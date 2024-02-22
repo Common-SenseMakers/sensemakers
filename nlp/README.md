@@ -1,5 +1,8 @@
 # DeSci Sensemaking Networks
 
+This is the development environment for the semantic parsers used by Sensemaker.
+Code inside the `desci_sense/shared` folder will be the one used by the `/app` to parse and annotate the social media posts.
+
 ## Installation
 
 Code is being developed on Ubuntu 22.04 with Python 3.11
@@ -23,7 +26,3 @@ Code is being developed on Ubuntu 22.04 with Python 3.11
   ```
   streamlit run desci_sense/demos/st_demo.py
   ```
-
-### Hosted App
-
-TODO
