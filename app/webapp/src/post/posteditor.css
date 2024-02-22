@@ -1,0 +1,12 @@
+.ProseMirror-focused {
+  outline: none; /* Remove the default focus outline */
+}
+
+.editor {
+  font-size: 22px;
+  padding: 16px 22px;
+}
+
+.editor p {
+  margin: 0.5em 0px;
+}

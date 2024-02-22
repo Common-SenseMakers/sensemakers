@@ -1,0 +1,330 @@
+{
+    "semantic_predicates": [
+        {
+            "name": "endorses",
+            "uri": null,
+            "versions": [
+                "v0"
+            ],
+            "label": "endorses",
+            "display_name": "➕ endorses",
+            "prompt": "this post endorses the mentioned reference. This label can also be used for cases of implicit recommendation, where the author is expressing enjoyment of some content but not explicitly recommending it.",
+            "valid_subject_types": [
+                "post",
+                "ref"
+            ],
+            "valid_object_types": [
+                "ref"
+            ]
+        },
+        {
+            "name": "disagreesWith",
+            "uri": "http://purl.org/spar/cito/disagreesWith",
+            "versions": [
+                "v0"
+            ],
+            "label": "disagrees",
+            "display_name": "👎 disagrees-with",
+            "prompt": "this post disputes or expresses disagreement with statements, ideas or conclusions presented in the mentioned reference.",
+            "valid_subject_types": [
+                "post",
+                "ref"
+            ],
+            "valid_object_types": [
+                "ref"
+            ]
+        },
+        {
+            "name": "agreesWith",
+            "uri": "http://purl.org/spar/cito/agreesWith",
+            "versions": [
+                "v0"
+            ],
+            "label": "agrees",
+            "display_name": "👍 agrees-with",
+            "prompt": "this post expresses agreement with statements, ideas or conclusions presented in the mentioned reference.",
+            "valid_subject_types": [
+                "post",
+                "ref"
+            ],
+            "valid_object_types": [
+                "ref"
+            ]
+        },
+        {
+            "name": "possibleMissingReference",
+            "uri": null,
+            "versions": [
+                "v0"
+            ],
+            "label": "missing-ref",
+            "display_name": "⬛ possible-missing-reference",
+            "prompt": "this post seems to be referring to a reference by name but has not explicitly provided a URL link to the reference. For example, a post that discusses a book and mentions it by title, but contains no link to the book.",
+            "valid_subject_types": [
+                "post"
+            ],
+            "valid_object_types": [
+                "nan"
+            ]
+        },
+        {
+            "name": "dgObservation",
+            "uri": null,
+            "versions": [
+                "v0"
+            ],
+            "label": "dg-observation",
+            "display_name": "🔭 discourse-graph/observation",
+            "prompt": "this post is articulating a single, highly observation. The intuition is that observation notes should be as close to “the data” as possible. They should be similar to how results are described in results sections of academic publications.",
+            "valid_subject_types": [
+                "post"
+            ],
+            "valid_object_types": [
+                "nan"
+            ]
+        },
+        {
+            "name": "dgClaim",
+            "uri": null,
+            "versions": [
+                "v0"
+            ],
+            "label": "dg-claim",
+            "display_name": "🫴 discourse-graph/claim",
+            "prompt": "this post is articulating an idea or a claim",
+            "valid_subject_types": [
+                "post"
+            ],
+            "valid_object_types": [
+                "nan"
+            ]
+        },
+        {
+            "name": "dgQuestion",
+            "uri": null,
+            "versions": [
+                "v0"
+            ],
+            "label": "dg-question",
+            "display_name": " ❓ discourse-graph/question",
+            "prompt": "this post is raising a research question.",
+            "valid_subject_types": [
+                "post"
+            ],
+            "valid_object_types": [
+                "nan"
+            ]
+        },
+        {
+            "name": "watchingStatus",
+            "uri": null,
+            "versions": [
+                "v0"
+            ],
+            "label": "watching",
+            "display_name": "👀 watching-status",
+            "prompt": "this post describes the watching status of the author in relation to a reference, such as a video or movie. The author may have watched the content in the past, is watching the content in the present, or is looking forward to watching the content in the future.",
+            "valid_subject_types": [
+                "post"
+            ],
+            "valid_object_types": [
+                "ref"
+            ]
+        },
+        {
+            "name": "readingStatus",
+            "uri": null,
+            "versions": [
+                "v0"
+            ],
+            "label": "reading",
+            "display_name": "📑 reading-status",
+            "prompt": "this post describes the reading status of the author in relation to a reference, such as a book or article. The author may either have read the reference in the past, is reading the reference in the present, or is looking forward to reading the reference in the future.",
+            "valid_subject_types": [
+                "post"
+            ],
+            "valid_object_types": [
+                "ref"
+            ]
+        },
+        {
+            "name": "listeningStatus",
+            "uri": null,
+            "versions": [
+                "v0"
+            ],
+            "label": "listening",
+            "display_name": "🎧 listening-status",
+            "prompt": "this post describes the listening status of the author in relation to a reference, such as a podcast or radio station. The author may have listened to the content in the past, is listening to the content in the present, or is looking forward to listening the content in the future.",
+            "valid_subject_types": [
+                "post"
+            ],
+            "valid_object_types": [
+                "ref"
+            ]
+        },
+        {
+            "name": "linksTo",
+            "uri": "http://purl.org/spar/cito/linksTo",
+            "versions": [
+                "v0"
+            ],
+            "label": "default",
+            "display_name": "🔗 links-to",
+            "prompt": "This is a special tag. Use this tag if none of the tags above are suitable. If you tag a post with <default>, no other tag should be assigned to the post.",
+            "valid_subject_types": [
+                "post"
+            ],
+            "valid_object_types": [
+                "ref"
+            ]
+        },
+        {
+            "name": "reviews",
+            "uri": "http://purl.org/spar/cito/reviews",
+            "versions": [
+                "v0"
+            ],
+            "label": "review",
+            "display_name": "🧐 reviews",
+            "prompt": "this post contains a review of another reference, such as a book, article or movie. The review could be positive or negative. A review can be detailed or a simple short endorsement.",
+            "valid_subject_types": [
+                "post",
+                "ref"
+            ],
+            "valid_object_types": [
+                "ref"
+            ]
+        },
+        {
+            "name": "recommends",
+            "uri": null,
+            "versions": [
+                "v0"
+            ],
+            "label": "recommendation",
+            "display_name": "👌 recommends",
+            "prompt": "The author is recommending any kind of content: an article, a movie, podcast, book, another post, etc.",
+            "valid_subject_types": [
+                "post",
+                "ref"
+            ],
+            "valid_object_types": [
+                "ref"
+            ]
+        },
+        {
+            "name": "asksQuestionAbout",
+            "uri": null,
+            "versions": [
+                "v0"
+            ],
+            "label": "question",
+            "display_name": "❔ ask-question-about",
+            "prompt": "this post is raising a question or questions about some content it's referring to. The content could be a research paper or other media like a podcast, video or blog post.",
+            "valid_subject_types": [
+                "post",
+                "ref"
+            ],
+            "valid_object_types": [
+                "ref"
+            ]
+        },
+        {
+            "name": "includesQuotationFrom",
+            "uri": "http://purl.org/spar/cito/includesQuotationFrom",
+            "versions": [
+                "v0"
+            ],
+            "label": "quote",
+            "display_name": "📝 quotes-from",
+            "prompt": "this post is quoting text from an article it's referring to. Symbols like \">\" or quotation marks are often used to indicate quotations.",
+            "valid_subject_types": [
+                "post",
+                "ref"
+            ],
+            "valid_object_types": [
+                "ref"
+            ]
+        },
+        {
+            "name": "discusses",
+            "uri": "http://purl.org/spar/cito/discusses",
+            "versions": [
+                "v0"
+            ],
+            "label": "discussion",
+            "display_name": "🗣️ discusses",
+            "prompt": "this post discusses how the cited reference relates to other facts or claims. For example, post might discuss how the cited reference informs questions, provides evidence, or supports or opposes claims.",
+            "valid_subject_types": [
+                "post",
+                "ref"
+            ],
+            "valid_object_types": [
+                "ref"
+            ]
+        },
+        {
+            "name": "announcesEvent",
+            "uri": null,
+            "versions": [
+                "v0"
+            ],
+            "label": "event",
+            "display_name": "🗓️ announces-event",
+            "prompt": "this post includes an invitation to an event, either a real-world or an online event. Any kind of event is relevant, some examples of such events could be seminars, meetups, or hackathons. This tag shold only be used for invitations to events, not for posts describing other kinds of events.",
+            "valid_subject_types": [
+                "post"
+            ],
+            "valid_object_types": [
+                "ref"
+            ]
+        },
+        {
+            "name": "announcesJob",
+            "uri": null,
+            "versions": [
+                "v0"
+            ],
+            "label": "job",
+            "display_name": "📢 announces-job",
+            "prompt": "this post describes a job listing, for example a call for graduate students or faculty applications.",
+            "valid_subject_types": [
+                "post"
+            ],
+            "valid_object_types": [
+                "ref"
+            ]
+        },
+        {
+            "name": "announcesResource",
+            "uri": null,
+            "versions": [
+                "v0"
+            ],
+            "label": "announce",
+            "display_name": "📢 announces",
+            "prompt": "this post contains an announcement of new research. The announcement is likely made by the authors but may be a third party. We use a broad definition of research that includes classic and non-traditional outputs. Classic outputs include papers, datasets or code. Non traditional outputs can include a podcast, blog post, video explainers, etc.",
+            "valid_subject_types": [
+                "post",
+                "ref"
+            ],
+            "valid_object_types": [
+                "ref"
+            ]
+        }
+    ],
+    "keyword_predicate": {
+        "name": "hasKeyword",
+        "uri": "https://pcp-on-web.de/ontology/0.2/index-en.html#hasKeyword",
+        "versions": [
+            "v0"
+        ]
+    },
+    "ontology_config": {
+        "db_id": "8de416983dd142c68b3b331d0828f2d0",
+        "versions": [
+            "v0"
+        ]
+    }
+}

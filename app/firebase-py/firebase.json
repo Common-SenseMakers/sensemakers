@@ -1,0 +1,24 @@
+{
+  "functions": [
+    {
+      "runtime": "python311",
+      "source": "functions",
+      "codebase": "python",
+      "ignore": [
+        "venv",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log"
+      ]
+    }
+  ],
+  "emulators": {
+    "functions": {
+      "port": 5002
+    },
+    "ui": {
+      "enabled": true
+    },
+    "singleProjectMode": true
+  }
+}

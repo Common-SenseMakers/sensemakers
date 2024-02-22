@@ -1,0 +1,27 @@
+{
+  "name": "microrevolutions-launcher",
+  "version": "1.0.0",
+  "description": "1) Extract relevant env files to ./env - see `Env set up` in notion.  a) You might need to create empty folder in `functions/src/shared/configs/env` 2) Install firebase tools globally: `npm install -g firebase-tools`  a) login: `firebase login` 3) Install dependencies: `cd functions; npm ci; npm run prepare:hooks` 4) Run `tsc` 5) Sync env files: `npm run use:dev` (see them below) 6) install docker and run a Redis container: `docker run --name common-redis -p 6379:6379 -d redis` or `docker start common-redis` if this container is already installed. 7) open 2 terminals:  a) npx tsc -w  b) NODE_ENV=local FIRESTORE_EMULATOR_HOST=localhost:8080 firebase emulators:start",
+  "main": "index.js",
+  "scripts": {
+    "emulate": "NODE_ENV=local FIRESTORE_EMULATOR_HOST=localhost:8080 firebase emulators:start --inspect-functions",
+    "emulate-mock": "NODE_ENV=local FIRESTORE_EMULATOR_HOST=localhost:8080 MOCK_SEMANTICS=true firebase emulators:start --inspect-functions",
+    "emulate-mock-test": "NODE_ENV=local FIRESTORE_EMULATOR_HOST=localhost:8080 MOCK_SEMANTICS=true IS_TEST=true firebase emulators:start --inspect-functions",
+    "emulate-test": "NODE_ENV=local FIRESTORE_EMULATOR_HOST=localhost:8080 firebase emulators:start --only firestore",
+    "log": "npx firebase-logging --project=common-dev-dea4e --freq=1500 --n=10 --func ",
+    "deploy": "firebase deploy --only functions",
+    "deploy-firestore": "firebase deploy --only firestore",
+    "prepare:hooks": "husky install"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "firebase-logging": "^1.0.16",
+    "firebase-tools": "^11.21.0"
+  },
+  "dependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.4"
+  }
+}

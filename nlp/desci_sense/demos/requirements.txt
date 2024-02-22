@@ -1,0 +1,16 @@
+streamlit==1.28.0
+langchain==0.1.7
+openai==1.12.0
+pytest
+wandb
+docopt
+loguru
+confection
+shortuuid
+html2text
+Mastodon.py
+url_normalize
+notion-client
+pydantic_settings
+python-dotenv
+rdflib
