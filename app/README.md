@@ -65,6 +65,11 @@ Run the python processing functions in another local firebase emulator
 cd firebase-py/functions  
 ```
 
+Add `.env` file in the functions folder and contents (fill with the correct key)
+```
+OPENROUTER_API_KEY=...
+```
+
 The first time you need to install env so run these two commands from the functions folder
 ```
 python3.11 -m venv venv
@@ -85,3 +90,5 @@ cd webapp
 yarn install
 yarn start
 ```
+
+Open http://localhost:3000/
