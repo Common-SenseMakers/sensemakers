@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 # import pydantic as pyd
 from confection import Config
-from shared_functions.init import ParserInitConfig, init_multi_stage_parser_config
+from .shared_functions.init import ParserInitConfig, init_multi_stage_parser_config
 
 load_dotenv()
 
