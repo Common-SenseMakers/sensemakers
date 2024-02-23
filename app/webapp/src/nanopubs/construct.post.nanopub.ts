@@ -46,8 +46,7 @@ export const constructPostNanopub = async (
   const assertionsRdf = await writeRDF(assertionsStore);
 
   /** append the npx:ExampleNanopub (manually for now) */
-  const exampleTriplet =
-    process.env.NODE_ENV !== 'production' ? `: a npx:ExampleNanopub .` : '';
+  const exampleTriplet =  `: a npx:ExampleNanopub .`;
 
   const semanticPostTriplet =  `: a <https://sense-nets.xyz/SemanticPost> .`
 
