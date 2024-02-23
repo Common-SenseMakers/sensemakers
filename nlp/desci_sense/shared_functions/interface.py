@@ -47,7 +47,7 @@ class KeywordConceptDefinition(OntologyConceptDefinition):
 
     name: str = Field(default="hasKeyword", description="Concept name.")
     uri: str = Field(
-        default="https://pcp-on-web.de/ontology/0.2/index-en.html#hasKeyword",
+        default="https://schema.org/keywords",
         description="Linked data URI for this concept.",
     )
     versions: List[str] = Field(
