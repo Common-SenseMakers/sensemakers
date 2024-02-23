@@ -193,7 +193,7 @@ ontology = {
     ],
     "keyword_predicate": {
         "name": "hasKeyword",
-        "uri": "https://pcp-on-web.de/ontology/0.2/index-en.html#hasKeyword",
+        "uri": "https://schema.org/keywords",
         "versions": ["v0"],
     },
     "ontology_config": {
