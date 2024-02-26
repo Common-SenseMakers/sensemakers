@@ -40,7 +40,7 @@ def init_multi_stage_parser_config(
     config: ParserInitConfig, optional: Optional[ParserInitConfigOptional] = None
 ):
     defaults = {
-        "model_name": "mistralai/mistral-7b-instruct",
+        "model_name": "openai/gpt-4",
         "parser_type": "multi_stage",
         "max_summary_length": MAX_SUMMARY_LENGTH,
         "temperature": 0.6,
@@ -52,7 +52,7 @@ def init_multi_stage_parser_config(
         "kw_template": "keywords_extraction.j2",
         "kw_ref_metadata_method": "citoid",
         "max_keywords": 6,
-        "keyword_extraction_model": "mistralai/mistral-7b-instruct",
+        "keyword_extraction_model": "openai/gpt-4",
     }
 
     if optional is None:
