@@ -54,7 +54,7 @@ const constants: StyleConstants = {
     xsmall: '14px',
   },
   colors: {
-    primary: '#506fa3',
+    primary: '#021c49',
     primaryLight: '#606060',
     text: '#20365f',
     textOnPrimary: '#ffffff',
@@ -64,8 +64,8 @@ const constants: StyleConstants = {
     backgroundLight: '#f7f7f7',
     backgroundLightShade: '#ececec',
     backgroundLightDarker: '#cacaca',
-    links: '#004766',
-    tagsBackground: '#88a8de',
+    links: '#021c49',
+    tagsBackground: '#52004c',
     tagsText: '#ffffff',
   },
 };

@@ -186,14 +186,20 @@ export const AppPostPage = (props: {}) => {
         <Box gap="medium" align="center">
           <Send color={constants.colors.primary} size={'80'}></Send>
           <AppHeading level="3">{t('postSent')}</AppHeading>
-          {post.tweet ? (
-            <TweetAnchor id={post.tweet?.id}></TweetAnchor>
-          ) : post.signedNanopub ? (
-            <NanopubAnchor href={post.signedNanopub.uri}></NanopubAnchor>
-          ) : (
-            <></>
-          )}
-          <AppButton label={t('postNew')} onClick={() => newPost()}></AppButton>
+          <Box margin={{ vertical: 'large' }}>
+            {post.tweet ? (
+              <TweetAnchor id={post.tweet?.id}></TweetAnchor>
+            ) : post.signedNanopub ? (
+              <NanopubAnchor href={post.signedNanopub.uri}></NanopubAnchor>
+            ) : (
+              <></>
+            )}
+          </Box>
+          <AppButton
+            primary
+            icon={<Add color={constants.colors.textOnPrimary}></Add>}
+            label={t('postNew')}
+            onClick={() => newPost()}></AppButton>
         </Box>
       );
     }
@@ -217,7 +223,7 @@ export const AppPostPage = (props: {}) => {
             }}></PostEditor>
         </Box>
 
-        <Box gap="small">
+        <Box margin={{ vertical: 'medium' }} gap="small">
           <AppSectionHeader level="4">{t('postSemantics')}</AppSectionHeader>
           <Box
             direction="row"
