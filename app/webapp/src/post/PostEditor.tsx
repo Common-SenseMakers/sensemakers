@@ -1,6 +1,6 @@
 import { ProseMirror } from '@nytimes/react-prosemirror';
 import { EditorProps } from '@nytimes/react-prosemirror/dist/types/hooks/useEditorView';
-import { Box, Text } from 'grommet';
+import { Box } from 'grommet';
 import { baseKeymap, splitBlock } from 'prosemirror-commands';
 import { keymap } from 'prosemirror-keymap';
 import { Schema } from 'prosemirror-model';
@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { EditorAutoFocus } from './editor.autofocus';
+import placeholder from './placeholder.plugin';
 import './posteditor.css';
 
 const DEBUG = false;
@@ -74,8 +75,6 @@ export const PostEditor = (props: IStatementEditable) => {
     EditorState.create({ schema })
   );
 
-  const editable = props.editable !== undefined && props.editable;
-
   const handleTransaction = (tr: any) => {
     setEditorState((s) => s.apply(tr));
   };
@@ -98,7 +97,11 @@ export const PostEditor = (props: IStatementEditable) => {
     defaultState,
     state: editorState,
     dispatchTransaction: handleTransaction,
-    plugins: [(keymap({ Enter: splitBlock }), keymap(baseKeymap))],
+    plugins: [
+      (keymap({ Enter: splitBlock }),
+      keymap(baseKeymap),
+      placeholder(t('writeYourPost'))),
+    ],
   };
 
   return (
@@ -118,20 +121,6 @@ export const PostEditor = (props: IStatementEditable) => {
           <EditorAutoFocus></EditorAutoFocus>
         </ProseMirror>
       </Box>
-      {editable ? (
-        <Box pad="small">
-          <Text
-            size="small"
-            style={{
-              textAlign: 'center',
-              color: constants.colors.primaryLight,
-            }}>
-            {t('helpEditable')}
-          </Text>
-        </Box>
-      ) : (
-        <></>
-      )}
     </>
   );
 };

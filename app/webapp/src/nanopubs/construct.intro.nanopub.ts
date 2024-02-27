@@ -47,8 +47,7 @@ export const constructIntroNanopub = async (
   const orcid = user.orcid?.orcid;
 
   /** append the npx:ExampleNanopub (manually for now) */
-  const exampleTriplet =
-    process.env.NODE_ENV !== 'production' ? `: a npx:ExampleNanopub .` : '';
+  const exampleTriplet = `: <http://purl.org/nanopub/x/hasNanopubType> npx:ExampleNanopub .`;
 
   const rdfStr = `
     @prefix : <${NANOPUB_PLACEHOLDER}> .

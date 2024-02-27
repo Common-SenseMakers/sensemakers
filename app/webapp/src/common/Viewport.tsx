@@ -80,7 +80,7 @@ export const ViewportPage = (props: { content: ReactNode; nav: ReactNode }) => {
           {props.content}
         </Box>
       </Box>
-      <Box id="nav" style={{ height: '90px', flexShrink: 0 }}>
+      <Box id="nav" style={{ height: '60px', flexShrink: 0 }}>
         {props.nav}
       </Box>
     </Box>

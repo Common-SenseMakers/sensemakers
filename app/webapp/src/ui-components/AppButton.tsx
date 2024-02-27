@@ -27,16 +27,24 @@ const circleButtonStyle: React.CSSProperties = {
 export const AppButton = (props: IButton & { loading?: boolean }) => {
   const { constants } = useThemeContext();
   const newProps = { ...props };
+
   if (newProps.loading) {
     newProps.disabled = true;
-    newProps.label = <Loading color={constants.colors.textOnPrimary}></Loading>;
+    newProps.label = (
+      <Box justify="center" direction="row">
+        <Loading color={constants.colors.textOnPrimary}></Loading>
+      </Box>
+    );
   }
 
   return (
     <>
       <Button
         {...newProps}
-        style={{ textTransform: 'uppercase', ...props.style }}
+        style={{
+          textTransform: 'uppercase',
+          ...props.style,
+        }}
       />
     </>
   );

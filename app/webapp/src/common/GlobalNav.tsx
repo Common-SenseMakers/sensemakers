@@ -1,6 +1,6 @@
 import { Box, Text } from 'grommet';
 import { ConnectedUser } from './ConnectedUser';
-import { SetPageTitleType } from './AppContainer';
+import { SetPageTitleType } from '../app/AppContainer';
 
 export const GlobalNav = (props: { title?: SetPageTitleType }) => {
   const title = (() => {

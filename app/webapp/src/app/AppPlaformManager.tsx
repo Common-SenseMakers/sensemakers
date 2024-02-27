@@ -20,7 +20,7 @@ export const AppPlatformManager = (props: {}) => {
   } = useNanopubContext();
 
   return (
-    <Box>
+    <Box fill pad={{ horizontal: 'medium' }} gap="small">
       <AppButton
         primary
         disabled={!needAuthorizeNanopub}

@@ -1,21 +1,19 @@
+import { Add, Connect, Edit, Home, Network } from 'grommet-icons';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 
 import { useAccountContext } from '../app/AccountContext';
 import { AppConnectWidget } from '../app/AppConnectButton';
 import { AppPlatformManager } from '../app/AppPlaformManager';
-import { useTwitterContext } from '../app/TwitterContext';
-import { ViewportPage } from '../app/Viewport';
+import { AppBottomNav } from '../common/AppBottomNav';
+import { ViewportPage } from '../common/Viewport';
 import { AbsoluteRoutes } from '../route.names';
-import { AppButton } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 
 export const AppHome = (props: {}) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+
   const { isConnected, isConnecting } = useAccountContext();
-  const { needAuthorize: needAuthorizeTwitter } = useTwitterContext();
 
   const content = (() => {
     if (isConnecting) {
@@ -24,17 +22,9 @@ export const AppHome = (props: {}) => {
 
     if (!isConnected) return <AppConnectWidget></AppConnectWidget>;
 
-    const canPost = !needAuthorizeTwitter;
-
     return (
       <>
         <AppPlatformManager></AppPlatformManager>
-        <AppButton
-          primary
-          disabled={!canPost}
-          label={t('post')}
-          onClick={() => navigate(AbsoluteRoutes.Post)}
-          style={{ minWidth: '180px' }}></AppButton>
       </>
     );
   })();
@@ -42,6 +32,19 @@ export const AppHome = (props: {}) => {
   return (
     <ViewportPage
       content={<BoxCentered>{content}</BoxCentered>}
-      nav={<></>}></ViewportPage>
+      nav={
+        <AppBottomNav
+          paths={{
+            [AbsoluteRoutes.App]: {
+              icon: <Network></Network>,
+              label: t('socials'),
+            },
+            [AbsoluteRoutes.Post]: {
+              disabled: !isConnected,
+              icon: <Edit></Edit>,
+              label: t('editor'),
+            },
+          }}></AppBottomNav>
+      }></ViewportPage>
   );
 };

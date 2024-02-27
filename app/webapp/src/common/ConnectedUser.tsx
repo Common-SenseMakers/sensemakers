@@ -6,9 +6,9 @@ import { useTranslation } from 'react-i18next';
 import { AppButton } from '../ui-components';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { cap } from '../utils/general';
-import { useAccountContext } from './AccountContext';
-import { AppAddress } from './AppAddress';
-import { useDisconnectContext } from './DisconnectContext';
+import { useAccountContext } from '../app/AccountContext';
+import { AppAddress } from '../app/AppAddress';
+import { useDisconnectContext } from '../app/DisconnectContext';
 import { OrcidAnchor } from './OrcidAnchor';
 import { TwitterProfileAnchor } from './TwitterAnchor';
 
