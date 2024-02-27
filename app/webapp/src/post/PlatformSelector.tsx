@@ -10,7 +10,7 @@ import { AppButton, AppButtonTwoLinesLabel } from '../ui-components';
 import { useResponsive } from '../ui-components/ResponsiveApp';
 import { useThemeContext } from '../ui-components/ThemedApp';
 
-const PlatformButton = (props: ButtonExtendedProps & { enabled: boolean }) => {
+const ToggleButton = (props: ButtonExtendedProps & { enabled: boolean }) => {
   const { constants } = useThemeContext();
 
   const iconColor = props.enabled
@@ -82,32 +82,40 @@ export const PlatformSelector = (
       gap="medium"
       justify="center"
       {...props}>
-      <PlatformButton
-        style={{ flexGrow: 1 }}
-        enabled={willTwitter}
-        justify="start"
-        onClick={() => select(PLATFORM.X)}
-        pad={{ vertical: 'xsmall', horizontal: 'medium' }}
-        label={
-          <AppButtonTwoLinesLabel
-            tag={t('twitter/x')}
-            label={`@${connectedUser?.twitter?.screen_name}`}></AppButtonTwoLinesLabel>
-        }></PlatformButton>
-      <PlatformButton
-        style={{ flexGrow: 1 }}
-        enabled={willNano}
-        onClick={() => select(PLATFORM.Nanopubs)}
-        justify="start"
-        pad={{ vertical: 'xsmall', horizontal: 'medium' }}
-        label={
-          <AppButtonTwoLinesLabel
-            tag={t('nanopub')}
-            label={
-              <AppAddress
-                asText
-                address={connectedUser?.eth?.ethAddress}></AppAddress>
-            }></AppButtonTwoLinesLabel>
-        }></PlatformButton>
+      {connectedUser?.twitter ? (
+        <ToggleButton
+          style={{ flexGrow: 1 }}
+          enabled={willTwitter}
+          justify="start"
+          onClick={() => select(PLATFORM.X)}
+          pad={{ vertical: 'xsmall', horizontal: 'medium' }}
+          label={
+            <AppButtonTwoLinesLabel
+              tag={t('twitter/x')}
+              label={`@${connectedUser?.twitter?.screen_name}`}></AppButtonTwoLinesLabel>
+          }></ToggleButton>
+      ) : (
+        <AppButton disabled label={t('twitterNotConnected')}></AppButton>
+      )}
+      {connectedUser?.eth ? (
+        <ToggleButton
+          style={{ flexGrow: 1 }}
+          enabled={willNano}
+          onClick={() => select(PLATFORM.Nanopubs)}
+          justify="start"
+          pad={{ vertical: 'xsmall', horizontal: 'medium' }}
+          label={
+            <AppButtonTwoLinesLabel
+              tag={t('nanopub')}
+              label={
+                <AppAddress
+                  asText
+                  address={connectedUser?.eth?.ethAddress}></AppAddress>
+              }></AppButtonTwoLinesLabel>
+          }></ToggleButton>
+      ) : (
+        <AppButton disabled label={t('nanopubsNotConnected')}></AppButton>
+      )}
     </Box>
   );
 };
