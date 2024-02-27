@@ -34,6 +34,8 @@ i18n.use(initReactI18next).init({
         postSent: 'Post succesfully created!',
         viewPost: 'Open Tweet',
         nanopub: 'Open nanopublication',
+        twitterNotConnected: 'Not Connected',
+        nanopubsNotConnected: 'Not Connected',
       },
     },
   },

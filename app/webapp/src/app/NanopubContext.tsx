@@ -12,13 +12,9 @@ import {
 import { postUserEthDetails } from '../functionsCalls/auth.requests';
 import { constructIntroNanopub } from '../nanopubs/construct.intro.nanopub';
 import { getProfile } from '../nanopubs/semantics.helper';
-import { getEthToRSAMessage, getRsaToEthMessage } from '../shared/sig.utils';
+import { getEthToRSAMessage } from '../shared/sig.utils';
 import { EthAccountDetails, HexStr } from '../shared/types';
-import {
-  RSAKeys,
-  getRSAKeys,
-  signMessage as signMessageRSA,
-} from '../utils/rsa.keys';
+import { RSAKeys, getRSAKeys } from '../utils/rsa.keys';
 import { useAccountContext } from './AccountContext';
 import { NANOPUBS_SERVER } from './config';
 import { useAppSigner } from './signer/SignerContext';

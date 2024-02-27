@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 
 import { useAccountContext } from '../app/AccountContext';
 import { AppAddress } from '../app/AppAddress';
+import { NanopubsIcon, TwitterIcon } from '../common/Icons';
 import { PLATFORM } from '../shared/types';
 import { AppButton, AppButtonTwoLinesLabel } from '../ui-components';
 import { useResponsive } from '../ui-components/ResponsiveApp';
@@ -88,6 +89,7 @@ export const PlatformSelector = (
           enabled={willTwitter}
           justify="start"
           onClick={() => select(PLATFORM.X)}
+          icon={<TwitterIcon></TwitterIcon>}
           pad={{ vertical: 'xsmall', horizontal: 'medium' }}
           label={
             <AppButtonTwoLinesLabel
@@ -95,7 +97,10 @@ export const PlatformSelector = (
               label={`@${connectedUser?.twitter?.screen_name}`}></AppButtonTwoLinesLabel>
           }></ToggleButton>
       ) : (
-        <AppButton disabled label={t('twitterNotConnected')}></AppButton>
+        <AppButton
+          icon={<TwitterIcon></TwitterIcon>}
+          disabled
+          label={t('twitterNotConnected')}></AppButton>
       )}
       {connectedUser?.eth ? (
         <ToggleButton
@@ -103,6 +108,7 @@ export const PlatformSelector = (
           enabled={willNano}
           onClick={() => select(PLATFORM.Nanopubs)}
           justify="start"
+          icon={<NanopubsIcon></NanopubsIcon>}
           pad={{ vertical: 'xsmall', horizontal: 'medium' }}
           label={
             <AppButtonTwoLinesLabel

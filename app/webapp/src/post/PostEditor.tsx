@@ -110,6 +110,7 @@ export const PostEditor = (props: IStatementEditable) => {
         style={{
           backgroundColor: constants.colors.primary,
           color: constants.colors.textOnPrimary,
+          position: 'relative',
           fontSize: '36px',
           borderRadius: '6px',
           cursor: props.onClick ? 'pointer' : '',

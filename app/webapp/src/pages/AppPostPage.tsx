@@ -244,7 +244,7 @@ export const AppPostPage = (props: {}) => {
                 ) : (
                   <></>
                 )}
-                <Box pad="small">
+                <Box fill pad="small">
                   <SemanticsEditor
                     id="aneditor"
                     isLoading={isGettingSemantics}
