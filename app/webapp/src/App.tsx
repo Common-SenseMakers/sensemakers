@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { AccountContext } from './app/AccountContext';
 import { AppContainer } from './app/AppContainer';
 import { DisconnectContext } from './app/DisconnectContext';
-import { GlobalStyles } from './app/GlobalStyles';
+import { GlobalStyles } from './common/GlobalStyles';
 import { NanopubContext } from './app/NanopubContext';
 import { TwitterContext } from './app/TwitterContext';
 import { ConnectedWallet } from './app/signer/ConnectedWalletContext';

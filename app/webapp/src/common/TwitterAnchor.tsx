@@ -13,7 +13,7 @@ export const TwitterProfileAnchor = (props: { screen_name?: string }) => {
       target="_blank"
       href={`https://twitter.com/${props.screen_name}`}
       size="small">
-      {props.screen_name}
+      @{props.screen_name}
     </Anchor>
   );
 };

@@ -3,12 +3,12 @@ import { UserExpert } from 'grommet-icons';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useAccountContext } from '../app/AccountContext';
+import { AppAddress } from '../app/AppAddress';
+import { useDisconnectContext } from '../app/DisconnectContext';
 import { AppButton } from '../ui-components';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { cap } from '../utils/general';
-import { useAccountContext } from './AccountContext';
-import { AppAddress } from './AppAddress';
-import { useDisconnectContext } from './DisconnectContext';
 import { OrcidAnchor } from './OrcidAnchor';
 import { TwitterProfileAnchor } from './TwitterAnchor';
 
@@ -76,7 +76,7 @@ export const ConnectedUser = (props: {}) => {
 
             {connectedUser?.eth ? (
               <Box margin={{ bottom: 'small' }}>
-                <Text>{cap(t('nanopub signer'))}</Text>
+                <Text>{cap(t('nanopubSigner'))}</Text>
                 <AppAddress address={connectedUser.eth.ethAddress}></AppAddress>
                 <Anchor
                   style={{}}

@@ -1,24 +1,31 @@
 import { Nanopub } from '@nanopub/sign';
 import { Box, Text } from 'grommet';
-import { Magic, Send } from 'grommet-icons';
+import { Add, Connect, Edit, Home, Magic, Network, Send } from 'grommet-icons';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // import { useDebounce } from 'use-debounce';
 import { useAccountContext } from '../app/AccountContext';
 import { useNanopubContext } from '../app/NanopubContext';
-import { NanopubAnchor, TweetAnchor } from '../app/TwitterAnchor';
-import { ViewportPage } from '../app/Viewport';
 import { NANOPUBS_SERVER } from '../app/config';
+import { AppBottomNav } from '../common/AppBottomNav';
+import { NanopubAnchor, TweetAnchor } from '../common/TwitterAnchor';
+import { ViewportPage } from '../common/Viewport';
 import { getPostSemantics, postMessage } from '../functionsCalls/post.requests';
 import { constructPostNanopub } from '../nanopubs/construct.post.nanopub';
 import { PlatformSelector } from '../post/PlatformSelector';
 import { PostEditor } from '../post/PostEditor';
+import { AbsoluteRoutes } from '../route.names';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PatternProps } from '../semantics/patterns/patterns';
 import { AppPostSemantics, ParserResult } from '../shared/parser.types';
 import { AppPost, AppPostCreate, PLATFORM } from '../shared/types';
-import { AppButton, AppCard, AppHeading } from '../ui-components';
+import {
+  AppButton,
+  AppCard,
+  AppHeading,
+  AppSectionHeader,
+} from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
@@ -59,8 +66,15 @@ export const AppPostPage = (props: {}) => {
   const [post, setPost] = useState<AppPost>();
 
   const canReRun = parsed && postText !== parsed.post;
+  const hasPlatform =
+    connectedUser && (connectedUser.eth || connectedUser?.twitter);
+
   const canPost =
-    postText && platforms && platforms.length && !isGettingSemantics;
+    hasPlatform &&
+    postText &&
+    platforms &&
+    platforms.length &&
+    !isGettingSemantics;
 
   // const reset = () => {
   //   setPost(undefined);
@@ -170,77 +184,101 @@ export const AppPostPage = (props: {}) => {
     if (post) {
       return (
         <Box gap="medium" align="center">
+          <Send color={constants.colors.primary} size={'80'}></Send>
           <AppHeading level="3">{t('postSent')}</AppHeading>
-          {post.tweet ? (
-            <TweetAnchor id={post.tweet?.id}></TweetAnchor>
-          ) : post.signedNanopub ? (
-            <NanopubAnchor href={post.signedNanopub.uri}></NanopubAnchor>
-          ) : (
-            <></>
-          )}
-          <AppButton label={t('postNew')} onClick={() => newPost()}></AppButton>
+          <Box margin={{ vertical: 'large' }}>
+            {post.tweet ? (
+              <TweetAnchor id={post.tweet?.id}></TweetAnchor>
+            ) : post.signedNanopub ? (
+              <NanopubAnchor href={post.signedNanopub.uri}></NanopubAnchor>
+            ) : (
+              <></>
+            )}
+          </Box>
+          <AppButton
+            primary
+            icon={<Add color={constants.colors.textOnPrimary}></Add>}
+            label={t('postNew')}
+            onClick={() => newPost()}></AppButton>
         </Box>
       );
     }
 
     return (
-      <Box width="100%" pad="medium">
+      <Box width="100%" pad="medium" gap="medium">
         <Box>
-          <AppHeading level="3">{t('Publishto')}:</AppHeading>
+          <AppSectionHeader level="4">{t('publishTo')}</AppSectionHeader>
           <PlatformSelector
             margin={{ vertical: 'medium' }}
             onChanged={setPlatforms}></PlatformSelector>
         </Box>
-        <PostEditor
-          editable
-          placeholder={t('writeYourPost')}
-          onChanged={(text) => {
-            setPostText(text);
-          }}></PostEditor>
 
-        <Box
-          direction="row"
-          gap="medium"
-          margin={{ bottom: 'medium' }}
-          style={{ minHeight: '200px' }}>
-          {isGettingSemantics !== undefined ? (
-            <Box fill>
-              {canReRun ? (
+        <Box gap="small">
+          <AppSectionHeader level="4">{t('postContent')}</AppSectionHeader>
+          <PostEditor
+            editable
+            placeholder={t('writeYourPost')}
+            onChanged={(text) => {
+              setPostText(text);
+            }}></PostEditor>
+        </Box>
+
+        <Box margin={{ vertical: 'medium' }} gap="small">
+          <AppSectionHeader level="4">{t('postSemantics')}</AppSectionHeader>
+          <Box
+            direction="row"
+            gap="medium"
+            margin={{ bottom: 'medium' }}
+            style={{ minHeight: '200px' }}>
+            {isGettingSemantics !== undefined ? (
+              <Box fill>
+                {canReRun ? (
+                  <AppButton
+                    disabled={isGettingSemantics}
+                    margin={{ vertical: 'small' }}
+                    onClick={() => getSemantics()}
+                    label={semantics ? t('reset') : t('refresh')}
+                    icon={
+                      <Magic color={constants.colors.primary}></Magic>
+                    }></AppButton>
+                ) : (
+                  <></>
+                )}
+                <Box pad="small">
+                  <SemanticsEditor
+                    id="aneditor"
+                    isLoading={isGettingSemantics}
+                    semantics={semantics}
+                    originalParsed={parsed}
+                    semanticsUpdated={semanticsUpdated}></SemanticsEditor>
+                </Box>
+              </Box>
+            ) : (
+              <BoxCentered
+                fill
+                style={{
+                  backgroundColor: constants.colors.backgroundLight,
+                  borderRadius: '8px',
+                }}>
                 <AppButton
-                  disabled={isGettingSemantics}
-                  margin={{ vertical: 'small' }}
+                  disabled={!canGetSemantics}
                   onClick={() => getSemantics()}
-                  label={semantics ? t('reset') : t('refresh')}
+                  label={t('process')}
                   icon={
                     <Magic color={constants.colors.primary}></Magic>
                   }></AppButton>
-              ) : (
-                <></>
-              )}
-              <SemanticsEditor
-                id="aneditor"
-                isLoading={isGettingSemantics}
-                semantics={semantics}
-                originalParsed={parsed}
-                semanticsUpdated={semanticsUpdated}></SemanticsEditor>
-            </Box>
-          ) : (
-            <BoxCentered
-              fill
-              style={{
-                backgroundColor: constants.colors.backgroundLight,
-                borderRadius: '8px',
-              }}>
-              <AppButton
-                disabled={!canGetSemantics}
-                onClick={() => getSemantics()}
-                label={t('process')}
-                icon={
-                  <Magic color={constants.colors.primary}></Magic>
-                }></AppButton>
-            </BoxCentered>
-          )}
+              </BoxCentered>
+            )}
+          </Box>
         </Box>
+
+        <AppButton
+          margin={{ bottom: 'large' }}
+          disabled={!canPost}
+          primary
+          icon={<Send color={constants.colors.textOnPrimary}></Send>}
+          onClick={() => send()}
+          label={t('publish')}></AppButton>
       </Box>
     );
   })();
@@ -249,15 +287,17 @@ export const AppPostPage = (props: {}) => {
     <ViewportPage
       content={<BoxCentered>{content}</BoxCentered>}
       nav={
-        <>
-          <AppButton
-            disabled={!canPost}
-            margin={{ vertical: 'small' }}
-            reverse
-            icon={<Send color={constants.colors.primary}></Send>}
-            label={t('post')}
-            onClick={() => send()}></AppButton>
-        </>
+        <AppBottomNav
+          paths={{
+            [AbsoluteRoutes.App]: {
+              icon: <Network></Network>,
+              label: t('socials'),
+            },
+            [AbsoluteRoutes.Post]: {
+              icon: <Edit></Edit>,
+              label: t('editor'),
+            },
+          }}></AppBottomNav>
       }></ViewportPage>
   );
 };

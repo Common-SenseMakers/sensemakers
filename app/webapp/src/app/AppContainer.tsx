@@ -6,8 +6,8 @@ import { AppHome } from '../pages/AppHome';
 import { AppPostPage } from '../pages/AppPostPage';
 import { RouteNames } from '../route.names';
 import { AppTest } from './AppTest';
-import { GlobalNav } from './GlobalNav';
-import { MAX_WIDTH_APP, ViewportContainer } from './Viewport';
+import { GlobalNav } from '../common/GlobalNav';
+import { MAX_WIDTH_APP, ViewportContainer } from '../common/Viewport';
 
 export interface SetPageTitleType {
   prefix: string;
