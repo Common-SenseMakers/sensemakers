@@ -36,6 +36,9 @@ i18n.use(initReactI18next).init({
         nanopub: 'Open nanopublication',
         twitterNotConnected: 'Not Connected',
         nanopubsNotConnected: 'Not Connected',
+        revoke: 'revoke',
+        revokeText:
+          'This is a prototype, you can revoke access to your Twitter account after playing with it. You will also be able to reconnect afterwards, if you want.',
       },
     },
   },

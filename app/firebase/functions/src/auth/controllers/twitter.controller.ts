@@ -1,6 +1,8 @@
 import { RequestHandler } from 'express';
 import { logger } from 'firebase-functions/v1';
 
+import { TWITTER_REVOKE_URL } from '../../config/config';
+import { removeTwitter } from '../../db/user.repo';
 import {
   TokenVerifier,
   getTwitterAccessToken,
@@ -43,6 +45,28 @@ export const postTwitterVerifierController: RequestHandler = async (
     let twitter_user = await getTwitterAccessToken(userId, payload);
     logger.debug('twitter user', { twitter_user });
     response.status(200).send({ success: true, twitter_user });
+  } catch (error: any) {
+    logger.error('error', error);
+    response.status(500).send({ success: false, error: error.message });
+  }
+};
+
+export const removeTwitterController: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    const userId = (request as any).userId;
+    if (!userId) {
+      response.status(403).send({});
+      return;
+    }
+
+    await removeTwitter(userId);
+
+    response
+      .status(200)
+      .send({ success: true, revokeLink: TWITTER_REVOKE_URL });
   } catch (error: any) {
     logger.error('error', error);
     response.status(500).send({ success: false, error: error.message });

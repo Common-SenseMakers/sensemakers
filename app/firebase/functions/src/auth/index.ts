@@ -9,6 +9,7 @@ import { potEthDetailsUserController } from './controllers/ethdetails.controller
 import {
   getTwitterCodeController,
   postTwitterVerifierController,
+  removeTwitterController,
 } from './controllers/twitter.controller';
 import { getLoggedUserController } from './controllers/user.controller';
 
@@ -17,6 +18,8 @@ const authRouter = express.Router();
 authRouter.post('/code', authCodeController);
 authRouter.post('/twitter-code', getTwitterCodeController);
 authRouter.post('/twitter-verifier', postTwitterVerifierController);
+authRouter.post('/twitter-revoke', removeTwitterController);
+
 authRouter.post('/me', getLoggedUserController);
 authRouter.post('/eth', potEthDetailsUserController);
 
