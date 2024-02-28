@@ -98,9 +98,9 @@ export const PostEditor = (props: IStatementEditable) => {
     state: editorState,
     dispatchTransaction: handleTransaction,
     plugins: [
-      (keymap({ Enter: splitBlock }),
+      keymap({ Enter: splitBlock }),
       keymap(baseKeymap),
-      placeholder(t('writeYourPost'))),
+      placeholder(t('writeYourPost')),
     ],
   };
 
