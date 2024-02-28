@@ -23,6 +23,8 @@ export const APP_URL =
     : 'https://sensemakers.netlify.app/';
 
 export const TWITTER_CALLBACK_URL = APP_URL;
+export const TWITTER_REVOKE_URL =
+  'https://twitter.com/settings/connected_apps/26368336';
 
 export const SENSENET_DOMAIN = 'http://127.0.0.1:3000/';
 export const FUNCTIONS_PY_URL =

@@ -1,3 +1,5 @@
+import { FieldValue } from 'firebase-admin/firestore';
+
 import { AppUser, DefinedIfTrue, EthAccountDetails } from '../@shared/types';
 import { collections } from '../db/db';
 
@@ -38,4 +40,15 @@ export const setUserEthDetails = async (
   }
 
   await docRef.set({ eth: details }, { merge: true });
+};
+
+export const removeTwitter = async (userId: string) => {
+  const docRef = collections.users.doc(userId);
+  const doc = await docRef.get();
+
+  if (!doc.exists) {
+    throw new Error(`User ${userId} not found`);
+  }
+
+  await docRef.update({ twitter: FieldValue.delete() });
 };

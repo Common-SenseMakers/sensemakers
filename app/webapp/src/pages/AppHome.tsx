@@ -1,4 +1,4 @@
-import { Add, Connect, Edit, Home, Network } from 'grommet-icons';
+import { Edit, Network } from 'grommet-icons';
 import { useTranslation } from 'react-i18next';
 
 import { useAccountContext } from '../app/AccountContext';

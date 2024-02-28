@@ -11,6 +11,7 @@ import { useSearchParams } from 'react-router-dom';
 import {
   getTwitterAuthLink,
   postTwitterVerifierToken,
+  revokeTwitterCredentials,
 } from '../functionsCalls/auth.requests';
 import { TwitterUser } from '../shared/types';
 import { useAccountContext } from './AccountContext';
@@ -19,6 +20,7 @@ const DEBUG = true;
 
 export type TwitterContextType = {
   connect: () => void;
+  revoke: () => void;
   isConnecting: boolean;
   needAuthorize?: boolean;
 };
@@ -55,6 +57,14 @@ export const TwitterContext = (props: PropsWithChildren) => {
       getTwitterAuthLink(appAccessToken).then((authLink) => {
         tokenHandled.current = true;
         window.location.href = authLink;
+      });
+    }
+  };
+
+  const revoke = () => {
+    if (appAccessToken) {
+      revokeTwitterCredentials(appAccessToken).then((revokeLink: string) => {
+        window.location.href = revokeLink;
       });
     }
   };
@@ -101,6 +111,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
     <TwitterContextValue.Provider
       value={{
         connect,
+        revoke,
         isConnecting,
         needAuthorize,
       }}>

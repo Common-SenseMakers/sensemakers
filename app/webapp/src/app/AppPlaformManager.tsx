@@ -1,7 +1,7 @@
-import { Box } from 'grommet';
+import { Box, Text } from 'grommet';
 import { useTranslation } from 'react-i18next';
 
-import { AppButton, AppSectionHeader } from '../ui-components';
+import { AppButton, AppCard, AppSectionHeader } from '../ui-components';
 import { useNanopubContext } from './NanopubContext';
 import { useTwitterContext } from './TwitterContext';
 
@@ -9,6 +9,7 @@ export const AppPlatformManager = (props: {}) => {
   const { t } = useTranslation();
   const {
     connect: connectTwitter,
+    revoke: revokeTwitter,
     isConnecting: isConnectingTwitter,
     needAuthorize: needAuthorizeTwitter,
   } = useTwitterContext();
@@ -47,6 +48,20 @@ export const AppPlatformManager = (props: {}) => {
           label={
             needAuthorizeTwitter ? t('connectTwitterBn') : t('twitterConnected')
           }></AppButton>
+        {!needAuthorizeTwitter ? (
+          <Box>
+            <AppButton
+              margin={{ vertical: 'small' }}
+              primary
+              onClick={() => revokeTwitter()}
+              label={t('revoke')}></AppButton>
+            <AppCard>
+              <Text>{t('revokeText')}</Text>
+            </AppCard>
+          </Box>
+        ) : (
+          <></>
+        )}
       </Box>
     </Box>
   );
