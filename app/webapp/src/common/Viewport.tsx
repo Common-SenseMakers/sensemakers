@@ -2,6 +2,7 @@ import {
   AreasType,
   Box,
   BoxExtendedProps,
+  BoxProps,
   Grid,
   GridColumnsType,
   GridExtendedProps,
@@ -16,7 +17,7 @@ import { useResponsive } from '../ui-components/ResponsiveApp';
 import { useThemeContext } from '../ui-components/ThemedApp';
 
 export const MAX_WIDTH_LANDING = 1600;
-export const MAX_WIDTH_APP = 700;
+export const MAX_WIDTH_APP = 800;
 
 export const ViewportContainer = (props: React.HTMLProps<HTMLDivElement>) => {
   return (
@@ -61,7 +62,11 @@ export const ViewportHeadingLarge = (props: { label: ReactNode }) => {
  * fill the vertical space with a scrollable content area, and leave the bottom
  * fixed to the navigation buttons
  */
-export const ViewportPage = (props: { content: ReactNode; nav: ReactNode }) => {
+export const ViewportPage = (props: {
+  content: ReactNode;
+  nav: ReactNode;
+  justify?: BoxProps['justify'];
+}) => {
   const { mobile } = useResponsive();
   const pad = mobile ? 'none' : 'large';
   return (
@@ -76,7 +81,9 @@ export const ViewportPage = (props: { content: ReactNode; nav: ReactNode }) => {
         overflow: 'hidden',
       }}>
       <Box id="content" style={{ flexGrow: 1, overflowY: 'auto' }}>
-        <Box style={{ flexGrow: 1, flexShrink: 0 }} justify="center">
+        <Box
+          style={{ flexGrow: 1, flexShrink: 0 }}
+          justify={props.justify || 'center'}>
           {props.content}
         </Box>
       </Box>
