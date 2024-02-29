@@ -35,15 +35,13 @@ export const getPostSemantics = async (
   return res.data.result;
 };
 
-export const getSparql = async (query: string, appAccessToken: string) => {
+export const getSparql = async (query: string) => {
   console.log({ FUNCTIONS_BASE });
   const res = await axios.post(
     FUNCTIONS_BASE + '/posts/sparql',
     { query },
     {
-      headers: {
-        Authorization: `Bearer ${appAccessToken}`,
-      },
+      headers: {},
     }
   );
 

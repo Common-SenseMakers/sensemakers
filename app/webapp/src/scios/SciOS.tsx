@@ -1,10 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { Anchor, Box, Text } from 'grommet';
+import { Refresh } from 'grommet-icons';
 import { useMemo } from 'react';
 
 import { useAccountContext } from '../app/AccountContext';
+import { ViewportPage } from '../common/Viewport';
 import { getSparql } from '../functionsCalls/post.requests';
-import { AppHeading, AppLabel } from '../ui-components';
+import { AppButton, AppHeading } from '../ui-components';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { TOP_URLS_QUERY, URLS_DATA_QUERIES } from './queries';
@@ -19,7 +21,7 @@ type Urls = Map<
   string,
   {
     score: number;
-    authorsData?: UrlAuthorData;
+    authorsData: UrlsAuthorData;
   }
 >;
 
@@ -40,25 +42,25 @@ export const AppSciOS = (props: {}) => {
   const { constants } = useThemeContext();
   const { appAccessToken } = useAccountContext();
 
-  const { data: topUrlsResult } = useQuery<TopUrlsResult>({
+  const { data: topUrlsResult, refetch: refetchTop } = useQuery<TopUrlsResult>({
     queryKey: ['sparql-top-urls', appAccessToken],
     queryFn: async () => {
-      if (appAccessToken) {
-        return getSparql(TOP_URLS_QUERY, appAccessToken);
-      }
-      return null;
+      return getSparql(TOP_URLS_QUERY);
     },
   });
 
-  const { data: urlsDataResult } = useQuery<UrlsDataResult>({
-    queryKey: ['sparql-urls-data', appAccessToken],
-    queryFn: async () => {
-      if (appAccessToken) {
-        return getSparql(URLS_DATA_QUERIES, appAccessToken);
-      }
-      return null;
-    },
-  });
+  const { data: urlsDataResult, refetch: refetchUrlsData } =
+    useQuery<UrlsDataResult>({
+      queryKey: ['sparql-urls-data', appAccessToken],
+      queryFn: async () => {
+        return getSparql(URLS_DATA_QUERIES);
+      },
+    });
+
+  const refresh = () => {
+    refetchTop();
+    refetchUrlsData();
+  };
 
   // For each url, store the authors and the keywords of each author
   const urlsAuthorData = useMemo<UrlsAuthorData | undefined>(() => {
@@ -85,12 +87,9 @@ export const AppSciOS = (props: {}) => {
       console.log({ topUrlsResult, urlsAuthorData });
 
       topUrlsResult.forEach((urlRes) => {
-        // get data of each url
-        const authorsData = urlsAuthorData.get(urlRes.url.value);
-
         map.set(urlRes.url.value, {
-          score: Number(urlRes.uniqueRef),
-          authorsData: authorsData,
+          score: Number(urlRes.uniqueRef.value),
+          authorsData: urlsAuthorData,
         });
       });
     }
@@ -102,49 +101,77 @@ export const AppSciOS = (props: {}) => {
     if (topUrls) {
       const unordered = Array.from(topUrls.entries());
       const ordered = unordered.sort((a, b) =>
-        a[1].score > b[1].score ? 1 : -1
+        a[1].score < b[1].score ? 1 : -1
       );
       return ordered;
     }
   }, [topUrls]);
 
-  return (
+  console.log({ topUrlsArray });
+
+  const content = (
     <Box pad={{ vertical: 'large' }} align="start" gap="medium">
-      <AppHeading level="1">SciOS 2024 - Demo</AppHeading>
-      {topUrlsArray ? (
-        topUrlsArray.map(([url, data]) => {
-          return (
-            <Box
-              gap="small"
-              pad={{ left: 'medium' }}
-              style={{
-                borderLeft: '4px solid',
-                borderColor: constants.colors.backgroundLightDarker,
-              }}>
-              <Text>Score: {data.score}</Text>
-              <Anchor href={url}>{url}</Anchor>
-              {data.authorsData ? (
-                <Box direction="row" align="center" gap="medium">
-                  <Text>{data.authorsData.author}</Text>
-                  <Box direction="row" gap="small">
-                    {Array.from(data.authorsData.keywords.values()).map(
-                      (keyword) => {
-                        return <AppLabel>#{keyword}</AppLabel>;
+      <Box direction="row">
+        <AppHeading level="1">SciOS 2024 - Demo</AppHeading>
+        <AppButton
+          onClick={() => {
+            refresh();
+          }}
+          icon={<Refresh></Refresh>}></AppButton>
+      </Box>
+
+      <Box gap="large">
+        {topUrlsArray ? (
+          topUrlsArray.map(([url, topUrlData], ix) => {
+            return (
+              <Box
+                key={ix}
+                gap="small"
+                pad={{ left: 'medium' }}
+                style={{
+                  borderLeft: '4px solid',
+                  borderColor: constants.colors.backgroundLightDarker,
+                }}>
+                <Box direction="row" gap="small" align="center">
+                  <Box
+                    pad="xsmall"
+                    style={{
+                      width: '60px',
+                      textAlign: 'center',
+                      backgroundColor: constants.colors.primary,
+                      borderRadius: '4px',
+                    }}>
+                    <Text
+                      size="large"
+                      color={constants.colors.textOnPrimary}
+                      style={{ fontWeight: 'bold' }}>
+                      {topUrlData.score}
+                    </Text>
+                  </Box>
+                  <Anchor href={url}>{url}</Anchor>
+                </Box>
+                {topUrlData.authorsData ? (
+                  <Box direction="row" align="center" gap="medium">
+                    {Array.from(topUrlData.authorsData.entries()).map(
+                      ([url, authorData]) => {
+                        return <Text>{authorData.author}</Text>;
                       }
                     )}
                   </Box>
-                </Box>
-              ) : (
-                <></>
-              )}
-            </Box>
-          );
-        })
-      ) : (
-        <Box>
-          <Loading></Loading>
-        </Box>
-      )}
+                ) : (
+                  <></>
+                )}
+              </Box>
+            );
+          })
+        ) : (
+          <Box>
+            <Loading></Loading>
+          </Box>
+        )}
+      </Box>
     </Box>
   );
+
+  return <ViewportPage content={content} nav={<></>}></ViewportPage>;
 };
