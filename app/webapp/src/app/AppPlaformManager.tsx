@@ -52,7 +52,6 @@ export const AppPlatformManager = (props: {}) => {
           <Box>
             <AppButton
               margin={{ vertical: 'small' }}
-              primary
               onClick={() => revokeTwitter()}
               label={t('revoke')}></AppButton>
             <AppCard>

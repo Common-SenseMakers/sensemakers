@@ -33,6 +33,8 @@ export const FUNCTIONS_PY_URL =
     : 'https://sm-function-post-parser-eeshylf4jq-uc.a.run.app/';
 
 export const TOKEN_EXPIRATION = '30d';
+export const NANOPUBS_SPARQL_SERVER =
+  'https://query.np.trustyuri.net/repo/full';
 
 export const REGION = 'us-central1';
 

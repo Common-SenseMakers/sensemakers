@@ -81,4 +81,8 @@ export type AppPost = AppPostStore & {
   id: string;
 };
 
+export interface AppGetSparkQL {
+  query: string;
+}
+
 export type HexStr = `0x${string}`;

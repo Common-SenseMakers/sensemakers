@@ -5,7 +5,7 @@ import { RSAKeys } from '../utils/rsa.keys';
 
 export const NANOPUB_PLACEHOLDER = 'http://purl.org/nanopub/temp/mynanopub#';
 export const ASSERTION_URI = `${NANOPUB_PLACEHOLDER}assertion`;
-export const HAS_COMMENT_URI = 'https://www.w3.org/2000/01/rdf-schema#comment';
+export const HAS_COMMENT_URI = 'http://www.w3.org/2000/01/rdf-schema#comment';
 
 export const getProfile = (rsaKeys: RSAKeys, connectedUser: AppUserRead) => {
   if (connectedUser.orcid) {
