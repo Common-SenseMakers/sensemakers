@@ -1,3 +1,5 @@
+const FROM_DATE = '2024-02-28T00:00:00';
+
 export const TOP_URLS_QUERY = `
 PREFIX rel: <https://w3id.org/np/RA4-9EhvPmX6Y2w_Ih3BiAZxyRehqm6ZVFW2DYA7v1Rjg#>
 PREFIX dct: <http://purl.org/dc/terms/>
@@ -10,6 +12,8 @@ SELECT ?url (COUNT(DISTINCT ?creator) AS ?uniqueRef)
 WHERE {
   ?np a ns1:SemanticPost ;
       np:hasAssertion ?assertion .
+  ?np dct:created ?date .
+  FILTER(?date > "${FROM_DATE}"^^xsd:date)  # Replace YYYY-MM-DD with your cutoff date
   ?assertion dct:creator ?creator .
   ?assertion ?relation ?url .
    GRAPH  rel:assertion {
@@ -29,12 +33,12 @@ PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX schema: <https://schema.org/>
 PREFIX rel: <https://w3id.org/np/RA4-9EhvPmX6Y2w_Ih3BiAZxyRehqm6ZVFW2DYA7v1Rjg#>
 
-SELECT DISTINCT ?url ?post ?name ?relation ?keyword
+SELECT DISTINCT ?url ?name ?relation
 WHERE {
   ?np np:hasAssertion ?assertion .
   ?np dct:created ?date .
-  FILTER(?date > "2024-02-27"^^xsd:date)  # Replace YYYY-MM-DD with your cutoff date
-
+  FILTER(?date > "${FROM_DATE}"^^xsd:date)  # Replace YYYY-MM-DD with your cutoff date
+  
   ?assertion ?relation ?url .
   GRAPH rel:assertion {
     ?relation rdfs:label ?label .
