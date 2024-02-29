@@ -119,14 +119,20 @@ export const AppPostPage = (props: {}) => {
       };
 
       if (DEBUG) console.log('postMessage', { postCreate });
-      postMessage(postCreate, appAccessToken).then((post) => {
-        if (post) {
-          setPost(post);
-          setIsSending(false);
-        } else {
+      postMessage(postCreate, appAccessToken)
+        .then((post) => {
+          if (post) {
+            setPost(post);
+            setIsSending(false);
+          } else {
+            setPostSentError(true);
+            setIsSending(false);
+          }
+        })
+        .catch((e) => {
           setPostSentError(true);
-        }
-      });
+          setIsSending(false);
+        });
     }
   }, [
     appAccessToken,
@@ -220,6 +226,7 @@ export const AppPostPage = (props: {}) => {
             placeholder={t('writeYourPost')}
             onChanged={(text) => {
               setPostText(text);
+              setPostSentError(false);
             }}></PostEditor>
         </Box>
 
@@ -279,6 +286,13 @@ export const AppPostPage = (props: {}) => {
           icon={<Send color={constants.colors.textOnPrimary}></Send>}
           onClick={() => send()}
           label={t('publish')}></AppButton>
+        {postSentError ? (
+          <AppCard>
+            <Text>There was an error, please retry</Text>
+          </AppCard>
+        ) : (
+          <></>
+        )}
       </Box>
     );
   })();

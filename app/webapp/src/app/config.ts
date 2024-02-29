@@ -17,6 +17,7 @@ export const TWITTER_CLIENT_ID = process.env.TWITTER_CLIENT_ID;
 export const WALLETCONNECT_PROJECT_ID = 'c12fdc701fd336cf8dc059f6784906bc';
 export const MAGIC_API_KEY = 'pk_live_A603B0287DAF3C97';
 
-export const NANOPUBS_SERVER = 'https://np.petapico.org/';
+// export const NANOPUBS_SERVER = 'https://np.petapico.org/';
+export const NANOPUBS_SERVER = 'https://np.knowledgepixels.com/';
 
 export const THIS_POST_NAME = 'http://sensentes/ThisText';
