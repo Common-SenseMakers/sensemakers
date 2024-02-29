@@ -2,12 +2,13 @@ import { Box } from 'grommet';
 import { createContext, useContext, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
+import { GlobalNav } from '../common/GlobalNav';
+import { MAX_WIDTH_APP, ViewportContainer } from '../common/Viewport';
 import { AppHome } from '../pages/AppHome';
 import { AppPostPage } from '../pages/AppPostPage';
 import { RouteNames } from '../route.names';
+import { AppSciOS } from '../scios/SciOS';
 import { AppTest } from './AppTest';
-import { GlobalNav } from '../common/GlobalNav';
-import { MAX_WIDTH_APP, ViewportContainer } from '../common/Viewport';
 
 export interface SetPageTitleType {
   prefix: string;
@@ -43,6 +44,9 @@ export const AppContainer = (props: React.PropsWithChildren) => {
               path={RouteNames.Post}
               element={<AppPostPage></AppPostPage>}></Route>
             <Route path={RouteNames.Test} element={<AppTest></AppTest>}></Route>
+            <Route
+              path={RouteNames.SciOS}
+              element={<AppSciOS></AppSciOS>}></Route>
           </Routes>
         </Box>
       </ViewportContainer>

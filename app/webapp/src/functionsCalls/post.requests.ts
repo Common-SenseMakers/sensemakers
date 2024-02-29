@@ -34,3 +34,16 @@ export const getPostSemantics = async (
 
   return res.data.result;
 };
+
+export const getSparql = async (query: string) => {
+  console.log({ FUNCTIONS_BASE });
+  const res = await axios.post(
+    FUNCTIONS_BASE + '/posts/sparql',
+    { query },
+    {
+      headers: {},
+    }
+  );
+
+  return res.data.data;
+};
