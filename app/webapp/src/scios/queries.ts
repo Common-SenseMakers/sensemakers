@@ -1,4 +1,4 @@
-const FROM_DATE = '2024-02-28T15:00:00';
+const FROM_DATE = '2024-02-29T02:00:00';
 
 export const TOP_URLS_QUERY = `
 PREFIX rel: <https://w3id.org/np/RA4-9EhvPmX6Y2w_Ih3BiAZxyRehqm6ZVFW2DYA7v1Rjg#>

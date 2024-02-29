@@ -24,11 +24,13 @@ export const AppHome = (props: {}) => {
       return <Loading></Loading>;
     }
 
-    if (!isConnected) return <AppConnectWidget></AppConnectWidget>;
-
     return (
       <>
-        <AppPlatformManager></AppPlatformManager>
+        {!isConnected ? (
+          <AppConnectWidget></AppConnectWidget>
+        ) : (
+          <AppPlatformManager></AppPlatformManager>
+        )}
         <Box margin={{ vertical: 'xlarge' }}>
           <AppButton
             primary
