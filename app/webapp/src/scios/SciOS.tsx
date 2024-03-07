@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { Anchor, Box, Grid, Text } from 'grommet';
-import { Refresh } from 'grommet-icons';
+import { CaretLeftFill, LinkPrevious, Refresh } from 'grommet-icons';
 import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { useAccountContext } from '../app/AccountContext';
 import { ViewportPage } from '../common/Viewport';
 import { getSparql } from '../functionsCalls/post.requests';
+import { RouteNames } from '../route.names';
 import { AppButton, AppHeading, AppLabel } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
@@ -37,6 +39,7 @@ type UrlsDataResult = Array<{
 }>;
 
 export const AppSciOS = (props: {}) => {
+  const navigate = useNavigate();
   const { constants } = useThemeContext();
   const { appAccessToken } = useAccountContext();
 
@@ -226,6 +229,11 @@ export const AppSciOS = (props: {}) => {
       content={
         <>
           <Box direction="row">
+            <AppButton
+              onClick={() => {
+                navigate('..');
+              }}
+              icon={<LinkPrevious></LinkPrevious>}></AppButton>
             <AppHeading level="1">SciOS 2024 - Demo</AppHeading>
             <AppButton
               onClick={() => {

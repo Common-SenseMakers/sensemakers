@@ -1,4 +1,4 @@
-import { Box, Text } from 'grommet';
+import { Anchor, Box, Text } from 'grommet';
 import { useTranslation } from 'react-i18next';
 
 import { AppButton, AppCard, AppSectionHeader } from '../ui-components';
@@ -50,12 +50,19 @@ export const AppPlatformManager = (props: {}) => {
           }></AppButton>
         {!needAuthorizeTwitter ? (
           <Box>
-            <AppButton
-              margin={{ vertical: 'small' }}
-              onClick={() => revokeTwitter()}
-              label={t('revoke')}></AppButton>
             <AppCard>
-              <Text>{t('revokeText')}</Text>
+              <Text>
+                This is a prototype, you can{' '}
+                <Anchor
+                  onClick={(e) => {
+                    e.preventDefault();
+                    revokeTwitter();
+                  }}>
+                  revoke
+                </Anchor>{' '}
+                access to your Twitter account after playing with it. You will
+                also be able to reconnect afterwards, if you want.'
+              </Text>
             </AppCard>
           </Box>
         ) : (

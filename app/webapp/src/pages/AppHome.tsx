@@ -1,16 +1,20 @@
+import { Box } from 'grommet';
 import { Edit, Network } from 'grommet-icons';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 import { useAccountContext } from '../app/AccountContext';
 import { AppConnectWidget } from '../app/AppConnectButton';
 import { AppPlatformManager } from '../app/AppPlaformManager';
 import { AppBottomNav } from '../common/AppBottomNav';
 import { ViewportPage } from '../common/Viewport';
-import { AbsoluteRoutes } from '../route.names';
+import { AbsoluteRoutes, RouteNames } from '../route.names';
+import { AppButton } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 
 export const AppHome = (props: {}) => {
+  const navigate = useNavigate();
   const { t } = useTranslation();
 
   const { isConnected, isConnecting } = useAccountContext();
@@ -20,11 +24,19 @@ export const AppHome = (props: {}) => {
       return <Loading></Loading>;
     }
 
-    if (!isConnected) return <AppConnectWidget></AppConnectWidget>;
-
     return (
       <>
-        <AppPlatformManager></AppPlatformManager>
+        {!isConnected ? (
+          <AppConnectWidget></AppConnectWidget>
+        ) : (
+          <AppPlatformManager></AppPlatformManager>
+        )}
+        <Box margin={{ vertical: 'xlarge' }}>
+          <AppButton
+            primary
+            onClick={() => navigate(RouteNames.SciOS)}
+            label={'SciOS 2024 - Top Links'}></AppButton>
+        </Box>
       </>
     );
   })();
