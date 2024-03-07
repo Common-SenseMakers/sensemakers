@@ -5,6 +5,6 @@ import { env } from './env';
 
 export const RUNTIME_OPTIONS: RuntimeOptions = {
   timeoutSeconds: 540,
-  memory: '4GB',
+  memory: '512MB',
   ...(env.environment === ENVIRONMENTS.PRODUCTION && { minInstances: 1 }),
 };
