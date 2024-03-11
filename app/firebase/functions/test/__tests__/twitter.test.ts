@@ -1,36 +1,13 @@
 import { expect } from 'chai';
+import { logger } from 'firebase-functions/v1';
 
-import {
-  TWITTER_API_KEY,
-  TWITTER_API_SECRET_KEY,
-} from '../../src/config/config';
-import { DBInstance } from '../../src/db/instance';
-import { TwitterService } from '../../src/platforms/twitter/twitter.service';
-import { UsersRepository } from '../../src/users/users.repository';
-import { UsersService } from '../../src/users/users.service';
+import { services } from '../../src/services';
 
 describe('twitter', () => {
-  let services: {
-    users: UsersService;
-  };
-
-  let twitter: TwitterService;
-
   let userId: string;
 
   before(async () => {
-    const db = new DBInstance();
-    const userRepo = new UsersRepository(db);
-
-    services = {
-      users: new UsersService(userRepo),
-    };
-
-    twitter = new TwitterService(userRepo, {
-      key: TWITTER_API_KEY,
-      secret: TWITTER_API_SECRET_KEY,
-    });
-
+    /** create a dumb user using orcid */
     userId = await services.users.create({
       orcid: {
         name: 'Test User',
@@ -39,8 +16,10 @@ describe('twitter', () => {
     });
   });
 
+  /** get twitter authLink */
   it('getAuthLink', async () => {
-    const link = await twitter.getAuthLink(userId);
+    const link = await services.twitter.getAuthLink(userId);
+    logger.log(`link: ${link}`);
     expect(link).to.not.be.undefined;
   });
 });
