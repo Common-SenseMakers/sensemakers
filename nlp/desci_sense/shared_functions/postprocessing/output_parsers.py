@@ -13,9 +13,10 @@ def extract_unique_keywords(input_str: str) -> List[str]:
     """
     # Split the input string by space to get individual words
     words = input_str.split()
+
     # Extract words that start with '#' and remove the '#' prefix
-    # Use a set to ensure uniqueness
-    keywords = set(word[1:] for word in words if word.startswith("#"))
+    # Use a set to ensure uniqueness and strip punctuation from each keyword
+    keywords = {word.strip("#").rstrip(",") for word in words if word.startswith("#")}
     return list(keywords)
 
 
@@ -151,7 +152,7 @@ class KeywordParser(BaseOutputParser):
             + candidate_tags.strip()
         )
 
-        # force valid_keywords to conform to closed set of tags
+        # extract unique keywords
         valid_keywords = extract_unique_keywords(final_answer)
 
         # take only top keywords (if -1 take all)

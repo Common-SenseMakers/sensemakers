@@ -6,7 +6,17 @@ ROOT = Path(__file__).parents[1]
 sys.path.append(str(ROOT))
 
 from desci_sense.runner import load_config
+from desci_sense.shared_functions.postprocessing.output_parsers import (
+    extract_unique_keywords,
+)
 from desci_sense.parsers.multi_stage_parser import MultiStageParser
+
+
+def test_kw_basic():
+    test_str = "#AI, #Web3, #AI"
+    kws = extract_unique_keywords(test_str)
+    assert (kws) == ["Web3", "AI"]
+
 
 # def test_parse_masto():
 #     config_path = ROOT / "tests/etc/configs/notion_dev.cfg"
@@ -37,12 +47,5 @@ from desci_sense.parsers.multi_stage_parser import MultiStageParser
 
 
 if __name__ == "__main__":
-    config_path = ROOT / "tests/etc/configs/notion_dev.cfg"
-    config = load_config()
-    config["keyword_extraction"]["model"][
-        "model_name"
-    ] = "mistralai/mistral-7b-instruct"
-    url = "https://mastodon.social/@natematias@social.coop/111410981466531543"
-    parser = MultiStageParser(config=config)
-    result = parser.kw_process_post(url)
-    print(result["answer"])
+    test_str = "#AI, #Web3, #AI"
+    kws = extract_unique_keywords(test_str)
