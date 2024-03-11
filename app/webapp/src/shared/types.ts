@@ -18,27 +18,21 @@ export interface AppUser {
     user_id?: string;
     screen_name?: string;
   };
-  eth?: EthAccountDetails;
-}
-
-export interface EthAccountDetails {
-  ethAddress: HexStr;
-  rsaPublickey: string;
-  ethSignature: HexStr;
-  introNanopub?: string;
-}
-
-export interface AppUserRead {
-  userId: string;
-  orcid?: {
-    orcid: string;
-    name: string;
+  eth?: {
+    ethAddress: HexStr;
+    rsaPublickey: string;
+    ethSignature: HexStr;
+    introNanopub?: string;
   };
+}
+
+export interface AppUserCreate extends Omit<AppUser, 'userId'> {}
+
+export interface AppUserRead extends AppUser {
   twitter?: {
     user_id: string;
     screen_name: string;
   };
-  eth?: EthAccountDetails;
 }
 
 export type DefinedIfTrue<V, R> = V extends true ? R : R | undefined;

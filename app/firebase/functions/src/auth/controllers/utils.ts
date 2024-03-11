@@ -4,7 +4,7 @@ import { verifyMessage } from 'viem';
 
 import { getEthToRSAMessage } from '../../@shared/sig.utils';
 import { EthAccountDetails } from '../../@shared/types';
-import { env } from '../../config/env';
+import { env } from '../../config/typedenv';
 
 export interface TokenData {
   userId: string;

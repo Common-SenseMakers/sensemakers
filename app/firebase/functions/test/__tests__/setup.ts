@@ -1,8 +1,10 @@
 import { Context } from 'mocha';
 
-import { test } from './index.test';
-import { LocalLogger, LogLevel } from './test.logger';
-import { resetDB } from './utils/db';
+import { loadEnv } from '../../load.env';
+import { resetDB } from '../__tests_support__/db';
+import { LocalLogger, LogLevel } from '../__tests_support__/test.logger';
+
+loadEnv();
 
 export type InjectableContext = Readonly<{
   // properties injected using the Root Mocha Hooks
@@ -29,9 +31,7 @@ export const mochaHooks = (): Mocha.RootHookObject => {
       // the contents of the Before Each hook
     },
 
-    async afterAll(this: TestContext) {
-      await test.cleanup();
-    },
+    async afterAll(this: TestContext) {},
 
     afterEach(this: TestContext) {
       // the contents of the After Each hook
