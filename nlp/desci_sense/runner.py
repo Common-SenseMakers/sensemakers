@@ -24,7 +24,13 @@ def load_config(config_path: str = None) -> Config:
     else:
         # use a default config - this is the config loaded in the streamlit demo app
         config = default_init_parser_config()
+
+        # set model types
         config["model"]["model_name"] = "mistralai/mistral-7b-instruct"
+        config["keyword_extraction"]["model"][
+            "model_name"
+        ] = "mistralai/mistral-7b-instruct"
+
         if "WANDB_PROJECT" in environ:
             wandb_proj = environ["WANDB_PROJECT"]
             config["wandb"]["project"] = wandb_proj

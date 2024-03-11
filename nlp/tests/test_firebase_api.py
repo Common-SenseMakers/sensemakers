@@ -5,7 +5,7 @@ ROOT = Path(__file__).parents[1]
 sys.path.append(str(ROOT))
 
 from desci_sense.shared_functions.interface import ParserResult
-from desci_sense.configs import default_init_parser_config
+from utils import default_init_parser_config
 from desci_sense.shared_functions.parsers.firebase_api_parser import (
     FirebaseAPIParser,
     PromptCase,

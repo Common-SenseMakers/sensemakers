@@ -168,6 +168,10 @@ def log_pred_wandb(
 
 def init_wandb_run(model_config):
     wandb.login(key=environ["WANDB_API_KEY"])
+
+    # don't log api key
+    model_config["openai_api"].pop("openai_api_key")
+
     wandb_run = wandb.init(
         job_type="demo",
         project=model_config["wandb"]["project"],
