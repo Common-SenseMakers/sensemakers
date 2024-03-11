@@ -16,3 +16,4 @@ app/firebase/functions/src/config/env.ts
 .env
 
 *.log
+*.code-workspace
