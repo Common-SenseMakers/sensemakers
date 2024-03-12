@@ -1,5 +1,3 @@
-import { logger } from 'firebase-functions/v1';
-
 import {
   APP_URL,
   ORCID_API_URL,

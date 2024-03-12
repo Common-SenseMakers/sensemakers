@@ -1,5 +1,4 @@
 import { RequestHandler } from 'express';
-import { logger } from 'firebase-functions/v1';
 
 import { EthAccountDetails } from '../../@shared/types';
 import { setUserEthDetails } from '../../db/user.repo';

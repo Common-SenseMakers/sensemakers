@@ -1,5 +1,4 @@
 import { RequestHandler } from 'express';
-import { logger } from 'firebase-functions/v1';
 
 import { AppPostGetSemantics } from '../../@shared/types';
 import { MOCK_SEMANTICS } from '../../config/config';

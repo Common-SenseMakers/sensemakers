@@ -2,7 +2,7 @@ export const env = {
   NODE_ENV: process.env.NODE_ENV,
   ORCID_CLIENT_ID: process.env.ORCID_CLIENT_ID,
   ORCID_SECRET: process.env.ORCID_SECRET,
-  TOKEN_SECRET: process.env.TOKEN_SECRET,
+  OUR_TOKEN_SECRET: process.env.OUR_TOKEN_SECRET,
   TWITTER_API_KEY: process.env.TWITTER_API_KEY,
   TWITTER_API_SECRET_KEY: process.env.TWITTER_API_SECRET_KEY,
   TWITTER_CLIENT_ID: process.env.TWITTER_CLIENT_ID,

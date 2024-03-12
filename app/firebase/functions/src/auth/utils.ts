@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { logger } from 'firebase-functions/v1';
 
 export const validateUser = (request: Request, response: Response) => {
   const userId = (request as any).userId;

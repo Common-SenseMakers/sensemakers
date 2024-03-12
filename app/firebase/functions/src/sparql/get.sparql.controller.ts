@@ -1,5 +1,4 @@
 import { RequestHandler } from 'express';
-import { logger } from 'firebase-functions/v1';
 
 import { AppGetSparkQL } from '../@shared/types';
 import { getSparqlValidationScheme } from './sparql.schemas';

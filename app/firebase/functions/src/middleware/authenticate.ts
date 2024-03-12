@@ -1,5 +1,4 @@
 import { RequestHandler } from 'express';
-import { logger } from 'firebase-functions/v1';
 
 import { verifyAccessToken } from '../auth/controllers/utils';
 import { ENVIRONMENTS } from '../config/ENVIRONMENTS';

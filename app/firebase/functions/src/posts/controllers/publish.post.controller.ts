@@ -1,11 +1,13 @@
 import { RequestHandler } from 'express';
-import { logger } from 'firebase-functions/v1';
 
 import { AppPostCreate } from '../../@shared/types';
 import { publishPost } from '../posts.service';
 import { publishPostsValidationScheme } from './posts.schemas';
 
-export const publishPostController: RequestHandler = async (request, response) => {
+export const publishPostController: RequestHandler = async (
+  request,
+  response
+) => {
   try {
     const userId = (request as any).userId;
     if (!userId) {

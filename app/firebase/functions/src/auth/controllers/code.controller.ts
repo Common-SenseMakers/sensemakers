@@ -1,5 +1,4 @@
 import { RequestHandler } from 'express';
-import { logger } from 'firebase-functions/v1';
 
 import { AppUser } from '../../@shared/types';
 import { TOKEN_EXPIRATION } from '../../config/config';

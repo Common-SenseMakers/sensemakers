@@ -1,6 +1,6 @@
 import request from 'supertest';
 
-import * as apps from '..';
+import * as apps from '../../src';
 
 const logger = (global as any).logger;
 

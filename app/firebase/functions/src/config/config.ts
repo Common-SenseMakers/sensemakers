@@ -1,5 +1,4 @@
-import { logger } from 'firebase-functions/v1';
-
+import { logger } from '../instances/logger';
 import { ENVIRONMENTS } from './ENVIRONMENTS';
 import { env } from './typedenv';
 

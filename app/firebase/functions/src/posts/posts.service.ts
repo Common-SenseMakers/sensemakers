@@ -1,5 +1,3 @@
-import { logger } from 'firebase-functions/v1';
-
 import { AppPostCreate, PLATFORM, TweetRead } from '../@shared/types';
 import { FUNCTIONS_PY_URL, IS_E2E_TEST } from '../config/config';
 import { createPost } from '../db/posts.repo';

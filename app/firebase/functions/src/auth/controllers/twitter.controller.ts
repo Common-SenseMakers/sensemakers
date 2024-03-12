@@ -1,5 +1,4 @@
 import { RequestHandler } from 'express';
-import { logger } from 'firebase-functions/v1';
 
 import { TWITTER_REVOKE_URL } from '../../config/config';
 import { removeTwitter } from '../../db/user.repo';

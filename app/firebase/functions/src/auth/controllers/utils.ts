@@ -1,27 +1,28 @@
 import * as jwt from 'jsonwebtoken';
 import * as forge from 'node-forge';
+import { AppUserCreate } from 'src/@shared/types';
 import { verifyMessage } from 'viem';
 
 import { getEthToRSAMessage } from '../../@shared/sig.utils';
-import { EthAccountDetails } from '../../@shared/types';
-import { env } from '../../config/typedenv';
 
 export interface TokenData {
   userId: string;
 }
 
 export function generateAccessToken(data: TokenData, expiresIn: string) {
-  return jwt.sign(data, env.TOKEN_SECRET, { expiresIn });
+  return jwt.sign(data, TOKEN_SECRET, { expiresIn });
 }
 
 export function verifyAccessToken(token: string): string {
-  const verified = jwt.verify(token, env.TOKEN_SECRET, {
+  const verified = jwt.verify(token, TOKEN_SECRET, {
     complete: true,
   }) as unknown as jwt.JwtPayload & TokenData;
   return verified.payload.userId;
 }
 
-export const validateEthDetails = async (details: EthAccountDetails) => {
+export const validateEthDetails = async (details: AppUserCreate['eth']) => {
+  if (!details) throw new Error(`undefined details`);
+
   const validEth = await verifyMessage({
     address: details.ethAddress,
     message: getEthToRSAMessage(details.rsaPublickey),

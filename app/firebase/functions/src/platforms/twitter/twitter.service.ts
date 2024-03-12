@@ -2,7 +2,7 @@ import { TweetV2PostTweetResult, TwitterApi } from 'twitter-api-v2';
 
 import { AppUser, TwitterUser } from '../../@shared/types';
 import { TWITTER_CALLBACK_URL } from '../../config/config';
-import { UsersRepository } from '../../users/users.repository';
+import { UsersService } from '../../users/users.service';
 import { PlatformService } from '../platform.service';
 
 export interface ApiCredentials {
@@ -17,7 +17,7 @@ export interface TokenVerifier {
 
 export class TwitterService implements PlatformService {
   constructor(
-    protected usersRepo: UsersRepository,
+    protected users: UsersService,
     protected credentials: ApiCredentials
   ) {}
 
@@ -44,7 +44,7 @@ export class TwitterService implements PlatformService {
   private async getUserClient(_user: AppUser | string) {
     let user = _user;
     if (typeof _user === 'string') {
-      user = await this.usersRepo.getUser(_user as string, true);
+      user = await this.users.repo.getUser(_user as string, true);
     }
 
     return this.getUserClientInternal(user as AppUser);
@@ -58,7 +58,7 @@ export class TwitterService implements PlatformService {
     });
 
     /** store user credentials */
-    await this.usersRepo.setUserTwitterCredentials(userId, {
+    await this.users.repo.setUserTwitterCredentials(userId, {
       oauth_token: authLink.oauth_token,
       oauth_token_secret: authLink.oauth_token_secret,
     });
@@ -70,7 +70,7 @@ export class TwitterService implements PlatformService {
     userId: string,
     oauth: TokenVerifier
   ): Promise<TwitterUser> {
-    const user = await this.usersRepo.getUser(userId, true);
+    const user = await this.users.repo.getUser(userId, true);
 
     if (!user.twitter || !user.twitter.oauth_token_secret) {
       throw new Error('Twitter credentials not found');
@@ -93,7 +93,7 @@ export class TwitterService implements PlatformService {
       screen_name: result.screenName,
     };
 
-    await this.usersRepo.setUserTwitterCredentials(userId, twitter);
+    await this.users.repo.setUserTwitterCredentials(userId, twitter);
 
     if (!twitter.user_id) {
       throw new Error(`userId not returned`);

@@ -1,15 +1,14 @@
-import { logger } from 'firebase-functions/v1';
-
 import { AppUserCreate } from '../@shared/types';
+import { logger } from '../instances/logger';
 import { UsersRepository } from './users.repository';
 
 export class UsersService {
-  constructor(protected usersRepo: UsersRepository) {}
+  constructor(public repo: UsersRepository) {}
 
   /** Derive the userId from a user object */
   public getUserId(user: AppUserCreate): string {
     if (user.orcid) {
-      return `orcid:${user.orcid}`;
+      return `orcid:${user.orcid.orcid}`;
     }
 
     if (user.twitter) {
@@ -32,7 +31,7 @@ export class UsersService {
 
     const userId = this.getUserId(user);
 
-    const userIdRef = await this.usersRepo.setUser(userId, user);
+    const userIdRef = await this.repo.setUser(userId, user);
 
     if (userId !== userIdRef) {
       throw new Error(`userIds wont match ${userId} and ${userIdRef}`);

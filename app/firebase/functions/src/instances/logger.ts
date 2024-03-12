@@ -1,4 +1,5 @@
 import pino from 'pino';
+
 import { ENVIRONMENTS } from '../config/ENVIRONMENTS';
 
 /**
@@ -39,7 +40,7 @@ const pinoLevelToSeverityLookup: Record<string, string> = {
   emergency: 'EMERGENCY',
 };
 
-export const logger = pino({
+export const loggerPino = pino({
   messageKey: 'message',
   customLevels,
   formatters: {
@@ -70,26 +71,28 @@ export const logger = pino({
 
 (global as any).logger = {
   debug: (message: any, context: any, args: any) => {
-    logger.debug({ message, context, args });
+    loggerPino.debug({ message, context, args });
   },
 
   info: (message: any, context: any, args: any) => {
-    logger.info({ message, context, args });
+    loggerPino.info({ message, context, args });
   },
 
   notice: (message: any, context: any, args: any) => {
-    logger.notice({ message, context, args });
+    loggerPino.notice({ message, context, args });
   },
 
   warn: (message: any, context: any, args: any) => {
-    logger.warn({ message, context, args });
+    loggerPino.warn({ message, context, args });
   },
 
   error: (message: any, context: any, args: any) => {
-    logger.error({ message, context, args });
+    loggerPino.error({ message, context, args });
   },
 
   critical: (message: any, context: any, args: any) => {
-    logger.critical({ message, context, args });
+    loggerPino.critical({ message, context, args });
   },
 };
+
+export const logger = (global as any).logger;
