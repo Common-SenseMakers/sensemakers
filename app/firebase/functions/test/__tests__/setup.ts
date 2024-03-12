@@ -10,7 +10,7 @@ export type InjectableContext = Readonly<{
   // properties injected using the Root Mocha Hooks
 }>;
 
-(global as any).logger = new LocalLogger(LogLevel.warn, LogLevel.warn, [
+(global as any).logger = new LocalLogger(LogLevel.debug, LogLevel.debug, [
   'Testing authorization',
 ]);
 

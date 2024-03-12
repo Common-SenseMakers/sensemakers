@@ -27,7 +27,7 @@ export class UsersService {
 
   /** Create a new user */
   public async create(user: AppUserCreate) {
-    logger.debug(`Creating user ${JSON.stringify(user)}`);
+    logger.debug(`Creating user`, user);
 
     const userId = this.getUserId(user);
 
@@ -37,7 +37,7 @@ export class UsersService {
       throw new Error(`userIds wont match ${userId} and ${userIdRef}`);
     }
 
-    logger.debug(`Created user ${JSON.stringify({ userId, user })}`);
+    logger.debug(`Created user`, { userId, user });
 
     return userId;
   }

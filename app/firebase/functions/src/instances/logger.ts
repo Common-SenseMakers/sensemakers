@@ -1,6 +1,7 @@
 import pino from 'pino';
 
 import { ENVIRONMENTS } from '../config/ENVIRONMENTS';
+import { NODE_ENV } from '../config/config';
 
 /**
   https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#logseverity
@@ -69,30 +70,5 @@ export const loggerPino = pino({
   }),
 });
 
-(global as any).logger = {
-  debug: (message: any, context: any, args: any) => {
-    loggerPino.debug({ message, context, args });
-  },
-
-  info: (message: any, context: any, args: any) => {
-    loggerPino.info({ message, context, args });
-  },
-
-  notice: (message: any, context: any, args: any) => {
-    loggerPino.notice({ message, context, args });
-  },
-
-  warn: (message: any, context: any, args: any) => {
-    loggerPino.warn({ message, context, args });
-  },
-
-  error: (message: any, context: any, args: any) => {
-    loggerPino.error({ message, context, args });
-  },
-
-  critical: (message: any, context: any, args: any) => {
-    loggerPino.critical({ message, context, args });
-  },
-};
-
-export const logger = (global as any).logger;
+export const logger =
+  NODE_ENV === ENVIRONMENTS.PRODUCTION ? loggerPino : (global as any).logger;
