@@ -1,26 +1,12 @@
 import { TweetV2PostTweetResult, TwitterApi } from 'twitter-api-v2';
 
-import { AppUser, TwitterUser } from '../../@shared/types';
+import { AppUser, TwitterDetails, TwitterUser } from '../../@shared/types';
 import { TWITTER_CALLBACK_URL } from '../../config/config';
-import { PlatformService } from '../identity.service';
+import { PlatformService } from '../platforms.interface';
 
 export interface TwitterApiCredentials {
   key: string;
   secret: string;
-}
-
-export interface TwitterSignupContext {
-  link: string;
-}
-
-export interface TwitterSignupData {
-  oauth_token: string;
-  oauth_verifier: string;
-}
-
-export interface TwitterUserDetails {
-  orcid: string;
-  name: string;
 }
 
 export class TwitterService
@@ -31,7 +17,7 @@ export class TwitterService
       TwitterUserDetails
     >
 {
-  constructor(protected credentials: ApiCredentials) {}
+  constructor(protected credentials: TwitterApiCredentials) {}
 
   private getGenericClient() {
     return new TwitterApi({
@@ -56,24 +42,22 @@ export class TwitterService
     });
   }
 
-  public async getSignupData() {
+  public async getSignupContext() {
     const client = this.getGenericClient();
 
     const authLink = await client.generateAuthLink(TWITTER_CALLBACK_URL, {
       linkMode: 'authorize',
     });
 
-    return { links: authLink };
+    return authLink;
   }
 
-  async handleSignupData(
-    oauth: TwitterSignupData
-  ): Promise<AppUser['twitter']> {
-    const client = await this.getUserClient({});
-    const result = await client.login(oauth.oauth_verifier);
+  async handleSignupData(data: TwitterSignupData): Promise<TwitterUserDetails> {
+    const client = await this.getUserClient(data);
+    const result = await client.login(data.oauth_verifier);
 
-    const twitter: AppUser['twitter'] = {
-      oauth_verifier: oauth.oauth_verifier,
+    const twitter: TwitterUserDetails = {
+      oauth_verifier: data.oauth_verifier,
       accessToken: result.accessToken,
       accessSecret: result.accessSecret,
       user_id: result.userId,

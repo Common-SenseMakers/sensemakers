@@ -4,50 +4,68 @@ import { TweetV2PostTweetResult } from 'twitter-api-v2';
 import { AppPostSemantics, ParserResult } from './parser.types';
 
 export enum PLATFORM {
-  ORCID = 'ORCID',
-  X = 'X',
+  Orcid = 'Orcid',
+  Twitter = 'Twitter',
   Nanopubs = 'Nanopubs',
 }
 
-export interface OrcidDetails {
-  orcid?: {
-    orcid: string;
-    name: string;
-  };
+export interface UserDetailsBase {
+  user_id: string;
 }
 
-export interface TwitterDetails {
-  twitter?: {
-    oauth_token?: string;
-    oauth_token_secret?: string;
-    oauth_verifier?: string;
-    accessToken?: string;
-    accessSecret?: string;
-    user_id?: string;
-    screen_name?: string;
-  };
+/** ORCID */
+export interface OrcidSignupContext {
+  link: string;
 }
 
-export interface NanopubDetails {
-  eth?: {
-    ethAddress: HexStr;
-    rsaPublickey: string;
-    ethSignature: HexStr;
-    introNanopub?: string;
-  };
+export interface OrcidSignupData {
+  code: string;
 }
 
-export interface AppUser extends OrcidDetails, TwitterDetails, NanopubDetails {
+export interface OrcidUserDetails extends UserDetailsBase {
+  name: string;
+}
+
+/** TWITTER */
+export interface TwitterSignupContext {
+  oauth_token: string;
+  oauth_token_secret: string;
+  oauth_callback_confirmed: 'true';
+  url: string;
+}
+
+export type TwitterSignupData = Pick<
+  TwitterSignupContext,
+  'oauth_token' | 'oauth_token_secret'
+> & { oauth_verifier: string };
+
+export interface TwitterUserDetails {
+  oauth_verifier: string;
+  accessToken: string;
+  accessSecret: string;
+  user_id: string;
+  screen_name: string;
+}
+
+/** NANOPUB */
+export interface NanopubUserDetails extends UserDetailsBase {
+  rsaPublickey: string;
+  ethAddress: HexStr;
+  ethSignature: HexStr;
+  introNanopub?: string;
+}
+
+export interface AppUser {
   userId: string;
+  orcid?: OrcidUserDetails[];
+  twitter?: TwitterUserDetails[];
+  nanopub?: NanopubUserDetails[];
 }
 
 export interface AppUserCreate extends Omit<AppUser, 'userId'> {}
 
-export interface AppUserRead extends AppUser {
-  twitter?: {
-    user_id: string;
-    screen_name: string;
-  };
+export interface AppUserRead extends Omit<AppUser, 'twitter'> {
+  twitter: Array<Pick<TwitterUserDetails, 'user_id' | 'screen_name'>>;
 }
 
 export type DefinedIfTrue<V, R> = V extends true ? R : R | undefined;

@@ -1,6 +1,13 @@
+import { firestore } from 'firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 
-import { AppUser, AppUserCreate, DefinedIfTrue } from '../@shared/types';
+import {
+  AppUser,
+  AppUserCreate,
+  DefinedIfTrue,
+  PLATFORM,
+  UserDetailsBase,
+} from '../@shared/types';
 import { DBInstance } from '../db/instance';
 
 export class UsersRepository {
@@ -47,28 +54,57 @@ export class UsersRepository {
     } as unknown as DefinedIfTrue<T, AppUser>;
   }
 
-  public async setUser(userId: string, user: AppUserCreate) {
+  public async createUser(userId: string, user: AppUserCreate) {
     const ref = await this.getUserRef(userId);
     await ref.create(user);
     return ref.id;
   }
 
-  public async setUserEthDetails(userId: string, details: AppUser['eth']) {
-    const ref = await this.getUserRef(userId, true);
-    await ref.set({ eth: details }, { merge: true });
-  }
-
-  public async setUserTwitterCredentials(
+  /** append userDetails of a given platform */
+  public async addUserDetails(
     userId: string,
-    credentials: AppUser['twitter']
+    platform: PLATFORM,
+    details: any
   ) {
     const ref = await this.getUserRef(userId, true);
-    await ref.set({ twitter: credentials }, { merge: true });
+    await ref.update({
+      [platform]: firestore.FieldValue.arrayUnion(details),
+    });
   }
 
-  public async removeTwitter(userId: string) {
-    const ref = await this.getUserRef(userId, true);
-    await ref.update({ twitter: FieldValue.delete() });
+  /** remove userDetails of a given platform */
+  public async removeUserDetails(
+    userId: string,
+    platform: PLATFORM,
+    user_id: string
+  ) {
+    const doc = await this.getUserDoc(userId);
+
+    if (!doc.exists) {
+      throw new Error(`User ${userId} not found`);
+    }
+
+    const user = doc.data();
+
+    if (
+      !user ||
+      !Array.isArray(user[platform]) ||
+      user[platform].length === 0
+    ) {
+      throw new Error(`User ${userId} data as expected`);
+    }
+
+    const details = (user[platform] as Array<UserDetailsBase>).find(
+      (details) => details.user_id === user_id
+    );
+
+    if (!details) {
+      throw new Error(`Details for user ${userId} not found`);
+    }
+
+    await doc.ref.update({
+      [platform]: firestore.FieldValue.arrayRemove(details),
+    });
   }
 
   public async getAll() {

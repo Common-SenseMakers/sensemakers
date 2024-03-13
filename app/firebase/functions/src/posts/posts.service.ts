@@ -8,7 +8,7 @@ import { TAG_OPTIONS } from './TAG_OPTIONS';
 export const publishPost = async (userId: string, post: AppPostCreate) => {
   let tweet: TweetRead | undefined = undefined;
 
-  if (post.platforms.includes(PLATFORM.X)) {
+  if (post.platforms.includes(PLATFORM.Twitter)) {
     const tweetContent = await constructTweet(post);
     if (IS_E2E_TEST) {
       tweet = { id: 'dummyurl', text: tweetContent };
