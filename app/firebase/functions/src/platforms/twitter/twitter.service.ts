@@ -2,24 +2,36 @@ import { TweetV2PostTweetResult, TwitterApi } from 'twitter-api-v2';
 
 import { AppUser, TwitterUser } from '../../@shared/types';
 import { TWITTER_CALLBACK_URL } from '../../config/config';
-import { UsersService } from '../../users/users.service';
-import { PlatformService } from '../platform.service';
+import { PlatformService } from '../identity.service';
 
-export interface ApiCredentials {
+export interface TwitterApiCredentials {
   key: string;
   secret: string;
 }
 
-export interface TokenVerifier {
+export interface TwitterSignupContext {
+  link: string;
+}
+
+export interface TwitterSignupData {
   oauth_token: string;
   oauth_verifier: string;
 }
 
-export class TwitterService implements PlatformService {
-  constructor(
-    protected users: UsersService,
-    protected credentials: ApiCredentials
-  ) {}
+export interface TwitterUserDetails {
+  orcid: string;
+  name: string;
+}
+
+export class TwitterService
+  implements
+    PlatformService<
+      TwitterSignupContext,
+      TwitterSignupData,
+      TwitterUserDetails
+    >
+{
+  constructor(protected credentials: ApiCredentials) {}
 
   private getGenericClient() {
     return new TwitterApi({
@@ -28,61 +40,36 @@ export class TwitterService implements PlatformService {
     });
   }
 
-  private async getUserClientInternal(user: AppUser) {
-    if (!user.twitter || !user.twitter.oauth_token_secret) {
+  private async getUserClient(twitter: {
+    oauth_token: string;
+    oauth_token_secret: string;
+  }) {
+    if (!twitter || !twitter.oauth_token_secret) {
       throw new Error('Twitter credentials not found');
     }
 
     return new TwitterApi({
       appKey: this.credentials.key,
       appSecret: this.credentials.secret,
-      accessToken: user.twitter.oauth_token,
-      accessSecret: user.twitter.oauth_token_secret,
+      accessToken: twitter.oauth_token,
+      accessSecret: twitter.oauth_token_secret,
     });
   }
 
-  private async getUserClient(_user: AppUser | string) {
-    let user = _user;
-    if (typeof _user === 'string') {
-      user = await this.users.repo.getUser(_user as string, true);
-    }
-
-    return this.getUserClientInternal(user as AppUser);
-  }
-
-  public async getAuthLink(userId: string): Promise<string> {
+  public async getSignupData() {
     const client = this.getGenericClient();
 
     const authLink = await client.generateAuthLink(TWITTER_CALLBACK_URL, {
       linkMode: 'authorize',
     });
 
-    /** store user credentials */
-    await this.users.repo.setUserTwitterCredentials(userId, {
-      oauth_token: authLink.oauth_token,
-      oauth_token_secret: authLink.oauth_token_secret,
-    });
-
-    return authLink.url;
+    return { links: authLink };
   }
 
-  async getAccessToken(
-    userId: string,
-    oauth: TokenVerifier
-  ): Promise<TwitterUser> {
-    const user = await this.users.repo.getUser(userId, true);
-
-    if (!user.twitter || !user.twitter.oauth_token_secret) {
-      throw new Error('Twitter credentials not found');
-    }
-
-    if (user.twitter.oauth_token !== oauth.oauth_token) {
-      throw new Error(
-        `User ${userId} oauth_token mismatch. "${oauth.oauth_token}" was expected to be "${user.twitter.oauth_token}" `
-      );
-    }
-
-    const client = await this.getUserClient(user);
+  async handleSignupData(
+    oauth: TwitterSignupData
+  ): Promise<AppUser['twitter']> {
+    const client = await this.getUserClient({});
     const result = await client.login(oauth.oauth_verifier);
 
     const twitter: AppUser['twitter'] = {
@@ -93,20 +80,7 @@ export class TwitterService implements PlatformService {
       screen_name: result.screenName,
     };
 
-    await this.users.repo.setUserTwitterCredentials(userId, twitter);
-
-    if (!twitter.user_id) {
-      throw new Error(`userId not returned`);
-    }
-
-    if (!twitter.screen_name) {
-      throw new Error(`screen_name not returned`);
-    }
-
-    return {
-      user_id: twitter.user_id,
-      screen_name: twitter.screen_name,
-    };
+    return twitter;
   }
 
   async postMessageTwitter(

@@ -14,8 +14,8 @@ describe('signups', () => {
       expect(link).to.not.be.undefined;
     });
 
-    it('use code to create new user', async () => {
-      const userId = await services.orcid.handleCode(orcidId);
+    it('handle orcid code (create new user)', async () => {
+      const userId = await services.users.handleSignupData(orcidId);
       const expectedUserId = services.users.getUserId({
         orcid: { orcid: orcidId, name: '' },
       });
@@ -33,7 +33,9 @@ describe('signups', () => {
     });
 
     describe('connect twitter', () => {
-      it('connect twitter', () => {});
+      it('handle twitter code', async () => {
+        const userId = await services.twitter.handleCode(orcidId);
+      });
     });
   });
 });

@@ -3,12 +3,20 @@ import { TweetV2PostTweetResult } from 'twitter-api-v2';
 
 import { AppPostSemantics, ParserResult } from './parser.types';
 
-export interface AppUser {
-  userId: string;
+export enum PLATFORM {
+  ORCID = 'ORCID',
+  X = 'X',
+  Nanopubs = 'Nanopubs',
+}
+
+export interface OrcidDetails {
   orcid?: {
     orcid: string;
     name: string;
   };
+}
+
+export interface TwitterDetails {
   twitter?: {
     oauth_token?: string;
     oauth_token_secret?: string;
@@ -18,12 +26,19 @@ export interface AppUser {
     user_id?: string;
     screen_name?: string;
   };
+}
+
+export interface NanopubDetails {
   eth?: {
     ethAddress: HexStr;
     rsaPublickey: string;
     ethSignature: HexStr;
     introNanopub?: string;
   };
+}
+
+export interface AppUser extends OrcidDetails, TwitterDetails, NanopubDetails {
+  userId: string;
 }
 
 export interface AppUserCreate extends Omit<AppUser, 'userId'> {}
@@ -40,11 +55,6 @@ export type DefinedIfTrue<V, R> = V extends true ? R : R | undefined;
 export interface TwitterUser {
   user_id: string;
   screen_name: string;
-}
-
-export enum PLATFORM {
-  X = 'X',
-  Nanopubs = 'Nanopubs',
 }
 
 export interface AppPostCreate {

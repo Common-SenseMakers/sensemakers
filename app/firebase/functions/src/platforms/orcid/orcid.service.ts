@@ -1,25 +1,36 @@
-import { ENVIRONMENTS } from '../../config/ENVIRONMENTS';
 import {
   APP_URL,
-  NODE_ENV,
   ORCID_API_URL,
   ORCID_CLIENT_ID,
   ORCID_SECRET,
 } from '../../config/config';
 import { logger } from '../../instances/logger';
-import { UsersService } from '../../users/users.service';
-import { OAuthIdentityService } from '../identity.service';
+import { IdentityService } from '../identity.service';
 
-export class OrcidService implements OAuthIdentityService {
-  constructor(protected usersService: UsersService) {}
+export interface OrcidSignupContext {
+  link: string;
+}
 
-  public async getAuthLink() {
-    return `${ORCID_API_URL}/oauth/authorize?client_id=${ORCID_CLIENT_ID}&response_type=code&scope=/authenticate&redirect_uri=${APP_URL}`;
+export interface OrcidSignupData {
+  code: string;
+}
+
+export interface OrcidUserDetails {
+  orcid: string;
+  name: string;
+}
+
+export class OrcidService
+  implements
+    IdentityService<OrcidSignupContext, OrcidSignupData, OrcidUserDetails>
+{
+  public async getSignupContext() {
+    return {
+      link: `${ORCID_API_URL}/oauth/authorize?client_id=${ORCID_CLIENT_ID}&response_type=code&scope=/authenticate&redirect_uri=${APP_URL}`,
+    };
   }
 
-  protected async fetchUserFromCode(
-    code: string
-  ): Promise<{ orcid: string; name: string }> {
+  protected async fetchUserFromCode(code: string): Promise<OrcidUserDetails> {
     const params = new URLSearchParams();
 
     params.append('client_id', ORCID_CLIENT_ID);
@@ -51,22 +62,8 @@ export class OrcidService implements OAuthIdentityService {
     return data;
   }
 
-  public async handleCode(code: string): Promise<string> {
-    const user =
-      NODE_ENV !== ENVIRONMENTS.TEST
-        ? await this.fetchUserFromCode(code)
-        : {
-            orcid: code,
-            name: 'Test User',
-          };
-
-    const userId = await this.usersService.create({
-      orcid: {
-        orcid: user.orcid,
-        name: user.name,
-      },
-    });
-
-    return userId;
+  public async handleSignupData(data: OrcidSignupData) {
+    const user = await this.fetchUserFromCode(data.code);
+    return user;
   }
 }
