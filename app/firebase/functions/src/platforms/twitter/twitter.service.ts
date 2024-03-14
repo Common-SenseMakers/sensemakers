@@ -1,12 +1,21 @@
 import { TweetV2PostTweetResult, TwitterApi } from 'twitter-api-v2';
 
-import { AppUser, TwitterDetails, TwitterUser } from '../../@shared/types';
+import {
+  TwitterSignupContext,
+  TwitterSignupData,
+  TwitterUserDetails,
+} from '../../@shared/types';
 import { TWITTER_CALLBACK_URL } from '../../config/config';
 import { PlatformService } from '../platforms.interface';
 
 export interface TwitterApiCredentials {
   key: string;
   secret: string;
+}
+
+export interface UserClientParameters {
+  oauth_token: string;
+  oauth_token_secret: string;
 }
 
 export class TwitterService
@@ -26,19 +35,12 @@ export class TwitterService
     });
   }
 
-  private async getUserClient(twitter: {
-    oauth_token: string;
-    oauth_token_secret: string;
-  }) {
-    if (!twitter || !twitter.oauth_token_secret) {
-      throw new Error('Twitter credentials not found');
-    }
-
+  private async getUserClient(params: UserClientParameters) {
     return new TwitterApi({
       appKey: this.credentials.key,
       appSecret: this.credentials.secret,
-      accessToken: twitter.oauth_token,
-      accessSecret: twitter.oauth_token_secret,
+      accessToken: params.oauth_token,
+      accessSecret: params.oauth_token_secret,
     });
   }
 
@@ -68,10 +70,10 @@ export class TwitterService
   }
 
   async postMessageTwitter(
-    userId: string,
+    params: UserClientParameters,
     text: string
   ): Promise<TweetV2PostTweetResult['data']> {
-    const client = await this.getUserClient(userId);
+    const client = await this.getUserClient(params);
     const result = await client.v2.tweet(text);
 
     return result.data;

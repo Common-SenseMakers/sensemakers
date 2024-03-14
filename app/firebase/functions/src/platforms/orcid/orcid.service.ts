@@ -1,24 +1,16 @@
 import {
+  OrcidSignupContext,
+  OrcidSignupData,
+  OrcidUserDetails,
+} from '../../@shared/types';
+import {
   APP_URL,
   ORCID_API_URL,
   ORCID_CLIENT_ID,
   ORCID_SECRET,
 } from '../../config/config';
 import { logger } from '../../instances/logger';
-import { IdentityService } from '../identity.service';
-
-export interface OrcidSignupContext {
-  link: string;
-}
-
-export interface OrcidSignupData {
-  code: string;
-}
-
-export interface OrcidUserDetails {
-  orcid: string;
-  name: string;
-}
+import { IdentityService } from '../platforms.interface';
 
 export class OrcidService
   implements

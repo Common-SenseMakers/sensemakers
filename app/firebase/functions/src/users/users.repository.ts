@@ -1,5 +1,4 @@
 import { firestore } from 'firebase-admin';
-import { FieldValue } from 'firebase-admin/firestore';
 
 import {
   AppUser,

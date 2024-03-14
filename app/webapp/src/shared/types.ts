@@ -4,9 +4,9 @@ import { TweetV2PostTweetResult } from 'twitter-api-v2';
 import { AppPostSemantics, ParserResult } from './parser.types';
 
 export enum PLATFORM {
-  Orcid = 'Orcid',
-  Twitter = 'Twitter',
-  Nanopubs = 'Nanopubs',
+  Orcid = 'orcid',
+  Twitter = 'twitter',
+  Nanopubs = 'nanopubs',
 }
 
 export interface UserDetailsBase {
@@ -57,9 +57,9 @@ export interface NanopubUserDetails extends UserDetailsBase {
 
 export interface AppUser {
   userId: string;
-  orcid?: OrcidUserDetails[];
-  twitter?: TwitterUserDetails[];
-  nanopub?: NanopubUserDetails[];
+  [PLATFORM.Orcid]?: OrcidUserDetails[];
+  [PLATFORM.Twitter]?: TwitterUserDetails[];
+  [PLATFORM.Nanopubs]?: NanopubUserDetails[];
 }
 
 export interface AppUserCreate extends Omit<AppUser, 'userId'> {}

@@ -8,7 +8,4 @@ export interface IdentityService<SignupContext, SignupData, UserDetails> {
 export interface PlatformService<SignupContext, SignupData, UserDetails>
   extends IdentityService<SignupContext, SignupData, UserDetails> {}
 
-export type AppIdentityPlatforms = Map<
-  PLATFORM,
-  IdentityService<any, any, any>
->;
+export type IdentityPlatforms = Map<PLATFORM, IdentityService<any, any, any>>;
