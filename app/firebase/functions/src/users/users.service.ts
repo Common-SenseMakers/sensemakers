@@ -79,13 +79,25 @@ export class UsersService {
    */
   public async handleSignup(
     platform: PLATFORM,
-    signupData: any,
+    _signupData: any,
     _userId?: string
   ) {
+    /**
+     * signup data is obtained from the provided one merged with the current user
+     * signupData (in case getSignupContext precomputed some user details)
+     */
+    let currentDetails = {};
+    if (_userId) {
+      const user = await this.repo.getUser(_userId, true);
+      const allDetails = user[platform];
+      currentDetails = allDetails ? allDetails[0] : {};
+    }
+
     /**
      * validate the signup data for this platform and convert it into
      * user details
      */
+    const signupData = { ...currentDetails, ..._signupData };
     const userDetails =
       await this.getIdentityService(platform).handleSignupData(signupData);
 

@@ -7,6 +7,8 @@ const logger = (global as any).logger;
 
 describe('signups', () => {
   let orcidId: string = '0000-0000-0000-0001';
+  let twitterId: string = '123456789';
+
   let userId: string | undefined;
 
   describe('connect orcid', () => {
@@ -36,6 +38,17 @@ describe('signups', () => {
     it('get twitter oauth details', async () => {
       const details = await services.users.getSignupContext(
         PLATFORM.Twitter,
+        userId
+      );
+
+      logger.debug(`details:`, { details });
+      expect(details).to.not.be.undefined;
+    });
+
+    it('handle twitter signup', async () => {
+      const details = await services.users.handleSignup(
+        PLATFORM.Twitter,
+        { oauth_verifier: twitterId },
         userId
       );
 

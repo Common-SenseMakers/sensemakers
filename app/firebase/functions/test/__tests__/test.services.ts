@@ -4,6 +4,8 @@ import {
   OrcidSignupData,
   OrcidUserDetails,
   PLATFORM,
+  TwitterSignupData,
+  TwitterUserDetails,
 } from '../../src/@shared/types';
 import {
   TWITTER_API_KEY,
@@ -17,6 +19,7 @@ import { UsersRepository } from '../../src/users/users.repository';
 import { UsersService } from '../../src/users/users.service';
 
 export const TEST_USER_NAME = 'Test User';
+export const TEST_TWITTER_NAME = 'testuser';
 
 const db = new DBInstance();
 const userRepo = new UsersRepository(db);
@@ -32,15 +35,30 @@ when(MockedOrcid.handleSignupData(anything())).thenCall(
 );
 const mockedOrcid = instance(MockedOrcid);
 
-identityServices.set(PLATFORM.Orcid, mockedOrcid);
-identityServices.set(
-  PLATFORM.Twitter,
-  new TwitterService({
-    key: TWITTER_API_KEY,
-    secret: TWITTER_API_SECRET_KEY,
-  })
+/** mocked twitter */
+const twitter = new TwitterService({
+  key: TWITTER_API_KEY,
+  secret: TWITTER_API_SECRET_KEY,
+});
+const MockedTwitter = spy(twitter);
+when(MockedTwitter.handleSignupData(anything())).thenCall(
+  (data: TwitterSignupData): TwitterUserDetails => {
+    return {
+      user_id: data.oauth_verifier,
+      accessSecret: 'dummy',
+      accessToken: 'dummy',
+      oauth_verifier: 'dummy',
+      screen_name: TEST_TWITTER_NAME,
+    };
+  }
 );
+const mockedTWitter = instance(MockedTwitter);
 
+/** all identity services */
+identityServices.set(PLATFORM.Orcid, mockedOrcid);
+identityServices.set(PLATFORM.Twitter, mockedTWitter);
+
+/** users service */
 const usersService = new UsersService(userRepo, identityServices);
 
 export const services = {
