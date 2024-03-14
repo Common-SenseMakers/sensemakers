@@ -66,8 +66,15 @@ export const AppPostPage = (props: {}) => {
   const [post, setPost] = useState<AppPost>();
 
   const canReRun = parsed && postText !== parsed.post;
-  const hasPlatform =
-    connectedUser && (connectedUser.eth || connectedUser?.twitter);
+  const hasNano =
+    connectedUser !== undefined &&
+    connectedUser[PLATFORM.Nanopubs] !== undefined;
+
+  const hasTwitter =
+    connectedUser !== undefined &&
+    connectedUser[PLATFORM.Twitter] !== undefined;
+
+  const hasPlatform = hasNano || hasTwitter;
 
   const canPost =
     hasPlatform &&

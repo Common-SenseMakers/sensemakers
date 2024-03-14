@@ -52,7 +52,7 @@ export const PlatformSelector = (
   const { mobile } = useResponsive();
   const { connectedUser } = useAccountContext();
   const [platforms, setPlatforms] = useState<PLATFORM[]>([
-    PLATFORM.X,
+    PLATFORM.Twitter,
     PLATFORM.Nanopubs,
   ]);
 
@@ -71,10 +71,19 @@ export const PlatformSelector = (
     }
   }, [platforms]);
 
-  const canTwitter = (connectedUser && connectedUser.twitter) !== undefined;
-  const willTwitter = canTwitter && platforms.includes(PLATFORM.X);
+  const address =
+    connectedUser && connectedUser[PLATFORM.Nanopubs]
+      ? connectedUser[PLATFORM.Nanopubs][0].ethAddress
+      : undefined;
 
-  const canNano = (connectedUser && connectedUser.eth) !== undefined;
+  const hasNano =
+    connectedUser !== undefined &&
+    connectedUser[PLATFORM.Nanopubs] !== undefined;
+
+  const canTwitter = (connectedUser && connectedUser.twitter) !== undefined;
+  const willTwitter = canTwitter && platforms.includes(PLATFORM.Twitter);
+
+  const canNano = hasNano;
   const willNano = canNano && platforms.includes(PLATFORM.Nanopubs);
 
   return (
@@ -88,13 +97,13 @@ export const PlatformSelector = (
           style={{ flexGrow: 1 }}
           enabled={willTwitter}
           justify="start"
-          onClick={() => select(PLATFORM.X)}
+          onClick={() => select(PLATFORM.Twitter)}
           icon={<TwitterIcon></TwitterIcon>}
           pad={{ vertical: 'xsmall', horizontal: 'medium' }}
           label={
             <AppButtonTwoLinesLabel
               tag={t('twitter/x')}
-              label={`@${connectedUser?.twitter?.screen_name}`}></AppButtonTwoLinesLabel>
+              label={`@${connectedUser?.twitter[0]?.screen_name}`}></AppButtonTwoLinesLabel>
           }></ToggleButton>
       ) : (
         <AppButton
@@ -102,7 +111,7 @@ export const PlatformSelector = (
           disabled
           label={t('twitterNotConnected')}></AppButton>
       )}
-      {connectedUser?.eth ? (
+      {hasNano ? (
         <ToggleButton
           style={{ flexGrow: 1 }}
           enabled={willNano}
@@ -114,9 +123,7 @@ export const PlatformSelector = (
             <AppButtonTwoLinesLabel
               tag={t('nanopub')}
               label={
-                <AppAddress
-                  asText
-                  address={connectedUser?.eth?.ethAddress}></AppAddress>
+                <AppAddress asText address={address}></AppAddress>
               }></AppButtonTwoLinesLabel>
           }></ToggleButton>
       ) : (

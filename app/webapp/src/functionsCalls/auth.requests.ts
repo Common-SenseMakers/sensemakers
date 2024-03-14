@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 import { FUNCTIONS_BASE } from '../app/config';
-import { AppUserRead, EthAccountDetails } from '../shared/types';
+import { AppUserRead, NanopubUserDetails } from '../shared/types';
 
 export const postOrcidCode = async (code: string) => {
   const res = await axios.post(FUNCTIONS_BASE + '/auth/code', { code }, {});
@@ -72,7 +72,7 @@ export const getLoggedUser = async (
 };
 
 export const postUserEthDetails = async (
-  details: EthAccountDetails,
+  details: NanopubUserDetails,
   appAccessToken: string
 ): Promise<void> => {
   const res = await axios.post(FUNCTIONS_BASE + '/auth/eth', details, {

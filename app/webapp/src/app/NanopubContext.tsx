@@ -13,7 +13,7 @@ import { postUserEthDetails } from '../functionsCalls/auth.requests';
 import { constructIntroNanopub } from '../nanopubs/construct.intro.nanopub';
 import { getProfile } from '../nanopubs/semantics.helper';
 import { getEthToRSAMessage } from '../shared/sig.utils';
-import { EthAccountDetails, HexStr } from '../shared/types';
+import { HexStr, NanopubUserDetails, PLATFORM } from '../shared/types';
 import { RSAKeys, getRSAKeys } from '../utils/rsa.keys';
 import { useAccountContext } from './AccountContext';
 import { NANOPUBS_SERVER } from './config';
@@ -56,6 +56,11 @@ export const NanopubContext = (props: PropsWithChildren) => {
 
   const [ethSignature, setEthSignature] = useState<HexStr>();
 
+  const nanopubDetails =
+    connectedUser && connectedUser[PLATFORM.Nanopubs]
+      ? connectedUser[PLATFORM.Nanopubs][0]
+      : undefined;
+
   const disconnect = () => {
     localStorage.removeItem(KEYS_KEY);
     readKeys();
@@ -85,7 +90,7 @@ export const NanopubContext = (props: PropsWithChildren) => {
 
   /** set profile */
   const buildProfile = async () => {
-    if (rsaKeys && connectedUser && connectedUser.eth && connectedUser.orcid) {
+    if (rsaKeys && connectedUser && nanopubDetails && connectedUser.orcid) {
       await (init as any)();
 
       const profile = getProfile(rsaKeys, connectedUser);
@@ -101,7 +106,7 @@ export const NanopubContext = (props: PropsWithChildren) => {
 
   /** set Nanopub profile (considered the end of the connecting flow) */
   useEffect(() => {
-    if (rsaKeys && connectedUser && connectedUser.eth) {
+    if (rsaKeys && connectedUser && nanopubDetails) {
       buildProfile();
     }
   }, [connectedUser, rsaKeys]);
@@ -115,7 +120,7 @@ export const NanopubContext = (props: PropsWithChildren) => {
   /** keep user details aligned with profile and keep track of the
    * eth<>rsa signature (if not already done) */
   const postEthDetails = useCallback(
-    async (details: EthAccountDetails) => {
+    async (details: NanopubUserDetails) => {
       if (rsaKeys && appAccessToken && connectedUser) {
         const introNanopub = await constructIntroNanopub(
           details,
@@ -144,9 +149,10 @@ export const NanopubContext = (props: PropsWithChildren) => {
   );
 
   useEffect(() => {
-    if (connectedUser && !connectedUser.eth && connectIntention) {
+    if (connectedUser && !nanopubDetails && connectIntention) {
       if (rsaKeys && address && ethSignature && appAccessToken) {
-        const details: EthAccountDetails = {
+        const details: NanopubUserDetails = {
+          user_id: rsaKeys.publicKey,
           rsaPublickey: rsaKeys.publicKey,
           ethAddress: address,
           ethSignature,
@@ -243,7 +249,7 @@ export const NanopubContext = (props: PropsWithChildren) => {
   };
 
   const needAuthorize =
-    profile === undefined || (connectedUser && connectedUser.eth === undefined);
+    profile === undefined || (connectedUser && nanopubDetails === undefined);
 
   return (
     <NanopubContextValue.Provider
