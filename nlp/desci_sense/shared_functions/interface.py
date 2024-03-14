@@ -116,10 +116,10 @@ class RefMetadata(BaseModel):
     mentioned in a post.
     """
 
-    citoid_url: str = Field(
+    citoid_url: Union[str, None] = Field(
         description="URL used by citoid (might have different subdomain or final slashes).",
     )
-    url: str = Field(description="URL of reference.")
+    url: Union[str, None] = Field(description="URL of reference.")
     item_type: Union[str, None] = Field(
         default=None,
         description="Item type label returned from emtadata extractor. \

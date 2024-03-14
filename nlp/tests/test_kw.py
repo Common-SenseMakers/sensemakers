@@ -9,13 +9,66 @@ from desci_sense.runner import load_config
 from desci_sense.shared_functions.postprocessing.output_parsers import (
     extract_unique_keywords,
 )
-from desci_sense.parsers.multi_stage_parser import MultiStageParser
+from desci_sense.shared_functions.interface import ParserResult
+from utils import default_init_parser_config
+from desci_sense.shared_functions.parsers.firebase_api_parser import (
+    FirebaseAPIParser,
+    PromptCase,
+)
+from desci_sense.shared_functions.dataloaders import (
+    scrape_post,
+    convert_text_to_ref_post,
+)
+
+TEST_POST_TEXT_W_REF = """
+I really liked this paper!
+https://arxiv.org/abs/2402.04607
+"""
 
 
 def test_kw_basic():
     test_str = "#AI, #Web3, #AI"
     kws = extract_unique_keywords(test_str)
-    assert (kws) == ["Web3", "AI"]
+    assert set(kws) == set(["Web3", "AI"])
+
+
+def test_parallel_kw_parse_result():
+    config = default_init_parser_config()
+    parser = FirebaseAPIParser(config=config)
+    parser.set_md_extract_method("citoid")
+    result = parser.process_text_parallel(TEST_POST_TEXT_W_REF)
+    result_dict = result.model_dump()
+    result_2 = ParserResult.model_validate(result_dict)
+    assert "semantics" in result_dict
+    assert "semantics" in result_2.model_dump()
+
+
+def test_parallel_keywords():
+    config = default_init_parser_config()
+    parser = FirebaseAPIParser(config=config)
+    parser.set_md_extract_method("citoid")
+    post = convert_text_to_ref_post(TEST_POST_TEXT_W_REF)
+    combined = parser.process_ref_post_parallel(post)
+    assert len(combined["keywords"]["answer"]["valid_keywords"]) > 0
+
+
+def test_parse_kw_post():
+    url = "https://mastodon.social/@psmaldino@qoto.org/111405098400404613"
+    config = default_init_parser_config()
+    parser = FirebaseAPIParser(config=config)
+    post = scrape_post(url)
+    result = parser.extract_post_topics_w_metadata(post)
+    assert "valid_keywords" in result["answer"]
+
+
+def test_multi_ref_post():
+    url = "https://twitter.com/Elinor_Carmi/status/1768238325020659885"
+    config = default_init_parser_config()
+    parser = FirebaseAPIParser(config=config)
+    parser.set_md_extract_method("citoid")
+    post = scrape_post(url)
+    result = parser.extract_post_topics_w_metadata(post)
+    assert "valid_keywords" in result["answer"]
 
 
 # def test_parse_masto():

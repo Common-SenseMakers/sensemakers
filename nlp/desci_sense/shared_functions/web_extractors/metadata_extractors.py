@@ -1,5 +1,6 @@
 from typing import List
 from enum import Enum
+import asyncio
 
 from ..interface import RefMetadata
 from .citoid import fetch_citation, fetch_all_citations
@@ -89,10 +90,8 @@ def extract_urls_citoid_metadata(
         return [extract_citoid_metadata(target_urls[0], max_summary_length)]
     else:
         # use parallel call
-        metadatas_raw = fetch_all_citations(target_urls)
-        return [
-            normalize_citoid_metadata(md, max_summary_length) for md in metadatas_raw
-        ]
+        metadatas_raw = asyncio.run(fetch_all_citations(target_urls))
+        return normalize_citoid_metadata(metadatas_raw, max_summary_length)
 
 
 def extract_all_metadata_by_type(
