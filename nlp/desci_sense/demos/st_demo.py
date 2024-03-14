@@ -251,6 +251,7 @@ def process_keywords(result, model):
         result["kw_prompt"] = kw_result["full_prompt"]
         result["kw_reasoning"] = kw_result["answer"].get("reasoning")
         result["academic_kw"] = kw_result["answer"].get("academic_kw")
+        result["raw_kw_output"] = kw_result["answer"].get("raw_text")
         return result
 
 
