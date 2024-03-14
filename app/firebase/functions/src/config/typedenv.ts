@@ -8,4 +8,6 @@ export const env = {
   TWITTER_CLIENT_ID: process.env.TWITTER_CLIENT_ID,
   TWITTER_CLIENT_SECRET: process.env.TWITTER_CLIENT_SECRET,
   TWITTER_BEARER_TOKEN: process.env.TWITTER_BEARER_TOKEN,
+  LOG_LEVEL_MSG: process.env.LOG_LEVEL_MSG,
+  LOG_LEVEL_OBJ: process.env.LOG_LEVEL_OBJ,
 };

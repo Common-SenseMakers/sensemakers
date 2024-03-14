@@ -1,18 +1,21 @@
 import { Context } from 'mocha';
 
-import { loadEnv } from '../../load.env';
+import { env } from '../../src/config/typedenv';
 import { resetDB } from '../__tests_support__/db';
 import { LocalLogger, LogLevel } from '../__tests_support__/test.logger';
 
-loadEnv();
+export const LOG_LEVEL_MSG = env.LOG_LEVEL_MSG;
+export const LOG_LEVEL_OBJ = env.LOG_LEVEL_OBJ;
 
 export type InjectableContext = Readonly<{
   // properties injected using the Root Mocha Hooks
 }>;
 
-(global as any).logger = new LocalLogger(LogLevel.debug, LogLevel.debug, [
-  'Testing authorization',
-]);
+(global as any).logger = new LocalLogger(
+  (LOG_LEVEL_MSG as LogLevel) || LogLevel.warn,
+  (LOG_LEVEL_OBJ as LogLevel) || LogLevel.warn,
+  ['Testing authorization']
+);
 
 // TestContext will be used by all the test
 export type TestContext = Mocha.Context & Context;

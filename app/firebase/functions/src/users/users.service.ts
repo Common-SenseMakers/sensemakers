@@ -3,6 +3,13 @@ import { logger } from '../instances/logger';
 import { IdentityPlatforms } from '../platforms/platforms.interface';
 import { UsersRepository } from './users.repository';
 
+/**
+ * A user profile is made up of a dictionary of PLATFORM => Arrray<AuthenticationDetails>
+ * One user can have multiple profiles on each platform.
+ *
+ * Authentication details may be OAuth access tokens, or validated details about the user
+ * identity like its public key/address.
+ */
 export class UsersService {
   constructor(
     public repo: UsersRepository,
@@ -53,13 +60,19 @@ export class UsersService {
     return userId;
   }
 
+  /** This method request the user signup context and stores it in the user profile */
+  public async getSignupContext(platform: PLATFORM, userId?: string) {
+    const context =
+      await this.getIdentityService(platform).getSignupContext(userId);
+
+    if (userId) {
+      await this.repo.addUserDetails(userId, platform, context);
+    }
+
+    return context;
+  }
+
   /**
-   * A user profile is made up of a dictionary of PLATFORM => Arrray<AuthenticationDetails>
-   * One user can have multiple profiles on each platform.
-   *
-   * Authentication details may be OAuth access tokens, or validated details about the user
-   * identity like its public key/address.
-   *
    * This method validates the signup data and stores it in the user profile. If
    * a userId is provided the user must exist and a new platform is added to it,
    * otherewise a new user is created.

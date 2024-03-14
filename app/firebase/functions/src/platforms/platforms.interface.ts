@@ -1,7 +1,7 @@
 import { PLATFORM } from '../@shared/types';
 
 export interface IdentityService<SignupContext, SignupData, UserDetails> {
-  getSignupContext: () => Promise<SignupContext>;
+  getSignupContext: (userId?: string) => Promise<SignupContext>;
   handleSignupData: (signupData: SignupData) => Promise<UserDetails>;
 }
 
