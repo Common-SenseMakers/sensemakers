@@ -334,6 +334,7 @@ class FirebaseAPIParser:
         Returns:
             str: full instantiated prompt
         """
+        metadata_list = metadata_list if metadata_list else list()
         references_metadata = self.get_refs_metadata_portion(metadata_list)
         prompt_j2_template = self.prompt_case_dict[case]["prompt_j2_template"]
         type_templates = self.prompt_case_dict[case]["type_templates"]
