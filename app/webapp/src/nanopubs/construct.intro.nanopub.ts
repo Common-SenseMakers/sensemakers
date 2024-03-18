@@ -3,11 +3,12 @@ import { DataFactory, Store } from 'n3';
 
 import { writeRDF } from '../shared/n3.utils';
 import { getEthToRSAMessage } from '../shared/sig.utils';
-import { AppUserRead, NanopubUserDetails } from '../shared/types';
+import { AppUserRead } from '../shared/types';
+import { NanopubUserDetails } from '../shared/types.nanopubs';
 import { NANOPUB_PLACEHOLDER } from './semantics.helper';
 
 export const constructIntroNanopub = async (
-  details: NanopubUserDetails,
+  details: NanopubUserDetails['profile'],
   user: AppUserRead
 ): Promise<Nanopub> => {
   await (init as any)();
@@ -19,6 +20,10 @@ export const constructIntroNanopub = async (
    * TODO: This makes no sense. Its a placeholder but the actual
    * structure is completely TBD
    */
+
+  if (!details) {
+    throw new Error('details undefined');
+  }
 
   assertionsStore.addQuad(
     DataFactory.namedNode(`https://sense-nets.xyz/${details.ethAddress}`),

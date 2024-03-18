@@ -1,8 +1,9 @@
 import { RequestHandler } from 'express';
 
-import { verifyAccessToken } from '../auth/controllers/utils';
+import { verifyAccessToken } from '../auth.utils';
 import { ENVIRONMENTS } from '../config/ENVIRONMENTS';
 import { NODE_ENV } from '../config/config';
+import { logger } from '../instances/logger';
 
 export const authenticate: RequestHandler = async (request, response, next) => {
   if (!request.headers.authorization) {

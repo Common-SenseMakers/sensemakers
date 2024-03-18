@@ -1,17 +1,22 @@
 import { Anchor, Box, Text } from 'grommet';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { I18Keys } from '../i18n/i18n';
+import { useNanopubContext } from '../platforms/NanopubContext';
+import { useTwitterContext } from '../platforms/TwitterContext';
+import { PLATFORM } from '../shared/types';
 import { AppButton, AppCard, AppSectionHeader } from '../ui-components';
-import { useNanopubContext } from './NanopubContext';
-import { useTwitterContext } from './TwitterContext';
+import { useAccountContext } from './AccountContext';
 
 export const AppPlatformManager = (props: {}) => {
   const { t } = useTranslation();
   const {
     connect: connectTwitter,
-    revoke: revokeTwitter,
+    approve: approveTwitter,
+    revokeApproval: revokeTwitter,
     isConnecting: isConnectingTwitter,
-    needAuthorize: needAuthorizeTwitter,
+    isAuthorizing: isAuthorizingTwitter,
   } = useTwitterContext();
 
   const {
@@ -20,9 +25,81 @@ export const AppPlatformManager = (props: {}) => {
     needAuthorize: needAuthorizeNanopub,
   } = useNanopubContext();
 
+  const { connectedUser } = useAccountContext();
+
+  /** need authorize twitter if not connected if no read access provided */
+  const needConnectTwitter =
+    !connectedUser ||
+    !connectedUser[PLATFORM.Twitter] ||
+    !connectedUser[PLATFORM.Twitter].length ||
+    !connectedUser[PLATFORM.Twitter][0].read;
+
+  const needApproveTwitter =
+    !connectedUser ||
+    !connectedUser[PLATFORM.Twitter] ||
+    !connectedUser[PLATFORM.Twitter].length ||
+    !connectedUser[PLATFORM.Twitter][0].write;
+
   return (
-    <Box fill pad={{ horizontal: 'medium' }} gap="small">
-      <Box>
+    <Box fill>
+      <AppCard>
+        <Text>{t(I18Keys.platformManagerOverview)}</Text>
+      </AppCard>
+
+      <Box margin={{ top: 'large' }}>
+        <AppSectionHeader level="4">
+          {t(I18Keys.connectTwitter)}
+        </AppSectionHeader>
+
+        <AppCard margin={{ top: 'medium' }}>
+          <Text>{t(I18Keys.connectTwitterOverview)}</Text>
+        </AppCard>
+
+        <Box direction="row" gap="small" margin={{ top: 'medium' }}>
+          <AppButton
+            style={{ width: '50%' }}
+            primary
+            disabled={!needConnectTwitter}
+            loading={isConnectingTwitter}
+            onClick={() => {
+              if (connectTwitter) {
+                connectTwitter();
+              }
+            }}
+            label={t(I18Keys.connectTwitterBtn)}></AppButton>
+
+          <AppButton
+            style={{ width: '50%' }}
+            primary
+            disabled={!needApproveTwitter}
+            loading={isAuthorizingTwitter}
+            onClick={() => {
+              if (approveTwitter) {
+                approveTwitter();
+              }
+            }}
+            label={t(I18Keys.approveTwitterBtn)}></AppButton>
+        </Box>
+
+        {!needApproveTwitter ? (
+          <AppCard margin={{ top: 'small' }}>
+            <Text>
+              <Anchor
+                onClick={(e) => {
+                  e.preventDefault();
+                  revokeTwitter();
+                }}>
+                revoke
+              </Anchor>{' '}
+              posting approval.
+            </Text>
+          </AppCard>
+        ) : (
+          <></>
+        )}
+      </Box>
+
+      <Box margin={{ top: 'large' }}>
         <AppSectionHeader level="4">{t('connectNanopub')}</AppSectionHeader>
         <AppButton
           margin={{ vertical: 'small' }}
@@ -35,39 +112,6 @@ export const AppPlatformManager = (props: {}) => {
               ? t('connectNanopubBtn')
               : t('nanopubConnected')
           }></AppButton>
-      </Box>
-
-      <Box margin={{ top: 'large' }}>
-        <AppSectionHeader level="4">{t('connectTwitter')}</AppSectionHeader>
-        <AppButton
-          margin={{ vertical: 'small' }}
-          primary
-          disabled={!needAuthorizeTwitter}
-          loading={isConnectingTwitter}
-          onClick={() => connectTwitter()}
-          label={
-            needAuthorizeTwitter ? t('connectTwitterBn') : t('twitterConnected')
-          }></AppButton>
-        {!needAuthorizeTwitter ? (
-          <Box>
-            <AppCard>
-              <Text>
-                This is a prototype, you can{' '}
-                <Anchor
-                  onClick={(e) => {
-                    e.preventDefault();
-                    revokeTwitter();
-                  }}>
-                  revoke
-                </Anchor>{' '}
-                access to your Twitter account after playing with it. You will
-                also be able to reconnect afterwards, if you want.'
-              </Text>
-            </AppCard>
-          </Box>
-        ) : (
-          <></>
-        )}
       </Box>
     </Box>
   );

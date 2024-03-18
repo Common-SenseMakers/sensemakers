@@ -7,8 +7,11 @@ import {
   useState,
 } from 'react';
 
+import {
+  NanopubContextType,
+  useNanopubContext,
+} from '../platforms/NanopubContext';
 import { useAccountContext } from './AccountContext';
-import { NanopubContextType, useNanopubContext } from './NanopubContext';
 import { useAppSigner } from './signer/SignerContext';
 
 const DEBUG = false;

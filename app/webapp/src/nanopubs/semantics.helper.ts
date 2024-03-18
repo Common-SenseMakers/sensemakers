@@ -18,7 +18,7 @@ export const getProfile = (rsaKeys: RSAKeys, connectedUser: AppUserRead) => {
     return new NpProfile(
       keyBody,
       `https://orcid.org/${connectedUser.orcid[0].user_id}`,
-      `${connectedUser.orcid[0].name}`,
+      `${connectedUser.orcid[0].profile?.name}`,
       ''
     );
   }

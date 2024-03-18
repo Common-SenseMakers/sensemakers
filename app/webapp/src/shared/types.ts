@@ -1,7 +1,14 @@
 import { Nanopub } from '@nanopub/sign';
 import { TweetV2PostTweetResult } from 'twitter-api-v2';
 
-import { AppPostSemantics, ParserResult } from './parser.types';
+import { NanopubUserDetails } from './types.nanopubs';
+import { OrcidSignupData, OrcidUserDetails } from './types.orcid';
+import { AppPostSemantics, ParserResult } from './types.parser';
+import {
+  TweetRead,
+  TwitterSignupData,
+  TwitterUserDetails,
+} from './types.twitter';
 
 export enum PLATFORM {
   Orcid = 'orcid',
@@ -9,102 +16,64 @@ export enum PLATFORM {
   Nanopubs = 'nanopubs',
 }
 
-export interface UserDetailsBase {
+/** The user details has, for each PLATFORM, a details object
+ * with
+ * - user_id: the unique user id on that platform
+ * - context: data needed for signing up that had to be remembered in a multiple-step sigup process
+ * - profile: metadata of the user on that platform (handle, avatar, etc)
+ * - read: credentials or other data needed for reading the posts from that user
+ * - write: credentials or other data needed for creating new posts in the name of the user
+ */
+
+interface PlatformUserId {
   user_id: string;
 }
 
-/** ORCID */
-export interface OrcidSignupContext {
-  link: string;
+export interface UserDetailsBase<C, P, R, W> extends PlatformUserId {
+  context?: C;
+  profile?: P;
+  read?: R;
+  write?: W;
 }
 
-export interface OrcidSignupData {
-  code: string;
+export interface UserDetailsReadBase<P> extends PlatformUserId {
+  profile?: P;
+  read: boolean;
+  write: boolean;
 }
 
-export interface OrcidUserDetails extends UserDetailsBase {
-  name: string;
-}
-
-/** TWITTER */
-export interface TwitterSignupContext {
-  oauth_token: string;
-  oauth_token_secret: string;
-  oauth_callback_confirmed: 'true';
-  url: string;
-}
-
-export type TwitterSignupData = Pick<
-  TwitterSignupContext,
-  'oauth_token' | 'oauth_token_secret'
-> & { oauth_verifier: string };
-
-export interface TwitterUserDetails {
-  oauth_verifier: string;
-  accessToken: string;
-  accessSecret: string;
-  user_id: string;
-  screen_name: string;
-}
-
-/** NANOPUB */
-export interface NanopubUserDetails extends UserDetailsBase {
-  rsaPublickey: string;
-  ethAddress: HexStr;
-  ethSignature: HexStr;
-  introNanopub?: string;
-}
-
-export interface AppUser {
+/** The AppUser object combines the details of each platform */
+interface UserWithId {
   userId: string;
+}
+
+/**
+ * AppUser is the entire User object (include credentials) and MUST be
+ * kept inside the backend, never sent to the user. We use AppUserRead
+ * to send the user profiles to the frontend.
+ */
+export interface AppUser extends UserWithId {
   [PLATFORM.Orcid]?: OrcidUserDetails[];
   [PLATFORM.Twitter]?: TwitterUserDetails[];
   [PLATFORM.Nanopubs]?: NanopubUserDetails[];
 }
 
-export interface AppUserCreate extends Omit<AppUser, 'userId'> {}
-
-export interface AppUserRead extends Omit<AppUser, 'twitter'> {
-  twitter: Array<Pick<TwitterUserDetails, 'user_id' | 'screen_name'>>;
+export interface AppUserCreate {
+  [PLATFORM.Orcid]?: OrcidSignupData;
+  [PLATFORM.Twitter]?: TwitterSignupData;
 }
 
+/**
+ * The AppUserRead replaces the details with read details (keeps the profile and users
+ * boolean flags for the read and write properties)
+ */
+export interface AppUserRead extends UserWithId {
+  [PLATFORM.Orcid]?: UserDetailsReadBase<OrcidUserDetails['profile']>[];
+  [PLATFORM.Twitter]?: UserDetailsReadBase<TwitterUserDetails['profile']>[];
+  [PLATFORM.Nanopubs]?: UserDetailsReadBase<NanopubUserDetails['profile']>[];
+}
+
+/** Support types */
 export type DefinedIfTrue<V, R> = V extends true ? R : R | undefined;
-
-export interface TwitterUser {
-  user_id: string;
-  screen_name: string;
-}
-
-export interface AppPostCreate {
-  content: string;
-  originalParsed?: ParserResult;
-  semantics?: AppPostSemantics;
-  signedNanopub?: { uri: string };
-  platforms: PLATFORM[];
-}
-
-export interface AppPostGetSemantics {
-  content: string;
-}
-
-export interface AppPostConstructNanopub {
-  content: string;
-}
-
-export type AppPostStore = AppPostCreate & {
-  author: string;
-  tweet?: TweetRead;
-  nanopub?: Nanopub;
-};
-
-export type TweetRead = TweetV2PostTweetResult['data'];
-
-export type AppPost = AppPostStore & {
-  id: string;
-};
-
-export interface AppGetSparkQL {
-  query: string;
-}
 
 export type HexStr = `0x${string}`;

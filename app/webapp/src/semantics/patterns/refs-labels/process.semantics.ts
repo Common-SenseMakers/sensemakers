@@ -1,7 +1,7 @@
 import { Store } from 'n3';
 
 import { filterStore, forEachStore } from '../../../shared/n3.utils';
-import { ParsedSupport, RefMeta } from '../../../shared/parser.types';
+import { ParsedSupport, RefMeta } from '../../../shared/types.parser';
 
 export interface RefData {
   labelsUris: string[];
@@ -54,7 +54,7 @@ export const processSemantics = (
   /** then append the metadata for each ref */
   for (const [ref, value] of Array.from(refs.entries())) {
     const meta = support?.refs_meta ? support.refs_meta[ref] : undefined;
-    
+
     refs.set(ref, {
       labelsUris: value ? value.labelsUris : [],
       meta,

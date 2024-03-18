@@ -9,15 +9,16 @@ import {
   useState,
 } from 'react';
 
-import { postUserEthDetails } from '../functionsCalls/auth.requests';
+import { useAccountContext } from '../app/AccountContext';
+import { useAppFetch } from '../app/app.fetch';
+import { NANOPUBS_SERVER } from '../app/config';
+import { useAppSigner } from '../app/signer/SignerContext';
 import { constructIntroNanopub } from '../nanopubs/construct.intro.nanopub';
 import { getProfile } from '../nanopubs/semantics.helper';
 import { getEthToRSAMessage } from '../shared/sig.utils';
-import { HexStr, NanopubUserDetails, PLATFORM } from '../shared/types';
+import { HexStr, PLATFORM } from '../shared/types';
+import { NanopubUserDetails } from '../shared/types.nanopubs';
 import { RSAKeys, getRSAKeys } from '../utils/rsa.keys';
-import { useAccountContext } from './AccountContext';
-import { NANOPUBS_SERVER } from './config';
-import { useAppSigner } from './signer/SignerContext';
 
 const DEBUG = false;
 
@@ -39,12 +40,9 @@ const DETERMINISTIC_MESSAGE = 'Prepare my Nanopub identity';
 
 /** Manages the authentication process */
 export const NanopubContext = (props: PropsWithChildren) => {
-  const {
-    connectedUser,
-    refresh: refreshConnectedUser,
-    appAccessToken,
-  } = useAccountContext();
+  const { connectedUser, refresh: refreshConnectedUser } = useAccountContext();
   const { signMessage, connect: connectWallet, address } = useAppSigner();
+  const appFetch = useAppFetch();
 
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [connectIntention, setConnectIntention] = useState<boolean>(false);
@@ -121,9 +119,9 @@ export const NanopubContext = (props: PropsWithChildren) => {
    * eth<>rsa signature (if not already done) */
   const postEthDetails = useCallback(
     async (details: NanopubUserDetails) => {
-      if (rsaKeys && appAccessToken && connectedUser) {
+      if (rsaKeys && connectedUser && details.profile) {
         const introNanopub = await constructIntroNanopub(
-          details,
+          details.profile,
           connectedUser
         );
         if (DEBUG) console.log({ introNanopub });
@@ -136,26 +134,28 @@ export const NanopubContext = (props: PropsWithChildren) => {
           NANOPUBS_SERVER
         );
         const introUrl = introPublished.info().uri;
-        details.introNanopub = introUrl;
+        details.profile.introNanopub = introUrl;
 
         if (DEBUG) console.log({ details });
 
-        postUserEthDetails(details, appAccessToken).then(() => {
+        appFetch('/auth/eth', details).then(() => {
           refreshConnectedUser();
         });
       }
     },
-    [appAccessToken, connectedUser, refreshConnectedUser, rsaKeys]
+    [connectedUser, refreshConnectedUser, rsaKeys]
   );
 
   useEffect(() => {
     if (connectedUser && !nanopubDetails && connectIntention) {
-      if (rsaKeys && address && ethSignature && appAccessToken) {
+      if (rsaKeys && address && ethSignature) {
         const details: NanopubUserDetails = {
           user_id: rsaKeys.publicKey,
-          rsaPublickey: rsaKeys.publicKey,
-          ethAddress: address,
-          ethSignature,
+          profile: {
+            rsaPublickey: rsaKeys.publicKey,
+            ethAddress: address,
+            ethSignature,
+          },
         };
         if (DEBUG) console.log('posting user details', { details });
         postEthDetails(details);
@@ -173,7 +173,6 @@ export const NanopubContext = (props: PropsWithChildren) => {
     connectedUser,
     rsaKeys,
     ethSignature,
-    appAccessToken,
     signMessage,
     refreshConnectedUser,
     connectIntention,

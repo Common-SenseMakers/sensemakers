@@ -73,7 +73,7 @@ export const PlatformSelector = (
 
   const address =
     connectedUser && connectedUser[PLATFORM.Nanopubs]
-      ? connectedUser[PLATFORM.Nanopubs][0].ethAddress
+      ? connectedUser[PLATFORM.Nanopubs][0].profile?.ethAddress
       : undefined;
 
   const hasNano =
@@ -103,7 +103,7 @@ export const PlatformSelector = (
           label={
             <AppButtonTwoLinesLabel
               tag={t('twitter/x')}
-              label={`@${connectedUser?.twitter[0]?.screen_name}`}></AppButtonTwoLinesLabel>
+              label={`@${connectedUser?.twitter[0]?.profile?.screen_name}`}></AppButtonTwoLinesLabel>
           }></ToggleButton>
       ) : (
         <AppButton

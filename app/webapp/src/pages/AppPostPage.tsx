@@ -4,22 +4,24 @@ import { Add, Connect, Edit, Home, Magic, Network, Send } from 'grommet-icons';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-// import { useDebounce } from 'use-debounce';
 import { useAccountContext } from '../app/AccountContext';
-import { useNanopubContext } from '../app/NanopubContext';
+import { useAppFetch } from '../app/app.fetch';
 import { NANOPUBS_SERVER } from '../app/config';
 import { AppBottomNav } from '../common/AppBottomNav';
 import { NanopubAnchor, TweetAnchor } from '../common/TwitterAnchor';
 import { ViewportPage } from '../common/Viewport';
 import { getPostSemantics, postMessage } from '../functionsCalls/post.requests';
 import { constructPostNanopub } from '../nanopubs/construct.post.nanopub';
+import { useNanopubContext } from '../platforms/NanopubContext';
+// import { useDebounce } from 'use-debounce';
 import { PlatformSelector } from '../post/PlatformSelector';
 import { PostEditor } from '../post/PostEditor';
 import { AbsoluteRoutes } from '../route.names';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PatternProps } from '../semantics/patterns/patterns';
-import { AppPostSemantics, ParserResult } from '../shared/parser.types';
-import { AppPost, AppPostCreate, PLATFORM } from '../shared/types';
+import { PLATFORM } from '../shared/types';
+import { AppPostSemantics, ParserResult } from '../shared/types.parser';
+import { AppPost, AppPostCreate } from '../shared/types.posts';
 import {
   AppButton,
   AppCard,
@@ -33,15 +35,10 @@ import { useThemeContext } from '../ui-components/ThemedApp';
 const DEBUG = false;
 
 export const AppPostPage = (props: {}) => {
+  const appFetch = useAppFetch();
   const { t } = useTranslation();
   const { constants } = useThemeContext();
-  const {
-    appAccessToken,
-    isConnecting,
-    isConnected,
-    connectedUser,
-    isInitializing,
-  } = useAccountContext();
+  const { isConnected, connectedUser } = useAccountContext();
 
   const { profile } = useNanopubContext();
 
@@ -93,7 +90,7 @@ export const AppPostPage = (props: {}) => {
   // };
 
   const send = useCallback(async () => {
-    if (postText && appAccessToken && platforms) {
+    if (postText && platforms) {
       setIsSending(true);
 
       let nanopubPublished: Nanopub | undefined = undefined;
@@ -126,7 +123,7 @@ export const AppPostPage = (props: {}) => {
       };
 
       if (DEBUG) console.log('postMessage', { postCreate });
-      postMessage(postCreate, appAccessToken)
+      appFetch<AppPost>('/posts/post', post)
         .then((post) => {
           if (post) {
             setPost(post);
@@ -141,23 +138,15 @@ export const AppPostPage = (props: {}) => {
           setIsSending(false);
         });
     }
-  }, [
-    appAccessToken,
-    connectedUser,
-    parsed,
-    platforms,
-    postText,
-    profile,
-    semantics,
-  ]);
+  }, [connectedUser, parsed, platforms, postText, profile, semantics]);
 
-  const canGetSemantics = postText && appAccessToken;
+  const canGetSemantics = postText;
   const getSemantics = () => {
     if (canGetSemantics) {
       setSemantics(undefined);
       if (DEBUG) console.log('getPostMeta', { postText });
       setIsGettingSemantics(true);
-      getPostSemantics(postText, appAccessToken).then((result) => {
+      appFetch<ParserResult>('/posts/getSemantics').then((result) => {
         if (DEBUG) console.log({ result });
         setParsed(result);
         setIsGettingSemantics(false);
@@ -178,11 +167,7 @@ export const AppPostPage = (props: {}) => {
   };
 
   const content = (() => {
-    if (isSending || isConnecting) {
-      return <Loading></Loading>;
-    }
-
-    if (isInitializing || isConnecting) {
+    if (isSending) {
       return <Loading></Loading>;
     }
 

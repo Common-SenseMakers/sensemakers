@@ -1,7 +1,7 @@
 import { Anchor, Box } from 'grommet';
 import { useMemo } from 'react';
 
-import { ParsedSupport, RefMeta } from '../../../shared/parser.types';
+import { ParsedSupport, RefMeta } from '../../../shared/types.parser';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { useThemeContext } from '../../../ui-components/ThemedApp';
 import { RefCard } from '../common/RefCard';
@@ -84,10 +84,16 @@ export const RefLabels = (props: {
           removeLabel={(label) => removeLabel(label)}
           addLabel={(label) => addLabel(label)}></AppLabelsEditor>
       </Box>
-      {refData.meta ? <RefCard
-        title={refData.meta?.title}
-        description={refData.meta?.summary}
-        image={refData.meta?.image}></RefCard> : <Anchor target="_blank" href={props.refUrl}>{props.refUrl}</Anchor>}
+      {refData.meta ? (
+        <RefCard
+          title={refData.meta?.title}
+          description={refData.meta?.summary}
+          image={refData.meta?.image}></RefCard>
+      ) : (
+        <Anchor target="_blank" href={props.refUrl}>
+          {props.refUrl}
+        </Anchor>
+      )}
     </Box>
   );
 };

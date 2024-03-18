@@ -15,7 +15,7 @@ import { TwitterProfileAnchor } from './TwitterAnchor';
 
 export const ConnectedUser = (props: {}) => {
   const { t } = useTranslation();
-  const { isConnected, connect, connectedUser } = useAccountContext();
+  const { isConnected, connectedUser } = useAccountContext();
 
   const { constants } = useThemeContext();
 
@@ -25,17 +25,17 @@ export const ConnectedUser = (props: {}) => {
 
   const nanopubDetails =
     connectedUser && connectedUser[PLATFORM.Nanopubs]
-      ? connectedUser[PLATFORM.Nanopubs][0]
+      ? connectedUser[PLATFORM.Nanopubs][0].profile
       : undefined;
 
   const twitterDetails =
     connectedUser && connectedUser[PLATFORM.Twitter]
-      ? connectedUser[PLATFORM.Twitter][0]
+      ? connectedUser[PLATFORM.Twitter][0].profile
       : undefined;
 
   const orcidDetails =
     connectedUser && connectedUser[PLATFORM.Orcid]
-      ? connectedUser[PLATFORM.Orcid][0]
+      ? connectedUser[PLATFORM.Orcid][0].profile
       : undefined;
 
   const name = useMemo(() => {
@@ -47,12 +47,7 @@ export const ConnectedUser = (props: {}) => {
 
   const content = (() => {
     if (!isConnected) {
-      return (
-        <AppButton
-          style={{ fontSize: '16px', padding: '6px 8px' }}
-          label={t('connect')}
-          onClick={() => connect()}></AppButton>
-      );
+      return <></>;
     }
 
     return (
@@ -75,7 +70,7 @@ export const ConnectedUser = (props: {}) => {
           <Box pad="20px" gap="small" style={{ width: '220px' }}>
             <Box margin={{ bottom: 'small' }}>
               <Text>{cap(t('orcid'))}</Text>
-              <OrcidAnchor orcid={orcidDetails?.user_id}></OrcidAnchor>
+              <OrcidAnchor orcid={orcidDetails?.name}></OrcidAnchor>
             </Box>
 
             {connectedUser?.twitter ? (

@@ -3,8 +3,8 @@ import { DataFactory, Store } from 'n3';
 
 import { THIS_POST_NAME } from '../app/config';
 import { parseRDF, replaceNodes, writeRDF } from '../shared/n3.utils';
-import { AppPostSemantics } from '../shared/parser.types';
 import { AppUserRead, PLATFORM } from '../shared/types';
+import { AppPostSemantics } from '../shared/types.parser';
 import {
   ASSERTION_URI,
   HAS_COMMENT_URI,
@@ -55,7 +55,7 @@ export const constructPostNanopub = async (
 
   const nanoDetails = user[PLATFORM.Nanopubs];
   const hasEthSigner = nanoDetails !== undefined;
-  const address = nanoDetails && nanoDetails[0].ethAddress;
+  const address = nanoDetails && nanoDetails[0].profile?.ethAddress;
 
   const ethSignerRdf = hasEthSigner
     ? `
