@@ -1,14 +1,6 @@
-import { Nanopub } from '@nanopub/sign';
-import { TweetV2PostTweetResult } from 'twitter-api-v2';
-
 import { NanopubUserDetails } from './types.nanopubs';
 import { OrcidSignupData, OrcidUserDetails } from './types.orcid';
-import { AppPostSemantics, ParserResult } from './types.parser';
-import {
-  TweetRead,
-  TwitterSignupData,
-  TwitterUserDetails,
-} from './types.twitter';
+import { TwitterSignupData, TwitterUserDetails } from './types.twitter';
 
 export enum PLATFORM {
   Orcid = 'orcid',
@@ -25,11 +17,12 @@ export enum PLATFORM {
  * - write: credentials or other data needed for creating new posts in the name of the user
  */
 
-interface PlatformUserId {
+export interface PlatformUserId {
   user_id: string;
 }
 
-export interface UserDetailsBase<C, P, R, W> extends PlatformUserId {
+export interface UserDetailsBase<C = any, P = any, R = any, W = any>
+  extends PlatformUserId {
   context?: C;
   profile?: P;
   read?: R;

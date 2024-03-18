@@ -1,12 +1,14 @@
 import { anything, instance, spy, when } from 'ts-mockito';
 
+import { PLATFORM } from '../../src/@shared/types';
 import {
   OrcidSignupData,
   OrcidUserDetails,
-  PLATFORM,
+} from '../../src/@shared/types.orcid';
+import {
   TwitterSignupData,
   TwitterUserDetails,
-} from '../../src/@shared/types';
+} from '../../src/@shared/types.twitter';
 import {
   TWITTER_API_KEY,
   TWITTER_API_SECRET_KEY,
@@ -30,7 +32,7 @@ const orcid = new OrcidService();
 const MockedOrcid = spy(orcid);
 when(MockedOrcid.handleSignupData(anything())).thenCall(
   (data: OrcidSignupData): OrcidUserDetails => {
-    return { user_id: data.code, name: TEST_USER_NAME };
+    return { user_id: data.code, profile: { name: TEST_USER_NAME } };
   }
 );
 const mockedOrcid = instance(MockedOrcid);
@@ -45,10 +47,7 @@ when(MockedTwitter.handleSignupData(anything())).thenCall(
   (data: TwitterSignupData): TwitterUserDetails => {
     return {
       user_id: data.oauth_verifier,
-      accessSecret: 'dummy',
-      accessToken: 'dummy',
-      oauth_verifier: 'dummy',
-      screen_name: TEST_TWITTER_NAME,
+      profile: { screen_name: TEST_TWITTER_NAME },
     };
   }
 );

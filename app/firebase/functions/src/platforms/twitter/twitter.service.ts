@@ -1,10 +1,10 @@
-import { TweetV2PostTweetResult, TwitterApi } from 'twitter-api-v2';
-
 import {
   TwitterSignupContext,
   TwitterSignupData,
   TwitterUserDetails,
-} from '../../@shared/types';
+} from 'src/@shared/types.twitter';
+import { TweetV2PostTweetResult, TwitterApi } from 'twitter-api-v2';
+
 import { TWITTER_CALLBACK_URL } from '../../config/config';
 import { PlatformService } from '../platforms.interface';
 
@@ -59,11 +59,14 @@ export class TwitterService
     const result = await client.login(data.oauth_verifier);
 
     const twitter: TwitterUserDetails = {
-      oauth_verifier: data.oauth_verifier,
-      accessToken: result.accessToken,
-      accessSecret: result.accessSecret,
       user_id: result.userId,
-      screen_name: result.screenName,
+      write: {
+        accessToken: result.accessToken,
+        accessSecret: result.accessSecret,
+      },
+      profile: {
+        screen_name: result.screenName,
+      },
     };
 
     return twitter;

@@ -29,7 +29,7 @@ describe('signups', () => {
       if (user && user.orcid && user.orcid.length === 1) {
         expect(user.orcid[0]).to.not.be.undefined;
         expect(user.orcid[0].user_id).to.eq(orcidId);
-        expect(user.orcid[0].name).to.eq(TEST_USER_NAME);
+        expect(user.orcid[0].profile?.name).to.eq(TEST_USER_NAME);
       }
     });
   });

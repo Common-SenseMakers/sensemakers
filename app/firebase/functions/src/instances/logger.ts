@@ -1,3 +1,4 @@
+import { logger as fblogger } from 'firebase-functions/v1';
 import pino from 'pino';
 
 import { ENVIRONMENTS } from '../config/ENVIRONMENTS';
@@ -71,4 +72,4 @@ export const loggerPino = pino({
 });
 
 export const logger =
-  NODE_ENV === ENVIRONMENTS.PRODUCTION ? loggerPino : (global as any).logger;
+  NODE_ENV === ENVIRONMENTS.PRODUCTION ? loggerPino : fblogger;
