@@ -1,31 +1,41 @@
 import { logger } from '../instances/logger';
 import { ENVIRONMENTS } from './ENVIRONMENTS';
-import { env } from './typedenv';
+import { envRuntime } from './typedenv.runtime';
 
 logger.debug('NODE_ENV', process.env.NODE_ENV);
 
-/** Verify that all needed env variables were provided */
-if (!env.ORCID_CLIENT_ID) throw new Error('ORCID_CLIENT_ID undefined');
-if (!env.ORCID_SECRET) throw new Error('ORCID_SECRET undefined');
-if (!env.TWITTER_CLIENT_ID) throw new Error('TWITTER_CLIENT_ID undefined');
-if (!env.TWITTER_BEARER_TOKEN)
-  throw new Error('TWITTER_BEARER_TOKEN undefined');
-if (!env.TWITTER_API_KEY) throw new Error('TWITTER_API_KEY undefined');
-if (!env.TWITTER_API_SECRET_KEY)
-  throw new Error('TWITTER_API_SECRET_KEY undefined');
+// Define some parameters
 
-/** Export all indendent constants user by the functions */
-export const NODE_ENV = env.NODE_ENV;
+/** Verify that all needed env variables were provided */
+const mandatory: Array<keyof typeof envRuntime> = [
+  'ORCID_CLIENT_ID',
+  'ORCID_SECRET',
+  'OUR_TOKEN_SECRET',
+  'TWITTER_API_KEY',
+  'TWITTER_API_SECRET_KEY',
+  'TWITTER_CLIENT_ID',
+  'TWITTER_CLIENT_SECRET',
+  'TWITTER_BEARER_TOKEN',
+];
+
+mandatory.forEach((varName) => {
+  if (!envRuntime[varName]) {
+    throw new Error(`${varName} undefined`);
+  }
+});
+
+/** Export all independent constants used by the functions */
+export const NODE_ENV = envRuntime.NODE_ENV;
 
 export const ORCID_API_URL = 'https://orcid.org';
-export const ORCID_CLIENT_ID = env.ORCID_CLIENT_ID;
-export const ORCID_SECRET = env.ORCID_SECRET;
+export const ORCID_CLIENT_ID = envRuntime.ORCID_CLIENT_ID;
+export const ORCID_SECRET = envRuntime.ORCID_SECRET;
 
 export const TWITTER_API_URL = 'https://api.twitter.com';
-export const TWITTER_CLIENT_ID = env.TWITTER_CLIENT_ID;
-export const TWITTER_BEARER_TOKEN = env.TWITTER_BEARER_TOKEN;
-export const TWITTER_API_KEY = env.TWITTER_API_KEY;
-export const TWITTER_API_SECRET_KEY = env.TWITTER_API_SECRET_KEY;
+export const TWITTER_CLIENT_ID = envRuntime.TWITTER_CLIENT_ID;
+export const TWITTER_BEARER_TOKEN = envRuntime.TWITTER_BEARER_TOKEN;
+export const TWITTER_API_KEY = envRuntime.TWITTER_API_KEY;
+export const TWITTER_API_SECRET_KEY = envRuntime.TWITTER_API_SECRET_KEY;
 
 export const MOCK_SEMANTICS = NODE_ENV === ENVIRONMENTS.TEST;
 
@@ -44,8 +54,8 @@ export const FUNCTIONS_PY_URL =
     ? 'http://127.0.0.1:5002/sensenets-9ef26/us-central1'
     : 'https://sm-function-post-parser-eeshylf4jq-uc.a.run.app/';
 
+export const OUR_TOKEN_SECRET = envRuntime.OUR_TOKEN_SECRET;
 export const TOKEN_EXPIRATION = '30d';
+
 export const NANOPUBS_SPARQL_SERVER =
   'https://query.np.trustyuri.net/repo/full';
-
-export const REGION = 'us-central1';

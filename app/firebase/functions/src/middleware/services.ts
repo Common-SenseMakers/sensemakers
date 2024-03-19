@@ -1,7 +1,10 @@
 import { RequestHandler } from 'express';
 
 import { PLATFORM } from '../@shared/types';
-import { TWITTER_API_KEY, TWITTER_API_SECRET_KEY } from '../config/config';
+import {
+  TWITTER_API_KEY,
+  TWITTER_API_SECRET_KEY,
+} from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
 import { OrcidService } from '../platforms/orcid/orcid.service';
 import { IdentityPlatforms } from '../platforms/platforms.interface';

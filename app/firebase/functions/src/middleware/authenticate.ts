@@ -2,7 +2,7 @@ import { RequestHandler } from 'express';
 
 import { verifyAccessToken } from '../auth.utils';
 import { ENVIRONMENTS } from '../config/ENVIRONMENTS';
-import { NODE_ENV } from '../config/config';
+import { NODE_ENV } from '../config/config.runtime';
 import { logger } from '../instances/logger';
 
 export const authenticate: RequestHandler = async (request, response, next) => {

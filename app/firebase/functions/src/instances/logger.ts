@@ -2,7 +2,7 @@ import { logger as fblogger } from 'firebase-functions/v1';
 import pino from 'pino';
 
 import { ENVIRONMENTS } from '../config/ENVIRONMENTS';
-import { NODE_ENV } from '../config/config';
+import { envDeploy } from '../config/typedenv.deploy';
 
 /**
   https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#logseverity
@@ -72,4 +72,4 @@ export const loggerPino = pino({
 });
 
 export const logger =
-  NODE_ENV === ENVIRONMENTS.PRODUCTION ? loggerPino : fblogger;
+  envDeploy.NODE_ENV === ENVIRONMENTS.PRODUCTION ? loggerPino : fblogger;

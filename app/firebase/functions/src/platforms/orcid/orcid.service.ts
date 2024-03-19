@@ -9,7 +9,7 @@ import {
   ORCID_API_URL,
   ORCID_CLIENT_ID,
   ORCID_SECRET,
-} from '../../config/config';
+} from '../../config/config.runtime';
 import { logger } from '../../instances/logger';
 import { IdentityService } from '../platforms.interface';
 

@@ -5,7 +5,7 @@ import {
 } from 'src/@shared/types.twitter';
 import { TweetV2PostTweetResult, TwitterApi } from 'twitter-api-v2';
 
-import { TWITTER_CALLBACK_URL } from '../../config/config';
+import { TWITTER_CALLBACK_URL } from '../../config/config.runtime';
 import { PlatformService } from '../platforms.interface';
 
 export interface TwitterApiCredentials {
