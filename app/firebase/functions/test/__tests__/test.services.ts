@@ -9,10 +9,6 @@ import {
   TwitterSignupData,
   TwitterUserDetails,
 } from '../../src/@shared/types.twitter';
-import {
-  TWITTER_API_KEY,
-  TWITTER_API_SECRET_KEY,
-} from '../../src/config/config.runtime';
 import { DBInstance } from '../../src/db/instance';
 import { OrcidService } from '../../src/platforms/orcid/orcid.service';
 import { IdentityPlatforms } from '../../src/platforms/platforms.interface';
@@ -39,8 +35,8 @@ const mockedOrcid = instance(MockedOrcid);
 
 /** mocked twitter */
 const twitter = new TwitterService({
-  key: TWITTER_API_KEY,
-  secret: TWITTER_API_SECRET_KEY,
+  key: process.env.TWITTER_API_KEY as string,
+  secret: process.env.TWITTER_API_SECRET_KEY as string,
 });
 const MockedTwitter = spy(twitter);
 when(MockedTwitter.handleSignupData(anything())).thenCall(
