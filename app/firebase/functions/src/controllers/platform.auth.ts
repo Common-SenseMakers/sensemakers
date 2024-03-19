@@ -12,7 +12,7 @@ export const getSignupContextController: RequestHandler = async (
     const services = (request as any).services as Services;
     const platform = request.params.platform as PLATFORM;
     const context = await services.users.getSignupContext(platform);
-    response.status(200).send({ success: true, context });
+    response.status(200).send({ success: true, data: context });
   } catch (error) {
     logger.error('error', error);
     response.status(500).send({ success: false, error });

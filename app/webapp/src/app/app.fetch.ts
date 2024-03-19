@@ -22,9 +22,11 @@ export const _appFetch = async <T>(
     headers['authorization'] = `Bearer ${accessToken}`;
   }
 
-  const res = await axios.post<T>(FUNCTIONS_BASE + path, data, { headers });
+  const res = await axios.post<{ data: T }>(FUNCTIONS_BASE + path, data, {
+    headers,
+  });
 
-  return res.data;
+  return res.data.data;
 };
 
 export const useAppFetch = () => {
