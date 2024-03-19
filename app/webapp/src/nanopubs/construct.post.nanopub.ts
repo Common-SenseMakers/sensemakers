@@ -3,8 +3,8 @@ import { DataFactory, Store } from 'n3';
 
 import { THIS_POST_NAME } from '../app/config';
 import { parseRDF, replaceNodes, writeRDF } from '../shared/n3.utils';
-import { AppPostSemantics } from '../shared/parser.types';
-import { AppUserRead } from '../shared/types';
+import { AppUserRead, PLATFORM } from '../shared/types';
+import { AppPostSemantics } from '../shared/types.parser';
 import {
   ASSERTION_URI,
   HAS_COMMENT_URI,
@@ -46,15 +46,16 @@ export const constructPostNanopub = async (
   const assertionsRdf = await writeRDF(assertionsStore);
 
   /** append the npx:ExampleNanopub (manually for now) */
-  const exampleTriplet =  `: a npx:ExampleNanopub .`;
+  const exampleTriplet = `: a npx:ExampleNanopub .`;
 
-  const semanticPostTriplet =  `: a <https://sense-nets.xyz/SemanticPost> .`
+  const semanticPostTriplet = `: a <https://sense-nets.xyz/SemanticPost> .`;
 
   /** append the data related to the author (including) identity */
-  const orcid = user.orcid?.orcid;
+  const orcid = user.orcid && user.orcid[0].user_id;
 
-  const hasEthSigner = user.eth !== undefined;
-  const address = user.eth?.ethAddress;
+  const nanoDetails = user[PLATFORM.Nanopubs];
+  const hasEthSigner = nanoDetails !== undefined;
+  const address = nanoDetails && nanoDetails[0].profile?.ethAddress;
 
   const ethSignerRdf = hasEthSigner
     ? `

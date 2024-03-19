@@ -2,10 +2,10 @@ import { Box } from 'grommet';
 import { useEffect } from 'react';
 
 import { constructPostNanopub } from '../nanopubs/construct.post.nanopub';
+import { useNanopubContext } from '../platforms/NanopubContext';
 import sample_result from '../sample.result.json';
 import { AppButton } from '../ui-components';
 import { useAccountContext } from './AccountContext';
-import { useNanopubContext } from './NanopubContext';
 import { NANOPUBS_SERVER } from './config';
 
 export const AppTest = (props: {}) => {

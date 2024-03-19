@@ -1,6 +1,7 @@
 import { Box, Text } from 'grommet';
-import { ConnectedUser } from './ConnectedUser';
+
 import { SetPageTitleType } from '../app/AppContainer';
+import { ConnectedUser } from './ConnectedUser';
 
 export const GlobalNav = (props: { title?: SetPageTitleType }) => {
   const title = (() => {
@@ -10,7 +11,9 @@ export const GlobalNav = (props: { title?: SetPageTitleType }) => {
           <Text size="small">{props.title?.prefix}</Text>
         </Box>
         <Box>
-          <Text size="large" style={{ fontWeight: 'bold', textTransform: 'uppercase' }}>
+          <Text
+            size="large"
+            style={{ fontWeight: 'bold', textTransform: 'uppercase' }}>
             {props.title?.main}
           </Text>
         </Box>

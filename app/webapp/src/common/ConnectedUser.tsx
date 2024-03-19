@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useAccountContext } from '../app/AccountContext';
 import { AppAddress } from '../app/AppAddress';
 import { useDisconnectContext } from '../app/DisconnectContext';
+import { PLATFORM } from '../shared/types';
 import { AppButton } from '../ui-components';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { cap } from '../utils/general';
@@ -14,7 +15,7 @@ import { TwitterProfileAnchor } from './TwitterAnchor';
 
 export const ConnectedUser = (props: {}) => {
   const { t } = useTranslation();
-  const { isConnected, connect, connectedUser } = useAccountContext();
+  const { isConnected, connectedUser } = useAccountContext();
 
   const { constants } = useThemeContext();
 
@@ -22,21 +23,31 @@ export const ConnectedUser = (props: {}) => {
 
   const [showDrop, setShowDrop] = useState<boolean>(false);
 
+  const nanopubDetails =
+    connectedUser && connectedUser[PLATFORM.Nanopubs]
+      ? connectedUser[PLATFORM.Nanopubs][0].profile
+      : undefined;
+
+  const twitterDetails =
+    connectedUser && connectedUser[PLATFORM.Twitter]
+      ? connectedUser[PLATFORM.Twitter][0].profile
+      : undefined;
+
+  const orcidDetails =
+    connectedUser && connectedUser[PLATFORM.Orcid]
+      ? connectedUser[PLATFORM.Orcid][0].profile
+      : undefined;
+
   const name = useMemo(() => {
-    const parts = connectedUser?.orcid?.name.split(' ');
+    const parts = orcidDetails ? orcidDetails.name.split(' ') : undefined;
     if (!parts) return '';
     if (parts.length > 2) return `${parts[0]} ${parts[2]}`;
     return `${parts[0]} ${parts[1]}`;
-  }, [connectedUser?.orcid?.name]);
+  }, [orcidDetails?.name]);
 
   const content = (() => {
     if (!isConnected) {
-      return (
-        <AppButton
-          style={{ fontSize: '16px', padding: '6px 8px' }}
-          label={t('connect')}
-          onClick={() => connect()}></AppButton>
-      );
+      return <></>;
     }
 
     return (
@@ -59,7 +70,7 @@ export const ConnectedUser = (props: {}) => {
           <Box pad="20px" gap="small" style={{ width: '220px' }}>
             <Box margin={{ bottom: 'small' }}>
               <Text>{cap(t('orcid'))}</Text>
-              <OrcidAnchor orcid={connectedUser?.orcid?.orcid}></OrcidAnchor>
+              <OrcidAnchor orcid={orcidDetails?.name}></OrcidAnchor>
             </Box>
 
             {connectedUser?.twitter ? (
@@ -67,21 +78,21 @@ export const ConnectedUser = (props: {}) => {
                 <Text>{cap(t('twitter'))}</Text>
                 <TwitterProfileAnchor
                   screen_name={
-                    connectedUser?.twitter?.screen_name
+                    twitterDetails?.screen_name
                   }></TwitterProfileAnchor>
               </Box>
             ) : (
               <></>
             )}
 
-            {connectedUser?.eth ? (
+            {nanopubDetails ? (
               <Box margin={{ bottom: 'small' }}>
                 <Text>{cap(t('nanopubSigner'))}</Text>
-                <AppAddress address={connectedUser.eth.ethAddress}></AppAddress>
+                <AppAddress address={nanopubDetails.ethAddress}></AppAddress>
                 <Anchor
                   style={{}}
                   target="_blank"
-                  href={`${connectedUser.eth.introNanopub}`}
+                  href={`${nanopubDetails.introNanopub}`}
                   size="small">
                   {t('introPub')}
                 </Anchor>

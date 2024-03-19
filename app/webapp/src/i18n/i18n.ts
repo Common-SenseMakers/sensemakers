@@ -1,43 +1,28 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
+export enum I18Keys {
+  platformManagerOverview = 's001',
+  connectTwitter = 's002',
+  connectTwitterOverview = 's003',
+  connectTwitterBtn = 's004',
+  approveTwitterBtn = 's005',
+}
+
+const translationENG: Record<I18Keys, string> = {
+  [I18Keys.platformManagerOverview]:
+    'Connect the social networks you normally use for topics related to Science and get the posts automatically parsed and stored as FAIR content in the Nanopublications network.',
+  [I18Keys.connectTwitter]: 'Connect Twitter/X',
+  [I18Keys.connectTwitterOverview]:
+    'Login with Twitter (enought for parsing and storing your tweets). Authorize posting to be able to create tweets from this app.',
+  [I18Keys.connectTwitterBtn]: 'Connect',
+  [I18Keys.approveTwitterBtn]: 'Approve Posting',
+};
+
 i18n.use(initReactI18next).init({
   resources: {
     ENG: {
-      translation: {
-        connectedAs: 'Connected as',
-        connect: 'Login',
-        connectBtn: 'Login with ORCID',
-        accountReady: 'Connected',
-        connectNanopub: 'Connect to the Nanopub Network',
-        connectNanopubBtn: 'Connect',
-        nanopubConnected: 'Connected',
-        connectTwitter: 'Connect to Twitter/X',
-        connectTwitterBn: 'Connect',
-        twitterConnected: 'Connected',
-        orcid: 'orcid',
-        twitter: 'twitter/X',
-        nanopubSigner: 'Nanopub Signer',
-        introPub: 'Intro Nanopub',
-        socials: 'Socials',
-        editor: 'Editor',
-        userNotConnected: 'Not connected',
-        postNew: 'New Post',
-        publishTo: 'Publish to',
-        postContent: 'Content',
-        postSemantics: 'Semantics',
-        writeYourPost: 'Your post...',
-        reset: 'reset',
-        refresh: 'refresh',
-        process: 'process',
-        publish: 'publish',
-        postSent: 'Post succesfully created!',
-        viewPost: 'Open Tweet',
-        nanopub: 'Open nanopublication',
-        twitterNotConnected: 'Not Connected',
-        nanopubsNotConnected: 'Not Connected',
-        revoke: 'revoke',
-      },
+      translation: translationENG,
     },
   },
   lng: 'ENG', // default language

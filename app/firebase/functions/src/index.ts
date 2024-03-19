@@ -1,21 +1,27 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * import {onCall} from "firebase-functions/v2/https";
- * import {onDocumentWritten} from "firebase-functions/v2/firestore";
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
-import { authApp } from './auth';
-import { postsApp } from './posts';
+import express from 'express';
+import * as functions from 'firebase-functions';
 
-export const auth = authApp;
-export const posts = postsApp;
+import { envDeploy } from './config/typedenv.deploy';
+import { envRuntime } from './config/typedenv.runtime';
+import { getSignupContextController } from './controllers/platform.auth';
+import { buildApp } from './instances/app';
 
-// Start writing functions
-// https://firebase.google.com/docs/functions/typescript
+const authRouter = express.Router();
 
-// export const helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+authRouter.post('/auth/:platform/context', getSignupContextController);
+
+export const app = functions
+  .region(envDeploy.REGION)
+  .runWith({
+    timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
+    memory: envDeploy.CONFIG_MEMORY,
+    minInstances: envDeploy.CONFIG_MININSTANCE,
+    secrets: [
+      envRuntime.ORCID_SECRET,
+      envRuntime.OUR_TOKEN_SECRET,
+      envRuntime.TWITTER_API_SECRET_KEY,
+      envRuntime.TWITTER_CLIENT_SECRET,
+      envRuntime.TWITTER_BEARER_TOKEN,
+    ],
+  })
+  .https.onRequest(buildApp(authRouter));
