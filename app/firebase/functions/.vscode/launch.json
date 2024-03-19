@@ -2,23 +2,19 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "functions-debug",
+      "name": "functions-test",
       "type": "node",
       "request": "launch",
       "skipFiles": ["<node_internals>/**"],
       "cwd": "${workspaceFolder}",
       "env": {
-        "NODE_ENV": "local",
-        "IS_TEST": "true",
-        "MOCK_SEMANTICS": "false",
-        "FIRESTORE_EMULATOR_HOST": "localhost:8080"
+        "NODE_ENV": "test",
+        "FIRESTORE_EMULATOR_HOST": "localhost:8080",
+        "LOG_LEVEL_MSG": "warn",
+        "LOG_LEVEL_OBJ": "warn"
       },
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/mocha",
-      "args": [
-        "--config",
-        "./.mocharc.e2e.js",
-        "src/__e2e_tests__/**/*.test.ts"
-      ],
+      "args": ["--config", "./.mocharc.js", "test/__tests__/**/*.test.ts"],
       "outputCapture": "std",
       "console": "integratedTerminal"
     }

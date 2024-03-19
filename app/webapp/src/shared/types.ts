@@ -1,88 +1,72 @@
-import { Nanopub } from '@nanopub/sign';
-import { TweetV2PostTweetResult } from 'twitter-api-v2';
-
-import { AppPostSemantics, ParserResult } from './parser.types';
-
-export interface AppUser {
-  userId: string;
-  orcid?: {
-    orcid: string;
-    name: string;
-  };
-  twitter?: {
-    oauth_token?: string;
-    oauth_token_secret?: string;
-    oauth_verifier?: string;
-    accessToken?: string;
-    accessSecret?: string;
-    user_id?: string;
-    screen_name?: string;
-  };
-  eth?: EthAccountDetails;
-}
-
-export interface EthAccountDetails {
-  ethAddress: HexStr;
-  rsaPublickey: string;
-  ethSignature: HexStr;
-  introNanopub?: string;
-}
-
-export interface AppUserRead {
-  userId: string;
-  orcid?: {
-    orcid: string;
-    name: string;
-  };
-  twitter?: {
-    user_id: string;
-    screen_name: string;
-  };
-  eth?: EthAccountDetails;
-}
-
-export type DefinedIfTrue<V, R> = V extends true ? R : R | undefined;
-
-export interface TwitterUser {
-  user_id: string;
-  screen_name: string;
-}
+import { NanopubUserDetails } from './types.nanopubs';
+import { OrcidSignupData, OrcidUserDetails } from './types.orcid';
+import { TwitterSignupData, TwitterUserDetails } from './types.twitter';
 
 export enum PLATFORM {
-  X = 'X',
-  Nanopubs = 'Nanopubs',
+  Orcid = 'orcid',
+  Twitter = 'twitter',
+  Nanopubs = 'nanopubs',
 }
 
-export interface AppPostCreate {
-  content: string;
-  originalParsed?: ParserResult;
-  semantics?: AppPostSemantics;
-  signedNanopub?: { uri: string };
-  platforms: PLATFORM[];
+/** The user details has, for each PLATFORM, a details object
+ * with
+ * - user_id: the unique user id on that platform
+ * - context: data needed for signing up that had to be remembered in a multiple-step sigup process
+ * - profile: metadata of the user on that platform (handle, avatar, etc)
+ * - read: credentials or other data needed for reading the posts from that user
+ * - write: credentials or other data needed for creating new posts in the name of the user
+ */
+
+export interface PlatformUserId {
+  user_id: string;
 }
 
-export interface AppPostGetSemantics {
-  content: string;
+export interface UserDetailsBase<C = any, P = any, R = any, W = any>
+  extends PlatformUserId {
+  context?: C;
+  profile?: P;
+  read?: R;
+  write?: W;
 }
 
-export interface AppPostConstructNanopub {
-  content: string;
+export interface UserDetailsReadBase<P> extends PlatformUserId {
+  profile?: P;
+  read: boolean;
+  write: boolean;
 }
 
-export type AppPostStore = AppPostCreate & {
-  author: string;
-  tweet?: TweetRead;
-  nanopub?: Nanopub;
-};
-
-export type TweetRead = TweetV2PostTweetResult['data'];
-
-export type AppPost = AppPostStore & {
-  id: string;
-};
-
-export interface AppGetSparkQL {
-  query: string;
+/** The AppUser object combines the details of each platform */
+interface UserWithId {
+  userId: string;
 }
+
+/**
+ * AppUser is the entire User object (include credentials) and MUST be
+ * kept inside the backend, never sent to the user. We use AppUserRead
+ * to send the user profiles to the frontend.
+ */
+export interface AppUser extends UserWithId {
+  [PLATFORM.Orcid]?: OrcidUserDetails[];
+  [PLATFORM.Twitter]?: TwitterUserDetails[];
+  [PLATFORM.Nanopubs]?: NanopubUserDetails[];
+}
+
+export interface AppUserCreate {
+  [PLATFORM.Orcid]?: OrcidSignupData;
+  [PLATFORM.Twitter]?: TwitterSignupData;
+}
+
+/**
+ * The AppUserRead replaces the details with read details (keeps the profile and users
+ * boolean flags for the read and write properties)
+ */
+export interface AppUserRead extends UserWithId {
+  [PLATFORM.Orcid]?: UserDetailsReadBase<OrcidUserDetails['profile']>[];
+  [PLATFORM.Twitter]?: UserDetailsReadBase<TwitterUserDetails['profile']>[];
+  [PLATFORM.Nanopubs]?: UserDetailsReadBase<NanopubUserDetails['profile']>[];
+}
+
+/** Support types */
+export type DefinedIfTrue<V, R> = V extends true ? R : R | undefined;
 
 export type HexStr = `0x${string}`;

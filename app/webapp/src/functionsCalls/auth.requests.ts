@@ -1,25 +1,11 @@
 import axios from 'axios';
 
 import { FUNCTIONS_BASE } from '../app/config';
-import { AppUserRead, EthAccountDetails } from '../shared/types';
+import { AppUserRead } from '../shared/types';
 
 export const postOrcidCode = async (code: string) => {
   const res = await axios.post(FUNCTIONS_BASE + '/auth/code', { code }, {});
   return res.data.token;
-};
-
-export const getTwitterAuthLink = async (appAccessToken: string) => {
-  const res = await axios.post(
-    FUNCTIONS_BASE + '/auth/twitter-code',
-    {},
-    {
-      headers: {
-        authorization: `Bearer ${appAccessToken}`,
-      },
-    }
-  );
-
-  return res.data.authLink;
 };
 
 export const revokeTwitterCredentials = async (
@@ -69,17 +55,4 @@ export const getLoggedUser = async (
   );
 
   return res.data.user;
-};
-
-export const postUserEthDetails = async (
-  details: EthAccountDetails,
-  appAccessToken: string
-): Promise<void> => {
-  const res = await axios.post(FUNCTIONS_BASE + '/auth/eth', details, {
-    headers: {
-      Authorization: `Bearer ${appAccessToken}`,
-    },
-  });
-
-  return res.data.post;
 };

@@ -53,12 +53,13 @@ export const AppBottomNav = (props: {
 
   return (
     <Box direction="row" justify="evenly" style={{ position: 'relative' }}>
-      {paths.map((path) => {
+      {paths.map((path, ix) => {
         const pathDetais = props.paths[path];
         const isPage = location.pathname === path;
 
         return (
           <AppButton
+            key={ix}
             label={pathDetais.label}
             icon={
               pathDetais.icon ? (

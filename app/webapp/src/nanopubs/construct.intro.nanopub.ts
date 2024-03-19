@@ -3,11 +3,12 @@ import { DataFactory, Store } from 'n3';
 
 import { writeRDF } from '../shared/n3.utils';
 import { getEthToRSAMessage } from '../shared/sig.utils';
-import { AppUserRead, EthAccountDetails } from '../shared/types';
+import { AppUserRead } from '../shared/types';
+import { NanopubUserDetails } from '../shared/types.nanopubs';
 import { NANOPUB_PLACEHOLDER } from './semantics.helper';
 
 export const constructIntroNanopub = async (
-  details: EthAccountDetails,
+  details: NanopubUserDetails['profile'],
   user: AppUserRead
 ): Promise<Nanopub> => {
   await (init as any)();
@@ -19,6 +20,10 @@ export const constructIntroNanopub = async (
    * TODO: This makes no sense. Its a placeholder but the actual
    * structure is completely TBD
    */
+
+  if (!details) {
+    throw new Error('details undefined');
+  }
 
   assertionsStore.addQuad(
     DataFactory.namedNode(`https://sense-nets.xyz/${details.ethAddress}`),
@@ -44,7 +49,7 @@ export const constructIntroNanopub = async (
   /** Then get the RDF as triplets */
   const assertionsRdf = await writeRDF(assertionsStore);
 
-  const orcid = user.orcid?.orcid;
+  const orcid = user.orcid && user.orcid[0].user_id;
 
   /** append the npx:ExampleNanopub (manually for now) */
   const exampleTriplet = `: <http://purl.org/nanopub/x/hasNanopubType> npx:ExampleNanopub .`;

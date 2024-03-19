@@ -1,5 +1,8 @@
+import { logger as fblogger } from 'firebase-functions/v1';
 import pino from 'pino';
+
 import { ENVIRONMENTS } from '../config/ENVIRONMENTS';
+import { envDeploy } from '../config/typedenv.deploy';
 
 /**
   https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#logseverity
@@ -39,7 +42,7 @@ const pinoLevelToSeverityLookup: Record<string, string> = {
   emergency: 'EMERGENCY',
 };
 
-export const logger = pino({
+export const loggerPino = pino({
   messageKey: 'message',
   customLevels,
   formatters: {
@@ -68,28 +71,5 @@ export const logger = pino({
   }),
 });
 
-(global as any).logger = {
-  debug: (message: any, context: any, args: any) => {
-    logger.debug({ message, context, args });
-  },
-
-  info: (message: any, context: any, args: any) => {
-    logger.info({ message, context, args });
-  },
-
-  notice: (message: any, context: any, args: any) => {
-    logger.notice({ message, context, args });
-  },
-
-  warn: (message: any, context: any, args: any) => {
-    logger.warn({ message, context, args });
-  },
-
-  error: (message: any, context: any, args: any) => {
-    logger.error({ message, context, args });
-  },
-
-  critical: (message: any, context: any, args: any) => {
-    logger.critical({ message, context, args });
-  },
-};
+export const logger =
+  envDeploy.NODE_ENV === ENVIRONMENTS.PRODUCTION ? loggerPino : fblogger;
