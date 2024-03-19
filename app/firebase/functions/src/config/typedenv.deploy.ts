@@ -4,7 +4,7 @@ const LOG_LEVEL_MSG = defineString('LOG_LEVEL_MSG');
 const LOG_LEVEL_OBJ = defineString('LOG_LEVEL_OBJ');
 
 const CONFIG_TIMEOUT = defineInt('CONFIG_TIMEOUT');
-const CONFIG_MEMORY = defineString('CONFIG_MEMORY');
+const CONFIG_MEMORY = defineInt('CONFIG_MEMORY');
 const CONFIG_MININSTANCE = defineInt('CONFIG_MININSTANCE');
 const REGION = defineString('LOG_LEVEL_OBJ');
 

@@ -1,8 +1,8 @@
 import express from 'express';
 import * as functions from 'firebase-functions';
 
-import { RUNTIME_OPTIONS } from '../config/RUNTIME_OPTIONS';
 import { envDeploy } from '../config/typedenv.deploy';
+import { envRuntime } from '../config/typedenv.runtime';
 import { buildApp } from '../instances/app';
 import { getSignupContextController } from './platform.auth';
 
@@ -12,5 +12,16 @@ authRouter.post('/auth/:platform/context', getSignupContextController);
 
 export const app = functions
   .region(envDeploy.REGION)
-  .runWith({ ...RUNTIME_OPTIONS })
+  .runWith({
+    timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
+    memory: envDeploy.CONFIG_MEMORY,
+    minInstances: envDeploy.CONFIG_MININSTANCE,
+    secrets: [
+      envRuntime.ORCID_SECRET,
+      envRuntime.OUR_TOKEN_SECRET,
+      envRuntime.TWITTER_API_SECRET_KEY,
+      envRuntime.TWITTER_CLIENT_SECRET,
+      envRuntime.TWITTER_BEARER_TOKEN,
+    ],
+  })
   .https.onRequest(buildApp(authRouter));

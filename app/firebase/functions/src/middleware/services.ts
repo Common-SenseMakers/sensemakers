@@ -21,8 +21,8 @@ const orcid = new OrcidService();
 
 /** mocked twitter */
 const twitter = new TwitterService({
-  key: TWITTER_API_KEY,
-  secret: TWITTER_API_SECRET_KEY,
+  key: TWITTER_API_KEY.value(),
+  secret: TWITTER_API_SECRET_KEY.value(),
 });
 
 /** all identity services */

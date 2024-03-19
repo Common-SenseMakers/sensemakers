@@ -1,10 +1,4 @@
-import { logger } from '../instances/logger';
-import { ENVIRONMENTS } from './ENVIRONMENTS';
 import { envRuntime } from './typedenv.runtime';
-
-logger.debug('NODE_ENV', process.env.NODE_ENV);
-
-// Define some parameters
 
 /** Verify that all needed env variables were provided */
 const mandatory: Array<keyof typeof envRuntime> = [
@@ -37,7 +31,7 @@ export const TWITTER_BEARER_TOKEN = envRuntime.TWITTER_BEARER_TOKEN;
 export const TWITTER_API_KEY = envRuntime.TWITTER_API_KEY;
 export const TWITTER_API_SECRET_KEY = envRuntime.TWITTER_API_SECRET_KEY;
 
-export const MOCK_SEMANTICS = NODE_ENV === ENVIRONMENTS.TEST;
+export const MOCK_SEMANTICS = false;
 
 export const APP_URL =
   process.env.NODE_ENV !== 'production'

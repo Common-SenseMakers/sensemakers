@@ -12,7 +12,7 @@ import {
 import {
   TWITTER_API_KEY,
   TWITTER_API_SECRET_KEY,
-} from '../../src/config/config';
+} from '../../src/config/config.runtime';
 import { DBInstance } from '../../src/db/instance';
 import { OrcidService } from '../../src/platforms/orcid/orcid.service';
 import { IdentityPlatforms } from '../../src/platforms/platforms.interface';

@@ -26,8 +26,8 @@ export class OrcidService
   protected async fetchUserFromCode(code: string): Promise<OrcidUserDetails> {
     const params = new URLSearchParams();
 
-    params.append('client_id', ORCID_CLIENT_ID);
-    params.append('client_secret', ORCID_SECRET);
+    params.append('client_id', ORCID_CLIENT_ID.value());
+    params.append('client_secret', ORCID_SECRET.value());
     params.append('grant_type', 'authorization_code');
     params.append('code', code);
     params.append('redirect_uri', APP_URL);
