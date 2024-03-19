@@ -3,6 +3,7 @@ import express from 'express';
 
 import { authenticate } from '../middleware/authenticate';
 import { errorHandling } from '../middleware/errorHandlingMiddleware';
+import { attachServices } from '../middleware/services';
 
 export const buildApp = (router?: express.Router): express.Application => {
   const app = express();
@@ -14,6 +15,7 @@ export const buildApp = (router?: express.Router): express.Application => {
     })
   );
 
+  app.use(attachServices);
   app.use(authenticate);
 
   if (router) {

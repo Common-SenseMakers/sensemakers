@@ -16,7 +16,7 @@ export const AppPlatformManager = (props: {}) => {
     approve: approveTwitter,
     revokeApproval: revokeTwitter,
     isConnecting: isConnectingTwitter,
-    isAuthorizing: isAuthorizingTwitter,
+    isApproving: isApprovingTwitter,
   } = useTwitterContext();
 
   const {
@@ -72,7 +72,7 @@ export const AppPlatformManager = (props: {}) => {
             style={{ width: '50%' }}
             primary
             disabled={!needApproveTwitter}
-            loading={isAuthorizingTwitter}
+            loading={isApprovingTwitter}
             onClick={() => {
               if (approveTwitter) {
                 approveTwitter();

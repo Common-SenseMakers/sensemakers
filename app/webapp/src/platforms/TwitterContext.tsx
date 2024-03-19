@@ -25,7 +25,7 @@ export type TwitterContextType = {
   approve?: () => void;
   revokeApproval: () => void;
   isConnecting: boolean;
-  isAuthorizing: boolean;
+  isApproving: boolean;
   needAuthorize?: boolean;
 };
 
@@ -51,7 +51,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
     queryKey: ['twitterSignup'],
     queryFn: async () => {
       const context = await appFetch<TwitterSignupContext>(
-        '/auth/twitter-code',
+        `/auth/${PLATFORM.Twitter}/context`,
         {
           type: TwitterSignupType.login,
         }
@@ -120,7 +120,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
         approve,
         revokeApproval,
         isConnecting,
-        isAuthorizing: isApproving,
+        isApproving,
         needAuthorize,
       }}>
       {props.children}
