@@ -1,6 +1,22 @@
 {
     "semantic_predicates": [
         {
+            "name": "mentionsCallForPapers",
+            "uri": "https://sense-nets.xyz/mentionsCallForPapers",
+            "versions": [
+                "v1"
+            ],
+            "label": "call-for-papers",
+            "display_name": "📜 mentions-call-for-papers",
+            "prompt": "this post contains a call for research papers, for example to a journal, conference or workshop.",
+            "valid_subject_types": [
+                "post"
+            ],
+            "valid_object_types": [
+                "ref"
+            ]
+        },
+        {
             "name": "endorses",
             "uri": "https://sense-nets.xyz/endorses",
             "versions": [
@@ -116,13 +132,45 @@
             ]
         },
         {
-            "name": "watchingStatus",
-            "uri": "https://sense-nets.xyz/watchingStatus",
+            "name": "indicatesInterest",
+            "uri": "https://sense-nets.xyz/indicatesInterest",
+            "versions": [
+                "v1"
+            ],
+            "label": "indicates-interest",
+            "display_name": "👀 indicates-interest",
+            "prompt": "this post indicates interest in a reference. This label is meant for cases where the post is not explicitly recommending or endorsing the cited reference.",
+            "valid_subject_types": [
+                "post"
+            ],
+            "valid_object_types": [
+                "ref"
+            ]
+        },
+        {
+            "name": "mentionsFundingOpportunity",
+            "uri": "https://sense-nets.xyz/mentionsFundingOpportunity",
+            "versions": [
+                "v1"
+            ],
+            "label": "funding",
+            "display_name": "🏦 mentions-funding",
+            "prompt": "this post mentions a funding opportunity, for example a research grant or prize.",
+            "valid_subject_types": [
+                "post"
+            ],
+            "valid_object_types": [
+                "ref"
+            ]
+        },
+        {
+            "name": "mentionsWatchingStatus",
+            "uri": "https://sense-nets.xyz/mentionsWatchingStatus",
             "versions": [
                 "v0"
             ],
             "label": "watching",
-            "display_name": "👀 watching-status",
+            "display_name": "📺 watching-status",
             "prompt": "this post describes the watching status of the author in relation to a reference, such as a video or movie. The author may have watched the content in the past, is watching the content in the present, or is looking forward to watching the content in the future.",
             "valid_subject_types": [
                 "post"
@@ -132,8 +180,8 @@
             ]
         },
         {
-            "name": "readingStatus",
-            "uri": "https://sense-nets.xyz/readingStatus",
+            "name": "mentionsReadingStatus",
+            "uri": "https://sense-nets.xyz/mentionsReadingStatus",
             "versions": [
                 "v0"
             ],
@@ -148,8 +196,8 @@
             ]
         },
         {
-            "name": "listeningStatus",
-            "uri": "https://sense-nets.xyz/listeningStatus",
+            "name": "mentionsListeningStatus",
+            "uri": "https://sense-nets.xyz/mentionsListeningStatus",
             "versions": [
                 "v0"
             ],
@@ -324,7 +372,8 @@
     "ontology_config": {
         "db_id": "8de416983dd142c68b3b331d0828f2d0",
         "versions": [
-            "v0"
+            "v0",
+            "v1"
         ]
     }
 }

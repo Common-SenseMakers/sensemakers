@@ -17,44 +17,44 @@ If you don't have firebase-tools installed run
 npm install -g firebase-tools
 ```
 
-## Express Server
+## Express Server (Configured to run as a firebase function)
 
 Run the express server, and firestore, in a local emulator 
 
-Install yarn here to use emulation and deploy scripts
+Install yarn dependencies in the `/firebase` folder.
 ```
 cd firebase
 yarn install
 ```
 
-The first time you need to do a few things inside the functions folder:
-
-Install dependencies
+Install yarn dependencies in the `/firebase/functions`
 ```
 cd functions
 yarn install 
 ```
 
-Create the env.ts file by copying the env.sample.ts file and filling it's values (ask maintainer)
+### Runnig tests
+
+For running the tests create a `.env.test` file **inside the `/firebase/functions` folder**.
+
 ```
-cp src/config/env.sample.ts src/config/env.ts
+TWITTER_API_KEY=
+TWITTER_API_SECRET_KEY=
 ```
 
-Build the functions 
+Build the functions from the `/firebase/functions` folder
 ```
-yarn build
-cd ..
-```
-
-You can then run the emulation script from the firebase folder
-```
-yarn emulate
-```
-
-And iff you want to make changes to the server and load them in the emulator automatically use build:watch to build the functions
-```
-cd functions
 yarn build:watch
+```
+
+Run the emulation script from the `/firebase` folder
+```
+yarn emulate-test
+```
+
+Run the tests from the `/firebase/functions` folder
+```
+yarn test
 ```
 
 ## Python Server

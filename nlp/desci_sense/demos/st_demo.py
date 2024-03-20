@@ -168,6 +168,11 @@ def log_pred_wandb(
 
 def init_wandb_run(model_config):
     wandb.login(key=environ["WANDB_API_KEY"])
+
+    # don't log api key - remove if exists
+    if "openai_api_key" in model_config["openai_api"]:
+        model_config["openai_api"].pop("openai_api_key")
+
     wandb_run = wandb.init(
         job_type="demo",
         project=model_config["wandb"]["project"],
@@ -244,6 +249,9 @@ def process_keywords(result, model):
         kw_result = model.extract_post_topics_w_metadata(post)
         result["keywords"] = kw_result["answer"].get("valid_keywords")
         result["kw_prompt"] = kw_result["full_prompt"]
+        result["kw_reasoning"] = kw_result["answer"].get("reasoning")
+        result["academic_kw"] = kw_result["answer"].get("academic_kw")
+        result["raw_kw_output"] = kw_result["answer"].get("raw_text")
         return result
 
 
@@ -379,6 +387,14 @@ if __name__ == "__main__":
                     "Predicted keywords",
                     st.session_state.result["keywords"],
                     st.session_state.result["keywords"],
+                    disabled=True,
+                )
+                # Convert the input string to lower case for case-insensitive comparison
+                academic_kw = st.session_state.result["academic_kw"]
+                is_academic = academic_kw.lower() == "academic"
+                st.checkbox(
+                    "Is this post related to academic research?",
+                    value=is_academic,
                     disabled=True,
                 )
 
