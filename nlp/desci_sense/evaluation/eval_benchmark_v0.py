@@ -54,7 +54,7 @@ def pred_labels(df):
     model = init_model(config)
     for i in tqdm(range(len(df)), desc="Processing", unit="pred"):
         # print('in iteration',i)
-        response = model.process_text(df["Text"][i])
+        response = model.process_text_st(df["Text"][i])
         df["Predicted Label"][i] = response["answer"]["multi_tag"]
         df["Reasoning Steps"][i] = response["answer"]["reasoning"]
 
