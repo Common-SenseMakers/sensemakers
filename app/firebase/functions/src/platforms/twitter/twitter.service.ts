@@ -24,7 +24,9 @@ export interface UserClientParameters {
 
 export interface TwitterQueryParameters {
   user_id: string;
-  start_time: string;
+  start_time?: string;
+  end_time?: string;
+  max_results?: number;
 }
 
 export class TwitterService
@@ -94,10 +96,12 @@ export class TwitterService
   async fetch(
     params: TwitterQueryParameters
   ): Promise<TweetV2PaginableTimelineResult['data']> {
-    const client = this.getGenericClient();
+    const client = await this.getGenericClient().appLogin();
     const result = await client.v2.userTimeline(params.user_id, {
       start_time: params.start_time,
-      max_results: 100,
+      end_time: params.end_time,
+      max_results: params.max_results,
+      'tweet.fields': ['created_at', 'author_id'],
     });
     return result.data.data;
   }
