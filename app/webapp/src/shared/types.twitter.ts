@@ -10,12 +10,7 @@ export interface TwitterSignupContext {
   url: string;
 }
 
-type TwitterSignupContextStored = Pick<
-  TwitterSignupContext,
-  'oauth_token' | 'oauth_token_secret'
->;
-
-export type TwitterSignupData = TwitterSignupContextStored & {
+export type TwitterSignupData = TwitterSignupContext & {
   oauth_verifier: string;
 };
 
@@ -24,7 +19,6 @@ export type TwitterSignupData = TwitterSignupContextStored & {
  */
 export interface TwitterUserDetails
   extends UserDetailsBase<
-    TwitterSignupContextStored,
     {
       screen_name: string;
     },

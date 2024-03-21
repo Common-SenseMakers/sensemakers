@@ -101,7 +101,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
       setIsConnecting(true);
 
-      appFetch(`/auth/twitter-verifier`, {
+      appFetch(`/auth/${PLATFORM.Twitter}/signup`, {
         oauth_verifier: oauth_verifier_param,
         oauth_token: oauth_token_param,
       }).then(() => {

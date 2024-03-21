@@ -23,7 +23,11 @@ export class UsersService {
     return service;
   }
 
-  /** This method request the user signup context and stores it in the user profile */
+  /**
+   * This method request the user signup context and stores it in the user profile.
+   * If the user is not defined (first time), the details are stored on a temporary
+   * collection and associated to a random signup_token
+   */
   public async getSignupContext(platform: PLATFORM, userId?: string) {
     const context =
       await this.getIdentityService(platform).getSignupContext(userId);
@@ -42,25 +46,13 @@ export class UsersService {
    */
   public async handleSignup(
     platform: PLATFORM,
-    _signupData: any,
-    _userId?: string
+    signupData: any,
+    _userId?: string // MUST be the authenticated userId
   ) {
-    /**
-     * signup data is obtained from the provided one merged with the current user
-     * signupData (in case getSignupContext precomputed some user details)
-     */
-    let currentDetails = {};
-    if (_userId) {
-      const user = await this.repo.getUser(_userId, true);
-      const allDetails = user[platform];
-      currentDetails = allDetails ? allDetails[0] : {};
-    }
-
     /**
      * validate the signup data for this platform and convert it into
      * user details
      */
-    const signupData = { ...currentDetails, ..._signupData };
     const userDetails = (await this.getIdentityService(
       platform
     ).handleSignupData(signupData)) as UserDetailsBase;

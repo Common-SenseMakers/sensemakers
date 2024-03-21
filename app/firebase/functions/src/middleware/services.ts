@@ -25,10 +25,7 @@ export const attachServices: RequestHandler = async (
   const userRepo = new UsersRepository(db);
   const identityServices: IdentityPlatforms = new Map();
 
-  /** mocked orcid */
   const orcid = new OrcidService();
-
-  /** mocked twitter */
   const twitter = new TwitterService({
     key: TWITTER_API_KEY.value(),
     secret: TWITTER_API_SECRET_KEY.value(),

@@ -14,8 +14,8 @@ export interface TwitterApiCredentials {
 }
 
 export interface UserClientParameters {
-  oauth_token: string;
-  oauth_token_secret: string;
+  accessToken: string;
+  accessTokenSecret: string;
 }
 
 export class TwitterService
@@ -39,23 +39,27 @@ export class TwitterService
     return new TwitterApi({
       appKey: this.credentials.key,
       appSecret: this.credentials.secret,
-      accessToken: params.oauth_token,
-      accessSecret: params.oauth_token_secret,
+      accessToken: params.accessToken,
+      accessSecret: params.accessTokenSecret,
     });
   }
 
   public async getSignupContext() {
     const client = this.getGenericClient();
 
-    const authLink = await client.generateAuthLink(TWITTER_CALLBACK_URL, {
+    const authDetails = await client.generateAuthLink(TWITTER_CALLBACK_URL, {
       linkMode: 'authorize',
     });
 
-    return authLink;
+    return authDetails;
   }
 
   async handleSignupData(data: TwitterSignupData): Promise<TwitterUserDetails> {
-    const client = await this.getUserClient(data);
+    const client = await this.getUserClient({
+      accessToken: data.oauth_token,
+      accessTokenSecret: data.oauth_token_secret,
+    });
+
     const result = await client.login(data.oauth_verifier);
 
     const twitter: TwitterUserDetails = {

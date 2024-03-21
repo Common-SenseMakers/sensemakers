@@ -11,7 +11,6 @@ export enum PLATFORM {
 /** The user details has, for each PLATFORM, a details object
  * with
  * - user_id: the unique user id on that platform
- * - context: data needed for signing up that had to be remembered in a multiple-step sigup process
  * - profile: metadata of the user on that platform (handle, avatar, etc)
  * - read: credentials or other data needed for reading the posts from that user
  * - write: credentials or other data needed for creating new posts in the name of the user
@@ -21,9 +20,8 @@ export interface PlatformUserId {
   user_id: string;
 }
 
-export interface UserDetailsBase<C = any, P = any, R = any, W = any>
+export interface UserDetailsBase<P = any, R = any, W = any>
   extends PlatformUserId {
-  context?: C;
   profile?: P;
   read?: R;
   write?: W;

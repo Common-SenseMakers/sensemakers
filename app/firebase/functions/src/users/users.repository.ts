@@ -1,4 +1,5 @@
 import { firestore } from 'firebase-admin';
+import { v4 as uuid } from 'uuid';
 
 import {
   AppUser,
@@ -112,5 +113,24 @@ export class UsersRepository {
       // doc.data() is never undefined for query doc snapshots
       console.log(doc.id, ' => ', doc.data());
     });
+  }
+
+  /** temporary collection for storing secrets of users during signup */
+  public async createTempSignupContext() {
+    const id = uuid();
+    const ref = this.db.collections.signup.doc(id);
+    /** empty object, the id is the value */
+    await ref.create({});
+    return ref.id;
+  }
+
+  public async getTempSignupContext(signupToken: string): Promise<any> {
+    const doc = await this.db.collections.signup.doc(signupToken).get();
+    return doc.data();
+  }
+
+  public async deleteTempSignupContext(signupToken: string) {
+    const ref = this.db.collections.signup.doc(signupToken);
+    await ref.delete();
   }
 }
