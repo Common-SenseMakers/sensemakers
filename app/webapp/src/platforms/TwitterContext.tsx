@@ -42,8 +42,8 @@ export const TwitterContext = (props: PropsWithChildren) => {
   const { connectedUser, refresh: refreshConnected } = useAccountContext();
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const oauth_token_param = searchParams.get('oauth_token');
-  const oauth_verifier_param = searchParams.get('oauth_verifier');
+  const state_param = searchParams.get('state');
+  const code_param = searchParams.get('code');
 
   const appFetch = useAppFetch();
 
@@ -55,7 +55,9 @@ export const TwitterContext = (props: PropsWithChildren) => {
   const connect = async () => {
     setIsConnecting(true);
 
-    const params: TwitterGetContextParams = { type: 'authorize' };
+    const params: TwitterGetContextParams = {
+      callback_url: window.location.href,
+    };
     const siginContext = await appFetch<TwitterSignupContext>(
       `/auth/${PLATFORM.Twitter}/context`,
       params
@@ -70,7 +72,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
   /** Listen to oauth verifier to send it to the backend */
   useEffect(() => {
-    if (!verifierHandled.current && oauth_token_param && oauth_verifier_param) {
+    if (!verifierHandled.current && code_param && state_param) {
       verifierHandled.current = true;
 
       setIsConnecting(true);
@@ -83,23 +85,22 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
       const context = JSON.parse(contextStr) as TwitterSignupContext;
 
-      if (context.oauth_token !== oauth_token_param) {
-        throw new Error('Undexpected oauth token');
+      if (context.state !== state_param) {
+        throw new Error('Undexpected state');
       }
 
       appFetch(`/auth/${PLATFORM.Twitter}/signup`, {
-        oauth_verifier: oauth_verifier_param,
-        oauth_token: context.oauth_token,
-        oauth_token_secret: context.oauth_token_secret,
+        ...context,
+        code: code_param,
       }).then(() => {
-        searchParams.delete('oauth_token');
-        searchParams.delete('oauth_verifier');
+        searchParams.delete('state');
+        searchParams.delete('code');
         setSearchParams(searchParams);
         setIsConnecting(false);
         refreshConnected();
       });
     }
-  }, [oauth_token_param, oauth_verifier_param, searchParams, setSearchParams]);
+  }, [state_param, code_param, searchParams, setSearchParams]);
 
   const approve = async () => {
     setIsApproving(true);

@@ -10,8 +10,8 @@
       "env": {
         "NODE_ENV": "test",
         "FIRESTORE_EMULATOR_HOST": "localhost:8080",
-        "LOG_LEVEL_MSG": "warn",
-        "LOG_LEVEL_OBJ": "warn"
+        "LOG_LEVEL_MSG": "debug",
+        "LOG_LEVEL_OBJ": "debug"
       },
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/mocha",
       "args": ["--config", "./.mocharc.js", "test/__tests__/**/*.test.ts"],

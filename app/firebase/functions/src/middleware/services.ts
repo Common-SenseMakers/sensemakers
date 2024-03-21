@@ -2,8 +2,8 @@ import { RequestHandler } from 'express';
 
 import { PLATFORM } from '../@shared/types';
 import {
-  TWITTER_API_KEY,
-  TWITTER_API_SECRET_KEY,
+  TWITTER_CLIENT_ID,
+  TWITTER_CLIENT_SECRET,
 } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
 import { OrcidService } from '../platforms/orcid/orcid.service';
@@ -27,8 +27,8 @@ export const attachServices: RequestHandler = async (
 
   const orcid = new OrcidService();
   const twitter = new TwitterService({
-    key: TWITTER_API_KEY.value(),
-    secret: TWITTER_API_SECRET_KEY.value(),
+    clientId: TWITTER_CLIENT_ID.value(),
+    clientSecret: TWITTER_CLIENT_SECRET.value(),
   });
 
   /** all identity services */

@@ -26,8 +26,12 @@ export const ORCID_CLIENT_ID = envRuntime.ORCID_CLIENT_ID;
 export const ORCID_SECRET = envRuntime.ORCID_SECRET;
 
 export const TWITTER_API_URL = 'https://api.twitter.com';
+
 export const TWITTER_CLIENT_ID = envRuntime.TWITTER_CLIENT_ID;
+export const TWITTER_CLIENT_SECRET = envRuntime.TWITTER_CLIENT_SECRET;
+
 export const TWITTER_BEARER_TOKEN = envRuntime.TWITTER_BEARER_TOKEN;
+
 export const TWITTER_API_KEY = envRuntime.TWITTER_API_KEY;
 export const TWITTER_API_SECRET_KEY = envRuntime.TWITTER_API_SECRET_KEY;
 

@@ -1,11 +1,11 @@
 import { object, string } from 'yup';
 
 export const twitterGetSignupContextSchema = object({
-  type: string().oneOf(['authenticate', 'authorize']).required(),
+  callback_url: string().required(),
 }).noUnknown(true);
 
 export const twitterSignupDataSchema = object({
-  oauth_token: string().required(),
-  oauth_token_secret: string().required(),
-  oauth_verifier: string().required(),
+  code: string().required(),
+  codeVerifier: string().required(),
+  callback_url: string().required(),
 }).noUnknown(true);

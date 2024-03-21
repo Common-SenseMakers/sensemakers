@@ -103,7 +103,7 @@ export const PlatformSelector = (
           label={
             <AppButtonTwoLinesLabel
               tag={t('twitter/x')}
-              label={`@${connectedUser?.twitter[0]?.profile?.screen_name}`}></AppButtonTwoLinesLabel>
+              label={`@${connectedUser?.twitter[0]?.profile?.username}`}></AppButtonTwoLinesLabel>
           }></ToggleButton>
       ) : (
         <AppButton

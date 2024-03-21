@@ -58,7 +58,7 @@ export class TwitterService
   }
 
   async handleSignupData(data: TwitterSignupData): Promise<TwitterUserDetails> {
-    const client = await this.getGenericClient();
+    const client = this.getGenericClient();
 
     const result = await client.loginWithOAuth2({
       code: data.code,
@@ -90,8 +90,8 @@ export class TwitterService
   }
 
   async postMessageTwitter(
-    accessToken: string,
-    text: string
+    text: string,
+    accessToken: string
   ): Promise<TweetV2PostTweetResult['data']> {
     const client = await this.getUserClient(accessToken);
     const result = await client.v2.tweet(text);

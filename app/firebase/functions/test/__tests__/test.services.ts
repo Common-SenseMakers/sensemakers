@@ -16,8 +16,13 @@ import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { UsersRepository } from '../../src/users/users.repository';
 import { UsersService } from '../../src/users/users.service';
 
-export const TEST_USER_NAME = 'Test User';
-export const TEST_TWITTER_NAME = 'testuser';
+export const TEST_ORCID_PROFILE = { name: 'Orcid Scientist' };
+
+export const TEST_TWITTER_PROFILE = {
+  id: '1',
+  name: 'TestName',
+  username: 'testhandle',
+};
 
 const db = new DBInstance();
 const userRepo = new UsersRepository(db);
@@ -28,7 +33,7 @@ const orcid = new OrcidService();
 const MockedOrcid = spy(orcid);
 when(MockedOrcid.handleSignupData(anything())).thenCall(
   (data: OrcidSignupData): OrcidUserDetails => {
-    return { user_id: data.code, profile: { name: TEST_USER_NAME } };
+    return { user_id: data.code, profile: TEST_ORCID_PROFILE };
   }
 );
 const mockedOrcid = instance(MockedOrcid);
@@ -43,7 +48,12 @@ when(MockedTwitter.handleSignupData(anything())).thenCall(
   (data: TwitterSignupData): TwitterUserDetails => {
     return {
       user_id: data.code,
-      profile: { id: '1', name: 'TestName', username: 'testhandle' },
+      write: {
+        accessToken: process.env.ACCESS_TOKEN_TEST_USER_0 as string,
+        refreshToken: '',
+        expiresIn: 0,
+      },
+      profile: TEST_TWITTER_PROFILE,
     };
   }
 );

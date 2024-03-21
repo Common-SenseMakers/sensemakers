@@ -1,7 +1,12 @@
 import { expect } from 'chai';
 
 import { PLATFORM } from '../../src/@shared/types';
-import { TEST_USER_NAME, services } from './test.services';
+import { TwitterService } from '../../src/platforms/twitter/twitter.service';
+import {
+  TEST_ORCID_PROFILE,
+  TEST_TWITTER_PROFILE,
+  services,
+} from './test.services';
 
 const logger = (global as any).logger;
 
@@ -29,12 +34,15 @@ describe('signups', () => {
       if (user && user.orcid && user.orcid.length === 1) {
         expect(user.orcid[0]).to.not.be.undefined;
         expect(user.orcid[0].user_id).to.eq(orcidId);
-        expect(user.orcid[0].profile?.name).to.eq(TEST_USER_NAME);
+        expect(user.orcid[0].profile?.name).to.eq(TEST_ORCID_PROFILE.name);
       }
     });
   });
 
   describe('connect twitter', () => {
+    let userId: string;
+    let accessToken: string | undefined;
+
     it('get twitter oauth details', async () => {
       const details = await services.users.getSignupContext(
         PLATFORM.Twitter,
@@ -49,7 +57,7 @@ describe('signups', () => {
     });
 
     it('handle twitter signup', async () => {
-      const details = await services.users.handleSignup(
+      await services.users.handleSignup(
         PLATFORM.Twitter,
         {
           code: twitterId,
@@ -57,8 +65,24 @@ describe('signups', () => {
         userId
       );
 
-      logger.debug(`details:`, { details });
-      expect(details).to.not.be.undefined;
+      const user = await services.users.repo.getUser(userId);
+
+      if (!user) {
+        throw new Error('user undefined');
+      }
+
+      const twitterDetails = user[PLATFORM.Twitter];
+
+      if (!twitterDetails) {
+        throw new Error('twitterDetails undefined');
+      }
+
+      expect(user.userId).to.eq(userId);
+      expect(twitterDetails.length).to.eq(1);
+      expect(twitterDetails[0].profile?.id).to.eq(TEST_TWITTER_PROFILE.id);
+
+      accessToken = twitterDetails[0].write?.accessToken;
+      expect(accessToken).to.not.be.undefined;
     });
   });
 });

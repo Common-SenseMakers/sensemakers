@@ -38,10 +38,6 @@ export class UsersService {
       params
     );
 
-    if (userId) {
-      await this.repo.addUserDetails(userId, platform, context);
-    }
-
     return context;
   }
 

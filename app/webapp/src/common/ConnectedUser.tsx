@@ -77,9 +77,7 @@ export const ConnectedUser = (props: {}) => {
               <Box margin={{ bottom: 'small' }}>
                 <Text>{cap(t('twitter'))}</Text>
                 <TwitterProfileAnchor
-                  screen_name={
-                    twitterDetails?.screen_name
-                  }></TwitterProfileAnchor>
+                  screen_name={twitterDetails?.username}></TwitterProfileAnchor>
               </Box>
             ) : (
               <></>
