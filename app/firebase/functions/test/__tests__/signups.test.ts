@@ -38,7 +38,10 @@ describe('signups', () => {
     it('get twitter oauth details', async () => {
       const details = await services.users.getSignupContext(
         PLATFORM.Twitter,
-        userId
+        userId,
+        {
+          callback_url: '',
+        }
       );
 
       logger.debug(`details:`, { details });
@@ -48,7 +51,9 @@ describe('signups', () => {
     it('handle twitter signup', async () => {
       const details = await services.users.handleSignup(
         PLATFORM.Twitter,
-        { oauth_verifier: twitterId },
+        {
+          code: twitterId,
+        },
         userId
       );
 

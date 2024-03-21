@@ -5,9 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { I18Keys } from '../i18n/i18n';
 import { useNanopubContext } from '../platforms/NanopubContext';
 import { useTwitterContext } from '../platforms/TwitterContext';
-import { PLATFORM } from '../shared/types';
 import { AppButton, AppCard, AppSectionHeader } from '../ui-components';
-import { useAccountContext } from './AccountContext';
 
 export const AppPlatformManager = (props: {}) => {
   const { t } = useTranslation();

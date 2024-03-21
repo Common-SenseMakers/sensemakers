@@ -13,9 +13,8 @@ import { useAccountContext } from '../app/AccountContext';
 import { useAppFetch } from '../app/app.fetch';
 import { PLATFORM } from '../shared/types';
 import {
+  TwitterGetContextParams,
   TwitterSignupContext,
-  TwitterSignupType,
-  TwitterUser,
 } from '../shared/types.twitter';
 
 const DEBUG = true;
@@ -56,11 +55,10 @@ export const TwitterContext = (props: PropsWithChildren) => {
   const connect = async () => {
     setIsConnecting(true);
 
+    const params: TwitterGetContextParams = { type: 'authorize' };
     const siginContext = await appFetch<TwitterSignupContext>(
       `/auth/${PLATFORM.Twitter}/context`,
-      {
-        type: TwitterSignupType.login,
-      }
+      params
     );
 
     /** remember the login context */

@@ -1,22 +1,20 @@
-import { TweetV2PostTweetResult } from 'twitter-api-v2';
+import {
+  IOAuth2RequestTokenResult,
+  TweetV2PostTweetResult,
+  UserV2,
+} from 'twitter-api-v2';
 
 import { UserDetailsBase } from './types';
 
-/** TWITTER */
-
 export type TwitterGetContextParams = {
-  type: 'authorize' | 'authenticate';
+  callback_url: string;
 };
 
-export interface TwitterSignupContext {
-  oauth_token: string;
-  oauth_token_secret: string;
-  oauth_callback_confirmed: 'true';
-  url: string;
-}
+export type TwitterSignupContext = IOAuth2RequestTokenResult &
+  TwitterGetContextParams;
 
 export type TwitterSignupData = TwitterSignupContext & {
-  oauth_verifier: string;
+  code: string;
 };
 
 /** For Twitter we need to store the oAuth token and secret as part of the signup process
@@ -24,20 +22,14 @@ export type TwitterSignupData = TwitterSignupContext & {
  */
 export interface TwitterUserDetails
   extends UserDetailsBase<
-    {
-      screen_name: string;
-    },
+    UserV2,
     undefined,
     {
       accessToken: string;
-      accessSecret: string;
+      refreshToken: string;
+      expiresIn: number;
     }
   > {}
-
-export enum TwitterSignupType {
-  login = 'login',
-  approvePost = 'approvePost',
-}
 
 export type TweetRead = TweetV2PostTweetResult['data'];
 

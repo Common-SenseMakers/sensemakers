@@ -35,15 +35,15 @@ const mockedOrcid = instance(MockedOrcid);
 
 /** mocked twitter */
 const twitter = new TwitterService({
-  key: process.env.TWITTER_API_KEY as string,
-  secret: process.env.TWITTER_API_SECRET_KEY as string,
+  clientId: process.env.TWITTER_CLIENT_ID as string,
+  clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
 });
 const MockedTwitter = spy(twitter);
 when(MockedTwitter.handleSignupData(anything())).thenCall(
   (data: TwitterSignupData): TwitterUserDetails => {
     return {
-      user_id: data.oauth_verifier,
-      profile: { screen_name: TEST_TWITTER_NAME },
+      user_id: data.code,
+      profile: { id: '1', name: 'TestName', username: 'testhandle' },
     };
   }
 );
