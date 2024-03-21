@@ -16,18 +16,18 @@ export enum PLATFORM {
  * - write: credentials or other data needed for creating new posts in the name of the user
  */
 
-export interface PlatformUserId {
+export interface WithPlatformUserId {
   user_id: string;
 }
 
 export interface UserDetailsBase<P = any, R = any, W = any>
-  extends PlatformUserId {
+  extends WithPlatformUserId {
   profile?: P;
   read?: R;
   write?: W;
 }
 
-export interface UserDetailsReadBase<P> extends PlatformUserId {
+export interface UserDetailsReadBase<P> extends WithPlatformUserId {
   profile?: P;
   read: boolean;
   write: boolean;

@@ -3,6 +3,11 @@ import { TweetV2PostTweetResult } from 'twitter-api-v2';
 import { UserDetailsBase } from './types';
 
 /** TWITTER */
+
+export type TwitterGetContextParams = {
+  type: 'authorize' | 'authenticate';
+};
+
 export interface TwitterSignupContext {
   oauth_token: string;
   oauth_token_secret: string;

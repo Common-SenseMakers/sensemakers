@@ -17,6 +17,7 @@ export const AppPlatformManager = (props: {}) => {
     revokeApproval: revokeTwitter,
     isConnecting: isConnectingTwitter,
     isApproving: isApprovingTwitter,
+    needConnect: needConnectTwitter,
   } = useTwitterContext();
 
   const {
@@ -24,21 +25,6 @@ export const AppPlatformManager = (props: {}) => {
     isConnecting: isConnectingNanopub,
     needAuthorize: needAuthorizeNanopub,
   } = useNanopubContext();
-
-  const { connectedUser } = useAccountContext();
-
-  /** need authorize twitter if not connected if no read access provided */
-  const needConnectTwitter =
-    !connectedUser ||
-    !connectedUser[PLATFORM.Twitter] ||
-    !connectedUser[PLATFORM.Twitter].length ||
-    !connectedUser[PLATFORM.Twitter][0].read;
-
-  const needApproveTwitter =
-    !connectedUser ||
-    !connectedUser[PLATFORM.Twitter] ||
-    !connectedUser[PLATFORM.Twitter].length ||
-    !connectedUser[PLATFORM.Twitter][0].write;
 
   return (
     <Box fill>
@@ -71,7 +57,7 @@ export const AppPlatformManager = (props: {}) => {
           <AppButton
             style={{ width: '50%' }}
             primary
-            disabled={!needApproveTwitter}
+            disabled={!needConnectTwitter}
             loading={isApprovingTwitter}
             onClick={() => {
               if (approveTwitter) {
@@ -81,7 +67,7 @@ export const AppPlatformManager = (props: {}) => {
             label={t(I18Keys.approveTwitterBtn)}></AppButton>
         </Box>
 
-        {!needApproveTwitter ? (
+        {!needConnectTwitter ? (
           <AppCard margin={{ top: 'small' }}>
             <Text>
               <Anchor

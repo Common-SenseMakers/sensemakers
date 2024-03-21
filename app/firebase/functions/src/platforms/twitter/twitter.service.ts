@@ -1,10 +1,11 @@
+import { TweetV2PostTweetResult, TwitterApi } from 'twitter-api-v2';
+
 import {
+  TwitterGetContextParams,
   TwitterSignupContext,
   TwitterSignupData,
   TwitterUserDetails,
-} from 'src/@shared/types.twitter';
-import { TweetV2PostTweetResult, TwitterApi } from 'twitter-api-v2';
-
+} from '../../@shared/types.twitter';
 import { TWITTER_CALLBACK_URL } from '../../config/config.runtime';
 import { PlatformService } from '../platforms.interface';
 
@@ -44,11 +45,15 @@ export class TwitterService
     });
   }
 
-  public async getSignupContext() {
+  public async getSignupContext(
+    userId?: string,
+    params?: TwitterGetContextParams
+  ) {
     const client = this.getGenericClient();
+    const type = params ? params.type : 'authenticate';
 
     const authDetails = await client.generateAuthLink(TWITTER_CALLBACK_URL, {
-      linkMode: 'authorize',
+      linkMode: type,
     });
 
     return authDetails;

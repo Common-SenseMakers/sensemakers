@@ -3,7 +3,10 @@ import { RequestHandler } from 'express';
 import { PLATFORM } from '../@shared/types';
 import { logger } from '../instances/logger';
 import { Services } from '../middleware/services';
-import { twitterSignupDataSchema } from './auth.schema';
+import {
+  twitterGetSignupContextSchema,
+  twitterSignupDataSchema,
+} from './auth.schema';
 import { getAuthenticatedUser } from './controllers.utils';
 
 export const getSignupContextController: RequestHandler = async (
@@ -11,9 +14,24 @@ export const getSignupContextController: RequestHandler = async (
   response
 ) => {
   try {
+    const userId = getAuthenticatedUser(request);
     const services = (request as any).services as Services;
     const platform = request.params.platform as PLATFORM;
-    const context = await services.users.getSignupContext(platform);
+
+    const payload = await (async () => {
+      if (platform === PLATFORM.Twitter) {
+        return twitterGetSignupContextSchema.validate(request.body);
+      }
+
+      throw new Error(`Unexpected platform ${platform}`);
+    })();
+
+    const context = await services.users.getSignupContext(
+      platform,
+      userId,
+      payload
+    );
+
     response.status(200).send({ success: true, data: context });
   } catch (error) {
     logger.error('error', error);

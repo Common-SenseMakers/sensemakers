@@ -1,4 +1,4 @@
-import { PLATFORM, UserDetailsBase } from '../@shared/types';
+import { PLATFORM } from '../@shared/types';
 import { IdentityPlatforms } from '../platforms/platforms.interface';
 import { UsersRepository } from './users.repository';
 
@@ -28,9 +28,15 @@ export class UsersService {
    * If the user is not defined (first time), the details are stored on a temporary
    * collection and associated to a random signup_token
    */
-  public async getSignupContext(platform: PLATFORM, userId?: string) {
-    const context =
-      await this.getIdentityService(platform).getSignupContext(userId);
+  public async getSignupContext(
+    platform: PLATFORM,
+    userId?: string,
+    params?: any
+  ) {
+    const context = await this.getIdentityService(platform).getSignupContext(
+      userId,
+      params
+    );
 
     if (userId) {
       await this.repo.addUserDetails(userId, platform, context);
@@ -53,15 +59,14 @@ export class UsersService {
      * validate the signup data for this platform and convert it into
      * user details
      */
-    const userDetails = (await this.getIdentityService(
-      platform
-    ).handleSignupData(signupData)) as UserDetailsBase;
+    const userDetails =
+      await this.getIdentityService(platform).handleSignupData(signupData);
 
     let userId = _userId;
 
     /** create user if it does not exist */
     if (!_userId) {
-      userId = userDetails.user_id;
+      userId = `${platform}:${userDetails.user_id}`;
       await this.repo.createUser(userId, { [platform]: [userDetails] });
     } else {
       if (!userId) throw new Error('unexpected');
