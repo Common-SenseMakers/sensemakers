@@ -3,7 +3,11 @@ import {
   TwitterSignupData,
   TwitterUserDetails,
 } from 'src/@shared/types.twitter';
-import { TweetV2PostTweetResult, TwitterApi } from 'twitter-api-v2';
+import {
+  TweetV2PaginableTimelineResult,
+  TweetV2PostTweetResult,
+  TwitterApi,
+} from 'twitter-api-v2';
 
 import { TWITTER_CALLBACK_URL } from '../../config/config.runtime';
 import { PlatformService } from '../platforms.interface';
@@ -16,6 +20,11 @@ export interface TwitterApiCredentials {
 export interface UserClientParameters {
   oauth_token: string;
   oauth_token_secret: string;
+}
+
+export interface TwitterQueryParameters {
+  user_id: string;
+  start_time: string;
 }
 
 export class TwitterService
@@ -82,7 +91,14 @@ export class TwitterService
     return result.data;
   }
 
-  async fetch() {
-    return [];
+  async fetch(
+    params: TwitterQueryParameters
+  ): Promise<TweetV2PaginableTimelineResult['data']> {
+    const client = this.getGenericClient();
+    const result = await client.v2.userTimeline(params.user_id, {
+      start_time: params.start_time,
+      max_results: 100,
+    });
+    return result.data.data;
   }
 }
