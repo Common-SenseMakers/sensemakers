@@ -9,15 +9,17 @@ import {
 } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
+import { useAccountContext } from '../app/AccountContext';
 import { useAppFetch } from '../app/app.fetch';
 import { PLATFORM } from '../shared/types';
 import {
+  TwitterGetContextParams,
   TwitterSignupContext,
-  TwitterSignupType,
-  TwitterUser,
 } from '../shared/types.twitter';
 
 const DEBUG = true;
+
+const LS_TWITTER_CONTEXT_KEY = 'twitter-signin-context';
 
 /** Manages the authentication process with Twitter */
 export type TwitterContextType = {
@@ -26,7 +28,7 @@ export type TwitterContextType = {
   revokeApproval: () => void;
   isConnecting: boolean;
   isApproving: boolean;
-  needAuthorize?: boolean;
+  needConnect?: boolean;
 };
 
 const TwitterContextValue = createContext<TwitterContextType | undefined>(
@@ -37,55 +39,73 @@ const TwitterContextValue = createContext<TwitterContextType | undefined>(
 export const TwitterContext = (props: PropsWithChildren) => {
   const verifierHandled = useRef(false);
 
+  const { connectedUser, refresh: refreshConnected } = useAccountContext();
+
   const [searchParams, setSearchParams] = useSearchParams();
-  const oauth_token_param = searchParams.get('oauth_token');
-  const oauth_verifier_param = searchParams.get('oauth_verifier');
+  const state_param = searchParams.get('state');
+  const code_param = searchParams.get('code');
 
   const appFetch = useAppFetch();
 
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [isApproving, setIsApproving] = useState<boolean>(false);
-  const [needAuthorize, setNeedAuthorize] = useState<boolean>();
 
-  const { data: siginContext } = useQuery<TwitterSignupContext>({
-    queryKey: ['twitterSignup'],
-    queryFn: async () => {
-      const context = await appFetch<TwitterSignupContext>(
-        `/auth/${PLATFORM.Twitter}/context`,
-        {
-          type: TwitterSignupType.login,
-        }
-      );
-      return context;
-    },
-  });
+  const needConnect = !connectedUser || !connectedUser[PLATFORM.Twitter];
 
-  const { data: approveContext } = useQuery<TwitterSignupContext>({
-    queryKey: ['twitterSignup'],
-    queryFn: async () => {
-      const context = await appFetch<TwitterSignupContext>(
-        `/auth/${PLATFORM.Twitter}/context`,
-        {
-          type: TwitterSignupType.approvePost,
-        }
-      );
-      return context;
-    },
-  });
+  const connect = async () => {
+    setIsConnecting(true);
 
-  const connect = siginContext
-    ? async () => {
-        setIsConnecting(true);
-        window.location.href = siginContext.url;
+    const params: TwitterGetContextParams = {
+      callback_url: window.location.href,
+    };
+    const siginContext = await appFetch<TwitterSignupContext>(
+      `/auth/${PLATFORM.Twitter}/context`,
+      params
+    );
+
+    /** remember the login context */
+    localStorage.setItem(LS_TWITTER_CONTEXT_KEY, JSON.stringify(siginContext));
+
+    /** go to twitter */
+    window.location.href = siginContext.url;
+  };
+
+  /** Listen to oauth verifier to send it to the backend */
+  useEffect(() => {
+    if (!verifierHandled.current && code_param && state_param) {
+      verifierHandled.current = true;
+
+      setIsConnecting(true);
+
+      const contextStr = localStorage.getItem(LS_TWITTER_CONTEXT_KEY);
+
+      if (contextStr === null) {
+        throw new Error('Twitter context not found');
       }
-    : undefined;
 
-  const approve = approveContext
-    ? async () => {
-        setIsApproving(true);
-        window.location.href = approveContext.url;
+      const context = JSON.parse(contextStr) as TwitterSignupContext;
+
+      if (context.state !== state_param) {
+        throw new Error('Undexpected state');
       }
-    : undefined;
+
+      appFetch(`/auth/${PLATFORM.Twitter}/signup`, {
+        ...context,
+        code: code_param,
+      }).then(() => {
+        searchParams.delete('state');
+        searchParams.delete('code');
+        setSearchParams(searchParams);
+        setIsConnecting(false);
+        refreshConnected();
+      });
+    }
+  }, [state_param, code_param, searchParams, setSearchParams]);
+
+  const approve = async () => {
+    setIsApproving(true);
+    window.location.href = '';
+  };
 
   const revokeApproval = async () => {
     const revokeLink = await appFetch<string>(
@@ -93,25 +113,6 @@ export const TwitterContext = (props: PropsWithChildren) => {
     );
     window.location.href = revokeLink;
   };
-
-  /** Listen to oauth verifier to send it to the backend */
-  useEffect(() => {
-    if (!verifierHandled.current && oauth_token_param && oauth_verifier_param) {
-      verifierHandled.current = true;
-
-      setIsConnecting(true);
-
-      appFetch(`/auth/twitter-verifier`, {
-        oauth_verifier: oauth_verifier_param,
-        oauth_token: oauth_token_param,
-      }).then(() => {
-        searchParams.delete('oauth_token');
-        searchParams.delete('oauth_verifier');
-        setSearchParams(searchParams);
-        setIsConnecting(false);
-      });
-    }
-  }, [oauth_token_param, oauth_verifier_param, searchParams, setSearchParams]);
 
   return (
     <TwitterContextValue.Provider
@@ -121,7 +122,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
         revokeApproval,
         isConnecting,
         isApproving,
-        needAuthorize,
+        needConnect,
       }}>
       {props.children}
     </TwitterContextValue.Provider>

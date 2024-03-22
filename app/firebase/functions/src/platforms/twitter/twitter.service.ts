@@ -1,23 +1,21 @@
+import { TweetV2PostTweetResult, TwitterApi } from 'twitter-api-v2';
+
 import {
+  TwitterGetContextParams,
   TwitterSignupContext,
   TwitterSignupData,
   TwitterUserDetails,
-} from 'src/@shared/types.twitter';
-import { TweetV2PostTweetResult, TwitterApi } from 'twitter-api-v2';
-
-import { TWITTER_CALLBACK_URL } from '../../config/config.runtime';
+} from '../../@shared/types.twitter';
 import { PlatformService } from '../platforms.interface';
 
 export interface TwitterApiCredentials {
-  key: string;
-  secret: string;
+  clientId: string;
+  clientSecret: string;
 }
 
-export interface UserClientParameters {
-  oauth_token: string;
-  oauth_token_secret: string;
-}
+/** check https://github.com/PLhery/node-twitter-api-v2/blob/master/doc/auth.md#oauth2-user-wide-authentication-flow for OAuth2 flow */
 
+/** Twitter service handles all interactions with Twitter API */
 export class TwitterService
   implements
     PlatformService<
@@ -30,53 +28,72 @@ export class TwitterService
 
   private getGenericClient() {
     return new TwitterApi({
-      appKey: this.credentials.key,
-      appSecret: this.credentials.secret,
+      clientId: this.credentials.clientId,
+      clientSecret: this.credentials.clientSecret,
     });
   }
 
-  private async getUserClient(params: UserClientParameters) {
-    return new TwitterApi({
-      appKey: this.credentials.key,
-      appSecret: this.credentials.secret,
-      accessToken: params.oauth_token,
-      accessSecret: params.oauth_token_secret,
-    });
+  private async getUserClient(accessToken: string) {
+    return new TwitterApi(accessToken);
   }
 
-  public async getSignupContext() {
+  public async getSignupContext(
+    userId?: string,
+    params?: TwitterGetContextParams
+  ) {
     const client = this.getGenericClient();
 
-    const authLink = await client.generateAuthLink(TWITTER_CALLBACK_URL, {
-      linkMode: 'authorize',
-    });
+    if (!params) {
+      throw new Error('params must be defined');
+    }
 
-    return authLink;
+    const authDetails = await client.generateOAuth2AuthLink(
+      params.callback_url,
+      {
+        scope: ['tweet.read', 'offline.access', 'users.read'],
+      }
+    );
+
+    return { ...authDetails, callback_url: params.callback_url };
   }
 
   async handleSignupData(data: TwitterSignupData): Promise<TwitterUserDetails> {
-    const client = await this.getUserClient(data);
-    const result = await client.login(data.oauth_verifier);
+    const client = this.getGenericClient();
+
+    const result = await client.loginWithOAuth2({
+      code: data.code,
+      codeVerifier: data.codeVerifier,
+      redirectUri: data.callback_url,
+    });
+
+    const { data: user } = await result.client.v2.me();
+
+    if (!result.refreshToken) {
+      throw new Error('Unexpected undefined refresh token');
+    }
+
+    if (!result.expiresIn) {
+      throw new Error('Unexpected undefined refresh token');
+    }
 
     const twitter: TwitterUserDetails = {
-      user_id: result.userId,
+      user_id: user.id,
       write: {
         accessToken: result.accessToken,
-        accessSecret: result.accessSecret,
+        refreshToken: result.refreshToken,
+        expiresIn: result.expiresIn,
       },
-      profile: {
-        screen_name: result.screenName,
-      },
+      profile: user,
     };
 
     return twitter;
   }
 
   async postMessageTwitter(
-    params: UserClientParameters,
-    text: string
+    text: string,
+    accessToken: string
   ): Promise<TweetV2PostTweetResult['data']> {
-    const client = await this.getUserClient(params);
+    const client = await this.getUserClient(accessToken);
     const result = await client.v2.tweet(text);
 
     return result.data;

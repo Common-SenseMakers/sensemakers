@@ -10,13 +10,21 @@
       "env": {
         "NODE_ENV": "test",
         "FIRESTORE_EMULATOR_HOST": "localhost:8080",
-        "LOG_LEVEL_MSG": "warn",
-        "LOG_LEVEL_OBJ": "warn"
+        "LOG_LEVEL_MSG": "debug",
+        "LOG_LEVEL_OBJ": "debug"
       },
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/mocha",
       "args": ["--config", "./.mocharc.js", "test/__tests__/**/*.test.ts"],
       "outputCapture": "std",
       "console": "integratedTerminal"
+    },
+    {
+      "name": "attach",
+      "type": "node",
+      "request": "attach",
+      "port": 9229,
+      "restart": true,
+      "skipFiles": ["<node_internals>/**"]
     }
   ]
 }
