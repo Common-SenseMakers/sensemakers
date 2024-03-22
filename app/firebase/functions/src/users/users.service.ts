@@ -137,6 +137,12 @@ export class UsersService {
 
         const userId = existingUserWithPlatformAccount.userId;
 
+        await this.repo.setPlatformDetails(
+          userId,
+          platform,
+          authenticatedDetails
+        );
+
         return {
           ourAccessToken: this.generateOurAccessToken({
             userId,

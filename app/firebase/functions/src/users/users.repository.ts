@@ -65,7 +65,7 @@ export class UsersRepository {
     const platformIds_property: keyof UserWithId = 'platformIds';
     const query = this.db.collections.users.where(
       platformIds_property,
-      '==',
+      'array-contains',
       prefixed_user_id
     );
     const snap = await query.get();
@@ -80,7 +80,7 @@ export class UsersRepository {
       );
     }
 
-    return snap.docs[0].data() as AppUser;
+    return { userId: snap.docs[0].id, ...snap.docs[0].data() } as AppUser;
   }
 
   public async createUser(userId: string, user: AppUserCreate) {
