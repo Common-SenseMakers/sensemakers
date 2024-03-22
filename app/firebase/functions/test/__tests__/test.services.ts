@@ -63,7 +63,7 @@ when(MockedTwitter.handleSignupData(anything())).thenCall(
     return {
       user_id: data.code,
       write: {
-        accessToken: process.env.ACCESS_TOKEN_TEST_USER_0 as string,
+        accessToken: process.env.TWITTER_ACCESS_TOKEN as string,
         refreshToken: '',
         expiresIn: 0,
       },
