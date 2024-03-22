@@ -1,5 +1,6 @@
 import {
   TwitterGetContextParams,
+  TwitterQueryParameters,
   TwitterSignupContext,
   TwitterSignupData,
   TwitterUserDetails,
@@ -19,13 +20,6 @@ export interface TwitterApiCredentials {
 }
 
 /** check https://github.com/PLhery/node-twitter-api-v2/blob/master/doc/auth.md#oauth2-user-wide-authentication-flow for OAuth2 flow */
-
-export interface TwitterQueryParameters {
-  user_id: string;
-  start_time?: string;
-  end_time?: string;
-  max_results?: number;
-}
 
 /** Twitter service handles all interactions with Twitter API */
 export class TwitterService
