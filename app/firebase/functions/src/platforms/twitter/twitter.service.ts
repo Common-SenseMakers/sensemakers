@@ -4,6 +4,7 @@ import {
   TwitterUserDetails,
 } from 'src/@shared/types.twitter';
 import {
+  TweetV2,
   TweetV2PaginableTimelineResult,
   TweetV2PostTweetResult,
   TwitterApi,
@@ -103,6 +104,19 @@ export class TwitterService
       max_results: params.max_results,
       'tweet.fields': ['created_at', 'author_id'],
     });
-    return result.data.data;
+    const resultCollection: TweetV2[] = result.data.data;
+    let nextToken = result.meta.next_token;
+    while (nextToken) {
+      const nextResult = await client.v2.userTimeline(params.user_id, {
+        start_time: params.start_time,
+        end_time: params.end_time,
+        max_results: params.max_results,
+        'tweet.fields': ['created_at', 'author_id'],
+        pagination_token: nextToken,
+      });
+      resultCollection.push(...nextResult.data.data);
+      nextToken = nextResult.meta.next_token;
+    }
+    return resultCollection;
   }
 }

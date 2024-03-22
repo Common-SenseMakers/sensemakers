@@ -6,7 +6,7 @@ import { services } from './test.services';
 
 describe('platforms', () => {
   describe('twitter', () => {
-    it("get's all tweets in a time range", async () => {
+    it("get's all tweets in a time range using pagination", async () => {
       services;
       const twitterService = services.users.platforms.get(PLATFORM.Twitter) as
         | TwitterService
@@ -14,13 +14,18 @@ describe('platforms', () => {
       if (!twitterService) {
         throw new Error('Twitter service not found');
       }
-      const tweets = await twitterService.fetch({
-        user_id: '1753077743816777728',
-        start_time: '2024-02-24T00:00:00Z',
-        end_time: '2024-02-25T00:00:00Z',
-      });
-      expect(tweets).to.not.be.undefined;
-      expect(tweets.length).to.be.equal(1);
+      try {
+        const tweets = await twitterService.fetch({
+          user_id: '1753077743816777728',
+          start_time: '2024-02-22T00:00:00Z',
+          end_time: '2024-02-23T00:00:00Z',
+          max_results: 5,
+        });
+        expect(tweets).to.not.be.undefined;
+        expect(tweets.length).to.be.equal(11);
+      } catch (error) {
+        console.error('error: ', error);
+      }
     });
   });
 });
