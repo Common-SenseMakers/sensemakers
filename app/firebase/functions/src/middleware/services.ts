@@ -2,8 +2,10 @@ import { RequestHandler } from 'express';
 
 import { PLATFORM } from '../@shared/types';
 import {
-  TWITTER_API_KEY,
-  TWITTER_API_SECRET_KEY,
+  OUR_EXPIRES_IN,
+  OUR_TOKEN_SECRET,
+  TWITTER_CLIENT_ID,
+  TWITTER_CLIENT_SECRET,
 } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
 import { OrcidService } from '../platforms/orcid/orcid.service';
@@ -25,13 +27,10 @@ export const attachServices: RequestHandler = async (
   const userRepo = new UsersRepository(db);
   const identityServices: IdentityPlatforms = new Map();
 
-  /** mocked orcid */
   const orcid = new OrcidService();
-
-  /** mocked twitter */
   const twitter = new TwitterService({
-    key: TWITTER_API_KEY.value(),
-    secret: TWITTER_API_SECRET_KEY.value(),
+    clientId: TWITTER_CLIENT_ID.value(),
+    clientSecret: TWITTER_CLIENT_SECRET.value(),
   });
 
   /** all identity services */
@@ -39,7 +38,10 @@ export const attachServices: RequestHandler = async (
   identityServices.set(PLATFORM.Twitter, twitter);
 
   /** users service */
-  const usersService = new UsersService(userRepo, identityServices);
+  const usersService = new UsersService(userRepo, identityServices, {
+    tokenSecret: OUR_TOKEN_SECRET.value(),
+    expiresIn: OUR_EXPIRES_IN,
+  });
 
   const services: Services = {
     users: usersService,

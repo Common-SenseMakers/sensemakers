@@ -1,8 +1,8 @@
 import { RequestHandler } from 'express';
 
-import { verifyAccessToken } from '../auth.utils';
 import { ENVIRONMENTS } from '../config/ENVIRONMENTS';
 import { NODE_ENV } from '../config/config.runtime';
+import { getServices } from '../controllers/controllers.utils';
 import { logger } from '../instances/logger';
 
 export const authenticate: RequestHandler = async (request, response, next) => {
@@ -12,8 +12,10 @@ export const authenticate: RequestHandler = async (request, response, next) => {
   }
 
   try {
+    const services = getServices(request);
     const parts = request.headers.authorization.split(' ');
 
+    // TODO: maybe this should be removed and use mocks?
     if (NODE_ENV === ENVIRONMENTS.TEST) {
       (request as any).userId = parts.length > 1 ? parts[1] : '';
       return next();
@@ -21,7 +23,7 @@ export const authenticate: RequestHandler = async (request, response, next) => {
 
     const token = parts[1];
     logger.debug(`Authentica request token: ${token.slice(0, 12)}`);
-    const userId = verifyAccessToken(token);
+    const userId = services.users.verifyAccessToken(token);
 
     logger.debug(`Authenticated user: ${userId}`);
 
