@@ -7,7 +7,7 @@ import {
   twitterGetSignupContextSchema,
   twitterSignupDataSchema,
 } from './auth.schema';
-import { getAuthenticatedUser } from './controllers.utils';
+import { getAuthenticatedUser, getServices } from './controllers.utils';
 
 export const getSignupContextController: RequestHandler = async (
   request,
@@ -44,9 +44,9 @@ export const handleSignupController: RequestHandler = async (
   response
 ) => {
   try {
-    const services = (request as any).services as Services;
     const platform = request.params.platform as PLATFORM;
 
+    const services = getServices(request);
     const userId = getAuthenticatedUser(request);
 
     const payload = await (async () => {

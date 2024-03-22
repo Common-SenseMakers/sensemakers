@@ -16,6 +16,20 @@ import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { UsersRepository } from '../../src/users/users.repository';
 import { UsersService } from '../../src/users/users.service';
 
+const mandatory = [
+  'TWITTER_CLIENT_ID',
+  'TWITTER_CLIENT_SECRET',
+  'OUR_TOKEN_SECRET',
+];
+
+mandatory.forEach((varName) => {
+  if (!process.env[varName]) {
+    throw new Error(
+      `${varName} undefined in process.env (derived from .env.test)`
+    );
+  }
+});
+
 export const TEST_ORCID_PROFILE = { name: 'Orcid Scientist' };
 
 export const TEST_TWITTER_PROFILE = {
@@ -64,7 +78,10 @@ identityServices.set(PLATFORM.Orcid, mockedOrcid);
 identityServices.set(PLATFORM.Twitter, mockedTWitter);
 
 /** users service */
-const usersService = new UsersService(userRepo, identityServices);
+const usersService = new UsersService(userRepo, identityServices, {
+  tokenSecret: process.env.OUR_TOKEN_SECRET as string,
+  expiresIn: '30d',
+});
 
 export const services = {
   users: usersService,

@@ -6,8 +6,11 @@ import {
   DefinedIfTrue,
   PLATFORM,
   UserDetailsBase,
+  UserWithId,
+  WithPlatformUserId,
 } from '../@shared/types';
 import { DBInstance } from '../db/instance';
+import { getPrefixedUserId } from './users.utils';
 
 export class UsersRepository {
   constructor(protected db: DBInstance) {}
@@ -49,8 +52,35 @@ export class UsersRepository {
     }
 
     return {
+      userId,
       ...doc.data(),
     } as unknown as DefinedIfTrue<T, AppUser>;
+  }
+
+  /** Sensistive method! Call only if the platform and user_id were authenticated */
+  public async getUserWithPlatformAccount(platform: PLATFORM, user_id: string) {
+    const prefixed_user_id = getPrefixedUserId(platform, user_id);
+
+    /** protect against changes in the property name */
+    const platformIds_property: keyof UserWithId = 'platformIds';
+    const query = this.db.collections.users.where(
+      platformIds_property,
+      '==',
+      prefixed_user_id
+    );
+    const snap = await query.get();
+
+    if (snap.empty) {
+      return undefined;
+    }
+
+    if (snap.size > 1) {
+      throw new Error(
+        `Data corrupted. Unexpected multiple users with the same platform user_id ${prefixed_user_id}`
+      );
+    }
+
+    return snap.docs[0].data() as AppUser;
   }
 
   public async createUser(userId: string, user: AppUserCreate) {
@@ -60,19 +90,56 @@ export class UsersRepository {
   }
 
   /** append userDetails of a given platform */
-  public async addUserDetails(
+  public async setPlatformDetails(
     userId: string,
     platform: PLATFORM,
-    details: any
+    details: WithPlatformUserId
   ) {
-    const ref = await this.getUserRef(userId, true);
-    await ref.update({
-      [platform]: firestore.FieldValue.arrayUnion(details),
-    });
+    const prefixed_user_id = getPrefixedUserId(platform, details.user_id);
+
+    /** check if this platform user_id */
+    const existingUserWithPlatformAccount =
+      await this.getUserWithPlatformAccount(platform, details.user_id);
+
+    const userRef = await this.getUserRef(userId, true);
+
+    if (existingUserWithPlatformAccount) {
+      if (existingUserWithPlatformAccount.userId !== userId) {
+        throw new Error(
+          `Unexpected, existing user ${existingUserWithPlatformAccount.userId} with this platform user_id ${prefixed_user_id} does not match the userId provided ${userId}`
+        );
+      }
+
+      /**  overwrite previous details for that user */
+      const accounts = existingUserWithPlatformAccount[platform];
+      if (accounts === undefined) {
+        throw new Error('Unexpected');
+      }
+
+      /** replace existing details */
+      const ix = accounts.findIndex((a) => a.user_id === details.user_id);
+      accounts[ix] = details;
+
+      /** replace entire array */
+      await userRef.update({
+        [platform]: accounts,
+      });
+
+      return;
+    } else {
+      const existingUser = await this.getUser(userId);
+      const platformIds = existingUser ? existingUser.platformIds : [];
+      /** append a new details entry in the platform array and store the prefixed platform id in the platformIds array */
+      const platformIds_property: keyof UserWithId = 'platformIds';
+      await userRef.update({
+        [platformIds_property]: platformIds.push(prefixed_user_id),
+        [platform]: firestore.FieldValue.arrayUnion(details),
+      });
+    }
   }
 
   /** remove userDetails of a given platform */
-  public async removeUserDetails(
+  public async removePlatformDetails(
     userId: string,
     platform: PLATFORM,
     user_id: string

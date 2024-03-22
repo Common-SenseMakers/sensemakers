@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 
 import { PLATFORM } from '../../src/@shared/types';
-import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import {
   TEST_ORCID_PROFILE,
   TEST_TWITTER_PROFILE,
@@ -20,18 +19,28 @@ describe('signups', () => {
     it('get orcid authlink', async () => {
       const { link } = await services.users.getSignupContext(PLATFORM.Orcid);
       logger.debug(`link: ${link}`);
-      expect(link).to.not.be.undefined;
+      expect(link.startsWith('https://orcid.org')).to.be.true;
     });
 
     it('handle orcid code (create new user)', async () => {
-      userId = await services.users.handleSignup(PLATFORM.Orcid, {
+      const result = await services.users.handleSignup(PLATFORM.Orcid, {
         code: orcidId,
       });
 
+      if (!result) {
+        throw Error('unexpected');
+      }
+
+      expect(result.ourAccessToken).to.not.be.undefined;
+
+      userId = result.userId;
+
       const user = await services.users.repo.getUser(userId);
       expect(user).to.not.be.undefined;
+      expect(userId.startsWith('orcid:')).to.be.true;
 
       if (user && user.orcid && user.orcid.length === 1) {
+        expect(user.platformIds).to.include(userId);
         expect(user.orcid[0]).to.not.be.undefined;
         expect(user.orcid[0].user_id).to.eq(orcidId);
         expect(user.orcid[0].profile?.name).to.eq(TEST_ORCID_PROFILE.name);
@@ -40,10 +49,11 @@ describe('signups', () => {
   });
 
   describe('connect twitter', () => {
-    let userId: string;
-    let accessToken: string | undefined;
-
     it('get twitter oauth details', async () => {
+      if (!userId) {
+        throw new Error('unexpected');
+      }
+
       const details = await services.users.getSignupContext(
         PLATFORM.Twitter,
         userId,
@@ -54,9 +64,19 @@ describe('signups', () => {
 
       logger.debug(`details:`, { details });
       expect(details).to.not.be.undefined;
+
+      expect(details.callback_url).to.not.be.undefined;
+      expect(details.codeChallenge).to.not.be.undefined;
+      expect(details.codeVerifier).to.not.be.undefined;
+      expect(details.state).to.not.be.undefined;
+      expect(details.url.startsWith('https://twitter.com')).to.be.true;
     });
 
     it('handle twitter signup', async () => {
+      if (!userId) {
+        throw new Error('unexpected');
+      }
+
       await services.users.handleSignup(
         PLATFORM.Twitter,
         {
@@ -80,9 +100,7 @@ describe('signups', () => {
       expect(user.userId).to.eq(userId);
       expect(twitterDetails.length).to.eq(1);
       expect(twitterDetails[0].profile?.id).to.eq(TEST_TWITTER_PROFILE.id);
-
-      accessToken = twitterDetails[0].write?.accessToken;
-      expect(accessToken).to.not.be.undefined;
+      expect(twitterDetails[0].write?.accessToken).to.not.be.undefined;
     });
   });
 });

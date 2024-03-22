@@ -1,6 +1,7 @@
 import { Request } from 'express';
 
 import { DefinedIfTrue } from '../@shared/types';
+import { Services } from '../middleware/services';
 
 export const getAuthenticatedUser = <T extends boolean>(
   request: Request,
@@ -11,4 +12,12 @@ export const getAuthenticatedUser = <T extends boolean>(
     throw new Error(`userId not found on request`);
   }
   return userId;
+};
+
+export const getServices = (request: Request) => {
+  const services = (request as any).services as Services;
+  if (!services) {
+    throw new Error(`Services not found`);
+  }
+  return services;
 };

@@ -50,7 +50,7 @@ export class TwitterService
     const authDetails = await client.generateOAuth2AuthLink(
       params.callback_url,
       {
-        scope: ['tweet.read', 'offline.access'],
+        scope: ['tweet.read', 'offline.access', 'users.read'],
       }
     );
 

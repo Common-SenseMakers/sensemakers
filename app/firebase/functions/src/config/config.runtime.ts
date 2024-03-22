@@ -53,7 +53,7 @@ export const FUNCTIONS_PY_URL =
     : 'https://sm-function-post-parser-eeshylf4jq-uc.a.run.app/';
 
 export const OUR_TOKEN_SECRET = envRuntime.OUR_TOKEN_SECRET;
-export const TOKEN_EXPIRATION = '30d';
+export const OUR_EXPIRES_IN = '30d';
 
 export const NANOPUBS_SPARQL_SERVER =
   'https://query.np.trustyuri.net/repo/full';

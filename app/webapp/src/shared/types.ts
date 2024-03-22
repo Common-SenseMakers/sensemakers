@@ -1,6 +1,6 @@
 import { NanopubUserDetails } from './types.nanopubs';
-import { OrcidSignupData, OrcidUserDetails } from './types.orcid';
-import { TwitterSignupData, TwitterUserDetails } from './types.twitter';
+import { OrcidUserDetails } from './types.orcid';
+import { TwitterUserDetails } from './types.twitter';
 
 export enum PLATFORM {
   Orcid = 'orcid',
@@ -17,6 +17,8 @@ export enum PLATFORM {
  */
 
 export interface WithPlatformUserId {
+  /** We are using user_id to refer the id of the user on a given platform and leave
+   * userId for our own internal id for users. */
   user_id: string;
 }
 
@@ -34,8 +36,9 @@ export interface UserDetailsReadBase<P> extends WithPlatformUserId {
 }
 
 /** The AppUser object combines the details of each platform */
-interface UserWithId {
+export interface UserWithId {
   userId: string;
+  platformIds: string[]; // redundant array with the prefixed user_id of all the authenticated platforms for a given user
 }
 
 /**
@@ -49,10 +52,7 @@ export interface AppUser extends UserWithId {
   [PLATFORM.Nanopubs]?: NanopubUserDetails[];
 }
 
-export interface AppUserCreate {
-  [PLATFORM.Orcid]?: OrcidSignupData;
-  [PLATFORM.Twitter]?: TwitterSignupData;
-}
+export type AppUserCreate = Omit<AppUser, 'userId'>;
 
 /**
  * The AppUserRead replaces the details with read details (keeps the profile and users
@@ -68,3 +68,8 @@ export interface AppUserRead extends UserWithId {
 export type DefinedIfTrue<V, R> = V extends true ? R : R | undefined;
 
 export type HexStr = `0x${string}`;
+
+export interface OurTokenConfig {
+  tokenSecret: string;
+  expiresIn: string;
+}

@@ -2,6 +2,8 @@ import { RequestHandler } from 'express';
 
 import { PLATFORM } from '../@shared/types';
 import {
+  OUR_EXPIRES_IN,
+  OUR_TOKEN_SECRET,
   TWITTER_CLIENT_ID,
   TWITTER_CLIENT_SECRET,
 } from '../config/config.runtime';
@@ -36,7 +38,10 @@ export const attachServices: RequestHandler = async (
   identityServices.set(PLATFORM.Twitter, twitter);
 
   /** users service */
-  const usersService = new UsersService(userRepo, identityServices);
+  const usersService = new UsersService(userRepo, identityServices, {
+    tokenSecret: OUR_TOKEN_SECRET.value(),
+    expiresIn: OUR_EXPIRES_IN,
+  });
 
   const services: Services = {
     users: usersService,
