@@ -106,10 +106,12 @@ export class TwitterService
   }
 
   async fetch(
-    params: TwitterQueryParameters
+    params: TwitterQueryParameters,
+    accessToken: string
   ): Promise<TweetV2PaginableTimelineResult['data']> {
-    const client = await this.getGenericClient().appLogin();
-    const result = await client.v2.userTimeline(params.user_id, {
+    const client = await this.getUserClient(accessToken);
+    const readOnlyClient = client.readOnly;
+    const result = await readOnlyClient.v2.userTimeline(params.user_id, {
       start_time: params.start_time,
       end_time: params.end_time,
       max_results: params.max_results,
@@ -118,7 +120,7 @@ export class TwitterService
     const resultCollection: TweetV2[] = result.data.data;
     let nextToken = result.meta.next_token;
     while (nextToken) {
-      const nextResult = await client.v2.userTimeline(params.user_id, {
+      const nextResult = await readOnlyClient.v2.userTimeline(params.user_id, {
         start_time: params.start_time,
         end_time: params.end_time,
         max_results: params.max_results,
