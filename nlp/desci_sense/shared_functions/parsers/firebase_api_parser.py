@@ -2,10 +2,14 @@ from confection import Config
 
 from loguru import logger
 from typing import List, Dict
+from operator import itemgetter
+import asyncio
 
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
-from langchain_core.runnables import RunnableParallel
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnableParallel, RunnableConfig
+from langchain_core.prompts import ChatPromptTemplate
 
 from ..interface import ParserResult, ParserSupport
 from ..init import MAX_SUMMARY_LENGTH
@@ -16,8 +20,14 @@ from ..postprocessing import (
     convert_predicted_relations_to_rdf_triplets,
     convert_triplets_to_graph,
     convert_keywords_to_triplets,
+    convert_raw_outputs_to_st_format,
 )
-from ..postprocessing.output_parsers import TagTypeParser, KeywordParser
+from ..postprocessing.output_parsers import (
+    TagTypeParser,
+    KeywordParser,
+    AllowedTermsParser,
+    ALLOWED_TAGS_DELIMITER,
+)
 from ..dataloaders import scrape_post
 from ..enum_dict import EnumDict, EnumDictKey
 from ..web_extractors.metadata_extractors import (
@@ -25,6 +35,7 @@ from ..web_extractors.metadata_extractors import (
     RefMetadata,
     extract_metadata_by_type,
     extract_all_metadata_by_type,
+    extract_posts_ref_metadata_dict,
 )
 
 from ..prompting.jinja.zero_ref_template import zero_ref_template
@@ -37,6 +48,14 @@ class PromptCase(EnumDictKey):
     ZERO_REF = "ZERO_REF"
     SINGLE_REF = "SINGLE_REF"
     MULTI_REF = "MULTI_REF"
+
+
+def _extract_msg_content(input_prompt: ChatPromptTemplate) -> str:
+    """
+    Utility function to extract the string content of the ChatPromptTemplate module
+    """
+    message = input_prompt.messages[0].content
+    return message
 
 
 def set_metadata_extraction_type(extract_type: str):
@@ -116,6 +135,9 @@ class FirebaseAPIParser:
 
         # organize information in ontology for quick retrieval by prompter
         self.init_prompt_case_dict(self.ontology)
+
+        # setup semantics chain
+        self.init_unified_semantics_chain()
 
         # collect all allowed labels
         self.all_labels = []
@@ -207,6 +229,28 @@ class FirebaseAPIParser:
         ] = multi_ref_template
 
         self.prompt_case_dict = prompt_case_dict
+
+    def init_unified_semantics_chain(self):
+        """
+        TODO
+        """
+        self.parser_chain = self.prompt_template | self.parser_model | StrOutputParser()
+
+        _merge = ChatPromptTemplate.from_template(
+            "{raw_parser_chain_output} \n\n "
+            + ALLOWED_TAGS_DELIMITER
+            + "{allowed_tags}"
+        )
+
+        self.uni_semantics_chain = (
+            {
+                "raw_parser_chain_output": self.parser_chain,
+                "allowed_tags": itemgetter("allowed_tags"),
+            }
+            | _merge
+            | _extract_msg_content
+            | AllowedTermsParser()
+        )
 
     @property
     def all_allowed_tags(self) -> List[str]:
@@ -645,3 +689,87 @@ class FirebaseAPIParser:
         result = self.process_ref_post_st(post)
 
         return result
+
+    def get_post_case(self, post: RefPost) -> PromptCase:
+        # check how many external references post mentions
+        if len(post.ref_urls) == 0:
+            case = PromptCase.ZERO_REF
+
+        else:
+            # at least one external reference
+            if len(post.ref_urls) == 1:
+                case = PromptCase.SINGLE_REF
+
+            else:
+                case = PromptCase.MULTI_REF
+
+        return case
+
+    def create_prompts_parallel(
+        self,
+        posts: List[RefPost],
+        md_dict: Dict[str, RefMetadata],
+    ) -> List[str]:
+        cases = [self.get_post_case(post) for post in posts]
+
+        prompts = []
+        for case, post in zip(cases, posts):
+            # get relevant metadata list
+            md_list = [md_dict.get(url) for url in post.ref_urls if md_dict.get(url)]
+            s_prompt = self.create_semantics_prompt_by_case(
+                post,
+                case,
+                md_list,
+            )
+            prompt = {
+                "input": s_prompt,
+                "allowed_tags": self.prompt_case_dict[case]["labels"],
+            }
+            if self.kw_mode_enabled:
+                kw_prompt = self.create_kw_prompt(post, md_list)
+                prompt["kw_input"] = kw_prompt
+            prompts.append(prompt)
+
+        return prompts
+
+    def abatch_process_ref_post(
+        self, inputs: List[RefPost], batch_size: int = 5
+    ) -> List[Dict]:
+        """Batch process a list of RefPosts.
+
+        Args:
+            inputs (List[RefPost]): input RefPosts.
+            batch_size (int): maximum number of concurrent calls to make. Defaults to 5.
+
+        Returns:
+            List[Dict]: list of processed results
+        """
+        # extract all posts metadata
+        md_dict = extract_posts_ref_metadata_dict(inputs, self.md_extract_method)
+
+        # create list of full prompts
+        prompts = self.create_prompts_parallel(inputs, md_dict)
+
+        # create runnable parallel
+
+        semantics_chain = self.uni_semantics_chain
+
+        if self.kw_mode_enabled:
+            kw_chain = self.kw_extraction.get("chain")
+            final_chain = RunnableParallel(semantics=semantics_chain, keywords=kw_chain)
+        else:
+            final_chain = RunnableParallel(semantics=semantics_chain)
+
+        # setup async batch job
+        config = RunnableConfig(max_concurrency=batch_size)
+
+        results = asyncio.run(final_chain.abatch(prompts, config=config))
+
+        st_outputs = convert_raw_outputs_to_st_format(
+            inputs,
+            results,
+            prompts,
+            md_dict,
+        )
+
+        return st_outputs

@@ -181,3 +181,7 @@ def render_to_py_dict(obj_dict, obj_name: str = "object", out_path: str = "outpu
 
     with open(out_path, "w") as file:
         file.write(rendered_content)
+
+
+def flatten(nested_lists):
+    return [item for row in nested_lists for item in row]

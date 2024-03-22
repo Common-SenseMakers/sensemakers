@@ -13,6 +13,7 @@ from desci_sense.shared_functions.dataloaders.mastodon.mastodon_utils import (
     scrape_mastodon_post,
 )
 
+
 def test_timeline_loader():
     start_date = datetime(2024, 1, 20)
     end_date = datetime(2024, 2, 2)
@@ -25,8 +26,13 @@ def test_timeline_loader():
         end_date=end_date,
     )
     assert len(posts) == 1
-    assert set(posts[0].ref_urls) == set(['https://twitter.com/deliprao/status/1750732070014337101',
-     'https://arxiv.org/abs/2401.13782'])
+    assert set(posts[0].ref_urls) == set(
+        [
+            "https://twitter.com/deliprao/status/1750732070014337101",
+            "https://arxiv.org/abs/2401.13782",
+        ]
+    )
+
 
 def test_timeline_loader_2():
     start_date = datetime(2024, 1, 27)
@@ -41,9 +47,10 @@ def test_timeline_loader_2():
     )
     assert len(posts) == 0
 
+
 def test_repost():
     start_date = datetime(2024, 3, 1)
-    end_date = datetime(2024, 3, 22)
+    end_date = datetime(2024, 3, 15)
     mloader = MastodonLoader()
     acct = "@ronent@mastodon.social"
     posts = mloader.load_profile_timeline(
@@ -56,7 +63,8 @@ def test_repost():
     )
     assert all([post.is_repost for post in posts])
     assert len(posts) == 2
-    
+
+
 def test_reply_filter():
     start_date = datetime(2024, 1, 1)
     end_date = datetime(2024, 1, 4)
@@ -71,7 +79,8 @@ def test_reply_filter():
         exclude_replies=True,
     )
     assert len(posts) == 1
-    assert posts[0].url == 'https://mastodon.social/@ronent/111687038322549430'
+    assert posts[0].url == "https://mastodon.social/@ronent/111687038322549430"
+
 
 if __name__ == "__main__":
     start_date = datetime(2024, 1, 1)

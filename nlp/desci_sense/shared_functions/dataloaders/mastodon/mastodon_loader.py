@@ -22,7 +22,7 @@ class MastodonLoader:
     def load_profile_timeline(
         self,
         mastodon_account: str,
-        max_toots: Optional[int] = 5,
+        max_toots: Optional[int] = None,
         exclude_replies: bool = True,
         exclude_reposts: bool = True,
         start_date: datetime = None,
@@ -57,7 +57,10 @@ class MastodonLoader:
             pinned=False,
             exclude_replies=exclude_replies,
             exclude_reblogs=exclude_reposts,
-            limit=max_toots,
+            # we filter below since api not working correctly.
+            # but there is a problem with the API if this isn't set to some value
+            # so setting arbitrarily high
+            limit=10000,
         )
 
         filtered_posts = []
@@ -77,7 +80,10 @@ class MastodonLoader:
         if exclude_replies:
             results = [p for p in results if not p.is_reply]
 
-        return results
+        if max_toots:
+            return results[:max_toots]
+        else:
+            return results
 
     def load_profiles(
         self,
