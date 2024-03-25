@@ -20,6 +20,7 @@ const mandatory = [
   'TWITTER_CLIENT_ID',
   'TWITTER_CLIENT_SECRET',
   'OUR_TOKEN_SECRET',
+  'ACCESS_TOKEN_TEST_USER_0',
 ];
 
 mandatory.forEach((varName) => {
@@ -63,7 +64,7 @@ when(MockedTwitter.handleSignupData(anything())).thenCall(
     return {
       user_id: data.code,
       write: {
-        accessToken: process.env.TWITTER_ACCESS_TOKEN as string,
+        accessToken: process.env.ACCESS_TOKEN_TEST_USER_0 as string,
         refreshToken: '',
         expiresIn: 0,
       },
