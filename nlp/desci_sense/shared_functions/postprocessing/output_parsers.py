@@ -12,24 +12,37 @@ def detect_academic_kw(keywords: List[str]) -> Tuple[str, List[str]]:
     """if special keyword 'academic' is in `keywords`,
     return 'academic' and updated list without the `academic` element. If 'not-academic' is in the list return 'not-academic' and the updated list without the `not-academic` element. In all other cases return 'not-detected' and the list unchanged.
     """
+    academic_kws = set()
     lower_keywords = [kw.lower().rstrip() for kw in keywords]
     if "academic" in lower_keywords:
         # Find the original keyword to remove
         original_keyword = keywords[lower_keywords.index("academic")]
         keywords.remove(original_keyword)
-        return "academic", keywords
+        academic_kws.add("academic")
     elif "academicresearch" in lower_keywords:
         # hacky - this is a variant the model often returns
         original_keyword = keywords[lower_keywords.index("academicresearch")]
         keywords.remove(original_keyword)
-        return "academic", keywords
+        academic_kws.add("academic")
     elif "not-academic" in lower_keywords:
         # Find the original keyword to remove
         original_keyword = keywords[lower_keywords.index("not-academic")]
         keywords.remove(original_keyword)
-        return "not-academic", keywords
+        academic_kws.add("not-academic")
     else:
-        return "not-detected", keywords
+        academic_kws.add("not-detected")
+
+    # for case where both academic and not academic suggested, we take not-academic
+    if "not-academic" in academic_kws:
+        result = "not-academic"
+    elif "not-detected" in academic_kws:
+        result = "not-detected"
+    elif "academic" in academic_kws:
+        result = "academic"
+    else:
+        result = "not-academic"
+
+    return result, keywords
 
 
 # GPT4
