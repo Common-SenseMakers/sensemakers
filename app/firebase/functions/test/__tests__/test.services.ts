@@ -10,9 +10,15 @@ import {
   TwitterUserDetails,
 } from '../../src/@shared/types.twitter';
 import { DBInstance } from '../../src/db/instance';
+import { Services } from '../../src/instances/services';
 import { OrcidService } from '../../src/platforms/orcid/orcid.service';
-import { IdentityPlatforms } from '../../src/platforms/platforms.interface';
+import {
+  IdentityServicesMap,
+  PlatformsMap,
+  PlatformsService,
+} from '../../src/platforms/platforms.service';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
+import { PostsService } from '../../src/posts/PostsService';
 import { UsersRepository } from '../../src/users/users.repository';
 import { UsersService } from '../../src/users/users.service';
 
@@ -42,7 +48,8 @@ export const TEST_TWITTER_PROFILE = {
 
 const db = new DBInstance();
 const userRepo = new UsersRepository(db);
-const identityServices: IdentityPlatforms = new Map();
+const identityServices: IdentityServicesMap = new Map();
+const platformsMap: PlatformsMap = new Map();
 
 /** mocked orcid */
 const orcid = new OrcidService();
@@ -60,6 +67,7 @@ const twitter = new TwitterService({
   clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
 });
 const MockedTwitter = spy(twitter);
+
 when(MockedTwitter.handleSignupData(anything())).thenCall(
   (data: TwitterSignupData): TwitterUserDetails => {
     return {
@@ -85,6 +93,17 @@ const usersService = new UsersService(userRepo, identityServices, {
   expiresIn: '30d',
 });
 
-export const services = {
+/** all platforms */
+platformsMap.set(PLATFORM.Twitter, twitter);
+
+/** platforms service */
+const platformsService = new PlatformsService(platformsMap);
+
+/** posts service */
+const postsService = new PostsService(usersService, platformsService);
+
+export const services: Services = {
   users: usersService,
+  posts: postsService,
+  platforms: platformsService,
 };

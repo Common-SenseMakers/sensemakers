@@ -12,7 +12,7 @@ import {
   TwitterApi,
 } from 'twitter-api-v2';
 
-import { PlatformService } from '../platforms.interface';
+import { FetchUserPostsParams, PlatformService } from '../platforms.interface';
 
 export interface TwitterApiCredentials {
   clientId: string;
@@ -95,6 +95,7 @@ export class TwitterService
     return twitter;
   }
 
+  // placeholder, not tested
   async postMessageTwitter(
     text: string,
     accessToken: string
@@ -105,7 +106,8 @@ export class TwitterService
     return result.data;
   }
 
-  async fetch(
+  /** methods non part of Platform interface should be protected (private) */
+  protected async fetch(
     params: TwitterQueryParameters,
     accessToken: string
   ): Promise<TweetV2PaginableTimelineResult['data']> {
@@ -131,5 +133,16 @@ export class TwitterService
       nextToken = nextResult.meta.next_token;
     }
     return resultCollection;
+  }
+
+  /** @Wes, this is an implementation of the Platform interface.
+   * It will have the same shape on all platfforms */
+  public async fetchPostsSince(
+    params: FetchUserPostsParams[]
+  ): Promise<TweetV2[]> {
+    // get all posts from all users in the input params
+    // params.user_ids.foreach ... this.fetch()
+    console.log({ params });
+    return [];
   }
 }

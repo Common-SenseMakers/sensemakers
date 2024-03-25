@@ -1,4 +1,10 @@
-import { PLATFORM, WithPlatformUserId } from '../@shared/types';
+import { WithPlatformUserId } from '../@shared/types';
+
+export interface FetchUserPostsParams {
+  user_id: string;
+  start_time: number; // timestamp in ms
+  credentials: any;
+}
 
 export interface IdentityService<
   SignupContext,
@@ -12,12 +18,9 @@ export interface IdentityService<
 }
 
 export interface PlatformService<
-  SignupContext,
-  SignupData,
-  UserDetails extends WithPlatformUserId,
-> extends IdentityService<SignupContext, SignupData, UserDetails> {}
-
-export type IdentityPlatforms = Map<
-  PLATFORM,
-  IdentityService<any, any, WithPlatformUserId>
->;
+  SignupContext = any,
+  SignupData = any,
+  UserDetails extends WithPlatformUserId = WithPlatformUserId,
+> extends IdentityService<SignupContext, SignupData, UserDetails> {
+  fetchPostsSince(params: FetchUserPostsParams[]): Promise<any[]>;
+}

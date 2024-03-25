@@ -4,6 +4,12 @@ import { PLATFORM } from './types';
 import { AppPostSemantics, ParserResult } from './types.parser';
 import { TweetRead } from './types.twitter';
 
+/**
+ * for now, this is placeholder for the generic type of a post read from any platform
+ * is there a common interface for all platforms?
+ * */
+export type PlatformPost = any;
+
 export interface AppPostCreate {
   content: string;
   originalParsed?: ParserResult;

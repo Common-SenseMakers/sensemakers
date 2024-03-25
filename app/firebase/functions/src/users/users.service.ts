@@ -1,4 +1,5 @@
 import * as jwt from 'jsonwebtoken';
+import { IdentityServicesMap } from 'src/platforms/platforms.service';
 
 import {
   HandleSignupResult,
@@ -6,7 +7,6 @@ import {
   PLATFORM,
   UserWithId,
 } from '../@shared/types';
-import { IdentityPlatforms } from '../platforms/platforms.interface';
 import { UsersRepository } from './users.repository';
 import { getPrefixedUserId } from './users.utils';
 
@@ -24,12 +24,12 @@ interface TokenData {
 export class UsersService {
   constructor(
     public repo: UsersRepository,
-    public platforms: IdentityPlatforms,
+    public identityPlatforms: IdentityServicesMap,
     protected ourToken: OurTokenConfig
   ) {}
 
   private getIdentityService(platform: PLATFORM) {
-    const service = this.platforms.get(platform);
+    const service = this.identityPlatforms.get(platform);
     if (!service) {
       throw new Error(`Identity service ${platform} not found`);
     }
