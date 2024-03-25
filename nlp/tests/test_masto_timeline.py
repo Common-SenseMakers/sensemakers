@@ -80,18 +80,34 @@ def test_reply_filter():
     )
     assert len(posts) == 1
     assert posts[0].url == "https://mastodon.social/@ronent/111687038322549430"
-
-
-if __name__ == "__main__":
-    start_date = datetime(2024, 1, 1)
-    end_date = datetime(2024, 1, 4)
+    
+def test_pagination():
+    # user has lots of posts so pagination needed to fetch them all
+    start_date = datetime(2024, 3, 1)
+    end_date = datetime(2024, 3, 10)
     mloader = MastodonLoader()
-    acct = "@ronent@mastodon.social"
+    acct = "@cwebber@octodon.social"
     posts = mloader.load_profile_timeline(
         acct,
         max_toots=30,
         start_date=start_date,
         end_date=end_date,
-        exclude_reposts=False,
         exclude_replies=True,
+        exclude_reposts=True,
+    )
+    assert len(posts) > 0
+
+
+if __name__ == "__main__":
+    start_date = datetime(2024, 3, 1)
+    end_date = datetime(2024, 3, 10)
+    mloader = MastodonLoader()
+    acct = "@cwebber@octodon.social"
+    posts = mloader.load_profile_timeline(
+        acct,
+        max_toots=30,
+        start_date=start_date,
+        end_date=end_date,
+        exclude_replies=True,
+        exclude_reposts=True,
     )
