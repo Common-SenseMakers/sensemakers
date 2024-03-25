@@ -24,6 +24,8 @@ ALLOWED_TOPICS = [
     "literature",
     "travel",
     "personal",
+    "humour",
+    "other",
 ]
 
 
@@ -47,7 +49,6 @@ Rules:
 
 
 # Input post text:
-Author: {{ author_name }}
 Content: {{ content }}
 
 {{ references_metadata }}
