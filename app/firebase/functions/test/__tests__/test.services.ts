@@ -21,6 +21,7 @@ const mandatory = [
   'TWITTER_CLIENT_SECRET',
   'OUR_TOKEN_SECRET',
   'ACCESS_TOKEN_TEST_USER_0',
+  'TWITTER_MY_BEARER_TOKEN',
 ];
 
 mandatory.forEach((varName) => {

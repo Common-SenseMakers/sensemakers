@@ -9,7 +9,7 @@ import {
 
 const logger = (global as any).logger;
 
-describe.only('signups', () => {
+describe('signups', () => {
   let orcidId: string = '0000-0000-0000-0001';
   let twitterId: string = '123456789';
 
