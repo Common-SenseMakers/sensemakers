@@ -98,8 +98,6 @@ def main():
         st.session_state.posts = list()
     if not "results" in st.session_state:
         st.session_state.results = list()
-    if not "refresh_counter" in st.session_state:
-        st.session_state.refresh_counter = 0
 
     # initialize config
     config = load_config()
@@ -169,9 +167,6 @@ def main():
                 st.session_state.posts_df,
                 st.session_state.results,
             )
-
-            # https://discuss.streamlit.io/t/selecting-a-row-forces-aggrid-to-reload/47201/3
-            st.session_state.refresh_counter += 1
 
     if st.session_state.results:
         with st.expander("Full results"):

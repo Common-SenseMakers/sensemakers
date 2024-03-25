@@ -26,7 +26,7 @@ from ..postprocessing.output_parsers import (
     TagTypeParser,
     KeywordParser,
     AllowedTermsParser,
-    ALLOWED_TAGS_DELIMITER,
+    ALLOWED_TERMS_DELIMITER,
 )
 from ..dataloaders import scrape_post
 from ..enum_dict import EnumDict, EnumDictKey
@@ -42,6 +42,7 @@ from ..prompting.jinja.zero_ref_template import zero_ref_template
 from ..prompting.jinja.single_ref_template import single_ref_template
 from ..prompting.jinja.keywords_extraction_template import keywords_extraction_template
 from ..prompting.jinja.multi_ref_template import multi_ref_template
+from ..prompting.jinja.topics_template import ALLOWED_TOPICS, topics_template
 
 
 class PromptCase(EnumDictKey):
@@ -139,6 +140,10 @@ class FirebaseAPIParser:
         # setup semantics chain
         self.init_unified_semantics_chain()
 
+        # setup topics chain
+        logger.info("Initializing topics chain...")
+        self.init_topics_chain()
+
         # collect all allowed labels
         self.all_labels = []
         for case_dict in self.prompt_case_dict.values():
@@ -230,6 +235,30 @@ class FirebaseAPIParser:
 
         self.prompt_case_dict = prompt_case_dict
 
+    def init_topics_chain(self):
+        # setup prompt template
+        self.topics_prompt_template = PromptTemplate.from_template("{topics_input}")
+        self.topics_template = topics_template
+        self.topics_chain = (
+            self.topics_prompt_template | self.parser_model | StrOutputParser()
+        )
+
+        _topics_merge = ChatPromptTemplate.from_template(
+            "{raw_parser_chain_output} \n\n "
+            + ALLOWED_TERMS_DELIMITER
+            + "{allowed_topics}"
+        )
+
+        self.uni_topics_chain = (
+            {
+                "raw_parser_chain_output": self.topics_chain,
+                "allowed_topics": itemgetter("allowed_topics"),
+            }
+            | _topics_merge
+            | _extract_msg_content
+            | AllowedTermsParser()
+        )
+
     def init_unified_semantics_chain(self):
         """
         TODO
@@ -238,7 +267,7 @@ class FirebaseAPIParser:
 
         _merge = ChatPromptTemplate.from_template(
             "{raw_parser_chain_output} \n\n "
-            + ALLOWED_TAGS_DELIMITER
+            + ALLOWED_TERMS_DELIMITER
             + "{allowed_tags}"
         )
 
@@ -288,6 +317,7 @@ class FirebaseAPIParser:
         self,
         semantics: Dict,
         keywords: Dict = None,
+        topics: List[str] = None,
     ) -> ParserResult:
         """convert parser output result into format
         required by app interface."""
@@ -329,6 +359,37 @@ class FirebaseAPIParser:
             result_string = "\n".join(result_lines)
             return result_string
         return ""
+
+    def create_topics_prompt(
+        self,
+        post: RefPost,
+        metadata_list: List[RefMetadata] = None,
+        allowed_topics: List[str] = ALLOWED_TOPICS,
+    ) -> str:
+        """
+        Return full prompt for keyword chain
+
+        Args:
+            post (RefPost): input post
+            metadata_list (List[RefMetadata], optional): List of extracted
+            references metadata. Defaults to None.
+
+        Returns:
+            str: full instantiated prompt
+        """
+
+        references_metadata = self.get_refs_metadata_portion(metadata_list)
+        prompt_j2_template = self.topics_template
+
+        # instantiate prompt with ref post details
+        full_prompt = prompt_j2_template.render(
+            author_name=post.author,
+            content=post.content,
+            references_metadata=references_metadata,
+            topics=allowed_topics,
+        )
+
+        return full_prompt
 
     def create_kw_prompt(
         self,
@@ -468,6 +529,7 @@ class FirebaseAPIParser:
 
         return True
 
+    # TODO rename
     def extract_post_topics(
         self, post: RefPost, metadata_list: List[RefMetadata] = None
     ) -> dict:
@@ -482,6 +544,33 @@ class FirebaseAPIParser:
 
         # run chain on full prompt
         answer = chain.invoke({"kw_input": full_prompt})
+
+        # TODO make structured output type
+        result = {"post": post, "full_prompt": full_prompt, "answer": answer}
+
+        return result
+
+    def extract_topics(
+        self, post: RefPost, metadata_list: List[RefMetadata] = None
+    ) -> dict:
+        """ """
+        # instantiate prompt with ref post details
+        full_prompt = self.create_topics_prompt(
+            post,
+            metadata_list,
+            ALLOWED_TOPICS,
+        )
+
+        # load corresponding chain
+        chain = self.uni_topics_chain
+
+        # run chain on full prompt
+        answer = chain.invoke(
+            {
+                "topics_input": full_prompt,
+                "allowed_topics": ALLOWED_TOPICS,
+            }
+        )
 
         # TODO make structured output type
         result = {"post": post, "full_prompt": full_prompt, "answer": answer}
@@ -522,14 +611,20 @@ class FirebaseAPIParser:
             if len(post.ref_urls) == 1:
                 case = PromptCase.SINGLE_REF
                 # if metadata flag is active, retreive metadata
-                md_list = extract_metadata_by_type(
-                    post.ref_urls[0],
+                md_list = extract_all_metadata_by_type(
+                    post.ref_urls,
                     self.md_extract_method,
                     self.config["general"]["max_summary_length"],
                 )
 
             else:
                 case = PromptCase.MULTI_REF
+                # if metadata flag is active, retreive metadata
+                md_list = extract_all_metadata_by_type(
+                    post.ref_urls,
+                    self.md_extract_method,
+                    self.config["general"]["max_summary_length"],
+                )
                 # TODO finish
                 # md_list = extract_metadata_by_type(post.ref_urls[0], self.md_extract_method)
 
@@ -544,22 +639,36 @@ class FirebaseAPIParser:
 
         full_kw_prompt = self.create_kw_prompt(post, md_list)
 
+        topics_prompt = self.create_topics_prompt(
+            post,
+            md_list,
+            ALLOWED_TOPICS,
+        )
+
         # create parallel chain
         kw_chain = self.kw_extraction.get("chain")
         semantics_chain = self.prompt_case_dict[case]["chain"]
+        topics_chain = self.uni_topics_chain
 
-        map_chain = RunnableParallel(semantics=semantics_chain, keywords=kw_chain)
+        map_chain = RunnableParallel(
+            semantics=semantics_chain,
+            keywords=kw_chain,
+            topics=topics_chain,
+        )
 
         combined_result = map_chain.invoke(
             {
                 "kw_input": full_kw_prompt,
                 "input": full_semantics_prompt,
+                "topics_input": topics_prompt,
+                "allowed_topics": ALLOWED_TOPICS,
             }
         )
 
         # TODO hacky, find a cleaner way to pass this info
         semantics_answer = combined_result.get("semantics")
         kw_answer = combined_result.get("keywords")
+        topics_answer = combined_result.get("topics")
 
         combined_result["keywords"] = {
             "post": post,
@@ -575,6 +684,12 @@ class FirebaseAPIParser:
             "md_list": md_list,
         }
 
+        combined_result["topics"] = {
+            "post": post,
+            "full_prompt": topics_prompt,
+            "answer": topics_answer,
+        }
+
         # logger.info(
         #     f"combined_result[semantics]: {combined_result['semantics']['full_prompt']}"
         # )
@@ -585,6 +700,16 @@ class FirebaseAPIParser:
 
         return combined_result
 
+    def extract_topics_w_metadata(self, post: RefPost) -> dict:
+        md_list = extract_all_metadata_by_type(
+            post.ref_urls, self.kw_md_extract_method, self.max_summary_length
+        )
+
+        result = self.extract_topics(post, md_list)
+
+        return result
+
+    # TODO rename to kwords
     def extract_post_topics_w_metadata(self, post: RefPost) -> List[str]:
         md_list = extract_all_metadata_by_type(
             post.ref_urls, self.kw_md_extract_method, self.max_summary_length
@@ -725,9 +850,21 @@ class FirebaseAPIParser:
                 "input": s_prompt,
                 "allowed_tags": self.prompt_case_dict[case]["labels"],
             }
+
+            # topics prompt
+            topics_prompt = self.create_topics_prompt(
+                post,
+                md_list,
+                ALLOWED_TOPICS,
+            )
+            prompt["allowed_topics"] = ALLOWED_TOPICS
+            prompt["topics_input"] = topics_prompt
+
+            # keywords prompt
             if self.kw_mode_enabled:
                 kw_prompt = self.create_kw_prompt(post, md_list)
                 prompt["kw_input"] = kw_prompt
+
             prompts.append(prompt)
 
         return prompts
@@ -753,17 +890,27 @@ class FirebaseAPIParser:
         # create runnable parallel
 
         semantics_chain = self.uni_semantics_chain
+        topics_chain = self.uni_topics_chain
 
         if self.kw_mode_enabled:
             kw_chain = self.kw_extraction.get("chain")
-            final_chain = RunnableParallel(semantics=semantics_chain, keywords=kw_chain)
+            final_chain = RunnableParallel(
+                semantics=semantics_chain,
+                topics=topics_chain,
+                keywords=kw_chain,
+            )
         else:
-            final_chain = RunnableParallel(semantics=semantics_chain)
+            final_chain = RunnableParallel(
+                semantics=semantics_chain,
+                topics=topics_chain,
+            )
 
         # setup async batch job
         config = RunnableConfig(max_concurrency=batch_size)
 
         results = asyncio.run(final_chain.abatch(prompts, config=config))
+
+        # return results
 
         st_outputs = convert_raw_outputs_to_st_format(
             inputs,

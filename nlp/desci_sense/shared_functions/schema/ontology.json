@@ -1,20 +1,16 @@
 {
     "semantic_predicates": [
         {
-            "name": "mentionsCallForPapers",
-            "uri": "https://sense-nets.xyz/mentionsCallForPapers",
+            "name": "summarizes",
+            "uri": "https://sense-nets.xyz/summarizes",
             "versions": [
-                "v1"
+                "v0"
             ],
-            "label": "call-for-papers",
-            "display_name": "📜 mentions-call-for-papers",
-            "prompt": "this post contains a call for research papers, for example to a journal, conference or workshop.",
-            "valid_subject_types": [
-                "post"
-            ],
-            "valid_object_types": [
-                "ref"
-            ]
+            "label": "summarizes",
+            "display_name": "🗜️ summarizes",
+            "prompt": "this post contains a summary of new research. The summary is likely provided by the authors but may be a third party. We use a broad definition of research that includes classic and non-traditional outputs. Classic outputs include papers, datasets or code. Non traditional outputs can include a podcast, blog post, video explainers, etc.",
+            "valid_subject_types": [],
+            "valid_object_types": []
         },
         {
             "name": "endorses",
@@ -129,38 +125,6 @@
             ],
             "valid_object_types": [
                 "nan"
-            ]
-        },
-        {
-            "name": "indicatesInterest",
-            "uri": "https://sense-nets.xyz/indicatesInterest",
-            "versions": [
-                "v1"
-            ],
-            "label": "indicates-interest",
-            "display_name": "👀 indicates-interest",
-            "prompt": "this post indicates interest in a reference. This label is meant for cases where the post is not explicitly recommending or endorsing the cited reference.",
-            "valid_subject_types": [
-                "post"
-            ],
-            "valid_object_types": [
-                "ref"
-            ]
-        },
-        {
-            "name": "mentionsFundingOpportunity",
-            "uri": "https://sense-nets.xyz/mentionsFundingOpportunity",
-            "versions": [
-                "v1"
-            ],
-            "label": "funding",
-            "display_name": "🏦 mentions-funding",
-            "prompt": "this post mentions a funding opportunity, for example a research grant or prize.",
-            "valid_subject_types": [
-                "post"
-            ],
-            "valid_object_types": [
-                "ref"
             ]
         },
         {
@@ -369,11 +333,41 @@
             "v0"
         ]
     },
+    "topics_predicate": {
+        "name": "hasTopic",
+        "uri": "https://schema.org/about",
+        "versions": [
+            "v0"
+        ]
+    },
+    "allowed_topics": [
+        "technology",
+        "science",
+        "academia",
+        "research",
+        "design",
+        "climate",
+        "sustainability",
+        "software & hardware",
+        "philosophy",
+        "health",
+        "culture",
+        "economics",
+        "business",
+        "politics",
+        "news",
+        "finance",
+        "sports",
+        "entertainment & leisure",
+        "art",
+        "literature",
+        "travel",
+        "personal"
+    ],
     "ontology_config": {
         "db_id": "8de416983dd142c68b3b331d0828f2d0",
         "versions": [
-            "v0",
-            "v1"
+            "v0"
         ]
     }
 }

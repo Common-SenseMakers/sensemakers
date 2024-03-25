@@ -23,6 +23,7 @@ class StreamlitParserResults(BaseModel):
     reference_urls: List[str]
     semantic_tags: List[str]
     keywords: List[str]
+    topics: List[str]
     debug: Optional[Dict] = Field(default_factory=dict)
 
 
@@ -30,6 +31,7 @@ def convert_raw_output_to_st_format(
     post: RefPost,
     sem_prompt: str,
     kw_prompt: str,
+    topics_prompt: str,
     output: dict,
     md_dict: Dict[str, RefMetadata],
 ):
@@ -39,6 +41,7 @@ def convert_raw_output_to_st_format(
     ]
     semantic_tags = output["semantics"]["multi_tag"]
     keywords = output["keywords"]["valid_keywords"]
+    topics = output["topics"]["multi_tag"]
     research_filter = output["keywords"]["academic_kw"]
     debug = {
         "semantics": {
@@ -46,9 +49,13 @@ def convert_raw_output_to_st_format(
             "reasoning": output["semantics"]["reasoning"],
             "allowed_tags": output["semantics"]["allowed_tags"],
         },
-        "kw_prompt": {
+        "keywords": {
             "prompt": kw_prompt,
             "reasoning": output["keywords"]["reasoning"],
+        },
+        "topics": {
+            "prompt": topics_prompt,
+            "reasoning": output["topics"]["reasoning"],
         },
     }
     return StreamlitParserResults(
@@ -56,6 +63,7 @@ def convert_raw_output_to_st_format(
         item_types=item_types,
         reference_urls=reference_urls,
         semantic_tags=semantic_tags,
+        topics=topics,
         keywords=keywords,
         debug=debug,
     )
@@ -75,6 +83,7 @@ def convert_raw_outputs_to_st_format(
             post,
             prompt_dict["input"],
             prompt_dict["kw_input"],
+            prompt_dict["topics_input"],
             output,
             md_dict,
         )

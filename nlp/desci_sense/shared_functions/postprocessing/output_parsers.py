@@ -5,7 +5,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain.schema import BaseOutputParser
 from langchain_core.messages import AnyMessage, BaseMessage
 
-ALLOWED_TAGS_DELIMITER = "##Allowed Tags: "
+ALLOWED_TERMS_DELIMITER = "##Allowed terms: "
 
 
 def detect_academic_kw(keywords: List[str]) -> Tuple[str, List[str]]:
@@ -206,7 +206,7 @@ class KeywordParser(BaseOutputParser):
 
 def extract_tags_list(text):
     # Pattern to match " ##Allowed Tags: " followed by the list
-    pattern = r"" + ALLOWED_TAGS_DELIMITER + "(\[.*?\])"
+    pattern = r"" + ALLOWED_TERMS_DELIMITER + "(\[.*?\])"
 
     # Searching for the pattern in the text
     match = re.search(pattern, text)
@@ -241,9 +241,9 @@ class AllowedTermsParser(BaseOutputParser):
     def parse(self, text: str):
         """Parse the output of an LLM call."""
         # Define the regular expressions for the three sections
-        reasoning_steps_pattern = r"Reasoning Steps:(.*?)Candidate Tags:"
-        candidate_tags_pattern = r"Candidate Tags:(.*?)Final Answer:"
-        final_answer_pattern = r"Final Answer:(.*)" + ALLOWED_TAGS_DELIMITER
+        reasoning_steps_pattern = r"Reasoning Steps:(.*?)Candidate (?:Tags|Topics):"
+        candidate_tags_pattern = r"Candidate (?:Tags|Topics):(.*?)Final Answer:"
+        final_answer_pattern = r"Final Answer:(.*)" + ALLOWED_TERMS_DELIMITER
 
         # Extract content using regular expressions with error handling
         try:
