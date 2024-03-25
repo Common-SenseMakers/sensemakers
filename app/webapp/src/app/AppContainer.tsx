@@ -5,9 +5,7 @@ import { Route, Routes } from 'react-router-dom';
 import { GlobalNav } from '../common/GlobalNav';
 import { MAX_WIDTH_APP, ViewportContainer } from '../common/Viewport';
 import { AppHome } from '../pages/AppHome';
-import { AppPostPage } from '../pages/AppPostPage';
 import { RouteNames } from '../route.names';
-import { AppTest } from './AppTest';
 
 export interface SetPageTitleType {
   prefix: string;
@@ -39,10 +37,6 @@ export const AppContainer = (props: React.PropsWithChildren) => {
             <Route
               path={RouteNames.AppHome}
               element={<AppHome></AppHome>}></Route>
-            <Route
-              path={RouteNames.Post}
-              element={<AppPostPage></AppPostPage>}></Route>
-            <Route path={RouteNames.Test} element={<AppTest></AppTest>}></Route>
           </Routes>
         </Box>
       </ViewportContainer>

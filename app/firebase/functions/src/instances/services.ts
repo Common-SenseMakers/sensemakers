@@ -1,5 +1,3 @@
-import { RequestHandler } from 'express';
-
 import { PLATFORM } from '../@shared/types';
 import {
   OUR_EXPIRES_IN,
@@ -18,11 +16,7 @@ export interface Services {
   users: UsersService;
 }
 
-export const attachServices: RequestHandler = async (
-  request,
-  response,
-  next
-) => {
+export const createServices = () => {
   const db = new DBInstance();
   const userRepo = new UsersRepository(db);
   const identityServices: IdentityPlatforms = new Map();
@@ -47,7 +41,5 @@ export const attachServices: RequestHandler = async (
     users: usersService,
   };
 
-  (request as any).services = services;
-
-  return next();
+  return services;
 };

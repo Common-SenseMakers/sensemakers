@@ -11,7 +11,7 @@ import { useSearchParams } from 'react-router-dom';
 
 import { useAccountContext } from '../app/AccountContext';
 import { useAppFetch } from '../app/app.fetch';
-import { PLATFORM } from '../shared/types';
+import { HandleSignupResult, PLATFORM } from '../shared/types';
 import {
   TwitterGetContextParams,
   TwitterSignupContext,
@@ -39,7 +39,11 @@ const TwitterContextValue = createContext<TwitterContextType | undefined>(
 export const TwitterContext = (props: PropsWithChildren) => {
   const verifierHandled = useRef(false);
 
-  const { connectedUser, refresh: refreshConnected } = useAccountContext();
+  const {
+    connectedUser,
+    refresh: refreshConnected,
+    setToken: setOurToken,
+  } = useAccountContext();
 
   const [searchParams, setSearchParams] = useSearchParams();
   const state_param = searchParams.get('state');
@@ -89,10 +93,14 @@ export const TwitterContext = (props: PropsWithChildren) => {
         throw new Error('Undexpected state');
       }
 
-      appFetch(`/auth/${PLATFORM.Twitter}/signup`, {
+      appFetch<HandleSignupResult>(`/auth/${PLATFORM.Twitter}/signup`, {
         ...context,
         code: code_param,
-      }).then(() => {
+      }).then((result) => {
+        if (result.ourAccessToken) {
+          setOurToken(result.ourAccessToken);
+        }
+
         searchParams.delete('state');
         searchParams.delete('code');
         setSearchParams(searchParams);

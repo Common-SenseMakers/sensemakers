@@ -73,3 +73,8 @@ export interface OurTokenConfig {
   tokenSecret: string;
   expiresIn: string;
 }
+
+export interface HandleSignupResult {
+  userId: string;
+  ourAccessToken?: string;
+}

@@ -12,12 +12,12 @@ import {
 import { useAccountContext } from '../app/AccountContext';
 import { useAppFetch } from '../app/app.fetch';
 import { NANOPUBS_SERVER } from '../app/config';
-import { useAppSigner } from '../app/signer/SignerContext';
 import { constructIntroNanopub } from '../nanopubs/construct.intro.nanopub';
 import { getProfile } from '../nanopubs/semantics.helper';
 import { getEthToRSAMessage } from '../shared/sig.utils';
 import { HexStr, PLATFORM } from '../shared/types';
 import { NanopubUserDetails } from '../shared/types.nanopubs';
+import { useAppSigner } from '../signer/SignerContext';
 import { RSAKeys, getRSAKeys } from '../utils/rsa.keys';
 
 const DEBUG = false;

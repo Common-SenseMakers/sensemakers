@@ -11,12 +11,15 @@ import { AppUserRead } from '../shared/types';
 
 const DEBUG = true;
 
+export const OUR_TOKEN_NAME = 'ourToken';
+
 export type AccountContextType = {
   connectedUser?: AppUserRead;
   isConnected: boolean;
   disconnect: () => void;
   refresh: () => void;
   token?: string;
+  setToken: (token: string) => void;
 };
 
 const AccountContextValue = createContext<AccountContextType | undefined>(
@@ -34,7 +37,7 @@ export const AccountContext = (props: PropsWithChildren) => {
   const [token, setToken] = useState<string>();
 
   const checkToken = () => {
-    const _token = localStorage.getItem('token');
+    const _token = localStorage.getItem(OUR_TOKEN_NAME);
 
     if (_token !== null) {
       if (DEBUG) console.log('tokend found in localstorage');
@@ -78,6 +81,7 @@ export const AccountContext = (props: PropsWithChildren) => {
         disconnect,
         refresh,
         token,
+        setToken,
       }}>
       {props.children}
     </AccountContextValue.Provider>

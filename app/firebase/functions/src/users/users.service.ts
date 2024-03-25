@@ -1,6 +1,11 @@
 import * as jwt from 'jsonwebtoken';
 
-import { OurTokenConfig, PLATFORM, UserWithId } from '../@shared/types';
+import {
+  HandleSignupResult,
+  OurTokenConfig,
+  PLATFORM,
+  UserWithId,
+} from '../@shared/types';
 import { IdentityPlatforms } from '../platforms/platforms.interface';
 import { UsersRepository } from './users.repository';
 import { getPrefixedUserId } from './users.utils';
@@ -58,13 +63,7 @@ export class UsersService {
     platform: PLATFORM,
     signupData: any,
     _userId?: string // MUST be the authenticated userId
-  ): Promise<
-    | {
-        userId: string;
-        ourAccessToken?: string;
-      }
-    | undefined
-  > {
+  ): Promise<HandleSignupResult | undefined> {
     /**
      * validate the signup data for this platform and convert it into
      * user details

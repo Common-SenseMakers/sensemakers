@@ -1,7 +1,7 @@
 import { Request } from 'express';
 
 import { DefinedIfTrue } from '../@shared/types';
-import { Services } from '../middleware/services';
+import { Services } from '../instances/services';
 
 export const getAuthenticatedUser = <T extends boolean>(
   request: Request,
