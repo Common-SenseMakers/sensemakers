@@ -1,11 +1,17 @@
-import { TweetV2PostTweetResult, TwitterApi } from 'twitter-api-v2';
-
 import {
   TwitterGetContextParams,
+  TwitterQueryParameters,
   TwitterSignupContext,
   TwitterSignupData,
   TwitterUserDetails,
-} from '../../@shared/types.twitter';
+} from 'src/@shared/types.twitter';
+import {
+  TweetV2,
+  TweetV2PaginableTimelineResult,
+  TweetV2PostTweetResult,
+  TwitterApi,
+} from 'twitter-api-v2';
+
 import { PlatformService } from '../platforms.interface';
 
 export interface TwitterApiCredentials {
@@ -99,7 +105,31 @@ export class TwitterService
     return result.data;
   }
 
-  async fetch() {
-    return [];
+  async fetch(
+    params: TwitterQueryParameters,
+    accessToken: string
+  ): Promise<TweetV2PaginableTimelineResult['data']> {
+    const client = await this.getUserClient(accessToken);
+    const readOnlyClient = client.readOnly;
+    const result = await readOnlyClient.v2.userTimeline(params.user_id, {
+      start_time: params.start_time,
+      end_time: params.end_time,
+      max_results: params.max_results,
+      'tweet.fields': ['created_at', 'author_id'],
+    });
+    const resultCollection: TweetV2[] = result.data.data;
+    let nextToken = result.meta.next_token;
+    while (nextToken) {
+      const nextResult = await readOnlyClient.v2.userTimeline(params.user_id, {
+        start_time: params.start_time,
+        end_time: params.end_time,
+        max_results: params.max_results,
+        'tweet.fields': ['created_at', 'author_id'],
+        pagination_token: nextToken,
+      });
+      resultCollection.push(...nextResult.data.data);
+      nextToken = nextResult.meta.next_token;
+    }
+    return resultCollection;
   }
 }
