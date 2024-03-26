@@ -25,7 +25,7 @@ describe('platforms', () => {
       try {
         const tweets = await twitterService.fetch([
           {
-            user_id: '1753077743816777728',
+            user_id: TEST_TOKENS_MAP[TWITTER_ACCOUNT].user_id,
             start_time: 1708560000000,
             end_time: 1708646400000,
             credentials: {
