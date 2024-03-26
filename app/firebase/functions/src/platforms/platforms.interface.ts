@@ -38,7 +38,7 @@ export interface PlatformService<
   SignupData = any,
   UserDetails extends UserDetailsBase = WithPlatformUserId,
 > extends IdentityService<SignupContext, SignupData, UserDetails> {
-  fetch(params: FetchUserPostsParams<PLATFORM>[]): Promise<any[]>;
+  fetch(params: FetchUserPostsParams<PLATFORM>[]): Promise<PlatformPost[]>;
   convertToGeneric(platformPost: PlatformPost): GenericPostData;
   publish(
     post: AppPostPublish,

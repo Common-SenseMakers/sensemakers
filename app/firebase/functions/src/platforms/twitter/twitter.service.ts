@@ -1,5 +1,6 @@
 import {
   TOAuth2Scope,
+  TTweetv2TweetField,
   TweetV2,
   TweetV2PaginableTimelineResult,
   TweetV2SingleResult,
@@ -131,11 +132,13 @@ export class TwitterService
     const client = this.getUserClient(accessToken);
     const readOnlyClient = client.readOnly;
 
+    const tweetFields: TTweetv2TweetField[] = ['created_at', 'author_id'];
+
     const result = await readOnlyClient.v2.userTimeline(params.user_id, {
       start_time: params.start_time,
       end_time: params.end_time,
       max_results: params.max_results,
-      'tweet.fields': ['created_at', 'author_id'],
+      'tweet.fields': tweetFields,
     });
 
     const resultCollection: TweetV2[] = result.data.data;
@@ -146,7 +149,7 @@ export class TwitterService
         start_time: params.start_time,
         end_time: params.end_time,
         max_results: params.max_results,
-        'tweet.fields': ['created_at', 'author_id'],
+        'tweet.fields': tweetFields,
         pagination_token: nextToken,
       });
       resultCollection.push(...nextResult.data.data);
@@ -158,7 +161,7 @@ export class TwitterService
 
   public async fetch(
     params: FetchUserPostsParams<PLATFORM.Twitter>[]
-  ): Promise<TweetV2[]> {
+  ): Promise<PlatformPost<TweetV2>[]> {
     const allAccountTweetPromises = params.map((fetchUserPostsParams) =>
       this.fetchInternal(
         {
@@ -174,7 +177,24 @@ export class TwitterService
     const allAccountTweets = (
       await Promise.all(allAccountTweetPromises)
     ).flat();
-    return allAccountTweets;
+
+    return allAccountTweets.map((tweet) => {
+      if (!tweet.author_id) {
+        throw new Error(`Unexpected author_id undefined`);
+      }
+      if (!tweet.created_at) {
+        throw new Error(
+          `Unexpected created_at undefined, how would we know the timestamp then? )`
+        );
+      }
+      return {
+        platformId: PLATFORM.Twitter,
+        post_id: tweet.id,
+        user_id: tweet.author_id,
+        timestamp: this.dateStrToTimestampMs(tweet.created_at),
+        original: tweet,
+      };
+    });
   }
 
   public convertToGeneric(
