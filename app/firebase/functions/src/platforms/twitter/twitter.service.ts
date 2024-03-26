@@ -2,11 +2,16 @@ import {
   TweetV2,
   TweetV2PaginableTimelineResult,
   TweetV2PostTweetResult,
+  TweetV2SingleResult,
   TwitterApi,
 } from 'twitter-api-v2';
 
 import { PLATFORM } from '../../@shared/types';
-import { AppPost, PlatformPost } from '../../@shared/types.posts';
+import {
+  AppPost,
+  AppPostPublish,
+  PlatformPost,
+} from '../../@shared/types.posts';
 import {
   TwitterGetContextParams,
   TwitterQueryParameters,
@@ -33,6 +38,11 @@ export class TwitterService
     >
 {
   constructor(protected credentials: TwitterApiCredentials) {}
+
+  public dateStrToTimestampMs(dateStr: string) {
+    // TODO: implement the conversion
+    return 10000;
+  }
 
   private getGenericClient() {
     return new TwitterApi({
@@ -115,14 +125,17 @@ export class TwitterService
   ): Promise<TweetV2PaginableTimelineResult['data']> {
     const client = await this.getUserClient(accessToken);
     const readOnlyClient = client.readOnly;
+
     const result = await readOnlyClient.v2.userTimeline(params.user_id, {
       start_time: params.start_time,
       end_time: params.end_time,
       max_results: params.max_results,
       'tweet.fields': ['created_at', 'author_id'],
     });
+
     const resultCollection: TweetV2[] = result.data.data;
     let nextToken = result.meta.next_token;
+
     while (nextToken) {
       const nextResult = await readOnlyClient.v2.userTimeline(params.user_id, {
         start_time: params.start_time,
@@ -134,6 +147,7 @@ export class TwitterService
       resultCollection.push(...nextResult.data.data);
       nextToken = nextResult.meta.next_token;
     }
+
     return resultCollection;
   }
 
@@ -165,6 +179,44 @@ export class TwitterService
       originals: {
         [PLATFORM.Twitter]: platformPost.original,
       },
+    };
+  }
+
+  public async getPost(tweetId: string) {
+    return this.getGenericClient().v2.singleTweet(tweetId);
+  }
+
+  public async publish(
+    post: AppPostPublish,
+    user_id: string,
+    write: NonNullable<TwitterUserDetails['write']>
+  ): Promise<PlatformPost<TweetV2SingleResult>> {
+    const client = await this.getUserClient(write.accessToken);
+
+    const result = await client.v2.tweet(post.content);
+
+    if (result.errors) {
+      throw new Error(`Error posting tweet`);
+    }
+
+    const tweet = await this.getPost(result.data.id);
+
+    if (user_id !== tweet.data.author_id) {
+      throw new Error(`Unexpected author_id (but tweet already published :/ )`);
+    }
+
+    if (!tweet.data.created_at) {
+      throw new Error(
+        `Unexpected created_at undefined, how would we know the timestamp then? )`
+      );
+    }
+
+    return {
+      platformId: PLATFORM.Twitter,
+      post_id: tweet.data.id,
+      user_id: user_id,
+      timestamp: this.dateStrToTimestampMs(tweet.data.created_at),
+      original: tweet,
     };
   }
 }

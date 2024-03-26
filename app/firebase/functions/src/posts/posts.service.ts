@@ -1,9 +1,10 @@
+import { PLATFORM } from '../@shared/types';
 import {
   PARSER_MODE,
   ParsePostRequest,
   TopicsParams,
 } from '../@shared/types.parser';
-import { AppPost } from '../@shared/types.posts';
+import { AppPost, AppPostPublish } from '../@shared/types.posts';
 import { ParserService } from '../parser/parser.service';
 import {
   FetchAllUserPostsParams,
@@ -119,5 +120,40 @@ export class PostsService {
   async process() {
     const posts = await this.fetchFromUsers();
     await this.parse(posts, true);
+  }
+
+  /**
+   * CAUTION: userId MUST be an authenticated userId.
+   *
+   * This method will publish a post on a given platform and with a given
+   * platform user_id. It verifies the account is controlled by the userId
+   *
+   * */
+  async publish(
+    userId: string,
+    post: AppPostPublish,
+    platformId: PLATFORM,
+    user_id: string
+  ) {
+    const user = await this.users.repo.getUserWithPlatformAccount(
+      platformId,
+      user_id,
+      true
+    );
+
+    if (user.userId !== userId) {
+      throw new Error(
+        `Account in platformId ${platformId} and user_id ${user_id} not controlled by ${userId}`
+      );
+    }
+
+    /** get user write credentials for this account */
+    const account = user[PLATFORM.Twitter]?.find((u) => u.user_id === user_id);
+
+    if (!account || !account.write) {
+      throw new Error(`Write credentials for user ${userId} not found`);
+    }
+
+    return this.platforms.publish(platformId, post, user_id, account.write);
   }
 }

@@ -27,3 +27,6 @@ export interface AppPost {
     [PLATFORM.Nanopubs]: any;
   }>;
 }
+
+/** AppPost sent to a PlatformService to be published */
+export type AppPostPublish = Omit<AppPost, 'id' | 'originals' | 'authorId'>;

@@ -58,7 +58,11 @@ export class UsersRepository {
   }
 
   /** Sensistive method! Call only if the platform and user_id were authenticated */
-  public async getUserWithPlatformAccount(platform: PLATFORM, user_id: string) {
+  public async getUserWithPlatformAccount<T extends boolean>(
+    platform: PLATFORM,
+    user_id: string,
+    shouldThrow?: T
+  ): Promise<DefinedIfTrue<T, AppUser>> {
     const prefixed_user_id = getPrefixedUserId(platform, user_id);
 
     /** protect against changes in the property name */
@@ -70,8 +74,14 @@ export class UsersRepository {
     );
     const snap = await query.get();
 
+    const _shouldThrow = shouldThrow !== undefined ? shouldThrow : false;
+
     if (snap.empty) {
-      return undefined;
+      if (_shouldThrow)
+        throw new Error(
+          `User with user_id: ${user_id} and platform ${platform} not found`
+        );
+      else return undefined as DefinedIfTrue<T, AppUser>;
     }
 
     if (snap.size > 1) {
@@ -80,7 +90,10 @@ export class UsersRepository {
       );
     }
 
-    return { userId: snap.docs[0].id, ...snap.docs[0].data() } as AppUser;
+    return { userId: snap.docs[0].id, ...snap.docs[0].data() } as DefinedIfTrue<
+      T,
+      AppUser
+    >;
   }
 
   public async createUser(userId: string, user: AppUserCreate) {
