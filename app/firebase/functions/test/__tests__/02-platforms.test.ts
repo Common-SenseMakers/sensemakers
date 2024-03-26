@@ -27,13 +27,14 @@ describe('platforms', () => {
           {
             user_id: '1753077743816777728',
             start_time: 1708560000000,
+            end_time: 1708646400000,
             credentials: {
               accessToken: TEST_TOKENS_MAP[TWITTER_ACCOUNT].accessToken,
             },
           },
         ]);
         expect(tweets).to.not.be.undefined;
-        expect(tweets.length).to.be.equal(0);
+        expect(tweets.length).to.be.equal(11);
       } catch (error) {
         console.error('error: ', error);
         throw error;

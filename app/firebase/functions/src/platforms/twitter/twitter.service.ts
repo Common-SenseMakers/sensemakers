@@ -128,7 +128,7 @@ export class TwitterService
     params: TwitterQueryParameters,
     accessToken: string
   ): Promise<TweetV2PaginableTimelineResult['data']> {
-    const client = await this.getUserClient(accessToken);
+    const client = this.getUserClient(accessToken);
     const readOnlyClient = client.readOnly;
 
     const result = await readOnlyClient.v2.userTimeline(params.user_id, {
@@ -156,13 +156,25 @@ export class TwitterService
     return resultCollection;
   }
 
-  /** @Wes, this is an implementation of the Platform interface.
-   * It will have the same shape on all platfforms */
-  public async fetch(params: FetchUserPostsParams[]): Promise<TweetV2[]> {
-    // get all posts from all users in the input params
-    // params.user_ids.foreach ... this.fetch()
-    // console.log({ params });
-    return [];
+  public async fetch(
+    params: FetchUserPostsParams<PLATFORM.Twitter>[]
+  ): Promise<TweetV2[]> {
+    const allAccountTweetPromises = params.map((fetchUserPostsParams) =>
+      this.fetchInternal(
+        {
+          user_id: fetchUserPostsParams.user_id,
+          start_time: new Date(fetchUserPostsParams.start_time).toISOString(),
+          end_time: fetchUserPostsParams.end_time
+            ? new Date(fetchUserPostsParams.end_time).toISOString()
+            : undefined,
+        },
+        fetchUserPostsParams.credentials.accessToken
+      )
+    );
+    const allAccountTweets = (
+      await Promise.all(allAccountTweetPromises)
+    ).flat();
+    return allAccountTweets;
   }
 
   public convertToGeneric(
