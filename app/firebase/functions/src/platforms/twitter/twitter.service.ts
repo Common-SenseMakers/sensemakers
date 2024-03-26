@@ -1,5 +1,6 @@
 import {
   TOAuth2Scope,
+  TTweetv2TweetField,
   TweetV2,
   TweetV2PaginableTimelineResult,
   TweetV2SingleResult,
@@ -40,9 +41,14 @@ export class TwitterService
 {
   constructor(protected credentials: TwitterApiCredentials) {}
 
+  /**
+   *
+   * @param dateStr ISO 8601 date string, e.g. '2021-09-01T00:00:00Z'
+   * @returns unix timestamp in milliseconds
+   */
   public dateStrToTimestampMs(dateStr: string) {
-    // TODO: implement the conversion
-    return 10000;
+    const date = new Date(dateStr);
+    return date.getTime();
   }
 
   private getGenericClient() {
@@ -123,14 +129,16 @@ export class TwitterService
     params: TwitterQueryParameters,
     accessToken: string
   ): Promise<TweetV2PaginableTimelineResult['data']> {
-    const client = await this.getUserClient(accessToken);
+    const client = this.getUserClient(accessToken);
     const readOnlyClient = client.readOnly;
+
+    const tweetFields: TTweetv2TweetField[] = ['created_at', 'author_id'];
 
     const result = await readOnlyClient.v2.userTimeline(params.user_id, {
       start_time: params.start_time,
       end_time: params.end_time,
       max_results: params.max_results,
-      'tweet.fields': ['created_at', 'author_id'],
+      'tweet.fields': tweetFields,
     });
 
     const resultCollection: TweetV2[] = result.data.data;
@@ -141,7 +149,7 @@ export class TwitterService
         start_time: params.start_time,
         end_time: params.end_time,
         max_results: params.max_results,
-        'tweet.fields': ['created_at', 'author_id'],
+        'tweet.fields': tweetFields,
         pagination_token: nextToken,
       });
       resultCollection.push(...nextResult.data.data);
@@ -151,13 +159,42 @@ export class TwitterService
     return resultCollection;
   }
 
-  /** @Wes, this is an implementation of the Platform interface.
-   * It will have the same shape on all platfforms */
-  public async fetch(params: FetchUserPostsParams[]): Promise<TweetV2[]> {
-    // get all posts from all users in the input params
-    // params.user_ids.foreach ... this.fetch()
-    // console.log({ params });
-    return [];
+  public async fetch(
+    params: FetchUserPostsParams<PLATFORM.Twitter>[]
+  ): Promise<PlatformPost<TweetV2>[]> {
+    const allAccountTweetPromises = params.map((fetchUserPostsParams) =>
+      this.fetchInternal(
+        {
+          user_id: fetchUserPostsParams.user_id,
+          start_time: new Date(fetchUserPostsParams.start_time).toISOString(),
+          end_time: fetchUserPostsParams.end_time
+            ? new Date(fetchUserPostsParams.end_time).toISOString()
+            : undefined,
+        },
+        fetchUserPostsParams.credentials.accessToken
+      )
+    );
+    const allAccountTweets = (
+      await Promise.all(allAccountTweetPromises)
+    ).flat();
+
+    return allAccountTweets.map((tweet) => {
+      if (!tweet.author_id) {
+        throw new Error(`Unexpected author_id undefined`);
+      }
+      if (!tweet.created_at) {
+        throw new Error(
+          `Unexpected created_at undefined, how would we know the timestamp then? )`
+        );
+      }
+      return {
+        platformId: PLATFORM.Twitter,
+        post_id: tweet.id,
+        user_id: tweet.author_id,
+        timestamp: this.dateStrToTimestampMs(tweet.created_at),
+        original: tweet,
+      };
+    });
   }
 
   public convertToGeneric(
