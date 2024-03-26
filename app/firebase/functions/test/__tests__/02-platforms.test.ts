@@ -5,6 +5,12 @@ import { logger } from '../../src/instances/logger';
 import { resetDB } from '../__tests_support__/db';
 import { services } from './test.services';
 
+const TWITTER_ACCOUNT = 'sensemakergod';
+
+const TEST_TOKENS_MAP = JSON.parse(
+  process.env.TEST_USERS_BEARER_TOKENS as string
+);
+
 describe('platforms', () => {
   before(async () => {
     logger.debug('resetting DB');
@@ -22,7 +28,7 @@ describe('platforms', () => {
             user_id: '1753077743816777728',
             start_time: 1708560000000,
             credentials: {
-              accessToken: process.env.TWITTER_MY_BEARER_TOKEN,
+              accessToken: TEST_TOKENS_MAP[TWITTER_ACCOUNT].accessToken,
             },
           },
         ]);
