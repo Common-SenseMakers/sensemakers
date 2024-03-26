@@ -2,7 +2,7 @@ import { RequestHandler } from 'express';
 
 import { PLATFORM } from '../@shared/types';
 import { logger } from '../instances/logger';
-import { Services } from '../middleware/services';
+import { Services } from '../instances/services';
 import {
   twitterGetSignupContextSchema,
   twitterSignupDataSchema,
@@ -57,12 +57,8 @@ export const handleSignupController: RequestHandler = async (
       throw new Error(`Unexpected platform ${platform}`);
     })();
 
-    const context = await services.users.handleSignup(
-      platform,
-      payload,
-      userId
-    );
-    response.status(200).send({ success: true, data: context });
+    const result = await services.users.handleSignup(platform, payload, userId);
+    response.status(200).send({ success: true, data: result });
   } catch (error) {
     logger.error('error', error);
     response.status(500).send({ success: false, error });

@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 
 import { PLATFORM } from '../../src/@shared/types';
+import { resetDB } from '../__tests_support__/db';
 import {
   TEST_ORCID_PROFILE,
   TEST_TWITTER_PROFILE,
@@ -14,6 +15,11 @@ describe('signups', () => {
   let twitterId: string = '123456789';
 
   let userId: string | undefined;
+
+  before(async () => {
+    logger.debug('resetting DB');
+    await resetDB();
+  });
 
   describe('connect orcid', () => {
     it('get orcid authlink', async () => {

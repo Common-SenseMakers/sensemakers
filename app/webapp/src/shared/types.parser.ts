@@ -1,3 +1,20 @@
+import { AppPost } from './types.posts';
+
+export enum PARSER_MODE {
+  REF_LABELS = 'REF_LABELS',
+  KEYWORDS = 'KEYWORDS',
+  TOPICS = 'TOPICS',
+}
+
+export interface TopicsParams {
+  topics: string[];
+}
+
+export interface ParsePostRequest<P> {
+  post: AppPost;
+  params: Partial<Record<PARSER_MODE, P>>;
+}
+
 export type AppPostSemantics = string;
 
 export interface OntologyItem {
@@ -30,7 +47,7 @@ export interface ParsedSupport {
   refs_meta?: Record<string, RefMeta>;
 }
 
-export interface ParserResult {
+export interface ParsePostResult {
   post: string;
   semantics: AppPostSemantics;
   support?: ParsedSupport;

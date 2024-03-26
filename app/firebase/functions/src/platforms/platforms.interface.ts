@@ -1,4 +1,11 @@
-import { PLATFORM, WithPlatformUserId } from '../@shared/types';
+import { UserDetailsBase, WithPlatformUserId } from '../@shared/types';
+import { AppPostPublish, PlatformPost } from '../@shared/types.posts';
+
+export interface FetchUserPostsParams {
+  user_id: string;
+  start_time: number; // timestamp in ms
+  credentials: any;
+}
 
 export interface IdentityService<
   SignupContext,
@@ -11,13 +18,19 @@ export interface IdentityService<
   handleSignupData: (signupData: SignupData) => Promise<UserDetails>;
 }
 
-export interface PlatformService<
-  SignupContext,
-  SignupData,
-  UserDetails extends WithPlatformUserId,
-> extends IdentityService<SignupContext, SignupData, UserDetails> {}
+export interface GenericPostData {
+  content: string;
+}
 
-export type IdentityPlatforms = Map<
-  PLATFORM,
-  IdentityService<any, any, WithPlatformUserId>
->;
+export interface PlatformService<
+  SignupContext = any,
+  SignupData = any,
+  UserDetails extends UserDetailsBase = WithPlatformUserId,
+> extends IdentityService<SignupContext, SignupData, UserDetails> {
+  fetch(params: FetchUserPostsParams[]): Promise<any[]>;
+  convertToGeneric(platformPost: PlatformPost): GenericPostData;
+  publish(
+    post: AppPostPublish,
+    write: NonNullable<UserDetails['write']>
+  ): Promise<PlatformPost>;
+}

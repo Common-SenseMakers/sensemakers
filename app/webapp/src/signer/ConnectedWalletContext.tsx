@@ -4,7 +4,7 @@ import { defaultWagmiConfig } from '@web3modal/wagmi/react/config';
 import { WagmiProvider } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 
-import { WALLETCONNECT_PROJECT_ID } from '../config';
+import { WALLETCONNECT_PROJECT_ID } from '../app/config';
 
 export const chain = mainnet;
 

@@ -24,4 +24,8 @@ export class DBInstance {
       posts: this.firestore.collection(CollectionNames.Posts),
     };
   }
+
+  get batch() {
+    return this.firestore.batch();
+  }
 }

@@ -11,7 +11,6 @@ export const AppPlatformManager = (props: {}) => {
   const { t } = useTranslation();
   const {
     connect: connectTwitter,
-    approve: approveTwitter,
     revokeApproval: revokeTwitter,
     isConnecting: isConnectingTwitter,
     isApproving: isApprovingTwitter,
@@ -47,7 +46,7 @@ export const AppPlatformManager = (props: {}) => {
             loading={isConnectingTwitter}
             onClick={() => {
               if (connectTwitter) {
-                connectTwitter();
+                connectTwitter('read');
               }
             }}
             label={t(I18Keys.connectTwitterBtn)}></AppButton>
@@ -58,8 +57,8 @@ export const AppPlatformManager = (props: {}) => {
             disabled={!needConnectTwitter}
             loading={isApprovingTwitter}
             onClick={() => {
-              if (approveTwitter) {
-                approveTwitter();
+              if (connectTwitter) {
+                connectTwitter('write');
               }
             }}
             label={t(I18Keys.approveTwitterBtn)}></AppButton>

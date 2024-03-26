@@ -11,7 +11,7 @@ import { useSearchParams } from 'react-router-dom';
 
 import { useAccountContext } from '../app/AccountContext';
 import { useAppFetch } from '../app/app.fetch';
-import { PLATFORM } from '../shared/types';
+import { HandleSignupResult, PLATFORM } from '../shared/types';
 import {
   TwitterGetContextParams,
   TwitterSignupContext,
@@ -23,8 +23,7 @@ const LS_TWITTER_CONTEXT_KEY = 'twitter-signin-context';
 
 /** Manages the authentication process with Twitter */
 export type TwitterContextType = {
-  connect?: () => void;
-  approve?: () => void;
+  connect?: (type: TwitterGetContextParams['type']) => void;
   revokeApproval: () => void;
   isConnecting: boolean;
   isApproving: boolean;
@@ -39,7 +38,11 @@ const TwitterContextValue = createContext<TwitterContextType | undefined>(
 export const TwitterContext = (props: PropsWithChildren) => {
   const verifierHandled = useRef(false);
 
-  const { connectedUser, refresh: refreshConnected } = useAccountContext();
+  const {
+    connectedUser,
+    refresh: refreshConnected,
+    setToken: setOurToken,
+  } = useAccountContext();
 
   const [searchParams, setSearchParams] = useSearchParams();
   const state_param = searchParams.get('state');
@@ -52,11 +55,12 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
   const needConnect = !connectedUser || !connectedUser[PLATFORM.Twitter];
 
-  const connect = async () => {
+  const connect = async (type: TwitterGetContextParams['type']) => {
     setIsConnecting(true);
 
     const params: TwitterGetContextParams = {
       callback_url: window.location.href,
+      type,
     };
     const siginContext = await appFetch<TwitterSignupContext>(
       `/auth/${PLATFORM.Twitter}/context`,
@@ -83,16 +87,22 @@ export const TwitterContext = (props: PropsWithChildren) => {
         throw new Error('Twitter context not found');
       }
 
+      localStorage.removeItem(LS_TWITTER_CONTEXT_KEY);
+
       const context = JSON.parse(contextStr) as TwitterSignupContext;
 
       if (context.state !== state_param) {
         throw new Error('Undexpected state');
       }
 
-      appFetch(`/auth/${PLATFORM.Twitter}/signup`, {
+      appFetch<HandleSignupResult>(`/auth/${PLATFORM.Twitter}/signup`, {
         ...context,
         code: code_param,
-      }).then(() => {
+      }).then((result) => {
+        if (result.ourAccessToken) {
+          setOurToken(result.ourAccessToken);
+        }
+
         searchParams.delete('state');
         searchParams.delete('code');
         setSearchParams(searchParams);
@@ -101,11 +111,6 @@ export const TwitterContext = (props: PropsWithChildren) => {
       });
     }
   }, [state_param, code_param, searchParams, setSearchParams]);
-
-  const approve = async () => {
-    setIsApproving(true);
-    window.location.href = '';
-  };
 
   const revokeApproval = async () => {
     const revokeLink = await appFetch<string>(
@@ -118,7 +123,6 @@ export const TwitterContext = (props: PropsWithChildren) => {
     <TwitterContextValue.Provider
       value={{
         connect,
-        approve,
         revokeApproval,
         isConnecting,
         isApproving,

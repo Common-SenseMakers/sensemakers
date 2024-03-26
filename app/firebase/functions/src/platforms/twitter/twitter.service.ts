@@ -1,12 +1,26 @@
-import { TweetV2PostTweetResult, TwitterApi } from 'twitter-api-v2';
+import {
+  TOAuth2Scope,
+  TweetV2,
+  TweetV2PaginableTimelineResult,
+  TweetV2SingleResult,
+  Tweetv2FieldsParams,
+  TwitterApi,
+} from 'twitter-api-v2';
 
+import { PLATFORM } from '../../@shared/types';
+import { AppPostPublish, PlatformPost } from '../../@shared/types.posts';
 import {
   TwitterGetContextParams,
+  TwitterQueryParameters,
   TwitterSignupContext,
   TwitterSignupData,
   TwitterUserDetails,
 } from '../../@shared/types.twitter';
-import { PlatformService } from '../platforms.interface';
+import {
+  FetchUserPostsParams,
+  GenericPostData,
+  PlatformService,
+} from '../platforms.interface';
 
 export interface TwitterApiCredentials {
   clientId: string;
@@ -26,6 +40,11 @@ export class TwitterService
 {
   constructor(protected credentials: TwitterApiCredentials) {}
 
+  public dateStrToTimestampMs(dateStr: string) {
+    // TODO: implement the conversion
+    return 10000;
+  }
+
   private getGenericClient() {
     return new TwitterApi({
       clientId: this.credentials.clientId,
@@ -33,7 +52,7 @@ export class TwitterService
     });
   }
 
-  private async getUserClient(accessToken: string) {
+  private getUserClient(accessToken: string) {
     return new TwitterApi(accessToken);
   }
 
@@ -47,14 +66,24 @@ export class TwitterService
       throw new Error('params must be defined');
     }
 
+    const scope: TOAuth2Scope[] = [
+      'tweet.read',
+      'offline.access',
+      'users.read',
+    ];
+
+    if (params.type === 'write') {
+      scope.push('tweet.write');
+    }
+
     const authDetails = await client.generateOAuth2AuthLink(
       params.callback_url,
       {
-        scope: ['tweet.read', 'offline.access', 'users.read'],
+        scope,
       }
     );
 
-    return { ...authDetails, callback_url: params.callback_url };
+    return { ...authDetails, ...params };
   }
 
   async handleSignupData(data: TwitterSignupData): Promise<TwitterUserDetails> {
@@ -89,17 +118,110 @@ export class TwitterService
     return twitter;
   }
 
-  async postMessageTwitter(
-    text: string,
+  /** methods non part of Platform interface should be protected (private) */
+  protected async fetchInternal(
+    params: TwitterQueryParameters,
     accessToken: string
-  ): Promise<TweetV2PostTweetResult['data']> {
+  ): Promise<TweetV2PaginableTimelineResult['data']> {
     const client = await this.getUserClient(accessToken);
-    const result = await client.v2.tweet(text);
+    const readOnlyClient = client.readOnly;
 
-    return result.data;
+    const result = await readOnlyClient.v2.userTimeline(params.user_id, {
+      start_time: params.start_time,
+      end_time: params.end_time,
+      max_results: params.max_results,
+      'tweet.fields': ['created_at', 'author_id'],
+    });
+
+    const resultCollection: TweetV2[] = result.data.data;
+    let nextToken = result.meta.next_token;
+
+    while (nextToken) {
+      const nextResult = await readOnlyClient.v2.userTimeline(params.user_id, {
+        start_time: params.start_time,
+        end_time: params.end_time,
+        max_results: params.max_results,
+        'tweet.fields': ['created_at', 'author_id'],
+        pagination_token: nextToken,
+      });
+      resultCollection.push(...nextResult.data.data);
+      nextToken = nextResult.meta.next_token;
+    }
+
+    return resultCollection;
   }
 
-  async fetch() {
+  /** @Wes, this is an implementation of the Platform interface.
+   * It will have the same shape on all platfforms */
+  public async fetch(params: FetchUserPostsParams[]): Promise<TweetV2[]> {
+    // get all posts from all users in the input params
+    // params.user_ids.foreach ... this.fetch()
+    // console.log({ params });
     return [];
+  }
+
+  public convertToGeneric(
+    platformPost: PlatformPost<TweetV2>
+  ): GenericPostData {
+    if (
+      platformPost.original.author_id &&
+      platformPost.original.author_id !== platformPost.user_id
+    ) {
+      throw new Error(
+        `unexpected author_id ${platformPost.original.author_id}, Expected ${platformPost.user_id} `
+      );
+    }
+
+    return {
+      content: platformPost.original.text,
+    };
+  }
+
+  public async getPost(tweetId: string, read?: TwitterUserDetails['read']) {
+    const options: Partial<Tweetv2FieldsParams> = {
+      'tweet.fields': ['author_id', 'created_at'],
+    };
+
+    const client = read
+      ? this.getUserClient(read.accessToken)
+      : this.getGenericClient();
+
+    return client.v2.singleTweet(tweetId, options);
+  }
+
+  public async publish(
+    post: AppPostPublish,
+    write: NonNullable<TwitterUserDetails['write']>
+  ): Promise<PlatformPost<TweetV2SingleResult>> {
+    const client = this.getUserClient(write.accessToken);
+
+    const result = await client.v2.tweet(post.content);
+
+    if (result.errors) {
+      throw new Error(`Error posting tweet`);
+    }
+
+    const tweet = await this.getPost(result.data.id, {
+      ...write,
+      lastFetched: 0,
+    });
+
+    if (!tweet.data.author_id) {
+      throw new Error(`Unexpected author_id undefined`);
+    }
+
+    if (!tweet.data.created_at) {
+      throw new Error(
+        `Unexpected created_at undefined, how would we know the timestamp then? )`
+      );
+    }
+
+    return {
+      platformId: PLATFORM.Twitter,
+      post_id: tweet.data.id,
+      user_id: tweet.data.author_id,
+      timestamp: this.dateStrToTimestampMs(tweet.data.created_at),
+      original: tweet,
+    };
   }
 }

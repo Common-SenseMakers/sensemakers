@@ -11,8 +11,8 @@ import {
   NanopubContextType,
   useNanopubContext,
 } from '../platforms/NanopubContext';
+import { useAppSigner } from '../signer/SignerContext';
 import { useAccountContext } from './AccountContext';
-import { useAppSigner } from './signer/SignerContext';
 
 const DEBUG = false;
 
