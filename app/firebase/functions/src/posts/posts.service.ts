@@ -112,10 +112,11 @@ export class PostsService {
     }
   }
 
-  /** Coordinate the fetch and parse processed. It only stores
+  /**
+   * Coordinate the fetch and parse processed. It only stores
    * on the parse step.
    */
-  async processNewPosts() {
+  async process() {
     const posts = await this.fetchFromUsers();
     await this.parse(posts, true);
   }

@@ -1,9 +1,16 @@
 import { expect } from 'chai';
 
 import { PLATFORM } from '../../src/@shared/types';
+import { logger } from '../../src/instances/logger';
+import { resetDB } from '../__tests_support__/db';
 import { services } from './test.services';
 
-describe.only('platforms', () => {
+describe('platforms', () => {
+  before(() => {
+    logger.info('resetting DB');
+    resetDB();
+  });
+
   describe('twitter', () => {
     it("get's all tweets in a time range using pagination", async () => {
       services;

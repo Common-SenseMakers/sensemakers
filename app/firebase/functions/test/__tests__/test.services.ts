@@ -5,6 +5,7 @@ import {
   OrcidSignupData,
   OrcidUserDetails,
 } from '../../src/@shared/types.orcid';
+import { ParsePostResult } from '../../src/@shared/types.parser';
 import {
   TwitterSignupData,
   TwitterUserDetails,
@@ -107,12 +108,24 @@ const platformsService = new PlatformsService(platformsMap);
 /** parser service */
 const parserService = new ParserService(process.env.PARSER_API_URL as string);
 
+ParserService;
+const MockedParser = spy(parserService);
+
+const mockedResult: ParsePostResult[] = [
+  {
+    post: 'test',
+    semantics: '<semantics>',
+  },
+];
+when(MockedParser.parsePosts(anything())).thenResolve(mockedResult);
+const mockedParser = instance(MockedParser);
+
 /** posts service */
 const postsService = new PostsService(
   usersService,
   platformsService,
   postsRepo,
-  parserService
+  mockedParser
 );
 
 export const services: Services = {
