@@ -25,6 +25,7 @@ export type IdentityServicesMap = Map<
 export class PlatformsService {
   constructor(protected platforms: PlatformsMap) {}
 
+  // TODO set the return type depending on the value of platformId
   get(platformId: PLATFORM) {
     const platform = this.platforms.get(platformId);
     if (!platform) {
@@ -34,11 +35,9 @@ export class PlatformsService {
   }
 
   /**
-   * [[[[PLACEHOLDER]]]]
-   * fetch posts from all platforms for the provided user_ids and timestemps */
-  async fetchPostsSince(
-    fetchParams: FetchAllUserPostsParams
-  ): Promise<PlatformPost[]> {
+   * fetch posts from all platforms for the provided user_ids and timestemps
+   * */
+  async fetch(fetchParams: FetchAllUserPostsParams): Promise<PlatformPost[]> {
     const allPosts = await Promise.all(
       Array.from(fetchParams.keys()).map(
         async (platformId): Promise<PlatformPost[]> => {

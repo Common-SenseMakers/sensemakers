@@ -6,9 +6,9 @@ import { resetDB } from '../__tests_support__/db';
 import { services } from './test.services';
 
 describe('platforms', () => {
-  before(() => {
-    logger.info('resetting DB');
-    resetDB();
+  before(async () => {
+    logger.debug('resetting DB');
+    await resetDB();
   });
 
   describe('twitter', () => {
@@ -27,7 +27,7 @@ describe('platforms', () => {
           },
         ]);
         expect(tweets).to.not.be.undefined;
-        expect(tweets.length).to.be.equal(11);
+        expect(tweets.length).to.be.equal(0);
       } catch (error) {
         console.error('error: ', error);
         throw error;

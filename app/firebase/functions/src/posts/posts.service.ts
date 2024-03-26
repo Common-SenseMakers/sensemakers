@@ -27,18 +27,24 @@ export class PostsService {
    * this function fetch all recent posts from all platforms */
   async fetch(params: FetchAllUserPostsParams): Promise<AppPost[]> {
     /** call the fetch */
-    const platformPosts = await this.platforms.fetchPostsSince(params);
+    const platformPosts = await this.platforms.fetch(params);
 
     /** convert into internal format */
     const posts = platformPosts.map((platformPost): AppPost => {
-      const postNoIds = this.platforms.convertToGeneric(platformPost);
+      const { content } = this.platforms.convertToGeneric(platformPost);
+
       return {
-        ...postNoIds,
+        content,
         id: getUniquePostId(platformPost.platformId, platformPost.post_id),
+        parseStatus: 'unprocessed',
+        reviewedStatus: 'pending',
         authorId: getPrefixedUserId(
           platformPost.platformId,
           platformPost.user_id
         ),
+        mirrors: {
+          [platformPost.platformId]: platformPost,
+        },
       };
     });
 
@@ -119,7 +125,7 @@ export class PostsService {
    */
   async process() {
     const posts = await this.fetchFromUsers();
-    await this.parse(posts, true);
+    await this.parse(posts);
   }
 
   /**

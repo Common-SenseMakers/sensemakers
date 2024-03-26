@@ -25,6 +25,12 @@ import { PostsService } from '../../src/posts/posts.service';
 import { UsersRepository } from '../../src/users/users.repository';
 import { UsersService } from '../../src/users/users.service';
 
+const TWITTER_ACCOUNT = 'sensemakergod';
+
+const TEST_TOKENS_MAP = JSON.parse(
+  process.env.TEST_USERS_BEARER_TOKENS as string
+);
+
 const mandatory = [
   'TWITTER_CLIENT_ID',
   'TWITTER_CLIENT_SECRET',
@@ -79,7 +85,7 @@ when(MockedTwitter.handleSignupData(anything())).thenCall(
     return {
       user_id: data.code,
       write: {
-        accessToken: process.env.ACCESS_TOKEN_TEST_USER_0 as string,
+        accessToken: TEST_TOKENS_MAP[TWITTER_ACCOUNT].accessToken,
         refreshToken: '',
         expiresIn: 0,
       },

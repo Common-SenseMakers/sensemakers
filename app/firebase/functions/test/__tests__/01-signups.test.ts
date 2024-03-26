@@ -16,9 +16,9 @@ describe('signups', () => {
 
   let userId: string | undefined;
 
-  before(() => {
-    logger.info('resetting DB');
-    resetDB();
+  before(async () => {
+    logger.debug('resetting DB');
+    await resetDB();
   });
 
   describe('connect orcid', () => {

@@ -1,5 +1,5 @@
 import { UserDetailsBase, WithPlatformUserId } from '../@shared/types';
-import { AppPost, AppPostPublish, PlatformPost } from '../@shared/types.posts';
+import { AppPostPublish, PlatformPost } from '../@shared/types.posts';
 
 export interface FetchUserPostsParams {
   user_id: string;
@@ -18,15 +18,17 @@ export interface IdentityService<
   handleSignupData: (signupData: SignupData) => Promise<UserDetails>;
 }
 
+export interface GenericPostData {
+  content: string;
+}
+
 export interface PlatformService<
   SignupContext = any,
   SignupData = any,
   UserDetails extends UserDetailsBase = WithPlatformUserId,
 > extends IdentityService<SignupContext, SignupData, UserDetails> {
   fetch(params: FetchUserPostsParams[]): Promise<any[]>;
-  convertToGeneric(
-    platformPost: PlatformPost
-  ): Omit<AppPost, 'id' | 'authorId'>;
+  convertToGeneric(platformPost: PlatformPost): GenericPostData;
   publish(
     post: AppPostPublish,
     write: NonNullable<UserDetails['write']>

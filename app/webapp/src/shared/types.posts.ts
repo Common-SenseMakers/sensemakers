@@ -15,18 +15,29 @@ export interface PlatformPost<C = any> {
   original: C;
 }
 
+export interface MirrorStatus<C = any> {
+  shouldPost: boolean;
+  user_id: string;
+  platformPost: C;
+}
+
 /** Basic interface of a Post object */
 export interface AppPost {
   id: string;
   authorId: string;
   content: string;
+  parseStatus: 'unprocessed' | 'processed';
+  reviewedStatus: 'pending' | 'reviewed';
   originalParsed?: ParsePostResult;
   semantics?: AppPostSemantics;
-  originals: Partial<{
-    [PLATFORM.Twitter]: TweetV2;
-    [PLATFORM.Nanopubs]: any;
+  mirrors: Partial<{
+    [PLATFORM.Twitter]: MirrorStatus<TweetV2>[];
+    [PLATFORM.Nanopubs]: MirrorStatus[];
   }>;
 }
 
 /** AppPost sent to a PlatformService to be published */
-export type AppPostPublish = Omit<AppPost, 'id' | 'originals' | 'authorId'>;
+export type AppPostPublish = Omit<
+  AppPost,
+  'id' | 'originals' | 'authorId' | 'parseStatus' | 'reviewedStatus' | 'mirrors'
+>;

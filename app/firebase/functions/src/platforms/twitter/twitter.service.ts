@@ -2,18 +2,13 @@ import {
   TOAuth2Scope,
   TweetV2,
   TweetV2PaginableTimelineResult,
-  TweetV2PostTweetResult,
   TweetV2SingleResult,
   Tweetv2FieldsParams,
   TwitterApi,
 } from 'twitter-api-v2';
 
 import { PLATFORM } from '../../@shared/types';
-import {
-  AppPost,
-  AppPostPublish,
-  PlatformPost,
-} from '../../@shared/types.posts';
+import { AppPostPublish, PlatformPost } from '../../@shared/types.posts';
 import {
   TwitterGetContextParams,
   TwitterQueryParameters,
@@ -21,7 +16,11 @@ import {
   TwitterSignupData,
   TwitterUserDetails,
 } from '../../@shared/types.twitter';
-import { FetchUserPostsParams, PlatformService } from '../platforms.interface';
+import {
+  FetchUserPostsParams,
+  GenericPostData,
+  PlatformService,
+} from '../platforms.interface';
 
 export interface TwitterApiCredentials {
   clientId: string;
@@ -119,17 +118,6 @@ export class TwitterService
     return twitter;
   }
 
-  // placeholder, not tested
-  async postMessageTwitter(
-    text: string,
-    accessToken: string
-  ): Promise<TweetV2PostTweetResult['data']> {
-    const client = await this.getUserClient(accessToken);
-    const result = await client.v2.tweet(text);
-
-    return result.data;
-  }
-
   /** methods non part of Platform interface should be protected (private) */
   protected async fetchInternal(
     params: TwitterQueryParameters,
@@ -168,13 +156,13 @@ export class TwitterService
   public async fetch(params: FetchUserPostsParams[]): Promise<TweetV2[]> {
     // get all posts from all users in the input params
     // params.user_ids.foreach ... this.fetch()
-    console.log({ params });
+    // console.log({ params });
     return [];
   }
 
   public convertToGeneric(
     platformPost: PlatformPost<TweetV2>
-  ): Omit<AppPost, 'id' | 'authorId'> {
+  ): GenericPostData {
     if (
       platformPost.original.author_id &&
       platformPost.original.author_id !== platformPost.user_id
@@ -186,9 +174,6 @@ export class TwitterService
 
     return {
       content: platformPost.original.text,
-      originals: {
-        [PLATFORM.Twitter]: platformPost.original,
-      },
     };
   }
 
