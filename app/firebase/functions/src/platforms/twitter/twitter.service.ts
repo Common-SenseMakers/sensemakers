@@ -40,9 +40,14 @@ export class TwitterService
 {
   constructor(protected credentials: TwitterApiCredentials) {}
 
+  /**
+   *
+   * @param dateStr ISO 8601 date string, e.g. '2021-09-01T00:00:00Z'
+   * @returns unix timestamp in milliseconds
+   */
   public dateStrToTimestampMs(dateStr: string) {
-    // TODO: implement the conversion
-    return 10000;
+    const date = new Date(dateStr);
+    return date.getTime();
   }
 
   private getGenericClient() {
