@@ -1,4 +1,5 @@
 import { WithPlatformUserId } from '../@shared/types';
+import { AppPost, PlatformPost } from '../@shared/types.posts';
 
 export interface FetchUserPostsParams {
   user_id: string;
@@ -23,4 +24,5 @@ export interface PlatformService<
   UserDetails extends WithPlatformUserId = WithPlatformUserId,
 > extends IdentityService<SignupContext, SignupData, UserDetails> {
   fetchPostsSince(params: FetchUserPostsParams[]): Promise<any[]>;
+  convertToGeneric(platformPost: PlatformPost): AppPost;
 }

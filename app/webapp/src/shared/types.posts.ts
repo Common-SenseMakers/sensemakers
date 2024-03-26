@@ -1,33 +1,29 @@
-import { Nanopub } from '@nanopub/sign';
+import { TweetV2 } from 'twitter-api-v2';
 
 import { PLATFORM } from './types';
-import { AppPostSemantics, ParserResult } from './types.parser';
-import { TweetRead } from './types.twitter';
+import { AppPostSemantics, ParsePostResult } from './types.parser';
 
 /**
- * for now, this is placeholder for the generic type of a post read from any platform
- * is there a common interface for all platforms?
+ * Common interface that all platforms should return when they
+ * return a Post
  * */
-export type PlatformPost = any;
-
-export interface AppPostCreate {
-  content: string;
-  originalParsed?: ParserResult;
-  semantics?: AppPostSemantics;
-  signedNanopub?: { uri: string };
-  platforms: PLATFORM[];
+export interface PlatformPost<C = any> {
+  platformId: PLATFORM;
+  user_id: string;
+  post_id: string;
+  timestamp: number; // timestamp in ms
+  original: C;
 }
 
-export interface AppPostGetSemantics {
-  content: string;
-}
-
-export type AppPostStore = AppPostCreate & {
-  author: string;
-  tweet?: TweetRead;
-  nanopub?: Nanopub;
-};
-
-export type AppPost = AppPostStore & {
+/** Basic interface of a Post object */
+export interface AppPost {
   id: string;
-};
+  authorId: string;
+  content: string;
+  originalParsed?: ParsePostResult;
+  semantics?: AppPostSemantics;
+  originals: {
+    [PLATFORM.Twitter]: TweetV2;
+    [PLATFORM.Nanopubs]: any;
+  };
+}

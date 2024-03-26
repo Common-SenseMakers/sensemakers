@@ -51,4 +51,9 @@ export class PlatformsService {
     /** concatenate the results from all platforms */
     return allPosts.reduce((acc, currArray) => acc.concat(currArray), []);
   }
+
+  convertToGeneric(platformPost: PlatformPost) {
+    const platform = this.get(platformPost.platformId);
+    return platform.convertToGeneric(platformPost);
+  }
 }

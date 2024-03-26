@@ -1,3 +1,5 @@
+import { PLATFORM } from 'src/@shared/types';
+import { AppPost, PlatformPost } from 'src/@shared/types.posts';
 import {
   TwitterGetContextParams,
   TwitterQueryParameters,
@@ -12,6 +14,7 @@ import {
   TwitterApi,
 } from 'twitter-api-v2';
 
+import { getPrefixedUserId, getUniquePostId } from '../../users/users.utils';
 import { FetchUserPostsParams, PlatformService } from '../platforms.interface';
 
 export interface TwitterApiCredentials {
@@ -144,5 +147,28 @@ export class TwitterService
     // params.user_ids.foreach ... this.fetch()
     console.log({ params });
     return [];
+  }
+
+  public convertToGeneric(platformPost: PlatformPost<TweetV2>): AppPost {
+    if (
+      platformPost.original.author_id &&
+      platformPost.original.author_id !== platformPost.user_id
+    ) {
+      throw new Error(
+        `unexpected author_id ${platformPost.original.author_id}, Expected ${platformPost.user_id} `
+      );
+    }
+
+    return {
+      authorId: getPrefixedUserId(
+        platformPost.platformId,
+        platformPost.user_id
+      ),
+      postId: getUniquePostId(platformPost.platformId, platformPost.user_id),
+      content: platformPost.original.text,
+      originals: {
+        [PLATFORM.Twitter]: platformPost.original,
+      },
+    };
   }
 }

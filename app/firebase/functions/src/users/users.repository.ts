@@ -175,9 +175,24 @@ export class UsersRepository {
 
   public async getAll() {
     const snapshot = await this.db.collections.users.get();
+    const users: AppUser[] = [];
     snapshot.forEach((doc) => {
-      // doc.data() is never undefined for query doc snapshots
-      console.log(doc.id, ' => ', doc.data());
+      users.push({
+        userId: doc.id,
+        ...(doc.data() as Omit<AppUser, 'userId'>),
+      });
     });
+
+    return users;
+  }
+
+  public async getAllIds() {
+    const snapshot = await this.db.collections.users.get();
+    const usersIds: string[] = [];
+    snapshot.forEach((doc) => {
+      usersIds.push(doc.id);
+    });
+
+    return usersIds;
   }
 }

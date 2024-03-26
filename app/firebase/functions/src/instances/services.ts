@@ -13,7 +13,7 @@ import {
   PlatformsService,
 } from '../platforms/platforms.service';
 import { TwitterService } from '../platforms/twitter/twitter.service';
-import { PostsService } from '../posts/PostsService';
+import { PostsService } from '../posts/posts.service';
 import { UsersRepository } from '../users/users.repository';
 import { UsersService } from '../users/users.service';
 
