@@ -23,13 +23,12 @@ export interface PlatformService<
   SignupData = any,
   UserDetails extends UserDetailsBase = WithPlatformUserId,
 > extends IdentityService<SignupContext, SignupData, UserDetails> {
-  fetchPostsSince(params: FetchUserPostsParams[]): Promise<any[]>;
+  fetch(params: FetchUserPostsParams[]): Promise<any[]>;
   convertToGeneric(
     platformPost: PlatformPost
   ): Omit<AppPost, 'id' | 'authorId'>;
   publish(
     post: AppPostPublish,
-    user_id: string,
     write: NonNullable<UserDetails['write']>
   ): Promise<PlatformPost>;
 }

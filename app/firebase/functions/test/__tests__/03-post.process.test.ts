@@ -7,26 +7,27 @@ import { services } from './test.services';
 
 const TWITTER_ACCOUNT = 'sensemakergod';
 
+const TEST_TOKENS_MAP = JSON.parse(
+  process.env.TEST_USERS_BEARER_TOKENS as string
+);
+
 describe.only('posting and processing users posts', () => {
   describe('fetch', () => {
     before(async () => {
       resetDB();
 
-      const TEST_TOKENS_MAP = JSON.parse(
-        process.env.TEST_USERS_BEARER_TOKENS as string
-      );
-
       /** store some real twitter users in the DB */
       const users: AppUser[] = [TWITTER_ACCOUNT].map((handle): AppUser => {
-        const userId = getPrefixedUserId(PLATFORM.Twitter, handle);
+        const user_id = TEST_TOKENS_MAP[handle].user_id;
+        const userId = getPrefixedUserId(PLATFORM.Twitter, user_id);
         return {
           userId,
           platformIds: [userId],
           twitter: [
             {
-              user_id: handle,
+              user_id,
               write: {
-                accessToken: TEST_TOKENS_MAP[handle],
+                accessToken: TEST_TOKENS_MAP[handle].accessToken,
                 expiresIn: 0,
                 refreshToken: '',
               },
@@ -44,22 +45,27 @@ describe.only('posting and processing users posts', () => {
     });
 
     it('publish a post in the name of the test user', async () => {
+      const user_id = TEST_TOKENS_MAP[TWITTER_ACCOUNT].user_id;
+
       const user = await services.users.repo.getUserWithPlatformAccount(
         PLATFORM.Twitter,
-        TWITTER_ACCOUNT,
+        user_id,
         true
       );
 
       const tweet = await services.posts.publish(
         user.userId,
         {
-          content: 'This is a test post',
+          content: `This is a test post ${Date.now()}`,
         },
         PLATFORM.Twitter,
-        TWITTER_ACCOUNT
+        user_id
       );
 
       expect(tweet).to.not.be.undefined;
+
+      /** wait for just a second */
+      await new Promise<void>((resolve) => setTimeout(resolve, 1000));
     });
 
     it('fetch all posts from all platforms', async () => {

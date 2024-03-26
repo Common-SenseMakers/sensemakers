@@ -1,11 +1,13 @@
 import { PLATFORM } from '../@shared/types';
 import {
+  FUNCTIONS_PY_URL,
   OUR_EXPIRES_IN,
   OUR_TOKEN_SECRET,
   TWITTER_CLIENT_ID,
   TWITTER_CLIENT_SECRET,
 } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
+import { ParserService } from '../parser/parser.service';
 import { OrcidService } from '../platforms/orcid/orcid.service';
 import {
   IdentityServicesMap,
@@ -13,6 +15,7 @@ import {
   PlatformsService,
 } from '../platforms/platforms.service';
 import { TwitterService } from '../platforms/twitter/twitter.service';
+import { PostsRepository } from '../posts/posts.repository';
 import { PostsService } from '../posts/posts.service';
 import { UsersRepository } from '../users/users.repository';
 import { UsersService } from '../users/users.service';
@@ -26,6 +29,8 @@ export interface Services {
 export const createServices = () => {
   const db = new DBInstance();
   const userRepo = new UsersRepository(db);
+  const postsRepo = new PostsRepository(db);
+
   const identityPlatforms: IdentityServicesMap = new Map();
   const platformsMap: PlatformsMap = new Map();
 
@@ -51,8 +56,16 @@ export const createServices = () => {
   /** platforms service */
   const platformsService = new PlatformsService(platformsMap);
 
+  /** parser service */
+  const parserService = new ParserService(FUNCTIONS_PY_URL);
+
   /** posts service */
-  const postsService = new PostsService(usersService, platformsService);
+  const postsService = new PostsService(
+    usersService,
+    platformsService,
+    postsRepo,
+    parserService
+  );
 
   /** all services */
   const services: Services = {

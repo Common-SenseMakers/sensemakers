@@ -44,7 +44,7 @@ export class PlatformsService {
         async (platformId): Promise<PlatformPost[]> => {
           const thisFetchParams = fetchParams.get(platformId);
           if (thisFetchParams) {
-            return this.get(platformId).fetchPostsSince(thisFetchParams);
+            return this.get(platformId).fetch(thisFetchParams);
           } else {
             return [];
           }
@@ -64,10 +64,9 @@ export class PlatformsService {
   publish(
     platformId: PLATFORM,
     post: AppPostPublish,
-    user_id: string,
     write: NonNullable<UserDetailsBase['write']>
   ) {
     const platform = this.get(platformId);
-    return platform.publish(post, user_id, write);
+    return platform.publish(post, write);
   }
 }

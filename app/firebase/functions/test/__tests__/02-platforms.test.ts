@@ -17,7 +17,7 @@ describe('platforms', () => {
       const twitterService = services.platforms.get(PLATFORM.Twitter);
 
       try {
-        const tweets = await twitterService.fetchPostsSince([
+        const tweets = await twitterService.fetch([
           {
             user_id: '1753077743816777728',
             start_time: 1708560000000,

@@ -126,7 +126,8 @@ export class PostsService {
    * CAUTION: userId MUST be an authenticated userId.
    *
    * This method will publish a post on a given platform and with a given
-   * platform user_id. It verifies the account is controlled by the userId
+   * platform user_id. It verifies the account is controlled by the provided
+   * userId and uses the stored write credentials for that account
    *
    * */
   async publish(
@@ -154,6 +155,6 @@ export class PostsService {
       throw new Error(`Write credentials for user ${userId} not found`);
     }
 
-    return this.platforms.publish(platformId, post, user_id, account.write);
+    return this.platforms.publish(platformId, post, account.write);
   }
 }

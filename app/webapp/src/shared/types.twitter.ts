@@ -8,6 +8,7 @@ import { UserDetailsBase } from './types';
 
 export type TwitterGetContextParams = {
   callback_url: string;
+  type: 'read' | 'write';
 };
 
 export type TwitterSignupContext = IOAuth2RequestTokenResult &
@@ -23,7 +24,11 @@ export type TwitterSignupData = TwitterSignupContext & {
 export interface TwitterUserDetails
   extends UserDetailsBase<
     UserV2,
-    undefined,
+    {
+      accessToken: string;
+      refreshToken: string;
+      expiresIn: number;
+    },
     {
       accessToken: string;
       refreshToken: string;

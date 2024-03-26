@@ -1,8 +1,10 @@
 import {
+  TOAuth2Scope,
   TweetV2,
   TweetV2PaginableTimelineResult,
   TweetV2PostTweetResult,
   TweetV2SingleResult,
+  Tweetv2FieldsParams,
   TwitterApi,
 } from 'twitter-api-v2';
 
@@ -51,7 +53,7 @@ export class TwitterService
     });
   }
 
-  private async getUserClient(accessToken: string) {
+  private getUserClient(accessToken: string) {
     return new TwitterApi(accessToken);
   }
 
@@ -65,14 +67,24 @@ export class TwitterService
       throw new Error('params must be defined');
     }
 
+    const scope: TOAuth2Scope[] = [
+      'tweet.read',
+      'offline.access',
+      'users.read',
+    ];
+
+    if (params.type === 'write') {
+      scope.push('tweet.write');
+    }
+
     const authDetails = await client.generateOAuth2AuthLink(
       params.callback_url,
       {
-        scope: ['tweet.read', 'offline.access', 'users.read'],
+        scope,
       }
     );
 
-    return { ...authDetails, callback_url: params.callback_url };
+    return { ...authDetails, ...params };
   }
 
   async handleSignupData(data: TwitterSignupData): Promise<TwitterUserDetails> {
@@ -119,7 +131,7 @@ export class TwitterService
   }
 
   /** methods non part of Platform interface should be protected (private) */
-  protected async fetch(
+  protected async fetchInternal(
     params: TwitterQueryParameters,
     accessToken: string
   ): Promise<TweetV2PaginableTimelineResult['data']> {
@@ -153,9 +165,7 @@ export class TwitterService
 
   /** @Wes, this is an implementation of the Platform interface.
    * It will have the same shape on all platfforms */
-  public async fetchPostsSince(
-    params: FetchUserPostsParams[]
-  ): Promise<TweetV2[]> {
+  public async fetch(params: FetchUserPostsParams[]): Promise<TweetV2[]> {
     // get all posts from all users in the input params
     // params.user_ids.foreach ... this.fetch()
     console.log({ params });
@@ -182,16 +192,23 @@ export class TwitterService
     };
   }
 
-  public async getPost(tweetId: string) {
-    return this.getGenericClient().v2.singleTweet(tweetId);
+  public async getPost(tweetId: string, read?: TwitterUserDetails['read']) {
+    const options: Partial<Tweetv2FieldsParams> = {
+      'tweet.fields': ['author_id', 'created_at'],
+    };
+
+    const client = read
+      ? this.getUserClient(read.accessToken)
+      : this.getGenericClient();
+
+    return client.v2.singleTweet(tweetId, options);
   }
 
   public async publish(
     post: AppPostPublish,
-    user_id: string,
     write: NonNullable<TwitterUserDetails['write']>
   ): Promise<PlatformPost<TweetV2SingleResult>> {
-    const client = await this.getUserClient(write.accessToken);
+    const client = this.getUserClient(write.accessToken);
 
     const result = await client.v2.tweet(post.content);
 
@@ -199,10 +216,13 @@ export class TwitterService
       throw new Error(`Error posting tweet`);
     }
 
-    const tweet = await this.getPost(result.data.id);
+    const tweet = await this.getPost(result.data.id, {
+      ...write,
+      lastFetched: 0,
+    });
 
-    if (user_id !== tweet.data.author_id) {
-      throw new Error(`Unexpected author_id (but tweet already published :/ )`);
+    if (!tweet.data.author_id) {
+      throw new Error(`Unexpected author_id undefined`);
     }
 
     if (!tweet.data.created_at) {
@@ -214,7 +234,7 @@ export class TwitterService
     return {
       platformId: PLATFORM.Twitter,
       post_id: tweet.data.id,
-      user_id: user_id,
+      user_id: tweet.data.author_id,
       timestamp: this.dateStrToTimestampMs(tweet.data.created_at),
       original: tweet,
     };
