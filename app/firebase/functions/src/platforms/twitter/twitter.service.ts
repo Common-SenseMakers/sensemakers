@@ -1,12 +1,3 @@
-import { PLATFORM } from 'src/@shared/types';
-import { AppPost, PlatformPost } from 'src/@shared/types.posts';
-import {
-  TwitterGetContextParams,
-  TwitterQueryParameters,
-  TwitterSignupContext,
-  TwitterSignupData,
-  TwitterUserDetails,
-} from 'src/@shared/types.twitter';
 import {
   TweetV2,
   TweetV2PaginableTimelineResult,
@@ -14,7 +5,15 @@ import {
   TwitterApi,
 } from 'twitter-api-v2';
 
-import { getPrefixedUserId, getUniquePostId } from '../../users/users.utils';
+import { PLATFORM } from '../../@shared/types';
+import { AppPost, PlatformPost } from '../../@shared/types.posts';
+import {
+  TwitterGetContextParams,
+  TwitterQueryParameters,
+  TwitterSignupContext,
+  TwitterSignupData,
+  TwitterUserDetails,
+} from '../../@shared/types.twitter';
 import { FetchUserPostsParams, PlatformService } from '../platforms.interface';
 
 export interface TwitterApiCredentials {
@@ -149,7 +148,9 @@ export class TwitterService
     return [];
   }
 
-  public convertToGeneric(platformPost: PlatformPost<TweetV2>): AppPost {
+  public convertToGeneric(
+    platformPost: PlatformPost<TweetV2>
+  ): Omit<AppPost, 'id' | 'authorId'> {
     if (
       platformPost.original.author_id &&
       platformPost.original.author_id !== platformPost.user_id
@@ -160,11 +161,6 @@ export class TwitterService
     }
 
     return {
-      authorId: getPrefixedUserId(
-        platformPost.platformId,
-        platformPost.user_id
-      ),
-      postId: getUniquePostId(platformPost.platformId, platformPost.user_id),
       content: platformPost.original.text,
       originals: {
         [PLATFORM.Twitter]: platformPost.original,

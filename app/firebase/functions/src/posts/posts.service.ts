@@ -2,8 +2,7 @@ import {
   PARSER_MODE,
   ParsePostRequest,
   TopicsParams,
-} from 'src/@shared/types.parser';
-
+} from '../@shared/types.parser';
 import { AppPost } from '../@shared/types.posts';
 import { ParserService } from '../parser/parser.service';
 import {
@@ -11,6 +10,7 @@ import {
   PlatformsService,
 } from '../platforms/platforms.service';
 import { UsersService } from '../users/users.service';
+import { getPrefixedUserId, getUniquePostId } from '../users/users.utils';
 import { PostsRepository } from './posts.repository';
 
 export class PostsService {
@@ -29,8 +29,16 @@ export class PostsService {
     const platformPosts = await this.platforms.fetchPostsSince(params);
 
     /** convert into internal format */
-    const posts = platformPosts.map((platformPost) => {
-      return this.platforms.convertToGeneric(platformPost);
+    const posts = platformPosts.map((platformPost): AppPost => {
+      const postNoIds = this.platforms.convertToGeneric(platformPost);
+      return {
+        ...postNoIds,
+        id: getUniquePostId(platformPost.platformId, platformPost.post_id),
+        authorId: getPrefixedUserId(
+          platformPost.platformId,
+          platformPost.user_id
+        ),
+      };
     });
 
     return posts;

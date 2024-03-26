@@ -24,5 +24,7 @@ export interface PlatformService<
   UserDetails extends WithPlatformUserId = WithPlatformUserId,
 > extends IdentityService<SignupContext, SignupData, UserDetails> {
   fetchPostsSince(params: FetchUserPostsParams[]): Promise<any[]>;
-  convertToGeneric(platformPost: PlatformPost): AppPost;
+  convertToGeneric(
+    platformPost: PlatformPost
+  ): Omit<AppPost, 'id' | 'authorId'>;
 }

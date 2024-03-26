@@ -22,8 +22,8 @@ export interface AppPost {
   content: string;
   originalParsed?: ParsePostResult;
   semantics?: AppPostSemantics;
-  originals: {
+  originals: Partial<{
     [PLATFORM.Twitter]: TweetV2;
     [PLATFORM.Nanopubs]: any;
-  };
+  }>;
 }

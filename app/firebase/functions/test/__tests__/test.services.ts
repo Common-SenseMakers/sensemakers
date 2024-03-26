@@ -11,6 +11,7 @@ import {
 } from '../../src/@shared/types.twitter';
 import { DBInstance } from '../../src/db/instance';
 import { Services } from '../../src/instances/services';
+import { ParserService } from '../../src/parser/parser.service';
 import { OrcidService } from '../../src/platforms/orcid/orcid.service';
 import {
   IdentityServicesMap,
@@ -18,7 +19,8 @@ import {
   PlatformsService,
 } from '../../src/platforms/platforms.service';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
-import { PostsService } from '../../src/posts/PostsService';
+import { PostsRepository } from '../../src/posts/posts.repository';
+import { PostsService } from '../../src/posts/posts.service';
 import { UsersRepository } from '../../src/users/users.repository';
 import { UsersService } from '../../src/users/users.service';
 
@@ -28,6 +30,7 @@ const mandatory = [
   'OUR_TOKEN_SECRET',
   'ACCESS_TOKEN_TEST_USER_0',
   'TWITTER_MY_BEARER_TOKEN',
+  'PARSER_API_URL',
 ];
 
 mandatory.forEach((varName) => {
@@ -48,6 +51,8 @@ export const TEST_TWITTER_PROFILE = {
 
 const db = new DBInstance();
 const userRepo = new UsersRepository(db);
+const postsRepo = new PostsRepository(db);
+
 const identityServices: IdentityServicesMap = new Map();
 const platformsMap: PlatformsMap = new Map();
 
@@ -99,8 +104,16 @@ platformsMap.set(PLATFORM.Twitter, twitter);
 /** platforms service */
 const platformsService = new PlatformsService(platformsMap);
 
+/** parser service */
+const parserService = new ParserService(process.env.PARSER_API_URL as string);
+
 /** posts service */
-const postsService = new PostsService(usersService, platformsService);
+const postsService = new PostsService(
+  usersService,
+  platformsService,
+  postsRepo,
+  parserService
+);
 
 export const services: Services = {
   users: usersService,
