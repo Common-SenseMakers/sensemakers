@@ -1,12 +1,12 @@
 import { Box } from 'grommet';
 import React from 'react';
 
-import { AppPostSemantics, ParserResult } from '../../shared/types.parser';
+import { AppPostSemantics, ParsePostResult } from '../../shared/types.parser';
 import { KeywordsComponent } from './keywords/Keywords.component';
 import { RefLabelsComponent } from './refs-labels/RefsLabels.component';
 
 export interface PatternProps {
-  originalParsed?: ParserResult;
+  originalParsed?: ParsePostResult;
   semantics?: AppPostSemantics;
   semanticsUpdated?: (semantics: AppPostSemantics) => void;
 }

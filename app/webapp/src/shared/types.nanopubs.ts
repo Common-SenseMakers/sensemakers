@@ -7,7 +7,6 @@ import { HexStr, UserDetailsBase } from './types';
  */
 export interface NanopubUserDetails
   extends UserDetailsBase<
-    undefined,
     {
       rsaPublickey: string;
       ethAddress: HexStr;

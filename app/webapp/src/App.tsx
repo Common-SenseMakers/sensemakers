@@ -4,12 +4,12 @@ import { BrowserRouter } from 'react-router-dom';
 import { AccountContext } from './app/AccountContext';
 import { AppContainer } from './app/AppContainer';
 import { DisconnectContext } from './app/DisconnectContext';
-import { ConnectedWallet } from './app/signer/ConnectedWalletContext';
-import { SignerContext } from './app/signer/SignerContext';
 import { GlobalStyles } from './common/GlobalStyles';
 import { i18n } from './i18n/i18n';
 import { NanopubContext } from './platforms/NanopubContext';
 import { TwitterContext } from './platforms/TwitterContext';
+import { ConnectedWallet } from './signer/ConnectedWalletContext';
+import { SignerContext } from './signer/SignerContext';
 import { ResponsiveApp } from './ui-components/ResponsiveApp';
 import { ThemedApp } from './ui-components/ThemedApp';
 

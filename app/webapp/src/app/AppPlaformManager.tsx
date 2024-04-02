@@ -5,18 +5,16 @@ import { useTranslation } from 'react-i18next';
 import { I18Keys } from '../i18n/i18n';
 import { useNanopubContext } from '../platforms/NanopubContext';
 import { useTwitterContext } from '../platforms/TwitterContext';
-import { PLATFORM } from '../shared/types';
 import { AppButton, AppCard, AppSectionHeader } from '../ui-components';
-import { useAccountContext } from './AccountContext';
 
 export const AppPlatformManager = (props: {}) => {
   const { t } = useTranslation();
   const {
     connect: connectTwitter,
-    approve: approveTwitter,
     revokeApproval: revokeTwitter,
     isConnecting: isConnectingTwitter,
     isApproving: isApprovingTwitter,
+    needConnect: needConnectTwitter,
   } = useTwitterContext();
 
   const {
@@ -24,21 +22,6 @@ export const AppPlatformManager = (props: {}) => {
     isConnecting: isConnectingNanopub,
     needAuthorize: needAuthorizeNanopub,
   } = useNanopubContext();
-
-  const { connectedUser } = useAccountContext();
-
-  /** need authorize twitter if not connected if no read access provided */
-  const needConnectTwitter =
-    !connectedUser ||
-    !connectedUser[PLATFORM.Twitter] ||
-    !connectedUser[PLATFORM.Twitter].length ||
-    !connectedUser[PLATFORM.Twitter][0].read;
-
-  const needApproveTwitter =
-    !connectedUser ||
-    !connectedUser[PLATFORM.Twitter] ||
-    !connectedUser[PLATFORM.Twitter].length ||
-    !connectedUser[PLATFORM.Twitter][0].write;
 
   return (
     <Box fill>
@@ -63,7 +46,7 @@ export const AppPlatformManager = (props: {}) => {
             loading={isConnectingTwitter}
             onClick={() => {
               if (connectTwitter) {
-                connectTwitter();
+                connectTwitter('read');
               }
             }}
             label={t(I18Keys.connectTwitterBtn)}></AppButton>
@@ -71,17 +54,17 @@ export const AppPlatformManager = (props: {}) => {
           <AppButton
             style={{ width: '50%' }}
             primary
-            disabled={!needApproveTwitter}
+            disabled={!needConnectTwitter}
             loading={isApprovingTwitter}
             onClick={() => {
-              if (approveTwitter) {
-                approveTwitter();
+              if (connectTwitter) {
+                connectTwitter('write');
               }
             }}
             label={t(I18Keys.approveTwitterBtn)}></AppButton>
         </Box>
 
-        {!needApproveTwitter ? (
+        {!needConnectTwitter ? (
           <AppCard margin={{ top: 'small' }}>
             <Text>
               <Anchor

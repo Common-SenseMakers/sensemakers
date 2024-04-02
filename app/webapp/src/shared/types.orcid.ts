@@ -12,7 +12,6 @@ export interface OrcidSignupData {
 /** For ORCID we only need to store the name of the user */
 export interface OrcidUserDetails
   extends UserDetailsBase<
-    undefined,
     {
       name: string;
     },

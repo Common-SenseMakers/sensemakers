@@ -1,6 +1,6 @@
 import { NanopubUserDetails } from './types.nanopubs';
-import { OrcidSignupData, OrcidUserDetails } from './types.orcid';
-import { TwitterSignupData, TwitterUserDetails } from './types.twitter';
+import { OrcidUserDetails } from './types.orcid';
+import { TwitterUserDetails } from './types.twitter';
 
 export enum PLATFORM {
   Orcid = 'orcid',
@@ -11,33 +11,34 @@ export enum PLATFORM {
 /** The user details has, for each PLATFORM, a details object
  * with
  * - user_id: the unique user id on that platform
- * - context: data needed for signing up that had to be remembered in a multiple-step sigup process
  * - profile: metadata of the user on that platform (handle, avatar, etc)
  * - read: credentials or other data needed for reading the posts from that user
  * - write: credentials or other data needed for creating new posts in the name of the user
  */
 
-export interface PlatformUserId {
+export interface WithPlatformUserId {
+  /** We are using user_id to refer the id of the user on a given platform and leave
+   * userId for our own internal id for users. */
   user_id: string;
 }
 
-export interface UserDetailsBase<C = any, P = any, R = any, W = any>
-  extends PlatformUserId {
-  context?: C;
+export interface UserDetailsBase<P = any, R = any, W = any>
+  extends WithPlatformUserId {
   profile?: P;
-  read?: R;
+  read?: R & { lastFetched: number };
   write?: W;
 }
 
-export interface UserDetailsReadBase<P> extends PlatformUserId {
+export interface UserDetailsReadBase<P> extends WithPlatformUserId {
   profile?: P;
   read: boolean;
   write: boolean;
 }
 
 /** The AppUser object combines the details of each platform */
-interface UserWithId {
+export interface UserWithId {
   userId: string;
+  platformIds: string[]; // redundant array with the prefixed user_id of all the authenticated platforms for a given user
 }
 
 /**
@@ -51,10 +52,7 @@ export interface AppUser extends UserWithId {
   [PLATFORM.Nanopubs]?: NanopubUserDetails[];
 }
 
-export interface AppUserCreate {
-  [PLATFORM.Orcid]?: OrcidSignupData;
-  [PLATFORM.Twitter]?: TwitterSignupData;
-}
+export type AppUserCreate = Omit<AppUser, 'userId'>;
 
 /**
  * The AppUserRead replaces the details with read details (keeps the profile and users
@@ -70,3 +68,13 @@ export interface AppUserRead extends UserWithId {
 export type DefinedIfTrue<V, R> = V extends true ? R : R | undefined;
 
 export type HexStr = `0x${string}`;
+
+export interface OurTokenConfig {
+  tokenSecret: string;
+  expiresIn: string;
+}
+
+export interface HandleSignupResult {
+  userId: string;
+  ourAccessToken?: string;
+}

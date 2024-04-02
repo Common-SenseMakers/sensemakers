@@ -7,15 +7,11 @@ initializeApp();
 
 export const db = getFirestore();
 
-export const collections = {
-  users: db.collection(CollectionNames.Users),
-  posts: db.collection(CollectionNames.Posts),
-};
-
 export class DBInstance {
   protected firestore: Firestore;
 
   public collections: {
+    signup: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
     users: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
     posts: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
   };
@@ -23,8 +19,13 @@ export class DBInstance {
   constructor() {
     this.firestore = getFirestore();
     this.collections = {
+      signup: this.firestore.collection(CollectionNames.Signup),
       users: this.firestore.collection(CollectionNames.Users),
       posts: this.firestore.collection(CollectionNames.Posts),
     };
+  }
+
+  get batch() {
+    return this.firestore.batch();
   }
 }

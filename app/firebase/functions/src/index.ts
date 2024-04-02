@@ -3,12 +3,16 @@ import * as functions from 'firebase-functions';
 
 import { envDeploy } from './config/typedenv.deploy';
 import { envRuntime } from './config/typedenv.runtime';
-import { getSignupContextController } from './controllers/platform.auth';
+import {
+  getSignupContextController,
+  handleSignupController,
+} from './controllers/platforms.auth.controller';
 import { buildApp } from './instances/app';
 
 const authRouter = express.Router();
 
 authRouter.post('/auth/:platform/context', getSignupContextController);
+authRouter.post('/auth/:platform/signup', handleSignupController);
 
 export const app = functions
   .region(envDeploy.REGION)
