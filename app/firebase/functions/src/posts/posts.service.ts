@@ -1,10 +1,15 @@
-import { PLATFORM } from '../@shared/types';
+import { ALL_PUBLISH_PLATFORMS, PLATFORM } from '../@shared/types';
 import {
   PARSER_MODE,
   ParsePostRequest,
   TopicsParams,
 } from '../@shared/types.parser';
-import { AppPost, AppPostPublish } from '../@shared/types.posts';
+import {
+  AppPost,
+  AppPostMirror,
+  AppPostPublish,
+  MirrorStatus,
+} from '../@shared/types.posts';
 import { ParserService } from '../parser/parser.service';
 import {
   FetchAllUserPostsParams,
@@ -18,12 +23,12 @@ export class PostsService {
   constructor(
     protected users: UsersService,
     protected platforms: PlatformsService,
-    protected postsRepo: PostsRepository,
+    protected repo: PostsRepository,
     protected parserService: ParserService
   ) {}
 
   /**
-   * From a list of userIds and platform fetchs status details for each user,
+   * From a list of userIds and platform access credentials for each user,
    * this function fetch all recent posts from all platforms */
   async fetch(params: FetchAllUserPostsParams): Promise<AppPost[]> {
     /** call the fetch */
@@ -33,9 +38,18 @@ export class PostsService {
     const posts = platformPosts.map((platformPost): AppPost => {
       const { content } = this.platforms.convertToGeneric(platformPost);
 
+      /** the original post is stored as one mirror of the AppPost */
+      const mirror: MirrorStatus = {
+        user_id: platformPost.user_id,
+        shouldPost: false,
+        status: 'fetched',
+        platformPost,
+      };
+
       return {
         content,
         id: getUniquePostId(platformPost.platformId, platformPost.post_id),
+        origin: platformPost.platformId,
         parseStatus: 'unprocessed',
         reviewedStatus: 'pending',
         authorId: getPrefixedUserId(
@@ -43,7 +57,7 @@ export class PostsService {
           platformPost.user_id
         ),
         mirrors: {
-          [platformPost.platformId]: platformPost,
+          [platformPost.platformId]: mirror,
         },
       };
     });
@@ -53,7 +67,7 @@ export class PostsService {
 
   /** Store a list of posts in the Posts collection */
   async storePosts(posts: AppPost[]) {
-    await this.postsRepo.storePosts(posts);
+    await this.repo.storePosts(posts);
   }
 
   /**
@@ -98,10 +112,9 @@ export class PostsService {
     const parserResult = await this.parserService.parsePosts(postsToParse);
 
     /** Append semantics to each Post */
-    let postsWithSemantics = posts;
 
     if (parserResult) {
-      postsWithSemantics = posts.map((post): AppPost => {
+      posts = posts.map((post): AppPost => {
         const parsedPostResult = parserResult.find((parsed) => parsed.post);
         return {
           ...post,
@@ -112,20 +125,112 @@ export class PostsService {
 
       /** optional store in case it is postponed */
       if (store) {
-        await this.storePosts(postsWithSemantics);
+        await this.storePosts(posts);
       }
     } else {
       throw new Error('Error parsing');
     }
+
+    return posts;
+  }
+
+  /** Calls the convertFromGeneric on all platforms and store the results as the platformDraft of each mirror  */
+  public async preProcess(posts: AppPost[], store: boolean = false) {
+    posts.forEach((post) => {
+      ALL_PUBLISH_PLATFORMS.forEach((platformId) => {
+        const platformDraft = this.platforms
+          .get(platformId)
+          .convertFromGeneric(post);
+
+        const mirror: MirrorStatus = {
+          status: 'draft',
+          postApproval: 'pending',
+          platformDraft,
+        };
+
+        post.mirrors = {
+          ...post.mirrors,
+          [platformId]: mirror,
+        };
+      });
+    });
+
+    /** optional store in case it is postponed */
+    if (store) {
+      await this.storePosts(posts);
+    }
+
+    return posts;
   }
 
   /**
-   * Coordinate the fetch and parse processed. It only stores
-   * on the parse step.
+   * Coordinate the fetch, parse and preProcess steps. It only stores
+   * on the last step.
    */
-  async process() {
+  public async process() {
     const posts = await this.fetchFromUsers();
-    await this.parse(posts);
+    const postsWithSemantics = await this.parse(posts);
+    await this.preProcess(postsWithSemantics, true);
+  }
+
+  /**
+   * Mirror a set of existing posts into other platforms. The content and
+   * semantics of the post might have changed and will be updated
+   * in the Posts collection too.
+   *
+   * userId MUST be the authenticated user
+   * */
+  public async mirror(postsToMirror: AppPostMirror[], userId: string) {
+    /** validate posts authors and organize them by platform */
+    const postsPerPlatform: Map<PLATFORM, AppPost[]> = new Map();
+
+    await Promise.all(
+      postsToMirror.map(async (postToMirror) => {
+        const post = await this.repo.getPost(postToMirror.postId, true);
+
+        if (post.authorId !== userId) {
+          throw new Error(`Post ${post.id} not owned by ${userId}`);
+        }
+
+        postToMirror.platforms.forEach((platform) => {
+          const current = postsPerPlatform.get(platform) || [];
+          current.push(post);
+          postsPerPlatform.set(platform, current);
+        });
+      })
+    );
+
+    /** call mirror on each platform */
+    const allPosts: AppPost[] = [];
+    await Promise.all(
+      Array.from(postsPerPlatform.entries()).map(async ([platform, posts]) => {
+        const platformPosts = await this.platforms
+          .get(platform)
+          .mirror(postsToMirror);
+
+        /** inject each platform post as a mirror on its corresponding AppPost */
+        platformPosts.forEach((platformPost) => {
+          const post = posts.find((p) => p.id === platformPost.post_id);
+
+          if (!post) {
+            throw new Error(
+              `Unexpected not found post for platformPost ${platformPost.post_id}`
+            );
+          }
+
+          post.mirrors = {
+            [platformPost.platformId]: {
+              platformPost,
+            },
+          };
+        });
+
+        allPosts.push(...posts);
+      })
+    );
+
+    /** store the updated posts in the DB */
+    await this.storePosts(allPosts);
   }
 
   /**

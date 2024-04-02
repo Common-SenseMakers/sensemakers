@@ -3,10 +3,18 @@ import { OrcidUserDetails } from './types.orcid';
 import { TwitterUserDetails } from './types.twitter';
 
 export enum PLATFORM {
+  Local = 'local', // local referst to out platform
   Orcid = 'orcid',
   Twitter = 'twitter',
   Nanopubs = 'nanopubs',
 }
+
+export type PUBLISHABLE_PLATFORMS = PLATFORM.Twitter | PLATFORM.Nanopubs;
+
+export const ALL_PUBLISH_PLATFORMS: PUBLISHABLE_PLATFORMS[] = [
+  PLATFORM.Twitter,
+  PLATFORM.Nanopubs,
+];
 
 /** The user details has, for each PLATFORM, a details object
  * with

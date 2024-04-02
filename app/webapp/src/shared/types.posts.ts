@@ -12,13 +12,16 @@ export interface PlatformPost<C = any> {
   user_id: string;
   post_id: string;
   timestamp: number; // timestamp in ms
+  mirrorOf?: string;
   original: C;
 }
 
-export interface MirrorStatus<C = any> {
-  shouldPost: boolean;
-  user_id: string;
-  platformPost: C;
+export interface MirrorStatus<P = any, D = any> {
+  postApproval: 'pending' | 'shouldPost';
+  status: 'draft' | 'posted' | 'fetched';
+  platformDraft?: D; // a draft is prepared before it gets published (it could be the unsigned version of a post)
+  platformPost?: P; // the actual platform post as it was published on the platform (it could be signed and include further data not in the draft)
+  user_id?: string;
 }
 
 /** Basic interface of a Post object */
@@ -26,6 +29,7 @@ export interface AppPost {
   id: string;
   authorId: string;
   content: string;
+  origin: PLATFORM; // The platform where the post originated
   parseStatus: 'unprocessed' | 'processed';
   reviewedStatus: 'pending' | 'reviewed';
   originalParsed?: ParsePostResult;
@@ -36,8 +40,17 @@ export interface AppPost {
   }>;
 }
 
+export interface AppPostMirror {
+  postId: string;
+  content: string;
+  semantics: AppPostSemantics;
+  platforms: PLATFORM[]; // platforms where the post should be mirrored
+}
+
 /** AppPost sent to a PlatformService to be published */
-export type AppPostPublish = Omit<
-  AppPost,
-  'id' | 'originals' | 'authorId' | 'parseStatus' | 'reviewedStatus' | 'mirrors'
->;
+export type AppPostPublish = {
+  content: string;
+  semantics: AppPostSemantics;
+};
+
+export type PostUpdate = Pick<AppPost, 'id' | 'content' | 'semantics'>;

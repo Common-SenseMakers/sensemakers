@@ -3,7 +3,12 @@ import {
   UserDetailsBase,
   WithPlatformUserId,
 } from '../@shared/types';
-import { AppPostPublish, PlatformPost } from '../@shared/types.posts';
+import {
+  AppPost,
+  AppPostMirror,
+  AppPostPublish,
+  PlatformPost,
+} from '../@shared/types.posts';
 
 /** use conditional types to dynamically assign credential types for each platform */
 export type CredentialsForPlatform<P> = P extends PLATFORM.Twitter
@@ -13,7 +18,6 @@ export type CredentialsForPlatform<P> = P extends PLATFORM.Twitter
 export interface FetchUserPostsParams<P extends PLATFORM> {
   user_id: string;
   start_time: number; // timestamp in ms
-  /** end_time is useful for testing and some platforms may need to explicitely define the end time of the fetch */
   end_time?: number; // timestamp in ms
   credentials: CredentialsForPlatform<P>;
 }
@@ -40,8 +44,10 @@ export interface PlatformService<
 > extends IdentityService<SignupContext, SignupData, UserDetails> {
   fetch(params: FetchUserPostsParams<PLATFORM>[]): Promise<PlatformPost[]>;
   convertToGeneric(platformPost: PlatformPost): GenericPostData;
+  convertFromGeneric(platformPost: AppPost): PlatformPost;
   publish(
     post: AppPostPublish,
     write: NonNullable<UserDetails['write']>
   ): Promise<PlatformPost>;
+  mirror(postsToMirror: AppPostMirror[]): Promise<PlatformPost[]>;
 }
