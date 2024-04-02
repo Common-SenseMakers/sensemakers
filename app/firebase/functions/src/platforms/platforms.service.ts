@@ -29,7 +29,7 @@ export class PlatformsService {
   constructor(protected platforms: PlatformsMap) {}
 
   // TODO set the return type depending on the value of platformId
-  get(platformId: PLATFORM) {
+  public get(platformId: PLATFORM) {
     const platform = this.platforms.get(platformId);
     if (!platform) {
       throw new Error(`Platform ${platformId} not found`);
@@ -38,9 +38,11 @@ export class PlatformsService {
   }
 
   /**
-   * fetch posts from all platforms for the provided user_ids and timestemps
+   * fetch posts from the provided platforms and for the provided user_ids and timestemps
    * */
-  async fetch(fetchParams: FetchAllUserPostsParams): Promise<PlatformPost[]> {
+  public async fetch(
+    fetchParams: FetchAllUserPostsParams
+  ): Promise<PlatformPost[]> {
     const allPosts = await Promise.all(
       Array.from(fetchParams.keys()).map(
         async (platformId): Promise<PlatformPost[]> => {
@@ -58,12 +60,12 @@ export class PlatformsService {
     return allPosts.reduce((acc, currArray) => acc.concat(currArray), []);
   }
 
-  convertToGeneric(platformPost: PlatformPost) {
+  public convertToGeneric(platformPost: PlatformPost) {
     const platform = this.get(platformPost.platformId);
     return platform.convertToGeneric(platformPost);
   }
 
-  publish(
+  public publish(
     platformId: PLATFORM,
     post: AppPostPublish,
     write: NonNullable<UserDetailsBase['write']>
