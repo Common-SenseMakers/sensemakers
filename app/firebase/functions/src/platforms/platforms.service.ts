@@ -10,7 +10,10 @@ import {
   PlatformService,
 } from './platforms.interface';
 
-export type FetchAllUserPostsParams = Map<PLATFORM, FetchUserPostsParams[]>;
+export type FetchAllUserPostsParams = Map<
+  PLATFORM,
+  FetchUserPostsParams<PLATFORM>[]
+>;
 export type PlatformsMap = Map<
   PLATFORM,
   PlatformService<any, any, WithPlatformUserId>
