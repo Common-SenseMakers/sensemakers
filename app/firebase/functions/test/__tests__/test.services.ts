@@ -57,7 +57,7 @@ export const TEST_TWITTER_PROFILE = {
 };
 
 const db = new DBInstance();
-const userRepo = new UsersRepository(db);
+export const userRepo = new UsersRepository(db);
 const postsRepo = new PostsRepository(db);
 
 const identityServices: IdentityServicesMap = new Map();
