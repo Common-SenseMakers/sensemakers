@@ -1,3 +1,5 @@
+import { TimeService } from 'src/time/time.service';
+
 import { PLATFORM } from '../@shared/types';
 import {
   FUNCTIONS_PY_URL,
@@ -33,9 +35,10 @@ export const createServices = () => {
 
   const identityPlatforms: IdentityServicesMap = new Map();
   const platformsMap: PlatformsMap = new Map();
+  const time = new TimeService();
 
   const orcid = new OrcidService();
-  const twitter = new TwitterService({
+  const twitter = new TwitterService(time, userRepo, {
     clientId: TWITTER_CLIENT_ID.value(),
     clientSecret: TWITTER_CLIENT_SECRET.value(),
   });

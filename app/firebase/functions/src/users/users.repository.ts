@@ -106,7 +106,7 @@ export class UsersRepository {
   public async setPlatformDetails(
     userId: string,
     platform: PLATFORM,
-    details: WithPlatformUserId
+    details: UserDetailsBase
   ) {
     const prefixed_user_id = getPrefixedUserId(platform, details.user_id);
 

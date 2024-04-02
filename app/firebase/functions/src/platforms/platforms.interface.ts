@@ -47,7 +47,7 @@ export interface PlatformService<
   convertFromGeneric(platformPost: AppPost): PlatformPost;
   publish(
     post: AppPostPublish,
-    write: NonNullable<UserDetails['write']>
+    user_id: NonNullable<UserDetails['write']>
   ): Promise<PlatformPost>;
   mirror(postsToMirror: AppPostMirror[]): Promise<PlatformPost[]>;
 }
