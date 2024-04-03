@@ -30,18 +30,19 @@ export const authenticateTwitterUsers = async (
     clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
   });
 
-  const browser = await puppeteer.launch({ headless: false });
-
   const authenticatedUserPromises = userCredentials.map(async (testAccount) => {
-    return authenticateTwitterUser(
+    const browser = await puppeteer.launch({ headless: false });
+    const userToken = await authenticateTwitterUser(
       testAccount,
       twitterService,
       browser,
       'read'
     );
+    await browser.close();
+    return userToken;
   });
-  browser.close();
-  return Promise.all(authenticatedUserPromises);
+  const authenticatedUsers = await Promise.all(authenticatedUserPromises);
+  return authenticatedUsers;
 };
 
 export const authenticateTwitterUser = async (
@@ -90,7 +91,7 @@ export const authenticateTwitterUser = async (
 
   await page.waitForNavigation();
   const currentUrl = page.url();
-  page.close();
+  await page.close();
 
   const queryParams = new URLSearchParams(new URL(currentUrl).search);
 

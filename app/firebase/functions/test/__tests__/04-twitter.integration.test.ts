@@ -1,47 +1,36 @@
 import { expect } from 'chai';
-import puppeteer from 'puppeteer';
 import { TwitterApi } from 'twitter-api-v2';
 
-import { TwitterService } from '../../src/platforms/twitter/twitter.service';
-import { TimeService } from '../../src/time/time.service';
 import {
   TwitterAccountCredentials,
-  authenticateTwitterUser,
+  authenticateTwitterUsers,
 } from '../utils/authenticateTwitterUsers';
-import { userRepo } from './test.services';
 
-const TEST_ACCOUNTS = JSON.parse(
+const TEST_ACCOUNTS: TwitterAccountCredentials[] = JSON.parse(
   process.env.TEST_USER_TWITTER_CREDENTIALS as string
 );
 
 describe.only('twitter integration', () => {
-  let testAccount: TwitterAccountCredentials = TEST_ACCOUNTS[1];
-  if (!testAccount) {
-    throw new Error('testAccount undefined');
+  if (!TEST_ACCOUNTS) {
+    throw new Error('test acccounts undefined');
+  }
+  if (TEST_ACCOUNTS.length < 2) {
+    throw new Error('need at least two test accounts');
   }
 
-  const time = new TimeService();
-  const twitterService = new TwitterService(time, userRepo, {
-    clientId: process.env.TWITTER_CLIENT_ID as string,
-    clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
-  });
-
-  it('authenticates a twitter user with the oauth 2.0 flow', async () => {
-    const browser = await puppeteer.launch({ headless: false });
-    const userTokens = await authenticateTwitterUser(
-      testAccount,
-      twitterService,
-      browser,
-      'read'
+  it('authenticates two twitter users with the oauth 2.0 flow for reading access', async () => {
+    const userTokens = await authenticateTwitterUsers(
+      TEST_ACCOUNTS.slice(0, 2)
     );
     expect(userTokens).to.not.be.undefined;
-    // expect(userTokens.length).to.eq(1);
-    if (!userTokens.read?.accessToken) {
-      throw new Error('unexpected');
+    expect(userTokens.length).to.eq(2);
+    for (const userToken of userTokens) {
+      if (!userToken.read?.accessToken) {
+        throw new Error('unexpected: access token missing');
+      }
+      const twitterClient = new TwitterApi(userToken.read?.accessToken);
+      const { data: userObject } = await twitterClient.v2.me();
+      expect(userObject).to.not.be.undefined;
     }
-
-    const twitterClient = new TwitterApi(userTokens.read?.accessToken);
-    const { data: userObject } = await twitterClient.v2.me();
-    expect(userObject).to.not.be.undefined;
   });
 });
