@@ -18,29 +18,28 @@ def detect_academic_kw(keywords: List[str]) -> Tuple[str, List[str]]:
         # Find the original keyword to remove
         original_keyword = keywords[lower_keywords.index("academic")]
         keywords.remove(original_keyword)
+        lower_keywords.remove("academic")
         academic_kws.add("academic")
-    elif "academicresearch" in lower_keywords:
+    if "academicresearch" in lower_keywords:
         # hacky - this is a variant the model often returns
         original_keyword = keywords[lower_keywords.index("academicresearch")]
         keywords.remove(original_keyword)
+        lower_keywords.remove("academicresearch")
         academic_kws.add("academic")
-    elif "not-academic" in lower_keywords:
+    if "not-academic" in lower_keywords:
         # Find the original keyword to remove
         original_keyword = keywords[lower_keywords.index("not-academic")]
         keywords.remove(original_keyword)
+        lower_keywords.remove("not-academic")
         academic_kws.add("not-academic")
-    else:
-        academic_kws.add("not-detected")
 
     # for case where both academic and not academic suggested, we take not-academic
     if "not-academic" in academic_kws:
         result = "not-academic"
-    elif "not-detected" in academic_kws:
-        result = "not-detected"
     elif "academic" in academic_kws:
         result = "academic"
     else:
-        result = "not-academic"
+        result = "not-detected"
 
     return result, keywords
 
