@@ -15,11 +15,10 @@ export type CredentialsForPlatform<P> = P extends PLATFORM.Twitter
   ? { accessToken: string }
   : any;
 
-export interface FetchUserPostsParams<P extends PLATFORM> {
-  user_id: string;
+export interface FetchUserPostsParams {
   start_time: number; // timestamp in ms
   end_time?: number; // timestamp in ms
-  credentials: CredentialsForPlatform<P>;
+  userDetails: UserDetailsBase;
 }
 
 export interface IdentityService<
@@ -42,12 +41,12 @@ export interface PlatformService<
   SignupData = any,
   UserDetails extends UserDetailsBase = WithPlatformUserId,
 > extends IdentityService<SignupContext, SignupData, UserDetails> {
-  fetch(params: FetchUserPostsParams<PLATFORM>[]): Promise<PlatformPost[]>;
+  fetch(params: FetchUserPostsParams[]): Promise<PlatformPost[]>;
   convertToGeneric(platformPost: PlatformPost): GenericPostData;
-  convertFromGeneric(platformPost: AppPost): PlatformPost;
+  convertFromGeneric(post: AppPost): PlatformPost;
   publish(
     post: AppPostPublish,
-    user_id: NonNullable<UserDetails['write']>
+    userDetails: UserDetailsBase
   ): Promise<PlatformPost>;
   mirror(postsToMirror: AppPostMirror[]): Promise<PlatformPost[]>;
 }

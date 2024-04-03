@@ -9,7 +9,7 @@ import {
   TwitterApiReadOnly,
 } from 'twitter-api-v2';
 
-import { PLATFORM, UserDetails, UserDetailsBase } from '../../@shared/types';
+import { PLATFORM, UserDetailsBase } from '../../@shared/types';
 import {
   AppPost,
   AppPostMirror,
@@ -63,6 +63,9 @@ export class TwitterService
     return date.getTime();
   }
 
+  /**
+   * Get generic client user app credentials
+   * */
   private getGenericClient() {
     return new TwitterApi({
       clientId: this.credentials.clientId,
@@ -70,6 +73,25 @@ export class TwitterService
     });
   }
 
+  /**
+   * Get user-specific client using user credentials, it may
+   * return a new set of credentials if the previous ones
+   * expired
+   * */
+  private async getClientWithCredentials(
+    credentials: TwitterUserCredentials,
+    type: 'write'
+  ): Promise<{
+    client: TwitterApi;
+    credentials?: TwitterUserCredentials;
+  }>;
+  private async getClientWithCredentials(
+    credentials: TwitterUserCredentials,
+    type: 'read'
+  ): Promise<{
+    client: TwitterApiReadOnly;
+    credentials?: TwitterUserCredentials;
+  }>;
   private async getClientWithCredentials(
     credentials: TwitterUserCredentials,
     type: 'read' | 'write'
@@ -105,7 +127,10 @@ export class TwitterService
     }
   }
 
-  /** Reads the credentials from the users database */
+  /**
+   * Get a user-specific client but reads the credentials
+   * from the users database
+   * */
   private async getUserClient(
     user_id: string,
     type: 'write'
@@ -114,7 +139,10 @@ export class TwitterService
     user_id: string,
     type: 'read'
   ): Promise<TwitterApiReadOnly>;
-  private async getUserClient(user_id: string, type: 'read' | 'write') {
+  private async getUserClient(
+    user_id: string,
+    type: 'read' | 'write'
+  ): Promise<TwitterApi | TwitterApiReadOnly> {
     /** read user from the DB */
     const user = await this.usersRepo.getUserWithPlatformAccount(
       PLATFORM.Twitter,
@@ -141,8 +169,9 @@ export class TwitterService
     }
 
     const { client, credentials: newCredentials } =
-      await this.getClientWithCredentials(credentials, type);
+      await this.getClientWithCredentials(credentials, type as any);
 
+    /** update user credentials */
     if (newCredentials) {
       const newDetails = {
         ...details,
@@ -156,6 +185,42 @@ export class TwitterService
       );
     }
 
+    return client;
+  }
+
+  /**
+   * A wrapper that adapts to the input user details and calls a diferent get client method
+   * accordingly
+   */
+  private async getClient(
+    userDetails?: UserDetailsBase,
+    type?: 'write'
+  ): Promise<TwitterApi>;
+  private async getClient(
+    userDetails?: UserDetailsBase,
+    type?: 'read'
+  ): Promise<TwitterApiReadOnly>;
+  private async getClient(
+    userDetails?: UserDetailsBase,
+    type: 'read' | 'write' = 'read'
+  ): Promise<TwitterApi | TwitterApiReadOnly> {
+    if (!userDetails) {
+      if (type === 'write') {
+        throw new Error('Cannot provide a write client without user details');
+      }
+      return this.getGenericClient().readOnly;
+    }
+
+    /** if the read or write credentials are undefined, read them from the user_id (slow) */
+    if (userDetails[type] === undefined) {
+      return this.getUserClient(userDetails.user_id, type as any); // TODO: review unexpected TS error
+    }
+
+    /** otherwise use those credentials directly (fast) */
+    const { client } = await this.getClientWithCredentials(
+      userDetails[type],
+      type as any
+    );
     return client;
   }
 
@@ -225,16 +290,9 @@ export class TwitterService
   /** methods non part of Platform interface should be protected (private) */
   protected async fetchInternal(
     params: TwitterQueryParameters,
-    user_id?: string,
-    read?: UserDetailsBase['read']
+    userDetails?: UserDetailsBase
   ): Promise<TweetV2PaginableTimelineResult['data']> {
-    const readOnlyClient =
-      read === undefined
-        ? ((await this.getUserClient(
-            user_id as string,
-            'read'
-          )) as TwitterApiReadOnly)
-        : this.getClientWithCredentials(read, 'read');
+    const readOnlyClient = await this.getClient(userDetails, 'read');
 
     const tweetFields: TTweetv2TweetField[] = ['created_at', 'author_id'];
 
@@ -264,20 +322,21 @@ export class TwitterService
   }
 
   public async fetch(
-    params: FetchUserPostsParams<PLATFORM.Twitter>[]
+    params: FetchUserPostsParams[]
   ): Promise<PlatformPost<TweetV2>[]> {
     const allAccountTweetPromises = params.map((fetchUserPostsParams) =>
       this.fetchInternal(
         {
-          user_id: fetchUserPostsParams.user_id,
+          user_id: fetchUserPostsParams.userDetails.user_id,
           start_time: new Date(fetchUserPostsParams.start_time).toISOString(),
           end_time: fetchUserPostsParams.end_time
             ? new Date(fetchUserPostsParams.end_time).toISOString()
             : undefined,
         },
-        fetchUserPostsParams.credentials.accessToken
+        fetchUserPostsParams.userDetails
       )
     );
+
     const allAccountTweets = (
       await Promise.all(allAccountTweetPromises)
     ).flat();
@@ -334,9 +393,9 @@ export class TwitterService
   /** user_id must be from the authenticated userId */
   public async publish(
     post: AppPostPublish,
-    user_id: string
+    userDetails: UserDetailsBase
   ): Promise<PlatformPost<TweetV2SingleResult>> {
-    const client = await this.getUserClient(user_id, 'write');
+    const client = await this.getClient(userDetails, 'write');
 
     const result = await client.v2.tweet(post.content);
 
@@ -344,7 +403,7 @@ export class TwitterService
       throw new Error(`Error posting tweet`);
     }
 
-    const tweet = await this.getPost(result.data.id, user_id);
+    const tweet = await this.getPost(result.data.id, userDetails.user_id);
 
     if (!tweet.data.author_id) {
       throw new Error(`Unexpected author_id undefined`);
