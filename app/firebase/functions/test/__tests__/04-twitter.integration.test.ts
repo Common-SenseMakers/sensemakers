@@ -7,10 +7,10 @@ import {
 } from '../utils/authenticateTwitterUsers';
 
 const TEST_ACCOUNTS: TwitterAccountCredentials[] = JSON.parse(
-  process.env.TEST_USER_TWITTER_CREDENTIALS as string
+  process.env.TEST_USER_TWITTER_ACCOUNTS as string
 );
 
-describe.only('twitter integration', () => {
+describe('twitter integration', () => {
   if (!TEST_ACCOUNTS) {
     throw new Error('test acccounts undefined');
   }

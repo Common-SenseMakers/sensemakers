@@ -17,6 +17,7 @@ const USERNAME_INPUT_SELECTOR = 'input[autocomplete="username"]';
 const PASSWORD_INPUT_SELECTOR = 'input[autocomplete="current-password"]';
 
 export interface TwitterAccountCredentials {
+  user_id: string;
   username: string;
   password: string;
 }
