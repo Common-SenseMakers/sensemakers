@@ -18,22 +18,21 @@ export type TwitterSignupData = TwitterSignupContext & {
   code: string;
 };
 
+export interface TwitterUserCredentials {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+  expiresAtMs: number;
+}
+
 /** For Twitter we need to store the oAuth token and secret as part of the signup process
  * and the access Token and Secret as the credentials need to post in the name of the user
  */
 export interface TwitterUserDetails
   extends UserDetailsBase<
     UserV2,
-    {
-      accessToken: string;
-      refreshToken: string;
-      expiresIn: number;
-    },
-    {
-      accessToken: string;
-      refreshToken: string;
-      expiresIn: number;
-    }
+    TwitterUserCredentials,
+    TwitterUserCredentials
   > {}
 
 export type TweetRead = TweetV2PostTweetResult['data'];

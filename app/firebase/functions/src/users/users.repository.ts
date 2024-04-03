@@ -7,7 +7,6 @@ import {
   PLATFORM,
   UserDetailsBase,
   UserWithId,
-  WithPlatformUserId,
 } from '../@shared/types';
 import { DBInstance } from '../db/instance';
 import { getPrefixedUserId } from './users.utils';
@@ -102,29 +101,86 @@ export class UsersRepository {
     return ref.id;
   }
 
-  /** append userDetails of a given platform */
+  /**
+   * Just update the lastFetchedMs value of a given account
+   * */
+  public async setLastFetched(
+    platform: PLATFORM,
+    user_id: string,
+    lastFetchedMs: number
+  ) {
+    /** check if this platform user_id already exists */
+    const existingUser = await this.getUserWithPlatformAccount(
+      platform,
+      user_id
+    );
+
+    if (!existingUser) {
+      throw new Error(`User not found ${platform}:${user_id}`);
+    }
+
+    if (platform === PLATFORM.Local) {
+      throw new Error('Unexpected');
+    }
+
+    const accounts = existingUser[platform];
+    if (accounts === undefined) {
+      throw new Error(`User accounts not found`);
+    }
+
+    /** find the ix */
+    const ix = accounts.findIndex((a) => a.user_id === user_id);
+
+    if (ix === -1) {
+      throw new Error(`Account ${platform}:${user_id} not found`);
+    }
+
+    const current = accounts[ix];
+
+    if (!current.read) {
+      throw new Error(
+        `Account ${platform}:${user_id} dont have read credentials`
+      );
+    }
+
+    /** overwrite the lastFeched value */
+    current.read.lastFetchedMs = lastFetchedMs;
+
+    const userRef = await this.getUserRef(existingUser.userId, true);
+
+    /** overwrite all the user account credentials */
+    await userRef.update({ [platform]: accounts });
+  }
+
+  /** append or overwrite userDetails for an account of a given platform */
   public async setPlatformDetails(
     userId: string,
     platform: PLATFORM,
-    details: WithPlatformUserId
+    details: UserDetailsBase
   ) {
     const prefixed_user_id = getPrefixedUserId(platform, details.user_id);
 
-    /** check if this platform user_id */
-    const existingUserWithPlatformAccount =
-      await this.getUserWithPlatformAccount(platform, details.user_id);
+    /** check if this platform user_id already exists */
+    const existingUser = await this.getUserWithPlatformAccount(
+      platform,
+      details.user_id
+    );
 
     const userRef = await this.getUserRef(userId, true);
 
-    if (existingUserWithPlatformAccount) {
-      if (existingUserWithPlatformAccount.userId !== userId) {
+    if (existingUser) {
+      if (existingUser.userId !== userId) {
         throw new Error(
-          `Unexpected, existing user ${existingUserWithPlatformAccount.userId} with this platform user_id ${prefixed_user_id} does not match the userId provided ${userId}`
+          `Unexpected, existing user ${existingUser.userId} with this platform user_id ${prefixed_user_id} does not match the userId provided ${userId}`
         );
       }
 
       /**  overwrite previous details for that user */
-      const accounts = existingUserWithPlatformAccount[platform];
+      if (platform === PLATFORM.Local) {
+        throw new Error('Unexpected');
+      }
+
+      const accounts = existingUser[platform];
       if (accounts === undefined) {
         throw new Error('Unexpected');
       }
@@ -142,7 +198,10 @@ export class UsersRepository {
     } else {
       const existingUser = await this.getUser(userId);
       const platformIds = existingUser ? existingUser.platformIds : [];
-      /** append a new details entry in the platform array and store the prefixed platform id in the platformIds array */
+      /**
+       * append a new details entry in the platform array and store the
+       * prefixed platform id in the platformIds array
+       * */
       const platformIds_property: keyof UserWithId = 'platformIds';
       await userRef.update({
         [platformIds_property]: platformIds.push(prefixed_user_id),

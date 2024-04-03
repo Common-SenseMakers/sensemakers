@@ -76,11 +76,10 @@ export class UsersService {
       authenticatedDetails.user_id
     );
 
-    const existingUserWithPlatformAccount =
-      await this.repo.getUserWithPlatformAccount(
-        platform,
-        authenticatedDetails.user_id
-      );
+    const existingUserWithAccount = await this.repo.getUserWithPlatformAccount(
+      platform,
+      authenticatedDetails.user_id
+    );
 
     if (_userId) {
       /**
@@ -88,19 +87,19 @@ export class UsersService {
        * already registered this platform user_id
        * */
 
-      if (existingUserWithPlatformAccount) {
+      if (existingUserWithAccount) {
         /**
          * a user has already registered this platform user_id, then check which user registered it.
          * */
 
-        if (existingUserWithPlatformAccount.userId !== _userId) {
+        if (existingUserWithAccount.userId !== _userId) {
           /**
            * the user with this platform user_id is another userId then we have a problem. This person has two
            *  user profiles on our app and the should be merged.
            * */
 
           throw new Error(
-            `Unexpected, existing user ${existingUserWithPlatformAccount.userId} with this platform user_id ${prefixed_user_id} does not match the userId provided ${_userId}`
+            `Unexpected, existing user ${existingUserWithAccount.userId} with this platform user_id ${prefixed_user_id} does not match the userId provided ${_userId}`
           );
         }
 
@@ -129,12 +128,12 @@ export class UsersService {
        * authenticated userId not provided: the user may or may not exist
        * */
 
-      if (existingUserWithPlatformAccount) {
+      if (existingUserWithAccount) {
         /**
          * a user exist with this platform user_id, then return an accessToken and consider this a login for that userId
          * */
 
-        const userId = existingUserWithPlatformAccount.userId;
+        const userId = existingUserWithAccount.userId;
 
         await this.repo.setPlatformDetails(
           userId,

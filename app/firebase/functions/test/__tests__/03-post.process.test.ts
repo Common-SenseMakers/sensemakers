@@ -12,7 +12,7 @@ const TEST_TOKENS_MAP = JSON.parse(
   process.env.TEST_USERS_BEARER_TOKENS as string
 );
 
-describe('process', () => {
+describe.only('process', () => {
   before(async () => {
     logger.debug('resetting DB');
     await resetDB();
@@ -30,10 +30,19 @@ describe('process', () => {
           twitter: [
             {
               user_id,
+              signupDate: 0,
               write: {
                 accessToken: TEST_TOKENS_MAP[handle].accessToken,
                 expiresIn: 0,
+                expiresAtMs: 9712132755509,
                 refreshToken: '',
+              },
+              read: {
+                accessToken: TEST_TOKENS_MAP[handle].accessToken,
+                expiresIn: 0,
+                expiresAtMs: 9712132755509,
+                refreshToken: '',
+                lastFetchedMs: 0,
               },
             },
           ],
@@ -57,19 +66,43 @@ describe('process', () => {
         true
       );
 
-      const tweet = await services.posts.publish(
-        user.userId,
+      const accounts = user[PLATFORM.Twitter];
+      if (!accounts) {
+        throw new Error('Unexpected');
+      }
+      const account = accounts[0];
+      if (!account) {
+        throw new Error('Unexpected');
+      }
+
+      const tweets = await services.platforms.get(PLATFORM.Twitter).publish([
         {
-          content: `This is a test post ${Date.now()}`,
+          post: {
+            id: '',
+            authorId: '',
+            content: `This is a test post ${Date.now()}`,
+            mirrors: {},
+            origin: PLATFORM.Local,
+            parseStatus: 'unprocessed',
+            reviewedStatus: 'pending',
+          },
+          userDetails: account,
         },
+      ]);
+
+      const tweet = tweets[0];
+
+      /** set lastFetched to one second before the last tweet timestamp */
+      await services.users.repo.setLastFetched(
         PLATFORM.Twitter,
-        user_id
+        user_id,
+        tweet.timestampMs - 1000
       );
 
       expect(tweet).to.not.be.undefined;
 
       /** wait for just a second */
-      await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+      await new Promise<void>((resolve) => setTimeout(resolve, 10000));
     });
 
     it('fetch all posts from all platforms', async () => {
@@ -78,6 +111,7 @@ describe('process', () => {
        * all registered users
        */
       await services.posts.process();
+      console.log('done');
     });
   });
 });
