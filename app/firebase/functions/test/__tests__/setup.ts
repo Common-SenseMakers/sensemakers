@@ -1,3 +1,4 @@
+import fs from 'fs';
 import { Context } from 'mocha';
 
 import { TwitterUserDetails } from '../../src/@shared/types.twitter';
@@ -12,6 +13,8 @@ import {
 export const LOG_LEVEL_MSG = envDeploy.LOG_LEVEL_MSG.value();
 export const LOG_LEVEL_OBJ = envDeploy.LOG_LEVEL_OBJ.value();
 export const NUM_TWITTER_USERS = 1;
+const TEST_CREDENTIAL_FILE_PATH =
+  './test/__tests__/test.twitter.credentials.json';
 
 export type InjectableContext = Readonly<{
   // properties injected using the Root Mocha Hooks
@@ -34,6 +37,7 @@ export const mochaHooks = (): Mocha.RootHookObject => {
     async beforeAll(this: Mocha.Context) {
       const context: InjectableContext = {};
       await resetDB();
+
       const testAccountCredentials: TwitterAccountCredentials[] = JSON.parse(
         process.env.TEST_USER_TWITTER_ACCOUNTS as string
       );
@@ -43,9 +47,47 @@ export const mochaHooks = (): Mocha.RootHookObject => {
       if (testAccountCredentials.length < NUM_TWITTER_USERS) {
         throw new Error('not enough twitter account credentials provided');
       }
-      const accountTokens = await authenticateTwitterUsers(
-        testAccountCredentials
-      );
+      let accountTokens: TwitterUserDetails[] = [];
+
+      if (fs.existsSync(TEST_CREDENTIAL_FILE_PATH)) {
+        const fileContents = fs.readFileSync(TEST_CREDENTIAL_FILE_PATH, 'utf8');
+        const credentials: TwitterUserDetails[] = JSON.parse(fileContents);
+
+        // check if any of the credentials have expired, if any of them have, return false, if they are all valid, return true
+        let valid = true;
+        credentials.forEach((credential) => {
+          if (
+            credential.read?.expiresAtMs &&
+            credential.read.expiresAtMs < Date.now()
+          ) {
+            valid = false;
+          }
+        });
+        if (credentials.length < NUM_TWITTER_USERS) {
+          valid = false;
+        }
+
+        if (!valid) {
+          accountTokens = await authenticateTwitterUsers(
+            testAccountCredentials.splice(0, NUM_TWITTER_USERS)
+          );
+          fs.writeFileSync(
+            TEST_CREDENTIAL_FILE_PATH,
+            JSON.stringify(accountTokens),
+            'utf8'
+          );
+        } else {
+          accountTokens = credentials;
+        }
+      } else {
+        accountTokens = await authenticateTwitterUsers(testAccountCredentials);
+        fs.writeFileSync(
+          TEST_CREDENTIAL_FILE_PATH,
+          JSON.stringify(accountTokens),
+          'utf8'
+        );
+      }
+
       accountTokens.forEach((accountToken) => {
         if (!accountToken.profile?.username) {
           throw new Error('unexpected: twitter account username missing');
