@@ -41,8 +41,8 @@ export class PostsService {
       /** the original post is stored as one mirror of the AppPost */
       const mirror: MirrorStatus = {
         user_id: platformPost.user_id,
-        shouldPost: false,
         status: 'fetched',
+        postApproval: 'not-needed',
         platformPost,
       };
 

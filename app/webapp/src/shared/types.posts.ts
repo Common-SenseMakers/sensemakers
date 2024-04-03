@@ -17,7 +17,7 @@ export interface PlatformPost<C = any> {
 }
 
 export interface MirrorStatus<P = any, D = any> {
-  postApproval: 'pending' | 'shouldPost';
+  postApproval: 'pending' | 'shouldPost' | 'not-needed';
   status: 'draft' | 'posted' | 'fetched';
   platformDraft?: D; // a draft is prepared before it gets published (it could be the unsigned version of a post)
   platformPost?: P; // the actual platform post as it was published on the platform (it could be signed and include further data not in the draft)

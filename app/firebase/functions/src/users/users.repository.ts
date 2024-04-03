@@ -7,7 +7,6 @@ import {
   PLATFORM,
   UserDetailsBase,
   UserWithId,
-  WithPlatformUserId,
 } from '../@shared/types';
 import { DBInstance } from '../db/instance';
 import { getPrefixedUserId } from './users.utils';
@@ -111,20 +110,26 @@ export class UsersRepository {
     const prefixed_user_id = getPrefixedUserId(platform, details.user_id);
 
     /** check if this platform user_id */
-    const existingUserWithPlatformAccount =
-      await this.getUserWithPlatformAccount(platform, details.user_id);
+    const existingUser = await this.getUserWithPlatformAccount(
+      platform,
+      details.user_id
+    );
 
     const userRef = await this.getUserRef(userId, true);
 
-    if (existingUserWithPlatformAccount) {
-      if (existingUserWithPlatformAccount.userId !== userId) {
+    if (existingUser) {
+      if (existingUser.userId !== userId) {
         throw new Error(
-          `Unexpected, existing user ${existingUserWithPlatformAccount.userId} with this platform user_id ${prefixed_user_id} does not match the userId provided ${userId}`
+          `Unexpected, existing user ${existingUser.userId} with this platform user_id ${prefixed_user_id} does not match the userId provided ${userId}`
         );
       }
 
       /**  overwrite previous details for that user */
-      const accounts = existingUserWithPlatformAccount[platform];
+      if (platform === PLATFORM.Local) {
+        throw new Error('Unexpected');
+      }
+
+      const accounts = existingUser[platform];
       if (accounts === undefined) {
         throw new Error('Unexpected');
       }
