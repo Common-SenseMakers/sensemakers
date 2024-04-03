@@ -276,7 +276,7 @@ export class TwitterService
     const twitter: TwitterUserDetails = {
       user_id: user.id,
       signupDate: 0,
-      write: {
+      [data.type]: {
         accessToken: result.accessToken,
         refreshToken: result.refreshToken,
         expiresIn: result.expiresIn,
