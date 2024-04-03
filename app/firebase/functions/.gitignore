@@ -11,4 +11,4 @@ node_modules/
 .env.*
 .secret.*
 
-test/__tests__/test_user_data.json
+test/__tests__/test.twitter.credentials.json
