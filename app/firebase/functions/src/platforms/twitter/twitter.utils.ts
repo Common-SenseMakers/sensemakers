@@ -6,5 +6,6 @@ export const handleTwitterError = (e: ApiResponseError) => {
     path: ${e.request.path}
     code: ${e.code}
     data: ${JSON.stringify(e.data)}
+    rateLimit: ${JSON.stringify(e.rateLimit)}
     `;
 };

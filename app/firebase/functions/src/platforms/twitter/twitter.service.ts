@@ -297,29 +297,36 @@ export class TwitterService
 
     const tweetFields: TTweetv2TweetField[] = ['created_at', 'author_id'];
 
-    const result = await readOnlyClient.v2.userTimeline(params.user_id, {
-      start_time: params.start_time,
-      end_time: params.end_time,
-      max_results: params.max_results,
-      'tweet.fields': tweetFields,
-    });
-
-    const resultCollection: TweetV2[] = result.data.data;
-    let nextToken = result.meta.next_token;
-
-    while (nextToken) {
-      const nextResult = await readOnlyClient.v2.userTimeline(params.user_id, {
+    try {
+      const result = await readOnlyClient.v2.userTimeline(params.user_id, {
         start_time: params.start_time,
         end_time: params.end_time,
         max_results: params.max_results,
         'tweet.fields': tweetFields,
-        pagination_token: nextToken,
       });
-      resultCollection.push(...nextResult.data.data);
-      nextToken = nextResult.meta.next_token;
-    }
 
-    return resultCollection;
+      const resultCollection: TweetV2[] = result.data.data;
+      let nextToken = result.meta.next_token;
+
+      while (nextToken) {
+        const nextResult = await readOnlyClient.v2.userTimeline(
+          params.user_id,
+          {
+            start_time: params.start_time,
+            end_time: params.end_time,
+            max_results: params.max_results,
+            'tweet.fields': tweetFields,
+            pagination_token: nextToken,
+          }
+        );
+        resultCollection.push(...nextResult.data.data);
+        nextToken = nextResult.meta.next_token;
+      }
+
+      return resultCollection;
+    } catch (e: any) {
+      throw new Error(handleTwitterError(e));
+    }
   }
 
   public async fetch(
