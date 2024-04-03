@@ -99,15 +99,16 @@ def test_pagination():
 
 
 if __name__ == "__main__":
-    start_date = datetime(2024, 3, 1)
-    end_date = datetime(2024, 3, 10)
-    mloader = MastodonLoader()
-    acct = "@cwebber@octodon.social"
-    posts = mloader.load_profile_timeline(
-        acct,
-        max_toots=30,
-        start_date=start_date,
-        end_date=end_date,
-        exclude_replies=True,
-        exclude_reposts=True,
-    )
+    scrape_mastodon_post("https://fediscience.org/@petersuber/112083114047048300")
+    # start_date = datetime(2024, 3, 10)
+    # end_date = datetime(2024, 3, 25)
+    # mloader = MastodonLoader()
+    # acct = "@petersuber@fediscience.org"
+    # posts = mloader.load_profile_timeline(
+    #     acct,
+    #     max_toots=30,
+    #     start_date=start_date,
+    #     end_date=end_date,
+    #     exclude_replies=True,
+    #     exclude_reposts=True,
+    # )

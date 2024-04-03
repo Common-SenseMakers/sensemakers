@@ -20,8 +20,11 @@ from ..postprocessing import (
     convert_predicted_relations_to_rdf_triplets,
     convert_triplets_to_graph,
     convert_keywords_to_triplets,
+    convert_raw_output_to_st_format,
     convert_raw_outputs_to_st_format,
+    CombinedParserOutput,
 )
+from ..filters.research_filter import apply_research_filter
 from ..postprocessing.output_parsers import (
     TagTypeParser,
     KeywordParser,
@@ -315,15 +318,15 @@ class FirebaseAPIParser:
 
     def post_process_result(
         self,
-        semantics: Dict,
-        keywords: Dict = None,
-        topics: List[str] = None,
+        combined_parser_output: CombinedParserOutput,
     ) -> ParserResult:
         """convert parser output result into format
         required by app interface."""
+        semantics = combined_parser_output.semantic_tags
+        keywords = combined_parser_output.keywords
 
         # get metadata
-        metadata_list: List[RefMetadata] = semantics.get("md_list", list())
+        metadata_list: List[RefMetadata] = combined_parser_output.metadata_list
 
         # convert model outputs to triplets
         triplets = convert_predicted_relations_to_rdf_triplets(
@@ -607,26 +610,20 @@ class FirebaseAPIParser:
             case = PromptCase.ZERO_REF
 
         else:
+            md_dict = extract_posts_ref_metadata_dict(
+                [post],
+                self.md_extract_method,
+            )
+            md_list = [md_dict.get(url) for url in post.ref_urls if md_dict.get(url)]
+
             # at least one external reference
             if len(post.ref_urls) == 1:
                 case = PromptCase.SINGLE_REF
                 # if metadata flag is active, retreive metadata
-                md_list = extract_all_metadata_by_type(
-                    post.ref_urls,
-                    self.md_extract_method,
-                    self.config["general"]["max_summary_length"],
-                )
 
             else:
                 case = PromptCase.MULTI_REF
-                # if metadata flag is active, retreive metadata
-                md_list = extract_all_metadata_by_type(
-                    post.ref_urls,
-                    self.md_extract_method,
-                    self.config["general"]["max_summary_length"],
-                )
                 # TODO finish
-                # md_list = extract_metadata_by_type(post.ref_urls[0], self.md_extract_method)
 
         # run filters if specified TODO
 
@@ -665,40 +662,16 @@ class FirebaseAPIParser:
             }
         )
 
-        # TODO hacky, find a cleaner way to pass this info
-        semantics_answer = combined_result.get("semantics")
-        kw_answer = combined_result.get("keywords")
-        topics_answer = combined_result.get("topics")
+        st_output = convert_raw_output_to_st_format(
+            post,
+            full_semantics_prompt,
+            full_kw_prompt,
+            topics_prompt,
+            combined_result,
+            md_dict,
+        )
 
-        combined_result["keywords"] = {
-            "post": post,
-            "full_prompt": full_kw_prompt,
-            "answer": kw_answer,
-        }
-
-        combined_result["semantics"] = {
-            "post": post,
-            "full_prompt": full_semantics_prompt,
-            "answer": semantics_answer,
-            "possible_labels": self.prompt_case_dict[case]["labels"],
-            "md_list": md_list,
-        }
-
-        combined_result["topics"] = {
-            "post": post,
-            "full_prompt": topics_prompt,
-            "answer": topics_answer,
-        }
-
-        # logger.info(
-        #     f"combined_result[semantics]: {combined_result['semantics']['full_prompt']}"
-        # )
-
-        # logger.info(
-        #     f"combined_result[keywords]: {combined_result['keywords']['full_prompt']}"
-        # )
-
-        return combined_result
+        return st_output
 
     def extract_topics_w_metadata(self, post: RefPost) -> dict:
         md_list = extract_all_metadata_by_type(
@@ -882,7 +855,10 @@ class FirebaseAPIParser:
             List[Dict]: list of processed results
         """
         # extract all posts metadata
-        md_dict = extract_posts_ref_metadata_dict(inputs, self.md_extract_method)
+        md_dict = extract_posts_ref_metadata_dict(
+            inputs,
+            self.md_extract_method,
+        )
 
         # create list of full prompts
         prompts = self.create_prompts_parallel(inputs, md_dict)
@@ -918,5 +894,9 @@ class FirebaseAPIParser:
             prompts,
             md_dict,
         )
+
+        # apply filter
+        for output in st_outputs:
+            apply_research_filter(output)
 
         return st_outputs

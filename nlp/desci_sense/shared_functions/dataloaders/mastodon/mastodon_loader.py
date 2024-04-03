@@ -1,6 +1,7 @@
 # based on https://github.com/langchain-ai/langchain/blob/master/libs/langchain/langchain/document_loaders/mastodon.py
 
 from typing import Any, Dict, Iterable, List, Optional, Sequence
+from loguru import logger
 from mastodon import Mastodon
 from datetime import datetime, time, date
 
@@ -72,7 +73,12 @@ class MastodonLoader:
             )
             if start_date <= created_at_datetime <= end_date:
                 filtered_posts.append(toot)
-        results.extend(self._format_toots(filtered_posts, user))
+        #results.extend(self._format_toots(filtered_posts, user))
+        
+        for toot in filtered_posts:
+            logger.debug(f"toot: {toot['url']}")
+            results.append(convert_post_json_to_ref_post(toot))
+            
 
         # Mastodon api exclude wasn't working, so verify this here
         if exclude_reposts:
@@ -131,5 +137,8 @@ class MastodonLoader:
     ) -> Iterable[RefPost]:
         """Format toots into posts."""
         for toot in toots:
-            ref_post = convert_post_json_to_ref_post(toot)
-            yield ref_post
+            try:
+                ref_post = convert_post_json_to_ref_post(toot)
+                yield ref_post
+            except Exception as e:
+                logger.warning(e)

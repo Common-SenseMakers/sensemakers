@@ -16,7 +16,7 @@ from pandas.api.types import (
     is_object_dtype,
 )
 
-from desci_sense.shared_functions.postprocessing import StreamlitParserResults
+from desci_sense.shared_functions.postprocessing import CombinedParserOutput
 from desci_sense.shared_functions.schema.post import RefPost
 from desci_sense.shared_functions.dataloaders.mastodon.mastodon_loader import (
     MastodonLoader,
@@ -32,12 +32,12 @@ def load_model(config):
 
 
 def add_results_to_df(
-    df: pd.DataFrame, results: List[StreamlitParserResults]
+    df: pd.DataFrame, results: List[CombinedParserOutput]
 ) -> pd.DataFrame:
     # Ensure the DataFrame and results list have the same length
     if not df.empty and len(df) == len(results):
         # Iterate over the schema of StreamlitParserResults to get all field names
-        for field_name in StreamlitParserResults.model_fields.keys():
+        for field_name in CombinedParserOutput.model_fields.keys():
             if field_name != "debug":
                 # For each field, create a new column in df with the values from results
                 df[field_name] = [getattr(r, field_name) for r in results]

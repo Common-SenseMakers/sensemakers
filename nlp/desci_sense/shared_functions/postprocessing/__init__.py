@@ -1,4 +1,5 @@
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
+from enum import Enum
 from rdflib.namespace import RDF
 from rdflib import URIRef, Literal, Graph
 from ..interface import (
@@ -17,13 +18,22 @@ from pydantic import (
 )
 
 
-class StreamlitParserResults(BaseModel):
-    research_filter: str
+class ParserChainOutput(BaseModel):
+    answer: Any
+    full_prompt: str
+    reasoning: Optional[str]
+    extra: Dict
+
+
+class CombinedParserOutput(BaseModel):
+    research_keyword: str
+    research_filter: str = None  # TODO make enum
     item_types: List[str]
     reference_urls: List[str]
     semantic_tags: List[str]
     keywords: List[str]
     topics: List[str]
+    metadata_list: List[RefMetadata]
     debug: Optional[Dict] = Field(default_factory=dict)
 
 
@@ -34,7 +44,7 @@ def convert_raw_output_to_st_format(
     topics_prompt: str,
     output: dict,
     md_dict: Dict[str, RefMetadata],
-):
+) -> CombinedParserOutput:
     reference_urls = post.ref_urls
     item_types = [
         md_dict[url].item_type if md_dict[url] else "unknown" for url in reference_urls
@@ -42,7 +52,8 @@ def convert_raw_output_to_st_format(
     semantic_tags = output["semantics"]["multi_tag"]
     keywords = output["keywords"]["valid_keywords"]
     topics = output["topics"]["multi_tag"]
-    research_filter = output["keywords"]["academic_kw"]
+    academic_kw = output["keywords"]["academic_kw"]
+    md_list = list(md_dict.values())
     debug = {
         "semantics": {
             "prompt": sem_prompt,
@@ -58,13 +69,14 @@ def convert_raw_output_to_st_format(
             "reasoning": output["topics"]["reasoning"],
         },
     }
-    return StreamlitParserResults(
-        research_filter=research_filter,
+    return CombinedParserOutput(
+        research_keyword=academic_kw,
         item_types=item_types,
         reference_urls=reference_urls,
         semantic_tags=semantic_tags,
         topics=topics,
         keywords=keywords,
+        metadata_list=md_list,
         debug=debug,
     )
 
@@ -74,7 +86,7 @@ def convert_raw_outputs_to_st_format(
     outputs: List[dict],
     prompts,
     md_dict: Dict[str, RefMetadata],
-) -> List[StreamlitParserResults]:
+) -> List[CombinedParserOutput]:
     assert len(prompts) == len(outputs)
     assert len(posts) == len(outputs)
     st_results = []
