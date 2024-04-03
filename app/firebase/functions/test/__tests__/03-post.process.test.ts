@@ -66,14 +66,31 @@ describe.only('process', () => {
         true
       );
 
-      const tweet = await services.posts.publish(
-        user.userId,
+      const accounts = user[PLATFORM.Twitter];
+      if (!accounts) {
+        throw new Error('Unexpected');
+      }
+      const account = accounts[0];
+      if (!account) {
+        throw new Error('Unexpected');
+      }
+
+      const tweets = await services.platforms.get(PLATFORM.Twitter).publish([
         {
-          content: `This is a test post ${Date.now()}`,
+          post: {
+            id: '',
+            authorId: '',
+            content: `This is a test post ${Date.now()}`,
+            mirrors: {},
+            origin: PLATFORM.Local,
+            parseStatus: 'unprocessed',
+            reviewedStatus: 'pending',
+          },
+          userDetails: account,
         },
-        PLATFORM.Twitter,
-        user_id
-      );
+      ]);
+
+      const tweet = tweets[0];
 
       /** set lastFetched to one second before the last tweet timestamp */
       await services.users.repo.setLastFetched(
