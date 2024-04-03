@@ -1,15 +1,24 @@
 import { Context } from 'mocha';
 
+import { TwitterUserDetails } from '../../src/@shared/types.twitter';
 import { envDeploy } from '../../src/config/typedenv.deploy';
 import { resetDB } from '../__tests_support__/db';
 import { LocalLogger, LogLevel } from '../__tests_support__/test.logger';
+import {
+  TwitterAccountCredentials,
+  authenticateTwitterUsers,
+} from '../utils/authenticateTwitterUsers';
 
 export const LOG_LEVEL_MSG = envDeploy.LOG_LEVEL_MSG.value();
 export const LOG_LEVEL_OBJ = envDeploy.LOG_LEVEL_OBJ.value();
+export const NUM_TWITTER_USERS = 1;
 
 export type InjectableContext = Readonly<{
   // properties injected using the Root Mocha Hooks
 }>;
+
+export let testTwitterAccountTokens: Map<string, TwitterUserDetails> =
+  new Map();
 
 (global as any).logger = new LocalLogger(
   (LOG_LEVEL_MSG as LogLevel) || LogLevel.warn,
@@ -24,8 +33,28 @@ export const mochaHooks = (): Mocha.RootHookObject => {
   return {
     async beforeAll(this: Mocha.Context) {
       const context: InjectableContext = {};
-
       await resetDB();
+      const testAccountCredentials: TwitterAccountCredentials[] = JSON.parse(
+        process.env.TEST_USER_TWITTER_ACCOUNTS as string
+      );
+      if (!testAccountCredentials) {
+        throw new Error('test acccounts undefined');
+      }
+      if (testAccountCredentials.length < NUM_TWITTER_USERS) {
+        throw new Error('not enough twitter account credentials provided');
+      }
+      const accountTokens = await authenticateTwitterUsers(
+        testAccountCredentials
+      );
+      accountTokens.forEach((accountToken) => {
+        if (!accountToken.profile?.username) {
+          throw new Error('unexpected: twitter account username missing');
+        }
+        testTwitterAccountTokens.set(
+          accountToken.profile?.username,
+          accountToken
+        );
+      });
 
       Object.assign(this, context);
     },
