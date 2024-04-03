@@ -1,6 +1,6 @@
 import { TweetV2 } from 'twitter-api-v2';
 
-import { PLATFORM } from './types';
+import { PLATFORM, UserDetailsBase } from './types';
 import { AppPostSemantics, ParsePostResult } from './types.parser';
 
 /**
@@ -17,11 +17,12 @@ export interface PlatformPost<C = any> {
 }
 
 export interface MirrorStatus<P = any, D = any> {
-  postApproval: 'pending' | 'shouldPost' | 'not-needed';
+  platformId: PLATFORM;
+  user_id: string;
+  postApproval: 'pending' | 'should-post' | 'not-needed';
   status: 'draft' | 'posted' | 'fetched';
   platformDraft?: D; // a draft is prepared before it gets published (it could be the unsigned version of a post)
   platformPost?: P; // the actual platform post as it was published on the platform (it could be signed and include further data not in the draft)
-  user_id?: string;
 }
 
 /** Basic interface of a Post object */
@@ -40,17 +41,22 @@ export interface AppPost {
   }>;
 }
 
-export interface AppPostMirror {
-  postId: string;
-  content: string;
-  semantics: AppPostSemantics;
-  platforms: PLATFORM[]; // platforms where the post should be mirrored
+/** AppPost sent to a PlatformService to be published */
+export interface PostToPublish {
+  post: AppPost;
+  userDetails: UserDetailsBase;
 }
 
-/** AppPost sent to a PlatformService to be published */
-export type AppPostPublish = {
-  content: string;
+export interface AppPostPublish {}
+
+/**
+ * Payload to signal which post is to be mirrored on which platforms,
+ */
+export interface AppPostMirror {
+  postId: string;
+  content?: string;
   semantics?: AppPostSemantics;
-};
+  mirrors: MirrorStatus[];
+}
 
 export type PostUpdate = Pick<AppPost, 'id' | 'content' | 'semantics'>;

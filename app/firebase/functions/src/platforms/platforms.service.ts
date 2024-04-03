@@ -1,5 +1,5 @@
 import { PLATFORM, UserDetailsBase } from '../@shared/types';
-import { AppPostPublish, PlatformPost } from '../@shared/types.posts';
+import { PlatformPost, PostToPublish } from '../@shared/types.posts';
 import {
   FetchUserPostsParams,
   IdentityService,
@@ -58,12 +58,8 @@ export class PlatformsService {
     return platform.convertToGeneric(platformPost);
   }
 
-  public publish(
-    platformId: PLATFORM,
-    post: AppPostPublish,
-    userDetails: UserDetailsBase
-  ) {
+  public publish(platformId: PLATFORM, posts: PostToPublish[]) {
     const platform = this.get(platformId);
-    return platform.publish(post, userDetails);
+    return platform.publish(posts);
   }
 }

@@ -42,7 +42,7 @@ export class PostsRepository {
     } as unknown as DefinedIfTrue<T, AppPost>;
   }
 
-  public async updatePost(postUpdate: PostUpdate) {
+  public async updatePostContent(postUpdate: PostUpdate) {
     const doc = await this.getPostDoc(postUpdate.id, true);
     const post = doc.data() as AppPost;
 
@@ -51,6 +51,17 @@ export class PostsRepository {
     post.semantics = postUpdate.semantics;
 
     await doc.ref.set(post, { merge: true });
+  }
+
+  /** only update the posts mirrors of an array AppPost[] */
+  public async updatePostsMirrors(posts: AppPost[]) {
+    const batch = this.db.batch;
+    posts.forEach((post) => {
+      const postRef = this.db.collections.posts.doc(post.id);
+      batch.update(postRef, { mirrors: post.mirrors });
+    });
+
+    await batch.commit();
   }
 
   public async storePosts(posts: AppPost[]) {

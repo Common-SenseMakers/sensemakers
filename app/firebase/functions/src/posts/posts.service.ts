@@ -7,8 +7,8 @@ import {
 import {
   AppPost,
   AppPostMirror,
-  AppPostPublish,
   MirrorStatus,
+  PostToPublish,
 } from '../@shared/types.posts';
 import { ParserService } from '../parser/parser.service';
 import { FetchUserPostsParams } from '../platforms/platforms.interface';
@@ -36,32 +36,35 @@ export class PostsService {
     const platformPosts = await this.platforms.fetch(params);
 
     /** convert into internal format */
-    const posts = platformPosts.map((platformPost): AppPost => {
-      const { content } = this.platforms.convertToGeneric(platformPost);
+    const posts = await Promise.all(
+      platformPosts.map(async (platformPost): Promise<AppPost> => {
+        const { content } = await this.platforms.convertToGeneric(platformPost);
 
-      /** the original post is stored as one mirror of the AppPost */
-      const mirror: MirrorStatus = {
-        user_id: platformPost.user_id,
-        status: 'fetched',
-        postApproval: 'not-needed',
-        platformPost,
-      };
+        /** the original post is stored as one mirror of the AppPost */
+        const mirror: MirrorStatus = {
+          platformId: platformPost.platformId,
+          user_id: platformPost.user_id,
+          status: 'fetched',
+          postApproval: 'not-needed',
+          platformPost,
+        };
 
-      return {
-        content,
-        id: getUniquePostId(platformPost.platformId, platformPost.post_id),
-        origin: platformPost.platformId,
-        parseStatus: 'unprocessed',
-        reviewedStatus: 'pending',
-        authorId: getPrefixedUserId(
-          platformPost.platformId,
-          platformPost.user_id
-        ),
-        mirrors: {
-          [platformPost.platformId]: mirror,
-        },
-      };
-    });
+        return {
+          content,
+          id: getUniquePostId(platformPost.platformId, platformPost.post_id),
+          origin: platformPost.platformId,
+          parseStatus: 'unprocessed',
+          reviewedStatus: 'pending',
+          authorId: getPrefixedUserId(
+            platformPost.platformId,
+            platformPost.user_id
+          ),
+          mirrors: {
+            [platformPost.platformId]: mirror,
+          },
+        };
+      })
+    );
 
     return posts;
   }
@@ -167,6 +170,8 @@ export class PostsService {
             .convertFromGeneric(post);
 
           const mirror: MirrorStatus = {
+            platformId,
+            user_id: '',
             status: 'draft',
             postApproval: 'pending',
             platformDraft,
@@ -199,98 +204,86 @@ export class PostsService {
   }
 
   /**
-   * Mirror a set of existing posts into other platforms. The content and
-   * semantics of the post might have changed and will be updated
-   * in the Posts collection too.
+   * Update and mark the mirroring of a post on different platforms as approved.
+   * If publish flag is true, and publish the mirror son the corresponding platform
    *
    * userId MUST be the authenticated user
    * */
-  public async mirror(postsToMirror: AppPostMirror[], userId: string) {
-    /** validate posts authors and organize them by platform */
-    const postsPerPlatform: Map<PLATFORM, AppPost[]> = new Map();
+  public async approveMirrors(postsToMirror: AppPostMirror[], userId: string) {
+    /** validate posts authors, organize them by platform and append publish credentials */
+    const postsPerPlatform: Map<PLATFORM, PostToPublish[]> = new Map();
+    const user = await this.users.repo.getUser(userId, true);
 
     await Promise.all(
       postsToMirror.map(async (postToMirror) => {
+        /** verify authorship */
         const post = await this.repo.getPost(postToMirror.postId, true);
 
         if (post.authorId !== userId) {
           throw new Error(`Post ${post.id} not owned by ${userId}`);
         }
 
-        postToMirror.platforms.forEach((platform) => {
-          const current = postsPerPlatform.get(platform) || [];
-          current.push(post);
-          postsPerPlatform.set(platform, current);
-        });
-      })
-    );
+        /** prepare posts and userDetails */
+        postToMirror.mirrors.map((mirrorDetails) => {
+          const platformId = mirrorDetails.platformId;
+          const current = postsPerPlatform.get(platformId) || [];
 
-    /** call mirror on each platform */
-    const allPosts: AppPost[] = [];
-    await Promise.all(
-      Array.from(postsPerPlatform.entries()).map(async ([platform, posts]) => {
-        const platformPosts = await this.platforms
-          .get(platform)
-          .mirror(postsToMirror);
+          if (platformId === PLATFORM.Local) {
+            throw new Error('Unexpected');
+          }
+          const accounts = user[platformId];
 
-        /** inject each platform post as a mirror on its corresponding AppPost */
-        platformPosts.forEach((platformPost) => {
-          const post = posts.find((p) => p.id === platformPost.post_id);
-
-          if (!post) {
-            throw new Error(
-              `Unexpected not found post for platformPost ${platformPost.post_id}`
-            );
+          if (!accounts) {
+            throw new Error('Unexpected');
           }
 
-          post.mirrors = {
-            [platformPost.platformId]: {
-              platformPost,
-            },
-          };
-        });
+          const account = accounts.find(
+            (a) => a.user_id === mirrorDetails.user_id
+          );
 
-        allPosts.push(...posts);
+          if (!account) {
+            throw new Error('Unexpected');
+          }
+
+          current.push({ post, userDetails: account });
+          postsPerPlatform.set(platformId as PLATFORM, current);
+        });
       })
     );
 
-    /** store the updated posts in the DB */
-    await this.storePosts(allPosts);
-  }
+    /** publish on each platform */
+    const allPosts: AppPost[] = [];
+    await Promise.all(
+      Array.from(postsPerPlatform.entries()).map(
+        async ([platform, postsToPublish]) => {
+          const platformPosts = await this.platforms
+            .get(platform)
+            .publish(postsToPublish);
 
-  /**
-   * CAUTION: userId MUST be an authenticated userId.
-   *
-   * This method will publish a post on a given platform and with a given
-   * platform user_id. It verifies the account is controlled by the provided
-   * userId and uses the stored write credentials for that account
-   *
-   * */
-  async publish(
-    userId: string,
-    post: AppPostPublish,
-    platformId: PLATFORM,
-    user_id: string
-  ) {
-    const user = await this.users.repo.getUserWithPlatformAccount(
-      platformId,
-      user_id,
-      true
+          /** inject each platform post as a mirror on its corresponding AppPost */
+          platformPosts.forEach((platformPost) => {
+            const postToPublish = postsToPublish.find(
+              (p) => p.post.id === platformPost.post_id
+            );
+
+            if (!postToPublish) {
+              throw new Error(
+                `Unexpected not found post for platformPost ${platformPost.post_id}`
+              );
+            }
+
+            postToPublish.post.mirrors = {
+              [platformPost.platformId]: {
+                platformPost,
+              },
+            };
+          });
+
+          allPosts.push(...postsToPublish.map((p) => p.post));
+        }
+      )
     );
 
-    if (user.userId !== userId) {
-      throw new Error(
-        `Account in platformId ${platformId} and user_id ${user_id} not controlled by ${userId}`
-      );
-    }
-
-    /** get user write credentials for this account */
-    const account = user[PLATFORM.Twitter]?.find((u) => u.user_id === user_id);
-
-    if (!account || !account.write) {
-      throw new Error(`Write credentials for user ${userId} not found`);
-    }
-
-    return this.platforms.publish(platformId, post, account);
+    await this.repo.updatePostsMirrors(allPosts);
   }
 }

@@ -12,9 +12,8 @@ import {
 import { PLATFORM, UserDetailsBase } from '../../@shared/types';
 import {
   AppPost,
-  AppPostMirror,
-  AppPostPublish,
   PlatformPost,
+  PostToPublish,
 } from '../../@shared/types.posts';
 import {
   TwitterGetContextParams,
@@ -361,9 +360,9 @@ export class TwitterService
     });
   }
 
-  public convertToGeneric(
+  public async convertToGeneric(
     platformPost: PlatformPost<TweetV2>
-  ): GenericPostData {
+  ): Promise<GenericPostData> {
     if (
       platformPost.original.author_id &&
       platformPost.original.author_id !== platformPost.user_id
@@ -393,9 +392,12 @@ export class TwitterService
 
   /** user_id must be from the authenticated userId */
   public async publish(
-    post: AppPostPublish,
-    userDetails: UserDetailsBase
-  ): Promise<PlatformPost<TweetV2SingleResult>> {
+    posts: PostToPublish[]
+  ): Promise<PlatformPost<TweetV2SingleResult>[]> {
+    // TODO udpate to support many
+    const userDetails = posts[0].userDetails;
+    const post = posts[0].post;
+
     const client = await this.getClient(userDetails, 'write');
 
     const result = await client.v2.tweet(post.content);
@@ -416,19 +418,18 @@ export class TwitterService
       );
     }
 
-    return {
-      platformId: PLATFORM.Twitter,
-      post_id: tweet.data.id,
-      user_id: tweet.data.author_id,
-      timestampMs: this.dateStrToTimestampMs(tweet.data.created_at),
-      original: tweet,
-    };
+    return [
+      {
+        platformId: PLATFORM.Twitter,
+        post_id: tweet.data.id,
+        user_id: tweet.data.author_id,
+        timestampMs: this.dateStrToTimestampMs(tweet.data.created_at),
+        original: tweet,
+      },
+    ];
   }
 
-  convertFromGeneric(platformPost: AppPost): PlatformPost<any> {
-    throw new Error('Method not implemented.');
-  }
-  mirror(postsToMirror: AppPostMirror[]): Promise<PlatformPost<any>[]> {
+  convertFromGeneric(post: AppPost): Promise<PlatformPost<any>> {
     throw new Error('Method not implemented.');
   }
 }

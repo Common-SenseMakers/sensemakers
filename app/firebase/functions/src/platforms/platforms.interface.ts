@@ -1,10 +1,5 @@
 import { PLATFORM, UserDetailsBase } from '../@shared/types';
-import {
-  AppPost,
-  AppPostMirror,
-  AppPostPublish,
-  PlatformPost,
-} from '../@shared/types.posts';
+import { AppPost, PlatformPost, PostToPublish } from '../@shared/types.posts';
 
 /** use conditional types to dynamically assign credential types for each platform */
 export type CredentialsForPlatform<P> = P extends PLATFORM.Twitter
@@ -38,11 +33,7 @@ export interface PlatformService<
   UserDetails extends UserDetailsBase = UserDetailsBase,
 > extends IdentityService<SignupContext, SignupData, UserDetails> {
   fetch(params: FetchUserPostsParams[]): Promise<PlatformPost[]>;
-  convertToGeneric(platformPost: PlatformPost): GenericPostData;
-  convertFromGeneric(post: AppPost): PlatformPost;
-  publish(
-    post: AppPostPublish,
-    userDetails: UserDetailsBase
-  ): Promise<PlatformPost>;
-  mirror(postsToMirror: AppPostMirror[]): Promise<PlatformPost[]>;
+  publish(posts: PostToPublish[]): Promise<PlatformPost[]>;
+  convertToGeneric(platformPost: PlatformPost): Promise<GenericPostData>;
+  convertFromGeneric(post: AppPost): Promise<PlatformPost>;
 }
