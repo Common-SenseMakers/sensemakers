@@ -30,6 +30,7 @@ import {
   GenericPostData,
   PlatformService,
 } from '../platforms.interface';
+import { handleTwitterError } from './twitter.utils';
 
 export interface TwitterApiCredentials {
   clientId: string;
@@ -400,33 +401,36 @@ export class TwitterService
 
     const client = await this.getClient(userDetails, 'write');
 
-    const result = await client.v2.tweet(post.content);
+    try {
+      const result = await client.v2.tweet(post.content);
+      if (result.errors) {
+        throw new Error(`Error posting tweet`);
+      }
 
-    if (result.errors) {
-      throw new Error(`Error posting tweet`);
+      const tweet = await this.getPost(result.data.id, userDetails.user_id);
+
+      if (!tweet.data.author_id) {
+        throw new Error(`Unexpected author_id undefined`);
+      }
+
+      if (!tweet.data.created_at) {
+        throw new Error(
+          `Unexpected created_at undefined, how would we know the timestamp then? )`
+        );
+      }
+
+      return [
+        {
+          platformId: PLATFORM.Twitter,
+          post_id: tweet.data.id,
+          user_id: tweet.data.author_id,
+          timestampMs: this.dateStrToTimestampMs(tweet.data.created_at),
+          original: tweet,
+        },
+      ];
+    } catch (e: any) {
+      throw new Error(handleTwitterError(e));
     }
-
-    const tweet = await this.getPost(result.data.id, userDetails.user_id);
-
-    if (!tweet.data.author_id) {
-      throw new Error(`Unexpected author_id undefined`);
-    }
-
-    if (!tweet.data.created_at) {
-      throw new Error(
-        `Unexpected created_at undefined, how would we know the timestamp then? )`
-      );
-    }
-
-    return [
-      {
-        platformId: PLATFORM.Twitter,
-        post_id: tweet.data.id,
-        user_id: tweet.data.author_id,
-        timestampMs: this.dateStrToTimestampMs(tweet.data.created_at),
-        original: tweet,
-      },
-    ];
   }
 
   convertFromGeneric(post: AppPost): Promise<PlatformPost<any>> {

@@ -102,7 +102,7 @@ describe.only('process', () => {
       expect(tweet).to.not.be.undefined;
 
       /** wait for just a second */
-      await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+      await new Promise<void>((resolve) => setTimeout(resolve, 10000));
     });
 
     it('fetch all posts from all platforms', async () => {
