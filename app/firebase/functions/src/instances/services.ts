@@ -1,5 +1,3 @@
-import { TimeService } from 'src/time/time.service';
-
 import { PLATFORM } from '../@shared/types';
 import {
   FUNCTIONS_PY_URL,
@@ -19,6 +17,7 @@ import {
 import { TwitterService } from '../platforms/twitter/twitter.service';
 import { PostsRepository } from '../posts/posts.repository';
 import { PostsService } from '../posts/posts.service';
+import { TimeService } from '../time/time.service';
 import { UsersRepository } from '../users/users.repository';
 import { UsersService } from '../users/users.service';
 

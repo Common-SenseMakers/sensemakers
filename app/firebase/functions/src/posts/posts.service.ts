@@ -266,6 +266,6 @@ export class PostsService {
       throw new Error(`Write credentials for user ${userId} not found`);
     }
 
-    return this.platforms.publish(platformId, post, account.write);
+    return this.platforms.publish(platformId, post, account);
   }
 }

@@ -33,8 +33,15 @@ describe('process', () => {
               write: {
                 accessToken: TEST_TOKENS_MAP[handle].accessToken,
                 expiresIn: 0,
-                expiresAtMs: 0,
+                expiresAtMs: 9712132755509,
                 refreshToken: '',
+              },
+              read: {
+                accessToken: TEST_TOKENS_MAP[handle].accessToken,
+                expiresIn: 0,
+                expiresAtMs: 9712132755509,
+                refreshToken: '',
+                lastFetched: 0,
               },
             },
           ],

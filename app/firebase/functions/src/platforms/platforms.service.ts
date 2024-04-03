@@ -65,9 +65,9 @@ export class PlatformsService {
   public publish(
     platformId: PLATFORM,
     post: AppPostPublish,
-    write: NonNullable<UserDetailsBase['write']>
+    userDetails: UserDetailsBase
   ) {
     const platform = this.get(platformId);
-    return platform.publish(post, write);
+    return platform.publish(post, userDetails);
   }
 }
