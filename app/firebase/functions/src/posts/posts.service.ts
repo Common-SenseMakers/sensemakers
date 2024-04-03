@@ -11,6 +11,7 @@ import {
   MirrorStatus,
 } from '../@shared/types.posts';
 import { ParserService } from '../parser/parser.service';
+import { FetchUserPostsParams } from '../platforms/platforms.interface';
 import {
   FetchAllUserPostsParams,
   PlatformsService,
@@ -76,12 +77,31 @@ export class PostsService {
    * (optional) it stores the posts in the Posts collection
    */
   async fetchFromUsers(store: boolean = false) {
-    /**
-     * TODO create the fetch params with the start timestamp
-     * for each platform and user
-     *  */
-    // const userIds = await this.users.repo.getAllIds();
+    const users = await this.users.repo.getAll();
     const params = new Map();
+
+    /**
+     * organize the credentials and lastFetched timestamps for
+     * all users and platforms
+     */
+    users.forEach((user) => {
+      ALL_PUBLISH_PLATFORMS.map((platformId) => {
+        /** check if the user has credentials for that platform */
+        const accounts = user[platformId];
+        if (accounts) {
+          accounts.forEach((account) => {
+            const current = params.get(platformId) || [];
+            const thisParams: FetchUserPostsParams = {
+              start_time: account.read
+                ? account.read.lastFetchedMs
+                : account.signupDate,
+              userDetails: account,
+            };
+            params.set(platformId, current.concat(thisParams));
+          });
+        }
+      });
+    });
 
     const posts = await this.fetch(params);
 
@@ -134,24 +154,29 @@ export class PostsService {
     return posts;
   }
 
-  /** Calls the convertFromGeneric on all platforms and store the results as the platformDraft of each mirror  */
+  /**
+   * Calls the convertFromGeneric on all platforms, other than the post origin,
+   * and store the results as the platformDraft of each mirror
+   * */
   public async preProcess(posts: AppPost[], store: boolean = false) {
     posts.forEach((post) => {
       ALL_PUBLISH_PLATFORMS.forEach((platformId) => {
-        const platformDraft = this.platforms
-          .get(platformId)
-          .convertFromGeneric(post);
+        if (post.origin !== platformId) {
+          const platformDraft = this.platforms
+            .get(platformId)
+            .convertFromGeneric(post);
 
-        const mirror: MirrorStatus = {
-          status: 'draft',
-          postApproval: 'pending',
-          platformDraft,
-        };
+          const mirror: MirrorStatus = {
+            status: 'draft',
+            postApproval: 'pending',
+            platformDraft,
+          };
 
-        post.mirrors = {
-          ...post.mirrors,
-          [platformId]: mirror,
-        };
+          post.mirrors = {
+            ...post.mirrors,
+            [platformId]: mirror,
+          };
+        }
       });
     });
 

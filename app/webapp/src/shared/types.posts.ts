@@ -11,7 +11,7 @@ export interface PlatformPost<C = any> {
   platformId: PLATFORM;
   user_id: string;
   post_id: string;
-  timestamp: number; // timestamp in ms
+  timestampMs: number; // timestamp in ms
   mirrorOf?: string;
   original: C;
 }

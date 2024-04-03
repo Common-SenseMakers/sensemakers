@@ -12,7 +12,7 @@ const TEST_TOKENS_MAP = JSON.parse(
   process.env.TEST_USERS_BEARER_TOKENS as string
 );
 
-describe('process', () => {
+describe.only('process', () => {
   before(async () => {
     logger.debug('resetting DB');
     await resetDB();
@@ -30,6 +30,7 @@ describe('process', () => {
           twitter: [
             {
               user_id,
+              signupDate: 0,
               write: {
                 accessToken: TEST_TOKENS_MAP[handle].accessToken,
                 expiresIn: 0,
@@ -41,7 +42,7 @@ describe('process', () => {
                 expiresIn: 0,
                 expiresAtMs: 9712132755509,
                 refreshToken: '',
-                lastFetched: 0,
+                lastFetchedMs: 0,
               },
             },
           ],
@@ -74,6 +75,13 @@ describe('process', () => {
         user_id
       );
 
+      /** set lastFetched to one second before the last tweet timestamp */
+      await services.users.repo.setLastFetched(
+        PLATFORM.Twitter,
+        user_id,
+        tweet.timestampMs - 1000
+      );
+
       expect(tweet).to.not.be.undefined;
 
       /** wait for just a second */
@@ -86,6 +94,7 @@ describe('process', () => {
        * all registered users
        */
       await services.posts.process();
+      console.log('done');
     });
   });
 });

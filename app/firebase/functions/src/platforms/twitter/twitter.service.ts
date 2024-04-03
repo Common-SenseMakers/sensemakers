@@ -275,6 +275,7 @@ export class TwitterService
 
     const twitter: TwitterUserDetails = {
       user_id: user.id,
+      signupDate: 0,
       write: {
         accessToken: result.accessToken,
         refreshToken: result.refreshToken,
@@ -354,7 +355,7 @@ export class TwitterService
         platformId: PLATFORM.Twitter,
         post_id: tweet.id,
         user_id: tweet.author_id,
-        timestamp: this.dateStrToTimestampMs(tweet.created_at),
+        timestampMs: this.dateStrToTimestampMs(tweet.created_at),
         original: tweet,
       };
     });
@@ -419,7 +420,7 @@ export class TwitterService
       platformId: PLATFORM.Twitter,
       post_id: tweet.data.id,
       user_id: tweet.data.author_id,
-      timestamp: this.dateStrToTimestampMs(tweet.data.created_at),
+      timestampMs: this.dateStrToTimestampMs(tweet.data.created_at),
       original: tweet,
     };
   }

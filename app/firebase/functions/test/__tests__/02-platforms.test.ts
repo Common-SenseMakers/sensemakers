@@ -27,6 +27,7 @@ describe('platforms', () => {
           {
             userDetails: {
               user_id: TEST_TOKENS_MAP[TWITTER_ACCOUNT].user_id,
+              signupDate: 0,
               read: {
                 accessToken: TEST_TOKENS_MAP[TWITTER_ACCOUNT].accessToken,
               },

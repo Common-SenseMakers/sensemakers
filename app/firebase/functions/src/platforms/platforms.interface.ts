@@ -1,8 +1,4 @@
-import {
-  PLATFORM,
-  UserDetailsBase,
-  WithPlatformUserId,
-} from '../@shared/types';
+import { PLATFORM, UserDetailsBase } from '../@shared/types';
 import {
   AppPost,
   AppPostMirror,
@@ -24,7 +20,7 @@ export interface FetchUserPostsParams {
 export interface IdentityService<
   SignupContext,
   SignupData,
-  UserDetails extends WithPlatformUserId,
+  UserDetails extends UserDetailsBase,
 > {
   /** provides info needed by the frontend to start the signup flow */
   getSignupContext: (userId?: string, params?: any) => Promise<SignupContext>;
@@ -39,7 +35,7 @@ export interface GenericPostData {
 export interface PlatformService<
   SignupContext = any,
   SignupData = any,
-  UserDetails extends UserDetailsBase = WithPlatformUserId,
+  UserDetails extends UserDetailsBase = UserDetailsBase,
 > extends IdentityService<SignupContext, SignupData, UserDetails> {
   fetch(params: FetchUserPostsParams[]): Promise<PlatformPost[]>;
   convertToGeneric(platformPost: PlatformPost): GenericPostData;

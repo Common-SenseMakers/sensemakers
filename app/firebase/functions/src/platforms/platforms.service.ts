@@ -1,8 +1,4 @@
-import {
-  PLATFORM,
-  UserDetailsBase,
-  WithPlatformUserId,
-} from '../@shared/types';
+import { PLATFORM, UserDetailsBase } from '../@shared/types';
 import { AppPostPublish, PlatformPost } from '../@shared/types.posts';
 import {
   FetchUserPostsParams,
@@ -13,12 +9,12 @@ import {
 export type FetchAllUserPostsParams = Map<PLATFORM, FetchUserPostsParams[]>;
 export type PlatformsMap = Map<
   PLATFORM,
-  PlatformService<any, any, WithPlatformUserId>
+  PlatformService<any, any, UserDetailsBase>
 >;
 
 export type IdentityServicesMap = Map<
   PLATFORM,
-  IdentityService<any, any, WithPlatformUserId>
+  IdentityService<any, any, UserDetailsBase>
 >;
 
 /** a simple wrapper of the Map to get defined and typed Platform services */
