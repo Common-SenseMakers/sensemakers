@@ -10,3 +10,9 @@ export const twitterSignupDataSchema = object({
   codeVerifier: string().required(),
   callback_url: string().required(),
 }).noUnknown(true);
+
+export const mirrorPostSchema = object({
+  id: string().required(),
+  content: string().required(),
+  semantics: string().required(),
+}).noUnknown(true);

@@ -26,12 +26,15 @@ describe('platforms', () => {
       try {
         const tweets = await twitterService.fetch([
           {
-            user_id: TEST_TOKENS_MAP[TWITTER_ACCOUNT].user_id,
+            userDetails: {
+              user_id: TEST_TOKENS_MAP[TWITTER_ACCOUNT].user_id,
+              signupDate: 0,
+              read: {
+                accessToken: TEST_TOKENS_MAP[TWITTER_ACCOUNT].accessToken,
+              },
+            },
             start_time: 1708560000000,
             end_time: 1708646400000,
-            credentials: {
-              accessToken: TEST_TOKENS_MAP[TWITTER_ACCOUNT].accessToken,
-            },
           },
         ]);
         expect(tweets).to.not.be.undefined;

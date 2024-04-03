@@ -22,6 +22,7 @@ import {
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { PostsRepository } from '../../src/posts/posts.repository';
 import { PostsService } from '../../src/posts/posts.service';
+import { TimeService } from '../../src/time/time.service';
 import { UsersRepository } from '../../src/users/users.repository';
 import { UsersService } from '../../src/users/users.service';
 
@@ -62,19 +63,20 @@ const postsRepo = new PostsRepository(db);
 
 const identityServices: IdentityServicesMap = new Map();
 const platformsMap: PlatformsMap = new Map();
+const time = new TimeService();
 
 /** mocked orcid */
 const orcid = new OrcidService();
 const MockedOrcid = spy(orcid);
 when(MockedOrcid.handleSignupData(anything())).thenCall(
   (data: OrcidSignupData): OrcidUserDetails => {
-    return { user_id: data.code, profile: TEST_ORCID_PROFILE };
+    return { user_id: data.code, profile: TEST_ORCID_PROFILE, signupDate: 0 };
   }
 );
 const mockedOrcid = instance(MockedOrcid);
 
 /** mocked twitter */
-const twitter = new TwitterService({
+const twitter = new TwitterService(time, userRepo, {
   clientId: process.env.TWITTER_CLIENT_ID as string,
   clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
 });
@@ -84,10 +86,12 @@ when(MockedTwitter.handleSignupData(anything())).thenCall(
   (data: TwitterSignupData): TwitterUserDetails => {
     return {
       user_id: data.code,
+      signupDate: 0,
       write: {
         accessToken: TEST_TOKENS_MAP[TWITTER_ACCOUNT].accessToken,
         refreshToken: '',
         expiresIn: 0,
+        expiresAtMs: 0,
       },
       profile: TEST_TWITTER_PROFILE,
     };

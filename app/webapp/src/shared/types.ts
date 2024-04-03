@@ -3,10 +3,18 @@ import { OrcidUserDetails } from './types.orcid';
 import { TwitterUserDetails } from './types.twitter';
 
 export enum PLATFORM {
+  Local = 'local', // local referst to out platform
   Orcid = 'orcid',
   Twitter = 'twitter',
   Nanopubs = 'nanopubs',
 }
+
+export type PUBLISHABLE_PLATFORMS = PLATFORM.Twitter | PLATFORM.Nanopubs;
+
+export const ALL_PUBLISH_PLATFORMS: PUBLISHABLE_PLATFORMS[] = [
+  PLATFORM.Twitter,
+  PLATFORM.Nanopubs,
+];
 
 /** The user details has, for each PLATFORM, a details object
  * with
@@ -20,12 +28,13 @@ export interface WithPlatformUserId {
   /** We are using user_id to refer the id of the user on a given platform and leave
    * userId for our own internal id for users. */
   user_id: string;
+  signupDate: number;
 }
 
 export interface UserDetailsBase<P = any, R = any, W = any>
   extends WithPlatformUserId {
   profile?: P;
-  read?: R & { lastFetched: number };
+  read?: R & { lastFetchedMs: number };
   write?: W;
 }
 
