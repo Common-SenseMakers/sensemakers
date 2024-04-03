@@ -37,13 +37,13 @@ https://arxiv.org/abs/2402.04607
 #     assert "semantics" in result_2.model_dump()
 
 
-# def test_parallel_keywords():
-#     config = default_init_parser_config()
-#     parser = FirebaseAPIParser(config=config)
-#     parser.set_md_extract_method("citoid")
-#     post = convert_text_to_ref_post(TEST_POST_TEXT_W_REF)
-#     combined = parser.process_ref_post_parallel(post)
-#     assert len(combined["keywords"]["answer"]["valid_keywords"]) > 0
+def test_parallel_keywords():
+    config = default_init_parser_config()
+    parser = FirebaseAPIParser(config=config)
+    parser.set_md_extract_method("citoid")
+    post = convert_text_to_ref_post(TEST_POST_TEXT_W_REF)
+    combined = parser.process_ref_post_parallel(post)
+    assert len(combined["keywords"]["answer"]["valid_keywords"]) > 0
 
 
 def test_parse_topics_post():
