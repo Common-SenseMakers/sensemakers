@@ -50,7 +50,7 @@ export interface AppPostMirror {
 /** AppPost sent to a PlatformService to be published */
 export type AppPostPublish = {
   content: string;
-  semantics: AppPostSemantics;
+  semantics?: AppPostSemantics;
 };
 
 export type PostUpdate = Pick<AppPost, 'id' | 'content' | 'semantics'>;
