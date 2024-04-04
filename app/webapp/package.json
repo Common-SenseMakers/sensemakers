@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "craco start",
+    "start": "HOST=127.0.0.1 PORT=3000 craco start",
     "start-remote": "craco start --config craco.config.prod.js",
     "build": "craco build --config craco.config.prod.js",
     "test": "craco test",
