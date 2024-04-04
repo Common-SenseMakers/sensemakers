@@ -23,12 +23,12 @@ describe('platforms', () => {
       if (!appUser) {
         throw new Error('appUser not created');
       }
-      const usersDetails = appUser[PLATFORM.Twitter];
-      if (!usersDetails || usersDetails.length < 0) {
+      const allUserDetails = appUser[PLATFORM.Twitter];
+      if (!allUserDetails || allUserDetails.length < 0) {
         throw new Error('Unexpected');
       }
       const twitterService = services.platforms.get(PLATFORM.Twitter);
-      const userDetails = usersDetails[0];
+      const userDetails = allUserDetails[0];
       if (userDetails.read === undefined) {
         throw new Error('Unexpected');
       }
@@ -51,11 +51,11 @@ describe('platforms', () => {
       if (!appUser) {
         throw new Error('appUser not created');
       }
-      const usersDetails = appUser[PLATFORM.Twitter];
-      if (!usersDetails || usersDetails.length < 0) {
+      const allUserDetails = appUser[PLATFORM.Twitter];
+      if (!allUserDetails || allUserDetails.length < 0) {
         throw new Error('Unexpected');
       }
-      const userDetails = usersDetails[0];
+      const userDetails = allUserDetails[0];
       const twitterService = new TwitterService(MockedTime, userRepo, {
         clientId: process.env.TWITTER_CLIENT_ID as string,
         clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
