@@ -1,10 +1,6 @@
 import { anything, instance, spy, when } from 'ts-mockito';
 
 import { PLATFORM } from '../../src/@shared/types';
-import {
-  OrcidSignupData,
-  OrcidUserDetails,
-} from '../../src/@shared/types.orcid';
 import { ParsePostResult } from '../../src/@shared/types.parser';
 import { DBInstance } from '../../src/db/instance';
 import { Services } from '../../src/instances/services';
@@ -32,14 +28,6 @@ mandatory.forEach((varName) => {
   }
 });
 
-export const TEST_ORCID_PROFILE = { name: 'Orcid Scientist' };
-
-export const TEST_TWITTER_PROFILE = {
-  id: '1',
-  name: 'TestName',
-  username: 'testhandle',
-};
-
 const db = new DBInstance();
 export const userRepo = new UsersRepository(db);
 const postsRepo = new PostsRepository(db);
@@ -55,13 +43,6 @@ when(MockedTime.now()).thenReturn(
 
 /** mocked orcid */
 const orcid = new OrcidService();
-const MockedOrcid = spy(orcid);
-when(MockedOrcid.handleSignupData(anything())).thenCall(
-  (data: OrcidSignupData): OrcidUserDetails => {
-    return { user_id: data.code, profile: TEST_ORCID_PROFILE, signupDate: 0 };
-  }
-);
-const mockedOrcid = instance(MockedOrcid);
 
 /** mocked twitter */
 const twitter = new TwitterService(time, userRepo, {
@@ -70,7 +51,7 @@ const twitter = new TwitterService(time, userRepo, {
 });
 
 /** all identity services */
-identityServices.set(PLATFORM.Orcid, mockedOrcid);
+identityServices.set(PLATFORM.Orcid, orcid);
 identityServices.set(PLATFORM.Twitter, twitter);
 
 /** users service */

@@ -15,10 +15,12 @@ describe('platforms', () => {
 
   describe('twitter', () => {
     let appUser: AppUser | undefined;
+
     before(async () => {
       const users = await createTestAppUsers();
       appUser = users[0];
     });
+
     it("get's all tweets in a time range using pagination", async () => {
       if (!appUser) {
         throw new Error('appUser not created');
@@ -47,6 +49,7 @@ describe('platforms', () => {
         throw error;
       }
     });
+
     it('refreshes the access token if it has expired when using the twitter service', async () => {
       if (!appUser) {
         throw new Error('appUser not created');
