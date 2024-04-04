@@ -45,7 +45,7 @@ export const authenticateTwitterUsers = async (
   return authenticatedUsers;
 };
 
-export const authenticateTwitterUser = async (
+const authenticateTwitterUser = async (
   user: TwitterAccountCredentials,
   twitterService: TwitterService,
   browser: Browser,

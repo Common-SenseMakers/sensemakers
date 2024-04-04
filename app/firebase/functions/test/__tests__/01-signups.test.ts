@@ -6,7 +6,7 @@ import { services } from './test.services';
 
 const logger = (global as any).logger;
 
-describe.only('signups', () => {
+describe('signups', () => {
   let userId: string = 'twitter:123456789';
 
   before(async () => {
