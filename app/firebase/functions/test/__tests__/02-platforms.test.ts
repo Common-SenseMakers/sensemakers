@@ -2,11 +2,12 @@ import { expect } from 'chai';
 
 import { AppUser, PLATFORM } from '../../src/@shared/types';
 import { logger } from '../../src/instances/logger';
+import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { resetDB } from '../__tests_support__/db';
 import { createTestAppUsers } from '../utils/createTestAppUsers';
-import { services } from './test.services';
+import { MockedTime, services, userRepo } from './test.services';
 
-describe.only('platforms', () => {
+describe('platforms', () => {
   before(async () => {
     logger.debug('resetting DB');
     await resetDB();
@@ -23,11 +24,11 @@ describe.only('platforms', () => {
         throw new Error('appUser not created');
       }
       const usersDetails = appUser[PLATFORM.Twitter];
-      if (!usersDetails) {
+      if (!usersDetails || usersDetails.length < 0) {
         throw new Error('Unexpected');
       }
       const twitterService = services.platforms.get(PLATFORM.Twitter);
-      let userDetails = usersDetails[0];
+      const userDetails = usersDetails[0];
       if (userDetails.read === undefined) {
         throw new Error('Unexpected');
       }
@@ -45,6 +46,38 @@ describe.only('platforms', () => {
         console.error('error: ', error);
         throw error;
       }
+    });
+    it('refreshes the access token if it has expired when using the twitter service', async () => {
+      if (!appUser) {
+        throw new Error('appUser not created');
+      }
+      const usersDetails = appUser[PLATFORM.Twitter];
+      if (!usersDetails || usersDetails.length < 0) {
+        throw new Error('Unexpected');
+      }
+      const userDetails = usersDetails[0];
+      const twitterService = new TwitterService(MockedTime, userRepo, {
+        clientId: process.env.TWITTER_CLIENT_ID as string,
+        clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
+      });
+
+      const tweets = twitterService.fetch([
+        {
+          userDetails,
+          start_time: Date.now() - 1000,
+        },
+      ]);
+      expect(tweets).to.not.be.undefined;
+      const user = await services.users.repo.getUserWithPlatformAccount(
+        PLATFORM.Twitter,
+        userDetails.user_id,
+        true
+      );
+      const newUserDetails = user[PLATFORM.Twitter];
+      if (!newUserDetails || newUserDetails.length != 1) {
+        throw new Error('Unexpected');
+      }
+      expect(newUserDetails[0]).to.not.deep.equal(userDetails);
     });
   });
 });
