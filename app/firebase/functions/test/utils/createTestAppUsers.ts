@@ -35,7 +35,7 @@ export const createTestAppUsers = async (): Promise<AppUser[]> => {
       if (!twitter) {
         throw new Error('Unexpected');
       }
-      const user_id = ''; //twitterAccount.user_id;
+      const user_id = twitter.user_id;
       const userId = getPrefixedUserId(PLATFORM.Twitter, user_id);
       return {
         userId,
