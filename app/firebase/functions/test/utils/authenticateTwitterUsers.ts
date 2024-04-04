@@ -17,7 +17,6 @@ const USERNAME_INPUT_SELECTOR = 'input[autocomplete="username"]';
 const PASSWORD_INPUT_SELECTOR = 'input[autocomplete="current-password"]';
 
 export interface TwitterAccountCredentials {
-  user_id: string;
   username: string;
   password: string;
 }
@@ -31,7 +30,9 @@ export const authenticateTwitterUsers = async (
     clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
   });
 
-  const authenticatedUserPromises = userCredentials.map(async (testAccount) => {
+  const authenticatedUsers: TwitterUserDetails[] = [];
+
+  for (const testAccount of userCredentials) {
     const browser = await puppeteer.launch({ headless: false });
     const userToken = await authenticateTwitterUser(
       testAccount,
@@ -40,9 +41,9 @@ export const authenticateTwitterUsers = async (
       'read'
     );
     await browser.close();
-    return userToken;
-  });
-  const authenticatedUsers = await Promise.all(authenticatedUserPromises);
+    authenticatedUsers.push(userToken);
+  }
+
   return authenticatedUsers;
 };
 

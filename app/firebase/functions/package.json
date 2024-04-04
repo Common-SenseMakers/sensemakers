@@ -49,6 +49,7 @@
     "dotenv": "^16.4.5",
     "firebase-functions-test": "^3.1.0",
     "mocha": "^10.2.0",
+    "puppeteer": "^22.6.2",
     "supertest": "^6.3.4",
     "ts-mockito": "^2.6.1",
     "ts-node": "^10.9.1",

@@ -7,6 +7,16 @@ import {
 import { services } from '../__tests__/test.services';
 import { TwitterAccountCredentials } from './authenticateTwitterUsers';
 
+const mandatory = ['TEST_USER_TWITTER_ACCOUNTS'];
+
+mandatory.forEach((varName) => {
+  if (!process.env[varName]) {
+    throw new Error(
+      `${varName} undefined in process.env (derived from .env.test)`
+    );
+  }
+});
+
 const TWITTER_ACCOUNTS: TwitterAccountCredentials[] = JSON.parse(
   process.env.TEST_USER_TWITTER_ACCOUNTS as string
 );
@@ -25,7 +35,7 @@ export const createTestAppUsers = async (): Promise<AppUser[]> => {
       if (!twitter) {
         throw new Error('Unexpected');
       }
-      const user_id = twitterAccount.user_id;
+      const user_id = ''; //twitterAccount.user_id;
       const userId = getPrefixedUserId(PLATFORM.Twitter, user_id);
       return {
         userId,

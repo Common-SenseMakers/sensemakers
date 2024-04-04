@@ -6,10 +6,6 @@ import {
   OrcidUserDetails,
 } from '../../src/@shared/types.orcid';
 import { ParsePostResult } from '../../src/@shared/types.parser';
-import {
-  TwitterSignupData,
-  TwitterUserDetails,
-} from '../../src/@shared/types.twitter';
 import { DBInstance } from '../../src/db/instance';
 import { Services } from '../../src/instances/services';
 import { ParserService } from '../../src/parser/parser.service';
@@ -26,20 +22,7 @@ import { TimeService } from '../../src/time/time.service';
 import { UsersRepository } from '../../src/users/users.repository';
 import { UsersService } from '../../src/users/users.service';
 
-const TWITTER_ACCOUNT = 'sensemakergod';
-
-const TEST_TOKENS_MAP = JSON.parse(
-  process.env.TEST_USERS_BEARER_TOKENS as string
-);
-
-const mandatory = [
-  'TWITTER_CLIENT_ID',
-  'TWITTER_CLIENT_SECRET',
-  'OUR_TOKEN_SECRET',
-  'TEST_USERS_BEARER_TOKENS',
-  'TWITTER_MY_BEARER_TOKEN',
-  'PARSER_API_URL',
-];
+const mandatory = ['TWITTER_CLIENT_ID', 'TWITTER_CLIENT_SECRET'];
 
 mandatory.forEach((varName) => {
   if (!process.env[varName]) {
@@ -85,28 +68,10 @@ const twitter = new TwitterService(time, userRepo, {
   clientId: process.env.TWITTER_CLIENT_ID as string,
   clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
 });
-const MockedTwitter = spy(twitter);
-
-when(MockedTwitter.handleSignupData(anything())).thenCall(
-  (data: TwitterSignupData): TwitterUserDetails => {
-    return {
-      user_id: data.code,
-      signupDate: 0,
-      write: {
-        accessToken: TEST_TOKENS_MAP[TWITTER_ACCOUNT].accessToken,
-        refreshToken: '',
-        expiresIn: 0,
-        expiresAtMs: 0,
-      },
-      profile: TEST_TWITTER_PROFILE,
-    };
-  }
-);
-const mockedTWitter = instance(MockedTwitter);
 
 /** all identity services */
 identityServices.set(PLATFORM.Orcid, mockedOrcid);
-identityServices.set(PLATFORM.Twitter, mockedTWitter);
+identityServices.set(PLATFORM.Twitter, twitter);
 
 /** users service */
 const usersService = new UsersService(userRepo, identityServices, {

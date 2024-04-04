@@ -10,7 +10,7 @@ const TEST_ACCOUNTS: TwitterAccountCredentials[] = JSON.parse(
   process.env.TEST_USER_TWITTER_ACCOUNTS as string
 );
 
-describe('twitter integration', () => {
+describe.only('twitter integration', () => {
   if (!TEST_ACCOUNTS) {
     throw new Error('test acccounts undefined');
   }
