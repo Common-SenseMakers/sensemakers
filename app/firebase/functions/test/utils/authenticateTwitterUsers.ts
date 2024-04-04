@@ -30,9 +30,7 @@ export const authenticateTwitterUsers = async (
     clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
   });
 
-  const authenticatedUsers: TwitterUserDetails[] = [];
-
-  for (const testAccount of userCredentials) {
+  const authenticatedUserPromises = userCredentials.map(async (testAccount) => {
     const browser = await puppeteer.launch({ headless: false });
     const userToken = await authenticateTwitterUser(
       testAccount,
@@ -41,9 +39,9 @@ export const authenticateTwitterUsers = async (
       'read'
     );
     await browser.close();
-    authenticatedUsers.push(userToken);
-  }
-
+    return userToken;
+  });
+  const authenticatedUsers = await Promise.all(authenticatedUserPromises);
   return authenticatedUsers;
 };
 
