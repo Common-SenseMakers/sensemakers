@@ -281,6 +281,8 @@ export class TwitterService
         refreshToken: result.refreshToken,
         expiresIn: result.expiresIn,
         expiresAtMs: this.time.now() + result.expiresIn * 1000,
+        /** if granting read access set the last fetched time to now */
+        lastFetchedMs: data.type === 'read' ? this.time.now() : undefined,
       },
       profile: user,
     };
