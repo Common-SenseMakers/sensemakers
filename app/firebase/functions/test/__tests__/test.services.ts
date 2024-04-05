@@ -64,7 +64,7 @@ const postsRepo = new PostsRepository(db);
 const identityServices: IdentityServicesMap = new Map();
 const platformsMap: PlatformsMap = new Map();
 const time = new TimeService();
-export const MockedTime = spy(time);
+export const MockedTime = spy(new TimeService());
 when(MockedTime.now()).thenReturn(
   /** 3 hours from now so the token will always be invalid */
   Date.now() + 3 * 60 * 60 * 1000
