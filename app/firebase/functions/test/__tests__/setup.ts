@@ -80,7 +80,9 @@ export const mochaHooks = (): Mocha.RootHookObject => {
           accountTokens = credentials;
         }
       } else {
-        accountTokens = await authenticateTwitterUsers(testAccountCredentials);
+        accountTokens = await authenticateTwitterUsers(
+          testAccountCredentials.splice(0, NUM_TWITTER_USERS)
+        );
         fs.writeFileSync(
           TEST_CREDENTIAL_FILE_PATH,
           JSON.stringify(accountTokens),
