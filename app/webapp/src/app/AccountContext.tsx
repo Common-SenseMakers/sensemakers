@@ -7,7 +7,7 @@ import {
 } from 'react';
 
 import { getLoggedUser, postOrcidCode } from '../functionsCalls/auth.requests';
-import { AppUserRead } from '../shared/types';
+import { AppUserRead } from '../shared/types/types';
 
 const DEBUG = true;
 

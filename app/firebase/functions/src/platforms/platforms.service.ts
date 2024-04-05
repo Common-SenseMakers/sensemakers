@@ -1,5 +1,5 @@
-import { PLATFORM, UserDetailsBase } from '../@shared/types';
-import { PlatformPost, PostToPublish } from '../@shared/types.posts';
+import { PLATFORM, UserDetailsBase } from '../@shared/types/types';
+import { PlatformPost, PostToPublish } from '../@shared/types/types.posts';
 import {
   FetchUserPostsParams,
   IdentityService,

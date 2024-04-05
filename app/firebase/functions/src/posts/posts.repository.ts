@@ -1,5 +1,5 @@
-import { DefinedIfTrue } from '../@shared/types';
-import { AppPost, PostUpdate } from '../@shared/types.posts';
+import { DefinedIfTrue } from '../@shared/types/types';
+import { AppPost, PostUpdate } from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
 
 export class PostsRepository {

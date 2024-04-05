@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { PLATFORM } from '../../src/@shared/types';
+import { PLATFORM } from '../../src/@shared/types/types';
 import { resetDB } from '../__tests_support__/db';
 import {
   TEST_ORCID_PROFILE,

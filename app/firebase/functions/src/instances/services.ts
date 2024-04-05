@@ -1,4 +1,4 @@
-import { PLATFORM } from '../@shared/types';
+import { PLATFORM } from '../@shared/types/types';
 import {
   FUNCTIONS_PY_URL,
   OUR_EXPIRES_IN,

@@ -1,7 +1,7 @@
 import { Store } from 'n3';
 import { useEffect, useState } from 'react';
 
-import { parseRDF } from '../../../shared/n3.utils';
+import { parseRDF } from '../../../shared/utils/n3.utils';
 import { PatternProps } from '../patterns';
 
 export const useSemanticsStore = (props: PatternProps) => {

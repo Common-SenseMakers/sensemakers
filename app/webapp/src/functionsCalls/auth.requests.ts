@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 import { FUNCTIONS_BASE } from '../app/config';
-import { AppUserRead } from '../shared/types';
+import { AppUserRead } from '../shared/types/types';
 
 export const postOrcidCode = async (code: string) => {
   const res = await axios.post(FUNCTIONS_BASE + '/auth/code', { code }, {});

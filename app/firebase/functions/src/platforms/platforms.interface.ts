@@ -1,5 +1,9 @@
-import { PLATFORM, PostAndAuthor, UserDetailsBase } from '../@shared/types';
-import { PlatformPost, PostToPublish } from '../@shared/types.posts';
+import {
+  PLATFORM,
+  PostAndAuthor,
+  UserDetailsBase,
+} from '../@shared/types/types';
+import { PlatformPost, PostToPublish } from '../@shared/types/types.posts';
 
 /** use conditional types to dynamically assign credential types for each platform */
 export type CredentialsForPlatform<P> = P extends PLATFORM.Twitter

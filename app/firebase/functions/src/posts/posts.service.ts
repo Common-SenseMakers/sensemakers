@@ -2,18 +2,18 @@ import {
   ALL_PUBLISH_PLATFORMS,
   PLATFORM,
   PostAndAuthor,
-} from '../@shared/types';
+} from '../@shared/types/types';
 import {
   PARSER_MODE,
   ParsePostRequest,
   TopicsParams,
-} from '../@shared/types.parser';
+} from '../@shared/types/types.parser';
 import {
   AppPost,
   AppPostMirror,
   MirrorStatus,
   PostToPublish,
-} from '../@shared/types.posts';
+} from '../@shared/types/types.posts';
 import { ParserService } from '../parser/parser.service';
 import { FetchUserPostsParams } from '../platforms/platforms.interface';
 import {

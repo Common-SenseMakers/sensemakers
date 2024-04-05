@@ -1,15 +1,15 @@
 import { anything, instance, spy, when } from 'ts-mockito';
 
-import { PLATFORM } from '../../src/@shared/types';
+import { PLATFORM } from '../../src/@shared/types/types';
 import {
   OrcidSignupData,
   OrcidUserDetails,
-} from '../../src/@shared/types.orcid';
-import { ParsePostResult } from '../../src/@shared/types.parser';
+} from '../../src/@shared/types/types.orcid';
+import { ParsePostResult } from '../../src/@shared/types/types.parser';
 import {
   TwitterSignupData,
   TwitterUserDetails,
-} from '../../src/@shared/types.twitter';
+} from '../../src/@shared/types/types.twitter';
 import { DBInstance } from '../../src/db/instance';
 import { Services } from '../../src/instances/services';
 import { ParserService } from '../../src/parser/parser.service';

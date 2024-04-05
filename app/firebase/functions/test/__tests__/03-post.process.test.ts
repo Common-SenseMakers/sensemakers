@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { AppUser, PLATFORM } from '../../src/@shared/types';
+import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import { logger } from '../../src/instances/logger';
 import { getPrefixedUserId } from '../../src/users/users.utils';
 import { resetDB } from '../__tests_support__/db';

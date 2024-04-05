@@ -1,15 +1,15 @@
 import init, { Nanopub } from '@nanopub/sign';
 import { DataFactory, Store } from 'n3';
 
-import { parseRDF, replaceNodes, writeRDF } from '../shared/n3.utils';
+import { AppUserRead, PLATFORM } from '../shared/types/types';
+import { AppPostSemantics } from '../shared/types/types.parser';
+import { parseRDF, replaceNodes, writeRDF } from '../shared/utils/n3.utils';
 import {
   ASSERTION_URI,
   HAS_COMMENT_URI,
   NANOPUB_PLACEHOLDER,
   THIS_POST_NAME,
-} from '../shared/semantics.helper';
-import { AppUserRead, PLATFORM } from '../shared/types';
-import { AppPostSemantics } from '../shared/types.parser';
+} from '../shared/utils/semantics.helper';
 
 export const constructPostNanopub = async (
   content: string,

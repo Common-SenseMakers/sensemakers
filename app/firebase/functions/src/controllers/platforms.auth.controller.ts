@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 
-import { PLATFORM } from '../@shared/types';
+import { PLATFORM } from '../@shared/types/types';
 import { logger } from '../instances/logger';
 import { Services } from '../instances/services';
 import {

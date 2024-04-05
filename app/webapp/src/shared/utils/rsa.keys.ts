@@ -1,6 +1,6 @@
 import forge from 'node-forge';
 
-import { RSAKeys } from '../shared/types.nanopubs';
+import { RSAKeys } from '../types/types.nanopubs';
 
 export const getRSAKeys = (seed: string): RSAKeys => {
   // https://stackoverflow.com/a/72057346/1943661

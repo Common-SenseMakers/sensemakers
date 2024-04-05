@@ -7,7 +7,7 @@ import {
   filterStore,
   mapStoreElements,
   writeRDF,
-} from '../../../shared/n3.utils';
+} from '../../../shared/utils/n3.utils';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { useThemeContext } from '../../../ui-components/ThemedApp';
 import { useSemanticsStore } from '../common/use.semantics';

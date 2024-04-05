@@ -9,8 +9,12 @@ import {
   TwitterApiReadOnly,
 } from 'twitter-api-v2';
 
-import { PLATFORM, PostAndAuthor, UserDetailsBase } from '../../@shared/types';
-import { PlatformPost, PostToPublish } from '../../@shared/types.posts';
+import {
+  PLATFORM,
+  PostAndAuthor,
+  UserDetailsBase,
+} from '../../@shared/types/types';
+import { PlatformPost, PostToPublish } from '../../@shared/types/types.posts';
 import {
   TwitterGetContextParams,
   TwitterQueryParameters,
@@ -18,7 +22,7 @@ import {
   TwitterSignupData,
   TwitterUserCredentials,
   TwitterUserDetails,
-} from '../../@shared/types.twitter';
+} from '../../@shared/types/types.twitter';
 import { TimeService } from '../../time/time.service';
 import { UsersRepository } from '../../users/users.repository';
 import {

@@ -1,10 +1,14 @@
-import { PLATFORM, PostAndAuthor, UserDetailsBase } from '../../@shared/types';
-import { NanopubUserProfile } from '../../@shared/types.nanopubs';
+import {
+  PLATFORM,
+  PostAndAuthor,
+  UserDetailsBase,
+} from '../../@shared/types/types';
+import { NanopubUserProfile } from '../../@shared/types/types.nanopubs';
 import {
   AppPostMirror,
   PlatformPost,
   PostToPublish,
-} from '../../@shared/types.posts';
+} from '../../@shared/types/types.posts';
 import { TimeService } from '../../time/time.service';
 import {
   FetchUserPostsParams,
