@@ -20,9 +20,6 @@ export type InjectableContext = Readonly<{
   // properties injected using the Root Mocha Hooks
 }>;
 
-export let testTwitterAccountTokens: Map<string, TwitterUserDetails> =
-  new Map();
-
 (global as any).logger = new LocalLogger(
   (LOG_LEVEL_MSG as LogLevel) || LogLevel.warn,
   (LOG_LEVEL_OBJ as LogLevel) || LogLevel.warn,
@@ -38,15 +35,8 @@ export const mochaHooks = (): Mocha.RootHookObject => {
       const context: InjectableContext = {};
       await resetDB();
 
-      const testAccountCredentials: TwitterAccountCredentials[] = JSON.parse(
-        process.env.TEST_USER_TWITTER_ACCOUNTS as string
-      );
-      if (!testAccountCredentials) {
-        throw new Error('test acccounts undefined');
-      }
-      if (testAccountCredentials.length < NUM_TWITTER_USERS) {
-        throw new Error('not enough twitter account credentials provided');
-      }
+      /** check if user test.users.credentials.json exist, if  */
+
       let accountTokens: TwitterUserDetails[] = [];
 
       if (fs.existsSync(TEST_CREDENTIAL_FILE_PATH)) {

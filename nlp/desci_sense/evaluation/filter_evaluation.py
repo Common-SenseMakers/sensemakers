@@ -1,7 +1,9 @@
+#evaluation of the research filter
+
 """Script to run evaluation of label prediction models.
 
 Usage:
-  eval_benchmark_v0.py [--config=<config>] [--dataset=<dataset>] [--file=<file>]
+  filter_evaluation.py [--config=<config>] [--dataset=<dataset>] [--file=<file>]
 
 
 Options:
@@ -20,7 +22,7 @@ import sys
 from tqdm import tqdm
 import docopt
 import re
-from sklearn.preprocessing import MultiLabelBinarizer
+from sklearn.preprocessing import LabelBinarizer
 from sklearn.metrics import (
     precision_recall_fscore_support,
     accuracy_score,
@@ -32,25 +34,20 @@ sys.path.append(str(Path(__file__).parents[2]))
 
 from desci_sense.runner import init_model, load_config
 from desci_sense.shared_functions.schema.post import RefPost
+from desci_sense.evaluation.utils import get_dataset, create_custom_confusion_matrix
 
+#processing keywords
+def process_keywords(result, model):
+    post = result['post']
+    model.set_kw_md_extract_method("citoid")
 
-# get a path to a wandb table and populate it in a pd data frame
-def get_dataset(table_path):
-    raw_data = json.load(table_path.open())
+    kw_result = model.extract_post_topics_w_metadata(post)
+    result["kw_reasoning"] = kw_result["answer"]["reasoning"]
+    result["academic_kw"] = kw_result["answer"]["academic_kw"]
+    result["raw_kw_output"] = kw_result["answer"]["raw_text"]
+    return result
 
-    # put it in a dataframe
-    try:
-        rows = [
-            dict(zip(raw_data["columns"], raw_data["data"][i]))
-            for i in range(len(raw_data["data"]))
-        ]
-    except Exception as e:
-        print(f"Exception occurred: {e}")
-
-    df = pd.DataFrame(rows)
-    return df
-
-
+#function for predicting labels
 def pred_labels(df):
     model = init_model(config)
     columns_list = df.columns.tolist()
@@ -61,47 +58,57 @@ def pred_labels(df):
     if "Reasoning Steps" not in columns_list:
         df["Reasoning Steps"] = ''
 
-   
+    
     for i in tqdm(range(len(df)), desc="Processing", unit="pred"):
-        # print('in iteration',i)
-        response = model.process_text_st(df["Text"][i])
-        df["Predicted Label"][i] = response["answer"]["multi_tag"]
-        df["Reasoning Steps"][i] = response["answer"]["reasoning"]
+        print("urls: ",df['urls'][i])
+        refpost = {
+            'post': RefPost(
+                    author='default_author',
+                    content= df['Text'][i], 
+                    url='', 
+                    source_network='default_source', 
+                    ref_urls=df['urls'][i]
+                    )
+                }
+
+        #response = model.process_text_st(df["Text"][i])
+        try:
+            response = process_keywords(result=refpost,model=model)
+            df.loc[i, "Predicted Label"] = response["academic_kw"]
+            df.loc[i, "Reasoning Steps"] = response["raw_kw_output"]
+            print('Predicted Label is: ',df['Predicted Label'][i])
+        except Exception as e:
+            df.loc[i, "Predicted Label"] = 'parser error'
+            df.loc[i, "Reasoning Steps"] = str(e)
+            print('Predicted Label is: ',df['Predicted Label'][i])
+            print(e)
+            
 
 
-
-# values are returned as string, we want them as lists
+#make sure that the dataframe conforms with the binary classification format
 def normalize_df(df):
     # Assuming each label is a single word and there are no spaces in labels
     # This will remove all non-word characters and split the string into words
-    if type(df["True Label"][0]) == str:
-        df["True Label"] = df["True Label"].apply(
-            lambda x: re.sub(r"\W+", " ", x).split()
-        )
-
-    # Replace empty list with an empty 'None' in 'Predicted label' TODO
-    # df['Predicted Label'] = df['Predicted Label'].apply(lambda x: 'None' if pd.isnull(x) else x)
-    # df['Predicted Label'] = df['Predicted Label'].apply(lambda x: re.sub(r'\W+', ' ', x).split())
-
+    if type(df["True Label"][0]) == list:
+        df["True Label"] = df["True Label"].apply(lambda x: x[0])
 
 def binarize(y_pred, y_true):
     # binarize for using skl functions
     # Assume df['True label'] and df['Predicted label'] are your true and predicted labels
-    mlb = MultiLabelBinarizer()
+    lb = LabelBinarizer()
 
     # Binarize the labels
-    mlb.fit(y_pred + y_true)
+    # Note that the binarization is done alphabeticly so in binary classes 'academic' = 0 & 'non-academic' =1.
+    lb.fit(pd.concat([y_pred, y_true]).unique())
 
     # binarize true and predicted labels vectors
-    y_true = mlb.transform(y_true)
+    y_true = lb.transform(y_true)
 
-    y_pred = mlb.transform(y_pred)
+    y_pred = lb.transform(y_pred)
     print("y_pred: ", y_pred)
     print("y_true: ", y_true)
-    return y_pred, y_true, mlb.classes_
+    return y_pred, y_true, lb.classes_
 
-
-# assumes that the values on 'True Label' and 'Predicted Label' are lists
 def calculate_scores(y_pred, y_true):
     # calculate scores
     # Calculate precision, recall, f1_score, support
@@ -114,61 +121,7 @@ def calculate_scores(y_pred, y_true):
 
     # calculate label confusion chart
 
-    return precision, recall, f1_score, support, accuracy
-
-
-# def create_evaluation_artifact(df,)
-
-# Create a custom confusion matrix: on the diagonal you see the true positives
-# off the diagonal you see the false positives incase the row label was predicted as false negative
-
-
-def create_custom_confusion_matrix(y_true, y_pred, labels):
-    # Initialize an empty matrix
-    matrix = np.zeros((len(labels), len(labels)))
-
-    # Calculate confusion matrix for each label
-    for i, label_i in enumerate(labels):
-        for j, label_j in enumerate(labels):
-            if i == j:
-                # Diagonal: True Positives for label i
-                tp = confusion_matrix(y_true[:, i], y_pred[:, i]).ravel()[3]
-                matrix[i, i] = tp
-            else:
-                # Off-diagonal: i was true (fn for i) but j was predicted (fp for j)
-                fn_i = y_true[:, i] & ~y_pred[:, i]
-                fp_j = ~y_true[:, j] & y_pred[:, j]
-                matrix[i, j] = np.sum(fn_i & fp_j)
-
-    return pd.DataFrame(matrix, index=labels, columns=labels)
-
-
-# Log chart of metrics per label
-def score_chart_by_label(labels, y_pred, y_true):
-    precision, recall, f1_score, support, accuracy = calculate_scores(
-        y_pred=y_pred, y_true=y_true
-    )
-    df = pd.DataFrame(
-        {
-            "Labels": labels,
-            "Precision": precision,
-            "Recall": recall,
-            "F1 score": f1_score,
-            "True label Count": sum(y_true),
-        }
-    )
-    avg_row = pd.DataFrame(
-        {
-            "Labels": "Average",
-            "Precision": pd.Series(precision).mean(),
-            "Recall": pd.Series(recall).mean(),
-            "F1 score": pd.Series(f1_score).mean(),
-            "True label Count": sum(sum(y_true)),
-        },
-        index=[0],
-    )
-    df = df._append(avg_row, ignore_index=True)
-    return df
+    return precision[0], recall[0], f1_score[0], accuracy 
 
 
 if __name__ == "__main__":
@@ -186,15 +139,16 @@ if __name__ == "__main__":
 
     api = wandb.Api()
 
-    run = wandb.init(project="evaluation_benchmark", job_type="evaluation")
+    run = wandb.init(project="filter_evaluation", job_type="evaluation")
 
     # get artifact path
     if dataset_path:
         dataset_artifact_id = dataset_path
+        print(dataset_artifact_id)
     else:
         dataset_artifact_id = (
-            "common-sense-makers/evaluation_benchmark/dataset_for_eval:latest"
-            #'common-sense-makers/evaluation/toot_sci__labeling:v1'
+            
+            'common-sense-makers/evaluation/toot_sci__labeling:v1'
         )
 
     # set artifact as input artifact
@@ -205,18 +159,20 @@ if __name__ == "__main__":
 
     # download path to table
     a_path = dataset_artifact.download()
+    print("The path is",a_path)
 
     # get file name
     if file_name:
         table_path = Path(f"{a_path}/{file_name}")
     else:
-        table_path = Path(f"{a_path}/labeled_data.table.json")
+        table_path = Path(f"{a_path}/labeled_data_table.table.json")
 
     # return the pd df from the table
+    #remember to remove the head TODO
     df = get_dataset(table_path)
 
     pred_labels(df)
-
+    
     # make sure df can be binarized
     normalize_df(df)
     # return binarized predictions and true labels, as well as labels names
@@ -224,8 +180,9 @@ if __name__ == "__main__":
         y_pred=df["Predicted Label"], y_true=df["True Label"]
     )
 
-    # calculate scores
-    precision, recall, f1_score, support, accuracy = calculate_scores(
+    # calculate scores: Note that we assumes that the 'academic' label is the firs in the label list
+    # TODO in the score function, return scores of the index of the 'academic' label so not to assume it is the first.
+    precision, recall, f1_score, accuracy = calculate_scores(
         y_pred=y_pred, y_true=y_true
     )
 
@@ -243,18 +200,17 @@ if __name__ == "__main__":
     # Add the wandb.Table to the artifact
     artifact.add(table, "prediction_evaluation")
 
-    # Log score chart per label
-    score_chart = score_chart_by_label(labels=labels, y_pred=y_pred, y_true=y_true)
+    # Log cm
+    # Generate the confusion matrix
+    try:
+        matrix = confusion_matrix(y_true, y_pred)
+    except:
+        matrix = create_custom_confusion_matrix(y_true=y_true, y_pred=y_pred, labels=labels)
 
-    print(score_chart)
-
-    wandb.log({"Label Score Chart": wandb.Table(dataframe=score_chart)})
-
-    # Log c
-    matrix = create_custom_confusion_matrix(y_true=y_true, y_pred=y_pred, labels=labels)
+    #log the matrix
     wandb.log(
         {
-            f"costume_confusion_matrix": wandb.plots.HeatMap(
+            f"confusion_matrix": wandb.plots.HeatMap(
                 matrix_values=matrix, y_labels=labels, x_labels=labels, show_text=True
             )
         }

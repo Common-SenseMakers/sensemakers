@@ -17,7 +17,6 @@ const USERNAME_INPUT_SELECTOR = 'input[autocomplete="username"]';
 const PASSWORD_INPUT_SELECTOR = 'input[autocomplete="current-password"]';
 
 export interface TwitterAccountCredentials {
-  user_id: string;
   username: string;
   password: string;
 }
@@ -46,7 +45,7 @@ export const authenticateTwitterUsers = async (
   return authenticatedUsers;
 };
 
-export const authenticateTwitterUser = async (
+const authenticateTwitterUser = async (
   user: TwitterAccountCredentials,
   twitterService: TwitterService,
   browser: Browser,

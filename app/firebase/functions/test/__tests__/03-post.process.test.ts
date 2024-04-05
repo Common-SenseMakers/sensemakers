@@ -6,7 +6,7 @@ import { resetDB } from '../__tests_support__/db';
 import { createTestAppUsers } from '../utils/createTestAppUsers';
 import { services } from './test.services';
 
-describe('process', () => {
+describe.only('process', () => {
   before(async () => {
     logger.debug('resetting DB');
     await resetDB();
@@ -14,6 +14,7 @@ describe('process', () => {
 
   describe('create and process', () => {
     let appUser: AppUser | undefined;
+
     before(async () => {
       const users = await createTestAppUsers();
       appUser = users[0];
