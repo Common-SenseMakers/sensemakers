@@ -1,14 +1,14 @@
-import { Nanopub } from '@nanopub/sign';
+import { Nanopub, NpProfile } from '@nanopub/sign';
 import { expect } from 'chai';
 
 import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
 import { AppPost } from '../../src/@shared/types/types.posts';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
-import { getProfile } from '../../src/@shared/utils/semantics.helper';
+import { cleanPrivateKey } from '../../src/@shared/utils/semantics.helper';
 import { logger } from '../../src/instances/logger';
 import { FetchUserPostsParams } from '../../src/platforms/platforms.interface';
-import { PostsHelper } from '../../src/posts/posts.helper';
+// import { PostsHelper } from '../../src/posts/posts.helper';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../__tests_support__/db';
 import { services } from './test.services';
@@ -130,8 +130,37 @@ describe('platforms', () => {
           throw new Error('Post not created');
         }
 
-        const nanopub = PostsHelper.getMirror(post, PLATFORM.Nanopub, true);
-        const nanopubObj = new Nanopub(nanopub.platformDraft.original);
+        // const nanopub = PostsHelper.getMirror(post, PLATFORM.Nanopub, true);
+        // const nanopubObj = new Nanopub(nanopub.platformDraft.original);
+        const nanopubObj =
+          new Nanopub(`@prefix : <http://purl.org/nanopub/temp/mynanopub#> .
+        @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+        @prefix dc: <http://purl.org/dc/terms/> .
+        @prefix pav: <http://purl.org/pav/> .
+        @prefix prov: <http://www.w3.org/ns/prov#> .
+        @prefix np: <http://www.nanopub.org/nschema#> .
+        @prefix npx: <http://purl.org/nanopub/x/> .
+        @prefix ex: <http://example.org/> .
+        
+        :Head {
+          : np:hasAssertion :assertion ;
+            np:hasProvenance :provenance ;
+            np:hasPublicationInfo :pubinfo ;
+            a np:Nanopublication .
+        }
+        
+        :assertion {
+          ex:mosquito ex:transmits ex:malaria .
+        }
+        
+        :provenance {
+          :assertion prov:hadPrimarySource <http://dx.doi.org/10.3233/ISU-2010-0613> .
+        }
+        
+        :pubinfo {
+          : a npx:ExampleNanopub .
+        }
+        `);
 
         const nanopubAccount = UsersHelper.getAccount(
           users[0],
@@ -148,11 +177,17 @@ describe('platforms', () => {
           throw new Error('RSA keys not found');
         }
 
-        const profile = getProfile(
-          rsaKeys,
+        const keyBody = cleanPrivateKey(rsaKeys);
+
+        const profile = new NpProfile(
+          keyBody,
+          '',
+          '',
           nanopubAccount.profile.introNanopub
         );
+
         const signed = nanopubObj.sign(profile);
+
         expect(signed).to.not.be.undefined;
 
         const published = await nanopubService.publish([
