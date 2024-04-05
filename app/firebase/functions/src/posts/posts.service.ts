@@ -1,4 +1,8 @@
-import { ALL_PUBLISH_PLATFORMS, PLATFORM } from '../@shared/types';
+import {
+  ALL_PUBLISH_PLATFORMS,
+  PLATFORM,
+  PostAndAuthor,
+} from '../@shared/types';
 import {
   PARSER_MODE,
   ParsePostRequest,
@@ -79,7 +83,7 @@ export class PostsService {
    * and fetch their new posts.
    * (optional) it stores the posts in the Posts collection
    */
-  async fetchFromUsers(store: boolean = false) {
+  async fetchFromUsers(store: boolean = false): Promise<PostAndAuthor[]> {
     const users = await this.users.repo.getAll();
     const params = new Map();
 
@@ -107,22 +111,36 @@ export class PostsService {
     });
 
     const posts = await this.fetch(params);
+    const postsAndAuthors: PostAndAuthor[] = [];
+
+    posts.forEach((post) => {
+      const author = users.find((user) => user.userId === post.authorId);
+
+      if (!author) {
+        throw new Error('Unexpected');
+      }
+
+      postsAndAuthors.push({
+        post,
+        author,
+      });
+    });
 
     /** optional store in case it is postponed */
     if (store) {
       await this.storePosts(posts);
     }
 
-    return posts;
+    return postsAndAuthors;
   }
 
   /** Parse a list of Posts and optionally stores them in the Posts collection */
-  async parse(posts: AppPost[], store: boolean = false) {
+  async parse(postsAndAuthors: PostAndAuthor[], store: boolean = false) {
     /** Prepare the ParsePostRequest */
-    const postsToParse = posts.map(
-      (post: AppPost): ParsePostRequest<TopicsParams> => {
+    const postsToParse = postsAndAuthors.map(
+      (postAndAuthor: PostAndAuthor): ParsePostRequest<TopicsParams> => {
         return {
-          post,
+          post: postAndAuthor.post,
           // TODO: this could be an env var but could also be read per user in the future
           params: {
             [PARSER_MODE.TOPICS]: { topics: ['science', 'technology'] },
@@ -135,39 +153,47 @@ export class PostsService {
     const parserResult = await this.parserService.parsePosts(postsToParse);
 
     /** Append semantics to each Post */
-
     if (parserResult) {
-      posts = posts.map((post): AppPost => {
-        const parsedPostResult = parserResult.find((parsed) => parsed.post);
-        return {
-          ...post,
-          originalParsed: parsedPostResult,
-          semantics: parsedPostResult?.semantics,
-        };
-      });
+      const withSemantics = postsAndAuthors.map(
+        (postAndAuthor): PostAndAuthor => {
+          const parsedPostResult = parserResult.find((parsed) => parsed.post);
+          const newPost = {
+            ...postAndAuthor.post,
+            originalParsed: parsedPostResult,
+            semantics: parsedPostResult?.semantics,
+          };
+          return {
+            post: newPost,
+            author: postAndAuthor.author,
+          };
+        }
+      );
 
       /** optional store in case it is postponed */
       if (store) {
+        const posts = withSemantics.map((p) => p.post);
         await this.storePosts(posts);
       }
+      return withSemantics;
     } else {
       throw new Error('Error parsing');
     }
-
-    return posts;
   }
 
   /**
    * Calls the convertFromGeneric on all platforms, other than the post origin,
    * and store the results as the platformDraft of each mirror
    * */
-  public async preProcess(posts: AppPost[], store: boolean = false) {
-    posts.forEach((post) => {
+  public async preProcess(
+    postsAndAuthors: PostAndAuthor[],
+    storePosts: boolean = false
+  ) {
+    postsAndAuthors.forEach((postAndAuthor) => {
       ALL_PUBLISH_PLATFORMS.forEach((platformId) => {
-        if (post.origin !== platformId) {
+        if (postAndAuthor.post.origin !== platformId) {
           const platformDraft = this.platforms
             .get(platformId)
-            .convertFromGeneric(post);
+            .convertFromGeneric(postAndAuthor);
 
           const mirror: MirrorStatus = {
             platformId,
@@ -177,8 +203,8 @@ export class PostsService {
             platformDraft,
           };
 
-          post.mirrors = {
-            ...post.mirrors,
+          postAndAuthor.post.mirrors = {
+            ...postAndAuthor.post.mirrors,
             [platformId]: mirror,
           };
         }
@@ -186,11 +212,11 @@ export class PostsService {
     });
 
     /** optional store in case it is postponed */
-    if (store) {
-      await this.storePosts(posts);
+    if (storePosts) {
+      await this.storePosts(postsAndAuthors.map((p) => p.post));
     }
 
-    return posts;
+    return postsAndAuthors.map((p) => p.post);
   }
 
   /**
@@ -198,9 +224,9 @@ export class PostsService {
    * on the last step.
    */
   public async process() {
-    const posts = await this.fetchFromUsers();
-    const postsWithSemantics = await this.parse(posts);
-    await this.preProcess(postsWithSemantics, true);
+    const postsAndAuthors0 = await this.fetchFromUsers();
+    const postsAndAuthors1 = await this.parse(postsAndAuthors0);
+    await this.preProcess(postsAndAuthors1, true);
   }
 
   /**

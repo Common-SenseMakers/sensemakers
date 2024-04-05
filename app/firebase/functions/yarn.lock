@@ -348,10 +348,10 @@
   dependencies:
     lodash "^4.17.21"
 
-"@nanopub/sign@^0.0.18":
-  version "0.0.18"
-  resolved "https://registry.yarnpkg.com/@nanopub/sign/-/sign-0.0.18.tgz#323dca49ddcad9c10e467389fcd3d925f21faa79"
-  integrity sha512-IbrlYhg358p45L/Tp7XZY6vqT0+QX+KSx7wCJHdlxoeOjkLgw8pkWhwSO3fy+RhIxvbb/9fpQUX43oTKBFpmdQ==
+"@nanopub/sign@^0.1.3":
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/@nanopub/sign/-/sign-0.1.3.tgz#8b65c977b31fb39be486c404727e31cd1c1bfad4"
+  integrity sha512-wwW9Cr530hbv2FHU0EexJH4Cu1h0CbssadN7I2Q0ebURGlTG7iEoLnScb3lesLX4LmIoCgMjj+qDaIA6BBkcaQ==
 
 "@noble/curves@1.2.0", "@noble/curves@~1.2.0":
   version "1.2.0"

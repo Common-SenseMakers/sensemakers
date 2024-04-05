@@ -37,7 +37,7 @@ export interface AppPost {
   semantics?: AppPostSemantics;
   mirrors: Partial<{
     [PLATFORM.Twitter]: MirrorStatus<TweetV2>[];
-    [PLATFORM.Nanopubs]: MirrorStatus[];
+    [PLATFORM.Nanopub]: MirrorStatus[];
   }>;
 }
 

@@ -13,6 +13,7 @@ import {
 import { DBInstance } from '../../src/db/instance';
 import { Services } from '../../src/instances/services';
 import { ParserService } from '../../src/parser/parser.service';
+import { NanopubService } from '../../src/platforms/nanopub/nanopub.service';
 import { OrcidService } from '../../src/platforms/orcid/orcid.service';
 import {
   IdentityServicesMap,
@@ -36,8 +37,7 @@ const mandatory = [
   'TWITTER_CLIENT_ID',
   'TWITTER_CLIENT_SECRET',
   'OUR_TOKEN_SECRET',
-  'TEST_USERS_BEARER_TOKENS',
-  'TWITTER_MY_BEARER_TOKEN',
+  'TEST_USER_TWITTER_ACCOUNTS',
   'PARSER_API_URL',
 ];
 
@@ -99,6 +99,9 @@ when(MockedTwitter.handleSignupData(anything())).thenCall(
 );
 const mockedTWitter = instance(MockedTwitter);
 
+/** nanopub */
+const nanopub = new NanopubService(time);
+
 /** all identity services */
 identityServices.set(PLATFORM.Orcid, mockedOrcid);
 identityServices.set(PLATFORM.Twitter, mockedTWitter);
@@ -111,6 +114,7 @@ const usersService = new UsersService(userRepo, identityServices, {
 
 /** all platforms */
 platformsMap.set(PLATFORM.Twitter, twitter);
+platformsMap.set(PLATFORM.Nanopub, nanopub);
 
 /** platforms service */
 const platformsService = new PlatformsService(platformsMap);

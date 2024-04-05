@@ -9,12 +9,8 @@ import {
   TwitterApiReadOnly,
 } from 'twitter-api-v2';
 
-import { PLATFORM, UserDetailsBase } from '../../@shared/types';
-import {
-  AppPost,
-  PlatformPost,
-  PostToPublish,
-} from '../../@shared/types.posts';
+import { PLATFORM, PostAndAuthor, UserDetailsBase } from '../../@shared/types';
+import { PlatformPost, PostToPublish } from '../../@shared/types.posts';
 import {
   TwitterGetContextParams,
   TwitterQueryParameters,
@@ -53,6 +49,7 @@ export class TwitterService
     protected usersRepo: UsersRepository,
     protected credentials: TwitterApiCredentials
   ) {}
+
   /**
    *
    * @param dateStr ISO 8601 date string, e.g. '2021-09-01T00:00:00Z'
@@ -440,7 +437,7 @@ export class TwitterService
     }
   }
 
-  convertFromGeneric(post: AppPost): Promise<PlatformPost<any>> {
+  convertFromGeneric(postAndAuthor: PostAndAuthor): Promise<PlatformPost<any>> {
     throw new Error('Method not implemented.');
   }
 }

@@ -1,8 +1,9 @@
 import { NpProfile } from '@nanopub/sign';
 
-import { AppUserRead } from '../shared/types';
-import { RSAKeys } from '../utils/rsa.keys';
+import { AppUserRead } from './types';
+import { RSAKeys } from './types.nanopubs';
 
+export const THIS_POST_NAME = 'http://sensentes/ThisText';
 export const NANOPUB_PLACEHOLDER = 'http://purl.org/nanopub/temp/mynanopub#';
 export const ASSERTION_URI = `${NANOPUB_PLACEHOLDER}assertion`;
 export const HAS_COMMENT_URI = 'http://www.w3.org/2000/01/rdf-schema#comment';
@@ -22,4 +23,6 @@ export const getProfile = (rsaKeys: RSAKeys, connectedUser: AppUserRead) => {
       ''
     );
   }
+
+  throw new Error('User does not have an ORCID profile');
 };

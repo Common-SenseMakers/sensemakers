@@ -12,7 +12,7 @@ const TEST_TOKENS_MAP = JSON.parse(
   process.env.TEST_USERS_BEARER_TOKENS as string
 );
 
-describe.only('process', () => {
+describe('process', () => {
   before(async () => {
     logger.debug('resetting DB');
     await resetDB();

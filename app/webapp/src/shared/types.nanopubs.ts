@@ -19,3 +19,9 @@ export interface NanopubUserDetails
 export interface AppPostConstructNanopub {
   content: string;
 }
+
+export interface RSAKeys {
+  privateKey: string;
+  publicKey: string;
+  address?: HexStr;
+}
