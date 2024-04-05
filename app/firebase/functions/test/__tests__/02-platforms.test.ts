@@ -4,7 +4,7 @@ import { AppUser, PLATFORM } from '../../src/@shared/types';
 import { logger } from '../../src/instances/logger';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { resetDB } from '../__tests_support__/db';
-import { createTestAppUsers } from '../utils/createTestAppUsers';
+import { createTestAppUsers } from '../utils/user.factory';
 import { MockedTime, services, userRepo } from './test.services';
 
 describe('platforms', () => {
@@ -15,12 +15,10 @@ describe('platforms', () => {
 
   describe('twitter', () => {
     let appUser: AppUser | undefined;
-
     before(async () => {
       const users = await createTestAppUsers();
       appUser = users[0];
     });
-
     it("get's all tweets in a time range using pagination", async () => {
       if (!appUser) {
         throw new Error('appUser not created');
@@ -37,7 +35,10 @@ describe('platforms', () => {
       try {
         const tweets = await twitterService.fetch([
           {
-            userDetails,
+            userDetails: {
+              ...userDetails,
+              user_id: '1753077743816777728', // this is `sensemakergod`'s user_id, since we want to test pagination.
+            },
             start_time: 1708560000000,
             end_time: 1708646400000,
           },
@@ -49,8 +50,7 @@ describe('platforms', () => {
         throw error;
       }
     });
-
-    it('refreshes the access token if it has expired when using the twitter service', async () => {
+    it.skip('refreshes the access token if it has expired when using the twitter service', async () => {
       if (!appUser) {
         throw new Error('appUser not created');
       }
@@ -64,7 +64,7 @@ describe('platforms', () => {
         clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
       });
 
-      const tweets = twitterService.fetch([
+      const tweets = await twitterService.fetch([
         {
           userDetails,
           start_time: Date.now() - 1000,

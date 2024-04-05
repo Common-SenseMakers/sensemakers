@@ -1,12 +1,14 @@
 import puppeteer, { Browser } from 'puppeteer';
 import { IOAuth2RequestTokenResult } from 'twitter-api-v2';
 
+import { AppUserCreate, PLATFORM, UserWithId } from '../../src/@shared/types';
 import {
   TwitterGetContextParams,
   TwitterUserDetails,
 } from '../../src/@shared/types.twitter';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { TimeService } from '../../src/time/time.service';
+import { getPrefixedUserId } from '../../src/users/users.utils';
 import { userRepo } from '../__tests__/test.services';
 
 const CALLBACK_URL = 'https://sense-nets.xyz/';
@@ -23,7 +25,7 @@ export interface TwitterAccountCredentials {
 
 export const authenticateTwitterUsers = async (
   userCredentials: TwitterAccountCredentials[]
-): Promise<TwitterUserDetails[]> => {
+): Promise<AppUserCreate[]> => {
   const time = new TimeService();
   const twitterService = new TwitterService(time, userRepo, {
     clientId: process.env.TWITTER_CLIENT_ID as string,
@@ -41,8 +43,16 @@ export const authenticateTwitterUsers = async (
     await browser.close();
     return userToken;
   });
-  const authenticatedUsers = await Promise.all(authenticatedUserPromises);
-  return authenticatedUsers;
+  let twitterUserDetails = await Promise.all(authenticatedUserPromises);
+  const platformIds_property: keyof UserWithId = 'platformIds';
+  return twitterUserDetails.map((user) => {
+    return {
+      [platformIds_property]: [
+        getPrefixedUserId(PLATFORM.Twitter, user.user_id),
+      ],
+      [PLATFORM.Twitter]: [user],
+    };
+  });
 };
 
 const authenticateTwitterUser = async (

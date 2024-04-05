@@ -3,10 +3,10 @@ import { expect } from 'chai';
 import { AppUser, PLATFORM } from '../../src/@shared/types';
 import { logger } from '../../src/instances/logger';
 import { resetDB } from '../__tests_support__/db';
-import { createTestAppUsers } from '../utils/createTestAppUsers';
+import { createTestAppUsers } from '../utils/user.factory';
 import { services } from './test.services';
 
-describe.only('process', () => {
+describe('process', () => {
   before(async () => {
     logger.debug('resetting DB');
     await resetDB();
@@ -20,7 +20,8 @@ describe.only('process', () => {
       appUser = users[0];
     });
 
-    it('publish a post in the name of the test user', async () => {
+    /** skip for now because we have not yet granted write access */
+    it.skip('publish a post in the name of the test user', async () => {
       if (!appUser) {
         throw new Error('appUser not created');
       }
