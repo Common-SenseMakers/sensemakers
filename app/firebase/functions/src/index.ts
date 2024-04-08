@@ -23,9 +23,7 @@ export const app = functions
     secrets: [
       envRuntime.ORCID_SECRET,
       envRuntime.OUR_TOKEN_SECRET,
-      envRuntime.TWITTER_API_SECRET_KEY,
       envRuntime.TWITTER_CLIENT_SECRET,
-      envRuntime.TWITTER_BEARER_TOKEN,
     ],
   })
   .https.onRequest(buildApp(authRouter));

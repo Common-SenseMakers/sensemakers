@@ -22,12 +22,12 @@ export class PlatformsService {
   constructor(protected platforms: PlatformsMap) {}
 
   // TODO set the return type depending on the value of platformId
-  public get(platformId: PLATFORM) {
+  public get<T extends PlatformService>(platformId: PLATFORM): T {
     const platform = this.platforms.get(platformId);
     if (!platform) {
       throw new Error(`Platform ${platformId} not found`);
     }
-    return platform;
+    return platform as T;
   }
 
   /**
