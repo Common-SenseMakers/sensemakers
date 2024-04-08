@@ -1,15 +1,13 @@
 import puppeteer, { Browser } from 'puppeteer';
 import { IOAuth2RequestTokenResult } from 'twitter-api-v2';
 
-import { AppUserCreate, PLATFORM, UserWithId } from '../../src/@shared/types';
+import { AppUser, PLATFORM } from '../../src/@shared/types';
 import {
   TwitterGetContextParams,
-  TwitterUserDetails,
+  TwitterSignupData,
 } from '../../src/@shared/types.twitter';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
-import { TimeService } from '../../src/time/time.service';
-import { getPrefixedUserId } from '../../src/users/users.utils';
-import { userRepo } from '../__tests__/test.services';
+import { services } from '../__tests__/test.services';
 
 const CALLBACK_URL = 'https://sense-nets.xyz/';
 const NEXT_BUTTON_TEXT = 'Next';
@@ -21,51 +19,62 @@ const PASSWORD_INPUT_SELECTOR = 'input[autocomplete="current-password"]';
 export interface TwitterAccountCredentials {
   username: string;
   password: string;
+  type: 'read' | 'write';
 }
 
-export const authenticateTwitterUsers = async (
-  userCredentials: TwitterAccountCredentials[]
-): Promise<AppUserCreate[]> => {
-  const time = new TimeService();
-  const twitterService = new TwitterService(time, userRepo, {
-    clientId: process.env.TWITTER_CLIENT_ID as string,
-    clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
-  });
-
-  const authenticatedUserPromises = userCredentials.map(async (testAccount) => {
+/**
+ * From a set of platform credentials, authenticate the users and
+ * return their full profiles
+ */
+export const authenticateTestUsers = async (
+  twitterCredentials: TwitterAccountCredentials[]
+): Promise<AppUser[]> => {
+  const signupDatasPromises = twitterCredentials.map(async (testAccount) => {
     const browser = await puppeteer.launch({ headless: false });
     const userToken = await authenticateTwitterUser(
       testAccount,
-      twitterService,
-      browser,
-      'read'
+      services.platforms.get<TwitterService>(PLATFORM.Twitter),
+      browser
     );
     await browser.close();
     return userToken;
   });
-  let twitterUserDetails = await Promise.all(authenticatedUserPromises);
-  const platformIds_property: keyof UserWithId = 'platformIds';
-  return twitterUserDetails.map((user) => {
-    return {
-      [platformIds_property]: [
-        getPrefixedUserId(PLATFORM.Twitter, user.user_id),
-      ],
-      [PLATFORM.Twitter]: [user],
-    };
-  });
+
+  let twitterSignupDatas = await Promise.all(signupDatasPromises);
+
+  let users: AppUser[] = [];
+
+  await Promise.all(
+    twitterSignupDatas.map(async (signupData: TwitterSignupData) => {
+      /** store the user in the DB (build the user profile object and derive the ID) */
+      const result = await services.users.handleSignup(
+        PLATFORM.Twitter,
+        signupData
+      );
+      if (!result) {
+        throw new Error('Unexpected');
+      }
+
+      /** read the just created user (will fail if not found) */
+      const user = await services.users.repo.getUser(result.userId, true);
+      users.push(user);
+    })
+  );
+
+  return users;
 };
 
 const authenticateTwitterUser = async (
   user: TwitterAccountCredentials,
   twitterService: TwitterService,
-  browser: Browser,
-  type: 'read' | 'write'
-): Promise<TwitterUserDetails> => {
+  browser: Browser
+): Promise<TwitterSignupData> => {
   const twitterOAuthTokenRequestResult: IOAuth2RequestTokenResult &
     TwitterGetContextParams = await twitterService.getSignupContext(undefined, {
     callback_url: CALLBACK_URL,
-    type,
+    type: user.type,
   });
+
   const page = await browser.newPage();
   await page.goto(twitterOAuthTokenRequestResult.url);
   await page.waitForSelector(USERNAME_INPUT_SELECTOR);
@@ -110,10 +119,13 @@ const authenticateTwitterUser = async (
     throw new Error('twitterOAuthCode undefined');
   }
 
-  const userDetails = await twitterService.handleSignupData({
-    ...twitterOAuthTokenRequestResult,
+  return {
     code: twitterOAuthCode,
-  });
-
-  return userDetails;
+    callback_url: twitterOAuthTokenRequestResult.callback_url,
+    codeChallenge: twitterOAuthTokenRequestResult.codeChallenge,
+    codeVerifier: twitterOAuthTokenRequestResult.codeVerifier,
+    state: twitterOAuthTokenRequestResult.state,
+    type: twitterOAuthTokenRequestResult.type,
+    url: twitterOAuthTokenRequestResult.url,
+  };
 };

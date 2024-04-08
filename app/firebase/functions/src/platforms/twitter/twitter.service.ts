@@ -273,18 +273,28 @@ export class TwitterService
       throw new Error('Unexpected undefined refresh token');
     }
 
+    const credentials: TwitterUserCredentials = {
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+      expiresIn: result.expiresIn,
+      expiresAtMs: this.time.now() + result.expiresIn * 1000,
+    };
+
     const twitter: TwitterUserDetails = {
       user_id: user.id,
       signupDate: 0,
-      [data.type]: {
-        accessToken: result.accessToken,
-        refreshToken: result.refreshToken,
-        expiresIn: result.expiresIn,
-        expiresAtMs: this.time.now() + result.expiresIn * 1000,
-        /** if granting read access set the last fetched time to now */
-        lastFetchedMs: data.type === 'read' ? this.time.now() : undefined,
-      },
       profile: user,
+    };
+
+    /** the same credentials apply for reading and writing */
+    if (data.type === 'write') {
+      twitter[data.type] = credentials;
+    }
+
+    /** always store the credential as read credentials */
+    twitter.read = {
+      ...credentials,
+      lastFetchedMs: this.time.now(),
     };
 
     return twitter;

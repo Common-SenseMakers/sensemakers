@@ -4,7 +4,7 @@ import { TwitterApi } from 'twitter-api-v2';
 import { PLATFORM } from '../../src/@shared/types';
 import {
   TwitterAccountCredentials,
-  authenticateTwitterUsers,
+  authenticateTestUsers,
 } from '../utils/authenticate.users';
 
 const NUM_TWITTER_USERS = 1;
@@ -22,13 +22,13 @@ describe.skip('twitter integration', () => {
   }
 
   it(`authenticates ${NUM_TWITTER_USERS} twitter users with the oauth 2.0 flow for reading access`, async () => {
-    const appUserCreates = await authenticateTwitterUsers(
+    const appUsers = await authenticateTestUsers(
       TEST_ACCOUNTS.slice(0, NUM_TWITTER_USERS)
     );
-    expect(appUserCreates).to.not.be.undefined;
-    expect(appUserCreates.length).to.eq(NUM_TWITTER_USERS);
-    for (const appUserCreate of appUserCreates) {
-      for (const twitterDetails of appUserCreate[PLATFORM.Twitter] ?? []) {
+    expect(appUsers).to.not.be.undefined;
+    expect(appUsers.length).to.eq(NUM_TWITTER_USERS);
+    for (const appUser of appUsers) {
+      for (const twitterDetails of appUser[PLATFORM.Twitter] ?? []) {
         if (!twitterDetails.read?.accessToken) {
           throw new Error('unexpected: access token missing');
         }

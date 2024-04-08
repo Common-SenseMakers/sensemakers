@@ -7,7 +7,7 @@ import { resetDB } from '../__tests_support__/db';
 import { LocalLogger, LogLevel } from '../__tests_support__/test.logger';
 import {
   TwitterAccountCredentials,
-  authenticateTwitterUsers,
+  authenticateTestUsers,
 } from '../utils/authenticate.users';
 import { services } from './test.services';
 
@@ -69,22 +69,14 @@ export const mochaHooks = (): Mocha.RootHookObject => {
 
         /** update appUserCreates with new tokens */
         if (!valid) {
-          const appUserCreates = await authenticateTwitterUsers(
+          appUsers = await authenticateTestUsers(
             testAccountCredentials.splice(0, NUM_TEST_USERS)
           );
-          appUsers = appUserCreates.map((appUserCreate) => ({
-            userId: appUserCreate.platformIds[0],
-            ...appUserCreate,
-          }));
         }
       } else {
-        const appUserCreates = await authenticateTwitterUsers(
+        appUsers = await authenticateTestUsers(
           testAccountCredentials.splice(0, NUM_TEST_USERS)
         );
-        appUsers = appUserCreates.map((appUserCreate) => ({
-          userId: appUserCreate.platformIds[0],
-          ...appUserCreate,
-        }));
       }
 
       appUsers.forEach((appUser) => {

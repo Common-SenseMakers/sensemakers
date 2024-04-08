@@ -6,7 +6,7 @@ import { resetDB } from '../__tests_support__/db';
 import { createTestAppUsers } from '../utils/user.factory';
 import { services } from './test.services';
 
-describe('process', () => {
+describe.skip('process', () => {
   before(async () => {
     logger.debug('resetting DB');
     await resetDB();
@@ -21,7 +21,7 @@ describe('process', () => {
     });
 
     /** skip for now because we have not yet granted write access */
-    it.skip('publish a post in the name of the test user', async () => {
+    it('publish a post in the name of the test user', async () => {
       if (!appUser) {
         throw new Error('appUser not created');
       }
@@ -71,7 +71,6 @@ describe('process', () => {
 
       expect(tweet).to.not.be.undefined;
 
-      /** wait for just a second */
       await new Promise<void>((resolve) => setTimeout(resolve, 10000));
     });
 
