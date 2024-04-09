@@ -1,6 +1,8 @@
 import express from 'express';
 import * as functions from 'firebase-functions';
+import { onSchedule } from 'firebase-functions/v2/scheduler';
 
+import { POSTS_JOB_SCHEDULE } from './config/config.runtime';
 import { envDeploy } from './config/typedenv.deploy';
 import { envRuntime } from './config/typedenv.runtime';
 import {
@@ -8,6 +10,7 @@ import {
   handleSignupController,
 } from './controllers/platforms.auth.controller';
 import { buildApp } from './instances/app';
+import { fetchNewPosts } from './posts/posts.job';
 
 const authRouter = express.Router();
 
@@ -27,3 +30,5 @@ export const app = functions
     ],
   })
   .https.onRequest(buildApp(authRouter));
+
+export const postsJob = onSchedule(POSTS_JOB_SCHEDULE, fetchNewPosts);

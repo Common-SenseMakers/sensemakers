@@ -49,3 +49,5 @@ export const OUR_EXPIRES_IN = '30d';
 
 export const NANOPUBS_SPARQL_SERVER =
   'https://query.np.trustyuri.net/repo/full';
+
+export const POSTS_JOB_SCHEDULE = 'every 2 hours';
