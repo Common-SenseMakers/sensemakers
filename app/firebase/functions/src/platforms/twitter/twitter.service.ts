@@ -173,10 +173,30 @@ export class TwitterService
 
     /** update user credentials */
     if (newCredentials) {
-      const newDetails = {
-        ...details,
-        [type]: newCredentials,
-      };
+      let newDetails: TwitterUserDetails;
+      /** if the user has both read and write credentials, update both together since write credentials overwrite read credentials */
+      if (details.read !== undefined && details.write !== undefined) {
+        newDetails = {
+          ...details,
+          write: newCredentials,
+          read: {
+            ...newCredentials,
+            lastFetchedMs: details.read.lastFetchedMs,
+          },
+        };
+      } else if (details.read !== undefined) {
+        newDetails = {
+          ...details,
+          read: {
+            ...newCredentials,
+            lastFetchedMs: details.read.lastFetchedMs,
+          },
+        };
+      } else {
+        throw new Error(
+          `Read credentials for user ${details.user_id} not found`
+        );
+      }
 
       this.usersRepo.setPlatformDetails(
         user.userId,
