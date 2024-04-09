@@ -154,8 +154,12 @@ class RefMetadata(BaseModel):
         """
         Prints each attribute on a new line in the form: attribute: value
         """
+        # attributes to skip printing
+        skip_list = ["citoid_url"]
         result = []
         for attr, value in vars(self).items():
+            if attr in skip_list:
+                continue
             if isinstance(value, str) or value is None:
                 value = value or "None"  # Convert None or empty strings to "None"
                 result.append(f"{attr}: {value}")
