@@ -117,6 +117,16 @@ def test_exclude():
             kp,
         ]
     )
+    
+    model_dict = multi_config.model_dump()
+    
+    assert "api_key" not in model_dict.get("openrouter_api_config")
+    assert "referer" not in model_dict.get("openrouter_api_config")
+    
+    # reload model from dict
+    model_reload = MultiParserChainConfig.model_validate(model_dict)
+    assert hasattr(model_reload.openrouter_api_config, "api_key")
+    assert hasattr(model_reload.openrouter_api_config, "referer")
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional, Any, Union
 from enum import Enum
 from rdflib.namespace import RDF
 from rdflib import URIRef, Literal, Graph
@@ -7,6 +7,7 @@ from ..interface import (
     isAConceptDefintion,
     KeywordConceptDefinition,
 )
+from ..filters import SciFilterClassfication
 from ..schema.ontology_base import OntologyBase
 from ..schema.post import RefPost
 from ..web_extractors.metadata_extractors import (
@@ -16,6 +17,16 @@ from pydantic import (
     Field,
     BaseModel,
 )
+
+
+class PostProcessType(str, Enum):
+    """
+    Types of post processing of MultiChainParser outputs
+    """
+
+    NONE = "none"  # leave raw output dict unmodified
+    COMBINED = "combined"  # for streamlit apps
+    FIREBASE = "firebase"  # for firebase app
 
 
 class ParserChainOutput(BaseModel):
@@ -31,14 +42,19 @@ class ParserChainOutput(BaseModel):
 
 
 class CombinedParserOutput(BaseModel):
-    research_keyword: str
-    research_filter: str = None  # TODO make enum
-    item_types: List[str]
-    reference_urls: List[str]
-    semantic_tags: List[str]
-    keywords: List[str]
-    topics: List[str]
-    metadata_list: List[RefMetadata]
+    research_keyword: str = Field(
+        description="Output of keywords submodule for research classification",
+        default="not-detected",
+    )
+    filter_classification: SciFilterClassfication = (
+        SciFilterClassfication.NOT_CLASSIFIED
+    )
+    item_types: List[str] = Field(default_factory=list)
+    reference_urls: List[str] = Field(default_factory=list)
+    semantic_tags: List[str] = Field(default_factory=list)
+    keywords: List[str] = Field(default_factory=list)
+    topics: List[str] = Field(default_factory=list)
+    metadata_list: List[RefMetadata] = Field(default_factory=list)
     debug: Optional[Dict] = Field(default_factory=dict)
 
 
@@ -183,3 +199,32 @@ def convert_raw_output_to_queue_format(
     outputs: List[dict], md_list: Dict[str, RefMetadata]
 ):
     pass
+
+
+def post_process_chain_output(
+    post: RefPost,
+    raw_results: Dict[str, ParserChainOutput],
+    md_dict: Dict[str, RefMetadata],
+    post_process_type: PostProcessType,
+) -> Union[CombinedParserOutput,]:
+    if post_process_type == PostProcessType.COMBINED:
+        reference_urls = post.ref_urls
+        item_types = [
+            md_dict[url].item_type if md_dict[url] else "unknown"
+            for url in reference_urls
+        ]
+        semantic_tags = output["semantics"]["multi_tag"]
+        keywords = output["keywords"]["valid_keywords"]
+        topics = output["topics"]["multi_tag"]
+        academic_kw = output["keywords"]["academic_kw"]
+        md_list = list(md_dict.values())
+        return CombinedParserOutput(
+            research_keyword=academic_kw,
+            item_types=item_types,
+            reference_urls=reference_urls,
+            semantic_tags=semantic_tags,
+            topics=topics,
+            keywords=keywords,
+            metadata_list=md_list,
+            debug=debug,
+        )

@@ -65,6 +65,13 @@ class OpenrouterAPIConfig(BaseSettings):
     def load_referer_from_env(cls, v):
         return validate_env_var("OPENROUTER_REFERRER", v)
 
+    def model_dump_all(self):
+        # special method to dump including excluded attrs
+        model_dict = self.model_dump()
+        model_dict["referer"] = self.referer
+        model_dict["api_key"] = self.api_key
+        return model_dict
+
 
 class WandbConfig(BaseSettings):
     entity: str = Field(

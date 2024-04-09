@@ -144,5 +144,61 @@ class MultiChainParser:
         ref_post: RefPost = convert_text_to_ref_post(text)
         return self.process_ref_post(ref_post, active_list, as_triplets)
 
-    def batch_process_ref_posts(self):
-        pass
+    def batch_process_ref_posts(
+        self,
+        inputs: List[RefPost],
+        batch_size: int = 5,
+        active_list: List[str] = None,
+    ) -> Dict:
+        """Batch process a list of RefPosts.
+
+        Args:
+            inputs (List[RefPost]): input RefPosts.
+            batch_size (int): maximum number of concurrent calls to make. Defaults to 5.
+
+        Returns:
+            List[Dict]: list of processed results
+        """
+        # extract all posts metadata
+        md_dict = extract_posts_ref_metadata_dict(
+            inputs,
+            self.config.metadata_extract_config.extraction_method,
+        )
+
+        if active_list is None:
+            active_list = list(self.pparsers.keys())
+        logger.debug(f"Processing {len(inputs)} posts with parsers: {active_list}")
+
+        logger.debug("Instantiating prompts...")
+        inst_prompts = [
+            self.instantiate_prompts(post, md_dict, active_list) for post in inputs
+        ]
+
+        # create runnable parallel
+        # setup async batch job
+        config = RunnableConfig(max_concurrency=batch_size)
+        parallel_chain = self.create_parallel_chain(active_list)
+
+        logger.debug("Invoking parallel chain...")
+
+        results = asyncio.run(
+            parallel_chain.abatch(
+                inst_prompts,
+                config=config,
+            )
+        )
+
+        return results
+
+        # st_outputs = convert_raw_outputs_to_st_format(
+        #     inputs,
+        #     results,
+        #     prompts,
+        #     md_dict,
+        # )
+
+        # # apply filter
+        # for output in st_outputs:
+        #     apply_research_filter(output)
+
+        # return st_outputs

@@ -30,7 +30,7 @@ class PostParserChain(ABC):
         # join kw args in single dict
         kw_args = {
             **self.parser_config.llm_config.model_dump(),
-            **self.global_config.openrouter_api_config.model_dump(),
+            **self.global_config.openrouter_api_config.model_dump_all(),
         }
         self._model = create_model(**kw_args)
 

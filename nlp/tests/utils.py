@@ -12,6 +12,44 @@ from desci_sense.shared_functions.init import (
     MAX_SUMMARY_LENGTH,
     ParserInitConfigOptional,
 )
+from desci_sense.shared_functions.parsers.multi_chain_parser import MultiChainParser
+from desci_sense.shared_functions.runners.configs import (
+    OpenrouterAPIConfig,
+    WandbConfig,
+    LLMConfig,
+    KeywordPParserChainConfig,
+    RefTaggerChainConfig,
+    TopicsPParserChainConfig,
+    validate_env_var,
+    MultiParserChainConfig,
+    ParserChainType,
+)
+
+
+def create_multi_chain_for_tests():
+    kp = KeywordPParserChainConfig(
+        name="kw_test",
+        use_metadata=True,
+        llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
+    )
+    rtc = RefTaggerChainConfig(
+        name="refs_tag_test",
+        use_metadata=True,
+        llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
+    )
+    tpc = TopicsPParserChainConfig(
+        name="topic_test",
+        use_metadata=True,
+        llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
+    )
+    multi_config = MultiParserChainConfig(
+        parser_configs=[
+            rtc,
+            tpc,
+            kp,
+        ]
+    )
+    return MultiChainParser(multi_config)
 
 
 def default_init_parser_config():

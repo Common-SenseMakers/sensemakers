@@ -6,6 +6,8 @@ sys.path.append(str(ROOT))
 import os
 import pytest
 from pydantic import ValidationError
+
+from utils import create_multi_chain_for_tests
 from desci_sense.shared_functions.parsers.multi_chain_parser import MultiChainParser
 from desci_sense.shared_functions.runners.configs import (
     OpenrouterAPIConfig,
@@ -161,32 +163,23 @@ def test_topics_kw_ref_tagging():
     assert "rt_test" in res
 
 
+def test_multi_chain_batch_simple():
+    # get a few posts for input
+    urls = [
+        "https://mastodon.social/@psmaldino@qoto.org/111405098400404613",
+        "https://mastodon.social/@UlrikeHahn@fediscience.org/111732713776994953",
+        "https://mastodon.social/@ronent/111687038322549430",
+    ]
+    posts = [scrape_post(url) for url in urls]
+    multi_chain_parser = create_multi_chain_for_tests()
+    res = multi_chain_parser.batch_process_ref_posts(posts)
+
+    assert len(res) == 3
+
+
 if __name__ == "__main__":
-    kp = KeywordPParserChainConfig(
-        name="kw_test",
-        use_metadata=True,
-        llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
-    )
-    rtc = RefTaggerChainConfig(
-        name="rt_test",
-        use_metadata=True,
-        llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
-    )
-    tpc = TopicsPParserChainConfig(
-        name="topic_test",
-        use_metadata=True,
-        llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
-    )
-    multi_config = MultiParserChainConfig(
-        parser_configs=[
-            rtc,
-            tpc,
-            kp,
-        ]
-    )
+    kp = KeywordPParserChainConfig(name="test")
+    multi_config = MultiParserChainConfig(parser_configs=[kp])
     mcp = MultiChainParser(multi_config)
-
-    res = mcp.process_text(TEST_POST_TEXT_W_REF)
-
-    prompt = res["rt_test"].extra["prompt"]
+    # assert "test" in mcp.pparsers
     # assert "Google Scholar is manipulatable" in prompt
