@@ -20,9 +20,14 @@ from pydantic import (
 
 class ParserChainOutput(BaseModel):
     answer: Any
-    full_prompt: str
-    reasoning: Optional[str]
-    extra: Dict
+    reasoning: Optional[str] = Field(
+        description="Reasoning steps.",
+        default=None,
+    )
+    extra: Optional[Dict] = Field(
+        description="Extra data for debugging.",
+        default_factory=dict,
+    )
 
 
 class CombinedParserOutput(BaseModel):

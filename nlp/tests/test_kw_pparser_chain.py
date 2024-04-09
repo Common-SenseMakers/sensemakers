@@ -7,6 +7,7 @@ import os
 import pytest
 from pydantic import ValidationError
 from desci_sense.shared_functions.parsers.keyword_pparser import KeywordPostParserChain
+from desci_sense.shared_functions.schema.ontology_base import OntologyBase
 from desci_sense.shared_functions.runners.configs import (
     OpenrouterAPIConfig,
     WandbConfig,
@@ -22,8 +23,17 @@ def test_simple_init():
     kppc = KeywordPostParserChain(kp)
     assert kppc.parser_config.name == "test"
 
-
-if __name__ == "__main__":
+def test_kw_parser_init():
+    ontology = OntologyBase()
     kp = KeywordPParserChainConfig(name="test")
     multi_config = MultiParserChainConfig(parsers=[kp])
-    kppc = KeywordPostParserChain(kp, multi_config)
+    kppc = KeywordPostParserChain(kp, multi_config, ontology)
+    assert kppc.ontology.ontology_interface.keyword_predicate.name == 'hasKeyword'
+
+
+if __name__ == "__main__":
+    ontology = OntologyBase()
+    kp = KeywordPParserChainConfig(name="test")
+    multi_config = MultiParserChainConfig(parsers=[kp])
+    kppc = KeywordPostParserChain(kp, multi_config, ontology)
+    assert kppc.ontology.ontology_interface.keyword_predicate.name == 'hasKeyword'

@@ -165,3 +165,33 @@ def extract_posts_ref_metadata_dict(
         all_ref_urls, md_type, max_summary_length=500
     )
     return md_dict
+
+
+def get_refs_metadata_portion(metadata_list: List[RefMetadata]) -> str:
+    """
+    Processes the metadata list to append to the prompt
+    """
+    if len(metadata_list) > 0:
+        result_lines = ["## Reference Metadata:"]
+        for i, ref in enumerate(metadata_list):
+            if hasattr(ref, "to_str"):
+                result_lines.append(ref.to_str())
+            if i < len(metadata_list) - 1:  # Check if it's not the last element
+                result_lines.append("---------------")
+        result_string = "\n".join(result_lines)
+        return result_string
+    return ""
+
+
+def get_ref_post_metadata_list(
+    post: RefPost,
+    md_dict: Dict[str, RefMetadata],
+) -> List[RefMetadata]:
+    """
+    Returns list of the post's reference metadata
+    """
+    md_list = []
+    for ref in post.ref_urls:
+        if ref in md_dict:
+            md_list.append(md_dict.get(ref))
+    return md_list

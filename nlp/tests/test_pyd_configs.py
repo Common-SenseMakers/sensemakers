@@ -9,7 +9,10 @@ from pydantic import ValidationError
 from desci_sense.shared_functions.runners.configs import (
     OpenrouterAPIConfig,
     WandbConfig,
+    LLMConfig,
     KeywordPParserChainConfig,
+    RefTaggerChainConfig,
+    TopicsPParserChainConfig,
     validate_env_var,
     MultiParserChainConfig,
     ParserChainType,
@@ -83,12 +86,70 @@ def test_default_runner_config():
     config: MultiParserChainConfig = MultiParserChainConfig()
     config_dict = config.model_dump()
     assert "batch_size" in config_dict
-    
+
+
 def test_kw_config():
     kp = KeywordPParserChainConfig(name="test")
     assert kp.name == "test"
     assert kp.type == ParserChainType.KEYWORDS
 
+
+def test_exclude():
+    kp = KeywordPParserChainConfig(
+        name="kw_test",
+        use_metadata=True,
+        llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
+    )
+    rtc = RefTaggerChainConfig(
+        name="rt_test",
+        use_metadata=True,
+        llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
+    )
+    tpc = TopicsPParserChainConfig(
+        name="topic_test",
+        use_metadata=True,
+        llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
+    )
+    multi_config = MultiParserChainConfig(
+        parser_configs=[
+            rtc,
+            tpc,
+            kp,
+        ]
+    )
+
+
 if __name__ == "__main__":
-    kp = KeywordPParserChainConfig(name="test")
+    kp = KeywordPParserChainConfig(
+        name="kw_test",
+        use_metadata=True,
+        llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
+    )
+    rtc = RefTaggerChainConfig(
+        name="rt_test",
+        use_metadata=True,
+        llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
+    )
+    tpc = TopicsPParserChainConfig(
+        name="topic_test",
+        use_metadata=True,
+        llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
+    )
+    multi_config = MultiParserChainConfig(
+        parser_configs=[
+            rtc,
+            tpc,
+            kp,
+        ]
+    )
+    
+    model_dict = multi_config.model_dump()
+    
+    assert "api_key" not in model_dict.get("openrouter_api_config")
+    assert "referer" not in model_dict.get("openrouter_api_config")
+    
+    # reload model from dict
+    model_reload = MultiParserChainConfig.model_validate(model_dict)
+    assert hasattr(model_reload.openrouter_api_config, "api_key")
+    assert hasattr(model_reload.openrouter_api_config, "referer")
     

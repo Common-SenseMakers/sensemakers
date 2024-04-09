@@ -49,10 +49,12 @@ class OpenrouterAPIConfig(BaseSettings):
     api_key: str | None = Field(
         description="Openrouter API key",
         default=None,
+        exclude=True,
     )
     referer: str | None = Field(
         default=None,
         description="Referer for tracking on Openrouter",
+        exclude=True,
     )
 
     @field_validator("api_key")
@@ -95,9 +97,9 @@ class MetadataExtractionConfig(BaseSettings):
 
 
 class LLMConfig(BaseSettings, BaseModel):
-    name: str = Field(
+    llm_type: str = Field(
         default="mistralai/mistral-7b-instruct",
-        description="Name of the model to be intialized.",
+        description="Type of model to be intialized.",
     )
     temperature: str = Field(
         default="0.6",
@@ -126,13 +128,25 @@ class KeywordPParserChainConfig(PostParserChainConfig):
     )
 
 
+class RefTaggerChainConfig(PostParserChainConfig):
+    type: ParserChainType = ParserChainType.REFERENCE_TAGGER
+
+
+class TopicsPParserChainConfig(PostParserChainConfig):
+    type: ParserChainType = ParserChainType.TOPICS
+
+
 class MultiParserChainConfig(BaseSettings):
     openrouter_api_config: OpenrouterAPIConfig = Field(
         default_factory=OpenrouterAPIConfig, description="Settings for Openrouter API."
     )
-    parsers: List[Union[KeywordPParserChainConfig]] = Field(
-        description="List of parser chain configurations", default_factory=list
-    )
+    parser_configs: List[
+        Union[
+            KeywordPParserChainConfig,
+            RefTaggerChainConfig,
+            TopicsPParserChainConfig,
+        ]
+    ] = Field(description="List of parser chain configurations", default_factory=list)
     metadata_extract_config: MetadataExtractionConfig = Field(
         default_factory=MetadataExtractionConfig,
         description="Metadata extraction config for \
