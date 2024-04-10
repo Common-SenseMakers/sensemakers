@@ -1,4 +1,4 @@
-import { ALL_PUBLISH_PLATFORMS, PLATFORM } from '../@shared/types';
+import { ALL_PUBLISH_PLATFORMS, AppUser, PLATFORM } from '../@shared/types';
 import {
   PARSER_MODE,
   ParsePostRequest,
@@ -79,8 +79,15 @@ export class PostsService {
    * and fetch their new posts.
    * (optional) it stores the posts in the Posts collection
    */
-  async fetchFromUsers(store: boolean = false) {
-    const users = await this.users.repo.getAll();
+  async fetchFromUsers(userIds?: [string], store: boolean = false) {
+    let users: AppUser[];
+    if (userIds) {
+      users = await Promise.all(
+        userIds.map((userId) => this.users.repo.getUser(userId, true))
+      );
+    } else {
+      users = await this.users.repo.getAll();
+    }
     const params = new Map();
 
     /**
