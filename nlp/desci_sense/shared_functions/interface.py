@@ -10,6 +10,7 @@ from pydantic import (
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from rdflib import URIRef, Literal, Graph
 from .prompting.jinja.topics_template import ALLOWED_TOPICS
+from .filters import SciFilterClassfication
 
 
 # TODO fix using alias for env var default loading
@@ -198,6 +199,9 @@ class ParserResult(BaseModel):
     support: ParserSupport = Field(
         description="Support information used \
                                     by parser"
+    )
+    filter_classification: SciFilterClassfication = (
+        SciFilterClassfication.NOT_CLASSIFIED
     )
 
     @field_serializer("semantics")

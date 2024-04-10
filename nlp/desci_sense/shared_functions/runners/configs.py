@@ -19,6 +19,16 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from ..web_extractors.metadata_extractors import MetadataExtractionType
 
 
+class PostProcessType(str, Enum):
+    """
+    Types of post processing of MultiChainParser outputs
+    """
+
+    NONE = "none"  # leave raw output dict unmodified
+    COMBINED = "combined"  # for streamlit apps
+    FIREBASE = "firebase"  # for firebase app
+
+
 class ParserChainType(str, Enum):
     KEYWORDS = "keywords"
     REFERENCE_TAGGER = "reference_tagger"
@@ -165,4 +175,8 @@ class MultiParserChainConfig(BaseSettings):
     batch_size: int = Field(
         default=5,
         description="Default batch size for batched requests",
+    )
+    post_process_type: PostProcessType = Field(
+        description="Type of post-processing to apply to parser chain results",
+        default=PostProcessType.NONE,
     )

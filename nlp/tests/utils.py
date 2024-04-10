@@ -25,8 +25,7 @@ from desci_sense.shared_functions.runners.configs import (
     ParserChainType,
 )
 
-
-def create_multi_chain_for_tests():
+def create_multi_config_for_tests():
     kp = KeywordPParserChainConfig(
         name="kw_test",
         use_metadata=True,
@@ -49,6 +48,10 @@ def create_multi_chain_for_tests():
             kp,
         ]
     )
+    return multi_config
+    
+def create_multi_chain_for_tests():
+    multi_config = create_multi_config_for_tests()
     return MultiChainParser(multi_config)
 
 

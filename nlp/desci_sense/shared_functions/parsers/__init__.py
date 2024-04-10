@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Dict
 from loguru import logger
 from langchain_openai import ChatOpenAI
+from enum import Enum
 
 from ..schema.post import RefPost
 from ..web_extractors.metadata_extractors import RefMetadata

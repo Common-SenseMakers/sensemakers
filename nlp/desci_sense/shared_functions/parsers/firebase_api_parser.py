@@ -322,7 +322,7 @@ class FirebaseAPIParser:
     ) -> ParserResult:
         """convert parser output result into format
         required by app interface."""
-        semantics = combined_parser_output.semantic_tags
+        semantics = combined_parser_output.reference_tagger
         keywords = combined_parser_output.keywords
 
         # get metadata

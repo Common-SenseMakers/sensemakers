@@ -1,4 +1,5 @@
 from ..postprocessing import CombinedParserOutput
+from . import SciFilterClassfication
 
 item_types_whitelist = [
     "bookSection",
@@ -32,11 +33,10 @@ topics_whitelist = [
 ]
 
 
-# TODO change so that doesn't have side effects
-def apply_research_filter(result: CombinedParserOutput) -> bool:
+def apply_research_filter(result: CombinedParserOutput) -> SciFilterClassfication:
     # if any item types on the whitelist, pass automatically
     if len(set(result.item_types).intersection(set(item_types_whitelist))) > 0:
-        result.research_filter = "passed"
+        return SciFilterClassfication.RESEARCH
 
     # if item types inconclusive, use scoring system
     score = 0
@@ -46,7 +46,7 @@ def apply_research_filter(result: CombinedParserOutput) -> bool:
         score += 1
 
     # if academic keyword not assigned = 1 point
-    if result.research_filter != "academic":
+    if result.research_keyword != "academic":
         score += 1
 
     # if no references present = 1 point
@@ -54,8 +54,6 @@ def apply_research_filter(result: CombinedParserOutput) -> bool:
         score += 1
 
     if score >= 2:
-        result.research_filter = "failed"
+        return SciFilterClassfication.NOT_RESEARCH
     else:
-        result.research_filter = "passed"
-
-    return result.research_filter
+        return SciFilterClassfication.RESEARCH

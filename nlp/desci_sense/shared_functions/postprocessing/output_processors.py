@@ -6,6 +6,7 @@ from langchain.schema import BaseOutputParser
 from langchain_core.messages import AnyMessage, BaseMessage
 
 from . import ParserChainOutput
+from ..runners.configs import ParserChainType, PostProcessType
 
 ALLOWED_TERMS_DELIMITER = "##Allowed terms: "
 
@@ -218,8 +219,9 @@ class KeywordParser(BaseOutputParser):
         return ParserChainOutput(
             answer={
                 "keywords": top_k_valid,
-                "academic_kw": academic_indicator_kw,
+                "research_keyword": academic_indicator_kw,
             },
+            pparser_type=ParserChainType.KEYWORDS,
             reasoning=final_reasoning,
             extra={"raw_text": text},
         )
@@ -260,6 +262,8 @@ class AllowedTermsParser(BaseOutputParser):
     and uses those to filter out LLM output tags that aren't in the allowed tags list.
     There is probably a less hacky way to do this but it seems like this will do for now.
     """
+
+    parser_chain_type: ParserChainType
 
     def parse(self, text: str) -> ParserChainOutput:
         """Parse the output of an LLM call."""
@@ -318,6 +322,7 @@ class AllowedTermsParser(BaseOutputParser):
 
         output = ParserChainOutput(
             answer=multi_tags,
+            pparser_type=self.parser_chain_type,
             reasoning=final_reasoning,
             extra={
                 "allowed_tags": allowed_tags,

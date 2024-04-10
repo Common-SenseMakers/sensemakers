@@ -5,7 +5,11 @@ from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from operator import itemgetter
 
 from .post_parser_chain import PostParserChain
-from ..runners.configs import PostParserChainConfig, MultiParserChainConfig
+from ..runners.configs import (
+    PostParserChainConfig,
+    MultiParserChainConfig,
+    ParserChainType,
+)
 from ..schema.post import RefPost
 from ..web_extractors.metadata_extractors import (
     RefMetadata,
@@ -59,7 +63,7 @@ class AllowedTermsPParserChain(PostParserChain):
             }
             | _merge
             | _extract_msg_content
-            | AllowedTermsParser()
+            | AllowedTermsParser(parser_chain_type=parser_config.type)
         )
 
     @property

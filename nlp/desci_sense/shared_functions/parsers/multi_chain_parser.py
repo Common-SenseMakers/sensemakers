@@ -10,7 +10,10 @@ from langchain_core.runnables import RunnableParallel, RunnableConfig
 from langchain_core.prompts import ChatPromptTemplate
 
 from .parser_factory import parser_factory
-from ..runners.configs import MultiParserChainConfig
+from ..runners.configs import (
+    MultiParserChainConfig,
+    PostProcessType,
+)
 from ..interface import ParserResult, ParserSupport
 from ..init import MAX_SUMMARY_LENGTH
 from ..schema.ontology_base import OntologyBase
@@ -23,14 +26,12 @@ from ..postprocessing import (
     convert_raw_output_to_st_format,
     convert_raw_outputs_to_st_format,
     CombinedParserOutput,
+    post_process_chain_output,
+    post_process_firebase,
 )
 from ..filters.research_filter import apply_research_filter
-from ..postprocessing.output_parsers import (
-    TagTypeParser,
-    KeywordParser,
-    AllowedTermsParser,
-    ALLOWED_TERMS_DELIMITER,
-)
+from ..filters import SciFilterClassfication
+from ..postprocessing import post_process_chain_output
 from ..dataloaders import scrape_post
 from ..enum_dict import EnumDict, EnumDictKey
 from ..web_extractors.metadata_extractors import (
@@ -103,11 +104,20 @@ class MultiChainParser:
                 inst_prompts.update(inst_prompt)
         return inst_prompts
 
+    def apply_sci_filter(
+        self,
+        combined_results: CombinedParserOutput,
+    ) -> CombinedParserOutput:
+        result = apply_research_filter(combined_results)
+        combined_results.filter_classification = result
+        return combined_results
+
+    # def filter_and_post_process(self, ):
+
     def process_ref_post(
         self,
         post: RefPost,
         active_list: List[str] = None,
-        as_triplets: bool = False,
     ):
         md_dict = extract_posts_ref_metadata_dict(
             [post],
@@ -131,18 +141,34 @@ class MultiChainParser:
         for name, output in res.items():
             output.extra["prompt"] = inst_prompts[f"{name}_input"]
 
-        # TODO add option for post processing to triplets format
+        if self.config.post_process_type == PostProcessType.NONE:
+            return res
 
-        return res
+        # post processing to specified format
+        combined_res = post_process_chain_output(
+            post,
+            res,
+            md_dict,
+            self.ontology_base,
+            PostProcessType.COMBINED,
+        )
+
+        # apply science filter
+        combined_res.filter_classification = apply_research_filter(combined_res)
+        post_processed_res = combined_res
+
+        if self.config.post_process_type == PostProcessType.FIREBASE:
+            post_processed_res = post_process_firebase(combined_res, self.ontology_base)
+
+        return post_processed_res
 
     def process_text(
         self,
         text: str,
-        active_list: List[str] = None,
-        as_triplets: bool = False,
+        active_list: List[str] = None
     ):
         ref_post: RefPost = convert_text_to_ref_post(text)
-        return self.process_ref_post(ref_post, active_list, as_triplets)
+        return self.process_ref_post(ref_post, active_list)
 
     def batch_process_ref_posts(
         self,

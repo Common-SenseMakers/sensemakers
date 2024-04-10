@@ -7,7 +7,7 @@ import os
 import pytest
 from pydantic import ValidationError
 
-from utils import create_multi_chain_for_tests
+from utils import create_multi_chain_for_tests, create_multi_config_for_tests
 from desci_sense.shared_functions.parsers.multi_chain_parser import MultiChainParser
 from desci_sense.shared_functions.runners.configs import (
     OpenrouterAPIConfig,
@@ -19,6 +19,7 @@ from desci_sense.shared_functions.runners.configs import (
     validate_env_var,
     MultiParserChainConfig,
     ParserChainType,
+    PostProcessType,
 )  # Adjust the import as necessary
 from desci_sense.shared_functions.dataloaders import (
     scrape_post,
@@ -56,7 +57,7 @@ def test_kw_chain_md_disabled():
     post = scrape_post(url)
     res = mcp.process_ref_post(post)
     output = res["kw_test_2"]
-    assert "academic_kw" in res["kw_test"].answer
+    assert "research_keyword" in res["kw_test"].answer
     assert "keywords" in res["kw_test"].answer
     assert "keywords" in res["kw_test_2"].answer
     assert "itemType" not in output.extra["prompt"]
@@ -93,7 +94,7 @@ def test_active_list():
     post = scrape_post(url)
     res = mcp.process_ref_post(post, active_list=["kw_test"])
     # output = res["kw_test_2"]
-    assert "academic_kw" in res["kw_test"].answer
+    assert "research_keyword" in res["kw_test"].answer
     assert "keywords" in res["kw_test"].answer
     assert list(res.keys()) == ["kw_test"]
     # assert "keywords" in res["kw_test_2"].answer
@@ -175,11 +176,14 @@ def test_multi_chain_batch_simple():
     res = multi_chain_parser.batch_process_ref_posts(posts)
 
     assert len(res) == 3
+    
 
 
 if __name__ == "__main__":
-    kp = KeywordPParserChainConfig(name="test")
-    multi_config = MultiParserChainConfig(parser_configs=[kp])
+    
+    multi_config = create_multi_config_for_tests()
+    multi_config.post_process_type = PostProcessType.COMBINED
     mcp = MultiChainParser(multi_config)
+    res = mcp.process_text(TEST_POST_TEXT_W_REF)
     # assert "test" in mcp.pparsers
     # assert "Google Scholar is manipulatable" in prompt
