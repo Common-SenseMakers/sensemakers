@@ -8,6 +8,7 @@ import {
 
 import { getLoggedUser, postOrcidCode } from '../functionsCalls/auth.requests';
 import { AppUserRead } from '../shared/types';
+import { _appFetch } from './app.fetch';
 
 const DEBUG = true;
 
@@ -66,6 +67,12 @@ export const AccountContext = (props: PropsWithChildren) => {
   useEffect(() => {
     refresh();
   }, [token]);
+
+  useEffect(() => {
+    _appFetch('/api/posts/fetch', {}, token).then((res) => {
+      if (DEBUG) console.log('fetch posts', { res });
+    });
+  }, [connectedUser]);
 
   const disconnect = () => {
     if (DEBUG) console.log('disconnecting');
