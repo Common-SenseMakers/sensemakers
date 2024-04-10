@@ -47,5 +47,7 @@ export const FUNCTIONS_PY_URL =
 export const OUR_TOKEN_SECRET = envRuntime.OUR_TOKEN_SECRET;
 export const OUR_EXPIRES_IN = '30d';
 
-export const NANOPUBS_SPARQL_SERVER =
-  'https://query.np.trustyuri.net/repo/full';
+export const NANOPUBS_PUBLISH_SERVERS = [
+  'https://np.petapico.org/',
+  'https://np.knowledgepixels.com/',
+];

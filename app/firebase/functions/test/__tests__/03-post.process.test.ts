@@ -6,7 +6,7 @@ import { resetDB } from '../__tests_support__/db';
 import { createTestAppUsers } from '../utils/user.factory';
 import { services } from './test.services';
 
-describe.skip('process', () => {
+describe('process', () => {
   before(async () => {
     logger.debug('resetting DB');
     await resetDB();

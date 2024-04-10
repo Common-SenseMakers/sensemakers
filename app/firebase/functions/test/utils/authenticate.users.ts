@@ -1,11 +1,11 @@
 import puppeteer, { Browser } from 'puppeteer';
 import { IOAuth2RequestTokenResult } from 'twitter-api-v2';
 
-import { AppUser, PLATFORM } from '../../src/@shared/types';
+import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import {
   TwitterGetContextParams,
   TwitterSignupData,
-} from '../../src/@shared/types.twitter';
+} from '../../src/@shared/types/types.twitter';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { services } from '../__tests__/test.services';
 

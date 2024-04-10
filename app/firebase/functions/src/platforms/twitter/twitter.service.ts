@@ -14,7 +14,11 @@ import {
   PostAndAuthor,
   UserDetailsBase,
 } from '../../@shared/types/types';
-import { PlatformPost, PostToPublish } from '../../@shared/types/types.posts';
+import {
+  PlatformPost,
+  PlatformPostBase,
+  PostToPublish,
+} from '../../@shared/types/types.posts';
 import {
   TwitterGetContextParams,
   TwitterQueryParameters,
@@ -344,7 +348,7 @@ export class TwitterService
 
   public async fetch(
     params: FetchUserPostsParams[]
-  ): Promise<PlatformPost<TweetV2>[]> {
+  ): Promise<PlatformPostBase<TweetV2>[]> {
     const allAccountTweetPromises = params.map((fetchUserPostsParams) =>
       this.fetchInternal(
         {
@@ -376,7 +380,7 @@ export class TwitterService
         post_id: tweet.id,
         user_id: tweet.author_id,
         timestampMs: this.dateStrToTimestampMs(tweet.created_at),
-        original: tweet,
+        post: tweet,
       };
     });
   }
@@ -384,17 +388,20 @@ export class TwitterService
   public async convertToGeneric(
     platformPost: PlatformPost<TweetV2>
   ): Promise<GenericPostData> {
+    if (!platformPost.post) {
+      throw new Error('Unexpected undefined post');
+    }
     if (
-      platformPost.original.author_id &&
-      platformPost.original.author_id !== platformPost.user_id
+      platformPost.post.author_id &&
+      platformPost.post.author_id !== platformPost.user_id
     ) {
       throw new Error(
-        `unexpected author_id ${platformPost.original.author_id}, Expected ${platformPost.user_id} `
+        `unexpected author_id ${platformPost.post.author_id}, Expected ${platformPost.user_id} `
       );
     }
 
     return {
-      content: platformPost.original.text,
+      content: platformPost.post.text,
     };
   }
 
@@ -414,7 +421,7 @@ export class TwitterService
   /** user_id must be from the authenticated userId */
   public async publish(
     posts: PostToPublish[]
-  ): Promise<PlatformPost<TweetV2SingleResult>[]> {
+  ): Promise<PlatformPostBase<TweetV2SingleResult>[]> {
     // TODO udpate to support many
     const userDetails = posts[0].userDetails;
     const post = posts[0].post;
@@ -445,7 +452,7 @@ export class TwitterService
           post_id: tweet.data.id,
           user_id: tweet.data.author_id,
           timestampMs: this.dateStrToTimestampMs(tweet.data.created_at),
-          original: tweet,
+          post: tweet,
         },
       ];
     } catch (e: any) {

@@ -1,3 +1,5 @@
+import { PlatformPost } from 'src/@shared/types/types.platform.posts';
+
 import { DefinedIfTrue } from '../@shared/types/types';
 import { AppPost, PostUpdate } from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
@@ -53,21 +55,20 @@ export class PostsRepository {
     await doc.ref.set(post, { merge: true });
   }
 
-  /** only update the posts mirrors of an array AppPost[] */
-  public async updatePostsMirrors(posts: AppPost[]) {
+  public async storePosts(posts: AppPost[]) {
     const batch = this.db.batch;
     posts.forEach((post) => {
-      const postRef = this.db.collections.posts.doc(post.id);
-      batch.update(postRef, { mirrors: post.mirrors });
+      const postRef = this.db.collections.posts.doc();
+      batch.set(postRef, post);
     });
 
     await batch.commit();
   }
 
-  public async storePosts(posts: AppPost[]) {
+  public async updatePostsMirrors(platformPosts: PlatformPost[]) {
     const batch = this.db.batch;
-    posts.forEach((post) => {
-      const postRef = this.db.collections.posts.doc();
+    platformPosts.forEach((post) => {
+      const postRef = this.db.collections.platformPosts.doc(post.id);
       batch.set(postRef, post);
     });
 

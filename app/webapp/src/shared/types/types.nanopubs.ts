@@ -15,10 +15,6 @@ export interface NanopubUserProfile {
 export interface NanopubUserDetails
   extends UserDetailsBase<NanopubUserProfile, undefined, undefined> {}
 
-export interface AppPostConstructNanopub {
-  content: string;
-}
-
 export interface RSAKeys {
   privateKey: string;
   publicKey: string;

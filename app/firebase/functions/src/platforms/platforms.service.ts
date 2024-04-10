@@ -1,5 +1,13 @@
-import { PLATFORM, UserDetailsBase } from '../@shared/types/types';
-import { PlatformPost, PostToPublish } from '../@shared/types/types.posts';
+import {
+  PLATFORM,
+  PUBLISHABLE_PLATFORMS,
+  UserDetailsBase,
+} from '../@shared/types/types';
+import {
+  AppPostFull,
+  PlatformPost,
+  PlatformPostBase,
+} from '../@shared/types/types.posts';
 import {
   FetchUserPostsParams,
   IdentityService,
@@ -17,7 +25,7 @@ export type IdentityServicesMap = Map<
   IdentityService<any, any, UserDetailsBase>
 >;
 
-/** a simple wrapper of the Map to get defined and typed Platform services */
+/** a wrapper of the PlatformSerivces to get defined and typed Platform services */
 export class PlatformsService {
   constructor(protected platforms: PlatformsMap) {}
 
@@ -35,22 +43,25 @@ export class PlatformsService {
    * */
   public async fetch(
     fetchParams: FetchAllUserPostsParams
-  ): Promise<PlatformPost[]> {
+  ): Promise<PlatformPostBase[]> {
     const allPosts = await Promise.all(
-      Array.from(fetchParams.keys()).map(
-        async (platformId): Promise<PlatformPost[]> => {
-          const thisFetchParams = fetchParams.get(platformId);
-          if (thisFetchParams) {
-            return this.get(platformId).fetch(thisFetchParams);
-          } else {
-            return [];
-          }
+      Array.from(fetchParams.keys()).map(async (platformId) => {
+        const thisFetchParams = fetchParams.get(platformId);
+        if (thisFetchParams) {
+          const posts = await this.get(platformId).fetch(thisFetchParams);
+          /** append the platformId */
+          const postWithPlatform = posts.map((p): PlatformPostBase => {
+            return { ...p, platformId: platformId as PUBLISHABLE_PLATFORMS };
+          });
+          return postWithPlatform;
+        } else {
+          return [];
         }
-      )
+      })
     );
 
     /** concatenate the results from all platforms */
-    return allPosts.reduce((acc, currArray) => acc.concat(currArray), []);
+    return allPosts.flat();
   }
 
   public convertToGeneric(platformPost: PlatformPost) {
@@ -58,7 +69,7 @@ export class PlatformsService {
     return platform.convertToGeneric(platformPost);
   }
 
-  public publish(platformId: PLATFORM, posts: PostToPublish[]) {
+  public publish(platformId: PLATFORM, posts: AppPostFull[]) {
     const platform = this.get(platformId);
     return platform.publish(posts);
   }

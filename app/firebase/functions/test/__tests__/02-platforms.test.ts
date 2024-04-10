@@ -100,6 +100,7 @@ describe('platforms', () => {
         throw error;
       }
     });
+
     it.skip('refreshes the access token if it has expired when using the twitter service', async () => {
       if (!appUser) {
         throw new Error('appUser not created');

@@ -1,4 +1,4 @@
-import { AppUser } from '../../src/@shared/types';
+import { AppUser } from '../../src/@shared/types/types';
 import { testUsers } from '../__tests__/setup';
 import { services } from '../__tests__/test.services';
 

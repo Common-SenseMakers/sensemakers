@@ -15,15 +15,17 @@ import {
   PlatformsService,
 } from '../platforms/platforms.service';
 import { TwitterService } from '../platforms/twitter/twitter.service';
+import { PostsManager } from '../posts/posts.manager';
+import { PostsProcessing } from '../posts/posts.processing';
 import { PostsRepository } from '../posts/posts.repository';
-import { PostsService } from '../posts/posts.service';
 import { TimeService } from '../time/time.service';
 import { UsersRepository } from '../users/users.repository';
 import { UsersService } from '../users/users.service';
 
 export interface Services {
   users: UsersService;
-  posts: PostsService;
+  postsProcessing: PostsProcessing;
+  postsManager: PostsManager;
   platforms: PlatformsService;
 }
 
@@ -62,17 +64,19 @@ export const createServices = () => {
   const parserService = new ParserService(FUNCTIONS_PY_URL);
 
   /** posts service */
-  const postsService = new PostsService(
+  const postsProcessing = new PostsProcessing(platformsService, parserService);
+  const postsManager = new PostsManager(
     usersService,
-    platformsService,
     postsRepo,
-    parserService
+    postsProcessing,
+    platformsService
   );
 
   /** all services */
   const services: Services = {
     users: usersService,
-    posts: postsService,
+    postsProcessing: postsProcessing,
+    postsManager: postsManager,
     platforms: platformsService,
   };
 

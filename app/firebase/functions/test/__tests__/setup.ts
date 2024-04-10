@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { Context } from 'mocha';
 
-import { AppUser, PLATFORM } from '../../src/@shared/types';
+import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import { envDeploy } from '../../src/config/typedenv.deploy';
 import { resetDB } from '../__tests_support__/db';
 import { LocalLogger, LogLevel } from '../__tests_support__/test.logger';

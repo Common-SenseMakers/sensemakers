@@ -14,7 +14,7 @@ export class UsersHelper {
     user: AppUser,
     platformId: PUBLISHABLE_PLATFORMS,
     user_id: string | undefined,
-    _throw: T
+    _throw?: T
   ): DefinedIfTrue<T, UserDetailsBase> {
     const platformAccounts = user[platformId];
 

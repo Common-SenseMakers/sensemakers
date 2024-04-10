@@ -1,9 +1,12 @@
+import { PLATFORM, UserDetailsBase } from '../@shared/types/types';
 import {
-  PLATFORM,
+  GenericPostData,
+  PlatformPost,
+  PlatformPostPosted,
+  PlatformPostPublishWithCrendentials,
+  PlatformPostPublished,
   PostAndAuthor,
-  UserDetailsBase,
-} from '../@shared/types/types';
-import { PlatformPost, PostToPublish } from '../@shared/types/types.posts';
+} from '../@shared/types/types.posts';
 
 /** use conditional types to dynamically assign credential types for each platform */
 export type CredentialsForPlatform<P> = P extends PLATFORM.Twitter
@@ -27,17 +30,15 @@ export interface IdentityService<
   handleSignupData: (signupData: SignupData) => Promise<UserDetails>;
 }
 
-export interface GenericPostData {
-  content: string;
-}
-
 export interface PlatformService<
   SignupContext = any,
   SignupData = any,
   UserDetails extends UserDetailsBase = UserDetailsBase,
 > extends IdentityService<SignupContext, SignupData, UserDetails> {
-  fetch(params: FetchUserPostsParams[]): Promise<PlatformPost[]>;
-  publish(posts: PostToPublish[]): Promise<PlatformPost[]>;
+  fetch(params: FetchUserPostsParams[]): Promise<PlatformPostPosted[]>;
+  publish(
+    posts: PlatformPostPublishWithCrendentials[]
+  ): Promise<PlatformPostPublished[]>;
   convertToGeneric(platformPost: PlatformPost): Promise<GenericPostData>;
-  convertFromGeneric(postAndAuthor: PostAndAuthor): Promise<PlatformPost>;
+  convertFromGeneric(postAndAuthor: PostAndAuthor): Promise<any>;
 }

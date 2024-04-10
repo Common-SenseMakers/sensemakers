@@ -1,6 +1,5 @@
 import { NanopubUserDetails } from './types.nanopubs';
 import { OrcidUserDetails } from './types.orcid';
-import { AppPost } from './types.posts';
 import { TwitterUserDetails } from './types.twitter';
 
 export enum PLATFORM {
@@ -72,12 +71,6 @@ export interface AppUserRead extends UserWithId {
   [PLATFORM.Orcid]?: UserDetailsReadBase<OrcidUserDetails['profile']>[];
   [PLATFORM.Twitter]?: UserDetailsReadBase<TwitterUserDetails['profile']>[];
   [PLATFORM.Nanopub]?: UserDetailsReadBase<NanopubUserDetails['profile']>[];
-}
-
-/** */
-export interface PostAndAuthor {
-  post: AppPost;
-  author: AppUser;
 }
 
 /** Support types */

@@ -14,6 +14,7 @@ export class DBInstance {
     signup: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
     users: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
     posts: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
+    platformPosts: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
   };
 
   constructor() {
@@ -22,6 +23,7 @@ export class DBInstance {
       signup: this.firestore.collection(CollectionNames.Signup),
       users: this.firestore.collection(CollectionNames.Users),
       posts: this.firestore.collection(CollectionNames.Posts),
+      platformPosts: this.firestore.collection(CollectionNames.PlatformPosts),
     };
   }
 
