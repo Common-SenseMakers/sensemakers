@@ -9,13 +9,17 @@ import {
   getSignupContextController,
   handleSignupController,
 } from './controllers/platforms.auth.controller';
+import { fetchUserPostsController } from './controllers/posts.controller';
 import { buildApp } from './instances/app';
 import { fetchNewPosts } from './posts/posts.job';
 
 const authRouter = express.Router();
+const apiRouter = express.Router();
 
 authRouter.post('/auth/:platform/context', getSignupContextController);
 authRouter.post('/auth/:platform/signup', handleSignupController);
+
+apiRouter.post('/api/posts/fetch', fetchUserPostsController);
 
 export const app = functions
   .region(envDeploy.REGION)

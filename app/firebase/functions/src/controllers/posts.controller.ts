@@ -25,3 +25,23 @@ export const mirrorPostController: RequestHandler = async (
     response.status(500).send({ success: false, error });
   }
 };
+
+export const fetchUserPostsController: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    const userId = getAuthenticatedUser(request, true);
+    const services = getServices(request);
+
+    services.posts.fetchFromUsers([userId], true).then((posts) => {
+      services.posts.parse(posts).then((postsWithSemantics) => {
+        services.posts.preProcess(postsWithSemantics, true);
+      });
+    });
+    response.status(200).send({ success: true });
+  } catch (error) {
+    logger.error('error', error);
+    response.status(500).send({ success: false, error });
+  }
+};
