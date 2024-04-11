@@ -23,13 +23,27 @@ export class PostsManager {
     protected platforms: PlatformsService
   ) {}
 
+  /** run function with manager or create one */
+  private run<P, R>(
+    func: HandleWithTransactionManager<P, R>,
+    payload: P,
+    manager?: TransactionManager
+  ): Promise<R> {
+    if (manager) {
+      return func(payload, manager);
+    } else {
+      return this.db.runWithTransactionManager(func, payload, {
+        mode: ManagerModes.TRANSACTION,
+      });
+    }
+  }
+
   /**
    * Reads all PlatformPosts from all users and returns a combination of PlatformPosts
    * and authors
    * */
-  async fetchAll() {
-    await this.db.runWithTransactionManager(
-      async (payload, manager) => {
+  async fetchAll(_manager?: TransactionManager) {
+    const func: HandleWithTransactionManager<undefined, (PlatformPostCreate | undefined)[]> = async (payload, manager) => {
         const users = await this.users.repo.getAll();
         const params = new Map();
 
@@ -80,12 +94,14 @@ export class PostsManager {
       undefined,
       { mode: ManagerModes.TRANSACTION }
     );
+
+    return this.run(func, undefined, _manager);
   }
 
   /** Store all platform posts (can use an existing TransactionManager or create new one) */
   async storePlatformPosts(
     platformPosts: PlatformPostCreate[],
-    manager?: TransactionManager
+    _manager?: TransactionManager
   ) {
     const func: HandleWithTransactionManager<
       undefined,
@@ -101,12 +117,6 @@ export class PostsManager {
       );
     };
 
-    if (manager) {
-      return func(undefined, manager);
-    } else {
-      return this.db.runWithTransactionManager(func, undefined, {
-        mode: ManagerModes.TRANSACTION,
-      });
-    }
+    return this.run(func, undefined, _manager);
   }
 }
