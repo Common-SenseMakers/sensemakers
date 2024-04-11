@@ -25,21 +25,21 @@ from desci_sense.shared_functions.runners.configs import (
     ParserChainType,
 )
 
-def create_multi_config_for_tests():
+def create_multi_config_for_tests(llm_type: str = "mistralai/mistral-7b-instruct:free"):
     kp = KeywordPParserChainConfig(
         name="kw_test",
         use_metadata=True,
-        llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
+        llm_config=LLMConfig(llm_type=llm_type),
     )
     rtc = RefTaggerChainConfig(
         name="refs_tag_test",
         use_metadata=True,
-        llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
+        llm_config=LLMConfig(llm_type=llm_type),
     )
     tpc = TopicsPParserChainConfig(
         name="topic_test",
         use_metadata=True,
-        llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
+        llm_config=LLMConfig(llm_type=llm_type),
     )
     multi_config = MultiParserChainConfig(
         parser_configs=[

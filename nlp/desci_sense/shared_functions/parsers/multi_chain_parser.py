@@ -1,5 +1,5 @@
 from loguru import logger
-from typing import List, Dict
+from typing import List, Dict, Union
 from operator import itemgetter
 import asyncio
 
@@ -26,6 +26,7 @@ from ..postprocessing import (
     convert_raw_output_to_st_format,
     convert_raw_outputs_to_st_format,
     CombinedParserOutput,
+    ParserChainOutput,
     post_process_chain_output,
     post_process_firebase,
 )
@@ -47,6 +48,15 @@ from ..prompting.jinja.single_ref_template import single_ref_template
 from ..prompting.jinja.keywords_extraction_template import keywords_extraction_template
 from ..prompting.jinja.multi_ref_template import multi_ref_template
 from ..prompting.jinja.topics_template import ALLOWED_TOPICS, topics_template
+
+
+def add_prompts_to_output(
+    raw_output: Dict[str, ParserChainOutput],
+    prompts_dict: Dict,
+):
+    # add full prompts for debugging purposes
+    for name, output in raw_output.items():
+        output.extra["prompt"] = prompts_dict[f"{name}_input"]
 
 
 class MultiChainParser:
@@ -112,7 +122,38 @@ class MultiChainParser:
         combined_results.filter_classification = result
         return combined_results
 
-    # def filter_and_post_process(self, ):
+    def post_process_raw_results(
+        self,
+        post: RefPost,
+        inst_prompt_dict: Dict[str, str],
+        raw_results: Dict[str, ParserChainOutput],
+        md_dict: Dict[str, RefMetadata],
+        post_process_type: PostProcessType,
+    ) -> Union[Dict[str, ParserChainOutput], CombinedParserOutput, ParserResult]:
+        # add full prompts for debugging purposes
+        add_prompts_to_output(raw_results, inst_prompt_dict)
+
+        # post processing to specified format
+        if post_process_type == PostProcessType.NONE:
+            return raw_results
+
+        # convert raw outputs to combined format
+        combined_res = post_process_chain_output(
+            post,
+            raw_results,
+            md_dict,
+            self.ontology_base,
+            PostProcessType.COMBINED,
+        )
+
+        # apply science filter
+        combined_res.filter_classification = apply_research_filter(combined_res)
+        post_processed_res = combined_res
+
+        if post_process_type == PostProcessType.FIREBASE:
+            post_processed_res = post_process_firebase(combined_res, self.ontology_base)
+
+        return post_processed_res
 
     def process_ref_post(
         self,
@@ -137,36 +178,17 @@ class MultiChainParser:
         logger.debug("Invoking parallel chain...")
         res = parallel_chain.invoke(inst_prompts)
 
-        # add full prompts for debugging purposes
-        for name, output in res.items():
-            output.extra["prompt"] = inst_prompts[f"{name}_input"]
-
-        if self.config.post_process_type == PostProcessType.NONE:
-            return res
-
-        # post processing to specified format
-        combined_res = post_process_chain_output(
+        post_processed_res = self.post_process_raw_results(
             post,
+            inst_prompts,
             res,
             md_dict,
-            self.ontology_base,
-            PostProcessType.COMBINED,
+            self.config.post_process_type,
         )
-
-        # apply science filter
-        combined_res.filter_classification = apply_research_filter(combined_res)
-        post_processed_res = combined_res
-
-        if self.config.post_process_type == PostProcessType.FIREBASE:
-            post_processed_res = post_process_firebase(combined_res, self.ontology_base)
 
         return post_processed_res
 
-    def process_text(
-        self,
-        text: str,
-        active_list: List[str] = None
-    ):
+    def process_text(self, text: str, active_list: List[str] = None):
         ref_post: RefPost = convert_text_to_ref_post(text)
         return self.process_ref_post(ref_post, active_list)
 
@@ -214,7 +236,22 @@ class MultiChainParser:
             )
         )
 
-        return results
+        # post processing results
+        logger.debug(f"Post processing {len(results)} results...")
+        post_processed_results = []
+        for post, result, prompts_dict in zip(inputs, results, inst_prompts):
+            post_processed_res = self.post_process_raw_results(
+                post,
+                prompts_dict,
+                result,
+                md_dict,
+                self.config.post_process_type,
+            )
+            post_processed_results.append(post_processed_res)
+
+        logger.debug("Done!")
+
+        return post_processed_results
 
         # st_outputs = convert_raw_outputs_to_st_format(
         #     inputs,

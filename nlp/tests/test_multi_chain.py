@@ -196,7 +196,7 @@ def test_metadata_fail():
 
 if __name__ == "__main__":
     
-    multi_config = create_multi_config_for_tests()
+    multi_config = create_multi_config_for_tests(llm_type="google/gemma-7b-it:free")
     multi_config.post_process_type = PostProcessType.COMBINED
     mcp = MultiChainParser(multi_config)
     res = mcp.process_text(TEST_POST_TEXT_W_REF)
