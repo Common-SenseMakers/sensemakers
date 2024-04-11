@@ -2,7 +2,7 @@ import { Nanopub } from '@nanopub/sign';
 import { DataFactory, Store } from 'n3';
 
 import { AppUser, PLATFORM } from '../../@shared/types/types';
-import { AppPost } from '../../@shared/types/types.posts';
+import { AppPostFull } from '../../@shared/types/types.posts';
 import { parseRDF, replaceNodes, writeRDF } from '../../@shared/utils/n3.utils';
 import {
   ASSERTION_URI,
@@ -11,7 +11,10 @@ import {
   THIS_POST_NAME,
 } from '../../@shared/utils/semantics.helper';
 
-export const createNanopublication = async (post: AppPost, user: AppUser) => {
+export const createNanopublication = async (
+  post: AppPostFull,
+  user: AppUser
+) => {
   const semantics = post.semantics;
   const content = post.content;
   const orcid = user.orcid && user.orcid[0].user_id;

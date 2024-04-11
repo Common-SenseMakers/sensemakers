@@ -1,4 +1,5 @@
 import { PLATFORM, PUBLISHABLE_PLATFORMS, UserDetailsBase } from './types';
+import { AppPost } from './types.posts';
 
 /**
  * Platform posts as stored in our DB. A platform post can be in one of these statuses
@@ -19,15 +20,15 @@ export interface PlatformPost<C = any, D = any> {
   draft?: PlatformPostDraft<D>;
 }
 
-export type PlatformPostCreate = Omit<PlatformPost, 'id'>;
+export type PlatformPostCreate<C = any> = Omit<PlatformPost<C>, 'id'>;
 
 /**
  * The PlatformPostPosted status is defined after a PlatformPost
  * has been published to its platform
  */
 export interface PlatformPostPosted<C = any> {
-  platformId: PUBLISHABLE_PLATFORMS;
   user_id: string; // The itended user_id of when publishing
+  // platformId?: PUBLISHABLE_PLATFORMS; // Only needed in some cases
   post_id: string; // The id of the platform post on the platform
   timestampMs: number; // timestamp in ms
   post: C;
@@ -50,15 +51,6 @@ export interface PlatformPostPublish<D = any> {
   draft: D;
 }
 
-/**
- * A published post is like a fetched post except it must also include
- * the original id
- * */
-export interface PlatformPostPublished<C = any> {
-  id: string;
-  postStatus: PlatformPostPosted<C>;
-}
-
 export interface PlatformPostPublishWithCrendentials {
   platformPost: PlatformPostPublish;
   userDetails: UserDetailsBase;
@@ -68,3 +60,8 @@ export type PerPlatformPublish = Map<
   PLATFORM,
   PlatformPostPublishWithCrendentials[]
 >;
+
+export interface PlatformPostCreated {
+  post: AppPost;
+  platformPost: PlatformPost;
+}

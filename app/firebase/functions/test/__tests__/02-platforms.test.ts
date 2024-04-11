@@ -3,7 +3,7 @@ import { expect } from 'chai';
 
 import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
-import { AppPost } from '../../src/@shared/types/types.posts';
+import { AppPost, AppPostFull } from '../../src/@shared/types/types.posts';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { cleanPrivateKey } from '../../src/@shared/utils/semantics.helper';
 import { logger } from '../../src/instances/logger';
@@ -12,7 +12,7 @@ import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../__tests_support__/db';
 import { createTestAppUsers } from '../utils/user.factory';
-import { MockedTime, services, userRepo } from './test.services';
+import { MockedTime, services } from './test.services';
 
 describe('platforms', () => {
   let users: AppUser[] = [];
@@ -81,17 +81,14 @@ describe('platforms', () => {
           throw new Error('User does not have Twitter credentials');
         }
 
-        const fetchParams: FetchUserPostsParams[] = [
-          {
-            userDetails: {
-              ...userDetails,
-              user_id: '1753077743816777728', // this is `sensemakergod`'s user_id, since we want to test pagination.
-            },
-            start_time: 1708560000000,
-            end_time: 1708646400000,
+        const fetchParams: FetchUserPostsParams = {
+          userDetails: {
+            ...userDetails,
+            user_id: '1753077743816777728', // this is `sensemakergod`'s user_id, since we want to test pagination.
           },
-        ];
-
+          start_time: 1708560000000,
+          end_time: 1708646400000,
+        };
         const tweets = await twitterService.fetch(fetchParams);
         expect(tweets).to.not.be.undefined;
         expect(tweets.length).to.be.equal(11);
@@ -110,17 +107,19 @@ describe('platforms', () => {
         throw new Error('Unexpected');
       }
       const userDetails = allUserDetails[0];
-      const twitterService = new TwitterService(MockedTime, userRepo, {
-        clientId: process.env.TWITTER_CLIENT_ID as string,
-        clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
-      });
-
-      const tweets = await twitterService.fetch([
+      const twitterService = new TwitterService(
+        MockedTime,
+        services.users.repo,
         {
-          userDetails,
-          start_time: Date.now() - 1000,
-        },
-      ]);
+          clientId: process.env.TWITTER_CLIENT_ID as string,
+          clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
+        }
+      );
+
+      const tweets = await twitterService.fetch({
+        userDetails,
+        start_time: Date.now() - 1000,
+      });
       expect(tweets).to.not.be.undefined;
       const user = await services.users.repo.getUserWithPlatformAccount(
         PLATFORM.Twitter,
@@ -136,38 +135,27 @@ describe('platforms', () => {
   });
 
   describe.only('nanopub', () => {
-    let post: AppPost | undefined;
+    let post: AppPostFull | undefined;
 
     it('creates a draft nanopub', async () => {
       const nanopubService = services.platforms.get(PLATFORM.Nanopub);
 
       try {
         post = {
+          id: 'test-id',
           authorId: users[0].userId,
           content: 'test content',
-          id: 'test-id',
           semantics: '',
-          mirrors: {},
           origin: PLATFORM.Twitter,
           parseStatus: 'processed',
           reviewedStatus: 'pending',
+          mirrors: [],
         };
 
         const nanopub = await nanopubService.convertFromGeneric({
           post,
           author: users[0],
         });
-
-        expect(nanopub).to.not.be.undefined;
-        post.mirrors.nanopub = [
-          {
-            user_id: '123456',
-            platformId: PLATFORM.Nanopub,
-            postApproval: 'pending',
-            status: 'draft',
-            platformDraft: nanopub,
-          },
-        ];
       } catch (error) {
         console.error('error: ', error);
         throw error;
@@ -182,37 +170,8 @@ describe('platforms', () => {
           throw new Error('Post not created');
         }
 
-        // const nanopub = PostsHelper.getMirror(post, PLATFORM.Nanopub, true);
-        // const nanopubObj = new Nanopub(nanopub.platformDraft.original);
-        const nanopubObj =
-          new Nanopub(`@prefix : <http://purl.org/nanopub/temp/mynanopub#> .
-        @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-        @prefix dc: <http://purl.org/dc/terms/> .
-        @prefix pav: <http://purl.org/pav/> .
-        @prefix prov: <http://www.w3.org/ns/prov#> .
-        @prefix np: <http://www.nanopub.org/nschema#> .
-        @prefix npx: <http://purl.org/nanopub/x/> .
-        @prefix ex: <http://example.org/> .
-        
-        :Head {
-          : np:hasAssertion :assertion ;
-            np:hasProvenance :provenance ;
-            np:hasPublicationInfo :pubinfo ;
-            a np:Nanopublication .
-        }
-        
-        :assertion {
-          ex:mosquito ex:transmits ex:malaria .
-        }
-        
-        :provenance {
-          :assertion prov:hadPrimarySource <http://dx.doi.org/10.3233/ISU-2010-0613> .
-        }
-        
-        :pubinfo {
-          : a npx:ExampleNanopub .
-        }
-        `);
+        const nanopub = services.posts;
+        const nanopubObj = new Nanopub(nanopub.platformDraft.original);
 
         const nanopubAccount = UsersHelper.getAccount(
           users[0],
@@ -242,11 +201,11 @@ describe('platforms', () => {
 
         expect(signed).to.not.be.undefined;
 
-        const published = await nanopubService.publish([
-          { post, userDetails: nanopubAccount },
-        ]);
+        const published = await nanopubService.publish({
+          post,
+          userDetails: nanopubAccount,
+        });
         expect(published).to.not.be.undefined;
-        expect(published.length).to.be.equal(1);
       } catch (error) {
         console.error('error: ', error);
         throw error;

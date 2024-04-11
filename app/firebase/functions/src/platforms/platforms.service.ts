@@ -37,32 +37,9 @@ export class PlatformsService {
     return platform as T;
   }
 
-  /**
-   * fetch posts from the provided platforms and for the provided user_ids and timestamps
-   * */
-  public async fetchAll(
-    fetchParams: FetchAllUserPostsParams
-  ): Promise<PlatformPostCreate[]> {
-    const all = await Promise.all(
-      Array.from(fetchParams.keys()).map(async (platformId) => {
-        const thisFetchParams = fetchParams.get(platformId);
-        if (thisFetchParams) {
-          return this.fetchOne(platformId, thisFetchParams);
-        } else {
-          return [];
-        }
-      })
-    );
-
-    return all.flat();
-  }
-
-  public async fetchOne(
-    platformId: PLATFORM,
-    thisFetchParams: FetchUserPostsParams[]
-  ) {
+  public async fetch(platformId: PLATFORM, params: FetchUserPostsParams) {
     /** all fetched posts from one platform */
-    const fetched = await this.get(platformId).fetch(thisFetchParams);
+    const fetched = await this.get(platformId).fetch(params);
 
     /** convert them into a PlatformPost */
     return fetched.map((fetchedPost) => {
@@ -84,9 +61,9 @@ export class PlatformsService {
 
   public publish(
     platformId: PLATFORM,
-    posts: PlatformPostPublishWithCrendentials[]
+    postPublish: PlatformPostPublishWithCrendentials
   ) {
     const platform = this.get(platformId);
-    return platform.publish(posts);
+    return platform.publish(postPublish);
   }
 }

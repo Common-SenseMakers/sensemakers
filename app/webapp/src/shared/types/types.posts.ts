@@ -1,4 +1,4 @@
-import { AppUser, PLATFORM, PUBLISHABLE_PLATFORMS } from './types';
+import { AppUser, PLATFORM } from './types';
 import { AppPostSemantics, ParsePostResult } from './types.parser';
 import { PlatformPost } from './types.platform.posts';
 

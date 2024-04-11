@@ -1,8 +1,19 @@
 import { Nanopub } from '@nanopub/sign';
+import { UsersHelper } from 'src/users/users.helper';
 
-import { UserDetailsBase } from '../../@shared/types/types';
+import { PLATFORM, UserDetailsBase } from '../../@shared/types/types';
 import { NanopubUserProfile } from '../../@shared/types/types.nanopubs';
-import { AppPostMirror } from '../../@shared/types/types.posts';
+import {
+  PlatformPost,
+  PlatformPostDraft,
+  PlatformPostPosted,
+  PlatformPostPublishWithCrendentials,
+} from '../../@shared/types/types.platform.posts';
+import {
+  AppPostMirror,
+  GenericPostData,
+  PostAndAuthor,
+} from '../../@shared/types/types.posts';
 import { NANOPUBS_PUBLISH_SERVERS } from '../../config/config.runtime';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
@@ -21,18 +32,28 @@ export class NanopubService
 {
   constructor(protected time: TimeService) {}
 
-  /** converts a post into a nanopublication string */
+  /** converts a post into a nanopublication draft */
   async convertFromGeneric(
     postAndAuthor: PostAndAuthor
-  ): Promise<PlatformPostBase<string>> {
+  ): Promise<PlatformPostDraft<string>> {
+    /** TODO: What if one user has many nanopub accounts? */
+
+    const account = UsersHelper.getAccount(
+      postAndAuthor.author,
+      PLATFORM.Nanopub,
+      undefined,
+      true
+    );
+
     const nanopubDraft = await createNanopublication(
       postAndAuthor.post,
       postAndAuthor.author
     );
-    /** post_id is not defined until it's signed  */
+
     return {
-      timestampMs: this.time.now(),
-      draft: nanopubDraft.rdf(),
+      post: nanopubDraft.rdf(),
+      user_id: account.user_id,
+      postApproval: 'pending',
     };
   }
 
@@ -40,67 +61,54 @@ export class NanopubService
    * Receives a list of PostToPublish (platformPost, mirrors and user credentials) and returns
    * a list of the updated platformPosts
    */
-  async publish(posts: PostToPublish[]): Promise<PlatformPost<any>[]> {
-    const allPublished: PlatformPost<any>[] = [];
+  async publish(
+    postPublish: PlatformPostPublishWithCrendentials
+  ): Promise<PlatformPostPosted<any>> {
+    let published: Nanopub | undefined = undefined;
+    const draft = new Nanopub(postPublish.platformPost.draft);
 
-    await Promise.all(
-      posts.map(async (post) => {
-        const published = await Promise.all(
-          post.mirrors.map(async (mirrorWithDraft) => {
-            let nanopub: Nanopub | undefined = undefined;
+    let stop: boolean = false;
+    let serverIx = 0;
 
-            if (
-              mirrorWithDraft.status === 'draft' &&
-              mirrorWithDraft.postApproval === 'approved'
-            ) {
-              const draft = new Nanopub(mirrorWithDraft.platformDraft.original);
-
-              let stop: boolean = false;
-              let serverIx = 0;
-
-              while (!stop) {
-                try {
-                  if (serverIx < NANOPUBS_PUBLISH_SERVERS.length) {
-                    nanopub = await draft.publish(
-                      undefined,
-                      NANOPUBS_PUBLISH_SERVERS[serverIx]
-                    );
-                    stop = true;
-                  } else {
-                    stop = true;
-                  }
-                } catch (error) {
-                  logger.error(
-                    `Error publishing nanopub from ${NANOPUBS_PUBLISH_SERVERS[serverIx]}, retrying`,
-                    error
-                  );
-                  serverIx++;
-                }
-              }
-            }
-
-            /** store the published nanopub */
-            if (nanopub) {
-              mirrorWithDraft.platformPost = nanopub.rdf();
-              return mirrorWithDraft;
-            }
-
-            return undefined;
-          })
+    while (!stop) {
+      try {
+        if (serverIx < NANOPUBS_PUBLISH_SERVERS.length) {
+          published = await draft.publish(
+            undefined,
+            NANOPUBS_PUBLISH_SERVERS[serverIx]
+          );
+          stop = true;
+        } else {
+          stop = true;
+        }
+      } catch (error) {
+        logger.error(
+          `Error publishing nanopub from ${NANOPUBS_PUBLISH_SERVERS[serverIx]}, retrying`,
+          error
         );
+        serverIx++;
+      }
+    }
 
-        allPublished.push();
-      })
-    );
+    if (published) {
+      console.log('Check info()');
+      const platfformPostPosted: PlatformPostPosted = {
+        post_id: published.info().uri,
+        timestampMs: Date.now(),
+        user_id: postPublish.userDetails.user_id,
+        post: published.rdf(),
+      };
+      return platfformPostPosted;
+    }
 
-    return allPublished;
+    throw new Error('Could not publish nanopub');
   }
 
   convertToGeneric(platformPost: PlatformPost<any>): Promise<GenericPostData> {
     throw new Error('Method not implemented.');
   }
 
-  fetch(params: FetchUserPostsParams[]): Promise<PlatformPost<any>[]> {
+  fetch(params: FetchUserPostsParams): Promise<PlatformPostPosted<any>[]> {
     throw new Error('Method not implemented.');
   }
 

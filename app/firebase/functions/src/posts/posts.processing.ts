@@ -1,33 +1,34 @@
-import { PlatformPostCreate } from '../@shared/types/types.platform.posts';
+import {
+  PlatformPost,
+  PlatformPostCreate,
+} from '../@shared/types/types.platform.posts';
 import { AppPost, AppPostCreate } from '../@shared/types/types.posts';
 import { TransactionManager } from '../db/transaction.manager';
 import { PlatformsService } from '../platforms/platforms.service';
 import { UsersService } from '../users/users.service';
 import { getPrefixedUserId } from '../users/users.utils';
 import { PlatformPostaRepository } from './platform.posts.repository';
-import { PostsParser } from './posts.parser';
 import { PostsRepository } from './posts.repository';
 
 /**
  * Per-PlatformPost or Per-AppPost methods.
  * They operate over a TransactionManager
  */
-export class PostsManager {
+export class PostsProcessing {
   constructor(
     protected users: UsersService,
     protected posts: PostsRepository,
     protected platformPosts: PlatformPostaRepository,
-    protected processing: PostsParser,
     protected platforms: PlatformsService
   ) {}
 
   /**
    * Checks if a PlatformPost exist and creates it if not. It also creates an AppPost
    * */
-  async storePlatformPost(
+  async createPlatformPost(
     platformPost: PlatformPostCreate,
     manager: TransactionManager
-  ) {
+  ): Promise<PlatformPostCreate | undefined> {
     const existing = platformPost.posted
       ? await this.platformPosts.getFromPostId(
           platformPost.posted.post_id,
@@ -36,8 +37,7 @@ export class PostsManager {
       : undefined;
 
     if (existing) {
-      /** If the platformPost exists, do nothing and return it */
-      return existing;
+      return undefined;
     }
 
     /** if a platformPost does not exist (must likely scenario) then create a new AppPost for this PlatformPost */

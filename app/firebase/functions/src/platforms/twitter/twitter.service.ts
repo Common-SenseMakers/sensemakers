@@ -9,15 +9,17 @@ import {
   TwitterApiReadOnly,
 } from 'twitter-api-v2';
 
+import { PLATFORM, UserDetailsBase } from '../../@shared/types/types';
 import {
-  PLATFORM,
+  PlatformPostCreate,
+  PlatformPostDraft,
+  PlatformPostPosted,
+  PlatformPostPublishWithCrendentials,
+} from '../../@shared/types/types.platform.posts';
+import '../../@shared/types/types.posts';
+import {
+  GenericPostData,
   PostAndAuthor,
-  UserDetailsBase,
-} from '../../@shared/types/types';
-import {
-  PlatformPost,
-  PlatformPostBase,
-  PostToPublish,
 } from '../../@shared/types/types.posts';
 import {
   TwitterGetContextParams,
@@ -29,11 +31,7 @@ import {
 } from '../../@shared/types/types.twitter';
 import { TimeService } from '../../time/time.service';
 import { UsersRepository } from '../../users/users.repository';
-import {
-  FetchUserPostsParams,
-  GenericPostData,
-  PlatformService,
-} from '../platforms.interface';
+import { FetchUserPostsParams, PlatformService } from '../platforms.interface';
 import { handleTwitterError } from './twitter.utils';
 
 export interface TwitterApiCredentials {
@@ -347,26 +345,20 @@ export class TwitterService
   }
 
   public async fetch(
-    params: FetchUserPostsParams[]
-  ): Promise<PlatformPostBase<TweetV2>[]> {
-    const allAccountTweetPromises = params.map((fetchUserPostsParams) =>
-      this.fetchInternal(
-        {
-          user_id: fetchUserPostsParams.userDetails.user_id,
-          start_time: new Date(fetchUserPostsParams.start_time).toISOString(),
-          end_time: fetchUserPostsParams.end_time
-            ? new Date(fetchUserPostsParams.end_time).toISOString()
-            : undefined,
-        },
-        fetchUserPostsParams.userDetails
-      )
+    params: FetchUserPostsParams
+  ): Promise<PlatformPostPosted<TweetV2>[]> {
+    const tweets = await this.fetchInternal(
+      {
+        user_id: params.userDetails.user_id,
+        start_time: new Date(params.start_time).toISOString(),
+        end_time: params.end_time
+          ? new Date(params.end_time).toISOString()
+          : undefined,
+      },
+      params.userDetails
     );
 
-    const allAccountTweets = (
-      await Promise.all(allAccountTweetPromises)
-    ).flat();
-
-    return allAccountTweets.map((tweet) => {
+    return tweets.map((tweet) => {
       if (!tweet.author_id) {
         throw new Error(`Unexpected author_id undefined`);
       }
@@ -376,7 +368,6 @@ export class TwitterService
         );
       }
       return {
-        platformId: PLATFORM.Twitter,
         post_id: tweet.id,
         user_id: tweet.author_id,
         timestampMs: this.dateStrToTimestampMs(tweet.created_at),
@@ -386,22 +377,14 @@ export class TwitterService
   }
 
   public async convertToGeneric(
-    platformPost: PlatformPost<TweetV2>
+    platformPost: PlatformPostCreate<TweetV2>
   ): Promise<GenericPostData> {
-    if (!platformPost.post) {
-      throw new Error('Unexpected undefined post');
-    }
-    if (
-      platformPost.post.author_id &&
-      platformPost.post.author_id !== platformPost.user_id
-    ) {
-      throw new Error(
-        `unexpected author_id ${platformPost.post.author_id}, Expected ${platformPost.user_id} `
-      );
+    if (!platformPost.posted) {
+      throw new Error('Unexpected undefined posted');
     }
 
     return {
-      content: platformPost.post.text,
+      content: platformPost.posted.post.text,
     };
   }
 
@@ -420,16 +403,17 @@ export class TwitterService
 
   /** user_id must be from the authenticated userId */
   public async publish(
-    posts: PostToPublish[]
-  ): Promise<PlatformPostBase<TweetV2SingleResult>[]> {
+    postPublish: PlatformPostPublishWithCrendentials
+  ): Promise<PlatformPostPosted<TweetV2SingleResult>> {
     // TODO udpate to support many
-    const userDetails = posts[0].userDetails;
-    const post = posts[0].post;
+    const userDetails = postPublish.userDetails;
+    const post = postPublish.platformPost;
 
     const client = await this.getClient(userDetails, 'write');
 
     try {
-      const result = await client.v2.tweet(post.content);
+      // Post the tweet and also read the tweet
+      const result = await client.v2.tweet(post.draft.text);
       if (result.errors) {
         throw new Error(`Error posting tweet`);
       }
@@ -446,21 +430,20 @@ export class TwitterService
         );
       }
 
-      return [
-        {
-          platformId: PLATFORM.Twitter,
-          post_id: tweet.data.id,
-          user_id: tweet.data.author_id,
-          timestampMs: this.dateStrToTimestampMs(tweet.data.created_at),
-          post: tweet,
-        },
-      ];
+      return {
+        post_id: tweet.data.id,
+        user_id: tweet.data.author_id,
+        timestampMs: this.dateStrToTimestampMs(tweet.data.created_at),
+        post: tweet,
+      };
     } catch (e: any) {
       throw new Error(handleTwitterError(e));
     }
   }
 
-  convertFromGeneric(postAndAuthor: PostAndAuthor): Promise<PlatformPost<any>> {
+  convertFromGeneric(
+    postAndAuthor: PostAndAuthor
+  ): Promise<PlatformPostDraft<any>> {
     throw new Error('Method not implemented.');
   }
 }

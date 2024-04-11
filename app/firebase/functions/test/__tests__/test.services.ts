@@ -1,10 +1,8 @@
-import { anything, instance, spy, when } from 'ts-mockito';
+import { spy, when } from 'ts-mockito';
 
 import { PLATFORM } from '../../src/@shared/types/types';
-import { ParsePostResult } from '../../src/@shared/types/types.parser';
 import { DBInstance } from '../../src/db/instance';
 import { Services } from '../../src/instances/services';
-import { ParserService } from '../../src/parser/parser.service';
 import { NanopubService } from '../../src/platforms/nanopub/nanopub.service';
 import { OrcidService } from '../../src/platforms/orcid/orcid.service';
 import {
@@ -13,8 +11,10 @@ import {
   PlatformsService,
 } from '../../src/platforms/platforms.service';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
+import { PlatformPostaRepository } from '../../src/posts/platform.posts.repository';
+import { PostsManager } from '../../src/posts/posts.manager';
+import { PostsProcessing } from '../../src/posts/posts.processing';
 import { PostsRepository } from '../../src/posts/posts.repository';
-import { PostsService } from '../../src/posts/posts.service';
 import { TimeService } from '../../src/time/time.service';
 import { UsersRepository } from '../../src/users/users.repository';
 import { UsersService } from '../../src/users/users.service';
@@ -30,8 +30,9 @@ mandatory.forEach((varName) => {
 });
 
 const db = new DBInstance();
-export const userRepo = new UsersRepository(db);
+const userRepo = new UsersRepository(db);
 const postsRepo = new PostsRepository(db);
+const platformPostsRepo = new PlatformPostaRepository(db);
 
 const identityServices: IdentityServicesMap = new Map();
 const platformsMap: PlatformsMap = new Map();
@@ -72,30 +73,36 @@ platformsMap.set(PLATFORM.Nanopub, nanopub);
 const platformsService = new PlatformsService(platformsMap);
 
 /** parser service */
-const parserService = new ParserService(process.env.PARSER_API_URL as string);
+// const parserService = new ParserService(process.env.PARSER_API_URL as string);
 
-ParserService;
-const MockedParser = spy(parserService);
+// const MockedParser = spy(parserService);
 
-const mockedResult: ParsePostResult[] = [
-  {
-    post: 'test',
-    semantics: '<semantics>',
-  },
-];
-when(MockedParser.parsePosts(anything())).thenResolve(mockedResult);
-const mockedParser = instance(MockedParser);
+// const mockedResult: ParsePostResult[] = [
+//   {
+//     post: 'test',
+//     semantics: '<semantics>',
+//   },
+// ];
+// when(MockedParser.parsePosts(anything())).thenResolve(mockedResult);
+// const mockedParser = instance(MockedParser);
 
 /** posts service */
-const postsService = new PostsService(
+const postsProcessing = new PostsProcessing(
   usersService,
-  platformsService,
   postsRepo,
-  mockedParser
+  platformPostsRepo,
+  platformsService
+);
+
+const postsManager = new PostsManager(
+  db,
+  usersService,
+  postsProcessing,
+  platformsService
 );
 
 export const services: Services = {
   users: usersService,
-  posts: postsService,
+  postsManager: postsManager,
   platforms: platformsService,
 };

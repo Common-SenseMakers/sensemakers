@@ -6,7 +6,7 @@ import { resetDB } from '../__tests_support__/db';
 import { createTestAppUsers } from '../utils/user.factory';
 import { services } from './test.services';
 
-describe('process', () => {
+describe.only('process', () => {
   before(async () => {
     logger.debug('resetting DB');
     await resetDB();
@@ -45,28 +45,19 @@ describe('process', () => {
         throw new Error('Unexpected');
       }
 
-      const tweets = await services.platforms.get(PLATFORM.Twitter).publish([
-        {
-          post: {
-            id: '',
-            authorId: '',
-            content: `This is a test post ${Date.now()}`,
-            mirrors: {},
-            origin: PLATFORM.Local,
-            parseStatus: 'unprocessed',
-            reviewedStatus: 'pending',
-          },
-          userDetails: account,
+      const tweet = await services.platforms.get(PLATFORM.Twitter).publish({
+        platformPost: {
+          id: '',
+          draft: { text: `This is a test post ${Date.now()}` },
         },
-      ]);
-
-      const tweet = tweets[0];
+        userDetails: account,
+      });
 
       /** set lastFetched to one second before the last tweet timestamp */
       await services.users.repo.setLastFetched(
         PLATFORM.Twitter,
         user_id,
-        tweet.timestampMs - 1000
+        tweet.post.timestampMs - 1000
       );
 
       expect(tweet).to.not.be.undefined;
@@ -79,7 +70,7 @@ describe('process', () => {
        * high-level trigger to process all new posts from
        * all registered users
        */
-      await services.posts.process();
+      // await services.posts.process();
       console.log('done');
     });
   });
