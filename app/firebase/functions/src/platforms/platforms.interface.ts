@@ -1,12 +1,11 @@
 import { PLATFORM, UserDetailsBase } from '../@shared/types/types';
 import {
-  GenericPostData,
-  PlatformPost,
+  PlatformPostCreate,
   PlatformPostPosted,
   PlatformPostPublishWithCrendentials,
   PlatformPostPublished,
-  PostAndAuthor,
-} from '../@shared/types/types.posts';
+} from '../@shared/types/types.platform.posts';
+import { GenericPostData, PostAndAuthor } from '../@shared/types/types.posts';
 
 /** use conditional types to dynamically assign credential types for each platform */
 export type CredentialsForPlatform<P> = P extends PLATFORM.Twitter
@@ -39,6 +38,6 @@ export interface PlatformService<
   publish(
     posts: PlatformPostPublishWithCrendentials[]
   ): Promise<PlatformPostPublished[]>;
-  convertToGeneric(platformPost: PlatformPost): Promise<GenericPostData>;
+  convertToGeneric(platformPost: PlatformPostCreate): Promise<GenericPostData>;
   convertFromGeneric(postAndAuthor: PostAndAuthor): Promise<any>;
 }

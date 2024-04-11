@@ -2,10 +2,14 @@ import { initializeApp } from 'firebase-admin/app';
 import { Firestore, getFirestore } from 'firebase-admin/firestore';
 
 import { CollectionNames } from '../@shared/utils/collectionNames';
+import {
+  HandleWithTransactionManager,
+  ManagerConfig,
+  ManagerModes,
+  TransactionManager,
+} from './transaction.manager';
 
 initializeApp();
-
-export const db = getFirestore();
 
 export class DBInstance {
   protected firestore: Firestore;
@@ -27,7 +31,35 @@ export class DBInstance {
     };
   }
 
-  get batch() {
-    return this.firestore.batch();
+  /** a wrapper of TransactionManager to instantiate and applyWrites automatically */
+  async runWithTransactionManager<P, R>(
+    func: HandleWithTransactionManager<P, R>,
+    payload: P,
+    authUserId?: string,
+    config: ManagerConfig = { mode: ManagerModes.TRANSACTION }
+  ): Promise<R> {
+    switch (config.mode) {
+      case ManagerModes.TRANSACTION:
+        return this.firestore.runTransaction(async (transaction) => {
+          const manager = new TransactionManager(transaction);
+
+          const result = await func(payload, manager, authUserId);
+
+          await manager.applyWrites();
+
+          return result;
+        });
+
+      case ManagerModes.BATCH: {
+        const batch = this.firestore.batch();
+        const manager = new TransactionManager(undefined, batch);
+
+        const result = await func(payload, manager, authUserId);
+
+        await manager.applyWrites();
+
+        return result;
+      }
+    }
   }
 }

@@ -9,38 +9,32 @@ import { FetchUserPostsParams } from '../platforms/platforms.interface';
 import { PlatformsService } from '../platforms/platforms.service';
 import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
-import { PostsProcessing } from './posts.processing';
+import { getUniquePostId } from '../users/users.utils';
+import { PostsParser } from './posts.parser';
 import { PostsRepository } from './posts.repository';
 
 /**
- * Read data from the DB, call PostsProcessing methods
- * and writes data to the DB. Some methods can also
- * verify the user's permissions based on an input authenticatedUserId
+ * Top level methods. They instantiate a TransactionManger and execute
+ * read and writes to the DB
  */
 export class PostsManager {
   constructor(
     protected users: UsersService,
     protected repo: PostsRepository,
-    protected processing: PostsProcessing,
+    protected processing: PostsParser,
     protected platforms: PlatformsService
   ) {}
 
   /**
-   * Coordinate the fetch, parse and preProcess steps. It only stores
-   * on the last step.
-   */
-  public async process() {
-    const postsAndAuthors0 = await this.fetchFromUsers();
-    const postsAndAuthors1 = await this.processing.parse(postsAndAuthors0);
-    const platformPosts = await this.processing.preProcess(postsAndAuthors1);
-  }
-
-  async fetchFromUsers(store: boolean = false): Promise<PostAndAuthor[]> {
+   * Reads all PlatformPosts from all users and returns a combination of PlatformPosts
+   * and authors
+   * */
+  async fetchAll(): Promise<PostAndAuthor[]> {
     const users = await this.users.repo.getAll();
     const params = new Map();
 
     /**
-     * organize the credentials and lastFetched timestamps for
+     * prepare the credentials and lastFetched timestamps for
      * all users and platforms
      */
     users.forEach((user) => {
@@ -62,7 +56,11 @@ export class PostsManager {
       });
     });
 
-    const posts = await this.processing.fetch(params);
+    /** fetch all new posts from all platforms */
+    const platformPosts = await this.platforms.fetchAll(params);
+
+    await this.storePlatformPosts(platformPosts);
+
     const postsAndAuthors: PostAndAuthor[] = [];
 
     posts.forEach((post) => {
@@ -79,6 +77,38 @@ export class PostsManager {
     });
 
     return postsAndAuthors;
+  }
+
+  async checkAndStorePlatformPosts(platformPosts: PlatformPost[]) {
+    /**
+     * only if 'published' check if there is another 'published' PlatformPost
+     * with the same post_id
+     *
+     * If not, store, and create an AppPost
+     */
+  }
+
+  async createNewAppPost() {
+    /**
+     * Derive AppPost GenericPostData
+     * */
+    const { content } = await this.platforms.convertToGeneric(platformPost);
+
+    /** Build the AppPostFull object */
+    const post = {
+      id: getUniquePostId(platformPost.platformId, platformPostFetched.post_id),
+      content,
+      origin: platformPost.platformId,
+      parseStatus: 'unprocessed',
+      reviewedStatus: 'pending',
+      authorId: getPrefixedUserId(
+        platformPostFetched.platformId,
+        platformPostFetched.user_id
+      ),
+      mirrorsIds: [platformPost.id],
+    };
+
+    await this.repo.storePost(post, txManager);
   }
 
   /**
@@ -111,10 +141,17 @@ export class PostsManager {
            * mirrors must be existing PlatformPost, they MAY have been changed
            * by the author
            */
+          if (!mirror.draft) {
+            throw new Error(
+              `Unexpected trying to mark as approved a platoform post ${JSON.stringify(mirror)} without draftStatus`
+            );
+          }
+
           mirror = {
             ...mirror,
-            draftStatus: {
-              draft: mirror.draftStatus?.draft,
+            draft: {
+              user_id: mirror.draft.user_id,
+              post: mirror.draft.post,
               postApproval: 'approved',
             },
           };
@@ -128,21 +165,28 @@ export class PostsManager {
   }
 
   /**
-   * organize platformPosts by platform and append author credentials
-   * */
-  private async preparePlatformPosts(
-    platformPosts: PlatformPost[]
-  ): Promise<PerPlatformPublish> {
-    const perPlatform: PerPlatformPublish = new Map();
+   * Reads all unpublished platform posts, publishes them, update the
+   * platformPosts in the DB */
+  async publishUnpublishedPosts() {
+    /** get unpublished posts */
+    const platformPosts: PlatformPost[] = []; // this.repo.getUnpublishedPlatformPosts();
 
+    /** prepare author credentials for each platform and account */
+    const perPlatform: PerPlatformPublish = new Map();
     await Promise.all(
       platformPosts.map(async (platformPost) => {
         const platformId = platformPost.platformId;
         const current = perPlatform.get(platformId) || [];
 
+        if (!platformPost.draft) {
+          throw new Error(
+            `Unexpected. PlatformPost ${platformPost.id} does not have draftStatus`
+          );
+        }
+
         const author = await this.users.repo.getUserWithPlatformAccount(
           platformId,
-          platformPost.user_id,
+          platformPost.draft.user_id,
           true
         );
 
@@ -150,12 +194,12 @@ export class PostsManager {
         const account = UsersHelper.getAccount(
           author,
           platformId,
-          platformPost.user_id,
+          platformPost.draft.user_id,
           true
         );
 
         const postToPublish: PlatformPostPublish = {
-          draft: platformPost.draftStatus?.draft,
+          draft: platformPost.draft?.post,
           id: platformPost.id,
         };
 
@@ -164,14 +208,6 @@ export class PostsManager {
       })
     );
 
-    return perPlatform;
-  }
-
-  /** reads all unpublished platform posts and publishes them */
-  async publishUnpublishedPosts() {
-    /** get unpublished posts */
-    const platformPosts: PlatformPost[] = []; // this.repo.getUnpublishedPlatformPosts();
-    const perPlatform = await this.preparePlatformPosts(platformPosts);
     const updatedPlatformPosts: PlatformPost[] = [];
 
     /**
@@ -214,5 +250,49 @@ export class PostsManager {
 
   async updatePlatformPosts(platformPosts: PlatformPost[]) {
     await this.repo.updatePostsMirrors(platformPosts);
+  }
+
+  async storePlatformPosts(platformPosts: PlatformPost[]) {
+    await this.repo.storePostsMirrors(platformPosts);
+  }
+
+  /**
+   * Calls the convertFromGeneric on all platforms and returns the results as PlatformPosts
+   * */
+  public async prepareDrafts(postsAndAuthors: PostAndAuthor[]) {
+    const allPlatformPosts: PlatformPost[] = [];
+
+    postsAndAuthors.forEach((postAndAuthor) => {
+      ALL_PUBLISH_PLATFORMS.forEach((platformId) => {
+        if (postAndAuthor.post.origin !== platformId) {
+          const draft = this.platforms
+            .get(platformId)
+            .convertFromGeneric(postAndAuthor);
+
+          const accounts = UsersHelper.getAccounts(
+            postAndAuthor.author,
+            platformId,
+            true
+          );
+
+          accounts.forEach((account) => {
+            const platformPost: PlatformPost = {
+              id: getUniquePostId(platformId, postAndAuthor.post.id),
+              platformId,
+              status: 'draft',
+              draft: {
+                post: draft,
+                postApproval: 'pending',
+                user_id: account.user_id,
+              },
+            };
+
+            allPlatformPosts.push(platformPost);
+          });
+        }
+      });
+    });
+
+    return allPlatformPosts;
   }
 }

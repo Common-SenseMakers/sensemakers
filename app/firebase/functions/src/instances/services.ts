@@ -16,7 +16,7 @@ import {
 } from '../platforms/platforms.service';
 import { TwitterService } from '../platforms/twitter/twitter.service';
 import { PostsManager } from '../posts/posts.manager';
-import { PostsProcessing } from '../posts/posts.processing';
+import { PostsParser } from '../posts/posts.parser';
 import { PostsRepository } from '../posts/posts.repository';
 import { TimeService } from '../time/time.service';
 import { UsersRepository } from '../users/users.repository';
@@ -24,7 +24,7 @@ import { UsersService } from '../users/users.service';
 
 export interface Services {
   users: UsersService;
-  postsProcessing: PostsProcessing;
+  postsProcessing: PostsParser;
   postsManager: PostsManager;
   platforms: PlatformsService;
 }
@@ -64,7 +64,7 @@ export const createServices = () => {
   const parserService = new ParserService(FUNCTIONS_PY_URL);
 
   /** posts service */
-  const postsProcessing = new PostsProcessing(platformsService, parserService);
+  const postsProcessing = new PostsParser(platformsService, parserService);
   const postsManager = new PostsManager(
     usersService,
     postsRepo,

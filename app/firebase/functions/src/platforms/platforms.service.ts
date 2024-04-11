@@ -4,10 +4,9 @@ import {
   UserDetailsBase,
 } from '../@shared/types/types';
 import {
-  AppPostFull,
-  PlatformPost,
-  PlatformPostBase,
-} from '../@shared/types/types.posts';
+  PlatformPostCreate,
+  PlatformPostPublishWithCrendentials,
+} from '../@shared/types/types.platform.posts';
 import {
   FetchUserPostsParams,
   IdentityService,
@@ -39,37 +38,54 @@ export class PlatformsService {
   }
 
   /**
-   * fetch posts from the provided platforms and for the provided user_ids and timestemps
+   * fetch posts from the provided platforms and for the provided user_ids and timestamps
    * */
-  public async fetch(
+  public async fetchAll(
     fetchParams: FetchAllUserPostsParams
-  ): Promise<PlatformPostBase[]> {
-    const allPosts = await Promise.all(
+  ): Promise<PlatformPostCreate[]> {
+    const all = await Promise.all(
       Array.from(fetchParams.keys()).map(async (platformId) => {
         const thisFetchParams = fetchParams.get(platformId);
         if (thisFetchParams) {
-          const posts = await this.get(platformId).fetch(thisFetchParams);
-          /** append the platformId */
-          const postWithPlatform = posts.map((p): PlatformPostBase => {
-            return { ...p, platformId: platformId as PUBLISHABLE_PLATFORMS };
-          });
-          return postWithPlatform;
+          return this.fetchOne(platformId, thisFetchParams);
         } else {
           return [];
         }
       })
     );
 
-    /** concatenate the results from all platforms */
-    return allPosts.flat();
+    return all.flat();
   }
 
-  public convertToGeneric(platformPost: PlatformPost) {
+  public async fetchOne(
+    platformId: PLATFORM,
+    thisFetchParams: FetchUserPostsParams[]
+  ) {
+    /** all fetched posts from one platform */
+    const fetched = await this.get(platformId).fetch(thisFetchParams);
+
+    /** convert them into a PlatformPost */
+    return fetched.map((fetchedPost) => {
+      const platformPost: PlatformPostCreate = {
+        platformId: platformId as PUBLISHABLE_PLATFORMS,
+        publishStatus: 'published',
+        publishOrigin: 'fetched',
+        posted: fetchedPost,
+      };
+
+      return platformPost;
+    });
+  }
+
+  public convertToGeneric(platformPost: PlatformPostCreate) {
     const platform = this.get(platformPost.platformId);
     return platform.convertToGeneric(platformPost);
   }
 
-  public publish(platformId: PLATFORM, posts: AppPostFull[]) {
+  public publish(
+    platformId: PLATFORM,
+    posts: PlatformPostPublishWithCrendentials[]
+  ) {
     const platform = this.get(platformId);
     return platform.publish(posts);
   }

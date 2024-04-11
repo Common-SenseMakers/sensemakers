@@ -10,17 +10,35 @@ export class UsersHelper {
    * From a AppUser object return the account of a platform
    * (undefined if not found, throw if _throw = true
    * */
+  static getAccounts<T extends boolean>(
+    user: AppUser,
+    platformId: PUBLISHABLE_PLATFORMS,
+    _throw?: T
+  ): DefinedIfTrue<T, UserDetailsBase[]> {
+    const platformAccounts = user[platformId];
+
+    if (!platformAccounts && _throw) {
+      throw new Error('Platform account not found');
+    }
+
+    if (!platformAccounts) {
+      return undefined as DefinedIfTrue<T, UserDetailsBase[]>;
+    }
+
+    return platformAccounts as DefinedIfTrue<T, UserDetailsBase[]>;
+  }
+
+  /**
+   * From a AppUser object return the account of a platform
+   * (undefined if not found, throw if _throw = true
+   * */
   static getAccount<T extends boolean>(
     user: AppUser,
     platformId: PUBLISHABLE_PLATFORMS,
     user_id: string | undefined,
     _throw?: T
   ): DefinedIfTrue<T, UserDetailsBase> {
-    const platformAccounts = user[platformId];
-
-    if (!platformAccounts && _throw) {
-      throw new Error('Platform account not found');
-    }
+    const platformAccounts = UsersHelper.getAccounts(user, platformId, _throw);
 
     if (!platformAccounts) {
       return undefined as DefinedIfTrue<T, UserDetailsBase>;
