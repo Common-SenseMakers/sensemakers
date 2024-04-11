@@ -63,7 +63,7 @@ def extract_citoid_metadata(target_url, max_summary_length):
     normalized = normalize_citoid_metadata(
         [target_url], citoid_metadata, max_summary_length
     )
-    return normalized[0] if len(normalized) > 0 else []
+    return normalized if len(normalized) > 0 else []
 
 
 def extract_metadata_by_type(
@@ -81,7 +81,7 @@ def extract_metadata_by_type(
     if md_type == MetadataExtractionType.NONE:
         return []
     if md_type == MetadataExtractionType.CITOID:
-        return [extract_citoid_metadata(target_url, max_summary_length)]
+        return extract_citoid_metadata(target_url, max_summary_length)
     else:
         raise ValueError(f"Unsupported extraaction type:{md_type.value}")
 
@@ -98,7 +98,7 @@ def extract_urls_citoid_metadata(
     if len(target_urls) == 0:
         return []
     if len(target_urls) == 1:
-        return [extract_citoid_metadata(target_urls[0], max_summary_length)]
+        return extract_citoid_metadata(target_urls[0], max_summary_length)
     else:
         # use parallel call
         metadatas_raw = asyncio.run(fetch_all_citations(target_urls))
@@ -193,5 +193,7 @@ def get_ref_post_metadata_list(
     md_list = []
     for ref in post.ref_urls:
         if ref in md_dict:
-            md_list.append(md_dict.get(ref))
+            md = md_dict.get(ref)
+            if md:
+                md_list.append(md)
     return md_list

@@ -177,7 +177,22 @@ def test_multi_chain_batch_simple():
 
     assert len(res) == 3
     
-
+    
+def test_metadata_fail():
+    tpc = TopicsPParserChainConfig(
+        name="topic_test",
+        use_metadata=True,
+        llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
+    )
+    multi_config = MultiParserChainConfig(
+        parser_configs=[
+            tpc,
+        ]
+    )
+    mcp = MultiChainParser(multi_config)
+    post = scrape_post("https://sciencemastodon.com/@brianvastag/112237141873145192")
+    res = mcp.process_ref_post(post)
+    assert len(res) == 1
 
 if __name__ == "__main__":
     

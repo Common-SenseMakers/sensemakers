@@ -53,9 +53,10 @@ def test_firebase_pp():
 if __name__ == "__main__":
     
     multi_config = create_multi_config_for_tests()
-    multi_config.post_process_type = PostProcessType.FIREBASE
+    multi_config.post_process_type = PostProcessType.COMBINED
     mcp = MultiChainParser(multi_config)
-    res = mcp.process_text(TEST_POST_TEXT_W_REF)
-    len(res.support.refs_meta) == 1
+    post = scrape_post("https://sciencemastodon.com/@brianvastag/112237141873145192")
+    res = mcp.process_ref_post(post)
+    # len(res.support.refs_meta) == 1
     # assert "test" in mcp.pparsers
     # assert "Google Scholar is manipulatable" in prompt
