@@ -13,12 +13,12 @@ import { useAccountContext } from '../app/AccountContext';
 import { useAppFetch } from '../app/app.fetch';
 import { NANOPUBS_SERVER } from '../app/config';
 import { constructIntroNanopub } from '../nanopubs/construct.intro.nanopub';
-import { getProfile } from '../nanopubs/semantics.helper';
-import { getEthToRSAMessage } from '../shared/sig.utils';
-import { HexStr, PLATFORM } from '../shared/types';
-import { NanopubUserDetails } from '../shared/types.nanopubs';
+import { HexStr, PLATFORM } from '../shared/types/types';
+import { NanopubUserDetails, RSAKeys } from '../shared/types/types.nanopubs';
+import { getRSAKeys } from '../shared/utils/rsa.keys';
+import { getProfile } from '../shared/utils/semantics.helper';
+import { getEthToRSAMessage } from '../shared/utils/sig.utils';
 import { useAppSigner } from '../signer/SignerContext';
-import { RSAKeys, getRSAKeys } from '../utils/rsa.keys';
 
 const DEBUG = false;
 

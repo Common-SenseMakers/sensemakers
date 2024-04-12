@@ -1,4 +1,4 @@
-import { PLATFORM } from '../@shared/types';
+import { PLATFORM } from '../@shared/types/types';
 
 export function getPrefixedUserId(platform: PLATFORM, user_id: string) {
   return `${platform}:${user_id}`;

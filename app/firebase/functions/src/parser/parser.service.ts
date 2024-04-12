@@ -1,4 +1,7 @@
-import { ParsePostRequest, ParsePostResult } from '../@shared/types.parser';
+import {
+  ParsePostRequest,
+  ParsePostResult,
+} from '../@shared/types/types.parser';
 import { logger } from '../instances/logger';
 
 export class ParserService {

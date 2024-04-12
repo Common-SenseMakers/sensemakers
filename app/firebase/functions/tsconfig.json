@@ -18,5 +18,5 @@
     "typeRoots": ["./src/types", "node_modules/@types", "./src/custom.d.ts"],
   },
   "compileOnSave": true,
-  "include": ["src/index.ts", "src/custom.d.ts"],
+  "include": ["src/index.ts", "src/custom.d.ts", "test/__tests__"],
 }

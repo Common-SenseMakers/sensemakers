@@ -6,14 +6,14 @@ export enum PLATFORM {
   Local = 'local', // local referst to out platform
   Orcid = 'orcid',
   Twitter = 'twitter',
-  Nanopubs = 'nanopubs',
+  Nanopub = 'nanopub',
 }
 
-export type PUBLISHABLE_PLATFORMS = PLATFORM.Twitter | PLATFORM.Nanopubs;
+export type PUBLISHABLE_PLATFORMS = PLATFORM.Twitter | PLATFORM.Nanopub;
 
 export const ALL_PUBLISH_PLATFORMS: PUBLISHABLE_PLATFORMS[] = [
   PLATFORM.Twitter,
-  PLATFORM.Nanopubs,
+  PLATFORM.Nanopub,
 ];
 
 /** The user details has, for each PLATFORM, a details object
@@ -58,7 +58,7 @@ export interface UserWithId {
 export interface AppUser extends UserWithId {
   [PLATFORM.Orcid]?: OrcidUserDetails[];
   [PLATFORM.Twitter]?: TwitterUserDetails[];
-  [PLATFORM.Nanopubs]?: NanopubUserDetails[];
+  [PLATFORM.Nanopub]?: NanopubUserDetails[];
 }
 
 export type AppUserCreate = Omit<AppUser, 'userId'>;
@@ -70,7 +70,7 @@ export type AppUserCreate = Omit<AppUser, 'userId'>;
 export interface AppUserRead extends UserWithId {
   [PLATFORM.Orcid]?: UserDetailsReadBase<OrcidUserDetails['profile']>[];
   [PLATFORM.Twitter]?: UserDetailsReadBase<TwitterUserDetails['profile']>[];
-  [PLATFORM.Nanopubs]?: UserDetailsReadBase<NanopubUserDetails['profile']>[];
+  [PLATFORM.Nanopub]?: UserDetailsReadBase<NanopubUserDetails['profile']>[];
 }
 
 /** Support types */
