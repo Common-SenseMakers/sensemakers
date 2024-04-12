@@ -6,7 +6,7 @@ import {
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 
-export class PlatformPostaRepository {
+export class PlatformPostsRepository {
   constructor(protected db: DBInstance) {}
 
   public create(
@@ -42,6 +42,43 @@ export class PlatformPostaRepository {
 
     return {
       id: doc.id,
+      ...doc.data(),
+    } as unknown as DefinedIfTrue<T, R>;
+  }
+
+  protected async getRef(postId: string, shouldThrow: boolean = false) {
+    const ref = this.db.collections.platformPosts.doc(postId);
+    if (shouldThrow) {
+      const doc = await this.getDoc(postId);
+
+      if (!doc.exists) {
+        throw new Error(`Post ${postId} not found`);
+      }
+    }
+
+    return ref;
+  }
+
+  protected async getDoc(userId: string, shouldThrow: boolean = false) {
+    const ref = await this.getRef(userId, shouldThrow);
+    return ref.get();
+  }
+
+  public async get<T extends boolean, R = PlatformPost>(
+    id: string,
+    shouldThrow?: T
+  ): Promise<DefinedIfTrue<T, R>> {
+    const doc = await this.getDoc(id);
+
+    const _shouldThrow = shouldThrow !== undefined ? shouldThrow : false;
+
+    if (!doc.exists) {
+      if (_shouldThrow) throw new Error(`PlatformPost ${id} not found`);
+      else return undefined as DefinedIfTrue<T, R>;
+    }
+
+    return {
+      id,
       ...doc.data(),
     } as unknown as DefinedIfTrue<T, R>;
   }

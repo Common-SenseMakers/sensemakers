@@ -23,7 +23,7 @@ export class PostsManager {
   constructor(
     protected db: DBInstance,
     protected users: UsersService,
-    protected processing: PostsProcessing,
+    public processing: PostsProcessing,
     protected platforms: PlatformsService
   ) {}
 
@@ -49,7 +49,7 @@ export class PostsManager {
   async fetchAll(_manager?: TransactionManager) {
     const func: HandleWithTransactionManager<
       undefined,
-      (PlatformPostCreated | undefined)[]
+      PlatformPostCreated[]
     > = async (payload, manager) => {
       const users = await this.users.repo.getAll();
       const params: Map<PLATFORM, FetchUserPostsParams[]> = new Map();
@@ -97,7 +97,7 @@ export class PostsManager {
       /** Create the PlatformPosts (and the AppPosts) */
       const created = await this.storePlatformPosts(platformPosts, manager);
 
-      return created;
+      return created.filter((p) => p !== undefined) as PlatformPostCreated[];
     };
 
     return this.run(func, undefined, _manager);

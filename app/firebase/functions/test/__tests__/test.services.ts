@@ -11,7 +11,7 @@ import {
   PlatformsService,
 } from '../../src/platforms/platforms.service';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
-import { PlatformPostaRepository } from '../../src/posts/platform.posts.repository';
+import { PlatformPostsRepository } from '../../src/posts/platform.posts.repository';
 import { PostsManager } from '../../src/posts/posts.manager';
 import { PostsProcessing } from '../../src/posts/posts.processing';
 import { PostsRepository } from '../../src/posts/posts.repository';
@@ -35,7 +35,7 @@ export const getTestServices = () => {
   const db = new DBInstance();
   const userRepo = new UsersRepository(db);
   const postsRepo = new PostsRepository(db);
-  const platformPostsRepo = new PlatformPostaRepository(db);
+  const platformPostsRepo = new PlatformPostsRepository(db);
 
   const identityServices: IdentityServicesMap = new Map();
   const platformsMap: PlatformsMap = new Map();

@@ -39,23 +39,23 @@ export class PostsRepository {
     return ref.get();
   }
 
-  public async getPost<T extends boolean>(
-    userId: string,
+  public async get<T extends boolean, R = AppPost>(
+    id: string,
     shouldThrow?: T
-  ): Promise<DefinedIfTrue<T, AppPost>> {
-    const doc = await this.getPostDoc(userId);
+  ): Promise<DefinedIfTrue<T, R>> {
+    const doc = await this.getPostDoc(id);
 
     const _shouldThrow = shouldThrow !== undefined ? shouldThrow : false;
 
     if (!doc.exists) {
-      if (_shouldThrow) throw new Error(`User ${userId} not found`);
-      else return undefined as DefinedIfTrue<T, AppPost>;
+      if (_shouldThrow) throw new Error(`AppPost ${id} not found`);
+      else return undefined as DefinedIfTrue<T, R>;
     }
 
     return {
-      userId,
+      id,
       ...doc.data(),
-    } as unknown as DefinedIfTrue<T, AppPost>;
+    } as unknown as DefinedIfTrue<T, R>;
   }
 
   public async updatePostContent(postUpdate: PostUpdate) {

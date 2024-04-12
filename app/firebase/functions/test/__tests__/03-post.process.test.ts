@@ -1,5 +1,11 @@
 import { expect } from 'chai';
+import {
+  PlatformPost,
+  PlatformPostPosted,
+} from 'src/@shared/types/types.platform.posts';
+import { AppPost } from 'src/@shared/types/types.posts';
 import { TwitterService } from 'src/platforms/twitter/twitter.service';
+import { TweetV2SingleResult } from 'twitter-api-v2';
 
 import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import { logger } from '../../src/instances/logger';
@@ -8,7 +14,7 @@ import { createTestAppUsers } from '../utils/user.factory';
 import { MOCK_TWITTER } from './setup';
 import { getTestServices } from './test.services';
 
-describe('process', () => {
+describe.only('process', () => {
   const services = getTestServices();
 
   before(async () => {
@@ -18,6 +24,8 @@ describe('process', () => {
 
   describe('create and process', () => {
     let appUser: AppUser | undefined;
+    let content = `This is a test post ${Date.now()}`;
+    let tweet: PlatformPostPosted<TweetV2SingleResult>;
 
     before(async () => {
       const users = await createTestAppUsers(services);
@@ -49,10 +57,10 @@ describe('process', () => {
         throw new Error('Unexpected');
       }
 
-      const tweet = await services.platforms
+      tweet = await services.platforms
         .get<TwitterService>(PLATFORM.Twitter)
         .publish({
-          draft: { text: `This is a test post ${Date.now()}` },
+          draft: { text: content },
           userDetails: account,
         });
 
@@ -75,7 +83,56 @@ describe('process', () => {
        * high-level trigger to process all new posts from
        * all registered users
        */
-      await services.postsManager.fetchAll();
+      const fetched = await services.postsManager.fetchAll();
+      expect(fetched).to.have.length(1);
+
+      const postFetched = fetched[0].post;
+      const platformPostFetched = fetched[0].platformPost;
+
+      const postRead = await services.postsManager.processing.posts.get(
+        postFetched.id,
+        true
+      );
+      const platformPostRead =
+        await services.postsManager.processing.platformPosts.get(
+          platformPostFetched.id,
+          true
+        );
+
+      if (!appUser) {
+        throw new Error('appUser not created');
+      }
+
+      const refAppPost: AppPost = {
+        id: postFetched.id,
+        authorId: appUser.userId,
+        origin: PLATFORM.Twitter,
+        parseStatus: 'unprocessed',
+        content,
+        mirrorsIds: [platformPostRead.id],
+        reviewedStatus: 'pending',
+      };
+
+      const refPlatformPost: PlatformPost = {
+        id: platformPostFetched.id,
+        platformId: PLATFORM.Twitter,
+        publishOrigin: 'fetched',
+        publishStatus: 'published',
+        posted: {
+          post_id: tweet.post.data.id,
+          user_id: (appUser[PLATFORM.Twitter] as any)[0].user_id,
+          timestampMs: tweet.timestampMs,
+          post: tweet.post.data,
+        },
+      };
+
+      expect(postRead).to.not.be.undefined;
+
+      expect(postRead).to.deep.equal(refAppPost);
+      expect(postFetched).to.deep.equal(refAppPost);
+
+      expect(platformPostRead).to.deep.equal(refPlatformPost);
+      expect(platformPostFetched).to.deep.equal(refPlatformPost);
     });
   });
 });

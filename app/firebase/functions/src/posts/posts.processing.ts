@@ -7,7 +7,7 @@ import { TransactionManager } from '../db/transaction.manager';
 import { PlatformsService } from '../platforms/platforms.service';
 import { UsersService } from '../users/users.service';
 import { getPrefixedUserId } from '../users/users.utils';
-import { PlatformPostaRepository } from './platform.posts.repository';
+import { PlatformPostsRepository } from './platform.posts.repository';
 import { PostsRepository } from './posts.repository';
 
 /**
@@ -17,8 +17,8 @@ import { PostsRepository } from './posts.repository';
 export class PostsProcessing {
   constructor(
     protected users: UsersService,
-    protected posts: PostsRepository,
-    protected platformPosts: PlatformPostaRepository,
+    public posts: PostsRepository,
+    public platformPosts: PlatformPostsRepository,
     protected platforms: PlatformsService
   ) {}
 

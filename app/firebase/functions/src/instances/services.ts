@@ -1,4 +1,4 @@
-import { PlatformPostaRepository } from 'src/posts/platform.posts.repository';
+import { PlatformPostsRepository } from 'src/posts/platform.posts.repository';
 import { PostsProcessing } from 'src/posts/posts.processing';
 
 import { PLATFORM } from '../@shared/types/types';
@@ -34,7 +34,7 @@ export const createServices = () => {
   const db = new DBInstance();
   const userRepo = new UsersRepository(db);
   const postsRepo = new PostsRepository(db);
-  const platformPostsRepo = new PlatformPostaRepository(db);
+  const platformPostsRepo = new PlatformPostsRepository(db);
 
   const identityPlatforms: IdentityServicesMap = new Map();
   const platformsMap: PlatformsMap = new Map();
