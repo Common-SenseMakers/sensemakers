@@ -135,7 +135,7 @@ describe('platforms', () => {
     });
   });
 
-  describe.only('nanopub', () => {
+  describe('nanopub', () => {
     let nanopub: PlatformPostDraft | undefined;
 
     it('creates a draft nanopub', async () => {

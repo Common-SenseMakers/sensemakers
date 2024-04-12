@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { TwitterService } from 'src/platforms/twitter/twitter.service';
 
 import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import { logger } from '../../src/instances/logger';
@@ -45,21 +46,23 @@ describe.only('process', () => {
         throw new Error('Unexpected');
       }
 
-      const tweet = await services.platforms.get(PLATFORM.Twitter).publish({
-        draft: { text: `This is a test post ${Date.now()}` },
-        userDetails: account,
-      });
+      const tweet = await services.platforms
+        .get<TwitterService>(PLATFORM.Twitter)
+        .publish({
+          draft: { text: `This is a test post ${Date.now()}` },
+          userDetails: account,
+        });
 
       /** set lastFetched to one second before the last tweet timestamp */
       await services.users.repo.setLastFetched(
         PLATFORM.Twitter,
         user_id,
-        tweet.post.timestampMs - 1000
+        tweet.timestampMs - 1000
       );
 
       expect(tweet).to.not.be.undefined;
 
-      await new Promise<void>((resolve) => setTimeout(resolve, 10000));
+      // await new Promise<void>((resolve) => setTimeout(resolve, 10000));
     });
 
     it('fetch all posts from all platforms', async () => {
@@ -67,8 +70,7 @@ describe.only('process', () => {
        * high-level trigger to process all new posts from
        * all registered users
        */
-      // await services.posts.process();
-      console.log('done');
+      await services.postsManager.fetchAll();
     });
   });
 });

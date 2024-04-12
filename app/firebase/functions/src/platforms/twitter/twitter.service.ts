@@ -22,6 +22,7 @@ import {
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
 import {
+  TwitterDraft,
   TwitterGetContextParams,
   TwitterQueryParameters,
   TwitterSignupContext,
@@ -32,7 +33,7 @@ import {
 import { TimeService } from '../../time/time.service';
 import { UsersRepository } from '../../users/users.repository';
 import { FetchUserPostsParams, PlatformService } from '../platforms.interface';
-import { handleTwitterError } from './twitter.utils';
+import { dateStrToTimestampMs, handleTwitterError } from './twitter.utils';
 
 export interface TwitterApiCredentials {
   clientId: string;
@@ -55,16 +56,6 @@ export class TwitterService
     protected usersRepo: UsersRepository,
     protected credentials: TwitterApiCredentials
   ) {}
-
-  /**
-   *
-   * @param dateStr ISO 8601 date string, e.g. '2021-09-01T00:00:00Z'
-   * @returns unix timestamp in milliseconds
-   */
-  public dateStrToTimestampMs(dateStr: string) {
-    const date = new Date(dateStr);
-    return date.getTime();
-  }
 
   /**
    * Get generic client user app credentials
@@ -370,7 +361,7 @@ export class TwitterService
       return {
         post_id: tweet.id,
         user_id: tweet.author_id,
-        timestampMs: this.dateStrToTimestampMs(tweet.created_at),
+        timestampMs: dateStrToTimestampMs(tweet.created_at),
         post: tweet,
       };
     });
@@ -403,7 +394,7 @@ export class TwitterService
 
   /** user_id must be from the authenticated userId */
   public async publish(
-    postPublish: PlatformPostPublish
+    postPublish: PlatformPostPublish<TwitterDraft>
   ): Promise<PlatformPostPosted<TweetV2SingleResult>> {
     // TODO udpate to support many
     const userDetails = postPublish.userDetails;
@@ -413,7 +404,7 @@ export class TwitterService
 
     try {
       // Post the tweet and also read the tweet
-      const result = await client.v2.tweet(post.draft.text);
+      const result = await client.v2.tweet(post.text);
       if (result.errors) {
         throw new Error(`Error posting tweet`);
       }
@@ -433,7 +424,7 @@ export class TwitterService
       return {
         post_id: tweet.data.id,
         user_id: tweet.data.author_id,
-        timestampMs: this.dateStrToTimestampMs(tweet.data.created_at),
+        timestampMs: dateStrToTimestampMs(tweet.data.created_at),
         post: tweet,
       };
     } catch (e: any) {

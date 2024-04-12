@@ -1,4 +1,4 @@
-import { ALL_PUBLISH_PLATFORMS } from '../@shared/types/types';
+import { ALL_PUBLISH_PLATFORMS, PLATFORM } from '../@shared/types/types';
 import {
   PlatformPostCreate,
   PlatformPostCreated,
@@ -11,6 +11,7 @@ import {
 } from '../db/transaction.manager';
 import { FetchUserPostsParams } from '../platforms/platforms.interface';
 import { PlatformsService } from '../platforms/platforms.service';
+import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { PostsProcessing } from './posts.processing';
 
@@ -51,7 +52,7 @@ export class PostsManager {
       (PlatformPostCreated | undefined)[]
     > = async (payload, manager) => {
       const users = await this.users.repo.getAll();
-      const params = new Map();
+      const params: Map<PLATFORM, FetchUserPostsParams[]> = new Map();
 
       /**
        * prepare the credentials and lastFetched timestamps for
@@ -60,39 +61,41 @@ export class PostsManager {
       users.forEach((user) => {
         ALL_PUBLISH_PLATFORMS.map((platformId) => {
           /** check if the user has credentials for that platform */
-          const accounts = user[platformId];
-          if (accounts) {
-            accounts.forEach((account) => {
-              const current = params.get(platformId) || [];
-              const thisParams: FetchUserPostsParams = {
-                start_time: account.read
-                  ? account.read.lastFetchedMs
-                  : account.signupDate,
-                userDetails: account,
-              };
-              params.set(platformId, current.concat(thisParams));
-            });
+          const account = UsersHelper.getAccount(user, platformId);
+          if (account) {
+            const current = params.get(platformId) || [];
+            const thisParams: FetchUserPostsParams = {
+              start_time: account.read
+                ? account.read.lastFetchedMs
+                : account.signupDate,
+              userDetails: account,
+            };
+
+            current.push(thisParams);
+            params.set(platformId, current);
           }
         });
       });
 
       /** Call fetch for each user and platform */
       const allPosts = await Promise.all(
-        Array.from(params.keys()).map(async (platformId) => {
-          const thisParams = params.get(platformId);
-          if (thisParams) {
-            return this.platforms.fetch(platformId, thisParams);
-          } else {
-            return [];
+        Array.from(params.entries()).map(
+          async ([platformId, allUsersParams]) => {
+            const allUsersPosts = await Promise.all(
+              allUsersParams.map((userParams) =>
+                this.platforms.fetch(platformId, userParams)
+              )
+            );
+            return allUsersPosts.flat();
           }
-        })
+        )
       );
 
       /** fetch all new posts from all platforms */
       const platformPosts = allPosts.flat();
 
       /** Create the PlatformPosts (and the AppPosts) */
-      const created = await this.storePlatformPosts(platformPosts);
+      const created = await this.storePlatformPosts(platformPosts, manager);
 
       return created;
     };

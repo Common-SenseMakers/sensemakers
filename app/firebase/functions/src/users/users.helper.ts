@@ -35,7 +35,7 @@ export class UsersHelper {
   static getAccount<T extends boolean>(
     user: AppUser,
     platformId: PUBLISHABLE_PLATFORMS,
-    user_id: string | undefined,
+    user_id?: string,
     _throw?: T
   ): DefinedIfTrue<T, UserDetailsBase> {
     const platformAccounts = UsersHelper.getAccounts(user, platformId, _throw);

@@ -1,5 +1,4 @@
 import { Nanopub } from '@nanopub/sign';
-import { UsersHelper } from 'src/users/users.helper';
 
 import { PLATFORM, UserDetailsBase } from '../../@shared/types/types';
 import { NanopubUserProfile } from '../../@shared/types/types.nanopubs';
@@ -17,6 +16,7 @@ import {
 import { NANOPUBS_PUBLISH_SERVERS } from '../../config/config.runtime';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
+import { UsersHelper } from '../../users/users.helper';
 import { FetchUserPostsParams, PlatformService } from '../platforms.interface';
 import { createNanopublication } from './create.nanopub';
 

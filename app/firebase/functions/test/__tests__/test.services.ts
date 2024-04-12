@@ -18,6 +18,7 @@ import { PostsRepository } from '../../src/posts/posts.repository';
 import { TimeService } from '../../src/time/time.service';
 import { UsersRepository } from '../../src/users/users.repository';
 import { UsersService } from '../../src/users/users.service';
+import { getTwitterMock } from './mocks/twitter.service.mock';
 
 const mandatory = ['TWITTER_CLIENT_ID', 'TWITTER_CLIENT_SECRET'];
 
@@ -47,10 +48,12 @@ when(MockedTime.now()).thenReturn(
 const orcid = new OrcidService();
 
 /** mocked twitter */
-const twitter = new TwitterService(time, userRepo, {
+const _twitter = new TwitterService(time, userRepo, {
   clientId: process.env.TWITTER_CLIENT_ID as string,
   clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
 });
+
+const twitter = process.env.MOCK_TWITTER ? getTwitterMock(_twitter) : _twitter;
 
 /** nanopub */
 const nanopub = new NanopubService(time);
