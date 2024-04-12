@@ -5,6 +5,7 @@ import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import { logger } from '../../src/instances/logger';
 import { resetDB } from '../__tests_support__/db';
 import { createTestAppUsers } from '../utils/user.factory';
+import { MOCK_TWITTER } from './setup';
 import { services } from './test.services';
 
 describe.only('process', () => {
@@ -62,7 +63,9 @@ describe.only('process', () => {
 
       expect(tweet).to.not.be.undefined;
 
-      // await new Promise<void>((resolve) => setTimeout(resolve, 10000));
+      if (!MOCK_TWITTER) {
+        await new Promise<void>((resolve) => setTimeout(resolve, 6 * 1000));
+      }
     });
 
     it('fetch all posts from all platforms', async () => {

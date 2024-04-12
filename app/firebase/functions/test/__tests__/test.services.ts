@@ -19,6 +19,7 @@ import { TimeService } from '../../src/time/time.service';
 import { UsersRepository } from '../../src/users/users.repository';
 import { UsersService } from '../../src/users/users.service';
 import { getTwitterMock } from './mocks/twitter.service.mock';
+import { MOCK_TWITTER } from './setup';
 
 const mandatory = ['TWITTER_CLIENT_ID', 'TWITTER_CLIENT_SECRET'];
 
@@ -53,7 +54,7 @@ const _twitter = new TwitterService(time, userRepo, {
   clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
 });
 
-const twitter = process.env.MOCK_TWITTER ? getTwitterMock(_twitter) : _twitter;
+const twitter = MOCK_TWITTER ? getTwitterMock(_twitter) : _twitter;
 
 /** nanopub */
 const nanopub = new NanopubService(time);

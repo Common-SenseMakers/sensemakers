@@ -93,12 +93,18 @@ export class TwitterService
     client: TwitterApi | TwitterApiReadOnly;
     credentials?: TwitterUserCredentials;
   }> {
+    let client = new TwitterApi(credentials.accessToken);
+
     /** Check for refresh token ten minutes before expected expiration */
     if (this.time.now() >= credentials.expiresAtMs - 1000 * 60 * 10) {
-      const genericClient = this.getGenericClient();
-      /** */
-      const { client, accessToken, refreshToken, expiresIn } =
-        await genericClient.refreshOAuth2Token(credentials.refreshToken);
+      const {
+        client: newClient,
+        accessToken,
+        refreshToken,
+        expiresIn,
+      } = await client.refreshOAuth2Token(credentials.refreshToken);
+
+      client = newClient;
 
       if (!refreshToken) {
         throw new Error(`Refresh token cannot be undefined`);
@@ -116,7 +122,6 @@ export class TwitterService
         credentials: newCredentials,
       };
     } else {
-      const client = new TwitterApi(credentials.accessToken);
       return { client: type === 'read' ? client.readOnly : client };
     }
   }
@@ -311,7 +316,7 @@ export class TwitterService
         'tweet.fields': tweetFields,
       });
 
-      const resultCollection: TweetV2[] = result.data.data;
+      const resultCollection: TweetV2[] = result.data.data || [];
       let nextToken = result.meta.next_token;
 
       while (nextToken) {
