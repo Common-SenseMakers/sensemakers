@@ -28,13 +28,13 @@ export class PostsManager {
   ) {}
 
   /** run function with manager or create one */
-  private run<P, R>(
-    func: HandleWithTransactionManager<P, R>,
-    payload: P,
-    manager?: TransactionManager
+  private run<R, P>(
+    func: HandleWithTransactionManager<R, P>,
+    manager?: TransactionManager,
+    payload?: P
   ): Promise<R> {
     if (manager) {
-      return func(payload, manager);
+      return func(manager, payload);
     } else {
       return this.db.runWithTransactionManager(func, payload, {
         mode: ManagerModes.TRANSACTION,
@@ -48,9 +48,9 @@ export class PostsManager {
    * */
   async fetchAll(_manager?: TransactionManager) {
     const func: HandleWithTransactionManager<
-      undefined,
-      PlatformPostCreated[]
-    > = async (payload, manager) => {
+      PlatformPostCreated[],
+      undefined
+    > = async (manager) => {
       const users = await this.users.repo.getAll();
       const params: Map<PLATFORM, FetchUserPostsParams[]> = new Map();
 
@@ -83,7 +83,7 @@ export class PostsManager {
           async ([platformId, allUsersParams]) => {
             const allUsersPosts = await Promise.all(
               allUsersParams.map((userParams) =>
-                this.platforms.fetch(platformId, userParams)
+                this.platforms.fetch(platformId, userParams, manager)
               )
             );
             return allUsersPosts.flat();
@@ -100,7 +100,7 @@ export class PostsManager {
       return created.filter((p) => p !== undefined) as PlatformPostCreated[];
     };
 
-    return this.run(func, undefined, _manager);
+    return this.run(func, _manager);
   }
 
   /** Store all platform posts (can use an existing TransactionManager or create new one) */
@@ -109,9 +109,9 @@ export class PostsManager {
     _manager?: TransactionManager
   ) {
     const func: HandleWithTransactionManager<
-      undefined,
-      Array<PlatformPostCreated | undefined>
-    > = async (payload, manager) => {
+      Array<PlatformPostCreated | undefined>,
+      undefined
+    > = async (manager) => {
       return await Promise.all(
         platformPosts.map(async (platformPost) => {
           return await this.processing.createPlatformPost(
@@ -122,6 +122,6 @@ export class PostsManager {
       );
     };
 
-    return this.run(func, undefined, _manager);
+    return this.run(func, _manager);
   }
 }

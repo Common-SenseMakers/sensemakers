@@ -117,6 +117,7 @@ export const getTestServices = () => {
     postsManager: postsManager,
     platforms: platformsService,
     time: time,
+    db,
   };
 
   return services;

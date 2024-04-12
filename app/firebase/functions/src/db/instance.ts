@@ -32,9 +32,9 @@ export class DBInstance {
   }
 
   /** a wrapper of TransactionManager to instantiate and applyWrites automatically */
-  async runWithTransactionManager<P, R>(
-    func: HandleWithTransactionManager<P, R>,
-    payload: P,
+  async runWithTransactionManager<R, P>(
+    func: HandleWithTransactionManager<R, P>,
+    payload?: P,
     config: ManagerConfig = { mode: ManagerModes.TRANSACTION }
   ): Promise<R> {
     switch (config.mode) {
@@ -42,7 +42,7 @@ export class DBInstance {
         return this.firestore.runTransaction(async (transaction) => {
           const manager = new TransactionManager(transaction);
 
-          const result = await func(payload, manager);
+          const result = await func(manager, payload);
 
           await manager.applyWrites();
 
@@ -53,7 +53,7 @@ export class DBInstance {
         const batch = this.firestore.batch();
         const manager = new TransactionManager(undefined, batch);
 
-        const result = await func(payload, manager);
+        const result = await func(manager, payload);
 
         await manager.applyWrites();
 

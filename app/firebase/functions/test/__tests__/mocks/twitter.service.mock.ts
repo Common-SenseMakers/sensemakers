@@ -31,7 +31,7 @@ type MockedType = Omit<TwitterService, 'fetchInternal'> & {
 export const getTwitterMock = (twitterService: TwitterService) => {
   const Mocked = spy(twitterService) as unknown as MockedType;
 
-  when(Mocked.publish(anything())).thenCall(
+  when(Mocked.publish(anything(), anything())).thenCall(
     (postPublish: PlatformPostPublish<TwitterDraft>) => {
       const tweet: TweetV2SingleResult = {
         data: {

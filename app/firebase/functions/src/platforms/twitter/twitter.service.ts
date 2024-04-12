@@ -1,3 +1,4 @@
+import { TransactionManager } from 'src/db/transaction.manager';
 import {
   TOAuth2Scope,
   TTweetv2TweetField,
@@ -132,20 +133,24 @@ export class TwitterService
    * */
   private async getUserClient(
     user_id: string,
-    type: 'write'
+    type: 'write',
+    manager: TransactionManager
   ): Promise<TwitterApi>;
   private async getUserClient(
     user_id: string,
-    type: 'read'
+    type: 'read',
+    manager: TransactionManager
   ): Promise<TwitterApiReadOnly>;
   private async getUserClient(
     user_id: string,
-    type: 'read' | 'write'
+    type: 'read' | 'write',
+    manager: TransactionManager
   ): Promise<TwitterApi | TwitterApiReadOnly> {
     /** read user from the DB */
     const user = await this.usersRepo.getUserWithPlatformAccount(
       PLATFORM.Twitter,
       user_id,
+      manager,
       true
     );
 
@@ -180,7 +185,8 @@ export class TwitterService
       this.usersRepo.setPlatformDetails(
         user.userId,
         PLATFORM.Twitter,
-        newDetails
+        newDetails,
+        manager
       );
     }
 
@@ -192,14 +198,17 @@ export class TwitterService
    * accordingly
    */
   private async getClient(
+    manager: TransactionManager,
     userDetails?: UserDetailsBase,
     type?: 'write'
   ): Promise<TwitterApi>;
   private async getClient(
+    manager: TransactionManager,
     userDetails?: UserDetailsBase,
     type?: 'read'
   ): Promise<TwitterApiReadOnly>;
   private async getClient(
+    manager: TransactionManager,
     userDetails?: UserDetailsBase,
     type: 'read' | 'write' = 'read'
   ): Promise<TwitterApi | TwitterApiReadOnly> {
@@ -212,7 +221,7 @@ export class TwitterService
 
     /** if the read or write credentials are undefined, read them from the user_id (slow) */
     if (userDetails[type] === undefined) {
-      return this.getUserClient(userDetails.user_id, type as any); // TODO: review unexpected TS error
+      return this.getUserClient(userDetails.user_id, type as any, manager); // TODO: review unexpected TS error
     }
 
     /** otherwise use those credentials directly (fast) */
@@ -302,9 +311,10 @@ export class TwitterService
   /** methods non part of Platform interface should be protected (private) */
   protected async fetchInternal(
     params: TwitterQueryParameters,
+    manager: TransactionManager,
     userDetails?: UserDetailsBase
   ): Promise<TweetV2PaginableTimelineResult['data']> {
-    const readOnlyClient = await this.getClient(userDetails, 'read');
+    const readOnlyClient = await this.getClient(manager, userDetails, 'read');
 
     const tweetFields: TTweetv2TweetField[] = ['created_at', 'author_id'];
 
@@ -341,7 +351,8 @@ export class TwitterService
   }
 
   public async fetch(
-    params: FetchUserPostsParams
+    params: FetchUserPostsParams,
+    manager: TransactionManager
   ): Promise<PlatformPostPosted<TweetV2>[]> {
     const tweets = await this.fetchInternal(
       {
@@ -351,6 +362,7 @@ export class TwitterService
           ? new Date(params.end_time).toISOString()
           : undefined,
       },
+      manager,
       params.userDetails
     );
 
@@ -385,13 +397,17 @@ export class TwitterService
   }
 
   /** if user_id is provided it must be from the authenticated userId */
-  public async getPost(tweetId: string, user_id?: string) {
+  public async getPost(
+    tweetId: string,
+    manager: TransactionManager,
+    user_id?: string
+  ) {
     const options: Partial<Tweetv2FieldsParams> = {
       'tweet.fields': ['author_id', 'created_at'],
     };
 
     const client = user_id
-      ? await this.getUserClient(user_id, 'read')
+      ? await this.getUserClient(user_id, 'read', manager)
       : this.getGenericClient();
 
     return client.v2.singleTweet(tweetId, options);
@@ -399,13 +415,14 @@ export class TwitterService
 
   /** user_id must be from the authenticated userId */
   public async publish(
-    postPublish: PlatformPostPublish<TwitterDraft>
+    postPublish: PlatformPostPublish<TwitterDraft>,
+    manager: TransactionManager
   ): Promise<PlatformPostPosted<TweetV2SingleResult>> {
     // TODO udpate to support many
     const userDetails = postPublish.userDetails;
     const post = postPublish.draft;
 
-    const client = await this.getClient(userDetails, 'write');
+    const client = await this.getClient(manager, userDetails, 'write');
 
     try {
       // Post the tweet and also read the tweet
@@ -414,7 +431,11 @@ export class TwitterService
         throw new Error(`Error posting tweet`);
       }
 
-      const tweet = await this.getPost(result.data.id, userDetails.user_id);
+      const tweet = await this.getPost(
+        result.data.id,
+        manager,
+        userDetails.user_id
+      );
 
       if (!tweet.data.author_id) {
         throw new Error(`Unexpected author_id undefined`);

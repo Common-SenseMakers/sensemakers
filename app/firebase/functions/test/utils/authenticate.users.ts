@@ -6,6 +6,7 @@ import {
   TwitterGetContextParams,
   TwitterSignupData,
 } from '../../src/@shared/types/types.twitter';
+import { TransactionManager } from '../../src/db/transaction.manager';
 import { Services } from '../../src/instances/services';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 
@@ -28,7 +29,8 @@ export interface TwitterAccountCredentials {
  */
 export const authenticateTestUsers = async (
   twitterCredentials: TwitterAccountCredentials[],
-  services: Services
+  services: Services,
+  manager: TransactionManager
 ): Promise<AppUser[]> => {
   const signupDatasPromises = twitterCredentials.map(async (testAccount) => {
     const browser = await puppeteer.launch({ headless: false });
@@ -50,14 +52,19 @@ export const authenticateTestUsers = async (
       /** store the user in the DB (build the user profile object and derive the ID) */
       const result = await services.users.handleSignup(
         PLATFORM.Twitter,
-        signupData
+        signupData,
+        manager
       );
       if (!result) {
         throw new Error('Unexpected');
       }
 
       /** read the just created user (will fail if not found) */
-      const user = await services.users.repo.getUser(result.userId, true);
+      const user = await services.users.repo.getUser(
+        result.userId,
+        manager,
+        true
+      );
       users.push(user);
     })
   );

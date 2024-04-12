@@ -257,9 +257,9 @@ export type MayHandleWithTransactionManager<P, R> = (
   authUserId?: string
 ) => Promise<R>;
 
-export type HandleWithTransactionManager<P, R> = (
-  payload: P,
-  manager: TransactionManager
+export type HandleWithTransactionManager<R = void, P = void> = (
+  manager: TransactionManager,
+  payload?: P
 ) => Promise<R>;
 
 export enum ManagerModes {
