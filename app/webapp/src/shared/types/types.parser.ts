@@ -11,7 +11,7 @@ export interface TopicsParams {
 }
 
 export interface ParsePostRequest<P> {
-  post: AppPost;
+  post: Omit<AppPost, 'mirrorsIds'>;
   params: Partial<Record<PARSER_MODE, P>>;
 }
 

@@ -10,3 +10,5 @@ node_modules/
 
 .env.*
 .secret.*
+
+test/__tests__/test.users.json

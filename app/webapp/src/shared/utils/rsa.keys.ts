@@ -1,12 +1,6 @@
 import forge from 'node-forge';
 
-import { HexStr } from '../shared/types';
-
-export interface RSAKeys {
-  privateKey: string;
-  publicKey: string;
-  address?: HexStr;
-}
+import { RSAKeys } from '../types/types.nanopubs';
 
 export const getRSAKeys = (seed: string): RSAKeys => {
   // https://stackoverflow.com/a/72057346/1943661

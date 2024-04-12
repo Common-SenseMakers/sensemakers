@@ -6,7 +6,7 @@ import {
   OurTokenConfig,
   PLATFORM,
   UserWithId,
-} from '../@shared/types';
+} from '../@shared/types/types';
 import { UsersRepository } from './users.repository';
 import { getPrefixedUserId } from './users.utils';
 

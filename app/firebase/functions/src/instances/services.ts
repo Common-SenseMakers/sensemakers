@@ -1,13 +1,15 @@
-import { PLATFORM } from '../@shared/types';
+import { PlatformPostaRepository } from 'src/posts/platform.posts.repository';
+import { PostsProcessing } from 'src/posts/posts.processing';
+
+import { PLATFORM } from '../@shared/types/types';
 import {
-  FUNCTIONS_PY_URL,
   OUR_EXPIRES_IN,
   OUR_TOKEN_SECRET,
   TWITTER_CLIENT_ID,
   TWITTER_CLIENT_SECRET,
 } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
-import { ParserService } from '../parser/parser.service';
+// import { ParserService } from '../parser/parser.service';
 import { OrcidService } from '../platforms/orcid/orcid.service';
 import {
   IdentityServicesMap,
@@ -15,22 +17,24 @@ import {
   PlatformsService,
 } from '../platforms/platforms.service';
 import { TwitterService } from '../platforms/twitter/twitter.service';
+import { PostsManager } from '../posts/posts.manager';
 import { PostsRepository } from '../posts/posts.repository';
-import { PostsService } from '../posts/posts.service';
 import { TimeService } from '../time/time.service';
 import { UsersRepository } from '../users/users.repository';
 import { UsersService } from '../users/users.service';
 
 export interface Services {
   users: UsersService;
-  posts: PostsService;
+  postsManager: PostsManager;
   platforms: PlatformsService;
+  time: TimeService;
 }
 
 export const createServices = () => {
   const db = new DBInstance();
   const userRepo = new UsersRepository(db);
   const postsRepo = new PostsRepository(db);
+  const platformPostsRepo = new PlatformPostaRepository(db);
 
   const identityPlatforms: IdentityServicesMap = new Map();
   const platformsMap: PlatformsMap = new Map();
@@ -59,21 +63,29 @@ export const createServices = () => {
   const platformsService = new PlatformsService(platformsMap);
 
   /** parser service */
-  const parserService = new ParserService(FUNCTIONS_PY_URL);
+  // const parserService = new ParserService(FUNCTIONS_PY_URL);
 
   /** posts service */
-  const postsService = new PostsService(
+  const postsProcessing = new PostsProcessing(
     usersService,
-    platformsService,
     postsRepo,
-    parserService
+    platformPostsRepo,
+    platformsService
+  );
+  // const postsParser = new PostsParser(platformsService, parserService);
+  const postsManager = new PostsManager(
+    db,
+    usersService,
+    postsProcessing,
+    platformsService
   );
 
   /** all services */
   const services: Services = {
     users: usersService,
-    posts: postsService,
+    postsManager: postsManager,
     platforms: platformsService,
+    time,
   };
 
   return services;
