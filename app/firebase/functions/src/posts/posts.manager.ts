@@ -46,7 +46,7 @@ export class PostsManager {
    * Reads all PlatformPosts from all users and returns a combination of PlatformPosts
    * and authors
    * */
-  async fetchAll(_manager?: TransactionManager) {
+  async fetchAll() {
     const func: HandleWithTxManager<PlatformPostCreated[], undefined> = async (
       manager
     ) => {
@@ -94,10 +94,12 @@ export class PostsManager {
       const platformPosts = allPosts.flat();
 
       /** Create the PlatformPosts (and the AppPosts) */
-      const created = await this.storePlatformPosts(platformPosts, manager);
+      const created = await this.storePlatformPosts(platformPosts);
 
       return created.filter((p) => p !== undefined) as PlatformPostCreated[];
     };
+
+    WIP... getAll should not be one huge transaction it cant actually... 
 
     return this.run(func, _manager);
   }

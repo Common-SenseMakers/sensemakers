@@ -12,7 +12,7 @@ import {
 initializeApp();
 
 export class DBInstance {
-  protected firestore: Firestore;
+  public firestore: Firestore;
 
   public collections: {
     signup: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;

@@ -15,7 +15,7 @@ import { createTestAppUsers } from '../utils/user.factory';
 import { MOCK_TWITTER } from './setup';
 import { getTestServices } from './test.services';
 
-describe.only('process', () => {
+describe.only('03-process', () => {
   const services = getTestServices();
 
   before(async () => {
@@ -34,7 +34,7 @@ describe.only('process', () => {
         appUser = users[0];
       };
 
-      await services.db.run(func, undefined);
+      await services.db.run(func);
     });
 
     /** skip for now because we have not yet granted write access */
@@ -89,7 +89,7 @@ describe.only('process', () => {
         }
       };
 
-      await services.db.run(func, undefined);
+      await services.db.run(func);
     });
 
     it('fetch all posts from all platforms', async () => {

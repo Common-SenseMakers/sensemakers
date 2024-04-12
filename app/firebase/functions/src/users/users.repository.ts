@@ -162,7 +162,7 @@ export class UsersRepository {
     const userRef = await this.getUserRef(existingUser.userId, manager, true);
 
     /** overwrite all the user account credentials */
-    await userRef.update({ [platform]: accounts });
+    manager.update(userRef, { [platform]: accounts });
   }
 
   /** append or overwrite userDetails for an account of a given platform */

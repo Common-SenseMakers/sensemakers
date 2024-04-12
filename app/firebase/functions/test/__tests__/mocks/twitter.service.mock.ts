@@ -28,6 +28,10 @@ type MockedType = Omit<TwitterService, 'fetchInternal'> & {
   fetchInternal: TwitterService['fetchInternal'];
 };
 
+/**
+ * TwitterService mock that publish and fetches posts without really
+ * hitting the API
+ */
 export const getTwitterMock = (twitterService: TwitterService) => {
   const Mocked = spy(twitterService) as unknown as MockedType;
 

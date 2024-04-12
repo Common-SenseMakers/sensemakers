@@ -93,7 +93,7 @@ export const mochaHooks = (): Mocha.RootHookObject => {
         });
       };
 
-      services.db.run(func);
+      await services.db.run(func);
 
       Object.assign(this, context);
     },

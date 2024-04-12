@@ -15,7 +15,7 @@ import { resetDB } from '../__tests_support__/db';
 import { createTestAppUsers } from '../utils/user.factory';
 import { getTestServices } from './test.services';
 
-describe('platforms', () => {
+describe('02-platforms', () => {
   let users: AppUser[] = [];
   let rsaKeys: RSAKeys | undefined;
   const services = getTestServices();
