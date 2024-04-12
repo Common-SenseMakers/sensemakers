@@ -7,7 +7,7 @@ import {
   PLATFORM,
   UserDetailsBase,
   UserWithId,
-} from '../@shared/types';
+} from '../@shared/types/types';
 import { DBInstance } from '../db/instance';
 import { getPrefixedUserId } from './users.utils';
 

@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 import { FUNCTIONS_BASE } from '../app/config';
-import { ParsePostResult } from '../shared/types.parser';
-import { AppPost } from '../shared/types.posts';
+import { ParsePostResult } from '../shared/types/types.parser';
+import { AppPost } from '../shared/types/types.posts';
 
 export const postMessage = async (
   post: AppPost,

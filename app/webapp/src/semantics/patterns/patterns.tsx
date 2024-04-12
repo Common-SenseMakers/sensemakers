@@ -1,7 +1,10 @@
 import { Box } from 'grommet';
 import React from 'react';
 
-import { AppPostSemantics, ParsePostResult } from '../../shared/types.parser';
+import {
+  AppPostSemantics,
+  ParsePostResult,
+} from '../../shared/types/types.parser';
 import { KeywordsComponent } from './keywords/Keywords.component';
 import { RefLabelsComponent } from './refs-labels/RefsLabels.component';
 

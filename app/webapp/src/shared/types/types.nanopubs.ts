@@ -9,13 +9,14 @@ import { HexStr, UserDetailsBase } from './types';
 export interface NanopubUserProfile {
   rsaPublickey: string;
   ethAddress: HexStr;
-  ethSignature: HexStr;
   introNanopub?: string;
 }
 
 export interface NanopubUserDetails
   extends UserDetailsBase<NanopubUserProfile, undefined, undefined> {}
 
-export interface AppPostConstructNanopub {
-  content: string;
+export interface RSAKeys {
+  privateKey: string;
+  publicKey: string;
+  address?: HexStr;
 }

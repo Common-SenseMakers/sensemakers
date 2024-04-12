@@ -3,7 +3,7 @@ import { DataFactory } from 'n3';
 import { useMemo } from 'react';
 
 import { THIS_POST_NAME } from '../../../app/config';
-import { filterStore, writeRDF } from '../../../shared/n3.utils';
+import { filterStore, writeRDF } from '../../../shared/utils/n3.utils';
 import { useSemanticsStore } from '../common/use.semantics';
 import { PatternProps } from '../patterns';
 import { RefLabels } from './RefLabel';

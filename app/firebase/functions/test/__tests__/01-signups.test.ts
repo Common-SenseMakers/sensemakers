@@ -1,12 +1,13 @@
 import { expect } from 'chai';
 
-import { PLATFORM } from '../../src/@shared/types';
+import { PLATFORM } from '../../src/@shared/types/types';
 import { resetDB } from '../__tests_support__/db';
-import { services } from './test.services';
+import { getTestServices } from './test.services';
 
 const logger = (global as any).logger;
 
 describe('signups', () => {
+  const services = getTestServices();
   let userId: string = 'twitter:123456789';
 
   before(async () => {

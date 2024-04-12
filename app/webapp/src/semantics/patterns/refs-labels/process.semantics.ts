@@ -1,7 +1,7 @@
 import { Store } from 'n3';
 
-import { filterStore, forEachStore } from '../../../shared/n3.utils';
-import { ParsedSupport, RefMeta } from '../../../shared/types.parser';
+import { ParsedSupport, RefMeta } from '../../../shared/types/types.parser';
+import { filterStore, forEachStore } from '../../../shared/utils/n3.utils';
 
 export interface RefData {
   labelsUris: string[];

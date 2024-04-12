@@ -1,12 +1,22 @@
 import { expect } from 'chai';
+import {
+  PlatformPost,
+  PlatformPostPosted,
+} from 'src/@shared/types/types.platform.posts';
+import { AppPost } from 'src/@shared/types/types.posts';
+import { TwitterService } from 'src/platforms/twitter/twitter.service';
+import { TweetV2SingleResult } from 'twitter-api-v2';
 
-import { AppUser, PLATFORM } from '../../src/@shared/types';
+import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import { logger } from '../../src/instances/logger';
 import { resetDB } from '../__tests_support__/db';
 import { createTestAppUsers } from '../utils/user.factory';
-import { services } from './test.services';
+import { MOCK_TWITTER } from './setup';
+import { getTestServices } from './test.services';
 
-describe.skip('process', () => {
+describe.only('process', () => {
+  const services = getTestServices();
+
   before(async () => {
     logger.debug('resetting DB');
     await resetDB();
@@ -14,9 +24,11 @@ describe.skip('process', () => {
 
   describe('create and process', () => {
     let appUser: AppUser | undefined;
+    let content = `This is a test post ${Date.now()}`;
+    let tweet: PlatformPostPosted<TweetV2SingleResult>;
 
     before(async () => {
-      const users = await createTestAppUsers();
+      const users = await createTestAppUsers(services);
       appUser = users[0];
     });
 
@@ -45,22 +57,12 @@ describe.skip('process', () => {
         throw new Error('Unexpected');
       }
 
-      const tweets = await services.platforms.get(PLATFORM.Twitter).publish([
-        {
-          post: {
-            id: '',
-            authorId: '',
-            content: `This is a test post ${Date.now()}`,
-            mirrors: {},
-            origin: PLATFORM.Local,
-            parseStatus: 'unprocessed',
-            reviewedStatus: 'pending',
-          },
+      tweet = await services.platforms
+        .get<TwitterService>(PLATFORM.Twitter)
+        .publish({
+          draft: { text: content },
           userDetails: account,
-        },
-      ]);
-
-      const tweet = tweets[0];
+        });
 
       /** set lastFetched to one second before the last tweet timestamp */
       await services.users.repo.setLastFetched(
@@ -71,7 +73,9 @@ describe.skip('process', () => {
 
       expect(tweet).to.not.be.undefined;
 
-      await new Promise<void>((resolve) => setTimeout(resolve, 10000));
+      if (!MOCK_TWITTER) {
+        await new Promise<void>((resolve) => setTimeout(resolve, 6 * 1000));
+      }
     });
 
     it('fetch all posts from all platforms', async () => {
@@ -79,8 +83,56 @@ describe.skip('process', () => {
        * high-level trigger to process all new posts from
        * all registered users
        */
-      await services.posts.process();
-      console.log('done');
+      const fetched = await services.postsManager.fetchAll();
+      expect(fetched).to.have.length(1);
+
+      const postFetched = fetched[0].post;
+      const platformPostFetched = fetched[0].platformPost;
+
+      const postRead = await services.postsManager.processing.posts.get(
+        postFetched.id,
+        true
+      );
+      const platformPostRead =
+        await services.postsManager.processing.platformPosts.get(
+          platformPostFetched.id,
+          true
+        );
+
+      if (!appUser) {
+        throw new Error('appUser not created');
+      }
+
+      const refAppPost: AppPost = {
+        id: postFetched.id,
+        authorId: appUser.userId,
+        origin: PLATFORM.Twitter,
+        parseStatus: 'unprocessed',
+        content,
+        mirrorsIds: [platformPostRead.id],
+        reviewedStatus: 'pending',
+      };
+
+      const refPlatformPost: PlatformPost = {
+        id: platformPostFetched.id,
+        platformId: PLATFORM.Twitter,
+        publishOrigin: 'fetched',
+        publishStatus: 'published',
+        posted: {
+          post_id: tweet.post.data.id,
+          user_id: (appUser[PLATFORM.Twitter] as any)[0].user_id,
+          timestampMs: tweet.timestampMs,
+          post: tweet.post.data,
+        },
+      };
+
+      expect(postRead).to.not.be.undefined;
+
+      expect(postRead).to.deep.equal(refAppPost);
+      expect(postFetched).to.deep.equal(refAppPost);
+
+      expect(platformPostRead).to.deep.equal(refPlatformPost);
+      expect(platformPostFetched).to.deep.equal(refPlatformPost);
     });
   });
 });

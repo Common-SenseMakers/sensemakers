@@ -19,5 +19,3 @@ export const MAGIC_API_KEY = 'pk_live_A603B0287DAF3C97';
 
 export const NANOPUBS_SERVER = 'https://np.petapico.org/';
 // export const NANOPUBS_SERVER = 'https://np.knowledgepixels.com/';
-
-export const THIS_POST_NAME = 'http://sensentes/ThisText';
