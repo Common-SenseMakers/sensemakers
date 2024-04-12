@@ -5,7 +5,7 @@ import {
 } from '../@shared/types/types';
 import {
   PlatformPostCreate,
-  PlatformPostPublishWithCrendentials,
+  PlatformPostPublish,
 } from '../@shared/types/types.platform.posts';
 import {
   FetchUserPostsParams,
@@ -59,10 +59,7 @@ export class PlatformsService {
     return platform.convertToGeneric(platformPost);
   }
 
-  public publish(
-    platformId: PLATFORM,
-    postPublish: PlatformPostPublishWithCrendentials
-  ) {
+  public publish(platformId: PLATFORM, postPublish: PlatformPostPublish) {
     const platform = this.get(platformId);
     return platform.publish(postPublish);
   }

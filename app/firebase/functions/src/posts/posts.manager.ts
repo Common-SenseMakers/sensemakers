@@ -1,5 +1,8 @@
 import { ALL_PUBLISH_PLATFORMS } from '../@shared/types/types';
-import { PlatformPostCreate } from '../@shared/types/types.platform.posts';
+import {
+  PlatformPostCreate,
+  PlatformPostCreated,
+} from '../@shared/types/types.platform.posts';
 import { DBInstance } from '../db/instance';
 import {
   HandleWithTransactionManager,
@@ -43,57 +46,56 @@ export class PostsManager {
    * and authors
    * */
   async fetchAll(_manager?: TransactionManager) {
-    const func: HandleWithTransactionManager<undefined, (PlatformPostCreate | undefined)[]> = async (payload, manager) => {
-        const users = await this.users.repo.getAll();
-        const params = new Map();
-
-        /**
-         * prepare the credentials and lastFetched timestamps for
-         * all users and platforms
-         */
-        users.forEach((user) => {
-          ALL_PUBLISH_PLATFORMS.map((platformId) => {
-            /** check if the user has credentials for that platform */
-            const accounts = user[platformId];
-            if (accounts) {
-              accounts.forEach((account) => {
-                const current = params.get(platformId) || [];
-                const thisParams: FetchUserPostsParams = {
-                  start_time: account.read
-                    ? account.read.lastFetchedMs
-                    : account.signupDate,
-                  userDetails: account,
-                };
-                params.set(platformId, current.concat(thisParams));
-              });
-            }
-          });
-        });
-
-        /** Call fetch for each user and platform */
-        const allPosts = await Promise.all(
-          Array.from(params.keys()).map(async (platformId) => {
-            const thisParams = params.get(platformId);
-            if (thisParams) {
-              return this.platforms.fetch(platformId, thisParams);
-            } else {
-              return [];
-            }
-          })
-        );
-
-        /** fetch all new posts from all platforms */
-        const platformPosts = allPosts.flat();
-
-        /** Create the PlatformPosts (and the AppPosts) */
-        const created = await this.storePlatformPosts(platformPosts);
-
-        return created;
-      },
-      {},
+    const func: HandleWithTransactionManager<
       undefined,
-      { mode: ManagerModes.TRANSACTION }
-    );
+      (PlatformPostCreated | undefined)[]
+    > = async (payload, manager) => {
+      const users = await this.users.repo.getAll();
+      const params = new Map();
+
+      /**
+       * prepare the credentials and lastFetched timestamps for
+       * all users and platforms
+       */
+      users.forEach((user) => {
+        ALL_PUBLISH_PLATFORMS.map((platformId) => {
+          /** check if the user has credentials for that platform */
+          const accounts = user[platformId];
+          if (accounts) {
+            accounts.forEach((account) => {
+              const current = params.get(platformId) || [];
+              const thisParams: FetchUserPostsParams = {
+                start_time: account.read
+                  ? account.read.lastFetchedMs
+                  : account.signupDate,
+                userDetails: account,
+              };
+              params.set(platformId, current.concat(thisParams));
+            });
+          }
+        });
+      });
+
+      /** Call fetch for each user and platform */
+      const allPosts = await Promise.all(
+        Array.from(params.keys()).map(async (platformId) => {
+          const thisParams = params.get(platformId);
+          if (thisParams) {
+            return this.platforms.fetch(platformId, thisParams);
+          } else {
+            return [];
+          }
+        })
+      );
+
+      /** fetch all new posts from all platforms */
+      const platformPosts = allPosts.flat();
+
+      /** Create the PlatformPosts (and the AppPosts) */
+      const created = await this.storePlatformPosts(platformPosts);
+
+      return created;
+    };
 
     return this.run(func, undefined, _manager);
   }
@@ -105,7 +107,7 @@ export class PostsManager {
   ) {
     const func: HandleWithTransactionManager<
       undefined,
-      Array<PlatformPostCreate | undefined>
+      Array<PlatformPostCreated | undefined>
     > = async (payload, manager) => {
       return await Promise.all(
         platformPosts.map(async (platformPost) => {

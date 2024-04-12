@@ -1,6 +1,6 @@
 import {
-  PlatformPost,
   PlatformPostCreate,
+  PlatformPostCreated,
 } from '../@shared/types/types.platform.posts';
 import { AppPost, AppPostCreate } from '../@shared/types/types.posts';
 import { TransactionManager } from '../db/transaction.manager';
@@ -28,7 +28,7 @@ export class PostsProcessing {
   async createPlatformPost(
     platformPost: PlatformPostCreate,
     manager: TransactionManager
-  ): Promise<PlatformPostCreate | undefined> {
+  ): Promise<PlatformPostCreated | undefined> {
     const existing = platformPost.posted
       ? await this.platformPosts.getFromPostId(
           platformPost.posted.post_id,

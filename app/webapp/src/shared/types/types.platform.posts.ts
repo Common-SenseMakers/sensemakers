@@ -47,19 +47,11 @@ export interface PlatformPostDraft<D = any> {
  * The PlatformPostPublish object is used to publish a post on a platform
  * */
 export interface PlatformPostPublish<D = any> {
-  id: string; // internal postId of which this post is a mirror
   draft: D;
-}
-
-export interface PlatformPostPublishWithCrendentials {
-  platformPost: PlatformPostPublish;
   userDetails: UserDetailsBase;
 }
 
-export type PerPlatformPublish = Map<
-  PLATFORM,
-  PlatformPostPublishWithCrendentials[]
->;
+export type PerPlatformPublish = Map<PLATFORM, PlatformPostPublish[]>;
 
 export interface PlatformPostCreated {
   post: AppPost;

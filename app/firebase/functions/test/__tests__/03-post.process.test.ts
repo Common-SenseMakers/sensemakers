@@ -46,10 +46,7 @@ describe.only('process', () => {
       }
 
       const tweet = await services.platforms.get(PLATFORM.Twitter).publish({
-        platformPost: {
-          id: '',
-          draft: { text: `This is a test post ${Date.now()}` },
-        },
+        draft: { text: `This is a test post ${Date.now()}` },
         userDetails: account,
       });
 

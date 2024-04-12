@@ -7,7 +7,7 @@ import {
   PlatformPost,
   PlatformPostDraft,
   PlatformPostPosted,
-  PlatformPostPublishWithCrendentials,
+  PlatformPostPublish,
 } from '../../@shared/types/types.platform.posts';
 import {
   AppPostMirror,
@@ -62,10 +62,10 @@ export class NanopubService
    * a list of the updated platformPosts
    */
   async publish(
-    postPublish: PlatformPostPublishWithCrendentials
+    postPublish: PlatformPostPublish
   ): Promise<PlatformPostPosted<any>> {
     let published: Nanopub | undefined = undefined;
-    const draft = new Nanopub(postPublish.platformPost.draft);
+    const draft = new Nanopub(postPublish.draft);
 
     let stop: boolean = false;
     let serverIx = 0;

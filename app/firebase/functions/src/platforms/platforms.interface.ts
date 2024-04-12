@@ -3,7 +3,7 @@ import {
   PlatformPostCreate,
   PlatformPostDraft,
   PlatformPostPosted,
-  PlatformPostPublishWithCrendentials,
+  PlatformPostPublish,
 } from '../@shared/types/types.platform.posts';
 import { GenericPostData, PostAndAuthor } from '../@shared/types/types.posts';
 
@@ -35,9 +35,7 @@ export interface PlatformService<
   UserDetails extends UserDetailsBase = UserDetailsBase,
 > extends IdentityService<SignupContext, SignupData, UserDetails> {
   fetch(params: FetchUserPostsParams): Promise<PlatformPostPosted[]>;
-  publish(
-    posts: PlatformPostPublishWithCrendentials
-  ): Promise<PlatformPostPosted>;
+  publish(posts: PlatformPostPublish): Promise<PlatformPostPosted>;
   convertToGeneric(platformPost: PlatformPostCreate): Promise<GenericPostData>;
   convertFromGeneric(postAndAuthor: PostAndAuthor): Promise<PlatformPostDraft>;
 }

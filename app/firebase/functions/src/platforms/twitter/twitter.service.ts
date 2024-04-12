@@ -14,7 +14,7 @@ import {
   PlatformPostCreate,
   PlatformPostDraft,
   PlatformPostPosted,
-  PlatformPostPublishWithCrendentials,
+  PlatformPostPublish,
 } from '../../@shared/types/types.platform.posts';
 import '../../@shared/types/types.posts';
 import {
@@ -403,11 +403,11 @@ export class TwitterService
 
   /** user_id must be from the authenticated userId */
   public async publish(
-    postPublish: PlatformPostPublishWithCrendentials
+    postPublish: PlatformPostPublish
   ): Promise<PlatformPostPosted<TweetV2SingleResult>> {
     // TODO udpate to support many
     const userDetails = postPublish.userDetails;
-    const post = postPublish.platformPost;
+    const post = postPublish.draft;
 
     const client = await this.getClient(userDetails, 'write');
 

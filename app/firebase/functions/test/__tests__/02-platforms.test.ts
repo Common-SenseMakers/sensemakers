@@ -1,9 +1,10 @@
 import { Nanopub, NpProfile } from '@nanopub/sign';
 import { expect } from 'chai';
+import { PlatformPostDraft } from 'src/@shared/types/types.platform.posts';
 
 import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
-import { AppPost, AppPostFull } from '../../src/@shared/types/types.posts';
+import { AppPostFull } from '../../src/@shared/types/types.posts';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { cleanPrivateKey } from '../../src/@shared/utils/semantics.helper';
 import { logger } from '../../src/instances/logger';
@@ -135,13 +136,13 @@ describe('platforms', () => {
   });
 
   describe.only('nanopub', () => {
-    let post: AppPostFull | undefined;
+    let nanopub: PlatformPostDraft | undefined;
 
     it('creates a draft nanopub', async () => {
       const nanopubService = services.platforms.get(PLATFORM.Nanopub);
 
       try {
-        post = {
+        const post: AppPostFull = {
           id: 'test-id',
           authorId: users[0].userId,
           content: 'test content',
@@ -152,7 +153,7 @@ describe('platforms', () => {
           mirrors: [],
         };
 
-        const nanopub = await nanopubService.convertFromGeneric({
+        nanopub = await nanopubService.convertFromGeneric({
           post,
           author: users[0],
         });
@@ -166,12 +167,11 @@ describe('platforms', () => {
       try {
         const nanopubService = services.platforms.get(PLATFORM.Nanopub);
 
-        if (!post) {
+        if (!nanopub) {
           throw new Error('Post not created');
         }
 
-        const nanopub = services.posts;
-        const nanopubObj = new Nanopub(nanopub.platformDraft.original);
+        const nanopubObj = new Nanopub(nanopub.post);
 
         const nanopubAccount = UsersHelper.getAccount(
           users[0],
@@ -202,7 +202,7 @@ describe('platforms', () => {
         expect(signed).to.not.be.undefined;
 
         const published = await nanopubService.publish({
-          post,
+          draft: signed.rdf(),
           userDetails: nanopubAccount,
         });
         expect(published).to.not.be.undefined;
