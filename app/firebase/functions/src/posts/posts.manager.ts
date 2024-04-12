@@ -5,7 +5,7 @@ import {
 } from '../@shared/types/types.platform.posts';
 import { DBInstance } from '../db/instance';
 import {
-  HandleWithTransactionManager,
+  HandleWithTxManager,
   ManagerModes,
   TransactionManager,
 } from '../db/transaction.manager';
@@ -29,14 +29,14 @@ export class PostsManager {
 
   /** run function with manager or create one */
   private run<R, P>(
-    func: HandleWithTransactionManager<R, P>,
+    func: HandleWithTxManager<R, P>,
     manager?: TransactionManager,
     payload?: P
   ): Promise<R> {
     if (manager) {
       return func(manager, payload);
     } else {
-      return this.db.runWithTransactionManager(func, payload, {
+      return this.db.run(func, payload, {
         mode: ManagerModes.TRANSACTION,
       });
     }
@@ -47,10 +47,9 @@ export class PostsManager {
    * and authors
    * */
   async fetchAll(_manager?: TransactionManager) {
-    const func: HandleWithTransactionManager<
-      PlatformPostCreated[],
-      undefined
-    > = async (manager) => {
+    const func: HandleWithTxManager<PlatformPostCreated[], undefined> = async (
+      manager
+    ) => {
       const users = await this.users.repo.getAll();
       const params: Map<PLATFORM, FetchUserPostsParams[]> = new Map();
 
@@ -108,7 +107,7 @@ export class PostsManager {
     platformPosts: PlatformPostCreate[],
     _manager?: TransactionManager
   ) {
-    const func: HandleWithTransactionManager<
+    const func: HandleWithTxManager<
       Array<PlatformPostCreated | undefined>,
       undefined
     > = async (manager) => {

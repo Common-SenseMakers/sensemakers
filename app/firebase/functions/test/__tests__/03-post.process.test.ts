@@ -7,7 +7,7 @@ import {
   PlatformPostPosted,
 } from '../../src/@shared/types/types.platform.posts';
 import { AppPost } from '../../src/@shared/types/types.posts';
-import { HandleWithTransactionManager } from '../../src/db/transaction.manager';
+import { HandleWithTxManager } from '../../src/db/transaction.manager';
 import { logger } from '../../src/instances/logger';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { resetDB } from '../__tests_support__/db';
@@ -29,17 +29,17 @@ describe.only('process', () => {
     let tweet: PlatformPostPosted<TweetV2SingleResult>;
 
     before(async () => {
-      const func: HandleWithTransactionManager = async (manager) => {
+      const func: HandleWithTxManager = async (manager) => {
         const users = await createTestAppUsers(services, manager);
         appUser = users[0];
       };
 
-      await services.db.runWithTransactionManager(func, undefined);
+      await services.db.run(func, undefined);
     });
 
     /** skip for now because we have not yet granted write access */
     it('publish a post in the name of the test user', async () => {
-      const func: HandleWithTransactionManager = async (manager) => {
+      const func: HandleWithTxManager = async (manager) => {
         if (!appUser) {
           throw new Error('appUser not created');
         }
@@ -89,7 +89,7 @@ describe.only('process', () => {
         }
       };
 
-      await services.db.runWithTransactionManager(func, undefined);
+      await services.db.run(func, undefined);
     });
 
     it('fetch all posts from all platforms', async () => {

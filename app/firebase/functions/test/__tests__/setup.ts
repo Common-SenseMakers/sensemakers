@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { Context } from 'mocha';
-import { HandleWithTransactionManager } from 'src/db/transaction.manager';
+import { HandleWithTxManager } from 'src/db/transaction.manager';
 
 import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import { envDeploy } from '../../src/config/typedenv.deploy';
@@ -40,7 +40,7 @@ export const mochaHooks = (): Mocha.RootHookObject => {
       const context: InjectableContext = {};
       await resetDB();
 
-      const func: HandleWithTransactionManager = async (manager) => {
+      const func: HandleWithTxManager = async (manager) => {
         const testAccountCredentials: TwitterAccountCredentials[] = JSON.parse(
           process.env.TEST_USER_TWITTER_ACCOUNTS as string
         );
@@ -93,7 +93,7 @@ export const mochaHooks = (): Mocha.RootHookObject => {
         });
       };
 
-      services.db.runWithTransactionManager(func);
+      services.db.run(func);
 
       Object.assign(this, context);
     },

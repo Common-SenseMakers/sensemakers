@@ -3,7 +3,7 @@ import { Firestore, getFirestore } from 'firebase-admin/firestore';
 
 import { CollectionNames } from '../@shared/utils/collectionNames';
 import {
-  HandleWithTransactionManager,
+  HandleWithTxManager,
   ManagerConfig,
   ManagerModes,
   TransactionManager,
@@ -32,8 +32,8 @@ export class DBInstance {
   }
 
   /** a wrapper of TransactionManager to instantiate and applyWrites automatically */
-  async runWithTransactionManager<R, P>(
-    func: HandleWithTransactionManager<R, P>,
+  async run<R, P>(
+    func: HandleWithTxManager<R, P>,
     payload?: P,
     config: ManagerConfig = { mode: ManagerModes.TRANSACTION }
   ): Promise<R> {

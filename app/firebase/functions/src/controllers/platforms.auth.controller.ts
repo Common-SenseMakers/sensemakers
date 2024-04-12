@@ -57,7 +57,7 @@ export const handleSignupController: RequestHandler = async (
       throw new Error(`Unexpected platform ${platform}`);
     })();
 
-    const result = await services.db.runWithTransactionManager((manager) =>
+    const result = await services.db.run((manager) =>
       services.users.handleSignup(platform, payload, manager, userId)
     );
 

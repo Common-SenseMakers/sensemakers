@@ -60,7 +60,7 @@ describe('platforms', () => {
     let appUser: AppUser | undefined;
 
     before(async () => {
-      const users = await services.db.runWithTransactionManager((manager) =>
+      const users = await services.db.run((manager) =>
         createTestAppUsers(services, manager)
       );
       appUser = users[0];
@@ -96,7 +96,7 @@ describe('platforms', () => {
           end_time: 1708646400000,
         };
 
-        const tweets = await services.db.runWithTransactionManager((manager) =>
+        const tweets = await services.db.run((manager) =>
           twitterService.fetch(fetchParams, manager)
         );
 
@@ -126,7 +126,7 @@ describe('platforms', () => {
         }
       );
 
-      await services.db.runWithTransactionManager(async (manager) => {
+      await services.db.run(async (manager) => {
         const tweets = await twitterService.fetch(
           {
             userDetails,
@@ -220,15 +220,14 @@ describe('platforms', () => {
 
         expect(signed).to.not.be.undefined;
 
-        const published = await services.db.runWithTransactionManager(
-          (manager) =>
-            nanopubService.publish(
-              {
-                draft: signed.rdf(),
-                userDetails: nanopubAccount,
-              },
-              manager
-            )
+        const published = await services.db.run((manager) =>
+          nanopubService.publish(
+            {
+              draft: signed.rdf(),
+              userDetails: nanopubAccount,
+            },
+            manager
+          )
         );
         expect(published).to.not.be.undefined;
       } catch (error) {
