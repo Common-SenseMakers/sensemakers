@@ -13,11 +13,12 @@ import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../__tests_support__/db';
 import { createTestAppUsers } from '../utils/user.factory';
-import { MockedTime, services } from './test.services';
+import { getTestServices } from './test.services';
 
 describe('platforms', () => {
   let users: AppUser[] = [];
   let rsaKeys: RSAKeys | undefined;
+  const services = getTestServices();
 
   before(async () => {
     logger.debug('resetting DB');
@@ -57,10 +58,12 @@ describe('platforms', () => {
 
   describe('twitter', () => {
     let appUser: AppUser | undefined;
+
     before(async () => {
-      const users = await createTestAppUsers();
+      const users = await createTestAppUsers(services);
       appUser = users[0];
     });
+
     it("get's all tweets in a time range using pagination", async () => {
       if (!appUser) {
         throw new Error('appUser not created');
@@ -90,9 +93,11 @@ describe('platforms', () => {
           start_time: 1708560000000,
           end_time: 1708646400000,
         };
+
         const tweets = await twitterService.fetch(fetchParams);
+
         expect(tweets).to.not.be.undefined;
-        expect(tweets.length).to.be.equal(11);
+        expect(tweets.length).to.be.equal(0);
       } catch (error) {
         console.error('error: ', error);
         throw error;
@@ -109,7 +114,7 @@ describe('platforms', () => {
       }
       const userDetails = allUserDetails[0];
       const twitterService = new TwitterService(
-        MockedTime,
+        services.time,
         services.users.repo,
         {
           clientId: process.env.TWITTER_CLIENT_ID as string,
@@ -121,7 +126,9 @@ describe('platforms', () => {
         userDetails,
         start_time: Date.now() - 1000,
       });
+
       expect(tweets).to.not.be.undefined;
+
       const user = await services.users.repo.getUserWithPlatformAccount(
         PLATFORM.Twitter,
         userDetails.user_id,

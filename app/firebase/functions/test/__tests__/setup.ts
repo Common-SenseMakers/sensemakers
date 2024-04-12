@@ -9,7 +9,7 @@ import {
   TwitterAccountCredentials,
   authenticateTestUsers,
 } from '../utils/authenticate.users';
-import { services } from './test.services';
+import { getTestServices } from './test.services';
 
 export const LOG_LEVEL_MSG = envDeploy.LOG_LEVEL_MSG.value();
 export const LOG_LEVEL_OBJ = envDeploy.LOG_LEVEL_OBJ.value();
@@ -32,6 +32,8 @@ export let testUsers: Map<string, AppUser> = new Map();
 export type TestContext = Mocha.Context & Context;
 
 export const mochaHooks = (): Mocha.RootHookObject => {
+  const services = getTestServices();
+
   return {
     async beforeAll(this: Mocha.Context) {
       const context: InjectableContext = {};
@@ -71,12 +73,14 @@ export const mochaHooks = (): Mocha.RootHookObject => {
         /** update appUserCreates with new tokens */
         if (!valid) {
           appUsers = await authenticateTestUsers(
-            testAccountCredentials.splice(0, NUM_TEST_USERS)
+            testAccountCredentials.splice(0, NUM_TEST_USERS),
+            services
           );
         }
       } else {
         appUsers = await authenticateTestUsers(
-          testAccountCredentials.splice(0, NUM_TEST_USERS)
+          testAccountCredentials.splice(0, NUM_TEST_USERS),
+          services
         );
       }
 

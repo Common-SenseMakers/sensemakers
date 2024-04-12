@@ -21,92 +21,103 @@ import { UsersService } from '../../src/users/users.service';
 import { getTwitterMock } from './mocks/twitter.service.mock';
 import { MOCK_TWITTER } from './setup';
 
-const mandatory = ['TWITTER_CLIENT_ID', 'TWITTER_CLIENT_SECRET'];
+export const getTestServices = () => {
+  const mandatory = ['TWITTER_CLIENT_ID', 'TWITTER_CLIENT_SECRET'];
 
-mandatory.forEach((varName) => {
-  if (!process.env[varName]) {
-    throw new Error(
-      `${varName} undefined in process.env (derived from .env.test)`
-    );
-  }
-});
+  mandatory.forEach((varName) => {
+    if (!process.env[varName]) {
+      throw new Error(
+        `${varName} undefined in process.env (derived from .env.test)`
+      );
+    }
+  });
 
-const db = new DBInstance();
-const userRepo = new UsersRepository(db);
-const postsRepo = new PostsRepository(db);
-const platformPostsRepo = new PlatformPostaRepository(db);
+  const db = new DBInstance();
+  const userRepo = new UsersRepository(db);
+  const postsRepo = new PostsRepository(db);
+  const platformPostsRepo = new PlatformPostaRepository(db);
 
-const identityServices: IdentityServicesMap = new Map();
-const platformsMap: PlatformsMap = new Map();
-const time = new TimeService();
-export const MockedTime = spy(new TimeService());
-when(MockedTime.now()).thenReturn(
-  /** 3 hours from now so the token will always be invalid */
-  Date.now() + 3 * 60 * 60 * 1000
-);
+  const identityServices: IdentityServicesMap = new Map();
+  const platformsMap: PlatformsMap = new Map();
+  const time = new TimeService();
+  const MockedTime = spy(new TimeService());
 
-/** mocked orcid */
-const orcid = new OrcidService();
+  when(MockedTime.now()).thenReturn(
+    /** 3 hours from now so the token will always be invalid */
+    Date.now() + 3 * 60 * 60 * 1000
+  );
 
-/** mocked twitter */
-const _twitter = new TwitterService(time, userRepo, {
-  clientId: process.env.TWITTER_CLIENT_ID as string,
-  clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
-});
+  /** mocked orcid */
+  const orcid = new OrcidService();
 
-const twitter = MOCK_TWITTER ? getTwitterMock(_twitter) : _twitter;
+  /** mocked twitter */
+  const _twitter = new TwitterService(time, userRepo, {
+    clientId: process.env.TWITTER_CLIENT_ID as string,
+    clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
+  });
 
-/** nanopub */
-const nanopub = new NanopubService(time);
+  const twitter = (() => {
+    if (MOCK_TWITTER) {
+      return getTwitterMock(_twitter);
+    }
+    return _twitter;
+  })();
 
-/** all identity services */
-identityServices.set(PLATFORM.Orcid, orcid);
-identityServices.set(PLATFORM.Twitter, twitter);
+  /** nanopub */
+  const nanopub = new NanopubService(time);
 
-/** users service */
-const usersService = new UsersService(userRepo, identityServices, {
-  tokenSecret: process.env.OUR_TOKEN_SECRET as string,
-  expiresIn: '30d',
-});
+  /** all identity services */
+  identityServices.set(PLATFORM.Orcid, orcid);
+  identityServices.set(PLATFORM.Twitter, twitter);
 
-/** all platforms */
-platformsMap.set(PLATFORM.Twitter, twitter);
-platformsMap.set(PLATFORM.Nanopub, nanopub);
+  /** users service */
+  const usersService = new UsersService(userRepo, identityServices, {
+    tokenSecret: process.env.OUR_TOKEN_SECRET as string,
+    expiresIn: '30d',
+  });
 
-/** platforms service */
-const platformsService = new PlatformsService(platformsMap);
+  /** all platforms */
+  platformsMap.set(PLATFORM.Twitter, twitter);
+  platformsMap.set(PLATFORM.Nanopub, nanopub);
 
-/** parser service */
-// const parserService = new ParserService(process.env.PARSER_API_URL as string);
+  /** platforms service */
+  const platformsService = new PlatformsService(platformsMap);
 
-// const MockedParser = spy(parserService);
+  /** parser service */
+  // const parserService = new ParserService(process.env.PARSER_API_URL as string);
 
-// const mockedResult: ParsePostResult[] = [
-//   {
-//     post: 'test',
-//     semantics: '<semantics>',
-//   },
-// ];
-// when(MockedParser.parsePosts(anything())).thenResolve(mockedResult);
-// const mockedParser = instance(MockedParser);
+  // const MockedParser = spy(parserService);
 
-/** posts service */
-const postsProcessing = new PostsProcessing(
-  usersService,
-  postsRepo,
-  platformPostsRepo,
-  platformsService
-);
+  // const mockedResult: ParsePostResult[] = [
+  //   {
+  //     post: 'test',
+  //     semantics: '<semantics>',
+  //   },
+  // ];
+  // when(MockedParser.parsePosts(anything())).thenResolve(mockedResult);
+  // const mockedParser = instance(MockedParser);
 
-const postsManager = new PostsManager(
-  db,
-  usersService,
-  postsProcessing,
-  platformsService
-);
+  /** posts service */
+  const postsProcessing = new PostsProcessing(
+    usersService,
+    postsRepo,
+    platformPostsRepo,
+    platformsService
+  );
 
-export const services: Services = {
-  users: usersService,
-  postsManager: postsManager,
-  platforms: platformsService,
+  const postsManager = new PostsManager(
+    db,
+    usersService,
+    postsProcessing,
+    platformsService
+  );
+
+  const services: Services = {
+    users: usersService,
+    postsManager: postsManager,
+    platforms: platformsService,
+    time: time,
+  };
+
+  return services;
 };

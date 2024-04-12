@@ -6,6 +6,7 @@ import {
   TwitterAccountCredentials,
   authenticateTestUsers,
 } from '../utils/authenticate.users';
+import { getTestServices } from './test.services';
 
 const NUM_TWITTER_USERS = 1;
 const TEST_ACCOUNTS: TwitterAccountCredentials[] = JSON.parse(
@@ -14,6 +15,8 @@ const TEST_ACCOUNTS: TwitterAccountCredentials[] = JSON.parse(
 
 /** skip for now as it will invalidate access tokens */
 describe.skip('twitter integration', () => {
+  const services = getTestServices();
+
   if (!TEST_ACCOUNTS) {
     throw new Error('test acccounts undefined');
   }
@@ -23,7 +26,8 @@ describe.skip('twitter integration', () => {
 
   it(`authenticates ${NUM_TWITTER_USERS} twitter users with the oauth 2.0 flow for reading access`, async () => {
     const appUsers = await authenticateTestUsers(
-      TEST_ACCOUNTS.slice(0, NUM_TWITTER_USERS)
+      TEST_ACCOUNTS.slice(0, NUM_TWITTER_USERS),
+      services
     );
     expect(appUsers).to.not.be.undefined;
     expect(appUsers.length).to.eq(NUM_TWITTER_USERS);

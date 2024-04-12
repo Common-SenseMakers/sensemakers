@@ -27,6 +27,7 @@ export interface Services {
   users: UsersService;
   postsManager: PostsManager;
   platforms: PlatformsService;
+  time: TimeService;
 }
 
 export const createServices = () => {
@@ -84,6 +85,7 @@ export const createServices = () => {
     users: usersService,
     postsManager: postsManager,
     platforms: platformsService,
+    time,
   };
 
   return services;

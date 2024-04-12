@@ -6,9 +6,11 @@ import { logger } from '../../src/instances/logger';
 import { resetDB } from '../__tests_support__/db';
 import { createTestAppUsers } from '../utils/user.factory';
 import { MOCK_TWITTER } from './setup';
-import { services } from './test.services';
+import { getTestServices } from './test.services';
 
-describe.only('process', () => {
+describe('process', () => {
+  const services = getTestServices();
+
   before(async () => {
     logger.debug('resetting DB');
     await resetDB();
@@ -18,7 +20,7 @@ describe.only('process', () => {
     let appUser: AppUser | undefined;
 
     before(async () => {
-      const users = await createTestAppUsers();
+      const users = await createTestAppUsers(services);
       appUser = users[0];
     });
 

@@ -6,8 +6,8 @@ import {
   TwitterGetContextParams,
   TwitterSignupData,
 } from '../../src/@shared/types/types.twitter';
+import { Services } from '../../src/instances/services';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
-import { services } from '../__tests__/test.services';
 
 const CALLBACK_URL = 'https://sense-nets.xyz/';
 const NEXT_BUTTON_TEXT = 'Next';
@@ -27,7 +27,8 @@ export interface TwitterAccountCredentials {
  * return their full profiles
  */
 export const authenticateTestUsers = async (
-  twitterCredentials: TwitterAccountCredentials[]
+  twitterCredentials: TwitterAccountCredentials[],
+  services: Services
 ): Promise<AppUser[]> => {
   const signupDatasPromises = twitterCredentials.map(async (testAccount) => {
     const browser = await puppeteer.launch({ headless: false });
