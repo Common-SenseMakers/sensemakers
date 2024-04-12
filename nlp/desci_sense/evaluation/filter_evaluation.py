@@ -123,6 +123,48 @@ def calculate_scores(y_pred, y_true):
 
     return precision[0], recall[0], f1_score[0], accuracy 
 
+def calculate_feed_score(df,name:str):
+   
+    df1 = df[df["username"] == name]
+   
+    y_pred = df1["Predicted Label"]
+    y_true= df1["True Label"]
+    n = len(y_true)
+    try:
+        y_pred, y_true, labels = binarize(y_pred=y_pred,y_true=y_true)
+        precision, recall, f1_score, accuracy = calculate_scores(y_pred=y_pred,y_true=y_true)
+        return pd.Series([precision, recall, f1_score, accuracy,n], index=["precision", "recall", "f1_score", "accuracy","toots number"])
+    except Exception as e:
+        print(f"exception was raised: {e}")
+        return pd.Series([0, 0, 0, 0, n], index=["precision", "recall", "f1_score", "accuracy","toots number"])
+
+def weighted_average(column_name:str,df):
+    return (df[column_name] * df['posts count']).sum() / df['posts count'].sum()
+
+
+def constr_feed_chart(df,df_handles):
+    # init the table to scores per feed
+    # Extract usernames and server names into separate columns TODO create an artifact that holds this file
+    df_handles['username'] = df_handles['accts'].apply(lambda x: x.split('@')[1])
+    df_handles['server'] = df_handles['accts'].apply(lambda x: x.split('@')[2])
+    df_feed_eval = df_handles[["username","server","info"]]
+    print(" 2 test")
+    for column in ["precision", "recall", "f1_score", "accuracy","posts count"]:
+        df_feed_eval[column] = 0
+    # calculate scores per each dataframe reduced to a handle
+    print("Calculating df_feed_eval")
+    df_feed_eval[["precision","recall","f1_score","accuracy","posts count"]] = df_feed_eval.apply(lambda row: calculate_feed_score(df=df,name=row["username"]),axis=1)
+    print(" 3 test")
+    average_row = [weighted_average(column_name = x,df = df_feed_eval) for x in ["precision", "recall", "f1_score", "accuracy"]]
+    print(" 4 test")
+    average_row.append(df_feed_eval["posts count"].sum())
+
+    new_row = ["Average","",""] + average_row
+
+    new_row = pd.DataFrame([new_row],columns=list(df_feed_eval.columns))
+
+    return df_feed_eval._append(new_row, ignore_index=True)
+
 
 if __name__ == "__main__":
     arguments = docopt.docopt(__doc__)
@@ -139,7 +181,7 @@ if __name__ == "__main__":
 
     api = wandb.Api()
 
-    run = wandb.init(project="filter_evaluation", job_type="evaluation")
+    run = wandb.init(project="testing", job_type="evaluation")
 
     # get artifact path
     if dataset_path:
@@ -147,8 +189,9 @@ if __name__ == "__main__":
         print(dataset_artifact_id)
     else:
         dataset_artifact_id = (
-            
-            'common-sense-makers/evaluation/toot_sci__labeling:v1'
+            # TODO choose a canonic location
+            #'common-sense-makers/evaluation/toot_sci__labeling:v1'
+            'common-sense-makers/testing/toot_sci__labeling:v1'
         )
 
     # set artifact as input artifact
@@ -169,8 +212,8 @@ if __name__ == "__main__":
 
     # return the pd df from the table
     #remember to remove the head TODO
-    df = get_dataset(table_path)
-
+    df = get_dataset(table_path).head(3)
+    print(df.columns)
     pred_labels(df)
     
     # make sure df can be binarized
@@ -200,6 +243,21 @@ if __name__ == "__main__":
     # Add the wandb.Table to the artifact
     artifact.add(table, "prediction_evaluation")
 
+    # Load profile list table
+    # Load the CSV file
+    # TODO make it modular and pull from from wandb
+    df_handles = pd.read_csv('/Users/shaharorielkagan/Documents/Python/desci-sense/nlp/notebooks/data/mastodon_accts_30v2.csv')
+
+
+    # Evaluation metrics per feed
+    try:
+        feed_chart = constr_feed_chart(df=df,df_handles=df_handles)
+        wandb.log({"Scores per feed": wandb.Table(dataframe=feed_chart)})
+
+    except Exception as e:
+        print("An exception was raised building the feed chart: ",e)
+
+    
     # Log cm
     # Generate the confusion matrix
     try:
