@@ -1,10 +1,10 @@
 import init, { Nanopub } from '@nanopub/sign';
 import { DataFactory, Store } from 'n3';
 
-import { writeRDF } from '../shared/n3.utils';
-import { getEthToRSAMessage } from '../shared/sig.utils';
-import { AppUserRead } from '../shared/types';
-import { NanopubUserDetails } from '../shared/types.nanopubs';
+import { AppUserRead } from '../shared/types/types';
+import { NanopubUserDetails } from '../shared/types/types.nanopubs';
+import { writeRDF } from '../shared/utils/n3.utils';
+import { getEthToRSAMessage } from '../shared/utils/sig.utils';
 import { NANOPUB_PLACEHOLDER } from './semantics.helper';
 
 export const constructIntroNanopub = async (

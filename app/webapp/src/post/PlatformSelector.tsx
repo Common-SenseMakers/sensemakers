@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { useAccountContext } from '../app/AccountContext';
 import { AppAddress } from '../app/AppAddress';
 import { NanopubsIcon, TwitterIcon } from '../common/Icons';
-import { PLATFORM } from '../shared/types';
+import { PLATFORM } from '../shared/types/types';
 import { AppButton, AppButtonTwoLinesLabel } from '../ui-components';
 import { useResponsive } from '../ui-components/ResponsiveApp';
 import { useThemeContext } from '../ui-components/ThemedApp';

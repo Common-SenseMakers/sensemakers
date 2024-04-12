@@ -2,7 +2,7 @@ import {
   getPostSemantics,
   postMessage,
 } from '../src/functionsCalls/post.requests';
-import { PLATFORM } from '../src/shared/types';
+import { PLATFORM } from '../src/shared/types/types';
 
 describe('test', () => {
   const userId = 'dummyuser';

@@ -10,7 +10,7 @@ import {
 import { WalletClient } from 'viem';
 import { useDisconnect, useWalletClient } from 'wagmi';
 
-import { HexStr } from '../shared/types';
+import { HexStr } from '../shared/types/types';
 import { createMagicSigner, magic } from './magic.signer';
 
 export type SignerContextType = {

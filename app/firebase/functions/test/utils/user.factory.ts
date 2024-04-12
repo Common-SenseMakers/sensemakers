@@ -1,12 +1,14 @@
-import { AppUser } from '../../src/@shared/types';
+import { Services } from 'src/instances/services';
+
+import { AppUser } from '../../src/@shared/types/types';
 import { testUsers } from '../__tests__/setup';
-import { services } from '../__tests__/test.services';
 
 /**
  * from a testUsers map, store in the DB the profiles of those
  * matching the userIds provided, or all if none provided
  */
 export const createTestAppUsers = async (
+  services: Services,
   userIds?: string[]
 ): Promise<AppUser[]> => {
   /** if no specific users specified, create them all */

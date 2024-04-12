@@ -48,3 +48,7 @@ export interface TwitterQueryParameters {
   end_time?: string;
   max_results?: number;
 }
+
+export interface TwitterDraft {
+  text: string;
+}

@@ -9,3 +9,13 @@ export const handleTwitterError = (e: ApiResponseError) => {
     rateLimit: ${JSON.stringify(e.rateLimit)}
     `;
 };
+
+/**
+ *
+ * @param dateStr ISO 8601 date string, e.g. '2021-09-01T00:00:00Z'
+ * @returns unix timestamp in milliseconds
+ */
+export const dateStrToTimestampMs = (dateStr: string) => {
+  const date = new Date(dateStr);
+  return date.getTime();
+};

@@ -1,7 +1,7 @@
 import { Anchor, Box } from 'grommet';
 import { useMemo } from 'react';
 
-import { ParsedSupport, RefMeta } from '../../../shared/types.parser';
+import { ParsedSupport, RefMeta } from '../../../shared/types/types.parser';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { useThemeContext } from '../../../ui-components/ThemedApp';
 import { RefCard } from '../common/RefCard';
