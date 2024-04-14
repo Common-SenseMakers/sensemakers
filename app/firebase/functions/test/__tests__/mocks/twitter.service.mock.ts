@@ -59,7 +59,7 @@ export const getTwitterMock = (twitterService: TwitterService) => {
     }
   );
 
-  when(Mocked.fetchInternal(anything(), anything())).thenCall(
+  when(Mocked.fetchInternal(anything(), anything(), anything())).thenCall(
     (params: TwitterQueryParameters, userDetails?: UserDetailsBase) => {
       return Array.from(state.tweets.values()).map((tweet) => tweet.data);
     }
