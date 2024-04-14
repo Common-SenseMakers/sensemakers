@@ -250,16 +250,9 @@ export class TransactionManager {
   }
 }
 
-/** Some functions must receive a manager, some others don't */
-export type MayHandleWithTransactionManager<P, R> = (
-  payload: P,
-  manager?: TransactionManager,
-  authUserId?: string
-) => Promise<R>;
-
-export type HandleWithTransactionManager<P, R> = (
-  payload: P,
-  manager: TransactionManager
+export type HandleWithTxManager<R = void, P = void> = (
+  manager: TransactionManager,
+  payload?: P
 ) => Promise<R>;
 
 export enum ManagerModes {

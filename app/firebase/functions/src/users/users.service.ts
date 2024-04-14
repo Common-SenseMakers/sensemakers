@@ -1,4 +1,5 @@
 import * as jwt from 'jsonwebtoken';
+import { TransactionManager } from 'src/db/transaction.manager';
 import { IdentityServicesMap } from 'src/platforms/platforms.service';
 
 import {
@@ -62,7 +63,8 @@ export class UsersService {
   public async handleSignup(
     platform: PLATFORM,
     signupData: any,
-    _userId?: string // MUST be the authenticated userId
+    manager: TransactionManager,
+    _userId?: string // MUST be the authenticated userId if provided
   ): Promise<HandleSignupResult | undefined> {
     /**
      * validate the signup data for this platform and convert it into
@@ -78,7 +80,8 @@ export class UsersService {
 
     const existingUserWithAccount = await this.repo.getUserWithPlatformAccount(
       platform,
-      authenticatedDetails.user_id
+      authenticatedDetails.user_id,
+      manager
     );
 
     if (_userId) {
@@ -120,7 +123,8 @@ export class UsersService {
         await this.repo.setPlatformDetails(
           _userId,
           platform,
-          authenticatedDetails
+          authenticatedDetails,
+          manager
         );
       }
     } else {
@@ -138,7 +142,8 @@ export class UsersService {
         await this.repo.setPlatformDetails(
           userId,
           platform,
-          authenticatedDetails
+          authenticatedDetails,
+          manager
         );
 
         return {
@@ -155,10 +160,14 @@ export class UsersService {
 
         const platformIds_property: keyof UserWithId = 'platformIds';
 
-        await this.repo.createUser(prefixed_user_id, {
-          [platformIds_property]: [prefixed_user_id],
-          [platform]: [authenticatedDetails],
-        });
+        await this.repo.createUser(
+          prefixed_user_id,
+          {
+            [platformIds_property]: [prefixed_user_id],
+            [platform]: [authenticatedDetails],
+          },
+          manager
+        );
 
         return {
           ourAccessToken: this.generateOurAccessToken({

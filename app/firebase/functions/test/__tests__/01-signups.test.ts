@@ -6,7 +6,7 @@ import { getTestServices } from './test.services';
 
 const logger = (global as any).logger;
 
-describe('signups', () => {
+describe('01-signups', () => {
   const services = getTestServices();
   let userId: string = 'twitter:123456789';
 

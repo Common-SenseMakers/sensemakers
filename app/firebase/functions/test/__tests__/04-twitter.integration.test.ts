@@ -25,10 +25,14 @@ describe.skip('twitter integration', () => {
   }
 
   it(`authenticates ${NUM_TWITTER_USERS} twitter users with the oauth 2.0 flow for reading access`, async () => {
-    const appUsers = await authenticateTestUsers(
-      TEST_ACCOUNTS.slice(0, NUM_TWITTER_USERS),
-      services
+    const appUsers = await services.db.run((manager) =>
+      authenticateTestUsers(
+        TEST_ACCOUNTS.slice(0, NUM_TWITTER_USERS),
+        services,
+        manager
+      )
     );
+
     expect(appUsers).to.not.be.undefined;
     expect(appUsers.length).to.eq(NUM_TWITTER_USERS);
     for (const appUser of appUsers) {

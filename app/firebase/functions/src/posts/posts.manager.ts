@@ -4,11 +4,7 @@ import {
   PlatformPostCreated,
 } from '../@shared/types/types.platform.posts';
 import { DBInstance } from '../db/instance';
-import {
-  HandleWithTransactionManager,
-  ManagerModes,
-  TransactionManager,
-} from '../db/transaction.manager';
+import { TransactionManager } from '../db/transaction.manager';
 import { FetchUserPostsParams } from '../platforms/platforms.interface';
 import { PlatformsService } from '../platforms/platforms.service';
 import { UsersHelper } from '../users/users.helper';
@@ -27,30 +23,12 @@ export class PostsManager {
     protected platforms: PlatformsService
   ) {}
 
-  /** run function with manager or create one */
-  private run<P, R>(
-    func: HandleWithTransactionManager<P, R>,
-    payload: P,
-    manager?: TransactionManager
-  ): Promise<R> {
-    if (manager) {
-      return func(payload, manager);
-    } else {
-      return this.db.runWithTransactionManager(func, payload, {
-        mode: ManagerModes.TRANSACTION,
-      });
-    }
-  }
-
   /**
    * Reads all PlatformPosts from all users and returns a combination of PlatformPosts
    * and authors
    * */
-  async fetchAll(_manager?: TransactionManager) {
-    const func: HandleWithTransactionManager<
-      undefined,
-      PlatformPostCreated[]
-    > = async (payload, manager) => {
+  async fetchAll() {
+    return this.db.run(async (manager) => {
       const users = await this.users.repo.getAll();
       const params: Map<PLATFORM, FetchUserPostsParams[]> = new Map();
 
@@ -81,9 +59,10 @@ export class PostsManager {
       const allPosts = await Promise.all(
         Array.from(params.entries()).map(
           async ([platformId, allUsersParams]) => {
+            /** each fetch is a different transaction */
             const allUsersPosts = await Promise.all(
               allUsersParams.map((userParams) =>
-                this.platforms.fetch(platformId, userParams)
+                this.platforms.fetch(platformId, userParams, manager)
               )
             );
             return allUsersPosts.flat();
@@ -98,30 +77,18 @@ export class PostsManager {
       const created = await this.storePlatformPosts(platformPosts, manager);
 
       return created.filter((p) => p !== undefined) as PlatformPostCreated[];
-    };
-
-    return this.run(func, undefined, _manager);
+    });
   }
 
   /** Store all platform posts (can use an existing TransactionManager or create new one) */
   async storePlatformPosts(
     platformPosts: PlatformPostCreate[],
-    _manager?: TransactionManager
+    manager: TransactionManager
   ) {
-    const func: HandleWithTransactionManager<
-      undefined,
-      Array<PlatformPostCreated | undefined>
-    > = async (payload, manager) => {
-      return await Promise.all(
-        platformPosts.map(async (platformPost) => {
-          return await this.processing.createPlatformPost(
-            platformPost,
-            manager
-          );
-        })
-      );
-    };
-
-    return this.run(func, undefined, _manager);
+    return await Promise.all(
+      platformPosts.map(async (platformPost) => {
+        return await this.processing.createPlatformPost(platformPost, manager);
+      })
+    );
   }
 }

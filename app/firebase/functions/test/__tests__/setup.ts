@@ -1,5 +1,6 @@
 import fs from 'fs';
 import { Context } from 'mocha';
+import { HandleWithTxManager } from 'src/db/transaction.manager';
 
 import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import { envDeploy } from '../../src/config/typedenv.deploy';
@@ -39,54 +40,60 @@ export const mochaHooks = (): Mocha.RootHookObject => {
       const context: InjectableContext = {};
       await resetDB();
 
-      const testAccountCredentials: TwitterAccountCredentials[] = JSON.parse(
-        process.env.TEST_USER_TWITTER_ACCOUNTS as string
-      );
-      if (!testAccountCredentials) {
-        throw new Error('test acccounts undefined');
-      }
-      if (testAccountCredentials.length < NUM_TEST_USERS) {
-        throw new Error('not enough twitter account credentials provided');
-      }
-      let appUsers: AppUser[] = [];
-
-      if (fs.existsSync(TEST_USERS_FILE_PATH)) {
-        const fileContents = fs.readFileSync(TEST_USERS_FILE_PATH, 'utf8');
-        appUsers = JSON.parse(fileContents);
-
-        /** check if any of the twitter access tokens have expired, and if so, re-authenticate */
-        let valid = true;
-        appUsers.forEach((appUser) => {
-          appUser[PLATFORM.Twitter]?.forEach((twitterDetails) => {
-            if (
-              twitterDetails.read?.expiresAtMs &&
-              twitterDetails.read.expiresAtMs < Date.now()
-            ) {
-              valid = false;
-            }
-          });
-        });
-        if (appUsers.length < NUM_TEST_USERS) {
-          valid = false;
+      const func: HandleWithTxManager = async (manager) => {
+        const testAccountCredentials: TwitterAccountCredentials[] = JSON.parse(
+          process.env.TEST_USER_TWITTER_ACCOUNTS as string
+        );
+        if (!testAccountCredentials) {
+          throw new Error('test acccounts undefined');
         }
+        if (testAccountCredentials.length < NUM_TEST_USERS) {
+          throw new Error('not enough twitter account credentials provided');
+        }
+        let appUsers: AppUser[] = [];
 
-        /** update appUserCreates with new tokens */
-        if (!valid) {
+        if (fs.existsSync(TEST_USERS_FILE_PATH)) {
+          const fileContents = fs.readFileSync(TEST_USERS_FILE_PATH, 'utf8');
+          appUsers = JSON.parse(fileContents);
+
+          /** check if any of the twitter access tokens have expired, and if so, re-authenticate */
+          let valid = true;
+          appUsers.forEach((appUser) => {
+            appUser[PLATFORM.Twitter]?.forEach((twitterDetails) => {
+              if (
+                twitterDetails.read?.expiresAtMs &&
+                twitterDetails.read.expiresAtMs < Date.now()
+              ) {
+                valid = false;
+              }
+            });
+          });
+          if (appUsers.length < NUM_TEST_USERS) {
+            valid = false;
+          }
+
+          /** update appUserCreates with new tokens */
+          if (!valid) {
+            appUsers = await authenticateTestUsers(
+              testAccountCredentials.splice(0, NUM_TEST_USERS),
+              services,
+              manager
+            );
+          }
+        } else {
           appUsers = await authenticateTestUsers(
             testAccountCredentials.splice(0, NUM_TEST_USERS),
-            services
+            services,
+            manager
           );
         }
-      } else {
-        appUsers = await authenticateTestUsers(
-          testAccountCredentials.splice(0, NUM_TEST_USERS),
-          services
-        );
-      }
 
-      appUsers.forEach((appUser) => {
-        testUsers.set(appUser.userId, appUser);
-      });
+        appUsers.forEach((appUser) => {
+          testUsers.set(appUser.userId, appUser);
+        });
+      };
+
+      await services.db.run(func);
 
       Object.assign(this, context);
     },
