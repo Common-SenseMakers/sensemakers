@@ -29,12 +29,10 @@ describe.only('03-process', () => {
     let tweet: PlatformPostPosted<TweetV2SingleResult>;
 
     before(async () => {
-      const func: HandleWithTxManager = async (manager) => {
+      await services.db.run(async (manager) => {
         const users = await createTestAppUsers(services, manager);
         appUser = users[0];
-      };
-
-      await services.db.run(func);
+      });
     });
 
     /** skip for now because we have not yet granted write access */
