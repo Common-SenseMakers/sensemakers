@@ -1,15 +1,17 @@
-#evaluation of the research filter
+#evaluation of the academic filter, it takes as a input a dataset and a handle table.
+# the handle table holds information about the accounts that published the dataset posts
 
 """Script to run evaluation of label prediction models.
 
 Usage:
-  filter_evaluation.py [--config=<config>] [--dataset=<dataset>] [--file=<file>]
+  filter_evaluation.py [--config=<config>] [--dataset=<dataset>] [--dataset_file=<file>] [--handle_file=<file>]
 
 
 Options:
 --config=<config>  Optional path to configuration file.
 --dataset=<dataset> Optional path to a wandb artifact.
---file=<file> Optional file name e.g. labeled_dataset.table.json indeed it should be a table.json format
+--dataset_file=<file> Optional dataset file name e.g. labeled_dataset.table.json indeed it should be a table.json format
+--handle_file=<file> Optional file name e.g. labeled_dataset.table.json indeed it should be a table.json format
 
 """
 from datetime import datetime
@@ -172,7 +174,8 @@ if __name__ == "__main__":
     # initialize config
     config_path = arguments.get("--config")
     dataset_path = arguments.get("--dataset")
-    file_name = arguments.get("--file")
+    dataset_file = arguments.get("--dataset_file")
+    handle_file = arguments.get("--handle_file")
     config = load_config(config_path)
 
     # initialize table path
@@ -181,7 +184,8 @@ if __name__ == "__main__":
 
     api = wandb.Api()
 
-    run = wandb.init(project="testing", job_type="evaluation")
+    #TODO move from testing
+    run = wandb.init(project="filter_evaluation", job_type="evaluation")
 
     # get artifact path
     if dataset_path:
@@ -189,9 +193,7 @@ if __name__ == "__main__":
         print(dataset_artifact_id)
     else:
         dataset_artifact_id = (
-            # TODO choose a canonic location
-            #'common-sense-makers/evaluation/toot_sci__labeling:v1'
-            'common-sense-makers/testing/toot_sci__labeling:v1'
+            'common-sense-makers/filter_evaluation/toot_sci__labeling:v0'
         )
 
     # set artifact as input artifact
@@ -204,16 +206,26 @@ if __name__ == "__main__":
     a_path = dataset_artifact.download()
     print("The path is",a_path)
 
-    # get file name
-    if file_name:
-        table_path = Path(f"{a_path}/{file_name}")
+    # get dataset file name
+    if dataset_file:
+        table_path = Path(f"{a_path}/{dataset_file}")
     else:
         table_path = Path(f"{a_path}/labeled_data_table.table.json")
 
+
     # return the pd df from the table
     #remember to remove the head TODO
-    df = get_dataset(table_path).head(3)
-    print(df.columns)
+    df = get_dataset(table_path)
+    #print(df.columns)
+
+     # get handle file name
+    if handle_file:
+        table_path = Path(f"{a_path}/{dataset_file}")
+    else:
+        table_path = Path(f"{a_path}/labeled_data_handles.table.json")
+    
+    df_handles = get_dataset(table_path)
+   
     pred_labels(df)
     
     # make sure df can be binarized
@@ -245,9 +257,7 @@ if __name__ == "__main__":
 
     # Load profile list table
     # Load the CSV file
-    # TODO make it modular and pull from from wandb
-    df_handles = pd.read_csv('/Users/shaharorielkagan/Documents/Python/desci-sense/nlp/notebooks/data/mastodon_accts_30v2.csv')
-
+    
 
     # Evaluation metrics per feed
     try:
