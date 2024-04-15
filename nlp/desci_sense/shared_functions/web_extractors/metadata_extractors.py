@@ -5,7 +5,7 @@ import asyncio
 from ..interface import RefMetadata
 
 from .citoid import fetch_citation, fetch_all_citations
-from ...shared_functions.schema.post import RefPost
+from ..schema.post import RefPost
 from ..utils import flatten
 
 
