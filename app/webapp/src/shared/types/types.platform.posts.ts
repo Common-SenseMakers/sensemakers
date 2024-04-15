@@ -54,6 +54,6 @@ export interface PlatformPostPublish<D = any> {
 export type PerPlatformPublish = Map<PLATFORM, PlatformPostPublish[]>;
 
 export interface PlatformPostCreated {
-  post: AppPost;
   platformPost: PlatformPost;
+  post: AppPost; // In case a post was created
 }

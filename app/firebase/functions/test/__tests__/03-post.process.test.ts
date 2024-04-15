@@ -101,50 +101,59 @@ describe.only('03-process', () => {
       const postFetched = fetched[0].post;
       const platformPostFetched = fetched[0].platformPost;
 
-      const postRead = await services.postsManager.processing.posts.get(
-        postFetched.id,
-        true
-      );
-      const platformPostRead =
-        await services.postsManager.processing.platformPosts.get(
-          platformPostFetched.id,
+      await services.db.run(async (manager) => {
+        const postRead = await services.postsManager.getPost(
+          postFetched.id,
           true
         );
 
-      if (!appUser) {
-        throw new Error('appUser not created');
-      }
+        expect(postRead.mirrors).to.have.length(2);
 
-      const refAppPost: AppPost = {
-        id: postFetched.id,
-        authorId: appUser.userId,
-        origin: PLATFORM.Twitter,
-        parseStatus: 'unprocessed',
-        content,
-        mirrorsIds: [platformPostRead.id],
-        reviewedStatus: 'pending',
-      };
+        const tweetRead = postRead.mirrors.find(
+          (m) => m.platformId === PLATFORM.Twitter
+        );
 
-      const refPlatformPost: PlatformPost = {
-        id: platformPostFetched.id,
-        platformId: PLATFORM.Twitter,
-        publishOrigin: 'fetched',
-        publishStatus: 'published',
-        posted: {
-          post_id: tweet.post.data.id,
-          user_id: (appUser[PLATFORM.Twitter] as any)[0].user_id,
-          timestampMs: tweet.timestampMs,
-          post: tweet.post.data,
-        },
-      };
+        expect(tweetRead).to.not.be.undefined;
 
-      expect(postRead).to.not.be.undefined;
+        if (!tweetRead) {
+          throw new Error('tweetRead not created');
+        }
 
-      expect(postRead).to.deep.equal(refAppPost);
-      expect(postFetched).to.deep.equal(refAppPost);
+        if (!appUser) {
+          throw new Error('appUser not created');
+        }
 
-      expect(platformPostRead).to.deep.equal(refPlatformPost);
-      expect(platformPostFetched).to.deep.equal(refPlatformPost);
+        const refAppPost: AppPost = {
+          id: postFetched.id,
+          authorId: appUser.userId,
+          origin: PLATFORM.Twitter,
+          parseStatus: 'unprocessed',
+          content,
+          mirrorsIds: [tweetRead.id],
+          reviewedStatus: 'pending',
+        };
+
+        const refTweet: PlatformPost = {
+          id: platformPostFetched.id,
+          platformId: PLATFORM.Twitter,
+          publishOrigin: 'fetched',
+          publishStatus: 'published',
+          posted: {
+            post_id: tweet.post.data.id,
+            user_id: (appUser[PLATFORM.Twitter] as any)[0].user_id,
+            timestampMs: tweet.timestampMs,
+            post: tweet.post.data,
+          },
+        };
+
+        expect(postRead).to.not.be.undefined;
+
+        expect(postRead).to.deep.equal(refAppPost);
+        expect(postFetched).to.deep.equal(refAppPost);
+
+        expect(tweetRead).to.deep.equal(refTweet);
+        expect(platformPostFetched).to.deep.equal(refTweet);
+      });
     });
 
     it('fetch one user pending posts', async () => {
@@ -152,9 +161,12 @@ describe.only('03-process', () => {
         throw new Error('appUser not created');
       }
 
+      /** get pending posts of user */
       const pendingPosts = await services.postsManager.getPendingOfUser(
         appUser.userId
       );
+
+      /** aprove */
 
       expect(pendingPosts).to.have.length(1);
     });

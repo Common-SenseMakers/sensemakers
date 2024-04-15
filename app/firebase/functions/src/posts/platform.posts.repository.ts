@@ -22,7 +22,8 @@ export class PlatformPostsRepository {
     };
   }
 
-  public async getFromPostId<T extends boolean, R = PlatformPost>(
+  /** Get the platform post from the published post_id */
+  public async getFrom_post_id<T extends boolean, R = PlatformPost>(
     post_id: string,
     manager: TransactionManager,
     shouldThrow?: T
@@ -46,29 +47,34 @@ export class PlatformPostsRepository {
     } as unknown as DefinedIfTrue<T, R>;
   }
 
-  protected async getRef(postId: string, shouldThrow: boolean = false) {
+  protected async getRef(
+    postId: string,
+    manager: TransactionManager,
+    shouldThrow: boolean = false
+  ) {
     const ref = this.db.collections.platformPosts.doc(postId);
     if (shouldThrow) {
-      const doc = await this.getDoc(postId);
-
-      if (!doc.exists) {
-        throw new Error(`Post ${postId} not found`);
-      }
+      await this.getDoc(postId, manager, true);
     }
 
     return ref;
   }
 
-  protected async getDoc(userId: string, shouldThrow: boolean = false) {
-    const ref = await this.getRef(userId, shouldThrow);
-    return ref.get();
+  protected async getDoc(
+    userId: string,
+    manager: TransactionManager,
+    shouldThrow: boolean = false
+  ) {
+    const ref = await this.getRef(userId, manager, shouldThrow);
+    return manager.get(ref);
   }
 
   public async get<T extends boolean, R = PlatformPost>(
     id: string,
+    manager: TransactionManager,
     shouldThrow?: T
   ): Promise<DefinedIfTrue<T, R>> {
-    const doc = await this.getDoc(id);
+    const doc = await this.getDoc(id, manager);
 
     const _shouldThrow = shouldThrow !== undefined ? shouldThrow : false;
 

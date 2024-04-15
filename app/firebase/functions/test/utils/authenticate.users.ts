@@ -23,6 +23,11 @@ export interface TwitterAccountCredentials {
   type: 'read' | 'write';
 }
 
+export interface userCredentials = {
+  twitter: TwitterAccountCredentials;
+  nanopub: WIP
+}
+
 /**
  * From a set of platform credentials, authenticate the users and
  * return their full profiles
@@ -47,6 +52,7 @@ export const authenticateTestUsers = async (
 
   let users: AppUser[] = [];
 
+  /** create users using the Twitter profiles */
   await Promise.all(
     twitterSignupDatas.map(async (signupData: TwitterSignupData) => {
       /** store the user in the DB (build the user profile object and derive the ID) */
@@ -68,6 +74,8 @@ export const authenticateTestUsers = async (
       users.push(user);
     })
   );
+
+  /** append the nanopub profiles */
 
   return users;
 };
