@@ -68,4 +68,17 @@ export class PostsRepository {
 
     await doc.ref.set(post, { merge: true });
   }
+
+  /** Cannot be part of a transaction */
+  public async getPendingOfUser(userId: string) {
+    const posts = await this.db.collections.posts
+      .where('authorId', '==', userId)
+      .where('reviewedStatus', '==', 'pending')
+      .get();
+
+    return posts.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as AppPost[];
+  }
 }

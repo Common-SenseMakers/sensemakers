@@ -15,7 +15,7 @@ import { createTestAppUsers } from '../utils/user.factory';
 import { MOCK_TWITTER } from './setup';
 import { getTestServices } from './test.services';
 
-describe('03-process', () => {
+describe.only('03-process', () => {
   const services = getTestServices();
 
   before(async () => {
@@ -147,6 +147,18 @@ describe('03-process', () => {
 
       expect(platformPostRead).to.deep.equal(refPlatformPost);
       expect(platformPostFetched).to.deep.equal(refPlatformPost);
+    });
+
+    it('fetch one user pending posts', async () => {
+      if (!appUser) {
+        throw new Error('appUser not created');
+      }
+
+      const pendingPosts = await services.postsManager.getPendingOfUser(
+        appUser.userId
+      );
+
+      expect(pendingPosts).to.have.length(1);
     });
   });
 });

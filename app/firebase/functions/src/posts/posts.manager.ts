@@ -91,4 +91,13 @@ export class PostsManager {
       })
     );
   }
+
+  /** get paginated pending posts of user */
+  async getPendingOfUser(userId: string) {
+    const results = await this.db.run(async (manager) => {
+      return this.processing.posts.getPendingOfUser(userId);
+    });
+
+    return results;
+  }
 }
