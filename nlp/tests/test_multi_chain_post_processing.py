@@ -15,7 +15,7 @@ from pydantic import ValidationError
 from utils import create_multi_chain_for_tests, create_multi_config_for_tests
 from desci_sense.shared_functions.parsers.multi_chain_parser import MultiChainParser
 from desci_sense.shared_functions.filters import SciFilterClassfication
-from desci_sense.shared_functions.runners.configs import (
+from desci_sense.shared_functions.configs import (
     OpenrouterAPIConfig,
     WandbConfig,
     LLMConfig,
@@ -71,7 +71,8 @@ def test_multi_chain_batch_pp_simple():
     res = multi_chain_parser.batch_process_ref_posts(posts)
 
     assert len(res) == 3
-    
+
+
 def test_multi_chain_batch_pp_combined():
     # get a few posts for input
     urls = [
@@ -84,19 +85,29 @@ def test_multi_chain_batch_pp_combined():
     multi_chain_parser = MultiChainParser(multi_config)
     multi_chain_parser.config.post_process_type = PostProcessType.COMBINED
     res = multi_chain_parser.batch_process_ref_posts(posts)
-    
+
     out_0 = res[0]
-    assert out_0.metadata_list[0].url == 'https://royalsocietypublishing.org/doi/10.1098/rstb.2022.0267'
+    assert (
+        out_0.metadata_list[0].url
+        == "https://royalsocietypublishing.org/doi/10.1098/rstb.2022.0267"
+    )
     assert len(out_0.metadata_list) == 1
-    
+
     out_1 = res[1]
     assert len(out_1.metadata_list) == 1
-    assert out_1.metadata_list[0].url == 'https://write.as/ulrikehahn/some-thoughts-on-social-media-for-science'
-    
+    assert (
+        out_1.metadata_list[0].url
+        == "https://write.as/ulrikehahn/some-thoughts-on-social-media-for-science"
+    )
+
     out_2 = res[2]
     assert len(out_2.metadata_list) == 2
-    assert set(out_2.reference_urls) == set(['https://paragraph.xyz/@sense-nets/sense-nets-intro',
-     'https://paragraph.xyz/@sense-nets/2-project-plan'])
+    assert set(out_2.reference_urls) == set(
+        [
+            "https://paragraph.xyz/@sense-nets/sense-nets-intro",
+            "https://paragraph.xyz/@sense-nets/2-project-plan",
+        ]
+    )
 
 
 if __name__ == "__main__":
@@ -107,25 +118,12 @@ if __name__ == "__main__":
         "https://mastodon.social/@ronent/111687038322549430",
     ]
     posts = [scrape_post(url) for url in urls]
-    multi_config = create_multi_config_for_tests(llm_type="google/gemma-7b-it:free")
+    multi_config = create_multi_config_for_tests(llm_type="google/gemma-7b-it")
     multi_chain_parser = MultiChainParser(multi_config)
-    multi_chain_parser.config.post_process_type = PostProcessType.COMBINED
+    multi_chain_parser.config.post_process_type = PostProcessType.FIREBASE
     res = multi_chain_parser.batch_process_ref_posts(posts)
-    
-    out_0 = res[0]
-    assert out_0.metadata_list[0].url == 'https://royalsocietypublishing.org/doi/10.1098/rstb.2022.0267'
-    assert len(out_0.metadata_list) == 1
-    
-    out_1 = res[1]
-    assert len(out_1.metadata_list) == 1
-    assert out_1.metadata_list[0].url == 'https://write.as/ulrikehahn/some-thoughts-on-social-media-for-science'
-    
-    out_2 = res[2]
-    assert len(out_2.metadata_list) == 2
-    assert set(out_2.reference_urls) == set(['https://paragraph.xyz/@sense-nets/sense-nets-intro',
-     'https://paragraph.xyz/@sense-nets/2-project-plan'])
-    
-    
+
+
     # len(res.support.refs_meta) == 1
     # assert "test" in mcp.pparsers
     # assert "Google Scholar is manipulatable" in prompt

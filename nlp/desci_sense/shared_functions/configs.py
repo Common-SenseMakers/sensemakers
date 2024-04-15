@@ -9,8 +9,6 @@ from pydantic import (
 
 from pydantic_settings import BaseSettings
 
-from ..configs import MetadataExtractionType
-
 
 class PostProcessType(str, Enum):
     """
@@ -45,34 +43,34 @@ def validate_env_var(env_var_name: str, value: Union[str, None]):
 
 
 class OpenrouterAPIConfig(BaseSettings):
-    api_base: str = Field(
+    openrouter_api_base: str = Field(
         default="https://openrouter.ai/api/v1",
         description="Base URL for Openrouter API",
     )
-    api_key: str | None = Field(
+    openrouter_api_key: str | None = Field(
         description="Openrouter API key",
         default=None,
         exclude=True,
     )
-    referer: str | None = Field(
+    openrouter_referer: str | None = Field(
         default=None,
         description="Referer for tracking on Openrouter",
         exclude=True,
     )
 
-    @field_validator("api_key")
+    @field_validator("openrouter_api_key")
     def load_api_key_from_env(cls, v):
         return validate_env_var("OPENROUTER_API_KEY", v)
 
-    @field_validator("referer")
+    @field_validator("openrouter_referer")
     def load_referer_from_env(cls, v):
         return validate_env_var("OPENROUTER_REFERRER", v)
 
     def model_dump_all(self):
         # special method to dump including excluded attrs
         model_dict = self.model_dump()
-        model_dict["referer"] = self.referer
-        model_dict["api_key"] = self.api_key
+        model_dict["openrouter_referer"] = self.openrouter_referer
+        model_dict["openrouter_api_key"] = self.openrouter_api_key
         return model_dict
 
 
@@ -92,6 +90,11 @@ class WandbConfig(BaseSettings):
         except Exception:
             # return default if not defined in env or explicitly
             return "st-demo-sandbox"
+
+
+class MetadataExtractionType(str, Enum):
+    NONE = "none"
+    CITOID = "citoid"
 
 
 class MetadataExtractionConfig(BaseSettings):

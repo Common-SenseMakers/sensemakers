@@ -1,17 +1,13 @@
 from typing import List, Dict
-from enum import Enum
 import asyncio
+
+from ..configs import MetadataExtractionType
 
 from ..interface import RefMetadata
 
 from .citoid import fetch_citation, fetch_all_citations
 from ..schema.post import RefPost
 from ..utils import flatten
-
-
-class MetadataExtractionType(str, Enum):
-    NONE = "none"
-    CITOID = "citoid"
 
 
 def get_trunc_str(input_str: str, max_len: int) -> str:

@@ -11,6 +11,8 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnableParallel, RunnableConfig
 from langchain_core.prompts import ChatPromptTemplate
 
+from ..configs import MetadataExtractionType
+
 from ..interface import ParserResult, ParserSupport
 from ..init import MAX_SUMMARY_LENGTH
 from ..schema.ontology_base import OntologyBase
@@ -34,7 +36,6 @@ from ..postprocessing.output_parsers import (
 from ..dataloaders import scrape_post
 from ..enum_dict import EnumDict, EnumDictKey
 from ..web_extractors.metadata_extractors import (
-    MetadataExtractionType,
     RefMetadata,
     extract_metadata_by_type,
     extract_all_metadata_by_type,

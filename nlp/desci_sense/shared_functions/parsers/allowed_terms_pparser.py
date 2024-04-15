@@ -5,7 +5,7 @@ from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from operator import itemgetter
 
 from .post_parser_chain import PostParserChain
-from ..runners.configs import (
+from ..configs import (
     PostParserChainConfig,
     MultiParserChainConfig,
     ParserChainType,

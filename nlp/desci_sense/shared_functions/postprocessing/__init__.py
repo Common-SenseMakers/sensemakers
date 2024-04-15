@@ -11,7 +11,7 @@ from ..interface import (
     OntologyInterface,
 )
 
-from ..runners.configs import ParserChainType, PostProcessType
+from ..configs import ParserChainType, PostProcessType
 from ..filters import SciFilterClassfication
 from ..schema.ontology_base import OntologyBase
 from ..schema.post import RefPost

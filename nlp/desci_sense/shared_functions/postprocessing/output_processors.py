@@ -6,7 +6,7 @@ from langchain.schema import BaseOutputParser
 from langchain_core.messages import AnyMessage, BaseMessage
 
 from . import ParserChainOutput
-from ..runners.configs import ParserChainType, PostProcessType
+from ..configs import ParserChainType, PostProcessType
 
 ALLOWED_TERMS_DELIMITER = "##Allowed terms: "
 

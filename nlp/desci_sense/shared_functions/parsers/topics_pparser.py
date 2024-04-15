@@ -2,7 +2,7 @@ from typing import Dict, List
 from langchain.prompts import PromptTemplate
 
 from .allowed_terms_pparser import AllowedTermsPParserChain
-from ..runners.configs import (
+from ..configs import (
     TopicsPParserChainConfig,
     MultiParserChainConfig,
 )

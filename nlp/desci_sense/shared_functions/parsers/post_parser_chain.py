@@ -5,7 +5,7 @@ from loguru import logger
 from ..schema.post import RefPost
 from ..web_extractors.metadata_extractors import RefMetadata
 from ..postprocessing import ParserChainOutput
-from ..runners.configs import (
+from ..configs import (
     PostParserChainConfig,
     MultiParserChainConfig,
 )

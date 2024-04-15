@@ -6,7 +6,8 @@ sys.path.append(str(ROOT))
 import os
 import pytest
 from pydantic import ValidationError
-from desci_sense.shared_functions.runners.configs import (
+
+from desci_sense.shared_functions.configs import (
     OpenrouterAPIConfig,
     WandbConfig,
     LLMConfig,
@@ -35,8 +36,8 @@ def test_openrouter_api_config_with_env_vars(setup_env_vars):
     os.environ["OPENROUTER_API_KEY"] = "test_api_key"
     os.environ["OPENROUTER_REFERRER"] = "test_referer"
     config = OpenrouterAPIConfig()
-    assert config.api_key == "test_api_key"
-    assert config.referer == "test_referer"
+    assert config.openrouter_api_key == "test_api_key"
+    assert config.openrouter_referer == "test_referer"
 
 
 def test_openrouter_api_config_with_explicit_values_overriding_env_vars(setup_env_vars):
@@ -46,9 +47,11 @@ def test_openrouter_api_config_with_explicit_values_overriding_env_vars(setup_en
     """
     os.environ["OPENROUTER_API_KEY"] = "env_api_key"
     os.environ["OPENROUTER_REFERRER"] = "env_referer"
-    config = OpenrouterAPIConfig(api_key="explicit_api_key", referer="explicit_referer")
-    assert config.api_key == "explicit_api_key"
-    assert config.referer == "explicit_referer"
+    config = OpenrouterAPIConfig(
+        openrouter_api_key="explicit_api_key", openrouter_referer="explicit_referer"
+    )
+    assert config.openrouter_api_key == "explicit_api_key"
+    assert config.openrouter_referer == "explicit_referer"
 
 
 def test_openrouter_api_config_missing_required_env_vars_raises_error(setup_env_vars):
@@ -60,7 +63,7 @@ def test_openrouter_api_config_missing_required_env_vars_raises_error(setup_env_
     os.environ.pop("OPENROUTER_REFERRER")
     # Assuming api_key is required and not provided through env vars or explicitly
     with pytest.raises(ValidationError):
-        OpenrouterAPIConfig(api_base="https://openrouter.ai/api/v1")
+        OpenrouterAPIConfig(openrouter_api_base="https://openrouter.ai/api/v1")
 
 
 #
@@ -117,16 +120,16 @@ def test_exclude():
             kp,
         ]
     )
-    
+
     model_dict = multi_config.model_dump()
-    
-    assert "api_key" not in model_dict.get("openrouter_api_config")
-    assert "referer" not in model_dict.get("openrouter_api_config")
-    
+
+    assert "openrouter_api_key" not in model_dict.get("openrouter_api_config")
+    assert "openrouter_referer" not in model_dict.get("openrouter_api_config")
+
     # reload model from dict
     model_reload = MultiParserChainConfig.model_validate(model_dict)
-    assert hasattr(model_reload.openrouter_api_config, "api_key")
-    assert hasattr(model_reload.openrouter_api_config, "referer")
+    assert hasattr(model_reload.openrouter_api_config, "openrouter_api_key")
+    assert hasattr(model_reload.openrouter_api_config, "openrouter_referer")
 
 
 if __name__ == "__main__":
@@ -152,14 +155,13 @@ if __name__ == "__main__":
             kp,
         ]
     )
-    
+
     model_dict = multi_config.model_dump()
-    
-    assert "api_key" not in model_dict.get("openrouter_api_config")
-    assert "referer" not in model_dict.get("openrouter_api_config")
-    
+
+    assert "openrouter_api_key" not in model_dict.get("openrouter_api_config")
+    assert "openrouter_referer" not in model_dict.get("openrouter_api_config")
+
     # reload model from dict
     model_reload = MultiParserChainConfig.model_validate(model_dict)
-    assert hasattr(model_reload.openrouter_api_config, "api_key")
-    assert hasattr(model_reload.openrouter_api_config, "referer")
-    
+    assert hasattr(model_reload.openrouter_api_config, "openrouter_api_key")
+    assert hasattr(model_reload.openrouter_api_config, "openrouter_referer")

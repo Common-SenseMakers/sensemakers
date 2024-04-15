@@ -2,7 +2,7 @@ from typing import Dict, List
 from langchain.prompts import PromptTemplate
 
 from .allowed_terms_pparser import AllowedTermsPParserChain
-from ..runners.configs import RefTaggerChainConfig, MultiParserChainConfig
+from ..configs import RefTaggerChainConfig, MultiParserChainConfig
 from ..schema.post import RefPost
 from ..prompting.jinja.zero_ref_template import zero_ref_template
 from ..prompting.jinja.single_ref_template import single_ref_template

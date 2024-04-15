@@ -1,5 +1,5 @@
 # from . import ParserChainType
-from ..runners.configs import (
+from ..configs import (
     MultiParserChainConfig,
     PostParserChainConfig,
     ParserChainType,

@@ -9,7 +9,7 @@ from pydantic import ValidationError
 
 from utils import create_multi_chain_for_tests, create_multi_config_for_tests
 from desci_sense.shared_functions.parsers.multi_chain_parser import MultiChainParser
-from desci_sense.shared_functions.runners.configs import (
+from desci_sense.shared_functions.configs import (
     OpenrouterAPIConfig,
     WandbConfig,
     LLMConfig,
@@ -176,8 +176,8 @@ def test_multi_chain_batch_simple():
     res = multi_chain_parser.batch_process_ref_posts(posts)
 
     assert len(res) == 3
-    
-    
+
+
 def test_metadata_fail():
     tpc = TopicsPParserChainConfig(
         name="topic_test",
@@ -194,8 +194,8 @@ def test_metadata_fail():
     res = mcp.process_ref_post(post)
     assert len(res) == 1
 
+
 if __name__ == "__main__":
-    
     multi_config = create_multi_config_for_tests(llm_type="google/gemma-7b-it:free")
     multi_config.post_process_type = PostProcessType.COMBINED
     mcp = MultiChainParser(multi_config)

@@ -7,7 +7,7 @@ from enum import Enum
 from ..schema.post import RefPost
 from ..web_extractors.metadata_extractors import RefMetadata
 from ..postprocessing import ParserChainOutput
-from ..runners.configs import (
+from ..configs import (
     PostParserChainConfig,
     MultiParserChainConfig,
 )
@@ -18,14 +18,14 @@ from ..schema.ontology_base import OntologyBase
 def create_model(
     llm_type: str,
     temperature: float,
-    api_base: str,
-    api_key: str,
-    referer: str = None,
+    openrouter_api_base: str,
+    openrouter_api_key: str,
+    openrouter_referer: str = None,
 ):
     model = ChatOpenAI(
         model=llm_type,
         temperature=temperature,
-        openai_api_key=api_key,
-        openai_api_base=api_base,
+        openai_api_key=openrouter_api_key,
+        openai_api_base=openrouter_api_base,
     )
     return model

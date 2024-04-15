@@ -7,7 +7,7 @@ from shared_functions.main import (
     SM_FUNCTION_post_parser_config,
     SM_FUNCTION_post_parser_imp,
 )
-from config import openai_api_key
+from env_config import openai_api_key
 
 app = initialize_app()
 
@@ -22,11 +22,10 @@ def SM_FUNCTION_post_parser(request):
     parameters = request_json["parameters"]
 
     config: SM_FUNCTION_post_parser_config = {
-        "wandb_project": "st-demo-sandbox",
-        "max_summary_length": 500,
-        "openai_api_key": openai_api_key,
-        "openai_api_base": "https://openrouter.ai/api/v1",
-        "openai_api_referer": "https://127.0.0.1:3000/",
+        "openrouter_api_key": openai_api_key,
+        "openrouter_api_base": "https://openrouter.ai/api/v1",
+        "openrouter_referer": "https://127.0.0.1:3000/",
+        "llm_type": "openai/gpt-4-turbo",
     }
 
     parser_result = SM_FUNCTION_post_parser_imp(content, parameters, config)

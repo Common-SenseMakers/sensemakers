@@ -2,7 +2,7 @@ from typing import Dict
 from langchain.prompts import PromptTemplate
 
 from .post_parser_chain import PostParserChain
-from ..runners.configs import KeywordPParserChainConfig, MultiParserChainConfig
+from ..configs import KeywordPParserChainConfig, MultiParserChainConfig
 from ..schema.post import RefPost
 from ..web_extractors.metadata_extractors import (
     RefMetadata,
