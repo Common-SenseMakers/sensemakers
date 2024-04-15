@@ -1,17 +1,14 @@
-import init, { Nanopub } from '@nanopub/sign';
+import { Nanopub } from '@nanopub/sign';
 import { DataFactory, Store } from 'n3';
 
-import { AppUserRead } from '../shared/types/types';
-import { NanopubUserDetails } from '../shared/types/types.nanopubs';
-import { writeRDF } from '../shared/utils/n3.utils';
-import { getEthToRSAMessage } from '../shared/utils/sig.utils';
-import { NANOPUB_PLACEHOLDER } from './semantics.helper';
+import { NanupubSignupData } from '../../@shared/types/types.nanopubs';
+import { writeRDF } from '../../@shared/utils/n3.utils';
+import { NANOPUB_PLACEHOLDER } from '../../@shared/utils/semantics.helper';
+import { getEthToRSAMessage } from '../../@shared/utils/sig.utils';
 
-export const constructIntroNanopub = async (
-  details: NanopubUserDetails['profile'],
-  user: AppUserRead
-): Promise<Nanopub> => {
-  await (init as any)();
+export const createIntroNanopublication = async (
+  details: NanupubSignupData
+) => {
   const assertionsStore = new Store();
 
   /** Add the post context as a comment of the assertion */
@@ -20,10 +17,6 @@ export const constructIntroNanopub = async (
    * TODO: This makes no sense. Its a placeholder but the actual
    * structure is completely TBD
    */
-
-  if (!details) {
-    throw new Error('details undefined');
-  }
 
   assertionsStore.addQuad(
     DataFactory.namedNode(`https://sense-nets.xyz/${details.ethAddress}`),
@@ -35,7 +28,7 @@ export const constructIntroNanopub = async (
   assertionsStore.addQuad(
     DataFactory.namedNode(`https://sense-nets.xyz/${details.ethAddress}`),
     DataFactory.namedNode('https://schema.org/hasSignature'),
-    DataFactory.literal(details.ethSignature),
+    DataFactory.literal(details.ethToRsaSignature),
     DataFactory.defaultGraph()
   );
 
@@ -48,8 +41,6 @@ export const constructIntroNanopub = async (
 
   /** Then get the RDF as triplets */
   const assertionsRdf = await writeRDF(assertionsStore);
-
-  const orcid = user.orcid && user.orcid[0].user_id;
 
   /** append the npx:ExampleNanopub (manually for now) */
   const exampleTriplet = `: <http://purl.org/nanopub/x/hasNanopubType> npx:ExampleNanopub .`;
@@ -75,12 +66,11 @@ export const constructIntroNanopub = async (
     }
     
     :assertion {
-      :assertion dct:creator orcid:${orcid} .
       ${assertionsRdf}
     }
     
     :provenance {
-      :assertion prov:wasAttributedTo orcid:${orcid} .
+      :assertion prov:wasAttributedTo "${details.ethAddress}" .
     }
     
     :pubinfo {

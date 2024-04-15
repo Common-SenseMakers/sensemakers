@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 
-import { PLATFORM } from '../@shared/types';
+import { PLATFORM } from '../@shared/types/types';
 import { logger } from '../instances/logger';
 import { Services } from '../instances/services';
 import {
@@ -57,7 +57,10 @@ export const handleSignupController: RequestHandler = async (
       throw new Error(`Unexpected platform ${platform}`);
     })();
 
-    const result = await services.users.handleSignup(platform, payload, userId);
+    const result = await services.db.run((manager) =>
+      services.users.handleSignup(platform, payload, manager, userId)
+    );
+
     response.status(200).send({ success: true, data: result });
   } catch (error) {
     logger.error('error', error);

@@ -11,11 +11,11 @@ import { useSearchParams } from 'react-router-dom';
 
 import { useAccountContext } from '../app/AccountContext';
 import { useAppFetch } from '../app/app.fetch';
-import { HandleSignupResult, PLATFORM } from '../shared/types';
+import { HandleSignupResult, PLATFORM } from '../shared/types/types';
 import {
   TwitterGetContextParams,
   TwitterSignupContext,
-} from '../shared/types.twitter';
+} from '../shared/types/types.twitter';
 
 const DEBUG = true;
 

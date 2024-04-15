@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useAccountContext } from '../app/AccountContext';
 import { AppAddress } from '../app/AppAddress';
 import { useDisconnectContext } from '../app/DisconnectContext';
-import { PLATFORM } from '../shared/types';
+import { PLATFORM } from '../shared/types/types';
 import { AppButton } from '../ui-components';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { cap } from '../utils/general';

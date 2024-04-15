@@ -1,12 +1,28 @@
-import { DefinedIfTrue } from '../@shared/types';
-import { AppPost, PostUpdate } from '../@shared/types.posts';
+import { TransactionManager } from 'src/db/transaction.manager';
+
+import { DefinedIfTrue } from '../@shared/types/types';
+import {
+  AppPost,
+  AppPostCreate,
+  PostUpdate,
+} from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
 
 export class PostsRepository {
   constructor(protected db: DBInstance) {}
 
+  public create(post: AppPostCreate, manager: TransactionManager): AppPost {
+    const postRef = this.db.collections.posts.doc();
+    manager.set(postRef, post);
+
+    return {
+      id: postRef.id,
+      ...post,
+    };
+  }
+
   protected async getPostRef(postId: string, shouldThrow: boolean = false) {
-    const ref = this.db.collections.users.doc(postId);
+    const ref = this.db.collections.posts.doc(postId);
     if (shouldThrow) {
       const doc = await this.getPostDoc(postId);
 
@@ -23,23 +39,23 @@ export class PostsRepository {
     return ref.get();
   }
 
-  public async getPost<T extends boolean>(
-    userId: string,
+  public async get<T extends boolean, R = AppPost>(
+    id: string,
     shouldThrow?: T
-  ): Promise<DefinedIfTrue<T, AppPost>> {
-    const doc = await this.getPostDoc(userId);
+  ): Promise<DefinedIfTrue<T, R>> {
+    const doc = await this.getPostDoc(id);
 
     const _shouldThrow = shouldThrow !== undefined ? shouldThrow : false;
 
     if (!doc.exists) {
-      if (_shouldThrow) throw new Error(`User ${userId} not found`);
-      else return undefined as DefinedIfTrue<T, AppPost>;
+      if (_shouldThrow) throw new Error(`AppPost ${id} not found`);
+      else return undefined as DefinedIfTrue<T, R>;
     }
 
     return {
-      userId,
+      id,
       ...doc.data(),
-    } as unknown as DefinedIfTrue<T, AppPost>;
+    } as unknown as DefinedIfTrue<T, R>;
   }
 
   public async updatePostContent(postUpdate: PostUpdate) {
@@ -51,26 +67,5 @@ export class PostsRepository {
     post.semantics = postUpdate.semantics;
 
     await doc.ref.set(post, { merge: true });
-  }
-
-  /** only update the posts mirrors of an array AppPost[] */
-  public async updatePostsMirrors(posts: AppPost[]) {
-    const batch = this.db.batch;
-    posts.forEach((post) => {
-      const postRef = this.db.collections.posts.doc(post.id);
-      batch.update(postRef, { mirrors: post.mirrors });
-    });
-
-    await batch.commit();
-  }
-
-  public async storePosts(posts: AppPost[]) {
-    const batch = this.db.batch;
-    posts.forEach((post) => {
-      const postRef = this.db.collections.posts.doc();
-      batch.set(postRef, post);
-    });
-
-    await batch.commit();
   }
 }

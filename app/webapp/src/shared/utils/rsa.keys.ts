@@ -1,12 +1,6 @@
 import forge from 'node-forge';
 
-import { HexStr } from '../shared/types';
-
-export interface RSAKeys {
-  privateKey: string;
-  publicKey: string;
-  address?: HexStr;
-}
+import { RSAKeys } from '../types/types.nanopubs';
 
 export const getRSAKeys = (seed: string): RSAKeys => {
   // https://stackoverflow.com/a/72057346/1943661
@@ -26,12 +20,4 @@ export const getRSAKeys = (seed: string): RSAKeys => {
     privateKey: privateKeyPem,
     publicKey: publicKeyPem,
   };
-};
-
-export const signMessage = (message: string, privateKey: string) => {
-  const md = forge.md.sha256.create();
-  md.update(message, 'utf8');
-  const privateKeyObj = forge.pki.privateKeyFromPem(privateKey);
-  const signature = privateKeyObj.sign(md);
-  return forge.util.encode64(signature);
 };
