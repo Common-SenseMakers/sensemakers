@@ -3,12 +3,12 @@ import { Context } from 'mocha';
 
 import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import { envDeploy } from '../../src/config/typedenv.deploy';
-import { resetDB } from '../__tests_support__/db';
 import { LocalLogger, LogLevel } from '../__tests_support__/test.logger';
 import {
   TwitterAccountCredentials,
   authenticateTestUsers,
 } from '../utils/authenticate.users';
+import { resetDB } from '../utils/db';
 import { getTestServices } from './test.services';
 
 export const LOG_LEVEL_MSG = envDeploy.LOG_LEVEL_MSG.value();

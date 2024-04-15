@@ -9,7 +9,7 @@ import { TweetV2SingleResult } from 'twitter-api-v2';
 
 import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import { logger } from '../../src/instances/logger';
-import { resetDB } from '../__tests_support__/db';
+import { resetDB } from '../utils/db';
 import { createTestAppUsers } from '../utils/user.factory';
 import { MOCK_TWITTER } from './setup';
 import { getTestServices } from './test.services';

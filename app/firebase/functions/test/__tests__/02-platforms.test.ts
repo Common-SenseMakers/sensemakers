@@ -11,7 +11,7 @@ import { logger } from '../../src/instances/logger';
 import { FetchUserPostsParams } from '../../src/platforms/platforms.interface';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { UsersHelper } from '../../src/users/users.helper';
-import { resetDB } from '../__tests_support__/db';
+import { resetDB } from '../utils/db';
 import { createTestAppUsers } from '../utils/user.factory';
 import { getTestServices } from './test.services';
 
