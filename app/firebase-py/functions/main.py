@@ -21,6 +21,9 @@ def SM_FUNCTION_post_parser(request):
     content = request_json["content"]
     parameters = request_json["parameters"]
 
+    # we will handle credentials from here and also crendentials rotation if needed
+    # input is going to be an array of posts to parse
+
     config: SM_FUNCTION_post_parser_config = {
         "wandb_project": "st-demo-sandbox",
         "max_summary_length": 500,

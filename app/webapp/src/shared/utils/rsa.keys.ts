@@ -21,11 +21,3 @@ export const getRSAKeys = (seed: string): RSAKeys => {
     publicKey: publicKeyPem,
   };
 };
-
-export const signMessage = (message: string, privateKey: string) => {
-  const md = forge.md.sha256.create();
-  md.update(message, 'utf8');
-  const privateKeyObj = forge.pki.privateKeyFromPem(privateKey);
-  const signature = privateKeyObj.sign(md);
-  return forge.util.encode64(signature);
-};
