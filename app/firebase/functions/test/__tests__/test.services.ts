@@ -69,6 +69,7 @@ export const getTestServices = () => {
   /** all identity services */
   identityServices.set(PLATFORM.Orcid, orcid);
   identityServices.set(PLATFORM.Twitter, twitter);
+  identityServices.set(PLATFORM.Nanopub, nanopub);
 
   /** users service */
   const usersService = new UsersService(userRepo, identityServices, {

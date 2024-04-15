@@ -1,6 +1,4 @@
 import * as jwt from 'jsonwebtoken';
-import { TransactionManager } from 'src/db/transaction.manager';
-import { IdentityServicesMap } from 'src/platforms/platforms.service';
 
 import {
   HandleSignupResult,
@@ -8,6 +6,8 @@ import {
   PLATFORM,
   UserWithId,
 } from '../@shared/types/types';
+import { TransactionManager } from '../db/transaction.manager';
+import { IdentityServicesMap } from '../platforms/platforms.service';
 import { UsersRepository } from './users.repository';
 import { getPrefixedUserId } from './users.utils';
 
@@ -42,11 +42,11 @@ export class UsersService {
    * If the user is not defined (first time), the details are stored on a temporary
    * collection and associated to a random signup_token
    */
-  public async getSignupContext(
+  public async getSignupContext<R = any>(
     platform: PLATFORM,
     userId?: string,
     params?: any
-  ) {
+  ): Promise<R> {
     const context = await this.getIdentityService(platform).getSignupContext(
       userId,
       params
@@ -60,9 +60,9 @@ export class UsersService {
    * a userId is provided the user must exist and a new platform is added to it,
    * otherewise a new user is created.
    */
-  public async handleSignup(
+  public async handleSignup<T = any>(
     platform: PLATFORM,
-    signupData: any,
+    signupData: T,
     manager: TransactionManager,
     _userId?: string // MUST be the authenticated userId if provided
   ): Promise<HandleSignupResult | undefined> {
