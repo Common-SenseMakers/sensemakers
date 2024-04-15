@@ -174,7 +174,7 @@ class MultiParserChainConfig(BaseSettings):
     )
     batch_size: int = Field(
         default=5,
-        description="Default batch size for batched requests",
+        description="Default batch size for batched requests. Only used for batched requests.",
     )
     post_process_type: PostProcessType = Field(
         description="Type of post-processing to apply to parser chain results",
