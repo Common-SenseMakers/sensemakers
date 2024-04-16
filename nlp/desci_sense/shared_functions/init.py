@@ -115,8 +115,9 @@ def init_multi_stage_parser_config(
 
 
 def init_multi_chain_parser_config(
-    open_router_api_config: OpenrouterAPIConfig,
+    open_router_api_config: OpenrouterAPIConfig = None,
     llm_type: str = "openai/gpt-4-turbo",
+    post_process_type: str = "firebase",
 ):
     kw_config = KeywordPParserChainConfig(
         name="keywords",
@@ -133,6 +134,13 @@ def init_multi_chain_parser_config(
         use_metadata=True,
         llm_config=LLMConfig(llm_type=llm_type),
     )
+    # set post process type
+    post_process_type = PostProcessType(post_process_type)
+
+    # if no openrouter config provided, use default
+    if not open_router_api_config:
+        open_router_api_config = OpenrouterAPIConfig()
+
     multi_config = MultiParserChainConfig(
         openrouter_api_config=open_router_api_config,
         parser_configs=[
@@ -140,7 +148,7 @@ def init_multi_chain_parser_config(
             topics_config,
             kw_config,
         ],
-        post_process_type=PostProcessType.FIREBASE,
+        post_process_type=post_process_type,
     )
 
     return multi_config

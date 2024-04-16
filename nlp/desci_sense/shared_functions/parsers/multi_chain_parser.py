@@ -61,6 +61,9 @@ def add_prompts_to_output(
 class MultiChainParser:
     def __init__(self, config: MultiParserChainConfig) -> None:
         self.config = config
+        logger.info(
+            f"Initializing MultiChainParser. PostProcessType={config.post_process_type.value}"
+        )
 
         self.ontology_base = OntologyBase()
 
