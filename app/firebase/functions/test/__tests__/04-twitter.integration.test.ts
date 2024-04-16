@@ -3,14 +3,14 @@ import { TwitterApi } from 'twitter-api-v2';
 
 import { PLATFORM } from '../../src/@shared/types/types';
 import {
-  TwitterAccountCredentials,
+  TestUserCredentials,
   authenticateTestUsers,
 } from '../utils/authenticate.users';
 import { getTestServices } from './test.services';
 
 const NUM_TWITTER_USERS = 1;
-const TEST_ACCOUNTS: TwitterAccountCredentials[] = JSON.parse(
-  process.env.TEST_USER_TWITTER_ACCOUNTS as string
+const TEST_ACCOUNTS: TestUserCredentials[] = JSON.parse(
+  process.env.TEST_USER_ACCOUNTS as string
 );
 
 /** skip for now as it will invalidate access tokens */

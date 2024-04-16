@@ -1,10 +1,6 @@
 import { AppPostFull } from 'src/@shared/types/types.posts';
 
-import {
-  ALL_PUBLISH_PLATFORMS,
-  AppUser,
-  DefinedIfTrue,
-} from '../@shared/types/types';
+import { ALL_PUBLISH_PLATFORMS, AppUser } from '../@shared/types/types';
 import {
   PlatformPost,
   PlatformPostCreate,
@@ -109,35 +105,6 @@ export class PostsManager {
     );
   }
 
-  /** get AppPostFull */
-  async getPost<T extends boolean, R = AppPostFull>(
-    postId: string,
-    shouldThrow?: T
-  ): Promise<DefinedIfTrue<T, R>> {
-    const post = await this.processing.posts.get(postId, shouldThrow);
-
-    if (!post && shouldThrow) {
-      throw new Error(`Post ${postId} not found`);
-    }
-
-    if (!post) {
-      return undefined as DefinedIfTrue<T, R>;
-    }
-
-    const mirrors = await Promise.all(
-      post.mirrorsIds.map((mirrorId) => {
-        return this.db.run((manager) =>
-          this.processing.platformPosts.get(mirrorId, manager)
-        );
-      })
-    );
-
-    return {
-      ...post,
-      mirrors: mirrors.filter((m) => m !== undefined) as PlatformPost[],
-    } as unknown as DefinedIfTrue<T, R>;
-  }
-
   /** get pending posts AppPostFull of user, cannot be part of a transaction */
   async getPendingOfUser(userId: string) {
     const pendingAppPosts =
@@ -160,5 +127,11 @@ export class PostsManager {
     );
 
     return postsFull;
+  }
+
+  async getPost<T extends boolean>(postId: string, shouldThrow: T) {
+    return this.db.run(async (manager) =>
+      this.processing.getPost(postId, manager, shouldThrow)
+    );
   }
 }

@@ -1,13 +1,19 @@
 import {
   ALL_PUBLISH_PLATFORMS,
   AppUser,
+  DefinedIfTrue,
   PUBLISHABLE_PLATFORMS,
 } from '../@shared/types/types';
 import {
+  PlatformPost,
   PlatformPostCreate,
   PlatformPostCreated,
 } from '../@shared/types/types.platform.posts';
-import { AppPost, AppPostCreate } from '../@shared/types/types.posts';
+import {
+  AppPost,
+  AppPostCreate,
+  AppPostFull,
+} from '../@shared/types/types.posts';
 import { TransactionManager } from '../db/transaction.manager';
 import { PlatformsService } from '../platforms/platforms.service';
 import { UsersHelper } from '../users/users.helper';
@@ -104,28 +110,63 @@ export class PostsProcessing {
      * Create platformPosts as drafts on all platforms
      * */
     await Promise.all(
-      draftsPlatforms.map((platformId) => {
+      draftsPlatforms.map(async (platformId) => {
         if (platformId !== post.origin) {
           const accounts = UsersHelper.getAccounts(user, platformId);
-          accounts.forEach((account) => {
-            /** create a draft for that platform and account */
-            const draft: PlatformPostCreate = {
-              platformId,
-              publishStatus: 'draft',
-              publishOrigin: 'posted',
-              draft: {
-                postApproval: 'pending',
-                user_id: account.user_id,
-                post: post.content,
-              },
-            };
+          await Promise.all(
+            accounts.map(async (account) => {
+              /** create a draft for that platform and account */
+              const postFull = await this.getPost(post.id, manager, true);
+              this.platforms
+                .get(platformId)
+                .convertFromGeneric({ post: postFull, author: user });
 
-            this.platformPosts.create(draft, manager);
-          });
+              const draft: PlatformPostCreate = {
+                platformId,
+                publishStatus: 'draft',
+                publishOrigin: 'posted',
+                draft: {
+                  postApproval: 'pending',
+                  user_id: account.user_id,
+                  post: postFull,
+                },
+              };
+
+              this.platformPosts.create(draft, manager);
+            })
+          );
         }
       })
     );
 
     return post;
+  }
+
+  /** get AppPostFull */
+  async getPost<T extends boolean, R = AppPostFull>(
+    postId: string,
+    manager: TransactionManager,
+    shouldThrow?: T
+  ): Promise<DefinedIfTrue<T, R>> {
+    const post = await this.posts.get(postId, shouldThrow);
+
+    if (!post && shouldThrow) {
+      throw new Error(`Post ${postId} not found`);
+    }
+
+    if (!post) {
+      return undefined as DefinedIfTrue<T, R>;
+    }
+
+    const mirrors = await Promise.all(
+      post.mirrorsIds.map((mirrorId) =>
+        this.platformPosts.get(mirrorId, manager)
+      )
+    );
+
+    return {
+      ...post,
+      mirrors: mirrors.filter((m) => m !== undefined) as PlatformPost[],
+    } as unknown as DefinedIfTrue<T, R>;
   }
 }

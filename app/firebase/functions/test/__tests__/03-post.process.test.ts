@@ -101,59 +101,57 @@ describe.only('03-process', () => {
       const postFetched = fetched[0].post;
       const platformPostFetched = fetched[0].platformPost;
 
-      await services.db.run(async (manager) => {
-        const postRead = await services.postsManager.getPost(
-          postFetched.id,
-          true
-        );
+      const postRead = await services.postsManager.getPost(
+        postFetched.id,
+        true
+      );
 
-        expect(postRead.mirrors).to.have.length(2);
+      expect(postRead.mirrors).to.have.length(2);
 
-        const tweetRead = postRead.mirrors.find(
-          (m) => m.platformId === PLATFORM.Twitter
-        );
+      const tweetRead = postRead.mirrors.find(
+        (m) => m.platformId === PLATFORM.Twitter
+      );
 
-        expect(tweetRead).to.not.be.undefined;
+      expect(tweetRead).to.not.be.undefined;
 
-        if (!tweetRead) {
-          throw new Error('tweetRead not created');
-        }
+      if (!tweetRead) {
+        throw new Error('tweetRead not created');
+      }
 
-        if (!appUser) {
-          throw new Error('appUser not created');
-        }
+      if (!appUser) {
+        throw new Error('appUser not created');
+      }
 
-        const refAppPost: AppPost = {
-          id: postFetched.id,
-          authorId: appUser.userId,
-          origin: PLATFORM.Twitter,
-          parseStatus: 'unprocessed',
-          content,
-          mirrorsIds: [tweetRead.id],
-          reviewedStatus: 'pending',
-        };
+      const refAppPost: AppPost = {
+        id: postFetched.id,
+        authorId: appUser.userId,
+        origin: PLATFORM.Twitter,
+        parseStatus: 'unprocessed',
+        content,
+        mirrorsIds: [tweetRead.id],
+        reviewedStatus: 'pending',
+      };
 
-        const refTweet: PlatformPost = {
-          id: platformPostFetched.id,
-          platformId: PLATFORM.Twitter,
-          publishOrigin: 'fetched',
-          publishStatus: 'published',
-          posted: {
-            post_id: tweet.post.data.id,
-            user_id: (appUser[PLATFORM.Twitter] as any)[0].user_id,
-            timestampMs: tweet.timestampMs,
-            post: tweet.post.data,
-          },
-        };
+      const refTweet: PlatformPost = {
+        id: platformPostFetched.id,
+        platformId: PLATFORM.Twitter,
+        publishOrigin: 'fetched',
+        publishStatus: 'published',
+        posted: {
+          post_id: tweet.post.data.id,
+          user_id: (appUser[PLATFORM.Twitter] as any)[0].user_id,
+          timestampMs: tweet.timestampMs,
+          post: tweet.post.data,
+        },
+      };
 
-        expect(postRead).to.not.be.undefined;
+      expect(postRead).to.not.be.undefined;
 
-        expect(postRead).to.deep.equal(refAppPost);
-        expect(postFetched).to.deep.equal(refAppPost);
+      expect(postRead).to.deep.equal(refAppPost);
+      expect(postFetched).to.deep.equal(refAppPost);
 
-        expect(tweetRead).to.deep.equal(refTweet);
-        expect(platformPostFetched).to.deep.equal(refTweet);
-      });
+      expect(tweetRead).to.deep.equal(refTweet);
+      expect(platformPostFetched).to.deep.equal(refTweet);
     });
 
     it('fetch one user pending posts', async () => {
