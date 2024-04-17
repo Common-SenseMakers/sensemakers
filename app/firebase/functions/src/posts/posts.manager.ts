@@ -65,6 +65,14 @@ export class PostsManager {
                 manager
               );
 
+              /** Set last fetched time */
+              await this.users.repo.setLastFetched(
+                platformId,
+                account.user_id,
+                Date.now(),
+                manager
+              );
+
               /** Create the PlatformPosts */
               const platformPostsCreated =
                 await this.processing.createPlatformPosts(
