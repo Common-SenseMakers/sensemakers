@@ -1,4 +1,5 @@
 import { firestore } from 'firebase-admin';
+import { TransactionManager } from 'src/db/transaction.manager';
 
 import {
   AppUser,
@@ -14,10 +15,14 @@ import { getPrefixedUserId } from './users.utils';
 export class UsersRepository {
   constructor(protected db: DBInstance) {}
 
-  protected async getUserRef(userId: string, onlyIfExists: boolean = false) {
+  protected async getUserRef(
+    userId: string,
+    manager: TransactionManager,
+    onlyIfExists: boolean = false
+  ) {
     const ref = this.db.collections.users.doc(userId);
     if (onlyIfExists) {
-      const doc = await this.getUserDoc(userId);
+      const doc = await this.getUserDoc(userId, manager);
 
       if (!doc.exists) {
         throw new Error(`User ${userId} not found`);
@@ -27,21 +32,22 @@ export class UsersRepository {
     return ref;
   }
 
-  protected async getUserDoc(userId: string) {
-    const ref = await this.getUserRef(userId);
-    return ref.get();
+  protected async getUserDoc(userId: string, manager: TransactionManager) {
+    const ref = await this.getUserRef(userId, manager);
+    return manager.get(ref);
   }
 
-  public async userExists(userId: string) {
-    const doc = await this.getUserDoc(userId);
+  public async userExists(userId: string, manager: TransactionManager) {
+    const doc = await this.getUserDoc(userId, manager);
     return doc.exists;
   }
 
   public async getUser<T extends boolean>(
     userId: string,
+    manager: TransactionManager,
     shouldThrow?: T
   ): Promise<DefinedIfTrue<T, AppUser>> {
-    const doc = await this.getUserDoc(userId);
+    const doc = await this.getUserDoc(userId, manager);
 
     const _shouldThrow = shouldThrow !== undefined ? shouldThrow : false;
 
@@ -60,6 +66,7 @@ export class UsersRepository {
   public async getUserWithPlatformAccount<T extends boolean>(
     platform: PLATFORM,
     user_id: string,
+    manager: TransactionManager,
     shouldThrow?: T
   ): Promise<DefinedIfTrue<T, AppUser>> {
     const prefixed_user_id = getPrefixedUserId(platform, user_id);
@@ -95,8 +102,12 @@ export class UsersRepository {
     >;
   }
 
-  public async createUser(userId: string, user: AppUserCreate) {
-    const ref = await this.getUserRef(userId);
+  public async createUser(
+    userId: string,
+    user: AppUserCreate,
+    manager: TransactionManager
+  ) {
+    const ref = await this.getUserRef(userId, manager);
     await ref.create(user);
     return ref.id;
   }
@@ -107,12 +118,14 @@ export class UsersRepository {
   public async setLastFetched(
     platform: PLATFORM,
     user_id: string,
-    lastFetchedMs: number
+    lastFetchedMs: number,
+    manager: TransactionManager
   ) {
     /** check if this platform user_id already exists */
     const existingUser = await this.getUserWithPlatformAccount(
       platform,
-      user_id
+      user_id,
+      manager
     );
 
     if (!existingUser) {
@@ -146,27 +159,29 @@ export class UsersRepository {
     /** overwrite the lastFeched value */
     current.read.lastFetchedMs = lastFetchedMs;
 
-    const userRef = await this.getUserRef(existingUser.userId, true);
+    const userRef = await this.getUserRef(existingUser.userId, manager, true);
 
     /** overwrite all the user account credentials */
-    await userRef.update({ [platform]: accounts });
+    manager.update(userRef, { [platform]: accounts });
   }
 
   /** append or overwrite userDetails for an account of a given platform */
   public async setPlatformDetails(
     userId: string,
     platform: PLATFORM,
-    details: UserDetailsBase
+    details: UserDetailsBase,
+    manager: TransactionManager
   ) {
     const prefixed_user_id = getPrefixedUserId(platform, details.user_id);
 
     /** check if this platform user_id already exists */
     const existingUser = await this.getUserWithPlatformAccount(
       platform,
-      details.user_id
+      details.user_id,
+      manager
     );
 
-    const userRef = await this.getUserRef(userId, true);
+    const userRef = await this.getUserRef(userId, manager, true);
 
     if (existingUser) {
       if (existingUser.userId !== userId) {
@@ -196,7 +211,7 @@ export class UsersRepository {
 
       return;
     } else {
-      const existingUser = await this.getUser(userId);
+      const existingUser = await this.getUser(userId, manager);
       const platformIds = existingUser ? existingUser.platformIds : [];
       /**
        * append a new details entry in the platform array and store the
@@ -214,9 +229,10 @@ export class UsersRepository {
   public async removePlatformDetails(
     userId: string,
     platform: PLATFORM,
-    user_id: string
+    user_id: string,
+    manager: TransactionManager
   ) {
-    const doc = await this.getUserDoc(userId);
+    const doc = await this.getUserDoc(userId, manager);
 
     if (!doc.exists) {
       throw new Error(`User ${userId} not found`);
