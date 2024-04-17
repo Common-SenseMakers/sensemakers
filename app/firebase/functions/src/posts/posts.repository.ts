@@ -1,3 +1,4 @@
+import { FieldValue } from 'firebase-admin/firestore';
 import { TransactionManager } from 'src/db/transaction.manager';
 
 import {
@@ -13,7 +14,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     super(db.collections.posts);
   }
 
-  public async updatePostContent(
+  public async updateContent(
     postUpdate: PostUpdate,
     manager: TransactionManager
   ) {
@@ -24,7 +25,18 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     post.content = postUpdate.content;
     post.semantics = postUpdate.semantics;
 
-    await doc.ref.set(post, { merge: true });
+    await manager.set(doc.ref, post, { merge: true });
+  }
+
+  public async addMirror(
+    postId: string,
+    mirrorId: string,
+    manager: TransactionManager
+  ) {
+    const ref = await this.getRef(postId, manager, true);
+
+    /** for safety support only some properties update */
+    manager.update(ref, { mirrorIds: FieldValue.arrayUnion(mirrorId) });
   }
 
   /** Cannot be part of a transaction */

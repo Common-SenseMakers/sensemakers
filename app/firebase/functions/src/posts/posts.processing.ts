@@ -103,7 +103,7 @@ export class PostsProcessing {
   ) {
     const drafts = await Promise.all(
       postIds.map(async (postId) => {
-        return await this.createPostDrafts(postId, draftsPlatforms, manager);
+        await this.createPostDrafts(postId, draftsPlatforms, manager);
       })
     );
     return drafts.flat();
@@ -147,11 +147,15 @@ export class PostsProcessing {
               },
             };
 
-            return this.platformPosts.create(draft, manager);
+            /** create and add as mirror */
+            const plaformPost = this.platformPosts.create(draft, manager);
+            this.posts.addMirror(postId, plaformPost.id, manager);
           })
         );
       })
     );
+
+    /** add drafts as post mirrors */
 
     return drafts.flat();
   }
