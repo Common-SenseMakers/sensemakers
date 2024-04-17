@@ -18,7 +18,9 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     postUpdate: PostUpdate,
     manager: TransactionManager
   ) {
-    const doc = await this.getDoc(postUpdate.id, manager, true);
+    const doc = await this.getDoc(postUpdate.id, manager);
+    if (!doc.exists) throw new Error(`Post ${postUpdate.id} not found`);
+
     const post = doc.data() as AppPost;
 
     /** for safety support only some properties update */
@@ -33,7 +35,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     mirrorId: string,
     manager: TransactionManager
   ) {
-    const ref = await this.getRef(postId, manager, true);
+    const ref = await this.getRef(postId, manager);
 
     /** for safety support only some properties update */
     manager.update(ref, { mirrorIds: FieldValue.arrayUnion(mirrorId) });

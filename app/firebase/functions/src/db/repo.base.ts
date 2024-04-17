@@ -14,50 +14,13 @@ export class BaseRepository<TT, CC> {
     };
   }
 
-  /** Get the platform post from the published post_id */
-  public async getFrom_post_id<T extends boolean, R = TT>(
-    post_id: string,
-    manager: TransactionManager,
-    shouldThrow?: T
-  ): Promise<DefinedIfTrue<T, R>> {
-    const _shouldThrow = shouldThrow !== undefined ? shouldThrow : false;
-
-    const posts = await manager.query(
-      this.collection.where('posted.post_id', '==', post_id)
-    );
-
-    if (posts.empty) {
-      if (_shouldThrow) throw new Error(`User ${post_id} not found`);
-      else return undefined as DefinedIfTrue<T, R>;
-    }
-
-    const doc = posts.docs[0];
-
-    return {
-      id: doc.id,
-      ...doc.data(),
-    } as unknown as DefinedIfTrue<T, R>;
-  }
-
-  protected async getRef(
-    postId: string,
-    manager: TransactionManager,
-    shouldThrow: boolean = false
-  ) {
+  protected async getRef(postId: string, manager: TransactionManager) {
     const ref = this.collection.doc(postId);
-    if (shouldThrow) {
-      await this.getDoc(postId, manager, true);
-    }
-
     return ref;
   }
 
-  protected async getDoc(
-    userId: string,
-    manager: TransactionManager,
-    shouldThrow: boolean = false
-  ) {
-    const ref = await this.getRef(userId, manager, shouldThrow);
+  protected async getDoc(userId: string, manager: TransactionManager) {
+    const ref = await this.getRef(userId, manager);
     return manager.get(ref);
   }
 
