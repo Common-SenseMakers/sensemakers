@@ -1,13 +1,7 @@
-import { AppPostFull } from 'src/@shared/types/types.posts';
-
 import { ALL_PUBLISH_PLATFORMS, AppUser } from '../@shared/types/types';
-import {
-  PlatformPost,
-  PlatformPostCreate,
-  PlatformPostCreated,
-} from '../@shared/types/types.platform.posts';
+import { PlatformPost } from '../@shared/types/types.platform.posts';
+import { AppPostFull } from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
-import { TransactionManager } from '../db/transaction.manager';
 import { FetchUserPostsParams } from '../platforms/platforms.interface';
 import { PlatformsService } from '../platforms/platforms.service';
 import { UsersHelper } from '../users/users.helper';
@@ -43,12 +37,14 @@ export class PostsManager {
 
   /**
    * Fetch and store platform posts of one user
-   * as one Transaction
+   * as one Transaction. It doesn't return anything
+   * Could be modified to return the PlatformPosts fetched,
+   * and the corresponding AppPosts and Drafts
    * */
   async fetchUser(user: AppUser) {
     /** Call fetch for each platform */
     return this.db.run(async (manager) => {
-      const _userPlatformPosts = await Promise.all(
+      await Promise.all(
         ALL_PUBLISH_PLATFORMS.map(async (platformId) => {
           const accounts = UsersHelper.getAccounts(user, platformId);
           /** Call fetch for each account */
@@ -69,10 +65,19 @@ export class PostsManager {
                 manager
               );
 
-              /** Store */
-              const platformPostsCreated = await this.storePlatformPosts(
-                user,
-                platformPosts,
+              /** Create the PlatformPosts */
+              const platformPostsCreated =
+                await this.processing.createPlatformPosts(
+                  platformPosts,
+                  manager
+                );
+
+              /** Create the Drafts */
+              await this.processing.createPostsDrafts(
+                platformPostsCreated.map((pp) => pp.post.id),
+                ALL_PUBLISH_PLATFORMS.filter(
+                  (_platformId) => _platformId !== platformId
+                ),
                 manager
               );
 
@@ -81,28 +86,7 @@ export class PostsManager {
           );
         })
       );
-
-      return _userPlatformPosts
-        .flat(2)
-        .filter((p) => p !== undefined) as PlatformPostCreated[];
     });
-  }
-
-  /** Store all platform posts */
-  async storePlatformPosts(
-    user: AppUser,
-    platformPosts: PlatformPostCreate[],
-    manager: TransactionManager
-  ) {
-    return await Promise.all(
-      platformPosts.map(async (platformPost) => {
-        return await this.processing.createPlatformPost(
-          user,
-          platformPost,
-          manager
-        );
-      })
-    );
   }
 
   /** get pending posts AppPostFull of user, cannot be part of a transaction */
@@ -131,7 +115,7 @@ export class PostsManager {
 
   async getPost<T extends boolean>(postId: string, shouldThrow: T) {
     return this.db.run(async (manager) =>
-      this.processing.getPost(postId, manager, shouldThrow)
+      this.processing.getPostFull(postId, manager, shouldThrow)
     );
   }
 }

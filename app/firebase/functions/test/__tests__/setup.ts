@@ -1,14 +1,13 @@
 import fs from 'fs';
 import { Context } from 'mocha';
 
-import { AppUser, PLATFORM } from '../../src/@shared/types/types';
+import { AppUser } from '../../src/@shared/types/types';
 import { envDeploy } from '../../src/config/typedenv.deploy';
 import { resetDB } from '../__tests_support__/db';
 import { LocalLogger, LogLevel } from '../__tests_support__/test.logger';
 import {
   TestUserCredentials,
   authenticateTestUser,
-  authenticateTwitterUser,
 } from '../utils/authenticate.users';
 import { getTestServices } from './test.services';
 
@@ -56,44 +55,8 @@ export const mochaHooks = (): Mocha.RootHookObject => {
           const fileContents = fs.readFileSync(TEST_USERS_FILE_PATH, 'utf8');
           appUsers = JSON.parse(fileContents);
 
-          /** check if any of the twitter access tokens have expired, and if so, re-authenticate */
           await Promise.all(
             appUsers.map(async (appUser) => {
-              const accounts = appUser[PLATFORM.Twitter] || [];
-              let updatedUser: AppUser | undefined = undefined;
-              await Promise.all(
-                accounts.map(async (twitterDetails) => {
-                  if (
-                    twitterDetails.read?.expiresAtMs &&
-                    twitterDetails.read.expiresAtMs < Date.now()
-                  ) {
-                    const credentials = testAccountsCredentials.find(
-                      (testCredentials) =>
-                        testCredentials.twitter.username ===
-                        twitterDetails.profile?.name
-                    );
-                    if (!credentials) {
-                      throw new Error('unexpected');
-                    }
-
-                    const user = await authenticateTwitterUser(
-                      credentials.twitter,
-                      services,
-                      manager
-                    );
-
-                    return user;
-                  }
-
-                  return undefined;
-                })
-              );
-
-              if (updatedUser) {
-                /** replace twitter credentials */
-                appUser[PLATFORM.Twitter] = updatedUser[PLATFORM.Twitter];
-              }
-
               testUsers.set(appUser.userId, appUser);
             })
           );

@@ -1,9 +1,4 @@
-import {
-  ALL_PUBLISH_PLATFORMS,
-  AppUser,
-  DefinedIfTrue,
-  PUBLISHABLE_PLATFORMS,
-} from '../@shared/types/types';
+import { DefinedIfTrue, PUBLISHABLE_PLATFORMS } from '../@shared/types/types';
 import {
   PlatformPost,
   PlatformPostCreate,
@@ -35,10 +30,10 @@ export class PostsProcessing {
   ) {}
 
   /**
-   * Checks if a PlatformPost exist and creates it if not. It also creates an AppPost
+   * Checks if a PlatformPost exist and creates it if not.
+   * It also creates an AppPost for that PlatformPost
    * */
   async createPlatformPost(
-    user: AppUser,
     platformPost: PlatformPostCreate,
     manager: TransactionManager
   ): Promise<PlatformPostCreated | undefined> {
@@ -80,20 +75,89 @@ export class PostsProcessing {
         content,
         mirrorsIds: [platformPostCreated.id],
       },
-      user,
-      ALL_PUBLISH_PLATFORMS.filter(
-        (platformId) => platformId !== platformPost.platformId
-      ),
       manager
     );
 
     return { post, platformPost: platformPostCreated };
   }
 
+  /** Store all platform posts */
+  async createPlatformPosts(
+    platformPosts: PlatformPostCreate[],
+    manager: TransactionManager
+  ) {
+    const postsCreated = await Promise.all(
+      platformPosts.map(async (platformPost) => {
+        return await this.createPlatformPost(platformPost, manager);
+      })
+    );
+
+    return postsCreated.filter((p) => p !== undefined) as PlatformPostCreated[];
+  }
+
+  /** Wrapper to create drafts for many posts */
+  async createPostsDrafts(
+    postIds: string[],
+    draftsPlatforms: PUBLISHABLE_PLATFORMS[],
+    manager: TransactionManager
+  ) {
+    const drafts = await Promise.all(
+      postIds.map(async (postId) => {
+        return await this.createPostDrafts(postId, draftsPlatforms, manager);
+      })
+    );
+    return drafts.flat();
+  }
+
+  /** Store all platform posts */
+  async createPostDrafts(
+    postId: string,
+    draftsPlatforms: PUBLISHABLE_PLATFORMS[],
+    manager: TransactionManager
+  ) {
+    const appPostFull = await this.getPostFull(postId, manager, true);
+    const user = await this.users.repo.getUser(
+      appPostFull.authorId,
+      manager,
+      true
+    );
+
+    /**
+     * Create platformPosts as drafts on all platforms
+     * */
+    const drafts = await Promise.all(
+      draftsPlatforms.map(async (platformId) => {
+        const accounts = UsersHelper.getAccounts(user, platformId);
+
+        return Promise.all(
+          accounts.map(async (account) => {
+            /** create a draft for that platform and account */
+            const draftPost = await this.platforms
+              .get(platformId)
+              .convertFromGeneric({ post: appPostFull, author: user });
+
+            const draft: PlatformPostCreate = {
+              platformId,
+              publishStatus: 'draft',
+              publishOrigin: 'posted',
+              draft: {
+                postApproval: 'pending',
+                user_id: account.user_id,
+                post: draftPost,
+              },
+            };
+
+            return this.platformPosts.create(draft, manager);
+          })
+        );
+      })
+    );
+
+    return drafts.flat();
+  }
+
   async createAppPost(
     input: Omit<AppPostCreate, 'parseStatus' | 'reviewedStatus'>,
-    user: AppUser,
-    draftsPlatforms: PUBLISHABLE_PLATFORMS[],
     manager: TransactionManager
   ): Promise<AppPost> {
     /** Build the AppPostFull object */
@@ -105,50 +169,16 @@ export class PostsProcessing {
 
     /** Create the post */
     const post = this.posts.create(postCreate, manager);
-
-    /**
-     * Create platformPosts as drafts on all platforms
-     * */
-    await Promise.all(
-      draftsPlatforms.map(async (platformId) => {
-        if (platformId !== post.origin) {
-          const accounts = UsersHelper.getAccounts(user, platformId);
-          await Promise.all(
-            accounts.map(async (account) => {
-              /** create a draft for that platform and account */
-              const postFull = await this.getPost(post.id, manager, true);
-              this.platforms
-                .get(platformId)
-                .convertFromGeneric({ post: postFull, author: user });
-
-              const draft: PlatformPostCreate = {
-                platformId,
-                publishStatus: 'draft',
-                publishOrigin: 'posted',
-                draft: {
-                  postApproval: 'pending',
-                  user_id: account.user_id,
-                  post: postFull,
-                },
-              };
-
-              this.platformPosts.create(draft, manager);
-            })
-          );
-        }
-      })
-    );
-
     return post;
   }
 
   /** get AppPostFull */
-  async getPost<T extends boolean, R = AppPostFull>(
+  async getPostFull<T extends boolean, R = AppPostFull>(
     postId: string,
     manager: TransactionManager,
     shouldThrow?: T
   ): Promise<DefinedIfTrue<T, R>> {
-    const post = await this.posts.get(postId, shouldThrow);
+    const post = await this.posts.get(postId, manager, shouldThrow);
 
     if (!post && shouldThrow) {
       throw new Error(`Post ${postId} not found`);
