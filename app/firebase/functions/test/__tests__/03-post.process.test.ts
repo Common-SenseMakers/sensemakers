@@ -126,13 +126,16 @@ describe.only('03-process', () => {
         throw new Error('appUser not created');
       }
 
+      /** mirrors are not part of the reference posts */
+      postsRead.forEach((p) => delete (p as any).mirrors);
+
       const refAppPost: AppPost = {
         id: postRead.id,
         authorId: appUser.userId,
         origin: PLATFORM.Twitter,
         parseStatus: 'unprocessed',
         content,
-        mirrorsIds: [tweetRead.id],
+        mirrorsIds: [tweetRead.id, nanopubRead.id],
         reviewedStatus: 'pending',
       };
 

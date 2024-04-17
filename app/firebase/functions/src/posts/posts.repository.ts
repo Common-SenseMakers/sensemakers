@@ -35,10 +35,10 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     mirrorId: string,
     manager: TransactionManager
   ) {
-    const ref = await this.getRef(postId, manager);
+    const ref = this.getRef(postId);
 
     /** for safety support only some properties update */
-    manager.update(ref, { mirrorIds: FieldValue.arrayUnion(mirrorId) });
+    manager.update(ref, { mirrorsIds: FieldValue.arrayUnion(mirrorId) });
   }
 
   /** Cannot be part of a transaction */

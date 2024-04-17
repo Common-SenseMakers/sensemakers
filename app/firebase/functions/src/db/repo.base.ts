@@ -14,13 +14,13 @@ export class BaseRepository<TT, CC> {
     };
   }
 
-  protected async getRef(postId: string, manager: TransactionManager) {
+  protected getRef(postId: string) {
     const ref = this.collection.doc(postId);
     return ref;
   }
 
   protected async getDoc(userId: string, manager: TransactionManager) {
-    const ref = await this.getRef(userId, manager);
+    const ref = this.getRef(userId);
     return manager.get(ref);
   }
 
