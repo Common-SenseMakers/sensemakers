@@ -4,6 +4,7 @@ import {
   TweetV2,
   TweetV2PaginableTimelineResult,
   TweetV2SingleResult,
+  TweetV2UserTimelineParams,
   Tweetv2FieldsParams,
   TwitterApi,
   TwitterApiReadOnly,
@@ -326,15 +327,28 @@ export class TwitterService
   ): Promise<TweetV2PaginableTimelineResult['data']> {
     const readOnlyClient = await this.getClient(userDetails, 'read');
 
-    const tweetFields: TTweetv2TweetField[] = ['created_at', 'author_id'];
+    const tweetFields: TTweetv2TweetField[] = [
+      'created_at',
+      'author_id',
+      'text',
+      'entities',
+      // @ts-ignore
+      'note_tweet',
+    ];
+
+    const timelineParams: Partial<TweetV2UserTimelineParams> = {
+      start_time: params.start_time,
+      end_time: params.end_time,
+      max_results: params.max_results ? params.max_results : 100,
+      'tweet.fields': tweetFields,
+      exclude: ['retweets', 'replies'],
+    };
 
     try {
-      const result = await readOnlyClient.v2.userTimeline(params.user_id, {
-        start_time: params.start_time,
-        end_time: params.end_time,
-        max_results: params.max_results,
-        'tweet.fields': tweetFields,
-      });
+      const result = await readOnlyClient.v2.userTimeline(
+        params.user_id,
+        timelineParams
+      );
 
       const resultCollection: TweetV2[] = result.data.data || [];
       let nextToken = result.meta.next_token;
@@ -343,10 +357,7 @@ export class TwitterService
         const nextResult = await readOnlyClient.v2.userTimeline(
           params.user_id,
           {
-            start_time: params.start_time,
-            end_time: params.end_time,
-            max_results: params.max_results,
-            'tweet.fields': tweetFields,
+            ...timelineParams,
             pagination_token: nextToken,
           }
         );
