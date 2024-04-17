@@ -51,3 +51,4 @@ export const NANOPUBS_PUBLISH_SERVERS = [
   'https://np.petapico.org/',
   'https://np.knowledgepixels.com/',
 ];
+export const POSTS_JOB_SCHEDULE = 'every 2 hours';
