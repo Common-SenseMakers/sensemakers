@@ -156,8 +156,10 @@ export class NanopubService
     throw new Error('Method not implemented.');
   }
 
-  fetch(params: FetchUserPostsParams): Promise<PlatformPostPosted<any>[]> {
-    throw new Error('Method not implemented.');
+  async fetch(
+    params: FetchUserPostsParams
+  ): Promise<PlatformPostPosted<any>[]> {
+    return [];
   }
 
   mirror(postsToMirror: AppPostMirror[]): Promise<PlatformPost<any>[]> {

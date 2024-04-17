@@ -10,22 +10,17 @@ export class UsersHelper {
    * From a AppUser object return the account of a platform
    * (undefined if not found, throw if _throw = true
    * */
-  static getAccounts<T extends boolean>(
+  static getAccounts(
     user: AppUser,
-    platformId: PUBLISHABLE_PLATFORMS,
-    _throw?: T
-  ): DefinedIfTrue<T, UserDetailsBase[]> {
+    platformId: PUBLISHABLE_PLATFORMS
+  ): UserDetailsBase[] {
     const platformAccounts = user[platformId];
 
-    if (!platformAccounts && _throw) {
-      throw new Error('Platform account not found');
-    }
-
     if (!platformAccounts) {
-      return undefined as DefinedIfTrue<T, UserDetailsBase[]>;
+      return [];
     }
 
-    return platformAccounts as DefinedIfTrue<T, UserDetailsBase[]>;
+    return platformAccounts;
   }
 
   /**
@@ -38,19 +33,18 @@ export class UsersHelper {
     user_id?: string,
     _throw?: T
   ): DefinedIfTrue<T, UserDetailsBase> {
-    const platformAccounts = UsersHelper.getAccounts(user, platformId, _throw);
+    const platformAccounts = UsersHelper.getAccounts(user, platformId);
 
-    if (!platformAccounts) {
+    if (platformAccounts.length === 0) {
       return undefined as DefinedIfTrue<T, UserDetailsBase>;
+    }
+    if (platformAccounts.length === 0 && _throw) {
+      throw new Error('Platform account not found');
     }
 
     const account = user_id
       ? platformAccounts.find((p) => p.user_id === user_id)
       : platformAccounts[0];
-
-    if (!platformAccounts && _throw) {
-      throw new Error('Platform account not found');
-    }
 
     if (!account) {
       return undefined as DefinedIfTrue<T, UserDetailsBase>;

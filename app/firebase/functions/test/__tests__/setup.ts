@@ -1,14 +1,13 @@
 import fs from 'fs';
 import { Context } from 'mocha';
-import { HandleWithTxManager } from 'src/db/transaction.manager';
 
-import { AppUser, PLATFORM } from '../../src/@shared/types/types';
+import { AppUser } from '../../src/@shared/types/types';
 import { envDeploy } from '../../src/config/typedenv.deploy';
 import { resetDB } from '../__tests_support__/db';
 import { LocalLogger, LogLevel } from '../__tests_support__/test.logger';
 import {
-  TwitterAccountCredentials,
-  authenticateTestUsers,
+  TestUserCredentials,
+  authenticateTestUser,
 } from '../utils/authenticate.users';
 import { getTestServices } from './test.services';
 
@@ -40,14 +39,14 @@ export const mochaHooks = (): Mocha.RootHookObject => {
       const context: InjectableContext = {};
       await resetDB();
 
-      const func: HandleWithTxManager = async (manager) => {
-        const testAccountCredentials: TwitterAccountCredentials[] = JSON.parse(
-          process.env.TEST_USER_TWITTER_ACCOUNTS as string
+      await services.db.run(async (manager) => {
+        const testAccountsCredentials: TestUserCredentials[] = JSON.parse(
+          process.env.TEST_USER_ACCOUNTS as string
         );
-        if (!testAccountCredentials) {
+        if (!testAccountsCredentials) {
           throw new Error('test acccounts undefined');
         }
-        if (testAccountCredentials.length < NUM_TEST_USERS) {
+        if (testAccountsCredentials.length < NUM_TEST_USERS) {
           throw new Error('not enough twitter account credentials provided');
         }
         let appUsers: AppUser[] = [];
@@ -56,44 +55,24 @@ export const mochaHooks = (): Mocha.RootHookObject => {
           const fileContents = fs.readFileSync(TEST_USERS_FILE_PATH, 'utf8');
           appUsers = JSON.parse(fileContents);
 
-          /** check if any of the twitter access tokens have expired, and if so, re-authenticate */
-          let valid = true;
-          appUsers.forEach((appUser) => {
-            appUser[PLATFORM.Twitter]?.forEach((twitterDetails) => {
-              if (
-                twitterDetails.read?.expiresAtMs &&
-                twitterDetails.read.expiresAtMs < Date.now()
-              ) {
-                valid = false;
-              }
-            });
-          });
-          if (appUsers.length < NUM_TEST_USERS) {
-            valid = false;
-          }
-
-          /** update appUserCreates with new tokens */
-          if (!valid) {
-            appUsers = await authenticateTestUsers(
-              testAccountCredentials.splice(0, NUM_TEST_USERS),
-              services,
-              manager
-            );
-          }
+          await Promise.all(
+            appUsers.map(async (appUser) => {
+              testUsers.set(appUser.userId, appUser);
+            })
+          );
         } else {
-          appUsers = await authenticateTestUsers(
-            testAccountCredentials.splice(0, NUM_TEST_USERS),
-            services,
-            manager
+          await Promise.all(
+            testAccountsCredentials.map(async (accountCredentials) => {
+              const user = await authenticateTestUser(
+                accountCredentials,
+                services,
+                manager
+              );
+              testUsers.set(user.userId, user);
+            })
           );
         }
-
-        appUsers.forEach((appUser) => {
-          testUsers.set(appUser.userId, appUser);
-        });
-      };
-
-      await services.db.run(func);
+      });
 
       Object.assign(this, context);
     },
@@ -104,11 +83,13 @@ export const mochaHooks = (): Mocha.RootHookObject => {
 
     /** update stored test users after all tests run */
     async afterAll(this: TestContext) {
-      fs.writeFileSync(
-        TEST_USERS_FILE_PATH,
-        JSON.stringify(Array.from(testUsers.values())),
-        'utf8'
-      );
+      if (testUsers.size > 0) {
+        fs.writeFileSync(
+          TEST_USERS_FILE_PATH,
+          JSON.stringify(Array.from(testUsers.values())),
+          'utf8'
+        );
+      }
     },
 
     /** update test users global variable after each test in case tokens have been refreshed */

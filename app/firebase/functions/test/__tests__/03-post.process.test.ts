@@ -7,7 +7,6 @@ import {
   PlatformPostPosted,
 } from '../../src/@shared/types/types.platform.posts';
 import { AppPost } from '../../src/@shared/types/types.posts';
-import { HandleWithTxManager } from '../../src/db/transaction.manager';
 import { logger } from '../../src/instances/logger';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { resetDB } from '../__tests_support__/db';
@@ -15,7 +14,7 @@ import { createTestAppUsers } from '../utils/user.factory';
 import { MOCK_TWITTER } from './setup';
 import { getTestServices } from './test.services';
 
-describe('03-process', () => {
+describe.only('03-process', () => {
   const services = getTestServices();
 
   before(async () => {
@@ -29,17 +28,15 @@ describe('03-process', () => {
     let tweet: PlatformPostPosted<TweetV2SingleResult>;
 
     before(async () => {
-      const func: HandleWithTxManager = async (manager) => {
+      await services.db.run(async (manager) => {
         const users = await createTestAppUsers(services, manager);
         appUser = users[0];
-      };
-
-      await services.db.run(func);
+      });
     });
 
     /** skip for now because we have not yet granted write access */
     it('publish a post in the name of the test user', async () => {
-      const func: HandleWithTxManager = async (manager) => {
+      await services.db.run(async (manager) => {
         if (!appUser) {
           throw new Error('appUser not created');
         }
@@ -87,48 +84,63 @@ describe('03-process', () => {
         if (!MOCK_TWITTER) {
           await new Promise<void>((resolve) => setTimeout(resolve, 6 * 1000));
         }
-      };
-
-      await services.db.run(func);
+      });
     });
 
-    it('fetch all posts from all platforms', async () => {
-      /**
-       * high-level trigger to process all new posts from
-       * all registered users
-       */
-      const fetched = await services.postsManager.fetchAll();
-      expect(fetched).to.have.length(1);
+    it('fetch user posts from all platforms', async () => {
+      if (!appUser) {
+        throw new Error('appUser not created');
+      }
 
-      const postFetched = fetched[0].post;
-      const platformPostFetched = fetched[0].platformPost;
+      /** fetch user posts */
+      await services.postsManager.fetchUser(appUser);
 
-      const postRead = await services.postsManager.processing.posts.get(
-        postFetched.id,
-        true
+      /** read user post */
+      const postsRead = await services.postsManager.getPendingOfUser(
+        appUser.userId
       );
-      const platformPostRead =
-        await services.postsManager.processing.platformPosts.get(
-          platformPostFetched.id,
-          true
-        );
+
+      expect(postsRead).to.not.be.undefined;
+
+      const postRead = postsRead[0];
+      expect(postRead).to.not.be.undefined;
+      expect(postRead.mirrors).to.have.length(2);
+
+      const tweetRead = postRead.mirrors.find(
+        (m) => m.platformId === PLATFORM.Twitter
+      );
+
+      const nanopubRead = postRead.mirrors.find(
+        (m) => m.platformId === PLATFORM.Nanopub
+      );
+
+      if (!tweetRead) {
+        throw new Error('tweetRead not created');
+      }
+
+      if (!nanopubRead) {
+        throw new Error('tweetRead not created');
+      }
 
       if (!appUser) {
         throw new Error('appUser not created');
       }
 
+      /** mirrors are not part of the reference posts */
+      postsRead.forEach((p) => delete (p as any).mirrors);
+
       const refAppPost: AppPost = {
-        id: postFetched.id,
+        id: postRead.id,
         authorId: appUser.userId,
         origin: PLATFORM.Twitter,
         parseStatus: 'unprocessed',
         content,
-        mirrorsIds: [platformPostRead.id],
+        mirrorsIds: [tweetRead.id, nanopubRead.id],
         reviewedStatus: 'pending',
       };
 
-      const refPlatformPost: PlatformPost = {
-        id: platformPostFetched.id,
+      const refTweet: PlatformPost = {
+        id: tweetRead.id,
         platformId: PLATFORM.Twitter,
         publishOrigin: 'fetched',
         publishStatus: 'published',
@@ -143,10 +155,22 @@ describe('03-process', () => {
       expect(postRead).to.not.be.undefined;
 
       expect(postRead).to.deep.equal(refAppPost);
-      expect(postFetched).to.deep.equal(refAppPost);
+      expect(tweetRead).to.deep.equal(refTweet);
+    });
 
-      expect(platformPostRead).to.deep.equal(refPlatformPost);
-      expect(platformPostFetched).to.deep.equal(refPlatformPost);
+    it('fetch one user pending posts', async () => {
+      if (!appUser) {
+        throw new Error('appUser not created');
+      }
+
+      /** get pending posts of user */
+      const pendingPosts = await services.postsManager.getPendingOfUser(
+        appUser.userId
+      );
+
+      /** aprove */
+
+      expect(pendingPosts).to.have.length(1);
     });
   });
 });

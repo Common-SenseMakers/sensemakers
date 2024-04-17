@@ -1,19 +1,14 @@
 import { Nanopub, NpProfile } from '@nanopub/sign';
 import { expect } from 'chai';
-import { privateKeyToAccount } from 'viem/accounts';
 
 import { PLATFORM } from '../../src/@shared/types/types';
 import {
   NanopubUserProfile,
   NanupubSignupData,
 } from '../../src/@shared/types/types.nanopubs';
-import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { cleanPrivateKey } from '../../src/@shared/utils/semantics.helper';
-import {
-  DETERMINISTIC_MESSAGE,
-  getEthToRSAMessage,
-} from '../../src/@shared/utils/sig.utils';
 import { resetDB } from '../__tests_support__/db';
+import { getNanopubProfile } from '../utils/nanopub.profile';
 import { getTestServices } from './test.services';
 
 const logger = (global as any).logger;
@@ -60,46 +55,30 @@ describe('01-signups', () => {
     });
   });
 
-  describe.only('connect nanopub', () => {
+  describe('connect nanopub', () => {
     it('signup new user', async () => {
-      const ethAccount = privateKeyToAccount(
+      const { profile, rsaKeys } = await getNanopubProfile(
         '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
       );
-
-      /** derive RSA keys */
-      const seed = await ethAccount.signMessage({
-        message: DETERMINISTIC_MESSAGE,
-      });
-      const rsaKeys = getRSAKeys(seed);
-
-      /** confirm ownership */
-      const message = getEthToRSAMessage(rsaKeys.publicKey);
-      const ethToRsaSignature = await ethAccount.signMessage({ message });
-
-      const nanopubProfile: NanupubSignupData = {
-        rsaPublickey: rsaKeys.publicKey,
-        ethAddress: ethAccount.publicKey,
-        ethToRsaSignature,
-      };
 
       /** prepare introNanopub */
       const context = await services.users.getSignupContext<NanopubUserProfile>(
         PLATFORM.Nanopub,
         undefined,
-        nanopubProfile
+        profile
       );
 
       /** sign intro nanopub */
       const introObj = new Nanopub(context.introNanopub);
       const keyBody = cleanPrivateKey(rsaKeys);
-      const profile = new NpProfile(keyBody, '', '', '');
-      const signedIntro = introObj.sign(profile);
+      const npProfile = new NpProfile(keyBody, '', '', '');
+      const signedIntro = introObj.sign(npProfile);
 
       /** send signed to the backend */
       const result = await services.db.run((manager) =>
         services.users.handleSignup<NanupubSignupData>(
           PLATFORM.Nanopub,
-          { ...nanopubProfile, introNanopub: signedIntro.rdf() },
+          { ...profile, introNanopub: signedIntro.rdf() },
           manager
         )
       );
