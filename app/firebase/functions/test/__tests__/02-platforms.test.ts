@@ -15,7 +15,7 @@ import { resetDB } from '../utils/db';
 import { createTestAppUsers } from '../utils/user.factory';
 import { getTestServices } from './test.services';
 
-describe('platforms', () => {
+describe('02-platforms', () => {
   let users: AppUser[] = [];
   let rsaKeys: RSAKeys | undefined;
   const services = getTestServices();
@@ -60,7 +60,9 @@ describe('platforms', () => {
     let appUser: AppUser | undefined;
 
     before(async () => {
-      const users = await createTestAppUsers(services);
+      const users = await services.db.run((manager) =>
+        createTestAppUsers(services, manager)
+      );
       appUser = users[0];
     });
 
@@ -94,7 +96,9 @@ describe('platforms', () => {
           end_time: 1708646400000,
         };
 
-        const tweets = await twitterService.fetch(fetchParams);
+        const tweets = await services.db.run((manager) =>
+          twitterService.fetch(fetchParams, manager)
+        );
 
         expect(tweets).to.not.be.undefined;
         expect(tweets.length).to.be.equal(0);
@@ -122,23 +126,31 @@ describe('platforms', () => {
         }
       );
 
-      const tweets = await twitterService.fetch({
-        userDetails,
-        start_time: Date.now() - 1000,
+      await services.db.run(async (manager) => {
+        const tweets = await twitterService.fetch(
+          {
+            userDetails,
+            start_time: Date.now() - 1000,
+          },
+          manager
+        );
+
+        expect(tweets).to.not.be.undefined;
+
+        const user = await services.users.repo.getUserWithPlatformAccount(
+          PLATFORM.Twitter,
+          userDetails.user_id,
+          manager,
+          true
+        );
+
+        const newUserDetails = user[PLATFORM.Twitter];
+        if (!newUserDetails || newUserDetails.length != 1) {
+          throw new Error('Unexpected');
+        }
+
+        expect(newUserDetails[0]).to.not.deep.equal(userDetails);
       });
-
-      expect(tweets).to.not.be.undefined;
-
-      const user = await services.users.repo.getUserWithPlatformAccount(
-        PLATFORM.Twitter,
-        userDetails.user_id,
-        true
-      );
-      const newUserDetails = user[PLATFORM.Twitter];
-      if (!newUserDetails || newUserDetails.length != 1) {
-        throw new Error('Unexpected');
-      }
-      expect(newUserDetails[0]).to.not.deep.equal(userDetails);
     });
   });
 
@@ -208,10 +220,15 @@ describe('platforms', () => {
 
         expect(signed).to.not.be.undefined;
 
-        const published = await nanopubService.publish({
-          draft: signed.rdf(),
-          userDetails: nanopubAccount,
-        });
+        const published = await services.db.run((manager) =>
+          nanopubService.publish(
+            {
+              draft: signed.rdf(),
+              userDetails: nanopubAccount,
+            },
+            manager
+          )
+        );
         expect(published).to.not.be.undefined;
       } catch (error) {
         console.error('error: ', error);

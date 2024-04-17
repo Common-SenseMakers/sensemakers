@@ -1,13 +1,15 @@
 import puppeteer, { Browser } from 'puppeteer';
 import { IOAuth2RequestTokenResult } from 'twitter-api-v2';
 
-import { AppUser, PLATFORM } from '../../src/@shared/types/types';
+import { AppUser, HexStr, PLATFORM } from '../../src/@shared/types/types';
 import {
   TwitterGetContextParams,
   TwitterSignupData,
 } from '../../src/@shared/types/types.twitter';
+import { TransactionManager } from '../../src/db/transaction.manager';
 import { Services } from '../../src/instances/services';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
+import { getNanopubProfile } from './nanopub.profile';
 
 const CALLBACK_URL = 'https://sense-nets.xyz/';
 const NEXT_BUTTON_TEXT = 'Next';
@@ -22,50 +24,102 @@ export interface TwitterAccountCredentials {
   type: 'read' | 'write';
 }
 
+export interface OrcidAccountCredentials {
+  username: string;
+  password: string;
+}
+
+export interface NanopubAccountCredentials {
+  ethPrivateKey: HexStr;
+}
+
+export interface TestUserCredentials {
+  orcid: OrcidAccountCredentials;
+  twitter: TwitterAccountCredentials;
+  nanopub: NanopubAccountCredentials;
+}
+
+export const authenticateTestUsers = async (
+  credentials: TestUserCredentials[],
+  services: Services,
+  manager: TransactionManager
+) => {
+  return Promise.all(
+    credentials.map((credential) =>
+      authenticateTestUser(credential, services, manager)
+    )
+  );
+};
+
+export const authenticateTestUser = async (
+  credentials: TestUserCredentials,
+  services: Services,
+  manager: TransactionManager
+): Promise<AppUser> => {
+  const user0 = await authenticateTwitterUser(
+    credentials.twitter,
+    services,
+    manager
+  );
+  const user1 = await authenticateNanopub(user0, credentials.nanopub);
+  return user1;
+};
+
+const authenticateNanopub = async (
+  user: AppUser,
+  credentials: NanopubAccountCredentials
+): Promise<AppUser> => {
+  const { profile } = await getNanopubProfile(credentials.ethPrivateKey);
+
+  user[PLATFORM.Nanopub] = [
+    {
+      signupDate: 0,
+      user_id: profile.ethAddress,
+      profile: {
+        ethAddress: profile.ethAddress,
+        rsaPublickey: profile.rsaPublickey,
+      },
+    },
+  ];
+
+  return user;
+};
+
 /**
  * From a set of platform credentials, authenticate the users and
  * return their full profiles
  */
-export const authenticateTestUsers = async (
-  twitterCredentials: TwitterAccountCredentials[],
-  services: Services
-): Promise<AppUser[]> => {
-  const signupDatasPromises = twitterCredentials.map(async (testAccount) => {
-    const browser = await puppeteer.launch({ headless: false });
-    const userToken = await authenticateTwitterUser(
-      testAccount,
-      services.platforms.get<TwitterService>(PLATFORM.Twitter),
-      browser
-    );
-    await browser.close();
-    return userToken;
-  });
-
-  let twitterSignupDatas = await Promise.all(signupDatasPromises);
-
-  let users: AppUser[] = [];
-
-  await Promise.all(
-    twitterSignupDatas.map(async (signupData: TwitterSignupData) => {
-      /** store the user in the DB (build the user profile object and derive the ID) */
-      const result = await services.users.handleSignup(
-        PLATFORM.Twitter,
-        signupData
-      );
-      if (!result) {
-        throw new Error('Unexpected');
-      }
-
-      /** read the just created user (will fail if not found) */
-      const user = await services.users.repo.getUser(result.userId, true);
-      users.push(user);
-    })
+export const authenticateTwitterUser = async (
+  testAccount: TwitterAccountCredentials,
+  services: Services,
+  manager: TransactionManager
+): Promise<AppUser> => {
+  const browser = await puppeteer.launch({ headless: false });
+  const signupData = await runAuthenticateTwitterUser(
+    testAccount,
+    services.platforms.get<TwitterService>(PLATFORM.Twitter),
+    browser
   );
+  await browser.close();
 
-  return users;
+  /** create users using the Twitter profiles */
+  /** store the user in the DB (build the user profile object and derive the ID) */
+  const result = await services.users.handleSignup(
+    PLATFORM.Twitter,
+    signupData,
+    manager
+  );
+  if (!result) {
+    throw new Error('Unexpected');
+  }
+
+  /** read the just created user (will fail if not found) */
+  const user = await services.users.repo.getUser(result.userId, manager, true);
+
+  return user;
 };
 
-const authenticateTwitterUser = async (
+const runAuthenticateTwitterUser = async (
   user: TwitterAccountCredentials,
   twitterService: TwitterService,
   browser: Browser

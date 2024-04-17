@@ -1,3 +1,5 @@
+import { TransactionManager } from 'src/db/transaction.manager';
+
 import {
   PLATFORM,
   PUBLISHABLE_PLATFORMS,
@@ -37,9 +39,13 @@ export class PlatformsService {
     return platform as T;
   }
 
-  public async fetch(platformId: PLATFORM, params: FetchUserPostsParams) {
+  public async fetch(
+    platformId: PLATFORM,
+    params: FetchUserPostsParams,
+    manager: TransactionManager
+  ) {
     /** all fetched posts from one platform */
-    const fetched = await this.get(platformId).fetch(params);
+    const fetched = await this.get(platformId).fetch(params, manager);
 
     /** convert them into a PlatformPost */
     return fetched.map((fetchedPost) => {
@@ -59,8 +65,12 @@ export class PlatformsService {
     return platform.convertToGeneric(platformPost);
   }
 
-  public publish(platformId: PLATFORM, postPublish: PlatformPostPublish) {
+  public publish(
+    platformId: PLATFORM,
+    postPublish: PlatformPostPublish,
+    manager: TransactionManager
+  ) {
     const platform = this.get(platformId);
-    return platform.publish(postPublish);
+    return platform.publish(postPublish, manager);
   }
 }

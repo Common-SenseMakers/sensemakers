@@ -4,25 +4,19 @@ import {
   PlatformPostCreate,
 } from '../@shared/types/types.platform.posts';
 import { DBInstance } from '../db/instance';
+import { BaseRepository } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 
-export class PlatformPostsRepository {
-  constructor(protected db: DBInstance) {}
-
-  public create(
-    post: PlatformPostCreate,
-    manager: TransactionManager
-  ): PlatformPost {
-    const postRef = this.db.collections.platformPosts.doc();
-    manager.set(postRef, post);
-
-    return {
-      id: postRef.id,
-      ...post,
-    };
+export class PlatformPostsRepository extends BaseRepository<
+  PlatformPost,
+  PlatformPostCreate
+> {
+  constructor(protected db: DBInstance) {
+    super(db.collections.platformPosts);
   }
 
-  public async getFromPostId<T extends boolean, R = PlatformPost>(
+  /** Get the platform post from the published post_id */
+  public async getFrom_post_id<T extends boolean, R = PlatformPost>(
     post_id: string,
     manager: TransactionManager,
     shouldThrow?: T
@@ -42,43 +36,6 @@ export class PlatformPostsRepository {
 
     return {
       id: doc.id,
-      ...doc.data(),
-    } as unknown as DefinedIfTrue<T, R>;
-  }
-
-  protected async getRef(postId: string, shouldThrow: boolean = false) {
-    const ref = this.db.collections.platformPosts.doc(postId);
-    if (shouldThrow) {
-      const doc = await this.getDoc(postId);
-
-      if (!doc.exists) {
-        throw new Error(`Post ${postId} not found`);
-      }
-    }
-
-    return ref;
-  }
-
-  protected async getDoc(userId: string, shouldThrow: boolean = false) {
-    const ref = await this.getRef(userId, shouldThrow);
-    return ref.get();
-  }
-
-  public async get<T extends boolean, R = PlatformPost>(
-    id: string,
-    shouldThrow?: T
-  ): Promise<DefinedIfTrue<T, R>> {
-    const doc = await this.getDoc(id);
-
-    const _shouldThrow = shouldThrow !== undefined ? shouldThrow : false;
-
-    if (!doc.exists) {
-      if (_shouldThrow) throw new Error(`PlatformPost ${id} not found`);
-      else return undefined as DefinedIfTrue<T, R>;
-    }
-
-    return {
-      id,
       ...doc.data(),
     } as unknown as DefinedIfTrue<T, R>;
   }

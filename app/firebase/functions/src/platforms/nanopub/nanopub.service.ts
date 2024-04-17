@@ -1,7 +1,11 @@
 import { Nanopub } from '@nanopub/sign';
+import { verifyMessage } from 'viem';
 
 import { PLATFORM, UserDetailsBase } from '../../@shared/types/types';
-import { NanopubUserProfile } from '../../@shared/types/types.nanopubs';
+import {
+  NanopubUserProfile,
+  NanupubSignupData,
+} from '../../@shared/types/types.nanopubs';
 import {
   PlatformPost,
   PlatformPostDraft,
@@ -13,11 +17,13 @@ import {
   GenericPostData,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
+import { getRsaToEthMessage } from '../../@shared/utils/sig.utils';
 import { NANOPUBS_PUBLISH_SERVERS } from '../../config/config.runtime';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
 import { FetchUserPostsParams, PlatformService } from '../platforms.interface';
+import { createIntroNanopublication } from './create.intro.nanopub';
 import { createNanopublication } from './create.nanopub';
 
 export interface TwitterApiCredentials {
@@ -28,9 +34,51 @@ export interface TwitterApiCredentials {
 /** Twitter service handles all interactions with Twitter API */
 export class NanopubService
   implements
-    PlatformService<undefined, undefined, UserDetailsBase<NanopubUserProfile>>
+    PlatformService<
+      NanopubUserProfile,
+      NanupubSignupData,
+      UserDetailsBase<NanopubUserProfile>
+    >
 {
   constructor(protected time: TimeService) {}
+
+  async getSignupContext(
+    userId: string | undefined,
+    params?: NanupubSignupData
+  ): Promise<NanopubUserProfile> {
+    if (!params) {
+      throw new Error('Missing params');
+    }
+
+    const introNanopub = await createIntroNanopublication(params);
+    return { ...params, introNanopub: introNanopub.rdf() };
+  }
+
+  /** verifies signatures, creates intro nanopub */
+  async handleSignupData(
+    signupData: NanupubSignupData
+  ): Promise<UserDetailsBase<NanopubUserProfile, any, any>> {
+    /** verify ethSignature */
+    const valid = verifyMessage({
+      address: signupData.ethAddress,
+      message: getRsaToEthMessage(signupData.rsaPublickey),
+      signature: signupData.ethToRsaSignature,
+    });
+
+    if (!valid) {
+      throw new Error('Invalid signature');
+    }
+
+    return {
+      user_id: signupData.ethAddress,
+      signupDate: this.time.now(),
+      profile: {
+        rsaPublickey: signupData.rsaPublickey,
+        ethAddress: signupData.ethAddress,
+        introNanopub: signupData.introNanopub,
+      },
+    };
+  }
 
   /** converts a post into a nanopublication draft */
   async convertFromGeneric(
@@ -108,23 +156,13 @@ export class NanopubService
     throw new Error('Method not implemented.');
   }
 
-  fetch(params: FetchUserPostsParams): Promise<PlatformPostPosted<any>[]> {
-    throw new Error('Method not implemented.');
+  async fetch(
+    params: FetchUserPostsParams
+  ): Promise<PlatformPostPosted<any>[]> {
+    return [];
   }
 
   mirror(postsToMirror: AppPostMirror[]): Promise<PlatformPost<any>[]> {
-    throw new Error('Method not implemented.');
-  }
-  getSignupContext(
-    userId?: string | undefined,
-    params?: any
-  ): Promise<undefined> {
-    throw new Error('Method not implemented.');
-  }
-
-  handleSignupData(
-    signupData: undefined
-  ): Promise<UserDetailsBase<NanopubUserProfile, any, any>> {
     throw new Error('Method not implemented.');
   }
 }

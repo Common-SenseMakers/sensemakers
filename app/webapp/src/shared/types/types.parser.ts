@@ -1,4 +1,4 @@
-import { AppPost } from './types.posts';
+import { GenericPostData } from './types.posts';
 
 export enum PARSER_MODE {
   REF_LABELS = 'REF_LABELS',
@@ -11,7 +11,7 @@ export interface TopicsParams {
 }
 
 export interface ParsePostRequest<P> {
-  post: Omit<AppPost, 'mirrorsIds'>;
+  post: GenericPostData;
   params: Partial<Record<PARSER_MODE, P>>;
 }
 
