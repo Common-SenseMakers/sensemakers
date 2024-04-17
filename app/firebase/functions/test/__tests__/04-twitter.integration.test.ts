@@ -3,14 +3,14 @@ import { TwitterApi } from 'twitter-api-v2';
 
 import { PLATFORM } from '../../src/@shared/types/types';
 import {
-  TwitterAccountCredentials,
+  TestUserCredentials,
   authenticateTestUsers,
 } from '../utils/authenticate.users';
 import { getTestServices } from './test.services';
 
 const NUM_TWITTER_USERS = 1;
-const TEST_ACCOUNTS: TwitterAccountCredentials[] = JSON.parse(
-  process.env.TEST_USER_TWITTER_ACCOUNTS as string
+const TEST_ACCOUNTS: TestUserCredentials[] = JSON.parse(
+  process.env.TEST_USER_ACCOUNTS as string
 );
 
 /** skip for now as it will invalidate access tokens */
@@ -25,10 +25,14 @@ describe.skip('twitter integration', () => {
   }
 
   it(`authenticates ${NUM_TWITTER_USERS} twitter users with the oauth 2.0 flow for reading access`, async () => {
-    const appUsers = await authenticateTestUsers(
-      TEST_ACCOUNTS.slice(0, NUM_TWITTER_USERS),
-      services
+    const appUsers = await services.db.run((manager) =>
+      authenticateTestUsers(
+        TEST_ACCOUNTS.slice(0, NUM_TWITTER_USERS),
+        services,
+        manager
+      )
     );
+
     expect(appUsers).to.not.be.undefined;
     expect(appUsers.length).to.eq(NUM_TWITTER_USERS);
     for (const appUser of appUsers) {

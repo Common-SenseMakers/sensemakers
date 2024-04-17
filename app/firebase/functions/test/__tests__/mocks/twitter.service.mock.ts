@@ -28,10 +28,14 @@ type MockedType = Omit<TwitterService, 'fetchInternal'> & {
   fetchInternal: TwitterService['fetchInternal'];
 };
 
+/**
+ * TwitterService mock that publish and fetches posts without really
+ * hitting the API
+ */
 export const getTwitterMock = (twitterService: TwitterService) => {
   const Mocked = spy(twitterService) as unknown as MockedType;
 
-  when(Mocked.publish(anything())).thenCall(
+  when(Mocked.publish(anything(), anything())).thenCall(
     (postPublish: PlatformPostPublish<TwitterDraft>) => {
       const tweet: TweetV2SingleResult = {
         data: {
@@ -55,7 +59,7 @@ export const getTwitterMock = (twitterService: TwitterService) => {
     }
   );
 
-  when(Mocked.fetchInternal(anything(), anything())).thenCall(
+  when(Mocked.fetchInternal(anything(), anything(), anything())).thenCall(
     (params: TwitterQueryParameters, userDetails?: UserDetailsBase) => {
       return Array.from(state.tweets.values()).map((tweet) => tweet.data);
     }

@@ -1,3 +1,4 @@
+import { TransactionManager } from 'src/db/transaction.manager';
 import { Services } from 'src/instances/services';
 
 import { AppUser } from '../../src/@shared/types/types';
@@ -9,6 +10,7 @@ import { testUsers } from '../__tests__/setup';
  */
 export const createTestAppUsers = async (
   services: Services,
+  manager: TransactionManager,
   userIds?: string[]
 ): Promise<AppUser[]> => {
   /** if no specific users specified, create them all */
@@ -25,7 +27,7 @@ export const createTestAppUsers = async (
 
   await Promise.all(
     users.map((user) => {
-      return services.users.repo.createUser(user.userId, user);
+      return services.users.repo.createUser(user.userId, user, manager);
     })
   );
 

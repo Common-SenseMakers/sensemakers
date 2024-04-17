@@ -1,5 +1,4 @@
 import * as jwt from 'jsonwebtoken';
-import { IdentityServicesMap } from 'src/platforms/platforms.service';
 
 import {
   HandleSignupResult,
@@ -7,6 +6,8 @@ import {
   PLATFORM,
   UserWithId,
 } from '../@shared/types/types';
+import { TransactionManager } from '../db/transaction.manager';
+import { IdentityServicesMap } from '../platforms/platforms.service';
 import { UsersRepository } from './users.repository';
 import { getPrefixedUserId } from './users.utils';
 
@@ -41,11 +42,11 @@ export class UsersService {
    * If the user is not defined (first time), the details are stored on a temporary
    * collection and associated to a random signup_token
    */
-  public async getSignupContext(
+  public async getSignupContext<R = any>(
     platform: PLATFORM,
     userId?: string,
     params?: any
-  ) {
+  ): Promise<R> {
     const context = await this.getIdentityService(platform).getSignupContext(
       userId,
       params
@@ -59,10 +60,11 @@ export class UsersService {
    * a userId is provided the user must exist and a new platform is added to it,
    * otherewise a new user is created.
    */
-  public async handleSignup(
+  public async handleSignup<T = any>(
     platform: PLATFORM,
-    signupData: any,
-    _userId?: string // MUST be the authenticated userId
+    signupData: T,
+    manager: TransactionManager,
+    _userId?: string // MUST be the authenticated userId if provided
   ): Promise<HandleSignupResult | undefined> {
     /**
      * validate the signup data for this platform and convert it into
@@ -78,7 +80,8 @@ export class UsersService {
 
     const existingUserWithAccount = await this.repo.getUserWithPlatformAccount(
       platform,
-      authenticatedDetails.user_id
+      authenticatedDetails.user_id,
+      manager
     );
 
     if (_userId) {
@@ -120,7 +123,8 @@ export class UsersService {
         await this.repo.setPlatformDetails(
           _userId,
           platform,
-          authenticatedDetails
+          authenticatedDetails,
+          manager
         );
       }
     } else {
@@ -138,7 +142,8 @@ export class UsersService {
         await this.repo.setPlatformDetails(
           userId,
           platform,
-          authenticatedDetails
+          authenticatedDetails,
+          manager
         );
 
         return {
@@ -155,10 +160,14 @@ export class UsersService {
 
         const platformIds_property: keyof UserWithId = 'platformIds';
 
-        await this.repo.createUser(prefixed_user_id, {
-          [platformIds_property]: [prefixed_user_id],
-          [platform]: [authenticatedDetails],
-        });
+        await this.repo.createUser(
+          prefixed_user_id,
+          {
+            [platformIds_property]: [prefixed_user_id],
+            [platform]: [authenticatedDetails],
+          },
+          manager
+        );
 
         return {
           ourAccessToken: this.generateOurAccessToken({

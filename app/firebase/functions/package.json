@@ -1,7 +1,7 @@
 {
   "name": "functions",
   "scripts": {
-    "test": "NODE_ENV=test FIRESTORE_EMULATOR_HOST=localhost:8080 mocha -r ts-node/register 'test/__tests__/**/*.ts'",
+    "test": "NODE_ENV=test FIRESTORE_EMULATOR_HOST=localhost:8080 mocha --trace-uncaught -r ts-node/register 'test/__tests__/**/*.ts'",
     "lint": "eslint --ext .js,.ts .",
     "build": "tsc",
     "build:watch": "tsc --watch",
