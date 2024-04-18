@@ -2,10 +2,10 @@ import { Edit, Network } from 'grommet-icons';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { useAccountContext } from '../app/AccountContext';
-import { AppPlatformManager } from '../app/AppPlaformManager';
-import { AppBottomNav } from '../common/AppBottomNav';
-import { ViewportPage } from '../common/Viewport';
+import { AppPlatformManager } from '../_user/AppPlaformManager';
+import { useAccountContext } from '../_user/contexts/AccountContext';
+import { AppBottomNav } from '../app/layout/AppBottomNav';
+import { ViewportPage } from '../app/layout/Viewport';
 import { AbsoluteRoutes } from '../route.names';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';

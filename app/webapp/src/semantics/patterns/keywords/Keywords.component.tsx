@@ -2,12 +2,12 @@ import { Box } from 'grommet';
 import { DataFactory } from 'n3';
 import { useMemo } from 'react';
 
-import { THIS_POST_NAME } from '../../../app/config';
 import {
   filterStore,
   mapStoreElements,
   writeRDF,
 } from '../../../shared/utils/n3.utils';
+import { THIS_POST_NAME } from '../../../shared/utils/semantics.helper';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { useThemeContext } from '../../../ui-components/ThemedApp';
 import { useSemanticsStore } from '../common/use.semantics';

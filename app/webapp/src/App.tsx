@@ -1,15 +1,15 @@
 import { I18nextProvider } from 'react-i18next';
 import { BrowserRouter } from 'react-router-dom';
 
-import { AccountContext } from './app/AccountContext';
+import { AccountContext } from './_user/contexts/AccountContext';
+import { DisconnectContext } from './_user/contexts/DisconnectContext';
+import { NanopubContext } from './_user/contexts/platforms/NanopubContext';
+import { TwitterContext } from './_user/contexts/platforms/TwitterContext';
+import { ConnectedWallet } from './_user/contexts/signer/ConnectedWalletContext';
+import { SignerContext } from './_user/contexts/signer/SignerContext';
 import { AppContainer } from './app/AppContainer';
-import { DisconnectContext } from './app/DisconnectContext';
-import { GlobalStyles } from './common/GlobalStyles';
+import { GlobalStyles } from './app/layout/GlobalStyles';
 import { i18n } from './i18n/i18n';
-import { NanopubContext } from './platforms/NanopubContext';
-import { TwitterContext } from './platforms/TwitterContext';
-import { ConnectedWallet } from './signer/ConnectedWalletContext';
-import { SignerContext } from './signer/SignerContext';
 import { ResponsiveApp } from './ui-components/ResponsiveApp';
 import { ThemedApp } from './ui-components/ThemedApp';
 
