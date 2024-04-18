@@ -135,10 +135,10 @@ def calculate_feed_score(df,name:str):
     try:
         y_pred, y_true, labels = binarize(y_pred=y_pred,y_true=y_true)
         precision, recall, f1_score, accuracy = calculate_scores(y_pred=y_pred,y_true=y_true)
-        return pd.Series([precision, recall, f1_score, accuracy,n], index=["precision", "recall", "f1_score", "accuracy","toots number"])
+        return pd.Series([precision, recall, f1_score, accuracy,n], index=["precision", "recall", "f1_score", "accuracy","posts count"])
     except Exception as e:
         print(f"exception was raised: {e}")
-        return pd.Series([0, 0, 0, 0, n], index=["precision", "recall", "f1_score", "accuracy","toots number"])
+        return pd.Series([0, 0, 0, 0, n], index=["precision", "recall", "f1_score", "accuracy","posts count"])
 
 def weighted_average(column_name:str,df):
     return (df[column_name] * df['posts count']).sum() / df['posts count'].sum()
@@ -147,18 +147,15 @@ def weighted_average(column_name:str,df):
 def constr_feed_chart(df,df_handles):
     # init the table to scores per feed
     # Extract usernames and server names into separate columns TODO create an artifact that holds this file
-    df_handles['username'] = df_handles['accts'].apply(lambda x: x.split('@')[1])
-    df_handles['server'] = df_handles['accts'].apply(lambda x: x.split('@')[2])
+    #df_handles['username'] = df_handles['accts'].apply(lambda x: x.split('@')[1])
+    #df_handles['server'] = df_handles['accts'].apply(lambda x: x.split('@')[2])
     df_feed_eval = df_handles[["username","server","info"]]
-    print(" 2 test")
     for column in ["precision", "recall", "f1_score", "accuracy","posts count"]:
         df_feed_eval[column] = 0
     # calculate scores per each dataframe reduced to a handle
     print("Calculating df_feed_eval")
     df_feed_eval[["precision","recall","f1_score","accuracy","posts count"]] = df_feed_eval.apply(lambda row: calculate_feed_score(df=df,name=row["username"]),axis=1)
-    print(" 3 test")
     average_row = [weighted_average(column_name = x,df = df_feed_eval) for x in ["precision", "recall", "f1_score", "accuracy"]]
-    print(" 4 test")
     average_row.append(df_feed_eval["posts count"].sum())
 
     new_row = ["Average","",""] + average_row
@@ -185,7 +182,7 @@ if __name__ == "__main__":
     api = wandb.Api()
 
     #TODO move from testing
-    run = wandb.init(project="filter_evaluation", job_type="evaluation")
+    run = wandb.init(project="testing", job_type="evaluation")
 
     # get artifact path
     if dataset_path:
@@ -215,7 +212,7 @@ if __name__ == "__main__":
 
     # return the pd df from the table
     #remember to remove the head TODO
-    df = get_dataset(table_path)
+    df = get_dataset(table_path).head(3)
     #print(df.columns)
 
      # get handle file name
