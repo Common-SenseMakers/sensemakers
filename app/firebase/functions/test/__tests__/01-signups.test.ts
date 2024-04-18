@@ -7,7 +7,7 @@ import {
   NanupubSignupData,
 } from '../../src/@shared/types/types.nanopubs';
 import { cleanPrivateKey } from '../../src/@shared/utils/semantics.helper';
-import { resetDB } from '../__tests_support__/db';
+import { resetDB } from '../utils/db';
 import { getNanopubProfile } from '../utils/nanopub.profile';
 import { getTestServices } from './test.services';
 
