@@ -14,7 +14,7 @@ import { createTestAppUsers } from '../utils/user.factory';
 import { MOCK_TWITTER } from './setup';
 import { getTestServices } from './test.services';
 
-describe.only('03-process', () => {
+describe('03-process', () => {
   const services = getTestServices();
 
   before(async () => {
