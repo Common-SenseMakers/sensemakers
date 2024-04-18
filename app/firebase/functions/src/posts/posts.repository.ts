@@ -15,19 +15,18 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   }
 
   public async updateContent(
+    postId: string,
     postUpdate: PostUpdate,
-    manager: TransactionManager
+    manager: TransactionManager,
+    checkExists = false
   ) {
-    const doc = await this.getDoc(postUpdate.id, manager);
-    if (!doc.exists) throw new Error(`Post ${postUpdate.id} not found`);
+    if (checkExists) {
+      const doc = await this.getDoc(postId, manager);
+      if (!doc.exists) throw new Error(`Post ${postId} not found`);
+    }
 
-    const post = doc.data() as AppPost;
-
-    /** for safety support only some properties update */
-    post.content = postUpdate.content;
-    post.semantics = postUpdate.semantics;
-
-    await manager.set(doc.ref, post, { merge: true });
+    const ref = this.getRef(postId);
+    manager.update(ref, postUpdate);
   }
 
   public async addMirror(
@@ -36,8 +35,6 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     manager: TransactionManager
   ) {
     const ref = this.getRef(postId);
-
-    /** for safety support only some properties update */
     manager.update(ref, { mirrorsIds: FieldValue.arrayUnion(mirrorId) });
   }
 

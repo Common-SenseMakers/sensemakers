@@ -106,6 +106,9 @@ describe('03-process', () => {
       expect(postRead).to.not.be.undefined;
       expect(postRead.mirrors).to.have.length(2);
 
+      expect(postRead.semantics).to.not.be.undefined;
+      expect(postRead.originalParsed).to.not.be.undefined;
+
       const tweetRead = postRead.mirrors.find(
         (m) => m.platformId === PLATFORM.Twitter
       );
@@ -168,9 +171,11 @@ describe('03-process', () => {
         appUser.userId
       );
 
-      /** aprove */
-
       expect(pendingPosts).to.have.length(1);
+
+      /** aprove */
+      // const pendingPost = pendingPosts[0];
+      // await services.postsManager.approvePost(pendingPost);
     });
   });
 });

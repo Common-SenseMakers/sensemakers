@@ -1,14 +1,13 @@
-import { PlatformPostsRepository } from 'src/posts/platform.posts.repository';
-import { PostsProcessing } from 'src/posts/posts.processing';
-
 import { PLATFORM } from '../@shared/types/types';
 import {
+  FUNCTIONS_PY_URL,
   OUR_EXPIRES_IN,
   OUR_TOKEN_SECRET,
   TWITTER_CLIENT_ID,
   TWITTER_CLIENT_SECRET,
 } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
+import { ParserService } from '../parser/parser.service';
 // import { ParserService } from '../parser/parser.service';
 import { OrcidService } from '../platforms/orcid/orcid.service';
 import {
@@ -17,7 +16,9 @@ import {
   PlatformsService,
 } from '../platforms/platforms.service';
 import { TwitterService } from '../platforms/twitter/twitter.service';
+import { PlatformPostsRepository } from '../posts/platform.posts.repository';
 import { PostsManager } from '../posts/posts.manager';
+import { PostsProcessing } from '../posts/posts.processing';
 import { PostsRepository } from '../posts/posts.repository';
 import { TimeService } from '../time/time.service';
 import { UsersRepository } from '../users/users.repository';
@@ -64,7 +65,7 @@ export const createServices = () => {
   const platformsService = new PlatformsService(platformsMap);
 
   /** parser service */
-  // const parserService = new ParserService(FUNCTIONS_PY_URL);
+  const parser = new ParserService(FUNCTIONS_PY_URL);
 
   /** posts service */
   const postsProcessing = new PostsProcessing(
@@ -78,7 +79,8 @@ export const createServices = () => {
     db,
     usersService,
     postsProcessing,
-    platformsService
+    platformsService,
+    parser
   );
 
   /** all services */

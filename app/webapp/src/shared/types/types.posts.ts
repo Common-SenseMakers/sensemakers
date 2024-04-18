@@ -53,7 +53,7 @@ export interface AppPostMirror {
  * PostUpdate
  */
 export interface PostUpdate {
-  id: string;
   content: string;
   semantics: string;
+  originalParsed?: ParsePostResult;
 }
