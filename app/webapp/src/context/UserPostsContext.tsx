@@ -8,11 +8,11 @@ interface PostContextType {
   posts: PostState;
   dispatch: React.Dispatch<PostAction>;
 }
-const PostContext = createContext<PostContextType | undefined>(undefined);
+const UserPostsContext = createContext<PostContextType | undefined>(undefined);
 
-export { PostContext };
+export { UserPostsContext };
 
-const PostProvider: React.FC<{ children: React.ReactNode }> = ({
+const UserPostsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [posts, dispatch] = useReducer(postReducer, []);
@@ -24,17 +24,17 @@ const PostProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   return (
-    <PostContext.Provider value={{ posts, dispatch }}>
+    <UserPostsContext.Provider value={{ posts, dispatch }}>
       {children}
-    </PostContext.Provider>
+    </UserPostsContext.Provider>
   );
 };
-export const usePosts = () => {
-  const context = useContext(PostContext);
+export const useUserPosts = () => {
+  const context = useContext(UserPostsContext);
   if (!context) {
     throw new Error('usePosts must be used within a PostProvider');
   }
   return context;
 };
 
-export default PostProvider;
+export default UserPostsProvider;
