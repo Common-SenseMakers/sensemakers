@@ -17,7 +17,7 @@ export const createNanopublication = async (
 ) => {
   const semantics = post.semantics;
   const content = post.content;
-  const orcid = user.orcid && user.orcid[0].user_id;
+  const orcid = '0000-0000-0000-0000';
 
   /** Then get the RDF as triplets */
   const assertionsStore = await (async () => {

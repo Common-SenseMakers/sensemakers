@@ -154,9 +154,9 @@ export class PostsManager {
     }
 
     const update: PostUpdate = {
-      content: post.content,
       semantics: parserResult.semantics,
       originalParsed: parserResult,
+      parseStatus: 'processed',
     };
 
     await this.processing.posts.updateContent(post.id, update, manager);

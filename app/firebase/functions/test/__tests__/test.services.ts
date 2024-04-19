@@ -23,6 +23,14 @@ import { UsersService } from '../../src/users/users.service';
 import { getTwitterMock } from './mocks/twitter.service.mock';
 import { MOCK_TWITTER } from './setup';
 
+export const MOCKED_SEMANTICS =
+  '<http://example.org/mosquito> <http://example.org/transmits> <http://example.org/malaria> .';
+
+export const MOCKED_PARSER_RESULT: ParsePostResult = {
+  post: 'test',
+  semantics: MOCKED_SEMANTICS,
+};
+
 export const getTestServices = () => {
   const mandatory = ['TWITTER_CLIENT_ID', 'TWITTER_CLIENT_SECRET'];
 
@@ -91,10 +99,7 @@ export const getTestServices = () => {
 
   const MockedParser = spy(parserService);
 
-  const mockedResult: ParsePostResult = {
-    post: 'test',
-    semantics: '<semantics>',
-  };
+  const mockedResult: ParsePostResult = MOCKED_PARSER_RESULT;
 
   when(MockedParser.parsePosts(anything())).thenResolve(mockedResult);
   const mockedParser = instance(MockedParser);
