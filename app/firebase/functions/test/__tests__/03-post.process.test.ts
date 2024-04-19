@@ -21,7 +21,7 @@ import {
   getTestServices,
 } from './test.services';
 
-describe.only('03-process', () => {
+describe('03-process', () => {
   let rsaKeys: RSAKeys | undefined;
   const services = getTestServices();
 

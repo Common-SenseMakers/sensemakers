@@ -10,6 +10,7 @@ import {
   TwitterDraft,
   TwitterQueryParameters,
 } from '../../../src/@shared/types/types.twitter';
+import { logger } from '../../../src/instances/logger';
 import { TwitterService } from '../../../src/platforms/twitter/twitter.service';
 import { dateStrToTimestampMs } from '../../../src/platforms/twitter/twitter.utils';
 
@@ -37,6 +38,8 @@ export const getTwitterMock = (twitterService: TwitterService) => {
 
   when(Mocked.publish(anything(), anything())).thenCall(
     (postPublish: PlatformPostPublish<TwitterDraft>) => {
+      logger.warn(`called twitter publish mock`, postPublish);
+
       const tweet: TweetV2SingleResult = {
         data: {
           id: (state.latestId++).toString(),
