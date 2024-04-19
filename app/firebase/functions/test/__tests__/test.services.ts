@@ -1,8 +1,10 @@
-import { spy, when } from 'ts-mockito';
+import { anything, instance, spy, when } from 'ts-mockito';
 
 import { PLATFORM } from '../../src/@shared/types/types';
+import { ParsePostResult } from '../../src/@shared/types/types.parser';
 import { DBInstance } from '../../src/db/instance';
 import { Services } from '../../src/instances/services';
+import { ParserService } from '../../src/parser/parser.service';
 import { NanopubService } from '../../src/platforms/nanopub/nanopub.service';
 import { OrcidService } from '../../src/platforms/orcid/orcid.service';
 import {
@@ -20,6 +22,14 @@ import { UsersRepository } from '../../src/users/users.repository';
 import { UsersService } from '../../src/users/users.service';
 import { getTwitterMock } from './mocks/twitter.service.mock';
 import { MOCK_TWITTER } from './setup';
+
+export const MOCKED_SEMANTICS =
+  '<http://example.org/mosquito> <http://example.org/transmits> <http://example.org/malaria> .';
+
+export const MOCKED_PARSER_RESULT: ParsePostResult = {
+  post: 'test',
+  semantics: MOCKED_SEMANTICS,
+};
 
 export const getTestServices = () => {
   const mandatory = ['TWITTER_CLIENT_ID', 'TWITTER_CLIENT_SECRET'];
@@ -85,18 +95,14 @@ export const getTestServices = () => {
   const platformsService = new PlatformsService(platformsMap);
 
   /** parser service */
-  // const parserService = new ParserService(process.env.PARSER_API_URL as string);
+  const parserService = new ParserService(process.env.PARSER_API_URL as string);
 
-  // const MockedParser = spy(parserService);
+  const MockedParser = spy(parserService);
 
-  // const mockedResult: ParsePostResult[] = [
-  //   {
-  //     post: 'test',
-  //     semantics: '<semantics>',
-  //   },
-  // ];
-  // when(MockedParser.parsePosts(anything())).thenResolve(mockedResult);
-  // const mockedParser = instance(MockedParser);
+  const mockedResult: ParsePostResult = MOCKED_PARSER_RESULT;
+
+  when(MockedParser.parsePosts(anything())).thenResolve(mockedResult);
+  const mockedParser = instance(MockedParser);
 
   /** posts service */
   const postsProcessing = new PostsProcessing(
@@ -110,7 +116,8 @@ export const getTestServices = () => {
     db,
     usersService,
     postsProcessing,
-    platformsService
+    platformsService,
+    mockedParser
   );
 
   const services: Services = {

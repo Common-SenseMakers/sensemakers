@@ -116,6 +116,7 @@ export class PostsProcessing {
     manager: TransactionManager
   ) {
     const appPostFull = await this.getPostFull(postId, manager, true);
+
     const user = await this.users.repo.getUser(
       appPostFull.authorId,
       manager,

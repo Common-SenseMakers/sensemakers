@@ -8,8 +8,8 @@ export class ParserService {
   constructor(protected url: string) {}
 
   async parsePosts<P>(
-    posts: ParsePostRequest<P>[]
-  ): Promise<ParsePostResult[] | undefined> {
+    posts: ParsePostRequest<P>
+  ): Promise<ParsePostResult | undefined> {
     const response = await fetch(`${this.url}/SM_FUNCTION_post_parser`, {
       headers: [
         ['Accept', 'application/json'],
@@ -22,7 +22,7 @@ export class ParserService {
     try {
       const body = await response.json();
       logger.debug('getPostSemantics', body);
-      return body as ParsePostResult[];
+      return body as ParsePostResult;
     } catch (e) {
       logger.error(`error: ${JSON.stringify(e)}`);
       logger.error(

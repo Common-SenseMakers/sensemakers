@@ -12,9 +12,13 @@ import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { resetDB } from '../utils/db';
 import { createTestAppUsers } from '../utils/user.factory';
 import { MOCK_TWITTER } from './setup';
-import { getTestServices } from './test.services';
+import {
+  MOCKED_PARSER_RESULT,
+  MOCKED_SEMANTICS,
+  getTestServices,
+} from './test.services';
 
-describe('03-process', () => {
+describe.only('03-process', () => {
   const services = getTestServices();
 
   before(async () => {
@@ -106,6 +110,9 @@ describe('03-process', () => {
       expect(postRead).to.not.be.undefined;
       expect(postRead.mirrors).to.have.length(2);
 
+      expect(postRead.semantics).to.not.be.undefined;
+      expect(postRead.originalParsed).to.not.be.undefined;
+
       const tweetRead = postRead.mirrors.find(
         (m) => m.platformId === PLATFORM.Twitter
       );
@@ -133,10 +140,12 @@ describe('03-process', () => {
         id: postRead.id,
         authorId: appUser.userId,
         origin: PLATFORM.Twitter,
-        parseStatus: 'unprocessed',
+        parseStatus: 'processed',
         content,
         mirrorsIds: [tweetRead.id, nanopubRead.id],
         reviewedStatus: 'pending',
+        semantics: MOCKED_SEMANTICS,
+        originalParsed: MOCKED_PARSER_RESULT,
       };
 
       const refTweet: PlatformPost = {
@@ -168,9 +177,11 @@ describe('03-process', () => {
         appUser.userId
       );
 
-      /** aprove */
-
       expect(pendingPosts).to.have.length(1);
+
+      /** aprove */
+      // const pendingPost = pendingPosts[0];
+      // await services.postsManager.approvePost(pendingPost);
     });
   });
 });
