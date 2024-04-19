@@ -1,4 +1,3 @@
-import { Nanopub, NpProfile } from '@nanopub/sign';
 import { expect } from 'chai';
 import { PlatformPostDraft } from 'src/@shared/types/types.platform.posts';
 
@@ -6,11 +5,10 @@ import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
 import { AppPostFull } from '../../src/@shared/types/types.posts';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
-import { cleanPrivateKey } from '../../src/@shared/utils/semantics.helper';
 import { logger } from '../../src/instances/logger';
+import { signNanopublication } from '../../src/platforms/nanopub/sign.util';
 import { FetchUserPostsParams } from '../../src/platforms/platforms.interface';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
-import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
 import { createTestAppUsers } from '../utils/user.factory';
 import { getTestServices } from './test.services';
@@ -190,41 +188,21 @@ describe('02-platforms', () => {
           throw new Error('Post not created');
         }
 
-        const nanopubObj = new Nanopub(nanopub.post);
-
-        const nanopubAccount = UsersHelper.getAccount(
-          users[0],
-          PLATFORM.Nanopub,
-          undefined,
-          true
-        );
-
-        if (!nanopubAccount.profile?.introNanopub) {
-          throw new Error('User does not have an introduction nanopub URI');
-        }
-
         if (!rsaKeys) {
-          throw new Error('RSA keys not found');
+          throw new Error('RSA keys not created');
         }
 
-        const keyBody = cleanPrivateKey(rsaKeys);
-
-        const profile = new NpProfile(
-          keyBody,
-          '',
-          '',
-          nanopubAccount.profile.introNanopub
-        );
-
-        const signed = nanopubObj.sign(profile);
-
+        const signed = await signNanopublication(nanopub.post, rsaKeys, '');
         expect(signed).to.not.be.undefined;
 
         const published = await services.db.run((manager) =>
           nanopubService.publish(
             {
               draft: signed.rdf(),
-              userDetails: nanopubAccount,
+              userDetails: {
+                signupDate: 0,
+                user_id: '123456',
+              },
             },
             manager
           )

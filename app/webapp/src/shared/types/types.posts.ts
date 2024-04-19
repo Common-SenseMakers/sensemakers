@@ -53,5 +53,12 @@ export interface AppPostMirror {
  * PostUpdate
  */
 export type PostUpdate = Partial<
-  Pick<AppPost, 'content' | 'semantics' | 'originalParsed' | 'parseStatus'>
+  Pick<
+    AppPost,
+    | 'content'
+    | 'semantics'
+    | 'originalParsed'
+    | 'parseStatus'
+    | 'reviewedStatus'
+  >
 >;
