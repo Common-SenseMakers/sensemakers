@@ -32,7 +32,7 @@ describe('03-process', () => {
 
   describe('create and process', () => {
     let appUser: AppUser | undefined;
-    let content = `This is a test post ${Date.now()}`;
+    let TEST_CONTENT = `This is a test post ${Date.now()}`;
     let tweet: PlatformPostPosted<TweetV2SingleResult>;
 
     before(async () => {
@@ -74,7 +74,7 @@ describe('03-process', () => {
           .get<TwitterService>(PLATFORM.Twitter)
           .publish(
             {
-              draft: { text: content },
+              draft: { text: TEST_CONTENT },
               userDetails: account,
             },
             manager
@@ -110,6 +110,7 @@ describe('03-process', () => {
       );
 
       expect(postsRead).to.not.be.undefined;
+      expect(postsRead).to.have.length(1);
 
       const postRead = postsRead[0];
       expect(postRead).to.not.be.undefined;
@@ -147,7 +148,7 @@ describe('03-process', () => {
         origin: PLATFORM.Twitter,
         reviewedStatus: 'pending',
         parseStatus: 'processed',
-        content,
+        content: TEST_CONTENT,
         mirrorsIds: [tweetRead.id, nanopubRead.id],
         semantics: MOCKED_SEMANTICS,
         originalParsed: MOCKED_PARSER_RESULT,

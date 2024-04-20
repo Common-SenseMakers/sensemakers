@@ -14,8 +14,9 @@ import { createTestAppUsers } from '../utils/user.factory';
 import { getTestServices } from './test.services';
 
 describe('02-platforms', () => {
-  let users: AppUser[] = [];
   let rsaKeys: RSAKeys | undefined;
+  let appUser: AppUser | undefined;
+
   const services = getTestServices();
 
   before(async () => {
@@ -24,46 +25,13 @@ describe('02-platforms', () => {
 
     rsaKeys = getRSAKeys('');
 
-    users.push({
-      userId: 'twitter:123456',
-      platformIds: ['twitter:123456'],
-      twitter: [
-        {
-          user_id: '123456',
-          signupDate: 1708560000000,
-          read: {
-            accessToken: '',
-            refreshToken: '',
-            expiresAtMs: 0,
-            expiresIn: 0,
-            lastFetchedMs: 0,
-          },
-        },
-      ],
-      nanopub: [
-        {
-          user_id: '123456',
-          signupDate: 1708560000000,
-          profile: {
-            introNanopub: 'https://nanopub.org/np/123456',
-            ethAddress: '0x123456',
-            rsaPublickey: 'publickey',
-          },
-        },
-      ],
-    });
+    const users = await services.db.run((manager) =>
+      createTestAppUsers(services, manager)
+    );
+    appUser = users[0];
   });
 
   describe('twitter', () => {
-    let appUser: AppUser | undefined;
-
-    before(async () => {
-      const users = await services.db.run((manager) =>
-        createTestAppUsers(services, manager)
-      );
-      appUser = users[0];
-    });
-
     it("get's all tweets in a time range using pagination", async () => {
       if (!appUser) {
         throw new Error('appUser not created');
@@ -78,8 +46,7 @@ describe('02-platforms', () => {
         throw new Error('Unexpected');
       }
       try {
-        const user = users[0];
-        const twitter = user[PLATFORM.Twitter];
+        const twitter = appUser[PLATFORM.Twitter];
 
         if (!twitter) {
           throw new Error('User does not have Twitter credentials');
@@ -99,7 +66,7 @@ describe('02-platforms', () => {
         );
 
         expect(tweets).to.not.be.undefined;
-        expect(tweets.length).to.be.equal(0);
+        expect(tweets.length).to.be.equal(11);
       } catch (error) {
         console.error('error: ', error);
         throw error;
@@ -158,10 +125,14 @@ describe('02-platforms', () => {
     it('creates a draft nanopub', async () => {
       const nanopubService = services.platforms.get(PLATFORM.Nanopub);
 
+      if (!appUser) {
+        throw new Error('appUser not created');
+      }
+
       try {
         const post: AppPostFull = {
           id: 'test-id',
-          authorId: users[0].userId,
+          authorId: appUser.userId,
           content: 'test content',
           semantics: '',
           origin: PLATFORM.Twitter,
@@ -172,7 +143,7 @@ describe('02-platforms', () => {
 
         nanopub = await nanopubService.convertFromGeneric({
           post,
-          author: users[0],
+          author: appUser,
         });
       } catch (error) {
         console.error('error: ', error);
