@@ -2,6 +2,7 @@ import { DefinedIfTrue } from '../@shared/types/types';
 import {
   PlatformPost,
   PlatformPostCreate,
+  PlatformPostUpdatePosted,
 } from '../@shared/types/types.platform.posts';
 import { DBInstance } from '../db/instance';
 import { BaseRepository } from '../db/repo.base';
@@ -13,6 +14,21 @@ export class PlatformPostsRepository extends BaseRepository<
 > {
   constructor(protected db: DBInstance) {
     super(db.collections.platformPosts);
+  }
+
+  public async updatePosted(
+    postId: string,
+    postUpdate: PlatformPostUpdatePosted,
+    manager: TransactionManager,
+    checkExists = false
+  ) {
+    if (checkExists) {
+      const doc = await this.getDoc(postId, manager);
+      if (!doc.exists) throw new Error(`Post ${postId} not found`);
+    }
+
+    const ref = this.getRef(postId);
+    manager.update(ref, postUpdate);
   }
 
   /** Get the platform post from the published post_id */

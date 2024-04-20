@@ -144,7 +144,7 @@ export class PostsProcessing {
               draft: {
                 postApproval: 'pending',
                 user_id: account.user_id,
-                post: draftPost,
+                post: draftPost.post,
               },
             };
 

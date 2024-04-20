@@ -45,9 +45,7 @@ export class PostsManager {
 
   /**
    * Fetch and store platform posts of one user
-   * as one Transaction. It doesn't return anything
-   * Could be modified to return the PlatformPosts fetched,
-   * and the corresponding AppPosts and Drafts
+   * as one Transaction. It doesn't return anything.
    * */
   async fetchUser(user: AppUser) {
     /** Call fetch for each platform */
@@ -160,5 +158,79 @@ export class PostsManager {
     };
 
     await this.processing.posts.updateContent(post.id, update, manager);
+  }
+
+  /**
+   * Approving a post receives an AppPostFull.
+   * - The content and the semantics might have changed.
+   * - The draft value on the mirrors array might have changed.
+   *
+   * userId must be the authenticated user to prevent posting on
+   * behalf of others.
+   */
+  async approvePost(post: AppPostFull, userId: string) {
+    await this.db.run(async (manager) => {
+      const user = await this.users.repo.getUser(userId, manager, true);
+      const existing = await this.processing.posts.get(post.id, manager, true);
+      if (!existing) {
+        throw new Error(`Post not found: ${post.id}`);
+      }
+
+      /** force status transition */
+      await this.processing.posts.updateContent(
+        post.id,
+        {
+          reviewedStatus: 'reviewed',
+        },
+        manager
+      );
+
+      /** check if content or semantics changed (other changes are not expected and omited) */
+      if (
+        existing.content !== post.content ||
+        existing.semantics !== post.semantics
+      ) {
+        await this.processing.posts.updateContent(
+          post.id,
+          {
+            reviewedStatus: 'reviewed',
+            content: post.content,
+            semantics: post.semantics,
+          },
+          manager
+        );
+      }
+
+      /** publish approved drafts */
+      await Promise.all(
+        post.mirrors.map(async (mirror) => {
+          if (mirror.draft && mirror.draft.postApproval === 'approved') {
+            const account = UsersHelper.getAccount(
+              user,
+              mirror.platformId,
+              mirror.draft.user_id,
+              true
+            );
+
+            const posted = await this.platforms
+              .get(mirror.platformId)
+              .publish(
+                { draft: mirror.draft.post, userDetails: account },
+                manager
+              );
+
+            await this.processing.platformPosts.updatePosted(
+              mirror.id,
+              {
+                posted: posted,
+                publishOrigin: 'posted',
+                publishStatus: 'published',
+              },
+              manager
+            );
+          }
+        })
+      );
+    });
   }
 }

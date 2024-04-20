@@ -2,12 +2,15 @@ import { expect } from 'chai';
 import { TweetV2SingleResult } from 'twitter-api-v2';
 
 import { AppUser, PLATFORM } from '../../src/@shared/types/types';
+import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
 import {
   PlatformPost,
   PlatformPostPosted,
 } from '../../src/@shared/types/types.platform.posts';
 import { AppPost } from '../../src/@shared/types/types.posts';
+import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { logger } from '../../src/instances/logger';
+import { signNanopublication } from '../../src/platforms/nanopub/sign.util';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { resetDB } from '../utils/db';
 import { createTestAppUsers } from '../utils/user.factory';
@@ -18,7 +21,8 @@ import {
   getTestServices,
 } from './test.services';
 
-describe.only('03-process', () => {
+describe('03-process', () => {
+  let rsaKeys: RSAKeys | undefined;
   const services = getTestServices();
 
   before(async () => {
@@ -28,13 +32,14 @@ describe.only('03-process', () => {
 
   describe('create and process', () => {
     let appUser: AppUser | undefined;
-    let content = `This is a test post ${Date.now()}`;
+    let TEST_CONTENT = `This is a test post ${Date.now()}`;
     let tweet: PlatformPostPosted<TweetV2SingleResult>;
 
     before(async () => {
       await services.db.run(async (manager) => {
         const users = await createTestAppUsers(services, manager);
         appUser = users[0];
+        rsaKeys = getRSAKeys('');
       });
     });
 
@@ -69,7 +74,7 @@ describe.only('03-process', () => {
           .get<TwitterService>(PLATFORM.Twitter)
           .publish(
             {
-              draft: { text: content },
+              draft: { text: TEST_CONTENT },
               userDetails: account,
             },
             manager
@@ -105,6 +110,7 @@ describe.only('03-process', () => {
       );
 
       expect(postsRead).to.not.be.undefined;
+      expect(postsRead).to.have.length(1);
 
       const postRead = postsRead[0];
       expect(postRead).to.not.be.undefined;
@@ -140,10 +146,10 @@ describe.only('03-process', () => {
         id: postRead.id,
         authorId: appUser.userId,
         origin: PLATFORM.Twitter,
-        parseStatus: 'processed',
-        content,
-        mirrorsIds: [tweetRead.id, nanopubRead.id],
         reviewedStatus: 'pending',
+        parseStatus: 'processed',
+        content: TEST_CONTENT,
+        mirrorsIds: [tweetRead.id, nanopubRead.id],
         semantics: MOCKED_SEMANTICS,
         originalParsed: MOCKED_PARSER_RESULT,
       };
@@ -178,10 +184,36 @@ describe.only('03-process', () => {
       );
 
       expect(pendingPosts).to.have.length(1);
+      const pendingPost = pendingPosts[0];
+      const nanopub = pendingPost.mirrors.find(
+        (m) => m.platformId === PLATFORM.Nanopub
+      );
 
-      /** aprove */
-      // const pendingPost = pendingPosts[0];
-      // await services.postsManager.approvePost(pendingPost);
+      if (!nanopub?.draft) {
+        throw new Error('draft not created');
+      }
+
+      const draft = nanopub.draft.post;
+
+      if (!rsaKeys) {
+        throw new Error('draft not created');
+      }
+
+      /** sign */
+      const signed = await signNanopublication(draft, rsaKeys, '');
+      nanopub.draft.post = signed.rdf();
+      nanopub.draft.postApproval = 'approved';
+
+      /** send updated post (content and semantics did not changed) */
+      await services.postsManager.approvePost(pendingPost, appUser.userId);
+
+      const approved = await services.postsManager.getPost(
+        pendingPost.id,
+        true
+      );
+
+      expect(approved).to.not.be.undefined;
+      expect(approved.reviewedStatus).to.equal('reviewed');
     });
   });
 });
