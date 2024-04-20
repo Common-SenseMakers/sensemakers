@@ -8,7 +8,6 @@ import {
   authenticateTestUser,
 } from '../utils/authenticate.users';
 import { resetDB } from '../utils/db';
-import { LocalLogger, LogLevel } from '../utils/test.logger';
 import { getTestServices } from './test.services';
 
 export const LOG_LEVEL_MSG = envDeploy.LOG_LEVEL_MSG.value();
@@ -23,12 +22,6 @@ export type InjectableContext = Readonly<{
   // properties injected using the Root Mocha Hooks
 }>;
 export let testUsers: Map<string, AppUser> = new Map();
-
-(global as any).logger = new LocalLogger(
-  (LOG_LEVEL_MSG as LogLevel) || LogLevel.warn,
-  (LOG_LEVEL_OBJ as LogLevel) || LogLevel.warn,
-  ['Testing authorization']
-);
 
 // TestContext will be used by all the test
 export type TestContext = Mocha.Context & Context;
