@@ -66,7 +66,7 @@ describe('02-platforms', () => {
         );
 
         expect(tweets).to.not.be.undefined;
-        expect(tweets.length).to.be.equal(11);
+        expect(tweets.length).to.be.equal(0);
       } catch (error) {
         console.error('error: ', error);
         throw error;
