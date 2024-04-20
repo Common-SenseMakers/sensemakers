@@ -81,7 +81,7 @@ def convert_post_json_to_ref_post(post_json: dict) -> RefPost:
     text = convert_html_to_plain_text(post_json["content"])
     post_json["plain_content"] = text
     url = post_json["url"]
-    
+
     # convert time to datetime format if necessary
     if type(post_json["created_at"]) == datetime:
         created_at = post_json["created_at"]
@@ -99,6 +99,8 @@ def convert_post_json_to_ref_post(post_json: dict) -> RefPost:
         source_network="mastodon",
         metadata=post_json,
         ref_urls=ext_ref_urls,
+        is_reply=post_json["in_reply_to_id"] is not None,
+        is_repost=post_json["reblog"] is not None,
     )
 
     return post

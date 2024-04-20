@@ -5,7 +5,8 @@ from dataclasses import dataclass
 
 # import pydantic as pyd
 from confection import Config
-from .shared_functions.init import ParserInitConfig, init_multi_stage_parser_config
+
+# from .init import ParserInitConfig, init_multi_stage_parser_config
 
 load_dotenv()
 
@@ -56,7 +57,10 @@ def init_config(
     return config
 
 
-def default_init_parser_config():
+def default_init_parser_config(
+    semantics_model="openai/gpt-4",
+    kw_model="openai/gpt-4",
+):
     params = {
         "wandb_project": environ["WANDB_PROJECT"],
         "openai_api_key": environ["OPENROUTER_API_KEY"],
@@ -66,6 +70,11 @@ def default_init_parser_config():
     config = ParserInitConfig(**params)
 
     full_config = init_multi_stage_parser_config(config)
+
+    # TODO hacky - replace with updated config
+    full_config["model"]["model_name"] = semantics_model
+    full_config["keyword_extraction"]["model"]["model_name"] = kw_model
+
     return full_config
 
 

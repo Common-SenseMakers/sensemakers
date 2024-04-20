@@ -24,7 +24,7 @@ from confection import Config
 sys.path.append(str(Path(__file__).parents[2]))
 
 from desci_sense.shared_functions.schema.post import RefPost
-from desci_sense.shared_functions.web_extractors.metadata_extractors import (
+from nlp.desci_sense.shared_functions.configs import (
     MetadataExtractionType,
 )
 from desci_sense.shared_functions.schema.ontology_base import OntologyBase

@@ -51,6 +51,8 @@ async def fetch_all_citations(urls: list):
 
 
 def fetch_citation(target_url):
+    logger.debug(f"fetching citoid data for: {target_url}")
+
     # Fixed part of the API endpoint
     base_url = "https://en.wikipedia.org/api/rest_v1/data/citation/zotero/"
 
