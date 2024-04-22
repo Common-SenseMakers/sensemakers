@@ -1,5 +1,3 @@
-import pickle
-
 from shared_functions.main import (
     SM_FUNCTION_post_parser_imp,
     SM_FUNCTION_post_parser_config,
@@ -23,5 +21,5 @@ serialized = result.model_dump_json()
 
 print("semantics: {}", serialized)
 
-with open("last_output.pkl", "wb") as file:
-    pickle.dump(serialized, file)
+with open("last_output.json", "wb") as file:
+    file.write(serialized.encode("utf-8"))

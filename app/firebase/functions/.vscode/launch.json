@@ -12,9 +12,9 @@
         "FIRESTORE_EMULATOR_HOST": "localhost:8080",
         "LOG_LEVEL_MSG": "debug",
         "LOG_LEVEL_OBJ": "debug",
-        "MOCK_TWITTERX": "true",
-        "MOCK_NANOPUB": "true",
-        "MOCK_PARSER": "true"
+        "USE_REAL_TWITTERX": "false",
+        "USE_REAL_NANOPUB": "false",
+        "USE_REAL_PARSER": "false"
       },
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/mocha",
       "args": ["--config", "./.mocharc.js", "test/__tests__/**/*.test.ts"],

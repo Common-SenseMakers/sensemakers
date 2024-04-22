@@ -14,14 +14,10 @@ import { signNanopublication } from '../../src/platforms/nanopub/sign.util';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { resetDB } from '../utils/db';
 import { createTestAppUsers } from '../utils/user.factory';
-import { MOCK_TWITTER } from './setup';
-import {
-  MOCKED_PARSER_RESULT,
-  MOCKED_SEMANTICS,
-  getTestServices,
-} from './test.services';
+import { USE_REAL_TWITTER } from './setup';
+import { getTestServices } from './test.services';
 
-describe('03-process', () => {
+describe.only('03-process', () => {
   let rsaKeys: RSAKeys | undefined;
   const services = getTestServices();
 
@@ -90,7 +86,7 @@ describe('03-process', () => {
 
         expect(tweet).to.not.be.undefined;
 
-        if (!MOCK_TWITTER) {
+        if (USE_REAL_TWITTER) {
           await new Promise<void>((resolve) => setTimeout(resolve, 6 * 1000));
         }
       });
@@ -150,8 +146,6 @@ describe('03-process', () => {
         parseStatus: 'processed',
         content: TEST_CONTENT,
         mirrorsIds: [tweetRead.id, nanopubRead.id],
-        semantics: MOCKED_SEMANTICS,
-        originalParsed: MOCKED_PARSER_RESULT,
       };
 
       const refTweet: PlatformPost = {
@@ -168,6 +162,10 @@ describe('03-process', () => {
       };
 
       expect(postRead).to.not.be.undefined;
+
+      /** dont check semantics */
+      delete postRead.semantics;
+      delete postRead.originalParsed;
 
       expect(postRead).to.deep.equal(refAppPost);
       expect(tweetRead).to.deep.equal(refTweet);

@@ -1,7 +1,10 @@
 import { spy, when } from 'ts-mockito';
 
 import { PLATFORM } from '../../src/@shared/types/types';
-import { ParsePostResult } from '../../src/@shared/types/types.parser';
+import {
+  ParsePostResult,
+  SciFilterClassfication,
+} from '../../src/@shared/types/types.parser';
 import { DBInstance } from '../../src/db/instance';
 import { Services } from '../../src/instances/services';
 import { ParserService } from '../../src/parser/parser.service';
@@ -23,13 +26,13 @@ import { UsersService } from '../../src/users/users.service';
 import { getNanopubMock } from './mocks/nanopub.service.mock';
 import { getParserMock } from './mocks/parser.service.mock';
 import { getTwitterMock } from './mocks/twitter.service.mock';
-import { MOCK_NANOPUB, MOCK_PARSER, MOCK_TWITTER } from './setup';
+import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
 
 export const MOCKED_SEMANTICS =
   '<http://example.org/mosquito> <http://example.org/transmits> <http://example.org/malaria> .';
 
 export const MOCKED_PARSER_RESULT: ParsePostResult = {
-  post: 'test',
+  filter_clasification: SciFilterClassfication.RESEARCH,
   semantics: MOCKED_SEMANTICS,
 };
 
@@ -69,7 +72,7 @@ export const getTestServices = () => {
   });
 
   const twitter = (() => {
-    if (MOCK_TWITTER) {
+    if (!USE_REAL_TWITTER) {
       return getTwitterMock(_twitter);
     }
     return _twitter;
@@ -78,7 +81,7 @@ export const getTestServices = () => {
   /** nanopub */
   const _nanopub = new NanopubService(time);
   const nanopub = (() => {
-    if (MOCK_NANOPUB) {
+    if (!USE_REAL_NANOPUB) {
       return getNanopubMock(_nanopub);
     }
     return _nanopub;
@@ -105,7 +108,7 @@ export const getTestServices = () => {
   /** parser service */
   const _parser = new ParserService(process.env.PARSER_API_URL as string);
   const parser = (() => {
-    if (MOCK_PARSER) {
+    if (!USE_REAL_PARSER) {
       return getParserMock(_parser);
     }
     return _parser;

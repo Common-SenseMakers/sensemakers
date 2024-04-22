@@ -21,12 +21,12 @@ export interface OntologyItem {
   uri: string;
   display_name: string;
   label: string;
-  Name?: string;
+  name?: string;
   prompt?: string;
   notes?: string;
   valid_subject_types?: string;
   valid_object_types?: string;
-  versions?: string;
+  versions?: string[];
 }
 
 export interface RefMeta {
@@ -38,8 +38,10 @@ export interface RefMeta {
 }
 
 export interface ParserOntology {
+  allowed_topics: string[];
   keyword_predicate?: OntologyItem;
   semantic_predicates?: OntologyItem[];
+  topics_predicate?: OntologyItem;
 }
 
 export interface ParsedSupport {
@@ -47,8 +49,14 @@ export interface ParsedSupport {
   refs_meta?: Record<string, RefMeta>;
 }
 
+export enum SciFilterClassfication {
+  NOT_CLASSIFIED = 'not_classified',
+  RESEARCH = 'research',
+  NOT_RESEARCH = 'not_research',
+}
+
 export interface ParsePostResult {
-  post: string;
+  filter_clasification: SciFilterClassfication;
   semantics: AppPostSemantics;
   support?: ParsedSupport;
 }
