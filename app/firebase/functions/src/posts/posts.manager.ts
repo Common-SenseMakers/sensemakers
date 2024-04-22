@@ -9,7 +9,6 @@ import {
 import { PlatformPost } from '../@shared/types/types.platform.posts';
 import { AppPostFull, PostUpdate } from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
-import { TransactionManager } from '../db/transaction.manager';
 import { ParserService } from '../parser/parser.service';
 import { FetchUserPostsParams } from '../platforms/platforms.interface';
 import { PlatformsService } from '../platforms/platforms.service';

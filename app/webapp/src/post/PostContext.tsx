@@ -18,7 +18,7 @@ export const PostContext: React.FC<{
     throw new Error(`Both postId and post were undefined`);
   }
 
-  if (postInit !== undefined && postInit !== undefined) {
+  if (postInit !== undefined && _postId !== undefined) {
     throw new Error(`Both postId and post were defined. Define only one`);
   }
 

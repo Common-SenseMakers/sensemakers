@@ -7,8 +7,8 @@ export const subscribeToPost = (
   postId: string,
   callback: (post: AppPostFull) => void
 ) => {
-  const postRef = doc(collections.post(postId));
-  return onSnapshot(postRef, (doc): void => {
-    callback({ id: postRef.id, ...doc.data() } as AppPostFull);
+  const postDoc = collections.post(postId);
+  return onSnapshot(postDoc, (doc): void => {
+    callback({ id: postDoc.id, ...doc.data() } as AppPostFull);
   });
 };

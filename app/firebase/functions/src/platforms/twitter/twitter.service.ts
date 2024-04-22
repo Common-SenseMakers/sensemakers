@@ -397,15 +397,6 @@ export class TwitterService
       let nextToken = result.meta.next_token;
 
       while (nextToken) {
-        const nextResult = await readOnlyClient.v2.userTimeline(
-          params.user_id,
-          {
-            ...timelineParams,
-            pagination_token: nextToken,
-          }
-        );
-        resultCollection.push(...nextResult.data.data);
-
         /**
          * limit the total number of results to max_result.
          * Warning. different interpreation than the twitter API,
@@ -417,6 +408,15 @@ export class TwitterService
         ) {
           break;
         }
+
+        const nextResult = await readOnlyClient.v2.userTimeline(
+          params.user_id,
+          {
+            ...timelineParams,
+            pagination_token: nextToken,
+          }
+        );
+        resultCollection.push(...nextResult.data.data);
 
         nextToken = nextResult.meta.next_token;
       }

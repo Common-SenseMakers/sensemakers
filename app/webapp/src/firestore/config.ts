@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import {
-  collection,
   connectFirestoreEmulator,
+  doc,
   getFirestore,
 } from 'firebase/firestore';
 
@@ -31,5 +31,5 @@ if (!isProd) {
 }
 
 export const collections = {
-  post: (postId: string) => collection(db, CollectionNames.Posts, postId),
+  post: (postId: string) => doc(db, CollectionNames.Posts, postId),
 };
