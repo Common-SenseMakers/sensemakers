@@ -57,9 +57,24 @@ export const handleSignupController: RequestHandler = async (
       throw new Error(`Unexpected platform ${platform}`);
     })();
 
-    const result = await services.db.run((manager) =>
-      services.users.handleSignup(platform, payload, manager, userId)
-    );
+    const result = await services.db.run(async (manager) => {
+      /** handle signup and refetch user posts */
+      const result = await services.users.handleSignup(
+        platform,
+        payload,
+        manager,
+        userId
+      );
+
+      if (!result) {
+        throw new Error(`error handling signup`);
+      }
+
+      /** autofetch at signup */
+      await services.postsManager.fetchUser(result.userId, undefined, manager);
+
+      return result;
+    });
 
     response.status(200).send({ success: true, data: result });
   } catch (error) {

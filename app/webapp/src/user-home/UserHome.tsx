@@ -22,6 +22,10 @@ export const UserHome = () => {
     return <Box>Loading...</Box>;
   }
 
+  if (posts.length === 0) {
+    return <Box>No posts found</Box>;
+  }
+
   return (
     <Box>
       {posts.map((post, ix) => (

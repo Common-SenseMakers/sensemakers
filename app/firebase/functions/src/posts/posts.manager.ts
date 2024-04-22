@@ -1,3 +1,5 @@
+import { TransactionManager } from 'src/db/transaction.manager';
+
 import { ALL_PUBLISH_PLATFORMS, AppUser } from '../@shared/types/types';
 import { PlatformPost } from '../@shared/types/types.platform.posts';
 import { AppPostFull } from '../@shared/types/types.posts';
@@ -29,7 +31,7 @@ export class PostsManager {
 
     /** Call fetch for each user */
     const posts = await Promise.all(
-      users.map(async (user) => this.fetchUser(user))
+      users.map(async (user) => this.fetchUser(undefined, user))
     );
 
     return posts.flat();
@@ -41,9 +43,16 @@ export class PostsManager {
    * Could be modified to return the PlatformPosts fetched,
    * and the corresponding AppPosts and Drafts
    * */
-  async fetchUser(user: AppUser) {
-    /** Call fetch for each platform */
-    return this.db.run(async (manager) => {
+  async fetchUser(
+    userId?: string,
+    _user?: AppUser,
+    _manager?: TransactionManager
+  ) {
+    const func = async (manager: TransactionManager) => {
+      const user =
+        _user ||
+        (await this.users.repo.getUser(userId as string, manager, true));
+
       await Promise.all(
         ALL_PUBLISH_PLATFORMS.map(async (platformId) => {
           const accounts = UsersHelper.getAccounts(user, platformId);
@@ -86,7 +95,10 @@ export class PostsManager {
           );
         })
       );
-    });
+    };
+
+    if (_manager) return func(_manager);
+    return this.db.run((manager) => func(manager));
   }
 
   /** get pending posts AppPostFull of user, cannot be part of a transaction */
