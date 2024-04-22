@@ -12,7 +12,7 @@ export interface TopicsParams {
 
 export interface ParsePostRequest<P> {
   post: GenericPostData;
-  params: Partial<Record<PARSER_MODE, P>>;
+  parameters: Partial<Record<PARSER_MODE, P>>;
 }
 
 export type AppPostSemantics = string;

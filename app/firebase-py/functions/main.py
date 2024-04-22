@@ -18,7 +18,7 @@ def SM_FUNCTION_post_parser(request):
     Wrapper on SM_FUNCTION_post_parser_imp
     """
     request_json = request.get_json()
-    content = request_json["content"]
+    post = request_json["post"]
     parameters = request_json["parameters"]
 
     # we will handle credentials from here and also crendentials rotation if needed
@@ -31,7 +31,7 @@ def SM_FUNCTION_post_parser(request):
         "llm_type": "openai/gpt-4-turbo",
     }
 
-    parser_result = SM_FUNCTION_post_parser_imp(content, parameters, config)
+    parser_result = SM_FUNCTION_post_parser_imp(post["content"], parameters, config)
     parser_json = parser_result.model_dump_json()
 
     return https_fn.Response(

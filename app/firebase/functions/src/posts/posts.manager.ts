@@ -139,13 +139,13 @@ export class PostsManager {
 
     const params: ParsePostRequest<TopicsParams> = {
       post: { content: post.content },
-      params: {
+      parameters: {
         [PARSER_MODE.TOPICS]: { topics: ['science', 'technology'] },
       },
     };
 
     /** Call the parser */
-    const parserResult = await this.parserService.parsePosts(params);
+    const parserResult = await this.parserService.parsePost(params);
 
     if (!parserResult) {
       throw new Error(`Error parsing post: ${post.id}`);

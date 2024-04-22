@@ -9,7 +9,7 @@ import { MOCKED_PARSER_RESULT } from '../test.services';
 export const getParserMock = (parserService: ParserService) => {
   const Mocked = spy(parserService);
 
-  when(Mocked.parsePosts(anything())).thenCall((post) => {
+  when(Mocked.parsePost(anything())).thenCall((post) => {
     const path = '../../firebase-py/functions/last_output.json';
     if (fs.existsSync(path)) {
       const jsonData = fs.readFileSync(path, 'utf8');
