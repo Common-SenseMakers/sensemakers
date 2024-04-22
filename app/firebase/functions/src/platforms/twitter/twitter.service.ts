@@ -1,4 +1,3 @@
-import { TransactionManager } from 'src/db/transaction.manager';
 import {
   TOAuth2Scope,
   TTweetv2TweetField,
@@ -32,6 +31,7 @@ import {
   TwitterUserCredentials,
   TwitterUserDetails,
 } from '../../@shared/types/types.twitter';
+import { TransactionManager } from '../../db/transaction.manager';
 import { TimeService } from '../../time/time.service';
 import { UsersRepository } from '../../users/users.repository';
 import { FetchUserPostsParams, PlatformService } from '../platforms.interface';

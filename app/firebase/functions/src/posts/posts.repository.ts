@@ -1,5 +1,4 @@
 import { FieldValue } from 'firebase-admin/firestore';
-import { TransactionManager } from 'src/db/transaction.manager';
 
 import {
   AppPost,
@@ -8,6 +7,7 @@ import {
 } from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
 import { BaseRepository } from '../db/repo.base';
+import { TransactionManager } from '../db/transaction.manager';
 
 export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   constructor(protected db: DBInstance) {

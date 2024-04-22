@@ -1,6 +1,3 @@
-import { PlatformPostsRepository } from 'src/posts/platform.posts.repository';
-import { PostsProcessing } from 'src/posts/posts.processing';
-
 import { PLATFORM } from '../@shared/types/types';
 import {
   OUR_EXPIRES_IN,
@@ -17,7 +14,9 @@ import {
   PlatformsService,
 } from '../platforms/platforms.service';
 import { TwitterService } from '../platforms/twitter/twitter.service';
+import { PlatformPostsRepository } from '../posts/platform.posts.repository';
 import { PostsManager } from '../posts/posts.manager';
+import { PostsProcessing } from '../posts/posts.processing';
 import { PostsRepository } from '../posts/posts.repository';
 import { TimeService } from '../time/time.service';
 import { UsersRepository } from '../users/users.repository';

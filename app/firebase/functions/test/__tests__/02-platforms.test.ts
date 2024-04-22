@@ -1,9 +1,9 @@
 import { Nanopub, NpProfile } from '@nanopub/sign';
 import { expect } from 'chai';
-import { PlatformPostDraft } from 'src/@shared/types/types.platform.posts';
 
 import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
+import { PlatformPostDraft } from '../../src/@shared/types/types.platform.posts';
 import { AppPostFull } from '../../src/@shared/types/types.posts';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { cleanPrivateKey } from '../../src/@shared/utils/semantics.helper';

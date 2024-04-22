@@ -1,4 +1,4 @@
-import { createServices } from 'src/instances/services';
+import { createServices } from '../instances/services';
 
 export async function fetchNewPosts() {
   const { postsManager } = createServices();

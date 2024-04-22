@@ -4,6 +4,7 @@
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "outDir": "lib",
+    "rootDir": "src",
     "sourceMap": true,
     "strict": true,
     "target": "es2017",
@@ -18,5 +19,5 @@
     "typeRoots": ["./src/types", "node_modules/@types", "./src/custom.d.ts"],
   },
   "compileOnSave": true,
-  "include": ["src/index.ts", "src/custom.d.ts", "test/__tests__"],
+  "include": ["src/index.ts", "src/custom.d.ts"],
 }

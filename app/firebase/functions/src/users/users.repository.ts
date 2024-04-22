@@ -1,5 +1,4 @@
 import { firestore } from 'firebase-admin';
-import { TransactionManager } from 'src/db/transaction.manager';
 
 import {
   AppUser,
@@ -10,6 +9,7 @@ import {
   UserWithId,
 } from '../@shared/types/types';
 import { DBInstance } from '../db/instance';
+import { TransactionManager } from '../db/transaction.manager';
 import { getPrefixedUserId } from './users.utils';
 
 export class UsersRepository {

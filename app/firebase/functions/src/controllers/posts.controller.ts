@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
-import { AppUser } from 'src/@shared/types/types';
 
+import { AppUser } from '../@shared/types/types';
 import { logger } from '../instances/logger';
 import { getAuthenticatedUser, getServices } from './controllers.utils';
 

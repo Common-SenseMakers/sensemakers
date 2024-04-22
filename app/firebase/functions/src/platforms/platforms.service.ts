@@ -1,5 +1,3 @@
-import { TransactionManager } from 'src/db/transaction.manager';
-
 import {
   PLATFORM,
   PUBLISHABLE_PLATFORMS,
@@ -9,6 +7,7 @@ import {
   PlatformPostCreate,
   PlatformPostPublish,
 } from '../@shared/types/types.platform.posts';
+import { TransactionManager } from '../db/transaction.manager';
 import {
   FetchUserPostsParams,
   IdentityService,
