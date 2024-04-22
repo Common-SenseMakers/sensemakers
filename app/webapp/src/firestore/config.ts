@@ -8,12 +8,12 @@ import {
 import { CollectionNames } from '../shared/utils/collectionNames';
 
 const firebaseConfig = {
-  apiKey: 'YOUR_API_KEY',
-  authDomain: 'YOUR_AUTH_DOMAIN',
-  projectId: 'YOUR_PROJECT_ID',
-  storageBucket: 'YOUR_STORAGE_BUCKET',
-  messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-  appId: 'YOUR_APP_ID',
+  apiKey: 'AIzaSyCCrMwEZjqpFkXJhp02R1xFzGjX0p9M6mE',
+  authDomain: 'sensenets-9ef26.firebaseapp.com',
+  projectId: 'sensenets-9ef26',
+  storageBucket: 'sensenets-9ef26.appspot.com',
+  messagingSenderId: '309994696558',
+  appId: '1:309994696558:web:b17357718ef22fdaf39b7f',
 };
 
 export const app = initializeApp(firebaseConfig);

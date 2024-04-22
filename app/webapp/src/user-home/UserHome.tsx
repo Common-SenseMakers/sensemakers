@@ -27,9 +27,9 @@ export const UserHome = () => {
   }
 
   return (
-    <Box>
+    <Box gap="small">
       {posts.map((post, ix) => (
-        <Box>
+        <Box key={ix}>
           <PostContext postInit={post}>
             <PostCard></PostCard>
           </PostContext>
