@@ -1,13 +1,12 @@
 import { RequestHandler } from 'express';
+import { logger } from 'firebase-functions/v1';
 
-import { PLATFORM } from '../@shared/types/types';
-import { logger } from '../instances/logger';
-import { Services } from '../instances/services';
+import { PLATFORM } from '../../@shared/types/types';
+import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import {
   twitterGetSignupContextSchema,
   twitterSignupDataSchema,
 } from './auth.schema';
-import { getAuthenticatedUser, getServices } from './controllers.utils';
 
 export const getSignupContextController: RequestHandler = async (
   request,
@@ -15,7 +14,8 @@ export const getSignupContextController: RequestHandler = async (
 ) => {
   try {
     const userId = getAuthenticatedUser(request);
-    const services = (request as any).services as Services;
+    const services = getServices(request);
+
     const platform = request.params.platform as PLATFORM;
 
     const payload = await (async () => {

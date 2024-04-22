@@ -65,6 +65,9 @@ export const AccountContext = (props: PropsWithChildren) => {
   }, []);
 
   useEffect(() => {
+    if (token) {
+      localStorage.setItem(OUR_TOKEN_NAME, token);
+    }
     refresh();
   }, [token]);
 

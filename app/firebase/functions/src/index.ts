@@ -5,21 +5,21 @@ import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { POSTS_JOB_SCHEDULE } from './config/config.runtime';
 import { envDeploy } from './config/typedenv.deploy';
 import { envRuntime } from './config/typedenv.runtime';
+import { buildApp } from './instances/app';
+import { fetchUserPostsController } from './posts/controllers/posts.controller';
+import { fetchNewPosts } from './posts/posts.job';
+import { getLoggedUserController } from './users/controllers/get.logged.controller';
 import {
   getSignupContextController,
   handleSignupController,
-} from './controllers/platforms.auth.controller';
-import { fetchUserPostsController } from './controllers/posts.controller';
-import { buildApp } from './instances/app';
-import { fetchNewPosts } from './posts/posts.job';
+} from './users/controllers/platforms.auth.controller';
 
-const authRouter = express.Router();
-const apiRouter = express.Router();
+const router = express.Router();
 
-authRouter.post('/auth/:platform/context', getSignupContextController);
-authRouter.post('/auth/:platform/signup', handleSignupController);
-
-apiRouter.post('/api/posts/fetch', fetchUserPostsController);
+router.post('/auth/:platform/context', getSignupContextController);
+router.post('/auth/:platform/signup', handleSignupController);
+router.post('/auth/me', getLoggedUserController);
+router.post('/posts/fetch', fetchUserPostsController);
 
 export const app = functions
   .region(envDeploy.REGION)
@@ -33,6 +33,6 @@ export const app = functions
       envRuntime.TWITTER_CLIENT_SECRET,
     ],
   })
-  .https.onRequest(buildApp(authRouter));
+  .https.onRequest(buildApp(router));
 
 export const postsJob = onSchedule(POSTS_JOB_SCHEDULE, fetchNewPosts);

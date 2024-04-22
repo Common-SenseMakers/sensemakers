@@ -6,7 +6,7 @@ import {
   DefinedIfTrue,
   PLATFORM,
   UserDetailsBase,
-  UserWithId,
+  UserWithPlatformIds,
 } from '../@shared/types/types';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
@@ -72,7 +72,7 @@ export class UsersRepository {
     const prefixed_user_id = getPrefixedUserId(platform, user_id);
 
     /** protect against changes in the property name */
-    const platformIds_property: keyof UserWithId = 'platformIds';
+    const platformIds_property: keyof UserWithPlatformIds = 'platformIds';
     const query = this.db.collections.users.where(
       platformIds_property,
       'array-contains',
@@ -205,7 +205,7 @@ export class UsersRepository {
       accounts[ix] = details;
 
       /** replace entire array */
-      await userRef.update({
+      manager.update(userRef, {
         [platform]: accounts,
       });
 
@@ -217,8 +217,8 @@ export class UsersRepository {
        * append a new details entry in the platform array and store the
        * prefixed platform id in the platformIds array
        * */
-      const platformIds_property: keyof UserWithId = 'platformIds';
-      await userRef.update({
+      const platformIds_property: keyof UserWithPlatformIds = 'platformIds';
+      manager.update(userRef, {
         [platformIds_property]: platformIds.push(prefixed_user_id),
         [platform]: firestore.FieldValue.arrayUnion(details),
       });
@@ -256,7 +256,7 @@ export class UsersRepository {
       throw new Error(`Details for user ${userId} not found`);
     }
 
-    await doc.ref.update({
+    manager.update(doc.ref, {
       [platform]: firestore.FieldValue.arrayRemove(details),
     });
   }

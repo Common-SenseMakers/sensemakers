@@ -13,11 +13,11 @@ interface PostContextType {
   isFetching: boolean;
 }
 
-export const UserPostsContext = createContext<PostContextType | undefined>(
+export const UserPostsContextValue = createContext<PostContextType | undefined>(
   undefined
 );
 
-const UserPostsProvider: React.FC<{
+export const UserPostsContext: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
   const userId = 'some-user-id';
@@ -42,18 +42,17 @@ const UserPostsProvider: React.FC<{
   const posts = _posts !== null ? _posts : undefined;
 
   return (
-    <UserPostsContext.Provider value={{ posts, refetch, error, isFetching }}>
+    <UserPostsContextValue.Provider
+      value={{ posts, refetch, error, isFetching }}>
       {children}
-    </UserPostsContext.Provider>
+    </UserPostsContextValue.Provider>
   );
 };
 
 export const useUserPosts = () => {
-  const context = useContext(UserPostsContext);
+  const context = useContext(UserPostsContextValue);
   if (!context) {
     throw new Error('usePosts must be used within a PostProvider');
   }
   return context;
 };
-
-export default UserPostsProvider;

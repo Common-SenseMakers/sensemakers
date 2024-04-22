@@ -1,13 +1,16 @@
 import * as jwt from 'jsonwebtoken';
 
 import {
+  ALL_IDENTITY_PLATFORMS,
+  AppUserRead,
   HandleSignupResult,
   OurTokenConfig,
   PLATFORM,
-  UserWithId,
+  UserWithPlatformIds,
 } from '../@shared/types/types';
 import { TransactionManager } from '../db/transaction.manager';
 import { IdentityServicesMap } from '../platforms/platforms.service';
+import { UsersHelper } from './users.helper';
 import { UsersRepository } from './users.repository';
 import { getPrefixedUserId } from './users.utils';
 
@@ -158,7 +161,7 @@ export class UsersService {
          * and we need to create a new user.
          * */
 
-        const platformIds_property: keyof UserWithId = 'platformIds';
+        const platformIds_property: keyof UserWithPlatformIds = 'platformIds';
 
         await this.repo.createUser(
           prefixed_user_id,
@@ -192,5 +195,23 @@ export class UsersService {
       complete: true,
     }) as unknown as jwt.JwtPayload & TokenData;
     return verified.payload.userId;
+  }
+
+  public async getUserProfile(userId: string, manager: TransactionManager) {
+    const user = await this.repo.getUser(userId, manager, true);
+
+    /** extract the profile for each account */
+    const userRead: AppUserRead = {
+      userId,
+    };
+
+    ALL_IDENTITY_PLATFORMS.forEach((platform) => {
+      const accounts = UsersHelper.getAccounts(user, platform);
+      accounts.forEach((account) => {
+        userRead[platform] = account.profile;
+      });
+    });
+
+    return userRead;
   }
 }

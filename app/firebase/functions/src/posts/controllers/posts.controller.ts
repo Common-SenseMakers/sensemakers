@@ -1,8 +1,8 @@
 import { RequestHandler } from 'express';
 
-import { AppUser } from '../@shared/types/types';
-import { logger } from '../instances/logger';
-import { getAuthenticatedUser, getServices } from './controllers.utils';
+import { AppUser } from '../../@shared/types/types';
+import { getAuthenticatedUser, getServices } from '../../controllers.utils';
+import { logger } from '../../instances/logger';
 
 export const fetchUserPostsController: RequestHandler = async (
   request,

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { ViewportPage } from '../app/layout/Viewport';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { UserHome } from '../user-home/UserHome';
+import { UserPostsContext } from '../user-home/UserPostsContext';
 import { PlatformManager } from '../user-login/PlaformManager';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 
@@ -17,7 +18,11 @@ export const AppHome = (props: {}) => {
     if (!isConnected) {
       return <PlatformManager></PlatformManager>;
     } else {
-      return <UserHome></UserHome>;
+      return (
+        <UserPostsContext>
+          <UserHome></UserHome>
+        </UserPostsContext>
+      );
     }
   })();
 

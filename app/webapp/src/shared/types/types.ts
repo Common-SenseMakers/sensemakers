@@ -16,6 +16,17 @@ export const ALL_PUBLISH_PLATFORMS: PUBLISHABLE_PLATFORMS[] = [
   PLATFORM.Nanopub,
 ];
 
+export type IDENTITY_PLATFORMS =
+  | PLATFORM.Orcid
+  | PLATFORM.Twitter
+  | PLATFORM.Nanopub;
+
+export const ALL_IDENTITY_PLATFORMS: IDENTITY_PLATFORMS[] = [
+  PLATFORM.Twitter,
+  PLATFORM.Nanopub,
+  PLATFORM.Orcid,
+];
+
 /** The user details has, for each PLATFORM, a details object
  * with
  * - user_id: the unique user id on that platform
@@ -47,6 +58,9 @@ export interface UserDetailsReadBase<P> extends WithPlatformUserId {
 /** The AppUser object combines the details of each platform */
 export interface UserWithId {
   userId: string;
+}
+
+export interface UserWithPlatformIds {
   platformIds: string[]; // redundant array with the prefixed user_id of all the authenticated platforms for a given user
 }
 
@@ -55,7 +69,7 @@ export interface UserWithId {
  * kept inside the backend, never sent to the user. We use AppUserRead
  * to send the user profiles to the frontend.
  */
-export interface AppUser extends UserWithId {
+export interface AppUser extends UserWithId, UserWithPlatformIds {
   [PLATFORM.Orcid]?: OrcidUserDetails[];
   [PLATFORM.Twitter]?: TwitterUserDetails[];
   [PLATFORM.Nanopub]?: NanopubUserDetails[];
