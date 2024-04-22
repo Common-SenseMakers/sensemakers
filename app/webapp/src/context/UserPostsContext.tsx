@@ -1,13 +1,11 @@
+import { useQuery } from '@tanstack/react-query';
 import React, { useContext, useEffect, useReducer } from 'react';
 import { createContext } from 'react';
 
-import { PostAction, PostState, postReducer } from '../reducers/post.reducer';
-import { subscribeToUserPosts } from '../services/realtime.listener';
+import { getUserPosts } from '../api/post.requests';
+import { useAccountContext } from '../user/contexts/AccountContext';
 
-interface PostContextType {
-  posts: PostState;
-  dispatch: React.Dispatch<PostAction>;
-}
+interface PostContextType {}
 const UserPostsContext = createContext<PostContextType | undefined>(undefined);
 
 export { UserPostsContext };
@@ -15,16 +13,21 @@ export { UserPostsContext };
 const UserPostsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [posts, dispatch] = useReducer(postReducer, []);
   const userId = 'some-user-id';
-  useEffect(() => {
-    const unsubscribe = subscribeToUserPosts(userId, dispatch);
+  const { token } = useAccountContext();
 
-    return () => unsubscribe();
-  }, []);
+  const { data: posts } = useQuery({
+    queryKey: ['userPosts', userId, token],
+    queryFn: () => {
+      if (token) {
+        return getUserPosts(userId, token);
+      }
+      return null;
+    },
+  });
 
   return (
-    <UserPostsContext.Provider value={{ posts, dispatch }}>
+    <UserPostsContext.Provider value={{ posts }}>
       {children}
     </UserPostsContext.Provider>
   );

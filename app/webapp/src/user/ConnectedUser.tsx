@@ -3,8 +3,6 @@ import { UserExpert } from 'grommet-icons';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useAccountContext } from '../_user/contexts/AccountContext';
-import { useDisconnectContext } from '../_user/contexts/DisconnectContext';
 import { OrcidAnchor } from '../app/anchors/OrcidAnchor';
 import { TwitterProfileAnchor } from '../app/anchors/TwitterAnchor';
 import { PLATFORM } from '../shared/types/types';
@@ -12,6 +10,8 @@ import { AppButton } from '../ui-components';
 import { AppAddress } from '../ui-components/AppAddress';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { cap } from '../utils/general';
+import { useAccountContext } from './contexts/AccountContext';
+import { useDisconnectContext } from './contexts/DisconnectContext';
 
 export const ConnectedUser = (props: {}) => {
   const { t } = useTranslation();

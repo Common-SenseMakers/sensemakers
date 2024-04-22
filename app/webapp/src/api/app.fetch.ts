@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 
-import { useAccountContext } from '../_user/contexts/AccountContext';
 import { FUNCTIONS_BASE } from '../app/config';
+import { useAccountContext } from '../user/contexts/AccountContext';
 
 export interface AppFetch {
   post<T = any, R = AxiosResponse<T>['data'], D = any>(
