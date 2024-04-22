@@ -2,11 +2,12 @@
   "version": "0.2.0",
   "configurations": [
       {
-          "name": "functions-main.test.py",
-          "type": "python",
+          "name": "test.py",
+          "type": "debugpy",
           "request": "launch",
           "program": "${workspaceFolder}/main.test.py",
           "console": "integratedTerminal",
+          "python": "/home/pepo/anaconda3/envs/ENV_NAME/bin/python",
           "env": {
           },
           "args": [

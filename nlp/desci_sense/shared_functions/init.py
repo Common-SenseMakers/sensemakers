@@ -1,7 +1,20 @@
-from typing import List, TypedDict, Any, Optional
+from typing import List, TypedDict, Any, Dict, Optional
 
 from confection import Config
 from loguru import logger
+
+from .configs import (
+    OpenrouterAPIConfig,
+    WandbConfig,
+    LLMConfig,
+    KeywordPParserChainConfig,
+    RefTaggerChainConfig,
+    TopicsPParserChainConfig,
+    validate_env_var,
+    MultiParserChainConfig,
+    ParserChainType,
+    PostProcessType,
+)
 
 MAX_SUMMARY_LENGTH = 500
 
@@ -99,3 +112,43 @@ def init_multi_stage_parser_config(
         }
     )
     return parser_config
+
+
+def init_multi_chain_parser_config(
+    open_router_api_config: OpenrouterAPIConfig = None,
+    llm_type: str = "openai/gpt-4-turbo",
+    post_process_type: str = "firebase",
+):
+    kw_config = KeywordPParserChainConfig(
+        name="keywords",
+        use_metadata=True,
+        llm_config=LLMConfig(llm_type=llm_type),
+    )
+    refs_tagger_config = RefTaggerChainConfig(
+        name="refs_tagger",
+        use_metadata=True,
+        llm_config=LLMConfig(llm_type=llm_type),
+    )
+    topics_config = TopicsPParserChainConfig(
+        name="topics",
+        use_metadata=True,
+        llm_config=LLMConfig(llm_type=llm_type),
+    )
+    # set post process type
+    post_process_type = PostProcessType(post_process_type)
+
+    # if no openrouter config provided, use default
+    if not open_router_api_config:
+        open_router_api_config = OpenrouterAPIConfig()
+
+    multi_config = MultiParserChainConfig(
+        openrouter_api_config=open_router_api_config,
+        parser_configs=[
+            refs_tagger_config,
+            topics_config,
+            kw_config,
+        ],
+        post_process_type=post_process_type,
+    )
+
+    return multi_config

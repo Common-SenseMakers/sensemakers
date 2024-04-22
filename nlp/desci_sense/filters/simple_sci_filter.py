@@ -15,7 +15,7 @@ def filter_url_by_type(url: str, accepted_types: List[str]):
         return False
 
 
-class SimpleCitoidSciFilter:
+class SimpleSciFilter:
     """
     Simple filter for detecting posts about scientific research based on the Citoid API (https://www.mediawiki.org/wiki/Citoid)
     """
@@ -44,9 +44,9 @@ class SimpleCitoidSciFilter:
             "podcast",
         ]
 
-    def filter(self, post: RefPost) -> bool:
+    def filter_by_citoid(self, post: RefPost) -> bool:
         """
-        Return True if post passed filter, False o.w.
+        Return True if post passed citoid filter, False o.w.
         """
 
         # if the post doesn't mention any references we filter it

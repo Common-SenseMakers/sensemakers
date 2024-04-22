@@ -31,6 +31,10 @@ class Post(Serializable):
     source_network: str = Field(default="unkown")
     """Social media network this post is sourced from (e.g., mastodon, twitter)."""
     type: Literal["Post"] = "Post"
+    is_reply: bool = Field(default=False)
+    """Is this post a reply to another post."""
+    is_repost: bool = Field(default=False)
+    """Is this post a repost (retweet) of another post."""
 
     @classmethod
     def is_lc_serializable(cls) -> bool:

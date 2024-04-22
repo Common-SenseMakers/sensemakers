@@ -1,12 +1,13 @@
 import sys
 from pathlib import Path
 
+from nlp.desci_sense.shared_functions.configs import MetadataExtractionType
+
 ROOT = Path(__file__).parents[1]
 sys.path.append(str(ROOT))
 
 from desci_sense.shared_functions.web_extractors.metadata_extractors import (
     extract_all_metadata_by_type,
-    MetadataExtractionType,
 )
 
 

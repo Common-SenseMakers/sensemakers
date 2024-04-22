@@ -7,7 +7,7 @@ from shared_functions.main import (
     SM_FUNCTION_post_parser_config,
     SM_FUNCTION_post_parser_imp,
 )
-from config import openai_api_key
+from env_config import openai_api_key
 
 app = initialize_app()
 
@@ -18,21 +18,20 @@ def SM_FUNCTION_post_parser(request):
     Wrapper on SM_FUNCTION_post_parser_imp
     """
     request_json = request.get_json()
-    content = request_json["content"]
+    post = request_json["post"]
     parameters = request_json["parameters"]
 
     # we will handle credentials from here and also crendentials rotation if needed
     # input is going to be an array of posts to parse
 
     config: SM_FUNCTION_post_parser_config = {
-        "wandb_project": "st-demo-sandbox",
-        "max_summary_length": 500,
-        "openai_api_key": openai_api_key,
-        "openai_api_base": "https://openrouter.ai/api/v1",
-        "openai_api_referer": "https://127.0.0.1:3000/",
+        "openrouter_api_key": openai_api_key,
+        "openrouter_api_base": "https://openrouter.ai/api/v1",
+        "openrouter_referer": "https://127.0.0.1:3000/",
+        "llm_type": "openai/gpt-4-turbo",
     }
 
-    parser_result = SM_FUNCTION_post_parser_imp(content, parameters, config)
+    parser_result = SM_FUNCTION_post_parser_imp(post["content"], parameters, config)
     parser_json = parser_result.model_dump_json()
 
     return https_fn.Response(
