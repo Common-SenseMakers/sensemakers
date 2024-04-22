@@ -2,6 +2,7 @@ import { I18nextProvider } from 'react-i18next';
 import { BrowserRouter } from 'react-router-dom';
 
 import { AppContainer } from './app/AppContainer';
+import { ToastsContext } from './app/ToastsContext';
 import { GlobalStyles } from './app/layout/GlobalStyles';
 import { i18n } from './i18n/i18n';
 import { ResponsiveApp } from './ui-components/ResponsiveApp';
@@ -17,26 +18,28 @@ function App() {
   return (
     <div className="App">
       <I18nextProvider i18n={i18n}>
-        <BrowserRouter>
-          <AccountContext>
-            <ConnectedWallet>
-              <SignerContext>
-                <TwitterContext>
-                  <NanopubContext>
-                    <DisconnectContext>
-                      <GlobalStyles />
-                      <ThemedApp>
-                        <ResponsiveApp>
-                          <AppContainer></AppContainer>
-                        </ResponsiveApp>
-                      </ThemedApp>
-                    </DisconnectContext>
-                  </NanopubContext>
-                </TwitterContext>
-              </SignerContext>
-            </ConnectedWallet>
-          </AccountContext>
-        </BrowserRouter>
+        <ToastsContext>
+          <BrowserRouter>
+            <AccountContext>
+              <ConnectedWallet>
+                <SignerContext>
+                  <TwitterContext>
+                    <NanopubContext>
+                      <DisconnectContext>
+                        <GlobalStyles />
+                        <ThemedApp>
+                          <ResponsiveApp>
+                            <AppContainer></AppContainer>
+                          </ResponsiveApp>
+                        </ThemedApp>
+                      </DisconnectContext>
+                    </NanopubContext>
+                  </TwitterContext>
+                </SignerContext>
+              </ConnectedWallet>
+            </AccountContext>
+          </BrowserRouter>
+        </ToastsContext>
       </I18nextProvider>
     </div>
   );

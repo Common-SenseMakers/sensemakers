@@ -1,6 +1,5 @@
 import { RequestHandler } from 'express';
 
-import { AppUser } from '../../@shared/types/types';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
 
@@ -10,16 +9,10 @@ export const fetchUserPostsController: RequestHandler = async (
 ) => {
   try {
     const userId = getAuthenticatedUser(request, true);
-    const { postsManager, users, db } = getServices(request);
+    const { postsManager } = getServices(request);
 
-    await db.run(async (manager) => {
-      const user = await users.repo.getUser(userId, manager);
-      if (user === undefined) {
-        response.status(404).send({ success: false, error: 'User not found' });
-      }
-      await postsManager.fetchUser(user as AppUser);
-      response.status(200).send({ success: true });
-    });
+    const posts = await postsManager.getPendingOfUser(userId);
+    response.status(200).send({ success: true, posts });
   } catch (error) {
     logger.error('error', error);
     response.status(500).send({ success: false, error });

@@ -9,7 +9,7 @@ export const getUserPosts = async (
   appAccessToken: string
 ): Promise<AppPostFull[]> => {
   const res = await axios.post(
-    FUNCTIONS_BASE + '/posts/getPending',
+    FUNCTIONS_BASE + '/posts/fetch',
     { userId },
     {
       headers: {
@@ -18,5 +18,5 @@ export const getUserPosts = async (
     }
   );
 
-  return res.data.result;
+  return res.data.posts;
 };
