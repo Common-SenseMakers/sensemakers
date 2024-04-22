@@ -441,6 +441,7 @@ export class TwitterService
         end_time: params.end_time
           ? new Date(params.end_time).toISOString()
           : undefined,
+        max_results: params.max_results,
       },
       manager,
       params.userDetails
