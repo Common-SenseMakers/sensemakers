@@ -1,40 +1,40 @@
-import React, { useContext, useEffect, useReducer } from 'react';
-import { createContext } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
-import { PostAction, PostState, postReducer } from '../reducers/post.reducer';
-import { subscribeToUserPosts } from '../services/realtime.listener';
+import { firestoreService } from '../services/firestore.service';
+import { AppPost } from '../shared/types/types.posts';
 
-interface PostContextType {
-  posts: PostState;
-  dispatch: React.Dispatch<PostAction>;
+interface UserPostsContextType {
+  userPosts: AppPost[];
+  fetchUserPosts: () => void;
 }
-const UserPostsContext = createContext<PostContextType | undefined>(undefined);
 
-export { UserPostsContext };
+const UserPostsContext = createContext<UserPostsContextType | undefined>(
+  undefined
+);
 
-const UserPostsProvider: React.FC<{ children: React.ReactNode }> = ({
+export const useUserPosts = () => useContext(UserPostsContext);
+
+export const UserPostsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [posts, dispatch] = useReducer(postReducer, []);
-  const userId = 'some-user-id';
-  useEffect(() => {
-    const unsubscribe = subscribeToUserPosts(userId, dispatch);
+  const [userPosts, setUserPosts] = useState<AppPost[]>([]);
 
-    return () => unsubscribe();
+  const fetchUserPosts = async () => {
+    try {
+      const userPosts = await firestoreService.getUserPosts('');
+      setUserPosts(userPosts);
+    } catch (error) {
+      console.error('Failed to fetch user posts:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserPosts();
   }, []);
 
   return (
-    <UserPostsContext.Provider value={{ posts, dispatch }}>
+    <UserPostsContext.Provider value={{ userPosts, fetchUserPosts }}>
       {children}
     </UserPostsContext.Provider>
   );
 };
-export const useUserPosts = () => {
-  const context = useContext(UserPostsContext);
-  if (!context) {
-    throw new Error('usePosts must be used within a PostProvider');
-  }
-  return context;
-};
-
-export default UserPostsProvider;
