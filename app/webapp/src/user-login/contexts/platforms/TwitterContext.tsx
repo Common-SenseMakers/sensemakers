@@ -71,7 +71,9 @@ export const TwitterContext = (props: PropsWithChildren) => {
     localStorage.setItem(LS_TWITTER_CONTEXT_KEY, JSON.stringify(siginContext));
 
     /** go to twitter */
-    window.location.href = siginContext.url;
+    if (siginContext) {
+      window.location.href = siginContext.url;
+    }
   };
 
   /** Listen to oauth verifier to send it to the backend */
@@ -99,7 +101,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
         ...context,
         code: code_param,
       }).then((result) => {
-        if (result.ourAccessToken) {
+        if (result && result.ourAccessToken) {
           setOurToken(result.ourAccessToken);
         }
 
@@ -116,7 +118,9 @@ export const TwitterContext = (props: PropsWithChildren) => {
     const revokeLink = await appFetch<string>(
       `/auth/${PLATFORM.Twitter}/revoke`
     );
-    window.location.href = revokeLink;
+    if (revokeLink) {
+      window.location.href = revokeLink;
+    }
   };
 
   return (

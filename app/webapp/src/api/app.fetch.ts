@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 
 import { FUNCTIONS_BASE } from '../app/config';
-import { useAccountContext } from '../user/contexts/AccountContext';
+import { useAccountContext } from '../user-login/contexts/AccountContext';
 
 export interface AppFetch {
   post<T = any, R = AxiosResponse<T>['data'], D = any>(
@@ -22,11 +22,14 @@ export const _appFetch = async <T>(
     headers['authorization'] = `Bearer ${accessToken}`;
   }
 
-  const res = await axios.post<{ data: T }>(FUNCTIONS_BASE + path, data, {
-    headers,
-  });
-
-  return res.data.data;
+  try {
+    const res = await axios.post<{ data: T }>(FUNCTIONS_BASE + path, data, {
+      headers,
+    });
+    return res.data.data;
+  } catch (err) {
+    console.error(`Error fetching ${path}`, err);
+  }
 };
 
 export const useAppFetch = () => {

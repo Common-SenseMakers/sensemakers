@@ -68,12 +68,6 @@ export const AccountContext = (props: PropsWithChildren) => {
     refresh();
   }, [token]);
 
-  useEffect(() => {
-    _appFetch('/api/posts/fetch', {}, token).then((res) => {
-      if (DEBUG) console.log('fetch posts', { res });
-    });
-  }, [connectedUser]);
-
   const disconnect = () => {
     if (DEBUG) console.log('disconnecting');
     localStorage.removeItem('token');

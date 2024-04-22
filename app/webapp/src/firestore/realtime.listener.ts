@@ -1,14 +1,14 @@
 import { doc, onSnapshot } from 'firebase/firestore';
 
-import { AppPost } from '../shared/types/types.posts';
+import { AppPost, AppPostFull } from '../shared/types/types.posts';
 import { collections } from './config';
 
-export const postSubscribe = (
+export const subscribeToPost = (
   postId: string,
-  callback: (post: AppPost) => void
+  callback: (post: AppPostFull) => void
 ) => {
   const postRef = doc(collections.post(postId));
   return onSnapshot(postRef, (doc): void => {
-    callback({ id: postRef.id, ...doc.data() } as AppPost);
+    callback({ id: postRef.id, ...doc.data() } as AppPostFull);
   });
 };

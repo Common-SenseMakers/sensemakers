@@ -1,13 +1,11 @@
-import { Edit, Network } from 'grommet-icons';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { AppBottomNav } from '../app/layout/AppBottomNav';
 import { ViewportPage } from '../app/layout/Viewport';
-import { AbsoluteRoutes } from '../route.names';
 import { BoxCentered } from '../ui-components/BoxCentered';
-import { AppPlatformManager } from '../user/AppPlaformManager';
-import { useAccountContext } from '../user/contexts/AccountContext';
+import { UserHome } from '../user-home/UserHome';
+import { PlatformManager } from '../user-login/PlaformManager';
+import { useAccountContext } from '../user-login/contexts/AccountContext';
 
 export const AppHome = (props: {}) => {
   const navigate = useNavigate();
@@ -16,25 +14,16 @@ export const AppHome = (props: {}) => {
   const { isConnected } = useAccountContext();
 
   const content = (() => {
-    return <AppPlatformManager></AppPlatformManager>;
+    if (!isConnected) {
+      return <PlatformManager></PlatformManager>;
+    } else {
+      return <UserHome></UserHome>;
+    }
   })();
 
   return (
     <ViewportPage
       content={<BoxCentered>{content}</BoxCentered>}
-      nav={
-        <AppBottomNav
-          paths={{
-            [AbsoluteRoutes.App]: {
-              icon: <Network></Network>,
-              label: t('socials'),
-            },
-            [AbsoluteRoutes.Post]: {
-              disabled: !isConnected,
-              icon: <Edit></Edit>,
-              label: t('editor'),
-            },
-          }}></AppBottomNav>
-      }></ViewportPage>
+      nav={<></>}></ViewportPage>
   );
 };

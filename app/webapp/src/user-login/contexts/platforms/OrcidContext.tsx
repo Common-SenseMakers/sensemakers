@@ -34,7 +34,7 @@ export const OrcidContext = (props: PropsWithChildren) => {
   const code = searchParams.get('code');
 
   /** Get the auth link from the backend */
-  const { data: orcidSignup } = useQuery<OrcidSignupContext>({
+  const { data: orcidSignup } = useQuery<OrcidSignupContext | undefined>({
     queryKey: ['orcidLink'],
     queryFn: async () => {
       const context = await appFetch<OrcidSignupContext>(
