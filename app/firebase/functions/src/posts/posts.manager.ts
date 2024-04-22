@@ -1,9 +1,16 @@
 import { TransactionManager } from 'src/db/transaction.manager';
 
 import { ALL_PUBLISH_PLATFORMS, AppUser } from '../@shared/types/types';
+import {
+  PARSER_MODE,
+  ParsePostRequest,
+  TopicsParams,
+} from '../@shared/types/types.parser';
 import { PlatformPost } from '../@shared/types/types.platform.posts';
-import { AppPostFull } from '../@shared/types/types.posts';
+import { AppPostFull, PostUpdate } from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
+import { TransactionManager } from '../db/transaction.manager';
+import { ParserService } from '../parser/parser.service';
 import { FetchUserPostsParams } from '../platforms/platforms.interface';
 import { PlatformsService } from '../platforms/platforms.service';
 import { UsersHelper } from '../users/users.helper';
@@ -19,7 +26,8 @@ export class PostsManager {
     protected db: DBInstance,
     protected users: UsersService,
     public processing: PostsProcessing,
-    protected platforms: PlatformsService
+    protected platforms: PlatformsService,
+    protected parserService: ParserService
   ) {}
 
   /**
@@ -39,9 +47,7 @@ export class PostsManager {
 
   /**
    * Fetch and store platform posts of one user
-   * as one Transaction. It doesn't return anything
-   * Could be modified to return the PlatformPosts fetched,
-   * and the corresponding AppPosts and Drafts
+   * as one Transaction. It doesn't return anything.
    * */
   async fetchUser(
     userId?: string,
@@ -82,9 +88,12 @@ export class PostsManager {
                   manager
                 );
 
+              const postIds = platformPostsCreated.map((pp) => pp.post.id);
+              await this.parsePosts(postIds, manager);
+
               /** Create the Drafts */
               await this.processing.createPostsDrafts(
-                platformPostsCreated.map((pp) => pp.post.id),
+                postIds,
                 ALL_PUBLISH_PLATFORMS.filter(
                   (_platformId) => _platformId !== platformId
                 ),
@@ -130,5 +139,111 @@ export class PostsManager {
     return this.db.run(async (manager) =>
       this.processing.getPostFull(postId, manager, shouldThrow)
     );
+  }
+
+  async parsePosts(postIds: string[], manager: TransactionManager) {
+    return Promise.all(
+      postIds.map((postId) => this.parsePost(postId, manager))
+    );
+  }
+
+  async parsePost(postId: string, manager: TransactionManager) {
+    const post = await this.processing.posts.get(postId, manager, true);
+
+    const params: ParsePostRequest<TopicsParams> = {
+      post: { content: post.content },
+      parameters: {
+        [PARSER_MODE.TOPICS]: { topics: ['science', 'technology'] },
+      },
+    };
+
+    /** Call the parser */
+    const parserResult = await this.parserService.parsePost(params);
+
+    if (!parserResult) {
+      throw new Error(`Error parsing post: ${post.id}`);
+    }
+
+    const update: PostUpdate = {
+      semantics: parserResult.semantics,
+      originalParsed: parserResult,
+      parseStatus: 'processed',
+    };
+
+    await this.processing.posts.updateContent(post.id, update, manager);
+  }
+
+  /**
+   * Approving a post receives an AppPostFull.
+   * - The content and the semantics might have changed.
+   * - The draft value on the mirrors array might have changed.
+   *
+   * userId must be the authenticated user to prevent posting on
+   * behalf of others.
+   */
+  async approvePost(post: AppPostFull, userId: string) {
+    await this.db.run(async (manager) => {
+      const user = await this.users.repo.getUser(userId, manager, true);
+      const existing = await this.processing.posts.get(post.id, manager, true);
+      if (!existing) {
+        throw new Error(`Post not found: ${post.id}`);
+      }
+
+      /** force status transition */
+      await this.processing.posts.updateContent(
+        post.id,
+        {
+          reviewedStatus: 'reviewed',
+        },
+        manager
+      );
+
+      /** check if content or semantics changed (other changes are not expected and omited) */
+      if (
+        existing.content !== post.content ||
+        existing.semantics !== post.semantics
+      ) {
+        await this.processing.posts.updateContent(
+          post.id,
+          {
+            reviewedStatus: 'reviewed',
+            content: post.content,
+            semantics: post.semantics,
+          },
+          manager
+        );
+      }
+
+      /** publish approved drafts */
+      await Promise.all(
+        post.mirrors.map(async (mirror) => {
+          if (mirror.draft && mirror.draft.postApproval === 'approved') {
+            const account = UsersHelper.getAccount(
+              user,
+              mirror.platformId,
+              mirror.draft.user_id,
+              true
+            );
+
+            const posted = await this.platforms
+              .get(mirror.platformId)
+              .publish(
+                { draft: mirror.draft.post, userDetails: account },
+                manager
+              );
+
+            await this.processing.platformPosts.updatePosted(
+              mirror.id,
+              {
+                posted: posted,
+                publishOrigin: 'posted',
+                publishStatus: 'published',
+              },
+              manager
+            );
+          }
+        })
+      );
+    });
   }
 }

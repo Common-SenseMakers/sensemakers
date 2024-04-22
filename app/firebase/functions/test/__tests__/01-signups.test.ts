@@ -7,11 +7,10 @@ import {
   NanupubSignupData,
 } from '../../src/@shared/types/types.nanopubs';
 import { cleanPrivateKey } from '../../src/@shared/utils/semantics.helper';
+import { logger } from '../../src/instances/logger';
 import { resetDB } from '../utils/db';
 import { getNanopubProfile } from '../utils/nanopub.profile';
 import { getTestServices } from './test.services';
-
-const logger = (global as any).logger;
 
 describe('01-signups', () => {
   const services = getTestServices();

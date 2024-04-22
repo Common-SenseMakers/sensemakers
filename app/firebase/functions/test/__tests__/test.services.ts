@@ -1,8 +1,13 @@
 import { spy, when } from 'ts-mockito';
 
 import { PLATFORM } from '../../src/@shared/types/types';
+import {
+  ParsePostResult,
+  SciFilterClassfication,
+} from '../../src/@shared/types/types.parser';
 import { DBInstance } from '../../src/db/instance';
 import { Services } from '../../src/instances/services';
+import { ParserService } from '../../src/parser/parser.service';
 import { NanopubService } from '../../src/platforms/nanopub/nanopub.service';
 import { OrcidService } from '../../src/platforms/orcid/orcid.service';
 import {
@@ -18,8 +23,18 @@ import { PostsRepository } from '../../src/posts/posts.repository';
 import { TimeService } from '../../src/time/time.service';
 import { UsersRepository } from '../../src/users/users.repository';
 import { UsersService } from '../../src/users/users.service';
+import { getNanopubMock } from './mocks/nanopub.service.mock';
+import { getParserMock } from './mocks/parser.service.mock';
 import { getTwitterMock } from './mocks/twitter.service.mock';
-import { MOCK_TWITTER } from './setup';
+import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
+
+export const MOCKED_SEMANTICS =
+  '<http://example.org/mosquito> <http://example.org/transmits> <http://example.org/malaria> .';
+
+export const MOCKED_PARSER_RESULT: ParsePostResult = {
+  filter_clasification: SciFilterClassfication.RESEARCH,
+  semantics: MOCKED_SEMANTICS,
+};
 
 export const getTestServices = () => {
   const mandatory = ['TWITTER_CLIENT_ID', 'TWITTER_CLIENT_SECRET'];
@@ -57,14 +72,20 @@ export const getTestServices = () => {
   });
 
   const twitter = (() => {
-    if (MOCK_TWITTER) {
+    if (!USE_REAL_TWITTER) {
       return getTwitterMock(_twitter);
     }
     return _twitter;
   })();
 
   /** nanopub */
-  const nanopub = new NanopubService(time);
+  const _nanopub = new NanopubService(time);
+  const nanopub = (() => {
+    if (!USE_REAL_NANOPUB) {
+      return getNanopubMock(_nanopub);
+    }
+    return _nanopub;
+  })();
 
   /** all identity services */
   identityServices.set(PLATFORM.Orcid, orcid);
@@ -85,18 +106,13 @@ export const getTestServices = () => {
   const platformsService = new PlatformsService(platformsMap);
 
   /** parser service */
-  // const parserService = new ParserService(process.env.PARSER_API_URL as string);
-
-  // const MockedParser = spy(parserService);
-
-  // const mockedResult: ParsePostResult[] = [
-  //   {
-  //     post: 'test',
-  //     semantics: '<semantics>',
-  //   },
-  // ];
-  // when(MockedParser.parsePosts(anything())).thenResolve(mockedResult);
-  // const mockedParser = instance(MockedParser);
+  const _parser = new ParserService(process.env.PARSER_API_URL as string);
+  const parser = (() => {
+    if (!USE_REAL_PARSER) {
+      return getParserMock(_parser);
+    }
+    return _parser;
+  })();
 
   /** posts service */
   const postsProcessing = new PostsProcessing(
@@ -110,7 +126,8 @@ export const getTestServices = () => {
     db,
     usersService,
     postsProcessing,
-    platformsService
+    platformsService,
+    parser
   );
 
   const services: Services = {

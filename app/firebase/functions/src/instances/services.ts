@@ -1,11 +1,13 @@
 import { PLATFORM } from '../@shared/types/types';
 import {
+  FUNCTIONS_PY_URL,
   OUR_EXPIRES_IN,
   OUR_TOKEN_SECRET,
   TWITTER_CLIENT_ID,
   TWITTER_CLIENT_SECRET,
 } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
+import { ParserService } from '../parser/parser.service';
 // import { ParserService } from '../parser/parser.service';
 import { OrcidService } from '../platforms/orcid/orcid.service';
 import {
@@ -63,7 +65,7 @@ export const createServices = () => {
   const platformsService = new PlatformsService(platformsMap);
 
   /** parser service */
-  // const parserService = new ParserService(FUNCTIONS_PY_URL);
+  const parser = new ParserService(FUNCTIONS_PY_URL);
 
   /** posts service */
   const postsProcessing = new PostsProcessing(
@@ -77,7 +79,8 @@ export const createServices = () => {
     db,
     usersService,
     postsProcessing,
-    platformsService
+    platformsService,
+    parser
   );
 
   /** all services */

@@ -57,3 +57,7 @@ export interface PlatformPostCreated {
   platformPost: PlatformPost;
   post: AppPost; // In case a post was created
 }
+
+export type PlatformPostUpdatePosted = Partial<
+  Pick<PlatformPost, 'posted' | 'publishOrigin' | 'publishStatus'>
+>;

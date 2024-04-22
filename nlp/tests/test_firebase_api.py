@@ -1,5 +1,7 @@
 import sys
 from pathlib import Path
+import nest_asyncio
+nest_asyncio.apply()
 
 ROOT = Path(__file__).parents[1]
 sys.path.append(str(ROOT))
@@ -70,12 +72,27 @@ def test_parser_result():
     result_2 = ParserResult.model_validate(result_dict)
     assert "semantics" in result_dict
     assert "semantics" in result_2.model_dump()
+    
+def test_parallel_w_kw_and_topics():
+    url = "https://twitter.com/Elinor_Carmi/status/1768238325020659885"
+    config = default_init_parser_config()
+    config["model"]["model_name"] = "mistralai/mistral-7b-instruct"
+    config["keyword_extraction"]["model"]["model_name"] = "mistralai/mistral-7b-instruct"
+    parser = FirebaseAPIParser(config=config)
+    parser.set_md_extract_method("citoid")
+    post = scrape_post(url)
+    result = parser.process_ref_post_parallel(post)
+    assert "topics" in result
+    assert "semantics" in result
+    assert "keywords" in result
 
 
 if __name__ == "__main__":
     url = "https://twitter.com/Elinor_Carmi/status/1768238325020659885"
     config = default_init_parser_config()
+    config["model"]["model_name"] = "mistralai/mistral-7b-instruct"
+    config["keyword_extraction"]["model"]["model_name"] = "mistralai/mistral-7b-instruct"
     parser = FirebaseAPIParser(config=config)
     parser.set_md_extract_method("citoid")
     post = scrape_post(url)
-    result = parser.extract_post_topics_w_metadata(post)
+    result = parser.process_ref_post_parallel(post)

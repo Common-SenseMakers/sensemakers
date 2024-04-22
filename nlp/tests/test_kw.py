@@ -8,6 +8,7 @@ sys.path.append(str(ROOT))
 from desci_sense.runner import load_config
 from desci_sense.shared_functions.postprocessing.output_parsers import (
     extract_unique_keywords,
+    detect_academic_kw,
 )
 from desci_sense.shared_functions.interface import ParserResult
 from utils import default_init_parser_config
@@ -30,6 +31,13 @@ def test_kw_basic():
     test_str = "#AI, #Web3, #AI"
     kws = extract_unique_keywords(test_str)
     assert set(kws) == set(["Web3", "AI"])
+
+
+def test_academic_kw():
+    kws = ["academic", "not-academic", "web3"]
+    academic_kw, res_kws = detect_academic_kw(kws)
+    assert res_kws == ["web3"]
+    assert academic_kw == "not-academic"
 
 
 def test_parallel_kw_parse_result():
