@@ -73,7 +73,7 @@ export const AccountContext = (props: PropsWithChildren) => {
 
   const disconnect = () => {
     if (DEBUG) console.log('disconnecting');
-    localStorage.removeItem('token');
+    localStorage.removeItem(OUR_TOKEN_NAME);
     checkToken();
   };
 

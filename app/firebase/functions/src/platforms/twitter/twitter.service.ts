@@ -356,7 +356,7 @@ export class TwitterService
     /** always store the credential as read credentials */
     twitter.read = {
       ...credentials,
-      lastFetchedMs: this.time.now(),
+      lastFetchedMs: 0,
     };
 
     return twitter;
@@ -382,7 +382,7 @@ export class TwitterService
     const timelineParams: Partial<TweetV2UserTimelineParams> = {
       start_time: params.start_time,
       end_time: params.end_time,
-      max_results: params.max_results ? params.max_results : 100,
+      max_results: 10,
       'tweet.fields': tweetFields,
       exclude: ['retweets', 'replies'],
     };
@@ -405,6 +405,19 @@ export class TwitterService
           }
         );
         resultCollection.push(...nextResult.data.data);
+
+        /**
+         * limit the total number of results to max_result.
+         * Warning. different interpreation than the twitter API,
+         * where max_results is the page size
+         */
+        if (
+          params.max_results &&
+          resultCollection.length >= params.max_results
+        ) {
+          break;
+        }
+
         nextToken = nextResult.meta.next_token;
       }
 
@@ -421,7 +434,10 @@ export class TwitterService
     const tweets = await this.fetchInternal(
       {
         user_id: params.userDetails.user_id,
-        start_time: new Date(params.start_time).toISOString(),
+        start_time:
+          params.start_time !== 0
+            ? new Date(params.start_time).toISOString()
+            : undefined,
         end_time: params.end_time
           ? new Date(params.end_time).toISOString()
           : undefined,

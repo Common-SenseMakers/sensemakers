@@ -9,9 +9,6 @@ import { PlatformManager } from '../user-login/PlaformManager';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 
 export const AppHome = (props: {}) => {
-  const navigate = useNavigate();
-  const { t } = useTranslation();
-
   const { isConnected } = useAccountContext();
 
   const content = (() => {

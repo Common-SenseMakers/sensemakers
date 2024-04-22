@@ -65,6 +65,7 @@ export class PostsManager {
                   ? account.read.lastFetchedMs
                   : account.signupDate,
                 userDetails: account,
+                max_results: 10,
               };
 
               /** Fetch */
