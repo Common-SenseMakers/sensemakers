@@ -1,4 +1,5 @@
 import re
+import string
 from typing import List, Tuple
 
 from langchain_core.prompts import ChatPromptTemplate
@@ -9,6 +10,9 @@ from . import ParserChainOutput
 from ..configs import ParserChainType, PostProcessType
 
 ALLOWED_TERMS_DELIMITER = "##Allowed terms: "
+
+# https://stackoverflow.com/questions/265960/best-way-to-strip-punctuation-from-a-string
+PUNCTUATION_CHARS = "".join(set(string.punctuation))
 
 
 def detect_academic_kw(keywords: List[str]) -> Tuple[str, List[str]]:
@@ -60,7 +64,9 @@ def extract_unique_keywords(input_str: str) -> List[str]:
     # Extract words that start with '#' and remove the '#' prefix
     # Use a set to ensure uniqueness and strip punctuation from each keyword
     keywords = {
-        word.strip("#").rstrip(":,. ") for word in words if word.startswith("#")
+        word.strip("#").rstrip(PUNCTUATION_CHARS)
+        for word in words
+        if word.startswith("#")
     }
     return list(keywords)
 
