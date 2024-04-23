@@ -1,4 +1,5 @@
 import { Nanopub } from '@nanopub/sign';
+import { TransactionManager } from 'src/db/transaction.manager';
 import { verifyMessage } from 'viem';
 
 import { PLATFORM, UserDetailsBase } from '../../@shared/types/types';
@@ -110,7 +111,8 @@ export class NanopubService
    * a list of the updated platformPosts
    */
   async publish(
-    postPublish: PlatformPostPublish
+    postPublish: PlatformPostPublish<any>,
+    _manager: TransactionManager
   ): Promise<PlatformPostPosted<any>> {
     let published: Nanopub | undefined = undefined;
     const draft = new Nanopub(postPublish.draft);
@@ -139,7 +141,6 @@ export class NanopubService
     }
 
     if (published) {
-      console.log('Check info()');
       const platfformPostPosted: PlatformPostPosted = {
         post_id: published.info().uri,
         timestampMs: Date.now(),

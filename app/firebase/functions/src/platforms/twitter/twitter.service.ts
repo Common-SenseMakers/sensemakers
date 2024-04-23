@@ -5,6 +5,7 @@ import {
   TweetV2,
   TweetV2PaginableTimelineResult,
   TweetV2SingleResult,
+  TweetV2UserTimelineParams,
   Tweetv2FieldsParams,
   TwitterApi,
   TwitterApiReadOnly,
@@ -152,10 +153,30 @@ export class TwitterService
 
     /** update user credentials */
     if (newCredentials) {
-      const newDetails = {
-        ...details,
-        [type]: newCredentials,
-      };
+      let newDetails: TwitterUserDetails;
+      /** if the user has both read and write credentials, update both together since write credentials overwrite read credentials */
+      if (details.read !== undefined && details.write !== undefined) {
+        newDetails = {
+          ...details,
+          write: newCredentials,
+          read: {
+            ...newCredentials,
+            lastFetchedMs: details.read.lastFetchedMs,
+          },
+        };
+      } else if (details.read !== undefined) {
+        newDetails = {
+          ...details,
+          read: {
+            ...newCredentials,
+            lastFetchedMs: details.read.lastFetchedMs,
+          },
+        };
+      } else {
+        throw new Error(
+          `Read credentials for user ${details.user_id} not found`
+        );
+      }
 
       this.usersRepo.setPlatformDetails(
         userId,
@@ -349,15 +370,28 @@ export class TwitterService
   ): Promise<TweetV2PaginableTimelineResult['data']> {
     const readOnlyClient = await this.getClient(manager, userDetails, 'read');
 
-    const tweetFields: TTweetv2TweetField[] = ['created_at', 'author_id'];
+    const tweetFields: TTweetv2TweetField[] = [
+      'created_at',
+      'author_id',
+      'text',
+      'entities',
+      // @ts-ignore
+      'note_tweet',
+    ];
+
+    const timelineParams: Partial<TweetV2UserTimelineParams> = {
+      start_time: params.start_time,
+      end_time: params.end_time,
+      max_results: params.max_results ? params.max_results : 100,
+      'tweet.fields': tweetFields,
+      exclude: ['retweets', 'replies'],
+    };
 
     try {
-      const result = await readOnlyClient.v2.userTimeline(params.user_id, {
-        start_time: params.start_time,
-        end_time: params.end_time,
-        max_results: params.max_results,
-        'tweet.fields': tweetFields,
-      });
+      const result = await readOnlyClient.v2.userTimeline(
+        params.user_id,
+        timelineParams
+      );
 
       const resultCollection: TweetV2[] = result.data.data || [];
       let nextToken = result.meta.next_token;
@@ -366,10 +400,7 @@ export class TwitterService
         const nextResult = await readOnlyClient.v2.userTimeline(
           params.user_id,
           {
-            start_time: params.start_time,
-            end_time: params.end_time,
-            max_results: params.max_results,
-            'tweet.fields': tweetFields,
+            ...timelineParams,
             pagination_token: nextToken,
           }
         );

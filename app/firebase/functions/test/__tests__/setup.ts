@@ -3,30 +3,25 @@ import { Context } from 'mocha';
 
 import { AppUser } from '../../src/@shared/types/types';
 import { envDeploy } from '../../src/config/typedenv.deploy';
-import { resetDB } from '../__tests_support__/db';
-import { LocalLogger, LogLevel } from '../__tests_support__/test.logger';
 import {
   TestUserCredentials,
   authenticateTestUser,
 } from '../utils/authenticate.users';
+import { resetDB } from '../utils/db';
 import { getTestServices } from './test.services';
 
 export const LOG_LEVEL_MSG = envDeploy.LOG_LEVEL_MSG.value();
 export const LOG_LEVEL_OBJ = envDeploy.LOG_LEVEL_OBJ.value();
 export const NUM_TEST_USERS = 1;
 export const TEST_USERS_FILE_PATH = './test/__tests__/test.users.json';
-export const MOCK_TWITTER = process.env.MOCK_TWITTERX === 'true';
+export const USE_REAL_TWITTER = process.env.USE_REAL_TWITTERX === 'true';
+export const USE_REAL_NANOPUB = process.env.USE_REAL_NANOPUB === 'true';
+export const USE_REAL_PARSER = process.env.USE_REAL_PARSER === 'true';
 
 export type InjectableContext = Readonly<{
   // properties injected using the Root Mocha Hooks
 }>;
 export let testUsers: Map<string, AppUser> = new Map();
-
-(global as any).logger = new LocalLogger(
-  (LOG_LEVEL_MSG as LogLevel) || LogLevel.warn,
-  (LOG_LEVEL_OBJ as LogLevel) || LogLevel.warn,
-  ['Testing authorization']
-);
 
 // TestContext will be used by all the test
 export type TestContext = Mocha.Context & Context;

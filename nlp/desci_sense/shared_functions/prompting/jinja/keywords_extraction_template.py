@@ -14,7 +14,6 @@ Rules:
 
 
 # Input post text:
-Author: {{ author_name }}
 Content: {{ content }}
 
 {{ references_metadata }}

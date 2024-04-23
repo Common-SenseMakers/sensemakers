@@ -1,5 +1,9 @@
 streamlit==1.28.0
-langchain==0.1.7
+langchain
+langchain-community
+langchain-core
+langchain-openai
+langsmith
 openai==1.12.0
 pytest==7.4.0
 wandb
@@ -14,3 +18,4 @@ notion-client
 python-dotenv
 pydantic-settings
 rdflib
+streamlit-aggrid
