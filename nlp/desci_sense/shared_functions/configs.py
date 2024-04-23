@@ -24,6 +24,7 @@ class ParserChainType(str, Enum):
     KEYWORDS = "keywords"
     REFERENCE_TAGGER = "reference_tagger"
     TOPICS = "topics"
+    HASHTAGS = "hashtags"
 
 
 def validate_env_var(env_var_name: str, value: Union[str, None]):
@@ -141,6 +142,15 @@ class KeywordPParserChainConfig(PostParserChainConfig):
     )
 
 
+class HashtagPParserChainConfig(PostParserChainConfig):
+    type: ParserChainType = ParserChainType.HASHTAGS
+    use_metadata: bool = False
+    max_hashtags: int = Field(
+        default=20,
+        description="Maximum number of hashtags to parse",
+    )
+
+
 class RefTaggerChainConfig(PostParserChainConfig):
     type: ParserChainType = ParserChainType.REFERENCE_TAGGER
 
@@ -158,6 +168,7 @@ class MultiParserChainConfig(BaseSettings):
             KeywordPParserChainConfig,
             RefTaggerChainConfig,
             TopicsPParserChainConfig,
+            HashtagPParserChainConfig,
         ]
     ] = Field(description="List of parser chain configurations", default_factory=list)
     metadata_extract_config: MetadataExtractionConfig = Field(

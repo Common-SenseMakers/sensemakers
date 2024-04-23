@@ -44,6 +44,8 @@ class ParserChainOutput(BaseModel):
             return {self.pparser_type.value: self.answer}
         elif self.pparser_type == ParserChainType.TOPICS:
             return {self.pparser_type.value: self.answer}
+        elif self.pparser_type == ParserChainType.HASHTAGS:
+            return {self.pparser_type.value: self.answer}
         else:
             raise ValueError(f"Unsupported ParserChainType: {self.pparser_type}")
 
@@ -61,6 +63,7 @@ class CombinedParserOutput(BaseModel):
     reference_tagger: List[str] = Field(default_factory=list)
     keywords: List[str] = Field(default_factory=list)
     topics: List[str] = Field(default_factory=list)
+    hashtags: List[str] = Field(default_factory=list)
     metadata_list: List[RefMetadata] = Field(default_factory=list)
     debug: Optional[Dict] = Field(default_factory=dict)
 
@@ -313,6 +316,11 @@ def post_process_firebase(
     required by app interface."""
     semantics = combined_parser_output.reference_tagger
     keywords = combined_parser_output.keywords
+    hashtags = combined_parser_output.hashtags
+
+    # combine keywords and hashtags
+    # https://github.com/Common-SenseMakers/sensemakers/issues/59
+    keywords = list(set(hashtags).union(set(keywords)))
 
     # get metadata
     metadata_list: List[RefMetadata] = combined_parser_output.metadata_list

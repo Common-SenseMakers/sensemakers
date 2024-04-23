@@ -10,6 +10,7 @@ from .configs import (
     KeywordPParserChainConfig,
     RefTaggerChainConfig,
     TopicsPParserChainConfig,
+    HashtagPParserChainConfig,
     validate_env_var,
     MultiParserChainConfig,
     ParserChainType,
@@ -134,6 +135,10 @@ def init_multi_chain_parser_config(
         use_metadata=True,
         llm_config=LLMConfig(llm_type=llm_type),
     )
+    hashtags_config = HashtagPParserChainConfig(
+        name="hashtags",
+        use_metadata=False,
+    )
     # set post process type
     post_process_type = PostProcessType(post_process_type)
 
@@ -147,6 +152,7 @@ def init_multi_chain_parser_config(
             refs_tagger_config,
             topics_config,
             kw_config,
+            hashtags_config,
         ],
         post_process_type=post_process_type,
     )
