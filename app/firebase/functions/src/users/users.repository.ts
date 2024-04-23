@@ -112,13 +112,24 @@ export class UsersRepository {
     return ref.id;
   }
 
+  public async setLastFetched(
+    userId: string,
+    fetchedMs: number,
+    manager: TransactionManager
+  ) {
+    const userRef = await this.getUserRef(userId, manager, true);
+
+    /** overwrite all the user account credentials */
+    manager.update(userRef, { lastFetchedMs: fetchedMs });
+  }
+
   /**
    * Just update the lastFetchedMs value of a given account
    * */
-  public async setLastFetched(
+  public async setAccountLastFetched(
     platform: PLATFORM,
     user_id: string,
-    lastFetchedMs: number,
+    fetchedMs: number,
     manager: TransactionManager
   ) {
     /** check if this platform user_id already exists */
@@ -157,7 +168,7 @@ export class UsersRepository {
     }
 
     /** overwrite the lastFeched value */
-    current.read.lastFetchedMs = lastFetchedMs;
+    current.read.lastFetchedMs = fetchedMs;
 
     const userRef = await this.getUserRef(existingUser.userId, manager, true);
 

@@ -1,7 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import React, { createContext, useContext, useEffect, useMemo } from 'react';
 
+import { getPost } from '../api/post.requests';
 import { subscribeToPost } from '../firestore/realtime.listener';
 import { AppPostFull } from '../shared/types/types.posts';
+import { useAccountContext } from '../user-login/contexts/AccountContext';
 
 interface PostContextType {
   post: AppPostFull | undefined;
@@ -22,11 +25,28 @@ export const PostContext: React.FC<{
     throw new Error(`Both postId and post were defined. Define only one`);
   }
 
-  const [post, setPost] = useState<AppPostFull | undefined>(postInit);
-  const postId = _postId ? _postId : (postInit as unknown as AppPostFull).id;
+  const { token } = useAccountContext();
 
+  const postId = useMemo(
+    () => (_postId ? _postId : (postInit as unknown as AppPostFull).id),
+    [_postId, postInit]
+  );
+
+  /** if postInit not provided get post from the DB */
+  const { data: post, refetch } = useQuery({
+    queryKey: ['postId'],
+    queryFn: () => {
+      if (postId && token) {
+        return getPost(postId, token);
+      }
+    },
+  });
+
+  /**
+   * subscribe to real time updates of this post and trigger a refetch everytime
+   * one is received*/
   useEffect(() => {
-    const unsubscribe = subscribeToPost(postId, setPost);
+    const unsubscribe = subscribeToPost(postId, refetch);
     return () => unsubscribe();
   }, []);
 

@@ -3,11 +3,13 @@ import axios from 'axios';
 import { FUNCTIONS_BASE } from '../app/config';
 import { AppPostFull } from '../shared/types/types.posts';
 
-/** Get pending posts */
-export const getUserPosts = async (
+/**
+ * Triggers and awaits the fetch action for a given user.
+ * */
+export const fetchUserPosts = async (
   userId: string,
   appAccessToken: string
-): Promise<AppPostFull[]> => {
+): Promise<boolean> => {
   const res = await axios.post(
     FUNCTIONS_BASE + '/posts/fetch',
     { userId },
@@ -18,5 +20,46 @@ export const getUserPosts = async (
     }
   );
 
+  return res.data.success;
+};
+
+/**
+ * Get user AppPosts. It reads from our DB and does
+ * not triffer any refetch from any platform
+ * */
+export const getUserPosts = async (
+  userId: string,
+  appAccessToken: string
+): Promise<AppPostFull[]> => {
+  const res = await axios.post(
+    FUNCTIONS_BASE + '/posts/getOfUser',
+    { userId },
+    {
+      headers: {
+        Authorization: `Bearer ${appAccessToken}`,
+      },
+    }
+  );
+
   return res.data.posts;
+};
+
+/**
+ * Get one AppPosts
+ * */
+export const getPost = async (
+  postId: string,
+  appAccessToken: string
+): Promise<AppPostFull> => {
+  const res = await axios.post(
+    FUNCTIONS_BASE + '/posts/get',
+    { postId },
+    {
+      headers: {
+        Authorization: `Bearer ${appAccessToken}`,
+      },
+    }
+  );
+
+  return res.data.post;
 };

@@ -54,3 +54,4 @@ export const NANOPUBS_PUBLISH_SERVERS = [
   'https://np.knowledgepixels.com/',
 ];
 export const POSTS_JOB_SCHEDULE = 'every 2 hours';
+export const FETCH_RATE_LIMIT_MS = 3 * 60 * 1000;

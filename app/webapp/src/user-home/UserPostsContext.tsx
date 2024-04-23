@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import React, { useContext } from 'react';
 import { createContext } from 'react';
 
-import { getUserPosts } from '../api/post.requests';
+import { fetchUserPosts, getUserPosts } from '../api/post.requests';
 import { AppPostFull } from '../shared/types/types.posts';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 
@@ -20,23 +20,37 @@ export const UserPostsContextValue = createContext<PostContextType | undefined>(
 export const UserPostsContext: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
-  const userId = 'some-user-id';
-  const { token } = useAccountContext();
+  const { token, connectedUser } = useAccountContext();
 
+  /** everytime the connected user changes, trigger a fetch */
+  const { data: fetched, refetch: triggerFetch } = useQuery({
+    queryKey: ['fetchUserPosts', connectedUser, token],
+    queryFn: () => {
+      if (connectedUser && token) {
+        return fetchUserPosts(connectedUser.userId, token);
+      }
+      return null;
+    },
+  });
+
+  /** once fetched, get the posts */
   const {
     data: _posts,
     refetch,
     error,
     isFetching,
   } = useQuery({
-    queryKey: ['userPosts', userId, token],
+    queryKey: ['getUserPosts', connectedUser, token],
     queryFn: () => {
-      if (token) {
-        return getUserPosts(userId, token);
+      if (connectedUser && token) {
+        return getUserPosts(connectedUser.userId, token);
       }
       return null;
     },
+    enabled: fetched !== null && fetched !== undefined,
   });
+
+  /** triggering of each post parse is done in the PostContext */
 
   /** convert null to undefined */
   const posts = _posts !== null ? _posts : undefined;

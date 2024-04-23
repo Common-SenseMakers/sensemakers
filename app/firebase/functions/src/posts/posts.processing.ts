@@ -1,3 +1,5 @@
+import { TimeService } from 'src/time/time.service';
+
 import { ALL_PUBLISH_PLATFORMS, DefinedIfTrue } from '../@shared/types/types';
 import {
   PlatformPost,
@@ -24,6 +26,7 @@ import { PostsRepository } from './posts.repository';
 export class PostsProcessing {
   constructor(
     protected users: UsersService,
+    private time: TimeService,
     public posts: PostsRepository,
     public platformPosts: PlatformPostsRepository,
     protected platforms: PlatformsService
@@ -74,6 +77,7 @@ export class PostsProcessing {
         authorId: getPrefixedUserId(platformPost.platformId, user_id),
         content,
         mirrorsIds: [platformPostCreated.id],
+        createdAtMs: this.time.now(),
       },
       manager
     );

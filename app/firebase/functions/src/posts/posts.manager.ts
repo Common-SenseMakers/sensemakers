@@ -1,5 +1,3 @@
-import { TransactionManager } from 'src/db/transaction.manager';
-
 import { ALL_PUBLISH_PLATFORMS, AppUser } from '../@shared/types/types';
 import {
   PARSER_MODE,
@@ -7,11 +5,14 @@ import {
   TopicsParams,
 } from '../@shared/types/types.parser';
 import { PlatformPost } from '../@shared/types/types.platform.posts';
-import { AppPostFull, PostUpdate } from '../@shared/types/types.posts';
+import { AppPost, AppPostFull, PostUpdate } from '../@shared/types/types.posts';
+import { FETCH_RATE_LIMIT_MS } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
+import { TransactionManager } from '../db/transaction.manager';
 import { ParserService } from '../parser/parser.service';
 import { FetchUserPostsParams } from '../platforms/platforms.interface';
 import { PlatformsService } from '../platforms/platforms.service';
+import { TimeService } from '../time/time.service';
 import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { PostsProcessing } from './posts.processing';
@@ -23,6 +24,7 @@ import { PostsProcessing } from './posts.processing';
 export class PostsManager {
   constructor(
     protected db: DBInstance,
+    protected time: TimeService,
     protected users: UsersService,
     public processing: PostsProcessing,
     protected platforms: PlatformsService,
@@ -46,17 +48,27 @@ export class PostsManager {
 
   /**
    * Fetch and store platform posts of one user
-   * as one Transaction. It doesn't return anything.
+   * as one Transaction.
    * */
   async fetchUser(
     userId?: string,
     _user?: AppUser,
     _manager?: TransactionManager
   ) {
-    const fetch = async (manager: TransactionManager) => {
+    const fetch = async (manager: TransactionManager): Promise<void> => {
       const user =
         _user ||
         (await this.users.repo.getUser(userId as string, manager, true));
+
+      const now = this.time.now();
+
+      /** reject fetch if latest fetch was too recent */
+      if (now - user.lastFetchedMs <= FETCH_RATE_LIMIT_MS) {
+        const retryAt = user.lastFetchedMs + FETCH_RATE_LIMIT_MS;
+        throw new Error(
+          `Rate limit exceeded for user ${user.userId}. Retry in ${Math.round((retryAt - now) / 1000)} seconds`
+        );
+      }
 
       await Promise.all(
         ALL_PUBLISH_PLATFORMS.map(async (platformId) => {
@@ -77,6 +89,12 @@ export class PostsManager {
               const platformPosts = await this.platforms.fetch(
                 platformId,
                 userParams,
+                manager
+              );
+
+              this.users.repo.setLastFetched(
+                user.userId,
+                this.time.now(),
                 manager
               );
 
@@ -101,35 +119,41 @@ export class PostsManager {
     return this.db.run((manager) => fetch(manager));
   }
 
-  /** parse posts and create drafts on pending platforms */
-  async parse(postIds: string[], manager: TransactionManager) {
-    await this.parsePosts(postIds, manager);
-    /** Create the Drafts */
-    await this.processing.createPostsDrafts(postIds, manager);
+  async parseOfUser(userId: string) {
+    const postIds = await this.processing.posts.getNonParsedOfUser(userId);
+    await this.db.run(async (manager) => {
+      await this.parsePosts(postIds, manager);
+      await this.processing.createPostsDrafts(postIds, manager);
+    });
   }
 
   /** get pending posts AppPostFull of user, cannot be part of a transaction */
-  async getPendingOfUser(userId: string) {
-    const pendingAppPosts =
-      await this.processing.posts.getPendingOfUser(userId);
+  async getOfUser(userId: string) {
+    const pendingAppPosts = await this.processing.posts.getOfUser(userId);
 
     const postsFull = await Promise.all(
-      pendingAppPosts.map(async (post): Promise<AppPostFull> => {
-        const mirrors = await Promise.all(
-          post.mirrorsIds.map((mirrorId) => {
-            return this.db.run((manager) =>
-              this.processing.platformPosts.get(mirrorId, manager)
-            );
-          })
-        );
-        return {
-          ...post,
-          mirrors: mirrors.filter((m) => m !== undefined) as PlatformPost[],
-        };
-      })
+      pendingAppPosts.map((post) => this.appendMirrors(post))
     );
 
     return postsFull;
+  }
+
+  /**
+   * Append full mirrors to AppPost and return AppPostFull
+   * */
+  async appendMirrors(post: AppPost): Promise<AppPostFull> {
+    const mirrors = await Promise.all(
+      post.mirrorsIds.map((mirrorId) => {
+        return this.db.run((manager) =>
+          this.processing.platformPosts.get(mirrorId, manager)
+        );
+      })
+    );
+
+    return {
+      ...post,
+      mirrors: mirrors.filter((m) => m !== undefined) as PlatformPost[],
+    };
   }
 
   async getPost<T extends boolean>(postId: string, shouldThrow: T) {

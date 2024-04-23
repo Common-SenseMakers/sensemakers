@@ -64,7 +64,11 @@ export const createServices = () => {
   });
 
   /** platforms service */
-  const platformsService = new PlatformsService(platformsMap);
+  const platformsService = new PlatformsService(
+    platformsMap,
+    time,
+    usersService
+  );
 
   /** parser service */
   const _parser = new ParserService(FUNCTIONS_PY_URL);
@@ -78,6 +82,7 @@ export const createServices = () => {
   /** posts service */
   const postsProcessing = new PostsProcessing(
     usersService,
+    time,
     postsRepo,
     platformPostsRepo,
     platformsService
@@ -85,6 +90,7 @@ export const createServices = () => {
   // const postsParser = new PostsParser(platformsService, parserService);
   const postsManager = new PostsManager(
     db,
+    time,
     usersService,
     postsProcessing,
     platformsService,

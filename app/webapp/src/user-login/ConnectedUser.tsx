@@ -3,7 +3,6 @@ import { UserExpert } from 'grommet-icons';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { OrcidAnchor } from '../app/anchors/OrcidAnchor';
 import { TwitterProfileAnchor } from '../app/anchors/TwitterAnchor';
 import { PLATFORM } from '../shared/types/types';
 import { AppButton } from '../ui-components';
@@ -24,26 +23,14 @@ export const ConnectedUser = (props: {}) => {
   const [showDrop, setShowDrop] = useState<boolean>(false);
 
   const nanopubDetails =
-    connectedUser && connectedUser[PLATFORM.Nanopub]
+    connectedUser && connectedUser[PLATFORM.Nanopub]?.length
       ? connectedUser[PLATFORM.Nanopub][0].profile
       : undefined;
 
   const twitterDetails =
-    connectedUser && connectedUser[PLATFORM.Twitter]
+    connectedUser && connectedUser[PLATFORM.Twitter]?.length
       ? connectedUser[PLATFORM.Twitter][0].profile
       : undefined;
-
-  const orcidDetails =
-    connectedUser && connectedUser[PLATFORM.Orcid]
-      ? connectedUser[PLATFORM.Orcid][0].profile
-      : undefined;
-
-  const name = useMemo(() => {
-    const parts = orcidDetails ? orcidDetails.name.split(' ') : undefined;
-    if (!parts) return '';
-    if (parts.length > 2) return `${parts[0]} ${parts[2]}`;
-    return `${parts[0]} ${parts[1]}`;
-  }, [orcidDetails?.name]);
 
   const content = (() => {
     if (!isConnected) {
@@ -59,7 +46,7 @@ export const ConnectedUser = (props: {}) => {
               color={constants.colors.primary}
               style={{ margin: '2px 0px 0px 5px' }}></UserExpert>
             <Text margin={{ left: 'small' }} style={{ flexShrink: 0 }}>
-              {name}
+              {twitterDetails?.username}
             </Text>
           </Box>
         }
@@ -68,11 +55,6 @@ export const ConnectedUser = (props: {}) => {
         onOpen={() => setShowDrop(true)}
         dropContent={
           <Box pad="20px" gap="small" style={{ width: '220px' }}>
-            <Box margin={{ bottom: 'small' }}>
-              <Text>{cap(t('orcid'))}</Text>
-              <OrcidAnchor orcid={orcidDetails?.name}></OrcidAnchor>
-            </Box>
-
             {connectedUser?.twitter ? (
               <Box margin={{ bottom: 'small' }}>
                 <Text>{cap(t('twitter'))}</Text>

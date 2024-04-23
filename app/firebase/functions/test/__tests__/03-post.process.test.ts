@@ -77,7 +77,7 @@ describe('03-process', () => {
           );
 
         /** set lastFetched to one second before the last tweet timestamp */
-        await services.users.repo.setLastFetched(
+        await services.users.repo.setAccountLastFetched(
           PLATFORM.Twitter,
           user_id,
           tweet.timestampMs - 1000,

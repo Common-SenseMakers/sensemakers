@@ -6,7 +6,11 @@ import { POSTS_JOB_SCHEDULE } from './config/config.runtime';
 import { envDeploy } from './config/typedenv.deploy';
 import { envRuntime } from './config/typedenv.runtime';
 import { buildApp } from './instances/app';
-import { fetchUserPostsController } from './posts/controllers/posts.controller';
+import {
+  fetchUserPostsController,
+  getPostController,
+  getUserPostsController,
+} from './posts/controllers/posts.controller';
 import { fetchNewPosts } from './posts/posts.job';
 import { getLoggedUserController } from './users/controllers/get.logged.controller';
 import {
@@ -19,7 +23,10 @@ const router = express.Router();
 router.post('/auth/:platform/context', getSignupContextController);
 router.post('/auth/:platform/signup', handleSignupController);
 router.post('/auth/me', getLoggedUserController);
+
+router.post('/posts/getOfUser', getUserPostsController);
 router.post('/posts/fetch', fetchUserPostsController);
+router.post('/posts/get', getPostController);
 
 export const app = functions
   .region(envDeploy.REGION)

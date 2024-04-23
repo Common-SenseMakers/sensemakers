@@ -1,3 +1,6 @@
+import { TimeService } from 'src/time/time.service';
+import { UsersService } from 'src/users/users.service';
+
 import {
   PLATFORM,
   PUBLISHABLE_PLATFORMS,
@@ -27,7 +30,11 @@ export type IdentityServicesMap = Map<
 
 /** a wrapper of the PlatformSerivces to get defined and typed Platform services */
 export class PlatformsService {
-  constructor(protected platforms: PlatformsMap) {}
+  constructor(
+    protected platforms: PlatformsMap,
+    protected time: TimeService,
+    protected users: UsersService
+  ) {}
 
   // TODO set the return type depending on the value of platformId
   public get<T extends PlatformService>(platformId: PLATFORM): T {
@@ -45,6 +52,12 @@ export class PlatformsService {
   ) {
     /** all fetched posts from one platform */
     const fetched = await this.get(platformId).fetch(params, manager);
+    this.users.repo.setAccountLastFetched(
+      platformId,
+      params.userDetails.user_id,
+      this.time.now(),
+      manager
+    );
 
     /** convert them into a PlatformPost */
     return fetched.map((fetchedPost) => {

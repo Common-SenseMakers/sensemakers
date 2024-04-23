@@ -6,6 +6,7 @@ import {
   HandleSignupResult,
   OurTokenConfig,
   PLATFORM,
+  UserDetailsReadBase,
   UserWithPlatformIds,
 } from '../@shared/types/types';
 import { TransactionManager } from '../db/transaction.manager';
@@ -166,6 +167,7 @@ export class UsersService {
         await this.repo.createUser(
           prefixed_user_id,
           {
+            lastFetchedMs: 0,
             [platformIds_property]: [prefixed_user_id],
             [platform]: [authenticatedDetails],
           },
@@ -207,8 +209,14 @@ export class UsersService {
 
     ALL_IDENTITY_PLATFORMS.forEach((platform) => {
       const accounts = UsersHelper.getAccounts(user, platform);
+
+      /** initialize */
+      userRead[platform] = [];
+
       accounts.forEach((account) => {
-        userRead[platform] = account.profile;
+        (userRead[platform] as UserDetailsReadBase<any['profile']>[]).push(
+          account.profile
+        );
       });
     });
 
