@@ -1,12 +1,9 @@
 import { spy, when } from 'ts-mockito';
 
 import { PLATFORM } from '../../src/@shared/types/types';
-import {
-  ParsePostResult,
-  SciFilterClassfication,
-} from '../../src/@shared/types/types.parser';
 import { DBInstance } from '../../src/db/instance';
 import { Services } from '../../src/instances/services';
+import { getParserMock } from '../../src/parser/mock/parser.service.mock';
 import { ParserService } from '../../src/parser/parser.service';
 import { NanopubService } from '../../src/platforms/nanopub/nanopub.service';
 import { OrcidService } from '../../src/platforms/orcid/orcid.service';
@@ -24,17 +21,8 @@ import { TimeService } from '../../src/time/time.service';
 import { UsersRepository } from '../../src/users/users.repository';
 import { UsersService } from '../../src/users/users.service';
 import { getNanopubMock } from './mocks/nanopub.service.mock';
-import { getParserMock } from './mocks/parser.service.mock';
 import { getTwitterMock } from './mocks/twitter.service.mock';
 import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
-
-export const MOCKED_SEMANTICS =
-  '<http://example.org/mosquito> <http://example.org/transmits> <http://example.org/malaria> .';
-
-export const MOCKED_PARSER_RESULT: ParsePostResult = {
-  filter_clasification: SciFilterClassfication.RESEARCH,
-  semantics: MOCKED_SEMANTICS,
-};
 
 export const getTestServices = () => {
   const mandatory = ['TWITTER_CLIENT_ID', 'TWITTER_CLIENT_SECRET'];

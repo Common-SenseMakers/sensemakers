@@ -5,8 +5,10 @@ import {
   OUR_TOKEN_SECRET,
   TWITTER_CLIENT_ID,
   TWITTER_CLIENT_SECRET,
+  USE_REAL_PARSER,
 } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
+import { getParserMock } from '../parser/mock/parser.service.mock';
 import { ParserService } from '../parser/parser.service';
 // import { ParserService } from '../parser/parser.service';
 import { OrcidService } from '../platforms/orcid/orcid.service';
@@ -65,7 +67,13 @@ export const createServices = () => {
   const platformsService = new PlatformsService(platformsMap);
 
   /** parser service */
-  const parser = new ParserService(FUNCTIONS_PY_URL);
+  const _parser = new ParserService(FUNCTIONS_PY_URL);
+  const parser = (() => {
+    if (!USE_REAL_PARSER) {
+      return getParserMock(_parser);
+    }
+    return _parser;
+  })();
 
   /** posts service */
   const postsProcessing = new PostsProcessing(

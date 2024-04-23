@@ -1,10 +1,20 @@
 import * as fs from 'fs';
 import { anything, instance, spy, when } from 'ts-mockito';
 
-import { ParsePostResult } from '../../../src/@shared/types/types.parser';
-import { logger } from '../../../src/instances/logger';
-import { ParserService } from '../../../src/parser/parser.service';
-import { MOCKED_PARSER_RESULT } from '../test.services';
+import {
+  ParsePostResult,
+  SciFilterClassfication,
+} from '../../@shared/types/types.parser';
+import { logger } from '../../instances/logger';
+import { ParserService } from '../parser.service';
+
+export const MOCKED_SEMANTICS =
+  '<http://example.org/mosquito> <http://example.org/transmits> <http://example.org/malaria> .';
+
+export const MOCKED_PARSER_RESULT: ParsePostResult = {
+  filter_clasification: SciFilterClassfication.RESEARCH,
+  semantics: MOCKED_SEMANTICS,
+};
 
 export const getParserMock = (parserService: ParserService) => {
   const Mocked = spy(parserService);
