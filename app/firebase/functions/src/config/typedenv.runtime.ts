@@ -1,9 +1,13 @@
-import { defineSecret, defineString } from 'firebase-functions/params';
+import {
+  defineBoolean,
+  defineSecret,
+  defineString,
+} from 'firebase-functions/params';
 
 const ORCID_CLIENT_ID = defineString('ORCID_CLIENT_ID');
 const TWITTER_CLIENT_ID = defineString('TWITTER_CLIENT_ID');
 
-const USE_REAL_PARSER = defineString('USE_REAL_PARSER');
+const USE_REAL_PARSER = defineBoolean('USE_REAL_PARSER');
 
 const ORCID_SECRET = defineSecret('ORCID_SECRET');
 const OUR_TOKEN_SECRET = defineSecret('OUR_TOKEN_SECRET');

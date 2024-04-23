@@ -70,9 +70,6 @@ export const handleSignupController: RequestHandler = async (
         throw new Error(`error handling signup`);
       }
 
-      /** autofetch at signup */
-      await services.postsManager.fetchUser(result.userId, undefined, manager);
-
       return result;
     });
 

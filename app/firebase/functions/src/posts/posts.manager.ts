@@ -53,7 +53,7 @@ export class PostsManager {
     _user?: AppUser,
     _manager?: TransactionManager
   ) {
-    const func = async (manager: TransactionManager) => {
+    const fetch = async (manager: TransactionManager) => {
       const user =
         _user ||
         (await this.users.repo.getUser(userId as string, manager, true));
@@ -87,18 +87,6 @@ export class PostsManager {
                   manager
                 );
 
-              const postIds = platformPostsCreated.map((pp) => pp.post.id);
-              await this.parsePosts(postIds, manager);
-
-              /** Create the Drafts */
-              await this.processing.createPostsDrafts(
-                postIds,
-                ALL_PUBLISH_PLATFORMS.filter(
-                  (_platformId) => _platformId !== platformId
-                ),
-                manager
-              );
-
               return platformPostsCreated;
             })
           );
@@ -106,8 +94,18 @@ export class PostsManager {
       );
     };
 
-    if (_manager) return func(_manager);
-    return this.db.run((manager) => func(manager));
+    /** can be called as part of a transaction or independently */
+    if (_manager) {
+      return fetch(_manager);
+    }
+    return this.db.run((manager) => fetch(manager));
+  }
+
+  /** parse posts and create drafts on pending platforms */
+  async parse(postIds: string[], manager: TransactionManager) {
+    await this.parsePosts(postIds, manager);
+    /** Create the Drafts */
+    await this.processing.createPostsDrafts(postIds, manager);
   }
 
   /** get pending posts AppPostFull of user, cannot be part of a transaction */

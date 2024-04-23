@@ -1,4 +1,4 @@
-import { DefinedIfTrue, PUBLISHABLE_PLATFORMS } from '../@shared/types/types';
+import { ALL_PUBLISH_PLATFORMS, DefinedIfTrue } from '../@shared/types/types';
 import {
   PlatformPost,
   PlatformPostCreate,
@@ -96,25 +96,17 @@ export class PostsProcessing {
   }
 
   /** Wrapper to create drafts for many posts */
-  async createPostsDrafts(
-    postIds: string[],
-    draftsPlatforms: PUBLISHABLE_PLATFORMS[],
-    manager: TransactionManager
-  ) {
+  async createPostsDrafts(postIds: string[], manager: TransactionManager) {
     const drafts = await Promise.all(
       postIds.map(async (postId) => {
-        await this.createPostDrafts(postId, draftsPlatforms, manager);
+        await this.createPostDrafts(postId, manager);
       })
     );
     return drafts.flat();
   }
 
   /** Store all platform posts */
-  async createPostDrafts(
-    postId: string,
-    draftsPlatforms: PUBLISHABLE_PLATFORMS[],
-    manager: TransactionManager
-  ) {
+  async createPostDrafts(postId: string, manager: TransactionManager) {
     const appPostFull = await this.getPostFull(postId, manager, true);
 
     const user = await this.users.repo.getUser(
@@ -123,11 +115,18 @@ export class PostsProcessing {
       true
     );
 
+    const postedPlatforms = appPostFull.mirrors
+      .filter((m) => m.publishStatus === 'published')
+      .map((m) => m.platformId);
+    const pendingPlatforms = ALL_PUBLISH_PLATFORMS.filter(
+      (p) => !postedPlatforms.includes(p)
+    );
+
     /**
      * Create platformPosts as drafts on all platforms
      * */
     const drafts = await Promise.all(
-      draftsPlatforms.map(async (platformId) => {
+      pendingPlatforms.map(async (platformId) => {
         const accounts = UsersHelper.getAccounts(user, platformId);
 
         return Promise.all(
