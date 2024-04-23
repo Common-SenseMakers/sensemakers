@@ -3,6 +3,7 @@ import { createContext, useContext, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import { AppHome } from '../pages/AppHome';
+import { PostView } from '../post/PostView';
 import { RouteNames } from '../route.names';
 import { GlobalNav } from './layout/GlobalNav';
 import { MAX_WIDTH_APP, ViewportContainer } from './layout/Viewport';
@@ -37,6 +38,9 @@ export const AppContainer = (props: React.PropsWithChildren) => {
             <Route
               path={RouteNames.AppHome}
               element={<AppHome></AppHome>}></Route>
+            <Route
+              path={RouteNames.PostView}
+              element={<PostView></PostView>}></Route>
           </Routes>
         </Box>
       </ViewportContainer>
