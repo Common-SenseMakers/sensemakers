@@ -1,7 +1,7 @@
 import { PropsWithChildren, createContext, useContext } from 'react';
 
 import { useAccountContext } from './AccountContext';
-import { useNanopubContext } from './platforms/NanopubContext';
+import { useNanopubContext } from './platforms/nanopubs/NanopubContext';
 import { useAppSigner } from './signer/SignerContext';
 
 const DEBUG = false;

@@ -6,12 +6,12 @@ import {
 } from '../@shared/types/types.parser';
 import { PlatformPost } from '../@shared/types/types.platform.posts';
 import { AppPost, AppPostFull, PostUpdate } from '../@shared/types/types.posts';
+import { UsersHelper } from '../@shared/utils/users.helper';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { ParserService } from '../parser/parser.service';
 import { FetchUserPostsParams } from '../platforms/platforms.interface';
 import { PlatformsService } from '../platforms/platforms.service';
-import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { PostsProcessing } from './posts.processing';
 

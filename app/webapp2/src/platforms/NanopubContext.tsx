@@ -20,7 +20,7 @@ import { cleanPrivateKey } from '../shared/utils/semantics.helper';
 import { getEthToRSAMessage } from '../shared/utils/sig.utils';
 import { useAppSigner } from '../signer/SignerContext';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export type NanopubContextType = {
   profile?: NpProfile;

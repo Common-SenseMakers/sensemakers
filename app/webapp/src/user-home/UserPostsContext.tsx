@@ -2,11 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import React, { useContext } from 'react';
 import { createContext } from 'react';
 
-import {
-  fetchUserPosts,
-  getUserPosts,
-  triggerUserPosts,
-} from '../api/post.requests';
+import { useAppFetch } from '../api/app.fetch';
 import { AppPostFull } from '../shared/types/types.posts';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 
@@ -24,6 +20,7 @@ export const UserPostsContext: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
   const { token, connectedUser } = useAccountContext();
+  const appFetch = useAppFetch();
 
   /** everytime the connected user changes, trigger a fetch */
   const {
@@ -34,7 +31,7 @@ export const UserPostsContext: React.FC<{
     queryKey: ['fetchUserPosts', connectedUser, token],
     queryFn: () => {
       if (connectedUser && token) {
-        return fetchUserPosts(connectedUser.userId, token);
+        return appFetch('/posts/fetch', { userId: connectedUser.userId });
       }
       return null;
     },
@@ -51,7 +48,7 @@ export const UserPostsContext: React.FC<{
     queryKey: ['getUserPosts', connectedUser, token],
     queryFn: () => {
       if (connectedUser && token) {
-        return getUserPosts(connectedUser.userId, token);
+        return appFetch('/posts/getOfUser', { userId: connectedUser.userId });
       }
       return null;
     },
@@ -65,7 +62,9 @@ export const UserPostsContext: React.FC<{
     queryKey: ['triggerUserPosts', connectedUser, token],
     queryFn: () => {
       if (connectedUser && token) {
-        return triggerUserPosts(connectedUser.userId, token);
+        return appFetch('/posts/triggerParse', {
+          userId: connectedUser.userId,
+        });
       }
       return null;
     },

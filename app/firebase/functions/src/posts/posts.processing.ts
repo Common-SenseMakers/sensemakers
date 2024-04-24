@@ -11,9 +11,9 @@ import {
   AppPostCreate,
   AppPostFull,
 } from '../@shared/types/types.posts';
+import { UsersHelper } from '../@shared/utils/users.helper';
 import { TransactionManager } from '../db/transaction.manager';
 import { PlatformsService } from '../platforms/platforms.service';
-import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { getPrefixedUserId } from '../users/users.utils';
 import { PlatformPostsRepository } from './platform.posts.repository';

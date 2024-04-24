@@ -5,7 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { AbsoluteRoutes } from '../route.names';
 import { AppButton } from '../ui-components';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
-import { useNanopubContext } from '../user-login/contexts/platforms/NanopubContext';
+import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { usePost } from './PostContext';
 
 export const PostView = () => {

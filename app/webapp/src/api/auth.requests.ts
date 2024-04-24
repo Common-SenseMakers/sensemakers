@@ -8,22 +8,6 @@ export const postOrcidCode = async (code: string) => {
   return res.data.token;
 };
 
-export const revokeTwitterCredentials = async (
-  appAccessToken: string
-): Promise<string> => {
-  const res = await axios.post(
-    FUNCTIONS_BASE + '/auth/twitter-revoke',
-    {},
-    {
-      headers: {
-        authorization: `Bearer ${appAccessToken}`,
-      },
-    }
-  );
-
-  return res.data.revokeLink;
-};
-
 export const postTwitterVerifierToken = async (
   appAccessToken: string,
   oauth: { oauth_token: string; oauth_verifier: string }

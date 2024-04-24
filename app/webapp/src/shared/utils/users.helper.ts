@@ -4,7 +4,7 @@ import {
   IDENTITY_PLATFORMS,
   PUBLISHABLE_PLATFORMS,
   UserDetailsBase,
-} from '../@shared/types/types';
+} from '../types/types';
 
 export class UsersHelper {
   /**

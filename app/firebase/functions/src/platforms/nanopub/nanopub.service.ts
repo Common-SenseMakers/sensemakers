@@ -19,10 +19,10 @@ import {
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
 import { getRsaToEthMessage } from '../../@shared/utils/sig.utils';
+import { UsersHelper } from '../../@shared/utils/users.helper';
 import { NANOPUBS_PUBLISH_SERVERS } from '../../config/config.runtime';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
-import { UsersHelper } from '../../users/users.helper';
 import { FetchUserPostsParams, PlatformService } from '../platforms.interface';
 import { createIntroNanopublication } from './create.intro.nanopub';
 import { createNanopublication } from './create.nanopub';

@@ -3,8 +3,8 @@ import { PropsWithChildren, createContext, useContext } from 'react';
 
 import { AccountContext } from './AccountContext';
 import { ConnectedUserContext } from './ConnectedUserContext';
-import { NanopubContext } from './platforms/NanopubContext';
 import { TwitterContext } from './platforms/TwitterContext';
+import { NanopubContext } from './platforms/nanopubs/NanopubContext';
 import { ConnectedWallet } from './signer/ConnectedWalletContext';
 import { SignerContext } from './signer/SignerContext';
 
