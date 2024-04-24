@@ -78,13 +78,20 @@ export interface AppUser extends UserWithId, UserWithPlatformIds {
 export type AppUserCreate = Omit<AppUser, 'userId'>;
 
 /**
- * The AppUserRead replaces the details with read details (keeps the profile and users
- * boolean flags for the read and write properties)
+ * The AppUserRead replaces the details with read details (keeps the profile)
  */
+
+export interface AccountDetailsRead<P> {
+  user_id: string;
+  profile: P;
+  read: boolean;
+  write: boolean;
+}
+
 export interface AppUserRead extends UserWithId {
-  [PLATFORM.Orcid]?: UserDetailsReadBase<OrcidUserDetails['profile']>[];
-  [PLATFORM.Twitter]?: UserDetailsReadBase<TwitterUserDetails['profile']>[];
-  [PLATFORM.Nanopub]?: UserDetailsReadBase<NanopubUserDetails['profile']>[];
+  [PLATFORM.Orcid]?: AccountDetailsRead<OrcidUserDetails['profile']>[];
+  [PLATFORM.Twitter]?: AccountDetailsRead<TwitterUserDetails['profile']>[];
+  [PLATFORM.Nanopub]?: AccountDetailsRead<NanopubUserDetails['profile']>[];
 }
 
 /** Support types */

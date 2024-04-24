@@ -2,11 +2,11 @@ import * as jwt from 'jsonwebtoken';
 
 import {
   ALL_IDENTITY_PLATFORMS,
+  AccountDetailsRead,
   AppUserRead,
   HandleSignupResult,
   OurTokenConfig,
   PLATFORM,
-  UserDetailsReadBase,
   UserWithPlatformIds,
 } from '../@shared/types/types';
 import { TransactionManager } from '../db/transaction.manager';
@@ -209,13 +209,16 @@ export class UsersService {
     ALL_IDENTITY_PLATFORMS.forEach((platform) => {
       const accounts = UsersHelper.getAccounts(user, platform);
 
-      /** initialize */
-      userRead[platform] = [];
-
       accounts.forEach((account) => {
-        (userRead[platform] as UserDetailsReadBase<any['profile']>[]).push(
-          account.profile
-        );
+        const current = userRead[platform] || [];
+        current.push({
+          user_id: account.user_id,
+          profile: account.profile,
+          read: account.read !== undefined,
+          write: account.write !== undefined,
+        });
+
+        userRead[platform] = current as AccountDetailsRead<any>[];
       });
     });
 

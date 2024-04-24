@@ -25,17 +25,17 @@ export const ConnectedUser = (props: {}) => {
 
   const nanopubDetails =
     connectedUser && connectedUser[PLATFORM.Nanopub]
-      ? connectedUser[PLATFORM.Nanopub][0].profile
+      ? connectedUser[PLATFORM.Nanopub][0]
       : undefined;
 
   const twitterDetails =
     connectedUser && connectedUser[PLATFORM.Twitter]
-      ? connectedUser[PLATFORM.Twitter][0].profile
+      ? connectedUser[PLATFORM.Twitter][0]
       : undefined;
 
   const orcidDetails =
     connectedUser && connectedUser[PLATFORM.Orcid]
-      ? connectedUser[PLATFORM.Orcid][0].profile
+      ? connectedUser[PLATFORM.Orcid][0]
       : undefined;
 
   const name = useMemo(() => {
