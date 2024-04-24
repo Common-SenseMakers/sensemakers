@@ -2,6 +2,7 @@ import { RequestHandler } from 'express';
 
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
+import { enqueueParseUserPosts } from '../posts.task';
 import { getPostSchema } from './posts.schema';
 
 const DEBUG = true;
@@ -56,11 +57,7 @@ export const triggerParseController: RequestHandler = async (
 ) => {
   try {
     const userId = getAuthenticatedUser(request, true);
-    const { postsManager } = getServices(request);
-
-    /** TODO: Convert into async task call */
-    await postsManager.parseOfUser(userId);
-
+    await enqueueParseUserPosts(userId);
     if (DEBUG) logger.debug(`${request.path}: parse triggered`, { userId });
     response.status(200).send({ success: true });
   } catch (error) {
