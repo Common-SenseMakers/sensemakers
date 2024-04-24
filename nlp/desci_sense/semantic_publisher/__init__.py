@@ -58,7 +58,7 @@ def create_triples_from_combined_result(combined_result_dict: CombinedParserOutp
     predicted_predicates = combined_result.reference_tagger
 
     # if no predicates were predicted, add the default predicate
-    if len(predicted_predicates) == 0:
+    if len(predicted_predicates) == 0 and len(ref_links) > 0:
         predicted_predicates = [DEFAULT_PREDICATE_LABEL]
 
     # create table of all extracted triples
