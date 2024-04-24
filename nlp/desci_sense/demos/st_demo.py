@@ -24,6 +24,7 @@ from confection import Config
 sys.path.append(str(Path(__file__).parents[2]))
 
 from desci_sense.shared_functions.schema.post import RefPost
+from desci_sense.shared_functions.filters import SciFilterClassfication
 from desci_sense.shared_functions.configs import (
     MetadataExtractionType,
 )
@@ -397,19 +398,29 @@ if __name__ == "__main__":
 
         if st.session_state.clicked_run:
             if "keywords" in st.session_state.result:
-                selected = st.multiselect(
+                selected_kws = st.multiselect(
                     "Predicted keywords",
                     st.session_state.result["keywords"],
                     st.session_state.result["keywords"],
                     disabled=True,
                 )
             if "topics" in st.session_state.result:
-                selected = st.multiselect(
+                selected_topics = st.multiselect(
                     "Predicted topics",
                     st.session_state.result["topics"],
                     st.session_state.result["topics"],
                     disabled=True,
                 )
+            if "filter_classification" in st.session_state.result:
+                sci_filter_opts = [x.value for x in SciFilterClassfication]
+                filter_result = st.session_state.result["filter_classification"].value
+                selected_filter = st.selectbox(
+                    "Predicted research filter",
+                    sci_filter_opts,
+                    index=sci_filter_opts.index(filter_result),
+                    disabled=True,
+                )
+
                 # Convert the input string to lower case for case-insensitive comparison
                 # academic_kw = st.session_state.result["academic_kw"]
                 # is_academic = academic_kw.lower() == "academic"
