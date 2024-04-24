@@ -7,12 +7,7 @@ import { GlobalStyles } from './app/layout/GlobalStyles';
 import { i18n } from './i18n/i18n';
 import { ResponsiveApp } from './ui-components/ResponsiveApp';
 import { ThemedApp } from './ui-components/ThemedApp';
-import { AccountContext } from './user-login/contexts/AccountContext';
-import { DisconnectContext } from './user-login/contexts/DisconnectContext';
-import { NanopubContext } from './user-login/contexts/platforms/NanopubContext';
-import { TwitterContext } from './user-login/contexts/platforms/TwitterContext';
-import { ConnectedWallet } from './user-login/contexts/signer/ConnectedWalletContext';
-import { SignerContext } from './user-login/contexts/signer/SignerContext';
+import { ConnectedUserWrapper } from './user-login/contexts/ConnectedUserWrapper';
 
 function App() {
   return (
@@ -20,24 +15,14 @@ function App() {
       <I18nextProvider i18n={i18n}>
         <ToastsContext>
           <BrowserRouter>
-            <AccountContext>
-              <ConnectedWallet>
-                <SignerContext>
-                  <TwitterContext>
-                    <NanopubContext>
-                      <DisconnectContext>
-                        <GlobalStyles />
-                        <ThemedApp>
-                          <ResponsiveApp>
-                            <AppContainer></AppContainer>
-                          </ResponsiveApp>
-                        </ThemedApp>
-                      </DisconnectContext>
-                    </NanopubContext>
-                  </TwitterContext>
-                </SignerContext>
-              </ConnectedWallet>
-            </AccountContext>
+            <ConnectedUserWrapper>
+              <GlobalStyles />
+              <ThemedApp>
+                <ResponsiveApp>
+                  <AppContainer></AppContainer>
+                </ResponsiveApp>
+              </ThemedApp>
+            </ConnectedUserWrapper>
           </BrowserRouter>
         </ToastsContext>
       </I18nextProvider>

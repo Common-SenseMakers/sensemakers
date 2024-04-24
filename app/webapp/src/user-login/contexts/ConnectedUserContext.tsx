@@ -1,11 +1,4 @@
-import {
-  PropsWithChildren,
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from 'react';
+import { PropsWithChildren, createContext, useContext } from 'react';
 
 import { useAccountContext } from './AccountContext';
 import { useNanopubContext } from './platforms/NanopubContext';
@@ -13,16 +6,16 @@ import { useAppSigner } from './signer/SignerContext';
 
 const DEBUG = false;
 
-export type DisconnectContextType = {
+export type ConnectedUserContextType = {
   disconnect: () => void;
 };
 
-const DisconnectContextValue = createContext<DisconnectContextType | undefined>(
-  undefined
-);
+const ConnectedUserContextValue = createContext<
+  ConnectedUserContextType | undefined
+>(undefined);
 
 /** Disconnect from all platforms */
-export const DisconnectContext = (props: PropsWithChildren) => {
+export const ConnectedUserContext = (props: PropsWithChildren) => {
   const { disconnect: disconnectServer } = useAccountContext();
   const { disconnect: disconnectWallet } = useAppSigner();
   const { disconnect: disconnectNanopub } = useNanopubContext();
@@ -34,17 +27,17 @@ export const DisconnectContext = (props: PropsWithChildren) => {
   };
 
   return (
-    <DisconnectContextValue.Provider
+    <ConnectedUserContextValue.Provider
       value={{
         disconnect,
       }}>
       {props.children}
-    </DisconnectContextValue.Provider>
+    </ConnectedUserContextValue.Provider>
   );
 };
 
-export const useDisconnectContext = (): DisconnectContextType => {
-  const context = useContext(DisconnectContextValue);
+export const useDisconnectContext = (): ConnectedUserContextType => {
+  const context = useContext(ConnectedUserContextValue);
   if (!context) throw Error('context not found');
   return context;
 };

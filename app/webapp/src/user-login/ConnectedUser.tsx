@@ -10,7 +10,7 @@ import { AppAddress } from '../ui-components/AppAddress';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { cap } from '../utils/general';
 import { useAccountContext } from './contexts/AccountContext';
-import { useDisconnectContext } from './contexts/DisconnectContext';
+import { useDisconnectContext } from './contexts/ConnectedUserContext';
 
 export const ConnectedUser = (props: {}) => {
   const { t } = useTranslation();

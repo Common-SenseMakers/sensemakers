@@ -4,10 +4,18 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import { AbsoluteRoutes } from '../route.names';
 import { AppButton } from '../ui-components';
-import { PostContext, usePost } from './PostContext';
+import { useAccountContext } from '../user-login/contexts/AccountContext';
+import { useNanopubContext } from '../user-login/contexts/platforms/NanopubContext';
+import { usePost } from './PostContext';
 
 export const PostView = () => {
   const { post } = usePost();
+  const { connectedUser } = useAccountContext();
+  const { connect: connectNanopub } = useNanopubContext();
+
+  const canPublish =
+    connectedUser && connectedUser.nanopub && connectedUser.nanopub.length > 0;
+
   const navigate = useNavigate();
   return (
     <Box round="small" pad={{ horizontal: 'medium' }}>
@@ -40,9 +48,15 @@ export const PostView = () => {
         </Box>
         {/* handle rendering of semantic data below */}
         <Footer direction="row" justify="between" margin={{ top: 'medium' }}>
-          <Button label="ignore" />
-          <Button primary label="nanopublish" />
+          <AppButton label="ignore" />
+          <AppButton primary label="nanopublish" disabled={!canPublish} />
         </Footer>
+        <Box>
+          <Text>Please connect your nanopub credentials to publish</Text>
+          <AppButton
+            onClick={() => connectNanopub()}
+            label="connect"></AppButton>
+        </Box>
       </Box>
     </Box>
   );

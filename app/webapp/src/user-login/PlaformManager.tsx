@@ -9,9 +9,7 @@ export const PlatformManager = (props: {}) => {
   const { t } = useTranslation();
   const {
     connect: connectTwitter,
-    revokeApproval: revokeTwitter,
     isConnecting: isConnectingTwitter,
-    isApproving: isApprovingTwitter,
     needConnect: needConnectTwitter,
   } = useTwitterContext();
 
