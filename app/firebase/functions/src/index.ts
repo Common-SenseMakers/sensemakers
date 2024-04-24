@@ -10,6 +10,7 @@ import {
   fetchUserPostsController,
   getPostController,
   getUserPostsController,
+  triggerParseController,
 } from './posts/controllers/posts.controller';
 import { fetchNewPosts } from './posts/posts.job';
 import { getLoggedUserController } from './users/controllers/get.logged.controller';
@@ -27,6 +28,7 @@ router.post('/auth/me', getLoggedUserController);
 router.post('/posts/getOfUser', getUserPostsController);
 router.post('/posts/fetch', fetchUserPostsController);
 router.post('/posts/get', getPostController);
+router.post('/posts/triggerParse', triggerParseController);
 
 export const app = functions
   .region(envDeploy.REGION)

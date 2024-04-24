@@ -58,7 +58,8 @@ export const triggerParseController: RequestHandler = async (
     const userId = getAuthenticatedUser(request, true);
     const { postsManager } = getServices(request);
 
-    postsManager.parseOfUser(userId);
+    /** TODO: Convert into async task call */
+    await postsManager.parseOfUser(userId);
 
     if (DEBUG) logger.debug(`${request.path}: parse triggered`, { userId });
     response.status(200).send({ success: true });

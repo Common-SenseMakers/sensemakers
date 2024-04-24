@@ -45,6 +45,26 @@ export const getUserPosts = async (
 };
 
 /**
+ * Trigger the parsing of all users posts
+ * */
+export const triggerUserPosts = async (
+  userId: string,
+  appAccessToken: string
+): Promise<AppPostFull[]> => {
+  const res = await axios.post(
+    FUNCTIONS_BASE + '/posts/triggerParse',
+    { userId },
+    {
+      headers: {
+        Authorization: `Bearer ${appAccessToken}`,
+      },
+    }
+  );
+
+  return res.data.success;
+};
+
+/**
  * Get one AppPosts
  * */
 export const getPost = async (

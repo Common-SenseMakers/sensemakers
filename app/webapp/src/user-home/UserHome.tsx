@@ -8,7 +8,7 @@ import { useUserPosts } from './UserPostsContext';
 
 export const UserHome = () => {
   const { show } = useToastContext();
-  const { posts, isFetching, error } = useUserPosts();
+  const { posts, isLoading, error } = useUserPosts();
 
   useEffect(() => {
     if (error) {
@@ -18,13 +18,15 @@ export const UserHome = () => {
     }
   }, [error]);
 
-  if (!posts || isFetching) {
+  if (!posts || isLoading) {
     return <Box>Loading...</Box>;
   }
 
   if (posts.length === 0) {
     return <Box>No posts found</Box>;
   }
+
+  console.log({ posts });
 
   return (
     <Box gap="small">

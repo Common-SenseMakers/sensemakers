@@ -2,15 +2,18 @@ import { useQuery } from '@tanstack/react-query';
 import React, { useContext } from 'react';
 import { createContext } from 'react';
 
-import { fetchUserPosts, getUserPosts } from '../api/post.requests';
+import {
+  fetchUserPosts,
+  getUserPosts,
+  triggerUserPosts,
+} from '../api/post.requests';
 import { AppPostFull } from '../shared/types/types.posts';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 
 interface PostContextType {
   posts?: AppPostFull[];
-  refetch: () => void;
+  isLoading: boolean;
   error: Error | null;
-  isFetching: boolean;
 }
 
 export const UserPostsContextValue = createContext<PostContextType | undefined>(
@@ -23,7 +26,11 @@ export const UserPostsContext: React.FC<{
   const { token, connectedUser } = useAccountContext();
 
   /** everytime the connected user changes, trigger a fetch */
-  const { data: fetched, refetch: triggerFetch } = useQuery({
+  const {
+    refetch: refetchFetch,
+    isSuccess: fetched,
+    isFetching: isFetching,
+  } = useQuery({
     queryKey: ['fetchUserPosts', connectedUser, token],
     queryFn: () => {
       if (connectedUser && token) {
@@ -36,9 +43,10 @@ export const UserPostsContext: React.FC<{
   /** once fetched, get the posts */
   const {
     data: _posts,
-    refetch,
+    refetch: refetchGet,
     error,
-    isFetching,
+    isFetching: isGetting,
+    isSuccess: gotPosts,
   } = useQuery({
     queryKey: ['getUserPosts', connectedUser, token],
     queryFn: () => {
@@ -47,7 +55,21 @@ export const UserPostsContext: React.FC<{
       }
       return null;
     },
-    enabled: fetched !== null && fetched !== undefined,
+    enabled: fetched,
+  });
+
+  console.log({ _posts, error, fetched });
+
+  /** once post got, trigger parse */
+  const { refetch: refetchTriggerParse } = useQuery({
+    queryKey: ['triggerUserPosts', connectedUser, token],
+    queryFn: () => {
+      if (connectedUser && token) {
+        return triggerUserPosts(connectedUser.userId, token);
+      }
+      return null;
+    },
+    enabled: gotPosts,
   });
 
   /** triggering of each post parse is done in the PostContext */
@@ -57,7 +79,7 @@ export const UserPostsContext: React.FC<{
 
   return (
     <UserPostsContextValue.Provider
-      value={{ posts, refetch, error, isFetching }}>
+      value={{ posts, isLoading: isFetching || isGetting, error: error }}>
       {children}
     </UserPostsContextValue.Provider>
   );
