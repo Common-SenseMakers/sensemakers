@@ -4,6 +4,8 @@ import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
 import { getPostSchema } from './posts.schema';
 
+const DEBUG = true;
+
 /**
  * get user posts from the DB (does not fetch for more)
  * */
@@ -16,7 +18,7 @@ export const getUserPostsController: RequestHandler = async (
     const { postsManager } = getServices(request);
 
     const posts = await postsManager.getOfUser(userId);
-    logger.debug('posts', posts);
+    if (DEBUG) logger.debug(`${request.path}: posts`, { posts, userId });
     response.status(200).send({ success: true, posts });
   } catch (error) {
     logger.error('error', error);
@@ -37,6 +39,7 @@ export const fetchUserPostsController: RequestHandler = async (
 
     await postsManager.fetchUser(userId);
 
+    if (DEBUG) logger.debug(`${request.path}: fetched`, { userId });
     response.status(200).send({ success: true });
   } catch (error) {
     logger.error('error', error);
@@ -57,6 +60,7 @@ export const triggerParseController: RequestHandler = async (
 
     postsManager.parseOfUser(userId);
 
+    if (DEBUG) logger.debug(`${request.path}: parse triggered`, { userId });
     response.status(200).send({ success: true });
   } catch (error) {
     logger.error('error', error);
@@ -78,11 +82,21 @@ export const getPostController: RequestHandler = async (request, response) => {
 
     const post = await postsManager.getPost(payload.postId, true);
     if (post.authorId !== userId) {
+      if (DEBUG)
+        logger.debug(`${request.path}: getPost not authorize`, {
+          userId,
+          postId: payload.postId,
+        });
       response.status(403).send({
         success: false,
         message: 'post are accessible to authors only',
       });
     } else {
+      if (DEBUG)
+        logger.debug(`${request.path}: getPost`, {
+          userId,
+          post: post,
+        });
       response.status(200).send({ success: true, post });
     }
   } catch (error) {
