@@ -1,5 +1,6 @@
 from typing import List, Dict
 import asyncio
+from loguru import logger
 
 from ..configs import MetadataExtractionType
 
@@ -8,6 +9,16 @@ from ..interface import RefMetadata
 from .citoid import fetch_citation, fetch_all_citations
 from ..schema.post import RefPost
 from ..utils import flatten
+
+
+def set_metadata_extraction_type(extract_type: str):
+    try:
+        metadata_extract_type = MetadataExtractionType(extract_type)
+    except ValueError as e:
+        logger.warning(f"Unknown extraction type: {e} -> defaulting to NONE...")
+        metadata_extract_type = MetadataExtractionType.NONE
+
+    return metadata_extract_type
 
 
 def get_trunc_str(input_str: str, max_len: int) -> str:

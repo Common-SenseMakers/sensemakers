@@ -40,6 +40,7 @@ from ..web_extractors.metadata_extractors import (
     extract_metadata_by_type,
     extract_all_metadata_by_type,
     extract_posts_ref_metadata_dict,
+    set_metadata_extraction_type,
 )
 
 from ..prompting.jinja.zero_ref_template import zero_ref_template
@@ -77,6 +78,16 @@ class MultiChainParser:
 
         # init parallel chain
         self.parallel_chain = self.create_parallel_chain(self.pparsers)
+
+    @property
+    def ontology(self) -> OntologyBase:
+        return self.ontology_base
+
+    def set_md_extract_method(self, md_extract_method: str):
+        logger.info(f"Setting metadata extraction method to {md_extract_method}...")
+        self.config.metadata_extract_config.extraction_method = (
+            set_metadata_extraction_type(md_extract_method)
+        )
 
     def create_parallel_chain(self, active_list: List[str] = None) -> RunnableParallel:
         """
