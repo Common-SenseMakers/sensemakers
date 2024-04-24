@@ -16,6 +16,7 @@ export const getUserPostsController: RequestHandler = async (
     const { postsManager } = getServices(request);
 
     const posts = await postsManager.getOfUser(userId);
+    logger.debug('posts', posts);
     response.status(200).send({ success: true, posts });
   } catch (error) {
     logger.error('error', error);

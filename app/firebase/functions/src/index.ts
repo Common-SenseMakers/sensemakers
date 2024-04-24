@@ -43,3 +43,5 @@ export const app = functions
   .https.onRequest(buildApp(router));
 
 export const postsJob = onSchedule(POSTS_JOB_SCHEDULE, fetchNewPosts);
+
+// TODO: Configure a task that will parse all the unparsed posts of a user
