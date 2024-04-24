@@ -8,7 +8,7 @@ import {
 
 import { _appFetch } from '../../api/app.fetch';
 import { getLoggedUser, postOrcidCode } from '../../api/auth.requests';
-import { AppUserRead } from '../../shared/types/types';
+import { AppUserRead, PLATFORM } from '../../shared/types/types';
 
 const DEBUG = true;
 
