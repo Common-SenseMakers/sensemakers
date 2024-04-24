@@ -52,7 +52,7 @@ export class PlatformsService {
   ) {
     /** all fetched posts from one platform */
     const fetched = await this.get(platformId).fetch(params, manager);
-    this.users.repo.setAccountLastFetched(
+    await this.users.repo.setAccountLastFetched(
       platformId,
       params.userDetails.user_id,
       this.time.now(),

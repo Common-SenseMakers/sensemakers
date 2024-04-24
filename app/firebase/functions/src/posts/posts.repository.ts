@@ -55,6 +55,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     })) as AppPost[];
   }
 
+  /** Cannot be part of a transaction */
   public async getNonParsedOfUser(userId: string): Promise<string[]> {
     /** type protection agains properties renaming */
     const statusKey: keyof AppPost = 'parseStatus';

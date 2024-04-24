@@ -35,30 +35,11 @@ const getSampleTweet = (id: string, authorId: string) => {
     },
   };
 };
-
-state.tweets.push({
-  id: '001',
-  tweet: getSampleTweet('T001', '1773032135814717440'),
-});
-state.tweets.push({
-  id: '002',
-  tweet: getSampleTweet('T002', '1773032135814717440'),
-});
-state.tweets.push({
-  id: '003',
-  tweet: getSampleTweet('T003', '1773032135814717440'),
-});
-state.tweets.push({
-  id: '004',
-  tweet: getSampleTweet('T004', '1773032135814717440'),
-});
-state.tweets.push({
-  id: '005',
-  tweet: getSampleTweet('T005', '1773032135814717440'),
-});
-state.tweets.push({
-  id: '006',
-  tweet: getSampleTweet('T006', '1773032135814717440'),
+[1, 2].map((ix) => {
+  state.tweets.push({
+    id: `${ix}`,
+    tweet: getSampleTweet(`T${ix}`, '1773032135814717440'),
+  });
 });
 
 /** make private methods public */
