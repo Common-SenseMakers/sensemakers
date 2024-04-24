@@ -16,12 +16,12 @@ import { dateStrToTimestampMs } from '../twitter.utils';
 
 interface TwitterTestState {
   latestId: number;
-  tweets: Map<string, TweetV2SingleResult>;
+  tweets: Array<{ id: string; tweet: TweetV2SingleResult }>;
 }
 
 let state: TwitterTestState = {
   latestId: 0,
-  tweets: new Map(),
+  tweets: [],
 };
 
 const getSampleTweet = (id: string, authorId: string) => {
@@ -36,12 +36,30 @@ const getSampleTweet = (id: string, authorId: string) => {
   };
 };
 
-state.tweets.set('001', getSampleTweet('T001', '1773032135814717440'));
-state.tweets.set('002', getSampleTweet('T002', '1773032135814717440'));
-state.tweets.set('003', getSampleTweet('T003', '1773032135814717440'));
-state.tweets.set('004', getSampleTweet('T004', '1773032135814717440'));
-state.tweets.set('005', getSampleTweet('T005', '1773032135814717440'));
-state.tweets.set('006', getSampleTweet('T006', '1773032135814717440'));
+state.tweets.push({
+  id: '001',
+  tweet: getSampleTweet('T001', '1773032135814717440'),
+});
+state.tweets.push({
+  id: '002',
+  tweet: getSampleTweet('T002', '1773032135814717440'),
+});
+state.tweets.push({
+  id: '003',
+  tweet: getSampleTweet('T003', '1773032135814717440'),
+});
+state.tweets.push({
+  id: '004',
+  tweet: getSampleTweet('T004', '1773032135814717440'),
+});
+state.tweets.push({
+  id: '005',
+  tweet: getSampleTweet('T005', '1773032135814717440'),
+});
+state.tweets.push({
+  id: '006',
+  tweet: getSampleTweet('T006', '1773032135814717440'),
+});
 
 /** make private methods public */
 type MockedType = Omit<TwitterService, 'fetchInternal'> & {
@@ -69,7 +87,7 @@ export const getTwitterMock = (twitterService: TwitterService) => {
         },
       };
 
-      state.tweets.set(tweet.data.id, tweet);
+      state.tweets.push({ id: tweet.data.id, tweet });
 
       const post: PlatformPostPosted<TweetV2SingleResult> = {
         post_id: tweet.data.id,
@@ -83,7 +101,7 @@ export const getTwitterMock = (twitterService: TwitterService) => {
 
   when(Mocked.fetchInternal(anything(), anything(), anything())).thenCall(
     (params: TwitterQueryParameters, userDetails?: UserDetailsBase) => {
-      return Array.from(state.tweets.values()).map((tweet) => tweet.data);
+      return state.tweets.reverse().map((entry) => entry.tweet.data);
     }
   );
 
