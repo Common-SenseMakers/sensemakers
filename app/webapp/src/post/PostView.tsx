@@ -35,6 +35,9 @@ export const PostView = () => {
         <Box pad={{ vertical: 'small' }}>
           <Text>{post?.content}</Text>
         </Box>
+        <Box>
+          <Text size="xsmall">{post?.semantics}</Text>
+        </Box>
         {/* handle rendering of semantic data below */}
         <Footer direction="row" justify="between" margin={{ top: 'medium' }}>
           <Button label="ignore" />
