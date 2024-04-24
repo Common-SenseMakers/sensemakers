@@ -5,11 +5,15 @@ import {
   OUR_TOKEN_SECRET,
   TWITTER_CLIENT_ID,
   TWITTER_CLIENT_SECRET,
+  USE_REAL_NANOPUB,
   USE_REAL_PARSER,
+  USE_REAL_TWITTERX,
 } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
 import { getParserMock } from '../parser/mock/parser.service.mock';
 import { ParserService } from '../parser/parser.service';
+import { getNanopubMock } from '../platforms/nanopub/mock/nanopub.service.mock';
+import { NanopubService } from '../platforms/nanopub/nanopub.service';
 // import { ParserService } from '../parser/parser.service';
 import { OrcidService } from '../platforms/orcid/orcid.service';
 import {
@@ -17,6 +21,7 @@ import {
   PlatformsMap,
   PlatformsService,
 } from '../platforms/platforms.service';
+import { getTwitterMock } from '../platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../platforms/twitter/twitter.service';
 import { PlatformPostsRepository } from '../posts/platform.posts.repository';
 import { PostsManager } from '../posts/posts.manager';
@@ -45,17 +50,34 @@ export const createServices = () => {
   const time = new TimeService();
 
   const orcid = new OrcidService();
-  const twitter = new TwitterService(time, userRepo, {
+  const _twitter = new TwitterService(time, userRepo, {
     clientId: TWITTER_CLIENT_ID.value(),
     clientSecret: TWITTER_CLIENT_SECRET.value(),
   });
 
+  const twitter = (() => {
+    if (!USE_REAL_TWITTERX.value()) {
+      return getTwitterMock(_twitter);
+    }
+    return _twitter;
+  })();
+
+  const _nanopub = new NanopubService(time);
+  const nanopub = (() => {
+    if (!USE_REAL_NANOPUB.value()) {
+      return getNanopubMock(_nanopub);
+    }
+    return _nanopub;
+  })();
+
   /** all identity services */
   identityPlatforms.set(PLATFORM.Orcid, orcid);
   identityPlatforms.set(PLATFORM.Twitter, twitter);
+  identityPlatforms.set(PLATFORM.Nanopub, nanopub);
 
   /** all platforms */
   platformsMap.set(PLATFORM.Twitter, twitter);
+  platformsMap.set(PLATFORM.Nanopub, nanopub);
 
   /** users service */
   const usersService = new UsersService(userRepo, identityPlatforms, {
@@ -90,7 +112,6 @@ export const createServices = () => {
   // const postsParser = new PostsParser(platformsService, parserService);
   const postsManager = new PostsManager(
     db,
-    time,
     usersService,
     postsProcessing,
     platformsService,

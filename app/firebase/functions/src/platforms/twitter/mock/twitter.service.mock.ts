@@ -1,18 +1,18 @@
 import { anything, instance, spy, when } from 'ts-mockito';
 import { TweetV2SingleResult } from 'twitter-api-v2';
 
-import { UserDetailsBase } from '../../../src/@shared/types/types';
+import { UserDetailsBase } from '../../../@shared/types/types';
 import {
   PlatformPostPosted,
   PlatformPostPublish,
-} from '../../../src/@shared/types/types.platform.posts';
+} from '../../../@shared/types/types.platform.posts';
 import {
   TwitterDraft,
   TwitterQueryParameters,
-} from '../../../src/@shared/types/types.twitter';
-import { logger } from '../../../src/instances/logger';
-import { TwitterService } from '../../../src/platforms/twitter/twitter.service';
-import { dateStrToTimestampMs } from '../../../src/platforms/twitter/twitter.utils';
+} from '../../../@shared/types/types.twitter';
+import { logger } from '../../../instances/logger';
+import { TwitterService } from '../twitter.service';
+import { dateStrToTimestampMs } from '../twitter.utils';
 
 interface TwitterTestState {
   latestId: number;
@@ -23,6 +23,25 @@ let state: TwitterTestState = {
   latestId: 0,
   tweets: new Map(),
 };
+
+const getSampleTweet = (id: string, authorId: string) => {
+  return {
+    data: {
+      id: id,
+      text: `Hello World ${id}`,
+      author_id: authorId,
+      created_at: new Date().toISOString(),
+      edit_history_tweet_ids: [],
+    },
+  };
+};
+
+state.tweets.set('001', getSampleTweet('T001', '1773032135814717440'));
+state.tweets.set('002', getSampleTweet('T002', '1773032135814717440'));
+state.tweets.set('003', getSampleTweet('T003', '1773032135814717440'));
+state.tweets.set('004', getSampleTweet('T004', '1773032135814717440'));
+state.tweets.set('005', getSampleTweet('T005', '1773032135814717440'));
+state.tweets.set('006', getSampleTweet('T006', '1773032135814717440'));
 
 /** make private methods public */
 type MockedType = Omit<TwitterService, 'fetchInternal'> & {

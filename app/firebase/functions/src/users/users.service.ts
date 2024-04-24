@@ -167,7 +167,6 @@ export class UsersService {
         await this.repo.createUser(
           prefixed_user_id,
           {
-            lastFetchedMs: 0,
             [platformIds_property]: [prefixed_user_id],
             [platform]: [authenticatedDetails],
           },

@@ -3,9 +3,9 @@ import { anything, instance, spy, when } from 'ts-mockito';
 import {
   PlatformPostPosted,
   PlatformPostPublish,
-} from '../../../src/@shared/types/types.platform.posts';
-import { logger } from '../../../src/instances/logger';
-import { NanopubService } from '../../../src/platforms/nanopub/nanopub.service';
+} from '../../../@shared/types/types.platform.posts';
+import { logger } from '../../../instances/logger';
+import { NanopubService } from '../nanopub.service';
 
 let count = 0;
 

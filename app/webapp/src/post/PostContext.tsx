@@ -34,7 +34,7 @@ export const PostContext: React.FC<{
 
   /** if postInit not provided get post from the DB */
   const { data: post, refetch } = useQuery({
-    queryKey: ['postId'],
+    queryKey: ['postId', postId],
     queryFn: () => {
       if (postId && token) {
         return getPost(postId, token);

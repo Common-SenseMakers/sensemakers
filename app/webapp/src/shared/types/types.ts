@@ -70,7 +70,6 @@ export interface UserWithPlatformIds {
  * to send the user profiles to the frontend.
  */
 export interface AppUser extends UserWithId, UserWithPlatformIds {
-  lastFetchedMs: number;
   [PLATFORM.Orcid]?: OrcidUserDetails[];
   [PLATFORM.Twitter]?: TwitterUserDetails[];
   [PLATFORM.Nanopub]?: NanopubUserDetails[];

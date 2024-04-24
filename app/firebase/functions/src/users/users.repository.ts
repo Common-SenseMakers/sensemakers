@@ -112,17 +112,6 @@ export class UsersRepository {
     return ref.id;
   }
 
-  public async setLastFetched(
-    userId: string,
-    fetchedMs: number,
-    manager: TransactionManager
-  ) {
-    const userRef = await this.getUserRef(userId, manager, true);
-
-    /** overwrite all the user account credentials */
-    manager.update(userRef, { lastFetchedMs: fetchedMs });
-  }
-
   /**
    * Just update the lastFetchedMs value of a given account
    * */

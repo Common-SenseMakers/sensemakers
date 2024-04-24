@@ -5,6 +5,7 @@ import { DBInstance } from '../../src/db/instance';
 import { Services } from '../../src/instances/services';
 import { getParserMock } from '../../src/parser/mock/parser.service.mock';
 import { ParserService } from '../../src/parser/parser.service';
+import { getNanopubMock } from '../../src/platforms/nanopub/mock/nanopub.service.mock';
 import { NanopubService } from '../../src/platforms/nanopub/nanopub.service';
 import { OrcidService } from '../../src/platforms/orcid/orcid.service';
 import {
@@ -12,6 +13,7 @@ import {
   PlatformsMap,
   PlatformsService,
 } from '../../src/platforms/platforms.service';
+import { getTwitterMock } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { PlatformPostsRepository } from '../../src/posts/platform.posts.repository';
 import { PostsManager } from '../../src/posts/posts.manager';
@@ -20,8 +22,6 @@ import { PostsRepository } from '../../src/posts/posts.repository';
 import { TimeService } from '../../src/time/time.service';
 import { UsersRepository } from '../../src/users/users.repository';
 import { UsersService } from '../../src/users/users.service';
-import { getNanopubMock } from './mocks/nanopub.service.mock';
-import { getTwitterMock } from './mocks/twitter.service.mock';
 import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
 
 export const getTestServices = () => {
@@ -91,7 +91,11 @@ export const getTestServices = () => {
   platformsMap.set(PLATFORM.Nanopub, nanopub);
 
   /** platforms service */
-  const platformsService = new PlatformsService(platformsMap);
+  const platformsService = new PlatformsService(
+    platformsMap,
+    time,
+    usersService
+  );
 
   /** parser service */
   const _parser = new ParserService(process.env.PARSER_API_URL as string);
@@ -105,6 +109,7 @@ export const getTestServices = () => {
   /** posts service */
   const postsProcessing = new PostsProcessing(
     usersService,
+    time,
     postsRepo,
     platformPostsRepo,
     platformsService
@@ -112,6 +117,7 @@ export const getTestServices = () => {
 
   const postsManager = new PostsManager(
     db,
+    time,
     usersService,
     postsProcessing,
     platformsService,

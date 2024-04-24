@@ -6,13 +6,11 @@ import {
 } from '../@shared/types/types.parser';
 import { PlatformPost } from '../@shared/types/types.platform.posts';
 import { AppPost, AppPostFull, PostUpdate } from '../@shared/types/types.posts';
-import { FETCH_RATE_LIMIT_MS } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { ParserService } from '../parser/parser.service';
 import { FetchUserPostsParams } from '../platforms/platforms.interface';
 import { PlatformsService } from '../platforms/platforms.service';
-import { TimeService } from '../time/time.service';
 import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { PostsProcessing } from './posts.processing';
@@ -24,7 +22,6 @@ import { PostsProcessing } from './posts.processing';
 export class PostsManager {
   constructor(
     protected db: DBInstance,
-    protected time: TimeService,
     protected users: UsersService,
     public processing: PostsProcessing,
     protected platforms: PlatformsService,
@@ -60,16 +57,6 @@ export class PostsManager {
         _user ||
         (await this.users.repo.getUser(userId as string, manager, true));
 
-      const now = this.time.now();
-
-      /** reject fetch if latest fetch was too recent */
-      if (now - user.lastFetchedMs <= FETCH_RATE_LIMIT_MS) {
-        const retryAt = user.lastFetchedMs + FETCH_RATE_LIMIT_MS;
-        throw new Error(
-          `Rate limit exceeded for user ${user.userId}. Retry in ${Math.round((retryAt - now) / 1000)} seconds`
-        );
-      }
-
       await Promise.all(
         ALL_PUBLISH_PLATFORMS.map(async (platformId) => {
           const accounts = UsersHelper.getAccounts(user, platformId);
@@ -89,12 +76,6 @@ export class PostsManager {
               const platformPosts = await this.platforms.fetch(
                 platformId,
                 userParams,
-                manager
-              );
-
-              this.users.repo.setLastFetched(
-                user.userId,
-                this.time.now(),
                 manager
               );
 
