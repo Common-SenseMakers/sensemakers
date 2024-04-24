@@ -2,12 +2,13 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { useAppFetch } from '../../../../api/app.fetch';
 import { DEBUG } from '../../../../app/config';
-import { HexStr } from '../../../../shared/types/types';
+import { HexStr, PLATFORM } from '../../../../shared/types/types';
 import {
   NanopubUserDetails,
   RSAKeys,
 } from '../../../../shared/types/types.nanopubs';
 import { getEthToRSAMessage } from '../../../../shared/utils/sig.utils';
+import { getAccount } from '../../../user.helper';
 import { useAccountContext } from '../../AccountContext';
 import { useAppSigner } from '../../signer/SignerContext';
 
@@ -17,7 +18,7 @@ export const usePostCredentials = (rsaKeys?: RSAKeys) => {
   const { connectedUser, refresh: refreshConnectedUser } = useAccountContext();
   const appFetch = useAppFetch();
 
-  const nanopubDetails = UserHelper.getAccount(connectedUser, PLATFORM.Nanopub);
+  const nanopubDetails = getAccount(connectedUser, PLATFORM.Nanopub);
 
   /**
    * keep user details aligned with profile and keep track of the
@@ -36,7 +37,7 @@ export const usePostCredentials = (rsaKeys?: RSAKeys) => {
   );
 
   useEffect(() => {
-    if (connectedUser && !nanopubDetails && connectIntention) {
+    if (connectedUser && !nanopubDetails) {
       if (rsaKeys && address && ethSignature) {
         const details: NanopubUserDetails = {
           user_id: rsaKeys.publicKey,

@@ -48,7 +48,9 @@ export const UserPostsContext: React.FC<{
     queryKey: ['getUserPosts', connectedUser, token],
     queryFn: () => {
       if (connectedUser && token) {
-        return appFetch('/posts/getOfUser', { userId: connectedUser.userId });
+        return appFetch<AppPostFull[]>('/posts/getOfUser', {
+          userId: connectedUser.userId,
+        });
       }
       return null;
     },

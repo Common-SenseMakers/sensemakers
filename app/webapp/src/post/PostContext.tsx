@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import React, { createContext, useContext, useEffect, useMemo } from 'react';
 
-import { getPost } from '../api/post.requests';
+import { useAppFetch } from '../api/app.fetch';
 import { subscribeToPost } from '../firestore/realtime.listener';
 import { AppPostFull } from '../shared/types/types.posts';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
@@ -26,6 +26,7 @@ export const PostContext: React.FC<{
   }
 
   const { token } = useAccountContext();
+  const appFetch = useAppFetch();
 
   const postId = useMemo(
     () => (_postId ? _postId : (postInit as unknown as AppPostFull).id),
@@ -37,7 +38,7 @@ export const PostContext: React.FC<{
     queryKey: ['postId', postId],
     queryFn: () => {
       if (postId && token) {
-        return getPost(postId, token);
+        return appFetch<AppPostFull>('posts/get', { postId });
       }
     },
   });

@@ -1,5 +1,4 @@
 import { Nanopub } from '@nanopub/sign';
-import { TransactionManager } from 'src/db/transaction.manager';
 import { verifyMessage } from 'viem';
 
 import { PLATFORM, UserDetailsBase } from '../../@shared/types/types';
@@ -19,10 +18,11 @@ import {
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
 import { getRsaToEthMessage } from '../../@shared/utils/sig.utils';
-import { UsersHelper } from '../../@shared/utils/users.helper';
 import { NANOPUBS_PUBLISH_SERVERS } from '../../config/config.runtime';
+import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
+import { UsersHelper } from '../../users/users.helper';
 import { FetchUserPostsParams, PlatformService } from '../platforms.interface';
 import { createIntroNanopublication } from './create.intro.nanopub';
 import { createNanopublication } from './create.nanopub';

@@ -9,9 +9,9 @@ import {
   PLATFORM,
   UserWithPlatformIds,
 } from '../@shared/types/types';
-import { UsersHelper } from '../@shared/utils/users.helper';
 import { TransactionManager } from '../db/transaction.manager';
 import { IdentityServicesMap } from '../platforms/platforms.service';
+import { UsersHelper } from './users.helper';
 import { UsersRepository } from './users.repository';
 import { getPrefixedUserId } from './users.utils';
 

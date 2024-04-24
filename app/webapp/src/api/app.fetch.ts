@@ -11,7 +11,7 @@ export interface AppFetch {
   ): Promise<R>;
 }
 
-export const _appFetch = async <T>(
+export const _appFetch = async <T = any>(
   path: string,
   data: any = {},
   accessToken?: string

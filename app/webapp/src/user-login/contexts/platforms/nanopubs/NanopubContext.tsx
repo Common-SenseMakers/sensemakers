@@ -30,8 +30,6 @@ const NanopubContextValue = createContext<NanopubContextType | undefined>(
 
 /** Manages the authentication process */
 export const NanopubContext = (props: PropsWithChildren) => {
-  const appFetch = useAppFetch();
-
   const [connectIntention, setConnectIntention] = useState<boolean>(false);
   const { rsaKeys, readKeys, removeKeys } = useNanopubKeys(connectIntention);
 
@@ -50,7 +48,7 @@ export const NanopubContext = (props: PropsWithChildren) => {
 
   /** set profile */
   const buildProfile = async () => {
-    if (rsaKeys && nanopubDetails) {
+    if (rsaKeys) {
       await (init as any)();
 
       const profile = getProfile(rsaKeys);
@@ -96,9 +94,6 @@ export const NanopubContext = (props: PropsWithChildren) => {
     setProfile(undefined);
   };
 
-  const needAuthorize =
-    profile === undefined || (connectedUser && nanopubDetails === undefined);
-
   return (
     <NanopubContextValue.Provider
       value={{
@@ -106,7 +101,6 @@ export const NanopubContext = (props: PropsWithChildren) => {
         disconnect,
         profile,
         isConnecting,
-        needAuthorize,
         profileAddress,
       }}>
       {props.children}
