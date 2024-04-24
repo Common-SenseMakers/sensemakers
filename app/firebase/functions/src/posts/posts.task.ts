@@ -31,10 +31,12 @@ async function getFunctionUrl(name: string, location = 'us-central1') {
     });
   }
   const projectId = await auth.getProjectId();
+  if (process.env.NODE_ENV !== 'production') {
+    return `http://localhost:5001/${projectId}/${location}/${name}`;
+  }
   const url =
     'https://cloudfunctions.googleapis.com/v2beta/' +
     `projects/${projectId}/locations/${location}/functions/${name}`;
-
   const client = await auth.getClient();
   const res = await client.request({ url });
   // @ts-ignore
@@ -42,5 +44,5 @@ async function getFunctionUrl(name: string, location = 'us-central1') {
   if (!uri) {
     throw new Error(`Unable to retreive uri for function at ${url}`);
   }
-  return uri;
+  return url;
 }
