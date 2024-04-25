@@ -122,9 +122,6 @@ describe.only('03-process', () => {
         throw new Error('appUser not created');
       }
 
-      /** mirrors are not part of the reference posts */
-      postsRead.forEach((p) => delete (p as any).mirrors);
-
       expect(postRead).to.not.be.undefined;
     });
 
@@ -133,6 +130,20 @@ describe.only('03-process', () => {
         throw new Error('appUser not created');
       }
       await enqueueParseUserPosts(appUser.userId, 'us-central1');
+
+      /** wait for the task to finish */
+      await new Promise<void>((resolve) => setTimeout(resolve, 0.5 * 1000));
+
+      const postsRead = await services.postsManager.getOfUser(appUser.userId);
+
+      expect(postsRead).to.not.be.undefined;
+      expect(postsRead).to.have.length(3);
+
+      postsRead.forEach((postRead) => {
+        expect(postRead.semantics).to.not.be.undefined;
+        expect(postRead.originalParsed).to.not.be.undefined;
+        expect(postRead.parseStatus).to.eq('processed');
+      });
     });
 
     it('fetch one user pending posts', async () => {
