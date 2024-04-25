@@ -101,9 +101,7 @@ describe('03-process', () => {
       await services.postsManager.fetchUser(undefined, appUser);
 
       /** read user post */
-      const postsRead = await services.postsManager.getPendingOfUser(
-        appUser.userId
-      );
+      const postsRead = await services.postsManager.getOfUser(appUser.userId);
 
       expect(postsRead).to.not.be.undefined;
       expect(postsRead).to.have.length(1);
@@ -140,6 +138,7 @@ describe('03-process', () => {
 
       const refAppPost: AppPost = {
         id: postRead.id,
+        createdAtMs: postRead.createdAtMs,
         authorId: appUser.userId,
         origin: PLATFORM.Twitter,
         reviewedStatus: 'pending',
@@ -177,7 +176,7 @@ describe('03-process', () => {
       }
 
       /** get pending posts of user */
-      const pendingPosts = await services.postsManager.getPendingOfUser(
+      const pendingPosts = await services.postsManager.getOfUser(
         appUser.userId
       );
 

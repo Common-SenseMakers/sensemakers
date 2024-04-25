@@ -1,5 +1,6 @@
 import { RequestHandler } from 'express';
 
+import { envRuntime } from '../../config/typedenv.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
 import { enqueueParseUserPosts } from '../posts.task';
@@ -57,7 +58,7 @@ export const triggerParseController: RequestHandler = async (
 ) => {
   try {
     const userId = getAuthenticatedUser(request, true);
-    await enqueueParseUserPosts(userId);
+    await enqueueParseUserPosts(userId, envRuntime.REGION as string);
     if (DEBUG) logger.debug(`${request.path}: parse triggered`, { userId });
     response.status(200).send({ success: true });
   } catch (error) {

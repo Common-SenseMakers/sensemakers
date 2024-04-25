@@ -117,7 +117,6 @@ export const getTestServices = () => {
 
   const postsManager = new PostsManager(
     db,
-    time,
     usersService,
     postsProcessing,
     platformsService,

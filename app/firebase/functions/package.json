@@ -1,10 +1,10 @@
 {
   "name": "functions",
   "scripts": {
-    "test": "NODE_ENV=test FIRESTORE_EMULATOR_HOST=localhost:8080 mocha --trace-uncaught -r ts-node/register 'test/__tests__/**/*.ts'",
+    "test": "NODE_ENV=test FIRESTORE_EMULATOR_HOST=localhost:8080 TS_NODE_PROJECT=tsconfig.test.json mocha --trace-uncaught -r ts-node/register 'test/__tests__/**/*.ts'",
     "lint": "eslint --ext .js,.ts .",
     "build": "tsc",
-    "build:watch-test": "rm -rf ./lib & tsc --watch -p ./tsconfig.test.json",
+    "build:watch-test": "rm -rf ./lib-test & tsc --watch -p ./tsconfig.test.json",
     "build:watch": "rm -rf ./lib & tsc --watch",
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
@@ -25,8 +25,8 @@
     "crypto-js": "^4.2.0",
     "express": "^4.18.2",
     "fetch-sparql-endpoint": "^4.1.1",
-    "firebase-admin": "^11.8.0",
-    "firebase-functions": "^4.3.1",
+    "firebase-admin": "^12.1.0",
+    "firebase-functions": "^4.9.0",
     "jsonwebtoken": "^9.0.2",
     "n3": "^1.17.2",
     "node-fetch": "^3.3.2",
