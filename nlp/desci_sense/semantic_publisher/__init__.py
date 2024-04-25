@@ -1,6 +1,8 @@
+from loguru import logger
+
 from ..schema.templates import TEMPLATES, LABEL_TEMPLATE_MAP, DEFAULT_PREDICATE_LABEL
 from ..shared_functions.schema.post import RefPost
-
+from ..shared_functions.postprocessing import CombinedParserOutput
 
 # placeholder for post in RDF triplet
 POST_RDF = "post"
@@ -31,6 +33,32 @@ def create_triples_from_prediction(prediction):
 
     # if no predicates were predicted, add the default predicate
     if len(predicted_predicates) == 0:
+        predicted_predicates = [DEFAULT_PREDICATE_LABEL]
+
+    # create table of all extracted triples
+    rows = []
+    for label in predicted_predicates:
+        rows += [(POST_RDF, label, link) for link in ref_links]
+
+    return rows
+
+
+def create_triples_from_combined_result(combined_result_dict: CombinedParserOutput):
+    # parse back into model schema
+    combined_result = CombinedParserOutput.model_validate(combined_result_dict)
+
+    # extract list of referenced links
+    ref_links = combined_result.reference_urls
+
+    if len(ref_links) == 0:
+        # no references mentioned
+        ref_links = [NO_SUBJ_DISP_NAME]
+
+    # extract predicted predicates
+    predicted_predicates = combined_result.reference_tagger
+
+    # if no predicates were predicted, add the default predicate
+    if len(predicted_predicates) == 0 and len(ref_links) > 0:
         predicted_predicates = [DEFAULT_PREDICATE_LABEL]
 
     # create table of all extracted triples

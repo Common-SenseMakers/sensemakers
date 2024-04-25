@@ -5,7 +5,9 @@ from langchain_openai import ChatOpenAI
 from enum import Enum
 
 from ..schema.post import RefPost
-from ..web_extractors.metadata_extractors import RefMetadata
+from ..web_extractors.metadata_extractors import (
+    RefMetadata,
+)
 from ..postprocessing import ParserChainOutput
 from ..configs import (
     PostParserChainConfig,

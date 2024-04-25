@@ -48,12 +48,12 @@ class OpenrouterAPIConfig(BaseSettings):
         default="https://openrouter.ai/api/v1",
         description="Base URL for Openrouter API",
     )
-    openrouter_api_key: str | None = Field(
+    openrouter_api_key: Union[str, None] = Field(
         description="Openrouter API key",
         default=None,
         exclude=True,
     )
-    openrouter_referer: str | None = Field(
+    openrouter_referer: Union[str, None] = Field(
         default=None,
         description="Referer for tracking on Openrouter",
         exclude=True,
@@ -79,7 +79,7 @@ class WandbConfig(BaseSettings):
     entity: str = Field(
         default="common-sense-makers", description="wandb entity to log runs to."
     )
-    project: str | None = Field(
+    project: Union[str, None] = Field(
         description="wandb project to log runs to",
         default=None,
     )
