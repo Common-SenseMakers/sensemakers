@@ -137,6 +137,7 @@ export const NanopubContext = (props: PropsWithChildren) => {
       if (rsaKeys && address && ethSignature) {
         const details: NanopubUserDetails = {
           user_id: rsaKeys.publicKey,
+          lastFetchedMs: 0,
           signupDate: 0,
           profile: {
             rsaPublickey: rsaKeys.publicKey,

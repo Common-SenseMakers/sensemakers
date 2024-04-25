@@ -9,7 +9,7 @@ import { createServices } from '../instances/services';
 export const PARSE_USER_POSTS_TASK = 'parseUserPosts';
 
 export const queueOnEmulator = async (url: string, data: any) => {
-  return await fetch(url, {
+  return fetch(url, {
     headers: [
       ['Accept', 'application/json'],
       ['Content-Type', 'application/json'],
