@@ -154,28 +154,17 @@ export class TwitterService
     /** update user credentials */
     if (newCredentials) {
       let newDetails: TwitterUserDetails;
-      /** if the user has both read and write credentials, update both together since write credentials overwrite read credentials */
-      if (details.read !== undefined && details.write !== undefined) {
-        newDetails = {
-          ...details,
-          write: newCredentials,
-          read: {
-            ...newCredentials,
-            lastFetchedMs: details.read.lastFetchedMs,
-          },
-        };
-      } else if (details.read !== undefined) {
-        newDetails = {
-          ...details,
-          read: {
-            ...newCredentials,
-            lastFetchedMs: details.read.lastFetchedMs,
-          },
-        };
-      } else {
-        throw new Error(
-          `Read credentials for user ${details.user_id} not found`
-        );
+
+      newDetails = {
+        ...details,
+        read: {
+          ...newCredentials,
+        },
+      };
+
+      if (details.write !== undefined) {
+        /** if the user has both read and write credentials, update both together since write credentials overwrite read credentials */
+        newDetails['write'] = newCredentials;
       }
 
       this.usersRepo.setPlatformDetails(
@@ -344,20 +333,17 @@ export class TwitterService
 
     const twitter: TwitterUserDetails = {
       user_id: user.id,
+      lastFetchedMs: 0,
       signupDate: 0,
       profile: user,
     };
 
+    /** always store the credential as read credentials */
+    twitter.read = credentials;
     /** the same credentials apply for reading and writing */
     if (data.type === 'write') {
-      twitter[data.type] = credentials;
+      twitter['write'] = credentials;
     }
-
-    /** always store the credential as read credentials */
-    twitter.read = {
-      ...credentials,
-      lastFetchedMs: 0,
-    };
 
     return twitter;
   }
@@ -435,7 +421,7 @@ export class TwitterService
       {
         user_id: params.userDetails.user_id,
         start_time:
-          params.start_time !== 0
+          params.start_time && params.start_time !== 0
             ? new Date(params.start_time).toISOString()
             : undefined,
         end_time: params.end_time

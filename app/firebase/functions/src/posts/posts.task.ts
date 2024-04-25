@@ -2,9 +2,22 @@ import { getFunctions } from 'firebase-admin/functions';
 import { Request } from 'firebase-functions/v2/tasks';
 import { GoogleAuth } from 'google-auth-library';
 
+import { IS_EMULATOR } from '../config/config.runtime';
+import { envRuntime } from '../config/typedenv.runtime';
 import { createServices } from '../instances/services';
 
 export const PARSE_USER_POSTS_TASK = 'parseUserPosts';
+
+export const queueOnEmulator = async (url: string, data: any) => {
+  return await fetch(url, {
+    headers: [
+      ['Accept', 'application/json'],
+      ['Content-Type', 'application/json'],
+    ],
+    method: 'post',
+    body: JSON.stringify({ data }),
+  });
+};
 
 export const parseUserPostsTask = async (req: Request) => {
   const userId = req.data.userId;
@@ -16,17 +29,24 @@ export const enqueueParseUserPosts = async (
   userId: string,
   location: string
 ) => {
-  const queue = getFunctions().taskQueue(PARSE_USER_POSTS_TASK);
   const targetUri = await getFunctionUrl(PARSE_USER_POSTS_TASK, location);
-  await queue.enqueue({ userId }, { uri: targetUri });
+
+  if (IS_EMULATOR) {
+    /** Emulator does not support queue.enqueue(), but uses a simple http request */
+    return queueOnEmulator(targetUri, { userId });
+  }
+
+  const queue = getFunctions().taskQueue(PARSE_USER_POSTS_TASK);
+  /** enqueue */
+  return queue.enqueue({ userId }, { uri: targetUri });
 };
 
 /**
  * Get the URL of a given v2 cloud function.
  *
- * @param {string} name the function's name
- * @param {string} location the function's location
- * @return {Promise<string>} The URL of the function
+ * @param name the function's name
+ * @param location the function's location
+ * @return The URL of the function
  */
 async function getFunctionUrl(name: string, location: string) {
   let auth: GoogleAuth | undefined = undefined;
@@ -37,7 +57,7 @@ async function getFunctionUrl(name: string, location: string) {
   }
   const projectId = await auth.getProjectId();
 
-  if (process.env.NODE_ENV !== 'production') {
+  if (envRuntime.NODE_ENV !== 'production') {
     return `http://localhost:5001/${projectId}/${location}/${name}`;
   }
 

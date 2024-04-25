@@ -172,6 +172,7 @@ describe('02-platforms', () => {
             {
               draft: signed.rdf(),
               userDetails: {
+                lastFetchedMs: 0,
                 signupDate: 0,
                 user_id: '123456',
               },

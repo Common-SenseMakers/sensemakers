@@ -78,7 +78,7 @@ export class UsersRepository {
       'array-contains',
       prefixed_user_id
     );
-    const snap = await query.get();
+    const snap = await manager.query(query);
 
     const _shouldThrow = shouldThrow !== undefined ? shouldThrow : false;
 
@@ -108,7 +108,7 @@ export class UsersRepository {
     manager: TransactionManager
   ) {
     const ref = await this.getUserRef(userId, manager);
-    await ref.create(user);
+    manager.create(ref, user);
     return ref.id;
   }
 
@@ -150,14 +150,8 @@ export class UsersRepository {
 
     const current = accounts[ix];
 
-    if (!current.read) {
-      throw new Error(
-        `Account ${platform}:${user_id} dont have read credentials`
-      );
-    }
-
     /** overwrite the lastFeched value */
-    current.read.lastFetchedMs = fetchedMs;
+    current.lastFetchedMs = fetchedMs;
 
     const userRef = await this.getUserRef(existingUser.userId, manager, true);
 

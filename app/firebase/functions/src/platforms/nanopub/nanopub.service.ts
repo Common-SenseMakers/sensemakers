@@ -73,6 +73,7 @@ export class NanopubService
     return {
       user_id: signupData.ethAddress,
       signupDate: this.time.now(),
+      lastFetchedMs: 0,
       profile: {
         rsaPublickey: signupData.rsaPublickey,
         ethAddress: signupData.ethAddress,

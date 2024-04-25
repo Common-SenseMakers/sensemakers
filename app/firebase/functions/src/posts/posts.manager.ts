@@ -1,10 +1,15 @@
+import { logger } from 'firebase-functions/v1';
+
 import { ALL_PUBLISH_PLATFORMS, AppUser } from '../@shared/types/types';
 import {
   PARSER_MODE,
   ParsePostRequest,
   TopicsParams,
 } from '../@shared/types/types.parser';
-import { PlatformPost } from '../@shared/types/types.platform.posts';
+import {
+  PlatformPost,
+  PlatformPostCreated,
+} from '../@shared/types/types.platform.posts';
 import { AppPost, AppPostFull, PostUpdate } from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
@@ -62,32 +67,42 @@ export class PostsManager {
           const accounts = UsersHelper.getAccounts(user, platformId);
           /** Call fetch for each account */
           return Promise.all(
-            accounts.map(async (account) => {
-              /** This fetch parameters */
-              const userParams: FetchUserPostsParams = {
-                start_time: account.read
-                  ? account.read.lastFetchedMs
-                  : account.signupDate,
-                userDetails: account,
-                max_results: 10,
-              };
+            accounts.map(
+              async (account): Promise<PlatformPostCreated[] | undefined> => {
+                /** This fetch parameters */
+                const userParams: FetchUserPostsParams = {
+                  start_time: account.read
+                    ? account.read.lastFetchedMs
+                    : account.signupDate,
+                  userDetails: account,
+                  max_results: 10,
+                };
 
-              /** Fetch */
-              const platformPosts = await this.platforms.fetch(
-                platformId,
-                userParams,
-                manager
-              );
+                /** Fetch */
+                try {
+                  const platformPosts = await this.platforms.fetch(
+                    platformId,
+                    userParams,
+                    manager
+                  );
 
-              /** Create the PlatformPosts */
-              const platformPostsCreated =
-                await this.processing.createPlatformPosts(
-                  platformPosts,
-                  manager
-                );
+                  /** Create the PlatformPosts */
+                  const platformPostsCreated =
+                    await this.processing.createPlatformPosts(
+                      platformPosts,
+                      manager
+                    );
 
-              return platformPostsCreated;
-            })
+                  return platformPostsCreated;
+                } catch (err) {
+                  logger.error(
+                    `Error fetching posts for user ${user.userId} on platform ${platformId}`,
+                    err
+                  );
+                  return;
+                }
+              }
+            )
           );
         })
       );

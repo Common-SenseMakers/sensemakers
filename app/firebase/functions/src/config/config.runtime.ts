@@ -17,6 +17,7 @@ mandatory.forEach((varName) => {
 
 /** Export all independent constants used by the functions */
 export const NODE_ENV = envRuntime.NODE_ENV;
+export const IS_EMULATOR = process.env.FIRESTORE_EMULATOR_HOST !== undefined;
 
 export const ORCID_API_URL = 'https://orcid.org';
 export const ORCID_CLIENT_ID = envRuntime.ORCID_CLIENT_ID;
