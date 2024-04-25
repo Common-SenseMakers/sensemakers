@@ -24,7 +24,6 @@ const LS_TWITTER_CONTEXT_KEY = 'twitter-signin-context';
 /** Manages the authentication process with Twitter */
 export type TwitterContextType = {
   connect?: (type: TwitterGetContextParams['type']) => void;
-  revokeApproval: () => void;
   isConnecting: boolean;
   isApproving: boolean;
   needConnect?: boolean;
@@ -63,7 +62,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
       type,
     };
     const siginContext = await appFetch<TwitterSignupContext>(
-      `/auth/${PLATFORM.Twitter}/context`,
+      `/app/auth/${PLATFORM.Twitter}/context`,
       params
     );
 
@@ -97,7 +96,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
         throw new Error('Undexpected state');
       }
 
-      appFetch<HandleSignupResult>(`/auth/${PLATFORM.Twitter}/signup`, {
+      appFetch<HandleSignupResult>(`/app/auth/${PLATFORM.Twitter}/signup`, {
         ...context,
         code: code_param,
       }).then((result) => {
@@ -114,20 +113,10 @@ export const TwitterContext = (props: PropsWithChildren) => {
     }
   }, [state_param, code_param, searchParams, setSearchParams]);
 
-  const revokeApproval = async () => {
-    const revokeLink = await appFetch<string>(
-      `/auth/${PLATFORM.Twitter}/revoke`
-    );
-    if (revokeLink) {
-      window.location.href = revokeLink;
-    }
-  };
-
   return (
     <TwitterContextValue.Provider
       value={{
         connect,
-        revokeApproval,
         isConnecting,
         isApproving,
         needConnect,

@@ -59,7 +59,9 @@ export const triggerParseController: RequestHandler = async (
   try {
     const userId = getAuthenticatedUser(request, true);
 
-    await enqueueParseUserPosts(userId, envRuntime.REGION as string);
+    const REGION = envRuntime.REGION || 'us-central1';
+
+    await enqueueParseUserPosts(userId, REGION);
 
     if (DEBUG) logger.debug(`${request.path}: parse triggered`, { userId });
     response.status(200).send({ success: true });

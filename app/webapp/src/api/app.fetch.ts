@@ -22,14 +22,10 @@ export const _appFetch = async <T>(
     headers['authorization'] = `Bearer ${accessToken}`;
   }
 
-  try {
-    const res = await axios.post<{ data: T }>(FUNCTIONS_BASE + path, data, {
-      headers,
-    });
-    return res.data.data;
-  } catch (err) {
-    console.error(`Error fetching ${path}`, err);
-  }
+  const res = await axios.post<{ data: T }>(FUNCTIONS_BASE + path, data, {
+    headers,
+  });
+  return res.data.data ? res.data.data : null;
 };
 
 export const useAppFetch = () => {

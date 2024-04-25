@@ -2,11 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import React, { useContext } from 'react';
 import { createContext } from 'react';
 
-import {
-  fetchUserPosts,
-  getUserPosts,
-  triggerUserPosts,
-} from '../api/post.requests';
+import { useAppFetch } from '../api/app.fetch';
 import { AppPostFull } from '../shared/types/types.posts';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 
@@ -23,7 +19,8 @@ export const UserPostsContextValue = createContext<PostContextType | undefined>(
 export const UserPostsContext: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
-  const { token, connectedUser } = useAccountContext();
+  const { connectedUser } = useAccountContext();
+  const appFetch = useAppFetch();
 
   /** everytime the connected user changes, trigger a fetch */
   const {
@@ -31,10 +28,12 @@ export const UserPostsContext: React.FC<{
     isSuccess: fetched,
     isFetching: isFetching,
   } = useQuery({
-    queryKey: ['fetchUserPosts', connectedUser, token],
+    queryKey: ['fetchUserPosts', connectedUser],
     queryFn: () => {
-      if (connectedUser && token) {
-        return fetchUserPosts(connectedUser.userId, token);
+      if (connectedUser) {
+        return appFetch('/app/posts/fetch', {
+          userId: connectedUser.userId,
+        });
       }
       return null;
     },
@@ -48,10 +47,12 @@ export const UserPostsContext: React.FC<{
     isFetching: isGetting,
     isSuccess: gotPosts,
   } = useQuery({
-    queryKey: ['getUserPosts', connectedUser, token],
+    queryKey: ['getUserPosts', connectedUser],
     queryFn: () => {
-      if (connectedUser && token) {
-        return getUserPosts(connectedUser.userId, token);
+      if (connectedUser) {
+        return appFetch<AppPostFull[]>('/app/posts/getOfUser', {
+          userId: connectedUser.userId,
+        });
       }
       return null;
     },
@@ -62,10 +63,12 @@ export const UserPostsContext: React.FC<{
 
   /** once post got, trigger parse */
   const { refetch: refetchTriggerParse } = useQuery({
-    queryKey: ['triggerUserPosts', connectedUser, token],
+    queryKey: ['parseUserPosts', connectedUser],
     queryFn: () => {
-      if (connectedUser && token) {
-        return triggerUserPosts(connectedUser.userId, token);
+      if (connectedUser) {
+        return appFetch('/app/posts/triggerParse', {
+          userId: connectedUser.userId,
+        });
       }
       return null;
     },

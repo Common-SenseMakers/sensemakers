@@ -7,8 +7,7 @@ import {
 } from 'react';
 
 import { _appFetch } from '../../api/app.fetch';
-import { getLoggedUser, postOrcidCode } from '../../api/auth.requests';
-import { AppUserRead, PLATFORM } from '../../shared/types/types';
+import { AppUserRead } from '../../shared/types/types';
 
 const DEBUG = true;
 
@@ -49,12 +48,11 @@ export const AccountContext = (props: PropsWithChildren) => {
     }
   };
 
-  const refresh = () => {
+  const refresh = async () => {
     if (token) {
-      getLoggedUser(token).then((user) => {
-        if (DEBUG) console.log('got connected user', { user });
-        setConnectedUser(user);
-      });
+      const user = await _appFetch<AppUserRead>('/app/auth/me', {}, token);
+      if (DEBUG) console.log('got connected user', { user });
+      setConnectedUser(user);
     } else {
       setConnectedUser(null);
     }

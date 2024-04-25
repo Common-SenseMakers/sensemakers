@@ -17,7 +17,7 @@ export const getLoggedUserController: RequestHandler = async (
 
     response.status(200).send({
       success: true,
-      user,
+      data: user,
     });
   } catch (error: any) {
     logger.error('error', error);
