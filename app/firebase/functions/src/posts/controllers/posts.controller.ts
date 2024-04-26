@@ -21,7 +21,7 @@ export const getUserPostsController: RequestHandler = async (
 
     const posts = await postsManager.getOfUser(userId);
     if (DEBUG) logger.debug(`${request.path}: posts`, { posts, userId });
-    response.status(200).send({ success: true, posts });
+    response.status(200).send({ success: true, data: posts });
   } catch (error) {
     logger.error('error', error);
     response.status(500).send({ success: false, error });
@@ -100,7 +100,7 @@ export const getPostController: RequestHandler = async (request, response) => {
           userId,
           post: post,
         });
-      response.status(200).send({ success: true, post });
+      response.status(200).send({ success: true, data: post });
     }
   } catch (error) {
     logger.error('error', error);
