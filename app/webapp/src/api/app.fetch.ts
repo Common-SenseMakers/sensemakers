@@ -11,9 +11,9 @@ export interface AppFetch {
   ): Promise<R>;
 }
 
-export const _appFetch = async <T = any>(
+export const _appFetch = async <T = any, D = any>(
   path: string,
-  data: any = {},
+  data?: D,
   accessToken?: string
 ) => {
   const headers: AxiosRequestConfig['headers'] = {};
@@ -22,7 +22,7 @@ export const _appFetch = async <T = any>(
     headers['authorization'] = `Bearer ${accessToken}`;
   }
 
-  const res = await axios.post<{ data: T }>(FUNCTIONS_BASE + path, data, {
+  const res = await axios.post<{ data: T }>(FUNCTIONS_BASE + path, data || {}, {
     headers,
   });
 
@@ -34,7 +34,7 @@ export const _appFetch = async <T = any>(
 export const useAppFetch = () => {
   const { token } = useAccountContext();
 
-  const appFetch = async <T>(path: string, data: any = {}) => {
+  const appFetch = async <T, D = any>(path: string, data?: D) => {
     return _appFetch<T>(path, data, token);
   };
 

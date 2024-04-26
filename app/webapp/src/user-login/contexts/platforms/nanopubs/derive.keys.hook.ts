@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { RSAKeys } from '../../../../shared/types/types.nanopubs';
 import { getRSAKeys } from '../../../../shared/utils/rsa.keys';
 import { useAppSigner } from '../../signer/SignerContext';
+import { usePostCredentials } from './post.credentials.hook';
 
 const KEYS_KEY = 'NP_PEM_KEYS';
 const DETERMINISTIC_MESSAGE = 'Prepare my Nanopub identity';
@@ -17,6 +18,9 @@ export const useNanopubKeys = (connectIntention: boolean) => {
   const [connectAsked, setConnectAsked] = useState<boolean>();
   const { signMessage, connect: connectWallet, address } = useAppSigner();
   const [rsaKeys, setRsaKeys] = useState<RSAKeys>();
+
+  /** isolated logic that handles posting the credentials to the backend ("signinup") */
+  usePostCredentials(rsaKeys);
 
   /**
    * check for the rsa keys on localStorage, if they exist

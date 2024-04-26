@@ -8,12 +8,12 @@ import {
   useState,
 } from 'react';
 
-import { useAppFetch } from '../../../../api/app.fetch';
-import { HexStr, PLATFORM } from '../../../../shared/types/types';
+import { HexStr } from '../../../../shared/types/types';
 import { useNanopubKeys } from './derive.keys.hook';
 import { getProfile } from './nanopub.utils';
+import { usePostCredentials } from './post.credentials.hook';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export type NanopubContextType = {
   profile?: NpProfile;

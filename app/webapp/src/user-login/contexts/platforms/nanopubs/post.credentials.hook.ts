@@ -12,33 +12,25 @@ import { getAccount } from '../../../user.helper';
 import { useAccountContext } from '../../AccountContext';
 import { useAppSigner } from '../../signer/SignerContext';
 
+/**
+ * from a set of connected keys, checks if the current user
+ * has that nanopub account refisted and registers it if not
+ */
 export const usePostCredentials = (rsaKeys?: RSAKeys) => {
   const [ethSignature, setEthSignature] = useState<HexStr>();
+
   const { signMessage, address } = useAppSigner();
   const { connectedUser, refresh: refreshConnectedUser } = useAccountContext();
   const appFetch = useAppFetch();
 
-  const nanopubDetails = getAccount(connectedUser, PLATFORM.Nanopub);
-
   /**
-   * keep user details aligned with profile and keep track of the
-   * eth<>rsa signature (if not already done) */
-  const postEthDetails = useCallback(
-    async (details: NanopubUserDetails) => {
-      if (rsaKeys && details.profile) {
-        if (DEBUG) console.log({ details });
-
-        appFetch('/auth/eth', details).then(() => {
-          refreshConnectedUser();
-        });
-      }
-    },
-    [connectedUser, refreshConnectedUser, rsaKeys]
-  );
-
+   * macro-effect that asks for signature and post the nanopub details if the
+   * connected wallet has not yet signed-up
+   */
   useEffect(() => {
-    if (connectedUser && !nanopubDetails) {
-      if (rsaKeys && address && ethSignature) {
+    if (connectedUser && address) {
+      const details = getAccount(connectedUser, PLATFORM.Nanopub, address);
+      if (!details && rsaKeys && ethSignature) {
         const details: NanopubUserDetails = {
           user_id: rsaKeys.publicKey,
           lastFetchedMs: 0,
@@ -49,7 +41,10 @@ export const usePostCredentials = (rsaKeys?: RSAKeys) => {
           },
         };
         if (DEBUG) console.log('posting user details', { details });
-        postEthDetails(details);
+
+        appFetch('/api/auth/handleSignup', details).then(() => {
+          refreshConnectedUser();
+        });
       } else if (!ethSignature && signMessage && rsaKeys) {
         if (DEBUG)
           console.log('generating ETH signature of RSA account', { address });
@@ -59,12 +54,11 @@ export const usePostCredentials = (rsaKeys?: RSAKeys) => {
       }
     }
   }, [
+    rsaKeys,
     address,
     connectedUser,
-    rsaKeys,
     ethSignature,
     signMessage,
     refreshConnectedUser,
-    postEthDetails,
   ]);
 };
