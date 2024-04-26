@@ -40,6 +40,7 @@ export const fetchUserPostsController: RequestHandler = async (
     const { postsManager } = getServices(request);
 
     await postsManager.fetchUser(userId);
+    await enqueueParseUserPosts(userId, envRuntime.REGION || 'us-central1');
 
     if (DEBUG) logger.debug(`${request.path}: fetched`, { userId });
     response.status(200).send({ success: true });

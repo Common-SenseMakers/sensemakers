@@ -23,11 +23,7 @@ export const UserPostsContext: React.FC<{
   const appFetch = useAppFetch();
 
   /** everytime the connected user changes, trigger a fetch */
-  const {
-    refetch: refetchFetch,
-    isSuccess: fetched,
-    isFetching: isFetching,
-  } = useQuery({
+  const { isSuccess: fetched, isFetching: isFetching } = useQuery({
     queryKey: ['fetchUserPosts', connectedUser],
     queryFn: () => {
       if (connectedUser) {
@@ -42,10 +38,8 @@ export const UserPostsContext: React.FC<{
   /** once fetched, get the posts */
   const {
     data: _posts,
-    refetch: refetchGet,
     error,
     isFetching: isGetting,
-    isSuccess: gotPosts,
   } = useQuery({
     queryKey: ['getUserPosts', connectedUser],
     queryFn: () => {
@@ -60,22 +54,6 @@ export const UserPostsContext: React.FC<{
   });
 
   console.log({ _posts, error, fetched });
-
-  /** once post got, trigger parse */
-  const { refetch: refetchTriggerParse } = useQuery({
-    queryKey: ['parseUserPosts', connectedUser],
-    queryFn: () => {
-      if (connectedUser) {
-        return appFetch('/app/posts/triggerParse', {
-          userId: connectedUser.userId,
-        });
-      }
-      return null;
-    },
-    enabled: gotPosts,
-  });
-
-  /** triggering of each post parse is done in the PostContext */
 
   /** convert null to undefined */
   const posts = _posts !== null ? _posts : undefined;
