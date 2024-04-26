@@ -62,7 +62,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
       type,
     };
     const siginContext = await appFetch<TwitterSignupContext>(
-      `/app/auth/${PLATFORM.Twitter}/context`,
+      `/api/auth/${PLATFORM.Twitter}/context`,
       params
     );
 
@@ -96,7 +96,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
         throw new Error('Undexpected state');
       }
 
-      appFetch<HandleSignupResult>(`/app/auth/${PLATFORM.Twitter}/signup`, {
+      appFetch<HandleSignupResult>(`/api/auth/${PLATFORM.Twitter}/signup`, {
         ...context,
         code: code_param,
       }).then((result) => {

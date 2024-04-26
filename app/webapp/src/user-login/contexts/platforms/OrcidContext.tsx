@@ -38,7 +38,7 @@ export const OrcidContext = (props: PropsWithChildren) => {
     queryKey: ['orcidLink'],
     queryFn: async () => {
       const context = await appFetch<OrcidSignupContext>(
-        `/app/auth/${PLATFORM.Orcid}/context`
+        `/api/auth/${PLATFORM.Orcid}/context`
       );
       return context;
     },

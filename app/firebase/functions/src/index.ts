@@ -13,7 +13,7 @@ import {
   getUserPostsController,
   triggerParseController,
 } from './posts/controllers/posts.controller';
-import { PARSE_USER_POSTS_TASK, parseUserPostsTask } from './posts/posts.task';
+import { parseUserPostsTask } from './posts/posts.task';
 // import { fetchNewPosts } from './posts/posts.job';
 import { getLoggedUserController } from './users/controllers/get.logged.controller';
 import {
@@ -33,7 +33,7 @@ router.post('/posts/get', getPostController);
 router.post('/posts/triggerParse', triggerParseController);
 
 /** Registed the API as an HTTP triggered function */
-exports['app'] = functions
+exports['api'] = functions
   .region(envDeploy.REGION)
   .runWith({
     timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
@@ -50,6 +50,4 @@ exports['app'] = functions
 // export const postsJob = onSchedule(POSTS_JOB_SCHEDULE, fetchNewPosts);
 
 /** Registed the parseUserPost task */
-exports[PARSE_USER_POSTS_TASK] = (() => {
-  return onTaskDispatched({}, parseUserPostsTask);
-})();
+exports['parseUserPosts'] = onTaskDispatched({}, parseUserPostsTask);

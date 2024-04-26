@@ -8,7 +8,7 @@ export const resetDB = async () => {
     );
   }
 
-  if (!process.env.FIRESTORE_EMULATOR_HOST.includes('localhost')) {
+  if (!process.env.FIRESTORE_EMULATOR_HOST.includes('127.0.0.1')) {
     throw new Error(
       'Test can only run on emulator. It will delete all current data'
     );
