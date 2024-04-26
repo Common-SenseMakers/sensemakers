@@ -2,20 +2,17 @@ import express from 'express';
 import * as functions from 'firebase-functions';
 import { onTaskDispatched } from 'firebase-functions/v2/tasks';
 
-import { IS_EMULATOR } from './config/config.runtime';
 // import { onSchedule } from 'firebase-functions/v2/scheduler';
 // import { POSTS_JOB_SCHEDULE } from './config/config.runtime';
 import { envDeploy } from './config/typedenv.deploy';
 import { envRuntime } from './config/typedenv.runtime';
 import { buildApp } from './instances/app';
-import { logger } from './instances/logger';
 import {
   fetchUserPostsController,
   getPostController,
   getUserPostsController,
   triggerParseController,
 } from './posts/controllers/posts.controller';
-import { parseUserPostsController } from './posts/controllers/posts.controller.emulator';
 import { PARSE_USER_POSTS_TASK, parseUserPostsTask } from './posts/posts.task';
 // import { fetchNewPosts } from './posts/posts.job';
 import { getLoggedUserController } from './users/controllers/get.logged.controller';
@@ -54,16 +51,5 @@ exports['app'] = functions
 
 /** Registed the parseUserPost task */
 exports[PARSE_USER_POSTS_TASK] = (() => {
-  if (IS_EMULATOR) {
-    logger.warn('Running in emulator mode');
-
-    /** use https onRequest instead of onTaskDispatched in the emulator. Its
-     * called from the  */
-    const _router = express.Router();
-    _router.post('/', parseUserPostsController);
-    return functions.https.onRequest(buildApp(_router));
-  } else {
-    /** use the actual taskDispatcher in production */
-    return onTaskDispatched({}, parseUserPostsTask);
-  }
+  return onTaskDispatched({}, parseUserPostsTask);
 })();
