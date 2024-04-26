@@ -1,17 +1,27 @@
 import { Box, Button, Footer, Text } from 'grommet';
 import { FormPrevious } from 'grommet-icons';
 import { useNavigate, useParams } from 'react-router-dom';
+import { UserV2 } from 'twitter-api-v2';
 
 import { AbsoluteRoutes } from '../route.names';
 import { AppButton } from '../ui-components';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/NanopubContext';
+import { getPlatformProfile } from '../utils/post.utils';
 import { usePost } from './PostContext';
 
 export const PostView = () => {
   const { post } = usePost();
   const { connectedUser } = useAccountContext();
   const { connect: connectNanopub } = useNanopubContext();
+  const postAuthorProfile =
+    connectedUser && post
+      ? (getPlatformProfile(
+          connectedUser,
+          post.origin,
+          post.authorId
+        ) as UserV2)
+      : undefined;
 
   const canPublish =
     connectedUser && connectedUser.nanopub && connectedUser.nanopub.length > 0;
@@ -34,10 +44,10 @@ export const PostView = () => {
           justify="between"
           background="light-1">
           <Box direction="row" align="center" gap="small">
-            <Text weight="bold">{'NAME'}</Text>
-            <Text color="dark-6">{'HANDLE'}</Text>
+            <Text weight="bold">{postAuthorProfile?.name}</Text>
+            <Text color="dark-6">{postAuthorProfile?.username}</Text>
           </Box>
-          <Text>{'DATE'}</Text>
+          <Text>{post?.createdAtMs}</Text>
         </Box>
         {/* Content */}
         <Box pad={{ vertical: 'small' }}>
