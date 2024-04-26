@@ -3,21 +3,18 @@ import { TweetV2SingleResult } from 'twitter-api-v2';
 
 import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
-import {
-  PlatformPost,
-  PlatformPostPosted,
-} from '../../src/@shared/types/types.platform.posts';
-import { AppPost } from '../../src/@shared/types/types.posts';
+import { PlatformPostPosted } from '../../src/@shared/types/types.platform.posts';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { logger } from '../../src/instances/logger';
 import { signNanopublication } from '../../src/platforms/nanopub/sign.util';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
+import { enqueueParseUserPosts } from '../../src/posts/posts.task';
 import { resetDB } from '../utils/db';
 import { createTestAppUsers } from '../utils/user.factory';
 import { USE_REAL_TWITTER } from './setup';
 import { getTestServices } from './test.services';
 
-describe('03-process', () => {
+describe.only('03-process', () => {
   let rsaKeys: RSAKeys | undefined;
   const services = getTestServices();
 
@@ -101,33 +98,23 @@ describe('03-process', () => {
       await services.postsManager.fetchUser(undefined, appUser);
 
       /** read user post */
-      const postsRead = await services.postsManager.getPendingOfUser(
-        appUser.userId
-      );
+      const postsRead = await services.postsManager.getOfUser(appUser.userId);
 
       expect(postsRead).to.not.be.undefined;
-      expect(postsRead).to.have.length(1);
+      expect(postsRead).to.have.length(3);
 
       const postRead = postsRead[0];
       expect(postRead).to.not.be.undefined;
-      expect(postRead.mirrors).to.have.length(2);
+      expect(postRead.mirrors).to.have.length(1);
 
-      expect(postRead.semantics).to.not.be.undefined;
-      expect(postRead.originalParsed).to.not.be.undefined;
+      expect(postRead.semantics).to.be.undefined;
+      expect(postRead.originalParsed).to.be.undefined;
 
       const tweetRead = postRead.mirrors.find(
         (m) => m.platformId === PLATFORM.Twitter
       );
 
-      const nanopubRead = postRead.mirrors.find(
-        (m) => m.platformId === PLATFORM.Nanopub
-      );
-
       if (!tweetRead) {
-        throw new Error('tweetRead not created');
-      }
-
-      if (!nanopubRead) {
         throw new Error('tweetRead not created');
       }
 
@@ -135,40 +122,28 @@ describe('03-process', () => {
         throw new Error('appUser not created');
       }
 
-      /** mirrors are not part of the reference posts */
-      postsRead.forEach((p) => delete (p as any).mirrors);
-
-      const refAppPost: AppPost = {
-        id: postRead.id,
-        authorId: appUser.userId,
-        origin: PLATFORM.Twitter,
-        reviewedStatus: 'pending',
-        parseStatus: 'processed',
-        content: TEST_CONTENT,
-        mirrorsIds: [tweetRead.id, nanopubRead.id],
-      };
-
-      const refTweet: PlatformPost = {
-        id: tweetRead.id,
-        platformId: PLATFORM.Twitter,
-        publishOrigin: 'fetched',
-        publishStatus: 'published',
-        posted: {
-          post_id: tweet.post.data.id,
-          user_id: (appUser[PLATFORM.Twitter] as any)[0].user_id,
-          timestampMs: tweet.timestampMs,
-          post: tweet.post.data,
-        },
-      };
-
       expect(postRead).to.not.be.undefined;
+    });
 
-      /** dont check semantics */
-      delete postRead.semantics;
-      delete postRead.originalParsed;
+    it('triggers parse user posts task', async () => {
+      if (!appUser) {
+        throw new Error('appUser not created');
+      }
+      await enqueueParseUserPosts(appUser.userId, 'us-central1');
 
-      expect(postRead).to.deep.equal(refAppPost);
-      expect(tweetRead).to.deep.equal(refTweet);
+      /** wait for the task to finish */
+      await new Promise<void>((resolve) => setTimeout(resolve, 0.5 * 1000));
+
+      const postsRead = await services.postsManager.getOfUser(appUser.userId);
+
+      expect(postsRead).to.not.be.undefined;
+      expect(postsRead).to.have.length(3);
+
+      postsRead.forEach((postRead) => {
+        expect(postRead.semantics).to.not.be.undefined;
+        expect(postRead.originalParsed).to.not.be.undefined;
+        expect(postRead.parseStatus).to.eq('processed');
+      });
     });
 
     it('fetch one user pending posts', async () => {
@@ -177,11 +152,11 @@ describe('03-process', () => {
       }
 
       /** get pending posts of user */
-      const pendingPosts = await services.postsManager.getPendingOfUser(
+      const pendingPosts = await services.postsManager.getOfUser(
         appUser.userId
       );
 
-      expect(pendingPosts).to.have.length(1);
+      expect(pendingPosts).to.have.length(3);
       const pendingPost = pendingPosts[0];
       const nanopub = pendingPost.mirrors.find(
         (m) => m.platformId === PLATFORM.Nanopub

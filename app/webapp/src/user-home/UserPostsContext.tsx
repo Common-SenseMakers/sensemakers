@@ -19,7 +19,7 @@ export const UserPostsContextValue = createContext<PostContextType | undefined>(
 export const UserPostsContext: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
-  const { token, connectedUser } = useAccountContext();
+  const { connectedUser } = useAccountContext();
   const appFetch = useAppFetch();
 
   /** everytime the connected user changes, trigger a fetch */
@@ -28,10 +28,12 @@ export const UserPostsContext: React.FC<{
     isSuccess: fetched,
     isFetching: isFetching,
   } = useQuery({
-    queryKey: ['fetchUserPosts', connectedUser, token],
+    queryKey: ['fetchUserPosts', connectedUser],
     queryFn: () => {
-      if (connectedUser && token) {
-        return appFetch('/posts/fetch', { userId: connectedUser.userId });
+      if (connectedUser) {
+        return appFetch('/api/posts/fetch', {
+          userId: connectedUser.userId,
+        });
       }
       return null;
     },
@@ -45,10 +47,10 @@ export const UserPostsContext: React.FC<{
     isFetching: isGetting,
     isSuccess: gotPosts,
   } = useQuery({
-    queryKey: ['getUserPosts', connectedUser, token],
+    queryKey: ['getUserPosts', connectedUser],
     queryFn: () => {
-      if (connectedUser && token) {
-        return appFetch<AppPostFull[]>('/posts/getOfUser', {
+      if (connectedUser) {
+        return appFetch<AppPostFull[]>('/api/posts/getOfUser', {
           userId: connectedUser.userId,
         });
       }
@@ -61,10 +63,10 @@ export const UserPostsContext: React.FC<{
 
   /** once post got, trigger parse */
   const { refetch: refetchTriggerParse } = useQuery({
-    queryKey: ['triggerUserPosts', connectedUser, token],
+    queryKey: ['parseUserPosts', connectedUser],
     queryFn: () => {
-      if (connectedUser && token) {
-        return appFetch('/posts/triggerParse', {
+      if (connectedUser) {
+        return appFetch('/api/posts/triggerParse', {
           userId: connectedUser.userId,
         });
       }

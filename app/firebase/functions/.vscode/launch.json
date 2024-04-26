@@ -9,7 +9,7 @@
       "cwd": "${workspaceFolder}",
       "env": {
         "NODE_ENV": "test",
-        "FIRESTORE_EMULATOR_HOST": "localhost:8080",
+        "FIRESTORE_EMULATOR_HOST": "127.0.0.1:8080",
         "LOG_LEVEL_MSG": "debug",
         "LOG_LEVEL_OBJ": "debug",
         "USE_REAL_TWITTERX": "false",

@@ -132,6 +132,7 @@ describe('02-platforms', () => {
       try {
         const post: AppPostFull = {
           id: 'test-id',
+          createdAtMs: Date.now(),
           authorId: appUser.userId,
           content: 'test content',
           semantics: '',
@@ -171,6 +172,7 @@ describe('02-platforms', () => {
             {
               draft: signed.rdf(),
               userDetails: {
+                lastFetchedMs: 0,
                 signupDate: 0,
                 user_id: '123456',
               },

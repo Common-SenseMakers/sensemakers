@@ -1,8 +1,9 @@
 import express from 'express';
 import * as functions from 'firebase-functions';
-import { onSchedule } from 'firebase-functions/v2/scheduler';
+import { onTaskDispatched } from 'firebase-functions/v2/tasks';
 
-import { POSTS_JOB_SCHEDULE } from './config/config.runtime';
+// import { onSchedule } from 'firebase-functions/v2/scheduler';
+// import { POSTS_JOB_SCHEDULE } from './config/config.runtime';
 import { envDeploy } from './config/typedenv.deploy';
 import { envRuntime } from './config/typedenv.runtime';
 import { buildApp } from './instances/app';
@@ -12,7 +13,8 @@ import {
   getUserPostsController,
   triggerParseController,
 } from './posts/controllers/posts.controller';
-import { fetchNewPosts } from './posts/posts.job';
+import { parseUserPostsTask } from './posts/posts.task';
+// import { fetchNewPosts } from './posts/posts.job';
 import { getLoggedUserController } from './users/controllers/get.logged.controller';
 import {
   getSignupContextController,
@@ -30,7 +32,8 @@ router.post('/posts/fetch', fetchUserPostsController);
 router.post('/posts/get', getPostController);
 router.post('/posts/triggerParse', triggerParseController);
 
-export const app = functions
+/** Registed the API as an HTTP triggered function */
+exports['api'] = functions
   .region(envDeploy.REGION)
   .runWith({
     timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
@@ -44,6 +47,7 @@ export const app = functions
   })
   .https.onRequest(buildApp(router));
 
-export const postsJob = onSchedule(POSTS_JOB_SCHEDULE, fetchNewPosts);
+// export const postsJob = onSchedule(POSTS_JOB_SCHEDULE, fetchNewPosts);
 
-// TODO: Configure a task that will parse all the unparsed posts of a user
+/** Registed the parseUserPost task */
+exports['parseUserPosts'] = onTaskDispatched({}, parseUserPostsTask);

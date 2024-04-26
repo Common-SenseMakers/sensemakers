@@ -44,8 +44,9 @@ export interface WithPlatformUserId {
 
 export interface UserDetailsBase<P = any, R = any, W = any>
   extends WithPlatformUserId {
+  lastFetchedMs: number;
   profile?: P;
-  read?: R & { lastFetchedMs: number };
+  read?: R;
   write?: W;
 }
 

@@ -25,7 +25,6 @@ export const PostContext: React.FC<{
     throw new Error(`Both postId and post were defined. Define only one`);
   }
 
-  const { token } = useAccountContext();
   const appFetch = useAppFetch();
 
   const postId = useMemo(
@@ -34,14 +33,16 @@ export const PostContext: React.FC<{
   );
 
   /** if postInit not provided get post from the DB */
-  const { data: post, refetch } = useQuery({
+  const { data: _post, refetch } = useQuery({
     queryKey: ['postId', postId],
     queryFn: () => {
-      if (postId && token) {
-        return appFetch<AppPostFull>('posts/get', { postId });
+      if (postId) {
+        return appFetch<AppPostFull>('/api/posts/get', { postId });
       }
     },
   });
+
+  const post = _post !== null ? _post : undefined;
 
   /**
    * subscribe to real time updates of this post and trigger a refetch everytime
