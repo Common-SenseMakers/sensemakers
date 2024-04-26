@@ -38,7 +38,7 @@ const getSampleTweet = (id: string, authorId: string) => {
 [1, 2].map((ix) => {
   state.tweets.push({
     id: `${ix}`,
-    tweet: getSampleTweet(`T${ix}`, '262842859'),
+    tweet: getSampleTweet(`T${ix}`, '1773032135814717440'),
   });
 });
 
