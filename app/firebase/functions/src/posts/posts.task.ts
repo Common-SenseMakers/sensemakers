@@ -4,22 +4,22 @@ import { GoogleAuth } from 'google-auth-library';
 
 import { IS_EMULATOR } from '../config/config.runtime';
 import { envRuntime } from '../config/typedenv.runtime';
+import { logger } from '../instances/logger';
 import { createServices } from '../instances/services';
 
 export const PARSE_USER_POSTS_TASK = 'parseUserPosts';
 
 export const queueOnEmulator = async (url: string, data: any) => {
-  return fetch(url, {
-    headers: [
-      ['Accept', 'application/json'],
-      ['Content-Type', 'application/json'],
-    ],
+  const res = await fetch(url, {
+    headers: [['Content-Type', 'application/json']],
     method: 'post',
     body: JSON.stringify({ data }),
   });
+  return res;
 };
 
 export const parseUserPostsTask = async (req: Request) => {
+  logger.debug('parseUserPostsTask', { data: req.data });
   const userId = req.data.userId;
   const { postsManager } = createServices();
   await postsManager.parseOfUser(userId);
@@ -58,7 +58,7 @@ async function getFunctionUrl(name: string, location: string) {
   const projectId = await auth.getProjectId();
 
   if (envRuntime.NODE_ENV !== 'production') {
-    return `http://localhost:5001/${projectId}/${location}/${name}`;
+    return `http://127.0.0.1:5001/${projectId}/${location}/${name}`;
   }
 
   const url =

@@ -31,7 +31,7 @@ export const UserPostsContext: React.FC<{
     queryKey: ['fetchUserPosts', connectedUser],
     queryFn: () => {
       if (connectedUser) {
-        return appFetch('/app/posts/fetch', {
+        return appFetch('/api/posts/fetch', {
           userId: connectedUser.userId,
         });
       }
@@ -50,7 +50,7 @@ export const UserPostsContext: React.FC<{
     queryKey: ['getUserPosts', connectedUser],
     queryFn: () => {
       if (connectedUser) {
-        return appFetch<AppPostFull[]>('/app/posts/getOfUser', {
+        return appFetch<AppPostFull[]>('/api/posts/getOfUser', {
           userId: connectedUser.userId,
         });
       }
@@ -66,7 +66,7 @@ export const UserPostsContext: React.FC<{
     queryKey: ['parseUserPosts', connectedUser],
     queryFn: () => {
       if (connectedUser) {
-        return appFetch('/app/posts/triggerParse', {
+        return appFetch('/api/posts/triggerParse', {
           userId: connectedUser.userId,
         });
       }

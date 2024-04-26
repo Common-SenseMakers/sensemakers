@@ -37,7 +37,7 @@ export const PostContext: React.FC<{
     queryKey: ['postId', postId],
     queryFn: () => {
       if (postId) {
-        return appFetch<AppPostFull>('/app/posts/get', { postId });
+        return appFetch<AppPostFull>('/api/posts/get', { postId });
       }
     },
   });

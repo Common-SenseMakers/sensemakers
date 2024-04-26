@@ -1,5 +1,3 @@
-import { logger } from 'firebase-functions/v1';
-
 import { ALL_PUBLISH_PLATFORMS, AppUser } from '../@shared/types/types';
 import {
   PARSER_MODE,
@@ -13,6 +11,7 @@ import {
 import { AppPost, AppPostFull, PostUpdate } from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
+import { logger } from '../instances/logger';
 import { ParserService } from '../parser/parser.service';
 import { FetchUserPostsParams } from '../platforms/platforms.interface';
 import { PlatformsService } from '../platforms/platforms.service';
@@ -165,6 +164,7 @@ export class PostsManager {
   }
 
   async parsePost(postId: string, manager: TransactionManager) {
+    logger.debug('parsePost', { postId });
     const post = await this.processing.posts.get(postId, manager, true);
 
     const params: ParsePostRequest<TopicsParams> = {

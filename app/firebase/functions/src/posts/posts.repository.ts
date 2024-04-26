@@ -59,9 +59,9 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   public async getNonParsedOfUser(userId: string): Promise<string[]> {
     /** type protection agains properties renaming */
     const statusKey: keyof AppPost = 'parseStatus';
-    const statusValue: AppPost['parseStatus'] = 'unprocessed';
-
     const authorKey: keyof AppPost = 'authorId';
+
+    const statusValue: AppPost['parseStatus'] = 'unprocessed';
 
     const posts = await this.db.collections.posts
       .where(statusKey, '==', statusValue)
