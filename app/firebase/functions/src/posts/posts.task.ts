@@ -58,7 +58,7 @@ async function getFunctionUrl(name: string, location: string) {
   const projectId = await auth.getProjectId();
 
   if (envRuntime.NODE_ENV !== 'production') {
-    return `http://localhost:5001/${projectId}/${location}/${name}`;
+    return `http://127.0.0.1:5001/${projectId}/${location}/${name}`;
   }
 
   const url =
