@@ -26,7 +26,7 @@ export const _appFetch = async <T = any>(
     headers,
   });
 
-  if (DEBUG) console.log(`appFetch: ${path}`, { data, res });
+  if (DEBUG) console.log(`appFetch: ${path}`, data);
 
   return res.data.data ? res.data.data : null;
 };

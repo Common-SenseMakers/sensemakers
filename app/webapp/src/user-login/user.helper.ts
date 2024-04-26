@@ -1,6 +1,10 @@
 import { Restaurant } from 'grommet-icons';
 
-import { AppUserRead, PLATFORM } from '../shared/types/types';
+import {
+  AccountDetailsRead,
+  AppUserRead,
+  PLATFORM,
+} from '../shared/types/types';
 
 export const getAccount = (
   user?: AppUserRead,
@@ -19,9 +23,13 @@ export const getAccount = (
     throw Error('undexpected');
   }
 
-  const accounts = user[platformId];
+  const accounts = user[platformId] as AccountDetailsRead<any>[] | undefined;
 
-  if (!accounts || accounts.length === 0) {
+  if (!accounts) {
+    return undefined;
+  }
+
+  if (accounts.length === 0) {
     return undefined;
   }
 

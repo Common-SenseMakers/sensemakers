@@ -27,6 +27,7 @@ createWeb3Modal({
   wagmiConfig: config,
   projectId,
   enableAnalytics: false,
+  allowUnsupportedChain: true,
 });
 
 const queryClient = new QueryClient();

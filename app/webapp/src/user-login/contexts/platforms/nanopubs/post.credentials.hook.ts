@@ -41,6 +41,7 @@ export const usePostCredentials = (rsaKeys?: RSAKeys) => {
       if (rsaKeys && address && ethSignature) {
         const details: NanopubUserDetails = {
           user_id: rsaKeys.publicKey,
+          lastFetchedMs: 0,
           signupDate: 0,
           profile: {
             rsaPublickey: rsaKeys.publicKey,
@@ -58,14 +59,12 @@ export const usePostCredentials = (rsaKeys?: RSAKeys) => {
       }
     }
   }, [
-    publicKey,
     address,
     connectedUser,
     rsaKeys,
     ethSignature,
     signMessage,
     refreshConnectedUser,
-    connectIntention,
     postEthDetails,
   ]);
 };
