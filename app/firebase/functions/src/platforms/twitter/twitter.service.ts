@@ -8,6 +8,7 @@ import {
   Tweetv2FieldsParams,
   TwitterApi,
   TwitterApiReadOnly,
+  UsersV2Params,
 } from 'twitter-api-v2';
 
 import { PLATFORM, UserDetailsBase } from '../../@shared/types/types';
@@ -314,7 +315,10 @@ export class TwitterService
       redirectUri: data.callback_url,
     });
 
-    const { data: user } = await result.client.v2.me();
+    const profileParams: Partial<UsersV2Params> = {
+      'user.fields': ['profile_image_url'],
+    };
+    const { data: user } = await result.client.v2.me(profileParams);
 
     if (!result.refreshToken) {
       throw new Error('Unexpected undefined refresh token');

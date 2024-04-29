@@ -63,7 +63,7 @@ export const useNanopubKeys = (connectIntention: boolean) => {
       return;
     }
 
-    if (connectAsked) {
+    if (connectAsked && !signMessage) {
       return;
     }
 

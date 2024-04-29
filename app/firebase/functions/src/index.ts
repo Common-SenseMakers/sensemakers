@@ -11,7 +11,6 @@ import {
   fetchUserPostsController,
   getPostController,
   getUserPostsController,
-  triggerParseController,
 } from './posts/controllers/posts.controller';
 import { parseUserPostsTask } from './posts/posts.task';
 // import { fetchNewPosts } from './posts/posts.job';
@@ -30,7 +29,6 @@ router.post('/auth/me', getLoggedUserController);
 router.post('/posts/getOfUser', getUserPostsController);
 router.post('/posts/fetch', fetchUserPostsController);
 router.post('/posts/get', getPostController);
-router.post('/posts/triggerParse', triggerParseController);
 
 /** Registed the API as an HTTP triggered function */
 exports['api'] = functions

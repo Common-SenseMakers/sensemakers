@@ -28,14 +28,14 @@ export const _appFetch = async <T = any, D = any>(
 
   if (DEBUG) console.log(`appFetch: ${path}`, data);
 
-  return res.data.data ? res.data.data : null;
+  return (res.data.data ? res.data.data : null) as T;
 };
 
 export const useAppFetch = () => {
   const { token } = useAccountContext();
 
   const appFetch = async <T, D = any>(path: string, data?: D) => {
-    return _appFetch<T>(path, data, token);
+    return _appFetch<T, D>(path, data, token);
   };
 
   return appFetch;

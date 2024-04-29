@@ -89,7 +89,7 @@ export class LocalLogger {
     }
 
     if (showCtx) {
-      console[method](`[${level.tag}]: ${msg}`, obj);
+      console[method](`[${level.tag}]: ${msg}`, obj || '');
     } else {
       console[method](`[${level.tag}]: ${msg}`);
     }

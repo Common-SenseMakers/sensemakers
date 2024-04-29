@@ -40,30 +40,9 @@ export const fetchUserPostsController: RequestHandler = async (
     const { postsManager } = getServices(request);
 
     await postsManager.fetchUser(userId);
+    await enqueueParseUserPosts(userId, envRuntime.REGION || 'us-central1');
 
     if (DEBUG) logger.debug(`${request.path}: fetched`, { userId });
-    response.status(200).send({ success: true });
-  } catch (error) {
-    logger.error('error', error);
-    response.status(500).send({ success: false, error });
-  }
-};
-
-/**
- * trigger parse of unparsed posts (does not wait for parsing to finish)
- * */
-export const triggerParseController: RequestHandler = async (
-  request,
-  response
-) => {
-  try {
-    const userId = getAuthenticatedUser(request, true);
-
-    const REGION = envRuntime.REGION || 'us-central1';
-
-    await enqueueParseUserPosts(userId, REGION);
-
-    if (DEBUG) logger.debug(`${request.path}: parse triggered`, { userId });
     response.status(200).send({ success: true });
   } catch (error) {
     logger.error('error', error);

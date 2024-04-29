@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { createContext } from 'react';
 
 import { useAppFetch } from '../api/app.fetch';
+import { useToastContext } from '../app/ToastsContext';
 import { AppPostFull } from '../shared/types/types.posts';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 
@@ -19,16 +20,17 @@ export const UserPostsContextValue = createContext<PostContextType | undefined>(
 export const UserPostsContext: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
+  const { show } = useToastContext();
   const { connectedUser } = useAccountContext();
   const appFetch = useAppFetch();
 
   /** everytime the connected user changes, trigger a fetch */
   const {
-    refetch: refetchFetch,
     isSuccess: fetched,
     isFetching: isFetching,
+    error: errorFetching,
   } = useQuery({
-    queryKey: ['fetchUserPosts', connectedUser],
+    queryKey: ['fetchUserPosts', connectedUser?.userId],
     queryFn: () => {
       if (connectedUser) {
         return appFetch('/api/posts/fetch', {
@@ -39,13 +41,18 @@ export const UserPostsContext: React.FC<{
     },
   });
 
+  useEffect(() => {
+    if (errorFetching) {
+      console.error(errorFetching);
+      show({ message: errorFetching.message, status: 'critical' });
+    }
+  }, [errorFetching]);
+
   /** once fetched, get the posts */
   const {
     data: _posts,
-    refetch: refetchGet,
     error,
     isFetching: isGetting,
-    isSuccess: gotPosts,
   } = useQuery({
     queryKey: ['getUserPosts', connectedUser],
     queryFn: () => {
@@ -60,22 +67,6 @@ export const UserPostsContext: React.FC<{
   });
 
   console.log({ _posts, error, fetched });
-
-  /** once post got, trigger parse */
-  const { refetch: refetchTriggerParse } = useQuery({
-    queryKey: ['parseUserPosts', connectedUser],
-    queryFn: () => {
-      if (connectedUser) {
-        return appFetch('/api/posts/triggerParse', {
-          userId: connectedUser.userId,
-        });
-      }
-      return null;
-    },
-    enabled: gotPosts,
-  });
-
-  /** triggering of each post parse is done in the PostContext */
 
   /** convert null to undefined */
   const posts = _posts !== null ? _posts : undefined;

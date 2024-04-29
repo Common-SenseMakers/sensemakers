@@ -1,4 +1,5 @@
 import { firestore } from 'firebase-admin';
+import { FieldValue } from 'firebase-admin/firestore';
 
 import {
   AppUser,
@@ -214,7 +215,7 @@ export class UsersRepository {
       const platformIds_property: keyof UserWithPlatformIds = 'platformIds';
       manager.update(userRef, {
         [platformIds_property]: platformIds.push(prefixed_user_id),
-        [platform]: firestore.FieldValue.arrayUnion(details),
+        [platform]: FieldValue.arrayUnion(details),
       });
     }
   }

@@ -17,7 +17,7 @@ import {
   GenericPostData,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
-import { getRsaToEthMessage } from '../../@shared/utils/sig.utils';
+import { getEthToRSAMessage } from '../../@shared/utils/nanopub.sign.util';
 import { NANOPUBS_PUBLISH_SERVERS } from '../../config/config.runtime';
 import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
@@ -26,6 +26,8 @@ import { UsersHelper } from '../../users/users.helper';
 import { FetchUserPostsParams, PlatformService } from '../platforms.interface';
 import { createIntroNanopublication } from './create.intro.nanopub';
 import { createNanopublication } from './create.nanopub';
+
+const DEBUG = true;
 
 export interface TwitterApiCredentials {
   clientId: string;
@@ -60,9 +62,11 @@ export class NanopubService
     signupData: NanupubSignupData
   ): Promise<UserDetailsBase<NanopubUserProfile, any, any>> {
     /** verify ethSignature */
+    if (DEBUG) logger.debug('nanopub: handleSignupData', { signupData });
+
     const valid = verifyMessage({
       address: signupData.ethAddress,
-      message: getRsaToEthMessage(signupData.rsaPublickey),
+      message: getEthToRSAMessage(signupData.rsaPublickey),
       signature: signupData.ethToRsaSignature,
     });
 

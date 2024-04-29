@@ -4,6 +4,8 @@ import { logger } from 'firebase-functions/v1';
 import { PLATFORM } from '../../@shared/types/types';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import {
+  nanopubGetSignupContextSchema,
+  nanopubSignupDataSchema,
   twitterGetSignupContextSchema,
   twitterSignupDataSchema,
 } from './auth.schema';
@@ -21,6 +23,10 @@ export const getSignupContextController: RequestHandler = async (
     const payload = await (async () => {
       if (platform === PLATFORM.Twitter) {
         return twitterGetSignupContextSchema.validate(request.body);
+      }
+
+      if (platform === PLATFORM.Nanopub) {
+        return nanopubGetSignupContextSchema.validate(request.body);
       }
 
       throw new Error(`Unexpected platform ${platform}`);
@@ -54,23 +60,21 @@ export const handleSignupController: RequestHandler = async (
         return twitterSignupDataSchema.validate(request.body);
       }
 
+      if (platform === PLATFORM.Nanopub) {
+        return nanopubSignupDataSchema.validate(request.body);
+      }
+
       throw new Error(`Unexpected platform ${platform}`);
     })();
 
     const result = await services.db.run(async (manager) => {
       /** handle signup and refetch user posts */
-      const result = await services.users.handleSignup(
+      return await services.users.handleSignup(
         platform,
         payload,
         manager,
         userId
       );
-
-      if (!result) {
-        throw new Error(`error handling signup`);
-      }
-
-      return result;
     });
 
     response.status(200).send({ success: true, data: result });

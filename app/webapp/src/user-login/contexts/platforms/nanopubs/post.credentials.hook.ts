@@ -5,9 +5,13 @@ import { DEBUG } from '../../../../app/config';
 import { HexStr, PLATFORM } from '../../../../shared/types/types';
 import {
   NanopubUserDetails,
+  NanupubSignupData,
   RSAKeys,
 } from '../../../../shared/types/types.nanopubs';
-import { getEthToRSAMessage } from '../../../../shared/utils/sig.utils';
+import {
+  getEthToRSAMessage,
+  signNanopublication,
+} from '../../../../shared/utils/nanopub.sign.util';
 import { getAccount } from '../../../user.helper';
 import { useAccountContext } from '../../AccountContext';
 import { useAppSigner } from '../../signer/SignerContext';
@@ -31,19 +35,33 @@ export const usePostCredentials = (rsaKeys?: RSAKeys) => {
     if (connectedUser && address) {
       const details = getAccount(connectedUser, PLATFORM.Nanopub, address);
       if (!details && rsaKeys && ethSignature) {
-        const details: NanopubUserDetails = {
-          user_id: rsaKeys.publicKey,
-          lastFetchedMs: 0,
-          signupDate: 0,
-          profile: {
-            rsaPublickey: rsaKeys.publicKey,
-            ethAddress: address,
-          },
+        const details: NanupubSignupData = {
+          rsaPublickey: rsaKeys.publicKey,
+          ethAddress: address,
+          ethToRsaSignature: ethSignature,
         };
-        if (DEBUG) console.log('posting user details', { details });
 
-        appFetch('/api/auth/handleSignup', details).then(() => {
-          refreshConnectedUser();
+        appFetch<NanupubSignupData>(
+          `/api/auth/${PLATFORM.Nanopub}/context`,
+          details
+        ).then(async (context) => {
+          /** sign introNanopub */
+          if (!context.introNanopub)
+            throw new Error(`Unexpected introNanopub not found`);
+
+          const introNanopub = await signNanopublication(
+            context.introNanopub,
+            rsaKeys
+          );
+
+          /** replace draft with signed */
+          context.introNanopub = introNanopub.get_rdf();
+          if (DEBUG) console.log('posting user details', { details });
+
+          /** post */
+          appFetch(`/api/auth/${PLATFORM.Nanopub}/signup`, context).then(() => {
+            refreshConnectedUser();
+          });
         });
       } else if (!ethSignature && signMessage && rsaKeys) {
         if (DEBUG)
