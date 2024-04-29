@@ -19,6 +19,8 @@ import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { PostsProcessing } from './posts.processing';
 
+const DEBUG = true;
+
 /**
  * Top level methods. They instantiate a TransactionManger and execute
  * read and writes to the DB
@@ -200,6 +202,7 @@ export class PostsManager {
    */
   async approvePost(post: AppPostFull, userId: string) {
     await this.db.run(async (manager) => {
+      if (DEBUG) logger.debug('approvePost', { post, userId });
       const user = await this.users.repo.getUser(userId, manager, true);
       const existing = await this.processing.posts.get(post.id, manager, true);
       if (!existing) {
@@ -220,6 +223,8 @@ export class PostsManager {
         existing.content !== post.content ||
         existing.semantics !== post.semantics
       ) {
+        if (DEBUG)
+          logger.debug('approvePost - updateContent', { existing, post });
         await this.processing.posts.updateContent(
           post.id,
           {
@@ -241,6 +246,9 @@ export class PostsManager {
               mirror.draft.user_id,
               true
             );
+
+            if (DEBUG)
+              logger.debug('approvePost - publish mirror', { mirror, account });
 
             const posted = await this.platforms
               .get(mirror.platformId)

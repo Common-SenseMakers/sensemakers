@@ -1,10 +1,11 @@
 import { RequestHandler } from 'express';
+import { AppPostFull } from 'src/@shared/types/types.posts';
 
 import { envRuntime } from '../../config/typedenv.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
 import { enqueueParseUserPosts } from '../posts.task';
-import { getPostSchema } from './posts.schema';
+import { approvePostSchema, getPostSchema } from './posts.schema';
 
 const DEBUG = true;
 
@@ -81,6 +82,32 @@ export const getPostController: RequestHandler = async (request, response) => {
         });
       response.status(200).send({ success: true, data: post });
     }
+  } catch (error) {
+    logger.error('error', error);
+    response.status(500).send({ success: false, error });
+  }
+};
+
+export const approvePostController: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    const userId = getAuthenticatedUser(request, true);
+    const { postsManager } = getServices(request);
+
+    const payload = (await approvePostSchema.validate(
+      request.body
+    )) as AppPostFull;
+
+    await postsManager.approvePost(payload, userId);
+
+    if (DEBUG)
+      logger.debug(`${request.path}: approvePost`, {
+        post: payload,
+      });
+
+    response.status(200).send({ success: true });
   } catch (error) {
     logger.error('error', error);
     response.status(500).send({ success: false, error });
