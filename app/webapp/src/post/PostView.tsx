@@ -1,6 +1,6 @@
-import { Box, Button, Footer, Text } from 'grommet';
+import { Box, Footer, Text } from 'grommet';
 import { FormPrevious } from 'grommet-icons';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { UserV2 } from 'twitter-api-v2';
 
 import { AbsoluteRoutes } from '../route.names';

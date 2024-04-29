@@ -27,7 +27,7 @@ import { FetchUserPostsParams, PlatformService } from '../platforms.interface';
 import { createIntroNanopublication } from './create.intro.nanopub';
 import { createNanopublication } from './create.nanopub';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export interface TwitterApiCredentials {
   clientId: string;
@@ -74,6 +74,19 @@ export class NanopubService
       throw new Error('Invalid signature');
     }
 
+    /** publish nanopub */
+    if (!signupData.introNanopub) {
+      throw new Error(`Intro nanopub not found`);
+    }
+
+    const published = await this.publishInternal(signupData.introNanopub);
+    if (!published) {
+      throw new Error(`Error publishing intro nanopub`);
+    }
+
+    if (DEBUG)
+      logger.debug('nanopub: intro published', { published: published.info() });
+
     return {
       user_id: signupData.ethAddress,
       signupDate: this.time.now(),
@@ -111,24 +124,18 @@ export class NanopubService
     };
   }
 
-  /**
-   * Receives a list of PostToPublish (platformPost, mirrors and user credentials) and returns
-   * a list of the updated platformPosts
-   */
-  async publish(
-    postPublish: PlatformPostPublish<any>,
-    _manager: TransactionManager
-  ): Promise<PlatformPostPosted<any>> {
-    let published: Nanopub | undefined = undefined;
-    const draft = new Nanopub(postPublish.draft);
+  async publishInternal(signed: string) {
+    const nanopub = new Nanopub(signed);
 
     let stop: boolean = false;
     let serverIx = 0;
 
+    let published: Nanopub | undefined = undefined;
+
     while (!stop) {
       try {
         if (serverIx < NANOPUBS_PUBLISH_SERVERS.length) {
-          published = await draft.publish(
+          published = await nanopub.publish(
             undefined,
             NANOPUBS_PUBLISH_SERVERS[serverIx]
           );
@@ -144,6 +151,19 @@ export class NanopubService
         serverIx++;
       }
     }
+
+    return published;
+  }
+
+  /**
+   * Receives a list of PostToPublish (platformPost, mirrors and user credentials) and returns
+   * a list of the updated platformPosts
+   */
+  async publish(
+    postPublish: PlatformPostPublish<any>,
+    _manager: TransactionManager
+  ): Promise<PlatformPostPosted<any>> {
+    const published = await this.publishInternal(postPublish.draft);
 
     if (published) {
       const platfformPostPosted: PlatformPostPosted = {
