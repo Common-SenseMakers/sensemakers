@@ -281,6 +281,7 @@ export class PostsManager {
             await this.processing.platformPosts.updatePosted(
               mirror.id,
               {
+                draft: mirror.draft,
                 posted: posted,
                 publishOrigin: 'posted',
                 publishStatus: 'published',

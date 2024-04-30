@@ -1,7 +1,6 @@
-import { Nanopub } from '@nanopub/sign';
-import { Box, Footer, Text } from 'grommet';
+import { Box, Text } from 'grommet';
 import { FormPrevious } from 'grommet-icons';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserV2 } from 'twitter-api-v2';
 
@@ -13,12 +12,12 @@ import { AppPostFull } from '../shared/types/types.posts';
 import { AppButton } from '../ui-components';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
-import { getAccount } from '../user-login/user.helper';
 import { getPlatformProfile } from '../utils/post.utils';
 import { usePost } from './PostContext';
 
 export const PostView = () => {
-  const { post } = usePost();
+  const { post, nanopubDraft, nanopubPublished } = usePost();
+  const { signNanopublication } = useNanopubContext();
   const { connectedUser } = useAccountContext();
   const { connect: connectNanopub } = useNanopubContext();
   const appFetch = useAppFetch();
@@ -33,14 +32,6 @@ export const PostView = () => {
     }
   }, [post]);
 
-  useEffect(() => {
-    const nanopubAccount = getAccount(connectedUser, PLATFORM.Nanopub);
-    if (nanopubAccount && !nanopubDraft) {
-      /** if draft not available, create it */
-      appFetch('/api/posts/', {});
-    }
-  }, [post, connectedUser]);
-
   const postAuthorProfile =
     connectedUser && post
       ? (getPlatformProfile(
@@ -50,29 +41,11 @@ export const PostView = () => {
         ) as UserV2)
       : undefined;
 
-  const nanopubPublished = useMemo(() => {
-    const nanopub = post?.mirrors.find(
-      (m) => m.platformId === PLATFORM.Nanopub
-    );
-    if (!nanopub) return undefined;
-
-    const nanopubObj = new Nanopub(nanopub.posted);
-    return nanopubObj;
-  }, [post]);
-
-  const nanopubDraft = useMemo(() => {
-    const nanopub = post?.mirrors.find(
-      (m) => m.platformId === PLATFORM.Nanopub
-    );
-    if (!nanopub) return undefined;
-
-    return nanopub.draft;
-  }, [post]);
-
   const canPublishNanopub =
     connectedUser &&
     connectedUser.nanopub &&
     connectedUser.nanopub.length > 0 &&
+    signNanopublication &&
     nanopubDraft &&
     !nanopubPublished;
 
@@ -85,9 +58,14 @@ export const PostView = () => {
     if (!nanopub || !nanopub.draft) {
       throw new Error(`Unexpected nanopub mirror not found`);
     }
-    nanopub.draft.postApproval = 'approved';
 
-    await appFetch<void, AppPostFull>('/api/posts/approve', postEdited);
+    if (signNanopublication) {
+      const signed = await signNanopublication(nanopub.draft.post);
+      nanopub.draft.postApproval = 'approved';
+      nanopub.draft.post = signed.rdf();
+
+      await appFetch<void, AppPostFull>('/api/posts/approve', postEdited);
+    }
   };
 
   const navigate = useNavigate();
@@ -135,7 +113,7 @@ export const PostView = () => {
           <Box>
             <Text>
               Nanopublication published{' '}
-              <NanopubAnchor href={nanopubPublished.info().uri}></NanopubAnchor>
+              <NanopubAnchor href={nanopubPublished.uri}></NanopubAnchor>
             </Text>
           </Box>
         )}

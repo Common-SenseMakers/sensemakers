@@ -1,4 +1,4 @@
-import init, { NpProfile } from '@nanopub/sign';
+import init, { Nanopub, NpProfile } from '@nanopub/sign';
 import {
   PropsWithChildren,
   createContext,
@@ -9,9 +9,9 @@ import {
 } from 'react';
 
 import { HexStr } from '../../../../shared/types/types';
+import { signNanopublication as _signNanopublication } from '../../../../shared/utils/nanopub.sign.util';
 import { useNanopubKeys } from './derive.keys.hook';
 import { getProfile } from './nanopub.utils';
-import { usePostCredentials } from './post.credentials.hook';
 
 const DEBUG = true;
 
@@ -22,6 +22,7 @@ export type NanopubContextType = {
   disconnect: () => void;
   isConnecting: boolean;
   needAuthorize?: boolean;
+  signNanopublication: ((nanopubStr: string) => Promise<Nanopub>) | undefined;
 };
 
 const NanopubContextValue = createContext<NanopubContextType | undefined>(
@@ -94,6 +95,14 @@ export const NanopubContext = (props: PropsWithChildren) => {
     setProfile(undefined);
   };
 
+  const signNanopublication = rsaKeys
+    ? async (nanopubStr: string) => {
+        return _signNanopublication(nanopubStr, rsaKeys);
+      }
+    : undefined;
+
+  console.log({ signNanopublication });
+
   return (
     <NanopubContextValue.Provider
       value={{
@@ -102,6 +111,7 @@ export const NanopubContext = (props: PropsWithChildren) => {
         profile,
         isConnecting,
         profileAddress,
+        signNanopublication,
       }}>
       {props.children}
     </NanopubContextValue.Provider>

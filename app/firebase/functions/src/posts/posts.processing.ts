@@ -111,7 +111,7 @@ export class PostsProcessing {
     return drafts.flat();
   }
 
-  /** Store all platform posts */
+  /** Create and store all platform posts for one post */
   async createPostDrafts(postId: string, manager: TransactionManager) {
     const appPostFull = await this.getPostFull(postId, manager, true);
 
@@ -121,18 +121,19 @@ export class PostsProcessing {
       true
     );
 
-    const postedPlatforms = appPostFull.mirrors
-      .filter((m) => m.publishStatus === 'published')
+    const preparedPlatforms = appPostFull.mirrors
+      .filter((m) => m.publishStatus === 'published' || m.draft !== undefined)
       .map((m) => m.platformId);
+
     const pendingPlatforms = ALL_PUBLISH_PLATFORMS.filter(
-      (p) => !postedPlatforms.includes(p)
+      (p) => !preparedPlatforms.includes(p)
     );
 
     if (DEBUG)
       logger.debug('createPostDrafts', {
         appPostFull,
         user,
-        postedPlatforms,
+        preparedPlatforms,
         pendingPlatforms,
       });
 

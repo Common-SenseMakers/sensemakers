@@ -59,5 +59,5 @@ export interface PlatformPostCreated {
 }
 
 export type PlatformPostUpdatePosted = Partial<
-  Pick<PlatformPost, 'posted' | 'publishOrigin' | 'publishStatus'>
+  Pick<PlatformPost, 'posted' | 'publishOrigin' | 'publishStatus' | 'draft'>
 >;

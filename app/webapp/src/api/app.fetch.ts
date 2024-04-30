@@ -16,19 +16,28 @@ export const _appFetch = async <T = any, D = any>(
   data?: D,
   accessToken?: string
 ) => {
-  const headers: AxiosRequestConfig['headers'] = {};
+  try {
+    const headers: AxiosRequestConfig['headers'] = {};
 
-  if (accessToken) {
-    headers['authorization'] = `Bearer ${accessToken}`;
+    if (accessToken) {
+      headers['authorization'] = `Bearer ${accessToken}`;
+    }
+
+    const res = await axios.post<{ data: T }>(
+      FUNCTIONS_BASE + path,
+      data || {},
+      {
+        headers,
+      }
+    );
+
+    if (DEBUG) console.log(`appFetch: ${path}`, data);
+
+    return (res.data.data ? res.data.data : null) as T;
+  } catch (e) {
+    console.error(e);
+    throw new Error(`Error fetching ${path}`);
   }
-
-  const res = await axios.post<{ data: T }>(FUNCTIONS_BASE + path, data || {}, {
-    headers,
-  });
-
-  if (DEBUG) console.log(`appFetch: ${path}`, data);
-
-  return (res.data.data ? res.data.data : null) as T;
 };
 
 export const useAppFetch = () => {
