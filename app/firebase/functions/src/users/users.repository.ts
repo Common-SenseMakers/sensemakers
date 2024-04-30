@@ -213,10 +213,13 @@ export class UsersRepository {
        * prefixed platform id in the platformIds array
        * */
       const platformIds_property: keyof UserWithPlatformIds = 'platformIds';
-      manager.update(userRef, {
-        [platformIds_property]: platformIds.push(prefixed_user_id),
+      platformIds.push(prefixed_user_id);
+
+      const update: Partial<AppUser> = {
+        [platformIds_property]: platformIds,
         [platform]: FieldValue.arrayUnion(details),
-      });
+      };
+      manager.update(userRef, update);
     }
   }
 
