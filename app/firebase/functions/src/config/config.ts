@@ -18,7 +18,7 @@ export const MOCK_SEMANTICS = process.env.MOCK_SEMANTICS === 'true';
 export const APP_URL =
   process.env.NODE_ENV !== 'production'
     ? 'http://127.0.0.1:3000/'
-    : 'https://sensemakers.netlify.app/';
+    : 'https://prototype--sensemakers.netlify.app/';
 
 export const TWITTER_CALLBACK_URL = APP_URL;
 export const TWITTER_REVOKE_URL =
@@ -31,8 +31,7 @@ export const FUNCTIONS_PY_URL =
     : 'https://sm-function-post-parser-h6qpmrbfia-uc.a.run.app';
 
 export const TOKEN_EXPIRATION = '30d';
-export const NANOPUBS_SPARQL_SERVER =
-  'https://query.np.trustyuri.net/repo/full';
+export const NANOPUBS_SPARQL_SERVER = 'https://query.knowledgepixels.com/';
 
 export const REGION = 'us-central1';
 
