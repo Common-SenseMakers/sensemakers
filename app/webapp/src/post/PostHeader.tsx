@@ -1,5 +1,5 @@
 import { Anchor, Avatar, Box, Tag, Text } from 'grommet';
-import { FormNext, FormPrevious } from 'grommet-icons';
+import { FormNextLink, FormPrevious, FormPreviousLink } from 'grommet-icons';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -41,31 +41,41 @@ export const PostHeader: React.FC<{
           {prevPostId && (
             <AppButton
               size="small"
-              icon={<FormPrevious></FormPrevious>}
+              icon={<FormPreviousLink></FormPreviousLink>}
               label="Previous"
               onClick={() => navigate(`/post/${prevPostId}`)}></AppButton>
           )}
           {nextPostId && (
             <AppButton
               size="small"
-              icon={<FormNext></FormNext>}
               label="Next"
+              reverse={true}
+              icon={<FormNextLink></FormNextLink>}
               onClick={() => navigate(`/post/${nextPostId}`)}></AppButton>
           )}
         </Box>
       </Box>
       <Box direction="row" align="center" gap="small" justify="between">
-        <Avatar src={profileImageUrl} />
+        <Avatar size="small" src={profileImageUrl} />
         <Box direction="column" gap="small">
-          <Text weight="bold">{profileName}</Text>
-          <Anchor href={postUrl}>{`Tweeted ${datePosted}`}</Anchor>
+          <Text size="small" weight="bold">
+            {profileName}
+          </Text>
+          <Anchor
+            size="xsmall"
+            href={postUrl}
+            label={`Tweeted ${datePosted}`}
+          />
           <Text size="small" color="dark-6">
             {isNanopublished ? 'Nanopublished' : 'Not Nanopublished'}
           </Text>
         </Box>
         <Box direction="column" gap="small">
           <Tag value={reviewStatus} />
-          <Anchor href={`https://twitter.com/${profileHandle}`} color="dark-6">
+          <Anchor
+            size="small"
+            href={`https://twitter.com/${profileHandle}`}
+            color="dark-6">
             {`@${profileHandle}`}
           </Anchor>
         </Box>
