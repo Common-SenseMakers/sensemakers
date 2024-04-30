@@ -89,7 +89,7 @@ export const createServices = () => {
   );
 
   /** parser service */
-  const _parser = new ParserService(FUNCTIONS_PY_URL);
+  const _parser = new ParserService(FUNCTIONS_PY_URL.value());
   const parser = getParserMock(
     _parser,
     USE_REAL_PARSER.value() ? 'real' : 'mock'
