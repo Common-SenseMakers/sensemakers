@@ -1,13 +1,9 @@
 import { Nanopub } from '@nanopub/sign';
-import { Box, Footer, Text } from 'grommet';
-import { FormPrevious } from 'grommet-icons';
+import { Box, Text } from 'grommet';
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { UserV2 } from 'twitter-api-v2';
 
 import { useAppFetch } from '../api/app.fetch';
 import { NanopubAnchor } from '../app/anchors/TwitterAnchor';
-import { AbsoluteRoutes } from '../route.names';
 import { PLATFORM } from '../shared/types/types';
 import { AppPostFull } from '../shared/types/types.posts';
 import { AppButton } from '../ui-components';
@@ -15,6 +11,7 @@ import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { getPlatformProfile } from '../utils/post.utils';
 import { usePost } from './PostContext';
+import { PostHeader } from './PostHeader';
 
 export const PostView = () => {
   const { post } = usePost();
@@ -34,11 +31,7 @@ export const PostView = () => {
 
   const postAuthorProfile =
     connectedUser && post
-      ? (getPlatformProfile(
-          connectedUser,
-          post.origin,
-          post.authorId
-        ) as UserV2)
+      ? getPlatformProfile(connectedUser, post.origin, post.authorId)
       : undefined;
 
   const nanopubPublished = useMemo(() => {
@@ -71,30 +64,25 @@ export const PostView = () => {
     await appFetch<void, AppPostFull>('/api/posts/approve', postEdited);
   };
 
-  const navigate = useNavigate();
+  if (!postAuthorProfile) {
+    return <Box>No Author Info Found</Box>;
+  }
+  if (!post) {
+    return <Box>No Post Found</Box>;
+  }
   return (
     <Box round="small" pad={{ horizontal: 'medium' }}>
-      {/* Header */}
-      <Box margin={{ vertical: 'large' }}>
-        <AppButton
-          icon={<FormPrevious></FormPrevious>}
-          label="back"
-          onClick={() => navigate(AbsoluteRoutes.App)}></AppButton>
-      </Box>
+      <PostHeader
+        profileImageUrl={postAuthorProfile.profileImageUrl}
+        profileName={postAuthorProfile.profileName}
+        profileHandle={postAuthorProfile.profileHandle}
+        datePosted={new Date(post.createdAtMs).toISOString()}
+        postUrl="https://twitter.com/sense_nets_bot/status/1781581576125526151"
+        prevPostId="1234"
+        nextPostId="1234"
+        isNanopublished={false}
+        reviewStatus="For Review"></PostHeader>
       <Box pad="medium" elevation="small">
-        <Box
-          direction="row"
-          align="center"
-          gap="small"
-          justify="between"
-          background="light-1">
-          <Box direction="row" align="center" gap="small">
-            <Text weight="bold">{postAuthorProfile?.name}</Text>
-            <Text color="dark-6">{postAuthorProfile?.username}</Text>
-          </Box>
-          <Text>{post?.createdAtMs}</Text>
-        </Box>
-        {/* Content */}
         <Box pad={{ vertical: 'small' }}>
           <Text>{post?.content}</Text>
         </Box>
