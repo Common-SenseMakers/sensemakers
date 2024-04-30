@@ -1,5 +1,5 @@
 import { firestore } from 'firebase-admin';
-import { TransactionManager } from 'src/db/transaction.manager';
+import { FieldValue } from 'firebase-admin/firestore';
 
 import {
   AppUser,
@@ -7,9 +7,10 @@ import {
   DefinedIfTrue,
   PLATFORM,
   UserDetailsBase,
-  UserWithId,
+  UserWithPlatformIds,
 } from '../@shared/types/types';
 import { DBInstance } from '../db/instance';
+import { TransactionManager } from '../db/transaction.manager';
 import { getPrefixedUserId } from './users.utils';
 
 export class UsersRepository {
@@ -72,13 +73,13 @@ export class UsersRepository {
     const prefixed_user_id = getPrefixedUserId(platform, user_id);
 
     /** protect against changes in the property name */
-    const platformIds_property: keyof UserWithId = 'platformIds';
+    const platformIds_property: keyof UserWithPlatformIds = 'platformIds';
     const query = this.db.collections.users.where(
       platformIds_property,
       'array-contains',
       prefixed_user_id
     );
-    const snap = await query.get();
+    const snap = await manager.query(query);
 
     const _shouldThrow = shouldThrow !== undefined ? shouldThrow : false;
 
@@ -108,17 +109,17 @@ export class UsersRepository {
     manager: TransactionManager
   ) {
     const ref = await this.getUserRef(userId, manager);
-    await ref.create(user);
+    manager.create(ref, user);
     return ref.id;
   }
 
   /**
    * Just update the lastFetchedMs value of a given account
    * */
-  public async setLastFetched(
+  public async setAccountLastFetched(
     platform: PLATFORM,
     user_id: string,
-    lastFetchedMs: number,
+    fetchedMs: number,
     manager: TransactionManager
   ) {
     /** check if this platform user_id already exists */
@@ -150,14 +151,8 @@ export class UsersRepository {
 
     const current = accounts[ix];
 
-    if (!current.read) {
-      throw new Error(
-        `Account ${platform}:${user_id} dont have read credentials`
-      );
-    }
-
     /** overwrite the lastFeched value */
-    current.read.lastFetchedMs = lastFetchedMs;
+    current.lastFetchedMs = fetchedMs;
 
     const userRef = await this.getUserRef(existingUser.userId, manager, true);
 
@@ -205,7 +200,7 @@ export class UsersRepository {
       accounts[ix] = details;
 
       /** replace entire array */
-      await userRef.update({
+      manager.update(userRef, {
         [platform]: accounts,
       });
 
@@ -217,11 +212,14 @@ export class UsersRepository {
        * append a new details entry in the platform array and store the
        * prefixed platform id in the platformIds array
        * */
-      const platformIds_property: keyof UserWithId = 'platformIds';
-      await userRef.update({
-        [platformIds_property]: platformIds.push(prefixed_user_id),
-        [platform]: firestore.FieldValue.arrayUnion(details),
-      });
+      const platformIds_property: keyof UserWithPlatformIds = 'platformIds';
+      platformIds.push(prefixed_user_id);
+
+      const update: Partial<AppUser> = {
+        [platformIds_property]: platformIds,
+        [platform]: FieldValue.arrayUnion(details),
+      };
+      manager.update(userRef, update);
     }
   }
 
@@ -256,7 +254,7 @@ export class UsersRepository {
       throw new Error(`Details for user ${userId} not found`);
     }
 
-    await doc.ref.update({
+    manager.update(doc.ref, {
       [platform]: firestore.FieldValue.arrayRemove(details),
     });
   }

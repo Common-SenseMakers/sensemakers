@@ -9,6 +9,7 @@ import {
 import { TransactionManager } from '../../src/db/transaction.manager';
 import { Services } from '../../src/instances/services';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
+import { getPrefixedUserId } from '../../src/users/users.utils';
 import { getNanopubProfile } from './nanopub.profile';
 
 const CALLBACK_URL = 'https://sense-nets.xyz/';
@@ -71,10 +72,15 @@ const authenticateNanopub = async (
 ): Promise<AppUser> => {
   const { profile } = await getNanopubProfile(credentials.ethPrivateKey);
 
+  user.platformIds.push(
+    getPrefixedUserId(PLATFORM.Nanopub, profile.ethAddress)
+  );
+
   user[PLATFORM.Nanopub] = [
     {
       signupDate: 0,
       user_id: profile.ethAddress,
+      lastFetchedMs: 0,
       profile: {
         ethAddress: profile.ethAddress,
         rsaPublickey: profile.rsaPublickey,

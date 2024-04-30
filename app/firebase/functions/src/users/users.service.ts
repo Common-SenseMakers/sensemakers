@@ -1,15 +1,22 @@
 import * as jwt from 'jsonwebtoken';
 
 import {
+  ALL_IDENTITY_PLATFORMS,
+  AccountDetailsRead,
+  AppUserRead,
   HandleSignupResult,
   OurTokenConfig,
   PLATFORM,
-  UserWithId,
+  UserWithPlatformIds,
 } from '../@shared/types/types';
 import { TransactionManager } from '../db/transaction.manager';
+import { logger } from '../instances/logger';
 import { IdentityServicesMap } from '../platforms/platforms.service';
+import { UsersHelper } from './users.helper';
 import { UsersRepository } from './users.repository';
 import { getPrefixedUserId } from './users.utils';
+
+const DEBUG = true;
 
 interface TokenData {
   userId: string;
@@ -52,6 +59,14 @@ export class UsersService {
       params
     );
 
+    if (DEBUG)
+      logger.debug('UsersService: getSignupContext', {
+        userId,
+        platform,
+        params,
+        context,
+      });
+
     return context;
   }
 
@@ -70,6 +85,13 @@ export class UsersService {
      * validate the signup data for this platform and convert it into
      * user details
      */
+    if (DEBUG)
+      logger.debug('UsersService: handleSignup', {
+        platform,
+        signupData,
+        userId: _userId,
+      });
+
     const authenticatedDetails =
       await this.getIdentityService(platform).handleSignupData(signupData);
 
@@ -83,6 +105,13 @@ export class UsersService {
       authenticatedDetails.user_id,
       manager
     );
+
+    if (DEBUG)
+      logger.debug('UsersService: handleSignup', {
+        authenticatedDetails,
+        prefixed_user_id,
+        existingUserWithAccount,
+      });
 
     if (_userId) {
       /**
@@ -111,6 +140,11 @@ export class UsersService {
          * ourAccessToken is valid and this is an unexpected call since there was no need to signup with this platform
          * and user_id
          * */
+        if (DEBUG)
+          logger.debug(
+            'the user with this platform user_id is the same authenticated userId'
+          );
+
         return {
           userId: _userId,
         };
@@ -119,6 +153,11 @@ export class UsersService {
          * the user has not registered this platform user_id, then store it as a new entry on the [platform] array
          * of the AppUser object
          * */
+        if (DEBUG)
+          logger.debug(
+            'the user has not registered this platform user_id, then store it',
+            { _userId, platform, authenticatedDetails }
+          );
 
         await this.repo.setPlatformDetails(
           _userId,
@@ -139,6 +178,11 @@ export class UsersService {
 
         const userId = existingUserWithAccount.userId;
 
+        if (DEBUG)
+          logger.debug(
+            ' user exist with this platform user_id, then return an accessToken'
+          );
+
         await this.repo.setPlatformDetails(
           userId,
           platform,
@@ -158,7 +202,7 @@ export class UsersService {
          * and we need to create a new user.
          * */
 
-        const platformIds_property: keyof UserWithId = 'platformIds';
+        const platformIds_property: keyof UserWithPlatformIds = 'platformIds';
 
         await this.repo.createUser(
           prefixed_user_id,
@@ -168,6 +212,11 @@ export class UsersService {
           },
           manager
         );
+
+        if (DEBUG)
+          logger.debug(
+            'a user does not exist with this platform user_id then this is the first time that platform is used to signin and we need to create a new user.'
+          );
 
         return {
           ourAccessToken: this.generateOurAccessToken({
@@ -192,5 +241,32 @@ export class UsersService {
       complete: true,
     }) as unknown as jwt.JwtPayload & TokenData;
     return verified.payload.userId;
+  }
+
+  public async getUserProfile(userId: string, manager: TransactionManager) {
+    const user = await this.repo.getUser(userId, manager, true);
+
+    /** extract the profile for each account */
+    const userRead: AppUserRead = {
+      userId,
+    };
+
+    ALL_IDENTITY_PLATFORMS.forEach((platform) => {
+      const accounts = UsersHelper.getAccounts(user, platform);
+
+      accounts.forEach((account) => {
+        const current = userRead[platform] || [];
+        current.push({
+          user_id: account.user_id,
+          profile: account.profile,
+          read: account.read !== undefined,
+          write: account.write !== undefined,
+        });
+
+        userRead[platform] = current as AccountDetailsRead<any>[];
+      });
+    });
+
+    return userRead;
   }
 }

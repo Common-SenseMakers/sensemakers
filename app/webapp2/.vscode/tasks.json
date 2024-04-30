@@ -1,0 +1,46 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "start all",
+      "dependsOn": ["chain", "oracle", "frontend"],
+      // Mark as the default build task so cmd/ctrl+shift+b will create them
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      // The name that shows up in terminal tab
+      "label": "oracle",
+      // The task will launch a shell
+      "dependsOrder": "sequence",
+      "dependsOn": ["oracle-docker"],
+      "type": "shell",
+      "command": "cd packages/oracle-node && yarn start",
+      // Mark as a background task to avoid the spinner animation on the terminal tab
+      "isBackground": false,
+      "problemMatcher": []
+    },
+    {
+      // The name that shows up in terminal tab
+      "label": "chain",
+      // The task will launch a shell
+      "type": "shell",
+      "command": "cd packages/contracts && yarn chain",
+      // Mark as a background task to avoid the spinner animation on the terminal tab
+      "isBackground": false,
+      "problemMatcher": []
+    },
+    {
+      // The name that shows up in terminal tab
+      "label": "oracle-docker",
+      // The task will launch a shell
+      "type": "shell",
+      "command": "cd packages/services/graph-node && sudo docker-compose up",
+      // Mark as a background task to avoid the spinner animation on the terminal tab
+      "isBackground": false,
+      "problemMatcher": []
+    }
+  ]
+}

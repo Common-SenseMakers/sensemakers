@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "lib-test",
+    "rootDir": "."
+  },
+  "compileOnSave": true,
+  "include": ["src/index.ts", "src/custom.d.ts", "test/__tests__"]
+}

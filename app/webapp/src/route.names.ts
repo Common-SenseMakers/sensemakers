@@ -1,10 +1,10 @@
 export const RouteNames = {
   AppHome: '',
-  Post: 'post',
+  PostView: 'post/:id',
   Test: 'test',
 };
 
 export const AbsoluteRoutes = {
   App: '/',
-  Post: `/${RouteNames.Post}`,
+  Post: `/${RouteNames.PostView}`,
 };

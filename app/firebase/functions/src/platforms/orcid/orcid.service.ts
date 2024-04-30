@@ -2,8 +2,7 @@ import {
   OrcidSignupContext,
   OrcidSignupData,
   OrcidUserDetails,
-} from 'src/@shared/types/types.orcid';
-
+} from '../../@shared/types/types.orcid';
 import {
   APP_URL,
   ORCID_API_URL,
