@@ -32,7 +32,7 @@ const getSampleTweet = (id: string, authorId: string) => {
   return {
     data: {
       id: id,
-      text: `Hello World ${id}`,
+      text: `This is an interesting paper https://arxiv.org/abs/2312.05230 ${id}`,
       author_id: authorId,
       created_at: new Date().toISOString(),
       edit_history_tweet_ids: [],

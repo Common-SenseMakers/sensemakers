@@ -1,6 +1,7 @@
 import { RequestHandler } from 'express';
-import { AppPostFull } from 'src/@shared/types/types.posts';
 
+import { AppPostFull } from '../../@shared/types/types.posts';
+import { IS_EMULATOR } from '../../config/config.runtime';
 import { envRuntime } from '../../config/typedenv.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
@@ -45,7 +46,15 @@ export const fetchUserPostsController: RequestHandler = async (
     const { postsManager } = getServices(request);
 
     await postsManager.fetchUser(userId);
-    await enqueueParseUserPosts(userId, envRuntime.REGION || 'us-central1');
+    const enqueue = enqueueParseUserPosts(
+      userId,
+      envRuntime.REGION || 'us-central1'
+    );
+
+    if (!IS_EMULATOR) {
+      /** it seems in the enmulator the task exection is synchronous to the http call */
+      await enqueue;
+    }
 
     if (DEBUG) logger.debug(`${request.path}: fetched`, { userId });
     response.status(200).send({ success: true });
