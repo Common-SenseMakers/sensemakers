@@ -1,5 +1,4 @@
 import { FieldValue } from 'firebase-admin/firestore';
-import { TransactionManager } from 'src/db/transaction.manager';
 
 import {
   AppPost,
@@ -8,6 +7,7 @@ import {
 } from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
 import { BaseRepository } from '../db/repo.base';
+import { TransactionManager } from '../db/transaction.manager';
 
 export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   constructor(protected db: DBInstance) {
@@ -39,15 +39,35 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   }
 
   /** Cannot be part of a transaction */
-  public async getPendingOfUser(userId: string) {
+  public async getOfUser(userId: string) {
+    /** type protection agains properties renaming */
+    const createdAtKey: keyof AppPost = 'createdAtMs';
+    const authorKey: keyof AppPost = 'authorId';
+
     const posts = await this.db.collections.posts
-      .where('authorId', '==', userId)
-      .where('reviewedStatus', '==', 'pending')
+      .where(authorKey, '==', userId)
+      .orderBy(createdAtKey, 'desc')
       .get();
 
     return posts.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     })) as AppPost[];
+  }
+
+  /** Cannot be part of a transaction */
+  public async getNonParsedOfUser(userId: string): Promise<string[]> {
+    /** type protection agains properties renaming */
+    const statusKey: keyof AppPost = 'parseStatus';
+    const authorKey: keyof AppPost = 'authorId';
+
+    const statusValue: AppPost['parseStatus'] = 'unprocessed';
+
+    const posts = await this.db.collections.posts
+      .where(statusKey, '==', statusValue)
+      .where(authorKey, '==', userId)
+      .get();
+
+    return posts.docs.map((doc) => doc.id) as string[];
   }
 }

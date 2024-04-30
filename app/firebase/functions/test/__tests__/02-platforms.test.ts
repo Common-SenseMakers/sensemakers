@@ -1,23 +1,28 @@
 import { expect } from 'chai';
-import { PlatformPostDraft } from 'src/@shared/types/types.platform.posts';
 
 import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
+import { PlatformPostDraft } from '../../src/@shared/types/types.platform.posts';
 import { AppPostFull } from '../../src/@shared/types/types.posts';
+import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { logger } from '../../src/instances/logger';
-import { signNanopublication } from '../../src/platforms/nanopub/sign.util';
 import { FetchUserPostsParams } from '../../src/platforms/platforms.interface';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { resetDB } from '../utils/db';
 import { createTestAppUsers } from '../utils/user.factory';
+import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
 import { getTestServices } from './test.services';
 
 describe('02-platforms', () => {
   let rsaKeys: RSAKeys | undefined;
   let appUser: AppUser | undefined;
 
-  const services = getTestServices();
+  const services = getTestServices({
+    twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
+    nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
+    parser: USE_REAL_PARSER ? 'real' : 'mock',
+  });
 
   before(async () => {
     logger.debug('resetting DB');
@@ -55,7 +60,7 @@ describe('02-platforms', () => {
         const fetchParams: FetchUserPostsParams = {
           userDetails: {
             ...userDetails,
-            user_id: '1753077743816777728', // this is `sensemakergod`'s user_id, since we want to test pagination.
+            user_id: '1773032135814717440',
           },
           start_time: 1708560000000,
           end_time: 1708646400000,
@@ -66,7 +71,7 @@ describe('02-platforms', () => {
         );
 
         expect(tweets).to.not.be.undefined;
-        expect(tweets.length).to.be.equal(0);
+        expect(tweets.length).to.be.equal(2);
       } catch (error) {
         console.error('error: ', error);
         throw error;
@@ -132,6 +137,7 @@ describe('02-platforms', () => {
       try {
         const post: AppPostFull = {
           id: 'test-id',
+          createdAtMs: Date.now(),
           authorId: appUser.userId,
           content: 'test content',
           semantics: '',
@@ -171,6 +177,7 @@ describe('02-platforms', () => {
             {
               draft: signed.rdf(),
               userDetails: {
+                lastFetchedMs: 0,
                 signupDate: 0,
                 user_id: '123456',
               },

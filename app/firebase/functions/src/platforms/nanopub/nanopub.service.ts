@@ -1,5 +1,4 @@
 import { Nanopub } from '@nanopub/sign';
-import { TransactionManager } from 'src/db/transaction.manager';
 import { verifyMessage } from 'viem';
 
 import { PLATFORM, UserDetailsBase } from '../../@shared/types/types';
@@ -18,14 +17,17 @@ import {
   GenericPostData,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
-import { getRsaToEthMessage } from '../../@shared/utils/sig.utils';
-import { NANOPUBS_PUBLISH_SERVERS } from '../../config/config.runtime';
+import { getEthToRSAMessage } from '../../@shared/utils/nanopub.sign.util';
+import { NANOPUBS_PUBLISH_SERVERS_STR } from '../../config/config.runtime';
+import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
 import { FetchUserPostsParams, PlatformService } from '../platforms.interface';
 import { createIntroNanopublication } from './create.intro.nanopub';
 import { createNanopublication } from './create.nanopub';
+
+const DEBUG = false;
 
 export interface TwitterApiCredentials {
   clientId: string;
@@ -60,9 +62,11 @@ export class NanopubService
     signupData: NanupubSignupData
   ): Promise<UserDetailsBase<NanopubUserProfile, any, any>> {
     /** verify ethSignature */
+    if (DEBUG) logger.debug('nanopub: handleSignupData', { signupData });
+
     const valid = verifyMessage({
       address: signupData.ethAddress,
-      message: getRsaToEthMessage(signupData.rsaPublickey),
+      message: getEthToRSAMessage(signupData.rsaPublickey),
       signature: signupData.ethToRsaSignature,
     });
 
@@ -70,9 +74,23 @@ export class NanopubService
       throw new Error('Invalid signature');
     }
 
+    /** publish nanopub */
+    if (!signupData.introNanopub) {
+      throw new Error(`Intro nanopub not found`);
+    }
+
+    const published = await this.publishInternal(signupData.introNanopub);
+    if (!published) {
+      throw new Error(`Error publishing intro nanopub`);
+    }
+
+    if (DEBUG)
+      logger.debug('nanopub: intro published', { published: published.info() });
+
     return {
       user_id: signupData.ethAddress,
       signupDate: this.time.now(),
+      lastFetchedMs: 0,
       profile: {
         rsaPublickey: signupData.rsaPublickey,
         ethAddress: signupData.ethAddress,
@@ -106,24 +124,20 @@ export class NanopubService
     };
   }
 
-  /**
-   * Receives a list of PostToPublish (platformPost, mirrors and user credentials) and returns
-   * a list of the updated platformPosts
-   */
-  async publish(
-    postPublish: PlatformPostPublish<any>,
-    _manager: TransactionManager
-  ): Promise<PlatformPostPosted<any>> {
-    let published: Nanopub | undefined = undefined;
-    const draft = new Nanopub(postPublish.draft);
+  async publishInternal(signed: string) {
+    const nanopub = new Nanopub(signed);
 
     let stop: boolean = false;
     let serverIx = 0;
 
+    let published: Nanopub | undefined = undefined;
+
+    const NANOPUBS_PUBLISH_SERVERS = JSON.parse(NANOPUBS_PUBLISH_SERVERS_STR.value());
+
     while (!stop) {
       try {
         if (serverIx < NANOPUBS_PUBLISH_SERVERS.length) {
-          published = await draft.publish(
+          published = await nanopub.publish(
             undefined,
             NANOPUBS_PUBLISH_SERVERS[serverIx]
           );
@@ -139,6 +153,19 @@ export class NanopubService
         serverIx++;
       }
     }
+
+    return published;
+  }
+
+  /**
+   * Receives a list of PostToPublish (platformPost, mirrors and user credentials) and returns
+   * a list of the updated platformPosts
+   */
+  async publish(
+    postPublish: PlatformPostPublish<any>,
+    _manager: TransactionManager
+  ): Promise<PlatformPostPosted<any>> {
+    const published = await this.publishInternal(postPublish.draft);
 
     if (published) {
       const platfformPostPosted: PlatformPostPosted = {

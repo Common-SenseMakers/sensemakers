@@ -1,4 +1,3 @@
-import { TransactionManager } from 'src/db/transaction.manager';
 import {
   TOAuth2Scope,
   TTweetv2TweetField,
@@ -9,6 +8,7 @@ import {
   Tweetv2FieldsParams,
   TwitterApi,
   TwitterApiReadOnly,
+  UsersV2Params,
 } from 'twitter-api-v2';
 
 import { PLATFORM, UserDetailsBase } from '../../@shared/types/types';
@@ -32,6 +32,7 @@ import {
   TwitterUserCredentials,
   TwitterUserDetails,
 } from '../../@shared/types/types.twitter';
+import { TransactionManager } from '../../db/transaction.manager';
 import { TimeService } from '../../time/time.service';
 import { UsersRepository } from '../../users/users.repository';
 import { FetchUserPostsParams, PlatformService } from '../platforms.interface';
@@ -154,28 +155,17 @@ export class TwitterService
     /** update user credentials */
     if (newCredentials) {
       let newDetails: TwitterUserDetails;
-      /** if the user has both read and write credentials, update both together since write credentials overwrite read credentials */
-      if (details.read !== undefined && details.write !== undefined) {
-        newDetails = {
-          ...details,
-          write: newCredentials,
-          read: {
-            ...newCredentials,
-            lastFetchedMs: details.read.lastFetchedMs,
-          },
-        };
-      } else if (details.read !== undefined) {
-        newDetails = {
-          ...details,
-          read: {
-            ...newCredentials,
-            lastFetchedMs: details.read.lastFetchedMs,
-          },
-        };
-      } else {
-        throw new Error(
-          `Read credentials for user ${details.user_id} not found`
-        );
+
+      newDetails = {
+        ...details,
+        read: {
+          ...newCredentials,
+        },
+      };
+
+      if (details.write !== undefined) {
+        /** if the user has both read and write credentials, update both together since write credentials overwrite read credentials */
+        newDetails['write'] = newCredentials;
       }
 
       this.usersRepo.setPlatformDetails(
@@ -325,7 +315,10 @@ export class TwitterService
       redirectUri: data.callback_url,
     });
 
-    const { data: user } = await result.client.v2.me();
+    const profileParams: Partial<UsersV2Params> = {
+      'user.fields': ['profile_image_url'],
+    };
+    const { data: user } = await result.client.v2.me(profileParams);
 
     if (!result.refreshToken) {
       throw new Error('Unexpected undefined refresh token');
@@ -344,20 +337,17 @@ export class TwitterService
 
     const twitter: TwitterUserDetails = {
       user_id: user.id,
+      lastFetchedMs: 0,
       signupDate: 0,
       profile: user,
     };
 
+    /** always store the credential as read credentials */
+    twitter.read = credentials;
     /** the same credentials apply for reading and writing */
     if (data.type === 'write') {
-      twitter[data.type] = credentials;
+      twitter['write'] = credentials;
     }
-
-    /** always store the credential as read credentials */
-    twitter.read = {
-      ...credentials,
-      lastFetchedMs: this.time.now(),
-    };
 
     return twitter;
   }
@@ -382,7 +372,7 @@ export class TwitterService
     const timelineParams: Partial<TweetV2UserTimelineParams> = {
       start_time: params.start_time,
       end_time: params.end_time,
-      max_results: params.max_results ? params.max_results : 100,
+      max_results: 10,
       'tweet.fields': tweetFields,
       exclude: ['retweets', 'replies'],
     };
@@ -397,6 +387,18 @@ export class TwitterService
       let nextToken = result.meta.next_token;
 
       while (nextToken) {
+        /**
+         * limit the total number of results to max_result.
+         * Warning. different interpreation than the twitter API,
+         * where max_results is the page size
+         */
+        if (
+          params.max_results &&
+          resultCollection.length >= params.max_results
+        ) {
+          break;
+        }
+
         const nextResult = await readOnlyClient.v2.userTimeline(
           params.user_id,
           {
@@ -405,6 +407,7 @@ export class TwitterService
           }
         );
         resultCollection.push(...nextResult.data.data);
+
         nextToken = nextResult.meta.next_token;
       }
 
@@ -421,10 +424,14 @@ export class TwitterService
     const tweets = await this.fetchInternal(
       {
         user_id: params.userDetails.user_id,
-        start_time: new Date(params.start_time).toISOString(),
+        start_time:
+          params.start_time && params.start_time !== 0
+            ? new Date(params.start_time).toISOString()
+            : undefined,
         end_time: params.end_time
           ? new Date(params.end_time).toISOString()
           : undefined,
+        max_results: params.max_results,
       },
       manager,
       params.userDetails

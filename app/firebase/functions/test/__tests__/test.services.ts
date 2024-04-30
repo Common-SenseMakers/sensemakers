@@ -1,13 +1,17 @@
 import { spy, when } from 'ts-mockito';
 
 import { PLATFORM } from '../../src/@shared/types/types';
-import {
-  ParsePostResult,
-  SciFilterClassfication,
-} from '../../src/@shared/types/types.parser';
 import { DBInstance } from '../../src/db/instance';
 import { Services } from '../../src/instances/services';
+import {
+  ParserMockConfig,
+  getParserMock,
+} from '../../src/parser/mock/parser.service.mock';
 import { ParserService } from '../../src/parser/parser.service';
+import {
+  NanopubMockConfig,
+  getNanopubMock,
+} from '../../src/platforms/nanopub/mock/nanopub.service.mock';
 import { NanopubService } from '../../src/platforms/nanopub/nanopub.service';
 import { OrcidService } from '../../src/platforms/orcid/orcid.service';
 import {
@@ -15,6 +19,10 @@ import {
   PlatformsMap,
   PlatformsService,
 } from '../../src/platforms/platforms.service';
+import {
+  TwitterMockConfig,
+  getTwitterMock,
+} from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { PlatformPostsRepository } from '../../src/posts/platform.posts.repository';
 import { PostsManager } from '../../src/posts/posts.manager';
@@ -23,20 +31,14 @@ import { PostsRepository } from '../../src/posts/posts.repository';
 import { TimeService } from '../../src/time/time.service';
 import { UsersRepository } from '../../src/users/users.repository';
 import { UsersService } from '../../src/users/users.service';
-import { getNanopubMock } from './mocks/nanopub.service.mock';
-import { getParserMock } from './mocks/parser.service.mock';
-import { getTwitterMock } from './mocks/twitter.service.mock';
-import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
 
-export const MOCKED_SEMANTICS =
-  '<http://example.org/mosquito> <http://example.org/transmits> <http://example.org/malaria> .';
+export interface TestServicesConfig {
+  twitter: TwitterMockConfig;
+  nanopub: NanopubMockConfig;
+  parser: ParserMockConfig;
+}
 
-export const MOCKED_PARSER_RESULT: ParsePostResult = {
-  filter_clasification: SciFilterClassfication.RESEARCH,
-  semantics: MOCKED_SEMANTICS,
-};
-
-export const getTestServices = () => {
+export const getTestServices = (config: TestServicesConfig) => {
   const mandatory = ['TWITTER_CLIENT_ID', 'TWITTER_CLIENT_SECRET'];
 
   mandatory.forEach((varName) => {
@@ -71,21 +73,11 @@ export const getTestServices = () => {
     clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
   });
 
-  const twitter = (() => {
-    if (!USE_REAL_TWITTER) {
-      return getTwitterMock(_twitter);
-    }
-    return _twitter;
-  })();
+  const twitter = getTwitterMock(_twitter, config.twitter);
 
   /** nanopub */
   const _nanopub = new NanopubService(time);
-  const nanopub = (() => {
-    if (!USE_REAL_NANOPUB) {
-      return getNanopubMock(_nanopub);
-    }
-    return _nanopub;
-  })();
+  const nanopub = getNanopubMock(_nanopub, config.nanopub);
 
   /** all identity services */
   identityServices.set(PLATFORM.Orcid, orcid);
@@ -103,20 +95,20 @@ export const getTestServices = () => {
   platformsMap.set(PLATFORM.Nanopub, nanopub);
 
   /** platforms service */
-  const platformsService = new PlatformsService(platformsMap);
+  const platformsService = new PlatformsService(
+    platformsMap,
+    time,
+    usersService
+  );
 
   /** parser service */
   const _parser = new ParserService(process.env.PARSER_API_URL as string);
-  const parser = (() => {
-    if (!USE_REAL_PARSER) {
-      return getParserMock(_parser);
-    }
-    return _parser;
-  })();
+  const parser = getParserMock(_parser, config.parser);
 
   /** posts service */
   const postsProcessing = new PostsProcessing(
     usersService,
+    time,
     postsRepo,
     platformPostsRepo,
     platformsService

@@ -27,7 +27,11 @@ export let testUsers: Map<string, AppUser> = new Map();
 export type TestContext = Mocha.Context & Context;
 
 export const mochaHooks = (): Mocha.RootHookObject => {
-  const services = getTestServices();
+  const services = getTestServices({
+    twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
+    nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
+    parser: USE_REAL_PARSER ? 'real' : 'mock',
+  });
 
   return {
     async beforeAll(this: Mocha.Context) {

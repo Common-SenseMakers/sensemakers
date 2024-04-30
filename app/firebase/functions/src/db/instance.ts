@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase-admin/app';
 import { Firestore, getFirestore } from 'firebase-admin/firestore';
 
 import { CollectionNames } from '../@shared/utils/collectionNames';
+// import { SERVICE_ACCOUNT_ID } from '../config/config.runtime';
 import {
   HandleWithTxManager,
   ManagerConfig,

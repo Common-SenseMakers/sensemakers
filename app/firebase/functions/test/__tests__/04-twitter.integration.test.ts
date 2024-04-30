@@ -6,6 +6,7 @@ import {
   TestUserCredentials,
   authenticateTestUsers,
 } from '../utils/authenticate.users';
+import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
 import { getTestServices } from './test.services';
 
 const NUM_TWITTER_USERS = 1;
@@ -15,7 +16,11 @@ const TEST_ACCOUNTS: TestUserCredentials[] = JSON.parse(
 
 /** skip for now as it will invalidate access tokens */
 describe.skip('twitter integration', () => {
-  const services = getTestServices();
+  const services = getTestServices({
+    twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
+    nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
+    parser: USE_REAL_PARSER ? 'real' : 'mock',
+  });
 
   if (!TEST_ACCOUNTS) {
     throw new Error('test acccounts undefined');
