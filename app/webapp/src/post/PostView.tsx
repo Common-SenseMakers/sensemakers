@@ -10,6 +10,7 @@ import { AppButton } from '../ui-components';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { getPlatformProfile } from '../utils/post.utils';
+import { PostContent } from './PostContent';
 import { usePost } from './PostContext';
 import { PostHeader } from './PostHeader';
 
@@ -82,38 +83,28 @@ export const PostView = () => {
         nextPostId="1234"
         isNanopublished={false}
         reviewStatus="For Review"></PostHeader>
-      <Box pad="medium" elevation="small">
-        <Box pad={{ vertical: 'small' }}>
-          <Text>{post?.content}</Text>
-        </Box>
-        <Box>
-          <Text size="xsmall">{post?.semantics}</Text>
-        </Box>
-        {/* handle rendering of semantic data below */}
-        {!nanopubPublished ? (
-          <Box direction="row" justify="between" margin={{ top: 'medium' }}>
-            <AppButton label="ignore" />
-            <AppButton
-              primary
-              label="nanopublish"
-              disabled={!canPublishNanopub}
-              onClick={() => approveNanopub()}
-            />
-          </Box>
-        ) : (
-          <Box>
-            <Text>
-              Nanopublication published{' '}
-              <NanopubAnchor href={nanopubPublished.info().uri}></NanopubAnchor>
-            </Text>
-          </Box>
-        )}
-        <Box>
-          <Text>Please connect your nanopub credentials to publish</Text>
+      <PostContent post={post}></PostContent>
+      {!nanopubPublished ? (
+        <Box direction="row" justify="between" margin={{ top: 'medium' }}>
+          <AppButton label="ignore" />
           <AppButton
-            onClick={() => connectNanopub()}
-            label="connect"></AppButton>
+            primary
+            label="nanopublish"
+            disabled={!canPublishNanopub}
+            onClick={() => approveNanopub()}
+          />
         </Box>
+      ) : (
+        <Box>
+          <Text>
+            Nanopublication published{' '}
+            <NanopubAnchor href={nanopubPublished.info().uri}></NanopubAnchor>
+          </Text>
+        </Box>
+      )}
+      <Box>
+        <Text>Please connect your nanopub credentials to publish</Text>
+        <AppButton onClick={() => connectNanopub()} label="connect"></AppButton>
       </Box>
     </Box>
   );
