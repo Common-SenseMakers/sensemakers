@@ -10,7 +10,7 @@ import {
   TwitterDraft,
   TwitterGetContextParams,
   TwitterQueryParameters,
-  TwitterSignupData,
+  TwitterUserDetails,
 } from '../../../@shared/types/types.twitter';
 import { logger } from '../../../instances/logger';
 import { TwitterService } from '../twitter.service';
@@ -106,8 +106,12 @@ export const getTwitterMock = (
       );
 
       when(Mocked.handleSignupData(anything())).thenCall(
-        (data: TwitterSignupData) => {
-          return {};
+        (data: { user_id: string }): TwitterUserDetails => {
+          return {
+            user_id: data.user_id,
+            lastFetchedMs: 0,
+            signupDate: 0,
+          };
         }
       );
     }

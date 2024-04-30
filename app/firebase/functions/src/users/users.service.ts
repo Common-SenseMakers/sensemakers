@@ -85,7 +85,12 @@ export class UsersService {
      * validate the signup data for this platform and convert it into
      * user details
      */
-    if (DEBUG) logger.debug('UsersService: handleSignup', { signupData });
+    if (DEBUG)
+      logger.debug('UsersService: handleSignup', {
+        platform,
+        signupData,
+        userId: _userId,
+      });
 
     const authenticatedDetails =
       await this.getIdentityService(platform).handleSignupData(signupData);

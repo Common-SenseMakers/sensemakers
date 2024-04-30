@@ -33,28 +33,91 @@ describe.only('01-signups', () => {
     });
   });
 
-  describe('connect twitter', () => {
-    it('get twitter oauth details', async () => {
+  describe('signup with mocked twitter', () => {
+    const TWITTER_USER_ID = '123456789';
+
+    it('signup with twitter', async () => {
       if (!userId) {
         throw new Error('unexpected');
       }
 
-      const details = await services.users.getSignupContext(
-        PLATFORM.Twitter,
-        userId,
-        {
-          callback_url: '',
+      await services.db.run(async (manager) => {
+        logger.debug(`handleSignup`, { user_id: TWITTER_USER_ID });
+
+        const result = await services.users.handleSignup(
+          PLATFORM.Twitter,
+          { user_id: TWITTER_USER_ID },
+          manager
+        );
+
+        logger.debug(`handleSignup - result `, { result });
+
+        expect(result).to.not.be.undefined;
+
+        if (!result) {
+          throw new Error('unexpected');
         }
-      );
 
-      logger.debug(`details:`, { details });
-      expect(details).to.not.be.undefined;
+        expect(result.userId).to.not.be.undefined;
+        expect(result.ourAccessToken).to.not.be.undefined;
+      });
+    });
 
-      expect(details.callback_url).to.not.be.undefined;
-      expect(details.codeChallenge).to.not.be.undefined;
-      expect(details.codeVerifier).to.not.be.undefined;
-      expect(details.state).to.not.be.undefined;
-      expect(details.url.startsWith('https://twitter.com')).to.be.true;
+    describe('connect nanopub account', () => {
+      it('connect nanopub account', async () => {
+        if (!userId) {
+          throw new Error('unexpected');
+        }
+
+        await services.db.run(async (manager) => {
+          const address =
+            '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+
+          const { profile, rsaKeys } = await getNanopubProfile(address);
+
+          logger.debug(`getNanopubProfile`, { profile });
+
+          /** prepare introNanopub */
+          const context =
+            await services.users.getSignupContext<NanopubUserProfile>(
+              PLATFORM.Nanopub,
+              undefined,
+              profile
+            );
+
+          logger.debug(`getNanopubProfile`, { context });
+
+          /** sign intro nanopub */
+          if (!context.introNanopub) {
+            throw new Error('introNanopub not found');
+          }
+
+          const signedIntro = await signNanopublication(
+            context.introNanopub,
+            rsaKeys
+          );
+
+          logger.debug(`getNanopubProfile`, { signedIntro });
+
+          const result = await services.users.handleSignup<NanupubSignupData>(
+            PLATFORM.Nanopub,
+            { ...profile, introNanopub: signedIntro.rdf() },
+            manager,
+            userId
+          );
+
+          logger.debug(`handleSignup`, { result });
+
+          expect(result).to.be.undefined;
+
+          const user = await services.users.repo.getUser(userId, manager, true);
+
+          logger.debug(`user`, { user });
+
+          expect(user).to.not.be.undefined;
+          expect(user.platformIds).to.have.length(2);
+        });
+      });
     });
   });
 
