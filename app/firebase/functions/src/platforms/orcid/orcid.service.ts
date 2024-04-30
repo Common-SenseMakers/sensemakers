@@ -4,7 +4,7 @@ import {
   OrcidUserDetails,
 } from '../../@shared/types/types.orcid';
 import {
-  APP_URL,
+  ORCID_REDIRECT_URL,
   ORCID_API_URL,
   ORCID_CLIENT_ID,
   ORCID_SECRET,
@@ -18,7 +18,7 @@ export class OrcidService
 {
   public async getSignupContext() {
     return {
-      link: `${ORCID_API_URL}/oauth/authorize?client_id=${ORCID_CLIENT_ID}&response_type=code&scope=/authenticate&redirect_uri=${APP_URL}`,
+      link: `${ORCID_API_URL}/oauth/authorize?client_id=${ORCID_CLIENT_ID.value()}&response_type=code&scope=/authenticate&redirect_uri=${ORCID_REDIRECT_URL.value()}`,
     };
   }
 
@@ -29,7 +29,7 @@ export class OrcidService
     params.append('client_secret', ORCID_SECRET.value());
     params.append('grant_type', 'authorization_code');
     params.append('code', code);
-    params.append('redirect_uri', APP_URL);
+    params.append('redirect_uri', ORCID_REDIRECT_URL.value());
 
     const response = await fetch(`${ORCID_API_URL}/oauth/token`, {
       headers: [

@@ -23,7 +23,7 @@ base.webpack.configure.plugins = [
         ...definePlugin.definitions.process.env,
         NODE_ENV: '"production"',
         FUNCTIONS_BASE:
-          '"https://us-central1-sensenets-9ef26.cloudfunctions.net"',
+          '"https://us-central1-sensenets-staging.cloudfunctions.net/api"',
       },
     },
   }),

@@ -52,4 +52,8 @@ exports['api'] = functions
 // export const postsJob = onSchedule(POSTS_JOB_SCHEDULE, fetchNewPosts);
 
 /** Registed the parseUserPost task */
-exports['parseUserPosts'] = onTaskDispatched({}, parseUserPostsTask);
+exports['parseUserPosts'] = onTaskDispatched({
+  timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
+  memory: envDeploy.CONFIG_MEMORY,
+  minInstances: envDeploy.CONFIG_MININSTANCE,
+}, parseUserPostsTask);

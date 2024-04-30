@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "sensenets-9ef26"
+    "staging": "sensenets-staging",
+    "prod": "sensenets-prod"
   }
 }

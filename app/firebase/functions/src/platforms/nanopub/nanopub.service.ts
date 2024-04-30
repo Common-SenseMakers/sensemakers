@@ -18,7 +18,7 @@ import {
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
 import { getEthToRSAMessage } from '../../@shared/utils/nanopub.sign.util';
-import { NANOPUBS_PUBLISH_SERVERS } from '../../config/config.runtime';
+import { NANOPUBS_PUBLISH_SERVERS_STR } from '../../config/config.runtime';
 import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
@@ -131,6 +131,8 @@ export class NanopubService
     let serverIx = 0;
 
     let published: Nanopub | undefined = undefined;
+
+    const NANOPUBS_PUBLISH_SERVERS = JSON.parse(NANOPUBS_PUBLISH_SERVERS_STR.value());
 
     while (!stop) {
       try {
