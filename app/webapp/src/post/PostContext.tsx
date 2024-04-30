@@ -17,6 +17,7 @@ export const PostContext: React.FC<{
   postInit?: AppPostFull;
   postId?: string;
 }> = ({ children, postInit, postId: _postId }) => {
+  const { connectedUser } = useAccountContext();
   if (_postId === undefined && postInit === undefined) {
     throw new Error(`Both postId and post were undefined`);
   }
@@ -34,9 +35,9 @@ export const PostContext: React.FC<{
 
   /** if postInit not provided get post from the DB */
   const { data: _post, refetch } = useQuery({
-    queryKey: ['postId', postId],
+    queryKey: ['postId', postId, connectedUser],
     queryFn: () => {
-      if (postId) {
+      if (postId && connectedUser) {
         return appFetch<AppPostFull>('/api/posts/get', { postId });
       }
     },
