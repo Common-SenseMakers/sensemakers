@@ -13,7 +13,7 @@ import { resetDB } from '../utils/db';
 import { createTestAppUsers } from '../utils/user.factory';
 import { getTestServices } from './test.services';
 
-describe.only('02-platforms', () => {
+describe('02-platforms', () => {
   let rsaKeys: RSAKeys | undefined;
   let appUser: AppUser | undefined;
 

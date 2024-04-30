@@ -1,4 +1,3 @@
-import { Nanopub, NpProfile } from '@nanopub/sign';
 import { expect } from 'chai';
 
 import { PLATFORM } from '../../src/@shared/types/types';
@@ -6,13 +5,13 @@ import {
   NanopubUserProfile,
   NanupubSignupData,
 } from '../../src/@shared/types/types.nanopubs';
-import { cleanPrivateKey } from '../../src/@shared/utils/semantics.helper';
+import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { logger } from '../../src/instances/logger';
 import { resetDB } from '../utils/db';
 import { getNanopubProfile } from '../utils/nanopub.profile';
 import { getTestServices } from './test.services';
 
-describe('01-signups', () => {
+describe.only('01-signups', () => {
   const services = getTestServices();
   let userId: string = 'twitter:123456789';
 
@@ -55,7 +54,7 @@ describe('01-signups', () => {
   });
 
   describe('connect nanopub', () => {
-    it('signup new user', async () => {
+    it('signup as existing user', async () => {
       const { profile, rsaKeys } = await getNanopubProfile(
         '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
       );
@@ -68,10 +67,14 @@ describe('01-signups', () => {
       );
 
       /** sign intro nanopub */
-      const introObj = new Nanopub(context.introNanopub);
-      const keyBody = cleanPrivateKey(rsaKeys);
-      const npProfile = new NpProfile(keyBody, '', '', '');
-      const signedIntro = introObj.sign(npProfile);
+      if (!context.introNanopub) {
+        throw new Error('introNanopub not found');
+      }
+
+      const signedIntro = await signNanopublication(
+        context.introNanopub,
+        rsaKeys
+      );
 
       /** send signed to the backend */
       const result = await services.db.run((manager) =>
