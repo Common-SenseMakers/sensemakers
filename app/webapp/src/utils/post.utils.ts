@@ -1,4 +1,5 @@
 import { AppUserRead, PLATFORM } from '../shared/types/types';
+import { TwitterUserDetails } from '../shared/types/types.twitter';
 
 export function getPlatformProfile(
   user: AppUserRead,
@@ -17,8 +18,22 @@ export function getPlatformProfile(
   }
   for (const platformProfile of platformProfiles) {
     if (`${platform}:${platformProfile.user_id}` === authorId) {
-      const profile = platformProfile.profile;
-      return profile;
+      switch (platform) {
+        case PLATFORM.Twitter:
+          const twitterProfile =
+            platformProfile.profile as TwitterUserDetails['profile'];
+          if (!twitterProfile) {
+            return undefined;
+          }
+
+          return {
+            profileName: twitterProfile.name,
+            profileHandle: twitterProfile.username,
+            profileImageUrl: twitterProfile.profile_image_url,
+          };
+        default:
+          return undefined;
+      }
     }
   }
   return undefined;
