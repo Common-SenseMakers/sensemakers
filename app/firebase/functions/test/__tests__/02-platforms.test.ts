@@ -11,13 +11,18 @@ import { FetchUserPostsParams } from '../../src/platforms/platforms.interface';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { resetDB } from '../utils/db';
 import { createTestAppUsers } from '../utils/user.factory';
+import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
 import { getTestServices } from './test.services';
 
 describe('02-platforms', () => {
   let rsaKeys: RSAKeys | undefined;
   let appUser: AppUser | undefined;
 
-  const services = getTestServices();
+  const services = getTestServices({
+    twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
+    nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
+    parser: USE_REAL_PARSER ? 'real' : 'mock',
+  });
 
   before(async () => {
     logger.debug('resetting DB');

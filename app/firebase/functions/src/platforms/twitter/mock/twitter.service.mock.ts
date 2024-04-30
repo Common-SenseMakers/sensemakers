@@ -8,7 +8,9 @@ import {
 } from '../../../@shared/types/types.platform.posts';
 import {
   TwitterDraft,
+  TwitterGetContextParams,
   TwitterQueryParameters,
+  TwitterSignupData,
 } from '../../../@shared/types/types.twitter';
 import { logger } from '../../../instances/logger';
 import { TwitterService } from '../twitter.service';
@@ -23,6 +25,8 @@ let state: TwitterTestState = {
   latestId: 0,
   tweets: [],
 };
+
+export type TwitterMockConfig = 'real' | 'mock-publish' | 'mock-signup';
 
 const getSampleTweet = (id: string, authorId: string) => {
   return {
@@ -51,40 +55,65 @@ type MockedType = Omit<TwitterService, 'fetchInternal'> & {
  * TwitterService mock that publish and fetches posts without really
  * hitting the API
  */
-export const getTwitterMock = (twitterService: TwitterService) => {
-  const Mocked = spy(twitterService) as unknown as MockedType;
+export const getTwitterMock = (
+  twitterService: TwitterService,
+  type: TwitterMockConfig
+) => {
+  if (type === 'real') {
+    return twitterService;
+  }
 
-  when(Mocked.publish(anything(), anything())).thenCall(
-    (postPublish: PlatformPostPublish<TwitterDraft>) => {
-      logger.warn(`called twitter publish mock`, postPublish);
+  if (type === 'mock-publish' || type === 'mock-signup') {
+    const Mocked = spy(twitterService) as unknown as MockedType;
 
-      const tweet: TweetV2SingleResult = {
-        data: {
-          id: (state.latestId++).toString(),
-          text: postPublish.draft.text,
-          edit_history_tweet_ids: [],
-          author_id: postPublish.userDetails.user_id,
-          created_at: new Date().toISOString(),
-        },
-      };
+    when(Mocked.publish(anything(), anything())).thenCall(
+      (postPublish: PlatformPostPublish<TwitterDraft>) => {
+        logger.warn(`called twitter publish mock`, postPublish);
 
-      state.tweets.push({ id: tweet.data.id, tweet });
+        const tweet: TweetV2SingleResult = {
+          data: {
+            id: (state.latestId++).toString(),
+            text: postPublish.draft.text,
+            edit_history_tweet_ids: [],
+            author_id: postPublish.userDetails.user_id,
+            created_at: new Date().toISOString(),
+          },
+        };
 
-      const post: PlatformPostPosted<TweetV2SingleResult> = {
-        post_id: tweet.data.id,
-        user_id: tweet.data.author_id as string,
-        timestampMs: dateStrToTimestampMs(tweet.data.created_at as string),
-        post: tweet,
-      };
-      return post;
+        state.tweets.push({ id: tweet.data.id, tweet });
+
+        const post: PlatformPostPosted<TweetV2SingleResult> = {
+          post_id: tweet.data.id,
+          user_id: tweet.data.author_id as string,
+          timestampMs: dateStrToTimestampMs(tweet.data.created_at as string),
+          post: tweet,
+        };
+        return post;
+      }
+    );
+
+    when(Mocked.fetchInternal(anything(), anything(), anything())).thenCall(
+      (params: TwitterQueryParameters, userDetails?: UserDetailsBase) => {
+        return state.tweets.reverse().map((entry) => entry.tweet.data);
+      }
+    );
+
+    if (type === 'mock-signup') {
+      when(Mocked.getSignupContext(anything(), anything())).thenCall(
+        (userId?: string, params?: TwitterGetContextParams) => {
+          return {};
+        }
+      );
+
+      when(Mocked.handleSignupData(anything())).thenCall(
+        (data: TwitterSignupData) => {
+          return {};
+        }
+      );
     }
-  );
 
-  when(Mocked.fetchInternal(anything(), anything(), anything())).thenCall(
-    (params: TwitterQueryParameters, userDetails?: UserDetailsBase) => {
-      return state.tweets.reverse().map((entry) => entry.tweet.data);
-    }
-  );
+    return instance(Mocked) as unknown as TwitterService;
+  }
 
-  return instance(Mocked);
+  throw new Error('Unexpected');
 };

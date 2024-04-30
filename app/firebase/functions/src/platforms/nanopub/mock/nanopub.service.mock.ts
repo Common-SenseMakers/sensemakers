@@ -9,7 +9,16 @@ import { NanopubService } from '../nanopub.service';
 
 let count = 0;
 
-export const getNanopubMock = (service: NanopubService) => {
+export type NanopubMockConfig = 'real' | 'mock-publish';
+
+export const getNanopubMock = (
+  service: NanopubService,
+  type: NanopubMockConfig
+) => {
+  if (type === 'real') {
+    return service;
+  }
+
   const Mocked = spy(service);
 
   when(Mocked.publish(anything(), anything())).thenCall(
@@ -26,5 +35,5 @@ export const getNanopubMock = (service: NanopubService) => {
     }
   );
 
-  return instance(Mocked);
+  return instance(Mocked) as NanopubService;
 };

@@ -12,7 +12,12 @@ import { getNanopubProfile } from '../utils/nanopub.profile';
 import { getTestServices } from './test.services';
 
 describe.only('01-signups', () => {
-  const services = getTestServices();
+  const services = getTestServices({
+    twitter: 'mock-signup',
+    nanopub: 'mock-publish',
+    parser: 'mock',
+  });
+
   let userId: string = 'twitter:123456789';
 
   before(async () => {
@@ -53,8 +58,8 @@ describe.only('01-signups', () => {
     });
   });
 
-  describe('connect nanopub', () => {
-    it('signup as existing user', async () => {
+  describe('signup with nanopub', () => {
+    it('signup as new user', async () => {
       const { profile, rsaKeys } = await getNanopubProfile(
         '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
       );

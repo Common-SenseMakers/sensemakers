@@ -16,7 +16,16 @@ export const MOCKED_PARSER_RESULT: ParsePostResult = {
   semantics: MOCKED_SEMANTICS,
 };
 
-export const getParserMock = (parserService: ParserService) => {
+export type ParserMockConfig = 'real' | 'mock';
+
+export const getParserMock = (
+  parserService: ParserService,
+  type: ParserMockConfig
+) => {
+  if (type === 'real') {
+    return parserService;
+  }
+
   const Mocked = spy(parserService);
 
   when(Mocked.parsePost(anything())).thenCall((post) => {

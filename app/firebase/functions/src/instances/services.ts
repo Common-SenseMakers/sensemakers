@@ -55,20 +55,16 @@ export const createServices = () => {
     clientSecret: TWITTER_CLIENT_SECRET.value(),
   });
 
-  const twitter = (() => {
-    if (!USE_REAL_TWITTERX.value()) {
-      return getTwitterMock(_twitter);
-    }
-    return _twitter;
-  })();
+  const twitter = getTwitterMock(
+    _twitter,
+    USE_REAL_TWITTERX.value() ? 'real' : 'mock-publish'
+  );
 
   const _nanopub = new NanopubService(time);
-  const nanopub = (() => {
-    if (!USE_REAL_NANOPUB.value()) {
-      return getNanopubMock(_nanopub);
-    }
-    return _nanopub;
-  })();
+  const nanopub = getNanopubMock(
+    _nanopub,
+    USE_REAL_NANOPUB.value() ? 'real' : 'mock-publish'
+  );
 
   /** all identity services */
   identityPlatforms.set(PLATFORM.Orcid, orcid);
@@ -94,12 +90,10 @@ export const createServices = () => {
 
   /** parser service */
   const _parser = new ParserService(FUNCTIONS_PY_URL);
-  const parser = (() => {
-    if (!USE_REAL_PARSER.value()) {
-      return getParserMock(_parser);
-    }
-    return _parser;
-  })();
+  const parser = getParserMock(
+    _parser,
+    USE_REAL_PARSER.value() ? 'real' : 'mock'
+  );
 
   /** posts service */
   const postsProcessing = new PostsProcessing(
