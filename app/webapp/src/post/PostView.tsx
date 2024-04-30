@@ -7,6 +7,7 @@ import { NanopubAnchor } from '../app/anchors/TwitterAnchor';
 import { PLATFORM } from '../shared/types/types';
 import { AppPostFull } from '../shared/types/types.posts';
 import { AppButton } from '../ui-components';
+import { useUserPosts } from '../user-home/UserPostsContext';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { getPlatformProfile } from '../utils/post.utils';
@@ -16,7 +17,8 @@ import { PostHeader } from './PostHeader';
 
 export const PostView = () => {
   const { post } = usePost();
-  const { connectedUser } = useAccountContext();
+  const { posts, isLoading, error } = useUserPosts();
+  const { connectedUser, isConnected } = useAccountContext();
   const { connect: connectNanopub } = useNanopubContext();
   const appFetch = useAppFetch();
 
@@ -65,6 +67,20 @@ export const PostView = () => {
     await appFetch<void, AppPostFull>('/api/posts/approve', postEdited);
   };
 
+  const currPostIndex = posts?.findIndex((p) => p.id === post?.id);
+  const prevPostId =
+    posts && currPostIndex && currPostIndex > 0
+      ? posts[currPostIndex - 1].id
+      : undefined;
+
+  const nextPostId =
+    posts && currPostIndex && currPostIndex < posts.length - 1
+      ? posts[currPostIndex + 1].id
+      : undefined;
+
+  if (!isConnected) {
+    return <Box>Loading...</Box>;
+  }
   if (!postAuthorProfile) {
     return <Box>No Author Info Found</Box>;
   }
@@ -79,8 +95,8 @@ export const PostView = () => {
         profileHandle={postAuthorProfile.profileHandle}
         datePosted={new Date(post.createdAtMs).toISOString()}
         postUrl="https://twitter.com/sense_nets_bot/status/1781581576125526151"
-        prevPostId="1234"
-        nextPostId="1234"
+        prevPostId={prevPostId}
+        nextPostId={nextPostId}
         isNanopublished={false}
         reviewStatus="For Review"></PostHeader>
       <PostContent post={post}></PostContent>
