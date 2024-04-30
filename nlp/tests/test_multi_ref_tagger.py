@@ -17,6 +17,7 @@ from desci_sense.shared_functions.configs import (
     RefTaggerChainConfig,
     TopicsPParserChainConfig,
     validate_env_var,
+    MetadataExtractionConfig,
     MultiParserChainConfig,
     MultiRefTaggerChainConfig,
     ParserChainType,
@@ -32,30 +33,48 @@ I really liked this paper!
 https://arxiv.org/abs/2402.04607
 """
 
+TEST_POST_TEXT_W_NO_REFS = """
+These 2 papers are highly recommended!
+"""
+
 
 def test_simple_init():
-    mt = MultiRefTaggerChainConfig(name="test")
+    mt = MultiRefTaggerChainConfig(name="multi_ref_tagger")
     multi_config = MultiParserChainConfig(parser_configs=[mt])
     mcp = MultiChainParser(multi_config)
-    assert "test" in mcp.pparsers
+    assert "multi_ref_tagger" in mcp.pparsers
+
+
+def test_run_simple():
+    multi_config = MultiParserChainConfig(
+        parser_configs=[
+            MultiRefTaggerChainConfig(
+                name="multi_ref_tagger",
+                llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
+            )
+        ],
+        metadata_extract_config=MetadataExtractionConfig(extraction_method="citoid"),
+    )
+    mcp = MultiChainParser(multi_config)
+    res = mcp.process_text(TEST_POST_TEXT_W_NO_REFS)
+    assert "multi_ref_tagger" in res
 
 
 if __name__ == "__main__":
-    tpc = TopicsPParserChainConfig(
-        name="topic_test",
-        use_metadata=True,
-        llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
-    )
     multi_config = MultiParserChainConfig(
         parser_configs=[
-            tpc,
-        ]
+            MultiRefTaggerChainConfig(
+                name="multi_ref_tagger",
+                llm_config=LLMConfig(llm_type="mistralai/mixtral-8x7b-instruct:nitro"),
+            )
+        ],
+        metadata_extract_config=MetadataExtractionConfig(extraction_method="citoid"),
     )
     mcp = MultiChainParser(multi_config)
 
-    res = mcp.process_text(TEST_POST_TEXT_W_REF)
-    output = res["topic_test"]
-    prompt = output.extra["prompt"]
+    res = mcp.process_text(TEST_POST_TEXT_W_NO_REFS)
+    # output = res["topic_test"]
+    # prompt = output.extra["prompt"]
     # multi_config = create_multi_config_for_tests(llm_type="google/gemma-7b-it:free")
     # multi_config.post_process_type = PostProcessType.COMBINED
     # mcp = MultiChainParser(multi_config)

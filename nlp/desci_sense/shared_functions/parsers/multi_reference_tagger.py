@@ -21,7 +21,7 @@ from ..web_extractors.metadata_extractors import (
     get_refs_metadata_portion,
     get_ref_post_metadata_list,
 )
-from ..postprocessing import ParserChainOutput, Answer
+from ..postprocessing import ParserChainOutput, Answer, SubAnswer
 from ..postprocessing.output_processors import PydanticAnswerParser
 from ..schema.ontology_base import OntologyBase
 from ..enum_dict import EnumDict, EnumDictKey
@@ -62,17 +62,38 @@ def normalize_references(answer: Answer, md_list: List[RefMetadata]) -> Answer:
     if len(md_list) == 0:
         # if zero refs, check that exactly one sub answer
         if len(answer.sub_answers) == 1:
-            # normalize to be zero index
-            answer.sub_answers[0].ref_number = 0
-        else:
-            # create new answer with error debug info
+            # no reference available
+            answer.sub_answers[0].ref_number = -1
+        elif len(answer.sub_answers) == 0:
+            # create empty subanswer
             answer = Answer(
+                sub_answers=[
+                    SubAnswer(
+                        ref_number=-1,
+                        final_answer=[],
+                    )
+                ],
                 debug={
                     "errors": f"len(answer.sub_answers)={len(answer.sub_answers)} \
                     != len(md_list)={len(md_list)}",
                     "answer": answer.dict(),  # pydantic v1
-                }
+                },  # create new answer with error debug info
             )
+        else:
+            # more than 1 subanswer - take first
+            answer = Answer(
+                sub_answers=[answer.sub_answers[0]],
+                debug={
+                    "errors": f"len(answer.sub_answers)={len(answer.sub_answers)} \
+                    != len(md_list)={len(md_list)}",
+                    "answer": answer.dict(),  # pydantic v1
+                },  # create new answer with error debug info
+            )
+            answer.sub_answers[0].ref_number = -1
+
+        assert len(answer.sub_answers) == 1
+        assert answer.sub_answers[0].ref_number == -1
+
     # handle case with refs
     else:
         normalized_sub_answers = []
@@ -93,6 +114,16 @@ def normalize_references(answer: Answer, md_list: List[RefMetadata]) -> Answer:
                 sub_ans.ref_url = ref_metadata.url
                 normalized_sub_answers.append(sub_ans)
                 sub_ans_dict.pop(i + 1)
+            else:
+                # add empty sub answer
+                sub_ans = SubAnswer(
+                    ref_number=i,
+                    reasoning_steps="[System] Generated output \
+                    did not contain answer for this reference.",
+                    final_answer=[],
+                    ref_url=ref_metadata.url,
+                )
+                normalized_sub_answers.append(sub_ans)
 
         # check that there are no superfluous subanswers
         if len(sub_ans_dict) > 0:
@@ -100,6 +131,7 @@ def normalize_references(answer: Answer, md_list: List[RefMetadata]) -> Answer:
                 f"Superfluous sub-answers: {sub_ans_dict.keys()}. Answer={answer.dict()}"
             )
 
+        assert len(normalized_sub_answers) == len(md_list)
         answer.sub_answers = normalized_sub_answers
 
     return answer
@@ -108,7 +140,7 @@ def normalize_references(answer: Answer, md_list: List[RefMetadata]) -> Answer:
 def post_process_llm_chain(input: dict) -> ParserChainOutput:
     answer = input.get("answer_chain")
     allowed_terms = input.get("allowed_terms")
-    md_list = input.get("md_list")
+    md_list = input.get("ref_metadata")
     prompt = input.get("prompt")
     output = _post_process_llm_chain(
         answer,
@@ -126,7 +158,11 @@ def _post_process_llm_chain(
     prompt: str,
 ) -> ParserChainOutput:
     # prepare extra metadata
-    extra = {"prompt": prompt}
+    extra = {
+        "prompt": prompt,
+        "md_list": md_list,
+        "allowed_terms": allowed_terms,
+    }
 
     # normalize references
     answer = normalize_references(answer, md_list)

@@ -188,11 +188,25 @@ def flatten(nested_lists):
     return [item for row in nested_lists for item in row]
 
 
+def clean_comments(input_string):
+    # Remove Python-style comments (anything after a '#' on the same line)
+    clean_string = "\n".join(
+        [line.split("#")[0].rstrip() for line in input_string.split("\n")]
+    )
+    return clean_string
+
+
 def _find_json_object(input_string):
     # find json substring within input string (GPT)
+    input_string = clean_comments(input_string)  # clean # style comments
+    input_string = input_string.replace("\\_", "_")
+    input_string = input_string.replace("\\[", "[")
+    input_string = input_string.replace("\\]", "]")  # remove escaping for underscore
     start = input_string.find("{")
     if start == -1:
-        return None  # No JSON object found
+        return (
+            "[System error]: " + input_string
+        )  # No JSON object found, return string for dbug purposes
 
     # Stack to match curly braces
     stack = []
@@ -213,7 +227,9 @@ def _find_json_object(input_string):
                     except json.JSONDecodeError:
                         continue  # The substring is not a valid JSON, continue searching
 
-    return None  # No valid JSON object found
+    return (
+        "[System error]: " + input_string
+    )  # No valid JSON object found, return string for dbug purposes
 
 
 def find_json_object(input_msg):

@@ -32,8 +32,8 @@ class SubAnswer(BaseModelLC):
         description="ID number of current reference",
         default=1,
     )
-    reasoning_steps: str = FieldLC(description="Model reasoning steps")
-    candidate_tags: Union[str, Any] = FieldLC(
+    reasoning_steps: Optional[str] = FieldLC(description="Model reasoning steps")
+    candidate_tags: Optional[Union[str, Any]] = FieldLC(
         description="Candidate tags and explanation of why they were chosen."
     )
     final_answer: List[str] = FieldLC(
