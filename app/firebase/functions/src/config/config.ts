@@ -28,7 +28,7 @@ export const SENSENET_DOMAIN = 'http://127.0.0.1:3000/';
 export const FUNCTIONS_PY_URL =
   process.env.NODE_ENV !== 'production'
     ? 'http://127.0.0.1:5002/sensenets-old/us-central1/SM_FUNCTION_post_parser'
-    : 'https://sm-function-post-parser-h6qpmrbfia-uc.a.run.app';
+    : 'https://sm-function-post-parser-h6qpmrbfia-uc.a.run.app/';
 
 export const TOKEN_EXPIRATION = '30d';
 export const NANOPUBS_SPARQL_SERVER = 'https://query.knowledgepixels.com/';
