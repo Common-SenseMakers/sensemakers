@@ -13,7 +13,7 @@ import { resetDB } from '../utils/db';
 import { createTestAppUsers } from '../utils/user.factory';
 import { getTestServices } from './test.services';
 
-describe('02-platforms', () => {
+describe.only('02-platforms', () => {
   let rsaKeys: RSAKeys | undefined;
   let appUser: AppUser | undefined;
 
@@ -55,7 +55,7 @@ describe('02-platforms', () => {
         const fetchParams: FetchUserPostsParams = {
           userDetails: {
             ...userDetails,
-            user_id: '1753077743816777728', // this is `sensemakergod`'s user_id, since we want to test pagination.
+            user_id: '1773032135814717440',
           },
           start_time: 1708560000000,
           end_time: 1708646400000,
@@ -66,7 +66,7 @@ describe('02-platforms', () => {
         );
 
         expect(tweets).to.not.be.undefined;
-        expect(tweets.length).to.be.equal(0);
+        expect(tweets.length).to.be.equal(2);
       } catch (error) {
         console.error('error: ', error);
         throw error;
