@@ -1,12 +1,18 @@
 import re
 import string
 from typing import List, Tuple
+import traceback
+from loguru import logger
+from operator import itemgetter
 
-from langchain_core.prompts import ChatPromptTemplate
 from langchain.schema import BaseOutputParser
+from langchain.output_parsers import PydanticOutputParser
+from langchain_core.outputs import Generation
 from langchain_core.messages import AnyMessage, BaseMessage
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.pydantic_v1 import ValidationError
 
-from . import ParserChainOutput
+from . import ParserChainOutput, Answer
 from ..configs import ParserChainType, PostProcessType
 
 ALLOWED_TERMS_DELIMITER = "##Allowed terms: "
@@ -336,3 +342,20 @@ class AllowedTermsParser(BaseOutputParser):
             },
         )
         return output
+
+
+class PydanticAnswerParser(PydanticOutputParser):
+    """
+    Wrapper for PydanticOutputParser that handles json decoding exceptions and returns
+    a default Answer if there are errors.
+    """
+
+    def parse_result(
+        self, result: List[Generation], *, partial: bool = False
+    ) -> Answer:
+        try:
+            return super().parse_result(result, partial=partial)
+        except (ValidationError, ValueError) as e:
+            err_msg = traceback.format_exc()
+            logger.warning(f"Failed to parse result: {str(e)}")
+            return Answer(debug={"errors": err_msg})

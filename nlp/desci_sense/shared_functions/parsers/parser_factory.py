@@ -8,6 +8,7 @@ from .keyword_pparser import KeywordPostParserChain
 from .reference_tagger import ReferenceTaggerParserChain
 from .topics_pparser import TopicsParserChain
 from .hashtag_parser import HashtagPostParserChain
+from .multi_reference_tagger import MultiRefTaggerParserChain
 from ..schema.ontology_base import OntologyBase
 
 
@@ -37,6 +38,12 @@ def parser_factory(
         )
     elif pparser_type == ParserChainType.HASHTAGS:
         pparser = HashtagPostParserChain(
+            pparser_config,
+            multi_chain_config,
+            ontology,
+        )
+    elif pparser_type == ParserChainType.MULTI_REF_TAGGER:
+        pparser = MultiRefTaggerParserChain(
             pparser_config,
             multi_chain_config,
             ontology,

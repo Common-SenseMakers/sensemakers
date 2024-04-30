@@ -88,6 +88,15 @@ class LLMOntologyConceptDefinition(OntologyConceptDefinition):
     label: str = Field(description="Output label model should use for this predicate")
     display_name: str = Field(description="Name to display in app front-ends.")
     prompt: str = Field(description="Description to use in prompt for this predicate")
+    prompt_zero_ref: Optional[str] = Field(
+        description="Description to use in prompt for this predicate for cases of zero reference posts"
+    )
+    prompt_single_ref: Optional[str] = Field(
+        description="Description to use in prompt for this predicate for cases of single reference posts"
+    )
+    prompt_multi_ref: Optional[str] = Field(
+        description="Description to use in prompt for this predicate for cases of multi reference posts"
+    )
     valid_subject_types: List[str] = Field(
         description="List of valid subject entity types for this predicate"
     )
@@ -144,21 +153,20 @@ class RefMetadata(BaseModel):
     url: Union[str, None] = Field(description="URL of reference.")
     item_type: Union[str, None] = Field(
         default=None,
-        description="Item type label returned from emtadata extractor. \
+        description="Item type label returned from metadata extractor. \
           Citoid uses https://www.zotero.org/support/kb/item_types_and_fields ",
     )
     title: str = Field(default="", description="Title of reference.")
     summary: str = Field(default="", description="Summary of reference.")
     image: str = Field(default="", description="Reference thumbnail image url.")
 
-    def to_str(self):
+    def to_str(self, skip_list: List[str] = ["citoid_url", "image"]):
         """
         Prints each attribute on a new line in the form: attribute: value
         """
-        # attributes to skip printing
-        skip_list = ["citoid_url"]
         result = []
         for attr, value in vars(self).items():
+            # attributes to skip printing
             if attr in skip_list:
                 continue
             if isinstance(value, str) or value is None:

@@ -1,19 +1,28 @@
 from typing import Dict, List
+from loguru import logger
+from operator import itemgetter
 from langchain.prompts import PromptTemplate
+from langchain_core.runnables import RunnableLambda
 
+from .post_parser_chain import PostParserChain
 from .allowed_terms_pparser import AllowedTermsPParserChain
-from ..configs import RefTaggerChainConfig, MultiParserChainConfig
+from ..configs import (
+    MultiRefTaggerChainConfig,
+    MultiParserChainConfig,
+    ParserChainType,
+)
+from ..utils import find_json_object
 from ..schema.post import RefPost
-from ..prompting.jinja.zero_ref_template import zero_ref_template
-from ..prompting.jinja.single_ref_template import single_ref_template
-from ..prompting.jinja.multi_ref_template import multi_ref_template
+from ..prompting.jinja.multi_ref.zero_ref_template import zero_ref_template
+from ..prompting.jinja.multi_ref.single_ref_template import single_ref_template
+from ..prompting.jinja.multi_ref.multi_ref_template import multi_ref_template
 from ..web_extractors.metadata_extractors import (
     RefMetadata,
     get_refs_metadata_portion,
     get_ref_post_metadata_list,
 )
-from ..postprocessing import ParserChainOutput
-from ..postprocessing.output_processors import KeywordParser
+from ..postprocessing import ParserChainOutput, Answer
+from ..postprocessing.output_processors import PydanticAnswerParser
 from ..schema.ontology_base import OntologyBase
 from ..enum_dict import EnumDict, EnumDictKey
 
@@ -24,20 +33,154 @@ class PromptCase(EnumDictKey):
     MULTI_REF = "MULTI_REF"
 
 
-class MultiReferenceTaggerParserChain(AllowedTermsPParserChain):
+def normalize_labels(answer: Answer, allowed_terms: List[str]) -> Answer:
+    for sub_answer in answer.sub_answers:
+        # list of normalized labels
+        normalized_labels = []
+
+        for term in allowed_terms:
+            for pred_label in sub_answer.final_answer:
+                # check if normalized term present in predicted label (eg "endorses" in "<endorses>")
+                if term in pred_label:
+                    normalized_labels.append(term)
+
+        # replace raw model labels with normalized labels
+        sub_answer.final_answer = normalized_labels
+
+    return answer
+
+
+def normalize_references(answer: Answer, md_list: List[RefMetadata]) -> Answer:
+    """
+    Normalize the link between sub-answers and the references they pertain to,
+    handle model generation errors.
+    Output will be an updated Answer with normalized ref numbers for each SubAnswer.
+    Each ref_number will correspond to one of the RefMetadata objects in `md_list`
+    If sub_answer.ref_number -> md_list[]
+    """
+    # handle zero ref case
+    if len(md_list) == 0:
+        # if zero refs, check that exactly one sub answer
+        if len(answer.sub_answers) == 1:
+            # normalize to be zero index
+            answer.sub_answers[0].ref_number = 0
+        else:
+            # create new answer with error debug info
+            answer = Answer(
+                debug={
+                    "errors": f"len(answer.sub_answers)={len(answer.sub_answers)} \
+                    != len(md_list)={len(md_list)}",
+                    "answer": answer.dict(),  # pydantic v1
+                }
+            )
+    # handle case with refs
+    else:
+        normalized_sub_answers = []
+        sub_ans_dict = {}
+        for sub_ans in answer.sub_answers:
+            if sub_ans.ref_number not in sub_ans_dict:
+                sub_ans_dict[sub_ans.ref_number] = sub_ans
+            else:
+                logger.warning(
+                    f"Multiple sub_answers for same ref number: {sub_ans.ref_number}"
+                )
+
+        for i, ref_metadata in enumerate(md_list):
+            # look for subanswer with corresponding ref number
+            if i + 1 in sub_ans_dict:
+                sub_ans = sub_ans_dict[i + 1]
+                sub_ans.ref_number = i
+                sub_ans.ref_url = ref_metadata.url
+                normalized_sub_answers.append(sub_ans)
+                sub_ans_dict.pop(i + 1)
+
+        # check that there are no superfluous subanswers
+        if len(sub_ans_dict) > 0:
+            logger.warning(
+                f"Superfluous sub-answers: {sub_ans_dict.keys()}. Answer={answer.dict()}"
+            )
+
+        answer.sub_answers = normalized_sub_answers
+
+    return answer
+
+
+def post_process_llm_chain(input: dict) -> ParserChainOutput:
+    answer = input.get("answer_chain")
+    allowed_terms = input.get("allowed_terms")
+    md_list = input.get("md_list")
+    prompt = input.get("prompt")
+    output = _post_process_llm_chain(
+        answer,
+        allowed_terms,
+        md_list,
+        prompt,
+    )
+    return output
+
+
+def _post_process_llm_chain(
+    answer: Answer,
+    allowed_terms: List[str],
+    md_list: List[RefMetadata],
+    prompt: str,
+) -> ParserChainOutput:
+    # prepare extra metadata
+    extra = {"prompt": prompt}
+
+    # normalize references
+    answer = normalize_references(answer, md_list)
+
+    # if error, add err msgs to extra data
+    if answer.is_err:
+        extra["debug"] = answer.debug
+
+    # normalize labels
+    answer = normalize_labels(answer, allowed_terms)
+
+    output = ParserChainOutput(
+        answer=answer,
+        pparser_type=ParserChainType.MULTI_REF_TAGGER,
+        extra=extra,
+    )
+
+    return output
+
+
+class MultiRefTaggerParserChain(PostParserChain):
     def __init__(
         self,
-        parser_config: RefTaggerChainConfig,
+        parser_config: MultiRefTaggerChainConfig,
         global_config: MultiParserChainConfig,
         ontology: OntologyBase,
     ):
         super().__init__(parser_config, global_config, ontology)
+
+        self.input_prompt = PromptTemplate.from_template(self.input_key)
+        self._allowed_terms_name = f"{self.input_name}_allowed_terms"
+        self.pydantic_parser = PydanticAnswerParser(pydantic_object=Answer)
+
+        # init chains
+        llm_chain = (
+            self.input_prompt | self.model | find_json_object | self.pydantic_parser
+        )
+
+        self._chain = {
+            "answer_chain": llm_chain,
+            "allowed_terms": itemgetter(self.allowed_terms_name),
+            "ref_metadata": itemgetter("ref_metadata"),
+            "prompt": itemgetter(self.input_name),
+        } | RunnableLambda(post_process_llm_chain)
 
         self.init_prompt_case_dict(ontology)
 
     @property
     def chain(self):
         return self._chain
+
+    @property
+    def allowed_terms_name(self) -> str:
+        return self._allowed_terms_name
 
     def process_ref_post(
         self,
@@ -131,6 +274,7 @@ class MultiReferenceTaggerParserChain(AllowedTermsPParserChain):
         full_prompt = {
             self.input_name: prompt,
             self.allowed_terms_name: self.prompt_case_dict[case]["labels"],
+            "ref_metadata": metadata_list,
         }
 
         return full_prompt
@@ -154,7 +298,7 @@ class MultiReferenceTaggerParserChain(AllowedTermsPParserChain):
             str: full instantiated prompt
         """
         metadata_list = metadata_list if metadata_list else list()
-        references_metadata = get_refs_metadata_portion(metadata_list)
+        references_metadata = metadata_list
         prompt_j2_template = self.prompt_case_dict[case]["prompt_j2_template"]
         type_templates = self.prompt_case_dict[case]["type_templates"]
 

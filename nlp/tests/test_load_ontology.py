@@ -66,7 +66,7 @@ def test_load_content():
 
 
 if __name__ == "__main__":
-    custom_config_path = "etc/configs/notion_test_config.json"
+    custom_config_path = "etc/configs/v1_ontology_multi.json"
     config = load_config(custom_config_path)
     notion_ontology = load_ontology_from_config(config)
     ontology = notion_ontology.ontology_interface

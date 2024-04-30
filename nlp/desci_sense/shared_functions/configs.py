@@ -25,6 +25,7 @@ class ParserChainType(str, Enum):
     REFERENCE_TAGGER = "reference_tagger"
     TOPICS = "topics"
     HASHTAGS = "hashtags"
+    MULTI_REF_TAGGER = "multi_reference_tagger"
 
 
 def validate_env_var(env_var_name: str, value: Union[str, None]):
@@ -155,6 +156,10 @@ class RefTaggerChainConfig(PostParserChainConfig):
     type: ParserChainType = ParserChainType.REFERENCE_TAGGER
 
 
+class MultiRefTaggerChainConfig(PostParserChainConfig):
+    type: ParserChainType = ParserChainType.MULTI_REF_TAGGER
+
+
 class TopicsPParserChainConfig(PostParserChainConfig):
     type: ParserChainType = ParserChainType.TOPICS
 
@@ -169,6 +174,7 @@ class MultiParserChainConfig(BaseSettings):
             RefTaggerChainConfig,
             TopicsPParserChainConfig,
             HashtagPParserChainConfig,
+            MultiRefTaggerChainConfig,
         ]
     ] = Field(description="List of parser chain configurations", default_factory=list)
     metadata_extract_config: MetadataExtractionConfig = Field(

@@ -1,5 +1,7 @@
 from typing import List, Dict, Optional, Any, Union
 from enum import Enum
+from langchain_core.pydantic_v1 import Field as FieldLC
+from langchain_core.pydantic_v1 import BaseModel as BaseModelLC
 from rdflib.namespace import RDF
 from rdflib import URIRef, Literal, Graph
 from ..interface import (
@@ -23,6 +25,36 @@ from pydantic import (
     Field,
     BaseModel,
 )
+
+
+class SubAnswer(BaseModelLC):
+    ref_number: int = FieldLC(
+        description="ID number of current reference",
+        default=1,
+    )
+    reasoning_steps: str = FieldLC(description="Model reasoning steps")
+    candidate_tags: Union[str, Any] = FieldLC(
+        description="Candidate tags and explanation of why they were chosen."
+    )
+    final_answer: List[str] = FieldLC(
+        description="Set of final tags, based on the Candidate Tags."
+    )
+    ref_url: Optional[str] = FieldLC(
+        description="reference url this subanswer refers to"
+    )
+
+
+class Answer(BaseModelLC):
+    sub_answers: List[SubAnswer] = FieldLC(
+        description="List of SubAnswers.", default_factory=list
+    )
+    debug: Dict = FieldLC(
+        description="Debug information for error diagnosis, etc.",
+        default_factory=dict,
+    )
+
+    def is_err(self) -> bool:
+        return "errors" in self.debug
 
 
 class ParserChainOutput(BaseModel):
