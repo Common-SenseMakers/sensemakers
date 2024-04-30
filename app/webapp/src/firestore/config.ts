@@ -32,4 +32,5 @@ if (!isProd) {
 
 export const collections = {
   post: (postId: string) => doc(db, CollectionNames.Posts, postId),
+  platformPost: (id: string) => doc(db, CollectionNames.PlatformPosts, id),
 };

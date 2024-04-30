@@ -13,7 +13,7 @@ export interface AppFetch {
 
 export const _appFetch = async <T = any, D = any>(
   path: string,
-  data?: D,
+  payload?: D,
   accessToken?: string
 ) => {
   try {
@@ -25,13 +25,14 @@ export const _appFetch = async <T = any, D = any>(
 
     const res = await axios.post<{ data: T }>(
       FUNCTIONS_BASE + path,
-      data || {},
+      payload || {},
       {
         headers,
       }
     );
 
-    if (DEBUG) console.log(`appFetch: ${path}`, data);
+    if (DEBUG)
+      console.log(`appFetch: ${path}`, { payload, data: res.data.data });
 
     return (res.data.data ? res.data.data : null) as T;
   } catch (e) {

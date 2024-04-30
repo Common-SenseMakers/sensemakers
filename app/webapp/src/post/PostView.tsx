@@ -30,7 +30,8 @@ export const PostView = (props: {
     if (!postEdited) {
       setPostEdited(post);
     } else {
-      console.warn('Post edited', postEdited);
+      /** merge remote changes with local changes */
+      setPostEdited(post);
     }
   }, [post]);
 

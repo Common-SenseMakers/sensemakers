@@ -3,7 +3,10 @@ import { useQuery } from '@tanstack/react-query';
 import React, { createContext, useContext, useEffect, useMemo } from 'react';
 
 import { useAppFetch } from '../api/app.fetch';
-import { subscribeToPost } from '../firestore/realtime.listener';
+import {
+  subscribeToPlatformPost,
+  subscribeToPost,
+} from '../firestore/realtime.listener';
 import { PLATFORM } from '../shared/types/types';
 import { PlatformPostDraft } from '../shared/types/types.platform.posts';
 import { AppPostFull } from '../shared/types/types.posts';
@@ -63,6 +66,20 @@ export const PostContext: React.FC<{
     const unsubscribe = subscribeToPost(postId, refetch);
     return () => unsubscribe();
   }, []);
+
+  /**
+   * subscribe to real time updates of this post platform posts */
+  useEffect(() => {
+    if (post && post.mirrors) {
+      const unsubscribes = post.mirrors.map((m) =>
+        subscribeToPlatformPost(m.id, refetch)
+      );
+
+      return () => {
+        unsubscribes.forEach((unsubscribe) => unsubscribe());
+      };
+    }
+  }, [post]);
 
   /** derive nanopub details from current post */
   const { data: nanopubPublished } = useQuery({
