@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom';
 
+import { UserPostsContext } from '../user-home/UserPostsContext';
 import { PostContext } from './PostContext';
 import { PostView } from './PostView';
 
@@ -7,8 +8,10 @@ import { PostView } from './PostView';
 export const PostPage = () => {
   const { id } = useParams();
   return (
-    <PostContext postId={id}>
-      <PostView></PostView>
-    </PostContext>
+    <UserPostsContext>
+      <PostContext postId={id}>
+        <PostView></PostView>
+      </PostContext>
+    </UserPostsContext>
   );
 };
