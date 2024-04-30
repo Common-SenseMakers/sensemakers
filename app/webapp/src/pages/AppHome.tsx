@@ -15,11 +15,7 @@ export const AppHome = (props: {}) => {
     if (!isConnected) {
       return <PlatformManager></PlatformManager>;
     } else {
-      return (
-        <UserPostsContext>
-          <UserHome></UserHome>
-        </UserPostsContext>
-      );
+      return <UserHome></UserHome>;
     }
   })();
 

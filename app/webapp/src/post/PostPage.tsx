@@ -21,10 +21,8 @@ export const PostPage = () => {
       : undefined;
 
   return (
-    <UserPostsContext>
-      <PostContext postId={id}>
-        <PostView prevPostId={prevPostId} nextPostId={nextPostId}></PostView>
-      </PostContext>
-    </UserPostsContext>
+    <PostContext postId={id}>
+      <PostView prevPostId={prevPostId} nextPostId={nextPostId}></PostView>
+    </PostContext>
   );
 };

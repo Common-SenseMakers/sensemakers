@@ -27,7 +27,6 @@ export const PostContext: React.FC<{
   postInit?: AppPostFull;
   postId?: string;
 }> = ({ children, postInit, postId: _postId }) => {
-  const { connectedUser } = useAccountContext();
   if (_postId === undefined && postInit === undefined) {
     throw new Error(`Both postId and post were undefined`);
   }
