@@ -13,6 +13,7 @@ import { AppPostFull } from '../shared/types/types.posts';
 import { AppButton } from '../ui-components';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
+import { getAccount } from '../user-login/user.helper';
 import { getPlatformProfile } from '../utils/post.utils';
 import { usePost } from './PostContext';
 
@@ -31,6 +32,14 @@ export const PostView = () => {
       console.warn('Post edited', postEdited);
     }
   }, [post]);
+
+  useEffect(() => {
+    const nanopubAccount = getAccount(connectedUser, PLATFORM.Nanopub);
+    if (nanopubAccount && !nanopubDraft) {
+      /** if draft not available, create it */
+      appFetch('/api/posts/', {});
+    }
+  }, [post, connectedUser]);
 
   const postAuthorProfile =
     connectedUser && post
@@ -51,10 +60,20 @@ export const PostView = () => {
     return nanopubObj;
   }, [post]);
 
+  const nanopubDraft = useMemo(() => {
+    const nanopub = post?.mirrors.find(
+      (m) => m.platformId === PLATFORM.Nanopub
+    );
+    if (!nanopub) return undefined;
+
+    return nanopub.draft;
+  }, [post]);
+
   const canPublishNanopub =
     connectedUser &&
     connectedUser.nanopub &&
     connectedUser.nanopub.length > 0 &&
+    nanopubDraft &&
     !nanopubPublished;
 
   const approveNanopub = async () => {

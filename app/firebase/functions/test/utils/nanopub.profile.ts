@@ -2,11 +2,11 @@ import { privateKeyToAccount } from 'viem/accounts';
 
 import { HexStr } from '../../src/@shared/types/types';
 import { NanupubSignupData } from '../../src/@shared/types/types.nanopubs';
-import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import {
   DETERMINISTIC_MESSAGE,
   getEthToRSAMessage,
-} from '../../src/@shared/utils/sig.utils';
+} from '../../src/@shared/utils/nanopub.sign.util';
+import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 
 export const getNanopubProfile = async (privateKey: HexStr) => {
   const ethAccount = privateKeyToAccount(privateKey);

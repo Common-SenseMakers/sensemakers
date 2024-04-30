@@ -62,6 +62,7 @@ export class PostsManager {
       const user =
         _user ||
         (await this.users.repo.getUser(userId as string, manager, true));
+      if (DEBUG) logger.debug('fetchUser', { user });
 
       await Promise.all(
         ALL_PUBLISH_PLATFORMS.map(async (platformId) => {
@@ -81,11 +82,22 @@ export class PostsManager {
 
                 /** Fetch */
                 try {
+                  if (DEBUG)
+                    logger.debug('fetchUser - fetchAccount', {
+                      platformId,
+                      userParams,
+                    });
+
                   const platformPosts = await this.platforms.fetch(
                     platformId,
                     userParams,
                     manager
                   );
+
+                  if (DEBUG)
+                    logger.debug('fetchUser - platformPosts', {
+                      platformPosts,
+                    });
 
                   /** Create the PlatformPosts */
                   const platformPostsCreated =
@@ -93,6 +105,11 @@ export class PostsManager {
                       platformPosts,
                       manager
                     );
+
+                  if (DEBUG)
+                    logger.debug('fetchUser - platformPostsCreated', {
+                      platformPostsCreated,
+                    });
 
                   return platformPostsCreated;
                 } catch (err) {
@@ -166,8 +183,8 @@ export class PostsManager {
   }
 
   async parsePost(postId: string, manager: TransactionManager) {
-    logger.debug('parsePost', { postId });
     const post = await this.processing.posts.get(postId, manager, true);
+    if (DEBUG) logger.debug('parsePost', { postId, post });
 
     const params: ParsePostRequest<TopicsParams> = {
       post: { content: post.content },
@@ -207,6 +224,10 @@ export class PostsManager {
       const existing = await this.processing.posts.get(post.id, manager, true);
       if (!existing) {
         throw new Error(`Post not found: ${post.id}`);
+      }
+
+      if (existing.authorId !== userId) {
+        throw new Error(`Only the author can approve a post: ${post.id}`);
       }
 
       /** force status transition */

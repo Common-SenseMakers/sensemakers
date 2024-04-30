@@ -9,6 +9,7 @@ import { envRuntime } from './config/typedenv.runtime';
 import { buildApp } from './instances/app';
 import {
   approvePostController,
+  createDraftPostController,
   fetchUserPostsController,
   getPostController,
   getUserPostsController,
@@ -30,6 +31,7 @@ router.post('/auth/me', getLoggedUserController);
 router.post('/posts/getOfUser', getUserPostsController);
 router.post('/posts/fetch', fetchUserPostsController);
 router.post('/posts/get', getPostController);
+router.post('/posts/createDraft', createDraftPostController);
 router.post('/posts/approve', approvePostController);
 
 /** Registed the API as an HTTP triggered function */

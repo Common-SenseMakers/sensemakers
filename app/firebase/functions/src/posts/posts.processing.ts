@@ -10,6 +10,7 @@ import {
   AppPostFull,
 } from '../@shared/types/types.posts';
 import { TransactionManager } from '../db/transaction.manager';
+import { logger } from '../instances/logger';
 import { PlatformsService } from '../platforms/platforms.service';
 import { TimeService } from '../time/time.service';
 import { UsersHelper } from '../users/users.helper';
@@ -17,6 +18,8 @@ import { UsersService } from '../users/users.service';
 import { getPrefixedUserId } from '../users/users.utils';
 import { PlatformPostsRepository } from './platform.posts.repository';
 import { PostsRepository } from './posts.repository';
+
+const DEBUG = true;
 
 /**
  * Per-PlatformPost or Per-AppPost methods.
@@ -125,12 +128,25 @@ export class PostsProcessing {
       (p) => !postedPlatforms.includes(p)
     );
 
+    if (DEBUG)
+      logger.debug('createPostDrafts', {
+        appPostFull,
+        user,
+        postedPlatforms,
+        pendingPlatforms,
+      });
+
     /**
      * Create platformPosts as drafts on all platforms
      * */
     const drafts = await Promise.all(
       pendingPlatforms.map(async (platformId) => {
         const accounts = UsersHelper.getAccounts(user, platformId);
+
+        if (DEBUG)
+          logger.debug('createPostDrafts - accounts', {
+            accounts,
+          });
 
         return Promise.all(
           accounts.map(async (account) => {
@@ -150,8 +166,21 @@ export class PostsProcessing {
               },
             };
 
+            if (DEBUG)
+              logger.debug('createPostDrafts- account', {
+                draftPost,
+                account,
+              });
+
             /** create and add as mirror */
             const plaformPost = this.platformPosts.create(draft, manager);
+
+            if (DEBUG)
+              logger.debug('createPostDrafts- addMirror', {
+                postId,
+                plaformPost,
+              });
+
             this.posts.addMirror(postId, plaformPost.id, manager);
           })
         );

@@ -10,3 +10,7 @@ export const approvePostSchema = object({
   semantics: string().required(),
   mirrors: array().of(object().shape({})).required(),
 }).noUnknown(true);
+
+export const createDraftPostSchema = object({
+  postId: string().required(),
+}).noUnknown(true);

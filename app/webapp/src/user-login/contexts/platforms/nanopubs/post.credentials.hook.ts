@@ -55,7 +55,7 @@ export const usePostCredentials = (rsaKeys?: RSAKeys) => {
           );
 
           /** replace draft with signed */
-          context.introNanopub = introNanopub.get_rdf();
+          context.introNanopub = introNanopub.rdf();
           if (DEBUG) console.log('posting user details', { details });
 
           /** post */

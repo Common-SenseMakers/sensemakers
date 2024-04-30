@@ -5,7 +5,11 @@ import { envRuntime } from '../../config/typedenv.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
 import { enqueueParseUserPosts } from '../posts.task';
-import { approvePostSchema, getPostSchema } from './posts.schema';
+import {
+  approvePostSchema,
+  createDraftPostSchema,
+  getPostSchema,
+} from './posts.schema';
 
 const DEBUG = true;
 
@@ -101,6 +105,33 @@ export const approvePostController: RequestHandler = async (
     )) as AppPostFull;
 
     await postsManager.approvePost(payload, userId);
+
+    if (DEBUG)
+      logger.debug(`${request.path}: approvePost`, {
+        post: payload,
+      });
+
+    response.status(200).send({ success: true });
+  } catch (error) {
+    logger.error('error', error);
+    response.status(500).send({ success: false, error });
+  }
+};
+
+export const createDraftPostController: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    const { db, postsManager } = getServices(request);
+
+    const payload = (await createDraftPostSchema.validate(request.body)) as {
+      postId: string;
+    };
+
+    db.run(async (manager) => {
+      return postsManager.processing.createPostDrafts(payload.postId, manager);
+    });
 
     if (DEBUG)
       logger.debug(`${request.path}: approvePost`, {
