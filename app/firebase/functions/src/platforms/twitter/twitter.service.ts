@@ -39,7 +39,7 @@ import { UsersRepository } from '../../users/users.repository';
 import { FetchUserPostsParams, PlatformService } from '../platforms.interface';
 import { dateStrToTimestampMs, handleTwitterError } from './twitter.utils';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export interface TwitterApiCredentials {
   clientId: string;
@@ -67,8 +67,12 @@ export class TwitterService
    * Get generic client user app credentials
    * */
   private getGenericClient() {
-    if (DEBUG)
-      logger.debug('getGenericClient', { credentials: this.apiCredentials });
+    if (DEBUG) {
+      logger.debug('getGenericClient', {
+        clientId: this.apiCredentials.clientId.substring(0, 8),
+        clientSecret: this.apiCredentials.clientSecret.substring(0, 8),
+      });
+    }
 
     return new TwitterApi({
       clientId: this.apiCredentials.clientId,
