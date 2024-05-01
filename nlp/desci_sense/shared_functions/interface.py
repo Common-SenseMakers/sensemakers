@@ -159,8 +159,9 @@ class RefMetadata(BaseModel):
     title: str = Field(default="", description="Title of reference.")
     summary: str = Field(default="", description="Summary of reference.")
     image: str = Field(default="", description="Reference thumbnail image url.")
+    debug: Dict = Field(description="Debug information.", default_factory=dict)
 
-    def to_str(self, skip_list: List[str] = ["citoid_url", "image"]):
+    def to_str(self, skip_list: List[str] = ["citoid_url", "image", "debug"]):
         """
         Prints each attribute on a new line in the form: attribute: value
         """
