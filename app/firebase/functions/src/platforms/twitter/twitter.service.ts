@@ -33,10 +33,13 @@ import {
   TwitterUserDetails,
 } from '../../@shared/types/types.twitter';
 import { TransactionManager } from '../../db/transaction.manager';
+import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersRepository } from '../../users/users.repository';
 import { FetchUserPostsParams, PlatformService } from '../platforms.interface';
 import { dateStrToTimestampMs, handleTwitterError } from './twitter.utils';
+
+const DEBUG = false;
 
 export interface TwitterApiCredentials {
   clientId: string;
@@ -64,6 +67,9 @@ export class TwitterService
    * Get generic client user app credentials
    * */
   private getGenericClient() {
+    if (DEBUG)
+      logger.debug('getGenericClient', { credentials: this.apiCredentials });
+
     return new TwitterApi({
       clientId: this.apiCredentials.clientId,
       clientSecret: this.apiCredentials.clientSecret,
@@ -307,6 +313,7 @@ export class TwitterService
   }
 
   async handleSignupData(data: TwitterSignupData): Promise<TwitterUserDetails> {
+    if (DEBUG) logger.debug('handleSignupData', data);
     const client = this.getGenericClient();
 
     const result = await client.loginWithOAuth2({
@@ -319,6 +326,7 @@ export class TwitterService
       'user.fields': ['profile_image_url'],
     };
     const { data: user } = await result.client.v2.me(profileParams);
+    if (DEBUG) logger.debug('handleSignupData', user);
 
     if (!result.refreshToken) {
       throw new Error('Unexpected undefined refresh token');
@@ -348,6 +356,8 @@ export class TwitterService
     if (data.type === 'write') {
       twitter['write'] = credentials;
     }
+
+    if (DEBUG) logger.debug('handleSignupData', twitter);
 
     return twitter;
   }

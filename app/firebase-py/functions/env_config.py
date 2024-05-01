@@ -6,7 +6,7 @@ environment = os.getenv('ENVIRONMENT', 'development')  # Default to 'development
 
 if environment == 'production':
     dotenv_path = os.path.join(os.path.dirname(__file__), '.env.prod')
-elif environment == 'staging's:
+elif environment == 'staging':
     dotenv_path = os.path.join(os.path.dirname(__file__), '.env.staging')
 else:
     dotenv_path = os.path.join(os.path.dirname(__file__), '.env')  # Default to .env for development
