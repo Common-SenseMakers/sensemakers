@@ -49,12 +49,16 @@ export const AccountContext = (props: PropsWithChildren) => {
   };
 
   const refresh = async () => {
-    if (token) {
-      const user = await _appFetch<AppUserRead>('/api/auth/me', {}, token);
-      if (DEBUG) console.log('got connected user', { user });
-      setConnectedUser(user);
-    } else {
-      setConnectedUser(null);
+    try {
+      if (token) {
+        const user = await _appFetch<AppUserRead>('/api/auth/me', {}, token);
+        if (DEBUG) console.log('got connected user', { user });
+        setConnectedUser(user);
+      } else {
+        setConnectedUser(null);
+      }
+    } catch (e) {
+      disconnect();
     }
   };
 
