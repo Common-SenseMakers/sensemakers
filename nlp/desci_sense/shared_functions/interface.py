@@ -152,7 +152,7 @@ class RefMetadata(BaseModel):
     )
     url: Union[str, None] = Field(description="URL of reference.")
     item_type: Union[str, None] = Field(
-        default=None,
+        default="unknown",
         description="Item type label returned from metadata extractor. \
           Citoid uses https://www.zotero.org/support/kb/item_types_and_fields ",
     )
@@ -160,6 +160,13 @@ class RefMetadata(BaseModel):
     summary: str = Field(default="", description="Summary of reference.")
     image: str = Field(default="", description="Reference thumbnail image url.")
     debug: Dict = Field(description="Debug information.", default_factory=dict)
+
+    @field_validator("item_type", mode="before")
+    @classmethod
+    def convert_none_unk(cls, v):
+        if type(v) is type(None):
+            v = "unknown"
+        return v
 
     def to_str(self, skip_list: List[str] = ["citoid_url", "image", "debug"]):
         """

@@ -1,6 +1,6 @@
 # using https://en.wikipedia.org/api/rest_v1/#/Citation/getCitation API
 
-from typing import List
+from typing import List, Dict, Union, Tuple
 
 
 from loguru import logger
@@ -14,6 +14,36 @@ from tenacity import (
     stop_after_attempt,
     wait_exponential,
 )
+from ..utils import identify_social_media
+
+
+def citoid_twitter_post(target_url: str) -> Dict:
+    return {
+        "itemType": "forumPost",
+        "creators": [],
+        "tags": [],
+        "title": "Twitter post",
+        "url": target_url,
+    }
+
+
+def pre_check_target_url(target_url: str) -> Tuple[bool, Dict]:
+    """_summary_
+
+    Args:
+        target_url (str): target url to check
+
+    Returns:
+        bool: True if Citoid call should be skipped. False o.w.
+        Dict: if True, citoid structured response to be used instead of Citoid call. None o.w.
+    """
+    # check social media type
+    social_type = identify_social_media(target_url)
+
+    if social_type == "twitter":
+        return True, citoid_twitter_post(target_url)
+    else:
+        return False, None
 
 
 # https://plainenglish.io/blog/send-http-requests-as-fast-as-possible-in-python-304134d46604
@@ -69,6 +99,11 @@ def return_default_value(retry_state):
     before=before_retry,  # Execute before_retry function before each attempt
 )
 async def fetch_citation_async_retry(target_url, session: ClientSession):
+    skip_citoid, response = pre_check_target_url(target_url)
+    if skip_citoid:
+        logger.debug(f"skipping citoid for {target_url}")
+        return response
+
     # Fixed part of the API endpoint
     base_url = "https://en.wikipedia.org/api/rest_v1/data/citation/zotero/"
 
@@ -112,6 +147,10 @@ async def fetch_all_citations(urls: list):
     before=before_retry,  # Execute before_retry function before each attempt
 )
 def fetch_citation(target_url):
+    skip_citoid, response = pre_check_target_url(target_url)
+    if skip_citoid:
+        logger.debug(f"skipping citoid for {target_url}")
+        return response
     logger.debug(f"fetching citoid data for: {target_url}")
 
     # Fixed part of the API endpoint
