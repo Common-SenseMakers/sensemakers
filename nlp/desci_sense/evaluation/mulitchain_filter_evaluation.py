@@ -34,7 +34,7 @@ from sklearn.metrics import (
 
 sys.path.append(str(Path(__file__).parents[2]))
 
-from desci_sense.evaluation.utils import get_dataset, create_custom_confusion_matrix
+from desci_sense.evaluation.utils import get_dataset, create_custom_confusion_matrix, posts_to_refPosts
 from desci_sense.shared_functions.parsers.multi_chain_parser import MultiChainParser
 from desci_sense.shared_functions.dataloaders import convert_text_to_ref_post
 from desci_sense.shared_functions.init import init_multi_chain_parser_config
@@ -42,7 +42,7 @@ from desci_sense.shared_functions.init import init_multi_chain_parser_config
 
 def prepare_parser_input(df):
     
-    return [convert_text_to_ref_post(p) for p in list(df['Text'])]
+    return posts_to_refPosts(df['Text'])
     
 
 #function for predicting labels
@@ -51,12 +51,15 @@ def pred_labels(df,config):
 
     inputs = prepare_parser_input(df)
 
-    results = model.batch_process_ref_posts(inputs=inputs,active_list=["keywords", "topics"])
+    results = model.batch_process_ref_posts(inputs=inputs,active_list=["keywords", "topics"],batch_size=1)
 
 
     try:
         df['Predicted Label'] = [x.filter_classification.value for x in results]
         df['Reasoning Steps'] = ["Keywords: "+x.debug['topics']['full_text']+"Topics: "+x.debug['keywords']['raw_text'] for x in results]
+        df['Keywords'] = [x.keywords for x in results]
+        df['Topics'] = [x.topics for x in results]
+        df['Ref item types'] = [x.item_types for x in results]
 
     except Exception as e:
        
@@ -172,7 +175,7 @@ if __name__ == "__main__":
         print(dataset_artifact_id)
     else:
         dataset_artifact_id = (
-            'common-sense-makers/filter_evaluation/toot_sci__labeling:v0'
+            'common-sense-makers/filter_evaluation/labeled_tweets_no_threads:v1'
         )
 
     # set artifact as input artifact
@@ -189,19 +192,19 @@ if __name__ == "__main__":
     if dataset_file:
         table_path = Path(f"{a_path}/{dataset_file}")
     else:
-        table_path = Path(f"{a_path}/labeled_data_table.table.json")
+        table_path = Path(f"{a_path}/labeled_data_table_no_threads.table.json")
 
 
     # return the pd df from the table
     #remember to remove the head TODO
-    df = get_dataset(table_path).head(3)
+    df = get_dataset(table_path)
     #print(df.columns)
 
      # get handle file name
     if handle_file:
         table_path = Path(f"{a_path}/{dataset_file}")
     else:
-        table_path = Path(f"{a_path}/labeled_data_handles.table.json")
+        table_path = Path(f"{a_path}/handles_chart.table.json")
     
     df_handles = get_dataset(table_path)
    
