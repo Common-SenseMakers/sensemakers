@@ -1,4 +1,4 @@
-import { DefinedIfTrue, PUBLISHABLE_PLATFORMS } from '../@shared/types/types';
+import { ALL_PUBLISH_PLATFORMS, DefinedIfTrue } from '../@shared/types/types';
 import {
   PlatformPost,
   PlatformPostCreate,
@@ -10,12 +10,16 @@ import {
   AppPostFull,
 } from '../@shared/types/types.posts';
 import { TransactionManager } from '../db/transaction.manager';
+import { logger } from '../instances/logger';
 import { PlatformsService } from '../platforms/platforms.service';
+import { TimeService } from '../time/time.service';
 import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { getPrefixedUserId } from '../users/users.utils';
 import { PlatformPostsRepository } from './platform.posts.repository';
 import { PostsRepository } from './posts.repository';
+
+const DEBUG = true;
 
 /**
  * Per-PlatformPost or Per-AppPost methods.
@@ -24,6 +28,7 @@ import { PostsRepository } from './posts.repository';
 export class PostsProcessing {
   constructor(
     protected users: UsersService,
+    private time: TimeService,
     public posts: PostsRepository,
     public platformPosts: PlatformPostsRepository,
     protected platforms: PlatformsService
@@ -74,6 +79,7 @@ export class PostsProcessing {
         authorId: getPrefixedUserId(platformPost.platformId, user_id),
         content,
         mirrorsIds: [platformPostCreated.id],
+        createdAtMs: this.time.now(),
       },
       manager
     );
@@ -96,25 +102,17 @@ export class PostsProcessing {
   }
 
   /** Wrapper to create drafts for many posts */
-  async createPostsDrafts(
-    postIds: string[],
-    draftsPlatforms: PUBLISHABLE_PLATFORMS[],
-    manager: TransactionManager
-  ) {
+  async createPostsDrafts(postIds: string[], manager: TransactionManager) {
     const drafts = await Promise.all(
       postIds.map(async (postId) => {
-        await this.createPostDrafts(postId, draftsPlatforms, manager);
+        await this.createPostDrafts(postId, manager);
       })
     );
     return drafts.flat();
   }
 
-  /** Store all platform posts */
-  async createPostDrafts(
-    postId: string,
-    draftsPlatforms: PUBLISHABLE_PLATFORMS[],
-    manager: TransactionManager
-  ) {
+  /** Create and store all platform posts for one post */
+  async createPostDrafts(postId: string, manager: TransactionManager) {
     const appPostFull = await this.getPostFull(postId, manager, true);
 
     const user = await this.users.repo.getUser(
@@ -123,12 +121,33 @@ export class PostsProcessing {
       true
     );
 
+    const preparedPlatforms = appPostFull.mirrors
+      .filter((m) => m.publishStatus === 'published' || m.draft !== undefined)
+      .map((m) => m.platformId);
+
+    const pendingPlatforms = ALL_PUBLISH_PLATFORMS.filter(
+      (p) => !preparedPlatforms.includes(p)
+    );
+
+    if (DEBUG)
+      logger.debug('createPostDrafts', {
+        appPostFull,
+        user,
+        preparedPlatforms,
+        pendingPlatforms,
+      });
+
     /**
      * Create platformPosts as drafts on all platforms
      * */
     const drafts = await Promise.all(
-      draftsPlatforms.map(async (platformId) => {
+      pendingPlatforms.map(async (platformId) => {
         const accounts = UsersHelper.getAccounts(user, platformId);
+
+        if (DEBUG)
+          logger.debug('createPostDrafts - accounts', {
+            accounts,
+          });
 
         return Promise.all(
           accounts.map(async (account) => {
@@ -148,8 +167,21 @@ export class PostsProcessing {
               },
             };
 
+            if (DEBUG)
+              logger.debug('createPostDrafts- account', {
+                draftPost,
+                account,
+              });
+
             /** create and add as mirror */
             const plaformPost = this.platformPosts.create(draft, manager);
+
+            if (DEBUG)
+              logger.debug('createPostDrafts- addMirror', {
+                postId,
+                plaformPost,
+              });
+
             this.posts.addMirror(postId, plaformPost.id, manager);
           })
         );

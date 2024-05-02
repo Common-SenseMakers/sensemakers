@@ -16,6 +16,17 @@ export const ALL_PUBLISH_PLATFORMS: PUBLISHABLE_PLATFORMS[] = [
   PLATFORM.Nanopub,
 ];
 
+export type IDENTITY_PLATFORMS =
+  | PLATFORM.Orcid
+  | PLATFORM.Twitter
+  | PLATFORM.Nanopub;
+
+export const ALL_IDENTITY_PLATFORMS: IDENTITY_PLATFORMS[] = [
+  PLATFORM.Twitter,
+  PLATFORM.Nanopub,
+  PLATFORM.Orcid,
+];
+
 /** The user details has, for each PLATFORM, a details object
  * with
  * - user_id: the unique user id on that platform
@@ -33,8 +44,9 @@ export interface WithPlatformUserId {
 
 export interface UserDetailsBase<P = any, R = any, W = any>
   extends WithPlatformUserId {
+  lastFetchedMs: number;
   profile?: P;
-  read?: R & { lastFetchedMs: number };
+  read?: R;
   write?: W;
 }
 
@@ -47,6 +59,9 @@ export interface UserDetailsReadBase<P> extends WithPlatformUserId {
 /** The AppUser object combines the details of each platform */
 export interface UserWithId {
   userId: string;
+}
+
+export interface UserWithPlatformIds {
   platformIds: string[]; // redundant array with the prefixed user_id of all the authenticated platforms for a given user
 }
 
@@ -55,7 +70,7 @@ export interface UserWithId {
  * kept inside the backend, never sent to the user. We use AppUserRead
  * to send the user profiles to the frontend.
  */
-export interface AppUser extends UserWithId {
+export interface AppUser extends UserWithId, UserWithPlatformIds {
   [PLATFORM.Orcid]?: OrcidUserDetails[];
   [PLATFORM.Twitter]?: TwitterUserDetails[];
   [PLATFORM.Nanopub]?: NanopubUserDetails[];
@@ -64,13 +79,20 @@ export interface AppUser extends UserWithId {
 export type AppUserCreate = Omit<AppUser, 'userId'>;
 
 /**
- * The AppUserRead replaces the details with read details (keeps the profile and users
- * boolean flags for the read and write properties)
+ * The AppUserRead replaces the details with read details (keeps the profile)
  */
+
+export interface AccountDetailsRead<P> {
+  user_id: string;
+  profile: P;
+  read: boolean;
+  write: boolean;
+}
+
 export interface AppUserRead extends UserWithId {
-  [PLATFORM.Orcid]?: UserDetailsReadBase<OrcidUserDetails['profile']>[];
-  [PLATFORM.Twitter]?: UserDetailsReadBase<TwitterUserDetails['profile']>[];
-  [PLATFORM.Nanopub]?: UserDetailsReadBase<NanopubUserDetails['profile']>[];
+  [PLATFORM.Orcid]?: AccountDetailsRead<OrcidUserDetails['profile']>[];
+  [PLATFORM.Twitter]?: AccountDetailsRead<TwitterUserDetails['profile']>[];
+  [PLATFORM.Nanopub]?: AccountDetailsRead<NanopubUserDetails['profile']>[];
 }
 
 /** Support types */

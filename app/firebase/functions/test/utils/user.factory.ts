@@ -1,7 +1,6 @@
-import { TransactionManager } from 'src/db/transaction.manager';
-import { Services } from 'src/instances/services';
-
 import { AppUser } from '../../src/@shared/types/types';
+import { TransactionManager } from '../../src/db/transaction.manager';
+import { Services } from '../../src/instances/services';
 import { testUsers } from '../__tests__/setup';
 
 /**

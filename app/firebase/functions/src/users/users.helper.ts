@@ -1,6 +1,7 @@
 import {
   AppUser,
   DefinedIfTrue,
+  IDENTITY_PLATFORMS,
   PUBLISHABLE_PLATFORMS,
   UserDetailsBase,
 } from '../@shared/types/types';
@@ -12,7 +13,7 @@ export class UsersHelper {
    * */
   static getAccounts(
     user: AppUser,
-    platformId: PUBLISHABLE_PLATFORMS
+    platformId: IDENTITY_PLATFORMS
   ): UserDetailsBase[] {
     const platformAccounts = user[platformId];
 

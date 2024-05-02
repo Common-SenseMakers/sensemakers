@@ -1,7 +1,4 @@
-import {
-  getPostSemantics,
-  postMessage,
-} from '../src/functionsCalls/post.requests';
+import { getPostSemantics, postMessage } from '../src/api/post.requests';
 import { PLATFORM } from '../src/shared/types/types';
 
 describe('test', () => {
