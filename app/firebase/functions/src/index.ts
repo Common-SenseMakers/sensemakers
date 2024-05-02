@@ -14,7 +14,7 @@ import {
   getPostController,
   getUserPostsController,
 } from './posts/controllers/posts.controller';
-import { parseUserPostsTask } from './posts/posts.task';
+import { PARSE_USER_POSTS_TASK, parseUserPostsTask } from './posts/posts.task';
 // import { fetchNewPosts } from './posts/posts.job';
 import { getLoggedUserController } from './users/controllers/get.logged.controller';
 import {
@@ -52,8 +52,11 @@ exports['api'] = functions
 // export const postsJob = onSchedule(POSTS_JOB_SCHEDULE, fetchNewPosts);
 
 /** Registed the parseUserPost task */
-exports['parseUserPosts'] = onTaskDispatched({
-  timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
-  memory: envDeploy.CONFIG_MEMORY,
-  minInstances: envDeploy.CONFIG_MININSTANCE,
-}, parseUserPostsTask);
+exports[PARSE_USER_POSTS_TASK] = onTaskDispatched(
+  {
+    timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
+    memory: envDeploy.CONFIG_MEMORY,
+    minInstances: envDeploy.CONFIG_MININSTANCE,
+  },
+  parseUserPostsTask
+);

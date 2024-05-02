@@ -32,12 +32,15 @@ export const enqueueParseUserPosts = async (
   const targetUri = await getFunctionUrl(PARSE_USER_POSTS_TASK, location);
 
   if (IS_EMULATOR) {
+    logger.debug(`enqueue ParseUserPosts - isEmulator`);
     /** Emulator does not support queue.enqueue(), but uses a simple http request */
     return queueOnEmulator(targetUri, { userId });
   }
 
   const queue = getFunctions().taskQueue(PARSE_USER_POSTS_TASK);
   /** enqueue */
+  logger.debug(`enqueueParseUserPosts - enqueue`, { userId, targetUri });
+
   return queue.enqueue({ userId }, { uri: targetUri });
 };
 
@@ -68,10 +71,10 @@ async function getFunctionUrl(name: string, location: string) {
   const client = await auth.getClient();
   const res = await client.request<{ serviceConfig: { uri: string } }>({ url });
 
-  const uri = res.data?.serviceConfig?.uri;
+  const realUri = res.data?.serviceConfig?.uri;
 
-  if (!uri) {
+  if (!realUri) {
     throw new Error(`Unable to retreive uri for function at ${url}`);
   }
-  return url;
+  return realUri;
 }
