@@ -1,4 +1,5 @@
 import {
+  Anchor,
   AreasType,
   Box,
   BoxExtendedProps,
@@ -15,24 +16,44 @@ import { ReactNode } from 'react';
 import { AppHeading } from '../../ui-components';
 import { useResponsive } from '../../ui-components/ResponsiveApp';
 import { useThemeContext } from '../../ui-components/ThemedApp';
+import { BUILD_ID } from '../config';
 
 export const MAX_WIDTH_LANDING = 1600;
 export const MAX_WIDTH_APP = 800;
 
 export const ViewportContainer = (props: React.HTMLProps<HTMLDivElement>) => {
+  const { constants } = useThemeContext();
   return (
-    <Box
-      id="viewport-container"
-      style={{
-        height: '100vh',
-        width: '100vw',
-        overflow: 'hidden',
-        maxWidth: `${MAX_WIDTH_LANDING}px`,
-        margin: '0 auto',
-        ...props.style,
-      }}>
-      {props.children}
-    </Box>
+    <>
+      <Box
+        id="viewport-container"
+        style={{
+          height: 'calc(100vh - 70px)',
+          width: '100vw',
+          overflow: 'hidden',
+          maxWidth: `${MAX_WIDTH_LANDING}px`,
+          margin: '0 auto',
+          ...props.style,
+        }}>
+        {props.children}
+      </Box>
+      <Box
+        id="footer"
+        style={{
+          height: '70px',
+          flexShrink: 0,
+          backgroundColor: constants.colors.primary,
+        }}
+        pad="medium"
+        justify="center"
+        align="center">
+        <Box direction="row" justify="between" fill align="center">
+          <Text size="xsmall" color={constants.colors.backgroundLightDarker}>
+            Build: {BUILD_ID?.substring(0, 7)}
+          </Text>
+        </Box>
+      </Box>
+    </>
   );
 };
 
