@@ -24,11 +24,11 @@ const circleButtonStyle: React.CSSProperties = {
   textAlign: 'center',
 };
 
-export const AppButton = (props: IButton & { loading?: boolean }) => {
+export const AppButton = (props: IButton & { isLoading?: boolean }) => {
   const { constants } = useThemeContext();
   const newProps = { ...props };
 
-  if (newProps.loading) {
+  if (newProps.isLoading) {
     newProps.disabled = true;
     newProps.label = (
       <Box justify="center" direction="row">

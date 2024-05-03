@@ -17,7 +17,8 @@ export const PostCard = () => {
       style={{ border: '2px solid', borderRadius: '4px', cursor: 'pointer' }}
       onClick={handleClick}>
       <Box>{post?.content}</Box>
-      <Box>{post?.parseStatus}</Box>
+      <Box>{post?.parsedStatus}</Box>
+      <Box>{post?.parsingStatus}</Box>
     </Box>
   );
 };

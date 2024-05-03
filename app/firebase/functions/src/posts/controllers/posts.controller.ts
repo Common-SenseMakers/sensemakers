@@ -107,7 +107,7 @@ export const getPostController: RequestHandler = async (request, response) => {
       });
     } else {
       if (DEBUG)
-        logger.debug(`${request.path}: getPost`, {
+        logger.debug(`${request.path}: getPost ${payload.postId} success`, {
           userId,
           post: post,
         });

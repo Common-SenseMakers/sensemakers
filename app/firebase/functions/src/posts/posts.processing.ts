@@ -194,13 +194,17 @@ export class PostsProcessing {
   }
 
   async createAppPost(
-    input: Omit<AppPostCreate, 'parseStatus' | 'reviewedStatus'>,
+    input: Omit<
+      AppPostCreate,
+      'parsingStatus' | 'parsedStatus' | 'reviewedStatus'
+    >,
     manager: TransactionManager
   ): Promise<AppPost> {
     /** Build the AppPostFull object */
     const postCreate: AppPostCreate = {
       ...input,
-      parseStatus: 'unprocessed',
+      parsedStatus: 'unprocessed',
+      parsingStatus: 'idle',
       reviewedStatus: 'pending',
     };
 

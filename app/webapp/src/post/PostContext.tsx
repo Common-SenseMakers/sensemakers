@@ -4,10 +4,7 @@ import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import { TweetV2 } from 'twitter-api-v2';
 
 import { useAppFetch } from '../api/app.fetch';
-import {
-  subscribeToPlatformPost,
-  subscribeToPost,
-} from '../firestore/realtime.listener';
+import { subscribeToUpdates } from '../firestore/realtime.listener';
 import { AppUserRead, PLATFORM } from '../shared/types/types';
 import {
   PlatformPost,
@@ -76,7 +73,7 @@ export const PostContext: React.FC<{
    * subscribe to real time updates of this post and trigger a refetch everytime
    * one is received*/
   useEffect(() => {
-    const unsubscribe = subscribeToPost(postId, refetch);
+    const unsubscribe = subscribeToUpdates(`post-${postId}`, refetch);
     return () => unsubscribe();
   }, []);
 
@@ -85,8 +82,7 @@ export const PostContext: React.FC<{
   useEffect(() => {
     if (post && post.mirrors) {
       const unsubscribes = post.mirrors.map((m) => {
-        if (DEBUG) console.log('subscribing to platformPost', m.id);
-        return subscribeToPlatformPost(m.id, refetch);
+        return subscribeToUpdates(`platformPost-${m.id}`, refetch);
       });
 
       return () => {
@@ -104,7 +100,7 @@ export const PostContext: React.FC<{
         const nanopub = post?.mirrors.find(
           (m) => m.platformId === PLATFORM.Nanopub
         );
-        if (!nanopub || !nanopub.posted) return undefined;
+        if (!nanopub || !nanopub.posted) return null;
 
         const nanopubObj = new Nanopub(nanopub.posted.post);
         return nanopubObj.info();

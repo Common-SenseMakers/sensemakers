@@ -8,7 +8,7 @@ import { usePostCredentials } from './post.credentials.hook';
 const KEYS_KEY = 'NP_PEM_KEYS';
 const DETERMINISTIC_MESSAGE = 'Prepare my Nanopub identity';
 
-const DEBUG = true;
+const DEBUG = false;
 
 /**
  * logic focused on managing the nanopub keys.

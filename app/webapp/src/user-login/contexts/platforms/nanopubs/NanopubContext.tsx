@@ -13,7 +13,7 @@ import { signNanopublication as _signNanopublication } from '../../../../shared/
 import { useNanopubKeys } from './derive.keys.hook';
 import { getProfile } from './nanopub.utils';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export type NanopubContextType = {
   profile?: NpProfile;
@@ -100,8 +100,6 @@ export const NanopubContext = (props: PropsWithChildren) => {
         return _signNanopublication(nanopubStr, rsaKeys);
       }
     : undefined;
-
-  console.log({ signNanopublication });
 
   return (
     <NanopubContextValue.Provider

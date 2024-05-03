@@ -20,7 +20,7 @@ export const PlatformManager = (props: {}) => {
           style={{ width: '50%' }}
           primary
           disabled={!needConnectTwitter}
-          loading={isConnectingTwitter}
+          isLoading={isConnectingTwitter}
           onClick={() => {
             if (connectTwitter) {
               connectTwitter('read');

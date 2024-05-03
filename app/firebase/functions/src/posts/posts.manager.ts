@@ -135,10 +135,39 @@ export class PostsManager {
 
   async parseOfUser(userId: string) {
     const postIds = await this.processing.posts.getNonParsedOfUser(userId);
-    await this.db.run(async (manager) => {
-      await this.parsePosts(postIds, manager);
-      await this.processing.createPostsDrafts(postIds, manager);
-    });
+
+    await Promise.all(
+      postIds.map(async (postId) => {
+        /**
+         * check if not being processed
+         * mark as being processed
+         * commit transaction */
+        const shouldParse = await this.db.run(async (manager) => {
+          const post = await this.processing.posts.get(postId, manager, true);
+          if (post.parsingStatus === 'processing') {
+            logger.debug(`parseOfUser - already parsing ${postId}`);
+            return false;
+          }
+
+          logger.debug(`parseOfUser - marking as parsing ${postId}`);
+          await this.processing.posts.updateContent(
+            postId,
+            { parsingStatus: 'processing' },
+            manager
+          );
+
+          return true;
+        });
+
+        if (shouldParse) {
+          /** then process */
+          await this.db.run(async (manager) => {
+            await this.parsePost(postId, manager);
+            await this.processing.createPostsDrafts(postIds, manager);
+          });
+        }
+      })
+    );
   }
 
   /** get pending posts AppPostFull of user, cannot be part of a transaction */
@@ -184,7 +213,7 @@ export class PostsManager {
 
   async parsePost(postId: string, manager: TransactionManager) {
     const post = await this.processing.posts.get(postId, manager, true);
-    if (DEBUG) logger.debug('parsePost', { postId, post });
+    if (DEBUG) logger.debug('parsePost - start', { postId, post });
 
     const params: ParsePostRequest<TopicsParams> = {
       post: { content: post.content },
@@ -203,8 +232,11 @@ export class PostsManager {
     const update: PostUpdate = {
       semantics: parserResult.semantics,
       originalParsed: parserResult,
-      parseStatus: 'processed',
+      parsedStatus: 'processed',
+      parsingStatus: 'idle',
     };
+
+    if (DEBUG) logger.debug('parsePost - done', { postId, update });
 
     await this.processing.posts.updateContent(post.id, update, manager);
   }

@@ -66,8 +66,6 @@ export const UserPostsContext: React.FC<{
     enabled: fetched,
   });
 
-  console.log({ _posts, error, fetched });
-
   /** convert null to undefined */
   const posts = _posts !== null ? _posts : undefined;
 
