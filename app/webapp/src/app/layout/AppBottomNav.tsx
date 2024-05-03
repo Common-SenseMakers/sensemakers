@@ -19,20 +19,15 @@ export interface IPath {
   icon?: ReactElement;
   disabled?: boolean;
   action?: () => void;
+  path?: string;
 }
 
-export const AppBottomNav = (props: {
-  paths: Record<string, IPath>;
-  popUp?: string;
-}) => {
+export const AppBottomNav = (props: { paths: IPath[] }) => {
   const { constants } = useThemeContext();
 
   const location = useLocation();
   const navigate = useNavigate();
-  const paths = useMemo(
-    () => Array.from(Object.keys(props.paths)),
-    [props.paths]
-  );
+  const { paths } = props;
 
   const style: React.CSSProperties = {
     flexGrow: '1',
@@ -41,28 +36,40 @@ export const AppBottomNav = (props: {
     borderRadius: '0px',
   };
 
-  const clicked = (path: string) => {
-    const pathDetais = props.paths[path];
-    if (pathDetais.action) {
-      pathDetais.action();
+  const clicked = (details: IPath) => {
+    if (details.action) {
+      details.action();
+    } else if (details.path) {
+      navigate(details.path);
     } else {
-      navigate(path);
+      throw new Error('unexpected');
     }
   };
 
   return (
-    <Box direction="row" justify="evenly" style={{ position: 'relative' }}>
+    <Box
+      fill
+      direction="row"
+      justify="evenly"
+      style={{
+        position: 'relative',
+        backgroundColor: constants.colors.backgroundLightShade,
+        borderTop: `2px solid ${constants.colors.primary}`,
+        fontSize: '16px',
+        fontWeight: 'bold',
+      }}>
       {paths.map((path, ix) => {
-        const pathDetais = props.paths[path];
+        const pathDetails = paths[ix];
         const isPage = location.pathname === path;
 
         return (
           <AppButton
+            plain
             key={ix}
-            label={pathDetais.label}
+            label={pathDetails.label}
             icon={
-              pathDetais.icon ? (
-                React.cloneElement(pathDetais.icon, {
+              pathDetails.icon ? (
+                React.cloneElement(pathDetails.icon, {
                   color: isPage
                     ? constants.colors.textOnPrimary
                     : constants.colors.text,
@@ -71,10 +78,14 @@ export const AppBottomNav = (props: {
                 <></>
               )
             }
-            onClick={() => clicked(path)}
-            style={style}
+            onClick={() => clicked(pathDetails)}
+            style={{
+              ...style,
+              borderLeft:
+                ix === 0 ? 'none' : `2px solid ${constants.colors.primary}`,
+            }}
             primary={isPage}
-            disabled={pathDetais.disabled}></AppButton>
+            disabled={pathDetails.disabled}></AppButton>
         );
       })}
     </Box>

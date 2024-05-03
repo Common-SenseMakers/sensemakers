@@ -1,19 +1,28 @@
-import { Box, Text } from 'grommet';
+import { Avatar, Box, Text } from 'grommet';
 import { useNavigate } from 'react-router-dom';
 
+import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { AppPostFull } from '../shared/types/types.posts';
 import { usePost } from './PostContext';
 
 export const PostContent = () => {
-  const navigate = useNavigate();
   const { post } = usePost();
+
+  const semanticsUpdated = (newSemantics: string) => {
+    console.log({ newSemantics });
+  };
+
   return (
-    <Box pad="medium" elevation="small">
-      <Box pad={{ vertical: 'small' }}>
+    <Box>
+      <Box elevation="small" pad="medium">
         <Text>{post?.content}</Text>
       </Box>
       <Box>
-        <Text size="xsmall">{post?.semantics}</Text>
+        <SemanticsEditor
+          isLoading={false}
+          semantics={post?.semantics}
+          originalParsed={post?.originalParsed}
+          semanticsUpdated={semanticsUpdated}></SemanticsEditor>
       </Box>
     </Box>
   );
