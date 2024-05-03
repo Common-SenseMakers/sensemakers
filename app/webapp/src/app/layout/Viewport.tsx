@@ -23,12 +23,13 @@ export const MAX_WIDTH_APP = 800;
 
 export const ViewportContainer = (props: React.HTMLProps<HTMLDivElement>) => {
   const { constants } = useThemeContext();
+  const footerHeight = '48px';
   return (
     <>
       <Box
         id="viewport-container"
         style={{
-          height: 'calc(100vh - 70px)',
+          height: `calc(100vh - ${footerHeight})`,
           width: '100vw',
           overflow: 'hidden',
           maxWidth: `${MAX_WIDTH_LANDING}px`,
@@ -40,7 +41,7 @@ export const ViewportContainer = (props: React.HTMLProps<HTMLDivElement>) => {
       <Box
         id="footer"
         style={{
-          height: '70px',
+          height: footerHeight,
           flexShrink: 0,
           backgroundColor: constants.colors.primary,
         }}
@@ -108,7 +109,7 @@ export const ViewportPage = (props: {
           {props.content}
         </Box>
       </Box>
-      <Box id="nav" style={{ height: '60px', flexShrink: 0 }}>
+      <Box id="nav" style={{ height: '0px', flexShrink: 0 }}>
         {props.nav}
       </Box>
     </Box>

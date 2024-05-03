@@ -79,7 +79,7 @@ export class PostsProcessing {
         authorId: getPrefixedUserId(platformPost.platformId, user_id),
         content,
         mirrorsIds: [platformPostCreated.id],
-        createdAtMs: this.time.now(),
+        createdAtMs: platformPost.posted?.timestampMs || this.time.now(),
       },
       manager
     );

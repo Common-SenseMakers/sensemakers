@@ -28,23 +28,31 @@ let state: TwitterTestState = {
 
 export type TwitterMockConfig = 'real' | 'mock-publish' | 'mock-signup';
 
-const getSampleTweet = (id: string, authorId: string) => {
+const getSampleTweet = (id: string, authorId: string, createdAt: number) => {
+  const date = new Date(createdAt);
+
   return {
     data: {
       id: id,
       text: `This is an interesting paper https://arxiv.org/abs/2312.05230 ${id}`,
       author_id: authorId,
-      created_at: new Date().toISOString(),
+      created_at: date.toISOString(),
       edit_history_tweet_ids: [],
     },
   };
 };
-[1, 2, 3].map((ix) => {
-  state.tweets.push({
+
+const now = Date.now();
+
+const tweets = [1, 2, 3, 4, 5, 6].map((ix) => {
+  const createdAt = now + ix * 1000;
+  return {
     id: `${ix}`,
-    tweet: getSampleTweet(`T${ix}`, '1773032135814717440'),
-  });
+    tweet: getSampleTweet(`T${ix}`, '1773032135814717440', createdAt),
+  };
 });
+
+state.tweets.push(...tweets);
 
 /** make private methods public */
 type MockedType = Omit<TwitterService, 'fetchInternal'> & {

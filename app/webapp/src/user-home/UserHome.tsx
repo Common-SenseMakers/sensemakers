@@ -29,7 +29,7 @@ export const UserHome = () => {
   console.log({ posts });
 
   return (
-    <Box gap="small">
+    <Box gap="small" pad={{ horizontal: 'small' }} justify="start">
       {posts.map((post, ix) => (
         <Box key={ix}>
           <PostContext postInit={post}>
