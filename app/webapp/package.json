@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "HOST=127.0.0.1 PORT=3000 craco start",
-    "start-remote": "craco start --config craco.config.prod.js",
-    "build": "craco build --config craco.config.prod.js",
+    "start": "export REACT_APP_VERSION=$(git rev-parse HEAD) && HOST=127.0.0.1 PORT=3000 craco start",
+    "start-remote": "export REACT_APP_VERSION=$(git rev-parse HEAD) && craco start --config craco.config.prod.js",
+    "build": "export REACT_APP_VERSION=$(git rev-parse HEAD) && craco build --config craco.config.prod.js",
     "test": "craco test",
     "eject": "craco eject",
     "test-functions": "FUNCTIONS_BASE=http://127.0.0.1:5001/sensenets-9ef26/us-central1 jest"

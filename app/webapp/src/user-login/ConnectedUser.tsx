@@ -39,6 +39,8 @@ export const ConnectedUser = (props: {}) => {
 
     return (
       <DropButton
+        plain
+        style={{ height: '70px', fontWeight: 'bold', padding: '0px 12px' }}
         pad="small"
         label={
           <Box direction="row" align="center">

@@ -23,17 +23,18 @@ const AppContainerContextValue = createContext<
 
 export const AppContainer = (props: React.PropsWithChildren) => {
   const [title, setTitle] = useState<SetPageTitleType>();
+  const topHeight = '70px';
 
   return (
     <AppContainerContextValue.Provider value={{ setTitle }}>
       <ViewportContainer style={{ maxWidth: MAX_WIDTH_APP }}>
         <Box
           pad={{ horizontal: 'medium' }}
-          style={{ height: '80px', flexShrink: 0 }}
+          style={{ height: topHeight, flexShrink: 0 }}
           justify="center">
           <GlobalNav title={title} />
         </Box>
-        <Box style={{ height: 'calc(100% - 80px)' }}>
+        <Box style={{ height: `calc(100% - ${topHeight})` }}>
           <Routes>
             <Route
               path={RouteNames.AppHome}
