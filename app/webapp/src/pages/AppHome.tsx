@@ -17,8 +17,6 @@ export const AppHome = (props: {}) => {
   })();
 
   return (
-    <ViewportPage
-      content={<BoxCentered>{content}</BoxCentered>}
-      nav={<AppBottomButton label="back"></AppBottomButton>}></ViewportPage>
+    <ViewportPage content={<BoxCentered>{content}</BoxCentered>}></ViewportPage>
   );
 };

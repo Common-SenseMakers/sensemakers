@@ -1,66 +1,42 @@
-import { Avatar, Box, Tag, Text } from 'grommet';
-import { FormNextLink, FormPrevious, FormPreviousLink } from 'grommet-icons';
-import { useNavigate } from 'react-router-dom';
-import { UserV2 } from 'twitter-api-v2';
-
+import { Box } from 'grommet';
 import {
-  TweetAnchor,
-  TwitterProfileAnchor,
-} from '../app/anchors/TwitterAnchor';
+  FormNext,
+  FormNextLink,
+  FormPrevious,
+  FormPreviousLink,
+  Home,
+} from 'grommet-icons';
+import { useNavigate } from 'react-router-dom';
+
+import { AppBottomNav } from '../app/layout/AppBottomNav';
 import { AbsoluteRoutes } from '../route.names';
-import { AccountDetailsRead, PLATFORM } from '../shared/types/types';
-import { AppButton } from '../ui-components';
-import { getAccount } from '../user-login/user.helper';
-import { usePost } from './PostContext';
 
 export const PostHeader = (props: {
   prevPostId?: string;
   nextPostId?: string;
 }) => {
   const { prevPostId, nextPostId } = props;
-
   const navigate = useNavigate();
-  /** its ok to usePost here */
-  // const { post, author, tweet, nanopubPublished } = usePost();
-
-  // const twitter = getAccount(
-  //   author,
-  //   PLATFORM.Twitter
-  // ) as AccountDetailsRead<UserV2>;
-
-  // const imageUrl = twitter.profile.profile_image_url;
-  // const name = twitter.profile.name;
-  // const username = twitter.profile.username;
-  // const tweetId = tweet?.posted?.post.id;
-  // const isNanopublished = nanopubPublished !== undefined;
-  // const reviewStatus = post?.reviewedStatus;
 
   return (
-    <Box>
-      <Box direction="row" justify="between" margin={{ vertical: 'large' }}>
-        <AppButton
-          size="small"
-          icon={<FormPrevious></FormPrevious>}
-          label="back"
-          onClick={() => navigate(AbsoluteRoutes.App)}></AppButton>
-        <Box direction="row" gap="small">
-          {prevPostId && (
-            <AppButton
-              size="small"
-              icon={<FormPreviousLink></FormPreviousLink>}
-              label="Previous"
-              onClick={() => navigate(`/post/${prevPostId}`)}></AppButton>
-          )}
-          {nextPostId && (
-            <AppButton
-              size="small"
-              label="Next"
-              reverse={true}
-              icon={<FormNextLink></FormNextLink>}
-              onClick={() => navigate(`/post/${nextPostId}`)}></AppButton>
-          )}
-        </Box>
-      </Box>
+    <Box style={{ height: '60px' }}>
+      <AppBottomNav
+        paths={[
+          { icon: <Home></Home>, label: 'back', path: AbsoluteRoutes.App },
+          {
+            icon: <FormPrevious></FormPrevious>,
+            label: 'prev',
+            disabled: !prevPostId,
+            action: () => navigate(`/post/${prevPostId}`),
+          },
+          {
+            reverse: true,
+            disabled: !nextPostId,
+            icon: <FormNext></FormNext>,
+            label: 'next',
+            action: () => navigate(`/post/${nextPostId}`),
+          },
+        ]}></AppBottomNav>
     </Box>
   );
 };

@@ -17,6 +17,7 @@ export const AppBottomButton = (props: IButton) => {
 export interface IPath {
   label?: string;
   icon?: ReactElement;
+  reverse?: boolean;
   disabled?: boolean;
   action?: () => void;
   path?: string;
@@ -46,6 +47,8 @@ export const AppBottomNav = (props: { paths: IPath[] }) => {
     }
   };
 
+  const border = `2px solid ${constants.colors.primary}`;
+
   return (
     <Box
       fill
@@ -54,7 +57,8 @@ export const AppBottomNav = (props: { paths: IPath[] }) => {
       style={{
         position: 'relative',
         backgroundColor: constants.colors.backgroundLightShade,
-        borderTop: `2px solid ${constants.colors.primary}`,
+        borderTop: border,
+        borderBottom: border,
         fontSize: '16px',
         fontWeight: 'bold',
       }}>
@@ -67,6 +71,7 @@ export const AppBottomNav = (props: { paths: IPath[] }) => {
             plain
             key={ix}
             label={pathDetails.label}
+            reverse={pathDetails.reverse}
             icon={
               pathDetails.icon ? (
                 React.cloneElement(pathDetails.icon, {
@@ -81,8 +86,7 @@ export const AppBottomNav = (props: { paths: IPath[] }) => {
             onClick={() => clicked(pathDetails)}
             style={{
               ...style,
-              borderLeft:
-                ix === 0 ? 'none' : `2px solid ${constants.colors.primary}`,
+              borderLeft: ix === 0 ? 'none' : border,
             }}
             primary={isPage}
             disabled={pathDetails.disabled}></AppButton>

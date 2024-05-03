@@ -13,7 +13,7 @@ export const PostContent = () => {
   };
 
   return (
-    <Box>
+    <Box pad={{ horizontal: 'small', vertical: 'medium' }}>
       <Box elevation="small" pad="medium">
         <Text>{post?.content}</Text>
       </Box>

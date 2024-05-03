@@ -1,15 +1,12 @@
 import { Box } from 'grommet';
 import { useParams } from 'react-router-dom';
 
-import { NanopubAnchor } from '../app/anchors/TwitterAnchor';
-import { AppBottomButton, AppBottomNav } from '../app/layout/AppBottomNav';
+import { AppBottomNav } from '../app/layout/AppBottomNav';
 import { ViewportPage } from '../app/layout/Viewport';
-import { AppButton } from '../ui-components';
-import { UserPostsContext, useUserPosts } from '../user-home/UserPostsContext';
+import { useUserPosts } from '../user-home/UserPostsContext';
 import { PostContent } from './PostContent';
 import { PostContext } from './PostContext';
 import { PostHeader } from './PostHeader';
-import { PostView } from './PostView';
 
 /** extract the postId from the route and pass it to a PostContext */
 export const PostPage = () => {
@@ -28,9 +25,8 @@ export const PostPage = () => {
       : undefined;
 
   const content = (
-    <Box round="small" pad={{ horizontal: 'medium' }}>
+    <Box round="small">
       <PostHeader prevPostId={prevPostId} nextPostId={nextPostId}></PostHeader>
-
       <PostContent></PostContent>
     </Box>
   );
