@@ -112,12 +112,12 @@ export class PostsManager {
                     });
 
                   return platformPostsCreated;
-                } catch (err) {
+                } catch (err: any) {
                   logger.error(
                     `Error fetching posts for user ${user.userId} on platform ${platformId}`,
                     err
                   );
-                  return;
+                  throw new Error(err.message);
                 }
               }
             )

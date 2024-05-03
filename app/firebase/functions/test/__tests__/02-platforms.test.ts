@@ -142,7 +142,8 @@ describe('02-platforms', () => {
           content: 'test content',
           semantics: '',
           origin: PLATFORM.Twitter,
-          parseStatus: 'processed',
+          parsedStatus: 'processed',
+          parsingStatus: 'idle',
           reviewedStatus: 'pending',
           mirrors: [],
         };

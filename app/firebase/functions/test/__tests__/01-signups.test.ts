@@ -11,7 +11,7 @@ import { resetDB } from '../utils/db';
 import { getNanopubProfile } from '../utils/nanopub.profile';
 import { getTestServices } from './test.services';
 
-describe('01-signups', () => {
+describe.only('01-signups', () => {
   const services = getTestServices({
     twitter: 'mock-signup',
     nanopub: 'mock-publish',

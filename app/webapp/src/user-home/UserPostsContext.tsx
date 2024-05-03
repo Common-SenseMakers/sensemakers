@@ -54,7 +54,7 @@ export const UserPostsContext: React.FC<{
           userId: connectedUser.userId,
         });
 
-        return posts.reverse();
+        return posts;
       }
       return null;
     },
