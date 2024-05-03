@@ -5,7 +5,7 @@ from shared_functions.main import (
 from env_config import openai_api_key
 
 # content = 'This is definititely an announcement of https://www.alink.com and I dont agree with https://anotherlink.io'
-content = "This is an interesting paper https://arxiv.org/abs/2312.05230 #user-hashtag"
+content = "This is an interesting paper https://arxiv.org/abs/2312.05230 but I disagree with its sequel https://anotherlink.io  #user-hashtag"
 parameters = {}
 
 config: SM_FUNCTION_post_parser_config = {

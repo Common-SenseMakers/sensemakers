@@ -12,6 +12,7 @@ Options:
 """
 
 import sys
+import json
 import streamlit as st
 import wandb
 import pandas as pd
@@ -29,11 +30,17 @@ from desci_sense.shared_functions.configs import (
     MetadataExtractionType,
 )
 from desci_sense.shared_functions.schema.ontology_base import OntologyBase
-from desci_sense.shared_functions.dataloaders import scrape_post
-
+from desci_sense.shared_functions.dataloaders import (
+    scrape_post,
+    convert_text_to_ref_post,
+)
+from desci_sense.shared_functions.utils import flatten
 from desci_sense.configs import environ
 from desci_sense.runner import init_model, load_config
-from desci_sense.semantic_publisher import create_triples_from_combined_result
+from desci_sense.semantic_publisher import (
+    create_triples_from_combined_result,
+    extract_reference_labels,
+)
 
 
 # display name for post for rendering in streamlit
@@ -125,7 +132,6 @@ def log_pred_wandb(
         "Text",
         "Full Prompt",
         "Reasoning Steps",
-        "Final Answer",
         "Predicted Label",
         "True Label",
         "Name of Label Provider",
@@ -140,10 +146,9 @@ def log_pred_wandb(
             post.author,
             post.url,
             post.content,
-            result["debug"]["reference_tagger"]["prompt"],
-            result["debug"]["reference_tagger"]["reasoning"],
-            result["debug"]["reference_tagger"]["full_text"],
-            result["reference_tagger"],
+            result["debug"]["multi_reference_tagger"]["prompt"],
+            json.dumps(result["debug"]["multi_reference_tagger"]["reasoning"]),
+            result["multi_reference_tagger"],
             human_label,  # if user supplied a label
             labeler_name,  # name of person who provided label
             post.source_network,
@@ -224,9 +229,14 @@ def st_scrape_post(post_url):
 def process_text(text, model, active_modules):
     # parse text
     with st.spinner("Parsing text..."):
-        result = model.process_text(text, active_list=active_modules)
+        post = convert_text_to_ref_post(text)
+        result = model.process_ref_post(post, active_list=active_modules)
         result_dict = result.model_dump()
-        # st.write(result["answer"])
+
+        # add hashtags to keywords if present
+        result_dict["keywords"] = result.all_keywords()
+
+        result_dict["post"] = post
         return result_dict
 
 
@@ -238,21 +248,12 @@ def process_post(post: RefPost, model, active_modules):
     with st.spinner(f"Parsing {sm_type} post..."):
         result = model.process_ref_post(post, active_list=active_modules)
         result_dict = result.model_dump()
+
+        # add hashtags to keywords if present
+        result_dict["keywords"] = result.all_keywords()
+
         result_dict["post"] = post
-        # st.write(result["answer"])
         return result_dict
-
-
-# def process_keywords(result, model):
-#     post = result.get("post")
-#     with st.spinner(f"Extracting keywords..."):
-#         kw_result = model.process_ref_post(post)
-#         result["keywords"] = kw_result["answer"].get("valid_keywords")
-#         result["kw_prompt"] = kw_result["full_prompt"]
-#         result["kw_reasoning"] = kw_result["answer"].get("reasoning")
-#         result["academic_kw"] = kw_result["answer"].get("academic_kw")
-#         result["raw_kw_output"] = kw_result["answer"].get("raw_text")
-#         return result
 
 
 @st.cache_resource
@@ -367,17 +368,12 @@ if __name__ == "__main__":
 
         with col2:
             st.markdown("### Parsing Modules")
+            cfg_names = [cfg.name for cfg in model.config.parser_configs]
             active_modules = st.multiselect(
                 "Select parsing modules to use",
-                ["keywords", "refs_tagger", "topics"],
-                default=["refs_tagger"],
+                cfg_names,
+                default=cfg_names,
             )
-
-            # enable_keywords = st.checkbox(label="Extract keywords?")
-            # if enable_keywords:
-            #     active_list = [""]
-            # else:
-            #     active_list = [""]
 
         start_run_btn = st.button("Run!", on_click=click_run)
         if start_run_btn:
@@ -389,10 +385,6 @@ if __name__ == "__main__":
                 result = process_text(target_text, model, active_modules)
                 st.session_state.result = result
 
-            # if enable_keywords:
-            #     # extract keywords
-            #     result = process_keywords(st.session_state.result, model)
-            #     st.session_state.result = result
             with st.expander("Full output result"):
                 st.write(result)
 
@@ -421,20 +413,15 @@ if __name__ == "__main__":
                     disabled=True,
                 )
 
-                # Convert the input string to lower case for case-insensitive comparison
-                # academic_kw = st.session_state.result["academic_kw"]
-                # is_academic = academic_kw.lower() == "academic"
-                # st.checkbox(
-                #     "Is this post related to academic research?",
-                #     value=is_academic,
-                #     disabled=True,
-                # )
-
-            if "reference_tagger" in st.session_state.result:
+            if "multi_reference_tagger" in st.session_state.result:
+                # get flattened unique list of labels
+                unique_flat_labels = list(
+                    set(flatten(st.session_state.result["multi_reference_tagger"]))
+                )
                 selected = st.multiselect(
                     "Predicted tags",
-                    st.session_state.result["reference_tagger"],
-                    st.session_state.result["reference_tagger"],
+                    unique_flat_labels,
+                    unique_flat_labels,
                     disabled=True,
                 )
             else:
@@ -454,8 +441,8 @@ if __name__ == "__main__":
 
                 edited_df = predicate_data_editor(
                     df,
-                    st.session_state.result["debug"]["reference_tagger"][
-                        "allowed_tags"
+                    st.session_state.result["debug"]["multi_reference_tagger"][
+                        "allowed_terms"
                     ],
                     ontology,
                 )
@@ -472,25 +459,32 @@ if __name__ == "__main__":
                 if log_results_btn:
                     # log results
                     # get labels selected by human
-                    selected_human = list(edited_df.predicate.unique())
+                    selected_human = extract_reference_labels(
+                        edited_df,
+                        st.session_state.result["post"].ref_urls,
+                    )
 
                     # convert from predicate display names to labels
-                    converted_to_labels = [
-                        ontology.display_name_df.loc[x]["label"]
-                        for x in selected_human
-                        if x in ontology.display_name_df.index
-                    ]
+                    converted_labels = []
+                    for display_names in selected_human:
+                        converted_labels.append(
+                            [
+                                ontology.display_name_df.loc[x]["label"]
+                                for x in display_names
+                                if x in ontology.display_name_df.index
+                            ]
+                        )
 
                     with st.spinner("Logging result..."):
                         # log results to wandb DB
-                        pred = list(st.session_state.result["reference_tagger"])
+                        # pred = list(st.session_state.result["multi_reference_tagger"])
                         wandb_run = init_wandb_run(model.config)
                         log_pred_wandb(
                             wandb_run,
                             st.session_state.result,
                             edited_df,
                             ontology.ont_df,
-                            converted_to_labels,
+                            converted_labels,
                             labeler_name,
                         )
                         wandb_run.finish()

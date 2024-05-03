@@ -1,5 +1,6 @@
 from typing import Dict, List
 from loguru import logger
+import re
 from operator import itemgetter
 from langchain.prompts import PromptTemplate
 from langchain_core.runnables import RunnableLambda
@@ -33,6 +34,19 @@ class PromptCase(EnumDictKey):
     MULTI_REF = "MULTI_REF"
 
 
+def check_equivalence(string1, string2):
+    # Function to remove non-alphabetic characters from a string
+    def clean_string(s):
+        return re.sub(r"[^a-zA-Z]", "", s)
+
+    # Clean both strings
+    cleaned_string1 = clean_string(string1)
+    cleaned_string2 = clean_string(string2)
+
+    # Compare cleaned strings
+    return cleaned_string1 == cleaned_string2
+
+
 def normalize_labels(answer: Answer, allowed_terms: List[str]) -> Answer:
     for sub_answer in answer.sub_answers:
         # list of normalized labels
@@ -41,7 +55,7 @@ def normalize_labels(answer: Answer, allowed_terms: List[str]) -> Answer:
         for term in allowed_terms:
             for pred_label in sub_answer.final_answer:
                 # check if normalized term present in predicted label (eg "endorses" in "<endorses>")
-                if term in pred_label:
+                if check_equivalence(term, pred_label):
                     normalized_labels.append(term)
 
         # replace raw model labels with normalized labels
@@ -50,7 +64,7 @@ def normalize_labels(answer: Answer, allowed_terms: List[str]) -> Answer:
     return answer
 
 
-def normalize_references(answer: Answer, md_list: List[RefMetadata]) -> Answer:
+def normalize_references(answer: Answer, ref_urls: List[str]) -> Answer:
     """
     Normalize the link between sub-answers and the references they pertain to,
     handle model generation errors.
@@ -59,7 +73,7 @@ def normalize_references(answer: Answer, md_list: List[RefMetadata]) -> Answer:
     If sub_answer.ref_number -> md_list[]
     """
     # handle zero ref case
-    if len(md_list) == 0:
+    if len(ref_urls) == 0:
         # if zero refs, check that exactly one sub answer
         if len(answer.sub_answers) == 1:
             # no reference available
@@ -75,7 +89,7 @@ def normalize_references(answer: Answer, md_list: List[RefMetadata]) -> Answer:
                 ],
                 debug={
                     "errors": f"len(answer.sub_answers)={len(answer.sub_answers)} \
-                    != len(md_list)={len(md_list)}",
+                    != len(md_list)={len(ref_urls)}",
                     "answer": answer.dict(),  # pydantic v1
                 },  # create new answer with error debug info
             )
@@ -85,7 +99,7 @@ def normalize_references(answer: Answer, md_list: List[RefMetadata]) -> Answer:
                 sub_answers=[answer.sub_answers[0]],
                 debug={
                     "errors": f"len(answer.sub_answers)={len(answer.sub_answers)} \
-                    != len(md_list)={len(md_list)}",
+                    != len(md_list)={len(ref_urls)}",
                     "answer": answer.dict(),  # pydantic v1
                 },  # create new answer with error debug info
             )
@@ -106,12 +120,12 @@ def normalize_references(answer: Answer, md_list: List[RefMetadata]) -> Answer:
                     f"Multiple sub_answers for same ref number: {sub_ans.ref_number}"
                 )
 
-        for i, ref_metadata in enumerate(md_list):
+        for i, ref_url in enumerate(ref_urls):
             # look for subanswer with corresponding ref number
             if i + 1 in sub_ans_dict:
                 sub_ans = sub_ans_dict[i + 1]
                 sub_ans.ref_number = i
-                sub_ans.ref_url = ref_metadata.url
+                sub_ans.ref_url = ref_url
                 normalized_sub_answers.append(sub_ans)
                 sub_ans_dict.pop(i + 1)
             else:
@@ -121,7 +135,7 @@ def normalize_references(answer: Answer, md_list: List[RefMetadata]) -> Answer:
                     reasoning_steps="[System] Generated output \
                     did not contain answer for this reference.",
                     final_answer=[],
-                    ref_url=ref_metadata.url,
+                    ref_url=ref_url,
                 )
                 normalized_sub_answers.append(sub_ans)
 
@@ -131,7 +145,13 @@ def normalize_references(answer: Answer, md_list: List[RefMetadata]) -> Answer:
                 f"Superfluous sub-answers: {sub_ans_dict.keys()}. Answer={answer.dict()}"
             )
 
-        assert len(normalized_sub_answers) == len(md_list)
+        # sort sub_answers by ascending reference number
+        normalized_sub_answers = sorted(
+            normalized_sub_answers,
+            key=lambda x: x.ref_number,
+        )
+
+        assert len(normalized_sub_answers) == len(ref_urls)
         answer.sub_answers = normalized_sub_answers
 
     return answer
@@ -141,11 +161,13 @@ def post_process_llm_chain(input: dict) -> ParserChainOutput:
     answer = input.get("answer_chain")
     allowed_terms = input.get("allowed_terms")
     md_list = input.get("ref_metadata")
+    ref_urls = input.get("ref_urls")
     prompt = input.get("prompt")
     output = _post_process_llm_chain(
         answer,
         allowed_terms,
         md_list,
+        ref_urls,
         prompt,
     )
     return output
@@ -155,6 +177,7 @@ def _post_process_llm_chain(
     answer: Answer,
     allowed_terms: List[str],
     md_list: List[RefMetadata],
+    ref_urls: List[str],
     prompt: str,
 ) -> ParserChainOutput:
     # prepare extra metadata
@@ -165,7 +188,7 @@ def _post_process_llm_chain(
     }
 
     # normalize references
-    answer = normalize_references(answer, md_list)
+    answer = normalize_references(answer, ref_urls)
 
     # if error, add err msgs to extra data
     if answer.is_err:
@@ -174,8 +197,17 @@ def _post_process_llm_chain(
     # normalize labels
     answer = normalize_labels(answer, allowed_terms)
 
+    # collect reasoning steps for each subanswer
+    reasoning_dict = {}
+    for sub_ans in answer.sub_answers:
+        reasoning_dict[sub_ans.ref_number] = {
+            "steps": sub_ans.reasoning_steps,
+            "candidates": sub_ans.candidate_tags,
+        }
+
     output = ParserChainOutput(
         answer=answer,
+        reasoning=reasoning_dict,
         pparser_type=ParserChainType.MULTI_REF_TAGGER,
         extra=extra,
     )
@@ -205,6 +237,7 @@ class MultiRefTaggerParserChain(PostParserChain):
             "answer_chain": llm_chain,
             "allowed_terms": itemgetter(self.allowed_terms_name),
             "ref_metadata": itemgetter("ref_metadata"),
+            "ref_urls": itemgetter("ref_urls"),
             "prompt": itemgetter(self.input_name),
         } | RunnableLambda(post_process_llm_chain)
 
@@ -310,7 +343,8 @@ class MultiRefTaggerParserChain(PostParserChain):
         full_prompt = {
             self.input_name: prompt,
             self.allowed_terms_name: self.prompt_case_dict[case]["labels"],
-            "ref_metadata": metadata_list,
+            "ref_metadata": metadata_list,  # TODO this might get overriden by other chains
+            "ref_urls": post.ref_urls,
         }
 
         return full_prompt

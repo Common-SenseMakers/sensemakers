@@ -13,6 +13,7 @@ from .configs import (
     HashtagPParserChainConfig,
     validate_env_var,
     MultiParserChainConfig,
+    MultiRefTaggerChainConfig,
     ParserChainType,
     PostProcessType,
 )
@@ -130,6 +131,11 @@ def init_multi_chain_parser_config(
         use_metadata=True,
         llm_config=LLMConfig(llm_type=llm_type),
     )
+    multi_refs_tagger_config = MultiRefTaggerChainConfig(
+        name="multi_refs_tagger",
+        use_metadata=True,
+        llm_config=LLMConfig(llm_type=llm_type),
+    )
     topics_config = TopicsPParserChainConfig(
         name="topics",
         use_metadata=True,
@@ -150,6 +156,7 @@ def init_multi_chain_parser_config(
         openrouter_api_config=open_router_api_config,
         parser_configs=[
             refs_tagger_config,
+            multi_refs_tagger_config,
             topics_config,
             kw_config,
             hashtags_config,

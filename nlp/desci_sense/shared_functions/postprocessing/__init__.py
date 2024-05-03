@@ -56,11 +56,14 @@ class Answer(BaseModelLC):
     def is_err(self) -> bool:
         return "errors" in self.debug
 
+    def to_combined_format(self) -> List[List[str]]:
+        return [sub_ans.final_answer for sub_ans in self.sub_answers]
+
 
 class ParserChainOutput(BaseModel):
     answer: Any
     pparser_type: ParserChainType
-    reasoning: Optional[str] = Field(
+    reasoning: Optional[Any] = Field(
         description="Reasoning steps.",
         default=None,
     )
@@ -78,8 +81,16 @@ class ParserChainOutput(BaseModel):
             return {self.pparser_type.value: self.answer}
         elif self.pparser_type == ParserChainType.HASHTAGS:
             return {self.pparser_type.value: self.answer}
+        elif self.pparser_type == ParserChainType.MULTI_REF_TAGGER:
+            return {
+                ParserChainType.MULTI_REF_TAGGER.value: self.answer.to_combined_format()
+            }
         else:
             raise ValueError(f"Unsupported ParserChainType: {self.pparser_type}")
+
+
+def nested_list_init():
+    return [[]]
 
 
 class CombinedParserOutput(BaseModel):
@@ -92,12 +103,26 @@ class CombinedParserOutput(BaseModel):
     )
     item_types: List[str] = Field(default_factory=list)
     reference_urls: List[str] = Field(default_factory=list)
-    reference_tagger: List[str] = Field(default_factory=list)
+    reference_tagger: Union[None, List[List[str]]] = Field(default=None)
+    multi_reference_tagger: Union[None, List[List[str]]] = Field(default=None)
     keywords: List[str] = Field(default_factory=list)
     topics: List[str] = Field(default_factory=list)
     hashtags: List[str] = Field(default_factory=list)
     metadata_list: List[RefMetadata] = Field(default_factory=list)
     debug: Optional[Dict] = Field(default_factory=dict)
+
+    def all_keywords(self) -> List[str]:
+        # return union of hashtags and keywords
+        return list(set(self.hashtags).union(set(self.keywords)))
+
+    @property
+    def gen_ref_tags(self) -> List[List[str]]:
+        if self.multi_reference_tagger is not None:
+            return self.multi_reference_tagger
+        elif self.reference_tagger is not None:
+            return self.reference_tagger
+        else:
+            return [[]]
 
 
 def convert_raw_output_to_st_format(
@@ -217,46 +242,75 @@ def convert_predicted_relations_to_rdf_triplets(
 
 def convert_ref_tags_to_rdf_triplets(
     reference_urls: List[str],
-    reference_tags: List[str],
+    all_reference_tags: List[List[str]],
     ontology: OntologyBase,
 ) -> List[RDFTriplet]:
     triplets = []
 
-    # for each tag decide if it's the object or predicate
-    for label in reference_tags:
-        concept = ontology.get_concept_by_label(label)
-        if concept.can_be_predicate():
-            # for now, if concept can be predicate we assume triplet
-            # of form assertion concept ref
-            assert len(reference_urls) > 0
-            # TODO change to real URI once we have that
-            triplets += [
-                RDFTriplet(
-                    predicate=URIRef(concept.uri),
-                    object=URIRef(ref),
-                )
-                for ref in reference_urls
-            ]
+    # handle zero ref case
+    if len(reference_urls) == 0:
+        assert len(all_reference_tags) == 1
 
-        elif concept.can_be_object():
-            # for now, if concept can be subject we assume triplet
-            # of form assertion isA concept
-            assert len(reference_urls) == 0
+        # add labels as objects in triplets
+        ref_tags = all_reference_tags[0]
+        for label in ref_tags:
+            concept = ontology.get_concept_by_label(label)
+            assert concept.can_be_object()
             triplets += [
                 RDFTriplet(
                     predicate=RDF.type,
-                    object=URIRef(ref),
+                    object=URIRef(concept.uri),
                 )
-                for ref in reference_urls
             ]
-
-        else:
-            raise ValueError(
-                f"Label type {label} is netiher a subject \
-                              or predicate"
-            )
-
+    else:
+        # non zero refs - add labels as predicates to corresponding urls
+        assert len(all_reference_tags) == len(reference_urls)
+        for ref_tags, ref_url in zip(all_reference_tags, reference_urls):
+            for label in ref_tags:
+                concept = ontology.get_concept_by_label(label)
+                assert concept.can_be_predicate()
+                triplets += [
+                    RDFTriplet(
+                        predicate=URIRef(concept.uri),
+                        object=URIRef(ref_url),
+                    )
+                ]
     return triplets
+
+    # # for each tag decide if it's the object or predicate
+    # for label in reference_tags:
+    #     concept = ontology.get_concept_by_label(label)
+    #     if concept.can_be_predicate():
+    #         # for now, if concept can be predicate we assume triplet
+    #         # of form assertion concept ref
+    #         assert len(reference_urls) > 0
+    #         # TODO change to real URI once we have that
+    #         triplets += [
+    #             RDFTriplet(
+    #                 predicate=URIRef(concept.uri),
+    #                 object=URIRef(ref),
+    #             )
+    #             for ref in reference_urls
+    #         ]
+
+    #     elif concept.can_be_object():
+    #         # for now, if concept can be subject we assume triplet
+    #         # of form assertion isA concept
+    #         assert len(reference_urls) == 0
+    #         triplets += [
+    #             RDFTriplet(
+    #                 predicate=RDF.type,
+    #                 object=URIRef(concept.uri),
+    #             )
+    #         ]
+
+    #     else:
+    #         raise ValueError(
+    #             f"Label type {label} is neither a subject \
+    #                           or predicate"
+    #         )
+
+    # return triplets
 
 
 def convert_keywords_to_triplets(prediction: Dict) -> List[RDFTriplet]:
@@ -346,13 +400,11 @@ def post_process_firebase(
 ) -> ParserResult:
     """convert parser output result into format
     required by app interface."""
-    semantics = combined_parser_output.reference_tagger
-    keywords = combined_parser_output.keywords
-    hashtags = combined_parser_output.hashtags
+    semantics = combined_parser_output.gen_ref_tags
 
     # combine keywords and hashtags
     # https://github.com/Common-SenseMakers/sensemakers/issues/59
-    keywords = list(set(hashtags).union(set(keywords)))
+    keywords = combined_parser_output.all_keywords()
 
     # get metadata
     metadata_list: List[RefMetadata] = combined_parser_output.metadata_list

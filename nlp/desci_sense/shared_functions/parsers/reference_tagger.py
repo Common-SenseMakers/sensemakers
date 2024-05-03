@@ -1,5 +1,6 @@
 from typing import Dict, List
-from langchain.prompts import PromptTemplate
+from operator import itemgetter
+from langchain_core.runnables import RunnableLambda
 
 from .allowed_terms_pparser import AllowedTermsPParserChain
 from ..configs import RefTaggerChainConfig, MultiParserChainConfig
@@ -24,6 +25,45 @@ class PromptCase(EnumDictKey):
     MULTI_REF = "MULTI_REF"
 
 
+def normalize_references(
+    parser_output: ParserChainOutput, ref_urls: List[str]
+) -> ParserChainOutput:
+    tags: List[str] = parser_output.answer
+
+    # handle zero ref case
+    if len(ref_urls) == 0:
+        normalized_answer = [tags]
+    else:
+        # handle case with refs
+        # assuming all tags apply to all refs
+        normalized_answer = [tags for _ in range(len(ref_urls))]
+
+    # replace answer with normalized answer
+    parser_output.answer = normalized_answer
+
+    return parser_output
+
+
+def post_process_tag_chain(input: dict) -> ParserChainOutput:
+    raw_tags_output: ParserChainOutput = input.get("raw_tags_chain")
+    ref_urls = input.get("ref_urls")
+    output = _post_process_llm_chain(
+        raw_tags_output,
+        ref_urls,
+    )
+    return output
+
+
+def _post_process_llm_chain(
+    raw_tags_output: ParserChainOutput,
+    ref_urls: List[str],
+) -> ParserChainOutput:
+    # normalize references
+    normalized_output = normalize_references(raw_tags_output, ref_urls)
+
+    return normalized_output
+
+
 class ReferenceTaggerParserChain(AllowedTermsPParserChain):
     def __init__(
         self,
@@ -35,9 +75,14 @@ class ReferenceTaggerParserChain(AllowedTermsPParserChain):
 
         self.init_prompt_case_dict(ontology)
 
+        self.ref_tag_chain = {
+            "raw_tags_chain": self._chain,
+            "ref_urls": itemgetter("ref_urls"),
+        } | RunnableLambda(post_process_tag_chain)
+
     @property
     def chain(self):
-        return self._chain
+        return self.ref_tag_chain
 
     def process_ref_post(
         self,
@@ -131,6 +176,7 @@ class ReferenceTaggerParserChain(AllowedTermsPParserChain):
         full_prompt = {
             self.input_name: prompt,
             self.allowed_terms_name: self.prompt_case_dict[case]["labels"],
+            "ref_urls": post.ref_urls,
         }
 
         return full_prompt
