@@ -11,15 +11,14 @@ export const PostPage = () => {
 
   const currPostIndex = posts?.findIndex((p) => p.id === id);
   const prevPostId =
-    posts && currPostIndex && currPostIndex > 0
+    posts && currPostIndex != undefined && currPostIndex > 0
       ? posts[currPostIndex - 1].id
       : undefined;
 
   const nextPostId =
-    posts && currPostIndex && currPostIndex < posts.length - 1
+    posts && currPostIndex != undefined && currPostIndex < posts.length - 1
       ? posts[currPostIndex + 1].id
       : undefined;
-
   return (
     <PostContext postId={id}>
       <PostView prevPostId={prevPostId} nextPostId={nextPostId}></PostView>
