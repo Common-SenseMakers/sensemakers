@@ -55,11 +55,13 @@ export const UserPostsContext: React.FC<{
     isFetching: isGetting,
   } = useQuery({
     queryKey: ['getUserPosts', connectedUser],
-    queryFn: () => {
+    queryFn: async () => {
       if (connectedUser) {
-        return appFetch<AppPostFull[]>('/api/posts/getOfUser', {
+        const posts = await appFetch<AppPostFull[]>('/api/posts/getOfUser', {
           userId: connectedUser.userId,
         });
+
+        return posts.reverse();
       }
       return null;
     },

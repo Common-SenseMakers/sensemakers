@@ -48,12 +48,16 @@ export const PostContext: React.FC<{
   const appFetch = useAppFetch();
 
   const postId = useMemo(
-    () => (_postId ? _postId : (postInit as unknown as AppPostFull).id),
+    () => (_postId ? _postId : (postInit as AppPostFull).id),
     [_postId, postInit]
   );
 
   /** if postInit not provided get post from the DB */
-  const { data: _post, refetch } = useQuery({
+  const {
+    data: _post,
+    refetch,
+    isLoading,
+  } = useQuery({
     queryKey: ['postId', postId, connectedUser],
     queryFn: () => {
       try {
@@ -67,7 +71,7 @@ export const PostContext: React.FC<{
     },
   });
 
-  const post = _post !== null ? _post : undefined;
+  const post = isLoading ? postInit : _post !== null ? _post : undefined;
 
   /**
    * subscribe to real time updates of this post and trigger a refetch everytime

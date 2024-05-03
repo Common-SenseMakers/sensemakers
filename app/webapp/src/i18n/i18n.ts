@@ -6,7 +6,7 @@ export enum I18Keys {
 }
 
 const translationENG: Record<I18Keys, string> = {
-  [I18Keys.connectTwitterBtn]: 'Connect With Twitter',
+  [I18Keys.connectTwitterBtn]: 'Connect',
 };
 
 i18n.use(initReactI18next).init({
