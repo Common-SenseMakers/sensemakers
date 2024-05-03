@@ -8,20 +8,10 @@ import {
 import { DBInstance } from '../db/instance';
 import { BaseRepository } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
-import { logger } from '../instances/logger';
-
-const DEBUG = true;
 
 export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   constructor(protected db: DBInstance) {
     super(db.collections.posts);
-  }
-
-  private triggerUpdate(postId: string, manager: TransactionManager) {
-    const now = Date.now();
-    if (DEBUG) logger.debug(`triggerUpdate post-${postId}-${now}`);
-    const updateRef = this.db.collections.updates.doc(`post-${postId}`);
-    manager.set(updateRef, { value: now });
   }
 
   public async updateContent(
@@ -37,7 +27,6 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
     const ref = this.getRef(postId);
     manager.update(ref, postUpdate);
-    this.triggerUpdate(ref.id, manager);
   }
 
   public async addMirror(
@@ -47,7 +36,6 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   ) {
     const ref = this.getRef(postId);
     manager.update(ref, { mirrorsIds: FieldValue.arrayUnion(mirrorId) });
-    this.triggerUpdate(ref.id, manager);
   }
 
   /** Cannot be part of a transaction */
