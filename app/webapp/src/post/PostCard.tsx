@@ -1,5 +1,4 @@
 import { Box, Text } from 'grommet';
-import { StatusGood } from 'grommet-icons';
 import { useNavigate } from 'react-router-dom';
 
 import { AppIcon } from '../app/icons/AppIcon';
@@ -20,11 +19,10 @@ export const PostCard = () => {
     <Box
       pad="medium"
       style={{
-        border: '2px solid',
-        borderRadius: '4px',
         cursor: 'pointer',
         position: 'relative',
       }}
+      elevation="small"
       onClick={handleClick}>
       <Text size="medium">{post?.content}</Text>
       <Box style={{ position: 'absolute', right: '10px', bottom: '10px' }}>
