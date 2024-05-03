@@ -83,7 +83,7 @@ export const PostView = (props: {
   return (
     <ViewportPage
       content={
-        <Box round="small">
+        <Box fill>
           <PostHeader
             prevPostId={prevPostId}
             nextPostId={nextPostId}></PostHeader>

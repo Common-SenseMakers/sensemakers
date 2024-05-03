@@ -1,4 +1,3 @@
-import { Box } from 'grommet';
 import { useParams } from 'react-router-dom';
 
 import { useUserPosts } from '../user-home/UserPostsContext';
