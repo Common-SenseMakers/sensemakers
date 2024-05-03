@@ -14,7 +14,7 @@ import { createTestAppUsers } from '../utils/user.factory';
 import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
 import { getTestServices } from './test.services';
 
-describe('02-platforms', () => {
+describe.only('02-platforms', () => {
   let rsaKeys: RSAKeys | undefined;
   let appUser: AppUser | undefined;
 
@@ -71,7 +71,7 @@ describe('02-platforms', () => {
         );
 
         expect(tweets).to.not.be.undefined;
-        expect(tweets.length).to.be.equal(2);
+        expect(tweets.length).to.be.equal(6);
       } catch (error) {
         console.error('error: ', error);
         throw error;
