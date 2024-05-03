@@ -379,7 +379,6 @@ export class TwitterService
       'author_id',
       'text',
       'entities',
-      // @ts-ignore
       'note_tweet',
     ];
 
@@ -500,9 +499,11 @@ export class TwitterService
     if (!platformPost.posted) {
       throw new Error('Unexpected undefined posted');
     }
-
+    const tweet = platformPost.posted.post;
     return {
-      content: platformPost.posted.post.text,
+      content: tweet['note_tweet']?.text
+        ? tweet['note_tweet'].text
+        : tweet.text,
     };
   }
 
