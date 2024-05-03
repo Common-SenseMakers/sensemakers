@@ -4,10 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { AppIcon } from '../app/icons/AppIcon';
 import { usePost } from '../post/PostContext';
 import { Loading } from '../ui-components/LoadingDiv';
+import { useThemeContext } from '../ui-components/ThemedApp';
 
 export const PostCard = () => {
   const { post } = usePost();
   const navigate = useNavigate();
+  const { constants } = useThemeContext();
 
   const handleClick = () => {
     navigate(`/post/${post?.id}`);
@@ -21,6 +23,7 @@ export const PostCard = () => {
       style={{
         cursor: 'pointer',
         position: 'relative',
+        backgroundColor: constants.colors.backgroundLight,
       }}
       elevation="small"
       onClick={handleClick}>

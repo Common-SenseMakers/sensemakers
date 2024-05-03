@@ -54,11 +54,10 @@ export const AppBottomNav = (props: { paths: IPath[] }) => {
       fill
       direction="row"
       justify="evenly"
+      elevation="small"
       style={{
         position: 'relative',
         backgroundColor: constants.colors.backgroundLightShade,
-        borderTop: border,
-        borderBottom: border,
         fontSize: '16px',
         fontWeight: 'bold',
       }}>

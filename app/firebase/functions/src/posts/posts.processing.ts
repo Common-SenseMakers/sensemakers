@@ -19,7 +19,7 @@ import { getPrefixedUserId } from '../users/users.utils';
 import { PlatformPostsRepository } from './platform.posts.repository';
 import { PostsRepository } from './posts.repository';
 
-const DEBUG = true;
+const DEBUG = false;
 
 /**
  * Per-PlatformPost or Per-AppPost methods.

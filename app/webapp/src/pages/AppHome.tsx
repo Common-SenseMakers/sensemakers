@@ -16,7 +16,5 @@ export const AppHome = (props: {}) => {
     }
   })();
 
-  return (
-    <ViewportPage content={<BoxCentered>{content}</BoxCentered>}></ViewportPage>
-  );
+  return <ViewportPage content={content}></ViewportPage>;
 };

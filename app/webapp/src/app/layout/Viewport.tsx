@@ -103,9 +103,7 @@ export const ViewportPage = (props: {
         overflow: 'hidden',
       }}>
       <Box id="content" style={{ flexGrow: 1, overflowY: 'auto' }}>
-        <Box
-          style={{ flexGrow: 1, flexShrink: 0 }}
-          justify={props.justify || 'center'}>
+        <Box style={{ flexShrink: 0 }} justify={props.justify || 'center'}>
           {props.content}
         </Box>
       </Box>

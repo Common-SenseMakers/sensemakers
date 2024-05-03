@@ -19,7 +19,7 @@ import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { PostsProcessing } from './posts.processing';
 
-const DEBUG = true;
+const DEBUG = false;
 
 /**
  * Top level methods. They instantiate a TransactionManger and execute
@@ -77,7 +77,7 @@ export class PostsManager {
                     ? account.read.lastFetchedMs
                     : account.signupDate,
                   userDetails: account,
-                  max_results: 10,
+                  max_results: 3,
                 };
 
                 /** Fetch */

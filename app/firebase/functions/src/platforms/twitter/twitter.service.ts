@@ -383,10 +383,22 @@ export class TwitterService
       'note_tweet',
     ];
 
+    /** twitter min page size is 5, max could be larger */
+    const pageSize = (() => {
+      if (!params.max_results) return 10;
+      if (params.max_results < 5) return 5;
+      if (params.max_results > 10) return 10;
+      return params.max_results;
+    })();
+
+    const pageSize0 = params.max_results
+      ? Math.min(params.max_results, pageSize)
+      : pageSize;
+
     const timelineParams: Partial<TweetV2UserTimelineParams> = {
       start_time: params.start_time,
       end_time: params.end_time,
-      max_results: 10,
+      max_results: pageSize,
       'tweet.fields': tweetFields,
       exclude: ['retweets', 'replies'],
     };
@@ -397,32 +409,45 @@ export class TwitterService
         timelineParams
       );
 
-      const resultCollection: TweetV2[] = result.data.data || [];
-      let nextToken = result.meta.next_token;
+      const resultCollection: TweetV2[] =
+        result.data.data.slice(0, pageSize0) || [];
 
-      while (nextToken) {
+      let nextToken = result.meta.next_token;
+      let reached: boolean = false;
+
+      while (nextToken && !reached) {
         /**
          * limit the total number of results to max_result.
          * Warning. different interpreation than the twitter API,
          * where max_results is the page size
          */
+        if (DEBUG) logger.debug('fetchInternal', { params, resultCollection });
         if (
           params.max_results &&
           resultCollection.length >= params.max_results
         ) {
-          break;
+          if (DEBUG)
+            logger.debug(
+              `fetchInternal -reached. length: ${resultCollection.length}`
+            );
+          reached = true;
+        } else {
+          const nextResult = await readOnlyClient.v2.userTimeline(
+            params.user_id,
+            {
+              ...timelineParams,
+              pagination_token: nextToken,
+            }
+          );
+          const nextResults = nextResult.data.data.slice(0, pageSize);
+          resultCollection.push(...nextResults);
+          if (DEBUG)
+            logger.debug(
+              `fetchInternal -reached. pushed: ${nextResults.length}. New length: ${resultCollection.length}`
+            );
+
+          nextToken = nextResult.meta.next_token;
         }
-
-        const nextResult = await readOnlyClient.v2.userTimeline(
-          params.user_id,
-          {
-            ...timelineParams,
-            pagination_token: nextToken,
-          }
-        );
-        resultCollection.push(...nextResult.data.data);
-
-        nextToken = nextResult.meta.next_token;
       }
 
       return resultCollection;

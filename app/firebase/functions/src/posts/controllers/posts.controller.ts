@@ -12,7 +12,7 @@ import {
   getPostSchema,
 } from './posts.schema';
 
-const DEBUG = true;
+const DEBUG = false;
 
 /**
  * get user posts from the DB (does not fetch for more)
