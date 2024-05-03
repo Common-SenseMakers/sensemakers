@@ -1,24 +1,22 @@
-import { doc, onSnapshot } from 'firebase/firestore';
+import { onSnapshot } from 'firebase/firestore';
 
-import { AppPost, AppPostFull } from '../shared/types/types.posts';
 import { collections } from './config';
 
-export const subscribeToPost = (postId: string, callback: () => void) => {
-  const postDoc = collections.post(postId);
-  return onSnapshot(postDoc, (doc): void => {
-    console.log('onSnapshot - postId', { postId, doc });
-    const post = doc.data();
-    callback();
-  });
-};
+const DEBUG = true;
 
-export const subscribeToPlatformPost = (
-  platformPostId: string,
-  callback: () => void
-) => {
-  const doc = collections.platformPost(platformPostId);
-  return onSnapshot(doc, (doc): void => {
-    console.log('onSnapshot - platformPostId', { platformPostId, doc });
-    callback();
+export const subscribeToUpdates = (updateId: string, callback: () => void) => {
+  const postUpdates = collections.updates(updateId);
+  if (DEBUG) console.log('subscribing to updates', updateId);
+  return onSnapshot(postUpdates, (doc): void => {
+    const data = doc.data();
+
+    console.log(`onSnapshot ${updateId}`, {
+      data,
+      metadata: doc.metadata,
+    });
+
+    if (data) {
+      callback();
+    }
   });
 };

@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 
-import { UserPostsContext, useUserPosts } from '../user-home/UserPostsContext';
+import { useUserPosts } from '../user-home/UserPostsContext';
 import { PostContext } from './PostContext';
 import { PostView } from './PostView';
 
@@ -11,12 +11,12 @@ export const PostPage = () => {
 
   const currPostIndex = posts?.findIndex((p) => p.id === id);
   const prevPostId =
-    posts && currPostIndex && currPostIndex > 0
+    posts && currPostIndex != undefined && currPostIndex > 0
       ? posts[currPostIndex - 1].id
       : undefined;
 
   const nextPostId =
-    posts && currPostIndex && currPostIndex < posts.length - 1
+    posts && currPostIndex != undefined && currPostIndex < posts.length - 1
       ? posts[currPostIndex + 1].id
       : undefined;
 

@@ -1,10 +1,7 @@
-import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
-
+import { AppBottomButton } from '../app/layout/AppBottomNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { UserHome } from '../user-home/UserHome';
-import { UserPostsContext } from '../user-home/UserPostsContext';
 import { PlatformManager } from '../user-login/PlaformManager';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 
@@ -19,9 +16,5 @@ export const AppHome = (props: {}) => {
     }
   })();
 
-  return (
-    <ViewportPage
-      content={<BoxCentered>{content}</BoxCentered>}
-      nav={<></>}></ViewportPage>
-  );
+  return <ViewportPage content={content}></ViewportPage>;
 };

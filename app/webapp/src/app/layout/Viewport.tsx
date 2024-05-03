@@ -1,4 +1,5 @@
 import {
+  Anchor,
   AreasType,
   Box,
   BoxExtendedProps,
@@ -15,24 +16,45 @@ import { ReactNode } from 'react';
 import { AppHeading } from '../../ui-components';
 import { useResponsive } from '../../ui-components/ResponsiveApp';
 import { useThemeContext } from '../../ui-components/ThemedApp';
+import { BUILD_ID } from '../config';
 
 export const MAX_WIDTH_LANDING = 1600;
 export const MAX_WIDTH_APP = 800;
 
 export const ViewportContainer = (props: React.HTMLProps<HTMLDivElement>) => {
+  const { constants } = useThemeContext();
+  const footerHeight = '48px';
   return (
-    <Box
-      id="viewport-container"
-      style={{
-        height: '100vh',
-        width: '100vw',
-        overflow: 'hidden',
-        maxWidth: `${MAX_WIDTH_LANDING}px`,
-        margin: '0 auto',
-        ...props.style,
-      }}>
-      {props.children}
-    </Box>
+    <>
+      <Box
+        id="viewport-container"
+        style={{
+          height: `calc(100vh - ${footerHeight})`,
+          width: '100vw',
+          overflow: 'hidden',
+          maxWidth: `${MAX_WIDTH_LANDING}px`,
+          margin: '0 auto',
+          ...props.style,
+        }}>
+        {props.children}
+      </Box>
+      <Box
+        id="footer"
+        style={{
+          height: footerHeight,
+          flexShrink: 0,
+          backgroundColor: constants.colors.primary,
+        }}
+        pad="medium"
+        justify="center"
+        align="center">
+        <Box direction="row" justify="between" fill align="center">
+          <Text size="xsmall" color={constants.colors.backgroundLightDarker}>
+            Build: {BUILD_ID?.substring(0, 7)}
+          </Text>
+        </Box>
+      </Box>
+    </>
   );
 };
 
@@ -64,7 +86,7 @@ export const ViewportHeadingLarge = (props: { label: ReactNode }) => {
  */
 export const ViewportPage = (props: {
   content: ReactNode;
-  nav: ReactNode;
+  nav?: ReactNode;
   justify?: BoxProps['justify'];
 }) => {
   const { mobile } = useResponsive();
@@ -87,9 +109,13 @@ export const ViewportPage = (props: {
           {props.content}
         </Box>
       </Box>
-      <Box id="nav" style={{ height: '60px', flexShrink: 0 }}>
-        {props.nav}
-      </Box>
+      {props.nav ? (
+        <Box id="nav" style={{ height: '60px', flexShrink: 0 }}>
+          {props.nav}
+        </Box>
+      ) : (
+        <></>
+      )}
     </Box>
   );
 };

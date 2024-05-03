@@ -17,7 +17,8 @@ export interface AppPost extends GenericPostData {
   authorId: string;
   origin: PLATFORM; // The platform where the post originated
   createdAtMs: number;
-  parseStatus: 'unprocessed' | 'processed';
+  parsingStatus: 'idle' | 'processing';
+  parsedStatus: 'unprocessed' | 'processed';
   reviewedStatus: 'pending' | 'reviewed';
   originalParsed?: ParsePostResult;
   semantics?: AppPostSemantics;
@@ -59,7 +60,8 @@ export type PostUpdate = Partial<
     | 'content'
     | 'semantics'
     | 'originalParsed'
-    | 'parseStatus'
+    | 'parsingStatus'
+    | 'parsedStatus'
     | 'reviewedStatus'
   >
 >;
