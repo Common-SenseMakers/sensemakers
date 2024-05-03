@@ -51,17 +51,33 @@ export const PostView = (props: {
     !nanopubPublished;
 
   const { action: rightClicked, label: rightLabel } = (() => {
+    if (nanopubPublished) {
+      return {
+        action: () => {
+          window.open(nanopubPublished.uri, '_newtab');
+        },
+        label: 'published!',
+      };
+    }
+
     if (!canPublishNanopub) {
       return {
         action: () => connect(),
         label: 'connect wallet',
       };
-    } else {
+    }
+
+    if (canPublishNanopub && nanopubDraft && !nanopubPublished) {
       return {
         action: () => approve(),
         label: 'approve',
       };
     }
+
+    return {
+      action: () => {},
+      label: '',
+    };
   })();
 
   return (
