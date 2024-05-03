@@ -7,9 +7,6 @@ import {
 import { DBInstance } from '../db/instance';
 import { BaseRepository } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
-import { logger } from '../instances/logger';
-
-const DEBUG = true;
 
 export class PlatformPostsRepository extends BaseRepository<
   PlatformPost,
@@ -17,14 +14,6 @@ export class PlatformPostsRepository extends BaseRepository<
 > {
   constructor(protected db: DBInstance) {
     super(db.collections.platformPosts);
-  }
-
-  private triggerUpdate(platformPostId: string, manager: TransactionManager) {
-    if (DEBUG) logger.debug(`triggerUpdate platformPostId-${platformPostId}`);
-    const updateRef = this.db.collections.updates.doc(
-      `platformPost-${platformPostId}`
-    );
-    manager.set(updateRef, Date.now());
   }
 
   public async updatePosted(
@@ -40,7 +29,6 @@ export class PlatformPostsRepository extends BaseRepository<
 
     const ref = this.getRef(postId);
     manager.update(ref, postUpdate);
-    this.triggerUpdate(ref.id, manager);
   }
 
   /** Get the platform post from the published post_id */
