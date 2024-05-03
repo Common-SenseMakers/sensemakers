@@ -29,6 +29,7 @@ import {
   TwitterQueryParameters,
   TwitterSignupContext,
   TwitterSignupData,
+  TwitterThread,
   TwitterUserCredentials,
   TwitterUserDetails,
 } from '../../@shared/types/types.twitter';
@@ -371,7 +372,7 @@ export class TwitterService
     params: TwitterQueryParameters,
     manager: TransactionManager,
     userDetails?: UserDetailsBase
-  ): Promise<TweetV2PaginableTimelineResult['data']> {
+  ): Promise<TwitterThread[]> {
     const readOnlyClient = await this.getClient(manager, userDetails, 'read');
 
     const tweetFields: TTweetv2TweetField[] = [
@@ -380,6 +381,7 @@ export class TwitterService
       'text',
       'entities',
       'note_tweet',
+      'conversation_id',
     ];
 
     /** twitter min page size is 5, max could be larger */
@@ -397,7 +399,7 @@ export class TwitterService
     const timelineParams: Partial<TweetV2UserTimelineParams> = {
       start_time: params.start_time,
       end_time: params.end_time,
-      max_results: pageSize,
+      max_results: 100,
       'tweet.fields': tweetFields,
       exclude: ['retweets', 'replies'],
     };
@@ -408,48 +410,77 @@ export class TwitterService
         timelineParams
       );
 
+      const tweetThreadsMap = new Map<string, TweetV2[]>();
+      /** organize tweets by conversation id to group them into threads */
+      result.data.data.forEach((tweet) => {
+        if (tweet.conversation_id) {
+          if (!tweetThreadsMap.has(tweet.conversation_id)) {
+            tweetThreadsMap.set(tweet.conversation_id, []);
+          }
+          tweetThreadsMap.get(tweet.conversation_id)?.push(tweet);
+        } else {
+          throw new Error('tweet does not have a conversation_id');
+        }
+      });
+
       const resultCollection: TweetV2[] =
         result.data.data.slice(0, pageSize0) || [];
 
       let nextToken = result.meta.next_token;
-      let reached: boolean = false;
 
-      while (nextToken && !reached) {
+      while (nextToken) {
         /**
          * limit the total number of results to max_result.
          * Warning. different interpreation than the twitter API,
          * where max_results is the page size
          */
         if (DEBUG) logger.debug('fetchInternal', { params, resultCollection });
-        if (
-          params.max_results &&
-          resultCollection.length >= params.max_results
-        ) {
-          if (DEBUG)
-            logger.debug(
-              `fetchInternal -reached. length: ${resultCollection.length}`
-            );
-          reached = true;
-        } else {
-          const nextResult = await readOnlyClient.v2.userTimeline(
-            params.user_id,
-            {
-              ...timelineParams,
-              pagination_token: nextToken,
+        const nextResult = await readOnlyClient.v2.userTimeline(
+          params.user_id,
+          {
+            ...timelineParams,
+            pagination_token: nextToken,
+          }
+        );
+        /** organize tweets by conversation id to group them into threads */
+        nextResult.data.data.forEach((tweet) => {
+          if (tweet.conversation_id) {
+            if (!tweetThreadsMap.has(tweet.conversation_id)) {
+              tweetThreadsMap.set(tweet.conversation_id, []);
             }
-          );
-          const nextResults = nextResult.data.data.slice(0, pageSize);
-          resultCollection.push(...nextResults);
-          if (DEBUG)
-            logger.debug(
-              `fetchInternal -reached. pushed: ${nextResults.length}. New length: ${resultCollection.length}`
-            );
+            tweetThreadsMap.get(tweet.conversation_id)?.push(tweet);
+          } else {
+            throw new Error('tweet does not have a conversation_id');
+          }
+        });
 
-          nextToken = nextResult.meta.next_token;
+        nextToken = nextResult.meta.next_token;
+        if (tweetThreadsMap.keys.length >= pageSize) {
+          break;
         }
       }
+      const twitterThreads: TwitterThread[] = [];
 
-      return resultCollection;
+      tweetThreadsMap.forEach((tweets, conversation_id) => {
+        /** sort tweets in thread by timestamp */
+        tweets.sort((tweetA, tweetB) => {
+          if (!tweetA.created_at || !tweetB.created_at) {
+            throw new Error(
+              `Unexpected created_at undefined, how would we know the timestamp then? )`
+            );
+          }
+          return (
+            dateStrToTimestampMs(tweetA.created_at) -
+            dateStrToTimestampMs(tweetB.created_at)
+          );
+        });
+        twitterThreads.push({ conversation_id, tweets });
+      });
+
+      if (params.max_results) {
+        return twitterThreads.slice(0, params.max_results);
+      }
+      return twitterThreads;
     } catch (e: any) {
       throw new Error(handleTwitterError(e));
     }
@@ -458,8 +489,8 @@ export class TwitterService
   public async fetch(
     params: FetchUserPostsParams,
     manager: TransactionManager
-  ): Promise<PlatformPostPosted<TweetV2>[]> {
-    const tweets = await this.fetchInternal(
+  ): Promise<PlatformPostPosted<TwitterThread>[]> {
+    const threads = await this.fetchInternal(
       {
         user_id: params.userDetails.user_id,
         start_time:
@@ -475,20 +506,20 @@ export class TwitterService
       params.userDetails
     );
 
-    return tweets.map((tweet) => {
-      if (!tweet.author_id) {
+    return threads.map((thread) => {
+      if (!thread.tweets[0].author_id) {
         throw new Error(`Unexpected author_id undefined`);
       }
-      if (!tweet.created_at) {
+      if (!thread.tweets[0].created_at) {
         throw new Error(
           `Unexpected created_at undefined, how would we know the timestamp then? )`
         );
       }
       return {
-        post_id: tweet.id,
-        user_id: tweet.author_id,
-        timestampMs: dateStrToTimestampMs(tweet.created_at),
-        post: tweet,
+        post_id: thread.conversation_id,
+        user_id: thread.tweets[0].author_id,
+        timestampMs: dateStrToTimestampMs(thread.tweets[0].created_at),
+        post: thread,
       };
     });
   }
