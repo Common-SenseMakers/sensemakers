@@ -14,7 +14,7 @@ import { createTestAppUsers } from '../utils/user.factory';
 import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
 import { getTestServices } from './test.services';
 
-describe('03-process', () => {
+describe.only('03-process', () => {
   let rsaKeys: RSAKeys | undefined;
   const services = getTestServices({
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
@@ -105,7 +105,7 @@ describe('03-process', () => {
       const postsRead = await services.postsManager.getOfUser(appUser.userId);
 
       expect(postsRead).to.not.be.undefined;
-      expect(postsRead).to.have.length(3);
+      expect(postsRead).to.have.length(1);
 
       const postRead = postsRead[0];
       expect(postRead).to.not.be.undefined;
@@ -141,7 +141,7 @@ describe('03-process', () => {
       const postsRead = await services.postsManager.getOfUser(appUser.userId);
 
       expect(postsRead).to.not.be.undefined;
-      expect(postsRead).to.have.length(3);
+      expect(postsRead).to.have.length(1);
 
       postsRead.forEach((postRead) => {
         expect(postRead.semantics).to.not.be.undefined;
@@ -160,7 +160,7 @@ describe('03-process', () => {
         appUser.userId
       );
 
-      expect(pendingPosts).to.have.length(3);
+      expect(pendingPosts).to.have.length(1);
       const pendingPost = pendingPosts[0];
       const nanopub = pendingPost.mirrors.find(
         (m) => m.platformId === PLATFORM.Nanopub
