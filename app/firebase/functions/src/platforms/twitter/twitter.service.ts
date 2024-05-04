@@ -514,16 +514,20 @@ export class TwitterService
   }
 
   public async convertToGeneric(
-    platformPost: PlatformPostCreate<TweetV2>
+    platformPost: PlatformPostCreate<TwitterThread>
   ): Promise<GenericPostData> {
     if (!platformPost.posted) {
       throw new Error('Unexpected undefined posted');
     }
-    const tweet = platformPost.posted.post;
+    const thread = platformPost.posted.post;
+    /** concatinate all tweets in thread into one app post */
+    const threadText = thread.tweets
+      .map((tweet) =>
+        tweet['note_tweet']?.text ? tweet['note_tweet'].text : tweet.text
+      )
+      .join('\n---\n');
     return {
-      content: tweet['note_tweet']?.text
-        ? tweet['note_tweet'].text
-        : tweet.text,
+      content: threadText,
     };
   }
 
