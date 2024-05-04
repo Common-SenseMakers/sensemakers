@@ -2,7 +2,6 @@ import {
   TOAuth2Scope,
   TTweetv2TweetField,
   TweetV2,
-  TweetV2PaginableTimelineResult,
   TweetV2SingleResult,
   TweetV2UserTimelineParams,
   Tweetv2FieldsParams,
@@ -462,18 +461,8 @@ export class TwitterService
       const twitterThreads: TwitterThread[] = [];
 
       tweetThreadsMap.forEach((tweets, conversation_id) => {
-        /** sort tweets in thread by timestamp */
-        tweets.sort((tweetA, tweetB) => {
-          if (!tweetA.created_at || !tweetB.created_at) {
-            throw new Error(
-              `Unexpected created_at undefined, how would we know the timestamp then? )`
-            );
-          }
-          return (
-            dateStrToTimestampMs(tweetA.created_at) -
-            dateStrToTimestampMs(tweetB.created_at)
-          );
-        });
+        /** sort tweets in thread by id so that they are in order */
+        tweets.sort((tweetA, tweetB) => Number(tweetA.id) - Number(tweetB.id));
         twitterThreads.push({ conversation_id, tweets });
       });
 
