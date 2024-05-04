@@ -37,7 +37,11 @@ import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersRepository } from '../../users/users.repository';
 import { FetchUserPostsParams, PlatformService } from '../platforms.interface';
-import { dateStrToTimestampMs, handleTwitterError } from './twitter.utils';
+import {
+  dateStrToTimestampMs,
+  getTweetTextWithUrls,
+  handleTwitterError,
+} from './twitter.utils';
 
 const DEBUG = true;
 
@@ -521,11 +525,7 @@ export class TwitterService
     }
     const thread = platformPost.posted.post;
     /** concatinate all tweets in thread into one app post */
-    const threadText = thread.tweets
-      .map((tweet) =>
-        tweet['note_tweet']?.text ? tweet['note_tweet'].text : tweet.text
-      )
-      .join('\n---\n');
+    const threadText = thread.tweets.map(getTweetTextWithUrls).join('\n---\n');
     return {
       content: threadText,
     };
