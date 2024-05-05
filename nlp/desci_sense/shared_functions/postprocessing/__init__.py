@@ -101,15 +101,42 @@ class CombinedParserOutput(BaseModel):
     filter_classification: SciFilterClassfication = (
         SciFilterClassfication.NOT_CLASSIFIED
     )
-    item_types: List[str] = Field(default_factory=list)
-    reference_urls: List[str] = Field(default_factory=list)
-    reference_tagger: Union[None, List[List[str]]] = Field(default=None)
-    multi_reference_tagger: Union[None, List[List[str]]] = Field(default=None)
-    keywords: List[str] = Field(default_factory=list)
-    topics: List[str] = Field(default_factory=list)
-    hashtags: List[str] = Field(default_factory=list)
-    metadata_list: List[RefMetadata] = Field(default_factory=list)
-    debug: Optional[Dict] = Field(default_factory=dict)
+    item_types: List[str] = Field(
+        default_factory=list,
+        description="Item types of `reference_urls` as returned by metadata extractor",
+    )
+    reference_urls: List[str] = Field(
+        default_factory=list,
+        description="Reference URLs mentioned in the parsed post.",
+    )
+    reference_tagger: Union[None, List[List[str]]] = Field(
+        default=None,
+        description="Results returned by reference tagger or None if N/A",
+    )
+    multi_reference_tagger: Union[None, List[List[str]]] = Field(
+        default=None,
+        description="Results returned by multi reference tagger or None if N/A",
+    )
+    keywords: List[str] = Field(
+        default_factory=list,
+        description="Results returned by keywords parser",
+    )
+    topics: List[str] = Field(
+        default_factory=list,
+        description="Results returned by topics parser",
+    )
+    hashtags: List[str] = Field(
+        default_factory=list,
+        description="Results returned by hashtags parser",
+    )
+    metadata_list: List[RefMetadata] = Field(
+        default_factory=list,
+        description="List of extracted reference metadata returned by metadata extractor",
+    )
+    debug: Optional[Dict] = Field(
+        default_factory=dict,
+        description="Diagnostic information for debugging purposes.",
+    )
 
     def all_keywords(self) -> List[str]:
         # return union of hashtags and keywords
@@ -435,6 +462,7 @@ def post_process_firebase(
         semantics=graph,
         support=parser_support,
         filter_classification=combined_parser_output.filter_classification,
+        metadata={"model_debug": combined_parser_output.debug},
     )
 
 

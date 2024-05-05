@@ -219,6 +219,10 @@ class ParserResult(BaseModel):
     filter_classification: SciFilterClassfication = (
         SciFilterClassfication.NOT_CLASSIFIED
     )
+    metadata: Dict = Field(
+        description="Other data such as diagnostics for debugging, etc.",
+        default_factory=dict,
+    )
 
     @field_serializer("semantics")
     def graph_serializer(graph: Graph):

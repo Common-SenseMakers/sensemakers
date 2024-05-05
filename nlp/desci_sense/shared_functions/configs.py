@@ -154,14 +154,17 @@ class HashtagPParserChainConfig(PostParserChainConfig):
 
 class RefTaggerChainConfig(PostParserChainConfig):
     type: ParserChainType = ParserChainType.REFERENCE_TAGGER
+    is_ref: bool = True  # dummy var, just used for pydnatic type resolution
 
 
 class MultiRefTaggerChainConfig(PostParserChainConfig):
     type: ParserChainType = ParserChainType.MULTI_REF_TAGGER
+    is_multi_ref: bool = True  # dummy var, just used for pydnatic type resolution
 
 
 class TopicsPParserChainConfig(PostParserChainConfig):
     type: ParserChainType = ParserChainType.TOPICS
+    is_topic: bool = True  # dummy var, just used for pydnatic type resolution
 
 
 class MultiParserChainConfig(BaseSettings):

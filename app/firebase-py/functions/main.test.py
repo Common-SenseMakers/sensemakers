@@ -1,3 +1,4 @@
+import json
 from shared_functions.main import (
     SM_FUNCTION_post_parser_imp,
     SM_FUNCTION_post_parser_config,
@@ -12,14 +13,15 @@ config: SM_FUNCTION_post_parser_config = {
     "openrouter_api_key": openai_api_key,
     "openrouter_api_base": "https://openrouter.ai/api/v1",
     "openrouter_referer": "https://127.0.0.1:3000/",
-    "llm_type": "google/gemma-7b-it",
+    "llm_type": "openai/gpt-3.5-turbo",
 }
 
 result = SM_FUNCTION_post_parser_imp(content, parameters, config)
 
 serialized = result.model_dump_json()
 
-print("semantics: {}", serialized)
+json_obj = json.loads(serialized)
+print(f"semantics: {json_obj['semantics']}")
 
 with open("last_output.json", "wb") as file:
     file.write(serialized.encode("utf-8"))
