@@ -1,17 +1,20 @@
 import init, { Nanopub } from '@nanopub/sign';
 import { useQuery } from '@tanstack/react-query';
 import React, { createContext, useContext, useEffect, useMemo } from 'react';
+import { TweetV2 } from 'twitter-api-v2';
 
 import { useAppFetch } from '../api/app.fetch';
+import { subscribeToUpdates } from '../firestore/realtime.listener';
+import { AppUserRead, PLATFORM } from '../shared/types/types';
 import {
-  subscribeToPlatformPost,
-  subscribeToPost,
-} from '../firestore/realtime.listener';
-import { PLATFORM } from '../shared/types/types';
-import { PlatformPostDraft } from '../shared/types/types.platform.posts';
+  PlatformPost,
+  PlatformPostDraft,
+} from '../shared/types/types.platform.posts';
 import { AppPostFull } from '../shared/types/types.posts';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { getAccount } from '../user-login/user.helper';
+
+const DEBUG = true;
 
 interface NanopubInfo {
   uri: string;
@@ -19,8 +22,10 @@ interface NanopubInfo {
 
 interface PostContextType {
   post: AppPostFull | undefined;
+  author: AppUserRead;
   nanopubDraft: PlatformPostDraft | undefined;
   nanopubPublished: NanopubInfo | undefined;
+  tweet?: PlatformPost<TweetV2>;
 }
 
 const PostContextValue = createContext<PostContextType | undefined>(undefined);
@@ -43,27 +48,36 @@ export const PostContext: React.FC<{
   const appFetch = useAppFetch();
 
   const postId = useMemo(
-    () => (_postId ? _postId : (postInit as unknown as AppPostFull).id),
+    () => (_postId ? _postId : (postInit as AppPostFull).id),
     [_postId, postInit]
   );
 
   /** if postInit not provided get post from the DB */
-  const { data: _post, refetch } = useQuery({
+  const {
+    data: _post,
+    refetch,
+    isLoading,
+  } = useQuery({
     queryKey: ['postId', postId, connectedUser],
     queryFn: () => {
-      if (postId && connectedUser) {
-        return appFetch<AppPostFull>('/api/posts/get', { postId });
+      try {
+        if (postId && connectedUser) {
+          return appFetch<AppPostFull>('/api/posts/get', { postId });
+        }
+      } catch (e: any) {
+        console.error(e);
+        throw new Error(e);
       }
     },
   });
 
-  const post = _post !== null ? _post : undefined;
+  const post = isLoading ? postInit : _post !== null ? _post : undefined;
 
   /**
    * subscribe to real time updates of this post and trigger a refetch everytime
    * one is received*/
   useEffect(() => {
-    const unsubscribe = subscribeToPost(postId, refetch);
+    const unsubscribe = subscribeToUpdates(`post-${postId}`, refetch);
     return () => unsubscribe();
   }, []);
 
@@ -71,9 +85,9 @@ export const PostContext: React.FC<{
    * subscribe to real time updates of this post platform posts */
   useEffect(() => {
     if (post && post.mirrors) {
-      const unsubscribes = post.mirrors.map((m) =>
-        subscribeToPlatformPost(m.id, refetch)
-      );
+      const unsubscribes = post.mirrors.map((m) => {
+        return subscribeToUpdates(`platformPost-${m.id}`, refetch);
+      });
 
       return () => {
         unsubscribes.forEach((unsubscribe) => unsubscribe());
@@ -90,7 +104,7 @@ export const PostContext: React.FC<{
         const nanopub = post?.mirrors.find(
           (m) => m.platformId === PLATFORM.Nanopub
         );
-        if (!nanopub || !nanopub.posted) return undefined;
+        if (!nanopub || !nanopub.posted) return null;
 
         const nanopubObj = new Nanopub(nanopub.posted.post);
         return nanopubObj.info();
@@ -119,8 +133,31 @@ export const PostContext: React.FC<{
     }
   }, [post, connectedUser]);
 
+  /** TODO: The post author needs not be the connected user. We can probably have an
+   * endpoint to get user profiles by userIds */
+  const author: AppUserRead = {
+    userId: '1234',
+    twitter: [
+      {
+        user_id: '1234',
+        read: true,
+        write: true,
+        profile: {
+          id: '1234',
+          name: 'SenseNet Bot',
+          username: 'sense_nets_bot',
+          profile_image_url:
+            'https://pbs.twimg.com/profile_images/1783977034038882304/RGn66lGT_normal.jpg',
+        },
+      },
+    ],
+  };
+
+  const tweet = post?.mirrors.find((m) => m.platformId === PLATFORM.Twitter);
+
   return (
-    <PostContextValue.Provider value={{ post, nanopubPublished, nanopubDraft }}>
+    <PostContextValue.Provider
+      value={{ post, author, tweet, nanopubPublished, nanopubDraft }}>
       {children}
     </PostContextValue.Provider>
   );

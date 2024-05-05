@@ -19,3 +19,4 @@ else:
 load_dotenv(dotenv_path)
 
 openai_api_key = os.environ.get("OPENROUTER_API_KEY")
+model = os.environ.get("MODEL")

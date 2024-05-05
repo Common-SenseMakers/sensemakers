@@ -17,7 +17,7 @@
   "license": "ISC",
   "devDependencies": {
     "firebase-logging": "^1.0.16",
-    "firebase-tools": "^11.21.0"
+    "firebase-tools": "^13.8.0"
   },
   "dependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",

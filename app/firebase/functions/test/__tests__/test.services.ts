@@ -39,7 +39,13 @@ export interface TestServicesConfig {
 }
 
 export const getTestServices = (config: TestServicesConfig) => {
-  const mandatory = ['TWITTER_CLIENT_ID', 'TWITTER_CLIENT_SECRET'];
+  const mandatory = [
+    'TWITTER_CLIENT_ID',
+    'TWITTER_CLIENT_SECRET',
+    'TEST_USER_ACCOUNTS',
+    'OUR_TOKEN_SECRET',
+    'NANOPUBS_PUBLISH_SERVERS',
+  ];
 
   mandatory.forEach((varName) => {
     if (!process.env[varName]) {

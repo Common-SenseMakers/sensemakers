@@ -12,7 +12,7 @@ import {
   getPostSchema,
 } from './posts.schema';
 
-const DEBUG = true;
+const DEBUG = false;
 
 /**
  * get user posts from the DB (does not fetch for more)
@@ -37,6 +37,8 @@ export const getUserPostsController: RequestHandler = async (
 /**
  * fetch users posts and awaits for the fetching operation to finish
  * */
+const DEBUG_ENQUEUE = false;
+
 export const fetchUserPostsController: RequestHandler = async (
   request,
   response
@@ -45,16 +47,32 @@ export const fetchUserPostsController: RequestHandler = async (
     const userId = getAuthenticatedUser(request, true);
     const { postsManager } = getServices(request);
 
+    if (DEBUG_ENQUEUE)
+      logger.debug(`fetch UserPostsController - start`, { userId });
+
     await postsManager.fetchUser(userId);
+
+    if (DEBUG_ENQUEUE)
+      logger.debug(`fetch UserPostsController - done`, { userId });
+
     const enqueue = enqueueParseUserPosts(
       userId,
       envRuntime.REGION || 'us-central1'
     );
 
     if (!IS_EMULATOR) {
+      if (DEBUG_ENQUEUE)
+        logger.debug(`fetch UserPostsController - awaiting enqueue`, {
+          userId,
+        });
       /** it seems in the enmulator the task exection is synchronous to the http call */
       await enqueue;
+
+      if (DEBUG_ENQUEUE)
+        logger.debug(`fetch UserPostsController - enqueue done`);
     }
+
+    logger.debug(`enqueue ParseUserPosts - done`, { userId });
 
     if (DEBUG) logger.debug(`${request.path}: fetched`, { userId });
     response.status(200).send({ success: true });
@@ -89,7 +107,7 @@ export const getPostController: RequestHandler = async (request, response) => {
       });
     } else {
       if (DEBUG)
-        logger.debug(`${request.path}: getPost`, {
+        logger.debug(`${request.path}: getPost ${payload.postId} success`, {
           userId,
           post: post,
         });

@@ -41,39 +41,36 @@ export const UserPostsContext: React.FC<{
     },
   });
 
-  useEffect(() => {
-    if (errorFetching) {
-      console.error(errorFetching);
-      show({ message: errorFetching.message, status: 'critical' });
-    }
-  }, [errorFetching]);
-
   /** once fetched, get the posts */
   const {
     data: _posts,
-    error,
+    error: errorGetting,
     isFetching: isGetting,
   } = useQuery({
     queryKey: ['getUserPosts', connectedUser],
-    queryFn: () => {
+    queryFn: async () => {
       if (connectedUser) {
-        return appFetch<AppPostFull[]>('/api/posts/getOfUser', {
+        const posts = await appFetch<AppPostFull[]>('/api/posts/getOfUser', {
           userId: connectedUser.userId,
         });
+
+        return posts;
       }
       return null;
     },
     enabled: fetched,
   });
 
-  console.log({ _posts, error, fetched });
-
   /** convert null to undefined */
   const posts = _posts !== null ? _posts : undefined;
 
   return (
     <UserPostsContextValue.Provider
-      value={{ posts, isLoading: isFetching || isGetting, error: error }}>
+      value={{
+        posts,
+        isLoading: isFetching || isGetting,
+        error: errorFetching || errorGetting,
+      }}>
       {children}
     </UserPostsContextValue.Provider>
   );

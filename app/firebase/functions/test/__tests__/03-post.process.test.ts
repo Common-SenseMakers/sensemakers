@@ -146,7 +146,7 @@ describe('03-process', () => {
       postsRead.forEach((postRead) => {
         expect(postRead.semantics).to.not.be.undefined;
         expect(postRead.originalParsed).to.not.be.undefined;
-        expect(postRead.parseStatus).to.eq('processed');
+        expect(postRead.parsedStatus).to.eq('processed');
       });
     });
 
