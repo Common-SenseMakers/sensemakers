@@ -59,17 +59,17 @@ def create_df_from_notion_db(raw_notion_db) -> pd.DataFrame:
             "prompt_zero_ref": row["properties"]["prompt_zero_ref"]["rich_text"][0][
                 "plain_text"
             ]
-            if row["properties"]["prompt_zero_ref"]["rich_text"]
+            if "prompt_zero_ref" in row["properties"]
             else None,
             "prompt_single_ref": row["properties"]["prompt_single_ref"]["rich_text"][0][
                 "plain_text"
             ]
-            if row["properties"]["prompt_single_ref"]["rich_text"]
+            if "prompt_single_ref" in row["properties"]
             else None,
             "prompt_multi_ref": row["properties"]["prompt_multi_ref"]["rich_text"][0][
                 "plain_text"
             ]
-            if row["properties"]["prompt_multi_ref"]["rich_text"]
+            if "prompt_multi_ref" in row["properties"]
             else None,
             "notes": row["properties"]["notes"]["rich_text"][0]["plain_text"]
             if row["properties"]["notes"]["rich_text"]
