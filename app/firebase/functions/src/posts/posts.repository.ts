@@ -4,6 +4,7 @@ import {
   AppPost,
   AppPostCreate,
   PostUpdate,
+  UserPostsQueryParams,
 } from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
 import { BaseRepository } from '../db/repo.base';
@@ -39,15 +40,32 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   }
 
   /** Cannot be part of a transaction */
-  public async getOfUser(userId: string) {
+  public async getOfUser(userId: string, queryParams: UserPostsQueryParams) {
     /** type protection agains properties renaming */
     const createdAtKey: keyof AppPost = 'createdAtMs';
     const authorKey: keyof AppPost = 'authorId';
 
-    const posts = await this.db.collections.posts
+    let query = this.db.collections.posts
       .where(authorKey, '==', userId)
-      .orderBy(createdAtKey, 'desc')
-      .get();
+      .orderBy(createdAtKey, 'desc');
+
+    /** perform query filtering at the level of AppPost */
+    switch (queryParams.status) {
+      case 'published':
+        query = query.where('reviewedStatus', '==', 'reviewed');
+        break;
+      case 'ignored':
+        query = query.where('parsedStatus', '==', 'processed');
+        break;
+      case 'for review':
+        query = query.where('reviewedStatus', '==', 'pending');
+        break;
+      case 'all':
+      default:
+        break;
+    }
+
+    const posts = await query.get();
 
     return posts.docs.map((doc) => ({
       id: doc.id,

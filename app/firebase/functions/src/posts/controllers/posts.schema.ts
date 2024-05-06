@@ -14,3 +14,7 @@ export const approvePostSchema = object({
 export const createDraftPostSchema = object({
   postId: string().required(),
 }).noUnknown(true);
+
+export const getUserPostsQuerySchema = object({
+  status: string().oneOf(['published', 'ignored', 'for review', 'all']),
+}).noUnknown(true);

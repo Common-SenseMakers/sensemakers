@@ -65,3 +65,7 @@ export type PostUpdate = Partial<
     | 'reviewedStatus'
   >
 >;
+
+export interface UserPostsQueryParams {
+  status?: 'published' | 'ignored' | 'for review' | 'all';
+}
