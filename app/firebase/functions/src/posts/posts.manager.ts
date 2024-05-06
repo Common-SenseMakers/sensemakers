@@ -95,9 +95,12 @@ export class PostsManager {
                   );
 
                   if (DEBUG)
-                    logger.debug('fetchUser - platformPosts', {
-                      platformPosts,
-                    });
+                    logger.debug(
+                      `fetchUser - platformPosts: ${platformPosts.length}`,
+                      {
+                        platformPosts,
+                      }
+                    );
 
                   /** Create the PlatformPosts */
                   const platformPostsCreated =
@@ -107,9 +110,12 @@ export class PostsManager {
                     );
 
                   if (DEBUG)
-                    logger.debug('fetchUser - platformPostsCreated', {
-                      platformPostsCreated,
-                    });
+                    logger.debug(
+                      `fetchUser - platformPostsCreated: ${platformPostsCreated.length}`,
+                      {
+                        platformPostsCreated,
+                      }
+                    );
 
                   return platformPostsCreated;
                 } catch (err: any) {
