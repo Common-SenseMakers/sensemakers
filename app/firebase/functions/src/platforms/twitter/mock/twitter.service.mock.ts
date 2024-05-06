@@ -28,23 +28,34 @@ let state: TwitterTestState = {
 
 export type TwitterMockConfig = 'real' | 'mock-publish' | 'mock-signup';
 
-const getSampleTweet = (id: string, authorId: string) => {
+export const TWITTER_USER_ID_MOCKS = '1753077743816777728';
+
+const getSampleTweet = (id: string, authorId: string, createdAt: number) => {
+  const date = new Date(createdAt);
+
   return {
     data: {
       id: id,
       text: `This is an interesting paper https://arxiv.org/abs/2312.05230 ${id}`,
       author_id: authorId,
-      created_at: new Date().toISOString(),
+      created_at: date.toISOString(),
       edit_history_tweet_ids: [],
     },
   };
 };
-[1, 2].map((ix) => {
-  state.tweets.push({
+
+const now = Date.now();
+
+const tweets = [1, 2, 3, 4, 5, 6].map((ix) => {
+  const createdAt = now + ix * 10;
+  state.latestId = ix;
+  return {
     id: `${ix}`,
-    tweet: getSampleTweet(`T${ix}`, '1773032135814717440'),
-  });
+    tweet: getSampleTweet(`T${ix}`, TWITTER_USER_ID_MOCKS, createdAt),
+  };
 });
+
+state.tweets.push(...tweets);
 
 /** make private methods public */
 type MockedType = Omit<TwitterService, 'fetchInternal'> & {
@@ -72,7 +83,7 @@ export const getTwitterMock = (
 
         const tweet: TweetV2SingleResult = {
           data: {
-            id: (state.latestId++).toString(),
+            id: (++state.latestId).toString(),
             text: postPublish.draft.text,
             edit_history_tweet_ids: [],
             author_id: postPublish.userDetails.user_id,
@@ -94,7 +105,17 @@ export const getTwitterMock = (
 
     when(Mocked.fetchInternal(anything(), anything(), anything())).thenCall(
       (params: TwitterQueryParameters, userDetails?: UserDetailsBase) => {
-        return state.tweets.reverse().map((entry) => entry.tweet.data);
+        const tweets = state.tweets
+          .reverse()
+          .filter((entry) => {
+            const createdAt = new Date(entry.tweet.data.created_at as string);
+            const startAt = params.start_time
+              ? new Date(params.start_time)
+              : undefined;
+            return startAt ? createdAt.getTime() >= startAt.getTime() : true;
+          })
+          .map((entry) => entry.tweet.data);
+        return tweets;
       }
     );
 

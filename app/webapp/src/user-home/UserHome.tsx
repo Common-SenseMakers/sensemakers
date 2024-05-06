@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useToastContext } from '../app/ToastsContext';
 import { PostCard } from '../post/PostCard';
 import { PostContext } from '../post/PostContext';
+import { BoxCentered } from '../ui-components/BoxCentered';
 import { useUserPosts } from './UserPostsContext';
 
 export const UserHome = () => {
@@ -18,18 +19,24 @@ export const UserHome = () => {
     }
   }, [error]);
 
+  if (error) {
+    return <BoxCentered>{error.message}</BoxCentered>;
+  }
+
   if (!posts || isLoading) {
-    return <Box>Loading...</Box>;
+    return <BoxCentered>Loading...</BoxCentered>;
   }
 
   if (posts.length === 0) {
-    return <Box>No posts found</Box>;
+    return <BoxCentered>No posts found</BoxCentered>;
   }
 
-  console.log({ posts });
-
   return (
-    <Box gap="small">
+    <Box
+      fill
+      gap="large"
+      pad={{ vertical: 'large', horizontal: 'medium' }}
+      justify="start">
       {posts.map((post, ix) => (
         <Box key={ix}>
           <PostContext postInit={post}>

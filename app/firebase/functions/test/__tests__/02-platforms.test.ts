@@ -71,7 +71,7 @@ describe('02-platforms', () => {
         );
 
         expect(tweets).to.not.be.undefined;
-        expect(tweets.length).to.be.equal(2);
+        expect(tweets.length).to.be.equal(6);
       } catch (error) {
         console.error('error: ', error);
         throw error;
@@ -142,7 +142,8 @@ describe('02-platforms', () => {
           content: 'test content',
           semantics: '',
           origin: PLATFORM.Twitter,
-          parseStatus: 'processed',
+          parsedStatus: 'processed',
+          parsingStatus: 'idle',
           reviewedStatus: 'pending',
           mirrors: [],
         };

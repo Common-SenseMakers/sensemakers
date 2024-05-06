@@ -1,4 +1,4 @@
-import init, { Nanopub, NpProfile } from '@nanopub/sign';
+import { Nanopub, NpProfile } from '@nanopub/sign';
 
 import { RSAKeys } from '../types/types.nanopubs';
 import { cleanPrivateKey } from './semantics.helper';
@@ -14,7 +14,6 @@ export const signNanopublication = async (
   rsaKeys: RSAKeys,
   introNanopub?: string
 ) => {
-  await (init as any)();
   const nanopubObj = new Nanopub(nanopubStr);
   const keyBody = cleanPrivateKey(rsaKeys);
   const profile = new NpProfile(keyBody, '', '', introNanopub || '');

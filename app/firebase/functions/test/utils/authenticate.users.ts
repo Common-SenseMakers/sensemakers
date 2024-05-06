@@ -35,7 +35,6 @@ export interface NanopubAccountCredentials {
 }
 
 export interface TestUserCredentials {
-  orcid: OrcidAccountCredentials;
   twitter: TwitterAccountCredentials;
   nanopub: NanopubAccountCredentials;
 }

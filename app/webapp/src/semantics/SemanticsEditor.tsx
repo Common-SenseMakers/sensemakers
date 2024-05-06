@@ -7,7 +7,6 @@ const DEBUG = false;
 
 export const SemanticsEditor = (
   props: {
-    id: string;
     isLoading: boolean;
   } & PatternProps
 ) => {

@@ -12,7 +12,7 @@ import {
   getPostSchema,
 } from './posts.schema';
 
-const DEBUG = true;
+const DEBUG = false;
 
 /**
  * get user posts from the DB (does not fetch for more)
@@ -107,7 +107,7 @@ export const getPostController: RequestHandler = async (request, response) => {
       });
     } else {
       if (DEBUG)
-        logger.debug(`${request.path}: getPost`, {
+        logger.debug(`${request.path}: getPost ${payload.postId} success`, {
           userId,
           post: post,
         });

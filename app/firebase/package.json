@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "set-secret": "firebase functions:secrets:set",
-    "emulate": "NODE_ENV=local FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 firebase emulators:start",
-    "emulate-test": "NODE_ENV=local FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 firebase emulators:start --only firestore",
+    "emulate": "NODE_ENV=local FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 firebase --project demo-sensenets emulators:start",
+    "emulate-test": "NODE_ENV=local FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 firebase --project demo-sensenets emulators:start --only firestore",
     "log": "npx firebase-logging --project=common-dev-dea4e --freq=1500 --n=10 --func ",
     "deploy-functions": "firebase deploy --project staging --only functions",
     "deploy-firestore": "firebase deploy --project staging --only firestore",
@@ -17,7 +17,7 @@
   "license": "ISC",
   "devDependencies": {
     "firebase-logging": "^1.0.16",
-    "firebase-tools": "^11.21.0"
+    "firebase-tools": "^13.8.0"
   },
   "dependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",

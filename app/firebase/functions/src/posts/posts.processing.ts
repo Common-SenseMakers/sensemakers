@@ -19,7 +19,7 @@ import { getPrefixedUserId } from '../users/users.utils';
 import { PlatformPostsRepository } from './platform.posts.repository';
 import { PostsRepository } from './posts.repository';
 
-const DEBUG = true;
+const DEBUG = false;
 
 /**
  * Per-PlatformPost or Per-AppPost methods.
@@ -79,7 +79,7 @@ export class PostsProcessing {
         authorId: getPrefixedUserId(platformPost.platformId, user_id),
         content,
         mirrorsIds: [platformPostCreated.id],
-        createdAtMs: this.time.now(),
+        createdAtMs: platformPost.posted?.timestampMs || this.time.now(),
       },
       manager
     );
@@ -194,13 +194,17 @@ export class PostsProcessing {
   }
 
   async createAppPost(
-    input: Omit<AppPostCreate, 'parseStatus' | 'reviewedStatus'>,
+    input: Omit<
+      AppPostCreate,
+      'parsingStatus' | 'parsedStatus' | 'reviewedStatus'
+    >,
     manager: TransactionManager
   ): Promise<AppPost> {
     /** Build the AppPostFull object */
     const postCreate: AppPostCreate = {
       ...input,
-      parseStatus: 'unprocessed',
+      parsedStatus: 'unprocessed',
+      parsingStatus: 'idle',
       reviewedStatus: 'pending',
     };
 

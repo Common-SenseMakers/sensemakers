@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase-admin/app';
 import { Firestore, getFirestore } from 'firebase-admin/firestore';
 
 import { CollectionNames } from '../@shared/utils/collectionNames';
+import { IS_EMULATOR } from '../config/config.runtime';
 // import { SERVICE_ACCOUNT_ID } from '../config/config.runtime';
 import {
   HandleWithTxManager,
@@ -10,7 +11,11 @@ import {
   TransactionManager,
 } from './transaction.manager';
 
-initializeApp();
+export const app = IS_EMULATOR
+  ? initializeApp({
+      projectId: 'demo-sensenets',
+    })
+  : initializeApp();
 
 export class DBInstance {
   public firestore: Firestore;
@@ -20,6 +25,7 @@ export class DBInstance {
     users: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
     posts: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
     platformPosts: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
+    updates: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
   };
 
   constructor() {
@@ -29,6 +35,7 @@ export class DBInstance {
       users: this.firestore.collection(CollectionNames.Users),
       posts: this.firestore.collection(CollectionNames.Posts),
       platformPosts: this.firestore.collection(CollectionNames.PlatformPosts),
+      updates: this.firestore.collection(CollectionNames.Updates),
     };
   }
 
@@ -42,22 +49,16 @@ export class DBInstance {
       case ManagerModes.TRANSACTION:
         return this.firestore.runTransaction(async (transaction) => {
           const manager = new TransactionManager(transaction);
-
           const result = await func(manager, payload);
-
           await manager.applyWrites();
-
           return result;
         });
 
       case ManagerModes.BATCH: {
         const batch = this.firestore.batch();
         const manager = new TransactionManager(undefined, batch);
-
         const result = await func(manager, payload);
-
         await manager.applyWrites();
-
         return result;
       }
     }
