@@ -14,7 +14,7 @@ export type CredentialsForPlatform<P> = P extends PLATFORM.Twitter
   : any;
 
 export interface FetchUserPostsParams {
-  start_time: number; // timestamp in ms
+  start_time?: number; // timestamp in ms
   end_time?: number; // timestamp in ms
   max_results?: number;
   userDetails: UserDetailsBase;

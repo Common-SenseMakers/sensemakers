@@ -95,9 +95,12 @@ export class PostsManager {
                   );
 
                   if (DEBUG)
-                    logger.debug('fetchUser - platformPosts', {
-                      platformPosts,
-                    });
+                    logger.debug(
+                      `fetchUser - platformPosts: ${platformPosts.length}`,
+                      {
+                        platformPosts,
+                      }
+                    );
 
                   /** Create the PlatformPosts */
                   const platformPostsCreated =
@@ -107,9 +110,12 @@ export class PostsManager {
                     );
 
                   if (DEBUG)
-                    logger.debug('fetchUser - platformPostsCreated', {
-                      platformPostsCreated,
-                    });
+                    logger.debug(
+                      `fetchUser - platformPostsCreated: ${platformPostsCreated.length}`,
+                      {
+                        platformPostsCreated,
+                      }
+                    );
 
                   return platformPostsCreated;
                 } catch (err: any) {
@@ -162,8 +168,17 @@ export class PostsManager {
         if (shouldParse) {
           /** then process */
           await this.db.run(async (manager) => {
-            await this.parsePost(postId, manager);
-            await this.processing.createPostsDrafts(postIds, manager);
+            try {
+              await this.parsePost(postId, manager);
+              await this.processing.createPostsDrafts(postIds, manager);
+            } catch (err: any) {
+              logger.error(`Error parsing post ${postId}`, err);
+              await this.processing.posts.updateContent(
+                postId,
+                { parsingStatus: 'errored' },
+                manager
+              );
+            }
           });
         }
       })

@@ -1,9 +1,8 @@
-import { Avatar, Box, Text } from 'grommet';
-import { useNavigate } from 'react-router-dom';
+import { Box, Markdown } from 'grommet';
 
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
-import { AppPostFull } from '../shared/types/types.posts';
 import { usePost } from './PostContext';
+import { PostText } from './PostText';
 
 export const PostContent = () => {
   const { post } = usePost();
@@ -15,7 +14,7 @@ export const PostContent = () => {
   return (
     <Box pad={{ horizontal: 'small', vertical: 'large' }}>
       <Box elevation="small" pad="medium">
-        <Text>{post?.content}</Text>
+        <PostText text={post?.content}></PostText>
       </Box>
       <Box>
         <SemanticsEditor

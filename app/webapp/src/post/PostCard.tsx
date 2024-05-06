@@ -5,6 +5,7 @@ import { AppIcon } from '../app/icons/AppIcon';
 import { usePost } from '../post/PostContext';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
+import { PostText } from './PostText';
 
 export const PostCard = () => {
   const { post } = usePost();
@@ -27,9 +28,13 @@ export const PostCard = () => {
       }}
       elevation="small"
       onClick={handleClick}>
-      <Text size="medium">{post?.content}</Text>
+      <PostText text={post?.content}></PostText>
       <Box style={{ position: 'absolute', right: '10px', bottom: '10px' }}>
-        {processed ? <AppIcon></AppIcon> : <Loading></Loading>}
+        {processed ? (
+          <AppIcon src="network.svg"></AppIcon>
+        ) : (
+          <Loading></Loading>
+        )}
       </Box>
     </Box>
   );

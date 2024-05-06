@@ -1883,10 +1883,10 @@ firebase-functions-test@^3.1.0:
     lodash "^4.17.5"
     ts-deepmerge "^2.0.1"
 
-firebase-functions@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/firebase-functions/-/firebase-functions-5.0.0.tgz#bbe2b9b31f4161825849d5d2c9ea4cfa7d3e88cc"
-  integrity sha512-iGG41MavOS+RtEsbcq2j/ltQ8L2Oji71dRpwVur+meIQWkvXCYb2QJtnyp0ryQVnV3NyjV+3Vdx7OnmD+Hanuw==
+firebase-functions@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/firebase-functions/-/firebase-functions-5.0.1.tgz#90f241f9231faac8a8cf4f3468b93b4b86bb348c"
+  integrity sha512-1m+crtgAR8Tl36gjpM02KCY5zduAejFmDSXvih/DB93apg39f0U/WwRgT7sitGIRqyCcIpktNUbXJv7Y9JOF4A==
   dependencies:
     "@types/cors" "^2.8.5"
     "@types/express" "4.17.3"
@@ -3675,10 +3675,10 @@ tunnel-agent@^0.6.0:
   dependencies:
     safe-buffer "^5.0.1"
 
-twitter-api-v2@^1.16.0:
-  version "1.16.0"
-  resolved "https://registry.yarnpkg.com/twitter-api-v2/-/twitter-api-v2-1.16.0.tgz#4aff58c402168a4582d1dc5a58ecfe3144ac620c"
-  integrity sha512-e7wzWqx5oQZ9IUc2xt8JiJ84ioVGlmjmca1h0NwCKx2AFfKXDePmQa42gcBDe0qau9YaHsIpzO9z5SX1fmb+IQ==
+twitter-api-v2@^1.16.2:
+  version "1.16.3"
+  resolved "https://registry.yarnpkg.com/twitter-api-v2/-/twitter-api-v2-1.16.3.tgz#6042c61b4dee35329dda3d153d9f08d2c6a348e3"
+  integrity sha512-T9Wbq1y3IrTshBvtVawpWp1GmL3mduF4RhieSfM1HsL10Qda0EeJMDUwr5C6IeelnSZ65tiiXzs0xUS8FHM9XA==
 
 type-detect@^4.0.0, type-detect@^4.0.8:
   version "4.0.8"
