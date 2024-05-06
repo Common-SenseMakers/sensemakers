@@ -50,36 +50,32 @@ describe('02-platforms', () => {
       if (userDetails.read === undefined) {
         throw new Error('Unexpected');
       }
-      try {
-        const twitter = appUser[PLATFORM.Twitter];
 
-        if (!twitter) {
-          throw new Error('User does not have Twitter credentials');
-        }
+      const twitter = appUser[PLATFORM.Twitter];
 
-        const fetchParams: FetchUserPostsParams = {
-          userDetails: {
-            ...userDetails,
-            user_id: '1773032135814717440',
-          },
-          end_time: 1714786027000,
-          max_results: 5,
-        };
-
-        const threads = await services.db.run((manager) =>
-          twitterService.fetch(fetchParams, manager)
-        );
-
-        expect(threads).to.not.be.undefined;
-        expect(threads.length).to.be.equal(5);
-        expect(threads[0].post.tweets.length).to.be.equal(5);
-        expect(threads[0].post.conversation_id).to.be.equal(
-          '1786430246264152195'
-        );
-      } catch (error) {
-        console.error('error: ', error);
-        throw error;
+      if (!twitter) {
+        throw new Error('User does not have Twitter credentials');
       }
+
+      const fetchParams: FetchUserPostsParams = {
+        userDetails: {
+          ...userDetails,
+          user_id: '1773032135814717440',
+        },
+        end_time: 1714786027000,
+        max_results: 5,
+      };
+
+      const threads = await services.db.run((manager) =>
+        twitterService.fetch(fetchParams, manager)
+      );
+
+      expect(threads).to.not.be.undefined;
+      expect(threads.length).to.be.equal(5);
+      expect(threads[0].post.tweets.length).to.be.equal(5);
+      expect(threads[0].post.conversation_id).to.be.equal(
+        '1786430246264152195'
+      );
     });
 
     it.skip('refreshes the access token if it has expired when using the twitter service', async () => {
