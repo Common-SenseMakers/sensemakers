@@ -1,7 +1,7 @@
 import { Box } from 'grommet';
-import { Twitter } from 'grommet-icons';
 import { useTranslation } from 'react-i18next';
 
+import { AppIcon } from '../app/icons/AppIcon';
 import { I18Keys } from '../i18n/i18n';
 import { AppButton } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
@@ -20,7 +20,7 @@ export const PlatformManager = (props: {}) => {
   return (
     <BoxCentered>
       <AppButton
-        icon={<Twitter color={constants.colors.textOnPrimary}></Twitter>}
+        icon={<AppIcon src="/icons/TwitterX.svg"></AppIcon>}
         style={{ width: '50%' }}
         primary
         disabled={!needConnectTwitter}
