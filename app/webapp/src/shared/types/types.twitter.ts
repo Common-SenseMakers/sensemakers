@@ -1,5 +1,6 @@
 import {
   IOAuth2RequestTokenResult,
+  TweetV2,
   TweetV2PostTweetResult,
   UserV2,
 } from 'twitter-api-v2';
@@ -52,3 +53,8 @@ export interface TwitterQueryParameters {
 export interface TwitterDraft {
   text: string;
 }
+
+export type TwitterThread = {
+  conversation_id: string;
+  tweets: TweetV2[];
+};

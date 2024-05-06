@@ -37,7 +37,7 @@ describe('02-platforms', () => {
   });
 
   describe('twitter', () => {
-    it("get's all tweets in a time range using pagination", async () => {
+    it.only("get's the latest 5 threads", async () => {
       if (!appUser) {
         throw new Error('appUser not created');
       }
@@ -62,16 +62,20 @@ describe('02-platforms', () => {
             ...userDetails,
             user_id: '1773032135814717440',
           },
-          start_time: 1708560000000,
-          end_time: 1708646400000,
+          end_time: 1714786027000,
+          max_results: 5,
         };
 
-        const tweets = await services.db.run((manager) =>
+        const threads = await services.db.run((manager) =>
           twitterService.fetch(fetchParams, manager)
         );
 
-        expect(tweets).to.not.be.undefined;
-        expect(tweets.length).to.be.equal(6);
+        expect(threads).to.not.be.undefined;
+        expect(threads.length).to.be.equal(5);
+        expect(threads[0].post.tweets.length).to.be.equal(5);
+        expect(threads[0].post.conversation_id).to.be.equal(
+          '1786430246264152195'
+        );
       } catch (error) {
         console.error('error: ', error);
         throw error;
