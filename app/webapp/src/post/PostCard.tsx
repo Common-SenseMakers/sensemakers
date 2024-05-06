@@ -29,7 +29,11 @@ export const PostCard = () => {
       onClick={handleClick}>
       <Text size="medium">{post?.content}</Text>
       <Box style={{ position: 'absolute', right: '10px', bottom: '10px' }}>
-        {processed ? <AppIcon></AppIcon> : <Loading></Loading>}
+        {processed ? (
+          <AppIcon src="network.svg"></AppIcon>
+        ) : (
+          <Loading></Loading>
+        )}
       </Box>
     </Box>
   );
