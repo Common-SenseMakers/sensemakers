@@ -19,7 +19,7 @@ import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { PostsProcessing } from './posts.processing';
 
-const DEBUG = false;
+const DEBUG = true;
 
 /**
  * Top level methods. They instantiate a TransactionManger and execute
