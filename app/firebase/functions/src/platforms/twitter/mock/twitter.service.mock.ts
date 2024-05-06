@@ -19,29 +19,33 @@ import { dateStrToTimestampMs } from '../twitter.utils';
 
 interface TwitterTestState {
   latestId: number;
-  tweets: Array<{ id: string; tweet: TweetV2SingleResult }>;
+  threads: TwitterThread[];
 }
 
 let state: TwitterTestState = {
   latestId: 0,
-  tweets: [],
+  threads: [],
 };
 
 export type TwitterMockConfig = 'real' | 'mock-publish' | 'mock-signup';
 
 export const TWITTER_USER_ID_MOCKS = '1753077743816777728';
 
-const getSampleTweet = (id: string, authorId: string, createdAt: number) => {
+const getSampleTweet = (
+  id: string,
+  authorId: string,
+  createdAt: number,
+  conversation_id: string
+) => {
   const date = new Date(createdAt);
 
   return {
-    data: {
-      id: id,
-      text: `This is an interesting paper https://arxiv.org/abs/2312.05230 ${id}`,
-      author_id: authorId,
-      created_at: date.toISOString(),
-      edit_history_tweet_ids: [],
-    },
+    id: id,
+    conversation_id,
+    text: `This is an interesting paper https://arxiv.org/abs/2312.05230 ${id}`,
+    author_id: authorId,
+    created_at: date.toISOString(),
+    edit_history_tweet_ids: [],
   };
 };
 
@@ -52,10 +56,12 @@ const threads = [[1, 2], [3], [4, 5, 6], [7]].map(
     const tweets = thread.map((ix) => {
       const createdAt = now + ixThread * 100 + 10 * ix;
       state.latestId = ix;
-      return {
-        id: `${ix}`,
-        tweet: getSampleTweet(`T${ix}`, TWITTER_USER_ID_MOCKS, createdAt),
-      };
+      return getSampleTweet(
+        `tweet-${ix}`,
+        TWITTER_USER_ID_MOCKS,
+        createdAt,
+        `conversation-${ixThread}`
+      );
     });
     return {
       conversation_id: `${ixThread}`,
@@ -64,7 +70,7 @@ const threads = [[1, 2], [3], [4, 5, 6], [7]].map(
   }
 );
 
-state.tweets.push(...tweets);
+state.threads.push(...threads);
 
 /** make private methods public */
 type MockedType = Omit<TwitterService, 'fetchInternal'> & {
@@ -100,7 +106,10 @@ export const getTwitterMock = (
           },
         };
 
-        state.tweets.push({ id: tweet.data.id, tweet });
+        state.threads.push({
+          conversation_id: `conversation-${Date.now()}`,
+          tweets: [tweet.data],
+        });
 
         const post: PlatformPostPosted<TweetV2SingleResult> = {
           post_id: tweet.data.id,
@@ -113,21 +122,19 @@ export const getTwitterMock = (
     );
 
     when(Mocked.fetchInternal(anything(), anything(), anything())).thenCall(
-      (
+      async (
         params: TwitterQueryParameters,
         userDetails?: UserDetailsBase
       ): Promise<TwitterThread[]> => {
-        const tweets = state.tweets
-          .reverse()
-          .filter((entry) => {
-            const createdAt = new Date(entry.tweet.data.created_at as string);
-            const startAt = params.start_time
-              ? new Date(params.start_time)
-              : undefined;
-            return startAt ? createdAt.getTime() >= startAt.getTime() : true;
-          })
-          .map((entry) => entry.tweet.data);
-        return tweets;
+        const threads = state.threads.reverse().filter((thread) => {
+          const tweet0 = thread.tweets[0];
+          const createdAt = new Date(tweet0.created_at as string);
+          const startAt = params.start_time
+            ? new Date(params.start_time)
+            : undefined;
+          return startAt ? createdAt.getTime() >= startAt.getTime() : true;
+        });
+        return threads;
       }
     );
 
