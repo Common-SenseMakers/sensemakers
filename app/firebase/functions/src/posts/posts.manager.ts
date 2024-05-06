@@ -229,6 +229,12 @@ export class PostsManager {
                 SciFilterClassfication.NOT_RESEARCH)
         );
       case 'for review':
+        return postsFull.filter(
+          (post) =>
+            post.reviewedStatus === 'pending' &&
+            post.originalParsed?.filter_clasification !==
+              SciFilterClassfication.RESEARCH
+        );
       case 'all':
       default:
         break;
