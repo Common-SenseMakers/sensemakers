@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase-admin/app';
 import { Firestore, getFirestore } from 'firebase-admin/firestore';
 
 import { CollectionNames } from '../@shared/utils/collectionNames';
+import { IS_EMULATOR } from '../config/config.runtime';
 // import { SERVICE_ACCOUNT_ID } from '../config/config.runtime';
 import {
   HandleWithTxManager,
@@ -10,7 +11,11 @@ import {
   TransactionManager,
 } from './transaction.manager';
 
-initializeApp();
+export const app = IS_EMULATOR
+  ? initializeApp({
+      projectId: 'demo-sensenets',
+    })
+  : initializeApp();
 
 export class DBInstance {
   public firestore: Firestore;
