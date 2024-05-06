@@ -17,7 +17,7 @@ export interface AppPost extends GenericPostData {
   authorId: string;
   origin: PLATFORM; // The platform where the post originated
   createdAtMs: number;
-  parsingStatus: 'idle' | 'processing';
+  parsingStatus: 'idle' | 'processing' | 'errored';
   parsedStatus: 'unprocessed' | 'processed';
   reviewedStatus: 'pending' | 'reviewed';
   originalParsed?: ParsePostResult;

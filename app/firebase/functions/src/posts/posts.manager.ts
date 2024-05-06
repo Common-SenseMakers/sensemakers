@@ -162,8 +162,17 @@ export class PostsManager {
         if (shouldParse) {
           /** then process */
           await this.db.run(async (manager) => {
-            await this.parsePost(postId, manager);
-            await this.processing.createPostsDrafts(postIds, manager);
+            try {
+              await this.parsePost(postId, manager);
+              await this.processing.createPostsDrafts(postIds, manager);
+            } catch (err: any) {
+              logger.error(`Error parsing post ${postId}`, err);
+              await this.processing.posts.updateContent(
+                postId,
+                { parsingStatus: 'errored' },
+                manager
+              );
+            }
           });
         }
       })
