@@ -410,7 +410,7 @@ export class TwitterService
       );
 
       const resultCollection: TweetV2[] =
-        result.data.data.slice(0, pageSize0) || [];
+        result.data.data?.slice(0, pageSize0) || [];
 
       let nextToken = result.meta.next_token;
       let reached: boolean = false;
