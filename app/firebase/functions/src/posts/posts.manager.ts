@@ -74,7 +74,7 @@ export class PostsManager {
                 /** This fetch parameters */
                 const userParams: FetchUserPostsParams = {
                   start_time: account.read
-                    ? account.read.lastFetchedMs
+                    ? account.lastFetchedMs
                     : account.signupDate,
                   userDetails: account,
                   max_results: 3,

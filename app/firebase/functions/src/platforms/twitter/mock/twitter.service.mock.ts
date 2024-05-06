@@ -28,6 +28,8 @@ let state: TwitterTestState = {
 
 export type TwitterMockConfig = 'real' | 'mock-publish' | 'mock-signup';
 
+export const TWITTER_USER_ID_MOCKS = '1773032135814717440';
+
 const getSampleTweet = (id: string, authorId: string, createdAt: number) => {
   const date = new Date(createdAt);
 
@@ -45,10 +47,11 @@ const getSampleTweet = (id: string, authorId: string, createdAt: number) => {
 const now = Date.now();
 
 const tweets = [1, 2, 3, 4, 5, 6].map((ix) => {
-  const createdAt = now + ix * 1000;
+  const createdAt = now + ix * 10;
+  state.latestId = ix;
   return {
     id: `${ix}`,
-    tweet: getSampleTweet(`T${ix}`, '1773032135814717440', createdAt),
+    tweet: getSampleTweet(`T${ix}`, TWITTER_USER_ID_MOCKS, createdAt),
   };
 });
 
@@ -80,7 +83,7 @@ export const getTwitterMock = (
 
         const tweet: TweetV2SingleResult = {
           data: {
-            id: (state.latestId++).toString(),
+            id: (++state.latestId).toString(),
             text: postPublish.draft.text,
             edit_history_tweet_ids: [],
             author_id: postPublish.userDetails.user_id,
@@ -102,7 +105,17 @@ export const getTwitterMock = (
 
     when(Mocked.fetchInternal(anything(), anything(), anything())).thenCall(
       (params: TwitterQueryParameters, userDetails?: UserDetailsBase) => {
-        return state.tweets.reverse().map((entry) => entry.tweet.data);
+        const tweets = state.tweets
+          .reverse()
+          .filter((entry) => {
+            const createdAt = new Date(entry.tweet.data.created_at as string);
+            const startAt = params.start_time
+              ? new Date(params.start_time)
+              : undefined;
+            return startAt ? createdAt.getTime() >= startAt.getTime() : true;
+          })
+          .map((entry) => entry.tweet.data);
+        return tweets;
       }
     );
 
