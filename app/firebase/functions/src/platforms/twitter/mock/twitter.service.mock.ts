@@ -10,6 +10,7 @@ import {
   TwitterDraft,
   TwitterGetContextParams,
   TwitterQueryParameters,
+  TwitterThread,
   TwitterUserDetails,
 } from '../../../@shared/types/types.twitter';
 import { logger } from '../../../instances/logger';
@@ -46,14 +47,22 @@ const getSampleTweet = (id: string, authorId: string, createdAt: number) => {
 
 const now = Date.now();
 
-const tweets = [1, 2, 3, 4, 5, 6].map((ix) => {
-  const createdAt = now + ix * 10;
-  state.latestId = ix;
-  return {
-    id: `${ix}`,
-    tweet: getSampleTweet(`T${ix}`, TWITTER_USER_ID_MOCKS, createdAt),
-  };
-});
+const threads = [[1, 2], [3], [4, 5, 6], [7]].map(
+  (thread, ixThread): TwitterThread => {
+    const tweets = thread.map((ix) => {
+      const createdAt = now + ixThread * 100 + 10 * ix;
+      state.latestId = ix;
+      return {
+        id: `${ix}`,
+        tweet: getSampleTweet(`T${ix}`, TWITTER_USER_ID_MOCKS, createdAt),
+      };
+    });
+    return {
+      conversation_id: `${ixThread}`,
+      tweets,
+    };
+  }
+);
 
 state.tweets.push(...tweets);
 
@@ -104,7 +113,10 @@ export const getTwitterMock = (
     );
 
     when(Mocked.fetchInternal(anything(), anything(), anything())).thenCall(
-      (params: TwitterQueryParameters, userDetails?: UserDetailsBase) => {
+      (
+        params: TwitterQueryParameters,
+        userDetails?: UserDetailsBase
+      ): Promise<TwitterThread[]> => {
         const tweets = state.tweets
           .reverse()
           .filter((entry) => {
