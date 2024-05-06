@@ -1,4 +1,4 @@
-import { ApiResponseError } from 'twitter-api-v2';
+import { ApiResponseError, TweetV2 } from 'twitter-api-v2';
 
 export const handleTwitterError = (e: ApiResponseError) => {
   if (e.request) {
@@ -22,4 +22,18 @@ export const handleTwitterError = (e: ApiResponseError) => {
 export const dateStrToTimestampMs = (dateStr: string) => {
   const date = new Date(dateStr);
   return date.getTime();
+};
+
+export const getTweetTextWithUrls = (tweet: TweetV2) => {
+  const fullTweet = tweet['note_tweet'] ? tweet['note_tweet'] : tweet;
+  const urls = fullTweet.entities?.urls;
+  let text = fullTweet.text;
+
+  if (urls) {
+    urls.forEach((url) => {
+      text = text.replace(url.url, url.expanded_url);
+    });
+  }
+
+  return text;
 };
