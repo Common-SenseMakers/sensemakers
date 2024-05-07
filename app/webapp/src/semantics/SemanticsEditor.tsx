@@ -11,11 +11,11 @@ export const SemanticsEditor = (
   } & PatternProps
 ) => {
   if (props.isLoading || !props.originalParsed) {
-    return <LoadingDiv fill></LoadingDiv>;
+    return <></>;
   }
 
   return (
-    <Box style={{ width: '100%' }} pad={{ vertical: 'large' }}>
+    <Box style={{ width: '100%' }}>
       <Patterns {...props}></Patterns>
     </Box>
   );

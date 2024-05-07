@@ -1,14 +1,24 @@
-import { ALL_PUBLISH_PLATFORMS, AppUser } from '../@shared/types/types';
+import {
+  ALL_PUBLISH_PLATFORMS,
+  AppUser,
+  PLATFORM,
+} from '../@shared/types/types';
 import {
   PARSER_MODE,
   ParsePostRequest,
+  SciFilterClassfication,
   TopicsParams,
 } from '../@shared/types/types.parser';
 import {
   PlatformPost,
   PlatformPostCreated,
 } from '../@shared/types/types.platform.posts';
-import { AppPost, AppPostFull, PostUpdate } from '../@shared/types/types.posts';
+import {
+  AppPost,
+  AppPostFull,
+  PostUpdate,
+  UserPostsQueryParams,
+} from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
@@ -19,7 +29,7 @@ import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { PostsProcessing } from './posts.processing';
 
-const DEBUG = false;
+const DEBUG = true;
 
 /**
  * Top level methods. They instantiate a TransactionManger and execute
@@ -141,59 +151,61 @@ export class PostsManager {
 
   async parseOfUser(userId: string) {
     const postIds = await this.processing.posts.getNonParsedOfUser(userId);
-
-    await Promise.all(
-      postIds.map(async (postId) => {
-        /**
-         * check if not being processed
-         * mark as being processed
-         * commit transaction */
-        const shouldParse = await this.db.run(async (manager) => {
-          const post = await this.processing.posts.get(postId, manager, true);
-          if (post.parsingStatus === 'processing') {
-            logger.debug(`parseOfUser - already parsing ${postId}`);
-            return false;
-          }
-
-          logger.debug(`parseOfUser - marking as parsing ${postId}`);
-          await this.processing.posts.updateContent(
-            postId,
-            { parsingStatus: 'processing' },
-            manager
-          );
-
-          return true;
-        });
-
-        if (shouldParse) {
-          /** then process */
-          await this.db.run(async (manager) => {
-            try {
-              await this.parsePost(postId, manager);
-              await this.processing.createPostsDrafts(postIds, manager);
-            } catch (err: any) {
-              logger.error(`Error parsing post ${postId}`, err);
-              await this.processing.posts.updateContent(
-                postId,
-                { parsingStatus: 'errored' },
-                manager
-              );
-            }
-          });
-        }
-      })
-    );
+    await Promise.all(postIds.map((postId) => this.markAndParsePost(postId)));
   }
 
   /** get pending posts AppPostFull of user, cannot be part of a transaction */
-  async getOfUser(userId: string) {
-    const pendingAppPosts = await this.processing.posts.getOfUser(userId);
+  async getOfUser(userId: string, queryParams?: UserPostsQueryParams) {
+    const appPosts = await this.processing.posts.getOfUser(userId, queryParams);
 
     const postsFull = await Promise.all(
-      pendingAppPosts.map((post) => this.appendMirrors(post))
+      appPosts.map((post) => this.appendMirrors(post))
     );
+    let filteredPostsFull = postsFull;
 
-    return postsFull;
+    /** perform query filtering at the level of PlatformPost now that we have the reduced set of PlatformPost's */
+    switch (queryParams?.status) {
+      case 'published':
+        filteredPostsFull = postsFull.filter((post) =>
+          post.mirrors.find(
+            (m) =>
+              m.platformId === PLATFORM.Nanopub &&
+              m.publishStatus === 'published'
+          )
+        );
+        break;
+      case 'ignored':
+        /** If the post has been reviewed and not nanopublished, or, if it hasn't been reviewed and
+         * is classified as NOT_RESEARCH by the classifier, it is considered ignored */
+        filteredPostsFull = postsFull.filter(
+          (post) =>
+            (post.reviewedStatus === 'reviewed' &&
+              post.mirrors.find(
+                (m) =>
+                  m.platformId === PLATFORM.Nanopub &&
+                  m.publishStatus === 'draft'
+              )) ||
+            (post.reviewedStatus === 'pending' &&
+              post.originalParsed?.filter_clasification ===
+                SciFilterClassfication.NOT_RESEARCH)
+        );
+        break;
+      case 'for review':
+        filteredPostsFull = postsFull.filter(
+          (post) =>
+            post.reviewedStatus === 'pending' &&
+            post.originalParsed?.filter_clasification !==
+              SciFilterClassfication.RESEARCH
+        );
+      case 'all':
+      default:
+        break;
+    }
+    logger.debug(
+      `getOfUser query for user ${userId} has ${filteredPostsFull.length} results for query params: `,
+      { queryParams }
+    );
+    return filteredPostsFull;
   }
 
   /**
@@ -220,13 +232,43 @@ export class PostsManager {
     );
   }
 
-  async parsePosts(postIds: string[], manager: TransactionManager) {
-    return Promise.all(
-      postIds.map((postId) => this.parsePost(postId, manager))
-    );
+  async markAndParsePost(postId: string) {
+    const shouldParse = await this.db.run(async (manager) => {
+      const post = await this.processing.posts.get(postId, manager, true);
+      if (post.parsingStatus === 'processing') {
+        logger.debug(`parseOfUser - already parsing ${postId}`);
+        return false;
+      }
+
+      logger.debug(`parseOfUser - marking as parsing ${postId}`);
+      await this.processing.posts.updateContent(
+        postId,
+        { parsingStatus: 'processing' },
+        manager
+      );
+
+      return true;
+    });
+
+    if (shouldParse) {
+      /** then process */
+      await this.db.run(async (manager) => {
+        try {
+          await this.parsePost(postId, manager);
+          await this.processing.createPostDrafts(postId, manager);
+        } catch (err: any) {
+          logger.error(`Error parsing post ${postId}`, err);
+          await this.processing.posts.updateContent(
+            postId,
+            { parsingStatus: 'errored' },
+            manager
+          );
+        }
+      });
+    }
   }
 
-  async parsePost(postId: string, manager: TransactionManager) {
+  protected async parsePost(postId: string, manager: TransactionManager) {
     const post = await this.processing.posts.get(postId, manager, true);
     if (DEBUG) logger.debug('parsePost - start', { postId, post });
 

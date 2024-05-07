@@ -1,9 +1,15 @@
-import { Box } from 'grommet';
+import { Box, Menu, Text } from 'grommet';
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { useToastContext } from '../app/ToastsContext';
 import { PostCard } from '../post/PostCard';
 import { PostContext } from '../post/PostContext';
+import { AbsoluteRoutes } from '../route.names';
+import {
+  PostsQueryStatusParam,
+  UserPostsQueryParams,
+} from '../shared/types/types.posts';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { useUserPosts } from './UserPostsContext';
 
@@ -19,6 +25,12 @@ export const UserHome = () => {
     }
   }, [error]);
 
+  const navigate = useNavigate();
+
+  const setFilter = (filter: UserPostsQueryParams) => {
+    navigate(`/${filter.status}`);
+  };
+
   if (error) {
     return <BoxCentered>{error.message}</BoxCentered>;
   }
@@ -27,23 +39,48 @@ export const UserHome = () => {
     return <BoxCentered>Loading...</BoxCentered>;
   }
 
-  if (posts.length === 0) {
-    return <BoxCentered>No posts found</BoxCentered>;
-  }
-
   return (
-    <Box
-      fill
-      gap="large"
-      pad={{ vertical: 'large', horizontal: 'medium' }}
-      justify="start">
-      {posts.map((post, ix) => (
-        <Box key={ix}>
-          <PostContext postInit={post}>
-            <PostCard></PostCard>
-          </PostContext>
-        </Box>
-      ))}
-    </Box>
+    <>
+      <Menu
+        label="Menu"
+        items={[
+          {
+            label: 'All',
+            onClick: () => setFilter({ status: PostsQueryStatusParam.ALL }),
+          },
+          {
+            label: 'For Review',
+            onClick: () => setFilter({ status: PostsQueryStatusParam.PENDING }),
+          },
+          {
+            label: 'Ignored',
+            onClick: () => setFilter({ status: PostsQueryStatusParam.IGNORED }),
+          },
+          {
+            label: 'Published',
+            onClick: () =>
+              setFilter({ status: PostsQueryStatusParam.PUBLISHED }),
+          },
+        ]}
+      />
+      <Box
+        fill
+        gap="large"
+        pad={{ vertical: 'large', horizontal: 'medium' }}
+        justify="start">
+        {posts.length === 0 && (
+          <BoxCentered>
+            <Text>No posts found</Text>
+          </BoxCentered>
+        )}
+        {posts.map((post, ix) => (
+          <Box key={ix}>
+            <PostContext postInit={post}>
+              <PostCard></PostCard>
+            </PostContext>
+          </Box>
+        ))}
+      </Box>
+    </>
   );
 };

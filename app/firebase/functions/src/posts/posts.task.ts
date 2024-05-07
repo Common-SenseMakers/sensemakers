@@ -2,7 +2,7 @@ import { getFunctions } from 'firebase-admin/functions';
 import { Request } from 'firebase-functions/v2/tasks';
 import { GoogleAuth } from 'google-auth-library';
 
-import { IS_EMULATOR } from '../config/config.runtime';
+import { IS_EMULATOR, PROJECT_ID } from '../config/config.runtime';
 import { envRuntime } from '../config/typedenv.runtime';
 import { logger } from '../instances/logger';
 import { createServices } from '../instances/services';
@@ -19,7 +19,7 @@ export const queueOnEmulator = async (url: string, data: any) => {
 };
 
 export const parseUserPostsTask = async (req: Request) => {
-  logger.debug('parseUserPostsTask', { data: req.data });
+  logger.debug(`parseUserPostsTask: userId: ${req.data.userId}`);
   const userId = req.data.userId;
   const { postsManager } = createServices();
   await postsManager.parseOfUser(userId);
@@ -56,7 +56,7 @@ async function getFunctionUrl(name: string, location: string) {
   if (!auth) {
     auth = new GoogleAuth({
       scopes: 'https://www.googleapis.com/auth/cloud-platform',
-      projectId: 'sensenets-staging',
+      projectId: PROJECT_ID.value(),
     });
   }
   const projectId = await auth.getProjectId();

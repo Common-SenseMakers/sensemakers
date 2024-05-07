@@ -1,10 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { createContext } from 'react';
+import { useLocation, useNavigation } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
 import { useToastContext } from '../app/ToastsContext';
-import { AppPostFull } from '../shared/types/types.posts';
+import {
+  AppPostFull,
+  PostsQueryStatusParam,
+  UserPostsQueryParams,
+} from '../shared/types/types.posts';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 
 interface PostContextType {
@@ -20,9 +25,28 @@ export const UserPostsContextValue = createContext<PostContextType | undefined>(
 export const UserPostsContext: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
-  const { show } = useToastContext();
   const { connectedUser } = useAccountContext();
   const appFetch = useAppFetch();
+
+  const [filter, setFilter] = useState<UserPostsQueryParams>({
+    status: PostsQueryStatusParam.ALL,
+  });
+
+  const location = useLocation();
+
+  console.log({ location });
+
+  useEffect(() => {
+    if (
+      Object.values(PostsQueryStatusParam)
+        .map((v) => `/${v}`)
+        .includes(location.pathname)
+    ) {
+      setFilter({
+        status: location.pathname.slice(1) as PostsQueryStatusParam,
+      });
+    }
+  }, [location]);
 
   /** everytime the connected user changes, trigger a fetch */
   const {
@@ -47,12 +71,13 @@ export const UserPostsContext: React.FC<{
     error: errorGetting,
     isFetching: isGetting,
   } = useQuery({
-    queryKey: ['getUserPosts', connectedUser],
+    queryKey: ['getUserPosts', connectedUser, filter],
     queryFn: async () => {
       if (connectedUser) {
-        const posts = await appFetch<AppPostFull[]>('/api/posts/getOfUser', {
-          userId: connectedUser.userId,
-        });
+        const posts = await appFetch<AppPostFull[], UserPostsQueryParams>(
+          '/api/posts/getOfUser',
+          filter
+        );
 
         return posts;
       }

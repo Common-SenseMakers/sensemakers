@@ -1,6 +1,9 @@
 import { RequestHandler } from 'express';
 
-import { AppPostFull } from '../../@shared/types/types.posts';
+import {
+  AppPostFull,
+  UserPostsQueryParams,
+} from '../../@shared/types/types.posts';
 import { IS_EMULATOR } from '../../config/config.runtime';
 import { envRuntime } from '../../config/typedenv.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
@@ -9,10 +12,11 @@ import { enqueueParseUserPosts } from '../posts.task';
 import {
   approvePostSchema,
   createDraftPostSchema,
-  getPostSchema,
+  getUserPostsQuerySchema,
+  postIdValidation,
 } from './posts.schema';
 
-const DEBUG = false;
+const DEBUG = true;
 
 /**
  * get user posts from the DB (does not fetch for more)
@@ -22,10 +26,15 @@ export const getUserPostsController: RequestHandler = async (
   response
 ) => {
   try {
+    const queryParams = (await getUserPostsQuerySchema.validate(
+      request.body
+    )) as UserPostsQueryParams;
+
+    logger.debug(`${request.path} - query parameters`, { queryParams });
     const userId = getAuthenticatedUser(request, true);
     const { postsManager } = getServices(request);
 
-    const posts = await postsManager.getOfUser(userId);
+    const posts = await postsManager.getOfUser(userId, queryParams);
     if (DEBUG) logger.debug(`${request.path}: posts`, { posts, userId });
     response.status(200).send({ success: true, data: posts });
   } catch (error) {
@@ -90,7 +99,7 @@ export const getPostController: RequestHandler = async (request, response) => {
     const userId = getAuthenticatedUser(request, true);
     const { postsManager } = getServices(request);
 
-    const payload = (await getPostSchema.validate(request.body)) as {
+    const payload = (await postIdValidation.validate(request.body)) as {
       postId: string;
     };
 
@@ -135,6 +144,31 @@ export const approvePostController: RequestHandler = async (
 
     if (DEBUG)
       logger.debug(`${request.path}: approvePost`, {
+        post: payload,
+      });
+
+    response.status(200).send({ success: true });
+  } catch (error) {
+    logger.error('error', error);
+    response.status(500).send({ success: false, error });
+  }
+};
+
+export const parsePostController: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    const { postsManager } = getServices(request);
+
+    const payload = (await postIdValidation.validate(request.body)) as {
+      postId: string;
+    };
+
+    postsManager.markAndParsePost(payload.postId);
+
+    if (DEBUG)
+      logger.debug(`${request.path}: parsePost: ${payload.postId}`, {
         post: payload,
       });
 

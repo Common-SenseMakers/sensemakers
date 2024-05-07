@@ -101,16 +101,6 @@ export class PostsProcessing {
     return postsCreated.filter((p) => p !== undefined) as PlatformPostCreated[];
   }
 
-  /** Wrapper to create drafts for many posts */
-  async createPostsDrafts(postIds: string[], manager: TransactionManager) {
-    const drafts = await Promise.all(
-      postIds.map(async (postId) => {
-        await this.createPostDrafts(postId, manager);
-      })
-    );
-    return drafts.flat();
-  }
-
   /** Create and store all platform posts for one post */
   async createPostDrafts(postId: string, manager: TransactionManager) {
     const appPostFull = await this.getPostFull(postId, manager, true);
