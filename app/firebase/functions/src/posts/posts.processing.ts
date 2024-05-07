@@ -13,6 +13,7 @@ import {
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
+  AppPostRepublishedStatus,
   AppPostReviewStatus,
 } from '../@shared/types/types.posts';
 import { TransactionManager } from '../db/transaction.manager';
@@ -192,7 +193,7 @@ export class PostsProcessing {
   async createAppPost(
     input: Omit<
       AppPostCreate,
-      'parsingStatus' | 'parsedStatus' | 'reviewedStatus'
+      'parsingStatus' | 'parsedStatus' | 'reviewedStatus' | 'republishedStatus'
     >,
     manager: TransactionManager
   ): Promise<AppPost> {
@@ -202,6 +203,7 @@ export class PostsProcessing {
       parsedStatus: AppPostParsedStatus.UNPROCESSED,
       parsingStatus: AppPostParsingStatus.IDLE,
       reviewedStatus: AppPostReviewStatus.PENDING,
+      republishedStatus: AppPostRepublishedStatus.PENDING,
     };
 
     /** Create the post */

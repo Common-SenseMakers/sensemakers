@@ -15,6 +15,7 @@ import {
   AppPostCreate,
   AppPostParsedStatus,
   AppPostParsingStatus,
+  AppPostRepublishedStatus,
   AppPostReviewStatus,
   PostsQueryStatusParam,
 } from '../../src/@shared/types/types.posts';
@@ -237,7 +238,8 @@ describe('03-process', () => {
             createdAtMs: 12345678,
             parsingStatus: AppPostParsingStatus.IDLE,
             parsedStatus: AppPostParsedStatus.PROCESSED,
-            reviewedStatus: AppPostReviewStatus.REVIEWED,
+            reviewedStatus: AppPostReviewStatus.APPROVED,
+            republishedStatus: AppPostRepublishedStatus.REPUBLISHED,
             semantics: 'semantics',
             mirrorsIds: [],
           },
@@ -256,7 +258,8 @@ describe('03-process', () => {
             createdAtMs: 12345678,
             parsingStatus: AppPostParsingStatus.IDLE,
             parsedStatus: AppPostParsedStatus.PROCESSED,
-            reviewedStatus: AppPostReviewStatus.REVIEWED,
+            reviewedStatus: AppPostReviewStatus.APPROVED,
+            republishedStatus: AppPostRepublishedStatus.REPUBLISHED,
             semantics: 'semantics',
             mirrorsIds: [],
           },
@@ -275,6 +278,7 @@ describe('03-process', () => {
             parsingStatus: AppPostParsingStatus.IDLE,
             parsedStatus: AppPostParsedStatus.PROCESSED,
             reviewedStatus: AppPostReviewStatus.PENDING,
+            republishedStatus: AppPostRepublishedStatus.REPUBLISHED,
             originalParsed: {
               filter_clasification: SciFilterClassfication.NOT_RESEARCH,
               semantics: 'semantics',
@@ -298,6 +302,7 @@ describe('03-process', () => {
             parsingStatus: AppPostParsingStatus.IDLE,
             parsedStatus: AppPostParsedStatus.PROCESSED,
             reviewedStatus: AppPostReviewStatus.PENDING,
+            republishedStatus: AppPostRepublishedStatus.REPUBLISHED,
             originalParsed: {
               filter_clasification: SciFilterClassfication.RESEARCH,
               semantics: 'semantics',

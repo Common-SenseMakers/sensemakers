@@ -23,7 +23,12 @@ export enum AppPostParsedStatus {
 }
 export enum AppPostReviewStatus {
   PENDING = 'pending',
-  REVIEWED = 'reviewed',
+  APPROVED = 'approved',
+  IGNORED = 'ignored',
+}
+export enum AppPostRepublishedStatus {
+  PENDING = 'pending',
+  REPUBLISHED = 'republished',
 }
 
 export interface AppPost extends GenericPostData {
@@ -34,6 +39,7 @@ export interface AppPost extends GenericPostData {
   parsingStatus: AppPostParsingStatus;
   parsedStatus: AppPostParsedStatus;
   reviewedStatus: AppPostReviewStatus;
+  republishedStatus: AppPostRepublishedStatus;
   originalParsed?: ParsePostResult;
   semantics?: AppPostSemantics;
   mirrorsIds: string[];
@@ -77,6 +83,7 @@ export type PostUpdate = Partial<
     | 'parsingStatus'
     | 'parsedStatus'
     | 'reviewedStatus'
+    | 'republishedStatus'
   >
 >;
 

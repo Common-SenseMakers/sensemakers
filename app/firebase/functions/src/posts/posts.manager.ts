@@ -1,17 +1,13 @@
-import {
-  ALL_PUBLISH_PLATFORMS,
-  AppUser,
-  PLATFORM,
-} from '../@shared/types/types';
+import { ALL_PUBLISH_PLATFORMS, AppUser } from '../@shared/types/types';
 import {
   PARSER_MODE,
   ParsePostRequest,
-  SciFilterClassfication,
   TopicsParams,
 } from '../@shared/types/types.parser';
 import {
   PlatformPost,
   PlatformPostCreated,
+  PlatformPostDraftApprova,
   PlatformPostPublishOrigin,
   PlatformPostPublishStatus,
 } from '../@shared/types/types.platform.posts';
@@ -20,9 +16,9 @@ import {
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
+  AppPostRepublishedStatus,
   AppPostReviewStatus,
   PostUpdate,
-  PostsQueryStatusParam,
   UserPostsQueryParams,
 } from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
@@ -167,51 +163,12 @@ export class PostsManager {
     const postsFull = await Promise.all(
       appPosts.map((post) => this.appendMirrors(post))
     );
-    let filteredPostsFull = postsFull;
 
-    /** perform query filtering at the level of PlatformPost now that we have the reduced set of PlatformPost's */
-    switch (queryParams?.status) {
-      case PostsQueryStatusParam.PUBLISHED:
-        filteredPostsFull = postsFull.filter((post) =>
-          post.mirrors.find(
-            (m) =>
-              m.platformId === PLATFORM.Nanopub &&
-              m.publishStatus === 'published'
-          )
-        );
-        break;
-      case PostsQueryStatusParam.IGNORED:
-        /** If the post has been reviewed and not nanopublished, or, if it hasn't been reviewed and
-         * is classified as NOT_RESEARCH by the classifier, it is considered ignored */
-        filteredPostsFull = postsFull.filter(
-          (post) =>
-            (post.reviewedStatus === 'reviewed' &&
-              post.mirrors.find(
-                (m) =>
-                  m.platformId === PLATFORM.Nanopub &&
-                  m.publishStatus === 'draft'
-              )) ||
-            (post.reviewedStatus === 'pending' &&
-              post.originalParsed?.filter_clasification ===
-                SciFilterClassfication.NOT_RESEARCH)
-        );
-        break;
-      case PostsQueryStatusParam.PENDING:
-        filteredPostsFull = postsFull.filter(
-          (post) =>
-            post.reviewedStatus === 'pending' &&
-            post.originalParsed?.filter_clasification !==
-              SciFilterClassfication.RESEARCH
-        );
-      case PostsQueryStatusParam.ALL:
-      default:
-        break;
-    }
     logger.debug(
-      `getOfUser query for user ${userId} has ${filteredPostsFull.length} results for query params: `,
+      `getOfUser query for user ${userId} has ${appPosts.length} results for query params: `,
       { queryParams }
     );
-    return filteredPostsFull;
+    return postsFull;
   }
 
   /**
@@ -325,11 +282,25 @@ export class PostsManager {
         throw new Error(`Only the author can approve a post: ${post.id}`);
       }
 
+      /** for now its either ignore all, or approve all */
+      if (post.reviewedStatus === AppPostReviewStatus.IGNORED) {
+        await this.processing.posts.updateContent(
+          post.id,
+          {
+            reviewedStatus: AppPostReviewStatus.IGNORED,
+          },
+          manager
+        );
+        return;
+      }
+
+      /** else mark as approved */
+
       /** force status transition */
       await this.processing.posts.updateContent(
         post.id,
         {
-          reviewedStatus: AppPostReviewStatus.REVIEWED,
+          reviewedStatus: AppPostReviewStatus.APPROVED,
         },
         manager
       );
@@ -344,7 +315,7 @@ export class PostsManager {
         await this.processing.posts.updateContent(
           post.id,
           {
-            reviewedStatus: AppPostReviewStatus.REVIEWED,
+            reviewedStatus: AppPostReviewStatus.APPROVED,
             content: post.content,
             semantics: post.semantics,
           },
@@ -353,9 +324,12 @@ export class PostsManager {
       }
 
       /** publish approved drafts */
-      await Promise.all(
+      const published = await Promise.all(
         post.mirrors.map(async (mirror) => {
-          if (mirror.draft && mirror.draft.postApproval === 'approved') {
+          if (
+            mirror.draft &&
+            mirror.draft.postApproval === PlatformPostDraftApprova.APPROVED
+          ) {
             const account = UsersHelper.getAccount(
               user,
               mirror.platformId,
@@ -383,9 +357,25 @@ export class PostsManager {
               },
               manager
             );
+
+            return true;
+          } else {
+            /** unpublished are the mirrors that were not posted (or fetched) */
+            return mirror.posted !== undefined;
           }
         })
       );
+
+      /** if all mirrors where published */
+      if (published.every((v) => v === true)) {
+        await this.processing.posts.updateContent(
+          post.id,
+          {
+            republishedStatus: AppPostRepublishedStatus.REPUBLISHED,
+          },
+          manager
+        );
+      }
     });
   }
 }

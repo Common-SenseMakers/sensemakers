@@ -4,6 +4,7 @@ import {
   AppPost,
   AppPostCreate,
   AppPostParsedStatus,
+  AppPostRepublishedStatus,
   AppPostReviewStatus,
   PostUpdate,
   PostsQueryStatusParam,
@@ -48,41 +49,43 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     const createdAtKey: keyof AppPost = 'createdAtMs';
     const authorKey: keyof AppPost = 'authorId';
     const reviewedStatusKey: keyof AppPost = 'reviewedStatus';
-    const parsedStatusKey: keyof AppPost = 'parsedStatus';
+    const republishedStatusKey: keyof AppPost = 'republishedStatus';
 
-    let query = this.db.collections.posts
-      .where(authorKey, '==', userId)
-      .orderBy(createdAtKey, 'desc');
+    /** status
+     * ALL: all posts
+     * PENDING: ReviewStatus.PENDING
+     */
 
-    /** perform query filtering at the level of AppPost */
-    switch (queryParams?.status) {
-      case PostsQueryStatusParam.PUBLISHED:
-        query = query.where(
-          reviewedStatusKey,
-          '==',
-          AppPostReviewStatus.REVIEWED
-        );
-        break;
-      case PostsQueryStatusParam.IGNORED:
-        query = query.where(
-          parsedStatusKey,
-          '==',
-          AppPostParsedStatus.PROCESSED
-        );
-        break;
-      case PostsQueryStatusParam.PENDING:
-        query = query.where(
-          reviewedStatusKey,
-          '==',
-          AppPostReviewStatus.PENDING
-        );
-        break;
-      case PostsQueryStatusParam.ALL:
-      default:
-        break;
-    }
+    const baseQuery = this.db.collections.posts.where(authorKey, '==', userId);
 
-    const posts = await query.get();
+    const filteredQuery = (() => {
+      if (queryParams) {
+        if (queryParams.status === PostsQueryStatusParam.ALL) {
+          return baseQuery;
+        }
+        if (queryParams.status === PostsQueryStatusParam.PENDING) {
+          return baseQuery.where(
+            reviewedStatusKey,
+            '==',
+            AppPostReviewStatus.PENDING
+          );
+        }
+        if (queryParams.status === PostsQueryStatusParam.PUBLISHED) {
+          return baseQuery.where(
+            republishedStatusKey,
+            '==',
+            AppPostRepublishedStatus.REPUBLISHED
+          );
+        }
+        return baseQuery;
+      } else {
+        return baseQuery;
+      }
+    })();
+
+    const finalQuery = filteredQuery.orderBy(createdAtKey, 'desc');
+
+    const posts = await finalQuery.get();
 
     return posts.docs.map((doc) => ({
       id: doc.id,

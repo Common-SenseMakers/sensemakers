@@ -7,6 +7,7 @@ import {
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
+  AppPostRepublishedStatus,
   AppPostReviewStatus,
 } from '../../src/@shared/types/types.posts';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
@@ -146,6 +147,7 @@ describe('02-platforms', () => {
           parsedStatus: AppPostParsedStatus.PROCESSED,
           parsingStatus: AppPostParsingStatus.IDLE,
           reviewedStatus: AppPostReviewStatus.PENDING,
+          republishedStatus: AppPostRepublishedStatus.PENDING,
           mirrors: [],
         };
 
