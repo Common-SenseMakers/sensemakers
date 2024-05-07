@@ -15,7 +15,7 @@ export const SemanticsEditor = (
   }
 
   return (
-    <Box style={{ width: '100%' }} pad={{ vertical: 'large' }}>
+    <Box style={{ width: '100%' }}>
       <Patterns {...props}></Patterns>
     </Box>
   );

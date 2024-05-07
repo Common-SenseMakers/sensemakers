@@ -2,12 +2,12 @@ import { Box, Text } from 'grommet';
 
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { AppButton, AppCard } from '../ui-components';
-import { Loading } from '../ui-components/LoadingDiv';
+import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
 import { usePost } from './PostContext';
 import { PostText } from './PostText';
 
 export const PostContent = () => {
-  const { post, reparse, isReparsing } = usePost();
+  const { post, reparse, isParsing } = usePost();
 
   const semanticsUpdated = (newSemantics: string) => {
     console.log({ newSemantics });
@@ -20,16 +20,17 @@ export const PostContent = () => {
       <Box elevation="small" pad="medium">
         <PostText text={post?.content}></PostText>
       </Box>
-      {isReparsing ? <Loading></Loading> : <></>}
-      {parsingError ? (
-        <AppCard margin={{ vertical: 'medium' }}>
-          <Text>There was an error parsing this post</Text>
-          <AppButton label="Retry" onClick={() => reparse()}></AppButton>
-        </AppCard>
-      ) : (
-        <></>
-      )}
-      <Box>
+
+      <Box margin={{ top: 'large' }}>
+        {isParsing ? <LoadingDiv></LoadingDiv> : <></>}
+        {parsingError ? (
+          <AppCard margin={{ vertical: 'large' }}>
+            <Text>There was an error parsing this post</Text>
+            <AppButton label="Retry" onClick={() => reparse()}></AppButton>
+          </AppCard>
+        ) : (
+          <></>
+        )}
         <SemanticsEditor
           isLoading={false}
           semantics={post?.semantics}

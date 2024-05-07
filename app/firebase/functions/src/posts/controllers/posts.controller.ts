@@ -12,7 +12,7 @@ import {
   postIdValidation,
 } from './posts.schema';
 
-const DEBUG = false;
+const DEBUG = true;
 
 /**
  * get user posts from the DB (does not fetch for more)

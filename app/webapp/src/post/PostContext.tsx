@@ -24,7 +24,7 @@ interface PostContextType {
   post: AppPostFull | undefined;
   author: AppUserRead;
   reparse: () => void;
-  isReparsing: boolean;
+  isParsing: boolean;
   nanopubDraft: PlatformPostDraft | undefined;
   nanopubPublished: NanopubInfo | undefined;
   tweet?: PlatformPost<TweetV2>;
@@ -124,7 +124,7 @@ export const PostContext: React.FC<{
     }
   };
 
-  const isReparsing = _isReparsing || post?.parsingStatus === 'processing';
+  const isParsing = _isReparsing || post?.parsingStatus === 'processing';
 
   /** derive nanopub details from current post */
   const { data: nanopubPublished } = useQuery({
@@ -195,7 +195,7 @@ export const PostContext: React.FC<{
         nanopubPublished,
         nanopubDraft,
         reparse,
-        isReparsing,
+        isParsing,
       }}>
       {children}
     </PostContextValue.Provider>
