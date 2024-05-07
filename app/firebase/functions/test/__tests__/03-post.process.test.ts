@@ -6,9 +6,18 @@ import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
 import { SciFilterClassfication } from '../../src/@shared/types/types.parser';
 import {
   PlatformPostCreate,
+  PlatformPostDraftApprova,
   PlatformPostPosted,
+  PlatformPostPublishOrigin,
+  PlatformPostPublishStatus,
 } from '../../src/@shared/types/types.platform.posts';
-import { AppPostCreate } from '../../src/@shared/types/types.posts';
+import {
+  AppPostCreate,
+  AppPostParsedStatus,
+  AppPostParsingStatus,
+  AppPostReviewStatus,
+  PostsQueryStatusParam,
+} from '../../src/@shared/types/types.posts';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { logger } from '../../src/instances/logger';
@@ -201,7 +210,7 @@ describe('03-process', () => {
       /** sign */
       const signed = await signNanopublication(draft, rsaKeys, '');
       nanopub.draft.post = signed.rdf();
-      nanopub.draft.postApproval = 'approved';
+      nanopub.draft.postApproval = PlatformPostDraftApprova.APPROVED;
 
       /** send updated post (content and semantics did not changed) */
       await services.postsManager.approvePost(pendingPost, appUser.userId);
@@ -217,7 +226,7 @@ describe('03-process', () => {
   });
   describe.only('query and filter', async () => {
     before(async () => {
-      const { postsRepository, platformPostsRepository } = services;
+      const { posts, platformPosts } = services.postsManager.processing;
       const appPostCreates: [AppPostCreate, PlatformPostCreate][] = [
         /** Published posts */
         [
@@ -226,16 +235,16 @@ describe('03-process', () => {
             authorId: 'test-user-id',
             origin: PLATFORM.Nanopub,
             createdAtMs: 12345678,
-            parsingStatus: 'idle',
-            parsedStatus: 'processed',
-            reviewedStatus: 'reviewed',
+            parsingStatus: AppPostParsingStatus.IDLE,
+            parsedStatus: AppPostParsedStatus.PROCESSED,
+            reviewedStatus: AppPostReviewStatus.REVIEWED,
             semantics: 'semantics',
             mirrorsIds: [],
           },
           {
             platformId: PLATFORM.Nanopub,
-            publishStatus: 'published',
-            publishOrigin: 'posted',
+            publishStatus: PlatformPostPublishStatus.PUBLISHED,
+            publishOrigin: PlatformPostPublishOrigin.POSTED,
           },
         ],
         /** Ignored posts */
@@ -245,16 +254,16 @@ describe('03-process', () => {
             authorId: 'test-user-id',
             origin: PLATFORM.Nanopub,
             createdAtMs: 12345678,
-            parsingStatus: 'idle',
-            parsedStatus: 'processed',
-            reviewedStatus: 'reviewed',
+            parsingStatus: AppPostParsingStatus.IDLE,
+            parsedStatus: AppPostParsedStatus.PROCESSED,
+            reviewedStatus: AppPostReviewStatus.REVIEWED,
             semantics: 'semantics',
             mirrorsIds: [],
           },
           {
             platformId: PLATFORM.Nanopub,
-            publishStatus: 'draft',
-            publishOrigin: 'posted',
+            publishStatus: PlatformPostPublishStatus.DRAFT,
+            publishOrigin: PlatformPostPublishOrigin.POSTED,
           },
         ],
         [
@@ -263,9 +272,9 @@ describe('03-process', () => {
             authorId: 'test-user-id',
             origin: PLATFORM.Nanopub,
             createdAtMs: 12345678,
-            parsingStatus: 'idle',
-            parsedStatus: 'processed',
-            reviewedStatus: 'pending',
+            parsingStatus: AppPostParsingStatus.IDLE,
+            parsedStatus: AppPostParsedStatus.PROCESSED,
+            reviewedStatus: AppPostReviewStatus.PENDING,
             originalParsed: {
               filter_clasification: SciFilterClassfication.NOT_RESEARCH,
               semantics: 'semantics',
@@ -275,8 +284,8 @@ describe('03-process', () => {
           },
           {
             platformId: PLATFORM.Nanopub,
-            publishStatus: 'draft',
-            publishOrigin: 'posted',
+            publishStatus: PlatformPostPublishStatus.DRAFT,
+            publishOrigin: PlatformPostPublishOrigin.POSTED,
           },
         ],
         /** For review posts */
@@ -286,9 +295,9 @@ describe('03-process', () => {
             authorId: 'test-user-id',
             origin: PLATFORM.Nanopub,
             createdAtMs: 12345678,
-            parsingStatus: 'idle',
-            parsedStatus: 'processed',
-            reviewedStatus: 'pending',
+            parsingStatus: AppPostParsingStatus.IDLE,
+            parsedStatus: AppPostParsedStatus.PROCESSED,
+            reviewedStatus: AppPostReviewStatus.PENDING,
             originalParsed: {
               filter_clasification: SciFilterClassfication.RESEARCH,
               semantics: 'semantics',
@@ -298,44 +307,44 @@ describe('03-process', () => {
           },
           {
             platformId: PLATFORM.Nanopub,
-            publishStatus: 'draft',
-            publishOrigin: 'posted',
+            publishStatus: PlatformPostPublishStatus.DRAFT,
+            publishOrigin: PlatformPostPublishOrigin.POSTED,
           },
         ],
       ];
 
       await services.db.run(async (manager) => {
         appPostCreates.forEach(([appPostCreate, platformPostCreate]) => {
-          const appPost = postsRepository.create(appPostCreate, manager);
-          const platformPost = platformPostsRepository.create(
+          const appPost = posts.create(appPostCreate, manager);
+          const platformPost = platformPosts.create(
             platformPostCreate,
             manager
           );
-          postsRepository.addMirror(appPost.id, platformPost.id, manager);
+          posts.addMirror(appPost.id, platformPost.id, manager);
         });
       });
     });
     it('gets all posts from a user', async () => {
       const posts = await services.postsManager.getOfUser('test-user-id', {
-        status: 'all',
+        status: PostsQueryStatusParam.ALL,
       });
       expect(posts).to.have.length(4);
     });
     it('gets all published posts from a user', async () => {
       const posts = await services.postsManager.getOfUser('test-user-id', {
-        status: 'published',
+        status: PostsQueryStatusParam.PUBLISHED,
       });
       expect(posts).to.have.length(1);
     });
     it('gets all for review posts from a user', async () => {
       const posts = await services.postsManager.getOfUser('test-user-id', {
-        status: 'for review',
+        status: PostsQueryStatusParam.PENDING,
       });
       expect(posts).to.have.length(1);
     });
     it('gets all ignored posts from a user', async () => {
       const posts = await services.postsManager.getOfUser('test-user-id', {
-        status: 'ignored',
+        status: PostsQueryStatusParam.IGNORED,
       });
       expect(posts).to.have.length(2);
     });

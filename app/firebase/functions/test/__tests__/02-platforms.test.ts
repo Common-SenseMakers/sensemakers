@@ -3,7 +3,12 @@ import { expect } from 'chai';
 import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
 import { PlatformPostDraft } from '../../src/@shared/types/types.platform.posts';
-import { AppPostFull } from '../../src/@shared/types/types.posts';
+import {
+  AppPostFull,
+  AppPostParsedStatus,
+  AppPostParsingStatus,
+  AppPostReviewStatus,
+} from '../../src/@shared/types/types.posts';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { logger } from '../../src/instances/logger';
@@ -138,9 +143,9 @@ describe('02-platforms', () => {
           content: 'test content',
           semantics: '',
           origin: PLATFORM.Twitter,
-          parsedStatus: 'processed',
-          parsingStatus: 'idle',
-          reviewedStatus: 'pending',
+          parsedStatus: AppPostParsedStatus.PROCESSED,
+          parsingStatus: AppPostParsingStatus.IDLE,
+          reviewedStatus: AppPostReviewStatus.PENDING,
           mirrors: [],
         };
 
