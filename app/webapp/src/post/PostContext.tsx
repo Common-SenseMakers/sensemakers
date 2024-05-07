@@ -23,6 +23,8 @@ interface NanopubInfo {
 interface PostContextType {
   post: AppPostFull | undefined;
   author: AppUserRead;
+  reparse: () => void;
+  isReparsing: boolean;
   nanopubDraft: PlatformPostDraft | undefined;
   nanopubPublished: NanopubInfo | undefined;
   tweet?: PlatformPost<TweetV2>;
@@ -78,7 +80,10 @@ export const PostContext: React.FC<{
    * one is received*/
   useEffect(() => {
     const unsubscribe = subscribeToUpdates(`post-${postId}`, refetch);
-    return () => unsubscribe();
+    return () => {
+      if (DEBUG) console.log('unsubscribing to updates post', postId);
+      unsubscribe();
+    };
   }, []);
 
   /**
@@ -86,14 +91,40 @@ export const PostContext: React.FC<{
   useEffect(() => {
     if (post && post.mirrors) {
       const unsubscribes = post.mirrors.map((m) => {
-        return subscribeToUpdates(`platformPost-${m.id}`, refetch);
+        return {
+          unsubscribe: subscribeToUpdates(`platformPost-${m.id}`, refetch),
+          platformPostId: m.id,
+        };
       });
 
       return () => {
-        unsubscribes.forEach((unsubscribe) => unsubscribe());
+        unsubscribes.forEach((unsubscribe) => {
+          if (DEBUG)
+            console.log(
+              'unsubscribing to updates platformPost',
+              unsubscribe.platformPostId
+            );
+          unsubscribe.unsubscribe();
+        });
       };
     }
   }, [post]);
+
+  const [_isReparsing, setIsReparsing] = React.useState(false);
+
+  const reparse = async () => {
+    try {
+      setIsReparsing(true);
+      await appFetch('/api/posts/parse', { postId: post?.id });
+      setIsReparsing(false);
+    } catch (e: any) {
+      setIsReparsing(false);
+      console.error(e);
+      throw new Error(e);
+    }
+  };
+
+  const isReparsing = _isReparsing || post?.parsingStatus === 'processing';
 
   /** derive nanopub details from current post */
   const { data: nanopubPublished } = useQuery({
@@ -157,7 +188,15 @@ export const PostContext: React.FC<{
 
   return (
     <PostContextValue.Provider
-      value={{ post, author, tweet, nanopubPublished, nanopubDraft }}>
+      value={{
+        post,
+        author,
+        tweet,
+        nanopubPublished,
+        nanopubDraft,
+        reparse,
+        isReparsing,
+      }}>
       {children}
     </PostContextValue.Provider>
   );

@@ -1,4 +1,5 @@
 import { Box, Text } from 'grommet';
+import { StatusCritical } from 'grommet-icons';
 import { useNavigate } from 'react-router-dom';
 
 import { AppIcon } from '../app/icons/AppIcon';
@@ -16,7 +17,15 @@ export const PostCard = () => {
     navigate(`/post/${post?.id}`);
   };
 
-  const processed = post && post.parsedStatus === 'processed';
+  const processStatusIcon = (() => {
+    const processed = post && post.parsedStatus === 'processed';
+    const processing = post && post.parsingStatus === 'processing';
+    const errored = post && post.parsingStatus === 'errored';
+
+    if (processed) return <AppIcon src="network.svg"></AppIcon>;
+    if (processing) return <Loading></Loading>;
+    if (errored) return <StatusCritical></StatusCritical>;
+  })();
 
   return (
     <Box
@@ -30,11 +39,7 @@ export const PostCard = () => {
       onClick={handleClick}>
       <PostText text={post?.content}></PostText>
       <Box style={{ position: 'absolute', right: '10px', bottom: '10px' }}>
-        {processed ? (
-          <AppIcon src="network.svg"></AppIcon>
-        ) : (
-          <Loading></Loading>
-        )}
+        {processStatusIcon}
       </Box>
     </Box>
   );

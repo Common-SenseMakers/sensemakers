@@ -9,7 +9,7 @@ import { enqueueParseUserPosts } from '../posts.task';
 import {
   approvePostSchema,
   createDraftPostSchema,
-  getPostSchema,
+  postIdValidation,
 } from './posts.schema';
 
 const DEBUG = false;
@@ -90,7 +90,7 @@ export const getPostController: RequestHandler = async (request, response) => {
     const userId = getAuthenticatedUser(request, true);
     const { postsManager } = getServices(request);
 
-    const payload = (await getPostSchema.validate(request.body)) as {
+    const payload = (await postIdValidation.validate(request.body)) as {
       postId: string;
     };
 
@@ -135,6 +135,31 @@ export const approvePostController: RequestHandler = async (
 
     if (DEBUG)
       logger.debug(`${request.path}: approvePost`, {
+        post: payload,
+      });
+
+    response.status(200).send({ success: true });
+  } catch (error) {
+    logger.error('error', error);
+    response.status(500).send({ success: false, error });
+  }
+};
+
+export const parsePostController: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    const { postsManager } = getServices(request);
+
+    const payload = (await postIdValidation.validate(request.body)) as {
+      postId: string;
+    };
+
+    postsManager.markAndParsePost(payload.postId);
+
+    if (DEBUG)
+      logger.debug(`${request.path}: parsePost: ${payload.postId}`, {
         post: payload,
       });
 

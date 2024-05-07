@@ -141,48 +141,7 @@ export class PostsManager {
 
   async parseOfUser(userId: string) {
     const postIds = await this.processing.posts.getNonParsedOfUser(userId);
-
-    await Promise.all(
-      postIds.map(async (postId) => {
-        /**
-         * check if not being processed
-         * mark as being processed
-         * commit transaction */
-        const shouldParse = await this.db.run(async (manager) => {
-          const post = await this.processing.posts.get(postId, manager, true);
-          if (post.parsingStatus === 'processing') {
-            logger.debug(`parseOfUser - already parsing ${postId}`);
-            return false;
-          }
-
-          logger.debug(`parseOfUser - marking as parsing ${postId}`);
-          await this.processing.posts.updateContent(
-            postId,
-            { parsingStatus: 'processing' },
-            manager
-          );
-
-          return true;
-        });
-
-        if (shouldParse) {
-          /** then process */
-          await this.db.run(async (manager) => {
-            try {
-              await this.parsePost(postId, manager);
-              await this.processing.createPostsDrafts(postIds, manager);
-            } catch (err: any) {
-              logger.error(`Error parsing post ${postId}`, err);
-              await this.processing.posts.updateContent(
-                postId,
-                { parsingStatus: 'errored' },
-                manager
-              );
-            }
-          });
-        }
-      })
-    );
+    await Promise.all(postIds.map((postId) => this.markAndParsePost(postId)));
   }
 
   /** get pending posts AppPostFull of user, cannot be part of a transaction */
@@ -220,13 +179,43 @@ export class PostsManager {
     );
   }
 
-  async parsePosts(postIds: string[], manager: TransactionManager) {
-    return Promise.all(
-      postIds.map((postId) => this.parsePost(postId, manager))
-    );
+  async markAndParsePost(postId: string) {
+    const shouldParse = await this.db.run(async (manager) => {
+      const post = await this.processing.posts.get(postId, manager, true);
+      if (post.parsingStatus === 'processing') {
+        logger.debug(`parseOfUser - already parsing ${postId}`);
+        return false;
+      }
+
+      logger.debug(`parseOfUser - marking as parsing ${postId}`);
+      await this.processing.posts.updateContent(
+        postId,
+        { parsingStatus: 'processing' },
+        manager
+      );
+
+      return true;
+    });
+
+    if (shouldParse) {
+      /** then process */
+      await this.db.run(async (manager) => {
+        try {
+          await this.parsePost(postId, manager);
+          await this.processing.createPostDrafts(postId, manager);
+        } catch (err: any) {
+          logger.error(`Error parsing post ${postId}`, err);
+          await this.processing.posts.updateContent(
+            postId,
+            { parsingStatus: 'errored' },
+            manager
+          );
+        }
+      });
+    }
   }
 
-  async parsePost(postId: string, manager: TransactionManager) {
+  protected async parsePost(postId: string, manager: TransactionManager) {
     const post = await this.processing.posts.get(postId, manager, true);
     if (DEBUG) logger.debug('parsePost - start', { postId, post });
 

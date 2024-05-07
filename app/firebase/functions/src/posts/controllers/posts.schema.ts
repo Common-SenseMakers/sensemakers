@@ -1,6 +1,6 @@
 import { array, object, string } from 'yup';
 
-export const getPostSchema = object({
+export const postIdValidation = object({
   postId: string().required(),
 }).noUnknown(true);
 

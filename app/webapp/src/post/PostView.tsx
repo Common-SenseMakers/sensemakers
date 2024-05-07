@@ -1,5 +1,4 @@
-import { Box } from 'grommet';
-import { connect } from 'http2';
+import { Box, Text } from 'grommet';
 
 import { useAppFetch } from '../api/app.fetch';
 import { AppBottomNav } from '../app/layout/AppBottomNav';
@@ -87,6 +86,9 @@ export const PostView = (props: {
           <PostHeader
             prevPostId={prevPostId}
             nextPostId={nextPostId}></PostHeader>
+          <Box align="center" pad="small">
+            <Text size="xsmall">{post?.id}</Text>
+          </Box>
           <PostContent></PostContent>
         </Box>
       }

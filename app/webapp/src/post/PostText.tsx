@@ -8,7 +8,5 @@ export const PostText = (props: { text?: string }) => {
     return <></>;
   }
 
-  console.log({ text });
-
   return <Markdown>{text}</Markdown>;
 };
