@@ -3,7 +3,12 @@ import { TweetV2SingleResult } from 'twitter-api-v2';
 
 import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
-import { PlatformPostPosted } from '../../src/@shared/types/types.platform.posts';
+import { SciFilterClassfication } from '../../src/@shared/types/types.parser';
+import {
+  PlatformPostCreate,
+  PlatformPostPosted,
+} from '../../src/@shared/types/types.platform.posts';
+import { AppPostCreate } from '../../src/@shared/types/types.posts';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { logger } from '../../src/instances/logger';
@@ -16,7 +21,7 @@ import { createTestAppUsers } from '../utils/user.factory';
 import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
 import { getTestServices } from './test.services';
 
-describe.only('03-process', () => {
+describe('03-process', () => {
   let rsaKeys: RSAKeys | undefined;
   const services = getTestServices({
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
@@ -208,6 +213,131 @@ describe.only('03-process', () => {
 
       expect(approved).to.not.be.undefined;
       expect(approved.reviewedStatus).to.equal('reviewed');
+    });
+  });
+  describe.only('query and filter', async () => {
+    before(async () => {
+      const { postsRepository, platformPostsRepository } = services;
+      const appPostCreates: [AppPostCreate, PlatformPostCreate][] = [
+        /** Published posts */
+        [
+          {
+            content: 'test content 1',
+            authorId: 'test-user-id',
+            origin: PLATFORM.Nanopub,
+            createdAtMs: 12345678,
+            parsingStatus: 'idle',
+            parsedStatus: 'processed',
+            reviewedStatus: 'reviewed',
+            semantics: 'semantics',
+            mirrorsIds: [],
+          },
+          {
+            platformId: PLATFORM.Nanopub,
+            publishStatus: 'published',
+            publishOrigin: 'posted',
+          },
+        ],
+        /** Ignored posts */
+        [
+          {
+            content: 'test content 2',
+            authorId: 'test-user-id',
+            origin: PLATFORM.Nanopub,
+            createdAtMs: 12345678,
+            parsingStatus: 'idle',
+            parsedStatus: 'processed',
+            reviewedStatus: 'reviewed',
+            semantics: 'semantics',
+            mirrorsIds: [],
+          },
+          {
+            platformId: PLATFORM.Nanopub,
+            publishStatus: 'draft',
+            publishOrigin: 'posted',
+          },
+        ],
+        [
+          {
+            content: 'test content 3',
+            authorId: 'test-user-id',
+            origin: PLATFORM.Nanopub,
+            createdAtMs: 12345678,
+            parsingStatus: 'idle',
+            parsedStatus: 'processed',
+            reviewedStatus: 'pending',
+            originalParsed: {
+              filter_clasification: SciFilterClassfication.NOT_RESEARCH,
+              semantics: 'semantics',
+            },
+            semantics: 'semantics',
+            mirrorsIds: [],
+          },
+          {
+            platformId: PLATFORM.Nanopub,
+            publishStatus: 'draft',
+            publishOrigin: 'posted',
+          },
+        ],
+        /** For review posts */
+        [
+          {
+            content: 'test content 4',
+            authorId: 'test-user-id',
+            origin: PLATFORM.Nanopub,
+            createdAtMs: 12345678,
+            parsingStatus: 'idle',
+            parsedStatus: 'processed',
+            reviewedStatus: 'pending',
+            originalParsed: {
+              filter_clasification: SciFilterClassfication.RESEARCH,
+              semantics: 'semantics',
+            },
+            semantics: 'semantics',
+            mirrorsIds: [],
+          },
+          {
+            platformId: PLATFORM.Nanopub,
+            publishStatus: 'draft',
+            publishOrigin: 'posted',
+          },
+        ],
+      ];
+
+      await services.db.run(async (manager) => {
+        appPostCreates.forEach(([appPostCreate, platformPostCreate]) => {
+          const appPost = postsRepository.create(appPostCreate, manager);
+          const platformPost = platformPostsRepository.create(
+            platformPostCreate,
+            manager
+          );
+          postsRepository.addMirror(appPost.id, platformPost.id, manager);
+        });
+      });
+    });
+    it('gets all posts from a user', async () => {
+      const posts = await services.postsManager.getOfUser('test-user-id', {
+        status: 'all',
+      });
+      expect(posts).to.have.length(4);
+    });
+    it('gets all published posts from a user', async () => {
+      const posts = await services.postsManager.getOfUser('test-user-id', {
+        status: 'published',
+      });
+      expect(posts).to.have.length(1);
+    });
+    it('gets all for review posts from a user', async () => {
+      const posts = await services.postsManager.getOfUser('test-user-id', {
+        status: 'for review',
+      });
+      expect(posts).to.have.length(1);
+    });
+    it('gets all ignored posts from a user', async () => {
+      const posts = await services.postsManager.getOfUser('test-user-id', {
+        status: 'ignored',
+      });
+      expect(posts).to.have.length(2);
     });
   });
 });
