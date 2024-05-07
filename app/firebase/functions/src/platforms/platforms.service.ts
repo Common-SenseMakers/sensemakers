@@ -9,6 +9,8 @@ import {
 import {
   PlatformPostCreate,
   PlatformPostPublish,
+  PlatformPostPublishOrigin,
+  PlatformPostPublishStatus,
 } from '../@shared/types/types.platform.posts';
 import { TransactionManager } from '../db/transaction.manager';
 import {
@@ -63,8 +65,8 @@ export class PlatformsService {
     return fetched.map((fetchedPost) => {
       const platformPost: PlatformPostCreate = {
         platformId: platformId as PUBLISHABLE_PLATFORMS,
-        publishStatus: 'published',
-        publishOrigin: 'fetched',
+        publishStatus: PlatformPostPublishStatus.PUBLISHED,
+        publishOrigin: PlatformPostPublishOrigin.FETCHED,
         posted: fetchedPost,
       };
 

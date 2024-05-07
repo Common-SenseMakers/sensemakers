@@ -3,11 +3,17 @@ import {
   PlatformPost,
   PlatformPostCreate,
   PlatformPostCreated,
+  PlatformPostDraftApprova,
+  PlatformPostPublishOrigin,
+  PlatformPostPublishStatus,
 } from '../@shared/types/types.platform.posts';
 import {
   AppPost,
   AppPostCreate,
   AppPostFull,
+  AppPostParsedStatus,
+  AppPostParsingStatus,
+  AppPostReviewStatus,
 } from '../@shared/types/types.posts';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
@@ -148,10 +154,10 @@ export class PostsProcessing {
 
             const draft: PlatformPostCreate = {
               platformId,
-              publishStatus: 'draft',
-              publishOrigin: 'posted',
+              publishStatus: PlatformPostPublishStatus.DRAFT,
+              publishOrigin: PlatformPostPublishOrigin.POSTED,
               draft: {
-                postApproval: 'pending',
+                postApproval: PlatformPostDraftApprova.PENDING,
                 user_id: account.user_id,
                 post: draftPost.post,
               },
@@ -193,9 +199,9 @@ export class PostsProcessing {
     /** Build the AppPostFull object */
     const postCreate: AppPostCreate = {
       ...input,
-      parsedStatus: 'unprocessed',
-      parsingStatus: 'idle',
-      reviewedStatus: 'pending',
+      parsedStatus: AppPostParsedStatus.UNPROCESSED,
+      parsingStatus: AppPostParsingStatus.IDLE,
+      reviewedStatus: AppPostReviewStatus.PENDING,
     };
 
     /** Create the post */

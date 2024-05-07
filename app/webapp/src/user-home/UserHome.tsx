@@ -10,12 +10,13 @@ import {
   PostsQueryStatusParam,
   UserPostsQueryParams,
 } from '../shared/types/types.posts';
+import { AppButton } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { useUserPosts } from './UserPostsContext';
 
 export const UserHome = () => {
   const { show } = useToastContext();
-  const { posts, isLoading, error } = useUserPosts();
+  const { posts, isLoading, error, more } = useUserPosts();
 
   useEffect(() => {
     if (error) {
@@ -80,6 +81,7 @@ export const UserHome = () => {
             </PostContext>
           </Box>
         ))}
+        <AppButton label="more" onClick={() => more()}></AppButton>
       </Box>
     </>
   );

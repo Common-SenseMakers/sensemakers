@@ -14,6 +14,7 @@ import { useAccountContext } from '../user-login/contexts/AccountContext';
 
 interface PostContextType {
   posts?: AppPostFull[];
+  more: () => void;
   isLoading: boolean;
   error: Error | null;
 }
@@ -48,24 +49,7 @@ export const UserPostsContext: React.FC<{
     }
   }, [location]);
 
-  /** everytime the connected user changes, trigger a fetch */
-  const {
-    isSuccess: fetched,
-    isFetching: isFetching,
-    error: errorFetching,
-  } = useQuery({
-    queryKey: ['fetchUserPosts', connectedUser?.userId],
-    queryFn: () => {
-      if (connectedUser) {
-        return appFetch('/api/posts/fetch', {
-          userId: connectedUser.userId,
-        });
-      }
-      return null;
-    },
-  });
-
-  /** once fetched, get the posts */
+  /** always refetch for a connected user and filter combination */
   const {
     data: _posts,
     error: errorGetting,
@@ -83,7 +67,6 @@ export const UserPostsContext: React.FC<{
       }
       return null;
     },
-    enabled: fetched,
   });
 
   /** convert null to undefined */
@@ -93,8 +76,9 @@ export const UserPostsContext: React.FC<{
     <UserPostsContextValue.Provider
       value={{
         posts,
-        isLoading: isFetching || isGetting,
-        error: errorFetching || errorGetting,
+        isLoading: isGetting,
+        error: errorGetting,
+        more: () => {},
       }}>
       {children}
     </UserPostsContextValue.Provider>

@@ -4,6 +4,7 @@ import { useAppFetch } from '../api/app.fetch';
 import { AppBottomNav } from '../app/layout/AppBottomNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { PLATFORM } from '../shared/types/types';
+import { PlatformPostDraftApprova } from '../shared/types/types.platform.posts';
 import { AppPostFull } from '../shared/types/types.posts';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
@@ -34,7 +35,7 @@ export const PostView = (props: {
 
     if (signNanopublication) {
       const signed = await signNanopublication(nanopub.draft.post);
-      nanopub.draft.postApproval = 'approved';
+      nanopub.draft.postApproval = PlatformPostDraftApprova.APPROVED;
       nanopub.draft.post = signed.rdf();
 
       await appFetch<void, AppPostFull>('/api/posts/approve', post);

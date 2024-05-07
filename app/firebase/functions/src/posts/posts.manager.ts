@@ -12,11 +12,17 @@ import {
 import {
   PlatformPost,
   PlatformPostCreated,
+  PlatformPostPublishOrigin,
+  PlatformPostPublishStatus,
 } from '../@shared/types/types.platform.posts';
 import {
   AppPost,
   AppPostFull,
+  AppPostParsedStatus,
+  AppPostParsingStatus,
+  AppPostReviewStatus,
   PostUpdate,
+  PostsQueryStatusParam,
   UserPostsQueryParams,
 } from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
@@ -165,7 +171,7 @@ export class PostsManager {
 
     /** perform query filtering at the level of PlatformPost now that we have the reduced set of PlatformPost's */
     switch (queryParams?.status) {
-      case 'published':
+      case PostsQueryStatusParam.PUBLISHED:
         filteredPostsFull = postsFull.filter((post) =>
           post.mirrors.find(
             (m) =>
@@ -174,7 +180,7 @@ export class PostsManager {
           )
         );
         break;
-      case 'ignored':
+      case PostsQueryStatusParam.IGNORED:
         /** If the post has been reviewed and not nanopublished, or, if it hasn't been reviewed and
          * is classified as NOT_RESEARCH by the classifier, it is considered ignored */
         filteredPostsFull = postsFull.filter(
@@ -190,14 +196,14 @@ export class PostsManager {
                 SciFilterClassfication.NOT_RESEARCH)
         );
         break;
-      case 'for review':
+      case PostsQueryStatusParam.PENDING:
         filteredPostsFull = postsFull.filter(
           (post) =>
             post.reviewedStatus === 'pending' &&
             post.originalParsed?.filter_clasification !==
               SciFilterClassfication.RESEARCH
         );
-      case 'all':
+      case PostsQueryStatusParam.ALL:
       default:
         break;
     }
@@ -243,7 +249,7 @@ export class PostsManager {
       logger.debug(`parseOfUser - marking as parsing ${postId}`);
       await this.processing.posts.updateContent(
         postId,
-        { parsingStatus: 'processing' },
+        { parsingStatus: AppPostParsingStatus.PROCESSING },
         manager
       );
 
@@ -260,7 +266,7 @@ export class PostsManager {
           logger.error(`Error parsing post ${postId}`, err);
           await this.processing.posts.updateContent(
             postId,
-            { parsingStatus: 'errored' },
+            { parsingStatus: AppPostParsingStatus.ERRORED },
             manager
           );
         }
@@ -289,8 +295,8 @@ export class PostsManager {
     const update: PostUpdate = {
       semantics: parserResult.semantics,
       originalParsed: parserResult,
-      parsedStatus: 'processed',
-      parsingStatus: 'idle',
+      parsedStatus: AppPostParsedStatus.PROCESSED,
+      parsingStatus: AppPostParsingStatus.IDLE,
     };
 
     if (DEBUG) logger.debug('parsePost - done', { postId, update });
@@ -323,7 +329,7 @@ export class PostsManager {
       await this.processing.posts.updateContent(
         post.id,
         {
-          reviewedStatus: 'reviewed',
+          reviewedStatus: AppPostReviewStatus.REVIEWED,
         },
         manager
       );
@@ -338,7 +344,7 @@ export class PostsManager {
         await this.processing.posts.updateContent(
           post.id,
           {
-            reviewedStatus: 'reviewed',
+            reviewedStatus: AppPostReviewStatus.REVIEWED,
             content: post.content,
             semantics: post.semantics,
           },
@@ -372,8 +378,8 @@ export class PostsManager {
               {
                 draft: mirror.draft,
                 posted: posted,
-                publishOrigin: 'posted',
-                publishStatus: 'published',
+                publishOrigin: PlatformPostPublishOrigin.POSTED,
+                publishStatus: PlatformPostPublishStatus.PUBLISHED,
               },
               manager
             );

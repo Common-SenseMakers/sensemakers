@@ -9,6 +9,7 @@ import {
 import {
   PlatformPost,
   PlatformPostDraft,
+  PlatformPostDraftApprova,
   PlatformPostPosted,
   PlatformPostPublish,
 } from '../../@shared/types/types.platform.posts';
@@ -120,7 +121,7 @@ export class NanopubService
     return {
       post: nanopubDraft.rdf(),
       user_id: account.user_id,
-      postApproval: 'pending',
+      postApproval: PlatformPostDraftApprova.PENDING,
     };
   }
 
@@ -132,7 +133,9 @@ export class NanopubService
 
     let published: Nanopub | undefined = undefined;
 
-    const NANOPUBS_PUBLISH_SERVERS = JSON.parse(NANOPUBS_PUBLISH_SERVERS_STR.value());
+    const NANOPUBS_PUBLISH_SERVERS = JSON.parse(
+      NANOPUBS_PUBLISH_SERVERS_STR.value()
+    );
 
     while (!stop) {
       try {

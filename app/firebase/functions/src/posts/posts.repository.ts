@@ -3,7 +3,10 @@ import { FieldValue } from 'firebase-admin/firestore';
 import {
   AppPost,
   AppPostCreate,
+  AppPostParsedStatus,
+  AppPostReviewStatus,
   PostUpdate,
+  PostsQueryStatusParam,
   UserPostsQueryParams,
 } from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
@@ -44,6 +47,8 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     /** type protection agains properties renaming */
     const createdAtKey: keyof AppPost = 'createdAtMs';
     const authorKey: keyof AppPost = 'authorId';
+    const reviewedStatusKey: keyof AppPost = 'reviewedStatus';
+    const parsedStatusKey: keyof AppPost = 'parsedStatus';
 
     let query = this.db.collections.posts
       .where(authorKey, '==', userId)
@@ -51,16 +56,28 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
     /** perform query filtering at the level of AppPost */
     switch (queryParams?.status) {
-      case 'published':
-        query = query.where('reviewedStatus', '==', 'reviewed');
+      case PostsQueryStatusParam.PUBLISHED:
+        query = query.where(
+          reviewedStatusKey,
+          '==',
+          AppPostReviewStatus.REVIEWED
+        );
         break;
-      case 'ignored':
-        query = query.where('parsedStatus', '==', 'processed');
+      case PostsQueryStatusParam.IGNORED:
+        query = query.where(
+          parsedStatusKey,
+          '==',
+          AppPostParsedStatus.PROCESSED
+        );
         break;
-      case 'for review':
-        query = query.where('reviewedStatus', '==', 'pending');
+      case PostsQueryStatusParam.PENDING:
+        query = query.where(
+          reviewedStatusKey,
+          '==',
+          AppPostReviewStatus.PENDING
+        );
         break;
-      case 'all':
+      case PostsQueryStatusParam.ALL:
       default:
         break;
     }
@@ -79,7 +96,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     const statusKey: keyof AppPost = 'parsedStatus';
     const authorKey: keyof AppPost = 'authorId';
 
-    const statusValue: AppPost['parsedStatus'] = 'unprocessed';
+    const statusValue: AppPostParsedStatus = AppPostParsedStatus.UNPROCESSED;
 
     const posts = await this.db.collections.posts
       .where(statusKey, '==', statusValue)
