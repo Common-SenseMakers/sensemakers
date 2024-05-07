@@ -1,5 +1,7 @@
 import { array, object, string } from 'yup';
 
+import { PostsQueryStatusParam } from '../../@shared/types/types.posts';
+
 export const getPostSchema = object({
   postId: string().required(),
 }).noUnknown(true);
@@ -16,5 +18,5 @@ export const createDraftPostSchema = object({
 }).noUnknown(true);
 
 export const getUserPostsQuerySchema = object({
-  status: string().oneOf(['published', 'ignored', 'for review', 'all']),
+  status: string().oneOf([...Object.values(PostsQueryStatusParam)]),
 }).noUnknown(true);
