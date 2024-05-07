@@ -1,16 +1,21 @@
 import { Box, Menu, Text } from 'grommet';
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { useToastContext } from '../app/ToastsContext';
 import { PostCard } from '../post/PostCard';
 import { PostContext } from '../post/PostContext';
-import { PostsQueryStatusParam } from '../shared/types/types.posts';
+import { AbsoluteRoutes } from '../route.names';
+import {
+  PostsQueryStatusParam,
+  UserPostsQueryParams,
+} from '../shared/types/types.posts';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { useUserPosts } from './UserPostsContext';
 
 export const UserHome = () => {
   const { show } = useToastContext();
-  const { posts, isLoading, error, setFilter } = useUserPosts();
+  const { posts, isLoading, error } = useUserPosts();
 
   useEffect(() => {
     if (error) {
@@ -19,6 +24,12 @@ export const UserHome = () => {
       });
     }
   }, [error]);
+
+  const navigate = useNavigate();
+
+  const setFilter = (filter: UserPostsQueryParams) => {
+    navigate(`/${filter.status}`);
+  };
 
   if (error) {
     return <BoxCentered>{error.message}</BoxCentered>;
@@ -39,8 +50,7 @@ export const UserHome = () => {
           },
           {
             label: 'For Review',
-            onClick: () =>
-              setFilter({ status: PostsQueryStatusParam.FOR_REVIEW }),
+            onClick: () => setFilter({ status: PostsQueryStatusParam.PENDING }),
           },
           {
             label: 'Ignored',

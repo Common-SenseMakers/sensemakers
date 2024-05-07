@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { createContext } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigation } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
 import { useToastContext } from '../app/ToastsContext';
@@ -14,7 +14,6 @@ import { useAccountContext } from '../user-login/contexts/AccountContext';
 
 interface PostContextType {
   posts?: AppPostFull[];
-  setFilter: (filter: UserPostsQueryParams) => void;
   isLoading: boolean;
   error: Error | null;
 }
@@ -26,12 +25,28 @@ export const UserPostsContextValue = createContext<PostContextType | undefined>(
 export const UserPostsContext: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
-  const { show } = useToastContext();
   const { connectedUser } = useAccountContext();
   const appFetch = useAppFetch();
+
   const [filter, setFilter] = useState<UserPostsQueryParams>({
     status: PostsQueryStatusParam.ALL,
   });
+
+  const location = useLocation();
+
+  console.log({ location });
+
+  useEffect(() => {
+    if (
+      Object.values(PostsQueryStatusParam)
+        .map((v) => `/${v}`)
+        .includes(location.pathname)
+    ) {
+      setFilter({
+        status: location.pathname.slice(1) as PostsQueryStatusParam,
+      });
+    }
+  }, [location]);
 
   /** everytime the connected user changes, trigger a fetch */
   const {
@@ -78,7 +93,6 @@ export const UserPostsContext: React.FC<{
     <UserPostsContextValue.Provider
       value={{
         posts,
-        setFilter,
         isLoading: isFetching || isGetting,
         error: errorFetching || errorGetting,
       }}>

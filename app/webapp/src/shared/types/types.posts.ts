@@ -69,7 +69,7 @@ export type PostUpdate = Partial<
 export enum PostsQueryStatusParam {
   PUBLISHED = 'published',
   IGNORED = 'ignored',
-  FOR_REVIEW = 'for review',
+  PENDING = 'pending',
   ALL = 'all',
 }
 

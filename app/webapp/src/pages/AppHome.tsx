@@ -1,6 +1,6 @@
-import { AppBottomButton } from '../app/layout/AppBottomNav';
+import { Outlet } from 'react-router-dom';
+
 import { ViewportPage } from '../app/layout/Viewport';
-import { BoxCentered } from '../ui-components/BoxCentered';
 import { UserHome } from '../user-home/UserHome';
 import { PlatformManager } from '../user-login/PlaformManager';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
