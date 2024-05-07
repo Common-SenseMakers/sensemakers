@@ -4,11 +4,8 @@ import {
   AppPostFull,
   UserPostsQueryParams,
 } from '../../@shared/types/types.posts';
-import { IS_EMULATOR } from '../../config/config.runtime';
-import { envRuntime } from '../../config/typedenv.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
-import { enqueueParseUserPosts } from '../posts.task';
 import {
   approvePostSchema,
   createDraftPostSchema,
@@ -35,56 +32,9 @@ export const getUserPostsController: RequestHandler = async (
     const { postsManager } = getServices(request);
 
     const posts = await postsManager.getOfUser(userId, queryParams);
+
     if (DEBUG) logger.debug(`${request.path}: posts`, { posts, userId });
     response.status(200).send({ success: true, data: posts });
-  } catch (error) {
-    logger.error('error', error);
-    response.status(500).send({ success: false, error });
-  }
-};
-
-/**
- * fetch users posts and awaits for the fetching operation to finish
- * */
-const DEBUG_ENQUEUE = false;
-
-export const fetchUserPostsController: RequestHandler = async (
-  request,
-  response
-) => {
-  try {
-    const userId = getAuthenticatedUser(request, true);
-    const { postsManager } = getServices(request);
-
-    if (DEBUG_ENQUEUE)
-      logger.debug(`fetch UserPostsController - start`, { userId });
-
-    await postsManager.fetchUser(userId);
-
-    if (DEBUG_ENQUEUE)
-      logger.debug(`fetch UserPostsController - done`, { userId });
-
-    const enqueue = enqueueParseUserPosts(
-      userId,
-      envRuntime.REGION || 'us-central1'
-    );
-
-    if (!IS_EMULATOR) {
-      if (DEBUG_ENQUEUE)
-        logger.debug(`fetch UserPostsController - awaiting enqueue`, {
-          userId,
-        });
-      /** it seems in the enmulator the task exection is synchronous to the http call */
-      await enqueue;
-
-      if (DEBUG_ENQUEUE)
-        logger.debug(`fetch UserPostsController - enqueue done`);
-    }
-
-    logger.debug(`enqueue ParseUserPosts - done`, { userId });
-
-    if (DEBUG) logger.debug(`${request.path}: fetched`, { userId });
-    response.status(200).send({ success: true });
   } catch (error) {
     logger.error('error', error);
     response.status(500).send({ success: false, error });

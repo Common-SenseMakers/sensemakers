@@ -19,6 +19,7 @@ import {
   AppPostRepublishedStatus,
   AppPostReviewStatus,
   PostUpdate,
+  PostsQueryStatusParam,
   UserPostsQueryParams,
 } from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
@@ -55,7 +56,7 @@ export class PostsManager {
 
     /** Call fetch for each user */
     const posts = await Promise.all(
-      users.map(async (user) => this.fetchUser(undefined, user))
+      users.map(async (user) => this.fetchUser({ user }))
     );
 
     return posts.flat();
@@ -66,14 +67,18 @@ export class PostsManager {
    * as one Transaction.
    * */
   async fetchUser(
-    userId?: string,
-    _user?: AppUser,
+    inputs: {
+      userId?: string;
+      user?: AppUser;
+      amount: number;
+    },
     _manager?: TransactionManager
   ) {
     const fetch = async (manager: TransactionManager): Promise<void> => {
       const user =
-        _user ||
-        (await this.users.repo.getUser(userId as string, manager, true));
+        inputs.user ||
+        (await this.users.repo.getUser(inputs.userId as string, manager, true));
+
       if (DEBUG) logger.debug('fetchUser', { user });
 
       await Promise.all(
@@ -157,11 +162,22 @@ export class PostsManager {
   }
 
   /** get pending posts AppPostFull of user, cannot be part of a transaction */
-  async getOfUser(userId: string, queryParams?: UserPostsQueryParams) {
-    const appPosts = await this.processing.posts.getOfUser(
-      userId,
-      queryParams || { pageSize: 10 }
-    );
+  async getOfUser(userId: string, _queryParams?: UserPostsQueryParams) {
+    const queryParams = _queryParams || {
+      pageSize: 10,
+      status: PostsQueryStatusParam.ALL,
+    };
+    const appPosts = await this.processing.posts.getOfUser(userId, queryParams);
+
+    /** Fetch for posts dynamically if returned less tha one page of posts */
+    if (
+      queryParams.status === PostsQueryStatusParam.ALL ||
+      queryParams.status === PostsQueryStatusParam.PENDING
+    ) {
+      if (appPosts.length < queryParams.pageSize) {
+        await this.fetchUser({ userId, amount: queryParams.pageSize });
+      }
+    }
 
     const postsFull = await Promise.all(
       appPosts.map((post) => this.appendMirrors(post))

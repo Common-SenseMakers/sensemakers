@@ -83,7 +83,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       }
     })();
 
-    const posts = await paginated.limit(queryParams.pageSize || 10).get();
+    const posts = await paginated.limit(queryParams.pageSize).get();
 
     return posts.docs.map((doc) => ({
       id: doc.id,

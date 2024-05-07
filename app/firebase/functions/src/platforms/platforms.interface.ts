@@ -13,6 +13,10 @@ export type CredentialsForPlatform<P> = P extends PLATFORM.Twitter
   ? { accessToken: string }
   : any;
 
+/** there are two fetch modes:
+ * - start_time !== undefined: must return all posts after this provided start_time
+ * - end_time !== undefined && max_results !== undefined: must return max_results posts before this provided end_time
+ */
 export interface FetchUserPostsParams {
   start_time?: number; // timestamp in ms
   end_time?: number; // timestamp in ms

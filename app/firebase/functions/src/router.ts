@@ -3,7 +3,6 @@ import express from 'express';
 import {
   approvePostController,
   createDraftPostController,
-  fetchUserPostsController,
   getPostController,
   getUserPostsController,
   parsePostController,
@@ -21,7 +20,6 @@ router.post('/auth/:platform/signup', handleSignupController);
 router.post('/auth/me', getLoggedUserController);
 
 router.post('/posts/getOfUser', getUserPostsController);
-router.post('/posts/fetch', fetchUserPostsController);
 router.post('/posts/get', getPostController);
 router.post('/posts/createDraft', createDraftPostController);
 router.post('/posts/approve', approvePostController);

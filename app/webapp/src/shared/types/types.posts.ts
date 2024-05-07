@@ -95,7 +95,7 @@ export enum PostsQueryStatusParam {
 }
 
 export interface UserPostsQueryParams {
-  status?: PostsQueryStatusParam;
-  pageSize?: number;
+  status: PostsQueryStatusParam;
+  pageSize: number;
   startAfter?: string;
 }

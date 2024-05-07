@@ -332,24 +332,28 @@ describe('03-process', () => {
     it('gets all posts from a user', async () => {
       const posts = await services.postsManager.getOfUser('test-user-id', {
         status: PostsQueryStatusParam.ALL,
+        pageSize: 10,
       });
       expect(posts).to.have.length(4);
     });
     it('gets all published posts from a user', async () => {
       const posts = await services.postsManager.getOfUser('test-user-id', {
         status: PostsQueryStatusParam.PUBLISHED,
+        pageSize: 10,
       });
       expect(posts).to.have.length(1);
     });
     it('gets all for review posts from a user', async () => {
       const posts = await services.postsManager.getOfUser('test-user-id', {
         status: PostsQueryStatusParam.PENDING,
+        pageSize: 10,
       });
       expect(posts).to.have.length(1);
     });
     it('gets all ignored posts from a user', async () => {
       const posts = await services.postsManager.getOfUser('test-user-id', {
         status: PostsQueryStatusParam.IGNORED,
+        pageSize: 10,
       });
       expect(posts).to.have.length(2);
     });
