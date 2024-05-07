@@ -158,7 +158,10 @@ export class PostsManager {
 
   /** get pending posts AppPostFull of user, cannot be part of a transaction */
   async getOfUser(userId: string, queryParams?: UserPostsQueryParams) {
-    const appPosts = await this.processing.posts.getOfUser(userId, queryParams);
+    const appPosts = await this.processing.posts.getOfUser(
+      userId,
+      queryParams || { pageSize: 10 }
+    );
 
     const postsFull = await Promise.all(
       appPosts.map((post) => this.appendMirrors(post))

@@ -44,48 +44,46 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   }
 
   /** Cannot be part of a transaction */
-  public async getOfUser(userId: string, queryParams?: UserPostsQueryParams) {
+  public async getOfUser(userId: string, queryParams: UserPostsQueryParams) {
     /** type protection agains properties renaming */
     const createdAtKey: keyof AppPost = 'createdAtMs';
     const authorKey: keyof AppPost = 'authorId';
     const reviewedStatusKey: keyof AppPost = 'reviewedStatus';
     const republishedStatusKey: keyof AppPost = 'republishedStatus';
 
-    /** status
-     * ALL: all posts
-     * PENDING: ReviewStatus.PENDING
-     */
+    const base = this.db.collections.posts.where(authorKey, '==', userId);
 
-    const baseQuery = this.db.collections.posts.where(authorKey, '==', userId);
+    const filtered = (() => {
+      if (queryParams.status === PostsQueryStatusParam.ALL) {
+        return base;
+      }
+      if (queryParams.status === PostsQueryStatusParam.PENDING) {
+        return base.where(reviewedStatusKey, '==', AppPostReviewStatus.PENDING);
+      }
+      if (queryParams.status === PostsQueryStatusParam.PUBLISHED) {
+        return base.where(
+          republishedStatusKey,
+          '==',
+          AppPostRepublishedStatus.REPUBLISHED
+        );
+      }
+      if (queryParams.status === PostsQueryStatusParam.IGNORED) {
+        return base.where(reviewedStatusKey, '==', AppPostReviewStatus.IGNORED);
+      }
+      return base;
+    })();
 
-    const filteredQuery = (() => {
-      if (queryParams) {
-        if (queryParams.status === PostsQueryStatusParam.ALL) {
-          return baseQuery;
-        }
-        if (queryParams.status === PostsQueryStatusParam.PENDING) {
-          return baseQuery.where(
-            reviewedStatusKey,
-            '==',
-            AppPostReviewStatus.PENDING
-          );
-        }
-        if (queryParams.status === PostsQueryStatusParam.PUBLISHED) {
-          return baseQuery.where(
-            republishedStatusKey,
-            '==',
-            AppPostRepublishedStatus.REPUBLISHED
-          );
-        }
-        return baseQuery;
+    const ordered = filtered.orderBy(createdAtKey, 'desc');
+
+    const paginated = (() => {
+      if (queryParams.startAfter) {
+        return ordered.startAfter(queryParams.startAfter);
       } else {
-        return baseQuery;
+        return ordered;
       }
     })();
 
-    const finalQuery = filteredQuery.orderBy(createdAtKey, 'desc');
-
-    const posts = await finalQuery.get();
+    const posts = await paginated.limit(queryParams.pageSize || 10).get();
 
     return posts.docs.map((doc) => ({
       id: doc.id,
