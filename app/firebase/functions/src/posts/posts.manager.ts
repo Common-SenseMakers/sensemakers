@@ -196,7 +196,7 @@ export class PostsManager {
   }
 
   /** get pending posts AppPostFull of user, cannot be part of a transaction */
-  async getOfUser(userId: string, queryParams: UserPostsQueryParams) {
+  async getOfUser(userId: string, queryParams?: UserPostsQueryParams) {
     const appPosts = await this.processing.posts.getOfUser(userId, queryParams);
 
     const postsFull = await Promise.all(
@@ -204,7 +204,7 @@ export class PostsManager {
     );
 
     /** perform query filtering at the level of PlatformPost now that we have the reduced set of PlatformPost's */
-    switch (queryParams.status) {
+    switch (queryParams?.status) {
       case 'published':
         return postsFull.filter((post) =>
           post.mirrors.find(

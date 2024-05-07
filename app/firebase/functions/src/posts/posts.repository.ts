@@ -40,7 +40,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   }
 
   /** Cannot be part of a transaction */
-  public async getOfUser(userId: string, queryParams: UserPostsQueryParams) {
+  public async getOfUser(userId: string, queryParams?: UserPostsQueryParams) {
     /** type protection agains properties renaming */
     const createdAtKey: keyof AppPost = 'createdAtMs';
     const authorKey: keyof AppPost = 'authorId';
@@ -50,7 +50,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       .orderBy(createdAtKey, 'desc');
 
     /** perform query filtering at the level of AppPost */
-    switch (queryParams.status) {
+    switch (queryParams?.status) {
       case 'published':
         query = query.where('reviewedStatus', '==', 'reviewed');
         break;
