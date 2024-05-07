@@ -1,19 +1,16 @@
-import { Box, Menu } from 'grommet';
+import { Box, Menu, Text } from 'grommet';
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import { useToastContext } from '../app/ToastsContext';
 import { PostCard } from '../post/PostCard';
 import { PostContext } from '../post/PostContext';
-import { AbsoluteRoutes } from '../route.names';
 import { PostsQueryStatusParam } from '../shared/types/types.posts';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { useUserPosts } from './UserPostsContext';
 
 export const UserHome = () => {
   const { show } = useToastContext();
-  const { posts, isLoading, error } = useUserPosts();
-  const navigate = useNavigate();
+  const { posts, isLoading, error, setFilter } = useUserPosts();
 
   useEffect(() => {
     if (error) {
@@ -31,10 +28,6 @@ export const UserHome = () => {
     return <BoxCentered>Loading...</BoxCentered>;
   }
 
-  if (posts.length === 0) {
-    return <BoxCentered>No posts found</BoxCentered>;
-  }
-
   return (
     <>
       <Menu
@@ -42,31 +35,21 @@ export const UserHome = () => {
         items={[
           {
             label: 'All',
-            onClick: () =>
-              navigate(
-                `${AbsoluteRoutes.Posts}?status=${PostsQueryStatusParam.ALL}`
-              ),
+            onClick: () => setFilter({ status: PostsQueryStatusParam.ALL }),
           },
           {
             label: 'For Review',
             onClick: () =>
-              navigate(
-                `${AbsoluteRoutes.Posts}?status=${PostsQueryStatusParam.FOR_REVIEW}`
-              ),
+              setFilter({ status: PostsQueryStatusParam.FOR_REVIEW }),
           },
           {
             label: 'Ignored',
-            onClick: () =>
-              navigate(
-                `${AbsoluteRoutes.Posts}?status=${PostsQueryStatusParam.IGNORED}`
-              ),
+            onClick: () => setFilter({ status: PostsQueryStatusParam.IGNORED }),
           },
           {
             label: 'Published',
             onClick: () =>
-              navigate(
-                `${AbsoluteRoutes.Posts}?status=${PostsQueryStatusParam.PUBLISHED}`
-              ),
+              setFilter({ status: PostsQueryStatusParam.PUBLISHED }),
           },
         ]}
       />
@@ -75,6 +58,11 @@ export const UserHome = () => {
         gap="large"
         pad={{ vertical: 'large', horizontal: 'medium' }}
         justify="start">
+        {posts.length === 0 && (
+          <BoxCentered>
+            <Text>No posts found</Text>
+          </BoxCentered>
+        )}
         {posts.map((post, ix) => (
           <Box key={ix}>
             <PostContext postInit={post}>

@@ -14,8 +14,7 @@ export interface AppFetch {
 export const _appFetch = async <T = any, D = any>(
   path: string,
   payload?: D,
-  accessToken?: string,
-  queryParams?: URLSearchParams
+  accessToken?: string
 ) => {
   try {
     const headers: AxiosRequestConfig['headers'] = {};
@@ -29,7 +28,6 @@ export const _appFetch = async <T = any, D = any>(
       payload || {},
       {
         headers,
-        params: queryParams,
       }
     );
 
@@ -46,12 +44,8 @@ export const _appFetch = async <T = any, D = any>(
 export const useAppFetch = () => {
   const { token } = useAccountContext();
 
-  const appFetch = async <T, D = any>(
-    path: string,
-    data?: D,
-    queryParams?: URLSearchParams
-  ) => {
-    return _appFetch<T, D>(path, data, token, queryParams);
+  const appFetch = async <T, D = any>(path: string, data?: D) => {
+    return _appFetch<T, D>(path, data, token);
   };
 
   return appFetch;

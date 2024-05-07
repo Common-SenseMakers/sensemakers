@@ -27,8 +27,9 @@ export const getUserPostsController: RequestHandler = async (
 ) => {
   try {
     const queryParams = (await getUserPostsQuerySchema.validate(
-      request.query
+      request.body
     )) as UserPostsQueryParams;
+
     logger.debug(`${request.path} - query parameters`, { queryParams });
     const userId = getAuthenticatedUser(request, true);
     const { postsManager } = getServices(request);

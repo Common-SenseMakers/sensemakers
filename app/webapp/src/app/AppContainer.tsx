@@ -36,15 +36,10 @@ export const AppContainer = (props: React.PropsWithChildren) => {
         </Box>
         <Box style={{ height: `calc(100% - ${topHeight})` }}>
           <Routes>
-            <Route
-              path={RouteNames.AppHome}
-              element={<Navigate to={RouteNames.PostsView} />}></Route>
+            <Route path={RouteNames.AppHome} element={<AppHome />}></Route>
             <Route
               path={RouteNames.PostView}
               element={<PostPage></PostPage>}></Route>
-            <Route
-              path={RouteNames.PostsView}
-              element={<AppHome></AppHome>}></Route>
           </Routes>
         </Box>
       </ViewportContainer>
