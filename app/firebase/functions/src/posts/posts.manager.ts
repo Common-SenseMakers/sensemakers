@@ -202,21 +202,23 @@ export class PostsManager {
     const postsFull = await Promise.all(
       appPosts.map((post) => this.appendMirrors(post))
     );
+    let filteredPostsFull = postsFull;
 
     /** perform query filtering at the level of PlatformPost now that we have the reduced set of PlatformPost's */
     switch (queryParams?.status) {
       case 'published':
-        return postsFull.filter((post) =>
+        filteredPostsFull = postsFull.filter((post) =>
           post.mirrors.find(
             (m) =>
               m.platformId === PLATFORM.Nanopub &&
               m.publishStatus === 'published'
           )
         );
+        break;
       case 'ignored':
         /** If the post has been reviewed and not nanopublished, or, if it hasn't been reviewed and
          * is classified as NOT_RESEARCH by the classifier, it is considered ignored */
-        return postsFull.filter(
+        filteredPostsFull = postsFull.filter(
           (post) =>
             (post.reviewedStatus === 'reviewed' &&
               post.mirrors.find(
@@ -228,8 +230,9 @@ export class PostsManager {
               post.originalParsed?.filter_clasification ===
                 SciFilterClassfication.NOT_RESEARCH)
         );
+        break;
       case 'for review':
-        return postsFull.filter(
+        filteredPostsFull = postsFull.filter(
           (post) =>
             post.reviewedStatus === 'pending' &&
             post.originalParsed?.filter_clasification !==
@@ -239,8 +242,11 @@ export class PostsManager {
       default:
         break;
     }
-
-    return postsFull;
+    logger.debug(
+      `getOfUser query for user ${userId} has ${filteredPostsFull.length} results for query params: `,
+      { queryParams }
+    );
+    return filteredPostsFull;
   }
 
   /**
