@@ -26,7 +26,7 @@ import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
 import { ParserService } from '../parser/parser.service';
-import { FetchUserPostsParams } from '../platforms/platforms.interface';
+import { FetchParams } from '../platforms/platforms.interface';
 import { PlatformsService } from '../platforms/platforms.service';
 import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
@@ -56,7 +56,7 @@ export class PostsManager {
 
     /** Call fetch for each user */
     const posts = await Promise.all(
-      users.map(async (user) => this.fetchUser({ user }))
+      users.map(async (user) => this.fetchUser({ user, mode: 'forward' }))
     );
 
     return posts.flat();
@@ -64,13 +64,17 @@ export class PostsManager {
 
   /**
    * Fetch and store platform posts of one user
-   * as one Transaction.
+   * in one Transaction.
+   *
+   * if mode === 'forward' fetches from the newset fetched date
+   * if mode === 'backwards' fetches from the oldest fetched date
    * */
   async fetchUser(
     inputs: {
       userId?: string;
       user?: AppUser;
-      amount: number;
+      mode: 'backwards' | 'forward';
+      expectedAmount?: number;
     },
     _manager?: TransactionManager
   ) {
@@ -89,13 +93,19 @@ export class PostsManager {
             accounts.map(
               async (account): Promise<PlatformPostCreated[] | undefined> => {
                 /** This fetch parameters */
-                const userParams: FetchUserPostsParams = {
-                  start_time: account.read
-                    ? account.lastFetchedMs
-                    : account.signupDate,
-                  userDetails: account,
-                  max_results: 3,
-                };
+                const userParams = ((): FetchParams => {
+                  if (inputs.mode === 'forward') {
+                    return {
+                      sinceId: account.fetched?.newestId,
+                      expectedAmount: inputs.expectedAmount,
+                    };
+                  }
+
+                  return {
+                    untilId: account.fetched?.oldestId,
+                    expectedAmount: inputs.expectedAmount,
+                  };
+                })();
 
                 /** Fetch */
                 try {
@@ -169,7 +179,7 @@ export class PostsManager {
     };
     const appPosts = await this.processing.posts.getOfUser(userId, queryParams);
 
-    /** Fetch for posts dynamically if returned less tha one page of posts */
+    /** Fetch for platform posts dynamically if returned less than one page of posts */
     if (
       queryParams.status === PostsQueryStatusParam.ALL ||
       queryParams.status === PostsQueryStatusParam.PENDING

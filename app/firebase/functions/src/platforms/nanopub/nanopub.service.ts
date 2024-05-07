@@ -7,6 +7,7 @@ import {
   NanupubSignupData,
 } from '../../@shared/types/types.nanopubs';
 import {
+  FetchedResult,
   PlatformPost,
   PlatformPostDraft,
   PlatformPostDraftApprova,
@@ -91,7 +92,6 @@ export class NanopubService
     return {
       user_id: signupData.ethAddress,
       signupDate: this.time.now(),
-      lastFetchedMs: 0,
       profile: {
         rsaPublickey: signupData.rsaPublickey,
         ethAddress: signupData.ethAddress,
@@ -187,10 +187,8 @@ export class NanopubService
     throw new Error('Method not implemented.');
   }
 
-  async fetch(
-    params: FetchUserPostsParams
-  ): Promise<PlatformPostPosted<any>[]> {
-    return [];
+  async fetch(params: FetchUserPostsParams): Promise<FetchedResult> {
+    return { fetched: {}, platformPosts: [] };
   }
 
   mirror(postsToMirror: AppPostMirror[]): Promise<PlatformPost<any>[]> {

@@ -1,5 +1,6 @@
 import { PLATFORM, UserDetailsBase } from '../@shared/types/types';
 import {
+  FetchedResult,
   PlatformPostCreate,
   PlatformPostDraft,
   PlatformPostPosted,
@@ -14,13 +15,18 @@ export type CredentialsForPlatform<P> = P extends PLATFORM.Twitter
   : any;
 
 /** there are two fetch modes:
- * - start_time !== undefined: must return all posts after this provided start_time
- * - end_time !== undefined && max_results !== undefined: must return max_results posts before this provided end_time
+ * - start_time !== undefined: must return max_results or all posts after this provided start_time
+ * - end_time !== undefined : must return max_results or at least 10 posts before this provided end_time
  */
+export interface FetchParams {
+  sinceId?: string;
+  untilId?: string;
+  expectedAmount?: number;
+}
+
 export interface FetchUserPostsParams {
-  start_time?: number; // timestamp in ms
-  end_time?: number; // timestamp in ms
-  max_results?: number;
+  mode: 'forward' | 'backward';
+  expectedAmount: number;
   userDetails: UserDetailsBase;
 }
 
@@ -41,9 +47,10 @@ export interface PlatformService<
   UserDetails extends UserDetailsBase = UserDetailsBase,
 > extends IdentityService<SignupContext, SignupData, UserDetails> {
   fetch(
-    params: FetchUserPostsParams,
+    params: FetchParams,
+    userDetails: UserDetailsBase,
     manager: TransactionManager
-  ): Promise<PlatformPostPosted[]>;
+  ): Promise<FetchedResult>;
   publish(
     posts: PlatformPostPublish,
     manager: TransactionManager

@@ -1,4 +1,9 @@
-import { PLATFORM, PUBLISHABLE_PLATFORMS, UserDetailsBase } from './types';
+import {
+  FetchedDetails,
+  PLATFORM,
+  PUBLISHABLE_PLATFORMS,
+  UserDetailsBase,
+} from './types';
 import { AppPost } from './types.posts';
 
 /**
@@ -42,6 +47,11 @@ export interface PlatformPostPosted<C = any> {
   post_id: string; // The id of the platform post on the platform
   timestampMs: number; // timestamp in ms
   post: C;
+}
+
+export interface FetchedResult<C = any> {
+  fetched: FetchedDetails;
+  platformPosts: PlatformPostPosted<C>[];
 }
 
 /**

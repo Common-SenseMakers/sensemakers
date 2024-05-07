@@ -42,9 +42,14 @@ export interface WithPlatformUserId {
   signupDate: number;
 }
 
+export interface FetchedDetails {
+  newestId?: string;
+  oldestId?: string;
+}
+
 export interface UserDetailsBase<P = any, R = any, W = any>
   extends WithPlatformUserId {
-  lastFetchedMs: number;
+  fetched?: FetchedDetails;
   profile?: P;
   read?: R;
   write?: W;

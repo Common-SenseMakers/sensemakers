@@ -14,6 +14,7 @@ import {
 } from '../@shared/types/types.platform.posts';
 import { TransactionManager } from '../db/transaction.manager';
 import {
+  FetchParams,
   FetchUserPostsParams,
   IdentityService,
   PlatformService,
@@ -49,20 +50,26 @@ export class PlatformsService {
 
   public async fetch(
     platformId: PLATFORM,
-    params: FetchUserPostsParams,
+    params: FetchParams,
+    userDetails: UserDetailsBase,
     manager: TransactionManager
   ) {
     /** all fetched posts from one platform */
-    const fetched = await this.get(platformId).fetch(params, manager);
-    await this.users.repo.setAccountLastFetched(
+    const fetched = await this.get(platformId).fetch(
+      params,
+      userDetails,
+      manager
+    );
+
+    await this.users.repo.setAccountFetched(
       platformId,
-      params.userDetails.user_id,
-      this.time.now(),
+      userDetails.user_id,
+      fetched.fetched,
       manager
     );
 
     /** convert them into a PlatformPost */
-    return fetched.map((fetchedPost) => {
+    return fetched.platformPosts.map((fetchedPost) => {
       const platformPost: PlatformPostCreate = {
         platformId: platformId as PUBLISHABLE_PLATFORMS,
         publishStatus: PlatformPostPublishStatus.PUBLISHED,

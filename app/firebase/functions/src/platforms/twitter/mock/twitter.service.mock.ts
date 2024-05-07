@@ -128,11 +128,9 @@ export const getTwitterMock = (
       ): Promise<TwitterThread[]> => {
         const threads = state.threads.reverse().filter((thread) => {
           const tweet0 = thread.tweets[0];
-          const createdAt = new Date(tweet0.created_at as string);
-          const startAt = params.start_time
-            ? new Date(params.start_time)
-            : undefined;
-          return startAt ? createdAt.getTime() >= startAt.getTime() : true;
+          return params.sinceId
+            ? Number(tweet0.id) > Number(params.sinceId)
+            : true;
         });
         return threads;
       }
@@ -149,7 +147,6 @@ export const getTwitterMock = (
         (data: { user_id: string }): TwitterUserDetails => {
           return {
             user_id: data.user_id,
-            lastFetchedMs: 0,
             signupDate: 0,
           };
         }
