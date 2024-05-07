@@ -56,6 +56,7 @@ async function getFunctionUrl(name: string, location: string) {
   if (!auth) {
     auth = new GoogleAuth({
       scopes: 'https://www.googleapis.com/auth/cloud-platform',
+      projectId: 'sensenets-staging',
     });
   }
   const projectId = await auth.getProjectId();

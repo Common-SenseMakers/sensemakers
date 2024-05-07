@@ -7,14 +7,16 @@ import { PlatformPostPosted } from '../../src/@shared/types/types.platform.posts
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { logger } from '../../src/instances/logger';
+import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
-import { enqueueParseUserPosts } from '../../src/posts/posts.task';
+import { parseUserPostsTask } from '../../src/posts/posts.task';
+import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
 import { createTestAppUsers } from '../utils/user.factory';
 import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
 import { getTestServices } from './test.services';
 
-describe('03-process', () => {
+describe.only('03-process', () => {
   let rsaKeys: RSAKeys | undefined;
   const services = getTestServices({
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
@@ -35,7 +37,20 @@ describe('03-process', () => {
     before(async () => {
       await services.db.run(async (manager) => {
         const users = await createTestAppUsers(services, manager);
-        appUser = users[0];
+
+        /**
+         * Use @sense_nets_bot. Used also in Twitter Mock and part of
+         * test users
+         */
+        appUser = users.find(
+          (u) =>
+            UsersHelper.getAccount(
+              u,
+              PLATFORM.Twitter,
+              TWITTER_USER_ID_MOCKS
+            ) !== undefined
+        );
+
         rsaKeys = getRSAKeys('');
       });
     });
@@ -67,6 +82,8 @@ describe('03-process', () => {
           throw new Error('Unexpected');
         }
 
+        const publishTime = services.time.now();
+
         tweet = await services.platforms
           .get<TwitterService>(PLATFORM.Twitter)
           .publish(
@@ -81,7 +98,7 @@ describe('03-process', () => {
         await services.users.repo.setAccountLastFetched(
           PLATFORM.Twitter,
           user_id,
-          tweet.timestampMs - 1000,
+          publishTime,
           manager
         );
 
@@ -99,13 +116,13 @@ describe('03-process', () => {
       }
 
       /** fetch user posts */
-      await services.postsManager.fetchUser(undefined, appUser);
+      await services.postsManager.fetchUser(appUser.userId);
 
       /** read user post */
       const postsRead = await services.postsManager.getOfUser(appUser.userId);
 
       expect(postsRead).to.not.be.undefined;
-      expect(postsRead).to.have.length(3);
+      expect(postsRead).to.have.length(1);
 
       const postRead = postsRead[0];
       expect(postRead).to.not.be.undefined;
@@ -133,7 +150,7 @@ describe('03-process', () => {
       if (!appUser) {
         throw new Error('appUser not created');
       }
-      await enqueueParseUserPosts(appUser.userId, 'us-central1');
+      await parseUserPostsTask({ data: { userId: appUser.userId } } as any);
 
       /** wait for the task to finish */
       await new Promise<void>((resolve) => setTimeout(resolve, 0.5 * 1000));
@@ -141,7 +158,7 @@ describe('03-process', () => {
       const postsRead = await services.postsManager.getOfUser(appUser.userId);
 
       expect(postsRead).to.not.be.undefined;
-      expect(postsRead).to.have.length(3);
+      expect(postsRead).to.have.length(1);
 
       postsRead.forEach((postRead) => {
         expect(postRead.semantics).to.not.be.undefined;
@@ -160,7 +177,7 @@ describe('03-process', () => {
         appUser.userId
       );
 
-      expect(pendingPosts).to.have.length(3);
+      expect(pendingPosts).to.have.length(1);
       const pendingPost = pendingPosts[0];
       const nanopub = pendingPost.mirrors.find(
         (m) => m.platformId === PLATFORM.Nanopub
