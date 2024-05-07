@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useMemo } from 'react';
 import { createContext } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
 import { useToastContext } from '../app/ToastsContext';
@@ -23,6 +24,12 @@ export const UserPostsContext: React.FC<{
   const { show } = useToastContext();
   const { connectedUser } = useAccountContext();
   const appFetch = useAppFetch();
+  const location = useLocation();
+
+  const queryParams = useMemo(
+    () => new URLSearchParams(location.search),
+    [location.search]
+  );
 
   /** everytime the connected user changes, trigger a fetch */
   const {
@@ -50,9 +57,13 @@ export const UserPostsContext: React.FC<{
     queryKey: ['getUserPosts', connectedUser],
     queryFn: async () => {
       if (connectedUser) {
-        const posts = await appFetch<AppPostFull[]>('/api/posts/getOfUser', {
-          userId: connectedUser.userId,
-        });
+        const posts = await appFetch<AppPostFull[]>(
+          '/api/posts/getOfUser',
+          {
+            userId: connectedUser.userId,
+          },
+          queryParams
+        );
 
         return posts;
       }

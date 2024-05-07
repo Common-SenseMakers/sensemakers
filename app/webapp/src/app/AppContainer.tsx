@@ -1,6 +1,6 @@
 import { Box } from 'grommet';
 import { createContext, useContext, useState } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { AppHome } from '../pages/AppHome';
 import { PostPage } from '../post/PostPage';
@@ -38,10 +38,13 @@ export const AppContainer = (props: React.PropsWithChildren) => {
           <Routes>
             <Route
               path={RouteNames.AppHome}
-              element={<AppHome></AppHome>}></Route>
+              element={<Navigate to={RouteNames.PostsView} />}></Route>
             <Route
               path={RouteNames.PostView}
               element={<PostPage></PostPage>}></Route>
+            <Route
+              path={RouteNames.PostsView}
+              element={<AppHome></AppHome>}></Route>
           </Routes>
         </Box>
       </ViewportContainer>
