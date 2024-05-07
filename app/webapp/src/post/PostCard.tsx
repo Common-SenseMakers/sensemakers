@@ -9,7 +9,7 @@ import { useThemeContext } from '../ui-components/ThemedApp';
 import { PostText } from './PostText';
 
 export const PostCard = () => {
-  const { post } = usePost();
+  const { post, isParsing } = usePost();
   const navigate = useNavigate();
   const { constants } = useThemeContext();
 
@@ -19,11 +19,10 @@ export const PostCard = () => {
 
   const processStatusIcon = (() => {
     const processed = post && post.parsedStatus === 'processed';
-    const processing = post && post.parsingStatus === 'processing';
     const errored = post && post.parsingStatus === 'errored';
 
+    if (isParsing) return <Loading></Loading>;
     if (processed) return <AppIcon src="network.svg"></AppIcon>;
-    if (processing) return <Loading></Loading>;
     if (errored) return <StatusCritical></StatusCritical>;
   })();
 

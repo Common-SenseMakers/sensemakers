@@ -11,7 +11,7 @@ export const SemanticsEditor = (
   } & PatternProps
 ) => {
   if (props.isLoading || !props.originalParsed) {
-    return <LoadingDiv fill></LoadingDiv>;
+    return <></>;
   }
 
   return (

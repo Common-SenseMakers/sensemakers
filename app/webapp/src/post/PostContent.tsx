@@ -21,8 +21,7 @@ export const PostContent = () => {
         <PostText text={post?.content}></PostText>
       </Box>
 
-      <Box margin={{ top: 'large' }}>
-        {isParsing ? <LoadingDiv></LoadingDiv> : <></>}
+      <Box margin={{ top: 'large' }} style={{ minHeight: '90px' }}>
         {parsingError ? (
           <AppCard margin={{ vertical: 'large' }}>
             <Text>There was an error parsing this post</Text>
@@ -31,6 +30,7 @@ export const PostContent = () => {
         ) : (
           <></>
         )}
+        {isParsing ? <LoadingDiv fill height="120px"></LoadingDiv> : <></>}
         <SemanticsEditor
           isLoading={false}
           semantics={post?.semantics}
