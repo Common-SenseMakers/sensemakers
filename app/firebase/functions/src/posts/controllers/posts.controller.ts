@@ -1,6 +1,9 @@
 import { RequestHandler } from 'express';
 
-import { AppPostFull } from '../../@shared/types/types.posts';
+import {
+  AppPostFull,
+  UserPostsQueryParams,
+} from '../../@shared/types/types.posts';
 import { IS_EMULATOR } from '../../config/config.runtime';
 import { envRuntime } from '../../config/typedenv.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
@@ -9,6 +12,7 @@ import { enqueueParseUserPosts } from '../posts.task';
 import {
   approvePostSchema,
   createDraftPostSchema,
+  getUserPostsQuerySchema,
   postIdValidation,
 } from './posts.schema';
 
@@ -22,10 +26,14 @@ export const getUserPostsController: RequestHandler = async (
   response
 ) => {
   try {
+    const queryParams = (await getUserPostsQuerySchema.validate(
+      request.query
+    )) as UserPostsQueryParams;
+    logger.debug(`${request.path} - query parameters`, { queryParams });
     const userId = getAuthenticatedUser(request, true);
     const { postsManager } = getServices(request);
 
-    const posts = await postsManager.getOfUser(userId);
+    const posts = await postsManager.getOfUser(userId, queryParams);
     if (DEBUG) logger.debug(`${request.path}: posts`, { posts, userId });
     response.status(200).send({ success: true, data: posts });
   } catch (error) {

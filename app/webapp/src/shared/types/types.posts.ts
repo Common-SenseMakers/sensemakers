@@ -65,3 +65,14 @@ export type PostUpdate = Partial<
     | 'reviewedStatus'
   >
 >;
+
+export enum PostsQueryStatusParam {
+  PUBLISHED = 'published',
+  IGNORED = 'ignored',
+  FOR_REVIEW = 'for review',
+  ALL = 'all',
+}
+
+export interface UserPostsQueryParams {
+  status?: PostsQueryStatusParam;
+}

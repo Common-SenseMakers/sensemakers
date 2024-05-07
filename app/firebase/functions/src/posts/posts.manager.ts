@@ -1,14 +1,24 @@
-import { ALL_PUBLISH_PLATFORMS, AppUser } from '../@shared/types/types';
+import {
+  ALL_PUBLISH_PLATFORMS,
+  AppUser,
+  PLATFORM,
+} from '../@shared/types/types';
 import {
   PARSER_MODE,
   ParsePostRequest,
+  SciFilterClassfication,
   TopicsParams,
 } from '../@shared/types/types.parser';
 import {
   PlatformPost,
   PlatformPostCreated,
 } from '../@shared/types/types.platform.posts';
-import { AppPost, AppPostFull, PostUpdate } from '../@shared/types/types.posts';
+import {
+  AppPost,
+  AppPostFull,
+  PostUpdate,
+  UserPostsQueryParams,
+} from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
@@ -145,14 +155,57 @@ export class PostsManager {
   }
 
   /** get pending posts AppPostFull of user, cannot be part of a transaction */
-  async getOfUser(userId: string) {
-    const pendingAppPosts = await this.processing.posts.getOfUser(userId);
+  async getOfUser(userId: string, queryParams?: UserPostsQueryParams) {
+    const appPosts = await this.processing.posts.getOfUser(userId, queryParams);
 
     const postsFull = await Promise.all(
-      pendingAppPosts.map((post) => this.appendMirrors(post))
+      appPosts.map((post) => this.appendMirrors(post))
     );
+    let filteredPostsFull = postsFull;
 
-    return postsFull;
+    /** perform query filtering at the level of PlatformPost now that we have the reduced set of PlatformPost's */
+    switch (queryParams?.status) {
+      case 'published':
+        filteredPostsFull = postsFull.filter((post) =>
+          post.mirrors.find(
+            (m) =>
+              m.platformId === PLATFORM.Nanopub &&
+              m.publishStatus === 'published'
+          )
+        );
+        break;
+      case 'ignored':
+        /** If the post has been reviewed and not nanopublished, or, if it hasn't been reviewed and
+         * is classified as NOT_RESEARCH by the classifier, it is considered ignored */
+        filteredPostsFull = postsFull.filter(
+          (post) =>
+            (post.reviewedStatus === 'reviewed' &&
+              post.mirrors.find(
+                (m) =>
+                  m.platformId === PLATFORM.Nanopub &&
+                  m.publishStatus === 'draft'
+              )) ||
+            (post.reviewedStatus === 'pending' &&
+              post.originalParsed?.filter_clasification ===
+                SciFilterClassfication.NOT_RESEARCH)
+        );
+        break;
+      case 'for review':
+        filteredPostsFull = postsFull.filter(
+          (post) =>
+            post.reviewedStatus === 'pending' &&
+            post.originalParsed?.filter_clasification !==
+              SciFilterClassfication.RESEARCH
+        );
+      case 'all':
+      default:
+        break;
+    }
+    logger.debug(
+      `getOfUser query for user ${userId} has ${filteredPostsFull.length} results for query params: `,
+      { queryParams }
+    );
+    return filteredPostsFull;
   }
 
   /**
