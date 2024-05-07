@@ -38,6 +38,11 @@ export interface TestServicesConfig {
   parser: ParserMockConfig;
 }
 
+export type TestServices = Services & {
+  platformPostsRepository: PlatformPostsRepository;
+  postsRepository: PostsRepository;
+};
+
 export const getTestServices = (config: TestServicesConfig) => {
   const mandatory = [
     'TWITTER_CLIENT_ID',
@@ -128,12 +133,14 @@ export const getTestServices = (config: TestServicesConfig) => {
     parser
   );
 
-  const services: Services = {
+  const services: TestServices = {
     users: usersService,
     postsManager: postsManager,
     platforms: platformsService,
     time: time,
     db,
+    platformPostsRepository: platformPostsRepo,
+    postsRepository: postsRepo,
   };
 
   return services;
