@@ -39,6 +39,17 @@ from desci_sense.shared_functions.parsers.multi_chain_parser import MultiChainPa
 from desci_sense.shared_functions.dataloaders import convert_text_to_ref_post
 from desci_sense.shared_functions.init import init_multi_chain_parser_config
 
+class CustomLabelBinarizer(LabelBinarizer):
+    def fit(self, y, order=None):
+        if order is not None:
+            # Set classes to the provided order
+            self.classes_ = np.array(order)
+        else:
+            # Default behavior
+            super().fit(y)
+        return self
+
+
 
 def prepare_parser_input(df):
     
@@ -51,7 +62,7 @@ def pred_labels(df,config):
 
     inputs = prepare_parser_input(df)
 
-    results = model.batch_process_ref_posts(inputs=inputs,active_list=["keywords", "topics"],batch_size=1)
+    results = model.batch_process_ref_posts(inputs=inputs,active_list=["keywords", "topics"],batch_size=10)
 
 
     try:
@@ -78,18 +89,20 @@ def normalize_df(df):
 def binarize(y_pred, y_true):
     # binarize for using skl functions
     # Assume df['True label'] and df['Predicted label'] are your true and predicted labels
-    lb = LabelBinarizer()
+    #lb = LabelBinarizer()
+    lb = CustomLabelBinarizer()
 
     # Binarize the labels
     # Note that the binarization is done alphabeticly so in binary classes 'academic' = 0 & 'non-academic' =1.
-    lb.fit(pd.concat([y_pred, y_true]).unique())
+    lb.fit(['research','not_research'],order=['research','not_research'])
 
+    print('binarized labes are: ',lb.classes_)
     # binarize true and predicted labels vectors
     y_true = lb.transform(y_true)
 
     y_pred = lb.transform(y_pred)
-    print("y_pred: ", y_pred)
-    print("y_true: ", y_true)
+    #print("y_pred: ", y_pred)
+    #print("y_true: ", y_true)
     return y_pred, y_true, lb.classes_
 
 def calculate_scores(y_pred, y_true):
@@ -116,10 +129,10 @@ def calculate_feed_score(df,name:str):
     try:
         y_pred, y_true, labels = binarize(y_pred=y_pred,y_true=y_true)
         precision, recall, f1_score, accuracy = calculate_scores(y_pred=y_pred,y_true=y_true)
-        print("##########here#########",precision, recall, f1_score, accuracy,n ,labels)
+        #print("##########here#########",precision, recall, f1_score, accuracy,n ,labels)
         return pd.Series([precision, recall, f1_score, accuracy,n], index=["precision", "recall", "f1_score", "accuracy","posts count"])
     except Exception as e:
-        print(f"exception was raised: {e}")
+        print(f"exception was raised while calculating feed scores: {e}")
         return pd.Series([0, 0, 0, 0, n], index=["precision", "recall", "f1_score", "accuracy","posts count"])
 
 def weighted_average(column_name:str,df):
@@ -157,7 +170,7 @@ if __name__ == "__main__":
     handle_file = arguments.get("--handle_file")
 
     # TODO - make modular config setting
-    config = init_multi_chain_parser_config(llm_type="google/gemma-7b-it",
+    config = init_multi_chain_parser_config(llm_type="openai/gpt-3.5-turbo-0125",
                                         post_process_type="combined")
 
     # initialize table path
@@ -167,7 +180,7 @@ if __name__ == "__main__":
     api = wandb.Api()
 
     #TODO move from testing
-    run = wandb.init(project="testing", job_type="evaluation")
+    run = wandb.init(project="filter_evaluation", job_type="evaluation")
 
     # get artifact path
     if dataset_path:
