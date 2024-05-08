@@ -96,7 +96,7 @@ export const UserHome = () => {
             </PostContext>
           </Box>
         ))}
-        <AppButton label="more" onClick={() => more()}></AppButton>
+        <AppButton label="fetch older" onClick={() => more()}></AppButton>
       </Box>
     </>
   );
