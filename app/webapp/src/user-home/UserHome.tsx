@@ -47,20 +47,35 @@ export const UserHome = () => {
         items={[
           {
             label: 'All',
-            onClick: () => setFilter({ status: PostsQueryStatusParam.ALL }),
+            onClick: () =>
+              setFilter({
+                status: PostsQueryStatusParam.ALL,
+                fetchParams: { expectedAmount: 10 },
+              }),
           },
           {
             label: 'For Review',
-            onClick: () => setFilter({ status: PostsQueryStatusParam.PENDING }),
+            onClick: () =>
+              setFilter({
+                status: PostsQueryStatusParam.PENDING,
+                fetchParams: { expectedAmount: 10 },
+              }),
           },
           {
             label: 'Ignored',
-            onClick: () => setFilter({ status: PostsQueryStatusParam.IGNORED }),
+            onClick: () =>
+              setFilter({
+                status: PostsQueryStatusParam.IGNORED,
+                fetchParams: { expectedAmount: 10 },
+              }),
           },
           {
             label: 'Published',
             onClick: () =>
-              setFilter({ status: PostsQueryStatusParam.PUBLISHED }),
+              setFilter({
+                status: PostsQueryStatusParam.PUBLISHED,
+                fetchParams: { expectedAmount: 10 },
+              }),
           },
         ]}
       />

@@ -283,9 +283,10 @@ export class PostsManager {
    * We trigger fetching posts from the platforms from here
    */
   async getOfUser(userId: string, _queryParams?: UserPostsQueryParams) {
-    const queryParams: UserPostsQueryParams = _queryParams || {
+    const queryParams: UserPostsQueryParams = {
       fetchParams: { expectedAmount: 10 },
       status: PostsQueryStatusParam.ALL,
+      ..._queryParams,
     };
 
     const appPosts = await this.getAndFetchIfNecessary(userId, queryParams);

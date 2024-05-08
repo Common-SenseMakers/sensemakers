@@ -31,6 +31,7 @@ export const UserPostsContext: React.FC<{
 
   const [filter, setFilter] = useState<UserPostsQueryParams>({
     status: PostsQueryStatusParam.ALL,
+    fetchParams: { expectedAmount: 10 },
   });
 
   const location = useLocation();
@@ -45,6 +46,7 @@ export const UserPostsContext: React.FC<{
     ) {
       setFilter({
         status: location.pathname.slice(1) as PostsQueryStatusParam,
+        fetchParams: { expectedAmount: 10 },
       });
     }
   }, [location]);
