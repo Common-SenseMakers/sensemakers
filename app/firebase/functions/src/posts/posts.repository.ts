@@ -73,17 +73,20 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       return base;
     })();
 
-    const ordered = filtered.orderBy(createdAtKey, 'desc');
-
+    /** two modes, forward sinceId or backwards untilId  */
     const paginated = (() => {
-      if (queryParams.startAfter) {
-        return ordered.startAfter(queryParams.startAfter);
+      if (queryParams.fetchParams.sinceId) {
+        const ordered = filtered.orderBy(createdAtKey, 'asc');
+        return ordered.startAfter(queryParams.fetchParams.sinceId);
       } else {
-        return ordered;
+        const ordered = filtered.orderBy(createdAtKey, 'desc');
+        return ordered.startAfter(queryParams.fetchParams.sinceId);
       }
     })();
 
-    const posts = await paginated.limit(queryParams.pageSize).get();
+    const posts = await paginated
+      .limit(queryParams.fetchParams.expectedAmount)
+      .get();
 
     return posts.docs.map((doc) => ({
       id: doc.id,

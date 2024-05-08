@@ -1,4 +1,4 @@
-import { AppUser, PLATFORM } from './types';
+import { AppUser, FetchParams, PLATFORM } from './types';
 import { AppPostSemantics, ParsePostResult } from './types.parser';
 import { PlatformPost } from './types.platform.posts';
 
@@ -96,6 +96,5 @@ export enum PostsQueryStatusParam {
 
 export interface UserPostsQueryParams {
   status: PostsQueryStatusParam;
-  pageSize: number;
-  startAfter?: string;
+  fetchParams: FetchParams;
 }

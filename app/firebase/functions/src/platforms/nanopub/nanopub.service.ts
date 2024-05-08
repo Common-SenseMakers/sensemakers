@@ -1,7 +1,11 @@
 import { Nanopub } from '@nanopub/sign';
 import { verifyMessage } from 'viem';
 
-import { PLATFORM, UserDetailsBase } from '../../@shared/types/types';
+import {
+  FetchParams,
+  PLATFORM,
+  UserDetailsBase,
+} from '../../@shared/types/types';
 import {
   NanopubUserProfile,
   NanupubSignupData,
@@ -25,7 +29,7 @@ import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
-import { FetchUserPostsParams, PlatformService } from '../platforms.interface';
+import { PlatformService } from '../platforms.interface';
 import { createIntroNanopublication } from './create.intro.nanopub';
 import { createNanopublication } from './create.nanopub';
 
@@ -187,7 +191,10 @@ export class NanopubService
     throw new Error('Method not implemented.');
   }
 
-  async fetch(params: FetchUserPostsParams): Promise<FetchedResult> {
+  async fetch(
+    params: FetchParams,
+    userDetails: UserDetailsBase
+  ): Promise<FetchedResult> {
     return { fetched: {}, platformPosts: [] };
   }
 

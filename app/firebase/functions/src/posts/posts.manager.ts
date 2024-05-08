@@ -1,4 +1,8 @@
-import { ALL_PUBLISH_PLATFORMS, AppUser } from '../@shared/types/types';
+import {
+  ALL_PUBLISH_PLATFORMS,
+  AppUser,
+  FetchParams,
+} from '../@shared/types/types';
 import {
   PARSER_MODE,
   ParsePostRequest,
@@ -26,7 +30,6 @@ import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
 import { ParserService } from '../parser/parser.service';
-import { FetchParams } from '../platforms/platforms.interface';
 import { PlatformsService } from '../platforms/platforms.service';
 import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
@@ -56,7 +59,9 @@ export class PostsManager {
 
     /** Call fetch for each user */
     const posts = await Promise.all(
-      users.map(async (user) => this.fetchUser({ user, mode: 'forward' }))
+      users.map(async (user) =>
+        this.fetchUser({ user, params: { expectedAmount: 10 } })
+      )
     );
 
     return posts.flat();
@@ -73,8 +78,7 @@ export class PostsManager {
     inputs: {
       userId?: string;
       user?: AppUser;
-      mode: 'backwards' | 'forward';
-      expectedAmount?: number;
+      params: FetchParams;
     },
     _manager?: TransactionManager
   ) {
@@ -94,16 +98,16 @@ export class PostsManager {
               async (account): Promise<PlatformPostCreated[] | undefined> => {
                 /** This fetch parameters */
                 const userParams = ((): FetchParams => {
-                  if (inputs.mode === 'forward') {
+                  if (inputs.params.sinceId) {
                     return {
                       sinceId: account.fetched?.newestId,
-                      expectedAmount: inputs.expectedAmount,
+                      expectedAmount: inputs.params.expectedAmount,
                     };
                   }
 
                   return {
                     untilId: account.fetched?.oldestId,
-                    expectedAmount: inputs.expectedAmount,
+                    expectedAmount: inputs.params.expectedAmount,
                   };
                 })();
 
@@ -118,6 +122,7 @@ export class PostsManager {
                   const platformPosts = await this.platforms.fetch(
                     platformId,
                     userParams,
+                    account,
                     manager
                   );
 
@@ -171,24 +176,46 @@ export class PostsManager {
     await Promise.all(postIds.map((postId) => this.markAndParsePost(postId)));
   }
 
-  /** get pending posts AppPostFull of user, cannot be part of a transaction */
+  /** get AppPost and fetch for new posts if necessary */
+  private async getAndFetchIfNecessary(
+    userId: string,
+    queryParams: UserPostsQueryParams
+  ) {
+    /** if sinceId is provided fetch forward always */
+    if (queryParams.fetchParams.sinceId !== undefined) {
+      /** fetch platforms for new PlatformPosts */
+      await this.fetchUser({ userId, params: queryParams.fetchParams });
+      return this.processing.posts.getOfUser(userId, queryParams);
+    } else {
+      /** if untilId fetch backwards but only if not enough posts are already stored */
+      const appPosts = await this.processing.posts.getOfUser(
+        userId,
+        queryParams
+      );
+
+      if (
+        queryParams.status === PostsQueryStatusParam.ALL ||
+        queryParams.status === PostsQueryStatusParam.PENDING
+      ) {
+        if (appPosts.length < queryParams.fetchParams.expectedAmount) {
+          await this.fetchUser({ userId, params: queryParams.fetchParams });
+          return this.processing.posts.getOfUser(userId, queryParams);
+        }
+      }
+      return appPosts;
+    }
+  }
+
+  /** Get posts AppPostFull of user, cannot be part of a transaction
+   * We trigger fetching posts from the platforms from here
+   */
   async getOfUser(userId: string, _queryParams?: UserPostsQueryParams) {
-    const queryParams = _queryParams || {
-      pageSize: 10,
+    const queryParams: UserPostsQueryParams = _queryParams || {
+      fetchParams: { expectedAmount: 10 },
       status: PostsQueryStatusParam.ALL,
     };
-    const appPosts = await this.processing.posts.getOfUser(userId, queryParams);
 
-    /** Fetch for platform posts dynamically if returned less than one page of posts */
-    if (
-      queryParams.status === PostsQueryStatusParam.ALL ||
-      queryParams.status === PostsQueryStatusParam.PENDING
-    ) {
-      if (appPosts.length < queryParams.pageSize) {
-        await this.fetchUser({ userId, amount: queryParams.pageSize });
-      }
-    }
-
+    const appPosts = await this.getAndFetchIfNecessary(userId, queryParams);
     const postsFull = await Promise.all(
       appPosts.map((post) => this.appendMirrors(post))
     );

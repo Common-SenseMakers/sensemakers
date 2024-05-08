@@ -8,7 +8,11 @@ import {
   UsersV2Params,
 } from 'twitter-api-v2';
 
-import { FetchedDetails, UserDetailsBase } from '../../@shared/types/types';
+import {
+  FetchParams,
+  FetchedDetails,
+  UserDetailsBase,
+} from '../../@shared/types/types';
 import {
   FetchedResult,
   PlatformPostCreate,
@@ -34,7 +38,7 @@ import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersRepository } from '../../users/users.repository';
-import { FetchParams, PlatformService } from '../platforms.interface';
+import { PlatformService } from '../platforms.interface';
 import { TwitterServiceClient } from './twitter.service.client';
 import {
   dateStrToTimestampMs,

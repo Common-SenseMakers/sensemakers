@@ -2,6 +2,7 @@ import { TimeService } from 'src/time/time.service';
 import { UsersService } from 'src/users/users.service';
 
 import {
+  FetchParams,
   PLATFORM,
   PUBLISHABLE_PLATFORMS,
   UserDetailsBase,
@@ -13,14 +14,14 @@ import {
   PlatformPostPublishStatus,
 } from '../@shared/types/types.platform.posts';
 import { TransactionManager } from '../db/transaction.manager';
-import {
-  FetchParams,
-  FetchUserPostsParams,
-  IdentityService,
-  PlatformService,
-} from './platforms.interface';
+import { IdentityService, PlatformService } from './platforms.interface';
 
-export type FetchAllUserPostsParams = Map<PLATFORM, FetchUserPostsParams[]>;
+interface FetchUserParams {
+  params: FetchParams;
+  userDetails: UserDetailsBase;
+}
+
+export type FetchAllUserPostsParams = Map<PLATFORM, FetchUserParams[]>;
 export type PlatformsMap = Map<
   PLATFORM,
   PlatformService<any, any, UserDetailsBase>

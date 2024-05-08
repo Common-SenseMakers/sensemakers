@@ -1,4 +1,4 @@
-import { PLATFORM, UserDetailsBase } from '../@shared/types/types';
+import { FetchParams, PLATFORM, UserDetailsBase } from '../@shared/types/types';
 import {
   FetchedResult,
   PlatformPostCreate,
@@ -13,22 +13,6 @@ import { TransactionManager } from '../db/transaction.manager';
 export type CredentialsForPlatform<P> = P extends PLATFORM.Twitter
   ? { accessToken: string }
   : any;
-
-/** there are two fetch modes:
- * - start_time !== undefined: must return max_results or all posts after this provided start_time
- * - end_time !== undefined : must return max_results or at least 10 posts before this provided end_time
- */
-export interface FetchParams {
-  sinceId?: string;
-  untilId?: string;
-  expectedAmount?: number;
-}
-
-export interface FetchUserPostsParams {
-  mode: 'forward' | 'backward';
-  expectedAmount: number;
-  userDetails: UserDetailsBase;
-}
 
 export interface IdentityService<
   SignupContext,

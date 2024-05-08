@@ -97,8 +97,6 @@ describe('03-process', () => {
           throw new Error('Unexpected');
         }
 
-        const publishTime = services.time.now();
-
         tweet = await services.platforms
           .get<TwitterService>(PLATFORM.Twitter)
           .publish(
@@ -110,10 +108,10 @@ describe('03-process', () => {
           );
 
         /** set lastFetched to one second before the last tweet timestamp */
-        await services.users.repo.setAccountLastFetched(
+        await services.users.repo.setAccountFetched(
           PLATFORM.Twitter,
           user_id,
-          publishTime,
+          { newestId: tweet.post_id },
           manager
         );
 
@@ -131,7 +129,10 @@ describe('03-process', () => {
       }
 
       /** fetch user posts */
-      await services.postsManager.fetchUser(appUser.userId);
+      await services.postsManager.fetchUser({
+        userId: appUser.userId,
+        params: { expectedAmount: 10 },
+      });
 
       /** read user post */
       const postsRead = await services.postsManager.getOfUser(appUser.userId);
@@ -332,28 +333,28 @@ describe('03-process', () => {
     it('gets all posts from a user', async () => {
       const posts = await services.postsManager.getOfUser('test-user-id', {
         status: PostsQueryStatusParam.ALL,
-        pageSize: 10,
+        fetchParams: { expectedAmount: 10 },
       });
       expect(posts).to.have.length(4);
     });
     it('gets all published posts from a user', async () => {
       const posts = await services.postsManager.getOfUser('test-user-id', {
         status: PostsQueryStatusParam.PUBLISHED,
-        pageSize: 10,
+        fetchParams: { expectedAmount: 10 },
       });
       expect(posts).to.have.length(1);
     });
     it('gets all for review posts from a user', async () => {
       const posts = await services.postsManager.getOfUser('test-user-id', {
         status: PostsQueryStatusParam.PENDING,
-        pageSize: 10,
+        fetchParams: { expectedAmount: 10 },
       });
       expect(posts).to.have.length(1);
     });
     it('gets all ignored posts from a user', async () => {
       const posts = await services.postsManager.getOfUser('test-user-id', {
         status: PostsQueryStatusParam.IGNORED,
-        pageSize: 10,
+        fetchParams: { expectedAmount: 10 },
       });
       expect(posts).to.have.length(2);
     });
