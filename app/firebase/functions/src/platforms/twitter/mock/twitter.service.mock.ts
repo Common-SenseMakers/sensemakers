@@ -57,7 +57,7 @@ const threads = [[1, 2], [3], [4, 5, 6], [7]].map(
       const createdAt = now + ixThread * 100 + 10 * ix;
       state.latestId = ix;
       return getSampleTweet(
-        `tweet-${ix}`,
+        ix.toString().padStart(5, '0'),
         TWITTER_USER_ID_MOCKS,
         createdAt,
         `conversation-${ixThread}`

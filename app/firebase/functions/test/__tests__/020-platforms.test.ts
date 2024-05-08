@@ -41,7 +41,7 @@ describe.only('02-platforms', () => {
   });
 
   describe('twitter', () => {
-    it("get's the latest 5 threads", async () => {
+    it('fetch the latest 5 threads', async () => {
       if (!appUser) {
         throw new Error('appUser not created');
       }

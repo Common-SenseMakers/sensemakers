@@ -165,7 +165,7 @@ export class TwitterService
     manager: TransactionManager
   ): Promise<TwitterThread[]> {
     try {
-      const expectedAmount = params.expectedAmount || 10;
+      const expectedAmount = params.expectedAmount;
       const readOnlyClient = await this.getClient(manager, userDetails, 'read');
 
       const tweetFields: TTweetv2TweetField[] = [
@@ -289,18 +289,10 @@ export class TwitterService
       };
     });
 
-    const fetched = ((): FetchedDetails => {
-      if (params.sinceId) {
-        return {
-          newestId: platformPosts[0].post_id,
-        };
-      } else if (params.untilId) {
-        return {
-          oldestId: platformPosts[platformPosts.length - 1].post_id,
-        };
-      }
-      throw new Error('Unexpected');
-    })();
+    const fetched: FetchedDetails = {
+      newestId: platformPosts[0].post_id,
+      oldestId: platformPosts[platformPosts.length - 1].post_id,
+    };
 
     return {
       fetched,
