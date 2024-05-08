@@ -42,9 +42,14 @@ export interface WithPlatformUserId {
   signupDate: number;
 }
 
+export interface FetchedDetails {
+  newestId?: string;
+  oldestId?: string;
+}
+
 export interface UserDetailsBase<P = any, R = any, W = any>
   extends WithPlatformUserId {
-  lastFetchedMs: number;
+  fetched?: FetchedDetails;
   profile?: P;
   read?: R;
   write?: W;
@@ -108,4 +113,14 @@ export interface OurTokenConfig {
 export interface HandleSignupResult {
   userId: string;
   ourAccessToken?: string;
+}
+
+/** there are two fetch modes:
+ * - sinceId !== undefined: try to return expectedAmount or all posts after this provided sinceId
+ * - untilId !== undefined : try to return expectedAmount or all posts before this provided untilId
+ */
+export interface FetchParams {
+  sinceId?: string;
+  untilId?: string;
+  expectedAmount: number;
 }

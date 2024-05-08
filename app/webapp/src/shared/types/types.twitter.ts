@@ -45,9 +45,9 @@ export interface TwitterUser {
 
 export interface TwitterQueryParameters {
   user_id: string;
-  start_time?: string;
-  end_time?: string;
-  max_results?: number;
+  sinceId?: string;
+  untilId?: string;
+  maxResults?: number;
 }
 
 export interface TwitterDraft {

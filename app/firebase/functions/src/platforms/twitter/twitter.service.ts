@@ -2,14 +2,18 @@ import {
   TOAuth2Scope,
   TTweetv2TweetField,
   TweetV2,
-  TweetV2SingleResult,
   TweetV2UserTimelineParams,
   Tweetv2FieldsParams,
   UsersV2Params,
 } from 'twitter-api-v2';
 
-import { UserDetailsBase } from '../../@shared/types/types';
 import {
+  FetchParams,
+  FetchedDetails,
+  UserDetailsBase,
+} from '../../@shared/types/types';
+import {
+  FetchedResult,
   PlatformPostCreate,
   PlatformPostDraft,
   PlatformPostPosted,
@@ -23,7 +27,6 @@ import {
 import {
   TwitterDraft,
   TwitterGetContextParams,
-  TwitterQueryParameters,
   TwitterSignupContext,
   TwitterSignupData,
   TwitterThread,
@@ -34,7 +37,7 @@ import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersRepository } from '../../users/users.repository';
-import { FetchUserPostsParams, PlatformService } from '../platforms.interface';
+import { PlatformService } from '../platforms.interface';
 import { TwitterServiceClient } from './twitter.service.client';
 import {
   dateStrToTimestampMs,
@@ -132,7 +135,6 @@ export class TwitterService
 
     const twitter: TwitterUserDetails = {
       user_id: user.id,
-      lastFetchedMs: 0,
       signupDate: 0,
       profile: user,
     };
@@ -149,136 +151,127 @@ export class TwitterService
     return twitter;
   }
 
-  /** methods non part of Platform interface should be protected (private) */
+  /**
+   * Fetch for "around" _params.params.expectedResults threads.
+   * beacuse we fetch is pages of 30, we may fetch more threads
+   * than expected. We will return them all anyways. Because
+   * threads might be truncated and there are rate limits, we
+   * might also return less threads than expected.
+   * */
   protected async fetchInternal(
-    params: TwitterQueryParameters,
-    manager: TransactionManager,
-    userDetails?: UserDetailsBase
+    params: FetchParams,
+    userDetails: UserDetailsBase,
+    manager: TransactionManager
   ): Promise<TwitterThread[]> {
-    const readOnlyClient = await this.getClient(manager, userDetails, 'read');
-
-    const tweetFields: TTweetv2TweetField[] = [
-      'created_at',
-      'author_id',
-      'text',
-      'entities',
-      'note_tweet',
-      'conversation_id',
-    ];
-
-    /** twitter min page size is 5, max could be larger */
-    const pageSize = (() => {
-      if (!params.max_results) return 10;
-      if (params.max_results < 5) return 5;
-      if (params.max_results > 10) return 10;
-      return params.max_results;
-    })();
-
-    const pageSize0 = params.max_results
-      ? Math.min(params.max_results, pageSize)
-      : pageSize;
-
-    const timelineParams: Partial<TweetV2UserTimelineParams> = {
-      start_time: params.start_time,
-      end_time: params.end_time,
-      max_results: 100,
-      'tweet.fields': tweetFields,
-      exclude: ['retweets', 'replies'],
-    };
-
     try {
-      const result = await readOnlyClient.v2.userTimeline(
-        params.user_id,
-        timelineParams
-      );
+      const expectedAmount = params.expectedAmount;
+      const readOnlyClient = await this.getClient(manager, userDetails, 'read');
 
+      const tweetFields: TTweetv2TweetField[] = [
+        'created_at',
+        'author_id',
+        'text',
+        'entities',
+        'note_tweet',
+        'conversation_id',
+      ];
+
+      /**
+       * TODO: because we are fetching 30 tweets per page, we
+       * can easily end up with more threads than the requested expectedResults
+       * The rate limit of 5 request in 15 minutes gives us 150 tweets max per result
+       * */
+
+      const _timelineParams: Partial<TweetV2UserTimelineParams> = {
+        since_id: params.sinceId,
+        until_id: params.untilId,
+        max_results: 30,
+        'tweet.fields': tweetFields,
+        exclude: ['retweets', 'replies'],
+      };
+
+      let nextToken: string | undefined = undefined;
       const tweetThreadsMap = new Map<string, TweetV2[]>();
-      /** organize tweets by conversation id to group them into threads */
-      result.data.data.forEach((tweet) => {
-        if (tweet.conversation_id) {
-          if (!tweetThreadsMap.has(tweet.conversation_id)) {
-            tweetThreadsMap.set(tweet.conversation_id, []);
-          }
-          tweetThreadsMap.get(tweet.conversation_id)?.push(tweet);
-        } else {
-          throw new Error('tweet does not have a conversation_id');
+
+      do {
+        const timelineParams = _timelineParams;
+        if (nextToken) {
+          timelineParams.pagination_token = nextToken;
         }
-      });
 
-      const resultCollection: TweetV2[] =
-        result.data.data?.slice(0, pageSize0) || [];
+        try {
+          const result = await readOnlyClient.v2.userTimeline(
+            userDetails.user_id,
+            timelineParams
+          );
 
-      let nextToken = result.meta.next_token;
-
-      while (nextToken) {
-        /**
-         * limit the total number of results to max_result.
-         * Warning. different interpreation than the twitter API,
-         * where max_results is the page size
-         */
-        if (DEBUG) logger.debug('fetchInternal', { params, resultCollection });
-        const nextResult = await readOnlyClient.v2.userTimeline(
-          params.user_id,
-          {
-            ...timelineParams,
-            pagination_token: nextToken,
+          if (result.data.data) {
+            /** organize tweets by conversation id to group them into threads */
+            result.data.data.forEach((tweet) => {
+              if (tweet.conversation_id) {
+                if (!tweetThreadsMap.has(tweet.conversation_id)) {
+                  tweetThreadsMap.set(tweet.conversation_id, []);
+                }
+                tweetThreadsMap.get(tweet.conversation_id)?.push(tweet);
+              } else {
+                throw new Error('tweet does not have a conversation_id');
+              }
+            });
           }
-        );
-        /** organize tweets by conversation id to group them into threads */
-        nextResult.data.data.forEach((tweet) => {
-          if (tweet.conversation_id) {
-            if (!tweetThreadsMap.has(tweet.conversation_id)) {
-              tweetThreadsMap.set(tweet.conversation_id, []);
+
+          nextToken = result.meta.next_token;
+        } catch (e: any) {
+          if (e.rateLimit) {
+            /** if we hit the rate limit after haven gotten some tweets, return what we got so far  */
+            if (tweetThreadsMap.size > 0) {
+              break;
+            } else {
+              /** otherwise throw */
+              throw new Error(e);
             }
-            tweetThreadsMap.get(tweet.conversation_id)?.push(tweet);
-          } else {
-            throw new Error('tweet does not have a conversation_id');
           }
-        });
+        }
 
-        nextToken = nextResult.meta.next_token;
-        if (tweetThreadsMap.keys.length >= pageSize) {
+        if (tweetThreadsMap.size >= expectedAmount + 1) {
           break;
         }
-      }
-      const twitterThreads: TwitterThread[] = [];
+      } while (nextToken !== undefined);
 
-      tweetThreadsMap.forEach((tweets, conversation_id) => {
-        /** sort tweets in thread by id so that they are in order */
-        tweets.sort((tweetA, tweetB) => Number(tweetA.id) - Number(tweetB.id));
-        twitterThreads.push({ conversation_id, tweets });
+      /** the last conversation may be truncated. Discard it */
+      const tweetsArrays = Array.from(tweetThreadsMap.values());
+      /** sort threads */
+      tweetsArrays.sort(
+        (tA, tB) =>
+          Number(tB[0].conversation_id) - Number(tA[0].conversation_id)
+      );
+      /** discard last */
+      tweetsArrays.pop();
+
+      /** sort tweets inside each thread, and compose the TwitterThread[] array */
+      const threads = tweetsArrays.map((thread): TwitterThread => {
+        const tweets = thread.sort(
+          (tweetA, tweetB) => Number(tweetA.id) - Number(tweetB.id)
+        );
+        return {
+          conversation_id: tweets[0].conversation_id as string,
+          tweets,
+        };
       });
 
-      if (params.max_results) {
-        return twitterThreads.slice(0, params.max_results);
-      }
-      return twitterThreads;
+      return threads;
     } catch (e: any) {
       throw new Error(handleTwitterError(e));
     }
   }
 
   public async fetch(
-    params: FetchUserPostsParams,
+    params: FetchParams,
+    userDetails: UserDetailsBase,
     manager: TransactionManager
-  ): Promise<PlatformPostPosted<TwitterThread>[]> {
-    const threads = await this.fetchInternal(
-      {
-        user_id: params.userDetails.user_id,
-        start_time:
-          params.start_time && params.start_time !== 0
-            ? new Date(params.start_time).toISOString()
-            : undefined,
-        end_time: params.end_time
-          ? new Date(params.end_time).toISOString()
-          : undefined,
-        max_results: params.max_results,
-      },
-      manager,
-      params.userDetails
-    );
+  ): Promise<FetchedResult<TwitterThread>> {
+    const threads = await this.fetchInternal(params, userDetails, manager);
 
-    return threads.map((thread) => {
+    const platformPosts = threads.map((thread) => {
       if (!thread.tweets[0].author_id) {
         throw new Error(`Unexpected author_id undefined`);
       }
@@ -294,6 +287,19 @@ export class TwitterService
         post: thread,
       };
     });
+
+    const fetched: FetchedDetails = {
+      newestId: platformPosts.length > 0 ? platformPosts[0].post_id : undefined,
+      oldestId:
+        platformPosts.length > 0
+          ? platformPosts[platformPosts.length - 1].post_id
+          : undefined,
+    };
+
+    return {
+      fetched,
+      platformPosts,
+    };
   }
 
   public async convertToGeneric(
@@ -317,7 +323,7 @@ export class TwitterService
     user_id?: string
   ) {
     const options: Partial<Tweetv2FieldsParams> = {
-      'tweet.fields': ['author_id', 'created_at'],
+      'tweet.fields': ['author_id', 'created_at', 'conversation_id'],
     };
 
     const client = user_id
@@ -331,7 +337,7 @@ export class TwitterService
   public async publish(
     postPublish: PlatformPostPublish<TwitterDraft>,
     manager: TransactionManager
-  ): Promise<PlatformPostPosted<TweetV2SingleResult>> {
+  ): Promise<PlatformPostPosted<TwitterThread>> {
     // TODO udpate to support many
     const userDetails = postPublish.userDetails;
     const post = postPublish.draft;
@@ -355,17 +361,26 @@ export class TwitterService
         throw new Error(`Unexpected author_id undefined`);
       }
 
+      if (!tweet.data.conversation_id) {
+        throw new Error(`Unexpected conversation_id undefined`);
+      }
+
       if (!tweet.data.created_at) {
         throw new Error(
           `Unexpected created_at undefined, how would we know the timestamp then? )`
         );
       }
 
+      const thread: TwitterThread = {
+        conversation_id: tweet.data.conversation_id,
+        tweets: [tweet.data],
+      };
+
       return {
         post_id: tweet.data.id,
         user_id: tweet.data.author_id,
         timestampMs: dateStrToTimestampMs(tweet.data.created_at),
-        post: tweet,
+        post: thread,
       };
     } catch (e: any) {
       throw new Error(handleTwitterError(e));

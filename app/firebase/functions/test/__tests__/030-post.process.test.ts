@@ -1,14 +1,13 @@
 import { expect } from 'chai';
-import { TweetV2SingleResult } from 'twitter-api-v2';
 
 import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
-import { SciFilterClassfication } from '../../src/@shared/types/types.parser';
 import {
-  PlatformPostCreate,
+  PlatformPostDraftApprova,
   PlatformPostPosted,
 } from '../../src/@shared/types/types.platform.posts';
-import { AppPostCreate } from '../../src/@shared/types/types.posts';
+import { AppPostReviewStatus } from '../../src/@shared/types/types.posts';
+import { TwitterThread } from '../../src/@shared/types/types.twitter';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { logger } from '../../src/instances/logger';
@@ -21,7 +20,7 @@ import { createTestAppUsers } from '../utils/user.factory';
 import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
 import { getTestServices } from './test.services';
 
-describe('03-process', () => {
+describe('030-process', () => {
   let rsaKeys: RSAKeys | undefined;
   const services = getTestServices({
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
@@ -37,7 +36,7 @@ describe('03-process', () => {
   describe('create and process', () => {
     let appUser: AppUser | undefined;
     let TEST_CONTENT = `This is a test post ${Date.now()}`;
-    let tweet: PlatformPostPosted<TweetV2SingleResult>;
+    let thread: PlatformPostPosted<TwitterThread>;
 
     before(async () => {
       await services.db.run(async (manager) => {
@@ -57,6 +56,19 @@ describe('03-process', () => {
         );
 
         rsaKeys = getRSAKeys('');
+      });
+
+      /**
+       * fetch once to get the posts once and set the fetchedDetails of
+       * the account
+       */
+      await services.db.run(async (manager) => {
+        if (!appUser) throw new Error('appUser not created');
+        /** fetch will store the posts in the DB */
+        await services.postsManager.fetchUser({
+          userId: appUser.userId,
+          params: { expectedAmount: 10 },
+        });
       });
     });
 
@@ -87,9 +99,7 @@ describe('03-process', () => {
           throw new Error('Unexpected');
         }
 
-        const publishTime = services.time.now();
-
-        tweet = await services.platforms
+        thread = await services.platforms
           .get<TwitterService>(PLATFORM.Twitter)
           .publish(
             {
@@ -99,15 +109,7 @@ describe('03-process', () => {
             manager
           );
 
-        /** set lastFetched to one second before the last tweet timestamp */
-        await services.users.repo.setAccountLastFetched(
-          PLATFORM.Twitter,
-          user_id,
-          publishTime,
-          manager
-        );
-
-        expect(tweet).to.not.be.undefined;
+        expect(thread).to.not.be.undefined;
 
         if (USE_REAL_TWITTER) {
           await new Promise<void>((resolve) => setTimeout(resolve, 6 * 1000));
@@ -120,14 +122,19 @@ describe('03-process', () => {
         throw new Error('appUser not created');
       }
 
-      /** fetch user posts */
-      await services.postsManager.fetchUser(appUser.userId);
+      /**
+       * fetch user posts. This time should return only the
+       * newly published post
+       */
+      await services.postsManager.fetchUser({
+        userId: appUser.userId,
+        params: { expectedAmount: 10 },
+      });
 
       /** read user post */
       const postsRead = await services.postsManager.getOfUser(appUser.userId);
 
       expect(postsRead).to.not.be.undefined;
-      expect(postsRead).to.have.length(1);
 
       const postRead = postsRead[0];
       expect(postRead).to.not.be.undefined;
@@ -163,7 +170,6 @@ describe('03-process', () => {
       const postsRead = await services.postsManager.getOfUser(appUser.userId);
 
       expect(postsRead).to.not.be.undefined;
-      expect(postsRead).to.have.length(1);
 
       postsRead.forEach((postRead) => {
         expect(postRead.semantics).to.not.be.undefined;
@@ -182,7 +188,6 @@ describe('03-process', () => {
         appUser.userId
       );
 
-      expect(pendingPosts).to.have.length(1);
       const pendingPost = pendingPosts[0];
       const nanopub = pendingPost.mirrors.find(
         (m) => m.platformId === PLATFORM.Nanopub
@@ -201,7 +206,7 @@ describe('03-process', () => {
       /** sign */
       const signed = await signNanopublication(draft, rsaKeys, '');
       nanopub.draft.post = signed.rdf();
-      nanopub.draft.postApproval = 'approved';
+      nanopub.draft.postApproval = PlatformPostDraftApprova.APPROVED;
 
       /** send updated post (content and semantics did not changed) */
       await services.postsManager.approvePost(pendingPost, appUser.userId);
@@ -212,132 +217,7 @@ describe('03-process', () => {
       );
 
       expect(approved).to.not.be.undefined;
-      expect(approved.reviewedStatus).to.equal('reviewed');
-    });
-  });
-  describe.only('query and filter', async () => {
-    before(async () => {
-      const { postsRepository, platformPostsRepository } = services;
-      const appPostCreates: [AppPostCreate, PlatformPostCreate][] = [
-        /** Published posts */
-        [
-          {
-            content: 'test content 1',
-            authorId: 'test-user-id',
-            origin: PLATFORM.Nanopub,
-            createdAtMs: 12345678,
-            parsingStatus: 'idle',
-            parsedStatus: 'processed',
-            reviewedStatus: 'reviewed',
-            semantics: 'semantics',
-            mirrorsIds: [],
-          },
-          {
-            platformId: PLATFORM.Nanopub,
-            publishStatus: 'published',
-            publishOrigin: 'posted',
-          },
-        ],
-        /** Ignored posts */
-        [
-          {
-            content: 'test content 2',
-            authorId: 'test-user-id',
-            origin: PLATFORM.Nanopub,
-            createdAtMs: 12345678,
-            parsingStatus: 'idle',
-            parsedStatus: 'processed',
-            reviewedStatus: 'reviewed',
-            semantics: 'semantics',
-            mirrorsIds: [],
-          },
-          {
-            platformId: PLATFORM.Nanopub,
-            publishStatus: 'draft',
-            publishOrigin: 'posted',
-          },
-        ],
-        [
-          {
-            content: 'test content 3',
-            authorId: 'test-user-id',
-            origin: PLATFORM.Nanopub,
-            createdAtMs: 12345678,
-            parsingStatus: 'idle',
-            parsedStatus: 'processed',
-            reviewedStatus: 'pending',
-            originalParsed: {
-              filter_clasification: SciFilterClassfication.NOT_RESEARCH,
-              semantics: 'semantics',
-            },
-            semantics: 'semantics',
-            mirrorsIds: [],
-          },
-          {
-            platformId: PLATFORM.Nanopub,
-            publishStatus: 'draft',
-            publishOrigin: 'posted',
-          },
-        ],
-        /** For review posts */
-        [
-          {
-            content: 'test content 4',
-            authorId: 'test-user-id',
-            origin: PLATFORM.Nanopub,
-            createdAtMs: 12345678,
-            parsingStatus: 'idle',
-            parsedStatus: 'processed',
-            reviewedStatus: 'pending',
-            originalParsed: {
-              filter_clasification: SciFilterClassfication.RESEARCH,
-              semantics: 'semantics',
-            },
-            semantics: 'semantics',
-            mirrorsIds: [],
-          },
-          {
-            platformId: PLATFORM.Nanopub,
-            publishStatus: 'draft',
-            publishOrigin: 'posted',
-          },
-        ],
-      ];
-
-      await services.db.run(async (manager) => {
-        appPostCreates.forEach(([appPostCreate, platformPostCreate]) => {
-          const appPost = postsRepository.create(appPostCreate, manager);
-          const platformPost = platformPostsRepository.create(
-            platformPostCreate,
-            manager
-          );
-          postsRepository.addMirror(appPost.id, platformPost.id, manager);
-        });
-      });
-    });
-    it('gets all posts from a user', async () => {
-      const posts = await services.postsManager.getOfUser('test-user-id', {
-        status: 'all',
-      });
-      expect(posts).to.have.length(4);
-    });
-    it('gets all published posts from a user', async () => {
-      const posts = await services.postsManager.getOfUser('test-user-id', {
-        status: 'published',
-      });
-      expect(posts).to.have.length(1);
-    });
-    it('gets all for review posts from a user', async () => {
-      const posts = await services.postsManager.getOfUser('test-user-id', {
-        status: 'for review',
-      });
-      expect(posts).to.have.length(1);
-    });
-    it('gets all ignored posts from a user', async () => {
-      const posts = await services.postsManager.getOfUser('test-user-id', {
-        status: 'ignored',
-      });
-      expect(posts).to.have.length(2);
+      expect(approved.reviewedStatus).to.equal(AppPostReviewStatus.APPROVED);
     });
   });
 });

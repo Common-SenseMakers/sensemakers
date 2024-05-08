@@ -3,7 +3,11 @@ import { FieldValue } from 'firebase-admin/firestore';
 import {
   AppPost,
   AppPostCreate,
+  AppPostParsedStatus,
+  AppPostRepublishedStatus,
+  AppPostReviewStatus,
   PostUpdate,
+  PostsQueryStatusParam,
   UserPostsQueryParams,
 } from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
@@ -40,32 +44,51 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   }
 
   /** Cannot be part of a transaction */
-  public async getOfUser(userId: string, queryParams?: UserPostsQueryParams) {
+  public async getOfUser(userId: string, queryParams: UserPostsQueryParams) {
     /** type protection agains properties renaming */
     const createdAtKey: keyof AppPost = 'createdAtMs';
     const authorKey: keyof AppPost = 'authorId';
+    const reviewedStatusKey: keyof AppPost = 'reviewedStatus';
+    const republishedStatusKey: keyof AppPost = 'republishedStatus';
 
-    let query = this.db.collections.posts
-      .where(authorKey, '==', userId)
-      .orderBy(createdAtKey, 'desc');
+    const base = this.db.collections.posts.where(authorKey, '==', userId);
 
-    /** perform query filtering at the level of AppPost */
-    switch (queryParams?.status) {
-      case 'published':
-        query = query.where('reviewedStatus', '==', 'reviewed');
-        break;
-      case 'ignored':
-        query = query.where('parsedStatus', '==', 'processed');
-        break;
-      case 'for review':
-        query = query.where('reviewedStatus', '==', 'pending');
-        break;
-      case 'all':
-      default:
-        break;
-    }
+    const filtered = (() => {
+      if (queryParams.status === PostsQueryStatusParam.ALL) {
+        return base;
+      }
+      if (queryParams.status === PostsQueryStatusParam.PENDING) {
+        return base.where(reviewedStatusKey, '==', AppPostReviewStatus.PENDING);
+      }
+      if (queryParams.status === PostsQueryStatusParam.PUBLISHED) {
+        return base.where(
+          republishedStatusKey,
+          '==',
+          AppPostRepublishedStatus.REPUBLISHED
+        );
+      }
+      if (queryParams.status === PostsQueryStatusParam.IGNORED) {
+        return base.where(reviewedStatusKey, '==', AppPostReviewStatus.IGNORED);
+      }
+      return base;
+    })();
 
-    const posts = await query.get();
+    /** two modes, forward sinceId or backwards untilId  */
+    const paginated = (() => {
+      if (queryParams.fetchParams.sinceId) {
+        const ordered = filtered.orderBy(createdAtKey, 'asc');
+        return ordered.startAfter(queryParams.fetchParams.sinceId);
+      } else {
+        const ordered = filtered.orderBy(createdAtKey, 'desc');
+        return queryParams.fetchParams.sinceId
+          ? ordered.startAfter(queryParams.fetchParams.sinceId)
+          : ordered;
+      }
+    })();
+
+    const posts = await paginated
+      .limit(queryParams.fetchParams.expectedAmount)
+      .get();
 
     return posts.docs.map((doc) => ({
       id: doc.id,
@@ -79,7 +102,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     const statusKey: keyof AppPost = 'parsedStatus';
     const authorKey: keyof AppPost = 'authorId';
 
-    const statusValue: AppPost['parsedStatus'] = 'unprocessed';
+    const statusValue: AppPostParsedStatus = AppPostParsedStatus.UNPROCESSED;
 
     const posts = await this.db.collections.posts
       .where(statusKey, '==', statusValue)

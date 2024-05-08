@@ -1,8 +1,9 @@
 import fs from 'fs';
 import { Context } from 'mocha';
 
-import { AppUser } from '../../src/@shared/types/types';
+import { ALL_PUBLISH_PLATFORMS, AppUser } from '../../src/@shared/types/types';
 import { envDeploy } from '../../src/config/typedenv.deploy';
+import { UsersHelper } from '../../src/users/users.helper';
 import {
   TestUserCredentials,
   authenticateTestUser,
@@ -83,20 +84,22 @@ export const mochaHooks = (): Mocha.RootHookObject => {
     /** update stored test users after all tests run */
     async afterAll(this: TestContext) {
       if (testUsers.size > 0) {
+        // remove the fetchedDetails
+        Array.from(testUsers.values()).map((user) => {
+          ALL_PUBLISH_PLATFORMS.map((platform) => {
+            const accounts = UsersHelper.getAccounts(user, platform);
+            accounts.map((account) => {
+              account.fetched = undefined;
+            });
+          });
+        });
+
         fs.writeFileSync(
           TEST_USERS_FILE_PATH,
-          JSON.stringify(Array.from(testUsers.values())),
+          JSON.stringify(Array.from(testUsers.values()), null, 2),
           'utf8'
         );
       }
-    },
-
-    /** update test users global variable after each test in case tokens have been refreshed */
-    async afterEach(this: TestContext) {
-      const testAppUsers = await services.users.repo.getAll();
-      testAppUsers.forEach((appUser) => {
-        testUsers.set(appUser.userId, appUser);
-      });
     },
   };
 };

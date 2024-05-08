@@ -79,7 +79,6 @@ const authenticateNanopub = async (
     {
       signupDate: 0,
       user_id: profile.ethAddress,
-      lastFetchedMs: 0,
       profile: {
         ethAddress: profile.ethAddress,
         rsaPublickey: profile.rsaPublickey,

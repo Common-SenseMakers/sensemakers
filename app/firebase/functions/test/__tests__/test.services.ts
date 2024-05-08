@@ -38,10 +38,7 @@ export interface TestServicesConfig {
   parser: ParserMockConfig;
 }
 
-export type TestServices = Services & {
-  platformPostsRepository: PlatformPostsRepository;
-  postsRepository: PostsRepository;
-};
+export type TestServices = Services;
 
 export const getTestServices = (config: TestServicesConfig) => {
   const mandatory = [
@@ -139,8 +136,6 @@ export const getTestServices = (config: TestServicesConfig) => {
     platforms: platformsService,
     time: time,
     db,
-    platformPostsRepository: platformPostsRepo,
-    postsRepository: postsRepo,
   };
 
   return services;

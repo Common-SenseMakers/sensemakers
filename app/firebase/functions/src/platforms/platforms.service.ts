@@ -1,23 +1,20 @@
 import { TimeService } from 'src/time/time.service';
 import { UsersService } from 'src/users/users.service';
 
-import {
-  PLATFORM,
-  PUBLISHABLE_PLATFORMS,
-  UserDetailsBase,
-} from '../@shared/types/types';
+import { FetchParams, PLATFORM, UserDetailsBase } from '../@shared/types/types';
 import {
   PlatformPostCreate,
   PlatformPostPublish,
 } from '../@shared/types/types.platform.posts';
 import { TransactionManager } from '../db/transaction.manager';
-import {
-  FetchUserPostsParams,
-  IdentityService,
-  PlatformService,
-} from './platforms.interface';
+import { IdentityService, PlatformService } from './platforms.interface';
 
-export type FetchAllUserPostsParams = Map<PLATFORM, FetchUserPostsParams[]>;
+interface FetchUserParams {
+  params: FetchParams;
+  userDetails: UserDetailsBase;
+}
+
+export type FetchAllUserPostsParams = Map<PLATFORM, FetchUserParams[]>;
 export type PlatformsMap = Map<
   PLATFORM,
   PlatformService<any, any, UserDetailsBase>
@@ -47,29 +44,17 @@ export class PlatformsService {
 
   public async fetch(
     platformId: PLATFORM,
-    params: FetchUserPostsParams,
+    params: FetchParams,
+    userDetails: UserDetailsBase,
     manager: TransactionManager
   ) {
     /** all fetched posts from one platform */
-    const fetched = await this.get(platformId).fetch(params, manager);
-    await this.users.repo.setAccountLastFetched(
-      platformId,
-      params.userDetails.user_id,
-      this.time.now(),
+    const fetched = await this.get(platformId).fetch(
+      params,
+      userDetails,
       manager
     );
-
-    /** convert them into a PlatformPost */
-    return fetched.map((fetchedPost) => {
-      const platformPost: PlatformPostCreate = {
-        platformId: platformId as PUBLISHABLE_PLATFORMS,
-        publishStatus: 'published',
-        publishOrigin: 'fetched',
-        posted: fetchedPost,
-      };
-
-      return platformPost;
-    });
+    return fetched;
   }
 
   public convertToGeneric(platformPost: PlatformPostCreate) {

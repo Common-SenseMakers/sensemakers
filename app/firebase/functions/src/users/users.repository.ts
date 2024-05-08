@@ -5,6 +5,7 @@ import {
   AppUser,
   AppUserCreate,
   DefinedIfTrue,
+  FetchedDetails,
   PLATFORM,
   UserDetailsBase,
   UserWithPlatformIds,
@@ -116,10 +117,10 @@ export class UsersRepository {
   /**
    * Just update the lastFetchedMs value of a given account
    * */
-  public async setAccountLastFetched(
+  public async setAccountFetched(
     platform: PLATFORM,
     user_id: string,
-    fetchedMs: number,
+    fetched: FetchedDetails,
     manager: TransactionManager
   ) {
     /** check if this platform user_id already exists */
@@ -151,8 +152,21 @@ export class UsersRepository {
 
     const current = accounts[ix];
 
-    /** overwrite the lastFeched value */
-    current.lastFetchedMs = fetchedMs;
+    /** merge the new fetched value with the current one */
+    const newFetched = (() => {
+      const currentFetched = current.fetched || {};
+      if (fetched.newestId) {
+        currentFetched.newestId = fetched.newestId;
+      }
+
+      if (fetched.oldestId) {
+        currentFetched.oldestId = fetched.oldestId;
+      }
+
+      return currentFetched;
+    })();
+
+    current.fetched = newFetched;
 
     const userRef = await this.getUserRef(existingUser.userId, manager, true);
 
