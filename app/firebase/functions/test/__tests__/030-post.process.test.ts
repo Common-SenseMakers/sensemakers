@@ -3,22 +3,10 @@ import { TweetV2SingleResult } from 'twitter-api-v2';
 
 import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
-import { SciFilterClassfication } from '../../src/@shared/types/types.parser';
 import {
-  PlatformPostCreate,
   PlatformPostDraftApprova,
   PlatformPostPosted,
-  PlatformPostPublishOrigin,
-  PlatformPostPublishStatus,
 } from '../../src/@shared/types/types.platform.posts';
-import {
-  AppPostCreate,
-  AppPostParsedStatus,
-  AppPostParsingStatus,
-  AppPostRepublishedStatus,
-  AppPostReviewStatus,
-  PostsQueryStatusParam,
-} from '../../src/@shared/types/types.posts';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { logger } from '../../src/instances/logger';

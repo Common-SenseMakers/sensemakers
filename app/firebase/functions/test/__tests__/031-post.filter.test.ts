@@ -1,13 +1,9 @@
 import { expect } from 'chai';
-import { TweetV2SingleResult } from 'twitter-api-v2';
 
-import { AppUser, PLATFORM } from '../../src/@shared/types/types';
-import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
+import { PLATFORM } from '../../src/@shared/types/types';
 import { SciFilterClassfication } from '../../src/@shared/types/types.parser';
 import {
   PlatformPostCreate,
-  PlatformPostDraftApprova,
-  PlatformPostPosted,
   PlatformPostPublishOrigin,
   PlatformPostPublishStatus,
 } from '../../src/@shared/types/types.platform.posts';
@@ -19,20 +15,12 @@ import {
   AppPostReviewStatus,
   PostsQueryStatusParam,
 } from '../../src/@shared/types/types.posts';
-import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
-import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { logger } from '../../src/instances/logger';
-import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
-import { TwitterService } from '../../src/platforms/twitter/twitter.service';
-import { parseUserPostsTask } from '../../src/posts/posts.task';
-import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
-import { createTestAppUsers } from '../utils/user.factory';
 import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
 import { getTestServices } from './test.services';
 
 describe('031-filter', () => {
-  let rsaKeys: RSAKeys | undefined;
   const services = getTestServices({
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
