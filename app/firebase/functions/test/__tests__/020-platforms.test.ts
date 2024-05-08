@@ -70,7 +70,9 @@ describe.only('02-platforms', () => {
       );
 
       expect(threads).to.not.be.undefined;
-      expect(threads.platformPosts.length).to.be.equal(4);
+      if (!USE_REAL_TWITTER) {
+        expect(threads.platformPosts.length).to.be.equal(4);
+      }
     });
   });
 

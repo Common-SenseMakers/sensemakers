@@ -243,7 +243,7 @@ export class TwitterService
       /** sort threads */
       tweetsArrays.sort(
         (tA, tB) =>
-          Number(tA[0].conversation_id) - Number(tB[0].conversation_id)
+          Number(tB[0].conversation_id) - Number(tA[0].conversation_id)
       );
       /** discard last */
       tweetsArrays.pop();
