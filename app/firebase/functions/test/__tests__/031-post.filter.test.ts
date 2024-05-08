@@ -20,7 +20,7 @@ import { resetDB } from '../utils/db';
 import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
 import { getTestServices } from './test.services';
 
-describe('031-filter', () => {
+describe.only('031-filter', () => {
   const services = getTestServices({
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
@@ -65,8 +65,8 @@ describe('031-filter', () => {
             createdAtMs: 12345678,
             parsingStatus: AppPostParsingStatus.IDLE,
             parsedStatus: AppPostParsedStatus.PROCESSED,
-            reviewedStatus: AppPostReviewStatus.APPROVED,
-            republishedStatus: AppPostRepublishedStatus.REPUBLISHED,
+            reviewedStatus: AppPostReviewStatus.IGNORED,
+            republishedStatus: AppPostRepublishedStatus.PENDING,
             semantics: 'semantics',
             mirrorsIds: [],
           },
@@ -84,8 +84,8 @@ describe('031-filter', () => {
             createdAtMs: 12345678,
             parsingStatus: AppPostParsingStatus.IDLE,
             parsedStatus: AppPostParsedStatus.PROCESSED,
-            reviewedStatus: AppPostReviewStatus.PENDING,
-            republishedStatus: AppPostRepublishedStatus.REPUBLISHED,
+            reviewedStatus: AppPostReviewStatus.IGNORED,
+            republishedStatus: AppPostRepublishedStatus.PENDING,
             originalParsed: {
               filter_clasification: SciFilterClassfication.NOT_RESEARCH,
               semantics: 'semantics',
@@ -109,7 +109,7 @@ describe('031-filter', () => {
             parsingStatus: AppPostParsingStatus.IDLE,
             parsedStatus: AppPostParsedStatus.PROCESSED,
             reviewedStatus: AppPostReviewStatus.PENDING,
-            republishedStatus: AppPostRepublishedStatus.REPUBLISHED,
+            republishedStatus: AppPostRepublishedStatus.PENDING,
             originalParsed: {
               filter_clasification: SciFilterClassfication.RESEARCH,
               semantics: 'semantics',

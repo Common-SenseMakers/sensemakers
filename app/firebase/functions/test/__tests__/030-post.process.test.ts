@@ -20,7 +20,7 @@ import { createTestAppUsers } from '../utils/user.factory';
 import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
 import { getTestServices } from './test.services';
 
-describe.only('030-process', () => {
+describe('030-process', () => {
   let rsaKeys: RSAKeys | undefined;
   const services = getTestServices({
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
