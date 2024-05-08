@@ -1,17 +1,10 @@
 import { TimeService } from 'src/time/time.service';
 import { UsersService } from 'src/users/users.service';
 
-import {
-  FetchParams,
-  PLATFORM,
-  PUBLISHABLE_PLATFORMS,
-  UserDetailsBase,
-} from '../@shared/types/types';
+import { FetchParams, PLATFORM, UserDetailsBase } from '../@shared/types/types';
 import {
   PlatformPostCreate,
   PlatformPostPublish,
-  PlatformPostPublishOrigin,
-  PlatformPostPublishStatus,
 } from '../@shared/types/types.platform.posts';
 import { TransactionManager } from '../db/transaction.manager';
 import { IdentityService, PlatformService } from './platforms.interface';
@@ -61,25 +54,7 @@ export class PlatformsService {
       userDetails,
       manager
     );
-
-    await this.users.repo.setAccountFetched(
-      platformId,
-      userDetails.user_id,
-      fetched.fetched,
-      manager
-    );
-
-    /** convert them into a PlatformPost */
-    return fetched.platformPosts.map((fetchedPost) => {
-      const platformPost: PlatformPostCreate = {
-        platformId: platformId as PUBLISHABLE_PLATFORMS,
-        publishStatus: PlatformPostPublishStatus.PUBLISHED,
-        publishOrigin: PlatformPostPublishOrigin.FETCHED,
-        posted: fetchedPost,
-      };
-
-      return platformPost;
-    });
+    return fetched;
   }
 
   public convertToGeneric(platformPost: PlatformPostCreate) {

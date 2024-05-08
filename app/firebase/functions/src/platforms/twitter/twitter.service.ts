@@ -2,7 +2,6 @@ import {
   TOAuth2Scope,
   TTweetv2TweetField,
   TweetV2,
-  TweetV2SingleResult,
   TweetV2UserTimelineParams,
   Tweetv2FieldsParams,
   UsersV2Params,
@@ -290,8 +289,11 @@ export class TwitterService
     });
 
     const fetched: FetchedDetails = {
-      newestId: platformPosts[0].post_id,
-      oldestId: platformPosts[platformPosts.length - 1].post_id,
+      newestId: platformPosts.length > 0 ? platformPosts[0].post_id : undefined,
+      oldestId:
+        platformPosts.length > 0
+          ? platformPosts[platformPosts.length - 1].post_id
+          : undefined,
     };
 
     return {
@@ -335,7 +337,7 @@ export class TwitterService
   public async publish(
     postPublish: PlatformPostPublish<TwitterDraft>,
     manager: TransactionManager
-  ): Promise<PlatformPostPosted<TweetV2SingleResult>> {
+  ): Promise<PlatformPostPosted<TwitterThread>> {
     // TODO udpate to support many
     const userDetails = postPublish.userDetails;
     const post = postPublish.draft;
@@ -359,17 +361,26 @@ export class TwitterService
         throw new Error(`Unexpected author_id undefined`);
       }
 
+      if (!tweet.data.conversation_id) {
+        throw new Error(`Unexpected conversation_id undefined`);
+      }
+
       if (!tweet.data.created_at) {
         throw new Error(
           `Unexpected created_at undefined, how would we know the timestamp then? )`
         );
       }
 
+      const thread: TwitterThread = {
+        conversation_id: tweet.data.conversation_id,
+        tweets: [tweet.data],
+      };
+
       return {
         post_id: tweet.data.id,
         user_id: tweet.data.author_id,
         timestampMs: dateStrToTimestampMs(tweet.data.created_at),
-        post: tweet,
+        post: thread,
       };
     } catch (e: any) {
       throw new Error(handleTwitterError(e));

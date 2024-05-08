@@ -2,6 +2,10 @@ import {
   ALL_PUBLISH_PLATFORMS,
   AppUser,
   FetchParams,
+  FetchedDetails,
+  PLATFORM,
+  PUBLISHABLE_PLATFORMS,
+  UserDetailsBase,
 } from '../@shared/types/types';
 import {
   PARSER_MODE,
@@ -10,6 +14,7 @@ import {
 } from '../@shared/types/types.parser';
 import {
   PlatformPost,
+  PlatformPostCreate,
   PlatformPostCreated,
   PlatformPostDraftApprova,
   PlatformPostPublishOrigin,
@@ -67,6 +72,98 @@ export class PostsManager {
     return posts.flat();
   }
 
+  private async fetchUserFromPlatform(
+    platformId: PLATFORM,
+    params: FetchParams,
+    account: UserDetailsBase,
+    manager: TransactionManager
+  ) {
+    /** This fetch parameters */
+    const userParams = ((): FetchParams => {
+      if (params.sinceId) {
+        return {
+          sinceId: params.sinceId,
+          expectedAmount: params.expectedAmount,
+        };
+      }
+
+      if (params.untilId) {
+        return {
+          sinceId: params.untilId,
+          expectedAmount: params.expectedAmount,
+        };
+      }
+
+      /**
+       * if no parameters are provided, if user has
+       * newestId, fetch forward since then, if not
+       * fetch without parameters (which is equivalent to
+       * latest backwards)
+       */
+
+      if (account.fetched?.newestId) {
+        return {
+          sinceId: account.fetched?.newestId,
+          expectedAmount: params.expectedAmount,
+        };
+      }
+
+      return {
+        expectedAmount: params.expectedAmount,
+      };
+    })();
+
+    const fetched = await this.platforms.fetch(
+      platformId,
+      userParams,
+      account,
+      manager
+    );
+
+    if (DEBUG)
+      logger.debug(
+        `fetchUser - platformPosts: ${fetched.platformPosts.length}`,
+        {
+          fetched,
+        }
+      );
+
+    /** keep track of the newest and oldest posts */
+    const newFetchedDetails: FetchedDetails = {};
+
+    if (userParams.untilId && fetched.fetched.oldestId) {
+      newFetchedDetails.oldestId = fetched.fetched.oldestId;
+    }
+
+    if (userParams.sinceId && fetched.fetched.newestId) {
+      newFetchedDetails.newestId = fetched.fetched.newestId;
+    }
+
+    if (!userParams.sinceId && !userParams.untilId) {
+      newFetchedDetails.newestId = fetched.fetched.newestId;
+      newFetchedDetails.oldestId = fetched.fetched.oldestId;
+    }
+
+    await this.users.repo.setAccountFetched(
+      platformId,
+      account.user_id,
+      newFetchedDetails,
+      manager
+    );
+
+    /** convert them into a PlatformPost */
+    return fetched.platformPosts.map((fetchedPost) => {
+      const platformPost: PlatformPostCreate = {
+        platformId: platformId as PUBLISHABLE_PLATFORMS,
+        publishStatus: PlatformPostPublishStatus.PUBLISHED,
+        publishOrigin: PlatformPostPublishOrigin.FETCHED,
+        posted: fetchedPost,
+      };
+
+      return platformPost;
+    });
+  }
+
   /**
    * Fetch and store platform posts of one user
    * in one Transaction.
@@ -96,48 +193,24 @@ export class PostsManager {
           return Promise.all(
             accounts.map(
               async (account): Promise<PlatformPostCreated[] | undefined> => {
-                /** This fetch parameters */
-                const userParams = ((): FetchParams => {
-                  if (inputs.params.sinceId) {
-                    return {
-                      sinceId: account.fetched?.newestId,
-                      expectedAmount: inputs.params.expectedAmount,
-                    };
-                  }
-
-                  return {
-                    untilId: account.fetched?.oldestId,
-                    expectedAmount: inputs.params.expectedAmount,
-                  };
-                })();
-
                 /** Fetch */
                 try {
                   if (DEBUG)
                     logger.debug('fetchUser - fetchAccount', {
                       platformId,
-                      userParams,
                     });
 
-                  const platformPosts = await this.platforms.fetch(
+                  const platformPostsCreate = await this.fetchUserFromPlatform(
                     platformId,
-                    userParams,
+                    inputs.params,
                     account,
                     manager
                   );
 
-                  if (DEBUG)
-                    logger.debug(
-                      `fetchUser - platformPosts: ${platformPosts.length}`,
-                      {
-                        platformPosts,
-                      }
-                    );
-
                   /** Create the PlatformPosts */
                   const platformPostsCreated =
                     await this.processing.createPlatformPosts(
-                      platformPosts,
+                      platformPostsCreate,
                       manager
                     );
 

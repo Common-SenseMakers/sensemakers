@@ -80,7 +80,9 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
         return ordered.startAfter(queryParams.fetchParams.sinceId);
       } else {
         const ordered = filtered.orderBy(createdAtKey, 'desc');
-        return ordered.startAfter(queryParams.fetchParams.sinceId);
+        return queryParams.fetchParams.sinceId
+          ? ordered.startAfter(queryParams.fetchParams.sinceId)
+          : ordered;
       }
     })();
 

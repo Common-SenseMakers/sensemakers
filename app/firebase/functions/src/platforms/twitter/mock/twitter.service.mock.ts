@@ -18,12 +18,14 @@ import { TwitterService } from '../twitter.service';
 import { dateStrToTimestampMs } from '../twitter.utils';
 
 interface TwitterTestState {
-  latestId: number;
+  latestTweetId: number;
+  latestConvId: number;
   threads: TwitterThread[];
 }
 
 let state: TwitterTestState = {
-  latestId: 0,
+  latestTweetId: 0,
+  latestConvId: 0,
   threads: [],
 };
 
@@ -35,14 +37,15 @@ const getSampleTweet = (
   id: string,
   authorId: string,
   createdAt: number,
-  conversation_id: string
+  conversation_id: string,
+  content: string
 ) => {
   const date = new Date(createdAt);
 
   return {
     id: id,
     conversation_id,
-    text: `This is an interesting paper https://arxiv.org/abs/2312.05230 ${id}`,
+    text: `This is an interesting paper https://arxiv.org/abs/2312.05230 ${id} - ${content}`,
     author_id: authorId,
     created_at: date.toISOString(),
     edit_history_tweet_ids: [],
@@ -51,18 +54,20 @@ const getSampleTweet = (
 
 const now = Date.now();
 
-const threads = [[1, 2], [3], [4, 5, 6], [7]].map(
+const threads = [['', ''], [''], ['', '', ''], ['']].map(
   (thread, ixThread): TwitterThread => {
-    const tweets = thread.map((ix) => {
-      const createdAt = now + ixThread * 100 + 10 * ix;
-      state.latestId = ix;
+    const tweets = thread.map((content, ixTweet) => {
+      const createdAt = now + ixThread * 100 + 10 * ixTweet;
+      state.latestTweetId = ixTweet;
       return getSampleTweet(
-        ix.toString().padStart(5, '0'),
+        ixTweet.toString().padStart(5, '0'),
         TWITTER_USER_ID_MOCKS,
         createdAt,
-        `conversation-${ixThread}`
+        ixThread.toString().padStart(5, '0'),
+        content
       );
     });
+    state.latestConvId = ixThread;
     return {
       conversation_id: `${ixThread}`,
       tweets,
@@ -98,7 +103,7 @@ export const getTwitterMock = (
 
         const tweet: TweetV2SingleResult = {
           data: {
-            id: (++state.latestId).toString(),
+            id: (++state.latestTweetId).toString(),
             text: postPublish.draft.text,
             edit_history_tweet_ids: [],
             author_id: postPublish.userDetails.user_id,
@@ -106,16 +111,18 @@ export const getTwitterMock = (
           },
         };
 
-        state.threads.push({
-          conversation_id: `conversation-${Date.now()}`,
+        const thread = {
+          conversation_id: (++state.latestConvId).toString(),
           tweets: [tweet.data],
-        });
+        };
 
-        const post: PlatformPostPosted<TweetV2SingleResult> = {
-          post_id: tweet.data.id,
+        state.threads.push(thread);
+
+        const post: PlatformPostPosted<TwitterThread> = {
+          post_id: thread.conversation_id,
           user_id: tweet.data.author_id as string,
           timestampMs: dateStrToTimestampMs(tweet.data.created_at as string),
-          post: tweet,
+          post: thread,
         };
         return post;
       }
@@ -127,9 +134,8 @@ export const getTwitterMock = (
         userDetails?: UserDetailsBase
       ): Promise<TwitterThread[]> => {
         const threads = state.threads.reverse().filter((thread) => {
-          const tweet0 = thread.tweets[0];
           return params.sinceId
-            ? Number(tweet0.id) > Number(params.sinceId)
+            ? Number(thread.conversation_id) > Number(params.sinceId)
             : true;
         });
         return threads;

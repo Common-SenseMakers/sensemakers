@@ -152,8 +152,21 @@ export class UsersRepository {
 
     const current = accounts[ix];
 
-    /** overwrite the lastFeched value */
-    current.fetched = fetched;
+    /** merge the new fetched value with the current one */
+    const newFetched = (() => {
+      const currentFetched = current.fetched || {};
+      if (fetched.newestId) {
+        currentFetched.newestId = fetched.newestId;
+      }
+
+      if (fetched.oldestId) {
+        currentFetched.oldestId = fetched.oldestId;
+      }
+
+      return currentFetched;
+    })();
+
+    current.fetched = newFetched;
 
     const userRef = await this.getUserRef(existingUser.userId, manager, true);
 
