@@ -323,7 +323,7 @@ export class TwitterService
     user_id?: string
   ) {
     const options: Partial<Tweetv2FieldsParams> = {
-      'tweet.fields': ['author_id', 'created_at'],
+      'tweet.fields': ['author_id', 'created_at', 'conversation_id'],
     };
 
     const client = user_id
