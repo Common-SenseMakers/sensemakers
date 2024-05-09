@@ -36,6 +36,7 @@ export const PostCard = () => {
       }}
       elevation="small"
       onClick={handleClick}>
+      <Text size="xsmall">{post?.id}</Text>
       <PostText text={post?.content}></PostText>
       <Box style={{ position: 'absolute', right: '10px', bottom: '10px' }}>
         {processStatusIcon}

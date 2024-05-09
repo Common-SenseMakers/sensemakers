@@ -1,10 +1,14 @@
-import { useQuery } from '@tanstack/react-query';
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { createContext } from 'react';
-import { useLocation, useNavigation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
-import { useToastContext } from '../app/ToastsContext';
 import {
   AppPostFull,
   PostsQueryStatusParam,
@@ -14,14 +18,16 @@ import { useAccountContext } from '../user-login/contexts/AccountContext';
 
 interface PostContextType {
   posts?: AppPostFull[];
-  more: () => void;
-  isLoading: boolean;
-  error: Error | null;
+  isFetching: boolean;
+  error?: Error;
+  fetchOlder: () => void;
 }
 
 export const UserPostsContextValue = createContext<PostContextType | undefined>(
   undefined
 );
+
+const PAGE_SIZE = 5;
 
 export const UserPostsContext: React.FC<{
   children: React.ReactNode;
@@ -29,62 +35,92 @@ export const UserPostsContext: React.FC<{
   const { connectedUser } = useAccountContext();
   const appFetch = useAppFetch();
 
-  const [filter, setFilter] = useState<UserPostsQueryParams>({
-    status: PostsQueryStatusParam.ALL,
-    fetchParams: { expectedAmount: 5 },
-  });
+  const [posts, setPosts] = useState<AppPostFull[]>([]);
+  const [fetchedFirst, setFetchedFirst] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
+  const [errorFetching, setErrorFetching] = useState<Error>();
+
+  const [status, setStatus] = useState<PostsQueryStatusParam>(
+    PostsQueryStatusParam.ALL
+  );
 
   const location = useLocation();
 
-  console.log({ location });
+  /** first data fill happens everytime the posts are empty and the firstFetched is false */
+  useEffect(() => {
+    if (posts.length === 0 && !fetchedFirst && connectedUser) {
+      _fetchOlder(undefined);
+    }
+  }, [posts, fetchedFirst, connectedUser]);
 
-  const setFilterStatus = (status: PostsQueryStatusParam) => {
-    setFilter({
-      status,
-      fetchParams: filter.fetchParams,
-    });
+  const reset = () => {
+    setPosts([]);
+    setFetchedFirst(false);
   };
 
+  /** reset at every status change  */
+  useEffect(() => {
+    reset();
+  }, [status]);
+
+  /** listen to the URL and set the filter status based on it */
   useEffect(() => {
     if (
       Object.values(PostsQueryStatusParam)
         .map((v) => `/${v}`)
         .includes(location.pathname)
     ) {
-      setFilterStatus(location.pathname.slice(1) as PostsQueryStatusParam);
+      setStatus(location.pathname.slice(1) as PostsQueryStatusParam);
     }
   }, [location]);
 
-  /** always refetch for a connected user and filter combination */
-  const {
-    data: _posts,
-    error: errorGetting,
-    isFetching: isGetting,
-  } = useQuery({
-    queryKey: ['getUserPosts', connectedUser, filter],
-    queryFn: async () => {
-      if (connectedUser) {
-        const posts = await appFetch<AppPostFull[], UserPostsQueryParams>(
+  const _oldestPostId = useMemo(() => {
+    return posts ? posts[posts.length - 1]?.id : undefined;
+  }, [posts]);
+
+  /** fetch for more post backwards */
+  const _fetchOlder = useCallback(
+    async (oldestPostId?: string) => {
+      if (!connectedUser) {
+        return;
+      }
+
+      setIsFetching(true);
+      setFetchedFirst(true);
+      try {
+        const readPosts = await appFetch<AppPostFull[], UserPostsQueryParams>(
           '/api/posts/getOfUser',
-          filter
+          {
+            status,
+            fetchParams: {
+              expectedAmount: PAGE_SIZE,
+              untilId: oldestPostId,
+            },
+          }
         );
 
-        return posts;
+        setPosts((prev) => prev.concat(readPosts));
+        setIsFetching(false);
+      } catch (e: any) {
+        setIsFetching(false);
+        setErrorFetching(e);
       }
-      return null;
     },
-  });
+    [appFetch, status, connectedUser]
+  );
 
-  /** convert null to undefined */
-  const posts = _posts !== null ? _posts : undefined;
+  /** public function to trigger fetching for older posts */
+  const fetchOlder = useCallback(() => {
+    _fetchOlder(_oldestPostId);
+  }, [_fetchOlder, _oldestPostId]);
 
   return (
     <UserPostsContextValue.Provider
       value={{
         posts,
-        isLoading: isGetting,
-        error: errorGetting,
-        more: () => {},
+        isFetching,
+        error: errorFetching,
+        fetchOlder,
       }}>
       {children}
     </UserPostsContextValue.Provider>
