@@ -12,11 +12,12 @@ import {
 } from '../shared/types/types.posts';
 import { AppButton } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
+import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useUserPosts } from './UserPostsContext';
 
 export const UserHome = () => {
   const { show } = useToastContext();
-  const { posts, isLoading, error, more } = useUserPosts();
+  const { posts, isFetching, error, fetchOlder } = useUserPosts();
 
   useEffect(() => {
     if (error) {
@@ -32,11 +33,7 @@ export const UserHome = () => {
     navigate(`/${filter.status}`);
   };
 
-  if (error) {
-    return <BoxCentered>{error.message}</BoxCentered>;
-  }
-
-  if (!posts || isLoading) {
+  if (!posts) {
     return <BoxCentered>Loading...</BoxCentered>;
   }
 
@@ -89,14 +86,21 @@ export const UserHome = () => {
             <Text>No posts found</Text>
           </BoxCentered>
         )}
+
         {posts.map((post, ix) => (
           <Box key={ix}>
-            <PostContext postInit={post}>
-              <PostCard></PostCard>
-            </PostContext>
+            <PostCard post={post}></PostCard>
           </Box>
         ))}
-        <AppButton label="fetch older" onClick={() => more()}></AppButton>
+
+        {!isFetching ? (
+          <AppButton
+            label="fetch older"
+            onClick={() => fetchOlder()}></AppButton>
+        ) : (
+          <LoadingDiv></LoadingDiv>
+        )}
+        {error ? <BoxCentered>{error.message}</BoxCentered> : <></>}
       </Box>
     </>
   );

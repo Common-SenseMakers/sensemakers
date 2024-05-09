@@ -4,8 +4,11 @@ import {
   AppPostFull,
   UserPostsQueryParams,
 } from '../../@shared/types/types.posts';
+import { IS_EMULATOR } from '../../config/config.runtime';
+import { envRuntime } from '../../config/typedenv.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
+import { enqueueParsePost } from '../posts.task';
 import {
   approvePostSchema,
   createDraftPostSchema,
@@ -109,13 +112,19 @@ export const parsePostController: RequestHandler = async (
   response
 ) => {
   try {
-    const { postsManager } = getServices(request);
-
     const payload = (await postIdValidation.validate(request.body)) as {
       postId: string;
     };
 
-    postsManager.markAndParsePost(payload.postId);
+    const task = enqueueParsePost(
+      payload.postId,
+      envRuntime.REGION || 'us-central1'
+    );
+
+    if (!IS_EMULATOR) {
+      // can await if not emulator
+      await task;
+    }
 
     if (DEBUG)
       logger.debug(`${request.path}: parsePost: ${payload.postId}`, {

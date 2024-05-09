@@ -1,7 +1,10 @@
 import { anything, instance, spy, when } from 'ts-mockito';
 import { TweetV2SingleResult } from 'twitter-api-v2';
 
-import { UserDetailsBase } from '../../../@shared/types/types';
+import {
+  PlatformFetchParams,
+  UserDetailsBase,
+} from '../../../@shared/types/types';
 import {
   PlatformPostPosted,
   PlatformPostPublish,
@@ -9,7 +12,6 @@ import {
 import {
   TwitterDraft,
   TwitterGetContextParams,
-  TwitterQueryParameters,
   TwitterThread,
   TwitterUserDetails,
 } from '../../../@shared/types/types.twitter';
@@ -45,7 +47,7 @@ const getSampleTweet = (
   return {
     id: id,
     conversation_id,
-    text: `This is an interesting paper https://arxiv.org/abs/2312.05230 ${id} - ${content}`,
+    text: `This is an interesting paper https://arxiv.org/abs/2312.05230 ${id} | ${content}`,
     author_id: authorId,
     created_at: date.toISOString(),
     edit_history_tweet_ids: [],
@@ -54,28 +56,48 @@ const getSampleTweet = (
 
 const now = Date.now();
 
-const threads = [['', ''], [''], ['', '', ''], ['']].map(
-  (thread, ixThread): TwitterThread => {
-    const tweets = thread.map((content, ixTweet) => {
-      const createdAt = now + ixThread * 100 + 10 * ixTweet;
-      state.latestTweetId = ixTweet;
-      return getSampleTweet(
-        ixTweet.toString().padStart(5, '0'),
-        TWITTER_USER_ID_MOCKS,
-        createdAt,
-        ixThread.toString().padStart(5, '0'),
-        content
-      );
-    });
-    state.latestConvId = ixThread;
-    return {
-      conversation_id: `${ixThread}`,
-      tweets,
-    };
-  }
-);
+const threads = [
+  ['', ''],
+  [''],
+  ['', '', '', '', '', '', '', '', ''],
+  [''],
+  [''],
+  ['', '', ''],
+  [''],
+  [''],
+  ['', '', ''],
+  [''],
+  [''],
+  ['', ''],
+  [''],
+  [''],
+  ['', '', '', '', '', '', '', '', '', '', '', ''],
+  [''],
+  [''],
+  ['', '', ''],
+  [''],
+].map((thread, ixThread): TwitterThread => {
+  const tweets = thread.map((content, ixTweet) => {
+    const idTweet = ixThread * 100 + ixTweet;
+    const createdAt = now + ixThread * 100 + 10 * ixTweet;
+    state.latestTweetId = idTweet;
+    return getSampleTweet(
+      idTweet.toString().padStart(5, '0'),
+      TWITTER_USER_ID_MOCKS,
+      createdAt,
+      ixThread.toString().padStart(5, '0'),
+      content
+    );
+  });
+  state.latestConvId = ixThread;
+  return {
+    conversation_id: `${ixThread}`,
+    tweets,
+  };
+});
 
 state.threads.push(...threads);
+state.threads.reverse();
 
 /** make private methods public */
 type MockedType = Omit<TwitterService, 'fetchInternal'> & {
@@ -130,15 +152,25 @@ export const getTwitterMock = (
 
     when(Mocked.fetchInternal(anything(), anything(), anything())).thenCall(
       async (
-        params: TwitterQueryParameters,
+        params: PlatformFetchParams,
         userDetails?: UserDetailsBase
       ): Promise<TwitterThread[]> => {
-        const threads = state.threads.reverse().filter((thread) => {
-          return params.sinceId
-            ? Number(thread.conversation_id) > Number(params.sinceId)
-            : true;
+        const threads = state.threads.filter((thread) => {
+          if (params.since_id) {
+            /** exclusive */
+            return Number(thread.conversation_id) > Number(params.since_id);
+          }
+
+          if (params.until_id) {
+            /** exclusive */
+            return Number(thread.conversation_id) < Number(params.until_id);
+          }
+
+          return true;
         });
-        return threads;
+        return params.expectedAmount && threads.length > params.expectedAmount
+          ? threads.slice(0, params.expectedAmount)
+          : threads;
       }
     );
 

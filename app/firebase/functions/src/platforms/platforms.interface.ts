@@ -1,4 +1,8 @@
-import { FetchParams, PLATFORM, UserDetailsBase } from '../@shared/types/types';
+import {
+  PLATFORM,
+  PlatformFetchParams,
+  UserDetailsBase,
+} from '../@shared/types/types';
 import {
   FetchedResult,
   PlatformPostCreate,
@@ -31,7 +35,7 @@ export interface PlatformService<
   UserDetails extends UserDetailsBase = UserDetailsBase,
 > extends IdentityService<SignupContext, SignupData, UserDetails> {
   fetch(
-    params: FetchParams,
+    params: PlatformFetchParams,
     userDetails: UserDetailsBase,
     manager: TransactionManager
   ): Promise<FetchedResult>;

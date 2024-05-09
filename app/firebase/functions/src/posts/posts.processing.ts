@@ -91,6 +91,9 @@ export class PostsProcessing {
       manager
     );
 
+    /** set the postId of the platformPost */
+    this.platformPosts.setPostId(platformPostCreated.id, post.id, manager);
+
     return { post, platformPost: platformPostCreated };
   }
 

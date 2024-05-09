@@ -1,4 +1,4 @@
-import { array, object, string } from 'yup';
+import { array, number, object, string } from 'yup';
 
 import { PostsQueryStatusParam } from '../../@shared/types/types.posts';
 
@@ -19,4 +19,9 @@ export const createDraftPostSchema = object({
 
 export const getUserPostsQuerySchema = object({
   status: string().oneOf([...Object.values(PostsQueryStatusParam)]),
+  fetchParams: object({
+    expectedAmount: number().required(),
+    sinceId: string().optional(),
+    untilId: string().optional(),
+  }).required(),
 }).noUnknown(true);

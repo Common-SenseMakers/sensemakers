@@ -10,7 +10,7 @@ import { envRuntime } from './config/typedenv.runtime';
 import { buildApp } from './instances/app';
 import { logger } from './instances/logger';
 import { createServices } from './instances/services';
-import { PARSE_USER_POSTS_TASK, parseUserPostsTask } from './posts/posts.task';
+import { PARSE_POST_TASK, parsePostTask } from './posts/posts.task';
 import { router } from './router';
 
 // import { fetchNewPosts } from './posts/posts.job';
@@ -33,13 +33,13 @@ exports['api'] = functions
 // export const postsJob = onSchedule(POSTS_JOB_SCHEDULE, fetchNewPosts);
 
 /** Registed the parseUserPost task */
-exports[PARSE_USER_POSTS_TASK] = onTaskDispatched(
+exports[PARSE_POST_TASK] = onTaskDispatched(
   {
     timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
     memory: envDeploy.CONFIG_MEMORY,
     minInstances: envDeploy.CONFIG_MININSTANCE,
   },
-  parseUserPostsTask
+  parsePostTask
 );
 
 exports.postUpdateListener = onDocumentUpdated(

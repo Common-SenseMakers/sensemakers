@@ -1,4 +1,5 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { useCallback } from 'react';
 
 import { DEBUG, FUNCTIONS_BASE } from '../app/config';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
@@ -44,9 +45,13 @@ export const _appFetch = async <T = any, D = any>(
 export const useAppFetch = () => {
   const { token } = useAccountContext();
 
-  const appFetch = async <T, D = any>(path: string, data?: D) => {
-    return _appFetch<T, D>(path, data, token);
-  };
+  const appFetch = useCallback(
+    async <T, D = any>(path: string, data?: D, auth: boolean = false) => {
+      if (auth && !token) throw new Error('No token available');
+      return _appFetch<T, D>(path, data, token);
+    },
+    [token]
+  );
 
   return appFetch;
 };
