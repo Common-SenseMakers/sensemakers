@@ -93,9 +93,7 @@ export const UserHome = () => {
 
         {posts.map((post, ix) => (
           <Box key={ix}>
-            <PostContext postInit={post}>
-              <PostCard></PostCard>
-            </PostContext>
+            <PostCard post={post}></PostCard>
           </Box>
         ))}
 

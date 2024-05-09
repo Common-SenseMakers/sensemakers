@@ -3,12 +3,14 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import { createContext } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
+import { subscribeToUpdates } from '../firestore/realtime.listener';
 import {
   AppPostFull,
   PostsQueryStatusParam,
@@ -42,11 +44,97 @@ export const UserPostsContext: React.FC<{
   const [isFetching, setIsFetching] = useState(false);
   const [errorFetching, setErrorFetching] = useState<Error>();
 
+  const unsubscribeCallbacks = useRef<Record<string, () => void>>({});
+
   const [status, setStatus] = useState<PostsQueryStatusParam>(
     PostsQueryStatusParam.ALL
   );
 
   const location = useLocation();
+
+  console.log({ posts });
+
+  /** refetch a post and overwrite its value in the array */
+  const refetchPost = useCallback(
+    async (postId: string) => {
+      const post = await appFetch<AppPostFull>(`/api/posts/get`, { postId });
+
+      if (DEBUG) console.log(`refetch post returned`, { post, posts });
+
+      setPosts((prev) => {
+        const newPosts = [...prev];
+        const ix = prev.findIndex((p) => p.id === postId);
+        if (DEBUG) console.log(`setPosts called`, { ix, newPosts });
+        if (ix !== -1) {
+          newPosts[ix] = post;
+        }
+        return newPosts;
+      });
+    },
+    [posts]
+  );
+
+  const addPosts = (posts: AppPostFull[]) => {
+    if (DEBUG) console.log(`addPosts called`, { posts });
+
+    /** add posts  */
+    setPosts((prev) => {
+      const allPosts = prev.concat(posts);
+      if (DEBUG) console.log(`pushing posts`, { prev, allPosts });
+      return allPosts;
+    });
+
+    /** subscribe to updates */
+    posts.forEach((post) => {
+      if (!unsubscribeCallbacks.current) {
+        unsubscribeCallbacks.current = {};
+      }
+
+      const current = unsubscribeCallbacks.current[post.id];
+      /** unsubscribe from previous */
+      if (current) {
+        if (DEBUG) console.log(`current unsubscribe for post ${post.id} found`);
+        current();
+      }
+
+      const unsubscribe = subscribeToUpdates(`post-${post.id}`, () => {
+        if (DEBUG) console.log(`update detected`, post.id);
+        refetchPost(post.id);
+      });
+
+      if (DEBUG)
+        console.log(
+          `unsubscribefor post ${post.id} stored on unsubscribeCallbacks`
+        );
+      unsubscribeCallbacks.current[post.id] = unsubscribe;
+    });
+  };
+
+  /** unsubscribe from all updates when unmounting */
+  useEffect(() => {
+    return () => {
+      Object.entries(unsubscribeCallbacks.current).forEach(
+        ([postId, unsubscribe]) => {
+          if (DEBUG)
+            console.log(`unsubscribing from post ${postId} at unmount`);
+          unsubscribe();
+        }
+      );
+    };
+  }, []);
+
+  const removeAllPosts = () => {
+    /** unsubscribe from all posts */
+    Object.entries(unsubscribeCallbacks.current).forEach(
+      ([postId, unsubscribe]) => {
+        if (DEBUG) console.log(`unsubscribing from ${postId}`);
+        unsubscribe();
+      }
+    );
+    /** reset the array */
+    if (DEBUG) console.log(`settings pots to empty array`);
+    setPosts([]);
+  };
 
   /** first data fill happens everytime the posts are empty and the firstFetched is false */
   useEffect(() => {
@@ -58,7 +146,7 @@ export const UserPostsContext: React.FC<{
 
   const reset = () => {
     if (DEBUG) console.log('resetting posts');
-    setPosts([]);
+    removeAllPosts();
     setFetchedFirst(false);
   };
 
@@ -110,12 +198,7 @@ export const UserPostsContext: React.FC<{
         );
 
         if (DEBUG) console.log(`fetching for older retrieved`, readPosts);
-        setPosts((prev) => {
-          const newPosts = prev.concat(readPosts);
-          if (DEBUG)
-            console.log(`pushing posts`, { prev, readPosts, newPosts });
-          return newPosts;
-        });
+        addPosts(readPosts);
         setIsFetching(false);
       } catch (e: any) {
         setIsFetching(false);

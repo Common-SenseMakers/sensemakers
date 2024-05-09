@@ -4,17 +4,20 @@ import { useNavigate } from 'react-router-dom';
 
 import { AppIcon } from '../app/icons/AppIcon';
 import { usePost } from '../post/PostContext';
+import { AppPostFull, AppPostParsingStatus } from '../shared/types/types.posts';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { PostText } from './PostText';
 
-export const PostCard = () => {
-  const { post, isParsing } = usePost();
+export const PostCard = (props: { post: AppPostFull }) => {
+  const { post } = props;
+  const isParsing = post.parsingStatus === AppPostParsingStatus.PROCESSING;
+
   const navigate = useNavigate();
   const { constants } = useThemeContext();
 
   const handleClick = () => {
-    navigate(`/post/${post?.id}`);
+    navigate(`/post/${post.id}`);
   };
 
   const processStatusIcon = (() => {
