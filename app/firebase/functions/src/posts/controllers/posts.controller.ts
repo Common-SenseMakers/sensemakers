@@ -115,7 +115,7 @@ export const parsePostController: RequestHandler = async (
       postId: string;
     };
 
-    postsManager.markAndParsePost(payload.postId);
+    postsManager.parsePost(payload.postId);
 
     if (DEBUG)
       logger.debug(`${request.path}: parsePost: ${payload.postId}`, {

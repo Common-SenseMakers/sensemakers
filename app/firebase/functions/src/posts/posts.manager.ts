@@ -272,7 +272,7 @@ export class PostsManager {
 
   async parseOfUser(userId: string) {
     const postIds = await this.processing.posts.getNonParsedOfUser(userId);
-    await Promise.all(postIds.map((postId) => this.markAndParsePost(postId)));
+    await Promise.all(postIds.map((postId) => this.parsePost(postId)));
   }
 
   /** get AppPost and fetch for new posts if necessary */
@@ -351,7 +351,7 @@ export class PostsManager {
     );
   }
 
-  async markAndParsePost(postId: string) {
+  async parsePost(postId: string) {
     const shouldParse = await this.db.run(async (manager) => {
       const post = await this.processing.posts.get(postId, manager, true);
       if (post.parsingStatus === 'processing') {
@@ -373,7 +373,7 @@ export class PostsManager {
       /** then process */
       await this.db.run(async (manager) => {
         try {
-          await this.parsePost(postId, manager);
+          await this._parsePost(postId, manager);
           await this.processing.createPostDrafts(postId, manager);
         } catch (err: any) {
           logger.error(`Error parsing post ${postId}`, err);
@@ -387,7 +387,7 @@ export class PostsManager {
     }
   }
 
-  protected async parsePost(postId: string, manager: TransactionManager) {
+  protected async _parsePost(postId: string, manager: TransactionManager) {
     const post = await this.processing.posts.get(postId, manager, true);
     if (DEBUG) logger.debug('parsePost - start', { postId, post });
 
