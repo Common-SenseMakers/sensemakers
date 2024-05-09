@@ -26,14 +26,14 @@ export class PlatformPostsRepository extends BaseRepository<
     shouldThrow?: T
   ) {
     const _shouldThrow = shouldThrow !== undefined ? shouldThrow : false;
-    const idKey: keyof PlatformPost = 'id';
+    const postIdKey: keyof PlatformPost = 'postId';
     const postedKey: keyof PlatformPost = 'posted';
     const user_idKey: keyof PlatformPostPosted = 'user_id';
     const platformKey: keyof PlatformPost = 'platformId';
 
     const posts = await manager.query(
       this.db.collections.platformPosts
-        .where(idKey, '==', postId)
+        .where(postIdKey, '==', postId)
         .where(platformKey, '==', platform)
         .where(`${postedKey}.${user_idKey}`, '==', user_id)
     );

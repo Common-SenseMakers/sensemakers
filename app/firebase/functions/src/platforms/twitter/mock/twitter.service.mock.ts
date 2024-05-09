@@ -1,7 +1,10 @@
 import { anything, instance, spy, when } from 'ts-mockito';
 import { TweetV2SingleResult } from 'twitter-api-v2';
 
-import { FetchParams, UserDetailsBase } from '../../../@shared/types/types';
+import {
+  PlatformFetchParams,
+  UserDetailsBase,
+} from '../../../@shared/types/types';
 import {
   PlatformPostPosted,
   PlatformPostPublish,
@@ -94,6 +97,7 @@ const threads = [
 });
 
 state.threads.push(...threads);
+state.threads.reverse();
 
 /** make private methods public */
 type MockedType = Omit<TwitterService, 'fetchInternal'> & {
@@ -148,18 +152,18 @@ export const getTwitterMock = (
 
     when(Mocked.fetchInternal(anything(), anything(), anything())).thenCall(
       async (
-        params: FetchParams,
+        params: PlatformFetchParams,
         userDetails?: UserDetailsBase
       ): Promise<TwitterThread[]> => {
-        const threads = state.threads.reverse().filter((thread) => {
-          if (params.sinceId) {
+        const threads = state.threads.filter((thread) => {
+          if (params.since_id) {
             /** exclusive */
-            return Number(thread.conversation_id) > Number(params.sinceId);
+            return Number(thread.conversation_id) > Number(params.since_id);
           }
 
-          if (params.untilId) {
+          if (params.until_id) {
             /** exclusive */
-            return Number(thread.conversation_id) < Number(params.untilId);
+            return Number(thread.conversation_id) < Number(params.until_id);
           }
 
           return true;

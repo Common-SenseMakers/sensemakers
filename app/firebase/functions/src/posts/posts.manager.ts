@@ -89,7 +89,7 @@ export class PostsManager {
         );
 
         return {
-          since_id: since ? since.id : undefined,
+          since_id: since ? since.posted?.post_id : undefined,
           expectedAmount: params.expectedAmount,
         };
       }
@@ -103,7 +103,7 @@ export class PostsManager {
         );
 
         return {
-          until_id: until ? until.id : undefined,
+          until_id: until ? until.posted?.post_id : undefined,
           expectedAmount: params.expectedAmount,
         };
       }
