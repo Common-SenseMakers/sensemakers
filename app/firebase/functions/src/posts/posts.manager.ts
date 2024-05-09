@@ -316,6 +316,7 @@ export class PostsManager {
     };
 
     const appPosts = await this.getAndFetchIfNecessary(userId, queryParams);
+
     const postsFull = await Promise.all(
       appPosts.map((post) => this.appendMirrors(post))
     );

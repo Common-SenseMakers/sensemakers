@@ -13,6 +13,8 @@ import { useAppFetch } from '../api/app.fetch';
 import { subscribeToUpdates } from '../firestore/realtime.listener';
 import {
   AppPostFull,
+  AppPostParsedStatus,
+  AppPostParsingStatus,
   PostsQueryStatusParam,
   UserPostsQueryParams,
 } from '../shared/types/types.posts';
@@ -74,41 +76,56 @@ export const UserPostsContext: React.FC<{
     [posts]
   );
 
-  const addPosts = (posts: AppPostFull[]) => {
-    if (DEBUG) console.log(`addPosts called`, { posts });
+  const addPosts = useCallback(
+    (posts: AppPostFull[]) => {
+      if (DEBUG) console.log(`addPosts called`, { posts });
 
-    /** add posts  */
-    setPosts((prev) => {
-      const allPosts = prev.concat(posts);
-      if (DEBUG) console.log(`pushing posts`, { prev, allPosts });
-      return allPosts;
-    });
-
-    /** subscribe to updates */
-    posts.forEach((post) => {
-      if (!unsubscribeCallbacks.current) {
-        unsubscribeCallbacks.current = {};
-      }
-
-      const current = unsubscribeCallbacks.current[post.id];
-      /** unsubscribe from previous */
-      if (current) {
-        if (DEBUG) console.log(`current unsubscribe for post ${post.id} found`);
-        current();
-      }
-
-      const unsubscribe = subscribeToUpdates(`post-${post.id}`, () => {
-        if (DEBUG) console.log(`update detected`, post.id);
-        refetchPost(post.id);
+      /** add posts  */
+      setPosts((prev) => {
+        const allPosts = prev.concat(posts);
+        if (DEBUG) console.log(`pushing posts`, { prev, allPosts });
+        return allPosts;
       });
 
-      if (DEBUG)
-        console.log(
-          `unsubscribefor post ${post.id} stored on unsubscribeCallbacks`
-        );
-      unsubscribeCallbacks.current[post.id] = unsubscribe;
-    });
-  };
+      /** subscribe to updates */
+      posts.forEach((post) => {
+        if (!unsubscribeCallbacks.current) {
+          unsubscribeCallbacks.current = {};
+        }
+
+        const current = unsubscribeCallbacks.current[post.id];
+        /** unsubscribe from previous */
+        if (current) {
+          if (DEBUG)
+            console.log(`current unsubscribe for post ${post.id} found`);
+          current();
+        }
+
+        const unsubscribe = subscribeToUpdates(`post-${post.id}`, () => {
+          if (DEBUG) console.log(`update detected`, post.id);
+          refetchPost(post.id);
+        });
+
+        if (DEBUG)
+          console.log(
+            `unsubscribefor post ${post.id} stored on unsubscribeCallbacks`
+          );
+        unsubscribeCallbacks.current[post.id] = unsubscribe;
+      });
+
+      /** trigger parse if not parsed and not parsing */
+      posts.forEach((post) => {
+        if (
+          post.parsedStatus === AppPostParsedStatus.UNPROCESSED &&
+          post.parsingStatus !== AppPostParsingStatus.PROCESSING
+        ) {
+          // async trigger parse
+          appFetch(`/api/posts/parse`, { postId: post.id });
+        }
+      });
+    },
+    [appFetch]
+  );
 
   /** unsubscribe from all updates when unmounting */
   useEffect(() => {
