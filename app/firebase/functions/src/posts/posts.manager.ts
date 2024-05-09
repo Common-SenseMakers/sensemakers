@@ -409,7 +409,7 @@ export class PostsManager {
 
     /** science filter hack */
     const reviewedStatus: AppPostReviewStatus =
-      parserResult.filter_clasification !== SciFilterClassfication.RESEARCH
+      parserResult.filter_classification !== SciFilterClassfication.RESEARCH
         ? AppPostReviewStatus.IGNORED
         : AppPostReviewStatus.PENDING;
 

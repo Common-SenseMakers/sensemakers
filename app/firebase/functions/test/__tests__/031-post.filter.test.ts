@@ -87,7 +87,7 @@ describe.only('031-filter', () => {
             reviewedStatus: AppPostReviewStatus.IGNORED,
             republishedStatus: AppPostRepublishedStatus.PENDING,
             originalParsed: {
-              filter_clasification: SciFilterClassfication.NOT_RESEARCH,
+              filter_classification: SciFilterClassfication.NOT_RESEARCH,
               semantics: 'semantics',
             },
             semantics: 'semantics',
@@ -111,7 +111,7 @@ describe.only('031-filter', () => {
             reviewedStatus: AppPostReviewStatus.PENDING,
             republishedStatus: AppPostRepublishedStatus.PENDING,
             originalParsed: {
-              filter_clasification: SciFilterClassfication.RESEARCH,
+              filter_classification: SciFilterClassfication.RESEARCH,
               semantics: 'semantics',
             },
             semantics: 'semantics',
