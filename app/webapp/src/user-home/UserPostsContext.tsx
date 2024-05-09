@@ -31,12 +31,19 @@ export const UserPostsContext: React.FC<{
 
   const [filter, setFilter] = useState<UserPostsQueryParams>({
     status: PostsQueryStatusParam.ALL,
-    fetchParams: { expectedAmount: 10 },
+    fetchParams: { expectedAmount: 5 },
   });
 
   const location = useLocation();
 
   console.log({ location });
+
+  const setFilterStatus = (status: PostsQueryStatusParam) => {
+    setFilter({
+      status,
+      fetchParams: filter.fetchParams,
+    });
+  };
 
   useEffect(() => {
     if (
@@ -44,10 +51,7 @@ export const UserPostsContext: React.FC<{
         .map((v) => `/${v}`)
         .includes(location.pathname)
     ) {
-      setFilter({
-        status: location.pathname.slice(1) as PostsQueryStatusParam,
-        fetchParams: { expectedAmount: 10 },
-      });
+      setFilterStatus(location.pathname.slice(1) as PostsQueryStatusParam);
     }
   }, [location]);
 
