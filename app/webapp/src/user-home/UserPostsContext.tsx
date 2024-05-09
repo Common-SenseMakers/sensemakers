@@ -29,6 +29,8 @@ export const UserPostsContextValue = createContext<PostContextType | undefined>(
 
 const PAGE_SIZE = 5;
 
+const DEBUG = true;
+
 export const UserPostsContext: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
@@ -49,11 +51,13 @@ export const UserPostsContext: React.FC<{
   /** first data fill happens everytime the posts are empty and the firstFetched is false */
   useEffect(() => {
     if (posts.length === 0 && !fetchedFirst && connectedUser) {
+      if (DEBUG) console.log('first fetch');
       _fetchOlder(undefined);
     }
   }, [posts, fetchedFirst, connectedUser]);
 
   const reset = () => {
+    if (DEBUG) console.log('resetting posts');
     setPosts([]);
     setFetchedFirst(false);
   };
@@ -70,12 +74,15 @@ export const UserPostsContext: React.FC<{
         .map((v) => `/${v}`)
         .includes(location.pathname)
     ) {
+      if (DEBUG) console.log('changing status based on location');
       setStatus(location.pathname.slice(1) as PostsQueryStatusParam);
     }
   }, [location]);
 
   const _oldestPostId = useMemo(() => {
-    return posts ? posts[posts.length - 1]?.id : undefined;
+    const oldest = posts ? posts[posts.length - 1]?.id : undefined;
+    if (DEBUG) console.log(`recomputing oldest _oldestPostId ${oldest}`);
+    return oldest;
   }, [posts]);
 
   /** fetch for more post backwards */
@@ -85,21 +92,30 @@ export const UserPostsContext: React.FC<{
         return;
       }
 
+      if (DEBUG) console.log(`fetching for older`);
       setIsFetching(true);
       setFetchedFirst(true);
       try {
+        const params: UserPostsQueryParams = {
+          status,
+          fetchParams: {
+            expectedAmount: PAGE_SIZE,
+            untilId: oldestPostId,
+          },
+        };
+        if (DEBUG) console.log(`fetching for older`, params);
         const readPosts = await appFetch<AppPostFull[], UserPostsQueryParams>(
           '/api/posts/getOfUser',
-          {
-            status,
-            fetchParams: {
-              expectedAmount: PAGE_SIZE,
-              untilId: oldestPostId,
-            },
-          }
+          params
         );
 
-        setPosts((prev) => prev.concat(readPosts));
+        if (DEBUG) console.log(`fetching for older retrieved`, readPosts);
+        setPosts((prev) => {
+          const newPosts = prev.concat(readPosts);
+          if (DEBUG)
+            console.log(`pushing posts`, { prev, readPosts, newPosts });
+          return newPosts;
+        });
         setIsFetching(false);
       } catch (e: any) {
         setIsFetching(false);
@@ -111,6 +127,7 @@ export const UserPostsContext: React.FC<{
 
   /** public function to trigger fetching for older posts */
   const fetchOlder = useCallback(() => {
+    if (DEBUG) console.log(`external fetchOlder`, _oldestPostId);
     _fetchOlder(_oldestPostId);
   }, [_fetchOlder, _oldestPostId]);
 

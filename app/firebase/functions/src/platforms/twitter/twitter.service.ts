@@ -289,8 +289,9 @@ export class TwitterService
     });
 
     const fetched: FetchedDetails = {
-      newestId: platformPosts.length > 0 ? platformPosts[0].post_id : undefined,
-      oldestId:
+      newest_id:
+        platformPosts.length > 0 ? platformPosts[0].post_id : undefined,
+      oldest_id:
         platformPosts.length > 0
           ? platformPosts[platformPosts.length - 1].post_id
           : undefined,

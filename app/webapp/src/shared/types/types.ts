@@ -43,8 +43,8 @@ export interface WithPlatformUserId {
 }
 
 export interface FetchedDetails {
-  newestId?: string;
-  oldestId?: string;
+  newest_id?: string;
+  oldest_id?: string;
 }
 
 export interface UserDetailsBase<P = any, R = any, W = any>
@@ -122,5 +122,12 @@ export interface HandleSignupResult {
 export interface FetchParams {
   sinceId?: string;
   untilId?: string;
+  expectedAmount: number;
+}
+
+/** ids are in terms of platformPost post_id */
+export interface PlatformFetchParams {
+  since_id?: string;
+  until_id?: string;
   expectedAmount: number;
 }

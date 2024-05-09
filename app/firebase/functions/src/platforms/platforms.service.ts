@@ -1,7 +1,12 @@
 import { TimeService } from 'src/time/time.service';
 import { UsersService } from 'src/users/users.service';
 
-import { FetchParams, PLATFORM, UserDetailsBase } from '../@shared/types/types';
+import {
+  FetchParams,
+  PLATFORM,
+  PlatformFetchParams,
+  UserDetailsBase,
+} from '../@shared/types/types';
 import {
   PlatformPostCreate,
   PlatformPostPublish,
@@ -44,7 +49,7 @@ export class PlatformsService {
 
   public async fetch(
     platformId: PLATFORM,
-    params: FetchParams,
+    params: PlatformFetchParams,
     userDetails: UserDetailsBase,
     manager: TransactionManager
   ) {

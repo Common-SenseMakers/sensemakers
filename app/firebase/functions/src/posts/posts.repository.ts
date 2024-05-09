@@ -73,16 +73,40 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       return base;
     })();
 
+    /** get the sinceCreatedAt and untilCreatedAt timestamps from the elements ids */
+    const { sinceCreatedAt, untilCreatedAt } = await (async () => {
+      return this.db.run(async (manager) => {
+        let sinceCreatedAt: number | undefined;
+        let untilCreatedAt: number | undefined;
+
+        if (queryParams.fetchParams.sinceId) {
+          const since = await this.get(
+            queryParams.fetchParams.sinceId,
+            manager
+          );
+          sinceCreatedAt = since ? since.createdAtMs : undefined;
+        }
+
+        if (queryParams.fetchParams.untilId) {
+          const until = await this.get(
+            queryParams.fetchParams.untilId,
+            manager
+          );
+          untilCreatedAt = until ? until.createdAtMs : undefined;
+        }
+
+        return { sinceCreatedAt, untilCreatedAt };
+      });
+    })();
+
     /** two modes, forward sinceId or backwards untilId  */
-    const paginated = (() => {
-      if (queryParams.fetchParams.sinceId) {
+    const paginated = await (async () => {
+      if (sinceCreatedAt) {
         const ordered = filtered.orderBy(createdAtKey, 'asc');
-        return ordered.startAfter(queryParams.fetchParams.sinceId);
+        return ordered.startAfter(sinceCreatedAt);
       } else {
         const ordered = filtered.orderBy(createdAtKey, 'desc');
-        return queryParams.fetchParams.sinceId
-          ? ordered.startAfter(queryParams.fetchParams.sinceId)
-          : ordered;
+        return untilCreatedAt ? ordered.startAfter(untilCreatedAt) : ordered;
       }
     })();
 

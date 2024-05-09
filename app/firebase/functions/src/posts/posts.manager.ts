@@ -5,6 +5,7 @@ import {
   FetchedDetails,
   PLATFORM,
   PUBLISHABLE_PLATFORMS,
+  PlatformFetchParams,
   UserDetailsBase,
 } from '../@shared/types/types';
 import {
@@ -78,18 +79,31 @@ export class PostsManager {
     account: UserDetailsBase,
     manager: TransactionManager
   ) {
-    /** This fetch parameters */
-    const userParams = ((): FetchParams => {
+    const platformParams = await (async (): Promise<PlatformFetchParams> => {
       if (params.sinceId) {
+        const since = await this.processing.platformPosts.getFromPostId(
+          params.sinceId,
+          platformId,
+          account.user_id,
+          manager
+        );
+
         return {
-          sinceId: params.sinceId,
+          since_id: since ? since.id : undefined,
           expectedAmount: params.expectedAmount,
         };
       }
 
       if (params.untilId) {
+        const until = await this.processing.platformPosts.getFromPostId(
+          params.untilId,
+          platformId,
+          account.user_id,
+          manager
+        );
+
         return {
-          sinceId: params.untilId,
+          until_id: until ? until.id : undefined,
           expectedAmount: params.expectedAmount,
         };
       }
@@ -101,9 +115,9 @@ export class PostsManager {
        * latest backwards)
        */
 
-      if (account.fetched?.newestId) {
+      if (account.fetched?.newest_id) {
         return {
-          sinceId: account.fetched?.newestId,
+          since_id: account.fetched?.newest_id,
           expectedAmount: params.expectedAmount,
         };
       }
@@ -115,7 +129,7 @@ export class PostsManager {
 
     const fetched = await this.platforms.fetch(
       platformId,
-      userParams,
+      platformParams,
       account,
       manager
     );
@@ -131,17 +145,29 @@ export class PostsManager {
     /** keep track of the newest and oldest posts */
     const newFetchedDetails: FetchedDetails = {};
 
-    if (userParams.untilId && fetched.fetched.oldestId) {
-      newFetchedDetails.oldestId = fetched.fetched.oldestId;
+    /**
+     * if until_id was requested, the fetched oldest_id will be the
+     * new oldest_id
+     */
+    if (platformParams.until_id && fetched.fetched.oldest_id) {
+      newFetchedDetails.oldest_id = fetched.fetched.oldest_id;
     }
 
-    if (userParams.sinceId && fetched.fetched.newestId) {
-      newFetchedDetails.newestId = fetched.fetched.newestId;
+    /**
+     * if since_id was requested, the fetched newest_id will be the
+     * new newest_id
+     */
+    if (platformParams.since_id && fetched.fetched.newest_id) {
+      newFetchedDetails.newest_id = fetched.fetched.newest_id;
     }
 
-    if (!userParams.sinceId && !userParams.untilId) {
-      newFetchedDetails.newestId = fetched.fetched.newestId;
-      newFetchedDetails.oldestId = fetched.fetched.oldestId;
+    /**
+     * if neither since_id nor until_id were requested, both
+     * the newest and oldest fetched ids will be the absolute ones
+     */
+    if (!platformParams.since_id && !platformParams.until_id) {
+      newFetchedDetails.newest_id = fetched.fetched.newest_id;
+      newFetchedDetails.oldest_id = fetched.fetched.oldest_id;
     }
 
     await this.users.repo.setAccountFetched(

@@ -152,9 +152,17 @@ export const getTwitterMock = (
         userDetails?: UserDetailsBase
       ): Promise<TwitterThread[]> => {
         const threads = state.threads.reverse().filter((thread) => {
-          return params.sinceId
-            ? Number(thread.conversation_id) > Number(params.sinceId)
-            : true;
+          if (params.sinceId) {
+            /** exclusive */
+            return Number(thread.conversation_id) > Number(params.sinceId);
+          }
+
+          if (params.untilId) {
+            /** exclusive */
+            return Number(thread.conversation_id) < Number(params.untilId);
+          }
+
+          return true;
         });
         return params.expectedAmount && threads.length > params.expectedAmount
           ? threads.slice(0, params.expectedAmount)
