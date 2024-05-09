@@ -101,6 +101,23 @@ def test_active_list():
     # assert "itemType" not in output.extra["prompt"]
 
 
+def test_no_ref():
+    kp = KeywordPParserChainConfig(
+        name="kw_test",
+        use_metadata=True,
+    )
+    kp.llm_config.llm_type = "mistralai/mistral-7b-instruct:free"
+    multi_config = MultiParserChainConfig(parser_configs=[kp])
+    mcp = MultiChainParser(multi_config)
+    url = "https://mastodon.social/@natematias@social.coop/111410981466531543"
+    post = scrape_post(url)
+    res = mcp.process_ref_post(post, active_list=["kw_test"])
+    # output = res["kw_test_2"]
+    assert "research_keyword" in res["kw_test"].answer
+    assert "keywords" in res["kw_test"].answer
+    assert list(res.keys()) == ["kw_test"]
+
+
 def test_ref_tagger():
     rtc = RefTaggerChainConfig(name="rt_test")
     rtc.llm_config.llm_type = "mistralai/mistral-7b-instruct:free"
@@ -164,6 +181,39 @@ def test_topics_kw_ref_tagging():
     assert "rt_test" in res
 
 
+def test_topics_kw_ref_tagging_2():
+    llm_type = "open-orca/mistral-7b-openorca"
+    kp = KeywordPParserChainConfig(
+        name="kw_test",
+        use_metadata=True,
+        llm_config=LLMConfig(llm_type=llm_type),
+    )
+    rtc = RefTaggerChainConfig(
+        name="rt_test",
+        use_metadata=True,
+        llm_config=LLMConfig(llm_type=llm_type),
+    )
+    tpc = TopicsPParserChainConfig(
+        name="topic_test",
+        use_metadata=True,
+        llm_config=LLMConfig(llm_type=llm_type),
+    )
+    multi_config = MultiParserChainConfig(
+        parser_configs=[
+            rtc,
+            tpc,
+            kp,
+        ]
+    )
+    mcp = MultiChainParser(multi_config)
+    url = "https://twitter.com/Elinor_Carmi/status/1768238325020659885"
+    post = scrape_post(url)
+    res = mcp.process_ref_post(post)
+    assert "topic_test" in res
+    assert "kw_test" in res
+    assert "rt_test" in res
+
+
 def test_multi_chain_batch_simple():
     # get a few posts for input
     urls = [
@@ -196,9 +246,24 @@ def test_metadata_fail():
 
 
 if __name__ == "__main__":
-    multi_config = create_multi_config_for_tests(llm_type="google/gemma-7b-it:free")
-    multi_config.post_process_type = PostProcessType.COMBINED
+    tpc = TopicsPParserChainConfig(
+        name="topic_test",
+        use_metadata=True,
+        llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
+    )
+    multi_config = MultiParserChainConfig(
+        parser_configs=[
+            tpc,
+        ]
+    )
     mcp = MultiChainParser(multi_config)
+
     res = mcp.process_text(TEST_POST_TEXT_W_REF)
+    output = res["topic_test"]
+    prompt = output.extra["prompt"]
+    # multi_config = create_multi_config_for_tests(llm_type="google/gemma-7b-it:free")
+    # multi_config.post_process_type = PostProcessType.COMBINED
+    # mcp = MultiChainParser(multi_config)
+    # res = mcp.process_text(TEST_POST_TEXT_W_REF)
     # assert "test" in mcp.pparsers
     # assert "Google Scholar is manipulatable" in prompt

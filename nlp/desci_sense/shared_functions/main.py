@@ -30,7 +30,15 @@ def SM_FUNCTION_post_parser_imp(
     logger.info(f"Running parser on content: {content}...")
 
     # TODO change this to handle post and not text
-    result = parser.process_text(content)
+    result = parser.process_text(
+        content,
+        active_list=[  # using new multi reference tagger
+            "keywords",
+            "multi_refs_tagger",
+            "topics",
+            "hashtags",
+        ],
+    )
 
     logger.info(f"Parser run ended result: {result}...")
 

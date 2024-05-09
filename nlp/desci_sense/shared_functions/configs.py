@@ -24,6 +24,8 @@ class ParserChainType(str, Enum):
     KEYWORDS = "keywords"
     REFERENCE_TAGGER = "reference_tagger"
     TOPICS = "topics"
+    HASHTAGS = "hashtags"
+    MULTI_REF_TAGGER = "multi_reference_tagger"
 
 
 def validate_env_var(env_var_name: str, value: Union[str, None]):
@@ -141,12 +143,28 @@ class KeywordPParserChainConfig(PostParserChainConfig):
     )
 
 
+class HashtagPParserChainConfig(PostParserChainConfig):
+    type: ParserChainType = ParserChainType.HASHTAGS
+    use_metadata: bool = False
+    max_hashtags: int = Field(
+        default=20,
+        description="Maximum number of hashtags to parse",
+    )
+
+
 class RefTaggerChainConfig(PostParserChainConfig):
     type: ParserChainType = ParserChainType.REFERENCE_TAGGER
+    is_ref: bool = True  # dummy var, just used for pydnatic type resolution
+
+
+class MultiRefTaggerChainConfig(PostParserChainConfig):
+    type: ParserChainType = ParserChainType.MULTI_REF_TAGGER
+    is_multi_ref: bool = True  # dummy var, just used for pydnatic type resolution
 
 
 class TopicsPParserChainConfig(PostParserChainConfig):
     type: ParserChainType = ParserChainType.TOPICS
+    is_topic: bool = True  # dummy var, just used for pydnatic type resolution
 
 
 class MultiParserChainConfig(BaseSettings):
@@ -158,6 +176,8 @@ class MultiParserChainConfig(BaseSettings):
             KeywordPParserChainConfig,
             RefTaggerChainConfig,
             TopicsPParserChainConfig,
+            HashtagPParserChainConfig,
+            MultiRefTaggerChainConfig,
         ]
     ] = Field(description="List of parser chain configurations", default_factory=list)
     metadata_extract_config: MetadataExtractionConfig = Field(

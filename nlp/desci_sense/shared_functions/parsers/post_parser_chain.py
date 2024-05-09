@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Dict
 from loguru import logger
+from langchain.prompts import PromptTemplate
+from langchain_core.output_parsers import StrOutputParser
 
 from ..schema.post import RefPost
 from ..web_extractors.metadata_extractors import RefMetadata
@@ -33,6 +35,13 @@ class PostParserChain(ABC):
             **self.global_config.openrouter_api_config.model_dump_all(),
         }
         self._model = create_model(**kw_args)
+
+        # simple chat chain for debug purposes
+        self._chat_chain = (
+            PromptTemplate.from_template("{chat_input}")
+            | self._model
+            | StrOutputParser()
+        )
 
     @abstractmethod
     def chain(self):
@@ -88,3 +97,7 @@ class PostParserChain(ABC):
         md_dict: Dict[str, RefMetadata],
     ) -> str:
         pass
+
+    def chat(self, input: str) -> str:
+        res = self._chat_chain.invoke({"chat_input": input})
+        return res

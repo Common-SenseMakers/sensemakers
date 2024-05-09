@@ -48,6 +48,7 @@ from ..prompting.jinja.single_ref_template import single_ref_template
 from ..prompting.jinja.keywords_extraction_template import keywords_extraction_template
 from ..prompting.jinja.multi_ref_template import multi_ref_template
 from ..prompting.jinja.topics_template import ALLOWED_TOPICS, topics_template
+from .parser_utils import BatchCallback
 
 
 def add_prompts_to_output(
@@ -237,7 +238,8 @@ class MultiChainParser:
 
         # create runnable parallel
         # setup async batch job
-        config = RunnableConfig(max_concurrency=batch_size)
+        cb = BatchCallback(len(inputs))  # init callback
+        config = RunnableConfig(max_concurrency=batch_size, callbacks=[cb])
         parallel_chain = self.create_parallel_chain(active_list)
 
         logger.debug("Invoking parallel chain...")
@@ -248,6 +250,7 @@ class MultiChainParser:
                 config=config,
             )
         )
+        cb.progress_bar.close()
 
         # post processing results
         logger.debug(f"Post processing {len(results)} results...")

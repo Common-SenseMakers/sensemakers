@@ -50,6 +50,7 @@ class AllowedTermsPParserChain(PostParserChain):
         self._allowed_terms_name = f"{self.input_name}_allowed_terms"
         self._allowed_terms_key = "{" + self._allowed_terms_name + "}"
 
+        # add allowed terms below the parser chain output, so the output parser has access to them
         _merge = ChatPromptTemplate.from_template(
             "{raw_parser_chain_output} \n\n "
             + ALLOWED_TERMS_DELIMITER
