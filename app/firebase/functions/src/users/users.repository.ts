@@ -155,12 +155,12 @@ export class UsersRepository {
     /** merge the new fetched value with the current one */
     const newFetched = (() => {
       const currentFetched = current.fetched || {};
-      if (fetched.newestId) {
-        currentFetched.newestId = fetched.newestId;
+      if (fetched.newest_id) {
+        currentFetched.newest_id = fetched.newest_id;
       }
 
-      if (fetched.oldestId) {
-        currentFetched.oldestId = fetched.oldestId;
+      if (fetched.oldest_id) {
+        currentFetched.oldest_id = fetched.oldest_id;
       }
 
       return currentFetched;
