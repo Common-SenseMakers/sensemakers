@@ -59,21 +59,33 @@ export const UserPostsContext: React.FC<{
   /** refetch a post and overwrite its value in the array */
   const refetchPost = useCallback(
     async (postId: string) => {
-      const post = await appFetch<AppPostFull>(`/api/posts/get`, { postId });
+      if (!connectedUser) {
+        return;
+      }
 
-      if (DEBUG) console.log(`refetch post returned`, { post, posts });
+      try {
+        const post = await appFetch<AppPostFull>(
+          `/api/posts/get`,
+          { postId },
+          true
+        );
+        if (DEBUG) console.log(`refetch post returned`, { post, posts });
 
-      setPosts((prev) => {
-        const newPosts = [...prev];
-        const ix = prev.findIndex((p) => p.id === postId);
-        if (DEBUG) console.log(`setPosts called`, { ix, newPosts });
-        if (ix !== -1) {
-          newPosts[ix] = post;
-        }
-        return newPosts;
-      });
+        setPosts((prev) => {
+          const newPosts = [...prev];
+          const ix = prev.findIndex((p) => p.id === postId);
+          if (DEBUG) console.log(`setPosts called`, { ix, newPosts });
+          if (ix !== -1) {
+            newPosts[ix] = post;
+          }
+          return newPosts;
+        });
+      } catch (e) {
+        console.error(e);
+        throw new Error(`Error fetching post ${postId}`);
+      }
     },
-    [posts]
+    [posts, connectedUser]
   );
 
   const addPosts = useCallback(
@@ -124,7 +136,7 @@ export const UserPostsContext: React.FC<{
         }
       });
     },
-    [appFetch]
+    [appFetch, refetchPost]
   );
 
   /** unsubscribe from all updates when unmounting */
