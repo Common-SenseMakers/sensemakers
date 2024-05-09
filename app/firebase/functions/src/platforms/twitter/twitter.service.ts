@@ -10,6 +10,7 @@ import {
 import {
   FetchParams,
   FetchedDetails,
+  PlatformFetchParams,
   UserDetailsBase,
 } from '../../@shared/types/types';
 import {
@@ -159,7 +160,7 @@ export class TwitterService
    * might also return less threads than expected.
    * */
   protected async fetchInternal(
-    params: FetchParams,
+    params: PlatformFetchParams,
     userDetails: UserDetailsBase,
     manager: TransactionManager
   ): Promise<TwitterThread[]> {
@@ -183,8 +184,8 @@ export class TwitterService
        * */
 
       const _timelineParams: Partial<TweetV2UserTimelineParams> = {
-        since_id: params.sinceId,
-        until_id: params.untilId,
+        since_id: params.since_id,
+        until_id: params.until_id,
         max_results: 30,
         'tweet.fields': tweetFields,
         exclude: ['retweets', 'replies'],

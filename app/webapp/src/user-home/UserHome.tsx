@@ -33,11 +33,7 @@ export const UserHome = () => {
     navigate(`/${filter.status}`);
   };
 
-  if (error) {
-    return <BoxCentered>{error.message}</BoxCentered>;
-  }
-
-  if (!posts || isFetching) {
+  if (!posts) {
     return <BoxCentered>Loading...</BoxCentered>;
   }
 
@@ -104,6 +100,7 @@ export const UserHome = () => {
         ) : (
           <LoadingDiv></LoadingDiv>
         )}
+        {error ? <BoxCentered>{error.message}</BoxCentered> : <></>}
       </Box>
     </>
   );
