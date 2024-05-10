@@ -15,6 +15,7 @@ import {
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
+  PostUpdate,
   PostsQueryStatusParam,
   UserPostsQueryParams,
 } from '../shared/types/types.posts';
@@ -26,6 +27,7 @@ interface PostContextType {
   error?: Error;
   fetchOlder: () => void;
   filterStatus: PostsQueryStatusParam;
+  updatePost: (postId: string, postUpdate: PostUpdate) => Promise<void>;
 }
 
 export const UserPostsContextValue = createContext<PostContextType | undefined>(
@@ -244,6 +246,20 @@ export const UserPostsContext: React.FC<{
     _fetchOlder(_oldestPostId);
   }, [_fetchOlder, _oldestPostId]);
 
+  const updatePost = async (postId: string, postUpdate: PostUpdate) => {
+    if (DEBUG) console.log(`updatePost called`, { postId, postUpdate });
+    await appFetch<
+      void,
+      {
+        postId: string;
+        postUpdate: PostUpdate;
+      }
+    >('/api/posts/update', {
+      postId,
+      postUpdate,
+    });
+  };
+
   return (
     <UserPostsContextValue.Provider
       value={{
@@ -252,6 +268,7 @@ export const UserPostsContext: React.FC<{
         error: errorFetching,
         fetchOlder,
         filterStatus: status,
+        updatePost,
       }}>
       {children}
     </UserPostsContextValue.Provider>
