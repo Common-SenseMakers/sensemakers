@@ -39,7 +39,10 @@ export const PostCard = (props: { post: AppPostFull }) => {
       }}
       elevation="small"
       onClick={handleClick}>
-      <Text size="xsmall">{post?.id}</Text>
+      <Box direction="row" justify="between">
+        <Text size="xsmall">{post?.id}</Text>
+        <Text size="small">{post?.reviewedStatus}</Text>
+      </Box>
       <PostText text={post?.content}></PostText>
       <Box style={{ position: 'absolute', right: '10px', bottom: '10px' }}>
         {processStatusIcon}

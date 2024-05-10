@@ -172,6 +172,7 @@ export const updatePostController: RequestHandler = async (
   response
 ) => {
   try {
+    const userId = getAuthenticatedUser(request, true);
     const { db, postsManager } = getServices(request);
 
     const payload = (await updatePostSchema.validate(request.body)) as {
@@ -180,6 +181,16 @@ export const updatePostController: RequestHandler = async (
     };
 
     db.run(async (manager) => {
+      const post = await postsManager.processing.posts.get(
+        payload.postId,
+        manager,
+        true
+      );
+
+      if (post.authorId !== userId) {
+        throw new Error(`Post can only be edited by the author`);
+      }
+
       return postsManager.processing.posts.updateContent(
         payload.postId,
         payload.post,

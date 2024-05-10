@@ -44,6 +44,7 @@ export const PostView = (props: {
       },
     });
   };
+
   const ignore = async () => {
     if (!post) {
       throw new Error(`Unexpected post not found`);
@@ -61,6 +62,7 @@ export const PostView = (props: {
       },
     });
   };
+
   const approve = async () => {
     // mark nanopub draft as approved
     const nanopub = post?.mirrors.find(

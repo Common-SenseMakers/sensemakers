@@ -7,10 +7,10 @@ import { usePost } from './PostContext';
 import { PostText } from './PostText';
 
 export const PostContent = () => {
-  const { post, reparse, isParsing } = usePost();
+  const { post, reparse, isParsing, updateSemantics } = usePost();
 
   const semanticsUpdated = (newSemantics: string) => {
-    console.log({ newSemantics });
+    updateSemantics(newSemantics);
   };
 
   const parsingError = post && post.parsingStatus === 'errored';
