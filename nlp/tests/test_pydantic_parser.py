@@ -34,7 +34,8 @@ from desci_sense.shared_functions.postprocessing import Answer, SubAnswer
 
 
 def test_parse_1():
-    json_str = """```json
+    json_strs = [
+        """```json
     {
     "sub_answers": [
         {
@@ -48,6 +49,23 @@ def test_parse_1():
         }
     ]
     }
-    ```"""
-    parsed = _find_json_object(json_str)
-    assert "[System error]" not in parsed
+    ```""",
+        """```json
+{
+  "sub_answers": [
+    {
+      "reasoning_steps": "The post mentions the recommendation of two papers, indicating a positive sentiment towards them.",
+      "candidate_tags": {
+        "<dg-observation>": "The post is articulating a positive observation about the recommended papers.",
+        "<reading>": "The author is likely looking forward to reading the recommended papers in the future.",
+        "<missing-ref>": "There is no explicit link provided to the papers mentioned.",
+      },
+      "final_answer": ["<dg-observation>", "<reading>", "<missing-ref>"]
+    }
+  ]
+}
+```""",
+    ]
+    all_parsed = [_find_json_object(json_str) for json_str in json_strs]
+
+    assert all(["[System error]" not in p for p in all_parsed])

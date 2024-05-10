@@ -3,6 +3,7 @@ import requests
 from jinja2 import Environment, BaseLoader
 from enum import Enum
 import json
+from jsoncomment import JsonComment
 import html2text
 from urllib.parse import urlparse
 
@@ -202,6 +203,10 @@ def _find_json_object(input_string):
     input_string = input_string.replace("\\_", "_")
     input_string = input_string.replace("\\[", "[")
     input_string = input_string.replace("\\]", "]")  # remove escaping for underscore
+
+    # to handle generated JSONs with comments, trailing commas
+    jsonc = JsonComment()
+
     start = input_string.find("{")
     if start == -1:
         return (
@@ -220,7 +225,7 @@ def _find_json_object(input_string):
                     end = i + 1
                     try:
                         # Try to parse the substring as JSON
-                        parsed_json = json.loads(input_string[start:end])
+                        parsed_json = jsonc.loads(input_string[start:end])
                         return input_string[
                             start:end
                         ]  # Return the valid JSON substring
