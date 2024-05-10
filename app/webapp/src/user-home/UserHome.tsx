@@ -51,25 +51,6 @@ export const UserHome = () => {
         return 'Published';
     }
   };
-  const postReviewStatusMatchesFilter = (
-    postReviewStatus: AppPostReviewStatus
-  ) => {
-    if (!routeComponents[1]) {
-      return true;
-    }
-    if (routeComponents[1] === PostsQueryStatusParam.ALL) {
-      return true;
-    }
-    if (routeComponents[1] === PostsQueryStatusParam.PENDING) {
-      return postReviewStatus === AppPostReviewStatus.PENDING;
-    }
-    if (routeComponents[1] === PostsQueryStatusParam.IGNORED) {
-      return postReviewStatus === AppPostReviewStatus.IGNORED;
-    }
-    if (routeComponents[1] === PostsQueryStatusParam.PUBLISHED) {
-      return postReviewStatus === AppPostReviewStatus.APPROVED;
-    }
-  };
 
   return (
     <>
@@ -127,9 +108,7 @@ export const UserHome = () => {
 
         {posts.map((post, ix) => (
           <Box key={ix}>
-            {postReviewStatusMatchesFilter(post.reviewedStatus) && (
-              <PostCard post={post}></PostCard>
-            )}
+            <PostCard post={post}></PostCard>
           </Box>
         ))}
 

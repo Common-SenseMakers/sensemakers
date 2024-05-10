@@ -28,6 +28,7 @@ interface PostContextType {
   fetchOlder: () => void;
   filterStatus: PostsQueryStatusParam;
   updatePost: (postId: string, postUpdate: PostUpdate) => Promise<void>;
+  isPostUpdating: (postId: string) => boolean;
 }
 
 export const UserPostsContextValue = createContext<PostContextType | undefined>(
@@ -48,6 +49,7 @@ export const UserPostsContext: React.FC<{
   const [fetchedFirst, setFetchedFirst] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [errorFetching, setErrorFetching] = useState<Error>();
+  const [updatingPosts, setUpdatingPosts] = useState<string[]>([]);
 
   const unsubscribeCallbacks = useRef<Record<string, () => void>>({});
 
@@ -248,16 +250,31 @@ export const UserPostsContext: React.FC<{
 
   const updatePost = async (postId: string, postUpdate: PostUpdate) => {
     if (DEBUG) console.log(`updatePost called`, { postId, postUpdate });
-    await appFetch<
-      void,
-      {
-        postId: string;
-        postUpdate: PostUpdate;
-      }
-    >('/api/posts/update', {
-      postId,
-      postUpdate,
-    });
+
+    setUpdatingPosts((prev) => [...prev, postId]);
+
+    try {
+      await appFetch<
+        void,
+        {
+          postId: string;
+          postUpdate: PostUpdate;
+        }
+      >('/api/posts/update', {
+        postId,
+        postUpdate,
+      });
+
+      setPosts((prev) => prev.filter((p) => p.id !== postId));
+    } catch (error) {
+      console.error(error);
+      throw new Error(`Error updating post ${postId}`);
+    }
+    setUpdatingPosts((prev) => prev.filter((id) => id !== postId));
+  };
+
+  const isPostUpdating = (postId: string) => {
+    return updatingPosts.includes(postId);
   };
 
   return (
@@ -269,6 +286,7 @@ export const UserPostsContext: React.FC<{
         fetchOlder,
         filterStatus: status,
         updatePost,
+        isPostUpdating,
       }}>
       {children}
     </UserPostsContextValue.Provider>
