@@ -1,7 +1,7 @@
 import { I18nextProvider } from 'react-i18next';
 import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom';
 
-import { AppContainer } from './app/AppContainer';
+import { AppContainer0 } from './app/AppContainer';
 import { ToastsContext } from './app/ToastsContext';
 import { i18n } from './i18n/i18n';
 
@@ -12,7 +12,9 @@ function App() {
         <ToastsContext>
           <BrowserRouter>
             <Routes>
-              <Route path="/*" element={<AppContainer></AppContainer>}></Route>
+              <Route
+                path="/*"
+                element={<AppContainer0></AppContainer0>}></Route>
             </Routes>
           </BrowserRouter>
         </ToastsContext>
