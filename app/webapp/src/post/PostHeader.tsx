@@ -22,7 +22,7 @@ export const PostHeader = (props: {
     <Box style={{ height: '60px' }}>
       <AppBottomNav
         paths={[
-          { icon: <Home></Home>, label: 'back', path: AbsoluteRoutes.App },
+          { icon: <Home></Home>, label: 'back', action: () => navigate(-1) },
           {
             icon: <FormPrevious></FormPrevious>,
             label: 'prev',
