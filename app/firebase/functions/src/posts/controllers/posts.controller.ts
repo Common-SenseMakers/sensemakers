@@ -2,6 +2,7 @@ import { RequestHandler } from 'express';
 
 import {
   AppPostFull,
+  PostUpdate,
   UserPostsQueryParams,
 } from '../../@shared/types/types.posts';
 import { IS_EMULATOR } from '../../config/config.runtime';
@@ -14,6 +15,7 @@ import {
   createDraftPostSchema,
   getUserPostsQuerySchema,
   postIdValidation,
+  updatePostSchema,
 } from './posts.schema';
 
 const DEBUG = true;
@@ -155,6 +157,38 @@ export const createDraftPostController: RequestHandler = async (
 
     if (DEBUG)
       logger.debug(`${request.path}: approvePost`, {
+        post: payload,
+      });
+
+    response.status(200).send({ success: true });
+  } catch (error) {
+    logger.error('error', error);
+    response.status(500).send({ success: false, error });
+  }
+};
+
+export const updatePostController: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    const { db, postsManager } = getServices(request);
+
+    const payload = (await updatePostSchema.validate(request.body)) as {
+      postId: string;
+      post: PostUpdate;
+    };
+
+    db.run(async (manager) => {
+      return postsManager.processing.posts.updateContent(
+        payload.postId,
+        payload.post,
+        manager
+      );
+    });
+
+    if (DEBUG)
+      logger.debug(`${request.path}: updatePost`, {
         post: payload,
       });
 

@@ -1,4 +1,4 @@
-import { array, number, object, string } from 'yup';
+import { array, mixed, number, object, string } from 'yup';
 
 import { PostsQueryStatusParam } from '../../@shared/types/types.posts';
 
@@ -25,3 +25,21 @@ export const getUserPostsQuerySchema = object({
     untilId: string().optional(),
   }).required(),
 }).noUnknown(true);
+
+export const updatePostSchema = object({
+  postId: string().required(),
+  post: object()
+    .shape({
+      content: string().optional(),
+      semantics: mixed().optional(),
+      originalParsed: mixed().optional(),
+      parsingStatus: string().optional(),
+      parsedStatus: string().optional(),
+      reviewedStatus: string().optional(),
+      republishedStatus: string().optional(),
+    })
+    .noUnknown(true)
+    .required(),
+})
+  .required()
+  .noUnknown(true);
