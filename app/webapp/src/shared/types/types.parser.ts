@@ -56,7 +56,7 @@ export enum SciFilterClassfication {
 }
 
 export interface ParsePostResult {
-  filter_clasification: SciFilterClassfication;
+  filter_classification: SciFilterClassfication;
   semantics: AppPostSemantics;
   support?: ParsedSupport;
 }

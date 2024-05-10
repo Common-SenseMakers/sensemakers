@@ -31,11 +31,15 @@ export const PostContent = () => {
           <></>
         )}
         {isParsing ? <LoadingDiv fill height="120px"></LoadingDiv> : <></>}
-        <SemanticsEditor
-          isLoading={false}
-          semantics={post?.semantics}
-          originalParsed={post?.originalParsed}
-          semanticsUpdated={semanticsUpdated}></SemanticsEditor>
+        {post?.reviewedStatus !== 'ignored' ? (
+          <SemanticsEditor
+            isLoading={false}
+            semantics={post?.semantics}
+            originalParsed={post?.originalParsed}
+            semanticsUpdated={semanticsUpdated}></SemanticsEditor>
+        ) : (
+          <></>
+        )}
       </Box>
     </Box>
   );

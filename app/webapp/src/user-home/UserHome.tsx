@@ -5,8 +5,6 @@ import { useNavigate } from 'react-router-dom';
 
 import { useToastContext } from '../app/ToastsContext';
 import { PostCard } from '../post/PostCard';
-import { PostContext } from '../post/PostContext';
-import { AbsoluteRoutes } from '../route.names';
 import {
   PostsQueryStatusParam,
   UserPostsQueryParams,
@@ -48,7 +46,6 @@ export const UserHome = () => {
   if (!posts) {
     return <BoxCentered>Loading...</BoxCentered>;
   }
-
   return (
     <>
       <Box direction="row" justify="between" pad={{ horizontal: 'medium' }}>
