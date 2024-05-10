@@ -1,11 +1,10 @@
 import { Box, Menu, Text } from 'grommet';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import { useToastContext } from '../app/ToastsContext';
 import { PostCard } from '../post/PostCard';
-import { PostContext } from '../post/PostContext';
-import { AbsoluteRoutes } from '../route.names';
 import {
   PostsQueryStatusParam,
   UserPostsQueryParams,
@@ -18,6 +17,8 @@ import { useUserPosts } from './UserPostsContext';
 export const UserHome = () => {
   const { show } = useToastContext();
   const { posts, isFetching, error, fetchOlder } = useUserPosts();
+  const location = useLocation();
+  const routeComponents = location.pathname.split('/');
 
   useEffect(() => {
     if (error) {
@@ -37,13 +38,30 @@ export const UserHome = () => {
     return <BoxCentered>Loading...</BoxCentered>;
   }
 
+  const labelFromStatusParam = (status: PostsQueryStatusParam) => {
+    switch (status) {
+      case PostsQueryStatusParam.ALL:
+        return 'All';
+      case PostsQueryStatusParam.PENDING:
+        return 'For Review';
+      case PostsQueryStatusParam.IGNORED:
+        return 'Ignored';
+      case PostsQueryStatusParam.PUBLISHED:
+        return 'Published';
+    }
+  };
+
   return (
     <>
       <Menu
-        label="Menu"
+        label={
+          routeComponents[1]
+            ? labelFromStatusParam(routeComponents[1] as PostsQueryStatusParam)
+            : labelFromStatusParam(PostsQueryStatusParam.ALL)
+        }
         items={[
           {
-            label: 'All',
+            label: labelFromStatusParam(PostsQueryStatusParam.ALL),
             onClick: () =>
               setFilter({
                 status: PostsQueryStatusParam.ALL,
@@ -51,7 +69,7 @@ export const UserHome = () => {
               }),
           },
           {
-            label: 'For Review',
+            label: labelFromStatusParam(PostsQueryStatusParam.PENDING),
             onClick: () =>
               setFilter({
                 status: PostsQueryStatusParam.PENDING,
@@ -59,7 +77,7 @@ export const UserHome = () => {
               }),
           },
           {
-            label: 'Ignored',
+            label: labelFromStatusParam(PostsQueryStatusParam.IGNORED),
             onClick: () =>
               setFilter({
                 status: PostsQueryStatusParam.IGNORED,
@@ -67,7 +85,7 @@ export const UserHome = () => {
               }),
           },
           {
-            label: 'Published',
+            label: labelFromStatusParam(PostsQueryStatusParam.PUBLISHED),
             onClick: () =>
               setFilter({
                 status: PostsQueryStatusParam.PUBLISHED,
