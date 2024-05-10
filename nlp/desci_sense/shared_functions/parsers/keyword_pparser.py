@@ -1,5 +1,6 @@
 from typing import Dict
 from langchain.prompts import PromptTemplate
+from langchain_core.runnables import RunnableLambda
 
 from .post_parser_chain import PostParserChain
 from ..configs import KeywordPParserChainConfig, MultiParserChainConfig
@@ -13,6 +14,15 @@ from ..postprocessing import ParserChainOutput
 from ..postprocessing.output_processors import KeywordParser
 from ..schema.ontology_base import OntologyBase
 from ..prompting.jinja.keywords_extraction_template import keywords_extraction_template
+from ..configs import ParserChainType
+
+
+def return_fallback(input):
+    return ParserChainOutput(
+        answer=[],
+        pparser_type=ParserChainType.KEYWORDS,
+        extra={"errors": "fallback"},
+    )
 
 
 class KeywordPostParserChain(PostParserChain):
@@ -25,6 +35,7 @@ class KeywordPostParserChain(PostParserChain):
         super().__init__(parser_config, global_config, ontology)
 
         self.input_template = PromptTemplate.from_template(self.input_key)
+        self.runnable_fallback = RunnableLambda(return_fallback)
 
         self.prompt_template = keywords_extraction_template
 
@@ -36,7 +47,9 @@ class KeywordPostParserChain(PostParserChain):
 
     @property
     def chain(self):
-        return self._chain
+        return self._chain.with_retry(stop_after_attempt=5).with_fallbacks(
+            [self.runnable_fallback]
+        )
 
     def process_ref_post(
         self,

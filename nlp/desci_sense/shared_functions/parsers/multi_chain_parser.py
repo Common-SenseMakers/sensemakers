@@ -238,7 +238,10 @@ class MultiChainParser:
 
         # create runnable parallel
         # setup async batch job
-        cb = BatchCallback(len(inputs))  # init callback
+        total_iterations = len(inputs) * len(
+            active_list
+        )  # number of parsers * total inputs
+        cb = BatchCallback(total_iterations)  # init callback
         config = RunnableConfig(max_concurrency=batch_size, callbacks=[cb])
         parallel_chain = self.create_parallel_chain(active_list)
 

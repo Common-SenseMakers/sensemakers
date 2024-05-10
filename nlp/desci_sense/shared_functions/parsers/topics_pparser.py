@@ -1,6 +1,6 @@
 from typing import Dict, List
 from langchain.prompts import PromptTemplate
-
+from langchain_core.runnables import RunnableLambda
 from .allowed_terms_pparser import AllowedTermsPParserChain
 from ..configs import (
     TopicsPParserChainConfig,
@@ -20,12 +20,21 @@ from ..postprocessing.output_processors import KeywordParser
 from ..schema.ontology_base import OntologyBase
 from ..enum_dict import EnumDict, EnumDictKey
 from ..prompting.jinja.topics_template import ALLOWED_TOPICS, topics_template
+from ..configs import ParserChainType
 
 
 class PromptCase(EnumDictKey):
     ZERO_REF = "ZERO_REF"
     SINGLE_REF = "SINGLE_REF"
     MULTI_REF = "MULTI_REF"
+
+
+def return_fallback(input):
+    return ParserChainOutput(
+        answer=[],
+        pparser_type=ParserChainType.TOPICS,
+        extra={"errors": "fallback"},
+    )
 
 
 class TopicsParserChain(AllowedTermsPParserChain):
@@ -39,9 +48,13 @@ class TopicsParserChain(AllowedTermsPParserChain):
 
         self.topics_template = topics_template
 
+        self.runnable_fallback = RunnableLambda(return_fallback)
+
     @property
     def chain(self):
-        return self._chain
+        return self._chain.with_retry(stop_after_attempt=5).with_fallbacks(
+            [self.runnable_fallback]
+        )
 
     def process_ref_post(
         self,

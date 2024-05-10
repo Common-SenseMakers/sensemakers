@@ -34,6 +34,14 @@ class PromptCase(EnumDictKey):
     MULTI_REF = "MULTI_REF"
 
 
+def return_fallback(input):
+    return ParserChainOutput(
+        answer=[],
+        pparser_type=ParserChainType.MULTI_REF_TAGGER,
+        extra={"errors": "fallback"},
+    )
+
+
 def check_equivalence(string1, string2):
     # Function to remove non-alphabetic characters from a string
     def clean_string(s):
@@ -228,6 +236,8 @@ class MultiRefTaggerParserChain(PostParserChain):
         self._allowed_terms_name = f"{self.input_name}_allowed_terms"
         self.pydantic_parser = PydanticAnswerParser(pydantic_object=Answer)
 
+        self.runnable_fallback = RunnableLambda(return_fallback)
+
         # init chains
         llm_chain = (
             self.input_prompt | self.model | find_json_object | self.pydantic_parser
@@ -245,7 +255,7 @@ class MultiRefTaggerParserChain(PostParserChain):
 
     @property
     def chain(self):
-        return self._chain
+        return self._chain.with_retry().with_fallbacks([self.runnable_fallback])
 
     @property
     def allowed_terms_name(self) -> str:
