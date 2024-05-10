@@ -15,6 +15,7 @@ import {
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
+  AppPostReviewStatus,
   PostUpdate,
   PostsQueryStatusParam,
   UserPostsQueryParams,
@@ -265,7 +266,27 @@ export const UserPostsContext: React.FC<{
         postUpdate,
       });
 
-      setPosts((prev) => prev.filter((p) => p.id !== postId));
+      /** If the updated post no longer matches the status filter, remove it from the list and unsubscribe it  */
+      if (
+        !(() => {
+          if (status === PostsQueryStatusParam.ALL) {
+            return true;
+          }
+          if (status === PostsQueryStatusParam.PENDING) {
+            return postUpdate.reviewedStatus === AppPostReviewStatus.PENDING;
+          }
+          if (status === PostsQueryStatusParam.PUBLISHED) {
+            return postUpdate.reviewedStatus === AppPostReviewStatus.APPROVED;
+          }
+          if (status === PostsQueryStatusParam.IGNORED) {
+            return postUpdate.reviewedStatus === AppPostReviewStatus.IGNORED;
+          }
+        })()
+      ) {
+        if (DEBUG) console.log(`removing post ${postId} from list`);
+        setPosts((prev) => prev.filter((p) => p.id !== postId));
+        unsubscribeCallbacks.current[postId]();
+      }
     } catch (error) {
       console.error(error);
       throw new Error(`Error updating post ${postId}`);
