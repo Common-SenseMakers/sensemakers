@@ -38,9 +38,9 @@ export const getUserPostsController: RequestHandler = async (
 
     if (DEBUG) logger.debug(`${request.path}: posts`, { posts, userId });
     response.status(200).send({ success: true, data: posts });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('error', error);
-    response.status(500).send({ success: false, error });
+    response.status(500).send({ success: false, error: error.message });
   }
 };
 
@@ -75,9 +75,9 @@ export const getPostController: RequestHandler = async (request, response) => {
         });
       response.status(200).send({ success: true, data: post });
     }
-  } catch (error) {
+  } catch (error: any) {
     logger.error('error', error);
-    response.status(500).send({ success: false, error });
+    response.status(500).send({ success: false, error: error.message });
   }
 };
 
@@ -101,9 +101,9 @@ export const approvePostController: RequestHandler = async (
       });
 
     response.status(200).send({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('error', error);
-    response.status(500).send({ success: false, error });
+    response.status(500).send({ success: false, error: error.message });
   }
 };
 
@@ -132,9 +132,9 @@ export const parsePostController: RequestHandler = async (
       });
 
     response.status(200).send({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('error', error);
-    response.status(500).send({ success: false, error });
+    response.status(500).send({ success: false, error: error.message });
   }
 };
 
@@ -159,8 +159,8 @@ export const createDraftPostController: RequestHandler = async (
       });
 
     response.status(200).send({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('error', error);
-    response.status(500).send({ success: false, error });
+    response.status(500).send({ success: false, error: error.message });
   }
 };

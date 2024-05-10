@@ -22,9 +22,12 @@ import { useAccountContext } from '../user-login/contexts/AccountContext';
 
 interface PostContextType {
   posts?: AppPostFull[];
-  isFetching: boolean;
-  error?: Error;
+  isFetchingOlder: boolean;
+  errorFetchingOlder?: Error;
+  isFetchingNewer: boolean;
+  errorFetchingNewer?: Error;
   fetchOlder: () => void;
+  fetchNewer: () => void;
 }
 
 export const UserPostsContextValue = createContext<PostContextType | undefined>(
@@ -43,8 +46,12 @@ export const UserPostsContext: React.FC<{
 
   const [posts, setPosts] = useState<AppPostFull[]>([]);
   const [fetchedFirst, setFetchedFirst] = useState(false);
-  const [isFetching, setIsFetching] = useState(false);
-  const [errorFetching, setErrorFetching] = useState<Error>();
+
+  const [isFetchingOlder, setIsFetchingOlder] = useState(false);
+  const [errorFetchingOlder, setErrorFetchingOlder] = useState<Error>();
+
+  const [isFetchingNewer, setIsFetchingNewer] = useState(false);
+  const [errorFetchingNewer, setErrorFetchingNewer] = useState<Error>();
 
   const unsubscribeCallbacks = useRef<Record<string, () => void>>({});
 
@@ -89,12 +96,13 @@ export const UserPostsContext: React.FC<{
   );
 
   const addPosts = useCallback(
-    (posts: AppPostFull[]) => {
+    (posts: AppPostFull[], position: 'start' | 'end') => {
       if (DEBUG) console.log(`addPosts called`, { posts });
 
       /** add posts  */
       setPosts((prev) => {
-        const allPosts = prev.concat(posts);
+        const allPosts =
+          position === 'end' ? prev.concat(posts) : posts.concat(prev);
         if (DEBUG) console.log(`pushing posts`, { prev, allPosts });
         return allPosts;
       });
@@ -210,7 +218,7 @@ export const UserPostsContext: React.FC<{
       }
 
       if (DEBUG) console.log(`fetching for older`);
-      setIsFetching(true);
+      setIsFetchingOlder(true);
       setFetchedFirst(true);
       try {
         const params: UserPostsQueryParams = {
@@ -227,11 +235,11 @@ export const UserPostsContext: React.FC<{
         );
 
         if (DEBUG) console.log(`fetching for older retrieved`, readPosts);
-        addPosts(readPosts);
-        setIsFetching(false);
+        addPosts(readPosts, 'end');
+        setIsFetchingOlder(false);
       } catch (e: any) {
-        setIsFetching(false);
-        setErrorFetching(e);
+        setIsFetchingOlder(false);
+        setErrorFetchingOlder(e);
       }
     },
     [appFetch, status, connectedUser]
@@ -243,13 +251,64 @@ export const UserPostsContext: React.FC<{
     _fetchOlder(_oldestPostId);
   }, [_fetchOlder, _oldestPostId]);
 
+  const newestPostId = useMemo(() => {
+    const newest = posts ? posts[0]?.id : undefined;
+    if (DEBUG) console.log(`recomputing newestPostId ${newest}`);
+    return newest;
+  }, [posts]);
+
+  const _fetchNewer = useCallback(
+    async (_newestPostId: string) => {
+      if (!connectedUser || !_newestPostId) {
+        return;
+      }
+
+      if (DEBUG) console.log(`fetching for newer`);
+      setIsFetchingNewer(true);
+
+      try {
+        const params: UserPostsQueryParams = {
+          status,
+          fetchParams: {
+            expectedAmount: PAGE_SIZE,
+            sinceId: _newestPostId,
+          },
+        };
+        if (DEBUG) console.log(`fetching for newer`, params);
+        const readPosts = await appFetch<AppPostFull[], UserPostsQueryParams>(
+          '/api/posts/getOfUser',
+          params
+        );
+
+        if (DEBUG) console.log(`fetching for newer retrieved`, readPosts);
+        addPosts(readPosts, 'start');
+        setIsFetchingNewer(false);
+      } catch (e: any) {
+        setIsFetchingNewer(false);
+        setErrorFetchingNewer(e);
+      }
+    },
+    [appFetch, connectedUser]
+  );
+
+  /** public function to trigger fetching for older posts */
+  const fetchNewer = useCallback(() => {
+    if (newestPostId) {
+      if (DEBUG) console.log(`external fetchNewer`, newestPostId);
+      _fetchNewer(newestPostId);
+    }
+  }, [_fetchNewer, newestPostId]);
+
   return (
     <UserPostsContextValue.Provider
       value={{
         posts,
-        isFetching,
-        error: errorFetching,
+        isFetchingOlder: isFetchingOlder,
+        errorFetchingOlder: errorFetchingOlder,
+        isFetchingNewer: isFetchingNewer,
+        errorFetchingNewer: errorFetchingNewer,
         fetchOlder,
+        fetchNewer,
       }}>
       {children}
     </UserPostsContextValue.Provider>

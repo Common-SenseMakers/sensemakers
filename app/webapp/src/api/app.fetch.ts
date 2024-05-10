@@ -36,9 +36,9 @@ export const _appFetch = async <T = any, D = any>(
       console.log(`appFetch: ${path}`, { payload, data: res.data.data });
 
     return (res.data.data ? res.data.data : null) as T;
-  } catch (e) {
+  } catch (e: any) {
     console.error(e);
-    throw new Error(`Error fetching ${path}`);
+    throw new Error(`Error fetching ${path} - ${e.response.data.error}`);
   }
 };
 
