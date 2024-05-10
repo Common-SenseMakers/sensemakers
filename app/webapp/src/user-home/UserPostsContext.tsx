@@ -25,6 +25,7 @@ interface PostContextType {
   isFetching: boolean;
   error?: Error;
   fetchOlder: () => void;
+  filterStatus: PostsQueryStatusParam;
 }
 
 export const UserPostsContextValue = createContext<PostContextType | undefined>(
@@ -250,6 +251,7 @@ export const UserPostsContext: React.FC<{
         isFetching,
         error: errorFetching,
         fetchOlder,
+        filterStatus: status,
       }}>
       {children}
     </UserPostsContextValue.Provider>
