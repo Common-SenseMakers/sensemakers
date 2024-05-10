@@ -1,14 +1,14 @@
-#evaluation of the academic filter, it takes as a input a dataset and a handle table.
+#evaluation of the academic filter, it takes as a input a dataset and a handle table from a prediction artifact.
 # the handle table holds information about the accounts that published the dataset posts
 
 """Script to run evaluation of label prediction models.
 
 Usage:
-  filter_evaluation.py [--config=<config>] [--dataset=<dataset>] [--dataset_file=<file>] [--handle_file=<file>]
+  filter_evaluation.py  [--dataset=<dataset>] [--dataset_file=<file>] [--handle_file=<file>]
 
 
 Options:
---config=<config>  Optional path to configuration file.
+
 --dataset=<dataset> Optional path to a wandb artifact.
 --dataset_file=<file> Optional dataset file name e.g. labeled_dataset.table.json indeed it should be a table.json format
 --handle_file=<file> Optional file name e.g. labeled_dataset.table.json indeed it should be a table.json format
@@ -31,8 +31,7 @@ from sklearn.metrics import (
 
 sys.path.append(str(Path(__file__).parents[2]))
 
-from desci_sense.evaluation.utils import get_dataset, create_custom_confusion_matrix, posts_to_refPosts
-from desci_sense.shared_functions.parsers.multi_chain_parser import MultiChainParser
+from desci_sense.evaluation.utils import get_dataset, create_custom_confusion_matrix
 from desci_sense.shared_functions.init import init_multi_chain_parser_config
 
 class CustomLabelBinarizer(LabelBinarizer):
@@ -74,42 +73,6 @@ def check_topic(topics:list):
         return 1
     else:
         return 0
-
-
-def prepare_parser_input(df):
-    
-    return posts_to_refPosts(df['Text'])
-    
-
-#function for predicting labels
-def pred_labels(df,config):
-    model = MultiChainParser(config)
-
-    inputs = prepare_parser_input(df)
-
-    results = model.batch_process_ref_posts(inputs=inputs,active_list=["keywords", "topics"],batch_size=10)
-
-
-    try:
-        df['Predicted Label'] = [x.filter_classification.value for x in results]
-        df['Reasoning Steps'] = ["Keywords: "+x.debug['topics']['full_text']+"Topics: "+x.debug['keywords']['raw_text'] for x in results]
-        df['Keywords'] = [x.keywords for x in results]
-        df['Topics'] = [x.topics for x in results]
-        df['Ref item types'] = [x.item_types for x in results]
-
-    except Exception as e:
-       
-    
-        print(e)
-            
-
-
-#make sure that the dataframe conforms with the binary classification format
-def normalize_df(df):
-    # Assuming each label is a single word and there are no spaces in labels
-    # This will remove all non-word characters and split the string into words
-    if type(df["True Label"][0]) == list:
-        df["True Label"] = df["True Label"].apply(lambda x: x[0])
 
 def binarize(y_pred, y_true):
     # binarize for using skl functions
@@ -198,14 +161,11 @@ if __name__ == "__main__":
     arguments = docopt.docopt(__doc__)
 
     # initialize config
-    config_path = arguments.get("--config")
     dataset_path = arguments.get("--dataset")
     dataset_file = arguments.get("--dataset_file")
     handle_file = arguments.get("--handle_file")
 
-    # TODO - make modular config setting
-    config = init_multi_chain_parser_config(llm_type="mistralai/mixtral-8x7b-instruct:nitro",
-                                        post_process_type="combined")
+   
 
     # initialize table path
 
@@ -216,36 +176,25 @@ if __name__ == "__main__":
     #TODO move from testing
     run = wandb.init(project="filter_evaluation", job_type="evaluation")
 
-    # get artifact path
-    if dataset_path:
-        dataset_artifact_id = dataset_path
-        print(dataset_artifact_id)
-    else:
-        dataset_artifact_id = (
-            'common-sense-makers/filter_evaluation/labeled_tweets_no_threads:v1'
-        )
+    # get handees artifact path
+   
+    handle_artifact_id = (
+        'common-sense-makers/filter_evaluation/labeled_tweets_no_threads:v1'
+    )
 
     # set artifact as input artifact
-    dataset_artifact = run.use_artifact(dataset_artifact_id)
+    handle_artifact = run.use_artifact(handle_artifact_id)
 
     # initialize table path
     # add the option to call table_path =  arguments.get('--dataset')
 
     # download path to table
-    a_path = dataset_artifact.download()
+    a_path = handle_artifact.download()
     print("The path is",a_path)
 
-    # get dataset file name
-    if dataset_file:
-        table_path = Path(f"{a_path}/{dataset_file}")
-    else:
-        table_path = Path(f"{a_path}/labeled_data_table_no_threads.table.json")
 
 
-    # return the pd df from the table
-    #remember to remove the head TODO
-    df = get_dataset(table_path).head(40)
-    #print(df.columns)
+   
 
      # get handle file name
     if handle_file:
@@ -254,11 +203,34 @@ if __name__ == "__main__":
         table_path = Path(f"{a_path}/handles_chart.table.json")
     
     df_handles = get_dataset(table_path)
+
+    if dataset_path:
+        dataset_artifact_id = dataset_path
+        
+    else:
+        dataset_artifact_id = (
+            'common-sense-makers/filter_evaluation/prediction_evaluation-20240507151427:v0'
+        )
+    dataset_artifact = run.use_artifact(dataset_artifact_id)
+
+    a_path = dataset_artifact.download()
    
-    pred_labels(df=df,config=config)
+     # get handle file name
+    if dataset_file:
+        table_path = Path(f"{a_path}/{dataset_file}")
+    else:
+        table_path = Path(f"{a_path}/prediction_evaluation.table.json")
+
+    dataset_run = dataset_artifact.logged_by()
+
+    config = dataset_run.config
+
+    #remember to remove the head TODO
+    df = get_dataset(table_path)
+    #print(df.columns)
+   
     
-    # make sure df can be binarized
-    normalize_df(df)
+    
     # return binarized predictions and true labels, as well as labels names
     y_pred, y_true, labels = binarize(
         y_pred=df["Predicted Label"], y_true=df["True Label"]
