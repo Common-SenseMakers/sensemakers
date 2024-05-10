@@ -8,6 +8,9 @@ export enum I18Keys {
   introParagraph1 = 's007',
   introParagraph2 = 's008',
   startBtn = 's009',
+  connectAccounts = 's010',
+  connectParagraph = 's011',
+  signInX = 's012',
 }
 
 const translationENG: Record<I18Keys, string> = {
@@ -20,6 +23,10 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.introParagraph2]:
     'Harness this knowledge by converting your social media posts into nanopublications, making your content <b>FAIR</b> (<b>F</b>indable, <b>A</b>ccessible, <b>I</b>nteroperable and <b>R</b>eusable), so your contributions can get proper recognition',
   [I18Keys.startBtn]: 'Start nanopublishing now',
+  [I18Keys.connectAccounts]: 'Connect your accounts',
+  [I18Keys.connectParagraph]:
+    'SenseNet loads your X (Twitter) feed and analyzes your posts using AI to deduct keywords and relations, which can be used to better interpret the meaning of your content.',
+  [I18Keys.signInX]: 'Sign in with X',
 };
 i18n.use(initReactI18next).init({
   resources: {

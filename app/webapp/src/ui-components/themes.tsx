@@ -42,15 +42,15 @@ export interface ExtendedThemeType extends ThemeType {
 
 const constants: StyleConstants = {
   headingFontSizes: {
-    1: '36px',
-    2: '28px',
+    1: '28px',
+    2: '24px',
     3: '22px',
     4: '22px',
   },
   textFontSizes: {
-    large: '32px',
-    medium: '26px',
-    normal: '22px',
+    large: '24px',
+    medium: '18px',
+    normal: '16px',
     small: '18px',
     xsmall: '14px',
   },
@@ -236,8 +236,12 @@ const extension: ExtendedThemeType = {
     `,
   },
   paragraph: {
+    medium: {
+      size: constants.textFontSizes.normal,
+    },
     extend: css`
-      margin: 0px 0px 36px 0px;
+      margin: 0px 0px 24px 0px;
+      line-height: 24px; /* 150% */
     `,
   },
 };
