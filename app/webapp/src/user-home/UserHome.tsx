@@ -6,6 +6,7 @@ import { useLocation } from 'react-router-dom';
 import { useToastContext } from '../app/ToastsContext';
 import { PostCard } from '../post/PostCard';
 import {
+  AppPostReviewStatus,
   PostsQueryStatusParam,
   UserPostsQueryParams,
 } from '../shared/types/types.posts';
@@ -48,6 +49,25 @@ export const UserHome = () => {
         return 'Ignored';
       case PostsQueryStatusParam.PUBLISHED:
         return 'Published';
+    }
+  };
+  const postReviewStatusMatchesFilter = (
+    postReviewStatus: AppPostReviewStatus
+  ) => {
+    if (!routeComponents[1]) {
+      return true;
+    }
+    if (routeComponents[1] === PostsQueryStatusParam.ALL) {
+      return true;
+    }
+    if (routeComponents[1] === PostsQueryStatusParam.PENDING) {
+      return postReviewStatus === AppPostReviewStatus.PENDING;
+    }
+    if (routeComponents[1] === PostsQueryStatusParam.IGNORED) {
+      return postReviewStatus === AppPostReviewStatus.IGNORED;
+    }
+    if (routeComponents[1] === PostsQueryStatusParam.PUBLISHED) {
+      return postReviewStatus === AppPostReviewStatus.APPROVED;
     }
   };
 
@@ -107,7 +127,9 @@ export const UserHome = () => {
 
         {posts.map((post, ix) => (
           <Box key={ix}>
-            <PostCard post={post}></PostCard>
+            {postReviewStatusMatchesFilter(post.reviewedStatus) && (
+              <PostCard post={post}></PostCard>
+            )}
           </Box>
         ))}
 
