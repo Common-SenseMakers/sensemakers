@@ -1,15 +1,23 @@
-import { Box } from 'grommet';
+import { Box, Menu, Text } from 'grommet';
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { useToastContext } from '../app/ToastsContext';
 import { PostCard } from '../post/PostCard';
 import { PostContext } from '../post/PostContext';
+import { AbsoluteRoutes } from '../route.names';
+import {
+  PostsQueryStatusParam,
+  UserPostsQueryParams,
+} from '../shared/types/types.posts';
+import { AppButton } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
+import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useUserPosts } from './UserPostsContext';
 
 export const UserHome = () => {
   const { show } = useToastContext();
-  const { posts, isLoading, error } = useUserPosts();
+  const { posts, isFetching, error, fetchOlder } = useUserPosts();
 
   useEffect(() => {
     if (error) {
@@ -19,31 +27,81 @@ export const UserHome = () => {
     }
   }, [error]);
 
-  if (error) {
-    return <BoxCentered>{error.message}</BoxCentered>;
-  }
+  const navigate = useNavigate();
 
-  if (!posts || isLoading) {
+  const setFilter = (filter: UserPostsQueryParams) => {
+    navigate(`/${filter.status}`);
+  };
+
+  if (!posts) {
     return <BoxCentered>Loading...</BoxCentered>;
   }
 
-  if (posts.length === 0) {
-    return <BoxCentered>No posts found</BoxCentered>;
-  }
-
   return (
-    <Box
-      fill
-      gap="large"
-      pad={{ vertical: 'large', horizontal: 'medium' }}
-      justify="start">
-      {posts.map((post, ix) => (
-        <Box key={ix}>
-          <PostContext postInit={post}>
-            <PostCard></PostCard>
-          </PostContext>
-        </Box>
-      ))}
-    </Box>
+    <>
+      <Menu
+        label="Menu"
+        items={[
+          {
+            label: 'All',
+            onClick: () =>
+              setFilter({
+                status: PostsQueryStatusParam.ALL,
+                fetchParams: { expectedAmount: 10 },
+              }),
+          },
+          {
+            label: 'For Review',
+            onClick: () =>
+              setFilter({
+                status: PostsQueryStatusParam.PENDING,
+                fetchParams: { expectedAmount: 10 },
+              }),
+          },
+          {
+            label: 'Ignored',
+            onClick: () =>
+              setFilter({
+                status: PostsQueryStatusParam.IGNORED,
+                fetchParams: { expectedAmount: 10 },
+              }),
+          },
+          {
+            label: 'Published',
+            onClick: () =>
+              setFilter({
+                status: PostsQueryStatusParam.PUBLISHED,
+                fetchParams: { expectedAmount: 10 },
+              }),
+          },
+        ]}
+      />
+      <Box
+        fill
+        gap="large"
+        pad={{ vertical: 'large', horizontal: 'medium' }}
+        justify="start">
+        {posts.length === 0 && (
+          <BoxCentered>
+            <Text>No posts found</Text>
+          </BoxCentered>
+        )}
+
+        {posts.map((post, ix) => (
+          <Box key={ix}>
+            <PostCard post={post}></PostCard>
+          </Box>
+        ))}
+
+        {!isFetching ? (
+          <AppButton
+            label="fetch older"
+            onClick={() => fetchOlder()}></AppButton>
+        ) : (
+          <LoadingDiv></LoadingDiv>
+        )}
+        {error ? <BoxCentered>{error.message}</BoxCentered> : <></>}
+      </Box>
+    </>
   );
 };

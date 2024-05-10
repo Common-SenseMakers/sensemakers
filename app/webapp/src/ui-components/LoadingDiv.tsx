@@ -5,8 +5,11 @@ import './LoadingDiv.css';
 export const LoadingDiv = (props: BoxExtendedProps) => {
   const style: React.CSSProperties = props.style || {};
 
-  if (!props.fill) {
+  if (!props.fill && !props.height) {
     style['height'] = props.style?.height || '22px';
+  }
+
+  if (!props.fill && !props.width) {
     style['width'] = props.style?.width || '120px';
   }
 

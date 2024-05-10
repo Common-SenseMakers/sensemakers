@@ -1,14 +1,20 @@
 import { Nanopub } from '@nanopub/sign';
 import { verifyMessage } from 'viem';
 
-import { PLATFORM, UserDetailsBase } from '../../@shared/types/types';
+import {
+  FetchParams,
+  PLATFORM,
+  UserDetailsBase,
+} from '../../@shared/types/types';
 import {
   NanopubUserProfile,
   NanupubSignupData,
 } from '../../@shared/types/types.nanopubs';
 import {
+  FetchedResult,
   PlatformPost,
   PlatformPostDraft,
+  PlatformPostDraftApprova,
   PlatformPostPosted,
   PlatformPostPublish,
 } from '../../@shared/types/types.platform.posts';
@@ -23,7 +29,7 @@ import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
-import { FetchUserPostsParams, PlatformService } from '../platforms.interface';
+import { PlatformService } from '../platforms.interface';
 import { createIntroNanopublication } from './create.intro.nanopub';
 import { createNanopublication } from './create.nanopub';
 
@@ -90,7 +96,6 @@ export class NanopubService
     return {
       user_id: signupData.ethAddress,
       signupDate: this.time.now(),
-      lastFetchedMs: 0,
       profile: {
         rsaPublickey: signupData.rsaPublickey,
         ethAddress: signupData.ethAddress,
@@ -120,7 +125,7 @@ export class NanopubService
     return {
       post: nanopubDraft.rdf(),
       user_id: account.user_id,
-      postApproval: 'pending',
+      postApproval: PlatformPostDraftApprova.PENDING,
     };
   }
 
@@ -132,7 +137,9 @@ export class NanopubService
 
     let published: Nanopub | undefined = undefined;
 
-    const NANOPUBS_PUBLISH_SERVERS = JSON.parse(NANOPUBS_PUBLISH_SERVERS_STR.value());
+    const NANOPUBS_PUBLISH_SERVERS = JSON.parse(
+      NANOPUBS_PUBLISH_SERVERS_STR.value()
+    );
 
     while (!stop) {
       try {
@@ -185,9 +192,10 @@ export class NanopubService
   }
 
   async fetch(
-    params: FetchUserPostsParams
-  ): Promise<PlatformPostPosted<any>[]> {
-    return [];
+    params: FetchParams,
+    userDetails: UserDetailsBase
+  ): Promise<FetchedResult> {
+    return { fetched: {}, platformPosts: [] };
   }
 
   mirror(postsToMirror: AppPostMirror[]): Promise<PlatformPost<any>[]> {

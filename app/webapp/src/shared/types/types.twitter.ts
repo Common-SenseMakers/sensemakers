@@ -43,13 +43,6 @@ export interface TwitterUser {
   screen_name: string;
 }
 
-export interface TwitterQueryParameters {
-  user_id: string;
-  start_time?: string;
-  end_time?: string;
-  max_results?: number;
-}
-
 export interface TwitterDraft {
   text: string;
 }

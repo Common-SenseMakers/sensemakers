@@ -3,11 +3,18 @@ import {
   PlatformPost,
   PlatformPostCreate,
   PlatformPostCreated,
+  PlatformPostDraftApprova,
+  PlatformPostPublishOrigin,
+  PlatformPostPublishStatus,
 } from '../@shared/types/types.platform.posts';
 import {
   AppPost,
   AppPostCreate,
   AppPostFull,
+  AppPostParsedStatus,
+  AppPostParsingStatus,
+  AppPostRepublishedStatus,
+  AppPostReviewStatus,
 } from '../@shared/types/types.posts';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
@@ -84,6 +91,9 @@ export class PostsProcessing {
       manager
     );
 
+    /** set the postId of the platformPost */
+    this.platformPosts.setPostId(platformPostCreated.id, post.id, manager);
+
     return { post, platformPost: platformPostCreated };
   }
 
@@ -99,16 +109,6 @@ export class PostsProcessing {
     );
 
     return postsCreated.filter((p) => p !== undefined) as PlatformPostCreated[];
-  }
-
-  /** Wrapper to create drafts for many posts */
-  async createPostsDrafts(postIds: string[], manager: TransactionManager) {
-    const drafts = await Promise.all(
-      postIds.map(async (postId) => {
-        await this.createPostDrafts(postId, manager);
-      })
-    );
-    return drafts.flat();
   }
 
   /** Create and store all platform posts for one post */
@@ -158,10 +158,10 @@ export class PostsProcessing {
 
             const draft: PlatformPostCreate = {
               platformId,
-              publishStatus: 'draft',
-              publishOrigin: 'posted',
+              publishStatus: PlatformPostPublishStatus.DRAFT,
+              publishOrigin: PlatformPostPublishOrigin.POSTED,
               draft: {
-                postApproval: 'pending',
+                postApproval: PlatformPostDraftApprova.PENDING,
                 user_id: account.user_id,
                 post: draftPost.post,
               },
@@ -196,16 +196,17 @@ export class PostsProcessing {
   async createAppPost(
     input: Omit<
       AppPostCreate,
-      'parsingStatus' | 'parsedStatus' | 'reviewedStatus'
+      'parsingStatus' | 'parsedStatus' | 'reviewedStatus' | 'republishedStatus'
     >,
     manager: TransactionManager
   ): Promise<AppPost> {
     /** Build the AppPostFull object */
     const postCreate: AppPostCreate = {
       ...input,
-      parsedStatus: 'unprocessed',
-      parsingStatus: 'idle',
-      reviewedStatus: 'pending',
+      parsedStatus: AppPostParsedStatus.UNPROCESSED,
+      parsingStatus: AppPostParsingStatus.IDLE,
+      reviewedStatus: AppPostReviewStatus.PENDING,
+      republishedStatus: AppPostRepublishedStatus.PENDING,
     };
 
     /** Create the post */
