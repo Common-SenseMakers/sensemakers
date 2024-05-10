@@ -28,6 +28,7 @@ import { PlatformPostsRepository } from '../../src/posts/platform.posts.reposito
 import { PostsManager } from '../../src/posts/posts.manager';
 import { PostsProcessing } from '../../src/posts/posts.processing';
 import { PostsRepository } from '../../src/posts/posts.repository';
+import { getTimeMock } from '../../src/time/mock/time.service.mock';
 import { TimeService } from '../../src/time/time.service';
 import { UsersRepository } from '../../src/users/users.repository';
 import { UsersService } from '../../src/users/users.service';
@@ -36,6 +37,7 @@ export interface TestServicesConfig {
   twitter: TwitterMockConfig;
   nanopub: NanopubMockConfig;
   parser: ParserMockConfig;
+  time: 'real' | 'mock';
 }
 
 export type TestServices = Services;
@@ -64,7 +66,7 @@ export const getTestServices = (config: TestServicesConfig) => {
 
   const identityServices: IdentityServicesMap = new Map();
   const platformsMap: PlatformsMap = new Map();
-  const time = new TimeService();
+  const time = getTimeMock(new TimeService(), config.time);
   const MockedTime = spy(new TimeService());
 
   when(MockedTime.now()).thenReturn(

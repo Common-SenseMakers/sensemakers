@@ -299,6 +299,16 @@ export const UserPostsContext: React.FC<{
     }
   }, [_fetchNewer, newestPostId]);
 
+  /** turn off errors automatically */
+  useEffect(() => {
+    if (errorFetchingNewer) {
+      setErrorFetchingNewer(undefined);
+    }
+    if (errorFetchingOlder) {
+      setErrorFetchingOlder(undefined);
+    }
+  }, [errorFetchingNewer, errorFetchingOlder]);
+
   return (
     <UserPostsContextValue.Provider
       value={{

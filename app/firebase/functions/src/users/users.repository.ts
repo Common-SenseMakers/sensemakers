@@ -1,5 +1,4 @@
 import { firestore } from 'firebase-admin';
-import { FieldValue } from 'firebase-admin/firestore';
 
 import {
   AppUser,
@@ -12,7 +11,10 @@ import {
 } from '../@shared/types/types';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
+import { logger } from '../instances/logger';
 import { getPrefixedUserId } from './users.utils';
+
+const DEBUG = true;
 
 export class UsersRepository {
   constructor(protected db: DBInstance) {}
@@ -181,60 +183,77 @@ export class UsersRepository {
     details: UserDetailsBase,
     manager: TransactionManager
   ) {
-    const prefixed_user_id = getPrefixedUserId(platform, details.user_id);
+    /**
+     * the user is either the existing with that account, or the
+     * one from userId
+     */
+    const user = await (async () => {
+      const existWithAccount = await this.getUserWithPlatformAccount(
+        platform,
+        details.user_id,
+        manager
+      );
 
-    /** check if this platform user_id already exists */
-    const existingUser = await this.getUserWithPlatformAccount(
-      platform,
-      details.user_id,
-      manager
-    );
-
-    const userRef = await this.getUserRef(userId, manager, true);
-
-    if (existingUser) {
-      if (existingUser.userId !== userId) {
-        throw new Error(
-          `Unexpected, existing user ${existingUser.userId} with this platform user_id ${prefixed_user_id} does not match the userId provided ${userId}`
-        );
+      if (existWithAccount) {
+        if (DEBUG)
+          logger.debug(`setPlatformDetails existWithAccount`, {
+            existWithAccount,
+          });
+        return existWithAccount;
       }
 
-      /**  overwrite previous details for that user */
+      if (DEBUG) logger.debug(`setPlatformDetails new account`, { userId });
+      return this.getUser(userId, manager, true);
+    })();
+
+    /** set theuser account */
+    const { accounts, platformIds } = await (async () => {
+      /**  overwrite previous details for that user account*/
       if (platform === PLATFORM.Local) {
         throw new Error('Unexpected');
       }
 
-      const accounts = existingUser[platform];
-      if (accounts === undefined) {
-        throw new Error('Unexpected');
+      const accounts: UserDetailsBase[] = user[platform] || [];
+      let platformIds = user.platformIds;
+
+      if (DEBUG)
+        logger.debug(`setPlatformDetails accounts`, {
+          accounts,
+          platformIds,
+          details,
+        });
+
+      /** find the specific account */
+      const ix = accounts.findIndex((a) => a.user_id === details.user_id);
+      if (ix !== -1) {
+        /** set the new details of that account */
+        if (DEBUG) logger.debug(`setPlatformDetails account not found`);
+        accounts[ix] = details;
+      } else {
+        if (DEBUG) logger.debug(`setPlatformDetails account found`);
+        accounts.push(details);
+        platformIds.push(getPrefixedUserId(platform, details.user_id));
       }
 
-      /** replace existing details */
-      const ix = accounts.findIndex((a) => a.user_id === details.user_id);
-      accounts[ix] = details;
+      return { accounts, platformIds };
+    })();
 
-      /** replace entire array */
-      manager.update(userRef, {
-        [platform]: accounts,
+    if (DEBUG)
+      logger.debug(`setPlatformDetails accounts and platformIds`, {
+        accounts,
+        platformIds,
       });
 
-      return;
-    } else {
-      const existingUser = await this.getUser(userId, manager);
-      const platformIds = existingUser ? existingUser.platformIds : [];
-      /**
-       * append a new details entry in the platform array and store the
-       * prefixed platform id in the platformIds array
-       * */
-      const platformIds_property: keyof UserWithPlatformIds = 'platformIds';
-      platformIds.push(prefixed_user_id);
+    const userRef = await this.getUserRef(userId, manager, true);
+    const platformIds_property: keyof UserWithPlatformIds = 'platformIds';
+    const update: Partial<AppUser> = {
+      [platformIds_property]: platformIds,
+      [platform]: accounts,
+    };
 
-      const update: Partial<AppUser> = {
-        [platformIds_property]: platformIds,
-        [platform]: FieldValue.arrayUnion(details),
-      };
-      manager.update(userRef, update);
-    }
+    if (DEBUG) logger.debug(`Updating user ${userId}`, { update });
+
+    manager.update(userRef, update);
   }
 
   /** remove userDetails of a given platform */

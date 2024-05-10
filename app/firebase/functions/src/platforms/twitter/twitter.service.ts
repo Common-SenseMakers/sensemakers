@@ -1,10 +1,8 @@
 import {
-  TOAuth2Scope,
   TTweetv2TweetField,
   TweetV2,
   TweetV2UserTimelineParams,
   Tweetv2FieldsParams,
-  UsersV2Params,
 } from 'twitter-api-v2';
 
 import {
@@ -27,15 +25,12 @@ import {
 } from '../../@shared/types/types.posts';
 import {
   TwitterDraft,
-  TwitterGetContextParams,
   TwitterSignupContext,
   TwitterSignupData,
   TwitterThread,
-  TwitterUserCredentials,
   TwitterUserDetails,
 } from '../../@shared/types/types.twitter';
 import { TransactionManager } from '../../db/transaction.manager';
-import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersRepository } from '../../users/users.repository';
 import { PlatformService } from '../platforms.interface';
@@ -46,14 +41,10 @@ import {
   handleTwitterError,
 } from './twitter.utils';
 
-const DEBUG = true;
-
 export interface TwitterApiCredentials {
   clientId: string;
   clientSecret: string;
 }
-
-/** check https://github.com/PLhery/node-twitter-api-v2/blob/master/doc/auth.md#oauth2-user-wide-authentication-flow for OAuth2 flow */
 
 /** Twitter service handles all interactions with Twitter API */
 export class TwitterService
@@ -71,85 +62,6 @@ export class TwitterService
     protected apiCredentials: TwitterApiCredentials
   ) {
     super(time, usersRepo, apiCredentials);
-  }
-
-  public async getSignupContext(
-    userId?: string,
-    params?: TwitterGetContextParams
-  ) {
-    const client = this.getGenericClient();
-
-    if (!params) {
-      throw new Error('params must be defined');
-    }
-
-    const scope: TOAuth2Scope[] = [
-      'tweet.read',
-      'offline.access',
-      'users.read',
-    ];
-
-    if (params.type === 'write') {
-      scope.push('tweet.write');
-    }
-
-    const authDetails = await client.generateOAuth2AuthLink(
-      params.callback_url,
-      {
-        scope,
-      }
-    );
-
-    return { ...authDetails, ...params };
-  }
-
-  async handleSignupData(data: TwitterSignupData): Promise<TwitterUserDetails> {
-    if (DEBUG) logger.debug('handleSignupData', data);
-    const client = this.getGenericClient();
-
-    const result = await client.loginWithOAuth2({
-      code: data.code,
-      codeVerifier: data.codeVerifier,
-      redirectUri: data.callback_url,
-    });
-
-    const profileParams: Partial<UsersV2Params> = {
-      'user.fields': ['profile_image_url'],
-    };
-    const { data: user } = await result.client.v2.me(profileParams);
-    if (DEBUG) logger.debug('handleSignupData', user);
-
-    if (!result.refreshToken) {
-      throw new Error('Unexpected undefined refresh token');
-    }
-
-    if (!result.expiresIn) {
-      throw new Error('Unexpected undefined refresh token');
-    }
-
-    const credentials: TwitterUserCredentials = {
-      accessToken: result.accessToken,
-      refreshToken: result.refreshToken,
-      expiresIn: result.expiresIn,
-      expiresAtMs: this.time.now() + result.expiresIn * 1000,
-    };
-
-    const twitter: TwitterUserDetails = {
-      user_id: user.id,
-      signupDate: 0,
-      profile: user,
-    };
-
-    /** always store the credential as read credentials */
-    twitter.read = credentials;
-    /** the same credentials apply for reading and writing */
-    if (data.type === 'write') {
-      twitter['write'] = credentials;
-    }
-
-    if (DEBUG) logger.debug('handleSignupData', twitter);
-
-    return twitter;
   }
 
   /**
