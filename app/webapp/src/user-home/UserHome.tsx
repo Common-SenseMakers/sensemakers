@@ -1,24 +1,29 @@
-import { Box, Menu, Text } from 'grommet';
+import { Box, BoxExtendedProps, DropButton, Menu, Text } from 'grommet';
 import { Refresh } from 'grommet-icons';
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { useToastContext } from '../app/ToastsContext';
+import { I18Keys } from '../i18n/i18n';
 import { PostCard } from '../post/PostCard';
+import { PostsQueryStatus, UserPostsQuery } from '../shared/types/types.posts';
 import {
-  PostsQueryStatusParam,
-  UserPostsQueryParams,
-} from '../shared/types/types.posts';
-import { AppButton } from '../ui-components';
+  AppButton,
+  AppHeading,
+  AppSelect,
+  SelectValue,
+} from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
-import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useUserPosts } from './UserPostsContext';
 
 export const UserHome = () => {
-  const { isConnected } = useAccountContext();
+  const { t } = useTranslation();
   const { show } = useToastContext();
+
   const {
+    filterStatus,
     posts,
     errorFetchingOlder,
     fetchOlder,
@@ -41,7 +46,7 @@ export const UserHome = () => {
 
   const navigate = useNavigate();
 
-  const setFilter = (filter: UserPostsQueryParams) => {
+  const setFilter = (filter: UserPostsQuery) => {
     navigate(`/${filter.status}`);
   };
 
@@ -69,60 +74,70 @@ export const UserHome = () => {
     </>
   );
 
+  const FilterValue = (
+    props: {
+      status: PostsQueryStatus;
+    } & BoxExtendedProps
+  ) => {
+    return (
+      <SelectValue style={{ padding: '6px 16px' }}>
+        <Box>{props.status}</Box>
+      </SelectValue>
+    );
+  };
+
+  const options: PostsQueryStatus[] = [
+    PostsQueryStatus.ALL,
+    PostsQueryStatus.PENDING,
+    PostsQueryStatus.PUBLISHED,
+    PostsQueryStatus.IGNORED,
+  ];
+
   const menu = (
-    <Menu
-      label="Menu"
-      items={[
-        {
-          label: 'All',
-          onClick: () =>
-            setFilter({
-              status: PostsQueryStatusParam.ALL,
-              fetchParams: { expectedAmount: 10 },
-            }),
-        },
-        {
-          label: 'For Review',
-          onClick: () =>
-            setFilter({
-              status: PostsQueryStatusParam.PENDING,
-              fetchParams: { expectedAmount: 10 },
-            }),
-        },
-        {
-          label: 'Ignored',
-          onClick: () =>
-            setFilter({
-              status: PostsQueryStatusParam.IGNORED,
-              fetchParams: { expectedAmount: 10 },
-            }),
-        },
-        {
-          label: 'Published',
-          onClick: () =>
-            setFilter({
-              status: PostsQueryStatusParam.PUBLISHED,
-              fetchParams: { expectedAmount: 10 },
-            }),
-        },
-      ]}
-    />
+    <AppSelect
+      value={
+        filterStatus ? (
+          <FilterValue status={filterStatus}></FilterValue>
+        ) : (
+          <FilterValue status={PostsQueryStatus.ALL}></FilterValue>
+        )
+      }
+      options={options}
+      onChange={(e) =>
+        setFilter({
+          status: e.target.value,
+          fetchParams: { expectedAmount: 10 },
+        })
+      }>
+      {(status) => {
+        return <FilterValue status={status}></FilterValue>;
+      }}
+    </AppSelect>
+  );
+
+  const header = (
+    <Box>
+      <Box direction="row">
+        <AppHeading level="3">{t(I18Keys.yourPublications)}</AppHeading>
+      </Box>
+
+      {menu}
+
+      {isFetchingNewer ? (
+        <Box pad="medium">
+          <Loading></Loading>
+        </Box>
+      ) : (
+        <AppButton
+          icon={<Refresh></Refresh>}
+          onClick={() => fetchNewer()}></AppButton>
+      )}
+    </Box>
   );
 
   return (
     <>
-      <Box direction="row" justify="between" pad={{ horizontal: 'medium' }}>
-        {menu}
-        {isFetchingNewer ? (
-          <Box pad="medium">
-            <Loading></Loading>
-          </Box>
-        ) : (
-          <AppButton
-            icon={<Refresh></Refresh>}
-            onClick={() => fetchNewer()}></AppButton>
-        )}
-      </Box>
+      {header}
 
       <Box
         fill

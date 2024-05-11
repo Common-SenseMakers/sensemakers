@@ -44,8 +44,8 @@ const constants: StyleConstants = {
   headingFontSizes: {
     1: '28px',
     2: '24px',
-    3: '22px',
-    4: '22px',
+    3: '20px',
+    4: '18px',
   },
   textFontSizes: {
     large: '24px',

@@ -5,7 +5,7 @@ import {
   AppPostFull,
   AppPostReviewStatus,
   PostUpdate,
-  PostsQueryStatusParam,
+  PostsQueryStatus,
 } from '../shared/types/types.posts';
 import { usePostsFetch } from './usePostsFetch';
 import { useQueryFilter } from './useQueryFilter';
@@ -21,7 +21,7 @@ interface PostContextType {
   fetchNewer: () => void;
   updatePost: (postId: string, postUpdate: PostUpdate) => Promise<void>;
   isPostUpdating: (postId: string) => boolean;
-  filterStatus: PostsQueryStatusParam;
+  filterStatus: PostsQueryStatus;
 }
 
 export const UserPostsContextValue = createContext<PostContextType | undefined>(
@@ -41,10 +41,33 @@ export const UserPostsContext: React.FC<{
     isFetchingNewer,
     errorFetchingNewer,
   } = usePostsFetch();
-  const { updatePost, isPostUpdating } = usePostUpdate();
+
+  const { updatePost: _updatePost, isPostUpdating } = usePostUpdate();
+
   const { status } = useQueryFilter();
 
-  console.log({ posts });
+  const updatePost = (postId: string, postUpdate: PostUpdate) => {
+    /** If the updated post no longer matches the status filter, remove it from the list and unsubscribe it  */
+    if (
+      !(() => {
+        if (status === PostsQueryStatus.ALL) {
+          return true;
+        }
+        if (status === PostsQueryStatus.PENDING) {
+          return postUpdate.reviewedStatus === AppPostReviewStatus.PENDING;
+        }
+        if (status === PostsQueryStatus.PUBLISHED) {
+          return postUpdate.reviewedStatus === AppPostReviewStatus.APPROVED;
+        }
+        if (status === PostsQueryStatus.IGNORED) {
+          return postUpdate.reviewedStatus === AppPostReviewStatus.IGNORED;
+        }
+      })()
+    ) {
+      removePost(postId);
+    }
+    return _updatePost(postId, postUpdate);
+  };
 
   return (
     <UserPostsContextValue.Provider
@@ -56,34 +79,7 @@ export const UserPostsContext: React.FC<{
         errorFetchingNewer: errorFetchingNewer,
         fetchNewer,
         fetchOlder,
-        updatePost: (postId: string, postUpdate: PostUpdate) => {
-          /** If the updated post no longer matches the status filter, remove it from the list and unsubscribe it  */
-          if (
-            !(() => {
-              if (status === PostsQueryStatusParam.ALL) {
-                return true;
-              }
-              if (status === PostsQueryStatusParam.PENDING) {
-                return (
-                  postUpdate.reviewedStatus === AppPostReviewStatus.PENDING
-                );
-              }
-              if (status === PostsQueryStatusParam.PUBLISHED) {
-                return (
-                  postUpdate.reviewedStatus === AppPostReviewStatus.APPROVED
-                );
-              }
-              if (status === PostsQueryStatusParam.IGNORED) {
-                return (
-                  postUpdate.reviewedStatus === AppPostReviewStatus.IGNORED
-                );
-              }
-            })()
-          ) {
-            removePost(postId);
-          }
-          return updatePost(postId, postUpdate);
-        },
+        updatePost,
         isPostUpdating,
         filterStatus: status,
       }}>
