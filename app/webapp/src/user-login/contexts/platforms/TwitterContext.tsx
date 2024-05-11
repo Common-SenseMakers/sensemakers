@@ -7,9 +7,12 @@ import {
   useRef,
   useState,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 
 import { useAppFetch } from '../../../api/app.fetch';
+import { useToastContext } from '../../../app/ToastsContext';
+import { I18Keys } from '../../../i18n/i18n';
 import { HandleSignupResult, PLATFORM } from '../../../shared/types/types';
 import {
   TwitterGetContextParams,
@@ -35,6 +38,8 @@ const TwitterContextValue = createContext<TwitterContextType | undefined>(
 
 /** Manages the authentication process */
 export const TwitterContext = (props: PropsWithChildren) => {
+  const { show } = useToastContext();
+  const { t } = useTranslation();
   const verifierHandled = useRef(false);
 
   const {
@@ -46,6 +51,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const state_param = searchParams.get('state');
   const code_param = searchParams.get('code');
+  const error_param = searchParams.get('error');
 
   const appFetch = useAppFetch();
 
@@ -77,41 +83,48 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
   /** Listen to oauth verifier to send it to the backend */
   useEffect(() => {
-    if (!verifierHandled.current && code_param && state_param) {
-      verifierHandled.current = true;
-
-      setIsConnecting(true);
-
-      const contextStr = localStorage.getItem(LS_TWITTER_CONTEXT_KEY);
-
-      if (contextStr === null) {
-        throw new Error('Twitter context not found');
+    if (!verifierHandled.current) {
+      if (error_param) {
+        show({ title: t(I18Keys.errorConnectTwitter), message: error_param });
+        searchParams.delete('error');
+        searchParams.delete('state');
       }
+      if (code_param && state_param) {
+        verifierHandled.current = true;
 
-      localStorage.removeItem(LS_TWITTER_CONTEXT_KEY);
+        setIsConnecting(true);
 
-      const context = JSON.parse(contextStr) as TwitterSignupContext;
+        const contextStr = localStorage.getItem(LS_TWITTER_CONTEXT_KEY);
 
-      if (context.state !== state_param) {
-        throw new Error('Undexpected state');
-      }
-
-      appFetch<HandleSignupResult>(`/api/auth/${PLATFORM.Twitter}/signup`, {
-        ...context,
-        code: code_param,
-      }).then((result) => {
-        if (result && result.ourAccessToken) {
-          setOurToken(result.ourAccessToken);
+        if (contextStr === null) {
+          throw new Error('Twitter context not found');
         }
 
-        searchParams.delete('state');
-        searchParams.delete('code');
-        setSearchParams(searchParams);
-        setIsConnecting(false);
-        refreshConnected();
-      });
+        localStorage.removeItem(LS_TWITTER_CONTEXT_KEY);
+
+        const context = JSON.parse(contextStr) as TwitterSignupContext;
+
+        if (context.state !== state_param) {
+          throw new Error('Undexpected state');
+        }
+
+        appFetch<HandleSignupResult>(`/api/auth/${PLATFORM.Twitter}/signup`, {
+          ...context,
+          code: code_param,
+        }).then((result) => {
+          if (result && result.ourAccessToken) {
+            setOurToken(result.ourAccessToken);
+          }
+
+          searchParams.delete('state');
+          searchParams.delete('code');
+          setIsConnecting(false);
+          refreshConnected();
+        });
+      }
+      setSearchParams(searchParams);
     }
-  }, [state_param, code_param, searchParams, setSearchParams]);
+  }, [state_param, code_param, error_param, searchParams, setSearchParams]);
 
   return (
     <TwitterContextValue.Provider

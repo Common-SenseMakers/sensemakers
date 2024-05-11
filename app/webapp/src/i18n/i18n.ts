@@ -11,6 +11,7 @@ export enum I18Keys {
   connectAccounts = 's010',
   connectParagraph = 's011',
   signInX = 's012',
+  errorConnectTwitter = 's013',
 }
 
 const translationENG: Record<I18Keys, string> = {
@@ -27,6 +28,7 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.connectParagraph]:
     'SenseNet loads your X (Twitter) feed and analyzes your posts using AI to deduct keywords and relations, which can be used to better interpret the meaning of your content.',
   [I18Keys.signInX]: 'Sign in with X',
+  [I18Keys.errorConnectTwitter]: 'Error connecting Twitter',
 };
 i18n.use(initReactI18next).init({
   resources: {
