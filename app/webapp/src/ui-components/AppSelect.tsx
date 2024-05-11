@@ -23,7 +23,7 @@ export const SelectRow = (props: BoxExtendedProps): JSX.Element => {
     <Box
       direction="row"
       align="center"
-      style={{ width: '100%', padding: '6px 12px', ...props.style }}>
+      style={{ width: '100%', ...props.style }}>
       {props.children}
     </Box>
   );
@@ -36,7 +36,7 @@ export const SelectValue = (props: BoxExtendedProps): JSX.Element => {
     <SelectRow
       style={{
         border: '1px solid',
-        borderRadius: '32px',
+        borderRadius: '8px',
         borderColor: constants.colors.border,
         ...props.style,
       }}>

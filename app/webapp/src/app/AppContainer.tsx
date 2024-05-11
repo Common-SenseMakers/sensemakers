@@ -38,14 +38,7 @@ export const AppContainer = (props: React.PropsWithChildren) => {
   const { connectedUser } = useAccountContext();
   const [title, setTitle] = useState<SetPageTitleType>();
 
-  const location = useLocation();
-
-  const { topHeight } = useMemo(() => {
-    if (location.pathname === '/' && !connectedUser) {
-      return { topHeight: '0px' };
-    }
-    return { topHeight: '70px' };
-  }, [location]);
+  const topHeight = '0px';
 
   return (
     <>
@@ -54,12 +47,6 @@ export const AppContainer = (props: React.PropsWithChildren) => {
         <ResponsiveApp>
           <AppContainerContextValue.Provider value={{ setTitle }}>
             <ViewportContainer style={{ maxWidth: MAX_WIDTH_APP }}>
-              <Box
-                pad={{ horizontal: 'medium' }}
-                style={{ height: topHeight, flexShrink: 0 }}
-                justify="center">
-                <GlobalNav title={title} />
-              </Box>
               <Box style={{ height: `calc(100% - ${topHeight})` }}>
                 <Routes>
                   <Route path={RouteNames.AppHome} element={<Outlet />}>

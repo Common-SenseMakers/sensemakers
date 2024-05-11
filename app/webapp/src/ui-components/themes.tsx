@@ -61,7 +61,7 @@ const constants: StyleConstants = {
     textLight: '#4B5563',
     textOnPrimary: '#ffffff',
     lightTextOnLight: '#949494',
-    border: '#333333',
+    border: '#D1D5DB',
     headings: '#1a1a1a',
     backgroundLight: '#f7f7f7',
     backgroundLightShade: '#ececec',
@@ -126,6 +126,11 @@ const extension: ExtendedThemeType = {
       },
     },
     responsiveBreakpoint: undefined,
+    extend: css`
+      font-style: normal;
+      font-weight: 600;
+      letter-spacing: -0.4px;
+    `,
   },
   button: {
     padding: { vertical: '15px', horizontal: '30px' },
@@ -170,6 +175,10 @@ const extension: ExtendedThemeType = {
       extend: css`
         & {
           border-style: none;
+          font-size: 14px;
+          font-style: normal;
+          font-weight: 500;
+          line-height: 16px; /* 114.286% */
         }
       `,
     },

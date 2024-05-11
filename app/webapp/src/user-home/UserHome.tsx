@@ -18,6 +18,13 @@ import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
 import { useUserPosts } from './UserPostsContext';
 
+const statusPretty: Record<PostsQueryStatus, string> = {
+  all: 'All',
+  ignored: 'Ignored',
+  pending: 'Pending',
+  published: 'Published',
+};
+
 export const UserHome = () => {
   const { t } = useTranslation();
   const { show } = useToastContext();
@@ -81,7 +88,7 @@ export const UserHome = () => {
   ) => {
     return (
       <SelectValue style={{ padding: '6px 16px' }}>
-        <Box>{props.status}</Box>
+        <Text size="14px">{statusPretty[props.status]}</Text>
       </SelectValue>
     );
   };
@@ -115,23 +122,27 @@ export const UserHome = () => {
     </AppSelect>
   );
 
-  const header = (
+  const reload = isFetchingNewer ? (
     <Box>
-      <Box direction="row">
+      <Loading size="20px"></Loading>
+    </Box>
+  ) : (
+    <AppButton
+      plain
+      icon={<Refresh size="20px"></Refresh>}
+      onClick={() => fetchNewer()}></AppButton>
+  );
+
+  const header = (
+    <Box pad={{ top: '24px', horizontal: '12px' }} style={{ flexShrink: 0 }}>
+      <Box direction="row" margin={{ bottom: '12px' }}>
         <AppHeading level="3">{t(I18Keys.yourPublications)}</AppHeading>
       </Box>
 
-      {menu}
-
-      {isFetchingNewer ? (
-        <Box pad="medium">
-          <Loading></Loading>
-        </Box>
-      ) : (
-        <AppButton
-          icon={<Refresh></Refresh>}
-          onClick={() => fetchNewer()}></AppButton>
-      )}
+      <Box direction="row" align="center">
+        <Box style={{ flexGrow: 1 }}>{menu}</Box>
+        <Box pad={{ horizontal: '10px' }}>{reload}</Box>
+      </Box>
     </Box>
   );
 
