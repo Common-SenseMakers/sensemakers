@@ -28,7 +28,7 @@ export const getUserPostsQuerySchema = object({
 
 export const updatePostSchema = object({
   postId: string().required(),
-  post: object()
+  postUpdate: object()
     .shape({
       content: string().optional(),
       semantics: mixed().optional(),

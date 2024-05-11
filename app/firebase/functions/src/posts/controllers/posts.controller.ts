@@ -177,7 +177,7 @@ export const updatePostController: RequestHandler = async (
 
     const payload = (await updatePostSchema.validate(request.body)) as {
       postId: string;
-      post: PostUpdate;
+      postUpdate: PostUpdate;
     };
 
     db.run(async (manager) => {
@@ -193,15 +193,12 @@ export const updatePostController: RequestHandler = async (
 
       return postsManager.processing.posts.updateContent(
         payload.postId,
-        payload.post,
+        payload.postUpdate,
         manager
       );
     });
 
-    if (DEBUG)
-      logger.debug(`${request.path}: updatePost`, {
-        post: payload,
-      });
+    if (DEBUG) logger.debug(`${request.path}: updatePost`, payload);
 
     response.status(200).send({ success: true });
   } catch (error) {

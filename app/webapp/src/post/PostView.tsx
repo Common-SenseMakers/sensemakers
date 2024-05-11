@@ -10,6 +10,7 @@ import {
   AppPostReviewStatus,
   PostUpdate,
 } from '../shared/types/types.posts';
+import { useUserPosts } from '../user-home/UserPostsContext';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { PostContent } from './PostContent';
@@ -26,22 +27,14 @@ export const PostView = (props: {
   const { connectedUser } = useAccountContext();
   const { signNanopublication, connect } = useNanopubContext();
   const appFetch = useAppFetch();
+  const { updatePost } = useUserPosts();
 
   const reviewForPublication = async () => {
     if (!post) {
       throw new Error(`Unexpected post not found`);
     }
-    await appFetch<
-      void,
-      {
-        postId: string;
-        post: PostUpdate;
-      }
-    >('/api/posts/update', {
-      postId: post.id,
-      post: {
-        reviewedStatus: AppPostReviewStatus.PENDING,
-      },
+    updatePost(post.id, {
+      reviewedStatus: AppPostReviewStatus.PENDING,
     });
   };
 
@@ -49,17 +42,8 @@ export const PostView = (props: {
     if (!post) {
       throw new Error(`Unexpected post not found`);
     }
-    await appFetch<
-      void,
-      {
-        postId: string;
-        post: PostUpdate;
-      }
-    >('/api/posts/update', {
-      postId: post.id,
-      post: {
-        reviewedStatus: AppPostReviewStatus.IGNORED,
-      },
+    updatePost(post.id, {
+      reviewedStatus: AppPostReviewStatus.IGNORED,
     });
   };
 
@@ -144,7 +128,10 @@ export const PostView = (props: {
                   },
                 ]
               : [
-                  { action: ignore, label: 'ignore' },
+                  {
+                    action: ignore,
+                    label: 'ignore',
+                  },
                   { action: rightClicked, label: rightLabel },
                 ]
           }></AppBottomNav>
