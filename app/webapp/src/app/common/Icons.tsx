@@ -1,10 +1,12 @@
-import { Box, Image } from 'grommet';
+import { Box, BoxExtendedProps, Image } from 'grommet';
 
-export const TwitterIcon = (props: { size?: number; color?: string }) => {
+export const TwitterIcon = (
+  props: { size?: number; color?: string } & BoxExtendedProps
+) => {
   const size = props.size || 20;
   const color = props.color || 'white';
   return (
-    <div style={{ height: `${size}px`, width: `${size}px` }}>
+    <Box style={{ height: `${size}px`, width: `${size}px` }}>
       <svg
         style={{ height: '100%', width: 'auto' }}
         width="1200"
@@ -17,7 +19,7 @@ export const TwitterIcon = (props: { size?: number; color?: string }) => {
           fill={color}
         />
       </svg>
-    </div>
+    </Box>
   );
 };
 

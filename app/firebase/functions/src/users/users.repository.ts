@@ -55,7 +55,8 @@ export class UsersRepository {
 
     const _shouldThrow = shouldThrow !== undefined ? shouldThrow : false;
 
-    if (!doc.exists) {
+    const data = doc.data();
+    if (!doc.exists || !data || Object.keys(data).length === 0) {
       if (_shouldThrow) throw new Error(`User ${userId} not found`);
       else return undefined as DefinedIfTrue<T, AppUser>;
     }
