@@ -20,8 +20,9 @@ import { resetDB } from '../utils/db';
 import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
 import { getTestServices } from './test.services';
 
-describe.only('031-filter', () => {
+describe('031-filter', () => {
   const services = getTestServices({
+    time: 'real',
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
@@ -87,7 +88,7 @@ describe.only('031-filter', () => {
             reviewedStatus: AppPostReviewStatus.IGNORED,
             republishedStatus: AppPostRepublishedStatus.PENDING,
             originalParsed: {
-              filter_clasification: SciFilterClassfication.NOT_RESEARCH,
+              filter_classification: SciFilterClassfication.NOT_RESEARCH,
               semantics: 'semantics',
             },
             semantics: 'semantics',
@@ -111,7 +112,7 @@ describe.only('031-filter', () => {
             reviewedStatus: AppPostReviewStatus.PENDING,
             republishedStatus: AppPostRepublishedStatus.PENDING,
             originalParsed: {
-              filter_clasification: SciFilterClassfication.RESEARCH,
+              filter_classification: SciFilterClassfication.RESEARCH,
               semantics: 'semantics',
             },
             semantics: 'semantics',

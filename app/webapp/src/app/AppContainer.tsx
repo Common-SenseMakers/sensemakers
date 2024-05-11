@@ -1,12 +1,13 @@
 import { Box } from 'grommet';
-import { createContext, useContext, useState } from 'react';
-import { Outlet, Route, Routes } from 'react-router-dom';
+import { createContext, useContext, useMemo, useState } from 'react';
+import { Outlet, Route, Routes, useLocation } from 'react-router-dom';
 
 import { AppHome } from '../pages/AppHome';
 import { PostPage } from '../post/PostPage';
 import { RouteNames } from '../route.names';
 import { ResponsiveApp } from '../ui-components/ResponsiveApp';
 import { ThemedApp } from '../ui-components/ThemedApp';
+import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { ConnectedUserWrapper } from '../user-login/contexts/ConnectedUserWrapper';
 import { GlobalNav } from './layout/GlobalNav';
 import { GlobalStyles } from './layout/GlobalStyles';
@@ -25,12 +26,29 @@ const AppContainerContextValue = createContext<
   AppContainerContextType | undefined
 >(undefined);
 
-export const AppContainer = (props: React.PropsWithChildren) => {
-  const [title, setTitle] = useState<SetPageTitleType>();
-  const topHeight = '70px';
-
+export const AppContainer0 = (props: React.PropsWithChildren) => {
   return (
     <ConnectedUserWrapper>
+      <AppContainer></AppContainer>
+    </ConnectedUserWrapper>
+  );
+};
+
+export const AppContainer = (props: React.PropsWithChildren) => {
+  const { connectedUser } = useAccountContext();
+  const [title, setTitle] = useState<SetPageTitleType>();
+
+  const location = useLocation();
+
+  const { topHeight } = useMemo(() => {
+    if (location.pathname === '/' && !connectedUser) {
+      return { topHeight: '0px' };
+    }
+    return { topHeight: '70px' };
+  }, [location]);
+
+  return (
+    <>
       <GlobalStyles />
       <ThemedApp>
         <ResponsiveApp>
@@ -57,7 +75,7 @@ export const AppContainer = (props: React.PropsWithChildren) => {
           </AppContainerContextValue.Provider>
         </ResponsiveApp>
       </ThemedApp>
-    </ConnectedUserWrapper>
+    </>
   );
 };
 

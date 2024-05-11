@@ -30,6 +30,7 @@ export class DBInstance {
 
   constructor() {
     this.firestore = getFirestore();
+
     this.collections = {
       signup: this.firestore.collection(CollectionNames.Signup),
       users: this.firestore.collection(CollectionNames.Users),

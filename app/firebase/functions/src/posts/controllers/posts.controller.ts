@@ -2,6 +2,7 @@ import { RequestHandler } from 'express';
 
 import {
   AppPostFull,
+  PostUpdate,
   UserPostsQueryParams,
 } from '../../@shared/types/types.posts';
 import { IS_EMULATOR } from '../../config/config.runtime';
@@ -14,6 +15,7 @@ import {
   createDraftPostSchema,
   getUserPostsQuerySchema,
   postIdValidation,
+  updatePostSchema,
 } from './posts.schema';
 
 const DEBUG = true;
@@ -38,9 +40,9 @@ export const getUserPostsController: RequestHandler = async (
 
     if (DEBUG) logger.debug(`${request.path}: posts`, { posts, userId });
     response.status(200).send({ success: true, data: posts });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('error', error);
-    response.status(500).send({ success: false, error });
+    response.status(500).send({ success: false, error: error.message });
   }
 };
 
@@ -75,9 +77,9 @@ export const getPostController: RequestHandler = async (request, response) => {
         });
       response.status(200).send({ success: true, data: post });
     }
-  } catch (error) {
+  } catch (error: any) {
     logger.error('error', error);
-    response.status(500).send({ success: false, error });
+    response.status(500).send({ success: false, error: error.message });
   }
 };
 
@@ -101,9 +103,9 @@ export const approvePostController: RequestHandler = async (
       });
 
     response.status(200).send({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('error', error);
-    response.status(500).send({ success: false, error });
+    response.status(500).send({ success: false, error: error.message });
   }
 };
 
@@ -132,9 +134,9 @@ export const parsePostController: RequestHandler = async (
       });
 
     response.status(200).send({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('error', error);
-    response.status(500).send({ success: false, error });
+    response.status(500).send({ success: false, error: error.message });
   }
 };
 
@@ -157,6 +159,46 @@ export const createDraftPostController: RequestHandler = async (
       logger.debug(`${request.path}: approvePost`, {
         post: payload,
       });
+
+    response.status(200).send({ success: true });
+  } catch (error: any) {
+    logger.error('error', error);
+    response.status(500).send({ success: false, error: error.message });
+  }
+};
+
+export const updatePostController: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    const userId = getAuthenticatedUser(request, true);
+    const { db, postsManager } = getServices(request);
+
+    const payload = (await updatePostSchema.validate(request.body)) as {
+      postId: string;
+      postUpdate: PostUpdate;
+    };
+
+    db.run(async (manager) => {
+      const post = await postsManager.processing.posts.get(
+        payload.postId,
+        manager,
+        true
+      );
+
+      if (post.authorId !== userId) {
+        throw new Error(`Post can only be edited by the author`);
+      }
+
+      return postsManager.processing.posts.updateContent(
+        payload.postId,
+        payload.postUpdate,
+        manager
+      );
+    });
+
+    if (DEBUG) logger.debug(`${request.path}: updatePost`, payload);
 
     response.status(200).send({ success: true });
   } catch (error) {

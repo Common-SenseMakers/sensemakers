@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { AppBottomNav } from '../app/layout/AppBottomNav';
 import { AbsoluteRoutes } from '../route.names';
+import { useUserPosts } from '../user-home/UserPostsContext';
 
 export const PostHeader = (props: {
   prevPostId?: string;
@@ -17,12 +18,17 @@ export const PostHeader = (props: {
 }) => {
   const { prevPostId, nextPostId } = props;
   const navigate = useNavigate();
+  const { filterStatus } = useUserPosts();
 
   return (
     <Box style={{ height: '60px' }}>
       <AppBottomNav
         paths={[
-          { icon: <Home></Home>, label: 'back', path: AbsoluteRoutes.App },
+          {
+            icon: <Home></Home>,
+            label: 'back',
+            action: () => navigate(`/${filterStatus}`),
+          },
           {
             icon: <FormPrevious></FormPrevious>,
             label: 'prev',

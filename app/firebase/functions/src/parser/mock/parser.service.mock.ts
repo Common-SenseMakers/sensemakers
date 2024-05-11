@@ -12,7 +12,7 @@ export const MOCKED_SEMANTICS =
   '<http://example.org/mosquito> <http://example.org/transmits> <http://example.org/malaria> .';
 
 export const MOCKED_PARSER_RESULT: ParsePostResult = {
-  filter_clasification: SciFilterClassfication.RESEARCH,
+  filter_classification: SciFilterClassfication.RESEARCH,
   semantics: MOCKED_SEMANTICS,
 };
 

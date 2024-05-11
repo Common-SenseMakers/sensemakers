@@ -42,7 +42,10 @@ export const AppButton = (props: IButton & { isLoading?: boolean }) => {
       <Button
         {...newProps}
         style={{
-          textTransform: 'uppercase',
+          fontSize: '14px',
+          fontStyle: 'normal',
+          fontWeight: '500',
+          lineHeight: '16px',
           ...props.style,
         }}
       />

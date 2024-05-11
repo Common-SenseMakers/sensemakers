@@ -11,6 +11,7 @@ import {
 import {
   PARSER_MODE,
   ParsePostRequest,
+  SciFilterClassfication,
   TopicsParams,
 } from '../@shared/types/types.parser';
 import {
@@ -406,11 +407,18 @@ export class PostsManager {
       throw new Error(`Error parsing post: ${post.id}`);
     }
 
+    /** science filter hack */
+    const reviewedStatus: AppPostReviewStatus =
+      parserResult.filter_classification !== SciFilterClassfication.RESEARCH
+        ? AppPostReviewStatus.IGNORED
+        : AppPostReviewStatus.PENDING;
+
     const update: PostUpdate = {
       semantics: parserResult.semantics,
       originalParsed: parserResult,
       parsedStatus: AppPostParsedStatus.PROCESSED,
       parsingStatus: AppPostParsingStatus.IDLE,
+      reviewedStatus,
     };
 
     if (DEBUG) logger.debug('parsePost - done', { postId, update });

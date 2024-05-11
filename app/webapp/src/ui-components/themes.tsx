@@ -22,6 +22,7 @@ export interface StyleConstants {
     primary: string;
     primaryLight: string;
     text: string;
+    textLight: string;
     textOnPrimary: string;
     lightTextOnLight: string;
     headings: string;
@@ -41,22 +42,23 @@ export interface ExtendedThemeType extends ThemeType {
 
 const constants: StyleConstants = {
   headingFontSizes: {
-    1: '36px',
-    2: '28px',
+    1: '28px',
+    2: '24px',
     3: '22px',
     4: '22px',
   },
   textFontSizes: {
-    large: '32px',
-    medium: '26px',
-    normal: '22px',
+    large: '24px',
+    medium: '18px',
+    normal: '16px',
     small: '18px',
     xsmall: '14px',
   },
   colors: {
-    primary: '#021c49',
-    primaryLight: '#606060',
-    text: '#20365f',
+    primary: '#111827',
+    primaryLight: '#4B5563',
+    text: '#111827',
+    textLight: '#4B5563',
     textOnPrimary: '#ffffff',
     lightTextOnLight: '#949494',
     border: '#333333',
@@ -231,6 +233,15 @@ const extension: ExtendedThemeType = {
     textDecoration: 'underline',
     extend: css`
       font-size: ${constants.textFontSizes.small};
+    `,
+  },
+  paragraph: {
+    medium: {
+      size: constants.textFontSizes.normal,
+    },
+    extend: css`
+      margin: 0px 0px 24px 0px;
+      line-height: 24px; /* 150% */
     `,
   },
 };

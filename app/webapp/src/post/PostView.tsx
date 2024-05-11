@@ -5,7 +5,12 @@ import { AppBottomNav } from '../app/layout/AppBottomNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { PLATFORM } from '../shared/types/types';
 import { PlatformPostDraftApprova } from '../shared/types/types.platform.posts';
-import { AppPostFull } from '../shared/types/types.posts';
+import {
+  AppPostFull,
+  AppPostReviewStatus,
+  PostUpdate,
+} from '../shared/types/types.posts';
+import { useUserPosts } from '../user-home/UserPostsContext';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { PostContent } from './PostContent';
@@ -22,6 +27,25 @@ export const PostView = (props: {
   const { connectedUser } = useAccountContext();
   const { signNanopublication, connect } = useNanopubContext();
   const appFetch = useAppFetch();
+  const { updatePost } = useUserPosts();
+
+  const reviewForPublication = async () => {
+    if (!post) {
+      throw new Error(`Unexpected post not found`);
+    }
+    updatePost(post.id, {
+      reviewedStatus: AppPostReviewStatus.PENDING,
+    });
+  };
+
+  const ignore = async () => {
+    if (!post) {
+      throw new Error(`Unexpected post not found`);
+    }
+    updatePost(post.id, {
+      reviewedStatus: AppPostReviewStatus.IGNORED,
+    });
+  };
 
   const approve = async () => {
     // mark nanopub draft as approved
@@ -95,10 +119,22 @@ export const PostView = (props: {
       }
       nav={
         <AppBottomNav
-          paths={[
-            { action: rightClicked, label: 'ignore' },
-            { action: rightClicked, label: rightLabel },
-          ]}></AppBottomNav>
+          paths={
+            post?.reviewedStatus === AppPostReviewStatus.IGNORED
+              ? [
+                  {
+                    action: reviewForPublication,
+                    label: 'Review For Publication',
+                  },
+                ]
+              : [
+                  {
+                    action: ignore,
+                    label: 'ignore',
+                  },
+                  { action: rightClicked, label: rightLabel },
+                ]
+          }></AppBottomNav>
       }></ViewportPage>
   );
 };

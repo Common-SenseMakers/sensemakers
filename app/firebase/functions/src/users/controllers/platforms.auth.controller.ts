@@ -39,9 +39,9 @@ export const getSignupContextController: RequestHandler = async (
     );
 
     response.status(200).send({ success: true, data: context });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('error', error);
-    response.status(500).send({ success: false, error });
+    response.status(500).send({ success: false, error: error.message });
   }
 };
 
@@ -78,8 +78,8 @@ export const handleSignupController: RequestHandler = async (
     });
 
     response.status(200).send({ success: true, data: result });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('error', error);
-    response.status(500).send({ success: false, error });
+    response.status(500).send({ success: false, error: error.message });
   }
 };

@@ -9,20 +9,25 @@ import {
 import { AppPostReviewStatus } from '../../src/@shared/types/types.posts';
 import { TwitterThread } from '../../src/@shared/types/types.twitter';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
-import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { logger } from '../../src/instances/logger';
 import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
-import { parseUserPostsTask } from '../../src/posts/posts.task';
+import { parsePostTask } from '../../src/posts/posts.task';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
-import { createTestAppUsers } from '../utils/user.factory';
-import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
+import { createUsers } from '../utils/users.utils';
+import {
+  USE_REAL_NANOPUB,
+  USE_REAL_PARSER,
+  USE_REAL_TWITTER,
+  testUsers,
+} from './setup';
 import { getTestServices } from './test.services';
 
 describe('030-process', () => {
   let rsaKeys: RSAKeys | undefined;
   const services = getTestServices({
+    time: 'real',
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
@@ -34,19 +39,18 @@ describe('030-process', () => {
   });
 
   describe('create and process', () => {
-    let appUser: AppUser | undefined;
+    let user: AppUser | undefined;
     let TEST_CONTENT = `This is a test post ${Date.now()}`;
     let thread: PlatformPostPosted<TwitterThread>;
 
     before(async () => {
       await services.db.run(async (manager) => {
-        const users = await createTestAppUsers(services, manager);
-
-        /**
-         * Use @sense_nets_bot. Used also in Twitter Mock and part of
-         * test users
-         */
-        appUser = users.find(
+        const users = await createUsers(
+          services,
+          Array.from(testUsers.values()),
+          manager
+        );
+        user = users.find(
           (u) =>
             UsersHelper.getAccount(
               u,
@@ -54,8 +58,6 @@ describe('030-process', () => {
               TWITTER_USER_ID_MOCKS
             ) !== undefined
         );
-
-        rsaKeys = getRSAKeys('');
       });
 
       /**
@@ -63,32 +65,24 @@ describe('030-process', () => {
        * the account
        */
       await services.db.run(async (manager) => {
-        if (!appUser) throw new Error('appUser not created');
+        if (!user) throw new Error('user not created');
         /** fetch will store the posts in the DB */
-        await services.postsManager.fetchUser({
-          userId: appUser.userId,
-          params: { expectedAmount: 10 },
-        });
+        await services.postsManager.fetchUser(
+          {
+            userId: user.userId,
+            params: { expectedAmount: 10 },
+          },
+          manager
+        );
       });
     });
 
     /** skip for now because we have not yet granted write access */
     it('publish a post in the name of the test user', async () => {
       await services.db.run(async (manager) => {
-        if (!appUser) {
-          throw new Error('appUser not created');
+        if (!user) {
+          throw new Error('user not created');
         }
-        const user_id = appUser[PLATFORM.Twitter]?.[0].user_id;
-        if (!user_id) {
-          throw new Error('Unexpected');
-        }
-
-        const user = await services.users.repo.getUserWithPlatformAccount(
-          PLATFORM.Twitter,
-          user_id,
-          manager,
-          true
-        );
 
         const accounts = user[PLATFORM.Twitter];
         if (!accounts) {
@@ -118,8 +112,8 @@ describe('030-process', () => {
     });
 
     it('fetch user posts from all platforms', async () => {
-      if (!appUser) {
-        throw new Error('appUser not created');
+      if (!user) {
+        throw new Error('user not created');
       }
 
       /**
@@ -127,12 +121,12 @@ describe('030-process', () => {
        * newly published post
        */
       await services.postsManager.fetchUser({
-        userId: appUser.userId,
+        userId: user.userId,
         params: { expectedAmount: 10 },
       });
 
       /** read user post */
-      const postsRead = await services.postsManager.getOfUser(appUser.userId);
+      const postsRead = await services.postsManager.getOfUser(user.userId);
 
       expect(postsRead).to.not.be.undefined;
 
@@ -151,23 +145,29 @@ describe('030-process', () => {
         throw new Error('tweetRead not created');
       }
 
-      if (!appUser) {
-        throw new Error('appUser not created');
+      if (!user) {
+        throw new Error('user not created');
       }
 
       expect(postRead).to.not.be.undefined;
     });
 
     it('triggers parse user posts task', async () => {
-      if (!appUser) {
-        throw new Error('appUser not created');
+      if (!user) {
+        throw new Error('user not created');
       }
-      await parseUserPostsTask({ data: { userId: appUser.userId } } as any);
+
+      const posts = await services.postsManager.getOfUser(user.userId);
+      await Promise.all(
+        posts.map((post) => {
+          return parsePostTask({ data: { postId: post.id } } as any);
+        })
+      );
 
       /** wait for the task to finish */
       await new Promise<void>((resolve) => setTimeout(resolve, 0.5 * 1000));
 
-      const postsRead = await services.postsManager.getOfUser(appUser.userId);
+      const postsRead = await services.postsManager.getOfUser(user.userId);
 
       expect(postsRead).to.not.be.undefined;
 
@@ -179,14 +179,12 @@ describe('030-process', () => {
     });
 
     it('fetch one user pending posts', async () => {
-      if (!appUser) {
-        throw new Error('appUser not created');
+      if (!user) {
+        throw new Error('user not created');
       }
 
       /** get pending posts of user */
-      const pendingPosts = await services.postsManager.getOfUser(
-        appUser.userId
-      );
+      const pendingPosts = await services.postsManager.getOfUser(user.userId);
 
       const pendingPost = pendingPosts[0];
       const nanopub = pendingPost.mirrors.find(
@@ -209,7 +207,7 @@ describe('030-process', () => {
       nanopub.draft.postApproval = PlatformPostDraftApprova.APPROVED;
 
       /** send updated post (content and semantics did not changed) */
-      await services.postsManager.approvePost(pendingPost, appUser.userId);
+      await services.postsManager.approvePost(pendingPost, user.userId);
 
       const approved = await services.postsManager.getPost(
         pendingPost.id,

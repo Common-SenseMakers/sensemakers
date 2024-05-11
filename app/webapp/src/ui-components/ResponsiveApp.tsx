@@ -1,4 +1,4 @@
-import { ResponsiveContext } from 'grommet';
+import { Box, ResponsiveContext } from 'grommet';
 import {
   CSSProperties,
   createContext,

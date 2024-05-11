@@ -6,6 +6,7 @@ import {
   getPostController,
   getUserPostsController,
   parsePostController,
+  updatePostController,
 } from './posts/controllers/posts.controller';
 import { getLoggedUserController } from './users/controllers/get.logged.controller';
 import {
@@ -24,3 +25,4 @@ router.post('/posts/get', getPostController);
 router.post('/posts/createDraft', createDraftPostController);
 router.post('/posts/approve', approvePostController);
 router.post('/posts/parse', parsePostController);
+router.post('/posts/update', updatePostController);

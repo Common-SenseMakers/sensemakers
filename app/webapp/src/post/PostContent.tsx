@@ -7,10 +7,10 @@ import { usePost } from './PostContext';
 import { PostText } from './PostText';
 
 export const PostContent = () => {
-  const { post, reparse, isParsing } = usePost();
+  const { post, reparse, isParsing, updateSemantics } = usePost();
 
   const semanticsUpdated = (newSemantics: string) => {
-    console.log({ newSemantics });
+    updateSemantics(newSemantics);
   };
 
   const parsingError = post && post.parsingStatus === 'errored';
@@ -31,11 +31,15 @@ export const PostContent = () => {
           <></>
         )}
         {isParsing ? <LoadingDiv fill height="120px"></LoadingDiv> : <></>}
-        <SemanticsEditor
-          isLoading={false}
-          semantics={post?.semantics}
-          originalParsed={post?.originalParsed}
-          semanticsUpdated={semanticsUpdated}></SemanticsEditor>
+        {post?.reviewedStatus !== 'ignored' ? (
+          <SemanticsEditor
+            isLoading={false}
+            semantics={post?.semantics}
+            originalParsed={post?.originalParsed}
+            semanticsUpdated={semanticsUpdated}></SemanticsEditor>
+        ) : (
+          <></>
+        )}
       </Box>
     </Box>
   );
