@@ -1,7 +1,7 @@
 import { Box, Text } from 'grommet';
 
-import { AppIcon } from '../app/brand/AppIcon';
-import { NanopubIcon } from '../app/brand/NanopubIcon';
+import { AppIcon } from '../app/icons/AppIcon';
+import { NanopubIcon } from '../app/icons/NanopubIcon';
 
 export const StatusTag = (props: { label: string }) => {
   const { label } = props;

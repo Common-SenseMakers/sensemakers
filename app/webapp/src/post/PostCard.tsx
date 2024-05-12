@@ -3,7 +3,7 @@ import { StatusCritical } from 'grommet-icons';
 import { useNavigate } from 'react-router-dom';
 
 import { TweetAnchor } from '../app/anchors/TwitterAnchor';
-import { AppIcon } from '../app/brand/AppIcon';
+import { AppIcon } from '../app/icons/AppIcon';
 import { PLATFORM } from '../shared/types/types';
 import {
   AppPostFull,

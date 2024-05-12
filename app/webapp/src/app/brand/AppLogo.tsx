@@ -1,6 +1,6 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
 
-import { AppIcon } from './AppIcon';
+import { AppIcon } from '../icons/AppIcon';
 
 export const AppLogo = (props: BoxExtendedProps) => {
   return (

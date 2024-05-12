@@ -116,25 +116,6 @@ export const PostView = (props: {
           </Box>
           <PostContent></PostContent>
         </Box>
-      }
-      nav={
-        <AppBottomNav
-          paths={
-            post?.reviewedStatus === AppPostReviewStatus.IGNORED
-              ? [
-                  {
-                    action: reviewForPublication,
-                    label: 'Review For Publication',
-                  },
-                ]
-              : [
-                  {
-                    action: ignore,
-                    label: 'ignore',
-                  },
-                  { action: rightClicked, label: rightLabel },
-                ]
-          }></AppBottomNav>
       }></ViewportPage>
   );
 };
