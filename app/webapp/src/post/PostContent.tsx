@@ -16,8 +16,8 @@ export const PostContent = () => {
   const parsingError = post && post.parsingStatus === 'errored';
 
   return (
-    <Box pad={{ horizontal: 'small', vertical: 'large' }}>
-      <Box elevation="small" pad="medium">
+    <Box>
+      <Box>
         <PostText text={post?.content}></PostText>
       </Box>
 

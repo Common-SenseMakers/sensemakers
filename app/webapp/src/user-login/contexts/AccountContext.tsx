@@ -7,7 +7,9 @@ import {
 } from 'react';
 
 import { _appFetch } from '../../api/app.fetch';
-import { AppUserRead } from '../../shared/types/types';
+import { AppUserRead, PLATFORM } from '../../shared/types/types';
+import { TwitterUserProfile } from '../../shared/types/types.twitter';
+import { getAccount } from '../user.helper';
 
 const DEBUG = false;
 
@@ -15,6 +17,7 @@ export const OUR_TOKEN_NAME = 'ourToken';
 
 export type AccountContextType = {
   connectedUser?: AppUserRead;
+  twitterProfile?: TwitterUserProfile;
   isConnected: boolean;
   disconnect: () => void;
   refresh: () => void;
@@ -79,10 +82,15 @@ export const AccountContext = (props: PropsWithChildren) => {
     checkToken();
   };
 
+  const twitterProfile = connectedUser
+    ? getAccount(connectedUser, PLATFORM.Twitter)?.profile
+    : undefined;
+
   return (
     <AccountContextValue.Provider
       value={{
         connectedUser: connectedUser === null ? undefined : connectedUser,
+        twitterProfile,
         isConnected: connectedUser !== undefined && connectedUser !== null,
         disconnect,
         refresh,
