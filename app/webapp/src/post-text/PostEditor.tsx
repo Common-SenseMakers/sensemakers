@@ -143,6 +143,7 @@ export const PostEditor = (props: IStatementEditable) => {
   }, [editorState]);
 
   const editorProps: EditorProps = {
+    editable: () => (props.editable !== undefined ? props.editable : false),
     defaultState,
     state: editorState,
     dispatchTransaction: handleTransaction,

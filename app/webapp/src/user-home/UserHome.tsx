@@ -65,7 +65,7 @@ export const UserHome = () => {
       <Box gap="medium">
         {posts.map((post, ix) => (
           <Box key={ix}>
-            <PostCard post={post}></PostCard>
+            <PostCard post={post} shade={ix % 2 === 1}></PostCard>
           </Box>
         ))}
       </Box>
@@ -151,7 +151,7 @@ export const UserHome = () => {
   const header = (
     <Box
       pad={{ top: '24px', bottom: '12px', horizontal: '12px' }}
-      style={{ backgroundColor: constants.colors.header, flexShrink: 0 }}>
+      style={{ backgroundColor: constants.colors.shade, flexShrink: 0 }}>
       <Box direction="row" margin={{ bottom: '12px' }}>
         <AppHeading level="3">{t(I18Keys.yourPublications)}</AppHeading>
       </Box>

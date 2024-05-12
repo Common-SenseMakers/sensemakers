@@ -2,11 +2,19 @@ import { Box, Text } from 'grommet';
 import { StatusCritical } from 'grommet-icons';
 import { useNavigate } from 'react-router-dom';
 
+import { TweetAnchor } from '../app/anchors/TwitterAnchor';
 import { AppIcon } from '../app/brand/AppIcon';
-import { AppPostFull, AppPostParsingStatus } from '../shared/types/types.posts';
+import { PLATFORM } from '../shared/types/types';
+import {
+  AppPostFull,
+  AppPostParsedStatus,
+  AppPostParsingStatus,
+  AppPostReviewStatus,
+} from '../shared/types/types.posts';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { PostText } from './PostText';
+import { StatusTag } from './StatusTag';
 
 export const PostCard = (props: { post: AppPostFull; shade?: boolean }) => {
   const { post, shade: _shade } = props;
@@ -20,29 +28,40 @@ export const PostCard = (props: { post: AppPostFull; shade?: boolean }) => {
     navigate(`/post/${post.id}`);
   };
 
-  const processStatusIcon = (() => {
-    const processed = post && post.parsedStatus === 'processed';
-    const errored = post && post.parsingStatus === 'errored';
+  const tweet = post.mirrors.find((m) => m.platformId === PLATFORM.Twitter);
 
-    if (isParsing) return <Loading></Loading>;
-    if (processed) return <AppIcon></AppIcon>;
-    if (errored) return <StatusCritical></StatusCritical>;
+  const reviewStatus = (() => {
+    const processed =
+      post && post.parsedStatus === AppPostParsedStatus.PROCESSED;
+    const errored = post && post.parsingStatus === AppPostParsingStatus.ERRORED;
+
+    if (!processed) {
+      if (isParsing) return <Loading></Loading>;
+      if (errored) return <StatusCritical></StatusCritical>;
+    }
+
+    const pending = post && post.reviewedStatus === AppPostReviewStatus.PENDING;
+    if (pending) {
+      return <StatusTag label="For Review"></StatusTag>;
+    }
   })();
 
   return (
     <Box
-      pad="medium"
+      pad={{ top: 'large', bottom: 'medium', horizontal: 'medium' }}
       style={{
-        backgroundColor: shade ? '#D1D5DB' : 'white',
+        backgroundColor: shade ? constants.colors.shade : 'white',
         cursor: 'pointer',
         position: 'relative',
       }}
       onClick={handleClick}>
       <Box direction="row" justify="between">
-        <Text size="xsmall">{post?.id}</Text>
-        <Text size="small">{post?.reviewedStatus}</Text>
+        <TweetAnchor
+          thread={tweet?.posted?.post}
+          timestamp={tweet?.posted?.timestampMs}></TweetAnchor>
+        {reviewStatus}
       </Box>
-      <PostText truncate text={post?.content}></PostText>
+      <PostText truncate shade={shade} text={post?.content}></PostText>
     </Box>
   );
 };

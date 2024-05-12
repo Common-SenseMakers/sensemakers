@@ -13,6 +13,8 @@ export enum I18Keys {
   signInX = 's012',
   errorConnectTwitter = 's013',
   yourPublications = 's014',
+  TweetX = 's015',
+  ThreadX = 's016',
 }
 
 const translationENG: Record<I18Keys, string> = {
@@ -31,7 +33,10 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.signInX]: 'Sign in with X',
   [I18Keys.errorConnectTwitter]: 'Error connecting Twitter',
   [I18Keys.yourPublications]: 'Your publications',
+  [I18Keys.TweetX]: 'X · Tweet',
+  [I18Keys.ThreadX]: 'X · Thread',
 };
+
 i18n.use(initReactI18next).init({
   resources: {
     ENG: {

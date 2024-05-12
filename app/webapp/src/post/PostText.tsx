@@ -2,11 +2,19 @@ import { Box, Text } from 'grommet';
 import { useEffect, useRef, useState } from 'react';
 
 import { PostEditor } from '../post-text/PostEditor';
+import { useThemeContext } from '../ui-components/ThemedApp';
 
 const DEBUG = true;
 
-export const PostText = (props: { text?: string; truncate?: boolean }) => {
-  const { text, truncate: _truncate } = props;
+export const PostText = (props: {
+  text?: string;
+  truncate?: boolean;
+  shade?: boolean;
+}) => {
+  const { text, truncate: _truncate, shade: _shade } = props;
+  const shade = _shade || false;
+
+  const { constants } = useThemeContext();
   const [isTruncated, setIsTruncated] = useState(false);
 
   const ref = useRef<HTMLParagraphElement>(null);
@@ -53,15 +61,16 @@ export const PostText = (props: { text?: string; truncate?: boolean }) => {
         <PostEditor value={text}></PostEditor>
         {isTruncated ? (
           <Box
-            width={'30px'}
+            width={'45px'}
+            pad={{ horizontal: 'small' }}
             style={{
-              backgroundColor: 'white',
+              backgroundColor: shade ? constants.colors.shade : 'white',
               position: 'absolute',
               right: '0px',
               bottom: '0px',
               height: '20px',
             }}>
-            <Text>...</Text>
+            <Text style={{ letterSpacing: '1.6px' }}>...</Text>
           </Box>
         ) : (
           <></>
