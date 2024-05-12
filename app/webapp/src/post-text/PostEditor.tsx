@@ -3,6 +3,7 @@ import { EditorProps } from '@nytimes/react-prosemirror/dist/types/hooks/useEdit
 import { Box } from 'grommet';
 import { baseKeymap, splitBlock } from 'prosemirror-commands';
 import { keymap } from 'prosemirror-keymap';
+import { DOMParser } from 'prosemirror-model';
 import { Schema } from 'prosemirror-model';
 import { EditorState } from 'prosemirror-state';
 import { useEffect, useState } from 'react';
@@ -58,6 +59,8 @@ function editorStateToPlainText(state: any) {
     content.push(text + suffix);
   }
 
+  if (DEBUG) console.log({ content });
+
   return content.join('');
 }
 
@@ -68,30 +71,41 @@ const defaultState = EditorState.create({
 export const PostEditor = (props: IStatementEditable) => {
   const { t } = useTranslation();
   const { constants } = useThemeContext();
-  const [text, setText] = useState<string>();
 
   const [mount, setMount] = useState<HTMLElement | null>(null);
+
   const [editorState, setEditorState] = useState(
-    EditorState.create({ schema })
+    EditorState.create({
+      schema,
+    })
   );
+
+  useEffect(() => {
+    if (props.value) {
+      const element = document.createElement('div');
+      element.innerHTML = props.value;
+      const doc = DOMParser.fromSchema(schema).parse(element);
+
+      const newState = EditorState.create({
+        doc,
+        schema,
+        plugins: editorState.plugins,
+      });
+      setEditorState(newState);
+    }
+  }, [props.value]);
 
   const handleTransaction = (tr: any) => {
     setEditorState((s) => s.apply(tr));
   };
 
   useEffect(() => {
-    const text = editorStateToPlainText(editorState);
+    const newText = editorStateToPlainText(editorState);
     if (props.onChanged) {
-      if (DEBUG) console.log({ editorState, text });
-      props.onChanged(text);
+      if (DEBUG) console.log({ editorState, newText });
+      props.onChanged(newText);
     }
   }, [editorState]);
-
-  useEffect(() => {}, [text, props.onChanged]);
-
-  useEffect(() => {
-    setText(props.value);
-  }, [props.value]);
 
   const editorProps: EditorProps = {
     defaultState,
