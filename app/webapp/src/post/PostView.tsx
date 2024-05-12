@@ -15,7 +15,7 @@ import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { PostContent } from './PostContent';
 import { usePost } from './PostContext';
-import { PostHeader } from './PostHeader';
+import { PostNav } from './PostNav';
 
 /** extract the postId from the route and pass it to a PostContext */
 export const PostView = (props: {
@@ -108,9 +108,7 @@ export const PostView = (props: {
     <ViewportPage
       content={
         <Box fill>
-          <PostHeader
-            prevPostId={prevPostId}
-            nextPostId={nextPostId}></PostHeader>
+          <PostNav prevPostId={prevPostId} nextPostId={nextPostId}></PostNav>
           <Box align="center" pad="small">
             <Text size="xsmall">{post?.id}</Text>
           </Box>

@@ -9,7 +9,7 @@ import { AppButton } from '../ui-components';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useUserPosts } from '../user-home/UserPostsContext';
 
-export const PostHeader = (props: {
+export const PostNav = (props: {
   prevPostId?: string;
   nextPostId?: string;
 }) => {
