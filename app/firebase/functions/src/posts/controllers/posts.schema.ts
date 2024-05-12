@@ -1,6 +1,6 @@
 import { array, mixed, number, object, string } from 'yup';
 
-import { PostsQueryStatusParam } from '../../@shared/types/types.posts';
+import { PostsQueryStatus } from '../../@shared/types/types.posts';
 
 export const postIdValidation = object({
   postId: string().required(),
@@ -18,7 +18,7 @@ export const createDraftPostSchema = object({
 }).noUnknown(true);
 
 export const getUserPostsQuerySchema = object({
-  status: string().oneOf([...Object.values(PostsQueryStatusParam)]),
+  status: string().oneOf([...Object.values(PostsQueryStatus)]),
   fetchParams: object({
     expectedAmount: number().required(),
     sinceId: string().optional(),

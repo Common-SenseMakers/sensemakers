@@ -1,6 +1,6 @@
 import { Box, BoxExtendedProps, DropButton, Menu, Text } from 'grommet';
 import { Refresh } from 'grommet-icons';
-import { useEffect } from 'react';
+import { CSSProperties, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -8,14 +8,10 @@ import { useToastContext } from '../app/ToastsContext';
 import { I18Keys } from '../i18n/i18n';
 import { PostCard } from '../post/PostCard';
 import { PostsQueryStatus, UserPostsQuery } from '../shared/types/types.posts';
-import {
-  AppButton,
-  AppHeading,
-  AppSelect,
-  SelectValue,
-} from '../ui-components';
+import { AppButton, AppHeading, AppSelect } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
+import { useThemeContext } from '../ui-components/ThemedApp';
 import { useUserPosts } from './UserPostsContext';
 
 const statusPretty: Record<PostsQueryStatus, string> = {
@@ -26,6 +22,7 @@ const statusPretty: Record<PostsQueryStatus, string> = {
 };
 
 export const UserHome = () => {
+  const { constants } = useThemeContext();
   const { t } = useTranslation();
   const { show } = useToastContext();
 
@@ -84,12 +81,25 @@ export const UserHome = () => {
   const FilterValue = (
     props: {
       status: PostsQueryStatus;
+      border?: boolean;
     } & BoxExtendedProps
   ) => {
+    const borderStyle: CSSProperties = props.border
+      ? {
+          border: '1px solid',
+          borderRadius: '8px',
+          borderColor: constants.colors.border,
+        }
+      : {};
     return (
-      <SelectValue style={{ padding: '6px 16px' }}>
+      <Box
+        pad={{ horizontal: 'medium', vertical: 'small' }}
+        width="100%"
+        style={{
+          ...borderStyle,
+        }}>
         <Text size="14px">{statusPretty[props.status]}</Text>
-      </SelectValue>
+      </Box>
     );
   };
 
@@ -104,9 +114,9 @@ export const UserHome = () => {
     <AppSelect
       value={
         filterStatus ? (
-          <FilterValue status={filterStatus}></FilterValue>
+          <FilterValue border status={filterStatus}></FilterValue>
         ) : (
-          <FilterValue status={PostsQueryStatus.ALL}></FilterValue>
+          <FilterValue border status={PostsQueryStatus.ALL}></FilterValue>
         )
       }
       options={options}
@@ -124,12 +134,12 @@ export const UserHome = () => {
 
   const reload = isFetchingNewer ? (
     <Box>
-      <Loading size="20px"></Loading>
+      <Loading color={constants.colors.primary} size="20px"></Loading>
     </Box>
   ) : (
     <AppButton
       plain
-      icon={<Refresh size="20px"></Refresh>}
+      icon={<Refresh color={constants.colors.primary} size="20px"></Refresh>}
       onClick={() => fetchNewer()}></AppButton>
   );
 
