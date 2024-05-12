@@ -13,7 +13,7 @@ import { useQueryFilter } from './useQueryFilter';
 
 const PAGE_SIZE = 5;
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const usePostsFetch = () => {
   const { connectedUser } = useAccountContext();

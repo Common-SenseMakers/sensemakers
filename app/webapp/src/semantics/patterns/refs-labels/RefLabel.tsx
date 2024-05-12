@@ -7,7 +7,7 @@ import { useThemeContext } from '../../../ui-components/ThemedApp';
 import { RefCard } from '../common/RefCard';
 import { RefData } from './process.semantics';
 
-const DEBUG = true;
+const DEBUG = false;
 
 /** renders the labels for one ref */
 export const RefLabels = (props: {

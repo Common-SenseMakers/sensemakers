@@ -24,7 +24,7 @@ import {
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { getAccount } from '../user-login/user.helper';
 
-const DEBUG = true;
+const DEBUG = false;
 
 interface NanopubInfo {
   uri: string;

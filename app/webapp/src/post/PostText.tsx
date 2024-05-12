@@ -1,12 +1,14 @@
 import { Markdown, Paragraph, Text } from 'grommet';
 
+import { PostEditor } from '../post-text/PostEditor';
+
 export const PostText = (props: { text?: string }) => {
   const paragraphs = props.text?.split('---');
-  const text = paragraphs?.map((p, i) => `<p><span>${p}</span></p>`).join('');
+  const text = paragraphs?.map((p, i) => `<p>${p}</p>`).join('');
 
   if (!text) {
     return <></>;
   }
 
-  return <Markdown>{text}</Markdown>;
+  return <PostEditor value={text}></PostEditor>;
 };

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { useAppFetch } from '../../../../api/app.fetch';
-import { DEBUG } from '../../../../app/config';
 import { HexStr, PLATFORM } from '../../../../shared/types/types';
 import {
   NanopubUserDetails,
@@ -15,6 +14,8 @@ import {
 import { getAccount } from '../../../user.helper';
 import { useAccountContext } from '../../AccountContext';
 import { useAppSigner } from '../../signer/SignerContext';
+
+const DEBUG = false;
 
 /**
  * from a set of connected keys, checks if the current user

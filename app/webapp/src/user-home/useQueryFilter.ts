@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 
 import { PostsQueryStatus } from '../shared/types/types.posts';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const useQueryFilter = () => {
   const [status, setStatus] = useState<PostsQueryStatus>(PostsQueryStatus.ALL);

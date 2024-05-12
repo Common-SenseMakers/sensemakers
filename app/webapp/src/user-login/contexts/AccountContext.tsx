@@ -9,7 +9,7 @@ import {
 import { _appFetch } from '../../api/app.fetch';
 import { AppUserRead } from '../../shared/types/types';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const OUR_TOKEN_NAME = 'ourToken';
 
