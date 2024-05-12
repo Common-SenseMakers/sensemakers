@@ -21,9 +21,7 @@ export const AppLabel = (
       {...props}
       style={{
         width: 'fit-content',
-        backgroundColor: constants.colors.tagsBackground,
         fontSize: '14px',
-        color: constants.colors.tagsText,
         fontWeight: '700',
         borderRadius: '6px',
         height: '36px',
@@ -39,7 +37,7 @@ export const AppLabel = (
               pad={{ left: 'small', right: 'medium' }}
               style={{ height: '36px' }}
               justify="center">
-              <Close color={constants.colors.tagsText} size="small"></Close>
+              <Close color={constants.colors.primary} size="small"></Close>
             </Box>
           </AppButton>
         ) : (

@@ -9,7 +9,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 import { AppBottomNav } from '../app/layout/AppBottomNav';
-import { AbsoluteRoutes } from '../route.names';
 import { useUserPosts } from '../user-home/UserPostsContext';
 
 export const PostHeader = (props: {

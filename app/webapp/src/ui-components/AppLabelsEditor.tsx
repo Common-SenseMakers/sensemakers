@@ -112,7 +112,7 @@ export const AppLabelsEditor = (props: {
           style={{ textTransform: 'none' }}>
           <Box direction="row" align="center">
             <AppLabel margin={{ right: 'small' }}>{input}</AppLabel>
-            <Text color={constants.colors.lightTextOnLight}>{t('create')}</Text>
+            <Text color={constants.colors.primary}>{t('create')}</Text>
           </Box>
         </AppButton>
       );
@@ -152,9 +152,7 @@ export const AppLabelsEditor = (props: {
       ref={keyBox}
       width="100%"
       style={{
-        backgroundColor: adding
-          ? constants.colors.backgroundLight
-          : 'transparent',
+        backgroundColor: adding ? constants.colors.primary : 'transparent',
         position: 'relative',
       }}>
       <Box style={{ display: 'block' }}>
@@ -203,7 +201,6 @@ export const AppLabelsEditor = (props: {
               onClick={() => setAdding(true)}>
               <AppButton
                 plain
-                color={constants.colors.backgroundLightDarker}
                 style={{ height: '36px', textTransform: 'none' }}
                 justify="center">
                 <Text>{t('add/remove')}...</Text>
@@ -217,7 +214,6 @@ export const AppLabelsEditor = (props: {
         <Box
           style={{
             position: 'absolute',
-            backgroundColor: constants.colors.backgroundLightShade,
             width: '100%',
             padding: '12px 12px 12px 12px',
             top: `${height}px`,

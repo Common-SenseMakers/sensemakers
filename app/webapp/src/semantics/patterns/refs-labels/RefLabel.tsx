@@ -74,7 +74,7 @@ export const RefLabels = (props: {
     <Box
       style={{
         borderLeft: '4px solid',
-        borderColor: constants.colors.backgroundLightDarker,
+        borderColor: constants.colors.primary,
       }}
       pad={{ left: 'medium', vertical: 'small' }}>
       <Box direction="row" margin={{ bottom: 'small' }}>

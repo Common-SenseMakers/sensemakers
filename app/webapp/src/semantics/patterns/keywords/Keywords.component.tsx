@@ -76,7 +76,7 @@ export const KeywordsComponent = (props: PatternProps) => {
       direction="row"
       style={{
         borderLeft: '4px solid',
-        borderColor: constants.colors.backgroundLightDarker,
+        borderColor: constants.colors.primary,
       }}
       pad={{ left: 'medium' }}>
       <Box

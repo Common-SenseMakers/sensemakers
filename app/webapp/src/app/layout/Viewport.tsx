@@ -66,7 +66,7 @@ export const ViewportContainer = (props: React.HTMLProps<HTMLDivElement>) => {
               right: '0px',
               bottom: '0px',
             }}>
-            <Text size="6px" color={constants.colors.backgroundLightDarker}>
+            <Text size="6px" color="white">
               Build: {BUILD_ID?.substring(0, 7)}
             </Text>
           </Box>
@@ -146,48 +146,6 @@ export interface ITwoColumns {
   line?: boolean;
   frs?: number[];
 }
-
-export const TwoColumns = (props: ITwoColumns) => {
-  const { constants } = useThemeContext();
-
-  const gap = props.gap !== undefined ? props.gap : 78; // minus 2 of the line
-  const showLine = props.line !== undefined ? props.line : true;
-  const frs = props.frs || [1, 1];
-
-  const colWidths = [`${frs[0]}fr`, `${frs[1]}fr`];
-
-  return (
-    <Grid
-      fill
-      columns={[colWidths[0], `${gap}px`, colWidths[1]]}
-      rows={['auto']}
-      areas={[
-        { name: 'left', start: [0, 0], end: [0, 0] },
-        { name: 'center', start: [1, 0], end: [1, 0] },
-        { name: 'right', start: [2, 0], end: [2, 0] },
-      ]}
-      style={{ ...props.grid?.style }}>
-      <Box gridArea="left" direction="column" {...props.boxes}>
-        {(props.children as React.ReactNode[])[0]}
-      </Box>
-      <Box gridArea="center" align="center">
-        {showLine ? (
-          <Box
-            style={{
-              height: '100%',
-              width: '2px',
-              backgroundColor: constants.colors.backgroundLight,
-            }}></Box>
-        ) : (
-          <></>
-        )}
-      </Box>
-      <Box gridArea="right" direction="column" {...props.boxes}>
-        {(props.children as React.ReactNode[])[1]}
-      </Box>
-    </Grid>
-  );
-};
 
 export enum Breakpoint {
   small = 'small',

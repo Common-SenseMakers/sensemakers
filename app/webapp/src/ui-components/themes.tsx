@@ -20,19 +20,13 @@ export interface StyleConstants {
   };
   colors: {
     primary: string;
-    primaryLight: string;
-    text: string;
     textLight: string;
-    textOnPrimary: string;
-    lightTextOnLight: string;
-    headings: string;
-    backgroundLight: string;
-    backgroundLightShade: string;
-    backgroundLightDarker: string;
-    border: string;
+    header: string;
+    shade: string;
     links: string;
-    tagsBackground: string;
-    tagsText: string;
+    text: string;
+    textOnPrimary: string;
+    border: string;
   };
 }
 
@@ -56,19 +50,13 @@ const constants: StyleConstants = {
   },
   colors: {
     primary: '#111827',
-    primaryLight: '#4B5563',
-    text: '#111827',
     textLight: '#4B5563',
+    header: '#F9FAFB',
+    shade: '#D1D5DB',
+    text: '#111827',
+    links: '#3182CE',
     textOnPrimary: '#ffffff',
-    lightTextOnLight: '#949494',
     border: '#D1D5DB',
-    headings: '#1a1a1a',
-    backgroundLight: '#f7f7f7',
-    backgroundLightShade: '#ececec',
-    backgroundLightDarker: '#cacaca',
-    links: '#021c49',
-    tagsBackground: '#52004c',
-    tagsText: '#ffffff',
   },
 };
 
@@ -77,7 +65,6 @@ const extension: ExtendedThemeType = {
   global: {
     colors: {
       brand: constants.colors.primary,
-      brandLight: constants.colors.primaryLight,
       text: constants.colors.text,
     },
     font: {
@@ -230,7 +217,7 @@ const extension: ExtendedThemeType = {
   },
   accordion: {
     icons: {
-      color: constants.colors.primaryLight,
+      color: constants.colors.primary,
     },
     border: false,
     panel: {

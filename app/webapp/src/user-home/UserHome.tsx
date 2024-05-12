@@ -62,11 +62,13 @@ export const UserHome = () => {
         </BoxCentered>
       )}
 
-      {posts.map((post, ix) => (
-        <Box key={ix}>
-          <PostCard post={post}></PostCard>
-        </Box>
-      ))}
+      <Box gap="medium">
+        {posts.map((post, ix) => (
+          <Box key={ix}>
+            <PostCard post={post}></PostCard>
+          </Box>
+        ))}
+      </Box>
 
       {posts.length > 0 && !errorFetchingOlder ? (
         <AppButton label="fetch older" onClick={() => fetchOlder()}></AppButton>
@@ -96,7 +98,10 @@ export const UserHome = () => {
         pad={{ horizontal: 'medium', vertical: 'small' }}
         width="100%"
         style={{
+          backgroundColor: 'white',
           ...borderStyle,
+          boxShadow:
+            '0px 1px 2px 0px rgba(16, 24, 40, 0.04), 0px 1px 2px 0px rgba(16, 24, 40, 0.04)',
         }}>
         <Text size="14px">{statusPretty[props.status]}</Text>
       </Box>
@@ -144,7 +149,9 @@ export const UserHome = () => {
   );
 
   const header = (
-    <Box pad={{ top: '24px', horizontal: '12px' }} style={{ flexShrink: 0 }}>
+    <Box
+      pad={{ top: '24px', bottom: '12px', horizontal: '12px' }}
+      style={{ backgroundColor: constants.colors.header, flexShrink: 0 }}>
       <Box direction="row" margin={{ bottom: '12px' }}>
         <AppHeading level="3">{t(I18Keys.yourPublications)}</AppHeading>
       </Box>
@@ -160,11 +167,7 @@ export const UserHome = () => {
     <>
       {header}
 
-      <Box
-        fill
-        gap="large"
-        pad={{ vertical: 'large', horizontal: 'medium' }}
-        justify="start">
+      <Box fill justify="start">
         {content}
       </Box>
     </>
