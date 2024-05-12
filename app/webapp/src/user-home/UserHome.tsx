@@ -70,13 +70,17 @@ export const UserHome = () => {
         ))}
       </Box>
 
-      {posts.length > 0 && !errorFetchingOlder ? (
-        <AppButton label="fetch older" onClick={() => fetchOlder()}></AppButton>
-      ) : posts.length > 0 ? (
-        <LoadingDiv></LoadingDiv>
-      ) : (
-        <> </>
-      )}
+      <Box pad="large">
+        {posts.length > 0 && !errorFetchingOlder ? (
+          <AppButton
+            label="fetch older"
+            onClick={() => fetchOlder()}></AppButton>
+        ) : posts.length > 0 ? (
+          <LoadingDiv></LoadingDiv>
+        ) : (
+          <> </>
+        )}
+      </Box>
     </>
   );
 
