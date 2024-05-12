@@ -14,7 +14,24 @@ import { EditorAutoFocus } from './editor.autofocus';
 import placeholder from './placeholder.plugin';
 import './posteditor.css';
 
-const DEBUG = true;
+const DEBUG = false;
+
+export const textToHtml = (text: string) => {
+  const paragraphs = text.split('---');
+  let html = paragraphs?.map((p, i) => `<p>${p}</p>`).join('');
+
+  const urlRegex = /\bhttps?:\/\/\S+/gi;
+  html = html.replace(urlRegex, (url) => {
+    const urlObj = new URL(url);
+    const urlClean = `${urlObj.protocol}/${urlObj.hostname}/${urlObj.pathname}`;
+    return `<a href="${url}">${urlClean}</a>`;
+  });
+
+  const element = document.createElement('div');
+  element.innerHTML = html;
+
+  return element;
+};
 
 export interface IStatementEditable {
   placeholder?: string;
@@ -43,8 +60,27 @@ const schema = new Schema({
     },
   },
   marks: {
-    // While we want to keep the schema to plain text, you might consider using
-    // a plugin for URL detection and styling instead of a schema mark for links.
+    link: {
+      attrs: {
+        href: {},
+        title: { default: null },
+      },
+      inclusive: false,
+      parseDOM: [
+        {
+          tag: 'a[href]',
+          getAttrs(dom: any) {
+            return {
+              href: dom.getAttribute('href'),
+              title: dom.getAttribute('title'),
+            };
+          },
+        },
+      ],
+      toDOM(node) {
+        return ['a', { href: node.attrs.href, title: node.attrs.title }, 0];
+      },
+    },
   },
 });
 
@@ -82,8 +118,7 @@ export const PostEditor = (props: IStatementEditable) => {
 
   useEffect(() => {
     if (props.value) {
-      const element = document.createElement('div');
-      element.innerHTML = props.value;
+      const element = textToHtml(props.value);
       const doc = DOMParser.fromSchema(schema).parse(element);
 
       const newState = EditorState.create({
@@ -120,17 +155,7 @@ export const PostEditor = (props: IStatementEditable) => {
 
   return (
     <>
-      <Box
-        style={{
-          backgroundColor: constants.colors.primary,
-          color: constants.colors.textOnPrimary,
-          position: 'relative',
-          fontSize: '36px',
-          borderRadius: '6px',
-          cursor: props.onClick ? 'pointer' : '',
-          ...props.containerStyle,
-        }}
-        onClick={props.onClick}>
+      <Box>
         <ProseMirror mount={mount} {...editorProps}>
           <div className="editor" ref={setMount} />
           <EditorAutoFocus></EditorAutoFocus>

@@ -8,8 +8,9 @@ import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { PostText } from './PostText';
 
-export const PostCard = (props: { post: AppPostFull }) => {
-  const { post } = props;
+export const PostCard = (props: { post: AppPostFull; shade?: boolean }) => {
+  const { post, shade: _shade } = props;
+  const shade = _shade || false;
   const isParsing = post.parsingStatus === AppPostParsingStatus.PROCESSING;
 
   const navigate = useNavigate();
@@ -32,20 +33,16 @@ export const PostCard = (props: { post: AppPostFull }) => {
     <Box
       pad="medium"
       style={{
+        backgroundColor: shade ? '#D1D5DB' : 'white',
         cursor: 'pointer',
         position: 'relative',
-        backgroundColor: constants.colors.backgroundLight,
       }}
-      elevation="small"
       onClick={handleClick}>
       <Box direction="row" justify="between">
         <Text size="xsmall">{post?.id}</Text>
         <Text size="small">{post?.reviewedStatus}</Text>
       </Box>
-      <PostText text={post?.content}></PostText>
-      <Box style={{ position: 'absolute', right: '10px', bottom: '10px' }}>
-        {processStatusIcon}
-      </Box>
+      <PostText truncate text={post?.content}></PostText>
     </Box>
   );
 };
