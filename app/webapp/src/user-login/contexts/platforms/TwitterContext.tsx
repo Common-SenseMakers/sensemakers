@@ -88,6 +88,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
         show({ title: t(I18Keys.errorConnectTwitter), message: error_param });
         searchParams.delete('error');
         searchParams.delete('state');
+        setSearchParams(searchParams);
       }
 
       if (code_param && state_param) {
@@ -103,6 +104,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
           searchParams.delete('code');
           setIsConnecting(false);
           refreshConnected();
+          setSearchParams(searchParams);
         } else {
           localStorage.removeItem(LS_TWITTER_CONTEXT_KEY);
 
@@ -124,15 +126,15 @@ export const TwitterContext = (props: PropsWithChildren) => {
             searchParams.delete('code');
             setIsConnecting(false);
             refreshConnected();
+            setSearchParams(searchParams);
           });
         }
       } else {
         if (state_param) {
           searchParams.delete('state');
+          setSearchParams(searchParams);
         }
       }
-
-      setSearchParams(searchParams);
     }
   }, [state_param, code_param, error_param, searchParams, setSearchParams]);
 
