@@ -2,6 +2,8 @@ import { Box, Text } from 'grommet';
 import { Clear, FormClose, Refresh, Send } from 'grommet-icons';
 
 import { useAppFetch } from '../api/app.fetch';
+import { ClearIcon } from '../app/icons/ClearIcon';
+import { SendIcon } from '../app/icons/SendIcon';
 import { AppBottomNav } from '../app/layout/AppBottomNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
@@ -90,7 +92,7 @@ export const PostView = (props: {
     if (!canPublishNanopub) {
       return {
         action: () => connect(),
-        label: 'Connect Identity',
+        label: 'Connect',
       };
     }
 
@@ -108,7 +110,7 @@ export const PostView = (props: {
   })();
 
   const action = (() => {
-    if (!status.processed) {
+    if (!status.processed && !status.isParsing) {
       return (
         <AppButton
           margin={{ top: 'medium' }}
@@ -118,17 +120,18 @@ export const PostView = (props: {
           label="Process"></AppButton>
       );
     }
+
     if (!status.nanopubPublished && !status.ignored) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
           <AppButton
-            icon={<FormClose color={constants.colors.text}></FormClose>}
+            icon={<ClearIcon></ClearIcon>}
             style={{ width: '50%' }}
             onClick={() => ignore()}
             label="Ignore"></AppButton>
           <AppButton
             primary
-            icon={<Send color={constants.colors.textOnPrimary}></Send>}
+            icon={<SendIcon></SendIcon>}
             style={{ width: '50%' }}
             onClick={() => rightClicked()}
             label={rightLabel}></AppButton>
