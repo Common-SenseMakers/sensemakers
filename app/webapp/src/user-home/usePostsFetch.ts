@@ -23,6 +23,8 @@ export const usePostsFetch = () => {
   const [posts, setPosts] = useState<AppPostFull[]>([]);
   const [fetchedFirst, setFetchedFirst] = useState(false);
 
+  const [isLoading, setIsLoading] = useState(true);
+
   const [isFetchingOlder, setIsFetchingOlder] = useState(false);
   const [errorFetchingOlder, setErrorFetchingOlder] = useState<Error>();
 
@@ -193,9 +195,11 @@ export const usePostsFetch = () => {
         if (DEBUG) console.log(`fetching for older retrieved`, readPosts);
         addPosts(readPosts, 'end');
         setIsFetchingOlder(false);
+        setIsLoading(false);
       } catch (e: any) {
         setIsFetchingOlder(false);
         setErrorFetchingOlder(e);
+        setIsLoading(false);
       }
     },
     [appFetch, status, connectedUser]
@@ -239,9 +243,11 @@ export const usePostsFetch = () => {
         if (DEBUG) console.log(`fetching for newer retrieved`, readPosts);
         addPosts(readPosts, 'start');
         setIsFetchingNewer(false);
+        setIsLoading(false);
       } catch (e: any) {
         setIsFetchingNewer(false);
         setErrorFetchingNewer(e);
+        setIsLoading(false);
       }
     },
     [appFetch, connectedUser]
@@ -280,5 +286,6 @@ export const usePostsFetch = () => {
     fetchNewer,
     isFetchingNewer,
     errorFetchingNewer,
+    isLoading,
   };
 };

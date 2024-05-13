@@ -13,9 +13,9 @@ export const LeftIcon = (props: { size?: number }) => {
         <path
           d="M8.44444 15.4444L3 9.99999M3 9.99999L8.44444 4.55554M3 9.99999L17 9.99999"
           stroke="#111827"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
       </svg>
     </Box>

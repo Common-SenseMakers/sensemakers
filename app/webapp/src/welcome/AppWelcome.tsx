@@ -47,6 +47,7 @@ export const AppWelcome = (props: {}) => {
           <Box width="100%" height="4px"></Box>
           <Paragraph>{t(I18Keys.connectParagraph)}</Paragraph>
           <AppButton
+            disabled={isConnectingTwitter}
             margin={{ top: 'medium' }}
             icon={<TwitterIcon></TwitterIcon>}
             primary

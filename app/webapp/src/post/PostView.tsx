@@ -168,6 +168,7 @@ export const PostView = (props: {
             {action}
             {status.ignored ? (
               <AppButton
+                margin={{ top: 'medium' }}
                 primary
                 onClick={() => reviewForPublication()}
                 label="Review for publication"></AppButton>

@@ -13,6 +13,7 @@ import { usePostUpdate } from './useUpdatePost';
 
 interface PostContextType {
   posts?: AppPostFull[];
+  isLoading: boolean;
   isFetchingOlder: boolean;
   errorFetchingOlder?: Error;
   isFetchingNewer: boolean;
@@ -40,6 +41,7 @@ export const UserPostsContext: React.FC<{
     fetchNewer,
     isFetchingNewer,
     errorFetchingNewer,
+    isLoading,
   } = usePostsFetch();
 
   const { updatePost: _updatePost, isPostUpdating } = usePostUpdate();
@@ -73,6 +75,7 @@ export const UserPostsContext: React.FC<{
     <UserPostsContextValue.Provider
       value={{
         posts,
+        isLoading,
         isFetchingOlder: isFetchingOlder,
         errorFetchingOlder: errorFetchingOlder,
         isFetchingNewer: isFetchingNewer,

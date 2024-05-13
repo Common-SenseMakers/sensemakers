@@ -3,6 +3,7 @@ import { UserExpert } from 'grommet-icons';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { TwitterAvatar } from '../app/TwitterAvatar';
 import { TwitterProfileAnchor } from '../app/anchors/TwitterAnchor';
 import { PLATFORM } from '../shared/types/types';
 import { AppButton } from '../ui-components';
@@ -44,12 +45,7 @@ export const ConnectedUser = (props: {}) => {
         pad="small"
         label={
           <Box direction="row" align="center">
-            <UserExpert
-              color={constants.colors.primary}
-              style={{ margin: '2px 0px 0px 5px' }}></UserExpert>
-            <Text margin={{ left: 'small' }} style={{ flexShrink: 0 }}>
-              {twitterDetails?.username}
-            </Text>
+            <TwitterAvatar size={40} profile={twitterDetails}></TwitterAvatar>
           </Box>
         }
         open={showDrop}
