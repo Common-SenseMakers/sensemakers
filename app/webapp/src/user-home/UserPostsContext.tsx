@@ -8,7 +8,6 @@ import {
   PostsQueryStatus,
 } from '../shared/types/types.posts';
 import { usePostsFetch } from './usePostsFetch';
-import { usePostUpdate } from './useUpdatePost';
 
 interface PostContextType {
   posts?: AppPostFull[];
@@ -19,10 +18,9 @@ interface PostContextType {
   errorFetchingNewer?: Error;
   fetchOlder: () => void;
   fetchNewer: () => void;
-  updatePost: (postId: string, postUpdate: PostUpdate) => Promise<void>;
-  isPostUpdating: (postId: string) => boolean;
   filterStatus: PostsQueryStatus;
   getPost: (postId: string) => AppPostFull | undefined;
+  removePost: (postId: string) => void;
 }
 
 export const UserPostsContextValue = createContext<PostContextType | undefined>(
@@ -34,7 +32,6 @@ export const UserPostsContext: React.FC<{
 }> = ({ children }) => {
   const {
     posts,
-    removePost,
     fetchOlder,
     isFetchingOlder,
     errorFetchingOlder,
@@ -43,32 +40,8 @@ export const UserPostsContext: React.FC<{
     errorFetchingNewer,
     isLoading,
     status,
+    removePost,
   } = usePostsFetch();
-
-  const { updatePost: _updatePost, isPostUpdating } = usePostUpdate();
-
-  const updatePost = (postId: string, postUpdate: PostUpdate) => {
-    /** If the updated post no longer matches the status filter, remove it from the list and unsubscribe it  */
-    if (
-      !(() => {
-        if (status === PostsQueryStatus.ALL) {
-          return true;
-        }
-        if (status === PostsQueryStatus.PENDING) {
-          return postUpdate.reviewedStatus === AppPostReviewStatus.PENDING;
-        }
-        if (status === PostsQueryStatus.PUBLISHED) {
-          return postUpdate.reviewedStatus === AppPostReviewStatus.APPROVED;
-        }
-        if (status === PostsQueryStatus.IGNORED) {
-          return postUpdate.reviewedStatus === AppPostReviewStatus.IGNORED;
-        }
-      })()
-    ) {
-      removePost(postId);
-    }
-    return _updatePost(postId, postUpdate);
-  };
 
   const getPost = useCallback(
     (postId: string) => {
@@ -89,10 +62,9 @@ export const UserPostsContext: React.FC<{
         errorFetchingNewer: errorFetchingNewer,
         fetchNewer,
         fetchOlder,
-        updatePost,
-        isPostUpdating,
         filterStatus: status,
         getPost,
+        removePost,
       }}>
       {children}
     </UserPostsContextValue.Provider>

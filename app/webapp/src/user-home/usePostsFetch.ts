@@ -6,6 +6,7 @@ import {
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
+  PostUpdate,
   UserPostsQuery,
 } from '../shared/types/types.posts';
 import { useAccountContext } from '../user-login/contexts/AccountContext';

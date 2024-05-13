@@ -1,13 +1,11 @@
 import { Box, Text } from 'grommet';
 
-import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { AppButton, AppCard } from '../ui-components';
-import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
+import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { usePost } from './PostContext';
-import { PostText } from './PostText';
 
 export const PostContent = () => {
-  const { post, reparse, status } = usePost();
+  const { post, reparse, postStatuses } = usePost();
 
   const parsingError = post && post.parsingStatus === 'errored';
 
@@ -24,7 +22,7 @@ export const PostContent = () => {
         ) : (
           <></>
         )}
-        {status.isParsing ? (
+        {postStatuses.isParsing ? (
           <LoadingDiv fill height="120px"></LoadingDiv>
         ) : (
           <></>

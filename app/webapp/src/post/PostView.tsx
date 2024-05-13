@@ -33,11 +33,18 @@ export const PostView = (props: {
 }) => {
   const { constants } = useThemeContext();
   const { prevPostId, nextPostId } = props;
-  const { post, nanopubDraft, updateSemantics, status, reparse } = usePost();
+  const {
+    post,
+    nanopubDraft,
+    updateSemantics,
+    postStatuses: statuses,
+    reparse,
+    updatePost,
+    isUpdating,
+  } = usePost();
   const { connectedUser } = useAccountContext();
   const { signNanopublication, connect } = useNanopubContext();
   const appFetch = useAppFetch();
-  const { updatePost } = useUserPosts();
 
   const semanticsUpdated = (newSemantics: string) => {
     updateSemantics(newSemantics);
@@ -47,7 +54,7 @@ export const PostView = (props: {
     if (!post) {
       throw new Error(`Unexpected post not found`);
     }
-    updatePost(post.id, {
+    updatePost({
       reviewedStatus: AppPostReviewStatus.PENDING,
     });
   };
@@ -56,7 +63,7 @@ export const PostView = (props: {
     if (!post) {
       throw new Error(`Unexpected post not found`);
     }
-    updatePost(post.id, {
+    updatePost({
       reviewedStatus: AppPostReviewStatus.IGNORED,
     });
   };
@@ -86,7 +93,7 @@ export const PostView = (props: {
     connectedUser.nanopub.length > 0 &&
     signNanopublication &&
     nanopubDraft &&
-    !status.nanopubPublished;
+    !statuses.nanopubPublished;
 
   const { action: rightClicked, label: rightLabel } = (() => {
     if (!canPublishNanopub) {
@@ -96,7 +103,7 @@ export const PostView = (props: {
       };
     }
 
-    if (canPublishNanopub && nanopubDraft && !status.nanopubPublished) {
+    if (canPublishNanopub && nanopubDraft && !statuses.nanopubPublished) {
       return {
         action: () => approve(),
         label: 'Nanopublish',
@@ -110,7 +117,7 @@ export const PostView = (props: {
   })();
 
   const action = (() => {
-    if (!status.processed && !status.isParsing) {
+    if (!statuses.processed && !statuses.isParsing) {
       return (
         <AppButton
           margin={{ top: 'medium' }}
@@ -121,10 +128,11 @@ export const PostView = (props: {
       );
     }
 
-    if (!status.nanopubPublished && !status.ignored) {
+    if (!statuses.nanopubPublished && !statuses.ignored) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
           <AppButton
+            disabled={isUpdating}
             icon={<ClearIcon></ClearIcon>}
             style={{ width: '50%' }}
             onClick={() => ignore()}
@@ -174,8 +182,9 @@ export const PostView = (props: {
             }}
             include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
           {action}
-          {status.ignored ? (
+          {statuses.ignored ? (
             <AppButton
+              disabled={isUpdating}
               margin={{ top: 'medium' }}
               primary
               onClick={() => reviewForPublication()}
