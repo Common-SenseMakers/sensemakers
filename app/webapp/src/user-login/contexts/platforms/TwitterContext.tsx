@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { useAppFetch } from '../../../api/app.fetch';
 import { useToastContext } from '../../../app/ToastsContext';
@@ -57,6 +57,8 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [isApproving, setIsApproving] = useState<boolean>(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const needConnect = !connectedUser || !connectedUser[PLATFORM.Twitter];
 
@@ -120,6 +122,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
           searchParams.delete('code');
           setIsConnecting(false);
           refreshConnected();
+          navigate(location.pathname, { replace: true });
         });
       }
       setSearchParams(searchParams);
