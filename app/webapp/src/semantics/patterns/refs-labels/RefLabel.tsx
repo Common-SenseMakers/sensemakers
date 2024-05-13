@@ -79,6 +79,7 @@ export const RefLabels = (props: {
       pad={{ left: 'medium', vertical: 'small' }}>
       <Box direction="row" margin={{ bottom: 'small' }}>
         <AppLabelsEditor
+          color="#337FBD"
           labels={labelsDisplayNames}
           options={optionDisplayNames}
           removeLabel={(label) => removeLabel(label)}

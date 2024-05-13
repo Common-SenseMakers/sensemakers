@@ -48,6 +48,7 @@ export const AppBytes = (props: IBytesInfo): JSX.Element => {
         }}>
         <Box direction="row" align="center">
           <AppLabel
+            color={constants.colors.primary}
             style={{
               fontSize: constants.textFontSizes.xsmall,
               marginRight: '10.5px',

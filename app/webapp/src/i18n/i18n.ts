@@ -15,6 +15,7 @@ export enum I18Keys {
   yourPublications = 's014',
   TweetX = 's015',
   ThreadX = 's016',
+  addKeyword = 's017',
 }
 
 const translationENG: Record<I18Keys, string> = {
@@ -35,6 +36,7 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.yourPublications]: 'Your publications',
   [I18Keys.TweetX]: 'X · Tweet',
   [I18Keys.ThreadX]: 'X · Thread',
+  [I18Keys.addKeyword]: 'add keyword',
 };
 
 i18n.use(initReactI18next).init({

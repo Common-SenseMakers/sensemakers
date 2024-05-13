@@ -1,7 +1,9 @@
 import { Box, Keyboard, Text } from 'grommet';
+import { Edit } from 'grommet-icons';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { I18Keys } from '../i18n/i18n';
 import { AppButton } from './AppButton';
 import { AppInput } from './AppInput';
 import { AppLabel } from './AppLabel';
@@ -16,7 +18,9 @@ export const AppLabelsEditor = (props: {
   addLabel?: (label: string) => void;
   removeLabel?: (label: string) => void;
   hashtag?: boolean;
+  color: string;
 }) => {
+  const color = props.color;
   const hashtag = props.hashtag !== undefined ? props.hashtag : false;
 
   const { constants } = useThemeContext();
@@ -111,8 +115,20 @@ export const AppLabelsEditor = (props: {
           onClick={() => addLabel()}
           style={{ textTransform: 'none' }}>
           <Box direction="row" align="center">
-            <AppLabel margin={{ right: 'small' }}>{input}</AppLabel>
-            <Text color={constants.colors.primary}>{t('create')}</Text>
+            <AppLabel margin={{ right: 'small' }} color={color}>
+              {input}
+            </AppLabel>
+            <Text
+              style={{
+                height: '16px',
+                fontSize: '14px',
+                fontStyle: 'normal',
+                fontWeight: '400',
+                lineHeight: '16px',
+              }}
+              color={constants.colors.primary}>
+              {t(I18Keys.addKeyword)}
+            </Text>
           </Box>
         </AppButton>
       );
@@ -127,7 +143,7 @@ export const AppLabelsEditor = (props: {
                 <Box
                   style={{ display: 'block', float: 'left' }}
                   margin={{ right: 'small', bottom: 'xsmall' }}>
-                  <AppLabel>{option}</AppLabel>
+                  <AppLabel color={color}>{option}</AppLabel>
                 </Box>
               );
             })();
@@ -152,7 +168,7 @@ export const AppLabelsEditor = (props: {
       ref={keyBox}
       width="100%"
       style={{
-        backgroundColor: adding ? constants.colors.primary : 'transparent',
+        backgroundColor: adding ? constants.colors.shade : 'transparent',
         position: 'relative',
       }}>
       <Box style={{ display: 'block' }}>
@@ -163,6 +179,7 @@ export const AppLabelsEditor = (props: {
               key={ix}
               style={{ display: 'block', float: 'left', paddingTop: '5.5px' }}>
               <AppLabel
+                color={color}
                 showClose={adding}
                 remove={() => removeLabel(label)}
                 key={ix}
@@ -180,8 +197,6 @@ export const AppLabelsEditor = (props: {
               <Box>
                 <AppInput
                   style={{
-                    width: addWidth,
-                    padding: '0px 0px 0px 12px',
                     color: constants.colors.text,
                   }}
                   plain
@@ -196,15 +211,19 @@ export const AppLabelsEditor = (props: {
             <Box
               margin={{ left: 'small' }}
               style={{
-                width: addWidth,
+                backgroundColor: '#E5E7EB',
+                height: '24px',
+                width: '24px',
+                borderRadius: '12px',
               }}
-              onClick={() => setAdding(true)}>
+              onClick={() => setAdding(true)}
+              justify="center"
+              align="center">
               <AppButton
-                plain
-                style={{ height: '36px', textTransform: 'none' }}
-                justify="center">
-                <Text>{t('add/remove')}...</Text>
-              </AppButton>
+                icon={
+                  <Edit color={constants.colors.primary} size="12px"></Edit>
+                }
+                plain></AppButton>
             </Box>
           )}
         </Box>
@@ -214,6 +233,7 @@ export const AppLabelsEditor = (props: {
         <Box
           style={{
             position: 'absolute',
+            backgroundColor: constants.colors.shade,
             width: '100%',
             padding: '12px 12px 12px 12px',
             top: `${height}px`,
