@@ -9,7 +9,7 @@ import {
   UserPostsQuery,
 } from '../shared/types/types.posts';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
-import { useQueryFilter } from './useQueryFilter';
+import { useQueryFilter } from './query.filter.hook';
 
 const PAGE_SIZE = 5;
 
