@@ -1,4 +1,3 @@
-import init, { Nanopub } from '@nanopub/sign';
 import { useQuery } from '@tanstack/react-query';
 import { Anchor, Box, Text } from 'grommet';
 import { useMemo } from 'react';
@@ -11,26 +10,13 @@ import {
   AppPostParsingStatus,
   AppPostReviewStatus,
 } from '../shared/types/types.posts';
+import { useStatus } from './useStatus';
 
 export const NanopubStatus = (props: { post?: AppPostFull }) => {
   const { post } = props;
-  const { data: nanopubPublished } = useQuery({
-    queryKey: ['nanopub', post],
-    queryFn: async () => {
-      try {
-        await (init as any)();
-        const nanopub = post?.mirrors?.find(
-          (m) => m.platformId === PLATFORM.Nanopub
-        );
-        if (!nanopub || !nanopub.posted) return null;
 
-        const nanopubObj = new Nanopub(nanopub.posted.post);
-        return nanopubObj.info();
-      } catch (e) {
-        console.error(e);
-      }
-    },
-  });
+  const { nanopubPublished, processed, isParsing, errored, pending, ignored } =
+    useStatus(post);
 
   if (nanopubPublished) {
     return (
@@ -40,25 +26,18 @@ export const NanopubStatus = (props: { post?: AppPostFull }) => {
     );
   }
 
-  const processed = post && post.parsedStatus === AppPostParsedStatus.PROCESSED;
-  const errored = post && post.parsingStatus === AppPostParsingStatus.ERRORED;
-  const isParsing =
-    post && post.parsingStatus === AppPostParsingStatus.PROCESSING;
-
   if (!processed) {
     if (isParsing)
       return <StatusTag label="Processing" color="#6B7280"></StatusTag>;
 
     if (errored) return <StatusTag label="Error" color="#6B7280"></StatusTag>;
-  }
 
-  const pending = post && post.reviewedStatus === AppPostReviewStatus.PENDING;
+    return <StatusTag label="Not processed" color="#6B7280"></StatusTag>;
+  }
 
   if (pending) {
     return <StatusTag label="For Review" color="#F79A3E"></StatusTag>;
   }
-
-  const ignored = post && post.reviewedStatus === AppPostReviewStatus.IGNORED;
 
   if (ignored) {
     return <StatusTag label="Ignored" color="#D1D5DB"></StatusTag>;

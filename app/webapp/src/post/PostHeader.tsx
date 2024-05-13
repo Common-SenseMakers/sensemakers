@@ -4,8 +4,8 @@ import { TwitterAvatar } from '../app/TwitterAvatar';
 import { TweetAnchor } from '../app/anchors/TwitterAnchor';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
+import { NanopubStatus } from './NanopubStatus';
 import { usePost } from './PostContext';
-import { NanopubStatus } from './StatusTag';
 
 export const PostHeader = (props: BoxExtendedProps) => {
   const { constants } = useThemeContext();

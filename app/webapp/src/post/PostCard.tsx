@@ -5,8 +5,8 @@ import { TweetAnchor } from '../app/anchors/TwitterAnchor';
 import { PLATFORM } from '../shared/types/types';
 import { AppPostFull } from '../shared/types/types.posts';
 import { useThemeContext } from '../ui-components/ThemedApp';
+import { NanopubStatus, StatusTag } from './NanopubStatus';
 import { PostText } from './PostText';
-import { NanopubStatus, StatusTag } from './StatusTag';
 
 export const PostCard = (props: { post: AppPostFull; shade?: boolean }) => {
   const { post, shade: _shade } = props;

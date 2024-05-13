@@ -7,7 +7,7 @@ import { usePost } from './PostContext';
 import { PostText } from './PostText';
 
 export const PostContent = () => {
-  const { post, reparse, isParsing } = usePost();
+  const { post, reparse, status } = usePost();
 
   const parsingError = post && post.parsingStatus === 'errored';
 
@@ -24,7 +24,11 @@ export const PostContent = () => {
         ) : (
           <></>
         )}
-        {isParsing ? <LoadingDiv fill height="120px"></LoadingDiv> : <></>}
+        {status.isParsing ? (
+          <LoadingDiv fill height="120px"></LoadingDiv>
+        ) : (
+          <></>
+        )}
       </Box>
     </Box>
   );
