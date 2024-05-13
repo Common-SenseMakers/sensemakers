@@ -16,6 +16,7 @@ export const RefLabels = (props: {
   support?: ParsedSupport;
   addLabel: (labelUri: string) => void;
   removeLabel: (labelUri: string) => void;
+  editable?: boolean;
 }) => {
   const labelsOntology = props.support?.ontology?.semantic_predicates;
   const refData = props.refData;
@@ -74,6 +75,7 @@ export const RefLabels = (props: {
     <Box>
       <Box direction="row" margin={{ bottom: 'small' }}>
         <AppLabelsEditor
+          editable={props.editable}
           color="#337FBD"
           labels={labelsDisplayNames}
           options={optionDisplayNames}
