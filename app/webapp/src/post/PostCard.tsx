@@ -23,7 +23,7 @@ export const PostCard = (props: { post: AppPostFull; shade?: boolean }) => {
 
   return (
     <Box
-      pad={{ top: 'large', bottom: 'medium', horizontal: 'medium' }}
+      pad={{ top: 'medium', bottom: 'large', horizontal: 'medium' }}
       style={{
         backgroundColor: shade ? constants.colors.shade : 'white',
         cursor: 'pointer',
