@@ -86,13 +86,13 @@ export const UserHome = () => {
           ))}
         </Box>
         <Box pad="large">
-          {posts.length > 0 && !errorFetchingOlder ? (
+          {posts.length > 0 &&
+          !errorFetchingOlder &&
+          filterStatus === PostsQueryStatus.ALL ? (
             <AppButton
               disabled={isFetchingOlder}
               label={!isFetchingOlder ? 'fetch older' : 'loading...'}
               onClick={() => fetchOlder()}></AppButton>
-          ) : posts.length > 0 ? (
-            <LoadingDiv></LoadingDiv>
           ) : (
             <> </>
           )}

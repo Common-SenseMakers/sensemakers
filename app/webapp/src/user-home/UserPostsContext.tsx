@@ -8,7 +8,6 @@ import {
   PostsQueryStatus,
 } from '../shared/types/types.posts';
 import { usePostsFetch } from './usePostsFetch';
-import { useQueryFilter } from './useQueryFilter';
 import { usePostUpdate } from './useUpdatePost';
 
 interface PostContextType {
@@ -43,11 +42,10 @@ export const UserPostsContext: React.FC<{
     isFetchingNewer,
     errorFetchingNewer,
     isLoading,
+    status,
   } = usePostsFetch();
 
   const { updatePost: _updatePost, isPostUpdating } = usePostUpdate();
-
-  const { status } = useQueryFilter();
 
   const updatePost = (postId: string, postUpdate: PostUpdate) => {
     /** If the updated post no longer matches the status filter, remove it from the list and unsubscribe it  */

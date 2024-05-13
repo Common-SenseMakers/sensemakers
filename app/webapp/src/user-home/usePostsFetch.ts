@@ -155,6 +155,7 @@ export const usePostsFetch = () => {
     if (DEBUG) console.log('resetting posts');
     removeAllPosts();
     setFetchedFirst(false);
+    setIsLoading(true);
   };
 
   /** reset at every status change  */
@@ -287,5 +288,6 @@ export const usePostsFetch = () => {
     isFetchingNewer,
     errorFetchingNewer,
     isLoading,
+    status,
   };
 };
