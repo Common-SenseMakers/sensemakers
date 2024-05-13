@@ -15,6 +15,7 @@ import { AppUserRead, PLATFORM } from '../shared/types/types';
 import {
   PlatformPost,
   PlatformPostDraft,
+  PlatformPostDraftApprova,
 } from '../shared/types/types.platform.posts';
 import {
   AppPostFull,
@@ -26,6 +27,7 @@ import {
 import { TwitterThread } from '../shared/types/types.twitter';
 import { UserPostsContext, useUserPosts } from '../user-home/UserPostsContext';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
+import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { getAccount } from '../user-login/user.helper';
 import { AppPostStatus, useStatus } from './useStatus';
 
@@ -41,6 +43,7 @@ interface PostContextType {
   postStatuses: AppPostStatus;
   updatePost: (update: PostUpdate) => Promise<void>;
   isUpdating: boolean;
+  approve: () => Promise<void>;
 }
 
 const PostContextValue = createContext<PostContextType | undefined>(undefined);
@@ -261,6 +264,29 @@ export const PostContext: React.FC<{
 
   const postStatuses = useStatus(post);
 
+  const { signNanopublication } = useNanopubContext();
+
+  const approve = async () => {
+    // mark nanopub draft as approved
+    setIsUpdating(true);
+    const nanopub = post?.mirrors.find(
+      (m) => m.platformId === PLATFORM.Nanopub
+    );
+
+    if (!nanopub || !nanopub.draft) {
+      throw new Error(`Unexpected nanopub mirror not found`);
+    }
+
+    if (signNanopublication) {
+      const signed = await signNanopublication(nanopub.draft.post);
+      nanopub.draft.postApproval = PlatformPostDraftApprova.APPROVED;
+      nanopub.draft.post = signed.rdf();
+
+      await appFetch<void, AppPostFull>('/api/posts/approve', post);
+    }
+    // setIsUpdating(false); should be set by the refetech flow
+  };
+
   return (
     <PostContextValue.Provider
       value={{
@@ -273,6 +299,7 @@ export const PostContext: React.FC<{
         updateSemantics,
         updatePost,
         isUpdating,
+        approve,
       }}>
       {children}
     </PostContextValue.Provider>

@@ -1,5 +1,6 @@
 import { Box, Text } from 'grommet';
 import { Clear, FormClose, Refresh, Send } from 'grommet-icons';
+import { useState } from 'react';
 
 import { useAppFetch } from '../api/app.fetch';
 import { ClearIcon } from '../app/icons/ClearIcon';
@@ -41,10 +42,10 @@ export const PostView = (props: {
     reparse,
     updatePost,
     isUpdating,
+    approve,
   } = usePost();
+
   const { connectedUser } = useAccountContext();
-  const { signNanopublication, connect } = useNanopubContext();
-  const appFetch = useAppFetch();
 
   const semanticsUpdated = (newSemantics: string) => {
     updateSemantics(newSemantics);
@@ -68,24 +69,7 @@ export const PostView = (props: {
     });
   };
 
-  const approve = async () => {
-    // mark nanopub draft as approved
-    const nanopub = post?.mirrors.find(
-      (m) => m.platformId === PLATFORM.Nanopub
-    );
-
-    if (!nanopub || !nanopub.draft) {
-      throw new Error(`Unexpected nanopub mirror not found`);
-    }
-
-    if (signNanopublication) {
-      const signed = await signNanopublication(nanopub.draft.post);
-      nanopub.draft.postApproval = PlatformPostDraftApprova.APPROVED;
-      nanopub.draft.post = signed.rdf();
-
-      await appFetch<void, AppPostFull>('/api/posts/approve', post);
-    }
-  };
+  const { signNanopublication, connect } = useNanopubContext();
 
   const canPublishNanopub =
     connectedUser &&
@@ -139,6 +123,7 @@ export const PostView = (props: {
             label="Ignore"></AppButton>
           <AppButton
             primary
+            disabled={isUpdating}
             icon={<SendIcon></SendIcon>}
             style={{ width: '50%' }}
             onClick={() => rightClicked()}
