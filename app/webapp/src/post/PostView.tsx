@@ -1,4 +1,5 @@
 import { Box, Text } from 'grommet';
+import { Clear, FormClose, Refresh, Send } from 'grommet-icons';
 
 import { useAppFetch } from '../api/app.fetch';
 import { AppBottomNav } from '../app/layout/AppBottomNav';
@@ -13,6 +14,7 @@ import {
   PostUpdate,
 } from '../shared/types/types.posts';
 import { AppButton } from '../ui-components';
+import { useThemeContext } from '../ui-components/ThemedApp';
 import { useUserPosts } from '../user-home/UserPostsContext';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
@@ -27,8 +29,9 @@ export const PostView = (props: {
   prevPostId?: string;
   nextPostId?: string;
 }) => {
+  const { constants } = useThemeContext();
   const { prevPostId, nextPostId } = props;
-  const { post, nanopubDraft, nanopubPublished, updateSemantics } = usePost();
+  const { post, nanopubDraft, updateSemantics, status, reparse } = usePost();
   const { connectedUser } = useAccountContext();
   const { signNanopublication, connect } = useNanopubContext();
   const appFetch = useAppFetch();
@@ -81,20 +84,20 @@ export const PostView = (props: {
     connectedUser.nanopub.length > 0 &&
     signNanopublication &&
     nanopubDraft &&
-    !nanopubPublished;
+    !status.nanopubPublished;
 
   const { action: rightClicked, label: rightLabel } = (() => {
     if (!canPublishNanopub) {
       return {
         action: () => connect(),
-        label: 'connect to publish',
+        label: 'Connect Identity',
       };
     }
 
-    if (canPublishNanopub && nanopubDraft && !nanopubPublished) {
+    if (canPublishNanopub && nanopubDraft && !status.nanopubPublished) {
       return {
         action: () => approve(),
-        label: 'nanopublish',
+        label: 'Nanopublish',
       };
     }
 
@@ -102,6 +105,37 @@ export const PostView = (props: {
       action: () => {},
       label: '',
     };
+  })();
+
+  const action = (() => {
+    if (!status.processed) {
+      return (
+        <AppButton
+          margin={{ top: 'medium' }}
+          icon={<Refresh color={constants.colors.text}></Refresh>}
+          style={{ width: '100%' }}
+          onClick={() => reparse()}
+          label="Process"></AppButton>
+      );
+    }
+    if (!status.nanopubPublished && !status.ignored) {
+      return (
+        <Box direction="row" gap="small" margin={{ top: 'medium' }}>
+          <AppButton
+            icon={<FormClose color={constants.colors.text}></FormClose>}
+            style={{ width: '50%' }}
+            onClick={() => ignore()}
+            label="Ignore"></AppButton>
+          <AppButton
+            primary
+            icon={<Send color={constants.colors.textOnPrimary}></Send>}
+            style={{ width: '50%' }}
+            onClick={() => rightClicked()}
+            label={rightLabel}></AppButton>
+        </Box>
+      );
+    }
+    return <></>;
   })();
 
   return (
@@ -128,16 +162,12 @@ export const PostView = (props: {
                 semanticsUpdated: semanticsUpdated,
               }}
               include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
-            {!nanopubPublished ? (
-              <Box direction="row">
-                <AppButton
-                  onClick={() => rightClicked()}
-                  label="ignore"></AppButton>
-                <AppButton
-                  primary
-                  onClick={() => rightClicked()}
-                  label={rightLabel}></AppButton>
-              </Box>
+            {action}
+            {status.ignored ? (
+              <AppButton
+                primary
+                onClick={() => reviewForPublication()}
+                label="Review for publication"></AppButton>
             ) : (
               <></>
             )}
