@@ -40,6 +40,15 @@ export const NanopubStatus = (props: { post?: AppPostFull }) => {
       };
     }
 
+    const ignored = post && post.reviewedStatus === AppPostReviewStatus.IGNORED;
+
+    if (ignored) {
+      return {
+        label: 'Ignored',
+        color: '#D1D5DB',
+      };
+    }
+
     return {
       label: 'Unknown',
       color: '#6B7280',
