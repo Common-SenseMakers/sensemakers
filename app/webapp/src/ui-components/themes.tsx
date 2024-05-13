@@ -233,10 +233,7 @@ const extension: ExtendedThemeType = {
     medium: {
       size: constants.textFontSizes.normal,
     },
-    extend: css`
-      margin: 0px 0px 24px 0px;
-      line-height: 24px; /* 150% */
-    `,
+    extend: css``,
   },
 };
 

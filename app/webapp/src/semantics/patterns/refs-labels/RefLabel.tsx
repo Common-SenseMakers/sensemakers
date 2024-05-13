@@ -71,12 +71,7 @@ export const RefLabels = (props: {
   };
 
   return (
-    <Box
-      style={{
-        borderLeft: '4px solid',
-        borderColor: constants.colors.primary,
-      }}
-      pad={{ left: 'medium', vertical: 'small' }}>
+    <Box>
       <Box direction="row" margin={{ bottom: 'small' }}>
         <AppLabelsEditor
           color="#337FBD"

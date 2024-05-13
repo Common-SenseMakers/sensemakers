@@ -128,6 +128,14 @@ export const PostView = (props: {
               }}
               include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
             <PostText text={post?.content}></PostText>
+            <SemanticsEditor
+              isLoading={false}
+              patternProps={{
+                semantics: post?.semantics,
+                originalParsed: post?.originalParsed,
+                semanticsUpdated: semanticsUpdated,
+              }}
+              include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
           </Box>
         </Box>
       }></ViewportPage>
