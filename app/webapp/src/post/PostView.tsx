@@ -16,11 +16,11 @@ import {
   PostUpdate,
 } from '../shared/types/types.posts';
 import { AppButton } from '../ui-components';
+import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useUserPosts } from '../user-home/UserPostsContext';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
-import { PostContent } from './PostContent';
 import { usePost } from './PostContext';
 import { PostHeader } from './PostHeader';
 import { PostNav } from './PostNav';
@@ -141,41 +141,59 @@ export const PostView = (props: {
     return <></>;
   })();
 
+  const content = (() => {
+    if (!post) {
+      return (
+        <Box gap="12px" pad="medium">
+          <LoadingDiv height="90px" width="100%"></LoadingDiv>
+          <LoadingDiv height="200px" width="100%"></LoadingDiv>
+          <LoadingDiv height="120px" width="100%"></LoadingDiv>;
+        </Box>
+      );
+    }
+
+    return (
+      <>
+        <Box pad="medium">
+          <PostHeader margin={{ bottom: '16px' }}></PostHeader>
+          <SemanticsEditor
+            isLoading={false}
+            patternProps={{
+              semantics: post?.semantics,
+              originalParsed: post?.originalParsed,
+              semanticsUpdated: semanticsUpdated,
+            }}
+            include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
+          <PostText text={post?.content}></PostText>
+          <SemanticsEditor
+            isLoading={false}
+            patternProps={{
+              semantics: post?.semantics,
+              originalParsed: post?.originalParsed,
+              semanticsUpdated: semanticsUpdated,
+            }}
+            include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
+          {action}
+          {status.ignored ? (
+            <AppButton
+              margin={{ top: 'medium' }}
+              primary
+              onClick={() => reviewForPublication()}
+              label="Review for publication"></AppButton>
+          ) : (
+            <></>
+          )}
+        </Box>
+      </>
+    );
+  })();
+
   return (
     <ViewportPage
       content={
         <Box fill>
           <PostNav prevPostId={prevPostId} nextPostId={nextPostId}></PostNav>
-          <Box pad="medium">
-            <PostHeader margin={{ bottom: '16px' }}></PostHeader>
-            <SemanticsEditor
-              isLoading={false}
-              patternProps={{
-                semantics: post?.semantics,
-                originalParsed: post?.originalParsed,
-                semanticsUpdated: semanticsUpdated,
-              }}
-              include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
-            <PostText text={post?.content}></PostText>
-            <SemanticsEditor
-              isLoading={false}
-              patternProps={{
-                semantics: post?.semantics,
-                originalParsed: post?.originalParsed,
-                semanticsUpdated: semanticsUpdated,
-              }}
-              include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
-            {action}
-            {status.ignored ? (
-              <AppButton
-                margin={{ top: 'medium' }}
-                primary
-                onClick={() => reviewForPublication()}
-                label="Review for publication"></AppButton>
-            ) : (
-              <></>
-            )}
-          </Box>
+          {content}
         </Box>
       }></ViewportPage>
   );

@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { createContext } from 'react';
 
 import {
@@ -23,6 +23,7 @@ interface PostContextType {
   updatePost: (postId: string, postUpdate: PostUpdate) => Promise<void>;
   isPostUpdating: (postId: string) => boolean;
   filterStatus: PostsQueryStatus;
+  getPost: (postId: string) => AppPostFull | undefined;
 }
 
 export const UserPostsContextValue = createContext<PostContextType | undefined>(
@@ -71,6 +72,14 @@ export const UserPostsContext: React.FC<{
     return _updatePost(postId, postUpdate);
   };
 
+  const getPost = useCallback(
+    (postId: string) => {
+      const ix = posts.findIndex((p) => p.id === postId);
+      return ix !== -1 ? posts[ix] : undefined;
+    },
+    [posts]
+  );
+
   return (
     <UserPostsContextValue.Provider
       value={{
@@ -85,6 +94,7 @@ export const UserPostsContext: React.FC<{
         updatePost,
         isPostUpdating,
         filterStatus: status,
+        getPost,
       }}>
       {children}
     </UserPostsContextValue.Provider>

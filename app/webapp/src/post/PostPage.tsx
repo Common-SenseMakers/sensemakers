@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useUserPosts } from '../user-home/UserPostsContext';
@@ -7,7 +8,9 @@ import { PostView } from './PostView';
 /** extract the postId from the route and pass it to a PostContext */
 export const PostPage = () => {
   const { id } = useParams();
-  const { posts } = useUserPosts();
+  const { posts, getPost } = useUserPosts();
+
+  const postInit = useMemo(() => (id ? getPost(id) : undefined), [id]);
 
   const currPostIndex = posts?.findIndex((p) => p.id === id);
   const prevPostId =
@@ -21,7 +24,7 @@ export const PostPage = () => {
       : undefined;
 
   return (
-    <PostContext postId={id}>
+    <PostContext postId={id} postInit={postInit}>
       <PostView prevPostId={prevPostId} nextPostId={nextPostId}></PostView>
     </PostContext>
   );
