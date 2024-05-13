@@ -11,8 +11,9 @@ export const PostText = (props: {
   truncate?: boolean;
   shade?: boolean;
 }) => {
-  const { text, truncate: _truncate, shade: _shade } = props;
-  const shade = _shade || false;
+  const text = props.text;
+  const shade = props.shade || false;
+  const truncate = props.truncate || false;
 
   const { constants } = useThemeContext();
   const [isTruncated, setIsTruncated] = useState(false);
@@ -51,15 +52,14 @@ export const PostText = (props: {
 
   return (
     <Box
-      id="test-1"
       style={{
-        height: isTruncated ? `${maxHeight}px` : 'auto',
+        height: truncate ? `${maxHeight}px` : 'auto',
         position: 'relative',
         overflow: 'hidden',
       }}>
-      <div id="test-2" ref={ref}>
+      <div ref={ref}>
         <PostEditor value={text}></PostEditor>
-        {isTruncated ? (
+        {truncate && isTruncated ? (
           <Box
             width={'45px'}
             pad={{ horizontal: 'small' }}

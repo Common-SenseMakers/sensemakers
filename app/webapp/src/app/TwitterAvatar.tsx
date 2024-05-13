@@ -12,7 +12,7 @@ export const TwitterAvatar = (props: { profile?: UserV2; size?: number }) => {
     <Box
       height={`${size}px`}
       width={`${size}px`}
-      style={{ borderRadius: `${size / 2}px` }}
+      style={{ borderRadius: `${size / 2}px`, flexShrink: 0 }}
       overflow="hidden">
       {content}
     </Box>

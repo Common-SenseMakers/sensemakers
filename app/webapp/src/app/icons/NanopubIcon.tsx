@@ -1,14 +1,16 @@
 import { Box, Text } from 'grommet';
 
-export const NanopubIcon = (props: { size?: number }) => {
+export const NanopubIcon = (props: { size?: number; color?: string }) => {
   const size = props.size || 18;
+  const color = props.color || '#F79A3E';
+
   return (
     <Box
       style={{
         height: `${size}px`,
         width: `${size}px`,
         borderRadius: '2px',
-        backgroundColor: '#F79A3E',
+        backgroundColor: color,
       }}
       align="center"
       justify="center">
