@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { PostEditor } from '../post-text/PostEditor';
 import { useThemeContext } from '../ui-components/ThemedApp';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const PostText = (props: {
   text?: string;

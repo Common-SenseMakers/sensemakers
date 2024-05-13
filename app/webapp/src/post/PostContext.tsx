@@ -24,6 +24,7 @@ import {
 import { TwitterThread } from '../shared/types/types.twitter';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { getAccount } from '../user-login/user.helper';
+import { AppPostStatus, useStatus } from './useStatus';
 
 const DEBUG = false;
 
@@ -35,11 +36,10 @@ interface PostContextType {
   post: AppPostFull | undefined;
   author: AppUserRead;
   reparse: () => void;
-  isParsing: boolean;
   nanopubDraft: PlatformPostDraft | undefined;
-  nanopubPublished: NanopubInfo | undefined;
   tweet?: PlatformPost<TwitterThread>;
   updateSemantics: (newSemantics: string) => Promise<void>;
+  status: AppPostStatus;
 }
 
 const PostContextValue = createContext<PostContextType | undefined>(undefined);
@@ -152,27 +152,6 @@ export const PostContext: React.FC<{
     }
   };
 
-  const isParsing = _isReparsing || post?.parsingStatus === 'processing';
-
-  /** derive nanopub details from current post */
-  const { data: nanopubPublished } = useQuery({
-    queryKey: ['nanopub', post],
-    queryFn: async () => {
-      try {
-        await (init as any)();
-        const nanopub = post?.mirrors?.find(
-          (m) => m.platformId === PLATFORM.Nanopub
-        );
-        if (!nanopub || !nanopub.posted) return null;
-
-        const nanopubObj = new Nanopub(nanopub.posted.post);
-        return nanopubObj.info();
-      } catch (e) {
-        console.error(e);
-      }
-    },
-  });
-
   const nanopubDraft = useMemo(() => {
     const nanopub = post?.mirrors?.find(
       (m) => m.platformId === PLATFORM.Nanopub
@@ -235,11 +214,14 @@ export const PostContext: React.FC<{
     },
     [post]
   );
+
   const updateSemantics = (newSemantics: string) =>
     optimisticUpdate({
       reviewedStatus: AppPostReviewStatus.DRAFT,
       semantics: newSemantics,
     });
+
+  const status = useStatus(post);
 
   return (
     <PostContextValue.Provider
@@ -247,11 +229,10 @@ export const PostContext: React.FC<{
         post,
         author,
         tweet,
-        nanopubPublished,
         nanopubDraft,
         reparse,
-        isParsing,
         updateSemantics,
+        status,
       }}>
       {children}
     </PostContextValue.Provider>
