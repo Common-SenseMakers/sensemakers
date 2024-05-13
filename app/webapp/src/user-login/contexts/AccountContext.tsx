@@ -40,7 +40,10 @@ export const AccountContext = (props: PropsWithChildren) => {
   const [connectedUser, setConnectedUser] = useState<AppUserRead | null>();
   const [hasTriedFetchingUser, setHasTriedFetchingUser] =
     useState<boolean>(false);
-  const [token, setToken] = useState<string>();
+  const _token = localStorage.getItem(OUR_TOKEN_NAME);
+  const [token, setToken] = useState<string | undefined>(
+    _token ? _token : undefined
+  );
 
   const checkToken = () => {
     const _token = localStorage.getItem(OUR_TOKEN_NAME);
@@ -58,11 +61,12 @@ export const AccountContext = (props: PropsWithChildren) => {
     try {
       if (token) {
         const user = await _appFetch<AppUserRead>('/api/auth/me', {}, token);
-        setHasTriedFetchingUser(false);
         if (DEBUG) console.log('got connected user', { user });
         setConnectedUser(user);
+        setHasTriedFetchingUser(true);
       } else {
         setConnectedUser(null);
+        setHasTriedFetchingUser(true);
       }
     } catch (e) {
       disconnect();
