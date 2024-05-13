@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-from nlp.desci_sense.shared_functions.configs import MetadataExtractionType
+from desci_sense.shared_functions.configs import MetadataExtractionType
 
 ROOT = Path(__file__).parents[1]
 sys.path.append(str(ROOT))

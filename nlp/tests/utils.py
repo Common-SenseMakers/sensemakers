@@ -28,7 +28,7 @@ from desci_sense.shared_functions.configs import (
 )
 
 
-def create_multi_config_for_tests(llm_type: str = "mistralai/mistral-7b-instruct:free"):
+def create_multi_config_for_tests(llm_type: str = "open-orca/mistral-7b-openorca"):
     kp = KeywordPParserChainConfig(
         name="kw_test",
         use_metadata=True,

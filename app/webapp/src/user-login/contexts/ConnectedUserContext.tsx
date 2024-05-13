@@ -1,5 +1,7 @@
-import { PropsWithChildren, createContext, useContext } from 'react';
+import { PropsWithChildren, createContext, useContext, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
+import { AbsoluteRoutes } from '../../route.names';
 import { useAccountContext } from './AccountContext';
 import { useNanopubContext } from './platforms/nanopubs/NanopubContext';
 import { useAppSigner } from './signer/SignerContext';
@@ -16,9 +18,19 @@ const ConnectedUserContextValue = createContext<
 
 /** Disconnect from all platforms */
 export const ConnectedUserContext = (props: PropsWithChildren) => {
-  const { disconnect: disconnectServer } = useAccountContext();
+  const { disconnect: disconnectServer, connectedUser } = useAccountContext();
   const { disconnect: disconnectWallet } = useAppSigner();
   const { disconnect: disconnectNanopub } = useNanopubContext();
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    /** navigate home if not logged user */
+    if (location.pathname !== '/' && !connectedUser) {
+      navigate(AbsoluteRoutes.App);
+    }
+  }, [location, connectedUser]);
 
   const disconnect = () => {
     disconnectServer();

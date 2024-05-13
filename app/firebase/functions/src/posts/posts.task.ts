@@ -2,12 +2,12 @@ import { getFunctions } from 'firebase-admin/functions';
 import { Request } from 'firebase-functions/v2/tasks';
 import { GoogleAuth } from 'google-auth-library';
 
-import { IS_EMULATOR } from '../config/config.runtime';
+import { IS_EMULATOR, PROJECT_ID } from '../config/config.runtime';
 import { envRuntime } from '../config/typedenv.runtime';
 import { logger } from '../instances/logger';
 import { createServices } from '../instances/services';
 
-export const PARSE_USER_POSTS_TASK = 'parseUserPosts';
+export const PARSE_POST_TASK = 'parsePost';
 
 export const queueOnEmulator = async (url: string, data: any) => {
   const res = await fetch(url, {
@@ -18,30 +18,27 @@ export const queueOnEmulator = async (url: string, data: any) => {
   return res;
 };
 
-export const parseUserPostsTask = async (req: Request) => {
-  logger.debug('parseUserPostsTask', { data: req.data });
-  const userId = req.data.userId;
+export const parsePostTask = async (req: Request) => {
+  logger.debug(`parsePostTask: postId: ${req.data.postId}`);
+  const postId = req.data.postId;
   const { postsManager } = createServices();
-  await postsManager.parseOfUser(userId);
+  await postsManager.parsePost(postId);
 };
 
-export const enqueueParseUserPosts = async (
-  userId: string,
-  location: string
-) => {
-  const targetUri = await getFunctionUrl(PARSE_USER_POSTS_TASK, location);
+export const enqueueParsePost = async (postId: string, location: string) => {
+  const targetUri = await getFunctionUrl(PARSE_POST_TASK, location);
 
   if (IS_EMULATOR) {
-    logger.debug(`enqueue ParseUserPosts - isEmulator`);
+    logger.debug(`enqueue enqueueParsePost - isEmulator`);
     /** Emulator does not support queue.enqueue(), but uses a simple http request */
-    return queueOnEmulator(targetUri, { userId });
+    return queueOnEmulator(targetUri, { postId });
   }
 
-  const queue = getFunctions().taskQueue(PARSE_USER_POSTS_TASK);
+  const queue = getFunctions().taskQueue(PARSE_POST_TASK);
   /** enqueue */
-  logger.debug(`enqueueParseUserPosts - enqueue`, { userId, targetUri });
+  logger.debug(`enqueueParsePost - enqueue`, { postId, targetUri });
 
-  return queue.enqueue({ userId }, { uri: targetUri });
+  return queue.enqueue({ postId }, { uri: targetUri });
 };
 
 /**
@@ -56,6 +53,7 @@ async function getFunctionUrl(name: string, location: string) {
   if (!auth) {
     auth = new GoogleAuth({
       scopes: 'https://www.googleapis.com/auth/cloud-platform',
+      projectId: PROJECT_ID.value(),
     });
   }
   const projectId = await auth.getProjectId();

@@ -57,7 +57,7 @@ export const AppBottomNav = (props: { paths: IPath[] }) => {
       elevation="small"
       style={{
         position: 'relative',
-        backgroundColor: constants.colors.backgroundLightShade,
+        backgroundColor: constants.colors.primary,
         fontSize: '16px',
         fontWeight: 'bold',
       }}>

@@ -12,7 +12,7 @@ export interface AppCardProps extends BoxExtendedProps {
 
 const cardStyle = (constants: StyleConstants): React.CSSProperties => {
   return {
-    backgroundColor: constants.colors.backgroundLight,
+    backgroundColor: 'white',
     padding: '16px 24px',
     borderRadius: '6px',
   };
@@ -56,7 +56,7 @@ export const AppCard = React.forwardRef<HTMLDivElement, AppCardProps>(
               }
             }}>
             <Refresh
-              color={constants.colors.primaryLight}
+              color={constants.colors.primary}
               style={{ height: '20px', width: '20px' }}></Refresh>
           </Box>
         ) : (
@@ -79,7 +79,6 @@ export const ExpansibleCard = (props: IExpansibleCard): JSX.Element => {
   const circleStyle: React.CSSProperties = {
     borderRadius: '15px',
     border: 'solid 1px',
-    borderColor: constants.colors.primaryLight,
     backgroundColor: 'white',
     height: '30px',
     width: '27px',

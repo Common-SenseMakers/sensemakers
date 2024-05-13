@@ -1,49 +1,179 @@
-import { Box } from 'grommet';
-import { useEffect } from 'react';
+import { Box, BoxExtendedProps, DropButton, Menu, Text } from 'grommet';
+import { Refresh } from 'grommet-icons';
+import { CSSProperties, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 import { useToastContext } from '../app/ToastsContext';
+import { I18Keys } from '../i18n/i18n';
 import { PostCard } from '../post/PostCard';
-import { PostContext } from '../post/PostContext';
+import { PostsQueryStatus, UserPostsQuery } from '../shared/types/types.posts';
+import { AppButton, AppHeading, AppSelect } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
+import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
+import { useThemeContext } from '../ui-components/ThemedApp';
 import { useUserPosts } from './UserPostsContext';
 
+const statusPretty: Record<PostsQueryStatus, string> = {
+  all: 'All',
+  ignored: 'Ignored',
+  pending: 'Pending',
+  published: 'Published',
+};
+
 export const UserHome = () => {
+  const { constants } = useThemeContext();
+  const { t } = useTranslation();
   const { show } = useToastContext();
-  const { posts, isLoading, error } = useUserPosts();
+
+  const {
+    filterStatus,
+    posts,
+    errorFetchingOlder,
+    fetchOlder,
+    fetchNewer,
+    isFetchingNewer,
+    errorFetchingNewer,
+  } = useUserPosts();
 
   useEffect(() => {
+    const error = errorFetchingOlder || errorFetchingNewer;
     if (error) {
       show({
         title: 'Error getting users posts',
+        message: error.message.includes('429')
+          ? "Too many requests to Twitter's API. Please retry in 10-15 minutes"
+          : error.message,
       });
     }
-  }, [error]);
+  }, [errorFetchingOlder, errorFetchingNewer]);
 
-  if (error) {
-    return <BoxCentered>{error.message}</BoxCentered>;
-  }
+  const navigate = useNavigate();
 
-  if (!posts || isLoading) {
-    return <BoxCentered>Loading...</BoxCentered>;
-  }
+  const setFilter = (filter: UserPostsQuery) => {
+    navigate(`/${filter.status}`);
+  };
 
-  if (posts.length === 0) {
-    return <BoxCentered>No posts found</BoxCentered>;
-  }
+  const content = posts && (
+    <>
+      {posts.length === 0 && (
+        <BoxCentered>
+          <Text>No posts found</Text>
+        </BoxCentered>
+      )}
+
+      <Box gap="medium">
+        {posts.map((post, ix) => (
+          <Box key={ix}>
+            <PostCard post={post} shade={ix % 2 === 1}></PostCard>
+          </Box>
+        ))}
+      </Box>
+
+      <Box pad="large">
+        {posts.length > 0 && !errorFetchingOlder ? (
+          <AppButton
+            label="fetch older"
+            onClick={() => fetchOlder()}></AppButton>
+        ) : posts.length > 0 ? (
+          <LoadingDiv></LoadingDiv>
+        ) : (
+          <> </>
+        )}
+      </Box>
+    </>
+  );
+
+  const FilterValue = (
+    props: {
+      status: PostsQueryStatus;
+      border?: boolean;
+    } & BoxExtendedProps
+  ) => {
+    const borderStyle: CSSProperties = props.border
+      ? {
+          border: '1px solid',
+          borderRadius: '8px',
+          borderColor: constants.colors.border,
+        }
+      : {};
+    return (
+      <Box
+        pad={{ horizontal: 'medium', vertical: 'small' }}
+        width="100%"
+        style={{
+          backgroundColor: 'white',
+          ...borderStyle,
+          boxShadow:
+            '0px 1px 2px 0px rgba(16, 24, 40, 0.04), 0px 1px 2px 0px rgba(16, 24, 40, 0.04)',
+        }}>
+        <Text size="14px">{statusPretty[props.status]}</Text>
+      </Box>
+    );
+  };
+
+  const options: PostsQueryStatus[] = [
+    PostsQueryStatus.ALL,
+    PostsQueryStatus.PENDING,
+    PostsQueryStatus.PUBLISHED,
+    PostsQueryStatus.IGNORED,
+  ];
+
+  const menu = (
+    <AppSelect
+      value={
+        filterStatus ? (
+          <FilterValue border status={filterStatus}></FilterValue>
+        ) : (
+          <FilterValue border status={PostsQueryStatus.ALL}></FilterValue>
+        )
+      }
+      options={options}
+      onChange={(e) =>
+        setFilter({
+          status: e.target.value,
+          fetchParams: { expectedAmount: 10 },
+        })
+      }>
+      {(status) => {
+        return <FilterValue status={status}></FilterValue>;
+      }}
+    </AppSelect>
+  );
+
+  const reload = isFetchingNewer ? (
+    <Box>
+      <Loading color={constants.colors.primary} size="20px"></Loading>
+    </Box>
+  ) : (
+    <AppButton
+      plain
+      icon={<Refresh color={constants.colors.primary} size="20px"></Refresh>}
+      onClick={() => fetchNewer()}></AppButton>
+  );
+
+  const header = (
+    <Box
+      pad={{ top: '24px', bottom: '12px', horizontal: '12px' }}
+      style={{ backgroundColor: constants.colors.shade, flexShrink: 0 }}>
+      <Box direction="row" margin={{ bottom: '12px' }}>
+        <AppHeading level="3">{t(I18Keys.yourPublications)}</AppHeading>
+      </Box>
+
+      <Box direction="row" align="center">
+        <Box style={{ flexGrow: 1 }}>{menu}</Box>
+        <Box pad={{ horizontal: '10px' }}>{reload}</Box>
+      </Box>
+    </Box>
+  );
 
   return (
-    <Box
-      fill
-      gap="large"
-      pad={{ vertical: 'large', horizontal: 'medium' }}
-      justify="start">
-      {posts.map((post, ix) => (
-        <Box key={ix}>
-          <PostContext postInit={post}>
-            <PostCard></PostCard>
-          </PostContext>
-        </Box>
-      ))}
-    </Box>
+    <>
+      {header}
+
+      <Box fill justify="start">
+        {content}
+      </Box>
+    </>
   );
 };

@@ -12,7 +12,7 @@ export const MOCKED_SEMANTICS =
   '<http://example.org/mosquito> <http://example.org/transmits> <http://example.org/malaria> .';
 
 export const MOCKED_PARSER_RESULT: ParsePostResult = {
-  filter_clasification: SciFilterClassfication.RESEARCH,
+  filter_classification: SciFilterClassfication.RESEARCH,
   semantics: MOCKED_SEMANTICS,
 };
 
@@ -28,7 +28,7 @@ export const getParserMock = (
 
   const Mocked = spy(parserService);
 
-  when(Mocked.parsePost(anything())).thenCall((post) => {
+  when(Mocked.parsePost(anything())).thenCall(async (post) => {
     const path = '../../firebase-py/functions/last_output.json';
     if (fs.existsSync(path)) {
       const jsonData = fs.readFileSync(path, 'utf8');
@@ -37,6 +37,10 @@ export const getParserMock = (
     }
 
     const mockedResult: ParsePostResult = MOCKED_PARSER_RESULT;
+
+    await new Promise((resolve) =>
+      setTimeout(resolve, 1 + Math.random() * 5000)
+    );
     return mockedResult;
   });
 

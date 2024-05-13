@@ -1,17 +1,20 @@
 import { firestore } from 'firebase-admin';
-import { FieldValue } from 'firebase-admin/firestore';
 
 import {
   AppUser,
   AppUserCreate,
   DefinedIfTrue,
+  FetchedDetails,
   PLATFORM,
   UserDetailsBase,
   UserWithPlatformIds,
 } from '../@shared/types/types';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
+import { logger } from '../instances/logger';
 import { getPrefixedUserId } from './users.utils';
+
+const DEBUG = true;
 
 export class UsersRepository {
   constructor(protected db: DBInstance) {}
@@ -52,7 +55,8 @@ export class UsersRepository {
 
     const _shouldThrow = shouldThrow !== undefined ? shouldThrow : false;
 
-    if (!doc.exists) {
+    const data = doc.data();
+    if (!doc.exists || !data || Object.keys(data).length === 0) {
       if (_shouldThrow) throw new Error(`User ${userId} not found`);
       else return undefined as DefinedIfTrue<T, AppUser>;
     }
@@ -116,10 +120,10 @@ export class UsersRepository {
   /**
    * Just update the lastFetchedMs value of a given account
    * */
-  public async setAccountLastFetched(
+  public async setAccountFetched(
     platform: PLATFORM,
     user_id: string,
-    fetchedMs: number,
+    fetched: FetchedDetails,
     manager: TransactionManager
   ) {
     /** check if this platform user_id already exists */
@@ -151,8 +155,21 @@ export class UsersRepository {
 
     const current = accounts[ix];
 
-    /** overwrite the lastFeched value */
-    current.lastFetchedMs = fetchedMs;
+    /** merge the new fetched value with the current one */
+    const newFetched = (() => {
+      const currentFetched = current.fetched || {};
+      if (fetched.newest_id) {
+        currentFetched.newest_id = fetched.newest_id;
+      }
+
+      if (fetched.oldest_id) {
+        currentFetched.oldest_id = fetched.oldest_id;
+      }
+
+      return currentFetched;
+    })();
+
+    current.fetched = newFetched;
 
     const userRef = await this.getUserRef(existingUser.userId, manager, true);
 
@@ -167,60 +184,77 @@ export class UsersRepository {
     details: UserDetailsBase,
     manager: TransactionManager
   ) {
-    const prefixed_user_id = getPrefixedUserId(platform, details.user_id);
+    /**
+     * the user is either the existing with that account, or the
+     * one from userId
+     */
+    const user = await (async () => {
+      const existWithAccount = await this.getUserWithPlatformAccount(
+        platform,
+        details.user_id,
+        manager
+      );
 
-    /** check if this platform user_id already exists */
-    const existingUser = await this.getUserWithPlatformAccount(
-      platform,
-      details.user_id,
-      manager
-    );
-
-    const userRef = await this.getUserRef(userId, manager, true);
-
-    if (existingUser) {
-      if (existingUser.userId !== userId) {
-        throw new Error(
-          `Unexpected, existing user ${existingUser.userId} with this platform user_id ${prefixed_user_id} does not match the userId provided ${userId}`
-        );
+      if (existWithAccount) {
+        if (DEBUG)
+          logger.debug(`setPlatformDetails existWithAccount`, {
+            existWithAccount,
+          });
+        return existWithAccount;
       }
 
-      /**  overwrite previous details for that user */
+      if (DEBUG) logger.debug(`setPlatformDetails new account`, { userId });
+      return this.getUser(userId, manager, true);
+    })();
+
+    /** set theuser account */
+    const { accounts, platformIds } = await (async () => {
+      /**  overwrite previous details for that user account*/
       if (platform === PLATFORM.Local) {
         throw new Error('Unexpected');
       }
 
-      const accounts = existingUser[platform];
-      if (accounts === undefined) {
-        throw new Error('Unexpected');
+      const accounts: UserDetailsBase[] = user[platform] || [];
+      let platformIds = user.platformIds;
+
+      if (DEBUG)
+        logger.debug(`setPlatformDetails accounts`, {
+          accounts,
+          platformIds,
+          details,
+        });
+
+      /** find the specific account */
+      const ix = accounts.findIndex((a) => a.user_id === details.user_id);
+      if (ix !== -1) {
+        /** set the new details of that account */
+        if (DEBUG) logger.debug(`setPlatformDetails account not found`);
+        accounts[ix] = details;
+      } else {
+        if (DEBUG) logger.debug(`setPlatformDetails account found`);
+        accounts.push(details);
+        platformIds.push(getPrefixedUserId(platform, details.user_id));
       }
 
-      /** replace existing details */
-      const ix = accounts.findIndex((a) => a.user_id === details.user_id);
-      accounts[ix] = details;
+      return { accounts, platformIds };
+    })();
 
-      /** replace entire array */
-      manager.update(userRef, {
-        [platform]: accounts,
+    if (DEBUG)
+      logger.debug(`setPlatformDetails accounts and platformIds`, {
+        accounts,
+        platformIds,
       });
 
-      return;
-    } else {
-      const existingUser = await this.getUser(userId, manager);
-      const platformIds = existingUser ? existingUser.platformIds : [];
-      /**
-       * append a new details entry in the platform array and store the
-       * prefixed platform id in the platformIds array
-       * */
-      const platformIds_property: keyof UserWithPlatformIds = 'platformIds';
-      platformIds.push(prefixed_user_id);
+    const userRef = await this.getUserRef(userId, manager, true);
+    const platformIds_property: keyof UserWithPlatformIds = 'platformIds';
+    const update: Partial<AppUser> = {
+      [platformIds_property]: platformIds,
+      [platform]: accounts,
+    };
 
-      const update: Partial<AppUser> = {
-        [platformIds_property]: platformIds,
-        [platform]: FieldValue.arrayUnion(details),
-      };
-      manager.update(userRef, update);
-    }
+    if (DEBUG) logger.debug(`Updating user ${userId}`, { update });
+
+    manager.update(userRef, update);
   }
 
   /** remove userDetails of a given platform */

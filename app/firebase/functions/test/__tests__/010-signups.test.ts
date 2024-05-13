@@ -11,8 +11,9 @@ import { resetDB } from '../utils/db';
 import { getNanopubProfile } from '../utils/nanopub.profile';
 import { getTestServices } from './test.services';
 
-describe('01-signups', () => {
+describe.only('010-signups', () => {
   const services = getTestServices({
+    time: 'real',
     twitter: 'mock-signup',
     nanopub: 'mock-publish',
     parser: 'mock',
@@ -35,6 +36,10 @@ describe('01-signups', () => {
 
   describe('signup with mocked twitter', () => {
     const TWITTER_USER_ID = '123456789';
+
+    before(() => {
+      (this as any).skipUsersUpdate = true;
+    });
 
     it('signup with twitter', async () => {
       if (!userId) {

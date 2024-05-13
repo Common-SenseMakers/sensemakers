@@ -1,16 +1,27 @@
-import { useQuery } from '@tanstack/react-query';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { createContext } from 'react';
 
-import { useAppFetch } from '../api/app.fetch';
-import { useToastContext } from '../app/ToastsContext';
-import { AppPostFull } from '../shared/types/types.posts';
-import { useAccountContext } from '../user-login/contexts/AccountContext';
+import {
+  AppPostFull,
+  AppPostReviewStatus,
+  PostUpdate,
+  PostsQueryStatus,
+} from '../shared/types/types.posts';
+import { usePostsFetch } from './usePostsFetch';
+import { useQueryFilter } from './useQueryFilter';
+import { usePostUpdate } from './useUpdatePost';
 
 interface PostContextType {
   posts?: AppPostFull[];
-  isLoading: boolean;
-  error: Error | null;
+  isFetchingOlder: boolean;
+  errorFetchingOlder?: Error;
+  isFetchingNewer: boolean;
+  errorFetchingNewer?: Error;
+  fetchOlder: () => void;
+  fetchNewer: () => void;
+  updatePost: (postId: string, postUpdate: PostUpdate) => Promise<void>;
+  isPostUpdating: (postId: string) => boolean;
+  filterStatus: PostsQueryStatus;
 }
 
 export const UserPostsContextValue = createContext<PostContextType | undefined>(
@@ -20,56 +31,57 @@ export const UserPostsContextValue = createContext<PostContextType | undefined>(
 export const UserPostsContext: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
-  const { show } = useToastContext();
-  const { connectedUser } = useAccountContext();
-  const appFetch = useAppFetch();
-
-  /** everytime the connected user changes, trigger a fetch */
   const {
-    isSuccess: fetched,
-    isFetching: isFetching,
-    error: errorFetching,
-  } = useQuery({
-    queryKey: ['fetchUserPosts', connectedUser?.userId],
-    queryFn: () => {
-      if (connectedUser) {
-        return appFetch('/api/posts/fetch', {
-          userId: connectedUser.userId,
-        });
-      }
-      return null;
-    },
-  });
+    posts,
+    removePost,
+    fetchOlder,
+    isFetchingOlder,
+    errorFetchingOlder,
+    fetchNewer,
+    isFetchingNewer,
+    errorFetchingNewer,
+  } = usePostsFetch();
 
-  /** once fetched, get the posts */
-  const {
-    data: _posts,
-    error: errorGetting,
-    isFetching: isGetting,
-  } = useQuery({
-    queryKey: ['getUserPosts', connectedUser],
-    queryFn: async () => {
-      if (connectedUser) {
-        const posts = await appFetch<AppPostFull[]>('/api/posts/getOfUser', {
-          userId: connectedUser.userId,
-        });
+  const { updatePost: _updatePost, isPostUpdating } = usePostUpdate();
 
-        return posts;
-      }
-      return null;
-    },
-    enabled: fetched,
-  });
+  const { status } = useQueryFilter();
 
-  /** convert null to undefined */
-  const posts = _posts !== null ? _posts : undefined;
+  const updatePost = (postId: string, postUpdate: PostUpdate) => {
+    /** If the updated post no longer matches the status filter, remove it from the list and unsubscribe it  */
+    if (
+      !(() => {
+        if (status === PostsQueryStatus.ALL) {
+          return true;
+        }
+        if (status === PostsQueryStatus.PENDING) {
+          return postUpdate.reviewedStatus === AppPostReviewStatus.PENDING;
+        }
+        if (status === PostsQueryStatus.PUBLISHED) {
+          return postUpdate.reviewedStatus === AppPostReviewStatus.APPROVED;
+        }
+        if (status === PostsQueryStatus.IGNORED) {
+          return postUpdate.reviewedStatus === AppPostReviewStatus.IGNORED;
+        }
+      })()
+    ) {
+      removePost(postId);
+    }
+    return _updatePost(postId, postUpdate);
+  };
 
   return (
     <UserPostsContextValue.Provider
       value={{
         posts,
-        isLoading: isFetching || isGetting,
-        error: errorFetching || errorGetting,
+        isFetchingOlder: isFetchingOlder,
+        errorFetchingOlder: errorFetchingOlder,
+        isFetchingNewer: isFetchingNewer,
+        errorFetchingNewer: errorFetchingNewer,
+        fetchNewer,
+        fetchOlder,
+        updatePost,
+        isPostUpdating,
+        filterStatus: status,
       }}>
       {children}
     </UserPostsContextValue.Provider>

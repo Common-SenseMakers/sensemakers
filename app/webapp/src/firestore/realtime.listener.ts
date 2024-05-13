@@ -2,7 +2,7 @@ import { onSnapshot } from 'firebase/firestore';
 
 import { collections } from './config';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const subscribeToUpdates = (updateId: string, callback: () => void) => {
   const postUpdates = collections.updates(updateId);
@@ -10,10 +10,11 @@ export const subscribeToUpdates = (updateId: string, callback: () => void) => {
   return onSnapshot(postUpdates, (doc): void => {
     const data = doc.data();
 
-    console.log(`onSnapshot ${updateId}`, {
-      data,
-      metadata: doc.metadata,
-    });
+    if (DEBUG)
+      console.log(`onSnapshot ${updateId}`, {
+        data,
+        metadata: doc.metadata,
+      });
 
     if (data) {
       callback();

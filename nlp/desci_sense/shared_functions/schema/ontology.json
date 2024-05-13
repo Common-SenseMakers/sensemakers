@@ -419,10 +419,10 @@
             ],
             "label": "indicates-interest",
             "display_name": "👀 indicates-interest",
-            "prompt": "this post indicates interest in a reference. This label is meant for cases where the post is not explicitly recommending or endorsing the cited reference. This label is suggested by use of the 👀 emoji",
+            "prompt": "this post indicates interest in a reference. This label is meant for cases where the post is not explicitly recommending or endorsing the cited reference.",
             "prompt_zero_ref": null,
-            "prompt_single_ref": "this post indicates interest in a reference. This label is meant for cases where the post is not explicitly recommending or endorsing the cited reference. This label is suggested by use of the 👀 emoji",
-            "prompt_multi_ref": "the post is indicating interest in this reference. This label is meant for cases where the post is not explicitly recommending or endorsing this reference. This label is suggested by use of the 👀 emoji",
+            "prompt_single_ref": "this post indicates interest in a reference. This label is meant for cases where the post is not explicitly recommending or endorsing the cited reference.",
+            "prompt_multi_ref": "the post is indicating interest in this reference. This label is meant for cases where the post is not explicitly recommending or endorsing this reference.",
             "valid_subject_types": [
                 "post"
             ],

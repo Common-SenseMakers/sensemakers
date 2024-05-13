@@ -13,13 +13,14 @@ import {
 } from 'grommet';
 import { ReactNode } from 'react';
 
-import { AppHeading } from '../../ui-components';
+import { AppButton, AppHeading } from '../../ui-components';
 import { useResponsive } from '../../ui-components/ResponsiveApp';
 import { useThemeContext } from '../../ui-components/ThemedApp';
+import { TwitterIcon } from '../common/Icons';
 import { BUILD_ID } from '../config';
 
 export const MAX_WIDTH_LANDING = 1600;
-export const MAX_WIDTH_APP = 800;
+export const MAX_WIDTH_APP = 600;
 
 export const ViewportContainer = (props: React.HTMLProps<HTMLDivElement>) => {
   const { constants } = useThemeContext();
@@ -48,10 +49,27 @@ export const ViewportContainer = (props: React.HTMLProps<HTMLDivElement>) => {
         pad="medium"
         justify="center"
         align="center">
-        <Box direction="row" justify="between" fill align="center">
-          <Text size="xsmall" color={constants.colors.backgroundLightDarker}>
-            Build: {BUILD_ID?.substring(0, 7)}
-          </Text>
+        <Box
+          direction="row"
+          justify="center"
+          fill
+          align="center"
+          style={{ position: 'relative' }}>
+          <Anchor
+            href={`https://twitter.com/${process.env.PROJECT_TWITTER_ACCOUNT}`}
+            target="_blank">
+            <TwitterIcon size={14} style={{}}></TwitterIcon>
+          </Anchor>
+          <Box
+            style={{
+              position: 'absolute',
+              right: '0px',
+              bottom: '0px',
+            }}>
+            <Text size="6px" color="white">
+              Build: {BUILD_ID?.substring(0, 7)}
+            </Text>
+          </Box>
         </Box>
       </Box>
     </>
@@ -128,48 +146,6 @@ export interface ITwoColumns {
   line?: boolean;
   frs?: number[];
 }
-
-export const TwoColumns = (props: ITwoColumns) => {
-  const { constants } = useThemeContext();
-
-  const gap = props.gap !== undefined ? props.gap : 78; // minus 2 of the line
-  const showLine = props.line !== undefined ? props.line : true;
-  const frs = props.frs || [1, 1];
-
-  const colWidths = [`${frs[0]}fr`, `${frs[1]}fr`];
-
-  return (
-    <Grid
-      fill
-      columns={[colWidths[0], `${gap}px`, colWidths[1]]}
-      rows={['auto']}
-      areas={[
-        { name: 'left', start: [0, 0], end: [0, 0] },
-        { name: 'center', start: [1, 0], end: [1, 0] },
-        { name: 'right', start: [2, 0], end: [2, 0] },
-      ]}
-      style={{ ...props.grid?.style }}>
-      <Box gridArea="left" direction="column" {...props.boxes}>
-        {(props.children as React.ReactNode[])[0]}
-      </Box>
-      <Box gridArea="center" align="center">
-        {showLine ? (
-          <Box
-            style={{
-              height: '100%',
-              width: '2px',
-              backgroundColor: constants.colors.backgroundLight,
-            }}></Box>
-        ) : (
-          <></>
-        )}
-      </Box>
-      <Box gridArea="right" direction="column" {...props.boxes}>
-        {(props.children as React.ReactNode[])[1]}
-      </Box>
-    </Grid>
-  );
-};
 
 export enum Breakpoint {
   small = 'small',

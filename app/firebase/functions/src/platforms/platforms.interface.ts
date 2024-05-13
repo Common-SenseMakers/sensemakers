@@ -1,5 +1,10 @@
-import { PLATFORM, UserDetailsBase } from '../@shared/types/types';
 import {
+  PLATFORM,
+  PlatformFetchParams,
+  UserDetailsBase,
+} from '../@shared/types/types';
+import {
+  FetchedResult,
   PlatformPostCreate,
   PlatformPostDraft,
   PlatformPostPosted,
@@ -12,13 +17,6 @@ import { TransactionManager } from '../db/transaction.manager';
 export type CredentialsForPlatform<P> = P extends PLATFORM.Twitter
   ? { accessToken: string }
   : any;
-
-export interface FetchUserPostsParams {
-  start_time: number; // timestamp in ms
-  end_time?: number; // timestamp in ms
-  max_results?: number;
-  userDetails: UserDetailsBase;
-}
 
 export interface IdentityService<
   SignupContext,
@@ -37,9 +35,10 @@ export interface PlatformService<
   UserDetails extends UserDetailsBase = UserDetailsBase,
 > extends IdentityService<SignupContext, SignupData, UserDetails> {
   fetch(
-    params: FetchUserPostsParams,
+    params: PlatformFetchParams,
+    userDetails: UserDetailsBase,
     manager: TransactionManager
-  ): Promise<PlatformPostPosted[]>;
+  ): Promise<FetchedResult>;
   publish(
     posts: PlatformPostPublish,
     manager: TransactionManager

@@ -1,8 +1,10 @@
 import fs from 'fs';
 import { Context } from 'mocha';
 
-import { AppUser } from '../../src/@shared/types/types';
+import { ALL_PUBLISH_PLATFORMS, AppUser } from '../../src/@shared/types/types';
 import { envDeploy } from '../../src/config/typedenv.deploy';
+import { logger } from '../../src/instances/logger';
+import { UsersHelper } from '../../src/users/users.helper';
 import {
   TestUserCredentials,
   authenticateTestUser,
@@ -28,6 +30,7 @@ export type TestContext = Mocha.Context & Context;
 
 export const mochaHooks = (): Mocha.RootHookObject => {
   const services = getTestServices({
+    time: 'real',
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
@@ -77,26 +80,58 @@ export const mochaHooks = (): Mocha.RootHookObject => {
     },
 
     beforeEach(this: TestContext) {
-      // the contents of the Before Each hook
+      /**
+       * by default each test will update the testUsers global object with
+       * the latest user details in the DB
+       */
+      this.skipUsersUpdate = false;
     },
 
-    /** update stored test users after all tests run */
-    async afterAll(this: TestContext) {
-      if (testUsers.size > 0) {
-        fs.writeFileSync(
-          TEST_USERS_FILE_PATH,
-          JSON.stringify(Array.from(testUsers.values())),
-          'utf8'
+    async afterEach(this: TestContext) {
+      if (this.skipUsersUpdate) {
+        return;
+      }
+
+      const testUsersLocal = testUsers;
+
+      if (testUsersLocal.size > 0) {
+        // remove the fetchedDetails
+        await Promise.all(
+          Array.from(testUsersLocal.values()).map(async (user) => {
+            const userRead = await services.db.run((manager) =>
+              services.users.repo.getUser(user.userId, manager, true)
+            );
+
+            logger.debug('afterAll - userRead', { userRead });
+
+            if (!userRead.platformIds) {
+              return;
+            }
+
+            /** delete the fetched details */
+            ALL_PUBLISH_PLATFORMS.map((platform) => {
+              const accounts = UsersHelper.getAccounts(userRead, platform);
+              accounts.map((account) => {
+                delete account['fetched'];
+              });
+            });
+
+            logger.debug('afterAll - set', { userRead });
+
+            /** update the testUser */
+            testUsersLocal.set(userRead.userId, userRead);
+          })
         );
       }
     },
 
-    /** update test users global variable after each test in case tokens have been refreshed */
-    async afterEach(this: TestContext) {
-      const testAppUsers = await services.users.repo.getAll();
-      testAppUsers.forEach((appUser) => {
-        testUsers.set(appUser.userId, appUser);
-      });
+    async afterAll(this: TestContext) {
+      const testUsersLocal = testUsers;
+      fs.writeFileSync(
+        TEST_USERS_FILE_PATH,
+        JSON.stringify(Array.from(testUsersLocal.values()), null, 2),
+        'utf8'
+      );
     },
   };
 };

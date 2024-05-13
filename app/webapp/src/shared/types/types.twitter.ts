@@ -1,5 +1,6 @@
 import {
   IOAuth2RequestTokenResult,
+  TweetV2,
   TweetV2PostTweetResult,
   UserV2,
 } from 'twitter-api-v2';
@@ -25,12 +26,17 @@ export interface TwitterUserCredentials {
   expiresAtMs: number;
 }
 
+export type TwitterUserProfile = Pick<
+  UserV2,
+  'profile_image_url' | 'name' | 'username' | 'id'
+>;
+
 /** For Twitter we need to store the oAuth token and secret as part of the signup process
  * and the access Token and Secret as the credentials need to post in the name of the user
  */
 export interface TwitterUserDetails
   extends UserDetailsBase<
-    UserV2,
+    TwitterUserProfile,
     TwitterUserCredentials,
     TwitterUserCredentials
   > {}
@@ -42,13 +48,11 @@ export interface TwitterUser {
   screen_name: string;
 }
 
-export interface TwitterQueryParameters {
-  user_id: string;
-  start_time?: string;
-  end_time?: string;
-  max_results?: number;
-}
-
 export interface TwitterDraft {
   text: string;
 }
+
+export type TwitterThread = {
+  conversation_id: string;
+  tweets: TweetV2[];
+};

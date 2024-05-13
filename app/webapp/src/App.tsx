@@ -1,13 +1,9 @@
 import { I18nextProvider } from 'react-i18next';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom';
 
-import { AppContainer } from './app/AppContainer';
+import { AppContainer0 } from './app/AppContainer';
 import { ToastsContext } from './app/ToastsContext';
-import { GlobalStyles } from './app/layout/GlobalStyles';
 import { i18n } from './i18n/i18n';
-import { ResponsiveApp } from './ui-components/ResponsiveApp';
-import { ThemedApp } from './ui-components/ThemedApp';
-import { ConnectedUserWrapper } from './user-login/contexts/ConnectedUserWrapper';
 
 function App() {
   return (
@@ -15,14 +11,11 @@ function App() {
       <I18nextProvider i18n={i18n}>
         <ToastsContext>
           <BrowserRouter>
-            <ConnectedUserWrapper>
-              <GlobalStyles />
-              <ThemedApp>
-                <ResponsiveApp>
-                  <AppContainer></AppContainer>
-                </ResponsiveApp>
-              </ThemedApp>
-            </ConnectedUserWrapper>
+            <Routes>
+              <Route
+                path="/*"
+                element={<AppContainer0></AppContainer0>}></Route>
+            </Routes>
           </BrowserRouter>
         </ToastsContext>
       </I18nextProvider>

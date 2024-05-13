@@ -3,7 +3,12 @@ import { FieldValue } from 'firebase-admin/firestore';
 import {
   AppPost,
   AppPostCreate,
+  AppPostParsedStatus,
+  AppPostRepublishedStatus,
+  AppPostReviewStatus,
   PostUpdate,
+  PostsQueryStatus,
+  UserPostsQuery,
 } from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
 import { BaseRepository } from '../db/repo.base';
@@ -39,14 +44,74 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   }
 
   /** Cannot be part of a transaction */
-  public async getOfUser(userId: string) {
+  public async getOfUser(userId: string, queryParams: UserPostsQuery) {
     /** type protection agains properties renaming */
     const createdAtKey: keyof AppPost = 'createdAtMs';
     const authorKey: keyof AppPost = 'authorId';
+    const reviewedStatusKey: keyof AppPost = 'reviewedStatus';
+    const republishedStatusKey: keyof AppPost = 'republishedStatus';
 
-    const posts = await this.db.collections.posts
-      .where(authorKey, '==', userId)
-      .orderBy(createdAtKey, 'desc')
+    const base = this.db.collections.posts.where(authorKey, '==', userId);
+
+    const filtered = (() => {
+      if (queryParams.status === PostsQueryStatus.ALL) {
+        return base;
+      }
+      if (queryParams.status === PostsQueryStatus.PENDING) {
+        return base.where(reviewedStatusKey, '==', AppPostReviewStatus.PENDING);
+      }
+      if (queryParams.status === PostsQueryStatus.PUBLISHED) {
+        return base.where(
+          republishedStatusKey,
+          '==',
+          AppPostRepublishedStatus.REPUBLISHED
+        );
+      }
+      if (queryParams.status === PostsQueryStatus.IGNORED) {
+        return base.where(reviewedStatusKey, '==', AppPostReviewStatus.IGNORED);
+      }
+      return base;
+    })();
+
+    /** get the sinceCreatedAt and untilCreatedAt timestamps from the elements ids */
+    const { sinceCreatedAt, untilCreatedAt } = await (async () => {
+      return this.db.run(async (manager) => {
+        let sinceCreatedAt: number | undefined;
+        let untilCreatedAt: number | undefined;
+
+        if (queryParams.fetchParams.sinceId) {
+          const since = await this.get(
+            queryParams.fetchParams.sinceId,
+            manager
+          );
+          sinceCreatedAt = since ? since.createdAtMs : undefined;
+        }
+
+        if (queryParams.fetchParams.untilId) {
+          const until = await this.get(
+            queryParams.fetchParams.untilId,
+            manager
+          );
+          untilCreatedAt = until ? until.createdAtMs : undefined;
+        }
+
+        return { sinceCreatedAt, untilCreatedAt };
+      });
+    })();
+
+    /** two modes, forward sinceId or backwards untilId  */
+    const paginated = await (async () => {
+      if (sinceCreatedAt) {
+        const ordered = filtered.orderBy(createdAtKey, 'asc');
+        return ordered.startAfter(sinceCreatedAt);
+      } else {
+        const ordered = filtered.orderBy(createdAtKey, 'desc');
+        return untilCreatedAt ? ordered.startAfter(untilCreatedAt) : ordered;
+      }
+    })();
+
+    const posts = await paginated
+      .limit(queryParams.fetchParams.expectedAmount)
       .get();
 
     return posts.docs.map((doc) => ({
@@ -61,7 +126,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     const statusKey: keyof AppPost = 'parsedStatus';
     const authorKey: keyof AppPost = 'authorId';
 
-    const statusValue: AppPost['parsedStatus'] = 'unprocessed';
+    const statusValue: AppPostParsedStatus = AppPostParsedStatus.UNPROCESSED;
 
     const posts = await this.db.collections.posts
       .where(statusKey, '==', statusValue)

@@ -20,14 +20,16 @@ from desci_sense.shared_functions.configs import (
 
 def test_simple_init():
     kp = KeywordPParserChainConfig(name="test")
-    kppc = KeywordPostParserChain(kp)
+    ontology = OntologyBase()
+    multi_config = MultiParserChainConfig(parser_configs=[kp])
+    kppc = KeywordPostParserChain(kp, multi_config, ontology)
     assert kppc.parser_config.name == "test"
 
 
 def test_kw_parser_init():
     ontology = OntologyBase()
     kp = KeywordPParserChainConfig(name="test")
-    multi_config = MultiParserChainConfig(parsers=[kp])
+    multi_config = MultiParserChainConfig(parser_configs=[kp])
     kppc = KeywordPostParserChain(kp, multi_config, ontology)
     assert kppc.ontology.ontology_interface.keyword_predicate.name == "hasKeyword"
 

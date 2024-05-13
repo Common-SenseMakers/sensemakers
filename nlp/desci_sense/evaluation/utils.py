@@ -1,11 +1,21 @@
 import json
 import pandas as pd
 import numpy as np
+import concurrent.futures
+from tqdm import tqdm
 from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.metrics import (
     precision_recall_fscore_support,
     accuracy_score,
     confusion_matrix
+)
+
+from desci_sense.shared_functions.init import init_multi_chain_parser_config
+from desci_sense.shared_functions.parsers.multi_chain_parser import MultiChainParser
+
+from desci_sense.shared_functions.dataloaders import (
+    scrape_post,
+    convert_text_to_ref_post,
 )
 
 
@@ -25,6 +35,16 @@ def get_dataset(table_path):
 
     df = pd.DataFrame(rows)
     return df
+
+def process_text(text):
+    return convert_text_to_ref_post(text)
+
+def posts_to_refPosts(posts:list):
+    
+    
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        refPosts = list(tqdm(executor.map(process_text, posts), total=len(posts)))
+    return refPosts
 
 def create_custom_confusion_matrix(y_true, y_pred, labels):
     # Initialize an empty matrix

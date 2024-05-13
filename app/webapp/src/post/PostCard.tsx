@@ -1,36 +1,42 @@
-import { Box, Text } from 'grommet';
+import { Box } from 'grommet';
 import { useNavigate } from 'react-router-dom';
 
-import { AppIcon } from '../app/icons/AppIcon';
-import { usePost } from '../post/PostContext';
-import { Loading } from '../ui-components/LoadingDiv';
+import { TweetAnchor } from '../app/anchors/TwitterAnchor';
+import { PLATFORM } from '../shared/types/types';
+import { AppPostFull } from '../shared/types/types.posts';
 import { useThemeContext } from '../ui-components/ThemedApp';
+import { PostText } from './PostText';
+import { NanopubStatus, StatusTag } from './StatusTag';
 
-export const PostCard = () => {
-  const { post } = usePost();
+export const PostCard = (props: { post: AppPostFull; shade?: boolean }) => {
+  const { post, shade: _shade } = props;
+  const shade = _shade || false;
+
   const navigate = useNavigate();
   const { constants } = useThemeContext();
 
   const handleClick = () => {
-    navigate(`/post/${post?.id}`);
+    navigate(`/post/${post.id}`);
   };
 
-  const processed = post && post.parsedStatus === 'processed';
+  const tweet = post.mirrors.find((m) => m.platformId === PLATFORM.Twitter);
 
   return (
     <Box
-      pad="medium"
+      pad={{ top: 'large', bottom: 'medium', horizontal: 'medium' }}
       style={{
+        backgroundColor: shade ? constants.colors.shade : 'white',
         cursor: 'pointer',
         position: 'relative',
-        backgroundColor: constants.colors.backgroundLight,
       }}
-      elevation="small"
       onClick={handleClick}>
-      <Text size="medium">{post?.content}</Text>
-      <Box style={{ position: 'absolute', right: '10px', bottom: '10px' }}>
-        {processed ? <AppIcon></AppIcon> : <Loading></Loading>}
+      <Box direction="row" justify="between">
+        <TweetAnchor
+          thread={tweet?.posted?.post}
+          timestamp={tweet?.posted?.timestampMs}></TweetAnchor>
+        <NanopubStatus post={post}></NanopubStatus>
       </Box>
+      <PostText truncate shade={shade} text={post?.content}></PostText>
     </Box>
   );
 };

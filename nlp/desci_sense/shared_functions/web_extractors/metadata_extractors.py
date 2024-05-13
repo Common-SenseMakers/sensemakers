@@ -40,23 +40,18 @@ def normalize_citoid_metadata(
     for url, metadata in zip(target_urls, metadata_list):
         metadata["original_url"] = url
         summary = metadata.get("abstractNote", "")
-
-        skip = False
-        if "msg" in metadata and metadata["msg"].startswith("Error:"):
-            skip = True
-
-        if not skip:
-            results.append(
-                RefMetadata(
-                    **{
-                        "citoid_url": metadata.get("url", None),
-                        "url": metadata.get("original_url", None),
-                        "item_type": metadata.get("itemType", None),
-                        "title": metadata.get("title", ""),
-                        "summary": get_trunc_str(summary, max_summary_length),
-                    }
-                )
+        results.append(
+            RefMetadata(
+                **{
+                    "citoid_url": metadata.get("url", None),
+                    "url": metadata.get("original_url", None),
+                    "item_type": metadata.get("itemType", None),
+                    "title": metadata.get("title", ""),
+                    "summary": get_trunc_str(summary, max_summary_length),
+                    "debug": {"error": metadata.get("error")},
+                }
             )
+        )
     return results
 
 

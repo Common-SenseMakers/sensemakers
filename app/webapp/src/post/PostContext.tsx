@@ -1,6 +1,12 @@
 import init, { Nanopub } from '@nanopub/sign';
 import { useQuery } from '@tanstack/react-query';
-import React, { createContext, useContext, useEffect, useMemo } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+} from 'react';
 import { TweetV2 } from 'twitter-api-v2';
 
 import { useAppFetch } from '../api/app.fetch';
@@ -10,11 +16,16 @@ import {
   PlatformPost,
   PlatformPostDraft,
 } from '../shared/types/types.platform.posts';
-import { AppPostFull } from '../shared/types/types.posts';
+import {
+  AppPostFull,
+  AppPostReviewStatus,
+  PostUpdate,
+} from '../shared/types/types.posts';
+import { TwitterThread } from '../shared/types/types.twitter';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { getAccount } from '../user-login/user.helper';
 
-const DEBUG = true;
+const DEBUG = false;
 
 interface NanopubInfo {
   uri: string;
@@ -23,9 +34,12 @@ interface NanopubInfo {
 interface PostContextType {
   post: AppPostFull | undefined;
   author: AppUserRead;
+  reparse: () => void;
+  isParsing: boolean;
   nanopubDraft: PlatformPostDraft | undefined;
   nanopubPublished: NanopubInfo | undefined;
-  tweet?: PlatformPost<TweetV2>;
+  tweet?: PlatformPost<TwitterThread>;
+  updateSemantics: (newSemantics: string) => Promise<void>;
 }
 
 const PostContextValue = createContext<PostContextType | undefined>(undefined);
@@ -44,6 +58,9 @@ export const PostContext: React.FC<{
   }
 
   const { connectedUser } = useAccountContext();
+  const [postEdited, setPostEdited] = React.useState<AppPostFull | undefined>(
+    undefined
+  );
 
   const appFetch = useAppFetch();
 
@@ -54,7 +71,7 @@ export const PostContext: React.FC<{
 
   /** if postInit not provided get post from the DB */
   const {
-    data: _post,
+    data: postFetched,
     refetch,
     isLoading,
   } = useQuery({
@@ -71,14 +88,24 @@ export const PostContext: React.FC<{
     },
   });
 
-  const post = isLoading ? postInit : _post !== null ? _post : undefined;
+  /** the post is the combination of the postFetched and the edited */
+  const post = useMemo<AppPostFull | undefined>(() => {
+    if (isLoading) return postInit;
+    if (postFetched && postFetched !== null) {
+      return { ...postFetched, ...postEdited };
+    }
+    return undefined;
+  }, [postFetched, postInit, postEdited]);
 
   /**
    * subscribe to real time updates of this post and trigger a refetch everytime
    * one is received*/
   useEffect(() => {
     const unsubscribe = subscribeToUpdates(`post-${postId}`, refetch);
-    return () => unsubscribe();
+    return () => {
+      if (DEBUG) console.log('unsubscribing to updates post', postId);
+      unsubscribe();
+    };
   }, []);
 
   /**
@@ -86,14 +113,46 @@ export const PostContext: React.FC<{
   useEffect(() => {
     if (post && post.mirrors) {
       const unsubscribes = post.mirrors.map((m) => {
-        return subscribeToUpdates(`platformPost-${m.id}`, refetch);
+        return {
+          unsubscribe: subscribeToUpdates(`platformPost-${m.id}`, refetch),
+          platformPostId: m.id,
+        };
       });
 
       return () => {
-        unsubscribes.forEach((unsubscribe) => unsubscribe());
+        unsubscribes.forEach((unsubscribe) => {
+          if (DEBUG)
+            console.log(
+              'unsubscribing to updates platformPost',
+              unsubscribe.platformPostId
+            );
+          unsubscribe.unsubscribe();
+        });
       };
     }
   }, [post]);
+
+  useEffect(() => {
+    if (postFetched) {
+      setPostEdited(undefined);
+    }
+  }, [postFetched]);
+
+  const [_isReparsing, setIsReparsing] = React.useState(false);
+
+  const reparse = async () => {
+    try {
+      setIsReparsing(true);
+      await appFetch('/api/posts/parse', { postId: post?.id });
+      setIsReparsing(false);
+    } catch (e: any) {
+      setIsReparsing(false);
+      console.error(e);
+      throw new Error(e);
+    }
+  };
+
+  const isParsing = _isReparsing || post?.parsingStatus === 'processing';
 
   /** derive nanopub details from current post */
   const { data: nanopubPublished } = useQuery({
@@ -101,7 +160,7 @@ export const PostContext: React.FC<{
     queryFn: async () => {
       try {
         await (init as any)();
-        const nanopub = post?.mirrors.find(
+        const nanopub = post?.mirrors?.find(
           (m) => m.platformId === PLATFORM.Nanopub
         );
         if (!nanopub || !nanopub.posted) return null;
@@ -115,7 +174,7 @@ export const PostContext: React.FC<{
   });
 
   const nanopubDraft = useMemo(() => {
-    const nanopub = post?.mirrors.find(
+    const nanopub = post?.mirrors?.find(
       (m) => m.platformId === PLATFORM.Nanopub
     );
     if (!nanopub) return undefined;
@@ -153,11 +212,47 @@ export const PostContext: React.FC<{
     ],
   };
 
-  const tweet = post?.mirrors.find((m) => m.platformId === PLATFORM.Twitter);
+  const tweet = post?.mirrors?.find((m) => m.platformId === PLATFORM.Twitter);
+
+  const optimisticUpdate = useCallback(
+    async (update: PostUpdate) => {
+      if (!post) {
+        return;
+      }
+
+      setPostEdited({ ...post, ...update });
+
+      await appFetch<
+        void,
+        {
+          postId: string;
+          post: PostUpdate;
+        }
+      >('/api/posts/update', {
+        postId: post.id,
+        post: update,
+      });
+    },
+    [post]
+  );
+  const updateSemantics = (newSemantics: string) =>
+    optimisticUpdate({
+      reviewedStatus: AppPostReviewStatus.DRAFT,
+      semantics: newSemantics,
+    });
 
   return (
     <PostContextValue.Provider
-      value={{ post, author, tweet, nanopubPublished, nanopubDraft }}>
+      value={{
+        post,
+        author,
+        tweet,
+        nanopubPublished,
+        nanopubDraft,
+        reparse,
+        isParsing,
+        updateSemantics,
+      }}>
       {children}
     </PostContextValue.Provider>
   );
