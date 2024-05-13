@@ -79,6 +79,7 @@ export const KeywordsComponent = (props: PatternProps) => {
         }}
         direction="row">
         <AppLabelsEditor
+          editable={props.editable}
           color="#498283"
           labels={keywords}
           addLabel={(newLabel) => addKeyword(newLabel)}

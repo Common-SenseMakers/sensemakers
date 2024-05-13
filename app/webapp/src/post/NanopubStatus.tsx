@@ -10,13 +10,13 @@ import {
   AppPostParsingStatus,
   AppPostReviewStatus,
 } from '../shared/types/types.posts';
-import { useStatus } from './useStatus';
+import { usePostStatuses } from './usePostStatuses';
 
 export const NanopubStatus = (props: { post?: AppPostFull }) => {
   const { post } = props;
 
   const { nanopubPublished, processed, isParsing, errored, pending, ignored } =
-    useStatus(post);
+    usePostStatuses(post);
 
   if (nanopubPublished) {
     return (

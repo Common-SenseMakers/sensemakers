@@ -19,7 +19,9 @@ export const AppLabelsEditor = (props: {
   removeLabel?: (label: string) => void;
   hashtag?: boolean;
   color: string;
+  editable?: boolean;
 }) => {
+  const editable = props.editable !== undefined ? props.editable : true;
   const color = props.color;
   const hashtag = props.hashtag !== undefined ? props.hashtag : false;
 
@@ -207,7 +209,7 @@ export const AppLabelsEditor = (props: {
                   }></AppInput>
               </Box>
             </Keyboard>
-          ) : (
+          ) : editable ? (
             <Box
               margin={{ left: 'small' }}
               style={{
@@ -225,6 +227,8 @@ export const AppLabelsEditor = (props: {
                 }
                 plain></AppButton>
             </Box>
+          ) : (
+            <></>
           )}
         </Box>
       </Box>

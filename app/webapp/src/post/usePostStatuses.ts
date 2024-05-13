@@ -16,10 +16,11 @@ export interface AppPostStatus {
   pending?: boolean;
   ignored?: boolean;
   nanopubPublished?: { uri: string };
+  published?: boolean;
 }
 
 // One helper hook to derive all the statuses of a post
-export const useStatus = (post?: AppPostFull): AppPostStatus => {
+export const usePostStatuses = (post?: AppPostFull): AppPostStatus => {
   const { data: nanopubPublished } = useQuery({
     queryKey: ['nanopub', post],
     queryFn: async () => {
@@ -45,6 +46,7 @@ export const useStatus = (post?: AppPostFull): AppPostStatus => {
 
   const pending = post && post.reviewedStatus === AppPostReviewStatus.PENDING;
   const ignored = post && post.reviewedStatus === AppPostReviewStatus.IGNORED;
+  const published = post && nanopubPublished !== undefined;
 
   return {
     processed,
@@ -53,5 +55,6 @@ export const useStatus = (post?: AppPostFull): AppPostStatus => {
     pending,
     ignored,
     nanopubPublished,
+    published,
   };
 };

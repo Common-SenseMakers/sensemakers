@@ -38,7 +38,7 @@ export const PostView = (props: {
     post,
     nanopubDraft,
     updateSemantics,
-    postStatuses: statuses,
+    postStatuses,
     reparse,
     updatePost,
     isUpdating,
@@ -77,7 +77,7 @@ export const PostView = (props: {
     connectedUser.nanopub.length > 0 &&
     signNanopublication &&
     nanopubDraft &&
-    !statuses.nanopubPublished;
+    !postStatuses.nanopubPublished;
 
   const { action: rightClicked, label: rightLabel } = (() => {
     if (!canPublishNanopub) {
@@ -87,7 +87,7 @@ export const PostView = (props: {
       };
     }
 
-    if (canPublishNanopub && nanopubDraft && !statuses.nanopubPublished) {
+    if (canPublishNanopub && nanopubDraft && !postStatuses.nanopubPublished) {
       return {
         action: () => approve(),
         label: 'Nanopublish',
@@ -101,7 +101,7 @@ export const PostView = (props: {
   })();
 
   const action = (() => {
-    if (!statuses.processed && !statuses.isParsing) {
+    if (!postStatuses.processed && !postStatuses.isParsing) {
       return (
         <AppButton
           margin={{ top: 'medium' }}
@@ -112,7 +112,7 @@ export const PostView = (props: {
       );
     }
 
-    if (!statuses.nanopubPublished && !statuses.ignored) {
+    if (!postStatuses.nanopubPublished && !postStatuses.ignored) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
           <AppButton
@@ -134,6 +134,9 @@ export const PostView = (props: {
     return <></>;
   })();
 
+  const editable =
+    connectedUser?.userId === post?.authorId && !postStatuses.published;
+
   const content = (() => {
     if (!post) {
       return (
@@ -152,6 +155,7 @@ export const PostView = (props: {
           <SemanticsEditor
             isLoading={false}
             patternProps={{
+              editable,
               semantics: post?.semantics,
               originalParsed: post?.originalParsed,
               semanticsUpdated: semanticsUpdated,
@@ -161,13 +165,14 @@ export const PostView = (props: {
           <SemanticsEditor
             isLoading={false}
             patternProps={{
+              editable,
               semantics: post?.semantics,
               originalParsed: post?.originalParsed,
               semanticsUpdated: semanticsUpdated,
             }}
             include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
           {action}
-          {statuses.ignored ? (
+          {postStatuses.ignored ? (
             <AppButton
               disabled={isUpdating}
               margin={{ top: 'medium' }}

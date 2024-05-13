@@ -78,6 +78,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
 
               return (
                 <RefLabels
+                  editable={props.editable}
                   key={ixref}
                   refUrl={ref}
                   refData={refData}
