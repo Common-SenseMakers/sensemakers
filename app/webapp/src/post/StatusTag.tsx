@@ -1,6 +1,10 @@
-import { Box, Text } from 'grommet';
+import init, { Nanopub } from '@nanopub/sign';
+import { useQuery } from '@tanstack/react-query';
+import { Anchor, Box, Text } from 'grommet';
+import { useMemo } from 'react';
 
 import { NanopubIcon } from '../app/icons/NanopubIcon';
+import { PLATFORM } from '../shared/types/types';
 import {
   AppPostFull,
   AppPostParsedStatus,
@@ -10,52 +14,57 @@ import {
 
 export const NanopubStatus = (props: { post?: AppPostFull }) => {
   const { post } = props;
-  const { label, color } = (() => {
-    const processed =
-      post && post.parsedStatus === AppPostParsedStatus.PROCESSED;
-    const errored = post && post.parsingStatus === AppPostParsingStatus.ERRORED;
-    const isParsing =
-      post && post.parsingStatus === AppPostParsingStatus.PROCESSING;
+  const { data: nanopubPublished } = useQuery({
+    queryKey: ['nanopub', post],
+    queryFn: async () => {
+      try {
+        await (init as any)();
+        const nanopub = post?.mirrors?.find(
+          (m) => m.platformId === PLATFORM.Nanopub
+        );
+        if (!nanopub || !nanopub.posted) return null;
 
-    if (!processed) {
-      if (isParsing)
-        return {
-          label: 'Processing',
-          color: '#6B7280',
-        };
+        const nanopubObj = new Nanopub(nanopub.posted.post);
+        return nanopubObj.info();
+      } catch (e) {
+        console.error(e);
+      }
+    },
+  });
 
-      if (errored)
-        return {
-          label: 'Error',
-          color: '#6B7280',
-        };
-    }
+  if (nanopubPublished) {
+    return (
+      <Anchor href={nanopubPublished.uri} target="_blank">
+        <StatusTag label="Published" color="#337FBD"></StatusTag>
+      </Anchor>
+    );
+  }
 
-    const pending = post && post.reviewedStatus === AppPostReviewStatus.PENDING;
+  const processed = post && post.parsedStatus === AppPostParsedStatus.PROCESSED;
+  const errored = post && post.parsingStatus === AppPostParsingStatus.ERRORED;
+  const isParsing =
+    post && post.parsingStatus === AppPostParsingStatus.PROCESSING;
 
-    if (pending) {
-      return {
-        label: 'For Review',
-        color: '#F79A3E',
-      };
-    }
+  if (!processed) {
+    if (isParsing)
+      return <StatusTag label="Processing" color="#6B7280"></StatusTag>;
 
-    const ignored = post && post.reviewedStatus === AppPostReviewStatus.IGNORED;
+    if (errored) return <StatusTag label="Error" color="#6B7280"></StatusTag>;
+  }
 
-    if (ignored) {
-      return {
-        label: 'Ignored',
-        color: '#D1D5DB',
-      };
-    }
+  const pending = post && post.reviewedStatus === AppPostReviewStatus.PENDING;
 
-    return {
-      label: 'Unknown',
-      color: '#6B7280',
-    };
-  })();
+  if (pending) {
+    return <StatusTag label="For Review" color="#F79A3E"></StatusTag>;
+  }
 
-  return <StatusTag label={label} color={color}></StatusTag>;
+  const ignored = post && post.reviewedStatus === AppPostReviewStatus.IGNORED;
+
+  if (ignored) {
+    return <StatusTag label="Ignored" color="#D1D5DB"></StatusTag>;
+  }
+
+  return <></>;
 };
 
 export const StatusTag = (props: { label: string; color: string }) => {

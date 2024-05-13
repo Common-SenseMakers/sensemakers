@@ -12,6 +12,7 @@ import {
   AppPostReviewStatus,
   PostUpdate,
 } from '../shared/types/types.posts';
+import { AppButton } from '../ui-components';
 import { useUserPosts } from '../user-home/UserPostsContext';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
@@ -83,26 +84,17 @@ export const PostView = (props: {
     !nanopubPublished;
 
   const { action: rightClicked, label: rightLabel } = (() => {
-    if (nanopubPublished) {
-      return {
-        action: () => {
-          window.open(nanopubPublished.uri, '_newtab');
-        },
-        label: 'published!',
-      };
-    }
-
     if (!canPublishNanopub) {
       return {
         action: () => connect(),
-        label: 'connect wallet',
+        label: 'connect to publish',
       };
     }
 
     if (canPublishNanopub && nanopubDraft && !nanopubPublished) {
       return {
         action: () => approve(),
-        label: 'approve',
+        label: 'nanopublish',
       };
     }
 
@@ -136,6 +128,19 @@ export const PostView = (props: {
                 semanticsUpdated: semanticsUpdated,
               }}
               include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
+            {!nanopubPublished ? (
+              <Box direction="row">
+                <AppButton
+                  onClick={() => rightClicked()}
+                  label="ignore"></AppButton>
+                <AppButton
+                  primary
+                  onClick={() => rightClicked()}
+                  label={rightLabel}></AppButton>
+              </Box>
+            ) : (
+              <></>
+            )}
           </Box>
         </Box>
       }></ViewportPage>
