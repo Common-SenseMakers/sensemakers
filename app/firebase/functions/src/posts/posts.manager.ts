@@ -294,8 +294,7 @@ export class PostsManager {
       );
 
       if (
-        queryParams.status === PostsQueryStatus.ALL ||
-        queryParams.status === PostsQueryStatus.PENDING
+        queryParams.status === PostsQueryStatus.ALL
       ) {
         if (appPosts.length < queryParams.fetchParams.expectedAmount) {
           await this.fetchUser({ userId, params: queryParams.fetchParams });

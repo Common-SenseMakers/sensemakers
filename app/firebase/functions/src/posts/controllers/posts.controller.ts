@@ -2,7 +2,6 @@ import { RequestHandler } from 'express';
 
 import {
   AppPostFull,
-  PostUpdate,
   PostUpdatePayload,
   UserPostsQuery,
 } from '../../@shared/types/types.posts';
