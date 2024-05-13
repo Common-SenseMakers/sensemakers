@@ -88,6 +88,11 @@ export type PostUpdate = Partial<
   >
 >;
 
+export interface PostUpdatePayload {
+  postId: string;
+  postUpdate: PostUpdate;
+}
+
 export enum PostsQueryStatus {
   PUBLISHED = 'published',
   IGNORED = 'ignored',

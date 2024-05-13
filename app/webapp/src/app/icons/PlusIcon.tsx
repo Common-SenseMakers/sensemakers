@@ -13,9 +13,9 @@ export const PlusIcon = (props: { size?: number }) => {
         <path
           d="M8 4V12M12 8L4 8"
           stroke="#374151"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
       </svg>
     </Box>

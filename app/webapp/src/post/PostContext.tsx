@@ -1,5 +1,5 @@
-import init, { Nanopub } from '@nanopub/sign';
 import { useQuery } from '@tanstack/react-query';
+import { use } from 'i18next';
 import React, {
   createContext,
   useCallback,
@@ -7,30 +7,31 @@ import React, {
   useEffect,
   useMemo,
 } from 'react';
-import { TweetV2 } from 'twitter-api-v2';
 
 import { useAppFetch } from '../api/app.fetch';
+import { useToastContext } from '../app/ToastsContext';
 import { subscribeToUpdates } from '../firestore/realtime.listener';
 import { AppUserRead, PLATFORM } from '../shared/types/types';
 import {
   PlatformPost,
   PlatformPostDraft,
+  PlatformPostDraftApprova,
 } from '../shared/types/types.platform.posts';
 import {
   AppPostFull,
   AppPostReviewStatus,
   PostUpdate,
+  PostUpdatePayload,
+  PostsQueryStatus,
 } from '../shared/types/types.posts';
 import { TwitterThread } from '../shared/types/types.twitter';
+import { UserPostsContext, useUserPosts } from '../user-home/UserPostsContext';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
+import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { getAccount } from '../user-login/user.helper';
 import { AppPostStatus, useStatus } from './useStatus';
 
 const DEBUG = false;
-
-interface NanopubInfo {
-  uri: string;
-}
 
 interface PostContextType {
   post: AppPostFull | undefined;
@@ -39,7 +40,10 @@ interface PostContextType {
   nanopubDraft: PlatformPostDraft | undefined;
   tweet?: PlatformPost<TwitterThread>;
   updateSemantics: (newSemantics: string) => Promise<void>;
-  status: AppPostStatus;
+  postStatuses: AppPostStatus;
+  updatePost: (update: PostUpdate) => Promise<void>;
+  isUpdating: boolean;
+  approve: () => Promise<void>;
 }
 
 const PostContextValue = createContext<PostContextType | undefined>(undefined);
@@ -53,14 +57,14 @@ export const PostContext: React.FC<{
     throw new Error(`Both postId and post were undefined`);
   }
 
-  if (postInit !== undefined && _postId !== undefined) {
-    throw new Error(`Both postId and post were defined. Define only one`);
-  }
-
+  const { show } = useToastContext();
   const { connectedUser } = useAccountContext();
   const [postEdited, setPostEdited] = React.useState<AppPostFull | undefined>(
     undefined
   );
+
+  const { filterStatus, removePost } = useUserPosts();
+  const [isUpdating, setIsUpdating] = React.useState(false);
 
   const appFetch = useAppFetch();
 
@@ -92,6 +96,7 @@ export const PostContext: React.FC<{
   const post = useMemo<AppPostFull | undefined>(() => {
     if (isLoading) return postInit;
     if (postFetched && postFetched !== null) {
+      setIsUpdating(false);
       return { ...postFetched, ...postEdited };
     }
     return undefined;
@@ -193,6 +198,27 @@ export const PostContext: React.FC<{
 
   const tweet = post?.mirrors?.find((m) => m.platformId === PLATFORM.Twitter);
 
+  /** actuall call to update the post in the backend */
+  const _updatePost = async (update: PostUpdate) => {
+    if (!post) {
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      await appFetch<void, PostUpdatePayload>('/api/posts/update', {
+        postId: post.id,
+        postUpdate: update,
+      });
+      // setIsUpdating(false); let the refetch set the udpate flow to false
+    } catch (e: any) {
+      console.error(e);
+      show({ title: 'Error updating post', message: e.message });
+      setIsUpdating(false);
+    }
+  };
+
+  /** updatePost and optimistically update the post object */
   const optimisticUpdate = useCallback(
     async (update: PostUpdate) => {
       if (!post) {
@@ -200,17 +226,7 @@ export const PostContext: React.FC<{
       }
 
       setPostEdited({ ...post, ...update });
-
-      await appFetch<
-        void,
-        {
-          postId: string;
-          post: PostUpdate;
-        }
-      >('/api/posts/update', {
-        postId: post.id,
-        post: update,
-      });
+      _updatePost(update);
     },
     [post]
   );
@@ -221,18 +237,69 @@ export const PostContext: React.FC<{
       semantics: newSemantics,
     });
 
-  const status = useStatus(post);
+  /** updatePost and optimistically update the posts lists */
+  const updatePost = async (update: PostUpdate) => {
+    /** optimistic remove the post from the filtered list */
+    const statusKept = (() => {
+      if (filterStatus === PostsQueryStatus.ALL) {
+        return true;
+      }
+      if (filterStatus === PostsQueryStatus.PENDING) {
+        return update.reviewedStatus === AppPostReviewStatus.PENDING;
+      }
+      if (filterStatus === PostsQueryStatus.PUBLISHED) {
+        return update.reviewedStatus === AppPostReviewStatus.APPROVED;
+      }
+      if (filterStatus === PostsQueryStatus.IGNORED) {
+        return update.reviewedStatus === AppPostReviewStatus.IGNORED;
+      }
+    })();
+
+    if (!statusKept) {
+      removePost(postId);
+    }
+
+    _updatePost(update);
+  };
+
+  const postStatuses = useStatus(post);
+
+  const { signNanopublication } = useNanopubContext();
+
+  const approve = async () => {
+    // mark nanopub draft as approved
+    setIsUpdating(true);
+    const nanopub = post?.mirrors.find(
+      (m) => m.platformId === PLATFORM.Nanopub
+    );
+
+    if (!nanopub || !nanopub.draft) {
+      throw new Error(`Unexpected nanopub mirror not found`);
+    }
+
+    if (signNanopublication) {
+      const signed = await signNanopublication(nanopub.draft.post);
+      nanopub.draft.postApproval = PlatformPostDraftApprova.APPROVED;
+      nanopub.draft.post = signed.rdf();
+
+      await appFetch<void, AppPostFull>('/api/posts/approve', post);
+    }
+    // setIsUpdating(false); should be set by the refetech flow
+  };
 
   return (
     <PostContextValue.Provider
       value={{
         post,
+        postStatuses,
         author,
         tweet,
         nanopubDraft,
         reparse,
         updateSemantics,
-        status,
+        updatePost,
+        isUpdating,
+        approve,
       }}>
       {children}
     </PostContextValue.Provider>

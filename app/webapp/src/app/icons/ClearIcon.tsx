@@ -14,9 +14,9 @@ export const ClearIcon = (props: { size?: number }) => {
         <path
           d="M8.125 8.42505L11.875 12.175M11.875 8.42505L8.125 12.175M17.5 10.3C17.5 14.4422 14.1421 17.8 10 17.8C5.85786 17.8 2.5 14.4422 2.5 10.3C2.5 6.15791 5.85786 2.80005 10 2.80005C14.1421 2.80005 17.5 6.15791 17.5 10.3Z"
           stroke="#111827"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
       </svg>
     </Box>

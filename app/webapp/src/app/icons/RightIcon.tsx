@@ -13,9 +13,9 @@ export const RightIcon = (props: { size?: number }) => {
         <path
           d="M11.5556 4.55554L17 9.99999M17 9.99999L11.5556 15.4444M17 9.99999L3 9.99999"
           stroke="#111827"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
       </svg>
     </Box>
