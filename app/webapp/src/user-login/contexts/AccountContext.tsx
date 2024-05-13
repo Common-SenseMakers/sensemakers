@@ -17,6 +17,7 @@ export const OUR_TOKEN_NAME = 'ourToken';
 
 export type AccountContextType = {
   connectedUser?: AppUserRead;
+  hasTriedFetchingUser: boolean;
   twitterProfile?: TwitterUserProfile;
   isConnected: boolean;
   disconnect: () => void;
@@ -37,6 +38,8 @@ const AccountContextValue = createContext<AccountContextType | undefined>(
  */
 export const AccountContext = (props: PropsWithChildren) => {
   const [connectedUser, setConnectedUser] = useState<AppUserRead | null>();
+  const [hasTriedFetchingUser, setHasTriedFetchingUser] =
+    useState<boolean>(false);
   const [token, setToken] = useState<string>();
 
   const checkToken = () => {
@@ -55,6 +58,7 @@ export const AccountContext = (props: PropsWithChildren) => {
     try {
       if (token) {
         const user = await _appFetch<AppUserRead>('/api/auth/me', {}, token);
+        setHasTriedFetchingUser(false);
         if (DEBUG) console.log('got connected user', { user });
         setConnectedUser(user);
       } else {
@@ -90,6 +94,7 @@ export const AccountContext = (props: PropsWithChildren) => {
     <AccountContextValue.Provider
       value={{
         connectedUser: connectedUser === null ? undefined : connectedUser,
+        hasTriedFetchingUser,
         twitterProfile,
         isConnected: connectedUser !== undefined && connectedUser !== null,
         disconnect,
