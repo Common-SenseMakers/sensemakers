@@ -32,6 +32,7 @@ export const AppWelcome = (props: {}) => {
               components={{ b: <b></b> }}></Trans>
           </Paragraph>
           <AppButton
+            margin={{ top: 'medium' }}
             primary
             label={t(I18Keys.startBtn)}
             onClick={() => setState(1)}></AppButton>
@@ -46,6 +47,7 @@ export const AppWelcome = (props: {}) => {
           <Box width="100%" height="4px"></Box>
           <Paragraph>{t(I18Keys.connectParagraph)}</Paragraph>
           <AppButton
+            margin={{ top: 'medium' }}
             icon={<TwitterIcon></TwitterIcon>}
             primary
             label={t(I18Keys.signInX)}
