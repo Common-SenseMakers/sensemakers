@@ -3,7 +3,7 @@ import { RequestHandler } from 'express';
 import {
   AppPostFull,
   PostUpdate,
-  UserPostsQueryParams,
+  UserPostsQuery,
 } from '../../@shared/types/types.posts';
 import { IS_EMULATOR } from '../../config/config.runtime';
 import { envRuntime } from '../../config/typedenv.runtime';
@@ -30,7 +30,7 @@ export const getUserPostsController: RequestHandler = async (
   try {
     const queryParams = (await getUserPostsQuerySchema.validate(
       request.body
-    )) as UserPostsQueryParams;
+    )) as UserPostsQuery;
 
     logger.debug(`${request.path} - query parameters`, { queryParams });
     const userId = getAuthenticatedUser(request, true);

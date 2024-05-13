@@ -72,20 +72,14 @@ export const KeywordsComponent = (props: PatternProps) => {
   };
 
   return (
-    <Box
-      direction="row"
-      style={{
-        borderLeft: '4px solid',
-        borderColor: constants.colors.backgroundLightDarker,
-      }}
-      pad={{ left: 'medium' }}>
+    <Box direction="row">
       <Box
         style={{
           flexGrow: 1,
         }}
         direction="row">
         <AppLabelsEditor
-          hashtag
+          color="#498283"
           labels={keywords}
           addLabel={(newLabel) => addKeyword(newLabel)}
           removeLabel={(newLabel) => removeKeyword(newLabel)}></AppLabelsEditor>

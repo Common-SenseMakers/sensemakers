@@ -1,12 +1,13 @@
 import { Box, Image } from 'grommet';
 
-export const AppIcon = (props: {}) => {
+export const AppIcon = (props: { size?: number }) => {
+  const size = props.size || 18;
   return (
-    <Box pad="3.6px">
+    <Box pad={`${size * 0.2}px`}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="18"
-        height="18"
+        width={size}
+        height={size}
         viewBox="0 0 18 18"
         fill="none">
         <path

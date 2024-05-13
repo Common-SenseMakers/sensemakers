@@ -1,5 +1,3 @@
-export const DEBUG = true;
-
 export const FUNCTIONS_BASE = process.env.FUNCTIONS_BASE;
 
 export const ORCID_CLIENT_ID = process.env.ORCID_CLIENT_ID;

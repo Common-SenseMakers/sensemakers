@@ -1,16 +1,16 @@
-import { Box, Text } from 'grommet';
-import { StatusCritical } from 'grommet-icons';
+import { Box } from 'grommet';
 import { useNavigate } from 'react-router-dom';
 
-import { AppIcon } from '../app/brand/AppIcon';
-import { AppPostFull, AppPostParsingStatus } from '../shared/types/types.posts';
-import { Loading } from '../ui-components/LoadingDiv';
+import { TweetAnchor } from '../app/anchors/TwitterAnchor';
+import { PLATFORM } from '../shared/types/types';
+import { AppPostFull } from '../shared/types/types.posts';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { PostText } from './PostText';
+import { NanopubStatus, StatusTag } from './StatusTag';
 
-export const PostCard = (props: { post: AppPostFull }) => {
-  const { post } = props;
-  const isParsing = post.parsingStatus === AppPostParsingStatus.PROCESSING;
+export const PostCard = (props: { post: AppPostFull; shade?: boolean }) => {
+  const { post, shade: _shade } = props;
+  const shade = _shade || false;
 
   const navigate = useNavigate();
   const { constants } = useThemeContext();
@@ -19,33 +19,24 @@ export const PostCard = (props: { post: AppPostFull }) => {
     navigate(`/post/${post.id}`);
   };
 
-  const processStatusIcon = (() => {
-    const processed = post && post.parsedStatus === 'processed';
-    const errored = post && post.parsingStatus === 'errored';
-
-    if (isParsing) return <Loading></Loading>;
-    if (processed) return <AppIcon></AppIcon>;
-    if (errored) return <StatusCritical></StatusCritical>;
-  })();
+  const tweet = post.mirrors.find((m) => m.platformId === PLATFORM.Twitter);
 
   return (
     <Box
-      pad="medium"
+      pad={{ top: 'large', bottom: 'medium', horizontal: 'medium' }}
       style={{
+        backgroundColor: shade ? constants.colors.shade : 'white',
         cursor: 'pointer',
         position: 'relative',
-        backgroundColor: constants.colors.backgroundLight,
       }}
-      elevation="small"
       onClick={handleClick}>
       <Box direction="row" justify="between">
-        <Text size="xsmall">{post?.id}</Text>
-        <Text size="small">{post?.reviewedStatus}</Text>
+        <TweetAnchor
+          thread={tweet?.posted?.post}
+          timestamp={tweet?.posted?.timestampMs}></TweetAnchor>
+        <NanopubStatus post={post}></NanopubStatus>
       </Box>
-      <PostText text={post?.content}></PostText>
-      <Box style={{ position: 'absolute', right: '10px', bottom: '10px' }}>
-        {processStatusIcon}
-      </Box>
+      <PostText truncate shade={shade} text={post?.content}></PostText>
     </Box>
   );
 };

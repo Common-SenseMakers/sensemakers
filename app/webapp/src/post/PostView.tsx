@@ -3,6 +3,8 @@ import { Box, Text } from 'grommet';
 import { useAppFetch } from '../api/app.fetch';
 import { AppBottomNav } from '../app/layout/AppBottomNav';
 import { ViewportPage } from '../app/layout/Viewport';
+import { SemanticsEditor } from '../semantics/SemanticsEditor';
+import { PATTERN_ID } from '../semantics/patterns/patterns';
 import { PLATFORM } from '../shared/types/types';
 import { PlatformPostDraftApprova } from '../shared/types/types.platform.posts';
 import {
@@ -10,12 +12,15 @@ import {
   AppPostReviewStatus,
   PostUpdate,
 } from '../shared/types/types.posts';
+import { AppButton } from '../ui-components';
 import { useUserPosts } from '../user-home/UserPostsContext';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { PostContent } from './PostContent';
 import { usePost } from './PostContext';
 import { PostHeader } from './PostHeader';
+import { PostNav } from './PostNav';
+import { PostText } from './PostText';
 
 /** extract the postId from the route and pass it to a PostContext */
 export const PostView = (props: {
@@ -23,11 +28,15 @@ export const PostView = (props: {
   nextPostId?: string;
 }) => {
   const { prevPostId, nextPostId } = props;
-  const { post, nanopubDraft, nanopubPublished } = usePost();
+  const { post, nanopubDraft, nanopubPublished, updateSemantics } = usePost();
   const { connectedUser } = useAccountContext();
   const { signNanopublication, connect } = useNanopubContext();
   const appFetch = useAppFetch();
   const { updatePost } = useUserPosts();
+
+  const semanticsUpdated = (newSemantics: string) => {
+    updateSemantics(newSemantics);
+  };
 
   const reviewForPublication = async () => {
     if (!post) {
@@ -75,26 +84,17 @@ export const PostView = (props: {
     !nanopubPublished;
 
   const { action: rightClicked, label: rightLabel } = (() => {
-    if (nanopubPublished) {
-      return {
-        action: () => {
-          window.open(nanopubPublished.uri, '_newtab');
-        },
-        label: 'published!',
-      };
-    }
-
     if (!canPublishNanopub) {
       return {
         action: () => connect(),
-        label: 'connect wallet',
+        label: 'connect to publish',
       };
     }
 
     if (canPublishNanopub && nanopubDraft && !nanopubPublished) {
       return {
         action: () => approve(),
-        label: 'approve',
+        label: 'nanopublish',
       };
     }
 
@@ -108,33 +108,41 @@ export const PostView = (props: {
     <ViewportPage
       content={
         <Box fill>
-          <PostHeader
-            prevPostId={prevPostId}
-            nextPostId={nextPostId}></PostHeader>
-          <Box align="center" pad="small">
-            <Text size="xsmall">{post?.id}</Text>
+          <PostNav prevPostId={prevPostId} nextPostId={nextPostId}></PostNav>
+          <Box pad="medium">
+            <PostHeader margin={{ bottom: '16px' }}></PostHeader>
+            <SemanticsEditor
+              isLoading={false}
+              patternProps={{
+                semantics: post?.semantics,
+                originalParsed: post?.originalParsed,
+                semanticsUpdated: semanticsUpdated,
+              }}
+              include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
+            <PostText text={post?.content}></PostText>
+            <SemanticsEditor
+              isLoading={false}
+              patternProps={{
+                semantics: post?.semantics,
+                originalParsed: post?.originalParsed,
+                semanticsUpdated: semanticsUpdated,
+              }}
+              include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
+            {!nanopubPublished ? (
+              <Box direction="row">
+                <AppButton
+                  onClick={() => rightClicked()}
+                  label="ignore"></AppButton>
+                <AppButton
+                  primary
+                  onClick={() => rightClicked()}
+                  label={rightLabel}></AppButton>
+              </Box>
+            ) : (
+              <></>
+            )}
           </Box>
-          <PostContent></PostContent>
         </Box>
-      }
-      nav={
-        <AppBottomNav
-          paths={
-            post?.reviewedStatus === AppPostReviewStatus.IGNORED
-              ? [
-                  {
-                    action: reviewForPublication,
-                    label: 'Review For Publication',
-                  },
-                ]
-              : [
-                  {
-                    action: ignore,
-                    label: 'ignore',
-                  },
-                  { action: rightClicked, label: rightLabel },
-                ]
-          }></AppBottomNav>
       }></ViewportPage>
   );
 };

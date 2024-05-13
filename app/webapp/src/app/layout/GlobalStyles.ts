@@ -10,6 +10,10 @@ export const GlobalStyles = createGlobalStyle`
     scrollbar-color: transparent;
   }
 
+  p {
+    margin: 0;
+  }
+
   body {
     margin: 0;
   }

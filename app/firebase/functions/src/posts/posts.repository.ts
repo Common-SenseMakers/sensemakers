@@ -7,8 +7,8 @@ import {
   AppPostRepublishedStatus,
   AppPostReviewStatus,
   PostUpdate,
-  PostsQueryStatusParam,
-  UserPostsQueryParams,
+  PostsQueryStatus,
+  UserPostsQuery,
 } from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
 import { BaseRepository } from '../db/repo.base';
@@ -44,7 +44,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   }
 
   /** Cannot be part of a transaction */
-  public async getOfUser(userId: string, queryParams: UserPostsQueryParams) {
+  public async getOfUser(userId: string, queryParams: UserPostsQuery) {
     /** type protection agains properties renaming */
     const createdAtKey: keyof AppPost = 'createdAtMs';
     const authorKey: keyof AppPost = 'authorId';
@@ -54,20 +54,20 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     const base = this.db.collections.posts.where(authorKey, '==', userId);
 
     const filtered = (() => {
-      if (queryParams.status === PostsQueryStatusParam.ALL) {
+      if (queryParams.status === PostsQueryStatus.ALL) {
         return base;
       }
-      if (queryParams.status === PostsQueryStatusParam.PENDING) {
+      if (queryParams.status === PostsQueryStatus.PENDING) {
         return base.where(reviewedStatusKey, '==', AppPostReviewStatus.PENDING);
       }
-      if (queryParams.status === PostsQueryStatusParam.PUBLISHED) {
+      if (queryParams.status === PostsQueryStatus.PUBLISHED) {
         return base.where(
           republishedStatusKey,
           '==',
           AppPostRepublishedStatus.REPUBLISHED
         );
       }
-      if (queryParams.status === PostsQueryStatusParam.IGNORED) {
+      if (queryParams.status === PostsQueryStatus.IGNORED) {
         return base.where(reviewedStatusKey, '==', AppPostReviewStatus.IGNORED);
       }
       return base;

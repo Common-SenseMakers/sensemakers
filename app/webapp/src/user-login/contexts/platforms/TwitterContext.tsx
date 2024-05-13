@@ -20,7 +20,7 @@ import {
 } from '../../../shared/types/types.twitter';
 import { useAccountContext } from '../AccountContext';
 
-const DEBUG = true;
+const DEBUG = false;
 
 const LS_TWITTER_CONTEXT_KEY = 'twitter-signin-context';
 

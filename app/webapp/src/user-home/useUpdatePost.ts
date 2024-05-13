@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useAppFetch } from '../api/app.fetch';
 import { PostUpdate } from '../shared/types/types.posts';
 
-const DEBUG = true;
+const DEBUG = false;
 export const usePostUpdate = () => {
   const appFetch = useAppFetch();
   const [updatingPosts, setUpdatingPosts] = useState<string[]>([]);

@@ -7,19 +7,13 @@ import { usePost } from './PostContext';
 import { PostText } from './PostText';
 
 export const PostContent = () => {
-  const { post, reparse, isParsing, updateSemantics } = usePost();
-
-  const semanticsUpdated = (newSemantics: string) => {
-    updateSemantics(newSemantics);
-  };
+  const { post, reparse, isParsing } = usePost();
 
   const parsingError = post && post.parsingStatus === 'errored';
 
   return (
-    <Box pad={{ horizontal: 'small', vertical: 'large' }}>
-      <Box elevation="small" pad="medium">
-        <PostText text={post?.content}></PostText>
-      </Box>
+    <Box>
+      <Box></Box>
 
       <Box margin={{ top: 'large' }} style={{ minHeight: '90px' }}>
         {parsingError ? (
@@ -31,15 +25,6 @@ export const PostContent = () => {
           <></>
         )}
         {isParsing ? <LoadingDiv fill height="120px"></LoadingDiv> : <></>}
-        {post?.reviewedStatus !== 'ignored' ? (
-          <SemanticsEditor
-            isLoading={false}
-            semantics={post?.semantics}
-            originalParsed={post?.originalParsed}
-            semanticsUpdated={semanticsUpdated}></SemanticsEditor>
-        ) : (
-          <></>
-        )}
       </Box>
     </Box>
   );

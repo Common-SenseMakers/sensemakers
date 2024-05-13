@@ -30,8 +30,8 @@ import {
   AppPostRepublishedStatus,
   AppPostReviewStatus,
   PostUpdate,
-  PostsQueryStatusParam,
-  UserPostsQueryParams,
+  PostsQueryStatus,
+  UserPostsQuery,
 } from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
@@ -279,7 +279,7 @@ export class PostsManager {
   /** get AppPost and fetch for new posts if necessary */
   private async getAndFetchIfNecessary(
     userId: string,
-    queryParams: UserPostsQueryParams
+    queryParams: UserPostsQuery
   ) {
     /** if sinceId is provided fetch forward always */
     if (queryParams.fetchParams.sinceId !== undefined) {
@@ -294,8 +294,8 @@ export class PostsManager {
       );
 
       if (
-        queryParams.status === PostsQueryStatusParam.ALL ||
-        queryParams.status === PostsQueryStatusParam.PENDING
+        queryParams.status === PostsQueryStatus.ALL ||
+        queryParams.status === PostsQueryStatus.PENDING
       ) {
         if (appPosts.length < queryParams.fetchParams.expectedAmount) {
           await this.fetchUser({ userId, params: queryParams.fetchParams });
@@ -309,10 +309,10 @@ export class PostsManager {
   /** Get posts AppPostFull of user, cannot be part of a transaction
    * We trigger fetching posts from the platforms from here
    */
-  async getOfUser(userId: string, _queryParams?: UserPostsQueryParams) {
-    const queryParams: UserPostsQueryParams = {
+  async getOfUser(userId: string, _queryParams?: UserPostsQuery) {
+    const queryParams: UserPostsQuery = {
       fetchParams: { expectedAmount: 10 },
-      status: PostsQueryStatusParam.ALL,
+      status: PostsQueryStatus.ALL,
       ..._queryParams,
     };
 

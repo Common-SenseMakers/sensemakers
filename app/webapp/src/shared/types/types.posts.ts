@@ -88,14 +88,14 @@ export type PostUpdate = Partial<
   >
 >;
 
-export enum PostsQueryStatusParam {
+export enum PostsQueryStatus {
   PUBLISHED = 'published',
   IGNORED = 'ignored',
   PENDING = 'pending',
   ALL = 'all',
 }
 
-export interface UserPostsQueryParams {
-  status: PostsQueryStatusParam;
+export interface UserPostsQuery {
+  status: PostsQueryStatus;
   fetchParams: FetchParams;
 }

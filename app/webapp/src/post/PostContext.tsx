@@ -21,10 +21,11 @@ import {
   AppPostReviewStatus,
   PostUpdate,
 } from '../shared/types/types.posts';
+import { TwitterThread } from '../shared/types/types.twitter';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { getAccount } from '../user-login/user.helper';
 
-const DEBUG = true;
+const DEBUG = false;
 
 interface NanopubInfo {
   uri: string;
@@ -37,7 +38,7 @@ interface PostContextType {
   isParsing: boolean;
   nanopubDraft: PlatformPostDraft | undefined;
   nanopubPublished: NanopubInfo | undefined;
-  tweet?: PlatformPost<TweetV2>;
+  tweet?: PlatformPost<TwitterThread>;
   updateSemantics: (newSemantics: string) => Promise<void>;
 }
 

@@ -11,6 +11,7 @@ import {
   TwitterSignupData,
   TwitterUserCredentials,
   TwitterUserDetails,
+  TwitterUserProfile,
 } from '../../@shared/types/types.twitter';
 import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
@@ -302,7 +303,7 @@ export class TwitterServiceClient {
     });
 
     const profileParams: Partial<UsersV2Params> = {
-      'user.fields': ['profile_image_url'],
+      'user.fields': ['profile_image_url', 'name', 'username'],
     };
     const { data: user } = await result.client.v2.me(profileParams);
     if (DEBUG) logger.debug('handleSignupData', user);
@@ -325,7 +326,7 @@ export class TwitterServiceClient {
     const twitter: TwitterUserDetails = {
       user_id: user.id,
       signupDate: 0,
-      profile: user,
+      profile: user as TwitterUserProfile,
     };
 
     /** always store the credential as read credentials */

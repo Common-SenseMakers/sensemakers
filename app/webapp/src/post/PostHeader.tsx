@@ -1,48 +1,40 @@
-import { Box } from 'grommet';
-import {
-  FormNext,
-  FormNextLink,
-  FormPrevious,
-  FormPreviousLink,
-  Home,
-} from 'grommet-icons';
-import { useNavigate } from 'react-router-dom';
+import { Box, BoxExtendedProps, Text } from 'grommet';
 
-import { AppBottomNav } from '../app/layout/AppBottomNav';
-import { AbsoluteRoutes } from '../route.names';
-import { useUserPosts } from '../user-home/UserPostsContext';
+import { TwitterAvatar } from '../app/TwitterAvatar';
+import { TweetAnchor } from '../app/anchors/TwitterAnchor';
+import { useThemeContext } from '../ui-components/ThemedApp';
+import { useAccountContext } from '../user-login/contexts/AccountContext';
+import { usePost } from './PostContext';
+import { NanopubStatus } from './StatusTag';
 
-export const PostHeader = (props: {
-  prevPostId?: string;
-  nextPostId?: string;
-}) => {
-  const { prevPostId, nextPostId } = props;
-  const navigate = useNavigate();
-  const { filterStatus } = useUserPosts();
+export const PostHeader = (props: BoxExtendedProps) => {
+  const { constants } = useThemeContext();
+  const { twitterProfile } = useAccountContext();
+  const { tweet, post } = usePost();
+
+  const username = twitterProfile?.name;
 
   return (
-    <Box style={{ height: '60px' }}>
-      <AppBottomNav
-        paths={[
-          {
-            icon: <Home></Home>,
-            label: 'back',
-            action: () => navigate(`/${filterStatus}`),
-          },
-          {
-            icon: <FormPrevious></FormPrevious>,
-            label: 'prev',
-            disabled: !prevPostId,
-            action: () => navigate(`/post/${prevPostId}`),
-          },
-          {
-            reverse: true,
-            disabled: !nextPostId,
-            icon: <FormNext></FormNext>,
-            label: 'next',
-            action: () => navigate(`/post/${nextPostId}`),
-          },
-        ]}></AppBottomNav>
+    <Box direction="row" {...props}>
+      <TwitterAvatar size={40} profile={twitterProfile}></TwitterAvatar>
+      <Box width="100%" margin={{ left: 'medium' }}>
+        <Box direction="row" justify="between">
+          <Text
+            color={constants.colors.primary}
+            style={{
+              fontSize: '16px',
+              fontStyle: 'normal',
+              fontWeight: '600',
+              lineHeight: '18px',
+              textDecoration: 'none',
+            }}>
+            {username}
+          </Text>
+          <NanopubStatus post={post}></NanopubStatus>
+        </Box>
+        <Box margin={{ bottom: '6px' }}></Box>
+        <TweetAnchor thread={tweet?.posted?.post}></TweetAnchor>
+      </Box>
     </Box>
   );
 };

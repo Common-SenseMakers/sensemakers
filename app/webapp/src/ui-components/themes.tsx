@@ -20,19 +20,12 @@ export interface StyleConstants {
   };
   colors: {
     primary: string;
-    primaryLight: string;
-    text: string;
     textLight: string;
-    textOnPrimary: string;
-    lightTextOnLight: string;
-    headings: string;
-    backgroundLight: string;
-    backgroundLightShade: string;
-    backgroundLightDarker: string;
-    border: string;
+    shade: string;
     links: string;
-    tagsBackground: string;
-    tagsText: string;
+    text: string;
+    textOnPrimary: string;
+    border: string;
   };
 }
 
@@ -44,8 +37,8 @@ const constants: StyleConstants = {
   headingFontSizes: {
     1: '28px',
     2: '24px',
-    3: '22px',
-    4: '22px',
+    3: '20px',
+    4: '18px',
   },
   textFontSizes: {
     large: '24px',
@@ -56,19 +49,12 @@ const constants: StyleConstants = {
   },
   colors: {
     primary: '#111827',
-    primaryLight: '#4B5563',
-    text: '#111827',
     textLight: '#4B5563',
+    shade: '#F9FAFB',
+    text: '#111827',
+    links: '#3182CE',
     textOnPrimary: '#ffffff',
-    lightTextOnLight: '#949494',
-    border: '#333333',
-    headings: '#1a1a1a',
-    backgroundLight: '#f7f7f7',
-    backgroundLightShade: '#ececec',
-    backgroundLightDarker: '#cacaca',
-    links: '#021c49',
-    tagsBackground: '#52004c',
-    tagsText: '#ffffff',
+    border: '#D1D5DB',
   },
 };
 
@@ -77,7 +63,6 @@ const extension: ExtendedThemeType = {
   global: {
     colors: {
       brand: constants.colors.primary,
-      brandLight: constants.colors.primaryLight,
       text: constants.colors.text,
     },
     font: {
@@ -126,6 +111,11 @@ const extension: ExtendedThemeType = {
       },
     },
     responsiveBreakpoint: undefined,
+    extend: css`
+      font-style: normal;
+      font-weight: 600;
+      letter-spacing: -0.4px;
+    `,
   },
   button: {
     padding: { vertical: '15px', horizontal: '30px' },
@@ -170,6 +160,10 @@ const extension: ExtendedThemeType = {
       extend: css`
         & {
           border-style: none;
+          font-size: 14px;
+          font-style: normal;
+          font-weight: 500;
+          line-height: 16px; /* 114.286% */
         }
       `,
     },
@@ -221,7 +215,7 @@ const extension: ExtendedThemeType = {
   },
   accordion: {
     icons: {
-      color: constants.colors.primaryLight,
+      color: constants.colors.primary,
     },
     border: false,
     panel: {
@@ -239,10 +233,7 @@ const extension: ExtendedThemeType = {
     medium: {
       size: constants.textFontSizes.normal,
     },
-    extend: css`
-      margin: 0px 0px 24px 0px;
-      line-height: 24px; /* 150% */
-    `,
+    extend: css``,
   },
 };
 

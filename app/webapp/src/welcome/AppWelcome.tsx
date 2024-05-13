@@ -21,7 +21,7 @@ export const AppWelcome = (props: {}) => {
     if (state === 0) {
       return (
         <>
-          <AppHeading>{t(I18Keys.introTitle)}</AppHeading>
+          <AppHeading level="1">{t(I18Keys.introTitle)}</AppHeading>
           <Box width="100%" height="4px"></Box>
           <AppSubtitle>{t(I18Keys.introSubtitle)}</AppSubtitle>
           <Box width="100%" height="16px"></Box>
@@ -42,7 +42,7 @@ export const AppWelcome = (props: {}) => {
     if (state === 1 && connectTwitter) {
       return (
         <>
-          <AppHeading>{t(I18Keys.connectAccounts)}</AppHeading>
+          <AppHeading level="1">{t(I18Keys.connectAccounts)}</AppHeading>
           <Box width="100%" height="4px"></Box>
           <Paragraph>{t(I18Keys.connectParagraph)}</Paragraph>
           <AppButton

@@ -6,14 +6,14 @@ import {
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
-  UserPostsQueryParams,
+  UserPostsQuery,
 } from '../shared/types/types.posts';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useQueryFilter } from './useQueryFilter';
 
 const PAGE_SIZE = 5;
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const usePostsFetch = () => {
   const { connectedUser } = useAccountContext();
@@ -177,7 +177,7 @@ export const usePostsFetch = () => {
       setIsFetchingOlder(true);
       setFetchedFirst(true);
       try {
-        const params: UserPostsQueryParams = {
+        const params: UserPostsQuery = {
           status,
           fetchParams: {
             expectedAmount: PAGE_SIZE,
@@ -185,7 +185,7 @@ export const usePostsFetch = () => {
           },
         };
         if (DEBUG) console.log(`fetching for older`, params);
-        const readPosts = await appFetch<AppPostFull[], UserPostsQueryParams>(
+        const readPosts = await appFetch<AppPostFull[], UserPostsQuery>(
           '/api/posts/getOfUser',
           params
         );
@@ -223,7 +223,7 @@ export const usePostsFetch = () => {
       setIsFetchingNewer(true);
 
       try {
-        const params: UserPostsQueryParams = {
+        const params: UserPostsQuery = {
           status,
           fetchParams: {
             expectedAmount: PAGE_SIZE,
@@ -231,7 +231,7 @@ export const usePostsFetch = () => {
           },
         };
         if (DEBUG) console.log(`fetching for newer`, params);
-        const readPosts = await appFetch<AppPostFull[], UserPostsQueryParams>(
+        const readPosts = await appFetch<AppPostFull[], UserPostsQuery>(
           '/api/posts/getOfUser',
           params
         );
