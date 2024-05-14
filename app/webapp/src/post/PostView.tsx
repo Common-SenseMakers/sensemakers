@@ -1,5 +1,6 @@
 import { Box, Text } from 'grommet';
 import { Clear, FormClose, Refresh, Send } from 'grommet-icons';
+import { useState } from 'react';
 
 import { useAppFetch } from '../api/app.fetch';
 import { ClearIcon } from '../app/icons/ClearIcon';
@@ -16,11 +17,11 @@ import {
   PostUpdate,
 } from '../shared/types/types.posts';
 import { AppButton } from '../ui-components';
+import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useUserPosts } from '../user-home/UserPostsContext';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
-import { PostContent } from './PostContent';
 import { usePost } from './PostContext';
 import { PostHeader } from './PostHeader';
 import { PostNav } from './PostNav';
@@ -33,11 +34,18 @@ export const PostView = (props: {
 }) => {
   const { constants } = useThemeContext();
   const { prevPostId, nextPostId } = props;
-  const { post, nanopubDraft, updateSemantics, status, reparse } = usePost();
+  const {
+    post,
+    nanopubDraft,
+    updateSemantics,
+    postStatuses,
+    reparse,
+    updatePost,
+    isUpdating,
+    approve,
+  } = usePost();
+
   const { connectedUser } = useAccountContext();
-  const { signNanopublication, connect } = useNanopubContext();
-  const appFetch = useAppFetch();
-  const { updatePost } = useUserPosts();
 
   const semanticsUpdated = (newSemantics: string) => {
     updateSemantics(newSemantics);
@@ -47,7 +55,7 @@ export const PostView = (props: {
     if (!post) {
       throw new Error(`Unexpected post not found`);
     }
-    updatePost(post.id, {
+    updatePost({
       reviewedStatus: AppPostReviewStatus.PENDING,
     });
   };
@@ -56,29 +64,12 @@ export const PostView = (props: {
     if (!post) {
       throw new Error(`Unexpected post not found`);
     }
-    updatePost(post.id, {
+    updatePost({
       reviewedStatus: AppPostReviewStatus.IGNORED,
     });
   };
 
-  const approve = async () => {
-    // mark nanopub draft as approved
-    const nanopub = post?.mirrors.find(
-      (m) => m.platformId === PLATFORM.Nanopub
-    );
-
-    if (!nanopub || !nanopub.draft) {
-      throw new Error(`Unexpected nanopub mirror not found`);
-    }
-
-    if (signNanopublication) {
-      const signed = await signNanopublication(nanopub.draft.post);
-      nanopub.draft.postApproval = PlatformPostDraftApprova.APPROVED;
-      nanopub.draft.post = signed.rdf();
-
-      await appFetch<void, AppPostFull>('/api/posts/approve', post);
-    }
-  };
+  const { signNanopublication, connect } = useNanopubContext();
 
   const canPublishNanopub =
     connectedUser &&
@@ -86,7 +77,7 @@ export const PostView = (props: {
     connectedUser.nanopub.length > 0 &&
     signNanopublication &&
     nanopubDraft &&
-    !status.nanopubPublished;
+    !postStatuses.nanopubPublished;
 
   const { action: rightClicked, label: rightLabel } = (() => {
     if (!canPublishNanopub) {
@@ -96,7 +87,7 @@ export const PostView = (props: {
       };
     }
 
-    if (canPublishNanopub && nanopubDraft && !status.nanopubPublished) {
+    if (canPublishNanopub && nanopubDraft && !postStatuses.nanopubPublished) {
       return {
         action: () => approve(),
         label: 'Nanopublish',
@@ -110,7 +101,7 @@ export const PostView = (props: {
   })();
 
   const action = (() => {
-    if (!status.processed && !status.isParsing) {
+    if (!postStatuses.processed && !postStatuses.isParsing) {
       return (
         <AppButton
           margin={{ top: 'medium' }}
@@ -121,16 +112,18 @@ export const PostView = (props: {
       );
     }
 
-    if (!status.nanopubPublished && !status.ignored) {
+    if (!postStatuses.nanopubPublished && !postStatuses.ignored) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
           <AppButton
+            disabled={isUpdating}
             icon={<ClearIcon></ClearIcon>}
             style={{ width: '50%' }}
             onClick={() => ignore()}
             label="Ignore"></AppButton>
           <AppButton
             primary
+            disabled={isUpdating}
             icon={<SendIcon></SendIcon>}
             style={{ width: '50%' }}
             onClick={() => rightClicked()}
@@ -141,40 +134,65 @@ export const PostView = (props: {
     return <></>;
   })();
 
+  const editable =
+    connectedUser?.userId === post?.authorId && !postStatuses.published;
+
+  const content = (() => {
+    if (!post) {
+      return (
+        <Box gap="12px" pad="medium">
+          <LoadingDiv height="90px" width="100%"></LoadingDiv>
+          <LoadingDiv height="200px" width="100%"></LoadingDiv>
+          <LoadingDiv height="120px" width="100%"></LoadingDiv>;
+        </Box>
+      );
+    }
+
+    return (
+      <>
+        <Box pad="medium">
+          <PostHeader margin={{ bottom: '16px' }}></PostHeader>
+          <SemanticsEditor
+            isLoading={false}
+            patternProps={{
+              editable,
+              semantics: post?.semantics,
+              originalParsed: post?.originalParsed,
+              semanticsUpdated: semanticsUpdated,
+            }}
+            include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
+          <PostText text={post?.content}></PostText>
+          <SemanticsEditor
+            isLoading={false}
+            patternProps={{
+              editable,
+              semantics: post?.semantics,
+              originalParsed: post?.originalParsed,
+              semanticsUpdated: semanticsUpdated,
+            }}
+            include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
+          {action}
+          {postStatuses.ignored ? (
+            <AppButton
+              disabled={isUpdating}
+              margin={{ top: 'medium' }}
+              primary
+              onClick={() => reviewForPublication()}
+              label="Review for publication"></AppButton>
+          ) : (
+            <></>
+          )}
+        </Box>
+      </>
+    );
+  })();
+
   return (
     <ViewportPage
       content={
         <Box fill>
           <PostNav prevPostId={prevPostId} nextPostId={nextPostId}></PostNav>
-          <Box pad="medium">
-            <PostHeader margin={{ bottom: '16px' }}></PostHeader>
-            <SemanticsEditor
-              isLoading={false}
-              patternProps={{
-                semantics: post?.semantics,
-                originalParsed: post?.originalParsed,
-                semanticsUpdated: semanticsUpdated,
-              }}
-              include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
-            <PostText text={post?.content}></PostText>
-            <SemanticsEditor
-              isLoading={false}
-              patternProps={{
-                semantics: post?.semantics,
-                originalParsed: post?.originalParsed,
-                semanticsUpdated: semanticsUpdated,
-              }}
-              include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
-            {action}
-            {status.ignored ? (
-              <AppButton
-                primary
-                onClick={() => reviewForPublication()}
-                label="Review for publication"></AppButton>
-            ) : (
-              <></>
-            )}
-          </Box>
+          {content}
         </Box>
       }></ViewportPage>
   );

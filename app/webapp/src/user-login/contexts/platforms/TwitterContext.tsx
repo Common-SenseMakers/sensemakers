@@ -90,7 +90,9 @@ export const TwitterContext = (props: PropsWithChildren) => {
         show({ title: t(I18Keys.errorConnectTwitter), message: error_param });
         searchParams.delete('error');
         searchParams.delete('state');
+        setSearchParams(searchParams);
       }
+
       if (code_param && state_param) {
         verifierHandled.current = true;
 
@@ -99,33 +101,43 @@ export const TwitterContext = (props: PropsWithChildren) => {
         const contextStr = localStorage.getItem(LS_TWITTER_CONTEXT_KEY);
 
         if (contextStr === null) {
-          throw new Error('Twitter context not found');
-        }
-
-        localStorage.removeItem(LS_TWITTER_CONTEXT_KEY);
-
-        const context = JSON.parse(contextStr) as TwitterSignupContext;
-
-        if (context.state !== state_param) {
-          throw new Error('Undexpected state');
-        }
-
-        appFetch<HandleSignupResult>(`/api/auth/${PLATFORM.Twitter}/signup`, {
-          ...context,
-          code: code_param,
-        }).then((result) => {
-          if (result && result.ourAccessToken) {
-            setOurToken(result.ourAccessToken);
-          }
-
+          // unexpected state, reset
           searchParams.delete('state');
           searchParams.delete('code');
           setIsConnecting(false);
           refreshConnected();
-          navigate(location.pathname, { replace: true });
-        });
+          setSearchParams(searchParams);
+        } else {
+          localStorage.removeItem(LS_TWITTER_CONTEXT_KEY);
+
+          const context = JSON.parse(contextStr) as TwitterSignupContext;
+
+          if (context.state !== state_param) {
+            throw new Error('Undexpected state');
+          }
+
+          appFetch<HandleSignupResult>(`/api/auth/${PLATFORM.Twitter}/signup`, {
+            ...context,
+            code: code_param,
+          }).then((result) => {
+            if (result && result.ourAccessToken) {
+              setOurToken(result.ourAccessToken);
+            }
+
+            searchParams.delete('state');
+            searchParams.delete('code');
+            setIsConnecting(false);
+            refreshConnected();
+            setSearchParams(searchParams);
+          });
+        }
+      } else {
+        if (state_param) {
+          searchParams.delete('state');
+          setSearchParams(searchParams);
+        }
       }
-      setSearchParams(searchParams);
+      navigate(location.pathname, { replace: true });
     }
   }, [state_param, code_param, error_param, searchParams, setSearchParams]);
 

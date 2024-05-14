@@ -14,6 +14,7 @@ export enum PATTERN_ID {
 }
 
 export interface PatternProps {
+  editable?: boolean;
   originalParsed?: ParsePostResult;
   semantics?: AppPostSemantics;
   semanticsUpdated?: (semantics: AppPostSemantics) => void;
@@ -33,17 +34,22 @@ export const Patterns = (props: {
 }) => {
   return (
     <Box>
-      {Array.from(Object.entries(patternsLib)).map(([patternId, Pattern]) => {
-        if (props.include && !props.include.includes(patternId as PATTERN_ID)) {
-          return <></>;
-        }
+      {Array.from(Object.entries(patternsLib)).map(
+        ([patternId, Pattern], ix) => {
+          if (
+            props.include &&
+            !props.include.includes(patternId as PATTERN_ID)
+          ) {
+            return <Box key={ix}></Box>;
+          }
 
-        return (
-          <Box key={patternId}>
-            <Pattern {...props.patternProps}></Pattern>
-          </Box>
-        );
-      })}
+          return (
+            <Box key={ix}>
+              <Pattern {...props.patternProps}></Pattern>
+            </Box>
+          );
+        }
+      )}
     </Box>
   );
 };

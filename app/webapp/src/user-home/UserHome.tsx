@@ -12,6 +12,7 @@ import { AppButton, AppHeading, AppSelect } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
+import { ConnectedUser } from '../user-login/ConnectedUser';
 import { useUserPosts } from './UserPostsContext';
 
 const statusPretty: Record<PostsQueryStatus, string> = {
@@ -29,11 +30,13 @@ export const UserHome = () => {
   const {
     filterStatus,
     posts,
-    errorFetchingOlder,
     fetchOlder,
+    errorFetchingOlder,
+    isFetchingOlder,
     fetchNewer,
     isFetchingNewer,
     errorFetchingNewer,
+    isLoading,
   } = useUserPosts();
 
   useEffect(() => {
@@ -54,35 +57,49 @@ export const UserHome = () => {
     navigate(`/${filter.status}`);
   };
 
-  const content = posts && (
-    <>
-      {posts.length === 0 && (
+  const content = (() => {
+    if (!posts || isLoading) {
+      return [1, 2, 4, 5, 6].map((ix) => (
+        <LoadingDiv
+          key={ix}
+          height="108px"
+          width="100%"
+          margin={{ bottom: '2px' }}></LoadingDiv>
+      ));
+    }
+
+    if (posts.length === 0) {
+      return (
         <BoxCentered>
           <Text>No posts found</Text>
         </BoxCentered>
-      )}
+      );
+    }
 
-      <Box gap="medium">
-        {posts.map((post, ix) => (
-          <Box key={ix}>
-            <PostCard post={post} shade={ix % 2 === 1}></PostCard>
-          </Box>
-        ))}
-      </Box>
-
-      <Box pad="large">
-        {posts.length > 0 && !errorFetchingOlder ? (
-          <AppButton
-            label="fetch older"
-            onClick={() => fetchOlder()}></AppButton>
-        ) : posts.length > 0 ? (
-          <LoadingDiv></LoadingDiv>
-        ) : (
-          <> </>
-        )}
-      </Box>
-    </>
-  );
+    return (
+      <>
+        <Box gap="medium">
+          {posts.map((post, ix) => (
+            <Box key={ix}>
+              <PostCard post={post} shade={ix % 2 === 1}></PostCard>
+            </Box>
+          ))}
+        </Box>
+        <Box pad="large">
+          {posts.length > 0 &&
+          !errorFetchingOlder &&
+          filterStatus === PostsQueryStatus.ALL ? (
+            <AppButton
+              disabled={isFetchingOlder}
+              label={!isFetchingOlder ? 'fetch older' : 'loading...'}
+              onClick={() => fetchOlder()}></AppButton>
+          ) : (
+            <> </>
+          )}
+        </Box>
+      </>
+    );
+  })();
 
   const FilterValue = (
     props: {
@@ -156,8 +173,13 @@ export const UserHome = () => {
     <Box
       pad={{ top: '24px', bottom: '12px', horizontal: '12px' }}
       style={{ backgroundColor: constants.colors.shade, flexShrink: 0 }}>
-      <Box direction="row" margin={{ bottom: '12px' }}>
+      <Box
+        direction="row"
+        margin={{ bottom: '12px' }}
+        justify="between"
+        align="center">
         <AppHeading level="3">{t(I18Keys.yourPublications)}</AppHeading>
+        <ConnectedUser></ConnectedUser>
       </Box>
 
       <Box direction="row" align="center">

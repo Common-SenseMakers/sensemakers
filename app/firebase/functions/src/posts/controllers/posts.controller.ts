@@ -3,6 +3,7 @@ import { RequestHandler } from 'express';
 import {
   AppPostFull,
   PostUpdate,
+  PostUpdatePayload,
   UserPostsQuery,
 } from '../../@shared/types/types.posts';
 import { IS_EMULATOR } from '../../config/config.runtime';
@@ -175,10 +176,7 @@ export const updatePostController: RequestHandler = async (
     const userId = getAuthenticatedUser(request, true);
     const { db, postsManager } = getServices(request);
 
-    const payload = (await updatePostSchema.validate(request.body)) as {
-      postId: string;
-      postUpdate: PostUpdate;
-    };
+    const payload = (await updatePostSchema.validate(request.body)) as PostUpdatePayload;
 
     db.run(async (manager) => {
       const post = await postsManager.processing.posts.get(
