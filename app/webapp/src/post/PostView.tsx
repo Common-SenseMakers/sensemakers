@@ -152,25 +152,33 @@ export const PostView = (props: {
       <>
         <Box pad="medium">
           <PostHeader margin={{ bottom: '16px' }}></PostHeader>
-          <SemanticsEditor
-            isLoading={false}
-            patternProps={{
-              editable,
-              semantics: post?.semantics,
-              originalParsed: post?.originalParsed,
-              semanticsUpdated: semanticsUpdated,
-            }}
-            include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
+          {postStatuses.isParsing ? (
+            <LoadingDiv height="60px" width="100%"></LoadingDiv>
+          ) : (
+            <SemanticsEditor
+              isLoading={false}
+              patternProps={{
+                editable,
+                semantics: post?.semantics,
+                originalParsed: post?.originalParsed,
+                semanticsUpdated: semanticsUpdated,
+              }}
+              include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
+          )}
           <PostText text={post?.content}></PostText>
-          <SemanticsEditor
-            isLoading={false}
-            patternProps={{
-              editable,
-              semantics: post?.semantics,
-              originalParsed: post?.originalParsed,
-              semanticsUpdated: semanticsUpdated,
-            }}
-            include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
+          {postStatuses.isParsing ? (
+            <LoadingDiv height="120px" width="100%"></LoadingDiv>
+          ) : (
+            <SemanticsEditor
+              isLoading={false}
+              patternProps={{
+                editable,
+                semantics: post?.semantics,
+                originalParsed: post?.originalParsed,
+                semanticsUpdated: semanticsUpdated,
+              }}
+              include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
+          )}
           {action}
           {postStatuses.ignored ? (
             <AppButton
