@@ -17,7 +17,10 @@ export const createNanopublication = async (
 ) => {
   const semantics = post.semantics;
   const content = post.content;
-  const orcid = '0000-0000-0000-0000';
+  const twitterUsername = user[PLATFORM.Twitter]?.[0].profile?.username;
+  if (!twitterUsername) {
+    throw new Error('Twitter username not found');
+  }
 
   /** Then get the RDF as triplets */
   const assertionsStore = await (async () => {
@@ -70,7 +73,7 @@ export const createNanopublication = async (
           @prefix npx: <http://purl.org/nanopub/x/> .
           @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
           @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-          @prefix orcid: <https://orcid.org/> .
+          @prefix twitter: <https://twitter.com/> .
           @prefix ns1: <http://purl.org/np/> .
           @prefix prov: <http://www.w3.org/ns/prov#> .
           @prefix foaf: <http://xmlns.com/foaf/0.1/> .
@@ -83,13 +86,13 @@ export const createNanopublication = async (
           }
           
           :assertion {
-            :assertion dct:creator orcid:${orcid} .
+            :assertion dct:creator twitter:${twitterUsername} .
             ${assertionsRdf}
           }
           
           
           :provenance {
-            :assertion prov:wasAttributedTo orcid:${orcid} .
+            :assertion prov:wasAttributedTo twitter:${twitterUsername} .
           }
           
           :pubinfo {
