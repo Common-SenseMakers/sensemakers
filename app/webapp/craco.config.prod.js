@@ -13,8 +13,8 @@ base.webpack.configure.plugins.splice(ix, 1);
 /** new copy of plugins without the org define one */
 const newPlugins = [...base.webpack.configure.plugins];
 
-if (!process.env.NODE_ENVX) {
-  throw new Error('NODE_ENVX is not set');
+if (!process.env.NODE_ENV) {
+  throw new Error('NODE_ENV is not set');
 }
 
 if (process.env.NODE_ENV === 'staging') {

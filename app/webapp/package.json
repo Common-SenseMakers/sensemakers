@@ -5,7 +5,7 @@
   "scripts": {
     "start": "export REACT_APP_VERSION=$(git rev-parse HEAD) && HOST=127.0.0.1 PORT=3000 craco start --config craco.config.js",
     "start-remote": "export REACT_APP_VERSION=$(git rev-parse HEAD) && NODE_ENV=production craco start --config craco.config.prod.js",
-    "build": "export REACT_APP_VERSION=$(git rev-parse HEAD) && craco build --config craco.config.prod.js",
+    "build": "npm install craco --save-dev && export REACT_APP_VERSION=$(git rev-parse HEAD) && craco build --config craco.config.prod.js",
     "test": "craco test",
     "eject": "craco eject",
     "test-functions": "FUNCTIONS_BASE=http://127.0.0.1:5001/sensenets-9ef26/us-central1 jest"
