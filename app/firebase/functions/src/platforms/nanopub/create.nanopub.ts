@@ -1,5 +1,7 @@
 import { Nanopub } from '@nanopub/sign';
 import { DataFactory, Store } from 'n3';
+import { PlatformPost } from 'src/@shared/types/types.platform.posts';
+import { TwitterThread } from 'src/@shared/types/types.twitter';
 
 import { AppUser, PLATFORM } from '../../@shared/types/types';
 import { AppPostFull } from '../../@shared/types/types.posts';
@@ -21,6 +23,14 @@ export const createNanopublication = async (
   if (!twitterUsername) {
     throw new Error('Twitter username not found');
   }
+  const originalPlatformPost = post.mirrors.find(
+    (platformPost) => platformPost.platformId === PLATFORM.Twitter
+  )?.posted as PlatformPost<TwitterThread> | undefined;
+  const originalPlatformPostId = originalPlatformPost?.posted?.post_id;
+  if (!originalPlatformPostId) {
+    throw new Error('Original platform post id not found');
+  }
+  const originalPostUrl = `https://twitter.com/${twitterUsername}/status/${originalPlatformPostId}`;
 
   /** Then get the RDF as triplets */
   const assertionsStore = await (async () => {
@@ -92,7 +102,8 @@ export const createNanopublication = async (
           
           
           :provenance {
-            :assertion prov:wasAttributedTo twitter:${twitterUsername} .
+            :assertion prov:wasAttributedTo twitter:${twitterUsername} ;
+            :assertion prov:wasDerivedFrom twitter:${originalPostUrl} .
           }
           
           :pubinfo {
