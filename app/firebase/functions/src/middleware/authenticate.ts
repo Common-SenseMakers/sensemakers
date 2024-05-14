@@ -1,28 +1,33 @@
 import { RequestHandler } from 'express';
-import { logger } from 'firebase-functions/v1';
 
-import { verifyAccessToken } from '../auth/controllers/utils';
-import { IS_TEST } from '../config/config';
+import { ENVIRONMENTS } from '../config/ENVIRONMENTS';
+import { NODE_ENV } from '../config/config.runtime';
+import { getServices } from '../controllers.utils';
+import { logger } from '../instances/logger';
 
 export const authenticate: RequestHandler = async (request, response, next) => {
   if (!request.headers.authorization) {
-    logger.debug('Unauthenticated request');
+    logger.debug(`${request.path}: Unauthenticated request`);
     return next();
   }
 
   try {
+    const services = getServices(request);
     const parts = request.headers.authorization.split(' ');
-    
-    if (IS_TEST) {
+
+    // TODO: maybe this should be removed and use mocks?
+    if (NODE_ENV === ENVIRONMENTS.TEST) {
       (request as any).userId = parts.length > 1 ? parts[1] : '';
       return next();
     }
 
     const token = parts[1];
-    logger.debug(`Authentica request token: ${token.slice(0,12)}`);
-    const userId = verifyAccessToken(token);
-    
-    logger.debug(`Authenticated user: ${userId}`);
+    const userId = services.users.verifyAccessToken(token);
+
+    logger.debug(`${request.path}: Authenticated user`, {
+      userId,
+      token06: token.slice(0, 6),
+    });
 
     (request as any).userId = userId;
 

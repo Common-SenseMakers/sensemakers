@@ -2,6 +2,7 @@ import re
 import requests
 from jinja2 import Environment, BaseLoader
 from enum import Enum
+import json
 import html2text
 from urllib.parse import urlparse
 
@@ -181,3 +182,55 @@ def render_to_py_dict(obj_dict, obj_name: str = "object", out_path: str = "outpu
 
     with open(out_path, "w") as file:
         file.write(rendered_content)
+
+
+def flatten(nested_lists):
+    return [item for row in nested_lists for item in row]
+
+
+def clean_comments(input_string):
+    # Remove Python-style comments (anything after a '#' on the same line)
+    clean_string = "\n".join(
+        [line.split("#")[0].rstrip() for line in input_string.split("\n")]
+    )
+    return clean_string
+
+
+def _find_json_object(input_string):
+    # find json substring within input string (GPT)
+    input_string = clean_comments(input_string)  # clean # style comments
+    input_string = input_string.replace("\\_", "_")
+    input_string = input_string.replace("\\[", "[")
+    input_string = input_string.replace("\\]", "]")  # remove escaping for underscore
+    start = input_string.find("{")
+    if start == -1:
+        return (
+            "[System error]: " + input_string
+        )  # No JSON object found, return string for dbug purposes
+
+    # Stack to match curly braces
+    stack = []
+    for i in range(start, len(input_string)):
+        if input_string[i] == "{":
+            stack.append(i)
+        elif input_string[i] == "}":
+            if stack:
+                stack.pop()
+                if not stack:  # All open braces have been closed
+                    end = i + 1
+                    try:
+                        # Try to parse the substring as JSON
+                        parsed_json = json.loads(input_string[start:end])
+                        return input_string[
+                            start:end
+                        ]  # Return the valid JSON substring
+                    except json.JSONDecodeError:
+                        continue  # The substring is not a valid JSON, continue searching
+
+    return (
+        "[System error]: " + input_string
+    )  # No valid JSON object found, return string for dbug purposes
+
+
+def find_json_object(input_msg):
+    return _find_json_object(input_msg.content)

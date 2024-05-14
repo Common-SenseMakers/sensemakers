@@ -2,12 +2,12 @@ import { Box } from 'grommet';
 import { DataFactory } from 'n3';
 import { useMemo } from 'react';
 
-import { THIS_POST_NAME } from '../../../app/config';
 import {
   filterStore,
   mapStoreElements,
   writeRDF,
-} from '../../../shared/n3.utils';
+} from '../../../shared/utils/n3.utils';
+import { THIS_POST_NAME } from '../../../shared/utils/semantics.helper';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { useThemeContext } from '../../../ui-components/ThemedApp';
 import { useSemanticsStore } from '../common/use.semantics';
@@ -72,20 +72,15 @@ export const KeywordsComponent = (props: PatternProps) => {
   };
 
   return (
-    <Box
-      direction="row"
-      style={{
-        borderLeft: '4px solid',
-        borderColor: constants.colors.backgroundLightDarker,
-      }}
-      pad={{ left: 'medium' }}>
+    <Box direction="row">
       <Box
         style={{
           flexGrow: 1,
         }}
         direction="row">
         <AppLabelsEditor
-          hashtag
+          editable={props.editable}
+          color="#498283"
           labels={keywords}
           addLabel={(newLabel) => addKeyword(newLabel)}
           removeLabel={(newLabel) => removeKeyword(newLabel)}></AppLabelsEditor>

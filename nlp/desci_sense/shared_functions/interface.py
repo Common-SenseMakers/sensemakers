@@ -9,6 +9,8 @@ from pydantic import (
 )
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from rdflib import URIRef, Literal, Graph
+from .prompting.jinja.topics_template import ALLOWED_TOPICS
+from .filters import SciFilterClassfication
 
 
 # TODO fix using alias for env var default loading
@@ -55,6 +57,22 @@ class KeywordConceptDefinition(OntologyConceptDefinition):
     )
 
 
+class TopicConceptDefinition(OntologyConceptDefinition):
+    """
+    Special OntologyPredicateDefinition class intialized to represent
+    the topic concept.
+    """
+
+    name: str = Field(default="hasTopic", description="Concept name.")
+    uri: str = Field(
+        default="https://schema.org/about",
+        description="Linked data URI for this concept.",
+    )
+    versions: List[str] = Field(
+        ["v0"], description="Which ontology versions is this item included in."
+    )
+
+
 class isAConceptDefintion(OntologyConceptDefinition):
     name: str = Field(default="isA", description="Concept name.")
     uri: str = Field(
@@ -70,6 +88,15 @@ class LLMOntologyConceptDefinition(OntologyConceptDefinition):
     label: str = Field(description="Output label model should use for this predicate")
     display_name: str = Field(description="Name to display in app front-ends.")
     prompt: str = Field(description="Description to use in prompt for this predicate")
+    prompt_zero_ref: Optional[str] = Field(
+        description="Description to use in prompt for this predicate for cases of zero reference posts"
+    )
+    prompt_single_ref: Optional[str] = Field(
+        description="Description to use in prompt for this predicate for cases of single reference posts"
+    )
+    prompt_multi_ref: Optional[str] = Field(
+        description="Description to use in prompt for this predicate for cases of multi reference posts"
+    )
     valid_subject_types: List[str] = Field(
         description="List of valid subject entity types for this predicate"
     )
@@ -89,6 +116,10 @@ class OntologyInterface(BaseModel):
     keyword_predicate: KeywordConceptDefinition = Field(
         default_factory=KeywordConceptDefinition
     )
+    topics_predicate: TopicConceptDefinition = Field(
+        default_factory=TopicConceptDefinition
+    )
+    allowed_topics: List[str] = Field(default=ALLOWED_TOPICS)
     ontology_config: NotionOntologyConfig = Field(default_factory=NotionOntologyConfig)
 
 
@@ -116,25 +147,36 @@ class RefMetadata(BaseModel):
     mentioned in a post.
     """
 
-    citoid_url: str = Field(
+    citoid_url: Union[str, None] = Field(
         description="URL used by citoid (might have different subdomain or final slashes).",
     )
-    url: str = Field(description="URL of reference.")
+    url: Union[str, None] = Field(description="URL of reference.")
     item_type: Union[str, None] = Field(
-        default=None,
-        description="Item type label returned from emtadata extractor. \
+        default="unknown",
+        description="Item type label returned from metadata extractor. \
           Citoid uses https://www.zotero.org/support/kb/item_types_and_fields ",
     )
     title: str = Field(default="", description="Title of reference.")
     summary: str = Field(default="", description="Summary of reference.")
     image: str = Field(default="", description="Reference thumbnail image url.")
+    debug: Dict = Field(description="Debug information.", default_factory=dict)
 
-    def to_str(self):
+    @field_validator("item_type", mode="before")
+    @classmethod
+    def convert_none_unk(cls, v):
+        if type(v) is type(None):
+            v = "unknown"
+        return v
+
+    def to_str(self, skip_list: List[str] = ["citoid_url", "image", "debug"]):
         """
         Prints each attribute on a new line in the form: attribute: value
         """
         result = []
         for attr, value in vars(self).items():
+            # attributes to skip printing
+            if attr in skip_list:
+                continue
             if isinstance(value, str) or value is None:
                 value = value or "None"  # Convert None or empty strings to "None"
                 result.append(f"{attr}: {value}")
@@ -173,6 +215,13 @@ class ParserResult(BaseModel):
     support: ParserSupport = Field(
         description="Support information used \
                                     by parser"
+    )
+    filter_classification: SciFilterClassfication = (
+        SciFilterClassfication.NOT_CLASSIFIED
+    )
+    metadata: Dict = Field(
+        description="Other data such as diagnostics for debugging, etc.",
+        default_factory=dict,
     )
 
     @field_serializer("semantics")

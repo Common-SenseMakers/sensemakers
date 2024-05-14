@@ -5,8 +5,11 @@ import './LoadingDiv.css';
 export const LoadingDiv = (props: BoxExtendedProps) => {
   const style: React.CSSProperties = props.style || {};
 
-  if (!props.fill) {
+  if (!props.fill && !props.height) {
     style['height'] = props.style?.height || '22px';
+  }
+
+  if (!props.fill && !props.width) {
     style['width'] = props.style?.width || '120px';
   }
 
@@ -17,6 +20,11 @@ export const LoadingDiv = (props: BoxExtendedProps) => {
   );
 };
 
-export const Loading = (props: { color?: string }) => {
-  return <Spinner color={props.color}></Spinner>;
+export const Loading = (props: { color?: string; size?: string }) => {
+  return (
+    <Spinner
+      height={props.size}
+      width={props.size}
+      color={props.color}></Spinner>
+  );
 };

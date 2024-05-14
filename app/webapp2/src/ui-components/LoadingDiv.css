@@ -1,0 +1,17 @@
+.loading-square {
+  border-radius: 4px;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(to right, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+  background-size: 200% 100%;
+  animation: loadingAnimation 1.5s infinite linear;
+}
+
+@keyframes loadingAnimation {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

@@ -12,6 +12,7 @@ Options:
 """
 
 import sys
+import json
 import streamlit as st
 import wandb
 import pandas as pd
@@ -24,14 +25,22 @@ from confection import Config
 sys.path.append(str(Path(__file__).parents[2]))
 
 from desci_sense.shared_functions.schema.post import RefPost
-from desci_sense.shared_functions.web_extractors.metadata_extractors import (
+from desci_sense.shared_functions.filters import SciFilterClassfication
+from desci_sense.shared_functions.configs import (
     MetadataExtractionType,
 )
 from desci_sense.shared_functions.schema.ontology_base import OntologyBase
-from desci_sense.shared_functions.dataloaders import scrape_post
+from desci_sense.shared_functions.dataloaders import (
+    scrape_post,
+    convert_text_to_ref_post,
+)
+from desci_sense.shared_functions.utils import flatten
 from desci_sense.configs import environ
 from desci_sense.runner import init_model, load_config
-from desci_sense.semantic_publisher import create_triples_from_prediction
+from desci_sense.semantic_publisher import (
+    create_triples_from_combined_result,
+    extract_reference_labels,
+)
 
 
 # display name for post for rendering in streamlit
@@ -123,7 +132,6 @@ def log_pred_wandb(
         "Text",
         "Full Prompt",
         "Reasoning Steps",
-        "Final Answer",
         "Predicted Label",
         "True Label",
         "Name of Label Provider",
@@ -138,10 +146,9 @@ def log_pred_wandb(
             post.author,
             post.url,
             post.content,
-            result.get("full_prompt", None),
-            result["answer"]["reasoning"],
-            result["answer"]["final_answer"],
-            result["answer"].get("multi_tag", list()),
+            result["debug"]["multi_reference_tagger"]["prompt"],
+            json.dumps(result["debug"]["multi_reference_tagger"]["reasoning"]),
+            result["multi_reference_tagger"],
             human_label,  # if user supplied a label
             labeler_name,  # name of person who provided label
             post.source_network,
@@ -168,11 +175,12 @@ def log_pred_wandb(
 
 def init_wandb_run(model_config):
     wandb.login(key=environ["WANDB_API_KEY"])
+
     wandb_run = wandb.init(
         job_type="demo",
-        project=model_config["wandb"]["project"],
-        config=model_config,
-        entity=model_config["wandb"]["entity"],
+        project=model_config.wandb_config.project,
+        config=model_config.model_dump(),
+        entity=model_config.wandb_config.entity,
     )
 
     return wandb_run
@@ -218,38 +226,39 @@ def st_scrape_post(post_url):
     return post
 
 
-def process_text(text, model):
+def process_text(text, model, active_modules):
     # parse text
     with st.spinner("Parsing text..."):
-        result = model.process_text_st(text, author="unknown", source="raw_text_input")
-        # st.write(result["answer"])
-        return result
+        post = convert_text_to_ref_post(text)
+        result = model.process_ref_post(post, active_list=active_modules)
+        result_dict = result.model_dump()
+
+        # add hashtags to keywords if present
+        result_dict["keywords"] = result.all_keywords()
+
+        result_dict["post"] = post
+        return result_dict
 
 
-def process_post(post: RefPost, model):
+def process_post(post: RefPost, model, active_modules):
     # check whether masto or twitter and parse accordingly
     sm_type = post.source_network
     assert sm_type in ["twitter", "mastodon"]
 
     with st.spinner(f"Parsing {sm_type} post..."):
-        result = model.process_ref_post_st(post)
-        # st.write(result["answer"])
-        return result
+        result = model.process_ref_post(post, active_list=active_modules)
+        result_dict = result.model_dump()
 
+        # add hashtags to keywords if present
+        result_dict["keywords"] = result.all_keywords()
 
-def process_keywords(result, model):
-    post = result.get("post")
-    model.set_kw_md_extract_method("citoid")
-    with st.spinner(f"Extracting keywords..."):
-        kw_result = model.extract_post_topics_w_metadata(post)
-        result["keywords"] = kw_result["answer"].get("valid_keywords")
-        result["kw_prompt"] = kw_result["full_prompt"]
-        return result
+        result_dict["post"] = post
+        return result_dict
 
 
 @st.cache_resource
-def load_model(config):
-    model = init_model(config)
+def load_model(_config):
+    model = init_model(_config)
     return model
 
 
@@ -265,7 +274,7 @@ if __name__ == "__main__":
         ontology = model.ontology
 
     # add set of possible predicate labels available in this run
-    config["ontology"]["tags"] = ontology.get_all_labels()
+    # config["ontology"]["tags"] = ontology.get_all_labels()
 
     st.title("LLM Nanopublishing assistant demo")
 
@@ -343,57 +352,83 @@ if __name__ == "__main__":
         col1, col2 = st.columns(2)
 
         with col1:
-            st.markdown("### Semantic parsing")
+            st.markdown("### Citoid")
             # let users select metadata extraction method type (or None)
             md_values = [x.value for x in MetadataExtractionType]
+
+            # assuming we have citoid - choose as default
+            citoid_index = md_values.index("citoid")
+
             metadata_type = st.radio(
-                "Select metadata extraction method:", options=md_values
+                "Select metadata extraction method:",
+                options=md_values,
+                index=citoid_index,
             )
-            if "ref_metadata_method" in model.config["general"]:
-                model.set_md_extract_method(metadata_type)
+            model.set_md_extract_method(metadata_type)
 
         with col2:
-            st.markdown("### Keyword extraction")
-            enable_keywords = st.checkbox(label="Extract keywords?")
+            st.markdown("### Parsing Modules")
+            cfg_names = [cfg.name for cfg in model.config.parser_configs]
+            active_modules = st.multiselect(
+                "Select parsing modules to use",
+                cfg_names,
+                default=cfg_names,
+            )
 
         start_run_btn = st.button("Run!", on_click=click_run)
         if start_run_btn:
             if post_url:
-                result = process_post(post, model)
+                result = process_post(post, model, active_modules)
                 st.session_state.result = result
             else:
                 # free text option
-                result = process_text(target_text, model)
+                result = process_text(target_text, model, active_modules)
                 st.session_state.result = result
 
-            if enable_keywords:
-                # extract keywords
-                result = process_keywords(st.session_state.result, model)
-                st.session_state.result = result
             with st.expander("Full output result"):
                 st.write(result)
 
         if st.session_state.clicked_run:
             if "keywords" in st.session_state.result:
-                selected = st.multiselect(
+                selected_kws = st.multiselect(
                     "Predicted keywords",
                     st.session_state.result["keywords"],
                     st.session_state.result["keywords"],
                     disabled=True,
                 )
+            if "topics" in st.session_state.result:
+                selected_topics = st.multiselect(
+                    "Predicted topics",
+                    st.session_state.result["topics"],
+                    st.session_state.result["topics"],
+                    disabled=True,
+                )
+            if "filter_classification" in st.session_state.result:
+                sci_filter_opts = [x.value for x in SciFilterClassfication]
+                filter_result = st.session_state.result["filter_classification"].value
+                selected_filter = st.selectbox(
+                    "Predicted research filter",
+                    sci_filter_opts,
+                    index=sci_filter_opts.index(filter_result),
+                    disabled=True,
+                )
 
-            if "answer" in st.session_state.result:
+            if "multi_reference_tagger" in st.session_state.result:
+                # get flattened unique list of labels
+                unique_flat_labels = list(
+                    set(flatten(st.session_state.result["multi_reference_tagger"]))
+                )
                 selected = st.multiselect(
                     "Predicted tags",
-                    st.session_state.result["possible_labels"],
-                    st.session_state.result["answer"]["multi_tag"],
+                    unique_flat_labels,
+                    unique_flat_labels,
                     disabled=True,
                 )
             else:
                 selected = []
 
             # display editable table of predicted triplets
-            rows = create_triples_from_prediction(st.session_state.result)
+            rows = create_triples_from_combined_result(st.session_state.result)
 
             # create dataframe from rows
             df = pd.DataFrame(rows, columns=["subject", "predicate", "object"])
@@ -405,7 +440,11 @@ if __name__ == "__main__":
                 )
 
                 edited_df = predicate_data_editor(
-                    df, st.session_state.result["possible_labels"], ontology
+                    df,
+                    st.session_state.result["debug"]["multi_reference_tagger"][
+                        "allowed_terms"
+                    ],
+                    ontology,
                 )
 
                 labeler_name = st.text_input(
@@ -420,25 +459,32 @@ if __name__ == "__main__":
                 if log_results_btn:
                     # log results
                     # get labels selected by human
-                    selected_human = list(edited_df.predicate.unique())
+                    selected_human = extract_reference_labels(
+                        edited_df,
+                        st.session_state.result["post"].ref_urls,
+                    )
 
                     # convert from predicate display names to labels
-                    converted_to_labels = [
-                        ontology.display_name_df.loc[x]["label"]
-                        for x in selected_human
-                        if x in ontology.display_name_df.index
-                    ]
+                    converted_labels = []
+                    for display_names in selected_human:
+                        converted_labels.append(
+                            [
+                                ontology.display_name_df.loc[x]["label"]
+                                for x in display_names
+                                if x in ontology.display_name_df.index
+                            ]
+                        )
 
                     with st.spinner("Logging result..."):
                         # log results to wandb DB
-                        pred = list(st.session_state.result["answer"]["multi_tag"])
+                        # pred = list(st.session_state.result["multi_reference_tagger"])
                         wandb_run = init_wandb_run(model.config)
                         log_pred_wandb(
                             wandb_run,
                             st.session_state.result,
                             edited_df,
                             ontology.ont_df,
-                            converted_to_labels,
+                            converted_labels,
                             labeler_name,
                         )
                         wandb_run.finish()

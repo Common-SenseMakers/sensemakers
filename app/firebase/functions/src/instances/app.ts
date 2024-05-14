@@ -1,10 +1,11 @@
 import cors from 'cors';
 import express from 'express';
 
+import { attachServices } from '../middleware/attach.services';
 import { authenticate } from '../middleware/authenticate';
 import { errorHandling } from '../middleware/errorHandlingMiddleware';
 
-export const app = (router?: express.Router): express.Application => {
+export const buildApp = (router?: express.Router): express.Application => {
   const app = express();
 
   app.use(express.json());
@@ -14,6 +15,7 @@ export const app = (router?: express.Router): express.Application => {
     })
   );
 
+  app.use(attachServices);
   app.use(authenticate);
 
   if (router) {

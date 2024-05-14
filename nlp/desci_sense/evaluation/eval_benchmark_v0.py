@@ -24,13 +24,14 @@ from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.metrics import (
     precision_recall_fscore_support,
     accuracy_score,
-    confusion_matrix,
+    confusion_matrix
 )
 
 
 sys.path.append(str(Path(__file__).parents[2]))
 
 from desci_sense.runner import init_model, load_config
+from desci_sense.shared_functions.schema.post import RefPost
 
 
 # get a path to a wandb table and populate it in a pd data frame
@@ -52,14 +53,21 @@ def get_dataset(table_path):
 
 def pred_labels(df):
     model = init_model(config)
+    columns_list = df.columns.tolist()
+    #print("C list is: ",columns_list)
+    if "Predicted Label" not in columns_list:
+        df["Predicted Label"] = ''
+
+    if "Reasoning Steps" not in columns_list:
+        df["Reasoning Steps"] = ''
+
+   
     for i in tqdm(range(len(df)), desc="Processing", unit="pred"):
         # print('in iteration',i)
-        response = model.process_text(df["Text"][i])
+        response = model.process_text_st(df["Text"][i])
         df["Predicted Label"][i] = response["answer"]["multi_tag"]
         df["Reasoning Steps"][i] = response["answer"]["reasoning"]
 
-        """ print('Predicted Label: ',df['Predicted Label'][i])
-    print(tuple(zip(df['Predicted Label'],df['True Label'])))"""
 
 
 # values are returned as string, we want them as lists
@@ -186,6 +194,7 @@ if __name__ == "__main__":
     else:
         dataset_artifact_id = (
             "common-sense-makers/evaluation_benchmark/dataset_for_eval:latest"
+            #'common-sense-makers/evaluation/toot_sci__labeling:v1'
         )
 
     # set artifact as input artifact
@@ -210,7 +219,6 @@ if __name__ == "__main__":
 
     # make sure df can be binarized
     normalize_df(df)
-
     # return binarized predictions and true labels, as well as labels names
     y_pred, y_true, labels = binarize(
         y_pred=df["Predicted Label"], y_true=df["True Label"]

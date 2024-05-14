@@ -24,7 +24,6 @@ export const CircleIcon = (props: ICircleIcon): JSX.Element => {
         height: `${size}px`,
         width: `${size}px`,
         borderRadius: `${size / 2}px`,
-        backgroundColor: constants.colors.primaryLight,
         overflow: 'hidden',
         ...props.style,
       }}>

@@ -2,8 +2,8 @@ import { Box } from 'grommet';
 import { DataFactory } from 'n3';
 import { useMemo } from 'react';
 
-import { THIS_POST_NAME } from '../../../app/config';
-import { filterStore, writeRDF } from '../../../shared/n3.utils';
+import { filterStore, writeRDF } from '../../../shared/utils/n3.utils';
+import { THIS_POST_NAME } from '../../../shared/utils/semantics.helper';
 import { useSemanticsStore } from '../common/use.semantics';
 import { PatternProps } from '../patterns';
 import { RefLabels } from './RefLabel';
@@ -78,6 +78,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
 
               return (
                 <RefLabels
+                  editable={props.editable}
                   key={ixref}
                   refUrl={ref}
                   refData={refData}

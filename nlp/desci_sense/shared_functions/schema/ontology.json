@@ -1,23 +1,6 @@
 {
     "semantic_predicates": [
         {
-            "name": "endorses",
-            "uri": "https://sense-nets.xyz/endorses",
-            "versions": [
-                "v0"
-            ],
-            "label": "endorses",
-            "display_name": "➕ endorses",
-            "prompt": "this post endorses the mentioned reference. This label can also be used for cases of implicit recommendation, where the author is expressing enjoyment of some content but not explicitly recommending it.",
-            "valid_subject_types": [
-                "post",
-                "ref"
-            ],
-            "valid_object_types": [
-                "ref"
-            ]
-        },
-        {
             "name": "disagreesWith",
             "uri": "http://purl.org/spar/cito/disagreesWith",
             "versions": [
@@ -26,23 +9,9 @@
             "label": "disagrees",
             "display_name": "👎 disagrees-with",
             "prompt": "this post disputes or expresses disagreement with statements, ideas or conclusions presented in the mentioned reference.",
-            "valid_subject_types": [
-                "post",
-                "ref"
-            ],
-            "valid_object_types": [
-                "ref"
-            ]
-        },
-        {
-            "name": "agreesWith",
-            "uri": "http://purl.org/spar/cito/agreesWith",
-            "versions": [
-                "v0"
-            ],
-            "label": "agrees",
-            "display_name": "👍 agrees-with",
-            "prompt": "this post expresses agreement with statements, ideas or conclusions presented in the mentioned reference.",
+            "prompt_zero_ref": null,
+            "prompt_single_ref": "this post disputes or expresses disagreement with statements, ideas or conclusions presented in the mentioned reference.",
+            "prompt_multi_ref": "this reference is being disputed by the post. The post expresses disagreement with statements, ideas or conclusions presented in the mentioned reference.",
             "valid_subject_types": [
                 "post",
                 "ref"
@@ -60,123 +29,14 @@
             "label": "missing-ref",
             "display_name": "⬛ possible-missing-reference",
             "prompt": "this post seems to be referring to a reference by name but has not explicitly provided a URL link to the reference. For example, a post that discusses a book and mentions it by title, but contains no link to the book.",
+            "prompt_zero_ref": "this post seems to be referring to a reference by name but has not explicitly provided a URL link to the reference. For example, a post that discusses a book and mentions it by title, but contains no link to the book.",
+            "prompt_single_ref": null,
+            "prompt_multi_ref": null,
             "valid_subject_types": [
                 "post"
             ],
             "valid_object_types": [
                 "nan"
-            ]
-        },
-        {
-            "name": "observation",
-            "uri": "https://schema.org/Observation",
-            "versions": [
-                "v0"
-            ],
-            "label": "dg-observation",
-            "display_name": "🔭 discourse-graph/observation",
-            "prompt": "this post is articulating a single, highly observation. The intuition is that observation notes should be as close to “the data” as possible. They should be similar to how results are described in results sections of academic publications.",
-            "valid_subject_types": [
-                "post"
-            ],
-            "valid_object_types": [
-                "nan"
-            ]
-        },
-        {
-            "name": "claim",
-            "uri": "https://schema.org/Claim",
-            "versions": [
-                "v0"
-            ],
-            "label": "dg-claim",
-            "display_name": "🫴 discourse-graph/claim",
-            "prompt": "this post is articulating an idea or a claim",
-            "valid_subject_types": [
-                "post"
-            ],
-            "valid_object_types": [
-                "nan"
-            ]
-        },
-        {
-            "name": "question",
-            "uri": "https://schema.org/Question",
-            "versions": [
-                "v0"
-            ],
-            "label": "dg-question",
-            "display_name": " ❓ discourse-graph/question",
-            "prompt": "this post is raising a research question.",
-            "valid_subject_types": [
-                "post"
-            ],
-            "valid_object_types": [
-                "nan"
-            ]
-        },
-        {
-            "name": "watchingStatus",
-            "uri": "https://sense-nets.xyz/watchingStatus",
-            "versions": [
-                "v0"
-            ],
-            "label": "watching",
-            "display_name": "👀 watching-status",
-            "prompt": "this post describes the watching status of the author in relation to a reference, such as a video or movie. The author may have watched the content in the past, is watching the content in the present, or is looking forward to watching the content in the future.",
-            "valid_subject_types": [
-                "post"
-            ],
-            "valid_object_types": [
-                "ref"
-            ]
-        },
-        {
-            "name": "readingStatus",
-            "uri": "https://sense-nets.xyz/readingStatus",
-            "versions": [
-                "v0"
-            ],
-            "label": "reading",
-            "display_name": "📑 reading-status",
-            "prompt": "this post describes the reading status of the author in relation to a reference, such as a book or article. The author may either have read the reference in the past, is reading the reference in the present, or is looking forward to reading the reference in the future.",
-            "valid_subject_types": [
-                "post"
-            ],
-            "valid_object_types": [
-                "ref"
-            ]
-        },
-        {
-            "name": "listeningStatus",
-            "uri": "https://sense-nets.xyz/listeningStatus",
-            "versions": [
-                "v0"
-            ],
-            "label": "listening",
-            "display_name": "🎧 listening-status",
-            "prompt": "this post describes the listening status of the author in relation to a reference, such as a podcast or radio station. The author may have listened to the content in the past, is listening to the content in the present, or is looking forward to listening the content in the future.",
-            "valid_subject_types": [
-                "post"
-            ],
-            "valid_object_types": [
-                "ref"
-            ]
-        },
-        {
-            "name": "linksTo",
-            "uri": "http://purl.org/spar/cito/linksTo",
-            "versions": [
-                "v0"
-            ],
-            "label": "default",
-            "display_name": "🔗 links-to",
-            "prompt": "This is a special tag. Use this tag if none of the tags above are suitable. If you tag a post with <default>, no other tag should be assigned to the post.",
-            "valid_subject_types": [
-                "post"
-            ],
-            "valid_object_types": [
-                "ref"
             ]
         },
         {
@@ -188,6 +48,9 @@
             "label": "review",
             "display_name": "🧐 reviews",
             "prompt": "this post contains a review of another reference, such as a book, article or movie. The review could be positive or negative. A review can be detailed or a simple short endorsement.",
+            "prompt_zero_ref": null,
+            "prompt_single_ref": "this post contains a review of another reference, such as a book, article or movie. The review could be positive or negative. A review can be detailed or a simple short endorsement.",
+            "prompt_multi_ref": "the reference is being reviewed by the post. The reference could be a book, article or movie, or other media content. The review could be positive or negative.",
             "valid_subject_types": [
                 "post",
                 "ref"
@@ -197,14 +60,36 @@
             ]
         },
         {
-            "name": "recommends",
-            "uri": "https://sense-nets.xyz/recommends",
+            "name": "question",
+            "uri": "https://schema.org/Question",
             "versions": [
                 "v0"
             ],
-            "label": "recommendation",
-            "display_name": "👌 recommends",
-            "prompt": "The author is recommending any kind of content: an article, a movie, podcast, book, another post, etc.",
+            "label": "dg-question",
+            "display_name": " ❓ discourse-graph/question",
+            "prompt": "this post is raising a research question.",
+            "prompt_zero_ref": "this post is raising a research question.",
+            "prompt_single_ref": null,
+            "prompt_multi_ref": null,
+            "valid_subject_types": [
+                "post"
+            ],
+            "valid_object_types": [
+                "nan"
+            ]
+        },
+        {
+            "name": "announcesResource",
+            "uri": "https://sense-nets.xyz/announcesResource",
+            "versions": [
+                "v0"
+            ],
+            "label": "announce",
+            "display_name": "📢 announces",
+            "prompt": "this post contains an announcement of new research. The announcement is likely made by the authors but may be a third party. We use a broad definition of research that includes classic and non-traditional outputs. Classic outputs include papers, datasets or code. Non traditional outputs can include a podcast, blog post, video explainers, etc.",
+            "prompt_zero_ref": null,
+            "prompt_single_ref": "this post contains an announcement of new research. The announcement is likely made by the authors but may be a third party. We use a broad definition of research that includes classic and non-traditional outputs. Classic outputs include papers, datasets or code. Non traditional outputs can include a podcast, blog post, video explainers, etc.",
+            "prompt_multi_ref": "the reference is a new research output being announced by the post. The announcement is likely made by the authors but may be a third party. A research output could be a paper, dataset or other type of research that is being announced publicly.",
             "valid_subject_types": [
                 "post",
                 "ref"
@@ -214,31 +99,17 @@
             ]
         },
         {
-            "name": "asksQuestionAbout",
-            "uri": "https://sense-nets.xyz/asksQuestionAbout",
+            "name": "endorses",
+            "uri": "https://sense-nets.xyz/endorses",
             "versions": [
                 "v0"
             ],
-            "label": "question",
-            "display_name": "❔ ask-question-about",
-            "prompt": "this post is raising a question or questions about some content it's referring to. The content could be a research paper or other media like a podcast, video or blog post.",
-            "valid_subject_types": [
-                "post",
-                "ref"
-            ],
-            "valid_object_types": [
-                "ref"
-            ]
-        },
-        {
-            "name": "includesQuotationFrom",
-            "uri": "http://purl.org/spar/cito/includesQuotationFrom",
-            "versions": [
-                "v0"
-            ],
-            "label": "quote",
-            "display_name": "📝 quotes-from",
-            "prompt": "this post is quoting text from an article it's referring to. Symbols like \">\" or quotation marks are often used to indicate quotations.",
+            "label": "endorses",
+            "display_name": "➕ endorses",
+            "prompt": "this post endorses the mentioned reference. This label can also be used for cases of implicit recommendation, where the author is expressing enjoyment of some content but not explicitly recommending it.",
+            "prompt_zero_ref": null,
+            "prompt_single_ref": "this post endorses the mentioned reference. This label can also be used for cases of implicit recommendation, where the author is expressing enjoyment of some content but not explicitly recommending it.",
+            "prompt_multi_ref": "the post endorses this reference. This label can also be used for cases of implicit recommendation, where the author is expressing enjoyment of some content but not explicitly recommending it.",
             "valid_subject_types": [
                 "post",
                 "ref"
@@ -256,12 +127,248 @@
             "label": "discussion",
             "display_name": "🗣️ discusses",
             "prompt": "this post discusses how the cited reference relates to other facts or claims. For example, post might discuss how the cited reference informs questions, provides evidence, or supports or opposes claims.",
+            "prompt_zero_ref": null,
+            "prompt_single_ref": "this post discusses how the cited reference relates to other facts or claims. For example, post might discuss how the cited reference informs questions, provides evidence, or supports or opposes claims.",
+            "prompt_multi_ref": "this post discusses how the cited reference relates to other facts or claims. For example, post might discuss how the cited reference informs questions, provides evidence, or supports or opposes claims.",
             "valid_subject_types": [
                 "post",
                 "ref"
             ],
             "valid_object_types": [
                 "ref"
+            ]
+        },
+        {
+            "name": "mentionsListeningStatus",
+            "uri": "https://sense-nets.xyz/mentionsListeningStatus",
+            "versions": [
+                "v0"
+            ],
+            "label": "listening",
+            "display_name": "🎧 listening-status",
+            "prompt": "this post describes the listening status of the author in relation to a reference, such as a podcast or radio station. The author may have listened to the content in the past, is listening to the content in the present, or is looking forward to listening the content in the future.",
+            "prompt_zero_ref": "this post describes the listening status of the author in relation to a reference, such as a podcast or radio station. The author may have listened to the content in the past, is listening to the content in the present, or is looking forward to listening the content in the future.",
+            "prompt_single_ref": "this post describes the listening status of the author in relation to a reference, such as a podcast or radio station. The author may have listened to the content in the past, is listening to the content in the present, or is looking forward to listening the content in the future.",
+            "prompt_multi_ref": "this post describes the listening status of the author in relation to this reference, such as a podcast or radio station. The author may have listened to the content in the past, is listening to the content in the present, or is looking forward to listening the content in the future.",
+            "valid_subject_types": [
+                "post"
+            ],
+            "valid_object_types": [
+                "ref",
+                "nan"
+            ]
+        },
+        {
+            "name": "recommends",
+            "uri": "https://sense-nets.xyz/recommends",
+            "versions": [
+                "v0"
+            ],
+            "label": "recommendation",
+            "display_name": "👌 recommends",
+            "prompt": "The author is recommending any kind of content: an article, a movie, podcast, book, another post, etc.",
+            "prompt_zero_ref": null,
+            "prompt_single_ref": "The author is recommending any kind of content: an article, a movie, podcast, book, another post, etc.",
+            "prompt_multi_ref": "The author is recommending the reference, which can be any kind of content: an article, a movie, podcast, book, another post, etc. This tag can also be used for cases of implicit recommendation, where the author is expressing enjoyment of some content but not explicitly recommending it.",
+            "valid_subject_types": [
+                "post",
+                "ref"
+            ],
+            "valid_object_types": [
+                "ref"
+            ]
+        },
+        {
+            "name": "mentionsCallForPapers",
+            "uri": "https://sense-nets.xyz/mentionsCallForPapers",
+            "versions": [
+                "v1"
+            ],
+            "label": "call-for-papers",
+            "display_name": "📜 mentions-call-for-papers",
+            "prompt": "this post contains a call for research papers, for example to a journal, conference or workshop.",
+            "prompt_zero_ref": "this post contains a call for research papers, for example to a journal, conference or workshop.",
+            "prompt_single_ref": "this post contains a call for research papers, for example to a journal, conference or workshop.",
+            "prompt_multi_ref": "this reference contains a call for research papers, for example to a journal, conference or workshop.",
+            "valid_subject_types": [
+                "post"
+            ],
+            "valid_object_types": [
+                "ref",
+                "nan"
+            ]
+        },
+        {
+            "name": "includesQuotationFrom",
+            "uri": "http://purl.org/spar/cito/includesQuotationFrom",
+            "versions": [
+                "v0"
+            ],
+            "label": "quote",
+            "display_name": "📝 quotes-from",
+            "prompt": "this post is quoting text from an article it's referring to. Symbols like \">\" or quotation marks are often used to indicate quotations.",
+            "prompt_zero_ref": null,
+            "prompt_single_ref": "this post is quoting text from an article it's referring to. Symbols like \">\" or quotation marks are often used to indicate quotations.",
+            "prompt_multi_ref": "this reference is being quoted in the post. Symbols like \">\" or quotation marks are often used to indicate quotations. ",
+            "valid_subject_types": [
+                "post",
+                "ref"
+            ],
+            "valid_object_types": [
+                "ref"
+            ]
+        },
+        {
+            "name": "asksQuestionAbout",
+            "uri": "https://sense-nets.xyz/asksQuestionAbout",
+            "versions": [
+                "v0"
+            ],
+            "label": "question",
+            "display_name": "❔ ask-question-about",
+            "prompt": "this post is raising a question or questions about some content it's referring to. The content could be a research paper or other media like a podcast, video or blog post.",
+            "prompt_zero_ref": null,
+            "prompt_single_ref": "this post is raising a question or questions about some content it's referring to. The content could be a research paper or other media like a podcast, video or blog post.",
+            "prompt_multi_ref": "this post is raising a question or questions about the reference. The content could be a research paper or other media like a podcast, video or blog post.",
+            "valid_subject_types": [
+                "post",
+                "ref"
+            ],
+            "valid_object_types": [
+                "ref"
+            ]
+        },
+        {
+            "name": "agreesWith",
+            "uri": "http://purl.org/spar/cito/agreesWith",
+            "versions": [
+                "v0"
+            ],
+            "label": "agrees",
+            "display_name": "👍 agrees-with",
+            "prompt": "this post expresses agreement with statements, ideas or conclusions presented in the mentioned reference.",
+            "prompt_zero_ref": null,
+            "prompt_single_ref": "this post expresses agreement with statements, ideas or conclusions presented in the mentioned reference.",
+            "prompt_multi_ref": "this post expresses agreement with statements, ideas or conclusions presented in this reference.",
+            "valid_subject_types": [
+                "post",
+                "ref"
+            ],
+            "valid_object_types": [
+                "ref"
+            ]
+        },
+        {
+            "name": "observation",
+            "uri": "https://schema.org/Observation",
+            "versions": [
+                "v0"
+            ],
+            "label": "dg-observation",
+            "display_name": "🔭 discourse-graph/observation",
+            "prompt": "this post is articulating a single, highly observation. The intuition is that observation notes should be as close to “the data” as possible. They should be similar to how results are described in results sections of academic publications.",
+            "prompt_zero_ref": "this post is articulating a single, highly observation. The intuition is that observation notes should be as close to “the data” as possible. They should be similar to how results are described in results sections of academic publications.",
+            "prompt_single_ref": null,
+            "prompt_multi_ref": null,
+            "valid_subject_types": [
+                "post"
+            ],
+            "valid_object_types": [
+                "nan"
+            ]
+        },
+        {
+            "name": "claim",
+            "uri": "https://schema.org/Claim",
+            "versions": [
+                "v0"
+            ],
+            "label": "dg-claim",
+            "display_name": "🫴 discourse-graph/claim",
+            "prompt": "this post is articulating an idea or a claim",
+            "prompt_zero_ref": "this post is articulating an idea or a claim",
+            "prompt_single_ref": null,
+            "prompt_multi_ref": null,
+            "valid_subject_types": [
+                "post"
+            ],
+            "valid_object_types": [
+                "nan"
+            ]
+        },
+        {
+            "name": "summarizes",
+            "uri": "https://sense-nets.xyz/summarizes",
+            "versions": [
+                "v0"
+            ],
+            "label": "summarizes",
+            "display_name": "🗜️ summarizes",
+            "prompt": "this post contains a summary of the mentioned reference. The summary is likely provided by the authors but may be a third party.",
+            "prompt_zero_ref": null,
+            "prompt_single_ref": "this post contains a summary of the mentioned reference. The summary is likely provided by the authors but may be a third party.",
+            "prompt_multi_ref": "this reference is summarized by the post. The summary is likely provided by the authors but may be a third party.",
+            "valid_subject_types": [],
+            "valid_object_types": []
+        },
+        {
+            "name": "mentionsFundingOpportunity",
+            "uri": "https://sense-nets.xyz/mentionsFundingOpportunity",
+            "versions": [
+                "v1"
+            ],
+            "label": "funding",
+            "display_name": "🏦 mentions-funding",
+            "prompt": "this post mentions a funding opportunity, for example a research grant or prize.",
+            "prompt_zero_ref": "this post mentions a funding opportunity, for example a research grant or prize.",
+            "prompt_single_ref": "this post mentions a funding opportunity, for example a research grant or prize.",
+            "prompt_multi_ref": "this reference contains a funding opportunity, for example a research grant or prize.",
+            "valid_subject_types": [
+                "post"
+            ],
+            "valid_object_types": [
+                "ref",
+                "nan"
+            ]
+        },
+        {
+            "name": "mentionsWatchingStatus",
+            "uri": "https://sense-nets.xyz/mentionsWatchingStatus",
+            "versions": [
+                "v0"
+            ],
+            "label": "watching",
+            "display_name": "📺 watching-status",
+            "prompt": "this post describes the watching status of the author in relation to a reference, such as a video or movie. The author may have watched the content in the past, is watching the content in the present, or is looking forward to watching the content in the future.",
+            "prompt_zero_ref": "this post describes the watching status of the author in relation to a reference, such as a video or movie. The author may have watched the content in the past, is watching the content in the present, or is looking forward to watching the content in the future.",
+            "prompt_single_ref": "this post describes the watching status of the author in relation to a reference, such as a video or movie. The author may have watched the content in the past, is watching the content in the present, or is looking forward to watching the content in the future.",
+            "prompt_multi_ref": "this post describes the watching status of the author in relation to this reference, such as a video or movie. The author may have watched the content in the past, is watching the content in the present, or is looking forward to watching the content in the future.",
+            "valid_subject_types": [
+                "post"
+            ],
+            "valid_object_types": [
+                "ref",
+                "nan"
+            ]
+        },
+        {
+            "name": "mentionsReadingStatus",
+            "uri": "https://sense-nets.xyz/mentionsReadingStatus",
+            "versions": [
+                "v0"
+            ],
+            "label": "reading",
+            "display_name": "📑 reading-status",
+            "prompt": "this post describes the reading status of the author in relation to a reference, such as a book or article. The author may either have read the reference in the past, is reading the reference in the present, or is looking forward to reading the reference in the future.",
+            "prompt_zero_ref": "this post describes the reading status of the author in relation to a reference, such as a book or article. The author may either have read the reference in the past, is reading the reference in the present, or is looking forward to reading the reference in the future.",
+            "prompt_single_ref": "this post describes the reading status of the author in relation to a reference, such as a book or article. The author may either have read the reference in the past, is reading the reference in the present, or is looking forward to reading the reference in the future.",
+            "prompt_multi_ref": "this post describes the reading status of the author in relation to this reference, which could be a book, article or other written media. The author may either have read the reference in the past, is reading the reference in the present, or is looking forward to reading the reference in the future.",
+            "valid_subject_types": [
+                "post"
+            ],
+            "valid_object_types": [
+                "ref",
+                "nan"
             ]
         },
         {
@@ -272,12 +379,16 @@
             ],
             "label": "event",
             "display_name": "🗓️ announces-event",
-            "prompt": "this post includes an invitation to an event, either a real-world or an online event. Any kind of event is relevant, some examples of such events could be seminars, meetups, or hackathons. This tag shold only be used for invitations to events, not for posts describing other kinds of events.",
+            "prompt": "this post includes an invitation to an event, either a real-world or an online event. Any kind of event is relevant, some examples of such events could be seminars, meetups, or hackathons. This tag should only be used for invitations to events, not for posts describing other kinds of events.",
+            "prompt_zero_ref": "this post includes an invitation to an event, either a real-world or an online event. Any kind of event is relevant, some examples of such events could be seminars, meetups, or hackathons. This tag should only be used for invitations to events, not for posts describing other kinds of events.",
+            "prompt_single_ref": "this post includes an invitation to an event, either a real-world or an online event. Any kind of event is relevant, some examples of such events could be seminars, meetups, or hackathons. This tag should only be used for invitations to events, not for posts describing other kinds of events.",
+            "prompt_multi_ref": "the reference is an invitation to an event, either a real-world or an online event. Any kind of event is relevant, some examples of such events could be seminars, meetups, or hackathons. This tag shold only be used for invitations to events, not for posts describing other kinds of events.",
             "valid_subject_types": [
                 "post"
             ],
             "valid_object_types": [
-                "ref"
+                "ref",
+                "nan"
             ]
         },
         {
@@ -289,6 +400,29 @@
             "label": "job",
             "display_name": "📢 announces-job",
             "prompt": "this post describes a job listing, for example a call for graduate students or faculty applications.",
+            "prompt_zero_ref": "this post describes a job listing, for example a call for graduate students or faculty applications.",
+            "prompt_single_ref": "this post describes a job listing, for example a call for graduate students or faculty applications.",
+            "prompt_multi_ref": "the reference is a job listing, for example a call for graduate students or faculty applications.",
+            "valid_subject_types": [
+                "post"
+            ],
+            "valid_object_types": [
+                "ref",
+                "nan"
+            ]
+        },
+        {
+            "name": "indicatesInterest",
+            "uri": "https://sense-nets.xyz/indicatesInterest",
+            "versions": [
+                "v1"
+            ],
+            "label": "indicates-interest",
+            "display_name": "👀 indicates-interest",
+            "prompt": "this post indicates interest in a reference. This label is meant for cases where the post is not explicitly recommending or endorsing the cited reference.",
+            "prompt_zero_ref": null,
+            "prompt_single_ref": "this post indicates interest in a reference. This label is meant for cases where the post is not explicitly recommending or endorsing the cited reference.",
+            "prompt_multi_ref": "the post is indicating interest in this reference. This label is meant for cases where the post is not explicitly recommending or endorsing this reference.",
             "valid_subject_types": [
                 "post"
             ],
@@ -297,17 +431,19 @@
             ]
         },
         {
-            "name": "announcesResource",
-            "uri": "https://sense-nets.xyz/announcesResource",
+            "name": "linksTo",
+            "uri": "http://purl.org/spar/cito/linksTo",
             "versions": [
                 "v0"
             ],
-            "label": "announce",
-            "display_name": "📢 announces",
-            "prompt": "this post contains an announcement of new research. The announcement is likely made by the authors but may be a third party. We use a broad definition of research that includes classic and non-traditional outputs. Classic outputs include papers, datasets or code. Non traditional outputs can include a podcast, blog post, video explainers, etc.",
+            "label": "default",
+            "display_name": "🔗 links-to",
+            "prompt": "This is a special tag. Use this tag if none of the tags above are suitable. If you tag a post with <default>, no other tag should be assigned to the post.",
+            "prompt_zero_ref": null,
+            "prompt_single_ref": "This is a special tag. Use this tag if none of the tags above are suitable. If you tag a post with <default>, no other tag should be assigned to the post.",
+            "prompt_multi_ref": "This is a special tag. Use this tag if none of the other tags are suitable to characterize this reference.",
             "valid_subject_types": [
-                "post",
-                "ref"
+                "post"
             ],
             "valid_object_types": [
                 "ref"
@@ -321,10 +457,44 @@
             "v0"
         ]
     },
-    "ontology_config": {
-        "db_id": "8de416983dd142c68b3b331d0828f2d0",
+    "topics_predicate": {
+        "name": "hasTopic",
+        "uri": "https://schema.org/about",
         "versions": [
             "v0"
+        ]
+    },
+    "allowed_topics": [
+        "technology",
+        "science",
+        "academia",
+        "research",
+        "design",
+        "climate",
+        "sustainability",
+        "software & hardware",
+        "philosophy",
+        "health",
+        "culture",
+        "economics",
+        "business",
+        "politics",
+        "news",
+        "finance",
+        "sports",
+        "entertainment & leisure",
+        "art",
+        "literature",
+        "travel",
+        "personal",
+        "humour",
+        "other"
+    ],
+    "ontology_config": {
+        "db_id": "50c9352aa26b442994148b3cd7cccfcc",
+        "versions": [
+            "v0",
+            "v1"
         ]
     }
 }

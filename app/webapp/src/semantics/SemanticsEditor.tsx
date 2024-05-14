@@ -1,22 +1,20 @@
 import { Box } from 'grommet';
 
-import { LoadingDiv } from '../ui-components/LoadingDiv';
-import { PatternProps, Patterns } from './patterns/patterns';
+import { PATTERN_ID, PatternProps, Patterns } from './patterns/patterns';
 
 const DEBUG = false;
 
-export const SemanticsEditor = (
-  props: {
-    id: string;
-    isLoading: boolean;
-  } & PatternProps
-) => {
-  if (props.isLoading || !props.originalParsed) {
-    return <LoadingDiv fill></LoadingDiv>;
+export const SemanticsEditor = (props: {
+  isLoading: boolean;
+  patternProps: PatternProps;
+  include?: PATTERN_ID[];
+}) => {
+  if (props.isLoading || !props.patternProps.originalParsed) {
+    return <></>;
   }
 
   return (
-    <Box style={{ width: '100%' }} pad={{ vertical: 'large' }}>
+    <Box style={{ width: '100%' }}>
       <Patterns {...props}></Patterns>
     </Box>
   );
