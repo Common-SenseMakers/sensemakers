@@ -18,7 +18,7 @@ import {
   updatePostSchema,
 } from './posts.schema';
 
-const DEBUG = true;
+const DEBUG = false;
 
 /**
  * get user posts from the DB (does not fetch for more)
@@ -152,7 +152,10 @@ export const createDraftPostController: RequestHandler = async (
     };
 
     db.run(async (manager) => {
-      return postsManager.processing.createPostDrafts(payload.postId, manager);
+      return postsManager.processing.createOrUpdatePostDrafts(
+        payload.postId,
+        manager
+      );
     });
 
     if (DEBUG)
@@ -175,7 +178,9 @@ export const updatePostController: RequestHandler = async (
     const userId = getAuthenticatedUser(request, true);
     const { db, postsManager } = getServices(request);
 
-    const payload = (await updatePostSchema.validate(request.body)) as PostUpdatePayload;
+    const payload = (await updatePostSchema.validate(
+      request.body
+    )) as PostUpdatePayload;
 
     db.run(async (manager) => {
       const post = await postsManager.processing.posts.get(
@@ -188,7 +193,7 @@ export const updatePostController: RequestHandler = async (
         throw new Error(`Post can only be edited by the author`);
       }
 
-      return postsManager.processing.posts.updateContent(
+      return postsManager.updatePost(
         payload.postId,
         payload.postUpdate,
         manager

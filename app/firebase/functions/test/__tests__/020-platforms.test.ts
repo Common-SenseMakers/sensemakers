@@ -2,7 +2,11 @@ import { expect } from 'chai';
 
 import { AppUser, FetchParams, PLATFORM } from '../../src/@shared/types/types';
 import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
-import { PlatformPostDraft } from '../../src/@shared/types/types.platform.posts';
+import {
+  PlatformPostDraft,
+  PlatformPostPublishOrigin,
+  PlatformPostPublishStatus,
+} from '../../src/@shared/types/types.platform.posts';
 import {
   AppPostFull,
   AppPostParsedStatus,
@@ -25,7 +29,7 @@ import {
 } from './setup';
 import { getTestServices } from './test.services';
 
-describe.only('02-platforms', () => {
+describe('02-platforms', () => {
   let rsaKeys: RSAKeys | undefined;
   let user: AppUser | undefined;
 
@@ -92,7 +96,7 @@ describe.only('02-platforms', () => {
     });
   });
 
-  describe('nanopub', () => {
+  describe.only('nanopub', () => {
     let nanopub: PlatformPostDraft | undefined;
 
     it('creates a draft nanopub', async () => {
@@ -104,7 +108,7 @@ describe.only('02-platforms', () => {
 
       try {
         const post: AppPostFull = {
-          id: 'test-id',
+          id: 'post-id',
           createdAtMs: Date.now(),
           authorId: user.userId,
           content: 'test content',
@@ -114,7 +118,40 @@ describe.only('02-platforms', () => {
           parsingStatus: AppPostParsingStatus.IDLE,
           reviewedStatus: AppPostReviewStatus.PENDING,
           republishedStatus: AppPostRepublishedStatus.PENDING,
-          mirrors: [],
+          mirrors: [
+            {
+              id: 'pp-id',
+              platformId: PLATFORM.Twitter,
+              publishOrigin: PlatformPostPublishOrigin.FETCHED,
+              publishStatus: PlatformPostPublishStatus.PUBLISHED,
+              posted: {
+                post_id: '123456',
+                timestampMs: Date.now(),
+                user_id: TWITTER_USER_ID_MOCKS,
+                post: {
+                  id: 'post-id',
+                  createdAtMs: Date.now(),
+                  authorId: user.userId,
+                  content: 'test content',
+                  semantics: `
+                    @prefix ns1: <http://purl.org/spar/cito/> .
+                    @prefix schema: <https://schema.org/> .
+                    
+                    <http://purl.org/nanopub/temp/mynanopub#assertion> 
+                      ns1:discusses <https://twitter.com/ori_goldberg/status/1781281656071946541> ;    
+                      ns1:includesQuotationFrom <https://twitter.com/ori_goldberg/status/1781281656071946541> ;    
+                      schema:keywords "ExternalSecurity",        "Geopolitics",        "Israel",        "Kissinger",        "PoliticalScience",        "Security" .
+                    `,
+
+                  origin: PLATFORM.Twitter,
+                  parsedStatus: AppPostParsedStatus.PROCESSED,
+                  parsingStatus: AppPostParsingStatus.IDLE,
+                  reviewedStatus: AppPostReviewStatus.PENDING,
+                  republishedStatus: AppPostRepublishedStatus.PENDING,
+                },
+              },
+            },
+          ],
         };
 
         nanopub = await nanopubService.convertFromGeneric({

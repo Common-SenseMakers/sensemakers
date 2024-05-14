@@ -112,7 +112,7 @@ export class PostsProcessing {
   }
 
   /** Create and store all platform posts for one post */
-  async createPostDrafts(postId: string, manager: TransactionManager) {
+  async createOrUpdatePostDrafts(postId: string, manager: TransactionManager) {
     const appPostFull = await this.getPostFull(postId, manager, true);
 
     const user = await this.users.repo.getUser(
@@ -121,19 +121,19 @@ export class PostsProcessing {
       true
     );
 
-    const preparedPlatforms = appPostFull.mirrors
-      .filter((m) => m.publishStatus === 'published' || m.draft !== undefined)
+    const publishedPlatforms = appPostFull.mirrors
+      .filter((m) => m.publishStatus === 'published')
       .map((m) => m.platformId);
 
     const pendingPlatforms = ALL_PUBLISH_PLATFORMS.filter(
-      (p) => !preparedPlatforms.includes(p)
+      (p) => !publishedPlatforms.includes(p)
     );
 
     if (DEBUG)
       logger.debug('createPostDrafts', {
         appPostFull,
         user,
-        preparedPlatforms,
+        publishedPlatforms,
         pendingPlatforms,
       });
 
@@ -151,7 +151,7 @@ export class PostsProcessing {
 
         return Promise.all(
           accounts.map(async (account) => {
-            /** create a draft for that platform and account */
+            /** create/update the draft for that platform and account */
             const draftPost = await this.platforms
               .get(platformId)
               .convertFromGeneric({ post: appPostFull, author: user });
@@ -173,16 +173,24 @@ export class PostsProcessing {
                 account,
               });
 
-            /** create and add as mirror */
-            const plaformPost = this.platformPosts.create(draft, manager);
+            const existing = await this.platformPosts.getFromPostId(
+              postId,
+              platformId,
+              account.user_id,
+              manager
+            );
 
-            if (DEBUG)
-              logger.debug('createPostDrafts- addMirror', {
-                postId,
-                plaformPost,
-              });
+            if (!existing) {
+              /** create and add as mirror */
+              const plaformPost = this.platformPosts.create(draft, manager);
+              if (DEBUG)
+                logger.debug('createPostDrafts- addMirror', {
+                  postId,
+                  plaformPost,
+                });
 
-            this.posts.addMirror(postId, plaformPost.id, manager);
+              this.posts.addMirror(postId, plaformPost.id, manager);
+            }
           })
         );
       })

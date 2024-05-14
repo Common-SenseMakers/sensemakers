@@ -82,6 +82,7 @@ const authenticateNanopub = async (
       profile: {
         ethAddress: profile.ethAddress,
         rsaPublickey: profile.rsaPublickey,
+        ethToRsaSignature: profile.ethToRsaSignature,
       },
     },
   ];

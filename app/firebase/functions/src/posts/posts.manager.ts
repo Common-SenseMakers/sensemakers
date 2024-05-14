@@ -293,9 +293,7 @@ export class PostsManager {
         queryParams
       );
 
-      if (
-        queryParams.status === PostsQueryStatus.ALL
-      ) {
+      if (queryParams.status === PostsQueryStatus.ALL) {
         if (appPosts.length < queryParams.fetchParams.expectedAmount) {
           await this.fetchUser({ userId, params: queryParams.fetchParams });
           return this.processing.posts.getOfUser(userId, queryParams);
@@ -375,7 +373,6 @@ export class PostsManager {
       await this.db.run(async (manager) => {
         try {
           await this._parsePost(postId, manager);
-          await this.processing.createPostDrafts(postId, manager);
         } catch (err: any) {
           logger.error(`Error parsing post ${postId}`, err);
           await this.processing.posts.updateContent(
@@ -422,7 +419,20 @@ export class PostsManager {
 
     if (DEBUG) logger.debug('parsePost - done', { postId, update });
 
-    await this.processing.posts.updateContent(post.id, update, manager);
+    await this.updatePost(post.id, update, manager);
+  }
+
+  /** single place to update a post (it updates the drafts if necessary) */
+  async updatePost(
+    postId: string,
+    postUpdate: PostUpdate,
+    manager: TransactionManager
+  ) {
+    await this.processing.posts.updateContent(postId, postUpdate, manager);
+    if (postUpdate.semantics || postUpdate.content) {
+      /** rebuild the platform drafts with the new post content */
+      await this.processing.createOrUpdatePostDrafts(postId, manager);
+    }
   }
 
   /**
@@ -448,7 +458,7 @@ export class PostsManager {
 
       /** for now its either ignore all, or approve all */
       if (post.reviewedStatus === AppPostReviewStatus.IGNORED) {
-        await this.processing.posts.updateContent(
+        await this.updatePost(
           post.id,
           {
             reviewedStatus: AppPostReviewStatus.IGNORED,
@@ -461,7 +471,7 @@ export class PostsManager {
       /** else mark as approved */
 
       /** force status transition */
-      await this.processing.posts.updateContent(
+      await this.updatePost(
         post.id,
         {
           reviewedStatus: AppPostReviewStatus.APPROVED,
@@ -476,7 +486,7 @@ export class PostsManager {
       ) {
         if (DEBUG)
           logger.debug('approvePost - updateContent', { existing, post });
-        await this.processing.posts.updateContent(
+        await this.updatePost(
           post.id,
           {
             reviewedStatus: AppPostReviewStatus.APPROVED,
@@ -532,7 +542,7 @@ export class PostsManager {
 
       /** if all mirrors where published */
       if (published.every((v) => v === true)) {
-        await this.processing.posts.updateContent(
+        await this.updatePost(
           post.id,
           {
             republishedStatus: AppPostRepublishedStatus.REPUBLISHED,

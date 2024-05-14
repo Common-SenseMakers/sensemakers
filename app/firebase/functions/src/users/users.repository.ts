@@ -14,7 +14,7 @@ import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
 import { getPrefixedUserId } from './users.utils';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export class UsersRepository {
   constructor(protected db: DBInstance) {}
