@@ -84,7 +84,8 @@ export const RefLabels = (props: {
         <RefCard
           title={refData.meta?.title}
           description={refData.meta?.summary}
-          image={refData.meta?.image}></RefCard>
+          image={refData.meta?.image}
+          onClick={() => window.open(props.refUrl, '_blank')}></RefCard>
       ) : (
         <Anchor target="_blank" href={props.refUrl}>
           {props.refUrl}

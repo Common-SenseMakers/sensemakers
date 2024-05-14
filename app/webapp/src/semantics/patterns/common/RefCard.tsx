@@ -8,6 +8,7 @@ export const RefCard = (props: {
   title?: string;
   description?: string;
   image?: string;
+  onClick?: () => void;
 }) => {
   const titleTruncated = props.title && truncate(props.title, 50);
   const descriptionTruncated =
@@ -15,6 +16,7 @@ export const RefCard = (props: {
 
   return (
     <Box
+      onClick={props.onClick}
       direction="row"
       align="start"
       pad={{ horizontal: '12px', vertical: '8px' }}
