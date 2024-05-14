@@ -29,7 +29,7 @@ export const usePostCredentials = (rsaKeys?: RSAKeys) => {
   const appFetch = useAppFetch();
 
   /**
-   * macro-effect that asks for signature and post the nanopub details if the
+   * effect that asks for signature and post the nanopub details if the
    * connected wallet has not yet signed-up
    */
   useEffect(() => {
@@ -64,7 +64,7 @@ export const usePostCredentials = (rsaKeys?: RSAKeys) => {
             refreshConnectedUser();
           });
         });
-      } else if (!ethSignature && signMessage && rsaKeys) {
+      } else if (!details && !ethSignature && signMessage && rsaKeys) {
         if (DEBUG)
           console.log('generating ETH signature of RSA account', { address });
         signMessage(getEthToRSAMessage(rsaKeys.publicKey)).then((sig) => {

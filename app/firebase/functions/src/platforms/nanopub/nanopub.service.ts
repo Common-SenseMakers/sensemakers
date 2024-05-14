@@ -100,6 +100,7 @@ export class NanopubService
         rsaPublickey: signupData.rsaPublickey,
         ethAddress: signupData.ethAddress,
         introNanopub: signupData.introNanopub,
+        ethToRsaSignature: signupData.ethToRsaSignature,
       },
     };
   }
