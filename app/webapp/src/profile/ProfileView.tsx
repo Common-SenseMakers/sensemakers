@@ -10,6 +10,7 @@ import {
   ProfilePostsQuery,
   UserPostsQuery,
 } from '../shared/types/types.posts';
+import { AppButton } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
@@ -26,6 +27,8 @@ export const ProfileView = (props: { username?: string }) => {
 
   const [posts, setPosts] = useState<AppPostFull[]>([]);
   const fetchedFirst = useRef<boolean>(false);
+
+  const [selectedTab, setSelectedTab] = useState<number>(0);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -44,6 +47,17 @@ export const ProfileView = (props: { username?: string }) => {
       _fetchOlder(undefined);
     }
   }, [posts]);
+
+  const reset = () => {
+    if (DEBUG) console.log('resetting posts');
+    setPosts([]);
+    setIsLoading(true);
+  };
+
+  /** reset at every status change  */
+  useEffect(() => {
+    reset();
+  }, [selectedTab]);
 
   const addPosts = useCallback(
     (posts: AppPostFull[], position: 'start' | 'end') => {
@@ -131,9 +145,19 @@ export const ProfileView = (props: { username?: string }) => {
     const tabs = [
       {
         label: 'All',
-        getPosts: () => {
-          appFetch<AppPostFull[]>('/api/');
-        },
+        getPosts: () => {},
+      },
+      {
+        label: 'Thinks',
+        getPosts: () => {},
+      },
+      {
+        label: 'Shares',
+        getPosts: () => {},
+      },
+      {
+        label: 'Announces',
+        getPosts: () => {},
       },
     ];
 
@@ -156,8 +180,42 @@ export const ProfileView = (props: { username?: string }) => {
               horizontal: '12px',
               bottom: '16px',
             }}></ProfileHeader>
-          <Box>{}</Box>
         </Box>
+
+        <Box
+          pad={{ horizontal: '12px' }}
+          align="center"
+          direction="row"
+          width={'100%'}
+          style={{ borderBottom: '1px solid  #D1D5DB' }}>
+          {tabs.map((tab, ix) => {
+            const selected = ix === selectedTab;
+            return (
+              <AppButton
+                key={ix}
+                plain
+                style={{
+                  flexGrow: 1,
+                  borderBottom: selected ? '2px solid #337FBD' : 'none',
+                }}
+                onClick={() => setSelectedTab(ix)}>
+                <Box height={'40px'} justify="center" align="center">
+                  <Text
+                    style={{
+                      fontSize: '16px',
+                      fontStyle: 'normal',
+                      fontWeight: '500',
+                      lineHeight: '18px',
+                      color: '#6B7280',
+                    }}>
+                    {tab.label}
+                  </Text>
+                </Box>
+              </AppButton>
+            );
+          })}
+        </Box>
+
         <Box gap="medium">
           {posts.map((post, ix) => (
             <Box key={ix}>
