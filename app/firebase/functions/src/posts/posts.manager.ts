@@ -440,15 +440,21 @@ export class PostsManager {
         });
 
       await this.processing.createOrUpdatePostDrafts(postId, manager);
+    }
 
-      /** reindex the semantics as triples */
-      if (postUpdate.semantics) {
-        await this.processing.triples.deleteOfPost(postId, manager);
-        await this.processing.storeTriples(
-          postId,
-          postUpdate.semantics,
-          manager
-        );
+    /** index the semantics as triples when the post is published */
+    if (postUpdate.republishedStatus === AppPostRepublishedStatus.REPUBLISHED) {
+      await this.processing.triples.deleteOfPost(postId, manager);
+      const semantics = await (async () => {
+        if (postUpdate.semantics) {
+          return postUpdate.semantics;
+        }
+        const post = await this.processing.posts.get(postId, manager, true);
+        return post.semantics;
+      })();
+
+      if (semantics) {
+        await this.processing.storeTriples(postId, semantics, manager);
       }
     }
   }

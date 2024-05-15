@@ -1,5 +1,5 @@
 import { Box } from 'grommet';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { TweetAnchor } from '../app/anchors/TwitterAnchor';
 import { PLATFORM } from '../shared/types/types';
@@ -8,15 +8,25 @@ import { useThemeContext } from '../ui-components/ThemedApp';
 import { NanopubStatus, StatusTag } from './NanopubStatus';
 import { PostText } from './PostText';
 
-export const PostCard = (props: { post: AppPostFull; shade?: boolean }) => {
+export const PostCard = (props: {
+  post: AppPostFull;
+  shade?: boolean;
+  profile?: boolean;
+}) => {
   const { post, shade: _shade } = props;
+  const profile = props.profile !== undefined ? props.profile : false;
   const shade = _shade || false;
 
   const navigate = useNavigate();
   const { constants } = useThemeContext();
 
+  const location = useLocation();
+
   const handleClick = () => {
-    navigate(`/post/${post.id}`);
+    const path = profile
+      ? `${location.pathname}/${post.id}`
+      : `/post/${post.id}`;
+    navigate(path);
   };
 
   const tweet = post.mirrors.find((m) => m.platformId === PLATFORM.Twitter);
@@ -34,7 +44,7 @@ export const PostCard = (props: { post: AppPostFull; shade?: boolean }) => {
         <TweetAnchor
           thread={tweet?.posted?.post}
           timestamp={tweet?.posted?.timestampMs}></TweetAnchor>
-        <NanopubStatus post={post}></NanopubStatus>
+        {!profile ? <NanopubStatus post={post}></NanopubStatus> : <></>}
       </Box>
       <PostText truncate shade={shade} text={post?.content}></PostText>
     </Box>

@@ -7,7 +7,8 @@ import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { NanopubStatus } from './NanopubStatus';
 import { usePost } from './PostContext';
 
-export const PostHeader = (props: BoxExtendedProps) => {
+export const PostHeader = (props: BoxExtendedProps & { profile?: boolean }) => {
+  const profile = props.profile !== undefined ? props.profile : false;
   const { constants } = useThemeContext();
   const { twitterProfile } = useAccountContext();
   const { tweet, post } = usePost();
@@ -30,7 +31,7 @@ export const PostHeader = (props: BoxExtendedProps) => {
             }}>
             {username}
           </Text>
-          <NanopubStatus post={post}></NanopubStatus>
+          {!profile ? <NanopubStatus post={post}></NanopubStatus> : <></>}
         </Box>
         <Box margin={{ bottom: '6px' }}></Box>
         <TweetAnchor thread={tweet?.posted?.post}></TweetAnchor>

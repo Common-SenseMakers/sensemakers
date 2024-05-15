@@ -5,6 +5,7 @@ import { Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { AppHome } from '../pages/AppHome';
 import { PostPage } from '../post/PostPage';
 import { ProfilePage } from '../profile/ProfilePage';
+import { ProfilePostPage } from '../profile/ProfilePostPage';
 import { RouteNames } from '../route.names';
 import { ResponsiveApp } from '../ui-components/ResponsiveApp';
 import { ThemedApp } from '../ui-components/ThemedApp';
@@ -51,6 +52,9 @@ export const AppContainer = (props: React.PropsWithChildren) => {
               <Box style={{ height: `calc(100% - ${topHeight})` }}>
                 <Routes>
                   <Route path={RouteNames.AppHome} element={<Outlet />}>
+                    <Route
+                      path={`${RouteNames.Profile}/:username/:postId`}
+                      element={<ProfilePostPage></ProfilePostPage>}></Route>
                     <Route
                       path={`${RouteNames.Profile}/:username`}
                       element={<ProfilePage></ProfilePage>}></Route>
