@@ -161,7 +161,10 @@ describe.only('030-process', () => {
         throw new Error('user not created');
       }
 
-      const posts = await services.postsManager.getOfUser(user.userId);
+      const posts = await services.postsManager.getOfUser(user.userId, {
+        status: PostsQueryStatus.ALL,
+        fetchParams: { expectedAmount: 100 },
+      });
       await Promise.all(
         posts.map((post) => {
           return parsePostTask({ data: { postId: post.id } } as any);
@@ -169,7 +172,9 @@ describe.only('030-process', () => {
       );
 
       /** wait for the task to finish */
-      await new Promise<void>((resolve) => setTimeout(resolve, 0.5 * 1000));
+      if (USE_REAL_PARSER) {
+        await new Promise<void>((resolve) => setTimeout(resolve, 0.5 * 1000));
+      }
 
       const postsRead = await services.postsManager.getOfUser(user.userId);
 
@@ -194,7 +199,7 @@ describe.only('030-process', () => {
       });
 
       if (!USE_REAL_TWITTER) {
-        expect(pendingPosts).to.have.length(10);
+        expect(pendingPosts).to.have.length(8);
       }
 
       await Promise.all(
@@ -260,12 +265,27 @@ describe.only('030-process', () => {
       const profilePosts = await services.postsManager.getUserProfile(
         PLATFORM.Twitter,
         username,
-        { expectedAmount: 10 },
+        { expectedAmount: 100 },
         LABELS_URIS
       );
 
       expect(profilePosts).to.not.be.undefined;
-      expect(profilePosts).to.have.length(10);
+      expect(profilePosts).to.have.length(1);
+
+      const LABELS_URIS_2 = [
+        'https://sense-nets.xyz/asksQuestionAbout',
+        'http://purl.org/spar/cito/discusses',
+      ];
+
+      const profilePosts2 = await services.postsManager.getUserProfile(
+        PLATFORM.Twitter,
+        username,
+        { expectedAmount: 100 },
+        LABELS_URIS_2
+      );
+
+      expect(profilePosts2).to.not.be.undefined;
+      expect(profilePosts2).to.have.length(6);
     });
   });
 });

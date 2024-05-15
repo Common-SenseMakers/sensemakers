@@ -359,7 +359,7 @@ export class PostsManager {
       }
 
       logger.debug(`parseOfUser - marking as parsing ${postId}`);
-      await this.processing.posts.updateContent(
+      await this.updatePost(
         postId,
         { parsingStatus: AppPostParsingStatus.PROCESSING },
         manager
@@ -375,7 +375,7 @@ export class PostsManager {
           await this._parsePost(postId, manager);
         } catch (err: any) {
           logger.error(`Error parsing post ${postId}`, err);
-          await this.processing.posts.updateContent(
+          await this.updatePost(
             postId,
             { parsingStatus: AppPostParsingStatus.ERRORED },
             manager
@@ -387,7 +387,7 @@ export class PostsManager {
 
   protected async _parsePost(postId: string, manager: TransactionManager) {
     const post = await this.processing.posts.get(postId, manager, true);
-    if (DEBUG) logger.debug('parsePost - start', { postId, post });
+    if (DEBUG) logger.debug(`parsePost - start ${postId}`, { postId, post });
 
     const params: ParsePostRequest<TopicsParams> = {
       post: { content: post.content },
@@ -417,7 +417,7 @@ export class PostsManager {
       reviewedStatus,
     };
 
-    if (DEBUG) logger.debug('parsePost - done', { postId, update });
+    if (DEBUG) logger.debug(`parsePost - done ${postId}`, { postId, update });
 
     await this.updatePost(post.id, update, manager);
   }
@@ -428,13 +428,13 @@ export class PostsManager {
     postUpdate: PostUpdate,
     manager: TransactionManager
   ) {
-    if (DEBUG) logger.debug('updatePost', { postId, postUpdate });
+    if (DEBUG) logger.debug(`updatePost ${postId}`, { postId, postUpdate });
     await this.processing.posts.updateContent(postId, postUpdate, manager);
 
     if (postUpdate.semantics || postUpdate.content) {
       /** rebuild the platform drafts with the new post content */
       if (DEBUG)
-        logger.debug('updatePost - semantics, content found', {
+        logger.debug(`updatePost - semantics, content found ${postId}`, {
           postId,
           postUpdate,
         });
@@ -463,7 +463,7 @@ export class PostsManager {
    */
   async approvePost(post: AppPostFull, userId: string) {
     await this.db.run(async (manager) => {
-      if (DEBUG) logger.debug('approvePost', { post, userId });
+      if (DEBUG) logger.debug(`approvePost ${post.id}`, { post, userId });
       const user = await this.users.repo.getUser(userId, manager, true);
       const existing = await this.processing.posts.get(post.id, manager, true);
       if (!existing) {
