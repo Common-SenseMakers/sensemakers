@@ -5,6 +5,7 @@ import {
   createDraftPostController,
   getPostController,
   getUserPostsController,
+  getUserProfileController,
   parsePostController,
   updatePostController,
 } from './posts/controllers/posts.controller';
@@ -21,6 +22,8 @@ router.post('/auth/:platform/signup', handleSignupController);
 router.post('/auth/me', getLoggedUserController);
 
 router.post('/posts/getOfUser', getUserPostsController);
+router.post('/posts/getProfilePosts', getUserProfileController);
+
 router.post('/posts/get', getPostController);
 router.post('/posts/createDraft', createDraftPostController);
 router.post('/posts/approve', approvePostController);

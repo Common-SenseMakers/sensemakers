@@ -104,3 +104,10 @@ export interface UserPostsQuery {
   status: PostsQueryStatus;
   fetchParams: FetchParams;
 }
+
+export interface ProfilePostsQuery {
+  platformId: string;
+  username: string;
+  labelsUris?: string[];
+  fetchParams: FetchParams;
+}

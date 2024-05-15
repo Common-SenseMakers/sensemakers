@@ -4,6 +4,7 @@ import {
   AppPostFull,
   PostUpdatePayload,
   UserPostsQuery,
+  ProfilePostsQuery
 } from '../../@shared/types/types.posts';
 import { IS_EMULATOR } from '../../config/config.runtime';
 import { envRuntime } from '../../config/typedenv.runtime';
@@ -14,6 +15,7 @@ import {
   approvePostSchema,
   createDraftPostSchema,
   getUserPostsQuerySchema,
+  getUserProfileSchema,
   postIdValidation,
   updatePostSchema,
 } from './posts.schema';
@@ -39,6 +41,32 @@ export const getUserPostsController: RequestHandler = async (
     const posts = await postsManager.getOfUser(userId, queryParams);
 
     if (DEBUG) logger.debug(`${request.path}: posts`, { posts, userId });
+    response.status(200).send({ success: true, data: posts });
+  } catch (error: any) {
+    logger.error('error', error);
+    response.status(500).send({ success: false, error: error.message });
+  }
+};
+
+
+/**
+ * get user posts from the DB (does not fetch for more)
+ * */
+export const getUserProfileController: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    const queryParams = (await getUserProfileSchema.validate(
+      request.body
+    )) as ProfilePostsQuery;
+
+    logger.debug(`${request.path} - query parameters`, { queryParams });
+    const { postsManager } = getServices(request);
+
+    const posts = await postsManager.getUserProfile(queryParams.platformId, queryParams.username, queryParams.fetchParams, queryParams.labelsUris);
+    if (DEBUG) logger.debug(`${request.path}: posts`, { posts });
+
     response.status(200).send({ success: true, data: posts });
   } catch (error: any) {
     logger.error('error', error);

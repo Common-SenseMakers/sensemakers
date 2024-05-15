@@ -1,12 +1,7 @@
 import React, { useCallback, useContext } from 'react';
 import { createContext } from 'react';
 
-import {
-  AppPostFull,
-  AppPostReviewStatus,
-  PostUpdate,
-  PostsQueryStatus,
-} from '../shared/types/types.posts';
+import { AppPostFull, PostsQueryStatus } from '../shared/types/types.posts';
 import { usePostsFetch } from './posts.fetch.hook';
 
 interface PostContextType {

@@ -32,6 +32,7 @@ import { getTimeMock } from '../../src/time/mock/time.service.mock';
 import { TimeService } from '../../src/time/time.service';
 import { UsersRepository } from '../../src/users/users.repository';
 import { UsersService } from '../../src/users/users.service';
+import { TriplesRepository } from '../../src/semantics/triples.repository';
 
 export interface TestServicesConfig {
   twitter: TwitterMockConfig;
@@ -62,6 +63,7 @@ export const getTestServices = (config: TestServicesConfig) => {
   const db = new DBInstance();
   const userRepo = new UsersRepository(db);
   const postsRepo = new PostsRepository(db);
+  const triplesRepo = new TriplesRepository(db);
   const platformPostsRepo = new PlatformPostsRepository(db);
 
   const identityServices: IdentityServicesMap = new Map();
@@ -119,6 +121,7 @@ export const getTestServices = (config: TestServicesConfig) => {
   const postsProcessing = new PostsProcessing(
     usersService,
     time,
+    triplesRepo,
     postsRepo,
     platformPostsRepo,
     platformsService
