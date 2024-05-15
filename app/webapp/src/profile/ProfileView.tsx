@@ -204,6 +204,31 @@ export const ProfileView = (props: { username?: string }) => {
       );
     }
 
+    const postResults = (() => {
+      if (!posts || isLoading) {
+        return [1, 2, 3, 4, 5, 6].map((ix) => (
+          <LoadingDiv
+            key={ix}
+            height="108px"
+            width="100%"
+            margin={{ bottom: '2px' }}></LoadingDiv>
+        ));
+      }
+
+      if (posts.length === 0) {
+        return (
+          <BoxCentered>
+            <Text>No posts found</Text>
+          </BoxCentered>
+        );
+      }
+      return posts.map((post, ix) => (
+        <Box key={ix}>
+          <PostCard post={post} shade={ix % 2 === 1} profile></PostCard>
+        </Box>
+      ));
+    })();
+
     return (
       <>
         <Anchor href="/" style={{ textDecoration: 'none' }}>
@@ -253,13 +278,7 @@ export const ProfileView = (props: { username?: string }) => {
           })}
         </Box>
 
-        <Box gap="medium">
-          {posts.map((post, ix) => (
-            <Box key={ix}>
-              <PostCard post={post} shade={ix % 2 === 1} profile></PostCard>
-            </Box>
-          ))}
-        </Box>
+        <Box gap="medium">{postResults}</Box>
       </>
     );
   })();
