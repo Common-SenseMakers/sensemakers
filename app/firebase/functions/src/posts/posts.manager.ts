@@ -440,6 +440,16 @@ export class PostsManager {
         });
 
       await this.processing.createOrUpdatePostDrafts(postId, manager);
+
+      /** reindex the semantics as triples */
+      if (postUpdate.semantics) {
+        await this.processing.triples.deleteOfPost(postId, manager);
+        await this.processing.storeTriples(
+          postId,
+          postUpdate.semantics,
+          manager
+        );
+      }
     }
   }
 
@@ -529,6 +539,7 @@ export class PostsManager {
                 manager
               );
 
+            /**  update platform post status and posted values*/
             await this.processing.platformPosts.update(
               mirror.id,
               {
@@ -561,25 +572,43 @@ export class PostsManager {
     });
   }
 
-   /** Get posts AppPostFull of user, cannot be part of a transaction
+  /** Get posts AppPostFull of user, cannot be part of a transaction
    * We trigger fetching posts from the platforms from here
    */
-   async getUserProfile(platformId: string, username: string, fetchParams: FetchParams, labelsUris?: string[]): Promise<AppPostFull[]> {
+  async getUserProfile(
+    platformId: string,
+    username: string,
+    fetchParams: FetchParams,
+    labelsUris?: string[]
+  ): Promise<AppPostFull[]> {
     return this.db.run(async (manager) => {
       const usernameTag = (() => {
         if (platformId === PLATFORM.Twitter) {
-          return 'username'
+          return 'username';
         }
 
-        throw new Error('unexpected for now')
-      })()
+        throw new Error('unexpected for now');
+      })();
 
-      const user = await this.users.repo.getByPlatformUsername(platformId, usernameTag, username, manager, true);
+      const user = await this.users.repo.getByPlatformUsername(
+        platformId,
+        usernameTag,
+        username,
+        manager,
+        true
+      );
       const appPosts = await (async () => {
         if (labelsUris !== undefined) {
-         return this.processing.triples.getWithPredicatesOfUser(username, labelsUris, fetchParams);
+          return this.processing.triples.getWithPredicatesOfUser(
+            username,
+            labelsUris,
+            fetchParams
+          );
         } else {
-          return this.processing.posts.getOfUser(user.userId, {status: PostsQueryStatus.ALL, fetchParams});
+          return this.processing.posts.getOfUser(user.userId, {
+            status: PostsQueryStatus.ALL,
+            fetchParams,
+          });
         }
       })();
 
@@ -589,10 +618,10 @@ export class PostsManager {
 
       logger.debug(
         `getUserProfile query for user ${username} has ${appPosts.length} results for query params: `,
-        { platformId,username,labelsUris,fetchParams }
+        { platformId, username, labelsUris, fetchParams }
       );
 
       return postsFull;
-    }); 
+    });
   }
 }

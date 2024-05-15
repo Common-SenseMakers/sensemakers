@@ -1,4 +1,3 @@
-import { TriplesRepository } from '../semantics/triples.repository';
 import { ALL_PUBLISH_PLATFORMS, DefinedIfTrue } from '../@shared/types/types';
 import {
   PlatformPost,
@@ -18,9 +17,11 @@ import {
   AppPostRepublishedStatus,
   AppPostReviewStatus,
 } from '../@shared/types/types.posts';
+import { mapStoreElements, parseRDF } from '../@shared/utils/n3.utils';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
 import { PlatformsService } from '../platforms/platforms.service';
+import { TriplesRepository } from '../semantics/triples.repository';
 import { TimeService } from '../time/time.service';
 import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
@@ -238,6 +239,33 @@ export class PostsProcessing {
     /** add drafts as post mirrors */
 
     return drafts.flat();
+  }
+
+  async storeTriples(
+    postId: string,
+    semantics: string,
+    manager: TransactionManager
+  ) {
+    const post = await this.posts.get(postId, manager, true);
+    const store = await parseRDF(semantics);
+
+    const createdAtMs = post.createdAtMs;
+    const authorId = post.authorId;
+
+    /** store the triples */
+    mapStoreElements(store, (q) => {
+      this.triples.create(
+        {
+          postId,
+          createdAtMs,
+          authorId,
+          subject: q.subject.value,
+          predicate: q.predicate.value,
+          object: q.object.value,
+        },
+        manager
+      );
+    });
   }
 
   async createAppPost(

@@ -12,7 +12,7 @@ import { resetDB } from '../utils/db';
 import { getNanopubProfile } from '../utils/nanopub.profile';
 import { getTestServices } from './test.services';
 
-describe.only('010-signups', () => {
+describe('010-signups', () => {
   const services = getTestServices({
     time: 'real',
     twitter: 'mock-signup',
