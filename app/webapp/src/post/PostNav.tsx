@@ -12,7 +12,10 @@ import { useUserPosts } from '../user-home/UserPostsContext';
 export const PostNav = (props: {
   prevPostId?: string;
   nextPostId?: string;
+  profile?: boolean;
 }) => {
+  const profile = props.profile !== undefined ? props.profile : false;
+
   const { prevPostId, nextPostId } = props;
   const navigate = useNavigate();
   const { constants } = useThemeContext();
@@ -29,22 +32,26 @@ export const PostNav = (props: {
       direction="row"
       justify="between">
       <NavButton
-        icon={<HomeIcon></HomeIcon>}
-        label="Home"
-        onClick={() => navigate('/')}></NavButton>
-      <Box direction="row" gap="8px">
-        <NavButton
-          icon={<LeftIcon></LeftIcon>}
-          disabled={!prevPostId}
-          label="Previous"
-          onClick={() => navigate(`/post/${prevPostId}`)}></NavButton>
-        <NavButton
-          reverse
-          icon={<RightIcon></RightIcon>}
-          disabled={!nextPostId}
-          label="Next"
-          onClick={() => navigate(`/post/${nextPostId}`)}></NavButton>
-      </Box>
+        icon={profile ? <LeftIcon></LeftIcon> : <HomeIcon></HomeIcon>}
+        label={profile ? 'Back' : 'Home'}
+        onClick={() => (profile ? navigate(-1) : navigate('/'))}></NavButton>
+      {!profile ? (
+        <Box direction="row" gap="8px">
+          <NavButton
+            icon={<LeftIcon></LeftIcon>}
+            disabled={!prevPostId}
+            label="Previous"
+            onClick={() => navigate(`/post/${prevPostId}`)}></NavButton>
+          <NavButton
+            reverse
+            icon={<RightIcon></RightIcon>}
+            disabled={!nextPostId}
+            label="Next"
+            onClick={() => navigate(`/post/${nextPostId}`)}></NavButton>
+        </Box>
+      ) : (
+        <></>
+      )}
     </Box>
   );
 };

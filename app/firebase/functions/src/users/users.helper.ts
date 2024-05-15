@@ -1,10 +1,17 @@
 import {
+  ALL_PUBLISH_PLATFORMS,
   AppUser,
+  AppUserCreate,
   DefinedIfTrue,
   IDENTITY_PLATFORMS,
   PUBLISHABLE_PLATFORMS,
   UserDetailsBase,
 } from '../@shared/types/types';
+
+export interface PlatformDetails {
+  platform: PUBLISHABLE_PLATFORMS;
+  account: UserDetailsBase;
+}
 
 export class UsersHelper {
   /**
@@ -12,7 +19,7 @@ export class UsersHelper {
    * (undefined if not found, throw if _throw = true
    * */
   static getAccounts(
-    user: AppUser,
+    user: AppUser | AppUserCreate,
     platformId: IDENTITY_PLATFORMS
   ): UserDetailsBase[] {
     const platformAccounts = user[platformId];
@@ -52,5 +59,23 @@ export class UsersHelper {
     }
 
     return account as DefinedIfTrue<T, UserDetailsBase>;
+  }
+
+  static getAllAccounts(user: AppUserCreate | AppUser): PlatformDetails[] {
+    const perPlatform = ALL_PUBLISH_PLATFORMS.map((platform) => {
+      return {
+        platform,
+        accounts: UsersHelper.getAccounts(user, platform),
+      };
+    });
+
+    const allAccounts: PlatformDetails[] = [];
+    perPlatform.forEach((p) => {
+      p.accounts.forEach((account) => {
+        allAccounts.push({ platform: p.platform, account });
+      });
+    });
+
+    return allAccounts;
   }
 }

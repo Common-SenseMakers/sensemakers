@@ -21,7 +21,10 @@ import { PostText } from './PostText';
 export const PostView = (props: {
   prevPostId?: string;
   nextPostId?: string;
+  profile?: boolean;
 }) => {
+  const profile = props.profile !== undefined ? props.profile : false;
+
   const { constants } = useThemeContext();
   const { prevPostId, nextPostId } = props;
   const {
@@ -141,7 +144,9 @@ export const PostView = (props: {
     return (
       <>
         <Box pad="medium">
-          <PostHeader margin={{ bottom: '16px' }}></PostHeader>
+          <PostHeader
+            profile={profile}
+            margin={{ bottom: '16px' }}></PostHeader>
           {postStatuses.isParsing ? (
             <LoadingDiv height="60px" width="100%"></LoadingDiv>
           ) : (
@@ -189,7 +194,10 @@ export const PostView = (props: {
     <ViewportPage
       content={
         <Box fill>
-          <PostNav prevPostId={prevPostId} nextPostId={nextPostId}></PostNav>
+          <PostNav
+            profile={profile}
+            prevPostId={prevPostId}
+            nextPostId={nextPostId}></PostNav>
           {content}
         </Box>
       }></ViewportPage>

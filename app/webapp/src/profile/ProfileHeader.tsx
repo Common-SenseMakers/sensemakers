@@ -4,37 +4,46 @@ import { TwitterAvatar } from '../app/TwitterAvatar';
 import { TweetAnchor } from '../app/anchors/TwitterAnchor';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
-import { NanopubStatus } from './NanopubStatus';
-import { usePost } from './PostContext';
 
-export const PostHeader = (props: BoxExtendedProps & { profile?: boolean }) => {
-  const profile = props.profile !== undefined ? props.profile : false;
+export const ProfileHeader = (props: BoxExtendedProps) => {
   const { constants } = useThemeContext();
   const { twitterProfile } = useAccountContext();
-  const { tweet, post } = usePost();
 
-  const username = twitterProfile?.name;
+  const name = twitterProfile?.name;
+  const username = twitterProfile?.username;
 
   return (
     <Box direction="row" {...props}>
-      <TwitterAvatar size={40} profile={twitterProfile}></TwitterAvatar>
+      <TwitterAvatar size={60} profile={twitterProfile}></TwitterAvatar>
       <Box width="100%" margin={{ left: 'medium' }}>
-        <Box direction="row" justify="between">
+        <Box>
+          <Text
+            color={constants.colors.primary}
+            style={{
+              fontSize: '18px',
+              fontStyle: 'normal',
+              fontWeight: '600',
+              lineHeight: '24px',
+              textDecoration: 'none',
+            }}>
+            {name}
+          </Text>
+        </Box>
+        <Box>
           <Text
             color={constants.colors.primary}
             style={{
               fontSize: '16px',
               fontStyle: 'normal',
-              fontWeight: '600',
+              fontWeight: '500',
               lineHeight: '18px',
               textDecoration: 'none',
+              color: '#337FBD',
             }}>
-            {username}
+            @{username}
           </Text>
-          {!profile ? <NanopubStatus post={post}></NanopubStatus> : <></>}
         </Box>
         <Box margin={{ bottom: '6px' }}></Box>
-        <TweetAnchor thread={tweet?.posted?.post}></TweetAnchor>
       </Box>
     </Box>
   );

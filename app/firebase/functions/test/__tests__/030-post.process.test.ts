@@ -1,14 +1,17 @@
 import { expect } from 'chai';
 
 import { AppUser, PLATFORM } from '../../src/@shared/types/types';
-import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
 import {
-  PlatformPostDraftApprova,
+  PlatformPostDraftApproval,
   PlatformPostPosted,
 } from '../../src/@shared/types/types.platform.posts';
-import { AppPostReviewStatus } from '../../src/@shared/types/types.posts';
+import {
+  AppPostReviewStatus,
+  PostsQueryStatus,
+} from '../../src/@shared/types/types.posts';
 import { TwitterThread } from '../../src/@shared/types/types.twitter';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
+import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { logger } from '../../src/instances/logger';
 import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
@@ -24,8 +27,9 @@ import {
 } from './setup';
 import { getTestServices } from './test.services';
 
-describe('030-process', () => {
-  let rsaKeys: RSAKeys | undefined;
+describe.only('030-process', () => {
+  let rsaKeys = getRSAKeys('');
+
   const services = getTestServices({
     time: 'real',
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
@@ -157,7 +161,10 @@ describe('030-process', () => {
         throw new Error('user not created');
       }
 
-      const posts = await services.postsManager.getOfUser(user.userId);
+      const posts = await services.postsManager.getOfUser(user.userId, {
+        status: PostsQueryStatus.ALL,
+        fetchParams: { expectedAmount: 100 },
+      });
       await Promise.all(
         posts.map((post) => {
           return parsePostTask({ data: { postId: post.id } } as any);
@@ -165,7 +172,9 @@ describe('030-process', () => {
       );
 
       /** wait for the task to finish */
-      await new Promise<void>((resolve) => setTimeout(resolve, 0.5 * 1000));
+      if (USE_REAL_PARSER) {
+        await new Promise<void>((resolve) => setTimeout(resolve, 0.5 * 1000));
+      }
 
       const postsRead = await services.postsManager.getOfUser(user.userId);
 
@@ -178,44 +187,105 @@ describe('030-process', () => {
       });
     });
 
-    it('fetch one user pending posts', async () => {
+    it('approves/publishes pending post', async () => {
       if (!user) {
         throw new Error('user not created');
       }
 
       /** get pending posts of user */
-      const pendingPosts = await services.postsManager.getOfUser(user.userId);
+      const pendingPosts = await services.postsManager.getOfUser(user.userId, {
+        status: PostsQueryStatus.PENDING,
+        fetchParams: { expectedAmount: 10 },
+      });
 
-      const pendingPost = pendingPosts[0];
-      const nanopub = pendingPost.mirrors.find(
-        (m) => m.platformId === PLATFORM.Nanopub
+      if (!USE_REAL_TWITTER) {
+        expect(pendingPosts).to.have.length(8);
+      }
+
+      await Promise.all(
+        pendingPosts.map(async (pendingPost) => {
+          const nanopub = pendingPost.mirrors.find(
+            (m) => m.platformId === PLATFORM.Nanopub
+          );
+
+          if (!nanopub?.draft) {
+            throw new Error('draft not created');
+          }
+
+          const draft = nanopub.draft.post;
+
+          if (!rsaKeys) {
+            throw new Error('rsaKeys undefined');
+          }
+
+          /** sign */
+          const signed = await signNanopublication(draft, rsaKeys, '');
+          nanopub.draft.post = signed.rdf();
+          nanopub.draft.postApproval = PlatformPostDraftApproval.APPROVED;
+
+          if (!user) {
+            throw new Error('user not created');
+          }
+
+          /** send updated post (content and semantics did not changed) */
+          await services.postsManager.approvePost(pendingPost, user.userId);
+
+          const approved = await services.postsManager.getPost(
+            pendingPost.id,
+            true
+          );
+
+          expect(approved).to.not.be.undefined;
+          expect(approved.reviewedStatus).to.equal(
+            AppPostReviewStatus.APPROVED
+          );
+        })
       );
+    });
 
-      if (!nanopub?.draft) {
-        throw new Error('draft not created');
+    it('get user profile', async () => {
+      if (!user) {
+        throw new Error('user not created');
       }
 
-      const draft = nanopub.draft.post;
-
-      if (!rsaKeys) {
-        throw new Error('draft not created');
-      }
-
-      /** sign */
-      const signed = await signNanopublication(draft, rsaKeys, '');
-      nanopub.draft.post = signed.rdf();
-      nanopub.draft.postApproval = PlatformPostDraftApprova.APPROVED;
-
-      /** send updated post (content and semantics did not changed) */
-      await services.postsManager.approvePost(pendingPost, user.userId);
-
-      const approved = await services.postsManager.getPost(
-        pendingPost.id,
+      const twitter = UsersHelper.getAccount(
+        user,
+        PLATFORM.Twitter,
+        undefined,
         true
       );
 
-      expect(approved).to.not.be.undefined;
-      expect(approved.reviewedStatus).to.equal(AppPostReviewStatus.APPROVED);
+      const username = twitter.profile?.username;
+      if (!username) {
+        throw new Error('username not found in profile');
+      }
+
+      const LABELS_URIS = ['https://sense-nets.xyz/asksQuestionAbout'];
+
+      const profilePosts = await services.postsManager.getUserProfile(
+        PLATFORM.Twitter,
+        username,
+        { expectedAmount: 100 },
+        LABELS_URIS
+      );
+
+      expect(profilePosts).to.not.be.undefined;
+      expect(profilePosts).to.have.length(1);
+
+      const LABELS_URIS_2 = [
+        'https://sense-nets.xyz/asksQuestionAbout',
+        'http://purl.org/spar/cito/discusses',
+      ];
+
+      const profilePosts2 = await services.postsManager.getUserProfile(
+        PLATFORM.Twitter,
+        username,
+        { expectedAmount: 100 },
+        LABELS_URIS_2
+      );
+
+      expect(profilePosts2).to.not.be.undefined;
+      expect(profilePosts2).to.have.length(6);
     });
   });
 });
