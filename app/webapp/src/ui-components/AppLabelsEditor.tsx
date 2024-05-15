@@ -220,7 +220,8 @@ export const AppLabelsEditor = (props: {
               }}
               onClick={() => setAdding(true)}
               justify="center"
-              align="center">
+              align="center"
+              pad={{ top: '2px' }}>
               <AppButton
                 icon={
                   <Edit color={constants.colors.primary} size="12px"></Edit>

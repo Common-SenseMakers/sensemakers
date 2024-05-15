@@ -151,17 +151,17 @@ export const createDraftPostController: RequestHandler = async (
       postId: string;
     };
 
+    if (DEBUG)
+      logger.debug(`${request.path}: createDraftPostController`, {
+        payload,
+      });
+
     db.run(async (manager) => {
       return postsManager.processing.createOrUpdatePostDrafts(
         payload.postId,
         manager
       );
     });
-
-    if (DEBUG)
-      logger.debug(`${request.path}: approvePost`, {
-        post: payload,
-      });
 
     response.status(200).send({ success: true });
   } catch (error: any) {

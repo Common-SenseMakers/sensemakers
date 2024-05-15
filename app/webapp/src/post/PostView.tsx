@@ -1,25 +1,15 @@
-import { Box, Text } from 'grommet';
-import { Clear, FormClose, Refresh, Send } from 'grommet-icons';
-import { useState } from 'react';
+import { Box } from 'grommet';
+import { Refresh } from 'grommet-icons';
 
-import { useAppFetch } from '../api/app.fetch';
 import { ClearIcon } from '../app/icons/ClearIcon';
 import { SendIcon } from '../app/icons/SendIcon';
-import { AppBottomNav } from '../app/layout/AppBottomNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID } from '../semantics/patterns/patterns';
-import { PLATFORM } from '../shared/types/types';
-import { PlatformPostDraftApprova } from '../shared/types/types.platform.posts';
-import {
-  AppPostFull,
-  AppPostReviewStatus,
-  PostUpdate,
-} from '../shared/types/types.posts';
+import { AppPostReviewStatus } from '../shared/types/types.posts';
 import { AppButton } from '../ui-components';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
-import { useUserPosts } from '../user-home/UserPostsContext';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { usePost } from './PostContext';

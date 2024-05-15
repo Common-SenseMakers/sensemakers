@@ -3,6 +3,7 @@ import { Firestore, getFirestore } from 'firebase-admin/firestore';
 
 import { CollectionNames } from '../@shared/utils/collectionNames';
 import { IS_EMULATOR } from '../config/config.runtime';
+import { logger } from '../instances/logger';
 // import { SERVICE_ACCOUNT_ID } from '../config/config.runtime';
 import {
   HandleWithTxManager,
@@ -16,6 +17,8 @@ export const app = IS_EMULATOR
       projectId: 'demo-sensenets',
     })
   : initializeApp();
+
+const DEBUG = false;
 
 export class DBInstance {
   public firestore: Firestore;
@@ -49,9 +52,12 @@ export class DBInstance {
     switch (config.mode) {
       case ManagerModes.TRANSACTION:
         return this.firestore.runTransaction(async (transaction) => {
+          if (DEBUG) logger.debug('Transaction started');
           const manager = new TransactionManager(transaction);
           const result = await func(manager, payload);
+          if (DEBUG) logger.debug('Transaction function executed');
           await manager.applyWrites();
+          if (DEBUG) logger.debug('Transaction writes applied');
           return result;
         });
 

@@ -14,7 +14,7 @@ import {
 import { logger } from '../../instances/logger';
 import { UsersHelper } from '../../users/users.helper';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const createNanopublication = async (
   post: AppPostFull,
@@ -46,7 +46,10 @@ export const createNanopublication = async (
 
   const twitterPath = `${twitterUsername}`;
 
-  if (DEBUG) logger.debug(`Creating nanopub`, { twitterPath });
+  if (DEBUG)
+    logger.debug(`Creating nanopub twitterPath:${twitterPath}`, {
+      twitterPath,
+    });
 
   /** Then get the RDF as triplets */
   const assertionsStore = await (async () => {
@@ -127,7 +130,10 @@ export const createNanopublication = async (
         `;
 
   try {
-    if (DEBUG) logger.debug(`Creating nanopub`, { rdfStr });
+    if (DEBUG)
+      logger.debug(`Creating nanopub rdfStr:${rdfStr.slice(0, 320)}`, {
+        rdfStr,
+      });
     const np = new Nanopub(rdfStr);
 
     if (DEBUG) logger.debug(`Created nanopub!`);
