@@ -102,7 +102,8 @@ export interface AppUserRead extends UserWithId {
 
 /** Support collection with all the profiles from all platforms */
 export interface UserPlatformProfile {
-  platformId: string
+  userId: string;
+  platformId: string;
   user_id: string;
   profile: any;
 }

@@ -135,7 +135,7 @@ export class UsersRepository {
         throw new Error(
           `User with profile.username: ${username} and platform ${platformId} not found`
         );
-      else return undefined as DefinedIfTrue<T, AppUser>;
+      else return undefined as DefinedIfTrue<T, string>;
     }
 
     if (snap.size > 1) {
@@ -144,10 +144,8 @@ export class UsersRepository {
       );
     }
 
-    return { userId: snap.docs[0].id, ...snap.docs[0].data() } as DefinedIfTrue<
-      T,
-      AppUser
-    >;
+    const userId = (snap.docs[0].data() as UserPlatformProfile).userId;
+    return userId as DefinedIfTrue<T, string>;
   }
 
   public async createUser(
@@ -169,11 +167,13 @@ export class UsersRepository {
             platformAccount.account.user_id
           )
         );
-        manager.create(profileRef, {
+        const data: UserPlatformProfile = {
+          userId,
           profile: platformAccount.account.profile,
           platformId: platformAccount.platform,
           user_id: platformAccount.account.user_id,
-        });
+        };
+        manager.create(profileRef, data);
       }
     });
 

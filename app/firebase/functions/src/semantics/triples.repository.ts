@@ -1,5 +1,4 @@
 import { FetchParams } from '../@shared/types/types';
-import { AppPost } from '../@shared/types/types.posts';
 import { PostTriple, PostTripleCreate } from '../@shared/types/types.triples';
 import { DBInstance } from '../db/instance';
 import { BaseRepository } from '../db/repo.base';
@@ -64,6 +63,6 @@ export class TriplesRepository extends BaseRepository<
     return snap.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
-    })) as AppPost[];
+    })) as PostTriple[];
   }
 }

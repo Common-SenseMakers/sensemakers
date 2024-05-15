@@ -581,7 +581,8 @@ export class PostsManager {
     fetchParams: FetchParams,
     labelsUris?: string[]
   ): Promise<AppPostFull[]> {
-    return this.db.run(async (manager) => {
+    /** get userId from username */
+    const userId = await this.db.run(async (manager) => {
       const usernameTag = (() => {
         if (platformId === PLATFORM.Twitter) {
           return 'username';
@@ -590,38 +591,52 @@ export class PostsManager {
         throw new Error('unexpected for now');
       })();
 
-      const user = await this.users.repo.getByPlatformUsername(
+      const userId = await this.users.repo.getByPlatformUsername(
         platformId,
         usernameTag,
         username,
         manager,
         true
       );
-      const appPosts = await (async () => {
-        if (labelsUris !== undefined) {
-          return this.processing.triples.getWithPredicatesOfUser(
-            username,
-            labelsUris,
-            fetchParams
-          );
-        } else {
-          return this.processing.posts.getOfUser(user.userId, {
-            status: PostsQueryStatus.ALL,
-            fetchParams,
-          });
-        }
-      })();
 
-      const postsFull = await Promise.all(
-        appPosts.map((post) => this.appendMirrors(post))
-      );
-
-      logger.debug(
-        `getUserProfile query for user ${username} has ${appPosts.length} results for query params: `,
-        { platformId, username, labelsUris, fetchParams }
-      );
-
-      return postsFull;
+      return userId;
     });
+
+    /** get AppPost from userId and labels (no manager) */
+    const appPosts = await (async () => {
+      if (labelsUris !== undefined) {
+        const triples = await this.processing.triples.getWithPredicatesOfUser(
+          userId,
+          labelsUris,
+          fetchParams
+        );
+
+        return this.db.run((manager) =>
+          Promise.all(
+            triples.map((triple) =>
+              this.processing.posts.get(triple.postId, manager, true)
+            )
+          )
+        );
+      } else {
+        /** if not labels, get all published posts */
+        return this.processing.posts.getOfUser(userId, {
+          status: PostsQueryStatus.PUBLISHED,
+          fetchParams,
+        });
+      }
+    })();
+
+    /** build AppPostFull (append mirrors) */
+    const postsFull = await Promise.all(
+      appPosts.map((post) => this.appendMirrors(post))
+    );
+
+    logger.debug(
+      `getUserProfile query for user ${username} has ${appPosts.length} results for query params: `,
+      { platformId, username, labelsUris, fetchParams }
+    );
+
+    return postsFull;
   }
 }

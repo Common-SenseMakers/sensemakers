@@ -265,6 +265,7 @@ describe.only('030-process', () => {
       );
 
       expect(profilePosts).to.not.be.undefined;
+      expect(profilePosts).to.have.length(10);
     });
   });
 });
