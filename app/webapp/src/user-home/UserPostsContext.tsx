@@ -7,7 +7,7 @@ import {
   PostUpdate,
   PostsQueryStatus,
 } from '../shared/types/types.posts';
-import { usePostsFetch } from './usePostsFetch';
+import { usePostsFetch } from './posts.fetch.hook';
 
 interface PostContextType {
   posts?: AppPostFull[];

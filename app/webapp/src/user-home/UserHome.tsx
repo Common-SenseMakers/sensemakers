@@ -171,7 +171,7 @@ export const UserHome = () => {
 
   const header = (
     <Box
-      pad={{ top: '24px', bottom: '12px', horizontal: '12px' }}
+      pad={{ top: '12px', bottom: '12px', horizontal: '12px' }}
       style={{ backgroundColor: constants.colors.shade, flexShrink: 0 }}>
       <Box
         direction="row"

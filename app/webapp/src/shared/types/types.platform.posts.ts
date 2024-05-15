@@ -58,13 +58,13 @@ export interface FetchedResult<C = any> {
 /**
  * The PlatformPostDraft status is defined prior to posting a PlatformPost
  */
-export enum PlatformPostDraftApprova {
+export enum PlatformPostDraftApproval {
   PENDING = 'pending',
   APPROVED = 'approved',
 }
 export interface PlatformPostDraft<D = any> {
   user_id: string; // The intended user_id of when publishing
-  postApproval: PlatformPostDraftApprova;
+  postApproval: PlatformPostDraftApproval;
   post?: D;
 }
 
@@ -83,6 +83,6 @@ export interface PlatformPostCreated {
   post: AppPost; // In case a post was created
 }
 
-export type PlatformPostUpdatePosted = Partial<
+export type PlatformPostUpdate = Partial<
   Pick<PlatformPost, 'posted' | 'publishOrigin' | 'publishStatus' | 'draft'>
 >;

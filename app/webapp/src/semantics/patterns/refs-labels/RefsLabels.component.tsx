@@ -72,23 +72,27 @@ export const RefLabelsComponent = (props: PatternProps) => {
       <Box margin={{ top: 'small' }}>
         <Box style={{ display: 'block' }}>
           <Box gap="large">
-            {Array.from(refs.entries()).map(([ref, refData], ixref) => {
-              if (!props.originalParsed)
-                throw new Error('Undexpected undefined');
+            {Array.from(refs.entries())
+              .reverse()
+              .map(([ref, refData], ixref) => {
+                if (!props.originalParsed)
+                  throw new Error('Undexpected undefined');
 
-              return (
-                <RefLabels
-                  editable={props.editable}
-                  key={ixref}
-                  refUrl={ref}
-                  refData={refData}
-                  support={props.originalParsed?.support}
-                  removeLabel={(labelUri: string) => removeLabel(ref, labelUri)}
-                  addLabel={(labelUri: string) =>
-                    addLabel(ref, labelUri)
-                  }></RefLabels>
-              );
-            })}
+                return (
+                  <RefLabels
+                    editable={props.editable}
+                    key={ixref}
+                    refUrl={ref}
+                    refData={refData}
+                    support={props.originalParsed?.support}
+                    removeLabel={(labelUri: string) =>
+                      removeLabel(ref, labelUri)
+                    }
+                    addLabel={(labelUri: string) =>
+                      addLabel(ref, labelUri)
+                    }></RefLabels>
+                );
+              })}
           </Box>
         </Box>
       </Box>

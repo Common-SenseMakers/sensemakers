@@ -18,7 +18,11 @@ const ConnectedUserContextValue = createContext<
 
 /** Disconnect from all platforms */
 export const ConnectedUserContext = (props: PropsWithChildren) => {
-  const { disconnect: disconnectServer, connectedUser } = useAccountContext();
+  const {
+    disconnect: disconnectServer,
+    connectedUser,
+    hasTriedFetchingUser,
+  } = useAccountContext();
   const { disconnect: disconnectWallet } = useAppSigner();
   const { disconnect: disconnectNanopub } = useNanopubContext();
 
@@ -27,7 +31,7 @@ export const ConnectedUserContext = (props: PropsWithChildren) => {
 
   useEffect(() => {
     /** navigate home if not logged user */
-    if (location.pathname !== '/' && !connectedUser) {
+    if (location.pathname !== '/' && !connectedUser && hasTriedFetchingUser) {
       navigate(AbsoluteRoutes.App);
     }
   }, [location, connectedUser]);

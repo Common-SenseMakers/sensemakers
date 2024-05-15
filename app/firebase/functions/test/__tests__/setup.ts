@@ -28,6 +28,8 @@ export let testUsers: Map<string, AppUser> = new Map();
 // TestContext will be used by all the test
 export type TestContext = Mocha.Context & Context;
 
+const DEBUG = false;
+
 export const mochaHooks = (): Mocha.RootHookObject => {
   const services = getTestServices({
     time: 'real',
@@ -99,12 +101,12 @@ export const mochaHooks = (): Mocha.RootHookObject => {
         await Promise.all(
           Array.from(testUsersLocal.values()).map(async (user) => {
             const userRead = await services.db.run((manager) =>
-              services.users.repo.getUser(user.userId, manager, true)
+              services.users.repo.getUser(user.userId, manager)
             );
 
-            logger.debug('afterAll - userRead', { userRead });
+            if (DEBUG) logger.debug('afterAll - userRead', { userRead });
 
-            if (!userRead.platformIds) {
+            if (!userRead || !userRead.platformIds) {
               return;
             }
 
@@ -116,7 +118,7 @@ export const mochaHooks = (): Mocha.RootHookObject => {
               });
             });
 
-            logger.debug('afterAll - set', { userRead });
+            if (DEBUG) logger.debug('afterAll - set', { userRead });
 
             /** update the testUser */
             testUsersLocal.set(userRead.userId, userRead);

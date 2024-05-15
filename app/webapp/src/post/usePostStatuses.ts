@@ -46,7 +46,8 @@ export const usePostStatuses = (post?: AppPostFull): AppPostStatus => {
 
   const pending = post && post.reviewedStatus === AppPostReviewStatus.PENDING;
   const ignored = post && post.reviewedStatus === AppPostReviewStatus.IGNORED;
-  const published = post && nanopubPublished !== undefined;
+  const published =
+    post && nanopubPublished !== undefined && nanopubPublished !== null;
 
   return {
     processed,

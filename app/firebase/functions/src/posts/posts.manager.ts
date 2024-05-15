@@ -18,7 +18,7 @@ import {
   PlatformPost,
   PlatformPostCreate,
   PlatformPostCreated,
-  PlatformPostDraftApprova,
+  PlatformPostDraftApproval,
   PlatformPostPublishOrigin,
   PlatformPostPublishStatus,
 } from '../@shared/types/types.platform.posts';
@@ -82,7 +82,7 @@ export class PostsManager {
   ) {
     const platformParams = await (async (): Promise<PlatformFetchParams> => {
       if (params.sinceId) {
-        const since = await this.processing.platformPosts.getFromPostId(
+        const since = await this.processing.platformPosts.getPostedFromPostId(
           params.sinceId,
           platformId,
           account.user_id,
@@ -96,7 +96,7 @@ export class PostsManager {
       }
 
       if (params.untilId) {
-        const until = await this.processing.platformPosts.getFromPostId(
+        const until = await this.processing.platformPosts.getPostedFromPostId(
           params.untilId,
           platformId,
           account.user_id,
@@ -293,10 +293,7 @@ export class PostsManager {
         queryParams
       );
 
-      if (
-        queryParams.status === PostsQueryStatus.ALL ||
-        queryParams.status === PostsQueryStatus.PENDING
-      ) {
+      if (queryParams.status === PostsQueryStatus.ALL) {
         if (appPosts.length < queryParams.fetchParams.expectedAmount) {
           await this.fetchUser({ userId, params: queryParams.fetchParams });
           return this.processing.posts.getOfUser(userId, queryParams);
@@ -376,7 +373,6 @@ export class PostsManager {
       await this.db.run(async (manager) => {
         try {
           await this._parsePost(postId, manager);
-          await this.processing.createPostDrafts(postId, manager);
         } catch (err: any) {
           logger.error(`Error parsing post ${postId}`, err);
           await this.processing.posts.updateContent(
@@ -423,7 +419,28 @@ export class PostsManager {
 
     if (DEBUG) logger.debug('parsePost - done', { postId, update });
 
-    await this.processing.posts.updateContent(post.id, update, manager);
+    await this.updatePost(post.id, update, manager);
+  }
+
+  /** single place to update a post (it updates the drafts if necessary) */
+  async updatePost(
+    postId: string,
+    postUpdate: PostUpdate,
+    manager: TransactionManager
+  ) {
+    if (DEBUG) logger.debug('updatePost', { postId, postUpdate });
+    await this.processing.posts.updateContent(postId, postUpdate, manager);
+
+    if (postUpdate.semantics || postUpdate.content) {
+      /** rebuild the platform drafts with the new post content */
+      if (DEBUG)
+        logger.debug('updatePost - semantics, content found', {
+          postId,
+          postUpdate,
+        });
+
+      await this.processing.createOrUpdatePostDrafts(postId, manager);
+    }
   }
 
   /**
@@ -449,7 +466,7 @@ export class PostsManager {
 
       /** for now its either ignore all, or approve all */
       if (post.reviewedStatus === AppPostReviewStatus.IGNORED) {
-        await this.processing.posts.updateContent(
+        await this.updatePost(
           post.id,
           {
             reviewedStatus: AppPostReviewStatus.IGNORED,
@@ -462,7 +479,7 @@ export class PostsManager {
       /** else mark as approved */
 
       /** force status transition */
-      await this.processing.posts.updateContent(
+      await this.updatePost(
         post.id,
         {
           reviewedStatus: AppPostReviewStatus.APPROVED,
@@ -477,7 +494,7 @@ export class PostsManager {
       ) {
         if (DEBUG)
           logger.debug('approvePost - updateContent', { existing, post });
-        await this.processing.posts.updateContent(
+        await this.updatePost(
           post.id,
           {
             reviewedStatus: AppPostReviewStatus.APPROVED,
@@ -493,7 +510,7 @@ export class PostsManager {
         post.mirrors.map(async (mirror) => {
           if (
             mirror.draft &&
-            mirror.draft.postApproval === PlatformPostDraftApprova.APPROVED
+            mirror.draft.postApproval === PlatformPostDraftApproval.APPROVED
           ) {
             const account = UsersHelper.getAccount(
               user,
@@ -512,7 +529,7 @@ export class PostsManager {
                 manager
               );
 
-            await this.processing.platformPosts.updatePosted(
+            await this.processing.platformPosts.update(
               mirror.id,
               {
                 draft: mirror.draft,
@@ -533,7 +550,7 @@ export class PostsManager {
 
       /** if all mirrors where published */
       if (published.every((v) => v === true)) {
-        await this.processing.posts.updateContent(
+        await this.updatePost(
           post.id,
           {
             republishedStatus: AppPostRepublishedStatus.REPUBLISHED,

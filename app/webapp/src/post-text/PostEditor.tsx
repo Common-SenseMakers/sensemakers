@@ -22,8 +22,14 @@ export const textToHtml = (text: string) => {
 
   const urlRegex = /\bhttps?:\/\/\S+/gi;
   html = html.replace(urlRegex, (url) => {
-    const urlObj = new URL(url);
-    const urlClean = `${urlObj.protocol}/${urlObj.hostname}/${urlObj.pathname}`;
+    let urlClean = url;
+    try {
+      const urlObj = new URL(url);
+      urlClean = `${urlObj.protocol}/${urlObj.hostname}/${urlObj.pathname}`;
+    } catch (e) {
+      console.error(`error parsing url ${url}`, e);
+    }
+
     return `<a href="${url}">${urlClean}</a>`;
   });
 
@@ -78,7 +84,11 @@ const schema = new Schema({
         },
       ],
       toDOM(node) {
-        return ['a', { href: node.attrs.href, title: node.attrs.title }, 0];
+        return [
+          'a',
+          { href: node.attrs.href, title: node.attrs.title, target: '_blank' },
+          0,
+        ];
       },
     },
   },
