@@ -616,11 +616,12 @@ export class PostsManager {
           labelsUris,
           fetchParams
         );
+        const uniquePostIds = new Set(triples.map((triple) => triple.postId));
 
         return this.db.run((manager) =>
           Promise.all(
-            triples.map((triple) =>
-              this.processing.posts.get(triple.postId, manager, true)
+            Array.from(uniquePostIds.values()).map((postId) =>
+              this.processing.posts.get(postId, manager, true)
             )
           )
         );
