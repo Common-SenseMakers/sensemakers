@@ -9,7 +9,7 @@ import { logger } from '../../instances/logger';
 import { ParserService } from '../parser.service';
 
 export const MOCKED_SEMANTICS =
-  '<http://example.org/mosquito> <http://example.org/transmits> <http://example.org/malaria> .';
+  '@prefix ns1: <http://purl.org/spar/cito/> .@prefix ns2: <https://sense-nets.xyz/> .@prefix schema: <https://schema.org/> .<http://purl.org/nanopub/temp/mynanopub#assertion> ns1:discusses <https://twitter.com/ItaiYanai/status/1780813867213336910> ;    schema:keywords "AI",        "LLM",        "NLP",        "academic-study",        "research-focus" ;    ns2:asksQuestionAbout <https://twitter.com/ItaiYanai/status/1780813867213336910> .';
 
 export const MOCKED_PARSER_RESULT: ParsePostResult = {
   filter_classification: SciFilterClassfication.RESEARCH,

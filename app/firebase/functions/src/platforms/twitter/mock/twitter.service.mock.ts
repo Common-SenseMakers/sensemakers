@@ -182,10 +182,9 @@ export const getTwitterMock = (
       );
 
       when(Mocked.handleSignupData(anything())).thenCall(
-        (data: { user_id: string }): TwitterUserDetails => {
+        (data: TwitterUserDetails): TwitterUserDetails => {
           return {
-            user_id: data.user_id,
-            signupDate: 0,
+            ...data,
           };
         }
       );

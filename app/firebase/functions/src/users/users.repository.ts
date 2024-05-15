@@ -13,9 +13,13 @@ import {
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
+import { UsersHelper } from './users.helper';
 import { getPrefixedUserId } from './users.utils';
 
 const DEBUG = false;
+
+const getProfileId = (userId: string, platform: PLATFORM, user_id: string) =>
+  `${userId}-${platform}-${user_id}`;
 
 export class UsersRepository {
   constructor(protected db: DBInstance) {}
@@ -108,15 +112,19 @@ export class UsersRepository {
     >;
   }
 
-  public async getByPlatformUsername<T extends boolean>(platformId: PLATFORM, usernameTag: string, username: string, manager: TransactionManager,  shouldThrow?: T) {
-    const platformId_property: keyof UserPlatformProfile = 'platformId' ;
-    const profile_property: keyof UserPlatformProfile = 'profile'; 
-    
-    const query = this.db.collections.profiles.where(platformId_property, '==', platformId).where(
-      `${profile_property}.${usernameTag}`,
-      '==',
-      username
-    );
+  public async getByPlatformUsername<T extends boolean>(
+    platformId: PLATFORM,
+    usernameTag: string,
+    username: string,
+    manager: TransactionManager,
+    shouldThrow?: T
+  ) {
+    const platformId_property: keyof UserPlatformProfile = 'platformId';
+    const profile_property: keyof UserPlatformProfile = 'profile';
+
+    const query = this.db.collections.profiles
+      .where(platformId_property, '==', platformId)
+      .where(`${profile_property}.${usernameTag}`, '==', username);
 
     const snap = await manager.query(query);
 
@@ -149,6 +157,26 @@ export class UsersRepository {
   ) {
     const ref = await this.getUserRef(userId, manager);
     manager.create(ref, user);
+
+    /** keep the profiles collection in sync */
+    const platformAccounts = UsersHelper.getAllAccounts(user);
+    platformAccounts.forEach((platformAccount) => {
+      if (platformAccount.account.profile) {
+        const profileRef = this.db.collections.profiles.doc(
+          getProfileId(
+            userId,
+            platformAccount.platform,
+            platformAccount.account.user_id
+          )
+        );
+        manager.create(profileRef, {
+          profile: platformAccount.account.profile,
+          platformId: platformAccount.platform,
+          user_id: platformAccount.account.user_id,
+        });
+      }
+    });
+
     return ref.id;
   }
 
@@ -290,6 +318,14 @@ export class UsersRepository {
     if (DEBUG) logger.debug(`Updating user ${userId}`, { update });
 
     manager.update(userRef, update);
+
+    // update mirror collection profiles
+    if (details.profile) {
+      const profileRef = this.db.collections.profiles.doc(
+        getProfileId(userId, platform, details.user_id)
+      );
+      manager.set(profileRef, { profile: details.profile }, { merge: true });
+    }
   }
 
   /** remove userDetails of a given platform */
