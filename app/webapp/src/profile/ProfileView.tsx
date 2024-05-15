@@ -20,6 +20,50 @@ const DEBUG = true;
 
 const PAGE_SIZE = 20;
 
+const TABS_CONFIG: { label: string; labelsUris: string[] | undefined }[] = [
+  {
+    label: 'All',
+    labelsUris: undefined,
+  },
+  {
+    label: 'Thinks',
+    labelsUris: [
+      'http://purl.org/spar/cito/disagreesWith',
+      'https://schema.org/Question',
+      'http://purl.org/spar/cito/discusses',
+      'http://purl.org/spar/cito/includesQuotationFrom',
+      'https://sense-nets.xyz/asksQuestionAbout',
+      'http://purl.org/spar/cito/agreesWith',
+      'https://schema.org/Observation',
+      'https://schema.org/Claim',
+      'https://sense-nets.xyz/indicatesInterest',
+      'http://purl.org/spar/cito/linksTo',
+    ],
+  },
+  {
+    label: 'Recommends',
+    labelsUris: [
+      'http://purl.org/spar/cito/reviews',
+      'https://sense-nets.xyz/endorses',
+      'https://sense-nets.xyz/mentionsListeningStatus',
+      'https://sense-nets.xyz/recommends',
+      'https://sense-nets.xyz/summarizes',
+      'https://sense-nets.xyz/mentionsWatchingStatus',
+      'https://sense-nets.xyz/mentionsReadingStatus',
+    ],
+  },
+  {
+    label: 'Announces',
+    labelsUris: [
+      'https://sense-nets.xyz/announcesResource',
+      'https://sense-nets.xyz/mentionsCallForPapers',
+      'https://sense-nets.xyz/mentionsFundingOpportunity',
+      'https://sense-nets.xyz/announcesEvent',
+      'https://sense-nets.xyz/announcesJob',
+    ],
+  },
+];
+
 /** extract the postId from the route and pass it to a PostContext */
 export const ProfileView = (props: { username?: string }) => {
   const { constants } = useThemeContext();
@@ -44,9 +88,14 @@ export const ProfileView = (props: { username?: string }) => {
     if (posts.length === 0 && fetchedFirst.current === false) {
       fetchedFirst.current = true;
       if (DEBUG) console.log('first fetch');
-      _fetchOlder(undefined);
+      _fetchOlder({ selectedTab });
     }
   }, [posts]);
+
+  useEffect(() => {
+    reset();
+    _fetchOlder({ selectedTab });
+  }, [selectedTab]);
 
   const reset = () => {
     if (DEBUG) console.log('resetting posts');
@@ -82,7 +131,8 @@ export const ProfileView = (props: { username?: string }) => {
 
   /** fetch for more post backwards */
   const _fetchOlder = useCallback(
-    async (oldestPostId?: string) => {
+    async (inputs: { selectedTab: number; oldestPostId?: string }) => {
+      const { selectedTab, oldestPostId } = inputs;
       if (!username) {
         return;
       }
@@ -93,7 +143,7 @@ export const ProfileView = (props: { username?: string }) => {
         const params: ProfilePostsQuery = {
           platformId: PLATFORM.Twitter,
           username,
-          labelsUris,
+          labelsUris: TABS_CONFIG[selectedTab].labelsUris,
           fetchParams: {
             expectedAmount: PAGE_SIZE,
             untilId: oldestPostId,
@@ -120,9 +170,10 @@ export const ProfileView = (props: { username?: string }) => {
 
   /** public function to trigger fetching for older posts */
   const fetchOlder = useCallback(() => {
-    if (DEBUG) console.log(`external fetchOlder`, _oldestPostId);
-    _fetchOlder(_oldestPostId);
-  }, [_fetchOlder, _oldestPostId]);
+    if (DEBUG)
+      console.log(`external fetchOlder`, { selectedTab, _oldestPostId });
+    _fetchOlder({ selectedTab, oldestPostId: _oldestPostId });
+  }, [_fetchOlder, _oldestPostId, selectedTab]);
 
   const content = (() => {
     if (!username) {
@@ -142,25 +193,6 @@ export const ProfileView = (props: { username?: string }) => {
       );
     }
 
-    const tabs = [
-      {
-        label: 'All',
-        getPosts: () => {},
-      },
-      {
-        label: 'Thinks',
-        getPosts: () => {},
-      },
-      {
-        label: 'Shares',
-        getPosts: () => {},
-      },
-      {
-        label: 'Announces',
-        getPosts: () => {},
-      },
-    ];
-
     if (errorFetching) {
       return (
         <BoxCentered fill>
@@ -171,16 +203,18 @@ export const ProfileView = (props: { username?: string }) => {
 
     return (
       <>
-        <Box
-          pad={{ top: 'medium' }}
-          style={{ backgroundColor: constants.colors.shade }}>
-          <ProfileHeader
-            pad={{
-              top: '12px',
-              horizontal: '12px',
-              bottom: '16px',
-            }}></ProfileHeader>
-        </Box>
+        <Anchor href="/" style={{ textDecoration: 'none' }}>
+          <Box
+            pad={{ top: 'medium' }}
+            style={{ backgroundColor: constants.colors.shade }}>
+            <ProfileHeader
+              pad={{
+                top: '12px',
+                horizontal: '12px',
+                bottom: '16px',
+              }}></ProfileHeader>
+          </Box>
+        </Anchor>
 
         <Box
           pad={{ horizontal: '12px' }}
@@ -188,7 +222,7 @@ export const ProfileView = (props: { username?: string }) => {
           direction="row"
           width={'100%'}
           style={{ borderBottom: '1px solid  #D1D5DB' }}>
-          {tabs.map((tab, ix) => {
+          {TABS_CONFIG.map((tab, ix) => {
             const selected = ix === selectedTab;
             return (
               <AppButton
@@ -206,7 +240,7 @@ export const ProfileView = (props: { username?: string }) => {
                       fontStyle: 'normal',
                       fontWeight: '500',
                       lineHeight: '18px',
-                      color: '#6B7280',
+                      color: selected ? '#337FBD' : '#6B7280',
                     }}>
                     {tab.label}
                   </Text>

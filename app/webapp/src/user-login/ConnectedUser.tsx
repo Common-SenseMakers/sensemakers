@@ -61,21 +61,11 @@ export const ConnectedUser = (props: {}) => {
         onOpen={() => setShowDrop(true)}
         dropContent={
           <Box pad="20px" gap="small" style={{ width: '220px' }}>
-            {connectedUser?.twitter ? (
-              <Box margin={{ bottom: 'small' }}>
-                <Text>{cap(t('twitter'))}</Text>
-                <TwitterProfileAnchor
-                  screen_name={twitterDetails?.username}></TwitterProfileAnchor>
-              </Box>
-            ) : (
-              <></>
-            )}
-
             <AppButton
               plain
               onClick={() => goToProfile()}
               style={{ textTransform: 'none', paddingTop: '6px' }}>
-              <Text style={{ fontWeight: 'bold' }}>{cap(t('profile'))}</Text>
+              <Text>{cap(t('profile'))}</Text>
             </AppButton>
 
             <AppButton
