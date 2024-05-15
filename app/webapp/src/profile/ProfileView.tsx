@@ -117,7 +117,10 @@ export const ProfileView = (props: { username?: string }) => {
         const allPosts =
           position === 'end' ? prev.concat(posts) : posts.concat(prev);
         if (DEBUG) console.log(`pushing posts`, { prev, allPosts });
-        return allPosts;
+        const allPostsUnique = allPosts.filter(
+          (p, ix, self) => self.findIndex((s) => s.id === p.id) === ix
+        );
+        return allPostsUnique;
       });
     },
     []
