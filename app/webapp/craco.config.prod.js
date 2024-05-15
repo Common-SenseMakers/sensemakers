@@ -13,11 +13,11 @@ base.webpack.configure.plugins.splice(ix, 1);
 /** new copy of plugins without the org define one */
 const newPlugins = [...base.webpack.configure.plugins];
 
-if (!process.env.NODE_ENV) {
-  throw new Error('NODE_ENV is not set');
+if (!process.env.FB_PROJECT) {
+  throw new Error('FB_PROJECT is not set');
 }
 
-if (process.env.NODE_ENV === 'staging') {
+if (process.env.FB_PROJECT === 'staging') {
   base.webpack.configure.plugins = [
     ...newPlugins,
     new webpack.DefinePlugin({
@@ -41,7 +41,7 @@ if (process.env.NODE_ENV === 'staging') {
   ];
 }
 
-if (process.env.NODE_ENV === 'production') {
+if (process.env.FB_PROJECT === 'production') {
   base.webpack.configure.plugins = [
     ...newPlugins,
     new webpack.DefinePlugin({
