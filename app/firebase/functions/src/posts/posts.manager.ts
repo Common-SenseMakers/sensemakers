@@ -560,4 +560,39 @@ export class PostsManager {
       }
     });
   }
+
+   /** Get posts AppPostFull of user, cannot be part of a transaction
+   * We trigger fetching posts from the platforms from here
+   */
+   async getUserProfile(platformId: string, username: string, fetchParams: FetchParams, labelsUris?: string[]): Promise<AppPostFull[]> {
+    return this.db.run(async (manager) => {
+      const usernameTag = (() => {
+        if (platformId === PLATFORM.Twitter) {
+          return 'username'
+        }
+
+        throw new Error('unexpected for now')
+      })()
+
+      const user = await this.users.repo.getByPlatformUsername(platformId, usernameTag, username, manager, true);
+      const appPosts = await (async () => {
+        if (labelsUris !== undefined) {
+         return this.processing.triples.getWithPredicatesOfUser(username, labelsUris, fetchParams);
+        } else {
+          return this.processing.posts.getOfUser(user.userId, {status: PostsQueryStatus.ALL, fetchParams});
+        }
+      })();
+
+      const postsFull = await Promise.all(
+        appPosts.map((post) => this.appendMirrors(post))
+      );
+
+      logger.debug(
+        `getUserProfile query for user ${username} has ${appPosts.length} results for query params: `,
+        { platformId,username,labelsUris,fetchParams }
+      );
+
+      return postsFull;
+    }); 
+  }
 }

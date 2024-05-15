@@ -1,9 +1,8 @@
 import { expect } from 'chai';
 
 import { AppUser, PLATFORM } from '../../src/@shared/types/types';
-import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
 import {
-  PlatformPostDraftApprova,
+  PlatformPostDraftApproval,
   PlatformPostPosted,
 } from '../../src/@shared/types/types.platform.posts';
 import { AppPostReviewStatus } from '../../src/@shared/types/types.posts';
@@ -23,9 +22,11 @@ import {
   testUsers,
 } from './setup';
 import { getTestServices } from './test.services';
+import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 
-describe('030-process', () => {
-  let rsaKeys: RSAKeys | undefined;
+describe.only('030-process', () => {
+  let rsaKeys = getRSAKeys('');;
+
   const services = getTestServices({
     time: 'real',
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
@@ -198,13 +199,13 @@ describe('030-process', () => {
       const draft = nanopub.draft.post;
 
       if (!rsaKeys) {
-        throw new Error('draft not created');
+        throw new Error('rsaKeys undefined');
       }
 
       /** sign */
       const signed = await signNanopublication(draft, rsaKeys, '');
       nanopub.draft.post = signed.rdf();
-      nanopub.draft.postApproval = PlatformPostDraftApprova.APPROVED;
+      nanopub.draft.postApproval = PlatformPostDraftApproval.APPROVED;
 
       /** send updated post (content and semantics did not changed) */
       await services.postsManager.approvePost(pendingPost, user.userId);

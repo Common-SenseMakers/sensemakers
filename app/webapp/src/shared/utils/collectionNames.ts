@@ -4,4 +4,6 @@ export enum CollectionNames {
   Posts = 'posts',
   PlatformPosts = 'platformPosts',
   Updates = 'updates',
+  Profiles = 'profiles',
+  Triples = 'triples',
 }

@@ -31,6 +31,8 @@ import { TimeService } from '../time/time.service';
 import { UsersRepository } from '../users/users.repository';
 import { UsersService } from '../users/users.service';
 
+import {TriplesRepository} from '../semantics/triples.repository'
+
 export interface Services {
   users: UsersService;
   postsManager: PostsManager;
@@ -43,6 +45,7 @@ export const createServices = () => {
   const db = new DBInstance();
   const userRepo = new UsersRepository(db);
   const postsRepo = new PostsRepository(db);
+  const triplesRepo = new TriplesRepository(db);
   const platformPostsRepo = new PlatformPostsRepository(db);
 
   const identityPlatforms: IdentityServicesMap = new Map();
@@ -99,6 +102,7 @@ export const createServices = () => {
   const postsProcessing = new PostsProcessing(
     usersService,
     time,
+  triplesRepo,
     postsRepo,
     platformPostsRepo,
     platformsService

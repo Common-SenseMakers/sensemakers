@@ -1,3 +1,4 @@
+import { TriplesRepository } from '../semantics/triples.repository';
 import { ALL_PUBLISH_PLATFORMS, DefinedIfTrue } from '../@shared/types/types';
 import {
   PlatformPost,
@@ -37,6 +38,7 @@ export class PostsProcessing {
   constructor(
     protected users: UsersService,
     private time: TimeService,
+    public triples: TriplesRepository,
     public posts: PostsRepository,
     public platformPosts: PlatformPostsRepository,
     protected platforms: PlatformsService

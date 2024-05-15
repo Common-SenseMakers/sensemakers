@@ -100,6 +100,13 @@ export interface AppUserRead extends UserWithId {
   [PLATFORM.Nanopub]?: AccountDetailsRead<NanopubUserDetails['profile']>[];
 }
 
+/** Support collection with all the profiles from all platforms */
+export interface UserPlatformProfile {
+  platformId: string
+  user_id: string;
+  profile: any;
+}
+
 /** Support types */
 export type DefinedIfTrue<V, R> = V extends true ? R : R | undefined;
 

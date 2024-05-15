@@ -7,6 +7,7 @@ import {
   FetchedDetails,
   PLATFORM,
   UserDetailsBase,
+  UserPlatformProfile,
   UserWithPlatformIds,
 } from '../@shared/types/types';
 import { DBInstance } from '../db/instance';
@@ -98,6 +99,40 @@ export class UsersRepository {
     if (snap.size > 1) {
       throw new Error(
         `Data corrupted. Unexpected multiple users with the same platform user_id ${prefixed_user_id}`
+      );
+    }
+
+    return { userId: snap.docs[0].id, ...snap.docs[0].data() } as DefinedIfTrue<
+      T,
+      AppUser
+    >;
+  }
+
+  public async getByPlatformUsername<T extends boolean>(platformId: PLATFORM, usernameTag: string, username: string, manager: TransactionManager,  shouldThrow?: T) {
+    const platformId_property: keyof UserPlatformProfile = 'platformId' ;
+    const profile_property: keyof UserPlatformProfile = 'profile'; 
+    
+    const query = this.db.collections.profiles.where(platformId_property, '==', platformId).where(
+      `${profile_property}.${usernameTag}`,
+      '==',
+      username
+    );
+
+    const snap = await manager.query(query);
+
+    const _shouldThrow = shouldThrow !== undefined ? shouldThrow : false;
+
+    if (snap.empty) {
+      if (_shouldThrow)
+        throw new Error(
+          `User with profile.username: ${username} and platform ${platformId} not found`
+        );
+      else return undefined as DefinedIfTrue<T, AppUser>;
+    }
+
+    if (snap.size > 1) {
+      throw new Error(
+        `Data corrupted. Unexpected multiple users with the same platform username ${username}`
       );
     }
 
