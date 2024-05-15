@@ -9,6 +9,7 @@ export interface NanopubUserProfile {
   rsaPublickey: string;
   ethAddress: HexStr;
   introNanopub?: string;
+  ethToRsaSignature: HexStr,
 }
 
 export type NanupubSignupData = NanopubUserProfile & {

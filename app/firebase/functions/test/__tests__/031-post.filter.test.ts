@@ -13,7 +13,7 @@ import {
   AppPostParsingStatus,
   AppPostRepublishedStatus,
   AppPostReviewStatus,
-  PostsQueryStatusParam,
+  PostsQueryStatus,
 } from '../../src/@shared/types/types.posts';
 import { logger } from '../../src/instances/logger';
 import { resetDB } from '../utils/db';
@@ -139,28 +139,28 @@ describe('031-filter', () => {
     });
     it('gets all posts from a user', async () => {
       const posts = await services.postsManager.getOfUser('test-user-id', {
-        status: PostsQueryStatusParam.ALL,
+        status: PostsQueryStatus.ALL,
         fetchParams: { expectedAmount: 10 },
       });
       expect(posts).to.have.length(4);
     });
     it('gets all published posts from a user', async () => {
       const posts = await services.postsManager.getOfUser('test-user-id', {
-        status: PostsQueryStatusParam.PUBLISHED,
+        status: PostsQueryStatus.PUBLISHED,
         fetchParams: { expectedAmount: 10 },
       });
       expect(posts).to.have.length(1);
     });
     it('gets all for review posts from a user', async () => {
       const posts = await services.postsManager.getOfUser('test-user-id', {
-        status: PostsQueryStatusParam.PENDING,
+        status: PostsQueryStatus.PENDING,
         fetchParams: { expectedAmount: 10 },
       });
       expect(posts).to.have.length(1);
     });
     it('gets all ignored posts from a user', async () => {
       const posts = await services.postsManager.getOfUser('test-user-id', {
-        status: PostsQueryStatusParam.IGNORED,
+        status: PostsQueryStatus.IGNORED,
         fetchParams: { expectedAmount: 10 },
       });
       expect(posts).to.have.length(2);

@@ -84,7 +84,11 @@ const schema = new Schema({
         },
       ],
       toDOM(node) {
-        return ['a', { href: node.attrs.href, title: node.attrs.title }, 0];
+        return [
+          'a',
+          { href: node.attrs.href, title: node.attrs.title, target: '_blank' },
+          0,
+        ];
       },
     },
   },

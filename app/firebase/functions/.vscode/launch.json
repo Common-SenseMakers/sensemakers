@@ -12,7 +12,7 @@
         "FIRESTORE_EMULATOR_HOST": "127.0.0.1:8080",
         "LOG_LEVEL_MSG": "debug",
         "LOG_LEVEL_OBJ": "debug",
-        "USE_REAL_TWITTERX": "true",
+        "USE_REAL_TWITTERX": "false",
         "USE_REAL_NANOPUB": "false",
         "USE_REAL_PARSER": "false"
       },
