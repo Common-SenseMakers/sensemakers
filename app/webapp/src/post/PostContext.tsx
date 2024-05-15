@@ -15,7 +15,7 @@ import { AppUserRead, PLATFORM } from '../shared/types/types';
 import {
   PlatformPost,
   PlatformPostDraft,
-  PlatformPostDraftApprova,
+  PlatformPostDraftApproval,
 } from '../shared/types/types.platform.posts';
 import {
   AppPostFull,
@@ -62,6 +62,8 @@ export const PostContext: React.FC<{
   const [postEdited, setPostEdited] = React.useState<AppPostFull | undefined>(
     undefined
   );
+
+  const [requesteDraft, setRequestedDraft] = React.useState(false);
 
   const { filterStatus, removePost } = useUserPosts();
   const [isUpdating, setIsUpdating] = React.useState(false);
@@ -170,9 +172,12 @@ export const PostContext: React.FC<{
    * not exists */
   useEffect(() => {
     const nanopubAccount = getAccount(connectedUser, PLATFORM.Nanopub);
-    if (nanopubAccount && !nanopubDraft) {
+    if (nanopubAccount && !nanopubDraft && !requesteDraft) {
       /** if draft not available, create it */
-      appFetch('/api/posts/createDraft', { postId });
+      setRequestedDraft(true);
+      appFetch('/api/posts/createDraft', { postId }).then(() => {
+        setRequestedDraft(false);
+      });
     }
   }, [post, connectedUser]);
 
@@ -279,7 +284,7 @@ export const PostContext: React.FC<{
 
     if (signNanopublication) {
       const signed = await signNanopublication(nanopub.draft.post);
-      nanopub.draft.postApproval = PlatformPostDraftApprova.APPROVED;
+      nanopub.draft.postApproval = PlatformPostDraftApproval.APPROVED;
       nanopub.draft.post = signed.rdf();
 
       await appFetch<void, AppPostFull>('/api/posts/approve', post);

@@ -3,6 +3,7 @@ import { DataFactory, Store } from 'n3';
 
 import { AppUser, PLATFORM } from '../../@shared/types/types';
 import { AppPostFull } from '../../@shared/types/types.posts';
+import { TwitterUserDetails } from '../../@shared/types/types.twitter';
 import { parseRDF, replaceNodes, writeRDF } from '../../@shared/utils/n3.utils';
 import {
   ASSERTION_URI,
@@ -10,6 +11,10 @@ import {
   NANOPUB_PLACEHOLDER,
   THIS_POST_NAME,
 } from '../../@shared/utils/semantics.helper';
+import { logger } from '../../instances/logger';
+import { UsersHelper } from '../../users/users.helper';
+
+const DEBUG = false;
 
 export const createNanopublication = async (
   post: AppPostFull,
@@ -17,7 +22,34 @@ export const createNanopublication = async (
 ) => {
   const semantics = post.semantics;
   const content = post.content;
-  const orcid = '0000-0000-0000-0000';
+  const twitter = UsersHelper.getAccount(
+    user,
+    PLATFORM.Twitter,
+    undefined,
+    true
+  ) as TwitterUserDetails;
+  const twitterUsername = twitter.profile?.username;
+
+  if (!twitterUsername) {
+    throw new Error('Twitter username not found');
+  }
+
+  const originalPlatformPost = post.mirrors.find(
+    (platformPost) => platformPost.platformId === PLATFORM.Twitter
+  )?.posted;
+
+  const originalPlatformPostId = originalPlatformPost?.post_id;
+
+  if (!originalPlatformPostId) {
+    throw new Error('Original platform post id not found');
+  }
+
+  const twitterPath = `${twitterUsername}`;
+
+  if (DEBUG)
+    logger.debug(`Creating nanopub twitterPath:${twitterPath}`, {
+      twitterPath,
+    });
 
   /** Then get the RDF as triplets */
   const assertionsStore = await (async () => {
@@ -62,18 +94,15 @@ export const createNanopublication = async (
         `
     : '';
 
+  if (DEBUG) logger.debug(`Creating nanopub`, { ethSignerRdf });
+
   const rdfStr = `
           @prefix : <${NANOPUB_PLACEHOLDER}> .
           @prefix np: <http://www.nanopub.org/nschema#> .
-          @prefix dct: <http://purl.org/dc/terms/> .
-          @prefix nt: <https://w3id.org/np/o/ntemplate/> .
           @prefix npx: <http://purl.org/nanopub/x/> .
-          @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-          @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-          @prefix orcid: <https://orcid.org/> .
-          @prefix ns1: <http://purl.org/np/> .
+          @prefix dct: <http://purl.org/dc/terms/> .
+          @prefix twitter: <https://twitter.com/> .
           @prefix prov: <http://www.w3.org/ns/prov#> .
-          @prefix foaf: <http://xmlns.com/foaf/0.1/> .
           
           :Head {
             : np:hasAssertion :assertion ;
@@ -83,13 +112,14 @@ export const createNanopublication = async (
           }
           
           :assertion {
-            :assertion dct:creator orcid:${orcid} .
+            :assertion dct:creator twitter:${twitterUsername} .
             ${assertionsRdf}
           }
           
           
           :provenance {
-            :assertion prov:wasAttributedTo orcid:${orcid} .
+            :assertion prov:wasAttributedTo twitter:${twitterUsername} .
+            :assertion prov:wasDerivedFrom twitter:${twitterPath} .
           }
           
           :pubinfo {
@@ -99,6 +129,17 @@ export const createNanopublication = async (
           }
         `;
 
-  const np = new Nanopub(rdfStr);
-  return np;
+  try {
+    if (DEBUG)
+      logger.debug(`Creating nanopub rdfStr:${rdfStr.slice(0, 320)}`, {
+        rdfStr,
+      });
+    const np = new Nanopub(rdfStr);
+
+    if (DEBUG) logger.debug(`Created nanopub!`);
+    return np;
+  } catch (e: any) {
+    logger.error(e);
+    throw new Error(`Error creating nanopub: ${e}`);
+  }
 };
