@@ -2,6 +2,7 @@ import { Anchor, Box, Text } from 'grommet';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useAppFetch } from '../api/app.fetch';
+import { AppLogo } from '../app/brand/AppLogo';
 import { ViewportPage } from '../app/layout/Viewport';
 import { PostCard } from '../post/PostCard';
 import { PLATFORM } from '../shared/types/types';
@@ -80,8 +81,6 @@ export const ProfileView = (props: { username?: string }) => {
   const [errorFetching, setErrorFetching] = useState<Error>();
 
   const appFetch = useAppFetch();
-
-  const labelsUris = ['https://sense-nets.xyz/announcesResource'];
 
   /** trigger the first fetch */
   useEffect(() => {
@@ -203,18 +202,25 @@ export const ProfileView = (props: { username?: string }) => {
 
     return (
       <>
-        <Anchor href="/" style={{ textDecoration: 'none' }}>
+        <Box
+          pad={{ top: 'medium' }}
+          style={{ backgroundColor: constants.colors.shade }}>
           <Box
-            pad={{ top: 'medium' }}
-            style={{ backgroundColor: constants.colors.shade }}>
-            <ProfileHeader
-              pad={{
-                top: '12px',
-                horizontal: '12px',
-                bottom: '16px',
-              }}></ProfileHeader>
+            pad={{ horizontal: 'medium' }}
+            direction="row"
+            justify="start"
+            width={'100%'}>
+            <Anchor href="/" style={{ textDecoration: 'none' }}>
+              <AppLogo></AppLogo>
+            </Anchor>
           </Box>
-        </Anchor>
+          <ProfileHeader
+            pad={{
+              top: '12px',
+              horizontal: '12px',
+              bottom: '16px',
+            }}></ProfileHeader>
+        </Box>
 
         <Box
           pad={{ horizontal: '12px' }}
