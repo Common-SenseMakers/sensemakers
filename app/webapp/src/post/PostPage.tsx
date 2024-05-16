@@ -33,7 +33,8 @@ export const PostPage = () => {
       <PostView
         prevPostId={prevPostId}
         nextPostId={nextPostId}
-        profile={twitterProfile}></PostView>
+        profile={twitterProfile}
+        isProfile={false}></PostView>
     </PostContext>
   );
 };

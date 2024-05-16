@@ -12,7 +12,7 @@ export const ProfilePostPage = () => {
 
   return (
     <PostContext postId={postId}>
-      <PostView profile={profile}></PostView>
+      <PostView profile={profile} isProfile></PostView>
     </PostContext>
   );
 };

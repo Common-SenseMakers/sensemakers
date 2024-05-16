@@ -23,6 +23,7 @@ export const PostView = (props: {
   prevPostId?: string;
   nextPostId?: string;
   profile?: TwitterUserProfile;
+  isProfile: boolean;
 }) => {
   const { constants } = useThemeContext();
   const { prevPostId, nextPostId } = props;
@@ -130,7 +131,9 @@ export const PostView = (props: {
     connectedUser &&
     connectedUser.userId === post?.authorId &&
     !postStatuses.published &&
-    !props.profile;
+    !props.isProfile;
+
+  console.log({ editable, props });
 
   const content = (() => {
     if (!post) {
@@ -147,6 +150,7 @@ export const PostView = (props: {
       <>
         <Box pad="medium">
           <PostHeader
+            isProfile={props.isProfile}
             profile={props.profile}
             margin={{ bottom: '16px' }}></PostHeader>
           {postStatuses.isParsing ? (
@@ -197,6 +201,7 @@ export const PostView = (props: {
       content={
         <Box fill>
           <PostNav
+            isProfile={props.isProfile}
             profile={props.profile}
             prevPostId={prevPostId}
             nextPostId={nextPostId}></PostNav>

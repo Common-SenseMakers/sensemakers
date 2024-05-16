@@ -14,6 +14,7 @@ export const PostNav = (props: {
   prevPostId?: string;
   nextPostId?: string;
   profile?: TwitterUserProfile;
+  isProfile: boolean;
 }) => {
   const profile = props.profile;
   const { prevPostId, nextPostId } = props;
@@ -31,10 +32,10 @@ export const PostNav = (props: {
       direction="row"
       justify="between">
       <NavButton
-        icon={profile ? <LeftIcon></LeftIcon> : <HomeIcon></HomeIcon>}
-        label={profile ? 'Back' : 'Home'}
+        icon={props.isProfile ? <LeftIcon></LeftIcon> : <HomeIcon></HomeIcon>}
+        label={props.isProfile ? 'Back' : 'Home'}
         onClick={() => (profile ? navigate('..') : navigate('/'))}></NavButton>
-      {!profile ? (
+      {!props.isProfile ? (
         <Box direction="row" gap="8px">
           <NavButton
             icon={<LeftIcon></LeftIcon>}

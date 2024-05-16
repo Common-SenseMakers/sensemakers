@@ -21,7 +21,7 @@ export const AppLabelsEditor = (props: {
   color: string;
   editable?: boolean;
 }) => {
-  const editable = props.editable !== undefined ? props.editable : true;
+  const editable = props.editable !== undefined ? props.editable : false;
   const color = props.color;
   const hashtag = props.hashtag !== undefined ? props.hashtag : false;
 
