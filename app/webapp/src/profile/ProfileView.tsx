@@ -17,54 +17,11 @@ import { BoxCentered } from '../ui-components/BoxCentered';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { ProfileHeader } from './ProfileHeader';
+import { TABS_CONFIG } from './TABS.CONFIG';
 
 const DEBUG = true;
 
 const PAGE_SIZE = 20;
-
-const TABS_CONFIG: { label: string; labelsUris: string[] | undefined }[] = [
-  {
-    label: 'All',
-    labelsUris: undefined,
-  },
-  {
-    label: 'Thinks',
-    labelsUris: [
-      'http://purl.org/spar/cito/disagreesWith',
-      'https://schema.org/Question',
-      'http://purl.org/spar/cito/discusses',
-      'http://purl.org/spar/cito/includesQuotationFrom',
-      'https://sense-nets.xyz/asksQuestionAbout',
-      'http://purl.org/spar/cito/agreesWith',
-      'https://schema.org/Observation',
-      'https://schema.org/Claim',
-      'https://sense-nets.xyz/indicatesInterest',
-      'http://purl.org/spar/cito/linksTo',
-    ],
-  },
-  {
-    label: 'Recommends',
-    labelsUris: [
-      'http://purl.org/spar/cito/reviews',
-      'https://sense-nets.xyz/endorses',
-      'https://sense-nets.xyz/mentionsListeningStatus',
-      'https://sense-nets.xyz/recommends',
-      'https://sense-nets.xyz/summarizes',
-      'https://sense-nets.xyz/mentionsWatchingStatus',
-      'https://sense-nets.xyz/mentionsReadingStatus',
-    ],
-  },
-  {
-    label: 'Announces',
-    labelsUris: [
-      'https://sense-nets.xyz/announcesResource',
-      'https://sense-nets.xyz/mentionsCallForPapers',
-      'https://sense-nets.xyz/mentionsFundingOpportunity',
-      'https://sense-nets.xyz/announcesEvent',
-      'https://sense-nets.xyz/announcesJob',
-    ],
-  },
-];
 
 /** extract the postId from the route and pass it to a PostContext */
 export const ProfileView = (props: {
@@ -279,6 +236,7 @@ export const ProfileView = (props: {
                 <Box height={'40px'} justify="center" align="center">
                   <Text
                     style={{
+                      textAlign: 'center',
                       fontSize: '16px',
                       fontStyle: 'normal',
                       fontWeight: '500',
