@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
+import { getTransactionCountQueryOptions } from 'wagmi/query';
 
 import { useAppFetch } from '../api/app.fetch';
-import { PLATFORM, UserProfileQuery } from '../shared/types/types';
+import { AppUserRead, PLATFORM, UserProfileQuery } from '../shared/types/types';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
+import { getAccount } from '../user-login/user.helper';
 
-const DEBUG = false;
+const DEBUG = true;
 
 interface ProfileContextType {
   profile?: TwitterUserProfile;
@@ -22,17 +24,14 @@ export const ProfileContext: React.FC<{
 }> = ({ children, username, platformId }) => {
   const appFetch = useAppFetch();
 
-  const { data: profile, isLoading } = useQuery({
+  const { data: user } = useQuery({
     queryKey: ['profile', username],
     queryFn: () => {
       try {
-        return appFetch<TwitterUserProfile, UserProfileQuery>(
-          '/api/users/profile',
-          {
-            username,
-            platformId,
-          }
-        );
+        return appFetch<AppUserRead, UserProfileQuery>('/api/users/profile', {
+          username,
+          platformId,
+        });
       } catch (e: any) {
         console.error(e);
         throw new Error(e);
@@ -40,10 +39,16 @@ export const ProfileContext: React.FC<{
     },
   });
 
+  useEffect(() => {
+    if (DEBUG) console.log('user', user);
+  }, [user]);
+
+  const account = getAccount(user, platformId, undefined, username);
+
   return (
     <ProfileContextValue.Provider
       value={{
-        profile,
+        profile: account?.profile,
       }}>
       {children}
     </ProfileContextValue.Provider>
