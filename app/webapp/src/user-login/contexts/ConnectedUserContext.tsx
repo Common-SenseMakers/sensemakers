@@ -29,9 +29,14 @@ export const ConnectedUserContext = (props: PropsWithChildren) => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const openRoutes = ['/profile/', AbsoluteRoutes.App];
+
   useEffect(() => {
     /** navigate home if not logged user */
-    if (location.pathname !== '/' && !connectedUser && hasTriedFetchingUser) {
+    const isAllowedRoute = openRoutes.some((route) =>
+      location.pathname.includes(route)
+    );
+    if (!isAllowedRoute && !connectedUser && hasTriedFetchingUser) {
       navigate(AbsoluteRoutes.App);
     }
   }, [location, connectedUser]);
