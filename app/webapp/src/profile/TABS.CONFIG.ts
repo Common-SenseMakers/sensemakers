@@ -20,7 +20,7 @@ export const TABS_CONFIG: {
     ],
   },
   {
-    label: 'Announces',
+    label: 'Research',
     labelsUris: ['https://sense-nets.xyz/announcesResource'],
   },
   {
