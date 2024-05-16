@@ -3,6 +3,7 @@ import { useQuery } from 'wagmi/dist/types/utils/query';
 
 import { TwitterAvatar } from '../app/TwitterAvatar';
 import { TweetAnchor } from '../app/anchors/TwitterAnchor';
+import { useProfileContext } from '../profile/ProfileContext';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
@@ -13,14 +14,13 @@ export const PostHeader = (
   props: BoxExtendedProps & { profile?: TwitterUserProfile }
 ) => {
   const { constants } = useThemeContext();
-  const { twitterProfile } = useAccountContext();
   const { tweet, post } = usePost();
 
-  const username = twitterProfile?.name;
+  const username = props.profile?.name;
 
   return (
     <Box direction="row" {...props}>
-      <TwitterAvatar size={40} profile={twitterProfile}></TwitterAvatar>
+      <TwitterAvatar size={40} profile={props.profile}></TwitterAvatar>
       <Box width="100%" margin={{ left: 'medium' }}>
         <Box direction="row" justify="between">
           <Text
