@@ -11,6 +11,7 @@ import {
   ProfilePostsQuery,
   UserPostsQuery,
 } from '../shared/types/types.posts';
+import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { AppButton } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
@@ -66,7 +67,12 @@ const TABS_CONFIG: { label: string; labelsUris: string[] | undefined }[] = [
 ];
 
 /** extract the postId from the route and pass it to a PostContext */
-export const ProfileView = (props: { username?: string }) => {
+export const ProfileView = (props: {
+  username?: string;
+  profile: TwitterUserProfile;
+}) => {
+  const profile = props.profile;
+
   const { constants } = useThemeContext();
   const username = props.username;
 
@@ -181,9 +187,9 @@ export const ProfileView = (props: { username?: string }) => {
     if (!username) {
       return (
         <Box gap="12px">
-          <LoadingDiv height="60px" width="100%"></LoadingDiv>
+          <LoadingDiv height="125px" width="100%"></LoadingDiv>
           <Box>
-            {[1, 2, 4, 5, 6].map((ix) => (
+            {[1, 2].map((ix) => (
               <LoadingDiv
                 key={ix}
                 height="108px"
@@ -205,7 +211,7 @@ export const ProfileView = (props: { username?: string }) => {
 
     const postResults = (() => {
       if (!posts || isLoading) {
-        return [1, 2, 3, 4, 5, 6].map((ix) => (
+        return [1, 2].map((ix) => (
           <LoadingDiv
             key={ix}
             height="108px"
@@ -216,14 +222,17 @@ export const ProfileView = (props: { username?: string }) => {
 
       if (posts.length === 0) {
         return (
-          <BoxCentered>
+          <BoxCentered fill>
             <Text>No posts found</Text>
           </BoxCentered>
         );
       }
       return posts.map((post, ix) => (
         <Box key={ix}>
-          <PostCard post={post} shade={ix % 2 === 1} profile></PostCard>
+          <PostCard
+            post={post}
+            shade={ix % 2 === 1}
+            profile={profile}></PostCard>
         </Box>
       ));
     })();
@@ -232,7 +241,7 @@ export const ProfileView = (props: { username?: string }) => {
       <>
         <Box
           pad={{ top: 'medium' }}
-          style={{ backgroundColor: constants.colors.shade }}>
+          style={{ backgroundColor: constants.colors.shade, flexShrink: 0 }}>
           <Box
             pad={{ horizontal: 'medium' }}
             direction="row"
@@ -255,7 +264,7 @@ export const ProfileView = (props: { username?: string }) => {
           align="center"
           direction="row"
           width={'100%'}
-          style={{ borderBottom: '1px solid  #D1D5DB' }}>
+          style={{ borderBottom: '1px solid  #D1D5DB', flexShrink: 0 }}>
           {TABS_CONFIG.map((tab, ix) => {
             const selected = ix === selectedTab;
             return (
@@ -284,7 +293,9 @@ export const ProfileView = (props: { username?: string }) => {
           })}
         </Box>
 
-        <Box gap="medium">{postResults}</Box>
+        <Box gap="medium" fill>
+          {postResults}
+        </Box>
       </>
     );
   })();

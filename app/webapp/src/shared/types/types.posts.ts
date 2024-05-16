@@ -106,7 +106,7 @@ export interface UserPostsQuery {
 }
 
 export interface ProfilePostsQuery {
-  platformId: string;
+  platformId: PLATFORM;
   username: string;
   labelsUris?: string[];
   fetchParams: FetchParams;

@@ -6,6 +6,7 @@ import {
   getPostController,
   getUserPostsController,
   getUserProfileController,
+  getUserProfilePostsController,
   parsePostController,
   updatePostController,
 } from './posts/controllers/posts.controller';
@@ -21,8 +22,10 @@ router.post('/auth/:platform/context', getSignupContextController);
 router.post('/auth/:platform/signup', handleSignupController);
 router.post('/auth/me', getLoggedUserController);
 
+router.post('/users/profile', getUserProfileController);
+
 router.post('/posts/getOfUser', getUserPostsController);
-router.post('/posts/getProfilePosts', getUserProfileController);
+router.post('/posts/getProfilePosts', getUserProfilePostsController);
 
 router.post('/posts/get', getPostController);
 router.post('/posts/createDraft', createDraftPostController);

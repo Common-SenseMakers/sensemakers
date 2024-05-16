@@ -26,15 +26,6 @@ export const ConnectedUser = (props: {}) => {
   const { disconnect } = useDisconnectContext();
 
   const [showDrop, setShowDrop] = useState<boolean>(false);
-  const goToProfile = () => {
-    const twitter = getAccount(
-      connectedUser,
-      PLATFORM.Twitter
-    ) as UserDetailsBase<TwitterUserProfile>;
-    if (twitter && twitter.profile) {
-      navigate(AbsoluteRoutes.Profile(twitter.profile.username));
-    }
-  };
 
   const twitterDetails =
     connectedUser && connectedUser[PLATFORM.Twitter]?.length
@@ -63,7 +54,7 @@ export const ConnectedUser = (props: {}) => {
           <Box pad="20px" gap="small" style={{ width: '220px' }}>
             <Anchor
               target="_blank"
-              href={`${RouteNames.Profile}/${twitterDetails?.username}`}
+              href={`${RouteNames.Profile}/${PLATFORM.Twitter}/${twitterDetails?.username}`}
               style={{
                 textDecoration: 'none',
                 textTransform: 'none',

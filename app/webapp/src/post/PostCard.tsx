@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { TweetAnchor } from '../app/anchors/TwitterAnchor';
 import { PLATFORM } from '../shared/types/types';
 import { AppPostFull } from '../shared/types/types.posts';
+import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { NanopubStatus, StatusTag } from './NanopubStatus';
 import { PostText } from './PostText';
@@ -11,10 +12,10 @@ import { PostText } from './PostText';
 export const PostCard = (props: {
   post: AppPostFull;
   shade?: boolean;
-  profile?: boolean;
+  profile?: TwitterUserProfile;
 }) => {
   const { post, shade: _shade } = props;
-  const profile = props.profile !== undefined ? props.profile : false;
+  const profile = props.profile;
   const shade = _shade || false;
 
   const navigate = useNavigate();

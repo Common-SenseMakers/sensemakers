@@ -139,3 +139,8 @@ export interface PlatformFetchParams {
   until_id?: string;
   expectedAmount: number;
 }
+
+export interface UserProfileQuery {
+  platformId: PLATFORM;
+  username: string;
+}

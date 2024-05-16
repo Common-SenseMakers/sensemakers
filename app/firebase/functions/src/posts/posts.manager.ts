@@ -40,6 +40,7 @@ import { ParserService } from '../parser/parser.service';
 import { PlatformsService } from '../platforms/platforms.service';
 import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
+import { getUsernameTag } from '../users/users.utils';
 import { PostsProcessing } from './posts.processing';
 
 const DEBUG = true;
@@ -582,20 +583,14 @@ export class PostsManager {
    * We trigger fetching posts from the platforms from here
    */
   async getUserProfile(
-    platformId: string,
+    platformId: PLATFORM,
     username: string,
     fetchParams: FetchParams,
     labelsUris?: string[]
   ): Promise<AppPostFull[]> {
     /** get userId from username */
     const userId = await this.db.run(async (manager) => {
-      const usernameTag = (() => {
-        if (platformId === PLATFORM.Twitter) {
-          return 'username';
-        }
-
-        throw new Error('unexpected for now');
-      })();
+      const usernameTag = getUsernameTag(platformId as PLATFORM);
 
       const userId = await this.users.repo.getByPlatformUsername(
         platformId,

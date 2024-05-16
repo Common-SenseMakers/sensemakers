@@ -7,12 +7,15 @@ import { PostView } from './PostView';
 
 /** extract the postId from the route and pass it to a PostContext */
 export const PostPage = () => {
-  const { id } = useParams();
+  const { postId } = useParams();
   const { posts, getPost } = useUserPosts();
 
-  const postInit = useMemo(() => (id ? getPost(id) : undefined), [id]);
+  const postInit = useMemo(
+    () => (postId ? getPost(postId) : undefined),
+    [postId]
+  );
 
-  const currPostIndex = posts?.findIndex((p) => p.id === id);
+  const currPostIndex = posts?.findIndex((p) => p.id === postId);
   const prevPostId =
     posts && currPostIndex != undefined && currPostIndex > 0
       ? posts[currPostIndex - 1].id
@@ -24,7 +27,7 @@ export const PostPage = () => {
       : undefined;
 
   return (
-    <PostContext postId={id} postInit={postInit}>
+    <PostContext postId={postId} postInit={postInit}>
       <PostView prevPostId={prevPostId} nextPostId={nextPostId}></PostView>
     </PostContext>
   );
