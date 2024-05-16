@@ -33,7 +33,7 @@ export const PostNav = (props: {
       <NavButton
         icon={profile ? <LeftIcon></LeftIcon> : <HomeIcon></HomeIcon>}
         label={profile ? 'Back' : 'Home'}
-        onClick={() => (profile ? navigate(-1) : navigate('/'))}></NavButton>
+        onClick={() => (profile ? navigate('..') : navigate('/'))}></NavButton>
       {!profile ? (
         <Box direction="row" gap="8px">
           <NavButton

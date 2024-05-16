@@ -11,6 +11,7 @@ import { IS_EMULATOR } from '../../config/config.runtime';
 import { envRuntime } from '../../config/typedenv.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
+import { canReadPost } from '../posts.access.control';
 import { enqueueParsePost } from '../posts.task';
 import {
   approvePostSchema,
@@ -113,7 +114,7 @@ export const getUserProfilePostsController: RequestHandler = async (
  * */
 export const getPostController: RequestHandler = async (request, response) => {
   try {
-    const userId = getAuthenticatedUser(request, true);
+    const userId = getAuthenticatedUser(request);
     const { postsManager } = getServices(request);
 
     const payload = (await postIdValidation.validate(request.body)) as {
@@ -121,7 +122,10 @@ export const getPostController: RequestHandler = async (request, response) => {
     };
 
     const post = await postsManager.getPost(payload.postId, true);
-    if (post.authorId !== userId) {
+
+    const canRead = canReadPost(post, userId);
+
+    if (!canRead) {
       if (DEBUG)
         logger.debug(`${request.path}: getPost not authorize`, {
           userId,
