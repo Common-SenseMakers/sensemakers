@@ -127,7 +127,10 @@ export const PostView = (props: {
   })();
 
   const editable =
-    connectedUser?.userId === post?.authorId && !postStatuses.published;
+    connectedUser &&
+    connectedUser.userId === post?.authorId &&
+    !postStatuses.published &&
+    !props.profile;
 
   const content = (() => {
     if (!post) {

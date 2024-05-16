@@ -58,7 +58,7 @@ export const AppContainer = (props: React.PropsWithChildren) => {
                       element={<ProfileRoot></ProfileRoot>}>
                       <Route
                         path={`:postId`}
-                        element={<PostPage></PostPage>}></Route>
+                        element={<ProfilePostPage></ProfilePostPage>}></Route>
 
                       <Route
                         path={``}
