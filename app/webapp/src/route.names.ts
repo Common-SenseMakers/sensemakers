@@ -1,3 +1,5 @@
+import { PLATFORM } from './shared/types/types';
+
 export const RouteNames = {
   AppHome: '',
   Post: 'post',
@@ -8,5 +10,6 @@ export const RouteNames = {
 export const AbsoluteRoutes = {
   App: '/',
   Post: (postId: string) => `/${RouteNames.Post}/${postId}`,
-  Profile: (username: string) => `/${RouteNames.Profile}/${username}`,
+  Profile: (platformId: PLATFORM, username: string) =>
+    `/${RouteNames.Profile}/${platformId}/${username}`,
 };

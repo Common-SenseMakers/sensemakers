@@ -1,14 +1,17 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
+import { useQuery } from 'wagmi/dist/types/utils/query';
 
 import { TwitterAvatar } from '../app/TwitterAvatar';
 import { TweetAnchor } from '../app/anchors/TwitterAnchor';
+import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { NanopubStatus } from './NanopubStatus';
 import { usePost } from './PostContext';
 
-export const PostHeader = (props: BoxExtendedProps & { profile?: boolean }) => {
-  const profile = props.profile !== undefined ? props.profile : false;
+export const PostHeader = (
+  props: BoxExtendedProps & { profile?: TwitterUserProfile }
+) => {
   const { constants } = useThemeContext();
   const { twitterProfile } = useAccountContext();
   const { tweet, post } = usePost();
@@ -31,7 +34,7 @@ export const PostHeader = (props: BoxExtendedProps & { profile?: boolean }) => {
             }}>
             {username}
           </Text>
-          {!profile ? <NanopubStatus post={post}></NanopubStatus> : <></>}
+          {!props.profile ? <NanopubStatus post={post}></NanopubStatus> : <></>}
         </Box>
         <Box margin={{ bottom: '6px' }}></Box>
         <TweetAnchor thread={tweet?.posted?.post}></TweetAnchor>

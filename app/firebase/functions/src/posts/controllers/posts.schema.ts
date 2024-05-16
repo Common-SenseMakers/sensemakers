@@ -28,6 +28,11 @@ export const getUserPostsQuerySchema = object({
 }).noUnknown(true);
 
 export const getUserProfileSchema = object({
+  username: string().required(),
+  platformId: string().oneOf([...Object.values(PLATFORM)]),
+}).noUnknown(true);
+
+export const getUserProfilePostsSchema = object({
   platformId: string().oneOf([...Object.values(PLATFORM)]),
   username: string().required(),
   labelsUris: array().of(string()),

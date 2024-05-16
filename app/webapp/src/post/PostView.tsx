@@ -7,6 +7,7 @@ import { ViewportPage } from '../app/layout/Viewport';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID } from '../semantics/patterns/patterns';
 import { AppPostReviewStatus } from '../shared/types/types.posts';
+import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { AppButton } from '../ui-components';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
@@ -21,10 +22,8 @@ import { PostText } from './PostText';
 export const PostView = (props: {
   prevPostId?: string;
   nextPostId?: string;
-  profile?: boolean;
+  profile?: TwitterUserProfile;
 }) => {
-  const profile = props.profile !== undefined ? props.profile : false;
-
   const { constants } = useThemeContext();
   const { prevPostId, nextPostId } = props;
   const {
@@ -145,7 +144,7 @@ export const PostView = (props: {
       <>
         <Box pad="medium">
           <PostHeader
-            profile={profile}
+            profile={props.profile}
             margin={{ bottom: '16px' }}></PostHeader>
           {postStatuses.isParsing ? (
             <LoadingDiv height="60px" width="100%"></LoadingDiv>
@@ -195,7 +194,7 @@ export const PostView = (props: {
       content={
         <Box fill>
           <PostNav
-            profile={profile}
+            profile={props.profile}
             prevPostId={prevPostId}
             nextPostId={nextPostId}></PostNav>
           {content}

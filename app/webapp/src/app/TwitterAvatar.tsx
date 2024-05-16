@@ -1,7 +1,11 @@
 import { Box, Image } from 'grommet';
-import { UserV2 } from 'twitter-api-v2';
 
-export const TwitterAvatar = (props: { profile?: UserV2; size?: number }) => {
+import { TwitterUserProfile } from '../shared/types/types.twitter';
+
+export const TwitterAvatar = (props: {
+  profile?: TwitterUserProfile;
+  size?: number;
+}) => {
   const size = props.size || 40;
   const content = (() => {
     if (!props.profile || !props.profile.profile_image_url) return <></>;

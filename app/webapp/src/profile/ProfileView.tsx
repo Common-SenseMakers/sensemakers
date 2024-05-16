@@ -2,6 +2,7 @@ import { Anchor, Box, Text } from 'grommet';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useAppFetch } from '../api/app.fetch';
+import { AppLogo } from '../app/brand/AppLogo';
 import { ViewportPage } from '../app/layout/Viewport';
 import { PostCard } from '../post/PostCard';
 import { PLATFORM } from '../shared/types/types';
@@ -10,62 +11,25 @@ import {
   ProfilePostsQuery,
   UserPostsQuery,
 } from '../shared/types/types.posts';
+import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { AppButton } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { ProfileHeader } from './ProfileHeader';
+import { TABS_CONFIG } from './TABS.CONFIG';
 
 const DEBUG = true;
 
 const PAGE_SIZE = 20;
 
-const TABS_CONFIG: { label: string; labelsUris: string[] | undefined }[] = [
-  {
-    label: 'All',
-    labelsUris: undefined,
-  },
-  {
-    label: 'Thinks',
-    labelsUris: [
-      'http://purl.org/spar/cito/disagreesWith',
-      'https://schema.org/Question',
-      'http://purl.org/spar/cito/discusses',
-      'http://purl.org/spar/cito/includesQuotationFrom',
-      'https://sense-nets.xyz/asksQuestionAbout',
-      'http://purl.org/spar/cito/agreesWith',
-      'https://schema.org/Observation',
-      'https://schema.org/Claim',
-      'https://sense-nets.xyz/indicatesInterest',
-      'http://purl.org/spar/cito/linksTo',
-    ],
-  },
-  {
-    label: 'Recommends',
-    labelsUris: [
-      'http://purl.org/spar/cito/reviews',
-      'https://sense-nets.xyz/endorses',
-      'https://sense-nets.xyz/mentionsListeningStatus',
-      'https://sense-nets.xyz/recommends',
-      'https://sense-nets.xyz/summarizes',
-      'https://sense-nets.xyz/mentionsWatchingStatus',
-      'https://sense-nets.xyz/mentionsReadingStatus',
-    ],
-  },
-  {
-    label: 'Announces',
-    labelsUris: [
-      'https://sense-nets.xyz/announcesResource',
-      'https://sense-nets.xyz/mentionsCallForPapers',
-      'https://sense-nets.xyz/mentionsFundingOpportunity',
-      'https://sense-nets.xyz/announcesEvent',
-      'https://sense-nets.xyz/announcesJob',
-    ],
-  },
-];
-
 /** extract the postId from the route and pass it to a PostContext */
-export const ProfileView = (props: { username?: string }) => {
+export const ProfileView = (props: {
+  username?: string;
+  profile: TwitterUserProfile;
+}) => {
+  const profile = props.profile;
+
   const { constants } = useThemeContext();
   const username = props.username;
 
@@ -80,8 +44,6 @@ export const ProfileView = (props: { username?: string }) => {
   const [errorFetching, setErrorFetching] = useState<Error>();
 
   const appFetch = useAppFetch();
-
-  const labelsUris = ['https://sense-nets.xyz/announcesResource'];
 
   /** trigger the first fetch */
   useEffect(() => {
@@ -117,7 +79,10 @@ export const ProfileView = (props: { username?: string }) => {
         const allPosts =
           position === 'end' ? prev.concat(posts) : posts.concat(prev);
         if (DEBUG) console.log(`pushing posts`, { prev, allPosts });
-        return allPosts;
+        const allPostsUnique = allPosts.filter(
+          (p, ix, self) => self.findIndex((s) => s.id === p.id) === ix
+        );
+        return allPostsUnique;
       });
     },
     []
@@ -179,9 +144,9 @@ export const ProfileView = (props: { username?: string }) => {
     if (!username) {
       return (
         <Box gap="12px">
-          <LoadingDiv height="60px" width="100%"></LoadingDiv>
+          <LoadingDiv height="125px" width="100%"></LoadingDiv>
           <Box>
-            {[1, 2, 4, 5, 6].map((ix) => (
+            {[1, 2].map((ix) => (
               <LoadingDiv
                 key={ix}
                 height="108px"
@@ -201,27 +166,62 @@ export const ProfileView = (props: { username?: string }) => {
       );
     }
 
+    const postResults = (() => {
+      if (!posts || isLoading) {
+        return [1, 2].map((ix) => (
+          <LoadingDiv
+            key={ix}
+            height="108px"
+            width="100%"
+            margin={{ bottom: '2px' }}></LoadingDiv>
+        ));
+      }
+
+      if (posts.length === 0) {
+        return (
+          <BoxCentered fill>
+            <Text>No posts found</Text>
+          </BoxCentered>
+        );
+      }
+      return posts.map((post, ix) => (
+        <Box key={ix}>
+          <PostCard
+            post={post}
+            shade={ix % 2 === 1}
+            profile={profile}></PostCard>
+        </Box>
+      ));
+    })();
+
     return (
       <>
-        <Anchor href="/" style={{ textDecoration: 'none' }}>
+        <Box
+          pad={{ top: 'medium' }}
+          style={{ backgroundColor: constants.colors.shade, flexShrink: 0 }}>
           <Box
-            pad={{ top: 'medium' }}
-            style={{ backgroundColor: constants.colors.shade }}>
-            <ProfileHeader
-              pad={{
-                top: '12px',
-                horizontal: '12px',
-                bottom: '16px',
-              }}></ProfileHeader>
+            pad={{ horizontal: 'medium' }}
+            direction="row"
+            justify="start"
+            width={'100%'}>
+            <Anchor href="/" style={{ textDecoration: 'none' }}>
+              <AppLogo></AppLogo>
+            </Anchor>
           </Box>
-        </Anchor>
+          <ProfileHeader
+            pad={{
+              top: '12px',
+              horizontal: '12px',
+              bottom: '16px',
+            }}></ProfileHeader>
+        </Box>
 
         <Box
           pad={{ horizontal: '12px' }}
           align="center"
           direction="row"
           width={'100%'}
-          style={{ borderBottom: '1px solid  #D1D5DB' }}>
+          style={{ borderBottom: '1px solid  #D1D5DB', flexShrink: 0 }}>
           {TABS_CONFIG.map((tab, ix) => {
             const selected = ix === selectedTab;
             return (
@@ -236,6 +236,7 @@ export const ProfileView = (props: { username?: string }) => {
                 <Box height={'40px'} justify="center" align="center">
                   <Text
                     style={{
+                      textAlign: 'center',
                       fontSize: '16px',
                       fontStyle: 'normal',
                       fontWeight: '500',
@@ -250,12 +251,8 @@ export const ProfileView = (props: { username?: string }) => {
           })}
         </Box>
 
-        <Box gap="medium">
-          {posts.map((post, ix) => (
-            <Box key={ix}>
-              <PostCard post={post} shade={ix % 2 === 1} profile></PostCard>
-            </Box>
-          ))}
+        <Box gap="medium" fill>
+          {postResults}
         </Box>
       </>
     );

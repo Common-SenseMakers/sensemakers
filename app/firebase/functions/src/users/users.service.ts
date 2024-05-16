@@ -9,12 +9,13 @@ import {
   PLATFORM,
   UserWithPlatformIds,
 } from '../@shared/types/types';
+import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
 import { IdentityServicesMap } from '../platforms/platforms.service';
 import { UsersHelper } from './users.helper';
 import { UsersRepository } from './users.repository';
-import { getPrefixedUserId } from './users.utils';
+import { getPrefixedUserId, getUsernameTag } from './users.utils';
 
 const DEBUG = false;
 
@@ -31,6 +32,7 @@ interface TokenData {
  */
 export class UsersService {
   constructor(
+    public db: DBInstance,
     public repo: UsersRepository,
     public identityPlatforms: IdentityServicesMap,
     protected ourToken: OurTokenConfig
@@ -241,6 +243,26 @@ export class UsersService {
       complete: true,
     }) as unknown as jwt.JwtPayload & TokenData;
     return verified.payload.userId;
+  }
+
+  public async getUserProfileFromPlatformUsername(
+    platformId: PLATFORM,
+    username: string
+  ) {
+    const profile = await this.db.run(async (manager) => {
+      const usernameTag = getUsernameTag(platformId);
+      const userId = await this.repo.getByPlatformUsername(
+        platformId,
+        usernameTag,
+        username,
+        manager,
+        true
+      );
+
+      return this.getUserProfile(userId, manager);
+    });
+
+    return profile;
   }
 
   public async getUserProfile(userId: string, manager: TransactionManager) {
