@@ -7,7 +7,7 @@ export const TABS_CONFIG: {
     labelsUris: undefined,
   },
   {
-    label: 'Recommendations',
+    label: 'Recommends',
     labelsUris: [
       'https://sense-nets.xyz/recommends',
       'https://sense-nets.xyz/endorses',
@@ -20,7 +20,7 @@ export const TABS_CONFIG: {
     ],
   },
   {
-    label: 'New research',
+    label: 'Announces',
     labelsUris: ['https://sense-nets.xyz/announcesResource'],
   },
   {
@@ -29,7 +29,6 @@ export const TABS_CONFIG: {
       'https://sense-nets.xyz/announcesEvent',
       'https://sense-nets.xyz/announcesJob',
       'https://sense-nets.xyz/mentionsCallForPapers',
-
       'https://sense-nets.xyz/mentionsFundingOpportunity',
     ],
   },
