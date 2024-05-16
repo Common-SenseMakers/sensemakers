@@ -8,7 +8,7 @@ export const canReadPost = (post: AppPostFull, userId?: string) => {
     return true;
   }
 
-  if (!userId && post.authorId === userId) {
+  if (userId && post.authorId === userId) {
     return true;
   }
 

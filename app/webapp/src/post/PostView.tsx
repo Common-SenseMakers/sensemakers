@@ -138,7 +138,7 @@ export const PostView = (props: {
         <Box gap="12px" pad="medium">
           <LoadingDiv height="90px" width="100%"></LoadingDiv>
           <LoadingDiv height="200px" width="100%"></LoadingDiv>
-          <LoadingDiv height="120px" width="100%"></LoadingDiv>;
+          <LoadingDiv height="120px" width="100%"></LoadingDiv>
         </Box>
       );
     }
