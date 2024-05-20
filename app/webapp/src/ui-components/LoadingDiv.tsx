@@ -14,7 +14,7 @@ export const LoadingDiv = (props: BoxExtendedProps) => {
   }
 
   return (
-    <Box {...props} style={style}>
+    <Box {...props} style={{ width: '100%', ...style }}>
       <div className="loading-square"></div>
     </Box>
   );

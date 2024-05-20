@@ -17,6 +17,7 @@ export interface AppPostStatus {
   ignored?: boolean;
   nanopubPublished?: { uri: string };
   published?: boolean;
+  isEditing?: boolean;
 }
 
 // One helper hook to derive all the statuses of a post
@@ -49,6 +50,8 @@ export const usePostStatuses = (post?: AppPostFull): AppPostStatus => {
   const published =
     post && nanopubPublished !== undefined && nanopubPublished !== null;
 
+  const isEditing = post && post.reviewedStatus === AppPostReviewStatus.DRAFT;
+
   return {
     processed,
     errored,
@@ -57,5 +60,6 @@ export const usePostStatuses = (post?: AppPostFull): AppPostStatus => {
     ignored,
     nanopubPublished,
     published,
+    isEditing,
   };
 };

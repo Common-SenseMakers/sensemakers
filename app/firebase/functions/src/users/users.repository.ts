@@ -7,14 +7,19 @@ import {
   FetchedDetails,
   PLATFORM,
   UserDetailsBase,
+  UserPlatformProfile,
   UserWithPlatformIds,
 } from '../@shared/types/types';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
+import { UsersHelper } from './users.helper';
 import { getPrefixedUserId } from './users.utils';
 
 const DEBUG = false;
+
+const getProfileId = (userId: string, platform: PLATFORM, user_id: string) =>
+  `${userId}-${platform}-${user_id}`;
 
 export class UsersRepository {
   constructor(protected db: DBInstance) {}
@@ -107,6 +112,42 @@ export class UsersRepository {
     >;
   }
 
+  public async getByPlatformUsername<T extends boolean>(
+    platformId: PLATFORM,
+    usernameTag: string,
+    username: string,
+    manager: TransactionManager,
+    shouldThrow?: T
+  ) {
+    const platformId_property: keyof UserPlatformProfile = 'platformId';
+    const profile_property: keyof UserPlatformProfile = 'profile';
+
+    const query = this.db.collections.profiles
+      .where(platformId_property, '==', platformId)
+      .where(`${profile_property}.${usernameTag}`, '==', username);
+
+    const snap = await manager.query(query);
+
+    const _shouldThrow = shouldThrow !== undefined ? shouldThrow : false;
+
+    if (snap.empty) {
+      if (_shouldThrow)
+        throw new Error(
+          `User with profile.username: ${username} and platform ${platformId} not found`
+        );
+      else return undefined as DefinedIfTrue<T, string>;
+    }
+
+    if (snap.size > 1) {
+      throw new Error(
+        `Data corrupted. Unexpected multiple users with the same platform username ${username}`
+      );
+    }
+
+    const userId = (snap.docs[0].data() as UserPlatformProfile).userId;
+    return userId as DefinedIfTrue<T, string>;
+  }
+
   public async createUser(
     userId: string,
     user: AppUserCreate,
@@ -114,6 +155,28 @@ export class UsersRepository {
   ) {
     const ref = await this.getUserRef(userId, manager);
     manager.create(ref, user);
+
+    /** keep the profiles collection in sync */
+    const platformAccounts = UsersHelper.getAllAccounts(user);
+    platformAccounts.forEach((platformAccount) => {
+      if (platformAccount.account.profile) {
+        const profileRef = this.db.collections.profiles.doc(
+          getProfileId(
+            userId,
+            platformAccount.platform,
+            platformAccount.account.user_id
+          )
+        );
+        const data: UserPlatformProfile = {
+          userId,
+          profile: platformAccount.account.profile,
+          platformId: platformAccount.platform,
+          user_id: platformAccount.account.user_id,
+        };
+        manager.create(profileRef, data);
+      }
+    });
+
     return ref.id;
   }
 
@@ -228,10 +291,13 @@ export class UsersRepository {
       const ix = accounts.findIndex((a) => a.user_id === details.user_id);
       if (ix !== -1) {
         /** set the new details of that account */
-        if (DEBUG) logger.debug(`setPlatformDetails account not found`);
-        accounts[ix] = details;
+        if (DEBUG)
+          logger.debug(`setPlatformDetails account found - overwritting`);
+        /** keep the fetched details */
+        accounts[ix] = { ...accounts[ix], ...details };
       } else {
-        if (DEBUG) logger.debug(`setPlatformDetails account found`);
+        if (DEBUG)
+          logger.debug(`setPlatformDetails account not found - creating`);
         accounts.push(details);
         platformIds.push(getPrefixedUserId(platform, details.user_id));
       }
@@ -255,6 +321,14 @@ export class UsersRepository {
     if (DEBUG) logger.debug(`Updating user ${userId}`, { update });
 
     manager.update(userRef, update);
+
+    // update mirror collection profiles
+    if (details.profile) {
+      const profileRef = this.db.collections.profiles.doc(
+        getProfileId(userId, platform, details.user_id)
+      );
+      manager.set(profileRef, { profile: details.profile }, { merge: true });
+    }
   }
 
   /** remove userDetails of a given platform */

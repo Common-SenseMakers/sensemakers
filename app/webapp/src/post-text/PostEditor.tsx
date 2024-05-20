@@ -20,14 +20,23 @@ export const textToHtml = (text: string) => {
   const paragraphs = text.split('---');
   let html = paragraphs?.map((p, i) => `<p>${p}</p>`).join('');
 
-  const urlRegex = /\bhttps?:\/\/\S+/gi;
+  const urlRegex =
+    /\bhttps?:\/\/[\w.-]+(?:\.[\w.-]+)*[^\s.,;?!\])]*\/?(?:[\w\/?=+-]*)/gi;
+
   html = html.replace(urlRegex, (url) => {
     let urlClean = url;
     try {
+      if (url.endsWith('.')) {
+        url = url.slice(0, -1);
+      }
+
       const urlObj = new URL(url);
-      urlClean = `${urlObj.protocol}/${urlObj.hostname}/${urlObj.pathname}`;
+      urlClean = `${urlObj.protocol}//${urlObj.hostname}${urlObj.pathname}`;
+      if (urlObj.search) {
+        urlClean += urlObj.search;
+      }
     } catch (e) {
-      console.error(`error parsing url ${url}`, e);
+      console.error(`Error parsing URL: ${url}`, e);
     }
 
     return `<a href="${url}">${urlClean}</a>`;

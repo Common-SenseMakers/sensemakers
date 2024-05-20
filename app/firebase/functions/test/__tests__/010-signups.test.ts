@@ -5,6 +5,7 @@ import {
   NanopubUserProfile,
   NanupubSignupData,
 } from '../../src/@shared/types/types.nanopubs';
+import { TwitterUserProfile } from '../../src/@shared/types/types.twitter';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { logger } from '../../src/instances/logger';
 import { resetDB } from '../utils/db';
@@ -36,6 +37,11 @@ describe('010-signups', () => {
 
   describe('signup with mocked twitter', () => {
     const TWITTER_USER_ID = '123456789';
+    const TWITTER_PROFILE: TwitterUserProfile = {
+      id: TWITTER_USER_ID,
+      name: 'Test User',
+      username: 'username',
+    };
 
     before(() => {
       (this as any).skipUsersUpdate = true;
@@ -51,7 +57,7 @@ describe('010-signups', () => {
 
         const result = await services.users.handleSignup(
           PLATFORM.Twitter,
-          { user_id: TWITTER_USER_ID },
+          { user_id: TWITTER_USER_ID, profile: TWITTER_PROFILE },
           manager
         );
 
@@ -65,6 +71,20 @@ describe('010-signups', () => {
 
         expect(result.userId).to.not.be.undefined;
         expect(result.ourAccessToken).to.not.be.undefined;
+      });
+
+      await services.db.run(async (manager) => {
+        const userRead = await services.users.repo.getUser(userId, manager);
+        expect(userRead).to.not.be.undefined;
+
+        const userReadProfile = await services.users.repo.getByPlatformUsername(
+          PLATFORM.Twitter,
+          'username',
+          TWITTER_PROFILE.username,
+          manager
+        );
+
+        expect(userReadProfile).to.not.be.undefined;
       });
     });
 

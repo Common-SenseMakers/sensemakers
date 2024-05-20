@@ -15,8 +15,15 @@ import { usePostStatuses } from './usePostStatuses';
 export const NanopubStatus = (props: { post?: AppPostFull }) => {
   const { post } = props;
 
-  const { nanopubPublished, processed, isParsing, errored, pending, ignored } =
-    usePostStatuses(post);
+  const {
+    nanopubPublished,
+    processed,
+    isParsing,
+    errored,
+    pending,
+    ignored,
+    isEditing,
+  } = usePostStatuses(post);
 
   if (nanopubPublished) {
     return (
@@ -41,6 +48,10 @@ export const NanopubStatus = (props: { post?: AppPostFull }) => {
 
   if (ignored) {
     return <StatusTag label="Ignored" color="#D1D5DB"></StatusTag>;
+  }
+
+  if (isEditing) {
+    return <StatusTag label="Draft" color="#F79A3E"></StatusTag>;
   }
 
   return <></>;

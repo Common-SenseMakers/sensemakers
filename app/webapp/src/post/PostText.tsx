@@ -53,7 +53,7 @@ export const PostText = (props: {
   return (
     <Box
       style={{
-        height: truncate ? `${maxHeight}px` : 'auto',
+        maxHeight: truncate ? `${maxHeight}px` : 'auto',
         position: 'relative',
         overflow: 'hidden',
       }}>

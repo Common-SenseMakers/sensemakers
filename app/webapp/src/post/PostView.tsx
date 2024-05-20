@@ -7,6 +7,7 @@ import { ViewportPage } from '../app/layout/Viewport';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID } from '../semantics/patterns/patterns';
 import { AppPostReviewStatus } from '../shared/types/types.posts';
+import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { AppButton } from '../ui-components';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
@@ -21,6 +22,8 @@ import { PostText } from './PostText';
 export const PostView = (props: {
   prevPostId?: string;
   nextPostId?: string;
+  profile?: TwitterUserProfile;
+  isProfile: boolean;
 }) => {
   const { constants } = useThemeContext();
   const { prevPostId, nextPostId } = props;
@@ -125,7 +128,12 @@ export const PostView = (props: {
   })();
 
   const editable =
-    connectedUser?.userId === post?.authorId && !postStatuses.published;
+    connectedUser &&
+    connectedUser.userId === post?.authorId &&
+    !postStatuses.published &&
+    !props.isProfile;
+
+  console.log({ editable, props });
 
   const content = (() => {
     if (!post) {
@@ -133,7 +141,7 @@ export const PostView = (props: {
         <Box gap="12px" pad="medium">
           <LoadingDiv height="90px" width="100%"></LoadingDiv>
           <LoadingDiv height="200px" width="100%"></LoadingDiv>
-          <LoadingDiv height="120px" width="100%"></LoadingDiv>;
+          <LoadingDiv height="120px" width="100%"></LoadingDiv>
         </Box>
       );
     }
@@ -141,7 +149,10 @@ export const PostView = (props: {
     return (
       <>
         <Box pad="medium">
-          <PostHeader margin={{ bottom: '16px' }}></PostHeader>
+          <PostHeader
+            isProfile={props.isProfile}
+            profile={props.profile}
+            margin={{ bottom: '16px' }}></PostHeader>
           {postStatuses.isParsing ? (
             <LoadingDiv height="60px" width="100%"></LoadingDiv>
           ) : (
@@ -189,7 +200,11 @@ export const PostView = (props: {
     <ViewportPage
       content={
         <Box fill>
-          <PostNav prevPostId={prevPostId} nextPostId={nextPostId}></PostNav>
+          <PostNav
+            isProfile={props.isProfile}
+            profile={props.profile}
+            prevPostId={prevPostId}
+            nextPostId={nextPostId}></PostNav>
           {content}
         </Box>
       }></ViewportPage>
