@@ -5,6 +5,7 @@ import { NavButton } from '../app/NavButton';
 import { HomeIcon } from '../app/icons/HomeIcon';
 import { LeftIcon } from '../app/icons/LeftIcon';
 import { RightIcon } from '../app/icons/RightIcon';
+import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { AppButton } from '../ui-components';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useUserPosts } from '../user-home/UserPostsContext';
@@ -12,14 +13,13 @@ import { useUserPosts } from '../user-home/UserPostsContext';
 export const PostNav = (props: {
   prevPostId?: string;
   nextPostId?: string;
-  profile?: boolean;
+  profile?: TwitterUserProfile;
+  isProfile: boolean;
 }) => {
-  const profile = props.profile !== undefined ? props.profile : false;
-
+  const profile = props.profile;
   const { prevPostId, nextPostId } = props;
   const navigate = useNavigate();
   const { constants } = useThemeContext();
-  const { filterStatus } = useUserPosts();
 
   return (
     <Box
@@ -32,10 +32,10 @@ export const PostNav = (props: {
       direction="row"
       justify="between">
       <NavButton
-        icon={profile ? <LeftIcon></LeftIcon> : <HomeIcon></HomeIcon>}
-        label={profile ? 'Back' : 'Home'}
-        onClick={() => (profile ? navigate(-1) : navigate('/'))}></NavButton>
-      {!profile ? (
+        icon={props.isProfile ? <LeftIcon></LeftIcon> : <HomeIcon></HomeIcon>}
+        label={props.isProfile ? 'Back' : 'Home'}
+        onClick={() => (profile ? navigate('..') : navigate('/'))}></NavButton>
+      {!props.isProfile ? (
         <Box direction="row" gap="8px">
           <NavButton
             icon={<LeftIcon></LeftIcon>}

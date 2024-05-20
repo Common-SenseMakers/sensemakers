@@ -291,10 +291,13 @@ export class UsersRepository {
       const ix = accounts.findIndex((a) => a.user_id === details.user_id);
       if (ix !== -1) {
         /** set the new details of that account */
-        if (DEBUG) logger.debug(`setPlatformDetails account not found`);
-        accounts[ix] = details;
+        if (DEBUG)
+          logger.debug(`setPlatformDetails account found - overwritting`);
+        /** keep the fetched details */
+        accounts[ix] = { ...accounts[ix], ...details };
       } else {
-        if (DEBUG) logger.debug(`setPlatformDetails account found`);
+        if (DEBUG)
+          logger.debug(`setPlatformDetails account not found - creating`);
         accounts.push(details);
         platformIds.push(getPrefixedUserId(platform, details.user_id));
       }

@@ -4,17 +4,18 @@ import { TwitterAvatar } from '../app/TwitterAvatar';
 import { TweetAnchor } from '../app/anchors/TwitterAnchor';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
+import { useProfileContext } from './ProfileContext';
 
 export const ProfileHeader = (props: BoxExtendedProps) => {
   const { constants } = useThemeContext();
-  const { twitterProfile } = useAccountContext();
+  const { profile } = useProfileContext();
 
-  const name = twitterProfile?.name;
-  const username = twitterProfile?.username;
+  const name = profile?.name;
+  const username = profile?.username;
 
   return (
     <Box direction="row" {...props}>
-      <TwitterAvatar size={60} profile={twitterProfile}></TwitterAvatar>
+      <TwitterAvatar size={60} profile={profile}></TwitterAvatar>
       <Box width="100%" margin={{ left: 'medium' }}>
         <Box>
           <Text

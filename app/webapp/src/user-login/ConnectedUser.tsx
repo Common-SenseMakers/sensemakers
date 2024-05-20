@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { TwitterAvatar } from '../app/TwitterAvatar';
 import { TwitterProfileAnchor } from '../app/anchors/TwitterAnchor';
-import { AbsoluteRoutes } from '../route.names';
+import { AbsoluteRoutes, RouteNames } from '../route.names';
 import { PLATFORM, UserDetailsBase } from '../shared/types/types';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { AppButton } from '../ui-components';
@@ -26,15 +26,6 @@ export const ConnectedUser = (props: {}) => {
   const { disconnect } = useDisconnectContext();
 
   const [showDrop, setShowDrop] = useState<boolean>(false);
-  const goToProfile = () => {
-    const twitter = getAccount(
-      connectedUser,
-      PLATFORM.Twitter
-    ) as UserDetailsBase<TwitterUserProfile>;
-    if (twitter && twitter.profile) {
-      navigate(AbsoluteRoutes.Profile(twitter.profile.username));
-    }
-  };
 
   const twitterDetails =
     connectedUser && connectedUser[PLATFORM.Twitter]?.length
@@ -61,12 +52,16 @@ export const ConnectedUser = (props: {}) => {
         onOpen={() => setShowDrop(true)}
         dropContent={
           <Box pad="20px" gap="small" style={{ width: '220px' }}>
-            <AppButton
-              plain
-              onClick={() => goToProfile()}
-              style={{ textTransform: 'none', paddingTop: '6px' }}>
+            <Anchor
+              target="_blank"
+              href={`${RouteNames.Profile}/${PLATFORM.Twitter}/${twitterDetails?.username}`}
+              style={{
+                textDecoration: 'none',
+                textTransform: 'none',
+                paddingTop: '6px',
+              }}>
               <Text>{cap(t('profile'))}</Text>
-            </AppButton>
+            </Anchor>
 
             <AppButton
               plain

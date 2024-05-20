@@ -27,11 +27,10 @@ import { PlatformPostsRepository } from '../posts/platform.posts.repository';
 import { PostsManager } from '../posts/posts.manager';
 import { PostsProcessing } from '../posts/posts.processing';
 import { PostsRepository } from '../posts/posts.repository';
+import { TriplesRepository } from '../semantics/triples.repository';
 import { TimeService } from '../time/time.service';
 import { UsersRepository } from '../users/users.repository';
 import { UsersService } from '../users/users.service';
-
-import {TriplesRepository} from '../semantics/triples.repository'
 
 export interface Services {
   users: UsersService;
@@ -79,7 +78,7 @@ export const createServices = () => {
   platformsMap.set(PLATFORM.Nanopub, nanopub);
 
   /** users service */
-  const usersService = new UsersService(userRepo, identityPlatforms, {
+  const usersService = new UsersService(db, userRepo, identityPlatforms, {
     tokenSecret: OUR_TOKEN_SECRET.value(),
     expiresIn: OUR_EXPIRES_IN,
   });
@@ -102,7 +101,7 @@ export const createServices = () => {
   const postsProcessing = new PostsProcessing(
     usersService,
     time,
-  triplesRepo,
+    triplesRepo,
     postsRepo,
     platformPostsRepo,
     platformsService

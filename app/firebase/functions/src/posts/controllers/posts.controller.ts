@@ -1,20 +1,23 @@
 import { RequestHandler } from 'express';
 
+import { UserProfileQuery } from '../../@shared/types/types';
 import {
   AppPostFull,
   PostUpdatePayload,
+  ProfilePostsQuery,
   UserPostsQuery,
-  ProfilePostsQuery
 } from '../../@shared/types/types.posts';
 import { IS_EMULATOR } from '../../config/config.runtime';
 import { envRuntime } from '../../config/typedenv.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
+import { canReadPost } from '../posts.access.control';
 import { enqueueParsePost } from '../posts.task';
 import {
   approvePostSchema,
   createDraftPostSchema,
   getUserPostsQuerySchema,
+  getUserProfilePostsSchema,
   getUserProfileSchema,
   postIdValidation,
   updatePostSchema,
@@ -48,23 +51,55 @@ export const getUserPostsController: RequestHandler = async (
   }
 };
 
-
 /**
- * get user posts from the DB (does not fetch for more)
+ * PUBLIC get user profile from a platform and username
  * */
 export const getUserProfileController: RequestHandler = async (
   request,
   response
 ) => {
   try {
-    const queryParams = (await getUserProfileSchema.validate(
+    const payload = (await getUserProfileSchema.validate(
+      request.body
+    )) as UserProfileQuery;
+
+    logger.debug(`${request.path} - payload`, { payload });
+    const { users } = getServices(request);
+    const profile = await users.getUserProfileFromPlatformUsername(
+      payload.platformId,
+      payload.username
+    );
+
+    if (DEBUG) logger.debug(`${request.path}: users`, { profile });
+
+    response.status(200).send({ success: true, data: profile });
+  } catch (error: any) {
+    logger.error('error', error);
+    response.status(500).send({ success: false, error: error.message });
+  }
+};
+
+/**
+ * PUBLIC get user posts from the DB (does not fetch for more)
+ * */
+export const getUserProfilePostsController: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    const queryParams = (await getUserProfilePostsSchema.validate(
       request.body
     )) as ProfilePostsQuery;
 
     logger.debug(`${request.path} - query parameters`, { queryParams });
     const { postsManager } = getServices(request);
 
-    const posts = await postsManager.getUserProfile(queryParams.platformId, queryParams.username, queryParams.fetchParams, queryParams.labelsUris);
+    const posts = await postsManager.getUserProfile(
+      queryParams.platformId,
+      queryParams.username,
+      queryParams.fetchParams,
+      queryParams.labelsUris
+    );
     if (DEBUG) logger.debug(`${request.path}: posts`, { posts });
 
     response.status(200).send({ success: true, data: posts });
@@ -79,7 +114,7 @@ export const getUserProfileController: RequestHandler = async (
  * */
 export const getPostController: RequestHandler = async (request, response) => {
   try {
-    const userId = getAuthenticatedUser(request, true);
+    const userId = getAuthenticatedUser(request);
     const { postsManager } = getServices(request);
 
     const payload = (await postIdValidation.validate(request.body)) as {
@@ -87,7 +122,10 @@ export const getPostController: RequestHandler = async (request, response) => {
     };
 
     const post = await postsManager.getPost(payload.postId, true);
-    if (post.authorId !== userId) {
+
+    const canRead = canReadPost(post, userId);
+
+    if (!canRead) {
       if (DEBUG)
         logger.debug(`${request.path}: getPost not authorize`, {
           userId,

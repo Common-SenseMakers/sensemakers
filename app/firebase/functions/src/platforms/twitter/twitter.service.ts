@@ -157,8 +157,8 @@ export class TwitterService
         (tA, tB) =>
           Number(tB[0].conversation_id) - Number(tA[0].conversation_id)
       );
-      /** discard last */
-      tweetsArrays.pop();
+      /** discard last thread if read many threads. It could had been truncated */
+      // TODO: what if we only read one thread? is this an error?
 
       /** sort tweets inside each thread, and compose the TwitterThread[] array */
       const threads = tweetsArrays.map((thread): TwitterThread => {

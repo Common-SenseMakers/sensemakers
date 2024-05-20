@@ -9,7 +9,8 @@ import {
 export const getAccount = (
   user?: AppUserRead,
   platformId?: PLATFORM,
-  user_id?: string
+  user_id?: string,
+  username?: string
 ) => {
   if (!user) {
     return undefined;
@@ -35,5 +36,11 @@ export const getAccount = (
 
   return user_id === undefined
     ? accounts[0]
-    : accounts.find((a) => a.user_id === user_id);
+    : accounts.find((a) =>
+        user_id
+          ? a.user_id === user_id
+          : username
+            ? a.profile.username === username
+            : false
+      );
 };

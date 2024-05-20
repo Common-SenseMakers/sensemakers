@@ -84,7 +84,7 @@ export const PostContext: React.FC<{
     queryKey: ['postId', postId, connectedUser],
     queryFn: () => {
       try {
-        if (postId && connectedUser) {
+        if (postId) {
           return appFetch<AppPostFull>('/api/posts/get', { postId });
         }
       } catch (e: any) {
