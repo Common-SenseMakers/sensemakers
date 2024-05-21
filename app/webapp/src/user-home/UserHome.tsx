@@ -28,7 +28,7 @@ export const UserHome = () => {
   const { t } = useTranslation();
   const { show } = useToastContext();
 
-  const { hasUpdate, updateApp } = useServiceWorker();
+  const { hasUpdate, needsInstall, updateApp, install } = useServiceWorker();
 
   const {
     filterStatus,
@@ -172,20 +172,40 @@ export const UserHome = () => {
       onClick={() => fetchNewer()}></AppButton>
   );
 
-  const header = (
-    <Box
-      pad={{ top: '12px', bottom: '12px', horizontal: '12px' }}
-      style={{ backgroundColor: constants.colors.shade, flexShrink: 0 }}>
-      {hasUpdate ? (
+  const updater = (() => {
+    if (hasUpdate) {
+      return (
         <Box direction="row" align="center" gap="4px">
           <Text style={{ fontSize: '14px' }}>{t(I18Keys.updateAvailable)}</Text>
           <Anchor onClick={() => updateApp()}>
             <Text style={{ fontSize: '14px' }}>{t(I18Keys.updateNow)}</Text>
           </Anchor>
         </Box>
-      ) : (
-        <></>
-      )}
+      );
+    }
+    return <></>;
+  })();
+
+  const installer = (() => {
+    if (needsInstall) {
+      return (
+        <Box direction="row" align="center" gap="4px">
+          <Text style={{ fontSize: '14px' }}>{t(I18Keys.installPrompt)}</Text>
+          <Anchor onClick={() => install()}>
+            <Text style={{ fontSize: '14px' }}>{t(I18Keys.installNow)}</Text>
+          </Anchor>
+        </Box>
+      );
+    }
+    return <></>;
+  })();
+
+  const header = (
+    <Box
+      pad={{ top: '12px', bottom: '12px', horizontal: '12px' }}
+      style={{ backgroundColor: constants.colors.shade, flexShrink: 0 }}>
+      {installer}
+      {updater}
       <Box
         direction="row"
         margin={{ bottom: '12px' }}

@@ -9,30 +9,41 @@ import {
 
 import * as serviceWorkerRegistration from '../serviceWorkerRegistration';
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+}
+
 interface SWContextType {
   hasUpdate: boolean;
   updateApp: () => void;
+  needsInstall: boolean;
+  install: () => void;
 }
 
 const SWContextValue = createContext<SWContextType | undefined>(undefined);
 
 export const ServiceWorker = (props: PropsWithChildren) => {
+  const [installEvent, setInstallEvent] =
+    useState<BeforeInstallPromptEvent | null>(null);
+
+  const [needsInstall, setNeedsInstall] = useState<boolean>(false);
+
   const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(
     null
   );
 
   const [hasUpdate, setHasUpdate] = useState<boolean>(false);
-  // called when a service worker
-  // updates. this function is a callback
-  // to the actual service worker
-  // registration onUpdate.
+
+  const [displayMode, setDisplayMode] = useState<
+    'browser' | 'standalone' | 'twa' | undefined
+  >(undefined);
+
   const onSWUpdate = useCallback((registration: ServiceWorkerRegistration) => {
     setHasUpdate(true);
     setWaitingWorker(registration.waiting);
   }, []);
 
-  // simply put, this tells the service
-  // worker to skip the waiting phase and then reloads the page
   const updateApp = useCallback(() => {
     console.log('updateApp called');
     waitingWorker?.postMessage({ type: 'SKIP_WAITING' });
@@ -40,22 +51,65 @@ export const ServiceWorker = (props: PropsWithChildren) => {
     window.location.reload();
   }, [waitingWorker]);
 
-  // register the service worker
   useEffect(() => {
-    // If you want your app to work offline and load faster, you can change
-    // unregister() to register() below. Note this comes with some pitfalls.
-    // Learn more about service workers: https://cra.link/PWA
     serviceWorkerRegistration.register({
       onUpdate: onSWUpdate,
       onUpdateReady: onSWUpdate,
     });
   }, [onSWUpdate]);
 
+  const checkDisplayMode = () => {
+    const mode = (() => {
+      const isStandalone = window.matchMedia(
+        '(display-mode: standalone)'
+      ).matches;
+      if (document.referrer.startsWith('android-app://')) {
+        return 'twa';
+      } else if ((navigator as any).standalone || isStandalone) {
+        return 'standalone';
+      }
+      return 'browser';
+    })();
+
+    setDisplayMode(mode);
+  };
+
+  useEffect(() => {
+    window.addEventListener('beforeinstallprompt', (e: Event) => {
+      console.log(`'beforeinstallprompt' event was fired.`);
+      e.preventDefault();
+      setInstallEvent(e as BeforeInstallPromptEvent);
+      setNeedsInstall(true);
+    });
+
+    window.addEventListener('appinstalled', () => {
+      console.log(`'appinstalled' event was fired.`);
+      setNeedsInstall(false);
+    });
+
+    checkDisplayMode();
+  }, []);
+
+  const install = () => {
+    if (installEvent) {
+      installEvent.prompt();
+      installEvent.userChoice.then((choice) => {
+        if (choice.outcome === 'accepted') {
+          setNeedsInstall(false);
+        } else {
+          setNeedsInstall(true);
+        }
+      });
+    }
+  };
+
   return (
     <SWContextValue.Provider
       value={{
         hasUpdate,
         updateApp,
+        needsInstall,
+        install,
       }}>
       {props.children}
     </SWContextValue.Provider>
