@@ -1,49 +1,64 @@
-import { Box, Text } from 'grommet';
-import { StatusCritical } from 'grommet-icons';
-import { useNavigate } from 'react-router-dom';
+import { Box } from 'grommet';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-import { AppIcon } from '../app/icons/AppIcon';
-import { usePost } from '../post/PostContext';
-import { AppPostFull, AppPostParsingStatus } from '../shared/types/types.posts';
-import { Loading } from '../ui-components/LoadingDiv';
+import { TweetAnchor } from '../app/anchors/TwitterAnchor';
+import { SemanticsEditor } from '../semantics/SemanticsEditor';
+import { PATTERN_ID } from '../semantics/patterns/patterns';
+import { PLATFORM } from '../shared/types/types';
+import { AppPostFull, AppPostParsedStatus } from '../shared/types/types.posts';
+import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { useThemeContext } from '../ui-components/ThemedApp';
+import { NanopubStatus } from './NanopubStatus';
 import { PostText } from './PostText';
 
-export const PostCard = (props: { post: AppPostFull }) => {
-  const { post } = props;
-  const isParsing = post.parsingStatus === AppPostParsingStatus.PROCESSING;
+export const PostCard = (props: {
+  post: AppPostFull;
+  shade?: boolean;
+  profile?: TwitterUserProfile;
+}) => {
+  const { post, shade: _shade } = props;
+  const profile = props.profile;
+  const shade = _shade || false;
 
   const navigate = useNavigate();
   const { constants } = useThemeContext();
 
+  const location = useLocation();
+
   const handleClick = () => {
-    navigate(`/post/${post.id}`);
+    const path = profile
+      ? `${location.pathname}/${post.id}`
+      : `/post/${post.id}`;
+    navigate(path);
   };
 
-  const processStatusIcon = (() => {
-    const processed = post && post.parsedStatus === 'processed';
-    const errored = post && post.parsingStatus === 'errored';
-
-    if (isParsing) return <Loading></Loading>;
-    if (processed) return <AppIcon src="network.svg"></AppIcon>;
-    if (errored) return <StatusCritical></StatusCritical>;
-  })();
+  const tweet = post.mirrors.find((m) => m.platformId === PLATFORM.Twitter);
 
   return (
     <Box
-      pad="medium"
+      pad={{ top: 'medium', bottom: 'large', horizontal: 'medium' }}
       style={{
+        backgroundColor: shade ? constants.colors.shade : 'white',
         cursor: 'pointer',
         position: 'relative',
-        backgroundColor: constants.colors.backgroundLight,
       }}
-      elevation="small"
       onClick={handleClick}>
-      <Text size="xsmall">{post?.id}</Text>
-      <PostText text={post?.content}></PostText>
-      <Box style={{ position: 'absolute', right: '10px', bottom: '10px' }}>
-        {processStatusIcon}
+      <Box direction="row" justify="between">
+        <TweetAnchor
+          thread={tweet?.posted?.post}
+          timestamp={tweet?.posted?.timestampMs}></TweetAnchor>
+        {!profile ? <NanopubStatus post={post}></NanopubStatus> : <></>}
       </Box>
+      <PostText truncate shade={shade} text={post?.content}></PostText>
+
+      <SemanticsEditor
+        include={[PATTERN_ID.REF_LABELS]}
+        isLoading={false}
+        patternProps={{
+          editable: false,
+          semantics: post?.semantics,
+          originalParsed: post?.originalParsed,
+        }}></SemanticsEditor>
     </Box>
   );
 };

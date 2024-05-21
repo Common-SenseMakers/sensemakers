@@ -1,9 +1,17 @@
-import { TwitterApi, TwitterApiReadOnly } from 'twitter-api-v2';
+import {
+  TOAuth2Scope,
+  TwitterApi,
+  TwitterApiReadOnly,
+  UsersV2Params,
+} from 'twitter-api-v2';
 
 import { PLATFORM, UserDetailsBase } from '../../@shared/types/types';
 import {
+  TwitterGetContextParams,
+  TwitterSignupData,
   TwitterUserCredentials,
   TwitterUserDetails,
+  TwitterUserProfile,
 } from '../../@shared/types/types.twitter';
 import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
@@ -13,6 +21,8 @@ import { TwitterApiCredentials } from './twitter.service';
 import { handleTwitterError } from './twitter.utils';
 
 const DEBUG = false;
+
+/** check https://github.com/PLhery/node-twitter-api-v2/blob/master/doc/auth.md#oauth2-user-wide-authentication-flow for OAuth2 flow */
 
 export class TwitterServiceClient {
   constructor(
@@ -63,20 +73,26 @@ export class TwitterServiceClient {
     client: TwitterApi | TwitterApiReadOnly;
     credentials?: TwitterUserCredentials;
   }> {
-    let client = new TwitterApi(credentials.accessToken);
+    const client = new TwitterApi(credentials.accessToken);
 
-    /** Check for refresh token ten minutes before expected expiration */
+    if (DEBUG) logger.debug('getClientWithCredentials', { credentials });
+
+    /** Check for refresh token anytime after ten minutes before expected expiration */
     if (this.time.now() >= credentials.expiresAtMs - 1000 * 60 * 10) {
       const _client = this.getGenericClient();
       try {
+        if (DEBUG)
+          logger.debug(
+            'getClientWithCredentials - refreshOAuth2Token()',
+            credentials.refreshToken
+          );
+
         const {
           client: newClient,
           accessToken,
           refreshToken,
           expiresIn,
         } = await _client.refreshOAuth2Token(credentials.refreshToken);
-
-        client = newClient;
 
         if (!refreshToken) {
           throw new Error(`Refresh token cannot be undefined`);
@@ -89,8 +105,14 @@ export class TwitterServiceClient {
           expiresAtMs: this.time.now() + expiresIn * 1000,
         };
 
+        if (DEBUG)
+          logger.debug(
+            'getClientWithCredentials - newCredentials',
+            newCredentials
+          );
+
         return {
-          client: type === 'read' ? client.readOnly : client,
+          client: type === 'read' ? newClient.readOnly : newClient,
           credentials: newCredentials,
         };
       } catch (e: any) {
@@ -121,6 +143,12 @@ export class TwitterServiceClient {
 
     /** update user credentials */
     if (newCredentials) {
+      if (DEBUG)
+        logger.debug(
+          'getUserClientAndUpdateDetails - newCredentials',
+          newCredentials
+        );
+
       let newDetails: TwitterUserDetails;
 
       newDetails = {
@@ -135,7 +163,10 @@ export class TwitterServiceClient {
         newDetails['write'] = newCredentials;
       }
 
-      this.usersRepo.setPlatformDetails(
+      if (DEBUG)
+        logger.debug('getUserClientAndUpdateDetails - newDetails', newDetails);
+
+      await this.usersRepo.setPlatformDetails(
         userId,
         PLATFORM.Twitter,
         newDetails,
@@ -200,20 +231,20 @@ export class TwitterServiceClient {
    */
   protected async getClient(
     manager: TransactionManager,
-    userDetails?: UserDetailsBase,
-    userId?: string,
+    userDetails: UserDetailsBase,
+    userId: string,
     type?: 'write'
   ): Promise<TwitterApi>;
   protected async getClient(
     manager: TransactionManager,
-    userDetails?: UserDetailsBase,
-    userId?: string,
+    userDetails: UserDetailsBase,
+    userId: string,
     type?: 'read'
   ): Promise<TwitterApiReadOnly>;
   protected async getClient(
     manager: TransactionManager,
-    userDetails?: UserDetailsBase,
-    userId?: string,
+    userDetails: UserDetailsBase,
+    userId: string,
     type: 'read' | 'write' = 'read'
   ): Promise<TwitterApi | TwitterApiReadOnly> {
     if (!userDetails) {
@@ -221,15 +252,6 @@ export class TwitterServiceClient {
         throw new Error('Cannot provide a write client without user details');
       }
       return this.getGenericClient().readOnly;
-    }
-
-    /** if the read or write credentials are undefined, read them from the user_id (slow) */
-    if (userDetails[type] === undefined) {
-      return this.getUserClient(userDetails.user_id, type as any, manager); // TODO: review unexpected TS error
-    }
-
-    if (!userId) {
-      throw new Error('userId must be defined');
     }
 
     /** otherwise use those credentials directly (fast) */
@@ -241,5 +263,81 @@ export class TwitterServiceClient {
     );
 
     return client;
+  }
+
+  public async getSignupContext(
+    userId?: string,
+    params?: TwitterGetContextParams
+  ) {
+    const client = this.getGenericClient();
+
+    if (!params) {
+      throw new Error('params must be defined');
+    }
+
+    const scope: TOAuth2Scope[] = [
+      'tweet.read',
+      'users.read',
+      'offline.access',
+    ];
+
+    if (params.type === 'write') {
+      scope.push('tweet.write');
+    }
+
+    const authDetails = client.generateOAuth2AuthLink(params.callback_url, {
+      scope,
+    });
+
+    return { ...authDetails, ...params };
+  }
+
+  async handleSignupData(data: TwitterSignupData): Promise<TwitterUserDetails> {
+    if (DEBUG) logger.debug('handleSignupData', data);
+    const client = this.getGenericClient();
+
+    const result = await client.loginWithOAuth2({
+      code: data.code,
+      codeVerifier: data.codeVerifier,
+      redirectUri: data.callback_url,
+    });
+
+    const profileParams: Partial<UsersV2Params> = {
+      'user.fields': ['profile_image_url', 'name', 'username'],
+    };
+    const { data: user } = await result.client.v2.me(profileParams);
+    if (DEBUG) logger.debug('handleSignupData', user);
+
+    if (!result.refreshToken) {
+      throw new Error('Unexpected undefined refresh token');
+    }
+
+    if (!result.expiresIn) {
+      throw new Error('Unexpected undefined refresh token');
+    }
+
+    const credentials: TwitterUserCredentials = {
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+      expiresIn: result.expiresIn,
+      expiresAtMs: this.time.now() + result.expiresIn * 1000,
+    };
+
+    const twitter: TwitterUserDetails = {
+      user_id: user.id,
+      signupDate: 0,
+      profile: user as TwitterUserProfile,
+    };
+
+    /** always store the credential as read credentials */
+    twitter.read = credentials;
+    /** the same credentials apply for reading and writing */
+    if (data.type === 'write') {
+      twitter['write'] = credentials;
+    }
+
+    if (DEBUG) logger.debug('handleSignupData', twitter);
+
+    return twitter;
   }
 }

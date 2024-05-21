@@ -26,12 +26,17 @@ export interface TwitterUserCredentials {
   expiresAtMs: number;
 }
 
+export type TwitterUserProfile = Pick<
+  UserV2,
+  'profile_image_url' | 'name' | 'username' | 'id'
+>;
+
 /** For Twitter we need to store the oAuth token and secret as part of the signup process
  * and the access Token and Secret as the credentials need to post in the name of the user
  */
 export interface TwitterUserDetails
   extends UserDetailsBase<
-    UserV2,
+    TwitterUserProfile,
     TwitterUserCredentials,
     TwitterUserCredentials
   > {}

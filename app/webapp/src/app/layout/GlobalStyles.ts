@@ -2,14 +2,24 @@ import { createGlobalStyle } from 'styled-components';
 
 export const GlobalStyles = createGlobalStyle`
   * {
+    font-family: "Libre Franklin", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: <weight>;
+    font-style: normal;
     box-sizing: border-box;
-    font-family: 'DM Sans', sans-serif;
-    font-family: 'M PLUS Rounded 1c', sans-serif;
     scrollbar-color: transparent;
+  }
+
+  p {
+    margin: 0;
   }
 
   body {
     margin: 0;
+  }
+
+  b {
+    font-weight: 600;
   }
 
   ::-webkit-scrollbar {

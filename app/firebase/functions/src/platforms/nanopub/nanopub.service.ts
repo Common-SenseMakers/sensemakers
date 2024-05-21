@@ -14,7 +14,7 @@ import {
   FetchedResult,
   PlatformPost,
   PlatformPostDraft,
-  PlatformPostDraftApprova,
+  PlatformPostDraftApproval,
   PlatformPostPosted,
   PlatformPostPublish,
 } from '../../@shared/types/types.platform.posts';
@@ -100,6 +100,7 @@ export class NanopubService
         rsaPublickey: signupData.rsaPublickey,
         ethAddress: signupData.ethAddress,
         introNanopub: signupData.introNanopub,
+        ethToRsaSignature: signupData.ethToRsaSignature,
       },
     };
   }
@@ -125,7 +126,7 @@ export class NanopubService
     return {
       post: nanopubDraft.rdf(),
       user_id: account.user_id,
-      postApproval: PlatformPostDraftApprova.PENDING,
+      postApproval: PlatformPostDraftApproval.PENDING,
     };
   }
 

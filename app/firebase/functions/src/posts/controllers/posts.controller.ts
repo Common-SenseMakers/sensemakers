@@ -1,22 +1,29 @@
 import { RequestHandler } from 'express';
 
+import { UserProfileQuery } from '../../@shared/types/types';
 import {
   AppPostFull,
-  UserPostsQueryParams,
+  PostUpdatePayload,
+  ProfilePostsQuery,
+  UserPostsQuery,
 } from '../../@shared/types/types.posts';
 import { IS_EMULATOR } from '../../config/config.runtime';
 import { envRuntime } from '../../config/typedenv.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
+import { canReadPost } from '../posts.access.control';
 import { enqueueParsePost } from '../posts.task';
 import {
   approvePostSchema,
   createDraftPostSchema,
   getUserPostsQuerySchema,
+  getUserProfilePostsSchema,
+  getUserProfileSchema,
   postIdValidation,
+  updatePostSchema,
 } from './posts.schema';
 
-const DEBUG = true;
+const DEBUG = false;
 
 /**
  * get user posts from the DB (does not fetch for more)
@@ -28,7 +35,7 @@ export const getUserPostsController: RequestHandler = async (
   try {
     const queryParams = (await getUserPostsQuerySchema.validate(
       request.body
-    )) as UserPostsQueryParams;
+    )) as UserPostsQuery;
 
     logger.debug(`${request.path} - query parameters`, { queryParams });
     const userId = getAuthenticatedUser(request, true);
@@ -38,9 +45,67 @@ export const getUserPostsController: RequestHandler = async (
 
     if (DEBUG) logger.debug(`${request.path}: posts`, { posts, userId });
     response.status(200).send({ success: true, data: posts });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('error', error);
-    response.status(500).send({ success: false, error });
+    response.status(500).send({ success: false, error: error.message });
+  }
+};
+
+/**
+ * PUBLIC get user profile from a platform and username
+ * */
+export const getUserProfileController: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    const payload = (await getUserProfileSchema.validate(
+      request.body
+    )) as UserProfileQuery;
+
+    logger.debug(`${request.path} - payload`, { payload });
+    const { users } = getServices(request);
+    const profile = await users.getUserProfileFromPlatformUsername(
+      payload.platformId,
+      payload.username
+    );
+
+    if (DEBUG) logger.debug(`${request.path}: users`, { profile });
+
+    response.status(200).send({ success: true, data: profile });
+  } catch (error: any) {
+    logger.error('error', error);
+    response.status(500).send({ success: false, error: error.message });
+  }
+};
+
+/**
+ * PUBLIC get user posts from the DB (does not fetch for more)
+ * */
+export const getUserProfilePostsController: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    const queryParams = (await getUserProfilePostsSchema.validate(
+      request.body
+    )) as ProfilePostsQuery;
+
+    logger.debug(`${request.path} - query parameters`, { queryParams });
+    const { postsManager } = getServices(request);
+
+    const posts = await postsManager.getUserProfile(
+      queryParams.platformId,
+      queryParams.username,
+      queryParams.fetchParams,
+      queryParams.labelsUris
+    );
+    if (DEBUG) logger.debug(`${request.path}: posts`, { posts });
+
+    response.status(200).send({ success: true, data: posts });
+  } catch (error: any) {
+    logger.error('error', error);
+    response.status(500).send({ success: false, error: error.message });
   }
 };
 
@@ -49,7 +114,7 @@ export const getUserPostsController: RequestHandler = async (
  * */
 export const getPostController: RequestHandler = async (request, response) => {
   try {
-    const userId = getAuthenticatedUser(request, true);
+    const userId = getAuthenticatedUser(request);
     const { postsManager } = getServices(request);
 
     const payload = (await postIdValidation.validate(request.body)) as {
@@ -57,7 +122,10 @@ export const getPostController: RequestHandler = async (request, response) => {
     };
 
     const post = await postsManager.getPost(payload.postId, true);
-    if (post.authorId !== userId) {
+
+    const canRead = canReadPost(post, userId);
+
+    if (!canRead) {
       if (DEBUG)
         logger.debug(`${request.path}: getPost not authorize`, {
           userId,
@@ -75,9 +143,9 @@ export const getPostController: RequestHandler = async (request, response) => {
         });
       response.status(200).send({ success: true, data: post });
     }
-  } catch (error) {
+  } catch (error: any) {
     logger.error('error', error);
-    response.status(500).send({ success: false, error });
+    response.status(500).send({ success: false, error: error.message });
   }
 };
 
@@ -101,9 +169,9 @@ export const approvePostController: RequestHandler = async (
       });
 
     response.status(200).send({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('error', error);
-    response.status(500).send({ success: false, error });
+    response.status(500).send({ success: false, error: error.message });
   }
 };
 
@@ -132,9 +200,9 @@ export const parsePostController: RequestHandler = async (
       });
 
     response.status(200).send({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('error', error);
-    response.status(500).send({ success: false, error });
+    response.status(500).send({ success: false, error: error.message });
   }
 };
 
@@ -149,14 +217,56 @@ export const createDraftPostController: RequestHandler = async (
       postId: string;
     };
 
+    if (DEBUG)
+      logger.debug(`${request.path}: createDraftPostController`, {
+        payload,
+      });
+
     db.run(async (manager) => {
-      return postsManager.processing.createPostDrafts(payload.postId, manager);
+      return postsManager.processing.createOrUpdatePostDrafts(
+        payload.postId,
+        manager
+      );
     });
 
-    if (DEBUG)
-      logger.debug(`${request.path}: approvePost`, {
-        post: payload,
-      });
+    response.status(200).send({ success: true });
+  } catch (error: any) {
+    logger.error('error', error);
+    response.status(500).send({ success: false, error: error.message });
+  }
+};
+
+export const updatePostController: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    const userId = getAuthenticatedUser(request, true);
+    const { db, postsManager } = getServices(request);
+
+    const payload = (await updatePostSchema.validate(
+      request.body
+    )) as PostUpdatePayload;
+
+    db.run(async (manager) => {
+      const post = await postsManager.processing.posts.get(
+        payload.postId,
+        manager,
+        true
+      );
+
+      if (post.authorId !== userId) {
+        throw new Error(`Post can only be edited by the author`);
+      }
+
+      return postsManager.updatePost(
+        payload.postId,
+        payload.postUpdate,
+        manager
+      );
+    });
+
+    if (DEBUG) logger.debug(`${request.path}: updatePost`, payload);
 
     response.status(200).send({ success: true });
   } catch (error) {

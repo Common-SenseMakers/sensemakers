@@ -14,12 +14,17 @@ export const LoadingDiv = (props: BoxExtendedProps) => {
   }
 
   return (
-    <Box {...props} style={style}>
+    <Box {...props} style={{ width: '100%', ...style }}>
       <div className="loading-square"></div>
     </Box>
   );
 };
 
-export const Loading = (props: { color?: string }) => {
-  return <Spinner color={props.color}></Spinner>;
+export const Loading = (props: { color?: string; size?: string }) => {
+  return (
+    <Spinner
+      height={props.size}
+      width={props.size}
+      color={props.color}></Spinner>
+  );
 };

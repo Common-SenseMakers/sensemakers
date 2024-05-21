@@ -9,9 +9,8 @@
     "emulate-debug": "yarn emulate --inspect-functions",
     "emulate-test": "yarn emulate-debug --only firestore",
     "log": "npx firebase-logging --project=common-dev-dea4e --freq=1500 --n=10 --func ",
-    "deploy-functions": "firebase deploy --project staging --only functions",
-    "deploy-firestore": "firebase deploy --project staging --only firestore",
-    "deploy": "firebase deploy --project staging",
+    "deploy-staging": "firebase deploy --project staging",
+    "deploy-prod": "firebase deploy --project prod",
     "prepare:hooks": "husky install"
   },
   "author": "",

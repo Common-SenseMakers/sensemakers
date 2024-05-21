@@ -33,7 +33,7 @@ let state: TwitterTestState = {
 
 export type TwitterMockConfig = 'real' | 'mock-publish' | 'mock-signup';
 
-export const TWITTER_USER_ID_MOCKS = '1753077743816777728';
+export const TWITTER_USER_ID_MOCKS = '1773032135814717440';
 
 const getSampleTweet = (
   id: string,
@@ -182,10 +182,9 @@ export const getTwitterMock = (
       );
 
       when(Mocked.handleSignupData(anything())).thenCall(
-        (data: { user_id: string }): TwitterUserDetails => {
+        (data: TwitterUserDetails): TwitterUserDetails => {
           return {
-            user_id: data.user_id,
-            signupDate: 0,
+            ...data,
           };
         }
       );

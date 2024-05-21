@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Union
 from uuid import UUID
 from tqdm.auto import tqdm
 from langchain_core.callbacks import BaseCallbackHandler
@@ -17,7 +17,7 @@ class BatchCallback(BaseCallbackHandler):
         response: Any,
         *,
         run_id: UUID,
-        parent_run_id: UUID | None = None,
+        parent_run_id: Union[UUID, None] = None,
         **kwargs: Any
     ) -> Any:
         self.count += 1

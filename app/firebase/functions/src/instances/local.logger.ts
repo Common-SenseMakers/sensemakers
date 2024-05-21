@@ -1,3 +1,5 @@
+import * as util from 'util';
+
 export enum LogLevel {
   debug = 'debug',
   info = 'info',
@@ -89,7 +91,10 @@ export class LocalLogger {
     }
 
     if (showCtx) {
-      console[method](`[${level.tag}]: ${msg}`, obj || '');
+      console[method](
+        `[${level.tag}]: ${msg}`,
+        util.inspect(obj, { depth: 5, colors: true }) || ''
+      );
     } else {
       console[method](`[${level.tag}]: ${msg}`);
     }

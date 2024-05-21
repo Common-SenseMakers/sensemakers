@@ -25,6 +25,7 @@ export enum AppPostReviewStatus {
   PENDING = 'pending',
   APPROVED = 'approved',
   IGNORED = 'ignored',
+  DRAFT = 'draft',
 }
 export enum AppPostRepublishedStatus {
   PENDING = 'pending',
@@ -87,14 +88,26 @@ export type PostUpdate = Partial<
   >
 >;
 
-export enum PostsQueryStatusParam {
+export interface PostUpdatePayload {
+  postId: string;
+  postUpdate: PostUpdate;
+}
+
+export enum PostsQueryStatus {
   PUBLISHED = 'published',
   IGNORED = 'ignored',
   PENDING = 'pending',
   ALL = 'all',
 }
 
-export interface UserPostsQueryParams {
-  status: PostsQueryStatusParam;
+export interface UserPostsQuery {
+  status: PostsQueryStatus;
+  fetchParams: FetchParams;
+}
+
+export interface ProfilePostsQuery {
+  platformId: PLATFORM;
+  username: string;
+  labelsUris?: string[];
   fetchParams: FetchParams;
 }

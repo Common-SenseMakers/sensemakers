@@ -3,6 +3,7 @@ import { Firestore, getFirestore } from 'firebase-admin/firestore';
 
 import { CollectionNames } from '../@shared/utils/collectionNames';
 import { IS_EMULATOR } from '../config/config.runtime';
+import { logger } from '../instances/logger';
 // import { SERVICE_ACCOUNT_ID } from '../config/config.runtime';
 import {
   HandleWithTxManager,
@@ -17,6 +18,8 @@ export const app = IS_EMULATOR
     })
   : initializeApp();
 
+const DEBUG = false;
+
 export class DBInstance {
   public firestore: Firestore;
 
@@ -26,16 +29,21 @@ export class DBInstance {
     posts: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
     platformPosts: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
     updates: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
+    profiles: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
+    triples: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
   };
 
   constructor() {
     this.firestore = getFirestore();
+
     this.collections = {
       signup: this.firestore.collection(CollectionNames.Signup),
       users: this.firestore.collection(CollectionNames.Users),
       posts: this.firestore.collection(CollectionNames.Posts),
       platformPosts: this.firestore.collection(CollectionNames.PlatformPosts),
       updates: this.firestore.collection(CollectionNames.Updates),
+      profiles: this.firestore.collection(CollectionNames.Profiles),
+      triples: this.firestore.collection(CollectionNames.Triples),
     };
   }
 
@@ -48,9 +56,14 @@ export class DBInstance {
     switch (config.mode) {
       case ManagerModes.TRANSACTION:
         return this.firestore.runTransaction(async (transaction) => {
+          if (DEBUG) logger.debug('Transaction started');
           const manager = new TransactionManager(transaction);
+          
           const result = await func(manager, payload);
+          if (DEBUG) logger.debug('Transaction function executed');
+          
           await manager.applyWrites();
+          if (DEBUG) logger.debug('Transaction writes applied');
           return result;
         });
 

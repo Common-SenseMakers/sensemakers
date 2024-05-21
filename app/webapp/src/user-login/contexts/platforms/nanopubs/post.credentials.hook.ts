@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { useAppFetch } from '../../../../api/app.fetch';
-import { DEBUG } from '../../../../app/config';
 import { HexStr, PLATFORM } from '../../../../shared/types/types';
 import {
   NanopubUserDetails,
@@ -16,6 +15,8 @@ import { getAccount } from '../../../user.helper';
 import { useAccountContext } from '../../AccountContext';
 import { useAppSigner } from '../../signer/SignerContext';
 
+const DEBUG = false;
+
 /**
  * from a set of connected keys, checks if the current user
  * has that nanopub account refisted and registers it if not
@@ -28,7 +29,7 @@ export const usePostCredentials = (rsaKeys?: RSAKeys) => {
   const appFetch = useAppFetch();
 
   /**
-   * macro-effect that asks for signature and post the nanopub details if the
+   * effect that asks for signature and post the nanopub details if the
    * connected wallet has not yet signed-up
    */
   useEffect(() => {
@@ -63,7 +64,7 @@ export const usePostCredentials = (rsaKeys?: RSAKeys) => {
             refreshConnectedUser();
           });
         });
-      } else if (!ethSignature && signMessage && rsaKeys) {
+      } else if (!details && !ethSignature && signMessage && rsaKeys) {
         if (DEBUG)
           console.log('generating ETH signature of RSA account', { address });
         signMessage(getEthToRSAMessage(rsaKeys.publicKey)).then((sig) => {
