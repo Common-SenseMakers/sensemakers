@@ -11,7 +11,23 @@ export const AppHome = (props: {}) => {
     if (!isConnected && hasTriedFetchingUser) {
       return <AppWelcome></AppWelcome>;
     } else if (!hasTriedFetchingUser) {
-      return <LoadingDiv></LoadingDiv>;
+      return (
+        <>
+          <LoadingDiv
+            margin={{ bottom: '4px' }}
+            width="100%"
+            height="120px"></LoadingDiv>
+          {(() => {
+            return [1, 2, 4, 5, 6].map((ix) => (
+              <LoadingDiv
+                key={ix}
+                height="108px"
+                width="100%"
+                margin={{ bottom: '2px' }}></LoadingDiv>
+            ));
+          })()}
+        </>
+      );
     } else {
       return <UserHome></UserHome>;
     }
