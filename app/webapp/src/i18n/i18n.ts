@@ -38,7 +38,7 @@ const translationENG: Record<I18Keys, string> = {
     'SenseNet loads your X (Twitter) feed and analyzes your posts using AI to deduct keywords and relations, which can be used to better interpret the meaning of your content.',
   [I18Keys.signInX]: 'Sign in with X',
   [I18Keys.errorConnectTwitter]: 'Error connecting Twitter',
-  [I18Keys.yourPublications]: 'Your publications 2',
+  [I18Keys.yourPublications]: 'Your publications',
   [I18Keys.TweetX]: 'X · Tweet',
   [I18Keys.ThreadX]: 'X · Thread',
   [I18Keys.addKeyword]: 'add keyword',
