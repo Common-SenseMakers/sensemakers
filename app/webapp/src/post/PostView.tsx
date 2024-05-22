@@ -20,13 +20,10 @@ import { PostText } from './PostText';
 
 /** extract the postId from the route and pass it to a PostContext */
 export const PostView = (props: {
-  prevPostId?: string;
-  nextPostId?: string;
   profile?: TwitterUserProfile;
   isProfile: boolean;
 }) => {
   const { constants } = useThemeContext();
-  const { prevPostId, nextPostId } = props;
   const {
     post,
     nanopubDraft,
@@ -133,8 +130,6 @@ export const PostView = (props: {
     !postStatuses.published &&
     !props.isProfile;
 
-  console.log({ editable, props });
-
   const content = (() => {
     if (!post) {
       return (
@@ -202,9 +197,7 @@ export const PostView = (props: {
         <Box fill>
           <PostNav
             isProfile={props.isProfile}
-            profile={props.profile}
-            prevPostId={prevPostId}
-            nextPostId={nextPostId}></PostNav>
+            profile={props.profile}></PostNav>
           {content}
         </Box>
       }></ViewportPage>
