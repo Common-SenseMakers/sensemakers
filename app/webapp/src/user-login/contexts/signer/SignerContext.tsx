@@ -50,7 +50,7 @@ export const SignerContext = (props: PropsWithChildren) => {
     magic.user.isLoggedIn().then((res) => {
       if (res && !magicSigner) {
         console.log('Autoconnecting Magic');
-        connectMagic();
+        connectMagic(false);
       } else {
         setIsChecking(false);
       }
@@ -74,11 +74,11 @@ export const SignerContext = (props: PropsWithChildren) => {
 
   const { disconnect: disconnectInjected } = useDisconnect();
 
-  const connectMagic = () => {
+  const connectMagic = (openUI: boolean) => {
     console.log('connecting magic signer', { signer });
     setIsChecking(false);
     setIsConnecting(true);
-    createMagicSigner().then((signer) => {
+    createMagicSigner(openUI).then((signer) => {
       console.log('connected magic signer', { signer });
       setIsConnecting(false);
       setMagicSigner(signer);
@@ -95,7 +95,7 @@ export const SignerContext = (props: PropsWithChildren) => {
     if (hasInjected) {
       connectInjected();
     } else {
-      connectMagic();
+      connectMagic(true);
     }
   };
 
