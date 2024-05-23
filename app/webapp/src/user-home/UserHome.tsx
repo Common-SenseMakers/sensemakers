@@ -1,6 +1,7 @@
 import { Anchor, Box, BoxExtendedProps, DropButton, Menu, Text } from 'grommet';
 import { Refresh } from 'grommet-icons';
-import { CSSProperties, useEffect } from 'react';
+import debounce from 'lodash.debounce';
+import { CSSProperties, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -41,6 +42,31 @@ export const UserHome = () => {
     errorFetchingNewer,
     isLoading,
   } = useUserPosts();
+
+  const hasReachedBottom = useRef(false);
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleScroll = debounce(() => {
+    if (
+      window.innerHeight + window.scrollY >=
+      document.body.offsetHeight - 50
+    ) {
+      if (!isFetchingOlder && !hasReachedBottom.current) {
+        console.log('fetching older');
+        hasReachedBottom.current = true;
+        fetchOlder();
+      }
+    }
+  }, 300);
+
+  /** reset hasReachedBottom after older posts have been fetched */
+  useEffect(() => {
+    if (!isFetchingOlder) hasReachedBottom.current = false;
+  }, [posts?.length]);
 
   useEffect(() => {
     const error = errorFetchingOlder || errorFetchingNewer;
