@@ -5,6 +5,7 @@
   "scripts": {
     "preinstall": "npm install -g @craco/craco",
     "start": "export REACT_APP_VERSION=$(git rev-parse HEAD) && HOST=127.0.0.1 PORT=3000 craco start --config craco.config.js",
+    "start-mobile": "export REACT_APP_VERSION=$(git rev-parse HEAD) && HOST=127.0.0.1 PORT=3000 craco start --config craco.config.mobile.js",
     "start-remote": "export REACT_APP_VERSION=$(git rev-parse HEAD) && FB_PROJECT=staging craco start --config craco.config.prod.js",
     "build": "export REACT_APP_VERSION=$(git rev-parse HEAD) && craco build --config craco.config.prod.js",
     "build-local": "FB_PROJECT=staging yarn build",
@@ -28,6 +29,7 @@
     "@types/styled-components": "^5.1.25",
     "@web3modal/wagmi": "^4.1.11",
     "axios": "^1.6.7",
+    "dotenv": "^16.4.5",
     "firebase": "^10.11.0",
     "grommet": "^2.34.2",
     "grommet-icons": "^4.12.0",
