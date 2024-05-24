@@ -1,9 +1,7 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
 
-import { TwitterAvatar } from '../app/TwitterAvatar';
-import { TweetAnchor } from '../app/anchors/TwitterAnchor';
+import { TwitterAvatar } from '../app/icons/TwitterAvatar';
 import { useThemeContext } from '../ui-components/ThemedApp';
-import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useProfileContext } from './ProfileContext';
 
 export const ProfileHeader = (props: BoxExtendedProps) => {

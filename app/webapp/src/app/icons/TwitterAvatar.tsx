@@ -1,6 +1,6 @@
 import { Box, Image } from 'grommet';
 
-import { TwitterUserProfile } from '../shared/types/types.twitter';
+import { TwitterUserProfile } from '../../shared/types/types.twitter';
 
 export const TwitterAvatar = (props: {
   profile?: TwitterUserProfile;
