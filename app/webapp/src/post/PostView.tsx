@@ -120,9 +120,13 @@ export const PostView = (props: {
               onClick={() => rightClicked()}
               label={rightLabel}
               style={{ width: '100%' }}></AppButton>
-            <AppButton plain onClick={() => connectWithWeb3()}>
-              or show wallets (advanced)
-            </AppButton>
+            {!canPublishNanopub ? (
+              <AppButton plain onClick={() => connectWithWeb3()}>
+                or show wallets (advanced)
+              </AppButton>
+            ) : (
+              <></>
+            )}
           </Box>
         </Box>
       );

@@ -15,9 +15,6 @@ const DEBUG = true;
  * logic focused on managing the nanopub keys.
  * */
 export const useNanopubKeys = (connectIntention: ConnectIntention) => {
-  const [signatureAsked, setSignatureAsked] = useState<boolean>(false);
-  const [connectAsked, setConnectAsked] = useState<boolean>();
-
   const {
     signMessage,
     connect: connectWallet,
@@ -34,7 +31,7 @@ export const useNanopubKeys = (connectIntention: ConnectIntention) => {
    * check for the rsa keys on localStorage, if they exist
    * prepares the Nanopub profile
    */
-  const readKeys = () => {
+  const readKeys = useCallback(() => {
     const keysStr = localStorage.getItem(KEYS_KEY);
     if (DEBUG) console.log('readKeys', { keysStr });
 
@@ -44,11 +41,11 @@ export const useNanopubKeys = (connectIntention: ConnectIntention) => {
     } else {
       setRsaKeys(undefined);
     }
-  };
+  }, []);
 
   /** create rsa keys from a secret (camed from a secret signature with the eth wallet) */
   const deriveKeys = useCallback(
-    async (address: string, sig: string) => {
+    (address: string, sig: string) => {
       if (DEBUG) console.log('deriveKeys start', { sig });
       const keys = getRSAKeys(sig);
       if (DEBUG) console.log('deriveKeys done', { keys });
@@ -56,43 +53,34 @@ export const useNanopubKeys = (connectIntention: ConnectIntention) => {
 
       readKeys();
     },
-    [readKeys]
+    [readKeys, getRSAKeys]
   );
 
   useEffect(() => {
     if (errorConnecting) {
-      setConnectAsked(false);
       return;
     }
+  }, [errorConnecting]);
 
-    const initiateConnection = async () => {
-      if (!connectAsked) {
-        if (connectIntention !== undefined) {
-          setConnectAsked(true);
+  useEffect(() => {
+    if (connectIntention !== undefined) {
+      if (connectIntention === 'available') {
+        connectWallet();
+      } else {
+        if (connectIntention === 'web3') {
+          connectWeb3();
         }
-        if (connectIntention === 'available') {
-          connectWallet();
-        } else {
-          if (connectIntention === 'web3') {
-            connectWeb3();
-          }
-        }
-      } else if (connectAsked && signMessage && address && !signatureAsked) {
-        setSignatureAsked(true);
-        const sig = await signMessage(DETERMINISTIC_MESSAGE);
-        deriveKeys(address, sig);
       }
-    };
+    }
+  }, [connectIntention]);
 
-    initiateConnection();
-  }, [
-    connectIntention,
-    signMessage,
-    address,
-    connectAsked,
-    signatureAsked,
-    errorConnecting,
-  ]);
+  useEffect(() => {
+    if (connectIntention && signMessage && address) {
+      signMessage(DETERMINISTIC_MESSAGE).then((sig) => {
+        deriveKeys(address, sig);
+      });
+    }
+  }, [signMessage && address]);
 
   const removeKeys = () => {
     localStorage.removeItem(KEYS_KEY);
