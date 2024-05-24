@@ -1,12 +1,12 @@
 import { Anchor, Box, BoxExtendedProps, DropButton, Menu, Text } from 'grommet';
 import { Refresh } from 'grommet-icons';
-import debounce from 'lodash.debounce';
-import { CSSProperties, useEffect, useRef } from 'react';
+import { CSSProperties, useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { useServiceWorker } from '../app/ServiceWorkerContext';
 import { useToastContext } from '../app/ToastsContext';
+import { ViewportPageScrollContext } from '../app/layout/Viewport';
 import { I18Keys } from '../i18n/i18n';
 import { PostCard } from '../post/PostCard';
 import { PostsQueryStatus, UserPostsQuery } from '../shared/types/types.posts';
@@ -41,32 +41,16 @@ export const UserHome = () => {
     isFetchingNewer,
     errorFetchingNewer,
     isLoading,
+    moreToFetch,
   } = useUserPosts();
 
-  const hasReachedBottom = useRef(false);
+  const { isAtBottom } = useContext(ViewportPageScrollContext);
 
   useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const handleScroll = debounce(() => {
-    if (
-      window.innerHeight + window.scrollY >=
-      document.body.offsetHeight - 50
-    ) {
-      if (!isFetchingOlder && !hasReachedBottom.current) {
-        console.log('fetching older');
-        hasReachedBottom.current = true;
-        fetchOlder();
-      }
+    if (isAtBottom && !isLoading && moreToFetch) {
+      fetchOlder();
     }
-  }, 300);
-
-  /** reset hasReachedBottom after older posts have been fetched */
-  useEffect(() => {
-    if (!isFetchingOlder) hasReachedBottom.current = false;
-  }, [posts?.length]);
+  }, [isAtBottom]);
 
   useEffect(() => {
     const error = errorFetchingOlder || errorFetchingNewer;
@@ -114,18 +98,11 @@ export const UserHome = () => {
             </Box>
           ))}
         </Box>
-        <Box pad="large">
-          {posts.length > 0 &&
-          !errorFetchingOlder &&
-          filterStatus === PostsQueryStatus.ALL ? (
-            <AppButton
-              disabled={isFetchingOlder}
-              label={!isFetchingOlder ? 'fetch older' : 'loading...'}
-              onClick={() => fetchOlder()}></AppButton>
-          ) : (
-            <> </>
-          )}
-        </Box>
+        {isFetchingOlder && (
+          <Box>
+            <LoadingDiv height="120px" width="100%"></LoadingDiv>
+          </Box>
+        )}
       </>
     );
   })();
