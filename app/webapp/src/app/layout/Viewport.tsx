@@ -11,7 +11,7 @@ import {
   ResponsiveContext,
   Text,
 } from 'grommet';
-import { ReactNode } from 'react';
+import { ReactNode, createContext, useEffect, useRef, useState } from 'react';
 
 import { AppButton, AppHeading } from '../../ui-components';
 import { useResponsive } from '../../ui-components/ResponsiveApp';
@@ -98,6 +98,10 @@ export const ViewportHeadingLarge = (props: { label: ReactNode }) => {
   );
 };
 
+export const ViewportPageScrollContext = createContext({
+  isAtBottom: false,
+});
+
 /**
  * fill the vertical space with a scrollable content area, and leave the bottom
  * fixed to the navigation buttons
@@ -109,32 +113,67 @@ export const ViewportPage = (props: {
 }) => {
   const { mobile } = useResponsive();
   const pad = mobile ? 'none' : 'large';
+
+  const [isAtBottom, setIsAtBottom] = useState(false);
+  const viewportPageRef = useRef<HTMLDivElement | null>(null);
+  const bottomMarkerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (viewportPageRef.current) {
+      const options = {
+        root: viewportPageRef.current,
+        rootMargin: '0px',
+        threshold: 1.0,
+      };
+
+      const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach((entry) => {
+          setIsAtBottom(entry.isIntersecting);
+        });
+      }, options);
+
+      if (bottomMarkerRef.current) {
+        observer.observe(bottomMarkerRef.current);
+      }
+
+      return () => {
+        if (bottomMarkerRef.current) {
+          observer.unobserve(bottomMarkerRef.current);
+        }
+      };
+    }
+  }, []);
+
   return (
-    <Box
-      id="viewport-page"
-      pad={pad}
-      style={{
-        height: '100%',
-        width: '100%',
-        maxWidth: `${MAX_WIDTH_APP}px`,
-        margin: '0 auto',
-        overflow: 'hidden',
-      }}>
-      <Box id="content" style={{ flexGrow: 1, overflowY: 'auto' }}>
-        <Box
-          style={{ flexGrow: 1, flexShrink: 0 }}
-          justify={props.justify || 'center'}>
-          {props.content}
+    <ViewportPageScrollContext.Provider value={{ isAtBottom }}>
+      <Box
+        id="viewport-page"
+        ref={viewportPageRef}
+        pad={pad}
+        style={{
+          height: '100%',
+          width: '100%',
+          maxWidth: `${MAX_WIDTH_APP}px`,
+          margin: '0 auto',
+          overflow: 'hidden',
+        }}>
+        <Box id="content" style={{ flexGrow: 1, overflowY: 'auto' }}>
+          <Box
+            style={{ flexGrow: 1, flexShrink: 0 }}
+            justify={props.justify || 'center'}>
+            {props.content}
+          </Box>
+          <div ref={bottomMarkerRef}></div>
         </Box>
+        {props.nav ? (
+          <Box id="nav" style={{ height: '60px', flexShrink: 0 }}>
+            {props.nav}
+          </Box>
+        ) : (
+          <></>
+        )}
       </Box>
-      {props.nav ? (
-        <Box id="nav" style={{ height: '60px', flexShrink: 0 }}>
-          {props.nav}
-        </Box>
-      ) : (
-        <></>
-      )}
-    </Box>
+    </ViewportPageScrollContext.Provider>
   );
 };
 
