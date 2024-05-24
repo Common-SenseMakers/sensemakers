@@ -1,4 +1,4 @@
-import { Box } from 'grommet';
+import { Anchor, Box } from 'grommet';
 import { Refresh } from 'grommet-icons';
 
 import { ClearIcon } from '../app/icons/ClearIcon';
@@ -59,7 +59,7 @@ export const PostView = (props: {
     });
   };
 
-  const { signNanopublication, connect } = useNanopubContext();
+  const { signNanopublication, connect, connectWithWeb3 } = useNanopubContext();
 
   const canPublishNanopub =
     connectedUser &&
@@ -105,19 +105,25 @@ export const PostView = (props: {
     if (!postStatuses.nanopubPublished && !postStatuses.ignored) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
-          <AppButton
-            disabled={isUpdating}
-            icon={<ClearIcon></ClearIcon>}
-            style={{ width: '50%' }}
-            onClick={() => ignore()}
-            label="Ignore"></AppButton>
-          <AppButton
-            primary
-            disabled={isUpdating}
-            icon={<SendIcon></SendIcon>}
-            style={{ width: '50%' }}
-            onClick={() => rightClicked()}
-            label={rightLabel}></AppButton>
+          <Box style={{ flexGrow: 1 }}>
+            <AppButton
+              disabled={isUpdating}
+              icon={<ClearIcon></ClearIcon>}
+              onClick={() => ignore()}
+              label="Ignore"></AppButton>
+          </Box>
+          <Box style={{ flexGrow: 1 }} align="end" gap="small">
+            <AppButton
+              primary
+              disabled={isUpdating}
+              icon={<SendIcon></SendIcon>}
+              onClick={() => rightClicked()}
+              label={rightLabel}
+              style={{ width: '100%' }}></AppButton>
+            <AppButton plain onClick={() => connectWithWeb3()}>
+              or show wallets (advanced)
+            </AppButton>
+          </Box>
         </Box>
       );
     }

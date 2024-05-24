@@ -19,6 +19,7 @@ export type NanopubContextType = {
   profile?: NpProfile;
   profileAddress?: HexStr;
   connect: () => void;
+  connectWithWeb3: () => void;
   disconnect: () => void;
   isConnecting: boolean;
   needAuthorize?: boolean;
@@ -29,10 +30,14 @@ const NanopubContextValue = createContext<NanopubContextType | undefined>(
   undefined
 );
 
+export type ConnectIntention = undefined | 'available' | 'web3';
+
 /** Manages the authentication process */
 export const NanopubContext = (props: PropsWithChildren) => {
-  const [connectIntention, setConnectIntention] = useState<boolean>(false);
-  const { rsaKeys, readKeys, removeKeys } = useNanopubKeys(connectIntention);
+  const [connectIntention, setConnectIntention] =
+    useState<ConnectIntention>(undefined);
+  const { rsaKeys, readKeys, removeKeys, errorConnecting } =
+    useNanopubKeys(connectIntention);
 
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [profile, setProfile] = useState<NpProfile>();
@@ -46,6 +51,13 @@ export const NanopubContext = (props: PropsWithChildren) => {
   useEffect(() => {
     readKeys();
   }, []);
+
+  useEffect(() => {
+    if (errorConnecting) {
+      setConnectIntention(undefined);
+      setIsConnecting(false);
+    }
+  }, [errorConnecting]);
 
   /** set profile */
   const buildProfile = async () => {
@@ -78,20 +90,24 @@ export const NanopubContext = (props: PropsWithChildren) => {
 
   useEffect(() => {
     if (profile) {
-      /** finally, when a profile is set, the connect intentio is fullfilled */
+      /** finally, when a profile is set, the connect intention is fullfilled */
       if (DEBUG) console.log('final setConnectionIntention false');
-      setConnectIntention(false);
+      setConnectIntention(undefined);
       return;
     }
   }, [profile]);
 
   const connect = () => {
-    setConnectIntention(true);
+    setConnectIntention('available');
+  };
+
+  const connectWithWeb3 = () => {
+    setConnectIntention('web3');
   };
 
   const reset = () => {
     setIsConnecting(false);
-    setConnectIntention(false);
+    setConnectIntention(undefined);
     setProfile(undefined);
   };
 
@@ -105,6 +121,7 @@ export const NanopubContext = (props: PropsWithChildren) => {
     <NanopubContextValue.Provider
       value={{
         connect,
+        connectWithWeb3,
         disconnect,
         profile,
         isConnecting,

@@ -3,20 +3,28 @@ import { useCallback, useEffect, useState } from 'react';
 import { RSAKeys } from '../../../../shared/types/types.nanopubs';
 import { getRSAKeys } from '../../../../shared/utils/rsa.keys';
 import { useAppSigner } from '../../signer/SignerContext';
+import { ConnectIntention } from './NanopubContext';
 import { usePostCredentials } from './post.credentials.hook';
 
 const KEYS_KEY = 'NP_PEM_KEYS';
 const DETERMINISTIC_MESSAGE = 'Prepare my Nanopub identity';
 
-const DEBUG = false;
+const DEBUG = true;
 
 /**
  * logic focused on managing the nanopub keys.
  * */
-export const useNanopubKeys = (connectIntention: boolean) => {
+export const useNanopubKeys = (connectIntention: ConnectIntention) => {
   const [signatureAsked, setSignatureAsked] = useState<boolean>(false);
   const [connectAsked, setConnectAsked] = useState<boolean>();
-  const { signMessage, connect: connectWallet, address } = useAppSigner();
+
+  const {
+    signMessage,
+    connect: connectWallet,
+    address,
+    connectWeb3,
+    errorConnecting,
+  } = useAppSigner();
   const [rsaKeys, setRsaKeys] = useState<RSAKeys>();
 
   /** isolated logic that handles posting the credentials to the backend ("signinup") */
@@ -51,43 +59,39 @@ export const useNanopubKeys = (connectIntention: boolean) => {
     [readKeys]
   );
 
-  /**
-   * react to connectIntention
-   * */
   useEffect(() => {
-    if (!connectIntention) {
+    if (errorConnecting) {
+      setConnectAsked(false);
       return;
     }
 
-    if (signatureAsked) {
-      return;
-    }
-
-    if (connectAsked && !signMessage) {
-      return;
-    }
-
-    if (signMessage && address) {
-      /** once there is a signer, sign */
-      if (DEBUG) console.log('getting signature');
-      setSignatureAsked(true);
-      signMessage(DETERMINISTIC_MESSAGE).then((sig) => {
+    const initiateConnection = async () => {
+      if (!connectAsked) {
+        if (connectIntention !== undefined) {
+          setConnectAsked(true);
+        }
+        if (connectIntention === 'available') {
+          connectWallet();
+        } else {
+          if (connectIntention === 'web3') {
+            connectWeb3();
+          }
+        }
+      } else if (connectAsked && signMessage && address && !signatureAsked) {
+        setSignatureAsked(true);
+        const sig = await signMessage(DETERMINISTIC_MESSAGE);
         deriveKeys(address, sig);
-      });
-    } else {
-      /** if there is not signer, connect wallet */
-      if (DEBUG) console.log('connecting wallet');
-      setConnectAsked(true);
-      connectWallet();
-    }
+      }
+    };
+
+    initiateConnection();
   }, [
     connectIntention,
     signMessage,
-    connectWallet,
-    deriveKeys,
-    signatureAsked,
-    connectAsked,
     address,
+    connectAsked,
+    signatureAsked,
+    errorConnecting,
   ]);
 
   const removeKeys = () => {
@@ -95,5 +99,5 @@ export const useNanopubKeys = (connectIntention: boolean) => {
     readKeys();
   };
 
-  return { rsaKeys, readKeys, removeKeys };
+  return { rsaKeys, readKeys, removeKeys, errorConnecting };
 };
