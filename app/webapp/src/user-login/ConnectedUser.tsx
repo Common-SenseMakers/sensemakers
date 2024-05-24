@@ -1,21 +1,15 @@
 import { Anchor, Box, DropButton, Text } from 'grommet';
-import { UserExpert } from 'grommet-icons';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { TwitterAvatar } from '../app/TwitterAvatar';
-import { TwitterProfileAnchor } from '../app/anchors/TwitterAnchor';
-import { AbsoluteRoutes, RouteNames } from '../route.names';
-import { PLATFORM, UserDetailsBase } from '../shared/types/types';
-import { TwitterUserProfile } from '../shared/types/types.twitter';
+import { TwitterAvatar } from '../app/icons/TwitterAvatar';
+import { RouteNames } from '../route.names';
+import { PLATFORM } from '../shared/types/types';
 import { AppButton } from '../ui-components';
-import { AppAddress } from '../ui-components/AppAddress';
-import { useThemeContext } from '../ui-components/ThemedApp';
 import { cap } from '../utils/general';
 import { useAccountContext } from './contexts/AccountContext';
 import { useDisconnectContext } from './contexts/ConnectedUserContext';
-import { getAccount } from './user.helper';
 
 export const ConnectedUser = (props: {}) => {
   const { t } = useTranslation();
