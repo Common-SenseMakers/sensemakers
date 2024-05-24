@@ -103,6 +103,23 @@ export const UserHome = () => {
             <LoadingDiv height="120px" width="100%"></LoadingDiv>
           </Box>
         )}
+        {!moreToFetch && (
+          <Box
+            margin={{ vertical: 'medium', horizontal: 'medium' }}
+            align="center"
+            justify="center">
+            <Text
+              style={{
+                fontSize: '14px',
+                fontStyle: 'normal',
+                fontWeight: '500',
+                lineHeight: '16px',
+                color: 'grey',
+              }}>
+              {t(I18Keys.noMorePosts)}
+            </Text>
+          </Box>
+        )}
       </>
     );
   })();

@@ -21,6 +21,7 @@ export enum I18Keys {
   updateNow = 's020',
   installPrompt = 's021',
   installNow = 's022',
+  noMorePosts = 's023',
 }
 
 const translationENG: Record<I18Keys, string> = {
@@ -47,6 +48,7 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.updateNow]: 'update now',
   [I18Keys.installPrompt]: 'Please install this app, ',
   [I18Keys.installNow]: 'install',
+  [I18Keys.noMorePosts]: 'No more posts to show',
 };
 
 i18n.use(initReactI18next).init({
