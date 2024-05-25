@@ -90,7 +90,11 @@ export const PostNav = (props: {
       <NavButton
         icon={props.isProfile ? <LeftIcon></LeftIcon> : <HomeIcon></HomeIcon>}
         label={props.isProfile ? 'Back' : 'Home'}
-        onClick={() => (profile ? navigate('..') : navigate('/'))}></NavButton>
+        onClick={() =>
+          profile
+            ? navigate('..', { state: { postId: post?.id } })
+            : navigate('/')
+        }></NavButton>
       {!props.isProfile ? (
         <Box direction="row" gap="8px">
           <NavButton

@@ -2,7 +2,7 @@ import { Anchor, Box, BoxExtendedProps, DropButton, Menu, Text } from 'grommet';
 import { Refresh } from 'grommet-icons';
 import { CSSProperties, useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useServiceWorker } from '../app/ServiceWorkerContext';
 import { useToastContext } from '../app/ToastsContext';
@@ -45,7 +45,7 @@ export const UserHome = () => {
   } = useUserPosts();
 
   const { isAtBottom } = useContext(ViewportPageScrollContext);
-
+  const location = useLocation();
   useEffect(() => {
     if (isAtBottom && !isLoading && moreToFetch) {
       fetchOlder();
@@ -63,6 +63,23 @@ export const UserHome = () => {
       });
     }
   }, [errorFetchingOlder, errorFetchingNewer]);
+
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    if (location.state?.postId) {
+      const postCard = document.querySelector(`#post-${location.state.postId}`);
+      const viewportPage = document.querySelector('#content');
+      if (postCard && viewportPage) {
+        timeout = setTimeout(() => {
+          postCard.scrollIntoView({
+            behavior: 'instant' as ScrollBehavior,
+            block: 'center',
+          });
+        }, 0);
+      }
+    }
+    return () => clearTimeout(timeout);
+  }, []);
 
   const navigate = useNavigate();
 
@@ -93,7 +110,7 @@ export const UserHome = () => {
       <>
         <Box gap="medium">
           {posts.map((post, ix) => (
-            <Box key={ix}>
+            <Box key={ix} id={`post-${post.id}`}>
               <PostCard post={post} shade={ix % 2 === 1}></PostCard>
             </Box>
           ))}
