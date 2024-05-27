@@ -1,9 +1,10 @@
-import { Box, BoxExtendedProps, DropButton, Menu, Text } from 'grommet';
+import { Anchor, Box, BoxExtendedProps, DropButton, Menu, Text } from 'grommet';
 import { Refresh } from 'grommet-icons';
 import { CSSProperties, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
+import { useServiceWorker } from '../app/ServiceWorkerContext';
 import { useToastContext } from '../app/ToastsContext';
 import { I18Keys } from '../i18n/i18n';
 import { PostCard } from '../post/PostCard';
@@ -26,6 +27,8 @@ export const UserHome = () => {
   const { constants } = useThemeContext();
   const { t } = useTranslation();
   const { show } = useToastContext();
+
+  const { hasUpdate, needsInstall, updateApp, install } = useServiceWorker();
 
   const {
     filterStatus,
@@ -169,10 +172,40 @@ export const UserHome = () => {
       onClick={() => fetchNewer()}></AppButton>
   );
 
+  const updater = (() => {
+    if (hasUpdate) {
+      return (
+        <Box direction="row" align="center" gap="4px">
+          <Text style={{ fontSize: '14px' }}>{t(I18Keys.updateAvailable)}</Text>
+          <Anchor onClick={() => updateApp()}>
+            <Text style={{ fontSize: '14px' }}>{t(I18Keys.updateNow)}</Text>
+          </Anchor>
+        </Box>
+      );
+    }
+    return <></>;
+  })();
+
+  const installer = (() => {
+    if (needsInstall) {
+      return (
+        <Box direction="row" align="center" gap="4px">
+          <Text style={{ fontSize: '14px' }}>{t(I18Keys.installPrompt)}</Text>
+          <Anchor onClick={() => install()}>
+            <Text style={{ fontSize: '14px' }}>{t(I18Keys.installNow)}</Text>
+          </Anchor>
+        </Box>
+      );
+    }
+    return <></>;
+  })();
+
   const header = (
     <Box
       pad={{ top: '12px', bottom: '12px', horizontal: '12px' }}
       style={{ backgroundColor: constants.colors.shade, flexShrink: 0 }}>
+      {installer}
+      {updater}
       <Box
         direction="row"
         margin={{ bottom: '12px' }}

@@ -13,7 +13,7 @@ import {
 } from 'grommet';
 import { ReactNode } from 'react';
 
-import { AppButton, AppHeading } from '../../ui-components';
+import { AppHeading } from '../../ui-components';
 import { useResponsive } from '../../ui-components/ResponsiveApp';
 import { useThemeContext } from '../../ui-components/ThemedApp';
 import { TwitterIcon } from '../common/Icons';

@@ -17,11 +17,15 @@ export enum I18Keys {
   ThreadX = 's016',
   addKeyword = 's017',
   profile = 's018',
+  updateAvailable = 's019',
+  updateNow = 's020',
+  installPrompt = 's021',
+  installNow = 's022',
 }
 
 const translationENG: Record<I18Keys, string> = {
   [I18Keys.connectTwitterBtn]: 'Connect',
-  [I18Keys.introTitle]: 'Your ideas matter',
+  [I18Keys.introTitle]: 'Your ideas matter again',
   [I18Keys.introSubtitle]:
     'Transform your social media activity into meaningful scientific contributions',
   [I18Keys.introParagraph1]:
@@ -39,6 +43,10 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.ThreadX]: 'X · Thread',
   [I18Keys.addKeyword]: 'add keyword',
   [I18Keys.profile]: 'Profile',
+  [I18Keys.updateAvailable]: 'An update is available, ',
+  [I18Keys.updateNow]: 'update now',
+  [I18Keys.installPrompt]: 'Please install this app, ',
+  [I18Keys.installNow]: 'install',
 };
 
 i18n.use(initReactI18next).init({

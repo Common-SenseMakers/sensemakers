@@ -30,6 +30,10 @@ export const textToHtml = (text: string) => {
         url = url.slice(0, -1);
       }
 
+      if (url.endsWith('</p>')) {
+        url = url.slice(0, -4);
+      }
+
       const urlObj = new URL(url);
       urlClean = `${urlObj.protocol}//${urlObj.hostname}${urlObj.pathname}`;
       if (urlObj.search) {
