@@ -24,6 +24,12 @@ export const RefCard = (props: {
   const descriptionTruncated =
     props.description && truncate(props.description, 90);
 
+  const tweetId = getTweetId(props.url);
+
+  if (tweetId) {
+    // return <blockquote className="twitter-tweet">{props.url}</blockquote>;
+    return <AppTweet id={tweetId}></AppTweet>;
+  }
   const content = (() => {
     if (!titleTruncated && !descriptionTruncated) {
       const urlTruncated = truncate(props.url, 50);
@@ -32,13 +38,6 @@ export const RefCard = (props: {
           {urlTruncated}
         </Anchor>
       );
-    }
-
-    const tweetId = getTweetId(props.url);
-
-    if (tweetId) {
-      // return <blockquote className="twitter-tweet">{props.url}</blockquote>;
-      return <AppTweet id={tweetId}></AppTweet>;
     }
 
     return (
