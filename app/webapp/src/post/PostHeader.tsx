@@ -17,7 +17,7 @@ export const PostHeader = (
 
   return (
     <Box direction="row" {...props}>
-      <TwitterAvatar size={40} profile={props.profile}></TwitterAvatar>
+      <TwitterAvatar size={48} profile={props.profile}></TwitterAvatar>
       <Box width="100%" margin={{ left: 'medium' }}>
         <Box direction="row" justify="between">
           <Text

@@ -38,4 +38,11 @@ export const GlobalStyles = createGlobalStyle`
   h1, h2, h3, h4, h5, h6 {
     margin: 0px 0px;
   }
+
+  .react-tweet-theme {
+    --tweet-header-line-height: 1.2rem;
+    --tweet-header-font-size: 0.8rem;
+    --tweet-body-font-size: 0.8rem;
+  }
+  
 `;
