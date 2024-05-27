@@ -43,7 +43,7 @@ export const GlobalStyles = createGlobalStyle`
     --tweet-header-line-height: 1.2rem;
     --tweet-header-font-size: 0.8rem;
     --tweet-body-font-size: 0.8rem;
-    --tweet-body-line-height: 0.8rem;
+    --tweet-body-line-height: 0.9rem;
   }
   
 `;
