@@ -1,8 +1,10 @@
 import { Nanopub } from '@nanopub/sign';
 import { verifyMessage } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
 
 import {
   FetchParams,
+  HexStr,
   PLATFORM,
   UserDetailsBase,
 } from '../../@shared/types/types';
@@ -26,6 +28,7 @@ import {
 } from '../../@shared/types/types.posts';
 import { getEthToRSAMessage } from '../../@shared/utils/nanopub.sign.util';
 import { NANOPUBS_PUBLISH_SERVERS_STR } from '../../config/config.runtime';
+import { envRuntime } from '../../config/typedenv.runtime';
 import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
@@ -60,7 +63,14 @@ export class NanopubService
       throw new Error('Missing params');
     }
 
-    const introNanopub = await createIntroNanopublication(params);
+    const account = privateKeyToAccount(
+      envRuntime.NP_PUBLISH_PRIVATE_KEY.value() as HexStr
+    );
+
+    const introNanopub = await createIntroNanopublication(
+      params,
+      account.address
+    );
     return { ...params, introNanopub: introNanopub.rdf() };
   }
 
