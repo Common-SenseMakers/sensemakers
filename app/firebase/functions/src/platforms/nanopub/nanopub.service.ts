@@ -17,6 +17,7 @@ import {
   PlatformPostDraftApproval,
   PlatformPostPosted,
   PlatformPostPublish,
+  PlatformPostUpdate,
 } from '../../@shared/types/types.platform.posts';
 import {
   AppPostMirror,
@@ -173,6 +174,25 @@ export class NanopubService
     postPublish: PlatformPostPublish<any>,
     _manager: TransactionManager
   ): Promise<PlatformPostPosted<any>> {
+    const published = await this.publishInternal(postPublish.draft);
+
+    if (published) {
+      const platfformPostPosted: PlatformPostPosted = {
+        post_id: published.info().uri,
+        timestampMs: Date.now(),
+        user_id: postPublish.userDetails.user_id,
+        post: published.rdf(),
+      };
+      return platfformPostPosted;
+    }
+
+    throw new Error('Could not publish nanopub');
+  }
+
+  async update(
+    postPublish: PlatformPostUpdate<any>,
+    _manager: TransactionManager
+  ) {
     const published = await this.publishInternal(postPublish.draft);
 
     if (published) {

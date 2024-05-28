@@ -33,6 +33,9 @@ export const PostView = (props: {
     updatePost,
     isUpdating,
     approve,
+    editable: _editable,
+    enabledEdit,
+    setEnabledEdit,
   } = usePost();
 
   const { connectedUser } = useAccountContext();
@@ -138,14 +141,34 @@ export const PostView = (props: {
         </Box>
       );
     }
+
+    if (enabledEdit) {
+      return (
+        <Box direction="row" gap="small" margin={{ top: 'medium' }}>
+          <Box style={{ flexGrow: 1 }}>
+            <AppButton
+              disabled={isUpdating}
+              icon={<ClearIcon></ClearIcon>}
+              onClick={() => setEnabledEdit(false)}
+              label="Cancel"></AppButton>
+          </Box>
+          <Box style={{ flexGrow: 1 }} align="end" gap="small">
+            <AppButton
+              primary
+              disabled={isUpdating}
+              icon={<SendIcon></SendIcon>}
+              onClick={() => {}}
+              label="update"
+              style={{ width: '100%' }}></AppButton>
+          </Box>
+        </Box>
+      );
+    }
+
     return <></>;
   })();
 
-  const editable =
-    connectedUser &&
-    connectedUser.userId === post?.authorId &&
-    !postStatuses.published &&
-    !props.isProfile;
+  const editable = _editable && !props.isProfile;
 
   const content = (() => {
     if (!post) {

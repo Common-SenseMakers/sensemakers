@@ -1,15 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
 import { Anchor, Box, Text } from 'grommet';
-import { useMemo } from 'react';
 
 import { NanopubIcon } from '../app/icons/NanopubIcon';
-import { PLATFORM } from '../shared/types/types';
-import {
-  AppPostFull,
-  AppPostParsedStatus,
-  AppPostParsingStatus,
-  AppPostReviewStatus,
-} from '../shared/types/types.posts';
+import { AppPostFull } from '../shared/types/types.posts';
 import { usePostStatuses } from './usePostStatuses';
 
 export const NanopubStatus = (props: { post?: AppPostFull }) => {

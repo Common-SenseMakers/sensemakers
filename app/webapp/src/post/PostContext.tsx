@@ -25,7 +25,7 @@ import {
   PostsQueryStatus,
 } from '../shared/types/types.posts';
 import { TwitterThread } from '../shared/types/types.twitter';
-import { UserPostsContext, useUserPosts } from '../user-home/UserPostsContext';
+import { useUserPosts } from '../user-home/UserPostsContext';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { getAccount } from '../user-login/user.helper';
@@ -39,6 +39,9 @@ interface PostContextType {
   reparse: () => void;
   nanopubDraft: PlatformPostDraft | undefined;
   tweet?: PlatformPost<TwitterThread>;
+  editable: boolean; // can be true if not published
+  enabledEdit: boolean; // only true if editing after publishing
+  setEnabledEdit: (enabled: boolean) => void;
   updateSemantics: (newSemantics: string) => Promise<void>;
   postStatuses: AppPostStatus;
   updatePost: (update: PostUpdate) => Promise<void>;
@@ -62,6 +65,7 @@ export const PostContext: React.FC<{
   const [postEdited, setPostEdited] = React.useState<AppPostFull | undefined>(
     undefined
   );
+  const [enabledEdit, setEnabledEdit] = React.useState<boolean>(false);
 
   const [requesteDraft, setRequestedDraft] = React.useState(false);
 
@@ -292,6 +296,11 @@ export const PostContext: React.FC<{
     // setIsUpdating(false); should be set by the refetech flow
   };
 
+  const editable =
+    connectedUser &&
+    connectedUser.userId === post?.authorId &&
+    (!postStatuses.published || enabledEdit);
+
   return (
     <PostContextValue.Provider
       value={{
@@ -305,6 +314,9 @@ export const PostContext: React.FC<{
         updatePost,
         isUpdating,
         approve,
+        editable: editable !== undefined ? editable : false,
+        setEnabledEdit,
+        enabledEdit,
       }}>
       {children}
     </PostContextValue.Provider>
