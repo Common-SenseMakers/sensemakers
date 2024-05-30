@@ -81,6 +81,12 @@ export class LocalLogger {
         : args[1]
       : undefined;
 
+    const prefix = Array.isArray(args)
+      ? typeof args[0] !== 'string'
+        ? args[0]
+        : args[2]
+      : undefined;
+
     const showCtx = level.num >= ctxConfig.num;
 
     /** filters */
@@ -92,7 +98,7 @@ export class LocalLogger {
 
     if (showCtx) {
       console[method](
-        `[${level.tag}]: ${msg}`,
+        `[${level.tag}]: ${prefix} ${msg}`,
         util.inspect(obj, { depth: 5, colors: true }) || ''
       );
     } else {
