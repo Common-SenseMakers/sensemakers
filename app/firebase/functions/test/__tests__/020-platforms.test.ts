@@ -3,7 +3,6 @@ import { expect } from 'chai';
 import { AppUser, FetchParams, PLATFORM } from '../../src/@shared/types/types';
 import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
 import {
-  PlatformPostDraft,
   PlatformPostPublishOrigin,
   PlatformPostPublishStatus,
 } from '../../src/@shared/types/types.platform.posts';
@@ -29,7 +28,7 @@ import {
 } from './setup';
 import { getTestServices } from './test.services';
 
-describe('02-platforms', () => {
+describe.only('02-platforms', () => {
   let rsaKeys: RSAKeys | undefined;
   let user: AppUser | undefined;
 
@@ -97,11 +96,7 @@ describe('02-platforms', () => {
   });
 
   describe('nanopub', () => {
-    let nanopub: PlatformPostDraft | undefined;
-
-    it('creates a draft nanopub', async () => {
-      const nanopubService = services.platforms.get(PLATFORM.Nanopub);
-
+    it('creates a draft nanopub, sign and publish', async () => {
       if (!user) {
         throw new Error('appUser not created');
       }
@@ -154,19 +149,12 @@ describe('02-platforms', () => {
           ],
         };
 
-        nanopub = await nanopubService.convertFromGeneric({
+        const nanopubService = services.platforms.get(PLATFORM.Nanopub);
+
+        const nanopub = await nanopubService.convertFromGeneric({
           post,
           author: user,
         });
-      } catch (error) {
-        console.error('error: ', error);
-        throw error;
-      }
-    });
-
-    it('publish signed nanopub', async () => {
-      try {
-        const nanopubService = services.platforms.get(PLATFORM.Nanopub);
 
         if (!nanopub) {
           throw new Error('Post not created');

@@ -30,7 +30,7 @@ import { getTestServices } from './test.services';
 const DEBUG_PREFIX = `030-process`;
 const DEBUG = true;
 
-describe.only('030-process', () => {
+describe('030-process', () => {
   let rsaKeys = getRSAKeys('');
 
   const services = getTestServices({
