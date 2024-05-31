@@ -78,7 +78,11 @@ export class TwitterService
   ): Promise<TwitterThread[]> {
     try {
       const expectedAmount = params.expectedAmount;
-      const readOnlyClient = await this.getClient(manager, userDetails, 'read');
+      const readOnlyClient = await this.getUserClient(
+        userDetails.user_id,
+        'read',
+        manager
+      );
 
       const tweetFields: TTweetv2TweetField[] = [
         'created_at',
