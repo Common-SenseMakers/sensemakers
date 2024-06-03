@@ -8,12 +8,7 @@ import { GetClientResultInternal } from '../../src/platforms/twitter/twitter.ser
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
 import { createUsers } from '../utils/users.utils';
-import {
-  USE_REAL_NANOPUB,
-  USE_REAL_PARSER,
-  USE_REAL_TWITTER,
-  testUsers,
-} from './setup';
+import { USE_REAL_NANOPUB, USE_REAL_PARSER, testUsers } from './setup';
 import { getTestServices } from './test.services';
 
 describe.only('011-twitter refresh', () => {
@@ -21,7 +16,7 @@ describe.only('011-twitter refresh', () => {
 
   const services = getTestServices({
     time: 'mock',
-    twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
+    twitter: 'real',
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
   });
