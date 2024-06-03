@@ -314,4 +314,11 @@ export class TwitterService
   ): Promise<PlatformPostDraft<any>> {
     throw new Error('Method not implemented.');
   }
+
+  signDraft(
+    post: PlatformPostDraft<any>,
+    account: UserDetailsBase<any, any, any>
+  ): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
 }

@@ -1,4 +1,4 @@
-import { Nanopub } from '@nanopub/sign';
+import { Nanopub, NpProfile } from '@nanopub/sign';
 import { verifyMessage } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 
@@ -26,9 +26,15 @@ import {
   GenericPostData,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
-import { getEthToRSAMessage } from '../../@shared/utils/nanopub.sign.util';
-import { NANOPUBS_PUBLISH_SERVERS_STR } from '../../config/config.runtime';
-import { envRuntime } from '../../config/typedenv.runtime';
+import {
+  getEthToRSAMessage,
+  getProfile,
+} from '../../@shared/utils/nanopub.sign.util';
+import {
+  NANOPUBS_PUBLISH_SERVERS_STR,
+  NP_PUBLISH_RSA_PRIVATE_KEY,
+  NP_PUBLISH_RSA_PUBLIC_KEY,
+} from '../../config/config.runtime';
 import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
@@ -64,7 +70,7 @@ export class NanopubService
     }
 
     const account = privateKeyToAccount(
-      envRuntime.NP_PUBLISH_PRIVATE_KEY.value() as HexStr
+      NP_PUBLISH_RSA_PUBLIC_KEY.value() as HexStr
     );
 
     const introNanopub = await createIntroNanopublication(
@@ -135,10 +141,31 @@ export class NanopubService
     );
 
     return {
-      post: nanopubDraft.rdf(),
+      unsignedPost: nanopubDraft.rdf(),
       user_id: account.user_id,
       postApproval: PlatformPostDraftApproval.PENDING,
     };
+  }
+
+  protected getProfile(): NpProfile {
+    const privateKey = NP_PUBLISH_RSA_PRIVATE_KEY.value() as HexStr;
+    const profile = getProfile({ privateKey, publicKey: '' });
+    return profile;
+  }
+
+  async signDraft(
+    post: PlatformPostDraft<any>,
+    account: UserDetailsBase<any, any, any>
+  ): Promise<string> {
+    try {
+      const unsigned = new Nanopub(post.unsignedPost);
+      const profile = this.getProfile();
+      const signed = unsigned.sign(profile);
+      return signed.rdf();
+    } catch (error) {
+      logger.error('Error signing nanopub', error);
+      throw error;
+    }
   }
 
   async publishInternal(signed: string) {

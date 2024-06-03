@@ -4,6 +4,7 @@ import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import {
   PlatformPostDraftApproval,
   PlatformPostPosted,
+  PlatformPostSignerType,
 } from '../../src/@shared/types/types.platform.posts';
 import {
   AppPostReviewStatus,
@@ -30,7 +31,7 @@ import { getTestServices } from './test.services';
 const DEBUG_PREFIX = `030-process`;
 const DEBUG = true;
 
-describe('030-process', () => {
+describe.only('030-process', () => {
   let rsaKeys = getRSAKeys('');
 
   const services = getTestServices({
@@ -196,7 +197,7 @@ describe('030-process', () => {
       });
     });
 
-    it('approves/publishes pending post', async () => {
+    it('signs and approves/publishes pending post', async () => {
       if (!user) {
         throw new Error('user not created');
       }
@@ -212,6 +213,66 @@ describe('030-process', () => {
       }
 
       await Promise.all(
+        pendingPosts.slice(0, 2).map(async (pendingPost) => {
+          const nanopub = pendingPost.mirrors.find(
+            (m) => m.platformId === PLATFORM.Nanopub
+          );
+
+          if (!nanopub?.draft) {
+            throw new Error('draft not created');
+          }
+
+          const draft = nanopub.draft.unsignedPost;
+
+          if (!rsaKeys) {
+            throw new Error('rsaKeys undefined');
+          }
+
+          /** sign */
+          const signed = await signNanopublication(draft, rsaKeys, '');
+          nanopub.draft.signedPost = signed.rdf();
+          nanopub.draft.postApproval = PlatformPostDraftApproval.APPROVED;
+          nanopub.draft.signerType = PlatformPostSignerType.USER;
+
+          if (!user) {
+            throw new Error('user not created');
+          }
+
+          /** send updated post (content and semantics did not changed) */
+          await services.postsManager.publishOrUpdatePost(
+            pendingPost,
+            user.userId
+          );
+
+          const approved = await services.postsManager.getPost(
+            pendingPost.id,
+            true
+          );
+
+          expect(approved).to.not.be.undefined;
+          expect(approved.reviewedStatus).to.equal(
+            AppPostReviewStatus.APPROVED
+          );
+        })
+      );
+    });
+
+    it('approves/publishes an unsigned pending post', async () => {
+      if (!user) {
+        throw new Error('user not created');
+      }
+
+      /** get pending posts of user */
+      const pendingPosts = await services.postsManager.getOfUser(user.userId, {
+        status: PostsQueryStatus.PENDING,
+        fetchParams: { expectedAmount: 10 },
+      });
+
+      if (!USE_REAL_TWITTER) {
+        expect(pendingPosts).to.have.length(5);
+      }
+
+      await Promise.all(
         pendingPosts.map(async (pendingPost) => {
           const nanopub = pendingPost.mirrors.find(
             (m) => m.platformId === PLATFORM.Nanopub
@@ -221,31 +282,27 @@ describe('030-process', () => {
             throw new Error('draft not created');
           }
 
-          const draft = nanopub.draft.post;
-
-          if (!rsaKeys) {
-            throw new Error('rsaKeys undefined');
-          }
-
           /** sign */
-          const signed = await signNanopublication(draft, rsaKeys, '');
-          nanopub.draft.post = signed.rdf();
           nanopub.draft.postApproval = PlatformPostDraftApproval.APPROVED;
+          nanopub.draft.signerType = PlatformPostSignerType.DELEGATED;
 
           if (!user) {
             throw new Error('user not created');
           }
 
           /** send updated post (content and semantics did not changed) */
-          await services.postsManager.approvePost(pendingPost, user.userId);
+          await services.postsManager.publishOrUpdatePost(
+            pendingPost,
+            user.userId
+          );
 
-          const approved = await services.postsManager.getPost(
+          const published = await services.postsManager.getPost(
             pendingPost.id,
             true
           );
 
-          expect(approved).to.not.be.undefined;
-          expect(approved.reviewedStatus).to.equal(
+          expect(published).to.not.be.undefined;
+          expect(published.reviewedStatus).to.equal(
             AppPostReviewStatus.APPROVED
           );
         })

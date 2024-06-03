@@ -8,7 +8,8 @@ const mandatory: Array<keyof typeof envRuntime> = [
   'TWITTER_CLIENT_ID',
   'TWITTER_CLIENT_SECRET',
   'PROJECT_ID',
-  'NP_PUBLISH_PRIVATE_KEY',
+  'NP_PUBLISH_RSA_PRIVATE_KEY',
+  'NP_PUBLISH_RSA_PUBLIC_KEY',
 ];
 
 mandatory.forEach((varName) => {
@@ -50,4 +51,5 @@ export const NANOPUBS_PUBLISH_SERVERS_STR = envRuntime.NANOPUBS_PUBLISH_SERVERS;
 export const POSTS_JOB_SCHEDULE = envRuntime.POSTS_JOB_SCHEDULE;
 export const FETCH_RATE_LIMIT_MS = envRuntime.FETCH_RATE_LIMIT_MS;
 
-export const NP_PUBLISH_PRIVATE_KEY = envRuntime.NP_PUBLISH_PRIVATE_KEY;
+export const NP_PUBLISH_RSA_PRIVATE_KEY = envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY;
+export const NP_PUBLISH_RSA_PUBLIC_KEY = envRuntime.NP_PUBLISH_RSA_PUBLIC_KEY;

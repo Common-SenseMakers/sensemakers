@@ -34,12 +34,17 @@ export interface PlatformService<
   SignupContext = any,
   SignupData = any,
   UserDetails extends UserDetailsBase = UserDetailsBase,
+  DraftType = any,
 > extends IdentityService<SignupContext, SignupData, UserDetails> {
   fetch(
     params: PlatformFetchParams,
     userDetails: UserDetailsBase,
     manager: TransactionManager
   ): Promise<FetchedResult>;
+  signDraft(
+    post: PlatformPostDraft,
+    account: UserDetailsBase
+  ): Promise<DraftType>;
   publish(
     post: PlatformPostPublish,
     manager: TransactionManager

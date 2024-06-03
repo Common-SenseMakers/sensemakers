@@ -50,6 +50,8 @@ export interface PlatformPostPosted<C = any> {
   post: C;
 }
 
+export type PlatformPostSigned<C = any> = C;
+
 export interface FetchedResult<C = any> {
   fetched: FetchedDetails;
   platformPosts: PlatformPostPosted<C>[];
@@ -62,10 +64,18 @@ export enum PlatformPostDraftApproval {
   PENDING = 'pending',
   APPROVED = 'approved',
 }
+
+export enum PlatformPostSignerType {
+  USER = 'user',
+  DELEGATED = 'delegated',
+}
+
 export interface PlatformPostDraft<D = any> {
   user_id: string; // The intended user_id of when publishing
   postApproval: PlatformPostDraftApproval;
-  post?: D;
+  signerType?: PlatformPostSignerType;
+  unsignedPost?: D;
+  signedPost?: D;
 }
 
 /**

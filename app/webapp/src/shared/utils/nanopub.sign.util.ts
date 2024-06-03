@@ -21,3 +21,8 @@ export const signNanopublication = async (
   const signed = nanopubObj.sign(profile);
   return signed;
 };
+
+export const getProfile = (rsaKeys: RSAKeys) => {
+  const profile = new NpProfile(cleanPrivateKey(rsaKeys), '', '', '');
+  return profile;
+};

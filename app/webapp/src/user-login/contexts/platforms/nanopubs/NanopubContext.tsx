@@ -12,8 +12,8 @@ import { useLoadingContext } from '../../../../app/LoadingContext';
 import { useToastContext } from '../../../../app/ToastsContext';
 import { HexStr } from '../../../../shared/types/types';
 import { signNanopublication as _signNanopublication } from '../../../../shared/utils/nanopub.sign.util';
+import { getProfile } from '../../../../shared/utils/nanopub.utils';
 import { useNanopubKeys } from './derive.keys.hook';
-import { getProfile } from './nanopub.utils';
 
 const DEBUG = false;
 

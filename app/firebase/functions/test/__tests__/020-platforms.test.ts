@@ -2,23 +2,13 @@ import { expect } from 'chai';
 
 import { AppUser, FetchParams, PLATFORM } from '../../src/@shared/types/types';
 import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
-import {
-  PlatformPostPublishOrigin,
-  PlatformPostPublishStatus,
-} from '../../src/@shared/types/types.platform.posts';
-import {
-  AppPostFull,
-  AppPostParsedStatus,
-  AppPostParsingStatus,
-  AppPostRepublishedStatus,
-  AppPostReviewStatus,
-} from '../../src/@shared/types/types.posts';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { logger } from '../../src/instances/logger';
 import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
+import { getMockPost } from '../utils/posts.utils';
 import { createUsers } from '../utils/users.utils';
 import {
   USE_REAL_NANOPUB,
@@ -28,7 +18,7 @@ import {
 } from './setup';
 import { getTestServices } from './test.services';
 
-describe.only('02-platforms', () => {
+describe('02-platforms', () => {
   let rsaKeys: RSAKeys | undefined;
   let user: AppUser | undefined;
 
@@ -102,52 +92,7 @@ describe.only('02-platforms', () => {
       }
 
       try {
-        const post: AppPostFull = {
-          id: 'post-id',
-          createdAtMs: Date.now(),
-          authorId: user.userId,
-          content: 'test content',
-          semantics: '',
-          origin: PLATFORM.Twitter,
-          parsedStatus: AppPostParsedStatus.PROCESSED,
-          parsingStatus: AppPostParsingStatus.IDLE,
-          reviewedStatus: AppPostReviewStatus.PENDING,
-          republishedStatus: AppPostRepublishedStatus.PENDING,
-          mirrors: [
-            {
-              id: 'pp-id',
-              platformId: PLATFORM.Twitter,
-              publishOrigin: PlatformPostPublishOrigin.FETCHED,
-              publishStatus: PlatformPostPublishStatus.PUBLISHED,
-              posted: {
-                post_id: '123456',
-                timestampMs: Date.now(),
-                user_id: TWITTER_USER_ID_MOCKS,
-                post: {
-                  id: 'post-id',
-                  createdAtMs: Date.now(),
-                  authorId: user.userId,
-                  content: 'test content',
-                  semantics: `
-                    @prefix ns1: <http://purl.org/spar/cito/> .
-                    @prefix schema: <https://schema.org/> .
-                    
-                    <http://purl.org/nanopub/temp/mynanopub#assertion> 
-                      ns1:discusses <https://twitter.com/ori_goldberg/status/1781281656071946541> ;    
-                      ns1:includesQuotationFrom <https://twitter.com/ori_goldberg/status/1781281656071946541> ;    
-                      schema:keywords "ExternalSecurity",        "Geopolitics",        "Israel",        "Kissinger",        "PoliticalScience",        "Security" .
-                    `,
-
-                  origin: PLATFORM.Twitter,
-                  parsedStatus: AppPostParsedStatus.PROCESSED,
-                  parsingStatus: AppPostParsingStatus.IDLE,
-                  reviewedStatus: AppPostReviewStatus.PENDING,
-                  republishedStatus: AppPostRepublishedStatus.PENDING,
-                },
-              },
-            },
-          ],
-        };
+        const post = getMockPost({ authorId: user.userId, id: 'post-id-1' });
 
         const nanopubService = services.platforms.get(PLATFORM.Nanopub);
 
@@ -164,7 +109,11 @@ describe.only('02-platforms', () => {
           throw new Error('RSA keys not created');
         }
 
-        const signed = await signNanopublication(nanopub.post, rsaKeys, '');
+        const signed = await signNanopublication(
+          nanopub.unsignedPost,
+          rsaKeys,
+          ''
+        );
         expect(signed).to.not.be.undefined;
 
         const published = await services.db.run((manager) =>
