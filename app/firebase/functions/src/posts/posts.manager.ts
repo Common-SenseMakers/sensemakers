@@ -129,6 +129,8 @@ export class PostsManager {
       };
     })();
 
+    if (DEBUG) logger.debug(`Twitter Service - fetch ${platformId}`);
+
     const fetched = await this.platforms.fetch(
       platformId,
       platformParams,
@@ -138,7 +140,7 @@ export class PostsManager {
 
     if (DEBUG)
       logger.debug(
-        `fetchUser - platformPosts: ${fetched.platformPosts.length}`,
+        `fetchUser ${platformId} - platformPosts: ${fetched.platformPosts.length}`,
         {
           fetched,
         }

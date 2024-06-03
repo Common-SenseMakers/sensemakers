@@ -8,7 +8,12 @@ import { GetClientResultInternal } from '../../src/platforms/twitter/twitter.ser
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
 import { createUsers } from '../utils/users.utils';
-import { USE_REAL_NANOPUB, USE_REAL_PARSER, testUsers } from './setup';
+import {
+  USE_REAL_NANOPUB,
+  USE_REAL_PARSER,
+  USE_REAL_TWITTER,
+  testUsers,
+} from './setup';
 import { getTestServices } from './test.services';
 
 describe.only('011-twitter refresh', () => {
@@ -16,7 +21,7 @@ describe.only('011-twitter refresh', () => {
 
   const services = getTestServices({
     time: 'mock',
-    twitter: 'real',
+    twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
   });
@@ -119,8 +124,12 @@ describe.only('011-twitter refresh', () => {
         );
       });
 
+      logger.debug(`-- TEST -- account ${account.read?.refreshToken}`, {
+        account,
+      });
+
       /** set the mock time service time to that value */
-      (services.time as any).set(account.read?.expiredTimeMs);
+      (services.time as any).set(account.read?.expiresAtMs);
 
       // call getOfUsers (this should update the refresh token)
       void (await services.postsManager.getOfUser(user?.userId));
@@ -143,6 +152,13 @@ describe.only('011-twitter refresh', () => {
           true
         );
       });
+
+      logger.debug(
+        `-- TEST -- accountAfter ${accountAfter.read?.refreshToken}`,
+        {
+          accountAfter,
+        }
+      );
 
       expect(account.read?.refreshToken).to.not.equal(
         accountAfter.read?.refreshToken

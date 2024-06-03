@@ -132,6 +132,7 @@ export class TwitterServiceClient {
           credentials: newCredentials,
         };
       } catch (e: any) {
+        logger.error('getClientWithCredentials - refreshOAuth2Token()', e);
         throw new Error(handleTwitterError(e));
       }
     } else {

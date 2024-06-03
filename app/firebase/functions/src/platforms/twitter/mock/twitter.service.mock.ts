@@ -1,3 +1,4 @@
+import { TransactionManager } from 'src/db/transaction.manager';
 import { anything, instance, spy, when } from 'ts-mockito';
 import { TweetV2SingleResult } from 'twitter-api-v2';
 
@@ -33,6 +34,8 @@ let state: TwitterTestState = {
 
 export type TwitterMockConfig = 'real' | 'mock-publish' | 'mock-signup';
 
+const THREADS: string[][] = JSON.parse(process.env.TEST_THREADS as string);
+
 export const TWITTER_USER_ID_MOCKS = '1773032135814717440';
 
 const getSampleTweet = (
@@ -56,27 +59,7 @@ const getSampleTweet = (
 
 const now = Date.now();
 
-const threads = [
-  ['', ''],
-  [''],
-  ['', '', '', '', '', '', '', '', ''],
-  [''],
-  [''],
-  ['', '', ''],
-  [''],
-  [''],
-  ['', '', ''],
-  [''],
-  [''],
-  ['', ''],
-  [''],
-  [''],
-  ['', '', '', '', '', '', '', '', '', '', '', ''],
-  [''],
-  [''],
-  ['', '', ''],
-  [''],
-].map((thread, ixThread): TwitterThread => {
+const threads = THREADS.map((thread, ixThread): TwitterThread => {
   const tweets = thread.map((content, ixTweet) => {
     const idTweet = ixThread * 100 + ixTweet;
     const createdAt = now + ixThread * 100 + 10 * ixTweet;
@@ -100,8 +83,9 @@ state.threads.push(...threads);
 state.threads.reverse();
 
 /** make private methods public */
-type MockedType = Omit<TwitterService, 'fetchInternal'> & {
+type MockedType = Omit<TwitterService, 'fetchInternal' | 'getUserClient'> & {
   fetchInternal: TwitterService['fetchInternal'];
+  getUserClient: TwitterService['getUserClient'];
 };
 
 /**
@@ -117,9 +101,9 @@ export const getTwitterMock = (
   }
 
   if (type === 'mock-publish' || type === 'mock-signup') {
-    const Mocked = spy(twitterService) as unknown as MockedType;
+    const mocked = spy(twitterService) as unknown as MockedType;
 
-    when(Mocked.publish(anything(), anything())).thenCall(
+    when(mocked.publish(anything(), anything())).thenCall(
       (postPublish: PlatformPostPublish<TwitterDraft>) => {
         logger.warn(`called twitter publish mock`, postPublish);
 
@@ -150,10 +134,11 @@ export const getTwitterMock = (
       }
     );
 
-    when(Mocked.fetchInternal(anything(), anything(), anything())).thenCall(
+    when(mocked.fetchInternal(anything(), anything(), anything())).thenCall(
       async (
         params: PlatformFetchParams,
-        userDetails?: UserDetailsBase
+        userDetails: UserDetailsBase,
+        manager: TransactionManager
       ): Promise<TwitterThread[]> => {
         const threads = state.threads.filter((thread) => {
           if (params.since_id) {
@@ -175,13 +160,13 @@ export const getTwitterMock = (
     );
 
     if (type === 'mock-signup') {
-      when(Mocked.getSignupContext(anything(), anything())).thenCall(
+      when(mocked.getSignupContext(anything(), anything())).thenCall(
         (userId?: string, params?: TwitterGetContextParams) => {
           return {};
         }
       );
 
-      when(Mocked.handleSignupData(anything())).thenCall(
+      when(mocked.handleSignupData(anything())).thenCall(
         (data: TwitterUserDetails): TwitterUserDetails => {
           return {
             ...data,
@@ -190,7 +175,7 @@ export const getTwitterMock = (
       );
     }
 
-    return instance(Mocked) as unknown as TwitterService;
+    return instance(mocked) as unknown as TwitterService;
   }
 
   throw new Error('Unexpected');
