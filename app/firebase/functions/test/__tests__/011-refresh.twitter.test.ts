@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 
 import { AppUser, PLATFORM } from '../../src/@shared/types/types';
+import { TwitterUserDetails } from '../../src/@shared/types/types.twitter';
 import { logger } from '../../src/instances/logger';
 import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
@@ -50,17 +51,24 @@ describe.only('011-twitter refresh', () => {
         PLATFORM.Twitter
       ) as TwitterService;
 
-      await services.db.run(async (manager) => {
+      const account = await services.db.run(async (manager) => {
         if (!user) {
           throw new Error('unexpected');
         }
 
-        const account = UsersHelper.getAccount(user, PLATFORM.Twitter);
+        const account = UsersHelper.getAccount(
+          user,
+          PLATFORM.Twitter,
+          undefined,
+          true
+        );
 
-        if (!account) {
-          throw new Error('unexpected');
-        }
+        return account;
+      });
 
+      let expectedDetails: TwitterUserDetails | undefined = undefined;
+
+      await services.db.run(async (manager) => {
         (services.time as any).set(account?.read.expiresAtMs);
 
         const { client, oldDetails, newDetails } = (await (
@@ -71,7 +79,17 @@ describe.only('011-twitter refresh', () => {
           manager
         )) as GetClientResultInternal;
 
+        expect(client).to.not.be.undefined;
+
+        expectedDetails = newDetails;
+
         logger.debug(`oldDetails, newDetails`, { oldDetails, newDetails });
+      });
+
+      await services.db.run(async (manager) => {
+        if (!user) {
+          throw new Error('unexpected');
+        }
 
         const userRead = await services.users.repo.getUser(
           user.userId,
@@ -86,12 +104,10 @@ describe.only('011-twitter refresh', () => {
         );
 
         expect(accountRead?.read.refreshToken).to.equal(
-          newDetails?.read?.refreshToken
+          expectedDetails?.read?.refreshToken
         );
 
         logger.debug(`accountRead`, { accountRead });
-
-        expect(client).to.not.be.undefined;
       });
 
       expect(user).to.not.be.undefined;
