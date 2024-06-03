@@ -13,15 +13,16 @@ import {
   AppPostParsingStatus,
   AppPostRepublishedStatus,
   AppPostReviewStatus,
-  PostsQueryStatusParam,
+  PostsQueryStatus,
 } from '../../src/@shared/types/types.posts';
 import { logger } from '../../src/instances/logger';
 import { resetDB } from '../utils/db';
 import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
 import { getTestServices } from './test.services';
 
-describe.only('031-filter', () => {
+describe('031-filter', () => {
   const services = getTestServices({
+    time: 'real',
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
@@ -87,7 +88,7 @@ describe.only('031-filter', () => {
             reviewedStatus: AppPostReviewStatus.IGNORED,
             republishedStatus: AppPostRepublishedStatus.PENDING,
             originalParsed: {
-              filter_clasification: SciFilterClassfication.NOT_RESEARCH,
+              filter_classification: SciFilterClassfication.NOT_RESEARCH,
               semantics: 'semantics',
             },
             semantics: 'semantics',
@@ -111,7 +112,7 @@ describe.only('031-filter', () => {
             reviewedStatus: AppPostReviewStatus.PENDING,
             republishedStatus: AppPostRepublishedStatus.PENDING,
             originalParsed: {
-              filter_clasification: SciFilterClassfication.RESEARCH,
+              filter_classification: SciFilterClassfication.RESEARCH,
               semantics: 'semantics',
             },
             semantics: 'semantics',
@@ -138,28 +139,28 @@ describe.only('031-filter', () => {
     });
     it('gets all posts from a user', async () => {
       const posts = await services.postsManager.getOfUser('test-user-id', {
-        status: PostsQueryStatusParam.ALL,
+        status: PostsQueryStatus.ALL,
         fetchParams: { expectedAmount: 10 },
       });
       expect(posts).to.have.length(4);
     });
     it('gets all published posts from a user', async () => {
       const posts = await services.postsManager.getOfUser('test-user-id', {
-        status: PostsQueryStatusParam.PUBLISHED,
+        status: PostsQueryStatus.PUBLISHED,
         fetchParams: { expectedAmount: 10 },
       });
       expect(posts).to.have.length(1);
     });
     it('gets all for review posts from a user', async () => {
       const posts = await services.postsManager.getOfUser('test-user-id', {
-        status: PostsQueryStatusParam.PENDING,
+        status: PostsQueryStatus.PENDING,
         fetchParams: { expectedAmount: 10 },
       });
       expect(posts).to.have.length(1);
     });
     it('gets all ignored posts from a user', async () => {
       const posts = await services.postsManager.getOfUser('test-user-id', {
-        status: PostsQueryStatusParam.IGNORED,
+        status: PostsQueryStatus.IGNORED,
         fetchParams: { expectedAmount: 10 },
       });
       expect(posts).to.have.length(2);

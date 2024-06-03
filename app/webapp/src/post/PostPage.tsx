@@ -1,15 +1,23 @@
+import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useUserPosts } from '../user-home/UserPostsContext';
+import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { PostContext } from './PostContext';
 import { PostView } from './PostView';
 
 /** extract the postId from the route and pass it to a PostContext */
 export const PostPage = () => {
-  const { id } = useParams();
-  const { posts } = useUserPosts();
+  const { postId } = useParams();
+  const { posts, getPost } = useUserPosts();
+  const { twitterProfile } = useAccountContext();
 
-  const currPostIndex = posts?.findIndex((p) => p.id === id);
+  const postInit = useMemo(
+    () => (postId ? getPost(postId) : undefined),
+    [postId]
+  );
+
+  const currPostIndex = posts?.findIndex((p) => p.id === postId);
   const prevPostId =
     posts && currPostIndex != undefined && currPostIndex > 0
       ? posts[currPostIndex - 1].id
@@ -21,8 +29,12 @@ export const PostPage = () => {
       : undefined;
 
   return (
-    <PostContext postId={id}>
-      <PostView prevPostId={prevPostId} nextPostId={nextPostId}></PostView>
+    <PostContext postId={postId} postInit={postInit}>
+      <PostView
+        prevPostId={prevPostId}
+        nextPostId={nextPostId}
+        profile={twitterProfile}
+        isProfile={false}></PostView>
     </PostContext>
   );
 };

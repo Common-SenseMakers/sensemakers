@@ -7,7 +7,7 @@ import { useThemeContext } from '../../../ui-components/ThemedApp';
 import { RefCard } from '../common/RefCard';
 import { RefData } from './process.semantics';
 
-const DEBUG = true;
+const DEBUG = false;
 
 /** renders the labels for one ref */
 export const RefLabels = (props: {
@@ -16,6 +16,7 @@ export const RefLabels = (props: {
   support?: ParsedSupport;
   addLabel: (labelUri: string) => void;
   removeLabel: (labelUri: string) => void;
+  editable?: boolean;
 }) => {
   const labelsOntology = props.support?.ontology?.semantic_predicates;
   const refData = props.refData;
@@ -71,14 +72,11 @@ export const RefLabels = (props: {
   };
 
   return (
-    <Box
-      style={{
-        borderLeft: '4px solid',
-        borderColor: constants.colors.backgroundLightDarker,
-      }}
-      pad={{ left: 'medium', vertical: 'small' }}>
+    <Box>
       <Box direction="row" margin={{ bottom: 'small' }}>
         <AppLabelsEditor
+          editable={props.editable}
+          color="#337FBD"
           labels={labelsDisplayNames}
           options={optionDisplayNames}
           removeLabel={(label) => removeLabel(label)}
@@ -86,6 +84,7 @@ export const RefLabels = (props: {
       </Box>
       {refData.meta ? (
         <RefCard
+          url={props.refUrl}
           title={refData.meta?.title}
           description={refData.meta?.summary}
           image={refData.meta?.image}></RefCard>

@@ -1,33 +1,49 @@
-import init, { Nanopub } from '@nanopub/sign';
 import { useQuery } from '@tanstack/react-query';
-import React, { createContext, useContext, useEffect, useMemo } from 'react';
-import { TweetV2 } from 'twitter-api-v2';
+import { use } from 'i18next';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+} from 'react';
 
 import { useAppFetch } from '../api/app.fetch';
+import { useToastContext } from '../app/ToastsContext';
 import { subscribeToUpdates } from '../firestore/realtime.listener';
 import { AppUserRead, PLATFORM } from '../shared/types/types';
 import {
   PlatformPost,
   PlatformPostDraft,
+  PlatformPostDraftApproval,
 } from '../shared/types/types.platform.posts';
-import { AppPostFull } from '../shared/types/types.posts';
+import {
+  AppPostFull,
+  AppPostReviewStatus,
+  PostUpdate,
+  PostUpdatePayload,
+  PostsQueryStatus,
+} from '../shared/types/types.posts';
+import { TwitterThread } from '../shared/types/types.twitter';
+import { UserPostsContext, useUserPosts } from '../user-home/UserPostsContext';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
+import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { getAccount } from '../user-login/user.helper';
+import { AppPostStatus, usePostStatuses } from './usePostStatuses';
 
-const DEBUG = true;
-
-interface NanopubInfo {
-  uri: string;
-}
+const DEBUG = false;
 
 interface PostContextType {
   post: AppPostFull | undefined;
   author: AppUserRead;
   reparse: () => void;
-  isParsing: boolean;
   nanopubDraft: PlatformPostDraft | undefined;
-  nanopubPublished: NanopubInfo | undefined;
-  tweet?: PlatformPost<TweetV2>;
+  tweet?: PlatformPost<TwitterThread>;
+  updateSemantics: (newSemantics: string) => Promise<void>;
+  postStatuses: AppPostStatus;
+  updatePost: (update: PostUpdate) => Promise<void>;
+  isUpdating: boolean;
+  approve: () => Promise<void>;
 }
 
 const PostContextValue = createContext<PostContextType | undefined>(undefined);
@@ -41,11 +57,16 @@ export const PostContext: React.FC<{
     throw new Error(`Both postId and post were undefined`);
   }
 
-  if (postInit !== undefined && _postId !== undefined) {
-    throw new Error(`Both postId and post were defined. Define only one`);
-  }
-
+  const { show } = useToastContext();
   const { connectedUser } = useAccountContext();
+  const [postEdited, setPostEdited] = React.useState<AppPostFull | undefined>(
+    undefined
+  );
+
+  const [requesteDraft, setRequestedDraft] = React.useState(false);
+
+  const { filterStatus, removePost } = useUserPosts();
+  const [isUpdating, setIsUpdating] = React.useState(false);
 
   const appFetch = useAppFetch();
 
@@ -56,14 +77,14 @@ export const PostContext: React.FC<{
 
   /** if postInit not provided get post from the DB */
   const {
-    data: _post,
+    data: postFetched,
     refetch,
     isLoading,
   } = useQuery({
     queryKey: ['postId', postId, connectedUser],
     queryFn: () => {
       try {
-        if (postId && connectedUser) {
+        if (postId) {
           return appFetch<AppPostFull>('/api/posts/get', { postId });
         }
       } catch (e: any) {
@@ -73,7 +94,15 @@ export const PostContext: React.FC<{
     },
   });
 
-  const post = isLoading ? postInit : _post !== null ? _post : undefined;
+  /** the post is the combination of the postFetched and the edited */
+  const post = useMemo<AppPostFull | undefined>(() => {
+    if (isLoading) return postInit;
+    if (postFetched && postFetched !== null) {
+      setIsUpdating(false);
+      return { ...postFetched, ...postEdited };
+    }
+    return undefined;
+  }, [postFetched, postInit, postEdited]);
 
   /**
    * subscribe to real time updates of this post and trigger a refetch everytime
@@ -110,6 +139,12 @@ export const PostContext: React.FC<{
     }
   }, [post]);
 
+  useEffect(() => {
+    if (postFetched) {
+      setPostEdited(undefined);
+    }
+  }, [postFetched]);
+
   const [_isReparsing, setIsReparsing] = React.useState(false);
 
   const reparse = async () => {
@@ -124,29 +159,8 @@ export const PostContext: React.FC<{
     }
   };
 
-  const isParsing = _isReparsing || post?.parsingStatus === 'processing';
-
-  /** derive nanopub details from current post */
-  const { data: nanopubPublished } = useQuery({
-    queryKey: ['nanopub', post],
-    queryFn: async () => {
-      try {
-        await (init as any)();
-        const nanopub = post?.mirrors.find(
-          (m) => m.platformId === PLATFORM.Nanopub
-        );
-        if (!nanopub || !nanopub.posted) return null;
-
-        const nanopubObj = new Nanopub(nanopub.posted.post);
-        return nanopubObj.info();
-      } catch (e) {
-        console.error(e);
-      }
-    },
-  });
-
   const nanopubDraft = useMemo(() => {
-    const nanopub = post?.mirrors.find(
+    const nanopub = post?.mirrors?.find(
       (m) => m.platformId === PLATFORM.Nanopub
     );
     if (!nanopub) return undefined;
@@ -158,9 +172,12 @@ export const PostContext: React.FC<{
    * not exists */
   useEffect(() => {
     const nanopubAccount = getAccount(connectedUser, PLATFORM.Nanopub);
-    if (nanopubAccount && !nanopubDraft) {
+    if (nanopubAccount && !nanopubDraft && !requesteDraft) {
       /** if draft not available, create it */
-      appFetch('/api/posts/createDraft', { postId });
+      setRequestedDraft(true);
+      appFetch('/api/posts/createDraft', { postId }).then(() => {
+        setRequestedDraft(false);
+      });
     }
   }, [post, connectedUser]);
 
@@ -184,18 +201,110 @@ export const PostContext: React.FC<{
     ],
   };
 
-  const tweet = post?.mirrors.find((m) => m.platformId === PLATFORM.Twitter);
+  const tweet = post?.mirrors?.find((m) => m.platformId === PLATFORM.Twitter);
+
+  /** actuall call to update the post in the backend */
+  const _updatePost = async (update: PostUpdate) => {
+    if (!post) {
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      await appFetch<void, PostUpdatePayload>('/api/posts/update', {
+        postId: post.id,
+        postUpdate: update,
+      });
+      // setIsUpdating(false); let the refetch set the udpate flow to false
+    } catch (e: any) {
+      console.error(e);
+      show({ title: 'Error updating post', message: e.message });
+      setIsUpdating(false);
+    }
+  };
+
+  /** updatePost and optimistically update the post object */
+  const optimisticUpdate = useCallback(
+    async (update: PostUpdate) => {
+      if (!post) {
+        return;
+      }
+
+      setPostEdited({ ...post, ...update });
+      _updatePost(update);
+    },
+    [post]
+  );
+
+  const updateSemantics = (newSemantics: string) =>
+    optimisticUpdate({
+      reviewedStatus: AppPostReviewStatus.DRAFT,
+      semantics: newSemantics,
+    });
+
+  /** updatePost and optimistically update the posts lists */
+  const updatePost = async (update: PostUpdate) => {
+    /** optimistic remove the post from the filtered list */
+    const statusKept = (() => {
+      if (filterStatus === PostsQueryStatus.ALL) {
+        return true;
+      }
+      if (filterStatus === PostsQueryStatus.PENDING) {
+        return update.reviewedStatus === AppPostReviewStatus.PENDING;
+      }
+      if (filterStatus === PostsQueryStatus.PUBLISHED) {
+        return update.reviewedStatus === AppPostReviewStatus.APPROVED;
+      }
+      if (filterStatus === PostsQueryStatus.IGNORED) {
+        return update.reviewedStatus === AppPostReviewStatus.IGNORED;
+      }
+    })();
+
+    if (!statusKept) {
+      removePost(postId);
+    }
+
+    _updatePost(update);
+  };
+
+  const postStatuses = usePostStatuses(post);
+
+  const { signNanopublication } = useNanopubContext();
+
+  const approve = async () => {
+    // mark nanopub draft as approved
+    setIsUpdating(true);
+    const nanopub = post?.mirrors.find(
+      (m) => m.platformId === PLATFORM.Nanopub
+    );
+
+    if (!nanopub || !nanopub.draft) {
+      throw new Error(`Unexpected nanopub mirror not found`);
+    }
+
+    if (signNanopublication) {
+      const signed = await signNanopublication(nanopub.draft.post);
+      nanopub.draft.postApproval = PlatformPostDraftApproval.APPROVED;
+      nanopub.draft.post = signed.rdf();
+
+      await appFetch<void, AppPostFull>('/api/posts/approve', post);
+    }
+    // setIsUpdating(false); should be set by the refetech flow
+  };
 
   return (
     <PostContextValue.Provider
       value={{
         post,
+        postStatuses,
         author,
         tweet,
-        nanopubPublished,
         nanopubDraft,
         reparse,
-        isParsing,
+        updateSemantics,
+        updatePost,
+        isUpdating,
+        approve,
       }}>
       {children}
     </PostContextValue.Provider>

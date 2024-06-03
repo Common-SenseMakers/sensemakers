@@ -1,42 +1,48 @@
-import { Box } from 'grommet';
-import {
-  FormNext,
-  FormNextLink,
-  FormPrevious,
-  FormPreviousLink,
-  Home,
-} from 'grommet-icons';
-import { useNavigate } from 'react-router-dom';
+import { Box, BoxExtendedProps, Text } from 'grommet';
+import { useQuery } from 'wagmi/dist/types/utils/query';
 
-import { AppBottomNav } from '../app/layout/AppBottomNav';
-import { AbsoluteRoutes } from '../route.names';
+import { TwitterAvatar } from '../app/TwitterAvatar';
+import { TweetAnchor } from '../app/anchors/TwitterAnchor';
+import { useProfileContext } from '../profile/ProfileContext';
+import { TwitterUserProfile } from '../shared/types/types.twitter';
+import { useThemeContext } from '../ui-components/ThemedApp';
+import { useAccountContext } from '../user-login/contexts/AccountContext';
+import { NanopubStatus } from './NanopubStatus';
+import { usePost } from './PostContext';
 
-export const PostHeader = (props: {
-  prevPostId?: string;
-  nextPostId?: string;
-}) => {
-  const { prevPostId, nextPostId } = props;
-  const navigate = useNavigate();
+export const PostHeader = (
+  props: BoxExtendedProps & { profile?: TwitterUserProfile; isProfile: boolean }
+) => {
+  const { constants } = useThemeContext();
+  const { tweet, post } = usePost();
+
+  const username = props.profile?.name;
 
   return (
-    <Box style={{ height: '60px' }}>
-      <AppBottomNav
-        paths={[
-          { icon: <Home></Home>, label: 'back', path: AbsoluteRoutes.App },
-          {
-            icon: <FormPrevious></FormPrevious>,
-            label: 'prev',
-            disabled: !prevPostId,
-            action: () => navigate(`/post/${prevPostId}`),
-          },
-          {
-            reverse: true,
-            disabled: !nextPostId,
-            icon: <FormNext></FormNext>,
-            label: 'next',
-            action: () => navigate(`/post/${nextPostId}`),
-          },
-        ]}></AppBottomNav>
+    <Box direction="row" {...props}>
+      <TwitterAvatar size={40} profile={props.profile}></TwitterAvatar>
+      <Box width="100%" margin={{ left: 'medium' }}>
+        <Box direction="row" justify="between">
+          <Text
+            color={constants.colors.primary}
+            style={{
+              fontSize: '16px',
+              fontStyle: 'normal',
+              fontWeight: '600',
+              lineHeight: '18px',
+              textDecoration: 'none',
+            }}>
+            {username}
+          </Text>
+          {!props.isProfile ? (
+            <NanopubStatus post={post}></NanopubStatus>
+          ) : (
+            <></>
+          )}
+        </Box>
+        <Box margin={{ bottom: '6px' }}></Box>
+        <TweetAnchor thread={tweet?.posted?.post}></TweetAnchor>
+      </Box>
     </Box>
   );
 };

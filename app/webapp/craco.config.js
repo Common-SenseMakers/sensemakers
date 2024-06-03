@@ -17,6 +17,7 @@ module.exports = {
               ORCID_CLIENT_ID: '"APP-M1QE4V5MBUYC7Y54"',
               TWITTER_CLIENT_ID: '"N0czb28xek5ldjRxdWpIRVVvZFg6MTpjaQ"',
               FB_PROJECTID: '"demo-sensenets"',
+              PROJECT_TWITTER_ACCOUNT: '"rtk254"',
             },
           },
         }),

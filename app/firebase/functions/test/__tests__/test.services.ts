@@ -28,14 +28,17 @@ import { PlatformPostsRepository } from '../../src/posts/platform.posts.reposito
 import { PostsManager } from '../../src/posts/posts.manager';
 import { PostsProcessing } from '../../src/posts/posts.processing';
 import { PostsRepository } from '../../src/posts/posts.repository';
+import { getTimeMock } from '../../src/time/mock/time.service.mock';
 import { TimeService } from '../../src/time/time.service';
 import { UsersRepository } from '../../src/users/users.repository';
 import { UsersService } from '../../src/users/users.service';
+import { TriplesRepository } from '../../src/semantics/triples.repository';
 
 export interface TestServicesConfig {
   twitter: TwitterMockConfig;
   nanopub: NanopubMockConfig;
   parser: ParserMockConfig;
+  time: 'real' | 'mock';
 }
 
 export type TestServices = Services;
@@ -60,11 +63,12 @@ export const getTestServices = (config: TestServicesConfig) => {
   const db = new DBInstance();
   const userRepo = new UsersRepository(db);
   const postsRepo = new PostsRepository(db);
+  const triplesRepo = new TriplesRepository(db);
   const platformPostsRepo = new PlatformPostsRepository(db);
 
   const identityServices: IdentityServicesMap = new Map();
   const platformsMap: PlatformsMap = new Map();
-  const time = new TimeService();
+  const time = getTimeMock(new TimeService(), config.time);
   const MockedTime = spy(new TimeService());
 
   when(MockedTime.now()).thenReturn(
@@ -117,6 +121,7 @@ export const getTestServices = (config: TestServicesConfig) => {
   const postsProcessing = new PostsProcessing(
     usersService,
     time,
+    triplesRepo,
     postsRepo,
     platformPostsRepo,
     platformsService

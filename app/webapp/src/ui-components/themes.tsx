@@ -20,18 +20,12 @@ export interface StyleConstants {
   };
   colors: {
     primary: string;
-    primaryLight: string;
+    textLight: string;
+    shade: string;
+    links: string;
     text: string;
     textOnPrimary: string;
-    lightTextOnLight: string;
-    headings: string;
-    backgroundLight: string;
-    backgroundLightShade: string;
-    backgroundLightDarker: string;
     border: string;
-    links: string;
-    tagsBackground: string;
-    tagsText: string;
   };
 }
 
@@ -41,32 +35,26 @@ export interface ExtendedThemeType extends ThemeType {
 
 const constants: StyleConstants = {
   headingFontSizes: {
-    1: '36px',
-    2: '28px',
-    3: '22px',
-    4: '22px',
+    1: '28px',
+    2: '24px',
+    3: '20px',
+    4: '18px',
   },
   textFontSizes: {
-    large: '32px',
-    medium: '26px',
-    normal: '22px',
+    large: '24px',
+    medium: '18px',
+    normal: '16px',
     small: '18px',
     xsmall: '14px',
   },
   colors: {
-    primary: '#021c49',
-    primaryLight: '#606060',
-    text: '#20365f',
+    primary: '#111827',
+    textLight: '#4B5563',
+    shade: '#F9FAFB',
+    text: '#111827',
+    links: '#3182CE',
     textOnPrimary: '#ffffff',
-    lightTextOnLight: '#949494',
-    border: '#333333',
-    headings: '#1a1a1a',
-    backgroundLight: '#f7f7f7',
-    backgroundLightShade: '#ececec',
-    backgroundLightDarker: '#cacaca',
-    links: '#021c49',
-    tagsBackground: '#52004c',
-    tagsText: '#ffffff',
+    border: '#D1D5DB',
   },
 };
 
@@ -75,7 +63,6 @@ const extension: ExtendedThemeType = {
   global: {
     colors: {
       brand: constants.colors.primary,
-      brandLight: constants.colors.primaryLight,
       text: constants.colors.text,
     },
     font: {
@@ -124,6 +111,11 @@ const extension: ExtendedThemeType = {
       },
     },
     responsiveBreakpoint: undefined,
+    extend: css`
+      font-style: normal;
+      font-weight: 600;
+      letter-spacing: -0.4px;
+    `,
   },
   button: {
     padding: { vertical: '15px', horizontal: '30px' },
@@ -168,6 +160,10 @@ const extension: ExtendedThemeType = {
       extend: css`
         & {
           border-style: none;
+          font-size: 14px;
+          font-style: normal;
+          font-weight: 500;
+          line-height: 16px; /* 114.286% */
         }
       `,
     },
@@ -219,7 +215,7 @@ const extension: ExtendedThemeType = {
   },
   accordion: {
     icons: {
-      color: constants.colors.primaryLight,
+      color: constants.colors.primary,
     },
     border: false,
     panel: {
@@ -232,6 +228,12 @@ const extension: ExtendedThemeType = {
     extend: css`
       font-size: ${constants.textFontSizes.small};
     `,
+  },
+  paragraph: {
+    medium: {
+      size: constants.textFontSizes.normal,
+    },
+    extend: css``,
   },
 };
 
