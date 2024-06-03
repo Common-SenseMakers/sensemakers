@@ -44,7 +44,7 @@ describe.only('011-twitter refresh', () => {
     });
   });
 
-  describe('refresh token', () => {
+  describe('refresh token manually', () => {
     it('refresh token', async () => {
       const twitterService = (services.platforms as any).platforms.get(
         PLATFORM.Twitter
@@ -95,6 +95,63 @@ describe.only('011-twitter refresh', () => {
       });
 
       expect(user).to.not.be.undefined;
+    });
+  });
+
+  describe('refresh token through getOfUser', () => {
+    it('refresh token', async () => {
+      if (!user) {
+        throw new Error('unexpected');
+      }
+
+      /** read the expireTime */
+      const account = await services.db.run(async (manager) => {
+        if (!user) {
+          throw new Error('unexpected');
+        }
+
+        const userRead = await services.users.repo.getUser(
+          user.userId,
+          manager,
+          true
+        );
+
+        return UsersHelper.getAccount(
+          userRead,
+          PLATFORM.Twitter,
+          undefined,
+          true
+        );
+      });
+
+      /** set the mock time service time to that value */
+      (services.time as any).set(account.read?.expiredTimeMs);
+
+      // call getOfUsers (this should update the refresh token)
+      void (await services.postsManager.getOfUser(user?.userId));
+
+      const accountAfter = await services.db.run(async (manager) => {
+        if (!user) {
+          throw new Error('unexpected');
+        }
+
+        const userRead = await services.users.repo.getUser(
+          user.userId,
+          manager,
+          true
+        );
+
+        return UsersHelper.getAccount(
+          userRead,
+          PLATFORM.Twitter,
+          undefined,
+          true
+        );
+      });
+
+      expect(account.read?.refreshToken).to.not.equal(
+        accountAfter.read?.refreshToken
+      );
     });
   });
 });
