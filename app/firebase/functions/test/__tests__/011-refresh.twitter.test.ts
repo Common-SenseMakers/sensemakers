@@ -4,6 +4,7 @@ import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import { logger } from '../../src/instances/logger';
 import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
+import { GetClientResultInternal } from '../../src/platforms/twitter/twitter.service.client';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
 import { createUsers } from '../utils/users.utils';
@@ -15,7 +16,7 @@ import {
 } from './setup';
 import { getTestServices } from './test.services';
 
-describe('011-twitter refresh', () => {
+describe.only('011-twitter refresh', () => {
   let user: AppUser | undefined;
 
   const services = getTestServices({
@@ -56,13 +57,39 @@ describe('011-twitter refresh', () => {
 
         const account = UsersHelper.getAccount(user, PLATFORM.Twitter);
 
+        if (!account) {
+          throw new Error('unexpected');
+        }
+
         (services.time as any).set(account?.read.expiresAtMs);
 
-        const client = await (twitterService as any).getUserClient(
-          account?.user_id,
+        const { client, oldDetails, newDetails } = (await (
+          twitterService as any
+        ).getUserClientInternal(
+          account.user_id,
           'read',
           manager
+        )) as GetClientResultInternal;
+
+        logger.debug(`oldDetails, newDetails`, { oldDetails, newDetails });
+
+        const userRead = await services.users.repo.getUser(
+          user.userId,
+          manager,
+          true
         );
+
+        const accountRead = UsersHelper.getAccount(
+          userRead,
+          PLATFORM.Twitter,
+          account.user_id
+        );
+
+        expect(accountRead?.read.refreshToken).to.equal(
+          newDetails?.read?.refreshToken
+        );
+
+        logger.debug(`accountRead`, { accountRead });
 
         expect(client).to.not.be.undefined;
       });

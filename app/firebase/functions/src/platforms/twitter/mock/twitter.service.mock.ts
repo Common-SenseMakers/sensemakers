@@ -1,3 +1,4 @@
+import { TransactionManager } from 'src/db/transaction.manager';
 import { anything, instance, spy, when } from 'ts-mockito';
 import { TweetV2SingleResult } from 'twitter-api-v2';
 
@@ -31,7 +32,11 @@ let state: TwitterTestState = {
   threads: [],
 };
 
-export type TwitterMockConfig = 'real' | 'mock-publish' | 'mock-signup';
+export type TwitterMockConfig =
+  | 'real'
+  | 'mock-publish'
+  | 'mock-signup'
+  | 'wrap-refresh';
 
 export const TWITTER_USER_ID_MOCKS = '1773032135814717440';
 
@@ -191,6 +196,29 @@ export const getTwitterMock = (
     }
 
     return instance(Mocked) as unknown as TwitterService;
+  }
+
+  type GetUserClientMockedType = Omit<
+    TwitterService,
+    'getUserClientInternal'
+  > & {
+    getUserClientInternal: TwitterService['getUserClientInternal'];
+  };
+
+  if (type === 'wrap-refresh') {
+    const mocked = spy(twitterService) as unknown as GetUserClientMockedType;
+
+    when(
+      mocked.getUserClientInternal(anything(), anything(), anything())
+    ).thenCall(
+      async (
+        user_id: string,
+        type: 'write' | 'read',
+        manager: TransactionManager
+      ) => {
+        return mocked.getUserClientInternal(user_id, type, manager);
+      }
+    );
   }
 
   throw new Error('Unexpected');

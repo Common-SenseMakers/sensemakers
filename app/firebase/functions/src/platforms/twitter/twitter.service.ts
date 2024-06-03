@@ -256,7 +256,7 @@ export class TwitterService
     const userDetails = postPublish.userDetails;
     const post = postPublish.draft;
 
-    const client = await this.getClient(manager, userDetails, 'write');
+    const client = await this.getClient<'write'>(manager, userDetails, 'write');
 
     try {
       // Post the tweet and also read the tweet
