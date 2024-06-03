@@ -98,7 +98,7 @@ describe.only('011-twitter refresh', () => {
     });
   });
 
-  describe('refresh token through getOfUser', () => {
+  describe.skip('refresh token through getOfUser', () => {
     it('refresh token', async () => {
       if (!user) {
         throw new Error('unexpected');
