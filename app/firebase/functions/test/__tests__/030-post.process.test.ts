@@ -68,16 +68,12 @@ describe('030-process', () => {
        * fetch once to get the posts once and set the fetchedDetails of
        * the account
        */
-      await services.db.run(async (manager) => {
-        if (!user) throw new Error('user not created');
-        /** fetch will store the posts in the DB */
-        await services.postsManager.fetchUser(
-          {
-            userId: user.userId,
-            params: { expectedAmount: 10 },
-          },
-          manager
-        );
+
+      if (!user) throw new Error('user not created');
+      /** fetch will store the posts in the DB */
+      await services.postsManager.fetchUser({
+        userId: user.userId,
+        params: { expectedAmount: 10 },
       });
     });
 

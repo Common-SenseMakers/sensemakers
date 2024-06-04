@@ -34,7 +34,9 @@ let state: TwitterTestState = {
 
 export type TwitterMockConfig = 'real' | 'mock-publish' | 'mock-signup';
 
-const THREADS: string[][] = JSON.parse(process.env.TEST_THREADS as string);
+const THREADS: string[][] = process.env.TEST_THREADS
+  ? JSON.parse(process.env.TEST_THREADS as string)
+  : [];
 
 export const TWITTER_USER_ID_MOCKS = '1773032135814717440';
 

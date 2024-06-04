@@ -204,12 +204,14 @@ export class TwitterServiceClient {
     manager: TransactionManager
   ): Promise<GetClientResultInternal<T>> {
     /** read user from the DB */
-    const user = await this.usersRepo.getUserWithPlatformAccount(
+    const userId = await this.usersRepo.getUserWithPlatformAccount(
       PLATFORM.Twitter,
       user_id,
       manager,
       true
     );
+
+    const user = await this.usersRepo.getUser(userId, manager, true);
 
     const twitter = user[PLATFORM.Twitter];
 
