@@ -79,7 +79,7 @@ export class PlatformPostsRepository extends BaseRepository<
   }
 
   /** Get the platform post from the published post_id */
-  public async getFrom_post_id<T extends boolean, R = PlatformPost>(
+  public async getFrom_post_id<T extends boolean, R = string>(
     post_id: string,
     manager: TransactionManager,
     shouldThrow?: T

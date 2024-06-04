@@ -28,11 +28,11 @@ import { PlatformPostsRepository } from '../../src/posts/platform.posts.reposito
 import { PostsManager } from '../../src/posts/posts.manager';
 import { PostsProcessing } from '../../src/posts/posts.processing';
 import { PostsRepository } from '../../src/posts/posts.repository';
+import { TriplesRepository } from '../../src/semantics/triples.repository';
 import { getTimeMock } from '../../src/time/mock/time.service.mock';
 import { TimeService } from '../../src/time/time.service';
 import { UsersRepository } from '../../src/users/users.repository';
 import { UsersService } from '../../src/users/users.service';
-import { TriplesRepository } from '../../src/semantics/triples.repository';
 
 export interface TestServicesConfig {
   twitter: TwitterMockConfig;
@@ -97,7 +97,7 @@ export const getTestServices = (config: TestServicesConfig) => {
   identityServices.set(PLATFORM.Nanopub, nanopub);
 
   /** users service */
-  const usersService = new UsersService(userRepo, identityServices, {
+  const usersService = new UsersService(db, userRepo, identityServices, {
     tokenSecret: process.env.OUR_TOKEN_SECRET as string,
     expiresIn: '30d',
   });
