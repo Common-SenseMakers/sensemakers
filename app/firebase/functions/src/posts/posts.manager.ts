@@ -130,6 +130,8 @@ export class PostsManager {
       };
     })();
 
+    if (DEBUG) logger.debug(`Twitter Service - fetch ${platformId}`);
+
     const fetched = await this.platforms.fetch(
       platformId,
       platformParams,
@@ -139,7 +141,7 @@ export class PostsManager {
 
     if (DEBUG)
       logger.debug(
-        `fetchUser - platformPosts: ${fetched.platformPosts.length}`,
+        `fetchUser ${platformId} - platformPosts: ${fetched.platformPosts.length}`,
         {
           fetched,
         }
@@ -200,15 +202,13 @@ export class PostsManager {
    * if mode === 'forward' fetches from the newset fetched date
    * if mode === 'backwards' fetches from the oldest fetched date
    * */
-  async fetchUser(
-    inputs: {
-      userId?: string;
-      user?: AppUser;
-      params: FetchParams;
-    },
-    _manager?: TransactionManager
-  ) {
-    const fetch = async (manager: TransactionManager): Promise<void> => {
+  async fetchUser(inputs: {
+    userId?: string;
+    user?: AppUser;
+    params: FetchParams;
+  }) {
+    /** can be called as part of a transaction or independently */
+    return this.db.run(async (manager: TransactionManager): Promise<void> => {
       const user =
         inputs.user ||
         (await this.users.repo.getUser(inputs.userId as string, manager, true));
@@ -264,13 +264,7 @@ export class PostsManager {
           );
         })
       );
-    };
-
-    /** can be called as part of a transaction or independently */
-    if (_manager) {
-      return fetch(_manager);
-    }
-    return this.db.run((manager) => fetch(manager));
+    });
   }
 
   async parseOfUser(userId: string) {

@@ -32,6 +32,7 @@ import {
   TwitterUserDetails,
 } from '../../@shared/types/types.twitter';
 import { TransactionManager } from '../../db/transaction.manager';
+import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersRepository } from '../../users/users.repository';
 import { PlatformService } from '../platforms.interface';
@@ -46,6 +47,8 @@ export interface TwitterApiCredentials {
   clientId: string;
   clientSecret: string;
 }
+
+const DEBUG = true;
 
 /** Twitter service handles all interactions with Twitter API */
 export class TwitterService
@@ -78,8 +81,14 @@ export class TwitterService
     manager: TransactionManager
   ): Promise<TwitterThread[]> {
     try {
+      if (DEBUG) logger.debug('Twitter Service - fetchInternal - start');
+
       const expectedAmount = params.expectedAmount;
-      const readOnlyClient = await this.getClient(manager, userDetails, 'read');
+      const readOnlyClient = await this.getUserClient(
+        userDetails.user_id,
+        'read',
+        manager
+      );
 
       const tweetFields: TTweetv2TweetField[] = [
         'created_at',
@@ -183,6 +192,8 @@ export class TwitterService
     userDetails: UserDetailsBase,
     manager: TransactionManager
   ): Promise<FetchedResult<TwitterThread>> {
+    if (DEBUG) logger.debug('Twitter Service - fetch - start');
+
     const threads = await this.fetchInternal(params, userDetails, manager);
 
     const platformPosts = threads.map((thread) => {
@@ -257,7 +268,7 @@ export class TwitterService
     const userDetails = postPublish.userDetails;
     const post = postPublish.draft;
 
-    const client = await this.getClient(manager, userDetails, 'write');
+    const client = await this.getClient<'write'>(manager, userDetails, 'write');
 
     try {
       // Post the tweet and also read the tweet

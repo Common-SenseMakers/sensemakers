@@ -20,7 +20,23 @@ import { UsersRepository } from '../../users/users.repository';
 import { TwitterApiCredentials } from './twitter.service';
 import { handleTwitterError } from './twitter.utils';
 
-const DEBUG = false;
+const DEBUG = true;
+
+export type GetClientResultInternal<T extends 'read' | 'write' = 'read'> =
+  T extends 'read'
+    ? {
+        client: TwitterApiReadOnly;
+        oldDetails: TwitterUserDetails;
+        newDetails?: TwitterUserDetails;
+      }
+    : {
+        client: TwitterApi;
+        oldDetails: TwitterUserDetails;
+        newDetails?: TwitterUserDetails;
+      };
+
+export type GetClientResult<T extends 'read' | 'write' | undefined> =
+  T extends 'write' ? TwitterApi : TwitterApiReadOnly;
 
 /** check https://github.com/PLhery/node-twitter-api-v2/blob/master/doc/auth.md#oauth2-user-wide-authentication-flow for OAuth2 flow */
 
@@ -83,7 +99,7 @@ export class TwitterServiceClient {
       try {
         if (DEBUG)
           logger.debug(
-            'getClientWithCredentials - refreshOAuth2Token()',
+            'getClientWithCredentials - refreshOAuth2Token() - old token:',
             credentials.refreshToken
           );
 
@@ -116,6 +132,7 @@ export class TwitterServiceClient {
           credentials: newCredentials,
         };
       } catch (e: any) {
+        logger.error('getClientWithCredentials - refreshOAuth2Token()', e);
         throw new Error(handleTwitterError(e));
       }
     } else {
@@ -141,6 +158,8 @@ export class TwitterServiceClient {
     const { client, credentials: newCredentials } =
       await this.getClientWithCredentials(credentials, type as any);
 
+    let newDetails: TwitterUserDetails | undefined = undefined;
+
     /** update user credentials */
     if (newCredentials) {
       if (DEBUG)
@@ -148,8 +167,6 @@ export class TwitterServiceClient {
           'getUserClientAndUpdateDetails - newCredentials',
           newCredentials
         );
-
-      let newDetails: TwitterUserDetails;
 
       newDetails = {
         ...details,
@@ -174,35 +191,27 @@ export class TwitterServiceClient {
       );
     }
 
-    return client;
+    return { client, newDetails };
   }
 
   /**
    * Get a user-specific client by reading the credentials
    * from the users database
    * */
-  protected async getUserClient(
+  private async getUserClientInternal<T extends 'read' | 'write'>(
     user_id: string,
-    type: 'write',
+    type: T,
     manager: TransactionManager
-  ): Promise<TwitterApi>;
-  protected async getUserClient(
-    user_id: string,
-    type: 'read',
-    manager: TransactionManager
-  ): Promise<TwitterApiReadOnly>;
-  protected async getUserClient(
-    user_id: string,
-    type: 'read' | 'write',
-    manager: TransactionManager
-  ): Promise<TwitterApi | TwitterApiReadOnly> {
+  ): Promise<GetClientResultInternal<T>> {
     /** read user from the DB */
-    const user = await this.usersRepo.getUserWithPlatformAccount(
+    const userId = await this.usersRepo.getUserWithPlatformAccount(
       PLATFORM.Twitter,
       user_id,
       manager,
       true
     );
+
+    const user = await this.usersRepo.getUser(userId, manager, true);
 
     const twitter = user[PLATFORM.Twitter];
 
@@ -215,43 +224,45 @@ export class TwitterServiceClient {
       throw new Error('Unexpected');
     }
 
-    const client = await this.getUserClientAndUpdateDetails(
+    const { client, newDetails } = await this.getUserClientAndUpdateDetails(
       user.userId,
       details,
       type,
       manager
     );
 
-    return client;
+    return { client, oldDetails: details, newDetails };
+  }
+
+  /**
+   * Get a user-specific client by reading the credentials
+   * from the users database
+   * */
+  protected async getUserClient<T extends 'read' | 'write'>(
+    user_id: string,
+    type: T,
+    manager: TransactionManager
+  ): Promise<T extends 'read' ? TwitterApiReadOnly : TwitterApi> {
+    /** read user from the DB */
+    const { client } = await this.getUserClientInternal(user_id, type, manager);
+    return client as T extends 'read' ? TwitterApiReadOnly : TwitterApi;
   }
 
   /**
    * A wrapper that adapts to the input user details and calls a diferent get client method
    * accordingly
    */
-  protected async getClient(
+  protected async getClient<T extends 'read' | 'write' | undefined = 'read'>(
     manager: TransactionManager,
     userDetails: UserDetailsBase,
     userId: string,
-    type?: 'write'
-  ): Promise<TwitterApi>;
-  protected async getClient(
-    manager: TransactionManager,
-    userDetails: UserDetailsBase,
-    userId: string,
-    type?: 'read'
-  ): Promise<TwitterApiReadOnly>;
-  protected async getClient(
-    manager: TransactionManager,
-    userDetails: UserDetailsBase,
-    userId: string,
-    type: 'read' | 'write' = 'read'
-  ): Promise<TwitterApi | TwitterApiReadOnly> {
+    type: T = 'read' as T
+  ): Promise<GetClientResult<T>> {
     if (!userDetails) {
       if (type === 'write') {
         throw new Error('Cannot provide a write client without user details');
       }
-      return this.getGenericClient().readOnly;
+      return this.getGenericClient().readOnly as GetClientResult<T>;
     }
 
     /** otherwise use those credentials directly (fast) */
@@ -262,7 +273,7 @@ export class TwitterServiceClient {
       manager
     );
 
-    return client;
+    return client.client as GetClientResult<T>;
   }
 
   public async getSignupContext(
