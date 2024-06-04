@@ -21,6 +21,7 @@ import {
   PlatformPostDraftApproval,
   PlatformPostPublishOrigin,
   PlatformPostPublishStatus,
+  PlatformPostSignerType,
 } from '../@shared/types/types.platform.posts';
 import {
   AppPost,
@@ -462,23 +463,28 @@ export class PostsManager {
    * userId must be the authenticated user to prevent posting on
    * behalf of others.
    */
-  async approvePost(post: AppPostFull, userId: string) {
+  async publishOrUpdatePost(newPost: AppPostFull, userId: string) {
     await this.db.run(async (manager) => {
-      if (DEBUG) logger.debug(`approvePost ${post.id}`, { post, userId });
+      if (DEBUG)
+        logger.debug(`approvePost ${newPost.id}`, { post: newPost, userId });
       const user = await this.users.repo.getUser(userId, manager, true);
-      const existing = await this.processing.posts.get(post.id, manager, true);
-      if (!existing) {
-        throw new Error(`Post not found: ${post.id}`);
+      const existingPost = await this.processing.posts.get(
+        newPost.id,
+        manager,
+        true
+      );
+      if (!existingPost) {
+        throw new Error(`Post not found: ${newPost.id}`);
       }
 
-      if (existing.authorId !== userId) {
-        throw new Error(`Only the author can approve a post: ${post.id}`);
+      if (existingPost.authorId !== userId) {
+        throw new Error(`Only the author can approve a post: ${newPost.id}`);
       }
 
       /** for now its either ignore all, or approve all */
-      if (post.reviewedStatus === AppPostReviewStatus.IGNORED) {
+      if (newPost.reviewedStatus === AppPostReviewStatus.IGNORED) {
         await this.updatePost(
-          post.id,
+          newPost.id,
           {
             reviewedStatus: AppPostReviewStatus.IGNORED,
           },
@@ -491,26 +497,35 @@ export class PostsManager {
 
       /** force status transition */
       await this.updatePost(
-        post.id,
+        newPost.id,
         {
-          reviewedStatus: AppPostReviewStatus.APPROVED,
+          reviewedStatus:
+            existingPost.republishedStatus ===
+            AppPostRepublishedStatus.REPUBLISHED
+              ? AppPostReviewStatus.UPDATED
+              : AppPostReviewStatus.APPROVED,
         },
         manager
       );
 
       /** check if content or semantics changed (other changes are not expected and omited) */
       if (
-        existing.content !== post.content ||
-        existing.semantics !== post.semantics
+        existingPost.content !== newPost.content ||
+        existingPost.semantics !== newPost.semantics
       ) {
         if (DEBUG)
-          logger.debug('approvePost - updateContent', { existing, post });
+          logger.debug('approvePost - updateContent', {
+            existing: existingPost,
+            post: newPost,
+          });
+
+        /** the mirror drafts are also updated based on the the new content and semantics */
         await this.updatePost(
-          post.id,
+          newPost.id,
           {
             reviewedStatus: AppPostReviewStatus.APPROVED,
-            content: post.content,
-            semantics: post.semantics,
+            content: newPost.content,
+            semantics: newPost.semantics,
           },
           manager
         );
@@ -518,7 +533,7 @@ export class PostsManager {
 
       /** publish approved drafts */
       const published = await Promise.all(
-        post.mirrors.map(async (mirror) => {
+        newPost.mirrors.map(async (mirror) => {
           if (
             mirror.draft &&
             mirror.draft.postApproval === PlatformPostDraftApproval.APPROVED
@@ -533,12 +548,24 @@ export class PostsManager {
             if (DEBUG)
               logger.debug('approvePost - publish mirror', { mirror, account });
 
-            const posted = await this.platforms
-              .get(mirror.platformId)
-              .publish(
-                { draft: mirror.draft.post, userDetails: account },
-                manager
+            const platform = this.platforms.get(mirror.platformId);
+
+            if (mirror.draft.signerType === PlatformPostSignerType.DELEGATED) {
+              const signedPost = await platform.signDraft(
+                mirror.draft,
+                account
               );
+              mirror.draft.signedPost = signedPost;
+            }
+
+            if (!mirror.draft.signedPost) {
+              throw new Error(`Expected signed post to be provided`);
+            }
+
+            const posted = await platform.publish(
+              { draft: mirror.draft.signedPost, userDetails: account },
+              manager
+            );
 
             /**  update platform post status and posted values*/
             await this.processing.platformPosts.update(
@@ -563,7 +590,7 @@ export class PostsManager {
       /** if all mirrors where published */
       if (published.every((v) => v === true)) {
         await this.updatePost(
-          post.id,
+          newPost.id,
           {
             republishedStatus: AppPostRepublishedStatus.REPUBLISHED,
           },

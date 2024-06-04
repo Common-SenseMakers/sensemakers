@@ -17,6 +17,7 @@ import {
   PlatformPostDraft,
   PlatformPostPosted,
   PlatformPostPublish,
+  PlatformPostUpdate,
 } from '../../@shared/types/types.platform.posts';
 import '../../@shared/types/types.posts';
 import {
@@ -312,9 +313,23 @@ export class TwitterService
     }
   }
 
+  update(
+    post: PlatformPostUpdate<any>,
+    manager: TransactionManager
+  ): Promise<PlatformPostPosted<any>> {
+    throw new Error('Method not implemented.');
+  }
+
   convertFromGeneric(
     postAndAuthor: PostAndAuthor
   ): Promise<PlatformPostDraft<any>> {
+    throw new Error('Method not implemented.');
+  }
+
+  signDraft(
+    post: PlatformPostDraft<any>,
+    account: UserDetailsBase<any, any, any>
+  ): Promise<any> {
     throw new Error('Method not implemented.');
   }
 }

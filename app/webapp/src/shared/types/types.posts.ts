@@ -26,6 +26,7 @@ export enum AppPostReviewStatus {
   APPROVED = 'approved',
   IGNORED = 'ignored',
   DRAFT = 'draft',
+  UPDATED = 'updated',
 }
 export enum AppPostRepublishedStatus {
   PENDING = 'pending',

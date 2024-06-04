@@ -4,6 +4,7 @@ import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import {
   PlatformPostDraftApproval,
   PlatformPostPosted,
+  PlatformPostSignerType,
 } from '../../src/@shared/types/types.platform.posts';
 import {
   AppPostReviewStatus,
@@ -27,7 +28,10 @@ import {
 } from './setup';
 import { getTestServices } from './test.services';
 
-describe('030-process', () => {
+const DEBUG_PREFIX = `030-process`;
+const DEBUG = true;
+
+describe.only('030-process', () => {
   let rsaKeys = getRSAKeys('');
 
   const services = getTestServices({
@@ -44,7 +48,6 @@ describe('030-process', () => {
 
   describe('create and process', () => {
     let user: AppUser | undefined;
-    let TEST_CONTENT = `This is a test post ${Date.now()}`;
     let thread: PlatformPostPosted<TwitterThread>;
 
     before(async () => {
@@ -54,6 +57,8 @@ describe('030-process', () => {
           Array.from(testUsers.values()),
           manager
         );
+        if (DEBUG)
+          logger.debug(`users crated ${users.length}`, { users }, DEBUG_PREFIX);
         user = users.find(
           (u) =>
             UsersHelper.getAccount(
@@ -62,6 +67,8 @@ describe('030-process', () => {
               TWITTER_USER_ID_MOCKS
             ) !== undefined
         );
+        if (DEBUG)
+          logger.debug(`test user ${user?.userId}`, { user }, DEBUG_PREFIX);
       });
 
       /**
@@ -70,6 +77,7 @@ describe('030-process', () => {
        */
 
       if (!user) throw new Error('user not created');
+      if (DEBUG) logger.debug(` ${user?.userId}`, { user }, DEBUG_PREFIX);
       /** fetch will store the posts in the DB */
       await services.postsManager.fetchUser({
         userId: user.userId,
@@ -77,8 +85,7 @@ describe('030-process', () => {
       });
     });
 
-    /** skip for now because we have not yet granted write access */
-    it('publish a post in the name of the test user', async () => {
+    it('publish a tweet in the name of the test user', async () => {
       await services.db.run(async (manager) => {
         if (!user) {
           throw new Error('user not created');
@@ -92,6 +99,8 @@ describe('030-process', () => {
         if (!account) {
           throw new Error('Unexpected');
         }
+
+        const TEST_CONTENT = `This is a test post ${USE_REAL_TWITTER ? Date.now() : ''}`;
 
         thread = await services.platforms
           .get<TwitterService>(PLATFORM.Twitter)
@@ -183,7 +192,7 @@ describe('030-process', () => {
       });
     });
 
-    it('approves/publishes pending post', async () => {
+    it('signs and approves/publishes pending post', async () => {
       if (!user) {
         throw new Error('user not created');
       }
@@ -195,7 +204,67 @@ describe('030-process', () => {
       });
 
       if (!USE_REAL_TWITTER) {
-        expect(pendingPosts).to.have.length(8);
+        expect(pendingPosts).to.have.length(7);
+      }
+
+      await Promise.all(
+        pendingPosts.slice(0, 2).map(async (pendingPost) => {
+          const nanopub = pendingPost.mirrors.find(
+            (m) => m.platformId === PLATFORM.Nanopub
+          );
+
+          if (!nanopub?.draft) {
+            throw new Error('draft not created');
+          }
+
+          const draft = nanopub.draft.unsignedPost;
+
+          if (!rsaKeys) {
+            throw new Error('rsaKeys undefined');
+          }
+
+          /** sign */
+          const signed = await signNanopublication(draft, rsaKeys, '');
+          nanopub.draft.signedPost = signed.rdf();
+          nanopub.draft.postApproval = PlatformPostDraftApproval.APPROVED;
+          nanopub.draft.signerType = PlatformPostSignerType.USER;
+
+          if (!user) {
+            throw new Error('user not created');
+          }
+
+          /** send updated post (content and semantics did not changed) */
+          await services.postsManager.publishOrUpdatePost(
+            pendingPost,
+            user.userId
+          );
+
+          const approved = await services.postsManager.getPost(
+            pendingPost.id,
+            true
+          );
+
+          expect(approved).to.not.be.undefined;
+          expect(approved.reviewedStatus).to.equal(
+            AppPostReviewStatus.APPROVED
+          );
+        })
+      );
+    });
+
+    it('approves/publishes an unsigned pending post', async () => {
+      if (!user) {
+        throw new Error('user not created');
+      }
+
+      /** get pending posts of user */
+      const pendingPosts = await services.postsManager.getOfUser(user.userId, {
+        status: PostsQueryStatus.PENDING,
+        fetchParams: { expectedAmount: 10 },
+      });
+
+      if (!USE_REAL_TWITTER) {
+        expect(pendingPosts).to.have.length(5);
       }
 
       await Promise.all(
@@ -208,31 +277,27 @@ describe('030-process', () => {
             throw new Error('draft not created');
           }
 
-          const draft = nanopub.draft.post;
-
-          if (!rsaKeys) {
-            throw new Error('rsaKeys undefined');
-          }
-
           /** sign */
-          const signed = await signNanopublication(draft, rsaKeys, '');
-          nanopub.draft.post = signed.rdf();
           nanopub.draft.postApproval = PlatformPostDraftApproval.APPROVED;
+          nanopub.draft.signerType = PlatformPostSignerType.DELEGATED;
 
           if (!user) {
             throw new Error('user not created');
           }
 
           /** send updated post (content and semantics did not changed) */
-          await services.postsManager.approvePost(pendingPost, user.userId);
+          await services.postsManager.publishOrUpdatePost(
+            pendingPost,
+            user.userId
+          );
 
-          const approved = await services.postsManager.getPost(
+          const published = await services.postsManager.getPost(
             pendingPost.id,
             true
           );
 
-          expect(approved).to.not.be.undefined;
-          expect(approved.reviewedStatus).to.equal(
+          expect(published).to.not.be.undefined;
+          expect(published.reviewedStatus).to.equal(
             AppPostReviewStatus.APPROVED
           );
         })
@@ -281,7 +346,40 @@ describe('030-process', () => {
       );
 
       expect(profilePosts2).to.not.be.undefined;
-      expect(profilePosts2).to.have.length(6);
+      expect(profilePosts2).to.have.length(5);
+    });
+
+    it('edits a published post', async () => {
+      if (!user) {
+        throw new Error('user not created');
+      }
+
+      /** get pending posts of user */
+      const publishedPosts = await services.postsManager.getOfUser(
+        user.userId,
+        {
+          status: PostsQueryStatus.PUBLISHED,
+          fetchParams: { expectedAmount: 10 },
+        }
+      );
+
+      expect(publishedPosts).to.have.length(7);
+
+      const post = publishedPosts[0];
+
+      const contentPrev = post.content;
+      const newContent = `${contentPrev} - edited`;
+
+      const newPost = { ...post };
+      newPost.content = newContent;
+
+      /** send updated post (content and semantics did not changed) */
+      await services.postsManager.publishOrUpdatePost(newPost, user.userId);
+
+      const readPost = await services.postsManager.getPost(post.id, true);
+
+      expect(readPost).to.not.be.undefined;
+      expect(readPost.content).to.equal(newContent);
     });
   });
 });

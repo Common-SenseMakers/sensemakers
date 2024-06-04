@@ -50,6 +50,8 @@ export interface PlatformPostPosted<C = any> {
   post: C;
 }
 
+export type PlatformPostSigned<C = any> = C;
+
 export interface FetchedResult<C = any> {
   fetched: FetchedDetails;
   platformPosts: PlatformPostPosted<C>[];
@@ -62,10 +64,18 @@ export enum PlatformPostDraftApproval {
   PENDING = 'pending',
   APPROVED = 'approved',
 }
+
+export enum PlatformPostSignerType {
+  USER = 'user',
+  DELEGATED = 'delegated',
+}
+
 export interface PlatformPostDraft<D = any> {
   user_id: string; // The intended user_id of when publishing
   postApproval: PlatformPostDraftApproval;
-  post?: D;
+  signerType?: PlatformPostSignerType;
+  unsignedPost?: D;
+  signedPost?: D;
 }
 
 /**
@@ -76,6 +86,10 @@ export interface PlatformPostPublish<D = any> {
   userDetails: UserDetailsBase;
 }
 
+export interface PlatformPostUpdate<D = any> extends PlatformPostPublish<D> {
+  post_id: string;
+}
+
 export type PerPlatformPublish = Map<PLATFORM, PlatformPostPublish[]>;
 
 export interface PlatformPostCreated {
@@ -83,6 +97,6 @@ export interface PlatformPostCreated {
   post: AppPost; // In case a post was created
 }
 
-export type PlatformPostUpdate = Partial<
+export type PlatformPostStatusUpdate = Partial<
   Pick<PlatformPost, 'posted' | 'publishOrigin' | 'publishStatus' | 'draft'>
 >;
