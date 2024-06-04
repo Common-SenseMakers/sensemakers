@@ -17,6 +17,7 @@ import {
   PlatformPostDraft,
   PlatformPostPosted,
   PlatformPostPublish,
+  PlatformPostUpdate,
 } from '../../@shared/types/types.platform.posts';
 import '../../@shared/types/types.posts';
 import {
@@ -31,6 +32,7 @@ import {
   TwitterUserDetails,
 } from '../../@shared/types/types.twitter';
 import { TransactionManager } from '../../db/transaction.manager';
+import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersRepository } from '../../users/users.repository';
 import { PlatformService } from '../platforms.interface';
@@ -45,6 +47,8 @@ export interface TwitterApiCredentials {
   clientId: string;
   clientSecret: string;
 }
+
+const DEBUG = true;
 
 /** Twitter service handles all interactions with Twitter API */
 export class TwitterService
@@ -77,6 +81,8 @@ export class TwitterService
     manager: TransactionManager
   ): Promise<TwitterThread[]> {
     try {
+      if (DEBUG) logger.debug('Twitter Service - fetchInternal - start');
+
       const expectedAmount = params.expectedAmount;
       const readOnlyClient = await this.getUserClient(
         userDetails.user_id,
@@ -186,6 +192,8 @@ export class TwitterService
     userDetails: UserDetailsBase,
     manager: TransactionManager
   ): Promise<FetchedResult<TwitterThread>> {
+    if (DEBUG) logger.debug('Twitter Service - fetch - start');
+
     const threads = await this.fetchInternal(params, userDetails, manager);
 
     const platformPosts = threads.map((thread) => {
@@ -260,7 +268,7 @@ export class TwitterService
     const userDetails = postPublish.userDetails;
     const post = postPublish.draft;
 
-    const client = await this.getClient(manager, userDetails, 'write');
+    const client = await this.getClient<'write'>(manager, userDetails, 'write');
 
     try {
       // Post the tweet and also read the tweet
@@ -305,9 +313,23 @@ export class TwitterService
     }
   }
 
+  update(
+    post: PlatformPostUpdate<any>,
+    manager: TransactionManager
+  ): Promise<PlatformPostPosted<any>> {
+    throw new Error('Method not implemented.');
+  }
+
   convertFromGeneric(
     postAndAuthor: PostAndAuthor
   ): Promise<PlatformPostDraft<any>> {
+    throw new Error('Method not implemented.');
+  }
+
+  signDraft(
+    post: PlatformPostDraft<any>,
+    account: UserDetailsBase<any, any, any>
+  ): Promise<any> {
     throw new Error('Method not implemented.');
   }
 }

@@ -7,11 +7,10 @@ import { getEthToRSAMessage } from '../../@shared/utils/nanopub.sign.util';
 import { NANOPUB_PLACEHOLDER } from '../../@shared/utils/semantics.helper';
 
 export const createIntroNanopublication = async (
-  details: NanupubSignupData
+  details: NanupubSignupData,
+  authorizedKey: string
 ) => {
   const assertionsStore = new Store();
-
-  /** Add the post context as a comment of the assertion */
 
   /**
    * TODO: This makes no sense. Its a placeholder but the actual
@@ -36,6 +35,13 @@ export const createIntroNanopublication = async (
     DataFactory.namedNode(`https://sense-nets.xyz/thisSignature`),
     DataFactory.namedNode('https://schema.org/isOfText'),
     DataFactory.literal(getEthToRSAMessage(details.rsaPublickey)),
+    DataFactory.defaultGraph()
+  );
+
+  assertionsStore.addQuad(
+    DataFactory.namedNode(`https://sense-nets.xyz/${details.ethAddress}`),
+    DataFactory.namedNode('https://schema.org/approvesPostingOnBahalf'),
+    DataFactory.literal(authorizedKey),
     DataFactory.defaultGraph()
   );
 

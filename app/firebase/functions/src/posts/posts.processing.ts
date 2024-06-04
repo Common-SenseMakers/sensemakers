@@ -193,7 +193,7 @@ export class PostsProcessing {
             const draft: PlatformPostDraft = {
               postApproval: PlatformPostDraftApproval.PENDING,
               user_id: account.user_id,
-              post: draftPost.post,
+              unsignedPost: draftPost.unsignedPost,
             };
 
             if (!existingMirrorDraft) {

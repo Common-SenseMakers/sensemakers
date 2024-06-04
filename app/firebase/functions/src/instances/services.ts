@@ -1,6 +1,9 @@
 import { PLATFORM } from '../@shared/types/types';
 import {
   FUNCTIONS_PY_URL,
+  NANOPUBS_PUBLISH_SERVERS,
+  NP_PUBLISH_RSA_PRIVATE_KEY,
+  NP_PUBLISH_RSA_PUBLIC_KEY,
   OUR_EXPIRES_IN,
   OUR_TOKEN_SECRET,
   TWITTER_CLIENT_ID,
@@ -62,7 +65,13 @@ export const createServices = () => {
     USE_REAL_TWITTERX.value() ? 'real' : 'mock-publish'
   );
 
-  const _nanopub = new NanopubService(time);
+  const _nanopub = new NanopubService(time, {
+    servers: JSON.parse(NANOPUBS_PUBLISH_SERVERS.value()),
+    rsaKeys: {
+      privateKey: NP_PUBLISH_RSA_PRIVATE_KEY.value(),
+      publicKey: NP_PUBLISH_RSA_PUBLIC_KEY.value(),
+    },
+  });
   const nanopub = getNanopubMock(
     _nanopub,
     USE_REAL_NANOPUB.value() ? 'real' : 'mock-publish'

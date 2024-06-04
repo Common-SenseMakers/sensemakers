@@ -50,6 +50,8 @@ export const getTestServices = (config: TestServicesConfig) => {
     'TEST_USER_ACCOUNTS',
     'OUR_TOKEN_SECRET',
     'NANOPUBS_PUBLISH_SERVERS',
+    'NP_PUBLISH_RSA_PRIVATE_KEY',
+    'NP_PUBLISH_RSA_PUBLIC_KEY',
   ];
 
   mandatory.forEach((varName) => {
@@ -88,7 +90,13 @@ export const getTestServices = (config: TestServicesConfig) => {
   const twitter = getTwitterMock(_twitter, config.twitter);
 
   /** nanopub */
-  const _nanopub = new NanopubService(time);
+  const _nanopub = new NanopubService(time, {
+    servers: JSON.parse(process.env.NANOPUBS_PUBLISH_SERVERS as string),
+    rsaKeys: {
+      privateKey: process.env.NP_PUBLISH_RSA_PRIVATE_KEY as string,
+      publicKey: process.env.NP_PUBLISH_RSA_PUBLIC_KEY as string,
+    },
+  });
   const nanopub = getNanopubMock(_nanopub, config.nanopub);
 
   /** all identity services */

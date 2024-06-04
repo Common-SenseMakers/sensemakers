@@ -3,7 +3,7 @@ import {
   PlatformPost,
   PlatformPostCreate,
   PlatformPostPosted,
-  PlatformPostUpdate,
+  PlatformPostStatusUpdate,
 } from '../@shared/types/types.platform.posts';
 import { DBInstance } from '../db/instance';
 import { BaseRepository } from '../db/repo.base';
@@ -65,7 +65,7 @@ export class PlatformPostsRepository extends BaseRepository<
 
   public async update(
     post_id: string,
-    postUpdate: PlatformPostUpdate,
+    postUpdate: PlatformPostStatusUpdate,
     manager: TransactionManager,
     checkExists = false
   ) {
@@ -79,7 +79,7 @@ export class PlatformPostsRepository extends BaseRepository<
   }
 
   /** Get the platform post from the published post_id */
-  public async getFrom_post_id<T extends boolean, R = PlatformPost>(
+  public async getFrom_post_id<T extends boolean, R = string>(
     post_id: string,
     manager: TransactionManager,
     shouldThrow?: T
