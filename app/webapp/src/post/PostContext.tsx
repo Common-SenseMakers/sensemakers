@@ -287,9 +287,9 @@ export const PostContext: React.FC<{
     }
 
     if (signNanopublication) {
-      const signed = await signNanopublication(nanopub.draft.post);
+      const signed = await signNanopublication(nanopub.draft.unsignedPost);
       nanopub.draft.postApproval = PlatformPostDraftApproval.APPROVED;
-      nanopub.draft.post = signed.rdf();
+      nanopub.draft.signedPost = signed.rdf();
 
       await appFetch<void, AppPostFull>('/api/posts/approve', post);
     }

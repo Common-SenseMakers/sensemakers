@@ -1,6 +1,5 @@
 import { Nanopub } from '@nanopub/sign';
 import { DataFactory, Store } from 'n3';
-import { HexStr } from 'src/@shared/types/types';
 
 import { NanupubSignupData } from '../../@shared/types/types.nanopubs';
 import { writeRDF } from '../../@shared/utils/n3.utils';
@@ -9,7 +8,7 @@ import { NANOPUB_PLACEHOLDER } from '../../@shared/utils/semantics.helper';
 
 export const createIntroNanopublication = async (
   details: NanupubSignupData,
-  authorizedAddress: HexStr
+  authorizedKey: string
 ) => {
   const assertionsStore = new Store();
 
@@ -42,7 +41,7 @@ export const createIntroNanopublication = async (
   assertionsStore.addQuad(
     DataFactory.namedNode(`https://sense-nets.xyz/${details.ethAddress}`),
     DataFactory.namedNode('https://schema.org/approvesPostingOnBahalf'),
-    DataFactory.literal(authorizedAddress),
+    DataFactory.literal(authorizedKey),
     DataFactory.defaultGraph()
   );
 

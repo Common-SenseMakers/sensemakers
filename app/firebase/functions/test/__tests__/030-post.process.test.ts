@@ -85,7 +85,6 @@ describe.only('030-process', () => {
       });
     });
 
-    /** skip for now because we have not yet granted write access */
     it('publish a tweet in the name of the test user', async () => {
       await services.db.run(async (manager) => {
         if (!user) {
