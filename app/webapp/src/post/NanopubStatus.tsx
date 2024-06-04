@@ -17,6 +17,14 @@ export const NanopubStatus = (props: { post?: AppPostFull }) => {
     isEditing,
   } = usePostStatuses(post);
 
+  if (nanopubPublished && isEditing) {
+    return (
+      <Anchor href={nanopubPublished.uri} target="_blank">
+        <StatusTag label="Editing (not published)" color="#F79A3E"></StatusTag>
+      </Anchor>
+    );
+  }
+
   if (nanopubPublished) {
     return (
       <Anchor href={nanopubPublished.uri} target="_blank">

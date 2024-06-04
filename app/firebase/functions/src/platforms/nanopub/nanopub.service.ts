@@ -64,10 +64,6 @@ export class NanopubService
       throw new Error('Missing params');
     }
 
-    if (!this.config.rsaKeys.address) {
-      throw new Error('Missing RSA address');
-    }
-
     const introNanopub = await createIntroNanopublication(
       params,
       this.config.rsaKeys.publicKey

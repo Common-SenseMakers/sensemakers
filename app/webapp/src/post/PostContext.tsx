@@ -16,9 +16,11 @@ import {
   PlatformPost,
   PlatformPostDraft,
   PlatformPostDraftApproval,
+  PlatformPostSignerType,
 } from '../shared/types/types.platform.posts';
 import {
   AppPostFull,
+  AppPostRepublishedStatus,
   AppPostReviewStatus,
   PostUpdate,
   PostUpdatePayload,
@@ -46,7 +48,7 @@ interface PostContextType {
   postStatuses: AppPostStatus;
   updatePost: (update: PostUpdate) => Promise<void>;
   isUpdating: boolean;
-  approve: () => Promise<void>;
+  approveOrUpdate: () => Promise<void>;
 }
 
 const PostContextValue = createContext<PostContextType | undefined>(undefined);
@@ -275,7 +277,7 @@ export const PostContext: React.FC<{
 
   const { signNanopublication } = useNanopubContext();
 
-  const approve = async () => {
+  const approveOrUpdate = async () => {
     // mark nanopub draft as approved
     setIsUpdating(true);
     const nanopub = post?.mirrors.find(
@@ -286,13 +288,25 @@ export const PostContext: React.FC<{
       throw new Error(`Unexpected nanopub mirror not found`);
     }
 
-    if (signNanopublication) {
-      const signed = await signNanopublication(nanopub.draft.unsignedPost);
-      nanopub.draft.postApproval = PlatformPostDraftApproval.APPROVED;
-      nanopub.draft.signedPost = signed.rdf();
+    if (nanopub.draft.signerType === PlatformPostSignerType.USER) {
+      if (!signNanopublication) {
+        throw new Error(`Unexpected signNanopublication undefined`);
+      }
 
-      await appFetch<void, AppPostFull>('/api/posts/approve', post);
+      const signed = await signNanopublication(nanopub.draft.unsignedPost);
+      nanopub.draft.signedPost = signed.rdf();
     }
+
+    /** approve is set the first time a post is published (should be set
+     * also set in the backend anyway) */
+    if (post && post.republishedStatus === AppPostRepublishedStatus.PENDING) {
+      nanopub.draft.postApproval = PlatformPostDraftApproval.APPROVED;
+    }
+
+    await appFetch<void, AppPostFull>('/api/posts/approve', post);
+
+    setEnabledEdit(false);
+
     // setIsUpdating(false); should be set by the refetech flow
   };
 
@@ -313,7 +327,7 @@ export const PostContext: React.FC<{
         updateSemantics,
         updatePost,
         isUpdating,
-        approve,
+        approveOrUpdate,
         editable: editable !== undefined ? editable : false,
         setEnabledEdit,
         enabledEdit,

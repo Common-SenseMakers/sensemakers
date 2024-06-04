@@ -32,7 +32,7 @@ export const PostView = (props: {
     reparse,
     updatePost,
     isUpdating,
-    approve,
+    approveOrUpdate,
     editable: _editable,
     enabledEdit,
     setEnabledEdit,
@@ -82,7 +82,7 @@ export const PostView = (props: {
 
     if (canPublishNanopub && nanopubDraft && !postStatuses.nanopubPublished) {
       return {
-        action: () => approve(),
+        action: () => approveOrUpdate(),
         label: 'Nanopublish',
       };
     }
@@ -157,7 +157,7 @@ export const PostView = (props: {
               primary
               disabled={isUpdating}
               icon={<SendIcon></SendIcon>}
-              onClick={() => {}}
+              onClick={() => approveOrUpdate()}
               label="update"
               style={{ width: '100%' }}></AppButton>
           </Box>
