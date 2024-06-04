@@ -348,5 +348,38 @@ describe.only('030-process', () => {
       expect(profilePosts2).to.not.be.undefined;
       expect(profilePosts2).to.have.length(5);
     });
+
+    it('edits a published post', async () => {
+      if (!user) {
+        throw new Error('user not created');
+      }
+
+      /** get pending posts of user */
+      const publishedPosts = await services.postsManager.getOfUser(
+        user.userId,
+        {
+          status: PostsQueryStatus.PUBLISHED,
+          fetchParams: { expectedAmount: 10 },
+        }
+      );
+
+      expect(publishedPosts).to.have.length(7);
+
+      const post = publishedPosts[0];
+
+      const contentPrev = post.content;
+      const newContent = `${contentPrev} - edited`;
+
+      const newPost = { ...post };
+      newPost.content = newContent;
+
+      /** send updated post (content and semantics did not changed) */
+      await services.postsManager.publishOrUpdatePost(newPost, user.userId);
+
+      const readPost = await services.postsManager.getPost(post.id, true);
+
+      expect(readPost).to.not.be.undefined;
+      expect(readPost.content).to.equal(newContent);
+    });
   });
 });
