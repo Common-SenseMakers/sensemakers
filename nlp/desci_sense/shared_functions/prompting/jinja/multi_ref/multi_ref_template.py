@@ -45,7 +45,7 @@ For example, for a post with 2 references, the output would be structured as fol
     ]
   },
   {
-    "ref_number": 1,
+    "ref_number": 2,
     "reasoning_steps": "<your reasoning steps...>",
     "candidate_tags": "[<tag1>, <tag3>, <tag4>]",
     "final_answer": [
