@@ -48,7 +48,7 @@ export interface TwitterApiCredentials {
   clientSecret: string;
 }
 
-const DEBUG = true;
+const DEBUG = false;
 
 /** Twitter service handles all interactions with Twitter API */
 export class TwitterService

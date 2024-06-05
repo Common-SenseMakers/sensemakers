@@ -41,7 +41,7 @@ export const MOCKED_PARSER_RESULTS: ParsePostResult[] = [
 
 export type ParserMockConfig = 'real' | 'mock';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const getParserMock = (
   parserService: ParserService,

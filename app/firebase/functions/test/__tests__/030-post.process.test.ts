@@ -29,7 +29,7 @@ import {
 import { getTestServices } from './test.services';
 
 const DEBUG_PREFIX = `030-process`;
-const DEBUG = true;
+const DEBUG = false;
 
 describe.only('030-process', () => {
   let rsaKeys = getRSAKeys('');
