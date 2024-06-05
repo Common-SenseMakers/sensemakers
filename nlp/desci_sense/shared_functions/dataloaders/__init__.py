@@ -9,7 +9,7 @@ from .mastodon.mastodon_utils import scrape_mastodon_post
 
 
 def convert_text_to_ref_post(
-    text: str, author: str = "deafult_author", source: str = "default_source"
+    text: str, author: str = "default_author", source: str = "default_source"
 ) -> RefPost:
     """
     Converts raw text to a RefPost.
