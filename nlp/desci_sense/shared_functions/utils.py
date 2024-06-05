@@ -11,7 +11,16 @@ from url_normalize import url_normalize
 
 
 def extract_twitter_status_id(url):
-    pattern = r"twitter\.com\/\w+\/status\/(\d+)"
+    """
+    Extract the status ID from Twitter or x.com post URLs.
+
+    Parameters:
+    url (str): The URL of the Twitter or x.com post.
+
+    Returns:
+    str: The extracted status ID or None if not found.
+    """
+    pattern = r"(?:twitter\.com|x\.com)\/\w+\/status\/(\d+)"
     match = re.search(pattern, url)
     if match:
         return match.group(1)

@@ -156,7 +156,8 @@ def extract_all_metadata_to_dict(
 
 
 def extract_posts_ref_metadata_dict(
-    posts: List[RefPost], md_type: MetadataExtractionType
+    posts: List[RefPost],
+    md_type: MetadataExtractionType = MetadataExtractionType.CITOID,
 ) -> Dict[str, RefMetadata]:
     """
     Extract all reference urls from posts and fetch metadata for them.
