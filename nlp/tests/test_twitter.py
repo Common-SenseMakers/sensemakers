@@ -1,12 +1,48 @@
 import sys
 from pathlib import Path
-from desci_sense.shared_functions.dataloaders.twitter.twitter_utils import (
-    extract_external_ref_urls,
-    scrape_tweet,
-)
 
 ROOT = Path(__file__).parents[1]
 sys.path.append(str(ROOT))
+from desci_sense.shared_functions.dataloaders.twitter.twitter_utils import (
+    extract_external_ref_urls,
+    scrape_tweet,
+    extract_twitter_status_id,
+)
+
+
+def test_extract_twitter_status_id_from_twitter_url():
+    url = "https://twitter.com/TechCrunch/status/1798026045544710492"
+    expected_status_id = "1798026045544710492"
+    assert extract_twitter_status_id(url) == expected_status_id
+
+
+def test_extract_twitter_status_id_from_x_url():
+    url = "https://x.com/TechCrunch/status/1798026045544710492"
+    expected_status_id = "1798026045544710492"
+    assert extract_twitter_status_id(url) == expected_status_id
+
+
+def test_extract_twitter_status_id_invalid_url():
+    url = "https://example.com/TechCrunch/status/1798026045544710492"
+    assert extract_twitter_status_id(url) is None
+
+
+def test_extract_twitter_status_id_no_status():
+    url = "https://twitter.com/TechCrunch"
+    assert extract_twitter_status_id(url) is None
+
+
+def test_extract_twitter_status_id_malformed_url():
+    url = "https://twitter.com/TechCrunch/status/"
+    assert extract_twitter_status_id(url) is None
+
+
+def test_extract_twitter_status_id_with_additional_parameters():
+    url = (
+        "https://twitter.com/TechCrunch/status/1798026045544710492?ref_src=twsrc%5Etfw"
+    )
+    expected_status_id = "1798026045544710492"
+    assert extract_twitter_status_id(url) == expected_status_id
 
 
 def test_ext_urls():

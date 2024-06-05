@@ -182,7 +182,7 @@ def fetch_citation(target_url):
         return response
     else:
         raise aiohttp.ClientError(
-            f"Failed to retreive citoid metadata for url {target_url}"
+            f"Failed to retreive citoid metadata for url {target_url}. Response: {response}"
         )
 
 

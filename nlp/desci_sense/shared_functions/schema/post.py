@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from abc import ABC, abstractmethod
 from functools import partial
-from typing import Any, Literal, Sequence, List
+from typing import Any, Literal, Sequence, List, Optional
 from datetime import datetime
 
 from langchain.load.serializable import Serializable
@@ -51,7 +51,30 @@ class RefPost(Post):
     """
     List of URLs referenced by the post
     """
+
+    quoted_url: Optional[str]
+    """
+    URL of post quoted by this post (for platforms that enable quote tweets)
+    """
+
     type: Literal["ReferencePost"] = "ReferencePost"
 
     def has_refs(self):
         return len(self.ref_urls) > 0
+
+
+class QuoteRefPost(RefPost):
+    """
+    RefPost that optionally quotes another post (like a quote tweet)
+    """
+
+    type: Literal["QuoteRefPost"] = "QuoteRefPost"
+
+    quoted_post: Optional[RefPost]
+    """
+    Other post that is quoted by this post
+    """
+
+    @property
+    def is_quote_post(self) -> bool:
+        return self.quoted_post is not None
