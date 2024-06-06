@@ -125,30 +125,11 @@ export class PostsProcessing {
       true
     );
 
-    const publishedPlatforms = appPostFull.mirrors
-      .filter((m) => m.publishStatus === 'published')
-      .map((m) => m.platformId);
-
-    const pendingPlatforms = ALL_PUBLISH_PLATFORMS.filter(
-      (p) => !publishedPlatforms.includes(p)
-    );
-
-    if (DEBUG)
-      logger.debug(
-        `createPostDrafts postId: ${postId}, publishedPlatforms: ${publishedPlatforms}, pendingPlatforms: ${pendingPlatforms}`,
-        {
-          appPostFull,
-          user,
-          publishedPlatforms,
-          pendingPlatforms,
-        }
-      );
-
     /**
      * Create platformPosts as drafts on all platforms
      * */
     const drafts = await Promise.all(
-      pendingPlatforms.map(async (platformId) => {
+      ALL_PUBLISH_PLATFORMS.map(async (platformId) => {
         const accounts = UsersHelper.getAccounts(user, platformId);
 
         if (DEBUG)
@@ -193,8 +174,11 @@ export class PostsProcessing {
             const draft: PlatformPostDraft = {
               postApproval: PlatformPostDraftApproval.PENDING,
               user_id: account.user_id,
-              unsignedPost: draftPost.unsignedPost,
             };
+
+            if (draftPost.unsignedPost) {
+              draft.unsignedPost = draftPost.unsignedPost;
+            }
 
             if (!existingMirrorDraft) {
               /** create and add as mirror */

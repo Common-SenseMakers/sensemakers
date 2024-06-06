@@ -44,7 +44,7 @@ import { UsersService } from '../users/users.service';
 import { getUsernameTag } from '../users/users.utils';
 import { PostsProcessing } from './posts.processing';
 
-const DEBUG = false;
+const DEBUG = true;
 
 /**
  * Top level methods. They instantiate a TransactionManger and execute
@@ -438,8 +438,12 @@ export class PostsManager {
       await this.processing.createOrUpdatePostDrafts(postId, manager);
     }
 
+    const postUpdated = await this.processing.posts.get(postId, manager, true);
+
     /** index the semantics as triples when the post is published */
-    if (postUpdate.republishedStatus === AppPostRepublishedStatus.REPUBLISHED) {
+    if (
+      postUpdated.republishedStatus === AppPostRepublishedStatus.REPUBLISHED
+    ) {
       await this.processing.triples.deleteOfPost(postId, manager);
       const semantics = await (async () => {
         if (postUpdate.semantics) {
@@ -493,17 +497,16 @@ export class PostsManager {
         return;
       }
 
-      /** else mark as approved */
+      /** set review status */
+      const reviewedStatus =
+        existingPost.republishedStatus === AppPostRepublishedStatus.REPUBLISHED
+          ? AppPostReviewStatus.UPDATED
+          : AppPostReviewStatus.APPROVED;
 
-      /** force status transition */
       await this.updatePost(
         newPost.id,
         {
-          reviewedStatus:
-            existingPost.republishedStatus ===
-            AppPostRepublishedStatus.REPUBLISHED
-              ? AppPostReviewStatus.UPDATED
-              : AppPostReviewStatus.APPROVED,
+          reviewedStatus,
         },
         manager
       );

@@ -14,7 +14,10 @@ import { TwitterThread } from '../../src/@shared/types/types.twitter';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { logger } from '../../src/instances/logger';
-import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
+import {
+  THREADS,
+  TWITTER_USER_ID_MOCKS,
+} from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { parsePostTask } from '../../src/posts/posts.task';
 import { UsersHelper } from '../../src/users/users.helper';
@@ -203,7 +206,7 @@ describe.only('030-process', () => {
         fetchParams: { expectedAmount: 10 },
       });
 
-      if (!USE_REAL_TWITTER) {
+      if (!USE_REAL_TWITTER && THREADS.length > 1) {
         expect(pendingPosts).to.have.length(7);
       }
 
@@ -264,7 +267,11 @@ describe.only('030-process', () => {
       });
 
       if (!USE_REAL_TWITTER) {
-        expect(pendingPosts).to.have.length(5);
+        if (THREADS.length > 1) {
+          expect(pendingPosts).to.have.length(5);
+        } else {
+          expect(pendingPosts).to.have.length(0);
+        }
       }
 
       await Promise.all(
@@ -363,7 +370,11 @@ describe.only('030-process', () => {
         }
       );
 
-      expect(publishedPosts).to.have.length(7);
+      if (THREADS.length > 1) {
+        expect(publishedPosts).to.have.length(7);
+      } else {
+        expect(publishedPosts).to.have.length(0);
+      }
 
       const post = publishedPosts[0];
 

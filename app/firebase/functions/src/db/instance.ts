@@ -58,10 +58,10 @@ export class DBInstance {
         return this.firestore.runTransaction(async (transaction) => {
           if (DEBUG) logger.debug('Transaction started');
           const manager = new TransactionManager(transaction);
-          
+
           const result = await func(manager, payload);
           if (DEBUG) logger.debug('Transaction function executed');
-          
+
           await manager.applyWrites();
           if (DEBUG) logger.debug('Transaction writes applied');
           return result;
