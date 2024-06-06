@@ -62,6 +62,13 @@ def test_ext_urls():
         ), f"{case} has_refs? = {tweet.has_refs()} - mismatch with {label}"
 
 
+def test_problem_tweet_i92():
+    # https://github.com/Common-SenseMakers/sensemakers/issues/92
+    url = "https://twitter.com/JingyiQiu4/status/1792956482851663941"
+    tweet = scrape_tweet(url)
+    assert tweet.ref_urls == ["https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4778120"]
+
+
 def test_problem_tweet_i31():
     # https://github.com/csensemakers/desci-sense/issues/31
     test_urls = [("https://twitter.com/victorveitch/status/1722300572554969090", True)]
@@ -71,3 +78,8 @@ def test_problem_tweet_i31():
         assert (
             tweet.has_refs() == label
         ), f"{case} has_refs? = {tweet.has_refs()} - mismatch with {label}"
+
+
+if __name__ == "__main__":
+    url = "https://twitter.com/JingyiQiu4/status/1792956482851663941"
+    tweet = scrape_tweet(url)
