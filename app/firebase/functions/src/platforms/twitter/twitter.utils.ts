@@ -1,3 +1,4 @@
+import { QuoteTweetV2 } from 'src/@shared/types/types.twitter';
 import { ApiResponseError, TweetV2 } from 'twitter-api-v2';
 
 export const handleTwitterError = (e: ApiResponseError) => {
@@ -36,4 +37,30 @@ export const getTweetTextWithUrls = (tweet: TweetV2) => {
   }
 
   return text;
+};
+
+export const convertToQuoteTweets = (
+  tweets: TweetV2[],
+  referencedTweets?: TweetV2[]
+): QuoteTweetV2[] => {
+  const formattedTweets = tweets.map((tweet): QuoteTweetV2 => {
+    if (
+      tweet.referenced_tweets &&
+      tweet.referenced_tweets[0].type === 'quoted'
+    ) {
+      const quotedTweet = referencedTweets?.find(
+        (refTweet) => refTweet.id === tweet.referenced_tweets?.[0].id
+      );
+
+      if (quotedTweet) {
+        return {
+          ...tweet,
+          quote_tweet: quotedTweet,
+        };
+      }
+    }
+    return tweet;
+  });
+
+  return formattedTweets;
 };

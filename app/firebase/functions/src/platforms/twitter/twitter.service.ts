@@ -1,9 +1,4 @@
-import {
-  TTweetv2TweetField,
-  TweetV2,
-  TweetV2UserTimelineParams,
-  Tweetv2FieldsParams,
-} from 'twitter-api-v2';
+import { TweetV2UserTimelineParams, Tweetv2FieldsParams } from 'twitter-api-v2';
 
 import {
   FetchParams,
@@ -25,6 +20,7 @@ import {
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
 import {
+  QuoteTweetV2,
   TwitterDraft,
   TwitterSignupContext,
   TwitterSignupData,
@@ -36,8 +32,10 @@ import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersRepository } from '../../users/users.repository';
 import { PlatformService } from '../platforms.interface';
+import { expansions, tweetFields } from './twitter.config';
 import { TwitterServiceClient } from './twitter.service.client';
 import {
+  convertToQuoteTweets,
   dateStrToTimestampMs,
   getTweetTextWithUrls,
   handleTwitterError,
@@ -90,15 +88,6 @@ export class TwitterService
         manager
       );
 
-      const tweetFields: TTweetv2TweetField[] = [
-        'created_at',
-        'author_id',
-        'text',
-        'entities',
-        'note_tweet',
-        'conversation_id',
-      ];
-
       /**
        * TODO: because we are fetching 30 tweets per page, we
        * can easily end up with more threads than the requested expectedResults
@@ -109,12 +98,13 @@ export class TwitterService
         since_id: params.since_id,
         until_id: params.until_id,
         max_results: 30,
+        expansions,
         'tweet.fields': tweetFields,
         exclude: ['retweets', 'replies'],
       };
 
       let nextToken: string | undefined = undefined;
-      const tweetThreadsMap = new Map<string, TweetV2[]>();
+      const tweetThreadsMap = new Map<string, QuoteTweetV2[]>();
 
       do {
         const timelineParams = _timelineParams;
@@ -127,14 +117,18 @@ export class TwitterService
             userDetails.user_id,
             timelineParams
           );
-
-          if (result.data.data) {
+          const tweetsWithQuoteTweets = convertToQuoteTweets(
+            result.data.data,
+            result.data.includes?.tweets
+          );
+          if (tweetsWithQuoteTweets) {
             /** organize tweets by conversation id to group them into threads */
-            result.data.data.forEach((tweet) => {
+            tweetsWithQuoteTweets.forEach((tweet) => {
               if (tweet.conversation_id) {
                 if (!tweetThreadsMap.has(tweet.conversation_id)) {
                   tweetThreadsMap.set(tweet.conversation_id, []);
                 }
+
                 tweetThreadsMap.get(tweet.conversation_id)?.push(tweet);
               } else {
                 throw new Error('tweet does not have a conversation_id');
@@ -249,7 +243,8 @@ export class TwitterService
     user_id?: string
   ) {
     const options: Partial<Tweetv2FieldsParams> = {
-      'tweet.fields': ['author_id', 'created_at', 'conversation_id'],
+      'tweet.fields': tweetFields,
+      expansions,
     };
 
     const client = user_id
@@ -257,6 +252,24 @@ export class TwitterService
       : this.getGenericClient();
 
     return client.v2.singleTweet(tweetId, options);
+  }
+
+  /** if user_id is provided it must be from the authenticated userId */
+  public async getPosts(
+    tweetIds: string[],
+    manager: TransactionManager,
+    user_id?: string
+  ) {
+    const options: Partial<Tweetv2FieldsParams> = {
+      'tweet.fields': tweetFields,
+      expansions,
+    };
+
+    const client = user_id
+      ? await this.getUserClient(user_id, 'read', manager)
+      : this.getGenericClient();
+
+    return client.v2.tweets(tweetIds, options);
   }
 
   /** user_id must be from the authenticated userId */
