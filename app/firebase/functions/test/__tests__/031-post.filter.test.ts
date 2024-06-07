@@ -41,6 +41,13 @@ describe('031-filter', () => {
         [
           {
             content: 'test content 1',
+            metadata: {
+              originalPlatformAuthor: {
+                id: 'test-user-id',
+                username: 'test-user',
+                name: 'test-user-name',
+              },
+            },
             authorId: 'test-user-id',
             origin: PLATFORM.Nanopub,
             createdAtMs: 12345678,
@@ -61,6 +68,13 @@ describe('031-filter', () => {
         [
           {
             content: 'test content 2',
+            metadata: {
+              originalPlatformAuthor: {
+                id: 'test-user-id',
+                username: 'test-user',
+                name: 'test-user-name',
+              },
+            },
             authorId: 'test-user-id',
             origin: PLATFORM.Nanopub,
             createdAtMs: 12345678,
@@ -80,6 +94,13 @@ describe('031-filter', () => {
         [
           {
             content: 'test content 3',
+            metadata: {
+              originalPlatformAuthor: {
+                id: 'test-user-id',
+                username: 'test-user',
+                name: 'test-user-name',
+              },
+            },
             authorId: 'test-user-id',
             origin: PLATFORM.Nanopub,
             createdAtMs: 12345678,
@@ -104,6 +125,13 @@ describe('031-filter', () => {
         [
           {
             content: 'test content 4',
+            metadata: {
+              originalPlatformAuthor: {
+                id: 'test-user-id',
+                username: 'test-user',
+                name: 'test-user-name',
+              },
+            },
             authorId: 'test-user-id',
             origin: PLATFORM.Nanopub,
             createdAtMs: 12345678,

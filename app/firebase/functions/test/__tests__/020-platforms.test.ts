@@ -112,10 +112,7 @@ describe('02-platforms', () => {
           'getPostsResult.json',
           JSON.stringify(result, null, 2)
         );
-        const quoteTweets = convertToQuoteTweets(
-          result.data,
-          result.includes?.tweets
-        );
+        const quoteTweets = convertToQuoteTweets(result.data, result.includes);
         fs.writeFileSync(
           'quoteTweets.json',
           JSON.stringify(quoteTweets, null, 2)
