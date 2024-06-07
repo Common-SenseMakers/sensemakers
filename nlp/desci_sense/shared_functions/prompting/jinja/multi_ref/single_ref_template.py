@@ -28,16 +28,7 @@ class Answer:
 {% endraw %}
 
 # Input post text:
-- Author: {{ author_name }}
-- Content: {{ content }}
-- References: 
-{%- for ref_md in references_metadata %}
-{{ loop.index }}: {{ ref_md.url }}
-Item type: {{ ref_md.item_type }}
-Title: {{ ref_md.title }}
-Summary: {{ ref_md.summary }}
-------------------
-{%- endfor %}
+{{ rendered_post }}
 
 # Output:
 """

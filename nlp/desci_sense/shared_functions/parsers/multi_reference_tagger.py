@@ -17,6 +17,7 @@ from ..schema.post import RefPost
 from ..prompting.jinja.multi_ref.zero_ref_template import zero_ref_template
 from ..prompting.jinja.multi_ref.single_ref_template import single_ref_template
 from ..prompting.jinja.multi_ref.multi_ref_template import multi_ref_template
+from ..prompting.post_renderers import post_renderer_factory
 from ..web_extractors.metadata_extractors import (
     RefMetadata,
     get_refs_metadata_portion,
@@ -238,6 +239,9 @@ class MultiRefTaggerParserChain(PostParserChain):
 
         self.runnable_fallback = RunnableLambda(return_fallback)
 
+        # init post renderer
+        self.post_renderer = post_renderer_factory(self.parser_config.post_renderer)
+
         # init chains
         llm_chain = (
             self.input_prompt | self.model | find_json_object | self.pydantic_parser
@@ -378,16 +382,18 @@ class MultiRefTaggerParserChain(PostParserChain):
             str: full instantiated prompt
         """
         metadata_list = metadata_list if metadata_list else list()
-        references_metadata = metadata_list
         prompt_j2_template = self.prompt_case_dict[case]["prompt_j2_template"]
         type_templates = self.prompt_case_dict[case]["type_templates"]
+
+        rendered_post = self.post_renderer.render(
+            post,
+            metadata_list,
+        )
 
         # instantiate prompt with ref post details
         full_prompt = prompt_j2_template.render(
             type_templates=type_templates,
-            author_name=post.author,
-            content=post.content,
-            references_metadata=references_metadata,
+            rendered_post=rendered_post,
         )
 
         return full_prompt

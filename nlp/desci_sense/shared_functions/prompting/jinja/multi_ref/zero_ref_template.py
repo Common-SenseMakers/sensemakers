@@ -27,8 +27,7 @@ class Answer:
 {% endraw %}
 
 # Input post text:
-- Author: {{ author_name }}
-- Content: {{ content }}
+{{ rendered_post }}
 
 # Output:
   """

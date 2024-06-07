@@ -28,6 +28,10 @@ class ParserChainType(str, Enum):
     MULTI_REF_TAGGER = "multi_reference_tagger"
 
 
+class PostRendererType(str, Enum):
+    REF_POST = "ref_post"
+
+
 def validate_env_var(env_var_name: str, value: Union[str, None]):
     """
     If `value` is not `None`, returns `value`.
@@ -160,6 +164,7 @@ class RefTaggerChainConfig(PostParserChainConfig):
 class MultiRefTaggerChainConfig(PostParserChainConfig):
     type: ParserChainType = ParserChainType.MULTI_REF_TAGGER
     is_multi_ref: bool = True  # dummy var, just used for pydnatic type resolution
+    post_renderer: PostRendererType = PostRendererType.REF_POST
 
 
 class TopicsPParserChainConfig(PostParserChainConfig):
