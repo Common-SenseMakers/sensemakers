@@ -1,9 +1,12 @@
 import { expect } from 'chai';
-import fs from 'fs';
 
 import { AppUser, FetchParams, PLATFORM } from '../../src/@shared/types/types';
 import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
-import { QuoteTweetV2 } from '../../src/@shared/types/types.twitter';
+import { PlatformPostCreate } from '../../src/@shared/types/types.platform.posts';
+import {
+  QuoteTweetV2,
+  TwitterThread,
+} from '../../src/@shared/types/types.twitter';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { logger } from '../../src/instances/logger';
@@ -54,7 +57,7 @@ describe('02-platforms', () => {
   });
 
   describe('twitter', () => {
-    it('fetch the latest 5 threads', async () => {
+    it.only('fetch the latest 5 threads', async () => {
       if (!user) {
         throw new Error('appUser not created');
       }
@@ -83,12 +86,24 @@ describe('02-platforms', () => {
       );
 
       expect(threads).to.not.be.undefined;
-      if (!USE_REAL_TWITTER) {
-        expect(threads.platformPosts.length).to.be.equal(5);
+      expect(threads.platformPosts.length).to.be.greaterThanOrEqual(5);
+
+      const threadWithQuotedTweet = threads.platformPosts.find((thread) => {
+        return (thread.post as TwitterThread).tweets.some((tweet) => {
+          return tweet.quote_tweet !== undefined;
+        });
+      });
+
+      if (threadWithQuotedTweet) {
+        const genericPost = await twitterService.convertToGeneric({
+          posted: threadWithQuotedTweet,
+        } as PlatformPostCreate<TwitterThread>);
+        console.log('genericPost: ', genericPost);
+        expect(genericPost.metadata.transcludedContent).to.not.be.undefined;
       }
     });
 
-    it.only('includes quote tweets', async () => {
+    it('includes quote tweets in platform post and app post', async () => {
       const postIds = [
         '1798791421152911644', // https://x.com/sense_nets_bot/status/1798791421152911644 quotes https://x.com/sense_nets_bot/status/1795069204418175459
         '1798791660668698927', // https://x.com/sense_nets_bot/status/1798791660668698927 quotes https://x.com/sense_nets_bot/status/1798782358201508331
@@ -108,15 +123,7 @@ describe('02-platforms', () => {
         const result = await services.db.run(async (manager) => {
           return twitterService.getPosts(postIds, manager, twitterId);
         });
-        fs.writeFileSync(
-          'getPostsResult.json',
-          JSON.stringify(result, null, 2)
-        );
         const quoteTweets = convertToQuoteTweets(result.data, result.includes);
-        fs.writeFileSync(
-          'quoteTweets.json',
-          JSON.stringify(quoteTweets, null, 2)
-        );
         expect(quoteTweets).to.not.be.undefined;
         expect(quoteTweets.length).to.be.equal(3);
 

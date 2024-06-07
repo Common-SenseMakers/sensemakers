@@ -1,5 +1,10 @@
-import { QuoteTweetV2 } from 'src/@shared/types/types.twitter';
-import { ApiResponseError, ApiV2Includes, TweetV2 } from 'twitter-api-v2';
+import { QuoteTweetV2, TwitterThread } from 'src/@shared/types/types.twitter';
+import {
+  ApiResponseError,
+  ApiV2Includes,
+  TweetV2,
+  UserV2,
+} from 'twitter-api-v2';
 
 export const handleTwitterError = (e: ApiResponseError) => {
   if (e.request) {
@@ -80,4 +85,41 @@ export const convertToQuoteTweets = (
   });
 
   return formattedTweets;
+};
+
+export const convertTweetsToThreads = (
+  tweets: QuoteTweetV2[],
+  author: UserV2
+) => {
+  const tweetThreadsMap = new Map<string, QuoteTweetV2[]>();
+  tweets.forEach((tweet) => {
+    if (tweet.conversation_id) {
+      if (!tweetThreadsMap.has(tweet.conversation_id)) {
+        tweetThreadsMap.set(tweet.conversation_id, []);
+      }
+
+      tweetThreadsMap.get(tweet.conversation_id)?.push(tweet);
+    } else {
+      throw new Error('tweet does not have a conversation_id');
+    }
+  });
+
+  const tweetsArrays = Array.from(tweetThreadsMap.values());
+  /** sort threads */
+  tweetsArrays.sort(
+    (tA, tB) => Number(tB[0].conversation_id) - Number(tA[0].conversation_id)
+  );
+
+  /** sort tweets inside each thread, and compose the TwitterThread[] array */
+  const threads = tweetsArrays.map((thread): TwitterThread => {
+    const tweets = thread.sort(
+      (tweetA, tweetB) => Number(tweetA.id) - Number(tweetB.id)
+    );
+    return {
+      conversation_id: tweets[0].conversation_id as string,
+      tweets,
+      author,
+    };
+  });
+  return threads;
 };

@@ -40,6 +40,7 @@ import { expansions, tweetFields } from './twitter.config';
 import { TwitterServiceClient } from './twitter.service.client';
 import {
   convertToQuoteTweets,
+  convertTweetsToThreads,
   dateStrToTimestampMs,
   getTweetTextWithUrls,
   handleTwitterError,
@@ -109,7 +110,8 @@ export class TwitterService
 
       let nextToken: string | undefined = undefined;
       let originalAuthor: UserV2 | undefined = undefined;
-      const tweetThreadsMap = new Map<string, QuoteTweetV2[]>();
+      let allTweets: QuoteTweetV2[] = [];
+      let conversationIds: Set<string> = new Set();
 
       do {
         const timelineParams = _timelineParams;
@@ -126,31 +128,26 @@ export class TwitterService
             result.data.data,
             result.data.includes
           );
+          /** keep track of the number of threads */
+          tweetsWithQuoteTweets.forEach((tweet) => {
+            if (tweet.conversation_id) {
+              conversationIds.add(tweet.conversation_id);
+            } else {
+              throw new Error('tweet does not have a conversation_id');
+            }
+          });
           if (!originalAuthor) {
             originalAuthor = result.data.includes?.users?.find(
               (user) => user.id === userDetails.user_id
             );
           }
-          if (tweetsWithQuoteTweets) {
-            /** organize tweets by conversation id to group them into threads */
-            tweetsWithQuoteTweets.forEach((tweet) => {
-              if (tweet.conversation_id) {
-                if (!tweetThreadsMap.has(tweet.conversation_id)) {
-                  tweetThreadsMap.set(tweet.conversation_id, []);
-                }
-
-                tweetThreadsMap.get(tweet.conversation_id)?.push(tweet);
-              } else {
-                throw new Error('tweet does not have a conversation_id');
-              }
-            });
-          }
+          allTweets.push(...tweetsWithQuoteTweets);
 
           nextToken = result.meta.next_token;
         } catch (e: any) {
           if (e.rateLimit) {
             /** if we hit the rate limit after haven gotten some tweets, return what we got so far  */
-            if (tweetThreadsMap.size > 0) {
+            if (conversationIds.size > 0) {
               break;
             } else {
               /** otherwise throw */
@@ -159,38 +156,16 @@ export class TwitterService
           }
         }
 
-        if (tweetThreadsMap.size >= expectedAmount + 1) {
+        if (conversationIds.size >= expectedAmount + 1) {
           break;
         }
       } while (nextToken !== undefined);
-
-      /** the last conversation may be truncated. Discard it */
-      const tweetsArrays = Array.from(tweetThreadsMap.values());
-      /** sort threads */
-      tweetsArrays.sort(
-        (tA, tB) =>
-          Number(tB[0].conversation_id) - Number(tA[0].conversation_id)
-      );
-      /** discard last thread if read many threads. It could had been truncated */
-      // TODO: what if we only read one thread? is this an error?
 
       if (!originalAuthor) {
         throw new Error(`Unexpected originalAuthor undefined`);
       }
 
-      /** sort tweets inside each thread, and compose the TwitterThread[] array */
-      const threads = tweetsArrays.map((thread): TwitterThread => {
-        const tweets = thread.sort(
-          (tweetA, tweetB) => Number(tweetA.id) - Number(tweetB.id)
-        );
-        return {
-          conversation_id: tweets[0].conversation_id as string,
-          tweets,
-          author: originalAuthor as UserV2,
-        };
-      });
-
-      return threads;
+      return convertTweetsToThreads(allTweets, originalAuthor);
     } catch (e: any) {
       throw new Error(handleTwitterError(e));
     }
