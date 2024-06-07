@@ -39,6 +39,8 @@ const THREADS: string[][] = process.env.TEST_THREADS
   : [];
 
 export const TWITTER_USER_ID_MOCKS = '1773032135814717440';
+export const TWITTER_USERNAME_MOCKS = 'sense_nets_bot';
+export const TWITTER_NAME_MOCKS = 'SenseNet Bot';
 
 const getSampleTweet = (
   id: string,
@@ -78,6 +80,11 @@ const threads = THREADS.map((thread, ixThread): TwitterThread => {
   return {
     conversation_id: `${ixThread}`,
     tweets,
+    author: {
+      id: TWITTER_USER_ID_MOCKS,
+      name: TWITTER_NAME_MOCKS,
+      username: TWITTER_USERNAME_MOCKS,
+    },
   };
 });
 
@@ -122,6 +129,11 @@ export const getTwitterMock = (
         const thread = {
           conversation_id: (++state.latestConvId).toString(),
           tweets: [tweet.data],
+          author: {
+            id: TWITTER_USER_ID_MOCKS,
+            name: TWITTER_NAME_MOCKS,
+            username: TWITTER_USERNAME_MOCKS,
+          },
         };
 
         state.threads.push(thread);

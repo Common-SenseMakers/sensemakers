@@ -7,6 +7,22 @@ import { PlatformPost } from './types.platform.posts';
  */
 export interface GenericPostData {
   content: string;
+  metadata: {
+    originalPlatformAuthor: {
+      id: string;
+      username: string;
+      name: string;
+    };
+    transcludedContent?: {
+      url: string;
+      content: string;
+      author: {
+        id: string;
+        username: string;
+        name: string;
+      };
+    }[];
+  };
 }
 
 /**

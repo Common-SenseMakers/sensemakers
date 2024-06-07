@@ -246,8 +246,28 @@ export class TwitterService
     const thread = platformPost.posted.post;
     /** concatenate all tweets in thread into one app post */
     const threadText = thread.tweets.map(getTweetTextWithUrls).join('\n---\n');
+    const transcludedContent = thread.tweets
+      .filter((tweet) => tweet.quote_tweet)
+      .map((tweet) => {
+        if (!tweet.quote_tweet?.author.username) {
+          throw new Error(`Unexpected quote_tweet.author.username undefined`);
+        }
+        return {
+          url: `https://x.com/${tweet.quote_tweet.author.username}/status/${tweet.id}`,
+          content: tweet.quote_tweet.text,
+          author: {
+            name: tweet.quote_tweet.author.name,
+            username: tweet.quote_tweet.author.username,
+            id: tweet.quote_tweet.author.id,
+          },
+        };
+      });
     return {
       content: threadText,
+      metadata: {
+        originalPlatformAuthor: thread.author,
+        transcludedContent,
+      },
     };
   }
 
