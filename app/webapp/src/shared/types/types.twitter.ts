@@ -52,7 +52,15 @@ export interface TwitterDraft {
   text: string;
 }
 
-export type TwitterThread = {
+export interface TwitterThread {
   conversation_id: string;
-  tweets: TweetV2[];
-};
+  tweets: QuoteTweetV2[];
+  author: UserV2;
+}
+
+export interface TweetV2WithAuthor extends TweetV2 {
+  author: UserV2;
+}
+export interface QuoteTweetV2 extends TweetV2 {
+  quote_tweet?: TweetV2WithAuthor;
+}

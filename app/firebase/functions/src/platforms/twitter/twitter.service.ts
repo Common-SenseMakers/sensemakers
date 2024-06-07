@@ -1,4 +1,8 @@
-import { TweetV2UserTimelineParams, Tweetv2FieldsParams } from 'twitter-api-v2';
+import {
+  TweetV2UserTimelineParams,
+  Tweetv2FieldsParams,
+  UserV2,
+} from 'twitter-api-v2';
 
 import {
   FetchParams,
@@ -104,6 +108,7 @@ export class TwitterService
       };
 
       let nextToken: string | undefined = undefined;
+      let originalAuthor: UserV2 | undefined = undefined;
       const tweetThreadsMap = new Map<string, QuoteTweetV2[]>();
 
       do {
@@ -119,8 +124,13 @@ export class TwitterService
           );
           const tweetsWithQuoteTweets = convertToQuoteTweets(
             result.data.data,
-            result.data.includes?.tweets
+            result.data.includes
           );
+          if (!originalAuthor) {
+            originalAuthor = result.data.includes?.users?.find(
+              (user) => user.id === userDetails.user_id
+            );
+          }
           if (tweetsWithQuoteTweets) {
             /** organize tweets by conversation id to group them into threads */
             tweetsWithQuoteTweets.forEach((tweet) => {
@@ -164,6 +174,10 @@ export class TwitterService
       /** discard last thread if read many threads. It could had been truncated */
       // TODO: what if we only read one thread? is this an error?
 
+      if (!originalAuthor) {
+        throw new Error(`Unexpected originalAuthor undefined`);
+      }
+
       /** sort tweets inside each thread, and compose the TwitterThread[] array */
       const threads = tweetsArrays.map((thread): TwitterThread => {
         const tweets = thread.sort(
@@ -172,6 +186,7 @@ export class TwitterService
         return {
           conversation_id: tweets[0].conversation_id as string,
           tweets,
+          author: originalAuthor as UserV2,
         };
       });
 
@@ -309,10 +324,16 @@ export class TwitterService
           `Unexpected created_at undefined, how would we know the timestamp then? )`
         );
       }
-
+      const author = tweet.includes?.users?.find(
+        (user) => user.id === tweet.data.author_id
+      );
+      if (!author) {
+        throw new Error(`Unexpected tweet does not match author`);
+      }
       const thread: TwitterThread = {
         conversation_id: tweet.data.conversation_id,
         tweets: [tweet.data],
+        author,
       };
 
       return {

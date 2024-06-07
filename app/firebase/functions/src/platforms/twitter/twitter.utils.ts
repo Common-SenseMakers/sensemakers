@@ -1,5 +1,5 @@
 import { QuoteTweetV2 } from 'src/@shared/types/types.twitter';
-import { ApiResponseError, TweetV2 } from 'twitter-api-v2';
+import { ApiResponseError, ApiV2Includes, TweetV2 } from 'twitter-api-v2';
 
 export const handleTwitterError = (e: ApiResponseError) => {
   if (e.request) {
@@ -41,21 +41,38 @@ export const getTweetTextWithUrls = (tweet: TweetV2) => {
 
 export const convertToQuoteTweets = (
   tweets: TweetV2[],
-  referencedTweets?: TweetV2[]
+  includes?: ApiV2Includes
 ): QuoteTweetV2[] => {
   const formattedTweets = tweets.map((tweet): QuoteTweetV2 => {
     if (
       tweet.referenced_tweets &&
       tweet.referenced_tweets[0].type === 'quoted'
     ) {
-      const quotedTweet = referencedTweets?.find(
+      const quotedTweet = includes?.tweets?.find(
         (refTweet) => refTweet.id === tweet.referenced_tweets?.[0].id
+      );
+      const quotedTweetAuthor = includes?.users?.find(
+        (user) => user.id === quotedTweet?.author_id
       );
 
       if (quotedTweet) {
+        if (!quotedTweetAuthor) {
+          throw new Error(
+            `Could not find author for quoted tweet: ${JSON.stringify(
+              quotedTweet
+            )}`
+          );
+        }
         return {
           ...tweet,
-          quote_tweet: quotedTweet,
+          quote_tweet: {
+            ...quotedTweet,
+            author: {
+              id: quotedTweetAuthor.id,
+              name: quotedTweetAuthor.name,
+              username: quotedTweetAuthor.username,
+            },
+          },
         };
       }
     }
