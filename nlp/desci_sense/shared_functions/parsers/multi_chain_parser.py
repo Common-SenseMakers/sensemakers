@@ -113,11 +113,15 @@ class MultiChainParser:
         self,
         post: RefPost,
         md_dict: Dict[str, RefMetadata],
-        active_list: List[str],
+        active_list: List[str] = None,
     ) -> List[str]:
         """
         Instantiate prompts for all pparsers specified by `active_list`
         """
+        
+        if active_list is None:
+            active_list = list(self.pparsers.keys())
+            
         inst_prompts = {}
         for pparser in self.get_pparsers():
             if pparser.name in active_list:
