@@ -3,11 +3,41 @@ from pathlib import Path
 
 ROOT = Path(__file__).parents[1]
 sys.path.append(str(ROOT))
+import pytest
+
+from desci_sense.shared_functions.dataloaders import (
+    PostScrapeError,
+    UnknownSocialMediaTypeError,
+    scrape_post,
+)
 from desci_sense.shared_functions.dataloaders.twitter.twitter_utils import (
     extract_external_ref_urls,
     scrape_tweet,
     extract_twitter_status_id,
 )
+
+
+def test_scrape_post_not_found_i95():
+    post_url = "https://twitter.com/AravSrinivas/status/1770128084999758130"
+
+    with pytest.raises(PostScrapeError) as exc_info:
+        scrape_post(post_url)
+
+    assert exc_info.value.post_url == post_url
+    assert (
+        exc_info.value.message
+        == f"Post scraping failed, perhaps it has been deleted: {post_url}"
+    )
+
+
+def test_scrape_post_unknown_social_media_type():
+    post_url = "https://unknownsocialmedia.com/example/status/1234567890"
+
+    with pytest.raises(UnknownSocialMediaTypeError) as exc_info:
+        scrape_post(post_url)
+
+    assert exc_info.value.post_url == post_url
+    assert exc_info.value.message == f"Unknown social media type: {post_url}"
 
 
 def test_extract_twitter_status_id_from_twitter_url():
@@ -66,7 +96,9 @@ def test_problem_tweet_i92():
     # https://github.com/Common-SenseMakers/sensemakers/issues/92
     url = "https://twitter.com/JingyiQiu4/status/1792956482851663941"
     tweet = scrape_tweet(url)
-    assert tweet.ref_urls == ["https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4778120"]
+    assert tweet.ref_urls == [
+        "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4778120"
+    ]
 
 
 def test_problem_tweet_i31():
@@ -81,5 +113,5 @@ def test_problem_tweet_i31():
 
 
 if __name__ == "__main__":
-    url = "https://twitter.com/JingyiQiu4/status/1792956482851663941"
-    tweet = scrape_tweet(url)
+    post_url = "https://twitter.com/example/status/1234567890"
+    tweet = scrape_post(post_url)
