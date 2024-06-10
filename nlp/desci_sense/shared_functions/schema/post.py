@@ -85,16 +85,18 @@ class QuoteRefPost(RefPost):
     def has_quote_post(self) -> bool:
         return self.quoted_post is not None
 
-    def md_ref_urls(self) -> List[str]:
+    def md_ref_urls(self, include_quoted_urls: bool = True) -> List[str]:
         """
         Return list of reference urls for metadata extraction
+        If include_quoted_urls == True, include quoted_post.md_ref_urls()
         """
-        all_ref_urls = self.ref_urls
+        all_ref_urls = self.ref_urls.copy()
         if self.has_quote_post:
-            all_ref_urls += self.quoted_post.md_ref_urls()
+            if include_quoted_urls:
+                all_ref_urls += self.quoted_post.md_ref_urls()
 
-            # remove dups in case quote tweet and quoted tweets refer to same
-            # ref
-            all_ref_urls = list(set(all_ref_urls))
+                # remove dups in case quote tweet and quoted tweets refer to same
+                # ref
+                all_ref_urls = list(set(all_ref_urls))
 
         return all_ref_urls

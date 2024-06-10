@@ -24,6 +24,10 @@ def test_qt_with_external_ref():
     target_urls_set = set(['https://x.com/biorxiv_neursci/status/1798962015148576815',
      'https://www.biorxiv.org/content/10.1101/2024.06.05.597547v1'])
     assert set(quote_ref_post.md_ref_urls()) == target_urls_set
+    assert quote_ref_post.ref_urls == ['https://x.com/biorxiv_neursci/status/1798962015148576815']
+    assert quote_ref_post.quoted_post.ref_urls == ['https://www.biorxiv.org/content/10.1101/2024.06.05.597547v1']
+
+
     
 
 if __name__ == "__main__":
