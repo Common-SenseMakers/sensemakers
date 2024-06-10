@@ -107,7 +107,7 @@ export class PostsManager {
         }
       );
 
-    const newFetchedDetails = await this.updateFetchedStatus(
+    const newFetchedDetails = await this.getNewFetchedStatus(
       platformParams,
       fetchedPosts.fetched
     );
@@ -196,7 +196,7 @@ export class PostsManager {
    * fetched results, update the user profile fetched
    * value
    */
-  protected async updateFetchedStatus(
+  protected async getNewFetchedStatus(
     platformParams: PlatformFetchParams,
     fetched: FetchedDetails
   ) {
@@ -477,9 +477,8 @@ export class PostsManager {
       await this.processing.createOrUpdatePostDrafts(postId, manager);
     }
 
+    /** sync the semantics as triples when the post is updated */
     const postUpdated = await this.processing.posts.get(postId, manager, true);
-
-    /** index the semantics as triples when the post is published */
     await this.processing.upsertTriples(postId, manager, postUpdated.semantics);
   }
 

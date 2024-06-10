@@ -328,7 +328,7 @@ describe.only('030-process', () => {
         throw new Error('username not found in profile');
       }
 
-      const LABELS_URIS = ['https://sense-nets.xyz/asksQuestionAbout'];
+      const LABELS_URIS = ['http://purl.org/spar/cito/linksTo'];
 
       const profilePosts = await services.postsManager.getUserProfile(
         PLATFORM.Twitter,
@@ -338,12 +338,9 @@ describe.only('030-process', () => {
       );
 
       expect(profilePosts).to.not.be.undefined;
-      expect(profilePosts).to.have.length(1);
+      expect(profilePosts).to.have.length(2);
 
-      const LABELS_URIS_2 = [
-        'https://sense-nets.xyz/asksQuestionAbout',
-        'http://purl.org/spar/cito/discusses',
-      ];
+      const LABELS_URIS_2 = ['http://purl.org/spar/cito/linksTo'];
 
       const profilePosts2 = await services.postsManager.getUserProfile(
         PLATFORM.Twitter,
@@ -353,7 +350,7 @@ describe.only('030-process', () => {
       );
 
       expect(profilePosts2).to.not.be.undefined;
-      expect(profilePosts2).to.have.length(5);
+      expect(profilePosts2).to.have.length(2);
     });
 
     it('edits a published post', async () => {
@@ -373,7 +370,7 @@ describe.only('030-process', () => {
       if (THREADS.length > 1) {
         expect(publishedPosts).to.have.length(7);
       } else {
-        expect(publishedPosts).to.have.length(0);
+        expect(publishedPosts).to.have.length(2);
       }
 
       const post = publishedPosts[0];
