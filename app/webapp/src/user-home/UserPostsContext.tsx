@@ -16,6 +16,7 @@ interface PostContextType {
   filterStatus: PostsQueryStatus;
   getPost: (postId: string) => AppPostFull | undefined;
   removePost: (postId: string) => void;
+  moreToFetch: boolean;
 }
 
 export const UserPostsContextValue = createContext<PostContextType | undefined>(
@@ -36,6 +37,7 @@ export const UserPostsContext: React.FC<{
     isLoading,
     status,
     removePost,
+    moreToFetch,
   } = usePostsFetch();
 
   const getPost = useCallback(
@@ -60,6 +62,7 @@ export const UserPostsContext: React.FC<{
         filterStatus: status,
         getPost,
         removePost,
+        moreToFetch,
       }}>
       {children}
     </UserPostsContextValue.Provider>
