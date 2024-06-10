@@ -82,57 +82,17 @@ export class PostsManager {
     account: UserDetailsBase,
     manager: TransactionManager
   ) {
-    const platformParams = await (async (): Promise<PlatformFetchParams> => {
-      if (params.sinceId) {
-        const since = await this.processing.platformPosts.getPostedFromPostId(
-          params.sinceId,
-          platformId,
-          account.user_id,
-          manager
-        );
-
-        return {
-          since_id: since ? since.posted?.post_id : undefined,
-          expectedAmount: params.expectedAmount,
-        };
-      }
-
-      if (params.untilId) {
-        const until = await this.processing.platformPosts.getPostedFromPostId(
-          params.untilId,
-          platformId,
-          account.user_id,
-          manager
-        );
-
-        return {
-          until_id: until ? until.posted?.post_id : undefined,
-          expectedAmount: params.expectedAmount,
-        };
-      }
-
-      /**
-       * if no parameters are provided, if user has
-       * newestId, fetch forward since then, if not
-       * fetch without parameters (which is equivalent to
-       * latest backwards)
-       */
-
-      if (account.fetched?.newest_id) {
-        return {
-          since_id: account.fetched?.newest_id,
-          expectedAmount: params.expectedAmount,
-        };
-      }
-
-      return {
-        expectedAmount: params.expectedAmount,
-      };
-    })();
+    const platformParams = await this.preparePlatformParams(
+      params,
+      platformId,
+      account.user_id,
+      manager,
+      account?.fetched
+    );
 
     if (DEBUG) logger.debug(`Twitter Service - fetch ${platformId}`);
 
-    const fetched = await this.platforms.fetch(
+    const fetchedPosts = await this.platforms.fetch(
       platformId,
       platformParams,
       account,
@@ -141,39 +101,16 @@ export class PostsManager {
 
     if (DEBUG)
       logger.debug(
-        `fetchUser ${platformId} - platformPosts: ${fetched.platformPosts.length}`,
+        `fetchUser ${platformId} - platformPosts: ${fetchedPosts.platformPosts.length}`,
         {
-          fetched,
+          fetched: fetchedPosts,
         }
       );
 
-    /** keep track of the newest and oldest posts */
-    const newFetchedDetails: FetchedDetails = {};
-
-    /**
-     * if until_id was requested, the fetched oldest_id will be the
-     * new oldest_id
-     */
-    if (platformParams.until_id && fetched.fetched.oldest_id) {
-      newFetchedDetails.oldest_id = fetched.fetched.oldest_id;
-    }
-
-    /**
-     * if since_id was requested, the fetched newest_id will be the
-     * new newest_id
-     */
-    if (platformParams.since_id && fetched.fetched.newest_id) {
-      newFetchedDetails.newest_id = fetched.fetched.newest_id;
-    }
-
-    /**
-     * if neither since_id nor until_id were requested, both
-     * the newest and oldest fetched ids will be the absolute ones
-     */
-    if (!platformParams.since_id && !platformParams.until_id) {
-      newFetchedDetails.newest_id = fetched.fetched.newest_id;
-      newFetchedDetails.oldest_id = fetched.fetched.oldest_id;
-    }
+    const newFetchedDetails = await this.updateFetchedStatus(
+      platformParams,
+      fetchedPosts.fetched
+    );
 
     await this.users.repo.setAccountFetched(
       platformId,
@@ -183,7 +120,7 @@ export class PostsManager {
     );
 
     /** convert them into a PlatformPost */
-    return fetched.platformPosts.map((fetchedPost) => {
+    return fetchedPosts.platformPosts.map((fetchedPost) => {
       const platformPost: PlatformPostCreate = {
         platformId: platformId as PUBLISHABLE_PLATFORMS,
         publishStatus: PlatformPostPublishStatus.PUBLISHED,
@@ -193,6 +130,105 @@ export class PostsManager {
 
       return platformPost;
     });
+  }
+
+  /**
+   * From a requested FetchedDetails, derive the actual
+   * PlatformFetchParams based on that user account fetched
+   * values
+   */
+  async preparePlatformParams(
+    params: FetchParams,
+    platformId: PLATFORM,
+    user_id: string,
+    manager: TransactionManager,
+    fetched?: FetchedDetails
+  ): Promise<PlatformFetchParams> {
+    if (params.sinceId) {
+      const since = await this.processing.platformPosts.getPostedFromPostId(
+        params.sinceId,
+        platformId,
+        user_id,
+        manager
+      );
+
+      return {
+        since_id: since ? since.posted?.post_id : undefined,
+        expectedAmount: params.expectedAmount,
+      };
+    }
+
+    if (params.untilId) {
+      const until = await this.processing.platformPosts.getPostedFromPostId(
+        params.untilId,
+        platformId,
+        user_id,
+        manager
+      );
+
+      return {
+        until_id: until ? until.posted?.post_id : undefined,
+        expectedAmount: params.expectedAmount,
+      };
+    }
+
+    /**
+     * if no parameters are provided, if user has
+     * newestId, fetch forward since then, if not
+     * fetch without parameters (which is equivalent to
+     * latest backwards)
+     */
+
+    if (fetched?.newest_id) {
+      return {
+        since_id: fetched?.newest_id,
+        expectedAmount: params.expectedAmount,
+      };
+    }
+
+    return {
+      expectedAmount: params.expectedAmount,
+    };
+  }
+
+  /**
+   * From the PlatformFetchParams and the actual
+   * fetched results, update the user profile fetched
+   * value
+   */
+  protected async updateFetchedStatus(
+    platformParams: PlatformFetchParams,
+    fetched: FetchedDetails
+  ) {
+    /** keep track of the newest and oldest posts */
+    const newFetchedDetails: FetchedDetails = {};
+
+    /**
+     * if until_id was requested, the fetched oldest_id will be the
+     * new oldest_id
+     */
+    if (platformParams.until_id && fetched.oldest_id) {
+      newFetchedDetails.oldest_id = fetched.oldest_id;
+    }
+
+    /**
+     * if since_id was requested, the fetched newest_id will be the
+     * new newest_id
+     */
+    if (platformParams.since_id && fetched.newest_id) {
+      newFetchedDetails.newest_id = fetched.newest_id;
+    }
+
+    /**
+     * if neither since_id nor until_id were requested, both
+     * the newest and oldest fetched ids will be the absolute ones
+     */
+    if (!platformParams.since_id && !platformParams.until_id) {
+      newFetchedDetails.newest_id = fetched.newest_id;
+      newFetchedDetails.oldest_id = fetched.oldest_id;
+    }
+
+    return newFetchedDetails;
   }
 
   /**
@@ -213,7 +249,7 @@ export class PostsManager {
         inputs.user ||
         (await this.users.repo.getUser(inputs.userId as string, manager, true));
 
-      if (DEBUG) logger.debug('fetchUser', { user });
+      if (DEBUG) logger.debug(`fetchUser user: ${user.userId}`, { user });
 
       await Promise.all(
         ALL_PUBLISH_PLATFORMS.map(async (platformId) => {
@@ -225,9 +261,12 @@ export class PostsManager {
                 /** Fetch */
                 try {
                   if (DEBUG)
-                    logger.debug('fetchUser - fetchAccount', {
-                      platformId,
-                    });
+                    logger.debug(
+                      `fetchUser - fetchAccount. platformId:${platformId} - account:${account.user_id}`,
+                      {
+                        platformId,
+                      }
+                    );
 
                   const platformPostsCreate = await this.fetchUserFromPlatform(
                     platformId,
@@ -245,7 +284,7 @@ export class PostsManager {
 
                   if (DEBUG)
                     logger.debug(
-                      `fetchUser - platformPostsCreated: ${platformPostsCreated.length}`,
+                      `fetchUser - platformId:${platformId} - account:${account.user_id} - platformPostsCreated: ${platformPostsCreated.length}`,
                       {
                         platformPostsCreated,
                       }
@@ -441,22 +480,7 @@ export class PostsManager {
     const postUpdated = await this.processing.posts.get(postId, manager, true);
 
     /** index the semantics as triples when the post is published */
-    if (
-      postUpdated.republishedStatus === AppPostRepublishedStatus.REPUBLISHED
-    ) {
-      await this.processing.triples.deleteOfPost(postId, manager);
-      const semantics = await (async () => {
-        if (postUpdate.semantics) {
-          return postUpdate.semantics;
-        }
-        const post = await this.processing.posts.get(postId, manager, true);
-        return post.semantics;
-      })();
-
-      if (semantics) {
-        await this.processing.storeTriples(postId, semantics, manager);
-      }
-    }
+    await this.processing.upsertTriples(postId, manager, postUpdated.semantics);
   }
 
   /**
