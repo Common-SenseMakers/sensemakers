@@ -75,6 +75,11 @@ Summary: + offering paid subscriptions (author: Roger's Bacon)
 
 RENDER_TARGET_MULTI_REF = "\n- Author: default_author\n- Content: These 2 papers are highly recommended!\nhttps://arxiv.org/abs/2402.04607\nhttps://royalsocietypublishing.org/doi/10.1098/rstb.2022.0267\n\n- References:\n1: https://arxiv.org/abs/2402.04607\nItem type: preprint\nTitle: Google Scholar is manipulatable\nSummary: Citations are widely considered in scientists' evaluation. As such, scientists may be incentivized to inflate their citation counts. While previous literature has examined self-citations and citation cartels, it remains unclear whether scientists can purchase citations. Here, we compile a dataset of ~1.6 million profiles on Google Scholar to examine instances of citation fraud on the platform. We survey faculty at highly-ranked universities, and confirm that Google Scholar is widely used when ev\n------------------\n2: https://royalsocietypublishing.org/doi/10.1098/rstb.2022.0267\nItem type: journalArticle\nTitle: Reducing global inequality increases local cooperation: a simple model of group selection with a global externality\nSummary: \n------------------\n"
 
+RENDER_TARGET_KW = "- Content: I really liked this paper!\nhttps://arxiv.org/abs/2402.04607\n\n- References:\n1: https://arxiv.org/abs/2402.04607\nItem type: preprint\nTitle: Google Scholar is manipulatable\nSummary: Citations are widely considered in scientists' evaluation. As such, scientists may be incentivized to inflate their citation counts. While previous literature has examined self-citations and citation cartels, it remains unclear whether scientists can purchase citations. Here, we compile a dataset of ~1.6 million profiles on Google Scholar to examine instances of citation fraud on the platform. We survey faculty at highly-ranked universities, and confirm that Google Scholar is widely used when ev\n------------------\n"
+
+RENDER_TARGET_TOPICS = "- Content: I really liked this paper!\nhttps://arxiv.org/abs/2402.04607\n\n- References:\n1: https://arxiv.org/abs/2402.04607\nItem type: preprint\nTitle: Google Scholar is manipulatable\nSummary: Citations are widely considered in scientists' evaluation. As such, scientists may be incentivized to inflate their citation counts. While previous literature has examined self-citations and citation cartels, it remains unclear whether scientists can purchase citations. Here, we compile a dataset of ~1.6 million profiles on Google Scholar to examine instances of citation fraud on the platform. We survey faculty at highly-ranked universities, and confirm that Google Scholar is widely used when ev\n------------------\n"
+
+
 def test_ref_render_1():
     tweet_url = "https://x.com/science_seeds/status/1752087818099159338"
     quote_ref_post = scrape_post(tweet_url)
@@ -113,7 +118,8 @@ def test_ref_render_multi_ref():
     rendered = ref_post_renderer.render(ref_post, md_list)
     target = RENDER_TARGET_MULTI_REF
     assert rendered == target
-    
+
+
 def test_ref_renderer_in_parser():
     ref_post = convert_text_to_ref_post(TEST_POST_TEXT_W_2_REFS)
     md_dict = extract_posts_ref_metadata_dict([ref_post])
@@ -129,21 +135,60 @@ def test_ref_renderer_in_parser():
     mcp = MultiChainParser(multi_config)
     prompt = mcp.instantiate_prompts(ref_post, md_dict)
     assert RENDER_TARGET_MULTI_REF in prompt["multi_ref_tagger_input"]
-    
 
 
-if __name__ == "__main__":
-    ref_post = convert_text_to_ref_post(TEST_POST_TEXT_W_2_REFS)
-    md_dict = extract_posts_ref_metadata_dict([ref_post])
+def test_kw_ref_post_render():
     multi_config = MultiParserChainConfig(
         parser_configs=[
-            MultiRefTaggerChainConfig(
-                name="multi_ref_tagger",
+            KeywordPParserChainConfig(
+                name="keywords",
                 llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
             )
         ],
         metadata_extract_config=MetadataExtractionConfig(extraction_method="citoid"),
     )
     mcp = MultiChainParser(multi_config)
+    ref_post = convert_text_to_ref_post(TEST_POST_TEXT_W_REF)
+    md_dict = extract_posts_ref_metadata_dict([ref_post])
     prompt = mcp.instantiate_prompts(ref_post, md_dict)
-    assert RENDER_TARGET_MULTI_REF in prompt["multi_ref_tagger_input"]
+    kw_prompt = prompt["keywords_input"]
+    assert RENDER_TARGET_KW in kw_prompt
+    assert "- Author:" not in kw_prompt
+
+
+def test_topics_ref_post_render():
+    multi_config = MultiParserChainConfig(
+        parser_configs=[
+            TopicsPParserChainConfig(
+                name="topics",
+                llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
+            )
+        ],
+        metadata_extract_config=MetadataExtractionConfig(extraction_method="citoid"),
+    )
+    mcp = MultiChainParser(multi_config)
+    ref_post = convert_text_to_ref_post(TEST_POST_TEXT_W_REF)
+    md_dict = extract_posts_ref_metadata_dict([ref_post])
+    prompt = mcp.instantiate_prompts(ref_post, md_dict)
+    topics_prompt = prompt["topics_input"]
+    assert RENDER_TARGET_TOPICS in topics_prompt
+    assert "- Author:" not in topics_prompt
+
+
+if __name__ == "__main__":
+    multi_config = MultiParserChainConfig(
+        parser_configs=[
+            TopicsPParserChainConfig(
+                name="topics",
+                llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
+            )
+        ],
+        metadata_extract_config=MetadataExtractionConfig(extraction_method="citoid"),
+    )
+    mcp = MultiChainParser(multi_config)
+    ref_post = convert_text_to_ref_post(TEST_POST_TEXT_W_REF)
+    md_dict = extract_posts_ref_metadata_dict([ref_post])
+    prompt = mcp.instantiate_prompts(ref_post, md_dict)
+    topics_prompt = prompt["topics_input"]
+    assert RENDER_TARGET_TOPICS in topics_prompt
+    assert "- Author:" not in topics_prompt

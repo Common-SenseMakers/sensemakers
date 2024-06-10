@@ -164,12 +164,12 @@ class ReferenceTaggerParserChain(AllowedTermsPParserChain):
             metadata_list = []
 
         # check how many external references post mentions
-        if len(post.ref_urls) == 0:
+        if len(post.md_ref_urls()) == 0:
             case = PromptCase.ZERO_REF
 
         else:
             # at least one external reference
-            if len(post.ref_urls) == 1:
+            if len(post.md_ref_urls()) == 1:
                 case = PromptCase.SINGLE_REF
                 # if metadata flag is active, retreive metadata
 
@@ -187,7 +187,7 @@ class ReferenceTaggerParserChain(AllowedTermsPParserChain):
         full_prompt = {
             self.input_name: prompt,
             self.allowed_terms_name: self.prompt_case_dict[case]["labels"],
-            "ref_urls": post.ref_urls,
+            "ref_urls": post.md_ref_urls(),
         }
 
         return full_prompt

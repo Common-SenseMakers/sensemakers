@@ -3,7 +3,9 @@ from jinja2 import Template
 
 ref_post_template = Template(
     """
+{%- if author_name %}
 - Author: {{ author_name }}
+{%- endif %}
 - Content: {{ content }}
 {%- if references_metadata|length > 0 %}
 - References: 

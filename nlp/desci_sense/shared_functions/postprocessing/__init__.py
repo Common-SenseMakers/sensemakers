@@ -160,7 +160,7 @@ def convert_raw_output_to_st_format(
     output: dict,
     md_dict: Dict[str, RefMetadata],
 ) -> CombinedParserOutput:
-    reference_urls = post.ref_urls
+    reference_urls = post.md_ref_urls()
     item_types = [
         md_dict[url].item_type if md_dict[url] else "unknown" for url in reference_urls
     ]
@@ -223,7 +223,7 @@ def convert_predicted_relations_to_rdf_triplets(
     ontology: OntologyBase,
 ) -> List[RDFTriplet]:
     post: RefPost = prediction.get("post")
-    refs = post.ref_urls
+    refs = post.md_ref_urls()
 
     # extract predicted labels
     predicted_labels = prediction["answer"]["multi_tag"]
@@ -390,7 +390,7 @@ def combine_from_raw_results(
         md_dict,
     )
     combined_parser_output = {
-        "reference_urls": post.ref_urls,
+        "reference_urls": post.md_ref_urls(),
         "item_types": [md.item_type for md in md_list],
         "metadata_list": md_list,
         "debug": {},

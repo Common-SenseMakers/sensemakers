@@ -60,7 +60,13 @@ class RefPost(Post):
     type: Literal["ReferencePost"] = "ReferencePost"
 
     def has_refs(self):
-        return len(self.ref_urls) > 0
+        return len(self.md_ref_urls()) > 0
+
+    def md_ref_urls(self) -> List[str]:
+        """
+        Return list of reference urls for metadata extraction
+        """
+        return self.ref_urls
 
 
 class QuoteRefPost(RefPost):
@@ -76,5 +82,19 @@ class QuoteRefPost(RefPost):
     """
 
     @property
-    def is_quote_post(self) -> bool:
+    def has_quote_post(self) -> bool:
         return self.quoted_post is not None
+
+    def md_ref_urls(self) -> List[str]:
+        """
+        Return list of reference urls for metadata extraction
+        """
+        all_ref_urls = self.ref_urls
+        if self.has_quote_post:
+            all_ref_urls += self.quoted_post.md_ref_urls()
+
+            # remove dups in case quote tweet and quoted tweets refer to same
+            # ref
+            all_ref_urls = list(set(all_ref_urls))
+
+        return all_ref_urls

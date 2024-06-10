@@ -163,7 +163,7 @@ def extract_posts_ref_metadata_dict(
     Extract all reference urls from posts and fetch metadata for them.
     Return dict of metadata keyed by url.
     """
-    all_ref_urls = list(set(flatten([p.ref_urls for p in posts])))
+    all_ref_urls = list(set(flatten([p.md_ref_urls() for p in posts])))
     md_dict = extract_all_metadata_to_dict(
         all_ref_urls, md_type, max_summary_length=500
     )
@@ -194,7 +194,7 @@ def get_ref_post_metadata_list(
     Returns list of the post's reference metadata
     """
     md_list = []
-    for ref in post.ref_urls:
+    for ref in post.md_ref_urls():
         if ref in md_dict:
             md = md_dict.get(ref)
             if md:

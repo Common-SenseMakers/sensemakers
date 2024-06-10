@@ -15,9 +15,14 @@ class RefPostRenderer(PostRenderer):
         self,
         post: RefPost,
         metadata_list: List[RefMetadata],
+        show_author: bool = True,
     ) -> str:
+        if show_author:
+            author_name = post.author
+        else:
+            author_name = None
         rendered_post = self._j2_template.render(
-            author_name=post.author,
+            author_name=author_name,
             content=post.content,
             references_metadata=metadata_list,
         )

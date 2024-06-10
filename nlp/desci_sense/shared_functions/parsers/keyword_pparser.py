@@ -72,14 +72,16 @@ class KeywordPostParserChain(PostParserChain):
             # if metadata not enabled - remove all metadata
             metadata_list = []
 
-        # format metadata into string for prompt
-        references_metadata = get_refs_metadata_portion(metadata_list)
+        # render post with metadata for prompt
+        rendered_post = self.post_renderer.render(
+            post,
+            metadata_list,
+            show_author=False,
+        )
 
         # instantiate prompt with ref post details
         full_prompt = self.prompt_template.render(
-            author_name=post.author,
-            content=post.content,
-            references_metadata=references_metadata,
+            rendered_post=rendered_post,
             max_keywords=self.parser_config.max_keywords,
         )
 

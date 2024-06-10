@@ -96,8 +96,8 @@ def convert_vxtweet_to_quote_ref_post(tweet: dict) -> QuoteRefPost:
         quoted_tweet = convert_vxtweet_to_ref_post(tweet["qrt"])
         quoted_url = quoted_tweet.url
         assert (
-            quoted_url in ref_post.ref_urls
-        ), f"{quoted_url} not in {ref_post.ref_urls}"
+            quoted_url in ref_post.md_ref_urls()
+        ), f"{quoted_url} not in {ref_post.md_ref_urls()}"
     else:
         quoted_tweet = None
         quoted_url = None
@@ -109,7 +109,7 @@ def convert_vxtweet_to_quote_ref_post(tweet: dict) -> QuoteRefPost:
         created_at=ref_post.created_at,
         source_network="twitter",
         metadata=tweet,
-        ref_urls=ref_post.ref_urls,
+        ref_urls=ref_post.md_ref_urls(),
         quoted_url=quoted_url,
         quoted_post=quoted_tweet,
     )
