@@ -31,6 +31,7 @@ export const usePostsFetch = () => {
 
   const [isFetchingNewer, setIsFetchingNewer] = useState(false);
   const [errorFetchingNewer, setErrorFetchingNewer] = useState<Error>();
+  const [moreToFetch, setMoreToFetch] = useState(true);
 
   const unsubscribeCallbacks = useRef<Record<string, () => void>>({});
 
@@ -198,6 +199,11 @@ export const usePostsFetch = () => {
         addPosts(readPosts, 'end');
         setIsFetchingOlder(false);
         setIsLoading(false);
+        if (readPosts.length < params.fetchParams.expectedAmount) {
+          setMoreToFetch(false);
+        } else {
+          setMoreToFetch(true);
+        }
       } catch (e: any) {
         setIsFetchingOlder(false);
         setErrorFetchingOlder(e);
@@ -290,5 +296,6 @@ export const usePostsFetch = () => {
     errorFetchingNewer,
     isLoading,
     status,
+    moreToFetch,
   };
 };
