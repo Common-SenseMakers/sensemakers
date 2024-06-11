@@ -43,10 +43,7 @@ export interface TwitterUserDetails
 
 export type TweetRead = TweetV2PostTweetResult['data'];
 
-export interface TwitterUser {
-  user_id: string;
-  screen_name: string;
-}
+export type TwitterUser = Required<Pick<UserV2, 'id' | 'username' | 'name'>>;
 
 export interface TwitterDraft {
   text: string;
@@ -54,13 +51,32 @@ export interface TwitterDraft {
 
 export interface TwitterThread {
   conversation_id: string;
-  tweets: QuoteTweetV2[];
-  author: UserV2;
+  tweets: AppTweet[];
+  author: TwitterUser;
 }
 
-export interface TweetV2WithAuthor extends TweetV2 {
-  author: UserV2;
-}
-export interface QuoteTweetV2 extends TweetV2 {
-  quote_tweet?: TweetV2WithAuthor;
+export const requiredTweetFields = [
+  'id',
+  'created_at',
+  'author_id',
+  'text',
+  'entities',
+  'conversation_id',
+] as const;
+
+export const optionalTweetFields = ['note_tweet'] as const;
+
+type RequiredTweetFields = (typeof requiredTweetFields)[number];
+type OptionalTweetFields = (typeof optionalTweetFields)[number];
+
+export type AppTweetBase = Required<Pick<TweetV2, RequiredTweetFields>> &
+  Pick<TweetV2, OptionalTweetFields>;
+
+export type AppQuotedTweet = AppTweetBase & {
+  author: TwitterUser;
+};
+
+/** our internal representation of a tweet */
+export interface AppTweet extends AppTweetBase {
+  quoted_tweet?: AppQuotedTweet;
 }

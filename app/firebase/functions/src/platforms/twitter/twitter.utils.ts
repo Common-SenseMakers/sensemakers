@@ -1,4 +1,10 @@
-import { QuoteTweetV2, TwitterThread } from 'src/@shared/types/types.twitter';
+import {
+  AppTweet,
+  AppTweetBase,
+  TwitterThread,
+  optionalTweetFields,
+  requiredTweetFields,
+} from 'src/@shared/types/types.twitter';
 import {
   ApiResponseError,
   ApiV2Includes,
@@ -30,7 +36,7 @@ export const dateStrToTimestampMs = (dateStr: string) => {
   return date.getTime();
 };
 
-export const getTweetTextWithUrls = (tweet: TweetV2) => {
+export const getTweetTextWithUrls = (tweet: AppTweet) => {
   const fullTweet = tweet['note_tweet'] ? tweet['note_tweet'] : tweet;
   const urls = fullTweet.entities?.urls;
   let text = fullTweet.text;
@@ -44,11 +50,37 @@ export const getTweetTextWithUrls = (tweet: TweetV2) => {
   return text;
 };
 
-export const convertToQuoteTweets = (
+export const convertToAppTweetBase = (tweet: TweetV2): AppTweetBase => {
+  requiredTweetFields.forEach((field) => {
+    if (
+      !(field in tweet) ||
+      tweet[field] === undefined ||
+      tweet[field] === null
+    ) {
+      throw new Error(`TweetV2 is missing required field: ${field}`);
+    }
+  });
+
+  const appTweetBase: Partial<AppTweetBase> = {};
+  requiredTweetFields.forEach((field) => {
+    appTweetBase[field] = tweet[field] as any;
+  });
+
+  optionalTweetFields.forEach((field) => {
+    if (field in tweet) {
+      appTweetBase[field] = tweet[field] as any;
+    }
+  });
+
+  return appTweetBase as AppTweetBase;
+};
+
+export const convertToAppTweets = (
   tweets: TweetV2[],
   includes?: ApiV2Includes
-): QuoteTweetV2[] => {
-  const formattedTweets = tweets.map((tweet): QuoteTweetV2 => {
+): AppTweet[] => {
+  const formattedTweets = tweets.map((tweet): AppTweet => {
+    const appTweetBase = convertToAppTweetBase(tweet);
     if (
       tweet.referenced_tweets &&
       tweet.referenced_tweets[0].type === 'quoted'
@@ -68,10 +100,11 @@ export const convertToQuoteTweets = (
             )}`
           );
         }
+        const quotedAppTweetBase = convertToAppTweetBase(quotedTweet);
         return {
-          ...tweet,
-          quote_tweet: {
-            ...quotedTweet,
+          ...appTweetBase,
+          quoted_tweet: {
+            ...quotedAppTweetBase,
             author: {
               id: quotedTweetAuthor.id,
               name: quotedTweetAuthor.name,
@@ -81,27 +114,21 @@ export const convertToQuoteTweets = (
         };
       }
     }
-    return tweet;
+
+    return appTweetBase;
   });
 
   return formattedTweets;
 };
 
-export const convertTweetsToThreads = (
-  tweets: QuoteTweetV2[],
-  author: UserV2
-) => {
-  const tweetThreadsMap = new Map<string, QuoteTweetV2[]>();
+export const convertTweetsToThreads = (tweets: AppTweet[], author: UserV2) => {
+  const tweetThreadsMap = new Map<string, AppTweet[]>();
   tweets.forEach((tweet) => {
-    if (tweet.conversation_id) {
-      if (!tweetThreadsMap.has(tweet.conversation_id)) {
-        tweetThreadsMap.set(tweet.conversation_id, []);
-      }
-
-      tweetThreadsMap.get(tweet.conversation_id)?.push(tweet);
-    } else {
-      throw new Error('tweet does not have a conversation_id');
+    if (!tweetThreadsMap.has(tweet.conversation_id)) {
+      tweetThreadsMap.set(tweet.conversation_id, []);
     }
+
+    tweetThreadsMap.get(tweet.conversation_id)?.push(tweet);
   });
 
   const tweetsArrays = Array.from(tweetThreadsMap.values());
@@ -116,9 +143,13 @@ export const convertTweetsToThreads = (
       (tweetA, tweetB) => Number(tweetA.id) - Number(tweetB.id)
     );
     return {
-      conversation_id: tweets[0].conversation_id as string,
+      conversation_id: tweets[0].conversation_id,
       tweets,
-      author,
+      author: {
+        id: author.id,
+        name: author.name,
+        username: author.username,
+      },
     };
   });
   return threads;

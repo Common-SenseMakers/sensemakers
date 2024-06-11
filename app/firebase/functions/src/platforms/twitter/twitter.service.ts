@@ -24,7 +24,7 @@ import {
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
 import {
-  QuoteTweetV2,
+  AppTweet,
   TwitterDraft,
   TwitterSignupContext,
   TwitterSignupData,
@@ -39,7 +39,8 @@ import { PlatformService } from '../platforms.interface';
 import { expansions, tweetFields } from './twitter.config';
 import { TwitterServiceClient } from './twitter.service.client';
 import {
-  convertToQuoteTweets,
+  convertToAppTweetBase,
+  convertToAppTweets,
   convertTweetsToThreads,
   dateStrToTimestampMs,
   getTweetTextWithUrls,
@@ -110,7 +111,7 @@ export class TwitterService
 
       let nextToken: string | undefined = undefined;
       let originalAuthor: UserV2 | undefined = undefined;
-      let allTweets: QuoteTweetV2[] = [];
+      let allTweets: AppTweet[] = [];
       let conversationIds: Set<string> = new Set();
 
       do {
@@ -124,12 +125,12 @@ export class TwitterService
             userDetails.user_id,
             timelineParams
           );
-          const tweetsWithQuoteTweets = convertToQuoteTweets(
+          const appTweets = convertToAppTweets(
             result.data.data,
             result.data.includes
           );
           /** keep track of the number of threads */
-          tweetsWithQuoteTweets.forEach((tweet) => {
+          appTweets.forEach((tweet) => {
             if (tweet.conversation_id) {
               conversationIds.add(tweet.conversation_id);
             } else {
@@ -141,7 +142,7 @@ export class TwitterService
               (user) => user.id === userDetails.user_id
             );
           }
-          allTweets.push(...tweetsWithQuoteTweets);
+          allTweets.push(...appTweets);
 
           nextToken = result.meta.next_token;
         } catch (e: any) {
@@ -222,18 +223,18 @@ export class TwitterService
     /** concatenate all tweets in thread into one app post */
     const threadText = thread.tweets.map(getTweetTextWithUrls).join('\n---\n');
     const transcludedContent = thread.tweets
-      .filter((tweet) => tweet.quote_tweet)
+      .filter((tweet) => tweet.quoted_tweet)
       .map((tweet) => {
-        if (!tweet.quote_tweet?.author.username) {
+        if (!tweet.quoted_tweet?.author.username) {
           throw new Error(`Unexpected quote_tweet.author.username undefined`);
         }
         return {
-          url: `https://x.com/${tweet.quote_tweet.author.username}/status/${tweet.id}`,
-          content: tweet.quote_tweet.text,
+          url: `https://x.com/${tweet.quoted_tweet.author.username}/status/${tweet.id}`,
+          content: tweet.quoted_tweet.text,
           author: {
-            name: tweet.quote_tweet.author.name,
-            username: tweet.quote_tweet.author.username,
-            id: tweet.quote_tweet.author.id,
+            name: tweet.quoted_tweet.author.name,
+            username: tweet.quoted_tweet.author.username,
+            id: tweet.quoted_tweet.author.id,
           },
         };
       });
@@ -327,7 +328,7 @@ export class TwitterService
       }
       const thread: TwitterThread = {
         conversation_id: tweet.data.conversation_id,
-        tweets: [tweet.data],
+        tweets: [convertToAppTweetBase(tweet.data)],
         author,
       };
 

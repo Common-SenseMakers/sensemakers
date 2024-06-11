@@ -3,16 +3,13 @@ import { expect } from 'chai';
 import { AppUser, FetchParams, PLATFORM } from '../../src/@shared/types/types';
 import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
 import { PlatformPostCreate } from '../../src/@shared/types/types.platform.posts';
-import {
-  QuoteTweetV2,
-  TwitterThread,
-} from '../../src/@shared/types/types.twitter';
+import { AppTweet, TwitterThread } from '../../src/@shared/types/types.twitter';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { logger } from '../../src/instances/logger';
 import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
-import { convertToQuoteTweets } from '../../src/platforms/twitter/twitter.utils';
+import { convertToAppTweets } from '../../src/platforms/twitter/twitter.utils';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
 import { getMockPost } from '../utils/posts.utils';
@@ -56,8 +53,8 @@ describe('02-platforms', () => {
     });
   });
 
-  describe('twitter', () => {
-    it.only('fetch the latest 5 threads', async () => {
+  describe.only('twitter', () => {
+    it('fetch the latest 5 threads', async () => {
       if (!user) {
         throw new Error('appUser not created');
       }
@@ -90,7 +87,7 @@ describe('02-platforms', () => {
 
       const threadWithQuotedTweet = threads.platformPosts.find((thread) => {
         return (thread.post as TwitterThread).tweets.some((tweet) => {
-          return tweet.quote_tweet !== undefined;
+          return tweet.quoted_tweet !== undefined;
         });
       });
 
@@ -123,9 +120,9 @@ describe('02-platforms', () => {
         const result = await services.db.run(async (manager) => {
           return twitterService.getPosts(postIds, manager, twitterId);
         });
-        const quoteTweets = convertToQuoteTweets(result.data, result.includes);
-        expect(quoteTweets).to.not.be.undefined;
-        expect(quoteTweets.length).to.be.equal(3);
+        const appTweets = convertToAppTweets(result.data, result.includes);
+        expect(appTweets).to.not.be.undefined;
+        expect(appTweets.length).to.be.equal(3);
 
         const quotedTweetIds = [
           '1795069204418175459',
@@ -133,8 +130,8 @@ describe('02-platforms', () => {
           '1798549107507974626',
         ];
 
-        quoteTweets.forEach((qt: QuoteTweetV2) => {
-          expect(quotedTweetIds).to.include(qt.quote_tweet?.id);
+        appTweets.forEach((appTweet: AppTweet) => {
+          expect(quotedTweetIds).to.include(appTweet.quoted_tweet?.id);
         });
       } catch (error) {
         console.error('error: ', error);
