@@ -18,7 +18,6 @@ import {
   PlatformPost,
   PlatformPostCreate,
   PlatformPostCreated,
-  PlatformPostDraftApproval,
   PlatformPostPublishOrigin,
   PlatformPostPublishStatus,
   PlatformPostSignerType,
@@ -487,10 +486,17 @@ export class PostsManager {
    * - The content and the semantics might have changed.
    * - The draft value on the mirrors array might have changed.
    *
+   * The platformIds are the platforms where the post will be published
+   * (or updated/republished)
+   *
    * userId must be the authenticated user to prevent posting on
    * behalf of others.
    */
-  async publishOrUpdatePost(newPost: AppPostFull, userId: string) {
+  async publishPost(
+    newPost: AppPostFull,
+    platformIds: PLATFORM[],
+    userId: string
+  ) {
     await this.db.run(async (manager) => {
       if (DEBUG)
         logger.debug(`approvePost ${newPost.id}`, { post: newPost, userId });
@@ -534,36 +540,31 @@ export class PostsManager {
         manager
       );
 
-      /** check if content or semantics changed (other changes are not expected and omited) */
-      if (
-        existingPost.content !== newPost.content ||
-        existingPost.semantics !== newPost.semantics
-      ) {
-        if (DEBUG)
-          logger.debug('approvePost - updateContent', {
-            existing: existingPost,
-            post: newPost,
-          });
+      if (DEBUG)
+        logger.debug('approvePost - updateContent', {
+          existing: existingPost,
+          post: newPost,
+        });
 
-        /** the mirror drafts are also updated based on the the new content and semantics */
-        await this.updatePost(
-          newPost.id,
-          {
-            reviewedStatus: AppPostReviewStatus.APPROVED,
-            content: newPost.content,
-            semantics: newPost.semantics,
-          },
-          manager
-        );
-      }
+      /**
+       * Force update the content and semantics. The updatePost method makes sure
+       * the mirrors and triples are aligned with the post. So its safer to always
+       * call it
+       */
+      await this.updatePost(
+        newPost.id,
+        {
+          reviewedStatus: AppPostReviewStatus.APPROVED,
+          content: newPost.content,
+          semantics: newPost.semantics,
+        },
+        manager
+      );
 
-      /** publish approved drafts */
+      /** publish drafts */
       const published = await Promise.all(
         newPost.mirrors.map(async (mirror) => {
-          if (
-            mirror.draft &&
-            mirror.draft.postApproval === PlatformPostDraftApproval.APPROVED
-          ) {
+          if (platformIds.includes(mirror.platformId) && mirror.draft) {
             const account = UsersHelper.getAccount(
               user,
               mirror.platformId,

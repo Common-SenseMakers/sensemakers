@@ -1,8 +1,10 @@
 import { RequestHandler } from 'express';
 
-import { UserProfileQuery } from '../../@shared/types/types';
 import {
-  AppPostFull,
+  PublishPostPayload,
+  UserProfileQuery,
+} from '../../@shared/types/types';
+import {
   PostUpdatePayload,
   ProfilePostsQuery,
   UserPostsQuery,
@@ -159,9 +161,9 @@ export const approvePostController: RequestHandler = async (
 
     const payload = (await approvePostSchema.validate(
       request.body
-    )) as AppPostFull;
+    )) as PublishPostPayload;
 
-    await postsManager.publishOrUpdatePost(payload, userId);
+    await postsManager.publishPost(payload.post, payload.platformIds, userId);
 
     if (DEBUG)
       logger.debug(`${request.path}: approvePost`, {

@@ -1,5 +1,6 @@
 import { NanopubUserDetails } from './types.nanopubs';
 import { OrcidUserDetails } from './types.orcid';
+import { AppPostFull } from './types.posts';
 import { TwitterUserDetails } from './types.twitter';
 
 export enum PLATFORM {
@@ -143,4 +144,9 @@ export interface PlatformFetchParams {
 export interface UserProfileQuery {
   platformId: PLATFORM;
   username: string;
+}
+
+export interface PublishPostPayload {
+  post: AppPostFull;
+  platformIds: PLATFORM[];
 }
