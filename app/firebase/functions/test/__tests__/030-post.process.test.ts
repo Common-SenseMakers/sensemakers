@@ -237,8 +237,9 @@ describe.only('030-process', () => {
           }
 
           /** send updated post (content and semantics did not changed) */
-          await services.postsManager.publishOrUpdatePost(
+          await services.postsManager.publishPost(
             pendingPost,
+            [PLATFORM.Nanopub],
             user.userId
           );
 
@@ -293,8 +294,9 @@ describe.only('030-process', () => {
           }
 
           /** send updated post (content and semantics did not changed) */
-          await services.postsManager.publishOrUpdatePost(
+          await services.postsManager.publishPost(
             pendingPost,
+            [PLATFORM.Nanopub],
             user.userId
           );
 
@@ -382,7 +384,11 @@ describe.only('030-process', () => {
       newPost.content = newContent;
 
       /** send updated post (content and semantics did not changed) */
-      await services.postsManager.publishOrUpdatePost(newPost, user.userId);
+      await services.postsManager.publishPost(
+        newPost,
+        [PLATFORM.Nanopub],
+        user.userId
+      );
 
       const readPost = await services.postsManager.getPost(post.id, true);
 
