@@ -11,7 +11,11 @@ import React, {
 import { useAppFetch } from '../api/app.fetch';
 import { useToastContext } from '../app/ToastsContext';
 import { subscribeToUpdates } from '../firestore/realtime.listener';
-import { AppUserRead, PLATFORM } from '../shared/types/types';
+import {
+  AppUserRead,
+  PLATFORM,
+  PublishPostPayload,
+} from '../shared/types/types';
 import {
   PlatformPost,
   PlatformPostDraft,
@@ -303,11 +307,16 @@ export const PostContext: React.FC<{
       nanopub.draft.postApproval = PlatformPostDraftApproval.APPROVED;
     }
 
-    await appFetch<void, AppPostFull>('/api/posts/approve', post);
+    if (post) {
+      await appFetch<void, PublishPostPayload>('/api/posts/approve', {
+        post,
+        platformIds: [PLATFORM.Nanopub],
+      });
+    }
 
     setEnabledEdit(false);
 
-    // setIsUpdating(false); should be set by the refetech flow
+    // setIsUpdating(false); should be set by the re-fetch flow
   };
 
   const editable =

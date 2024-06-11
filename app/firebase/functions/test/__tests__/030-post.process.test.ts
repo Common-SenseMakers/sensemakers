@@ -14,7 +14,10 @@ import { TwitterThread } from '../../src/@shared/types/types.twitter';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { logger } from '../../src/instances/logger';
-import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
+import {
+  THREADS,
+  TWITTER_USER_ID_MOCKS,
+} from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { parsePostTask } from '../../src/posts/posts.task';
 import { UsersHelper } from '../../src/users/users.helper';
@@ -29,7 +32,7 @@ import {
 import { getTestServices } from './test.services';
 
 const DEBUG_PREFIX = `030-process`;
-const DEBUG = true;
+const DEBUG = false;
 
 describe.only('030-process', () => {
   let rsaKeys = getRSAKeys('');
@@ -203,7 +206,7 @@ describe.only('030-process', () => {
         fetchParams: { expectedAmount: 10 },
       });
 
-      if (!USE_REAL_TWITTER) {
+      if (!USE_REAL_TWITTER && THREADS.length > 1) {
         expect(pendingPosts).to.have.length(7);
       }
 
@@ -234,8 +237,9 @@ describe.only('030-process', () => {
           }
 
           /** send updated post (content and semantics did not changed) */
-          await services.postsManager.publishOrUpdatePost(
+          await services.postsManager.publishPost(
             pendingPost,
+            [PLATFORM.Nanopub],
             user.userId
           );
 
@@ -264,7 +268,11 @@ describe.only('030-process', () => {
       });
 
       if (!USE_REAL_TWITTER) {
-        expect(pendingPosts).to.have.length(5);
+        if (THREADS.length > 1) {
+          expect(pendingPosts).to.have.length(5);
+        } else {
+          expect(pendingPosts).to.have.length(0);
+        }
       }
 
       await Promise.all(
@@ -286,8 +294,9 @@ describe.only('030-process', () => {
           }
 
           /** send updated post (content and semantics did not changed) */
-          await services.postsManager.publishOrUpdatePost(
+          await services.postsManager.publishPost(
             pendingPost,
+            [PLATFORM.Nanopub],
             user.userId
           );
 
@@ -321,7 +330,7 @@ describe.only('030-process', () => {
         throw new Error('username not found in profile');
       }
 
-      const LABELS_URIS = ['https://sense-nets.xyz/asksQuestionAbout'];
+      const LABELS_URIS = ['http://purl.org/spar/cito/linksTo'];
 
       const profilePosts = await services.postsManager.getUserProfile(
         PLATFORM.Twitter,
@@ -331,12 +340,9 @@ describe.only('030-process', () => {
       );
 
       expect(profilePosts).to.not.be.undefined;
-      expect(profilePosts).to.have.length(1);
+      expect(profilePosts).to.have.length(2);
 
-      const LABELS_URIS_2 = [
-        'https://sense-nets.xyz/asksQuestionAbout',
-        'http://purl.org/spar/cito/discusses',
-      ];
+      const LABELS_URIS_2 = ['http://purl.org/spar/cito/linksTo'];
 
       const profilePosts2 = await services.postsManager.getUserProfile(
         PLATFORM.Twitter,
@@ -346,7 +352,7 @@ describe.only('030-process', () => {
       );
 
       expect(profilePosts2).to.not.be.undefined;
-      expect(profilePosts2).to.have.length(5);
+      expect(profilePosts2).to.have.length(2);
     });
 
     it('edits a published post', async () => {
@@ -363,7 +369,11 @@ describe.only('030-process', () => {
         }
       );
 
-      expect(publishedPosts).to.have.length(7);
+      if (THREADS.length > 1) {
+        expect(publishedPosts).to.have.length(7);
+      } else {
+        expect(publishedPosts).to.have.length(2);
+      }
 
       const post = publishedPosts[0];
 
@@ -374,7 +384,11 @@ describe.only('030-process', () => {
       newPost.content = newContent;
 
       /** send updated post (content and semantics did not changed) */
-      await services.postsManager.publishOrUpdatePost(newPost, user.userId);
+      await services.postsManager.publishPost(
+        newPost,
+        [PLATFORM.Nanopub],
+        user.userId
+      );
 
       const readPost = await services.postsManager.getPost(post.id, true);
 

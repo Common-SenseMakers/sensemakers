@@ -8,6 +8,7 @@ import {
 import {
   FetchParams,
   FetchedDetails,
+  PLATFORM,
   PlatformFetchParams,
   UserDetailsBase,
 } from '../../@shared/types/types';
@@ -15,8 +16,10 @@ import {
   FetchedResult,
   PlatformPostCreate,
   PlatformPostDraft,
+  PlatformPostDraftApproval,
   PlatformPostPosted,
   PlatformPostPublish,
+  PlatformPostSignerType,
   PlatformPostUpdate,
 } from '../../@shared/types/types.platform.posts';
 import '../../@shared/types/types.posts';
@@ -34,6 +37,7 @@ import {
 import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
+import { UsersHelper } from '../../users/users.helper';
 import { UsersRepository } from '../../users/users.repository';
 import { PlatformService } from '../platforms.interface';
 import { TwitterServiceClient } from './twitter.service.client';
@@ -48,7 +52,7 @@ export interface TwitterApiCredentials {
   clientSecret: string;
 }
 
-const DEBUG = true;
+const DEBUG = false;
 
 /** Twitter service handles all interactions with Twitter API */
 export class TwitterService
@@ -320,16 +324,26 @@ export class TwitterService
     throw new Error('Method not implemented.');
   }
 
-  convertFromGeneric(
+  async convertFromGeneric(
     postAndAuthor: PostAndAuthor
   ): Promise<PlatformPostDraft<any>> {
-    throw new Error('Method not implemented.');
+    const account = UsersHelper.getAccount(
+      postAndAuthor.author,
+      PLATFORM.Twitter,
+      undefined,
+      true
+    );
+    return {
+      user_id: account.user_id,
+      signerType: PlatformPostSignerType.DELEGATED,
+      postApproval: PlatformPostDraftApproval.PENDING,
+    };
   }
 
-  signDraft(
+  async signDraft(
     post: PlatformPostDraft<any>,
     account: UserDetailsBase<any, any, any>
   ): Promise<any> {
-    throw new Error('Method not implemented.');
+    return post;
   }
 }

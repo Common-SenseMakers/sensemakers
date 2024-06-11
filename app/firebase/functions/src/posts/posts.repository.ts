@@ -34,7 +34,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     manager.update(ref, postUpdate);
   }
 
-  public async addMirror(
+  public addMirror(
     postId: string,
     mirrorId: string,
     manager: TransactionManager

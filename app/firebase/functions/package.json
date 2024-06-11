@@ -25,7 +25,7 @@
     "crypto-js": "^4.2.0",
     "express": "^4.18.2",
     "fetch-sparql-endpoint": "^4.1.1",
-    "firebase-admin": "^12.1.0",
+    "firebase-admin": "^12.1.1",
     "firebase-functions": "^5.0.1",
     "jsonwebtoken": "^9.0.2",
     "n3": "^1.17.2",

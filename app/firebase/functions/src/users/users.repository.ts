@@ -16,7 +16,7 @@ import { logger } from '../instances/logger';
 import { UsersHelper } from './users.helper';
 import { getPrefixedUserId } from './users.utils';
 
-const DEBUG = true;
+const DEBUG = false;
 
 const getProfileId = (userId: string, platform: PLATFORM, user_id: string) =>
   `${userId}-${platform}-${user_id}`;

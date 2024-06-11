@@ -125,30 +125,11 @@ export class PostsProcessing {
       true
     );
 
-    const publishedPlatforms = appPostFull.mirrors
-      .filter((m) => m.publishStatus === 'published')
-      .map((m) => m.platformId);
-
-    const pendingPlatforms = ALL_PUBLISH_PLATFORMS.filter(
-      (p) => !publishedPlatforms.includes(p)
-    );
-
-    if (DEBUG)
-      logger.debug(
-        `createPostDrafts postId: ${postId}, publishedPlatforms: ${publishedPlatforms}, pendingPlatforms: ${pendingPlatforms}`,
-        {
-          appPostFull,
-          user,
-          publishedPlatforms,
-          pendingPlatforms,
-        }
-      );
-
     /**
      * Create platformPosts as drafts on all platforms
      * */
     const drafts = await Promise.all(
-      pendingPlatforms.map(async (platformId) => {
+      ALL_PUBLISH_PLATFORMS.map(async (platformId) => {
         const accounts = UsersHelper.getAccounts(user, platformId);
 
         if (DEBUG)
@@ -175,28 +156,31 @@ export class PostsProcessing {
                 }
               );
 
-            const existingMirrorDraft = appPostFull.mirrors.find(
+            const existingMirror = appPostFull.mirrors.find(
               (m) =>
                 m.platformId === platformId &&
-                m.draft &&
-                m.draft.user_id === account.user_id
+                ((m.draft && m.draft.user_id === account.user_id) ||
+                  (m.posted && m.posted.user_id))
             );
 
             if (DEBUG)
               logger.debug(
-                `createPostDrafts- existing mirror ${postId}, existingMirror:${existingMirrorDraft !== undefined}`,
+                `createPostDrafts- existing mirror ${postId}, existingMirror:${existingMirror !== undefined}`,
                 {
-                  existingMirrorDraft,
+                  existingMirror,
                 }
               );
 
             const draft: PlatformPostDraft = {
               postApproval: PlatformPostDraftApproval.PENDING,
               user_id: account.user_id,
-              unsignedPost: draftPost.unsignedPost,
             };
 
-            if (!existingMirrorDraft) {
+            if (draftPost.unsignedPost) {
+              draft.unsignedPost = draftPost.unsignedPost;
+            }
+
+            if (!existingMirror) {
               /** create and add as mirror */
               const draftCreate: PlatformPostCreate = {
                 platformId,
@@ -225,11 +209,7 @@ export class PostsProcessing {
                   postId,
                   draft,
                 });
-              this.platformPosts.update(
-                existingMirrorDraft.id,
-                { draft },
-                manager
-              );
+              this.platformPosts.update(existingMirror.id, { draft }, manager);
             }
           })
         );
@@ -241,31 +221,36 @@ export class PostsProcessing {
     return drafts.flat();
   }
 
-  async storeTriples(
+  async upsertTriples(
     postId: string,
-    semantics: string,
-    manager: TransactionManager
+    manager: TransactionManager,
+    semantics?: string
   ) {
-    const post = await this.posts.get(postId, manager, true);
-    const store = await parseRDF(semantics);
+    /** always delete old triples */
+    await this.triples.deleteOfPost(postId, manager);
 
-    const createdAtMs = post.createdAtMs;
-    const authorId = post.authorId;
+    if (semantics) {
+      const post = await this.posts.get(postId, manager, true);
+      const store = await parseRDF(semantics);
 
-    /** store the triples */
-    mapStoreElements(store, (q) => {
-      this.triples.create(
-        {
-          postId,
-          createdAtMs,
-          authorId,
-          subject: q.subject.value,
-          predicate: q.predicate.value,
-          object: q.object.value,
-        },
-        manager
-      );
-    });
+      const createdAtMs = post.createdAtMs;
+      const authorId = post.authorId;
+
+      /** store the triples */
+      mapStoreElements(store, (q) => {
+        this.triples.create(
+          {
+            postId,
+            createdAtMs,
+            authorId,
+            subject: q.subject.value,
+            predicate: q.predicate.value,
+            object: q.object.value,
+          },
+          manager
+        );
+      });
+    }
   }
 
   async createAppPost(
