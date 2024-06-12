@@ -1,11 +1,19 @@
 import { expect } from 'chai';
 
-import { PlatformPostPosted } from '../../src/@shared/types/types.platform.posts';
+import {
+  PlatformPostPosted,
+  PlatformPostPublishStatus,
+} from '../../src/@shared/types/types.platform.posts';
+import {
+  AppPostParsedStatus,
+  AppPostRepublishedStatus,
+} from '../../src/@shared/types/types.posts';
 import { TwitterThread } from '../../src/@shared/types/types.twitter';
 import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
 import { logger } from '../../src/instances/logger';
 import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
+import { triggerAutofetchPosts } from '../../src/posts/tasks/posts.autofetch.task';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
 import { createUsers } from '../utils/users.utils';
@@ -20,7 +28,7 @@ import { getTestServices } from './test.services';
 const DEBUG_PREFIX = `030-process`;
 const DEBUG = false;
 
-describe.only('032-autopost', () => {
+describe.only('050-autopost', () => {
   const services = getTestServices({
     time: 'real',
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
@@ -112,40 +120,52 @@ describe.only('032-autopost', () => {
         throw new Error('user not created');
       }
 
-      /**
-       * fetch user posts. This time should return only the
-       * newly published post
-       */
-      await services.postsManager.fetchUser({
-        userId: user.userId,
-        params: { expectedAmount: 10 },
-      });
+      /** simulate the cron JOB */
+      await triggerAutofetchPosts();
+
+      logger.debug('autofetch and post chain - waiting', DEBUG_PREFIX);
+      await new Promise<void>((resolve) => setTimeout(resolve, 5 * 1000));
+
+      logger.debug('autofetch and post chain - checking', DEBUG_PREFIX);
 
       /** read user post */
       const postsRead = await services.postsManager.getOfUser(user.userId);
 
-      expect(postsRead).to.not.be.undefined;
+      expect(postsRead).to.have.length(2);
+      expect(postsRead).to.have.length(2);
 
-      const postRead = postsRead[0];
-      expect(postRead).to.not.be.undefined;
-      expect(postRead.mirrors).to.have.length(1);
-
-      expect(postRead.semantics).to.be.undefined;
-      expect(postRead.originalParsed).to.be.undefined;
-
-      const tweetRead = postRead.mirrors.find(
-        (m) => m.platformId === PLATFORM.Twitter
+      const postOfThread = postsRead.find((post) =>
+        post.mirrors.find(
+          (m) =>
+            m.platformId === PLATFORM.Twitter &&
+            m.posted?.post_id === thread.post_id
+        )
       );
 
-      if (!tweetRead) {
+      expect(postOfThread).to.not.be.undefined;
+
+      if (!postOfThread) {
+        throw new Error('postOfThread not created');
+      }
+
+      expect(postOfThread.semantics).to.be.undefined;
+      expect(postOfThread.originalParsed).to.be.undefined;
+
+      expect(postOfThread.parsedStatus).to.eq(AppPostParsedStatus.PROCESSED);
+      expect(postOfThread.republishedStatus).to.eq(
+        AppPostRepublishedStatus.REPUBLISHED
+      );
+
+      const nanopub = postOfThread?.mirrors.find(
+        (m) => m.platformId === PLATFORM.Nanopub
+      );
+
+      if (!nanopub) {
         throw new Error('tweetRead not created');
       }
 
-      if (!user) {
-        throw new Error('user not created');
-      }
-
-      expect(postRead).to.not.be.undefined;
+      expect(nanopub.posted).to.not.be.undefined;
+      expect(nanopub.publishStatus).to.eq(PlatformPostPublishStatus.PUBLISHED);
     });
   });
 });

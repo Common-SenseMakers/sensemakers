@@ -22,7 +22,7 @@ export const postUpdatedHook = async (
   const updateRef = db.collections.updates.doc(`post-${postId}`);
   const now = time.now();
 
-  logger.debug(`triggerUpdate post-${postId}-${now}`);
+  logger.debug(`postUpdatedHook post-${postId}-${now}`);
 
   await db.run(async (manager) => {
     manager.set(updateRef, { value: now });
@@ -38,8 +38,10 @@ export const postUpdatedHook = async (
   /** Auto-parsed then auto-posted */
   if (author.settings.autopost !== AutopostOption.MANUAL) {
     if (post.parsedStatus === AppPostParsedStatus.UNPROCESSED) {
+      logger.debug(`triggerTask ${PARSE_POST_TASK}-${postId}`);
       await enqueueTask(PARSE_POST_TASK, { postId });
     } else if (post.republishedStatus === AppPostRepublishedStatus.PENDING) {
+      logger.debug(`triggerTask ${AUTOPOST_POST_TASK}-${postId}`);
       await enqueueTask(AUTOPOST_POST_TASK, { postId });
     }
   }

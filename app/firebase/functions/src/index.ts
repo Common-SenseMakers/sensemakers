@@ -1,8 +1,10 @@
 import * as functions from 'firebase-functions';
 import { onDocumentUpdated } from 'firebase-functions/v2/firestore';
+import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { onTaskDispatched } from 'firebase-functions/v2/tasks';
 
 import { CollectionNames } from './@shared/utils/collectionNames';
+import { AUTOFETCH_PERIOD } from './config/config.runtime';
 // import { onSchedule } from 'firebase-functions/v2/scheduler';
 // import { POSTS_JOB_SCHEDULE } from './config/config.runtime';
 import { envDeploy } from './config/typedenv.deploy';
@@ -10,6 +12,11 @@ import { envRuntime } from './config/typedenv.runtime';
 import { buildApp } from './instances/app';
 import { platformPostUpdatedHook } from './posts/hooks/platformPost.updated.hook';
 import { postUpdatedHook } from './posts/hooks/post.updated.hook';
+import {
+  AUTOFETCH_POSTS_TASK,
+  autofetchUserPosts,
+  triggerAutofetchPosts,
+} from './posts/tasks/posts.autofetch.task';
 import { PARSE_POST_TASK, parsePostTask } from './posts/tasks/posts.parse.task';
 import { router } from './router';
 
@@ -32,7 +39,10 @@ exports['api'] = functions
 
 // export const postsJob = onSchedule(POSTS_JOB_SCHEDULE, fetchNewPosts);
 
-/** Registed the parseUserPost task */
+/** jobs */
+exports.accountFetch = onSchedule(AUTOFETCH_PERIOD, triggerAutofetchPosts);
+
+/** tasks */
 exports[PARSE_POST_TASK] = onTaskDispatched(
   {
     timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
@@ -42,6 +52,16 @@ exports[PARSE_POST_TASK] = onTaskDispatched(
   parsePostTask
 );
 
+exports[AUTOFETCH_POSTS_TASK] = onTaskDispatched(
+  {
+    timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
+    memory: envDeploy.CONFIG_MEMORY,
+    minInstances: envDeploy.CONFIG_MININSTANCE,
+  },
+  autofetchUserPosts
+);
+
+/** hooks */
 exports.postUpdateListener = onDocumentUpdated(
   `${CollectionNames.Posts}/{postId}`,
   postUpdatedHook

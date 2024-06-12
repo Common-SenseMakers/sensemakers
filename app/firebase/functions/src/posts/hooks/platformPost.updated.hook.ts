@@ -16,7 +16,7 @@ export const platformPostUpdatedHook = async (
   );
   const now = time.now();
 
-  logger.debug(`triggerUpdate platformPost-${platformPostId}-${now}`);
+  logger.debug(`platformPostUpdatedHook platformPost-${platformPostId}-${now}`);
 
   await db.run(async (manager) => {
     manager.set(updateRef, { value: now });

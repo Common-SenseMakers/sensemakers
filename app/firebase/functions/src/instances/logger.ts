@@ -8,8 +8,7 @@ export const logger = (() => {
   if (envDeploy.NODE_ENV !== ENVIRONMENTS.PRODUCTION) {
     return new LocalLogger(
       (envDeploy.LOG_LEVEL_MSG.value() as LogLevel) || LogLevel.warn,
-      (envDeploy.LOG_LEVEL_OBJ.value() as LogLevel) || LogLevel.warn,
-      ['Testing authorization']
+      (envDeploy.LOG_LEVEL_OBJ.value() as LogLevel) || LogLevel.warn
     );
   } else {
     return fblogger;
