@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { TwitterApi } from 'twitter-api-v2';
 
-import { PLATFORM } from '../../src/@shared/types/types';
+import { PLATFORM } from '../../src/@shared/types/types.user';
 import {
   TestUserCredentials,
   authenticateTestUsers,
