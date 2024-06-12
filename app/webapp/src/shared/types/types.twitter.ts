@@ -59,11 +59,11 @@ export enum REQUIRED_TWEET_FIELDS {
   CreatedAt = 'created_at',
   AuthorId = 'author_id',
   Text = 'text',
-  Entities = 'entities',
   ConversationId = 'conversation_id',
 }
 
 export enum OPTIONAL_TWEET_FIELDS {
+  Entities = 'entities',
   NoteTweet = 'note_tweet',
 }
 
