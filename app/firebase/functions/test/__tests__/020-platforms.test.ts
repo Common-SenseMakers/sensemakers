@@ -95,8 +95,7 @@ describe('02-platforms', () => {
         const genericPost = await twitterService.convertToGeneric({
           posted: threadWithQuotedTweet,
         } as PlatformPostCreate<TwitterThread>);
-        console.log('genericPost: ', genericPost);
-        expect(genericPost.metadata.transcludedContent).to.not.be.undefined;
+        expect(genericPost.quotedPosts).to.not.be.undefined;
       }
     });
 

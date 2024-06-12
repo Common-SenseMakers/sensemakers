@@ -7,6 +7,7 @@ import {
 import {
   FetchParams,
   FetchedDetails,
+  PLATFORM,
   PlatformFetchParams,
   UserDetailsBase,
 } from '../../@shared/types/types';
@@ -234,18 +235,15 @@ export class TwitterService
           url: `https://x.com/${tweet.quoted_tweet.author.username}/status/${tweet.id}`,
           content: tweet.quoted_tweet.text,
           author: {
-            name: tweet.quoted_tweet.author.name,
-            username: tweet.quoted_tweet.author.username,
-            id: tweet.quoted_tweet.author.id,
+            ...tweet.quoted_tweet.author,
+            platformId: PLATFORM.Twitter,
           },
         };
       });
     return {
       content: threadText,
-      metadata: {
-        originalPlatformAuthor: thread.author,
-        transcludedContent,
-      },
+      author: { ...thread.author, platformId: PLATFORM.Twitter },
+      quotedPosts: transcludedContent,
     };
   }
 

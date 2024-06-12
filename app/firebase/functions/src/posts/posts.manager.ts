@@ -387,8 +387,10 @@ export class PostsManager {
 
     const params: ParsePostRequest<TopicsParams> = {
       post: {
+        url: post.url,
         content: post.content,
-        metadata: post.metadata,
+        author: post.author,
+        quotedPosts: post.quotedPosts,
       },
       parameters: {
         [PARSER_MODE.TOPICS]: { topics: ['science', 'technology'] },

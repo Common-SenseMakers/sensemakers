@@ -20,12 +20,11 @@ export const getMockPost = (refPost: Partial<AppPostFull>) => {
     createdAtMs: createdAtMs,
     authorId: authorId,
     content: refPost.content || 'test content',
-    metadata: {
-      originalPlatformAuthor: {
-        id: 'test-user-id',
-        username: 'test-user',
-        name: 'test-user-name',
-      },
+    author: {
+      platformId: PLATFORM.Twitter,
+      id: 'test-user-id',
+      username: 'test-user',
+      name: 'test-user-name',
     },
     semantics: refPost.semantics || '',
     origin: PLATFORM.Twitter,
