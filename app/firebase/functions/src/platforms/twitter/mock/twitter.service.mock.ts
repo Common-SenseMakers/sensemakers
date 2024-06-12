@@ -2,10 +2,7 @@ import { TransactionManager } from 'src/db/transaction.manager';
 import { anything, instance, spy, when } from 'ts-mockito';
 import { TweetV2SingleResult } from 'twitter-api-v2';
 
-import {
-  PlatformFetchParams,
-  UserDetailsBase,
-} from '../../../@shared/types/types';
+import { PlatformFetchParams } from '../../../@shared/types/types.fetch';
 import {
   PlatformPostPosted,
   PlatformPostPublish,
@@ -16,6 +13,7 @@ import {
   TwitterThread,
   TwitterUserDetails,
 } from '../../../@shared/types/types.twitter';
+import { UserDetailsBase } from '../../../@shared/types/types.user';
 import { logger } from '../../../instances/logger';
 import { TwitterService } from '../twitter.service';
 import { dateStrToTimestampMs } from '../twitter.utils';

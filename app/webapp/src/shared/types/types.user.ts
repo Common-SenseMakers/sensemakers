@@ -1,7 +1,13 @@
 import { NanopubUserDetails } from './types.nanopubs';
 import { OrcidUserDetails } from './types.orcid';
-import { AppPostFull } from './types.posts';
 import { TwitterUserDetails } from './types.twitter';
+
+/** Support types */
+export type DefinedIfTrue<V, R> = V extends true ? R : R | undefined;
+
+export type HexStr = `0x${string}`;
+
+/** user types */
 
 export enum PLATFORM {
   Local = 'local', // local referst to out platform
@@ -124,46 +130,4 @@ export interface UserPlatformProfile {
   platformId: string;
   user_id: string;
   profile: any;
-}
-
-/** Support types */
-export type DefinedIfTrue<V, R> = V extends true ? R : R | undefined;
-
-export type HexStr = `0x${string}`;
-
-export interface OurTokenConfig {
-  tokenSecret: string;
-  expiresIn: string;
-}
-
-export interface HandleSignupResult {
-  userId: string;
-  ourAccessToken?: string;
-}
-
-/** there are two fetch modes:
- * - sinceId !== undefined: try to return expectedAmount or all posts after this provided sinceId
- * - untilId !== undefined : try to return expectedAmount or all posts before this provided untilId
- */
-export interface FetchParams {
-  sinceId?: string;
-  untilId?: string;
-  expectedAmount: number;
-}
-
-/** ids are in terms of platformPost post_id */
-export interface PlatformFetchParams {
-  since_id?: string;
-  until_id?: string;
-  expectedAmount: number;
-}
-
-export interface UserProfileQuery {
-  platformId: PLATFORM;
-  username: string;
-}
-
-export interface PublishPostPayload {
-  post: AppPostFull;
-  platformIds: PLATFORM[];
 }

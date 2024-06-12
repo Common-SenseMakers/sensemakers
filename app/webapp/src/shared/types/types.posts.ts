@@ -1,6 +1,7 @@
-import { AppUser, FetchParams, PLATFORM } from './types';
+import { FetchParams } from './types.fetch';
 import { AppPostSemantics, ParsePostResult } from './types.parser';
 import { PlatformPost } from './types.platform.posts';
+import { AppUser, PLATFORM } from './types.user';
 
 /**
  * Properties of a post that must be computed in the convertToGeneric method

@@ -11,7 +11,7 @@ import {
   UserPlatformProfile,
   UserSettings,
   UserWithPlatformIds,
-} from '../@shared/types/types';
+} from '../@shared/types/types.user';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';

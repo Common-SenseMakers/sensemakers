@@ -7,11 +7,8 @@ import {
 
 import {
   FetchParams,
-  FetchedDetails,
-  PLATFORM,
   PlatformFetchParams,
-  UserDetailsBase,
-} from '../../@shared/types/types';
+} from '../../@shared/types/types.fetch';
 import {
   FetchedResult,
   PlatformPostCreate,
@@ -34,6 +31,11 @@ import {
   TwitterThread,
   TwitterUserDetails,
 } from '../../@shared/types/types.twitter';
+import {
+  FetchedDetails,
+  PLATFORM,
+  UserDetailsBase,
+} from '../../@shared/types/types.user';
 import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';

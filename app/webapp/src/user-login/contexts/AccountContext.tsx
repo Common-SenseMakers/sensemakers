@@ -7,8 +7,8 @@ import {
 } from 'react';
 
 import { _appFetch } from '../../api/app.fetch';
-import { AppUserRead, PLATFORM } from '../../shared/types/types';
 import { TwitterUserProfile } from '../../shared/types/types.twitter';
+import { AppUserRead, PLATFORM } from '../../shared/types/types.user';
 import { getAccount } from '../user.helper';
 
 const DEBUG = false;

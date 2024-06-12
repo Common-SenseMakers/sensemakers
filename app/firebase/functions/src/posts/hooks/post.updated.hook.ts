@@ -1,11 +1,11 @@
 import { QueryDocumentSnapshot } from 'firebase-admin/firestore';
 import { Change } from 'firebase-functions/v1';
 import { FirestoreEvent } from 'firebase-functions/v2/firestore';
-import { AutopostOption } from 'src/@shared/types/types';
 import {
   AppPostParsedStatus,
   AppPostRepublishedStatus,
 } from 'src/@shared/types/types.posts';
+import { AutopostOption } from 'src/@shared/types/types.user';
 import { enqueueTask } from 'src/tasks.support';
 
 import { logger } from '../../instances/logger';

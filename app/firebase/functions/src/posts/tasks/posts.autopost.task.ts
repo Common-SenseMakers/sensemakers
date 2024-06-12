@@ -1,6 +1,6 @@
 import { Request } from 'firebase-functions/v2/tasks';
 
-import { PLATFORM } from '../../@shared/types/types';
+import { PLATFORM } from '../../@shared/types/types.user';
 import { logger } from '../../instances/logger';
 import { createServices } from '../../instances/services';
 

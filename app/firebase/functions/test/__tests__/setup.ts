@@ -1,7 +1,10 @@
 import fs from 'fs';
 import { Context } from 'mocha';
 
-import { ALL_PUBLISH_PLATFORMS, AppUser } from '../../src/@shared/types/types';
+import {
+  ALL_PUBLISH_PLATFORMS,
+  AppUser,
+} from '../../src/@shared/types/types.user';
 import { envDeploy } from '../../src/config/typedenv.deploy';
 import { logger } from '../../src/instances/logger';
 import { UsersHelper } from '../../src/users/users.helper';

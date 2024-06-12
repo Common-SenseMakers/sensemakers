@@ -1,8 +1,4 @@
-import {
-  PLATFORM,
-  PlatformFetchParams,
-  UserDetailsBase,
-} from '../@shared/types/types';
+import { PlatformFetchParams } from '../@shared/types/types.fetch';
 import {
   FetchedResult,
   PlatformPostCreate,
@@ -12,6 +8,7 @@ import {
   PlatformPostUpdate,
 } from '../@shared/types/types.platform.posts';
 import { GenericPostData, PostAndAuthor } from '../@shared/types/types.posts';
+import { PLATFORM, UserDetailsBase } from '../@shared/types/types.user';
 import { TransactionManager } from '../db/transaction.manager';
 
 /** use conditional types to dynamically assign credential types for each platform */

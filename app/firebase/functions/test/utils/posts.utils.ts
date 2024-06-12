@@ -1,4 +1,3 @@
-import { PLATFORM } from '../../src/@shared/types/types';
 import {
   PlatformPostPublishOrigin,
   PlatformPostPublishStatus,
@@ -10,6 +9,7 @@ import {
   AppPostRepublishedStatus,
   AppPostReviewStatus,
 } from '../../src/@shared/types/types.posts';
+import { PLATFORM } from '../../src/@shared/types/types.user';
 import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
 
 export const getMockPost = (refPost: Partial<AppPostFull>) => {

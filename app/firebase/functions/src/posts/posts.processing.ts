@@ -1,4 +1,3 @@
-import { ALL_PUBLISH_PLATFORMS, DefinedIfTrue } from '../@shared/types/types';
 import {
   PlatformPost,
   PlatformPostCreate,
@@ -17,6 +16,10 @@ import {
   AppPostRepublishedStatus,
   AppPostReviewStatus,
 } from '../@shared/types/types.posts';
+import {
+  ALL_PUBLISH_PLATFORMS,
+  DefinedIfTrue,
+} from '../@shared/types/types.user';
 import { mapStoreElements, parseRDF } from '../@shared/utils/n3.utils';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';

@@ -1,11 +1,7 @@
 import { Nanopub, NpProfile } from '@nanopub/sign';
 import { verifyMessage } from 'viem';
 
-import {
-  FetchParams,
-  PLATFORM,
-  UserDetailsBase,
-} from '../../@shared/types/types';
+import { FetchParams } from '../../@shared/types/types.fetch';
 import {
   NanopubUserProfile,
   NanupubSignupData,
@@ -25,6 +21,7 @@ import {
   GenericPostData,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
+import { PLATFORM, UserDetailsBase } from '../../@shared/types/types.user';
 import { getEthToRSAMessage } from '../../@shared/utils/nanopub.sign.util';
 import { cleanPrivateKey } from '../../@shared/utils/semantics.helper';
 import { TransactionManager } from '../../db/transaction.manager';

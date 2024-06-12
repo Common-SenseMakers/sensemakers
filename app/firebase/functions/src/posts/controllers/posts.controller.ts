@@ -3,7 +3,7 @@ import { RequestHandler } from 'express';
 import {
   PublishPostPayload,
   UserProfileQuery,
-} from '../../@shared/types/types';
+} from '../../@shared/types/types.fetch';
 import {
   PostUpdatePayload,
   ProfilePostsQuery,

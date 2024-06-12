@@ -1,13 +1,13 @@
 import init, { Nanopub } from '@nanopub/sign';
 import { useQuery } from '@tanstack/react-query';
 
-import { PLATFORM } from '../shared/types/types';
 import {
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
   AppPostReviewStatus,
 } from '../shared/types/types.posts';
+import { PLATFORM } from '../shared/types/types.user';
 
 export interface AppPostStatus {
   processed?: boolean;

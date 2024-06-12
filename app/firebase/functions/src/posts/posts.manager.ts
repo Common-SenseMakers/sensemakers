@@ -1,14 +1,4 @@
-import {
-  ALL_PUBLISH_PLATFORMS,
-  AppUser,
-  AutopostOption,
-  FetchParams,
-  FetchedDetails,
-  PLATFORM,
-  PUBLISHABLE_PLATFORMS,
-  PlatformFetchParams,
-  UserDetailsBase,
-} from '../@shared/types/types';
+import { FetchParams, PlatformFetchParams } from '../@shared/types/types.fetch';
 import {
   PARSER_MODE,
   ParsePostRequest,
@@ -34,6 +24,15 @@ import {
   PostsQueryStatus,
   UserPostsQuery,
 } from '../@shared/types/types.posts';
+import {
+  ALL_PUBLISH_PLATFORMS,
+  AppUser,
+  AutopostOption,
+  FetchedDetails,
+  PLATFORM,
+  PUBLISHABLE_PLATFORMS,
+  UserDetailsBase,
+} from '../@shared/types/types.user';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';

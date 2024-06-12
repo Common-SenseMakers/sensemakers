@@ -13,11 +13,12 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppFetch } from '../../../api/app.fetch';
 import { useToastContext } from '../../../app/ToastsContext';
 import { I18Keys } from '../../../i18n/i18n';
-import { HandleSignupResult, PLATFORM } from '../../../shared/types/types';
+import { HandleSignupResult } from '../../../shared/types/types.fetch';
 import {
   TwitterGetContextParams,
   TwitterSignupContext,
 } from '../../../shared/types/types.twitter';
+import { PLATFORM } from '../../../shared/types/types.user';
 import { useAccountContext } from '../AccountContext';
 
 const DEBUG = false;

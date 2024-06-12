@@ -1,10 +1,10 @@
-import { DefinedIfTrue, PLATFORM } from '../@shared/types/types';
 import {
   PlatformPost,
   PlatformPostCreate,
   PlatformPostPosted,
   PlatformPostStatusUpdate,
 } from '../@shared/types/types.platform.posts';
+import { DefinedIfTrue, PLATFORM } from '../@shared/types/types.user';
 import { DBInstance } from '../db/instance';
 import { BaseRepository } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';

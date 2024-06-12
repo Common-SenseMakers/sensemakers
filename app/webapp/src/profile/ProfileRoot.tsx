@@ -1,6 +1,6 @@
 import { Outlet, useParams } from 'react-router-dom';
 
-import { PLATFORM } from '../shared/types/types';
+import { PLATFORM } from '../shared/types/types.user';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { ProfileContext } from './ProfileContext';
 

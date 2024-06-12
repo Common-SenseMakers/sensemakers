@@ -1,6 +1,6 @@
 import { spy, when } from 'ts-mockito';
 
-import { PLATFORM } from '../../src/@shared/types/types';
+import { PLATFORM } from '../../src/@shared/types/types.user';
 import { DBInstance } from '../../src/db/instance';
 import { Services } from '../../src/instances/services';
 import {

@@ -1,10 +1,10 @@
+import { AppPost } from './types.posts';
 import {
   FetchedDetails,
   PLATFORM,
   PUBLISHABLE_PLATFORMS,
   UserDetailsBase,
-} from './types';
-import { AppPost } from './types.posts';
+} from './types.user';
 
 /**
  * Platform posts as stored in our DB. A platform post can be in one of these statuses

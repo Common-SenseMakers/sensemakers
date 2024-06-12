@@ -1,4 +1,4 @@
-import { DefinedIfTrue } from '../@shared/types/types';
+import { DefinedIfTrue } from '../@shared/types/types.user';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
 

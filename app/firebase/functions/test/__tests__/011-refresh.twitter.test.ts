@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
-import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import { TwitterUserDetails } from '../../src/@shared/types/types.twitter';
+import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
 import { logger } from '../../src/instances/logger';
 import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';

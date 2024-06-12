@@ -1,15 +1,17 @@
 import * as jwt from 'jsonwebtoken';
 
 import {
+  HandleSignupResult,
+  OurTokenConfig,
+} from '../@shared/types/types.fetch';
+import {
   ALL_IDENTITY_PLATFORMS,
   AccountDetailsRead,
   AppUserRead,
   AutopostOption,
-  HandleSignupResult,
-  OurTokenConfig,
   PLATFORM,
   UserSettings,
-} from '../@shared/types/types';
+} from '../@shared/types/types.user';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';

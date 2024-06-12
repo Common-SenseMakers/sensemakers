@@ -5,7 +5,7 @@ import {
   UserV2,
 } from 'twitter-api-v2';
 
-import { UserDetailsBase } from './types';
+import { UserDetailsBase } from './types.user';
 
 export type TwitterGetContextParams = {
   callback_url: string;

@@ -1,4 +1,4 @@
-import { PLATFORM } from '../@shared/types/types';
+import { PLATFORM } from '../@shared/types/types.user';
 import {
   FUNCTIONS_PY_URL,
   NANOPUBS_PUBLISH_SERVERS,

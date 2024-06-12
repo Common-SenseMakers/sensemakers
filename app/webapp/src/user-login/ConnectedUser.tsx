@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { TwitterAvatar } from '../app/icons/TwitterAvatar';
 import { RouteNames } from '../route.names';
-import { PLATFORM } from '../shared/types/types';
+import { PLATFORM } from '../shared/types/types.user';
 import { AppButton } from '../ui-components';
 import { cap } from '../utils/general';
 import { useAccountContext } from './contexts/AccountContext';

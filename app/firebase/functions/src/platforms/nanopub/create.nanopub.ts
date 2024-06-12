@@ -1,9 +1,9 @@
 import { Nanopub } from '@nanopub/sign';
 import { DataFactory, Store } from 'n3';
 
-import { AppUser, PLATFORM } from '../../@shared/types/types';
 import { AppPostFull } from '../../@shared/types/types.posts';
 import { TwitterUserDetails } from '../../@shared/types/types.twitter';
+import { AppUser, PLATFORM } from '../../@shared/types/types.user';
 import { parseRDF, replaceNodes, writeRDF } from '../../@shared/utils/n3.utils';
 import {
   ASSERTION_URI,
