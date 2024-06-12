@@ -41,6 +41,12 @@ describe('031-filter', () => {
         [
           {
             content: 'test content 1',
+            author: {
+              platformId: PLATFORM.Twitter,
+              id: 'test-user-id',
+              username: 'test-user',
+              name: 'test-user-name',
+            },
             authorId: 'test-user-id',
             origin: PLATFORM.Nanopub,
             createdAtMs: 12345678,
@@ -61,6 +67,12 @@ describe('031-filter', () => {
         [
           {
             content: 'test content 2',
+            author: {
+              platformId: PLATFORM.Twitter,
+              id: 'test-user-id',
+              username: 'test-user',
+              name: 'test-user-name',
+            },
             authorId: 'test-user-id',
             origin: PLATFORM.Nanopub,
             createdAtMs: 12345678,
@@ -80,6 +92,12 @@ describe('031-filter', () => {
         [
           {
             content: 'test content 3',
+            author: {
+              platformId: PLATFORM.Twitter,
+              id: 'test-user-id',
+              username: 'test-user',
+              name: 'test-user-name',
+            },
             authorId: 'test-user-id',
             origin: PLATFORM.Nanopub,
             createdAtMs: 12345678,
@@ -104,6 +122,12 @@ describe('031-filter', () => {
         [
           {
             content: 'test content 4',
+            author: {
+              platformId: PLATFORM.Twitter,
+              id: 'test-user-id',
+              username: 'test-user',
+              name: 'test-user-name',
+            },
             authorId: 'test-user-id',
             origin: PLATFORM.Nanopub,
             createdAtMs: 12345678,

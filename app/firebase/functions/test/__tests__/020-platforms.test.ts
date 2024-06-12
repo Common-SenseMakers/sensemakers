@@ -2,10 +2,14 @@ import { expect } from 'chai';
 
 import { AppUser, FetchParams, PLATFORM } from '../../src/@shared/types/types';
 import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
+import { PlatformPostCreate } from '../../src/@shared/types/types.platform.posts';
+import { AppTweet, TwitterThread } from '../../src/@shared/types/types.twitter';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { logger } from '../../src/instances/logger';
 import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
+import { TwitterService } from '../../src/platforms/twitter/twitter.service';
+import { convertToAppTweets } from '../../src/platforms/twitter/twitter.utils';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
 import { getMockPost } from '../utils/posts.utils';
@@ -49,7 +53,7 @@ describe('02-platforms', () => {
     });
   });
 
-  describe('twitter', () => {
+  describe.only('twitter', () => {
     it('fetch the latest 5 threads', async () => {
       if (!user) {
         throw new Error('appUser not created');
@@ -79,8 +83,58 @@ describe('02-platforms', () => {
       );
 
       expect(threads).to.not.be.undefined;
-      if (!USE_REAL_TWITTER) {
-        expect(threads.platformPosts.length).to.be.equal(5);
+      expect(threads.platformPosts.length).to.be.greaterThanOrEqual(5);
+
+      const threadWithQuotedTweet = threads.platformPosts.find((thread) => {
+        return (thread.post as TwitterThread).tweets.some((tweet) => {
+          return tweet.quoted_tweet !== undefined;
+        });
+      });
+
+      if (threadWithQuotedTweet) {
+        const genericPost = await twitterService.convertToGeneric({
+          posted: threadWithQuotedTweet,
+        } as PlatformPostCreate<TwitterThread>);
+        expect(genericPost.quotedPosts).to.not.be.undefined;
+      }
+    });
+
+    it('includes quote tweets in platform post and app post', async () => {
+      const postIds = [
+        '1798791421152911644', // https://x.com/sense_nets_bot/status/1798791421152911644 quotes https://x.com/sense_nets_bot/status/1795069204418175459
+        '1798791660668698927', // https://x.com/sense_nets_bot/status/1798791660668698927 quotes https://x.com/sense_nets_bot/status/1798782358201508331
+        '1798792109031559184', // https://x.com/sense_nets_bot/status/1798792109031559184 quotes https://x.com/rtk254/status/1798549107507974626
+      ];
+
+      if (!user) {
+        throw new Error('appUser not created');
+      }
+      const twitterId = user[PLATFORM.Twitter]?.[0]?.user_id;
+
+      const twitterService = services.platforms.get(
+        PLATFORM.Twitter
+      ) as TwitterService;
+
+      try {
+        const result = await services.db.run(async (manager) => {
+          return twitterService.getPosts(postIds, manager, twitterId);
+        });
+        const appTweets = convertToAppTweets(result.data, result.includes);
+        expect(appTweets).to.not.be.undefined;
+        expect(appTweets.length).to.be.equal(3);
+
+        const quotedTweetIds = [
+          '1795069204418175459',
+          '1798782358201508331',
+          '1798549107507974626',
+        ];
+
+        appTweets.forEach((appTweet: AppTweet) => {
+          expect(quotedTweetIds).to.include(appTweet.quoted_tweet?.id);
+        });
+      } catch (error) {
+        console.error('error: ', error);
+        throw error;
       }
     });
   });

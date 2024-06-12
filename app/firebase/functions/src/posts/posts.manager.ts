@@ -386,7 +386,12 @@ export class PostsManager {
     if (DEBUG) logger.debug(`parsePost - start ${postId}`, { postId, post });
 
     const params: ParsePostRequest<TopicsParams> = {
-      post: { content: post.content },
+      post: {
+        url: post.url,
+        content: post.content,
+        author: post.author,
+        quotedPosts: post.quotedPosts,
+      },
       parameters: {
         [PARSER_MODE.TOPICS]: { topics: ['science', 'technology'] },
       },

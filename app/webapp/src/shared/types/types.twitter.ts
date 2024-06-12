@@ -43,16 +43,38 @@ export interface TwitterUserDetails
 
 export type TweetRead = TweetV2PostTweetResult['data'];
 
-export interface TwitterUser {
-  user_id: string;
-  screen_name: string;
-}
-
 export interface TwitterDraft {
   text: string;
 }
 
-export type TwitterThread = {
+export type TwitterUser = Required<Pick<UserV2, 'id' | 'username' | 'name'>>;
+export interface TwitterThread {
   conversation_id: string;
-  tweets: TweetV2[];
+  tweets: AppTweet[];
+  author: TwitterUser;
+}
+
+export enum REQUIRED_TWEET_FIELDS {
+  Id = 'id',
+  CreatedAt = 'created_at',
+  AuthorId = 'author_id',
+  Text = 'text',
+  ConversationId = 'conversation_id',
+}
+
+export enum OPTIONAL_TWEET_FIELDS {
+  Entities = 'entities',
+  NoteTweet = 'note_tweet',
+}
+
+export type AppTweetBase = Required<Pick<TweetV2, REQUIRED_TWEET_FIELDS>> &
+  Pick<TweetV2, OPTIONAL_TWEET_FIELDS>;
+
+export type AppQuotedTweet = AppTweetBase & {
+  author: TwitterUser;
 };
+
+/** our internal representation of a tweet */
+export interface AppTweet extends AppTweetBase {
+  quoted_tweet?: AppQuotedTweet;
+}

@@ -18,7 +18,7 @@ import {
 } from '../../../@shared/types/types.twitter';
 import { logger } from '../../../instances/logger';
 import { TwitterService } from '../twitter.service';
-import { dateStrToTimestampMs } from '../twitter.utils';
+import { convertToAppTweetBase, dateStrToTimestampMs } from '../twitter.utils';
 
 interface TwitterTestState {
   latestTweetId: number;
@@ -39,6 +39,8 @@ const THREADS: string[][] = process.env.TEST_THREADS
   : [];
 
 export const TWITTER_USER_ID_MOCKS = '1773032135814717440';
+export const TWITTER_USERNAME_MOCKS = 'sense_nets_bot';
+export const TWITTER_NAME_MOCKS = 'SenseNet Bot';
 
 const getSampleTweet = (
   id: string,
@@ -55,6 +57,22 @@ const getSampleTweet = (
     text: `This is an interesting paper https://arxiv.org/abs/2312.05230 ${id} | ${content}`,
     author_id: authorId,
     created_at: date.toISOString(),
+    entities: {
+      urls: [
+        {
+          start: 50,
+          end: 73,
+          url: 'https://t.co/gguJOKvN37',
+          expanded_url: 'https://arxiv.org/abs/2312.05230',
+          display_url: 'x.com/sense_nets_bot…',
+          unwound_url: 'https://arxiv.org/abs/2312.05230',
+        },
+      ],
+      annotations: [],
+      hashtags: [],
+      mentions: [],
+      cashtags: [],
+    },
     edit_history_tweet_ids: [],
   };
 };
@@ -78,6 +96,11 @@ const threads = THREADS.map((thread, ixThread): TwitterThread => {
   return {
     conversation_id: `${ixThread}`,
     tweets,
+    author: {
+      id: TWITTER_USER_ID_MOCKS,
+      name: TWITTER_NAME_MOCKS,
+      username: TWITTER_USERNAME_MOCKS,
+    },
   };
 });
 
@@ -121,7 +144,12 @@ export const getTwitterMock = (
 
         const thread = {
           conversation_id: (++state.latestConvId).toString(),
-          tweets: [tweet.data],
+          tweets: [convertToAppTweetBase(tweet.data)],
+          author: {
+            id: TWITTER_USER_ID_MOCKS,
+            name: TWITTER_NAME_MOCKS,
+            username: TWITTER_USERNAME_MOCKS,
+          },
         };
 
         state.threads.push(thread);
