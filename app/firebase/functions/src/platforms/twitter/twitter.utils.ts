@@ -1,16 +1,17 @@
 import {
-  AppTweet,
-  AppTweetBase,
-  OPTIONAL_TWEET_FIELDS,
-  REQUIRED_TWEET_FIELDS,
-  TwitterThread,
-} from 'src/@shared/types/types.twitter';
-import {
   ApiResponseError,
   ApiV2Includes,
   TweetV2,
   UserV2,
 } from 'twitter-api-v2';
+
+import {
+  AppTweet,
+  AppTweetBase,
+  OPTIONAL_TWEET_FIELDS,
+  REQUIRED_TWEET_FIELDS,
+  TwitterThread,
+} from '../../@shared/types/types.twitter';
 
 export const handleTwitterError = (e: ApiResponseError) => {
   if (e.request) {
