@@ -1,9 +1,9 @@
 import {
   AppTweet,
   AppTweetBase,
+  OPTIONAL_TWEET_FIELDS,
+  REQUIRED_TWEET_FIELDS,
   TwitterThread,
-  optionalTweetFields,
-  requiredTweetFields,
 } from 'src/@shared/types/types.twitter';
 import {
   ApiResponseError,
@@ -37,7 +37,9 @@ export const dateStrToTimestampMs = (dateStr: string) => {
 };
 
 export const getTweetTextWithUrls = (tweet: AppTweet) => {
-  const fullTweet = tweet['note_tweet'] ? tweet['note_tweet'] : tweet;
+  const fullTweet = tweet[OPTIONAL_TWEET_FIELDS.NoteTweet]
+    ? tweet[OPTIONAL_TWEET_FIELDS.NoteTweet]
+    : tweet;
   const urls = fullTweet.entities?.urls;
   let text = fullTweet.text;
 
@@ -51,7 +53,7 @@ export const getTweetTextWithUrls = (tweet: AppTweet) => {
 };
 
 export const convertToAppTweetBase = (tweet: TweetV2): AppTweetBase => {
-  requiredTweetFields.forEach((field) => {
+  Object.values(REQUIRED_TWEET_FIELDS).forEach((field) => {
     if (
       !(field in tweet) ||
       tweet[field] === undefined ||
@@ -62,11 +64,11 @@ export const convertToAppTweetBase = (tweet: TweetV2): AppTweetBase => {
   });
 
   const appTweetBase: Partial<AppTweetBase> = {};
-  requiredTweetFields.forEach((field) => {
+  Object.values(REQUIRED_TWEET_FIELDS).forEach((field) => {
     appTweetBase[field] = tweet[field] as any;
   });
 
-  optionalTweetFields.forEach((field) => {
+  Object.values(OPTIONAL_TWEET_FIELDS).forEach((field) => {
     if (field in tweet) {
       appTweetBase[field] = tweet[field] as any;
     }

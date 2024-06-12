@@ -43,34 +43,32 @@ export interface TwitterUserDetails
 
 export type TweetRead = TweetV2PostTweetResult['data'];
 
-export type TwitterUser = Required<Pick<UserV2, 'id' | 'username' | 'name'>>;
-
 export interface TwitterDraft {
   text: string;
 }
 
+export type TwitterUser = Required<Pick<UserV2, 'id' | 'username' | 'name'>>;
 export interface TwitterThread {
   conversation_id: string;
   tweets: AppTweet[];
   author: TwitterUser;
 }
 
-export const requiredTweetFields = [
-  'id',
-  'created_at',
-  'author_id',
-  'text',
-  'entities',
-  'conversation_id',
-] as const;
+export enum REQUIRED_TWEET_FIELDS {
+  Id = 'id',
+  CreatedAt = 'created_at',
+  AuthorId = 'author_id',
+  Text = 'text',
+  Entities = 'entities',
+  ConversationId = 'conversation_id',
+}
 
-export const optionalTweetFields = ['note_tweet'] as const;
+export enum OPTIONAL_TWEET_FIELDS {
+  NoteTweet = 'note_tweet',
+}
 
-type RequiredTweetFields = (typeof requiredTweetFields)[number];
-type OptionalTweetFields = (typeof optionalTweetFields)[number];
-
-export type AppTweetBase = Required<Pick<TweetV2, RequiredTweetFields>> &
-  Pick<TweetV2, OptionalTweetFields>;
+export type AppTweetBase = Required<Pick<TweetV2, REQUIRED_TWEET_FIELDS>> &
+  Pick<TweetV2, OPTIONAL_TWEET_FIELDS>;
 
 export type AppQuotedTweet = AppTweetBase & {
   author: TwitterUser;
