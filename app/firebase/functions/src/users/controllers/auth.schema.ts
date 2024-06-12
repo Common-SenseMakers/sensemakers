@@ -1,3 +1,4 @@
+import { AutopostOption } from '../../@shared/types/types.user';
 import { object, string } from 'yup';
 
 export const twitterGetSignupContextSchema = object({
@@ -24,8 +25,8 @@ export const nanopubSignupDataSchema = object({
   introNanopub: string().required(),
 }).noUnknown(true);
 
-export const mirrorPostSchema = object({
-  id: string().required(),
-  content: string().required(),
-  semantics: string().required(),
+export const userSettingsUpdateSchema = object({
+  autopost: string()
+    .oneOf([...Object.values(AutopostOption)])
+    .required(),
 }).noUnknown(true);

@@ -1,15 +1,15 @@
 import { QueryDocumentSnapshot } from 'firebase-admin/firestore';
 import { Change } from 'firebase-functions/v1';
 import { FirestoreEvent } from 'firebase-functions/v2/firestore';
+
 import {
   AppPostParsedStatus,
   AppPostRepublishedStatus,
-} from 'src/@shared/types/types.posts';
-import { AutopostOption } from 'src/@shared/types/types.user';
-import { enqueueTask } from 'src/tasks.support';
-
+} from '../../@shared/types/types.posts';
+import { AutopostOption } from '../../@shared/types/types.user';
 import { logger } from '../../instances/logger';
 import { createServices } from '../../instances/services';
+import { enqueueTask } from '../../tasks.support';
 import { AUTOPOST_POST_TASK } from '../tasks/posts.autopost.task';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 

@@ -1,5 +1,5 @@
-import { TimeService } from 'src/time/time.service';
-import { UsersService } from 'src/users/users.service';
+import { TimeService } from '../time/time.service';
+import { UsersService } from '../users/users.service';
 
 import { FetchParams, PlatformFetchParams } from '../@shared/types/types.fetch';
 import {

@@ -18,11 +18,15 @@ export const triggerAutofetchPosts = async () => {
     AutopostOption.DETERMINISTIC,
   ]);
 
-  logger.debug(`number of users: ${usersIds.length}`, DEBUG_PREFIX);
+  logger.debug(`number of users: ${usersIds.length}`, undefined, DEBUG_PREFIX);
 
   await Promise.all(
     usersIds.map((userId) => {
-      logger.debug(`enqueing of users: ${usersIds.length}`, DEBUG_PREFIX);
+      logger.debug(
+        `enqueing of users: ${usersIds.length}`,
+        undefined,
+        DEBUG_PREFIX
+      );
       return enqueueTask(AUTOFETCH_POSTS_TASK, { userId });
     })
   );

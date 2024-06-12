@@ -302,4 +302,10 @@ export class UsersService {
 
     return userRead;
   }
+
+  updateSettings(userId: string, settings: UserSettings) {
+    return this.db.run(async (manager) => {
+      await this.repo.updateSettings(userId, settings, manager);
+    });
+  }
 }

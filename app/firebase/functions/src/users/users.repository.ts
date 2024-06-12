@@ -376,10 +376,10 @@ export class UsersRepository {
     const settingsKey: keyof AppUser = 'settings';
     const autopostKey: keyof UserSettings = 'autopost';
 
-    const query = this.db.collections.posts.where(
+    const query = this.db.collections.users.where(
       `${settingsKey}.${autopostKey}`,
       'in',
-      [values]
+      values
     );
 
     const result = await query.get();
@@ -407,5 +407,14 @@ export class UsersRepository {
     });
 
     return usersIds;
+  }
+
+  public async updateSettings(
+    userId: string,
+    settings: UserSettings,
+    manager: TransactionManager
+  ) {
+    const ref = await this.getUserRef(userId, manager, true);
+    manager.update(ref, { settings });
   }
 }

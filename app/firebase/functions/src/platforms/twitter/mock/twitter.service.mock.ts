@@ -1,4 +1,4 @@
-import { TransactionManager } from 'src/db/transaction.manager';
+import { TransactionManager } from '../../../db/transaction.manager';
 import { anything, instance, spy, when } from 'ts-mockito';
 import { TweetV2SingleResult } from 'twitter-api-v2';
 
