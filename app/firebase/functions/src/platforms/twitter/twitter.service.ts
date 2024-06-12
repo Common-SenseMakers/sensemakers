@@ -154,6 +154,8 @@ export class TwitterService
               /** otherwise throw */
               throw new Error(e);
             }
+          } else {
+            throw new Error(handleTwitterError(e));
           }
         }
 
