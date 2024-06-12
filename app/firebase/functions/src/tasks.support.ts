@@ -1,13 +1,9 @@
 import { getFunctions } from 'firebase-admin/functions';
-import { Request } from 'firebase-functions/v2/tasks';
 import { GoogleAuth } from 'google-auth-library';
 
-import { IS_EMULATOR, PROJECT_ID } from '../config/config.runtime';
-import { envRuntime } from '../config/typedenv.runtime';
-import { logger } from '../instances/logger';
-import { createServices } from '../instances/services';
-
-export const PARSE_POST_TASK = 'parsePost';
+import { IS_EMULATOR, PROJECT_ID } from './config/config.runtime';
+import { envRuntime } from './config/typedenv.runtime';
+import { logger } from './instances/logger';
 
 export const queueOnEmulator = async (url: string, data: any) => {
   const res = await fetch(url, {
@@ -18,29 +14,6 @@ export const queueOnEmulator = async (url: string, data: any) => {
   return res;
 };
 
-export const parsePostTask = async (req: Request) => {
-  logger.debug(`parsePostTask: postId: ${req.data.postId}`);
-  const postId = req.data.postId;
-  const { postsManager } = createServices();
-  await postsManager.parsePost(postId);
-};
-
-export const enqueueParsePost = async (postId: string, location: string) => {
-  const targetUri = await getFunctionUrl(PARSE_POST_TASK, location);
-
-  if (IS_EMULATOR) {
-    logger.debug(`enqueue enqueueParsePost - isEmulator`);
-    /** Emulator does not support queue.enqueue(), but uses a simple http request */
-    return queueOnEmulator(targetUri, { postId });
-  }
-
-  const queue = getFunctions().taskQueue(PARSE_POST_TASK);
-  /** enqueue */
-  logger.debug(`enqueueParsePost - enqueue`, { postId, targetUri });
-
-  return queue.enqueue({ postId }, { uri: targetUri });
-};
-
 /**
  * Get the URL of a given v2 cloud function.
  *
@@ -48,7 +21,7 @@ export const enqueueParsePost = async (postId: string, location: string) => {
  * @param location the function's location
  * @return The URL of the function
  */
-async function getFunctionUrl(name: string, location: string) {
+export async function getFunctionUrl(name: string, location: string) {
   let auth: GoogleAuth | undefined = undefined;
   if (!auth) {
     auth = new GoogleAuth({
@@ -57,7 +30,6 @@ async function getFunctionUrl(name: string, location: string) {
     });
   }
   const projectId = await auth.getProjectId();
-
   if (envRuntime.NODE_ENV !== 'production') {
     return `http://127.0.0.1:5001/${projectId}/${location}/${name}`;
   }
@@ -76,3 +48,20 @@ async function getFunctionUrl(name: string, location: string) {
   }
   return realUri;
 }
+
+export const enqueueTask = async (name: string, params: any) => {
+  const location = envRuntime.REGION || 'us-central1';
+  const targetUri = await getFunctionUrl(name, location);
+
+  if (IS_EMULATOR) {
+    logger.debug(`enqueue enqueueParsePost - isEmulator`);
+    /** Emulator does not support queue.enqueue(), but uses a simple http request */
+    return queueOnEmulator(targetUri, params);
+  }
+
+  const queue = getFunctions().taskQueue(name);
+  /** enqueue */
+  logger.debug(`enqueueParsePost - enqueue`, { params, targetUri });
+
+  return queue.enqueue(params, { uri: targetUri });
+};

@@ -1,6 +1,7 @@
 import {
   ALL_PUBLISH_PLATFORMS,
   AppUser,
+  AutopostOption,
   FetchParams,
   FetchedDetails,
   PLATFORM,
@@ -38,10 +39,12 @@ import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
 import { ParserService } from '../parser/parser.service';
 import { PlatformsService } from '../platforms/platforms.service';
+import { enqueueTask } from '../tasks.support';
 import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { getUsernameTag } from '../users/users.utils';
 import { PostsProcessing } from './posts.processing';
+import { AUTOFETCH_POSTS_TASK } from './tasks/posts.autofetch.task';
 
 const DEBUG = true;
 
@@ -691,5 +694,22 @@ export class PostsManager {
     );
 
     return postsFull;
+  }
+
+  /**
+   * get the list of users with enabled autofetch and triggers a different fetch
+   * task for each one of them
+   */
+  async triggerAutofetchPosts() {
+    const usersIds = await this.users.repo.getWithAutopostValues([
+      AutopostOption.AI,
+      AutopostOption.DETERMINISTIC,
+    ]);
+
+    await Promise.all(
+      usersIds.map((userId) => {
+        return enqueueTask(AUTOFETCH_POSTS_TASK, { userId });
+      })
+    );
   }
 }

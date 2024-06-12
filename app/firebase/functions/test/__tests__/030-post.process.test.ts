@@ -19,7 +19,7 @@ import {
   TWITTER_USER_ID_MOCKS,
 } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
-import { parsePostTask } from '../../src/posts/posts.task';
+import { parsePostTask } from '../../src/posts/tasks/posts.parse.task';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
 import { createUsers } from '../utils/users.utils';

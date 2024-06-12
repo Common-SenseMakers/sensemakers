@@ -3,11 +3,13 @@ import { firestore } from 'firebase-admin';
 import {
   AppUser,
   AppUserCreate,
+  AutopostOption,
   DefinedIfTrue,
   FetchedDetails,
   PLATFORM,
   UserDetailsBase,
   UserPlatformProfile,
+  UserSettings,
   UserWithPlatformIds,
 } from '../@shared/types/types';
 import { DBInstance } from '../db/instance';
@@ -366,6 +368,22 @@ export class UsersRepository {
     manager.update(doc.ref, {
       [platform]: firestore.FieldValue.arrayRemove(details),
     });
+  }
+
+  public async getWithAutopostValues(
+    values: AutopostOption[]
+  ): Promise<string[]> {
+    const settingsKey: keyof AppUser = 'settings';
+    const autopostKey: keyof UserSettings = 'autopost';
+
+    const query = this.db.collections.posts.where(
+      `${settingsKey}.${autopostKey}`,
+      'in',
+      [values]
+    );
+
+    const result = await query.get();
+    return result.docs.map((doc) => doc.id) as string[];
   }
 
   public async getAll() {

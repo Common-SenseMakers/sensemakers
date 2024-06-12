@@ -8,9 +8,9 @@ import { CollectionNames } from './@shared/utils/collectionNames';
 import { envDeploy } from './config/typedenv.deploy';
 import { envRuntime } from './config/typedenv.runtime';
 import { buildApp } from './instances/app';
-import { logger } from './instances/logger';
-import { createServices } from './instances/services';
-import { PARSE_POST_TASK, parsePostTask } from './posts/posts.task';
+import { platformPostUpdatedHook } from './posts/dbHooks/platformPost.updated.hook';
+import { postUpdatedHook } from './posts/dbHooks/post.updated.hook';
+import { PARSE_POST_TASK, parsePostTask } from './posts/tasks/posts.parse.task';
 import { router } from './router';
 
 // import { fetchNewPosts } from './posts/posts.job';
@@ -44,30 +44,10 @@ exports[PARSE_POST_TASK] = onTaskDispatched(
 
 exports.postUpdateListener = onDocumentUpdated(
   `${CollectionNames.Posts}/{postId}`,
-  async (event) => {
-    const postId = event.params?.postId;
-    const { db } = createServices();
-    const updateRef = db.collections.updates.doc(`post-${postId}`);
-    const now = Date.now();
-    logger.debug(`triggerUpdate post-${postId}-${now}`);
-    await db.run(async (manager) => {
-      manager.set(updateRef, { value: now });
-    });
-  }
+  postUpdatedHook
 );
 
 exports.platformPostUpdateListener = onDocumentUpdated(
   `${CollectionNames.PlatformPosts}/{platformPostId}`,
-  async (event) => {
-    const platformPostId = event.params?.platformPostId;
-    const { db } = createServices();
-    const updateRef = db.collections.updates.doc(
-      `platformPost-${platformPostId}`
-    );
-    const now = Date.now();
-    logger.debug(`triggerUpdate platformPost-${platformPostId}-${now}`);
-    await db.run(async (manager) => {
-      manager.set(updateRef, { value: now });
-    });
-  }
+  platformPostUpdatedHook
 );

@@ -4,10 +4,11 @@ import {
   ALL_IDENTITY_PLATFORMS,
   AccountDetailsRead,
   AppUserRead,
+  AutopostOption,
   HandleSignupResult,
   OurTokenConfig,
   PLATFORM,
-  UserWithPlatformIds,
+  UserSettings,
 } from '../@shared/types/types';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
@@ -209,12 +210,15 @@ export class UsersService {
          * and we need to create a new user.
          * */
 
-        const platformIds_property: keyof UserWithPlatformIds = 'platformIds';
+        const initSettings: UserSettings = {
+          autopost: AutopostOption.MANUAL,
+        };
 
         await this.repo.createUser(
           prefixed_user_id,
           {
-            [platformIds_property]: [prefixed_user_id],
+            settings: initSettings,
+            platformIds: [prefixed_user_id],
             [platform]: [authenticatedDetails],
           },
           manager

@@ -71,12 +71,29 @@ export interface UserWithPlatformIds {
   platformIds: string[]; // redundant array with the prefixed user_id of all the authenticated platforms for a given user
 }
 
+export enum AutopostOption {
+  MANUAL = 'MANUAL',
+  DETERMINISTIC = 'DETERMINISTIC',
+  AI = 'AI',
+}
+
+export interface UserSettings {
+  autopost: AutopostOption;
+}
+
+export interface UserWithSettings {
+  settings: UserSettings;
+}
+
 /**
  * AppUser is the entire User object (include credentials) and MUST be
  * kept inside the backend, never sent to the user. We use AppUserRead
  * to send the user profiles to the frontend.
  */
-export interface AppUser extends UserWithId, UserWithPlatformIds {
+export interface AppUser
+  extends UserWithId,
+    UserWithPlatformIds,
+    UserWithSettings {
   [PLATFORM.Orcid]?: OrcidUserDetails[];
   [PLATFORM.Twitter]?: TwitterUserDetails[];
   [PLATFORM.Nanopub]?: NanopubUserDetails[];
