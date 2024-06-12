@@ -10,6 +10,7 @@ import { enqueueTask } from 'src/tasks.support';
 
 import { logger } from '../../instances/logger';
 import { createServices } from '../../instances/services';
+import { AUTOPOST_POST_TASK } from '../tasks/posts.autopost.task';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 
 export const postUpdatedHook = async (
@@ -39,7 +40,7 @@ export const postUpdatedHook = async (
     if (post.parsedStatus === AppPostParsedStatus.UNPROCESSED) {
       await enqueueTask(PARSE_POST_TASK, { postId });
     } else if (post.republishedStatus === AppPostRepublishedStatus.PENDING) {
-      await enqueueTask(PUBLISH_POST_TASK, { postId });
+      await enqueueTask(AUTOPOST_POST_TASK, { postId });
     }
   }
 

@@ -498,9 +498,10 @@ export class PostsManager {
   async publishPost(
     newPost: AppPostFull,
     platformIds: PLATFORM[],
-    userId: string
+    userId: string,
+    manager?: TransactionManager
   ) {
-    await this.db.run(async (manager) => {
+    const publishFunction = async (manager: TransactionManager) => {
       if (DEBUG)
         logger.debug(`approvePost ${newPost.id}`, { post: newPost, userId });
       const user = await this.users.repo.getUser(userId, manager, true);
@@ -630,7 +631,13 @@ export class PostsManager {
           manager
         );
       }
-    });
+    };
+
+    if (manager) {
+      return publishFunction(manager);
+    } else {
+      return this.db.run((manager) => publishFunction(manager));
+    }
   }
 
   /** Get posts AppPostFull of user, cannot be part of a transaction

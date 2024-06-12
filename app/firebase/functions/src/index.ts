@@ -8,8 +8,8 @@ import { CollectionNames } from './@shared/utils/collectionNames';
 import { envDeploy } from './config/typedenv.deploy';
 import { envRuntime } from './config/typedenv.runtime';
 import { buildApp } from './instances/app';
-import { platformPostUpdatedHook } from './posts/dbHooks/platformPost.updated.hook';
-import { postUpdatedHook } from './posts/dbHooks/post.updated.hook';
+import { platformPostUpdatedHook } from './posts/hooks/platformPost.updated.hook';
+import { postUpdatedHook } from './posts/hooks/post.updated.hook';
 import { PARSE_POST_TASK, parsePostTask } from './posts/tasks/posts.parse.task';
 import { router } from './router';
 
