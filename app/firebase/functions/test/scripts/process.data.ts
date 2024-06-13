@@ -1,44 +1,66 @@
 import fs from 'fs';
-import { TweetEntitiesV2, TweetV2 } from 'twitter-api-v2';
+import { UserV2 } from 'twitter-api-v2';
+
+import { AppTweet } from '../../src/@shared/types/types.twitter';
+import {
+  getTweetTextWithUrls,
+  replaceTinyUrlsWithExpandedUrls,
+} from '../../src/platforms/twitter/twitter.utils';
 
 (() => {
-  const first1 = fs.readFileSync('[0,1].json', 'utf8');
-  const next1to10 = fs.readFileSync('[1,10].json', 'utf8');
-  const next10to15 = fs.readFileSync('[10,15].json', 'utf8');
+  const appTweets = JSON.parse(fs.readFileSync('appTweets.json', 'utf8')) as {
+    [key: string]: AppTweet[];
+  };
 
-  const tweets: (TweetV2 & {
-    username: string;
-    url: string;
-    note_tweet?: { text: string; entities?: TweetEntitiesV2 };
-  })[] = JSON.parse(first1);
-  const tweets1: (TweetV2 & {
-    username: string;
-    url: string;
-    note_tweet?: { text: string; entities?: TweetEntitiesV2 };
-  })[] = JSON.parse(next1to10);
-  const tweets2: (TweetV2 & {
-    username: string;
-    url: string;
-    note_tweet?: { text: string; entities?: TweetEntitiesV2 };
-  })[] = JSON.parse(next10to15);
-  const allTweets = tweets.concat(tweets1).concat(tweets2);
+  const userAccounts = JSON.parse(
+    fs.readFileSync('userAccounts.json', 'utf8')
+  ) as UserV2[];
 
-  const mappedTweets = allTweets.map((tweet) => {
+  const allTweetsFlattened = Object.values(appTweets).flat();
+
+  const allTweets = allTweetsFlattened.map((tweet) => {
+    const { username, name } = userAccounts.find(
+      (user) => user.id === tweet.author_id
+    )!;
+    const urls = tweet.note_tweet?.entities?.urls
+      ? tweet.note_tweet.entities.urls.map((url) => url.expanded_url)
+      : tweet.entities?.urls
+        ? tweet.entities.urls.map((url) => url.expanded_url)
+        : [];
+
+    const quoted_tweet = tweet.quoted_tweet
+      ? {
+          id: tweet.quoted_tweet?.id,
+          created_at: tweet.quoted_tweet?.created_at,
+          author_id: tweet.quoted_tweet?.author_id,
+          username: tweet.quoted_tweet?.author.username,
+          name: tweet.quoted_tweet?.author.name,
+          conversation_id: tweet.quoted_tweet?.conversation_id,
+          text: replaceTinyUrlsWithExpandedUrls(
+            tweet.quoted_tweet!.text,
+            tweet.quoted_tweet?.entities?.urls
+          ),
+          url: `https://x.com/${username}/status/${tweet.quoted_tweet?.id}`,
+        }
+      : undefined;
+    const text = getTweetTextWithUrls(tweet);
     return {
       id: tweet.id,
       created_at: tweet.created_at,
-      account_id: tweet.author_id,
-      username: tweet.username,
-      urls: tweet.note_tweet?.entities?.urls
-        ? tweet.note_tweet.entities.urls.map((url) => url.expanded_url)
-        : tweet.entities?.urls
-          ? tweet.entities.urls.map((url) => url.expanded_url)
-          : [],
-      text: tweet['note_tweet']?.text ? tweet['note_tweet'].text : tweet.text,
-      server: 'twitter.com',
-      tootURL: tweet.url,
-    };
+      author_id: tweet.author_id,
+      conversation_id: tweet.conversation_id,
+      quoted_tweet,
+      username,
+      name,
+      urls,
+      text,
+      url: `https://x.com/${username}/status/${tweet.id}`,
+    } as Omit<AppTweet, 'entities' | 'note_tweet' | 'quoted_tweet'>;
   });
 
-  fs.writeFileSync('mappedTweets.json', JSON.stringify(mappedTweets), 'utf8');
+  fs.writeFileSync(
+    'allTweetsFlattened.json',
+    JSON.stringify(allTweets),
+    'utf8'
+  );
 })();
