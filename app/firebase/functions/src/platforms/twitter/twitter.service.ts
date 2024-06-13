@@ -250,6 +250,7 @@ export class TwitterService
         };
       });
     return {
+      url: `https://x.com/${thread.author.username}/status/${thread.tweets[0].id}`,
       content: threadText,
       author: { ...thread.author, platformId: PLATFORM.Twitter },
       quotedPosts:
