@@ -1,6 +1,6 @@
 import { Request } from 'firebase-functions/v2/tasks';
 
-import { AutopostOption } from '../../@shared/types/types.user';
+import { AutopostOption, PLATFORM } from '../../@shared/types/types.user';
 import { logger } from '../../instances/logger';
 import { createServices } from '../../instances/services';
 import { enqueueTask } from '../../tasks.support';
@@ -13,7 +13,7 @@ export const triggerAutofetchPosts = async () => {
   logger.debug(`triggerAutofetchPosts`, undefined, DEBUG_PREFIX);
   const { users } = createServices();
 
-  const usersIds = await users.repo.getWithAutopostValues([
+  const usersIds = await users.repo.getWithAutopostValues(PLATFORM.Nanopub, [
     AutopostOption.AI,
     AutopostOption.DETERMINISTIC,
   ]);

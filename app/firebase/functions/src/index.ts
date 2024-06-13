@@ -45,7 +45,11 @@ exports.accountFetch = onSchedule(AUTOFETCH_PERIOD, triggerAutofetchPosts);
 
 // add enpoint when on emulator to trigger the scheduled task
 export const scheduledTriggerRouter = express.Router();
-scheduledTriggerRouter.post('/autofetch', triggerAutofetchPosts);
+
+scheduledTriggerRouter.post('/autofetch', async (request, response) => {
+  await triggerAutofetchPosts();
+  response.status(200).send({ success: true });
+});
 
 exports['trigger'] = functions
   .region(envDeploy.REGION)

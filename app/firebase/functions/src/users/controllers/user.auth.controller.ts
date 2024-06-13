@@ -6,7 +6,6 @@ import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import {
   nanopubSignupDataSchema,
   twitterSignupDataSchema,
-  userSettingsUpdateSchema,
 } from './auth.schema';
 
 export const handleSignupController: RequestHandler = async (

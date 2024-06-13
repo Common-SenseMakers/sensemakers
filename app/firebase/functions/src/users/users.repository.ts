@@ -371,13 +371,14 @@ export class UsersRepository {
   }
 
   public async getWithAutopostValues(
+    platformId: PLATFORM,
     values: AutopostOption[]
   ): Promise<string[]> {
     const settingsKey: keyof AppUser = 'settings';
     const autopostKey: keyof UserSettings = 'autopost';
 
     const query = this.db.collections.users.where(
-      `${settingsKey}.${autopostKey}`,
+      `${settingsKey}.${autopostKey}.${platformId}.value`,
       'in',
       values
     );
