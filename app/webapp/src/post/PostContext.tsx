@@ -27,7 +27,11 @@ import {
   PostsQueryStatus,
 } from '../shared/types/types.posts';
 import { TwitterThread } from '../shared/types/types.twitter';
-import { AppUserRead, PLATFORM } from '../shared/types/types.user';
+import {
+  AppUserRead,
+  AutopostOption,
+  PLATFORM,
+} from '../shared/types/types.user';
 import { useUserPosts } from '../user-home/UserPostsContext';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
@@ -192,6 +196,11 @@ export const PostContext: React.FC<{
    * endpoint to get user profiles by userIds */
   const author: AppUserRead = {
     userId: '1234',
+    settings: {
+      autopost: {
+        [PLATFORM.Nanopub]: { value: AutopostOption.MANUAL },
+      },
+    },
     twitter: [
       {
         user_id: '1234',

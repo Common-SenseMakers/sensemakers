@@ -1,3 +1,4 @@
+import express from 'express';
 import * as functions from 'firebase-functions';
 import { onDocumentUpdated } from 'firebase-functions/v2/firestore';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
@@ -41,6 +42,24 @@ exports['api'] = functions
 
 /** jobs */
 exports.accountFetch = onSchedule(AUTOFETCH_PERIOD, triggerAutofetchPosts);
+
+// add enpoint when on emulator to trigger the scheduled task
+export const scheduledTriggerRouter = express.Router();
+scheduledTriggerRouter.post('/autofetch', triggerAutofetchPosts);
+
+exports['trigger'] = functions
+  .region(envDeploy.REGION)
+  .runWith({
+    timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
+    memory: envDeploy.CONFIG_MEMORY,
+    minInstances: envDeploy.CONFIG_MININSTANCE,
+    secrets: [
+      envRuntime.ORCID_SECRET,
+      envRuntime.OUR_TOKEN_SECRET,
+      envRuntime.TWITTER_CLIENT_SECRET,
+    ],
+  })
+  .https.onRequest(buildApp(scheduledTriggerRouter));
 
 /** tasks */
 exports[PARSE_POST_TASK] = onTaskDispatched(

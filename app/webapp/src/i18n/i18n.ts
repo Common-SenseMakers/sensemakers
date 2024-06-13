@@ -22,6 +22,8 @@ export enum I18Keys {
   installPrompt = 's021',
   installNow = 's022',
   noMorePosts = 's023',
+  settings = 's024',
+  logout = 's025',
 }
 
 const translationENG: Record<I18Keys, string> = {
@@ -49,6 +51,8 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.installPrompt]: 'Please install this app, ',
   [I18Keys.installNow]: 'install',
   [I18Keys.noMorePosts]: 'No more posts to show',
+  [I18Keys.settings]: 'Settings',
+  [I18Keys.logout]: 'Logout',
 };
 
 i18n.use(initReactI18next).init({

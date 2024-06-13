@@ -281,6 +281,7 @@ export class UsersService {
 
     /** extract the profile for each account */
     const userRead: AppUserRead = {
+      settings: user.settings,
       userId,
     };
 

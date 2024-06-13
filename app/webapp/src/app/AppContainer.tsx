@@ -12,6 +12,7 @@ import { ResponsiveApp } from '../ui-components/ResponsiveApp';
 import { ThemedApp } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { ConnectedUserWrapper } from '../user-login/contexts/ConnectedUserWrapper';
+import { UserSettingsPage } from '../user-settings/UserSettingsPage';
 import { LoadingContext } from './LoadingContext';
 import { GlobalNav } from './layout/GlobalNav';
 import { GlobalStyles } from './layout/GlobalStyles';
@@ -75,6 +76,10 @@ export const AppContainer = (props: React.PropsWithChildren) => {
                 <Route
                   path={`${RouteNames.Post}/:postId`}
                   element={<PostPage></PostPage>}></Route>
+
+                <Route
+                  path={`${RouteNames.Settings}`}
+                  element={<UserSettingsPage></UserSettingsPage>}></Route>
                 <Route path={''} element={<AppHome></AppHome>}></Route>
                 <Route path={'/*'} element={<AppHome></AppHome>}></Route>
               </Route>

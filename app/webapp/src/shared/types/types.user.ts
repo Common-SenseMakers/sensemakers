@@ -122,7 +122,7 @@ export interface AccountDetailsRead<P> {
   write: boolean;
 }
 
-export interface AppUserRead extends UserWithId {
+export interface AppUserRead extends UserWithId, UserWithSettings {
   [PLATFORM.Orcid]?: AccountDetailsRead<OrcidUserDetails['profile']>[];
   [PLATFORM.Twitter]?: AccountDetailsRead<TwitterUserDetails['profile']>[];
   [PLATFORM.Nanopub]?: AccountDetailsRead<NanopubUserDetails['profile']>[];

@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { TwitterAvatar } from '../app/icons/TwitterAvatar';
-import { RouteNames } from '../route.names';
+import { I18Keys } from '../i18n/i18n';
+import { AbsoluteRoutes, RouteNames } from '../route.names';
 import { PLATFORM } from '../shared/types/types.user';
 import { AppButton } from '../ui-components';
 import { cap } from '../utils/general';
@@ -25,6 +26,10 @@ export const ConnectedUser = (props: {}) => {
     connectedUser && connectedUser[PLATFORM.Twitter]?.length
       ? connectedUser[PLATFORM.Twitter][0].profile
       : undefined;
+
+  const goToSettings = () => {
+    navigate(AbsoluteRoutes.Settings);
+  };
 
   const content = (() => {
     if (!isConnected) {
@@ -59,9 +64,20 @@ export const ConnectedUser = (props: {}) => {
 
             <AppButton
               plain
+              onClick={() => goToSettings()}
+              style={{ textTransform: 'none', paddingTop: '6px' }}>
+              <Text style={{ fontWeight: 'bold' }}>
+                {cap(t(I18Keys.settings))}
+              </Text>
+            </AppButton>
+
+            <AppButton
+              plain
               onClick={() => disconnect()}
               style={{ textTransform: 'none', paddingTop: '6px' }}>
-              <Text style={{ fontWeight: 'bold' }}>{cap(t('logout'))}</Text>
+              <Text style={{ fontWeight: 'bold' }}>
+                {cap(t(I18Keys.logout))}
+              </Text>
             </AppButton>
           </Box>
         }
