@@ -46,6 +46,7 @@ import {
   dateStrToTimestampMs,
   getTweetTextWithUrls,
   handleTwitterError,
+  replaceTinyUrlsWithExpandedUrls,
 } from './twitter.utils';
 
 export interface TwitterApiCredentials {
@@ -238,7 +239,10 @@ export class TwitterService
         }
         return {
           url: `https://x.com/${tweet.quoted_tweet.author.username}/status/${tweet.id}`,
-          content: tweet.quoted_tweet.text,
+          content: replaceTinyUrlsWithExpandedUrls(
+            tweet.quoted_tweet.text,
+            tweet.quoted_tweet.entities?.urls
+          ),
           author: {
             ...tweet.quoted_tweet.author,
             platformId: PLATFORM.Twitter,
