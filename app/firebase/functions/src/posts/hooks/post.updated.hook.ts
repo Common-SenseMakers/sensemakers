@@ -1,7 +1,3 @@
-import { QueryDocumentSnapshot } from 'firebase-admin/firestore';
-import { Change } from 'firebase-functions/v1';
-import { FirestoreEvent } from 'firebase-functions/v2/firestore';
-
 import {
   AppPostParsedStatus,
   AppPostRepublishedStatus,
@@ -13,10 +9,7 @@ import { enqueueTask } from '../../tasks.support';
 import { AUTOPOST_POST_TASK } from '../tasks/posts.autopost.task';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 
-export const postUpdatedHook = async (
-  event: FirestoreEvent<Change<QueryDocumentSnapshot> | undefined>
-) => {
-  const postId = event.params?.postId;
+export const postUpdatedHook = async (postId: string) => {
   const { db, time, users, postsManager } = createServices();
 
   const updateRef = db.collections.updates.doc(`post-${postId}`);

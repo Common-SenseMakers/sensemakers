@@ -1,6 +1,9 @@
 import express from 'express';
 import * as functions from 'firebase-functions';
-import { onDocumentUpdated } from 'firebase-functions/v2/firestore';
+import {
+  onDocumentCreated,
+  onDocumentUpdated,
+} from 'firebase-functions/v2/firestore';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { onTaskDispatched } from 'firebase-functions/v2/tasks';
 
@@ -18,6 +21,10 @@ import {
   autofetchUserPosts,
   triggerAutofetchPosts,
 } from './posts/tasks/posts.autofetch.task';
+import {
+  AUTOPOST_POST_TASK,
+  autopostPostTask,
+} from './posts/tasks/posts.autopost.task';
 import { PARSE_POST_TASK, parsePostTask } from './posts/tasks/posts.parse.task';
 import { router } from './router';
 
@@ -84,10 +91,24 @@ exports[AUTOFETCH_POSTS_TASK] = onTaskDispatched(
   autofetchUserPosts
 );
 
+exports[AUTOPOST_POST_TASK] = onTaskDispatched(
+  {
+    timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
+    memory: envDeploy.CONFIG_MEMORY,
+    minInstances: envDeploy.CONFIG_MININSTANCE,
+  },
+  autopostPostTask
+);
+
 /** hooks */
 exports.postUpdateListener = onDocumentUpdated(
   `${CollectionNames.Posts}/{postId}`,
-  postUpdatedHook
+  (event) => postUpdatedHook(event.params?.postId)
+);
+
+exports.postCreateListener = onDocumentCreated(
+  `${CollectionNames.Posts}/{postId}`,
+  (event) => postUpdatedHook(event.params?.postId)
 );
 
 exports.platformPostUpdateListener = onDocumentUpdated(

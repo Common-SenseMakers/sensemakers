@@ -6,6 +6,7 @@ import { envRuntime } from './config/typedenv.runtime';
 import { logger } from './instances/logger';
 
 export const queueOnEmulator = async (url: string, data: any) => {
+  logger.debug(`queueOnEmulator ${url}`, { data });
   const res = await fetch(url, {
     headers: [['Content-Type', 'application/json']],
     method: 'post',
@@ -54,14 +55,14 @@ export const enqueueTask = async (name: string, params: any) => {
   const targetUri = await getFunctionUrl(name, location);
 
   if (IS_EMULATOR) {
-    logger.debug(`enqueue enqueueParsePost - isEmulator`);
+    logger.debug(`enqueue ${name} - isEmulator`);
     /** Emulator does not support queue.enqueue(), but uses a simple http request */
     return queueOnEmulator(targetUri, params);
   }
 
   const queue = getFunctions().taskQueue(name);
   /** enqueue */
-  logger.debug(`enqueueParsePost - enqueue`, { params, targetUri });
+  logger.debug(`enqueue ${name}`, { params, targetUri });
 
   return queue.enqueue(params, { uri: targetUri });
 };
