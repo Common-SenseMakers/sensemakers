@@ -31,7 +31,7 @@ from sklearn.metrics import (
 
 sys.path.append(str(Path(__file__).parents[2]))
 
-from desci_sense.evaluation.utils import get_dataset, create_custom_confusion_matrix, posts_to_refPosts
+from desci_sense.evaluation.utils import get_dataset, create_custom_confusion_matrix, posts_to_refPosts, obj_str_to_dict
 from desci_sense.shared_functions.parsers.multi_chain_parser import MultiChainParser
 from desci_sense.shared_functions.init import init_multi_chain_parser_config
 
@@ -88,19 +88,16 @@ def pred_labels(df,config):
     inputs = prepare_parser_input(df)
 
     results = model.batch_process_ref_posts(inputs=inputs,active_list=["keywords", "topics"],batch_size=10)
-
-
     try:
         df['Predicted Label'] = [x.filter_classification.value for x in results]
-        df['Reasoning Steps'] = ["Keywords: "+x.debug['topics']['full_text']+"Topics: "+x.debug['keywords']['raw_text'] for x in results]
+        df['Reasoning Steps'] = ["Keywords: "+str(x.debug['topics']['reasoning'])+"Topics: "+str(x.debug['keywords']['reasoning']) for x in results]
         df['Keywords'] = [x.keywords for x in results]
         df['Topics'] = [x.topics for x in results]
         df['Ref item types'] = [x.item_types for x in results]
-
+        df['academic_keyword'] = [x.research_keyword for x in results]
     except Exception as e:
-       
-    
-        print(e)
+        precision("Parser error: ",e)
+
             
 
 
@@ -153,13 +150,25 @@ def calculate_feed_score(df,name:str):
     try:
         y_pred, y_true, labels = binarize(y_pred=y_pred,y_true=y_true)
         precision, recall, f1_score, accuracy = calculate_scores(y_pred=y_pred,y_true=y_true)
-        cm = confusion_matrix(y_pred=y_pred,y_true=y_true)
-        #print("Confusion matrix is: ",cm)
-        tp = cm[0,0]
-        fn = cm[1,0]
-        r_topics = topic_eval(df=df1,tp=tp)
+        try:
+            cm = confusion_matrix(y_pred=y_pred,y_true=y_true)
+        except:
+            print('No entries in feed of: ',name)
+            tp = 0
+        try:
+            tp = cm[0,0]
+            fn = cm[1,0]
+        except:
+            print("no FNs ")
+            fn = 0
+        try:
+            r_topics = topic_eval(df=df1,tp=tp)
+        except:
+            print("No citoids detection")
+            r_topics = 0
+
         
-        #print("##########here#########",precision, recall, f1_score, accuracy,n ,labels)
+        #print("##########here#########",precision, recall, f1_score, accuracy,n ,labels,tp,fn,r_topics)
         return pd.Series([precision, recall, f1_score, accuracy, tp, fn, n,r_topics], index=["precision", "recall", "f1_score", "accuracy","TP","FN","posts count",'citoid positive ratio'])
     except Exception as e:
         print(f"exception was raised while calculating feed scores: {e}")
@@ -177,6 +186,7 @@ def constr_feed_chart(df,df_handles):
     df_feed_eval = df_handles[["username","server","info"]]
     for column in ["precision", "recall", "f1_score", "accuracy","posts count"]:
         df_feed_eval[column] = 0
+    #print('def_feed_eval',df_feed_eval)
     # calculate scores per each dataframe reduced to a handle
     print("Calculating df_feed_eval")
     df_feed_eval[["precision","recall","f1_score","accuracy",'TP','FN',"posts count",'citoid positive ratio']] = df_feed_eval.apply(lambda row:  calculate_feed_score(df=df,name=row["username"]),axis=1)
@@ -204,7 +214,12 @@ if __name__ == "__main__":
     handle_file = arguments.get("--handle_file")
 
     # TODO - make modular config setting
-    config = init_multi_chain_parser_config(llm_type="mistralai/mixtral-8x7b-instruct:nitro",
+    llm_type="mistralai/mistral-7b-"
+    #llm_type = 'google/gemma-7b-it:free'
+    current_datetime = datetime.now()
+    time = current_datetime.strftime("%Y%m%d%H%M%S")
+
+    config = init_multi_chain_parser_config(llm_type=llm_type,
                                         post_process_type="combined")
 
     # initialize table path
@@ -214,7 +229,7 @@ if __name__ == "__main__":
     api = wandb.Api()
 
     #TODO move from testing
-    run = wandb.init(project="filter_evaluation", job_type="evaluation")
+    run = wandb.init(project="testing", job_type="evaluation", name=llm_type + str(time))
 
     # get artifact path
     if dataset_path:
@@ -244,8 +259,27 @@ if __name__ == "__main__":
 
     # return the pd df from the table
     #remember to remove the head TODO
-    df = get_dataset(table_path).head(40)
-    #print(df.columns)
+    df = get_dataset(table_path).head(10)
+
+
+    # TODO add handle tab modular path
+    handle_artifact_id = (
+        'common-sense-makers/filter_evaluation/labeled_tweets_no_threads:v1'
+    )
+
+    # set artifact as input artifact
+    handle_artifact = run.use_artifact(handle_artifact_id)
+
+    # initialize table path
+    # add the option to call table_path =  arguments.get('--dataset')
+
+    # download path to table
+    a_path = handle_artifact.download()
+    print("The path is",a_path)
+
+
+
+   
 
      # get handle file name
     if handle_file:
@@ -271,10 +305,8 @@ if __name__ == "__main__":
     )
 
     # Create the evaluation artifact
-    current_datetime = datetime.now()
 
     # Format the date to a custom alphanumeric format to comply with artifact name
-    time = current_datetime.strftime("%Y%m%d%H%M%S")
 
     artifact = wandb.Artifact("prediction_evaluation-" + str(time), type="evaluation")
 
@@ -300,22 +332,25 @@ if __name__ == "__main__":
     # Log cm
     # Generate the confusion matrix
     try:
-        matrix = confusion_matrix(y_true, y_pred)
+        try:
+            matrix = confusion_matrix(y_true, y_pred)
+        except:
+            matrix = create_custom_confusion_matrix(y_true=y_true, y_pred=y_pred, labels=labels)
+
+        #log the matrix
+        labels_with_info = [f"(True) {label}" for label in labels]
+        predicted_labels_with_info = [f"(Pred) {label}" for label in labels]
+
+        wandb.log({
+            "confusion_matrix": wandb.plots.HeatMap(
+                matrix_values=matrix, 
+                y_labels=labels_with_info, 
+                x_labels=predicted_labels_with_info, 
+                show_text=True
+            )
+        })
     except:
-        matrix = create_custom_confusion_matrix(y_true=y_true, y_pred=y_pred, labels=labels)
-
-    #log the matrix
-    labels_with_info = [f"(True) {label}" for label in labels]
-    predicted_labels_with_info = [f"(Pred) {label}" for label in labels]
-
-    wandb.log({
-        "confusion_matrix": wandb.plots.HeatMap(
-            matrix_values=matrix, 
-            y_labels=labels_with_info, 
-            x_labels=predicted_labels_with_info, 
-            show_text=True
-        )
-    })
+        print(" Not enough examples for constructing confusion matrix")
 
     # meta data and scores to log
     meta_data = {
@@ -330,7 +365,9 @@ if __name__ == "__main__":
     artifact.metadata.update(meta_data)
 
     # model_info is your model metadata
-    run.config.update(config)
+    trans_config = obj_str_to_dict(config)
+    print("CONFIG:::::",trans_config)
+    run.config.update(trans_config)
 
     # log scores as summary of the run
     # note that the scores are actually calculated in the cells above.

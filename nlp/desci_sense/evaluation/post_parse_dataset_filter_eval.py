@@ -31,7 +31,7 @@ from sklearn.metrics import (
 
 sys.path.append(str(Path(__file__).parents[2]))
 
-from desci_sense.evaluation.utils import get_dataset, create_custom_confusion_matrix
+from desci_sense.evaluation.utils import get_dataset, create_custom_confusion_matrix, obj_str_to_dict, parse_string_to_dict
 from desci_sense.shared_functions.init import init_multi_chain_parser_config
 
 class CustomLabelBinarizer(LabelBinarizer):
@@ -116,13 +116,25 @@ def calculate_feed_score(df,name:str):
     try:
         y_pred, y_true, labels = binarize(y_pred=y_pred,y_true=y_true)
         precision, recall, f1_score, accuracy = calculate_scores(y_pred=y_pred,y_true=y_true)
-        cm = confusion_matrix(y_pred=y_pred,y_true=y_true)
-        #print("Confusion matrix is: ",cm)
-        tp = cm[0,0]
-        fn = cm[1,0]
-        r_topics = topic_eval(df=df1,tp=tp)
+        try:
+            cm = confusion_matrix(y_pred=y_pred,y_true=y_true)
+        except:
+            print('No entries in feed of: ',name)
+            tp = 0
+        try:
+            tp = cm[0,0]
+            fn = cm[1,0]
+        except:
+            print("no FNs ")
+            fn = 0
+        try:
+            r_topics = topic_eval(df=df1,tp=tp)
+        except:
+            print("No citoids detection")
+            r_topics = 0
+
         
-        #print("##########here#########",precision, recall, f1_score, accuracy,n ,labels)
+        #print("##########here#########",precision, recall, f1_score, accuracy,n ,labels,tp,fn,r_topics)
         return pd.Series([precision, recall, f1_score, accuracy, tp, fn, n,r_topics], index=["precision", "recall", "f1_score", "accuracy","TP","FN","posts count",'citoid positive ratio'])
     except Exception as e:
         print(f"exception was raised while calculating feed scores: {e}")
@@ -174,7 +186,7 @@ if __name__ == "__main__":
     api = wandb.Api()
 
     #TODO move from testing
-    run = wandb.init(project="filter_evaluation", job_type="evaluation")
+    run = wandb.init(project="testing", job_type="evaluation")
 
     # get handees artifact path
    
@@ -209,7 +221,7 @@ if __name__ == "__main__":
         
     else:
         dataset_artifact_id = (
-            'common-sense-makers/filter_evaluation/prediction_evaluation-20240507151427:v0'
+            'common-sense-makers/filter_evaluation/prediction_evaluation-20240520143247:v0'
         )
     dataset_artifact = run.use_artifact(dataset_artifact_id)
 
@@ -224,6 +236,9 @@ if __name__ == "__main__":
     dataset_run = dataset_artifact.logged_by()
 
     config = dataset_run.config
+
+    config = obj_str_to_dict(config)
+    print(config)
 
     #remember to remove the head TODO
     df = get_dataset(table_path)
@@ -272,22 +287,25 @@ if __name__ == "__main__":
     # Log cm
     # Generate the confusion matrix
     try:
-        matrix = confusion_matrix(y_true, y_pred)
+            try:
+                matrix = confusion_matrix(y_true, y_pred)
+            except:
+                matrix = create_custom_confusion_matrix(y_true=y_true, y_pred=y_pred, labels=labels)
+
+            #log the matrix
+            labels_with_info = [f"(True) {label}" for label in labels]
+            predicted_labels_with_info = [f"(Pred) {label}" for label in labels]
+
+            wandb.log({
+                "confusion_matrix": wandb.plots.HeatMap(
+                    matrix_values=matrix, 
+                    y_labels=labels_with_info, 
+                    x_labels=predicted_labels_with_info, 
+                    show_text=True
+                )
+            })
     except:
-        matrix = create_custom_confusion_matrix(y_true=y_true, y_pred=y_pred, labels=labels)
-
-    #log the matrix
-    labels_with_info = [f"(True) {label}" for label in labels]
-    predicted_labels_with_info = [f"(Pred) {label}" for label in labels]
-
-    wandb.log({
-        "confusion_matrix": wandb.plots.HeatMap(
-            matrix_values=matrix, 
-            y_labels=labels_with_info, 
-            x_labels=predicted_labels_with_info, 
-            show_text=True
-        )
-    })
+        print(" Not enough examples for constructing confusion matrix")
 
     # meta data and scores to log
     meta_data = {
@@ -309,6 +327,6 @@ if __name__ == "__main__":
     run.summary.update(meta_data)
 
     # Log the artifact
-    wandb.log_artifact(artifact, aliases=["latest"])
+    #wandb.log_artifact(artifact, aliases=["latest"])
 
     wandb.run.finish()

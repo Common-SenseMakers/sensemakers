@@ -57,3 +57,4 @@ def apply_research_filter(result: CombinedParserOutput) -> SciFilterClassficatio
         return SciFilterClassfication.NOT_RESEARCH
     else:
         return SciFilterClassfication.RESEARCH
+
