@@ -17,7 +17,6 @@ import { convertTweetsToThreads } from '../../src/platforms/twitter/twitter.util
   const userTweets = Object.entries(appTweets);
 
   const allTweets = userTweets
-    .slice(0, 1)
     .map(([userId, tweets]) => {
       const userAccount = userAccounts.find((user) => user.id === userId)!;
       const userThreads = convertTweetsToThreads(tweets, userAccount);
