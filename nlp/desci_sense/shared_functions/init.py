@@ -16,6 +16,7 @@ from .configs import (
     MultiRefTaggerChainConfig,
     ParserChainType,
     PostProcessType,
+    PostRendererType,
 )
 
 MAX_SUMMARY_LENGTH = 500
@@ -135,6 +136,7 @@ def init_multi_chain_parser_config(
         name="multi_refs_tagger",
         use_metadata=True,
         llm_config=LLMConfig(llm_type=llm_type),
+        post_renderer=PostRendererType.QUOTE_REF_POST,
     )
     topics_config = TopicsPParserChainConfig(
         name="topics",

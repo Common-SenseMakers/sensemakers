@@ -11,7 +11,16 @@ from url_normalize import url_normalize
 
 
 def extract_twitter_status_id(url):
-    pattern = r"twitter\.com\/\w+\/status\/(\d+)"
+    """
+    Extract the status ID from Twitter or x.com post URLs.
+
+    Parameters:
+    url (str): The URL of the Twitter or x.com post.
+
+    Returns:
+    str: The extracted status ID or None if not found.
+    """
+    pattern = r"(?:twitter\.com|x\.com)\/\w+\/status\/(\d+)"
     match = re.search(pattern, url)
     if match:
         return match.group(1)
@@ -135,15 +144,22 @@ def normalize_url(url):
     return res
 
 
-def extract_and_expand_urls(text):
+def extract_and_expand_urls(text, return_orig_urls: bool = False):
     """_summary_
 
     Args:
         text (_type_): _description_
     """
+    # original unmodified urls
+    orig_urls = extract_urls(text)
 
-    expanded_urls = [normalize_url(url) for url in extract_urls(text)]
-    return expanded_urls
+    # unshortened and normalized urls
+    expanded_urls = [normalize_url(url) for url in orig_urls]
+
+    if return_orig_urls:
+        return expanded_urls, orig_urls
+    else:
+        return expanded_urls
 
 
 def render_to_py_dict(obj_dict, obj_name: str = "object", out_path: str = "output.py"):
@@ -239,3 +255,19 @@ def _find_json_object(input_string):
 
 def find_json_object(input_msg):
     return _find_json_object(input_msg.content)
+
+
+def remove_dups_ordered(input_list: list):
+    """
+    Remove duplicate occurrences of elements while preserving the
+    first occurrence of each element in the original list order.
+    eg, `remove_dups([5,4,2,5,2,4]) -> [5,4,2]`
+    """
+    seen = set()
+    result = []
+    for item in input_list:
+        if item not in seen:
+            seen.add(item)
+            result.append(item)
+
+    return result

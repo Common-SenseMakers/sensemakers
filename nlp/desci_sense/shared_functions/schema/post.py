@@ -5,11 +5,13 @@ from __future__ import annotations
 import asyncio
 from abc import ABC, abstractmethod
 from functools import partial
-from typing import Any, Literal, Sequence, List
+from typing import Any, Literal, Sequence, List, Optional
 from datetime import datetime
 
 from langchain.load.serializable import Serializable
 from langchain.pydantic_v1 import Field
+
+from desci_sense.shared_functions.utils import remove_dups_ordered
 
 
 class Post(Serializable):
@@ -51,7 +53,53 @@ class RefPost(Post):
     """
     List of URLs referenced by the post
     """
+
+    quoted_url: Optional[str]
+    """
+    URL of post quoted by this post (for platforms that enable quote tweets)
+    """
+
     type: Literal["ReferencePost"] = "ReferencePost"
 
     def has_refs(self):
-        return len(self.ref_urls) > 0
+        return len(self.md_ref_urls()) > 0
+
+    def md_ref_urls(self) -> List[str]:
+        """
+        Return list of reference urls for metadata extraction
+        ordered by place of appearance and uniqueified.
+        """
+        return remove_dups_ordered(self.ref_urls)
+
+
+class QuoteRefPost(RefPost):
+    """
+    RefPost that optionally quotes another post (like a quote tweet)
+    """
+
+    type: Literal["QuoteRefPost"] = "QuoteRefPost"
+
+    quoted_post: Optional[RefPost]
+    """
+    Other post that is quoted by this post
+    """
+
+    @property
+    def has_quote_post(self) -> bool:
+        return self.quoted_post is not None
+
+    def md_ref_urls(self, include_quoted_ref_urls: bool = True) -> List[str]:
+        """
+        Return list of reference urls for metadata extraction, ordered
+        by place of appearance.
+        If include_quoted_urls == True, include quoted_post.md_ref_urls()
+        """
+        all_ref_urls = self.ref_urls.copy()
+        if self.has_quote_post:
+            if include_quoted_ref_urls:
+                all_ref_urls += self.quoted_post.md_ref_urls()
+
+        # remove duplicate references
+        all_ref_urls = remove_dups_ordered(all_ref_urls)
+
+        return all_ref_urls

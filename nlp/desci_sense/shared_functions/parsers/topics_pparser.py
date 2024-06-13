@@ -111,11 +111,16 @@ class TopicsParserChain(AllowedTermsPParserChain):
 
         prompt_j2_template = self.topics_template
 
+        # render post with metadata for prompt
+        rendered_post = self.post_renderer.render(
+            post,
+            metadata_list,
+            show_author=False,
+        )
+
         # instantiate prompt with ref post details
         prompt = prompt_j2_template.render(
-            author_name=post.author,
-            content=post.content,
-            references_metadata=references_metadata,
+            rendered_post=rendered_post,
             topics=ALLOWED_TOPICS,
         )
 

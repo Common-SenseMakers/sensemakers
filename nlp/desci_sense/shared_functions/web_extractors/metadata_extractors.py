@@ -138,31 +138,33 @@ def extract_all_metadata_to_dict(
         max_summary_length,
     )
     res_dict = {}
+    urls_to_process = target_urls.copy()
 
     # add urls to dict
     for md in md_list:
         res_dict[md.url] = md
         try:
             # remove from target urls after processing
-            target_urls.remove(md.url)
+            urls_to_process.remove(md.url)
         except Exception:
             pass
 
     # process remaining URLs
-    for url in target_urls:
+    for url in urls_to_process:
         res_dict[url] = None
 
     return res_dict
 
 
 def extract_posts_ref_metadata_dict(
-    posts: List[RefPost], md_type: MetadataExtractionType
+    posts: List[RefPost],
+    md_type: MetadataExtractionType = MetadataExtractionType.CITOID,
 ) -> Dict[str, RefMetadata]:
     """
     Extract all reference urls from posts and fetch metadata for them.
     Return dict of metadata keyed by url.
     """
-    all_ref_urls = list(set(flatten([p.ref_urls for p in posts])))
+    all_ref_urls = list(set(flatten([p.md_ref_urls() for p in posts])))
     md_dict = extract_all_metadata_to_dict(
         all_ref_urls, md_type, max_summary_length=500
     )
@@ -193,7 +195,7 @@ def get_ref_post_metadata_list(
     Returns list of the post's reference metadata
     """
     md_list = []
-    for ref in post.ref_urls:
+    for ref in post.md_ref_urls():
         if ref in md_dict:
             md = md_dict.get(ref)
             if md:
