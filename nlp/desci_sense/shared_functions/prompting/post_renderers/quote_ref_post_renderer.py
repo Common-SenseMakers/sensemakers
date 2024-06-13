@@ -6,6 +6,18 @@ from ...web_extractors.metadata_extractors import (
 from ...schema.post import RefPost, QuoteRefPost
 from .templates.quote_ref_post_template import quote_ref_post_template
 
+ZERO_REF_INSTRUCTIONS = """"""
+
+SINGLE_REF_INSTRUCTIONS = """## Reference metadata
+The reference will be marked by a special token <ref_1> for convenient identification."""
+
+MULTI_REF_INSTRUCTIONS = """## Reference metadata
+Each reference will be marked by <ref_n> for convenient identification, where n is a number denoting the order of appearance in the post. The first reference will be <ref_1>, the second <ref_2>, etc. Additional metadata may also be provided for references, such as the author name, content type, and summary.
+
+### Quote posts
+Quote posts are a special kind of reference, where the post quotes another post. In which case, the quoted post content will be enclosed by <quote ref_n> (quote content) </quote>. Note that quote content may itself contain references.
+"""
+
 
 def get_md_str(md_list: List[RefMetadata]) -> str:
     metadata_str = ""
@@ -17,6 +29,20 @@ def get_md_str(md_list: List[RefMetadata]) -> str:
 class QuoteRefPostRenderer(PostRenderer):
     def __init__(self):
         self._j2_template = quote_ref_post_template
+
+    def render_instructions(self, post: RefPost) -> str:
+        """
+
+        Returns:
+            str: Instructions section for prompt
+        """
+        num_urls = len(post.md_ref_urls())
+        if num_urls == 0:
+            return ZERO_REF_INSTRUCTIONS
+        elif num_urls == 1:
+            return SINGLE_REF_INSTRUCTIONS
+        else:
+            return MULTI_REF_INSTRUCTIONS
 
     def render(
         self,

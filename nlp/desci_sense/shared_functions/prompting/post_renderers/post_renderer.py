@@ -7,16 +7,20 @@ from ...schema.post import RefPost
 
 
 class PostRenderer(ABC):
-    @property
-    def post(self) -> RefPost:
-        return self._post
+    @abstractmethod
+    def render_instructions(self, post) -> str:
+        """
 
-    @property
-    def metadata_list(self) -> List[RefMetadata]:
-        return self._metadata_list
+        Returns:
+            str: Instructions section for prompt
+        """
 
     @abstractmethod
-    def render(self) -> str:
+    def render(
+        self,
+        post: RefPost,
+        md_list: List[RefMetadata],
+    ) -> str:
         """
         Returns:
             str: Instantiated template.

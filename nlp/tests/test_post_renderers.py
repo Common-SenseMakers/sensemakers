@@ -16,6 +16,7 @@ from desci_sense.shared_functions.web_extractors.metadata_extractors import (
     RefMetadata,
 )
 from desci_sense.shared_functions.prompting.post_renderers import RefPostRenderer
+import desci_sense.shared_functions.prompting.post_renderers as postr
 from desci_sense.shared_functions.configs import MetadataExtractionType
 from desci_sense.shared_functions.dataloaders import (
     scrape_post,
@@ -112,6 +113,7 @@ item_type: preprint
 title: Replay of procedural experience is independent of the hippocampus
 summary: Sleep is critical for consolidating all forms of memory1-3, from episodic experience to the development of motor skills4-6. A core feature of the consolidation process is offline replay of neuronal firing patterns that occur during experience7,8. This replay is thought to originate in the hippocampus and trigger the reactivation of ensembles of cortical and subcortical neurons1,3,9-18. However, non-declarative memories do not require the hippocampus for learning or for sleep-dependent consolidat"""
 
+
 def test_ref_render_1():
     tweet_url = "https://x.com/science_seeds/status/1752087818099159338"
     quote_ref_post = scrape_post(tweet_url)
@@ -142,7 +144,6 @@ def test_ref_render_single_ref():
     assert rendered == target
 
 
-
 def test_ref_render_multi_ref():
     ref_post = convert_text_to_ref_post(TEST_POST_TEXT_W_2_REFS)
     md_dict = extract_posts_ref_metadata_dict([ref_post])
@@ -168,6 +169,10 @@ def test_ref_renderer_in_parser():
     mcp = MultiChainParser(multi_config)
     prompt = mcp.instantiate_prompts(ref_post, md_dict)
     assert RENDER_TARGET_MULTI_REF in prompt["multi_ref_tagger_input"]
+    assert (
+        postr.ref_post_renderer.MULTI_REF_INSTRUCTIONS
+        in prompt["multi_ref_tagger_input"]
+    )
 
 
 def test_kw_ref_post_render():
@@ -207,6 +212,7 @@ def test_topics_ref_post_render():
     assert RENDER_TARGET_TOPICS in topics_prompt
     assert "- Author:" not in topics_prompt
 
+
 def test_quote_post_render_single_ref():
     multi_config = MultiParserChainConfig(
         parser_configs=[
@@ -224,7 +230,9 @@ def test_quote_post_render_single_ref():
     prompt = mcp.instantiate_prompts(ref_post, md_dict)
     prompt_str = prompt["multi_ref_tagger_input"]
     assert RENDER_TARGET_SINGLE_REF in prompt_str
-    
+    assert postr.quote_ref_post_renderer.SINGLE_REF_INSTRUCTIONS in prompt_str
+
+
 def test_quote_post_render_multi_ref():
     tweet_url = "https://x.com/StephensonJones/status/1799035911042482210"
     quote_ref_post = scrape_post(tweet_url)
@@ -244,14 +252,15 @@ def test_quote_post_render_multi_ref():
     prompt_str = prompt["multi_ref_tagger_input"]
     assert RENDER_QUOTE_TWEET_1_TARGET in prompt_str
     assert RENDER_QT_MD_1_TARGET in prompt_str
+    assert postr.quote_ref_post_renderer.MULTI_REF_INSTRUCTIONS in prompt_str
 
-if __name__ == "__main__":
+def single_ref_post_instruction_test():
     multi_config = MultiParserChainConfig(
         parser_configs=[
             MultiRefTaggerChainConfig(
                 name="multi_ref_tagger",
                 llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
-                post_renderer=PostRendererType.QUOTE_REF_POST,
+                post_renderer=PostRendererType.REF_POST,
             )
         ],
         metadata_extract_config=MetadataExtractionConfig(extraction_method="citoid"),
@@ -261,3 +270,40 @@ if __name__ == "__main__":
     md_dict = extract_posts_ref_metadata_dict([ref_post])
     prompt = mcp.instantiate_prompts(ref_post, md_dict)
     prompt_str = prompt["multi_ref_tagger_input"]
+    assert postr.ref_post_renderer.SINGLE_REF_INSTRUCTIONS in prompt_str
+    
+def multi_ref_post_instruction_test():
+    multi_config = MultiParserChainConfig(
+        parser_configs=[
+            MultiRefTaggerChainConfig(
+                name="multi_ref_tagger",
+                llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
+                post_renderer=PostRendererType.REF_POST,
+            )
+        ],
+        metadata_extract_config=MetadataExtractionConfig(extraction_method="citoid"),
+    )
+    mcp = MultiChainParser(multi_config)
+    ref_post = convert_text_to_ref_post(TEST_POST_TEXT_W_2_REFS)
+    md_dict = extract_posts_ref_metadata_dict([ref_post])
+    prompt = mcp.instantiate_prompts(ref_post, md_dict)
+    prompt_str = prompt["multi_ref_tagger_input"]
+    assert postr.ref_post_renderer.MULTI_REF_INSTRUCTIONS in prompt_str
+    
+if __name__ == "__main__":
+    multi_config = MultiParserChainConfig(
+        parser_configs=[
+            MultiRefTaggerChainConfig(
+                name="multi_ref_tagger",
+                llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
+                post_renderer=PostRendererType.REF_POST,
+            )
+        ],
+        metadata_extract_config=MetadataExtractionConfig(extraction_method="citoid"),
+    )
+    mcp = MultiChainParser(multi_config)
+    ref_post = convert_text_to_ref_post(TEST_POST_TEXT_W_2_REFS)
+    md_dict = extract_posts_ref_metadata_dict([ref_post])
+    prompt = mcp.instantiate_prompts(ref_post, md_dict)
+    prompt_str = prompt["multi_ref_tagger_input"]
+    assert postr.ref_post_renderer.MULTI_REF_INSTRUCTIONS in prompt_str
