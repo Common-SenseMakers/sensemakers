@@ -252,7 +252,8 @@ export class TwitterService
     return {
       content: threadText,
       author: { ...thread.author, platformId: PLATFORM.Twitter },
-      quotedPosts: transcludedContent,
+      quotedPosts:
+        transcludedContent.length > 0 ? transcludedContent : undefined,
     };
   }
 
