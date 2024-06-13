@@ -39,8 +39,7 @@ I really liked this paper!
 https://arxiv.org/abs/2402.04607
 """
 
-TARGET_INPUT_POST = """- Author: default_author
-- Content: 
+TARGET_INPUT_POST = """- Content: 
 I really liked this paper!
 https://arxiv.org/abs/2402.04607
 
@@ -50,6 +49,7 @@ Item type: preprint
 Title: Google Scholar is manipulatable
 Summary: Citations are widely considered in scientists' evaluation. As such, scientists may be incentivized to inflate their citation counts. While previous literature has examined self-citations and citation cartels, it remains unclear whether scientists can purchase citations. Here, we compile a dataset of ~1.6 million profiles on Google Scholar to examine instances of citation fraud on the platform. We survey faculty at highly-ranked universities, and confirm that Google Scholar is widely used when ev
 ------------------"""
+
 
 def test_simple_init():
     kp = KeywordPParserChainConfig(name="test")

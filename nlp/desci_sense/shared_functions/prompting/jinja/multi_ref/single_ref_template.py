@@ -11,6 +11,8 @@ The available tag types are:
 
 A user will pass in a post, and you should think step by step, before selecting a set of tags that best match the post's relation to the reference.
 
+## Reference metadata
+The reference will be marked by a special token <ref_1> for convenient identification.
 
 # Required output format
 Your final answer should be structured as a JSON Answer object with a list of a *single* SubAnswer object, as described by the following schemas:

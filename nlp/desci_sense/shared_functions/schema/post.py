@@ -11,6 +11,8 @@ from datetime import datetime
 from langchain.load.serializable import Serializable
 from langchain.pydantic_v1 import Field
 
+from desci_sense.shared_functions.utils import remove_dups_ordered
+
 
 class Post(Serializable):
     """Class for storing a piece of text and associated metadata."""
@@ -65,8 +67,9 @@ class RefPost(Post):
     def md_ref_urls(self) -> List[str]:
         """
         Return list of reference urls for metadata extraction
+        ordered by place of appearance and uniqueified.
         """
-        return self.ref_urls
+        return remove_dups_ordered(self.ref_urls)
 
 
 class QuoteRefPost(RefPost):
@@ -85,18 +88,18 @@ class QuoteRefPost(RefPost):
     def has_quote_post(self) -> bool:
         return self.quoted_post is not None
 
-    def md_ref_urls(self, include_quoted_urls: bool = True) -> List[str]:
+    def md_ref_urls(self, include_quoted_ref_urls: bool = True) -> List[str]:
         """
-        Return list of reference urls for metadata extraction
+        Return list of reference urls for metadata extraction, ordered
+        by place of appearance.
         If include_quoted_urls == True, include quoted_post.md_ref_urls()
         """
         all_ref_urls = self.ref_urls.copy()
         if self.has_quote_post:
-            if include_quoted_urls:
+            if include_quoted_ref_urls:
                 all_ref_urls += self.quoted_post.md_ref_urls()
 
-                # remove dups in case quote tweet and quoted tweets refer to same
-                # ref
-                all_ref_urls = list(set(all_ref_urls))
+        # remove duplicate references
+        all_ref_urls = remove_dups_ordered(all_ref_urls)
 
         return all_ref_urls

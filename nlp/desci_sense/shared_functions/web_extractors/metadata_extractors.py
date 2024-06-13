@@ -138,18 +138,19 @@ def extract_all_metadata_to_dict(
         max_summary_length,
     )
     res_dict = {}
+    urls_to_process = target_urls.copy()
 
     # add urls to dict
     for md in md_list:
         res_dict[md.url] = md
         try:
             # remove from target urls after processing
-            target_urls.remove(md.url)
+            urls_to_process.remove(md.url)
         except Exception:
             pass
 
     # process remaining URLs
-    for url in target_urls:
+    for url in urls_to_process:
         res_dict[url] = None
 
     return res_dict

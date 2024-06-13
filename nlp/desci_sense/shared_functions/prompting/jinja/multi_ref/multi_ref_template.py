@@ -13,7 +13,11 @@ The tags are to be selected from a predefined set of tags. The available tag typ
 
 A user will pass in a post, and you should reason step by step, before selecting a set of tags for each reference that best that reference's relation with the post.
 
-Each reference will be marked by a number for convenient identification, in order of appearance in the post. The first reference will be number 1, the second 2, etc. Additional metadata may also be provided for references.
+## Reference metadata
+Each reference will be marked by <ref_n> for convenient identification, where n is a number denoting the order of appearance in the post. The first reference will be <ref_1>, the second <ref_2>, etc. Additional metadata may also be provided for references, such as the author name, content type, and summary.
+
+### Quote tweets
+Quote tweets are a special kind of reference, where the post quotes another post. In which case, the quoted post content will be enclosed by <quote ref_n> (quote content) </quote>. Note that quote content may itself contain references.
 
 ## Required output format
 Your final answer should be structured as a JSON Answer object with a list of SubAnswer objects, as described by the following schemas:

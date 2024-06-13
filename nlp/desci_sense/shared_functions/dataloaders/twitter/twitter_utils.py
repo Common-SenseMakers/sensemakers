@@ -70,11 +70,17 @@ def convert_vxtweet_to_ref_post(tweet: dict) -> RefPost:
     quoted_url = normalize_tweet_url(tweet["qrtURL"]) if tweet["qrtURL"] else None
 
     # extract external reference urls from post
-    ext_ref_urls = extract_external_ref_urls(tweet)
+    ext_ref_urls, orig_to_normed_map = extract_external_ref_urls(tweet)
+
+    # replace original urls with normalized forms
+    content = text
+    for orig_url, normed_url in orig_to_normed_map.items():
+        if orig_url in content:
+            content = text.replace(orig_url, normed_url)
 
     post = RefPost(
         author=author,
-        content=text,
+        content=content,
         url=url,
         created_at=date,
         source_network="twitter",
@@ -168,9 +174,15 @@ def extract_external_ref_urls(tweet: dict, add_qrt_url: bool = True):
     Shortened URLs are expanded to long form.
     Quote Retweets (QRTs) are treated by default as an external URL. (disable by setting `add_qrt_url`=False)
     """
-    urls = extract_and_expand_urls(tweet["text"])
+    expanded_urls, orig_urls = extract_and_expand_urls(
+        tweet["text"], return_orig_urls=True
+    )
 
-    normed_urls = [normalize_tweet_url(url) for url in urls]
+    orig_to_normed_map = {
+        orig_url: exp_url for (orig_url, exp_url) in zip(orig_urls, expanded_urls)
+    }
+
+    normed_urls = [normalize_tweet_url(url) for url in expanded_urls]
 
     # add qrt url if this was a qrt
     if add_qrt_url:
@@ -180,13 +192,10 @@ def extract_external_ref_urls(tweet: dict, add_qrt_url: bool = True):
             normed_urls += [qrt_url]
 
     # remove duplicate urls
-    urls = list(set(normed_urls))
-
-    # normalize urls
-    urls = [normalize_url(u) for u in urls]
+    expanded_urls = list(set(normed_urls))
 
     external = set()
-    for url in urls:
+    for url in expanded_urls:
         twitter_id = extract_twitter_status_id(url)
         if twitter_id:  # check if a twitter url
             if (
@@ -197,7 +206,7 @@ def extract_external_ref_urls(tweet: dict, add_qrt_url: bool = True):
             # not twitter url, add
             external.add(url)
 
-    return list(external)
+    return list(external), orig_to_normed_map
 
 
 # def extract_tweet_external_ref_urls(tweet_url):

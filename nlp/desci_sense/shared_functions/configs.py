@@ -30,6 +30,7 @@ class ParserChainType(str, Enum):
 
 class PostRendererType(str, Enum):
     REF_POST = "ref_post"
+    QUOTE_REF_POST = "quote_ref_post"
 
 
 def validate_env_var(env_var_name: str, value: Union[str, None]):
