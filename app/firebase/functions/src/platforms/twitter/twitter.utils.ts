@@ -63,7 +63,7 @@ export const replaceTinyUrlsWithExpandedUrls = (
     return newText;
   }
   urls.forEach((url) => {
-    newText = text.replace(url.url, url.expanded_url);
+    newText = newText.replace(url.url, url.expanded_url);
   });
   return newText;
 };
