@@ -84,7 +84,11 @@ export enum AutopostOption {
 }
 
 export interface UserSettings {
-  autopost: AutopostOption;
+  autopost: {
+    [PLATFORM.Nanopub]: {
+      value: AutopostOption;
+    };
+  };
 }
 
 export interface UserWithSettings {

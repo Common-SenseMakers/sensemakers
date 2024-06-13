@@ -6,13 +6,19 @@ import {
 } from '../../src/@shared/types/types.platform.posts';
 import {
   AppPostParsedStatus,
+  AppPostParsingStatus,
   AppPostRepublishedStatus,
 } from '../../src/@shared/types/types.posts';
 import { TwitterThread } from '../../src/@shared/types/types.twitter';
-import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
+import {
+  AppUser,
+  AutopostOption,
+  PLATFORM,
+} from '../../src/@shared/types/types.user';
 import { logger } from '../../src/instances/logger';
 import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
+import { postUpdatedHook } from '../../src/posts/hooks/post.updated.hook';
 import { triggerAutofetchPosts } from '../../src/posts/tasks/posts.autofetch.task';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
@@ -80,6 +86,28 @@ describe.only('050-autopost', () => {
       });
     });
 
+    it('upates user autopost settings', async () => {
+      if (!user) {
+        throw new Error('user not created');
+      }
+
+      await services.users.updateSettings(user.userId, {
+        autopost: { [PLATFORM.Nanopub]: { value: AutopostOption.AI } },
+      });
+
+      const userRead = await services.db.run(async (manager) => {
+        if (!user) {
+          throw new Error('user not created');
+        }
+
+        return services.users.repo.getUser(user.userId, manager, true);
+      });
+
+      expect(userRead.settings.autopost[PLATFORM.Nanopub].value).to.eq(
+        AutopostOption.AI
+      );
+    });
+
     it('publish a tweet in the name of the test user', async () => {
       await services.db.run(async (manager) => {
         if (!user) {
@@ -120,43 +148,64 @@ describe.only('050-autopost', () => {
         throw new Error('user not created');
       }
 
-      /** simulate the cron JOB */
+      /** simulate the cron JOB
+       * it wont trigger tasks
+       * it will fetch the tweet and create a new AppPost */
       await triggerAutofetchPosts();
 
-      logger.debug('autofetch and post chain - waiting', DEBUG_PREFIX);
-      await new Promise<void>((resolve) => setTimeout(resolve, 5 * 1000));
-
-      logger.debug('autofetch and post chain - checking', DEBUG_PREFIX);
-
-      /** read user post */
+      /** read user posts */
       const postsRead = await services.postsManager.getOfUser(user.userId);
-
-      expect(postsRead).to.have.length(2);
       expect(postsRead).to.have.length(2);
 
-      const postOfThread = postsRead.find((post) =>
-        post.mirrors.find(
-          (m) =>
-            m.platformId === PLATFORM.Twitter &&
-            m.posted?.post_id === thread.post_id
-        )
+      const postOfThread0 = postsRead.find(
+        (p) => p.origin === PLATFORM.Twitter
       );
-
-      expect(postOfThread).to.not.be.undefined;
-
-      if (!postOfThread) {
+      if (!postOfThread0) {
         throw new Error('postOfThread not created');
       }
 
-      expect(postOfThread.semantics).to.be.undefined;
-      expect(postOfThread.originalParsed).to.be.undefined;
+      expect(postOfThread0.semantics).to.be.undefined;
+      expect(postOfThread0.originalParsed).to.be.undefined;
+      expect(postOfThread0.mirrors).to.have.length(1);
+      expect(postOfThread0.parsingStatus).to.eq(AppPostParsingStatus.IDLE);
+      expect(postOfThread0.parsedStatus).to.eq(AppPostParsedStatus.UNPROCESSED);
+      expect(postOfThread0.republishedStatus).to.eq(
+        AppPostRepublishedStatus.PENDING
+      );
 
-      expect(postOfThread.parsedStatus).to.eq(AppPostParsedStatus.PROCESSED);
-      expect(postOfThread.republishedStatus).to.eq(
+      /** simulate postUpdatedHook (should parse the post )*/
+      await postUpdatedHook({ params: { postId: postOfThread0.id } } as any);
+      const postOfThread1 = await services.postsManager.getPost(
+        postOfThread0.id,
+        true
+      );
+
+      expect(postOfThread1.semantics).to.not.be.undefined;
+      expect(postOfThread1.originalParsed).to.not.be.undefined;
+      expect(postOfThread1.mirrors).to.have.length(2);
+      expect(postOfThread1.parsingStatus).to.eq(AppPostParsingStatus.IDLE);
+      expect(postOfThread1.parsedStatus).to.eq(AppPostParsedStatus.PROCESSED);
+      expect(postOfThread1.republishedStatus).to.eq(
+        AppPostRepublishedStatus.PENDING
+      );
+
+      /** simulate postUpdatedHook (should autopost the post )*/
+      await postUpdatedHook({ params: { postId: postOfThread0.id } } as any);
+      const postOfThread2 = await services.postsManager.getPost(
+        postOfThread0.id,
+        true
+      );
+
+      expect(postOfThread2.semantics).to.not.be.undefined;
+      expect(postOfThread2.originalParsed).to.not.be.undefined;
+      expect(postOfThread2.mirrors).to.have.length(2);
+      expect(postOfThread2.parsingStatus).to.eq(AppPostParsingStatus.IDLE);
+      expect(postOfThread2.parsedStatus).to.eq(AppPostParsedStatus.PROCESSED);
+      expect(postOfThread2.republishedStatus).to.eq(
         AppPostRepublishedStatus.REPUBLISHED
       );
 
-      const nanopub = postOfThread?.mirrors.find(
+      const nanopub = postOfThread2?.mirrors.find(
         (m) => m.platformId === PLATFORM.Nanopub
       );
 

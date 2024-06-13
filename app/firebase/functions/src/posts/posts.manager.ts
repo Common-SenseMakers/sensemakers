@@ -377,7 +377,7 @@ export class PostsManager {
     };
   }
 
-  async getPost<T extends boolean>(postId: string, shouldThrow: T) {
+  async getPost<T extends boolean>(postId: string, shouldThrow?: T) {
     return this.db.run(async (manager) =>
       this.processing.getPostFull(postId, manager, shouldThrow)
     );

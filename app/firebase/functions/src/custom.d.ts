@@ -1,3 +1,9 @@
-import { Logger } from '@types/pino';
+import 'sinon';
 
-declare global {}
+declare global {
+  namespace NodeJS {
+    interface Global {
+      enqueueTaskStub: sinon.SinonStub;
+    }
+  }
+}

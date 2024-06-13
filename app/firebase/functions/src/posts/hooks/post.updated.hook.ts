@@ -6,7 +6,7 @@ import {
   AppPostParsedStatus,
   AppPostRepublishedStatus,
 } from '../../@shared/types/types.posts';
-import { AutopostOption } from '../../@shared/types/types.user';
+import { AutopostOption, PLATFORM } from '../../@shared/types/types.user';
 import { logger } from '../../instances/logger';
 import { createServices } from '../../instances/services';
 import { enqueueTask } from '../../tasks.support';
@@ -36,13 +36,33 @@ export const postUpdatedHook = async (
   });
 
   /** Auto-parsed then auto-posted */
-  if (author.settings.autopost !== AutopostOption.MANUAL) {
+  const shouldAutopost =
+    author.settings.autopost[PLATFORM.Nanopub].value !== AutopostOption.MANUAL;
+
+  if (shouldAutopost) {
     if (post.parsedStatus === AppPostParsedStatus.UNPROCESSED) {
       logger.debug(`triggerTask ${PARSE_POST_TASK}-${postId}`);
       await enqueueTask(PARSE_POST_TASK, { postId });
     } else if (post.republishedStatus === AppPostRepublishedStatus.PENDING) {
       logger.debug(`triggerTask ${AUTOPOST_POST_TASK}-${postId}`);
-      await enqueueTask(AUTOPOST_POST_TASK, { postId });
+
+      /**
+       * Get the platformIds for which the user has set the autpost to
+       * not manual
+       */
+      const platformIds = (
+        Object.keys(author.settings.autopost) as PLATFORM[]
+      ).filter((platformId: PLATFORM) => {
+        if (platformId !== PLATFORM.Nanopub) {
+          throw new Error('Only autopost to nanopub is suported for now');
+        }
+
+        return (
+          author.settings.autopost[platformId].value !== AutopostOption.MANUAL
+        );
+      });
+
+      await enqueueTask(AUTOPOST_POST_TASK, { postId, platformIds });
     }
   }
 

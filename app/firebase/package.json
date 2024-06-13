@@ -8,7 +8,7 @@
     "emulate": "NODE_ENV=local FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 firebase --project demo-sensenets emulators:start",
     "emulate-verbose": "NODE_ENV=local FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 firebase --project demo-sensenets --debug emulators:start",
     "emulate-debug": "yarn emulate --inspect-functions",
-    "emulate-test": "yarn emulate-debug",
+    "emulate-test": "yarn emulate-debug --only firestore",
     "log": "npx firebase-logging --project=common-dev-dea4e --freq=1500 --n=10 --func ",
     "deploy-staging": "firebase deploy --project staging",
     "deploy-prod": "firebase deploy --project prod",

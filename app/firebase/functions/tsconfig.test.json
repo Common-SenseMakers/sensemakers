@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "lib-test",
     "rootDir": ".",
-    "baseUrl": "./",
+    "baseUrl": "./"
   },
   "compileOnSave": true,
   "include": ["src/index.ts", "src/custom.d.ts", "test/__tests__"]

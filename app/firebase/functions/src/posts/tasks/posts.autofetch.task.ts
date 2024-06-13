@@ -35,10 +35,16 @@ export const triggerAutofetchPosts = async () => {
 export const autofetchUserPosts = async (req: Request) => {
   logger.debug(`autofetchUserPosts: userId: ${req.data.userId}`);
 
-  const userId = req.data.userId;
+  const userId = req.data.userId as string;
+
+  if (!userId) {
+    throw new Error('userId is required');
+  }
+
   const { postsManager } = createServices();
 
-  await postsManager.fetchUser(userId);
+  // TODO: maybe replace for "fetch all" (TwitterService needs to be updated too)
+  await postsManager.fetchUser({ userId, params: { expectedAmount: 999 } });
   /** once the post is fetch a listner to the DB will trigger the 
   post to be parsed, and autoposted */
 };

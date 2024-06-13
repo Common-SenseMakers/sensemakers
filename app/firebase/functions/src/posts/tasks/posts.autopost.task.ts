@@ -9,22 +9,25 @@ export const AUTOPOST_POST_TASK = 'autopostPost';
 /** Sensitive (cannot be public) */
 export const autopostPostTask = async (req: Request) => {
   logger.debug(`autopostPost: postId: ${req.data.postId}`);
-  const postId = req.data.postId;
-  const platformsIds = req.data.platformsIds;
+  const postId = req.data.postId as string;
+  const platformIds = req.data.platformIds as PLATFORM[];
+
+  if (!postId) {
+    throw new Error('postId is required');
+  }
+
+  if (!platformIds) {
+    throw new Error('platformsIds is required');
+  }
 
   const { db, postsManager } = createServices();
-  db.run(async (manager) => {
+  return db.run(async (manager) => {
     const post = await postsManager.processing.getPostFull(
       postId,
       manager,
       true
     );
 
-    await postsManager.publishPost(
-      post,
-      platformsIds as PLATFORM[],
-      post.authorId,
-      manager
-    );
+    await postsManager.publishPost(post, platformIds, post.authorId, manager);
   });
 };

@@ -1,5 +1,6 @@
 import fs from 'fs';
 import { Context } from 'mocha';
+import * as sinon from 'sinon';
 
 import {
   ALL_PUBLISH_PLATFORMS,
@@ -7,6 +8,8 @@ import {
 } from '../../src/@shared/types/types.user';
 import { envDeploy } from '../../src/config/typedenv.deploy';
 import { logger } from '../../src/instances/logger';
+import * as tasksSupport from '../../src/tasks.support';
+import { enqueueTaskMock } from '../../src/tasks.support.mock';
 import { UsersHelper } from '../../src/users/users.helper';
 import {
   TestUserCredentials,
@@ -44,8 +47,16 @@ export const mochaHooks = (): Mocha.RootHookObject => {
   return {
     async beforeAll(this: Mocha.Context) {
       const context: InjectableContext = {};
+
+      /** reset db */
       await resetDB();
 
+      /** mock enqueueTask */
+      (global as any).enqueueTaskStub = sinon
+        .stub(tasksSupport, 'enqueueTask')
+        .callsFake(enqueueTaskMock);
+
+      /** prepare/authenticate users  */
       await services.db.run(async (manager) => {
         const testAccountsCredentials: TestUserCredentials[] = JSON.parse(
           process.env.TEST_USER_ACCOUNTS as string

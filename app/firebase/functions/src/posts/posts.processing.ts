@@ -304,4 +304,28 @@ export class PostsProcessing {
       mirrors: mirrors.filter((m) => m !== undefined) as PlatformPost[],
     } as unknown as DefinedIfTrue<T, R>;
   }
+
+  async getFrom_post_id<T extends boolean, R = AppPost>(
+    post_id: string,
+    manager: TransactionManager,
+    shouldThrow?: T
+  ): Promise<DefinedIfTrue<T, R>> {
+    const platformPostId = await this.platformPosts.getFrom_post_id(
+      post_id,
+      manager,
+      true
+    );
+
+    const platformPost = await this.platformPosts.get(
+      platformPostId,
+      manager,
+      true
+    );
+
+    if (!platformPost.postId) {
+      throw new Error('Unexpected');
+    }
+
+    return this.posts.get(platformPost.postId, manager, shouldThrow);
+  }
 }

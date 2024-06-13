@@ -213,7 +213,7 @@ export class UsersService {
          * */
 
         const initSettings: UserSettings = {
-          autopost: AutopostOption.MANUAL,
+          autopost: { [PLATFORM.Nanopub]: { value: AutopostOption.MANUAL } },
         };
 
         await this.repo.createUser(
