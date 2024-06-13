@@ -1,6 +1,7 @@
 import {
   ApiResponseError,
   ApiV2Includes,
+  TweetEntityUrlV2,
   TweetV2,
   UserV2,
 } from 'twitter-api-v2';
@@ -51,6 +52,20 @@ export const getTweetTextWithUrls = (tweet: AppTweet) => {
   }
 
   return text;
+};
+
+export const replaceTinyUrlsWithExpandedUrls = (
+  text: string,
+  urls?: TweetEntityUrlV2[]
+) => {
+  let newText = text;
+  if (!urls) {
+    return newText;
+  }
+  urls.forEach((url) => {
+    newText = text.replace(url.url, url.expanded_url);
+  });
+  return newText;
 };
 
 export const convertToAppTweetBase = (tweet: TweetV2): AppTweetBase => {
