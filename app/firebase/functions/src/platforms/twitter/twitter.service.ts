@@ -223,8 +223,13 @@ export class TwitterService
       throw new Error('Unexpected undefined posted');
     }
     const thread = platformPost.posted.post;
+    return TwitterService.convertThreadToGeneric(thread);
+  }
+
+  static convertThreadToGeneric(thread: TwitterThread): GenericPostData {
     /** concatenate all tweets in thread into one app post */
     const threadText = thread.tweets.map(getTweetTextWithUrls).join('\n---\n');
+
     const transcludedContent = thread.tweets
       .filter((tweet) => tweet.quoted_tweet)
       .map((tweet) => {
