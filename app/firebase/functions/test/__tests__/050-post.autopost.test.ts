@@ -174,7 +174,7 @@ describe.only('050-autopost', () => {
       );
 
       /** simulate postUpdatedHook (should parse the post )*/
-      await postUpdatedHook({ params: { postId: postOfThread0.id } } as any);
+      await postUpdatedHook(postOfThread0.id);
       const postOfThread1 = await services.postsManager.getPost(
         postOfThread0.id,
         true
@@ -190,7 +190,7 @@ describe.only('050-autopost', () => {
       );
 
       /** simulate postUpdatedHook (should autopost the post )*/
-      await postUpdatedHook({ params: { postId: postOfThread0.id } } as any);
+      await postUpdatedHook(postOfThread0.id);
       const postOfThread2 = await services.postsManager.getPost(
         postOfThread0.id,
         true
