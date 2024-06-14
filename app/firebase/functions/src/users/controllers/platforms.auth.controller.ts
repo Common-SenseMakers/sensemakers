@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { logger } from 'firebase-functions/v1';
 
-import { PLATFORM } from '../../@shared/types/types';
+import { PLATFORM } from '../../@shared/types/types.user';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import {
   nanopubGetSignupContextSchema,

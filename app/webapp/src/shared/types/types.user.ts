@@ -1,7 +1,13 @@
 import { NanopubUserDetails } from './types.nanopubs';
 import { OrcidUserDetails } from './types.orcid';
-import { AppPostFull } from './types.posts';
 import { TwitterUserDetails } from './types.twitter';
+
+/** Support types */
+export type DefinedIfTrue<V, R> = V extends true ? R : R | undefined;
+
+export type HexStr = `0x${string}`;
+
+/** user types */
 
 export enum PLATFORM {
   Local = 'local', // local referst to out platform
@@ -71,12 +77,33 @@ export interface UserWithPlatformIds {
   platformIds: string[]; // redundant array with the prefixed user_id of all the authenticated platforms for a given user
 }
 
+export enum AutopostOption {
+  MANUAL = 'MANUAL',
+  DETERMINISTIC = 'DETERMINISTIC',
+  AI = 'AI',
+}
+
+export interface UserSettings {
+  autopost: {
+    [PLATFORM.Nanopub]: {
+      value: AutopostOption;
+    };
+  };
+}
+
+export interface UserWithSettings {
+  settings: UserSettings;
+}
+
 /**
  * AppUser is the entire User object (include credentials) and MUST be
  * kept inside the backend, never sent to the user. We use AppUserRead
  * to send the user profiles to the frontend.
  */
-export interface AppUser extends UserWithId, UserWithPlatformIds {
+export interface AppUser
+  extends UserWithId,
+    UserWithPlatformIds,
+    UserWithSettings {
   [PLATFORM.Orcid]?: OrcidUserDetails[];
   [PLATFORM.Twitter]?: TwitterUserDetails[];
   [PLATFORM.Nanopub]?: NanopubUserDetails[];
@@ -95,7 +122,7 @@ export interface AccountDetailsRead<P> {
   write: boolean;
 }
 
-export interface AppUserRead extends UserWithId {
+export interface AppUserRead extends UserWithId, UserWithSettings {
   [PLATFORM.Orcid]?: AccountDetailsRead<OrcidUserDetails['profile']>[];
   [PLATFORM.Twitter]?: AccountDetailsRead<TwitterUserDetails['profile']>[];
   [PLATFORM.Nanopub]?: AccountDetailsRead<NanopubUserDetails['profile']>[];
@@ -107,46 +134,4 @@ export interface UserPlatformProfile {
   platformId: string;
   user_id: string;
   profile: any;
-}
-
-/** Support types */
-export type DefinedIfTrue<V, R> = V extends true ? R : R | undefined;
-
-export type HexStr = `0x${string}`;
-
-export interface OurTokenConfig {
-  tokenSecret: string;
-  expiresIn: string;
-}
-
-export interface HandleSignupResult {
-  userId: string;
-  ourAccessToken?: string;
-}
-
-/** there are two fetch modes:
- * - sinceId !== undefined: try to return expectedAmount or all posts after this provided sinceId
- * - untilId !== undefined : try to return expectedAmount or all posts before this provided untilId
- */
-export interface FetchParams {
-  sinceId?: string;
-  untilId?: string;
-  expectedAmount: number;
-}
-
-/** ids are in terms of platformPost post_id */
-export interface PlatformFetchParams {
-  since_id?: string;
-  until_id?: string;
-  expectedAmount: number;
-}
-
-export interface UserProfileQuery {
-  platformId: PLATFORM;
-  username: string;
-}
-
-export interface PublishPostPayload {
-  post: AppPostFull;
-  platformIds: PLATFORM[];
 }

@@ -5,7 +5,6 @@ import {
   UsersV2Params,
 } from 'twitter-api-v2';
 
-import { PLATFORM, UserDetailsBase } from '../../@shared/types/types';
 import {
   TwitterGetContextParams,
   TwitterSignupData,
@@ -13,6 +12,7 @@ import {
   TwitterUserDetails,
   TwitterUserProfile,
 } from '../../@shared/types/types.twitter';
+import { PLATFORM, UserDetailsBase } from '../../@shared/types/types.user';
 import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';

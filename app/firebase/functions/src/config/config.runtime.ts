@@ -55,3 +55,5 @@ export const FETCH_RATE_LIMIT_MS = envRuntime.FETCH_RATE_LIMIT_MS;
 export const NP_PUBLISH_RSA_PRIVATE_KEY = envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY;
 export const NP_PUBLISH_RSA_PUBLIC_KEY = envRuntime.NP_PUBLISH_RSA_PUBLIC_KEY;
 export const NANOPUBS_PUBLISH_SERVERS = envRuntime.NANOPUBS_PUBLISH_SERVERS;
+
+export const AUTOFETCH_PERIOD = 'every 185 seconds';

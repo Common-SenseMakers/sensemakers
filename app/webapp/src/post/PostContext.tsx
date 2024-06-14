@@ -11,11 +11,7 @@ import React, {
 import { useAppFetch } from '../api/app.fetch';
 import { useToastContext } from '../app/ToastsContext';
 import { subscribeToUpdates } from '../firestore/realtime.listener';
-import {
-  AppUserRead,
-  PLATFORM,
-  PublishPostPayload,
-} from '../shared/types/types';
+import { PublishPostPayload } from '../shared/types/types.fetch';
 import {
   PlatformPost,
   PlatformPostDraft,
@@ -31,6 +27,11 @@ import {
   PostsQueryStatus,
 } from '../shared/types/types.posts';
 import { TwitterThread } from '../shared/types/types.twitter';
+import {
+  AppUserRead,
+  AutopostOption,
+  PLATFORM,
+} from '../shared/types/types.user';
 import { useUserPosts } from '../user-home/UserPostsContext';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
@@ -195,6 +196,11 @@ export const PostContext: React.FC<{
    * endpoint to get user profiles by userIds */
   const author: AppUserRead = {
     userId: '1234',
+    settings: {
+      autopost: {
+        [PLATFORM.Nanopub]: { value: AutopostOption.MANUAL },
+      },
+    },
     twitter: [
       {
         user_id: '1234',

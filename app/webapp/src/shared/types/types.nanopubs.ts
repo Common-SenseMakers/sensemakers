@@ -1,5 +1,5 @@
 /** NANOPUB */
-import { HexStr, UserDetailsBase } from './types';
+import { HexStr, UserDetailsBase } from './types.user';
 
 /**
  * Nanopubs use private keys for authentication, no need to store credentials for each
@@ -9,7 +9,7 @@ export interface NanopubUserProfile {
   rsaPublickey: string;
   ethAddress: HexStr;
   introNanopub?: string;
-  ethToRsaSignature: HexStr,
+  ethToRsaSignature: HexStr;
 }
 
 export type NanupubSignupData = NanopubUserProfile & {

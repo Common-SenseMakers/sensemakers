@@ -1,13 +1,4 @@
-import {
-  ALL_PUBLISH_PLATFORMS,
-  AppUser,
-  FetchParams,
-  FetchedDetails,
-  PLATFORM,
-  PUBLISHABLE_PLATFORMS,
-  PlatformFetchParams,
-  UserDetailsBase,
-} from '../@shared/types/types';
+import { FetchParams, PlatformFetchParams } from '../@shared/types/types.fetch';
 import {
   PARSER_MODE,
   ParsePostRequest,
@@ -33,6 +24,14 @@ import {
   PostsQueryStatus,
   UserPostsQuery,
 } from '../@shared/types/types.posts';
+import {
+  ALL_PUBLISH_PLATFORMS,
+  AppUser,
+  FetchedDetails,
+  PLATFORM,
+  PUBLISHABLE_PLATFORMS,
+  UserDetailsBase,
+} from '../@shared/types/types.user';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
@@ -378,7 +377,7 @@ export class PostsManager {
     };
   }
 
-  async getPost<T extends boolean>(postId: string, shouldThrow: T) {
+  async getPost<T extends boolean>(postId: string, shouldThrow?: T) {
     return this.db.run(async (manager) =>
       this.processing.getPostFull(postId, manager, shouldThrow)
     );
@@ -495,9 +494,10 @@ export class PostsManager {
   async publishPost(
     newPost: AppPostFull,
     platformIds: PLATFORM[],
-    userId: string
+    userId: string,
+    manager?: TransactionManager
   ) {
-    await this.db.run(async (manager) => {
+    const publishFunction = async (manager: TransactionManager) => {
       if (DEBUG)
         logger.debug(`approvePost ${newPost.id}`, { post: newPost, userId });
       const user = await this.users.repo.getUser(userId, manager, true);
@@ -627,7 +627,13 @@ export class PostsManager {
           manager
         );
       }
-    });
+    };
+
+    if (manager) {
+      return publishFunction(manager);
+    } else {
+      return this.db.run((manager) => publishFunction(manager));
+    }
   }
 
   /** Get posts AppPostFull of user, cannot be part of a transaction

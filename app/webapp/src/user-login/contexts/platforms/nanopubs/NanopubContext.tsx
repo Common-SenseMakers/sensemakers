@@ -10,7 +10,7 @@ import {
 
 import { useLoadingContext } from '../../../../app/LoadingContext';
 import { useToastContext } from '../../../../app/ToastsContext';
-import { HexStr } from '../../../../shared/types/types';
+import { HexStr } from '../../../../shared/types/types.user';
 import { signNanopublication as _signNanopublication } from '../../../../shared/utils/nanopub.sign.util';
 import { cleanPrivateKey } from '../../../../shared/utils/semantics.helper';
 import { useNanopubKeys } from './derive.keys.hook';

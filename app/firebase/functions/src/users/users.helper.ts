@@ -6,7 +6,7 @@ import {
   IDENTITY_PLATFORMS,
   PUBLISHABLE_PLATFORMS,
   UserDetailsBase,
-} from '../@shared/types/types';
+} from '../@shared/types/types.user';
 
 export interface PlatformDetails {
   platform: PUBLISHABLE_PLATFORMS;

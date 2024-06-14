@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 
-import { PLATFORM } from '../../src/@shared/types/types';
 import { SciFilterClassfication } from '../../src/@shared/types/types.parser';
 import {
   PlatformPostCreate,
@@ -15,6 +14,7 @@ import {
   AppPostReviewStatus,
   PostsQueryStatus,
 } from '../../src/@shared/types/types.posts';
+import { PLATFORM } from '../../src/@shared/types/types.user';
 import { logger } from '../../src/instances/logger';
 import { resetDB } from '../utils/db';
 import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';

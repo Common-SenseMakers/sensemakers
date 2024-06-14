@@ -1,16 +1,12 @@
-import { TimeService } from 'src/time/time.service';
-import { UsersService } from 'src/users/users.service';
+import { TimeService } from '../time/time.service';
+import { UsersService } from '../users/users.service';
 
-import {
-  FetchParams,
-  PLATFORM,
-  PlatformFetchParams,
-  UserDetailsBase,
-} from '../@shared/types/types';
+import { FetchParams, PlatformFetchParams } from '../@shared/types/types.fetch';
 import {
   PlatformPostCreate,
   PlatformPostPublish,
 } from '../@shared/types/types.platform.posts';
+import { PLATFORM, UserDetailsBase } from '../@shared/types/types.user';
 import { TransactionManager } from '../db/transaction.manager';
 import { IdentityService, PlatformService } from './platforms.interface';
 

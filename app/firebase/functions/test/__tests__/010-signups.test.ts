@@ -1,11 +1,11 @@
 import { expect } from 'chai';
 
-import { PLATFORM } from '../../src/@shared/types/types';
 import {
   NanopubUserProfile,
   NanupubSignupData,
 } from '../../src/@shared/types/types.nanopubs';
 import { TwitterUserProfile } from '../../src/@shared/types/types.twitter';
+import { PLATFORM } from '../../src/@shared/types/types.user';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { logger } from '../../src/instances/logger';
 import { resetDB } from '../utils/db';

@@ -1,4 +1,3 @@
-import { ALL_PUBLISH_PLATFORMS, DefinedIfTrue } from '../@shared/types/types';
 import {
   PlatformPost,
   PlatformPostCreate,
@@ -17,6 +16,10 @@ import {
   AppPostRepublishedStatus,
   AppPostReviewStatus,
 } from '../@shared/types/types.posts';
+import {
+  ALL_PUBLISH_PLATFORMS,
+  DefinedIfTrue,
+} from '../@shared/types/types.user';
 import { mapStoreElements, parseRDF } from '../@shared/utils/n3.utils';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
@@ -300,5 +303,29 @@ export class PostsProcessing {
       ...post,
       mirrors: mirrors.filter((m) => m !== undefined) as PlatformPost[],
     } as unknown as DefinedIfTrue<T, R>;
+  }
+
+  async getFrom_post_id<T extends boolean, R = AppPost>(
+    post_id: string,
+    manager: TransactionManager,
+    shouldThrow?: T
+  ): Promise<DefinedIfTrue<T, R>> {
+    const platformPostId = await this.platformPosts.getFrom_post_id(
+      post_id,
+      manager,
+      true
+    );
+
+    const platformPost = await this.platformPosts.get(
+      platformPostId,
+      manager,
+      true
+    );
+
+    if (!platformPost.postId) {
+      throw new Error('Unexpected');
+    }
+
+    return this.posts.get(platformPost.postId, manager, shouldThrow);
   }
 }

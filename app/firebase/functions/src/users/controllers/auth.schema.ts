@@ -1,5 +1,7 @@
 import { object, string } from 'yup';
 
+import { AutopostOption, PLATFORM } from '../../@shared/types/types.user';
+
 export const twitterGetSignupContextSchema = object({
   callback_url: string().required(),
   type: string().oneOf(['read', 'write']).required(),
@@ -24,8 +26,12 @@ export const nanopubSignupDataSchema = object({
   introNanopub: string().required(),
 }).noUnknown(true);
 
-export const mirrorPostSchema = object({
-  id: string().required(),
-  content: string().required(),
-  semantics: string().required(),
+export const userSettingsUpdateSchema = object({
+  autopost: object({
+    [PLATFORM.Nanopub]: object({
+      value: string()
+        .oneOf([...Object.values(AutopostOption)])
+        .required(),
+    }),
+  }).required(),
 }).noUnknown(true);

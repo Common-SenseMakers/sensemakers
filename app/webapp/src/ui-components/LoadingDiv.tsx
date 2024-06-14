@@ -21,10 +21,6 @@ export const LoadingDiv = (props: BoxExtendedProps) => {
 };
 
 export const Loading = (props: { color?: string; size?: string }) => {
-  return (
-    <Spinner
-      height={props.size}
-      width={props.size}
-      color={props.color}></Spinner>
-  );
+  const size = props.size || '32px';
+  return <Spinner height={size} width={size} color={props.color}></Spinner>;
 };

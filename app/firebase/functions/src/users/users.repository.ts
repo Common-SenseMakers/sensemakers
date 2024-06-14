@@ -3,13 +3,15 @@ import { firestore } from 'firebase-admin';
 import {
   AppUser,
   AppUserCreate,
+  AutopostOption,
   DefinedIfTrue,
   FetchedDetails,
   PLATFORM,
   UserDetailsBase,
   UserPlatformProfile,
+  UserSettings,
   UserWithPlatformIds,
-} from '../@shared/types/types';
+} from '../@shared/types/types.user';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
@@ -368,6 +370,23 @@ export class UsersRepository {
     });
   }
 
+  public async getWithAutopostValues(
+    platformId: PLATFORM,
+    values: AutopostOption[]
+  ): Promise<string[]> {
+    const settingsKey: keyof AppUser = 'settings';
+    const autopostKey: keyof UserSettings = 'autopost';
+
+    const query = this.db.collections.users.where(
+      `${settingsKey}.${autopostKey}.${platformId}.value`,
+      'in',
+      values
+    );
+
+    const result = await query.get();
+    return result.docs.map((doc) => doc.id) as string[];
+  }
+
   public async getAll() {
     const snapshot = await this.db.collections.users.get();
     const users: AppUser[] = [];
@@ -389,5 +408,14 @@ export class UsersRepository {
     });
 
     return usersIds;
+  }
+
+  public async updateSettings(
+    userId: string,
+    settings: UserSettings,
+    manager: TransactionManager
+  ) {
+    const ref = await this.getUserRef(userId, manager, true);
+    manager.update(ref, { settings });
   }
 }

@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 
-import { AppUser, PLATFORM } from '../../src/@shared/types/types';
 import {
   PlatformPostDraftApproval,
   PlatformPostPosted,
@@ -11,6 +10,7 @@ import {
   PostsQueryStatus,
 } from '../../src/@shared/types/types.posts';
 import { TwitterThread } from '../../src/@shared/types/types.twitter';
+import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { logger } from '../../src/instances/logger';
@@ -19,7 +19,7 @@ import {
   TWITTER_USER_ID_MOCKS,
 } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
-import { parsePostTask } from '../../src/posts/posts.task';
+import { parsePostTask } from '../../src/posts/tasks/posts.parse.task';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
 import { createUsers } from '../utils/users.utils';

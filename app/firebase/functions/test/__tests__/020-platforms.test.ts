@@ -1,7 +1,8 @@
 import { expect } from 'chai';
 
-import { AppUser, FetchParams, PLATFORM } from '../../src/@shared/types/types';
+import { FetchParams } from '../../src/@shared/types/types.fetch';
 import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
+import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { logger } from '../../src/instances/logger';

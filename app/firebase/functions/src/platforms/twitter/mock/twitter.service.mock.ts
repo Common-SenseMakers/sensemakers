@@ -1,11 +1,7 @@
-import { TransactionManager } from 'src/db/transaction.manager';
 import { anything, instance, spy, when } from 'ts-mockito';
 import { TweetV2SingleResult } from 'twitter-api-v2';
 
-import {
-  PlatformFetchParams,
-  UserDetailsBase,
-} from '../../../@shared/types/types';
+import { PlatformFetchParams } from '../../../@shared/types/types.fetch';
 import {
   PlatformPostPosted,
   PlatformPostPublish,
@@ -16,6 +12,8 @@ import {
   TwitterThread,
   TwitterUserDetails,
 } from '../../../@shared/types/types.twitter';
+import { UserDetailsBase } from '../../../@shared/types/types.user';
+import { TransactionManager } from '../../../db/transaction.manager';
 import { logger } from '../../../instances/logger';
 import { TwitterService } from '../twitter.service';
 import { dateStrToTimestampMs } from '../twitter.utils';
@@ -59,30 +57,34 @@ const getSampleTweet = (
   };
 };
 
-const now = Date.now();
+export const initThreads = () => {
+  const now = Date.now();
 
-const threads = THREADS.map((thread, ixThread): TwitterThread => {
-  const tweets = thread.map((content, ixTweet) => {
-    const idTweet = ixThread * 100 + ixTweet;
-    const createdAt = now + ixThread * 100 + 10 * ixTweet;
-    state.latestTweetId = idTweet;
-    return getSampleTweet(
-      idTweet.toString().padStart(5, '0'),
-      TWITTER_USER_ID_MOCKS,
-      createdAt,
-      ixThread.toString().padStart(5, '0'),
-      content
-    );
+  const threads = THREADS.map((thread, ixThread): TwitterThread => {
+    const tweets = thread.map((content, ixTweet) => {
+      const idTweet = ixThread * 100 + ixTweet;
+      const createdAt = now + ixThread * 100 + 10 * ixTweet;
+      state.latestTweetId = idTweet;
+      return getSampleTweet(
+        idTweet.toString().padStart(5, '0'),
+        TWITTER_USER_ID_MOCKS,
+        createdAt,
+        ixThread.toString().padStart(5, '0'),
+        content
+      );
+    });
+    state.latestConvId = ixThread;
+    return {
+      conversation_id: `${ixThread}`,
+      tweets,
+    };
   });
-  state.latestConvId = ixThread;
-  return {
-    conversation_id: `${ixThread}`,
-    tweets,
-  };
-});
 
-state.threads.push(...threads);
-state.threads.reverse();
+  state.threads = threads;
+  state.threads.reverse();
+};
+
+initThreads();
 
 /** make private methods public */
 type MockedType = Omit<TwitterService, 'fetchInternal' | 'getUserClient'> & {
