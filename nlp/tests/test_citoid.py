@@ -47,9 +47,17 @@ def test_scale_citoid():
     num_res = len(res)
     assert num_res == len(test_input)
 
+def test_i99():
+    # https://github.com/Common-SenseMakers/sensemakers/issues/99
+    res = fetch_citation("https://accidental-expert.com/p/the-bob-ross-of-adobe")
+    assert res["title"] == "The Bob Ross of Adobe"
+    assert res["url"] == "https://accidental-expert.com/p/the-bob-ross-of-adobe"
+    
+    
+    
 
 if __name__ == "__main__":
-    bad_test_input = ["httpsss://ept.ms/3VUYqTRsdfs/ff"]
-    res = extract_urls_citoid_metadata(bad_test_input, max_summary_length=30)
-    assert len(res) == 1
-    print(res)
+    # test_input = ["'https://accidental-expert.com/p/the-bob-ross-of-adobe'"]
+    res = fetch_citation("https://accidental-expert.com/p/the-bob-ross-of-adobe")
+    # assert len(res) == 1
+    # print(res)
