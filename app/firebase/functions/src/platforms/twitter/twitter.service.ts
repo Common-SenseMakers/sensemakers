@@ -233,7 +233,7 @@ export class TwitterService
           throw new Error(`Unexpected quote_tweet.author.username undefined`);
         }
         return {
-          url: `https://x.com/${tweet.quoted_tweet.author.username}/status/${tweet.id}`,
+          url: `https://x.com/${tweet.quoted_tweet.author.username}/status/${tweet.quoted_tweet.id}`,
           content: replaceTinyUrlsWithExpandedUrls(
             tweet.quoted_tweet.text,
             tweet.quoted_tweet.entities?.urls
