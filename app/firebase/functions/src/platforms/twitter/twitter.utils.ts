@@ -156,13 +156,15 @@ export const convertTweetsToThreads = (tweets: AppTweet[], author: UserV2) => {
   );
 
   /** sort tweets inside each thread, and compose the TwitterThread[] array */
+  /** extract primary thread for each conversation id */
   const threads = tweetsArrays.map((thread): TwitterThread => {
     const tweets = thread.sort(
       (tweetA, tweetB) => Number(tweetA.id) - Number(tweetB.id)
     );
+    const primaryThread = extractPrimaryThread(tweets[0].id, tweets); // TODO: better handling here if the original conversation_id tweet isn't in this list - how to properly pick which primary thread to take?
     return {
       conversation_id: tweets[0].conversation_id,
-      tweets,
+      tweets: primaryThread,
       author: {
         id: author.id,
         name: author.name,
@@ -171,4 +173,34 @@ export const convertTweetsToThreads = (tweets: AppTweet[], author: UserV2) => {
     };
   });
   return threads;
+};
+
+const extractPrimaryThread = (id: string, tweets: AppTweet[]): AppTweet[] => {
+  const primaryTweet = tweets.find((tweet) => tweet.id === id);
+  if (!primaryTweet) {
+    throw new Error(`Could not find primary tweet with id: ${id}`);
+  }
+  const earliestResponse = getEarliestResponse(id, tweets);
+  if (!earliestResponse) {
+    return [primaryTweet];
+  }
+
+  return [primaryTweet, ...extractPrimaryThread(earliestResponse.id, tweets)];
+};
+
+const getEarliestResponse = (id: string, tweets: AppTweet[]) => {
+  const allTweetReplies = tweets.filter((tweet) =>
+    tweet.referenced_tweets?.some(
+      (referencedTweet) =>
+        referencedTweet.type === 'replied_to' && referencedTweet.id === id
+    )
+  );
+  if (allTweetReplies.length === 0) {
+    return null;
+  }
+  return allTweetReplies.reduce(
+    (earliestTweet, tweet) =>
+      Number(tweet.id) < Number(earliestTweet.id) ? tweet : earliestTweet,
+    allTweetReplies[0]
+  );
 };
