@@ -65,6 +65,7 @@ export enum REQUIRED_TWEET_FIELDS {
 export enum OPTIONAL_TWEET_FIELDS {
   Entities = 'entities',
   NoteTweet = 'note_tweet',
+  ReferencedTweets = 'referenced_tweets',
 }
 
 export type AppTweetBase = Required<Pick<TweetV2, REQUIRED_TWEET_FIELDS>> &
