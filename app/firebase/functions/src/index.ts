@@ -45,7 +45,12 @@ exports['api'] = functions
   .https.onRequest(buildApp(router));
 
 /** jobs */
-exports.accountFetch = onSchedule(AUTOFETCH_PERIOD, triggerAutofetchPosts);
+exports.accountFetch = onSchedule({schedule: AUTOFETCH_PERIOD, secrets: [
+  envRuntime.ORCID_SECRET,
+  envRuntime.OUR_TOKEN_SECRET,
+  envRuntime.TWITTER_CLIENT_SECRET,
+  envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY
+]}, triggerAutofetchPosts);
 
 // add enpoint when on emulator to trigger the scheduled task
 if (IS_EMULATOR) {
@@ -78,6 +83,12 @@ exports[PARSE_POST_TASK] = onTaskDispatched(
     timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
     memory: envDeploy.CONFIG_MEMORY,
     minInstances: envDeploy.CONFIG_MININSTANCE,
+    secrets: [
+      envRuntime.ORCID_SECRET,
+      envRuntime.OUR_TOKEN_SECRET,
+      envRuntime.TWITTER_CLIENT_SECRET,
+      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY
+    ]
   },
   parsePostTask
 );
@@ -87,6 +98,12 @@ exports[AUTOFETCH_POSTS_TASK] = onTaskDispatched(
     timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
     memory: envDeploy.CONFIG_MEMORY,
     minInstances: envDeploy.CONFIG_MININSTANCE,
+    secrets: [
+      envRuntime.ORCID_SECRET,
+      envRuntime.OUR_TOKEN_SECRET,
+      envRuntime.TWITTER_CLIENT_SECRET,
+      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY
+    ]
   },
   autofetchUserPosts
 );
@@ -96,6 +113,12 @@ exports[AUTOPOST_POST_TASK] = onTaskDispatched(
     timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
     memory: envDeploy.CONFIG_MEMORY,
     minInstances: envDeploy.CONFIG_MININSTANCE,
+    secrets: [
+      envRuntime.ORCID_SECRET,
+      envRuntime.OUR_TOKEN_SECRET,
+      envRuntime.TWITTER_CLIENT_SECRET,
+      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY
+    ]
   },
   autopostPostTask
 );
