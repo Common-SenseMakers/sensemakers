@@ -1,0 +1,352 @@
+{
+  "data": [
+    {
+      "created_at": "2024-06-06T18:57:49.000Z",
+      "referenced_tweets": [{ "type": "quoted", "id": "1795069204418175459" }],
+      "id": "1798791421152911644",
+      "entities": {
+        "urls": [
+          {
+            "start": 50,
+            "end": 73,
+            "url": "https://t.co/gguJOKvN37",
+            "expanded_url": "https://x.com/sense_nets_bot/status/1798782358201508331",
+            "display_url": "x.com/sense_nets_bot…"
+          },
+          {
+            "start": 75,
+            "end": 98,
+            "url": "https://t.co/Xvg4gOdJ8H",
+            "expanded_url": "https://x.com/sense_nets_bot/status/1795069204418175459",
+            "display_url": "x.com/sense_nets_bot…"
+          }
+        ]
+      },
+      "author_id": "1773032135814717440",
+      "edit_history_tweet_ids": ["1798791421152911644"],
+      "conversation_id": "1798791421152911644",
+      "text": "this is a tweet that references two other tweets!\nhttps://t.co/gguJOKvN37\n\nhttps://t.co/Xvg4gOdJ8H"
+    },
+    {
+      "created_at": "2024-06-06T18:58:46.000Z",
+      "referenced_tweets": [
+        { "type": "quoted", "id": "1798782358201508331" },
+        { "type": "replied_to", "id": "1798791421152911644" }
+      ],
+      "id": "1798791660668698927",
+      "entities": {
+        "urls": [
+          {
+            "start": 104,
+            "end": 127,
+            "url": "https://t.co/gguJOKvN37",
+            "expanded_url": "https://x.com/sense_nets_bot/status/1798782358201508331",
+            "display_url": "x.com/sense_nets_bot…"
+          }
+        ]
+      },
+      "author_id": "1773032135814717440",
+      "edit_history_tweet_ids": ["1798791660668698927"],
+      "conversation_id": "1798791421152911644",
+      "text": "I see that it only caught the second link as the quote tweet, but didn't include this as a quote tweet:\nhttps://t.co/gguJOKvN37"
+    },
+    {
+      "created_at": "2024-06-06T19:00:33.000Z",
+      "referenced_tweets": [
+        { "type": "quoted", "id": "1798549107507974626" },
+        { "type": "replied_to", "id": "1798791660668698927" }
+      ],
+      "id": "1798792109031559184",
+      "entities": {
+        "urls": [
+          {
+            "start": 33,
+            "end": 56,
+            "url": "https://t.co/9ZB0UaqOcc",
+            "expanded_url": "https://x.com/rtk254/status/1798549107507974626",
+            "display_url": "x.com/rtk254/status/…"
+          }
+        ]
+      },
+      "author_id": "1773032135814717440",
+      "edit_history_tweet_ids": ["1798792109031559184"],
+      "conversation_id": "1798791421152911644",
+      "text": "more quote tweets in this thread\nhttps://t.co/9ZB0UaqOcc"
+    },
+    {
+      "created_at": "2024-06-14T16:58:08.000Z",
+      "referenced_tweets": [
+        { "type": "replied_to", "id": "1798792109031559184" }
+      ],
+      "id": "1801660405367841019",
+      "author_id": "1773032135814717440",
+      "edit_history_tweet_ids": ["1801660405367841019"],
+      "conversation_id": "1798791421152911644",
+      "text": "what is this a response to?"
+    },
+    {
+      "created_at": "2024-06-14T16:58:50.000Z",
+      "referenced_tweets": [
+        { "type": "replied_to", "id": "1798791660668698927" }
+      ],
+      "id": "1801660583022104907",
+      "author_id": "1773032135814717440",
+      "edit_history_tweet_ids": ["1801660583022104907"],
+      "conversation_id": "1798791421152911644",
+      "text": "and this replies to a reply"
+    },
+    {
+      "created_at": "2024-06-14T17:04:31.000Z",
+      "referenced_tweets": [
+        { "type": "replied_to", "id": "1798791421152911644" }
+      ],
+      "id": "1801662011387871645",
+      "author_id": "1773032135814717440",
+      "edit_history_tweet_ids": ["1801662011387871645"],
+      "conversation_id": "1798791421152911644",
+      "text": "another direct response to: 1798791421152911644"
+    },
+    {
+      "created_at": "2024-06-14T17:04:52.000Z",
+      "referenced_tweets": [
+        { "type": "replied_to", "id": "1801661918236577796" }
+      ],
+      "id": "1801662101557309890",
+      "author_id": "1773032135814717440",
+      "edit_history_tweet_ids": ["1801662101557309890"],
+      "conversation_id": "1798791421152911644",
+      "text": "response to: 1801661918236577796"
+    },
+    {
+      "created_at": "2024-06-14T17:04:09.000Z",
+      "referenced_tweets": [
+        { "type": "replied_to", "id": "1798791421152911644" }
+      ],
+      "id": "1801661918236577796",
+      "author_id": "1773032135814717440",
+      "edit_history_tweet_ids": ["1801661918236577796"],
+      "conversation_id": "1798791421152911644",
+      "text": "direct response to: 1798791421152911644"
+    },
+    {
+      "created_at": "2024-06-14T17:16:51.000Z",
+      "referenced_tweets": [
+        { "type": "replied_to", "id": "1798791660668698927" }
+      ],
+      "id": "1801665117307748599",
+      "author_id": "1773032135814717440",
+      "edit_history_tweet_ids": ["1801665117307748599"],
+      "conversation_id": "1798791421152911644",
+      "text": "direct reply to: 1798791660668698927"
+    },
+    {
+      "created_at": "2024-06-14T17:17:08.000Z",
+      "referenced_tweets": [
+        { "type": "replied_to", "id": "1801665117307748599" }
+      ],
+      "id": "1801665186652176406",
+      "author_id": "1773032135814717440",
+      "edit_history_tweet_ids": ["1801665186652176406"],
+      "conversation_id": "1798791421152911644",
+      "text": "direct reply to: 1801665117307748599"
+    }
+  ],
+  "includes": {
+    "users": [
+      {
+        "id": "1773032135814717440",
+        "name": "SenseNet Bot",
+        "username": "sense_nets_bot"
+      },
+      {
+        "id": "1065316525417160705",
+        "name": "Ronen Tamari",
+        "username": "rtk254"
+      }
+    ],
+    "tweets": [
+      {
+        "created_at": "2024-05-27T12:27:03.000Z",
+        "referenced_tweets": [
+          { "type": "quoted", "id": "1793505119792677089" }
+        ],
+        "id": "1795069204418175459",
+        "entities": {
+          "urls": [
+            {
+              "start": 38,
+              "end": 61,
+              "url": "https://t.co/MynZ87Ln9R",
+              "expanded_url": "https://twitter.com/VitalikButerin/status/1793505119792677089",
+              "display_url": "x.com/VitalikButerin…"
+            }
+          ]
+        },
+        "author_id": "1773032135814717440",
+        "edit_history_tweet_ids": ["1795069204418175459"],
+        "conversation_id": "1795069204418175459",
+        "text": "A new quote tweet of something I love https://t.co/MynZ87Ln9R"
+      },
+      {
+        "created_at": "2024-06-06T18:21:48.000Z",
+        "referenced_tweets": [
+          { "type": "quoted", "id": "1795069204418175459" }
+        ],
+        "id": "1798782358201508331",
+        "entities": {
+          "urls": [
+            {
+              "start": 38,
+              "end": 61,
+              "url": "https://t.co/mUp1B8Ipkc",
+              "expanded_url": "https://twitter.com/sense_nets_bot/status/1795069204418175459",
+              "display_url": "x.com/sense_nets_bot…"
+            }
+          ]
+        },
+        "author_id": "1773032135814717440",
+        "edit_history_tweet_ids": ["1798782358201508331"],
+        "conversation_id": "1798782358201508331",
+        "text": "a quote tweet that goes 2 layers deep https://t.co/mUp1B8Ipkc"
+      },
+      {
+        "created_at": "2024-06-06T18:57:49.000Z",
+        "referenced_tweets": [
+          { "type": "quoted", "id": "1795069204418175459" }
+        ],
+        "id": "1798791421152911644",
+        "entities": {
+          "urls": [
+            {
+              "start": 50,
+              "end": 73,
+              "url": "https://t.co/gguJOKvN37",
+              "expanded_url": "https://x.com/sense_nets_bot/status/1798782358201508331",
+              "display_url": "x.com/sense_nets_bot…"
+            },
+            {
+              "start": 75,
+              "end": 98,
+              "url": "https://t.co/Xvg4gOdJ8H",
+              "expanded_url": "https://x.com/sense_nets_bot/status/1795069204418175459",
+              "display_url": "x.com/sense_nets_bot…"
+            }
+          ]
+        },
+        "author_id": "1773032135814717440",
+        "edit_history_tweet_ids": ["1798791421152911644"],
+        "conversation_id": "1798791421152911644",
+        "text": "this is a tweet that references two other tweets!\nhttps://t.co/gguJOKvN37\n\nhttps://t.co/Xvg4gOdJ8H"
+      },
+      {
+        "created_at": "2024-06-06T02:54:57.000Z",
+        "referenced_tweets": [
+          { "type": "quoted", "id": "1798312150345347127" }
+        ],
+        "id": "1798549107507974626",
+        "entities": {
+          "urls": [
+            {
+              "start": 107,
+              "end": 130,
+              "url": "https://t.co/YL93kDHmdo",
+              "expanded_url": "https://aeon.co/essays/on-the-dangers-of-seeing-human-minds-as-predictive-machines",
+              "display_url": "aeon.co/essays/on-the-…",
+              "status": 200,
+              "title": "On the dangers of seeing human minds as predictive machines | Aeon Essays",
+              "description": "Cognitive scientists and corporations alike see human minds as predictive machines. Right or wrong, they will change how we think",
+              "unwound_url": "https://aeon.co/essays/on-the-dangers-of-seeing-human-minds-as-predictive-machines"
+            },
+            {
+              "start": 131,
+              "end": 154,
+              "url": "https://t.co/cVBzU3kDij",
+              "expanded_url": "https://twitter.com/rtk254/status/1798549107507974626/photo/1",
+              "display_url": "pic.twitter.com/cVBzU3kDij",
+              "media_key": "3_1798549051249762304"
+            },
+            {
+              "start": 155,
+              "end": 178,
+              "url": "https://t.co/LogqUQRYIi",
+              "expanded_url": "https://twitter.com/behrenstimb/status/1798312150345347127",
+              "display_url": "x.com/behrenstimb/st…"
+            }
+          ]
+        },
+        "author_id": "1065316525417160705",
+        "edit_history_tweet_ids": ["1798549107507974626"],
+        "conversation_id": "1798549107507974626",
+        "text": "This can be generalized beyond writing - predictable is exactly how corporations want us. Be unpredictable https://t.co/YL93kDHmdo https://t.co/cVBzU3kDij https://t.co/LogqUQRYIi"
+      },
+      {
+        "created_at": "2024-06-06T18:58:46.000Z",
+        "referenced_tweets": [
+          { "type": "quoted", "id": "1798782358201508331" },
+          { "type": "replied_to", "id": "1798791421152911644" }
+        ],
+        "id": "1798791660668698927",
+        "entities": {
+          "urls": [
+            {
+              "start": 104,
+              "end": 127,
+              "url": "https://t.co/gguJOKvN37",
+              "expanded_url": "https://x.com/sense_nets_bot/status/1798782358201508331",
+              "display_url": "x.com/sense_nets_bot…"
+            }
+          ]
+        },
+        "author_id": "1773032135814717440",
+        "edit_history_tweet_ids": ["1798791660668698927"],
+        "conversation_id": "1798791421152911644",
+        "text": "I see that it only caught the second link as the quote tweet, but didn't include this as a quote tweet:\nhttps://t.co/gguJOKvN37"
+      },
+      {
+        "created_at": "2024-06-06T19:00:33.000Z",
+        "referenced_tweets": [
+          { "type": "quoted", "id": "1798549107507974626" },
+          { "type": "replied_to", "id": "1798791660668698927" }
+        ],
+        "id": "1798792109031559184",
+        "entities": {
+          "urls": [
+            {
+              "start": 33,
+              "end": 56,
+              "url": "https://t.co/9ZB0UaqOcc",
+              "expanded_url": "https://x.com/rtk254/status/1798549107507974626",
+              "display_url": "x.com/rtk254/status/…"
+            }
+          ]
+        },
+        "author_id": "1773032135814717440",
+        "edit_history_tweet_ids": ["1798792109031559184"],
+        "conversation_id": "1798791421152911644",
+        "text": "more quote tweets in this thread\nhttps://t.co/9ZB0UaqOcc"
+      },
+      {
+        "created_at": "2024-06-14T17:04:09.000Z",
+        "referenced_tweets": [
+          { "type": "replied_to", "id": "1798791421152911644" }
+        ],
+        "id": "1801661918236577796",
+        "author_id": "1773032135814717440",
+        "edit_history_tweet_ids": ["1801661918236577796"],
+        "conversation_id": "1798791421152911644",
+        "text": "direct response to: 1798791421152911644"
+      },
+      {
+        "created_at": "2024-06-14T17:16:51.000Z",
+        "referenced_tweets": [
+          { "type": "replied_to", "id": "1798791660668698927" }
+        ],
+        "id": "1801665117307748599",
+        "author_id": "1773032135814717440",
+        "edit_history_tweet_ids": ["1801665117307748599"],
+        "conversation_id": "1798791421152911644",
+        "text": "direct reply to: 1798791660668698927"
+      }
+    ]
+  }
+}
