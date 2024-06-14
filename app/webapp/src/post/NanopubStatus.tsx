@@ -1,15 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
 import { Anchor, Box, Text } from 'grommet';
-import { useMemo } from 'react';
 
 import { NanopubIcon } from '../app/icons/NanopubIcon';
-import { PLATFORM } from '../shared/types/types';
-import {
-  AppPostFull,
-  AppPostParsedStatus,
-  AppPostParsingStatus,
-  AppPostReviewStatus,
-} from '../shared/types/types.posts';
+import { AppPostFull } from '../shared/types/types.posts';
 import { usePostStatuses } from './usePostStatuses';
 
 export const NanopubStatus = (props: { post?: AppPostFull }) => {
@@ -24,6 +16,14 @@ export const NanopubStatus = (props: { post?: AppPostFull }) => {
     ignored,
     isEditing,
   } = usePostStatuses(post);
+
+  if (nanopubPublished && isEditing) {
+    return (
+      <Anchor href={nanopubPublished.uri} target="_blank">
+        <StatusTag label="Editing (not published)" color="#F79A3E"></StatusTag>
+      </Anchor>
+    );
+  }
 
   if (nanopubPublished) {
     return (

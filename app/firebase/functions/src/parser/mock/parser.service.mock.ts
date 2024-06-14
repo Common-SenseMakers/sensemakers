@@ -67,11 +67,12 @@ export const getParserMock = (
         post.post.content
       );
 
+      const mockedResult: ParsePostResult = MOCKED_PARSER_RESULTS[ix];
       if (DEBUG)
         logger.debug(
-          `mocked parser result ix:${ix} - content: ${post.post.content}`
+          `mocked parser result ix:${ix} - content: ${post.post.content}`,
+          mockedResult
         );
-      const mockedResult: ParsePostResult = MOCKED_PARSER_RESULTS[ix];
 
       await new Promise((resolve) =>
         setTimeout(resolve, 1 + Math.random() * 5000)

@@ -161,7 +161,7 @@ export const approvePostController: RequestHandler = async (
       request.body
     )) as AppPostFull;
 
-    await postsManager.approvePost(payload, userId);
+    await postsManager.publishOrUpdatePost(payload, userId);
 
     if (DEBUG)
       logger.debug(`${request.path}: approvePost`, {

@@ -28,11 +28,11 @@ import { PlatformPostsRepository } from '../../src/posts/platform.posts.reposito
 import { PostsManager } from '../../src/posts/posts.manager';
 import { PostsProcessing } from '../../src/posts/posts.processing';
 import { PostsRepository } from '../../src/posts/posts.repository';
+import { TriplesRepository } from '../../src/semantics/triples.repository';
 import { getTimeMock } from '../../src/time/mock/time.service.mock';
 import { TimeService } from '../../src/time/time.service';
 import { UsersRepository } from '../../src/users/users.repository';
 import { UsersService } from '../../src/users/users.service';
-import { TriplesRepository } from '../../src/semantics/triples.repository';
 
 export interface TestServicesConfig {
   twitter: TwitterMockConfig;
@@ -50,6 +50,8 @@ export const getTestServices = (config: TestServicesConfig) => {
     'TEST_USER_ACCOUNTS',
     'OUR_TOKEN_SECRET',
     'NANOPUBS_PUBLISH_SERVERS',
+    'NP_PUBLISH_RSA_PRIVATE_KEY',
+    'NP_PUBLISH_RSA_PUBLIC_KEY',
   ];
 
   mandatory.forEach((varName) => {
@@ -88,7 +90,13 @@ export const getTestServices = (config: TestServicesConfig) => {
   const twitter = getTwitterMock(_twitter, config.twitter);
 
   /** nanopub */
-  const _nanopub = new NanopubService(time);
+  const _nanopub = new NanopubService(time, {
+    servers: JSON.parse(process.env.NANOPUBS_PUBLISH_SERVERS as string),
+    rsaKeys: {
+      privateKey: process.env.NP_PUBLISH_RSA_PRIVATE_KEY as string,
+      publicKey: process.env.NP_PUBLISH_RSA_PUBLIC_KEY as string,
+    },
+  });
   const nanopub = getNanopubMock(_nanopub, config.nanopub);
 
   /** all identity services */
@@ -97,7 +105,7 @@ export const getTestServices = (config: TestServicesConfig) => {
   identityServices.set(PLATFORM.Nanopub, nanopub);
 
   /** users service */
-  const usersService = new UsersService(userRepo, identityServices, {
+  const usersService = new UsersService(db, userRepo, identityServices, {
     tokenSecret: process.env.OUR_TOKEN_SECRET as string,
     expiresIn: '30d',
   });

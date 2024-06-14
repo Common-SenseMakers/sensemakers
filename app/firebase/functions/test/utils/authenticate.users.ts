@@ -189,3 +189,18 @@ const runAuthenticateTwitterUser = async (
     url: twitterOAuthTokenRequestResult.url,
   };
 };
+
+export const checkOutdatedTwitterTokens = (appUsers: AppUser[]) => {
+  // const fileContents = fs.readFileSync(TEST_USERS_FILE_PATH, 'utf8');
+  // appUsers = JSON.parse(fileContents);
+  const outdatedUsers = appUsers.filter(
+    (user) =>
+      user[PLATFORM.Twitter] &&
+      user[PLATFORM.Twitter].some((twitterAccount) => {
+        return (
+          twitterAccount.read && twitterAccount.read.expiresAtMs < Date.now()
+        );
+      })
+  );
+  return outdatedUsers.length > 0;
+};

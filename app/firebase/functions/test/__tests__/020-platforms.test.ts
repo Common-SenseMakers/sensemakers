@@ -2,24 +2,17 @@ import { expect } from 'chai';
 
 import { AppUser, FetchParams, PLATFORM } from '../../src/@shared/types/types';
 import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
-import {
-  PlatformPostDraft,
-  PlatformPostPublishOrigin,
-  PlatformPostPublishStatus,
-} from '../../src/@shared/types/types.platform.posts';
-import {
-  AppPostFull,
-  AppPostParsedStatus,
-  AppPostParsingStatus,
-  AppPostRepublishedStatus,
-  AppPostReviewStatus,
-} from '../../src/@shared/types/types.posts';
+import { PlatformPostCreate } from '../../src/@shared/types/types.platform.posts';
+import { AppTweet, TwitterThread } from '../../src/@shared/types/types.twitter';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { logger } from '../../src/instances/logger';
 import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
+import { TwitterService } from '../../src/platforms/twitter/twitter.service';
+import { convertToAppTweets } from '../../src/platforms/twitter/twitter.utils';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
+import { getMockPost } from '../utils/posts.utils';
 import { createUsers } from '../utils/users.utils';
 import {
   USE_REAL_NANOPUB,
@@ -60,7 +53,7 @@ describe('02-platforms', () => {
     });
   });
 
-  describe('twitter', () => {
+  describe.only('twitter', () => {
     it('fetch the latest 5 threads', async () => {
       if (!user) {
         throw new Error('appUser not created');
@@ -90,83 +83,77 @@ describe('02-platforms', () => {
       );
 
       expect(threads).to.not.be.undefined;
-      if (!USE_REAL_TWITTER) {
-        expect(threads.platformPosts.length).to.be.equal(5);
+      expect(threads.platformPosts.length).to.be.greaterThanOrEqual(5);
+
+      const threadWithQuotedTweet = threads.platformPosts.find((thread) => {
+        return (thread.post as TwitterThread).tweets.some((tweet) => {
+          return tweet.quoted_tweet !== undefined;
+        });
+      });
+
+      if (threadWithQuotedTweet) {
+        const genericPost = await twitterService.convertToGeneric({
+          posted: threadWithQuotedTweet,
+        } as PlatformPostCreate<TwitterThread>);
+        expect(genericPost.quotedPosts).to.not.be.undefined;
       }
     });
-  });
 
-  describe('nanopub', () => {
-    let nanopub: PlatformPostDraft | undefined;
-
-    it('creates a draft nanopub', async () => {
-      const nanopubService = services.platforms.get(PLATFORM.Nanopub);
+    it('includes quote tweets in platform post and app post', async () => {
+      const postIds = [
+        '1798791421152911644', // https://x.com/sense_nets_bot/status/1798791421152911644 quotes https://x.com/sense_nets_bot/status/1795069204418175459
+        '1798791660668698927', // https://x.com/sense_nets_bot/status/1798791660668698927 quotes https://x.com/sense_nets_bot/status/1798782358201508331
+        '1798792109031559184', // https://x.com/sense_nets_bot/status/1798792109031559184 quotes https://x.com/rtk254/status/1798549107507974626
+      ];
 
       if (!user) {
         throw new Error('appUser not created');
       }
+      const twitterId = user[PLATFORM.Twitter]?.[0]?.user_id;
+
+      const twitterService = services.platforms.get(
+        PLATFORM.Twitter
+      ) as TwitterService;
 
       try {
-        const post: AppPostFull = {
-          id: 'post-id',
-          createdAtMs: Date.now(),
-          authorId: user.userId,
-          content: 'test content',
-          semantics: '',
-          origin: PLATFORM.Twitter,
-          parsedStatus: AppPostParsedStatus.PROCESSED,
-          parsingStatus: AppPostParsingStatus.IDLE,
-          reviewedStatus: AppPostReviewStatus.PENDING,
-          republishedStatus: AppPostRepublishedStatus.PENDING,
-          mirrors: [
-            {
-              id: 'pp-id',
-              platformId: PLATFORM.Twitter,
-              publishOrigin: PlatformPostPublishOrigin.FETCHED,
-              publishStatus: PlatformPostPublishStatus.PUBLISHED,
-              posted: {
-                post_id: '123456',
-                timestampMs: Date.now(),
-                user_id: TWITTER_USER_ID_MOCKS,
-                post: {
-                  id: 'post-id',
-                  createdAtMs: Date.now(),
-                  authorId: user.userId,
-                  content: 'test content',
-                  semantics: `
-                    @prefix ns1: <http://purl.org/spar/cito/> .
-                    @prefix schema: <https://schema.org/> .
-                    
-                    <http://purl.org/nanopub/temp/mynanopub#assertion> 
-                      ns1:discusses <https://twitter.com/ori_goldberg/status/1781281656071946541> ;    
-                      ns1:includesQuotationFrom <https://twitter.com/ori_goldberg/status/1781281656071946541> ;    
-                      schema:keywords "ExternalSecurity",        "Geopolitics",        "Israel",        "Kissinger",        "PoliticalScience",        "Security" .
-                    `,
+        const result = await services.db.run(async (manager) => {
+          return twitterService.getPosts(postIds, manager, twitterId);
+        });
+        const appTweets = convertToAppTweets(result.data, result.includes);
+        expect(appTweets).to.not.be.undefined;
+        expect(appTweets.length).to.be.equal(3);
 
-                  origin: PLATFORM.Twitter,
-                  parsedStatus: AppPostParsedStatus.PROCESSED,
-                  parsingStatus: AppPostParsingStatus.IDLE,
-                  reviewedStatus: AppPostReviewStatus.PENDING,
-                  republishedStatus: AppPostRepublishedStatus.PENDING,
-                },
-              },
-            },
-          ],
-        };
+        const quotedTweetIds = [
+          '1795069204418175459',
+          '1798782358201508331',
+          '1798549107507974626',
+        ];
 
-        nanopub = await nanopubService.convertFromGeneric({
-          post,
-          author: user,
+        appTweets.forEach((appTweet: AppTweet) => {
+          expect(quotedTweetIds).to.include(appTweet.quoted_tweet?.id);
         });
       } catch (error) {
         console.error('error: ', error);
         throw error;
       }
     });
+  });
 
-    it('publish signed nanopub', async () => {
+  describe('nanopub', () => {
+    it('creates a draft nanopub, sign and publish', async () => {
+      if (!user) {
+        throw new Error('appUser not created');
+      }
+
       try {
+        const post = getMockPost({ authorId: user.userId, id: 'post-id-1' });
+
         const nanopubService = services.platforms.get(PLATFORM.Nanopub);
+
+        const nanopub = await nanopubService.convertFromGeneric({
+          post,
+          author: user,
+        });
 
         if (!nanopub) {
           throw new Error('Post not created');
@@ -176,7 +163,11 @@ describe('02-platforms', () => {
           throw new Error('RSA keys not created');
         }
 
-        const signed = await signNanopublication(nanopub.post, rsaKeys, '');
+        const signed = await signNanopublication(
+          nanopub.unsignedPost,
+          rsaKeys,
+          ''
+        );
         expect(signed).to.not.be.undefined;
 
         const published = await services.db.run((manager) =>

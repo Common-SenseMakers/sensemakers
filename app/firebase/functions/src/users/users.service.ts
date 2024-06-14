@@ -102,11 +102,16 @@ export class UsersService {
       authenticatedDetails.user_id
     );
 
-    const existingUserWithAccount = await this.repo.getUserWithPlatformAccount(
-      platform,
-      authenticatedDetails.user_id,
-      manager
-    );
+    const existingUserWithAccountId =
+      await this.repo.getUserWithPlatformAccount(
+        platform,
+        authenticatedDetails.user_id,
+        manager
+      );
+
+    const existingUserWithAccount = existingUserWithAccountId
+      ? await this.repo.getUser(existingUserWithAccountId, manager)
+      : undefined;
 
     if (DEBUG)
       logger.debug('UsersService: handleSignup', {

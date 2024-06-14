@@ -12,8 +12,8 @@ import { useLoadingContext } from '../../../../app/LoadingContext';
 import { useToastContext } from '../../../../app/ToastsContext';
 import { HexStr } from '../../../../shared/types/types';
 import { signNanopublication as _signNanopublication } from '../../../../shared/utils/nanopub.sign.util';
+import { cleanPrivateKey } from '../../../../shared/utils/semantics.helper';
 import { useNanopubKeys } from './derive.keys.hook';
-import { getProfile } from './nanopub.utils';
 
 const DEBUG = false;
 
@@ -67,7 +67,7 @@ export const NanopubContext = (props: PropsWithChildren) => {
     if (rsaKeys) {
       await (init as any)();
 
-      const profile = getProfile(rsaKeys);
+      const profile = new NpProfile(cleanPrivateKey(rsaKeys));
       if (DEBUG) console.log('profile', { profile });
 
       setProfile(profile);

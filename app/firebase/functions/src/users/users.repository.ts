@@ -16,7 +16,7 @@ import { logger } from '../instances/logger';
 import { UsersHelper } from './users.helper';
 import { getPrefixedUserId } from './users.utils';
 
-const DEBUG = false;
+const DEBUG = true;
 
 const getProfileId = (userId: string, platform: PLATFORM, user_id: string) =>
   `${userId}-${platform}-${user_id}`;
@@ -78,7 +78,7 @@ export class UsersRepository {
     user_id: string,
     manager: TransactionManager,
     shouldThrow?: T
-  ): Promise<DefinedIfTrue<T, AppUser>> {
+  ): Promise<DefinedIfTrue<T, string>> {
     const prefixed_user_id = getPrefixedUserId(platform, user_id);
 
     /** protect against changes in the property name */
@@ -97,7 +97,7 @@ export class UsersRepository {
         throw new Error(
           `User with user_id: ${user_id} and platform ${platform} not found`
         );
-      else return undefined as DefinedIfTrue<T, AppUser>;
+      else return undefined as DefinedIfTrue<T, string>;
     }
 
     if (snap.size > 1) {
@@ -106,10 +106,8 @@ export class UsersRepository {
       );
     }
 
-    return { userId: snap.docs[0].id, ...snap.docs[0].data() } as DefinedIfTrue<
-      T,
-      AppUser
-    >;
+    /** should not return the data as it does not include the tx manager cache */
+    return snap.docs[0].id as DefinedIfTrue<T, string>;
   }
 
   public async getByPlatformUsername<T extends boolean>(
@@ -190,15 +188,14 @@ export class UsersRepository {
     manager: TransactionManager
   ) {
     /** check if this platform user_id already exists */
-    const existingUser = await this.getUserWithPlatformAccount(
+    const existingUserId = await this.getUserWithPlatformAccount(
       platform,
       user_id,
-      manager
+      manager,
+      true
     );
 
-    if (!existingUser) {
-      throw new Error(`User not found ${platform}:${user_id}`);
-    }
+    const existingUser = await this.getUser(existingUserId, manager, true);
 
     if (platform === PLATFORM.Local) {
       throw new Error('Unexpected');
@@ -252,11 +249,15 @@ export class UsersRepository {
      * one from userId
      */
     const user = await (async () => {
-      const existWithAccount = await this.getUserWithPlatformAccount(
+      const existWithAccountId = await this.getUserWithPlatformAccount(
         platform,
         details.user_id,
         manager
       );
+
+      const existWithAccount = existWithAccountId
+        ? await this.getUser(existWithAccountId, manager)
+        : undefined;
 
       if (existWithAccount) {
         if (DEBUG)
@@ -270,7 +271,7 @@ export class UsersRepository {
       return this.getUser(userId, manager, true);
     })();
 
-    /** set theuser account */
+    /** set the user account */
     const { accounts, platformIds } = await (async () => {
       /**  overwrite previous details for that user account*/
       if (platform === PLATFORM.Local) {

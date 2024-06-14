@@ -2,11 +2,21 @@ import { AppUser, FetchParams, PLATFORM } from './types';
 import { AppPostSemantics, ParsePostResult } from './types.parser';
 import { PlatformPost } from './types.platform.posts';
 
+export interface GenericPostAuthor {
+  platformId: PLATFORM;
+  id: string;
+  username: string;
+  name: string;
+}
+
 /**
  * Properties of a post that must be computed in the convertToGeneric method
  */
 export interface GenericPostData {
+  url?: string;
   content: string;
+  author: GenericPostAuthor;
+  quotedPosts?: GenericPostData[];
 }
 
 /**
@@ -26,6 +36,7 @@ export enum AppPostReviewStatus {
   APPROVED = 'approved',
   IGNORED = 'ignored',
   DRAFT = 'draft',
+  UPDATED = 'updated',
 }
 export enum AppPostRepublishedStatus {
   PENDING = 'pending',
