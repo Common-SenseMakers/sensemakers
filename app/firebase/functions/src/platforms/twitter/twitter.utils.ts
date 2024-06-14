@@ -99,10 +99,10 @@ export const convertToAppTweets = (
 ): AppTweet[] => {
   const formattedTweets = tweets.map((tweet): AppTweet => {
     const appTweetBase = convertToAppTweetBase(tweet);
-    if (
-      tweet.referenced_tweets &&
-      tweet.referenced_tweets[0].type === 'quoted'
-    ) {
+    const quotedTweetId = tweet.referenced_tweets?.find(
+      (ref) => ref.type === 'quoted'
+    )?.id;
+    if (quotedTweetId) {
       const quotedTweet = includes?.tweets?.find(
         (refTweet) => refTweet.id === tweet.referenced_tweets?.[0].id
       );
