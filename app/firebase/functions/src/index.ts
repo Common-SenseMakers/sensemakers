@@ -8,9 +8,7 @@ import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { onTaskDispatched } from 'firebase-functions/v2/tasks';
 
 import { CollectionNames } from './@shared/utils/collectionNames';
-import { AUTOFETCH_PERIOD } from './config/config.runtime';
-// import { onSchedule } from 'firebase-functions/v2/scheduler';
-// import { POSTS_JOB_SCHEDULE } from './config/config.runtime';
+import { AUTOFETCH_PERIOD, IS_EMULATOR } from './config/config.runtime';
 import { envDeploy } from './config/typedenv.deploy';
 import { envRuntime } from './config/typedenv.runtime';
 import { buildApp } from './instances/app';
@@ -41,36 +39,38 @@ exports['api'] = functions
       envRuntime.ORCID_SECRET,
       envRuntime.OUR_TOKEN_SECRET,
       envRuntime.TWITTER_CLIENT_SECRET,
+      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY
     ],
   })
   .https.onRequest(buildApp(router));
-
-// export const postsJob = onSchedule(POSTS_JOB_SCHEDULE, fetchNewPosts);
 
 /** jobs */
 exports.accountFetch = onSchedule(AUTOFETCH_PERIOD, triggerAutofetchPosts);
 
 // add enpoint when on emulator to trigger the scheduled task
-export const scheduledTriggerRouter = express.Router();
+if (IS_EMULATOR) {
+  const scheduledTriggerRouter = express.Router();
 
-scheduledTriggerRouter.post('/autofetch', async (request, response) => {
-  await triggerAutofetchPosts();
-  response.status(200).send({ success: true });
-});
+  scheduledTriggerRouter.post('/autofetch', async (request, response) => {
+    await triggerAutofetchPosts();
+    response.status(200).send({ success: true });
+  });
 
-exports['trigger'] = functions
-  .region(envDeploy.REGION)
-  .runWith({
-    timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
-    memory: envDeploy.CONFIG_MEMORY,
-    minInstances: envDeploy.CONFIG_MININSTANCE,
-    secrets: [
-      envRuntime.ORCID_SECRET,
-      envRuntime.OUR_TOKEN_SECRET,
-      envRuntime.TWITTER_CLIENT_SECRET,
-    ],
-  })
-  .https.onRequest(buildApp(scheduledTriggerRouter));
+  exports['trigger'] = functions
+    .region(envDeploy.REGION)
+    .runWith({
+      timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
+      memory: envDeploy.CONFIG_MEMORY,
+      minInstances: envDeploy.CONFIG_MININSTANCE,
+      secrets: [
+        envRuntime.ORCID_SECRET,
+        envRuntime.OUR_TOKEN_SECRET,
+        envRuntime.TWITTER_CLIENT_SECRET,
+        envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY
+      ],
+    })
+    .https.onRequest(buildApp(scheduledTriggerRouter));
+}
 
 /** tasks */
 exports[PARSE_POST_TASK] = onTaskDispatched(
