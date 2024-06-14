@@ -94,7 +94,15 @@ def identify_social_media(url):
     parsed_url = urlparse(url)
     domain = parsed_url.netloc.lower()
 
-    if any(twitter_domain in domain for twitter_domain in twitter_domains):
+    # Remove 'www.' prefix if present
+    try:
+        if domain.startswith("www."):
+            domain = domain[4:]
+    except Exception:
+        # for invalid urls
+        return "Unknown"
+
+    if domain in twitter_domains:
         return "twitter"
 
     else:

@@ -5,6 +5,7 @@ from pathlib import Path
 ROOT = Path(__file__).parents[1]
 sys.path.append(str(ROOT))
 
+from desci_sense.shared_functions.utils import identify_social_media
 from desci_sense.shared_functions.dataloaders import scrape_post
 from desci_sense.shared_functions.dataloaders.twitter.twitter_utils import (
     extract_external_ref_urls,
@@ -42,6 +43,37 @@ def test_remove_dups_ordered():
 
     # Test case 8: Large list with random elements
     assert remove_dups_ordered([5, 3, 9, 1, 2, 8, 5, 9, 3, 2]) == [5, 3, 9, 1, 2, 8]
+
+
+def test_identify_twitter():
+    assert identify_social_media("https://twitter.com") == "twitter"
+    assert identify_social_media("https://www.twitter.com") == "twitter"
+    assert (
+        identify_social_media("https://twitter.com/someuser/status/12345") == "twitter"
+    )
+    assert identify_social_media("http://t.co") == "twitter"
+    assert identify_social_media("http://www.t.co/somepath") == "twitter"
+    assert identify_social_media("https://x.com") == "twitter"
+    assert (
+        identify_social_media("https://x.com/sense_nets/status/1795939373747179683")
+        == "twitter"
+    )
+
+
+def test_identify_unknown():
+    assert identify_social_media("http://www.expert.com") == "Unknown"
+    assert identify_social_media("https://facebook.com") == "Unknown"
+    assert identify_social_media("http://www.linkedin.com") == "Unknown"
+    assert identify_social_media("https://example.com") == "Unknown"
+    assert identify_social_media("http://some.random.site") == "Unknown"
+    assert identify_social_media("https://notwitter.t.com") == "Unknown"
+
+
+def test_edge_cases():
+    assert identify_social_media("http://") == "Unknown"
+    assert identify_social_media("not a url") == "Unknown"
+    assert identify_social_media("") == "Unknown"
+    assert identify_social_media(None) == "Unknown"
 
 
 if __name__ == "__main__":

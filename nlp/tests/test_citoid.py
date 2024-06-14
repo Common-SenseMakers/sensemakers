@@ -47,14 +47,39 @@ def test_scale_citoid():
     num_res = len(res)
     assert num_res == len(test_input)
 
+
 def test_i99():
     # https://github.com/Common-SenseMakers/sensemakers/issues/99
     res = fetch_citation("https://accidental-expert.com/p/the-bob-ross-of-adobe")
     assert res["title"] == "The Bob Ross of Adobe"
     assert res["url"] == "https://accidental-expert.com/p/the-bob-ross-of-adobe"
-    
-    
-    
+
+
+from urllib.parse import urlparse
+
+from url_normalize import url_normalize
+
+
+def identify_social_media(url):
+    """
+    Identify whether a given URL is from Twitter.
+
+    Parameters:
+        url (str): The URL to be identified.
+
+    Returns:
+        str: The identified social media platform ('Twitter', 'Mastodon'), or 'Unknown' if not identified.
+    """
+    twitter_domains = ["twitter.com", "t.co", "x.com"]
+
+    parsed_url = urlparse(url)
+    domain = parsed_url.netloc.lower()
+
+    if any(twitter_domain in domain for twitter_domain in twitter_domains):
+        return "twitter"
+    else:
+        return "Unknown"
+
 
 if __name__ == "__main__":
     # test_input = ["'https://accidental-expert.com/p/the-bob-ross-of-adobe'"]
