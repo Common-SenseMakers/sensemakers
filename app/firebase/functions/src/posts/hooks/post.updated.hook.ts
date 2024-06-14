@@ -28,9 +28,11 @@ export const postUpdatedHook = async (postId: string) => {
     return { post, author };
   });
 
-  /** Auto-parsed then auto-posted */
+  /** Auto-parse then auto-post */
   const shouldAutopost =
     author.settings.autopost[PLATFORM.Nanopub].value !== AutopostOption.MANUAL;
+
+  logger.debug(`postUpdatedHook -${postId}`, { shouldAutopost, post, author });
 
   if (shouldAutopost) {
     if (post.parsedStatus === AppPostParsedStatus.UNPROCESSED) {

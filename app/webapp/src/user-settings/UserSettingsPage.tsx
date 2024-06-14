@@ -15,6 +15,7 @@ import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
+import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
 
 /** extract the postId from the route and pass it to a PostContext */
 export const UserSettingsPage = () => {
@@ -23,6 +24,11 @@ export const UserSettingsPage = () => {
   const appFetch = useAppFetch();
   const { connectedUser, refresh } = useAccountContext();
   const [isSetting, setIsSetting] = useState(false);
+
+  const { connect, connectWithWeb3 } = useNanopubContext();
+
+  const hasNanopub =
+    connectedUser && connectedUser.nanopub && connectedUser.nanopub.length > 0;
 
   const setAutopost = (option: AutopostOption) => {
     if (connectedUser) {
@@ -65,25 +71,34 @@ export const UserSettingsPage = () => {
         onClick={() => navigate(AbsoluteRoutes.App)}></AppButton>
       <AppHeading>Settings</AppHeading>
 
-      <Box>
+      <Box pad="medium">
         <Text>Choose:</Text>
+
+        <AppButton
+          disabled={isSetting}
+          primary={current === AutopostOption.MANUAL}
+          label="Manual"
+          onClick={() => setAutopost(AutopostOption.MANUAL)}></AppButton>
+        <AppButton
+          disabled={isSetting}
+          primary={current === AutopostOption.DETERMINISTIC}
+          label="Deterministic"
+          onClick={() => setAutopost(AutopostOption.DETERMINISTIC)}></AppButton>
+        <AppButton
+          disabled={isSetting}
+          primary={current === AutopostOption.AI}
+          label="AI"
+          onClick={() => setAutopost(AutopostOption.AI)}></AppButton>
       </Box>
 
-      <AppButton
-        disabled={isSetting}
-        primary={current === AutopostOption.MANUAL}
-        label="Manual"
-        onClick={() => setAutopost(AutopostOption.MANUAL)}></AppButton>
-      <AppButton
-        disabled={isSetting}
-        primary={current === AutopostOption.DETERMINISTIC}
-        label="Deterministic"
-        onClick={() => setAutopost(AutopostOption.DETERMINISTIC)}></AppButton>
-      <AppButton
-        disabled={isSetting}
-        primary={current === AutopostOption.AI}
-        label="AI"
-        onClick={() => setAutopost(AutopostOption.AI)}></AppButton>
+      <Box pad="medium">
+        <Text>Connect:</Text>
+        <AppButton
+          primary
+          disabled={hasNanopub}
+          label={hasNanopub ? 'Connected' : 'Connect'}
+          onClick={() => connect()}></AppButton>
+      </Box>
     </Box>
   );
 };
