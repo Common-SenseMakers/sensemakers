@@ -1,3 +1,4 @@
+import { ActivityEvent } from '../@shared/types/types.notifications';
 import { DBInstance } from '../db/instance';
 import { ActivityRepository } from './activity.repository';
 
@@ -7,12 +8,12 @@ export class NotificationService {
     public repo: ActivityRepository
   ) {}
 
-  public sendNotification(activityEventId: string) {
+  public async sendNotification(activityEventId: string) {
     return this.db.run(async (manager) => {
       const activityEvent = await this.repo.get(activityEventId, manager, true);
-      /** send email here */
-      console.log('Sending email to', activityEvent.userId);
+      await this.sendNotificationInternal(activityEvent);
       await this.repo.markAsNotified(activityEventId, manager);
     });
   }
+  async sendNotificationInternal(activityEvent: ActivityEvent) {}
 }

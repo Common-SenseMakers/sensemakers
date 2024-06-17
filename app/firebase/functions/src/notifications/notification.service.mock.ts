@@ -14,9 +14,10 @@ export const getNotificationsMock = (
 
   const Mocked = spy(notificationService);
 
-  when(Mocked.sendNotification(anything())).thenCall(
+  when(Mocked.sendNotificationInternal(anything())).thenCall(
     async (activityEventId: string) => {
       console.log('Sending email to', activityEventId);
+      return Promise.resolve();
     }
   );
 
