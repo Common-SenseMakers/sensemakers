@@ -9,10 +9,14 @@ import {
   TWITTER_CLIENT_ID,
   TWITTER_CLIENT_SECRET,
   USE_REAL_NANOPUB,
+  USE_REAL_NOTIFICATIONS,
   USE_REAL_PARSER,
   USE_REAL_TWITTERX,
 } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
+import { ActivityRepository } from '../notifications/activity.repository';
+import { NotificationService } from '../notifications/notification.service';
+import { getNotificationsMock } from '../notifications/notification.service.mock';
 import { getParserMock } from '../parser/mock/parser.service.mock';
 import { ParserService } from '../parser/parser.service';
 import { getNanopubMock } from '../platforms/nanopub/mock/nanopub.service.mock';
@@ -41,6 +45,7 @@ export interface Services {
   platforms: PlatformsService;
   time: TimeService;
   db: DBInstance;
+  notifications: NotificationService;
 }
 
 export const createServices = () => {
@@ -49,6 +54,7 @@ export const createServices = () => {
   const postsRepo = new PostsRepository(db);
   const triplesRepo = new TriplesRepository(db);
   const platformPostsRepo = new PlatformPostsRepository(db);
+  const activityRepo = new ActivityRepository(db);
 
   const identityPlatforms: IdentityServicesMap = new Map();
   const platformsMap: PlatformsMap = new Map();
@@ -124,6 +130,13 @@ export const createServices = () => {
     parser
   );
 
+  /** notification service */
+  const _notifications = new NotificationService(db, activityRepo);
+  const notifications = getNotificationsMock(
+    _notifications,
+    USE_REAL_NOTIFICATIONS.value() ? 'real' : 'mock'
+  );
+
   /** all services */
   const services: Services = {
     users: usersService,
@@ -131,6 +144,7 @@ export const createServices = () => {
     platforms: platformsService,
     time,
     db,
+    notifications,
   };
 
   return services;
