@@ -43,6 +43,7 @@ export const FUNCTIONS_PY_URL = envRuntime.FUNCTIONS_PY_URL;
 export const USE_REAL_PARSER = envRuntime.USE_REAL_PARSER;
 export const USE_REAL_TWITTERX = envRuntime.USE_REAL_TWITTERX;
 export const USE_REAL_NANOPUB = envRuntime.USE_REAL_NANOPUB;
+export const USE_REAL_NOTIFICATIONS = envRuntime.USE_REAL_NOTIFICATIONS;
 
 export const OUR_TOKEN_SECRET = envRuntime.OUR_TOKEN_SECRET;
 export const OUR_EXPIRES_IN = '30d';
@@ -55,4 +56,3 @@ export const FETCH_RATE_LIMIT_MS = envRuntime.FETCH_RATE_LIMIT_MS;
 export const NP_PUBLISH_RSA_PRIVATE_KEY = envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY;
 export const NP_PUBLISH_RSA_PUBLIC_KEY = envRuntime.NP_PUBLISH_RSA_PUBLIC_KEY;
 export const NANOPUBS_PUBLISH_SERVERS = envRuntime.NANOPUBS_PUBLISH_SERVERS;
-

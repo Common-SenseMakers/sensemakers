@@ -1,5 +1,9 @@
 import { logger } from './instances/logger';
 import {
+  SEND_NOTIFICATION_TASK,
+  sendNotificationTask,
+} from './notifications/notification.task';
+import {
   AUTOFETCH_POSTS_TASK,
   autofetchUserPosts,
 } from './posts/tasks/posts.autofetch.task';
@@ -21,6 +25,9 @@ export const enqueueTaskMock = async (name: string, params: any) => {
     }
     if (name === AUTOFETCH_POSTS_TASK) {
       return autofetchUserPosts({ data: params } as any);
+    }
+    if (name === SEND_NOTIFICATION_TASK) {
+      return sendNotificationTask({ data: params } as any);
     }
   })();
 };
