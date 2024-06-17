@@ -6,4 +6,5 @@ export enum CollectionNames {
   Updates = 'updates',
   Profiles = 'profiles',
   Triples = 'triples',
+  Activity = 'activity',
 }
