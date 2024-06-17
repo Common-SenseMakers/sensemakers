@@ -1,4 +1,4 @@
-import { verify } from 'ts-mockito';
+import { expect } from 'chai';
 
 import {
   ACTIVITY_EVENT_TYPE,
@@ -79,7 +79,7 @@ describe.only('060-notifications', () => {
       });
     });
 
-    it('sends a notification immediately when a posts parsed activity event is created', async () => {
+    it('marks the activity event as notified after sending notification', async () => {
       if (!user) {
         throw new Error('user not created');
       }
@@ -90,10 +90,7 @@ describe.only('060-notifications', () => {
       });
 
       const activityRepo = new ActivityRepository(services.db);
-      await services.db.run(async (manager) => {
-        // create an activity
-        // mock the notification service
-        // check if the notification service called `sendNotification`
+      const createdActivity = await services.db.run(async (manager) => {
         const activity = activityRepo.create(
           {
             userId: user!.userId,
@@ -105,11 +102,19 @@ describe.only('060-notifications', () => {
           },
           manager
         );
-
-        // wait some time until the function is called
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        verify(services.notifications.sendNotification(activity.id)).called();
+        return activity;
       });
+      await services.notifications.sendNotification(createdActivity.id);
+
+      const updatedActivity = await services.db.run(async (manager) => {
+        const activity = await activityRepo.get(
+          createdActivity.id,
+          manager,
+          true
+        );
+        return activity;
+      });
+      expect(updatedActivity.notified).to.be.true;
     });
   });
 });
