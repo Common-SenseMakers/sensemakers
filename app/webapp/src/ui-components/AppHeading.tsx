@@ -13,7 +13,6 @@ export const AppHeading = (props: HeadingExtendedProps) => {
       {...props}
       style={{
         fontWeight: '600',
-        lineHeight: '36px',
         letterSpacing: '-0.56px',
         ...props.style,
       }}
@@ -40,9 +39,9 @@ export const AppSubtitle = (props: TextExtendedProps) => {
     <Text
       {...props}
       style={{
-        fontSize: '18px',
+        fontSize: constants.fontSize.large.size,
+        lineHeight: constants.fontSize.large.height,
         fontWeight: '500',
-        lineHeight: '24px',
         letterSpacing: '-0.36px',
         color: constants.colors.textLight,
         ...props.style,

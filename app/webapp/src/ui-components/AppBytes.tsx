@@ -50,7 +50,7 @@ export const AppBytes = (props: IBytesInfo): JSX.Element => {
           <AppLabel
             color={constants.colors.primary}
             style={{
-              fontSize: constants.textFontSizes.xsmall,
+              fontSize: constants.fontSize.xsmall.size,
               marginRight: '10.5px',
             }}>
             {props.label}
@@ -64,7 +64,7 @@ export const AppBytes = (props: IBytesInfo): JSX.Element => {
         {props.sublabel ? (
           <Box
             style={{
-              fontSize: constants.textFontSizes.xsmall,
+              fontSize: constants.fontSize.xsmall.size,
               fontWeight: '500',
               color: constants.colors.primary,
             }}>
@@ -84,7 +84,7 @@ export const AppBytes = (props: IBytesInfo): JSX.Element => {
           style={{
             wordWrap: 'break-word',
             textAlign: 'right',
-            fontSize: constants.textFontSizes.small,
+            fontSize: constants.fontSize.small.size,
             fontWeight: '500',
           }}>
           {props.bytes}

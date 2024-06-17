@@ -4,19 +4,17 @@ import { css } from 'styled-components';
 
 export const theme = {};
 
+interface FontStyle {
+  size: string;
+  height: string;
+}
+
 export interface StyleConstants {
-  headingFontSizes: {
-    1: string;
-    2: string;
-    3: string;
-    4: string;
-  };
-  textFontSizes: {
-    large: string;
-    medium: string;
-    normal: string;
-    small: string;
-    xsmall: string;
+  fontSize: {
+    large: FontStyle;
+    medium: FontStyle;
+    small: FontStyle;
+    xsmall: FontStyle;
   };
   colors: {
     primary: string;
@@ -34,18 +32,23 @@ export interface ExtendedThemeType extends ThemeType {
 }
 
 const constants: StyleConstants = {
-  headingFontSizes: {
-    1: '28px',
-    2: '24px',
-    3: '20px',
-    4: '18px',
-  },
-  textFontSizes: {
-    large: '24px',
-    medium: '18px',
-    normal: '16px',
-    small: '18px',
-    xsmall: '14px',
+  fontSize: {
+    large: {
+      size: '18px',
+      height: '24px',
+    },
+    medium: {
+      size: '16px',
+      height: '24px',
+    },
+    small: {
+      size: '14px',
+      height: '16px',
+    },
+    xsmall: {
+      size: '12px',
+      height: '14px',
+    },
   },
   colors: {
     primary: '#111827',
@@ -66,11 +69,11 @@ const extension: ExtendedThemeType = {
       text: constants.colors.text,
     },
     font: {
-      size: constants.textFontSizes.normal,
+      size: constants.fontSize.medium.size,
     },
     input: {
       font: {
-        size: constants.textFontSizes.small,
+        size: constants.fontSize.small.size,
       },
     },
     breakpoints: {
@@ -91,22 +94,31 @@ const extension: ExtendedThemeType = {
       },
       shadow: 'none',
     },
+    edgeSize: {
+      large: '40px',
+    },
   },
   heading: {
     level: {
       1: {
+        font: {
+          weight: '600',
+        },
         medium: {
-          size: constants.headingFontSizes[1],
+          size: '28px',
+          height: '36px',
         },
       },
       2: {
         medium: {
-          size: constants.headingFontSizes[2],
+          size: '22px',
+          height: '28px',
         },
       },
       3: {
         medium: {
-          size: constants.headingFontSizes[3],
+          size: '18px',
+          height: '24px',
         },
       },
     },
@@ -120,14 +132,14 @@ const extension: ExtendedThemeType = {
   button: {
     padding: { vertical: '15px', horizontal: '30px' },
     border: {
-      radius: '4px',
+      radius: '8px',
     },
     primary: {
       color: constants.colors.primary,
       extend: css`
         & {
           color: #ffffff;
-          font-weight: 800;
+          font-weight: 500;
         }
       `,
     },
@@ -145,14 +157,14 @@ const extension: ExtendedThemeType = {
     },
     label: {
       weight: 700,
-      size: constants.textFontSizes.small,
+      size: constants.fontSize.small.size,
       margin: '0px 0px 8px 0px',
     },
     border: false,
   },
   fileInput: {
     message: {
-      size: constants.textFontSizes.small,
+      size: constants.fontSize.small.size,
     },
   },
   select: {
@@ -226,12 +238,12 @@ const extension: ExtendedThemeType = {
     color: constants.colors.links,
     textDecoration: 'underline',
     extend: css`
-      font-size: ${constants.textFontSizes.small};
+      font-size: ${constants.fontSize.small.size};
     `,
   },
   paragraph: {
     medium: {
-      size: constants.textFontSizes.normal,
+      size: constants.fontSize.medium.size,
     },
     extend: css``,
   },

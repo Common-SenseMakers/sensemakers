@@ -6,6 +6,7 @@ import { AppLogo } from '../app/brand/AppLogo';
 import { TwitterIcon } from '../app/common/Icons';
 import { I18Keys } from '../i18n/i18n';
 import { AppButton, AppHeading, AppSubtitle } from '../ui-components';
+import { AppParagraph } from '../ui-components/AppParagraph';
 import { useTwitterContext } from '../user-login/contexts/platforms/TwitterContext';
 
 export const AppWelcome = (props: {}) => {
@@ -25,15 +26,16 @@ export const AppWelcome = (props: {}) => {
           <Box width="100%" height="4px"></Box>
           <AppSubtitle>{t(I18Keys.introSubtitle)}</AppSubtitle>
           <Box width="100%" height="16px"></Box>
-          <Paragraph>{t(I18Keys.introParagraph1)}</Paragraph>
-          <Paragraph>
+          <AppParagraph>{t(I18Keys.introParagraph1)}</AppParagraph>
+          <AppParagraph addMargin>
             <Trans
               i18nKey={I18Keys.introParagraph2}
               components={{ b: <b></b> }}></Trans>
-          </Paragraph>
+          </AppParagraph>
           <AppButton
-            margin={{ top: 'medium' }}
+            margin={{ top: 'large' }}
             primary
+            icon={<TwitterIcon></TwitterIcon>}
             label={t(I18Keys.startBtn)}
             onClick={() => setState(1)}></AppButton>
         </>
