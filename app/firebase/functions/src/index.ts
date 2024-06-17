@@ -26,6 +26,14 @@ import {
 import { PARSE_POST_TASK, parsePostTask } from './posts/tasks/posts.parse.task';
 import { router } from './router';
 
+// all secrets are available to all functions
+const secrets = [
+  envRuntime.ORCID_SECRET,
+  envRuntime.OUR_TOKEN_SECRET,
+  envRuntime.TWITTER_CLIENT_SECRET,
+  envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
+];
+
 // import { fetchNewPosts } from './posts/posts.job';
 
 /** Registed the API as an HTTP triggered function */
@@ -35,12 +43,7 @@ exports['api'] = functions
     timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
     memory: envDeploy.CONFIG_MEMORY,
     minInstances: envDeploy.CONFIG_MININSTANCE,
-    secrets: [
-      envRuntime.ORCID_SECRET,
-      envRuntime.OUR_TOKEN_SECRET,
-      envRuntime.TWITTER_CLIENT_SECRET,
-      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
-    ],
+    secrets,
   })
   .https.onRequest(buildApp(router));
 
@@ -48,12 +51,7 @@ exports['api'] = functions
 exports.accountFetch = onSchedule(
   {
     schedule: AUTOFETCH_PERIOD,
-    secrets: [
-      envRuntime.ORCID_SECRET,
-      envRuntime.OUR_TOKEN_SECRET,
-      envRuntime.TWITTER_CLIENT_SECRET,
-      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
-    ],
+    secrets,
   },
   triggerAutofetchPosts
 );
@@ -73,12 +71,7 @@ if (IS_EMULATOR) {
       timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
       memory: envDeploy.CONFIG_MEMORY,
       minInstances: envDeploy.CONFIG_MININSTANCE,
-      secrets: [
-        envRuntime.ORCID_SECRET,
-        envRuntime.OUR_TOKEN_SECRET,
-        envRuntime.TWITTER_CLIENT_SECRET,
-        envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
-      ],
+      secrets,
     })
     .https.onRequest(buildApp(scheduledTriggerRouter));
 }
@@ -89,12 +82,7 @@ exports[PARSE_POST_TASK] = onTaskDispatched(
     timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
     memory: envDeploy.CONFIG_MEMORY,
     minInstances: envDeploy.CONFIG_MININSTANCE,
-    secrets: [
-      envRuntime.ORCID_SECRET,
-      envRuntime.OUR_TOKEN_SECRET,
-      envRuntime.TWITTER_CLIENT_SECRET,
-      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
-    ],
+    secrets,
   },
   parsePostTask
 );
@@ -104,12 +92,7 @@ exports[AUTOFETCH_POSTS_TASK] = onTaskDispatched(
     timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
     memory: envDeploy.CONFIG_MEMORY,
     minInstances: envDeploy.CONFIG_MININSTANCE,
-    secrets: [
-      envRuntime.ORCID_SECRET,
-      envRuntime.OUR_TOKEN_SECRET,
-      envRuntime.TWITTER_CLIENT_SECRET,
-      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
-    ],
+    secrets,
   },
   autofetchUserPosts
 );
@@ -119,12 +102,7 @@ exports[AUTOPOST_POST_TASK] = onTaskDispatched(
     timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
     memory: envDeploy.CONFIG_MEMORY,
     minInstances: envDeploy.CONFIG_MININSTANCE,
-    secrets: [
-      envRuntime.ORCID_SECRET,
-      envRuntime.OUR_TOKEN_SECRET,
-      envRuntime.TWITTER_CLIENT_SECRET,
-      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
-    ],
+    secrets,
   },
   autopostPostTask
 );
@@ -133,12 +111,7 @@ exports[AUTOPOST_POST_TASK] = onTaskDispatched(
 exports.postUpdateListener = onDocumentUpdated(
   {
     document: `${CollectionNames.Posts}/{postId}`,
-    secrets: [
-      envRuntime.ORCID_SECRET,
-      envRuntime.OUR_TOKEN_SECRET,
-      envRuntime.TWITTER_CLIENT_SECRET,
-      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
-    ],
+    secrets,
   },
   (event) => postUpdatedHook(event.params?.postId)
 );
@@ -146,12 +119,7 @@ exports.postUpdateListener = onDocumentUpdated(
 exports.postCreateListener = onDocumentCreated(
   {
     document: `${CollectionNames.Posts}/{postId}`,
-    secrets: [
-      envRuntime.ORCID_SECRET,
-      envRuntime.OUR_TOKEN_SECRET,
-      envRuntime.TWITTER_CLIENT_SECRET,
-      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
-    ],
+    secrets,
   },
 
   (event) => postUpdatedHook(event.params?.postId)
@@ -160,12 +128,7 @@ exports.postCreateListener = onDocumentCreated(
 exports.platformPostUpdateListener = onDocumentUpdated(
   {
     document: `${CollectionNames.PlatformPosts}/{platformPostId}`,
-    secrets: [
-      envRuntime.ORCID_SECRET,
-      envRuntime.OUR_TOKEN_SECRET,
-      envRuntime.TWITTER_CLIENT_SECRET,
-      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
-    ],
+    secrets,
   },
   platformPostUpdatedHook
 );
