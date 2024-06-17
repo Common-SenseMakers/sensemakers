@@ -22,6 +22,7 @@ import numpy as np
 import sys
 import docopt
 import re
+from collections import Counter
 import concurrent.futures
 from tqdm import tqdm
 from sklearn.preprocessing import LabelBinarizer
@@ -30,11 +31,16 @@ from sklearn.metrics import (
     accuracy_score,
     confusion_matrix
 )
+import matplotlib.pyplot as plt
+
 
 
 sys.path.append(str(Path(__file__).parents[2]))
 
-from desci_sense.evaluation.utils import get_dataset, create_custom_confusion_matrix, posts_to_refPosts, obj_str_to_dict
+from desci_sense.evaluation.utils import (
+    get_dataset, create_custom_confusion_matrix, posts_to_refPosts, obj_str_to_dict, autopct_format,
+    projection_to_list
+)
 from desci_sense.shared_functions.parsers.multi_chain_parser import MultiChainParser
 from desci_sense.shared_functions.init import init_multi_chain_parser_config
 from desci_sense.shared_functions.schema.post import RefPost
@@ -151,6 +157,54 @@ class Evaluation:
         new_row = ["Average", "", ""] + average_row
         new_row = pd.DataFrame([new_row], columns=['username', 'server', 'info', 'precision', 'recall', 'f1_score', 'accuracy', 'TP', 'FN', 'posts count', 'citoid positive ratio'])
         return df_feed_eval._append(new_row, ignore_index=True)
+    
+    # Zotero Item type analysis
+    def count_zotero_types(self,df : pd.DataFrame):
+        counts_df = df["Ref item types"].apply(Counter).apply(pd.Series).fillna(0).astype(int)
+        total_row = counts_df.sum()
+        total_row.name = 'Total'
+
+        return total_row
+    def count_research_zotero_types(self, df: pd.DataFrame, allow_list=[
+            "bookSection", "journalArticle", "preprint", "book", "manuscript",
+            "thesis", "presentation", "conferencePaper", "report"
+        ]):
+        # Apply the check_topic method to each row and create a boolean mask
+        mask = df['Ref item types'].apply(lambda x: self.check_topic([item for item in x]) == 1)
+
+        # Filter the DataFrame using the mask
+        filtered_df = df[mask]
+
+        project_to_allowlist = projection_to_list(allow_list)
+
+        #filtered_df['Ref item types'] = [project_to_allowlist(x) for x in filtered_df["Ref item types"]]
+        # Count items in the filtered DataFrame
+        counts_df = filtered_df["Ref item types"].apply(project_to_allowlist).apply(Counter).apply(pd.Series).fillna(0).astype(int)
+        total_row = counts_df.sum()
+        #total_row.name = 'Total'
+        return total_row
+
+
+    def build_item_type_pie(self,df:pd.DataFrame):
+        total_counts = self.count_zotero_types(df=df)
+        # Create a pie chart
+        fig1, ax = plt.subplots(figsize=(12, 12))
+        ax.pie(total_counts, labels=total_counts.index, autopct=lambda pct: autopct_format(pct, total_counts), startangle=140)
+        ax.set_title('Distribution of Item Types')
+
+        #plt.show()
+
+        
+
+        total_counts = self.count_research_zotero_types(df=df)
+        # Create a pie chart
+        fig2, ax = plt.subplots(figsize=(12, 12))
+        ax.pie(total_counts, labels=total_counts.index, autopct=lambda pct: autopct_format(pct, total_counts), startangle=140)
+        ax.set_title('Distribution of research item types')
+
+        #plt.show()
+
+        return fig1, fig2
 
 class TwitterEval(Evaluation):
     def __init__(self, config):
@@ -276,7 +330,7 @@ if __name__ == "__main__":
     # get artifact path
 
     dataset_artifact_id = (
-            'common-sense-makers/filter_evaluation/labeled_tweets_no_threads:v1'
+            'common-sense-makers/filter_evaluation/prediction_evaluation-20240521132713:v0'
         )
 
     # set artifact as input artifact
@@ -291,21 +345,42 @@ if __name__ == "__main__":
 
     # get dataset file name
 
-    table_path = Path(f"{a_path}/labeled_data_table_no_threads.table.json")
+    table_path = Path(f"{a_path}/prediction_evaluation.table.json")
 
 
     # return the pd df from the table
     #remember to remove the head TODO
     df = get_dataset(table_path)
 
-   
+    dataset_artifact_id = (
+            'common-sense-makers/filter_evaluation/labeled_tweets_no_threads:v1'
+        )
+    # set artifact as input artifact
+    dataset_artifact = run.use_artifact(dataset_artifact_id)
+
+    # initialize table path
+    # add the option to call table_path =  arguments.get('--dataset')
+
+    # download path to table
+    a_path = dataset_artifact.download()
 
     table_path = Path(f"{a_path}/handles_chart.table.json")
 
     df_handles = get_dataset(table_path)
-    df_eval = Eval.build_post_type_chart(df_handles=df_handles,df=df)
-    wandb.log({"Quote statistics per feed": wandb.Table(dataframe=df_eval)})
+    #df_eval = Eval.build_post_type_chart(df_handles=df_handles,df=df)
 
+    #wandb.log({"Quote statistics per feed": wandb.Table(dataframe=df_eval)})
+    print(df['Ref item types'])
+    fig1, fig2 = Eval.build_item_type_pie(df=df)
+
+    #wandb.log({"item_type_distribution": wandb.Image(fig1)})
+
+    #wandb.log({"research_item_type_distribution": wandb.Image(fig2)})
+
+    true_df = df[df["True Label"] == 'research']
+
+    fig1 , fig2 = Eval.build_item_type_pie(true_df)
+    #wandb.log({"research_type_distribution": wandb.Image(fig)})
     config = obj_str_to_dict(config)
 
     run.config.update(config)
