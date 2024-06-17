@@ -4,6 +4,7 @@ import {
   HandleSignupResult,
   OurTokenConfig,
 } from '../@shared/types/types.fetch';
+import { NOTIFICATION_FREQUENCY } from '../@shared/types/types.notifications';
 import {
   ALL_IDENTITY_PLATFORMS,
   AccountDetailsRead,
@@ -214,6 +215,7 @@ export class UsersService {
 
         const initSettings: UserSettings = {
           autopost: { [PLATFORM.Nanopub]: { value: AutopostOption.MANUAL } },
+          notificationFrequency: NOTIFICATION_FREQUENCY.None,
         };
 
         await this.repo.createUser(
