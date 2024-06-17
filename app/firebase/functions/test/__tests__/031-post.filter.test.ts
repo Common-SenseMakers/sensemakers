@@ -15,6 +15,7 @@ import {
   PostsQueryStatus,
 } from '../../src/@shared/types/types.posts';
 import { PLATFORM } from '../../src/@shared/types/types.user';
+import { USE_REAL_NOTIFICATIONS } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
 import { resetDB } from '../utils/db';
 import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
@@ -26,6 +27,7 @@ describe('031-filter', () => {
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
+    notifications: USE_REAL_NOTIFICATIONS ? 'real' : 'mock',
   });
 
   before(async () => {

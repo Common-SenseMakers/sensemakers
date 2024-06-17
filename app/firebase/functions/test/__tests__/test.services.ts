@@ -3,6 +3,12 @@ import { spy, when } from 'ts-mockito';
 import { PLATFORM } from '../../src/@shared/types/types.user';
 import { DBInstance } from '../../src/db/instance';
 import { Services } from '../../src/instances/services';
+import { ActivityRepository } from '../../src/notifications/activity.repository';
+import { NotificationService } from '../../src/notifications/notification.service';
+import {
+  NotificationsMockConfig,
+  getNotificationsMock,
+} from '../../src/notifications/notification.service.mock';
 import {
   ParserMockConfig,
   getParserMock,
@@ -39,6 +45,7 @@ export interface TestServicesConfig {
   nanopub: NanopubMockConfig;
   parser: ParserMockConfig;
   time: 'real' | 'mock';
+  notifications: NotificationsMockConfig;
 }
 
 export type TestServices = Services;
@@ -67,6 +74,7 @@ export const getTestServices = (config: TestServicesConfig) => {
   const postsRepo = new PostsRepository(db);
   const triplesRepo = new TriplesRepository(db);
   const platformPostsRepo = new PlatformPostsRepository(db);
+  const activityRepo = new ActivityRepository(db);
 
   const identityServices: IdentityServicesMap = new Map();
   const platformsMap: PlatformsMap = new Map();
@@ -143,12 +151,19 @@ export const getTestServices = (config: TestServicesConfig) => {
     parser
   );
 
+  const _notifications = new NotificationService(db, activityRepo);
+  const notifications = getNotificationsMock(
+    _notifications,
+    config.notifications
+  );
+
   const services: TestServices = {
     users: usersService,
     postsManager: postsManager,
     platforms: platformsService,
     time: time,
     db,
+    notifications,
   };
 
   return services;

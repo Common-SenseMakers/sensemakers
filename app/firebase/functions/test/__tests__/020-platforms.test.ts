@@ -5,6 +5,7 @@ import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
 import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
+import { USE_REAL_NOTIFICATIONS } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
 import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { UsersHelper } from '../../src/users/users.helper';
@@ -28,6 +29,7 @@ describe('02-platforms', () => {
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
+    notifications: USE_REAL_NOTIFICATIONS ? 'real' : 'mock',
   });
 
   before(async () => {

@@ -13,6 +13,7 @@ import { TwitterThread } from '../../src/@shared/types/types.twitter';
 import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
+import { USE_REAL_NOTIFICATIONS } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
 import {
   THREADS,
@@ -34,7 +35,7 @@ import { getTestServices } from './test.services';
 const DEBUG_PREFIX = `030-process`;
 const DEBUG = false;
 
-describe.only('030-process', () => {
+describe('030-process', () => {
   let rsaKeys = getRSAKeys('');
 
   const services = getTestServices({
@@ -42,6 +43,7 @@ describe.only('030-process', () => {
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
+    notifications: USE_REAL_NOTIFICATIONS ? 'real' : 'mock',
   });
 
   before(async () => {

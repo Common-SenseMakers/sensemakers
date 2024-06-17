@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 
+import { NOTIFICATION_FREQUENCY } from '../../src/@shared/types/types.notifications';
 import {
   PlatformPostPosted,
   PlatformPostPublishStatus,
@@ -15,6 +16,7 @@ import {
   AutopostOption,
   PLATFORM,
 } from '../../src/@shared/types/types.user';
+import { USE_REAL_NOTIFICATIONS } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
 import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
@@ -34,12 +36,13 @@ import { getTestServices } from './test.services';
 const DEBUG_PREFIX = `030-process`;
 const DEBUG = false;
 
-describe.only('050-autopost', () => {
+describe('050-autopost', () => {
   const services = getTestServices({
     time: 'real',
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
+    notifications: USE_REAL_NOTIFICATIONS ? 'real' : 'mock',
   });
 
   before(async () => {
@@ -93,6 +96,7 @@ describe.only('050-autopost', () => {
 
       await services.users.updateSettings(user.userId, {
         autopost: { [PLATFORM.Nanopub]: { value: AutopostOption.AI } },
+        notificationFrequency: NOTIFICATION_FREQUENCY.None,
       });
 
       const userRead = await services.db.run(async (manager) => {

@@ -6,6 +6,7 @@ import {
   ALL_PUBLISH_PLATFORMS,
   AppUser,
 } from '../../src/@shared/types/types.user';
+import { USE_REAL_NOTIFICATIONS } from '../../src/config/config.runtime';
 import { envDeploy } from '../../src/config/typedenv.deploy';
 import { logger } from '../../src/instances/logger';
 import * as tasksSupport from '../../src/tasks.support';
@@ -42,6 +43,7 @@ export const mochaHooks = (): Mocha.RootHookObject => {
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
+    notifications: USE_REAL_NOTIFICATIONS ? 'real' : 'mock',
   });
 
   return {
