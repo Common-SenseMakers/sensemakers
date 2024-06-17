@@ -39,18 +39,24 @@ exports['api'] = functions
       envRuntime.ORCID_SECRET,
       envRuntime.OUR_TOKEN_SECRET,
       envRuntime.TWITTER_CLIENT_SECRET,
-      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY
+      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
     ],
   })
   .https.onRequest(buildApp(router));
 
 /** jobs */
-exports.accountFetch = onSchedule({schedule: AUTOFETCH_PERIOD, secrets: [
-  envRuntime.ORCID_SECRET,
-  envRuntime.OUR_TOKEN_SECRET,
-  envRuntime.TWITTER_CLIENT_SECRET,
-  envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY
-]}, triggerAutofetchPosts);
+exports.accountFetch = onSchedule(
+  {
+    schedule: AUTOFETCH_PERIOD,
+    secrets: [
+      envRuntime.ORCID_SECRET,
+      envRuntime.OUR_TOKEN_SECRET,
+      envRuntime.TWITTER_CLIENT_SECRET,
+      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
+    ],
+  },
+  triggerAutofetchPosts
+);
 
 // add enpoint when on emulator to trigger the scheduled task
 if (IS_EMULATOR) {
@@ -71,7 +77,7 @@ if (IS_EMULATOR) {
         envRuntime.ORCID_SECRET,
         envRuntime.OUR_TOKEN_SECRET,
         envRuntime.TWITTER_CLIENT_SECRET,
-        envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY
+        envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
       ],
     })
     .https.onRequest(buildApp(scheduledTriggerRouter));
@@ -87,8 +93,8 @@ exports[PARSE_POST_TASK] = onTaskDispatched(
       envRuntime.ORCID_SECRET,
       envRuntime.OUR_TOKEN_SECRET,
       envRuntime.TWITTER_CLIENT_SECRET,
-      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY
-    ]
+      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
+    ],
   },
   parsePostTask
 );
@@ -102,8 +108,8 @@ exports[AUTOFETCH_POSTS_TASK] = onTaskDispatched(
       envRuntime.ORCID_SECRET,
       envRuntime.OUR_TOKEN_SECRET,
       envRuntime.TWITTER_CLIENT_SECRET,
-      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY
-    ]
+      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
+    ],
   },
   autofetchUserPosts
 );
@@ -117,24 +123,49 @@ exports[AUTOPOST_POST_TASK] = onTaskDispatched(
       envRuntime.ORCID_SECRET,
       envRuntime.OUR_TOKEN_SECRET,
       envRuntime.TWITTER_CLIENT_SECRET,
-      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY
-    ]
+      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
+    ],
   },
   autopostPostTask
 );
 
 /** hooks */
 exports.postUpdateListener = onDocumentUpdated(
-  `${CollectionNames.Posts}/{postId}`,
+  {
+    document: `${CollectionNames.Posts}/{postId}`,
+    secrets: [
+      envRuntime.ORCID_SECRET,
+      envRuntime.OUR_TOKEN_SECRET,
+      envRuntime.TWITTER_CLIENT_SECRET,
+      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
+    ],
+  },
   (event) => postUpdatedHook(event.params?.postId)
 );
 
 exports.postCreateListener = onDocumentCreated(
-  `${CollectionNames.Posts}/{postId}`,
+  {
+    document: `${CollectionNames.Posts}/{postId}`,
+    secrets: [
+      envRuntime.ORCID_SECRET,
+      envRuntime.OUR_TOKEN_SECRET,
+      envRuntime.TWITTER_CLIENT_SECRET,
+      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
+    ],
+  },
+
   (event) => postUpdatedHook(event.params?.postId)
 );
 
 exports.platformPostUpdateListener = onDocumentUpdated(
-  `${CollectionNames.PlatformPosts}/{platformPostId}`,
+  {
+    document: `${CollectionNames.PlatformPosts}/{platformPostId}`,
+    secrets: [
+      envRuntime.ORCID_SECRET,
+      envRuntime.OUR_TOKEN_SECRET,
+      envRuntime.TWITTER_CLIENT_SECRET,
+      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
+    ],
+  },
   platformPostUpdatedHook
 );
