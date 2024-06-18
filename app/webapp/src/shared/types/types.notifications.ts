@@ -1,11 +1,13 @@
 export enum ACTIVITY_EVENT_TYPE {
   PostsParsed,
+  PostAutoposted,
 }
 
 export enum NOTIFICATION_FREQUENCY {
   Instant,
   Daily,
   Weekly,
+  Monthly,
   None,
 }
 
@@ -23,6 +25,8 @@ export type ActivityEventCreate = Omit<ActivityEvent, 'id'>;
 
 export interface Notification {
   userId: string;
-  activityEventId: string;
-  sent: boolean;
+  title: string;
+  body: string;
+  activityEventType: ACTIVITY_EVENT_TYPE;
+  activityEventIds: string[];
 }
