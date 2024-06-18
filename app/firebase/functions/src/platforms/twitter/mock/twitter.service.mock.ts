@@ -11,6 +11,7 @@ import {
   PlatformPostPublish,
 } from '../../../@shared/types/types.platform.posts';
 import {
+  AppTweet,
   TwitterDraft,
   TwitterGetContextParams,
   TwitterThread,
@@ -48,7 +49,7 @@ const getSampleTweet = (
   createdAt: number,
   conversation_id: string,
   content: string
-) => {
+): AppTweet => {
   const date = new Date(createdAt);
 
   return {
@@ -73,7 +74,6 @@ const getSampleTweet = (
       mentions: [],
       cashtags: [],
     },
-    edit_history_tweet_ids: [],
   };
 };
 
@@ -135,6 +135,7 @@ export const getTwitterMock = (
         const tweet: TweetV2SingleResult = {
           data: {
             id: (++state.latestTweetId).toString(),
+            conversation_id: (++state.latestConvId).toString(),
             text: postPublish.draft.text,
             edit_history_tweet_ids: [],
             author_id: postPublish.userDetails.user_id,
