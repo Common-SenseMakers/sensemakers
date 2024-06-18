@@ -38,34 +38,26 @@ export const dateStrToTimestampMs = (dateStr: string) => {
   return date.getTime();
 };
 
-export const getTweetTextWithUrls = (tweet: AppTweet) => {
+export const getTweetTextWithUrls = (tweet: AppTweetBase) => {
   const fullTweet = tweet[OPTIONAL_TWEET_FIELDS.NoteTweet]
     ? tweet[OPTIONAL_TWEET_FIELDS.NoteTweet]
     : tweet;
   const urls = fullTweet.entities?.urls;
   let text = fullTweet.text;
-
-  if (urls) {
-    urls.forEach((url) => {
-      text = text.replace(url.url, url.expanded_url);
-    });
-  }
-
-  return text;
+  return replaceTinyUrlsWithExpandedUrls(text, urls);
 };
 
 export const replaceTinyUrlsWithExpandedUrls = (
   text: string,
   urls?: TweetEntityUrlV2[]
 ) => {
-  let newText = text;
   if (!urls) {
-    return newText;
+    return text;
   }
   urls.forEach((url) => {
-    newText = newText.replace(url.url, url.expanded_url);
+    text = text.replace(url.url, url.expanded_url);
   });
-  return newText;
+  return text;
 };
 
 export const convertToAppTweetBase = (tweet: TweetV2): AppTweetBase => {
