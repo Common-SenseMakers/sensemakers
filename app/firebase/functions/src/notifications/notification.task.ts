@@ -7,14 +7,20 @@ export const SEND_NOTIFICATION_TASK = 'sendNotification';
 
 export const sendNotificationTask = async (req: Request) => {
   logger.debug(
-    `sendNotificationTask: activityEventId: ${req.data.activityEventId}`
+    `sendNotificationTask: activityEventId: ${req.data.activityEvent}`
   );
-  const activityEventId = req.data.activityEventId as string;
+  const activityEvent = req.data.activityEvent as ActivityEvent;
 
-  if (!activityEventId) {
-    throw new Error('activityEventId is required');
+  if (!activityEvent) {
+    throw new Error('activityEvent is required');
   }
 
   const { notifications } = createServices();
-  await notifications.sendNotification(activityEventId);
+  const notificationObject = await notifications.createNotificationObject(
+    [activityEvent],
+    activityEvent.userId,
+    activityEvent.type
+  );
+  await notifications.sendNotification(notificationObject);
+};
 };

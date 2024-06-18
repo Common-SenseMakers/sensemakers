@@ -24,7 +24,7 @@ export const activityEventCreatedHook = async (activityEventId: string) => {
       userProfile.settings.notificationFrequency ===
       NOTIFICATION_FREQUENCY.Instant
     ) {
-      await enqueueTask(SEND_NOTIFICATION_TASK, { activityEventId });
+      await enqueueTask(SEND_NOTIFICATION_TASK, { activityEvent });
     }
   });
 };
