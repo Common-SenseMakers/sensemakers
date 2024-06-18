@@ -29,7 +29,6 @@ const LS_TWITTER_CONTEXT_KEY = 'twitter-signin-context';
 export type TwitterContextType = {
   connect?: (type: TwitterGetContextParams['type']) => void;
   isConnecting: boolean;
-  isApproving: boolean;
   needConnect?: boolean;
 };
 
@@ -56,8 +55,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
   const appFetch = useAppFetch();
 
-  const [isConnecting, setIsConnecting] = useState<boolean>(false);
-  const [isApproving, setIsApproving] = useState<boolean>(false);
+  const [_isConnecting, setIsConnecting] = useState<boolean>(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -142,12 +140,14 @@ export const TwitterContext = (props: PropsWithChildren) => {
     }
   }, [state_param, code_param, error_param, searchParams, setSearchParams]);
 
+  const isConnecting =
+    _isConnecting || (state_param !== undefined && code_param !== undefined);
+
   return (
     <TwitterContextValue.Provider
       value={{
         connect,
         isConnecting,
-        isApproving,
         needConnect,
       }}>
       {props.children}

@@ -1,3 +1,4 @@
+import { constants } from 'buffer';
 import { Box } from 'grommet';
 import { createContext, useContext, useMemo, useState } from 'react';
 import { Outlet, Route, Routes, useLocation } from 'react-router-dom';
@@ -9,7 +10,7 @@ import { ProfilePostPage } from '../profile/ProfilePostPage';
 import { ProfileRoot } from '../profile/ProfileRoot';
 import { RouteNames } from '../route.names';
 import { ResponsiveApp } from '../ui-components/ResponsiveApp';
-import { ThemedApp } from '../ui-components/ThemedApp';
+import { ThemedApp, useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { ConnectedUserWrapper } from '../user-login/contexts/ConnectedUserWrapper';
 import { UserSettingsPage } from '../user-settings/UserSettingsPage';
@@ -23,9 +24,7 @@ export interface SetPageTitleType {
   main: string;
 }
 
-export type AppContainerContextType = {
-  setTitle: (title: SetPageTitleType) => void;
-};
+export type AppContainerContextType = {};
 
 const AppContainerContextValue = createContext<
   AppContainerContextType | undefined
@@ -49,15 +48,18 @@ export const AppContainer0 = (props: React.PropsWithChildren) => {
 };
 
 export const AppContainer = (props: React.PropsWithChildren) => {
-  const { connectedUser } = useAccountContext();
-  const [title, setTitle] = useState<SetPageTitleType>();
+  const { constants } = useThemeContext();
 
   const topHeight = '0px';
 
   return (
     <>
-      <AppContainerContextValue.Provider value={{ setTitle }}>
-        <ViewportContainer style={{ maxWidth: MAX_WIDTH_APP }}>
+      <AppContainerContextValue.Provider value={{}}>
+        <ViewportContainer
+          style={{
+            maxWidth: MAX_WIDTH_APP,
+            backgroundColor: constants.colors.shade,
+          }}>
           <Box style={{ height: `calc(100% - ${topHeight})` }}>
             <Routes>
               <Route path={RouteNames.AppHome} element={<Outlet />}>

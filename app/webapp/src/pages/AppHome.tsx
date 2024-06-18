@@ -1,11 +1,12 @@
 import { ViewportPage } from '../app/layout/Viewport';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { UserHome } from '../user-home/UserHome';
+import { EmailInput } from '../user-login/EmailInput';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { AppWelcome } from '../welcome/AppWelcome';
 
 export const AppHome = (props: {}) => {
-  const { isConnected, hasTriedFetchingUser } = useAccountContext();
+  const { isConnected, hasTriedFetchingUser, email } = useAccountContext();
 
   const LoadingPlaceholder = (
     <>
@@ -27,11 +28,14 @@ export const AppHome = (props: {}) => {
 
   const content = (() => {
     if (!isConnected && hasTriedFetchingUser) {
-      return <AppWelcome></AppWelcome>;
+      // return <AppWelcome></AppWelcome>;
+      return <EmailInput></EmailInput>;
     } else if (!hasTriedFetchingUser) {
       return LoadingPlaceholder;
-    } else {
+    } else if (email) {
       return <UserHome></UserHome>;
+    } else {
+      return <EmailInput></EmailInput>;
     }
   })();
 

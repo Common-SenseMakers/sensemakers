@@ -24,6 +24,7 @@ export interface StyleConstants {
     text: string;
     textOnPrimary: string;
     border: string;
+    checkboxes: string;
   };
 }
 
@@ -43,7 +44,7 @@ const constants: StyleConstants = {
     },
     small: {
       size: '14px',
-      height: '16px',
+      height: '18px',
     },
     xsmall: {
       size: '12px',
@@ -58,6 +59,7 @@ const constants: StyleConstants = {
     links: '#3182CE',
     textOnPrimary: '#ffffff',
     border: '#D1D5DB',
+    checkboxes: '#337FBD',
   },
 };
 
@@ -96,6 +98,9 @@ const extension: ExtendedThemeType = {
     },
     edgeSize: {
       large: '40px',
+      medium: '16px',
+      small: '12px',
+      xsmall: '8px',
     },
   },
   heading: {
@@ -128,6 +133,18 @@ const extension: ExtendedThemeType = {
       font-weight: 600;
       letter-spacing: -0.4px;
     `,
+  },
+  paragraph: {
+    small: {
+      size: '14px',
+      height: '18px',
+      maxWidth: 'auto',
+    },
+    medium: {
+      size: '16px',
+      height: '24px',
+      maxWidth: 'auto',
+    },
   },
   button: {
     padding: { vertical: '15px', horizontal: '30px' },
@@ -209,7 +226,22 @@ const extension: ExtendedThemeType = {
     },
   },
   checkBox: {
-    color: constants.colors.primary,
+    color: constants.colors.textOnPrimary,
+    size: '18px',
+    icon: {
+      size: '16px',
+    },
+    border: {
+      width: '0px',
+    },
+    toggle: {
+      color: constants.colors.textOnPrimary,
+    },
+    check: {
+      extend: css`
+        background-color: ${constants.colors.checkboxes};
+      `,
+    },
   },
   table: {
     header: {
@@ -240,12 +272,6 @@ const extension: ExtendedThemeType = {
     extend: css`
       font-size: ${constants.fontSize.small.size};
     `,
-  },
-  paragraph: {
-    medium: {
-      size: constants.fontSize.medium.size,
-    },
-    extend: css``,
   },
 };
 
