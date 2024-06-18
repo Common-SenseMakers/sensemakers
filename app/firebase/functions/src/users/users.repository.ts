@@ -1,5 +1,6 @@
 import { firestore } from 'firebase-admin';
 
+import { NOTIFICATION_FREQUENCY } from '../@shared/types/types.notifications';
 import {
   AppUser,
   AppUserCreate,
@@ -417,5 +418,24 @@ export class UsersRepository {
   ) {
     const ref = await this.getUserRef(userId, manager, true);
     manager.update(ref, { settings });
+  }
+
+  public async getWithNotificationFrequency(
+    notificationFrequency: NOTIFICATION_FREQUENCY
+  ): Promise<Pick<AppUser, 'userId' | 'settings'>[]> {
+    const settingsKey: keyof AppUser = 'settings';
+    const notificationFrequencyKey: keyof UserSettings =
+      'notificationFrequency';
+
+    const query = this.db.collections.users.where(
+      `${settingsKey}.${notificationFrequencyKey}`,
+      '==',
+      notificationFrequency
+    );
+
+    const result = await query.get();
+    return result.docs.map((doc) => {
+      return { userId: doc.id, settings: doc.data().settings };
+    }) as Pick<AppUser, 'userId' | 'settings'>[];
   }
 }
