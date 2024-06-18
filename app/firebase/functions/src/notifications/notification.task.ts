@@ -1,5 +1,9 @@
 import { Request } from 'firebase-functions/v2/tasks';
 
+import {
+  ActivityEvent,
+  NOTIFICATION_FREQUENCY,
+} from '../@shared/types/types.notifications';
 import { logger } from '../instances/logger';
 import { createServices } from '../instances/services';
 
@@ -23,4 +27,22 @@ export const sendNotificationTask = async (req: Request) => {
   );
   await notifications.sendNotification(notificationObject);
 };
+
+export const triggerSendNotifications = async (
+  notificationFrequency: NOTIFICATION_FREQUENCY
+) => {
+  logger.debug(`triggerSendNotification`, undefined);
+  const { users, notifications } = createServices();
+
+  const usersWithSettings = await users.repo.getWithNotificationFrequency(
+    notificationFrequency
+  );
+
+  logger.debug(`number of users: ${usersWithSettings.length}`, undefined);
+
+  await Promise.all(
+    usersWithSettings.map(({ userId, settings }) => {
+      notifications.notifyUser(userId, settings);
+    })
+  );
 };
