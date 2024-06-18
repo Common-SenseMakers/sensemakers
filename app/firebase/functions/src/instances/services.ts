@@ -1,4 +1,5 @@
 import { PLATFORM } from '../@shared/types/types.user';
+import { ActivityRepository } from '../activity/activity.repository';
 import {
   FUNCTIONS_PY_URL,
   NANOPUBS_PUBLISH_SERVERS,
@@ -14,7 +15,6 @@ import {
   USE_REAL_TWITTERX,
 } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
-import { ActivityRepository } from '../notifications/activity.repository';
 import { NotificationService } from '../notifications/notification.service';
 import { getNotificationsMock } from '../notifications/notification.service.mock';
 import { getParserMock } from '../parser/mock/parser.service.mock';

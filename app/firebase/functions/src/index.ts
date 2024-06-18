@@ -9,6 +9,7 @@ import { onTaskDispatched } from 'firebase-functions/v2/tasks';
 
 import { NOTIFICATION_FREQUENCY } from './@shared/types/types.notifications';
 import { CollectionNames } from './@shared/utils/collectionNames';
+import { activityEventCreatedHook } from './activity/activity.created.hook';
 import {
   AUTOFETCH_PERIOD,
   DAILY_NOTIFICATION_PERIOD,
@@ -19,7 +20,6 @@ import {
 import { envDeploy } from './config/typedenv.deploy';
 import { envRuntime } from './config/typedenv.runtime';
 import { buildApp } from './instances/app';
-import { activityEventCreatedHook } from './notifications/activity.created.hook';
 import {
   SEND_NOTIFICATION_TASK,
   sendNotificationTask,

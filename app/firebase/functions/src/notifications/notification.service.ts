@@ -1,94 +1,75 @@
+import { ACTIVITY_EVENT_TYPE } from '../@shared/types/types.activity';
 import {
-  ACTIVITY_EVENT_TYPE,
-  ActivityEvent,
+  NOTIFICATION_FREQUENCY,
   Notification,
+  PostParsedNotification,
 } from '../@shared/types/types.notifications';
-import {
-  AutopostOption,
-  PLATFORM,
-  UserSettings,
-} from '../@shared/types/types.user';
+import { AppPost } from '../@shared/types/types.posts';
+import { PLATFORM } from '../@shared/types/types.user';
+import { AutopostOption, UserSettings } from '../@shared/types/types.user';
 import { DBInstance } from '../db/instance';
-import { ActivityRepository } from './activity.repository';
+import { NotificationsRepository } from './notifications.repository';
+
+interface EmailPostDetails {
+  title: string;
+  content: string;
+  url: string;
+}
 
 export class NotificationService {
   constructor(
     public db: DBInstance,
-    public repo: ActivityRepository
+    public repo: NotificationsRepository,
+    public posts: PostService
   ) {}
 
-  public async sendNotification(notification: Notification) {
-    return this.db.run(async (manager) => {
-      await this.sendNotificationInternal(notification);
-      await Promise.all(
-        notification.activityEventIds.map((activityEventId) => {
-          return this.repo.markAsNotified(activityEventId, manager);
-        })
-      );
-    });
-  }
-  async sendNotificationInternal(notification: Notification) {}
+  /** Aggregates all pending notifications of a user and sends them as an email */
   async notifyUser(userId: string, settings: UserSettings) {
+    /** get pending notificatations */
+    const pendingNotifications = await this.repo.getUnotifiedOfUser(userId);
+
+    /** check if user has enabled notififications */
+    if (settings.notificationFrequency === NOTIFICATION_FREQUENCY.None) {
+      return;
+    }
+
     const autopostingOptions = [
       AutopostOption.AI,
       AutopostOption.DETERMINISTIC,
     ];
-    const activityEvents = await this.repo.getUnotifiedOfUser(userId);
-    let notification = await (async () => {
-      if (
-        autopostingOptions.includes(settings.autopost[PLATFORM.Nanopub].value)
-      ) {
-        const autopostedEvents = activityEvents.filter((activityEvent) => {
-          return activityEvent.type === ACTIVITY_EVENT_TYPE.PostAutoposted;
-        });
-        return await this.createNotificationObject(
-          autopostedEvents,
-          userId,
-          ACTIVITY_EVENT_TYPE.PostAutoposted
-        );
-      } else if (
-        settings.autopost[PLATFORM.Nanopub].value === AutopostOption.MANUAL
-      ) {
-        const manualEvents = activityEvents.filter((activityEvent) => {
-          return activityEvent.type === ACTIVITY_EVENT_TYPE.PostsParsed;
-        });
-        return await this.createNotificationObject(
-          manualEvents,
-          userId,
-          ACTIVITY_EVENT_TYPE.PostsParsed
-        );
-      } else {
-        throw new Error('Invalid autopost option');
-      }
-    })();
-    this.sendNotification(notification);
+
+    if (
+      autopostingOptions.includes(settings.autopost[PLATFORM.Nanopub].value)
+    ) {
+      await this.sendDigestAuto(userId, pendingNotifications);
+    } else {
+      await this.sendDigestManual(userId, pendingNotifications);
+    }
   }
-  async createNotificationObject(
-    activityEvents: ActivityEvent[],
-    userId: string,
-    activityEventType: ACTIVITY_EVENT_TYPE
-  ): Promise<Notification> {
-    /** TODO: this is where we could create a notification document in a notification collection */
-    const notification = (() => {
-      if (activityEventType === ACTIVITY_EVENT_TYPE.PostsParsed) {
-        return {
-          title: 'Posts Ready For Review',
-          body: `You have ${activityEvents.length} potential nanopublications ready for review!`,
-        };
-      } else if (activityEventType === ACTIVITY_EVENT_TYPE.PostAutoposted) {
-        return {
-          title: 'Posts Autoposted',
-          body: `You have ${activityEvents.length} new nanopublication`,
-        };
-      } else {
-        throw new Error('Invalid activity event type');
-      }
-    })();
-    return {
-      ...notification,
-      userId,
-      activityEventType,
-      activityEventIds: activityEvents.map((event) => event.id),
-    };
+
+  async sendDigestManual(userId: string, notifications: Notification[]) {
+    /** */
+    const postsToPublish: EmailPostDetails[] = await Promise.all(
+      notifications.map(async (notification) => {
+        if (notification.activity.type === ACTIVITY_EVENT_TYPE.PostParsed) {
+          const post = await this.posts.get(
+            notification as PostParsedNotification,
+            true
+          );
+          WIP WIP
+          return {
+            title: post.title,
+            content: post.content,
+            url: post.url,
+          };
+        } else {
+          throw new Error('Unsupported notification type');
+        }
+      })
+    );
+  }
+
+  async sendDigestAuto(userId: string, notifications: Notification[]) {
+    const postsPublished: AppPost[] = [];
   }
 }

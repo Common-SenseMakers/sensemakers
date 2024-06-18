@@ -1,8 +1,8 @@
 import { NOTIFICATION_FREQUENCY } from '../@shared/types/types.notifications';
 import { createServices } from '../instances/services';
+import { SEND_NOTIFICATION_TASK } from '../notifications/notification.task';
 import { enqueueTask } from '../tasks.support';
 import { ActivityRepository } from './activity.repository';
-import { SEND_NOTIFICATION_TASK } from './notification.task';
 
 export const activityEventCreatedHook = async (activityEventId: string) => {
   const { db, users } = createServices();
