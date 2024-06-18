@@ -3,6 +3,7 @@ import { expect } from 'chai';
 import {
   ACTIVITY_EVENT_TYPE,
   NOTIFICATION_FREQUENCY,
+  Notification,
 } from '../../src/@shared/types/types.notifications';
 import {
   AppUser,
@@ -104,7 +105,14 @@ describe.only('060-notifications', () => {
         );
         return activity;
       });
-      await services.notifications.sendNotification(createdActivity.id);
+      const notificationObject: Notification = {
+        userId: user.userId,
+        activityEventIds: [createdActivity.id],
+        activityEventType: ACTIVITY_EVENT_TYPE.PostsParsed,
+        title: 'Posts Ready For Review',
+        body: `You have 1 potential nanopublications ready for review!`,
+      };
+      await services.notifications.sendNotification(notificationObject);
 
       const updatedActivity = await services.db.run(async (manager) => {
         const activity = await activityRepo.get(
