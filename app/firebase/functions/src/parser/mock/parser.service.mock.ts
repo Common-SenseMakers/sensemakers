@@ -64,13 +64,13 @@ export const getParserMock = (
       const ix = randomIndex(
         0,
         MOCKED_PARSER_RESULTS.length - 1,
-        post.post.content
+        post.post.content[0].content
       );
 
       const mockedResult: ParsePostResult = MOCKED_PARSER_RESULTS[ix];
       if (DEBUG)
         logger.debug(
-          `mocked parser result ix:${ix} - content: ${post.post.content}`,
+          `mocked parser result ix:${ix} - content: ${post.post.content[0].content}`,
           mockedResult
         );
 

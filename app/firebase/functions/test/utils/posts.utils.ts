@@ -19,13 +19,17 @@ export const getMockPost = (refPost: Partial<AppPostFull>) => {
     id: refPost.id || 'post-id',
     createdAtMs: createdAtMs,
     authorId: authorId,
-    content: refPost.content || 'test content',
-    author: {
-      platformId: PLATFORM.Twitter,
-      id: 'test-user-id',
-      username: 'test-user',
-      name: 'test-user-name',
-    },
+    content: refPost.content || [
+      {
+        content: 'test content',
+        author: {
+          platformId: PLATFORM.Twitter,
+          id: 'test-user-id',
+          username: 'test-user',
+          name: 'test-user-name',
+        },
+      },
+    ],
     semantics: refPost.semantics || '',
     origin: PLATFORM.Twitter,
     parsedStatus: AppPostParsedStatus.PROCESSED,
