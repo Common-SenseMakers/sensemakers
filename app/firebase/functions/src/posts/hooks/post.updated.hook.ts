@@ -9,9 +9,11 @@ import { enqueueTask } from '../../tasks.support';
 import { AUTOPOST_POST_TASK } from '../tasks/posts.autopost.task';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 
+// TODO: change interface to receive post as the after value and also send the previous one
 export const postUpdatedHook = async (postId: string) => {
   const { db, time, users, postsManager } = createServices();
 
+  /** Frontend watcher to react to changes in real-time */
   const updateRef = db.collections.updates.doc(`post-${postId}`);
   const now = time.now();
 

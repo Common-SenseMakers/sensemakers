@@ -422,7 +422,7 @@ export class UsersRepository {
 
   public async getWithNotificationFrequency(
     notificationFrequency: NOTIFICATION_FREQUENCY
-  ): Promise<Pick<AppUser, 'userId' | 'settings'>[]> {
+  ) {
     const settingsKey: keyof AppUser = 'settings';
     const notificationFrequencyKey: keyof UserSettings =
       'notificationFrequency';
@@ -434,8 +434,7 @@ export class UsersRepository {
     );
 
     const result = await query.get();
-    return result.docs.map((doc) => {
-      return { userId: doc.id, settings: doc.data().settings };
-    }) as Pick<AppUser, 'userId' | 'settings'>[];
+
+    return result.docs.map((doc) => doc.id) as string[];
   }
 }

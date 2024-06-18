@@ -21,8 +21,8 @@ import { envDeploy } from './config/typedenv.deploy';
 import { envRuntime } from './config/typedenv.runtime';
 import { buildApp } from './instances/app';
 import {
-  SEND_NOTIFICATION_TASK,
-  sendNotificationTask,
+  NOTIFY_USER_TASK,
+  notifyUserTask,
   triggerSendNotifications,
 } from './notifications/notification.task';
 import { platformPostUpdatedHook } from './posts/hooks/platformPost.updated.hook';
@@ -181,7 +181,7 @@ exports[AUTOPOST_POST_TASK] = onTaskDispatched(
   autopostPostTask
 );
 
-exports[SEND_NOTIFICATION_TASK] = onTaskDispatched(
+exports[NOTIFY_USER_TASK] = onTaskDispatched(
   {
     timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
     memory: envDeploy.CONFIG_MEMORY,
@@ -193,7 +193,7 @@ exports[SEND_NOTIFICATION_TASK] = onTaskDispatched(
       envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
     ],
   },
-  sendNotificationTask
+  notifyUserTask
 );
 
 /** hooks */

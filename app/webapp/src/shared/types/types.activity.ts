@@ -1,12 +1,11 @@
-export enum ACTIVITY_EVENT_TYPE {
+export enum ActivityType {
   PostParsed,
   PostAutoposted,
 }
 
-export interface ActivityEventBase<D> {
+export interface ActivityEventBase<D = any> {
   id: string;
-  userId: string;
-  type: ACTIVITY_EVENT_TYPE;
+  type: ActivityType;
   timestamp: number;
   data: D;
 }

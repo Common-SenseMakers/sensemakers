@@ -1,4 +1,4 @@
-import { ParsedPostActivity } from '../types/types.activity';
+import { ActivityEventBase } from '../types/types.activity';
 
 export enum NOTIFICATION_FREQUENCY {
   Instant,
@@ -14,11 +14,17 @@ export enum NotificationStatus {
   seen = 'seen',
 }
 
-export interface Notification<A = any> {
+export interface Notification {
   id: string;
   userId: string;
   status: NotificationStatus;
-  activity: A;
+  activityId: string;
 }
 
-export type PostParsedNotification = Notification<ParsedPostActivity>;
+export type NotificationFull<D = any> = Omit<Notification, 'activityId'> & {
+  activity: ActivityEventBase<D>;
+};
+
+export type NotificationCreate = Omit<Notification, 'id'>;
+
+export type PostParsedNotification = NotificationFull<{ postId: string }>;

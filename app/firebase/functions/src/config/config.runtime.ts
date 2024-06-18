@@ -22,6 +22,7 @@ mandatory.forEach((varName) => {
 /** Export all independent constants used by the functions */
 export const NODE_ENV = envRuntime.NODE_ENV;
 export const PROJECT_ID = envRuntime.PROJECT_ID;
+export const APP_URL = envRuntime.APP_URL;
 
 export const IS_EMULATOR = process.env.FIRESTORE_EMULATOR_HOST !== undefined;
 

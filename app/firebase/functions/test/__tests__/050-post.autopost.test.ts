@@ -18,6 +18,7 @@ import {
 } from '../../src/@shared/types/types.user';
 import { USE_REAL_NOTIFICATIONS } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
+import { triggerSendNotifications } from '../../src/notifications/notification.task';
 import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { postUpdatedHook } from '../../src/posts/hooks/post.updated.hook';

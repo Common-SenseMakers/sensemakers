@@ -1,30 +1,28 @@
-import { NOTIFICATION_FREQUENCY } from '../@shared/types/types.notifications';
+import {
+  ActivityEventBase,
+  ActivityType,
+  ParsedPostActivity,
+} from '../@shared/types/types.activity';
 import { createServices } from '../instances/services';
-import { SEND_NOTIFICATION_TASK } from '../notifications/notification.task';
-import { enqueueTask } from '../tasks.support';
-import { ActivityRepository } from './activity.repository';
 
-export const activityEventCreatedHook = async (activityEventId: string) => {
-  const { db, users } = createServices();
+// receive the data of the created activity
+export const activityEventCreatedHook = async (
+  activityEvent: ActivityEventBase
+) => {
+  const { db, users, postsManager, notifications } = createServices();
 
   await db.run(async (manager) => {
-    const activityRepo = new ActivityRepository(db);
-    const activityEvent = await activityRepo.get(
-      activityEventId,
-      manager,
-      true
-    );
+    await (async () => {
+      if (activityEvent.type === ActivityType.PostAutoposted) {
+        // get the author of the post and create one notification for them
+        const post = await postsManager.processing.posts.get(
+          (activityEvent as ParsedPostActivity).data.postId,
+          manager,
+          true
+        );
 
-    const userProfile = await users.getUserProfile(
-      activityEvent.userId,
-      manager
-    );
-
-    if (
-      userProfile.settings.notificationFrequency ===
-      NOTIFICATION_FREQUENCY.Instant
-    ) {
-      await enqueueTask(SEND_NOTIFICATION_TASK, { activityEvent });
-    }
+        await notifications.createNotification({});
+      }
+    })();
   });
 };

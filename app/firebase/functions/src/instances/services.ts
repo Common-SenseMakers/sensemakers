@@ -17,6 +17,7 @@ import {
 import { DBInstance } from '../db/instance';
 import { NotificationService } from '../notifications/notification.service';
 import { getNotificationsMock } from '../notifications/notification.service.mock';
+import { NotificationsRepository } from '../notifications/notifications.repository';
 import { getParserMock } from '../parser/mock/parser.service.mock';
 import { ParserService } from '../parser/parser.service';
 import { getNanopubMock } from '../platforms/nanopub/mock/nanopub.service.mock';
@@ -55,6 +56,7 @@ export const createServices = () => {
   const triplesRepo = new TriplesRepository(db);
   const platformPostsRepo = new PlatformPostsRepository(db);
   const activityRepo = new ActivityRepository(db);
+  const notificationsRepo = new NotificationsRepository(db);
 
   const identityPlatforms: IdentityServicesMap = new Map();
   const platformsMap: PlatformsMap = new Map();
@@ -131,7 +133,12 @@ export const createServices = () => {
   );
 
   /** notification service */
-  const _notifications = new NotificationService(db, activityRepo);
+  const _notifications = new NotificationService(
+    db,
+    notificationsRepo,
+    postsRepo,
+    activityRepo
+  );
   const notifications = getNotificationsMock(
     _notifications,
     USE_REAL_NOTIFICATIONS.value() ? 'real' : 'mock'

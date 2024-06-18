@@ -5,6 +5,7 @@ import {
 } from 'firebase-functions/params';
 
 const PROJECT_ID = defineString('PROJECT_ID');
+const APP_URL = defineString('APP_URL');
 
 const ORCID_REDIRECT_URL = defineString('ORCID_REDIRECT_URL');
 const TWITTER_CALLBACK_URL = defineString('TWITTER_CALLBACK_URL');
@@ -32,6 +33,7 @@ export const envRuntime = {
   NODE_ENV: process.env.NODE_ENV,
   REGION: process.env.FUNCTION_REGION,
   PROJECT_ID: PROJECT_ID,
+  APP_URL: APP_URL,
   ORCID_REDIRECT_URL: ORCID_REDIRECT_URL,
   TWITTER_CALLBACK_URL: TWITTER_CALLBACK_URL,
   TWITTER_REVOKE_URL: TWITTER_REVOKE_URL,
