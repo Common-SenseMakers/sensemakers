@@ -145,6 +145,13 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
   const isProcessing = state_param !== null && code_param !== null;
 
+  /** only consider the signup process done when connectedUser is read */
+  useEffect(() => {
+    if (connectedUser) {
+      setIsSigningUp(false);
+    }
+  }, [connectedUser]);
+
   return (
     <TwitterContextValue.Provider
       value={{

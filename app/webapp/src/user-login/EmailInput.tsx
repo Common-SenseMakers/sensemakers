@@ -1,9 +1,9 @@
-import { Box } from 'grommet';
-import { useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { Box, Text } from 'grommet';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import isEmail from 'validator/lib/isEmail';
 
 import { AppLogo } from '../app/brand/AppLogo';
-import { TwitterIcon } from '../app/common/Icons';
 import { I18Keys } from '../i18n/i18n';
 import {
   AppButton,
@@ -19,13 +19,27 @@ import { useAccountContext } from './contexts/AccountContext';
 
 export const EmailInput = (props: {}) => {
   const [emailInput, setEmailInput] = useState<string>('');
-  const { setEmail } = useAccountContext();
+  const [invalidEmail, setInvalidEmail] = useState<boolean>(false);
+
+  const { setEmail, isSettingEmail } = useAccountContext();
   const { t } = useTranslation();
   const { connect: connectTwitter } = useTwitterContext();
 
   const _setEmail = () => {
+    if (!isEmail(emailInput)) {
+      setInvalidEmail(true);
+    }
+
     setEmail(emailInput);
   };
+
+  useEffect(() => {
+    if (invalidEmail) {
+      if (isEmail(emailInput)) {
+        setInvalidEmail(false);
+      }
+    }
+  }, [emailInput]);
 
   const content = (() => {
     if (connectTwitter) {
@@ -40,6 +54,7 @@ export const EmailInput = (props: {}) => {
             <AppInput
               style={{ width: '100%' }}
               onChange={(e) => setEmailInput(e.target.value)}></AppInput>
+            {invalidEmail ? <Text>Error</Text> : <></>}
           </Box>
           <AppConfirmInput
             confirmText={t(I18Keys.emailInputConfirm)}></AppConfirmInput>
@@ -47,6 +62,7 @@ export const EmailInput = (props: {}) => {
             margin={{ top: 'large' }}
             primary
             label={t(I18Keys.emailInputBtn)}
+            disabled={isSettingEmail}
             onClick={() => _setEmail()}></AppButton>
         </>
       );

@@ -8,7 +8,7 @@ import { AppWelcome } from '../welcome/AppWelcome';
 
 export const AppHome = (props: {}) => {
   const { isConnected, hasTriedFetchingUser, email } = useAccountContext();
-  const { isConnecting, isSigningUp } = useTwitterContext();
+  const { isSigningUp } = useTwitterContext();
 
   const LoadingPlaceholder = (
     <>
@@ -29,7 +29,6 @@ export const AppHome = (props: {}) => {
   );
 
   const content = (() => {
-    console.log({ isConnected, isConnecting, email });
     if (isSigningUp || (isConnected && !email)) {
       return <EmailInput></EmailInput>;
     }

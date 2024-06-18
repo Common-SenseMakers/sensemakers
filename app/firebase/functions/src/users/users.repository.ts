@@ -418,4 +418,13 @@ export class UsersRepository {
     const ref = await this.getUserRef(userId, manager, true);
     manager.update(ref, { settings });
   }
+
+  public async updateEmail(
+    userId: string,
+    email: string,
+    manager: TransactionManager
+  ) {
+    const ref = await this.getUserRef(userId, manager, true);
+    manager.update(ref, { email });
+  }
 }

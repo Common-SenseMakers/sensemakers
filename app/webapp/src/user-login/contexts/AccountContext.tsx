@@ -11,7 +11,7 @@ import { TwitterUserProfile } from '../../shared/types/types.twitter';
 import { AppUserRead, PLATFORM } from '../../shared/types/types.user';
 import { getAccount } from '../user.helper';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export const OUR_TOKEN_NAME = 'ourToken';
 
