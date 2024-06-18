@@ -1,5 +1,6 @@
 import re
 import requests
+from typing import List, Optional
 from jinja2 import Environment, BaseLoader
 from enum import Enum
 import json
@@ -170,6 +171,34 @@ def extract_and_expand_urls(text, return_orig_urls: bool = False):
         return expanded_urls
 
 
+def extract_external_urls_from_status_tweet(
+    tweet_url: str, tweet_content: str
+) -> List[str]:
+    """
+    Extract list of non-internal URLs referenced by `tweet_content`.
+    In this context, internal URLs are URLs of media items associated with the tweet, such as images or videos.
+    Internal URLs share the same ID as the referencing tweet.
+    Shortened URLs are expanded to long form.
+    """
+    tweet_id = extract_twitter_status_id(tweet_url)
+    external = set()
+    urls = extract_and_expand_urls(tweet_content)
+
+    for url in urls:
+        # extract twitter id from url if the url is a twitter post
+        url_twitter_id = extract_twitter_status_id(url)
+        if url_twitter_id:  # check if a twitter url
+            if (
+                url_twitter_id != tweet_id
+            ):  # check if url does not share same status id with parsed tweet
+                external.add(url)
+        else:
+            # not twitter url, add
+            external.add(url)
+
+    return list(external)
+
+
 def render_to_py_dict(obj_dict, obj_name: str = "object", out_path: str = "output.py"):
     template_str = """{{ obj_name }} = {
     {% for key, value in obj_dict.items() -%}
@@ -279,3 +308,20 @@ def remove_dups_ordered(input_list: list):
             result.append(item)
 
     return result
+
+
+def find_last_occurence_of_any(input: str, strings: List[str]) -> Optional[str]:
+    """
+    Returns element of `strings` that appears last in `input`, or None
+    if none of the elements in `strings` appears in `input`
+    """
+    last_occurrence = None
+    last_index = -1
+
+    for s in strings:
+        index = input.rfind(s)
+        if index > last_index:
+            last_index = index
+            last_occurrence = s
+
+    return last_occurrence

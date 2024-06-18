@@ -289,6 +289,8 @@ def multi_ref_post_instruction_test():
     prompt = mcp.instantiate_prompts(ref_post, md_dict)
     prompt_str = prompt["multi_ref_tagger_input"]
     assert postr.ref_post_renderer.MULTI_REF_INSTRUCTIONS in prompt_str
+
+
     
 if __name__ == "__main__":
     multi_config = MultiParserChainConfig(
@@ -296,14 +298,14 @@ if __name__ == "__main__":
             MultiRefTaggerChainConfig(
                 name="multi_ref_tagger",
                 llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
-                post_renderer=PostRendererType.REF_POST,
+                post_renderer=PostRendererType.QUOTE_REF_POST,
             )
         ],
         metadata_extract_config=MetadataExtractionConfig(extraction_method="citoid"),
     )
     mcp = MultiChainParser(multi_config)
-    ref_post = convert_text_to_ref_post(TEST_POST_TEXT_W_2_REFS)
+    ref_post = scrape_post("https://x.com/neilturkewitz/status/1800926494358962257")
     md_dict = extract_posts_ref_metadata_dict([ref_post])
     prompt = mcp.instantiate_prompts(ref_post, md_dict)
     prompt_str = prompt["multi_ref_tagger_input"]
-    assert postr.ref_post_renderer.MULTI_REF_INSTRUCTIONS in prompt_str
+    # assert postr.ref_post_renderer.MULTI_REF_INSTRUCTIONS in prompt_str

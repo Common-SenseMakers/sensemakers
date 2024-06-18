@@ -1,6 +1,6 @@
 # Twitter scraping based on https://github.com/JustAnotherArchivist/snscrape/issues/996#issuecomment-1777981568
 
-from typing import Optional, Union
+from typing import Optional, Union, List
 import re
 import requests
 from datetime import datetime

@@ -5,7 +5,10 @@ from pathlib import Path
 ROOT = Path(__file__).parents[1]
 sys.path.append(str(ROOT))
 
-from desci_sense.shared_functions.utils import identify_social_media
+from desci_sense.shared_functions.utils import (
+    identify_social_media,
+    find_last_occurence_of_any,
+)
 from desci_sense.shared_functions.dataloaders import scrape_post
 from desci_sense.shared_functions.dataloaders.twitter.twitter_utils import (
     extract_external_ref_urls,
@@ -74,6 +77,34 @@ def test_edge_cases():
     assert identify_social_media("not a url") == "Unknown"
     assert identify_social_media("") == "Unknown"
     assert identify_social_media(None) == "Unknown"
+
+
+def test_find_last_occurence_of_any():
+    input_text = (
+        "This is a test string with multiple words. Let's find the last occurrence."
+    )
+    strings_to_find = ["test", "words", "occurrence", "find"]
+    assert find_last_occurence_of_any(input_text, strings_to_find) == "occurrence"
+
+    input_text = "apple banana cherry date"
+    strings_to_find = ["banana", "cherry", "apple"]
+    assert find_last_occurence_of_any(input_text, strings_to_find) == "cherry"
+
+    input_text = "apple banana cherry date"
+    strings_to_find = ["banana", "apple"]
+    assert find_last_occurence_of_any(input_text, strings_to_find) == "banana"
+
+    input_text = "apple banana cherry date"
+    strings_to_find = ["fig", "grape", "melon"]
+    assert find_last_occurence_of_any(input_text, strings_to_find) == None
+
+    input_text = ""
+    strings_to_find = ["apple", "banana", "cherry"]
+    assert find_last_occurence_of_any(input_text, strings_to_find) == None
+
+    input_text = "repeated words repeated words"
+    strings_to_find = ["words", "repeated"]
+    assert find_last_occurence_of_any(input_text, strings_to_find) == "words"
 
 
 if __name__ == "__main__":

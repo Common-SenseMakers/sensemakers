@@ -50,7 +50,7 @@ def test_qt_with_external_ref():
 
 
 if __name__ == "__main__":
-    tweet_url = "https://x.com/StephensonJones/status/1799035911042482210"
+    tweet_url = "https://x.com/neilturkewitz/status/1800926494358962257"
     # tweet_url = "https://twitter.com/i/status/1795918889542361110"
     quote_ref_post = scrape_post(tweet_url)
 
