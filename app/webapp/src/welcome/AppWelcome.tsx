@@ -12,7 +12,7 @@ import { useTwitterContext } from '../user-login/contexts/platforms/TwitterConte
 
 export const AppWelcome = (props: {}) => {
   const { t } = useTranslation();
-  const { connect: connectTwitter } = useTwitterContext();
+  const { connect: connectTwitter, isGoing } = useTwitterContext();
 
   const content = (() => {
     if (connectTwitter) {
@@ -32,6 +32,7 @@ export const AppWelcome = (props: {}) => {
             margin={{ top: 'large' }}
             primary
             icon={<TwitterIcon></TwitterIcon>}
+            disabled={isGoing}
             label={t(I18Keys.signInX)}
             onClick={() => connectTwitter('read')}></AppButton>
         </>
