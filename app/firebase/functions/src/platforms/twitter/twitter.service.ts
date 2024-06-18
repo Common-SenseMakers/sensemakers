@@ -21,6 +21,7 @@ import {
 } from '../../@shared/types/types.platform.posts';
 import '../../@shared/types/types.posts';
 import {
+  GenericPlatformPost,
   GenericPostData,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
@@ -46,7 +47,6 @@ import {
   dateStrToTimestampMs,
   getTweetTextWithUrls,
   handleTwitterError,
-  replaceTinyUrlsWithExpandedUrls,
 } from './twitter.utils';
 
 export interface TwitterApiCredentials {
@@ -224,34 +224,27 @@ export class TwitterService
       throw new Error('Unexpected undefined posted');
     }
     const thread = platformPost.posted.post;
-    /** concatenate all tweets in thread into one app post */
-    const threadText = thread.tweets.map(getTweetTextWithUrls).join('\n---\n');
-    const transcludedContent = thread.tweets
-      .filter((tweet) => tweet.quoted_tweet)
-      .map((tweet) => {
-        if (!tweet.quoted_tweet?.author.username) {
-          throw new Error(`Unexpected quote_tweet.author.username undefined`);
-        }
-        return {
-          url: `https://x.com/${tweet.quoted_tweet.author.username}/status/${tweet.quoted_tweet.id}`,
-          content: replaceTinyUrlsWithExpandedUrls(
-            tweet.quoted_tweet.text,
-            tweet.quoted_tweet.entities?.urls
-          ),
-          author: {
-            ...tweet.quoted_tweet.author,
-            platformId: PLATFORM.Twitter,
+    const content: GenericPlatformPost[] = thread.tweets.map((tweet) => {
+      return {
+        url: `https://x.com/${thread.author.username}/status/${tweet.id}`, // including this here for convenience, in case we need to reference the original platform post.
+        content: tweet.text,
+        author: { ...thread.author, platformId: PLATFORM.Twitter },
+        ...(tweet.quoted_tweet && {
+          quotedPost: {
+            url: `https://x.com/${tweet.quoted_tweet.author.username}/status/${tweet.quoted_tweet.id}`,
+            content: getTweetTextWithUrls(tweet.quoted_tweet),
+            author: {
+              ...tweet.quoted_tweet.author,
+              platformId: PLATFORM.Twitter,
+            },
           },
-        };
-      });
+        }),
+      };
+    });
     return {
-      content: threadText,
-      author: { ...thread.author, platformId: PLATFORM.Twitter },
-      quotedPosts:
-        transcludedContent.length > 0 ? transcludedContent : undefined,
+      content,
     };
   }
-
   /** if user_id is provided it must be from the authenticated userId */
   public async getPost(
     tweetId: string,

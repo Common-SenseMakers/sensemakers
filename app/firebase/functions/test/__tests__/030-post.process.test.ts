@@ -368,7 +368,10 @@ describe.only('030-process', () => {
       const post = publishedPosts[0];
 
       const contentPrev = post.content;
-      const newContent = `${contentPrev} - edited`;
+      const newContent = [
+        { ...contentPrev[0], content: `${contentPrev[0].content} - edited` },
+        ...contentPrev.slice(1),
+      ];
 
       const newPost = { ...post };
       newPost.content = newContent;

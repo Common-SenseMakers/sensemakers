@@ -2,21 +2,25 @@ import { AppUser, FetchParams, PLATFORM } from './types';
 import { AppPostSemantics, ParsePostResult } from './types.parser';
 import { PlatformPost } from './types.platform.posts';
 
-export interface GenericPostAuthor {
+export interface GenericPlatformPostAuthor {
   platformId: PLATFORM;
   id: string;
   username: string;
   name: string;
 }
 
+export interface GenericPlatformPost {
+  url?: string;
+  content: string;
+  quotedPost?: GenericPlatformPost;
+  author: GenericPlatformPostAuthor;
+}
+
 /**
  * Properties of a post that must be computed in the convertToGeneric method
  */
 export interface GenericPostData {
-  url?: string;
-  content: string;
-  author: GenericPostAuthor;
-  quotedPosts?: GenericPostData[];
+  content: GenericPlatformPost[];
 }
 
 /**

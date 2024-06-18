@@ -9,7 +9,11 @@ export const postIdValidation = object({
 
 export const approvePostSchema = object({
   id: string().required(),
-  content: string().required(),
+  content: array().of(
+    object().shape({
+      content: string().required(),
+    })
+  ),
   semantics: string().required(),
   mirrors: array().of(object().shape({})).required(),
 }).noUnknown(true);

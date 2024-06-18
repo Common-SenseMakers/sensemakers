@@ -84,19 +84,6 @@ describe('02-platforms', () => {
 
       expect(threads).to.not.be.undefined;
       expect(threads.platformPosts.length).to.be.greaterThanOrEqual(5);
-
-      const threadWithQuotedTweet = threads.platformPosts.find((thread) => {
-        return (thread.post as TwitterThread).tweets.some((tweet) => {
-          return tweet.quoted_tweet !== undefined;
-        });
-      });
-
-      if (threadWithQuotedTweet) {
-        const genericPost = await twitterService.convertToGeneric({
-          posted: threadWithQuotedTweet,
-        } as PlatformPostCreate<TwitterThread>);
-        expect(genericPost.quotedPosts).to.not.be.undefined;
-      }
     });
 
     it('includes quote tweets in platform post and app post', async () => {
@@ -123,6 +110,11 @@ describe('02-platforms', () => {
         expect(appTweets).to.not.be.undefined;
         expect(appTweets.length).to.be.equal(3);
 
+        const author = result.includes?.users?.find(
+          (user) => user.id === result.data[0].author_id
+        );
+        expect(author).to.not.be.undefined;
+
         const quotedTweetIds = [
           '1795069204418175459',
           '1798782358201508331',
@@ -131,6 +123,28 @@ describe('02-platforms', () => {
 
         appTweets.forEach((appTweet: AppTweet) => {
           expect(quotedTweetIds).to.include(appTweet.quoted_tweet?.id);
+        });
+
+        /** check that it converts the thread into a generic app post properly */
+        const platformPost = {
+          posted: {
+            post: {
+              conversation_id: appTweets[0].conversation_id,
+              tweets: appTweets,
+              author,
+            },
+          },
+        };
+
+        const genericPost = await twitterService.convertToGeneric(
+          platformPost as any as PlatformPostCreate<TwitterThread>
+        );
+
+        genericPost.content.forEach((post) => {
+          expect(post.quotedPost).to.not.be.undefined;
+          expect(
+            quotedTweetIds.some((id) => post.quotedPost?.url?.includes(id))
+          ).to.be.true;
         });
       } catch (error) {
         console.error('error: ', error);
