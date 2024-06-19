@@ -7,7 +7,10 @@ import {
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { onTaskDispatched } from 'firebase-functions/v2/tasks';
 
+import { ActivityEventBase } from './@shared/types/types.activity';
 import { NOTIFICATION_FREQUENCY } from './@shared/types/types.notifications';
+import { PlatformPost } from './@shared/types/types.platform.posts';
+import { AppPost } from './@shared/types/types.posts';
 import { CollectionNames } from './@shared/utils/collectionNames';
 import { activityEventCreatedHook } from './activity/activity.created.hook';
 import {
@@ -199,20 +202,56 @@ exports[NOTIFY_USER_TASK] = onTaskDispatched(
 /** hooks */
 exports.postUpdateListener = onDocumentUpdated(
   `${CollectionNames.Posts}/{postId}`,
-  (event) => postUpdatedHook(event.params?.postId)
+  async (event) => {
+    const postBefore = event.data?.before as AppPost | undefined;
+    const postAfter = event.data?.after as AppPost | undefined;
+
+    if (!postBefore || !postAfter) {
+      throw new Error('Unexpected post data not found in onDocumentUpdated');
+    }
+
+    await postUpdatedHook(postAfter, postBefore);
+  }
 );
 
 exports.postCreateListener = onDocumentCreated(
   `${CollectionNames.Posts}/{postId}`,
-  (event) => postUpdatedHook(event.params?.postId)
+  async (event) => {
+    const post = event.data?.data() as AppPost | undefined;
+
+    if (!post) {
+      throw new Error('Unexpected post data not found in onDocumentCreated');
+    }
+
+    await postUpdatedHook(post);
+  }
 );
 
 exports.platformPostUpdateListener = onDocumentUpdated(
   `${CollectionNames.PlatformPosts}/{platformPostId}`,
-  platformPostUpdatedHook
+  async (event) => {
+    const postBefore = event.data?.before as PlatformPost | undefined;
+    const postAfter = event.data?.after as PlatformPost | undefined;
+
+    if (!postBefore || !postAfter) {
+      throw new Error('Unexpected post data not found in onDocumentUpdated');
+    }
+
+    await platformPostUpdatedHook(postAfter, postBefore);
+  }
 );
 
 exports.activityEventCreateListener = onDocumentCreated(
   `${CollectionNames.Activity}/{activityEventId}`,
-  (event) => activityEventCreatedHook(event.params?.activityEventId)
+  async (event) => {
+    const activityEvent = event.data?.data() as ActivityEventBase | undefined;
+
+    if (!activityEvent) {
+      throw new Error(
+        'Unexpected activity data not found in onDocumentCreated'
+      );
+    }
+
+    await activityEventCreatedHook(activityEvent);
+  }
 );

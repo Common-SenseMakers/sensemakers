@@ -7,6 +7,7 @@ import {
   PlatformPostPublish,
 } from '../../../@shared/types/types.platform.posts';
 import {
+  AppTweet,
   TwitterDraft,
   TwitterGetContextParams,
   TwitterThread,
@@ -16,7 +17,7 @@ import { UserDetailsBase } from '../../../@shared/types/types.user';
 import { TransactionManager } from '../../../db/transaction.manager';
 import { logger } from '../../../instances/logger';
 import { TwitterService } from '../twitter.service';
-import { dateStrToTimestampMs } from '../twitter.utils';
+import { convertToAppTweetBase, dateStrToTimestampMs } from '../twitter.utils';
 
 interface TwitterTestState {
   latestTweetId: number;
@@ -37,6 +38,8 @@ export const THREADS: string[][] = process.env.TEST_THREADS
   : [];
 
 export const TWITTER_USER_ID_MOCKS = '1773032135814717440';
+export const TWITTER_USERNAME_MOCKS = 'sense_nets_bot';
+export const TWITTER_NAME_MOCKS = 'SenseNet Bot';
 
 const getSampleTweet = (
   id: string,
@@ -44,7 +47,7 @@ const getSampleTweet = (
   createdAt: number,
   conversation_id: string,
   content: string
-) => {
+): AppTweet => {
   const date = new Date(createdAt);
 
   return {
@@ -53,7 +56,22 @@ const getSampleTweet = (
     text: `This is an interesting paper https://arxiv.org/abs/2312.05230 ${id} | ${content}`,
     author_id: authorId,
     created_at: date.toISOString(),
-    edit_history_tweet_ids: [],
+    entities: {
+      urls: [
+        {
+          start: 50,
+          end: 73,
+          url: 'https://t.co/gguJOKvN37',
+          expanded_url: 'https://arxiv.org/abs/2312.05230',
+          display_url: 'x.com/sense_nets_bot…',
+          unwound_url: 'https://arxiv.org/abs/2312.05230',
+        },
+      ],
+      annotations: [],
+      hashtags: [],
+      mentions: [],
+      cashtags: [],
+    },
   };
 };
 
@@ -77,6 +95,11 @@ export const initThreads = () => {
     return {
       conversation_id: `${ixThread}`,
       tweets,
+      author: {
+        id: TWITTER_USER_ID_MOCKS,
+        name: TWITTER_NAME_MOCKS,
+        username: TWITTER_USERNAME_MOCKS,
+      },
     };
   });
 
@@ -114,6 +137,7 @@ export const getTwitterMock = (
         const tweet: TweetV2SingleResult = {
           data: {
             id: (++state.latestTweetId).toString(),
+            conversation_id: (++state.latestConvId).toString(),
             text: postPublish.draft.text,
             edit_history_tweet_ids: [],
             author_id: postPublish.userDetails.user_id,
@@ -123,7 +147,12 @@ export const getTwitterMock = (
 
         const thread = {
           conversation_id: (++state.latestConvId).toString(),
-          tweets: [tweet.data],
+          tweets: [convertToAppTweetBase(tweet.data)],
+          author: {
+            id: TWITTER_USER_ID_MOCKS,
+            name: TWITTER_NAME_MOCKS,
+            username: TWITTER_USERNAME_MOCKS,
+          },
         };
 
         state.threads.push(thread);

@@ -15,6 +15,7 @@ import { UsersHelper } from '../../src/users/users.helper';
 import {
   TestUserCredentials,
   authenticateTestUser,
+  checkOutdatedTwitterTokens,
 } from '../utils/authenticate.users';
 import { resetDB } from '../utils/db';
 import { getTestServices } from './test.services';
@@ -74,12 +75,27 @@ export const mochaHooks = (): Mocha.RootHookObject => {
         if (fs.existsSync(TEST_USERS_FILE_PATH)) {
           const fileContents = fs.readFileSync(TEST_USERS_FILE_PATH, 'utf8');
           appUsers = JSON.parse(fileContents);
-
-          await Promise.all(
-            appUsers.map(async (appUser) => {
-              testUsers.set(appUser.userId, appUser);
-            })
-          );
+          if (
+            checkOutdatedTwitterTokens(appUsers) ||
+            appUsers.length < testAccountsCredentials.length
+          ) {
+            await Promise.all(
+              testAccountsCredentials.map(async (accountCredentials) => {
+                const user = await authenticateTestUser(
+                  accountCredentials,
+                  services,
+                  manager
+                );
+                testUsers.set(user.userId, user);
+              })
+            );
+          } else {
+            await Promise.all(
+              appUsers.map(async (appUser) => {
+                testUsers.set(appUser.userId, appUser);
+              })
+            );
+          }
         } else {
           await Promise.all(
             testAccountsCredentials.map(async (accountCredentials) => {

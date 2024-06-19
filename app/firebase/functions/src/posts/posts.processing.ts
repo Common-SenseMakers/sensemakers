@@ -68,7 +68,7 @@ export class PostsProcessing {
     }
 
     /** if a platformPost does not exist (most likely scenario) then create a new AppPost for this PlatformPost */
-    const { content } = await this.platforms.convertToGeneric(platformPost);
+    const genericPostData = await this.platforms.convertToGeneric(platformPost);
 
     /** user_id might be defined or the intended one */
     const user_id = platformPost.posted
@@ -89,9 +89,9 @@ export class PostsProcessing {
     /** create AppPost */
     const post = await this.createAppPost(
       {
+        ...genericPostData,
         origin: platformPost.platformId,
         authorId: getPrefixedUserId(platformPost.platformId, user_id),
-        content,
         mirrorsIds: [platformPostCreated.id],
         createdAtMs: platformPost.posted?.timestampMs || this.time.now(),
       },

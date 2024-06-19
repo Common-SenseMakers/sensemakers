@@ -8,6 +8,7 @@ import {
   AppPostParsingStatus,
   AppPostRepublishedStatus,
   AppPostReviewStatus,
+  GenericThread,
 } from '../../src/@shared/types/types.posts';
 import { PLATFORM } from '../../src/@shared/types/types.user';
 import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
@@ -15,11 +16,18 @@ import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.
 export const getMockPost = (refPost: Partial<AppPostFull>) => {
   const authorId = refPost.authorId || 'test-author-id';
   const createdAtMs = refPost.createdAtMs || Date.now();
+
+  const defaultThread: GenericThread['thread'] = [
+    {
+      content: 'test content',
+    },
+  ];
+
   const post: AppPostFull = {
     id: refPost.id || 'post-id',
     createdAtMs: createdAtMs,
     authorId: authorId,
-    content: refPost.content || 'test content',
+    thread: refPost.thread || defaultThread,
     semantics: refPost.semantics || '',
     origin: PLATFORM.Twitter,
     parsedStatus: AppPostParsedStatus.PROCESSED,

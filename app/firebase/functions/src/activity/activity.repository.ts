@@ -7,7 +7,7 @@ import { BaseRepository } from '../db/repo.base';
 
 export class ActivityRepository extends BaseRepository<
   ActivityEventBase<any>,
-  ActivityEventCreate
+  ActivityEventCreate<any>
 > {
   constructor(protected db: DBInstance) {
     super(db.collections.activity);

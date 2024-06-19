@@ -2,8 +2,10 @@ import {
   ALL_PUBLISH_PLATFORMS,
   AppUser,
   AppUserCreate,
+  AutopostOption,
   DefinedIfTrue,
   IDENTITY_PLATFORMS,
+  PLATFORM,
   PUBLISHABLE_PLATFORMS,
   UserDetailsBase,
 } from '../@shared/types/types.user';
@@ -77,5 +79,19 @@ export class UsersHelper {
     });
 
     return allAccounts;
+  }
+
+  static autopostPlatformIds(user: AppUser): PLATFORM[] {
+    const platformIds = (
+      Object.keys(user.settings.autopost) as PLATFORM[]
+    ).filter((platformId: PLATFORM) => {
+      if (platformId !== PLATFORM.Nanopub) {
+        throw new Error('Only autopost to nanopub is suported for now');
+      }
+
+      return user.settings.autopost[platformId].value !== AutopostOption.MANUAL;
+    });
+
+    return platformIds;
   }
 }

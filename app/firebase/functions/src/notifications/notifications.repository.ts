@@ -11,16 +11,24 @@ import { TransactionManager } from '../db/transaction.manager';
 export class NotificationsRepository {
   constructor(protected db: DBInstance) {}
 
+  private getBaseRepo(userId: string) {
+    return new BaseRepository<Notification, NotificationCreate>(
+      this.db.collections.userNotifications(userId)
+    );
+  }
+
+  public create(notification: NotificationCreate, manager: TransactionManager) {
+    const repo = this.getBaseRepo(notification.userId);
+    return repo.create(notification, manager);
+  }
+
   public async get<T extends boolean, R = Notification>(
     userId: string,
     notificationId: string,
     manager: TransactionManager,
     shouldThrow?: T
   ): Promise<DefinedIfTrue<T, R>> {
-    const repo = new BaseRepository<Notification, NotificationCreate>(
-      this.db.collections.userNotifications(userId)
-    );
-
+    const repo = this.getBaseRepo(userId);
     return repo.get(notificationId, manager, shouldThrow);
   }
 

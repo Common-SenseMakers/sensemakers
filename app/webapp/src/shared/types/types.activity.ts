@@ -10,6 +10,5 @@ export interface ActivityEventBase<D = any> {
   data: D;
 }
 
-export type ActivityEventCreate = Omit<ActivityEventBase<any>, 'id'>;
-
-export type ParsedPostActivity = ActivityEventBase<{ postId: string }>;
+export type PostActData = { postId: string };
+export type ActivityEventCreate<D> = Omit<ActivityEventBase<D>, 'id'>;

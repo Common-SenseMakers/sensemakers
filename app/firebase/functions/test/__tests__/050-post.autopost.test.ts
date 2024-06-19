@@ -6,6 +6,7 @@ import {
   PlatformPostPublishStatus,
 } from '../../src/@shared/types/types.platform.posts';
 import {
+  AppPost,
   AppPostParsedStatus,
   AppPostParsingStatus,
   AppPostRepublishedStatus,
@@ -18,7 +19,6 @@ import {
 } from '../../src/@shared/types/types.user';
 import { USE_REAL_NOTIFICATIONS } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
-import { triggerSendNotifications } from '../../src/notifications/notification.task';
 import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { postUpdatedHook } from '../../src/posts/hooks/post.updated.hook';
@@ -154,7 +154,7 @@ describe('050-autopost', () => {
       }
 
       /** simulate the cron JOB
-       * it wont trigger tasks
+       * it will trigger parse tasks for each fetched post
        * it will fetch the tweet and create a new AppPost */
       await triggerAutofetchPosts();
 
@@ -162,28 +162,12 @@ describe('050-autopost', () => {
       const postsRead = await services.postsManager.getOfUser(user.userId);
       expect(postsRead).to.have.length(2);
 
-      const postOfThread0 = postsRead.find(
+      const postOfThread1 = postsRead.find(
         (p) => p.origin === PLATFORM.Twitter
       );
-      if (!postOfThread0) {
+      if (!postOfThread1) {
         throw new Error('postOfThread not created');
       }
-
-      expect(postOfThread0.semantics).to.be.undefined;
-      expect(postOfThread0.originalParsed).to.be.undefined;
-      expect(postOfThread0.mirrors).to.have.length(1);
-      expect(postOfThread0.parsingStatus).to.eq(AppPostParsingStatus.IDLE);
-      expect(postOfThread0.parsedStatus).to.eq(AppPostParsedStatus.UNPROCESSED);
-      expect(postOfThread0.republishedStatus).to.eq(
-        AppPostRepublishedStatus.PENDING
-      );
-
-      /** simulate postUpdatedHook (should parse the post )*/
-      await postUpdatedHook(postOfThread0.id);
-      const postOfThread1 = await services.postsManager.getPost(
-        postOfThread0.id,
-        true
-      );
 
       expect(postOfThread1.semantics).to.not.be.undefined;
       expect(postOfThread1.originalParsed).to.not.be.undefined;
@@ -195,9 +179,9 @@ describe('050-autopost', () => {
       );
 
       /** simulate postUpdatedHook (should autopost the post )*/
-      await postUpdatedHook(postOfThread0.id);
+      await postUpdatedHook(postOfThread1.id);
       const postOfThread2 = await services.postsManager.getPost(
-        postOfThread0.id,
+        postOfThread1.id,
         true
       );
 
@@ -207,7 +191,7 @@ describe('050-autopost', () => {
       expect(postOfThread2.parsingStatus).to.eq(AppPostParsingStatus.IDLE);
       expect(postOfThread2.parsedStatus).to.eq(AppPostParsedStatus.PROCESSED);
       expect(postOfThread2.republishedStatus).to.eq(
-        AppPostRepublishedStatus.REPUBLISHED
+        AppPostRepublishedStatus.AUTO_REPUBLISHED
       );
 
       const nanopub = postOfThread2?.mirrors.find(

@@ -1,6 +1,7 @@
 import { ActivityType } from '../@shared/types/types.activity';
 import {
   NOTIFICATION_FREQUENCY,
+  NotificationCreate,
   NotificationFull,
   PostParsedNotification,
 } from '../@shared/types/types.notifications';
@@ -9,6 +10,7 @@ import { AutopostOption } from '../@shared/types/types.user';
 import { ActivityRepository } from '../activity/activity.repository';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
+import { PostsHelper } from '../posts/posts.helper';
 import { PostsRepository } from '../posts/posts.repository';
 import { UsersRepository } from '../users/users.repository';
 import { getPostUrl } from './notification.utils';
@@ -27,6 +29,13 @@ export class NotificationService {
     public activityRepo: ActivityRepository,
     public usersRepo: UsersRepository
   ) {}
+
+  createNotification(
+    notification: NotificationCreate,
+    manager: TransactionManager
+  ) {
+    return this.notificationsRepo.create(notification, manager);
+  }
 
   async getFull(
     userId: string,
@@ -110,8 +119,10 @@ export class NotificationService {
         true
       );
 
+      const postText = PostsHelper.concatenateThread(post);
+
       return {
-        content: post.content,
+        content: postText,
         url: getPostUrl(post.id),
       };
     } else {

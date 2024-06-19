@@ -37,10 +37,12 @@ import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
 import { ParserService } from '../parser/parser.service';
 import { PlatformsService } from '../platforms/platforms.service';
+import { enqueueTask } from '../tasks.support';
 import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { getUsernameTag } from '../users/users.utils';
 import { PostsProcessing } from './posts.processing';
+import { AUTOPOST_POST_TASK } from './tasks/posts.autopost.task';
 
 const DEBUG = true;
 
@@ -423,7 +425,7 @@ export class PostsManager {
     if (DEBUG) logger.debug(`parsePost - start ${postId}`, { postId, post });
 
     const params: ParsePostRequest<TopicsParams> = {
-      post: { content: post.content },
+      post: genericPost,
       parameters: {
         [PARSER_MODE.TOPICS]: { topics: ['science', 'technology'] },
       },
@@ -452,7 +454,18 @@ export class PostsManager {
 
     if (DEBUG) logger.debug(`parsePost - done ${postId}`, { postId, update });
 
+    /** store the semantics and mark as processed */
     await this.updatePost(post.id, update, manager);
+
+    /** trigger autopost task if author has autopost configured  */
+    const author = await this.users.repo.getUser(post.authorId, manager, true);
+    const autopostOnPlatforms = UsersHelper.autopostPlatformIds(author);
+    if (autopostOnPlatforms.length > 0) {
+      await enqueueTask(AUTOPOST_POST_TASK, {
+        postId,
+        platformIds: autopostOnPlatforms,
+      });
+    }
   }
 
   /** single place to update a post (it updates the drafts if necessary) */
@@ -528,7 +541,7 @@ export class PostsManager {
 
       /** set review status */
       const reviewedStatus =
-        existingPost.republishedStatus === AppPostRepublishedStatus.REPUBLISHED
+        existingPost.republishedStatus !== AppPostRepublishedStatus.PENDING
           ? AppPostReviewStatus.UPDATED
           : AppPostReviewStatus.APPROVED;
 

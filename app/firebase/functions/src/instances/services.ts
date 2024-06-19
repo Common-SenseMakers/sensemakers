@@ -1,5 +1,6 @@
 import { PLATFORM } from '../@shared/types/types.user';
 import { ActivityRepository } from '../activity/activity.repository';
+import { ActivityService } from '../activity/activity.service';
 import {
   FUNCTIONS_PY_URL,
   NANOPUBS_PUBLISH_SERVERS,
@@ -47,6 +48,7 @@ export interface Services {
   time: TimeService;
   db: DBInstance;
   notifications: NotificationService;
+  activity: ActivityService;
 }
 
 export const createServices = () => {
@@ -132,12 +134,16 @@ export const createServices = () => {
     parser
   );
 
+  /** activity service */
+  const activity = new ActivityService(activityRepo);
+
   /** notification service */
   const _notifications = new NotificationService(
     db,
     notificationsRepo,
     postsRepo,
-    activityRepo
+    activityRepo,
+    userRepo
   );
   const notifications = getNotificationsMock(
     _notifications,
@@ -152,6 +158,7 @@ export const createServices = () => {
     time,
     db,
     notifications,
+    activity,
   };
 
   return services;

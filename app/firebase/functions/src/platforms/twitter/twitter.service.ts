@@ -1,8 +1,7 @@
 import {
-  TTweetv2TweetField,
-  TweetV2,
   TweetV2UserTimelineParams,
   Tweetv2FieldsParams,
+  UserV2,
 } from 'twitter-api-v2';
 
 import {
@@ -21,10 +20,13 @@ import {
 } from '../../@shared/types/types.platform.posts';
 import '../../@shared/types/types.posts';
 import {
-  GenericPostData,
+  GenericAuthor,
+  GenericPost,
+  GenericThread,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
 import {
+  AppTweet,
   TwitterDraft,
   TwitterSignupContext,
   TwitterSignupData,
@@ -42,10 +44,15 @@ import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
 import { UsersRepository } from '../../users/users.repository';
 import { PlatformService } from '../platforms.interface';
+import { expansions, tweetFields } from './twitter.config';
 import { TwitterServiceClient } from './twitter.service.client';
 import {
+  convertToAppTweetBase,
+  convertToAppTweets,
+  convertTweetsToThreads,
   dateStrToTimestampMs,
   getTweetTextWithUrls,
+  getTweetUrl,
   handleTwitterError,
 } from './twitter.utils';
 
@@ -96,15 +103,6 @@ export class TwitterService
         manager
       );
 
-      const tweetFields: TTweetv2TweetField[] = [
-        'created_at',
-        'author_id',
-        'text',
-        'entities',
-        'note_tweet',
-        'conversation_id',
-      ];
-
       /**
        * TODO: because we are fetching 30 tweets per page, we
        * can easily end up with more threads than the requested expectedResults
@@ -115,12 +113,15 @@ export class TwitterService
         since_id: params.since_id,
         until_id: params.until_id,
         max_results: 30,
+        expansions,
         'tweet.fields': tweetFields,
         exclude: ['retweets', 'replies'],
       };
 
       let nextToken: string | undefined = undefined;
-      const tweetThreadsMap = new Map<string, TweetV2[]>();
+      let originalAuthor: UserV2 | undefined = undefined;
+      let allTweets: AppTweet[] = [];
+      let conversationIds: Set<string> = new Set();
 
       do {
         const timelineParams = _timelineParams;
@@ -133,61 +134,50 @@ export class TwitterService
             userDetails.user_id,
             timelineParams
           );
-
-          if (result.data.data) {
-            /** organize tweets by conversation id to group them into threads */
-            result.data.data.forEach((tweet) => {
-              if (tweet.conversation_id) {
-                if (!tweetThreadsMap.has(tweet.conversation_id)) {
-                  tweetThreadsMap.set(tweet.conversation_id, []);
-                }
-                tweetThreadsMap.get(tweet.conversation_id)?.push(tweet);
-              } else {
-                throw new Error('tweet does not have a conversation_id');
-              }
-            });
+          const appTweets = convertToAppTweets(
+            result.data.data,
+            result.data.includes
+          );
+          /** keep track of the number of threads */
+          appTweets.forEach((tweet) => {
+            if (tweet.conversation_id) {
+              conversationIds.add(tweet.conversation_id);
+            } else {
+              throw new Error('tweet does not have a conversation_id');
+            }
+          });
+          if (!originalAuthor) {
+            originalAuthor = result.data.includes?.users?.find(
+              (user) => user.id === userDetails.user_id
+            );
           }
+          allTweets.push(...appTweets);
 
           nextToken = result.meta.next_token;
         } catch (e: any) {
           if (e.rateLimit) {
             /** if we hit the rate limit after haven gotten some tweets, return what we got so far  */
-            if (tweetThreadsMap.size > 0) {
+            if (conversationIds.size > 0) {
               break;
             } else {
               /** otherwise throw */
               throw new Error(e);
             }
+          } else {
+            throw new Error(handleTwitterError(e));
           }
         }
 
-        if (tweetThreadsMap.size >= expectedAmount + 1) {
+        if (conversationIds.size >= expectedAmount + 1) {
           break;
         }
       } while (nextToken !== undefined);
 
-      /** the last conversation may be truncated. Discard it */
-      const tweetsArrays = Array.from(tweetThreadsMap.values());
-      /** sort threads */
-      tweetsArrays.sort(
-        (tA, tB) =>
-          Number(tB[0].conversation_id) - Number(tA[0].conversation_id)
-      );
-      /** discard last thread if read many threads. It could had been truncated */
-      // TODO: what if we only read one thread? is this an error?
+      if (!originalAuthor) {
+        throw new Error(`Unexpected originalAuthor undefined`);
+      }
 
-      /** sort tweets inside each thread, and compose the TwitterThread[] array */
-      const threads = tweetsArrays.map((thread): TwitterThread => {
-        const tweets = thread.sort(
-          (tweetA, tweetB) => Number(tweetA.id) - Number(tweetB.id)
-        );
-        return {
-          conversation_id: tweets[0].conversation_id as string,
-          tweets,
-        };
-      });
-
-      return threads;
+      return convertTweetsToThreads(allTweets, originalAuthor);
     } catch (e: any) {
       throw new Error(handleTwitterError(e));
     }
@@ -236,18 +226,50 @@ export class TwitterService
 
   public async convertToGeneric(
     platformPost: PlatformPostCreate<TwitterThread>
-  ): Promise<GenericPostData> {
+  ): Promise<GenericThread> {
     if (!platformPost.posted) {
       throw new Error('Unexpected undefined posted');
     }
-    const thread = platformPost.posted.post;
-    /** concatenate all tweets in thread into one app post */
-    const threadText = thread.tweets.map(getTweetTextWithUrls).join('\n---\n');
+
+    const twitterThread = platformPost.posted.post;
+    const genericAuthor: GenericAuthor = {
+      ...twitterThread.author,
+      platformId: PLATFORM.Twitter,
+    };
+
+    const genericThread: GenericPost[] = twitterThread.tweets.map((tweet) => {
+      const genericPost: GenericPost = {
+        url: getTweetUrl(twitterThread.author.username, tweet.id),
+        content: tweet.text,
+      };
+
+      if (tweet.quoted_tweet) {
+        // TODO: read the whole quoted thread
+        genericPost.quotedThread = {
+          author: {
+            ...tweet.quoted_tweet.author,
+            platformId: PLATFORM.Twitter,
+          },
+          thread: [
+            {
+              content: getTweetTextWithUrls(tweet.quoted_tweet),
+              url: getTweetUrl(
+                tweet.quoted_tweet.author.username,
+                tweet.quoted_tweet.id
+              ),
+            },
+          ],
+        };
+      }
+
+      return genericPost;
+    });
+
     return {
-      content: threadText,
+      author: genericAuthor,
+      thread: genericThread,
     };
   }
-
   /** if user_id is provided it must be from the authenticated userId */
   public async getPost(
     tweetId: string,
@@ -255,7 +277,8 @@ export class TwitterService
     user_id?: string
   ) {
     const options: Partial<Tweetv2FieldsParams> = {
-      'tweet.fields': ['author_id', 'created_at', 'conversation_id'],
+      'tweet.fields': tweetFields,
+      expansions,
     };
 
     const client = user_id
@@ -263,6 +286,24 @@ export class TwitterService
       : this.getGenericClient();
 
     return client.v2.singleTweet(tweetId, options);
+  }
+
+  /** if user_id is provided it must be from the authenticated userId */
+  public async getPosts(
+    tweetIds: string[],
+    manager: TransactionManager,
+    user_id?: string
+  ) {
+    const options: Partial<Tweetv2FieldsParams> = {
+      'tweet.fields': tweetFields,
+      expansions,
+    };
+
+    const client = user_id
+      ? await this.getUserClient(user_id, 'read', manager)
+      : this.getGenericClient();
+
+    return client.v2.tweets(tweetIds, options);
   }
 
   /** user_id must be from the authenticated userId */
@@ -302,10 +343,16 @@ export class TwitterService
           `Unexpected created_at undefined, how would we know the timestamp then? )`
         );
       }
-
+      const author = tweet.includes?.users?.find(
+        (user) => user.id === tweet.data.author_id
+      );
+      if (!author) {
+        throw new Error(`Unexpected tweet does not match author`);
+      }
       const thread: TwitterThread = {
         conversation_id: tweet.data.conversation_id,
-        tweets: [tweet.data],
+        tweets: [convertToAppTweetBase(tweet.data)],
+        author,
       };
 
       return {
