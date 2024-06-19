@@ -4,6 +4,7 @@ import ast
 import re
 import pandas as pd
 import numpy as np
+from collections import Counter
 import concurrent.futures
 from tqdm import tqdm
 from sklearn.preprocessing import MultiLabelBinarizer
@@ -133,3 +134,20 @@ def create_custom_confusion_matrix(y_true, y_pred, labels):
                 matrix[i, j] = np.sum(fn_i & fp_j)
 
     return pd.DataFrame(matrix, index=labels, columns=labels)
+
+
+
+def autopct_format(pct, total_counts):
+    total = sum(total_counts)
+    count = int(round(pct * total / 100.0))
+    return f'{pct:.1f}% ({count})'
+
+def projection_to_list(list2):
+    def project_to_list(list1):
+        #return list(set(list1) & set(list2))
+        return [item for item in list1 if item in list2]
+    return project_to_list
+
+def flatten_list(lis:list):
+    return [item for sublist in lis for item in sublist]
+

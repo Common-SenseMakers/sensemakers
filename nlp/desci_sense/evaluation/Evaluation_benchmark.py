@@ -39,7 +39,7 @@ sys.path.append(str(Path(__file__).parents[2]))
 
 from desci_sense.evaluation.utils import (
     get_dataset, create_custom_confusion_matrix, posts_to_refPosts, obj_str_to_dict, autopct_format,
-    projection_to_list
+    projection_to_list, flatten_list
 )
 from desci_sense.shared_functions.parsers.multi_chain_parser import MultiChainParser
 from desci_sense.shared_functions.init import init_multi_chain_parser_config
@@ -154,13 +154,13 @@ class Evaluation:
         tp = df_feed_eval["TP"].sum()
         r_topics = self.topic_eval(df=df, tp=tp)
         average_row.extend([tp, df_feed_eval["FN"].sum(), df_feed_eval["posts count"].sum(), r_topics])
-        new_row = ["Average", "", ""] + average_row
+        new_row = ["Average", "", ""] + average_row 
         new_row = pd.DataFrame([new_row], columns=['username', 'server', 'info', 'precision', 'recall', 'f1_score', 'accuracy', 'TP', 'FN', 'posts count', 'citoid positive ratio'])
         return df_feed_eval._append(new_row, ignore_index=True)
     
     # Zotero Item type analysis
     def count_zotero_types(self,df : pd.DataFrame):
-        counts_df = df["Ref item types"].apply(Counter).apply(pd.Series).fillna(0).astype(int)
+        counts_df = df["Ref item types"].apply(flatten_list).apply(Counter).apply(pd.Series).fillna(0).astype(int)
         total_row = counts_df.sum()
         total_row.name = 'Total'
 
@@ -170,16 +170,17 @@ class Evaluation:
             "thesis", "presentation", "conferencePaper", "report"
         ]):
         # Apply the check_topic method to each row and create a boolean mask
-        mask = df['Ref item types'].apply(lambda x: self.check_topic([item for item in x]) == 1)
+        #mask = df['Ref item types'].apply(flatten_list).apply(lambda x: self.check_topic([item for item in x]) == 1)
 
         # Filter the DataFrame using the mask
-        filtered_df = df[mask]
+        #filtered_df = df[mask]
 
         project_to_allowlist = projection_to_list(allow_list)
-
+        #This is not good yet TODO, it will count each item only once
         #filtered_df['Ref item types'] = [project_to_allowlist(x) for x in filtered_df["Ref item types"]]
         # Count items in the filtered DataFrame
-        counts_df = filtered_df["Ref item types"].apply(project_to_allowlist).apply(Counter).apply(pd.Series).fillna(0).astype(int)
+        #counts_df = filtered_df["Ref item types"].apply(flatten_list).apply(project_to_allowlist).apply(Counter).apply(pd.Series).fillna(0).astype(int)
+        counts_df = df["Ref item types"].apply(flatten_list).apply(project_to_allowlist).apply(Counter).apply(pd.Series).fillna(0).astype(int)
         total_row = counts_df.sum()
         #total_row.name = 'Total'
         return total_row
@@ -226,11 +227,10 @@ class TwitterEval(Evaluation):
         print("post urls",result.reference_urls)
         print("Item types: ",result.item_types)
         
-        item_types = None  
+        item_types = result.item_types 
 
         if self.check_topic(result.item_types):
             print("Yay, citoid found topic")
-            item_types = result.item_types
             ind = 1
         else:
             quotes = self.check_quotes(result.reference_urls)
@@ -261,14 +261,16 @@ class TwitterEval(Evaluation):
 
     def feed_tweet_type_statistics(self, df, name):
         df1 = df[df["username"] == name]
-        inputs = Eval.prepare_parser_input(df1)
+        inputs = self.prepare_parser_input(df1)
         post_count=len(inputs)
-        results = Eval.nested_quotes_citoid_parallel(inputs)
+        results = self.nested_quotes_citoid_parallel(inputs)
         citoid_count = 0
         quotes_count = 0
         quoted_citoid_count = 0
+        item_type_list = []
         for ind, steps, item_type in results:
             citoid_count = citoid_count +ind
+            item_type_list.append(item_type)
             if steps:
                 quoted_citoid_count = quoted_citoid_count + ind
                 quotes_count = quotes_count + 1
@@ -279,13 +281,13 @@ class TwitterEval(Evaluation):
             quotes_ratio = -1
             citoid_ratio = -1
         
-        return citoid_count, quoted_citoid_count, quotes_count, post_count, quotes_ratio, citoid_ratio
+        return citoid_count, quoted_citoid_count, quotes_count, post_count, quotes_ratio, citoid_ratio, item_type_list
 
     def build_post_type_chart(self,df_handles:pd.DataFrame,df:pd.DataFrame):
         df_feed_eval = df_handles[["username", "server", "info"]].copy()
         for column in ["citoid_count", "quoted_citoid_count", "quotes_count","post_count","quotes_ratio","citoid_ratio"]:
             df_feed_eval[column] = 0
-            df_feed_eval[["citoid_count", "quoted_citoid_count", "quotes_count","post_count","quotes_ratio","citoid_ratio"]] = df_feed_eval.apply(
+            df_feed_eval[["citoid_count", "quoted_citoid_count", "quotes_count","post_count","quotes_ratio","citoid_ratio","Ref item types"]] = df_feed_eval.apply(
             lambda row: pd.Series(self.feed_tweet_type_statistics(df=df, name=row["username"])), axis=1)
         #"Total" row
         post_count = df_feed_eval["post_count"].sum()
@@ -297,8 +299,8 @@ class TwitterEval(Evaluation):
         else:
             quotes_ratio = -1
             citoid_ratio = -1
-        new_row = ["Summery","","",citoid_count,df_feed_eval["quoted_citoid_count"].sum(),quotes_count,post_count,quotes_ratio,citoid_ratio]
-        new_row = pd.DataFrame([new_row], columns=['username', 'server', 'info', "citoid_count", "quoted_citoid_count", "quotes_count","post_count","quotes_ratio","citoid_ratio"])
+        new_row = ["Summery","","",citoid_count,df_feed_eval["quoted_citoid_count"].sum(),quotes_count,post_count,quotes_ratio,citoid_ratio,[]]
+        new_row = pd.DataFrame([new_row], columns=['username', 'server', 'info', "citoid_count", "quoted_citoid_count", "quotes_count","post_count","quotes_ratio","citoid_ratio","Ref item types"])
         return df_feed_eval._append(new_row, ignore_index=True)
 
 
@@ -367,19 +369,19 @@ if __name__ == "__main__":
     table_path = Path(f"{a_path}/handles_chart.table.json")
 
     df_handles = get_dataset(table_path)
-    #df_eval = Eval.build_post_type_chart(df_handles=df_handles,df=df)
+    df_eval = Eval.build_post_type_chart(df_handles=df_handles,df=df)
+    fig1, fig2 = Eval.build_item_type_pie(df=df_eval)
+    wandb.log({"Quote statistics per feed": wandb.Table(dataframe=df_eval)})
+   #print(df['Ref item types'])
+    #fig1, fig2 = Eval.build_item_type_pie(df=df)
 
-    #wandb.log({"Quote statistics per feed": wandb.Table(dataframe=df_eval)})
-    print(df['Ref item types'])
-    fig1, fig2 = Eval.build_item_type_pie(df=df)
+    wandb.log({"item_type_distribution": wandb.Image(fig1)})
 
-    #wandb.log({"item_type_distribution": wandb.Image(fig1)})
+    wandb.log({"research_item_type_distribution": wandb.Image(fig2)})
 
-    #wandb.log({"research_item_type_distribution": wandb.Image(fig2)})
+    #true_df = df[df["True Label"] == 'research']
 
-    true_df = df[df["True Label"] == 'research']
-
-    fig1 , fig2 = Eval.build_item_type_pie(true_df)
+    #fig1 , fig2 = Eval.build_item_type_pie(true_df)
     #wandb.log({"research_type_distribution": wandb.Image(fig)})
     config = obj_str_to_dict(config)
 
