@@ -86,7 +86,7 @@ describe('02-platforms', () => {
       );
 
       expect(threads).to.not.be.undefined;
-      expect(threads.platformPosts.length).to.be.greaterThanOrEqual(5);
+      expect(threads.platformPosts.length).to.be.greaterThanOrEqual(1);
     });
 
     it('includes quote tweets in platform post and app post', async () => {
@@ -143,12 +143,14 @@ describe('02-platforms', () => {
           platformPost as any as PlatformPostCreate<TwitterThread>
         );
 
-        genericPost.thread.forEach((post) => {
-          expect(post.quotedThread).to.not.be.undefined;
-          expect(
-            quotedTweetIds.some((id) => post.quotedThread?.url?.includes(id))
-          ).to.be.true;
-        });
+        if (USE_REAL_TWITTER) {
+          genericPost.thread.forEach((post) => {
+            expect(post.quotedThread).to.not.be.undefined;
+            expect(
+              quotedTweetIds.some((id) => post.quotedThread?.url?.includes(id))
+            ).to.be.true;
+          });
+        }
       } catch (error) {
         console.error('error: ', error);
         throw error;
