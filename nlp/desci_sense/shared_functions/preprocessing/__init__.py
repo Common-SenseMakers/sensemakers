@@ -1,10 +1,9 @@
 from typing import Optional, List, Dict, TypedDict, Union, Any
-from pydantic import (
-    BaseModel,
-    Field,
-)
 
-from ..interface import ParsePostRequest, ThreadPostInterface
+# important to use this and not pydantic BaseModel https://medium.com/codex/migrating-to-pydantic-v2-5a4b864621c3
+from langchain.pydantic_v1 import Field, BaseModel
+
+from ..interface import ParsePostRequest, ThreadInterface
 from ..schema.post import ThreadRefPost, RefPost, QuoteRefPost
 from ..utils import (
     remove_dups_ordered,
@@ -12,10 +11,41 @@ from ..utils import (
     extract_and_expand_urls,
     extract_external_urls_from_status_tweet,
 )
+from .threads import create_thread_from_posts, trim_thread
+
+
+# class StreamlitParseRequest(BaseModel):
+#     """
+#     Format of request made by streamlit demo to parser.
+#     """
+
+#     post: QuoteRefPost
+
+
+class ParserInput(BaseModel):
+    """
+    Format of input for processing by parser.
+    """
+
+    thread_post: ThreadRefPost = Field(description="Target thread to parse")
+    max_posts: Optional[int] = Field(
+        description="Maximum number of posts in the thread to process.",
+        default=10,
+    )
+
+
+# def convert_st_request_to_parser_input(
+#     st_request: StreamlitParseRequest,
+# ) -> ParserInput:
+#     """
+#     Convert StreamlitParseRequest to ParserInput
+#     """
+#     thread = create_thread_from_posts([st_request.post])
+#     return thread
 
 
 def convert_thread_interface_to_ref_post(
-    thread_interface: ThreadPostInterface,
+    thread_interface: ThreadInterface,
 ) -> ThreadRefPost:
     """_summary_
 
@@ -73,7 +103,7 @@ def convert_thread_interface_to_ref_post(
     return thread_ref_post
 
 
-class PreprocParsePostRequest(BaseModel):
+class PreprocParserInput(BaseModel):
     post_to_parse: ThreadRefPost = Field(
         description="Post in input format for parser after preprocessing"
     )
@@ -82,20 +112,46 @@ class PreprocParsePostRequest(BaseModel):
     )
 
 
-def preproc_parse_post_request(
-    parse_request: ParsePostRequest,
-    max_posts: int = 10,
-) -> PreprocParsePostRequest:
-    """
-    Prepare an app post request for input to the parser.
-    Includes trimming long threads while preserving all reference urls.
+def preproc_parser_input(parser_input: ParserInput) -> PreprocParserInput:
+    """_summary_
 
     Args:
-        parse_request (ParsePostRequest): input request from app
-        max_posts (int): max number of posts in thread to parse
+        parser_input (ParserInput): _description_
 
     Returns:
-        PreprocParsePostRequest: Prepared input for parser
+        PreprocParserInput: _description_
     """
+    orig_thread = parser_input.thread_post
+    new_thread = trim_thread(orig_thread, parser_input.max_posts)
 
-    # trim thread to `max_post` length
+    # get reference urls from trimmed posts
+    excluded_urls = []
+    excluded_posts = orig_thread.posts[parser_input.max_posts :]
+    for p in excluded_posts:
+        excluded_urls += p.md_ref_urls()
+
+    preprocessed_input = PreprocParserInput(
+        post_to_parse=new_thread,
+        unparsed_urls=excluded_urls,
+    )
+
+    return preprocessed_input
+
+
+# def preproc_parse_post_request(
+#     parse_request: ParsePostRequest,
+#     max_posts: int = 10,
+# ) -> PreprocParsePostRequest:
+#     """
+#     Prepare an app post request for input to the parser.
+#     Includes trimming long threads while preserving all reference urls.
+
+#     Args:
+#         parse_request (ParsePostRequest): input request from app
+#         max_posts (int): max number of posts in thread to parse
+
+#     Returns:
+#         PreprocParsePostRequest: Prepared input for parser
+#     """
+
+# trim thread to `max_post` length

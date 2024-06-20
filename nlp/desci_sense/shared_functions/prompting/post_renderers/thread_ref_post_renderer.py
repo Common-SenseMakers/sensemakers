@@ -1,10 +1,11 @@
 from typing import List, Optional
 from .post_renderer import PostRenderer
 from . import render_metadata
+from .quote_ref_post_renderer import render_quote_post_content
 from ...web_extractors.metadata_extractors import (
     RefMetadata,
 )
-from ...schema.post import RefPost, QuoteRefPost
+from ...schema.post import RefPost, QuoteRefPost, ThreadRefPost
 from .templates.quote_ref_post_template import quote_ref_post_template
 
 ZERO_REF_INSTRUCTIONS = """"""
@@ -20,64 +21,25 @@ Quote posts are a special kind of reference, where the post quotes another post.
 """
 
 
-def render_quote_post_content(
-    post: QuoteRefPost,
-    ordered_refs: Optional[List[str]] = None,
+def render_thread_content(
+    thread: ThreadRefPost,
 ) -> str:
-    """_summary_
+    thread_posts = thread.posts
+    ordered_refs = thread.md_ref_urls()
 
-    Args:
-        post (QuoteRefPost): _description_
-        ordered_urls (Optional[List[str]]): _description_
+    rendered = []
+    for quote_post in thread_posts:
+        rendered.append(
+            render_quote_post_content(quote_post, ordered_refs=ordered_refs)
+        )
 
-    Returns:
-        str: _description_
-    """
+    # add line breaks
+    rendered_str = "\n---\n".join(rendered)
 
-    refs_to_process = post.md_ref_urls()
-
-    if not ordered_refs:
-        # if no external ordering provided, use post ref ordering by defualt
-        ordered_refs = post.md_ref_urls()
-
-    processed_content = post.content
-
-    if post.quoted_url:
-        # add quoted post url to end of quote post content if not present there
-        if post.quoted_url not in processed_content:
-            processed_content += f" {post.quoted_url}"
-
-        # if quoted post content available, add it
-        if post.has_quote_post:
-            quoted_post = post.quoted_post
-
-            # get order of appearance for quoted post url (1-indexed)
-            quoted_url_idx = ordered_refs.index(post.quoted_url) + 1
-
-            rendered_quoted_post = (
-                f"<quoted ref_{quoted_url_idx}>{quoted_post.content}</quote>"
-            )
-
-            # replace quoted post url with rendered version
-            processed_content = processed_content.replace(
-                post.quoted_url, rendered_quoted_post
-            )
-
-            # remove quoted post url from list to process
-            refs_to_process.remove(post.quoted_url)
-
-    # replace other urls with <ref> tokens
-    for url in refs_to_process:
-        # 1-indexed
-        url_idx = ordered_refs.index(url) + 1
-
-        ref_token = f"<ref_{url_idx}>"
-        processed_content = processed_content.replace(url, ref_token)
-
-    return processed_content
+    return rendered_str
 
 
-class QuoteRefPostRenderer(PostRenderer):
+class ThreadRefPostRenderer(PostRenderer):
     def __init__(self):
         self._j2_template = quote_ref_post_template
 
@@ -97,25 +59,24 @@ class QuoteRefPostRenderer(PostRenderer):
 
     def render(
         self,
-        post: QuoteRefPost,
+        thread: ThreadRefPost,
         metadata_list: List[RefMetadata],
         show_author: bool = True,
     ) -> str:
         if show_author:
-            author_name = post.author
+            author_name = thread.author
         else:
             author_name = None
 
-        ordered_refs = post.md_ref_urls()
+        ordered_refs = thread.md_ref_urls()
 
         # create mapping by url -> metadata
         md_dict = {md.url: md for md in metadata_list}
 
-        rendered_content = render_quote_post_content(post)
+        processed_content = render_thread_content(thread)
 
         # render metadata
         rendered_metadata = None
-
         ordered_md_list = []
         for url in ordered_refs:
             ordered_md_list.append(md_dict.get(url))
@@ -124,7 +85,7 @@ class QuoteRefPostRenderer(PostRenderer):
 
         rendered_post = self._j2_template.render(
             author_name=author_name,
-            content=rendered_content,
+            content=processed_content,
             rendered_metadata=rendered_metadata,
         )
 

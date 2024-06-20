@@ -256,24 +256,31 @@ class Author(BaseModel):
     platformId: SocialPlatformType = Field(description="Name of platform")
 
 
-class BasicPostInterface(BaseModel):
-    url: str = Field(description="Post url")
+# class AppPostContent(BaseModel):
+
+
+class AppPost(BaseModel):
     author: Author = Field(description="Post author")
     content: str = Field(description="Post content")
+    url: Optional[str] = Field(description="Post url", default=None)
+
+
+class QuoteAppPost(AppPost):
+    quotedPosts: List[AppPost] = Field(description="List of posts quoted in this post")
 
     @property
     def source_network(self) -> SocialPlatformType:
         return self.author.platformId
 
 
-class ThreadPostInterface(BasicPostInterface):
+class ThreadInterface(BaseModel):
     """
     The `GenericPostData` object passed to the parser in the `ParsePostRequest`.
 
     Supports threaded posts with multiple quoted posts
     """
 
-    quotedPosts: List[BasicPostInterface] = Field(
+    quotedPosts: List[AppPost] = Field(
         description="List of quote posts quoted by this thread"
     )
 
@@ -283,7 +290,7 @@ class ParsePostRequest(BaseModel):
     The request passed to the parser by the ts app
     """
 
-    post: ThreadPostInterface = Field(description="Threaded post to be processed")
+    post: ThreadInterface = Field(description="Threaded post to be processed")
     parameters: Any = Field(
         description="Additional params for parser (not used currently)"
     )

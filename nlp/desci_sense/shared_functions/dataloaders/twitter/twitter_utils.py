@@ -5,7 +5,13 @@ import re
 import requests
 from datetime import datetime
 
-from ...utils import extract_and_expand_urls, normalize_url, extract_twitter_status_id
+from ...interface import AppPost, SocialPlatformType
+from ...utils import (
+    extract_and_expand_urls,
+    normalize_url,
+    extract_twitter_status_id,
+    remove_dups_ordered,
+)
 from ...schema.post import RefPost, QuoteRefPost
 
 # from ...utils import extract_twitter_status_id
@@ -91,6 +97,39 @@ def convert_vxtweet_to_ref_post(tweet: dict) -> RefPost:
     return post
 
 
+def convert_basic_twitter_post_to_ref_post(basic_post: AppPost) -> RefPost:
+    author = basic_post.author
+    text = basic_post.content
+    url = normalize_tweet_url(basic_post.url)
+
+    # date not currently used
+    # date = convert_twitter_time_to_datetime(tweet["date"])
+
+    # qrtURL not currently used
+    # if this is a quote tweet, record quoted tweet url
+
+    # extract external reference urls from post
+    ext_ref_urls, orig_to_normed_map = extract_external_ref_urls_from_twitter_post(
+        url,
+        text,
+    )
+
+    # replace original urls with normalized forms
+    content = text
+    for orig_url, normed_url in orig_to_normed_map.items():
+        if orig_url in content:
+            content = text.replace(orig_url, normed_url)
+
+    post = RefPost(
+        author=author,
+        content=content,
+        url=url,
+        source_network="twitter",
+        ref_urls=ext_ref_urls,
+    )
+    return post
+
+
 def convert_vxtweet_to_quote_ref_post(tweet: dict) -> QuoteRefPost:
     """
     Convert a raw twitter post (dict format) from vxtwitter API to QuoteRefPost format
@@ -166,6 +205,7 @@ def normalize_tweet_url(url):
         return url
 
 
+# TODO combine with method below
 def extract_external_ref_urls(tweet: dict, add_qrt_url: bool = True):
     """
     Extract list of non-internal URLs referenced by this tweet (in the tweet text body).
@@ -192,29 +232,59 @@ def extract_external_ref_urls(tweet: dict, add_qrt_url: bool = True):
             normed_urls += [qrt_url]
 
     # remove duplicate urls
-    expanded_urls = list(set(normed_urls))
+    expanded_urls = remove_dups_ordered(normed_urls)
 
-    external = set()
+    external = []
     for url in expanded_urls:
         twitter_id = extract_twitter_status_id(url)
         if twitter_id:  # check if a twitter url
             if (
                 twitter_id != tweet["tweetID"]
             ):  # check if url shares same status id with parsed tweet
-                external.add(url)
+                external.append(url)
         else:
             # not twitter url, add
-            external.add(url)
+            external.append(url)
 
-    return list(external), orig_to_normed_map
+    return remove_dups_ordered(external), orig_to_normed_map
 
 
-# def extract_tweet_external_ref_urls(tweet_url):
-#     """
-#     Extract list of non-internal URLs referenced by the tweet associated with the tweet_url (in the tweet text body).
-#     In this context, internal URLs are URLs of media items associated with the tweet, such as images or videos.
-#     Internal URLs share the same ID as the referencing tweet.
-#     Shortened URLs are expanded to long form.
-#     """
-#     tweet = scrape_tweet(tweet_url)
-#     return extract_external_ref_urls(tweet)
+def extract_external_ref_urls_from_twitter_post(
+    post_url: str,
+    post_content: str,
+):
+    """
+    Extract list of non-internal URLs referenced by `post_content`.
+    In this context, internal URLs are URLs of media items associated with the tweet, such as images or videos.
+    Internal URLs share the same ID as the referencing tweet URL `post_url`.
+    Shortened URLs are expanded to long form.
+    """
+    expanded_urls, orig_urls = extract_and_expand_urls(
+        post_content, return_orig_urls=True
+    )
+
+    orig_to_normed_map = {
+        orig_url: exp_url for (orig_url, exp_url) in zip(orig_urls, expanded_urls)
+    }
+
+    normed_urls = [normalize_tweet_url(url) for url in expanded_urls]
+
+    # remove duplicate urls
+    expanded_urls = remove_dups_ordered(normed_urls)
+
+    external = []
+
+    post_twitter_id = extract_twitter_status_id(post_url)
+
+    for url in expanded_urls:
+        twitter_id = extract_twitter_status_id(url)
+        if twitter_id:  # check if a twitter url
+            if (
+                twitter_id != post_twitter_id
+            ):  # check if url shares same status id with parsed tweet
+                external.append(url)
+        else:
+            # not twitter url, add
+            external.append(url)
+
+    return remove_dups_ordered(external), orig_to_normed_map

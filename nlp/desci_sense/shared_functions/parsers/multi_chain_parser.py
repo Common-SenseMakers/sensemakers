@@ -1,5 +1,5 @@
 from loguru import logger
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Optional
 from operator import itemgetter
 import asyncio
 
@@ -15,7 +15,16 @@ from ..configs import (
     MultiParserChainConfig,
     PostProcessType,
 )
-from ..interface import ParserResult, ParserSupport
+from ..interface import (
+    ParserResult,
+    ParserSupport,
+    ParsePostRequest,
+)
+from ..preprocessing import (
+    ParserInput,
+    preproc_parser_input,
+    PreprocParserInput,
+)
 from ..schema.ontology_base import OntologyBase
 from ..schema.post import RefPost
 from ..schema.helpers import convert_text_to_ref_post
@@ -109,6 +118,11 @@ class MultiChainParser:
     def get_pparsers(self):
         return list(self.pparsers.values())
 
+    # def preprocess_interface_input(self, input_request: ParsePostRequest):
+    # pass
+
+    # def preprocess_st_input(self, input_request: ParsePostRequest):
+
     def instantiate_prompts(
         self,
         post: RefPost,
@@ -146,7 +160,9 @@ class MultiChainParser:
         inst_prompt_dict: Dict[str, str],
         raw_results: Dict[str, ParserChainOutput],
         md_dict: Dict[str, RefMetadata],
+        ontology: OntologyBase,
         post_process_type: PostProcessType,
+        unprocessed_urls: Optional[List[str]] = None,
     ) -> Union[Dict[str, ParserChainOutput], CombinedParserOutput, ParserResult]:
         # add full prompts for debugging purposes
         add_prompts_to_output(raw_results, inst_prompt_dict)
@@ -160,8 +176,9 @@ class MultiChainParser:
             post,
             raw_results,
             md_dict,
-            self.ontology_base,
+            ontology,
             PostProcessType.COMBINED,
+            unprocessed_urls,
         )
 
         # apply science filter
@@ -169,15 +186,58 @@ class MultiChainParser:
         post_processed_res = combined_res
 
         if post_process_type == PostProcessType.FIREBASE:
-            post_processed_res = post_process_firebase(combined_res, self.ontology_base)
+            post_processed_res = post_process_firebase(
+                combined_res,
+                ontology,
+            )
 
         return post_processed_res
+
+    def preproc_parser_input(self, parser_input: ParserInput) -> PreprocParserInput:
+        return preproc_parser_input(parser_input)
+
+    def process_parser_input(
+        self,
+        parser_input: ParserInput,
+        active_list: List[str] = None,
+    ):
+        preproc_input = self.preproc_parser_input(parser_input)
+        post = preproc_input.post_to_parse
+        res = self.process_ref_post(
+            post,
+            active_list=active_list,
+            unprocessed_urls=preproc_input.unparsed_urls,
+        )
+        return res
+
+    def batch_process_parser_inputs(
+        self,
+        inputs: List[ParserInput],
+        batch_size: int = 5,
+        active_list: List[str] = None,
+    ):
+        preproc_inputs = [self.preproc_parser_input(p) for p in inputs]
+        posts_batch, batch_unprocessed_urls = zip(*[
+            (p.post_to_parse, p.unparsed_urls) for p in preproc_inputs
+        ])
+        res = self.batch_process_ref_posts(
+            posts_batch,
+            batch_size,
+            active_list,
+            batch_unprocessed_urls,
+        )
+
+        return res
 
     def process_ref_post(
         self,
         post: RefPost,
         active_list: List[str] = None,
+        unprocessed_urls: List[str] = None,
     ):
+        if unprocessed_urls is None:
+            unprocessed_urls = []
+
         md_dict = extract_posts_ref_metadata_dict(
             [post],
             self.config.metadata_extract_config.extraction_method,
@@ -200,7 +260,9 @@ class MultiChainParser:
             inst_prompts,
             res,
             md_dict,
+            self.ontology,
             self.config.post_process_type,
+            unprocessed_urls,
         )
 
         return post_processed_res
@@ -214,6 +276,7 @@ class MultiChainParser:
         inputs: List[RefPost],
         batch_size: int = 5,
         active_list: List[str] = None,
+        batch_unprocessed_urls: List[List[str]] = None,
     ) -> Dict:
         """Batch process a list of RefPosts.
 
@@ -224,6 +287,9 @@ class MultiChainParser:
         Returns:
             List[Dict]: list of processed results
         """
+        if batch_unprocessed_urls is None:
+            batch_unprocessed_urls = [[] for _ in len(inputs)]
+            
         # extract all posts metadata
         md_dict = extract_posts_ref_metadata_dict(
             inputs,
@@ -261,29 +327,23 @@ class MultiChainParser:
         # post processing results
         logger.debug(f"Post processing {len(results)} results...")
         post_processed_results = []
-        for post, result, prompts_dict in zip(inputs, results, inst_prompts):
+        for post, result, prompts_dict, unproc_urls in zip(
+            inputs,
+            results,
+            inst_prompts,
+            batch_unprocessed_urls,
+        ):
             post_processed_res = self.post_process_raw_results(
                 post,
                 prompts_dict,
                 result,
                 md_dict,
+                self.ontology,
                 self.config.post_process_type,
+                unproc_urls,
             )
             post_processed_results.append(post_processed_res)
 
         logger.debug("Done!")
 
         return post_processed_results
-
-        # st_outputs = convert_raw_outputs_to_st_format(
-        #     inputs,
-        #     results,
-        #     prompts,
-        #     md_dict,
-        # )
-
-        # # apply filter
-        # for output in st_outputs:
-        #     apply_research_filter(output)
-
-        # return st_outputs

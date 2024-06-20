@@ -18,8 +18,8 @@ from ..utils import (
 )
 
 from ..interface import (
-    ThreadPostInterface,
-    BasicPostInterface,
+    ThreadInterface,
+    AppPost,
     SocialPlatformType,
 )
 
@@ -84,7 +84,7 @@ class RefPost(Post):
     @classmethod
     def from_basic_post_interface(
         cls,
-        basic_post_interface: BasicPostInterface,
+        basic_post_interface: AppPost,
     ):
         # if source network is twitter, use twitter specific preprocessing
         if basic_post_interface.source_network == SocialPlatformType.TWITTER:
@@ -171,6 +171,6 @@ class ThreadRefPost(RefPost):
     @classmethod
     def from_thread_post_interface(
         cls,
-        thread_post_interface: ThreadPostInterface,
+        thread_post_interface: ThreadInterface,
     ):
         pass

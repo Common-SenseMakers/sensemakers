@@ -9,14 +9,16 @@ from desci_sense.shared_functions.schema.post import (
     ThreadRefPost,
     QuoteRefPost,
 )
-from desci_sense.shared_functions.interface import ThreadPostInterface, ParsePostRequest
+from desci_sense.shared_functions.interface import ThreadInterface, ParsePostRequest
 from desci_sense.shared_functions.dataloaders import scrape_post
 from desci_sense.shared_functions.dataloaders.twitter.twitter_utils import (
     extract_external_ref_urls,
     scrape_tweet,
     extract_twitter_status_id,
 )
-from desci_sense.shared_functions.preprocessing import convert_thread_interface_to_ref_post
+from desci_sense.shared_functions.preprocessing import (
+    convert_thread_interface_to_ref_post,
+)
 
 SINGLE_QUOTE_TWEET = {
     "url": "https://x.com/nnnn/status/180089896680621",
@@ -94,7 +96,7 @@ def test_parse_single_post_request():
 
 
 def test_basic_post_interface_on_quoted_post():
-    ref = ThreadPostInterface.model_validate(MULTI_QUOTE_THREAD)
+    ref = ThreadInterface.model_validate(MULTI_QUOTE_THREAD)
     ref_post = RefPost.from_basic_post_interface(ref.quotedPosts[1])
     assert ref_post.ref_urls == [
         "https://twitter.com/JaneSmith/status/1797349211849245178"
@@ -102,5 +104,5 @@ def test_basic_post_interface_on_quoted_post():
 
 
 if __name__ == "__main__":
-    thread_interface = ThreadPostInterface.model_validate(MULTI_QUOTE_THREAD)
+    thread_interface = ThreadInterface.model_validate(MULTI_QUOTE_THREAD)
     thread_ref_post = convert_thread_interface_to_ref_post(thread_interface)
