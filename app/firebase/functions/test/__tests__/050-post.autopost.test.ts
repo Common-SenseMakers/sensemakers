@@ -1,12 +1,16 @@
 import { expect } from 'chai';
 
 import { NotificationFreq } from '../../src/@shared/types/types.notifications';
-import { PlatformPostPublishStatus } from '../../src/@shared/types/types.platform.posts';
+import {
+  PlatformPostPosted,
+  PlatformPostPublishStatus,
+} from '../../src/@shared/types/types.platform.posts';
 import {
   AppPostParsedStatus,
   AppPostParsingStatus,
   AppPostRepublishedStatus,
 } from '../../src/@shared/types/types.posts';
+import { TwitterThread } from '../../src/@shared/types/types.twitter';
 import {
   AppUser,
   AutopostOption,
@@ -43,6 +47,7 @@ describe.only('050-autopost', () => {
 
   describe('create and process', () => {
     let user: AppUser | undefined;
+    let thread: PlatformPostPosted<TwitterThread>;
 
     before(async () => {
       user = await _01_createAndFetchUsers(services, { DEBUG, DEBUG_PREFIX });
@@ -72,7 +77,7 @@ describe.only('050-autopost', () => {
     });
 
     it('publish a tweet in the name of the test user', async () => {
-      await _02_publishTweet(services, user);
+      thread = await _02_publishTweet(services, user);
     });
 
     it('fetch user posts from all platforms', async () => {
@@ -90,8 +95,12 @@ describe.only('050-autopost', () => {
       const postsRead = await services.postsManager.getOfUser(user.userId);
       expect(postsRead).to.have.length(TEST_THREADS.length + 1);
 
-      const postOfThread2 = postsRead.find(
-        (p) => p.origin === PLATFORM.Twitter
+      const postOfThread2 = postsRead.find((p) =>
+        p.mirrors.find(
+          (m) =>
+            m.platformId === PLATFORM.Twitter &&
+            m.posted?.post_id === thread.post_id
+        )
       );
 
       if (!postOfThread2) {

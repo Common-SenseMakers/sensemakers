@@ -59,7 +59,7 @@ export const _02_publishTweet = async (
   services: TestServices,
   user?: AppUser
 ) => {
-  await services.db.run(async (manager) => {
+  return services.db.run(async (manager) => {
     if (!user) {
       throw new Error('user not created');
     }

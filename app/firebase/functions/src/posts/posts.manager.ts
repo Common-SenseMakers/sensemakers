@@ -512,7 +512,8 @@ export class PostsManager {
     newPost: AppPostFull,
     platformIds: PLATFORM[],
     userId: string,
-    manager?: TransactionManager
+    manager?: TransactionManager,
+    auto?: boolean
   ) {
     const publishFunction = async (manager: TransactionManager) => {
       if (DEBUG)
@@ -636,10 +637,13 @@ export class PostsManager {
 
       /** if all mirrors where published */
       if (published.every((v) => v === true)) {
+        const wasAuto = auto !== undefined ? auto : false;
         await this.updatePost(
           newPost.id,
           {
-            republishedStatus: AppPostRepublishedStatus.REPUBLISHED,
+            republishedStatus: wasAuto
+              ? AppPostRepublishedStatus.AUTO_REPUBLISHED
+              : AppPostRepublishedStatus.REPUBLISHED,
           },
           manager
         );
