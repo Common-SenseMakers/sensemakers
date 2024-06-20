@@ -8,7 +8,7 @@ import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { onTaskDispatched } from 'firebase-functions/v2/tasks';
 
 import { ActivityEventBase } from './@shared/types/types.activity';
-import { NOTIFICATION_FREQUENCY } from './@shared/types/types.notifications';
+import { NotificationFreq } from './@shared/types/types.notifications';
 import { PlatformPost } from './@shared/types/types.platform.posts';
 import { AppPost } from './@shared/types/types.posts';
 import { CollectionNames } from './@shared/utils/collectionNames';
@@ -77,7 +77,7 @@ exports.sendDailyNotifications = onSchedule(
     schedule: DAILY_NOTIFICATION_PERIOD,
     secrets,
   },
-  () => triggerSendNotifications(NOTIFICATION_FREQUENCY.Daily)
+  () => triggerSendNotifications(NotificationFreq.Daily)
 );
 
 exports.sendWeeklyNotifications = onSchedule(
@@ -85,7 +85,7 @@ exports.sendWeeklyNotifications = onSchedule(
     schedule: WEEKLY_NOTIFICATION_PERIOD,
     secrets,
   },
-  () => triggerSendNotifications(NOTIFICATION_FREQUENCY.Weekly)
+  () => triggerSendNotifications(NotificationFreq.Weekly)
 );
 
 exports.sendMonthlyNotifications = onSchedule(
@@ -93,7 +93,7 @@ exports.sendMonthlyNotifications = onSchedule(
     schedule: MONTHLY_NOTIFICATION_PERIOD,
     secrets,
   },
-  () => triggerSendNotifications(NOTIFICATION_FREQUENCY.Monthly)
+  () => triggerSendNotifications(NotificationFreq.Monthly)
 );
 
 // add enpoint when on emulator to trigger the scheduled task

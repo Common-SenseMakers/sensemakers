@@ -1,6 +1,6 @@
 import { firestore } from 'firebase-admin';
 
-import { NOTIFICATION_FREQUENCY } from '../@shared/types/types.notifications';
+import { NotificationFreq } from '../@shared/types/types.notifications';
 import {
   AppUser,
   AppUserCreate,
@@ -421,7 +421,7 @@ export class UsersRepository {
   }
 
   public async getWithNotificationFrequency(
-    notificationFrequency: NOTIFICATION_FREQUENCY
+    notificationFrequency: NotificationFreq
   ) {
     const settingsKey: keyof AppUser = 'settings';
     const notificationFrequencyKey: keyof UserSettings =

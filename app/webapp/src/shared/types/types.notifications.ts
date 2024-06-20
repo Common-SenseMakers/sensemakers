@@ -1,6 +1,6 @@
 import { ActivityEventBase } from '../types/types.activity';
 
-export enum NOTIFICATION_FREQUENCY {
+export enum NotificationFreq {
   Instant,
   Daily,
   Weekly,

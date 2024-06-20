@@ -1,6 +1,6 @@
 import { Request } from 'firebase-functions/v2/tasks';
 
-import { NOTIFICATION_FREQUENCY } from '../@shared/types/types.notifications';
+import { NotificationFreq } from '../@shared/types/types.notifications';
 import { logger } from '../instances/logger';
 import { createServices } from '../instances/services';
 
@@ -24,7 +24,7 @@ export const notifyUserTask = async (req: Request) => {
 };
 
 export const triggerSendNotifications = async (
-  notificationFrequency: NOTIFICATION_FREQUENCY
+  notificationFrequency: NotificationFreq
 ) => {
   logger.debug(`triggerSendNotifications`);
   const { users, notifications } = createServices();

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { NOTIFICATION_FREQUENCY } from '../../src/@shared/types/types.notifications';
+import { NotificationFreq } from '../../src/@shared/types/types.notifications';
 import { PlatformPostPublishStatus } from '../../src/@shared/types/types.platform.posts';
 import {
   AppPostParsedStatus,
@@ -55,7 +55,7 @@ describe.only('050-autopost', () => {
 
       await services.users.updateSettings(user.userId, {
         autopost: { [PLATFORM.Nanopub]: { value: AutopostOption.AI } },
-        notificationFrequency: NOTIFICATION_FREQUENCY.None,
+        notificationFreq: NotificationFreq.None,
       });
 
       const userRead = await services.db.run(async (manager) => {

@@ -107,6 +107,12 @@ export const postUpdatedHook = async (post: AppPost, postBefore?: AppPost) => {
     const autopostOnPlatforms = UsersHelper.autopostPlatformIds(author);
 
     if (autopostOnPlatforms.length > 0) {
+      logger.debug(
+        `trigger ${AUTOPOST_POST_TASK}-${postId}`,
+        { autopostOnPlatforms },
+        PREFIX
+      );
+
       await enqueueTask(AUTOPOST_POST_TASK, {
         postId,
         platformIds: autopostOnPlatforms,

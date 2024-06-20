@@ -1,7 +1,7 @@
 import { ActivityType } from '../@shared/types/types.activity';
 import {
-  NOTIFICATION_FREQUENCY,
   NotificationCreate,
+  NotificationFreq,
   NotificationFull,
   PostParsedNotification,
 } from '../@shared/types/types.notifications';
@@ -80,7 +80,7 @@ export class NotificationService {
       );
 
       /** check if user has enabled notififications */
-      if (settings.notificationFrequency === NOTIFICATION_FREQUENCY.None) {
+      if (settings.notificationFreq === NotificationFreq.None) {
         return;
       }
 

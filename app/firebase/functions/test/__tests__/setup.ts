@@ -70,102 +70,20 @@ export const mochaHooks = (): Mocha.RootHookObject => {
         if (testAccountsCredentials.length < NUM_TEST_USERS) {
           throw new Error('not enough twitter account credentials provided');
         }
-        let appUsers: AppUser[] = [];
 
-        if (fs.existsSync(TEST_USERS_FILE_PATH)) {
-          const fileContents = fs.readFileSync(TEST_USERS_FILE_PATH, 'utf8');
-          appUsers = JSON.parse(fileContents);
-          if (
-            checkOutdatedTwitterTokens(appUsers) ||
-            appUsers.length < testAccountsCredentials.length
-          ) {
-            await Promise.all(
-              testAccountsCredentials.map(async (accountCredentials) => {
-                const user = await authenticateTestUser(
-                  accountCredentials,
-                  services,
-                  manager
-                );
-                testUsers.set(user.userId, user);
-              })
+        await Promise.all(
+          testAccountsCredentials.map(async (accountCredentials) => {
+            const user = await authenticateTestUser(
+              accountCredentials,
+              services,
+              manager
             );
-          } else {
-            await Promise.all(
-              appUsers.map(async (appUser) => {
-                testUsers.set(appUser.userId, appUser);
-              })
-            );
-          }
-        } else {
-          await Promise.all(
-            testAccountsCredentials.map(async (accountCredentials) => {
-              const user = await authenticateTestUser(
-                accountCredentials,
-                services,
-                manager
-              );
-              testUsers.set(user.userId, user);
-            })
-          );
-        }
+            testUsers.set(user.userId, user);
+          })
+        );
       });
 
       Object.assign(this, context);
-    },
-
-    beforeEach(this: TestContext) {
-      /**
-       * by default each test will update the testUsers global object with
-       * the latest user details in the DB
-       */
-      this.skipUsersUpdate = false;
-    },
-
-    async afterEach(this: TestContext) {
-      if (this.skipUsersUpdate) {
-        return;
-      }
-
-      const testUsersLocal = testUsers;
-
-      if (testUsersLocal.size > 0) {
-        // remove the fetchedDetails
-        await Promise.all(
-          Array.from(testUsersLocal.values()).map(async (user) => {
-            const userRead = await services.db.run((manager) =>
-              services.users.repo.getUser(user.userId, manager)
-            );
-
-            if (DEBUG) logger.debug('afterAll - userRead', { userRead });
-
-            if (!userRead || !userRead.platformIds) {
-              return;
-            }
-
-            /** delete the fetched details */
-            ALL_PUBLISH_PLATFORMS.map((platform) => {
-              const accounts = UsersHelper.getAccounts(userRead, platform);
-              accounts.map((account) => {
-                delete account['fetched'];
-              });
-            });
-
-            if (DEBUG) logger.debug('afterAll - set', { userRead });
-
-            /** update the testUser */
-            testUsersLocal.set(userRead.userId, userRead);
-          })
-        );
-      }
-    },
-
-    async afterAll(this: TestContext) {
-      const testUsersLocal = testUsers;
-      fs.writeFileSync(
-        TEST_USERS_FILE_PATH,
-        JSON.stringify(Array.from(testUsersLocal.values()), null, 2),
-        'utf8'
-      );
     },
   };
 };
