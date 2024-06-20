@@ -1,3 +1,4 @@
+import { FetchParams } from '../../src/@shared/types/types.fetch';
 import {
   PlatformPostPublishOrigin,
   PlatformPostPublishStatus,
@@ -12,6 +13,8 @@ import {
 } from '../../src/@shared/types/types.posts';
 import { PLATFORM } from '../../src/@shared/types/types.user';
 import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
+import { postUpdatedHook } from '../../src/posts/hooks/post.updated.hook';
+import { PostsManager } from '../../src/posts/posts.manager';
 
 export const getMockPost = (refPost: Partial<AppPostFull>) => {
   const authorId = refPost.authorId || 'test-author-id';
@@ -70,4 +73,28 @@ export const getMockPost = (refPost: Partial<AppPostFull>) => {
     ],
   };
   return post;
+};
+
+/**
+ * We need to manually call the postUpdate hook that would have been called
+ * when creating the AppPost as part of the fetch
+ */
+export const fetchPostsInTests = async (
+  userId: string,
+  params: FetchParams,
+  postsManager: PostsManager
+) => {
+  /** fetch will store the posts in the DB */
+  const postsCreated = await postsManager.fetchUser({
+    userId: userId,
+    params,
+  });
+
+  /**
+   * We need to manually call the postUpdate hook that would have been called
+   * when creating the AppPost as part of the fetch
+   */
+  await Promise.all(
+    postsCreated.map((postCreated) => postUpdatedHook(postCreated.post))
+  );
 };

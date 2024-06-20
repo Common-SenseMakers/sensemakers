@@ -33,7 +33,7 @@ let state: TwitterTestState = {
 
 export type TwitterMockConfig = 'real' | 'mock-publish' | 'mock-signup';
 
-export const THREADS: string[][] = process.env.TEST_THREADS
+export const TEST_THREADS: string[][] = process.env.TEST_THREADS
   ? JSON.parse(process.env.TEST_THREADS as string)
   : [];
 
@@ -78,7 +78,7 @@ const getSampleTweet = (
 export const initThreads = () => {
   const now = Date.now();
 
-  const threads = THREADS.map((thread, ixThread): TwitterThread => {
+  const threads = TEST_THREADS.map((thread, ixThread): TwitterThread => {
     const tweets = thread.map((content, ixTweet) => {
       const idTweet = ixThread * 100 + ixTweet;
       const createdAt = now + ixThread * 100 + 10 * ixTweet;

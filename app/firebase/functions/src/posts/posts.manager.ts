@@ -245,66 +245,79 @@ export class PostsManager {
     params: FetchParams;
   }) {
     /** can be called as part of a transaction or independently */
-    return this.db.run(async (manager: TransactionManager): Promise<void> => {
-      const user =
-        inputs.user ||
-        (await this.users.repo.getUser(inputs.userId as string, manager, true));
+    const postsCreated = await this.db.run(
+      async (manager: TransactionManager) => {
+        const user =
+          inputs.user ||
+          (await this.users.repo.getUser(
+            inputs.userId as string,
+            manager,
+            true
+          ));
 
-      if (DEBUG) logger.debug(`fetchUser user: ${user.userId}`, { user });
+        if (DEBUG) logger.debug(`fetchUser user: ${user.userId}`, { user });
 
-      await Promise.all(
-        ALL_PUBLISH_PLATFORMS.map(async (platformId) => {
-          const accounts = UsersHelper.getAccounts(user, platformId);
-          /** Call fetch for each account */
-          return Promise.all(
-            accounts.map(
-              async (account): Promise<PlatformPostCreated[] | undefined> => {
-                /** Fetch */
-                try {
-                  if (DEBUG)
-                    logger.debug(
-                      `fetchUser - fetchAccount. platformId:${platformId} - account:${account.user_id}`,
-                      {
+        return Promise.all(
+          ALL_PUBLISH_PLATFORMS.map(async (platformId) => {
+            const accounts = UsersHelper.getAccounts(user, platformId);
+            /** Call fetch for each account */
+            return Promise.all(
+              accounts.map(
+                async (account): Promise<PlatformPostCreated[] | undefined> => {
+                  /** Fetch */
+                  try {
+                    if (DEBUG)
+                      logger.debug(
+                        `fetchUser - fetchAccount. platformId:${platformId} - account:${account.user_id}`,
+                        {
+                          platformId,
+                        }
+                      );
+
+                    const platformPostsCreate =
+                      await this.fetchUserFromPlatform(
                         platformId,
-                      }
+                        inputs.params,
+                        account,
+                        manager
+                      );
+
+                    /** Create the PlatformPosts */
+                    const platformPostsCreated =
+                      await this.processing.createPlatformPosts(
+                        platformPostsCreate,
+                        manager
+                      );
+
+                    if (DEBUG)
+                      logger.debug(
+                        `fetchUser - platformId:${platformId} - account:${account.user_id} - platformPostsCreated: ${platformPostsCreated.length}`,
+                        {
+                          platformPostsCreated,
+                        }
+                      );
+
+                    return platformPostsCreated;
+                  } catch (err: any) {
+                    logger.error(
+                      `Error fetching posts for user ${user.userId} on platform ${platformId}`,
+                      err
                     );
-
-                  const platformPostsCreate = await this.fetchUserFromPlatform(
-                    platformId,
-                    inputs.params,
-                    account,
-                    manager
-                  );
-
-                  /** Create the PlatformPosts */
-                  const platformPostsCreated =
-                    await this.processing.createPlatformPosts(
-                      platformPostsCreate,
-                      manager
-                    );
-
-                  if (DEBUG)
-                    logger.debug(
-                      `fetchUser - platformId:${platformId} - account:${account.user_id} - platformPostsCreated: ${platformPostsCreated.length}`,
-                      {
-                        platformPostsCreated,
-                      }
-                    );
-
-                  return platformPostsCreated;
-                } catch (err: any) {
-                  logger.error(
-                    `Error fetching posts for user ${user.userId} on platform ${platformId}`,
-                    err
-                  );
-                  throw new Error(err.message);
+                    throw new Error(err.message);
+                  }
                 }
-              }
-            )
-          );
-        })
-      );
-    });
+              )
+            );
+          })
+        );
+      }
+    );
+
+    const postsCreatedAll = postsCreated
+      .flat(2)
+      .filter((p) => p !== undefined) as PlatformPostCreated[];
+
+    return postsCreatedAll;
   }
 
   async parseOfUser(userId: string) {
