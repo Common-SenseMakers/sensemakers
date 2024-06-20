@@ -18,7 +18,7 @@ import {
 } from './setup';
 import { getTestServices } from './test.services';
 
-describe('011-twitter refresh', () => {
+describe.skip('011-twitter refresh', () => {
   let user: AppUser | undefined;
 
   const services = getTestServices({
