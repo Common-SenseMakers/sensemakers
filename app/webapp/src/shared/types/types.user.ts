@@ -95,6 +95,7 @@ export interface UserSettings {
 
 export interface UserWithSettings {
   settings: UserSettings;
+  email?: string;
 }
 
 /**

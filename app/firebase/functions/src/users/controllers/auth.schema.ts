@@ -35,3 +35,7 @@ export const userSettingsUpdateSchema = object({
     }),
   }).required(),
 }).noUnknown(true);
+
+export const emailUpdateSchema = object({
+  email: string().email().required(),
+}).noUnknown(true);

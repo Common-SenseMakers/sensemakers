@@ -42,6 +42,14 @@ import {
 import { PARSE_POST_TASK, parsePostTask } from './posts/tasks/posts.parse.task';
 import { router } from './router';
 
+// all secrets are available to all functions
+const secrets = [
+  envRuntime.ORCID_SECRET,
+  envRuntime.OUR_TOKEN_SECRET,
+  envRuntime.TWITTER_CLIENT_SECRET,
+  envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
+];
+
 // import { fetchNewPosts } from './posts/posts.job';
 
 /** Registed the API as an HTTP triggered function */
@@ -51,12 +59,7 @@ exports['api'] = functions
     timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
     memory: envDeploy.CONFIG_MEMORY,
     minInstances: envDeploy.CONFIG_MININSTANCE,
-    secrets: [
-      envRuntime.ORCID_SECRET,
-      envRuntime.OUR_TOKEN_SECRET,
-      envRuntime.TWITTER_CLIENT_SECRET,
-      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
-    ],
+    secrets,
   })
   .https.onRequest(buildApp(router));
 
@@ -64,12 +67,7 @@ exports['api'] = functions
 exports.accountFetch = onSchedule(
   {
     schedule: AUTOFETCH_PERIOD,
-    secrets: [
-      envRuntime.ORCID_SECRET,
-      envRuntime.OUR_TOKEN_SECRET,
-      envRuntime.TWITTER_CLIENT_SECRET,
-      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
-    ],
+    secrets,
   },
   triggerAutofetchPosts
 );
@@ -77,12 +75,7 @@ exports.accountFetch = onSchedule(
 exports.sendDailyNotifications = onSchedule(
   {
     schedule: DAILY_NOTIFICATION_PERIOD,
-    secrets: [
-      envRuntime.ORCID_SECRET,
-      envRuntime.OUR_TOKEN_SECRET,
-      envRuntime.TWITTER_CLIENT_SECRET,
-      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
-    ],
+    secrets,
   },
   () => triggerSendNotifications(NOTIFICATION_FREQUENCY.Daily)
 );
@@ -90,12 +83,7 @@ exports.sendDailyNotifications = onSchedule(
 exports.sendWeeklyNotifications = onSchedule(
   {
     schedule: WEEKLY_NOTIFICATION_PERIOD,
-    secrets: [
-      envRuntime.ORCID_SECRET,
-      envRuntime.OUR_TOKEN_SECRET,
-      envRuntime.TWITTER_CLIENT_SECRET,
-      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
-    ],
+    secrets,
   },
   () => triggerSendNotifications(NOTIFICATION_FREQUENCY.Weekly)
 );
@@ -103,12 +91,7 @@ exports.sendWeeklyNotifications = onSchedule(
 exports.sendMonthlyNotifications = onSchedule(
   {
     schedule: MONTHLY_NOTIFICATION_PERIOD,
-    secrets: [
-      envRuntime.ORCID_SECRET,
-      envRuntime.OUR_TOKEN_SECRET,
-      envRuntime.TWITTER_CLIENT_SECRET,
-      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
-    ],
+    secrets,
   },
   () => triggerSendNotifications(NOTIFICATION_FREQUENCY.Monthly)
 );
@@ -128,12 +111,7 @@ if (IS_EMULATOR) {
       timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
       memory: envDeploy.CONFIG_MEMORY,
       minInstances: envDeploy.CONFIG_MININSTANCE,
-      secrets: [
-        envRuntime.ORCID_SECRET,
-        envRuntime.OUR_TOKEN_SECRET,
-        envRuntime.TWITTER_CLIENT_SECRET,
-        envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
-      ],
+      secrets,
     })
     .https.onRequest(buildApp(scheduledTriggerRouter));
 }
@@ -144,12 +122,7 @@ exports[PARSE_POST_TASK] = onTaskDispatched(
     timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
     memory: envDeploy.CONFIG_MEMORY,
     minInstances: envDeploy.CONFIG_MININSTANCE,
-    secrets: [
-      envRuntime.ORCID_SECRET,
-      envRuntime.OUR_TOKEN_SECRET,
-      envRuntime.TWITTER_CLIENT_SECRET,
-      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
-    ],
+    secrets,
   },
   parsePostTask
 );
@@ -159,12 +132,7 @@ exports[AUTOFETCH_POSTS_TASK] = onTaskDispatched(
     timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
     memory: envDeploy.CONFIG_MEMORY,
     minInstances: envDeploy.CONFIG_MININSTANCE,
-    secrets: [
-      envRuntime.ORCID_SECRET,
-      envRuntime.OUR_TOKEN_SECRET,
-      envRuntime.TWITTER_CLIENT_SECRET,
-      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
-    ],
+    secrets,
   },
   autofetchUserPosts
 );
@@ -174,12 +142,7 @@ exports[AUTOPOST_POST_TASK] = onTaskDispatched(
     timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
     memory: envDeploy.CONFIG_MEMORY,
     minInstances: envDeploy.CONFIG_MININSTANCE,
-    secrets: [
-      envRuntime.ORCID_SECRET,
-      envRuntime.OUR_TOKEN_SECRET,
-      envRuntime.TWITTER_CLIENT_SECRET,
-      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
-    ],
+    secrets,
   },
   autopostPostTask
 );
@@ -201,7 +164,10 @@ exports[NOTIFY_USER_TASK] = onTaskDispatched(
 
 /** hooks */
 exports.postUpdateListener = onDocumentUpdated(
-  `${CollectionNames.Posts}/{postId}`,
+  {
+    document: `${CollectionNames.Posts}/{postId}`,
+    secrets,
+  },
   async (event) => {
     const postBefore = event.data?.before as AppPost | undefined;
     const postAfter = event.data?.after as AppPost | undefined;
@@ -215,7 +181,10 @@ exports.postUpdateListener = onDocumentUpdated(
 );
 
 exports.postCreateListener = onDocumentCreated(
-  `${CollectionNames.Posts}/{postId}`,
+  {
+    document: `${CollectionNames.Posts}/{postId}`,
+    secrets,
+  },
   async (event) => {
     const post = event.data?.data() as AppPost | undefined;
 
@@ -228,7 +197,10 @@ exports.postCreateListener = onDocumentCreated(
 );
 
 exports.platformPostUpdateListener = onDocumentUpdated(
-  `${CollectionNames.PlatformPosts}/{platformPostId}`,
+  {
+    document: `${CollectionNames.PlatformPosts}/{platformPostId}`,
+    secrets,
+  },
   async (event) => {
     const postBefore = event.data?.before as PlatformPost | undefined;
     const postAfter = event.data?.after as PlatformPost | undefined;
@@ -242,7 +214,10 @@ exports.platformPostUpdateListener = onDocumentUpdated(
 );
 
 exports.activityEventCreateListener = onDocumentCreated(
-  `${CollectionNames.Activity}/{activityEventId}`,
+  {
+    document: `${CollectionNames.Activity}/{activityEventId}`,
+    secrets,
+  },
   async (event) => {
     const activityEvent = event.data?.data() as ActivityEventBase | undefined;
 

@@ -283,8 +283,9 @@ export class UsersService {
 
     /** extract the profile for each account */
     const userRead: AppUserRead = {
-      settings: user.settings,
       userId,
+      email: user.email,
+      settings: user.settings,
     };
 
     ALL_IDENTITY_PLATFORMS.forEach((platform) => {
@@ -309,6 +310,12 @@ export class UsersService {
   updateSettings(userId: string, settings: UserSettings) {
     return this.db.run(async (manager) => {
       await this.repo.updateSettings(userId, settings, manager);
+    });
+  }
+
+  updateEmail(userId: string, email: string) {
+    return this.db.run(async (manager) => {
+      await this.repo.updateEmail(userId, email, manager);
     });
   }
 }
