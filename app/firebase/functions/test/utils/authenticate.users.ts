@@ -3,7 +3,9 @@ import { TransactionManager } from '../../src/db/transaction.manager';
 import { Services } from '../../src/instances/services';
 import { getPrefixedUserId } from '../../src/users/users.utils';
 import { USE_REAL_TWITTER } from '../__tests__/setup';
+import { authenticateTwitterUser } from './authenticate.twitter';
 import { getNanopubProfile } from './nanopub.profile';
+import { getMockedUser } from './users.mock';
 
 export interface TwitterAccountCredentials {
   username: string;
@@ -21,6 +23,7 @@ export interface NanopubAccountCredentials {
 }
 
 export interface TestUserCredentials {
+  userId: string;
   twitter: TwitterAccountCredentials;
   nanopub: NanopubAccountCredentials;
 }
@@ -44,10 +47,14 @@ export const authenticateTestUser = async (
 ): Promise<AppUser> => {
   const user0 = USE_REAL_TWITTER
     ? await authenticateTwitterUser(credentials.twitter, services, manager)
-    : getMockedUser();
+    : getMockedUser(credentials);
 
-  const user1 = await authenticateNanopub(user0, credentials.nanopub);
-  return user1;
+  if (!USE_REAL_TWITTER) {
+    // authenticateTwitterUser dont add nanopub credentials, getMockedUser does
+    return await authenticateNanopub(user0, credentials.nanopub);
+  }
+
+  return user0;
 };
 
 const authenticateNanopub = async (

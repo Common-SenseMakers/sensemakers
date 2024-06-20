@@ -55,7 +55,7 @@ export const _01_createAndFetchUsers = async (
   return user;
 };
 
-export const _02_PublishTweet = async (
+export const _02_publishTweet = async (
   services: TestServices,
   user?: AppUser
 ) => {

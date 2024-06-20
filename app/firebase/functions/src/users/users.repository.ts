@@ -424,8 +424,7 @@ export class UsersRepository {
     notificationFrequency: NotificationFreq
   ) {
     const settingsKey: keyof AppUser = 'settings';
-    const notificationFrequencyKey: keyof UserSettings =
-      'notificationFrequency';
+    const notificationFrequencyKey: keyof UserSettings = 'notificationFreq';
 
     const query = this.db.collections.users.where(
       `${settingsKey}.${notificationFrequencyKey}`,

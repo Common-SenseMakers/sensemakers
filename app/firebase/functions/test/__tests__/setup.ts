@@ -1,21 +1,14 @@
-import fs from 'fs';
 import { Context } from 'mocha';
 import * as sinon from 'sinon';
 
-import {
-  ALL_PUBLISH_PLATFORMS,
-  AppUser,
-} from '../../src/@shared/types/types.user';
+import { AppUser } from '../../src/@shared/types/types.user';
 import { USE_REAL_NOTIFICATIONS } from '../../src/config/config.runtime';
 import { envDeploy } from '../../src/config/typedenv.deploy';
-import { logger } from '../../src/instances/logger';
 import * as tasksSupport from '../../src/tasks.support';
 import { enqueueTaskMock } from '../../src/tasks.support.mock';
-import { UsersHelper } from '../../src/users/users.helper';
 import {
   TestUserCredentials,
   authenticateTestUser,
-  checkOutdatedTwitterTokens,
 } from '../utils/authenticate.users';
 import { resetDB } from '../utils/db';
 import { getTestServices } from './test.services';
@@ -35,8 +28,6 @@ export let testUsers: Map<string, AppUser> = new Map();
 
 // TestContext will be used by all the test
 export type TestContext = Mocha.Context & Context;
-
-const DEBUG = false;
 
 export const mochaHooks = (): Mocha.RootHookObject => {
   const services = getTestServices({

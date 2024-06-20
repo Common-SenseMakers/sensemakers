@@ -19,7 +19,7 @@ import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
 import {
   _01_createAndFetchUsers,
-  _02_PublishTweet,
+  _02_publishTweet,
   _03_fetchAfterPublish,
 } from './reusable/create-post-fetch';
 import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
@@ -52,7 +52,7 @@ describe.only('030-process', () => {
     });
 
     it('publish a tweet in the name of the test user', async () => {
-      await _02_PublishTweet(services, user);
+      await _02_publishTweet(services, user);
     });
 
     it('fetch user posts from all platforms', async () => {

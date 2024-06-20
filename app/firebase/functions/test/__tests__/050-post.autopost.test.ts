@@ -19,7 +19,7 @@ import { triggerAutofetchPosts } from '../../src/posts/tasks/posts.autofetch.tas
 import { resetDB } from '../utils/db';
 import {
   _01_createAndFetchUsers,
-  _02_PublishTweet,
+  _02_publishTweet,
 } from './reusable/create-post-fetch';
 import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
 import { getTestServices } from './test.services';
@@ -72,7 +72,7 @@ describe.only('050-autopost', () => {
     });
 
     it('publish a tweet in the name of the test user', async () => {
-      await _02_PublishTweet(services, user);
+      await _02_publishTweet(services, user);
     });
 
     it('fetch user posts from all platforms', async () => {
