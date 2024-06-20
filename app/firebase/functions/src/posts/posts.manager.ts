@@ -37,13 +37,11 @@ import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
 import { ParserService } from '../parser/parser.service';
 import { PlatformsService } from '../platforms/platforms.service';
-import { enqueueTask } from '../tasks.support';
 import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { getUsernameTag } from '../users/users.utils';
 import { PostsHelper } from './posts.helper';
 import { PostsProcessing } from './posts.processing';
-import { AUTOPOST_POST_TASK } from './tasks/posts.autopost.task';
 
 const DEBUG = true;
 
@@ -472,15 +470,6 @@ export class PostsManager {
 
     /** store the semantics and mark as processed */
     await this.updatePost(post.id, update, manager);
-
-    /** trigger autopost task if author has autopost configured  */
-    const autopostOnPlatforms = UsersHelper.autopostPlatformIds(author);
-    if (autopostOnPlatforms.length > 0) {
-      await enqueueTask(AUTOPOST_POST_TASK, {
-        postId,
-        platformIds: autopostOnPlatforms,
-      });
-    }
   }
 
   /** single place to update a post (it updates the drafts if necessary) */

@@ -14,6 +14,7 @@ import {
 } from '../../src/@shared/types/types.user';
 import { USE_REAL_NOTIFICATIONS } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
+import { TEST_THREADS } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { triggerAutofetchPosts } from '../../src/posts/tasks/posts.autofetch.task';
 import { resetDB } from '../utils/db';
 import {
@@ -26,7 +27,7 @@ import { getTestServices } from './test.services';
 const DEBUG_PREFIX = `030-process`;
 const DEBUG = false;
 
-describe('050-autopost', () => {
+describe.only('050-autopost', () => {
   const services = getTestServices({
     time: 'real',
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
@@ -87,7 +88,7 @@ describe('050-autopost', () => {
 
       /** read user posts */
       const postsRead = await services.postsManager.getOfUser(user.userId);
-      expect(postsRead).to.have.length(2);
+      expect(postsRead).to.have.length(TEST_THREADS.length + 1);
 
       const postOfThread2 = postsRead.find(
         (p) => p.origin === PLATFORM.Twitter

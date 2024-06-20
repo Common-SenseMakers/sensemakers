@@ -1,4 +1,5 @@
 import { logger } from './instances/logger';
+import { createServices } from './instances/services';
 import {
   NOTIFY_USER_TASK,
   notifyUserTask,
@@ -19,11 +20,39 @@ export const enqueueTaskMock = async (name: string, params: any) => {
 
   await (async () => {
     if (name === PARSE_POST_TASK) {
-      return parsePostTask({ data: params } as any);
+      const { db, postsManager } = createServices();
+
+      const postBefore = await db.run(async (manager) =>
+        postsManager.processing.posts.get(params.postId, manager, true)
+      );
+
+      await parsePostTask({ data: params } as any);
+
+      const postAfter = await db.run(async (manager) =>
+        postsManager.processing.posts.get(params.postId, manager, true)
+      );
+
+      /** should detect the parse and trigger the autopost if needed */
+      await postUpdatedHook(postAfter, postBefore);
     }
+
     if (name === AUTOPOST_POST_TASK) {
-      return autopostPostTask({ data: params } as any);
+      const { db, postsManager } = createServices();
+
+      const postBefore = await db.run(async (manager) =>
+        postsManager.processing.posts.get(params.postId, manager, true)
+      );
+
+      await autopostPostTask({ data: params } as any);
+
+      const postAfter = await db.run(async (manager) =>
+        postsManager.processing.posts.get(params.postId, manager, true)
+      );
+
+      /** should create the activity */
+      await postUpdatedHook(postAfter, postBefore);
     }
+
     if (name === AUTOFETCH_POSTS_TASK) {
       const postsCreated = await autofetchUserPosts({ data: params } as any);
 
@@ -32,6 +61,7 @@ export const enqueueTaskMock = async (name: string, params: any) => {
         postsCreated.map((postCreated) => postUpdatedHook(postCreated.post))
       );
     }
+
     if (name === NOTIFY_USER_TASK) {
       return notifyUserTask({ data: params } as any);
     }

@@ -14,5 +14,5 @@ export const parsePostTask = async (req: Request) => {
   }
 
   const { postsManager } = createServices();
-  await postsManager.parsePost(postId);
+  return postsManager.parsePost(postId);
 };

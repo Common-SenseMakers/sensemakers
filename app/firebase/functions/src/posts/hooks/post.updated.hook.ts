@@ -11,6 +11,8 @@ import {
 import { logger } from '../../instances/logger';
 import { createServices } from '../../instances/services';
 import { enqueueTask } from '../../tasks.support';
+import { UsersHelper } from '../../users/users.helper';
+import { AUTOPOST_POST_TASK } from '../tasks/posts.autopost.task';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 
 const PREFIX = 'POST-UPDATED-HOOK';
@@ -19,7 +21,7 @@ const PREFIX = 'POST-UPDATED-HOOK';
 export const postUpdatedHook = async (post: AppPost, postBefore?: AppPost) => {
   const postId = post.id;
 
-  const { db, time, activity } = createServices();
+  const { db, time, activity, users } = createServices();
 
   /** Frontend watcher to react to changes in real-time */
   const updateRef = db.collections.updates.doc(`post-${postId}`);
@@ -31,15 +33,15 @@ export const postUpdatedHook = async (post: AppPost, postBefore?: AppPost) => {
     manager.set(updateRef, { value: now });
   });
 
-  /** handle post create */
+  /** Handle post create */
   if (postBefore === undefined) {
     // trigger parsePostTask
     logger.debug(`triggerTask ${PARSE_POST_TASK}-${postId}`);
     await enqueueTask(PARSE_POST_TASK, { postId });
   }
 
-  /** Handle post state transition */
-  await db.run(async (manager) => {
+  /** Create the activity elements */
+  const { wasParsed } = await db.run(async (manager) => {
     /** detect parsed state change */
     const wasParsed =
       postBefore &&
@@ -91,5 +93,24 @@ export const postUpdatedHook = async (post: AppPost, postBefore?: AppPost) => {
       },
       PREFIX
     );
+
+    return { wasParsed };
   });
+
+  /** trigger Autopost*/
+  if (wasParsed) {
+    const author = await db.run(async (manager) =>
+      users.repo.getUser(post.authorId, manager, true)
+    );
+    /** autopost when parsed and author has autopost enabled */
+    /** trigger autopost task if author has autopost configured  */
+    const autopostOnPlatforms = UsersHelper.autopostPlatformIds(author);
+
+    if (autopostOnPlatforms.length > 0) {
+      await enqueueTask(AUTOPOST_POST_TASK, {
+        postId,
+        platformIds: autopostOnPlatforms,
+      });
+    }
+  }
 };
