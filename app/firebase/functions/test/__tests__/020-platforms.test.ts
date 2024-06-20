@@ -24,7 +24,7 @@ import {
 } from './setup';
 import { getTestServices } from './test.services';
 
-describe('02-platforms', () => {
+describe.only('02-platforms', () => {
   let rsaKeys: RSAKeys | undefined;
   let user: AppUser | undefined;
 

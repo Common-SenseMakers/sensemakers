@@ -20,7 +20,8 @@ describe('twitter utility functions', () => {
     expect(appTweets).to.not.be.undefined;
     expect(appTweets.length).to.be.equal(result.data.length);
   });
-  it.only('extracts the primary thread from a thread tree (grouped by conversation_id)', async () => {
+
+  it('extracts the primary thread from a thread tree (grouped by conversation_id)', async () => {
     const result = JSON.parse(
       fs.readFileSync('./test/__tests__/thread.mock.json', 'utf8')
     ) as TweetV2LookupResult;
