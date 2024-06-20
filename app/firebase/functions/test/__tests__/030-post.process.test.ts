@@ -379,14 +379,18 @@ describe('030-process', () => {
 
       const post = publishedPosts[0];
 
-      const contentPrev = post.content;
-      const newContent = [
-        { ...contentPrev[0], content: `${contentPrev[0].content} - edited` },
-        ...contentPrev.slice(1),
-      ];
+      const threadPrev = post.thread;
+      const newThread = threadPrev.map((genericPostPrev) => {
+        return {
+          ...genericPostPrev,
+          content: `${genericPostPrev.content} - edited`,
+        };
+      });
 
-      const newPost = { ...post };
-      newPost.content = newContent;
+      const newPost = {
+        ...post,
+        thread: newThread,
+      };
 
       /** send updated post (content and semantics did not changed) */
       await services.postsManager.publishPost(
@@ -397,8 +401,8 @@ describe('030-process', () => {
 
       const readPost = await services.postsManager.getPost(post.id, true);
 
-      expect(readPost).to.not.be.undefined;
-      expect(readPost.content).to.equal(newContent);
+      expect(readPost.thread).to.have.length(threadPrev.length);
+      expect(readPost.thread[0].content).to.equal(newThread[0].content);
     });
   });
 });

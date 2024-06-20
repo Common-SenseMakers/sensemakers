@@ -9,7 +9,7 @@ import {
   PUBLISHABLE_PLATFORMS,
   UserDetailsBase,
 } from '../@shared/types/types.user';
-import { getTweetUrl } from '../platforms/twitter/twitter.utils';
+import { APP_URL } from '../config/config.runtime';
 import { UsersHelper } from '../users/users.helper';
 
 export interface PlatformDetails {
@@ -30,7 +30,7 @@ export class PostsHelper {
     );
 
     return {
-      url: getTweetUrl(),
+      url: PostsHelper.getPostUrl(post.id),
       author: {
         id: account.user_id,
         name: account.profile.name,
@@ -43,5 +43,9 @@ export class PostsHelper {
 
   static concatenateThread(post: AppPost | AppPostFull): string {
     return post.thread.reduce((_acc, post) => `${post.content}\n\n`, '');
+  }
+
+  static getPostUrl(postId: string): string {
+    return `${APP_URL}/post/${postId}`;
   }
 }

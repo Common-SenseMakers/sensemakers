@@ -6,7 +6,6 @@ import {
   PlatformPostPublishStatus,
 } from '../../src/@shared/types/types.platform.posts';
 import {
-  AppPost,
   AppPostParsedStatus,
   AppPostParsingStatus,
   AppPostRepublishedStatus,
@@ -21,7 +20,6 @@ import { USE_REAL_NOTIFICATIONS } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
 import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
-import { postUpdatedHook } from '../../src/posts/hooks/post.updated.hook';
 import { triggerAutofetchPosts } from '../../src/posts/tasks/posts.autofetch.task';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
@@ -155,35 +153,21 @@ describe('050-autopost', () => {
 
       /** simulate the cron JOB
        * it will trigger parse tasks for each fetched post
-       * it will fetch the tweet and create a new AppPost */
+       * it will trigger autopost tasks for each parsed post whose user has autopost enabled
+       * */
       await triggerAutofetchPosts();
 
       /** read user posts */
       const postsRead = await services.postsManager.getOfUser(user.userId);
       expect(postsRead).to.have.length(2);
 
-      const postOfThread1 = postsRead.find(
+      const postOfThread2 = postsRead.find(
         (p) => p.origin === PLATFORM.Twitter
       );
-      if (!postOfThread1) {
-        throw new Error('postOfThread not created');
+
+      if (!postOfThread2) {
+        throw new Error('post not found');
       }
-
-      expect(postOfThread1.semantics).to.not.be.undefined;
-      expect(postOfThread1.originalParsed).to.not.be.undefined;
-      expect(postOfThread1.mirrors).to.have.length(2);
-      expect(postOfThread1.parsingStatus).to.eq(AppPostParsingStatus.IDLE);
-      expect(postOfThread1.parsedStatus).to.eq(AppPostParsedStatus.PROCESSED);
-      expect(postOfThread1.republishedStatus).to.eq(
-        AppPostRepublishedStatus.PENDING
-      );
-
-      /** simulate postUpdatedHook (should autopost the post )*/
-      await postUpdatedHook(postOfThread1.id);
-      const postOfThread2 = await services.postsManager.getPost(
-        postOfThread1.id,
-        true
-      );
 
       expect(postOfThread2.semantics).to.not.be.undefined;
       expect(postOfThread2.originalParsed).to.not.be.undefined;

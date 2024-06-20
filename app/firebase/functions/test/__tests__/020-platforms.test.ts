@@ -143,10 +143,10 @@ describe('02-platforms', () => {
           platformPost as any as PlatformPostCreate<TwitterThread>
         );
 
-        genericPost.content.forEach((post) => {
-          expect(post.quotedPost).to.not.be.undefined;
+        genericPost.thread.forEach((post) => {
+          expect(post.quotedThread).to.not.be.undefined;
           expect(
-            quotedTweetIds.some((id) => post.quotedPost?.url?.includes(id))
+            quotedTweetIds.some((id) => post.quotedThread?.url?.includes(id))
           ).to.be.true;
         });
       } catch (error) {

@@ -41,6 +41,7 @@ import { enqueueTask } from '../tasks.support';
 import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { getUsernameTag } from '../users/users.utils';
+import { PostsHelper } from './posts.helper';
 import { PostsProcessing } from './posts.processing';
 import { AUTOPOST_POST_TASK } from './tasks/posts.autopost.task';
 
@@ -423,7 +424,9 @@ export class PostsManager {
   protected async _parsePost(postId: string, manager: TransactionManager) {
     const post = await this.processing.posts.get(postId, manager, true);
     if (DEBUG) logger.debug(`parsePost - start ${postId}`, { postId, post });
+    const author = await this.users.repo.getUser(post.authorId, manager, true);
 
+    const genericPost = PostsHelper.convertToGenericThread(post, author);
     const params: ParsePostRequest<TopicsParams> = {
       post: genericPost,
       parameters: {
@@ -458,7 +461,6 @@ export class PostsManager {
     await this.updatePost(post.id, update, manager);
 
     /** trigger autopost task if author has autopost configured  */
-    const author = await this.users.repo.getUser(post.authorId, manager, true);
     const autopostOnPlatforms = UsersHelper.autopostPlatformIds(author);
     if (autopostOnPlatforms.length > 0) {
       await enqueueTask(AUTOPOST_POST_TASK, {
@@ -477,7 +479,7 @@ export class PostsManager {
     if (DEBUG) logger.debug(`updatePost ${postId}`, { postId, postUpdate });
     await this.processing.posts.updateContent(postId, postUpdate, manager);
 
-    if (postUpdate.semantics || postUpdate.content) {
+    if (postUpdate.semantics || postUpdate.thread) {
       /** rebuild the platform drafts with the new post content */
       if (DEBUG)
         logger.debug(`updatePost - semantics, content found ${postId}`, {
@@ -568,7 +570,7 @@ export class PostsManager {
         newPost.id,
         {
           reviewedStatus: AppPostReviewStatus.APPROVED,
-          content: newPost.content,
+          thread: newPost.thread,
           semantics: newPost.semantics,
         },
         manager
