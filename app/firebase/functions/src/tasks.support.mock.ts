@@ -3,6 +3,7 @@ import {
   NOTIFY_USER_TASK,
   notifyUserTask,
 } from './notifications/notification.task';
+import { postUpdatedHook } from './posts/hooks/post.updated.hook';
 import {
   AUTOFETCH_POSTS_TASK,
   autofetchUserPosts,
@@ -24,7 +25,12 @@ export const enqueueTaskMock = async (name: string, params: any) => {
       return autopostPostTask({ data: params } as any);
     }
     if (name === AUTOFETCH_POSTS_TASK) {
-      return autofetchUserPosts({ data: params } as any);
+      const postsCreated = await autofetchUserPosts({ data: params } as any);
+
+      /** simulate the postUpdated hook with the created posts */
+      await Promise.all(
+        postsCreated.map((postCreated) => postUpdatedHook(postCreated.post))
+      );
     }
     if (name === NOTIFY_USER_TASK) {
       return notifyUserTask({ data: params } as any);

@@ -134,7 +134,9 @@ exports[AUTOFETCH_POSTS_TASK] = onTaskDispatched(
     minInstances: envDeploy.CONFIG_MININSTANCE,
     secrets,
   },
-  autofetchUserPosts
+  async (req) => {
+    void (await autofetchUserPosts(req));
+  }
 );
 
 exports[AUTOPOST_POST_TASK] = onTaskDispatched(

@@ -1,16 +1,12 @@
 import { expect } from 'chai';
 
 import { NOTIFICATION_FREQUENCY } from '../../src/@shared/types/types.notifications';
-import {
-  PlatformPostPosted,
-  PlatformPostPublishStatus,
-} from '../../src/@shared/types/types.platform.posts';
+import { PlatformPostPublishStatus } from '../../src/@shared/types/types.platform.posts';
 import {
   AppPostParsedStatus,
   AppPostParsingStatus,
   AppPostRepublishedStatus,
 } from '../../src/@shared/types/types.posts';
-import { TwitterThread } from '../../src/@shared/types/types.twitter';
 import {
   AppUser,
   AutopostOption,
@@ -18,18 +14,13 @@ import {
 } from '../../src/@shared/types/types.user';
 import { USE_REAL_NOTIFICATIONS } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
-import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
-import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { triggerAutofetchPosts } from '../../src/posts/tasks/posts.autofetch.task';
-import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
-import { createUsers } from '../utils/users.utils';
 import {
-  USE_REAL_NANOPUB,
-  USE_REAL_PARSER,
-  USE_REAL_TWITTER,
-  testUsers,
-} from './setup';
+  _01_createAndFetchUsers,
+  _02_PublishTweet,
+} from './reusable/create-post-fetch';
+import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
 import { getTestServices } from './test.services';
 
 const DEBUG_PREFIX = `030-process`;
@@ -51,41 +42,9 @@ describe('050-autopost', () => {
 
   describe('create and process', () => {
     let user: AppUser | undefined;
-    let thread: PlatformPostPosted<TwitterThread>;
 
     before(async () => {
-      await services.db.run(async (manager) => {
-        const users = await createUsers(
-          services,
-          Array.from(testUsers.values()),
-          manager
-        );
-        if (DEBUG)
-          logger.debug(`users crated ${users.length}`, { users }, DEBUG_PREFIX);
-        user = users.find(
-          (u) =>
-            UsersHelper.getAccount(
-              u,
-              PLATFORM.Twitter,
-              TWITTER_USER_ID_MOCKS
-            ) !== undefined
-        );
-        if (DEBUG)
-          logger.debug(`test user ${user?.userId}`, { user }, DEBUG_PREFIX);
-      });
-
-      /**
-       * fetch once to get the posts once and set the fetchedDetails of
-       * the account
-       */
-
-      if (!user) throw new Error('user not created');
-      if (DEBUG) logger.debug(` ${user?.userId}`, { user }, DEBUG_PREFIX);
-      /** fetch will store the posts in the DB */
-      await services.postsManager.fetchUser({
-        userId: user.userId,
-        params: { expectedAmount: 10 },
-      });
+      user = await _01_createAndFetchUsers(services, { DEBUG, DEBUG_PREFIX });
     });
 
     it('upates user autopost settings', async () => {
@@ -112,38 +71,7 @@ describe('050-autopost', () => {
     });
 
     it('publish a tweet in the name of the test user', async () => {
-      await services.db.run(async (manager) => {
-        if (!user) {
-          throw new Error('user not created');
-        }
-
-        const accounts = user[PLATFORM.Twitter];
-        if (!accounts) {
-          throw new Error('Unexpected');
-        }
-        const account = accounts[0];
-        if (!account) {
-          throw new Error('Unexpected');
-        }
-
-        const TEST_CONTENT = `This is a test post ${USE_REAL_TWITTER ? Date.now() : ''}`;
-
-        thread = await services.platforms
-          .get<TwitterService>(PLATFORM.Twitter)
-          .publish(
-            {
-              draft: { text: TEST_CONTENT },
-              userDetails: account,
-            },
-            manager
-          );
-
-        expect(thread).to.not.be.undefined;
-
-        if (USE_REAL_TWITTER) {
-          await new Promise<void>((resolve) => setTimeout(resolve, 6 * 1000));
-        }
-      });
+      await _02_PublishTweet(services, user);
     });
 
     it('fetch user posts from all platforms', async () => {
@@ -151,8 +79,8 @@ describe('050-autopost', () => {
         throw new Error('user not created');
       }
 
-      /** simulate the cron JOB
-       * it will trigger parse tasks for each fetched post
+      /**
+       * simulate the cron JOB
        * it will trigger autopost tasks for each parsed post whose user has autopost enabled
        * */
       await triggerAutofetchPosts();
