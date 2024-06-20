@@ -107,7 +107,6 @@ class TopicsParserChain(AllowedTermsPParserChain):
             str: full instantiated prompt
         """
         metadata_list = metadata_list if metadata_list else list()
-        references_metadata = get_refs_metadata_portion(metadata_list)
 
         prompt_j2_template = self.topics_template
 

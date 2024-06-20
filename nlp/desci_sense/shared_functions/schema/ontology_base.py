@@ -11,6 +11,9 @@ from ..interface import (
 from .ontology import ontology
 from ..utils import render_to_py_dict
 
+# TODO this should be validated in construction of the ontology
+DEFAULT_LABEL = "default"
+
 
 def load_ontology_from_model(ont_model: dict) -> OntologyInterface:
     ontology_interface = OntologyInterface.model_validate(ont_model)
@@ -156,3 +159,9 @@ class OntologyBase:
 
     def get_all_display_names(self) -> List[str]:
         return self.ont_df.display_name.to_list()
+
+    def default_mention_label(self) -> str:
+        """
+        Return label corresponding to a default `mentions` predicate
+        """
+        return DEFAULT_LABEL

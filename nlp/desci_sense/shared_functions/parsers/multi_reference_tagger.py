@@ -382,6 +382,9 @@ class MultiRefTaggerParserChain(PostParserChain):
         prompt_j2_template = self.prompt_case_dict[case]["prompt_j2_template"]
         type_templates = self.prompt_case_dict[case]["type_templates"]
 
+        # render instructions for reference metadata
+        rendered_instructions = self.post_renderer.render_instructions(post)
+
         # render post with metadata for prompt
         rendered_post = self.post_renderer.render(
             post,
@@ -391,6 +394,7 @@ class MultiRefTaggerParserChain(PostParserChain):
         # instantiate prompt with ref post details
         full_prompt = prompt_j2_template.render(
             type_templates=type_templates,
+            ref_metadata_instructions=rendered_instructions,
             rendered_post=rendered_post,
         )
 

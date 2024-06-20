@@ -46,7 +46,7 @@ def test_combined_pp():
     assert res.item_types == ["preprint"]
     assert len(res.keywords) > 0
     assert len(res.metadata_list) == 1
-    assert res.filter_classification == SciFilterClassfication.RESEARCH
+    assert res.filter_classification == SciFilterClassfication.CITOID_DETECTED_RESEARCH
 
 
 def test_firebase_pp():
@@ -55,7 +55,7 @@ def test_firebase_pp():
     mcp = MultiChainParser(multi_config)
     res = mcp.process_text(TEST_POST_TEXT_W_REF)
     len(res.support.refs_meta) == 1
-    assert res.filter_classification == SciFilterClassfication.RESEARCH
+    assert res.filter_classification == SciFilterClassfication.CITOID_DETECTED_RESEARCH
 
 
 def test_multi_chain_batch_pp_simple():
@@ -122,7 +122,6 @@ if __name__ == "__main__":
     multi_chain_parser = MultiChainParser(multi_config)
     multi_chain_parser.config.post_process_type = PostProcessType.FIREBASE
     res = multi_chain_parser.batch_process_ref_posts(posts)
-
 
     # len(res.support.refs_meta) == 1
     # assert "test" in mcp.pparsers

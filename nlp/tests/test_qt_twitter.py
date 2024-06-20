@@ -48,10 +48,29 @@ def test_qt_with_external_ref():
         in quote_ref_post.quoted_post.content
     )
 
+def test_ordering():
+    tweet_url = "https://x.com/EikoFried/status/1798167612175913332"
+    quote_ref_post = scrape_post(tweet_url)
+    assert quote_ref_post.md_ref_urls() == [
+        "https://journals.sagepub.com/doi/10.1177/20451253231198466",
+        "https://www.youtube.com/watch?feature=youtu.be&si=kjMtNR1Hwe7NZ8as&v=WknlkmJee4E",
+    ]
+    
+
 
 if __name__ == "__main__":
-    tweet_url = "https://x.com/StephensonJones/status/1799035911042482210"
-    # tweet_url = "https://twitter.com/i/status/1795918889542361110"
+    tweet_url = "https://x.com/EikoFried/status/1798167612175913332"
     quote_ref_post = scrape_post(tweet_url)
+    tweet_url = "https://x.com/EikoFried/status/1798167612175913332"
+    quote_ref_post = scrape_post(tweet_url)
+    ref_urls = quote_ref_post.md_ref_urls()
+    assert ref_urls == [
+        "https://journals.sagepub.com/doi/10.1177/20451253231198466",
+        "https://www.youtube.com/watch?feature=youtu.be&si=kjMtNR1Hwe7NZ8as&v=WknlkmJee4E",
+    ]
+    assert ref_urls == [
+        "https://journals.sagepub.com/doi/10.1177/20451253231198466",
+        "https://www.youtube.com/watch?feature=youtu.be&si=kjMtNR1Hwe7NZ8as&v=WknlkmJee4E",
+    ]
 
     # create dict of metadata by order of appearance

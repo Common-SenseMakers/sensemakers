@@ -11,7 +11,17 @@ from datetime import datetime
 from langchain.load.serializable import Serializable
 from langchain.pydantic_v1 import Field
 
-from desci_sense.shared_functions.utils import remove_dups_ordered
+from ..utils import (
+    remove_dups_ordered,
+    extract_and_expand_urls,
+    extract_external_urls_from_status_tweet,
+)
+
+from ..interface import (
+    ThreadInterface,
+    AppPost,
+    SocialPlatformType,
+)
 
 
 class Post(Serializable):
@@ -71,6 +81,29 @@ class RefPost(Post):
         """
         return remove_dups_ordered(self.ref_urls)
 
+    @classmethod
+    def from_basic_post_interface(
+        cls,
+        basic_post_interface: AppPost,
+    ):
+        # if source network is twitter, use twitter specific preprocessing
+        if basic_post_interface.source_network == SocialPlatformType.TWITTER:
+            ref_urls = extract_external_urls_from_status_tweet(
+                basic_post_interface.url,
+                basic_post_interface.content,
+            )
+
+        else:
+            ref_urls = extract_and_expand_urls(basic_post_interface.content)
+
+        return cls(
+            author=basic_post_interface.author.name,
+            url=basic_post_interface.url,
+            content=basic_post_interface.content,
+            ref_urls=ref_urls,
+            source_network=basic_post_interface.author.platformId,
+        )
+
 
 class QuoteRefPost(RefPost):
     """
@@ -103,3 +136,41 @@ class QuoteRefPost(RefPost):
         all_ref_urls = remove_dups_ordered(all_ref_urls)
 
         return all_ref_urls
+
+
+class ThreadRefPost(RefPost):
+    """
+    Thread of multiple posts linked together in a sequence
+    """
+
+    type: Literal["ThreadRefPost"] = "ThreadRefPost"
+
+    posts: List[QuoteRefPost]
+    """
+    Posts included in this thread
+    """
+
+    def md_ref_urls(self, include_quoted_ref_urls: bool = True) -> List[str]:
+        """
+        Return list of reference urls for metadata extraction, ordered
+        by place of appearance.
+        If include_quoted_urls == True, include quoted_post.md_ref_urls()
+        """
+        all_ref_urls = []
+
+        for post in self.posts:
+            all_ref_urls += post.md_ref_urls(
+                include_quoted_ref_urls=include_quoted_ref_urls
+            )
+
+        # remove duplicate references
+        all_ref_urls = remove_dups_ordered(all_ref_urls)
+
+        return all_ref_urls
+
+    @classmethod
+    def from_thread_post_interface(
+        cls,
+        thread_post_interface: ThreadInterface,
+    ):
+        pass

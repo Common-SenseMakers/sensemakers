@@ -14,6 +14,12 @@ from confection import Config
 #     MAX_SUMMARY_LENGTH,
 #     ParserInitConfigOptional,
 # )
+from desci_sense.shared_functions.dataloaders import (
+    scrape_post,
+    convert_text_to_ref_post,
+)
+from desci_sense.shared_functions.preprocessing import ParserInput
+from desci_sense.shared_functions.preprocessing.threads import create_thread_from_posts
 from desci_sense.shared_functions.parsers.multi_chain_parser import MultiChainParser
 from desci_sense.shared_functions.configs import (
     OpenrouterAPIConfig,
@@ -21,11 +27,45 @@ from desci_sense.shared_functions.configs import (
     LLMConfig,
     KeywordPParserChainConfig,
     RefTaggerChainConfig,
+    MultiRefTaggerChainConfig,
     TopicsPParserChainConfig,
     validate_env_var,
     MultiParserChainConfig,
     ParserChainType,
 )
+
+def no_empty_lists(list_of_lists):
+    """
+    Verifies that the input list of lists contains no empty lists.
+
+    Parameters:
+    list_of_lists (list of lists): The input list of lists to be verified.
+
+    Returns:
+    bool: True if no empty lists are found, False otherwise.
+    """
+    return all(len(sublist) > 0 for sublist in list_of_lists)
+
+
+def get_thread_1():
+    thread_urls = [
+        "https://x.com/EikoFried/status/1798166869574398271",
+        "https://x.com/EikoFried/status/1798167612175913332",
+        "https://x.com/EikoFried/status/1798170515817013679",
+        "https://x.com/EikoFried/status/1798170610314715569",
+        "https://x.com/EikoFried/status/1798171316375445681",
+    ]
+    thread_posts = [scrape_post(url) for url in thread_urls]
+    thread_post = create_thread_from_posts(thread_posts)
+    return thread_post
+
+
+def get_thread_single_post():
+    thread_posts = [
+        scrape_post("https://x.com/biorxiv_neursci/status/1798962015148576815")
+    ]
+    thread_post = create_thread_from_posts(thread_posts)
+    return thread_post
 
 
 def create_multi_config_for_tests(llm_type: str = "open-orca/mistral-7b-openorca"):
@@ -34,8 +74,8 @@ def create_multi_config_for_tests(llm_type: str = "open-orca/mistral-7b-openorca
         use_metadata=True,
         llm_config=LLMConfig(llm_type=llm_type),
     )
-    rtc = RefTaggerChainConfig(
-        name="refs_tag_test",
+    rtc = MultiRefTaggerChainConfig(
+        name="multi_refs_tag_test",
         use_metadata=True,
         llm_config=LLMConfig(llm_type=llm_type),
     )

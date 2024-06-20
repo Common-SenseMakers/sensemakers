@@ -11,6 +11,8 @@ You are an expert annotator tasked with converting social media posts about scie
 
   A user will pass in a post, and you should think step by step, before selecting a set of tags that best match the post.
 
+{{ ref_metadata_instructions }}
+
 # Required output format
 Your final answer should be structured as a JSON Answer object with a list of a *single* SubAnswer object, as described by the following schemas:
 

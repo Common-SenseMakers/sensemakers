@@ -1,4 +1,5 @@
 from typing import Optional, List, Dict, TypedDict, Union, Any
+from enum import Enum
 from pydantic import (
     Field,
     BaseModel,
@@ -11,6 +12,12 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from rdflib import URIRef, Literal, Graph
 from .prompting.jinja.topics_template import ALLOWED_TOPICS
 from .filters import SciFilterClassfication
+
+
+class SocialPlatformType(str, Enum):
+    TWITTER = "twitter"
+    MASTODON = "mastodon"
+    UNKNOWN = "unknown"
 
 
 # TODO fix using alias for env var default loading
@@ -240,6 +247,53 @@ class ParserResult(BaseModel):
             graph.parse(data=value, format="turtle")
             return graph
         raise ValueError("Invalid graph format")
+
+
+class Author(BaseModel):
+    id: str = Field(description="Internal platform ID for author")
+    name: str = Field(description="Author display name")
+    username: str = Field(description="Platform username of author")
+    platformId: SocialPlatformType = Field(description="Name of platform")
+
+
+# class AppPostContent(BaseModel):
+
+
+class AppPost(BaseModel):
+    author: Author = Field(description="Post author")
+    content: str = Field(description="Post content")
+    url: Optional[str] = Field(description="Post url", default=None)
+
+
+class QuoteAppPost(AppPost):
+    quotedPosts: List[AppPost] = Field(description="List of posts quoted in this post")
+
+    @property
+    def source_network(self) -> SocialPlatformType:
+        return self.author.platformId
+
+
+class ThreadInterface(BaseModel):
+    """
+    The `GenericPostData` object passed to the parser in the `ParsePostRequest`.
+
+    Supports threaded posts with multiple quoted posts
+    """
+
+    quotedPosts: List[AppPost] = Field(
+        description="List of quote posts quoted by this thread"
+    )
+
+
+class ParsePostRequest(BaseModel):
+    """
+    The request passed to the parser by the ts app
+    """
+
+    post: ThreadInterface = Field(description="Threaded post to be processed")
+    parameters: Any = Field(
+        description="Additional params for parser (not used currently)"
+    )
 
 
 # TODO remove - changed to RefMetadata
