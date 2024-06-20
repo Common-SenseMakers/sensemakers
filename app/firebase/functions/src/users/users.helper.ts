@@ -45,11 +45,12 @@ export class UsersHelper {
   ): DefinedIfTrue<T, UserDetailsBase> {
     const platformAccounts = UsersHelper.getAccounts(user, platformId);
 
-    if (platformAccounts.length === 0) {
-      return undefined as DefinedIfTrue<T, UserDetailsBase>;
-    }
     if (platformAccounts.length === 0 && _throw) {
       throw new Error('Platform account not found');
+    }
+
+    if (platformAccounts.length === 0) {
+      return undefined as DefinedIfTrue<T, UserDetailsBase>;
     }
 
     const account = user_id
