@@ -401,16 +401,11 @@ def test_thread_render_single_post():
 
 
 if __name__ == "__main__":
-    thread_post = get_thread_single_post()
-    multi_config = MultiParserChainConfig(
-        parser_configs=[
-            MultiRefTaggerChainConfig(
-                name="multi_ref_tagger",
-                llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
-                post_renderer=PostRendererType.THREAD_REF_POST,
-            )
-        ],
-        metadata_extract_config=MetadataExtractionConfig(extraction_method="citoid"),
-    )
-    mcp = MultiChainParser(multi_config)
-    res = mcp.process_ref_post(thread_post)
+    thread_post = get_thread_1()
+    dicts = []
+    for post in thread_post.posts:
+        pp = post.dict()
+        pp.pop("metadata")
+        if pp["quoted_post"]:
+            pp["quoted_post"].pop("metadata")
+        dicts.append(pp)
