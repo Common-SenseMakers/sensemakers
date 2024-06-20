@@ -256,14 +256,33 @@ class TwitterEval(Evaluation):
                     results.append(result)
                 except Exception as exc:
                     print(f'Post {post} generated an exception: {exc}')
+                    # Append a default value to maintain length consistency
+                    results.append((0, 0, ['citoid_error']))
                     
         return results
 
-    def feed_tweet_type_statistics(self, df, name):
+    def feed_tweet_type_statistics(self, df, name,update_df = 1):
         df1 = df[df["username"] == name]
         inputs = self.prepare_parser_input(df1)
         post_count=len(inputs)
         results = self.nested_quotes_citoid_parallel(inputs)
+        if update_df:
+            # Ensure 'citoid_research' column exists
+            if 'citoid_research' not in df.columns:
+                df['citoid_research'] = None
+
+            # Extract the first element of each tuple in results and ensure lengths match
+            first_elements = [result[0] for result in results[:post_count]]
+            
+            # Debugging prints
+            print(f"Length of df1: {len(df1)}")
+            print(f"Length of inputs: {len(inputs)}")
+            print(f"Length of results: {len(results)}")
+            print(f"Length of first_elements: {len(first_elements)}")
+        
+            # Assign these elements to the corresponding rows in df1
+            df.loc[df["username"] == name, 'citoid_research'] = first_elements
+
         citoid_count = 0
         quotes_count = 0
         quoted_citoid_count = 0
@@ -371,6 +390,7 @@ if __name__ == "__main__":
     df_handles = get_dataset(table_path)
     df_eval = Eval.build_post_type_chart(df_handles=df_handles,df=df)
     fig1, fig2 = Eval.build_item_type_pie(df=df_eval)
+    wandb.log({"dataset": wandb.Table(dataframe=df)})
     wandb.log({"Quote statistics per feed": wandb.Table(dataframe=df_eval)})
    #print(df['Ref item types'])
     #fig1, fig2 = Eval.build_item_type_pie(df=df)
