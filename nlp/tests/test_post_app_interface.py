@@ -4,12 +4,24 @@ from pathlib import Path
 ROOT = Path(__file__).parents[1]
 sys.path.append(str(ROOT))
 
+
+from pydantic import (
+    Field,
+    BaseModel,
+    validator,
+    ConfigDict,
+    field_validator,
+    field_serializer,
+    model_validator,
+    ValidationError,
+)
+
 from desci_sense.shared_functions.schema.post import (
     RefPost,
     ThreadRefPost,
     QuoteRefPost,
 )
-from desci_sense.shared_functions.interface import ThreadInterface, ParsePostRequest
+from desci_sense.shared_functions.interface import AppThread, ParsePostRequest
 from desci_sense.shared_functions.dataloaders import scrape_post
 from desci_sense.shared_functions.dataloaders.twitter.twitter_utils import (
     extract_external_ref_urls,
@@ -19,6 +31,48 @@ from desci_sense.shared_functions.dataloaders.twitter.twitter_utils import (
 from desci_sense.shared_functions.preprocessing import (
     convert_thread_interface_to_ref_post,
 )
+
+TEST_THREAD_INTERFACE_2 = {
+    "url": "https://example.com/post/2",
+    "thread": [
+        {
+            "url": "https://example.com/post/2",
+            "content": "This is the first post in the thread.",
+        },
+        {
+            "url": "https://example.com/post/3",
+            "content": "This is the second post in the thread.",
+        },
+    ],
+    "author": {
+        "platformId": "twitter",
+        "id": "author_456",
+        "username": "user546",
+        "name": "Sarah Gore",
+    },
+}
+
+TEST_THREAD_INTERFACE_1 = {
+    "url": "https://example.com/post/1",
+    "thread": [
+        {
+            "url": "https://example.com/post/1",
+            "content": "This is the first post in the thread.",
+            "quotedThread": TEST_THREAD_INTERFACE_2,
+        },
+        {
+            "url": "https://example.com/post/2",
+            "content": "This is the second post in the thread.",
+        },
+    ],
+    "author": {
+        "platformId": "twitter",
+        "id": "author_123",
+        "username": "user123",
+        "name": "John Doe",
+    },
+}
+
 
 SINGLE_QUOTE_TWEET = {
     "url": "https://x.com/nnnn/status/180089896680621",
@@ -96,13 +150,14 @@ def test_parse_single_post_request():
 
 
 def test_basic_post_interface_on_quoted_post():
-    ref = ThreadInterface.model_validate(MULTI_QUOTE_THREAD)
+    ref = AppThread.model_validate(MULTI_QUOTE_THREAD)
     ref_post = RefPost.from_basic_post_interface(ref.quotedPosts[1])
     assert ref_post.ref_urls == [
         "https://twitter.com/JaneSmith/status/1797349211849245178"
     ]
+    
+
 
 
 if __name__ == "__main__":
-    thread_interface = ThreadInterface.model_validate(MULTI_QUOTE_THREAD)
-    thread_ref_post = convert_thread_interface_to_ref_post(thread_interface)
+    thread = AppThread.model_validate(TEST_THREAD_INTERFACE_1)

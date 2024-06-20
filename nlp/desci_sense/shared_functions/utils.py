@@ -6,6 +6,7 @@ from enum import Enum
 import json
 from jsoncomment import JsonComment
 import html2text
+from loguru import logger
 from urllib.parse import urlparse
 
 from url_normalize import url_normalize
@@ -116,9 +117,10 @@ def identify_social_media(url):
 
 def unshorten_url(url):
     try:
-        response = requests.head(url, allow_redirects=True)
+        response = requests.head(url, allow_redirects=True, timeout=10)
         return response.url
-    except requests.RequestException as e:
+    except requests.RequestException:
+        logger.warning(f"[unshorten_url] RequestException for url {url}")
         # return original url in case of errors
         return url
 
