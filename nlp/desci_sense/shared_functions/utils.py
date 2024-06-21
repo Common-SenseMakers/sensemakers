@@ -183,7 +183,7 @@ def extract_external_urls_from_status_tweet(
     Shortened URLs are expanded to long form.
     """
     tweet_id = extract_twitter_status_id(tweet_url)
-    external = set()
+    external = []
     urls = extract_and_expand_urls(tweet_content)
 
     for url in urls:
@@ -193,12 +193,12 @@ def extract_external_urls_from_status_tweet(
             if (
                 url_twitter_id != tweet_id
             ):  # check if url does not share same status id with parsed tweet
-                external.add(url)
+                external.append(url)
         else:
             # not twitter url, add
-            external.add(url)
+            external.append(url)
 
-    return list(external)
+    return remove_dups_ordered(external)
 
 
 def render_to_py_dict(obj_dict, obj_name: str = "object", out_path: str = "output.py"):

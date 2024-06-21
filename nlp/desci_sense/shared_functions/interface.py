@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Optional, List, Dict, TypedDict, Union, Any
 from enum import Enum
 from pydantic import (
@@ -7,6 +8,8 @@ from pydantic import (
     ConfigDict,
     field_validator,
     field_serializer,
+    model_validator,
+    ValidationError,
 )
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from rdflib import URIRef, Literal, Graph
@@ -259,30 +262,43 @@ class Author(BaseModel):
 # class AppPostContent(BaseModel):
 
 
+# class AppPost(BaseModel):
+#     content: str = Field(description="Post content")
+#     url: Optional[str] = Field(description="Post url", default=None)
+#     quoted_thread_url: Optional[str] = Field(
+#         description="Url of quoted thread", default=None
+#     )
+
+
 class AppPost(BaseModel):
-    author: Author = Field(description="Post author")
     content: str = Field(description="Post content")
-    url: Optional[str] = Field(description="Post url", default=None)
+    url: str = Field(description="Post url")
+    quotedThread: Optional[AppThread] = Field(
+        description="Quoted thread",
+        default=None,
+    )
 
 
-class QuoteAppPost(AppPost):
-    quotedPosts: List[AppPost] = Field(description="List of posts quoted in this post")
+class AppThread(BaseModel):
+    author: Author
+    url: str = Field(description="Thread url (url of first post)")
+    thread: List[AppPost] = Field(description="List of posts quoted in this thread")
 
     @property
     def source_network(self) -> SocialPlatformType:
         return self.author.platformId
 
 
-class ThreadInterface(BaseModel):
-    """
-    The `GenericPostData` object passed to the parser in the `ParsePostRequest`.
+# class ThreadInterface(BaseModel):
+#     """
+#     The `GenericPostData` object passed to the parser in the `ParsePostRequest`.
 
-    Supports threaded posts with multiple quoted posts
-    """
+#     Supports threaded posts with multiple quoted posts
+#     """
 
-    quotedPosts: List[AppPost] = Field(
-        description="List of quote posts quoted by this thread"
-    )
+#     quotedPosts: List[AppPost] = Field(
+#         description="List of quote posts quoted by this thread"
+#     )
 
 
 class ParsePostRequest(BaseModel):
@@ -290,7 +306,7 @@ class ParsePostRequest(BaseModel):
     The request passed to the parser by the ts app
     """
 
-    post: ThreadInterface = Field(description="Threaded post to be processed")
+    post: AppThread = Field(description="Threaded post to be processed")
     parameters: Any = Field(
         description="Additional params for parser (not used currently)"
     )
