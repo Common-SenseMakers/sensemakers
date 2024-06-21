@@ -1,6 +1,6 @@
 export enum ActivityType {
-  PostParsed,
-  PostAutoposted,
+  PostParsed = 'postParsed',
+  PostAutoposted = 'PostAutoposted',
 }
 
 export interface ActivityEventBase<D = any> {

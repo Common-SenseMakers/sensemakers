@@ -1,11 +1,11 @@
 import { ActivityEventBase } from '../types/types.activity';
 
 export enum NotificationFreq {
-  Instant,
-  Daily,
-  Weekly,
-  Monthly,
-  None,
+  Instant = 'instant',
+  Daily = 'daily',
+  Weekly = 'weekly',
+  Monthly = 'monthly',
+  None = 'none',
 }
 
 export enum NotificationStatus {

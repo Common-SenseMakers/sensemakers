@@ -1,3 +1,4 @@
+import { activityEventCreatedHook } from './activity/activity.created.hook';
 import { logger } from './instances/logger';
 import { createServices } from './instances/services';
 import {
@@ -33,7 +34,11 @@ export const enqueueTaskMock = async (name: string, params: any) => {
       );
 
       /** should detect the parse and trigger the autopost if needed */
-      await postUpdatedHook(postAfter, postBefore);
+      const activities = await postUpdatedHook(postAfter, postBefore);
+
+      await Promise.all(
+        activities.map((activity) => activityEventCreatedHook(activity))
+      );
     }
 
     if (name === AUTOPOST_POST_TASK) {
@@ -50,7 +55,10 @@ export const enqueueTaskMock = async (name: string, params: any) => {
       );
 
       /** should create the activity */
-      await postUpdatedHook(postAfter, postBefore);
+      const activities = await postUpdatedHook(postAfter, postBefore);
+      await Promise.all(
+        activities.map((activity) => activityEventCreatedHook(activity))
+      );
     }
 
     if (name === AUTOFETCH_POSTS_TASK) {

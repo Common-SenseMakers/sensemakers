@@ -1,4 +1,5 @@
 import {
+  ActivityEventBase,
   ActivityEventCreate,
   ActivityType,
   PostActData,
@@ -40,6 +41,8 @@ export const postUpdatedHook = async (post: AppPost, postBefore?: AppPost) => {
     await enqueueTask(PARSE_POST_TASK, { postId });
   }
 
+  const activitiesCreated: ActivityEventBase[] = [];
+
   /** Create the activity elements */
   const { wasParsed } = await db.run(async (manager) => {
     /** detect parsed state change */
@@ -58,7 +61,8 @@ export const postUpdatedHook = async (post: AppPost, postBefore?: AppPost) => {
         timestamp: time.now(),
       };
 
-      activity.repo.create(event, manager);
+      const parsedActivity = activity.repo.create(event, manager);
+      activitiesCreated.push(parsedActivity);
     }
 
     // if was parsed and user has autopost, then also trigger autopost
@@ -81,7 +85,8 @@ export const postUpdatedHook = async (post: AppPost, postBefore?: AppPost) => {
         timestamp: time.now(),
       };
 
-      activity.repo.create(event, manager);
+      const autopostedActivity = activity.repo.create(event, manager);
+      activitiesCreated.push(autopostedActivity);
     }
 
     logger.debug(
@@ -119,4 +124,6 @@ export const postUpdatedHook = async (post: AppPost, postBefore?: AppPost) => {
       });
     }
   }
+
+  return activitiesCreated;
 };
