@@ -1,6 +1,4 @@
-import FormData from 'form-data';
-import Mailgun, { MailgunMessageData } from 'mailgun.js';
-import { IMailgunClient } from 'mailgun.js/Interfaces';
+import { Message, ServerClient } from 'postmark';
 
 import { ActivityType } from '../@shared/types/types.activity';
 import {
@@ -21,6 +19,8 @@ import { UsersRepository } from '../users/users.repository';
 import { getPostUrl } from './notification.utils';
 import { NotificationsRepository } from './notifications.repository';
 
+const postmark = require('postmark');
+
 export const DEBUG = true;
 export const DEBUG_PREFIX = `NOTIFICATION-SERVICE`;
 
@@ -34,7 +34,7 @@ export interface EmailServiceConfig {
 }
 
 export class NotificationService {
-  protected mailgun: IMailgunClient;
+  protected postmark: ServerClient;
 
   constructor(
     public db: DBInstance,
@@ -44,11 +44,7 @@ export class NotificationService {
     public usersRepo: UsersRepository,
     config: EmailServiceConfig
   ) {
-    const mailgun = new Mailgun(FormData);
-    this.mailgun = mailgun.client({
-      username: 'api',
-      key: config.apiKey,
-    });
+    this.postmark = new postmark.ServerClient(config.apiKey);
   }
 
   createNotification(
@@ -195,18 +191,17 @@ export class NotificationService {
   }
 
   async sendDigest(userId: string, posts: EmailPostDetails[]) {
-    const messageData: MailgunMessageData = {
-      from: 'Excited User <mail@example.com>',
-      to: 'pepo.ospina@gmail.com',
-      subject: 'Hello from Sensecast',
-      text: 'Testing some Mailgun awesomeness!',
+    const message: Message = {
+      From: 'pepo@microrevolutions.com',
+      To: 'pepo.ospina@gmail.com',
+      Subject: 'Hello from Sensecast',
+      HtmlBody: '<strong>Hello</strong> dear Postmark user.',
+      TextBody: 'Hello dear Postmark user',
+      MessageStream: 'outbound',
     };
 
     try {
-      const res = await this.mailgun.messages.create(
-        'sandbox.mailgun.org',
-        messageData
-      );
+      const res = await this.postmark.sendEmail(message);
       logger.debug(`sendDigest`, { res }, DEBUG_PREFIX);
     } catch (e) {
       logger.error(`sendDigest`, { e }, DEBUG_PREFIX);

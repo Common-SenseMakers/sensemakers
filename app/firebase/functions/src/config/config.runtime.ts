@@ -11,7 +11,7 @@ const mandatory: Array<keyof typeof envRuntime> = [
   'NANOPUBS_PUBLISH_SERVERS',
   'NP_PUBLISH_RSA_PRIVATE_KEY',
   'NP_PUBLISH_RSA_PUBLIC_KEY',
-  'MAILGUN_API_KEY',
+  'EMAIL_CLIENT_SECRET',
 ];
 
 mandatory.forEach((varName) => {
@@ -62,4 +62,4 @@ export const NP_PUBLISH_RSA_PRIVATE_KEY = envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY;
 export const NP_PUBLISH_RSA_PUBLIC_KEY = envRuntime.NP_PUBLISH_RSA_PUBLIC_KEY;
 export const NANOPUBS_PUBLISH_SERVERS = envRuntime.NANOPUBS_PUBLISH_SERVERS;
 
-export const MAILGUN_API_KEY = envRuntime.MAILGUN_API_KEY;
+export const EMAIL_CLIENT_SECRET = envRuntime.EMAIL_CLIENT_SECRET;
