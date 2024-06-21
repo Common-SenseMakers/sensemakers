@@ -295,11 +295,11 @@ class TwitterEval(Evaluation):
             # Extract the first element of each tuple in results and ensure lengths match
             first_elements = [result[0] for result in results[:post_count]]
             
-            # Debugging prints
+            '''# Debugging prints
             print(f"Length of df1: {len(df1)}")
             print(f"Length of inputs: {len(inputs)}")
             print(f"Length of results: {len(results)}")
-            print(f"Length of first_elements: {len(first_elements)}")
+            print(f"Length of first_elements: {len(first_elements)}")'''
         
             # Assign these elements to the corresponding rows in df1
             df.loc[df["username"] == name, 'citoid_research'] = first_elements
@@ -316,7 +316,7 @@ class TwitterEval(Evaluation):
                 quotes_count = quotes_count + 1
         if post_count:
             quotes_ratio = quotes_count/post_count
-            citoid_ratio = quoted_citoid_count/post_count
+            citoid_ratio = citoid_count/post_count
         else:
             quotes_ratio = -1
             citoid_ratio = -1
@@ -343,6 +343,25 @@ class TwitterEval(Evaluation):
         new_row = pd.DataFrame([new_row], columns=['username', 'server', 'info', "citoid_count", "quoted_citoid_count", "quotes_count","post_count","quotes_ratio","citoid_ratio","Ref item types"])
         return df_feed_eval._append(new_row, ignore_index=True)
 
+    def build_thread_chart(self,df_handles:pd.DataFrame,df:pd.DataFrame):
+        df_feed_eval = df_handles[["username", "server", "info"]].copy()
+        for column in ["citoid_count", "thread_citoid_count", "thread_count","post_count","thread_ratio","citoid_ratio"]:
+            df_feed_eval[column] = 0
+            df_feed_eval[["citoid_count", "thread_citoid_count", "thread_count","post_count","thread_ratio","citoid_ratio","Ref item types"]] = df_feed_eval.apply(
+            lambda row: pd.Series(self.feed_tweet_type_statistics(df=df, name=row["username"])), axis=1)
+        #"Total" row
+        post_count = df_feed_eval["post_count"].sum()
+        quotes_count = df_feed_eval["quotes_count"].sum()
+        citoid_count = df_feed_eval["citoid_count"].sum()
+        if post_count:
+            quotes_ratio = quotes_count/post_count
+            citoid_ratio = citoid_count/post_count
+        else:
+            quotes_ratio = -1
+            citoid_ratio = -1
+        new_row = ["Summery","","",citoid_count,df_feed_eval["quoted_citoid_count"].sum(),quotes_count,post_count,quotes_ratio,citoid_ratio,[]]
+        new_row = pd.DataFrame([new_row], columns=['username', 'server', 'info', "citoid_count", "quoted_citoid_count", "quotes_count","post_count","quotes_ratio","citoid_ratio","Ref item types"])
+        return df_feed_eval._append(new_row, ignore_index=True)
 
                     
 
