@@ -76,9 +76,29 @@ class Evaluation:
             ratio = 0
             print("Ratio exception:", e)
         return ratio
+    
+    def row_to_post(self,row:pd.DataFrame):
+        try:
+            ref_post = RefPost(
+                author=row['username'],content=row['Text'],url='',ref_urls=row['urls'],source_network=row['server']
+                )
+        except Exception as e:
+            print('cannot convert to refpost: ',row)
+            print('With exception: ',e)
+            ref_post = None
+        return ref_post
 
+    def dataframe_to_ref_posts(self, df: pd.DataFrame):
+        ref_posts = []
+        for _, row in df.iterrows():
+            ref_post = self.row_to_post(row)        
+            ref_posts.append(ref_post)
+        return ref_posts
+    
     def prepare_parser_input(self, df):
-        return posts_to_refPosts(df['Text'])
+        print('Converting posts to refPosts')
+        ref_posts = posts_to_refPosts(df['Text'])
+        return ref_posts
 
     def pred_labels(self, df,active_list = ["hashtags"] , batch_size=10):
         model = MultiChainParser(self.config)
@@ -214,7 +234,7 @@ class TwitterEval(Evaluation):
     @staticmethod
     def check_quotes(urls):
         quotes = []
-        pattern = re.compile(r'^https://twitter\.com/.+/[0-9]+$')
+        pattern = re.compile(r'^https://(?:twitter\.com|x\.com)/.+/[0-9]+$')
         for url in urls:
             if pattern.match(url):
                 quotes.append(url)
@@ -262,6 +282,7 @@ class TwitterEval(Evaluation):
         return results
 
     def feed_tweet_type_statistics(self, df, name,update_df = 1):
+        print('Analyze tweets by',name)
         df1 = df[df["username"] == name]
         inputs = self.prepare_parser_input(df1)
         post_count=len(inputs)
@@ -351,7 +372,7 @@ if __name__ == "__main__":
     # get artifact path
 
     dataset_artifact_id = (
-            'common-sense-makers/filter_evaluation/prediction_evaluation-20240521132713:v0'
+            'common-sense-makers/post_type_stat/non_labeled_tweets:v0'
         )
 
     # set artifact as input artifact
@@ -366,31 +387,26 @@ if __name__ == "__main__":
 
     # get dataset file name
 
-    table_path = Path(f"{a_path}/prediction_evaluation.table.json")
+    table_path = Path(f"{a_path}/non_labeled_data_table.table.json")
 
 
     # return the pd df from the table
     #remember to remove the head TODO
     df = get_dataset(table_path)
 
-    dataset_artifact_id = (
-            'common-sense-makers/filter_evaluation/labeled_tweets_no_threads:v1'
-        )
-    # set artifact as input artifact
-    dataset_artifact = run.use_artifact(dataset_artifact_id)
+    '''df1 = df[df["username"] == 'sbuckshum']
 
-    # initialize table path
-    # add the option to call table_path =  arguments.get('--dataset')
+    ref_posts= Eval.dataframe_to_ref_posts(df1)
 
-    # download path to table
-    a_path = dataset_artifact.download()
+    print(ref_posts)'''
+
 
     table_path = Path(f"{a_path}/handles_chart.table.json")
 
     df_handles = get_dataset(table_path)
     df_eval = Eval.build_post_type_chart(df_handles=df_handles,df=df)
     fig1, fig2 = Eval.build_item_type_pie(df=df_eval)
-    wandb.log({"dataset": wandb.Table(dataframe=df)})
+    
     wandb.log({"Quote statistics per feed": wandb.Table(dataframe=df_eval)})
    #print(df['Ref item types'])
     #fig1, fig2 = Eval.build_item_type_pie(df=df)
@@ -407,6 +423,17 @@ if __name__ == "__main__":
 
     run.config.update(config)
 
+    
+
+    artifact = wandb.Artifact("dataset_stat", type="stat")
+
+    # Create a wandb.Table from the Pandas DataFrame
+    table = wandb.Table(dataframe=df)
+
+    # Add the wandb.Table to the artifact
+    artifact.add(table, "prediction_evaluation")
+
+   
     wandb.run.finish()
 
     
