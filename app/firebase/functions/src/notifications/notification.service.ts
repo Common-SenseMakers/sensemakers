@@ -173,7 +173,7 @@ export class NotificationService {
       )
     );
 
-    this.sendDigest(userId, postsDetails);
+    await this.sendDigest(userId, postsDetails);
   }
 
   async prepareAndSendDigestAuto(
