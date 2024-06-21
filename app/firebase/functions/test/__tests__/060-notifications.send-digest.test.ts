@@ -6,7 +6,6 @@ import { PlatformPostPosted } from '../../src/@shared/types/types.platform.posts
 import { GenericPost } from '../../src/@shared/types/types.posts';
 import { TwitterThread } from '../../src/@shared/types/types.twitter';
 import { AppUser } from '../../src/@shared/types/types.user';
-import { USE_REAL_NOTIFICATIONS } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
 import { triggerSendNotifications } from '../../src/notifications/notification.task';
 import { PostsHelper } from '../../src/posts/posts.helper';
@@ -17,7 +16,12 @@ import {
   _02_publishTweet,
 } from './reusable/create-post-fetch';
 import { updateUserSettings } from './reusable/update.settings';
-import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
+import {
+  USE_REAL_NANOPUB,
+  USE_REAL_NOTIFICATIONS,
+  USE_REAL_PARSER,
+  USE_REAL_TWITTER,
+} from './setup';
 import { getTestServices } from './test.services';
 
 const DEBUG_PREFIX = `030-process`;
