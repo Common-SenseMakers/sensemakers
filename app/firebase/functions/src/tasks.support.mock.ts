@@ -1,11 +1,10 @@
-import { activityEventCreatedHook } from './activity/activity.created.hook';
+import { postUpdatedHookOnTest } from '../test/utils/posts.utils';
 import { logger } from './instances/logger';
 import { createServices } from './instances/services';
 import {
   NOTIFY_USER_TASK,
   notifyUserTask,
 } from './notifications/notification.task';
-import { postUpdatedHook } from './posts/hooks/post.updated.hook';
 import {
   AUTOFETCH_POSTS_TASK,
   autofetchUserPosts,
@@ -34,11 +33,7 @@ export const enqueueTaskMock = async (name: string, params: any) => {
       );
 
       /** should detect the parse and trigger the autopost if needed */
-      const activities = await postUpdatedHook(postAfter, postBefore);
-
-      await Promise.all(
-        activities.map((activity) => activityEventCreatedHook(activity))
-      );
+      await postUpdatedHookOnTest(postAfter, postBefore);
     }
 
     if (name === AUTOPOST_POST_TASK) {
@@ -55,10 +50,7 @@ export const enqueueTaskMock = async (name: string, params: any) => {
       );
 
       /** should create the activity */
-      const activities = await postUpdatedHook(postAfter, postBefore);
-      await Promise.all(
-        activities.map((activity) => activityEventCreatedHook(activity))
-      );
+      await postUpdatedHookOnTest(postAfter, postBefore);
     }
 
     if (name === AUTOFETCH_POSTS_TASK) {
@@ -66,7 +58,9 @@ export const enqueueTaskMock = async (name: string, params: any) => {
 
       /** simulate the postUpdated hook with the created posts */
       await Promise.all(
-        postsCreated.map((postCreated) => postUpdatedHook(postCreated.post))
+        postsCreated.map(async (postCreated) =>
+          postUpdatedHookOnTest(postCreated.post)
+        )
       );
     }
 

@@ -4,6 +4,7 @@ import {
   PlatformPostPublishStatus,
 } from '../../src/@shared/types/types.platform.posts';
 import {
+  AppPost,
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
@@ -12,6 +13,7 @@ import {
   GenericThread,
 } from '../../src/@shared/types/types.posts';
 import { PLATFORM } from '../../src/@shared/types/types.user';
+import { activityEventCreatedHook } from '../../src/activity/activity.created.hook';
 import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { postUpdatedHook } from '../../src/posts/hooks/post.updated.hook';
 import { PostsManager } from '../../src/posts/posts.manager';
@@ -96,5 +98,17 @@ export const fetchPostsInTests = async (
    */
   await Promise.all(
     postsCreated.map((postCreated) => postUpdatedHook(postCreated.post))
+  );
+};
+
+// auto triggfe the acivity create hook
+export const postUpdatedHookOnTest = async (
+  post: AppPost,
+  before?: AppPost
+) => {
+  const activities = await postUpdatedHook(post, before);
+
+  await Promise.all(
+    activities.map((activity) => activityEventCreatedHook(activity))
   );
 };

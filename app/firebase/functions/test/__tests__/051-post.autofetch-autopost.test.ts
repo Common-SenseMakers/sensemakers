@@ -1,5 +1,7 @@
 import { expect } from 'chai';
 
+import { ActivityType } from '../../src/@shared/types/types.activity';
+import { NotificationFreq } from '../../src/@shared/types/types.notifications';
 import {
   PlatformPostPosted,
   PlatformPostPublishStatus,
@@ -10,7 +12,11 @@ import {
   AppPostRepublishedStatus,
 } from '../../src/@shared/types/types.posts';
 import { TwitterThread } from '../../src/@shared/types/types.twitter';
-import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
+import {
+  AppUser,
+  AutopostOption,
+  PLATFORM,
+} from '../../src/@shared/types/types.user';
 import { USE_REAL_NOTIFICATIONS } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
 import { TEST_THREADS } from '../../src/platforms/twitter/mock/twitter.service.mock';
@@ -20,13 +26,14 @@ import {
   _01_createAndFetchUsers,
   _02_publishTweet,
 } from './reusable/create-post-fetch';
+import { updateUserSettings } from './reusable/update.settings';
 import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
 import { getTestServices } from './test.services';
 
 const DEBUG_PREFIX = `030-process`;
 const DEBUG = false;
 
-describe('051-autpost-disabled', () => {
+describe('051-autofetch-autopost', () => {
   const services = getTestServices({
     time: 'real',
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
@@ -48,11 +55,22 @@ describe('051-autpost-disabled', () => {
       user = await _01_createAndFetchUsers(services, { DEBUG, DEBUG_PREFIX });
     });
 
+    it('upates user autopost settings', async () => {
+      await updateUserSettings(
+        services,
+        {
+          autopost: { [PLATFORM.Nanopub]: { value: AutopostOption.AI } },
+          notificationFreq: NotificationFreq.Daily,
+        },
+        user
+      );
+    });
+
     it('publish a tweet in the name of the test user', async () => {
       thread = await _02_publishTweet(services, user);
     });
 
-    it('fetch user posts from all platforms', async () => {
+    it('fetch posts and autopost', async () => {
       if (!user) {
         throw new Error('user not created');
       }
@@ -98,6 +116,53 @@ describe('051-autpost-disabled', () => {
 
       expect(nanopub.posted).to.not.be.undefined;
       expect(nanopub.publishStatus).to.eq(PlatformPostPublishStatus.PUBLISHED);
+
+      if (!user) {
+        throw new Error('user not created');
+      }
+      const userId = user.userId;
+
+      /** check the notitication for the user was created */
+      await services.db.run(async (manager) => {
+        const notificationsIds =
+          await services.notifications.notificationsRepo.getUnotifiedOfUser(
+            userId,
+            manager
+          );
+
+        const userNotifications = await Promise.all(
+          notificationsIds.map(async (pendingId) => {
+            const notification =
+              await services.notifications.notificationsRepo.get(
+                userId,
+                pendingId,
+                manager,
+                true
+              );
+
+            return services.notifications.getFull(
+              userId,
+              notification.id,
+              manager
+            );
+          })
+        );
+
+        expect(userNotifications).to.have.length(1);
+        const autopostNotification = userNotifications[0];
+
+        if (!autopostNotification) {
+          throw new Error('autopostNotification not found');
+        }
+
+        expect(autopostNotification.activity.data.postId).to.eq(
+          postOfThread2.id
+        );
+
+        expect(autopostNotification.activity.type).to.eq(
+          ActivityType.PostAutoposted
+        );
+      });
     });
   });
 });

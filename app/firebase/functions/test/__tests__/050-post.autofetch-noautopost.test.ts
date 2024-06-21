@@ -12,11 +12,7 @@ import {
   AppPostRepublishedStatus,
 } from '../../src/@shared/types/types.posts';
 import { TwitterThread } from '../../src/@shared/types/types.twitter';
-import {
-  AppUser,
-  AutopostOption,
-  PLATFORM,
-} from '../../src/@shared/types/types.user';
+import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
 import { USE_REAL_NOTIFICATIONS } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
 import { TEST_THREADS } from '../../src/platforms/twitter/mock/twitter.service.mock';
@@ -26,14 +22,14 @@ import {
   _01_createAndFetchUsers,
   _02_publishTweet,
 } from './reusable/create-post-fetch';
-import { updateUserSettungs } from './reusable/update.settings';
+import { updateUserSettings } from './reusable/update.settings';
 import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
 import { getTestServices } from './test.services';
 
 const DEBUG_PREFIX = `030-process`;
 const DEBUG = false;
 
-describe.only('050-autopost', () => {
+describe.only('050-autofetch-no-autopost', () => {
   const services = getTestServices({
     time: 'real',
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
@@ -56,10 +52,9 @@ describe.only('050-autopost', () => {
     });
 
     it('upates user autopost settings', async () => {
-      await updateUserSettungs(
+      await updateUserSettings(
         services,
         {
-          autopost: { [PLATFORM.Nanopub]: { value: AutopostOption.AI } },
           notificationFreq: NotificationFreq.Daily,
         },
         user
@@ -70,7 +65,7 @@ describe.only('050-autopost', () => {
       thread = await _02_publishTweet(services, user);
     });
 
-    it('fetch user posts from all platforms', async () => {
+    it('fetch user posts - parsed', async () => {
       if (!user) {
         throw new Error('user not created');
       }
@@ -103,7 +98,7 @@ describe.only('050-autopost', () => {
       expect(postOfThread2.parsingStatus).to.eq(AppPostParsingStatus.IDLE);
       expect(postOfThread2.parsedStatus).to.eq(AppPostParsedStatus.PROCESSED);
       expect(postOfThread2.republishedStatus).to.eq(
-        AppPostRepublishedStatus.AUTO_REPUBLISHED
+        AppPostRepublishedStatus.PENDING
       );
 
       const nanopub = postOfThread2?.mirrors.find(
@@ -114,8 +109,10 @@ describe.only('050-autopost', () => {
         throw new Error('tweetRead not created');
       }
 
-      expect(nanopub.posted).to.not.be.undefined;
-      expect(nanopub.publishStatus).to.eq(PlatformPostPublishStatus.PUBLISHED);
+      expect(nanopub.posted).to.be.undefined;
+      expect(nanopub.draft).to.not.be.undefined;
+
+      expect(nanopub.publishStatus).to.eq(PlatformPostPublishStatus.DRAFT);
 
       if (!user) {
         throw new Error('user not created');
@@ -149,19 +146,15 @@ describe.only('050-autopost', () => {
         );
 
         expect(userNotifications).to.have.length(1);
-        const autopostNotification = userNotifications[0];
+        const notification = userNotifications[0];
 
-        if (!autopostNotification) {
+        if (!notification) {
           throw new Error('autopostNotification not found');
         }
 
-        expect(autopostNotification.activity.data.postId).to.eq(
-          postOfThread2.id
-        );
+        expect(notification.activity.data.postId).to.eq(postOfThread2.id);
 
-        expect(autopostNotification.activity.type).to.eq(
-          ActivityType.PostAutoposted
-        );
+        expect(notification.activity.type).to.eq(ActivityType.PostParsed);
       });
     });
   });

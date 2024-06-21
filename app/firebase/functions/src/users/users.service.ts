@@ -12,6 +12,7 @@ import {
   AutopostOption,
   PLATFORM,
   UserSettings,
+  UserSettingsUpdate,
 } from '../@shared/types/types.user';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
@@ -307,7 +308,7 @@ export class UsersService {
     return userRead;
   }
 
-  updateSettings(userId: string, settings: UserSettings) {
+  updateSettings(userId: string, settings: UserSettingsUpdate) {
     return this.db.run(async (manager) => {
       await this.repo.updateSettings(userId, settings, manager);
     });

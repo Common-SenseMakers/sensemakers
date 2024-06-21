@@ -63,12 +63,12 @@ export class PostsManager {
    * and authors
    * */
   async fetchAll() {
-    const users = await this.users.repo.getAll();
+    const usersIds = await this.users.repo.getAll();
 
     /** Call fetch for each user */
     const posts = await Promise.all(
-      users.map(async (user) =>
-        this.fetchUser({ user, params: { expectedAmount: 10 } })
+      usersIds.map(async (userId) =>
+        this.fetchUser({ userId, params: { expectedAmount: 10 } })
       )
     );
 

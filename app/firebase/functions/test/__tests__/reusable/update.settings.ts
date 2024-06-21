@@ -1,11 +1,15 @@
 import { expect } from 'chai';
 
-import { AppUser, UserSettings } from '../../../src/@shared/types/types.user';
+import {
+  AppUser,
+  UserSettings,
+  UserSettingsUpdate,
+} from '../../../src/@shared/types/types.user';
 import { TestServices } from '../test.services';
 
-export const updateUserSettungs = async (
+export const updateUserSettings = async (
   services: TestServices,
-  newSettings: UserSettings,
+  newSettings: UserSettingsUpdate,
   user?: AppUser
 ) => {
   if (!user) {
@@ -22,5 +26,7 @@ export const updateUserSettungs = async (
     return services.users.repo.getUser(user.userId, manager, true);
   });
 
-  expect(userRead.settings).to.deep.eq(newSettings);
+  (Object.keys(newSettings) as (keyof UserSettings)[]).forEach((key) => {
+    expect(userRead.settings[key]).to.deep.eq(newSettings[key]);
+  });
 };

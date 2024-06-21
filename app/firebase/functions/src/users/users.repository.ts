@@ -11,6 +11,7 @@ import {
   UserDetailsBase,
   UserPlatformProfile,
   UserSettings,
+  UserSettingsUpdate,
   UserWithPlatformIds,
 } from '../@shared/types/types.user';
 import { DBInstance } from '../db/instance';
@@ -390,15 +391,7 @@ export class UsersRepository {
 
   public async getAll() {
     const snapshot = await this.db.collections.users.get();
-    const users: AppUser[] = [];
-    snapshot.forEach((doc) => {
-      users.push({
-        userId: doc.id,
-        ...(doc.data() as Omit<AppUser, 'userId'>),
-      });
-    });
-
-    return users;
+    return snapshot.docs.map((doc) => doc.id);
   }
 
   public async getAllIds() {
@@ -413,11 +406,20 @@ export class UsersRepository {
 
   public async updateSettings(
     userId: string,
-    settings: UserSettings,
+    updateSettings: UserSettingsUpdate,
     manager: TransactionManager
   ) {
     const ref = await this.getUserRef(userId, manager, true);
-    manager.update(ref, { settings });
+    const existing = await this.getUser(userId, manager, true);
+
+    const newSettings: UserSettings = {
+      ...existing.settings,
+      ...updateSettings,
+    };
+
+    manager.update(ref, {
+      settings: newSettings,
+    });
   }
 
   public async getWithNotificationFrequency(

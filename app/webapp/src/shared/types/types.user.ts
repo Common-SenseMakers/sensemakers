@@ -93,6 +93,8 @@ export interface UserSettings {
   notificationFreq: NotificationFreq;
 }
 
+export type UserSettingsUpdate = Partial<UserSettings>;
+
 export interface UserWithSettings {
   settings: UserSettings;
   email?: string;
