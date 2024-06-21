@@ -50,7 +50,9 @@ export interface TestServicesConfig {
   notifications: NotificationsMockConfig;
 }
 
-export type TestServices = Services;
+export type TestServices = Services & {
+  notificationsMock?: NotificationService;
+};
 
 export const getTestServices = (config: TestServicesConfig) => {
   const mandatory = [
@@ -162,10 +164,8 @@ export const getTestServices = (config: TestServicesConfig) => {
     userRepo
   );
 
-  const notifications = getNotificationsMock(
-    _notifications,
-    config.notifications
-  );
+  const { instance: notifications, mock: notificationsMock } =
+    getNotificationsMock(_notifications, config.notifications);
 
   const activity = new ActivityService(activityRepo);
 
@@ -176,6 +176,7 @@ export const getTestServices = (config: TestServicesConfig) => {
     time: time,
     db,
     notifications,
+    notificationsMock,
     activity,
   };
 

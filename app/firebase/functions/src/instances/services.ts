@@ -145,7 +145,7 @@ export const createServices = () => {
     activityRepo,
     userRepo
   );
-  const notifications = getNotificationsMock(
+  const { instance: notifications } = getNotificationsMock(
     _notifications,
     USE_REAL_NOTIFICATIONS.value() ? 'real' : 'mock'
   );

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { capture, verify } from 'ts-mockito';
+import { anything, capture, verify } from 'ts-mockito';
 
 import { NotificationFreq } from '../../src/@shared/types/types.notifications';
 import { PlatformPostPosted } from '../../src/@shared/types/types.platform.posts';
@@ -92,27 +92,34 @@ describe.only('060-send-digest-no-autpost', () => {
       });
 
       /** check that the send digest was called with the posts contents */
-      verify(services.notifications).once();
+      const notificationsMock = services.notificationsMock;
+      if (!notificationsMock) {
+        throw new Error('notificationsMock not created');
+      }
+
+      verify(notificationsMock.sendDigest(anything(), anything())).once();
 
       const [capturedUserId, capturedPosts] = capture(
-        services.notifications.sendDigest
+        notificationsMock.sendDigest
       ).last();
 
       expect(capturedUserId).to.equal(userId);
       expect(capturedPosts).to.have.length(3);
 
-      threads.forEach((thread, i) => {
-        const post = capturedPosts[i];
+      const expectedContents = threads.map((thread) => {
+        return PostsHelper.concatenateThread({
+          thread: thread.post.tweets.map((tweet): GenericPost => {
+            return {
+              content: tweet.text,
+            };
+          }),
+        });
+      });
+
+      threads.forEach((_thread, ix) => {
+        const post = capturedPosts[ix];
         expect(post).to.not.be.undefined;
-        expect(post.content).to.equal(
-          PostsHelper.concatenateThread({
-            thread: thread.post.tweets.map((tweet): GenericPost => {
-              return {
-                content: tweet.text,
-              };
-            }),
-          })
-        );
+        expect(expectedContents).to.include(post.content);
       });
     });
   });

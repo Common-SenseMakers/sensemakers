@@ -7,9 +7,9 @@ export type NotificationsMockConfig = 'real' | 'mock';
 export const getNotificationsMock = (
   notificationService: NotificationService,
   type: NotificationsMockConfig
-) => {
+): { instance: NotificationService; mock?: NotificationService } => {
   if (type === 'real') {
-    return notificationService;
+    return { instance: notificationService };
   }
 
   const Mocked = spy(notificationService);
@@ -21,5 +21,8 @@ export const getNotificationsMock = (
     }
   );
 
-  return instance(Mocked);
+  return {
+    instance: instance(Mocked),
+    mock: Mocked,
+  };
 };
