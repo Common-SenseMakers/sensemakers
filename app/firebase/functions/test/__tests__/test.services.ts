@@ -161,7 +161,10 @@ export const getTestServices = (config: TestServicesConfig) => {
     notificationsRepo,
     postsRepo,
     activityRepo,
-    userRepo
+    userRepo,
+    {
+      apiKey: process.env.MAILGUN_API_KEY as string,
+    }
   );
 
   const { instance: notifications, mock: notificationsMock } =

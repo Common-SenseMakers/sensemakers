@@ -1,3 +1,7 @@
+import FormData from 'form-data';
+import Mailgun, { MailgunMessageData } from 'mailgun.js';
+import { IMailgunClient } from 'mailgun.js/Interfaces';
+
 import { ActivityType } from '../@shared/types/types.activity';
 import {
   NotificationCreate,
@@ -10,25 +14,42 @@ import { AutopostOption } from '../@shared/types/types.user';
 import { ActivityRepository } from '../activity/activity.repository';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
+import { logger } from '../instances/logger';
 import { PostsHelper } from '../posts/posts.helper';
 import { PostsRepository } from '../posts/posts.repository';
 import { UsersRepository } from '../users/users.repository';
 import { getPostUrl } from './notification.utils';
 import { NotificationsRepository } from './notifications.repository';
 
+export const DEBUG = true;
+export const DEBUG_PREFIX = `NOTIFICATION-SERVICE`;
+
 export interface EmailPostDetails {
   content: string;
   url: string;
 }
 
+export interface EmailServiceConfig {
+  apiKey: string;
+}
+
 export class NotificationService {
+  protected mailgun: IMailgunClient;
+
   constructor(
     public db: DBInstance,
     public notificationsRepo: NotificationsRepository,
     public postsRepo: PostsRepository,
     public activityRepo: ActivityRepository,
-    public usersRepo: UsersRepository
-  ) {}
+    public usersRepo: UsersRepository,
+    config: EmailServiceConfig
+  ) {
+    const mailgun = new Mailgun(FormData);
+    this.mailgun = mailgun.client({
+      username: 'api',
+      key: config.apiKey,
+    });
+  }
 
   createNotification(
     notification: NotificationCreate,
@@ -174,6 +195,21 @@ export class NotificationService {
   }
 
   async sendDigest(userId: string, posts: EmailPostDetails[]) {
-    throw new Error('Not implemented');
+    const messageData: MailgunMessageData = {
+      from: 'Excited User <mail@example.com>',
+      to: 'pepo.ospina@gmail.com',
+      subject: 'Hello from Sensecast',
+      text: 'Testing some Mailgun awesomeness!',
+    };
+
+    try {
+      const res = await this.mailgun.messages.create(
+        'sandbox.mailgun.org',
+        messageData
+      );
+      logger.debug(`sendDigest`, { res }, DEBUG_PREFIX);
+    } catch (e) {
+      logger.error(`sendDigest`, { e }, DEBUG_PREFIX);
+    }
   }
 }

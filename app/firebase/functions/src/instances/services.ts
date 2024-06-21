@@ -3,6 +3,7 @@ import { ActivityRepository } from '../activity/activity.repository';
 import { ActivityService } from '../activity/activity.service';
 import {
   FUNCTIONS_PY_URL,
+  MAILGUN_API_KEY,
   NANOPUBS_PUBLISH_SERVERS,
   NP_PUBLISH_RSA_PRIVATE_KEY,
   NP_PUBLISH_RSA_PUBLIC_KEY,
@@ -143,11 +144,14 @@ export const createServices = () => {
     notificationsRepo,
     postsRepo,
     activityRepo,
-    userRepo
+    userRepo,
+    {
+      apiKey: MAILGUN_API_KEY.value(),
+    }
   );
   const { instance: notifications } = getNotificationsMock(
     _notifications,
-    USE_REAL_NOTIFICATIONS.value() ? 'real' : 'mock'
+    USE_REAL_NOTIFICATIONS.value() ? 'spy' : 'mock'
   );
 
   /** all services */

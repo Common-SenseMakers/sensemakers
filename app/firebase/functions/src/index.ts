@@ -49,6 +49,7 @@ const secrets = [
   envRuntime.OUR_TOKEN_SECRET,
   envRuntime.TWITTER_CLIENT_SECRET,
   envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
+  envRuntime.MAILGUN_API_KEY,
 ];
 
 // import { fetchNewPosts } from './posts/posts.job';

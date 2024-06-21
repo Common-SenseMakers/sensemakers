@@ -18,7 +18,7 @@ describe('010-signups', () => {
     twitter: 'mock-signup',
     nanopub: 'mock-publish',
     parser: 'mock',
-    notifications: 'mock',
+    notifications: 'spy',
   });
 
   let userId: string = 'twitter:123456789';

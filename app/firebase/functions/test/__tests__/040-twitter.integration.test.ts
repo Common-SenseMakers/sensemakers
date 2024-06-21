@@ -22,7 +22,7 @@ describe.skip('twitter integration', () => {
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
-    notifications: USE_REAL_NOTIFICATIONS ? 'real' : 'mock',
+    notifications: USE_REAL_NOTIFICATIONS ? 'spy' : 'mock',
   });
 
   if (!TEST_ACCOUNTS) {
