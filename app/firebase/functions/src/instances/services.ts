@@ -2,8 +2,8 @@ import { PLATFORM } from '../@shared/types/types.user';
 import { ActivityRepository } from '../activity/activity.repository';
 import { ActivityService } from '../activity/activity.service';
 import {
+  EMAIL_CLIENT_SECRET,
   FUNCTIONS_PY_URL,
-  MAILGUN_API_KEY,
   NANOPUBS_PUBLISH_SERVERS,
   NP_PUBLISH_RSA_PRIVATE_KEY,
   NP_PUBLISH_RSA_PUBLIC_KEY,
@@ -146,7 +146,7 @@ export const createServices = () => {
     activityRepo,
     userRepo,
     {
-      apiKey: MAILGUN_API_KEY.value(),
+      apiKey: EMAIL_CLIENT_SECRET.value(),
     }
   );
   const { instance: notifications } = getNotificationsMock(

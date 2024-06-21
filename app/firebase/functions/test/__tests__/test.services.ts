@@ -163,7 +163,7 @@ export const getTestServices = (config: TestServicesConfig) => {
     activityRepo,
     userRepo,
     {
-      apiKey: process.env.MAILGUN_API_KEY as string,
+      apiKey: process.env.EMAIL_CLIENT_SECRET as string,
     }
   );
 
