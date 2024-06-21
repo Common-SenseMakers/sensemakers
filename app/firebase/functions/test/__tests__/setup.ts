@@ -2,7 +2,6 @@ import { Context } from 'mocha';
 import * as sinon from 'sinon';
 
 import { AppUser } from '../../src/@shared/types/types.user';
-import { USE_REAL_NOTIFICATIONS } from '../../src/config/config.runtime';
 import { envDeploy } from '../../src/config/typedenv.deploy';
 import * as tasksSupport from '../../src/tasks.support';
 import { enqueueTaskMock } from '../../src/tasks.support.mock';
@@ -20,6 +19,8 @@ export const TEST_USERS_FILE_PATH = './test/__tests__/test.users.json';
 export const USE_REAL_TWITTER = process.env.USE_REAL_TWITTERX === 'true';
 export const USE_REAL_NANOPUB = process.env.USE_REAL_NANOPUB === 'true';
 export const USE_REAL_PARSER = process.env.USE_REAL_PARSER === 'true';
+export const USE_REAL_NOTIFICATIONS =
+  process.env.USE_REAL_NOTIFICATIONS === 'true';
 
 export type InjectableContext = Readonly<{
   // properties injected using the Root Mocha Hooks

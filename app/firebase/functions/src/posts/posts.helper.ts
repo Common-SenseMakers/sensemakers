@@ -41,7 +41,7 @@ export class PostsHelper {
     };
   }
 
-  static concatenateThread(post: AppPost | AppPostFull): string {
+  static concatenateThread(post: { thread: AppPost['thread'] }): string {
     return post.thread.reduce((_acc, post) => `${post.content}\n\n`, '');
   }
 

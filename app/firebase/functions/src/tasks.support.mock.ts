@@ -1,6 +1,6 @@
 import { postUpdatedHookOnTest } from '../test/utils/posts.utils';
 import { logger } from './instances/logger';
-import { createServices } from './instances/services';
+import { Services, createServices } from './instances/services';
 import {
   NOTIFY_USER_TASK,
   notifyUserTask,
@@ -15,12 +15,16 @@ import {
 } from './posts/tasks/posts.autopost.task';
 import { PARSE_POST_TASK, parsePostTask } from './posts/tasks/posts.parse.task';
 
-export const enqueueTaskMock = async (name: string, params: any) => {
+export const enqueueTaskMock = async (
+  name: string,
+  params: any,
+  services?: Services
+) => {
   logger.debug('enqueueTaskStub', { name, params });
 
   await (async () => {
     if (name === PARSE_POST_TASK) {
-      const { db, postsManager } = createServices();
+      const { db, postsManager } = services || createServices();
 
       const postBefore = await db.run(async (manager) =>
         postsManager.processing.posts.get(params.postId, manager, true)
@@ -37,7 +41,7 @@ export const enqueueTaskMock = async (name: string, params: any) => {
     }
 
     if (name === AUTOPOST_POST_TASK) {
-      const { db, postsManager } = createServices();
+      const { db, postsManager } = services || createServices();
 
       const postBefore = await db.run(async (manager) =>
         postsManager.processing.posts.get(params.postId, manager, true)
@@ -65,7 +69,11 @@ export const enqueueTaskMock = async (name: string, params: any) => {
     }
 
     if (name === NOTIFY_USER_TASK) {
-      return notifyUserTask({ data: params } as any);
+      if (!services) {
+        throw new Error('services are required');
+      }
+
+      return notifyUserTask(params.userId, services);
     }
   })();
 };

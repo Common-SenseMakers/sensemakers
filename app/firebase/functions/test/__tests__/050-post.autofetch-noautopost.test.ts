@@ -29,7 +29,7 @@ import { getTestServices } from './test.services';
 const DEBUG_PREFIX = `030-process`;
 const DEBUG = false;
 
-describe.only('050-autofetch-no-autopost', () => {
+describe('050-autofetch-no-autopost', () => {
   const services = getTestServices({
     time: 'real',
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
@@ -62,7 +62,8 @@ describe.only('050-autofetch-no-autopost', () => {
     });
 
     it('publish a tweet in the name of the test user', async () => {
-      thread = await _02_publishTweet(services, user);
+      const TEST_CONTENT = `This is a test post ${USE_REAL_TWITTER ? Date.now() : ''}`;
+      thread = await _02_publishTweet(services, TEST_CONTENT, user);
     });
 
     it('fetch user posts - parsed', async () => {

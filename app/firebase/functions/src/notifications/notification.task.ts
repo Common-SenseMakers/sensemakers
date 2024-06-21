@@ -1,8 +1,7 @@
-import { Request } from 'firebase-functions/v2/tasks';
-
 import { NotificationFreq } from '../@shared/types/types.notifications';
 import { logger } from '../instances/logger';
-import { createServices } from '../instances/services';
+import { Services } from '../instances/services';
+import { enqueueTask } from '../tasks.support';
 
 export const NOTIFY_USER_TASK = 'notifyUser';
 
@@ -10,24 +9,18 @@ export const NOTIFY_USER_TASK = 'notifyUser';
  * this will get all unnotified notifications of one user,
  * wrap them into one digest email and send it.
  */
-export const notifyUserTask = async (req: Request) => {
-  logger.debug(`notifyUserTask - userId: ${req.data.userId}`);
-
-  if (!req.data.userId) {
-    throw new Error('userId not found for task notifyUserTask');
-  }
-
-  const userId = req.data.userId as string;
-
-  const { notifications } = createServices();
+export const notifyUserTask = async (userId: string, services: Services) => {
+  logger.debug(`notifyUserTask - userId: ${userId}`);
+  const { notifications } = services;
   await notifications.notifyUser(userId);
 };
 
 export const triggerSendNotifications = async (
-  notificationFrequency: NotificationFreq
+  notificationFrequency: NotificationFreq,
+  services: Services
 ) => {
   logger.debug(`triggerSendNotifications`);
-  const { users, notifications } = createServices();
+  const { users } = services;
 
   const usersIdsWithFrequency = await users.repo.getWithNotificationFrequency(
     notificationFrequency
@@ -36,8 +29,8 @@ export const triggerSendNotifications = async (
   logger.debug(`number of users: ${usersIdsWithFrequency.length}`, undefined);
 
   await Promise.all(
-    usersIdsWithFrequency.map((userId) => {
-      notifications.notifyUser(userId);
-    })
+    usersIdsWithFrequency.map((userId) =>
+      (enqueueTask as any)(NOTIFY_USER_TASK, { userId }, services)
+    )
   );
 };

@@ -16,7 +16,7 @@ import { UsersRepository } from '../users/users.repository';
 import { getPostUrl } from './notification.utils';
 import { NotificationsRepository } from './notifications.repository';
 
-interface EmailPostDetails {
+export interface EmailPostDetails {
   content: string;
   url: string;
 }
@@ -63,7 +63,7 @@ export class NotificationService {
 
   /** Aggregates all pending notifications of a user and sends them as an email */
   async notifyUser(userId: string) {
-    this.db.run(async (manager) => {
+    await this.db.run(async (manager) => {
       const user = await this.usersRepo.getUser(userId, manager, true);
       const settings = user.settings;
 
@@ -104,6 +104,12 @@ export class NotificationService {
           manager
         );
       }
+
+      await Promise.all(
+        pendingNotifications.map((n) =>
+          this.notificationsRepo.markAsNotified(userId, n.id, manager)
+        )
+      );
     });
   }
 
@@ -165,17 +171,9 @@ export class NotificationService {
     );
 
     await this.sendDigest(userId, postsDetails);
-
-    await Promise.all(
-      notifications.map((n) =>
-        this.notificationsRepo.markAsNotified(userId, n.id, manager)
-      )
-    );
   }
 
   async sendDigest(userId: string, posts: EmailPostDetails[]) {
-    const template = `Your recent posts: ${JSON.stringify(posts)}`; // Email clients support templates that receive some parameters
-    console.log(`Sending email to ${userId} with template: ${template}`);
-    // TODO connect SendGrid, or Mailgun
+    throw new Error('Not implemented');
   }
 }

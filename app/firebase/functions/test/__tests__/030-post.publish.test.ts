@@ -52,7 +52,8 @@ describe('030-process', () => {
     });
 
     it('publish a tweet in the name of the test user', async () => {
-      await _02_publishTweet(services, user);
+      const TEST_CONTENT = `This is a test post ${USE_REAL_TWITTER ? Date.now() : ''}`;
+      await _02_publishTweet(services, TEST_CONTENT, user);
     });
 
     it('fetch user posts from all platforms', async () => {

@@ -67,7 +67,9 @@ describe('051-autofetch-autopost', () => {
     });
 
     it('publish a tweet in the name of the test user', async () => {
-      thread = await _02_publishTweet(services, user);
+      const TEST_CONTENT = `This is a test post ${USE_REAL_TWITTER ? Date.now() : ''}`;
+
+      thread = await _02_publishTweet(services, TEST_CONTENT, user);
     });
 
     it('fetch posts and autopost', async () => {

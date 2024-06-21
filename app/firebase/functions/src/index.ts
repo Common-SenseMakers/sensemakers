@@ -23,6 +23,7 @@ import {
 import { envDeploy } from './config/typedenv.deploy';
 import { envRuntime } from './config/typedenv.runtime';
 import { buildApp } from './instances/app';
+import { createServices } from './instances/services';
 import {
   NOTIFY_USER_TASK,
   notifyUserTask,
@@ -77,7 +78,7 @@ exports.sendDailyNotifications = onSchedule(
     schedule: DAILY_NOTIFICATION_PERIOD,
     secrets,
   },
-  () => triggerSendNotifications(NotificationFreq.Daily)
+  () => triggerSendNotifications(NotificationFreq.Daily, createServices())
 );
 
 exports.sendWeeklyNotifications = onSchedule(
@@ -85,7 +86,7 @@ exports.sendWeeklyNotifications = onSchedule(
     schedule: WEEKLY_NOTIFICATION_PERIOD,
     secrets,
   },
-  () => triggerSendNotifications(NotificationFreq.Weekly)
+  () => triggerSendNotifications(NotificationFreq.Weekly, createServices())
 );
 
 exports.sendMonthlyNotifications = onSchedule(
@@ -93,7 +94,7 @@ exports.sendMonthlyNotifications = onSchedule(
     schedule: MONTHLY_NOTIFICATION_PERIOD,
     secrets,
   },
-  () => triggerSendNotifications(NotificationFreq.Monthly)
+  () => triggerSendNotifications(NotificationFreq.Monthly, createServices())
 );
 
 // add enpoint when on emulator to trigger the scheduled task
@@ -161,7 +162,13 @@ exports[NOTIFY_USER_TASK] = onTaskDispatched(
       envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
     ],
   },
-  notifyUserTask
+  async (req) => {
+    if (!req.data.userId) {
+      throw new Error('userId not found for task notifyUserTask');
+    }
+
+    notifyUserTask(req.data.userId, createServices());
+  }
 );
 
 /** hooks */

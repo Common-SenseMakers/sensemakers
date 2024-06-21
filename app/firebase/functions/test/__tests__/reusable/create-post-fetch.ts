@@ -57,6 +57,7 @@ export const _01_createAndFetchUsers = async (
 
 export const _02_publishTweet = async (
   services: TestServices,
+  text: string,
   user?: AppUser
 ) => {
   return services.db.run(async (manager) => {
@@ -73,13 +74,11 @@ export const _02_publishTweet = async (
       throw new Error('Unexpected');
     }
 
-    const TEST_CONTENT = `This is a test post ${USE_REAL_TWITTER ? Date.now() : ''}`;
-
     const thread = await services.platforms
       .get<TwitterService>(PLATFORM.Twitter)
       .publish(
         {
-          draft: { text: TEST_CONTENT },
+          draft: { text },
           userDetails: account,
         },
         manager
