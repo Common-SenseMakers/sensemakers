@@ -27,7 +27,7 @@ import { getTestServices } from './test.services';
 const DEBUG_PREFIX = `030-process`;
 const DEBUG = false;
 
-describe.only('060-send-digest-no-autpost', () => {
+describe('060-send-digest-no-autpost', () => {
   const services = getTestServices({
     time: 'real',
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
