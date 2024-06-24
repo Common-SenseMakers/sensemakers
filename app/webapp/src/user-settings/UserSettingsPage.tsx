@@ -5,10 +5,12 @@ import { useNavigate } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
 import { AbsoluteRoutes } from '../route.names';
+import { NotificationFreq } from '../shared/types/types.notifications';
 import {
   AutopostOption,
   PLATFORM,
   UserSettings,
+  UserSettingsUpdate,
 } from '../shared/types/types.user';
 import { AppButton, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
@@ -30,11 +32,17 @@ export const UserSettingsPage = () => {
   const hasNanopub =
     connectedUser && connectedUser.nanopub && connectedUser.nanopub.length > 0;
 
+  const setSettings = (newSettings: UserSettingsUpdate) => {
+    return appFetch('/api/auth/settings', newSettings).then(() => {
+      setIsSetting(false);
+      refresh();
+    });
+  };
+
   const setAutopost = (option: AutopostOption) => {
     if (connectedUser) {
       const settings = connectedUser.settings;
-      const newSettings: UserSettings = {
-        ...settings,
+      const newSettings: UserSettingsUpdate = {
         autopost: {
           ...settings.autopost,
           [PLATFORM.Nanopub]: { value: option },
@@ -42,14 +50,23 @@ export const UserSettingsPage = () => {
       };
 
       setIsSetting(true);
-      appFetch('/api/auth/settings', newSettings).then(() => {
-        setIsSetting(false);
-        refresh();
-      });
+      void setSettings(newSettings);
     }
   };
 
-  const current = connectedUser?.settings?.autopost[PLATFORM.Nanopub].value;
+  const setNotifications = (notificationFreq: NotificationFreq) => {
+    if (connectedUser) {
+      const newSettings: UserSettingsUpdate = {
+        notificationFreq,
+      };
+
+      void setSettings(newSettings);
+    }
+  };
+
+  const currentAutopost =
+    connectedUser?.settings?.autopost[PLATFORM.Nanopub].value;
+  const currentNotifications = connectedUser?.settings?.notificationFreq;
 
   if (!connectedUser) {
     return (
@@ -76,17 +93,17 @@ export const UserSettingsPage = () => {
 
         <AppButton
           disabled={isSetting}
-          primary={current === AutopostOption.MANUAL}
+          primary={currentAutopost === AutopostOption.MANUAL}
           label="Manual"
           onClick={() => setAutopost(AutopostOption.MANUAL)}></AppButton>
         <AppButton
           disabled={isSetting}
-          primary={current === AutopostOption.DETERMINISTIC}
+          primary={currentAutopost === AutopostOption.DETERMINISTIC}
           label="Deterministic"
           onClick={() => setAutopost(AutopostOption.DETERMINISTIC)}></AppButton>
         <AppButton
           disabled={isSetting}
-          primary={current === AutopostOption.AI}
+          primary={currentAutopost === AutopostOption.AI}
           label="AI"
           onClick={() => setAutopost(AutopostOption.AI)}></AppButton>
       </Box>
@@ -98,6 +115,23 @@ export const UserSettingsPage = () => {
           disabled={hasNanopub}
           label={hasNanopub ? 'Connected' : 'Connect'}
           onClick={() => connect()}></AppButton>
+      </Box>
+
+      <Box pad="medium">
+        <Text>Notifications:</Text>
+
+        <AppButton
+          primary={currentNotifications === NotificationFreq.None}
+          label="None"
+          onClick={() => setNotifications(NotificationFreq.None)}></AppButton>
+        <AppButton
+          primary={currentNotifications === NotificationFreq.Daily}
+          label="Daily"
+          onClick={() => setNotifications(NotificationFreq.Daily)}></AppButton>
+        <AppButton
+          primary={currentNotifications === NotificationFreq.Weekly}
+          label="Weekly"
+          onClick={() => setNotifications(NotificationFreq.Weekly)}></AppButton>
       </Box>
     </Box>
   );

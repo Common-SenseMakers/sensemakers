@@ -22,6 +22,7 @@ import {
 } from './config/config.runtime';
 import { envDeploy } from './config/typedenv.deploy';
 import { envRuntime } from './config/typedenv.runtime';
+import { getServices } from './controllers.utils';
 import { buildApp } from './instances/app';
 import { createServices } from './instances/services';
 import {
@@ -107,6 +108,17 @@ if (IS_EMULATOR) {
     response.status(200).send({ success: true });
   });
 
+  scheduledTriggerRouter.post(
+    '/sendDailyNotifications',
+    async (request, response) => {
+      await triggerSendNotifications(
+        NotificationFreq.Daily,
+        getServices(request)
+      );
+      response.status(200).send({ success: true });
+    }
+  );
+
   exports['trigger'] = functions
     .region(envDeploy.REGION)
     .runWith({
@@ -156,12 +168,7 @@ exports[NOTIFY_USER_TASK] = onTaskDispatched(
     timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
     memory: envDeploy.CONFIG_MEMORY,
     minInstances: envDeploy.CONFIG_MININSTANCE,
-    secrets: [
-      envRuntime.ORCID_SECRET,
-      envRuntime.OUR_TOKEN_SECRET,
-      envRuntime.TWITTER_CLIENT_SECRET,
-      envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
-    ],
+    secrets,
   },
   async (req) => {
     if (!req.data.userId) {

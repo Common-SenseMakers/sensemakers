@@ -41,6 +41,9 @@ import { TriplesRepository } from '../semantics/triples.repository';
 import { TimeService } from '../time/time.service';
 import { UsersRepository } from '../users/users.repository';
 import { UsersService } from '../users/users.service';
+import { logger } from './logger';
+
+const DEBUG = false;
 
 export interface Services {
   users: UsersService;
@@ -165,5 +168,13 @@ export const createServices = () => {
     activity,
   };
 
+  if (DEBUG) {
+    logger.debug('services', {
+      USE_REAL_PARSER: USE_REAL_PARSER.value(),
+      USE_REAL_TWITTER: USE_REAL_TWITTERX.value(),
+      USE_REAL_NANOPUB: USE_REAL_NANOPUB.value(),
+      USE_REAL_NOTIFICATIONS: USE_REAL_NOTIFICATIONS.value(),
+    });
+  }
   return services;
 };
