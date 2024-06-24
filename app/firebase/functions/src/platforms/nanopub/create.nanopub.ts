@@ -21,7 +21,7 @@ export const createNanopublication = async (
   user: AppUser
 ) => {
   const semantics = post.semantics;
-  const content = post.content;
+  const content = post.content.join('\n\n'); // TODO: decide how we want to join the contents of a thread
   const twitter = UsersHelper.getAccount(
     user,
     PLATFORM.Twitter,
