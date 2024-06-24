@@ -1,15 +1,16 @@
 import { anything, instance, spy, when } from 'ts-mockito';
 
-import {
-  PlatformPostPosted,
-  PlatformPostPublish,
-} from '../../../@shared/types/types.platform.posts';
 import { logger } from '../../../instances/logger';
 import { NanopubService } from '../nanopub.service';
 
 let count = 0;
 
 export type NanopubMockConfig = 'real' | 'mock-publish';
+
+/** make private methods public */
+type MockedType = Omit<NanopubService, 'publishInternal'> & {
+  publishInternal: NanopubService['publishInternal'];
+};
 
 export const getNanopubMock = (
   service: NanopubService,
@@ -19,21 +20,15 @@ export const getNanopubMock = (
     return service;
   }
 
-  const Mocked = spy(service);
+  const Mocked = spy(service) as unknown as MockedType;
 
-  when(Mocked.publish(anything(), anything())).thenCall(
-    (postPublish: PlatformPostPublish<string>) => {
-      logger.warn(`called nanopub publish`, postPublish);
-
-      const post: PlatformPostPosted<string> = {
-        post_id: `ABC${count++}`,
-        user_id: postPublish.userDetails.user_id,
-        timestampMs: Date.now(),
-        post: postPublish.draft,
-      };
-      return post;
-    }
-  );
+  when(Mocked.publishInternal(anything())).thenCall((signed: string) => {
+    logger.warn(`called nanopub publishInternal`, signed);
+    return {
+      info: () => ({ uri: `ABC${count++}` }),
+      rdf: () => signed,
+    };
+  });
 
   return instance(Mocked) as NanopubService;
 };
