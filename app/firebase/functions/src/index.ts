@@ -186,14 +186,18 @@ exports.postUpdateListener = onDocumentUpdated(
     secrets,
   },
   async (event) => {
+    const postId = event.params?.postId;
     const postBefore = event.data?.before as AppPost | undefined;
     const postAfter = event.data?.after as AppPost | undefined;
 
-    if (!postBefore || !postAfter) {
+    if (!postId || !postBefore || !postAfter) {
       throw new Error('Unexpected post data not found in onDocumentUpdated');
     }
 
-    await postUpdatedHook(postAfter, postBefore);
+    await postUpdatedHook(
+      { ...postAfter, id: postId },
+      { ...postBefore, id: postId }
+    );
   }
 );
 
@@ -203,13 +207,14 @@ exports.postCreateListener = onDocumentCreated(
     secrets,
   },
   async (event) => {
+    const postId = event.params?.postId;
     const post = event.data?.data() as AppPost | undefined;
 
-    if (!post) {
+    if (!postId || !post) {
       throw new Error('Unexpected post data not found in onDocumentCreated');
     }
 
-    await postUpdatedHook(post);
+    await postUpdatedHook({ ...post, id: postId });
   }
 );
 
@@ -219,14 +224,18 @@ exports.platformPostUpdateListener = onDocumentUpdated(
     secrets,
   },
   async (event) => {
+    const postId = event.params?.platformPostId;
     const postBefore = event.data?.before as PlatformPost | undefined;
     const postAfter = event.data?.after as PlatformPost | undefined;
 
-    if (!postBefore || !postAfter) {
+    if (!postId || !postBefore || !postAfter) {
       throw new Error('Unexpected post data not found in onDocumentUpdated');
     }
 
-    await platformPostUpdatedHook(postAfter, postBefore);
+    await platformPostUpdatedHook(
+      { ...postAfter, id: postId },
+      { ...postBefore, id: postId }
+    );
   }
 );
 
@@ -236,14 +245,15 @@ exports.activityEventCreateListener = onDocumentCreated(
     secrets,
   },
   async (event) => {
+    const activityEventId = event.params?.activityEventId;
     const activityEvent = event.data?.data() as ActivityEventBase | undefined;
 
-    if (!activityEvent) {
+    if (!activityEventId || !activityEvent) {
       throw new Error(
         'Unexpected activity data not found in onDocumentCreated'
       );
     }
 
-    await activityEventCreatedHook(activityEvent);
+    await activityEventCreatedHook({ ...activityEvent, id: activityEventId });
   }
 );
