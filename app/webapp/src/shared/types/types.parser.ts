@@ -1,4 +1,4 @@
-import { GenericPostData } from './types.posts';
+import { GenericThread } from './types.posts';
 
 export enum PARSER_MODE {
   REF_LABELS = 'REF_LABELS',
@@ -11,7 +11,7 @@ export interface TopicsParams {
 }
 
 export interface ParsePostRequest<P> {
-  post: GenericPostData;
+  post: GenericThread;
   parameters: Partial<Record<PARSER_MODE, P>>;
 }
 

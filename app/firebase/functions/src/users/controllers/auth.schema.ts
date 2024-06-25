@@ -1,5 +1,6 @@
 import { object, string } from 'yup';
 
+import { NotificationFreq } from '../../@shared/types/types.notifications';
 import { AutopostOption, PLATFORM } from '../../@shared/types/types.user';
 
 export const twitterGetSignupContextSchema = object({
@@ -33,7 +34,12 @@ export const userSettingsUpdateSchema = object({
         .oneOf([...Object.values(AutopostOption)])
         .required(),
     }),
-  }).required(),
+  })
+    .optional()
+    .default(undefined),
+  notificationFreq: string()
+    .oneOf([...Object.values(NotificationFreq)])
+    .optional(),
 }).noUnknown(true);
 
 export const emailUpdateSchema = object({

@@ -4,6 +4,7 @@ import {
   HandleSignupResult,
   OurTokenConfig,
 } from '../@shared/types/types.fetch';
+import { NotificationFreq } from '../@shared/types/types.notifications';
 import {
   ALL_IDENTITY_PLATFORMS,
   AccountDetailsRead,
@@ -11,6 +12,7 @@ import {
   AutopostOption,
   PLATFORM,
   UserSettings,
+  UserSettingsUpdate,
 } from '../@shared/types/types.user';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
@@ -214,6 +216,7 @@ export class UsersService {
 
         const initSettings: UserSettings = {
           autopost: { [PLATFORM.Nanopub]: { value: AutopostOption.MANUAL } },
+          notificationFreq: NotificationFreq.None,
         };
 
         await this.repo.createUser(
@@ -305,7 +308,7 @@ export class UsersService {
     return userRead;
   }
 
-  updateSettings(userId: string, settings: UserSettings) {
+  updateSettings(userId: string, settings: UserSettingsUpdate) {
     return this.db.run(async (manager) => {
       await this.repo.updateSettings(userId, settings, manager);
     });

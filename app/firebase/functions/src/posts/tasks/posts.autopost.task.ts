@@ -28,6 +28,12 @@ export const autopostPostTask = async (req: Request) => {
       true
     );
 
-    await postsManager.publishPost(post, platformIds, post.authorId, manager);
+    await postsManager.publishPost(
+      post,
+      platformIds,
+      post.authorId,
+      manager,
+      true
+    );
   });
 };

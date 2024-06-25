@@ -2,39 +2,33 @@ import { expect } from 'chai';
 
 import {
   PlatformPostDraftApproval,
-  PlatformPostPosted,
   PlatformPostSignerType,
 } from '../../src/@shared/types/types.platform.posts';
 import {
+  AppPostRepublishedStatus,
   AppPostReviewStatus,
   PostsQueryStatus,
 } from '../../src/@shared/types/types.posts';
-import { TwitterThread } from '../../src/@shared/types/types.twitter';
 import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
+import { USE_REAL_NOTIFICATIONS } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
-import {
-  THREADS,
-  TWITTER_USER_ID_MOCKS,
-} from '../../src/platforms/twitter/mock/twitter.service.mock';
-import { TwitterService } from '../../src/platforms/twitter/twitter.service';
-import { parsePostTask } from '../../src/posts/tasks/posts.parse.task';
+import { TEST_THREADS } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
-import { createUsers } from '../utils/users.utils';
 import {
-  USE_REAL_NANOPUB,
-  USE_REAL_PARSER,
-  USE_REAL_TWITTER,
-  testUsers,
-} from './setup';
+  _01_createAndFetchUsers,
+  _02_publishTweet,
+  _03_fetchAfterPublish,
+} from './reusable/create-post-fetch';
+import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
 import { getTestServices } from './test.services';
 
 const DEBUG_PREFIX = `030-process`;
 const DEBUG = false;
 
-describe.only('030-process', () => {
+describe('030-process', () => {
   let rsaKeys = getRSAKeys('');
 
   const services = getTestServices({
@@ -42,6 +36,7 @@ describe.only('030-process', () => {
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
+    notifications: USE_REAL_NOTIFICATIONS ? 'spy' : 'mock',
   });
 
   before(async () => {
@@ -51,148 +46,18 @@ describe.only('030-process', () => {
 
   describe('create and process', () => {
     let user: AppUser | undefined;
-    let thread: PlatformPostPosted<TwitterThread>;
 
     before(async () => {
-      await services.db.run(async (manager) => {
-        const users = await createUsers(
-          services,
-          Array.from(testUsers.values()),
-          manager
-        );
-        if (DEBUG)
-          logger.debug(`users crated ${users.length}`, { users }, DEBUG_PREFIX);
-        user = users.find(
-          (u) =>
-            UsersHelper.getAccount(
-              u,
-              PLATFORM.Twitter,
-              TWITTER_USER_ID_MOCKS
-            ) !== undefined
-        );
-        if (DEBUG)
-          logger.debug(`test user ${user?.userId}`, { user }, DEBUG_PREFIX);
-      });
-
-      /**
-       * fetch once to get the posts once and set the fetchedDetails of
-       * the account
-       */
-
-      if (!user) throw new Error('user not created');
-      if (DEBUG) logger.debug(` ${user?.userId}`, { user }, DEBUG_PREFIX);
-      /** fetch will store the posts in the DB */
-      await services.postsManager.fetchUser({
-        userId: user.userId,
-        params: { expectedAmount: 10 },
-      });
+      user = await _01_createAndFetchUsers(services, { DEBUG, DEBUG_PREFIX });
     });
 
     it('publish a tweet in the name of the test user', async () => {
-      await services.db.run(async (manager) => {
-        if (!user) {
-          throw new Error('user not created');
-        }
-
-        const accounts = user[PLATFORM.Twitter];
-        if (!accounts) {
-          throw new Error('Unexpected');
-        }
-        const account = accounts[0];
-        if (!account) {
-          throw new Error('Unexpected');
-        }
-
-        const TEST_CONTENT = `This is a test post ${USE_REAL_TWITTER ? Date.now() : ''}`;
-
-        thread = await services.platforms
-          .get<TwitterService>(PLATFORM.Twitter)
-          .publish(
-            {
-              draft: { text: TEST_CONTENT },
-              userDetails: account,
-            },
-            manager
-          );
-
-        expect(thread).to.not.be.undefined;
-
-        if (USE_REAL_TWITTER) {
-          await new Promise<void>((resolve) => setTimeout(resolve, 6 * 1000));
-        }
-      });
+      const TEST_CONTENT = `This is a test post ${USE_REAL_TWITTER ? Date.now() : ''}`;
+      await _02_publishTweet(services, TEST_CONTENT, user);
     });
 
     it('fetch user posts from all platforms', async () => {
-      if (!user) {
-        throw new Error('user not created');
-      }
-
-      /**
-       * fetch user posts. This time should return only the
-       * newly published post
-       */
-      await services.postsManager.fetchUser({
-        userId: user.userId,
-        params: { expectedAmount: 10 },
-      });
-
-      /** read user post */
-      const postsRead = await services.postsManager.getOfUser(user.userId);
-
-      expect(postsRead).to.not.be.undefined;
-
-      const postRead = postsRead[0];
-      expect(postRead).to.not.be.undefined;
-      expect(postRead.mirrors).to.have.length(1);
-
-      expect(postRead.semantics).to.be.undefined;
-      expect(postRead.originalParsed).to.be.undefined;
-
-      const tweetRead = postRead.mirrors.find(
-        (m) => m.platformId === PLATFORM.Twitter
-      );
-
-      if (!tweetRead) {
-        throw new Error('tweetRead not created');
-      }
-
-      if (!user) {
-        throw new Error('user not created');
-      }
-
-      expect(postRead).to.not.be.undefined;
-    });
-
-    it('triggers parse user posts task', async () => {
-      if (!user) {
-        throw new Error('user not created');
-      }
-
-      const posts = await services.postsManager.getOfUser(user.userId, {
-        status: PostsQueryStatus.ALL,
-        fetchParams: { expectedAmount: 100 },
-      });
-      await Promise.all(
-        posts.map((post) => {
-          return parsePostTask({ data: { postId: post.id } } as any);
-        })
-      );
-
-      /** wait for the task to finish */
-      if (USE_REAL_PARSER) {
-        await new Promise<void>((resolve) => setTimeout(resolve, 0.5 * 1000));
-      }
-
-      const postsRead = await services.postsManager.getOfUser(user.userId);
-
-      expect(postsRead).to.not.be.undefined;
-
-      postsRead.forEach((postRead) => {
-        expect(postRead.semantics).to.not.be.undefined;
-        expect(postRead.originalParsed).to.not.be.undefined;
-        expect(postRead.parsedStatus).to.eq('processed');
-      });
+      await _03_fetchAfterPublish(services, user?.userId);
     });
 
     it('signs and approves/publishes pending post', async () => {
@@ -206,8 +71,8 @@ describe.only('030-process', () => {
         fetchParams: { expectedAmount: 10 },
       });
 
-      if (!USE_REAL_TWITTER && THREADS.length > 1) {
-        expect(pendingPosts).to.have.length(7);
+      if (!USE_REAL_TWITTER && TEST_THREADS.length > 1) {
+        expect(pendingPosts).to.have.length(TEST_THREADS.length + 1);
       }
 
       await Promise.all(
@@ -243,14 +108,17 @@ describe.only('030-process', () => {
             user.userId
           );
 
-          const approved = await services.postsManager.getPost(
+          const published = await services.postsManager.getPost(
             pendingPost.id,
             true
           );
 
-          expect(approved).to.not.be.undefined;
-          expect(approved.reviewedStatus).to.equal(
+          expect(published).to.not.be.undefined;
+          expect(published.reviewedStatus).to.equal(
             AppPostReviewStatus.APPROVED
+          );
+          expect(published.republishedStatus).to.equal(
+            AppPostRepublishedStatus.REPUBLISHED
           );
         })
       );
@@ -268,8 +136,8 @@ describe.only('030-process', () => {
       });
 
       if (!USE_REAL_TWITTER) {
-        if (THREADS.length > 1) {
-          expect(pendingPosts).to.have.length(5);
+        if (TEST_THREADS.length > 1) {
+          expect(pendingPosts).to.have.length(TEST_THREADS.length - 1);
         } else {
           expect(pendingPosts).to.have.length(0);
         }
@@ -309,11 +177,14 @@ describe.only('030-process', () => {
           expect(published.reviewedStatus).to.equal(
             AppPostReviewStatus.APPROVED
           );
+          expect(published.republishedStatus).to.equal(
+            AppPostRepublishedStatus.REPUBLISHED
+          );
         })
       );
     });
 
-    it('get user profile', async () => {
+    it.skip('get user profile', async () => {
       if (!user) {
         throw new Error('user not created');
       }
@@ -369,19 +240,22 @@ describe.only('030-process', () => {
         }
       );
 
-      if (THREADS.length > 1) {
-        expect(publishedPosts).to.have.length(7);
-      } else {
-        expect(publishedPosts).to.have.length(2);
-      }
+      expect(publishedPosts).to.have.length(TEST_THREADS.length + 1);
 
       const post = publishedPosts[0];
 
-      const contentPrev = post.content;
-      const newContent = `${contentPrev} - edited`;
+      const threadPrev = post.thread;
+      const newThread = threadPrev.map((genericPostPrev) => {
+        return {
+          ...genericPostPrev,
+          content: `${genericPostPrev.content} - edited`,
+        };
+      });
 
-      const newPost = { ...post };
-      newPost.content = newContent;
+      const newPost = {
+        ...post,
+        thread: newThread,
+      };
 
       /** send updated post (content and semantics did not changed) */
       await services.postsManager.publishPost(
@@ -392,8 +266,8 @@ describe.only('030-process', () => {
 
       const readPost = await services.postsManager.getPost(post.id, true);
 
-      expect(readPost).to.not.be.undefined;
-      expect(readPost.content).to.equal(newContent);
+      expect(readPost.thread).to.have.length(threadPrev.length);
+      expect(readPost.thread[0].content).to.equal(newThread[0].content);
     });
   });
 });

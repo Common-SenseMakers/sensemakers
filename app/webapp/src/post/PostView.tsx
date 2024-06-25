@@ -17,6 +17,7 @@ import { usePost } from './PostContext';
 import { PostHeader } from './PostHeader';
 import { PostNav } from './PostNav';
 import { PostText } from './PostText';
+import { concatenateThread } from './posts.helper';
 
 /** extract the postId from the route and pass it to a PostContext */
 export const PostView = (props: {
@@ -201,7 +202,7 @@ export const PostView = (props: {
               }}
               include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
           )}
-          <PostText text={post?.content}></PostText>
+          <PostText text={concatenateThread(post)}></PostText>
           {postStatuses.isParsing ? (
             <LoadingDiv height="120px" width="100%"></LoadingDiv>
           ) : (

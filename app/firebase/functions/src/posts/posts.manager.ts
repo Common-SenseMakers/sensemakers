@@ -40,6 +40,7 @@ import { PlatformsService } from '../platforms/platforms.service';
 import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { getUsernameTag } from '../users/users.utils';
+import { PostsHelper } from './posts.helper';
 import { PostsProcessing } from './posts.processing';
 
 const DEBUG = true;
@@ -62,12 +63,12 @@ export class PostsManager {
    * and authors
    * */
   async fetchAll() {
-    const users = await this.users.repo.getAll();
+    const usersIds = await this.users.repo.getAll();
 
     /** Call fetch for each user */
     const posts = await Promise.all(
-      users.map(async (user) =>
-        this.fetchUser({ user, params: { expectedAmount: 10 } })
+      usersIds.map(async (userId) =>
+        this.fetchUser({ userId, params: { expectedAmount: 10 } })
       )
     );
 
@@ -242,66 +243,79 @@ export class PostsManager {
     params: FetchParams;
   }) {
     /** can be called as part of a transaction or independently */
-    return this.db.run(async (manager: TransactionManager): Promise<void> => {
-      const user =
-        inputs.user ||
-        (await this.users.repo.getUser(inputs.userId as string, manager, true));
+    const postsCreated = await this.db.run(
+      async (manager: TransactionManager) => {
+        const user =
+          inputs.user ||
+          (await this.users.repo.getUser(
+            inputs.userId as string,
+            manager,
+            true
+          ));
 
-      if (DEBUG) logger.debug(`fetchUser user: ${user.userId}`, { user });
+        if (DEBUG) logger.debug(`fetchUser user: ${user.userId}`, { user });
 
-      await Promise.all(
-        ALL_PUBLISH_PLATFORMS.map(async (platformId) => {
-          const accounts = UsersHelper.getAccounts(user, platformId);
-          /** Call fetch for each account */
-          return Promise.all(
-            accounts.map(
-              async (account): Promise<PlatformPostCreated[] | undefined> => {
-                /** Fetch */
-                try {
-                  if (DEBUG)
-                    logger.debug(
-                      `fetchUser - fetchAccount. platformId:${platformId} - account:${account.user_id}`,
-                      {
+        return Promise.all(
+          ALL_PUBLISH_PLATFORMS.map(async (platformId) => {
+            const accounts = UsersHelper.getAccounts(user, platformId);
+            /** Call fetch for each account */
+            return Promise.all(
+              accounts.map(
+                async (account): Promise<PlatformPostCreated[] | undefined> => {
+                  /** Fetch */
+                  try {
+                    if (DEBUG)
+                      logger.debug(
+                        `fetchUser - fetchAccount. platformId:${platformId} - account:${account.user_id}`,
+                        {
+                          platformId,
+                        }
+                      );
+
+                    const platformPostsCreate =
+                      await this.fetchUserFromPlatform(
                         platformId,
-                      }
+                        inputs.params,
+                        account,
+                        manager
+                      );
+
+                    /** Create the PlatformPosts */
+                    const platformPostsCreated =
+                      await this.processing.createPlatformPosts(
+                        platformPostsCreate,
+                        manager
+                      );
+
+                    if (DEBUG)
+                      logger.debug(
+                        `fetchUser - platformId:${platformId} - account:${account.user_id} - platformPostsCreated: ${platformPostsCreated.length}`,
+                        {
+                          platformPostsCreated,
+                        }
+                      );
+
+                    return platformPostsCreated;
+                  } catch (err: any) {
+                    logger.error(
+                      `Error fetching posts for user ${user.userId} on platform ${platformId}`,
+                      err
                     );
-
-                  const platformPostsCreate = await this.fetchUserFromPlatform(
-                    platformId,
-                    inputs.params,
-                    account,
-                    manager
-                  );
-
-                  /** Create the PlatformPosts */
-                  const platformPostsCreated =
-                    await this.processing.createPlatformPosts(
-                      platformPostsCreate,
-                      manager
-                    );
-
-                  if (DEBUG)
-                    logger.debug(
-                      `fetchUser - platformId:${platformId} - account:${account.user_id} - platformPostsCreated: ${platformPostsCreated.length}`,
-                      {
-                        platformPostsCreated,
-                      }
-                    );
-
-                  return platformPostsCreated;
-                } catch (err: any) {
-                  logger.error(
-                    `Error fetching posts for user ${user.userId} on platform ${platformId}`,
-                    err
-                  );
-                  throw new Error(err.message);
+                    throw new Error(err.message);
+                  }
                 }
-              }
-            )
-          );
-        })
-      );
-    });
+              )
+            );
+          })
+        );
+      }
+    );
+
+    const postsCreatedAll = postsCreated
+      .flat(2)
+      .filter((p) => p !== undefined) as PlatformPostCreated[];
+
+    return postsCreatedAll;
   }
 
   async parseOfUser(userId: string) {
@@ -421,9 +435,11 @@ export class PostsManager {
   protected async _parsePost(postId: string, manager: TransactionManager) {
     const post = await this.processing.posts.get(postId, manager, true);
     if (DEBUG) logger.debug(`parsePost - start ${postId}`, { postId, post });
+    const author = await this.users.repo.getUser(post.authorId, manager, true);
 
+    const genericPost = PostsHelper.convertToGenericThread(post, author);
     const params: ParsePostRequest<TopicsParams> = {
-      post: { content: post.content },
+      post: genericPost,
       parameters: {
         [PARSER_MODE.TOPICS]: { topics: ['science', 'technology'] },
       },
@@ -452,6 +468,7 @@ export class PostsManager {
 
     if (DEBUG) logger.debug(`parsePost - done ${postId}`, { postId, update });
 
+    /** store the semantics and mark as processed */
     await this.updatePost(post.id, update, manager);
   }
 
@@ -464,7 +481,7 @@ export class PostsManager {
     if (DEBUG) logger.debug(`updatePost ${postId}`, { postId, postUpdate });
     await this.processing.posts.updateContent(postId, postUpdate, manager);
 
-    if (postUpdate.semantics || postUpdate.content) {
+    if (postUpdate.semantics || postUpdate.thread) {
       /** rebuild the platform drafts with the new post content */
       if (DEBUG)
         logger.debug(`updatePost - semantics, content found ${postId}`, {
@@ -495,7 +512,8 @@ export class PostsManager {
     newPost: AppPostFull,
     platformIds: PLATFORM[],
     userId: string,
-    manager?: TransactionManager
+    manager?: TransactionManager,
+    auto?: boolean
   ) {
     const publishFunction = async (manager: TransactionManager) => {
       if (DEBUG)
@@ -528,7 +546,7 @@ export class PostsManager {
 
       /** set review status */
       const reviewedStatus =
-        existingPost.republishedStatus === AppPostRepublishedStatus.REPUBLISHED
+        existingPost.republishedStatus !== AppPostRepublishedStatus.PENDING
           ? AppPostReviewStatus.UPDATED
           : AppPostReviewStatus.APPROVED;
 
@@ -555,7 +573,7 @@ export class PostsManager {
         newPost.id,
         {
           reviewedStatus: AppPostReviewStatus.APPROVED,
-          content: newPost.content,
+          thread: newPost.thread,
           semantics: newPost.semantics,
         },
         manager
@@ -619,10 +637,13 @@ export class PostsManager {
 
       /** if all mirrors where published */
       if (published.every((v) => v === true)) {
+        const wasAuto = auto !== undefined ? auto : false;
         await this.updatePost(
           newPost.id,
           {
-            republishedStatus: AppPostRepublishedStatus.REPUBLISHED,
+            republishedStatus: wasAuto
+              ? AppPostRepublishedStatus.AUTO_REPUBLISHED
+              : AppPostRepublishedStatus.REPUBLISHED,
           },
           manager
         );

@@ -1,14 +1,12 @@
-import { QueryDocumentSnapshot } from 'firebase-admin/firestore';
-import { Change } from 'firebase-functions/v1';
-import { FirestoreEvent } from 'firebase-functions/v2/firestore';
-
+import { PlatformPost } from '../../@shared/types/types.platform.posts';
 import { logger } from '../../instances/logger';
 import { createServices } from '../../instances/services';
 
 export const platformPostUpdatedHook = async (
-  event: FirestoreEvent<Change<QueryDocumentSnapshot> | undefined>
+  platformPost: PlatformPost,
+  platformPostBefore?: PlatformPost
 ) => {
-  const platformPostId = event.params?.platformPostId;
+  const platformPostId = platformPost.id;
   const { db, time } = createServices();
 
   const updateRef = db.collections.updates.doc(

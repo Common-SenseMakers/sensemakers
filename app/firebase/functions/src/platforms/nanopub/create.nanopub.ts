@@ -12,6 +12,7 @@ import {
   THIS_POST_NAME,
 } from '../../@shared/utils/semantics.helper';
 import { logger } from '../../instances/logger';
+import { PostsHelper } from '../../posts/posts.helper';
 import { UsersHelper } from '../../users/users.helper';
 
 const DEBUG = false;
@@ -21,7 +22,7 @@ export const createNanopublication = async (
   user: AppUser
 ) => {
   const semantics = post.semantics;
-  const content = post.content;
+  const content = PostsHelper.concatenateThread(post);
   const twitter = UsersHelper.getAccount(
     user,
     PLATFORM.Twitter,

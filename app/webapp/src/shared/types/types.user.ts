@@ -1,4 +1,5 @@
 import { NanopubUserDetails } from './types.nanopubs';
+import { NotificationFreq } from './types.notifications';
 import { OrcidUserDetails } from './types.orcid';
 import { TwitterUserDetails } from './types.twitter';
 
@@ -89,7 +90,10 @@ export interface UserSettings {
       value: AutopostOption;
     };
   };
+  notificationFreq: NotificationFreq;
 }
+
+export type UserSettingsUpdate = Partial<UserSettings>;
 
 export interface UserWithSettings {
   settings: UserSettings;
