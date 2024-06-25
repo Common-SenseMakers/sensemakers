@@ -18,17 +18,17 @@ export const getMockedUser = (credentials: TestUserCredentials): AppUser => {
       notificationFreq: NotificationFreq.None,
     },
     platformIds: [
-      `${PLATFORM.Twitter}:${credentials.twitter.username}`,
+      `${PLATFORM.Twitter}:${credentials.twitter.id}`,
       `${PLATFORM.Nanopub}:${credentials.nanopub.ethPrivateKey}`,
     ],
     [PLATFORM.Twitter]: [
       {
-        user_id: credentials[PLATFORM.Twitter].username,
+        user_id: credentials[PLATFORM.Twitter].id,
         signupDate: 0,
         profile: {
           profile_image_url:
             'https://pbs.twimg.com/profile_images/1753077803258449920/2vI5Y2Wx_normal.png',
-          id: credentials[PLATFORM.Twitter].username,
+          id: credentials[PLATFORM.Twitter].id,
           name: credentials[PLATFORM.Twitter].username,
           username: credentials[PLATFORM.Twitter].username,
         },
