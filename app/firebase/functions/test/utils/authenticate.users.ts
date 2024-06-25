@@ -8,6 +8,7 @@ import { getNanopubProfile } from './nanopub.profile';
 import { getMockedUser } from './users.mock';
 
 export interface TwitterAccountCredentials {
+  id: string;
   username: string;
   password: string;
   type: 'read' | 'write';
