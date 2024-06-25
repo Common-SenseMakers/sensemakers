@@ -258,12 +258,3 @@ def test_load_real_thread():
 
 if __name__ == "__main__":
     thread = AppThread.model_validate(TEST_THREAD)
-    thread_ref_post = convert_thread_interface_to_ref_post(thread)
-    print(thread_ref_post.md_ref_urls())
-    assert thread_ref_post.md_ref_urls() == [
-        "https://x.com/FDAadcomms/status/1798104612635070611",
-        "https://journals.sagepub.com/doi/10.1177/20451253231198466",
-        "https://www.youtube.com/watch?feature=youtu.be&si=kjMtNR1Hwe7NZ8as&v=WknlkmJee4E",
-        "https://x.com/eturnermd1/status/1798046087737180395",
-        "https://x.com/FDAadcomms/status/1798107142219796794",
-    ]

@@ -307,8 +307,9 @@ class ParsePostRequest(BaseModel):
     """
 
     post: AppThread = Field(description="Threaded post to be processed")
-    parameters: Any = Field(
-        description="Additional params for parser (not used currently)"
+    parameters: Optional[Any] = Field(
+        description="Additional params for parser (not used currently)",
+        default_factory=dict,
     )
 
 

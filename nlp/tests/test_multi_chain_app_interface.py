@@ -16,7 +16,8 @@ from utils import (
     create_multi_chain_for_tests,
     create_multi_config_for_tests,
     get_thread_1,
-    no_empty_lists
+    no_empty_lists,
+    create_post_request,
 )
 from desci_sense.shared_functions.schema.post import ThreadRefPost, QuoteRefPost
 from desci_sense.shared_functions.parsers.multi_chain_parser import MultiChainParser
@@ -40,6 +41,7 @@ from desci_sense.shared_functions.dataloaders import (
     convert_text_to_ref_post,
 )
 from desci_sense.shared_functions.preprocessing import ParserInput
+from desci_sense.shared_functions.filters import SciFilterClassfication
 
 TEST_POST_TEXT_W_REF = """
 I really liked this paper!
@@ -106,7 +108,8 @@ def test_thread_trim():
     assert res.multi_reference_tagger[3:] == [["default"], ["default"]]
     assert TARGET_THREAD_RENDER in res.debug["multi_reference_tagger"]["prompt"]
     assert no_empty_lists(res.multi_reference_tagger)
-    
+
+
 def test_batch():
     multi_config = MultiParserChainConfig(
         parser_configs=[
@@ -133,14 +136,18 @@ def test_batch():
         assert no_empty_lists(result.multi_reference_tagger)
 
 
-# "mistralai/mistral-7b-instruct:free"
-# "google/gemma-7b-it"
-if __name__ == "__main__":
+def test_citoid_unprocessed_urls():
+    """ 
+    Tests that if a long thread contains a citoid url that gets trimmed out we we still 
+    classify this as CITOID detected research
+     """
+    thread = get_thread_1()
+    pi_1 = ParserInput(thread_post=thread, max_posts=1)
     multi_config = MultiParserChainConfig(
         parser_configs=[
             MultiRefTaggerChainConfig(
                 name="multi_ref_tagger",
-                llm_config=LLMConfig(llm_type="mistralai/mixtral-8x7b-instruct"),
+                llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
                 post_renderer=PostRendererType.THREAD_REF_POST,
             )
         ],
@@ -148,9 +155,45 @@ if __name__ == "__main__":
         metadata_extract_config=MetadataExtractionConfig(extraction_method="citoid"),
     )
     mcp = MultiChainParser(multi_config)
+    res = mcp.process_parser_input(pi_1)
+    assert res.filter_classification == SciFilterClassfication.CITOID_DETECTED_RESEARCH
+    
+
+# "mistralai/mixtral-8x7b-instruct"
+# "mistralai/mistral-7b-instruct:free"
+# "google/gemma-7b-it"
+if __name__ == "__main__":
     thread = get_thread_1()
     pi_1 = ParserInput(thread_post=thread, max_posts=1)
-    pi_2 = ParserInput(thread_post=thread, max_posts=3)
-    pi_3 = ParserInput(thread_post=thread, max_posts=4)
-    batch = [pi_1, pi_2, pi_3]
-    res = mcp.batch_process_parser_inputs(batch)
+    multi_config = MultiParserChainConfig(
+        parser_configs=[
+            MultiRefTaggerChainConfig(
+                name="multi_ref_tagger",
+                llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
+                post_renderer=PostRendererType.THREAD_REF_POST,
+            )
+        ],
+        post_process_type=PostProcessType.COMBINED,
+        metadata_extract_config=MetadataExtractionConfig(extraction_method="citoid"),
+    )
+    mcp = MultiChainParser(multi_config)
+    res = mcp.process_parser_input(pi_1)
+    assert res.filter_classification == SciFilterClassfication.CITOID_DETECTED_RESEARCH
+    
+    
+    
+    # parse_request = create_post_request()
+    # multi_config = MultiParserChainConfig(
+    #     parser_configs=[
+    #         MultiRefTaggerChainConfig(
+    #             name="multi_ref_tagger",
+    #             llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
+    #             post_renderer=PostRendererType.THREAD_REF_POST,
+    #         )
+    #     ],
+    #     post_process_type=PostProcessType.COMBINED,
+    #     metadata_extract_config=MetadataExtractionConfig(extraction_method="citoid"),
+    # )
+    # mcp = MultiChainParser(multi_config)
+
+    # res = mcp.process_parse_request(parse_request)

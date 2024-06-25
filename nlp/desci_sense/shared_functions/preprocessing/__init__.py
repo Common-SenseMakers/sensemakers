@@ -154,6 +154,22 @@ class ParserInput(BaseModel):
     )
 
 
+def convert_parse_request_to_parser_input(
+    parse_request: ParsePostRequest,
+) -> ParserInput:
+    """_summary_
+
+    Args:
+        parse_request (ParsePostRequest): _description_
+
+    Returns:
+        ParserInput: _description_
+    """
+    thread = convert_thread_interface_to_ref_post(parse_request.post)
+    parser_input = ParserInput(thread_post=thread)
+    return parser_input
+
+
 # def convert_st_request_to_parser_input(
 #     st_request: StreamlitParseRequest,
 # ) -> ParserInput:
