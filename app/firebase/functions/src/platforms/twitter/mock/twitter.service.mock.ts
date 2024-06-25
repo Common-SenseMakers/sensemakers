@@ -14,6 +14,8 @@ import {
   TwitterUserDetails,
 } from '../../../@shared/types/types.twitter';
 import { UserDetailsBase } from '../../../@shared/types/types.user';
+import { ENVIRONMENTS } from '../../../config/ENVIRONMENTS';
+import { NODE_ENV } from '../../../config/config.runtime';
 import { TransactionManager } from '../../../db/transaction.manager';
 import { logger } from '../../../instances/logger';
 import { TwitterService } from '../twitter.service';
@@ -84,10 +86,10 @@ export const initThreads = () => {
       const createdAt = now + ixThread * 100 + 10 * ixTweet;
       state.latestTweetId = idTweet;
       return getSampleTweet(
-        idTweet.toString().padStart(5, '0'),
+        idTweet.toString(),
         TWITTER_USER_ID_MOCKS,
         createdAt,
-        ixThread.toString().padStart(5, '0'),
+        ixThread.toString(),
         content
       );
     });
@@ -173,6 +175,28 @@ export const getTwitterMock = (
         userDetails: UserDetailsBase,
         manager: TransactionManager
       ): Promise<TwitterThread[]> => {
+        /** if fetching for newer posts add 1 to emulate a new post added */
+        if (params.since_id && NODE_ENV === ENVIRONMENTS.LOCAL) {
+          const newTweetId = `${(state.threads.length + 1) * 100 + 1}`;
+          state.threads.push({
+            conversation_id: newTweetId,
+            tweets: [
+              getSampleTweet(
+                newTweetId,
+                TWITTER_USER_ID_MOCKS,
+                Date.now(),
+                newTweetId,
+                `new post added ${newTweetId}`
+              ),
+            ],
+            author: {
+              id: TWITTER_USER_ID_MOCKS,
+              name: TWITTER_NAME_MOCKS,
+              username: TWITTER_USERNAME_MOCKS,
+            },
+          });
+          console.log('added new tweet');
+        }
         const threads = state.threads.filter((thread) => {
           if (params.since_id) {
             /** exclusive */
