@@ -1,6 +1,8 @@
 import express from 'express';
 import * as functions from 'firebase-functions';
 import {
+  FirestoreEvent,
+  QueryDocumentSnapshot,
   onDocumentCreated,
   onDocumentUpdated,
 } from 'firebase-functions/v2/firestore';
@@ -179,6 +181,41 @@ exports[NOTIFY_USER_TASK] = onTaskDispatched(
   }
 );
 
+const getBeforeAndAfterOnUpdate = <T>(
+  event: FirestoreEvent<functions.Change<QueryDocumentSnapshot> | undefined>,
+  idProperty: string
+) => {
+  const id = event.params[idProperty];
+  const before = event.data?.before.data() as T;
+  const after = event.data?.after.data() as T;
+
+  if (!id || !before || !after) {
+    throw new Error('Unexpected post data not found in onDocumentUpdated');
+  }
+
+  return {
+    before: { ...before, id },
+    after: { ...after, id },
+  };
+};
+
+const getCreatedOnCreate = <T>(
+  event: FirestoreEvent<QueryDocumentSnapshot | undefined>,
+  idProperty: string
+) => {
+  const id = event.params[idProperty];
+  const data = event.data?.data();
+
+  if (!id || !data) {
+    throw new Error('Unexpected data not found in onDocumentCreated');
+  }
+
+  return {
+    id,
+    ...data,
+  } as T;
+};
+
 /** hooks */
 exports.postUpdateListener = onDocumentUpdated(
   {
@@ -186,14 +223,11 @@ exports.postUpdateListener = onDocumentUpdated(
     secrets,
   },
   async (event) => {
-    const postBefore = event.data?.before as AppPost | undefined;
-    const postAfter = event.data?.after as AppPost | undefined;
-
-    if (!postBefore || !postAfter) {
-      throw new Error('Unexpected post data not found in onDocumentUpdated');
-    }
-
-    await postUpdatedHook(postAfter, postBefore);
+    const { before, after } = getBeforeAndAfterOnUpdate<AppPost>(
+      event,
+      'postId'
+    );
+    await postUpdatedHook(after, before);
   }
 );
 
@@ -203,13 +237,8 @@ exports.postCreateListener = onDocumentCreated(
     secrets,
   },
   async (event) => {
-    const post = event.data?.data() as AppPost | undefined;
-
-    if (!post) {
-      throw new Error('Unexpected post data not found in onDocumentCreated');
-    }
-
-    await postUpdatedHook(post);
+    const created = getCreatedOnCreate<AppPost>(event, 'postId');
+    await postUpdatedHook(created);
   }
 );
 
@@ -219,14 +248,11 @@ exports.platformPostUpdateListener = onDocumentUpdated(
     secrets,
   },
   async (event) => {
-    const postBefore = event.data?.before as PlatformPost | undefined;
-    const postAfter = event.data?.after as PlatformPost | undefined;
-
-    if (!postBefore || !postAfter) {
-      throw new Error('Unexpected post data not found in onDocumentUpdated');
-    }
-
-    await platformPostUpdatedHook(postAfter, postBefore);
+    const { before, after } = getBeforeAndAfterOnUpdate<PlatformPost>(
+      event,
+      'platformPostId'
+    );
+    await platformPostUpdatedHook(after, before);
   }
 );
 
@@ -236,14 +262,11 @@ exports.activityEventCreateListener = onDocumentCreated(
     secrets,
   },
   async (event) => {
-    const activityEvent = event.data?.data() as ActivityEventBase | undefined;
+    const created = getCreatedOnCreate<ActivityEventBase>(
+      event,
+      'activityEventId'
+    );
 
-    if (!activityEvent) {
-      throw new Error(
-        'Unexpected activity data not found in onDocumentCreated'
-      );
-    }
-
-    await activityEventCreatedHook(activityEvent);
+    await activityEventCreatedHook(created);
   }
 );
