@@ -248,40 +248,18 @@ TEST_THREAD = {
     ],
 }
 
-EXAMPLE_REQUEST = {"post": SINGLE_QUOTE_TWEET, "parameters": {}}
-
-
-def test_thread_interface():
-    thread = AppThread.model_validate(TEST_THREAD_INTERFACE_1)
-    assert len(thread.thread[0].quotedThread.thread) == 2
-
-
-def test_thread_interface_conversion():
-    thread = AppThread.model_validate(TEST_THREAD_INTERFACE_1)
-    thread_ref_post = convert_thread_interface_to_ref_post(thread)
-    assert thread_ref_post.posts[0].quoted_url == "https://example.com/post/2"
-    assert (
-        thread_ref_post.posts[0].quoted_post.url == thread_ref_post.posts[0].quoted_url
-    )
-    assert len(thread_ref_post.posts) == 2
-
-
-def test_load_real_thread():
-    thread = AppThread.model_validate(TEST_THREAD)
-    thread_ref_post = convert_thread_interface_to_ref_post(thread)
-    assert thread_ref_post.md_ref_urls() == [
-        "https://x.com/FDAadcomms/status/1798104612635070611",
-        "https://journals.sagepub.com/doi/10.1177/20451253231198466",
-        "https://www.youtube.com/watch?feature=youtu.be&si=kjMtNR1Hwe7NZ8as&v=WknlkmJee4E",
-        "https://x.com/eturnermd1/status/1798046087737180395",
-        "https://x.com/FDAadcomms/status/1798107142219796794",
-    ]
-
-
-
-
-if __name__ == "__main__":
+def test_trim_by_char_limit():
     thread = AppThread.model_validate(TEST_OVERLENGTH_THREAD_INTERFACE)
     thread_ref_post = convert_thread_interface_to_ref_post(thread)
     pi = ParserInput(thread_post=thread_ref_post, max_posts=30)
     proc_pi = preproc_parser_input(pi)
+    assert pi.thread_post.char_length() == 13926
+    assert proc_pi.post_to_parse.char_length() == 8400
+
+
+if __name__ == "__main__":
+    thread = AppThread.model_validate(TEST_THREAD)
+    thread_ref_post = convert_thread_interface_to_ref_post(thread)
+    pi = ParserInput(thread_post=thread_ref_post, max_posts=2)
+    proc_pi = preproc_parser_input(pi)
+

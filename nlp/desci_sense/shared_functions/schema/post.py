@@ -52,6 +52,9 @@ class Post(Serializable):
         """Return whether this class is serializable."""
         return True
 
+    def char_length(self) -> int:
+        return len(self.content)
+
 
 class RefPost(Post):
     """
@@ -136,6 +139,11 @@ class QuoteRefPost(RefPost):
 
         return all_ref_urls
 
+    def char_length(self) -> int:
+        post_len = len(self.content)
+        quoted_len = len(self.quoted_post.content) if self.quoted_post else 0
+        return post_len + quoted_len
+
 
 class ThreadRefPost(RefPost):
     """
@@ -167,9 +175,5 @@ class ThreadRefPost(RefPost):
 
         return all_ref_urls
 
-    # @classmethod
-    # def from_thread_post_interface(
-    #     cls,
-    #     thread_post_interface: ThreadInterface,
-    # ):
-    #     pass
+    def char_length(self) -> int:
+        return sum([p.char_length() for p in self.posts])

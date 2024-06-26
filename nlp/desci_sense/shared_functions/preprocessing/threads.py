@@ -12,6 +12,9 @@ def concat_post_content(posts: List[AppPost]) -> str:
 def create_thread_from_posts(posts: List[QuoteRefPost]):
     assert len(posts) > 0
 
+    # deep copy posts
+    posts_copy = [p.copy(deep=True) for p in posts]
+
     # gather all urls from thread posts
     all_ref_urls = []
     for post in posts:
@@ -25,7 +28,7 @@ def create_thread_from_posts(posts: List[QuoteRefPost]):
         url=posts[0].url,
         source_network=posts[0].source_network,
         ref_urls=all_ref_urls,
-        posts=posts,
+        posts=posts_copy,
     )
     return thread_post
 
