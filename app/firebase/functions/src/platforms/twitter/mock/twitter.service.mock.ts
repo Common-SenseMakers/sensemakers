@@ -8,7 +8,6 @@ import {
 } from '../../../@shared/types/types.platform.posts';
 import {
   TwitterDraft,
-  TwitterGetContextParams,
   TwitterThread,
   TwitterUserDetails,
 } from '../../../@shared/types/types.twitter';
@@ -163,21 +162,41 @@ export const getTwitterMock = (
       }
     );
 
-    if (type === 'mock-signup') {
-      when(mocked.getSignupContext(anything(), anything())).thenCall(
-        (userId?: string, params?: TwitterGetContextParams) => {
-          return {};
-        }
-      );
+    when(mocked.getSignupContext(anything(), anything())).thenCall(() => {
+      return {
+        url: 'http://127.0.0.1:3000/?state=65~FHQ.G60vdlxFVLD~3pCJNmxHscqOo&code=azdVb0hMVUFGV2lhc2NlSEU2Q2RCOV9uckYtMGppYlc4R25lMWVkVDN6cGhXOjE3MTk0MzE4MTkyNTU6MTowOmFjOjE',
+        state: '65~FHQ.G60vdlxFVLD~3pCJNmxHscqOo',
+        codeVerifier:
+          'UlC.YM2NljtlaC3fd.Ni4RpqHU9XBO~2EZbEwoL8tF_aGA2._7Sq7~bNMiEAkdaQt9TZf3lPoXPGhf2dHlH.UoJVFvXEaW4HF7ZkFnLs~uHDjZVMgzq6UgW3-ZsTqVkG',
+        codeChallenge: 'qJIf591edcrFYpEf3z8lXZX-5Cfqw5JOg_EL2-oJ330',
+        callback_url: 'http://127.0.0.1:3000/',
+        type: 'read',
+      };
+    });
 
-      when(mocked.handleSignupData(anything())).thenCall(
-        (data: TwitterUserDetails): TwitterUserDetails => {
-          return {
-            ...data,
-          };
-        }
-      );
-    }
+    when(mocked.handleSignupData(anything())).thenCall(
+      (data: TwitterUserDetails): TwitterUserDetails => {
+        return {
+          user_id: '1773032135814717440',
+          signupDate: 0,
+          profile: {
+            name: 'SenseNet Bot',
+            profile_image_url:
+              'https://pbs.twimg.com/profile_images/1783977034038882304/RGn66lGT_normal.jpg',
+            id: '1773032135814717440',
+            username: 'sense_nets_bot',
+          },
+          read: {
+            accessToken:
+              'ZWJzaEJCU1BSaFZvLUIwRFNCNHNXVlQtTV9mY2VSaDlOSk5ETjJPci0zbmJtOjE3MTk0MzM5ODkyNTM6MTowOmF0OjE',
+            refreshToken:
+              'U2xBMGpRSkFucE9yQzAxSnJlM0pRci1tQzJlR2dfWEY2MEpNc2daYkF6VjZSOjE3MTk0MzM5ODkyNTM6MTowOnJ0OjE',
+            expiresIn: 7200,
+            expiresAtMs: 1719441189590,
+          },
+        };
+      }
+    );
 
     return instance(mocked) as unknown as TwitterService;
   }
