@@ -367,8 +367,9 @@ def trim_str_with_urls_by_sep(
     """
     Takes an input string `txt` which may contain any number of urls, and also
     optionally contains any number of special separator strings `sep`.
-    Returns a list of strings `sep_strs: List[str]` containing substrings of
-    `txt` separated by `sep` occurences. The returned result `sep_strs`
+    Returns a list of strings `sep_strs: List[str]` containing the substrings of
+    `txt` separated by the `sep` occurences (without including the separators).
+    The returned result `sep_strs`
     should be uphold `len("".join(sep_strs))<= max_length + M` (for cases where the cutoff
     occurs in the middle of a URL).
     Eg, `trim_str_with_urls_by_sep("123<SEP>456789",4,"<SEP>") ==["123", "4"]`
@@ -390,7 +391,7 @@ def trim_str_with_urls_by_sep(
             trimmed_part = trim_str_with_urls(part, max_length - current_length)
             sep_strs.append(trimmed_part)
 
-            # check if part was trimmed or we still have parts left
+            # check if last part was trimmed or we still have parts left
             if trimmed_part != part or (i + 1) < len(parts):
                 trimmed = True
             break
@@ -399,3 +400,51 @@ def trim_str_with_urls_by_sep(
             current_length += len(part)
 
     return sep_strs, trimmed
+
+
+def trim_parts(parts: List, max_chars: int) -> Tuple[List[str], bool]:
+    """
+    Takes a list of string parts and trims them such that the total length of the
+    concatenated parts does not exceed the specified maximum number of characters.
+    Preserves URLs by ensuring they are not cut off mid-way.
+
+    Args:
+        parts (List[str]): List of string parts to trim.
+        max_chars (int): Maximum number of characters to trim to.
+
+    Returns:
+        Tuple[List[str], bool]: A tuple where the first element is the list of trimmed parts,
+        and the second element is a boolean indicating whether the input was trimmed (True) or not (False).
+    """
+    sep = "<<<SEP>>>"
+    joined_parts = sep.join(parts)
+    res = trim_str_with_urls_by_sep(
+        joined_parts,
+        max_length=max_chars,
+        sep=sep,
+    )
+    return res
+
+
+def trim_parts_to_length(part_lengths: List[int], max_length: int) -> List[int]:
+    """Given a list of part lengths and max_length,
+    return a new list of trimmed part lengths `trimmed_part_lengths`
+    such that `sum(trimmed_part_lengths) <= max_length` while preserving
+    as much of `part_lengths` as possible.
+    E.g., `trim_parts_to_length([1,2,3], 3) == [1,2])`
+    `trim_parts_to_length([1,2,3], 4) == [1,2,1])`
+    """
+    trimmed_part_lengths = []
+    current_length = 0
+
+    for length in part_lengths:
+        if current_length + length <= max_length:
+            trimmed_part_lengths.append(length)
+            current_length += length
+        else:
+            remaining_length = max_length - current_length
+            if remaining_length > 0:
+                trimmed_part_lengths.append(remaining_length)
+            break
+
+    return trimmed_part_lengths
