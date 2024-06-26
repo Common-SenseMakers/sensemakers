@@ -31,7 +31,10 @@ export const getTweetTextWithUrls = (tweet: TweetV2) => {
 
   if (urls) {
     urls.forEach((url) => {
-      text = text.replace(url.url, url.expanded_url);
+      text = text.replace(
+        url.url,
+        url.unwound_url ? url.unwound_url : url.expanded_url
+      );
     });
   }
 
