@@ -32,6 +32,7 @@ from desci_sense.shared_functions.preprocessing import (
     convert_thread_interface_to_ref_post,
     convert_app_post_to_ref_post,
     convert_app_post_to_quote_ref_post,
+    ParserInput,
 )
 
 TEST_THREAD_INTERFACE_2 = {
@@ -72,6 +73,26 @@ TEST_THREAD_INTERFACE_1 = {
         "id": "author_123",
         "username": "user123",
         "name": "John Doe",
+    },
+}
+
+TEST_OVERLENGTH_THREAD_INTERFACE = {
+    "url": "https://example.com/post/2",
+    "thread": [
+        {
+            "url": "https://example.com/post/2",
+            "content": "This is the first post in the thread.",
+        },
+        {
+            "url": "https://example.com/post/3",
+            "content": ",".join([str(x) for x in range(3000)]),
+        },
+    ],
+    "author": {
+        "platformId": "twitter",
+        "id": "author_456",
+        "username": "user546",
+        "name": "Sarah Gore",
     },
 }
 
@@ -255,6 +276,29 @@ def test_load_real_thread():
         "https://x.com/FDAadcomms/status/1798107142219796794",
     ]
 
+# def trim_str_with_urls(txt: str, max_length: int):
+#     """
+#     Takes input string `txt` which may contain any number of urls. Trims `txt`
+#     to `max_length` chars while preserving any urls if the cutoff happens in 
+#     the middle of a url.
+#     E.g., trim_str_with_urls("testing https://x.com/FDAadcomms/status/1798107142219796794", 10) = "testing https://x.com/FDAadcomms/status/1798107142219796794"
+#     trim_str_with_urls("testing not a valid url", 10) = 'testing no'
+    
+#     """
+    
+# def trim_str_with_urls_by_sep(txt:str, max_length: int, sep: str) -> List[str]:
+#     """
+#     Takes an input string `txt` which may contain any number of urls, and also 
+#     optionally contains any number of special separator strings `sep`.
+#     Returns a list of strings `sep_strs: List[str]` containing substrings of 
+#     `txt` separated by `sep` occurences. The returned result `sep_strs`
+#     should be uphold `len("".join(sep_strs))<= max_length + M` (for cases where the cutoff
+#     occurs in the middle of a URL).
+#     Eg, `trim_str_with_urls_by_sep("123<SEP>456789",4,"<SEP>") ==["123", "4"]`
+    
+#     """
 
 if __name__ == "__main__":
-    thread = AppThread.model_validate(TEST_THREAD)
+    thread = AppThread.model_validate(TEST_OVERLENGTH_THREAD_INTERFACE)
+    thread_ref_post = convert_thread_interface_to_ref_post(thread)
+    pi = ParserInput(thread_post=thread_ref_post, max_posts=30)

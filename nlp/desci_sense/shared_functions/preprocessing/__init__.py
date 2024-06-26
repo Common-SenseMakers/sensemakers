@@ -9,6 +9,7 @@ from ..interface import (
     SocialPlatformType,
     AppPost,
     Author,
+    MAX_CHARS_PER_POST,
 )
 from ..schema.post import ThreadRefPost, RefPost, QuoteRefPost
 from ..utils import (
@@ -153,6 +154,15 @@ class ParserInput(BaseModel):
         default=10,
     )
 
+    @property
+    def max_chars(self) -> int:
+        """
+        Returns maximum number of chars to process. Note that actual posts
+        might be longer than `MAX_CHARS_PER_POST` depending on the platform,
+        eg Mastodon (500) and Twitter Premium (25k)
+        """
+        return self.max_posts * MAX_CHARS_PER_POST
+
 
 def convert_parse_request_to_parser_input(
     parse_request: ParsePostRequest,
@@ -266,12 +276,19 @@ def preproc_parser_input(parser_input: ParserInput) -> PreprocParserInput:
     for p in excluded_posts:
         excluded_urls += p.md_ref_urls()
 
+    # remove dups
+    excluded_urls = remove_dups_ordered(excluded_urls)
+
     preprocessed_input = PreprocParserInput(
         post_to_parse=new_thread,
         unparsed_urls=excluded_urls,
     )
 
     return preprocessed_input
+
+
+# def validate_parser_input(parser_input: ParserInput) -> ParserInput:
+#     orig_thread = parser_input.thread_post
 
 
 # def preproc_parse_post_request(

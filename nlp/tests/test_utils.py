@@ -19,6 +19,8 @@ from desci_sense.shared_functions.dataloaders.twitter.twitter_utils import (
 
 from desci_sense.shared_functions.utils import (
     remove_dups_ordered,
+    trim_str_with_urls,
+    trim_str_with_urls_by_sep,
 )  # Replace 'your_module' with the actual module name
 
 
@@ -107,5 +109,34 @@ def test_find_last_occurence_of_any():
     assert find_last_occurence_of_any(input_text, strings_to_find) == "words"
 
 
+def test_trim_str_with_urls():
+    assert trim_str_with_urls("testing https://x.com/FDAadcomms/status/1798107142219796794", 10) == "testing https://x.com/FDAadcomms/status/1798107142219796794"
+    assert trim_str_with_urls("testing not a valid url", 10) == 'testing no'
+    assert trim_str_with_urls("short text", 20) == 'short text'
+    assert trim_str_with_urls("cutoff here example.com/test", 18) == 'cutoff here exampl'
+    assert trim_str_with_urls("cutoff here https://example.com/test", 19) == 'cutoff here https://example.com/test'
+    assert trim_str_with_urls("cutoff here https://example.com/test and more text", 40) == 'cutoff here https://example.com/test and'
+    assert trim_str_with_urls("multiple urls http://example.com/one https://example.com/two", 25) == 'multiple urls http://example.com/one'
+    assert trim_str_with_urls("multiple urls http://example.com/one https://example.com/two", 45) == 'multiple urls http://example.com/one https://example.com/two'
+    assert trim_str_with_urls("cutoff pre-url https://example.com/test", 15) == 'cutoff pre-url '
+    assert trim_str_with_urls("", 10) == ''
+    assert trim_str_with_urls("no urls in this text", 5) == 'no ur'
+
+
+def test_trim_str_with_urls_by_sep():
+    assert trim_str_with_urls_by_sep("123<SEP>456789", 4, "<SEP>") == (["123", "4"], True)
+    assert trim_str_with_urls_by_sep("testing<SEP>not a valid url", 10, "<SEP>") == (['testing', 'not'], True)
+    assert trim_str_with_urls_by_sep("short<SEP>text", 20, "<SEP>") == (["short", "text"], False)
+    assert trim_str_with_urls_by_sep("cutoff<SEP>here<SEP>https://example.com/test", 18, "<SEP>") == (['cutoff', 'here', 'https://example.com/test'], False)
+    assert trim_str_with_urls_by_sep("cutoff<SEP>here<SEP>https://example.com/test", 19, "<SEP>") == (["cutoff", "here", "https://example.com/test"], False)
+    assert trim_str_with_urls_by_sep("cutoff<SEP>here<SEP>https://example.com/test<SEP>and more text", 40, "<SEP>") == (['cutoff', 'here', 'https://example.com/test', 'and mo'], True)
+    assert trim_str_with_urls_by_sep("multiple<SEP>urls<SEP>http://example.com/one<SEP>https://example.com/two", 25, "<SEP>") == (["multiple", "urls", "http://example.com/one"], True)
+    assert trim_str_with_urls_by_sep("multiple<SEP>urls<SEP>http://example.com/one<SEP>https://example.com/two", 45, "<SEP>") == (["multiple", "urls", "http://example.com/one", "https://example.com/two"], False)
+    assert trim_str_with_urls_by_sep("cutoff<SEP>mid-url<SEP>https://example.com/test", 17, "<SEP>") == (['cutoff', 'mid-url', 'https://example.com/test'], False)
+    assert trim_str_with_urls_by_sep("cutoff<SEP>mid-url<SEP>https://example.com/test", 18, "<SEP>") == (["cutoff", "mid-url", "https://example.com/test"], False)
+    assert trim_str_with_urls_by_sep("", 10, "<SEP>") == ([""], False)
+    assert trim_str_with_urls_by_sep("no urls<SEP>in this text", 5, "<SEP>") == (["no ur"], True)
+
 if __name__ == "__main__":
-    pytest.main()
+    sep_strs, trimmed = trim_str_with_urls_by_sep("cutoff<SEP>here<SEP>https://example.com/test", 18, "<SEP>")
+

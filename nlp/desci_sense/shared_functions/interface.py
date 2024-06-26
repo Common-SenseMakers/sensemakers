@@ -16,6 +16,9 @@ from rdflib import URIRef, Literal, Graph
 from .prompting.jinja.topics_template import ALLOWED_TOPICS
 from .filters import SciFilterClassfication
 
+# for calculating thread length limits
+MAX_CHARS_PER_POST = 280
+
 
 class SocialPlatformType(str, Enum):
     TWITTER = "twitter"
