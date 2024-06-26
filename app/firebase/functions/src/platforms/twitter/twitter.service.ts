@@ -161,7 +161,7 @@ export class TwitterService
               break;
             } else {
               /** otherwise throw */
-              throw new Error(e);
+              throw new Error(handleTwitterError(e));
             }
           } else {
             throw new Error(handleTwitterError(e));

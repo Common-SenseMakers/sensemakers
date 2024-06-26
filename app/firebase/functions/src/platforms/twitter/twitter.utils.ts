@@ -16,12 +16,19 @@ import {
 
 export const handleTwitterError = (e: ApiResponseError) => {
   if (e.request) {
+    let retryAfter: number | undefined;
+    if (e.rateLimit && e.response.headers.date) {
+      const dateTwitter = dateStrToTimestampMs(e.response.headers.date);
+      retryAfter = e.rateLimit.reset - dateTwitter / 1000;
+    }
+
     return `
       Error calling Twitter API. 
       path: ${e.request.path}
       code: ${e.code}
       data: ${JSON.stringify(e.data)}
       rateLimit: ${JSON.stringify(e.rateLimit)}
+      ${retryAfter ? `retryAfter: ${retryAfter} seconds` : ''}
       `;
   } else {
     return e.message;

@@ -67,22 +67,33 @@ export class DBInstance {
       case ManagerModes.TRANSACTION:
         return this.firestore.runTransaction(async (transaction) => {
           if (DEBUG) logger.debug('Transaction started');
-          const manager = new TransactionManager(transaction);
+          try {
+            const manager = new TransactionManager(transaction);
 
-          const result = await func(manager, payload);
-          if (DEBUG) logger.debug('Transaction function executed');
+            const result = await func(manager, payload);
+            if (DEBUG) logger.debug('Transaction function executed');
 
-          await manager.applyWrites();
-          if (DEBUG) logger.debug('Transaction writes applied');
-          return result;
+            await manager.applyWrites();
+            if (DEBUG) logger.debug('Transaction writes applied');
+
+            return result;
+          } catch (error: any) {
+            logger.error('Transaction failed', error);
+            throw new Error(error);
+          }
         });
 
       case ManagerModes.BATCH: {
-        const batch = this.firestore.batch();
-        const manager = new TransactionManager(undefined, batch);
-        const result = await func(manager, payload);
-        await manager.applyWrites();
-        return result;
+        try {
+          const batch = this.firestore.batch();
+          const manager = new TransactionManager(undefined, batch);
+          const result = await func(manager, payload);
+          await manager.applyWrites();
+          return result;
+        } catch (error: any) {
+          logger.error('Transaction failed', error);
+          throw new Error(error);
+        }
       }
     }
   }
