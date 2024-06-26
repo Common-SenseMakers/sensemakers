@@ -16,7 +16,6 @@ import { logger } from '../instances/logger';
 import { PostsHelper } from '../posts/posts.helper';
 import { PostsRepository } from '../posts/posts.repository';
 import { UsersRepository } from '../users/users.repository';
-import { getPostUrl } from './notification.utils';
 import { NotificationsRepository } from './notifications.repository';
 
 const postmark = require('postmark');
@@ -146,7 +145,7 @@ export class NotificationService {
 
       return {
         content: postText,
-        url: getPostUrl(post.id),
+        url: PostsHelper.getPostUrl(post.id),
       };
     } else {
       throw new Error('Unsupported notification type');

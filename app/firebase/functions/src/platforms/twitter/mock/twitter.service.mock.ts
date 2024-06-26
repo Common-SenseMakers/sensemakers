@@ -10,10 +10,13 @@ import {
   AppTweet,
   TwitterDraft,
   TwitterGetContextParams,
+  TwitterSignupContext,
+  TwitterSignupData,
   TwitterThread,
   TwitterUserDetails,
 } from '../../../@shared/types/types.twitter';
 import { UserDetailsBase } from '../../../@shared/types/types.user';
+import { APP_URL } from '../../../config/config.runtime';
 import { TransactionManager } from '../../../db/transaction.manager';
 import { logger } from '../../../instances/logger';
 import { TwitterService } from '../twitter.service';
@@ -37,7 +40,7 @@ export const TEST_THREADS: string[][] = process.env.TEST_THREADS
   ? JSON.parse(process.env.TEST_THREADS as string)
   : [];
 
-export const TWITTER_USER_ID_MOCKS = 'sense_nets_bot';
+export const TWITTER_USER_ID_MOCKS = 'userIdOf_sense_nets_bot';
 export const TWITTER_USERNAME_MOCKS = 'sense_nets_bot';
 export const TWITTER_NAME_MOCKS = 'SenseNet Bot';
 
@@ -194,15 +197,33 @@ export const getTwitterMock = (
 
     if (type === 'mock-signup') {
       when(mocked.getSignupContext(anything(), anything())).thenCall(
-        (userId?: string, params?: TwitterGetContextParams) => {
-          return {};
+        (
+          userId?: string,
+          params?: TwitterGetContextParams
+        ): TwitterSignupContext => {
+          return {
+            url: `${APP_URL.value()}?code=${TWITTER_USERNAME_MOCKS}&state=testState`,
+            state: 'testState',
+            codeVerifier: 'testCodeVerifier',
+            codeChallenge: '',
+            callback_url: APP_URL.value(),
+            type: 'read',
+          };
         }
       );
 
       when(mocked.handleSignupData(anything())).thenCall(
-        (data: TwitterUserDetails): TwitterUserDetails => {
+        (data: TwitterSignupData): TwitterUserDetails => {
           return {
-            ...data,
+            user_id: TWITTER_USER_ID_MOCKS,
+            signupDate: Date.now(),
+            profile: {
+              id: TWITTER_USER_ID_MOCKS,
+              name: TWITTER_NAME_MOCKS,
+              username: TWITTER_USERNAME_MOCKS,
+              profile_image_url:
+                'https://pbs.twimg.com/profile_images/1753077803258449920/2vI5Y2Wx_normal.png',
+            },
           };
         }
       );
