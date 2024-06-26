@@ -12,7 +12,7 @@ import {
 import { IS_EMULATOR } from '../../config/config.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
-import { enqueueTask } from '../../tasks.support';
+import { enqueueTask } from '../../tasksUtils/tasks.support';
 import { canReadPost } from '../posts.access.control';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 import {

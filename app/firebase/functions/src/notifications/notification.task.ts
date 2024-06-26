@@ -1,7 +1,7 @@
 import { NotificationFreq } from '../@shared/types/types.notifications';
 import { logger } from '../instances/logger';
 import { Services } from '../instances/services';
-import { enqueueTask } from '../tasks.support';
+import { enqueueTask } from '../tasksUtils/tasks.support';
 
 export const NOTIFY_USER_TASK = 'notifyUser';
 

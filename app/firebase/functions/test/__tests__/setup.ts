@@ -3,13 +3,13 @@ import * as sinon from 'sinon';
 
 import { AppUser } from '../../src/@shared/types/types.user';
 import { envDeploy } from '../../src/config/typedenv.deploy';
-import * as tasksSupport from '../../src/tasks.support';
-import { enqueueTaskMock } from '../../src/tasks.support.mock';
+import * as tasksSupport from '../../src/tasksUtils/tasks.support';
 import {
   TestUserCredentials,
   authenticateTestUser,
 } from '../utils/authenticate.users';
 import { resetDB } from '../utils/db';
+import { enqueueTaskMockOnTests } from '../utils/tasks.enqueuer.mock.tests';
 import { getTestServices } from './test.services';
 
 export const LOG_LEVEL_MSG = envDeploy.LOG_LEVEL_MSG.value();
@@ -49,7 +49,7 @@ export const mochaHooks = (): Mocha.RootHookObject => {
       /** mock enqueueTask */
       (global as any).enqueueTaskStub = sinon
         .stub(tasksSupport, 'enqueueTask')
-        .callsFake(enqueueTaskMock);
+        .callsFake(enqueueTaskMockOnTests);
 
       /** prepare/authenticate users  */
       await services.db.run(async (manager) => {

@@ -1,21 +1,24 @@
-import { postUpdatedHookOnTest } from '../test/utils/posts.utils';
-import { logger } from './instances/logger';
-import { Services, createServices } from './instances/services';
+import { logger } from '../../src/instances/logger';
+import { Services, createServices } from '../../src/instances/services';
 import {
   NOTIFY_USER_TASK,
   notifyUserTask,
-} from './notifications/notification.task';
+} from '../../src/notifications/notification.task';
 import {
   AUTOFETCH_POSTS_TASK,
   autofetchUserPosts,
-} from './posts/tasks/posts.autofetch.task';
+} from '../../src/posts/tasks/posts.autofetch.task';
 import {
   AUTOPOST_POST_TASK,
   autopostPostTask,
-} from './posts/tasks/posts.autopost.task';
-import { PARSE_POST_TASK, parsePostTask } from './posts/tasks/posts.parse.task';
+} from '../../src/posts/tasks/posts.autopost.task';
+import {
+  PARSE_POST_TASK,
+  parsePostTask,
+} from '../../src/posts/tasks/posts.parse.task';
+import { postUpdatedHookOnTest } from './posts.utils';
 
-export const enqueueTaskMock = async (
+export const enqueueTaskMockOnTests = async (
   name: string,
   params: any,
   services?: Services

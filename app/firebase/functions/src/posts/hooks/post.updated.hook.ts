@@ -11,7 +11,7 @@ import {
 } from '../../@shared/types/types.posts';
 import { logger } from '../../instances/logger';
 import { createServices } from '../../instances/services';
-import { enqueueTask } from '../../tasks.support';
+import { enqueueTask } from '../../tasksUtils/tasks.support';
 import { UsersHelper } from '../../users/users.helper';
 import { AUTOPOST_POST_TASK } from '../tasks/posts.autopost.task';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
