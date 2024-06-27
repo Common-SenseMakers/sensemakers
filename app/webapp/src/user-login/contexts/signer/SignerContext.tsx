@@ -1,4 +1,4 @@
-import { useWeb3Modal } from '@web3modal/wagmi/react';
+import { useWeb3Modal, useWeb3ModalEvents } from '@web3modal/wagmi/react';
 import {
   PropsWithChildren,
   createContext,
@@ -10,18 +10,17 @@ import {
 import { WalletClient } from 'viem';
 import { useDisconnect, useWalletClient } from 'wagmi';
 
-import { HexStr } from '../../../shared/types/types';
+import { HexStr } from '../../../shared/types/types.user';
 import { createMagicSigner, magic } from './magic.signer';
 
 export type SignerContextType = {
   connect: () => void;
+  connectWeb3: () => void;
+  errorConnecting: boolean;
   hasInjected: boolean;
   signer?: WalletClient;
   address?: HexStr;
   signMessage?: (message: string) => Promise<HexStr>;
-  isConnecting: boolean;
-  isChecking: boolean;
-  errorConnecting?: Error;
   disconnect: () => void;
 };
 
@@ -31,28 +30,24 @@ const ProviderContextValue = createContext<SignerContextType | undefined>(
 
 export const SignerContext = (props: PropsWithChildren) => {
   const { open: openConnectModal } = useWeb3Modal();
+  const modalEvents = useWeb3ModalEvents();
 
   const [address, setAddress] = useState<HexStr>();
   const [magicSigner, setMagicSigner] = useState<WalletClient>();
 
   const { data: injectedSigner } = useWalletClient();
 
-  const [isConnecting, setIsConnecting] = useState<boolean>(false);
-  const [isChecking, setIsChecking] = useState<boolean>(true);
-  const [errorConnecting, setErrorConnecting] = useState<Error>();
+  const [errorConnecting, setErrorConnecting] = useState<boolean>(false);
 
   const signer: WalletClient | undefined = injectedSigner
     ? injectedSigner
     : magicSigner;
 
   useEffect(() => {
-    setIsChecking(true);
     magic.user.isLoggedIn().then((res) => {
       if (res && !magicSigner) {
         console.log('Autoconnecting Magic');
-        connectMagic();
-      } else {
-        setIsChecking(false);
+        connectMagic(false);
       }
     });
   }, []);
@@ -74,30 +69,46 @@ export const SignerContext = (props: PropsWithChildren) => {
 
   const { disconnect: disconnectInjected } = useDisconnect();
 
-  const connectMagic = () => {
-    console.log('connecting magic signer', { signer });
-    setIsChecking(false);
-    setIsConnecting(true);
-    createMagicSigner().then((signer) => {
-      console.log('connected magic signer', { signer });
-      setIsConnecting(false);
-      setMagicSigner(signer);
-    });
-  };
+  const connectMagic = useCallback(
+    (openUI: boolean) => {
+      setErrorConnecting(false);
+      console.log('connecting magic signer', { signer });
+      createMagicSigner(openUI)
+        .then((signer) => {
+          console.log('connected magic signer', { signer });
+          setMagicSigner(signer);
+        })
+        .catch((e) => {
+          setErrorConnecting(true);
+        });
+    },
+    [signer]
+  );
 
-  const connectInjected = () => {
+  const connectWeb3 = useCallback(() => {
+    setErrorConnecting(false);
     openConnectModal();
-  };
+  }, [openConnectModal]);
+
+  useEffect(() => {
+    console.log(modalEvents.data.event);
+    if (modalEvents.data.event === 'MODAL_CLOSE') {
+      setErrorConnecting(true);
+    }
+    if (modalEvents.data.event === 'CONNECT_ERROR') {
+      setErrorConnecting(true);
+    }
+  }, [modalEvents]);
 
   const hasInjected = (window as any).ethereum !== undefined;
 
-  const connect = () => {
+  const connect = useCallback(() => {
     if (hasInjected) {
-      connectInjected();
+      connectWeb3();
     } else {
-      connectMagic();
+      connectMagic(true);
     }
-  };
+  }, [hasInjected, connectWeb3, connectMagic]);
 
   const _signMessage = useCallback(
     (message: string) => {
@@ -124,8 +135,7 @@ export const SignerContext = (props: PropsWithChildren) => {
     <ProviderContextValue.Provider
       value={{
         connect,
-        isConnecting,
-        isChecking,
+        connectWeb3,
         errorConnecting,
         signMessage,
         hasInjected,

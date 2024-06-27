@@ -1,23 +1,11 @@
-import puppeteer, { Browser } from 'puppeteer';
-import { IOAuth2RequestTokenResult } from 'twitter-api-v2';
-
-import { AppUser, HexStr, PLATFORM } from '../../src/@shared/types/types';
-import {
-  TwitterGetContextParams,
-  TwitterSignupData,
-} from '../../src/@shared/types/types.twitter';
+import { AppUser, HexStr, PLATFORM } from '../../src/@shared/types/types.user';
 import { TransactionManager } from '../../src/db/transaction.manager';
 import { Services } from '../../src/instances/services';
-import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { getPrefixedUserId } from '../../src/users/users.utils';
+import { USE_REAL_TWITTER } from '../__tests__/setup';
+import { authenticateTwitterUser } from './authenticate.twitter';
 import { getNanopubProfile } from './nanopub.profile';
-
-const CALLBACK_URL = 'https://sense-nets.xyz/';
-const NEXT_BUTTON_TEXT = 'Next';
-const LOG_IN_BUTTON_TEXT = 'Log in';
-const AUTHORIZE_APP_BUTTON_TEXT = 'Authorize app';
-const USERNAME_INPUT_SELECTOR = 'input[autocomplete="username"]';
-const PASSWORD_INPUT_SELECTOR = 'input[autocomplete="current-password"]';
+import { getMockedUser } from './users.mock';
 
 export interface TwitterAccountCredentials {
   username: string;
@@ -35,6 +23,7 @@ export interface NanopubAccountCredentials {
 }
 
 export interface TestUserCredentials {
+  userId: string;
   twitter: TwitterAccountCredentials;
   nanopub: NanopubAccountCredentials;
 }
@@ -56,13 +45,16 @@ export const authenticateTestUser = async (
   services: Services,
   manager: TransactionManager
 ): Promise<AppUser> => {
-  const user0 = await authenticateTwitterUser(
-    credentials.twitter,
-    services,
-    manager
-  );
-  const user1 = await authenticateNanopub(user0, credentials.nanopub);
-  return user1;
+  const user0 = USE_REAL_TWITTER
+    ? await authenticateTwitterUser(credentials.twitter, services, manager)
+    : getMockedUser(credentials);
+
+  if (!USE_REAL_TWITTER) {
+    // authenticateTwitterUser dont add nanopub credentials, getMockedUser does
+    return await authenticateNanopub(user0, credentials.nanopub);
+  }
+
+  return user0;
 };
 
 const authenticateNanopub = async (
@@ -88,104 +80,4 @@ const authenticateNanopub = async (
   ];
 
   return user;
-};
-
-/**
- * From a set of platform credentials, authenticate the users and
- * return their full profiles
- */
-export const authenticateTwitterUser = async (
-  testAccount: TwitterAccountCredentials,
-  services: Services,
-  manager: TransactionManager
-): Promise<AppUser> => {
-  const browser = await puppeteer.launch({ headless: false });
-  const signupData = await runAuthenticateTwitterUser(
-    testAccount,
-    services.platforms.get<TwitterService>(PLATFORM.Twitter),
-    browser
-  );
-  await browser.close();
-
-  /** create users using the Twitter profiles */
-  /** store the user in the DB (build the user profile object and derive the ID) */
-  const result = await services.users.handleSignup(
-    PLATFORM.Twitter,
-    signupData,
-    manager
-  );
-  if (!result) {
-    throw new Error('Unexpected');
-  }
-
-  /** read the just created user (will fail if not found) */
-  const user = await services.users.repo.getUser(result.userId, manager, true);
-
-  return user;
-};
-
-const runAuthenticateTwitterUser = async (
-  user: TwitterAccountCredentials,
-  twitterService: TwitterService,
-  browser: Browser
-): Promise<TwitterSignupData> => {
-  const twitterOAuthTokenRequestResult: IOAuth2RequestTokenResult &
-    TwitterGetContextParams = await twitterService.getSignupContext(undefined, {
-    callback_url: CALLBACK_URL,
-    type: user.type,
-  });
-
-  const page = await browser.newPage();
-  await page.goto(twitterOAuthTokenRequestResult.url);
-  await page.waitForSelector(USERNAME_INPUT_SELECTOR);
-  await page.type(USERNAME_INPUT_SELECTOR, user.username);
-  await page.evaluate((nextButtonText) => {
-    const elements = [...document.querySelectorAll('span')];
-    const targetElement = elements.find((e) => e.innerText == nextButtonText);
-    if (targetElement) targetElement.click();
-  }, NEXT_BUTTON_TEXT);
-
-  await page.waitForSelector(PASSWORD_INPUT_SELECTOR);
-  await page.type(PASSWORD_INPUT_SELECTOR, user.password);
-  await page.evaluate((logInButtonText) => {
-    const elements = [...document.querySelectorAll('span')];
-    const targetElement = elements.find((e) => e.innerText == logInButtonText);
-    if (targetElement) targetElement.click();
-  }, LOG_IN_BUTTON_TEXT);
-
-  await page.waitForNavigation();
-  await page.waitForFunction(
-    (authorizeAppButtonText) =>
-      document.body.textContent?.includes(authorizeAppButtonText),
-    {},
-    AUTHORIZE_APP_BUTTON_TEXT
-  );
-  await page.evaluate((authorizeAppButtonText) => {
-    const elements = [...document.querySelectorAll('span')];
-    const targetElement = elements.find(
-      (e) => e.innerText == authorizeAppButtonText
-    );
-    if (targetElement) targetElement.click();
-  }, AUTHORIZE_APP_BUTTON_TEXT);
-
-  await page.waitForNavigation();
-  const currentUrl = page.url();
-  await page.close();
-
-  const queryParams = new URLSearchParams(new URL(currentUrl).search);
-
-  const twitterOAuthCode = queryParams.get('code');
-  if (!twitterOAuthCode) {
-    throw new Error('twitterOAuthCode undefined');
-  }
-
-  return {
-    code: twitterOAuthCode,
-    callback_url: twitterOAuthTokenRequestResult.callback_url,
-    codeChallenge: twitterOAuthTokenRequestResult.codeChallenge,
-    codeVerifier: twitterOAuthTokenRequestResult.codeVerifier,
-    state: twitterOAuthTokenRequestResult.state,
-    type: twitterOAuthTokenRequestResult.type,
-    url: twitterOAuthTokenRequestResult.url,
-  };
 };

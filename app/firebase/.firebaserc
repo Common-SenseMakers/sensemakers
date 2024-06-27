@@ -1,5 +1,6 @@
 {
   "projects": {
+    "dev": "sensenets-dev",
     "staging": "sensenets-staging",
     "prod": "sensenets-prod"
   },

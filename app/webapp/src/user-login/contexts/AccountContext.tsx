@@ -7,19 +7,22 @@ import {
 } from 'react';
 
 import { _appFetch } from '../../api/app.fetch';
-import { AppUserRead, PLATFORM } from '../../shared/types/types';
 import { TwitterUserProfile } from '../../shared/types/types.twitter';
+import { AppUserRead, PLATFORM } from '../../shared/types/types.user';
 import { getAccount } from '../user.helper';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export const OUR_TOKEN_NAME = 'ourToken';
 
 export type AccountContextType = {
   connectedUser?: AppUserRead;
   hasTriedFetchingUser: boolean;
-  twitterProfile?: TwitterUserProfile;
   isConnected: boolean;
+  twitterProfile?: TwitterUserProfile;
+  email?: string;
+  setEmail: (email: string) => void;
+  isSettingEmail: boolean;
   disconnect: () => void;
   refresh: () => void;
   token?: string;
@@ -40,10 +43,13 @@ export const AccountContext = (props: PropsWithChildren) => {
   const [connectedUser, setConnectedUser] = useState<AppUserRead | null>();
   const [hasTriedFetchingUser, setHasTriedFetchingUser] =
     useState<boolean>(false);
+
   const _token = localStorage.getItem(OUR_TOKEN_NAME);
   const [token, setToken] = useState<string | undefined>(
     _token ? _token : undefined
   );
+
+  const [isSettingEmail, setIsSettingEmail] = useState<boolean>(false);
 
   const checkToken = () => {
     const _token = localStorage.getItem(OUR_TOKEN_NAME);
@@ -73,6 +79,21 @@ export const AccountContext = (props: PropsWithChildren) => {
     }
   };
 
+  const setEmail = async (email: string) => {
+    if (token) {
+      setIsSettingEmail(true);
+      _appFetch<AppUserRead>('/api/auth/setEmail', { email }, token)
+        .then(() => {
+          setIsSettingEmail(false);
+          refresh();
+        })
+        .catch((e) => {
+          console.error(e);
+          setIsSettingEmail(false);
+        });
+    }
+  };
+
   useEffect(() => {
     checkToken();
   }, []);
@@ -94,12 +115,17 @@ export const AccountContext = (props: PropsWithChildren) => {
     ? getAccount(connectedUser, PLATFORM.Twitter)?.profile
     : undefined;
 
+  const email = connectedUser ? connectedUser.email : undefined;
+
   return (
     <AccountContextValue.Provider
       value={{
         connectedUser: connectedUser === null ? undefined : connectedUser,
         hasTriedFetchingUser,
         twitterProfile,
+        email,
+        setEmail,
+        isSettingEmail,
         isConnected: connectedUser !== undefined && connectedUser !== null,
         disconnect,
         refresh,

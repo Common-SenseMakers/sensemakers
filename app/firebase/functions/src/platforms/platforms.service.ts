@@ -1,17 +1,12 @@
-import { TimeService } from 'src/time/time.service';
-import { UsersService } from 'src/users/users.service';
-
-import {
-  FetchParams,
-  PLATFORM,
-  PlatformFetchParams,
-  UserDetailsBase,
-} from '../@shared/types/types';
+import { FetchParams, PlatformFetchParams } from '../@shared/types/types.fetch';
 import {
   PlatformPostCreate,
   PlatformPostPublish,
 } from '../@shared/types/types.platform.posts';
+import { PLATFORM, UserDetailsBase } from '../@shared/types/types.user';
 import { TransactionManager } from '../db/transaction.manager';
+import { TimeService } from '../time/time.service';
+import { UsersService } from '../users/users.service';
 import { IdentityService, PlatformService } from './platforms.interface';
 
 interface FetchUserParams {
@@ -38,7 +33,6 @@ export class PlatformsService {
     protected users: UsersService
   ) {}
 
-  // TODO set the return type depending on the value of platformId
   public get<T extends PlatformService>(platformId: PLATFORM): T {
     const platform = this.platforms.get(platformId);
     if (!platform) {

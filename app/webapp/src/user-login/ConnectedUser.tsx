@@ -1,21 +1,16 @@
 import { Anchor, Box, DropButton, Text } from 'grommet';
-import { UserExpert } from 'grommet-icons';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { TwitterAvatar } from '../app/TwitterAvatar';
-import { TwitterProfileAnchor } from '../app/anchors/TwitterAnchor';
+import { TwitterAvatar } from '../app/icons/TwitterAvatar';
+import { I18Keys } from '../i18n/i18n';
 import { AbsoluteRoutes, RouteNames } from '../route.names';
-import { PLATFORM, UserDetailsBase } from '../shared/types/types';
-import { TwitterUserProfile } from '../shared/types/types.twitter';
+import { PLATFORM } from '../shared/types/types.user';
 import { AppButton } from '../ui-components';
-import { AppAddress } from '../ui-components/AppAddress';
-import { useThemeContext } from '../ui-components/ThemedApp';
 import { cap } from '../utils/general';
 import { useAccountContext } from './contexts/AccountContext';
 import { useDisconnectContext } from './contexts/ConnectedUserContext';
-import { getAccount } from './user.helper';
 
 export const ConnectedUser = (props: {}) => {
   const { t } = useTranslation();
@@ -31,6 +26,10 @@ export const ConnectedUser = (props: {}) => {
     connectedUser && connectedUser[PLATFORM.Twitter]?.length
       ? connectedUser[PLATFORM.Twitter][0].profile
       : undefined;
+
+  const goToSettings = () => {
+    navigate(AbsoluteRoutes.Settings);
+  };
 
   const content = (() => {
     if (!isConnected) {
@@ -65,9 +64,20 @@ export const ConnectedUser = (props: {}) => {
 
             <AppButton
               plain
+              onClick={() => goToSettings()}
+              style={{ textTransform: 'none', paddingTop: '6px' }}>
+              <Text style={{ fontWeight: 'bold' }}>
+                {cap(t(I18Keys.settings))}
+              </Text>
+            </AppButton>
+
+            <AppButton
+              plain
               onClick={() => disconnect()}
               style={{ textTransform: 'none', paddingTop: '6px' }}>
-              <Text style={{ fontWeight: 'bold' }}>{cap(t('logout'))}</Text>
+              <Text style={{ fontWeight: 'bold' }}>
+                {cap(t(I18Keys.logout))}
+              </Text>
             </AppButton>
           </Box>
         }

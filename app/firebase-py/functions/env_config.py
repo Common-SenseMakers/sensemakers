@@ -10,6 +10,8 @@ if environment == "production":
     dotenv_path = os.path.join(os.path.dirname(__file__), ".env.prod")
 elif environment == "staging":
     dotenv_path = os.path.join(os.path.dirname(__file__), ".env.staging")
+elif environment == "dev":
+    dotenv_path = os.path.join(os.path.dirname(__file__), ".env.dev")
 else:
     dotenv_path = os.path.join(
         os.path.dirname(__file__), ".env"

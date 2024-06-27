@@ -1,11 +1,12 @@
 import { Anchor, Box, BoxExtendedProps, DropButton, Menu, Text } from 'grommet';
 import { Refresh } from 'grommet-icons';
-import { CSSProperties, useEffect } from 'react';
+import { CSSProperties, useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useServiceWorker } from '../app/ServiceWorkerContext';
 import { useToastContext } from '../app/ToastsContext';
+import { ViewportPageScrollContext } from '../app/layout/Viewport';
 import { I18Keys } from '../i18n/i18n';
 import { PostCard } from '../post/PostCard';
 import { PostsQueryStatus, UserPostsQuery } from '../shared/types/types.posts';
@@ -40,7 +41,16 @@ export const UserHome = () => {
     isFetchingNewer,
     errorFetchingNewer,
     isLoading,
+    moreToFetch,
   } = useUserPosts();
+
+  const { isAtBottom } = useContext(ViewportPageScrollContext);
+  const location = useLocation();
+  useEffect(() => {
+    if (isAtBottom && !isLoading && moreToFetch) {
+      fetchOlder();
+    }
+  }, [isAtBottom]);
 
   useEffect(() => {
     const error = errorFetchingOlder || errorFetchingNewer;
@@ -53,6 +63,23 @@ export const UserHome = () => {
       });
     }
   }, [errorFetchingOlder, errorFetchingNewer]);
+
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    if (location.state?.postId) {
+      const postCard = document.querySelector(`#post-${location.state.postId}`);
+      const viewportPage = document.querySelector('#content');
+      if (postCard && viewportPage) {
+        timeout = setTimeout(() => {
+          postCard.scrollIntoView({
+            behavior: 'instant' as ScrollBehavior,
+            block: 'center',
+          });
+        }, 0);
+      }
+    }
+    return () => clearTimeout(timeout);
+  }, []);
 
   const navigate = useNavigate();
 
@@ -83,23 +110,33 @@ export const UserHome = () => {
       <>
         <Box gap="medium">
           {posts.map((post, ix) => (
-            <Box key={ix}>
+            <Box key={ix} id={`post-${post.id}`}>
               <PostCard post={post} shade={ix % 2 === 1}></PostCard>
             </Box>
           ))}
         </Box>
-        <Box pad="large">
-          {posts.length > 0 &&
-          !errorFetchingOlder &&
-          filterStatus === PostsQueryStatus.ALL ? (
-            <AppButton
-              disabled={isFetchingOlder}
-              label={!isFetchingOlder ? 'fetch older' : 'loading...'}
-              onClick={() => fetchOlder()}></AppButton>
-          ) : (
-            <> </>
-          )}
-        </Box>
+        {isFetchingOlder && (
+          <Box>
+            <LoadingDiv height="120px" width="100%"></LoadingDiv>
+          </Box>
+        )}
+        {!moreToFetch && (
+          <Box
+            margin={{ vertical: 'medium', horizontal: 'medium' }}
+            align="center"
+            justify="center">
+            <Text
+              style={{
+                fontSize: '14px',
+                fontStyle: 'normal',
+                fontWeight: '500',
+                lineHeight: '16px',
+                color: 'grey',
+              }}>
+              {t(I18Keys.noMorePosts)}
+            </Text>
+          </Box>
+        )}
       </>
     );
   })();

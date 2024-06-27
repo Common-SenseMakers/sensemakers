@@ -1,4 +1,4 @@
-import { Box } from 'grommet';
+import { Anchor, Box } from 'grommet';
 import { Refresh } from 'grommet-icons';
 
 import { ClearIcon } from '../app/icons/ClearIcon';
@@ -17,16 +17,14 @@ import { usePost } from './PostContext';
 import { PostHeader } from './PostHeader';
 import { PostNav } from './PostNav';
 import { PostText } from './PostText';
+import { concatenateThread } from './posts.helper';
 
 /** extract the postId from the route and pass it to a PostContext */
 export const PostView = (props: {
-  prevPostId?: string;
-  nextPostId?: string;
   profile?: TwitterUserProfile;
   isProfile: boolean;
 }) => {
   const { constants } = useThemeContext();
-  const { prevPostId, nextPostId } = props;
   const {
     post,
     nanopubDraft,
@@ -35,7 +33,10 @@ export const PostView = (props: {
     reparse,
     updatePost,
     isUpdating,
-    approve,
+    approveOrUpdate,
+    editable: _editable,
+    enabledEdit,
+    setEnabledEdit,
   } = usePost();
 
   const { connectedUser } = useAccountContext();
@@ -62,7 +63,7 @@ export const PostView = (props: {
     });
   };
 
-  const { signNanopublication, connect } = useNanopubContext();
+  const { signNanopublication, connect, connectWithWeb3 } = useNanopubContext();
 
   const canPublishNanopub =
     connectedUser &&
@@ -82,7 +83,7 @@ export const PostView = (props: {
 
     if (canPublishNanopub && nanopubDraft && !postStatuses.nanopubPublished) {
       return {
-        action: () => approve(),
+        action: () => approveOrUpdate(),
         label: 'Nanopublish',
       };
     }
@@ -108,32 +109,67 @@ export const PostView = (props: {
     if (!postStatuses.nanopubPublished && !postStatuses.ignored) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
-          <AppButton
-            disabled={isUpdating}
-            icon={<ClearIcon></ClearIcon>}
-            style={{ width: '50%' }}
-            onClick={() => ignore()}
-            label="Ignore"></AppButton>
-          <AppButton
-            primary
-            disabled={isUpdating}
-            icon={<SendIcon></SendIcon>}
-            style={{ width: '50%' }}
-            onClick={() => rightClicked()}
-            label={rightLabel}></AppButton>
+          <Box style={{ flexGrow: 1 }}>
+            <AppButton
+              disabled={isUpdating}
+              icon={<ClearIcon></ClearIcon>}
+              onClick={() => ignore()}
+              label="Ignore"></AppButton>
+          </Box>
+          <Box style={{ flexGrow: 1 }} align="end" gap="small">
+            <AppButton
+              primary
+              disabled={isUpdating}
+              icon={<SendIcon></SendIcon>}
+              onClick={() => rightClicked()}
+              label={rightLabel}
+              style={{ width: '100%' }}></AppButton>
+            {!canPublishNanopub ? (
+              <AppButton
+                plain
+                onClick={() => connectWithWeb3()}
+                margin={{ top: '6px' }}>
+                or{' '}
+                <span style={{ textDecoration: 'underline' }}>
+                  show wallets
+                </span>{' '}
+                (advanced)
+              </AppButton>
+            ) : (
+              <></>
+            )}
+          </Box>
         </Box>
       );
     }
+
+    if (enabledEdit) {
+      return (
+        <Box direction="row" gap="small" margin={{ top: 'medium' }}>
+          <Box style={{ flexGrow: 1 }}>
+            <AppButton
+              disabled={isUpdating}
+              icon={<ClearIcon></ClearIcon>}
+              onClick={() => setEnabledEdit(false)}
+              label="Cancel"></AppButton>
+          </Box>
+          <Box style={{ flexGrow: 1 }} align="end" gap="small">
+            <AppButton
+              primary
+              disabled={isUpdating}
+              icon={<SendIcon></SendIcon>}
+              onClick={() => approveOrUpdate()}
+              label="update"
+              style={{ width: '100%' }}></AppButton>
+          </Box>
+        </Box>
+      );
+    }
+
     return <></>;
   })();
 
-  const editable =
-    connectedUser &&
-    connectedUser.userId === post?.authorId &&
-    !postStatuses.published &&
-    !props.isProfile;
-
-  console.log({ editable, props });
+  const editable = _editable && !props.isProfile;
 
   const content = (() => {
     if (!post) {
@@ -166,7 +202,7 @@ export const PostView = (props: {
               }}
               include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
           )}
-          <PostText text={post?.content}></PostText>
+          <PostText text={concatenateThread(post)}></PostText>
           {postStatuses.isParsing ? (
             <LoadingDiv height="120px" width="100%"></LoadingDiv>
           ) : (
@@ -202,9 +238,7 @@ export const PostView = (props: {
         <Box fill>
           <PostNav
             isProfile={props.isProfile}
-            profile={props.profile}
-            prevPostId={prevPostId}
-            nextPostId={nextPostId}></PostNav>
+            profile={props.profile}></PostNav>
           {content}
         </Box>
       }></ViewportPage>

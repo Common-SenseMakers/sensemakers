@@ -10,7 +10,11 @@ import {
   parsePostController,
   updatePostController,
 } from './posts/controllers/posts.controller';
-import { getLoggedUserController } from './users/controllers/get.logged.controller';
+import {
+  getLoggedUserController,
+  setUserEmail,
+  setUserSettingsController,
+} from './users/controllers/logged.user.controller';
 import {
   getSignupContextController,
   handleSignupController,
@@ -20,7 +24,9 @@ export const router = express.Router();
 
 router.post('/auth/:platform/context', getSignupContextController);
 router.post('/auth/:platform/signup', handleSignupController);
+router.post('/auth/settings', setUserSettingsController);
 router.post('/auth/me', getLoggedUserController);
+router.post('/auth/setEmail', setUserEmail);
 
 router.post('/users/profile', getUserProfileController);
 

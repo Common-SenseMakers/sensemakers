@@ -1,16 +1,14 @@
-import {
-  PLATFORM,
-  PlatformFetchParams,
-  UserDetailsBase,
-} from '../@shared/types/types';
+import { PlatformFetchParams } from '../@shared/types/types.fetch';
 import {
   FetchedResult,
   PlatformPostCreate,
   PlatformPostDraft,
   PlatformPostPosted,
   PlatformPostPublish,
+  PlatformPostUpdate,
 } from '../@shared/types/types.platform.posts';
-import { GenericPostData, PostAndAuthor } from '../@shared/types/types.posts';
+import { GenericThread, PostAndAuthor } from '../@shared/types/types.posts';
+import { PLATFORM, UserDetailsBase } from '../@shared/types/types.user';
 import { TransactionManager } from '../db/transaction.manager';
 
 /** use conditional types to dynamically assign credential types for each platform */
@@ -33,16 +31,25 @@ export interface PlatformService<
   SignupContext = any,
   SignupData = any,
   UserDetails extends UserDetailsBase = UserDetailsBase,
+  DraftType = any,
 > extends IdentityService<SignupContext, SignupData, UserDetails> {
   fetch(
     params: PlatformFetchParams,
     userDetails: UserDetailsBase,
     manager: TransactionManager
   ): Promise<FetchedResult>;
+  signDraft(
+    post: PlatformPostDraft,
+    account: UserDetailsBase
+  ): Promise<DraftType>;
   publish(
-    posts: PlatformPostPublish,
+    post: PlatformPostPublish,
     manager: TransactionManager
   ): Promise<PlatformPostPosted>;
-  convertToGeneric(platformPost: PlatformPostCreate): Promise<GenericPostData>;
+  update(
+    post: PlatformPostUpdate,
+    manager: TransactionManager
+  ): Promise<PlatformPostPosted>;
+  convertToGeneric(platformPost: PlatformPostCreate): Promise<GenericThread>;
   convertFromGeneric(postAndAuthor: PostAndAuthor): Promise<PlatformPostDraft>;
 }

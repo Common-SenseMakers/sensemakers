@@ -1,14 +1,16 @@
 {
-  "name": "microrevolutions-launcher",
+  "name": "sensemakers-launcher",
   "version": "1.0.0",
   "description": "1) Extract relevant env files to ./env - see `Env set up` in notion.  a) You might need to create empty folder in `functions/src/shared/configs/env` 2) Install firebase tools globally: `npm install -g firebase-tools`  a) login: `firebase login` 3) Install dependencies: `cd functions; npm ci; npm run prepare:hooks` 4) Run `tsc` 5) Sync env files: `npm run use:dev` (see them below) 6) install docker and run a Redis container: `docker run --name common-redis -p 6379:6379 -d redis` or `docker start common-redis` if this container is already installed. 7) open 2 terminals:  a) npx tsc -w  b) NODE_ENV=local FIRESTORE_EMULATOR_HOST=localhost:8080 firebase emulators:start",
   "main": "index.js",
   "scripts": {
     "set-secret": "firebase functions:secrets:set",
     "emulate": "NODE_ENV=local FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 firebase --project demo-sensenets emulators:start",
+    "emulate-verbose": "NODE_ENV=local FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 firebase --project demo-sensenets --debug emulators:start",
     "emulate-debug": "yarn emulate --inspect-functions",
     "emulate-test": "yarn emulate-debug --only firestore",
     "log": "npx firebase-logging --project=common-dev-dea4e --freq=1500 --n=10 --func ",
+    "deploy-dev": "firebase deploy --project dev",
     "deploy-staging": "firebase deploy --project staging",
     "deploy-prod": "firebase deploy --project prod",
     "prepare:hooks": "husky install"

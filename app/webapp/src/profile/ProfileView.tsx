@@ -5,13 +5,13 @@ import { useAppFetch } from '../api/app.fetch';
 import { AppLogo } from '../app/brand/AppLogo';
 import { ViewportPage } from '../app/layout/Viewport';
 import { PostCard } from '../post/PostCard';
-import { PLATFORM } from '../shared/types/types';
 import {
   AppPostFull,
   ProfilePostsQuery,
   UserPostsQuery,
 } from '../shared/types/types.posts';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
+import { PLATFORM } from '../shared/types/types.user';
 import { AppButton } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
