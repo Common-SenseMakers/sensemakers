@@ -29,6 +29,8 @@ export enum I18Keys {
   noMorePosts = 's023',
   settings = 's024',
   logout = 's025',
+
+  drafts = 's026',
 }
 
 const translationENG: Record<I18Keys, string> = {
@@ -48,6 +50,8 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.emailInputConfirm]:
     'I consent to receiving email notifications, including updates relating to my nanopublications (you can edit the frequency in your notification settings).',
   [I18Keys.emailInputBtn]: 'Get started',
+
+  [I18Keys.drafts]: 'Drafts',
 
   [I18Keys.connectAccounts]: 'Connect your accounts',
   [I18Keys.connectParagraph]:

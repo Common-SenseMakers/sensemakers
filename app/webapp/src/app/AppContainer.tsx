@@ -11,11 +11,9 @@ import { ProfileRoot } from '../profile/ProfileRoot';
 import { RouteNames } from '../route.names';
 import { ResponsiveApp } from '../ui-components/ResponsiveApp';
 import { ThemedApp, useThemeContext } from '../ui-components/ThemedApp';
-import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { ConnectedUserWrapper } from '../user-login/contexts/ConnectedUserWrapper';
 import { UserSettingsPage } from '../user-settings/UserSettingsPage';
 import { LoadingContext } from './LoadingContext';
-import { GlobalNav } from './layout/GlobalNav';
 import { GlobalStyles } from './layout/GlobalStyles';
 import { MAX_WIDTH_APP, ViewportContainer } from './layout/Viewport';
 
