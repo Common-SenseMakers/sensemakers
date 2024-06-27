@@ -134,26 +134,38 @@ export class TwitterService
             userDetails.user_id,
             timelineParams
           );
-          const appTweets = convertToAppTweets(
-            result.data.data,
-            result.data.includes
-          );
-          /** keep track of the number of threads */
-          appTweets.forEach((tweet) => {
-            if (tweet.conversation_id) {
-              conversationIds.add(tweet.conversation_id);
-            } else {
-              throw new Error('tweet does not have a conversation_id');
-            }
-          });
-          if (!originalAuthor) {
-            originalAuthor = result.data.includes?.users?.find(
-              (user) => user.id === userDetails.user_id
-            );
-          }
-          allTweets.push(...appTweets);
 
-          nextToken = result.meta.next_token;
+          if (result.meta.result_count > 0) {
+            if (result.data.data === undefined) {
+              throw new Error('Unexpected undefined data');
+            }
+
+            if (result.data.includes === undefined) {
+              throw new Error('Unexpected undefined data');
+            }
+
+            const appTweets = convertToAppTweets(
+              result.data.data,
+              result.data.includes
+            );
+            /** keep track of the number of threads */
+            appTweets.forEach((tweet) => {
+              if (tweet.conversation_id) {
+                conversationIds.add(tweet.conversation_id);
+              } else {
+                throw new Error('tweet does not have a conversation_id');
+              }
+            });
+
+            if (!originalAuthor) {
+              originalAuthor = result.data.includes?.users?.find(
+                (user) => user.id === userDetails.user_id
+              );
+            }
+            allTweets.push(...appTweets);
+
+            nextToken = result.meta.next_token;
+          }
         } catch (e: any) {
           if (e.rateLimit) {
             /** if we hit the rate limit after haven gotten some tweets, return what we got so far  */
@@ -173,11 +185,9 @@ export class TwitterService
         }
       } while (nextToken !== undefined);
 
-      if (!originalAuthor) {
-        throw new Error(`Unexpected originalAuthor undefined`);
-      }
-
-      return convertTweetsToThreads(allTweets, originalAuthor);
+      return allTweets.length > 0 && originalAuthor
+        ? convertTweetsToThreads(allTweets, originalAuthor)
+        : [];
     } catch (e: any) {
       throw new Error(handleTwitterError(e));
     }

@@ -138,7 +138,10 @@ export const convertToAppTweets = (
   return formattedTweets;
 };
 
-export const convertTweetsToThreads = (tweets: AppTweet[], author: UserV2) => {
+export const convertTweetsToThreads = (
+  tweets: AppTweet[],
+  author: UserV2
+): TwitterThread[] => {
   const tweetThreadsMap = new Map<string, AppTweet[]>();
   tweets.forEach((tweet) => {
     if (!tweetThreadsMap.has(tweet.conversation_id)) {

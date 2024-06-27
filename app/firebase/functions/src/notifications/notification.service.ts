@@ -223,8 +223,8 @@ export class NotificationService {
       From: 'pepo@microrevolutions.com',
       To: 'pepo.ospina@gmail.com',
       Subject: 'Hello from Sensecast',
-      HtmlBody: '<strong>Hello</strong> dear Postmark user.',
-      TextBody: 'Hello dear Postmark user',
+      HtmlBody: `<strong>Hello</strong> dear Sensecast user. ${JSON.stringify(posts)}`,
+      TextBody: `Hello dear Postmark user ${JSON.stringify(posts)}`,
       MessageStream: 'outbound',
     };
 
