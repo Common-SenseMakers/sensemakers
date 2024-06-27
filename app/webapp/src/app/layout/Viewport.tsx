@@ -166,7 +166,7 @@ export const ViewportPage = (props: {
           <div ref={bottomMarkerRef}></div>
         </Box>
         {props.nav ? (
-          <Box id="nav" style={{ height: '60px', flexShrink: 0 }}>
+          <Box id="nav" style={{ height: '48px', flexShrink: 0 }}>
             {props.nav}
           </Box>
         ) : (
