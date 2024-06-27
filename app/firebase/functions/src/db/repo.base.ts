@@ -42,7 +42,7 @@ export class BaseRepository<TT, CC> {
 
     if (!doc.exists) {
       if (DEBUG) logger.debug(`Doc dont exists ${doc.ref.id}`);
-      if (_shouldThrow) throw new Error(`PlatformPost ${id} not found`);
+      if (_shouldThrow) throw new Error(`Doc ${id} not found`);
       else return undefined as DefinedIfTrue<T, R>;
     }
 

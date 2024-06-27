@@ -1,8 +1,16 @@
 import { spy, when } from 'ts-mockito';
 
 import { PLATFORM } from '../../src/@shared/types/types.user';
+import { ActivityRepository } from '../../src/activity/activity.repository';
+import { ActivityService } from '../../src/activity/activity.service';
 import { DBInstance } from '../../src/db/instance';
 import { Services } from '../../src/instances/services';
+import { NotificationService } from '../../src/notifications/notification.service';
+import {
+  NotificationsMockConfig,
+  getNotificationsMock,
+} from '../../src/notifications/notification.service.mock';
+import { NotificationsRepository } from '../../src/notifications/notifications.repository';
 import {
   ParserMockConfig,
   getParserMock,
@@ -39,9 +47,12 @@ export interface TestServicesConfig {
   nanopub: NanopubMockConfig;
   parser: ParserMockConfig;
   time: 'real' | 'mock';
+  notifications: NotificationsMockConfig;
 }
 
-export type TestServices = Services;
+export type TestServices = Services & {
+  notificationsMock?: NotificationService;
+};
 
 export const getTestServices = (config: TestServicesConfig) => {
   const mandatory = [
@@ -67,6 +78,8 @@ export const getTestServices = (config: TestServicesConfig) => {
   const postsRepo = new PostsRepository(db);
   const triplesRepo = new TriplesRepository(db);
   const platformPostsRepo = new PlatformPostsRepository(db);
+  const notificationsRepo = new NotificationsRepository(db);
+  const activityRepo = new ActivityRepository(db);
 
   const identityServices: IdentityServicesMap = new Map();
   const platformsMap: PlatformsMap = new Map();
@@ -143,12 +156,31 @@ export const getTestServices = (config: TestServicesConfig) => {
     parser
   );
 
+  const _notifications = new NotificationService(
+    db,
+    notificationsRepo,
+    postsRepo,
+    activityRepo,
+    userRepo,
+    {
+      apiKey: process.env.EMAIL_CLIENT_SECRET as string,
+    }
+  );
+
+  const { instance: notifications, mock: notificationsMock } =
+    getNotificationsMock(_notifications, config.notifications);
+
+  const activity = new ActivityService(activityRepo);
+
   const services: TestServices = {
     users: usersService,
-    postsManager: postsManager,
+    postsManager,
     platforms: platformsService,
     time: time,
     db,
+    notifications,
+    notificationsMock,
+    activity,
   };
 
   return services;

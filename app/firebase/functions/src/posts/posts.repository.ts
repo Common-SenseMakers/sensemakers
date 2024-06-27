@@ -63,8 +63,8 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       if (queryParams.status === PostsQueryStatus.PUBLISHED) {
         return base.where(
           republishedStatusKey,
-          '==',
-          AppPostRepublishedStatus.REPUBLISHED
+          '!=',
+          AppPostRepublishedStatus.PENDING
         );
       }
       if (queryParams.status === PostsQueryStatus.IGNORED) {

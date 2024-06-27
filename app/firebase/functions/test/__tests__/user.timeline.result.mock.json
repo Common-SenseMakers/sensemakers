@@ -1,0 +1,1472 @@
+{
+  "_maxResultsWhenFetchLast": 100,
+  "_realData": {
+    "data": [
+      {
+        "conversation_id": "1798791421152911644",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-06-06T19:00:33.000Z",
+        "referenced_tweets": [
+          {
+            "type": "quoted",
+            "id": "1798549107507974626"
+          },
+          {
+            "type": "replied_to",
+            "id": "1798791660668698927"
+          }
+        ],
+        "entities": {
+          "urls": [
+            {
+              "start": 33,
+              "end": 56,
+              "url": "https://t.co/9ZB0UaqOcc",
+              "expanded_url": "https://x.com/rtk254/status/1798549107507974626",
+              "display_url": "x.com/rtk254/status/…"
+            }
+          ]
+        },
+        "text": "more quote tweets in this thread\nhttps://t.co/9ZB0UaqOcc",
+        "edit_history_tweet_ids": [
+          "1798792109031559184"
+        ],
+        "id": "1798792109031559184"
+      },
+      {
+        "conversation_id": "1798791421152911644",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-06-06T18:58:46.000Z",
+        "referenced_tweets": [
+          {
+            "type": "quoted",
+            "id": "1798782358201508331"
+          },
+          {
+            "type": "replied_to",
+            "id": "1798791421152911644"
+          }
+        ],
+        "entities": {
+          "urls": [
+            {
+              "start": 104,
+              "end": 127,
+              "url": "https://t.co/gguJOKvN37",
+              "expanded_url": "https://x.com/sense_nets_bot/status/1798782358201508331",
+              "display_url": "x.com/sense_nets_bot…"
+            }
+          ]
+        },
+        "text": "I see that it only caught the second link as the quote tweet, but didn't include this as a quote tweet:\nhttps://t.co/gguJOKvN37",
+        "edit_history_tweet_ids": [
+          "1798791660668698927"
+        ],
+        "id": "1798791660668698927"
+      },
+      {
+        "conversation_id": "1798791421152911644",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-06-06T18:57:49.000Z",
+        "referenced_tweets": [
+          {
+            "type": "quoted",
+            "id": "1795069204418175459"
+          }
+        ],
+        "entities": {
+          "urls": [
+            {
+              "start": 50,
+              "end": 73,
+              "url": "https://t.co/gguJOKvN37",
+              "expanded_url": "https://x.com/sense_nets_bot/status/1798782358201508331",
+              "display_url": "x.com/sense_nets_bot…"
+            },
+            {
+              "start": 75,
+              "end": 98,
+              "url": "https://t.co/Xvg4gOdJ8H",
+              "expanded_url": "https://x.com/sense_nets_bot/status/1795069204418175459",
+              "display_url": "x.com/sense_nets_bot…"
+            }
+          ]
+        },
+        "text": "this is a tweet that references two other tweets!\nhttps://t.co/gguJOKvN37\n\nhttps://t.co/Xvg4gOdJ8H",
+        "edit_history_tweet_ids": [
+          "1798791421152911644"
+        ],
+        "id": "1798791421152911644"
+      },
+      {
+        "conversation_id": "1798782358201508331",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-06-06T18:21:48.000Z",
+        "referenced_tweets": [
+          {
+            "type": "quoted",
+            "id": "1795069204418175459"
+          }
+        ],
+        "entities": {
+          "urls": [
+            {
+              "start": 38,
+              "end": 61,
+              "url": "https://t.co/mUp1B8Ipkc",
+              "expanded_url": "https://twitter.com/sense_nets_bot/status/1795069204418175459",
+              "display_url": "x.com/sense_nets_bot…"
+            }
+          ]
+        },
+        "text": "a quote tweet that goes 2 layers deep https://t.co/mUp1B8Ipkc",
+        "edit_history_tweet_ids": [
+          "1798782358201508331"
+        ],
+        "id": "1798782358201508331"
+      },
+      {
+        "conversation_id": "1795069204418175459",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-05-27T12:27:03.000Z",
+        "referenced_tweets": [
+          {
+            "type": "quoted",
+            "id": "1793505119792677089"
+          }
+        ],
+        "entities": {
+          "urls": [
+            {
+              "start": 38,
+              "end": 61,
+              "url": "https://t.co/MynZ87Ln9R",
+              "expanded_url": "https://twitter.com/VitalikButerin/status/1793505119792677089",
+              "display_url": "x.com/VitalikButerin…"
+            }
+          ]
+        },
+        "text": "A new quote tweet of something I love https://t.co/MynZ87Ln9R",
+        "edit_history_tweet_ids": [
+          "1795069204418175459"
+        ],
+        "id": "1795069204418175459"
+      },
+      {
+        "conversation_id": "1793202484871037102",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-05-22T08:49:23.000Z",
+        "entities": {
+          "urls": [
+            {
+              "start": 20,
+              "end": 43,
+              "url": "https://t.co/Yyc08Ch4BO",
+              "expanded_url": "http://pepo.is",
+              "display_url": "pepo.is",
+              "status": 200,
+              "title": "Pepo",
+              "unwound_url": "https://pepo.is/"
+            }
+          ]
+        },
+        "text": "Lets test this link https://t.co/Yyc08Ch4BO",
+        "edit_history_tweet_ids": [
+          "1793202484871037102"
+        ],
+        "id": "1793202484871037102"
+      },
+      {
+        "conversation_id": "1791204631646793767",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-05-16T20:30:37.000Z",
+        "text": "tree",
+        "edit_history_tweet_ids": [
+          "1791204631646793767"
+        ],
+        "id": "1791204631646793767"
+      },
+      {
+        "conversation_id": "1791204530622763228",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-05-16T20:30:13.000Z",
+        "text": "Two",
+        "edit_history_tweet_ids": [
+          "1791204530622763228"
+        ],
+        "id": "1791204530622763228"
+      },
+      {
+        "conversation_id": "1791204511748403587",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-05-16T20:30:09.000Z",
+        "text": "Letrs try again 1",
+        "edit_history_tweet_ids": [
+          "1791204511748403587"
+        ],
+        "id": "1791204511748403587"
+      },
+      {
+        "conversation_id": "1791202984572944754",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-05-16T20:24:05.000Z",
+        "text": "And two",
+        "edit_history_tweet_ids": [
+          "1791202984572944754"
+        ],
+        "id": "1791202984572944754"
+      },
+      {
+        "conversation_id": "1791202966877216789",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-05-16T20:24:00.000Z",
+        "text": "And now two posts",
+        "edit_history_tweet_ids": [
+          "1791202966877216789"
+        ],
+        "id": "1791202966877216789"
+      },
+      {
+        "conversation_id": "1791202825629774001",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-05-16T20:23:27.000Z",
+        "entities": {
+          "urls": [
+            {
+              "start": 27,
+              "end": 50,
+              "url": "https://t.co/Z44bgYAKd6",
+              "expanded_url": "http://www.pepo.is",
+              "display_url": "pepo.is",
+              "status": 200,
+              "title": "Pepo",
+              "unwound_url": "https://www.pepo.is/"
+            }
+          ]
+        },
+        "text": "What if I posted a new url\nhttps://t.co/Z44bgYAKd6",
+        "edit_history_tweet_ids": [
+          "1791202825629774001"
+        ],
+        "id": "1791202825629774001"
+      },
+      {
+        "conversation_id": "1791153449465159941",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-05-16T17:07:15.000Z",
+        "referenced_tweets": [
+          {
+            "type": "replied_to",
+            "id": "1791153449465159941"
+          }
+        ],
+        "entities": {
+          "urls": [
+            {
+              "start": 15,
+              "end": 38,
+              "url": "https://t.co/52EogOkMmB",
+              "expanded_url": "https://www.semanticscholar.org/paper/Audio-Visual-Language-Maps-for-Robot-Navigation-Huang-Mees/93565fe6db3948c9c414af1d1edccf4aff5e2e10",
+              "display_url": "semanticscholar.org/paper/Audio-Vi…",
+              "images": [
+                {
+                  "url": "https://pbs.twimg.com/news_img/1791153456683569152/_cobch96?format=jpg&name=orig",
+                  "width": 1200,
+                  "height": 630
+                },
+                {
+                  "url": "https://pbs.twimg.com/news_img/1791153456683569152/_cobch96?format=jpg&name=150x150",
+                  "width": 150,
+                  "height": 150
+                }
+              ],
+              "status": 200,
+              "title": "[PDF] Audio Visual Language Maps for Robot Navigation | Semantic Scholar",
+              "description": "This work proposes Audio-Visual-Language Maps (AVLMaps), a unified 3D spatial map representation for storing cross-modal information from audio, visual, and language cues, and shows that the addition of audio information enables robots to more reliably disambiguate goal locations. While interacting in the world is a multi-sensory experience, many robots continue to predominantly rely on visual perception to map and navigate in their environments. In this work, we propose Audio-Visual-Language Maps (AVLMaps), a unified 3D spatial map representation for storing cross-modal information from audio, visual, and language cues. AVLMaps integrate the open-vocabulary capabilities of multimodal foundation models pre-trained on Internet-scale data by fusing their features into a centralized 3D voxel grid. In the context of navigation, we show that AVLMaps enable robot systems to index goals in the map based on multimodal queries, e.g., textual descriptions, images, or audio snippets of landmarks.",
+              "unwound_url": "https://www.semanticscholar.org/paper/Audio-Visual-Language-Maps-for-Robot-Navigation-Huang-Mees/93565fe6db3948c9c414af1d1edccf4aff5e2e10"
+            }
+          ]
+        },
+        "text": "A second post \nhttps://t.co/52EogOkMmB",
+        "edit_history_tweet_ids": [
+          "1791153451218489632"
+        ],
+        "id": "1791153451218489632"
+      },
+      {
+        "conversation_id": "1791153449465159941",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-05-16T17:07:15.000Z",
+        "entities": {
+          "urls": [
+            {
+              "start": 191,
+              "end": 214,
+              "url": "https://t.co/94i3iYMt4w",
+              "expanded_url": "https://arxiv.org/abs/2405.05956/abs/2405.05956",
+              "display_url": "arxiv.org/abs/2405.05956…",
+              "images": [
+                {
+                  "url": "https://pbs.twimg.com/news_img/1792232296659165184/YLeFT2pS?format=jpg&name=orig",
+                  "width": 1000,
+                  "height": 1000
+                },
+                {
+                  "url": "https://pbs.twimg.com/news_img/1792232296659165184/YLeFT2pS?format=jpg&name=150x150",
+                  "width": 150,
+                  "height": 150
+                }
+              ],
+              "status": 200,
+              "title": "Probing Multimodal LLMs as World Models for Driving",
+              "description": "We provide a sober look at the application of Multimodal Large Language Models (MLLMs) within the domain of autonomous driving and challenge/verify some common assumptions, focusing on their...",
+              "unwound_url": "https://arxiv.org/abs/2405.05956"
+            }
+          ]
+        },
+        "text": "Language models != world models \"Probing Multimodal LLMs as World Models for Driving\"  https://arxiv.orgLanguage models != world models\n\"Probing Multimodal LLMs as World Models for Driving\" \nhttps://t.co/94i3iYMt4w",
+        "edit_history_tweet_ids": [
+          "1791153449465159941"
+        ],
+        "id": "1791153449465159941"
+      },
+      {
+        "conversation_id": "1791152599913119949",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-05-16T17:03:52.000Z",
+        "entities": {
+          "urls": [
+            {
+              "start": 41,
+              "end": 64,
+              "url": "https://t.co/BtspAwPatP",
+              "expanded_url": "https://www.thegreatsimplification.com/episode/122-zak-stein",
+              "display_url": "thegreatsimplification.com/episode/122-za…",
+              "images": [
+                {
+                  "url": "https://pbs.twimg.com/news_img/1789670658471022592/IcLC8aEI?format=jpg&name=orig",
+                  "width": 1500,
+                  "height": 1500
+                },
+                {
+                  "url": "https://pbs.twimg.com/news_img/1789670658471022592/IcLC8aEI?format=jpg&name=150x150",
+                  "width": 150,
+                  "height": 150
+                }
+              ],
+              "status": 200,
+              "title": "Zak Stein: \"Values, Education, AI and the Metacrisis” | The Great Simplification",
+              "description": "Episode 122",
+              "unwound_url": "https://www.thegreatsimplification.com/episode/122-zak-stein"
+            }
+          ]
+        },
+        "text": "Looking forward to this podcast episode!\nhttps://t.co/BtspAwPatP",
+        "edit_history_tweet_ids": [
+          "1791152599913119949"
+        ],
+        "id": "1791152599913119949"
+      },
+      {
+        "conversation_id": "1791151721038872952",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-05-16T17:00:22.000Z",
+        "entities": {
+          "urls": [
+            {
+              "start": 218,
+              "end": 241,
+              "url": "https://t.co/XwbuAMXQ6B",
+              "expanded_url": "https://nesslabs.com/meetups-2024",
+              "display_url": "nesslabs.com/meetups-2024",
+              "images": [
+                {
+                  "url": "https://pbs.twimg.com/news_img/1789028388700626944/WtqzAc1e?format=jpg&name=orig",
+                  "width": 1280,
+                  "height": 720
+                },
+                {
+                  "url": "https://pbs.twimg.com/news_img/1789028388700626944/WtqzAc1e?format=jpg&name=150x150",
+                  "width": 150,
+                  "height": 150
+                }
+              ],
+              "status": 200,
+              "title": "Ness Labs Meetups 2024",
+              "description": "Join one of our Spring/Summer meetups in New York City, San Francisco, London, Singapore, or Paris to connect with fellow curious minds.",
+              "unwound_url": "https://nesslabs.com/meetups-2024"
+            }
+          ],
+          "annotations": [
+            {
+              "start": 11,
+              "end": 16,
+              "probability": 0.9897,
+              "type": "Place",
+              "normalized_text": "London"
+            }
+          ]
+        },
+        "text": "’m back in London! I love how accessible nature is here. Today I took a nice walk and went to a dance party in the forest, just 30 min from where I live.  p.s. I’m hosting a meetup on Tuesday in Old Street, RSVP here:\nhttps://t.co/XwbuAMXQ6B",
+        "edit_history_tweet_ids": [
+          "1791151721038872952"
+        ],
+        "id": "1791151721038872952"
+      },
+      {
+        "conversation_id": "1791149652844146835",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-05-16T16:52:09.000Z",
+        "entities": {
+          "urls": [
+            {
+              "start": 42,
+              "end": 65,
+              "url": "https://t.co/BRY3FxDWQh",
+              "expanded_url": "https://skywritingspress.ca/",
+              "display_url": "skywritingspress.ca",
+              "images": [
+                {
+                  "url": "https://pbs.twimg.com/news_img/1798663524962500608/E3zL3Ljb?format=jpg&name=orig",
+                  "width": 200,
+                  "height": 200
+                },
+                {
+                  "url": "https://pbs.twimg.com/news_img/1798663524962500608/E3zL3Ljb?format=jpg&name=150x150",
+                  "width": 150,
+                  "height": 150
+                }
+              ],
+              "status": 200,
+              "title": "Understanding LLM Understanding",
+              "description": "DEDICATED TO THE MEMORY OF DANIEL C. DENNETT : 1942-2024 Summer School: June 3 – June 14, 2024 The Summer School is free for all on Zoom (with live webstreaming for the overflow on YouTube if needed). Registration is also free, and optional, but we recommend registering so you receive notices if there are any programme changes (and so we can know who and how many are attending). Questions and comments can only be aired if you provide your full name and institution. The video recordings for each of the 33",
+              "unwound_url": "https://skywritingspress.ca/"
+            }
+          ]
+        },
+        "text": "Looks like an interesting online course 👀\nhttps://t.co/BRY3FxDWQh.",
+        "edit_history_tweet_ids": [
+          "1791149652844146835"
+        ],
+        "id": "1791149652844146835"
+      },
+      {
+        "conversation_id": "1791142775586492804",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-05-16T16:24:50.000Z",
+        "entities": {
+          "urls": [
+            {
+              "start": 48,
+              "end": 71,
+              "url": "https://t.co/3KBDgU5GWc",
+              "expanded_url": "http://HeyDATA.org",
+              "display_url": "HeyDATA.org",
+              "unwound_url": "http://HeyDATA.org"
+            }
+          ],
+          "annotations": [
+            {
+              "start": 132,
+              "end": 133,
+              "probability": 0.5607,
+              "type": "Organization",
+              "normalized_text": "AI"
+            },
+            {
+              "start": 153,
+              "end": 156,
+              "probability": 0.4157,
+              "type": "Other",
+              "normalized_text": "DATA"
+            },
+            {
+              "start": 164,
+              "end": 170,
+              "probability": 0.7356,
+              "type": "Other",
+              "normalized_text": "ChatGPT"
+            }
+          ]
+        },
+        "text": "If this doesn't blow your mind, idk what will 🤯 https://t.co/3KBDgU5GWc Here's the complete breakdown —  Our no-code cross-platform AI automation suite  DATA  VS.  ChatGPT  Want to see it in action? Check out the thread below.",
+        "edit_history_tweet_ids": [
+          "1791142775586492804"
+        ],
+        "id": "1791142775586492804"
+      },
+      {
+        "conversation_id": "1791142378218070184",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-05-16T16:23:15.000Z",
+        "entities": {
+          "urls": [
+            {
+              "start": 20,
+              "end": 43,
+              "url": "https://t.co/xXPFSzd5Ym",
+              "expanded_url": "https://www.theverge.com/2024/5/14/24156630/google-ai-io-musician-marc-rebillet-musicfx-dj",
+              "display_url": "theverge.com/2024/5/14/2415…",
+              "images": [
+                {
+                  "url": "https://pbs.twimg.com/news_img/1799180427137323010/Qm8FgQj3?format=jpg&name=orig",
+                  "width": 1200,
+                  "height": 628
+                },
+                {
+                  "url": "https://pbs.twimg.com/news_img/1799180427137323010/Qm8FgQj3?format=jpg&name=150x150",
+                  "width": 150,
+                  "height": 150
+                }
+              ],
+              "status": 200,
+              "title": "Watch this screaming, rainbow-clad musician demo Google’s AI DJ",
+              "description": "We’re very awake now. Thanks, Google.",
+              "unwound_url": "https://www.theverge.com/2024/5/14/24156630/google-ai-io-musician-marc-rebillet-musicfx-dj"
+            }
+          ]
+        },
+        "text": "What this screaming\nhttps://t.co/xXPFSzd5Ym",
+        "edit_history_tweet_ids": [
+          "1791142378218070184"
+        ],
+        "id": "1791142378218070184"
+      },
+      {
+        "conversation_id": "1788940211470131386",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-05-10T14:32:39.000Z",
+        "referenced_tweets": [
+          {
+            "type": "replied_to",
+            "id": "1788940213886083147"
+          }
+        ],
+        "text": "Second, I definitely recommend it",
+        "edit_history_tweet_ids": [
+          "1788940215916064874"
+        ],
+        "id": "1788940215916064874"
+      },
+      {
+        "conversation_id": "1788940211470131386",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-05-10T14:32:38.000Z",
+        "referenced_tweets": [
+          {
+            "type": "replied_to",
+            "id": "1788940211470131386"
+          }
+        ],
+        "entities": {
+          "urls": [
+            {
+              "start": 35,
+              "end": 58,
+              "url": "https://t.co/jmHE2czV0f",
+              "expanded_url": "https://www.imdb.com/title/tt0119174/?ref_=nv_sr_srsg_2_tt_8_nm_0_q_the%2520game",
+              "display_url": "imdb.com/title/tt011917…",
+              "images": [
+                {
+                  "url": "https://pbs.twimg.com/news_img/1788940256470798336/cfJjHZ5_?format=jpg&name=orig",
+                  "width": 1000,
+                  "height": 1502
+                },
+                {
+                  "url": "https://pbs.twimg.com/news_img/1788940256470798336/cfJjHZ5_?format=jpg&name=150x150",
+                  "width": 150,
+                  "height": 150
+                }
+              ],
+              "status": 200,
+              "title": "The Game (1997) ⭐ 7.7 | Drama, Mystery, Thriller",
+              "description": "2h 9m | R",
+              "unwound_url": "https://www.imdb.com/title/tt0119174/?ref_=nv_sr_srsg_2_tt_8_nm_0_q_the%2520game"
+            }
+          ]
+        },
+        "text": "First, it reminds me of this movie\nhttps://t.co/jmHE2czV0f",
+        "edit_history_tweet_ids": [
+          "1788940213886083147"
+        ],
+        "id": "1788940213886083147"
+      },
+      {
+        "conversation_id": "1788940211470131386",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-05-10T14:32:37.000Z",
+        "entities": {
+          "urls": [
+            {
+              "start": 39,
+              "end": 62,
+              "url": "https://t.co/Y0HB0bqKAb",
+              "expanded_url": "https://www.goodreads.com/book/show/139509934-finite-and-infinite-games?from_search=true&from_srp=true&qid=F9C3pLceW7&rank=2",
+              "display_url": "goodreads.com/book/show/1395…",
+              "images": [
+                {
+                  "url": "https://pbs.twimg.com/news_img/1788940258064605184/Gn35ImzA?format=jpg&name=orig",
+                  "width": 893,
+                  "height": 1360
+                },
+                {
+                  "url": "https://pbs.twimg.com/news_img/1788940258064605184/Gn35ImzA?format=jpg&name=150x150",
+                  "width": 150,
+                  "height": 150
+                }
+              ],
+              "status": 200,
+              "title": "Finite and Infinite Games: A Vision of Life As Play and…",
+              "description": "Finite and Infinite A Vision of Life As Play and Possi…",
+              "unwound_url": "https://www.goodreads.com/book/show/139509934-finite-and-infinite-games?from_search=true&from_srp=true&qid=F9C3pLceW7&rank=2"
+            }
+          ]
+        },
+        "text": "I have just finished reading this book\nhttps://t.co/Y0HB0bqKAb\n\nI would like to say some things about it",
+        "edit_history_tweet_ids": [
+          "1788940211470131386"
+        ],
+        "id": "1788940211470131386"
+      },
+      {
+        "conversation_id": "1786430246264152195",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-05-04T00:27:31.000Z",
+        "referenced_tweets": [
+          {
+            "type": "replied_to",
+            "id": "1786553205930762548"
+          }
+        ],
+        "text": "reply 4",
+        "edit_history_tweet_ids": [
+          "1786553207038074973"
+        ],
+        "id": "1786553207038074973"
+      },
+      {
+        "conversation_id": "1786430246264152195",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-05-04T00:27:31.000Z",
+        "referenced_tweets": [
+          {
+            "type": "replied_to",
+            "id": "1786553204559184171"
+          }
+        ],
+        "entities": {
+          "annotations": [
+            {
+              "start": 0,
+              "end": 4,
+              "probability": 0.5136,
+              "type": "Other",
+              "normalized_text": "reply"
+            }
+          ]
+        },
+        "text": "reply 3",
+        "edit_history_tweet_ids": [
+          "1786553205930762548"
+        ],
+        "id": "1786553205930762548"
+      },
+      {
+        "conversation_id": "1786430246264152195",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-05-04T00:27:31.000Z",
+        "referenced_tweets": [
+          {
+            "type": "replied_to",
+            "id": "1786430246264152195"
+          }
+        ],
+        "text": "reply in thread 2",
+        "edit_history_tweet_ids": [
+          "1786553204559184171"
+        ],
+        "id": "1786553204559184171"
+      },
+      {
+        "conversation_id": "1786430246264152195",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-05-04T00:27:07.000Z",
+        "referenced_tweets": [
+          {
+            "type": "replied_to",
+            "id": "1786430246264152195"
+          }
+        ],
+        "text": "reply in thread 1",
+        "edit_history_tweet_ids": [
+          "1786553105498157283"
+        ],
+        "id": "1786553105498157283"
+      },
+      {
+        "conversation_id": "1786430246264152195",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-05-03T16:18:55.000Z",
+        "entities": {
+          "urls": [
+            {
+              "start": 27,
+              "end": 50,
+              "url": "https://t.co/6YTzkO4bm5",
+              "expanded_url": "https://google.com",
+              "display_url": "google.com",
+              "status": 200,
+              "title": "Google",
+              "description": "Search the world's information, including webpages, images, videos and more. Google has many special features to help you find exactly what you're looking for.",
+              "unwound_url": "https://www.google.com/"
+            },
+            {
+              "start": 117,
+              "end": 140,
+              "url": "https://t.co/54JiZLoa5o",
+              "expanded_url": "https://w3id.org/np/RAN3tNe1DGES3ZfTxf6gs6VhNBsWO-B3CwxBACNtvJIyw",
+              "display_url": "w3id.org/np/RAN3tNe1DGE…",
+              "status": 200,
+              "title": "Nanopublications",
+              "unwound_url": "https://np.knowledgepixels.com/RAN3tNe1DGES3ZfTxf6gs6VhNBsWO-B3CwxBACNtvJIyw"
+            }
+          ],
+          "annotations": [
+            {
+              "start": 0,
+              "end": 4,
+              "probability": 0.5624,
+              "type": "Other",
+              "normalized_text": "ANd 2"
+            },
+            {
+              "start": 61,
+              "end": 66,
+              "probability": 0.7732,
+              "type": "Organization",
+              "normalized_text": "google"
+            },
+            {
+              "start": 80,
+              "end": 91,
+              "probability": 0.531,
+              "type": "Other",
+              "normalized_text": "searchengine"
+            },
+            {
+              "start": 108,
+              "end": 114,
+              "probability": 0.6584,
+              "type": "Other",
+              "normalized_text": "nanopub"
+            }
+          ],
+          "hashtags": [
+            {
+              "start": 51,
+              "end": 59,
+              "tag": "default"
+            },
+            {
+              "start": 60,
+              "end": 67,
+              "tag": "google"
+            },
+            {
+              "start": 69,
+              "end": 78,
+              "tag": "internet"
+            },
+            {
+              "start": 79,
+              "end": 92,
+              "tag": "searchengine"
+            },
+            {
+              "start": 94,
+              "end": 106,
+              "tag": "techcompany"
+            }
+          ]
+        },
+        "text": "ANd 2 This is a post about https://t.co/6YTzkO4bm5 #default #google, #internet #searchengine, #techcompany, nanopub: https://t.co/54JiZLoa5o",
+        "edit_history_tweet_ids": [
+          "1786430246264152195"
+        ],
+        "id": "1786430246264152195"
+      },
+      {
+        "conversation_id": "1786419185037291534",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-05-03T15:34:58.000Z",
+        "entities": {
+          "urls": [
+            {
+              "start": 84,
+              "end": 107,
+              "url": "https://t.co/dnOmyxLKA4",
+              "expanded_url": "https://arxiv.org/abs/2101.05331",
+              "display_url": "arxiv.org/abs/2101.05331",
+              "images": [
+                {
+                  "url": "https://pbs.twimg.com/news_img/1786415490480349184/OjbPosmd?format=jpg&name=orig",
+                  "width": 1000,
+                  "height": 1000
+                },
+                {
+                  "url": "https://pbs.twimg.com/news_img/1786415490480349184/OjbPosmd?format=jpg&name=150x150",
+                  "width": 150,
+                  "height": 150
+                }
+              ],
+              "status": 200,
+              "title": "The history of LHCb",
+              "description": "In this paper we describe the history of the LHCb experiment over the last three decades, and its remarkable successes and achievements. LHCb was conceived primarily as a b-physics experiment,...",
+              "unwound_url": "https://arxiv.org/abs/2101.05331"
+            }
+          ]
+        },
+        "text": "A second q pleasure to announce my recent scientific results They are quite unique! https://t.co/dnOmyxLKA4",
+        "edit_history_tweet_ids": [
+          "1786419185037291534"
+        ],
+        "id": "1786419185037291534"
+      },
+      {
+        "conversation_id": "1786415489230438829",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-05-03T15:20:17.000Z",
+        "entities": {
+          "urls": [
+            {
+              "start": 80,
+              "end": 103,
+              "url": "https://t.co/dnOmyxLKA4",
+              "expanded_url": "https://arxiv.org/abs/2101.05331",
+              "display_url": "arxiv.org/abs/2101.05331",
+              "images": [
+                {
+                  "url": "https://pbs.twimg.com/news_img/1786415490480349184/OjbPosmd?format=jpg&name=orig",
+                  "width": 1000,
+                  "height": 1000
+                },
+                {
+                  "url": "https://pbs.twimg.com/news_img/1786415490480349184/OjbPosmd?format=jpg&name=150x150",
+                  "width": 150,
+                  "height": 150
+                }
+              ],
+              "status": 200,
+              "title": "The history of LHCb",
+              "description": "In this paper we describe the history of the LHCb experiment over the last three decades, and its remarkable successes and achievements. LHCb was conceived primarily as a b-physics experiment,...",
+              "unwound_url": "https://arxiv.org/abs/2101.05331"
+            }
+          ]
+        },
+        "text": "Its a pleasure to announce my recent scientific results \nThey are quite unique!\nhttps://t.co/dnOmyxLKA4",
+        "edit_history_tweet_ids": [
+          "1786415489230438829"
+        ],
+        "id": "1786415489230438829"
+      },
+      {
+        "conversation_id": "1785364396555821340",
+        "author_id": "1773032135814717440",
+        "created_at": "2024-04-30T17:43:37.000Z",
+        "entities": {
+          "urls": [
+            {
+              "start": 21,
+              "end": 44,
+              "url": "https://t.co/6YTzkO4bm5",
+              "expanded_url": "https://google.com",
+              "display_url": "google.com",
+              "status": 200,
+              "title": "Google",
+              "description": "Search the world's information, including webpages, images, videos and more. Google has many special features to help you find exactly what you're looking for.",
+              "unwound_url": "https://www.google.com/"
+            },
+            {
+              "start": 113,
+              "end": 136,
+              "url": "https://t.co/54JiZLoa5o",
+              "expanded_url": "https://w3id.org/np/RAN3tNe1DGES3ZfTxf6gs6VhNBsWO-B3CwxBACNtvJIyw",
+              "display_url": "w3id.org/np/RAN3tNe1DGE…",
+              "status": 200,
+              "title": "Nanopublications",
+              "unwound_url": "https://np.knowledgepixels.com/RAN3tNe1DGES3ZfTxf6gs6VhNBsWO-B3CwxBACNtvJIyw"
+            }
+          ],
+          "annotations": [
+            {
+              "start": 56,
+              "end": 61,
+              "probability": 0.8051,
+              "type": "Organization",
+              "normalized_text": "google"
+            },
+            {
+              "start": 75,
+              "end": 86,
+              "probability": 0.5963,
+              "type": "Other",
+              "normalized_text": "searchengine"
+            },
+            {
+              "start": 104,
+              "end": 110,
+              "probability": 0.7355,
+              "type": "Other",
+              "normalized_text": "nanopub"
+            }
+          ],
+          "hashtags": [
+            {
+              "start": 46,
+              "end": 54,
+              "tag": "default"
+            },
+            {
+              "start": 55,
+              "end": 62,
+              "tag": "google"
+            },
+            {
+              "start": 64,
+              "end": 73,
+              "tag": "internet"
+            },
+            {
+              "start": 74,
+              "end": 87,
+              "tag": "searchengine"
+            },
+            {
+              "start": 89,
+              "end": 101,
+              "tag": "techcompany"
+            }
+          ]
+        },
+        "text": "This is a post about https://t.co/6YTzkO4bm5\n\n#default #google, #internet #searchengine, #techcompany,\n\nnanopub: https://t.co/54JiZLoa5o",
+        "edit_history_tweet_ids": [
+          "1785364396555821340"
+        ],
+        "id": "1785364396555821340"
+      }
+    ],
+    "includes": {
+      "users": [
+        {
+          "id": "1773032135814717440",
+          "name": "SenseNet Bot",
+          "username": "sense_nets_bot"
+        },
+        {
+          "id": "1065316525417160705",
+          "name": "Ronen Tamari",
+          "username": "rtk254"
+        },
+        {
+          "id": "295218901",
+          "name": "vitalik.eth",
+          "username": "VitalikButerin"
+        }
+      ],
+      "tweets": [
+        {
+          "conversation_id": "1798549107507974626",
+          "author_id": "1065316525417160705",
+          "created_at": "2024-06-06T02:54:57.000Z",
+          "referenced_tweets": [
+            {
+              "type": "quoted",
+              "id": "1798312150345347127"
+            }
+          ],
+          "entities": {
+            "urls": [
+              {
+                "start": 107,
+                "end": 130,
+                "url": "https://t.co/YL93kDHmdo",
+                "expanded_url": "https://aeon.co/essays/on-the-dangers-of-seeing-human-minds-as-predictive-machines",
+                "display_url": "aeon.co/essays/on-the-…",
+                "status": 200,
+                "title": "On the dangers of seeing human minds as predictive machines | Aeon Essays",
+                "description": "Cognitive scientists and corporations alike see human minds as predictive machines. Right or wrong, they will change how we think",
+                "unwound_url": "https://aeon.co/essays/on-the-dangers-of-seeing-human-minds-as-predictive-machines"
+              },
+              {
+                "start": 131,
+                "end": 154,
+                "url": "https://t.co/cVBzU3kDij",
+                "expanded_url": "https://twitter.com/rtk254/status/1798549107507974626/photo/1",
+                "display_url": "pic.twitter.com/cVBzU3kDij",
+                "media_key": "3_1798549051249762304"
+              },
+              {
+                "start": 155,
+                "end": 178,
+                "url": "https://t.co/LogqUQRYIi",
+                "expanded_url": "https://twitter.com/behrenstimb/status/1798312150345347127",
+                "display_url": "x.com/behrenstimb/st…"
+              }
+            ]
+          },
+          "text": "This can be generalized beyond writing - predictable is exactly how corporations want us. Be unpredictable https://t.co/YL93kDHmdo https://t.co/cVBzU3kDij https://t.co/LogqUQRYIi",
+          "edit_history_tweet_ids": [
+            "1798549107507974626"
+          ],
+          "id": "1798549107507974626"
+        },
+        {
+          "conversation_id": "1798791421152911644",
+          "author_id": "1773032135814717440",
+          "created_at": "2024-06-06T18:58:46.000Z",
+          "referenced_tweets": [
+            {
+              "type": "quoted",
+              "id": "1798782358201508331"
+            },
+            {
+              "type": "replied_to",
+              "id": "1798791421152911644"
+            }
+          ],
+          "entities": {
+            "urls": [
+              {
+                "start": 104,
+                "end": 127,
+                "url": "https://t.co/gguJOKvN37",
+                "expanded_url": "https://x.com/sense_nets_bot/status/1798782358201508331",
+                "display_url": "x.com/sense_nets_bot…"
+              }
+            ]
+          },
+          "text": "I see that it only caught the second link as the quote tweet, but didn't include this as a quote tweet:\nhttps://t.co/gguJOKvN37",
+          "edit_history_tweet_ids": [
+            "1798791660668698927"
+          ],
+          "id": "1798791660668698927"
+        },
+        {
+          "conversation_id": "1798782358201508331",
+          "author_id": "1773032135814717440",
+          "created_at": "2024-06-06T18:21:48.000Z",
+          "referenced_tweets": [
+            {
+              "type": "quoted",
+              "id": "1795069204418175459"
+            }
+          ],
+          "entities": {
+            "urls": [
+              {
+                "start": 38,
+                "end": 61,
+                "url": "https://t.co/mUp1B8Ipkc",
+                "expanded_url": "https://twitter.com/sense_nets_bot/status/1795069204418175459",
+                "display_url": "x.com/sense_nets_bot…"
+              }
+            ]
+          },
+          "text": "a quote tweet that goes 2 layers deep https://t.co/mUp1B8Ipkc",
+          "edit_history_tweet_ids": [
+            "1798782358201508331"
+          ],
+          "id": "1798782358201508331"
+        },
+        {
+          "conversation_id": "1798791421152911644",
+          "author_id": "1773032135814717440",
+          "created_at": "2024-06-06T18:57:49.000Z",
+          "referenced_tweets": [
+            {
+              "type": "quoted",
+              "id": "1795069204418175459"
+            }
+          ],
+          "entities": {
+            "urls": [
+              {
+                "start": 50,
+                "end": 73,
+                "url": "https://t.co/gguJOKvN37",
+                "expanded_url": "https://x.com/sense_nets_bot/status/1798782358201508331",
+                "display_url": "x.com/sense_nets_bot…"
+              },
+              {
+                "start": 75,
+                "end": 98,
+                "url": "https://t.co/Xvg4gOdJ8H",
+                "expanded_url": "https://x.com/sense_nets_bot/status/1795069204418175459",
+                "display_url": "x.com/sense_nets_bot…"
+              }
+            ]
+          },
+          "text": "this is a tweet that references two other tweets!\nhttps://t.co/gguJOKvN37\n\nhttps://t.co/Xvg4gOdJ8H",
+          "edit_history_tweet_ids": [
+            "1798791421152911644"
+          ],
+          "id": "1798791421152911644"
+        },
+        {
+          "conversation_id": "1795069204418175459",
+          "author_id": "1773032135814717440",
+          "created_at": "2024-05-27T12:27:03.000Z",
+          "referenced_tweets": [
+            {
+              "type": "quoted",
+              "id": "1793505119792677089"
+            }
+          ],
+          "entities": {
+            "urls": [
+              {
+                "start": 38,
+                "end": 61,
+                "url": "https://t.co/MynZ87Ln9R",
+                "expanded_url": "https://twitter.com/VitalikButerin/status/1793505119792677089",
+                "display_url": "x.com/VitalikButerin…"
+              }
+            ]
+          },
+          "text": "A new quote tweet of something I love https://t.co/MynZ87Ln9R",
+          "edit_history_tweet_ids": [
+            "1795069204418175459"
+          ],
+          "id": "1795069204418175459"
+        },
+        {
+          "conversation_id": "1793505119792677089",
+          "author_id": "295218901",
+          "created_at": "2024-05-23T04:51:56.000Z",
+          "entities": {
+            "urls": [
+              {
+                "start": 56,
+                "end": 79,
+                "url": "https://t.co/l3utrly3ZP",
+                "expanded_url": "https://vitalik.eth.limo/general/2024/05/23/l2exec.html",
+                "display_url": "vitalik.eth.limo/general/2024/0…",
+                "status": 200,
+                "title": "How do layer 2s really differ from execution sharding?",
+                "unwound_url": "https://vitalik.eth.limo/general/2024/05/23/l2exec.html"
+              }
+            ]
+          },
+          "text": "How do layer 2s really differ from execution sharding?\n\nhttps://t.co/l3utrly3ZP",
+          "edit_history_tweet_ids": [
+            "1793505119792677089"
+          ],
+          "id": "1793505119792677089"
+        },
+        {
+          "conversation_id": "1791153449465159941",
+          "author_id": "1773032135814717440",
+          "created_at": "2024-05-16T17:07:15.000Z",
+          "entities": {
+            "urls": [
+              {
+                "start": 191,
+                "end": 214,
+                "url": "https://t.co/94i3iYMt4w",
+                "expanded_url": "https://arxiv.org/abs/2405.05956/abs/2405.05956",
+                "display_url": "arxiv.org/abs/2405.05956…",
+                "images": [
+                  {
+                    "url": "https://pbs.twimg.com/news_img/1792232296659165184/YLeFT2pS?format=jpg&name=orig",
+                    "width": 1000,
+                    "height": 1000
+                  },
+                  {
+                    "url": "https://pbs.twimg.com/news_img/1792232296659165184/YLeFT2pS?format=jpg&name=150x150",
+                    "width": 150,
+                    "height": 150
+                  }
+                ],
+                "status": 200,
+                "title": "Probing Multimodal LLMs as World Models for Driving",
+                "description": "We provide a sober look at the application of Multimodal Large Language Models (MLLMs) within the domain of autonomous driving and challenge/verify some common assumptions, focusing on their...",
+                "unwound_url": "https://arxiv.org/abs/2405.05956"
+              }
+            ]
+          },
+          "text": "Language models != world models \"Probing Multimodal LLMs as World Models for Driving\"  https://arxiv.orgLanguage models != world models\n\"Probing Multimodal LLMs as World Models for Driving\" \nhttps://t.co/94i3iYMt4w",
+          "edit_history_tweet_ids": [
+            "1791153449465159941"
+          ],
+          "id": "1791153449465159941"
+        },
+        {
+          "conversation_id": "1788940211470131386",
+          "author_id": "1773032135814717440",
+          "created_at": "2024-05-10T14:32:38.000Z",
+          "referenced_tweets": [
+            {
+              "type": "replied_to",
+              "id": "1788940211470131386"
+            }
+          ],
+          "entities": {
+            "urls": [
+              {
+                "start": 35,
+                "end": 58,
+                "url": "https://t.co/jmHE2czV0f",
+                "expanded_url": "https://www.imdb.com/title/tt0119174/?ref_=nv_sr_srsg_2_tt_8_nm_0_q_the%2520game",
+                "display_url": "imdb.com/title/tt011917…",
+                "images": [
+                  {
+                    "url": "https://pbs.twimg.com/news_img/1788940256470798336/cfJjHZ5_?format=jpg&name=orig",
+                    "width": 1000,
+                    "height": 1502
+                  },
+                  {
+                    "url": "https://pbs.twimg.com/news_img/1788940256470798336/cfJjHZ5_?format=jpg&name=150x150",
+                    "width": 150,
+                    "height": 150
+                  }
+                ],
+                "status": 200,
+                "title": "The Game (1997) ⭐ 7.7 | Drama, Mystery, Thriller",
+                "description": "2h 9m | R",
+                "unwound_url": "https://www.imdb.com/title/tt0119174/?ref_=nv_sr_srsg_2_tt_8_nm_0_q_the%2520game"
+              }
+            ]
+          },
+          "text": "First, it reminds me of this movie\nhttps://t.co/jmHE2czV0f",
+          "edit_history_tweet_ids": [
+            "1788940213886083147"
+          ],
+          "id": "1788940213886083147"
+        },
+        {
+          "conversation_id": "1788940211470131386",
+          "author_id": "1773032135814717440",
+          "created_at": "2024-05-10T14:32:37.000Z",
+          "entities": {
+            "urls": [
+              {
+                "start": 39,
+                "end": 62,
+                "url": "https://t.co/Y0HB0bqKAb",
+                "expanded_url": "https://www.goodreads.com/book/show/139509934-finite-and-infinite-games?from_search=true&from_srp=true&qid=F9C3pLceW7&rank=2",
+                "display_url": "goodreads.com/book/show/1395…",
+                "images": [
+                  {
+                    "url": "https://pbs.twimg.com/news_img/1788940258064605184/Gn35ImzA?format=jpg&name=orig",
+                    "width": 893,
+                    "height": 1360
+                  },
+                  {
+                    "url": "https://pbs.twimg.com/news_img/1788940258064605184/Gn35ImzA?format=jpg&name=150x150",
+                    "width": 150,
+                    "height": 150
+                  }
+                ],
+                "status": 200,
+                "title": "Finite and Infinite Games: A Vision of Life As Play and…",
+                "description": "Finite and Infinite A Vision of Life As Play and Possi…",
+                "unwound_url": "https://www.goodreads.com/book/show/139509934-finite-and-infinite-games?from_search=true&from_srp=true&qid=F9C3pLceW7&rank=2"
+              }
+            ]
+          },
+          "text": "I have just finished reading this book\nhttps://t.co/Y0HB0bqKAb\n\nI would like to say some things about it",
+          "edit_history_tweet_ids": [
+            "1788940211470131386"
+          ],
+          "id": "1788940211470131386"
+        },
+        {
+          "conversation_id": "1786430246264152195",
+          "author_id": "1773032135814717440",
+          "created_at": "2024-05-04T00:27:31.000Z",
+          "referenced_tweets": [
+            {
+              "type": "replied_to",
+              "id": "1786553204559184171"
+            }
+          ],
+          "entities": {
+            "annotations": [
+              {
+                "start": 0,
+                "end": 4,
+                "probability": 0.5136,
+                "type": "Other",
+                "normalized_text": "reply"
+              }
+            ]
+          },
+          "text": "reply 3",
+          "edit_history_tweet_ids": [
+            "1786553205930762548"
+          ],
+          "id": "1786553205930762548"
+        },
+        {
+          "conversation_id": "1786430246264152195",
+          "author_id": "1773032135814717440",
+          "created_at": "2024-05-04T00:27:31.000Z",
+          "referenced_tweets": [
+            {
+              "type": "replied_to",
+              "id": "1786430246264152195"
+            }
+          ],
+          "text": "reply in thread 2",
+          "edit_history_tweet_ids": [
+            "1786553204559184171"
+          ],
+          "id": "1786553204559184171"
+        },
+        {
+          "conversation_id": "1786430246264152195",
+          "author_id": "1773032135814717440",
+          "created_at": "2024-05-03T16:18:55.000Z",
+          "entities": {
+            "urls": [
+              {
+                "start": 27,
+                "end": 50,
+                "url": "https://t.co/6YTzkO4bm5",
+                "expanded_url": "https://google.com",
+                "display_url": "google.com",
+                "status": 200,
+                "title": "Google",
+                "description": "Search the world's information, including webpages, images, videos and more. Google has many special features to help you find exactly what you're looking for.",
+                "unwound_url": "https://www.google.com/"
+              },
+              {
+                "start": 117,
+                "end": 140,
+                "url": "https://t.co/54JiZLoa5o",
+                "expanded_url": "https://w3id.org/np/RAN3tNe1DGES3ZfTxf6gs6VhNBsWO-B3CwxBACNtvJIyw",
+                "display_url": "w3id.org/np/RAN3tNe1DGE…",
+                "status": 200,
+                "title": "Nanopublications",
+                "unwound_url": "https://np.knowledgepixels.com/RAN3tNe1DGES3ZfTxf6gs6VhNBsWO-B3CwxBACNtvJIyw"
+              }
+            ],
+            "annotations": [
+              {
+                "start": 0,
+                "end": 4,
+                "probability": 0.5624,
+                "type": "Other",
+                "normalized_text": "ANd 2"
+              },
+              {
+                "start": 61,
+                "end": 66,
+                "probability": 0.7732,
+                "type": "Organization",
+                "normalized_text": "google"
+              },
+              {
+                "start": 80,
+                "end": 91,
+                "probability": 0.531,
+                "type": "Other",
+                "normalized_text": "searchengine"
+              },
+              {
+                "start": 108,
+                "end": 114,
+                "probability": 0.6584,
+                "type": "Other",
+                "normalized_text": "nanopub"
+              }
+            ],
+            "hashtags": [
+              {
+                "start": 51,
+                "end": 59,
+                "tag": "default"
+              },
+              {
+                "start": 60,
+                "end": 67,
+                "tag": "google"
+              },
+              {
+                "start": 69,
+                "end": 78,
+                "tag": "internet"
+              },
+              {
+                "start": 79,
+                "end": 92,
+                "tag": "searchengine"
+              },
+              {
+                "start": 94,
+                "end": 106,
+                "tag": "techcompany"
+              }
+            ]
+          },
+          "text": "ANd 2 This is a post about https://t.co/6YTzkO4bm5 #default #google, #internet #searchengine, #techcompany, nanopub: https://t.co/54JiZLoa5o",
+          "edit_history_tweet_ids": [
+            "1786430246264152195"
+          ],
+          "id": "1786430246264152195"
+        }
+      ]
+    },
+    "meta": {
+      "result_count": 30,
+      "newest_id": "1798792109031559184",
+      "oldest_id": "1785364396555821340",
+      "next_token": "7140dibdnow9c7btw483gv2ic1vzuz9h4yy7w88hms27k"
+    }
+  },
+  "_rateLimit": {
+    "limit": 5,
+    "remaining": 1,
+    "reset": 1718223187
+  },
+  "_instance": {
+    "_currentUser": null,
+    "_currentUserV2": null,
+    "_requestMaker": {
+      "rateLimits": {
+        "https://api.twitter.com/2/users/:id/tweets": {
+          "limit": 5,
+          "remaining": 1,
+          "reset": 1718223187
+        }
+      },
+      "clientSettings": {},
+      "bearerToken": "dk43NndGeWRyLUVyZGJ4XzBZYmhZRzNzVGNLR1B0Y2FfM1pDZTdhNGUxeWQ2OjE3MTgyMjIyODUwNzg6MToxOmF0OjE"
+    },
+    "_prefix": "https://api.twitter.com/2/"
+  },
+  "_queryParams": {
+    "max_results": 30,
+    "expansions": [
+      "referenced_tweets.id",
+      "referenced_tweets.id.author_id",
+      "author_id"
+    ],
+    "tweet.fields": [
+      "created_at",
+      "author_id",
+      "text",
+      "entities",
+      "note_tweet",
+      "conversation_id"
+    ],
+    "exclude": [
+      "retweets",
+      "replies"
+    ]
+  },
+  "_sharedParams": {
+    "id": "1773032135814717440"
+  },
+  "_endpoint": "users/:id/tweets"
+}

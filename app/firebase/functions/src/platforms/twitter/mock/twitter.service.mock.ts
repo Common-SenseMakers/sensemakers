@@ -7,16 +7,20 @@ import {
   PlatformPostPublish,
 } from '../../../@shared/types/types.platform.posts';
 import {
+  AppTweet,
   TwitterDraft,
   TwitterGetContextParams,
+  TwitterSignupContext,
+  TwitterSignupData,
   TwitterThread,
   TwitterUserDetails,
 } from '../../../@shared/types/types.twitter';
 import { UserDetailsBase } from '../../../@shared/types/types.user';
+import { APP_URL } from '../../../config/config.runtime';
 import { TransactionManager } from '../../../db/transaction.manager';
 import { logger } from '../../../instances/logger';
 import { TwitterService } from '../twitter.service';
-import { dateStrToTimestampMs } from '../twitter.utils';
+import { convertToAppTweetBase, dateStrToTimestampMs } from '../twitter.utils';
 
 interface TwitterTestState {
   latestTweetId: number;
@@ -32,11 +36,13 @@ let state: TwitterTestState = {
 
 export type TwitterMockConfig = 'real' | 'mock-publish' | 'mock-signup';
 
-export const THREADS: string[][] = process.env.TEST_THREADS
+export const TEST_THREADS: string[][] = process.env.TEST_THREADS
   ? JSON.parse(process.env.TEST_THREADS as string)
   : [];
 
-export const TWITTER_USER_ID_MOCKS = '1773032135814717440';
+export const TWITTER_USER_ID_MOCKS = 'sense_nets_bot';
+export const TWITTER_USERNAME_MOCKS = 'sense_nets_bot';
+export const TWITTER_NAME_MOCKS = 'SenseNet Bot';
 
 const getSampleTweet = (
   id: string,
@@ -44,7 +50,7 @@ const getSampleTweet = (
   createdAt: number,
   conversation_id: string,
   content: string
-) => {
+): AppTweet => {
   const date = new Date(createdAt);
 
   return {
@@ -53,14 +59,29 @@ const getSampleTweet = (
     text: `This is an interesting paper https://arxiv.org/abs/2312.05230 ${id} | ${content}`,
     author_id: authorId,
     created_at: date.toISOString(),
-    edit_history_tweet_ids: [],
+    entities: {
+      urls: [
+        {
+          start: 50,
+          end: 73,
+          url: 'https://t.co/gguJOKvN37',
+          expanded_url: 'https://arxiv.org/abs/2312.05230',
+          display_url: 'x.com/sense_nets_bot…',
+          unwound_url: 'https://arxiv.org/abs/2312.05230',
+        },
+      ],
+      annotations: [],
+      hashtags: [],
+      mentions: [],
+      cashtags: [],
+    },
   };
 };
 
 export const initThreads = () => {
   const now = Date.now();
 
-  const threads = THREADS.map((thread, ixThread): TwitterThread => {
+  const threads = TEST_THREADS.map((thread, ixThread): TwitterThread => {
     const tweets = thread.map((content, ixTweet) => {
       const idTweet = ixThread * 100 + ixTweet;
       const createdAt = now + ixThread * 100 + 10 * ixTweet;
@@ -77,6 +98,11 @@ export const initThreads = () => {
     return {
       conversation_id: `${ixThread}`,
       tweets,
+      author: {
+        id: TWITTER_USER_ID_MOCKS,
+        name: TWITTER_NAME_MOCKS,
+        username: TWITTER_USERNAME_MOCKS,
+      },
     };
   });
 
@@ -114,6 +140,7 @@ export const getTwitterMock = (
         const tweet: TweetV2SingleResult = {
           data: {
             id: (++state.latestTweetId).toString(),
+            conversation_id: (++state.latestConvId).toString(),
             text: postPublish.draft.text,
             edit_history_tweet_ids: [],
             author_id: postPublish.userDetails.user_id,
@@ -123,7 +150,12 @@ export const getTwitterMock = (
 
         const thread = {
           conversation_id: (++state.latestConvId).toString(),
-          tweets: [tweet.data],
+          tweets: [convertToAppTweetBase(tweet.data)],
+          author: {
+            id: TWITTER_USER_ID_MOCKS,
+            name: TWITTER_NAME_MOCKS,
+            username: TWITTER_USERNAME_MOCKS,
+          },
         };
 
         state.threads.push(thread);
@@ -165,15 +197,33 @@ export const getTwitterMock = (
 
     if (type === 'mock-signup') {
       when(mocked.getSignupContext(anything(), anything())).thenCall(
-        (userId?: string, params?: TwitterGetContextParams) => {
-          return {};
+        (
+          userId?: string,
+          params?: TwitterGetContextParams
+        ): TwitterSignupContext => {
+          return {
+            url: `${APP_URL.value()}?code=${TWITTER_USERNAME_MOCKS}&state=testState`,
+            state: 'testState',
+            codeVerifier: 'testCodeVerifier',
+            codeChallenge: '',
+            callback_url: APP_URL.value(),
+            type: 'read',
+          };
         }
       );
 
       when(mocked.handleSignupData(anything())).thenCall(
-        (data: TwitterUserDetails): TwitterUserDetails => {
+        (data: TwitterSignupData): TwitterUserDetails => {
           return {
-            ...data,
+            user_id: TWITTER_USER_ID_MOCKS,
+            signupDate: Date.now(),
+            profile: {
+              id: TWITTER_USER_ID_MOCKS,
+              name: TWITTER_NAME_MOCKS,
+              username: TWITTER_USERNAME_MOCKS,
+              profile_image_url:
+                'https://pbs.twimg.com/profile_images/1753077803258449920/2vI5Y2Wx_normal.png',
+            },
           };
         }
       );

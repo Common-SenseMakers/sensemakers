@@ -1,5 +1,6 @@
 import { firestore } from 'firebase-admin';
 
+import { NotificationFreq } from '../@shared/types/types.notifications';
 import {
   AppUser,
   AppUserCreate,
@@ -10,6 +11,7 @@ import {
   UserDetailsBase,
   UserPlatformProfile,
   UserSettings,
+  UserSettingsUpdate,
   UserWithPlatformIds,
 } from '../@shared/types/types.user';
 import { DBInstance } from '../db/instance';
@@ -389,15 +391,7 @@ export class UsersRepository {
 
   public async getAll() {
     const snapshot = await this.db.collections.users.get();
-    const users: AppUser[] = [];
-    snapshot.forEach((doc) => {
-      users.push({
-        userId: doc.id,
-        ...(doc.data() as Omit<AppUser, 'userId'>),
-      });
-    });
-
-    return users;
+    return snapshot.docs.map((doc) => doc.id);
   }
 
   public async getAllIds() {
@@ -412,11 +406,37 @@ export class UsersRepository {
 
   public async updateSettings(
     userId: string,
-    settings: UserSettings,
+    updateSettings: UserSettingsUpdate,
     manager: TransactionManager
   ) {
     const ref = await this.getUserRef(userId, manager, true);
-    manager.update(ref, { settings });
+    const existing = await this.getUser(userId, manager, true);
+
+    const newSettings: UserSettings = {
+      ...existing.settings,
+      ...updateSettings,
+    };
+
+    manager.update(ref, {
+      settings: newSettings,
+    });
+  }
+
+  public async getWithNotificationFrequency(
+    notificationFrequency: NotificationFreq
+  ) {
+    const settingsKey: keyof AppUser = 'settings';
+    const notificationFrequencyKey: keyof UserSettings = 'notificationFreq';
+
+    const query = this.db.collections.users.where(
+      `${settingsKey}.${notificationFrequencyKey}`,
+      '==',
+      notificationFrequency
+    );
+
+    const result = await query.get();
+
+    return result.docs.map((doc) => doc.id) as string[];
   }
 
   public async updateEmail(
