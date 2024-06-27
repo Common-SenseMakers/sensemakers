@@ -40,7 +40,7 @@ export const TEST_THREADS: string[][] = process.env.TEST_THREADS
   ? JSON.parse(process.env.TEST_THREADS as string)
   : [];
 
-export const TWITTER_USER_ID_MOCKS = 'userIdOf_sense_nets_bot';
+export const TWITTER_USER_ID_MOCKS = 'sense_nets_bot';
 export const TWITTER_USERNAME_MOCKS = 'sense_nets_bot';
 export const TWITTER_NAME_MOCKS = 'SenseNet Bot';
 

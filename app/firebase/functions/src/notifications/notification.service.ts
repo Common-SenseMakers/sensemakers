@@ -89,6 +89,10 @@ export class NotificationService {
         manager
       );
 
+      if (DEBUG) {
+        logger.debug(`notifyUser ${userId}`, { pendingIds }, DEBUG_PREFIX);
+      }
+
       const pendingNotifications = await Promise.all(
         pendingIds.map((notificationId) =>
           this.getFull(userId, notificationId, manager)
@@ -105,15 +109,40 @@ export class NotificationService {
         AutopostOption.DETERMINISTIC,
       ];
 
+      if (pendingNotifications.length === 0) {
+        logger.debug(
+          `notifyUser ${userId} - no pending notifications`,
+          undefined,
+          DEBUG_PREFIX
+        );
+        return;
+      }
+
       if (
         autopostingOptions.includes(settings.autopost[PLATFORM.Nanopub].value)
       ) {
+        if (DEBUG) {
+          logger.debug(
+            `notifyUser ${userId} - prepareAndSendDigestAuto`,
+            { pendingNotifications },
+            DEBUG_PREFIX
+          );
+        }
+
         await this.prepareAndSendDigestAuto(
           userId,
           pendingNotifications,
           manager
         );
       } else {
+        if (DEBUG) {
+          logger.debug(
+            `notifyUser ${userId} - prepareAndSendDigestManual`,
+            { pendingNotifications },
+            DEBUG_PREFIX
+          );
+        }
+
         await this.prepareAndSendDigestManual(
           userId,
           pendingNotifications,

@@ -13,6 +13,7 @@ import { ActivityEventBase } from './@shared/types/types.activity';
 import { NotificationFreq } from './@shared/types/types.notifications';
 import { PlatformPost } from './@shared/types/types.platform.posts';
 import { AppPost } from './@shared/types/types.posts';
+import { PLATFORM } from './@shared/types/types.user';
 import { CollectionNames } from './@shared/utils/collectionNames';
 import { activityEventCreatedHook } from './activity/activity.created.hook';
 import {
@@ -32,6 +33,7 @@ import {
   notifyUserTask,
   triggerSendNotifications,
 } from './notifications/notification.task';
+import { TWITTER_USER_ID_MOCKS } from './platforms/twitter/mock/twitter.service.mock';
 import { platformPostUpdatedHook } from './posts/hooks/platformPost.updated.hook';
 import { postUpdatedHook } from './posts/hooks/post.updated.hook';
 import {
@@ -100,37 +102,6 @@ exports.sendMonthlyNotifications = onSchedule(
   },
   () => triggerSendNotifications(NotificationFreq.Monthly, createServices())
 );
-
-// add enpoint when on emulator to trigger the scheduled task
-if (IS_EMULATOR) {
-  const scheduledTriggerRouter = express.Router();
-
-  scheduledTriggerRouter.post('/autofetch', async (request, response) => {
-    await triggerAutofetchPosts();
-    response.status(200).send({ success: true });
-  });
-
-  scheduledTriggerRouter.post(
-    '/sendDailyNotifications',
-    async (request, response) => {
-      await triggerSendNotifications(
-        NotificationFreq.Daily,
-        getServices(request)
-      );
-      response.status(200).send({ success: true });
-    }
-  );
-
-  exports['trigger'] = functions
-    .region(envDeploy.REGION)
-    .runWith({
-      timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
-      memory: envDeploy.CONFIG_MEMORY,
-      minInstances: envDeploy.CONFIG_MININSTANCE,
-      secrets,
-    })
-    .https.onRequest(buildApp(scheduledTriggerRouter));
-}
 
 /** tasks */
 exports[PARSE_POST_TASK] = onTaskDispatched(
@@ -270,3 +241,54 @@ exports.activityEventCreateListener = onDocumentCreated(
     await activityEventCreatedHook(created);
   }
 );
+
+/** EMULATOR ONLY ENDPOINTS used to simulate events on platforms, or cron jobs */
+// add enpoint when on emulator to trigger the scheduled task
+if (IS_EMULATOR) {
+  const emulatorTriggerRouter = express.Router();
+
+  emulatorTriggerRouter.post('/autofetch', async (request, response) => {
+    await triggerAutofetchPosts();
+    response.status(200).send({ success: true });
+  });
+
+  emulatorTriggerRouter.post(
+    '/sendDailyNotifications',
+    async (request, response) => {
+      await triggerSendNotifications(
+        NotificationFreq.Daily,
+        getServices(request)
+      );
+      response.status(200).send({ success: true });
+    }
+  );
+
+  emulatorTriggerRouter.post('/publishTwitter', async (request, response) => {
+    const services = getServices(request);
+    const { platforms } = services;
+    const params = request.query;
+    const text = params.text || 'test tweet';
+
+    await platforms.get(PLATFORM.Twitter).publish(
+      {
+        draft: { text },
+        userDetails: {
+          user_id: TWITTER_USER_ID_MOCKS,
+        } as any,
+      },
+      undefined as any
+    );
+
+    response.status(200).send({ success: true });
+  });
+
+  exports['trigger'] = functions
+    .region(envDeploy.REGION)
+    .runWith({
+      timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
+      memory: envDeploy.CONFIG_MEMORY,
+      minInstances: envDeploy.CONFIG_MININSTANCE,
+      secrets,
+    })
+    .https.onRequest(buildApp(emulatorTriggerRouter));
+}
