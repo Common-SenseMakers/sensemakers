@@ -292,18 +292,6 @@ class AppThread(BaseModel):
         return self.author.platformId
 
 
-# class ThreadInterface(BaseModel):
-#     """
-#     The `GenericPostData` object passed to the parser in the `ParsePostRequest`.
-
-#     Supports threaded posts with multiple quoted posts
-#     """
-
-#     quotedPosts: List[AppPost] = Field(
-#         description="List of quote posts quoted by this thread"
-#     )
-
-
 class ParsePostRequest(BaseModel):
     """
     The request passed to the parser by the ts app
