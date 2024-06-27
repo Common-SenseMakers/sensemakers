@@ -12,6 +12,7 @@ import { useAppFetch } from '../api/app.fetch';
 import { useToastContext } from '../app/ToastsContext';
 import { subscribeToUpdates } from '../firestore/realtime.listener';
 import { PublishPostPayload } from '../shared/types/types.fetch';
+import { NotificationFreq } from '../shared/types/types.notifications';
 import {
   PlatformPost,
   PlatformPostDraft,
@@ -192,11 +193,12 @@ export const PostContext: React.FC<{
     }
   }, [post, connectedUser]);
 
-  /** TODO: The post author needs not be the connected user. We can probably have an
+  /** TODO: This is a placeholder. The post author may not be the connected user. We can probably have an
    * endpoint to get user profiles by userIds */
   const author: AppUserRead = {
     userId: '1234',
     settings: {
+      notificationFreq: NotificationFreq.None,
       autopost: {
         [PLATFORM.Nanopub]: { value: AutopostOption.MANUAL },
       },

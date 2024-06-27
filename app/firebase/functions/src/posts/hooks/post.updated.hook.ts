@@ -1,65 +1,129 @@
 import {
+  ActivityEventBase,
+  ActivityEventCreate,
+  ActivityType,
+  PostActData,
+} from '../../@shared/types/types.activity';
+import {
+  AppPost,
   AppPostParsedStatus,
   AppPostRepublishedStatus,
 } from '../../@shared/types/types.posts';
-import { AutopostOption, PLATFORM } from '../../@shared/types/types.user';
 import { logger } from '../../instances/logger';
 import { createServices } from '../../instances/services';
-import { enqueueTask } from '../../tasks.support';
+import { enqueueTask } from '../../tasksUtils/tasks.support';
+import { UsersHelper } from '../../users/users.helper';
 import { AUTOPOST_POST_TASK } from '../tasks/posts.autopost.task';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 
-export const postUpdatedHook = async (postId: string) => {
-  const { db, time, users, postsManager } = createServices();
+const PREFIX = 'POST-UPDATED-HOOK';
 
+// TODO: change interface to receive post as the after value and also send the previous one
+export const postUpdatedHook = async (post: AppPost, postBefore?: AppPost) => {
+  const postId = post.id;
+
+  const { db, time, activity, users } = createServices();
+
+  /** Frontend watcher to react to changes in real-time */
   const updateRef = db.collections.updates.doc(`post-${postId}`);
   const now = time.now();
 
-  logger.debug(`postUpdatedHook post-${postId}-${now}`);
+  logger.debug(`postUpdatedHook post-${postId}-${now}`, undefined, PREFIX);
 
   await db.run(async (manager) => {
     manager.set(updateRef, { value: now });
   });
 
-  /** check if it should be auto-parsed or auto published */
-  const { post, author } = await db.run(async (manager) => {
-    const post = await postsManager.processing.posts.get(postId, manager, true);
-    const author = await users.repo.getUser(post.authorId, manager, true);
-    return { post, author };
+  /** Handle post create */
+  if (postBefore === undefined) {
+    // trigger parsePostTask
+    logger.debug(`triggerTask ${PARSE_POST_TASK}-${postId}`);
+    await enqueueTask(PARSE_POST_TASK, { postId });
+  }
+
+  const activitiesCreated: ActivityEventBase[] = [];
+
+  /** Create the activity elements */
+  const { wasParsed } = await db.run(async (manager) => {
+    /** detect parsed state change */
+    const wasParsed =
+      postBefore &&
+      postBefore.parsedStatus === AppPostParsedStatus.UNPROCESSED &&
+      post.parsedStatus === AppPostParsedStatus.PROCESSED;
+
+    if (wasParsed) {
+      logger.debug(`wasParsed ${PARSE_POST_TASK}-${postId}`, undefined, PREFIX);
+      const event: ActivityEventCreate<PostActData> = {
+        type: ActivityType.PostParsed,
+        data: {
+          postId: post.id,
+        },
+        timestamp: time.now(),
+      };
+
+      const parsedActivity = activity.repo.create(event, manager);
+      activitiesCreated.push(parsedActivity);
+    }
+
+    // if was parsed and user has autopost, then also trigger autopost
+    const wasAutoposted =
+      postBefore &&
+      postBefore.republishedStatus === AppPostRepublishedStatus.PENDING &&
+      post.republishedStatus !== AppPostRepublishedStatus.PENDING;
+
+    if (wasAutoposted) {
+      logger.debug(
+        `wasAutoposted ${PARSE_POST_TASK}-${postId}`,
+        undefined,
+        PREFIX
+      );
+      const event: ActivityEventCreate<PostActData> = {
+        type: ActivityType.PostAutoposted,
+        data: {
+          postId: post.id,
+        },
+        timestamp: time.now(),
+      };
+
+      const autopostedActivity = activity.repo.create(event, manager);
+      activitiesCreated.push(autopostedActivity);
+    }
+
+    logger.debug(
+      `postUpdatedHook -${postId}`,
+      {
+        post,
+        wasAutoposted,
+        wasParsed,
+      },
+      PREFIX
+    );
+
+    return { wasParsed };
   });
 
-  /** Auto-parse then auto-post */
-  const shouldAutopost =
-    author.settings.autopost[PLATFORM.Nanopub].value !== AutopostOption.MANUAL;
+  /** trigger Autopost*/
+  if (wasParsed) {
+    const author = await db.run(async (manager) =>
+      users.repo.getUser(post.authorId, manager, true)
+    );
+    /** autopost when parsed and author has autopost enabled */
+    /** trigger autopost task if author has autopost configured  */
+    const autopostOnPlatforms = UsersHelper.autopostPlatformIds(author);
 
-  logger.debug(`postUpdatedHook -${postId}`, { shouldAutopost, post, author });
+    if (autopostOnPlatforms.length > 0) {
+      logger.debug(
+        `trigger ${AUTOPOST_POST_TASK}-${postId}`,
+        { autopostOnPlatforms },
+        PREFIX
+      );
 
-  if (shouldAutopost) {
-    if (post.parsedStatus === AppPostParsedStatus.UNPROCESSED) {
-      logger.debug(`triggerTask ${PARSE_POST_TASK}-${postId}`);
-      await enqueueTask(PARSE_POST_TASK, { postId });
-    } else if (post.republishedStatus === AppPostRepublishedStatus.PENDING) {
-      logger.debug(`triggerTask ${AUTOPOST_POST_TASK}-${postId}`);
-
-      /**
-       * Get the platformIds for which the user has set the autpost to
-       * not manual
-       */
-      const platformIds = (
-        Object.keys(author.settings.autopost) as PLATFORM[]
-      ).filter((platformId: PLATFORM) => {
-        if (platformId !== PLATFORM.Nanopub) {
-          throw new Error('Only autopost to nanopub is suported for now');
-        }
-
-        return (
-          author.settings.autopost[platformId].value !== AutopostOption.MANUAL
-        );
+      await enqueueTask(AUTOPOST_POST_TASK, {
+        postId,
+        platformIds: autopostOnPlatforms,
       });
-
-      await enqueueTask(AUTOPOST_POST_TASK, { postId, platformIds });
     }
   }
 
-  /** notifications? */
+  return activitiesCreated;
 };

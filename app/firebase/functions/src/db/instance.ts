@@ -31,6 +31,10 @@ export class DBInstance {
     updates: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
     profiles: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
     triples: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
+    activity: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
+    userNotifications: (
+      userId: string
+    ) => FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
   };
 
   constructor() {
@@ -44,6 +48,12 @@ export class DBInstance {
       updates: this.firestore.collection(CollectionNames.Updates),
       profiles: this.firestore.collection(CollectionNames.Profiles),
       triples: this.firestore.collection(CollectionNames.Triples),
+      activity: this.firestore.collection(CollectionNames.Activity),
+      userNotifications: (userId: string) =>
+        this.firestore
+          .collection(CollectionNames.Users)
+          .doc(userId)
+          .collection(CollectionNames.Notifications),
     };
   }
 
@@ -57,22 +67,33 @@ export class DBInstance {
       case ManagerModes.TRANSACTION:
         return this.firestore.runTransaction(async (transaction) => {
           if (DEBUG) logger.debug('Transaction started');
-          const manager = new TransactionManager(transaction);
+          try {
+            const manager = new TransactionManager(transaction);
 
-          const result = await func(manager, payload);
-          if (DEBUG) logger.debug('Transaction function executed');
+            const result = await func(manager, payload);
+            if (DEBUG) logger.debug('Transaction function executed');
 
-          await manager.applyWrites();
-          if (DEBUG) logger.debug('Transaction writes applied');
-          return result;
+            await manager.applyWrites();
+            if (DEBUG) logger.debug('Transaction writes applied');
+
+            return result;
+          } catch (error: any) {
+            logger.error('Transaction failed', error);
+            throw new Error(error);
+          }
         });
 
       case ManagerModes.BATCH: {
-        const batch = this.firestore.batch();
-        const manager = new TransactionManager(undefined, batch);
-        const result = await func(manager, payload);
-        await manager.applyWrites();
-        return result;
+        try {
+          const batch = this.firestore.batch();
+          const manager = new TransactionManager(undefined, batch);
+          const result = await func(manager, payload);
+          await manager.applyWrites();
+          return result;
+        } catch (error: any) {
+          logger.error('Transaction failed', error);
+          throw new Error(error);
+        }
       }
     }
   }

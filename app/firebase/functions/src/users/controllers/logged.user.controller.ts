@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { logger } from 'firebase-functions/v1';
 
-import { UserSettings } from '../../@shared/types/types.user';
+import { UserSettingsUpdate } from '../../@shared/types/types.user';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { emailUpdateSchema, userSettingsUpdateSchema } from './auth.schema';
 
@@ -37,7 +37,7 @@ export const setUserSettingsController: RequestHandler = async (
 
     const settingsUpdate = (await userSettingsUpdateSchema.validate(
       request.body
-    )) as UserSettings;
+    )) as UserSettingsUpdate;
 
     await services.users.updateSettings(userId, settingsUpdate);
 

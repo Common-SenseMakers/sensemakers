@@ -14,7 +14,8 @@
         "LOG_LEVEL_OBJ": "error",
         "USE_REAL_TWITTERX": "false",
         "USE_REAL_NANOPUB": "false",
-        "USE_REAL_PARSER": "false"
+        "USE_REAL_PARSER": "false",
+        "USE_REAL_NOTIFICATIONS": "true"
       },
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/mocha",
       "args": ["--config", "./.mocharc.js", "test/__tests__/**/*.test.ts"],

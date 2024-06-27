@@ -7,7 +7,7 @@ import {
   PlatformPostPublish,
   PlatformPostUpdate,
 } from '../@shared/types/types.platform.posts';
-import { GenericPostData, PostAndAuthor } from '../@shared/types/types.posts';
+import { GenericThread, PostAndAuthor } from '../@shared/types/types.posts';
 import { PLATFORM, UserDetailsBase } from '../@shared/types/types.user';
 import { TransactionManager } from '../db/transaction.manager';
 
@@ -50,6 +50,6 @@ export interface PlatformService<
     post: PlatformPostUpdate,
     manager: TransactionManager
   ): Promise<PlatformPostPosted>;
-  convertToGeneric(platformPost: PlatformPostCreate): Promise<GenericPostData>;
+  convertToGeneric(platformPost: PlatformPostCreate): Promise<GenericThread>;
   convertFromGeneric(postAndAuthor: PostAndAuthor): Promise<PlatformPostDraft>;
 }

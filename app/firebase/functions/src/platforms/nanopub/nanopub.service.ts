@@ -18,7 +18,7 @@ import {
 } from '../../@shared/types/types.platform.posts';
 import {
   AppPostMirror,
-  GenericPostData,
+  GenericThread,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
 import { PLATFORM, UserDetailsBase } from '../../@shared/types/types.user';
@@ -228,7 +228,7 @@ export class NanopubService
     throw new Error('Could not publish nanopub');
   }
 
-  convertToGeneric(platformPost: PlatformPost<any>): Promise<GenericPostData> {
+  convertToGeneric(platformPost: PlatformPost<any>): Promise<GenericThread> {
     throw new Error('Method not implemented.');
   }
 

@@ -1,25 +1,38 @@
+import { FetchParams } from '../../src/@shared/types/types.fetch';
 import {
   PlatformPostPublishOrigin,
   PlatformPostPublishStatus,
 } from '../../src/@shared/types/types.platform.posts';
 import {
+  AppPost,
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
   AppPostRepublishedStatus,
   AppPostReviewStatus,
+  GenericThread,
 } from '../../src/@shared/types/types.posts';
 import { PLATFORM } from '../../src/@shared/types/types.user';
+import { activityEventCreatedHook } from '../../src/activity/activity.created.hook';
 import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
+import { postUpdatedHook } from '../../src/posts/hooks/post.updated.hook';
+import { PostsManager } from '../../src/posts/posts.manager';
 
 export const getMockPost = (refPost: Partial<AppPostFull>) => {
   const authorId = refPost.authorId || 'test-author-id';
   const createdAtMs = refPost.createdAtMs || Date.now();
+
+  const defaultThread: GenericThread['thread'] = [
+    {
+      content: 'test content',
+    },
+  ];
+
   const post: AppPostFull = {
     id: refPost.id || 'post-id',
     createdAtMs: createdAtMs,
     authorId: authorId,
-    content: refPost.content || 'test content',
+    thread: refPost.thread || defaultThread,
     semantics: refPost.semantics || '',
     origin: PLATFORM.Twitter,
     parsedStatus: AppPostParsedStatus.PROCESSED,
@@ -62,4 +75,40 @@ export const getMockPost = (refPost: Partial<AppPostFull>) => {
     ],
   };
   return post;
+};
+
+/**
+ * We need to manually call the postUpdate hook that would have been called
+ * when creating the AppPost as part of the fetch
+ */
+export const fetchPostsInTests = async (
+  userId: string,
+  params: FetchParams,
+  postsManager: PostsManager
+) => {
+  /** fetch will store the posts in the DB */
+  const postsCreated = await postsManager.fetchUser({
+    userId: userId,
+    params,
+  });
+
+  /**
+   * We need to manually call the postUpdate hook that would have been called
+   * when creating the AppPost as part of the fetch
+   */
+  await Promise.all(
+    postsCreated.map((postCreated) => postUpdatedHook(postCreated.post))
+  );
+};
+
+// auto triggfe the acivity create hook
+export const postUpdatedHookOnTest = async (
+  post: AppPost,
+  before?: AppPost
+) => {
+  const activities = await postUpdatedHook(post, before);
+
+  await Promise.all(
+    activities.map((activity) => activityEventCreatedHook(activity))
+  );
 };

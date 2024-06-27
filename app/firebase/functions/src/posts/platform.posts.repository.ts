@@ -97,9 +97,6 @@ export class PlatformPostsRepository extends BaseRepository<
 
     const doc = posts.docs[0];
 
-    return {
-      id: doc.id,
-      ...doc.data(),
-    } as unknown as DefinedIfTrue<T, R>;
+    return doc.id as DefinedIfTrue<T, R>;
   }
 }
