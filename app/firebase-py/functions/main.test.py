@@ -35,7 +35,7 @@ config: SM_FUNCTION_post_parser_config = {
     "llm_type": "openai/gpt-3.5-turbo",
 }
 
-result = SM_FUNCTION_post_parser_imp(post, parameters, config)
+result = SM_FUNCTION_post_parser_imp(thread_data, parameters, config)
 
 serialized = result.model_dump_json()
 
