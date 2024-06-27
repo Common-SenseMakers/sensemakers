@@ -1,4 +1,5 @@
-from typing import TypedDict, Any
+from typing import TypedDict, List
+from enum import Enum
 
 from loguru import logger
 
@@ -14,9 +15,31 @@ class SM_FUNCTION_post_parser_config(TypedDict, total=True):
     openrouter_referer: int
     llm_type: str
 
+class PLATFORM(Enum):
+    Local = 'local'  # local refers to our platform
+    Orcid = 'orcid'
+    Twitter = 'twitter'
+    Nanopub = 'nanopub'
+
+class GenericAuthor(TypedDict):
+    platformId: PLATFORM
+    id: str
+    username: str
+    name: str
+
+class GenericPost(TypedDict, total=False):  # total=False makes all keys optional
+    url: str
+    content: str
+    quotedThread: 'GenericThread'  # Use forward reference with a string
+
+class GenericThread(TypedDict, total=False):
+    url: str
+    thread: List[GenericPost]
+    author: GenericAuthor
+
 
 def SM_FUNCTION_post_parser_imp(
-    content, parameters, parser_config: SM_FUNCTION_post_parser_config
+    parserRequest: GenericThread, parameters, parser_config: SM_FUNCTION_post_parser_config
 ) -> ParserResult:
     llm_type = parser_config.pop("llm_type")
     open_router_api_config = OpenrouterAPIConfig(**parser_config)
@@ -27,11 +50,11 @@ def SM_FUNCTION_post_parser_imp(
 
     parser = MultiChainParser(multi_chain_parser_config)
 
-    logger.info(f"Running parser on content: {content}...")
+    logger.info(f"Running parser on content: {parserRequest}...")
 
     # TODO change this to handle post and not text
     result = parser.process_text(
-        content,
+        parserRequest,
         active_list=[  # using new multi reference tagger
             "keywords",
             "multi_refs_tagger",
