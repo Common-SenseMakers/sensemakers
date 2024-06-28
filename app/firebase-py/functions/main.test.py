@@ -1,27 +1,24 @@
 import json
+from shared_functions.interface import AppPost, AppThread, Author, SocialPlatformType
 from shared_functions.main import (
-    PLATFORM,
-    GenericAuthor,
-    GenericPost,
-    GenericThread,
     SM_FUNCTION_post_parser_imp,
     SM_FUNCTION_post_parser_config,
 )
 from env_config import openai_api_key
 
 # content = 'This is definititely an announcement of https://www.alink.com and I dont agree with https://anotherlink.io'
-author_data: GenericAuthor = {
-    "platformId": PLATFORM.Local,
+author_data: Author = {
+    "platformId": SocialPlatformType,
     "id": "12345",
     "username": "johndoe",
     "name": "John Doe"
 }
 
-post_data: GenericPost = {
+post_data: AppPost = {
     "content": "This is an interesting paper https://arxiv.org/abs/2312.05230 but I disagree with its sequel https://anotherlink.io  #user-hashtag"
 }
 
-thread_data: GenericThread = {
+thread_data: AppThread = {
     "thread": [post_data],
     "author": author_data
 }
