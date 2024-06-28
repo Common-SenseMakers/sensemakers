@@ -27,11 +27,20 @@ export type AccountContextType = {
   refresh: () => void;
   token?: string;
   setToken: (token: string) => void;
+  setLoginStatus: (status: LoginStatus) => void;
+  loginStatus: LoginStatus;
 };
 
 const AccountContextValue = createContext<AccountContextType | undefined>(
   undefined
 );
+
+export enum LoginStatus {
+  Unknown = 'Unknown',
+  LoggedOut = 'LoggedOut',
+  LoggingIn = 'LoggingIn',
+  LoggedIn = 'LoggedIn',
+}
 
 /**
  * Manages the logged-in user. We use JWT tokens to authenticate
@@ -47,6 +56,10 @@ export const AccountContext = (props: PropsWithChildren) => {
   const _token = localStorage.getItem(OUR_TOKEN_NAME);
   const [token, setToken] = useState<string | undefined>(
     _token ? _token : undefined
+  );
+
+  const [loginStatus, setLoginStatus] = useState<LoginStatus>(
+    LoginStatus.Unknown
   );
 
   const [isSettingEmail, setIsSettingEmail] = useState<boolean>(false);
@@ -66,13 +79,16 @@ export const AccountContext = (props: PropsWithChildren) => {
   const refresh = async () => {
     try {
       if (token) {
+        setLoginStatus(LoginStatus.LoggingIn);
         const user = await _appFetch<AppUserRead>('/api/auth/me', {}, token);
+        setLoginStatus(LoginStatus.LoggedIn);
         if (DEBUG) console.log('got connected user', { user });
         setConnectedUser(user);
         setHasTriedFetchingUser(true);
       } else {
         setConnectedUser(null);
-        setHasTriedFetchingUser(true);
+        if (loginStatus === LoginStatus.LoggedIn)
+          setLoginStatus(LoginStatus.LoggedOut);
       }
     } catch (e) {
       disconnect();
@@ -131,6 +147,8 @@ export const AccountContext = (props: PropsWithChildren) => {
         refresh,
         token,
         setToken,
+        setLoginStatus,
+        loginStatus,
       }}>
       {props.children}
     </AccountContextValue.Provider>
