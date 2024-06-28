@@ -19,10 +19,15 @@ from .filters import SciFilterClassfication
 # for calculating thread length limits
 MAX_CHARS_PER_POST = 280
 
+# maximum allowed posts per request from parser
+MAX_POSTS_PER_REQUEST = 40
 
-class SocialPlatformType(str, Enum):
+
+class PlatformType(str, Enum):
     TWITTER = "twitter"
     MASTODON = "mastodon"
+    LOCAL = "local"  # our platform
+    ORCID = "orcid"
     UNKNOWN = "unknown"
 
 
@@ -259,7 +264,11 @@ class Author(BaseModel):
     id: str = Field(description="Internal platform ID for author")
     name: str = Field(description="Author display name")
     username: str = Field(description="Platform username of author")
-    platformId: SocialPlatformType = Field(description="Name of platform")
+    platformId: PlatformType = Field(description="Name of platform")
+
+    @validator("platformId", pre=True, always=True)
+    def lower_case_platform_id(cls, v):
+        return v.lower() if isinstance(v, str) else v
 
 
 # class AppPostContent(BaseModel):
@@ -275,7 +284,7 @@ class Author(BaseModel):
 
 class AppPost(BaseModel):
     content: str = Field(description="Post content")
-    url: str = Field(description="Post url")
+    url: Optional[str] = Field(description="Post url", default="")
     quotedThread: Optional[AppThread] = Field(
         description="Quoted thread",
         default=None,
@@ -284,11 +293,14 @@ class AppPost(BaseModel):
 
 class AppThread(BaseModel):
     author: Author
-    url: str = Field(description="Thread url (url of first post)")
     thread: List[AppPost] = Field(description="List of posts quoted in this thread")
+    url: Optional[str] = Field(
+        description="Thread url (url of first post)",
+        default=None,
+    )
 
     @property
-    def source_network(self) -> SocialPlatformType:
+    def source_network(self) -> PlatformType:
         return self.author.platformId
 
 

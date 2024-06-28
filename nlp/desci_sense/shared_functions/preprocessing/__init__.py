@@ -7,10 +7,11 @@ from langchain.pydantic_v1 import Field, BaseModel
 from ..interface import (
     ParsePostRequest,
     AppThread,
-    SocialPlatformType,
+    PlatformType,
     AppPost,
     Author,
     MAX_CHARS_PER_POST,
+    MAX_POSTS_PER_REQUEST,
 )
 from ..schema.post import ThreadRefPost, RefPost, QuoteRefPost
 from ..utils import (
@@ -53,7 +54,7 @@ def convert_app_post_to_ref_post(
     source_network = author.platformId
 
     # if source network is twitter, use twitter specific preprocessing
-    if source_network == SocialPlatformType.TWITTER:
+    if source_network == PlatformType.TWITTER:
         ref_urls = extract_external_urls_from_status_tweet(
             app_post.url,
             app_post.content,
@@ -234,7 +235,7 @@ class ParserInput(BaseModel):
     thread_post: ThreadRefPost = Field(description="Target thread to parse")
     max_posts: Optional[int] = Field(
         description="Maximum number of posts in the thread to process.",
-        default=10,
+        default=MAX_POSTS_PER_REQUEST,
     )
 
     @property
@@ -259,7 +260,10 @@ def convert_parse_request_to_parser_input(
         ParserInput: _description_
     """
     thread = convert_thread_interface_to_ref_post(parse_request.post)
-    parser_input = ParserInput(thread_post=thread)
+    parser_input = ParserInput(
+        thread_post=thread,
+        max_posts=MAX_POSTS_PER_REQUEST,
+    )
     return parser_input
 
 

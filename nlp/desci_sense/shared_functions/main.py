@@ -6,7 +6,7 @@ from loguru import logger
 from .parsers.multi_chain_parser import MultiChainParser
 from .init import init_multi_chain_parser_config
 from .configs import OpenrouterAPIConfig
-from .interface import ParserResult
+from .interface import ParserResult, ParsePostRequest
 
 
 class SM_FUNCTION_post_parser_config(TypedDict, total=True):
@@ -15,31 +15,9 @@ class SM_FUNCTION_post_parser_config(TypedDict, total=True):
     openrouter_referer: int
     llm_type: str
 
-class PLATFORM(Enum):
-    Local = 'local'  # local refers to our platform
-    Orcid = 'orcid'
-    Twitter = 'twitter'
-    Nanopub = 'nanopub'
-
-class GenericAuthor(TypedDict):
-    platformId: PLATFORM
-    id: str
-    username: str
-    name: str
-
-class GenericPost(TypedDict, total=False):  # total=False makes all keys optional
-    url: str
-    content: str
-    quotedThread: 'GenericThread'  # Use forward reference with a string
-
-class GenericThread(TypedDict, total=False):
-    url: str
-    thread: List[GenericPost]
-    author: GenericAuthor
-
 
 def SM_FUNCTION_post_parser_imp(
-    parserRequest: GenericThread, parameters, parser_config: SM_FUNCTION_post_parser_config
+    parserRequest: ParsePostRequest, parser_config: SM_FUNCTION_post_parser_config
 ) -> ParserResult:
     llm_type = parser_config.pop("llm_type")
     open_router_api_config = OpenrouterAPIConfig(**parser_config)
@@ -48,13 +26,15 @@ def SM_FUNCTION_post_parser_imp(
         llm_type=llm_type,
     )
 
+    val_parser_request = ParsePostRequest.model_validate(parserRequest)
+
     parser = MultiChainParser(multi_chain_parser_config)
 
-    logger.info(f"Running parser on content: {parserRequest}...")
+    logger.info(f"Running parser on content: {val_parser_request}...")
 
     # TODO change this to handle post and not text
-    result = parser.process_text(
-        parserRequest,
+    result = parser.process_parse_request(
+        val_parser_request,
         active_list=[  # using new multi reference tagger
             "keywords",
             "multi_refs_tagger",

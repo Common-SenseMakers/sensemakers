@@ -19,7 +19,7 @@ from ..utils import (
 
 from ..interface import (
     AppThread,
-    SocialPlatformType,
+    PlatformType,
 )
 
 
