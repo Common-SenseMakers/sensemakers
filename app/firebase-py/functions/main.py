@@ -35,7 +35,7 @@ def SM_FUNCTION_post_parser(request):
 
     logger.info(f"Calling SM_FUNCTION_post_parser_imp with config: {config}")
 
-    parser_result = SM_FUNCTION_post_parser_imp(post["content"], parameters, config)
+    parser_result = SM_FUNCTION_post_parser_imp(post, parameters, config)
     parser_json = parser_result.model_dump_json()
 
     return https_fn.Response(

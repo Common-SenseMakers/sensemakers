@@ -11,6 +11,7 @@ from ..configs import (
     PostParserChainConfig,
     MultiParserChainConfig,
 )
+from ..prompting.post_renderers import post_renderer_factory
 from ..schema.helpers import convert_text_to_ref_post
 from ..schema.ontology_base import OntologyBase
 from . import create_model
@@ -27,6 +28,9 @@ class PostParserChain(ABC):
         self._parser_config = parser_config
         self._global_config = global_config
         self._ontology = ontology
+
+        # init post renderer
+        self._post_renderer = post_renderer_factory(self.parser_config.post_renderer)
 
         # create model from configs
         # join kw args in single dict
@@ -58,6 +62,10 @@ class PostParserChain(ABC):
     @property
     def model(self):
         return self._model
+
+    @property
+    def post_renderer(self):
+        return self._post_renderer
 
     @property
     def ontology(self) -> OntologyBase:

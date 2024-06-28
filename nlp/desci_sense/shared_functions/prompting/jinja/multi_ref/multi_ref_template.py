@@ -13,7 +13,7 @@ The tags are to be selected from a predefined set of tags. The available tag typ
 
 A user will pass in a post, and you should reason step by step, before selecting a set of tags for each reference that best that reference's relation with the post.
 
-Each reference will be marked by a number for convenient identification, in order of appearance in the post. The first reference will be number 1, the second 2, etc. Additional metadata may also be provided for references.
+{{ ref_metadata_instructions }}
 
 ## Required output format
 Your final answer should be structured as a JSON Answer object with a list of SubAnswer objects, as described by the following schemas:
@@ -45,7 +45,7 @@ For example, for a post with 2 references, the output would be structured as fol
     ]
   },
   {
-    "ref_number": 1,
+    "ref_number": 2,
     "reasoning_steps": "<your reasoning steps...>",
     "candidate_tags": "[<tag1>, <tag3>, <tag4>]",
     "final_answer": [
@@ -59,16 +59,7 @@ For example, for a post with 2 references, the output would be structured as fol
 {% endraw %}
 
 # Input post text:
-- Author: {{ author_name }}
-- Content: {{ content }}
-- References: 
-{%- for ref_md in references_metadata %}
-{{ loop.index }}: {{ ref_md.url }}
-Item type: {{ ref_md.item_type }}
-Title: {{ ref_md.title }}
-Summary: {{ ref_md.summary }}
-------------------
-{%- endfor %}
+{{ rendered_post }}
 
 # Output:
 

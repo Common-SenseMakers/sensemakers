@@ -4,6 +4,7 @@ langchain-community
 langchain-core
 langchain-openai
 langsmith
+jsoncomment
 pytest
 wandb
 docopt

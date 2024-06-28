@@ -8,8 +8,27 @@ from .twitter.twitter_utils import scrape_tweet
 from .mastodon.mastodon_utils import scrape_mastodon_post
 
 
+class PostScrapeError(Exception):
+    """Exception raised when the post scraping fails,
+    such as when the post is not found or has been deleted."""
+
+    def __init__(self, post_url):
+        self.post_url = post_url
+        self.message = f"Post scraping failed, perhaps it has been deleted: {post_url}"
+        super().__init__(self.message)
+
+
+class UnknownSocialMediaTypeError(Exception):
+    """Exception raised when the social media type is unknown."""
+
+    def __init__(self, post_url, message="Unknown social media type"):
+        self.post_url = post_url
+        self.message = f"Unknown social media type: {post_url}"
+        super().__init__(self.message)
+
+
 def convert_text_to_ref_post(
-    text: str, author: str = "deafult_author", source: str = "default_source"
+    text: str, author: str = "default_author", source: str = "default_source"
 ) -> RefPost:
     """
     Converts raw text to a RefPost.
@@ -38,7 +57,10 @@ def scrape_post(post_url):
         result = scrape_mastodon_post(post_url)
 
     else:
-        logger.warn(f"Unknown post type: {post_url}")
-        result = None
+        logger.error(f"Unknown post type: {post_url}")
+        raise UnknownSocialMediaTypeError(post_url)
+
+    if result is None:
+        raise PostScrapeError(post_url)
 
     return result

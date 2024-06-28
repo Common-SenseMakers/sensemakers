@@ -4,6 +4,7 @@ langchain-community
 langchain-core
 langchain-openai
 langsmith
+jsoncomment
 openai==1.12.0
 pytest==7.4.0
 wandb

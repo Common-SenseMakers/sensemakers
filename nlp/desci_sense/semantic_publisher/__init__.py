@@ -49,7 +49,7 @@ def create_triples_from_prediction(prediction):
     # extract list of referenced links
     post: RefPost = prediction.get("post", None)
     if post:
-        ref_links = post.ref_urls
+        ref_links = post.md_ref_urls()
         if len(ref_links) == 0:
             # no references mentioned
             ref_links = [NO_OBJ_DISP_NAME]

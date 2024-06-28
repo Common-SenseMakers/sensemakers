@@ -2,6 +2,7 @@ from typing import Any, Dict, Union
 from uuid import UUID
 from tqdm.auto import tqdm
 from langchain_core.callbacks import BaseCallbackHandler
+from ..postprocessing import ParserChainOutput
 
 
 class BatchCallback(BaseCallbackHandler):
