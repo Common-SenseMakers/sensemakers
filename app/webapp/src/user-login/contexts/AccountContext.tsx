@@ -60,7 +60,7 @@ export const AccountContext = (props: PropsWithChildren) => {
   );
 
   const [loginStatus, setLoginStatus] = useState<LoginStatus>(
-    _twitterContext ? LoginStatus.LoggingIn : LoginStatus.LoggedOut
+    _token || _twitterContext ? LoginStatus.LoggingIn : LoginStatus.LoggedOut
   );
 
   const [isSettingEmail, setIsSettingEmail] = useState<boolean>(false);
