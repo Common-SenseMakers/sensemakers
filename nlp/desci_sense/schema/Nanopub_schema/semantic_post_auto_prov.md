@@ -25,6 +25,7 @@ In this doc I specify what triplets are to be present in our app auto-published 
 sub:provenance {
 	#Worked with Tobias on a more rebust prov, TODO
   cosmo: a prov:SoftwareAgent ;
+    rdfs:label "research_filter_v1" ;
     prov:actedOnBehalfOf x:xHandle .
   sub:activity a cosmo:nlpFacilitatedActivity ;
     prov:wasAssociatedWith cosmo:.

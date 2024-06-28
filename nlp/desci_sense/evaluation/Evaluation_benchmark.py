@@ -281,7 +281,7 @@ class TwitterEval(Evaluation):
                     
         return results
 
-    def feed_tweet_type_statistics(self, df, name,update_df = 1):
+    def feed_tweet_type_statistics(self, df, name,update_df = 1,post_types =['quote','thread']):
         print('Analyze tweets by',name)
         df1 = df[df["username"] == name]
         inputs = self.prepare_parser_input(df1)
@@ -303,7 +303,8 @@ class TwitterEval(Evaluation):
         
             # Assign these elements to the corresponding rows in df1
             df.loc[df["username"] == name, 'citoid_research'] = first_elements
-
+        #TODO make more better - defining df1 twice 
+        df1 = df[df["username"] == name]
         citoid_count = 0
         quotes_count = 0
         quoted_citoid_count = 0
@@ -320,27 +321,43 @@ class TwitterEval(Evaluation):
         else:
             quotes_ratio = -1
             citoid_ratio = -1
+        #thread stat
+        if 'thread' in post_types:
+            thread_count = df1['thread'].sum()
+            citoid_threads = df1[(df1['thread'] ==1) & (df1['citoid_research']==1)].shape[0]
+            if post_count:
+                thread_ratio = thread_count/post_count
+            else:
+                thread_ratio = -1
+            return citoid_count, quoted_citoid_count, quotes_count, post_count, quotes_ratio, citoid_ratio, thread_count, citoid_threads, thread_ratio, item_type_list
+
         
         return citoid_count, quoted_citoid_count, quotes_count, post_count, quotes_ratio, citoid_ratio, item_type_list
 
-    def build_post_type_chart(self,df_handles:pd.DataFrame,df:pd.DataFrame):
+    def build_post_type_chart(self,df_handles:pd.DataFrame,df:pd.DataFrame,parse_df = 1,post_types = ['quote','thread']):
         df_feed_eval = df_handles[["username", "server", "info"]].copy()
-        for column in ["citoid_count", "quoted_citoid_count", "quotes_count","post_count","quotes_ratio","citoid_ratio"]:
+        
+        for column in ["citoid_count", "quoted_citoid_count", "quotes_count","post_count","quotes_ratio","citoid_ratio","thread_count","citoid_threads","thread_ratio"]:
             df_feed_eval[column] = 0
-            df_feed_eval[["citoid_count", "quoted_citoid_count", "quotes_count","post_count","quotes_ratio","citoid_ratio","Ref item types"]] = df_feed_eval.apply(
+            df_feed_eval[["citoid_count", "quoted_citoid_count", "quotes_count","post_count","quotes_ratio","citoid_ratio","thread_count","citoid_threads","thread_ratio","Ref item types"]] = df_feed_eval.apply(
             lambda row: pd.Series(self.feed_tweet_type_statistics(df=df, name=row["username"])), axis=1)
+    
         #"Total" row
         post_count = df_feed_eval["post_count"].sum()
         quotes_count = df_feed_eval["quotes_count"].sum()
         citoid_count = df_feed_eval["citoid_count"].sum()
+        thread_count = df_feed_eval['thread_count'].sum()
+        citoid_threads = df_feed_eval['citoid_threads'].sum()
         if post_count:
             quotes_ratio = quotes_count/post_count
             citoid_ratio = citoid_count/post_count
+            thread_ratio = thread_count/post_count
         else:
             quotes_ratio = -1
             citoid_ratio = -1
-        new_row = ["Summery","","",citoid_count,df_feed_eval["quoted_citoid_count"].sum(),quotes_count,post_count,quotes_ratio,citoid_ratio,[]]
-        new_row = pd.DataFrame([new_row], columns=['username', 'server', 'info', "citoid_count", "quoted_citoid_count", "quotes_count","post_count","quotes_ratio","citoid_ratio","Ref item types"])
+            thread_ratio = -1
+        new_row = ["Summery","","",citoid_count,df_feed_eval["quoted_citoid_count"].sum(),quotes_count,post_count,quotes_ratio,citoid_ratio,thread_count,citoid_threads,thread_ratio,[]]
+        new_row = pd.DataFrame([new_row], columns=['username', 'server', 'info', "citoid_count", "quoted_citoid_count", "quotes_count","post_count","quotes_ratio","citoid_ratio","thread_count","citoid_threads","thread_ratio","Ref item types"])
         return df_feed_eval._append(new_row, ignore_index=True)
 
     def build_thread_chart(self,df_handles:pd.DataFrame,df:pd.DataFrame):
@@ -386,7 +403,7 @@ if __name__ == "__main__":
     api = wandb.Api()
 
     #TODO move from testing
-    run = wandb.init(project="testing", job_type="evaluation")
+    run = wandb.init(project="post_type_statistics", job_type="evaluation")
 
     # get artifact path
 
@@ -450,9 +467,10 @@ if __name__ == "__main__":
     table = wandb.Table(dataframe=df)
 
     # Add the wandb.Table to the artifact
-    artifact.add(table, "prediction_evaluation")
+    artifact.add(table, "post_stat")
 
-   
+    run.log_artifact(artifact)
+
     wandb.run.finish()
 
     
