@@ -1,4 +1,7 @@
 import json
+import inspect
+import ast
+import re
 import pandas as pd
 import numpy as np
 import concurrent.futures
@@ -19,7 +22,73 @@ from desci_sense.shared_functions.dataloaders import (
 )
 
 
+# Convert iteratable objects into json, used for config files so we can easily use the metadata
+def obj_to_dict(obj):
+    if isinstance(obj, dict):
+        return {k: obj_to_dict(v) for k, v in obj.items()}
+    elif hasattr(obj, "__dict__"):
+        return {k: obj_to_dict(v) for k, v in obj.__dict__.items() if not k.startswith('_')}
+    elif isinstance(obj, list):
+        return [obj_to_dict(i) for i in obj]
+    elif isinstance(obj, tuple):
+        return tuple(obj_to_dict(i) for i in obj)
+    elif isinstance(obj, set):
+        return {obj_to_dict(i) for i in obj}
+    else:
+        return obj
 
+def parse_string_to_dict(s):
+    """Parses a string representation of a dictionary or object."""
+    try:
+        return ast.literal_eval(s)
+    except Exception:
+        pass
+    
+    # Custom parsing logic for object-like strings
+    result = {}
+    # Split by spaces, but keep quoted strings together
+    parts = re.findall(r'(\w+)=\'(.*?)\'|(\w+)=([^\s]+)', s)
+    
+    for part in parts:
+        if part[0]:
+            key, value = part[0], part[1]
+        else:
+            key, value = part[2], part[3]
+        
+        # Attempt to parse the value further
+        try:
+            value = ast.literal_eval(value)
+        except Exception:
+            if isinstance(value, str) and '=' in value:
+                value = parse_string_to_dict(value)
+        
+        result[key] = value
+    
+    return result if result else s
+def list_to_dict(lst):
+    """Converts a list into a dictionary using indices as keys."""
+    return {str(i): obj_str_to_dict(item) for i, item in enumerate(lst)}
+
+def obj_str_to_dict(obj):
+    if isinstance(obj, dict):
+        return {k: obj_str_to_dict(v) for k, v in obj.items()}
+    elif hasattr(obj, "__dict__"):
+        return {k: obj_str_to_dict(v) for k, v in obj.__dict__.items() if not k.startswith('_')}
+    elif isinstance(obj, list):
+        return list_to_dict(obj)
+    elif isinstance(obj, tuple):
+        return tuple(obj_str_to_dict(i) for i in obj)
+    elif isinstance(obj, set):
+        return {obj_str_to_dict(i) for i in obj}
+    elif isinstance(obj, str):
+        return parse_string_to_dict(obj)
+    else:
+        return obj
+
+
+def obj_to_json(obj):
+    return json.dumps(obj_to_dict(obj), indent=4)
+ 
 # get a path to a wandb table and populate it in a pd data frame
 def get_dataset(table_path):
     raw_data = json.load(table_path.open())

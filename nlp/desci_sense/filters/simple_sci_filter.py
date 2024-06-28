@@ -55,7 +55,7 @@ class SimpleSciFilter:
 
         # if it has references, we run citoid on each
         # TODO lots of optimizations here to make this work faster
-        for url in post.ref_urls:
+        for url in post.md_ref_urls():
             # pass post as soon as we find one URL passing the filter
             if filter_url_by_type(url, self.accepted_citoid_item_types):
                 return True

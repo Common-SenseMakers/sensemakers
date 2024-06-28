@@ -5,6 +5,7 @@ langchain-core
 langchain-openai
 langsmith
 confection
+jsoncomment
 pandas==2.2.0
 loguru
 html2text==2020.1.16

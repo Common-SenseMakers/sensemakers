@@ -23,7 +23,7 @@ def create_dataframe_from_refposts(ref_posts: List[RefPost]):
             "post_url": post.url,
             "text": post.content,
             "date": post.created_at,
-            "ref_urls": post.ref_urls,
+            "ref_urls": post.md_ref_urls(),
         }
         for post in ref_posts
     ]

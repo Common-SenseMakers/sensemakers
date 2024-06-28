@@ -358,7 +358,9 @@ class MultiStageParser:
         return result
 
     def extract_post_topics_w_metadata(self, post: RefPost) -> List[str]:
-        md_list = extract_all_metadata_by_type(post.ref_urls, self.kw_md_extract_method)
+        md_list = extract_all_metadata_by_type(
+            post.md_ref_urls(), self.kw_md_extract_method
+        )
 
         result = self.extract_post_topics(post, md_list)
 
@@ -368,22 +370,22 @@ class MultiStageParser:
         md_list = []
 
         # check how many external references post mentions
-        if len(post.ref_urls) == 0:
+        if len(post.md_ref_urls()) == 0:
             case = PromptCase.ZERO_REF
 
         else:
             # at least one external reference
-            if len(post.ref_urls) == 1:
+            if len(post.md_ref_urls()) == 1:
                 case = PromptCase.SINGLE_REF
                 # if metadata flag is active, retreive metadata
                 md_list = extract_metadata_by_type(
-                    post.ref_urls[0], self.md_extract_method
+                    post.md_ref_urls()[0], self.md_extract_method
                 )
 
             else:
                 case = PromptCase.MULTI_REF
                 # TODO finish
-                # md_list = extract_metadata_by_type(post.ref_urls[0], self.md_extract_method)
+                # md_list = extract_metadata_by_type(post.md_ref_urls()[0], self.md_extract_method)
 
         # run filters if specified TODO
 

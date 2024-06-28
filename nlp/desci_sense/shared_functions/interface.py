@@ -1,4 +1,6 @@
+from __future__ import annotations
 from typing import Optional, List, Dict, TypedDict, Union, Any
+from enum import Enum
 from pydantic import (
     Field,
     BaseModel,
@@ -6,11 +8,22 @@ from pydantic import (
     ConfigDict,
     field_validator,
     field_serializer,
+    model_validator,
+    ValidationError,
 )
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from rdflib import URIRef, Literal, Graph
 from .prompting.jinja.topics_template import ALLOWED_TOPICS
 from .filters import SciFilterClassfication
+
+# for calculating thread length limits
+MAX_CHARS_PER_POST = 280
+
+
+class SocialPlatformType(str, Enum):
+    TWITTER = "twitter"
+    MASTODON = "mastodon"
+    UNKNOWN = "unknown"
 
 
 # TODO fix using alias for env var default loading
@@ -240,6 +253,55 @@ class ParserResult(BaseModel):
             graph.parse(data=value, format="turtle")
             return graph
         raise ValueError("Invalid graph format")
+
+
+class Author(BaseModel):
+    id: str = Field(description="Internal platform ID for author")
+    name: str = Field(description="Author display name")
+    username: str = Field(description="Platform username of author")
+    platformId: SocialPlatformType = Field(description="Name of platform")
+
+
+# class AppPostContent(BaseModel):
+
+
+# class AppPost(BaseModel):
+#     content: str = Field(description="Post content")
+#     url: Optional[str] = Field(description="Post url", default=None)
+#     quoted_thread_url: Optional[str] = Field(
+#         description="Url of quoted thread", default=None
+#     )
+
+
+class AppPost(BaseModel):
+    content: str = Field(description="Post content")
+    url: str = Field(description="Post url")
+    quotedThread: Optional[AppThread] = Field(
+        description="Quoted thread",
+        default=None,
+    )
+
+
+class AppThread(BaseModel):
+    author: Author
+    url: str = Field(description="Thread url (url of first post)")
+    thread: List[AppPost] = Field(description="List of posts quoted in this thread")
+
+    @property
+    def source_network(self) -> SocialPlatformType:
+        return self.author.platformId
+
+
+class ParsePostRequest(BaseModel):
+    """
+    The request passed to the parser by the ts app
+    """
+
+    post: AppThread = Field(description="Threaded post to be processed")
+    parameters: Optional[Any] = Field(
+        description="Additional params for parser (not used currently)",
+        default_factory=dict,
+    )
 
 
 # TODO remove - changed to RefMetadata

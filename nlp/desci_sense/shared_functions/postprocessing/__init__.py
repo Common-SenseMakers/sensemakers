@@ -1,5 +1,6 @@
 from typing import List, Dict, Optional, Any, Union
 from enum import Enum
+from loguru import logger
 from langchain_core.pydantic_v1 import Field as FieldLC
 from langchain_core.pydantic_v1 import BaseModel as BaseModelLC
 from rdflib.namespace import RDF
@@ -160,7 +161,7 @@ def convert_raw_output_to_st_format(
     output: dict,
     md_dict: Dict[str, RefMetadata],
 ) -> CombinedParserOutput:
-    reference_urls = post.ref_urls
+    reference_urls = post.md_ref_urls()
     item_types = [
         md_dict[url].item_type if md_dict[url] else "unknown" for url in reference_urls
     ]
@@ -223,7 +224,7 @@ def convert_predicted_relations_to_rdf_triplets(
     ontology: OntologyBase,
 ) -> List[RDFTriplet]:
     post: RefPost = prediction.get("post")
-    refs = post.ref_urls
+    refs = post.md_ref_urls()
 
     # extract predicted labels
     predicted_labels = prediction["answer"]["multi_tag"]
@@ -293,7 +294,14 @@ def convert_ref_tags_to_rdf_triplets(
         # non zero refs - add labels as predicates to corresponding urls
         assert len(all_reference_tags) == len(reference_urls)
         for ref_tags, ref_url in zip(all_reference_tags, reference_urls):
-            for label in ref_tags:
+            if len(ref_tags) == 0:
+                # if no ref tags provided, add default mention label
+                # add warning since this should be handled prior
+                logger.warning("No ref tags provided, adding default label!")
+                updated_ref_tags = [ontology.default_mention_label()]
+            else:
+                updated_ref_tags = ref_tags
+            for label in updated_ref_tags:
                 concept = ontology.get_concept_by_label(label)
                 assert concept.can_be_predicate()
                 triplets += [
@@ -384,13 +392,19 @@ def combine_from_raw_results(
     post: RefPost,
     raw_results: Dict[str, ParserChainOutput],
     md_dict: Dict[str, RefMetadata],
+    ontology: OntologyBase,
+    unprocessed_urls: Optional[List[str]] = None,
 ) -> CombinedParserOutput:
+    if unprocessed_urls is None:
+        unprocessed_urls = []
+
     md_list = get_ref_post_metadata_list(
         post,
         md_dict,
+        extra_urls=unprocessed_urls,
     )
     combined_parser_output = {
-        "reference_urls": post.ref_urls,
+        "reference_urls": post.md_ref_urls(),
         "item_types": [md.item_type for md in md_list],
         "metadata_list": md_list,
         "debug": {},
@@ -405,7 +419,28 @@ def combine_from_raw_results(
             "reasoning"
         ] = output.reasoning
 
-    return CombinedParserOutput(**combined_parser_output)
+    combined = CombinedParserOutput(**combined_parser_output)
+
+    if unprocessed_urls:
+        # add unprocessed urls to result
+        combined.reference_urls += unprocessed_urls
+
+        # add default labels for unprocessed urls if exist
+        if combined.multi_reference_tagger:
+            labels_for_unprocessed = [
+                [ontology.default_mention_label()] for _ in unprocessed_urls
+            ]
+            combined.multi_reference_tagger += labels_for_unprocessed
+
+    # add default label to any empty prediction (no predicted tags)
+    if combined.multi_reference_tagger:
+        default_label = ontology.default_mention_label()
+        for pred_labels in combined.multi_reference_tagger:
+            if len(pred_labels) == 0:
+                logger.debug(f"Empty prediction replaced by {default_label}")
+                pred_labels.append(default_label)
+
+    return combined
 
 
 def get_support_data(
@@ -472,7 +507,10 @@ def post_process_chain_output(
     md_dict: Dict[str, RefMetadata],
     ontology_base: OntologyBase,
     post_process_type: PostProcessType,
+    unprocessed_urls: Optional[List[str]] = None,
 ) -> Union[CombinedParserOutput, ParserResult, Dict[str, ParserChainOutput]]:
+    if unprocessed_urls is None:
+        unprocessed_urls = []
     if post_process_type == PostProcessType.NONE:
         return raw_results
     elif post_process_type == PostProcessType.COMBINED:
@@ -480,12 +518,16 @@ def post_process_chain_output(
             post,
             raw_results,
             md_dict,
+            ontology_base,
+            unprocessed_urls,
         )
     elif post_process_type == PostProcessType.FIREBASE:
         combined_results = combine_from_raw_results(
             post,
             raw_results,
             md_dict,
+            ontology_base,
+            unprocessed_urls,
         )
         firebase_results = post_process_firebase(
             combined_results,

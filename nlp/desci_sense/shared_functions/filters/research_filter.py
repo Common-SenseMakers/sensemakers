@@ -36,7 +36,7 @@ topics_whitelist = [
 def apply_research_filter(result: CombinedParserOutput) -> SciFilterClassfication:
     # if any item types on the whitelist, pass automatically
     if len(set(result.item_types).intersection(set(item_types_whitelist))) > 0:
-        return SciFilterClassfication.RESEARCH
+        return SciFilterClassfication.CITOID_DETECTED_RESEARCH
 
     # if item types inconclusive, use scoring system
     score = 0
@@ -56,4 +56,4 @@ def apply_research_filter(result: CombinedParserOutput) -> SciFilterClassficatio
     if score >= 2:
         return SciFilterClassfication.NOT_RESEARCH
     else:
-        return SciFilterClassfication.RESEARCH
+        return SciFilterClassfication.AI_DETECTED_RESEARCH

@@ -26,3 +26,10 @@ def test_scrape_tw_post():
     url = "https://twitter.com/bingbrunton/status/1719789465739333972"
     ref_post = scrape_post(url)
     assert ref_post.ref_urls == ["https://apply.interfolio.com/130336"]
+
+
+def test_unshorten_url_i104():
+    p = """
+  #HigherEd #GenAI: Assessment Reform for the Age of AI: in a nutshell here's the outcome from the @TEQSAGov expert forum 👉Report + HE sector consultation https://www.teqsa.gov.au/About-us/engagement/consultation """
+    ref_post = convert_text_to_ref_post(p)
+    assert ref_post.ref_urls == ['https://www.teqsa.gov.au/About-us/engagement/consultation']

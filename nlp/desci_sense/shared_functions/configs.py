@@ -28,6 +28,12 @@ class ParserChainType(str, Enum):
     MULTI_REF_TAGGER = "multi_reference_tagger"
 
 
+class PostRendererType(str, Enum):
+    REF_POST = "ref_post"
+    QUOTE_REF_POST = "quote_ref_post"
+    THREAD_REF_POST = "thread_ref_post"
+
+
 def validate_env_var(env_var_name: str, value: Union[str, None]):
     """
     If `value` is not `None`, returns `value`.
@@ -133,6 +139,7 @@ class PostParserChainConfig(BaseSettings):
         default=True,
         description="Whether to use reference metadata in the prompt as context",
     )
+    post_renderer: PostRendererType = PostRendererType.REF_POST
 
 
 class KeywordPParserChainConfig(PostParserChainConfig):
