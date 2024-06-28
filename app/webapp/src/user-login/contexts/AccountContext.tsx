@@ -10,6 +10,7 @@ import { _appFetch } from '../../api/app.fetch';
 import { TwitterUserProfile } from '../../shared/types/types.twitter';
 import { AppUserRead, PLATFORM } from '../../shared/types/types.user';
 import { getAccount } from '../user.helper';
+import { LS_TWITTER_CONTEXT_KEY } from './platforms/TwitterContext';
 
 const DEBUG = true;
 
@@ -36,7 +37,6 @@ const AccountContextValue = createContext<AccountContextType | undefined>(
 );
 
 export enum LoginStatus {
-  Unknown = 'Unknown',
   LoggedOut = 'LoggedOut',
   LoggingIn = 'LoggingIn',
   LoggedIn = 'LoggedIn',
@@ -54,12 +54,13 @@ export const AccountContext = (props: PropsWithChildren) => {
     useState<boolean>(false);
 
   const _token = localStorage.getItem(OUR_TOKEN_NAME);
+  const _twitterContext = localStorage.getItem(LS_TWITTER_CONTEXT_KEY);
   const [token, setToken] = useState<string | undefined>(
     _token ? _token : undefined
   );
 
   const [loginStatus, setLoginStatus] = useState<LoginStatus>(
-    LoginStatus.Unknown
+    _twitterContext ? LoginStatus.LoggingIn : LoginStatus.LoggedOut
   );
 
   const [isSettingEmail, setIsSettingEmail] = useState<boolean>(false);

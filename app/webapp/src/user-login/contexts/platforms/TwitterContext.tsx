@@ -23,7 +23,7 @@ import { LoginStatus, useAccountContext } from '../AccountContext';
 
 const DEBUG = false;
 
-const LS_TWITTER_CONTEXT_KEY = 'twitter-signin-context';
+export const LS_TWITTER_CONTEXT_KEY = 'twitter-signin-context';
 
 /** Manages the authentication process with Twitter */
 export type TwitterContextType = {
