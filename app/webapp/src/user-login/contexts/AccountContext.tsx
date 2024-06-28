@@ -92,6 +92,7 @@ export const AccountContext = (props: PropsWithChildren) => {
       }
     } catch (e) {
       disconnect();
+      setLoginStatus(LoginStatus.LoggedOut);
     }
   };
 
