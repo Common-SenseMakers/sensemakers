@@ -453,10 +453,12 @@ export class PostsManager {
     }
 
     /** science filter hack */
-    const reviewedStatus: AppPostReviewStatus =
-      parserResult.filter_classification !== SciFilterClassfication.RESEARCH
-        ? AppPostReviewStatus.IGNORED
-        : AppPostReviewStatus.PENDING;
+    const reviewedStatus: AppPostReviewStatus = [
+      SciFilterClassfication.AI_DETECTED_RESEARCH,
+      SciFilterClassfication.CITOID_DETECTED_RESEARCH,
+    ].includes(parserResult.filter_classification)
+      ? AppPostReviewStatus.PENDING
+      : AppPostReviewStatus.IGNORED;
 
     const update: PostUpdate = {
       semantics: parserResult.semantics,

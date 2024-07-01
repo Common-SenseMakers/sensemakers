@@ -55,11 +55,26 @@ export const UserHome = () => {
   useEffect(() => {
     const error = errorFetchingOlder || errorFetchingNewer;
     if (error) {
+      const message = (() => {
+        const regexCode = /code:\s*(\d+)/;
+        const regexRetry = /retryAfter:\s*(\d+)/;
+        const code = error.message.match(regexCode);
+        const retry = error.message.match(regexRetry);
+
+        if (code && retry !== null) {
+          const retrySeconds = parseInt(retry[1]);
+
+          if (code && retry) {
+            return `Too many requests to Twitter's API. Please retry in ${retrySeconds > 60 ? `${Math.ceil(retrySeconds / 60)} minutes` : `${retrySeconds} seconds`}`;
+          }
+        }
+
+        return error.message;
+      })();
+
       show({
         title: 'Error getting users posts',
-        message: error.message.includes('429')
-          ? "Too many requests to Twitter's API. Please retry in 10-15 minutes"
-          : error.message,
+        message,
       });
     }
   }, [errorFetchingOlder, errorFetchingNewer]);
