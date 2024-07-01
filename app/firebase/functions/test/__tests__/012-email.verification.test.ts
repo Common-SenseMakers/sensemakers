@@ -44,10 +44,33 @@ describe('012-email verification', () => {
       tokenRead = userRead.email?.token;
     });
 
-    it('verifies email', () => {
+    it('wont verify email if wrong token', async () => {
       if (!tokenRead) {
         throw new Error('unexpected');
       }
+
+      try {
+        await services.users.verifyEmail(userId, 'WRONT TOKEN');
+        expect(true, 'verifyEmail did not failed').to.eq(false);
+      } catch (error: any) {
+        expect(error.message).to.include('Token does not match');
+      }
+    });
+
+    it('verifies email', async () => {
+      if (!tokenRead) {
+        throw new Error('unexpected');
+      }
+
+      await services.users.verifyEmail(userId, tokenRead);
+
+      const userRead = await services.db.run(async (manager) =>
+        services.users.repo.getUser(userId, manager, true)
+      );
+
+      expect(userRead.email?.email).to.eq(EMAIL_TEST);
+      expect(userRead.email?.verified).to.eq(true);
+      expect(userRead.email?.token).to.to.not.be.undefined;
     });
   });
 });
