@@ -1,4 +1,4 @@
-import { Anchor, Box, BoxExtendedProps, DropButton, Menu, Text } from 'grommet';
+import { Anchor, Box, BoxExtendedProps, Text } from 'grommet';
 import { Refresh } from 'grommet-icons';
 import { CSSProperties, useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';

@@ -13,6 +13,9 @@ export enum I18Keys {
   emailInputConfirm = 's0094',
   emailInputBtn = 's0095',
 
+  emailConfirmationTitle = 's00910',
+  emailConfirmationSubtitle = 's00920',
+
   connectAccounts = 's010',
   connectParagraph = 's011',
   signInX = 's012',
@@ -48,6 +51,10 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.emailInputConfirm]:
     'I consent to receiving email notifications, including updates relating to my nanopublications (you can edit the frequency in your notification settings).',
   [I18Keys.emailInputBtn]: 'Get started',
+
+  [I18Keys.emailConfirmationTitle]: 'Plase confirm your email address',
+  [I18Keys.emailConfirmationSubtitle]:
+    'We have sent you and email with a special link. Open it to verify your email',
 
   [I18Keys.connectAccounts]: 'Connect your accounts',
   [I18Keys.connectParagraph]:

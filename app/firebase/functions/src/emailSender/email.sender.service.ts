@@ -30,6 +30,15 @@ export class EmailSenderService {
     this.postmark = new postmark.ServerClient(config.apiKey);
   }
 
+  private async callSendEmail(message: Message) {
+    try {
+      const res = await this.postmark.sendEmail(message);
+      logger.debug(`sendDigest - success`, { res }, DEBUG_PREFIX);
+    } catch (e) {
+      logger.error(`sendDigest - error`, { e }, DEBUG_PREFIX);
+    }
+  }
+
   async sendUserDigest(user: AppUser, posts: EmailPostDetails[]) {
     if (!user.email) {
       throw new Error(`User ${user.userId} has no email`);
@@ -44,12 +53,7 @@ export class EmailSenderService {
       MessageStream: 'outbound',
     };
 
-    try {
-      const res = await this.postmark.sendEmail(message);
-      logger.debug(`sendDigest`, { res }, DEBUG_PREFIX);
-    } catch (e) {
-      logger.error(`sendDigest`, { e }, DEBUG_PREFIX);
-    }
+    await this.callSendEmail(message);
   }
 
   async sendVerificationEmail(user: AppUser) {
@@ -66,11 +70,6 @@ export class EmailSenderService {
       MessageStream: 'outbound',
     };
 
-    try {
-      const res = await this.postmark.sendEmail(message);
-      logger.debug(`sendDigest`, { res }, DEBUG_PREFIX);
-    } catch (e) {
-      logger.error(`sendDigest`, { e }, DEBUG_PREFIX);
-    }
+    await this.callSendEmail(message);
   }
 }

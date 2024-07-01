@@ -57,9 +57,7 @@ describe('012-email verification', () => {
 
       expect(capturedUser.userId).to.equal(userId);
       expect(capturedUser.email).to.not.be.undefined;
-
       expect(capturedUser.email?.token).to.not.be.undefined;
-      expect(capturedUser.email).to.not.be.undefined;
     });
 
     it('wont verify email if wrong token', async () => {

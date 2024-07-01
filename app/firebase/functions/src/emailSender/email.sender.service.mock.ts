@@ -1,7 +1,7 @@
+import { Message } from 'postmark';
 import { anything, instance, spy, when } from 'ts-mockito';
 
-import { AppUser } from '../@shared/types/types.user';
-import { EmailPostDetails, EmailSenderService } from './email.sender.service';
+import { EmailSenderService } from './email.sender.service';
 
 export type EmailSenderMockConfig = 'real' | 'spy' | 'mock';
 
@@ -12,6 +12,10 @@ export const getEmailSenderMock = (
   if (type === 'real') {
     return { instance: emailSender };
   }
+
+  type MockedType = Omit<EmailSenderService, 'callSendEmail'> & {
+    callSendEmail: EmailSenderService['callSendEmail'];
+  };
 
   const Mocked = spy(emailSender);
 
@@ -24,10 +28,9 @@ export const getEmailSenderMock = (
   }
 
   /** mock will replace the sendDigest function */
-  when(Mocked.sendUserDigest(anything(), anything())).thenCall(
-    (user: AppUser, posts: EmailPostDetails[]) => {
-      const template = `Your recent posts: ${JSON.stringify(posts)}`; // Email clients support templates that receive some parameters
-      console.log(`Sending email to ${user.userId} with template: ${template}`);
+  when((Mocked as unknown as MockedType).callSendEmail(anything())).thenCall(
+    (message: Message) => {
+      console.log(`Sending email message`, { message });
     }
   );
 

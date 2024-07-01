@@ -139,7 +139,6 @@ export const TwitterContext = (props: PropsWithChildren) => {
           setSearchParams(searchParams);
         }
       }
-      navigate(location.pathname, { replace: true });
     }
   }, [state_param, code_param, error_param, searchParams, setSearchParams]);
 

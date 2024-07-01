@@ -11,6 +11,7 @@ import {
   AppUser,
   AppUserRead,
   AutopostOption,
+  EmailDetails,
   PLATFORM,
   UserSettings,
   UserSettingsUpdate,
@@ -292,12 +293,21 @@ export class UsersService {
   public async getUserProfile(userId: string, manager: TransactionManager) {
     const user = await this.repo.getUser(userId, manager, true);
 
-    /** extract the profile for each account */
+    /** delete the token, from the public profile */
+    const email: EmailDetails | undefined = user.email
+      ? {
+          ...user.email,
+          token: '',
+        }
+      : undefined;
+
     const userRead: AppUserRead = {
       userId,
+      email,
       settings: user.settings,
     };
 
+    /** extract the profile for each account */
     ALL_IDENTITY_PLATFORMS.forEach((platform) => {
       const accounts = UsersHelper.getAccounts(user, platform);
 
@@ -370,7 +380,7 @@ export class UsersService {
 
       await this.repo.setEmail(
         userId,
-        { ...user.email, verified: true },
+        { ...user.email, verified: true, token: '' },
         manager
       );
     });

@@ -29,7 +29,7 @@ export const AppHome = (props: {}) => {
   );
 
   const content = (() => {
-    if (isSigningUp || (isConnected && !email)) {
+    if (isSigningUp || (isConnected && (!email || !email.verified))) {
       return <EmailInput></EmailInput>;
     }
 

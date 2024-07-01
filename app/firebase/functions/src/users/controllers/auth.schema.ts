@@ -45,3 +45,7 @@ export const userSettingsUpdateSchema = object({
 export const emailUpdateSchema = object({
   email: string().email().required(),
 }).noUnknown(true);
+
+export const emailVerificationSchema = object({
+  token: string().required(),
+}).noUnknown(true);
