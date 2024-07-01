@@ -8,6 +8,7 @@ import { NotificationFreq } from '../@shared/types/types.notifications';
 import {
   ALL_IDENTITY_PLATFORMS,
   AccountDetailsRead,
+  AppUser,
   AppUserRead,
   AutopostOption,
   PLATFORM,
@@ -322,6 +323,24 @@ export class UsersService {
     });
   }
 
+  private async setEmailAndNotify(
+    emailStr: string,
+    user: AppUser,
+    manager: TransactionManager
+  ) {
+    const email: AppUserRead['email'] = {
+      email: emailStr,
+      verified: false,
+      token: generateToken(),
+      expire: this.time.now() + EMAIL_VER_TOKEN_EXPIRE,
+    };
+
+    await this.repo.setEmail(user.userId, email, manager);
+
+    const updatedUser = await this.repo.getUser(user.userId, manager, true);
+    await this.emailSender.sendVerificationEmail(updatedUser);
+  }
+
   setEmail(userId: string, emailStr: string) {
     return this.db.run(async (manager) => {
       const user = await this.repo.getUser(userId, manager, true);
@@ -329,15 +348,7 @@ export class UsersService {
         throw new Error('Email already set');
       }
 
-      const email: AppUserRead['email'] = {
-        email: emailStr,
-        verified: false,
-        token: generateToken(),
-        expire: this.time.now() + EMAIL_VER_TOKEN_EXPIRE,
-      };
-      await this.repo.setEmail(userId, email, manager);
-
-      this.emailSender.sendVerificationEmail(user);
+      await this.setEmailAndNotify(emailStr, user, manager);
     });
   }
 
@@ -353,7 +364,8 @@ export class UsersService {
       }
 
       if (user.email.expire < this.time.now()) {
-        throw new Error('Token expired');
+        /** resend verification email if expired */
+        await this.setEmailAndNotify(user.email.email, user, manager);
       }
 
       await this.repo.setEmail(

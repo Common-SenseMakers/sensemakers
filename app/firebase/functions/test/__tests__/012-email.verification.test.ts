@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { anything, capture, verify } from 'ts-mockito';
 
 import { logger } from '../../src/instances/logger';
 import { resetDB } from '../utils/db';
@@ -21,7 +22,7 @@ describe('012-email verification', () => {
     await resetDB();
   });
 
-  describe('verifies email', () => {
+  describe.only('verifies email', () => {
     let tokenRead: string | undefined;
 
     it('signup with twitter', async () => {
@@ -42,6 +43,23 @@ describe('012-email verification', () => {
       expect(userRead.email?.token).to.to.not.be.undefined;
 
       tokenRead = userRead.email?.token;
+
+      /** expect verification to have been sent */
+
+      const emailMock = services.emailMock;
+      if (!emailMock) {
+        throw new Error('notificationsMock not created');
+      }
+
+      verify(emailMock.sendVerificationEmail(anything())).once();
+
+      const [capturedUser] = capture(emailMock.sendVerificationEmail).last();
+
+      expect(capturedUser.userId).to.equal(userId);
+      expect(capturedUser.email).to.not.be.undefined;
+
+      expect(capturedUser.email?.token).to.not.be.undefined;
+      expect(capturedUser.email).to.not.be.undefined;
     });
 
     it('wont verify email if wrong token', async () => {
