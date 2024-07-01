@@ -20,7 +20,11 @@ import { logger } from '../instances/logger';
 import { IdentityServicesMap } from '../platforms/platforms.service';
 import { UsersHelper } from './users.helper';
 import { UsersRepository } from './users.repository';
-import { getPrefixedUserId, getUsernameTag } from './users.utils';
+import {
+  generateToken,
+  getPrefixedUserId,
+  getUsernameTag,
+} from './users.utils';
 
 const DEBUG = false;
 
@@ -285,7 +289,6 @@ export class UsersService {
     /** extract the profile for each account */
     const userRead: AppUserRead = {
       userId,
-      email: user.email,
       settings: user.settings,
     };
 
@@ -314,9 +317,19 @@ export class UsersService {
     });
   }
 
-  updateEmail(userId: string, email: string) {
+  updateEmail(userId: string, emailStr: string) {
     return this.db.run(async (manager) => {
-      await this.repo.updateEmail(userId, email, manager);
+      const user = await this.repo.getUser(userId, manager, true);
+      if (user.email) {
+        throw new Error('Email already set');
+      }
+
+      const email: AppUserRead['email'] = {
+        email: emailStr,
+        verified: false,
+        token: generateToken(),
+      };
+      await this.repo.setEmail(userId, email, manager);
     });
   }
 }

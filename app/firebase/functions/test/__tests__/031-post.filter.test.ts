@@ -114,7 +114,8 @@ describe.skip('031-filter', () => {
             reviewedStatus: AppPostReviewStatus.PENDING,
             republishedStatus: AppPostRepublishedStatus.PENDING,
             originalParsed: {
-              filter_classification: SciFilterClassfication.RESEARCH,
+              filter_classification:
+                SciFilterClassfication.AI_DETECTED_RESEARCH,
               semantics: 'semantics',
             },
             semantics: 'semantics',

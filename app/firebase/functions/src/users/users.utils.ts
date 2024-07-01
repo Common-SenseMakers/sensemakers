@@ -1,3 +1,5 @@
+import { randomBytes } from 'crypto';
+
 import { PLATFORM } from '../@shared/types/types.user';
 
 export function getPrefixedUserId(platform: PLATFORM, user_id: string) {
@@ -13,4 +15,8 @@ export const getUsernameTag = (platformId: PLATFORM) => {
   }
 
   throw new Error('unexpected for now');
+};
+
+export const generateToken = () => {
+  return randomBytes(16).toString('hex'); // generates a 32-character hex string
 };

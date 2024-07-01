@@ -439,9 +439,9 @@ export class UsersRepository {
     return result.docs.map((doc) => doc.id) as string[];
   }
 
-  public async updateEmail(
+  public async setEmail(
     userId: string,
-    email: string,
+    email: AppUser['email'],
     manager: TransactionManager
   ) {
     const ref = await this.getUserRef(userId, manager, true);

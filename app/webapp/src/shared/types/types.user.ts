@@ -97,7 +97,11 @@ export type UserSettingsUpdate = Partial<UserSettings>;
 
 export interface UserWithSettings {
   settings: UserSettings;
-  email?: string;
+  email?: {
+    email: string;
+    verified: boolean;
+    token: string;
+  };
 }
 
 /**
