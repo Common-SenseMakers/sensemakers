@@ -95,13 +95,16 @@ export interface UserSettings {
 
 export type UserSettingsUpdate = Partial<UserSettings>;
 
+export interface EmailDetails {
+  email: string;
+  verified: boolean;
+  token: string;
+  expire: number;
+}
+
 export interface UserWithSettings {
   settings: UserSettings;
-  email?: {
-    email: string;
-    verified: boolean;
-    token: string;
-  };
+  email?: EmailDetails;
 }
 
 /**

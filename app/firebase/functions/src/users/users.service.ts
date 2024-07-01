@@ -14,10 +14,13 @@ import {
   UserSettings,
   UserSettingsUpdate,
 } from '../@shared/types/types.user';
+import { EMAIL_VER_TOKEN_EXPIRE } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
+import { EmailSenderService } from '../emailSender/email.sender.service';
 import { logger } from '../instances/logger';
 import { IdentityServicesMap } from '../platforms/platforms.service';
+import { TimeService } from '../time/time.service';
 import { UsersHelper } from './users.helper';
 import { UsersRepository } from './users.repository';
 import {
@@ -44,6 +47,8 @@ export class UsersService {
     public db: DBInstance,
     public repo: UsersRepository,
     public identityPlatforms: IdentityServicesMap,
+    public time: TimeService,
+    public emailSender: EmailSenderService,
     protected ourToken: OurTokenConfig
   ) {}
 
@@ -317,7 +322,7 @@ export class UsersService {
     });
   }
 
-  updateEmail(userId: string, emailStr: string) {
+  setEmail(userId: string, emailStr: string) {
     return this.db.run(async (manager) => {
       const user = await this.repo.getUser(userId, manager, true);
       if (user.email) {
@@ -328,8 +333,34 @@ export class UsersService {
         email: emailStr,
         verified: false,
         token: generateToken(),
+        expire: this.time.now() + EMAIL_VER_TOKEN_EXPIRE,
       };
       await this.repo.setEmail(userId, email, manager);
+
+      this.emailSender.sendVerificationEmail(user);
+    });
+  }
+
+  verifyEmail(userId: string, token: string) {
+    return this.db.run(async (manager) => {
+      const user = await this.repo.getUser(userId, manager, true);
+      if (!user.email) {
+        throw new Error('Email details not found');
+      }
+
+      if (user.email.token !== token) {
+        throw new Error('Token does not match');
+      }
+
+      if (user.email.expire < this.time.now()) {
+        throw new Error('Token expired');
+      }
+
+      await this.repo.setEmail(
+        userId,
+        { ...user.email, verified: true },
+        manager
+      );
     });
   }
 }

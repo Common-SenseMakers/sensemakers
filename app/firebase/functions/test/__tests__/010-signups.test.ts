@@ -18,7 +18,7 @@ describe('010-signups', () => {
     twitter: 'mock-signup',
     nanopub: 'mock-publish',
     parser: 'mock',
-    notifications: 'spy',
+    emailSender: 'spy',
   });
 
   before(async () => {

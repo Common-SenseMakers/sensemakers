@@ -57,7 +57,7 @@ export const setUserEmail: RequestHandler = async (request, response) => {
       email: string;
     };
 
-    await services.users.updateEmail(userId, emailUpdate.email);
+    await services.users.setEmail(userId, emailUpdate.email);
 
     response.status(200).send({ success: true });
   } catch (error: any) {

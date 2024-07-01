@@ -7,13 +7,13 @@ import { getTestServices } from './test.services';
 
 const EMAIL_TEST = 'cs@sensenets.xyz';
 
-describe.only('012-email verification', () => {
+describe('012-email verification', () => {
   const services = getTestServices({
     time: 'real',
     twitter: 'mock-signup',
     nanopub: 'mock-publish',
     parser: 'mock',
-    notifications: 'spy',
+    emailSender: 'spy',
   });
 
   before(async () => {
@@ -22,12 +22,14 @@ describe.only('012-email verification', () => {
   });
 
   describe('verifies email', () => {
+    let tokenRead: string | undefined;
+
     it('signup with twitter', async () => {
       await handleSignupMock(services);
     });
 
     it('set email', async () => {
-      await services.users.updateEmail(userId, EMAIL_TEST);
+      await services.users.setEmail(userId, EMAIL_TEST);
 
       const userRead = await services.db.run(async (manager) =>
         services.users.repo.getUser(userId, manager, true)
@@ -37,6 +39,15 @@ describe.only('012-email verification', () => {
       expect(userRead.email).to.not.be.undefined;
       expect(userRead.email?.email).to.eq(EMAIL_TEST);
       expect(userRead.email?.verified).to.eq(false);
+      expect(userRead.email?.token).to.to.not.be.undefined;
+
+      tokenRead = userRead.email?.token;
+    });
+
+    it('verifies email', () => {
+      if (!tokenRead) {
+        throw new Error('unexpected');
+      }
     });
   });
 });
