@@ -10,6 +10,7 @@ import { _appFetch } from '../../api/app.fetch';
 import { TwitterUserProfile } from '../../shared/types/types.twitter';
 import { AppUserRead, PLATFORM } from '../../shared/types/types.user';
 import { getAccount } from '../user.helper';
+import { LS_TWITTER_CONTEXT_KEY } from './platforms/TwitterContext';
 
 const DEBUG = true;
 
@@ -27,11 +28,19 @@ export type AccountContextType = {
   refresh: () => void;
   token?: string;
   setToken: (token: string) => void;
+  setLoginStatus: (status: LoginStatus) => void;
+  loginStatus: LoginStatus;
 };
 
 const AccountContextValue = createContext<AccountContextType | undefined>(
   undefined
 );
+
+export enum LoginStatus {
+  LoggedOut = 'LoggedOut',
+  LoggingIn = 'LoggingIn',
+  LoggedIn = 'LoggedIn',
+}
 
 /**
  * Manages the logged-in user. We use JWT tokens to authenticate
@@ -45,8 +54,13 @@ export const AccountContext = (props: PropsWithChildren) => {
     useState<boolean>(false);
 
   const _token = localStorage.getItem(OUR_TOKEN_NAME);
+  const _twitterContext = localStorage.getItem(LS_TWITTER_CONTEXT_KEY);
   const [token, setToken] = useState<string | undefined>(
     _token ? _token : undefined
+  );
+
+  const [loginStatus, setLoginStatus] = useState<LoginStatus>(
+    _token || _twitterContext ? LoginStatus.LoggingIn : LoginStatus.LoggedOut
   );
 
   const [isSettingEmail, setIsSettingEmail] = useState<boolean>(false);
@@ -66,16 +80,20 @@ export const AccountContext = (props: PropsWithChildren) => {
   const refresh = async () => {
     try {
       if (token) {
+        setLoginStatus(LoginStatus.LoggingIn);
         const user = await _appFetch<AppUserRead>('/api/auth/me', {}, token);
+        setLoginStatus(LoginStatus.LoggedIn);
         if (DEBUG) console.log('got connected user', { user });
         setConnectedUser(user);
         setHasTriedFetchingUser(true);
       } else {
         setConnectedUser(null);
-        setHasTriedFetchingUser(true);
+        if (loginStatus === LoginStatus.LoggedIn)
+          setLoginStatus(LoginStatus.LoggedOut);
       }
     } catch (e) {
       disconnect();
+      setLoginStatus(LoginStatus.LoggedOut);
     }
   };
 
@@ -131,6 +149,8 @@ export const AccountContext = (props: PropsWithChildren) => {
         refresh,
         token,
         setToken,
+        setLoginStatus,
+        loginStatus,
       }}>
       {props.children}
     </AccountContextValue.Provider>
