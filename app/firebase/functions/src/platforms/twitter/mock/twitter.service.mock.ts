@@ -39,7 +39,7 @@ export const TEST_THREADS: string[][] = process.env.TEST_THREADS
   ? JSON.parse(process.env.TEST_THREADS as string)
   : [];
 
-export const TWITTER_USER_ID_MOCKS = 'sense_nets_bot';
+export const TWITTER_USER_ID_MOCKS = '1773032135814717440';
 export const TWITTER_USERNAME_MOCKS = 'sense_nets_bot';
 export const TWITTER_NAME_MOCKS = 'SenseNet Bot';
 
@@ -198,29 +198,27 @@ export const getTwitterMock = (
       }
     );
 
-    if (type === 'mock-signup') {
-      when(mocked.getSignupContext(anything(), anything())).thenCall(
-        (
-          userId?: string,
-          params?: TwitterGetContextParams
-        ): TwitterSignupContext => {
-          return {
-            url: `${APP_URL.value()}?code=${TWITTER_USERNAME_MOCKS}&state=testState`,
-            state: 'testState',
-            codeVerifier: 'testCodeVerifier',
-            codeChallenge: '',
-            callback_url: APP_URL.value(),
-            type: 'read',
-          };
-        }
-      );
+    when(mocked.getSignupContext(anything(), anything())).thenCall(
+      (
+        userId?: string,
+        params?: TwitterGetContextParams
+      ): TwitterSignupContext => {
+        return {
+          url: `${APP_URL.value()}?code=${TWITTER_USERNAME_MOCKS}&state=testState`,
+          state: 'testState',
+          codeVerifier: 'testCodeVerifier',
+          codeChallenge: '',
+          callback_url: APP_URL.value(),
+          type: 'read',
+        };
+      }
+    );
 
-      when(mocked.handleSignupData(anything())).thenCall(
-        (data: TwitterUserDetails): TwitterUserDetails => {
-          return data;
-        }
-      );
-    }
+    when(mocked.handleSignupData(anything())).thenCall(
+      (data: TwitterUserDetails): TwitterUserDetails => {
+        return data;
+      }
+    );
 
     return instance(mocked) as unknown as TwitterService;
   }
