@@ -7,6 +7,7 @@ import isEmail from 'validator/lib/isEmail';
 import { useAppFetch } from '../api/app.fetch';
 import { AppLogo } from '../app/brand/AppLogo';
 import { I18Keys } from '../i18n/i18n';
+import { EMAIL_VERIFY_TOKEN_NAME } from '../shared/types/types.user';
 import {
   AppButton,
   AppHeading,
@@ -20,6 +21,7 @@ import { useAccountContext } from './contexts/AccountContext';
 export const EmailInput = (props: {}) => {
   const [emailInput, setEmailInput] = useState<string>('');
   const [invalidEmail, setInvalidEmail] = useState<boolean>(false);
+  const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const { email } = useAccountContext();
 
   const { setEmail, isSettingEmail, isConnected, refresh } =
@@ -28,19 +30,28 @@ export const EmailInput = (props: {}) => {
 
   const appFetch = useAppFetch();
   const [searchParams, setSearchParams] = useSearchParams();
-  const emailVerify_param = searchParams.get('verifyEmailToken');
+  const emailVerify_param = searchParams.get(EMAIL_VERIFY_TOKEN_NAME);
 
   useEffect(() => {
-    if (isConnected && emailVerify_param) {
+    if (isConnected && emailVerify_param && !isVerifying) {
+      setIsVerifying(true);
       appFetch(`/api/auth/verifyEmail?`, { token: emailVerify_param }).then(
         () => {
-          searchParams.delete('verifyEmailToken');
+          searchParams.delete(EMAIL_VERIFY_TOKEN_NAME);
           setSearchParams(searchParams);
+          setIsVerifying(false);
           refresh();
         }
       );
     }
-  }, [emailVerify_param, searchParams]);
+  }, [
+    emailVerify_param,
+    searchParams,
+    isVerifying,
+    isConnected,
+    setSearchParams,
+    appFetch,
+  ]);
 
   const _setEmail = () => {
     if (!isEmail(emailInput)) {

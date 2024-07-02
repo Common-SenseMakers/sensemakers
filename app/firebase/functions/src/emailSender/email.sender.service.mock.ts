@@ -30,7 +30,7 @@ export const getEmailSenderMock = (
   /** mock will replace the sendDigest function */
   when((Mocked as unknown as MockedType).callSendEmail(anything())).thenCall(
     (message: Message) => {
-      console.log(`Sending email message`, { message });
+      console.log(`Mocked sending email message`, { message });
     }
   );
 

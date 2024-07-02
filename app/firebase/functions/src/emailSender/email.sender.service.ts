@@ -1,6 +1,6 @@
 import { Message, ServerClient } from 'postmark';
 
-import { AppUser } from '../@shared/types/types.user';
+import { AppUser, EMAIL_VERIFY_TOKEN_NAME } from '../@shared/types/types.user';
 import { APP_URL } from '../config/config.runtime';
 import { logger } from '../instances/logger';
 
@@ -61,7 +61,7 @@ export class EmailSenderService {
       throw new Error(`User ${user.userId} has no email`);
     }
 
-    const link = `${APP_URL}/verify-email?token=${user.email?.token}`;
+    const link = `${APP_URL.value()}?${EMAIL_VERIFY_TOKEN_NAME}=${user.email?.token}`;
     const message: Message = {
       From: 'pepo@microrevolutions.com',
       To: user.email?.email,

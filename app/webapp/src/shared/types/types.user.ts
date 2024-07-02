@@ -147,3 +147,5 @@ export interface UserPlatformProfile {
   user_id: string;
   profile: any;
 }
+
+export const EMAIL_VERIFY_TOKEN_NAME = 'verifyEmailToken';
