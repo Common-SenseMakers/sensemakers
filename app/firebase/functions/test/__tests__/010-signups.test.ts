@@ -4,12 +4,21 @@ import {
   NanopubUserProfile,
   NanupubSignupData,
 } from '../../src/@shared/types/types.nanopubs';
+import {
+  TwitterUserDetails,
+  TwitterUserProfile,
+} from '../../src/@shared/types/types.twitter';
 import { PLATFORM } from '../../src/@shared/types/types.user';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { logger } from '../../src/instances/logger';
+import {
+  TWITTER_NAME_MOCKS,
+  TWITTER_USERNAME_MOCKS,
+  TWITTER_USER_ID_MOCKS,
+} from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { resetDB } from '../utils/db';
 import { getNanopubProfile } from '../utils/nanopub.profile';
-import { handleSignupMock, userId } from './reusable/mocked.singup';
+import { handleSignupMock } from './reusable/mocked.singup';
 import { getTestServices } from './test.services';
 
 describe('010-signups', () => {
@@ -35,8 +44,21 @@ describe('010-signups', () => {
   });
 
   describe('signup with mocked twitter', () => {
+    let userId: string;
+
     it('signup with twitter', async () => {
-      await handleSignupMock(services);
+      const TWITTER_PROFILE: TwitterUserProfile = {
+        id: TWITTER_USER_ID_MOCKS,
+        name: TWITTER_NAME_MOCKS,
+        username: TWITTER_USERNAME_MOCKS,
+      };
+
+      const signupData: TwitterUserDetails = {
+        user_id: TWITTER_USER_ID_MOCKS,
+        profile: TWITTER_PROFILE,
+        signupDate: Date.now(),
+      };
+      userId = await handleSignupMock(services, signupData);
     });
 
     describe('connect nanopub account', () => {

@@ -1,9 +1,21 @@
 import { expect } from 'chai';
 import { anything, capture, verify } from 'ts-mockito';
 
+import {
+  TwitterUserDetails,
+  TwitterUserProfile,
+} from '../../src/@shared/types/types.twitter';
 import { logger } from '../../src/instances/logger';
+import {
+  TWITTER_NAME_MOCKS,
+  TWITTER_NAME_MOCKS2,
+  TWITTER_USERNAME_MOCKS,
+  TWITTER_USERNAME_MOCKS2,
+  TWITTER_USER_ID_MOCKS,
+  TWITTER_USER_ID_MOCKS2,
+} from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { resetDB } from '../utils/db';
-import { handleSignupMock, userId } from './reusable/mocked.singup';
+import { handleSignupMock } from './reusable/mocked.singup';
 import { getTestServices } from './test.services';
 
 const EMAIL_TEST = 'cs@sensenets.xyz';
@@ -24,9 +36,35 @@ describe('012-email verification', () => {
 
   describe.only('verifies email', () => {
     let tokenRead: string | undefined;
+    let userId: string;
+    let userId2: string;
 
     it('signup with twitter', async () => {
-      await handleSignupMock(services);
+      const TWITTER_PROFILE: TwitterUserProfile = {
+        id: TWITTER_USER_ID_MOCKS,
+        name: TWITTER_NAME_MOCKS,
+        username: TWITTER_USERNAME_MOCKS,
+      };
+
+      const signupData: TwitterUserDetails = {
+        user_id: TWITTER_USER_ID_MOCKS,
+        profile: TWITTER_PROFILE,
+        signupDate: Date.now(),
+      };
+
+      userId = await handleSignupMock(services, signupData);
+
+      const signupData2: TwitterUserDetails = {
+        user_id: TWITTER_USER_ID_MOCKS2,
+        profile: {
+          id: TWITTER_USER_ID_MOCKS2,
+          name: TWITTER_NAME_MOCKS2,
+          username: TWITTER_USERNAME_MOCKS2,
+        },
+        signupDate: Date.now(),
+      };
+
+      userId2 = await handleSignupMock(services, signupData2);
     });
 
     it('set email', async () => {
@@ -87,6 +125,17 @@ describe('012-email verification', () => {
       expect(userRead.email?.email).to.eq(EMAIL_TEST);
       expect(userRead.email?.verified).to.eq(true);
       expect(userRead.email?.token).to.to.not.be.undefined;
+    });
+
+    it('wont set existing verified email', async () => {
+      try {
+        await services.users.setEmail(userId2, EMAIL_TEST);
+        expect(true, 'setEmail did not failed').to.eq(false);
+      } catch (error: any) {
+        expect(error.message).to.include(
+          `User with email ${EMAIL_TEST} already exist`
+        );
+      }
     });
   });
 });

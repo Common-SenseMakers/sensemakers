@@ -35,14 +35,18 @@ export const EmailInput = (props: {}) => {
   useEffect(() => {
     if (isConnected && emailVerify_param && !isVerifying) {
       setIsVerifying(true);
-      appFetch(`/api/auth/verifyEmail?`, { token: emailVerify_param }).then(
-        () => {
+
+      appFetch(`/api/auth/verifyEmail?`, { token: emailVerify_param })
+        .then(() => {
           searchParams.delete(EMAIL_VERIFY_TOKEN_NAME);
           setSearchParams(searchParams);
           setIsVerifying(false);
           refresh();
-        }
-      );
+        })
+        .catch((e) => {
+          console.error(e);
+          setIsVerifying(false);
+        });
     }
   }, [
     emailVerify_param,
@@ -103,6 +107,7 @@ export const EmailInput = (props: {}) => {
             </AppHeading>
             <Box width="100%" height="4px"></Box>
             <AppSubtitle>{t(I18Keys.emailConfirmationSubtitle)}</AppSubtitle>
+            {isVerifying ? <Text>Verifying...</Text> : <></>}
           </>
         );
       }

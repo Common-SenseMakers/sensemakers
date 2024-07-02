@@ -6,6 +6,7 @@ import {
   AppUserCreate,
   AutopostOption,
   DefinedIfTrue,
+  EmailDetails,
   FetchedDetails,
   PLATFORM,
   UserDetailsBase,
@@ -422,8 +423,9 @@ export class UsersRepository {
     });
   }
 
-  public async getWithNotificationFrequency(
-    notificationFrequency: NotificationFreq
+  public async getByNotificationFreq(
+    notificationFrequency: NotificationFreq,
+    manager: TransactionManager
   ) {
     const settingsKey: keyof AppUser = 'settings';
     const notificationFrequencyKey: keyof UserSettings = 'notificationFreq';
@@ -434,9 +436,39 @@ export class UsersRepository {
       notificationFrequency
     );
 
-    const result = await query.get();
+    const result = await manager.query(query);
 
     return result.docs.map((doc) => doc.id) as string[];
+  }
+
+  public async getByEmail<T extends boolean, R = string>(
+    email: string,
+    manager: TransactionManager,
+    _shouldThrow?: boolean
+  ) {
+    const emailKey: keyof AppUser = 'email';
+    const emailStrKey: keyof EmailDetails = 'email';
+    const verifiedKey: keyof EmailDetails = 'verified';
+
+    const query = this.db.collections.users
+      .where(`${emailKey}.${emailStrKey}`, '==', email)
+      .where(`${emailKey}.${verifiedKey}`, '==', true);
+
+    const users = await manager.query(query);
+
+    const shouldThrow = _shouldThrow !== undefined ? _shouldThrow : false;
+
+    if (users.empty) {
+      if (shouldThrow) throw new Error(`User with email:${email} not found`);
+      else return undefined as DefinedIfTrue<T, R>;
+    }
+
+    const doc = users.docs[0];
+
+    return {
+      id: doc.id,
+      ...doc.data(),
+    } as unknown as DefinedIfTrue<T, R>;
   }
 
   public async setEmail(
@@ -444,6 +476,14 @@ export class UsersRepository {
     email: AppUser['email'],
     manager: TransactionManager
   ) {
+    if (!email) {
+      throw new Error(`Email details expected`);
+    }
+    const existing = await this.getByEmail(email.email, manager);
+    if (existing) {
+      throw new Error(`User with email ${email.email} already exist`);
+    }
+
     const ref = await this.getUserRef(userId, manager, true);
     manager.update(ref, { email });
   }
