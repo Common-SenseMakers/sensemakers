@@ -19,8 +19,7 @@ export const TEST_USERS_FILE_PATH = './test/__tests__/test.users.json';
 export const USE_REAL_TWITTER = process.env.USE_REAL_TWITTERX === 'true';
 export const USE_REAL_NANOPUB = process.env.USE_REAL_NANOPUB === 'true';
 export const USE_REAL_PARSER = process.env.USE_REAL_PARSER === 'true';
-export const USE_REAL_NOTIFICATIONS =
-  process.env.USE_REAL_NOTIFICATIONS === 'true';
+export const USE_REAL_EMAIL = process.env.USE_REAL_EMAIL === 'true';
 
 export type InjectableContext = Readonly<{
   // properties injected using the Root Mocha Hooks
@@ -36,7 +35,7 @@ export const mochaHooks = (): Mocha.RootHookObject => {
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
-    notifications: USE_REAL_NOTIFICATIONS ? 'spy' : 'mock',
+    emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
   });
 
   return {

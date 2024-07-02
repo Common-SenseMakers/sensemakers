@@ -20,10 +20,10 @@ export const triggerSendNotifications = async (
   services: Services
 ) => {
   logger.debug(`triggerSendNotifications`);
-  const { users } = services;
+  const { users, db } = services;
 
-  const usersIdsWithFrequency = await users.repo.getWithNotificationFrequency(
-    notificationFrequency
+  const usersIdsWithFrequency = await db.run((manager) =>
+    users.repo.getByNotificationFreq(notificationFrequency, manager)
   );
 
   logger.debug(`number of users: ${usersIdsWithFrequency.length}`, undefined);

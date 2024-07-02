@@ -11,7 +11,6 @@ import {
   TwitterDraft,
   TwitterGetContextParams,
   TwitterSignupContext,
-  TwitterSignupData,
   TwitterThread,
   TwitterUserDetails,
 } from '../../../@shared/types/types.twitter';
@@ -43,6 +42,10 @@ export const TEST_THREADS: string[][] = process.env.TEST_THREADS
 export const TWITTER_USER_ID_MOCKS = 'sense_nets_bot';
 export const TWITTER_USERNAME_MOCKS = 'sense_nets_bot';
 export const TWITTER_NAME_MOCKS = 'SenseNet Bot';
+
+export const TWITTER_USER_ID_MOCKS2 = 'sensemakergod';
+export const TWITTER_USERNAME_MOCKS2 = 'sensemakergod';
+export const TWITTER_NAME_MOCKS2 = 'Sensmaker God';
 
 const getSampleTweet = (
   id: string,
@@ -213,18 +216,8 @@ export const getTwitterMock = (
       );
 
       when(mocked.handleSignupData(anything())).thenCall(
-        (data: TwitterSignupData): TwitterUserDetails => {
-          return {
-            user_id: TWITTER_USER_ID_MOCKS,
-            signupDate: Date.now(),
-            profile: {
-              id: TWITTER_USER_ID_MOCKS,
-              name: TWITTER_NAME_MOCKS,
-              username: TWITTER_USERNAME_MOCKS,
-              profile_image_url:
-                'https://pbs.twimg.com/profile_images/1753077803258449920/2vI5Y2Wx_normal.png',
-            },
-          };
+        (data: TwitterUserDetails): TwitterUserDetails => {
+          return data;
         }
       );
     }

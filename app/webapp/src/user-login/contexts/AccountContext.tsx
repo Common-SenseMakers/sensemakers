@@ -5,10 +5,15 @@ import {
   useEffect,
   useState,
 } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
-import { _appFetch } from '../../api/app.fetch';
+import { _appFetch, useAppFetch } from '../../api/app.fetch';
 import { TwitterUserProfile } from '../../shared/types/types.twitter';
-import { AppUserRead, PLATFORM } from '../../shared/types/types.user';
+import {
+  AppUserRead,
+  EmailDetails,
+  PLATFORM,
+} from '../../shared/types/types.user';
 import { getAccount } from '../user.helper';
 
 const DEBUG = true;
@@ -20,7 +25,7 @@ export type AccountContextType = {
   hasTriedFetchingUser: boolean;
   isConnected: boolean;
   twitterProfile?: TwitterUserProfile;
-  email?: string;
+  email?: EmailDetails;
   setEmail: (email: string) => void;
   isSettingEmail: boolean;
   disconnect: () => void;
@@ -116,6 +121,8 @@ export const AccountContext = (props: PropsWithChildren) => {
     : undefined;
 
   const email = connectedUser ? connectedUser.email : undefined;
+
+  console.log({ email, connectedUser });
 
   return (
     <AccountContextValue.Provider

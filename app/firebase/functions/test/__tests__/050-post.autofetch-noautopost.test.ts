@@ -13,7 +13,7 @@ import {
 } from '../../src/@shared/types/types.posts';
 import { TwitterThread } from '../../src/@shared/types/types.twitter';
 import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
-import { USE_REAL_NOTIFICATIONS } from '../../src/config/config.runtime';
+import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
 import { TEST_THREADS } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { triggerAutofetchPosts } from '../../src/posts/tasks/posts.autofetch.task';
@@ -35,7 +35,7 @@ describe('050-autofetch-no-autopost', () => {
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
-    notifications: USE_REAL_NOTIFICATIONS ? 'spy' : 'mock',
+    emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
   });
 
   before(async () => {

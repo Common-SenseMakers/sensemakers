@@ -15,7 +15,7 @@ import {
   PostsQueryStatus,
 } from '../../src/@shared/types/types.posts';
 import { PLATFORM } from '../../src/@shared/types/types.user';
-import { USE_REAL_NOTIFICATIONS } from '../../src/config/config.runtime';
+import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
 import { resetDB } from '../utils/db';
 import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
@@ -27,7 +27,7 @@ describe.skip('031-filter', () => {
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
-    notifications: USE_REAL_NOTIFICATIONS ? 'spy' : 'mock',
+    emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
   });
 
   before(async () => {
@@ -114,7 +114,8 @@ describe.skip('031-filter', () => {
             reviewedStatus: AppPostReviewStatus.PENDING,
             republishedStatus: AppPostRepublishedStatus.PENDING,
             originalParsed: {
-              filter_classification: SciFilterClassfication.RESEARCH,
+              filter_classification:
+                SciFilterClassfication.AI_DETECTED_RESEARCH,
               semantics: 'semantics',
             },
             semantics: 'semantics',

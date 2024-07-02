@@ -17,8 +17,8 @@ import {
 } from './reusable/create-post-fetch';
 import { updateUserSettings } from './reusable/update.settings';
 import {
+  USE_REAL_EMAIL,
   USE_REAL_NANOPUB,
-  USE_REAL_NOTIFICATIONS,
   USE_REAL_PARSER,
   USE_REAL_TWITTER,
 } from './setup';
@@ -33,7 +33,7 @@ describe('060-send-digest-no-autpost', () => {
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
-    notifications: USE_REAL_NOTIFICATIONS ? 'spy' : 'mock',
+    emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
   });
 
   before(async () => {
@@ -92,18 +92,18 @@ describe('060-send-digest-no-autpost', () => {
       });
 
       /** check that the send digest was called with the posts contents */
-      const notificationsMock = services.notificationsMock;
-      if (!notificationsMock) {
+      const emailMock = services.emailMock;
+      if (!emailMock) {
         throw new Error('notificationsMock not created');
       }
 
-      verify(notificationsMock.sendDigest(anything(), anything())).once();
+      verify(emailMock.sendUserDigest(anything(), anything())).once();
 
-      const [capturedUserId, capturedPosts] = capture(
-        notificationsMock.sendDigest
+      const [capturedUser, capturedPosts] = capture(
+        emailMock.sendUserDigest
       ).last();
 
-      expect(capturedUserId).to.equal(userId);
+      expect(capturedUser.userId).to.equal(userId);
       expect(capturedPosts).to.have.length(3);
 
       const expectedContents = threads.map((thread) => {

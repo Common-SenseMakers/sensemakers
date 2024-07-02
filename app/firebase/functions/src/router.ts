@@ -14,6 +14,7 @@ import {
   getLoggedUserController,
   setUserEmail,
   setUserSettingsController,
+  verifyEmailController,
 } from './users/controllers/logged.user.controller';
 import {
   getSignupContextController,
@@ -27,6 +28,7 @@ router.post('/auth/:platform/signup', handleSignupController);
 router.post('/auth/settings', setUserSettingsController);
 router.post('/auth/me', getLoggedUserController);
 router.post('/auth/setEmail', setUserEmail);
+router.post('/auth/verifyEmail', verifyEmailController);
 
 router.post('/users/profile', getUserProfileController);
 

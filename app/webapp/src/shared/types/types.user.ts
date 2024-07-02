@@ -95,9 +95,16 @@ export interface UserSettings {
 
 export type UserSettingsUpdate = Partial<UserSettings>;
 
+export interface EmailDetails {
+  email: string;
+  verified: boolean;
+  token: string;
+  expire: number;
+}
+
 export interface UserWithSettings {
   settings: UserSettings;
-  email?: string;
+  email?: EmailDetails;
 }
 
 /**
@@ -140,3 +147,5 @@ export interface UserPlatformProfile {
   user_id: string;
   profile: any;
 }
+
+export const EMAIL_VERIFY_TOKEN_NAME = 'verifyEmailToken';
