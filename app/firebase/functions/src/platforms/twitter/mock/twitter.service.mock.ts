@@ -14,8 +14,11 @@ import {
   TwitterThread,
   TwitterUserDetails,
 } from '../../../@shared/types/types.twitter';
-import { UserDetailsBase } from '../../../@shared/types/types.user';
-import { APP_URL } from '../../../config/config.runtime';
+import {
+  TestUserCredentials,
+  UserDetailsBase,
+} from '../../../@shared/types/types.user';
+import { APP_URL, USE_REAL_TWITTERX } from '../../../config/config.runtime';
 import { TransactionManager } from '../../../db/transaction.manager';
 import { logger } from '../../../instances/logger';
 import { TwitterService } from '../twitter.service';
@@ -39,13 +42,20 @@ export const TEST_THREADS: string[][] = process.env.TEST_THREADS
   ? JSON.parse(process.env.TEST_THREADS as string)
   : [];
 
-export const TWITTER_USER_ID_MOCKS = '1773032135814717440';
-export const TWITTER_USERNAME_MOCKS = 'sense_nets_bot';
-export const TWITTER_NAME_MOCKS = 'SenseNet Bot';
+export let testAccountsCredentials: TestUserCredentials[] = [];
 
-export const TWITTER_USER_ID_MOCKS2 = 'sensemakergod';
-export const TWITTER_USERNAME_MOCKS2 = 'sensemakergod';
-export const TWITTER_NAME_MOCKS2 = 'Sensmaker God';
+if (!USE_REAL_TWITTERX.value()) {
+  testAccountsCredentials = JSON.parse(
+    process.env.TEST_USER_ACCOUNTS as string
+  );
+
+  if (!testAccountsCredentials) {
+    throw new Error('test acccounts undefined');
+  }
+  if (testAccountsCredentials.length < 1) {
+    throw new Error('not enough twitter account credentials provided');
+  }
+}
 
 const getSampleTweet = (
   id: string,
@@ -81,6 +91,8 @@ const getSampleTweet = (
   };
 };
 
+const testUser = testAccountsCredentials[0];
+
 export const initThreads = () => {
   const now = Date.now();
 
@@ -91,7 +103,7 @@ export const initThreads = () => {
       state.latestTweetId = idTweet;
       return getSampleTweet(
         idTweet.toString().padStart(5, '0'),
-        TWITTER_USER_ID_MOCKS,
+        testUser.twitter.id,
         createdAt,
         ixThread.toString().padStart(5, '0'),
         content
@@ -102,9 +114,9 @@ export const initThreads = () => {
       conversation_id: `${ixThread}`,
       tweets,
       author: {
-        id: TWITTER_USER_ID_MOCKS,
-        name: TWITTER_NAME_MOCKS,
-        username: TWITTER_USERNAME_MOCKS,
+        id: testUser.twitter.id,
+        name: testUser.twitter.username,
+        username: testUser.twitter.username,
       },
     };
   });
@@ -155,9 +167,9 @@ export const getTwitterMock = (
           conversation_id: (++state.latestConvId).toString(),
           tweets: [convertToAppTweetBase(tweet.data)],
           author: {
-            id: TWITTER_USER_ID_MOCKS,
-            name: TWITTER_NAME_MOCKS,
-            username: TWITTER_USERNAME_MOCKS,
+            id: testUser.twitter.id,
+            name: testUser.twitter.username,
+            username: testUser.twitter.username,
           },
         };
 
@@ -204,7 +216,7 @@ export const getTwitterMock = (
         params?: TwitterGetContextParams
       ): TwitterSignupContext => {
         return {
-          url: `${APP_URL.value()}?code=${TWITTER_USERNAME_MOCKS}&state=testState`,
+          url: `${APP_URL.value()}?code=testCode&state=testState`,
           state: 'testState',
           codeVerifier: 'testCodeVerifier',
           codeChallenge: '',

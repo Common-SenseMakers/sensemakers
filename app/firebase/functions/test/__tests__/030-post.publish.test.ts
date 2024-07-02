@@ -5,8 +5,10 @@ import {
   PlatformPostSignerType,
 } from '../../src/@shared/types/types.platform.posts';
 import {
+  AppPostFull,
   AppPostRepublishedStatus,
   AppPostReviewStatus,
+  GenericThread,
   PostsQueryStatus,
 } from '../../src/@shared/types/types.posts';
 import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
@@ -261,9 +263,15 @@ describe.only('030-process', () => {
         };
       });
 
-      const newPost = {
-        ...post,
+      const newGeneric: GenericThread = {
+        author: post.generic.author,
+        url: post.generic.url,
         thread: newThread,
+      };
+
+      const newPost: AppPostFull = {
+        ...post,
+        generic: newGeneric,
       };
 
       /** send updated post (content and semantics did not changed) */

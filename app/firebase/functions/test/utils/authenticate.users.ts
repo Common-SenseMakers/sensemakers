@@ -1,4 +1,9 @@
-import { AppUser, HexStr, PLATFORM } from '../../src/@shared/types/types.user';
+import {
+  AppUser,
+  NanopubAccountCredentials,
+  PLATFORM,
+  TestUserCredentials,
+} from '../../src/@shared/types/types.user';
 import { TransactionManager } from '../../src/db/transaction.manager';
 import { Services } from '../../src/instances/services';
 import { getPrefixedUserId } from '../../src/users/users.utils';
@@ -6,28 +11,6 @@ import { handleSignupMock } from '../__tests__/reusable/mocked.singup';
 import { USE_REAL_TWITTER } from '../__tests__/setup';
 import { authenticateTwitterUser } from './authenticate.twitter';
 import { getNanopubProfile } from './nanopub.profile';
-
-export interface TwitterAccountCredentials {
-  id: string;
-  username: string;
-  password: string;
-  type: 'read' | 'write';
-}
-
-export interface OrcidAccountCredentials {
-  username: string;
-  password: string;
-}
-
-export interface NanopubAccountCredentials {
-  ethPrivateKey: HexStr;
-}
-
-export interface TestUserCredentials {
-  userId: string;
-  twitter: TwitterAccountCredentials;
-  nanopub: NanopubAccountCredentials;
-}
 
 export const authenticateTestUsers = async (
   credentials: TestUserCredentials[],
