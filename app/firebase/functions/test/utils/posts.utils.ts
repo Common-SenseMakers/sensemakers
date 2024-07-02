@@ -22,17 +22,25 @@ export const getMockPost = (refPost: Partial<AppPostFull>) => {
   const authorId = refPost.authorId || 'test-author-id';
   const createdAtMs = refPost.createdAtMs || Date.now();
 
-  const defaultThread: GenericThread['thread'] = [
-    {
-      content: 'test content',
+  const defaultGeneric: GenericThread = {
+    thread: [
+      {
+        content: 'test content',
+      },
+    ],
+    author: {
+      id: '123456',
+      name: 'test author',
+      platformId: PLATFORM.Twitter,
+      username: 'test_author',
     },
-  ];
+  };
 
   const post: AppPostFull = {
     id: refPost.id || 'post-id',
     createdAtMs: createdAtMs,
     authorId: authorId,
-    thread: refPost.thread || defaultThread,
+    generic: refPost.generic || defaultGeneric,
     semantics: refPost.semantics || '',
     origin: PLATFORM.Twitter,
     parsedStatus: AppPostParsedStatus.PROCESSED,

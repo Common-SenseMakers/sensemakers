@@ -22,7 +22,7 @@ export const createNanopublication = async (
   user: AppUser
 ) => {
   const semantics = post.semantics;
-  const content = PostsHelper.concatenateThread(post);
+  const content = PostsHelper.concatenateThread(post.generic);
   const twitter = UsersHelper.getAccount(
     user,
     PLATFORM.Twitter,

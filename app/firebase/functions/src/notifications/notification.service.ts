@@ -163,7 +163,7 @@ export class NotificationService {
         true
       );
 
-      const postText = PostsHelper.concatenateThread(post);
+      const postText = PostsHelper.concatenateThread(post.generic);
 
       return {
         content: postText,

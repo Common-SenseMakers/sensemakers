@@ -24,7 +24,18 @@ export const USE_REAL_EMAIL = process.env.USE_REAL_EMAIL === 'true';
 export type InjectableContext = Readonly<{
   // properties injected using the Root Mocha Hooks
 }>;
-export let testUsers: Map<string, AppUser> = new Map();
+export let testUsers: AppUser[] = [];
+
+export const testAccountsCredentials: TestUserCredentials[] = JSON.parse(
+  process.env.TEST_USER_ACCOUNTS as string
+);
+
+if (!testAccountsCredentials) {
+  throw new Error('test acccounts undefined');
+}
+if (testAccountsCredentials.length < NUM_TEST_USERS) {
+  throw new Error('not enough twitter account credentials provided');
+}
 
 // TestContext will be used by all the test
 export type TestContext = Mocha.Context & Context;
@@ -52,16 +63,6 @@ export const mochaHooks = (): Mocha.RootHookObject => {
 
       /** prepare/authenticate users  */
       await services.db.run(async (manager) => {
-        const testAccountsCredentials: TestUserCredentials[] = JSON.parse(
-          process.env.TEST_USER_ACCOUNTS as string
-        );
-        if (!testAccountsCredentials) {
-          throw new Error('test acccounts undefined');
-        }
-        if (testAccountsCredentials.length < NUM_TEST_USERS) {
-          throw new Error('not enough twitter account credentials provided');
-        }
-
         await Promise.all(
           testAccountsCredentials.map(async (accountCredentials) => {
             const user = await authenticateTestUser(
@@ -69,7 +70,7 @@ export const mochaHooks = (): Mocha.RootHookObject => {
               services,
               manager
             );
-            testUsers.set(user.userId, user);
+            testUsers.push(user);
           })
         );
       });

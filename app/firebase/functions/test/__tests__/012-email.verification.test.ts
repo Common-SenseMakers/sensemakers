@@ -34,7 +34,7 @@ describe('012-email verification', () => {
     await resetDB();
   });
 
-  describe.only('verifies email', () => {
+  describe('verifies email', () => {
     let tokenRead: string | undefined;
     let userId: string;
     let userId2: string;

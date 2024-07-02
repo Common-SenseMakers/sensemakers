@@ -12,6 +12,7 @@ import {
   AppPostParsingStatus,
   AppPostRepublishedStatus,
   AppPostReviewStatus,
+  GenericThread,
   PostsQueryStatus,
 } from '../../src/@shared/types/types.posts';
 import { PLATFORM } from '../../src/@shared/types/types.user';
@@ -20,6 +21,22 @@ import { logger } from '../../src/instances/logger';
 import { resetDB } from '../utils/db';
 import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
 import { getTestServices } from './test.services';
+
+const defaultGeneric = (text: string): GenericThread => {
+  return {
+    thread: [
+      {
+        content: 'test content',
+      },
+    ],
+    author: {
+      id: '123456',
+      name: 'test author',
+      platformId: PLATFORM.Twitter,
+      username: 'test_author',
+    },
+  };
+};
 
 describe.skip('031-filter', () => {
   const services = getTestServices({
@@ -42,7 +59,7 @@ describe.skip('031-filter', () => {
         /** Published posts */
         [
           {
-            thread: [{ content: 'test content 1' }],
+            generic: defaultGeneric('test content 1'),
             authorId: 'test-user-id',
             origin: PLATFORM.Nanopub,
             createdAtMs: 12345678,
@@ -62,7 +79,7 @@ describe.skip('031-filter', () => {
         /** Ignored posts */
         [
           {
-            thread: [{ content: 'test content 2' }],
+            generic: defaultGeneric('test content 2'),
             authorId: 'test-user-id',
             origin: PLATFORM.Nanopub,
             createdAtMs: 12345678,
@@ -81,7 +98,7 @@ describe.skip('031-filter', () => {
         ],
         [
           {
-            thread: [{ content: 'test content 3' }],
+            generic: defaultGeneric('test content 3'),
             authorId: 'test-user-id',
             origin: PLATFORM.Nanopub,
             createdAtMs: 12345678,
@@ -105,7 +122,7 @@ describe.skip('031-filter', () => {
         /** For review posts */
         [
           {
-            thread: [{ content: 'test content 4' }],
+            generic: defaultGeneric('test content 4'),
             authorId: 'test-user-id',
             origin: PLATFORM.Nanopub,
             createdAtMs: 12345678,
@@ -140,6 +157,7 @@ describe.skip('031-filter', () => {
         });
       });
     });
+
     it('gets all posts from a user', async () => {
       const posts = await services.postsManager.getOfUser('test-user-id', {
         status: PostsQueryStatus.ALL,
@@ -147,6 +165,7 @@ describe.skip('031-filter', () => {
       });
       expect(posts).to.have.length(4);
     });
+
     it('gets all published posts from a user', async () => {
       const posts = await services.postsManager.getOfUser('test-user-id', {
         status: PostsQueryStatus.PUBLISHED,
@@ -154,6 +173,7 @@ describe.skip('031-filter', () => {
       });
       expect(posts).to.have.length(1);
     });
+
     it('gets all for review posts from a user', async () => {
       const posts = await services.postsManager.getOfUser('test-user-id', {
         status: PostsQueryStatus.PENDING,
@@ -161,6 +181,7 @@ describe.skip('031-filter', () => {
       });
       expect(posts).to.have.length(1);
     });
+
     it('gets all ignored posts from a user', async () => {
       const posts = await services.postsManager.getOfUser('test-user-id', {
         status: PostsQueryStatus.IGNORED,

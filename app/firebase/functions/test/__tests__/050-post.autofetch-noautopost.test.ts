@@ -23,7 +23,12 @@ import {
   _02_publishTweet,
 } from './reusable/create-post-fetch';
 import { updateUserSettings } from './reusable/update.settings';
-import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
+import {
+  USE_REAL_NANOPUB,
+  USE_REAL_PARSER,
+  USE_REAL_TWITTER,
+  testAccountsCredentials,
+} from './setup';
 import { getTestServices } from './test.services';
 
 const DEBUG_PREFIX = `030-process`;
@@ -48,7 +53,11 @@ describe('050-autofetch-no-autopost', () => {
     let thread: PlatformPostPosted<TwitterThread>;
 
     before(async () => {
-      user = await _01_createAndFetchUsers(services, { DEBUG, DEBUG_PREFIX });
+      const testUser = testAccountsCredentials[0];
+      user = await _01_createAndFetchUsers(services, testUser.twitter.id, {
+        DEBUG,
+        DEBUG_PREFIX,
+      });
     });
 
     it('upates user autopost settings', async () => {

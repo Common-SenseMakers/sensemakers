@@ -22,13 +22,18 @@ import {
   _02_publishTweet,
   _03_fetchAfterPublish,
 } from './reusable/create-post-fetch';
-import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
+import {
+  USE_REAL_NANOPUB,
+  USE_REAL_PARSER,
+  USE_REAL_TWITTER,
+  testAccountsCredentials,
+} from './setup';
 import { getTestServices } from './test.services';
 
 const DEBUG_PREFIX = `030-process`;
 const DEBUG = false;
 
-describe('030-process', () => {
+describe.only('030-process', () => {
   let rsaKeys = getRSAKeys('');
 
   const services = getTestServices({
@@ -48,7 +53,11 @@ describe('030-process', () => {
     let user: AppUser | undefined;
 
     before(async () => {
-      user = await _01_createAndFetchUsers(services, { DEBUG, DEBUG_PREFIX });
+      const testUser = testAccountsCredentials[0];
+      user = await _01_createAndFetchUsers(services, testUser.twitter.id, {
+        DEBUG,
+        DEBUG_PREFIX,
+      });
     });
 
     it('publish a tweet in the name of the test user', async () => {
@@ -244,7 +253,7 @@ describe('030-process', () => {
 
       const post = publishedPosts[0];
 
-      const threadPrev = post.thread;
+      const threadPrev = post.generic.thread;
       const newThread = threadPrev.map((genericPostPrev) => {
         return {
           ...genericPostPrev,
@@ -266,8 +275,8 @@ describe('030-process', () => {
 
       const readPost = await services.postsManager.getPost(post.id, true);
 
-      expect(readPost.thread).to.have.length(threadPrev.length);
-      expect(readPost.thread[0].content).to.equal(newThread[0].content);
+      expect(readPost.generic.thread).to.have.length(threadPrev.length);
+      expect(readPost.generic.thread[0].content).to.equal(newThread[0].content);
     });
   });
 });
