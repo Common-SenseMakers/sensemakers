@@ -2,6 +2,7 @@
   "name": "functions",
   "scripts": {
     "test": "NODE_ENV=test FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 TS_NODE_PROJECT=tsconfig.test.json mocha --trace-uncaught -r ts-node/register 'test/__tests__/**/*.ts'",
+    "test:nanopub": "yarn run test --grep 'creates a draft nanopub, sign and publish'",
     "lint": "eslint --ext .js,.ts .",
     "build": "tsc",
     "build:watch-test": "rm -rf ./lib-test & tsc --watch -p ./tsconfig.test.json",
