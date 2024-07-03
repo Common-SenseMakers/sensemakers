@@ -29,52 +29,60 @@ export let testUsers: Map<string, AppUser> = new Map();
 // TestContext will be used by all the test
 export type TestContext = Mocha.Context & Context;
 
-export const mochaHooks = (): Mocha.RootHookObject => {
-  const services = getTestServices({
-    time: 'real',
-    twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
-    nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
-    parser: USE_REAL_PARSER ? 'real' : 'mock',
-    emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
-  });
+let mochaHooksExport: () => Mocha.RootHookObject;
 
-  return {
-    async beforeAll(this: Mocha.Context) {
-      const context: InjectableContext = {};
+/** conditionally add hooks in case running tests without firebase emulator */
+if (!process.env.NO_MOCHA_HOOKS) {
+  mochaHooksExport = (): Mocha.RootHookObject => {
+    const services = getTestServices({
+      time: 'real',
+      twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
+      nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
+      parser: USE_REAL_PARSER ? 'real' : 'mock',
+      emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
+    });
 
-      /** reset db */
-      await resetDB();
+    return {
+      async beforeAll(this: Mocha.Context) {
+        const context: InjectableContext = {};
 
-      /** mock enqueueTask */
-      (global as any).enqueueTaskStub = sinon
-        .stub(tasksSupport, 'enqueueTask')
-        .callsFake(enqueueTaskMockOnTests);
+        /** reset db */
+        await resetDB();
 
-      /** prepare/authenticate users  */
-      await services.db.run(async (manager) => {
-        const testAccountsCredentials: TestUserCredentials[] = JSON.parse(
-          process.env.TEST_USER_ACCOUNTS as string
-        );
-        if (!testAccountsCredentials) {
-          throw new Error('test acccounts undefined');
-        }
-        if (testAccountsCredentials.length < NUM_TEST_USERS) {
-          throw new Error('not enough twitter account credentials provided');
-        }
+        /** mock enqueueTask */
+        (global as any).enqueueTaskStub = sinon
+          .stub(tasksSupport, 'enqueueTask')
+          .callsFake(enqueueTaskMockOnTests);
 
-        await Promise.all(
-          testAccountsCredentials.map(async (accountCredentials) => {
-            const user = await authenticateTestUser(
-              accountCredentials,
-              services,
-              manager
-            );
-            testUsers.set(user.userId, user);
-          })
-        );
-      });
+        /** prepare/authenticate users  */
+        await services.db.run(async (manager) => {
+          const testAccountsCredentials: TestUserCredentials[] = JSON.parse(
+            process.env.TEST_USER_ACCOUNTS as string
+          );
+          if (!testAccountsCredentials) {
+            throw new Error('test acccounts undefined');
+          }
+          if (testAccountsCredentials.length < NUM_TEST_USERS) {
+            throw new Error('not enough twitter account credentials provided');
+          }
 
-      Object.assign(this, context);
-    },
+          await Promise.all(
+            testAccountsCredentials.map(async (accountCredentials) => {
+              const user = await authenticateTestUser(
+                accountCredentials,
+                services,
+                manager
+              );
+              testUsers.set(user.userId, user);
+            })
+          );
+        });
+
+        Object.assign(this, context);
+      },
+    };
   };
-};
+} else {
+  mochaHooksExport = () => ({});
+}
+export const mochaHooks = mochaHooksExport;

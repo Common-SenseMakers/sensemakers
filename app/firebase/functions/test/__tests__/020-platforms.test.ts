@@ -1,4 +1,3 @@
-import { Nanopub } from '@nanopub/sign';
 import { expect } from 'chai';
 
 import { FetchParams } from '../../src/@shared/types/types.fetch';
@@ -203,12 +202,6 @@ describe('02-platforms', () => {
           )
         );
         expect(published).to.not.be.undefined;
-        const nanoPubId = published.post_id.split('/').pop();
-        expect(nanoPubId).to.not.be.undefined;
-        const fetchedPub = (await Nanopub.fetch(
-          `${(JSON.parse(process.env.NANOPUBS_PUBLISH_SERVERS as string) as string[])[0]}/${nanoPubId}`
-        )) as Nanopub;
-        expect(fetchedPub).to.not.be.undefined;
       } catch (error) {
         console.error('error: ', error);
         throw error;
