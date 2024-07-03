@@ -2,7 +2,7 @@ import { Context } from 'mocha';
 import * as sinon from 'sinon';
 
 import { AppUser } from '../../src/@shared/types/types.user';
-import { envDeploy } from '../../src/config/typedenv.deploy';
+import { envRuntime } from '../../src/config/typedenv.runtime';
 import * as tasksSupport from '../../src/tasksUtils/tasks.support';
 import { authenticateTestUser } from '../utils/authenticate.users';
 import { resetDB } from '../utils/db';
@@ -10,8 +10,8 @@ import { enqueueTaskMockOnTests } from '../utils/tasks.enqueuer.mock.tests';
 import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
-export const LOG_LEVEL_MSG = envDeploy.LOG_LEVEL_MSG.value();
-export const LOG_LEVEL_OBJ = envDeploy.LOG_LEVEL_OBJ.value();
+export const LOG_LEVEL_MSG = envRuntime.LOG_LEVEL_MSG.value();
+export const LOG_LEVEL_OBJ = envRuntime.LOG_LEVEL_OBJ.value();
 export const TEST_USERS_FILE_PATH = './test/__tests__/test.users.json';
 export const USE_REAL_TWITTER = process.env.USE_REAL_TWITTERX === 'true';
 export const USE_REAL_NANOPUB = process.env.USE_REAL_NANOPUB === 'true';

@@ -24,6 +24,9 @@ const USE_REAL_NANOPUB = defineBoolean('USE_REAL_NANOPUB');
 const USE_REAL_EMAIL = defineBoolean('USE_REAL_EMAIL');
 const TEST_USER_ACCOUNTS = defineString('TEST_USER_ACCOUNTS');
 
+const LOG_LEVEL_MSG = defineString('LOG_LEVEL_MSG');
+const LOG_LEVEL_OBJ = defineString('LOG_LEVEL_OBJ');
+
 const ORCID_SECRET = defineSecret('ORCID_SECRET');
 const OUR_TOKEN_SECRET = defineSecret('OUR_TOKEN_SECRET');
 const TWITTER_CLIENT_SECRET = defineSecret('TWITTER_CLIENT_SECRET');
@@ -34,6 +37,8 @@ const NP_PUBLISH_RSA_PRIVATE_KEY = defineSecret('NP_PUBLISH_RSA_PRIVATE_KEY');
 export const envRuntime = {
   NODE_ENV: process.env.NODE_ENV,
   REGION: process.env.FUNCTION_REGION,
+  LOG_LEVEL_MSG: LOG_LEVEL_MSG,
+  LOG_LEVEL_OBJ: LOG_LEVEL_OBJ,
   PROJECT_ID: PROJECT_ID,
   APP_URL: APP_URL,
   ORCID_REDIRECT_URL: ORCID_REDIRECT_URL,
