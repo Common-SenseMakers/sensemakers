@@ -96,7 +96,7 @@ export class PostsProcessing {
     /** create AppPost */
     const post = await this.createAppPost(
       {
-        ...genericPostData,
+        generic: genericPostData,
         origin: platformPost.platformId,
         authorId,
         mirrorsIds: [platformPostCreated.id],

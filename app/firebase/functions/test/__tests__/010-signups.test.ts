@@ -4,21 +4,15 @@ import {
   NanopubUserProfile,
   NanupubSignupData,
 } from '../../src/@shared/types/types.nanopubs';
-import {
-  TwitterUserDetails,
-  TwitterUserProfile,
-} from '../../src/@shared/types/types.twitter';
+import { TwitterUserDetails } from '../../src/@shared/types/types.twitter';
 import { PLATFORM } from '../../src/@shared/types/types.user';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { logger } from '../../src/instances/logger';
-import {
-  TWITTER_NAME_MOCKS,
-  TWITTER_USERNAME_MOCKS,
-  TWITTER_USER_ID_MOCKS,
-} from '../../src/platforms/twitter/mock/twitter.service.mock';
+import '../../src/platforms/twitter/mock/twitter.service.mock';
 import { resetDB } from '../utils/db';
 import { getNanopubProfile } from '../utils/nanopub.profile';
 import { handleSignupMock } from './reusable/mocked.singup';
+import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
 describe('010-signups', () => {
@@ -47,15 +41,14 @@ describe('010-signups', () => {
     let userId: string;
 
     it('signup with twitter', async () => {
-      const TWITTER_PROFILE: TwitterUserProfile = {
-        id: TWITTER_USER_ID_MOCKS,
-        name: TWITTER_NAME_MOCKS,
-        username: TWITTER_USERNAME_MOCKS,
-      };
-
+      const testUser = testCredentials[0];
       const signupData: TwitterUserDetails = {
-        user_id: TWITTER_USER_ID_MOCKS,
-        profile: TWITTER_PROFILE,
+        user_id: testUser.twitter.id,
+        profile: {
+          id: testUser.twitter.id,
+          name: testUser.twitter.username,
+          username: testUser.twitter.username,
+        },
         signupDate: Date.now(),
       };
       userId = await handleSignupMock(services, signupData);

@@ -1,8 +1,8 @@
 import { RequestHandler } from 'express';
-import { logger } from 'firebase-functions/v1';
 
 import { UserSettingsUpdate } from '../../@shared/types/types.user';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
+import { logger } from '../../instances/logger';
 import {
   emailUpdateSchema,
   emailVerificationSchema,

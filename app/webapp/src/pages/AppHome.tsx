@@ -2,13 +2,14 @@ import { ViewportPage } from '../app/layout/Viewport';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { UserHome } from '../user-home/UserHome';
 import { EmailInput } from '../user-login/EmailInput';
-import { useAccountContext } from '../user-login/contexts/AccountContext';
-import { useTwitterContext } from '../user-login/contexts/platforms/TwitterContext';
+import {
+  LoginStatus,
+  useAccountContext,
+} from '../user-login/contexts/AccountContext';
 import { AppWelcome } from '../welcome/AppWelcome';
 
 export const AppHome = (props: {}) => {
-  const { isConnected, hasTriedFetchingUser, email } = useAccountContext();
-  const { isSigningUp } = useTwitterContext();
+  const { email, loginStatus } = useAccountContext();
 
   const LoadingPlaceholder = (
     <>
@@ -29,16 +30,18 @@ export const AppHome = (props: {}) => {
   );
 
   const content = (() => {
-    if (isSigningUp || (isConnected && (!email || !email.verified))) {
-      return <EmailInput></EmailInput>;
-    }
-
-    if (!isConnected && hasTriedFetchingUser) {
+    if (loginStatus === LoginStatus.LoggedOut) {
       return <AppWelcome></AppWelcome>;
-    } else if (!hasTriedFetchingUser) {
+    } else if (loginStatus === LoginStatus.LoggingIn) {
       return LoadingPlaceholder;
-    } else if (email) {
-      return <UserHome></UserHome>;
+    } else if (loginStatus === LoginStatus.LoggedIn) {
+      if (!email || !email.verified) {
+        return <EmailInput></EmailInput>;
+      } else {
+        return <UserHome></UserHome>;
+      }
+    } else {
+      return LoadingPlaceholder;
     }
   })();
 

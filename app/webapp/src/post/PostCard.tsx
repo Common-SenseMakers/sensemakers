@@ -53,7 +53,7 @@ export const PostCard = (props: {
       <PostText
         truncate
         shade={shade}
-        text={concatenateThread(post)}></PostText>
+        text={concatenateThread(post.generic)}></PostText>
 
       <SemanticsEditor
         include={[PATTERN_ID.REF_LABELS]}
