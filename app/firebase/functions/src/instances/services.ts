@@ -32,6 +32,7 @@ import {
   PlatformsMap,
   PlatformsService,
 } from '../platforms/platforms.service';
+import { testCredentialsRuntime } from '../platforms/twitter/mock/test.users';
 import { getTwitterMock } from '../platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../platforms/twitter/twitter.service';
 import { PlatformPostsRepository } from '../posts/platform.posts.repository';
@@ -75,9 +76,12 @@ export const createServices = () => {
     clientSecret: TWITTER_CLIENT_SECRET.value(),
   });
 
+  const testUser = testCredentialsRuntime[0];
+
   const twitter = getTwitterMock(
     _twitter,
-    USE_REAL_TWITTERX.value() ? 'real' : 'mock-signup'
+    USE_REAL_TWITTERX.value() ? 'real' : 'mock-signup',
+    testUser
   );
 
   const _nanopub = new NanopubService(time, {

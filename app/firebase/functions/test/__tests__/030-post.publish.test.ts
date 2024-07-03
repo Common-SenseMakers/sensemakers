@@ -16,7 +16,6 @@ import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
-import { TEST_THREADS } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
 import {
@@ -25,11 +24,12 @@ import {
   _03_fetchAfterPublish,
 } from './reusable/create-post-fetch';
 import {
+  TEST_THREADS,
   USE_REAL_NANOPUB,
   USE_REAL_PARSER,
   USE_REAL_TWITTER,
-  testAccountsCredentials,
 } from './setup';
+import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
 const DEBUG_PREFIX = `030-process`;
@@ -55,7 +55,7 @@ describe('030-process', () => {
     let user: AppUser | undefined;
 
     before(async () => {
-      const testUser = testAccountsCredentials[0];
+      const testUser = testCredentials[0];
       user = await _01_createAndFetchUsers(services, testUser.twitter.id, {
         DEBUG,
         DEBUG_PREFIX,

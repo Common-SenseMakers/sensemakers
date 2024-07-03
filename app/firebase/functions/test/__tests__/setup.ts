@@ -1,15 +1,13 @@
 import { Context } from 'mocha';
 import * as sinon from 'sinon';
 
-import {
-  AppUser,
-  TestUserCredentials,
-} from '../../src/@shared/types/types.user';
+import { AppUser } from '../../src/@shared/types/types.user';
 import { envDeploy } from '../../src/config/typedenv.deploy';
 import * as tasksSupport from '../../src/tasksUtils/tasks.support';
 import { authenticateTestUser } from '../utils/authenticate.users';
 import { resetDB } from '../utils/db';
 import { enqueueTaskMockOnTests } from '../utils/tasks.enqueuer.mock.tests';
+import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
 export const LOG_LEVEL_MSG = envDeploy.LOG_LEVEL_MSG.value();
@@ -25,16 +23,9 @@ export type InjectableContext = Readonly<{
 }>;
 export let testUsers: AppUser[] = [];
 
-export const testAccountsCredentials: TestUserCredentials[] = JSON.parse(
-  process.env.TEST_USER_ACCOUNTS as string
-);
-
-if (!testAccountsCredentials) {
-  throw new Error('test acccounts undefined');
-}
-if (testAccountsCredentials.length < 1) {
-  throw new Error('not enough twitter account credentials provided');
-}
+export const TEST_THREADS: string[][] = process.env.TEST_THREADS
+  ? JSON.parse(process.env.TEST_THREADS as string)
+  : [];
 
 // TestContext will be used by all the test
 export type TestContext = Mocha.Context & Context;
@@ -63,7 +54,7 @@ export const mochaHooks = (): Mocha.RootHookObject => {
       /** prepare/authenticate users  */
       await services.db.run(async (manager) => {
         await Promise.all(
-          testAccountsCredentials.map(async (accountCredentials) => {
+          testCredentials.map(async (accountCredentials) => {
             const user = await authenticateTestUser(
               accountCredentials,
               services,

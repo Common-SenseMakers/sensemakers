@@ -12,7 +12,7 @@ import '../../src/platforms/twitter/mock/twitter.service.mock';
 import { resetDB } from '../utils/db';
 import { getNanopubProfile } from '../utils/nanopub.profile';
 import { handleSignupMock } from './reusable/mocked.singup';
-import { testAccountsCredentials } from './setup';
+import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
 describe('010-signups', () => {
@@ -41,7 +41,7 @@ describe('010-signups', () => {
     let userId: string;
 
     it('signup with twitter', async () => {
-      const testUser = testAccountsCredentials[0];
+      const testUser = testCredentials[0];
       const signupData: TwitterUserDetails = {
         user_id: testUser.twitter.id,
         profile: {

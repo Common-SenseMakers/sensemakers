@@ -42,6 +42,7 @@ import { getTimeMock } from '../../src/time/mock/time.service.mock';
 import { TimeService } from '../../src/time/time.service';
 import { UsersRepository } from '../../src/users/users.repository';
 import { UsersService } from '../../src/users/users.service';
+import { testCredentials } from './test.accounts';
 
 export interface TestServicesConfig {
   twitter: TwitterMockConfig;
@@ -101,7 +102,8 @@ export const getTestServices = (config: TestServicesConfig) => {
     clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
   });
 
-  const twitter = getTwitterMock(_twitter, config.twitter);
+  const testUser = testCredentials[0];
+  const twitter = getTwitterMock(_twitter, config.twitter, testUser);
 
   /** nanopub */
   const _nanopub = new NanopubService(time, {

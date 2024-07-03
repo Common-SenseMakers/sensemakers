@@ -18,7 +18,7 @@ import {
   TestUserCredentials,
   UserDetailsBase,
 } from '../../../@shared/types/types.user';
-import { APP_URL, USE_REAL_TWITTERX } from '../../../config/config.runtime';
+import { APP_URL } from '../../../config/config.runtime';
 import { TransactionManager } from '../../../db/transaction.manager';
 import { logger } from '../../../instances/logger';
 import { TwitterService } from '../twitter.service';
@@ -37,25 +37,6 @@ let state: TwitterTestState = {
 };
 
 export type TwitterMockConfig = 'real' | 'mock-publish' | 'mock-signup';
-
-export const TEST_THREADS: string[][] = process.env.TEST_THREADS
-  ? JSON.parse(process.env.TEST_THREADS as string)
-  : [];
-
-export let testAccountsCredentials: TestUserCredentials[] = [];
-
-if (!USE_REAL_TWITTERX.value()) {
-  testAccountsCredentials = JSON.parse(
-    process.env.TEST_USER_ACCOUNTS as string
-  );
-
-  if (!testAccountsCredentials) {
-    throw new Error('test acccounts undefined');
-  }
-  if (testAccountsCredentials.length < 1) {
-    throw new Error('not enough twitter account credentials provided');
-  }
-}
 
 const getSampleTweet = (
   id: string,
@@ -91,12 +72,13 @@ const getSampleTweet = (
   };
 };
 
-const testUser = testAccountsCredentials[0];
-
-export const initThreads = () => {
+export const initThreads = (
+  testThreads: string[][],
+  testUser: TestUserCredentials
+) => {
   const now = Date.now();
 
-  const threads = TEST_THREADS.map((thread, ixThread): TwitterThread => {
+  const threads = testThreads.map((thread, ixThread): TwitterThread => {
     const tweets = thread.map((content, ixTweet) => {
       const idTweet = ixThread * 100 + ixTweet;
       const createdAt = now + ixThread * 100 + 10 * ixTweet;
@@ -125,8 +107,6 @@ export const initThreads = () => {
   state.threads.reverse();
 };
 
-initThreads();
-
 /** make private methods public */
 type MockedType = Omit<TwitterService, 'fetchInternal' | 'getUserClient'> & {
   fetchInternal: TwitterService['fetchInternal'];
@@ -139,7 +119,8 @@ type MockedType = Omit<TwitterService, 'fetchInternal' | 'getUserClient'> & {
  */
 export const getTwitterMock = (
   twitterService: TwitterService,
-  type: TwitterMockConfig
+  type: TwitterMockConfig,
+  testUser: TestUserCredentials
 ) => {
   if (type === 'real') {
     return twitterService;

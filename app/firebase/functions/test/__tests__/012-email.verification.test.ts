@@ -5,7 +5,7 @@ import { TwitterUserDetails } from '../../src/@shared/types/types.twitter';
 import { logger } from '../../src/instances/logger';
 import { resetDB } from '../utils/db';
 import { handleSignupMock } from './reusable/mocked.singup';
-import { testAccountsCredentials } from './setup';
+import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
 const EMAIL_TEST = 'cs@sensenets.xyz';
@@ -31,11 +31,11 @@ describe('012-email verification', () => {
 
     it('signup with twitter', async () => {
       const signupData: TwitterUserDetails = {
-        user_id: testAccountsCredentials[0].twitter.id,
+        user_id: testCredentials[0].twitter.id,
         profile: {
-          id: testAccountsCredentials[0].twitter.id,
-          name: testAccountsCredentials[0].twitter.username,
-          username: testAccountsCredentials[0].twitter.username,
+          id: testCredentials[0].twitter.id,
+          name: testCredentials[0].twitter.username,
+          username: testCredentials[0].twitter.username,
         },
         signupDate: Date.now(),
       };
@@ -43,11 +43,11 @@ describe('012-email verification', () => {
       userId = await handleSignupMock(services, signupData);
 
       const signupData2: TwitterUserDetails = {
-        user_id: testAccountsCredentials[1].twitter.id,
+        user_id: testCredentials[1].twitter.id,
         profile: {
-          id: testAccountsCredentials[1].twitter.id,
-          name: testAccountsCredentials[1].twitter.username,
-          username: testAccountsCredentials[1].twitter.username,
+          id: testCredentials[1].twitter.id,
+          name: testCredentials[1].twitter.username,
+          username: testCredentials[1].twitter.username,
         },
         signupDate: Date.now(),
       };

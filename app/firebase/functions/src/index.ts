@@ -33,7 +33,7 @@ import {
   notifyUserTask,
   triggerSendNotifications,
 } from './notifications/notification.task';
-import { testAccountsCredentials } from './platforms/twitter/mock/twitter.service.mock';
+import { testCredentialsRuntime } from './platforms/twitter/mock/test.users';
 import { platformPostUpdatedHook } from './posts/hooks/platformPost.updated.hook';
 import { postUpdatedHook } from './posts/hooks/post.updated.hook';
 import {
@@ -273,7 +273,7 @@ if (IS_EMULATOR) {
       {
         draft: { text },
         userDetails: {
-          user_id: testAccountsCredentials[0].twitter.id,
+          user_id: testCredentialsRuntime[0].twitter.id,
         } as any,
       },
       undefined as any

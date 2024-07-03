@@ -13,9 +13,9 @@ import {
   USE_REAL_NANOPUB,
   USE_REAL_PARSER,
   USE_REAL_TWITTER,
-  testAccountsCredentials,
   testUsers,
 } from './setup';
+import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
 describe.skip('011-twitter refresh', () => {
@@ -39,7 +39,7 @@ describe.skip('011-twitter refresh', () => {
         Array.from(testUsers.values()),
         manager
       );
-      const testUser = testAccountsCredentials[0];
+      const testUser = testCredentials[0];
 
       user = users.find(
         (u) =>

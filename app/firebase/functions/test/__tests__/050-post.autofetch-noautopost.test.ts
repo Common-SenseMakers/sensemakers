@@ -15,7 +15,6 @@ import { TwitterThread } from '../../src/@shared/types/types.twitter';
 import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
 import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
-import { TEST_THREADS } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { triggerAutofetchPosts } from '../../src/posts/tasks/posts.autofetch.task';
 import { resetDB } from '../utils/db';
 import {
@@ -24,11 +23,12 @@ import {
 } from './reusable/create-post-fetch';
 import { updateUserSettings } from './reusable/update.settings';
 import {
+  TEST_THREADS,
   USE_REAL_NANOPUB,
   USE_REAL_PARSER,
   USE_REAL_TWITTER,
-  testAccountsCredentials,
 } from './setup';
+import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
 const DEBUG_PREFIX = `030-process`;
@@ -53,7 +53,7 @@ describe('050-autofetch-no-autopost', () => {
     let thread: PlatformPostPosted<TwitterThread>;
 
     before(async () => {
-      const testUser = testAccountsCredentials[0];
+      const testUser = testCredentials[0];
       user = await _01_createAndFetchUsers(services, testUser.twitter.id, {
         DEBUG,
         DEBUG_PREFIX,

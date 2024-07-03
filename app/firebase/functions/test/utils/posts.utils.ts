@@ -16,7 +16,7 @@ import { PLATFORM } from '../../src/@shared/types/types.user';
 import { activityEventCreatedHook } from '../../src/activity/activity.created.hook';
 import { postUpdatedHook } from '../../src/posts/hooks/post.updated.hook';
 import { PostsManager } from '../../src/posts/posts.manager';
-import { testAccountsCredentials } from '../__tests__/setup';
+import { testCredentials } from '../__tests__/test.accounts';
 
 export const getMockPost = (refPost: Partial<AppPostFull>) => {
   const authorId = refPost.authorId || 'test-author-id';
@@ -56,7 +56,7 @@ export const getMockPost = (refPost: Partial<AppPostFull>) => {
         posted: {
           post_id: '123456',
           timestampMs: createdAtMs,
-          user_id: testAccountsCredentials[0].twitter.id,
+          user_id: testCredentials[0].twitter.id,
           post: {
             id: 'post-id',
             createdAtMs: createdAtMs,

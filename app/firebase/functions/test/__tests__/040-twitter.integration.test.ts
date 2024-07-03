@@ -4,12 +4,8 @@ import { TwitterApi } from 'twitter-api-v2';
 import { PLATFORM } from '../../src/@shared/types/types.user';
 import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { authenticateTestUsers } from '../utils/authenticate.users';
-import {
-  USE_REAL_NANOPUB,
-  USE_REAL_PARSER,
-  USE_REAL_TWITTER,
-  testAccountsCredentials,
-} from './setup';
+import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
+import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
 const NUM_TWITTER_USERS = 1;
@@ -27,7 +23,7 @@ describe.skip('twitter integration', () => {
   it(`authenticates ${NUM_TWITTER_USERS} twitter users with the oauth 2.0 flow for reading access`, async () => {
     const appUsers = await services.db.run((manager) =>
       authenticateTestUsers(
-        testAccountsCredentials.slice(0, NUM_TWITTER_USERS),
+        testCredentials.slice(0, NUM_TWITTER_USERS),
         services,
         manager
       )

@@ -21,8 +21,8 @@ import {
   USE_REAL_NANOPUB,
   USE_REAL_PARSER,
   USE_REAL_TWITTER,
-  testAccountsCredentials,
 } from './setup';
+import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
 const DEBUG_PREFIX = `030-process`;
@@ -47,7 +47,7 @@ describe('060-send-digest-no-autpost', () => {
     let threads: PlatformPostPosted<TwitterThread>[];
 
     before(async () => {
-      const testUser = testAccountsCredentials[0];
+      const testUser = testCredentials[0];
       user = await _01_createAndFetchUsers(services, testUser.twitter.id, {
         DEBUG,
         DEBUG_PREFIX,
