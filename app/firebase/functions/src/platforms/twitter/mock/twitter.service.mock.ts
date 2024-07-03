@@ -120,7 +120,7 @@ type MockedType = Omit<TwitterService, 'fetchInternal' | 'getUserClient'> & {
 export const getTwitterMock = (
   twitterService: TwitterService,
   type: TwitterMockConfig,
-  testUser: TestUserCredentials
+  testUser?: TestUserCredentials
 ) => {
   if (type === 'real') {
     return twitterService;
@@ -132,6 +132,10 @@ export const getTwitterMock = (
     when(mocked.publish(anything(), anything())).thenCall(
       (postPublish: PlatformPostPublish<TwitterDraft>) => {
         logger.warn(`called twitter publish mock`, postPublish);
+
+        if (!testUser) {
+          throw new Error('test user not provided');
+        }
 
         const tweet: TweetV2SingleResult = {
           data: {

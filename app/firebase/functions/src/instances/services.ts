@@ -77,10 +77,7 @@ export const createServices = () => {
   });
 
   const testCredentials = getTestCredentials();
-  if (!testCredentials) {
-    throw new Error('test credentials not found');
-  }
-  const testUser = testCredentials[0];
+  const testUser = testCredentials && testCredentials[0];
 
   const twitter = getTwitterMock(
     _twitter,
