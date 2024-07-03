@@ -185,11 +185,13 @@ const extension: ExtendedThemeType = {
     },
   },
   select: {
+    icons: {
+      down: <></>,
+    },
     control: {
       extend: css`
         & {
           border-style: none;
-          font-size: 14px;
           font-style: normal;
           font-weight: 500;
           line-height: 16px; /* 114.286% */

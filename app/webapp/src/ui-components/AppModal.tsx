@@ -1,7 +1,14 @@
-import { LayerExtendedProps, LayerPositionType, ResponsiveContext, Box, Layer } from 'grommet';
+import {
+  Box,
+  Layer,
+  LayerExtendedProps,
+  LayerPositionType,
+  ResponsiveContext,
+} from 'grommet';
 import { Close } from 'grommet-icons';
 import React from 'react';
 
+import { MAX_WIDTH_APP } from '../app/layout/Viewport';
 import { AppHeading } from './AppHeading';
 
 export interface IAppModal extends LayerExtendedProps {
@@ -26,12 +33,16 @@ export const AppModal = (props: IAppModal) => {
   const size = React.useContext(ResponsiveContext);
   const mobile = size ? size.includes('small') : true;
 
-  const position = props.position !== undefined ? props.position : 'right';
+  const position = props.position !== undefined ? props.position : 'center';
 
   return (
     <Layer
       {...props}
-      style={{ ...props.style }}
+      style={{
+        height: '60vh',
+        maxWidth: `${MAX_WIDTH_APP * 0.8}px`,
+        ...props.style,
+      }}
       position={position}
       onEsc={(): void => close()}
       onClickOutside={(): void => close()}>
@@ -47,7 +58,8 @@ export const AppModal = (props: IAppModal) => {
             direction="row"
             style={{ marginBottom: '20px', padding: '4px 0px' }}
             onClick={(): void => close()}
-            align="center">
+            align="center"
+            justify="end">
             <Close style={{ height: '12px', width: '12px' }}></Close>
           </Box>
           <AppHeading level="2">{props.heading}</AppHeading>

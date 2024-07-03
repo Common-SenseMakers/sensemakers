@@ -1,3 +1,4 @@
+import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { UserHome } from '../user-home/UserHome';
@@ -45,5 +46,10 @@ export const AppHome = (props: {}) => {
     }
   })();
 
-  return <ViewportPage content={content} justify="start"></ViewportPage>;
+  return (
+    <ViewportPage
+      content={content}
+      nav={<GlobalNav></GlobalNav>}
+      justify="start"></ViewportPage>
+  );
 };

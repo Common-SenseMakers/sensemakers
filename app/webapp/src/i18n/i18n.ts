@@ -32,6 +32,8 @@ export enum I18Keys {
   noMorePosts = 's023',
   settings = 's024',
   logout = 's025',
+
+  drafts = 's026',
 }
 
 const translationENG: Record<I18Keys, string> = {
@@ -55,6 +57,8 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.emailConfirmationTitle]: 'Plase confirm your email address',
   [I18Keys.emailConfirmationSubtitle]:
     'We have sent you and email with a special link. Open it to verify your email',
+
+  [I18Keys.drafts]: 'Drafts',
 
   [I18Keys.connectAccounts]: 'Connect your accounts',
   [I18Keys.connectParagraph]:
