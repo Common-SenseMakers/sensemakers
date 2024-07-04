@@ -29,6 +29,16 @@
       "port": 9229,
       "restart": true,
       "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "test-nanopub",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "yarn",
+      "args": ["run", "test:nanopub"],
+      "skipFiles": ["<node_internals>/**"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
     }
   ]
 }
