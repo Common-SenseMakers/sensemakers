@@ -65,7 +65,7 @@ export const createNanopublication = async (
 
   const orcidDetails = user[PLATFORM.Orcid];
   const orcidId = orcidDetails && orcidDetails[0].user_id;
-  const tweetUrl = `https://twitter.com/${twitterPath}/status/${originalPlatformPostId}`;
+  const tweetUrl = `https://x.com/${twitterPath}/status/${originalPlatformPostId}`;
 
   return await buildSpostNp(
     ethAddress,
