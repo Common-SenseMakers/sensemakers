@@ -59,7 +59,6 @@ export const PostCard = (props: {
         text={concatenateThread(post.generic)}></PostText>
 
       <SemanticsEditor
-        include={[PATTERN_ID.REF_LABELS]}
         isLoading={false}
         patternProps={{
           editable: false,

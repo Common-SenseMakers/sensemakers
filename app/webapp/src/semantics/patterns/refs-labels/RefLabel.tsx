@@ -21,8 +21,6 @@ export const RefLabels = (props: {
   const labelsOntology = props.support?.ontology?.semantic_predicates;
   const refData = props.refData;
 
-  const { constants } = useThemeContext();
-
   /** display names for selected labels */
   const labelsDisplayNames = useMemo(
     () =>
@@ -76,7 +74,7 @@ export const RefLabels = (props: {
       <Box direction="row" margin={{ bottom: 'small' }}>
         <AppLabelsEditor
           editable={props.editable}
-          color="#337FBD"
+          colors={{ font: '#337FBD', background: '#EDF7FF', border: '#ADCCE4' }}
           labels={labelsDisplayNames}
           options={optionDisplayNames}
           removeLabel={(label) => removeLabel(label)}
