@@ -15,6 +15,7 @@ import { AppButton, AppHeading, AppModal, AppSelect } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
+import { IntroModal } from './IntroModal';
 import { useUserPosts } from './UserPostsContext';
 
 const statusPretty: Record<PostsQueryStatus, string> = {
@@ -277,10 +278,8 @@ export const UserHome = () => {
   const modal = (() => {
     if (showIntro) {
       return (
-        <AppModal heading="He" onClosed={() => introClosed()}>
-          <Box>
-            <Text>Hi</Text>
-          </Box>
+        <AppModal onClosed={() => introClosed()}>
+          <IntroModal></IntroModal>
         </AppModal>
       );
     }
