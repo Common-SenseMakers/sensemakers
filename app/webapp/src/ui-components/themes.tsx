@@ -126,6 +126,12 @@ const extension: ExtendedThemeType = {
           height: '24px',
         },
       },
+      4: {
+        medium: {
+          size: '16px',
+          height: '18px',
+        },
+      },
     },
     responsiveBreakpoint: undefined,
     extend: css`

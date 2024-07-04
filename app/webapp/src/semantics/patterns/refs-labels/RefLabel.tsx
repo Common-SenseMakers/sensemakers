@@ -10,7 +10,8 @@ import { RefData } from './process.semantics';
 const DEBUG = false;
 
 /** renders the labels for one ref */
-export const RefLabels = (props: {
+export const RefWithLabels = (props: {
+  ix: number;
   refUrl: string;
   refData: RefData;
   support?: ParsedSupport;
@@ -82,6 +83,7 @@ export const RefLabels = (props: {
       </Box>
       {refData.meta ? (
         <RefCard
+          ix={props.ix + 1}
           url={props.refUrl}
           title={refData.meta?.title}
           description={refData.meta?.summary}
