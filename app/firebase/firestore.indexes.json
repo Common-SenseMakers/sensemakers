@@ -37,6 +37,24 @@
           "order": "ASCENDING"
         },
         {
+          "fieldPath": "createdAtMs",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "republishedStatus",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "authorId",
+          "order": "ASCENDING"
+        },
+        {
           "fieldPath": "republishedStatus",
           "order": "ASCENDING"
         },
