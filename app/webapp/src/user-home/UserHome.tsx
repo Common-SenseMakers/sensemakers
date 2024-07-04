@@ -279,7 +279,7 @@ export const UserHome = () => {
     if (showIntro) {
       return (
         <AppModal onClosed={() => introClosed()}>
-          <IntroModal></IntroModal>
+          <IntroModal closeModal={() => setShowIntro(false)}></IntroModal>
         </AppModal>
       );
     }

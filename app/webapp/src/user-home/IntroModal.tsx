@@ -46,13 +46,11 @@ const IntroPage = (props: {
   );
 };
 
-export const IntroModal = () => {
+export const IntroModal = (props: { closeModal: () => void }) => {
+  const { closeModal } = props;
+
   const [step, setStep] = useState(0);
   const { t } = useTranslation();
-
-  const next = () => {
-    setStep(step + 1);
-  };
 
   const pages = [
     <IntroPage
@@ -83,6 +81,15 @@ export const IntroModal = () => {
       btnLabel={t(I18Keys.introFinalLabel)}
       onNext={() => next()}></IntroPage>,
   ];
+
+  const next = () => {
+    if (step === pages.length - 1) {
+      closeModal();
+    }
+    if (step < pages.length - 1) {
+      setStep(step + 1);
+    }
+  };
 
   return (
     <Box style={{ flexGrow: 1 }} id="intro">

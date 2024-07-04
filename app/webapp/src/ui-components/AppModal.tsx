@@ -33,7 +33,8 @@ export const AppModal = (props: IAppModal) => {
       }}
       position={position}
       onEsc={(): void => close()}
-      onClickOutside={(): void => close()}>
+      onClickOutside={(): void => close()}
+      animate={false}>
       <Box
         align="center"
         justify="center"
