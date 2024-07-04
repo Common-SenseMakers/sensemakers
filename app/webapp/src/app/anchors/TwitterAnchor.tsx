@@ -1,9 +1,10 @@
-import { Anchor, AnchorExtendedProps } from 'grommet';
+import { Anchor, AnchorExtendedProps, Box } from 'grommet';
 import { useTranslation } from 'react-i18next';
 
 import { I18Keys } from '../../i18n/i18n';
 import { TwitterThread } from '../../shared/types/types.twitter';
 import { LoadingDiv } from '../../ui-components/LoadingDiv';
+import { OpenLinkIcon } from '../icons/OpenLinkIcon';
 
 export const TwitterProfileAnchor = (props: { screen_name?: string }) => {
   if (!props.screen_name) {
@@ -48,15 +49,22 @@ export const TweetAnchor = (props: {
       style={{
         fontSize: '16px',
         fontStyle: 'normal',
-        fontWeight: '500',
+        fontWeight: '400',
         lineHeight: '18px',
         textDecoration: 'none',
-        color: '#9CA3AF',
       }}
       target="_blank"
       href={`https://twitter.com/x/status/${threadId}`}
       size="medium">
-      {label} - {date}
+      <Box direction="row" align="center">
+        <span style={{ color: '#6B7280' }}>{label}</span>
+        <span
+          style={{ color: '#4B5563', marginLeft: '8px', marginRight: '6px' }}>
+          {' '}
+          {date}
+        </span>
+        <OpenLinkIcon size={12}></OpenLinkIcon>
+      </Box>
     </Anchor>
   );
 };

@@ -10,7 +10,8 @@ import { RefData } from './process.semantics';
 const DEBUG = false;
 
 /** renders the labels for one ref */
-export const RefLabels = (props: {
+export const RefWithLabels = (props: {
+  ix: number;
   refUrl: string;
   refData: RefData;
   support?: ParsedSupport;
@@ -20,8 +21,6 @@ export const RefLabels = (props: {
 }) => {
   const labelsOntology = props.support?.ontology?.semantic_predicates;
   const refData = props.refData;
-
-  const { constants } = useThemeContext();
 
   /** display names for selected labels */
   const labelsDisplayNames = useMemo(
@@ -76,7 +75,7 @@ export const RefLabels = (props: {
       <Box direction="row" margin={{ bottom: 'small' }}>
         <AppLabelsEditor
           editable={props.editable}
-          color="#337FBD"
+          colors={{ font: '#337FBD', background: '#EDF7FF', border: '#ADCCE4' }}
           labels={labelsDisplayNames}
           options={optionDisplayNames}
           removeLabel={(label) => removeLabel(label)}
@@ -84,6 +83,7 @@ export const RefLabels = (props: {
       </Box>
       {refData.meta ? (
         <RefCard
+          ix={props.ix + 1}
           url={props.refUrl}
           title={refData.meta?.title}
           description={refData.meta?.summary}

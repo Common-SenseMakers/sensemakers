@@ -6,7 +6,7 @@ import { filterStore, writeRDF } from '../../../shared/utils/n3.utils';
 import { THIS_POST_NAME } from '../../../shared/utils/semantics.helper';
 import { useSemanticsStore } from '../common/use.semantics';
 import { PatternProps } from '../patterns';
-import { RefLabels } from './RefLabel';
+import { RefWithLabels } from './RefLabel';
 import { RefsMap, processSemantics } from './process.semantics';
 
 export const RefLabelsComponent = (props: PatternProps) => {
@@ -79,7 +79,8 @@ export const RefLabelsComponent = (props: PatternProps) => {
                   throw new Error('Undexpected undefined');
 
                 return (
-                  <RefLabels
+                  <RefWithLabels
+                    ix={ixref}
                     editable={props.editable}
                     key={ixref}
                     refUrl={ref}
@@ -90,7 +91,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
                     }
                     addLabel={(labelUri: string) =>
                       addLabel(ref, labelUri)
-                    }></RefLabels>
+                    }></RefWithLabels>
                 );
               })}
           </Box>

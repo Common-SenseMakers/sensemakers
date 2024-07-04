@@ -20,7 +20,10 @@ export const NanopubStatus = (props: { post?: AppPostFull }) => {
   if (nanopubPublished && isEditing) {
     return (
       <Anchor href={nanopubPublished.uri} target="_blank">
-        <StatusTag label="Editing (not published)" color="#F79A3E"></StatusTag>
+        <StatusTag
+          label="Editing (not published)"
+          backgroundColor="transparent"
+          color="#F79A3E"></StatusTag>
       </Anchor>
     );
   }
@@ -28,37 +31,75 @@ export const NanopubStatus = (props: { post?: AppPostFull }) => {
   if (nanopubPublished) {
     return (
       <Anchor href={nanopubPublished.uri} target="_blank">
-        <StatusTag label="Published" color="#337FBD"></StatusTag>
+        <StatusTag
+          label="Published"
+          backgroundColor="transparent"
+          color="#337FBD"></StatusTag>
       </Anchor>
     );
   }
 
   if (!processed) {
     if (isParsing)
-      return <StatusTag label="Processing" color="#6B7280"></StatusTag>;
+      return (
+        <StatusTag
+          label="Processing"
+          backgroundColor="transparent"
+          color="#6B7280"></StatusTag>
+      );
 
-    if (errored) return <StatusTag label="Error" color="#6B7280"></StatusTag>;
+    if (errored)
+      return (
+        <StatusTag
+          label="Error"
+          backgroundColor="transparent"
+          color="#6B7280"></StatusTag>
+      );
 
-    return <StatusTag label="Not processed" color="#6B7280"></StatusTag>;
+    return (
+      <StatusTag
+        label="Not processed"
+        backgroundColor="transparent"
+        color="#6B7280"></StatusTag>
+    );
   }
 
   if (pending) {
-    return <StatusTag label="For Review" color="#F79A3E"></StatusTag>;
+    return (
+      <StatusTag
+        label="For Review"
+        backgroundColor="#FFEEDB"
+        color="#ED8F1C"></StatusTag>
+    );
   }
 
   if (ignored) {
-    return <StatusTag label="Ignored" color="#D1D5DB"></StatusTag>;
+    return (
+      <StatusTag
+        label="Ignored"
+        backgroundColor="transparent"
+        color="#D1D5DB"></StatusTag>
+    );
   }
 
   if (isEditing) {
-    return <StatusTag label="Draft" color="#F79A3E"></StatusTag>;
+    return (
+      <StatusTag
+        label="Draft"
+        backgroundColor="transparent"
+        color="#F79A3E"></StatusTag>
+    );
   }
 
   return <></>;
 };
 
-export const StatusTag = (props: { label: string; color: string }) => {
-  const { label, color } = props;
+export const StatusTag = (props: {
+  label: string;
+  color: string;
+  backgroundColor: string;
+}) => {
+  const { label, color, backgroundColor } = props;
   return (
     <Box
       direction="row"
@@ -66,14 +107,13 @@ export const StatusTag = (props: { label: string; color: string }) => {
       align="center"
       style={{
         borderRadius: '4px',
-        border: '1px solid #D1D5DB',
         height: '20px',
         padding: '2px 4px',
+        backgroundColor,
       }}>
-      <NanopubIcon size={14} color={color}></NanopubIcon>
       <Text
         style={{
-          color: '#6B7280',
+          color: color,
           fontSize: '14px',
           fontStyle: 'normal',
           fontWeight: '500',
