@@ -37,7 +37,6 @@ export const UserHome = () => {
   const [showIntro, setShowIntro] = useState<boolean>(false);
 
   useEffect(() => {
-    setShowIntro(true);
     const shown = localStorage.getItem(INTRO_SHOWN);
     if (!shown) {
       setShowIntro(true);
@@ -142,10 +141,10 @@ export const UserHome = () => {
 
     return (
       <>
-        <Box gap="medium">
+        <Box>
           {posts.map((post, ix) => (
             <Box key={ix} id={`post-${post.id}`}>
-              <PostCard post={post} shade={ix % 2 === 1}></PostCard>
+              <PostCard post={post}></PostCard>
             </Box>
           ))}
         </Box>
