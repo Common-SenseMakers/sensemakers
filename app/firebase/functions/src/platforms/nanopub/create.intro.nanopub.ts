@@ -2,19 +2,21 @@ import { Nanopub } from '@nanopub/sign';
 import { DataFactory, Writer } from 'n3';
 
 import { NanupubSignupData } from '../../@shared/types/types.nanopubs';
+import { GenericAuthor } from '../../@shared/types/types.posts';
 import { buildNpHead } from './create.nanopub';
 
 const { namedNode, literal } = DataFactory;
 
 export const createIntroNanopublication = async (
   details: NanupubSignupData,
+  userInfo: Pick<GenericAuthor, 'username' | 'name'>,
   authorizedKey: string
 ) => {
   return buildIntroNp(
     '',
-    'test-user-handle', //TODO: hardcoded for now but figure out how to get this info
+    userInfo.username,
     details.ethAddress,
-    'test-user-name', //TODO: hardcoded for now but figure out how to get this info
+    userInfo.name,
     details.rsaPublickey,
     details.ethToRsaSignature
   );
