@@ -78,7 +78,7 @@ describe('nanopublication format', () => {
     }
   });
 
-  it.only('publishes a correctly formatted mock intronanopub to the test server', async () => {
+  it('publishes a correctly formatted mock intronanopub to the test server', async () => {
     try {
       const address =
         '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
@@ -86,6 +86,10 @@ describe('nanopublication format', () => {
       const { profile, rsaKeys } = await getNanopubProfile(address);
       const introNanopub = await createIntroNanopublication(
         profile,
+        {
+          username: 'test-username',
+          name: 'test-name',
+        },
         rsaKeys.publicKey
       );
 
