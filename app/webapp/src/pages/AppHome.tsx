@@ -30,26 +30,23 @@ export const AppHome = (props: {}) => {
     </>
   );
 
-  const content = (() => {
+  const { content, nav } = (() => {
     if (loginStatus === LoginStatus.LoggedOut) {
-      return <AppWelcome></AppWelcome>;
+      return { content: <AppWelcome></AppWelcome>, nav: <></> };
     } else if (loginStatus === LoginStatus.LoggingIn) {
-      return LoadingPlaceholder;
+      return { content: LoadingPlaceholder, nav: <></> };
     } else if (loginStatus === LoginStatus.LoggedIn) {
       if (!email || !email.verified) {
-        return <EmailInput></EmailInput>;
+        return { content: <EmailInput></EmailInput>, nav: <></> };
       } else {
-        return <UserHome></UserHome>;
+        return { content: <UserHome></UserHome>, nav: <GlobalNav></GlobalNav> };
       }
     } else {
-      return LoadingPlaceholder;
+      return { content: LoadingPlaceholder, nav: <></> };
     }
   })();
 
   return (
-    <ViewportPage
-      content={content}
-      nav={<GlobalNav></GlobalNav>}
-      justify="start"></ViewportPage>
+    <ViewportPage content={content} nav={nav} justify="start"></ViewportPage>
   );
 };

@@ -105,12 +105,6 @@ export const GlobalNav = (props: {}) => {
         pageIx === 1
       )}
       {button(
-        'Profile',
-        <AvatarIcon></AvatarIcon>,
-        `${RouteNames.Profile}/${PLATFORM.Twitter}/${twitterDetails?.username}`,
-        pageIx === 2
-      )}
-      {button(
         'Settings',
         <SettignsIcon></SettignsIcon>,
         AbsoluteRoutes.Settings,
