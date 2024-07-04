@@ -53,12 +53,21 @@ export const PostCard = (props: {
           timestamp={tweet?.posted?.timestampMs}></TweetAnchor>
         {!profile ? <NanopubStatus post={post}></NanopubStatus> : <></>}
       </Box>
+      <SemanticsEditor
+        include={[PATTERN_ID.KEYWORDS]}
+        isLoading={false}
+        patternProps={{
+          editable: false,
+          semantics: post?.semantics,
+          originalParsed: post?.originalParsed,
+        }}></SemanticsEditor>
       <PostText
         truncate
         shade={shade}
         text={concatenateThread(post.generic)}></PostText>
 
       <SemanticsEditor
+        include={[PATTERN_ID.REF_LABELS]}
         isLoading={false}
         patternProps={{
           editable: false,
