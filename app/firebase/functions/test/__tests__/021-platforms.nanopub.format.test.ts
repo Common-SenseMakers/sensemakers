@@ -14,7 +14,19 @@ import { getMockedUser } from '../utils/users.mock';
 describe('nanopublication format', () => {
   it('publishes a correctly formatted mock nanopub to the test server', async () => {
     try {
-      const post = getMockPost({ authorId: 'test-user-id', id: 'post-id-1' });
+      const post = getMockPost({
+        authorId: 'test-user-id',
+        id: 'post-id-1',
+        semantics: `
+        @prefix ns1: <http://purl.org/spar/cito/> .
+        @prefix schema: <https://schema.org/> .
+        
+        <http://purl.org/nanopub/temp/mynanopub#assertion> 
+          ns1:discusses <https://twitter.com/ori_goldberg/status/1781281656071946541> ;    
+          ns1:includesQuotationFrom <https://twitter.com/ori_goldberg/status/1781281656071946541> ;    
+          schema:keywords "ExternalSecurity",        "Geopolitics",        "Israel",        "Kissinger",        "PoliticalScience",        "Security" .
+        `,
+      });
       const mockUser = getMockedUser({
         userId: 'test-user-id',
         [PLATFORM.Nanopub]: {
