@@ -33,7 +33,7 @@ import {
   notifyUserTask,
   triggerSendNotifications,
 } from './notifications/notification.task';
-import { TWITTER_USER_ID_MOCKS } from './platforms/twitter/mock/twitter.service.mock';
+import { getTestCredentials } from './platforms/twitter/mock/test.users';
 import { platformPostUpdatedHook } from './posts/hooks/platformPost.updated.hook';
 import { postUpdatedHook } from './posts/hooks/post.updated.hook';
 import {
@@ -269,11 +269,16 @@ if (IS_EMULATOR) {
     const params = request.query;
     const text = params.text || 'test tweet';
 
+    const testCredentials = getTestCredentials();
+    if (!testCredentials) {
+      throw new Error('test credentials not found');
+    }
+
     await platforms.get(PLATFORM.Twitter).publish(
       {
         draft: { text },
         userDetails: {
-          user_id: TWITTER_USER_ID_MOCKS,
+          user_id: testCredentials[0].twitter.id,
         } as any,
       },
       undefined as any

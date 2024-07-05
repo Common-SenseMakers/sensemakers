@@ -40,7 +40,6 @@ import { PlatformsService } from '../platforms/platforms.service';
 import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { getUsernameTag } from '../users/users.utils';
-import { PostsHelper } from './posts.helper';
 import { PostsProcessing } from './posts.processing';
 
 const DEBUG = true;
@@ -435,11 +434,9 @@ export class PostsManager {
   protected async _parsePost(postId: string, manager: TransactionManager) {
     const post = await this.processing.posts.get(postId, manager, true);
     if (DEBUG) logger.debug(`parsePost - start ${postId}`, { postId, post });
-    const author = await this.users.repo.getUser(post.authorId, manager, true);
 
-    const genericPost = PostsHelper.convertToGenericThread(post, author);
     const params: ParsePostRequest<TopicsParams> = {
-      post: genericPost,
+      post: post.generic,
       parameters: {
         [PARSER_MODE.TOPICS]: { topics: ['science', 'technology'] },
       },
@@ -483,7 +480,7 @@ export class PostsManager {
     if (DEBUG) logger.debug(`updatePost ${postId}`, { postId, postUpdate });
     await this.processing.posts.updateContent(postId, postUpdate, manager);
 
-    if (postUpdate.semantics || postUpdate.thread) {
+    if (postUpdate.semantics || postUpdate.generic) {
       /** rebuild the platform drafts with the new post content */
       if (DEBUG)
         logger.debug(`updatePost - semantics, content found ${postId}`, {
@@ -575,7 +572,7 @@ export class PostsManager {
         newPost.id,
         {
           reviewedStatus: AppPostReviewStatus.APPROVED,
-          thread: newPost.thread,
+          generic: newPost.generic,
           semantics: newPost.semantics,
         },
         manager

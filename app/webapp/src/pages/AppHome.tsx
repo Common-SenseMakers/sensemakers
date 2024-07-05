@@ -1,14 +1,16 @@
+import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { UserHome } from '../user-home/UserHome';
 import { EmailInput } from '../user-login/EmailInput';
-import { useAccountContext } from '../user-login/contexts/AccountContext';
-import { useTwitterContext } from '../user-login/contexts/platforms/TwitterContext';
+import {
+  LoginStatus,
+  useAccountContext,
+} from '../user-login/contexts/AccountContext';
 import { AppWelcome } from '../welcome/AppWelcome';
 
 export const AppHome = (props: {}) => {
-  const { isConnected, hasTriedFetchingUser, email } = useAccountContext();
-  const { isSigningUp } = useTwitterContext();
+  const { email, loginStatus } = useAccountContext();
 
   const LoadingPlaceholder = (
     <>
@@ -28,19 +30,23 @@ export const AppHome = (props: {}) => {
     </>
   );
 
-  const content = (() => {
-    if (isSigningUp || (isConnected && (!email || !email.verified))) {
-      return <EmailInput></EmailInput>;
-    }
-
-    if (!isConnected && hasTriedFetchingUser) {
-      return <AppWelcome></AppWelcome>;
-    } else if (!hasTriedFetchingUser) {
-      return LoadingPlaceholder;
-    } else if (email) {
-      return <UserHome></UserHome>;
+  const { content, nav } = (() => {
+    if (loginStatus === LoginStatus.LoggedOut) {
+      return { content: <AppWelcome></AppWelcome>, nav: <></> };
+    } else if (loginStatus === LoginStatus.LoggingIn) {
+      return { content: LoadingPlaceholder, nav: <></> };
+    } else if (loginStatus === LoginStatus.LoggedIn) {
+      if (!email || !email.verified) {
+        return { content: <EmailInput></EmailInput>, nav: <></> };
+      } else {
+        return { content: <UserHome></UserHome>, nav: <GlobalNav></GlobalNav> };
+      }
+    } else {
+      return { content: LoadingPlaceholder, nav: <></> };
     }
   })();
 
-  return <ViewportPage content={content} justify="start"></ViewportPage>;
+  return (
+    <ViewportPage content={content} nav={nav} justify="start"></ViewportPage>
+  );
 };

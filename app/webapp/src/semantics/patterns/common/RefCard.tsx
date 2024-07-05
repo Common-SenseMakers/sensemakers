@@ -1,6 +1,7 @@
 import { Anchor, Box, Image, Paragraph, Text } from 'grommet';
 import { Tweet } from 'react-tweet';
 
+import { AppHeading, AppLabel } from '../../../ui-components';
 import { AppTweet } from './AppTweet';
 
 const truncate = (text: string, size: number) => {
@@ -14,6 +15,7 @@ function getTweetId(url: string): string | undefined {
 }
 
 export const RefCard = (props: {
+  ix: number;
   url: string;
   title?: string;
   description?: string;
@@ -21,9 +23,6 @@ export const RefCard = (props: {
   onClick?: () => void;
 }) => {
   const titleTruncated = props.title && truncate(props.title, 50);
-  const descriptionTruncated =
-    props.description && truncate(props.description, 90);
-
   const tweetId = getTweetId(props.url);
 
   if (tweetId) {
@@ -31,7 +30,7 @@ export const RefCard = (props: {
     return <AppTweet id={tweetId}></AppTweet>;
   }
   const content = (() => {
-    if (!titleTruncated && !descriptionTruncated) {
+    if (!titleTruncated && !props.description) {
       const urlTruncated = truncate(props.url, 50);
       return (
         <Anchor href={props.url} target="_blank">
@@ -42,35 +41,52 @@ export const RefCard = (props: {
 
     return (
       <Box
-        direction="row"
         align="start"
         pad={{ horizontal: '12px', vertical: '8px' }}
         style={{ borderRadius: '12px', border: '1px solid #D1D5DB' }}>
-        <Text
-          style={{
-            fontSize: '14px',
-            fontStyle: 'normal',
-            fontWeight: '600',
-            lineHeight: '16px',
-          }}>
+        <Box margin={{ bottom: '4px' }}>
+          <AppLabel
+            colors={{
+              font: '#6B7280',
+              background: '#E5E7EB',
+              border: 'transparent',
+            }}
+            style={{ borderRadius: '4px', border: 'none' }}>
+            Reference {props.ix}
+          </AppLabel>
+        </Box>
+
+        <AppHeading level={4} color="#374151" style={{ fontWeight: '500' }}>
           {titleTruncated}
-        </Text>
+        </AppHeading>
+
         <Paragraph
-          style={{
-            marginTop: '8px',
-            fontSize: '14px',
-            fontStyle: 'normal',
-            fontWeight: '400',
-            lineHeight: '20px',
-          }}>
-          {descriptionTruncated}
+          margin={{ vertical: '4px' }}
+          size="medium"
+          style={{ lineHeight: '18px', color: '#6B7280' }}
+          maxLines={2}>
+          {props.description}
         </Paragraph>
+
+        <Box>
+          <Text
+            style={{ fontSize: '16px', color: '#337FBD', fontWeight: '400' }}>
+            {props.url}
+          </Text>
+        </Box>
       </Box>
     );
   })();
 
   return (
-    <Anchor href={props.url} target="_blank">
+    <Anchor
+      href={props.url}
+      style={{
+        textDecoration: 'none',
+        color: 'inherit',
+        fontWeight: 'normal',
+      }}
+      target="_blank">
       {content}
     </Anchor>
   );

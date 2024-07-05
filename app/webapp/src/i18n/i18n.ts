@@ -32,6 +32,30 @@ export enum I18Keys {
   noMorePosts = 's023',
   settings = 's024',
   logout = 's025',
+
+  drafts = 's026',
+
+  introNextLabel = 's026x',
+  introFinalLabel = 's026y',
+
+  introHeading01 = 's027',
+  introText011 = 's028',
+  introText012 = 's029',
+
+  introHeading02 = 's0272',
+  introText021 = 's0282',
+  introText022 = 's0292',
+
+  introHeading03 = 's0273',
+  introText031 = 's0283',
+  introText032 = 's0293',
+}
+
+const check = new Set();
+for (let entry of Object.entries(I18Keys)) {
+  if (check.has(entry[1]))
+    throw new Error(`repeated value ${entry[1]} for I18Keys key ${entry[0]}`);
+  check.add(entry[1]);
 }
 
 const translationENG: Record<I18Keys, string> = {
@@ -55,6 +79,29 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.emailConfirmationTitle]: 'Plase confirm your email address',
   [I18Keys.emailConfirmationSubtitle]:
     'We have sent you and email with a special link. Open it to verify your email',
+
+  [I18Keys.drafts]: 'Drafts',
+
+  [I18Keys.introNextLabel]: 'Next Tip',
+  [I18Keys.introFinalLabel]: 'Let’s nanopublish!',
+
+  [I18Keys.introHeading01]: 'We’re finding your science posts',
+  [I18Keys.introText011]:
+    'Our AI is scanning your latest X · Twitter posts to identify and tag your science-related content.  These tags make your posts machine-readable, enhancing their discoverability and usability. ',
+  [I18Keys.introText012]:
+    'The posts tagged as "For Review" are those our AI recommends for nanopublishing.',
+
+  [I18Keys.introHeading02]: 'Nanopublish your research and recommendations ',
+  [I18Keys.introText021]:
+    'All your research-related posts make valuable nanopublications!',
+  [I18Keys.introText022]:
+    "Posts mentioning references with a DOI are perfect candidates, but don't stop there. Consider sharing research ideas, conference highlights, grant information, or job opportunities as well.",
+
+  [I18Keys.introHeading03]: 'We’ve got you covered!',
+  [I18Keys.introText031]:
+    "As you continue posting on X · Twitter, we'll monitor your feed for relevant content to ensure your future research remains FAIR and under your control.",
+  [I18Keys.introText032]:
+    'You can adjust your notification and publishing automation settings anytime in your preferences.',
 
   [I18Keys.connectAccounts]: 'Connect your accounts',
   [I18Keys.connectParagraph]:

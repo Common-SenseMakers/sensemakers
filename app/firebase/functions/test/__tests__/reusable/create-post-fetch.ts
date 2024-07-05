@@ -3,7 +3,6 @@ import { logger } from 'firebase-functions';
 import { user } from 'firebase-functions/v1/auth';
 
 import { AppUser, PLATFORM } from '../../../src/@shared/types/types.user';
-import { TWITTER_USER_ID_MOCKS } from '../../../src/platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../../../src/platforms/twitter/twitter.service';
 import { UsersHelper } from '../../../src/users/users.helper';
 import { fetchPostsInTests } from '../../utils/posts.utils';
@@ -13,6 +12,7 @@ import { TestServices } from '../test.services';
 
 export const _01_createAndFetchUsers = async (
   services: TestServices,
+  twitterUserId: string,
   debug: { DEBUG: boolean; DEBUG_PREFIX: string }
 ) => {
   let user: AppUser | undefined;
@@ -20,18 +20,13 @@ export const _01_createAndFetchUsers = async (
   const { DEBUG, DEBUG_PREFIX } = debug;
 
   await services.db.run(async (manager) => {
-    const users = await createUsers(
-      services,
-      Array.from(testUsers.values()),
-      manager
-    );
+    const users = await createUsers(services, testUsers, manager);
     if (DEBUG)
       logger.debug(`users crated ${users.length}`, { users }, DEBUG_PREFIX);
 
     user = users.find(
       (u) =>
-        UsersHelper.getAccount(u, PLATFORM.Twitter, TWITTER_USER_ID_MOCKS) !==
-        undefined
+        UsersHelper.getAccount(u, PLATFORM.Twitter, twitterUserId) !== undefined
     );
     if (DEBUG)
       logger.debug(`test user ${user?.userId}`, { user }, DEBUG_PREFIX);

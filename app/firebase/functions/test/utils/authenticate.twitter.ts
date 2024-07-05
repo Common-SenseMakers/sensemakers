@@ -5,11 +5,14 @@ import {
   TwitterGetContextParams,
   TwitterSignupData,
 } from '../../src/@shared/types/types.twitter';
-import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
+import {
+  AppUser,
+  PLATFORM,
+  TwitterAccountCredentials,
+} from '../../src/@shared/types/types.user';
 import { TransactionManager } from '../../src/db/transaction.manager';
 import { Services } from '../../src/instances/services';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
-import { TwitterAccountCredentials } from './authenticate.users';
 
 const CALLBACK_URL = 'https://sense-nets.xyz/';
 const NEXT_BUTTON_TEXT = 'Next';

@@ -4,6 +4,19 @@ import { logger } from '../instances/logger';
 
 const DEBUG = false;
 
+export function removeUndefined(obj: any): any {
+  if (obj !== null && typeof obj === 'object') {
+    for (const key in obj) {
+      if (obj[key] === undefined) {
+        delete obj[key]; // Delete the property if it's undefined
+      } else if (typeof obj[key] === 'object') {
+        removeUndefined(obj[key]); // Recurse into nested objects
+      }
+    }
+  }
+  return obj;
+}
+
 export class BaseRepository<TT, CC> {
   constructor(protected collection: FirebaseFirestore.CollectionReference) {}
 

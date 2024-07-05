@@ -1,21 +1,11 @@
 import { expect } from 'chai';
 import { anything, capture, verify } from 'ts-mockito';
 
-import {
-  TwitterUserDetails,
-  TwitterUserProfile,
-} from '../../src/@shared/types/types.twitter';
+import { TwitterUserDetails } from '../../src/@shared/types/types.twitter';
 import { logger } from '../../src/instances/logger';
-import {
-  TWITTER_NAME_MOCKS,
-  TWITTER_NAME_MOCKS2,
-  TWITTER_USERNAME_MOCKS,
-  TWITTER_USERNAME_MOCKS2,
-  TWITTER_USER_ID_MOCKS,
-  TWITTER_USER_ID_MOCKS2,
-} from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { resetDB } from '../utils/db';
 import { handleSignupMock } from './reusable/mocked.singup';
+import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
 const EMAIL_TEST = 'cs@sensenets.xyz';
@@ -40,26 +30,24 @@ describe('012-email verification', () => {
     let userId2: string;
 
     it('signup with twitter', async () => {
-      const TWITTER_PROFILE: TwitterUserProfile = {
-        id: TWITTER_USER_ID_MOCKS,
-        name: TWITTER_NAME_MOCKS,
-        username: TWITTER_USERNAME_MOCKS,
-      };
-
       const signupData: TwitterUserDetails = {
-        user_id: TWITTER_USER_ID_MOCKS,
-        profile: TWITTER_PROFILE,
+        user_id: testCredentials[0].twitter.id,
+        profile: {
+          id: testCredentials[0].twitter.id,
+          name: testCredentials[0].twitter.username,
+          username: testCredentials[0].twitter.username,
+        },
         signupDate: Date.now(),
       };
 
       userId = await handleSignupMock(services, signupData);
 
       const signupData2: TwitterUserDetails = {
-        user_id: TWITTER_USER_ID_MOCKS2,
+        user_id: testCredentials[1].twitter.id,
         profile: {
-          id: TWITTER_USER_ID_MOCKS2,
-          name: TWITTER_NAME_MOCKS2,
-          username: TWITTER_USERNAME_MOCKS2,
+          id: testCredentials[1].twitter.id,
+          name: testCredentials[1].twitter.username,
+          username: testCredentials[1].twitter.username,
         },
         signupDate: Date.now(),
       };

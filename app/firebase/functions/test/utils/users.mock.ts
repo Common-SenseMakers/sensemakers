@@ -3,8 +3,8 @@ import {
   AppUser,
   AutopostOption,
   PLATFORM,
+  TestUserCredentials,
 } from '../../src/@shared/types/types.user';
-import { TestUserCredentials } from './authenticate.users';
 
 export const getMockedUser = (credentials: TestUserCredentials): AppUser => {
   return {

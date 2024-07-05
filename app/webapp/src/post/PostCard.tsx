@@ -37,9 +37,12 @@ export const PostCard = (props: {
 
   return (
     <Box
-      pad={{ top: 'medium', bottom: 'large', horizontal: 'medium' }}
+      pad={{ top: '16px', bottom: '24px', horizontal: '12px' }}
       style={{
         backgroundColor: shade ? constants.colors.shade : 'white',
+        borderTop: '1px solid var(--Neutral-300, #D1D5DB)',
+        borderRight: '1px solid var(--Neutral-300, #D1D5DB)',
+        borderLeft: '1px solid var(--Neutral-300, #D1D5DB)',
         cursor: 'pointer',
         position: 'relative',
       }}
@@ -50,10 +53,18 @@ export const PostCard = (props: {
           timestamp={tweet?.posted?.timestampMs}></TweetAnchor>
         {!profile ? <NanopubStatus post={post}></NanopubStatus> : <></>}
       </Box>
+      <SemanticsEditor
+        include={[PATTERN_ID.KEYWORDS]}
+        isLoading={false}
+        patternProps={{
+          editable: false,
+          semantics: post?.semantics,
+          originalParsed: post?.originalParsed,
+        }}></SemanticsEditor>
       <PostText
         truncate
         shade={shade}
-        text={concatenateThread(post)}></PostText>
+        text={concatenateThread(post.generic)}></PostText>
 
       <SemanticsEditor
         include={[PATTERN_ID.REF_LABELS]}
