@@ -79,7 +79,7 @@ describe('nanopublication format', () => {
       const published: Nanopub = await signed.publish(undefined, nanopubServer);
 
       expect(published).to.not.be.undefined;
-      console.log('published: ', published.info(), published.rdf());
+      console.log('published at: ', published.info().published);
       const fetchedPub = (await Nanopub.fetch(
         published.info().published
       )) as Nanopub;
@@ -121,7 +121,7 @@ describe('nanopublication format', () => {
       const published: Nanopub = await signed.publish(undefined, nanopubServer);
 
       expect(published).to.not.be.undefined;
-      console.log('published: ', published.info(), published.rdf());
+      console.log('published at: ', published.info().published);
       const fetchedPub = (await Nanopub.fetch(
         published.info().published
       )) as Nanopub;
