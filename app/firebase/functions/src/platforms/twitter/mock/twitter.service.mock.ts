@@ -1,5 +1,5 @@
 import { anything, instance, spy, when } from 'ts-mockito';
-import { TweetV2SingleResult } from 'twitter-api-v2';
+import { TweetV2LookupResult, TweetV2SingleResult } from 'twitter-api-v2';
 
 import { PlatformFetchParams } from '../../../@shared/types/types.fetch';
 import {
@@ -192,6 +192,241 @@ export const getTwitterMock = (
         return params.expectedAmount && threads.length > params.expectedAmount
           ? threads.slice(0, params.expectedAmount)
           : threads;
+      }
+    );
+
+    when(mocked.getPosts(anything(), anything(), anything())).thenCall(
+      async (): Promise<TweetV2LookupResult> => {
+        return {
+          data: [
+            {
+              conversation_id: '1798791421152911644',
+              author_id: '1773032135814717440',
+              created_at: '2024-06-06T18:57:49.000Z',
+              referenced_tweets: [
+                {
+                  type: 'quoted',
+                  id: '1795069204418175459',
+                },
+              ],
+              entities: {
+                urls: [
+                  // @ts-ignore
+                  {
+                    start: 50,
+                    end: 73,
+                    url: 'https://t.co/gguJOKvN37',
+                    expanded_url:
+                      'https://x.com/sense_nets_bot/status/1798782358201508331',
+                    display_url: 'x.com/sense_nets_bot…',
+                  },
+                  // @ts-ignore
+                  {
+                    start: 75,
+                    end: 98,
+                    url: 'https://t.co/Xvg4gOdJ8H',
+                    expanded_url:
+                      'https://x.com/sense_nets_bot/status/1795069204418175459',
+                    display_url: 'x.com/sense_nets_bot…',
+                  },
+                ],
+              },
+              text: 'this is a tweet that references two other tweets!\nhttps://t.co/gguJOKvN37\n\nhttps://t.co/Xvg4gOdJ8H',
+              edit_history_tweet_ids: ['1798791421152911644'],
+              id: '1798791421152911644',
+            },
+            {
+              conversation_id: '1798791421152911644',
+              author_id: '1773032135814717440',
+              created_at: '2024-06-06T18:58:46.000Z',
+              referenced_tweets: [
+                {
+                  type: 'quoted',
+                  id: '1798782358201508331',
+                },
+                {
+                  type: 'replied_to',
+                  id: '1798791421152911644',
+                },
+              ],
+              entities: {
+                urls: [
+                  // @ts-ignore
+                  {
+                    start: 104,
+                    end: 127,
+                    url: 'https://t.co/gguJOKvN37',
+                    expanded_url:
+                      'https://x.com/sense_nets_bot/status/1798782358201508331',
+                    display_url: 'x.com/sense_nets_bot…',
+                  },
+                ],
+              },
+              text: "I see that it only caught the second link as the quote tweet, but didn't include this as a quote tweet:\nhttps://t.co/gguJOKvN37",
+              edit_history_tweet_ids: ['1798791660668698927'],
+              id: '1798791660668698927',
+            },
+            {
+              conversation_id: '1798791421152911644',
+              author_id: '1773032135814717440',
+              created_at: '2024-06-06T19:00:33.000Z',
+              referenced_tweets: [
+                {
+                  type: 'quoted',
+                  id: '1798549107507974626',
+                },
+                {
+                  type: 'replied_to',
+                  id: '1798791660668698927',
+                },
+              ],
+              entities: {
+                urls: [
+                  // @ts-ignore
+                  {
+                    start: 33,
+                    end: 56,
+                    url: 'https://t.co/9ZB0UaqOcc',
+                    expanded_url:
+                      'https://x.com/rtk254/status/1798549107507974626',
+                    display_url: 'x.com/rtk254/status/…',
+                  },
+                ],
+              },
+              text: 'more quote tweets in this thread\nhttps://t.co/9ZB0UaqOcc',
+              edit_history_tweet_ids: ['1798792109031559184'],
+              id: '1798792109031559184',
+            },
+          ],
+          includes: {
+            users: [
+              {
+                id: '1773032135814717440',
+                name: 'SenseNet Bot',
+                username: 'sense_nets_bot',
+              },
+              {
+                id: '1065316525417160705',
+                name: 'Ronen Tamari',
+                username: 'rtk254',
+              },
+              {
+                id: '295218901',
+                name: 'vitalik.eth',
+                username: 'VitalikButerin',
+              },
+            ],
+            tweets: [
+              {
+                conversation_id: '1795069204418175459',
+                author_id: '1773032135814717440',
+                created_at: '2024-05-27T12:27:03.000Z',
+                referenced_tweets: [
+                  {
+                    type: 'quoted',
+                    id: '1793505119792677089',
+                  },
+                ],
+                entities: {
+                  urls: [
+                    // @ts-ignore
+                    {
+                      start: 38,
+                      end: 61,
+                      url: 'https://t.co/MynZ87Ln9R',
+                      expanded_url:
+                        'https://twitter.com/VitalikButerin/status/1793505119792677089',
+                      display_url: 'x.com/VitalikButerin…',
+                    },
+                  ],
+                },
+                text: 'A new quote tweet of something I love https://t.co/MynZ87Ln9R',
+                edit_history_tweet_ids: ['1795069204418175459'],
+                id: '1795069204418175459',
+              },
+              {
+                conversation_id: '1798782358201508331',
+                author_id: '1773032135814717440',
+                created_at: '2024-06-06T18:21:48.000Z',
+                referenced_tweets: [
+                  {
+                    type: 'quoted',
+                    id: '1795069204418175459',
+                  },
+                ],
+                entities: {
+                  urls: [
+                    // @ts-ignore
+                    {
+                      start: 38,
+                      end: 61,
+                      url: 'https://t.co/mUp1B8Ipkc',
+                      expanded_url:
+                        'https://twitter.com/sense_nets_bot/status/1795069204418175459',
+                      display_url: 'x.com/sense_nets_bot…',
+                    },
+                  ],
+                },
+                text: 'a quote tweet that goes 2 layers deep https://t.co/mUp1B8Ipkc',
+                edit_history_tweet_ids: ['1798782358201508331'],
+                id: '1798782358201508331',
+              },
+              {
+                conversation_id: '1798549107507974626',
+                author_id: '1065316525417160705',
+                created_at: '2024-06-06T02:54:57.000Z',
+                referenced_tweets: [
+                  {
+                    type: 'quoted',
+                    id: '1798312150345347127',
+                  },
+                ],
+                entities: {
+                  urls: [
+                    {
+                      start: 107,
+                      end: 130,
+                      url: 'https://t.co/YL93kDHmdo',
+                      expanded_url:
+                        'https://aeon.co/essays/on-the-dangers-of-seeing-human-minds-as-predictive-machines',
+                      display_url: 'aeon.co/essays/on-the-…',
+                      // @ts-ignore
+                      status: 200,
+                      title:
+                        'On the dangers of seeing human minds as predictive machines | Aeon Essays',
+                      description:
+                        'Cognitive scientists and corporations alike see human minds as predictive machines. Right or wrong, they will change how we think',
+                      unwound_url:
+                        'https://aeon.co/essays/on-the-dangers-of-seeing-human-minds-as-predictive-machines',
+                    },
+                    {
+                      start: 131,
+                      end: 154,
+                      url: 'https://t.co/cVBzU3kDij',
+                      expanded_url:
+                        'https://twitter.com/rtk254/status/1798549107507974626/photo/1',
+                      display_url: 'pic.twitter.com/cVBzU3kDij',
+                      // @ts-ignore
+                      media_key: '3_1798549051249762304',
+                    },
+                    // @ts-ignore
+                    {
+                      start: 155,
+                      end: 178,
+                      url: 'https://t.co/LogqUQRYIi',
+                      expanded_url:
+                        'https://twitter.com/behrenstimb/status/1798312150345347127',
+                      display_url: 'x.com/behrenstimb/st…',
+                    },
+                  ],
+                },
+                text: 'This can be generalized beyond writing - predictable is exactly how corporations want us. Be unpredictable https://t.co/YL93kDHmdo https://t.co/cVBzU3kDij https://t.co/LogqUQRYIi',
+                edit_history_tweet_ids: ['1798549107507974626'],
+                id: '1798549107507974626',
+              },
+            ],
+          },
+        };
       }
     );
 
