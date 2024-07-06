@@ -19,7 +19,8 @@ import {
   TestUserCredentials,
   UserDetailsBase,
 } from '../../../@shared/types/types.user';
-import { APP_URL } from '../../../config/config.runtime';
+import { ENVIRONMENTS } from '../../../config/ENVIRONMENTS';
+import { APP_URL, NODE_ENV } from '../../../config/config.runtime';
 import { TransactionManager } from '../../../db/transaction.manager';
 import { logger } from '../../../instances/logger';
 import { TwitterService } from '../twitter.service';
@@ -178,6 +179,169 @@ export const getTwitterMock = (
         userDetails: UserDetailsBase,
         manager: TransactionManager
       ): Promise<TwitterThread[]> => {
+        if (NODE_ENV === ENVIRONMENTS.LOCAL) {
+          if (params.since_id) {
+            return [
+              {
+                conversation_id: (Number(params.since_id) + 100).toString(),
+                tweets: [
+                  getSampleTweet(
+                    (Number(params.since_id) + 100).toString(),
+                    userDetails.user_id,
+                    Date.now(),
+                    (Number(params.since_id) + 100).toString(),
+                    ''
+                  ),
+                ],
+                author: {
+                  id: userDetails.user_id,
+                  name: userDetails.profile.name,
+                  username: userDetails.profile.username,
+                },
+              },
+            ];
+          } else if (params.until_id) {
+            return [];
+          } else {
+            return [
+              {
+                conversation_id: '500',
+                tweets: [
+                  getSampleTweet(
+                    '500',
+                    userDetails.user_id,
+                    Date.now() + 5,
+                    '500',
+                    ''
+                  ),
+                ],
+                author: {
+                  id: userDetails.user_id,
+                  name: userDetails.profile.name,
+                  username: userDetails.profile.username,
+                },
+              },
+              {
+                conversation_id: '400',
+                tweets: [
+                  getSampleTweet(
+                    '400',
+                    userDetails.user_id,
+                    Date.now() + 4,
+                    '400',
+                    ''
+                  ),
+                  getSampleTweet(
+                    '401',
+                    userDetails.user_id,
+                    Date.now() + 4,
+                    '401',
+                    ''
+                  ),
+                  getSampleTweet(
+                    '402',
+                    userDetails.user_id,
+                    Date.now() + 4,
+                    '402',
+                    ''
+                  ),
+                ],
+                author: {
+                  id: userDetails.user_id,
+                  name: userDetails.profile.name,
+                  username: userDetails.profile.username,
+                },
+              },
+              {
+                conversation_id: '300',
+                tweets: [
+                  getSampleTweet(
+                    '300',
+                    userDetails.user_id,
+                    Date.now() + 3,
+                    '300',
+                    ''
+                  ),
+                  getSampleTweet(
+                    '301',
+                    userDetails.user_id,
+                    Date.now() + 3,
+                    '301',
+                    ''
+                  ),
+                ],
+                author: {
+                  id: userDetails.user_id,
+                  name: userDetails.profile.name,
+                  username: userDetails.profile.username,
+                },
+              },
+              {
+                conversation_id: '200',
+                tweets: [
+                  getSampleTweet(
+                    '200',
+                    userDetails.user_id,
+                    Date.now() + 2,
+                    '200',
+                    ''
+                  ),
+                  getSampleTweet(
+                    '201',
+                    userDetails.user_id,
+                    Date.now() + 2,
+                    '201',
+                    ''
+                  ),
+                  getSampleTweet(
+                    '202',
+                    userDetails.user_id,
+                    Date.now() + 2,
+                    '202',
+                    ''
+                  ),
+                ],
+                author: {
+                  id: userDetails.user_id,
+                  name: userDetails.profile.name,
+                  username: userDetails.profile.username,
+                },
+              },
+              {
+                conversation_id: '100',
+                tweets: [
+                  getSampleTweet(
+                    '100',
+                    userDetails.user_id,
+                    Date.now() + 1,
+                    '100',
+                    ''
+                  ),
+                  getSampleTweet(
+                    '101',
+                    userDetails.user_id,
+                    Date.now() + 1,
+                    '101',
+                    ''
+                  ),
+                  getSampleTweet(
+                    '102',
+                    userDetails.user_id,
+                    Date.now() + 1,
+                    '102',
+                    ''
+                  ),
+                ],
+                author: {
+                  id: userDetails.user_id,
+                  name: userDetails.profile.name,
+                  username: userDetails.profile.username,
+                },
+              },
+            ];
+          }
+        }
+
         const threads = state.threads.filter((thread) => {
           if (params.since_id) {
             /** exclusive */
