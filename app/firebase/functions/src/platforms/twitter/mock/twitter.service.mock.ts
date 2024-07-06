@@ -11,6 +11,7 @@ import {
   TwitterDraft,
   TwitterGetContextParams,
   TwitterSignupContext,
+  TwitterSignupData,
   TwitterThread,
   TwitterUserDetails,
 } from '../../../@shared/types/types.twitter';
@@ -23,6 +24,7 @@ import { TransactionManager } from '../../../db/transaction.manager';
 import { logger } from '../../../instances/logger';
 import { TwitterService } from '../twitter.service';
 import { convertToAppTweetBase, dateStrToTimestampMs } from '../twitter.utils';
+import { getTestCredentials } from './test.users';
 
 interface TwitterTestState {
   latestTweetId: number;
@@ -447,8 +449,30 @@ export const getTwitterMock = (
     );
 
     when(mocked.handleSignupData(anything())).thenCall(
-      (data: TwitterUserDetails): TwitterUserDetails => {
-        return data;
+      (data: TwitterSignupData): TwitterUserDetails => {
+        const testCredentials = getTestCredentials();
+        if (!testCredentials) {
+          throw new Error('test credentials not found');
+        }
+        return {
+          user_id: testCredentials[0].twitter.id,
+          signupDate: 0,
+          profile: {
+            name: testCredentials[0].twitter.username,
+            profile_image_url:
+              'https://pbs.twimg.com/profile_images/1783977034038882304/RGn66lGT_normal.jpg',
+            id: testCredentials[0].twitter.id,
+            username: testCredentials[0].twitter.username,
+          },
+          read: {
+            accessToken:
+              'ZWJzaEJCU1BSaFZvLUIwRFNCNHNXVlQtTV9mY2VSaDlOSk5ETjJPci0zbmJtOjE3MTk0MzM5ODkyNTM6MTowOmF0OjE',
+            refreshToken:
+              'U2xBMGpRSkFucE9yQzAxSnJlM0pRci1tQzJlR2dfWEY2MEpNc2daYkF6VjZSOjE3MTk0MzM5ODkyNTM6MTowOnJ0OjE',
+            expiresIn: 7200,
+            expiresAtMs: 1719441189590,
+          },
+        };
       }
     );
 
