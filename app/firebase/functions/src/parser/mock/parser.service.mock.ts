@@ -18,12 +18,12 @@ export const MOCKED_PARSER_RESULTS: ParsePostResult[] = [
       '@prefix ns1: <http://purl.org/spar/cito/> .@prefix ns2: <https://sense-nets.xyz/> .@prefix schema: <https://schema.org/> .<http://purl.org/nanopub/temp/mynanopub#assertion> ns1:discusses <https://twitter.com/ItaiYanai/status/1780813867213336910> ;    schema:keywords "AI",        "LLM",        "NLP",        "academic-study",        "research-focus" ;    ns2:asksQuestionAbout <https://twitter.com/ItaiYanai/status/1780813867213336910> .',
   },
   {
-    filter_classification: SciFilterClassfication.NOT_RESEARCH,
+    filter_classification: SciFilterClassfication.RESEARCH,
     semantics:
       '@prefix ns1: <http://purl.org/spar/cito/> .@prefix schema: <https://schema.org/> .<http://purl.org/nanopub/temp/mynanopub#assertion> ns1:linksTo <https://twitter.com/DeSciMic/status/1765391765358436666> ;    schema:keywords "DecentralizedScience",        "ForumPost",        "Research",        "SocialMedia",        "Twitter" .',
   },
   {
-    filter_classification: SciFilterClassfication.RESEARCH,
+    filter_classification: SciFilterClassfication.NOT_RESEARCH,
     semantics:
       '@prefix ns1: <https://sense-nets.xyz/> .@prefix schema: <https://schema.org/> .<http://purl.org/nanopub/temp/mynanopub#assertion> schema:keywords "AI",        "Benchmark",        "MachineLearning",        "NewRelease",        "ReinforcementLearning" ;    ns1:announcesResource <https://twitter.com/Rainmaker1973/status/1788916168008368195> .',
   },
@@ -64,14 +64,15 @@ export const getParserMock = (
       const ix = randomIndex(
         0,
         MOCKED_PARSER_RESULTS.length - 1,
-        post.post.content
+        post.post.thread[0].content
       );
 
+      const mockedResult: ParsePostResult = MOCKED_PARSER_RESULTS[ix];
       if (DEBUG)
         logger.debug(
-          `mocked parser result ix:${ix} - content: ${post.post.content}`
+          `mocked parser result ix:${ix} - content: ${post.post.thread[0].content}`,
+          mockedResult
         );
-      const mockedResult: ParsePostResult = MOCKED_PARSER_RESULTS[ix];
 
       await new Promise((resolve) =>
         setTimeout(resolve, 1 + Math.random() * 5000)

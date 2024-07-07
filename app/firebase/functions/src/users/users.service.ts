@@ -1,14 +1,19 @@
 import * as jwt from 'jsonwebtoken';
 
 import {
+  HandleSignupResult,
+  OurTokenConfig,
+} from '../@shared/types/types.fetch';
+import { NotificationFreq } from '../@shared/types/types.notifications';
+import {
   ALL_IDENTITY_PLATFORMS,
   AccountDetailsRead,
   AppUserRead,
-  HandleSignupResult,
-  OurTokenConfig,
+  AutopostOption,
   PLATFORM,
-  UserWithPlatformIds,
-} from '../@shared/types/types';
+  UserSettings,
+  UserSettingsUpdate,
+} from '../@shared/types/types.user';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
@@ -102,11 +107,16 @@ export class UsersService {
       authenticatedDetails.user_id
     );
 
-    const existingUserWithAccount = await this.repo.getUserWithPlatformAccount(
-      platform,
-      authenticatedDetails.user_id,
-      manager
-    );
+    const existingUserWithAccountId =
+      await this.repo.getUserWithPlatformAccount(
+        platform,
+        authenticatedDetails.user_id,
+        manager
+      );
+
+    const existingUserWithAccount = existingUserWithAccountId
+      ? await this.repo.getUser(existingUserWithAccountId, manager)
+      : undefined;
 
     if (DEBUG)
       logger.debug('UsersService: handleSignup', {
@@ -204,12 +214,16 @@ export class UsersService {
          * and we need to create a new user.
          * */
 
-        const platformIds_property: keyof UserWithPlatformIds = 'platformIds';
+        const initSettings: UserSettings = {
+          autopost: { [PLATFORM.Nanopub]: { value: AutopostOption.MANUAL } },
+          notificationFreq: NotificationFreq.None,
+        };
 
         await this.repo.createUser(
           prefixed_user_id,
           {
-            [platformIds_property]: [prefixed_user_id],
+            settings: initSettings,
+            platformIds: [prefixed_user_id],
             [platform]: [authenticatedDetails],
           },
           manager
@@ -271,6 +285,8 @@ export class UsersService {
     /** extract the profile for each account */
     const userRead: AppUserRead = {
       userId,
+      email: user.email,
+      settings: user.settings,
     };
 
     ALL_IDENTITY_PLATFORMS.forEach((platform) => {
@@ -290,5 +306,17 @@ export class UsersService {
     });
 
     return userRead;
+  }
+
+  updateSettings(userId: string, settings: UserSettingsUpdate) {
+    return this.db.run(async (manager) => {
+      await this.repo.updateSettings(userId, settings, manager);
+    });
+  }
+
+  updateEmail(userId: string, email: string) {
+    return this.db.run(async (manager) => {
+      await this.repo.updateEmail(userId, email, manager);
+    });
   }
 }

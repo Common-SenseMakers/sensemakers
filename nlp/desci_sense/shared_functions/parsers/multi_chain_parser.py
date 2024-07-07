@@ -24,6 +24,7 @@ from ..preprocessing import (
     ParserInput,
     preproc_parser_input,
     PreprocParserInput,
+    convert_parse_request_to_parser_input,
 )
 from ..schema.ontology_base import OntologyBase
 from ..schema.post import RefPost
@@ -193,8 +194,23 @@ class MultiChainParser:
 
         return post_processed_res
 
-    def preproc_parser_input(self, parser_input: ParserInput) -> PreprocParserInput:
+    def preproc_parser_input(
+        self,
+        parser_input: ParserInput,
+    ) -> PreprocParserInput:
         return preproc_parser_input(parser_input)
+
+    def process_parse_request(
+        self,
+        parse_request: ParsePostRequest,
+        active_list: List[str] = None,
+    ):
+        parser_input = convert_parse_request_to_parser_input(parse_request)
+        result = self.process_parser_input(
+            parser_input=parser_input,
+            active_list=active_list,
+        )
+        return result
 
     def process_parser_input(
         self,
@@ -217,9 +233,9 @@ class MultiChainParser:
         active_list: List[str] = None,
     ):
         preproc_inputs = [self.preproc_parser_input(p) for p in inputs]
-        posts_batch, batch_unprocessed_urls = zip(*[
-            (p.post_to_parse, p.unparsed_urls) for p in preproc_inputs
-        ])
+        posts_batch, batch_unprocessed_urls = zip(
+            *[(p.post_to_parse, p.unparsed_urls) for p in preproc_inputs]
+        )
         res = self.batch_process_ref_posts(
             posts_batch,
             batch_size,
@@ -241,6 +257,7 @@ class MultiChainParser:
         md_dict = extract_posts_ref_metadata_dict(
             [post],
             self.config.metadata_extract_config.extraction_method,
+            extra_urls=[unprocessed_urls],
         )
         # if no filter specified, run all chains
         if active_list is None:
@@ -288,12 +305,13 @@ class MultiChainParser:
             List[Dict]: list of processed results
         """
         if batch_unprocessed_urls is None:
-            batch_unprocessed_urls = [[] for _ in len(inputs)]
-            
+            batch_unprocessed_urls = [[] for _ in inputs]
+
         # extract all posts metadata
         md_dict = extract_posts_ref_metadata_dict(
             inputs,
             self.config.metadata_extract_config.extraction_method,
+            extra_urls=batch_unprocessed_urls,
         )
 
         if active_list is None:

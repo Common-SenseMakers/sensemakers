@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import React, { createContext, useContext, useEffect } from 'react';
-import { getTransactionCountQueryOptions } from 'wagmi/query';
 
 import { useAppFetch } from '../api/app.fetch';
-import { AppUserRead, PLATFORM, UserProfileQuery } from '../shared/types/types';
+import { UserProfileQuery } from '../shared/types/types.fetch';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
+import { AppUserRead, PLATFORM } from '../shared/types/types.user';
 import { getAccount } from '../user-login/user.helper';
 
 const DEBUG = true;

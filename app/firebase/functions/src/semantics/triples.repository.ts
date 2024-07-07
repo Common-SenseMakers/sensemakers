@@ -1,4 +1,4 @@
-import { FetchParams } from '../@shared/types/types';
+import { FetchParams } from '../@shared/types/types.fetch';
 import { PostTriple, PostTripleCreate } from '../@shared/types/types.triples';
 import { DBInstance } from '../db/instance';
 import { BaseRepository } from '../db/repo.base';

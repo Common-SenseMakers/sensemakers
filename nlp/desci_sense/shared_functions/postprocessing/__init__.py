@@ -401,6 +401,7 @@ def combine_from_raw_results(
     md_list = get_ref_post_metadata_list(
         post,
         md_dict,
+        extra_urls=unprocessed_urls,
     )
     combined_parser_output = {
         "reference_urls": post.md_ref_urls(),

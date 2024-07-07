@@ -21,13 +21,19 @@ export const textToHtml = (text: string) => {
   let html = paragraphs?.map((p, i) => `<p>${p}</p>`).join('');
 
   const urlRegex =
-    /\bhttps?:\/\/[\w.-]+(?:\.[\w.-]+)*[^\s.,;?!\])]*\/?(?:[\w\/?=+-]*)/gi;
+    /\bhttps?:\/\/[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
 
   html = html.replace(urlRegex, (url) => {
+    let endsWithPeriod = false;
     let urlClean = url;
     try {
       if (url.endsWith('.')) {
+        endsWithPeriod = true;
         url = url.slice(0, -1);
+      }
+
+      if (url.endsWith('</p>')) {
+        url = url.slice(0, -4);
       }
 
       const urlObj = new URL(url);
@@ -39,7 +45,7 @@ export const textToHtml = (text: string) => {
       console.error(`Error parsing URL: ${url}`, e);
     }
 
-    return `<a href="${url}">${urlClean}</a>`;
+    return `<a href="${url}">${urlClean}</a>${endsWithPeriod ? '.' : ''}`;
   });
 
   const element = document.createElement('div');

@@ -42,10 +42,10 @@ export const AppButton = (props: IButton & { isLoading?: boolean }) => {
       <Button
         {...newProps}
         style={{
-          fontSize: '14px',
+          fontSize: constants.fontSize.small.size,
           fontStyle: 'normal',
-          fontWeight: '500',
-          lineHeight: '16px',
+          padding: '6px 12px',
+          minHeight: '42px',
           ...props.style,
         }}
       />

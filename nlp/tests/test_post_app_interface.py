@@ -32,6 +32,8 @@ from desci_sense.shared_functions.preprocessing import (
     convert_thread_interface_to_ref_post,
     convert_app_post_to_ref_post,
     convert_app_post_to_quote_ref_post,
+    ParserInput,
+    preproc_parser_input,
 )
 
 TEST_THREAD_INTERFACE_2 = {
@@ -72,6 +74,26 @@ TEST_THREAD_INTERFACE_1 = {
         "id": "author_123",
         "username": "user123",
         "name": "John Doe",
+    },
+}
+
+TEST_OVERLENGTH_THREAD_INTERFACE = {
+    "url": "https://example.com/post/2",
+    "thread": [
+        {
+            "url": "https://example.com/post/2",
+            "content": "This is the first post in the thread.",
+        },
+        {
+            "url": "https://example.com/post/3",
+            "content": ",".join([str(x) for x in range(3000)]),
+        },
+    ],
+    "author": {
+        "platformId": "twitter",
+        "id": "author_456",
+        "username": "user546",
+        "name": "Sarah Gore",
     },
 }
 
@@ -256,14 +278,10 @@ def test_load_real_thread():
     ]
 
 
+
+
 if __name__ == "__main__":
-    thread = AppThread.model_validate(TEST_THREAD)
+    thread = AppThread.model_validate(TEST_OVERLENGTH_THREAD_INTERFACE)
     thread_ref_post = convert_thread_interface_to_ref_post(thread)
-    print(thread_ref_post.md_ref_urls())
-    assert thread_ref_post.md_ref_urls() == [
-        "https://x.com/FDAadcomms/status/1798104612635070611",
-        "https://journals.sagepub.com/doi/10.1177/20451253231198466",
-        "https://www.youtube.com/watch?feature=youtu.be&si=kjMtNR1Hwe7NZ8as&v=WknlkmJee4E",
-        "https://x.com/eturnermd1/status/1798046087737180395",
-        "https://x.com/FDAadcomms/status/1798107142219796794",
-    ]
+    pi = ParserInput(thread_post=thread_ref_post, max_posts=30)
+    proc_pi = preproc_parser_input(pi)

@@ -5,7 +5,7 @@ import re
 import requests
 from datetime import datetime
 
-from ...interface import AppPost, SocialPlatformType
+from ...interface import AppPost, PlatformType
 from ...utils import (
     extract_and_expand_urls,
     normalize_url,

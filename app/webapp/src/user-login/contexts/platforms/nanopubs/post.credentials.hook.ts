@@ -1,12 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useAppFetch } from '../../../../api/app.fetch';
-import { HexStr, PLATFORM } from '../../../../shared/types/types';
 import {
-  NanopubUserDetails,
   NanupubSignupData,
   RSAKeys,
 } from '../../../../shared/types/types.nanopubs';
+import { HexStr, PLATFORM } from '../../../../shared/types/types.user';
 import {
   getEthToRSAMessage,
   signNanopublication,

@@ -1,4 +1,4 @@
-import { UserDetailsBase } from './types';
+import { UserDetailsBase } from './types.user';
 
 /** ORCID */
 export interface OrcidSignupContext {

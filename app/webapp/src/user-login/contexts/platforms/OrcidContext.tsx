@@ -11,8 +11,8 @@ import { useSearchParams } from 'react-router-dom';
 
 import { useAppFetch } from '../../../api/app.fetch';
 import { postOrcidCode } from '../../../api/auth.requests';
-import { PLATFORM } from '../../../shared/types/types';
 import { OrcidSignupContext } from '../../../shared/types/types.orcid';
+import { PLATFORM } from '../../../shared/types/types.user';
 
 const DEBUG = false;
 

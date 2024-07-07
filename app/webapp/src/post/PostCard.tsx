@@ -4,12 +4,13 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { TweetAnchor } from '../app/anchors/TwitterAnchor';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID } from '../semantics/patterns/patterns';
-import { PLATFORM } from '../shared/types/types';
-import { AppPostFull, AppPostParsedStatus } from '../shared/types/types.posts';
+import { AppPostFull } from '../shared/types/types.posts';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
+import { PLATFORM } from '../shared/types/types.user';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { NanopubStatus } from './NanopubStatus';
 import { PostText } from './PostText';
+import { concatenateThread } from './posts.helper';
 
 export const PostCard = (props: {
   post: AppPostFull;
@@ -49,7 +50,10 @@ export const PostCard = (props: {
           timestamp={tweet?.posted?.timestampMs}></TweetAnchor>
         {!profile ? <NanopubStatus post={post}></NanopubStatus> : <></>}
       </Box>
-      <PostText truncate shade={shade} text={post?.content}></PostText>
+      <PostText
+        truncate
+        shade={shade}
+        text={concatenateThread(post)}></PostText>
 
       <SemanticsEditor
         include={[PATTERN_ID.REF_LABELS]}

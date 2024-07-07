@@ -1,11 +1,12 @@
-from typing import TypedDict, Any
+from typing import TypedDict, List
+from enum import Enum
 
 from loguru import logger
 
 from .parsers.multi_chain_parser import MultiChainParser
 from .init import init_multi_chain_parser_config
 from .configs import OpenrouterAPIConfig
-from .interface import ParserResult
+from .interface import ParserResult, ParsePostRequest
 
 
 class SM_FUNCTION_post_parser_config(TypedDict, total=True):
@@ -16,7 +17,7 @@ class SM_FUNCTION_post_parser_config(TypedDict, total=True):
 
 
 def SM_FUNCTION_post_parser_imp(
-    content, parameters, parser_config: SM_FUNCTION_post_parser_config
+    parserRequest: ParsePostRequest, parser_config: SM_FUNCTION_post_parser_config
 ) -> ParserResult:
     llm_type = parser_config.pop("llm_type")
     open_router_api_config = OpenrouterAPIConfig(**parser_config)
@@ -25,13 +26,15 @@ def SM_FUNCTION_post_parser_imp(
         llm_type=llm_type,
     )
 
+    val_parser_request = ParsePostRequest.model_validate(parserRequest)
+
     parser = MultiChainParser(multi_chain_parser_config)
 
-    logger.info(f"Running parser on content: {content}...")
+    logger.info(f"Running parser on content: {val_parser_request}...")
 
     # TODO change this to handle post and not text
-    result = parser.process_text(
-        content,
+    result = parser.process_parse_request(
+        val_parser_request,
         active_list=[  # using new multi reference tagger
             "keywords",
             "multi_refs_tagger",

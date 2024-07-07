@@ -8,10 +8,12 @@ import {
   useState,
 } from 'react';
 
-import { HexStr } from '../../../../shared/types/types';
+import { useLoadingContext } from '../../../../app/LoadingContext';
+import { useToastContext } from '../../../../app/ToastsContext';
+import { HexStr } from '../../../../shared/types/types.user';
 import { signNanopublication as _signNanopublication } from '../../../../shared/utils/nanopub.sign.util';
+import { cleanPrivateKey } from '../../../../shared/utils/semantics.helper';
 import { useNanopubKeys } from './derive.keys.hook';
-import { getProfile } from './nanopub.utils';
 
 const DEBUG = false;
 
@@ -19,8 +21,8 @@ export type NanopubContextType = {
   profile?: NpProfile;
   profileAddress?: HexStr;
   connect: () => void;
+  connectWithWeb3: () => void;
   disconnect: () => void;
-  isConnecting: boolean;
   needAuthorize?: boolean;
   signNanopublication: ((nanopubStr: string) => Promise<Nanopub>) | undefined;
 };
@@ -29,12 +31,17 @@ const NanopubContextValue = createContext<NanopubContextType | undefined>(
   undefined
 );
 
+export type ConnectIntention = undefined | 'available' | 'web3';
+
 /** Manages the authentication process */
 export const NanopubContext = (props: PropsWithChildren) => {
-  const [connectIntention, setConnectIntention] = useState<boolean>(false);
-  const { rsaKeys, readKeys, removeKeys } = useNanopubKeys(connectIntention);
+  const { open, close } = useLoadingContext();
+  const { show } = useToastContext();
+  const [connectIntention, setConnectIntention] =
+    useState<ConnectIntention>(undefined);
+  const { rsaKeys, readKeys, removeKeys, errorConnecting } =
+    useNanopubKeys(connectIntention);
 
-  const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [profile, setProfile] = useState<NpProfile>();
   const [profileAddress, setProfileAddress] = useState<HexStr>();
 
@@ -47,17 +54,24 @@ export const NanopubContext = (props: PropsWithChildren) => {
     readKeys();
   }, []);
 
+  useEffect(() => {
+    if (errorConnecting) {
+      close();
+      show({ title: 'Error connecting your identity' });
+      reset();
+    }
+  }, [errorConnecting]);
+
   /** set profile */
   const buildProfile = async () => {
     if (rsaKeys) {
       await (init as any)();
 
-      const profile = getProfile(rsaKeys);
+      const profile = new NpProfile(cleanPrivateKey(rsaKeys));
       if (DEBUG) console.log('profile', { profile });
 
       setProfile(profile);
       setProfileAddress(rsaKeys.address);
-      setIsConnecting(false);
     } else {
       reset();
     }
@@ -70,44 +84,48 @@ export const NanopubContext = (props: PropsWithChildren) => {
     }
   }, [rsaKeys]);
 
-  /** keep the rsaPublicKey up to date with the profile */
-  const publicKey = useMemo(() => {
-    if (!profile) return undefined;
-    return profile.toJs().public_key;
-  }, [profile]);
-
   useEffect(() => {
     if (profile) {
-      /** finally, when a profile is set, the connect intentio is fullfilled */
+      /** finally, when a profile is set, the connect intention is fullfilled */
       if (DEBUG) console.log('final setConnectionIntention false');
-      setConnectIntention(false);
+      setConnectIntention(undefined);
+      close();
       return;
     }
   }, [profile]);
 
   const connect = () => {
-    setConnectIntention(true);
+    open({ title: 'Connecting to Nanopub', subtitle: 'Please wait' });
+    setConnectIntention('available');
+  };
+
+  const connectWithWeb3 = () => {
+    open({ title: 'Connecting to Nanopub', subtitle: 'Please wait' });
+    setConnectIntention('web3');
   };
 
   const reset = () => {
-    setIsConnecting(false);
-    setConnectIntention(false);
+    setConnectIntention(undefined);
     setProfile(undefined);
   };
 
-  const signNanopublication = rsaKeys
-    ? async (nanopubStr: string) => {
-        return _signNanopublication(nanopubStr, rsaKeys);
-      }
-    : undefined;
+  const signNanopublication = useMemo(
+    () =>
+      rsaKeys
+        ? async (nanopubStr: string) => {
+            return _signNanopublication(nanopubStr, rsaKeys);
+          }
+        : undefined,
+    [rsaKeys]
+  );
 
   return (
     <NanopubContextValue.Provider
       value={{
         connect,
+        connectWithWeb3,
         disconnect,
         profile,
-        isConnecting,
         profileAddress,
         signNanopublication,
       }}>

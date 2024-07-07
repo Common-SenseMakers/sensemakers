@@ -1,6 +1,6 @@
 import re
 import requests
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from jinja2 import Environment, BaseLoader
 from enum import Enum
 import json
@@ -183,7 +183,7 @@ def extract_external_urls_from_status_tweet(
     Shortened URLs are expanded to long form.
     """
     tweet_id = extract_twitter_status_id(tweet_url)
-    external = set()
+    external = []
     urls = extract_and_expand_urls(tweet_content)
 
     for url in urls:
@@ -193,12 +193,12 @@ def extract_external_urls_from_status_tweet(
             if (
                 url_twitter_id != tweet_id
             ):  # check if url does not share same status id with parsed tweet
-                external.add(url)
+                external.append(url)
         else:
             # not twitter url, add
-            external.add(url)
+            external.append(url)
 
-    return list(external)
+    return remove_dups_ordered(external)
 
 
 def render_to_py_dict(obj_dict, obj_name: str = "object", out_path: str = "output.py"):
@@ -327,3 +327,124 @@ def find_last_occurence_of_any(input: str, strings: List[str]) -> Optional[str]:
             last_occurrence = s
 
     return last_occurrence
+
+
+def trim_str_with_urls(txt: str, max_length: int) -> str:
+    """
+    Takes input string `txt` which may contain any number of urls. Trims `txt`
+    to `max_length` chars while preserving any urls if the cutoff happens in
+    the middle of a url.
+    E.g., trim_str_with_urls("testing https://x.com/FDAadcomms/status/1798107142219796794", 10) = "testing https://x.com/FDAadcomms/status/1798107142219796794"
+    trim_str_with_urls("testing not a valid url", 10) = 'testing no'
+
+    """
+    # Regular expression to match URLs
+    url_pattern = re.compile(r"https?://[^\s]+")
+
+    # Find all URLs in the text
+    urls = list(url_pattern.finditer(txt))
+
+    # If the text is shorter than or equal to the max_length, return it as is
+    if len(txt) <= max_length:
+        return txt
+
+    # Determine if the cut-off point is within a URL
+    for url in urls:
+        url_start, url_end = url.span()
+        if url_start < max_length < url_end:
+            # If the cut-off point is within a URL, return the text up to the end of that URL
+            return txt[:url_end]
+
+    # If the cut-off point is not within any URL, return the text up to max_length
+    return txt[:max_length]
+
+
+def trim_str_with_urls_by_sep(
+    txt: str,
+    max_length: int,
+    sep: str,
+) -> Tuple[List[str], bool]:
+    """
+    Takes an input string `txt` which may contain any number of urls, and also
+    optionally contains any number of special separator strings `sep`.
+    Returns a list of strings `sep_strs: List[str]` containing the substrings of
+    `txt` separated by the `sep` occurences (without including the separators).
+    The returned result `sep_strs`
+    should be uphold `len("".join(sep_strs))<= max_length + M` (for cases where the cutoff
+    occurs in the middle of a URL).
+    Eg, `trim_str_with_urls_by_sep("123<SEP>456789",4,"<SEP>") ==["123", "4"]`
+    Also returns `trimmed` that is `True` if input was trimmed and `False` o.w
+    """
+    # Split the input string by the separator
+    parts = txt.split(sep)
+    sep_strs = []
+    current_length = 0
+    trimmed = False
+
+    for i, part in enumerate(parts):
+        # Calculate the potential length if this part is added
+        potential_length = current_length + len(part)
+
+        # Check if adding this part would exceed the max_length
+        if potential_length > max_length:
+            # Trim the part to fit within the remaining length
+            trimmed_part = trim_str_with_urls(part, max_length - current_length)
+            sep_strs.append(trimmed_part)
+
+            # check if last part was trimmed or we still have parts left
+            if trimmed_part != part or (i + 1) < len(parts):
+                trimmed = True
+            break
+        else:
+            sep_strs.append(part)
+            current_length += len(part)
+
+    return sep_strs, trimmed
+
+
+def trim_parts(parts: List, max_chars: int) -> Tuple[List[str], bool]:
+    """
+    Takes a list of string parts and trims them such that the total length of the
+    concatenated parts does not exceed the specified maximum number of characters.
+    Preserves URLs by ensuring they are not cut off mid-way.
+
+    Args:
+        parts (List[str]): List of string parts to trim.
+        max_chars (int): Maximum number of characters to trim to.
+
+    Returns:
+        Tuple[List[str], bool]: A tuple where the first element is the list of trimmed parts,
+        and the second element is a boolean indicating whether the input was trimmed (True) or not (False).
+    """
+    sep = "<<<SEP>>>"
+    joined_parts = sep.join(parts)
+    res = trim_str_with_urls_by_sep(
+        joined_parts,
+        max_length=max_chars,
+        sep=sep,
+    )
+    return res
+
+
+def trim_parts_to_length(part_lengths: List[int], max_length: int) -> List[int]:
+    """Given a list of part lengths and max_length,
+    return a new list of trimmed part lengths `trimmed_part_lengths`
+    such that `sum(trimmed_part_lengths) <= max_length` while preserving
+    as much of `part_lengths` as possible.
+    E.g., `trim_parts_to_length([1,2,3], 3) == [1,2])`
+    `trim_parts_to_length([1,2,3], 4) == [1,2,1])`
+    """
+    trimmed_part_lengths = []
+    current_length = 0
+
+    for length in part_lengths:
+        if current_length + length <= max_length:
+            trimmed_part_lengths.append(length)
+            current_length += length
+        else:
+            remaining_length = max_length - current_length
+            if remaining_length > 0:
+                trimmed_part_lengths.append(remaining_length)
+            break
+
+    return trimmed_part_lengths

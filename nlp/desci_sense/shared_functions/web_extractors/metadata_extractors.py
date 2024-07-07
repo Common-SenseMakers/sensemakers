@@ -8,7 +8,7 @@ from ..interface import RefMetadata
 
 from .citoid import fetch_citation, fetch_all_citations
 from ..schema.post import RefPost
-from ..utils import flatten
+from ..utils import flatten, remove_dups_ordered
 
 
 def set_metadata_extraction_type(extract_type: str):
@@ -159,12 +159,19 @@ def extract_all_metadata_to_dict(
 def extract_posts_ref_metadata_dict(
     posts: List[RefPost],
     md_type: MetadataExtractionType = MetadataExtractionType.CITOID,
+    extra_urls: List[List[str]] = None,
 ) -> Dict[str, RefMetadata]:
     """
     Extract all reference urls from posts and fetch metadata for them.
     Return dict of metadata keyed by url.
     """
     all_ref_urls = list(set(flatten([p.md_ref_urls() for p in posts])))
+
+    # add extra urls if supplied
+    if extra_urls is None:
+        extra_urls = [[] for _ in posts]
+    all_ref_urls += remove_dups_ordered(flatten(extra_urls))
+
     md_dict = extract_all_metadata_to_dict(
         all_ref_urls, md_type, max_summary_length=500
     )
@@ -190,12 +197,22 @@ def get_refs_metadata_portion(metadata_list: List[RefMetadata]) -> str:
 def get_ref_post_metadata_list(
     post: RefPost,
     md_dict: Dict[str, RefMetadata],
+    extra_urls: List[str] = None,
 ) -> List[RefMetadata]:
     """
-    Returns list of the post's reference metadata
+    Returns list of the post's reference metadata.
+    If extra urls are provided, they are also counted as part of the post ref
+    urls (for example extra_urls could include unprocessed urls due to max length
+    limits).
     """
+    all_ref_urls = post.md_ref_urls()
+
+    # add extra urls if supplied
+    extra_urls = [] if extra_urls is None else extra_urls
+    all_ref_urls += remove_dups_ordered(extra_urls)
+
     md_list = []
-    for ref in post.md_ref_urls():
+    for ref in all_ref_urls:
         if ref in md_dict:
             md = md_dict.get(ref)
             if md:

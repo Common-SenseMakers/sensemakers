@@ -1,8 +1,17 @@
-import { Anchor, Box, Paragraph, Text } from 'grommet';
+import { Anchor, Box, Image, Paragraph, Text } from 'grommet';
+import { Tweet } from 'react-tweet';
+
+import { AppTweet } from './AppTweet';
 
 const truncate = (text: string, size: number) => {
   return text.slice(0, size) + (text.length > size ? '...' : '');
 };
+
+function getTweetId(url: string): string | undefined {
+  const regex = /twitter\.com\/(?:#!\/)?\w+\/status\/(\d+)/;
+  const match = url.match(regex);
+  return match ? match[1] : undefined;
+}
 
 export const RefCard = (props: {
   url: string;
@@ -15,6 +24,12 @@ export const RefCard = (props: {
   const descriptionTruncated =
     props.description && truncate(props.description, 90);
 
+  const tweetId = getTweetId(props.url);
+
+  if (tweetId) {
+    // return <blockquote className="twitter-tweet">{props.url}</blockquote>;
+    return <AppTweet id={tweetId}></AppTweet>;
+  }
   const content = (() => {
     if (!titleTruncated && !descriptionTruncated) {
       const urlTruncated = truncate(props.url, 50);
@@ -26,7 +41,11 @@ export const RefCard = (props: {
     }
 
     return (
-      <>
+      <Box
+        direction="row"
+        align="start"
+        pad={{ horizontal: '12px', vertical: '8px' }}
+        style={{ borderRadius: '12px', border: '1px solid #D1D5DB' }}>
         <Text
           style={{
             fontSize: '14px',
@@ -46,19 +65,13 @@ export const RefCard = (props: {
           }}>
           {descriptionTruncated}
         </Paragraph>
-      </>
+      </Box>
     );
   })();
 
   return (
     <Anchor href={props.url} target="_blank">
-      <Box
-        direction="row"
-        align="start"
-        pad={{ horizontal: '12px', vertical: '8px' }}
-        style={{ borderRadius: '12px', border: '1px solid #D1D5DB' }}>
-        <Box>{content}</Box>
-      </Box>
+      {content}
     </Anchor>
   );
 };

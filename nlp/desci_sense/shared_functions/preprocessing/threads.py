@@ -1,11 +1,19 @@
 from typing import List
 from ..schema.post import QuoteRefPost, ThreadRefPost
+from ..interface import AppThread, AppPost, Author
 
-#
+POST_SEPARATOR = "\n---\n"
+
+
+def concat_post_content(posts: List[AppPost]) -> str:
+    return POST_SEPARATOR.join([p.content for p in posts])
 
 
 def create_thread_from_posts(posts: List[QuoteRefPost]):
     assert len(posts) > 0
+
+    # deep copy posts
+    posts_copy = [p.copy(deep=True) for p in posts]
 
     # gather all urls from thread posts
     all_ref_urls = []
@@ -13,14 +21,14 @@ def create_thread_from_posts(posts: List[QuoteRefPost]):
         all_ref_urls += post.md_ref_urls()
 
     author = posts[0].author
-    content = "\n---\n".join([p.content for p in posts])
+    content = concat_post_content(posts)
     thread_post = ThreadRefPost(
         author=author,
         content=content,
         url=posts[0].url,
-        source_network="twitter",
+        source_network=posts[0].source_network,
         ref_urls=all_ref_urls,
-        posts=posts,
+        posts=posts_copy,
     )
     return thread_post
 

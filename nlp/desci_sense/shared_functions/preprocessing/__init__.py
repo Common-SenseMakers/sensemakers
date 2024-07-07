@@ -1,17 +1,33 @@
 from typing import Optional, List, Dict, TypedDict, Union, Any
+from loguru import logger
 
 # important to use this and not pydantic BaseModel https://medium.com/codex/migrating-to-pydantic-v2-5a4b864621c3
 from langchain.pydantic_v1 import Field, BaseModel
 
-from ..interface import ParsePostRequest, ThreadInterface
+from ..interface import (
+    ParsePostRequest,
+    AppThread,
+    PlatformType,
+    AppPost,
+    Author,
+    MAX_CHARS_PER_POST,
+    MAX_POSTS_PER_REQUEST,
+)
 from ..schema.post import ThreadRefPost, RefPost, QuoteRefPost
 from ..utils import (
     remove_dups_ordered,
     find_last_occurence_of_any,
     extract_and_expand_urls,
     extract_external_urls_from_status_tweet,
+    trim_parts,
+    trim_parts_to_length,
+    trim_str_with_urls,
 )
-from .threads import create_thread_from_posts, trim_thread
+from .threads import (
+    concat_post_content,
+    trim_thread,
+    create_thread_from_posts,
+)
 
 
 # class StreamlitParseRequest(BaseModel):
@@ -22,30 +38,93 @@ from .threads import create_thread_from_posts, trim_thread
 #     post: QuoteRefPost
 
 
-class ParserInput(BaseModel):
-    """
-    Format of input for processing by parser.
-    """
+def convert_app_post_to_ref_post(
+    app_post: AppPost,
+    author: Author,
+) -> RefPost:
+    """_summary_
 
-    thread_post: ThreadRefPost = Field(description="Target thread to parse")
-    max_posts: Optional[int] = Field(
-        description="Maximum number of posts in the thread to process.",
-        default=10,
+    Args:
+        app_post (AppPost): _description_
+        source_network (SocialPlatformType): _description_
+
+    Returns:
+        RefPost: _description_
+    """
+    source_network = author.platformId
+
+    # if source network is twitter, use twitter specific preprocessing
+    if source_network == PlatformType.TWITTER:
+        ref_urls = extract_external_urls_from_status_tweet(
+            app_post.url,
+            app_post.content,
+        )
+
+    else:
+        ref_urls = extract_and_expand_urls(app_post.content)
+
+    return RefPost(
+        author=author.name,
+        url=app_post.url,
+        content=app_post.content,
+        ref_urls=ref_urls,
+        source_network=source_network,
     )
 
 
-# def convert_st_request_to_parser_input(
-#     st_request: StreamlitParseRequest,
-# ) -> ParserInput:
-#     """
-#     Convert StreamlitParseRequest to ParserInput
-#     """
-#     thread = create_thread_from_posts([st_request.post])
-#     return thread
+def convert_app_post_to_quote_ref_post(
+    app_post: AppPost,
+    author: Author,
+) -> QuoteRefPost:
+    """_summary_
+
+    Args:
+        app_post (AppPost): _description_
+
+    Returns:
+        QuoteRefPost: _description_
+    """
+    ref_post = convert_app_post_to_ref_post(app_post, author)
+
+    quoted_post = None
+    quoted_url = None
+    content = ref_post.content
+
+    # handle case where post has quoted thread
+    if app_post.quotedThread:
+        quoted_thread = app_post.quotedThread.thread
+        quoted_author = app_post.quotedThread.author
+        assert len(quoted_thread) > 0
+
+        # currently we only take first post and ignore the rest
+        quoted_post = convert_app_post_to_ref_post(
+            quoted_thread[0],
+            quoted_author,
+        )
+        quoted_url = quoted_post.url
+
+        # add quoted post url to end of quoting post content + ref_urls
+        if quoted_url not in content:
+            content = ref_post.content + " " + quoted_url
+
+        if quoted_url not in ref_post.ref_urls:
+            ref_post.ref_urls.append(quoted_url)
+
+    quote_ref_post = QuoteRefPost(
+        author=ref_post.author,
+        url=ref_post.url,
+        ref_urls=ref_post.ref_urls,
+        content=content,
+        source_network=ref_post.source_network,
+        quoted_post=quoted_post,
+        quoted_url=quoted_url,
+    )
+
+    return quote_ref_post
 
 
 def convert_thread_interface_to_ref_post(
-    thread_interface: ThreadInterface,
+    thread_interface: AppThread,
 ) -> ThreadRefPost:
     """_summary_
 
@@ -55,52 +134,137 @@ def convert_thread_interface_to_ref_post(
     Returns:
         ThreadRefPost: _description_
     """
+    assert len(thread_interface.thread) > 0
 
-    thread_posts_content = thread_interface.content.split("\n---\n")
-
-    # create dict of quote posts keyed by url
-    converted_quoted_posts = [
-        RefPost.from_basic_post_interface(post) for post in thread_interface.quotedPosts
-    ]
-    quote_post_dict = {p.url: p for p in converted_quoted_posts}
-
-    # for collecting all ref urls in thread
-    all_ref_urls = []
-
-    # create QuoteRefPosts from each post in thread
-    quote_ref_posts = []
-
-    for post_content in thread_posts_content:
-        quoted_post_url = find_last_occurence_of_any(
-            post_content, quote_post_dict.keys()
+    posts = []
+    for post in thread_interface.thread:
+        quote_ref_post = convert_app_post_to_quote_ref_post(
+            post, thread_interface.author
         )
-        quoted_post = quote_post_dict.get(quoted_post_url, None)
+        posts.append(quote_ref_post)
 
-        # TODO should be replaced with tweet url when we have it!
-        url = thread_interface.url
+    thread_ref_post = create_thread_from_posts(posts)
 
-        ref_urls = extract_external_urls_from_status_tweet(url, post_content)
-
-        quote_ref_post = QuoteRefPost(
-            author=thread_interface.author.name,
-            url=url,
-            content=post_content,
-            ref_urls=ref_urls,
-            quoted_post=quoted_post,
-        )
-        quote_ref_posts.append(quote_ref_post)
-
-        all_ref_urls += ref_urls
-
-    thread_ref_post = ThreadRefPost(
-        author=thread_interface.author.name,
-        url=thread_interface.url,
-        content=thread_interface.content,
-        source_network=thread_interface.author.platformId,
-        ref_urls=all_ref_urls,
-        posts=quote_ref_posts,
-    )
     return thread_ref_post
+
+
+def trim_post_by_length(quote_ref_post: QuoteRefPost, max_chars: int) -> QuoteRefPost:
+    """
+    Trims post to max chars length. Both post content and
+    quoted post content count towards limit. Post content is prioritized
+    and only then quoted post content.
+
+    Args:
+        quote_ref_post (QuoteRefPost): _description_
+        max_chars (int): _description_
+
+    Returns:
+        QuoteRefPost: _description_
+    """
+    trimmed_post_content = trim_str_with_urls(
+        quote_ref_post.content,
+        max_chars,
+    )
+    remaining_length = max_chars - len(trimmed_post_content)
+
+    new_ref_urls = extract_and_expand_urls(trimmed_post_content)
+
+    trimmed_quote_ref_post = quote_ref_post.copy(deep=True)
+    trimmed_quote_ref_post.content = trimmed_post_content
+    trimmed_quote_ref_post.ref_urls = new_ref_urls
+
+    # if there is still remaining_length, take quoted post content
+    if quote_ref_post.quoted_post:
+        trimmed_quoted_content = trim_str_with_urls(
+            quote_ref_post.quoted_post.content,
+            remaining_length,
+        )
+        new_quoted_urls = extract_and_expand_urls(trimmed_quoted_content)
+        trimmed_quote_ref_post.quoted_post.content = trimmed_quoted_content
+        trimmed_quote_ref_post.quoted_post.ref_urls = new_quoted_urls
+
+    return trimmed_quote_ref_post
+
+
+def trim_thread_by_length(thread: ThreadRefPost, max_chars: int) -> ThreadRefPost:
+    """
+    Trim thread to max chars by removing posts from the end
+    and possibly part of the last post
+
+    Returns:
+        ThreadRefPost: _description_
+    """
+    if thread.char_length() <= max_chars:
+        return thread
+
+    # trim thread
+    thread_part_lengths = [p.char_length() for p in thread.posts]
+    trimmed_part_lengths = trim_parts_to_length(thread_part_lengths, max_chars)
+    is_trimmed = trimmed_part_lengths != thread_part_lengths
+    assert is_trimmed  # should have returned above if not
+
+    assert len(trimmed_part_lengths) <= len(thread_part_lengths)
+
+    trimmed_index = len(trimmed_part_lengths) - 1
+    last_trimmed_part_length = trimmed_part_lengths[trimmed_index]
+    post_to_trim = thread.posts[trimmed_index]
+
+    trimmed_quote_ref_post = trim_post_by_length(
+        post_to_trim,
+        last_trimmed_part_length,
+    )
+
+    # trim extra posts
+    trimmed_thread = trim_thread(thread, max_posts=len(trimmed_part_lengths))
+
+    # replace last post with trimmed post
+    trimmed_thread.posts[trimmed_index] = trimmed_quote_ref_post
+
+    warn_msg = f"""Max length of {max_chars} exceeded! Trimmed thread 
+    from {thread.char_length()} to {trimmed_thread.char_length()}"""
+    logger.warning(warn_msg)
+
+    return trimmed_thread
+
+
+class ParserInput(BaseModel):
+    """
+    Format of input for processing by parser.
+    """
+
+    thread_post: ThreadRefPost = Field(description="Target thread to parse")
+    max_posts: Optional[int] = Field(
+        description="Maximum number of posts in the thread to process.",
+        default=MAX_POSTS_PER_REQUEST,
+    )
+
+    @property
+    def max_chars(self) -> int:
+        """
+        Returns maximum number of chars to process. Note that actual posts
+        might be longer than `MAX_CHARS_PER_POST` depending on the platform,
+        eg Mastodon (500) and Twitter Premium (25k)
+        """
+        return self.max_posts * MAX_CHARS_PER_POST
+
+
+def convert_parse_request_to_parser_input(
+    parse_request: ParsePostRequest,
+) -> ParserInput:
+    """_summary_
+
+    Args:
+        parse_request (ParsePostRequest): _description_
+
+    Returns:
+        ParserInput: _description_
+    """
+    thread = convert_thread_interface_to_ref_post(parse_request.post)
+    parser_input = ParserInput(
+        thread_post=thread,
+        max_posts=MAX_POSTS_PER_REQUEST,
+    )
+    return parser_input
 
 
 class PreprocParserInput(BaseModel):
@@ -122,13 +286,18 @@ def preproc_parser_input(parser_input: ParserInput) -> PreprocParserInput:
         PreprocParserInput: _description_
     """
     orig_thread = parser_input.thread_post
-    new_thread = trim_thread(orig_thread, parser_input.max_posts)
+    new_thread = trim_thread_by_length(orig_thread, parser_input.max_chars)
 
     # get reference urls from trimmed posts
+    # TODO handle urls possibly trimmed from trimmed post (currently will be ignored!)
     excluded_urls = []
-    excluded_posts = orig_thread.posts[parser_input.max_posts :]
+    num_posts_after_trim = len(new_thread.posts)
+    excluded_posts = orig_thread.posts[num_posts_after_trim:]
     for p in excluded_posts:
         excluded_urls += p.md_ref_urls()
+
+    # remove dups
+    excluded_urls = remove_dups_ordered(excluded_urls)
 
     preprocessed_input = PreprocParserInput(
         post_to_parse=new_thread,
@@ -136,22 +305,3 @@ def preproc_parser_input(parser_input: ParserInput) -> PreprocParserInput:
     )
 
     return preprocessed_input
-
-
-# def preproc_parse_post_request(
-#     parse_request: ParsePostRequest,
-#     max_posts: int = 10,
-# ) -> PreprocParsePostRequest:
-#     """
-#     Prepare an app post request for input to the parser.
-#     Includes trimming long threads while preserving all reference urls.
-
-#     Args:
-#         parse_request (ParsePostRequest): input request from app
-#         max_posts (int): max number of posts in thread to parse
-
-#     Returns:
-#         PreprocParsePostRequest: Prepared input for parser
-#     """
-
-# trim thread to `max_post` length

@@ -18,9 +18,8 @@ from ..utils import (
 )
 
 from ..interface import (
-    ThreadInterface,
-    AppPost,
-    SocialPlatformType,
+    AppThread,
+    PlatformType,
 )
 
 
@@ -53,6 +52,9 @@ class Post(Serializable):
         """Return whether this class is serializable."""
         return True
 
+    def char_length(self) -> int:
+        return len(self.content)
+
 
 class RefPost(Post):
     """
@@ -81,28 +83,28 @@ class RefPost(Post):
         """
         return remove_dups_ordered(self.ref_urls)
 
-    @classmethod
-    def from_basic_post_interface(
-        cls,
-        basic_post_interface: AppPost,
-    ):
-        # if source network is twitter, use twitter specific preprocessing
-        if basic_post_interface.source_network == SocialPlatformType.TWITTER:
-            ref_urls = extract_external_urls_from_status_tweet(
-                basic_post_interface.url,
-                basic_post_interface.content,
-            )
+    # @classmethod
+    # def from_basic_post_interface(
+    #     cls,
+    #     basic_post_interface: AppPost,
+    # ):
+    #     # if source network is twitter, use twitter specific preprocessing
+    #     if basic_post_interface.source_network == SocialPlatformType.TWITTER:
+    #         ref_urls = extract_external_urls_from_status_tweet(
+    #             basic_post_interface.url,
+    #             basic_post_interface.content,
+    #         )
 
-        else:
-            ref_urls = extract_and_expand_urls(basic_post_interface.content)
+    #     else:
+    #         ref_urls = extract_and_expand_urls(basic_post_interface.content)
 
-        return cls(
-            author=basic_post_interface.author.name,
-            url=basic_post_interface.url,
-            content=basic_post_interface.content,
-            ref_urls=ref_urls,
-            source_network=basic_post_interface.author.platformId,
-        )
+    #     return cls(
+    #         author=basic_post_interface.author.name,
+    #         url=basic_post_interface.url,
+    #         content=basic_post_interface.content,
+    #         ref_urls=ref_urls,
+    #         source_network=basic_post_interface.author.platformId,
+    #     )
 
 
 class QuoteRefPost(RefPost):
@@ -137,6 +139,11 @@ class QuoteRefPost(RefPost):
 
         return all_ref_urls
 
+    def char_length(self) -> int:
+        post_len = len(self.content)
+        quoted_len = len(self.quoted_post.content) if self.quoted_post else 0
+        return post_len + quoted_len
+
 
 class ThreadRefPost(RefPost):
     """
@@ -168,9 +175,5 @@ class ThreadRefPost(RefPost):
 
         return all_ref_urls
 
-    @classmethod
-    def from_thread_post_interface(
-        cls,
-        thread_post_interface: ThreadInterface,
-    ):
-        pass
+    def char_length(self) -> int:
+        return sum([p.char_length() for p in self.posts])

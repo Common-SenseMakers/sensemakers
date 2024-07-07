@@ -401,11 +401,9 @@ def test_thread_render_single_post():
 
 
 if __name__ == "__main__":
-    thread_post = get_thread_1()
-    dicts = []
-    for post in thread_post.posts:
-        pp = post.dict()
-        pp.pop("metadata")
-        if pp["quoted_post"]:
-            pp["quoted_post"].pop("metadata")
-        dicts.append(pp)
+    ref_post = convert_text_to_ref_post(TEST_POST_TEXT_W_2_REFS)
+    md_dict = extract_posts_ref_metadata_dict([ref_post])
+    md_list = get_ref_post_metadata_list(ref_post, md_dict)
+    ref_post_renderer = RefPostRenderer()
+    rendered = ref_post_renderer.render(ref_post, md_list)
+    target = RENDER_TARGET_MULTI_REF

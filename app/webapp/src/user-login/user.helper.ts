@@ -4,7 +4,7 @@ import {
   AccountDetailsRead,
   AppUserRead,
   PLATFORM,
-} from '../shared/types/types';
+} from '../shared/types/types.user';
 
 export const getAccount = (
   user?: AppUserRead,

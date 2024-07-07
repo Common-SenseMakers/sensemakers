@@ -2,7 +2,7 @@ import { Anchor, Text } from 'grommet';
 import { getAddress } from 'viem';
 import { useEnsName } from 'wagmi';
 
-import { HexStr } from '../shared/types/types';
+import { HexStr } from '../shared/types/types.user';
 import { LoadingDiv } from './LoadingDiv';
 
 export const AppAddress = (props: {
