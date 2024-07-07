@@ -1,5 +1,6 @@
 import { Nanopub } from '@nanopub/sign';
-import { DataFactory, Store, Writer } from 'n3';
+import { Options } from 'discord.js';
+import { DataFactory, Store, Writer, Quad } from 'n3';
 
 import { AppPostFull } from '../../@shared/types/types.posts';
 import { TwitterUserDetails } from '../../@shared/types/types.twitter';
@@ -67,19 +68,32 @@ export const createNanopublication = async (
   const orcidId = orcidDetails && orcidDetails[0].user_id;
   const tweetUrl = `https://x.com/${twitterPath}/status/${originalPlatformPostId}`;
 
+  //Need to fetch oldNpUri when update,  hardcoded for now.
+  const options = {
+    oldNpUri: 'https://example.org/oldNp',
+    orcidId: orcidId as string 
+  }
+
   return await buildSpostNp(
     ethAddress,
-    orcidId as string,
     twitterUsername,
     'sup', // hardcoded for now. Update to get from post
     twitterName,
     semanticsStore,
     content,
-    tweetUrl
+    tweetUrl,
+    options
   );
 };
 
 const { namedNode, quad, literal } = DataFactory;
+
+//define interface for possible extra values
+//oldNpUri is used for updates  
+interface BuildSpostNpOptions {
+  oldNpUri?: string;
+  orcidId?: string;
+}
 
 // Define the function
 export const sendTriplets = (): Store => {
@@ -100,11 +114,12 @@ export const sendTriplets = (): Store => {
 
 export const buildSpostProv = (
   postType: string,
-  orcidId: string,
   twitterHandle: string,
-  tweetUrl: string
+  tweetUrl: string,
+  options: BuildSpostNpOptions = {}
+
 ): Store => {
-  // Create a store
+  const { oldNpUri, orcidId } = options;
   const store = new Store();
 
   // Define the graph URI
@@ -114,93 +129,83 @@ export const buildSpostProv = (
   // Define the subjects, predicates, and objects
   const cosmo = namedNode('https://sense-nets.xyz/');
   const xHandle = namedNode('https://x.com/' + twitterHandle);
-  const assertion = namedNode(
-    'http://purl.org/nanopub/temp/mynanopub#assertion'
-  );
+  const assertion = namedNode('http://purl.org/nanopub/temp/mynanopub#assertion');
   const activity = namedNode('http://purl.org/nanopub/temp/mynanopub#activity');
 
   // Add quads to the store based on post_type
-  const activityType =
-    postType === 'sup'
+  const activityType = postType === 'sup'
       ? namedNode('https://sense-nets.xyz/supervisedActivity')
       : namedNode('https://sense-nets.xyz/unsupervisedActivity');
 
   store.addQuad(
     quad(
-      cosmo,
-      namedNode('http://www.w3.org/ns/prov#actedOnBehalfOf'),
-      xHandle,
+      cosmo, 
+      namedNode('http://www.w3.org/ns/prov#actedOnBehalfOf'), 
+      xHandle, 
       provenanceGraphUri
-    )
-  );
+      )
+      );
   store.addQuad(
     quad(
-      cosmo,
-      namedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
-      namedNode('http://www.w3.org/ns/prov#SoftwareAgent'),
+      cosmo, 
+      namedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), 
+      namedNode('http://www.w3.org/ns/prov#SoftwareAgent'), 
       provenanceGraphUri
-    )
-  );
+      )
+      );
   store.addQuad(
     quad(
-      activity,
-      namedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
-      activityType,
+      activity, 
+      namedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), 
+      activityType, 
       provenanceGraphUri
-    )
-  );
+      ));
   store.addQuad(
     quad(
-      activity,
-      namedNode('http://www.w3.org/ns/prov#wasAssociatedWith'),
-      cosmo,
+      activity, 
+      namedNode('http://www.w3.org/ns/prov#wasAssociatedWith'), 
+      cosmo, 
       provenanceGraphUri
-    )
-  );
+      ));
   store.addQuad(
     quad(
-      assertion,
-      namedNode('http://www.w3.org/ns/prov#wasAttributedTo'),
-      xHandle,
+      assertion, 
+      namedNode('http://www.w3.org/ns/prov#wasAttributedTo'), 
+      xHandle, 
       provenanceGraphUri
-    )
-  );
+      ));
   store.addQuad(
     quad(
-      assertion,
-      namedNode('http://www.w3.org/ns/prov#wasGeneratedBy'),
-      activity,
+      assertion, 
+      namedNode('http://www.w3.org/ns/prov#wasGeneratedBy'), 
+      activity, 
       provenanceGraphUri
-    )
-  );
+      ));
   store.addQuad(
     quad(
-      assertion,
-      namedNode('http://www.w3.org/ns/prov#linksTo'),
-      namedNode(tweetUrl),
+      assertion, 
+      namedNode('http://www.w3.org/ns/prov#linksTo'), 
+      namedNode(tweetUrl), 
       provenanceGraphUri
-    )
-  );
+      ));
 
   // If ORCID ID exists, add it to the provenance graph
   if (orcidId) {
-    const orcidNode = namedNode('https://orcid.org/' + orcidId);
-    store.addQuad(
-      quad(
-        assertion,
-        namedNode('http://www.w3.org/ns/prov#wasAttributedTo'),
-        orcidNode,
-        provenanceGraphUri
-      )
-    );
-    store.addQuad(
-      quad(
-        xHandle,
-        namedNode('http://www.w3.org/ns/prov#wasAttributedTo'),
-        orcidNode,
-        provenanceGraphUri
-      )
-    );
+      const orcidNode = namedNode('https://orcid.org/' + orcidId);
+      store.addQuad(
+        quad(
+          assertion, 
+          namedNode('http://www.w3.org/ns/prov#wasAttributedTo'), 
+          orcidNode, 
+          provenanceGraphUri
+          ));
+      store.addQuad(
+        quad(
+          xHandle, 
+          namedNode('http://www.w3.org/ns/prov#wasAttributedTo'), 
+          orcidNode, 
+          provenanceGraphUri
+          ));
   }
 
   return store;
@@ -226,7 +231,7 @@ export const buildSpostAssertion = (
   );
 
   // Add quads from the semantics store to the assertion store with the graph URI
-  semanticsStore.getQuads(null, null, null, null).forEach((parsedQuad) => {
+  semanticsStore.getQuads(null, null, null, null).forEach((parsedQuad:Quad) => {
     const newQuad = quad(
       parsedQuad.subject,
       parsedQuad.predicate,
@@ -248,86 +253,83 @@ export const buildSpostAssertion = (
 
 export const buildSpostPubinfo = (
   ethAddress: string,
-  orcidId: string,
   twitterHandle: string,
   postType: string,
-  name: string
+  name: string,
+  options: BuildSpostNpOptions = {}
+
 ): Store => {
+  const { oldNpUri, orcidId } = options;
   const BASE_URI = 'http://purl.org/nanopub/temp/mynanopub#';
-  const baseGraphUri = namedNode(BASE_URI);
-  const pubinfoGraphUri = namedNode(BASE_URI + 'pubinfo');
+  const baseGraphUri = namedNode(BASE_URI)
+  const pubinfoGraphUri = namedNode(BASE_URI + "pubinfo");
   const xHandle = namedNode('https://x.com/' + twitterHandle);
 
   // Create a new store for the assertion
   const store = new Store();
   //adding constant triplets
   store.addQuad(
-    xHandle,
-    namedNode('http://xmlns.com/foaf/0.1/name'),
-    literal(name),
-    pubinfoGraphUri
-  );
+      xHandle,
+      namedNode('http://xmlns.com/foaf/0.1/name'),
+      literal(name),
+      pubinfoGraphUri
+  )
   // If ORCID ID exists, add it to the provenance graph
   if (orcidId) {
-    const orcidNode = namedNode('https://orcid.org/' + orcidId);
-    store.addQuad(
-      quad(
-        orcidNode,
-        namedNode('http://xmlns.com/foaf/0.1/name'),
-        literal(name),
-        pubinfoGraphUri
-      )
-    );
-    store.addQuad(
-      quad(
-        baseGraphUri,
-        namedNode('http://www.w3.org/ns/prov#wasAttributedTo'),
-        orcidNode,
-        pubinfoGraphUri
-      )
-    );
+      const orcidNode = namedNode('https://orcid.org/' + orcidId);
+      store.addQuad(quad(orcidNode, namedNode('http://xmlns.com/foaf/0.1/name'), literal(name), pubinfoGraphUri));
+      store.addQuad(quad(baseGraphUri, namedNode('http://www.w3.org/ns/prov#wasAttributedTo'), orcidNode, pubinfoGraphUri));
   }
 
   store.addQuad(
-    baseGraphUri,
-    namedNode('http://www.w3.org/ns/prov#wasAttributedTo'),
-    namedNode('https://x.com/' + twitterHandle),
-    pubinfoGraphUri
-  );
+      baseGraphUri,
+      namedNode('http://www.w3.org/ns/prov#wasAttributedTo'),
+      namedNode('https://x.com/' + twitterHandle),
+      pubinfoGraphUri
+  )
   store.addQuad(
-    baseGraphUri,
-    namedNode('http://purl.org/nanopub/x/hasNanopubType'),
-    namedNode('https://sense-nets.xyz/SemanticPost'),
-    pubinfoGraphUri
-  );
+      baseGraphUri,
+      namedNode('http://purl.org/nanopub/x/hasNanopubType'),
+      namedNode('https://sense-nets.xyz/SemanticPost'),
+      pubinfoGraphUri
+  )
   store.addQuad(
-    baseGraphUri,
-    namedNode('http://purl.org/nanopub/x/wasCreatedAt'),
-    namedNode('https://sense-nets.xyz/'),
-    pubinfoGraphUri
-  );
+      baseGraphUri,
+      namedNode('http://purl.org/nanopub/x/wasCreatedAt'),
+      namedNode('https://sense-nets.xyz/'),
+      pubinfoGraphUri
+  )
   store.addQuad(
-    baseGraphUri,
-    namedNode('http://www.w3.org/2000/01/rdf-schema#label'),
-    literal('CoSMO Semantic Post'),
-    pubinfoGraphUri
-  );
+      baseGraphUri,
+      namedNode('http://www.w3.org/2000/01/rdf-schema#label'),
+      literal("CoSMO Semantic Post"),
+      pubinfoGraphUri
+  )
   store.addQuad(
-    baseGraphUri,
-    namedNode('https://sense-nets.xyz/hasRootSigner'),
-    literal(ethAddress),
-    pubinfoGraphUri
-  );
+      baseGraphUri,
+      namedNode('https://sense-nets.xyz/hasRootSinger'),
+      literal(ethAddress),
+      pubinfoGraphUri
+  )
+  //If we call this function to update, then oldNpUri is non empty and we add a triplet
+  if (oldNpUri) {
+      store.addQuad(
+          namedNode('http://purl.org/nanopub/temp/mynanopub#'),
+          namedNode('http://purl.org/nanopub/x/supersesdes'),
+          namedNode(oldNpUri),
+          namedNode('http://purl.org/nanopub/temp/mynanopub#pubinfo')
+      )
+  }
   //if post type is unsupervised then add
   if (postType == 'unsup') {
-    store.addQuad(
-      quad(
-        namedNode(BASE_URI + 'sig'),
-        namedNode('http://purl.org/nanopub/x/singedBy'),
-        namedNode('https://sense-nets.xyz/'),
-        pubinfoGraphUri
-      )
-    );
+      store.addQuad(
+          quad(
+              namedNode(BASE_URI + 'sig'),
+              namedNode('http://purl.org/nanopub/x/singedBy'),
+              namedNode('https://sense-nets.xyz/'),
+              pubinfoGraphUri
+          )
+      );
   }
   return store;
 };
@@ -370,36 +372,26 @@ export const buildNpHead = (): Store => {
 
 export const buildSpostNp = async (
   ethAddress: string,
-  orcidId: string,
   twitterHandle: string,
   postType: string,
   name: string,
   semantics: Store,
   postText: string,
-  tweetUrl: string
+  tweetUrl: string,
+  options: BuildSpostNpOptions = {}
   // privateKey: string
 ): Promise<Nanopub> => {
   return new Promise((resolve, reject) => {
     const assertionStore = buildSpostAssertion(
-      semantics,
-      twitterHandle,
-      postText
-    );
+      semantics, twitterHandle, postText
+      );
     const provStore = buildSpostProv(
-      postType,
-      orcidId,
-      twitterHandle,
-      tweetUrl
-    );
+      postType, twitterHandle, tweetUrl, options
+      );
     const pubinfoStore = buildSpostPubinfo(
-      ethAddress,
-      orcidId,
-      twitterHandle,
-      postType,
-      name
-    );
+      ethAddress, twitterHandle, postType, name, options
+      );
     const headStore = buildNpHead();
-
     // Create a writer and add prefixes
     const writer = new Writer({ format: 'application/trig' });
     writer.addPrefixes({
@@ -425,7 +417,7 @@ export const buildSpostNp = async (
         null,
         namedNode('http://purl.org/nanopub/temp/mynanopub#head')
       )
-      .forEach((quad) => {
+      .forEach((quad:Quad) => {
         writer.addQuad(quad);
       });
 
@@ -437,7 +429,7 @@ export const buildSpostNp = async (
         null,
         namedNode('http://purl.org/nanopub/temp/mynanopub#assertion')
       )
-      .forEach((quad) => {
+      .forEach((quad:Quad) => {
         writer.addQuad(quad);
       });
 
@@ -449,7 +441,7 @@ export const buildSpostNp = async (
         null,
         namedNode('http://purl.org/nanopub/temp/mynanopub#provenance')
       )
-      .forEach((quad) => {
+      .forEach((quad:Quad) => {
         writer.addQuad(quad);
       });
 
@@ -461,7 +453,7 @@ export const buildSpostNp = async (
         null,
         namedNode('http://purl.org/nanopub/temp/mynanopub#pubinfo')
       )
-      .forEach((quad) => {
+      .forEach((quad:Quad) => {
         writer.addQuad(quad);
       });
 
