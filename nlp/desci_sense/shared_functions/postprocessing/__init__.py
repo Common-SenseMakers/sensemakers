@@ -12,6 +12,7 @@ from ..interface import (
     ParserSupport,
     ParserResult,
     OntologyInterface,
+    ZoteroItemTypeDefinition,
 )
 
 from ..configs import ParserChainType, PostProcessType
@@ -374,6 +375,26 @@ def convert_keywords_to_rdf_triplets(keywords: List[str]) -> List[RDFTriplet]:
     return triplets
 
 
+def convert_item_types_to_rdf_triplets(
+    item_types: List[str], reference_urls: List[str]
+) -> List[RDFTriplet]:
+    """
+    Converts item type and reference url information into RDF triplets
+    using the ZoteroItemTypeDefinition predicate
+    """
+    assert len(reference_urls) == len(item_types)
+    triplets = [
+        RDFTriplet(
+            subject=URIRef(ref_url),
+            predicate=URIRef(ZoteroItemTypeDefinition().uri),
+            object=Literal(item_type),
+        )
+        for ref_url, item_type in zip(reference_urls, item_types)
+    ]
+
+    return triplets
+
+
 def convert_triplets_to_graph(triplets: List[RDFTriplet]) -> Graph:
     """Convert list of rdf triplets to rdf graph"""
     g = Graph()
@@ -486,6 +507,14 @@ def post_process_firebase(
         kw_triplets = convert_keywords_to_rdf_triplets(keywords)
         for t in kw_triplets:
             graph.add(t.to_tuple())
+
+    # add item type triplets
+    item_type_triplets = convert_item_types_to_rdf_triplets(
+        combined_parser_output.item_types,
+        combined_parser_output.reference_urls,
+    )
+    for t in item_type_triplets:
+        graph.add(t.to_tuple())
 
     # gather support info
     parser_support: ParserSupport = get_support_data(
