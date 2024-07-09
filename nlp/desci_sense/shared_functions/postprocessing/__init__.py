@@ -13,6 +13,7 @@ from ..interface import (
     ParserResult,
     OntologyInterface,
     ZoteroItemTypeDefinition,
+    QuotedPostDefinition,
 )
 
 from ..configs import ParserChainType, PostProcessType
@@ -134,6 +135,10 @@ class CombinedParserOutput(BaseModel):
     metadata_list: List[RefMetadata] = Field(
         default_factory=list,
         description="List of extracted reference metadata returned by metadata extractor",
+    )
+    quoted_post_url: Optional[str] = Field(
+        default=None,
+        description="URL of quoted post, if processed post quotes another post.",
     )
     debug: Optional[Dict] = Field(
         default_factory=dict,
@@ -375,12 +380,25 @@ def convert_keywords_to_rdf_triplets(keywords: List[str]) -> List[RDFTriplet]:
     return triplets
 
 
+def create_quoted_post_triplet(quoted_post_url: str):
+    triplet = RDFTriplet(
+        predicate=URIRef(QuotedPostDefinition().uri),
+        object=URIRef(quoted_post_url),
+    )
+    return triplet
+
+
 def convert_item_types_to_rdf_triplets(
     item_types: List[str], reference_urls: List[str]
 ) -> List[RDFTriplet]:
     """
     Converts item type and reference url information into RDF triplets
-    using the ZoteroItemTypeDefinition predicate
+    using the ZoteroItemTypeDefinition predicate.
+    For example,
+    convert_item_types_to_rdf_triplets(['preprint'], ['https://arxiv.org/abs/2402.04607']) -->
+    `[RDFTriplet(subject=rdflib.term.URIRef('https://arxiv.org/abs/2402.04607'), predicate=rdflib.term.URIRef('https://sense-nets.xyz/hasZoteroItemType'), object=rdflib.term.Literal('preprint'))]`
+
+
     """
     assert len(reference_urls) == len(item_types)
     triplets = [
@@ -441,6 +459,9 @@ def combine_from_raw_results(
         ] = output.reasoning
 
     combined = CombinedParserOutput(**combined_parser_output)
+
+    # add quoted post url
+    combined.quoted_post_url = post.quoted_url
 
     if unprocessed_urls:
         # add unprocessed urls to result
@@ -515,6 +536,11 @@ def post_process_firebase(
     )
     for t in item_type_triplets:
         graph.add(t.to_tuple())
+
+    # add quotesPost triplet if present
+    if combined_parser_output.quoted_post_url:
+        triplet = create_quoted_post_triplet(combined_parser_output.quoted_post_url)
+        graph.add(triplet.to_tuple())
 
     # gather support info
     parser_support: ParserSupport = get_support_data(

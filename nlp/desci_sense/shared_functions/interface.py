@@ -108,6 +108,22 @@ class ZoteroItemTypeDefinition(OntologyConceptDefinition):
     )
 
 
+class QuotedPostDefinition(OntologyConceptDefinition):
+    """
+    Definition of quotedPost relation for a post that quotes another post
+    https://github.com/Common-SenseMakers/sensemakers/blob/nlp-dev/nlp/desci_sense/schema/Nanopub_schema/semantic_post_quote_schema.md
+    """
+
+    name: str = Field(default="zoteroItemType", description="Concept name.")
+    uri: str = Field(
+        default="https://sense-nets.xyz/quotesPost",
+        description="Linked data URI for this concept.",
+    )
+    versions: List[str] = Field(
+        ["v0"], description="Which ontology versions is this item included in."
+    )
+
+
 class isAConceptDefintion(OntologyConceptDefinition):
     name: str = Field(default="isA", description="Concept name.")
     uri: str = Field(
