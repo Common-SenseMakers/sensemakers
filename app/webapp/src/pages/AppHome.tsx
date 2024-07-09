@@ -30,8 +30,6 @@ export const AppHome = (props: {}) => {
     </>
   );
 
-  console.log({ loginStatus, twitterProfile });
-
   const { content, nav } = (() => {
     if (loginStatus === LoginStatus.LoggedOut) {
       return { content: <AppWelcome></AppWelcome>, nav: <></> };
