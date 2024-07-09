@@ -15,6 +15,14 @@ export const createNanopublication = async (
   post: AppPostFull,
   user: AppUser
 ) => {
+  return createNanopublicationInner(post, user);
+};
+
+export const createNanopublicationInner = async (
+  post: AppPostFull,
+  user: AppUser,
+  oldNpUri?: string
+) => {
   const semantics = post.semantics;
   const content = PostsHelper.concatenateThread(post.generic);
   const twitter = UsersHelper.getAccount(
@@ -69,8 +77,8 @@ export const createNanopublication = async (
 
   //Need to fetch oldNpUri when update,  hardcoded for now.
   const options = {
-    oldNpUri: 'https://example.org/oldNp',
-    orcidId: orcidId as string,
+    oldNpUri,
+    orcidId: orcidId,
   };
 
   return await buildSpostNp(
