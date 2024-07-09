@@ -60,6 +60,7 @@ for (let entry of Object.entries(I18Keys)) {
 
 const translationENG: Record<I18Keys, string> = {
   [I18Keys.signInX]: 'Sign in with X',
+
   [I18Keys.introTitle]: 'Your ideas matter again',
   [I18Keys.introSubtitle]:
     'Transform your social media activity into meaningful scientific contributions',

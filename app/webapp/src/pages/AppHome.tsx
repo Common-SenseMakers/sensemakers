@@ -2,7 +2,6 @@ import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { UserHome } from '../user-home/UserHome';
-import { EmailInput } from '../user-login/EmailInput';
 import {
   LoginStatus,
   useAccountContext,
@@ -36,11 +35,7 @@ export const AppHome = (props: {}) => {
     } else if (loginStatus === LoginStatus.LoggingIn) {
       return { content: LoadingPlaceholder, nav: <></> };
     } else if (loginStatus === LoginStatus.LoggedIn) {
-      if (!email || !email.verified) {
-        return { content: <EmailInput></EmailInput>, nav: <></> };
-      } else {
-        return { content: <UserHome></UserHome>, nav: <GlobalNav></GlobalNav> };
-      }
+      return { content: <UserHome></UserHome>, nav: <GlobalNav></GlobalNav> };
     } else {
       return { content: LoadingPlaceholder, nav: <></> };
     }

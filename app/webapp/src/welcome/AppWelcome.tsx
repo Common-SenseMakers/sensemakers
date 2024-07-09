@@ -9,13 +9,14 @@ import { AppButton, AppHeading, AppSubtitle } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useTwitterContext } from '../user-login/contexts/platforms/TwitterContext';
+import { useAppSigner } from '../user-login/contexts/signer/SignerContext';
 
 export const AppWelcome = (props: {}) => {
   const { t } = useTranslation();
-  const { connect: connectTwitter, isGoing } = useTwitterContext();
+  const { connectMagic, isConnectingMagic } = useAppSigner();
 
   const content = (() => {
-    if (connectTwitter) {
+    if (connectMagic) {
       return (
         <>
           <AppHeading level="1">{t(I18Keys.introTitle)}</AppHeading>
@@ -31,10 +32,9 @@ export const AppWelcome = (props: {}) => {
           <AppButton
             margin={{ top: 'large' }}
             primary
-            icon={<TwitterIcon></TwitterIcon>}
-            disabled={isGoing}
-            label={t(I18Keys.signInX)}
-            onClick={() => connectTwitter('read')}></AppButton>
+            disabled={isConnectingMagic}
+            label={t(I18Keys.emailInputBtn)}
+            onClick={() => connectMagic(true)}></AppButton>
         </>
       );
     } else {

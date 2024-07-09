@@ -5,9 +5,8 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { useSearchParams } from 'react-router-dom';
 
-import { _appFetch, useAppFetch } from '../../api/app.fetch';
+import { _appFetch } from '../../api/app.fetch';
 import { TwitterUserProfile } from '../../shared/types/types.twitter';
 import {
   AppUserRead,
@@ -15,7 +14,6 @@ import {
   PLATFORM,
 } from '../../shared/types/types.user';
 import { getAccount } from '../user.helper';
-import { LS_TWITTER_CONTEXT_KEY } from './platforms/TwitterContext';
 
 const DEBUG = true;
 
@@ -27,8 +25,6 @@ export type AccountContextType = {
   isConnected: boolean;
   twitterProfile?: TwitterUserProfile;
   email?: EmailDetails;
-  setEmail: (email: string) => void;
-  isSettingEmail: boolean;
   disconnect: () => void;
   refresh: () => void;
   token?: string;
@@ -58,17 +54,18 @@ export const AccountContext = (props: PropsWithChildren) => {
   const [hasTriedFetchingUser, setHasTriedFetchingUser] =
     useState<boolean>(false);
 
-  const _token = localStorage.getItem(OUR_TOKEN_NAME);
-  const _twitterContext = localStorage.getItem(LS_TWITTER_CONTEXT_KEY);
-  const [token, setToken] = useState<string | undefined>(
-    _token ? _token : undefined
-  );
-
+  const [token, setToken] = useState<string | undefined>(undefined);
   const [loginStatus, setLoginStatus] = useState<LoginStatus>(
-    _token || _twitterContext ? LoginStatus.LoggingIn : LoginStatus.LoggedOut
+    LoginStatus.LoggedOut
   );
 
-  const [isSettingEmail, setIsSettingEmail] = useState<boolean>(false);
+  useEffect(() => {
+    const _token = localStorage.getItem(OUR_TOKEN_NAME);
+
+    if (_token) {
+      setToken(_token);
+    }
+  }, []);
 
   const checkToken = () => {
     const _token = localStorage.getItem(OUR_TOKEN_NAME);
@@ -85,35 +82,16 @@ export const AccountContext = (props: PropsWithChildren) => {
   const refresh = async () => {
     try {
       if (token) {
-        setLoginStatus(LoginStatus.LoggingIn);
         const user = await _appFetch<AppUserRead>('/api/auth/me', {}, token);
-        setLoginStatus(LoginStatus.LoggedIn);
         if (DEBUG) console.log('got connected user', { user });
         setConnectedUser(user);
         setHasTriedFetchingUser(true);
       } else {
         setConnectedUser(null);
-        if (loginStatus === LoginStatus.LoggedIn)
-          setLoginStatus(LoginStatus.LoggedOut);
       }
     } catch (e) {
       disconnect();
       setLoginStatus(LoginStatus.LoggedOut);
-    }
-  };
-
-  const setEmail = async (email: string) => {
-    if (token) {
-      setIsSettingEmail(true);
-      _appFetch<AppUserRead>('/api/auth/setEmail', { email }, token)
-        .then(() => {
-          setIsSettingEmail(false);
-          refresh();
-        })
-        .catch((e) => {
-          console.error(e);
-          setIsSettingEmail(false);
-        });
     }
   };
 
@@ -128,6 +106,15 @@ export const AccountContext = (props: PropsWithChildren) => {
     refresh();
   }, [token]);
 
+  /** logged in status is strictly linked to the connected user,
+   * this is the single place on the app where
+   */
+  useEffect(() => {
+    const status = connectedUser ? LoginStatus.LoggedIn : LoginStatus.LoggedOut;
+    if (DEBUG) console.log(`setLoginStatus ${status}`);
+    setLoginStatus(status);
+  }, [connectedUser]);
+
   const disconnect = () => {
     if (DEBUG) console.log('disconnecting');
     localStorage.removeItem(OUR_TOKEN_NAME);
@@ -140,8 +127,6 @@ export const AccountContext = (props: PropsWithChildren) => {
 
   const email = connectedUser ? connectedUser.email : undefined;
 
-  console.log({ email, connectedUser });
-
   return (
     <AccountContextValue.Provider
       value={{
@@ -149,8 +134,6 @@ export const AccountContext = (props: PropsWithChildren) => {
         hasTriedFetchingUser,
         twitterProfile,
         email,
-        setEmail,
-        isSettingEmail,
         isConnected: connectedUser !== undefined && connectedUser !== null,
         disconnect,
         refresh,

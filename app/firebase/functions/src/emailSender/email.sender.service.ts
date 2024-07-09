@@ -1,7 +1,6 @@
 import { Message, ServerClient } from 'postmark';
 
-import { AppUser, EMAIL_VERIFY_TOKEN_NAME } from '../@shared/types/types.user';
-import { APP_URL } from '../config/config.runtime';
+import { AppUser } from '../@shared/types/types.user';
 import { logger } from '../instances/logger';
 
 const postmark = require('postmark');
@@ -50,23 +49,6 @@ export class EmailSenderService {
       Subject: 'Hello from Sensecast',
       HtmlBody: `<strong>Hello</strong> dear Sensecast user. ${JSON.stringify(posts)}`,
       TextBody: `Hello dear Postmark user ${JSON.stringify(posts)}`,
-      MessageStream: 'outbound',
-    };
-
-    await this.callSendEmail(message);
-  }
-
-  async sendVerificationEmail(user: AppUser) {
-    if (!user.email) {
-      throw new Error(`User ${user.userId} has no email`);
-    }
-
-    const link = `${APP_URL.value()}?${EMAIL_VERIFY_TOKEN_NAME}=${user.email?.token}`;
-    const message: Message = {
-      From: 'pepo@microrevolutions.com',
-      To: user.email?.email,
-      Subject: 'Hello from Sensecast',
-      HtmlBody: `<strong>Click</strong> <a href=${link}>${link}</a>`,
       MessageStream: 'outbound',
     };
 

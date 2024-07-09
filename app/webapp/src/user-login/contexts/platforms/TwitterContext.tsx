@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 import { useAppFetch } from '../../../api/app.fetch';
 import { useToastContext } from '../../../app/ToastsContext';
@@ -19,7 +19,7 @@ import {
   TwitterSignupContext,
 } from '../../../shared/types/types.twitter';
 import { PLATFORM } from '../../../shared/types/types.user';
-import { LoginStatus, useAccountContext } from '../AccountContext';
+import { useAccountContext } from '../AccountContext';
 
 const DEBUG = false;
 
@@ -44,12 +44,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
   const { t } = useTranslation();
   const verifierHandled = useRef(false);
 
-  const {
-    connectedUser,
-    refresh: refreshConnected,
-    setToken: setOurToken,
-    setLoginStatus,
-  } = useAccountContext();
+  const { connectedUser, refresh: refreshConnected } = useAccountContext();
 
   const [searchParams, setSearchParams] = useSearchParams();
   const state_param = searchParams.get('state');
@@ -60,9 +55,6 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
   const [isGoing, setIsGoing] = useState<boolean>(false);
   const [isSigningUp, setIsSigningUp] = useState<boolean>(false);
-
-  const location = useLocation();
-  const navigate = useNavigate();
 
   const needConnect = !connectedUser || !connectedUser[PLATFORM.Twitter];
 
@@ -118,13 +110,11 @@ export const TwitterContext = (props: PropsWithChildren) => {
             throw new Error('Unexpected state');
           }
 
-          setLoginStatus(LoginStatus.LoggingIn);
           appFetch<HandleSignupResult>(`/api/auth/${PLATFORM.Twitter}/signup`, {
             ...context,
             code: code_param,
           }).then((result) => {
-            if (result && result.ourAccessToken) {
-              setOurToken(result.ourAccessToken);
+            if (result) {
               localStorage.removeItem(LS_TWITTER_CONTEXT_KEY);
             }
 
