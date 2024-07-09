@@ -60,9 +60,11 @@ export const AccountContext = (props: PropsWithChildren) => {
   );
 
   useEffect(() => {
+    if (DEBUG) console.log('reading token from localstorage');
     const _token = localStorage.getItem(OUR_TOKEN_NAME);
 
     if (_token) {
+      if (DEBUG) console.log('tokend found in localstorage');
       setToken(_token);
     }
   }, []);

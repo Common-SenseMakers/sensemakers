@@ -105,7 +105,6 @@ export const SignerContext = (props: PropsWithChildren) => {
     (openUI: boolean) => {
       setErrorConnecting(false);
       setIsConnectingMagic(true);
-      setLoginStatus(LoginStatus.LoggingIn);
 
       if (DEBUG) console.log('connecting magic signer', { signer });
       createMagicSigner(openUI)
