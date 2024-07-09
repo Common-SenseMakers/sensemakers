@@ -99,37 +99,6 @@ export const SignerContext = (props: PropsWithChildren) => {
     [address, signer]
   );
 
-  /** prepare SIWE message once we have the address */
-  useEffect(() => {
-    if (address && loginStatus === LoginStatus.LoggingIn && signer) {
-      const messageCreator = new SiweMessage({
-        scheme: window.location.protocol.slice(0, -1),
-        domain: window.location.host,
-        address,
-        statement: 'Sign in using Ethereum',
-        uri: origin,
-        version: '1',
-        chainId: 1,
-      });
-      const message = messageCreator.prepareMessage();
-
-      if (DEBUG) console.log('Signing in with Ethereum', { address, message });
-
-      _signMessage(message).then((signature: string) => {
-        appFetch<HandleSignupResult>(`/api/auth/${PLATFORM.Nanopub}/signup`, {
-          signature,
-        }).then((result) => {
-          if (result && result.ourAccessToken) {
-            if (DEBUG)
-              console.log('Signup with ethereum worked, setting token');
-            setOurToken(result.ourAccessToken);
-          }
-          refreshConnected();
-        });
-      });
-    }
-  }, [address]);
-
   const { disconnect: disconnectInjected } = useDisconnect();
 
   const connectMagic = useCallback(
