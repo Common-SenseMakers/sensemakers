@@ -62,7 +62,10 @@ export const replaceTinyUrlsWithExpandedUrls = (
     return text;
   }
   urls.forEach((url) => {
-    text = text.replace(url.url, url.expanded_url);
+    text = text.replace(
+      url.url,
+      url.unwound_url ? url.unwound_url : url.expanded_url
+    );
   });
   return text;
 };
@@ -88,7 +91,9 @@ export const convertToAppTweetBase = (tweet: TweetV2): AppTweetBase => {
       appTweetBase[field] = tweet[field] as any;
     }
   });
-
+  appTweetBase[REQUIRED_TWEET_FIELDS.Text] = getTweetTextWithUrls(
+    appTweetBase as AppTweetBase
+  );
   return appTweetBase as AppTweetBase;
 };
 
