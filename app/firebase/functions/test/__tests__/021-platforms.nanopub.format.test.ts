@@ -125,7 +125,8 @@ describe('nanopublication format', () => {
           username: 'test-username',
           name: 'test-name',
         },
-        rsaKeys.publicKey
+        rsaKeys.publicKey,
+        true
       );
 
       if (!introNanopub) {

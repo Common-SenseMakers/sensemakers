@@ -22,7 +22,11 @@ import {
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
 import { TwitterUserDetails } from '../../@shared/types/types.twitter';
-import { PLATFORM, UserDetailsBase } from '../../@shared/types/types.user';
+import {
+  AutopostOption,
+  PLATFORM,
+  UserDetailsBase,
+} from '../../@shared/types/types.user';
 import { getEthToRSAMessage } from '../../@shared/utils/nanopub.sign.util';
 import { cleanPrivateKey } from '../../@shared/utils/semantics.helper';
 import { TransactionManager } from '../../db/transaction.manager';
@@ -83,13 +87,17 @@ export class NanopubService
       throw new Error(`Twitter username or name not found`);
     }
 
+    const autopostingEnabled =
+      user.settings.autopost[PLATFORM.Nanopub].value !== AutopostOption.MANUAL;
+
     const introNanopub = await createIntroNanopublication(
       params,
       {
         username: twitterUsername,
         name: twitterName,
       },
-      this.config.rsaKeys.publicKey
+      this.config.rsaKeys.publicKey,
+      autopostingEnabled
     );
 
     return { ...params, introNanopub: introNanopub.rdf() };
