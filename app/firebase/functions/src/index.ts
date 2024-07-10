@@ -120,6 +120,9 @@ exports[AUTOFETCH_POSTS_TASK] = onTaskDispatched(
     memory: envDeploy.CONFIG_MEMORY,
     minInstances: envDeploy.CONFIG_MININSTANCE,
     secrets,
+    retryConfig: {
+      maxAttempts: 1,
+    },
   },
   async (req) => {
     void (await autofetchUserPosts(req));
