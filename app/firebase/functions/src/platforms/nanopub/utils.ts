@@ -532,6 +532,12 @@ export const buildIntroNp = async (
 
     const derivationProofNode = namedNode(`${BASE_URI}derivationProof`);
     writer.addQuad(
+        keyDeclarationNode,
+        namedNode('https://sense-nets.xyz/hasDerivationProof'),
+        derivationProofNode,
+        assertionGraph
+      );
+    writer.addQuad(
       derivationProofNode,
       namedNode(`${npx}hasAlgorithm`),
       namedNode('https://eips.ethereum.org/EIPS/eip-191'),
