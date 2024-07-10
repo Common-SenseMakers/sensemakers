@@ -449,7 +449,7 @@ export const buildIntroNp = async (
   options: BuildIntroNpOptions = {}
 ): Promise<Nanopub> => {
   return new Promise((resolve, reject) => {
-    const { orcidId, signDelegation } = options;
+    const { orcidId, signDelegation, oldNpUri } = options;
     const headStore = buildNpHead();
 
     // Define the graph URIs
@@ -531,6 +531,12 @@ export const buildIntroNp = async (
     );
 
     const derivationProofNode = namedNode(`${BASE_URI}derivationProof`);
+    writer.addQuad(
+        keyDeclarationNode,
+        namedNode('https://sense-nets.xyz/hasDerivationProof'),
+        derivationProofNode,
+        assertionGraph
+      );
     writer.addQuad(
       derivationProofNode,
       namedNode(`${npx}hasAlgorithm`),
@@ -630,6 +636,14 @@ export const buildIntroNp = async (
       twitterNode,
       pubinfoGraph
     );
+    if (oldNpUri) {
+        writer.addQuad(
+          namedNode('http://purl.org/nanopub/temp/mynanopub#'),
+          namedNode('http://purl.org/nanopub/x/supersesdes'),
+          namedNode(oldNpUri),
+          pubinfoGraph
+        );
+      }
 
     // Instantiate Nanopub profile (ORCID and name are optional)
     //const profile = new NpProfile(privateKey, "https://orcid.org/" + orcidId, name);
