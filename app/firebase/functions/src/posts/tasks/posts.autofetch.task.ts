@@ -39,13 +39,21 @@ export const autofetchUserPosts = async (req: Request) => {
 
   const { postsManager } = createServices();
 
-  const postsCreated = await postsManager.fetchUser({
-    userId,
-    params: { expectedAmount: 999 },
-  });
-  /** once the post is fetch a listner to the DB will trigger the 
-  post to be parsed, and autoposted */
+  try {
+    const postsCreated = await postsManager.fetchUser({
+      userId,
+      params: { expectedAmount: 999 },
+    });
+    /** once the post is fetch a listner to the DB will trigger the 
+      post to be parsed, and autoposted */
 
-  // return for test purposes
-  return postsCreated;
+    // return for test purposes
+    return postsCreated;
+  } catch (error: any) {
+    /** if hit a rate limit, don't throw and fail the task, otherwise throw */
+    if (!error.message.includes('code: 429')) {
+      throw error;
+    }
+    return undefined;
+  }
 };
