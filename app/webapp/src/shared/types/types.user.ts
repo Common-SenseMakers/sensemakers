@@ -95,9 +95,16 @@ export interface UserSettings {
 
 export type UserSettingsUpdate = Partial<UserSettings>;
 
+export interface EmailDetails {
+  email: string;
+  verified: boolean;
+  token: string;
+  expire: number;
+}
+
 export interface UserWithSettings {
   settings: UserSettings;
-  email?: string;
+  email?: EmailDetails;
 }
 
 /**
@@ -139,4 +146,29 @@ export interface UserPlatformProfile {
   platformId: string;
   user_id: string;
   profile: any;
+}
+
+export const EMAIL_VERIFY_TOKEN_NAME = 'verifyEmailToken';
+
+/** Test users support for mocks and tests */
+export interface TestUserCredentials {
+  userId: string;
+  twitter: TwitterAccountCredentials;
+  nanopub: NanopubAccountCredentials;
+}
+
+export interface TwitterAccountCredentials {
+  id: string;
+  username: string;
+  password: string;
+  type: 'read' | 'write';
+}
+
+export interface OrcidAccountCredentials {
+  username: string;
+  password: string;
+}
+
+export interface NanopubAccountCredentials {
+  ethPrivateKey: HexStr;
 }

@@ -17,9 +17,8 @@ import {
   AutopostOption,
   PLATFORM,
 } from '../../src/@shared/types/types.user';
-import { USE_REAL_NOTIFICATIONS } from '../../src/config/config.runtime';
+import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
-import { TEST_THREADS } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { triggerAutofetchPosts } from '../../src/posts/tasks/posts.autofetch.task';
 import { resetDB } from '../utils/db';
 import {
@@ -27,7 +26,13 @@ import {
   _02_publishTweet,
 } from './reusable/create-post-fetch';
 import { updateUserSettings } from './reusable/update.settings';
-import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
+import {
+  TEST_THREADS,
+  USE_REAL_NANOPUB,
+  USE_REAL_PARSER,
+  USE_REAL_TWITTER,
+} from './setup';
+import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
 const DEBUG_PREFIX = `030-process`;
@@ -39,7 +44,7 @@ describe('051-autofetch-autopost', () => {
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
-    notifications: USE_REAL_NOTIFICATIONS ? 'spy' : 'mock',
+    emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
   });
 
   before(async () => {
@@ -52,7 +57,11 @@ describe('051-autofetch-autopost', () => {
     let thread: PlatformPostPosted<TwitterThread>;
 
     before(async () => {
-      user = await _01_createAndFetchUsers(services, { DEBUG, DEBUG_PREFIX });
+      const testUser = testCredentials[0];
+      user = await _01_createAndFetchUsers(services, testUser.twitter.id, {
+        DEBUG,
+        DEBUG_PREFIX,
+      });
     });
 
     it('upates user autopost settings', async () => {

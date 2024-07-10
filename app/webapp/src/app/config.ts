@@ -2,10 +2,7 @@ export const FUNCTIONS_BASE = process.env.FUNCTIONS_BASE;
 
 export const ORCID_CLIENT_ID = process.env.ORCID_CLIENT_ID;
 export const ORCID_API_URL = 'https://orcid.org';
-export const APP_URL =
-  process.env.NODE_ENV !== 'production'
-    ? 'http://127.0.0.1:3000/'
-    : 'https://sensemakers.netlify.app/';
+export const APP_URL = window.location.origin;
 
 export const ORCID_REDIRECT_URL = APP_URL;
 

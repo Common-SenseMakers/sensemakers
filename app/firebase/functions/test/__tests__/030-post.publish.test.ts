@@ -5,16 +5,17 @@ import {
   PlatformPostSignerType,
 } from '../../src/@shared/types/types.platform.posts';
 import {
+  AppPostFull,
   AppPostRepublishedStatus,
   AppPostReviewStatus,
+  GenericThread,
   PostsQueryStatus,
 } from '../../src/@shared/types/types.posts';
 import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
-import { USE_REAL_NOTIFICATIONS } from '../../src/config/config.runtime';
+import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
-import { TEST_THREADS } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
 import {
@@ -22,7 +23,13 @@ import {
   _02_publishTweet,
   _03_fetchAfterPublish,
 } from './reusable/create-post-fetch';
-import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
+import {
+  TEST_THREADS,
+  USE_REAL_NANOPUB,
+  USE_REAL_PARSER,
+  USE_REAL_TWITTER,
+} from './setup';
+import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
 const DEBUG_PREFIX = `030-process`;
@@ -36,7 +43,7 @@ describe('030-process', () => {
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
-    notifications: USE_REAL_NOTIFICATIONS ? 'spy' : 'mock',
+    emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
   });
 
   before(async () => {
@@ -48,7 +55,11 @@ describe('030-process', () => {
     let user: AppUser | undefined;
 
     before(async () => {
-      user = await _01_createAndFetchUsers(services, { DEBUG, DEBUG_PREFIX });
+      const testUser = testCredentials[0];
+      user = await _01_createAndFetchUsers(services, testUser.twitter.id, {
+        DEBUG,
+        DEBUG_PREFIX,
+      });
     });
 
     it('publish a tweet in the name of the test user', async () => {
@@ -244,7 +255,7 @@ describe('030-process', () => {
 
       const post = publishedPosts[0];
 
-      const threadPrev = post.thread;
+      const threadPrev = post.generic.thread;
       const newThread = threadPrev.map((genericPostPrev) => {
         return {
           ...genericPostPrev,
@@ -252,9 +263,15 @@ describe('030-process', () => {
         };
       });
 
-      const newPost = {
-        ...post,
+      const newGeneric: GenericThread = {
+        author: post.generic.author,
+        url: post.generic.url,
         thread: newThread,
+      };
+
+      const newPost: AppPostFull = {
+        ...post,
+        generic: newGeneric,
       };
 
       /** send updated post (content and semantics did not changed) */
@@ -266,8 +283,8 @@ describe('030-process', () => {
 
       const readPost = await services.postsManager.getPost(post.id, true);
 
-      expect(readPost.thread).to.have.length(threadPrev.length);
-      expect(readPost.thread[0].content).to.equal(newThread[0].content);
+      expect(readPost.generic.thread).to.have.length(threadPrev.length);
+      expect(readPost.generic.thread[0].content).to.equal(newThread[0].content);
     });
   });
 });

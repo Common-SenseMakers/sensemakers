@@ -19,6 +19,22 @@ describe('twitter utility functions', () => {
     const appTweets = convertToAppTweets(result.data, result.includes);
     expect(appTweets).to.not.be.undefined;
     expect(appTweets.length).to.be.equal(result.data.length);
+
+    const expandedUrlTweet = appTweets.find(
+      (tweet) => tweet.id === '1798792109031559184'
+    );
+    expect(expandedUrlTweet).to.not.be.undefined;
+    expect(
+      expandedUrlTweet?.text.includes(
+        'https://x.com/rtk254/status/1798549107507974626'
+      )
+    ).to.be.true;
+
+    const unwoundUrlTweet = appTweets.find(
+      (tweet) => tweet.id === '1793202484871037102'
+    );
+    expect(unwoundUrlTweet).to.not.be.undefined;
+    expect(unwoundUrlTweet?.text.includes('https://pepo.is/')).to.be.true;
   });
 
   it('extracts the primary thread from a thread tree (grouped by conversation_id)', async () => {

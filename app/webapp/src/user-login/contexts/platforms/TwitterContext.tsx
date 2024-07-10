@@ -19,11 +19,11 @@ import {
   TwitterSignupContext,
 } from '../../../shared/types/types.twitter';
 import { PLATFORM } from '../../../shared/types/types.user';
-import { useAccountContext } from '../AccountContext';
+import { LoginStatus, useAccountContext } from '../AccountContext';
 
 const DEBUG = false;
 
-const LS_TWITTER_CONTEXT_KEY = 'twitter-signin-context';
+export const LS_TWITTER_CONTEXT_KEY = 'twitter-signin-context';
 
 /** Manages the authentication process with Twitter */
 export type TwitterContextType = {
@@ -48,6 +48,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
     connectedUser,
     refresh: refreshConnected,
     setToken: setOurToken,
+    setLoginStatus,
   } = useAccountContext();
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -111,20 +112,20 @@ export const TwitterContext = (props: PropsWithChildren) => {
           refreshConnected();
           setSearchParams(searchParams);
         } else {
-          localStorage.removeItem(LS_TWITTER_CONTEXT_KEY);
-
           const context = JSON.parse(contextStr) as TwitterSignupContext;
 
           if (context.state !== state_param) {
             throw new Error('Unexpected state');
           }
 
+          setLoginStatus(LoginStatus.LoggingIn);
           appFetch<HandleSignupResult>(`/api/auth/${PLATFORM.Twitter}/signup`, {
             ...context,
             code: code_param,
           }).then((result) => {
             if (result && result.ourAccessToken) {
               setOurToken(result.ourAccessToken);
+              localStorage.removeItem(LS_TWITTER_CONTEXT_KEY);
             }
 
             searchParams.delete('state');
@@ -139,7 +140,6 @@ export const TwitterContext = (props: PropsWithChildren) => {
           setSearchParams(searchParams);
         }
       }
-      navigate(location.pathname, { replace: true });
     }
   }, [state_param, code_param, error_param, searchParams, setSearchParams]);
 

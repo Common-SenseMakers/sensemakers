@@ -1,5 +1,3 @@
-import { Message, ServerClient } from 'postmark';
-
 import { ActivityType } from '../@shared/types/types.activity';
 import {
   NotificationCreate,
@@ -12,13 +10,12 @@ import { AutopostOption } from '../@shared/types/types.user';
 import { ActivityRepository } from '../activity/activity.repository';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
+import { EmailSenderService } from '../emailSender/email.sender.service';
 import { logger } from '../instances/logger';
 import { PostsHelper } from '../posts/posts.helper';
 import { PostsRepository } from '../posts/posts.repository';
 import { UsersRepository } from '../users/users.repository';
 import { NotificationsRepository } from './notifications.repository';
-
-const postmark = require('postmark');
 
 export const DEBUG = true;
 export const DEBUG_PREFIX = `NOTIFICATION-SERVICE`;
@@ -33,18 +30,14 @@ export interface EmailServiceConfig {
 }
 
 export class NotificationService {
-  protected postmark: ServerClient;
-
   constructor(
     public db: DBInstance,
     public notificationsRepo: NotificationsRepository,
     public postsRepo: PostsRepository,
     public activityRepo: ActivityRepository,
     public usersRepo: UsersRepository,
-    config: EmailServiceConfig
-  ) {
-    this.postmark = new postmark.ServerClient(config.apiKey);
-  }
+    public emailSender: EmailSenderService
+  ) {}
 
   createNotification(
     notification: NotificationCreate,
@@ -170,7 +163,7 @@ export class NotificationService {
         true
       );
 
-      const postText = PostsHelper.concatenateThread(post);
+      const postText = PostsHelper.concatenateThread(post.generic);
 
       return {
         content: postText,
@@ -219,17 +212,11 @@ export class NotificationService {
   }
 
   async sendDigest(userId: string, posts: EmailPostDetails[]) {
-    const message: Message = {
-      From: 'pepo@microrevolutions.com',
-      To: 'pepo.ospina@gmail.com',
-      Subject: 'Hello from Sensecast',
-      HtmlBody: `<strong>Hello</strong> dear Sensecast user. ${JSON.stringify(posts)}`,
-      TextBody: `Hello dear Postmark user ${JSON.stringify(posts)}`,
-      MessageStream: 'outbound',
-    };
-
     try {
-      const res = await this.postmark.sendEmail(message);
+      const user = await this.db.run((manager) =>
+        this.usersRepo.getUser(userId, manager, true)
+      );
+      const res = await this.emailSender.sendUserDigest(user, posts);
       logger.debug(`sendDigest`, { res }, DEBUG_PREFIX);
     } catch (e) {
       logger.error(`sendDigest`, { e }, DEBUG_PREFIX);

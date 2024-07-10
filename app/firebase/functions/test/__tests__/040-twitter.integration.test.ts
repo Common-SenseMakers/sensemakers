@@ -2,18 +2,13 @@ import { expect } from 'chai';
 import { TwitterApi } from 'twitter-api-v2';
 
 import { PLATFORM } from '../../src/@shared/types/types.user';
-import { USE_REAL_NOTIFICATIONS } from '../../src/config/config.runtime';
-import {
-  TestUserCredentials,
-  authenticateTestUsers,
-} from '../utils/authenticate.users';
+import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
+import { authenticateTestUsers } from '../utils/authenticate.users';
 import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
+import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
 const NUM_TWITTER_USERS = 1;
-const TEST_ACCOUNTS: TestUserCredentials[] = JSON.parse(
-  process.env.TEST_USER_ACCOUNTS as string
-);
 
 /** skip for now as it will invalidate access tokens */
 describe.skip('twitter integration', () => {
@@ -22,20 +17,13 @@ describe.skip('twitter integration', () => {
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
-    notifications: USE_REAL_NOTIFICATIONS ? 'spy' : 'mock',
+    emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
   });
-
-  if (!TEST_ACCOUNTS) {
-    throw new Error('test acccounts undefined');
-  }
-  if (TEST_ACCOUNTS.length < NUM_TWITTER_USERS) {
-    throw new Error('need at least two test accounts');
-  }
 
   it(`authenticates ${NUM_TWITTER_USERS} twitter users with the oauth 2.0 flow for reading access`, async () => {
     const appUsers = await services.db.run((manager) =>
       authenticateTestUsers(
-        TEST_ACCOUNTS.slice(0, NUM_TWITTER_USERS),
+        testCredentials.slice(0, NUM_TWITTER_USERS),
         services,
         manager
       )

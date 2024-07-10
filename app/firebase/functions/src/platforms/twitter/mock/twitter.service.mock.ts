@@ -11,11 +11,13 @@ import {
   TwitterDraft,
   TwitterGetContextParams,
   TwitterSignupContext,
-  TwitterSignupData,
   TwitterThread,
   TwitterUserDetails,
 } from '../../../@shared/types/types.twitter';
-import { UserDetailsBase } from '../../../@shared/types/types.user';
+import {
+  TestUserCredentials,
+  UserDetailsBase,
+} from '../../../@shared/types/types.user';
 import { APP_URL } from '../../../config/config.runtime';
 import { TransactionManager } from '../../../db/transaction.manager';
 import { logger } from '../../../instances/logger';
@@ -35,14 +37,6 @@ let state: TwitterTestState = {
 };
 
 export type TwitterMockConfig = 'real' | 'mock-publish' | 'mock-signup';
-
-export const TEST_THREADS: string[][] = process.env.TEST_THREADS
-  ? JSON.parse(process.env.TEST_THREADS as string)
-  : [];
-
-export const TWITTER_USER_ID_MOCKS = 'sense_nets_bot';
-export const TWITTER_USERNAME_MOCKS = 'sense_nets_bot';
-export const TWITTER_NAME_MOCKS = 'SenseNet Bot';
 
 const getSampleTweet = (
   id: string,
@@ -78,17 +72,20 @@ const getSampleTweet = (
   };
 };
 
-export const initThreads = () => {
+export const initThreads = (
+  testThreads: string[][],
+  testUser: TestUserCredentials
+) => {
   const now = Date.now();
 
-  const threads = TEST_THREADS.map((thread, ixThread): TwitterThread => {
+  const threads = testThreads.map((thread, ixThread): TwitterThread => {
     const tweets = thread.map((content, ixTweet) => {
       const idTweet = ixThread * 100 + ixTweet;
       const createdAt = now + ixThread * 100 + 10 * ixTweet;
       state.latestTweetId = idTweet;
       return getSampleTweet(
         idTweet.toString().padStart(5, '0'),
-        TWITTER_USER_ID_MOCKS,
+        testUser.twitter.id,
         createdAt,
         ixThread.toString().padStart(5, '0'),
         content
@@ -99,9 +96,9 @@ export const initThreads = () => {
       conversation_id: `${ixThread}`,
       tweets,
       author: {
-        id: TWITTER_USER_ID_MOCKS,
-        name: TWITTER_NAME_MOCKS,
-        username: TWITTER_USERNAME_MOCKS,
+        id: testUser.twitter.id,
+        name: testUser.twitter.username,
+        username: testUser.twitter.username,
       },
     };
   });
@@ -109,8 +106,6 @@ export const initThreads = () => {
   state.threads = threads;
   state.threads.reverse();
 };
-
-initThreads();
 
 /** make private methods public */
 type MockedType = Omit<TwitterService, 'fetchInternal' | 'getUserClient'> & {
@@ -124,7 +119,8 @@ type MockedType = Omit<TwitterService, 'fetchInternal' | 'getUserClient'> & {
  */
 export const getTwitterMock = (
   twitterService: TwitterService,
-  type: TwitterMockConfig
+  type: TwitterMockConfig,
+  testUser?: TestUserCredentials
 ) => {
   if (type === 'real') {
     return twitterService;
@@ -136,6 +132,10 @@ export const getTwitterMock = (
     when(mocked.publish(anything(), anything())).thenCall(
       (postPublish: PlatformPostPublish<TwitterDraft>) => {
         logger.warn(`called twitter publish mock`, postPublish);
+
+        if (!testUser) {
+          throw new Error('test user not provided');
+        }
 
         const tweet: TweetV2SingleResult = {
           data: {
@@ -152,9 +152,9 @@ export const getTwitterMock = (
           conversation_id: (++state.latestConvId).toString(),
           tweets: [convertToAppTweetBase(tweet.data)],
           author: {
-            id: TWITTER_USER_ID_MOCKS,
-            name: TWITTER_NAME_MOCKS,
-            username: TWITTER_USERNAME_MOCKS,
+            id: testUser.twitter.id,
+            name: testUser.twitter.username,
+            username: testUser.twitter.username,
           },
         };
 
@@ -195,39 +195,27 @@ export const getTwitterMock = (
       }
     );
 
-    if (type === 'mock-signup') {
-      when(mocked.getSignupContext(anything(), anything())).thenCall(
-        (
-          userId?: string,
-          params?: TwitterGetContextParams
-        ): TwitterSignupContext => {
-          return {
-            url: `${APP_URL.value()}?code=${TWITTER_USERNAME_MOCKS}&state=testState`,
-            state: 'testState',
-            codeVerifier: 'testCodeVerifier',
-            codeChallenge: '',
-            callback_url: APP_URL.value(),
-            type: 'read',
-          };
-        }
-      );
+    when(mocked.getSignupContext(anything(), anything())).thenCall(
+      (
+        userId?: string,
+        params?: TwitterGetContextParams
+      ): TwitterSignupContext => {
+        return {
+          url: `${APP_URL.value()}?code=testCode&state=testState`,
+          state: 'testState',
+          codeVerifier: 'testCodeVerifier',
+          codeChallenge: '',
+          callback_url: APP_URL.value(),
+          type: 'read',
+        };
+      }
+    );
 
-      when(mocked.handleSignupData(anything())).thenCall(
-        (data: TwitterSignupData): TwitterUserDetails => {
-          return {
-            user_id: TWITTER_USER_ID_MOCKS,
-            signupDate: Date.now(),
-            profile: {
-              id: TWITTER_USER_ID_MOCKS,
-              name: TWITTER_NAME_MOCKS,
-              username: TWITTER_USERNAME_MOCKS,
-              profile_image_url:
-                'https://pbs.twimg.com/profile_images/1753077803258449920/2vI5Y2Wx_normal.png',
-            },
-          };
-        }
-      );
-    }
+    when(mocked.handleSignupData(anything())).thenCall(
+      (data: TwitterUserDetails): TwitterUserDetails => {
+        return data;
+      }
+    );
 
     return instance(mocked) as unknown as TwitterService;
   }

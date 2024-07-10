@@ -8,19 +8,28 @@ import { NotificationFreq } from '../@shared/types/types.notifications';
 import {
   ALL_IDENTITY_PLATFORMS,
   AccountDetailsRead,
+  AppUser,
   AppUserRead,
   AutopostOption,
+  EmailDetails,
   PLATFORM,
   UserSettings,
   UserSettingsUpdate,
 } from '../@shared/types/types.user';
+import { EMAIL_VER_TOKEN_EXPIRE } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
+import { EmailSenderService } from '../emailSender/email.sender.service';
 import { logger } from '../instances/logger';
 import { IdentityServicesMap } from '../platforms/platforms.service';
+import { TimeService } from '../time/time.service';
 import { UsersHelper } from './users.helper';
 import { UsersRepository } from './users.repository';
-import { getPrefixedUserId, getUsernameTag } from './users.utils';
+import {
+  generateToken,
+  getPrefixedUserId,
+  getUsernameTag,
+} from './users.utils';
 
 const DEBUG = false;
 
@@ -40,6 +49,8 @@ export class UsersService {
     public db: DBInstance,
     public repo: UsersRepository,
     public identityPlatforms: IdentityServicesMap,
+    public time: TimeService,
+    public emailSender: EmailSenderService,
     protected ourToken: OurTokenConfig
   ) {}
 
@@ -282,13 +293,21 @@ export class UsersService {
   public async getUserProfile(userId: string, manager: TransactionManager) {
     const user = await this.repo.getUser(userId, manager, true);
 
-    /** extract the profile for each account */
+    /** delete the token, from the public profile */
+    const email: EmailDetails | undefined = user.email
+      ? {
+          ...user.email,
+          token: '',
+        }
+      : undefined;
+
     const userRead: AppUserRead = {
       userId,
-      email: user.email,
+      email,
       settings: user.settings,
     };
 
+    /** extract the profile for each account */
     ALL_IDENTITY_PLATFORMS.forEach((platform) => {
       const accounts = UsersHelper.getAccounts(user, platform);
 
@@ -314,9 +333,56 @@ export class UsersService {
     });
   }
 
-  updateEmail(userId: string, email: string) {
+  private async setEmailAndNotify(
+    emailStr: string,
+    user: AppUser,
+    manager: TransactionManager
+  ) {
+    const email: AppUserRead['email'] = {
+      email: emailStr,
+      verified: false,
+      token: generateToken(),
+      expire: this.time.now() + EMAIL_VER_TOKEN_EXPIRE,
+    };
+
+    await this.repo.setEmail(user.userId, email, manager);
+
+    const updatedUser = await this.repo.getUser(user.userId, manager, true);
+    await this.emailSender.sendVerificationEmail(updatedUser);
+  }
+
+  setEmail(userId: string, emailStr: string) {
     return this.db.run(async (manager) => {
-      await this.repo.updateEmail(userId, email, manager);
+      const user = await this.repo.getUser(userId, manager, true);
+      if (user.email) {
+        throw new Error('Email already set');
+      }
+
+      await this.setEmailAndNotify(emailStr, user, manager);
+    });
+  }
+
+  verifyEmail(userId: string, token: string) {
+    return this.db.run(async (manager) => {
+      const user = await this.repo.getUser(userId, manager, true);
+      if (!user.email) {
+        throw new Error('Email details not found');
+      }
+
+      if (user.email.token !== token) {
+        throw new Error('Token does not match');
+      }
+
+      if (user.email.expire < this.time.now()) {
+        /** resend verification email if expired */
+        await this.setEmailAndNotify(user.email.email, user, manager);
+      }
+
+      await this.repo.setEmail(
+        userId,
+        { ...user.email, verified: true, token: '' },
+        manager
+      );
     });
   }
 }

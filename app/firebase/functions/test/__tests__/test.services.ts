@@ -4,12 +4,13 @@ import { PLATFORM } from '../../src/@shared/types/types.user';
 import { ActivityRepository } from '../../src/activity/activity.repository';
 import { ActivityService } from '../../src/activity/activity.service';
 import { DBInstance } from '../../src/db/instance';
+import { EmailSenderService } from '../../src/emailSender/email.sender.service';
+import {
+  EmailSenderMockConfig,
+  getEmailSenderMock,
+} from '../../src/emailSender/email.sender.service.mock';
 import { Services } from '../../src/instances/services';
 import { NotificationService } from '../../src/notifications/notification.service';
-import {
-  NotificationsMockConfig,
-  getNotificationsMock,
-} from '../../src/notifications/notification.service.mock';
 import { NotificationsRepository } from '../../src/notifications/notifications.repository';
 import {
   ParserMockConfig,
@@ -41,17 +42,18 @@ import { getTimeMock } from '../../src/time/mock/time.service.mock';
 import { TimeService } from '../../src/time/time.service';
 import { UsersRepository } from '../../src/users/users.repository';
 import { UsersService } from '../../src/users/users.service';
+import { testCredentials } from './test.accounts';
 
 export interface TestServicesConfig {
   twitter: TwitterMockConfig;
   nanopub: NanopubMockConfig;
   parser: ParserMockConfig;
   time: 'real' | 'mock';
-  notifications: NotificationsMockConfig;
+  emailSender: EmailSenderMockConfig;
 }
 
 export type TestServices = Services & {
-  notificationsMock?: NotificationService;
+  emailMock?: EmailSenderService;
 };
 
 export const getTestServices = (config: TestServicesConfig) => {
@@ -100,7 +102,8 @@ export const getTestServices = (config: TestServicesConfig) => {
     clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
   });
 
-  const twitter = getTwitterMock(_twitter, config.twitter);
+  const testUser = testCredentials[0];
+  const twitter = getTwitterMock(_twitter, config.twitter, testUser);
 
   /** nanopub */
   const _nanopub = new NanopubService(time, {
@@ -117,11 +120,27 @@ export const getTestServices = (config: TestServicesConfig) => {
   identityServices.set(PLATFORM.Twitter, twitter);
   identityServices.set(PLATFORM.Nanopub, nanopub);
 
-  /** users service */
-  const usersService = new UsersService(db, userRepo, identityServices, {
-    tokenSecret: process.env.OUR_TOKEN_SECRET as string,
-    expiresIn: '30d',
+  const _email = new EmailSenderService({
+    apiKey: process.env.EMAIL_CLIENT_SECRET as string,
   });
+
+  const { instance: email, mock: emailMock } = getEmailSenderMock(
+    _email,
+    config.emailSender
+  );
+
+  /** users service */
+  const usersService = new UsersService(
+    db,
+    userRepo,
+    identityServices,
+    time,
+    email,
+    {
+      tokenSecret: process.env.OUR_TOKEN_SECRET as string,
+      expiresIn: '30d',
+    }
+  );
 
   /** all platforms */
   platformsMap.set(PLATFORM.Twitter, twitter);
@@ -156,19 +175,14 @@ export const getTestServices = (config: TestServicesConfig) => {
     parser
   );
 
-  const _notifications = new NotificationService(
+  const notifications = new NotificationService(
     db,
     notificationsRepo,
     postsRepo,
     activityRepo,
     userRepo,
-    {
-      apiKey: process.env.EMAIL_CLIENT_SECRET as string,
-    }
+    email
   );
-
-  const { instance: notifications, mock: notificationsMock } =
-    getNotificationsMock(_notifications, config.notifications);
 
   const activity = new ActivityService(activityRepo);
 
@@ -179,7 +193,7 @@ export const getTestServices = (config: TestServicesConfig) => {
     time: time,
     db,
     notifications,
-    notificationsMock,
+    emailMock,
     activity,
   };
 

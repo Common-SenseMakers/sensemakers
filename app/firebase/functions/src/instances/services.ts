@@ -11,14 +11,15 @@ import {
   OUR_TOKEN_SECRET,
   TWITTER_CLIENT_ID,
   TWITTER_CLIENT_SECRET,
+  USE_REAL_EMAIL,
   USE_REAL_NANOPUB,
-  USE_REAL_NOTIFICATIONS,
   USE_REAL_PARSER,
   USE_REAL_TWITTERX,
 } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
+import { EmailSenderService } from '../emailSender/email.sender.service';
+import { getEmailSenderMock } from '../emailSender/email.sender.service.mock';
 import { NotificationService } from '../notifications/notification.service';
-import { getNotificationsMock } from '../notifications/notification.service.mock';
 import { NotificationsRepository } from '../notifications/notifications.repository';
 import { getParserMock } from '../parser/mock/parser.service.mock';
 import { ParserService } from '../parser/parser.service';
@@ -31,6 +32,7 @@ import {
   PlatformsMap,
   PlatformsService,
 } from '../platforms/platforms.service';
+import { getTestCredentials } from '../platforms/twitter/mock/test.users';
 import { getTwitterMock } from '../platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../platforms/twitter/twitter.service';
 import { PlatformPostsRepository } from '../posts/platform.posts.repository';
@@ -74,9 +76,13 @@ export const createServices = () => {
     clientSecret: TWITTER_CLIENT_SECRET.value(),
   });
 
+  const testCredentials = getTestCredentials();
+  const testUser = testCredentials && testCredentials[0];
+
   const twitter = getTwitterMock(
     _twitter,
-    USE_REAL_TWITTERX.value() ? 'real' : 'mock-signup'
+    USE_REAL_TWITTERX.value() ? 'real' : 'mock-signup',
+    testUser
   );
 
   const _nanopub = new NanopubService(time, {
@@ -100,11 +106,28 @@ export const createServices = () => {
   platformsMap.set(PLATFORM.Twitter, twitter);
   platformsMap.set(PLATFORM.Nanopub, nanopub);
 
-  /** users service */
-  const usersService = new UsersService(db, userRepo, identityPlatforms, {
-    tokenSecret: OUR_TOKEN_SECRET.value(),
-    expiresIn: OUR_EXPIRES_IN,
+  /** email sender service */
+  const _email = new EmailSenderService({
+    apiKey: EMAIL_CLIENT_SECRET.value(),
   });
+
+  const { instance: email } = getEmailSenderMock(
+    _email,
+    USE_REAL_EMAIL.value() ? 'real' : 'mock'
+  );
+
+  /** users service */
+  const usersService = new UsersService(
+    db,
+    userRepo,
+    identityPlatforms,
+    time,
+    email,
+    {
+      tokenSecret: OUR_TOKEN_SECRET.value(),
+      expiresIn: OUR_EXPIRES_IN,
+    }
+  );
 
   /** platforms service */
   const platformsService = new PlatformsService(
@@ -142,19 +165,14 @@ export const createServices = () => {
   const activity = new ActivityService(activityRepo);
 
   /** notification service */
-  const _notifications = new NotificationService(
+
+  const notifications = new NotificationService(
     db,
     notificationsRepo,
     postsRepo,
     activityRepo,
     userRepo,
-    {
-      apiKey: EMAIL_CLIENT_SECRET.value(),
-    }
-  );
-  const { instance: notifications } = getNotificationsMock(
-    _notifications,
-    USE_REAL_NOTIFICATIONS.value() ? 'spy' : 'mock'
+    email
   );
 
   /** all services */
@@ -173,7 +191,7 @@ export const createServices = () => {
       USE_REAL_PARSER: USE_REAL_PARSER.value(),
       USE_REAL_TWITTER: USE_REAL_TWITTERX.value(),
       USE_REAL_NANOPUB: USE_REAL_NANOPUB.value(),
-      USE_REAL_NOTIFICATIONS: USE_REAL_NOTIFICATIONS.value(),
+      USE_REAL_EMAIL: USE_REAL_EMAIL.value(),
     });
   }
   return services;

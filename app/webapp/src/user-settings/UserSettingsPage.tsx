@@ -89,6 +89,11 @@ export const UserSettingsPage = () => {
       <AppHeading>Settings</AppHeading>
 
       <Box pad="medium">
+        <Box margin={{ bottom: 'medium' }}>
+          <Text>Email:</Text>
+          <Text>{connectedUser.email?.email}</Text>
+        </Box>
+
         <Text>Choose:</Text>
 
         <AppButton

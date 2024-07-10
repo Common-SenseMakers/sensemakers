@@ -45,10 +45,13 @@ export const FUNCTIONS_PY_URL = envRuntime.FUNCTIONS_PY_URL;
 export const USE_REAL_PARSER = envRuntime.USE_REAL_PARSER;
 export const USE_REAL_TWITTERX = envRuntime.USE_REAL_TWITTERX;
 export const USE_REAL_NANOPUB = envRuntime.USE_REAL_NANOPUB;
-export const USE_REAL_NOTIFICATIONS = envRuntime.USE_REAL_NOTIFICATIONS;
+export const USE_REAL_EMAIL = envRuntime.USE_REAL_EMAIL;
+
+export const TEST_USER_ACCOUNTS = envRuntime.TEST_USER_ACCOUNTS;
 
 export const OUR_TOKEN_SECRET = envRuntime.OUR_TOKEN_SECRET;
 export const OUR_EXPIRES_IN = '30d';
+export const EMAIL_VER_TOKEN_EXPIRE = 24 * 60 * 60 * 1000; // 24 hours
 
 export const NANOPUBS_PUBLISH_SERVERS_STR = envRuntime.NANOPUBS_PUBLISH_SERVERS;
 

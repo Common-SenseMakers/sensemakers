@@ -1,28 +1,31 @@
-import { Anchor, Box, BoxExtendedProps, DropButton, Menu, Text } from 'grommet';
-import { Refresh } from 'grommet-icons';
-import { CSSProperties, useContext, useEffect } from 'react';
+import { Anchor, Box, BoxExtendedProps, Text } from 'grommet';
+import { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useServiceWorker } from '../app/ServiceWorkerContext';
 import { useToastContext } from '../app/ToastsContext';
+import { FilterIcon } from '../app/icons/FilterIcon';
+import { ReloadIcon } from '../app/icons/ReloadIcon';
 import { ViewportPageScrollContext } from '../app/layout/Viewport';
 import { I18Keys } from '../i18n/i18n';
 import { PostCard } from '../post/PostCard';
 import { PostsQueryStatus, UserPostsQuery } from '../shared/types/types.posts';
-import { AppButton, AppHeading, AppSelect } from '../ui-components';
+import { AppButton, AppHeading, AppModal, AppSelect } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
-import { ConnectedUser } from '../user-login/ConnectedUser';
+import { IntroModal } from './IntroModal';
 import { useUserPosts } from './UserPostsContext';
 
 const statusPretty: Record<PostsQueryStatus, string> = {
-  all: 'All',
+  all: 'All Drafts',
   ignored: 'Ignored',
-  pending: 'Pending',
+  pending: 'For Review',
   published: 'Published',
 };
+
+const INTRO_SHOWN = 'introShown';
 
 export const UserHome = () => {
   const { constants } = useThemeContext();
@@ -30,6 +33,20 @@ export const UserHome = () => {
   const { show } = useToastContext();
 
   const { hasUpdate, needsInstall, updateApp, install } = useServiceWorker();
+
+  const [showIntro, setShowIntro] = useState<boolean>(false);
+
+  useEffect(() => {
+    const shown = localStorage.getItem(INTRO_SHOWN);
+    if (!shown) {
+      setShowIntro(true);
+    }
+  }, []);
+
+  const introClosed = () => {
+    setShowIntro(false);
+    localStorage.setItem(INTRO_SHOWN, 'true');
+  };
 
   const {
     filterStatus,
@@ -46,6 +63,7 @@ export const UserHome = () => {
 
   const { isAtBottom } = useContext(ViewportPageScrollContext);
   const location = useLocation();
+
   useEffect(() => {
     if (isAtBottom && !isLoading && moreToFetch) {
       fetchOlder();
@@ -55,11 +73,26 @@ export const UserHome = () => {
   useEffect(() => {
     const error = errorFetchingOlder || errorFetchingNewer;
     if (error) {
+      const message = (() => {
+        const regexCode = /code:\s*(\d+)/;
+        const regexRetry = /retryAfter:\s*(\d+)/;
+        const code = error.message.match(regexCode);
+        const retry = error.message.match(regexRetry);
+
+        if (code && retry !== null) {
+          const retrySeconds = parseInt(retry[1]);
+
+          if (code && retry) {
+            return `Too many requests to Twitter's API. Please retry in ${retrySeconds > 60 ? `${Math.ceil(retrySeconds / 60)} minutes` : `${retrySeconds} seconds`}`;
+          }
+        }
+
+        return error.message;
+      })();
+
       show({
         title: 'Error getting users posts',
-        message: error.message.includes('429')
-          ? "Too many requests to Twitter's API. Please retry in 10-15 minutes"
-          : error.message,
+        message,
       });
     }
   }, [errorFetchingOlder, errorFetchingNewer]);
@@ -108,10 +141,10 @@ export const UserHome = () => {
 
     return (
       <>
-        <Box gap="medium">
+        <Box>
           {posts.map((post, ix) => (
             <Box key={ix} id={`post-${post.id}`}>
-              <PostCard post={post} shade={ix % 2 === 1}></PostCard>
+              <PostCard post={post}></PostCard>
             </Box>
           ))}
         </Box>
@@ -145,26 +178,12 @@ export const UserHome = () => {
     props: {
       status: PostsQueryStatus;
       border?: boolean;
+      padx?: boolean;
     } & BoxExtendedProps
   ) => {
-    const borderStyle: CSSProperties = props.border
-      ? {
-          border: '1px solid',
-          borderRadius: '8px',
-          borderColor: constants.colors.border,
-        }
-      : {};
     return (
-      <Box
-        pad={{ horizontal: 'medium', vertical: 'small' }}
-        width="100%"
-        style={{
-          backgroundColor: 'white',
-          ...borderStyle,
-          boxShadow:
-            '0px 1px 2px 0px rgba(16, 24, 40, 0.04), 0px 1px 2px 0px rgba(16, 24, 40, 0.04)',
-        }}>
-        <Text size="14px">{statusPretty[props.status]}</Text>
+      <Box pad={{ horizontal: 'small', vertical: 'small' }} width="100%">
+        <Text size="small">{statusPretty[props.status]}</Text>
       </Box>
     );
   };
@@ -172,18 +191,16 @@ export const UserHome = () => {
   const options: PostsQueryStatus[] = [
     PostsQueryStatus.ALL,
     PostsQueryStatus.PENDING,
-    PostsQueryStatus.PUBLISHED,
     PostsQueryStatus.IGNORED,
   ];
 
   const menu = (
     <AppSelect
       value={
-        filterStatus ? (
+        <Box direction="row" align="center">
           <FilterValue border status={filterStatus}></FilterValue>
-        ) : (
-          <FilterValue border status={PostsQueryStatus.ALL}></FilterValue>
-        )
+          <FilterIcon></FilterIcon>
+        </Box>
       }
       options={options}
       onChange={(e) =>
@@ -193,7 +210,7 @@ export const UserHome = () => {
         })
       }>
       {(status) => {
-        return <FilterValue status={status}></FilterValue>;
+        return <FilterValue padx status={status}></FilterValue>;
       }}
     </AppSelect>
   );
@@ -205,7 +222,7 @@ export const UserHome = () => {
   ) : (
     <AppButton
       plain
-      icon={<Refresh color={constants.colors.primary} size="20px"></Refresh>}
+      icon={<ReloadIcon size={20}></ReloadIcon>}
       onClick={() => fetchNewer()}></AppButton>
   );
 
@@ -239,32 +256,40 @@ export const UserHome = () => {
 
   const header = (
     <Box
-      pad={{ top: '12px', bottom: '12px', horizontal: '12px' }}
-      style={{ backgroundColor: constants.colors.shade, flexShrink: 0 }}>
+      pad={{ horizontal: 'medium', vertical: 'none' }}
+      style={{
+        backgroundColor: constants.colors.shade,
+        flexShrink: 0,
+        minHeight: '40px',
+      }}>
       {installer}
       {updater}
-      <Box
-        direction="row"
-        margin={{ bottom: '12px' }}
-        justify="between"
-        align="center">
-        <AppHeading level="3">{t(I18Keys.yourPublications)}</AppHeading>
-        <ConnectedUser></ConnectedUser>
-      </Box>
-
-      <Box direction="row" align="center">
-        <Box style={{ flexGrow: 1 }}>{menu}</Box>
-        <Box pad={{ horizontal: '10px' }}>{reload}</Box>
+      <Box direction="row" justify="between" align="center">
+        <Box direction="row" align="center" gap="12px">
+          <AppHeading level="3">{t(I18Keys.drafts)}</AppHeading>
+          <Box>{reload}</Box>
+        </Box>
+        <Box>{menu}</Box>
       </Box>
     </Box>
   );
 
+  const modal = (() => {
+    if (showIntro) {
+      return (
+        <AppModal onClosed={() => introClosed()}>
+          <IntroModal closeModal={() => setShowIntro(false)}></IntroModal>
+        </AppModal>
+      );
+    }
+  })();
+
   return (
     <>
       {header}
-
       <Box fill justify="start">
         {content}
+        {modal}
       </Box>
     </>
   );

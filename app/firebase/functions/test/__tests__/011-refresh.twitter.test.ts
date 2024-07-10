@@ -2,9 +2,8 @@ import { expect } from 'chai';
 
 import { TwitterUserDetails } from '../../src/@shared/types/types.twitter';
 import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
-import { USE_REAL_NOTIFICATIONS } from '../../src/config/config.runtime';
+import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
-import { TWITTER_USER_ID_MOCKS } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { GetClientResultInternal } from '../../src/platforms/twitter/twitter.service.client';
 import { UsersHelper } from '../../src/users/users.helper';
@@ -16,6 +15,7 @@ import {
   USE_REAL_TWITTER,
   testUsers,
 } from './setup';
+import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
 describe.skip('011-twitter refresh', () => {
@@ -26,7 +26,7 @@ describe.skip('011-twitter refresh', () => {
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
-    notifications: USE_REAL_NOTIFICATIONS ? 'spy' : 'mock',
+    emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
   });
 
   before(async () => {
@@ -39,9 +39,11 @@ describe.skip('011-twitter refresh', () => {
         Array.from(testUsers.values()),
         manager
       );
+      const testUser = testCredentials[0];
+
       user = users.find(
         (u) =>
-          UsersHelper.getAccount(u, PLATFORM.Twitter, TWITTER_USER_ID_MOCKS) !==
+          UsersHelper.getAccount(u, PLATFORM.Twitter, testUser.twitter.id) !==
           undefined
       );
     });
