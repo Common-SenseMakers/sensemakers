@@ -1,5 +1,4 @@
-import { Anchor, Box, Image, Paragraph, Text } from 'grommet';
-import { Tweet } from 'react-tweet';
+import { Anchor, Box, Paragraph, Text } from 'grommet';
 
 import { AppHeading, AppLabel } from '../../../ui-components';
 import { AppTweet } from './AppTweet';
