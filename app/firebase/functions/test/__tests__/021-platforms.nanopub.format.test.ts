@@ -4,6 +4,8 @@ import { expect } from 'chai';
 import { PLATFORM } from '../../src/@shared/types/types.user';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
+import { cleanPublicKey } from '../../src/@shared/utils/semantics.helper';
+import { buildAppIntroNp } from '../../src/platforms/nanopub/create.app.intro.nanopub';
 import { createIntroNanopublication } from '../../src/platforms/nanopub/create.intro.nanopub';
 import { createNanopublication } from '../../src/platforms/nanopub/create.nanopub';
 import { NanopubService } from '../../src/platforms/nanopub/nanopub.service';
@@ -126,7 +128,7 @@ describe('nanopublication format', () => {
           username: 'test-username',
           name: 'test-name',
         },
-        rsaKeys.publicKey,
+        cleanPublicKey(rsaKeys),
         true
       );
 
@@ -159,7 +161,7 @@ describe('nanopublication format', () => {
           username: 'test-username',
           name: 'test-name-updated',
         },
-        rsaKeys.publicKey,
+        cleanPublicKey(rsaKeys),
         true,
         published.info().published
       );
@@ -173,14 +175,94 @@ describe('nanopublication format', () => {
         rsaKeys,
         ''
       );
-      expect(signed).to.not.be.undefined;
+      expect(updatedSigned).to.not.be.undefined;
 
       const updatedPublished: Nanopub = await updatedSigned.publish(
         undefined,
         nanopubServer
       );
 
+      expect(updatedPublished).to.not.be.undefined;
+      console.log('update published at: ', updatedPublished.info().published);
+      const updatedFetchedPub = (await Nanopub.fetch(
+        updatedPublished.info().published
+      )) as Nanopub;
+      expect(updatedFetchedPub).to.not.be.undefined;
+    } catch (error) {
+      console.error('error: ', error);
+      throw error;
+    }
+  });
+  it('publishes a correctly formatted mock app intro nanopub to the test server', async () => {
+    try {
+      const address1 =
+        '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+      const address2 =
+        '0xac0974bec38b27e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+
+      const { profile: profile1, rsaKeys: rsaKeys1 } =
+        await getNanopubProfile(address1);
+      const { profile: profile2, rsaKeys: rsaKeys2 } =
+        await getNanopubProfile(address2);
+      const appIntroNp = await buildAppIntroNp(
+        profile1.ethAddress,
+        profile2.ethAddress,
+        cleanPublicKey(rsaKeys1),
+        cleanPublicKey(rsaKeys2),
+        profile1.ethToRsaSignature,
+        profile2.ethToRsaSignature
+      );
+
+      if (!appIntroNp) {
+        throw new Error('Nanopub not constructed');
+      }
+
+      const signed = await signNanopublication(appIntroNp.rdf(), rsaKeys1, '');
+      expect(signed).to.not.be.undefined;
+      const nanopubServer = (
+        JSON.parse(process.env.NANOPUBS_PUBLISH_SERVERS as string) as string[]
+      )[0];
+      if (!nanopubServer) {
+        throw new Error('Nanopub server not defined');
+      }
+
+      const published: Nanopub = await signed.publish(undefined, nanopubServer);
+
       expect(published).to.not.be.undefined;
+      console.log('published at: ', published.info().published);
+      const fetchedPub = (await Nanopub.fetch(
+        published.info().published
+      )) as Nanopub;
+      expect(fetchedPub).to.not.be.undefined;
+
+      /** update the intro nanopublication */
+      const updatedAppIntroNp = await buildAppIntroNp(
+        profile1.ethAddress,
+        profile2.ethAddress,
+        cleanPublicKey(rsaKeys1),
+        cleanPublicKey(rsaKeys2),
+        profile1.ethToRsaSignature,
+        profile2.ethToRsaSignature,
+        published.info().published
+      );
+
+      if (!updatedAppIntroNp) {
+        throw new Error('Nanopub not constructed');
+      }
+
+      const updatedSigned = await signNanopublication(
+        updatedAppIntroNp.rdf(),
+        rsaKeys1,
+        ''
+      );
+      expect(updatedSigned).to.not.be.undefined;
+
+      const updatedPublished: Nanopub = await updatedSigned.publish(
+        undefined,
+        nanopubServer
+      );
+
+      expect(updatedPublished).to.not.be.undefined;
       console.log('update published at: ', updatedPublished.info().published);
       const updatedFetchedPub = (await Nanopub.fetch(
         updatedPublished.info().published
