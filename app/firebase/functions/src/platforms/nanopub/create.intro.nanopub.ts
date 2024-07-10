@@ -6,7 +6,8 @@ export const createIntroNanopublication = async (
   details: NanupubSignupData,
   userInfo: Pick<GenericAuthor, 'username' | 'name'>,
   authorizedKey: string,
-  signDelegation: boolean
+  signDelegation: boolean,
+  oldNpUri?: string
 ) => {
   return buildIntroNp(
     userInfo.username,
@@ -14,6 +15,6 @@ export const createIntroNanopublication = async (
     userInfo.name,
     details.rsaPublickey,
     details.ethToRsaSignature,
-    { signDelegation }
+    { signDelegation, oldNpUri }
   );
 };
