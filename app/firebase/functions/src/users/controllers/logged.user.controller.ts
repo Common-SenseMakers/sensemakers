@@ -3,11 +3,7 @@ import { RequestHandler } from 'express';
 import { UserSettingsUpdate } from '../../@shared/types/types.user';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
-import {
-  emailUpdateSchema,
-  emailVerificationSchema,
-  userSettingsUpdateSchema,
-} from './auth.schema';
+import { userSettingsUpdateSchema } from './auth.schema';
 
 export const getLoggedUserController: RequestHandler = async (
   request,
@@ -44,47 +40,6 @@ export const setUserSettingsController: RequestHandler = async (
     )) as UserSettingsUpdate;
 
     await services.users.updateSettings(userId, settingsUpdate);
-
-    response.status(200).send({ success: true });
-  } catch (error: any) {
-    logger.error('error', error);
-    response.status(500).send({ success: false, error: error.message });
-  }
-};
-
-export const setUserEmail: RequestHandler = async (request, response) => {
-  try {
-    const userId = getAuthenticatedUser(request, true);
-    const services = getServices(request);
-
-    const emailUpdate = (await emailUpdateSchema.validate(request.body)) as {
-      email: string;
-    };
-
-    await services.users.setEmail(userId, emailUpdate.email);
-
-    response.status(200).send({ success: true });
-  } catch (error: any) {
-    logger.error('error', error);
-    response.status(500).send({ success: false, error: error.message });
-  }
-};
-
-export const verifyEmailController: RequestHandler = async (
-  request,
-  response
-) => {
-  try {
-    const userId = getAuthenticatedUser(request, true);
-    const services = getServices(request);
-
-    const emailUpdate = (await emailVerificationSchema.validate(
-      request.body
-    )) as {
-      token: string;
-    };
-
-    await services.users.verifyEmail(userId, emailUpdate.token);
 
     response.status(200).send({ success: true });
   } catch (error: any) {

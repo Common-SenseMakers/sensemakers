@@ -6,19 +6,15 @@ export enum I18Keys {
   introSubtitle = 's006',
   introParagraph1 = 's007',
   introParagraph2 = 's008',
-
-  emailInputTitle = 's0091',
-  emailInputSubtitle = 's0092',
-  emailInputLabel = 's0093',
-  emailInputConfirm = 's0094',
   emailInputBtn = 's0095',
 
-  emailConfirmationTitle = 's00910',
-  emailConfirmationSubtitle = 's00920',
+  connectSocialsTitle = 's0090',
+  connectSocialsParagraph = 's0091',
+  connectSocialsParagraph2 = 's0092',
+  signInX = 's012',
 
   connectAccounts = 's010',
   connectParagraph = 's011',
-  signInX = 's012',
   errorConnectTwitter = 's013',
   yourPublications = 's014',
   TweetX = 's015',
@@ -59,7 +55,6 @@ for (let entry of Object.entries(I18Keys)) {
 }
 
 const translationENG: Record<I18Keys, string> = {
-  [I18Keys.signInX]: 'Sign in with X',
   [I18Keys.introTitle]: 'Your ideas matter again',
   [I18Keys.introSubtitle]:
     'Transform your social media activity into meaningful scientific contributions',
@@ -67,18 +62,14 @@ const translationENG: Record<I18Keys, string> = {
     'Social media posts are a valuable source of scientific knowledge, but they get buried in noisy feeds and locked away by platforms.',
   [I18Keys.introParagraph2]:
     'Harness this knowledge by converting your social media posts into nanopublications, making your content <b>FAIR</b> (<b>F</b>indable, <b>A</b>ccessible, <b>I</b>nteroperable and <b>R</b>eusable), so your contributions can get proper recognition',
-
-  [I18Keys.emailInputTitle]: 'How can we reach you?',
-  [I18Keys.emailInputSubtitle]:
-    'Enter the email you’d like to use to receive notifications about your nanopublications.',
-  [I18Keys.emailInputLabel]: 'Your email',
-  [I18Keys.emailInputConfirm]:
-    'I consent to receiving email notifications, including updates relating to my nanopublications (you can edit the frequency in your notification settings).',
   [I18Keys.emailInputBtn]: 'Get started',
 
-  [I18Keys.emailConfirmationTitle]: 'Plase confirm your email address',
-  [I18Keys.emailConfirmationSubtitle]:
-    'We have sent you and email with a special link. Open it to verify your email',
+  [I18Keys.connectSocialsTitle]: 'Connect your socials',
+  [I18Keys.connectSocialsParagraph]:
+    'Link your X·Twitter account to start transforming your tweets into nanopublications.',
+  [I18Keys.connectSocialsParagraph2]:
+    'By connecting, you can easily identify and FAIRify your valuable scientific insights.',
+  [I18Keys.signInX]: 'Sign in with X',
 
   [I18Keys.drafts]: 'Drafts',
 

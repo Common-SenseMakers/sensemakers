@@ -26,6 +26,7 @@ const IntroPage = (props: {
         <Box margin={{ top: '8px' }}>
           {parragraphs.map((p, ix) => (
             <Paragraph
+              key={ix}
               style={{
                 marginBottom: ix < parragraphs.length ? '24px' : '0px',
                 textAlign: 'center',

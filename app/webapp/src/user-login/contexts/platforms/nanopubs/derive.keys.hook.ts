@@ -3,8 +3,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { RSAKeys } from '../../../../shared/types/types.nanopubs';
 import { getRSAKeys } from '../../../../shared/utils/rsa.keys';
 import { useAppSigner } from '../../signer/SignerContext';
-import { ConnectIntention } from './NanopubContext';
-import { usePostCredentials } from './post.credentials.hook';
 
 const KEYS_KEY = 'NP_PEM_KEYS';
 const DETERMINISTIC_MESSAGE = 'Prepare my Nanopub identity';
@@ -14,18 +12,9 @@ const DEBUG = true;
 /**
  * logic focused on managing the nanopub keys.
  * */
-export const useNanopubKeys = (connectIntention: ConnectIntention) => {
-  const {
-    signMessage,
-    connect: connectWallet,
-    address,
-    connectWeb3,
-    errorConnecting,
-  } = useAppSigner();
+export const useNanopubKeys = () => {
+  const { signMessage, errorConnecting, address } = useAppSigner();
   const [rsaKeys, setRsaKeys] = useState<RSAKeys>();
-
-  /** isolated logic that handles posting the credentials to the backend ("signinup") */
-  usePostCredentials(rsaKeys);
 
   /**
    * check for the rsa keys on localStorage, if they exist
@@ -63,19 +52,7 @@ export const useNanopubKeys = (connectIntention: ConnectIntention) => {
   }, [errorConnecting]);
 
   useEffect(() => {
-    if (connectIntention !== undefined) {
-      if (connectIntention === 'available') {
-        connectWallet();
-      } else {
-        if (connectIntention === 'web3') {
-          connectWeb3();
-        }
-      }
-    }
-  }, [connectIntention]);
-
-  useEffect(() => {
-    if (connectIntention && signMessage && address) {
+    if (signMessage && address && !rsaKeys) {
       signMessage(DETERMINISTIC_MESSAGE).then((sig) => {
         deriveKeys(address, sig);
       });

@@ -63,7 +63,7 @@ export const PostView = (props: {
     });
   };
 
-  const { signNanopublication, connect, connectWithWeb3 } = useNanopubContext();
+  const { signNanopublication } = useNanopubContext();
 
   const canPublishNanopub =
     connectedUser &&
@@ -74,13 +74,6 @@ export const PostView = (props: {
     !postStatuses.nanopubPublished;
 
   const { action: rightClicked, label: rightLabel } = (() => {
-    if (!canPublishNanopub) {
-      return {
-        action: () => connect(),
-        label: 'Connect',
-      };
-    }
-
     if (canPublishNanopub && nanopubDraft && !postStatuses.nanopubPublished) {
       return {
         action: () => approveOrUpdate(),
@@ -124,20 +117,6 @@ export const PostView = (props: {
               onClick={() => rightClicked()}
               label={rightLabel}
               style={{ width: '100%' }}></AppButton>
-            {!canPublishNanopub ? (
-              <AppButton
-                plain
-                onClick={() => connectWithWeb3()}
-                margin={{ top: '6px' }}>
-                or{' '}
-                <span style={{ textDecoration: 'underline' }}>
-                  show wallets
-                </span>{' '}
-                (advanced)
-              </AppButton>
-            ) : (
-              <></>
-            )}
           </Box>
         </Box>
       );

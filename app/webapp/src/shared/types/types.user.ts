@@ -97,9 +97,7 @@ export type UserSettingsUpdate = Partial<UserSettings>;
 
 export interface EmailDetails {
   email: string;
-  verified: boolean;
-  token: string;
-  expire: number;
+  source: 'MAGIC';
 }
 
 export interface UserWithSettings {
@@ -147,8 +145,6 @@ export interface UserPlatformProfile {
   user_id: string;
   profile: any;
 }
-
-export const EMAIL_VERIFY_TOKEN_NAME = 'verifyEmailToken';
 
 /** Test users support for mocks and tests */
 export interface TestUserCredentials {

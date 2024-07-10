@@ -41,11 +41,3 @@ export const userSettingsUpdateSchema = object({
     .oneOf([...Object.values(NotificationFreq)])
     .optional(),
 }).noUnknown(true);
-
-export const emailUpdateSchema = object({
-  email: string().email().required(),
-}).noUnknown(true);
-
-export const emailVerificationSchema = object({
-  token: string().required(),
-}).noUnknown(true);

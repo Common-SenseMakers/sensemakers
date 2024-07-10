@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 import { useAppFetch } from '../../../api/app.fetch';
 import { useToastContext } from '../../../app/ToastsContext';
@@ -21,7 +21,7 @@ import {
 import { PLATFORM } from '../../../shared/types/types.user';
 import { LoginStatus, useAccountContext } from '../AccountContext';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export const LS_TWITTER_CONTEXT_KEY = 'twitter-signin-context';
 
@@ -47,8 +47,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
   const {
     connectedUser,
     refresh: refreshConnected,
-    setToken: setOurToken,
-    setLoginStatus,
+    loginStatus,
   } = useAccountContext();
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -60,9 +59,6 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
   const [isGoing, setIsGoing] = useState<boolean>(false);
   const [isSigningUp, setIsSigningUp] = useState<boolean>(false);
-
-  const location = useLocation();
-  const navigate = useNavigate();
 
   const needConnect = !connectedUser || !connectedUser[PLATFORM.Twitter];
 
@@ -91,13 +87,25 @@ export const TwitterContext = (props: PropsWithChildren) => {
   useEffect(() => {
     if (!verifierHandled.current) {
       if (error_param) {
+        if (DEBUG)
+          console.error('error on TwitterSignup', {
+            error_param,
+          });
+
         show({ title: t(I18Keys.errorConnectTwitter), message: error_param });
         searchParams.delete('error');
         searchParams.delete('state');
         setSearchParams(searchParams);
       }
 
-      if (code_param && state_param) {
+      if (DEBUG)
+        console.log('useEffect TwitterSignup', {
+          state_param,
+          code_param,
+          loginStatus,
+        });
+
+      if (code_param && state_param && loginStatus === LoginStatus.LoggedIn) {
         verifierHandled.current = true;
 
         setIsSigningUp(true);
@@ -118,13 +126,15 @@ export const TwitterContext = (props: PropsWithChildren) => {
             throw new Error('Unexpected state');
           }
 
-          setLoginStatus(LoginStatus.LoggingIn);
-          appFetch<HandleSignupResult>(`/api/auth/${PLATFORM.Twitter}/signup`, {
-            ...context,
-            code: code_param,
-          }).then((result) => {
-            if (result && result.ourAccessToken) {
-              setOurToken(result.ourAccessToken);
+          appFetch<HandleSignupResult>(
+            `/api/auth/${PLATFORM.Twitter}/signup`,
+            {
+              ...context,
+              code: code_param,
+            },
+            true
+          ).then((result) => {
+            if (result) {
               localStorage.removeItem(LS_TWITTER_CONTEXT_KEY);
             }
 
@@ -135,13 +145,20 @@ export const TwitterContext = (props: PropsWithChildren) => {
           });
         }
       } else {
-        if (state_param) {
+        if (state_param && loginStatus === LoginStatus.LoggedIn) {
           searchParams.delete('state');
           setSearchParams(searchParams);
         }
       }
     }
-  }, [state_param, code_param, error_param, searchParams, setSearchParams]);
+  }, [
+    state_param,
+    code_param,
+    loginStatus,
+    error_param,
+    searchParams,
+    setSearchParams,
+  ]);
 
   const isProcessing = state_param !== null && code_param !== null;
 

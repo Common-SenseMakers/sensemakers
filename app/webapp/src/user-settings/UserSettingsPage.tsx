@@ -27,8 +27,6 @@ export const UserSettingsPage = () => {
   const { connectedUser, refresh } = useAccountContext();
   const [isSetting, setIsSetting] = useState(false);
 
-  const { connect, connectWithWeb3 } = useNanopubContext();
-
   const hasNanopub =
     connectedUser && connectedUser.nanopub && connectedUser.nanopub.length > 0;
 
@@ -115,11 +113,6 @@ export const UserSettingsPage = () => {
 
       <Box pad="medium">
         <Text>Connect:</Text>
-        <AppButton
-          primary
-          disabled={hasNanopub}
-          label={hasNanopub ? 'Connected' : 'Connect'}
-          onClick={() => connect()}></AppButton>
       </Box>
 
       <Box pad="medium">

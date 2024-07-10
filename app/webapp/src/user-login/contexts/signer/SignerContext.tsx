@@ -5,17 +5,26 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from 'react';
+import { SiweMessage } from 'siwe';
 import { WalletClient } from 'viem';
 import { useDisconnect, useWalletClient } from 'wagmi';
 
-import { HexStr } from '../../../shared/types/types.user';
+import { useAppFetch } from '../../../api/app.fetch';
+import { HandleSignupResult } from '../../../shared/types/types.fetch';
+import { HexStr, PLATFORM } from '../../../shared/types/types.user';
+import { LoginStatus, useAccountContext } from '../AccountContext';
 import { createMagicSigner, magic } from './magic.signer';
+
+const DEBUG = true;
 
 export type SignerContextType = {
   connect: () => void;
   connectWeb3: () => void;
+  connectMagic: (openUI: boolean) => void;
+  isConnectingMagic: boolean;
   errorConnecting: boolean;
   hasInjected: boolean;
   signer?: WalletClient;
@@ -34,14 +43,24 @@ export const SignerContext = (props: PropsWithChildren) => {
 
   const [address, setAddress] = useState<HexStr>();
   const [magicSigner, setMagicSigner] = useState<WalletClient>();
+  const [isConnectingMagic, setIsConnectingMagic] = useState<boolean>(false);
 
   const { data: injectedSigner } = useWalletClient();
 
   const [errorConnecting, setErrorConnecting] = useState<boolean>(false);
 
-  const signer: WalletClient | undefined = injectedSigner
-    ? injectedSigner
-    : magicSigner;
+  const appFetch = useAppFetch();
+
+  const signer: WalletClient | undefined = useMemo(() => {
+    return injectedSigner ? injectedSigner : magicSigner;
+  }, [injectedSigner, magicSigner]);
+
+  const {
+    setToken: setOurToken,
+    setLoginStatus,
+    loginStatus,
+    refresh: refreshConnected,
+  } = useAccountContext();
 
   useEffect(() => {
     magic.user.isLoggedIn().then((res) => {
@@ -52,6 +71,7 @@ export const SignerContext = (props: PropsWithChildren) => {
     });
   }, []);
 
+  /** keep the address strictly linked to the signer */
   useEffect(() => {
     if (signer) {
       if (injectedSigner) {
@@ -67,19 +87,36 @@ export const SignerContext = (props: PropsWithChildren) => {
     }
   }, [signer]);
 
+  /** wrapper of signMessage */
+  const _signMessage = useCallback(
+    (message: string) => {
+      if (!signer || !address)
+        throw new Error(
+          'Unexpected signer or address undefined and signMessage called'
+        );
+      return (signer as any).signMessage({ account: address, message });
+    },
+    [address, signer]
+  );
+
   const { disconnect: disconnectInjected } = useDisconnect();
 
   const connectMagic = useCallback(
     (openUI: boolean) => {
       setErrorConnecting(false);
-      console.log('connecting magic signer', { signer });
+      setIsConnectingMagic(true);
+
+      if (DEBUG) console.log('connecting magic signer', { signer });
       createMagicSigner(openUI)
         .then((signer) => {
-          console.log('connected magic signer', { signer });
+          if (DEBUG) console.log('connected magic signer', { signer });
+
+          setIsConnectingMagic(false);
           setMagicSigner(signer);
         })
         .catch((e) => {
           setErrorConnecting(true);
+          setIsConnectingMagic(false);
         });
     },
     [signer]
@@ -91,7 +128,7 @@ export const SignerContext = (props: PropsWithChildren) => {
   }, [openConnectModal]);
 
   useEffect(() => {
-    console.log(modalEvents.data.event);
+    if (DEBUG) console.log(`Modal event: ${modalEvents.data.event}`);
     if (modalEvents.data.event === 'MODAL_CLOSE') {
       setErrorConnecting(true);
     }
@@ -110,17 +147,6 @@ export const SignerContext = (props: PropsWithChildren) => {
     }
   }, [hasInjected, connectWeb3, connectMagic]);
 
-  const _signMessage = useCallback(
-    (message: string) => {
-      if (!signer || !address)
-        throw new Error(
-          'Unexpected signer or address undefined and signMessage called'
-        );
-      return (signer as any).signMessage({ account: address, message });
-    },
-    [address, signer]
-  );
-
   /** set signMessage as undefined when not available */
   const signMessage = !signer || !address ? undefined : _signMessage;
 
@@ -136,6 +162,8 @@ export const SignerContext = (props: PropsWithChildren) => {
       value={{
         connect,
         connectWeb3,
+        connectMagic,
+        isConnectingMagic,
         errorConnecting,
         signMessage,
         hasInjected,

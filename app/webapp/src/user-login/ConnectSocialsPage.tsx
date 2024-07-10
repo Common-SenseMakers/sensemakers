@@ -2,36 +2,36 @@ import { Box } from 'grommet';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { AppLogo } from '../app/brand/AppLogo';
+import { TwitterIcon } from '../app/common/Icons';
 import { I18Keys } from '../i18n/i18n';
-import { AppButton, AppHeading, AppSubtitle } from '../ui-components';
+import { AppButton, AppHeading } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
 import { Loading } from '../ui-components/LoadingDiv';
-import { useAppSigner } from '../user-login/contexts/signer/SignerContext';
+import { useTwitterContext } from './contexts/platforms/TwitterContext';
 
-export const AppWelcome = (props: {}) => {
+export const ConnectSocialsPage = (props: {}) => {
   const { t } = useTranslation();
-  const { connectMagic, isConnectingMagic } = useAppSigner();
+  const { connect: connectTwitter, isConnecting } = useTwitterContext();
 
   const content = (() => {
-    if (connectMagic) {
+    if (connectTwitter) {
       return (
         <>
-          <AppHeading level="1">{t(I18Keys.introTitle)}</AppHeading>
-          <Box width="100%" height="4px"></Box>
-          <AppSubtitle>{t(I18Keys.introSubtitle)}</AppSubtitle>
+          <AppHeading level="1">{t(I18Keys.connectSocialsTitle)}</AppHeading>
           <Box width="100%" height="16px"></Box>
-          <AppParagraph>{t(I18Keys.introParagraph1)}</AppParagraph>
+          <AppParagraph>{t(I18Keys.connectSocialsParagraph)}</AppParagraph>
           <AppParagraph addMargin>
             <Trans
-              i18nKey={I18Keys.introParagraph2}
+              i18nKey={I18Keys.connectSocialsParagraph2}
               components={{ b: <b></b> }}></Trans>
           </AppParagraph>
           <AppButton
             margin={{ top: 'large' }}
             primary
-            disabled={isConnectingMagic}
-            label={t(I18Keys.emailInputBtn)}
-            onClick={() => connectMagic(true)}></AppButton>
+            disabled={isConnecting}
+            icon={<TwitterIcon></TwitterIcon>}
+            label={t(I18Keys.signInX)}
+            onClick={() => connectTwitter('read')}></AppButton>
         </>
       );
     } else {

@@ -2,7 +2,7 @@ import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { UserHome } from '../user-home/UserHome';
-import { EmailInput } from '../user-login/EmailInput';
+import { ConnectSocialsPage } from '../user-login/ConnectSocialsPage';
 import {
   LoginStatus,
   useAccountContext,
@@ -10,7 +10,7 @@ import {
 import { AppWelcome } from '../welcome/AppWelcome';
 
 export const AppHome = (props: {}) => {
-  const { email, loginStatus } = useAccountContext();
+  const { loginStatus, twitterProfile } = useAccountContext();
 
   const LoadingPlaceholder = (
     <>
@@ -35,14 +35,10 @@ export const AppHome = (props: {}) => {
       return { content: <AppWelcome></AppWelcome>, nav: <></> };
     } else if (loginStatus === LoginStatus.LoggingIn) {
       return { content: LoadingPlaceholder, nav: <></> };
-    } else if (loginStatus === LoginStatus.LoggedIn) {
-      if (!email || !email.verified) {
-        return { content: <EmailInput></EmailInput>, nav: <></> };
-      } else {
-        return { content: <UserHome></UserHome>, nav: <GlobalNav></GlobalNav> };
-      }
+    } else if (loginStatus === LoginStatus.LoggedIn && !twitterProfile) {
+      return { content: <ConnectSocialsPage></ConnectSocialsPage>, nav: <></> };
     } else {
-      return { content: LoadingPlaceholder, nav: <></> };
+      return { content: <UserHome></UserHome>, nav: <GlobalNav></GlobalNav> };
     }
   })();
 
