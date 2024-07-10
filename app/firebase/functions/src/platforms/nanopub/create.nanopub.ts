@@ -13,13 +13,6 @@ const DEBUG = false;
 
 export const createNanopublication = async (
   post: AppPostFull,
-  user: AppUser
-) => {
-  return createNanopublicationInner(post, user);
-};
-
-export const createNanopublicationInner = async (
-  post: AppPostFull,
   user: AppUser,
   oldNpUri?: string
 ) => {
