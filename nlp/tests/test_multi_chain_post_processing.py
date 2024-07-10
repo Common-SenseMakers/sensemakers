@@ -189,7 +189,7 @@ def test_convert_item_types_to_rdf_triplets_mismatched_lengths():
 
 if __name__ == "__main__":
     multi_config = create_multi_config_for_tests()
-    multi_config.post_process_type = PostProcessType.FIREBASE
+    multi_config.post_process_type = PostProcessType.COMBINED
     mcp = MultiChainParser(multi_config)
     res = mcp.process_text(TEST_POST_TEXT_W_REF)
 
