@@ -11,7 +11,7 @@ module.exports = {
 
       // Output configuration to produce a single JS bundle in the 'dist-module' directory
       webpackConfig.output = {
-        filename: 'bundle.js',
+        filename: 'render-email.js',
         path: path.resolve(__dirname, 'build'),
         library: 'renderEmailModule',
         libraryTarget: 'umd',
