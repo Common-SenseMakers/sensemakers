@@ -105,7 +105,12 @@ export const TwitterContext = (props: PropsWithChildren) => {
           loginStatus,
         });
 
-      if (code_param && state_param && loginStatus === LoginStatus.LoggedIn) {
+      if (
+        code_param &&
+        state_param &&
+        loginStatus === LoginStatus.LoggedIn &&
+        connectedUser
+      ) {
         verifierHandled.current = true;
 
         setIsSigningUp(true);
@@ -144,11 +149,6 @@ export const TwitterContext = (props: PropsWithChildren) => {
             setSearchParams(searchParams);
           });
         }
-      } else {
-        if (state_param && loginStatus === LoginStatus.LoggedIn) {
-          searchParams.delete('state');
-          setSearchParams(searchParams);
-        }
       }
     }
   }, [
@@ -157,6 +157,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
     loginStatus,
     error_param,
     searchParams,
+    connectedUser,
     setSearchParams,
   ]);
 

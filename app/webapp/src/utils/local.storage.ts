@@ -5,7 +5,7 @@ const DEBUG = true;
 export const usePersist = <T>(
   stateName: string,
   initialValue: T | null
-): [T, (value: T) => void, () => void] => {
+): [T, (value: T | null) => void, () => void] => {
   const name = `persist/${stateName}`;
 
   const getFromStorage = <T>(name: string, defaultValue?: T | null) => {

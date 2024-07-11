@@ -41,12 +41,13 @@ export const useNanopubSignup = (rsaKeys?: RSAKeys) => {
 
   /** first derive the ethSignature verifiyin the ownership of the RSAkeys */
   useEffect(() => {
-    console.log('nanopub hook useEffect for ethSignature', {
-      connectedUser,
-      address,
-      signMessage,
-      rsaKeys,
-    });
+    if (DEBUG)
+      console.log('nanopub hook useEffect for ethSignature', {
+        connectedUser,
+        address,
+        signMessage,
+        rsaKeys,
+      });
 
     if (!connectedUser && address && signMessage && rsaKeys) {
       if (DEBUG) console.log(`signing ownership of RSA keys`, { address });

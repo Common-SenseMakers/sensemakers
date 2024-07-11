@@ -57,14 +57,16 @@ export const AccountContext = (props: PropsWithChildren) => {
   const [hasTriedFetchingUser, setHasTriedFetchingUser] =
     useState<boolean>(false);
 
-  const [token, setToken] = usePersist<string | undefined>(
-    OUR_TOKEN_NAME,
-    null
-  );
+  const [token, setToken] = usePersist<string>(OUR_TOKEN_NAME, null);
   const [loginStatus, setLoginStatus] = usePersist<LoginStatus>(
     LOGIN_STATUS,
     LoginStatus.NotKnown
   );
+
+  /** keep the conneccted user linkted to the current token */
+  useEffect(() => {
+    refresh();
+  }, [token]);
 
   const refresh = async () => {
     try {
@@ -103,7 +105,9 @@ export const AccountContext = (props: PropsWithChildren) => {
     }
   }, [connectedUser]);
 
-  const disconnect = () => {};
+  const disconnect = () => {
+    setToken(null);
+  };
 
   const twitterProfile = connectedUser
     ? getAccount(connectedUser, PLATFORM.Twitter)?.profile

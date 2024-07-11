@@ -122,6 +122,7 @@ export const SignerContext = (props: PropsWithChildren) => {
 
   /** authenticate magic email to backend (one way call that should endup with the user email updated) */
   useEffect(() => {
+    if (DEBUG) console.log('check setEmail', { magicSigner, connectedUser });
     if (magicSigner && connectedUser && connectedUser.email === undefined) {
       magic.user.getIdToken().then((idToken) => {
         appFetch('/api/auth/setMagicEmail', { idToken }, true).then(() => {

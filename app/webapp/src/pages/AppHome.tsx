@@ -9,6 +9,8 @@ import {
 } from '../user-login/contexts/AccountContext';
 import { AppWelcome } from '../welcome/AppWelcome';
 
+const DEBUG = true;
+
 export const AppHome = (props: {}) => {
   const { loginStatus, twitterProfile } = useAccountContext();
 
@@ -31,15 +33,23 @@ export const AppHome = (props: {}) => {
   );
 
   const { content, nav } = (() => {
+    if (DEBUG) console.log('AppHome', { loginStatus, twitterProfile });
+    if (loginStatus === LoginStatus.NotKnown) {
+      return { content: <></>, nav: <></> };
+    }
+    if (loginStatus === LoginStatus.LoggingIn) {
+      return { content: LoadingPlaceholder, nav: <></> };
+    }
+
     if (loginStatus === LoginStatus.LoggedOut) {
       return { content: <AppWelcome></AppWelcome>, nav: <></> };
-    } else if (loginStatus === LoginStatus.LoggingIn) {
-      return { content: LoadingPlaceholder, nav: <></> };
-    } else if (loginStatus === LoginStatus.LoggedIn && !twitterProfile) {
-      return { content: <ConnectSocialsPage></ConnectSocialsPage>, nav: <></> };
-    } else {
-      return { content: <UserHome></UserHome>, nav: <GlobalNav></GlobalNav> };
     }
+
+    if (loginStatus === LoginStatus.LoggedIn && !twitterProfile) {
+      return { content: <ConnectSocialsPage></ConnectSocialsPage>, nav: <></> };
+    }
+
+    return { content: <UserHome></UserHome>, nav: <GlobalNav></GlobalNav> };
   })();
 
   return (
