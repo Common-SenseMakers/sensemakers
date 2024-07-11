@@ -109,12 +109,16 @@ export const AccountContext = (props: PropsWithChildren) => {
   }, [token]);
 
   /** logged in status is strictly linked to the connected user,
-   * this is the single place on the app where
+   * this should be the only place on the app where the status is set to loggedIn
    */
   useEffect(() => {
-    const status = connectedUser ? LoginStatus.LoggedIn : LoginStatus.LoggedOut;
-    if (DEBUG) console.log(`setLoginStatus ${status}`);
-    setLoginStatus(status);
+    if (connectedUser && connectedUser.email) {
+      setLoginStatus(LoginStatus.LoggedIn);
+    } else if (connectedUser) {
+      // setLoginStatus(LoginStatus.LoggingIn);  not needed, logging in should be the status already
+    } else {
+      setLoginStatus(LoginStatus.LoggedOut);
+    }
   }, [connectedUser]);
 
   const disconnect = () => {

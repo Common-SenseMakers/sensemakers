@@ -8,13 +8,11 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { SiweMessage } from 'siwe';
 import { WalletClient } from 'viem';
 import { useDisconnect, useWalletClient } from 'wagmi';
 
 import { useAppFetch } from '../../../api/app.fetch';
-import { HandleSignupResult } from '../../../shared/types/types.fetch';
-import { HexStr, PLATFORM } from '../../../shared/types/types.user';
+import { HexStr } from '../../../shared/types/types.user';
 import { LoginStatus, useAccountContext } from '../AccountContext';
 import { createMagicSigner, magic } from './magic.signer';
 
@@ -40,6 +38,9 @@ const ProviderContextValue = createContext<SignerContextType | undefined>(
 export const SignerContext = (props: PropsWithChildren) => {
   const { open: openConnectModal } = useWeb3Modal();
   const modalEvents = useWeb3ModalEvents();
+  const { connectedUser, refresh: refreshUser } = useAccountContext();
+
+  const appFetch = useAppFetch();
 
   const [address, setAddress] = useState<HexStr>();
   const [magicSigner, setMagicSigner] = useState<WalletClient>();
@@ -49,18 +50,9 @@ export const SignerContext = (props: PropsWithChildren) => {
 
   const [errorConnecting, setErrorConnecting] = useState<boolean>(false);
 
-  const appFetch = useAppFetch();
-
   const signer: WalletClient | undefined = useMemo(() => {
     return injectedSigner ? injectedSigner : magicSigner;
   }, [injectedSigner, magicSigner]);
-
-  const {
-    setToken: setOurToken,
-    setLoginStatus,
-    loginStatus,
-    refresh: refreshConnected,
-  } = useAccountContext();
 
   useEffect(() => {
     magic.user.isLoggedIn().then((res) => {
@@ -121,6 +113,17 @@ export const SignerContext = (props: PropsWithChildren) => {
     },
     [signer]
   );
+
+  /** authenticate magic email to backend (one way call that should endup with the user email updated) */
+  useEffect(() => {
+    if (magicSigner && connectedUser && connectedUser.email === undefined) {
+      magic.user.getIdToken().then((idToken) => {
+        appFetch('/api/auth/setMagicEmail', { idToken }, true).then(() => {
+          refreshUser();
+        });
+      });
+    }
+  }, [magicSigner, connectedUser, appFetch]);
 
   const connectWeb3 = useCallback(() => {
     setErrorConnecting(false);

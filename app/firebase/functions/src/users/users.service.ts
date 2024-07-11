@@ -1,3 +1,4 @@
+import { Magic } from '@magic-sdk/admin';
 import * as jwt from 'jsonwebtoken';
 
 import {
@@ -323,6 +324,62 @@ export class UsersService {
   updateSettings(userId: string, settings: UserSettingsUpdate) {
     return this.db.run(async (manager) => {
       await this.repo.updateSettings(userId, settings, manager);
+    });
+  }
+
+  setEmail(userId: string, emailDetails: EmailDetails) {
+    return this.db.run(async (manager) => {
+      const user = await this.repo.getUser(userId, manager, true);
+      if (user.email) {
+        throw new Error('Email already set');
+      }
+
+      await this.repo.setEmail(user.userId, emailDetails, manager);
+    });
+  }
+
+  async setEmailFromMagic(userId: string, idToken: string, magic: Magic) {
+    const userMetadata = await magic.users.getMetadataByToken(idToken);
+    if (DEBUG) {
+      logger.debug('setEmailFromMagic', { userId, userMetadata });
+    }
+
+    await this.db.run(async (manager) => {
+      const user = await this.repo.getUser(userId, manager, true);
+      if (user.email) {
+        throw new Error('Email already set');
+      }
+
+      const accounts = UsersHelper.getAccounts(user, PLATFORM.Nanopub);
+      const addresses = accounts.map((a) => a.user_id.toLocaleLowerCase());
+
+      if (DEBUG) {
+        logger.debug('setEmailFromMagic - addresses', { accounts, addresses });
+      }
+
+      /** check the magic user has a wallet that is owned by the logged in user */
+      if (
+        userMetadata.publicAddress &&
+        addresses.includes(userMetadata.publicAddress.toLocaleLowerCase())
+      ) {
+        if (userMetadata.email) {
+          if (DEBUG) {
+            logger.debug('setEmailFromMagic- email', {
+              email: userMetadata.email,
+            });
+          }
+
+          await this.repo.setEmail(
+            user.userId,
+            { email: userMetadata.email, source: 'MAGIC' },
+            manager
+          );
+        } else {
+          throw new Error('No email found');
+        }
+      } else {
+        throw new Error('No wallet found');
+      }
     });
   }
 }
