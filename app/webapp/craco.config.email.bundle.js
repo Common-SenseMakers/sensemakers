@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const webpack = require('webpack');
 
 module.exports = {
   webpack: {
@@ -17,6 +18,15 @@ module.exports = {
         libraryTarget: 'umd',
         globalObject: 'this',
       };
+
+      // Define 'window' as undefined for Node.js environment
+      webpackConfig.plugins.push(
+        new webpack.DefinePlugin({
+          window: {
+            location: {},
+          },
+        })
+      );
 
       // Log paths for debugging
       console.log('Webpack entry:', webpackConfig.entry);
