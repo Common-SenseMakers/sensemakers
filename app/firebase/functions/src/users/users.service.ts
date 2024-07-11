@@ -5,17 +5,16 @@ import {
   HandleSignupResult,
   OurTokenConfig,
 } from '../@shared/types/types.fetch';
-import { NotificationFreq } from '../@shared/types/types.notifications';
 import {
   ALL_IDENTITY_PLATFORMS,
   AccountDetailsRead,
   AppUserRead,
-  AutopostOption,
   EmailDetails,
   PLATFORM,
   UserSettings,
   UserSettingsUpdate,
 } from '../@shared/types/types.user';
+import { USER_INIT_SETTINGS } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { EmailSenderService } from '../emailSender/email.sender.service';
@@ -220,15 +219,13 @@ export class UsersService {
          * and we need to create a new user.
          * */
 
-        const initSettings: UserSettings = {
-          autopost: { [PLATFORM.Nanopub]: { value: AutopostOption.MANUAL } },
-          notificationFreq: NotificationFreq.None,
-        };
+        const initSettings: UserSettings = USER_INIT_SETTINGS;
 
         await this.repo.createUser(
           prefixed_user_id,
           {
             settings: initSettings,
+            signupDate: this.time.now(),
             platformIds: [prefixed_user_id],
             [platform]: [authenticatedDetails],
           },
@@ -298,6 +295,7 @@ export class UsersService {
     const userRead: AppUserRead = {
       userId,
       email,
+      signupDate: user.signupDate,
       settings: user.settings,
     };
 
