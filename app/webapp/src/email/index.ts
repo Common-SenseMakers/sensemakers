@@ -5,4 +5,4 @@ import { AppPostFull } from '../shared/types/types.posts';
 import { EmailTemplate } from './EmailTemplate';
 
 export const renderEmail = (posts: AppPostFull[]) =>
-  render(React.createElement(EmailTemplate, { posts: [] }));
+  render(React.createElement(EmailTemplate, { posts }));
