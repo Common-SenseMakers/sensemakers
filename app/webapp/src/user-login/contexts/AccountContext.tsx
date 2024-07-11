@@ -88,22 +88,21 @@ export const AccountContext = (props: PropsWithChildren) => {
    * this should be the only place on the app where the status is set to loggedIn
    */
   useEffect(() => {
-    if (DEBUG) console.log('connectedUser', { connectedUser });
+    if (DEBUG) console.log('connectedUser', { connectedUser, loginStatus });
 
-    if (connectedUser && connectedUser.email) {
+    if (connectedUser && twitterProfile && connectedUser.email) {
       if (DEBUG)
         console.log('connectedUser - setLoginStatus', LoginStatus.LoggedIn);
       setLoginStatus(LoginStatus.LoggedIn);
-    } else if (connectedUser) {
-      if (DEBUG)
-        console.log('connectedUser - setLoginStatus', LoginStatus.LoggingIn);
-      setLoginStatus(LoginStatus.LoggingIn);
-    } else {
+      return;
+    }
+
+    if (!connectedUser && loginStatus === LoginStatus.NotKnown) {
       if (DEBUG)
         console.log('connectedUser - setLoginStatus', LoginStatus.LoggedOut);
       setLoginStatus(LoginStatus.LoggedOut);
     }
-  }, [connectedUser]);
+  }, [connectedUser, loginStatus]);
 
   const disconnect = () => {
     setToken(null);

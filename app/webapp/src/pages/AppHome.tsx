@@ -34,6 +34,7 @@ export const AppHome = (props: {}) => {
 
   const { content, nav } = (() => {
     if (DEBUG) console.log('AppHome', { loginStatus, twitterProfile });
+
     if (loginStatus === LoginStatus.NotKnown) {
       return { content: <></>, nav: <></> };
     }

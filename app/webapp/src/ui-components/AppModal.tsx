@@ -6,7 +6,7 @@ import { MAX_WIDTH_APP } from '../app/layout/Viewport';
 
 export interface IAppModal extends LayerExtendedProps {
   position?: LayerPositionType;
-  onClosed?: () => void;
+  onModalClosed?: () => void;
   onSuccess?: () => void;
   onError?: () => void;
 }
@@ -14,12 +14,12 @@ export interface IAppModal extends LayerExtendedProps {
 export const AppModal = (props: IAppModal) => {
   const child = React.cloneElement(props.children as React.ReactElement, {
     onSuccess: props.onSuccess,
-    onClosed: props.onClosed,
+    onModalClosed: props.onModalClosed,
     onError: props.onError,
   });
 
   const close = (): void => {
-    if (props.onClosed) props.onClosed();
+    if (props.onModalClosed) props.onModalClosed();
   };
 
   const position = props.position !== undefined ? props.position : 'center';

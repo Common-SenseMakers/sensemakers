@@ -111,7 +111,7 @@ export const AppModalButtonResponsive = (props: {
         {...props.buttonProps}></AppButton>
       {showDrop ? (
         <AppModal
-          onClosed={() => setShowDrop(false)}
+          onModalClosed={() => setShowDrop(false)}
           {...props.modalProps}></AppModal>
       ) : (
         <></>
