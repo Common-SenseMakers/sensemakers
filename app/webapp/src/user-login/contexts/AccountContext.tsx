@@ -13,11 +13,13 @@ import {
   EmailDetails,
   PLATFORM,
 } from '../../shared/types/types.user';
+import { usePersist } from '../../utils/local.storage';
 import { getAccount } from '../user.helper';
 
 const DEBUG = true;
 
 export const OUR_TOKEN_NAME = 'ourToken';
+export const LOGIN_STATUS = 'loginStatus';
 
 export type AccountContextType = {
   connectedUser?: AppUserRead;
@@ -38,6 +40,7 @@ const AccountContextValue = createContext<AccountContextType | undefined>(
 );
 
 export enum LoginStatus {
+  NotKnown = 'NotKnown', // init value before we check localStorage
   LoggedOut = 'LoggedOut',
   LoggingIn = 'LoggingIn',
   LoggedIn = 'LoggedIn',
@@ -54,32 +57,14 @@ export const AccountContext = (props: PropsWithChildren) => {
   const [hasTriedFetchingUser, setHasTriedFetchingUser] =
     useState<boolean>(false);
 
-  const [token, setToken] = useState<string | undefined>(undefined);
-  const [loginStatus, setLoginStatus] = useState<LoginStatus>(
-    LoginStatus.LoggedOut
+  const [token, setToken] = usePersist<string | undefined>(
+    OUR_TOKEN_NAME,
+    null
   );
-
-  useEffect(() => {
-    if (DEBUG) console.log('reading token from localstorage');
-    const _token = localStorage.getItem(OUR_TOKEN_NAME);
-
-    if (_token) {
-      if (DEBUG) console.log('tokend found in localstorage');
-      setToken(_token);
-    }
-  }, []);
-
-  const checkToken = () => {
-    const _token = localStorage.getItem(OUR_TOKEN_NAME);
-
-    if (_token !== null) {
-      if (DEBUG) console.log('tokend found in localstorage');
-      setToken(_token);
-    } else {
-      setToken(undefined);
-      setConnectedUser(null);
-    }
-  };
+  const [loginStatus, setLoginStatus] = usePersist<LoginStatus>(
+    LOGIN_STATUS,
+    LoginStatus.NotKnown
+  );
 
   const refresh = async () => {
     try {
@@ -97,35 +82,28 @@ export const AccountContext = (props: PropsWithChildren) => {
     }
   };
 
-  useEffect(() => {
-    checkToken();
-  }, []);
-
-  useEffect(() => {
-    if (token) {
-      localStorage.setItem(OUR_TOKEN_NAME, token);
-    }
-    refresh();
-  }, [token]);
-
   /** logged in status is strictly linked to the connected user,
    * this should be the only place on the app where the status is set to loggedIn
    */
   useEffect(() => {
+    if (DEBUG) console.log('connectedUser', { connectedUser });
+
     if (connectedUser && connectedUser.email) {
+      if (DEBUG)
+        console.log('connectedUser - setLoginStatus', LoginStatus.LoggedIn);
       setLoginStatus(LoginStatus.LoggedIn);
     } else if (connectedUser) {
-      // setLoginStatus(LoginStatus.LoggingIn);  not needed, logging in should be the status already
+      if (DEBUG)
+        console.log('connectedUser - setLoginStatus', LoginStatus.LoggingIn);
+      setLoginStatus(LoginStatus.LoggingIn);
     } else {
+      if (DEBUG)
+        console.log('connectedUser - setLoginStatus', LoginStatus.LoggedOut);
       setLoginStatus(LoginStatus.LoggedOut);
     }
   }, [connectedUser]);
 
-  const disconnect = () => {
-    if (DEBUG) console.log('disconnecting');
-    localStorage.removeItem(OUR_TOKEN_NAME);
-    checkToken();
-  };
+  const disconnect = () => {};
 
   const twitterProfile = connectedUser
     ? getAccount(connectedUser, PLATFORM.Twitter)?.profile

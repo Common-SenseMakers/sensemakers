@@ -60,12 +60,13 @@ export const useNanopubSignup = (rsaKeys?: RSAKeys) => {
   /** then build the introNanopub (which is connected getting signup context of
    * the nanopub network) */
   useEffect(() => {
-    console.log('nanopub hook useEffect for signup', {
-      ethSignature,
-      rsaKeys,
-      address,
-      nanopubProfile,
-    });
+    if (DEBUG)
+      console.log('nanopub hook useEffect for signup', {
+        ethSignature,
+        rsaKeys,
+        address,
+        nanopubProfile,
+      });
 
     if (rsaKeys && ethSignature && address && !nanopubProfile) {
       if (DEBUG) console.log(`getting intro nanopub`, { address });

@@ -38,7 +38,11 @@ const ProviderContextValue = createContext<SignerContextType | undefined>(
 export const SignerContext = (props: PropsWithChildren) => {
   const { open: openConnectModal } = useWeb3Modal();
   const modalEvents = useWeb3ModalEvents();
-  const { connectedUser, refresh: refreshUser } = useAccountContext();
+  const {
+    connectedUser,
+    refresh: refreshUser,
+    setLoginStatus,
+  } = useAccountContext();
 
   const appFetch = useAppFetch();
 
@@ -95,8 +99,10 @@ export const SignerContext = (props: PropsWithChildren) => {
 
   const connectMagic = useCallback(
     (openUI: boolean) => {
+      if (DEBUG) console.log('connectMagic called');
       setErrorConnecting(false);
       setIsConnectingMagic(true);
+      setLoginStatus(LoginStatus.LoggingIn);
 
       if (DEBUG) console.log('connecting magic signer', { signer });
       createMagicSigner(openUI)
