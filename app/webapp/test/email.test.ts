@@ -1,6 +1,6 @@
-// @ts-ignore
-import { renderEmail } from '../build/bundle.js';
 import { getMockPost } from '../src/mocks/posts.mock';
+
+const renderEmail = require('../build/render-email.js').renderEmail;
 
 const root = document.getElementById('root');
 const posts = [getMockPost()];
