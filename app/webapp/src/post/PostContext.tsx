@@ -197,6 +197,7 @@ export const PostContext: React.FC<{
    * endpoint to get user profiles by userIds */
   const author: AppUserRead = {
     userId: '1234',
+    signupDate: 1720702932,
     settings: {
       notificationFreq: NotificationFreq.None,
       autopost: {

@@ -12,6 +12,7 @@ import {
 } from './posts/controllers/posts.controller';
 import {
   getLoggedUserController,
+  setUserEmailMagic,
   setUserSettingsController,
 } from './users/controllers/logged.user.controller';
 import {
@@ -25,6 +26,7 @@ router.post('/auth/:platform/context', getSignupContextController);
 router.post('/auth/:platform/signup', handleSignupController);
 router.post('/auth/settings', setUserSettingsController);
 router.post('/auth/me', getLoggedUserController);
+router.post('/auth/setMagicEmail', setUserEmailMagic);
 
 router.post('/users/profile', getUserProfileController);
 

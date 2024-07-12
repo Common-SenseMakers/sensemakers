@@ -13,11 +13,13 @@ import {
   EmailDetails,
   PLATFORM,
 } from '../../shared/types/types.user';
+import { usePersist } from '../../utils/use.persist';
 import { getAccount } from '../user.helper';
 
 const DEBUG = true;
 
 export const OUR_TOKEN_NAME = 'ourToken';
+export const LOGIN_STATUS = 'loginStatus';
 
 export type AccountContextType = {
   connectedUser?: AppUserRead;
@@ -29,18 +31,38 @@ export type AccountContextType = {
   refresh: () => void;
   token?: string;
   setToken: (token: string) => void;
-  setLoginStatus: (status: LoginStatus) => void;
-  loginStatus: LoginStatus;
+  setOverallLoginStatus: (status: OverallLoginStatus) => void;
+  overallLoginStatus: OverallLoginStatus | undefined;
+  setLoginFlowState: (status: LoginFlowState) => void;
+  loginFlowState: LoginFlowState;
 };
 
 const AccountContextValue = createContext<AccountContextType | undefined>(
   undefined
 );
 
-export enum LoginStatus {
+/** explicit status of the login/signup process */
+export enum LoginFlowState {
+  Idle = 'Idle',
+  ConnectingSigner = 'ConnectingSigner',
+  ComputingAddress = 'ComputingAddress',
+  ComputingRSAKeys = 'ComputingsRSAKeys',
+  CreatingEthSignature = 'CreatingEthSignature',
+  SignningUpNanopub = 'SignningUpNanopub',
+  RegisteringEmail = 'RegisteringEmail',
+  ConnectingTwitter = 'ConnectingTwitter',
+  BasicLoggedIn = 'BasicLoggedIn',
+}
+
+/** higher level status of the login flow. Persisted in localStorage helps
+ * make sense of the LoginFlowState on different situations
+ */
+export enum OverallLoginStatus {
+  NotKnown = 'NotKnown', // init value before we check localStorage
   LoggedOut = 'LoggedOut',
-  LoggingIn = 'LoggingIn',
-  LoggedIn = 'LoggedIn',
+  LogginIn = 'LogginIn',
+  PartialLoggedIn = 'PartialLoggedIn',
+  FullyLoggedIn = 'FullyLoggedIn',
 }
 
 /**
@@ -54,31 +76,27 @@ export const AccountContext = (props: PropsWithChildren) => {
   const [hasTriedFetchingUser, setHasTriedFetchingUser] =
     useState<boolean>(false);
 
-  const [token, setToken] = useState<string | undefined>(undefined);
-  const [loginStatus, setLoginStatus] = useState<LoginStatus>(
-    LoginStatus.LoggedOut
+  const [loginFlowState, _setLoginFlowState] = useState<LoginFlowState>(
+    LoginFlowState.Idle
   );
 
+  const [token, setToken] = usePersist<string>(OUR_TOKEN_NAME, null);
+  const [overallLoginStatus, _setOverallLoginStatus] =
+    usePersist<OverallLoginStatus>(LOGIN_STATUS, OverallLoginStatus.NotKnown);
+
+  /** keep the conneccted user linkted to the current token */
   useEffect(() => {
-    if (DEBUG) console.log('reading token from localstorage');
-    const _token = localStorage.getItem(OUR_TOKEN_NAME);
+    refresh();
+  }, [token]);
 
-    if (_token) {
-      if (DEBUG) console.log('tokend found in localstorage');
-      setToken(_token);
-    }
-  }, []);
+  const setOverallLoginStatus = (status: OverallLoginStatus) => {
+    if (DEBUG) console.log('setOverallLoginStatus', status);
+    _setOverallLoginStatus(status);
+  };
 
-  const checkToken = () => {
-    const _token = localStorage.getItem(OUR_TOKEN_NAME);
-
-    if (_token !== null) {
-      if (DEBUG) console.log('tokend found in localstorage');
-      setToken(_token);
-    } else {
-      setToken(undefined);
-      setConnectedUser(null);
-    }
+  const setLoginFlowState = (status: LoginFlowState) => {
+    if (DEBUG) console.log('setLoginFlowState', status);
+    _setLoginFlowState(status);
   };
 
   const refresh = async () => {
@@ -92,35 +110,36 @@ export const AccountContext = (props: PropsWithChildren) => {
         setConnectedUser(null);
       }
     } catch (e) {
-      disconnect();
-      setLoginStatus(LoginStatus.LoggedOut);
+      setToken(null);
     }
   };
 
-  useEffect(() => {
-    checkToken();
-  }, []);
-
-  useEffect(() => {
-    if (token) {
-      localStorage.setItem(OUR_TOKEN_NAME, token);
-    }
-    refresh();
-  }, [token]);
-
   /** logged in status is strictly linked to the connected user,
-   * this is the single place on the app where
+   * this should be the only place on the app where the status is set to loggedIn
    */
   useEffect(() => {
-    const status = connectedUser ? LoginStatus.LoggedIn : LoginStatus.LoggedOut;
-    if (DEBUG) console.log(`setLoginStatus ${status}`);
-    setLoginStatus(status);
-  }, [connectedUser]);
+    if (DEBUG)
+      console.log('connectedUser', { connectedUser, overallLoginStatus });
+
+    if (connectedUser && connectedUser.email && !twitterProfile) {
+      setOverallLoginStatus(OverallLoginStatus.PartialLoggedIn);
+      return;
+    }
+
+    if (connectedUser && connectedUser.email && twitterProfile) {
+      setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
+      return;
+    }
+
+    /** null explcitely denotes that we already tried to connect */
+    if (connectedUser === null) {
+      setOverallLoginStatus(OverallLoginStatus.LoggedOut);
+      return;
+    }
+  }, [connectedUser, overallLoginStatus]);
 
   const disconnect = () => {
-    if (DEBUG) console.log('disconnecting');
-    localStorage.removeItem(OUR_TOKEN_NAME);
-    checkToken();
+    setToken(null);
   };
 
   const twitterProfile = connectedUser
@@ -141,8 +160,10 @@ export const AccountContext = (props: PropsWithChildren) => {
         refresh,
         token,
         setToken,
-        setLoginStatus,
-        loginStatus,
+        setOverallLoginStatus,
+        overallLoginStatus,
+        loginFlowState,
+        setLoginFlowState,
       }}>
       {props.children}
     </AccountContextValue.Provider>

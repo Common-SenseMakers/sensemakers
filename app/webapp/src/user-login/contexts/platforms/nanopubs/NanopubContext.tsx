@@ -35,7 +35,7 @@ export const NanopubContext = (props: PropsWithChildren) => {
   const { close } = useLoadingContext();
   const { show } = useToastContext();
 
-  const { rsaKeys, readKeys, removeKeys, errorConnecting } = useNanopubKeys();
+  const { rsaKeys, removeKeys, errorConnecting } = useNanopubKeys();
 
   const [profile, setProfile] = useState<NpProfile>();
   const [profileAddress, setProfileAddress] = useState<HexStr>();
@@ -45,11 +45,6 @@ export const NanopubContext = (props: PropsWithChildren) => {
   const disconnect = () => {
     removeKeys();
   };
-
-  /** check profile once */
-  useEffect(() => {
-    readKeys();
-  }, []);
 
   useEffect(() => {
     if (errorConnecting) {

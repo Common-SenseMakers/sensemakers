@@ -19,7 +19,11 @@ import {
   TwitterSignupContext,
 } from '../../../shared/types/types.twitter';
 import { PLATFORM } from '../../../shared/types/types.user';
-import { LoginStatus, useAccountContext } from '../AccountContext';
+import {
+  LoginFlowState,
+  OverallLoginStatus,
+  useAccountContext,
+} from '../AccountContext';
 
 const DEBUG = true;
 
@@ -47,7 +51,8 @@ export const TwitterContext = (props: PropsWithChildren) => {
   const {
     connectedUser,
     refresh: refreshConnected,
-    loginStatus,
+    overallLoginStatus,
+    setLoginFlowState,
   } = useAccountContext();
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -64,6 +69,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
   const connect = async (type: TwitterGetContextParams['type']) => {
     setIsGoing(true);
+    setLoginFlowState(LoginFlowState.ConnectingTwitter);
 
     const params: TwitterGetContextParams = {
       callback_url: window.location.href,
@@ -98,14 +104,19 @@ export const TwitterContext = (props: PropsWithChildren) => {
         setSearchParams(searchParams);
       }
 
-      if (DEBUG)
-        console.log('useEffect TwitterSignup', {
-          state_param,
-          code_param,
-          loginStatus,
-        });
+      if (
+        code_param &&
+        state_param &&
+        overallLoginStatus === OverallLoginStatus.PartialLoggedIn &&
+        connectedUser
+      ) {
+        if (DEBUG)
+          console.log('useEffect TwitterSignup', {
+            state_param,
+            code_param,
+            overallLoginStatus,
+          });
 
-      if (code_param && state_param && loginStatus === LoginStatus.LoggedIn) {
         verifierHandled.current = true;
 
         setIsSigningUp(true);
@@ -144,19 +155,15 @@ export const TwitterContext = (props: PropsWithChildren) => {
             setSearchParams(searchParams);
           });
         }
-      } else {
-        if (state_param && loginStatus === LoginStatus.LoggedIn) {
-          searchParams.delete('state');
-          setSearchParams(searchParams);
-        }
       }
     }
   }, [
     state_param,
     code_param,
-    loginStatus,
+    overallLoginStatus,
     error_param,
     searchParams,
+    connectedUser,
     setSearchParams,
   ]);
 

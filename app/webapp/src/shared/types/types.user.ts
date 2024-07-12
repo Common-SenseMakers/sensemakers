@@ -103,6 +103,7 @@ export interface EmailDetails {
 export interface UserWithSettings {
   settings: UserSettings;
   email?: EmailDetails;
+  signupDate: number;
 }
 
 /**

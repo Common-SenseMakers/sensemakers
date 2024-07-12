@@ -7,7 +7,7 @@ import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { AppUserRead, PLATFORM } from '../shared/types/types.user';
 import { getAccount } from '../user-login/user.helper';
 
-const DEBUG = true;
+const DEBUG = false;
 
 interface ProfileContextType {
   profile?: TwitterUserProfile;

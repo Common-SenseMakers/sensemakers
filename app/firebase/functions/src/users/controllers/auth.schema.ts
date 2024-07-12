@@ -41,3 +41,7 @@ export const userSettingsUpdateSchema = object({
     .oneOf([...Object.values(NotificationFreq)])
     .optional(),
 }).noUnknown(true);
+
+export const magicEmailSetSchema = object({
+  idToken: string().required(),
+}).noUnknown(true);

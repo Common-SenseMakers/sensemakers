@@ -3,7 +3,7 @@ import { PropsWithChildren, createContext, useContext } from 'react';
 
 import { UserPostsContext } from '../../user-home/UserPostsContext';
 import { AccountContext } from './AccountContext';
-import { ConnectedUserContext } from './ConnectedUserContext';
+import { DisconnectUserContext } from './DisconnectUserContext';
 import { TwitterContext } from './platforms/TwitterContext';
 import { NanopubContext } from './platforms/nanopubs/NanopubContext';
 import { ConnectedWallet } from './signer/ConnectedWalletContext';
@@ -31,9 +31,9 @@ export const ConnectedUserWrapper = (props: PropsWithChildren) => {
           <SignerContext>
             <TwitterContext>
               <NanopubContext>
-                <ConnectedUserContext>
+                <DisconnectUserContext>
                   <UserPostsContext>{props.children}</UserPostsContext>
-                </ConnectedUserContext>
+                </DisconnectUserContext>
               </NanopubContext>
             </TwitterContext>
           </SignerContext>

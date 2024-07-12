@@ -10,7 +10,7 @@ import { PLATFORM } from '../shared/types/types.user';
 import { AppButton } from '../ui-components';
 import { cap } from '../utils/general';
 import { useAccountContext } from './contexts/AccountContext';
-import { useDisconnectContext } from './contexts/ConnectedUserContext';
+import { useDisconnectContext } from './contexts/DisconnectUserContext';
 
 export const ConnectedUser = (props: {}) => {
   const { t } = useTranslation();

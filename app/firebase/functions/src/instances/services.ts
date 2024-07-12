@@ -129,6 +129,8 @@ export const createServices = () => {
     }
   );
 
+  // trigger magic init
+
   /** platforms service */
   const platformsService = new PlatformsService(
     platformsMap,

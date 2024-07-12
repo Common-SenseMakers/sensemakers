@@ -1,3 +1,9 @@
+import { NotificationFreq } from '../@shared/types/types.notifications';
+import {
+  AutopostOption,
+  PLATFORM,
+  UserSettings,
+} from '../@shared/types/types.user';
 import { envRuntime } from './typedenv.runtime';
 
 /** Verify that all needed env variables were provided */
@@ -55,6 +61,7 @@ export const EMAIL_VER_TOKEN_EXPIRE = 24 * 60 * 60 * 1000; // 24 hours
 
 export const NANOPUBS_PUBLISH_SERVERS_STR = envRuntime.NANOPUBS_PUBLISH_SERVERS;
 
+export const QUIET_SIGNUP_PERIOD = 5 * 60 * 1000; // 5 minutes
 export const AUTOFETCH_PERIOD = 'every 5 minutes';
 export const DAILY_NOTIFICATION_PERIOD = 'every day 00:00';
 export const WEEKLY_NOTIFICATION_PERIOD = 'every monday 00:00';
@@ -66,3 +73,9 @@ export const NP_PUBLISH_RSA_PUBLIC_KEY = envRuntime.NP_PUBLISH_RSA_PUBLIC_KEY;
 export const NANOPUBS_PUBLISH_SERVERS = envRuntime.NANOPUBS_PUBLISH_SERVERS;
 
 export const EMAIL_CLIENT_SECRET = envRuntime.EMAIL_CLIENT_SECRET;
+export const MAGIC_ADMIN_SECRET = envRuntime.MAGIC_ADMIN_SECRET;
+
+export const USER_INIT_SETTINGS: UserSettings = {
+  autopost: { [PLATFORM.Nanopub]: { value: AutopostOption.MANUAL } },
+  notificationFreq: NotificationFreq.Weekly,
+};

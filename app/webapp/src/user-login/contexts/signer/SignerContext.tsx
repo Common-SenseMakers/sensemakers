@@ -8,17 +8,19 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { SiweMessage } from 'siwe';
 import { WalletClient } from 'viem';
 import { useDisconnect, useWalletClient } from 'wagmi';
 
 import { useAppFetch } from '../../../api/app.fetch';
-import { HandleSignupResult } from '../../../shared/types/types.fetch';
-import { HexStr, PLATFORM } from '../../../shared/types/types.user';
-import { LoginStatus, useAccountContext } from '../AccountContext';
+import { HexStr } from '../../../shared/types/types.user';
+import {
+  LoginFlowState,
+  OverallLoginStatus,
+  useAccountContext,
+} from '../AccountContext';
 import { createMagicSigner, magic } from './magic.signer';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export type SignerContextType = {
   connect: () => void;
@@ -40,6 +42,14 @@ const ProviderContextValue = createContext<SignerContextType | undefined>(
 export const SignerContext = (props: PropsWithChildren) => {
   const { open: openConnectModal } = useWeb3Modal();
   const modalEvents = useWeb3ModalEvents();
+  const {
+    connectedUser,
+    refresh: refreshUser,
+    setLoginFlowState,
+    loginFlowState,
+  } = useAccountContext();
+
+  const appFetch = useAppFetch();
 
   const [address, setAddress] = useState<HexStr>();
   const [magicSigner, setMagicSigner] = useState<WalletClient>();
@@ -49,18 +59,9 @@ export const SignerContext = (props: PropsWithChildren) => {
 
   const [errorConnecting, setErrorConnecting] = useState<boolean>(false);
 
-  const appFetch = useAppFetch();
-
   const signer: WalletClient | undefined = useMemo(() => {
     return injectedSigner ? injectedSigner : magicSigner;
   }, [injectedSigner, magicSigner]);
-
-  const {
-    setToken: setOurToken,
-    setLoginStatus,
-    loginStatus,
-    refresh: refreshConnected,
-  } = useAccountContext();
 
   useEffect(() => {
     magic.user.isLoggedIn().then((res) => {
@@ -74,6 +75,7 @@ export const SignerContext = (props: PropsWithChildren) => {
   /** keep the address strictly linked to the signer */
   useEffect(() => {
     if (signer) {
+      setLoginFlowState(LoginFlowState.ComputingAddress);
       if (injectedSigner) {
         setAddress(injectedSigner.account.address);
       } else {
@@ -103,8 +105,11 @@ export const SignerContext = (props: PropsWithChildren) => {
 
   const connectMagic = useCallback(
     (openUI: boolean) => {
+      if (DEBUG) console.log('connectMagic called');
       setErrorConnecting(false);
       setIsConnectingMagic(true);
+
+      setLoginFlowState(LoginFlowState.ConnectingSigner);
 
       if (DEBUG) console.log('connecting magic signer', { signer });
       createMagicSigner(openUI)
@@ -121,6 +126,19 @@ export const SignerContext = (props: PropsWithChildren) => {
     },
     [signer]
   );
+
+  /** authenticate magic email to backend (one way call that should endup with the user email updated) */
+  useEffect(() => {
+    if (DEBUG) console.log('check setEmail', { magicSigner, connectedUser });
+    if (magicSigner && connectedUser && connectedUser.email === undefined) {
+      setLoginFlowState(LoginFlowState.RegisteringEmail);
+      magic.user.getIdToken().then((idToken) => {
+        appFetch('/api/auth/setMagicEmail', { idToken }, true).then(() => {
+          refreshUser();
+        });
+      });
+    }
+  }, [magicSigner, connectedUser, appFetch]);
 
   const connectWeb3 = useCallback(() => {
     setErrorConnecting(false);
