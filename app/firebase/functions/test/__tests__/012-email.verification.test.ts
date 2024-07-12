@@ -11,7 +11,7 @@ const EMAIL_TEST = 'cs@sensenets.xyz';
 
 describe('012-email verification', () => {
   const services = getTestServices({
-    time: 'real',
+    time: 'mock',
     twitter: 'mock-signup',
     nanopub: 'mock-publish',
     parser: 'mock',

@@ -14,10 +14,9 @@ import {
 } from '../../src/@shared/types/types.posts';
 import { PLATFORM } from '../../src/@shared/types/types.user';
 import { activityEventCreatedHook } from '../../src/activity/activity.created.hook';
+import { Services } from '../../src/instances/services';
 import { postUpdatedHook } from '../../src/posts/hooks/post.updated.hook';
-import { PostsManager } from '../../src/posts/posts.manager';
 import { testCredentials } from '../__tests__/test.accounts';
-import { TestServices } from '../__tests__/test.services';
 
 export const getMockPost = (refPost: Partial<AppPostFull>) => {
   const authorId = refPost.authorId || 'test-author-id';
@@ -93,10 +92,10 @@ export const getMockPost = (refPost: Partial<AppPostFull>) => {
 export const fetchPostsInTests = async (
   userId: string,
   params: FetchParams,
-  postsManager: PostsManager
+  services: Services
 ) => {
   /** fetch will store the posts in the DB */
-  const postsCreated = await postsManager.fetchUser({
+  const postsCreated = await services.postsManager.fetchUser({
     userId: userId,
     params,
   });
@@ -106,17 +105,19 @@ export const fetchPostsInTests = async (
    * when creating the AppPost as part of the fetch
    */
   await Promise.all(
-    postsCreated.map((postCreated) => postUpdatedHook(postCreated.post))
+    postsCreated.map((postCreated) =>
+      postUpdatedHook(postCreated.post, services)
+    )
   );
 };
 
 // auto triggfe the acivity create hook
 export const postUpdatedHookOnTest = async (
   post: AppPost,
-  before?: AppPost,
-  services?: TestServices
+  services: Services,
+  before?: AppPost
 ) => {
-  const activities = await postUpdatedHook(post, before);
+  const activities = await postUpdatedHook(post, services, before);
 
   await Promise.all(
     activities.map((activity) => activityEventCreatedHook(activity, services))

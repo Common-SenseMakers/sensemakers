@@ -10,7 +10,7 @@ import {
 import { PlatformPostPublishStatus } from '../@shared/types/types.platform.posts';
 import { QUIET_SIGNUP_PERIOD } from '../config/config.runtime';
 import { logger } from '../instances/logger';
-import { Services, createServices } from '../instances/services';
+import { Services } from '../instances/services';
 import { UsersHelper } from '../users/users.helper';
 
 const DEBUG = true;
@@ -19,10 +19,9 @@ const PREFIX = 'ACTIVITY-CREATED-HOOK';
 // receive the data of the created activity
 export const activityEventCreatedHook = async (
   activityEvent: ActivityEventBase,
-  services?: Services
+  services: Services
 ) => {
-  const { db, postsManager, users, notifications, time } =
-    services || createServices();
+  const { db, postsManager, users, notifications, time } = services;
 
   await db.run(async (manager) => {
     /**

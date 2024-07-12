@@ -3,7 +3,7 @@ import { instance, mock, when } from 'ts-mockito';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../time.service';
 
-let time = Date.now();
+let time = 1720805241;
 
 export interface TimeMock extends TimeService {
   set(date: number): void;

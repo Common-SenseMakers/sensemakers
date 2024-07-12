@@ -64,7 +64,7 @@ describe.only('050-autofetch-no-autopost', () => {
       thread = await _02_publishTweet(globalTestServices, TEST_CONTENT, user);
     });
 
-    it('fetch user posts - parsed', async () => {
+    it('fetch user posts and check notifications', async () => {
       if (!user) {
         throw new Error('user not created');
       }
