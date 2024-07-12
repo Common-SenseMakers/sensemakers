@@ -128,6 +128,11 @@ export const AccountContext = (props: PropsWithChildren) => {
       setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
       return;
     }
+
+    if (overallLoginStatus === OverallLoginStatus.NotKnown) {
+      setOverallLoginStatus(OverallLoginStatus.LoggedOut);
+      return;
+    }
   }, [connectedUser, overallLoginStatus]);
 
   const disconnect = () => {
