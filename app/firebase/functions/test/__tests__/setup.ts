@@ -30,15 +30,15 @@ export const TEST_THREADS: string[][] = process.env.TEST_THREADS
 // TestContext will be used by all the test
 export type TestContext = Mocha.Context & Context;
 
-export const mochaHooks = (): Mocha.RootHookObject => {
-  const services = getTestServices({
-    time: 'real',
-    twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
-    nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
-    parser: USE_REAL_PARSER ? 'real' : 'mock',
-    emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
-  });
+export let globalTestServices = getTestServices({
+  time: 'mock',
+  twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
+  nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
+  parser: USE_REAL_PARSER ? 'real' : 'mock',
+  emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
+});
 
+export const mochaHooks = (): Mocha.RootHookObject => {
   return {
     async beforeAll(this: Mocha.Context) {
       const context: InjectableContext = {};
@@ -49,15 +49,17 @@ export const mochaHooks = (): Mocha.RootHookObject => {
       /** mock enqueueTask */
       (global as any).enqueueTaskStub = sinon
         .stub(tasksSupport, 'enqueueTask')
-        .callsFake(enqueueTaskMockOnTests);
+        .callsFake((name: string, params: any) =>
+          enqueueTaskMockOnTests(name, params, globalTestServices)
+        );
 
       /** prepare/authenticate users  */
-      await services.db.run(async (manager) => {
+      await globalTestServices.db.run(async (manager) => {
         await Promise.all(
           testCredentials.map(async (accountCredentials) => {
             const user = await authenticateTestUser(
               accountCredentials,
-              services,
+              globalTestServices,
               manager
             );
             testUsers.push(user);

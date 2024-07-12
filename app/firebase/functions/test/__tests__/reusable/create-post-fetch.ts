@@ -41,11 +41,10 @@ export const _01_createAndFetchUsers = async (
   if (DEBUG) logger.debug(` ${user?.userId}`, { user }, DEBUG_PREFIX);
 
   /** fetch will store the posts in the DB */
-  await fetchPostsInTests(
-    user.userId,
-    { expectedAmount: 10 },
-    services.postsManager
-  );
+  await fetchPostsInTests(user.userId, { expectedAmount: 10 }, services);
+
+  /** bypass quiet period for notifications */
+  services.time.forward(6 * 60 * 1000);
 
   return user;
 };
@@ -101,11 +100,7 @@ export const _03_fetchAfterPublish = async (
    * fetch user posts. This time should return only the
    * newly published post
    */
-  await fetchPostsInTests(
-    userId,
-    { expectedAmount: 10 },
-    services.postsManager
-  );
+  await fetchPostsInTests(userId, { expectedAmount: 10 }, services);
 
   /** read user post */
   const postsRead = await services.postsManager.getOfUser(userId);

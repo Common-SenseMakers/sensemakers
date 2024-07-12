@@ -16,27 +16,15 @@ import {
   _02_publishTweet,
 } from './reusable/create-post-fetch';
 import { updateUserSettings } from './reusable/update.settings';
-import {
-  USE_REAL_EMAIL,
-  USE_REAL_NANOPUB,
-  USE_REAL_PARSER,
-  USE_REAL_TWITTER,
-} from './setup';
+import { USE_REAL_TWITTER, globalTestServices } from './setup';
 import { testCredentials } from './test.accounts';
-import { getTestServices } from './test.services';
 
 const DEBUG_PREFIX = `030-process`;
 const DEBUG = false;
 
-describe('060-send-digest-no-autpost', () => {
-  const services = getTestServices({
-    time: 'real',
-    twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
-    nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
-    parser: USE_REAL_PARSER ? 'real' : 'mock',
-    emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
-  });
+const services = globalTestServices;
 
+describe('060-send-digest-no-autpost', () => {
   before(async () => {
     logger.debug('resetting DB');
     await resetDB();
@@ -75,7 +63,7 @@ describe('060-send-digest-no-autpost', () => {
     });
 
     it('fetch user posts - parsed', async () => {
-      await triggerAutofetchPosts();
+      await triggerAutofetchPosts(services);
 
       // simulate daily cron job
       await triggerSendNotifications(NotificationFreq.Daily, services);

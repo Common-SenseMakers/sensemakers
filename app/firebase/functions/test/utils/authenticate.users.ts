@@ -5,16 +5,16 @@ import {
   TestUserCredentials,
 } from '../../src/@shared/types/types.user';
 import { TransactionManager } from '../../src/db/transaction.manager';
-import { Services } from '../../src/instances/services';
 import { getPrefixedUserId } from '../../src/users/users.utils';
 import { handleSignupMock } from '../__tests__/reusable/mocked.singup';
 import { USE_REAL_TWITTER } from '../__tests__/setup';
+import { TestServices } from '../__tests__/test.services';
 import { authenticateTwitterUser } from './authenticate.twitter';
 import { getNanopubProfile } from './nanopub.profile';
 
 export const authenticateTestUsers = async (
   credentials: TestUserCredentials[],
-  services: Services,
+  services: TestServices,
   manager: TransactionManager
 ) => {
   return Promise.all(
@@ -26,7 +26,7 @@ export const authenticateTestUsers = async (
 
 export const authenticateTestUser = async (
   credentials: TestUserCredentials,
-  services: Services,
+  services: TestServices,
   manager: TransactionManager
 ): Promise<AppUser> => {
   const user0 = await (async () => {

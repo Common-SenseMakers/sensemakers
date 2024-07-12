@@ -24,6 +24,8 @@ import { logger } from '../../../instances/logger';
 import { TwitterService } from '../twitter.service';
 import { convertToAppTweetBase, dateStrToTimestampMs } from '../twitter.utils';
 
+const DEBUG = false;
+
 interface TwitterTestState {
   latestTweetId: number;
   latestConvId: number;
@@ -76,7 +78,7 @@ export const initThreads = (
   testThreads: string[][],
   testUser: TestUserCredentials
 ) => {
-  const now = Date.now();
+  const now = 1720805241;
 
   const threads = testThreads.map((thread, ixThread): TwitterThread => {
     const tweets = thread.map((content, ixTweet) => {
@@ -105,6 +107,10 @@ export const initThreads = (
 
   state.threads = threads;
   state.threads.reverse();
+  if (DEBUG)
+    console.log('twitter mock state initialized', {
+      state: JSON.stringify(state),
+    });
 };
 
 /** make private methods public */
