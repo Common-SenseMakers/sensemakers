@@ -119,12 +119,22 @@ export const AccountContext = (props: PropsWithChildren) => {
     if (DEBUG)
       console.log('connectedUser', { connectedUser, overallLoginStatus });
 
-    if (connectedUser && connectedUser.email && !twitterProfile) {
+    if (
+      connectedUser &&
+      connectedUser.email &&
+      !twitterProfile &&
+      overallLoginStatus === OverallLoginStatus.LogginIn
+    ) {
       setOverallLoginStatus(OverallLoginStatus.PartialLoggedIn);
       return;
     }
 
-    if (connectedUser && connectedUser.email && twitterProfile) {
+    if (
+      connectedUser &&
+      connectedUser.email &&
+      twitterProfile &&
+      overallLoginStatus === OverallLoginStatus.LogginIn
+    ) {
       setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
       return;
     }
@@ -136,6 +146,7 @@ export const AccountContext = (props: PropsWithChildren) => {
   }, [connectedUser, overallLoginStatus]);
 
   const disconnect = () => {
+    setOverallLoginStatus(OverallLoginStatus.LoggedOut);
     setToken(null);
   };
 
