@@ -77,7 +77,7 @@ exports.accountFetch = onSchedule(
     schedule: AUTOFETCH_PERIOD,
     secrets,
   },
-  triggerAutofetchPosts
+  () => triggerAutofetchPosts()
 );
 
 exports.sendDailyNotifications = onSchedule(

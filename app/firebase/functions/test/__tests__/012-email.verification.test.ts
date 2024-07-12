@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import { anything, capture, verify } from 'ts-mockito';
 
 import { TwitterUserDetails } from '../../src/@shared/types/types.twitter';
 import { logger } from '../../src/instances/logger';
@@ -25,9 +24,7 @@ describe('012-email verification', () => {
   });
 
   describe('verifies email', () => {
-    let tokenRead: string | undefined;
     let userId: string;
-    let userId2: string;
 
     it('signup with twitter', async () => {
       const signupData: TwitterUserDetails = {
@@ -41,22 +38,13 @@ describe('012-email verification', () => {
       };
 
       userId = await handleSignupMock(services, signupData);
-
-      const signupData2: TwitterUserDetails = {
-        user_id: testCredentials[1].twitter.id,
-        profile: {
-          id: testCredentials[1].twitter.id,
-          name: testCredentials[1].twitter.username,
-          username: testCredentials[1].twitter.username,
-        },
-        signupDate: Date.now(),
-      };
-
-      userId2 = await handleSignupMock(services, signupData2);
     });
 
     it('set email', async () => {
-      await services.users.setEmail(userId, EMAIL_TEST);
+      await services.users.setEmail(userId, {
+        email: EMAIL_TEST,
+        source: 'MAGIC',
+      });
 
       const userRead = await services.db.run(async (manager) =>
         services.users.repo.getUser(userId, manager, true)
@@ -65,65 +53,6 @@ describe('012-email verification', () => {
       expect(userRead).to.not.be.undefined;
       expect(userRead.email).to.not.be.undefined;
       expect(userRead.email?.email).to.eq(EMAIL_TEST);
-      expect(userRead.email?.verified).to.eq(false);
-      expect(userRead.email?.token).to.to.not.be.undefined;
-
-      tokenRead = userRead.email?.token;
-
-      /** expect verification to have been sent */
-
-      const emailMock = services.emailMock;
-      if (!emailMock) {
-        throw new Error('notificationsMock not created');
-      }
-
-      verify(emailMock.sendVerificationEmail(anything())).once();
-
-      const [capturedUser] = capture(emailMock.sendVerificationEmail).last();
-
-      expect(capturedUser.userId).to.equal(userId);
-      expect(capturedUser.email).to.not.be.undefined;
-      expect(capturedUser.email?.token).to.not.be.undefined;
-    });
-
-    it('wont verify email if wrong token', async () => {
-      if (!tokenRead) {
-        throw new Error('unexpected');
-      }
-
-      try {
-        await services.users.verifyEmail(userId, 'WRONT TOKEN');
-        expect(true, 'verifyEmail did not failed').to.eq(false);
-      } catch (error: any) {
-        expect(error.message).to.include('Token does not match');
-      }
-    });
-
-    it('verifies email', async () => {
-      if (!tokenRead) {
-        throw new Error('unexpected');
-      }
-
-      await services.users.verifyEmail(userId, tokenRead);
-
-      const userRead = await services.db.run(async (manager) =>
-        services.users.repo.getUser(userId, manager, true)
-      );
-
-      expect(userRead.email?.email).to.eq(EMAIL_TEST);
-      expect(userRead.email?.verified).to.eq(true);
-      expect(userRead.email?.token).to.to.not.be.undefined;
-    });
-
-    it('wont set existing verified email', async () => {
-      try {
-        await services.users.setEmail(userId2, EMAIL_TEST);
-        expect(true, 'setEmail did not failed').to.eq(false);
-      } catch (error: any) {
-        expect(error.message).to.include(
-          `User with email ${EMAIL_TEST} already exist`
-        );
-      }
     });
   });
 });

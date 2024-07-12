@@ -47,6 +47,9 @@ export const _01_createAndFetchUsers = async (
     services.postsManager
   );
 
+  /** bypass quiet period for notifications */
+  services.time.forward(6 * 60 * 1000);
+
   return user;
 };
 

@@ -17,6 +17,7 @@ import { activityEventCreatedHook } from '../../src/activity/activity.created.ho
 import { postUpdatedHook } from '../../src/posts/hooks/post.updated.hook';
 import { PostsManager } from '../../src/posts/posts.manager';
 import { testCredentials } from '../__tests__/test.accounts';
+import { TestServices } from '../__tests__/test.services';
 
 export const getMockPost = (refPost: Partial<AppPostFull>) => {
   const authorId = refPost.authorId || 'test-author-id';
@@ -112,11 +113,12 @@ export const fetchPostsInTests = async (
 // auto triggfe the acivity create hook
 export const postUpdatedHookOnTest = async (
   post: AppPost,
-  before?: AppPost
+  before?: AppPost,
+  services?: TestServices
 ) => {
   const activities = await postUpdatedHook(post, before);
 
   await Promise.all(
-    activities.map((activity) => activityEventCreatedHook(activity))
+    activities.map((activity) => activityEventCreatedHook(activity, services))
   );
 };

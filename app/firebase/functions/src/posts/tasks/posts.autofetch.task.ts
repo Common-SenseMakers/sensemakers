@@ -1,16 +1,16 @@
 import { Request } from 'firebase-functions/v2/tasks';
 
 import { logger } from '../../instances/logger';
-import { createServices } from '../../instances/services';
+import { Services, createServices } from '../../instances/services';
 import { enqueueTask } from '../../tasksUtils/tasks.support';
 
 export const AUTOFETCH_POSTS_TASK = 'autofetchPosts';
 
 const DEBUG_PREFIX = 'AUTOFETCH';
 
-export const triggerAutofetchPosts = async () => {
+export const triggerAutofetchPosts = async (services?: Services) => {
   logger.debug(`triggerAutofetchPosts`, undefined, DEBUG_PREFIX);
-  const { users } = createServices();
+  const { users } = services || createServices();
 
   const usersIds = await users.repo.getAll();
 

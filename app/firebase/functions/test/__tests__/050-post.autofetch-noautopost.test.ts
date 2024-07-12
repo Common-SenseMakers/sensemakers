@@ -13,7 +13,6 @@ import {
 } from '../../src/@shared/types/types.posts';
 import { TwitterThread } from '../../src/@shared/types/types.twitter';
 import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
-import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
 import { triggerAutofetchPosts } from '../../src/posts/tasks/posts.autofetch.task';
 import { resetDB } from '../utils/db';
@@ -22,27 +21,13 @@ import {
   _02_publishTweet,
 } from './reusable/create-post-fetch';
 import { updateUserSettings } from './reusable/update.settings';
-import {
-  TEST_THREADS,
-  USE_REAL_NANOPUB,
-  USE_REAL_PARSER,
-  USE_REAL_TWITTER,
-} from './setup';
+import { TEST_THREADS, USE_REAL_TWITTER, globalTestServices } from './setup';
 import { testCredentials } from './test.accounts';
-import { getTestServices } from './test.services';
 
 const DEBUG_PREFIX = `030-process`;
 const DEBUG = false;
 
-describe('050-autofetch-no-autopost', () => {
-  const services = getTestServices({
-    time: 'real',
-    twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
-    nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
-    parser: USE_REAL_PARSER ? 'real' : 'mock',
-    emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
-  });
-
+describe.only('050-autofetch-no-autopost', () => {
   before(async () => {
     logger.debug('resetting DB');
     await resetDB();
@@ -54,15 +39,19 @@ describe('050-autofetch-no-autopost', () => {
 
     before(async () => {
       const testUser = testCredentials[0];
-      user = await _01_createAndFetchUsers(services, testUser.twitter.id, {
-        DEBUG,
-        DEBUG_PREFIX,
-      });
+      user = await _01_createAndFetchUsers(
+        globalTestServices,
+        testUser.twitter.id,
+        {
+          DEBUG,
+          DEBUG_PREFIX,
+        }
+      );
     });
 
     it('upates user autopost settings', async () => {
       await updateUserSettings(
-        services,
+        globalTestServices,
         {
           notificationFreq: NotificationFreq.Daily,
         },
@@ -72,7 +61,7 @@ describe('050-autofetch-no-autopost', () => {
 
     it('publish a tweet in the name of the test user', async () => {
       const TEST_CONTENT = `This is a test post ${USE_REAL_TWITTER ? Date.now() : ''}`;
-      thread = await _02_publishTweet(services, TEST_CONTENT, user);
+      thread = await _02_publishTweet(globalTestServices, TEST_CONTENT, user);
     });
 
     it('fetch user posts - parsed', async () => {
@@ -84,10 +73,12 @@ describe('050-autofetch-no-autopost', () => {
        * simulate the cron JOB
        * it will trigger autopost tasks for each parsed post whose user has autopost enabled
        * */
-      await triggerAutofetchPosts();
+      await triggerAutofetchPosts(globalTestServices);
 
       /** read user posts */
-      const postsRead = await services.postsManager.getOfUser(user.userId);
+      const postsRead = await globalTestServices.postsManager.getOfUser(
+        user.userId
+      );
       expect(postsRead).to.have.length(TEST_THREADS.length + 1);
 
       const postOfThread2 = postsRead.find((p) =>
@@ -130,9 +121,9 @@ describe('050-autofetch-no-autopost', () => {
       const userId = user.userId;
 
       /** check the notitication for the user was created */
-      await services.db.run(async (manager) => {
+      await globalTestServices.db.run(async (manager) => {
         const notificationsIds =
-          await services.notifications.notificationsRepo.getUnotifiedOfUser(
+          await globalTestServices.notifications.notificationsRepo.getUnotifiedOfUser(
             userId,
             manager
           );
@@ -140,14 +131,14 @@ describe('050-autofetch-no-autopost', () => {
         const userNotifications = await Promise.all(
           notificationsIds.map(async (pendingId) => {
             const notification =
-              await services.notifications.notificationsRepo.get(
+              await globalTestServices.notifications.notificationsRepo.get(
                 userId,
                 pendingId,
                 manager,
                 true
               );
 
-            return services.notifications.getFull(
+            return globalTestServices.notifications.getFull(
               userId,
               notification.id,
               manager

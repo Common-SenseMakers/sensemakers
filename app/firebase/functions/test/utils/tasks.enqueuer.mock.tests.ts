@@ -1,5 +1,5 @@
 import { logger } from '../../src/instances/logger';
-import { Services, createServices } from '../../src/instances/services';
+import { createServices } from '../../src/instances/services';
 import {
   NOTIFY_USER_TASK,
   notifyUserTask,
@@ -16,12 +16,13 @@ import {
   PARSE_POST_TASK,
   parsePostTask,
 } from '../../src/posts/tasks/posts.parse.task';
+import { TestServices } from '../__tests__/test.services';
 import { postUpdatedHookOnTest } from './posts.utils';
 
 export const enqueueTaskMockOnTests = async (
   name: string,
   params: any,
-  services?: Services
+  services?: TestServices
 ) => {
   logger.debug('enqueueTaskStub', { name, params });
 
@@ -40,7 +41,7 @@ export const enqueueTaskMockOnTests = async (
       );
 
       /** should detect the parse and trigger the autopost if needed */
-      await postUpdatedHookOnTest(postAfter, postBefore);
+      await postUpdatedHookOnTest(postAfter, postBefore, services);
     }
 
     if (name === AUTOPOST_POST_TASK) {
@@ -57,16 +58,20 @@ export const enqueueTaskMockOnTests = async (
       );
 
       /** should create the activity */
-      await postUpdatedHookOnTest(postAfter, postBefore);
+      await postUpdatedHookOnTest(postAfter, postBefore, services);
     }
 
     if (name === AUTOFETCH_POSTS_TASK) {
       const postsCreated = await autofetchUserPosts({ data: params } as any);
 
+      if (postsCreated === undefined) {
+        throw new Error('postsCreated is undefined');
+      }
+
       /** simulate the postUpdated hook with the created posts */
       await Promise.all(
         postsCreated.map(async (postCreated) =>
-          postUpdatedHookOnTest(postCreated.post)
+          postUpdatedHookOnTest(postCreated.post, undefined, services)
         )
       );
     }
