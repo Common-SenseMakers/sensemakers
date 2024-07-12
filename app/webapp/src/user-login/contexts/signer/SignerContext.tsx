@@ -46,7 +46,7 @@ export const SignerContext = (props: PropsWithChildren) => {
     connectedUser,
     refresh: refreshUser,
     setLoginFlowState,
-    loginFlowState,
+    setOverallLoginStatus,
   } = useAccountContext();
 
   const appFetch = useAppFetch();
@@ -109,6 +109,7 @@ export const SignerContext = (props: PropsWithChildren) => {
       setErrorConnecting(false);
       setIsConnectingMagic(true);
 
+      setOverallLoginStatus(OverallLoginStatus.LogginIn);
       setLoginFlowState(LoginFlowState.ConnectingSigner);
 
       if (DEBUG) console.log('connecting magic signer', { signer });

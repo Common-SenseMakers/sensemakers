@@ -5,6 +5,7 @@ import { UserHome } from '../user-home/UserHome';
 import { ConnectSocialsPage } from '../user-login/ConnectSocialsPage';
 import {
   OverallLoginStatus,
+  TwitterConnectedStatus,
   useAccountContext,
 } from '../user-login/contexts/AccountContext';
 import { AppWelcome } from '../welcome/AppWelcome';
@@ -12,7 +13,8 @@ import { AppWelcome } from '../welcome/AppWelcome';
 const DEBUG = false;
 
 export const AppHome = (props: {}) => {
-  const { overallLoginStatus, twitterProfile } = useAccountContext();
+  const { overallLoginStatus, twitterProfile, twitterConnectedStatus } =
+    useAccountContext();
 
   const LoadingPlaceholder = (
     <>
@@ -43,7 +45,10 @@ export const AppHome = (props: {}) => {
       return { content: <AppWelcome></AppWelcome>, nav: <></> };
     }
 
-    if (overallLoginStatus === OverallLoginStatus.PartialLoggedIn) {
+    if (
+      overallLoginStatus === OverallLoginStatus.PartialLoggedIn &&
+      twitterConnectedStatus !== TwitterConnectedStatus.Connecting
+    ) {
       return { content: <ConnectSocialsPage></ConnectSocialsPage>, nav: <></> };
     }
 
