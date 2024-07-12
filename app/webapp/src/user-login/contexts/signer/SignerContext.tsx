@@ -13,7 +13,11 @@ import { useDisconnect, useWalletClient } from 'wagmi';
 
 import { useAppFetch } from '../../../api/app.fetch';
 import { HexStr } from '../../../shared/types/types.user';
-import { LoginStatus, useAccountContext } from '../AccountContext';
+import {
+  LoginFlowState,
+  OverallLoginStatus,
+  useAccountContext,
+} from '../AccountContext';
 import { createMagicSigner, magic } from './magic.signer';
 
 const DEBUG = false;
@@ -41,7 +45,8 @@ export const SignerContext = (props: PropsWithChildren) => {
   const {
     connectedUser,
     refresh: refreshUser,
-    setLoginStatus,
+    setLoginFlowState,
+    loginFlowState,
   } = useAccountContext();
 
   const appFetch = useAppFetch();
@@ -70,7 +75,7 @@ export const SignerContext = (props: PropsWithChildren) => {
   /** keep the address strictly linked to the signer */
   useEffect(() => {
     if (signer) {
-      setLoginStatus(LoginStatus.ComputingAddress);
+      setLoginFlowState(LoginFlowState.ComputingAddress);
       if (injectedSigner) {
         setAddress(injectedSigner.account.address);
       } else {
@@ -103,7 +108,8 @@ export const SignerContext = (props: PropsWithChildren) => {
       if (DEBUG) console.log('connectMagic called');
       setErrorConnecting(false);
       setIsConnectingMagic(true);
-      setLoginStatus(LoginStatus.ConnectingSigner);
+
+      setLoginFlowState(LoginFlowState.ConnectingSigner);
 
       if (DEBUG) console.log('connecting magic signer', { signer });
       createMagicSigner(openUI)
@@ -125,7 +131,7 @@ export const SignerContext = (props: PropsWithChildren) => {
   useEffect(() => {
     if (DEBUG) console.log('check setEmail', { magicSigner, connectedUser });
     if (magicSigner && connectedUser && connectedUser.email === undefined) {
-      setLoginStatus(LoginStatus.RegisteringEmail);
+      setLoginFlowState(LoginFlowState.RegisteringEmail);
       magic.user.getIdToken().then((idToken) => {
         appFetch('/api/auth/setMagicEmail', { idToken }, true).then(() => {
           refreshUser();

@@ -9,7 +9,6 @@ import { NotificationFreq } from '../shared/types/types.notifications';
 import {
   AutopostOption,
   PLATFORM,
-  UserSettings,
   UserSettingsUpdate,
 } from '../shared/types/types.user';
 import { AppButton, AppHeading } from '../ui-components';
@@ -17,18 +16,16 @@ import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
-import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
+import { useDisconnectContext } from '../user-login/contexts/DisconnectUserContext';
 
 /** extract the postId from the route and pass it to a PostContext */
 export const UserSettingsPage = () => {
+  const { disconnect } = useDisconnectContext();
   const { constants } = useThemeContext();
   const navigate = useNavigate();
   const appFetch = useAppFetch();
   const { connectedUser, refresh } = useAccountContext();
   const [isSetting, setIsSetting] = useState(false);
-
-  const hasNanopub =
-    connectedUser && connectedUser.nanopub && connectedUser.nanopub.length > 0;
 
   const setSettings = (newSettings: UserSettingsUpdate) => {
     return appFetch('/api/auth/settings', newSettings).then(() => {
@@ -130,6 +127,16 @@ export const UserSettingsPage = () => {
           primary={currentNotifications === NotificationFreq.Weekly}
           label="Weekly"
           onClick={() => setNotifications(NotificationFreq.Weekly)}></AppButton>
+      </Box>
+
+      <Box pad="medium">
+        <Text>Logout:</Text>
+
+        <AppButton
+          margin={{ bottom: 'large' }}
+          primary
+          label="Logout"
+          onClick={() => disconnect()}></AppButton>
       </Box>
     </Box>
   );

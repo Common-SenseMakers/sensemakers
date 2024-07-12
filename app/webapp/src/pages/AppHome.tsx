@@ -4,7 +4,7 @@ import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { UserHome } from '../user-home/UserHome';
 import { ConnectSocialsPage } from '../user-login/ConnectSocialsPage';
 import {
-  LoginStatus,
+  OverallLoginStatus,
   useAccountContext,
 } from '../user-login/contexts/AccountContext';
 import { AppWelcome } from '../welcome/AppWelcome';
@@ -12,7 +12,7 @@ import { AppWelcome } from '../welcome/AppWelcome';
 const DEBUG = false;
 
 export const AppHome = (props: {}) => {
-  const { loginStatus, twitterProfile } = useAccountContext();
+  const { overallLoginStatus, twitterProfile } = useAccountContext();
 
   const LoadingPlaceholder = (
     <>
@@ -33,21 +33,21 @@ export const AppHome = (props: {}) => {
   );
 
   const { content, nav } = (() => {
-    if (DEBUG) console.log('AppHome', { loginStatus, twitterProfile });
+    if (DEBUG) console.log('AppHome', { overallLoginStatus, twitterProfile });
 
-    if (loginStatus === LoginStatus.NotKnown) {
+    if (overallLoginStatus === OverallLoginStatus.NotKnown) {
       return { content: <></>, nav: <></> };
     }
 
-    if (loginStatus === LoginStatus.FullyLoggedOut) {
+    if (overallLoginStatus === OverallLoginStatus.LoggedOut) {
       return { content: <AppWelcome></AppWelcome>, nav: <></> };
     }
 
-    if (loginStatus === LoginStatus.BasicLoggedIn) {
+    if (overallLoginStatus === OverallLoginStatus.PartialLoggedIn) {
       return { content: <ConnectSocialsPage></ConnectSocialsPage>, nav: <></> };
     }
 
-    if (loginStatus === LoginStatus.FullyLoggedIn) {
+    if (overallLoginStatus === OverallLoginStatus.FullyLoggedIn) {
       return { content: <UserHome></UserHome>, nav: <GlobalNav></GlobalNav> };
     }
 

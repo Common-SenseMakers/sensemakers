@@ -2,7 +2,7 @@ import { PropsWithChildren, createContext, useContext, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { AbsoluteRoutes } from '../../route.names';
-import { LoginStatus, useAccountContext } from './AccountContext';
+import { OverallLoginStatus, useAccountContext } from './AccountContext';
 import { useNanopubContext } from './platforms/nanopubs/NanopubContext';
 import { useAppSigner } from './signer/SignerContext';
 
@@ -17,25 +17,26 @@ const ConnectedUserContextValue = createContext<
 >(undefined);
 
 /** Disconnect from all platforms */
-export const ConnectedUserContext = (props: PropsWithChildren) => {
-  const { disconnect: disconnectServer, loginStatus } = useAccountContext();
+export const DisconnectUserContext = (props: PropsWithChildren) => {
+  const { disconnect: disconnectServer, overallLoginStatus } =
+    useAccountContext();
   const { disconnect: disconnectWallet } = useAppSigner();
   const { disconnect: disconnectNanopub } = useNanopubContext();
 
   const location = useLocation();
   const navigate = useNavigate();
 
-  const closedRoutes = [AbsoluteRoutes.Post('')];
+  const closedRoutes = [AbsoluteRoutes.Post(''), AbsoluteRoutes.Settings];
 
   useEffect(() => {
     /** navigate home if not logged user */
     const isClosedRoute = closedRoutes.some((route) =>
       location.pathname.includes(route)
     );
-    if (isClosedRoute && loginStatus === LoginStatus.FullyLoggedOut) {
+    if (isClosedRoute && overallLoginStatus === OverallLoginStatus.LoggedOut) {
       navigate(AbsoluteRoutes.App);
     }
-  }, [location, loginStatus]);
+  }, [location, overallLoginStatus]);
 
   const disconnect = () => {
     disconnectServer();
