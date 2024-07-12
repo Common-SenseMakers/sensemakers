@@ -32,7 +32,7 @@ export const ConnectedUserContext = (props: PropsWithChildren) => {
     const isClosedRoute = closedRoutes.some((route) =>
       location.pathname.includes(route)
     );
-    if (isClosedRoute && loginStatus === LoginStatus.LoggedOut) {
+    if (isClosedRoute && loginStatus === LoginStatus.FullyLoggedOut) {
       navigate(AbsoluteRoutes.App);
     }
   }, [location, loginStatus]);

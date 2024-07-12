@@ -9,7 +9,7 @@ import {
 } from '../user-login/contexts/AccountContext';
 import { AppWelcome } from '../welcome/AppWelcome';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const AppHome = (props: {}) => {
   const { loginStatus, twitterProfile } = useAccountContext();
@@ -38,19 +38,21 @@ export const AppHome = (props: {}) => {
     if (loginStatus === LoginStatus.NotKnown) {
       return { content: <></>, nav: <></> };
     }
-    if (loginStatus === LoginStatus.LoggingIn) {
-      return { content: LoadingPlaceholder, nav: <></> };
-    }
 
-    if (loginStatus === LoginStatus.LoggedOut) {
+    if (loginStatus === LoginStatus.FullyLoggedOut) {
       return { content: <AppWelcome></AppWelcome>, nav: <></> };
     }
 
-    if (loginStatus === LoginStatus.LoggedIn && !twitterProfile) {
+    if (loginStatus === LoginStatus.BasicLoggedIn) {
       return { content: <ConnectSocialsPage></ConnectSocialsPage>, nav: <></> };
     }
 
-    return { content: <UserHome></UserHome>, nav: <GlobalNav></GlobalNav> };
+    if (loginStatus === LoginStatus.FullyLoggedIn) {
+      return { content: <UserHome></UserHome>, nav: <GlobalNav></GlobalNav> };
+    }
+
+    /** everything that is not the satus above shows the loadingDivs */
+    return { content: LoadingPlaceholder, nav: <></> };
   })();
 
   return (

@@ -3,17 +3,19 @@ import { useCallback, useEffect, useState } from 'react';
 import { RSAKeys } from '../../../../shared/types/types.nanopubs';
 import { getRSAKeys } from '../../../../shared/utils/rsa.keys';
 import { usePersist } from '../../../../utils/local.storage';
+import { LoginStatus, useAccountContext } from '../../AccountContext';
 import { useAppSigner } from '../../signer/SignerContext';
 
 const KEYS_KEY = 'NP_PEM_KEYS';
 const DETERMINISTIC_MESSAGE = 'Prepare my Nanopub identity';
 
-const DEBUG = true;
+const DEBUG = false;
 
 /**
  * logic focused on managing the nanopub keys.
  * */
 export const useNanopubKeys = () => {
+  const { setLoginStatus } = useAccountContext();
   const { signMessage, errorConnecting, address } = useAppSigner();
   const [rsaKeys, setRsaKeys] = usePersist<RSAKeys>(KEYS_KEY, null);
 
@@ -36,6 +38,7 @@ export const useNanopubKeys = () => {
 
   useEffect(() => {
     if (signMessage && address && !rsaKeys) {
+      setLoginStatus(LoginStatus.ComputingRSAKeys);
       signMessage(DETERMINISTIC_MESSAGE).then((sig) => {
         deriveKeys(sig);
       });

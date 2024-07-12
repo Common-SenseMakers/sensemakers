@@ -12,7 +12,7 @@ import {
   signNanopublication,
 } from '../../../../shared/utils/nanopub.sign.util';
 import { getAccount } from '../../../user.helper';
-import { useAccountContext } from '../../AccountContext';
+import { LoginStatus, useAccountContext } from '../../AccountContext';
 import { useAppSigner } from '../../signer/SignerContext';
 
 const DEBUG = false;
@@ -29,6 +29,7 @@ export const useNanopubSignup = (rsaKeys?: RSAKeys) => {
     connectedUser,
     refresh: refreshConnectedUser,
     setToken: setOurToken,
+    setLoginStatus,
   } = useAccountContext();
 
   const appFetch = useAppFetch();
@@ -51,6 +52,8 @@ export const useNanopubSignup = (rsaKeys?: RSAKeys) => {
 
     if (!connectedUser && address && signMessage && rsaKeys) {
       if (DEBUG) console.log(`signing ownership of RSA keys`, { address });
+      setLoginStatus(LoginStatus.CreatingEthSignature);
+
       signMessage(getEthToRSAMessage(rsaKeys.publicKey)).then((sig) => {
         if (DEBUG) console.log(`signied ownership of RSA keys`, { sig });
         setEthSignature(sig);
@@ -71,6 +74,8 @@ export const useNanopubSignup = (rsaKeys?: RSAKeys) => {
 
     if (rsaKeys && ethSignature && address && !nanopubProfile) {
       if (DEBUG) console.log(`getting intro nanopub`, { address });
+
+      setLoginStatus(LoginStatus.SignningUpNanopub);
 
       const details: NanupubSignupData = {
         rsaPublickey: rsaKeys.publicKey,

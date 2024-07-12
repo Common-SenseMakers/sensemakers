@@ -39,11 +39,19 @@ const AccountContextValue = createContext<AccountContextType | undefined>(
   undefined
 );
 
+/** explicit status of the login/signup process (useState persisted in localStorage) */
 export enum LoginStatus {
   NotKnown = 'NotKnown', // init value before we check localStorage
-  LoggedOut = 'LoggedOut',
-  LoggingIn = 'LoggingIn',
-  LoggedIn = 'LoggedIn',
+  ConnectingSigner = 'ConnectingSigner',
+  ComputingAddress = 'ComputingAddress',
+  ComputingRSAKeys = 'ComputingsRSAKeys',
+  CreatingEthSignature = 'CreatingEthSignature',
+  SignningUpNanopub = 'SignningUpNanopub',
+  RegisteringEmail = 'RegisteringEmail',
+  ConnectingTwitter = 'ConnectingTwitter',
+  BasicLoggedIn = 'BasicLoggedIn',
+  FullyLoggedIn = 'FullyLoggedIn',
+  FullyLoggedOut = 'FullyLoggedOut',
 }
 
 /**
@@ -58,7 +66,7 @@ export const AccountContext = (props: PropsWithChildren) => {
     useState<boolean>(false);
 
   const [token, setToken] = usePersist<string>(OUR_TOKEN_NAME, null);
-  const [loginStatus, setLoginStatus] = usePersist<LoginStatus>(
+  const [loginStatus, _setLoginStatus] = usePersist<LoginStatus>(
     LOGIN_STATUS,
     LoginStatus.NotKnown
   );
@@ -67,6 +75,11 @@ export const AccountContext = (props: PropsWithChildren) => {
   useEffect(() => {
     refresh();
   }, [token]);
+
+  const setLoginStatus = (status: LoginStatus) => {
+    if (DEBUG) console.log('setLoginStatus', status);
+    _setLoginStatus(status);
+  };
 
   const refresh = async () => {
     try {
@@ -80,7 +93,7 @@ export const AccountContext = (props: PropsWithChildren) => {
       }
     } catch (e) {
       disconnect();
-      setLoginStatus(LoginStatus.LoggedOut);
+      setLoginStatus(LoginStatus.FullyLoggedOut);
     }
   };
 
@@ -90,17 +103,18 @@ export const AccountContext = (props: PropsWithChildren) => {
   useEffect(() => {
     if (DEBUG) console.log('connectedUser', { connectedUser, loginStatus });
 
-    if (connectedUser && twitterProfile && connectedUser.email) {
-      if (DEBUG)
-        console.log('connectedUser - setLoginStatus', LoginStatus.LoggedIn);
-      setLoginStatus(LoginStatus.LoggedIn);
+    if (connectedUser && connectedUser.email) {
+      setLoginStatus(LoginStatus.BasicLoggedIn);
+      return;
+    }
+
+    if (connectedUser && connectedUser.email && twitterProfile) {
+      setLoginStatus(LoginStatus.FullyLoggedIn);
       return;
     }
 
     if (!connectedUser && loginStatus === LoginStatus.NotKnown) {
-      if (DEBUG)
-        console.log('connectedUser - setLoginStatus', LoginStatus.LoggedOut);
-      setLoginStatus(LoginStatus.LoggedOut);
+      setLoginStatus(LoginStatus.FullyLoggedOut);
     }
   }, [connectedUser, loginStatus]);
 

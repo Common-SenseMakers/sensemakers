@@ -16,7 +16,7 @@ import { HexStr } from '../../../shared/types/types.user';
 import { LoginStatus, useAccountContext } from '../AccountContext';
 import { createMagicSigner, magic } from './magic.signer';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export type SignerContextType = {
   connect: () => void;
@@ -70,6 +70,7 @@ export const SignerContext = (props: PropsWithChildren) => {
   /** keep the address strictly linked to the signer */
   useEffect(() => {
     if (signer) {
+      setLoginStatus(LoginStatus.ComputingAddress);
       if (injectedSigner) {
         setAddress(injectedSigner.account.address);
       } else {
@@ -102,7 +103,7 @@ export const SignerContext = (props: PropsWithChildren) => {
       if (DEBUG) console.log('connectMagic called');
       setErrorConnecting(false);
       setIsConnectingMagic(true);
-      setLoginStatus(LoginStatus.LoggingIn);
+      setLoginStatus(LoginStatus.ConnectingSigner);
 
       if (DEBUG) console.log('connecting magic signer', { signer });
       createMagicSigner(openUI)
@@ -124,6 +125,7 @@ export const SignerContext = (props: PropsWithChildren) => {
   useEffect(() => {
     if (DEBUG) console.log('check setEmail', { magicSigner, connectedUser });
     if (magicSigner && connectedUser && connectedUser.email === undefined) {
+      setLoginStatus(LoginStatus.RegisteringEmail);
       magic.user.getIdToken().then((idToken) => {
         appFetch('/api/auth/setMagicEmail', { idToken }, true).then(() => {
           refreshUser();

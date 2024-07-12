@@ -48,6 +48,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
     connectedUser,
     refresh: refreshConnected,
     loginStatus,
+    setLoginStatus,
   } = useAccountContext();
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -64,6 +65,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
   const connect = async (type: TwitterGetContextParams['type']) => {
     setIsGoing(true);
+    setLoginStatus(LoginStatus.ConnectingTwitter);
 
     const params: TwitterGetContextParams = {
       callback_url: window.location.href,
@@ -98,19 +100,19 @@ export const TwitterContext = (props: PropsWithChildren) => {
         setSearchParams(searchParams);
       }
 
-      if (DEBUG)
-        console.log('useEffect TwitterSignup', {
-          state_param,
-          code_param,
-          loginStatus,
-        });
-
       if (
         code_param &&
         state_param &&
-        loginStatus === LoginStatus.LoggedIn &&
+        loginStatus === LoginStatus.BasicLoggedIn &&
         connectedUser
       ) {
+        if (DEBUG)
+          console.log('useEffect TwitterSignup', {
+            state_param,
+            code_param,
+            loginStatus,
+          });
+
         verifierHandled.current = true;
 
         setIsSigningUp(true);

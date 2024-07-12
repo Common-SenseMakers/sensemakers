@@ -5,7 +5,7 @@ import React from 'react';
 import { MAX_WIDTH_APP } from '../app/layout/Viewport';
 
 export interface IAppModal extends LayerExtendedProps {
-  position?: LayerPositionType;
+  layerProps?: LayerExtendedProps;
   onModalClosed?: () => void;
   onSuccess?: () => void;
   onError?: () => void;
@@ -26,7 +26,7 @@ export const AppModal = (props: IAppModal) => {
 
   return (
     <Layer
-      {...props}
+      {...props.layerProps}
       style={{
         background: 'rgba(17, 24, 39, 0.35)',
         ...props.style,

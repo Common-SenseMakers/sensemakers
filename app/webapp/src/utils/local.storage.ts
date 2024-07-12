@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const usePersist = <T>(
   stateName: string,
