@@ -20,6 +20,7 @@ const DEBUG = true;
 
 export const OUR_TOKEN_NAME = 'ourToken';
 export const LOGIN_STATUS = 'loginStatus';
+export const TWITTER_LOGIN_STATUS = 'twitterLoginStatus';
 
 export type AccountContextType = {
   connectedUser?: AppUserRead;
@@ -34,6 +35,8 @@ export type AccountContextType = {
   overallLoginStatus: OverallLoginStatus | undefined;
   setLoginFlowState: (status: LoginFlowState) => void;
   loginFlowState: LoginFlowState;
+  setTwitterConnectedStatus: (status: TwitterConnectedStatus) => void;
+  twitterConnectedStatus: TwitterConnectedStatus | undefined;
 };
 
 const AccountContextValue = createContext<AccountContextType | undefined>(
@@ -64,6 +67,12 @@ export enum OverallLoginStatus {
   FullyLoggedIn = 'FullyLoggedIn',
 }
 
+export enum TwitterConnectedStatus {
+  Disconnected = 'Disconnected',
+  Connecting = 'Connecting',
+  Connected = 'Connected',
+}
+
 /**
  * Manages the logged-in user. We use JWT tokens to authenticate
  * a logged in user to our backend. The JWT is set when the user
@@ -80,6 +89,12 @@ export const AccountContext = (props: PropsWithChildren) => {
   const [token, setToken] = usePersist<string>(OUR_TOKEN_NAME, null);
   const [overallLoginStatus, _setOverallLoginStatus] =
     usePersist<OverallLoginStatus>(LOGIN_STATUS, OverallLoginStatus.NotKnown);
+
+  const [twitterConnectedStatus, setTwitterConnectedStatus] =
+    usePersist<TwitterConnectedStatus>(
+      TWITTER_LOGIN_STATUS,
+      TwitterConnectedStatus.Disconnected
+    );
 
   /** keep the conneccted user linkted to the current token */
   useEffect(() => {
@@ -119,12 +134,7 @@ export const AccountContext = (props: PropsWithChildren) => {
     if (DEBUG)
       console.log('connectedUser', { connectedUser, overallLoginStatus });
 
-    if (
-      connectedUser &&
-      connectedUser.email &&
-      !twitterProfile &&
-      overallLoginStatus === OverallLoginStatus.LogginIn
-    ) {
+    if (connectedUser && connectedUser.email && !twitterProfile) {
       setOverallLoginStatus(OverallLoginStatus.PartialLoggedIn);
       return;
     }
@@ -133,8 +143,11 @@ export const AccountContext = (props: PropsWithChildren) => {
       connectedUser &&
       connectedUser.email &&
       twitterProfile &&
-      overallLoginStatus === OverallLoginStatus.LogginIn
+      /** this one is tricky, when disconnecting,
+       * we set overallLoginStatus to LoggedOut before everything else is deleted. */
+      overallLoginStatus !== OverallLoginStatus.LoggedOut
     ) {
+      setTwitterConnectedStatus(TwitterConnectedStatus.Connected);
       setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
       return;
     }
@@ -147,6 +160,7 @@ export const AccountContext = (props: PropsWithChildren) => {
 
   const disconnect = () => {
     setOverallLoginStatus(OverallLoginStatus.LoggedOut);
+    setToken(TwitterConnectedStatus.Disconnected);
     setToken(null);
   };
 
@@ -171,6 +185,8 @@ export const AccountContext = (props: PropsWithChildren) => {
         overallLoginStatus,
         loginFlowState,
         setLoginFlowState,
+        setTwitterConnectedStatus,
+        twitterConnectedStatus,
       }}>
       {props.children}
     </AccountContextValue.Provider>

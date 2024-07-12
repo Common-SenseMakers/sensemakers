@@ -22,6 +22,7 @@ import { PLATFORM } from '../../../shared/types/types.user';
 import {
   LoginFlowState,
   OverallLoginStatus,
+  TwitterConnectedStatus,
   useAccountContext,
 } from '../AccountContext';
 
@@ -53,6 +54,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
     refresh: refreshConnected,
     overallLoginStatus,
     setLoginFlowState,
+    setTwitterConnectedStatus,
   } = useAccountContext();
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -70,6 +72,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
   const connect = async (type: TwitterGetContextParams['type']) => {
     setIsGoing(true);
     setLoginFlowState(LoginFlowState.ConnectingTwitter);
+    setTwitterConnectedStatus(TwitterConnectedStatus.Connecting);
 
     const params: TwitterGetContextParams = {
       callback_url: window.location.href,
