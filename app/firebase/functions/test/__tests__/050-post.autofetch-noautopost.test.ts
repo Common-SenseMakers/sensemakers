@@ -27,7 +27,7 @@ import { testCredentials } from './test.accounts';
 const DEBUG_PREFIX = `030-process`;
 const DEBUG = false;
 
-describe.only('050-autofetch-no-autopost', () => {
+describe('050-autofetch-no-autopost', () => {
   before(async () => {
     logger.debug('resetting DB');
     await resetDB();

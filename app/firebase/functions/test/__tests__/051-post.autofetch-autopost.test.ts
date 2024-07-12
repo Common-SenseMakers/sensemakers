@@ -33,7 +33,7 @@ const DEBUG = false;
 
 const services = globalTestServices;
 
-describe.only('051-autofetch-autopost', () => {
+describe('051-autofetch-autopost', () => {
   before(async () => {
     logger.debug('resetting DB');
     await resetDB();
