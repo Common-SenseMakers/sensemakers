@@ -3,11 +3,13 @@ import { instance, mock, when } from 'ts-mockito';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../time.service';
 
-let time = 1720805241;
+export const TIME_ZERO = 1720805241;
+let time = TIME_ZERO;
 
 export interface TimeMock extends TimeService {
   set(date: number): void;
   forward(delta: number): void;
+  reset(): void;
 }
 
 /**
@@ -38,6 +40,10 @@ export const getTimeMock = (
 
   _instance.forward = (_delta: number) => {
     time = time + _delta;
+  };
+
+  _instance.reset = () => {
+    time = TIME_ZERO;
   };
 
   return _instance;
