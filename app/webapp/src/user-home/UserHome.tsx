@@ -116,6 +116,11 @@ export const UserHome = () => {
     navigate(`/${filter.status}`);
   };
 
+  const closeIntro = () => {
+    setIntroShown(true);
+    setShowIntro(false);
+  };
+
   const content = (() => {
     if (!posts || isLoading) {
       return [1, 2, 4, 5, 6].map((ix) => (
@@ -273,8 +278,11 @@ export const UserHome = () => {
   const modal = (() => {
     if (showIntro) {
       return (
-        <AppModal type="small" onModalClosed={() => setIntroShown(true)}>
-          <IntroModal closeModal={() => setShowIntro(false)}></IntroModal>
+        <AppModal
+          type="small"
+          onModalClosed={() => closeIntro()}
+          windowStyle={{ flexGrow: 1 }}>
+          <IntroModal closeModal={() => closeIntro()}></IntroModal>
         </AppModal>
       );
     }

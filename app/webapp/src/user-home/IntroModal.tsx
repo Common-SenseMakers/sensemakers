@@ -2,12 +2,11 @@ import { Box, Paragraph, Text } from 'grommet';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { ImageIcon } from '../app/icons/ImageIcon';
 import { I18Keys } from '../i18n/i18n';
 import { AppButton, AppHeading } from '../ui-components';
+import { BoxCentered } from '../ui-components/BoxCentered';
 import { CarouselDots } from '../ui-components/CarouselDots';
-import { Icon01 } from './introIcons/Icon01';
-import { Icon02 } from './introIcons/Icon02';
-import { Icon03 } from './introIcons/Icon03';
 
 const IntroPage = (props: {
   icon: JSX.Element;
@@ -47,6 +46,21 @@ const IntroPage = (props: {
   );
 };
 
+const SectionIcon = (src: string) => {
+  return (
+    <BoxCentered
+      style={{
+        height: '60px',
+        width: '60px',
+        borderRadius: '40px',
+        backgroundColor: '#CEE2F2',
+      }}
+      margin={{ bottom: '16px' }}>
+      <ImageIcon src={src} size={40}></ImageIcon>
+    </BoxCentered>
+  );
+};
+
 export const IntroModal = (props: { closeModal: () => void }) => {
   const { closeModal } = props;
 
@@ -55,7 +69,7 @@ export const IntroModal = (props: { closeModal: () => void }) => {
 
   const pages = [
     <IntroPage
-      icon={<Icon01></Icon01>}
+      icon={SectionIcon('/icons/intro/icon01.png')}
       heading={t(I18Keys.introHeading01)}
       parragraphs={[
         <Text>{t(I18Keys.introText011)}</Text>,
@@ -64,7 +78,7 @@ export const IntroModal = (props: { closeModal: () => void }) => {
       btnLabel={t(I18Keys.introNextLabel)}
       onNext={() => next()}></IntroPage>,
     <IntroPage
-      icon={<Icon02></Icon02>}
+      icon={SectionIcon('/icons/intro/icon02.png')}
       heading={t(I18Keys.introHeading02)}
       parragraphs={[
         <Text>{t(I18Keys.introText021)}</Text>,
@@ -73,7 +87,7 @@ export const IntroModal = (props: { closeModal: () => void }) => {
       btnLabel={t(I18Keys.introNextLabel)}
       onNext={() => next()}></IntroPage>,
     <IntroPage
-      icon={<Icon03></Icon03>}
+      icon={SectionIcon('/icons/intro/icon03.png')}
       heading={t(I18Keys.introHeading03)}
       parragraphs={[
         <Text>{t(I18Keys.introText031)}</Text>,
