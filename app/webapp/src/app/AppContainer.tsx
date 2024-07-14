@@ -5,6 +5,7 @@ import { Outlet, Route, Routes, useLocation } from 'react-router-dom';
 
 import { AppHome } from '../pages/AppHome';
 import { PostPage } from '../post/PostPage';
+import { PostingPage } from '../post/PostingPage';
 import { ProfilePage } from '../profile/ProfilePage';
 import { ProfilePostPage } from '../profile/ProfilePostPage';
 import { ProfileRoot } from '../profile/ProfileRoot';
@@ -72,6 +73,10 @@ export const AppContainer = (props: React.PropsWithChildren) => {
                     path={``}
                     element={<ProfilePage></ProfilePage>}></Route>
                 </Route>
+
+                <Route
+                  path={`${RouteNames.Posting}`}
+                  element={<PostingPage></PostingPage>}></Route>
 
                 <Route
                   path={`${RouteNames.Post}/:postId`}

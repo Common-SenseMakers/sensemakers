@@ -42,7 +42,6 @@ export const TWITTER_API_URL = 'https://api.twitter.com';
 export const TWITTER_CLIENT_ID = envRuntime.TWITTER_CLIENT_ID;
 export const TWITTER_CLIENT_SECRET = envRuntime.TWITTER_CLIENT_SECRET;
 
-export const ORCID_REDIRECT_URL = envRuntime.ORCID_REDIRECT_URL;
 export const TWITTER_CALLBACK_URL = envRuntime.TWITTER_CALLBACK_URL;
 export const TWITTER_REVOKE_URL = envRuntime.TWITTER_REVOKE_URL;
 

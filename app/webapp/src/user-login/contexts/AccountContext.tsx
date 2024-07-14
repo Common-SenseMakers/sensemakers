@@ -7,6 +7,7 @@ import {
 } from 'react';
 
 import { _appFetch } from '../../api/app.fetch';
+import { OrcidUserProfile } from '../../shared/types/types.orcid';
 import { TwitterUserProfile } from '../../shared/types/types.twitter';
 import {
   AppUserRead,
@@ -16,7 +17,7 @@ import {
 import { usePersist } from '../../utils/use.persist';
 import { getAccount } from '../user.helper';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const OUR_TOKEN_NAME = 'ourToken';
 export const LOGIN_STATUS = 'loginStatus';
@@ -37,6 +38,7 @@ export type AccountContextType = {
   loginFlowState: LoginFlowState;
   setTwitterConnectedStatus: (status: TwitterConnectedStatus) => void;
   twitterConnectedStatus: TwitterConnectedStatus | undefined;
+  orcidProfile?: OrcidUserProfile;
 };
 
 const AccountContextValue = createContext<AccountContextType | undefined>(
@@ -168,6 +170,10 @@ export const AccountContext = (props: PropsWithChildren) => {
     ? getAccount(connectedUser, PLATFORM.Twitter)?.profile
     : undefined;
 
+  const orcidProfile = connectedUser
+    ? getAccount(connectedUser, PLATFORM.Orcid)?.profile
+    : undefined;
+
   const email = connectedUser ? connectedUser.email : undefined;
 
   return (
@@ -187,6 +193,7 @@ export const AccountContext = (props: PropsWithChildren) => {
         setLoginFlowState,
         setTwitterConnectedStatus,
         twitterConnectedStatus,
+        orcidProfile,
       }}>
       {props.children}
     </AccountContextValue.Provider>

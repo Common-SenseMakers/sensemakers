@@ -10,10 +10,11 @@ export const usePersist = <T>(
 
   const getFromStorage = <T>(name: string, defaultValue?: T | null) => {
     try {
-      if (defaultValue === null) {
+      const val = JSON.parse(localStorage.getItem(name) + '');
+      if (val === null && defaultValue === null) {
         return null;
       }
-      const val = JSON.parse(localStorage.getItem(name) + '');
+
       if (val !== null) {
         return val;
       } else {

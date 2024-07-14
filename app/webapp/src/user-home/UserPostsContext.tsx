@@ -17,6 +17,10 @@ interface PostContextType {
   getPost: (postId: string) => AppPostFull | undefined;
   removePost: (postId: string) => void;
   moreToFetch: boolean;
+  getNextAndPrev: (postId?: string) => {
+    prevPostId?: string;
+    nextPostId?: string;
+  };
 }
 
 export const UserPostsContextValue = createContext<PostContextType | undefined>(
@@ -48,6 +52,25 @@ export const UserPostsContext: React.FC<{
     [posts]
   );
 
+  const getNextAndPrev = (postId?: string) => {
+    if (!posts || !postId) {
+      return {};
+    }
+
+    const currPostIndex = posts?.findIndex((p) => p.id === postId);
+    const prevPostId =
+      posts && currPostIndex != undefined && currPostIndex > 0
+        ? posts[currPostIndex - 1].id
+        : undefined;
+
+    const nextPostId =
+      posts && currPostIndex != undefined && currPostIndex < posts.length - 1
+        ? posts[currPostIndex + 1].id
+        : undefined;
+
+    return { prevPostId, nextPostId };
+  };
+
   return (
     <UserPostsContextValue.Provider
       value={{
@@ -63,6 +86,7 @@ export const UserPostsContext: React.FC<{
         getPost,
         removePost,
         moreToFetch,
+        getNextAndPrev,
       }}>
       {children}
     </UserPostsContextValue.Provider>
