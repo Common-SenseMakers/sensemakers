@@ -7,6 +7,7 @@ import { MAX_WIDTH_APP } from '../app/layout/Viewport';
 export interface IAppModal extends LayerExtendedProps {
   type: 'small' | 'normal';
   layerProps?: LayerExtendedProps;
+  windowStyle?: React.CSSProperties;
   onModalClosed?: () => void;
   onSuccess?: () => void;
   onError?: () => void;
@@ -76,7 +77,10 @@ export const AppModal = (props: IAppModal) => {
       onEsc={(): void => close()}
       onClickOutside={(): void => close()}
       animate={false}>
-      <Box align="center" justify="center" style={{ width: '100%' }}>
+      <Box
+        align="center"
+        justify="center"
+        style={{ width: '100%', ...props.windowStyle }}>
         {wrappedContent}
       </Box>
     </Layer>

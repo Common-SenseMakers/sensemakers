@@ -31,6 +31,7 @@ export const nanopubSignupDataSchema = object({
 
 export const orcidSignupDataSchema = object({
   code: string().required(),
+  callbackUrl: string().required(),
 }).noUnknown(true);
 
 export const userSettingsUpdateSchema = object({

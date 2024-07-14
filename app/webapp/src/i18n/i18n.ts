@@ -62,6 +62,13 @@ export enum I18Keys {
 
   returnToDraft = 's0353',
   yesPublish = 's0364',
+
+  publishing = 's0365',
+
+  publishedTitle = 's0366',
+  publishedText = 's0367',
+  nextPost = 's0368',
+  openPublished = 's0369',
 }
 
 const check = new Set();
@@ -148,6 +155,13 @@ const translationENG: Record<I18Keys, string> = {
     'While you can retract a nanopub to make it invisible to most users, <b>it cannot be deleted</b>. This ensures the integrity of the scientific record.',
   [I18Keys.returnToDraft]: 'No, return to draft',
   [I18Keys.yesPublish]: 'Yes, I want to publish',
+
+  [I18Keys.publishing]: 'Publishing',
+
+  [I18Keys.publishedTitle]: 'Your nanopublication is live!',
+  [I18Keys.publishedText]: 'Your post has been nanopublished.',
+  [I18Keys.nextPost]: 'Next post for review',
+  [I18Keys.openPublished]: 'See live nanopublication',
 };
 
 i18n.use(initReactI18next).init({

@@ -123,7 +123,7 @@ export const UserSettingsPage = () => {
           primary
           disabled={orcid !== undefined}
           label={orcid === undefined ? 'Connect Orcid' : orcid.user_id}
-          onClick={() => connectOrcid()}></AppButton>
+          onClick={() => connectOrcid('/settings')}></AppButton>
       </Box>
 
       <Box pad="medium">
@@ -137,7 +137,7 @@ export const UserSettingsPage = () => {
               ? 'Connect Twitter'
               : twitterProfile.username
           }
-          onClick={() => connectOrcid()}></AppButton>
+          onClick={() => {}}></AppButton>
       </Box>
 
       <Box pad="medium">

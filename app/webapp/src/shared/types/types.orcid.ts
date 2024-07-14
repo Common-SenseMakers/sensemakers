@@ -2,11 +2,12 @@ import { UserDetailsBase } from './types.user';
 
 /** ORCID */
 export interface OrcidSignupContext {
-  link: string;
+  callbackUrl: string;
 }
 
 export interface OrcidSignupData {
   code: string;
+  callbackUrl: string;
 }
 
 export interface AuthenticationResult {

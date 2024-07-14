@@ -8,17 +8,22 @@ import {
 import { useSearchParams } from 'react-router-dom';
 
 import { useAppFetch } from '../../../api/app.fetch';
-import { ORCID_API_URL, ORCID_CLIENT_ID } from '../../../app/config';
+import {
+  ORCID_API_URL,
+  ORCID_CLIENT_ID,
+  ORCID_REDIRECT_URL,
+} from '../../../app/config';
 import { HandleSignupResult } from '../../../shared/types/types.fetch';
 import { PLATFORM } from '../../../shared/types/types.user';
 import { usePersist } from '../../../utils/use.persist';
 import { useAccountContext } from '../AccountContext';
 
-const DEBUG = true;
+const DEBUG = false;
 const WAS_CONNECTING_ORCID = 'was-connecting-orcid';
+const ORCID_REDIRECT_PATH = 'orcid-redirect-path';
 
 export type OrcidContextType = {
-  connect: () => void;
+  connect: (path: string) => void;
 };
 
 const OrcidContextValue = createContext<OrcidContextType | undefined>(
@@ -37,20 +42,41 @@ export const OrcidContext = (props: PropsWithChildren) => {
     false
   );
 
+  const [redirectPath, setRedirectPath] = usePersist<string>(
+    ORCID_REDIRECT_PATH,
+    null
+  );
+
   const appFetch = useAppFetch();
 
   /** Watch for the "code" parameter in the url */
   const code = searchParams.get('code');
 
   /** React to the code, force single reaction */
+  if (DEBUG)
+    console.log('OrcidContext', {
+      codeHandled,
+      code,
+      connectedUser,
+      wasConnecting,
+      redirectPath,
+    });
   useEffect(() => {
-    if (!codeHandled.current && code && connectedUser && wasConnecting) {
+    if (
+      !codeHandled.current &&
+      code &&
+      connectedUser &&
+      wasConnecting &&
+      redirectPath
+    ) {
       codeHandled.current = true;
       if (DEBUG) console.log('code received', { code });
 
+      const callbackUrl = window.location.origin + redirectPath;
+
       appFetch<HandleSignupResult>(
         `/api/auth/${PLATFORM.Orcid}/signup`,
-        { code },
+        { code, callbackUrl },
         true
       ).then((result) => {
         if (DEBUG) console.log('orcird signup returned', { result });
@@ -64,9 +90,10 @@ export const OrcidContext = (props: PropsWithChildren) => {
   }, [code, connectedUser, searchParams, setSearchParams]);
 
   /** connect will navigate to the orcid signing page */
-  const connect = () => {
+  const connect = (path: string) => {
     setWasConnecting(true);
-    window.location.href = `${ORCID_API_URL}/oauth/authorize?client_id=${ORCID_CLIENT_ID}&response_type=code&scope=/authenticate&redirect_uri=${window.location.origin + window.location.pathname}`;
+    setRedirectPath(path);
+    window.location.href = `${ORCID_API_URL}/oauth/authorize?client_id=${ORCID_CLIENT_ID}&response_type=code&scope=/authenticate&redirect_uri=${window.location.origin + path}`;
   };
 
   return (

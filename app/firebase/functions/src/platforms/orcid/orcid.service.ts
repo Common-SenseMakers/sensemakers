@@ -9,7 +9,6 @@ import {
 import {
   ORCID_API_URL,
   ORCID_CLIENT_ID,
-  ORCID_REDIRECT_URL,
   ORCID_SECRET,
 } from '../../config/config.runtime';
 import { logger } from '../../instances/logger';
@@ -19,14 +18,13 @@ export class OrcidService
   implements
     IdentityService<OrcidSignupContext, OrcidSignupData, OrcidUserDetails>
 {
-  public async getSignupContext() {
-    return {
-      link: `${ORCID_API_URL}/oauth/authorize?client_id=${ORCID_CLIENT_ID.value()}&response_type=code&scope=/authenticate&redirect_uri=${ORCID_REDIRECT_URL.value()}`,
-    };
+  public async getSignupContext(): Promise<OrcidSignupContext> {
+    throw new Error('not implemented');
   }
 
   protected async fetchCredentialsFromCode(
-    code: string
+    code: string,
+    redirect_uri: string
   ): Promise<AuthenticationResult> {
     const params = new URLSearchParams();
 
@@ -34,7 +32,7 @@ export class OrcidService
     params.append('client_secret', ORCID_SECRET.value());
     params.append('grant_type', 'authorization_code');
     params.append('code', code);
-    params.append('redirect_uri', ORCID_REDIRECT_URL.value());
+    params.append('redirect_uri', redirect_uri);
 
     const response = await fetch(`${ORCID_API_URL}/oauth/token`, {
       headers: [
@@ -60,7 +58,10 @@ export class OrcidService
   }
 
   public async handleSignupData(data: OrcidSignupData) {
-    const result = await this.fetchCredentialsFromCode(data.code);
+    const result = await this.fetchCredentialsFromCode(
+      data.code,
+      data.callbackUrl
+    );
     const credentials: OrcidUserCredentials = {
       access_token: result.access_token,
       refresh_token: result.refresh_token,
