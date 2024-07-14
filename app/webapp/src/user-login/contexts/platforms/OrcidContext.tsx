@@ -1,20 +1,21 @@
-import { useQuery } from '@tanstack/react-query';
 import {
   PropsWithChildren,
   createContext,
   useContext,
   useEffect,
-  useMemo,
   useRef,
 } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import { useAppFetch } from '../../../api/app.fetch';
-import { postOrcidCode } from '../../../api/auth.requests';
-import { OrcidSignupContext } from '../../../shared/types/types.orcid';
+import { ORCID_API_URL, ORCID_CLIENT_ID } from '../../../app/config';
+import { HandleSignupResult } from '../../../shared/types/types.fetch';
 import { PLATFORM } from '../../../shared/types/types.user';
+import { usePersist } from '../../../utils/use.persist';
+import { useAccountContext } from '../AccountContext';
 
-const DEBUG = false;
+const DEBUG = true;
+const WAS_CONNECTING_ORCID = 'was-connecting-orcid';
 
 export type OrcidContextType = {
   connect: () => void;
@@ -28,46 +29,44 @@ const OrcidContextValue = createContext<OrcidContextType | undefined>(
 export const OrcidContext = (props: PropsWithChildren) => {
   const codeHandled = useRef(false);
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const { connectedUser, refresh: refreshConnected } = useAccountContext();
+
+  const [wasConnecting, setWasConnecting] = usePersist<boolean>(
+    WAS_CONNECTING_ORCID,
+    false
+  );
+
   const appFetch = useAppFetch();
 
   /** Watch for the "code" parameter in the url */
   const code = searchParams.get('code');
 
-  /** Get the auth link from the backend */
-  const { data: orcidSignup } = useQuery({
-    queryKey: ['orcidLink'],
-    queryFn: async () => {
-      const context = await appFetch<OrcidSignupContext>(
-        `/api/auth/${PLATFORM.Orcid}/context`
-      );
-      return context;
-    },
-  });
-
   /** React to the code, force single reaction */
   useEffect(() => {
-    if (!codeHandled.current && code) {
+    if (!codeHandled.current && code && connectedUser && wasConnecting) {
       codeHandled.current = true;
       if (DEBUG) console.log('code received', { code });
 
-      postOrcidCode(code).then((token) => {
-        if (DEBUG)
-          console.log('token received (sliced)', { token: token.slice(0, 8) });
+      appFetch<HandleSignupResult>(
+        `/api/auth/${PLATFORM.Orcid}/signup`,
+        { code },
+        true
+      ).then((result) => {
+        if (DEBUG) console.log('orcird signup returned', { result });
 
         searchParams.delete('code');
         setSearchParams(searchParams);
-        localStorage.setItem('token', token);
+        setWasConnecting(false);
+        refreshConnected();
       });
     }
-  }, [code, searchParams, setSearchParams]);
+  }, [code, connectedUser, searchParams, setSearchParams]);
 
   /** connect will navigate to the orcid signing page */
   const connect = () => {
-    if (orcidSignup) {
-      /** redirect to the very same location */
-      window.location.href =
-        orcidSignup.link + `&callback_url=${window.location.href}`;
-    }
+    setWasConnecting(true);
+    window.location.href = `${ORCID_API_URL}/oauth/authorize?client_id=${ORCID_CLIENT_ID}&response_type=code&scope=/authenticate&redirect_uri=${window.location.origin + window.location.pathname}`;
   };
 
   return (

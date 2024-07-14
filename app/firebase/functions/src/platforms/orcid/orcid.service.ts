@@ -1,12 +1,15 @@
 import {
+  AuthenticationResult,
   OrcidSignupContext,
   OrcidSignupData,
+  OrcidUserCredentials,
   OrcidUserDetails,
+  OrcidUserProfile,
 } from '../../@shared/types/types.orcid';
 import {
-  ORCID_REDIRECT_URL,
   ORCID_API_URL,
   ORCID_CLIENT_ID,
+  ORCID_REDIRECT_URL,
   ORCID_SECRET,
 } from '../../config/config.runtime';
 import { logger } from '../../instances/logger';
@@ -22,7 +25,9 @@ export class OrcidService
     };
   }
 
-  protected async fetchUserFromCode(code: string): Promise<OrcidUserDetails> {
+  protected async fetchCredentialsFromCode(
+    code: string
+  ): Promise<AuthenticationResult> {
     const params = new URLSearchParams();
 
     params.append('client_id', ORCID_CLIENT_ID.value());
@@ -55,7 +60,26 @@ export class OrcidService
   }
 
   public async handleSignupData(data: OrcidSignupData) {
-    const user = await this.fetchUserFromCode(data.code);
-    return user;
+    const result = await this.fetchCredentialsFromCode(data.code);
+    const credentials: OrcidUserCredentials = {
+      access_token: result.access_token,
+      refresh_token: result.refresh_token,
+      expires_in: result.expires_in,
+      scope: result.scope,
+      token_type: result.token_type,
+    };
+
+    const profile: OrcidUserProfile = {
+      name: result.name,
+    };
+
+    const orcid: OrcidUserDetails = {
+      user_id: result.orcid,
+      signupDate: 0,
+      profile,
+      read: credentials,
+    };
+
+    return orcid;
   }
 }

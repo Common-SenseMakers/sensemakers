@@ -211,15 +211,18 @@ export const PostView = (props: {
 
           <Box width="100%" height="16px"></Box>
           <AppParagraph>{t(I18Keys.publishWarningPar01)}</AppParagraph>
-          <AppParagraph>
+          <AppParagraph addMargin>
             <Trans
               i18nKey={I18Keys.publishWarningPar02}
               components={{ b: <b></b> }}></Trans>
           </AppParagraph>
+          <AppParagraph addMargin>
+            <Trans
+              i18nKey={I18Keys.publishWarningPar03}
+              components={{ b: <b></b> }}></Trans>
+          </AppParagraph>
 
-          <AppParagraph addMargin></AppParagraph>
-
-          <Box direction="row" gap="small" margin={{ top: 'medium' }}>
+          <Box direction="row" gap="small" margin={{ top: 'large' }}>
             <Box width="50%" style={{ flexGrow: 1 }}>
               <AppButton
                 disabled={isUpdating}

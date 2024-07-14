@@ -17,15 +17,21 @@ import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useDisconnectContext } from '../user-login/contexts/DisconnectUserContext';
+import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
+import { getAccount } from '../user-login/user.helper';
 
 /** extract the postId from the route and pass it to a PostContext */
 export const UserSettingsPage = () => {
   const { disconnect } = useDisconnectContext();
   const { constants } = useThemeContext();
+
   const navigate = useNavigate();
   const appFetch = useAppFetch();
-  const { connectedUser, refresh } = useAccountContext();
+
+  const { connectedUser, refresh, twitterProfile } = useAccountContext();
   const [isSetting, setIsSetting] = useState(false);
+
+  const { connect: connectOrcid } = useOrcidContext();
 
   const setSettings = (newSettings: UserSettingsUpdate) => {
     return appFetch('/api/auth/settings', newSettings).then(() => {
@@ -62,6 +68,8 @@ export const UserSettingsPage = () => {
   const currentAutopost =
     connectedUser?.settings?.autopost[PLATFORM.Nanopub].value;
   const currentNotifications = connectedUser?.settings?.notificationFreq;
+
+  const orcid = getAccount(connectedUser, PLATFORM.Orcid);
 
   if (!connectedUser) {
     return (
@@ -109,7 +117,27 @@ export const UserSettingsPage = () => {
       </Box>
 
       <Box pad="medium">
-        <Text>Connect:</Text>
+        <Text>Orcid:</Text>
+
+        <AppButton
+          primary
+          disabled={orcid !== undefined}
+          label={orcid === undefined ? 'Connect Orcid' : orcid.user_id}
+          onClick={() => connectOrcid()}></AppButton>
+      </Box>
+
+      <Box pad="medium">
+        <Text>Twitter:</Text>
+
+        <AppButton
+          primary
+          disabled={twitterProfile !== undefined}
+          label={
+            twitterProfile === undefined
+              ? 'Connect Twitter'
+              : twitterProfile.username
+          }
+          onClick={() => connectOrcid()}></AppButton>
       </Box>
 
       <Box pad="medium">
