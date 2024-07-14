@@ -47,6 +47,7 @@ export const SignerContext = (props: PropsWithChildren) => {
     refresh: refreshUser,
     setLoginFlowState,
     setOverallLoginStatus,
+    overallLoginStatus,
   } = useAccountContext();
 
   const appFetch = useAppFetch();
@@ -65,9 +66,16 @@ export const SignerContext = (props: PropsWithChildren) => {
 
   useEffect(() => {
     magic.user.isLoggedIn().then((res) => {
+      if (DEBUG) console.log('Magic connection check done', { res });
+
       if (res && !magicSigner) {
-        console.log('Autoconnecting Magic');
+        if (DEBUG) console.log('Autoconnecting Magic');
         connectMagic(false);
+      } else {
+        if (overallLoginStatus === OverallLoginStatus.LogginIn) {
+          console.warn('Unexpected situation, resetting login status');
+          setOverallLoginStatus(OverallLoginStatus.LoggedOut);
+        }
       }
     });
   }, []);
