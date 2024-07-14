@@ -1,17 +1,22 @@
-import { Anchor, Box } from 'grommet';
+import { Box } from 'grommet';
 import { Refresh } from 'grommet-icons';
+import { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { ClearIcon } from '../app/icons/ClearIcon';
 import { SendIcon } from '../app/icons/SendIcon';
 import { ViewportPage } from '../app/layout/Viewport';
+import { I18Keys } from '../i18n/i18n';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID } from '../semantics/patterns/patterns';
 import { AppPostReviewStatus } from '../shared/types/types.posts';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
-import { AppButton } from '../ui-components';
+import { AppButton, AppHeading, AppModal, AppSubtitle } from '../ui-components';
+import { AppParagraph } from '../ui-components/AppParagraph';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
+import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { usePost } from './PostContext';
 import { PostHeader } from './PostHeader';
@@ -24,6 +29,11 @@ export const PostView = (props: {
   profile?: TwitterUserProfile;
   isProfile: boolean;
 }) => {
+  const [approveIntent, setApproveIntent] = useState(false);
+  const [askedOrcid, setAskedOrcid] = useState(false);
+
+  const { connect: _connectOrcid } = useOrcidContext();
+
   const { constants } = useThemeContext();
   const {
     post,
@@ -40,6 +50,8 @@ export const PostView = (props: {
   } = usePost();
 
   const { connectedUser } = useAccountContext();
+
+  const { t } = useTranslation();
 
   const semanticsUpdated = (newSemantics: string) => {
     updateSemantics(newSemantics);
@@ -76,8 +88,8 @@ export const PostView = (props: {
   const { action: rightClicked, label: rightLabel } = (() => {
     if (canPublishNanopub && nanopubDraft && !postStatuses.nanopubPublished) {
       return {
-        action: () => approveOrUpdate(),
-        label: 'Nanopublish',
+        action: () => setApproveIntent(true),
+        label: t(I18Keys.publish),
       };
     }
 
@@ -86,6 +98,10 @@ export const PostView = (props: {
       label: '',
     };
   })();
+
+  const connectOrcid = () => {
+    _connectOrcid();
+  };
 
   const action = (() => {
     if (!postStatuses.processed && !postStatuses.isParsing) {
@@ -102,14 +118,14 @@ export const PostView = (props: {
     if (!postStatuses.nanopubPublished && !postStatuses.ignored) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
-          <Box style={{ flexGrow: 1 }}>
+          <Box width="50%" style={{ flexGrow: 1 }}>
             <AppButton
               disabled={isUpdating}
               icon={<ClearIcon></ClearIcon>}
               onClick={() => ignore()}
-              label="Ignore"></AppButton>
+              label={t(I18Keys.ignore)}></AppButton>
           </Box>
-          <Box style={{ flexGrow: 1 }} align="end" gap="small">
+          <Box width="50%" align="end" gap="small">
             <AppButton
               primary
               disabled={isUpdating}
@@ -146,6 +162,82 @@ export const PostView = (props: {
     }
 
     return <></>;
+  })();
+
+  const askOrcid = (() => {
+    return (
+      <AppModal type="normal" onModalClosed={() => setApproveIntent(false)}>
+        <>
+          <Box width="100%" height="16px"></Box>
+          <AppHeading level="1">{t(I18Keys.connectOrcidTitle)}</AppHeading>
+
+          <Box width="100%" height="16px"></Box>
+          <AppParagraph>{t(I18Keys.connectOrcidPar01)}</AppParagraph>
+          <AppParagraph>
+            <Trans
+              i18nKey={I18Keys.connectOrcidPar02}
+              components={{ b: <b></b> }}></Trans>
+          </AppParagraph>
+
+          <AppParagraph addMargin></AppParagraph>
+
+          <Box direction="row" gap="small" margin={{ top: 'medium' }}>
+            <Box width="50%" style={{ flexGrow: 1 }}>
+              <AppButton
+                disabled={isUpdating}
+                onClick={() => connectOrcid()}
+                label={t(I18Keys.connectOrcid)}></AppButton>
+            </Box>
+            <Box width="50%" align="end" gap="small">
+              <AppButton
+                primary
+                disabled={isUpdating}
+                onClick={() => setAskedOrcid(true)}
+                label={t(I18Keys.continue)}
+                style={{ width: '100%' }}></AppButton>
+            </Box>
+          </Box>
+        </>
+      </AppModal>
+    );
+  })();
+
+  const finalApprove = (() => {
+    return (
+      <AppModal type="normal" onModalClosed={() => setApproveIntent(false)}>
+        <>
+          <Box width="100%" height="16px"></Box>
+          <AppHeading level="1">{t(I18Keys.publishWarningTitle)}</AppHeading>
+
+          <Box width="100%" height="16px"></Box>
+          <AppParagraph>{t(I18Keys.publishWarningPar01)}</AppParagraph>
+          <AppParagraph>
+            <Trans
+              i18nKey={I18Keys.publishWarningPar02}
+              components={{ b: <b></b> }}></Trans>
+          </AppParagraph>
+
+          <AppParagraph addMargin></AppParagraph>
+
+          <Box direction="row" gap="small" margin={{ top: 'medium' }}>
+            <Box width="50%" style={{ flexGrow: 1 }}>
+              <AppButton
+                disabled={isUpdating}
+                onClick={() => ignore()}
+                label={t(I18Keys.returnToDraft)}></AppButton>
+            </Box>
+            <Box width="50%" align="end" gap="small">
+              <AppButton
+                primary
+                disabled={isUpdating}
+                onClick={() => approveOrUpdate()}
+                label={t(I18Keys.yesPublish)}
+                style={{ width: '100%' }}></AppButton>
+            </Box>
+          </Box>
+        </>
+      </AppModal>
+    );
   })();
 
   const editable = _editable && !props.isProfile;
@@ -207,6 +299,7 @@ export const PostView = (props: {
             <></>
           )}
         </Box>
+        {approveIntent ? askedOrcid ? askOrcid : finalApprove : <></>}
       </>
     );
   })();

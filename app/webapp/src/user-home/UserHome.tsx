@@ -277,7 +277,7 @@ export const UserHome = () => {
   const modal = (() => {
     if (showIntro) {
       return (
-        <AppModal onModalClosed={() => introClosed()}>
+        <AppModal type="small" onModalClosed={() => introClosed()}>
           <IntroModal closeModal={() => setShowIntro(false)}></IntroModal>
         </AppModal>
       );
