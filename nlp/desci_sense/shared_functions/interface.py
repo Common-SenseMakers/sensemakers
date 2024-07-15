@@ -15,6 +15,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from rdflib import URIRef, Literal, Graph
 from .prompting.jinja.topics_template import ALLOWED_TOPICS
 from .filters import SciFilterClassfication
+from .utils import normalize_tweet_urls_in_text, normalize_tweet_url
 
 # for calculating thread length limits
 MAX_CHARS_PER_POST = 280
@@ -294,6 +295,14 @@ class AppPost(BaseModel):
         default=None,
     )
 
+    @validator("content", pre=True, always=True)
+    def normalize_twitter_urls(cls, v):
+        return normalize_tweet_urls_in_text(v) if isinstance(v, str) else v
+
+    @validator("url", pre=True, always=True)
+    def normalize_twitter_url(cls, v):
+        return normalize_tweet_url(v) if isinstance(v, str) else v
+
 
 class AppThread(BaseModel):
     author: Author
@@ -302,6 +311,10 @@ class AppThread(BaseModel):
         description="Thread url (url of first post)",
         default=None,
     )
+
+    @validator("url", pre=True, always=True)
+    def normalize_twitter_url(cls, v):
+        return normalize_tweet_url(v) if isinstance(v, str) else v
 
     @property
     def source_network(self) -> PlatformType:

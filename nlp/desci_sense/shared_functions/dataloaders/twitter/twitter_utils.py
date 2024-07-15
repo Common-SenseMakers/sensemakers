@@ -5,12 +5,14 @@ import re
 import requests
 from datetime import datetime
 
+
 from ...interface import AppPost, PlatformType
 from ...utils import (
     extract_and_expand_urls,
     normalize_url,
     extract_twitter_status_id,
     remove_dups_ordered,
+    normalize_tweet_url,
 )
 from ...schema.post import RefPost, QuoteRefPost
 
@@ -187,22 +189,6 @@ def extract_status_id(url):
         return match.group(1)
     else:
         return None
-
-
-def normalize_tweet_url(url):
-    """
-    Normalize Twitter post URLs to use the x.com domain.
-
-    Parameters:
-    url (str): The original Twitter URL.
-
-    Returns:
-    str: The normalized URL with x.com domain.
-    """
-    if "twitter.com" in url:
-        return url.replace("twitter.com", "x.com")
-    else:
-        return url
 
 
 # TODO combine with method below
