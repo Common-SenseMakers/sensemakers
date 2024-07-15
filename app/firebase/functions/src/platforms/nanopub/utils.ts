@@ -386,7 +386,7 @@ export const buildSpostNp = async (
         null,
         null,
         null,
-        namedNode(URI.PROVENANCE_URI)
+        namedNode(URI.PUBINFO_URI)
       )
       .forEach((quad: Quad) => {
         writer.addQuad(quad);
