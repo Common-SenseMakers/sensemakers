@@ -59,6 +59,7 @@ export const PostCard = (props: {
         isLoading={false}
         patternProps={{
           editable: false,
+          size: 'compact',
           semantics: post?.semantics,
           originalParsed: post?.originalParsed,
         }}></SemanticsEditor>
@@ -68,6 +69,7 @@ export const PostCard = (props: {
         include={[PATTERN_ID.REF_LABELS]}
         isLoading={false}
         patternProps={{
+          size: 'compact',
           editable: false,
           semantics: post?.semantics,
           originalParsed: post?.originalParsed,
