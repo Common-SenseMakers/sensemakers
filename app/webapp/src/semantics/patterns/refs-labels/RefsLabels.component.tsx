@@ -13,6 +13,7 @@ import { RefsMap, processSemantics } from './process.semantics';
 
 export const RefLabelsComponent = (props: PatternProps) => {
   const { store, originalStore } = useSemanticsStore(props);
+  const size = props.size || 'normal  ';
 
   /** processed ref labels with metadata */
   const refs = useMemo<RefsMap>(
@@ -70,7 +71,8 @@ export const RefLabelsComponent = (props: PatternProps) => {
   }
 
   const allRefs = Array.from(refs.entries()).reverse();
-  const [visibleRefs, restOfRefs] = splitArray(allRefs, 2);
+  const [visibleRefs, restOfRefs] =
+    size === 'compact' ? splitArray(allRefs, 2) : [allRefs, []];
 
   if (refs && refs.size > 0) {
     return (
