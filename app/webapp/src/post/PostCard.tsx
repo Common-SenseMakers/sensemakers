@@ -16,23 +16,15 @@ export const PostCard = (props: {
   post: AppPostFull;
   shade?: boolean;
   profile?: TwitterUserProfile;
+  handleClick: () => void;
 }) => {
   const { post, shade: _shade } = props;
   const profile = props.profile;
   const shade = _shade || false;
 
-  const navigate = useNavigate();
-  const { constants } = useThemeContext();
+    const { constants } = useThemeContext();
 
-  const location = useLocation();
-
-  const handleClick = () => {
-    const path = profile
-      ? `${location.pathname}/${post.id}`
-      : `/post/${post.id}`;
-    navigate(path);
-  };
-
+  const handleClick = props.handleClick;
   const tweet = post.mirrors.find((m) => m.platformId === PLATFORM.Twitter);
 
   return (
