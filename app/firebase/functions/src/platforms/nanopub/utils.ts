@@ -1,5 +1,6 @@
 import { Nanopub } from '@nanopub/sign';
 import { DataFactory, Quad, Store, Writer } from 'n3';
+import * as URI from './constants';
 
 const { namedNode, quad, literal } = DataFactory;
 
@@ -53,98 +54,79 @@ export const buildSpostProv = (
   const store = new Store();
 
   // Define the graph URI
-  const PROVENANCE_URI = 'http://purl.org/nanopub/temp/mynanopub#provenance';
-  const provenanceGraphUri = namedNode(PROVENANCE_URI);
+  const provenanceGraphUri = namedNode(URI.PROVENANCE_URI);
 
   // Define the subjects, predicates, and objects
-  const cosmo = namedNode('https://sense-nets.xyz/');
-  const xHandle = namedNode('https://x.com/' + twitterHandle);
-  const assertion = namedNode(
-    'http://purl.org/nanopub/temp/mynanopub#assertion'
-  );
-  const activity = namedNode('http://purl.org/nanopub/temp/mynanopub#activity');
+  const cosmo = namedNode(URI.COSMO_PREFIX);
+  const xHandle = namedNode(URI.X_PREFIX + twitterHandle);
+  const assertion = namedNode(URI.ASSERTION_URI);
+  const activity = namedNode(URI.ACTIVITY_URI);
 
   // Add quads to the store based on post_type
   const activityType =
     postType === 'sup'
-      ? namedNode('https://sense-nets.xyz/supervisedActivity')
-      : namedNode('https://sense-nets.xyz/unsupervisedActivity');
+      ? namedNode(URI.SUPERVISED_ACTIVITY)
+      : namedNode(URI.UNSUPERVISED_ACTIVITY);
 
   store.addQuad(
-    quad(
-      cosmo,
-      namedNode('http://www.w3.org/ns/prov#actedOnBehalfOf'),
-      xHandle,
-      provenanceGraphUri
-    )
+    cosmo,
+    namedNode(URI.PROV_ACTED_ON_BEHALF_OF),
+    xHandle,
+    provenanceGraphUri
   );
   store.addQuad(
-    quad(
-      cosmo,
-      namedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
-      namedNode('http://www.w3.org/ns/prov#SoftwareAgent'),
-      provenanceGraphUri
-    )
+    cosmo,
+    namedNode(URI.RDF_TYPE),
+    namedNode(URI.PROV_SOFTWARE_AGENT),
+    provenanceGraphUri
   );
   store.addQuad(
-    quad(
-      activity,
-      namedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
-      activityType,
-      provenanceGraphUri
-    )
+    activity,
+    namedNode(URI.RDF_TYPE),
+    activityType,
+    provenanceGraphUri
   );
   store.addQuad(
-    quad(
-      activity,
-      namedNode('http://www.w3.org/ns/prov#wasAssociatedWith'),
-      cosmo,
-      provenanceGraphUri
-    )
+    
+    activity,
+    namedNode(URI.PROV_WAS_ASSOCIATED_WITH),
+    cosmo,
+    provenanceGraphUri
+    
   );
   store.addQuad(
-    quad(
-      assertion,
-      namedNode('http://www.w3.org/ns/prov#wasAttributedTo'),
-      xHandle,
-      provenanceGraphUri
-    )
+    assertion,
+    namedNode(URI.PROV_WAS_ATTRIBUTED_TO),
+    xHandle,
+    provenanceGraphUri
   );
   store.addQuad(
-    quad(
-      assertion,
-      namedNode('http://www.w3.org/ns/prov#wasGeneratedBy'),
-      activity,
-      provenanceGraphUri
-    )
+    assertion,
+    namedNode(URI.PROV_WAS_GENERATED_BY),
+    activity,
+    provenanceGraphUri
   );
   store.addQuad(
-    quad(
-      assertion,
-      namedNode('http://www.w3.org/ns/prov#linksTo'),
-      namedNode(tweetUrl),
-      provenanceGraphUri
-    )
+    assertion,
+    namedNode(URI.PROV_LINKS_TO),
+    namedNode(tweetUrl),
+    provenanceGraphUri
   );
 
   // If ORCID ID exists, add it to the provenance graph
   if (orcidId) {
-    const orcidNode = namedNode('https://orcid.org/' + orcidId);
+    const orcidNode = namedNode(URI.ORCID_PREFIX + orcidId);
     store.addQuad(
-      quad(
-        assertion,
-        namedNode('http://www.w3.org/ns/prov#wasAttributedTo'),
-        orcidNode,
-        provenanceGraphUri
-      )
+      assertion,
+      namedNode(URI.PROV_WAS_ATTRIBUTED_TO),
+      orcidNode,
+      provenanceGraphUri
     );
     store.addQuad(
-      quad(
-        xHandle,
-        namedNode('http://www.w3.org/ns/prov#wasAttributedTo'),
-        orcidNode,
-        provenanceGraphUri
-      )
+      xHandle,
+      namedNode(URI.PROV_WAS_ATTRIBUTED_TO),
+      orcidNode,
+      provenanceGraphUri
     );
   }
 
@@ -157,15 +139,14 @@ export const buildSpostAssertion = (
   postText: string
 ): Store => {
   // Define the graph URI
-  const ASSERTION_URI = 'http://purl.org/nanopub/temp/mynanopub#assertion';
-  const assertionGraphUri = namedNode(ASSERTION_URI);
+  const assertionGraphUri = namedNode(URI.ASSERTION_URI);
 
   // Create a new store for the assertion
   const store = new Store();
   //attributing the assertion to twitter user
   store.addQuad(
     assertionGraphUri,
-    namedNode('http://www.w3.org/2000/01/rdf-schema#comment'),
+    namedNode(URI.RDFS_COMMENT),
     literal(postText),
     assertionGraphUri
   );
@@ -185,8 +166,8 @@ export const buildSpostAssertion = (
 
   store.addQuad(
     assertionGraphUri,
-    namedNode('http://www.w3.org/ns/prov#wasAttributedTo'),
-    namedNode('https://x.com/' + twitterHandle),
+    namedNode(URI.PROV_WAS_ATTRIBUTED_TO),
+    namedNode(URI.X_PREFIX + twitterHandle),
     assertionGraphUri
   );
 
@@ -201,27 +182,33 @@ export const buildSpostPubinfo = (
   options: BuildSpostNpOptions = {}
 ): Store => {
   const { oldNpUri, orcidId } = options;
-  const BASE_URI = 'http://purl.org/nanopub/temp/mynanopub#';
-  const baseGraphUri = namedNode(BASE_URI);
-  const pubinfoGraphUri = namedNode(BASE_URI + 'pubinfo');
-  const xHandle = namedNode('https://x.com/' + twitterHandle);
+  const baseGraphUri = namedNode(URI.BASE_URI);
+  const pubinfoGraphUri = namedNode(URI.PUBINFO_URI);
+  const xHandle = namedNode(URI.X_PREFIX + twitterHandle);
 
   // Create a new store for the assertion
   const store = new Store();
   //adding constant triplets
   store.addQuad(
+    namedNode(URI.BASE_URI),
+    namedNode(URI.LICENSE),
+    namedNode(URI.CREATIVECOMMONS4),
+    pubinfoGraphUri
+  );
+  
+  store.addQuad(
     xHandle,
-    namedNode('http://xmlns.com/foaf/0.1/name'),
+    namedNode(URI.FOAF_NAME),
     literal(name),
     pubinfoGraphUri
   );
   // If ORCID ID exists, add it to the provenance graph
   if (orcidId) {
-    const orcidNode = namedNode('https://orcid.org/' + orcidId);
+    const orcidNode = namedNode(URI.ORCID_PREFIX + orcidId);
     store.addQuad(
       quad(
         orcidNode,
-        namedNode('http://xmlns.com/foaf/0.1/name'),
+        namedNode(URI.FOAF_NAME),
         literal(name),
         pubinfoGraphUri
       )
@@ -229,7 +216,7 @@ export const buildSpostPubinfo = (
     store.addQuad(
       quad(
         baseGraphUri,
-        namedNode('http://www.w3.org/ns/prov#wasAttributedTo'),
+        namedNode(URI.PROV_WAS_ATTRIBUTED_TO),
         orcidNode,
         pubinfoGraphUri
       )
@@ -238,50 +225,50 @@ export const buildSpostPubinfo = (
 
   store.addQuad(
     baseGraphUri,
-    namedNode('http://www.w3.org/ns/prov#wasAttributedTo'),
-    namedNode('https://x.com/' + twitterHandle),
+    namedNode(URI.PROV_WAS_ATTRIBUTED_TO),
+    namedNode(URI.X_PREFIX + twitterHandle),
     pubinfoGraphUri
   );
   store.addQuad(
     baseGraphUri,
-    namedNode('http://purl.org/nanopub/x/hasNanopubType'),
-    namedNode('https://sense-nets.xyz/SemanticPost'),
+    namedNode(URI.NP_HAS_NANOPUB_TYPE),
+    namedNode(URI.COSMO_SEMANTIC_POST),
     pubinfoGraphUri
   );
   store.addQuad(
     baseGraphUri,
-    namedNode('http://purl.org/nanopub/x/wasCreatedAt'),
-    namedNode('https://sense-nets.xyz/'),
+    namedNode(URI.NP_WAS_CREATED_AT),
+    namedNode(URI.COSMO_PREFIX),
     pubinfoGraphUri
   );
   store.addQuad(
     baseGraphUri,
-    namedNode('http://www.w3.org/2000/01/rdf-schema#label'),
+    namedNode(URI.LABEL),
     literal('CoSMO Semantic Post'),
     pubinfoGraphUri
   );
   store.addQuad(
     baseGraphUri,
-    namedNode('https://sense-nets.xyz/hasRootSinger'),
+    namedNode(URI.NP_HAS_ROOT_SIGNER),
     literal(ethAddress),
     pubinfoGraphUri
   );
   //If we call this function to update, then oldNpUri is non empty and we add a triplet
   if (oldNpUri) {
     store.addQuad(
-      namedNode('http://purl.org/nanopub/temp/mynanopub#'),
-      namedNode('http://purl.org/nanopub/x/supersesdes'),
+      namedNode(URI.BASE_URI),
+      namedNode(URI.NP_SUPERSEDES),
       namedNode(oldNpUri),
-      namedNode('http://purl.org/nanopub/temp/mynanopub#pubinfo')
+      namedNode(URI.PUBINFO_URI)
     );
   }
   //if post type is unsupervised then add
   if (postType == 'unsup') {
     store.addQuad(
       quad(
-        namedNode(BASE_URI + 'sig'),
-        namedNode('http://purl.org/nanopub/x/singedBy'),
-        namedNode('https://sense-nets.xyz/'),
+        namedNode(URI.BASE_URI + 'sig'),
+        namedNode(URI.NP_SIGNED_BY),
+        namedNode(URI.COSMO_PREFIX),
         pubinfoGraphUri
       )
     );
@@ -292,33 +279,32 @@ export const buildSpostPubinfo = (
 export const buildNpHead = (): Store => {
   // build nanopub head
   const headStore = new Store();
-  const BASE_URI = 'http://purl.org/nanopub/temp/mynanopub#';
-  const baseGraphUri = namedNode(BASE_URI);
-  const headGraphUri = namedNode(BASE_URI + 'head');
+  const baseGraphUri = namedNode(URI.BASE_URI);
+  const headGraphUri = namedNode(URI.HEAD_URI);
 
   headStore.addQuad(
     baseGraphUri,
-    namedNode('http://www.nanopub.org/nschema#hasAssertion'),
-    namedNode(BASE_URI + 'assertion'),
+    namedNode(URI.NP_HAS_ASSERTION),
+    namedNode(URI.ASSERTION_URI),
     headGraphUri
   );
   headStore.addQuad(
     baseGraphUri,
-    namedNode('http://www.nanopub.org/nschema#hasProvenance'),
-    namedNode(BASE_URI + 'provenance'),
+    namedNode(URI.NP_HAS_PROVENANCE),
+    namedNode(URI.PROVENANCE_URI),
     headGraphUri
   );
 
   headStore.addQuad(
     baseGraphUri,
-    namedNode('http://www.nanopub.org/nschema#hasPublicationInfo'),
-    namedNode(BASE_URI + 'pubinfo'),
+    namedNode(URI.NP_HAS_PUBLICATION_INFO),
+    namedNode(URI.PUBINFO_URI),
     headGraphUri
   );
   headStore.addQuad(
     baseGraphUri,
-    namedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
-    namedNode('http://www.nanopub.org/nschema#Nanopublication'),
+    namedNode(URI.RDF_TYPE),
+    namedNode(URI.NP_NANOPUBLICATION),
     headGraphUri
   );
 
@@ -358,15 +344,15 @@ export const buildSpostNp = async (
     // Create a writer and add prefixes
     const writer = new Writer({ format: 'application/trig' });
     writer.addPrefixes({
-      base: 'http://purl.org/nanopub/temp/mynanopub#',
-      cosmo: 'https://sense-nets.xyz/',
+      base: URI.BASE_URI,
+      cosmo: URI.COSMO_PREFIX,
       dct: 'http://purl.org/dc/terms/',
       xsd: 'http://www.w3.org/2001/XMLSchema#',
       rdfs: 'http://www.w3.org/2000/01/rdf-schema#',
       ns1: 'http://purl.org/np/',
       foaf: 'http://xmlns.com/foaf/0.1/',
       schema: 'https://schema.org/',
-      x: 'https://x.com/',
+      x: URI.X_PREFIX,
       np: 'http://www.nanopub.org/nschema#',
       npx: 'http://purl.org/nanopub/x/',
       prov: 'http://www.w3.org/ns/prov#',
@@ -378,7 +364,7 @@ export const buildSpostNp = async (
         null,
         null,
         null,
-        namedNode('http://purl.org/nanopub/temp/mynanopub#head')
+        namedNode(URI.HEAD_URI)
       )
       .forEach((quad: Quad) => {
         writer.addQuad(quad);
@@ -390,7 +376,7 @@ export const buildSpostNp = async (
         null,
         null,
         null,
-        namedNode('http://purl.org/nanopub/temp/mynanopub#assertion')
+        namedNode(URI.ASSERTION_URI)
       )
       .forEach((quad: Quad) => {
         writer.addQuad(quad);
@@ -402,7 +388,7 @@ export const buildSpostNp = async (
         null,
         null,
         null,
-        namedNode('http://purl.org/nanopub/temp/mynanopub#provenance')
+        namedNode(URI.PROVENANCE_URI)
       )
       .forEach((quad: Quad) => {
         writer.addQuad(quad);
@@ -414,7 +400,7 @@ export const buildSpostNp = async (
         null,
         null,
         null,
-        namedNode('http://purl.org/nanopub/temp/mynanopub#pubinfo')
+        namedNode(URI.PROVENANCE_URI)
       )
       .forEach((quad: Quad) => {
         writer.addQuad(quad);
@@ -453,27 +439,26 @@ export const buildIntroNp = async (
     const headStore = buildNpHead();
 
     // Define the graph URIs
-    const BASE_URI = 'http://purl.org/nanopub/temp/mynanopub#';
-    const assertionGraph = namedNode(`${BASE_URI}assertion`);
-    const provenanceGraph = namedNode(`${BASE_URI}provenance`);
-    const pubinfoGraph = namedNode(`${BASE_URI}pubinfo`);
-    const x = 'https://x.com/';
-    const keyDeclarationNode = namedNode(`${BASE_URI}${ethAddress}`);
+    const assertionGraph = namedNode(URI.ASSERTION_URI);
+    const provenanceGraph = namedNode(URI.PROVENANCE_URI);
+    const pubinfoGraph = namedNode(URI.PUBINFO_URI);
+    const x = URI.X_PREFIX;
+    const keyDeclarationNode = namedNode(`${URI.BASE_URI}${ethAddress}`);
     const twitterNode = namedNode(`${x}${twitterHandle}`);
-    const npx = 'http://purl.org/nanopub/x/';
+    const npx = URI.NPX_PREFIX;
 
     // Create a writer and add prefixes
     const writer = new Writer({ format: 'application/trig' });
     writer.addPrefixes({
-      base: BASE_URI,
-      cosmo: 'https://sense-nets.xyz/',
+      base: URI.BASE_URI,
+      cosmo: URI.COSMO_PREFIX,
       dct: 'http://purl.org/dc/terms/',
       xsd: 'http://www.w3.org/2001/XMLSchema#',
       rdfs: 'http://www.w3.org/2000/01/rdf-schema#',
       ns1: 'http://purl.org/np/',
       foaf: 'http://xmlns.com/foaf/0.1/',
       schema: 'https://schema.org/',
-      x: 'https://x.com/',
+      x: URI.X_PREFIX,
       np: 'http://www.nanopub.org/nschema#',
       npx: 'http://purl.org/nanopub/x/',
       prov: 'http://www.w3.org/ns/prov#',
@@ -488,104 +473,104 @@ export const buildIntroNp = async (
     // Add triples to the assertion graph
     writer.addQuad(
       twitterNode,
-      namedNode('http://xmlns.com/foaf/0.1/name'),
+      namedNode(URI.FOAF_NAME),
       literal(name),
       assertionGraph
     );
     writer.addQuad(
       keyDeclarationNode,
-      namedNode(`${npx}declaredBy`),
+      namedNode(URI.NP_DECLARED_BY),
       twitterNode,
       assertionGraph
     );
     writer.addQuad(
       keyDeclarationNode,
-      namedNode(`${npx}hasAlgorithm`),
+      namedNode(URI.NP_HAS_ALGORITHM),
       literal('RSA'),
       assertionGraph
     );
     writer.addQuad(
       keyDeclarationNode,
-      namedNode(`${npx}hasPublicKey`),
+      namedNode(URI.NP_HAS_PUBLIC_KEY),
       literal(pubKey),
       assertionGraph
     );
 
     writer.addQuad(
       keyDeclarationNode,
-      namedNode('http://www.w3.org/ns/prov#wasDerivedFrom'),
+      namedNode(URI.PROV_WAS_DERIVED_FROM),
       literal(ethAddress),
       assertionGraph
     );
     writer.addQuad(
       keyDeclarationNode,
-      namedNode('https://sense-nets.xyz/hasDerivationPath'),
+      namedNode(URI.NP_HAS_DERIVATION_PATH),
       literal('/nanopub/0'),
       assertionGraph
     );
     writer.addQuad(
       keyDeclarationNode,
-      namedNode('https://sense-nets.xyz/hasDerivationWithStandard'),
+      namedNode(URI.NP_HAS_DERIVATION_STANDARD),
       literal('BIP-32'),
       assertionGraph
     );
 
-    const derivationProofNode = namedNode(`${BASE_URI}derivationProof`);
+    const derivationProofNode = namedNode(URI.DERIVATION_PROOF_URI);
     writer.addQuad(
       keyDeclarationNode,
-      namedNode('https://sense-nets.xyz/hasDerivationProof'),
+      namedNode(URI.NP_HAS_DERIVATION_PROOF),
       derivationProofNode,
       assertionGraph
     );
     writer.addQuad(
       derivationProofNode,
-      namedNode(`${npx}hasAlgorithm`),
-      namedNode('https://eips.ethereum.org/EIPS/eip-191'),
+      namedNode(URI.NP_HAS_ALGORITHM),
+      namedNode(URI.ETHEREUM_EIP_191),
       assertionGraph
     );
     writer.addQuad(
       derivationProofNode,
-      namedNode(`${npx}hasPublicKey`),
+      namedNode(URI.NP_HAS_PUBLIC_KEY),
       literal(ethAddress),
       assertionGraph
     );
     writer.addQuad(
       derivationProofNode,
-      namedNode(`${npx}hasSignatureTarget`),
+      namedNode(URI.NP_HAS_SIGNATURE_TARGET),
       literal(`This account controls the RSA public key: ${pubKey}`),
       assertionGraph
     );
     writer.addQuad(
       derivationProofNode,
-      namedNode(`${npx}hasSignature`),
+      namedNode(URI.PROV_HAS_SIGNATURE),
       literal(signature),
       assertionGraph
     );
 
     // Give permission on behalf of user to a key
     if (signDelegation) {
-      const signingDelegationNode = namedNode(`${BASE_URI}signingDelegation`);
+      const signingDelegationNode = namedNode(URI.SIGNING_DELEGATION_URI);
       writer.addQuad(
         signingDelegationNode,
-        namedNode(`${npx}declaredAsDelegationBy`),
+        namedNode(URI.NP_DECLARED_AS_DELEGATION_BY),
         twitterNode,
         assertionGraph
       );
       writer.addQuad(
         signingDelegationNode,
-        namedNode('https://sense-nets.xyz/DelegatedTo'),
-        namedNode('https://sense-nets.xyz/'),
+        namedNode(URI.NP_DELEGATED_TO),
+        namedNode(URI.COSMO_PREFIX),
         assertionGraph
       );
       writer.addQuad(
         signingDelegationNode,
-        namedNode('https://sense-nets.xyz/DelegatedBy'),
+        namedNode(URI.NP_DELEGATED_BY),
         twitterNode,
         assertionGraph
       );
       writer.addQuad(
         signingDelegationNode,
-        namedNode('https://sense-nets.xyz/withKeyDecleration'),
+        namedNode(URI.NP_WITH_KEY_DECLARATION),
         namedNode('https://example.org/appKeyDecleration'),
         assertionGraph
       );
@@ -593,16 +578,16 @@ export const buildIntroNp = async (
 
     // Add triples to the provenance graph
     writer.addQuad(
-      namedNode(`${BASE_URI}assertion`),
-      namedNode('prov:wasAttributedTo'),
+      namedNode(URI.ASSERTION_URI),
+      namedNode(URI.PROV_WAS_ATTRIBUTED_TO),
       twitterNode,
       provenanceGraph
     );
     if (orcidId) {
-      const orcidNode = namedNode('https://orcid.org/' + orcidId);
+      const orcidNode = namedNode(URI.ORCID_PREFIX + orcidId);
       writer.addQuad(
-        namedNode(`${BASE_URI}assertion`),
-        namedNode('http://www.w3.org/ns/prov#wasAttributedTo'),
+        namedNode(URI.ASSERTION_URI),
+        namedNode(URI.PROV_WAS_ATTRIBUTED_TO),
         orcidNode,
         provenanceGraph
       );
@@ -610,36 +595,43 @@ export const buildIntroNp = async (
 
     // Add triples to the pubinfo graph
     writer.addQuad(
-      namedNode(`${BASE_URI}`),
-      namedNode(`${npx}wasCreatedAt`),
-      namedNode('https://sense-nets.xyz/'),
+      namedNode(URI.BASE_URI),
+      namedNode(URI.LICENSE),
+      namedNode(URI.CREATIVECOMMONS4),
       pubinfoGraph
     );
 
     writer.addQuad(
-      namedNode(BASE_URI),
-      namedNode('http://www.w3.org/2000/01/rdf-schema#label'),
+      namedNode(URI.BASE_URI),
+      namedNode(URI.NP_WAS_CREATED_AT),
+      namedNode(URI.COSMO_PREFIX),
+      pubinfoGraph
+    );
+
+    writer.addQuad(
+      namedNode(URI.BASE_URI),
+      namedNode(URI.LABEL),
       literal('CoSMO Sensemaker intro'),
       pubinfoGraph
     );
 
     writer.addQuad(
-      namedNode(BASE_URI),
-      namedNode('https://sense-nets.xyz/hasRootSinger'),
+      namedNode(URI.BASE_URI),
+      namedNode(URI.NP_HAS_ROOT_SIGNER),
       literal(ethAddress),
       pubinfoGraph
     );
 
     writer.addQuad(
-      namedNode(BASE_URI),
-      namedNode('http://purl.org/dc/terms/creator'),
+      namedNode(URI.BASE_URI),
+      namedNode(URI.CREATOR),
       twitterNode,
       pubinfoGraph
     );
     if (oldNpUri) {
       writer.addQuad(
-        namedNode('http://purl.org/nanopub/temp/mynanopub#'),
-        namedNode('http://purl.org/nanopub/x/supersesdes'),
+        namedNode(URI.BASE_URI),
+        namedNode(URI.NP_SUPERSEDES),
         namedNode(oldNpUri),
         pubinfoGraph
       );
@@ -677,11 +669,10 @@ export const buildRetractionNp = async (
   ethAddress: string,
   orcidId?: string
 ): Promise<Nanopub> => {
-  const xHandle = `https://x.com/${twitter_handle}`;
-  const BASE_URI = 'http://purl.org/nanopub/temp/mynanopub#';
-  const assertionGraph = namedNode(`${BASE_URI}assertion`);
-  const provenanceGraph = namedNode(`${BASE_URI}provenance`);
-  const pubinfoGraph = namedNode(`${BASE_URI}pubinfo`);
+  const xHandle = `${URI.X_PREFIX}${twitter_handle}`;
+  const assertionGraph = namedNode(URI.ASSERTION_URI);
+  const provenanceGraph = namedNode(URI.PROVENANCE_URI);
+  const pubinfoGraph = namedNode(URI.PUBINFO_URI);
 
   const writer = new Writer({ format: 'application/trig' });
   writer.addPrefixes({
@@ -694,7 +685,7 @@ export const buildRetractionNp = async (
     orcid: 'https://orcid.org/',
     prov: 'http://www.w3.org/ns/prov#',
     foaf: 'http://xmlns.com/foaf/0.1/',
-    x: 'https://x.com/',
+    x: URI.X_PREFIX,
   });
 
   const headStore = buildNpHead();
@@ -704,64 +695,64 @@ export const buildRetractionNp = async (
 
   writer.addQuad(
     namedNode(xHandle),
-    namedNode('http://purl.org/nanopub/x/retracts'),
+    namedNode(URI.NP_RETRACTS),
     namedNode(targetNp),
     assertionGraph
   );
 
   writer.addQuad(
-    namedNode(`${BASE_URI}assertion`),
-    namedNode('http://www.w3.org/ns/prov#wasAttributedTo'),
+    namedNode(URI.ASSERTION_URI),
+    namedNode(URI.PROV_WAS_ATTRIBUTED_TO),
     namedNode(xHandle),
     provenanceGraph
   );
   if (orcidId) {
     writer.addQuad(
-      namedNode(BASE_URI),
-      namedNode('http://www.w3.org/ns/prov#wasAttributedTo'),
-      namedNode(`https://orcid.org/${orcidId}`),
+      namedNode(URI.BASE_URI),
+      namedNode(URI.PROV_WAS_ATTRIBUTED_TO),
+      namedNode(`${URI.ORCID_PREFIX}${orcidId}`),
       provenanceGraph
     );
   }
 
   writer.addQuad(
     namedNode(xHandle),
-    namedNode('http://xmlns.com/foaf/0.1/name'),
+    namedNode(URI.FOAF_NAME),
     literal(name),
     pubinfoGraph
   );
 
   writer.addQuad(
-    namedNode(BASE_URI),
-    namedNode('http://purl.org/dc/terms/creator'),
+    namedNode(URI.BASE_URI),
+    namedNode(URI.CREATOR),
     namedNode(xHandle),
     pubinfoGraph
   );
 
   writer.addQuad(
-    namedNode(BASE_URI),
-    namedNode('http://purl.org/dc/terms/license'),
-    namedNode('https://creativecommons.org/licenses/by/4.0/'),
+    namedNode(URI.BASE_URI),
+    namedNode(URI.LICENSE),
+    namedNode(URI.CREATIVECOMMONS4),
     pubinfoGraph
   );
 
   writer.addQuad(
-    namedNode(BASE_URI),
-    namedNode('http://purl.org/nanopub/x/wasCreatedAt'),
-    namedNode('https://sense-nets.xyz/'),
+    namedNode(URI.BASE_URI),
+    namedNode(URI.NP_WAS_CREATED_AT),
+    namedNode(URI.COSMO_PREFIX),
     pubinfoGraph
   );
 
   writer.addQuad(
-    namedNode(BASE_URI),
-    namedNode('http://www.w3.org/2000/01/rdf-schema#label'),
+    namedNode(URI.BASE_URI),
+    namedNode(URI.LABEL),
     literal('CoSMO Semantic Post retraction'),
     pubinfoGraph
   );
 
   writer.addQuad(
-    namedNode(BASE_URI),
-    namedNode('https://sense-nets.xyz/hasRootSinger'),
+    namedNode(URI.BASE_URI),
+    namedNode(URI.NP_HAS_ROOT_SIGNER),
     literal(ethAddress),
     pubinfoGraph
   );
