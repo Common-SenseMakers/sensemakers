@@ -195,7 +195,7 @@ export const buildSpostPubinfo = (
     namedNode(URI.CREATIVECOMMONS4),
     pubinfoGraphUri
   );
-  
+
   store.addQuad(
     xHandle,
     namedNode(URI.FOAF_NAME),
@@ -343,21 +343,7 @@ export const buildSpostNp = async (
     const headStore = buildNpHead();
     // Create a writer and add prefixes
     const writer = new Writer({ format: 'application/trig' });
-    writer.addPrefixes({
-      base: URI.BASE_URI,
-      cosmo: URI.COSMO_PREFIX,
-      dct: 'http://purl.org/dc/terms/',
-      xsd: 'http://www.w3.org/2001/XMLSchema#',
-      rdfs: 'http://www.w3.org/2000/01/rdf-schema#',
-      ns1: 'http://purl.org/np/',
-      foaf: 'http://xmlns.com/foaf/0.1/',
-      schema: 'https://schema.org/',
-      x: URI.X_PREFIX,
-      np: 'http://www.nanopub.org/nschema#',
-      npx: 'http://purl.org/nanopub/x/',
-      prov: 'http://www.w3.org/ns/prov#',
-      orcid: 'https://orcid.org/',
-    });
+    writer.addPrefixes(URI.sPostPrefixes);
 
     headStore
       .getQuads(
@@ -445,25 +431,10 @@ export const buildIntroNp = async (
     const x = URI.X_PREFIX;
     const keyDeclarationNode = namedNode(`${URI.BASE_URI}${ethAddress}`);
     const twitterNode = namedNode(`${x}${twitterHandle}`);
-    const npx = URI.NPX_PREFIX;
 
     // Create a writer and add prefixes
     const writer = new Writer({ format: 'application/trig' });
-    writer.addPrefixes({
-      base: URI.BASE_URI,
-      cosmo: URI.COSMO_PREFIX,
-      dct: 'http://purl.org/dc/terms/',
-      xsd: 'http://www.w3.org/2001/XMLSchema#',
-      rdfs: 'http://www.w3.org/2000/01/rdf-schema#',
-      ns1: 'http://purl.org/np/',
-      foaf: 'http://xmlns.com/foaf/0.1/',
-      schema: 'https://schema.org/',
-      x: URI.X_PREFIX,
-      np: 'http://www.nanopub.org/nschema#',
-      npx: 'http://purl.org/nanopub/x/',
-      prov: 'http://www.w3.org/ns/prov#',
-      orcid: 'https://orcid.org/',
-    });
+    writer.addPrefixes(URI.introPrefixes);
 
     // Add headStore quads to the writer
     headStore.getQuads(null, null, null, null).forEach((quad) => {
@@ -675,18 +646,7 @@ export const buildRetractionNp = async (
   const pubinfoGraph = namedNode(URI.PUBINFO_URI);
 
   const writer = new Writer({ format: 'application/trig' });
-  writer.addPrefixes({
-    np: 'http://www.nanopub.org/nschema#',
-    dct: 'http://purl.org/dc/terms/',
-    nt: 'https://w3id.org/np/o/ntemplate/',
-    npx: 'http://purl.org/nanopub/x/',
-    xsd: 'http://www.w3.org/2001/XMLSchema#',
-    rdfs: 'http://www.w3.org/2000/01/rdf-schema#',
-    orcid: 'https://orcid.org/',
-    prov: 'http://www.w3.org/ns/prov#',
-    foaf: 'http://xmlns.com/foaf/0.1/',
-    x: URI.X_PREFIX,
-  });
+  writer.addPrefixes(URI.retractionPrefixes);
 
   const headStore = buildNpHead();
   headStore.getQuads(null, null, null, null).forEach((quad) => {
