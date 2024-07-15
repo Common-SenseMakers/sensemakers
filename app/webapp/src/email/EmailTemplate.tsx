@@ -4,10 +4,10 @@ import { I18nextProvider } from 'react-i18next';
 import { ToastsContext } from '../app/ToastsContext';
 import { GlobalStyles } from '../app/layout/GlobalStyles';
 import { i18n } from '../i18n/i18n';
+import { PostCard } from '../post/PostCard';
 import { AppPostFull } from '../shared/types/types.posts';
 import { ResponsiveApp } from '../ui-components/ResponsiveApp';
 import { ThemedApp } from '../ui-components/ThemedApp';
-import { EmailPostCard } from './EmailPostCard';
 
 export function EmailTemplate(props: { posts: AppPostFull[] }) {
   const { posts } = props;
@@ -23,7 +23,7 @@ export function EmailTemplate(props: { posts: AppPostFull[] }) {
                   You have {posts.length} potential nanopublications to review.
                 </Heading>
                 {posts.map((post) => (
-                  <EmailPostCard key={post.id} post={post} />
+                  <PostCard key={post.id} post={post} handleClick={() => {}} />
                 ))}
               </Html>
             </ResponsiveApp>
