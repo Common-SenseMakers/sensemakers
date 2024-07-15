@@ -1,5 +1,5 @@
 import { logger } from '../instances/logger';
-import { createServices } from '../instances/services';
+import { Services } from '../instances/services';
 import {
   NOTIFY_USER_TASK,
   notifyUserTask,
@@ -17,25 +17,29 @@ import {
   parsePostTask,
 } from '../posts/tasks/posts.parse.task';
 
-export const enqueueTaskMockLocal = async (name: string, params: any) => {
+export const enqueueTaskMockLocal = async (
+  name: string,
+  params: any,
+  services: Services
+) => {
   logger.debug('enqueueTaskStub', { name, params });
 
   try {
     await (async () => {
       if (name === PARSE_POST_TASK) {
-        await parsePostTask({ data: params } as any);
+        await parsePostTask({ data: params } as any, services);
       }
 
       if (name === AUTOPOST_POST_TASK) {
-        await autopostPostTask({ data: params } as any);
+        await autopostPostTask({ data: params } as any, services);
       }
 
       if (name === AUTOFETCH_POSTS_TASK) {
-        await autofetchUserPosts({ data: params } as any);
+        await autofetchUserPosts({ data: params } as any, services);
       }
 
       if (name === NOTIFY_USER_TASK) {
-        await notifyUserTask(params.userId, createServices());
+        await notifyUserTask(params.userId, services);
       }
     })();
   } catch (e) {

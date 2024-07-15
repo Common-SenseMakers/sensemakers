@@ -38,7 +38,7 @@ import { PostsManager } from '../../src/posts/posts.manager';
 import { PostsProcessing } from '../../src/posts/posts.processing';
 import { PostsRepository } from '../../src/posts/posts.repository';
 import { TriplesRepository } from '../../src/semantics/triples.repository';
-import { getTimeMock } from '../../src/time/mock/time.service.mock';
+import { TimeMock, getTimeMock } from '../../src/time/mock/time.service.mock';
 import { TimeService } from '../../src/time/time.service';
 import { UsersRepository } from '../../src/users/users.repository';
 import { UsersService } from '../../src/users/users.service';
@@ -54,6 +54,7 @@ export interface TestServicesConfig {
 
 export type TestServices = Services & {
   emailMock?: EmailSenderService;
+  time: TimeMock;
 };
 
 export const getTestServices = (config: TestServicesConfig) => {
@@ -190,7 +191,7 @@ export const getTestServices = (config: TestServicesConfig) => {
     users: usersService,
     postsManager,
     platforms: platformsService,
-    time: time,
+    time: time as TimeMock,
     db,
     notifications,
     emailMock,

@@ -12,7 +12,7 @@ import {
   signNanopublication,
 } from '../../../../shared/utils/nanopub.sign.util';
 import { getAccount } from '../../../user.helper';
-import { useAccountContext } from '../../AccountContext';
+import { LoginFlowState, useAccountContext } from '../../AccountContext';
 import { useAppSigner } from '../../signer/SignerContext';
 
 const DEBUG = false;
@@ -29,6 +29,7 @@ export const useNanopubSignup = (rsaKeys?: RSAKeys) => {
     connectedUser,
     refresh: refreshConnectedUser,
     setToken: setOurToken,
+    setLoginFlowState,
   } = useAccountContext();
 
   const appFetch = useAppFetch();
@@ -41,15 +42,18 @@ export const useNanopubSignup = (rsaKeys?: RSAKeys) => {
 
   /** first derive the ethSignature verifiyin the ownership of the RSAkeys */
   useEffect(() => {
-    console.log('nanopub hook useEffect for ethSignature', {
-      connectedUser,
-      address,
-      signMessage,
-      rsaKeys,
-    });
+    if (DEBUG)
+      console.log('nanopub hook useEffect for ethSignature', {
+        connectedUser,
+        address,
+        signMessage,
+        rsaKeys,
+      });
 
     if (!connectedUser && address && signMessage && rsaKeys) {
       if (DEBUG) console.log(`signing ownership of RSA keys`, { address });
+      setLoginFlowState(LoginFlowState.CreatingEthSignature);
+
       signMessage(getEthToRSAMessage(rsaKeys.publicKey)).then((sig) => {
         if (DEBUG) console.log(`signied ownership of RSA keys`, { sig });
         setEthSignature(sig);
@@ -60,15 +64,18 @@ export const useNanopubSignup = (rsaKeys?: RSAKeys) => {
   /** then build the introNanopub (which is connected getting signup context of
    * the nanopub network) */
   useEffect(() => {
-    console.log('nanopub hook useEffect for signup', {
-      ethSignature,
-      rsaKeys,
-      address,
-      nanopubProfile,
-    });
+    if (DEBUG)
+      console.log('nanopub hook useEffect for signup', {
+        ethSignature,
+        rsaKeys,
+        address,
+        nanopubProfile,
+      });
 
     if (rsaKeys && ethSignature && address && !nanopubProfile) {
       if (DEBUG) console.log(`getting intro nanopub`, { address });
+
+      setLoginFlowState(LoginFlowState.SignningUpNanopub);
 
       const details: NanupubSignupData = {
         rsaPublickey: rsaKeys.publicKey,

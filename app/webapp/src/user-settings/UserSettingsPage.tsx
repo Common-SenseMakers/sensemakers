@@ -9,7 +9,6 @@ import { NotificationFreq } from '../shared/types/types.notifications';
 import {
   AutopostOption,
   PLATFORM,
-  UserSettings,
   UserSettingsUpdate,
 } from '../shared/types/types.user';
 import { AppButton, AppHeading } from '../ui-components';
@@ -17,18 +16,22 @@ import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
-import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
+import { useDisconnectContext } from '../user-login/contexts/DisconnectUserContext';
+import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
+import { getAccount } from '../user-login/user.helper';
 
 /** extract the postId from the route and pass it to a PostContext */
 export const UserSettingsPage = () => {
+  const { disconnect } = useDisconnectContext();
   const { constants } = useThemeContext();
+
   const navigate = useNavigate();
   const appFetch = useAppFetch();
-  const { connectedUser, refresh } = useAccountContext();
+
+  const { connectedUser, refresh, twitterProfile } = useAccountContext();
   const [isSetting, setIsSetting] = useState(false);
 
-  const hasNanopub =
-    connectedUser && connectedUser.nanopub && connectedUser.nanopub.length > 0;
+  const { connect: connectOrcid } = useOrcidContext();
 
   const setSettings = (newSettings: UserSettingsUpdate) => {
     return appFetch('/api/auth/settings', newSettings).then(() => {
@@ -65,6 +68,8 @@ export const UserSettingsPage = () => {
   const currentAutopost =
     connectedUser?.settings?.autopost[PLATFORM.Nanopub].value;
   const currentNotifications = connectedUser?.settings?.notificationFreq;
+
+  const orcid = getAccount(connectedUser, PLATFORM.Orcid);
 
   if (!connectedUser) {
     return (
@@ -112,7 +117,27 @@ export const UserSettingsPage = () => {
       </Box>
 
       <Box pad="medium">
-        <Text>Connect:</Text>
+        <Text>Orcid:</Text>
+
+        <AppButton
+          primary
+          disabled={orcid !== undefined}
+          label={orcid === undefined ? 'Connect Orcid' : orcid.user_id}
+          onClick={() => connectOrcid('/settings')}></AppButton>
+      </Box>
+
+      <Box pad="medium">
+        <Text>Twitter:</Text>
+
+        <AppButton
+          primary
+          disabled={twitterProfile !== undefined}
+          label={
+            twitterProfile === undefined
+              ? 'Connect Twitter'
+              : twitterProfile.username
+          }
+          onClick={() => {}}></AppButton>
       </Box>
 
       <Box pad="medium">
@@ -130,6 +155,16 @@ export const UserSettingsPage = () => {
           primary={currentNotifications === NotificationFreq.Weekly}
           label="Weekly"
           onClick={() => setNotifications(NotificationFreq.Weekly)}></AppButton>
+      </Box>
+
+      <Box pad="medium">
+        <Text>Logout:</Text>
+
+        <AppButton
+          margin={{ bottom: 'large' }}
+          primary
+          label="Logout"
+          onClick={() => disconnect()}></AppButton>
       </Box>
     </Box>
   );

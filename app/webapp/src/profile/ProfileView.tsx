@@ -20,7 +20,7 @@ import { useThemeContext } from '../ui-components/ThemedApp';
 import { ProfileHeader } from './ProfileHeader';
 import { TABS_CONFIG } from './TABS.CONFIG';
 
-const DEBUG = true;
+const DEBUG = false;
 
 const PAGE_SIZE = 20;
 

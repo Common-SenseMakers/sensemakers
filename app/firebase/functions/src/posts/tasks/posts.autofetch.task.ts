@@ -1,16 +1,16 @@
 import { Request } from 'firebase-functions/v2/tasks';
 
 import { logger } from '../../instances/logger';
-import { createServices } from '../../instances/services';
+import { Services } from '../../instances/services';
 import { enqueueTask } from '../../tasksUtils/tasks.support';
 
 export const AUTOFETCH_POSTS_TASK = 'autofetchPosts';
 
 const DEBUG_PREFIX = 'AUTOFETCH';
 
-export const triggerAutofetchPosts = async () => {
+export const triggerAutofetchPosts = async (services: Services) => {
   logger.debug(`triggerAutofetchPosts`, undefined, DEBUG_PREFIX);
-  const { users } = createServices();
+  const { users } = services;
 
   const usersIds = await users.repo.getAll();
 
@@ -28,7 +28,7 @@ export const triggerAutofetchPosts = async () => {
   );
 };
 
-export const autofetchUserPosts = async (req: Request) => {
+export const autofetchUserPosts = async (req: Request, services: Services) => {
   logger.debug(`autofetchUserPosts: userId: ${req.data.userId}`);
 
   const userId = req.data.userId as string;
@@ -37,7 +37,7 @@ export const autofetchUserPosts = async (req: Request) => {
     throw new Error('userId is required');
   }
 
-  const { postsManager } = createServices();
+  const { postsManager } = services;
 
   try {
     const postsCreated = await postsManager.fetchUser({

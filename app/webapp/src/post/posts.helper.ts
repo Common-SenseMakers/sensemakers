@@ -8,10 +8,14 @@ import {
 } from '../shared/types/types.posts';
 import { PLATFORM } from '../shared/types/types.user';
 
+/** The prosemirror render assumes --- separates the posts and creates <p> for each */
 export const concatenateThread = (post: {
   thread: AppPost['generic']['thread'];
 }): string => {
-  return post.thread.reduce((_acc, post) => `${post.content}\n\n`, '');
+  return post.thread.reduce(
+    (_acc, post, ix) => _acc + `${ix > 0 ? '---' : ''}${post.content}`,
+    ''
+  );
 };
 
 export interface AppPostStatus {

@@ -1,11 +1,11 @@
 import { Request } from 'firebase-functions/v2/tasks';
 
 import { logger } from '../../instances/logger';
-import { createServices } from '../../instances/services';
+import { Services } from '../../instances/services';
 
 export const PARSE_POST_TASK = 'parsePost';
 
-export const parsePostTask = async (req: Request) => {
+export const parsePostTask = async (req: Request, services: Services) => {
   logger.debug(`parsePostTask: postId: ${req.data.postId}`);
   const postId = req.data.postId as string;
 
@@ -13,6 +13,6 @@ export const parsePostTask = async (req: Request) => {
     throw new Error('postId is required');
   }
 
-  const { postsManager } = createServices();
+  const { postsManager } = services;
   return postsManager.parsePost(postId);
 };

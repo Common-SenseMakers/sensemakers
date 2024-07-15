@@ -162,17 +162,10 @@ const extension: ExtendedThemeType = {
       extend: css`
         & {
           color: #ffffff;
-          font-weight: 500;
         }
       `,
     },
-    secondary: {
-      extend: css`
-        & {
-          font-weight: 500;
-        }
-      `,
-    },
+    secondary: {},
   },
   formField: {
     checkBox: {

@@ -19,9 +19,16 @@ import {
   TwitterSignupContext,
 } from '../../../shared/types/types.twitter';
 import { PLATFORM } from '../../../shared/types/types.user';
-import { LoginStatus, useAccountContext } from '../AccountContext';
+import { usePersist } from '../../../utils/use.persist';
+import {
+  LoginFlowState,
+  OverallLoginStatus,
+  TwitterConnectedStatus,
+  useAccountContext,
+} from '../AccountContext';
 
-const DEBUG = true;
+const DEBUG = false;
+const WAS_CONNECTING_TWITTER = 'was-connecting-twitter';
 
 export const LS_TWITTER_CONTEXT_KEY = 'twitter-signin-context';
 
@@ -47,9 +54,15 @@ export const TwitterContext = (props: PropsWithChildren) => {
   const {
     connectedUser,
     refresh: refreshConnected,
-    loginStatus,
+    overallLoginStatus,
+    setLoginFlowState,
+    setTwitterConnectedStatus,
   } = useAccountContext();
 
+  const [wasConnecting, setWasConnecting] = usePersist<boolean>(
+    WAS_CONNECTING_TWITTER,
+    false
+  );
   const [searchParams, setSearchParams] = useSearchParams();
   const state_param = searchParams.get('state');
   const code_param = searchParams.get('code');
@@ -64,6 +77,8 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
   const connect = async (type: TwitterGetContextParams['type']) => {
     setIsGoing(true);
+    setLoginFlowState(LoginFlowState.ConnectingTwitter);
+    setTwitterConnectedStatus(TwitterConnectedStatus.Connecting);
 
     const params: TwitterGetContextParams = {
       callback_url: window.location.href,
@@ -79,6 +94,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
     /** go to twitter */
     if (siginContext) {
+      setWasConnecting(true);
       window.location.href = siginContext.url;
     }
   };
@@ -98,14 +114,20 @@ export const TwitterContext = (props: PropsWithChildren) => {
         setSearchParams(searchParams);
       }
 
-      if (DEBUG)
-        console.log('useEffect TwitterSignup', {
-          state_param,
-          code_param,
-          loginStatus,
-        });
+      if (
+        code_param &&
+        state_param &&
+        overallLoginStatus === OverallLoginStatus.PartialLoggedIn &&
+        connectedUser &&
+        wasConnecting
+      ) {
+        if (DEBUG)
+          console.log('useEffect TwitterSignup', {
+            state_param,
+            code_param,
+            overallLoginStatus,
+          });
 
-      if (code_param && state_param && loginStatus === LoginStatus.LoggedIn) {
         verifierHandled.current = true;
 
         setIsSigningUp(true);
@@ -144,19 +166,17 @@ export const TwitterContext = (props: PropsWithChildren) => {
             setSearchParams(searchParams);
           });
         }
-      } else {
-        if (state_param && loginStatus === LoginStatus.LoggedIn) {
-          searchParams.delete('state');
-          setSearchParams(searchParams);
-        }
+
+        setWasConnecting(false);
       }
     }
   }, [
     state_param,
     code_param,
-    loginStatus,
+    overallLoginStatus,
     error_param,
     searchParams,
+    connectedUser,
     setSearchParams,
   ]);
 

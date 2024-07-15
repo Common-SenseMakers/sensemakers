@@ -17,7 +17,7 @@ import { getTestServices } from './test.services';
 
 describe('010-signups', () => {
   const services = getTestServices({
-    time: 'real',
+    time: 'mock',
     twitter: 'mock-signup',
     nanopub: 'mock-publish',
     parser: 'mock',

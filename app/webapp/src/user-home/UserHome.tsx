@@ -15,6 +15,7 @@ import { AppButton, AppHeading, AppModal, AppSelect } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
+import { usePersist } from '../utils/use.persist';
 import { IntroModal } from './IntroModal';
 import { useUserPosts } from './UserPostsContext';
 
@@ -34,19 +35,14 @@ export const UserHome = () => {
 
   const { hasUpdate, needsInstall, updateApp, install } = useServiceWorker();
 
+  const [introShown, setIntroShown] = usePersist<boolean>(INTRO_SHOWN, false);
   const [showIntro, setShowIntro] = useState<boolean>(false);
 
   useEffect(() => {
-    const shown = localStorage.getItem(INTRO_SHOWN);
-    if (!shown) {
+    if (!introShown) {
       setShowIntro(true);
     }
   }, []);
-
-  const introClosed = () => {
-    setShowIntro(false);
-    localStorage.setItem(INTRO_SHOWN, 'true');
-  };
 
   const {
     filterStatus,
@@ -118,6 +114,11 @@ export const UserHome = () => {
 
   const setFilter = (filter: UserPostsQuery) => {
     navigate(`/${filter.status}`);
+  };
+
+  const closeIntro = () => {
+    setIntroShown(true);
+    setShowIntro(false);
   };
 
   const content = (() => {
@@ -282,8 +283,11 @@ export const UserHome = () => {
   const modal = (() => {
     if (showIntro) {
       return (
-        <AppModal onClosed={() => introClosed()}>
-          <IntroModal closeModal={() => setShowIntro(false)}></IntroModal>
+        <AppModal
+          type="small"
+          onModalClosed={() => closeIntro()}
+          layerProps={{}}>
+          <IntroModal closeModal={() => closeIntro()}></IntroModal>
         </AppModal>
       );
     }

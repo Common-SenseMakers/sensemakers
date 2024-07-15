@@ -45,6 +45,35 @@ export enum I18Keys {
   introHeading03 = 's0273',
   introText031 = 's0283',
   introText032 = 's0293',
+
+  ignore = 's031',
+  publish = 's030',
+
+  connectOrcidTitle = 's032',
+  connectOrcidPar01 = 's033',
+  connectOrcidPar02 = 's034',
+  connectOrcid = 's035',
+  continue = 's036',
+
+  publishWarningTitle = 's0320',
+  publishWarningPar01 = 's0331',
+  publishWarningPar02 = 's0342',
+  publishWarningPar03 = 's0353c',
+
+  returnToDraft = 's0353',
+  yesPublish = 's0364',
+
+  publishing = 's0365',
+
+  publishedTitle = 's0366',
+  publishedText = 's0367',
+  nextPost = 's0368',
+  openPublished = 's0369',
+
+  edit = 's037',
+  retract = 's038',
+
+  cancel = 's039',
 }
 
 const check = new Set();
@@ -110,6 +139,38 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.noMorePosts]: 'No more posts to show',
   [I18Keys.settings]: 'Settings',
   [I18Keys.logout]: 'Logout',
+
+  [I18Keys.ignore]: 'Ignore',
+  [I18Keys.publish]: 'Nanopublish',
+
+  [I18Keys.connectOrcidTitle]: 'Your data, your identity',
+  [I18Keys.connectOrcidPar01]:
+    'Your nanopublications are owned by you and tied to your identity through cryptographic signing. You’ll sign these nanopubs with a wallet we created for you using your email. ',
+  [I18Keys.connectOrcidPar02]:
+    'If you want, you can also <b>connect your ORCID</b> account to link your nanopubs to your professional profile, enhancing your recognition within the scientific community.',
+  [I18Keys.connectOrcid]: 'Connect ORCID',
+  [I18Keys.continue]: 'Continue',
+
+  [I18Keys.publishWarningTitle]: 'Share your research',
+  [I18Keys.publishWarningPar01]:
+    'Are you ready to publish this nanopublication?',
+  [I18Keys.publishWarningPar02]:
+    'Once published, your nanopub will be added to the decentralized nanopublications network, making your research accessible and verifiable. ',
+  [I18Keys.publishWarningPar03]:
+    'While you can retract a nanopub to make it invisible to most users, <b>it cannot be deleted</b>. This ensures the integrity of the scientific record.',
+  [I18Keys.returnToDraft]: 'No, return to draft',
+  [I18Keys.yesPublish]: 'Yes, I want to publish',
+
+  [I18Keys.publishing]: 'Publishing',
+
+  [I18Keys.publishedTitle]: 'Your nanopublication is live!',
+  [I18Keys.publishedText]: 'Your post has been nanopublished.',
+  [I18Keys.nextPost]: 'Next post for review',
+  [I18Keys.openPublished]: 'See live nanopublication',
+
+  [I18Keys.edit]: 'Edit',
+  [I18Keys.retract]: 'Retract',
+  [I18Keys.cancel]: 'Cancel',
 };
 
 i18n.use(initReactI18next).init({
