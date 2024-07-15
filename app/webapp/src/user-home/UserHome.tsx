@@ -281,7 +281,7 @@ export const UserHome = () => {
         <AppModal
           type="small"
           onModalClosed={() => closeIntro()}
-          windowStyle={{ flexGrow: 1 }}>
+          layerProps={{}}>
           <IntroModal closeModal={() => closeIntro()}></IntroModal>
         </AppModal>
       );

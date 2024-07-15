@@ -69,6 +69,11 @@ export enum I18Keys {
   publishedText = 's0367',
   nextPost = 's0368',
   openPublished = 's0369',
+
+  edit = 's037',
+  retract = 's038',
+
+  cancel = 's039',
 }
 
 const check = new Set();
@@ -162,6 +167,10 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.publishedText]: 'Your post has been nanopublished.',
   [I18Keys.nextPost]: 'Next post for review',
   [I18Keys.openPublished]: 'See live nanopublication',
+
+  [I18Keys.edit]: 'Edit',
+  [I18Keys.retract]: 'Retract',
+  [I18Keys.cancel]: 'Cancel',
 };
 
 i18n.use(initReactI18next).init({

@@ -18,7 +18,7 @@ const IntroPage = (props: {
   const { icon, heading, parragraphs, btnLabel, onNext } = props;
 
   return (
-    <Box id="page" style={{ flexGrow: 1 }}>
+    <Box id="page" style={{ flexGrow: 1, minHeight: '400px' }}>
       <Box align="center" style={{ flexGrow: 1 }}>
         <Box margin={{ bottom: '20px' }}>{icon}</Box>
         <AppHeading level={3}>{heading}</AppHeading>

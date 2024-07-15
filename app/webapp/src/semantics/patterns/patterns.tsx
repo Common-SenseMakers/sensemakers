@@ -14,6 +14,7 @@ export enum PATTERN_ID {
 }
 
 export interface PatternProps {
+  size?: 'compact' | 'normal';
   editable?: boolean;
   originalParsed?: ParsePostResult;
   semantics?: AppPostSemantics;

@@ -82,6 +82,8 @@ export const PostView = (props: {
     }
   }, [post?.id]);
 
+  const postText = post ? concatenateThread(post.generic) : undefined;
+
   const { connectedUser, orcidProfile } = useAccountContext();
 
   const { t } = useTranslation();
@@ -106,6 +108,22 @@ export const PostView = (props: {
     updatePost({
       reviewedStatus: AppPostReviewStatus.IGNORED,
     });
+  };
+
+  const enableEditOrUpdate = () => {
+    if (!enabledEdit) {
+      setEnabledEdit(true);
+    } else {
+      approveOrUpdate();
+    }
+  };
+
+  const cancelEdit = () => {
+    setEnabledEdit(false);
+  };
+
+  const retract = () => {
+    console.log('retract tbd');
   };
 
   const { signNanopublication } = useNanopubContext();
@@ -202,37 +220,56 @@ export const PostView = (props: {
           </Box>
         </Box>
       );
-    }
-
-    if (enabledEdit) {
-      return (
-        <Box direction="row" gap="small" margin={{ top: 'medium' }}>
-          <Box style={{ flexGrow: 1 }}>
-            <AppButton
-              disabled={isUpdating}
-              icon={<ClearIcon></ClearIcon>}
-              onClick={() => setEnabledEdit(false)}
-              label="Cancel"></AppButton>
+    } else {
+      if (!enabledEdit) {
+        return (
+          <Box direction="row" gap="small" margin={{ top: 'medium' }}>
+            <Box width="50%" style={{ flexGrow: 1 }}>
+              <AppButton
+                disabled={isUpdating}
+                icon={<ClearIcon></ClearIcon>}
+                onClick={() => retract()}
+                label={t(I18Keys.retract)}></AppButton>
+            </Box>
+            <Box width="50%" align="end" gap="small">
+              <AppButton
+                primary
+                disabled={isUpdating}
+                icon={<SendIcon></SendIcon>}
+                onClick={() => enableEditOrUpdate()}
+                label={t(I18Keys.edit)}
+                style={{ width: '100%' }}></AppButton>
+            </Box>
           </Box>
-          <Box style={{ flexGrow: 1 }} align="end" gap="small">
-            <AppButton
-              primary
-              disabled={isUpdating}
-              icon={<SendIcon></SendIcon>}
-              onClick={() => approveOrUpdate()}
-              label="update"
-              style={{ width: '100%' }}></AppButton>
+        );
+      } else {
+        return (
+          <Box direction="row" gap="small" margin={{ top: 'medium' }}>
+            <Box width="50%" style={{ flexGrow: 1 }}>
+              <AppButton
+                disabled={isUpdating}
+                icon={<ClearIcon></ClearIcon>}
+                onClick={() => cancelEdit()}
+                label={t(I18Keys.cancel)}></AppButton>
+            </Box>
+            <Box width="50%" align="end" gap="small">
+              <AppButton
+                primary
+                disabled={isUpdating}
+                icon={<SendIcon></SendIcon>}
+                onClick={() => enableEditOrUpdate()}
+                label={t(I18Keys.publish)}
+                style={{ width: '100%' }}></AppButton>
+            </Box>
           </Box>
-        </Box>
-      );
+        );
+      }
     }
-
-    return <></>;
   })();
 
   const askOrcid = (() => {
     return (
-      <AppModal type="normal" onModalClosed={() => setApproveIntent(false)}>
+      <AppModal type="small" onModalClosed={() => setApproveIntent(false)}>
         <>
           <Box width="100%" height="16px"></Box>
           <AppHeading level="1">{t(I18Keys.connectOrcidTitle)}</AppHeading>
@@ -270,7 +307,7 @@ export const PostView = (props: {
 
   const finalApprove = (() => {
     return (
-      <AppModal type="normal" onModalClosed={() => setApproveIntent(false)}>
+      <AppModal type="small" onModalClosed={() => setApproveIntent(false)}>
         <>
           <Box width="100%" height="16px"></Box>
           <AppHeading level="1">{t(I18Keys.publishWarningTitle)}</AppHeading>
@@ -312,7 +349,7 @@ export const PostView = (props: {
   const publishingModal = (() => {
     return (
       <AppModal
-        type="normal"
+        type="small"
         onModalClosed={() => setPublishing(false)}
         windowStyle={{ flexGrow: 1 }}>
         <Box pad="medium" align="center">
@@ -328,7 +365,7 @@ export const PostView = (props: {
   const publishedModal = (() => {
     return (
       <AppModal
-        type="normal"
+        type="small"
         onModalClosed={() => setReviewPublished(true)}
         windowStyle={{ backgroundColor: '#D1E8DF', flexGrow: 1 }}>
         <>
@@ -442,7 +479,7 @@ export const PostView = (props: {
               }}
               include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
           )}
-          <PostText text={concatenateThread(post.generic)}></PostText>
+          <PostText text={postText}></PostText>
           {postStatuses.isParsing ? (
             <LoadingDiv height="120px" width="100%"></LoadingDiv>
           ) : (
