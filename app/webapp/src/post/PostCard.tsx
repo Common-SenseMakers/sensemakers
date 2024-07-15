@@ -34,6 +34,7 @@ export const PostCard = (props: {
   };
 
   const tweet = post.mirrors.find((m) => m.platformId === PLATFORM.Twitter);
+  const postText = concatenateThread(post.generic);
 
   return (
     <Box
@@ -61,10 +62,7 @@ export const PostCard = (props: {
           semantics: post?.semantics,
           originalParsed: post?.originalParsed,
         }}></SemanticsEditor>
-      <PostText
-        truncate
-        shade={shade}
-        text={concatenateThread(post.generic)}></PostText>
+      <PostText truncate shade={shade} text={postText}></PostText>
 
       <SemanticsEditor
         include={[PATTERN_ID.REF_LABELS]}

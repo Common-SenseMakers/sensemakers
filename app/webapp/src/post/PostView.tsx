@@ -82,6 +82,8 @@ export const PostView = (props: {
     }
   }, [post?.id]);
 
+  const postText = post ? concatenateThread(post.generic) : undefined;
+
   const { connectedUser, orcidProfile } = useAccountContext();
 
   const { t } = useTranslation();
@@ -477,7 +479,7 @@ export const PostView = (props: {
               }}
               include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
           )}
-          <PostText text={concatenateThread(post.generic)}></PostText>
+          <PostText text={postText}></PostText>
           {postStatuses.isParsing ? (
             <LoadingDiv height="120px" width="100%"></LoadingDiv>
           ) : (

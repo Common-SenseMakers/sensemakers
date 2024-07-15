@@ -275,7 +275,6 @@ export const UserHome = () => {
     </Box>
   );
 
-  console.log({ showIntro });
   const modal = (() => {
     if (showIntro) {
       return (
