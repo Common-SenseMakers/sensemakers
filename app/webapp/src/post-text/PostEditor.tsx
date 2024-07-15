@@ -3,7 +3,7 @@ import { EditorProps } from '@nytimes/react-prosemirror/dist/types/hooks/useEdit
 import { Box } from 'grommet';
 import { baseKeymap, splitBlock } from 'prosemirror-commands';
 import { keymap } from 'prosemirror-keymap';
-import { DOMParser } from 'prosemirror-model';
+import { DOMParser, DOMSerializer } from 'prosemirror-model';
 import { Schema } from 'prosemirror-model';
 import { EditorState } from 'prosemirror-state';
 import { useEffect, useState } from 'react';
@@ -135,8 +135,12 @@ export const PostEditor = (props: IStatementEditable) => {
 
   const [mount, setMount] = useState<HTMLElement | null>(null);
 
+  const element = textToHtml(props.value ? props.value : '');
+  const doc = DOMParser.fromSchema(schema).parse(element);
+
   const [editorState, setEditorState] = useState(
     EditorState.create({
+      doc,
       schema,
     })
   );
@@ -178,14 +182,27 @@ export const PostEditor = (props: IStatementEditable) => {
       placeholder(t('writeYourPost')),
     ],
   };
+  function editorStateToHTML(state: EditorState) {
+    const serializer = DOMSerializer.fromSchema(schema);
+    const fragment = serializer.serializeFragment(state.doc.content);
+    const div = document.createElement('div');
+    div.appendChild(fragment);
+    return div.innerHTML;
+  }
 
   return (
     <>
       <Box>
-        <ProseMirror mount={mount} {...editorProps}>
-          <div className="editor" ref={setMount} />
-          <EditorAutoFocus></EditorAutoFocus>
-        </ProseMirror>
+        {props.editable ? (
+          <ProseMirror mount={mount} {...editorProps}>
+            <div className="editor" ref={setMount} />
+            <EditorAutoFocus></EditorAutoFocus>
+          </ProseMirror>
+        ) : (
+          <div
+            dangerouslySetInnerHTML={{ __html: editorStateToHTML(editorState) }}
+          />
+        )}
       </Box>
     </>
   );
