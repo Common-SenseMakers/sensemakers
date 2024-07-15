@@ -40,7 +40,7 @@ export const AppModal = (props: IAppModal) => {
           <Close style={{ height: '12px', width: '12px' }}></Close>
         </Box>
       </Box>
-      <Box style={{ flexGrow: 1 }}>{child}</Box>
+      <Box style={{ flexGrow: 1, maxHeight: '90vh' }}>{child}</Box>
     </>
   );
 
@@ -54,7 +54,7 @@ export const AppModal = (props: IAppModal) => {
             borderRadius: '6px',
             boxShadow:
               '0px 6px 15px -2px rgba(16, 24, 40, 0.08), 0px 6px 15px -2px rgba(16, 24, 40, 0.08)',
-            height: '60vh',
+            minHeight: '60vh',
             width: '100%',
             maxWidth: `${MAX_WIDTH_APP * 0.8}px`,
             flexShrink: '0',
@@ -71,6 +71,7 @@ export const AppModal = (props: IAppModal) => {
     <Layer
       {...props.layerProps}
       style={{
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
         ...props.style,
       }}
       position={position}
@@ -80,7 +81,11 @@ export const AppModal = (props: IAppModal) => {
       <Box
         align="center"
         justify="center"
-        style={{ width: '100%', ...props.windowStyle }}>
+        style={{
+          width: '100%',
+          flexGrow: 1,
+          ...props.windowStyle,
+        }}>
         {wrappedContent}
       </Box>
     </Layer>

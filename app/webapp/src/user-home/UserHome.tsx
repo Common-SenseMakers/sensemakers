@@ -275,13 +275,14 @@ export const UserHome = () => {
     </Box>
   );
 
+  console.log({ showIntro });
   const modal = (() => {
     if (showIntro) {
       return (
         <AppModal
           type="small"
           onModalClosed={() => closeIntro()}
-          windowStyle={{ flexGrow: 1 }}>
+          layerProps={{}}>
           <IntroModal closeModal={() => closeIntro()}></IntroModal>
         </AppModal>
       );

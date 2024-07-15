@@ -17,7 +17,7 @@ import {
 import { usePersist } from '../../utils/use.persist';
 import { getAccount } from '../user.helper';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export const OUR_TOKEN_NAME = 'ourToken';
 export const LOGIN_STATUS = 'loginStatus';
