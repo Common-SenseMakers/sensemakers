@@ -1,5 +1,6 @@
 import { Anchor, Box, Text } from 'grommet';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
 import { AppLogo } from '../app/brand/AppLogo';
@@ -140,6 +141,7 @@ export const ProfileView = (props: {
     _fetchOlder({ selectedTab, oldestPostId: _oldestPostId });
   }, [_fetchOlder, _oldestPostId, selectedTab]);
 
+  const navigate = useNavigate();
   const content = (() => {
     if (!username) {
       return (
@@ -189,7 +191,11 @@ export const ProfileView = (props: {
           <PostCard
             post={post}
             shade={ix % 2 === 1}
-            profile={profile}></PostCard>
+            profile={profile}
+            handleClick={() => {
+              const path = `${location.pathname}/${post.id}`;
+              navigate(path);
+            }}></PostCard>
         </Box>
       ));
     })();
