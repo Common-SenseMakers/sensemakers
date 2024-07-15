@@ -1,5 +1,4 @@
 import { Box } from 'grommet';
-import { useLocation, useNavigate } from 'react-router-dom';
 
 import { TweetAnchor } from '../app/anchors/TwitterAnchor';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
@@ -22,7 +21,7 @@ export const PostCard = (props: {
   const profile = props.profile;
   const shade = _shade || false;
 
-    const { constants } = useThemeContext();
+  const { constants } = useThemeContext();
 
   const handleClick = props.handleClick;
   const tweet = post.mirrors.find((m) => m.platformId === PLATFORM.Twitter);
