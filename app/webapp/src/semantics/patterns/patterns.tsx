@@ -5,6 +5,7 @@ import {
   AppPostSemantics,
   ParsePostResult,
 } from '../../shared/types/types.parser';
+import { AppButton } from '../../ui-components';
 import { KeywordsComponent } from './keywords/Keywords.component';
 import { RefLabelsComponent } from './refs-labels/RefsLabels.component';
 
@@ -20,6 +21,7 @@ export interface PatternProps {
   semanticsUpdated?: (semantics: AppPostSemantics) => void;
 }
 
+const appButton = AppButton;
 export const patternsLib: Record<
   PATTERN_ID,
   React.ComponentType<PatternProps>
