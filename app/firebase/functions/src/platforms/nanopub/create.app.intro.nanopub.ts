@@ -1,5 +1,6 @@
 import { Nanopub } from '@nanopub/sign';
 import { DataFactory, Writer } from 'n3';
+import * as URI from './constants';
 
 import { buildNpHead } from './utils';
 
@@ -18,32 +19,19 @@ export const buildAppIntroNp = async (
     const headStore = buildNpHead();
 
     // Define the graph URIs
-    const BASE_URI = 'http://purl.org/nanopub/temp/mynanopub#';
-    const assertionGraph = namedNode(`${BASE_URI}assertion`);
-    const provenanceGraph = namedNode(`${BASE_URI}provenance`);
-    const pubinfoGraph = namedNode(`${BASE_URI}pubinfo`);
-    const keyDeclarationNode1 = namedNode(`${BASE_URI}${ethAddress1}`);
-    const keyDeclarationNode2 = namedNode(`${BASE_URI}${ethAddress2}`);
-    const appAgentNode = namedNode('https://sense-nets.xyz/');
-    const npx = 'http://purl.org/nanopub/x/';
+    const assertionGraph = namedNode(URI.ASSERTION_URI);
+    const provenanceGraph = namedNode(URI.PROVENANCE_URI);
+    const pubinfoGraph = namedNode(URI.PUBINFO_URI);
+    const keyDeclarationNode1 = namedNode(`${URI.BASE_URI}${ethAddress1}`);
+    const keyDeclarationNode2 = namedNode(`${URI.BASE_URI}${ethAddress2}`);
+    const appAgentNode = namedNode(URI.COSMO_PREFIX);
+    const npx = URI.NPX_PREFIX;
     const name = 'SenseCast';
     // Create a writer and add prefixes
     const writer = new Writer({ format: 'application/trig' });
-    writer.addPrefixes({
-      base: BASE_URI,
-      cosmo: 'https://sense-nets.xyz/',
-      dct: 'http://purl.org/dc/terms/',
-      xsd: 'http://www.w3.org/2001/XMLSchema#',
-      rdfs: 'http://www.w3.org/2000/01/rdf-schema#',
-      ns1: 'http://purl.org/np/',
-      foaf: 'http://xmlns.com/foaf/0.1/',
-      schema: 'https://schema.org/',
-      x: 'https://x.com/',
-      np: 'http://www.nanopub.org/nschema#',
-      npx: 'http://purl.org/nanopub/x/',
-      prov: 'http://www.w3.org/ns/prov#',
-      orcid: 'https://orcid.org/',
-    });
+    writer.addPrefixes(
+      URI.introPrefixes
+    );
 
     // Add headStore quads to the writer
     headStore.getQuads(null, null, null, null).forEach((quad) => {
@@ -54,78 +42,78 @@ export const buildAppIntroNp = async (
     //first key declaration, for the official key
     writer.addQuad(
       appAgentNode,
-      namedNode('http://xmlns.com/foaf/0.1/name'),
+      namedNode(URI.FOAF_NAME),
       literal(name),
       assertionGraph
     );
     writer.addQuad(
       keyDeclarationNode1,
-      namedNode(`${npx}declaredBy`),
+      namedNode(URI.NP_DECLARED_BY),
       appAgentNode,
       assertionGraph
     );
     writer.addQuad(
       keyDeclarationNode1,
-      namedNode(`${npx}hasAlgorithm`),
+      namedNode(URI.NP_HAS_ALGORITHM),
       literal('RSA'),
       assertionGraph
     );
     writer.addQuad(
       keyDeclarationNode1,
-      namedNode(`${npx}hasPublicKey`),
+      namedNode(URI.NP_HAS_PUBLIC_KEY),
       literal(pubKey1),
       assertionGraph
     );
 
     writer.addQuad(
       keyDeclarationNode1,
-      namedNode('http://www.w3.org/ns/prov#wasDerivedFrom'),
+      namedNode(URI.PROV_WAS_DERIVED_FROM),
       literal(ethAddress1),
       assertionGraph
     );
     writer.addQuad(
       keyDeclarationNode1,
-      namedNode('https://sense-nets.xyz/hasDerivationPath'),
+      namedNode(URI.NP_HAS_DERIVATION_PATH),
       literal('/nanopub/0'),
       assertionGraph
     );
     writer.addQuad(
       keyDeclarationNode1,
-      namedNode('https://sense-nets.xyz/hasDerivationWithStandard'),
+      namedNode(URI.NP_HAS_DERIVATION_STANDARD),
       literal('BIP-32'),
       assertionGraph
     );
 
     const derivationProofNode1 = namedNode(
-      `${BASE_URI}derivationProof${ethAddress1}`
+      `${URI.BASE_URI}derivationProof${ethAddress1}`
     );
     writer.addQuad(
       keyDeclarationNode1,
-      namedNode('https://sense-nets.xyz/hasDerivationProof'),
+      namedNode(URI.NP_HAS_DERIVATION_PROOF),
       derivationProofNode1,
       assertionGraph
     );
     writer.addQuad(
       derivationProofNode1,
-      namedNode(`${npx}hasAlgorithm`),
+      namedNode(URI.NP_HAS_ALGORITHM),
       namedNode('https://eips.ethereum.org/EIPS/eip-191'),
       assertionGraph
     );
     writer.addQuad(
       derivationProofNode1,
-      namedNode(`${npx}hasPublicKey`),
+      namedNode(URI.NP_HAS_PUBLIC_KEY),
       literal(ethAddress1),
       assertionGraph
     );
     writer.addQuad(
       derivationProofNode1,
-      namedNode(`${npx}hasSignatureTarget`),
+      namedNode(URI.NP_HAS_SIGNATURE_TARGET),
       literal(`This account controls the RSA public key: ${pubKey1}`),
       assertionGraph
     );
     writer.addQuad(
       derivationProofNode1,
-      namedNode(`${npx}hasSignature`),
+      namedNode(URI.NP_HAS_ALGORITHM),
       literal(signature1),
       assertionGraph
     );
@@ -134,66 +122,66 @@ export const buildAppIntroNp = async (
 
     writer.addQuad(
       keyDeclarationNode2,
-      namedNode(`${npx}declaredBy`),
+      namedNode(URI.NP_DECLARED_BY),
       appAgentNode,
       assertionGraph
     );
     writer.addQuad(
       keyDeclarationNode2,
-      namedNode(`${npx}hasAlgorithm`),
+      namedNode(URI.NP_HAS_ALGORITHM),
       literal('RSA'),
       assertionGraph
     );
     writer.addQuad(
       keyDeclarationNode2,
-      namedNode(`${npx}hasPublicKey`),
+      namedNode(URI.NP_HAS_PUBLIC_KEY),
       literal(pubKey2),
       assertionGraph
     );
 
     writer.addQuad(
       keyDeclarationNode2,
-      namedNode('http://www.w3.org/ns/prov#wasDerivedFrom'),
+      namedNode(URI.PROV_WAS_DERIVED_FROM),
       literal(ethAddress2),
       assertionGraph
     );
     writer.addQuad(
       keyDeclarationNode2,
-      namedNode('https://sense-nets.xyz/hasDerivationPath'),
+      namedNode(URI.NP_HAS_DERIVATION_PATH),
       literal('/nanopub/0'),
       assertionGraph
     );
     writer.addQuad(
       keyDeclarationNode2,
-      namedNode('https://sense-nets.xyz/hasDerivationWithStandard'),
+      namedNode(URI.NP_HAS_DERIVATION_STANDARD),
       literal('BIP-32'),
       assertionGraph
     );
 
     const derivationProofNode2 = namedNode(
-      `${BASE_URI}derivationProof${ethAddress2}`
+      `${URI.BASE_URI}derivationProof${ethAddress2}`
     );
     writer.addQuad(
       keyDeclarationNode2,
-      namedNode('https://sense-nets.xyz/hasDerivationProof'),
+      namedNode(URI.NP_HAS_DERIVATION_PROOF),
       derivationProofNode2,
       assertionGraph
     );
     writer.addQuad(
       derivationProofNode2,
-      namedNode(`${npx}hasAlgorithm`),
+      namedNode(URI.NP_HAS_ALGORITHM),
       namedNode('https://eips.ethereum.org/EIPS/eip-191'),
       assertionGraph
     );
     writer.addQuad(
       derivationProofNode2,
-      namedNode(`${npx}hasPublicKey`),
+      namedNode(URI.NP_HAS_PUBLIC_KEY),
       literal(ethAddress2),
       assertionGraph
     );
     writer.addQuad(
       derivationProofNode2,
-      namedNode(`${npx}hasSignatureTarget`),
+      namedNode(URI.NP_HAS_SIGNATURE_TARGET),
       literal(`This account controls the RSA public key: ${pubKey1}`),
       assertionGraph
     );
@@ -206,44 +194,44 @@ export const buildAppIntroNp = async (
 
     // Add triples to the provenance graph
     writer.addQuad(
-      namedNode(`${BASE_URI}assertion`),
-      namedNode('prov:wasAttributedTo'),
+      namedNode(URI.ASSERTION_URI),
+      namedNode(URI.PROV_WAS_ATTRIBUTED_TO),
       appAgentNode,
       provenanceGraph
     );
 
     // Add triples to the pubinfo graph
     writer.addQuad(
-      namedNode(`${BASE_URI}`),
-      namedNode(`${npx}wasCreatedAt`),
-      namedNode('https://sense-nets.xyz/'),
+      namedNode(URI.BASE_URI),
+      namedNode(URI.NP_WAS_CREATED_AT),
+      namedNode(URI.COSMO_PREFIX),
       pubinfoGraph
     );
 
     writer.addQuad(
-      namedNode(BASE_URI),
-      namedNode('http://www.w3.org/2000/01/rdf-schema#label'),
+      namedNode(URI.BASE_URI),
+      namedNode(URI.LABEL),
       literal('CoSMO Sensemaker intro'),
       pubinfoGraph
     );
 
     writer.addQuad(
-      namedNode(BASE_URI),
-      namedNode('https://sense-nets.xyz/hasRootSinger'),
+      namedNode(URI.BASE_URI),
+      namedNode(URI.NP_HAS_ROOT_SIGNER),
       literal(ethAddress1),
       pubinfoGraph
     );
 
     writer.addQuad(
-      namedNode(BASE_URI),
-      namedNode('http://purl.org/dc/terms/creator'),
+      namedNode(URI.BASE_URI),
+      namedNode(URI.CREATOR),
       appAgentNode,
       pubinfoGraph
     );
     if (oldNpUri) {
       writer.addQuad(
-        namedNode('http://purl.org/nanopub/temp/mynanopub#'),
-        namedNode('http://purl.org/nanopub/x/supersesdes'),
+        namedNode(URI.BASE_URI),
+        namedNode(URI.NP_SUPERSEDES),
         namedNode(oldNpUri),
         pubinfoGraph
       );
