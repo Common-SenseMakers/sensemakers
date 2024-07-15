@@ -9,7 +9,7 @@ import { KeywordsComponent } from './keywords/Keywords.component';
 import { RefLabelsComponent } from './refs-labels/RefsLabels.component';
 
 export enum PATTERN_ID {
-  KEYWORDS = 'keywowrds',
+  KEYWORDS = 'keywords',
   REF_LABELS = 'ref-labels',
 }
 
