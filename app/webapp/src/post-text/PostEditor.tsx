@@ -182,27 +182,14 @@ export const PostEditor = (props: IStatementEditable) => {
       placeholder(t('writeYourPost')),
     ],
   };
-  function editorStateToHTML(state: EditorState) {
-    const serializer = DOMSerializer.fromSchema(schema);
-    const fragment = serializer.serializeFragment(state.doc.content);
-    const div = document.createElement('div');
-    div.appendChild(fragment);
-    return div.innerHTML;
-  }
 
   return (
     <>
       <Box>
-        {props.editable ? (
-          <ProseMirror mount={mount} {...editorProps}>
-            <div className="editor" ref={setMount} />
-            <EditorAutoFocus></EditorAutoFocus>
-          </ProseMirror>
-        ) : (
-          <div
-            dangerouslySetInnerHTML={{ __html: editorStateToHTML(editorState) }}
-          />
-        )}
+        <ProseMirror mount={mount} {...editorProps}>
+          <div className="editor" ref={setMount} />
+          <EditorAutoFocus></EditorAutoFocus>
+        </ProseMirror>
       </Box>
     </>
   );

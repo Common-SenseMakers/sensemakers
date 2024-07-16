@@ -35,12 +35,12 @@ if (process.env.FB_PROJECT === 'dev') {
           FB_STORAGE_BUCKET: '"sensenets-dev.appspot.com"',
           FB_MESSAGING_SENDER_ID: '"943634188972"',
           FB_APPID: '"1:943634188972:web:7c68eb87a4e517af63ad09"',
+          APP_BUILD: true,
         },
       },
     }),
   ];
 }
-
 
 if (process.env.FB_PROJECT === 'staging') {
   base.webpack.configure.plugins = [

@@ -1,10 +1,11 @@
 import { Box, Text } from 'grommet';
 import { useEffect, useRef, useState } from 'react';
 
-import { PostEditor } from '../post-text/PostEditor';
+import { PostEditor, textToHtml } from '../post-text/PostEditor';
 import { useThemeContext } from '../ui-components/ThemedApp';
 
 const DEBUG = false;
+const APP_BUILD = process.env.APP_BUILD ? process.env.APP_BUILD : false;
 
 export const PostText = (props: {
   text?: string;
@@ -58,7 +59,15 @@ export const PostText = (props: {
         overflow: 'hidden',
       }}>
       <div ref={ref}>
-        <PostEditor value={text}></PostEditor>
+        {!APP_BUILD ? (
+          <>
+            <div
+              dangerouslySetInnerHTML={{ __html: textToHtml(text).innerHTML }}
+            />
+          </>
+        ) : (
+          <PostEditor value={text}></PostEditor>
+        )}
         {truncate && isTruncated ? (
           <Box
             width={'45px'}
