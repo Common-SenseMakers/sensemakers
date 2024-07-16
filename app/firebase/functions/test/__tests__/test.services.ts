@@ -180,6 +180,7 @@ export const getTestServices = (config: TestServicesConfig) => {
     db,
     notificationsRepo,
     postsRepo,
+    platformPostsRepo,
     activityRepo,
     userRepo,
     email

@@ -112,7 +112,9 @@ describe('060-send-digest-no-autpost', () => {
       threads.forEach((_thread, ix) => {
         const post = capturedPosts[ix];
         expect(post).to.not.be.undefined;
-        expect(expectedContents).to.include(post.content);
+        expect(expectedContents).to.include(
+          PostsHelper.concatenateThread(post.generic)
+        );
       });
     });
   });

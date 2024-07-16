@@ -1,7 +1,14 @@
 import { Message, ServerClient } from 'postmark';
 
+import { AppPostFull } from '../@shared/types/types.posts';
 import { AppUser } from '../@shared/types/types.user';
 import { logger } from '../instances/logger';
+
+const pkg = require('../@shared/render-email.js');
+
+const { renderEmail } = pkg as {
+  renderEmail: (posts: AppPostFull[]) => string;
+};
 
 const postmark = require('postmark');
 
@@ -38,7 +45,7 @@ export class EmailSenderService {
     }
   }
 
-  async sendUserDigest(user: AppUser, posts: EmailPostDetails[]) {
+  async sendUserDigest(user: AppUser, posts: AppPostFull[]) {
     if (!user.email) {
       throw new Error(`User ${user.userId} has no email`);
     }
@@ -47,7 +54,7 @@ export class EmailSenderService {
       From: 'pepo@microrevolutions.com',
       To: user.email?.email,
       Subject: 'Hello from Sensecast',
-      HtmlBody: `<strong>Hello</strong> dear Sensecast user. ${JSON.stringify(posts)}`,
+      HtmlBody: renderEmail(posts),
       TextBody: `Hello dear Postmark user ${JSON.stringify(posts)}`,
       MessageStream: 'outbound',
     };
