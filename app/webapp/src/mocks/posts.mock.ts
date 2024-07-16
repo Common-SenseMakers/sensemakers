@@ -20,7 +20,7 @@ export const getMockPost = () => {
   const defaultGeneric: GenericThread = {
     thread: [
       {
-        content: 'test content',
+        content: 'this is such a cool idea! https://arxiv.org/abs/2312.05230',
       },
     ],
     author: {
