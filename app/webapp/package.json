@@ -12,8 +12,9 @@
     "eject": "craco eject",
     "test-functions": "FUNCTIONS_BASE=http://127.0.0.1:5001/sensenets-9ef26/us-central1 jest",
     "serve-build": "serve -s build -l 3000",
-    "test:email-template": "craco start --config craco.config.test.js",
-    "build-email-renderer": "craco build --config craco.config.email.bundle.js"
+    "test-email-template": "craco start --config craco.config.test.js",
+    "build-email-renderer": "craco build --config craco.config.email.bundle.js && yarn run copy-email-renderer",
+    "copy-email-renderer": "cp ./build/render-email.js ../firebase/functions/src/static"
   },
   "dependencies": {
     "@nanopub/sign": "^0.1.4",
