@@ -1,8 +1,10 @@
+import { render } from '@react-email/components';
 import React from 'react';
-import ReactDOM from 'react-dom';
 
-import { EmailTemplate } from '../src/email/EmailTemplate';
+import { EmailTemplateWrapper } from '../src/email/EmailTemplateWrapper';
 import { getMockPost } from '../src/mocks/posts.mock';
+import { NotificationFreq } from '../src/shared/types/types.notifications';
+import { AutopostOption } from '../src/shared/types/types.user';
 
 const pkg = require('../build/render-email.js');
 const { renderEmail } = pkg;
@@ -13,17 +15,20 @@ const root = document.getElementById('root');
 
 if (USE_BUNDLE) {
   root
-    ? (root.innerHTML = renderEmail([
-        getMockPost(),
-        getMockPost(),
-        getMockPost(),
-      ]))
+    ? (root.innerHTML = renderEmail(
+        [getMockPost(), getMockPost(), getMockPost()],
+        NotificationFreq.Daily,
+        AutopostOption.MANUAL
+      ))
     : null;
 } else {
-  ReactDOM.render(
-    React.createElement(EmailTemplate, {
-      posts: [getMockPost(), getMockPost()],
-    }),
-    root
-  );
+  root
+    ? (root.innerHTML = render(
+        React.createElement(EmailTemplateWrapper, {
+          posts: [getMockPost(), getMockPost()],
+          notificationFrequency: NotificationFreq.Daily,
+          autopostOption: AutopostOption.MANUAL,
+        })
+      ))
+    : null;
 }
