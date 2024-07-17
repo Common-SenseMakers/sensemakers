@@ -5,7 +5,7 @@ import { ServerStyleSheet } from 'styled-components';
 import { NotificationFreq } from '../shared/types/types.notifications';
 import { AppPostFull } from '../shared/types/types.posts';
 import { AutopostOption } from '../shared/types/types.user';
-import { EmailTemplate } from './EmailTemplate';
+import { EmailTemplateWrapper } from './EmailTemplateWrapper';
 
 export const renderEmail = (
   posts: AppPostFull[],
@@ -15,7 +15,7 @@ export const renderEmail = (
   const sheet = new ServerStyleSheet();
   const html = render(
     sheet.collectStyles(
-      React.createElement(EmailTemplate, {
+      React.createElement(EmailTemplateWrapper, {
         posts,
         notificationFrequency,
         autopostOption,
