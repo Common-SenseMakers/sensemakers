@@ -172,6 +172,7 @@ export const createServices = () => {
     db,
     notificationsRepo,
     postsRepo,
+    platformPostsRepo,
     activityRepo,
     userRepo,
     email

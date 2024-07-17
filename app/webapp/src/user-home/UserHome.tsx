@@ -145,7 +145,12 @@ export const UserHome = () => {
         <Box>
           {posts.map((post, ix) => (
             <Box key={ix} id={`post-${post.id}`}>
-              <PostCard post={post}></PostCard>
+              <PostCard
+                post={post}
+                handleClick={() => {
+                  const path = `/post/${post.id}`;
+                  navigate(path);
+                }}></PostCard>
             </Box>
           ))}
         </Box>

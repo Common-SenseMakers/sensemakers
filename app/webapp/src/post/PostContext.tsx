@@ -37,7 +37,7 @@ import { useUserPosts } from '../user-home/UserPostsContext';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { getAccount } from '../user-login/user.helper';
-import { AppPostStatus, usePostStatuses } from './usePostStatuses';
+import { AppPostStatus, getPostStatuses } from './posts.helper';
 
 const DEBUG = false;
 
@@ -288,7 +288,7 @@ export const PostContext: React.FC<{
     _updatePost(update);
   };
 
-  const postStatuses = usePostStatuses(post);
+  const postStatuses = getPostStatuses(post);
 
   const { signNanopublication } = useNanopubContext();
 

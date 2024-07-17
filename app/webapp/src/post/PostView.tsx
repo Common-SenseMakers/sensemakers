@@ -134,10 +134,10 @@ export const PostView = (props: {
     connectedUser.nanopub.length > 0 &&
     signNanopublication &&
     nanopubDraft &&
-    !postStatuses.nanopubPublished;
+    !postStatuses.published;
 
   const { action: rightClicked, label: rightLabel } = (() => {
-    if (canPublishNanopub && nanopubDraft && !postStatuses.nanopubPublished) {
+    if (canPublishNanopub && nanopubDraft && !postStatuses.published) {
       return {
         action: () => setApproveIntent(true),
         label: t(I18Keys.publish),
@@ -199,7 +199,7 @@ export const PostView = (props: {
       );
     }
 
-    if (!postStatuses.nanopubPublished && !postStatuses.ignored) {
+    if (!postStatuses.published && !postStatuses.ignored) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
           <Box width="50%" style={{ flexGrow: 1 }}>

@@ -5,6 +5,8 @@ import {
   NotificationFull,
   PostParsedNotification,
 } from '../@shared/types/types.notifications';
+import { PlatformPost } from '../@shared/types/types.platform.posts';
+import { AppPostFull } from '../@shared/types/types.posts';
 import { PLATFORM } from '../@shared/types/types.user';
 import { AutopostOption } from '../@shared/types/types.user';
 import { ActivityRepository } from '../activity/activity.repository';
@@ -12,7 +14,7 @@ import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { EmailSenderService } from '../emailSender/email.sender.service';
 import { logger } from '../instances/logger';
-import { PostsHelper } from '../posts/posts.helper';
+import { PlatformPostsRepository } from '../posts/platform.posts.repository';
 import { PostsRepository } from '../posts/posts.repository';
 import { UsersRepository } from '../users/users.repository';
 import { NotificationsRepository } from './notifications.repository';
@@ -34,6 +36,7 @@ export class NotificationService {
     public db: DBInstance,
     public notificationsRepo: NotificationsRepository,
     public postsRepo: PostsRepository,
+    public platformPostsRepo: PlatformPostsRepository,
     public activityRepo: ActivityRepository,
     public usersRepo: UsersRepository,
     public emailSender: EmailSenderService
@@ -155,7 +158,7 @@ export class NotificationService {
     notification: NotificationFull,
     types: ActivityType[],
     manager: TransactionManager
-  ) {
+  ): Promise<AppPostFull> {
     if (types.includes(notification.activity.type)) {
       const post = await this.postsRepo.get(
         (notification as PostParsedNotification).activity.data.postId,
@@ -163,11 +166,15 @@ export class NotificationService {
         true
       );
 
-      const postText = PostsHelper.concatenateThread(post.generic);
+      const mirrors = await Promise.all(
+        post.mirrorsIds.map((mirrorId) =>
+          this.platformPostsRepo.get(mirrorId, manager)
+        )
+      );
 
       return {
-        content: postText,
-        url: PostsHelper.getPostUrl(post.id),
+        ...post,
+        mirrors: mirrors.filter((m) => m !== undefined) as PlatformPost[],
       };
     } else {
       throw new Error('Unsupported notification type');
@@ -179,8 +186,7 @@ export class NotificationService {
     notifications: NotificationFull[],
     manager: TransactionManager
   ) {
-    /** */
-    const postsDetails: EmailPostDetails[] = await Promise.all(
+    const appPostFulls: AppPostFull[] = await Promise.all(
       notifications.map(async (notification) =>
         this.getPostEmailDetails(
           notification,
@@ -190,7 +196,7 @@ export class NotificationService {
       )
     );
 
-    await this.sendDigest(userId, postsDetails);
+    await this.sendDigest(userId, appPostFulls);
   }
 
   async prepareAndSendDigestAuto(
@@ -198,7 +204,7 @@ export class NotificationService {
     notifications: NotificationFull[],
     manager: TransactionManager
   ) {
-    const postsDetails: EmailPostDetails[] = await Promise.all(
+    const postsDetails: AppPostFull[] = await Promise.all(
       notifications.map(async (notification) =>
         this.getPostEmailDetails(
           notification,
@@ -211,7 +217,7 @@ export class NotificationService {
     await this.sendDigest(userId, postsDetails);
   }
 
-  async sendDigest(userId: string, posts: EmailPostDetails[]) {
+  async sendDigest(userId: string, posts: AppPostFull[]) {
     try {
       const user = await this.db.run((manager) =>
         this.usersRepo.getUser(userId, manager, true)

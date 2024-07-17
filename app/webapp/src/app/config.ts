@@ -16,3 +16,4 @@ export const NANOPUBS_SERVER = 'https://np.petapico.org/';
 // export const NANOPUBS_SERVER = 'https://np.knowledgepixels.com/';
 
 export const BUILD_ID = process.env.REACT_APP_VERSION;
+export const NANOPUB_EXPLORER_SERVER = 'https://np.test.knowledgepixels.com/';
