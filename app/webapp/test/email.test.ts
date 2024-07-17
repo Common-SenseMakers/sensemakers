@@ -6,10 +6,10 @@ import { getMockPost } from '../src/mocks/posts.mock';
 import { NotificationFreq } from '../src/shared/types/types.notifications';
 import { AutopostOption } from '../src/shared/types/types.user';
 
-const pkg = require('../build/render-email.js');
+const pkg = require('../build/index.js');
 const { renderEmail } = pkg;
 
-const USE_BUNDLE = false;
+const USE_BUNDLE = true;
 
 const root = document.getElementById('root');
 
@@ -19,7 +19,7 @@ if (USE_BUNDLE) {
         [getMockPost(), getMockPost(), getMockPost()],
         NotificationFreq.Daily,
         AutopostOption.MANUAL
-      ))
+      ).html)
     : null;
 } else {
   root
