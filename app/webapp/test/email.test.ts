@@ -9,7 +9,7 @@ import { AutopostOption } from '../src/shared/types/types.user';
 const pkg = require('../build/render-email.js');
 const { renderEmail } = pkg;
 
-const USE_BUNDLE = true;
+const USE_BUNDLE = false;
 
 const root = document.getElementById('root');
 
@@ -25,7 +25,7 @@ if (USE_BUNDLE) {
   root
     ? (root.innerHTML = render(
         React.createElement(EmailTemplateWrapper, {
-          posts: [getMockPost(), getMockPost()],
+          posts: [getMockPost(), getMockPost(), getMockPost(), getMockPost()],
           notificationFrequency: NotificationFreq.Daily,
           autopostOption: AutopostOption.MANUAL,
         })
