@@ -223,9 +223,9 @@ export class NotificationService {
         this.usersRepo.getUser(userId, manager, true)
       );
       const res = await this.emailSender.sendUserDigest(user, posts);
-      logger.debug(`sendDigest`, { res }, DEBUG_PREFIX);
+      if (DEBUG) logger.debug(`sendDigest`, { res }, DEBUG_PREFIX);
     } catch (e) {
-      logger.error(`sendDigest`, { e }, DEBUG_PREFIX);
+      logger.error(`error in sendUserDigest`, { e }, DEBUG_PREFIX);
     }
   }
 }

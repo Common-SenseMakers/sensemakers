@@ -4,10 +4,13 @@ import { ServerStyleSheet } from 'styled-components';
 
 import { NotificationFreq } from '../shared/types/types.notifications';
 import { AppPostFull } from '../shared/types/types.posts';
-import { AutopostOption } from '../shared/types/types.user';
+import {
+  AutopostOption,
+  RenderEmailFunction,
+} from '../shared/types/types.user';
 import { EmailTemplateWrapper } from './EmailTemplateWrapper';
 
-export const renderEmail = (
+export const renderEmail: RenderEmailFunction = (
   posts: AppPostFull[],
   notificationFrequency: NotificationFreq,
   autopostOption: AutopostOption
@@ -22,6 +25,17 @@ export const renderEmail = (
       })
     )
   );
+
+  const plainText = render(
+    sheet.collectStyles(
+      React.createElement(EmailTemplateWrapper, {
+        posts,
+        notificationFrequency,
+        autopostOption,
+      })
+    ),
+    { plainText: true }
+  );
   const styleTags = sheet.getStyleTags();
-  return `${styleTags}${html}`;
+  return { html: `${styleTags}${html}`, plainText };
 };

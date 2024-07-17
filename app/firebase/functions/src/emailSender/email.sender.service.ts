@@ -1,14 +1,16 @@
 import { Message, ServerClient } from 'postmark';
 
 import { AppPostFull } from '../@shared/types/types.posts';
-import { AppUser } from '../@shared/types/types.user';
+import {
+  AppUser,
+  PLATFORM,
+  RenderEmailFunction,
+} from '../@shared/types/types.user';
 import { logger } from '../instances/logger';
 
-const pkg = require('../@shared/render-email.js');
+const renderEmailPkg = require('../@shared/render-email.js');
 
-const { renderEmail } = pkg as {
-  renderEmail: (posts: AppPostFull[]) => string;
-};
+const { renderEmail } = renderEmailPkg as { renderEmail: RenderEmailFunction };
 
 const postmark = require('postmark');
 
@@ -50,12 +52,18 @@ export class EmailSenderService {
       throw new Error(`User ${user.userId} has no email`);
     }
 
+    const { html, plainText } = renderEmail(
+      posts,
+      user.settings.notificationFreq,
+      user.settings.autopost[PLATFORM.Nanopub].value
+    );
+
     const message: Message = {
-      From: 'pepo@microrevolutions.com',
+      From: ' pepo@microrevolutions.com',
       To: user.email?.email,
       Subject: 'Hello from Sensecast',
-      HtmlBody: renderEmail(posts),
-      TextBody: `Hello dear Postmark user ${JSON.stringify(posts)}`,
+      HtmlBody: html,
+      TextBody: plainText,
       MessageStream: 'outbound',
     };
 

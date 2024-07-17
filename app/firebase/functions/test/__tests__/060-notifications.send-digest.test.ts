@@ -42,6 +42,16 @@ describe('060-send-digest-no-autpost', () => {
       });
     });
 
+    it('sets users email', async () => {
+      if (!user) {
+        throw new Error('user not created');
+      }
+      await services.users.setEmail(user.userId, {
+        email: 'sample@email.com',
+        source: 'MAGIC',
+      });
+    });
+
     it('upates user autopost settings', async () => {
       await updateUserSettings(
         services,
