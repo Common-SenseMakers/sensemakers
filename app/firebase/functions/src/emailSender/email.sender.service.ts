@@ -4,13 +4,10 @@ import { AppPostFull } from '../@shared/types/types.posts';
 import {
   AppUser,
   PLATFORM,
-  RenderEmailFunction,
 } from '../@shared/types/types.user';
 import { logger } from '../instances/logger';
 
-const renderEmailPkg = require('../@shared/render-email.js');
-
-const { renderEmail } = renderEmailPkg as { renderEmail: RenderEmailFunction };
+import { renderEmail } from '@sensecast/webapp';
 
 const postmark = require('postmark');
 

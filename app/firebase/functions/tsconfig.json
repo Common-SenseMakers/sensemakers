@@ -14,8 +14,8 @@
     "resolveJsonModule": true,
     "typeRoots": ["./src/types", "node_modules/@types", "./src/custom.d.ts"],
     "allowJs": true,
-    "checkJs": false,
+    "checkJs": false
   },
   "compileOnSave": true,
-  "include": ["src/index.ts", "src/custom.d.ts", "src/@shared/render-email.js"],
+  "include": ["src/index.ts", "src/custom.d.ts"]
 }

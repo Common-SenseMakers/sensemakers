@@ -5,14 +5,26 @@ const webpack = require('webpack');
 module.exports = {
   webpack: {
     configure: (webpackConfig, { paths }) => {
-      paths.appIndexJs = path.resolve(__dirname, 'src/email/index.ts');
+      paths.appIndexJs = path.resolve(__dirname, 'src/index.lib.ts');
 
       // Entry point configuration
       webpackConfig.entry = paths.appIndexJs;
 
+      webpackConfig.mode = 'development';
+      webpackConfig.optimization.minimize = false;
+      webpackConfig.optimization.splitChunks = {
+        cacheGroups: {
+          default: false,
+        },
+      };
+      webpackConfig.optimization.runtimeChunk = false;
+      webpackConfig.devtool = 'source-map';
+
+
       // Output configuration to produce a single JS bundle in the 'dist-module' directory
       webpackConfig.output = {
-        filename: 'render-email.js',
+        ...webpackConfig.output,
+        filename: 'index.js',
         path: path.resolve(__dirname, 'build'),
         library: 'renderEmailModule',
         libraryTarget: 'umd',
@@ -28,6 +40,23 @@ module.exports = {
         })
       );
 
+      webpackConfig.module.rules.push({
+        test: /\.(ts|tsx)$/,
+        use: [
+          {
+            loader: 'ts-loader',
+            options: {
+              compilerOptions: {
+                declaration: true,
+                noEmit: false,
+                emitDeclarationOnly: true,
+              },
+            },
+          },
+        ],
+        exclude: /node_modules/,
+      });
+
       // Log paths for debugging
       console.log('Webpack entry:', webpackConfig.entry);
       console.log('Webpack output path:', webpackConfig.output.path);
@@ -42,4 +71,12 @@ module.exports = {
       return webpackConfig;
     },
   },
+  babel: {
+    loaderOptions: {
+      presets: ['@babel/preset-env', '@babel/preset-react', '@babel/preset-typescript'],
+      plugins: [],
+      // Disable compact mode
+      compact: false,
+    },
+  }
 };

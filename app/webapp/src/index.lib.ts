@@ -2,13 +2,10 @@ import { render } from '@react-email/components';
 import React from 'react';
 import { ServerStyleSheet } from 'styled-components';
 
-import { NotificationFreq } from '../shared/types/types.notifications';
-import { AppPostFull } from '../shared/types/types.posts';
-import {
-  AutopostOption,
-  RenderEmailFunction,
-} from '../shared/types/types.user';
-import { EmailTemplateWrapper } from './EmailTemplateWrapper';
+import { EmailTemplateWrapper } from './email/EmailTemplateWrapper';
+import { NotificationFreq } from './shared/types/types.notifications';
+import { AppPostFull } from './shared/types/types.posts';
+import { AutopostOption, RenderEmailFunction } from './shared/types/types.user';
 
 export const renderEmail: RenderEmailFunction = (
   posts: AppPostFull[],

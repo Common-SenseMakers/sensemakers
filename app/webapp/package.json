@@ -1,7 +1,9 @@
 {
-  "name": "webapp",
+  "name": "@sensecast/webapp",
   "version": "0.1.0",
   "private": true,
+  "main": "build/index.js",
+  "types": "build/index.lib.d.ts",
   "scripts": {
     "preinstall": "npm install -g @craco/craco",
     "start": "export REACT_APP_VERSION=$(git rev-parse HEAD) && HOST=127.0.0.1 PORT=3000 craco start --config craco.config.js",
@@ -13,8 +15,10 @@
     "test-functions": "FUNCTIONS_BASE=http://127.0.0.1:5001/sensenets-9ef26/us-central1 jest",
     "serve-build": "serve -s build -l 3000",
     "test-email-template": "craco start --config craco.config.test.js",
-    "build-email-renderer": "craco build --config craco.config.email.bundle.js && yarn run copy-email-renderer",
-    "copy-email-renderer": "cp ./build/render-email.js ./src/shared"
+    "build-email-dev": "NODE_ENV=development && yarn build-email",
+    "build-email": "rm -rf ./build && craco build --config craco.config.email.bundle.js && yarn build-types",
+    "build-types": "tsc -p tsconfig.dist.json"
+
   },
   "dependencies": {
     "@nanopub/sign": "^0.1.4",
@@ -84,7 +88,8 @@
     "nodemon": "^3.1.4",
     "prettier": "^3.2.4",
     "serve": "^14.2.3",
-    "ts-jest": "^29.1.2"
+    "ts-jest": "^29.1.2",
+    "ts-loader": "^9.5.1"
   },
   "eslintConfig": {
     "extends": [

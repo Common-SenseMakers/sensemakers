@@ -1,5 +1,6 @@
 {
   "name": "functions",
+  "version": "0.1.0",
   "scripts": {
     "test": "NODE_ENV=test FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 TS_NODE_PROJECT=tsconfig.test.json mocha --trace-uncaught -r ts-node/register 'test/__tests__/**/*.ts'",
     "lint": "eslint --ext .js,.ts .",
@@ -19,9 +20,11 @@
   "dependencies": {
     "@magic-sdk/admin": "^2.4.1",
     "@nanopub/sign": "^0.1.4",
+    "@sensecast/webapp": "0.1.0",
     "@types/n3": "^1.16.4",
     "@types/node-forge": "^1.3.11",
     "@types/pino": "^7.0.5",
+    "@types/postmark": "^2.0.3",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "crypto-js": "^4.2.0",
