@@ -193,8 +193,6 @@ export const ProfileView = (props: {
             shade={ix % 2 === 1}
             profile={profile}
             handleClick={() => {
-              const path = `${location.pathname}/${post.id}`;
-              navigate(path);
             }}></PostCard>
         </Box>
       ));
