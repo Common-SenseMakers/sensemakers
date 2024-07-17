@@ -16,17 +16,15 @@ export function EmailTemplateWrapper(props: {
   autopostOption: AutopostOption;
 }) {
   return (
-    <>
-      <I18nextProvider i18n={i18n}>
-        <ToastsContext>
-          <GlobalStyles />
-          <ThemedApp>
-            <ResponsiveApp>
-              <EmailTemplate {...props} />
-            </ResponsiveApp>
-          </ThemedApp>
-        </ToastsContext>
-      </I18nextProvider>
-    </>
+    <I18nextProvider i18n={i18n}>
+      <ToastsContext>
+        <GlobalStyles />
+        <ThemedApp>
+          <ResponsiveApp>
+            <EmailTemplate {...props} />
+          </ResponsiveApp>
+        </ThemedApp>
+      </ToastsContext>
+    </I18nextProvider>
   );
 }
