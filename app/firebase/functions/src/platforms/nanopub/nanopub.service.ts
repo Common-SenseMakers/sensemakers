@@ -21,11 +21,17 @@ import {
   GenericThread,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
-import { PLATFORM, UserDetailsBase } from '../../@shared/types/types.user';
+import { TwitterUserDetails } from '../../@shared/types/types.twitter';
+import {
+  AutopostOption,
+  PLATFORM,
+  UserDetailsBase,
+} from '../../@shared/types/types.user';
 import { getEthToRSAMessage } from '../../@shared/utils/nanopub.sign.util';
 import { cleanPrivateKey } from '../../@shared/utils/semantics.helper';
 import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
+import { createServices } from '../../instances/services';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
 import { PlatformService } from '../platforms.interface';
@@ -60,10 +66,38 @@ export class NanopubService
     if (!params) {
       throw new Error('Missing params');
     }
+    if (!userId) {
+      throw new Error('Missing userId');
+    }
+    const { db, users } = createServices();
+    const user = await db.run(async (manager) => {
+      return users.repo.getUser(userId, manager, true);
+    });
+
+    const twitterAccount: TwitterUserDetails | undefined =
+      UsersHelper.getAccounts(user, PLATFORM.Twitter).pop();
+    if (!twitterAccount) {
+      throw new Error(`Twitter account not found`);
+    }
+
+    const twitterUsername = twitterAccount.profile?.username;
+    const twitterName = twitterAccount.profile?.name;
+
+    if (!twitterUsername || !twitterName) {
+      throw new Error(`Twitter username or name not found`);
+    }
+
+    const autopostingEnabled =
+      user.settings.autopost[PLATFORM.Nanopub].value !== AutopostOption.MANUAL;
 
     const introNanopub = await createIntroNanopublication(
       params,
-      this.config.rsaKeys.publicKey
+      {
+        username: twitterUsername,
+        name: twitterName,
+      },
+      this.config.rsaKeys.publicKey,
+      autopostingEnabled
     );
 
     return { ...params, introNanopub: introNanopub.rdf() };
