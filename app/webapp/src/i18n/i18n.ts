@@ -74,6 +74,25 @@ export enum I18Keys {
   retract = 's038',
 
   cancel = 's039',
+
+  recommendedNanopubEmailHeader = 's040',
+  recommendedNanopubEmailHeaderSingular = 's040_one',
+  recommendedNanopubEmailHeaderPlural = 's040_other',
+
+  recommendedNanopubEmailFooter = 's041',
+
+  publishedNanopubEmailHeader = 's042',
+  publishedNanopubEmailHeaderSingular = 's042_one',
+  publishedNanopubEmailHeaderPlural = 's042_other',
+
+  publishedNanopubEmailFooter = 's043',
+
+  emailHeaderDailyNotificationTimeframe = 's044',
+  emailHeaderWeeklyNotificationTimeframe = 's045',
+  emailHeaderMonthlyNotificationTimeframe = 's046',
+  emailFooterDailyNotificationTimeframe = 's047',
+  emailFooterWeeklyNotificationTimeframe = 's048',
+  emailFooterMonthlyNotificationTimeframe = 's049',
 }
 
 const check = new Set();
@@ -171,6 +190,30 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.edit]: 'Edit',
   [I18Keys.retract]: 'Retract',
   [I18Keys.cancel]: 'Cancel',
+
+  [I18Keys.recommendedNanopubEmailHeader]: '',
+  [I18Keys.recommendedNanopubEmailHeaderSingular]:
+    'You have {{count}} potential nanopublication ready for review {{timeframe}}.',
+  [I18Keys.recommendedNanopubEmailHeaderPlural]:
+    'You have {{count}} potential nanopublications ready for review {{timeframe}}.',
+  [I18Keys.recommendedNanopubEmailFooter]:
+    "This is your {{timeframe}} nanopub recommendation summary. You can <emailSettingsLink>edit your email settings here</emailSettingsLink>. Don't see a post you'd like to nanopublish? <reviewPostsLink>Review all your recent posts here</reviewPostsLink>.",
+
+  [I18Keys.publishedNanopubEmailHeader]: '',
+  [I18Keys.publishedNanopubEmailHeaderSingular]:
+    "We've automatically published {{count}} post {{timeframe}}.",
+  [I18Keys.publishedNanopubEmailHeaderPlural]:
+    "We've automatically published {{count}} posts {{timeframe}}.",
+  [I18Keys.publishedNanopubEmailFooter]:
+    'These posts were automatically published according to your automation settings. You can <automationSettingsLink>change your automation settings here</automationSettingsLink>.\n\nSee any mistakes in your nanopublications? <reviewPostsLink>Edit or retract your automated nanopublications here</reviewPostsLink>.',
+
+  [I18Keys.emailHeaderDailyNotificationTimeframe]: 'today',
+  [I18Keys.emailHeaderWeeklyNotificationTimeframe]: 'this week',
+  [I18Keys.emailHeaderMonthlyNotificationTimeframe]: 'this month',
+
+  [I18Keys.emailFooterDailyNotificationTimeframe]: 'daily',
+  [I18Keys.emailFooterWeeklyNotificationTimeframe]: 'weekly',
+  [I18Keys.emailFooterMonthlyNotificationTimeframe]: 'monthly',
 };
 
 i18n.use(initReactI18next).init({

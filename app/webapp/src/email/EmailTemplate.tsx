@@ -1,6 +1,9 @@
 import { Html } from '@react-email/components';
-import { Box, Heading as GrommetHeading, Image, Text } from 'grommet';
+import { Anchor, Box, Heading as GrommetHeading, Image, Text } from 'grommet';
+import { t } from 'i18next';
+import { Trans } from 'react-i18next';
 
+import { I18Keys } from '../i18n/i18n';
 import { PostCard } from '../post/PostCard';
 import { NotificationFreq } from '../shared/types/types.notifications';
 import { AppPostFull } from '../shared/types/types.posts';
@@ -18,24 +21,73 @@ export function EmailTemplate(props: {
   const { constants } = useThemeContext();
   const { posts } = props;
 
-  const heading =
-    (() => {
-      if (props.autopostOption === AutopostOption.MANUAL) {
-        return `You have ${posts.length} potential nanopublication${posts.length > 1 ? 's' : ''} ready for review`;
-      } else {
-        return `We've automatically nanopublished ${posts.length} post${posts.length > 1 ? 's' : ''}`;
-      }
-    })() +
-    (() => {
-      if (props.notificationFrequency === NotificationFreq.Daily) {
-        return ' today.';
-      } else if (props.notificationFrequency === NotificationFreq.Weekly) {
-        return ' this week.';
-      } else if (props.notificationFrequency === NotificationFreq.Monthly) {
-        return ' this month.';
-      }
-      return '';
-    })();
+  const emailSettingsLink = 'https://example.com';
+  const reviewPostsLink = 'https://example.com';
+  const automationSettingsLink = 'https://example.com';
+
+  const headerTimeframeKey = (() => {
+    switch (props.notificationFrequency) {
+      case NotificationFreq.Daily:
+        return I18Keys.emailHeaderDailyNotificationTimeframe;
+      case NotificationFreq.Weekly:
+        return I18Keys.emailHeaderWeeklyNotificationTimeframe;
+      case NotificationFreq.Monthly:
+        return I18Keys.emailHeaderMonthlyNotificationTimeframe;
+      default:
+        return I18Keys.emailHeaderDailyNotificationTimeframe;
+    }
+  })();
+
+  const footerTimeframeKey = (() => {
+    switch (props.notificationFrequency) {
+      case NotificationFreq.Daily:
+        return I18Keys.emailFooterDailyNotificationTimeframe;
+      case NotificationFreq.Weekly:
+        return I18Keys.emailFooterWeeklyNotificationTimeframe;
+      case NotificationFreq.Monthly:
+        return I18Keys.emailFooterMonthlyNotificationTimeframe;
+      default:
+        return I18Keys.emailFooterDailyNotificationTimeframe;
+    }
+  })();
+
+  const { header, footer } = (() => {
+    if (props.autopostOption === AutopostOption.MANUAL) {
+      return {
+        header: t(I18Keys.recommendedNanopubEmailHeader, {
+          count: posts.length,
+          timeframe: t(headerTimeframeKey),
+        }),
+        footer: (
+          <Trans
+            i18nKey={I18Keys.recommendedNanopubEmailFooter}
+            components={{
+              emailSettingsLink: <Anchor href={emailSettingsLink} />,
+              reviewPostsLink: <Anchor href={reviewPostsLink} />,
+            }}
+            values={{ timeframe: t(footerTimeframeKey) }}
+          />
+        ),
+      };
+    } else {
+      return {
+        header: t(I18Keys.publishedNanopubEmailHeader, {
+          count: posts.length,
+          timeframe: t(headerTimeframeKey),
+        }),
+        footer: (
+          <Trans
+            i18nKey={I18Keys.publishedNanopubEmailFooter}
+            components={{
+              automationSettingsLink: <Anchor href={automationSettingsLink} />,
+              reviewPostsLink: <Anchor href={reviewPostsLink} />,
+            }}
+            values={{ timeframe: t(footerTimeframeKey) }}
+          />
+        ),
+      };
+    }
+  })();
 
   return (
     <Html lang="en">
@@ -60,7 +112,7 @@ export function EmailTemplate(props: {
             />
           </Box>
           <GrommetHeading level="2" margin="medium">
-            {heading}
+            {header}
           </GrommetHeading>
         </Box>
 
@@ -94,11 +146,15 @@ export function EmailTemplate(props: {
                 margin={{ top: 'medium' }}
               />
             </Box>
-            <Text
-              size="xsmall"
-              margin={{
-                top: 'medium',
-              }}>{`This is your daily nanopub recommendation summary. You can edit your email settings here. Don't see a post you'd like to nanopublish? Review all you recent posts here.`}</Text>
+            <Box width={{ max: '800px' }}>
+              <Text
+                size="small"
+                margin={{
+                  top: 'medium',
+                }}>
+                {footer}
+              </Text>
+            </Box>
           </>
         )}
       </Box>
