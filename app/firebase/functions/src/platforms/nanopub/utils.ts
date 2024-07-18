@@ -413,9 +413,7 @@ export const buildSpostNp = async (
 };
 
 export const buildIntroNp = async (
-  twitterHandle: string,
   ethAddress: string,
-  name: string,
   pubKey: string,
   signature: string,
   options: BuildIntroNpOptions = {}
@@ -428,9 +426,9 @@ export const buildIntroNp = async (
     const assertionGraph = namedNode(URI.ASSERTION_URI);
     const provenanceGraph = namedNode(URI.PROVENANCE_URI);
     const pubinfoGraph = namedNode(URI.PUBINFO_URI);
-    const x = URI.X_PREFIX;
+    // const x = URI.X_PREFIX;
     const keyDeclarationNode = namedNode(`${URI.BASE_URI}${ethAddress}`);
-    const twitterNode = namedNode(`${x}${twitterHandle}`);
+    // const twitterNode = namedNode(`${x}${twitterHandle}`);
 
     // Create a writer and add prefixes
     const writer = new Writer({ format: 'application/trig' });
@@ -442,18 +440,18 @@ export const buildIntroNp = async (
     });
 
     // Add triples to the assertion graph
-    writer.addQuad(
-      twitterNode,
-      namedNode(URI.FOAF_NAME),
-      literal(name),
-      assertionGraph
-    );
-    writer.addQuad(
-      keyDeclarationNode,
-      namedNode(URI.NP_DECLARED_BY),
-      twitterNode,
-      assertionGraph
-    );
+    // writer.addQuad(
+    //   twitterNode,
+    //   namedNode(URI.FOAF_NAME),
+    //   literal(name),
+    //   assertionGraph
+    // );
+    // writer.addQuad(
+    //   keyDeclarationNode,
+    //   namedNode(URI.NP_DECLARED_BY),
+    //   twitterNode,
+    //   assertionGraph
+    // );
     writer.addQuad(
       keyDeclarationNode,
       namedNode(URI.NP_HAS_ALGORITHM),
@@ -521,24 +519,24 @@ export const buildIntroNp = async (
     // Give permission on behalf of user to a key
     if (signDelegation) {
       const signingDelegationNode = namedNode(URI.SIGNING_DELEGATION_URI);
-      writer.addQuad(
-        signingDelegationNode,
-        namedNode(URI.NP_DECLARED_AS_DELEGATION_BY),
-        twitterNode,
-        assertionGraph
-      );
+      // writer.addQuad(
+      //   signingDelegationNode,
+      //   namedNode(URI.NP_DECLARED_AS_DELEGATION_BY),
+      //   twitterNode,
+      //   assertionGraph
+      // );
       writer.addQuad(
         signingDelegationNode,
         namedNode(URI.NP_DELEGATED_TO),
         namedNode(URI.COSMO_PREFIX),
         assertionGraph
       );
-      writer.addQuad(
-        signingDelegationNode,
-        namedNode(URI.NP_DELEGATED_BY),
-        twitterNode,
-        assertionGraph
-      );
+      // writer.addQuad(
+      //   signingDelegationNode,
+      //   namedNode(URI.NP_DELEGATED_BY),
+      //   twitterNode,
+      //   assertionGraph
+      // );
       writer.addQuad(
         signingDelegationNode,
         namedNode(URI.NP_WITH_KEY_DECLARATION),
@@ -548,12 +546,12 @@ export const buildIntroNp = async (
     }
 
     // Add triples to the provenance graph
-    writer.addQuad(
-      namedNode(URI.ASSERTION_URI),
-      namedNode(URI.PROV_WAS_ATTRIBUTED_TO),
-      twitterNode,
-      provenanceGraph
-    );
+    // writer.addQuad(
+    //   namedNode(URI.ASSERTION_URI),
+    //   namedNode(URI.PROV_WAS_ATTRIBUTED_TO),
+    //   twitterNode,
+    //   provenanceGraph
+    // );
     if (orcidId) {
       const orcidNode = namedNode(URI.ORCID_PREFIX + orcidId);
       writer.addQuad(
@@ -593,12 +591,12 @@ export const buildIntroNp = async (
       pubinfoGraph
     );
 
-    writer.addQuad(
-      namedNode(URI.BASE_URI),
-      namedNode(URI.CREATOR),
-      twitterNode,
-      pubinfoGraph
-    );
+    // writer.addQuad(
+    //   namedNode(URI.BASE_URI),
+    //   namedNode(URI.CREATOR),
+    //   twitterNode,
+    //   pubinfoGraph
+    // );
     if (oldNpUri) {
       writer.addQuad(
         namedNode(URI.BASE_URI),

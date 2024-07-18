@@ -21,9 +21,8 @@ import {
   GenericThread,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
-import { TwitterUserDetails } from '../../@shared/types/types.twitter';
+
 import {
-  AutopostOption,
   PLATFORM,
   UserDetailsBase,
 } from '../../@shared/types/types.user';
@@ -60,7 +59,7 @@ export class NanopubService
   ) {}
 
   async getSignupContext(
-    userId: string | undefined,
+    userId?: string,
     params?: NanupubSignupData
   ): Promise<NanopubUserProfile> {
     if (!params) {
@@ -90,14 +89,9 @@ export class NanopubService
     const autopostingEnabled =
       user.settings.autopost[PLATFORM.Nanopub].value !== AutopostOption.MANUAL;
 
-    const introNanopub = await createIntroNanopublication(
+  const introNanopub = await createIntroNanopublication(
       params,
-      {
-        username: twitterUsername,
-        name: twitterName,
-      },
-      this.config.rsaKeys.publicKey,
-      autopostingEnabled
+      false
     );
 
     return { ...params, introNanopub: introNanopub.rdf() };
