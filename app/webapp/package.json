@@ -10,7 +10,7 @@
     "preinstall": "npm install -g @craco/craco",
     "start": "export REACT_APP_VERSION=$(git rev-parse HEAD) && HOST=127.0.0.1 PORT=3000 craco start --config craco.config.js",
     "start-remote": "export REACT_APP_VERSION=$(git rev-parse HEAD) && FB_PROJECT=staging craco start --config craco.config.prod.js",
-    "build": "export REACT_APP_VERSION=$(git rev-parse HEAD) && craco build --config craco.config.prod.js",
+    "build": "yarn upgrade && export REACT_APP_VERSION=$(git rev-parse HEAD) && craco build --config craco.config.prod.js",
     "build-local": "FB_PROJECT=staging yarn build",
     "test": "craco test",
     "eject": "craco eject",
