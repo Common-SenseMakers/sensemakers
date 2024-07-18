@@ -14,7 +14,7 @@ import { getNanopubProfile } from '../utils/nanopub.profile';
 import { getMockPost } from '../utils/posts.utils';
 import { getMockedUser } from '../utils/users.mock';
 
-describe('nanopublication format', () => {
+describe.only('nanopublication format', () => {
   it('publishes a correctly formatted mock nanopub to the test server and updates it', async () => {
     try {
       const post = getMockPost({

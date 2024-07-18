@@ -2,8 +2,8 @@
   "name": "functions",
   "version": "0.1.0",
   "scripts": {
-    "test": "NODE_ENV=test FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 TS_NODE_PROJECT=tsconfig.test.json mocha --trace-uncaught -r ts-node/register 'test/__tests__/**/*.ts'",
-    "test:nanopub": "NO_MOCHA_HOOKS=true yarn run test --grep 'nanopublication format'",
+    "test": "NODE_ENV=test FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 mocha --trace-uncaught -r ts-node/register 'test/__tests__/**/*.ts'",
+    "test:nanopub": " NODE_ENV=test mocha --config .mocharc.nanopub.js --trace-uncaught -r ts-node/register 'test/__tests__/021-platforms.nanopub.format.test.ts'",
     "lint": "eslint --ext .js,.ts .",
     "build": "tsc",
     "build:watch-test": "rm -rf ./lib-test & tsc --watch -p ./tsconfig.test.json",
@@ -49,6 +49,7 @@
     "@johanblumenberg/ts-mockito": "^1.0.41",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/chai": "^4.3.4",
+    "@types/jest": "^29.5.12",
     "@types/mocha": "^10.0.1",
     "@types/sinon": "^17.0.3",
     "@types/supertest": "^6.0.2",
