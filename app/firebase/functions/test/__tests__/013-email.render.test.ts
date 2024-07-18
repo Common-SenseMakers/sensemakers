@@ -1,9 +1,9 @@
-import { renderEmail } from '@sensecast/webapp';
-
 import { NotificationFreq } from '../../src/@shared/types/types.notifications';
 import { AppPostFull } from '../../src/@shared/types/types.posts';
 import { AutopostOption, PLATFORM } from '../../src/@shared/types/types.user';
 import { getMockPost } from '../utils/posts.utils';
+
+const { renderEmail } = require('../../src/@shared/emailRenderer');
 
 describe.only('renders email', () => {
   it('imports the bundled render email function and successfully calls it', async () => {

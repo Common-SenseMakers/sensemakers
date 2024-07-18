@@ -1,13 +1,10 @@
 import { Message, ServerClient } from 'postmark';
 
 import { AppPostFull } from '../@shared/types/types.posts';
-import {
-  AppUser,
-  PLATFORM,
-} from '../@shared/types/types.user';
+import { AppUser, PLATFORM } from '../@shared/types/types.user';
 import { logger } from '../instances/logger';
 
-import { renderEmail } from '@sensecast/webapp';
+const { renderEmail } = require('../@shared/emailRenderer');
 
 const postmark = require('postmark');
 
