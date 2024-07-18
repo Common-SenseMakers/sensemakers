@@ -93,6 +93,12 @@ export enum I18Keys {
   emailFooterDailyNotificationTimeframe = 's047',
   emailFooterWeeklyNotificationTimeframe = 's048',
   emailFooterMonthlyNotificationTimeframe = 's049',
+
+  emailReviewPostButton = 's050',
+  emailSeeAllButton = 's051',
+  emailMorePostsNote = 's052',
+  emailMorePostsNoteSingular = 's052_one',
+  emailMorePostsNotePlural = 's052_other',
 }
 
 const check = new Set();
@@ -197,7 +203,7 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.recommendedNanopubEmailHeaderPlural]:
     'You have {{count}} potential nanopublications ready for review {{timeframe}}.',
   [I18Keys.recommendedNanopubEmailFooter]:
-    "This is your {{timeframe}} nanopub recommendation summary. You can <emailSettingsLink>edit your email settings here</emailSettingsLink>. Don't see a post you'd like to nanopublish? <reviewPostsLink>Review all your recent posts here</reviewPostsLink>.",
+    "This is your {{timeframe}} nanopub recommendation summary. You can <emailSettingsLink>edit your email settings here</emailSettingsLink>. Don't see a post you'd like to nanopublish? <ignoredPostsLink>Review all your recent posts here</ignoredPostsLink>.",
 
   [I18Keys.publishedNanopubEmailHeader]: '',
   [I18Keys.publishedNanopubEmailHeaderSingular]:
@@ -205,7 +211,7 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.publishedNanopubEmailHeaderPlural]:
     "We've automatically published {{count}} posts {{timeframe}}.",
   [I18Keys.publishedNanopubEmailFooter]:
-    'These posts were automatically published according to your automation settings. You can <automationSettingsLink>change your automation settings here</automationSettingsLink>.\n\nSee any mistakes in your nanopublications? <reviewPostsLink>Edit or retract your automated nanopublications here</reviewPostsLink>.',
+    'These posts were automatically published according to your automation settings. You can <automationSettingsLink>change your automation settings here</automationSettingsLink>.\n\nSee any mistakes in your nanopublications? <publishedPostsLink>Edit or retract your automated nanopublications here</publishedPostsLink>.',
 
   [I18Keys.emailHeaderDailyNotificationTimeframe]: 'today',
   [I18Keys.emailHeaderWeeklyNotificationTimeframe]: 'this week',
@@ -214,6 +220,13 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.emailFooterDailyNotificationTimeframe]: 'daily',
   [I18Keys.emailFooterWeeklyNotificationTimeframe]: 'weekly',
   [I18Keys.emailFooterMonthlyNotificationTimeframe]: 'monthly',
+
+  [I18Keys.emailReviewPostButton]: 'Review Post',
+  [I18Keys.emailSeeAllButton]: 'See All',
+
+  [I18Keys.emailMorePostsNote]: '',
+  [I18Keys.emailMorePostsNoteSingular]: '+{{count}} more post',
+  [I18Keys.emailMorePostsNotePlural]: '+{{count}} more posts',
 };
 
 i18n.use(initReactI18next).init({
