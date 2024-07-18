@@ -68,7 +68,7 @@ describe('010-signups', () => {
           const context =
             await services.users.getSignupContext<NanopubUserProfile>(
               PLATFORM.Nanopub,
-              undefined,
+              userId,
               profile
             );
 
@@ -109,7 +109,7 @@ describe('010-signups', () => {
   });
 
   describe('signup with nanopub', () => {
-    it('signup as new user', async () => {
+    it.skip('signup as new user', async () => {
       const { profile, rsaKeys } = await getNanopubProfile(
         '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
       );

@@ -24,7 +24,7 @@ import {
 import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
-describe.skip('02-platforms', () => {
+describe('02-platforms', () => {
   let rsaKeys: RSAKeys | undefined;
   let user: AppUser | undefined;
 
