@@ -16,6 +16,18 @@
       "console": "integratedTerminal"
     },
     {
+      "type": "node",
+      "request": "launch",
+      "name": "craco-build",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run-script", "build"],
+      "port": 9229,
+      "timeout": 30000,
+      "skipFiles": ["<node_internals>/**"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
       "name": "Chrome",
       "type": "chrome",
       "request": "launch",
