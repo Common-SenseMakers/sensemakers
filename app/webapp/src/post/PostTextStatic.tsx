@@ -11,5 +11,10 @@ export const PostTextStatic = (props: {
     return <></>;
   }
 
-  return <div dangerouslySetInnerHTML={{ __html: textToHtml(text) }} />;
+  return (
+    <div
+      style={{ overflow: 'hidden' }}
+      dangerouslySetInnerHTML={{ __html: textToHtml(text) }}
+    />
+  );
 };

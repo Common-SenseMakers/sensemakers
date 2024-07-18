@@ -54,6 +54,7 @@ export const PostCard = (props: {
           semantics: post?.semantics,
           originalParsed: post?.originalParsed,
         }}></SemanticsEditor>
+
       <PostTextStatic truncate shade={shade} text={postText}></PostTextStatic>
 
       <SemanticsEditor

@@ -479,7 +479,9 @@ export const PostView = (props: {
               }}
               include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
           )}
+
           <PostTextEditable text={postText}></PostTextEditable>
+
           {postStatuses.isParsing ? (
             <LoadingDiv height="120px" width="100%"></LoadingDiv>
           ) : (

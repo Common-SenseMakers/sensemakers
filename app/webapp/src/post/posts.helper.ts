@@ -32,8 +32,13 @@ export const getPostStatuses = (post?: AppPostFull): AppPostStatus => {
   const postedNanopub = post?.mirrors?.find(
     (m) => m.platformId === PLATFORM.Nanopub
   )?.posted;
+
+  const nanopubHash = postedNanopub
+    ? postedNanopub.post_id.split('/').pop()
+    : undefined;
+
   const nanopubUrl = postedNanopub
-    ? `${NANOPUB_EXPLORER_SERVER}${postedNanopub.post_id}`
+    ? `${NANOPUB_EXPLORER_SERVER}${nanopubHash}`
     : undefined;
 
   const processed = post && post.parsedStatus === AppPostParsedStatus.PROCESSED;
