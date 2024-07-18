@@ -8,7 +8,7 @@ import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { PLATFORM } from '../shared/types/types.user';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { NanopubStatus } from './NanopubStatus';
-import { PostText } from './PostText';
+import { PostTextStatic } from './PostTextStatic';
 import { concatenateThread } from './posts.helper';
 
 export const PostCard = (props: {
@@ -54,7 +54,7 @@ export const PostCard = (props: {
           semantics: post?.semantics,
           originalParsed: post?.originalParsed,
         }}></SemanticsEditor>
-      <PostText truncate shade={shade} text={postText}></PostText>
+      <PostTextStatic truncate shade={shade} text={postText}></PostTextStatic>
 
       <SemanticsEditor
         include={[PATTERN_ID.REF_LABELS]}

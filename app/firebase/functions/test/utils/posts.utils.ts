@@ -1,5 +1,6 @@
 import { FetchParams } from '../../src/@shared/types/types.fetch';
 import {
+  PlatformPost,
   PlatformPostPublishOrigin,
   PlatformPostPublishStatus,
 } from '../../src/@shared/types/types.platform.posts';
@@ -12,6 +13,7 @@ import {
   AppPostReviewStatus,
   GenericThread,
 } from '../../src/@shared/types/types.posts';
+import { TwitterThread } from '../../src/@shared/types/types.twitter';
 import { PLATFORM } from '../../src/@shared/types/types.user';
 import { activityEventCreatedHook } from '../../src/activity/activity.created.hook';
 import { Services } from '../../src/instances/services';
@@ -36,6 +38,35 @@ export const getMockPost = (refPost: Partial<AppPostFull>) => {
     },
   };
 
+  const twitterMirror: PlatformPost<TwitterThread> = {
+    id: 'pp-id',
+    platformId: PLATFORM.Twitter,
+    publishOrigin: PlatformPostPublishOrigin.FETCHED,
+    publishStatus: PlatformPostPublishStatus.PUBLISHED,
+    posted: {
+      post_id: '123456',
+      timestampMs: createdAtMs,
+      user_id: testCredentials[0].twitter.id,
+      post: {
+        conversation_id: '123456',
+        tweets: [
+          {
+            id: '123456',
+            created_at: '2021-01-01T00:00:00.000Z',
+            author_id: '123456',
+            conversation_id: '123456',
+            text: 'test content',
+          },
+        ],
+        author: {
+          id: '123456',
+          username: 'test_author',
+          name: 'test author',
+        },
+      },
+    },
+  };
+
   const post: AppPostFull = {
     id: refPost.id || 'post-id',
     createdAtMs: createdAtMs,
@@ -47,40 +78,7 @@ export const getMockPost = (refPost: Partial<AppPostFull>) => {
     parsingStatus: AppPostParsingStatus.IDLE,
     reviewedStatus: AppPostReviewStatus.PENDING,
     republishedStatus: AppPostRepublishedStatus.PENDING,
-    mirrors: [
-      {
-        id: 'pp-id',
-        platformId: PLATFORM.Twitter,
-        publishOrigin: PlatformPostPublishOrigin.FETCHED,
-        publishStatus: PlatformPostPublishStatus.PUBLISHED,
-        posted: {
-          post_id: '123456',
-          timestampMs: createdAtMs,
-          user_id: testCredentials[0].twitter.id,
-          post: {
-            id: 'post-id',
-            createdAtMs: createdAtMs,
-            authorId: authorId,
-            content: 'test content',
-            semantics: `
-                  @prefix ns1: <http://purl.org/spar/cito/> .
-                  @prefix schema: <https://schema.org/> .
-                  
-                  <http://purl.org/nanopub/temp/mynanopub#assertion> 
-                    ns1:discusses <https://twitter.com/ori_goldberg/status/1781281656071946541> ;    
-                    ns1:includesQuotationFrom <https://twitter.com/ori_goldberg/status/1781281656071946541> ;    
-                    schema:keywords "ExternalSecurity",        "Geopolitics",        "Israel",        "Kissinger",        "PoliticalScience",        "Security" .
-                  `,
-
-            origin: PLATFORM.Twitter,
-            parsedStatus: AppPostParsedStatus.PROCESSED,
-            parsingStatus: AppPostParsingStatus.IDLE,
-            reviewedStatus: AppPostReviewStatus.PENDING,
-            republishedStatus: AppPostRepublishedStatus.PENDING,
-          },
-        },
-      },
-    ],
+    mirrors: [twitterMirror],
   };
   return post;
 };

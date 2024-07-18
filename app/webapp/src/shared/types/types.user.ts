@@ -1,6 +1,7 @@
 import { NanopubUserDetails } from './types.nanopubs';
 import { NotificationFreq } from './types.notifications';
 import { OrcidUserDetails } from './types.orcid';
+import { AppPostFull } from './types.posts';
 import { TwitterUserDetails } from './types.twitter';
 
 /** Support types */
@@ -169,3 +170,9 @@ export interface OrcidAccountCredentials {
 export interface NanopubAccountCredentials {
   ethPrivateKey: HexStr;
 }
+
+export type RenderEmailFunction = (
+  posts: AppPostFull[],
+  notificationFrequency: NotificationFreq,
+  autopostOption: AutopostOption
+) => { html: string; plainText: string };

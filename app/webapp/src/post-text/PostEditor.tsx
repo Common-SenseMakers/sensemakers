@@ -12,47 +12,10 @@ import { useTranslation } from 'react-i18next';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { EditorAutoFocus } from './editor.autofocus';
 import placeholder from './placeholder.plugin';
+import { textToHtml } from './post.content.format';
 import './posteditor.css';
 
 const DEBUG = false;
-
-export const textToHtml = (text: string) => {
-  const paragraphs = text.split('---');
-  let html = paragraphs?.map((p, i) => `<p>${p}</p>`).join('');
-
-  const urlRegex =
-    /\bhttps?:\/\/[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
-
-  html = html.replace(urlRegex, (url) => {
-    let endsWithPeriod = false;
-    let urlClean = url;
-    try {
-      if (url.endsWith('.')) {
-        endsWithPeriod = true;
-        url = url.slice(0, -1);
-      }
-
-      if (url.endsWith('</p>')) {
-        url = url.slice(0, -4);
-      }
-
-      const urlObj = new URL(url);
-      urlClean = `${urlObj.protocol}//${urlObj.hostname}${urlObj.pathname}`;
-      if (urlObj.search) {
-        urlClean += urlObj.search;
-      }
-    } catch (e) {
-      console.error(`Error parsing URL: ${url}`, e);
-    }
-
-    return `<a href="${url}">${urlClean}</a>${endsWithPeriod ? '.' : ''}`;
-  });
-
-  const element = document.createElement('div');
-  element.innerHTML = html;
-
-  return element;
-};
 
 export interface IStatementEditable {
   placeholder?: string;
@@ -131,23 +94,22 @@ const defaultState = EditorState.create({
 
 export const PostEditor = (props: IStatementEditable) => {
   const { t } = useTranslation();
-  const { constants } = useThemeContext();
 
   const [mount, setMount] = useState<HTMLElement | null>(null);
 
-  const element = textToHtml(props.value ? props.value : '');
-  const doc = DOMParser.fromSchema(schema).parse(element);
-
   const [editorState, setEditorState] = useState(
     EditorState.create({
-      doc,
       schema,
     })
   );
 
+  /** from plain text to prosemirror state */
   useEffect(() => {
     if (props.value) {
-      const element = textToHtml(props.value);
+      const html = textToHtml(props.value);
+      const element = document.createElement('div');
+      element.innerHTML = html;
+
       const doc = DOMParser.fromSchema(schema).parse(element);
 
       const newState = EditorState.create({

@@ -26,7 +26,7 @@ import { usePersist } from '../utils/use.persist';
 import { usePost } from './PostContext';
 import { PostHeader } from './PostHeader';
 import { PostNav } from './PostNav';
-import { PostText } from './PostText';
+import { PostTextEditable } from './PostTextEditable';
 import { POSTING_POST_ID } from './PostingPage';
 import { concatenateThread } from './posts.helper';
 
@@ -479,7 +479,7 @@ export const PostView = (props: {
               }}
               include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
           )}
-          <PostText text={postText}></PostText>
+          <PostTextEditable text={postText}></PostTextEditable>
           {postStatuses.isParsing ? (
             <LoadingDiv height="120px" width="100%"></LoadingDiv>
           ) : (

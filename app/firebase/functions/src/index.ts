@@ -246,27 +246,28 @@ exports.activityEventCreateListener = onDocumentCreated(
   }
 );
 
-/** EMULATOR ONLY ENDPOINTS used to simulate events on platforms, or cron jobs */
-// add enpoint when on emulator to trigger the scheduled task
-if (IS_EMULATOR) {
-  const emulatorTriggerRouter = express.Router();
+/** trigger endpoints to trigger scheduled tasks manually */
+const emulatorTriggerRouter = express.Router();
 
-  emulatorTriggerRouter.post('/autofetch', async (request, response) => {
-    await triggerAutofetchPosts(createServices());
-    response.status(200).send({ success: true });
-  });
+emulatorTriggerRouter.post('/autofetch', async (request, response) => {
+  await triggerAutofetchPosts(createServices());
+  response.status(200).send({ success: true });
+});
 
-  emulatorTriggerRouter.post(
-    '/sendDailyNotifications',
-    async (request, response) => {
-      await triggerSendNotifications(
-        NotificationFreq.Daily,
-        getServices(request)
-      );
-      response.status(200).send({ success: true });
-    }
+emulatorTriggerRouter.post('/sendNotifications', async (request, response) => {
+  const params = request.query;
+  if (!params.freq) {
+    throw new Error('freq parameter is required');
+  }
+
+  await triggerSendNotifications(
+    params.freq as NotificationFreq,
+    getServices(request)
   );
+  response.status(200).send({ success: true });
+});
 
+if (IS_EMULATOR) {
   emulatorTriggerRouter.post('/publishTwitter', async (request, response) => {
     const services = getServices(request);
     const { platforms } = services;
@@ -290,14 +291,14 @@ if (IS_EMULATOR) {
 
     response.status(200).send({ success: true });
   });
-
-  exports['trigger'] = functions
-    .region(envDeploy.REGION)
-    .runWith({
-      timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
-      memory: envDeploy.CONFIG_MEMORY,
-      minInstances: envDeploy.CONFIG_MININSTANCE,
-      secrets,
-    })
-    .https.onRequest(buildApp(emulatorTriggerRouter));
 }
+
+exports['trigger'] = functions
+  .region(envDeploy.REGION)
+  .runWith({
+    timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
+    memory: envDeploy.CONFIG_MEMORY,
+    minInstances: envDeploy.CONFIG_MININSTANCE,
+    secrets,
+  })
+  .https.onRequest(buildApp(emulatorTriggerRouter));

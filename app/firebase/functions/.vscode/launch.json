@@ -11,11 +11,11 @@
         "NODE_ENV": "test",
         "FIRESTORE_EMULATOR_HOST": "127.0.0.1:8080",
         "LOG_LEVEL_MSG": "debug",
-        "LOG_LEVEL_OBJ": "debug",
+        "LOG_LEVEL_OBJ": "error",
         "USE_REAL_TWITTERX": "false",
         "USE_REAL_NANOPUB": "false",
         "USE_REAL_PARSER": "false",
-        "USE_REAL_NOTIFICATIONS": "true"
+        "USE_REAL_EMAIL": "false"
       },
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/mocha",
       "args": ["--config", "./.mocharc.js", "test/__tests__/**/*.test.ts"],

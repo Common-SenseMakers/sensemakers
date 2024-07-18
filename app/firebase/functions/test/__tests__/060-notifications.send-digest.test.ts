@@ -24,7 +24,7 @@ const DEBUG = false;
 
 const services = globalTestServices;
 
-describe('060-send-digest-no-autpost', () => {
+describe.only('060-send-digest-no-autpost', () => {
   before(async () => {
     logger.debug('resetting DB');
     await resetDB();
@@ -39,6 +39,16 @@ describe('060-send-digest-no-autpost', () => {
       user = await _01_createAndFetchUsers(services, testUser.twitter.id, {
         DEBUG,
         DEBUG_PREFIX,
+      });
+    });
+
+    it('sets users email', async () => {
+      if (!user) {
+        throw new Error('user not created');
+      }
+      await services.users.setEmail(user.userId, {
+        email: 'sample@email.com',
+        source: 'MAGIC',
       });
     });
 

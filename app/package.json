@@ -1,0 +1,10 @@
+{
+    "private": true,
+    "workspaces": [
+        "webapp",
+        "firebase/functions"
+    ],
+    "devDependencies": {
+        "ts-node": "^10.9.2"
+    }
+}
