@@ -17,5 +17,5 @@
     "checkJs": false
   },
   "compileOnSave": true,
-  "include": ["src/index.ts", "src/custom.d.ts"]
+  "include": ["src/index.ts", "src/@shared/", "src/custom.d.ts"]
 }
