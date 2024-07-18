@@ -24,7 +24,7 @@ const DEBUG = false;
 
 const services = globalTestServices;
 
-describe('060-send-digest-no-autpost', () => {
+describe.only('060-send-digest-no-autpost', () => {
   before(async () => {
     logger.debug('resetting DB');
     await resetDB();
