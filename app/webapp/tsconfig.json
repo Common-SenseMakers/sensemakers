@@ -14,6 +14,9 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
+    "paths": {
+      "strip-ansi": ["node_modules/strip-ansi-cjs"]
+    },
     "declaration": true,
     "sourceMap": true,
     "emitDeclarationOnly": true,
