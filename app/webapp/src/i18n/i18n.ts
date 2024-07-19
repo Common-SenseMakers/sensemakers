@@ -203,7 +203,7 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.recommendedNanopubEmailHeaderPlural]:
     'You have {{count}} potential nanopublications ready for review {{timeframe}}.',
   [I18Keys.recommendedNanopubEmailFooter]:
-    "This is your {{timeframe}} nanopub recommendation summary. You can <emailSettingsLink>edit your email settings here</emailSettingsLink>. Don't see a post you'd like to nanopublish? <ignoredPostsLink>Review all your recent posts here</ignoredPostsLink>.",
+    "This is your {{timeframe}} nanopub recommendation summary. You can edit your email settings <emailSettingsLink>here</emailSettingsLink>. Don't see a post you'd like to nanopublish? Review all your recent posts <ignoredPostsLink>here</ignoredPostsLink>.",
 
   [I18Keys.publishedNanopubEmailHeader]: '',
   [I18Keys.publishedNanopubEmailHeaderSingular]:
@@ -211,7 +211,7 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.publishedNanopubEmailHeaderPlural]:
     "We've automatically published {{count}} posts {{timeframe}}.",
   [I18Keys.publishedNanopubEmailFooter]:
-    'These posts were automatically published according to your automation settings. You can <automationSettingsLink>change your automation settings here</automationSettingsLink>.\n\nSee any mistakes in your nanopublications? <publishedPostsLink>Edit or retract your automated nanopublications here</publishedPostsLink>.',
+    'These posts were automatically published according to your automation settings. You can change your automation settings <automationSettingsLink>here</automationSettingsLink>.\n\nSee any mistakes in your nanopublications? Edit or retract your automated nanopublications <publishedPostsLink>here</publishedPostsLink>.',
 
   [I18Keys.emailHeaderDailyNotificationTimeframe]: 'today',
   [I18Keys.emailHeaderWeeklyNotificationTimeframe]: 'this week',
