@@ -37,7 +37,11 @@ export const RefCard = (props: {
       <Box
         align="start"
         pad={{ horizontal: '12px', vertical: '8px' }}
-        style={{ borderRadius: '12px', border: '1px solid #D1D5DB' }}>
+        style={{
+          borderRadius: '12px',
+          border: '1px solid #D1D5DB',
+          width: '100%',
+        }}>
         <Box
           margin={{ bottom: '4px' }}
           width="100%"
@@ -96,6 +100,7 @@ export const RefCard = (props: {
         textDecoration: 'none',
         color: 'inherit',
         fontWeight: 'normal',
+        width: '100%',
       }}
       target="_blank">
       {content}
