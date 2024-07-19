@@ -6,15 +6,13 @@
     "test:nanopub": " NODE_ENV=test mocha --config .mocharc.nanopub.js --trace-uncaught -r ts-node/register 'test/__tests__/021-platforms.nanopub.format.test.ts'",
     "lint": "eslint --ext .js,.ts .",
     "build": "tsc",
+    "build:watch": "rm -rf ./lib & tsc --watch",
     "build:watch-test": "rm -rf ./lib-test & tsc --watch -p ./tsconfig.test.json",
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log",
-    "build:watch": "rm -rf ./lib & tsc --watch",
-    "trigger-autofetch": "curl -X POST http://127.0.0.1:5001/demo-sensenets/us-central1/trigger/autofetch",
-    "trigger-notifications": "curl -X POST http://127.0.0.1:5001/demo-sensenets/us-central1/trigger/sendNotifications?freq=weekly"
+    "logs": "firebase functions:log"
   },
   "engines": {
     "node": "18"

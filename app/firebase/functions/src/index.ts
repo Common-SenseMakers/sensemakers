@@ -27,6 +27,7 @@ import { envDeploy } from './config/typedenv.deploy';
 import { envRuntime } from './config/typedenv.runtime';
 import { getServices } from './controllers.utils';
 import { buildApp } from './instances/app';
+import { logger } from './instances/logger';
 import { createServices } from './instances/services';
 import {
   NOTIFY_USER_TASK,
@@ -250,11 +251,13 @@ exports.activityEventCreateListener = onDocumentCreated(
 const emulatorTriggerRouter = express.Router();
 
 emulatorTriggerRouter.post('/autofetch', async (request, response) => {
+  logger.debug('autofetch triggered');
   await triggerAutofetchPosts(createServices());
   response.status(200).send({ success: true });
 });
 
 emulatorTriggerRouter.post('/sendNotifications', async (request, response) => {
+  logger.debug('sendNotifications triggered');
   const params = request.query;
   if (!params.freq) {
     throw new Error('freq parameter is required');
