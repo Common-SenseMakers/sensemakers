@@ -13,6 +13,7 @@ import { AppButton } from '../ui-components';
 import { useThemeContext } from '../ui-components/ThemedApp';
 
 const MAX_POSTS_IN_EMAIL = 3;
+const LOGO_URL = '/icons/logo.png';
 
 export function EmailTemplate(props: {
   posts: AppPostFull[];
@@ -109,12 +110,7 @@ export function EmailTemplate(props: {
             align="center"
             justify="center"
             margin={{ bottom: 'medium' }}>
-            <Image
-              src="/icons/logo.png"
-              alt="Logo"
-              width="50px"
-              height="50px"
-            />
+            <Image src={LOGO_URL} alt="Logo" width="50px" height="50px" />
           </Box>
           <GrommetHeading level="2" margin="medium">
             {header}
