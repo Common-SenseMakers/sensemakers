@@ -17,7 +17,8 @@
     "test-functions": "FUNCTIONS_BASE=http://127.0.0.1:5001/sensenets-9ef26/us-central1 jest",
     "serve-build": "serve -s build -l 3000",
     "test-email-template": "craco start --config craco.config.test.js",
-    "build-email": "rm -rf ./build && craco build --config craco.config.email.bundle.js && yarn build-types && copy-email-static",
+    "build-email": "yarn build-email-code && yarn build-types && yarn copy-email-static",
+    "build-email-code": "rm -rf ./build && craco build --config craco.config.email.bundle.js",
     "build-types": "tsc -p tsconfig.dist.json",
     "copy-email-static": "cp ./build/**.* ./src/shared/emailRenderer"
   },

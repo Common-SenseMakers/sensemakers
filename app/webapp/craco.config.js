@@ -25,7 +25,6 @@ module.exports = {
           ...webpackConfig.resolve,
           alias: {
             ...webpackConfig.resolve.alias,
-            'strip-ansi': require.resolve('strip-ansi-cjs'),
           },
         },
         plugins: [...webpackConfig.plugins, ...getPlugins(process.env)],
