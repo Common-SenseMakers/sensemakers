@@ -16,8 +16,9 @@ export const PostCard = (props: {
   shade?: boolean;
   profile?: TwitterUserProfile;
   handleClick: () => void;
+  isEmail?: boolean;
 }) => {
-  const { post, shade: _shade } = props;
+  const { post, shade: _shade, isEmail } = props;
   const profile = props.profile;
   const shade = _shade || false;
 
@@ -35,7 +36,10 @@ export const PostCard = (props: {
         borderTop: '1px solid var(--Neutral-300, #D1D5DB)',
         borderRight: '1px solid var(--Neutral-300, #D1D5DB)',
         borderLeft: '1px solid var(--Neutral-300, #D1D5DB)',
-        cursor: 'pointer',
+        borderBottom: isEmail
+          ? '1px solid var(--Neutral-300, #D1D5DB)'
+          : 'none',
+        cursor: !isEmail ? 'pointer' : 'default',
         position: 'relative',
       }}
       onClick={handleClick}>

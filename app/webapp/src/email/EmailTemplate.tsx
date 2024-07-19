@@ -123,7 +123,12 @@ export function EmailTemplate(props: {
             margin={{ bottom: 'medium' }}
             align="center"
             width={{ max: '600px' }}>
-            <PostCard key={post.id} post={post} handleClick={() => {}} />
+            <PostCard
+              isEmail
+              key={post.id}
+              post={post}
+              handleClick={() => {}}
+            />
             <Box align="center" margin="medium" width="auto">
               <AppButton
                 primary
