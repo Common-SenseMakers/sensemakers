@@ -13,7 +13,7 @@ import { AppButton } from '../ui-components';
 import { useThemeContext } from '../ui-components/ThemedApp';
 
 const MAX_POSTS_IN_EMAIL = 3;
-const LOGO_URL = '/icons/logo.png';
+const LOGO_URL = 'https://development--sensemakers.netlify.app/icons/logo.png';
 
 export function EmailTemplate(props: {
   posts: AppPostFull[];
