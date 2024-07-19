@@ -15,7 +15,7 @@
 
 
 ## Template Schema
-
+```
 sub:pubinfo {
 
   x:xHandle foaf:name "{retractos name}" . 
@@ -35,3 +35,4 @@ sub:pubinfo {
     this: cosmo:hasRootSinger "{eth address}"
     
 }
+```

@@ -15,6 +15,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from rdflib import URIRef, Literal, Graph
 from .prompting.jinja.topics_template import ALLOWED_TOPICS
 from .filters import SciFilterClassfication
+from .utils import normalize_tweet_urls_in_text, normalize_tweet_url
 
 # for calculating thread length limits
 MAX_CHARS_PER_POST = 280
@@ -91,6 +92,39 @@ class TopicConceptDefinition(OntologyConceptDefinition):
     )
 
 
+class ZoteroItemTypeDefinition(OntologyConceptDefinition):
+    """
+    Definition of the ZoteroItemType predicate which is used to represent a reference's
+    item type according to the Zotero ontology.
+    https://www.zotero.org/support/kb/item_types_and_fields
+    """
+
+    name: str = Field(default="zoteroItemType", description="Concept name.")
+    uri: str = Field(
+        default="https://sense-nets.xyz/hasZoteroItemType",
+        description="Linked data URI for this concept.",
+    )
+    versions: List[str] = Field(
+        ["v0"], description="Which ontology versions is this item included in."
+    )
+
+
+class QuotedPostDefinition(OntologyConceptDefinition):
+    """
+    Definition of quotedPost relation for a post that quotes another post
+    https://github.com/Common-SenseMakers/sensemakers/blob/nlp-dev/nlp/desci_sense/schema/Nanopub_schema/semantic_post_quote_schema.md
+    """
+
+    name: str = Field(default="zoteroItemType", description="Concept name.")
+    uri: str = Field(
+        default="https://sense-nets.xyz/quotesPost",
+        description="Linked data URI for this concept.",
+    )
+    versions: List[str] = Field(
+        ["v0"], description="Which ontology versions is this item included in."
+    )
+
+
 class isAConceptDefintion(OntologyConceptDefinition):
     name: str = Field(default="isA", description="Concept name.")
     uri: str = Field(
@@ -139,24 +173,6 @@ class OntologyInterface(BaseModel):
     )
     allowed_topics: List[str] = Field(default=ALLOWED_TOPICS)
     ontology_config: NotionOntologyConfig = Field(default_factory=NotionOntologyConfig)
-
-
-# TODO remove - changed to OntologyPredicateDefinition
-class OntologyItem(TypedDict):
-    URI: str
-    display_name: str
-    Name: Optional[str]
-    label: Optional[str]
-    prompt: str
-    notes: Optional[str]
-    valid_subject_types: Optional[str]
-    valid_object_types: Optional[str]
-    versions: Optional[str]
-
-
-# TODO remove - changed to KeywordPredicateDefinition
-class KeywordsSupport(TypedDict):
-    keyWordsOntology: OntologyItem
 
 
 class RefMetadata(BaseModel):
@@ -248,7 +264,7 @@ class ParserResult(BaseModel):
 
     @field_validator(
         "semantics", mode="before"
-    )  # before needed since arbitrary types allowec
+    )  # before needed since arbitrary types allowed
     @classmethod
     def ensure_graph(cls, value: Any):
         if isinstance(value, Graph):
@@ -271,17 +287,6 @@ class Author(BaseModel):
         return v.lower() if isinstance(v, str) else v
 
 
-# class AppPostContent(BaseModel):
-
-
-# class AppPost(BaseModel):
-#     content: str = Field(description="Post content")
-#     url: Optional[str] = Field(description="Post url", default=None)
-#     quoted_thread_url: Optional[str] = Field(
-#         description="Url of quoted thread", default=None
-#     )
-
-
 class AppPost(BaseModel):
     content: str = Field(description="Post content")
     url: Optional[str] = Field(description="Post url", default="")
@@ -289,6 +294,14 @@ class AppPost(BaseModel):
         description="Quoted thread",
         default=None,
     )
+
+    @validator("content", pre=True, always=True)
+    def normalize_twitter_urls(cls, v):
+        return normalize_tweet_urls_in_text(v) if isinstance(v, str) else v
+
+    @validator("url", pre=True, always=True)
+    def normalize_twitter_url(cls, v):
+        return normalize_tweet_url(v) if isinstance(v, str) else v
 
 
 class AppThread(BaseModel):
@@ -298,6 +311,10 @@ class AppThread(BaseModel):
         description="Thread url (url of first post)",
         default=None,
     )
+
+    @validator("url", pre=True, always=True)
+    def normalize_twitter_url(cls, v):
+        return normalize_tweet_url(v) if isinstance(v, str) else v
 
     @property
     def source_network(self) -> PlatformType:
@@ -314,25 +331,3 @@ class ParsePostRequest(BaseModel):
         description="Additional params for parser (not used currently)",
         default_factory=dict,
     )
-
-
-# TODO remove - changed to RefMetadata
-class RefMeta(TypedDict):
-    title: str
-    description: str
-    image: str
-
-
-class ReflabelsSupport(TypedDict):
-    labelsOntology: List[OntologyItem]
-    refsMeta: Dict[str, RefMeta]
-
-
-class ParsedSupport(TypedDict):
-    keywords: KeywordsSupport
-    refLabels: ReflabelsSupport
-
-
-class ParserResultDto(TypedDict):
-    semantics: str
-    support: ParsedSupport

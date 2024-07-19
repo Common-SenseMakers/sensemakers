@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+import pytest
 
 ROOT = Path(__file__).parents[1]
 sys.path.append(str(ROOT))
@@ -21,7 +22,12 @@ from desci_sense.shared_functions.schema.post import (
     ThreadRefPost,
     QuoteRefPost,
 )
-from desci_sense.shared_functions.interface import AppThread, ParsePostRequest
+from desci_sense.shared_functions.interface import (
+    AppThread,
+    ParsePostRequest,
+    Author,
+    AppPost,
+)
 from desci_sense.shared_functions.dataloaders import scrape_post
 from desci_sense.shared_functions.dataloaders.twitter.twitter_utils import (
     extract_external_ref_urls,
@@ -35,6 +41,40 @@ from desci_sense.shared_functions.preprocessing import (
     ParserInput,
     preproc_parser_input,
 )
+
+QUOTED_THREAD_I123 = {
+    "author": {
+        "platformId": "twitter",
+        "id": "author_123",
+        "username": "user123",
+        "name": "John Doe",
+    },
+    "url": "https://x.com/fchollet/status/1810833882037825646",
+    "thread": [
+        {
+            "url": "https://x.com/fchollet/status/1810833882037825646",
+            "content": "The fact is that tech bubbles have very little to do with the technical or even commercial merits of the technology they form around. They can happen with worthless narratives or with entirely grounded ones. They don't even require unrealistic revenue projections!",
+        }
+    ],
+}
+
+TEST_POST_I123 = {
+    "author": {
+        "platformId": "twitter",
+        "id": "author_456",
+        "username": "user546",
+        "name": "Sarah Gore",
+    },
+    "url": "https://example.com/post/2",
+    "thread": [
+        {
+            "url": "https://example.com/post/2",
+            "content": "Something deep alluded to here: - In theory we have free markets as superhuman information processors (Hayek) - In practice, that information processing is limited by the bounded, fallible & biased cognition of individual investors wielding outsized influence https://twitter.com/fchollet/status/1810833882037825646",
+            "quotedThread": QUOTED_THREAD_I123,
+        }
+    ],
+}
+
 
 TEST_THREAD_INTERFACE_2 = {
     "url": "https://example.com/post/2",
@@ -278,10 +318,67 @@ def test_load_real_thread():
     ]
 
 
+def test_author_platform_id_lowercase():
+    author = Author(id="123", name="John Doe", username="johndoe", platformId="Twitter")
+    assert author.platformId == "twitter"
+
+
+def test_author_invalid_platform_id():
+    with pytest.raises(ValidationError):
+        Author(
+            id="123", name="John Doe", username="johndoe", platformId=123
+        )  # platformId should be a string
+
+
+def test_app_post_normalize_content_urls():
+    content = "Check out this tweet: https://twitter.com/user/status/1234567890"
+    expected_content = "Check out this tweet: https://x.com/user/status/1234567890"
+    post = AppPost(content=content)
+    assert post.content == expected_content
+
+
+def test_app_post_normalize_url():
+    url = "https://twitter.com/user/status/1234567890"
+    expected_url = "https://x.com/user/status/1234567890"
+    post = AppPost(content="Test post", url=url)
+    assert post.url == expected_url
+
+
+def test_app_post_no_normalization_needed():
+    content = "This is a test post with no Twitter URLs."
+    url = "https://example.com"
+    post = AppPost(content=content, url=url)
+    assert post.content == content
+    assert post.url == url
+
+
+def test_app_thread_normalize_url():
+    url = "https://twitter.com/user/status/1234567890"
+    expected_url = "https://x.com/user/status/1234567890"
+    author = Author(id="123", name="John Doe", username="johndoe", platformId="twitter")
+    post = AppPost(content="Test post", url=url)
+    thread = AppThread(author=author, thread=[post], url=url)
+    assert thread.url == expected_url
+
+
+def test_app_thread_author():
+    author = Author(id="123", name="John Doe", username="johndoe", platformId="Twitter")
+    post = AppPost(content="Test post")
+    thread = AppThread(author=author, thread=[post])
+    assert thread.author.name == "John Doe"
+    assert thread.author.platformId == "twitter"
+
+
+def test_i123():
+    thread = AppThread.model_validate(TEST_POST_I123)
+    thread_ref_post = convert_thread_interface_to_ref_post(thread)
+    assert thread_ref_post.md_ref_urls() == [
+        "https://x.com/fchollet/status/1810833882037825646"
+    ]
 
 
 if __name__ == "__main__":
-    thread = AppThread.model_validate(TEST_OVERLENGTH_THREAD_INTERFACE)
+    thread = AppThread.model_validate(TEST_POST_I123)
     thread_ref_post = convert_thread_interface_to_ref_post(thread)
-    pi = ParserInput(thread_post=thread_ref_post, max_posts=30)
-    proc_pi = preproc_parser_input(pi)
+    # pi = ParserInput(thread_post=thread_ref_post, max_posts=30)
+    # proc_pi = preproc_parser_input(pi)

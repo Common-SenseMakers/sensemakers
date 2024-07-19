@@ -448,3 +448,42 @@ def trim_parts_to_length(part_lengths: List[int], max_length: int) -> List[int]:
             break
 
     return trimmed_part_lengths
+
+
+def normalize_tweet_url(url):
+    """
+    Normalize Twitter post URLs to use the x.com domain.
+
+    Parameters:
+    url (str): The original Twitter URL.
+
+    Returns:
+    str: The normalized URL with x.com domain.
+    """
+    if "twitter.com" in url:
+        return url.replace("twitter.com", "x.com")
+    else:
+        return url
+
+
+def normalize_tweet_urls_in_text(text: str) -> str:
+    """
+    Normalize all occurrences of Twitter URLs to uniform format (using x.com).
+
+    Args:
+        text (str): Input string.
+
+    Returns:
+        str: String after normalization.
+    """
+    extracted_urls, orig_urls = extract_and_expand_urls(
+        text,
+        return_orig_urls=True,
+    )
+    normalized_urls = [normalize_tweet_url(url) for url in extracted_urls]
+
+    # Replace all occurrences of orig_urls in text with normalized_urls
+    for orig_url, normalized_url in zip(orig_urls, normalized_urls):
+        text = text.replace(orig_url, normalized_url)
+
+    return text
