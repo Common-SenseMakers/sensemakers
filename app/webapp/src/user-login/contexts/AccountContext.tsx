@@ -17,7 +17,7 @@ import {
 import { usePersist } from '../../utils/use.persist';
 import { getAccount } from '../user.helper';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const OUR_TOKEN_NAME = 'ourToken';
 export const LOGIN_STATUS = 'loginStatus';
@@ -56,6 +56,7 @@ export enum LoginFlowState {
   RegisteringEmail = 'RegisteringEmail',
   ConnectingTwitter = 'ConnectingTwitter',
   BasicLoggedIn = 'BasicLoggedIn',
+  Disconnecting = 'Disconnecting',
 }
 
 /** higher level status of the login flow. Persisted in localStorage helps
@@ -134,7 +135,11 @@ export const AccountContext = (props: PropsWithChildren) => {
    */
   useEffect(() => {
     if (DEBUG)
-      console.log('connectedUser', { connectedUser, overallLoginStatus });
+      console.log('connectedUser', {
+        connectedUser,
+        overallLoginStatus,
+        twitter: connectedUser?.email,
+      });
 
     if (connectedUser && connectedUser.email && !twitterProfile) {
       setOverallLoginStatus(OverallLoginStatus.PartialLoggedIn);
@@ -145,9 +150,7 @@ export const AccountContext = (props: PropsWithChildren) => {
       connectedUser &&
       connectedUser.email &&
       twitterProfile &&
-      /** this one is tricky, when disconnecting,
-       * we set overallLoginStatus to LoggedOut before everything else is deleted. */
-      overallLoginStatus !== OverallLoginStatus.LoggedOut
+      loginFlowState !== LoginFlowState.Disconnecting
     ) {
       setTwitterConnectedStatus(TwitterConnectedStatus.Connected);
       setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
@@ -158,11 +161,18 @@ export const AccountContext = (props: PropsWithChildren) => {
       setOverallLoginStatus(OverallLoginStatus.LoggedOut);
       return;
     }
-  }, [connectedUser, overallLoginStatus]);
+
+    if (
+      !token &&
+      !connectedUser &&
+      overallLoginStatus !== OverallLoginStatus.LogginIn
+    ) {
+      setOverallLoginStatus(OverallLoginStatus.LoggedOut);
+    }
+  }, [connectedUser, overallLoginStatus, token]);
 
   const disconnect = () => {
-    setOverallLoginStatus(OverallLoginStatus.LoggedOut);
-    setToken(TwitterConnectedStatus.Disconnected);
+    setConnectedUser(undefined);
     setToken(null);
   };
 
