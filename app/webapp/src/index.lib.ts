@@ -1,4 +1,5 @@
 import { render } from '@react-email/components';
+import juice from 'juice';
 import React from 'react';
 import { ServerStyleSheet } from 'styled-components';
 
@@ -37,5 +38,5 @@ export const renderEmail: RenderEmailFunction = (
     { plainText: true }
   );
   const styleTags = sheet.getStyleTags();
-  return { html: `${styleTags}${html}`, plainText };
+  return { html: juice(`${styleTags}${html}`), plainText };
 };

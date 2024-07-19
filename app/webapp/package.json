@@ -43,6 +43,7 @@
     "grommet": "^2.34.2",
     "grommet-icons": "^4.12.0",
     "i18next": "^23.8.1",
+    "juice": "^10.0.0",
     "jwt-decode": "^4.0.0",
     "libsodium": "^0.7.13",
     "magic-sdk": "^22.1.1",
