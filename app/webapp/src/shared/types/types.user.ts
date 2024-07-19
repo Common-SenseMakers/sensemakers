@@ -174,5 +174,6 @@ export interface NanopubAccountCredentials {
 export type RenderEmailFunction = (
   posts: AppPostFull[],
   notificationFrequency: NotificationFreq,
-  autopostOption: AutopostOption
+  autopostOption: AutopostOption,
+  appUrl: string
 ) => { html: string; plainText: string };

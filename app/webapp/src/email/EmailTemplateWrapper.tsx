@@ -14,6 +14,7 @@ export function EmailTemplateWrapper(props: {
   posts: AppPostFull[];
   notificationFrequency: NotificationFreq;
   autopostOption: AutopostOption;
+  appUrl: string;
 }) {
   return (
     <I18nextProvider i18n={i18n}>

@@ -1,4 +1,5 @@
 import { render } from '@react-email/components';
+import juice from 'juice';
 import React from 'react';
 import { ServerStyleSheet } from 'styled-components';
 
@@ -10,7 +11,8 @@ import { AutopostOption, RenderEmailFunction } from './shared/types/types.user';
 export const renderEmail: RenderEmailFunction = (
   posts: AppPostFull[],
   notificationFrequency: NotificationFreq,
-  autopostOption: AutopostOption
+  autopostOption: AutopostOption,
+  appUrl: string
 ) => {
   const sheet = new ServerStyleSheet();
   const html = render(
@@ -19,6 +21,7 @@ export const renderEmail: RenderEmailFunction = (
         posts,
         notificationFrequency,
         autopostOption,
+        appUrl,
       })
     )
   );
@@ -29,10 +32,11 @@ export const renderEmail: RenderEmailFunction = (
         posts,
         notificationFrequency,
         autopostOption,
+        appUrl,
       })
     ),
     { plainText: true }
   );
   const styleTags = sheet.getStyleTags();
-  return { html: `${styleTags}${html}`, plainText };
+  return { html: juice(`${styleTags}${html}`), plainText };
 };
