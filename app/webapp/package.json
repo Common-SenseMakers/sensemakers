@@ -11,15 +11,18 @@
     "start": "export REACT_APP_VERSION=$(git rev-parse HEAD) && HOST=127.0.0.1 PORT=3000 craco start --config craco.config.js",
     "start-remote": "export REACT_APP_VERSION=$(git rev-parse HEAD) && FB_PROJECT=staging craco start --config craco.config.prod.js",
     "build": "export REACT_APP_VERSION=$(git rev-parse HEAD) && craco build --config craco.config.prod.js",
-    "build-local": "FB_PROJECT=staging yarn build",
+    "build-local": "FB_PROJECT=dev yarn build",
     "test": "craco test",
     "eject": "craco eject",
-    "test-functions": "FUNCTIONS_BASE=http://127.0.0.1:5001/sensenets-9ef26/us-central1 jest",
     "serve-build": "serve -s build -l 3000",
     "test-email-template": "craco start --config craco.config.test.js",
-    "build-email": "rm -rf ./build && craco build --config craco.config.email.bundle.js && yarn build-types && copy-email-static",
-    "build-types": "tsc -p tsconfig.dist.json",
+    "build-email": "yarn build-email-code && yarn build-email-types && yarn copy-email-static",
+    "build-email-code": "rm -rf ./build && craco build --config craco.config.email.bundle.js",
+    "build-email-types": "tsc -p tsconfig.dist.json",
     "copy-email-static": "cp ./build/**.* ./src/shared/emailRenderer"
+  },
+  "resolutions": {
+    "strip-ansi": "6.0.1"
   },
   "dependencies": {
     "@nanopub/sign": "^0.1.4",
@@ -60,7 +63,6 @@
     "react-router-dom": "^6.21.3",
     "react-scripts": "5.0.1",
     "siwe": "^2.3.2",
-    "strip-ansi-cjs": "^8.0.0",
     "styled-components": "^5.3.5",
     "twitter-api-v2": "^1.16.2",
     "typescript": "^4.9.5",

@@ -25,7 +25,7 @@ const DEBUG = false;
 export type SignerContextType = {
   connect: () => void;
   connectWeb3: () => void;
-  connectMagic: (openUI: boolean) => void;
+  connectMagic: (openUI: boolean, setLogginIn: boolean) => void;
   isConnectingMagic: boolean;
   errorConnecting: boolean;
   hasInjected: boolean;
@@ -65,20 +65,22 @@ export const SignerContext = (props: PropsWithChildren) => {
   }, [injectedSigner, magicSigner]);
 
   useEffect(() => {
-    magic.user.isLoggedIn().then((res) => {
-      if (DEBUG) console.log('Magic connection check done', { res });
+    if (!signer) {
+      magic.user.isLoggedIn().then((res) => {
+        if (DEBUG) console.log('Magic connection check done', { res });
 
-      if (res && !magicSigner) {
-        if (DEBUG) console.log('Autoconnecting Magic');
-        connectMagic(false);
-      } else {
-        if (overallLoginStatus === OverallLoginStatus.LogginIn) {
-          console.warn('Unexpected situation, resetting login status');
-          setOverallLoginStatus(OverallLoginStatus.LoggedOut);
+        if (res && !magicSigner) {
+          if (DEBUG) console.log('Autoconnecting Magic');
+          connectMagic(false, false);
+        } else {
+          if (overallLoginStatus === OverallLoginStatus.LogginIn) {
+            console.warn('Unexpected situation, resetting login status');
+            setOverallLoginStatus(OverallLoginStatus.LoggedOut);
+          }
         }
-      }
-    });
-  }, []);
+      });
+    }
+  }, [signer]);
 
   /** keep the address strictly linked to the signer */
   useEffect(() => {
@@ -112,26 +114,31 @@ export const SignerContext = (props: PropsWithChildren) => {
   const { disconnect: disconnectInjected } = useDisconnect();
 
   const connectMagic = useCallback(
-    (openUI: boolean) => {
-      if (DEBUG) console.log('connectMagic called');
-      setErrorConnecting(false);
-      setIsConnectingMagic(true);
+    (openUI: boolean, setLogginIn: boolean) => {
+      if (!signer) {
+        if (DEBUG) console.log('connectMagic called');
+        setErrorConnecting(false);
+        setIsConnectingMagic(true);
 
-      setOverallLoginStatus(OverallLoginStatus.LogginIn);
-      setLoginFlowState(LoginFlowState.ConnectingSigner);
+        if (setLogginIn) {
+          setOverallLoginStatus(OverallLoginStatus.LogginIn);
+        }
 
-      if (DEBUG) console.log('connecting magic signer', { signer });
-      createMagicSigner(openUI)
-        .then((signer) => {
-          if (DEBUG) console.log('connected magic signer', { signer });
+        setLoginFlowState(LoginFlowState.ConnectingSigner);
 
-          setIsConnectingMagic(false);
-          setMagicSigner(signer);
-        })
-        .catch((e) => {
-          setErrorConnecting(true);
-          setIsConnectingMagic(false);
-        });
+        if (DEBUG) console.log('connecting magic signer', { signer });
+        createMagicSigner(openUI)
+          .then((signer) => {
+            if (DEBUG) console.log('connected magic signer', { signer });
+
+            setIsConnectingMagic(false);
+            setMagicSigner(signer);
+          })
+          .catch((e) => {
+            setErrorConnecting(true);
+            setIsConnectingMagic(false);
+          });
+      }
     },
     [signer]
   );
@@ -170,7 +177,7 @@ export const SignerContext = (props: PropsWithChildren) => {
     if (hasInjected) {
       connectWeb3();
     } else {
-      connectMagic(true);
+      connectMagic(true, true);
     }
   }, [hasInjected, connectWeb3, connectMagic]);
 

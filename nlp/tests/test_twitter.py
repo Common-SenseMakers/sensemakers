@@ -1,9 +1,12 @@
 import sys
 from pathlib import Path
 
+
 ROOT = Path(__file__).parents[1]
 sys.path.append(str(ROOT))
 import pytest
+
+from desci_sense.shared_functions.utils import normalize_tweet_urls_in_text
 
 from desci_sense.shared_functions.dataloaders import (
     PostScrapeError,
@@ -110,6 +113,48 @@ def test_problem_tweet_i31():
         assert (
             tweet.has_refs() == label
         ), f"{case} has_refs? = {tweet.has_refs()} - mismatch with {label}"
+
+
+def test_normalize_single_twitter_url():
+    text = "Check out this tweet: https://twitter.com/user/status/1234567890"
+    expected = "Check out this tweet: https://x.com/user/status/1234567890"
+    assert normalize_tweet_urls_in_text(text) == expected
+
+
+def test_normalize_multiple_twitter_urls():
+    text = "First tweet: https://twitter.com/user1/status/1234567890 and second tweet: https://twitter.com/user2/status/0987654321"
+    expected = "First tweet: https://x.com/user1/status/1234567890 and second tweet: https://x.com/user2/status/0987654321"
+    assert normalize_tweet_urls_in_text(text) == expected
+
+
+def test_mixed_urls():
+    text = "Tweet: https://twitter.com/user/status/1234567890 and a non-Twitter URL: https://example.com/page"
+    expected = "Tweet: https://x.com/user/status/1234567890 and a non-Twitter URL: https://example.com/page"
+    assert normalize_tweet_urls_in_text(text) == expected
+
+
+def test_no_twitter_url():
+    text = "This text contains no Twitter URLs, only this: https://example.com/page"
+    expected = "This text contains no Twitter URLs, only this: https://example.com/page"
+    assert normalize_tweet_urls_in_text(text) == expected
+
+
+def test_empty_string():
+    text = ""
+    expected = ""
+    assert normalize_tweet_urls_in_text(text) == expected
+
+
+def test_url_with_http():
+    text = "Check out this tweet: http://twitter.com/user/status/1234567890"
+    expected = "Check out this tweet: https://x.com/user/status/1234567890"
+    assert normalize_tweet_urls_in_text(text) == expected
+
+
+def test_mixed_case_url():
+    text = "Check out this tweet: https://Twitter.com/user/status/1234567890"
+    expected = "Check out this tweet: https://x.com/user/status/1234567890"
+    assert normalize_tweet_urls_in_text(text) == expected
 
 
 if __name__ == "__main__":

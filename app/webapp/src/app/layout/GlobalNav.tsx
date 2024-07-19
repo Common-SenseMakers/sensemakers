@@ -1,6 +1,6 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
 import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Location, useLocation, useNavigate } from 'react-router-dom';
 
 import { AbsoluteRoutes, RouteNames } from '../../route.names';
 import { PostsQueryStatus } from '../../shared/types/types.posts';
@@ -12,35 +12,37 @@ import { SettignsIcon } from '../icons/SettingsIcon';
 
 const DEBUG = false;
 
+export const locationToPageIx = (location: Location) => {
+  if (DEBUG) console.log(location);
+
+  if (
+    location.pathname === '/' ||
+    location.pathname.startsWith(`/${PostsQueryStatus.ALL}`) ||
+    location.pathname.startsWith(`/${PostsQueryStatus.IGNORED}`) ||
+    location.pathname.startsWith(`/${PostsQueryStatus.PENDING}`)
+  ) {
+    return 0;
+  }
+
+  if (location.pathname.startsWith(`/${PostsQueryStatus.PUBLISHED}`)) {
+    return 1;
+  }
+
+  if (location.pathname.startsWith(`/${RouteNames.Profile}`)) {
+    return 2;
+  }
+
+  if (location.pathname.startsWith(`/${RouteNames.Settings}`)) {
+    return 3;
+  }
+};
+
 export const GlobalNav = (props: {}) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { constants } = useThemeContext();
 
-  const pageIx = (() => {
-    if (DEBUG) console.log(location);
-
-    if (
-      location.pathname === '/' ||
-      location.pathname.startsWith(`/${PostsQueryStatus.ALL}`) ||
-      location.pathname.startsWith(`/${PostsQueryStatus.IGNORED}`) ||
-      location.pathname.startsWith(`/${PostsQueryStatus.PENDING}`)
-    ) {
-      return 0;
-    }
-
-    if (location.pathname.startsWith(`/${PostsQueryStatus.PUBLISHED}`)) {
-      return 1;
-    }
-
-    if (location.pathname.startsWith(`/${RouteNames.Profile}`)) {
-      return 2;
-    }
-
-    if (location.pathname.startsWith(`/${RouteNames.Settings}`)) {
-      return 3;
-    }
-  })();
+  const pageIx = locationToPageIx(location);
 
   const button = (
     text: string,

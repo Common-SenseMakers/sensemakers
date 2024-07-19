@@ -57,8 +57,6 @@ def test_i99():
 
 from urllib.parse import urlparse
 
-from url_normalize import url_normalize
-
 
 def identify_social_media(url):
     """

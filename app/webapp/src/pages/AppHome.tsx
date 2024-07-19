@@ -1,12 +1,5 @@
-import { Box, Text } from 'grommet';
-import { t } from 'i18next';
-import { Trans } from 'react-i18next';
-
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
-import { I18Keys } from '../i18n/i18n';
-import { AppButton, AppHeading, AppModal, AppSubtitle } from '../ui-components';
-import { AppParagraph } from '../ui-components/AppParagraph';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { UserHome } from '../user-home/UserHome';
 import { ConnectSocialsPage } from '../user-login/ConnectSocialsPage';

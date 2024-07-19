@@ -11,7 +11,7 @@ sys.path.append(str(ROOT))
 import os
 import pytest
 from pydantic import ValidationError
-
+from rdflib import URIRef, Literal, Graph
 from utils import create_multi_chain_for_tests, create_multi_config_for_tests
 from desci_sense.shared_functions.parsers.multi_chain_parser import MultiChainParser
 from desci_sense.shared_functions.filters import SciFilterClassfication
@@ -27,9 +27,16 @@ from desci_sense.shared_functions.configs import (
     ParserChainType,
     PostProcessType,
 )  # Adjust the import as necessary
+from desci_sense.shared_functions.postprocessing import (
+    convert_item_types_to_rdf_triplets,
+)
 from desci_sense.shared_functions.dataloaders import (
     scrape_post,
     convert_text_to_ref_post,
+)
+from desci_sense.shared_functions.interface import (
+    RDFTriplet,
+    ZoteroItemTypeDefinition,
 )
 
 TEST_POST_TEXT_W_REF = """
@@ -56,6 +63,16 @@ def test_firebase_pp():
     res = mcp.process_text(TEST_POST_TEXT_W_REF)
     len(res.support.refs_meta) == 1
     assert res.filter_classification == SciFilterClassfication.CITOID_DETECTED_RESEARCH
+    # check item types
+    expected = [
+        RDFTriplet(
+            subject=URIRef("https://arxiv.org/abs/2402.04607"),
+            predicate=URIRef(ZoteroItemTypeDefinition().uri),
+            object=Literal("preprint"),
+        ),
+    ]
+    for triplet in expected:
+        assert (triplet.subject, triplet.predicate, triplet.object) in res.semantics
 
 
 def test_multi_chain_batch_pp_simple():
@@ -110,18 +127,71 @@ def test_multi_chain_batch_pp_combined():
     )
 
 
-if __name__ == "__main__":
-    # get a few posts for input
-    urls = [
-        "https://mastodon.social/@psmaldino@qoto.org/111405098400404613",
-        "https://mastodon.social/@UlrikeHahn@fediscience.org/111732713776994953",
-        "https://mastodon.social/@ronent/111687038322549430",
+def test_convert_item_types_to_rdf_triplets_single_entry():
+    item_types = ["preprint"]
+    reference_urls = ["https://arxiv.org/abs/2402.04607"]
+    result = convert_item_types_to_rdf_triplets(item_types, reference_urls)
+
+    expected = [
+        RDFTriplet(
+            subject=URIRef("https://arxiv.org/abs/2402.04607"),
+            predicate=URIRef(ZoteroItemTypeDefinition().uri),
+            object=Literal("preprint"),
+        )
     ]
-    posts = [scrape_post(url) for url in urls]
-    multi_config = create_multi_config_for_tests(llm_type="google/gemma-7b-it")
-    multi_chain_parser = MultiChainParser(multi_config)
-    multi_chain_parser.config.post_process_type = PostProcessType.FIREBASE
-    res = multi_chain_parser.batch_process_ref_posts(posts)
+
+    assert len(result) == len(expected)
+    for res, exp in zip(result, expected):
+        assert res.subject == exp.subject
+        assert res.predicate == exp.predicate
+        assert res.object == exp.object
+
+
+def test_convert_item_types_to_rdf_triplets_multiple_entries():
+    item_types = ["journalArticle", "book"]
+    reference_urls = ["https://example.com/article1", "https://example.com/book1"]
+    result = convert_item_types_to_rdf_triplets(item_types, reference_urls)
+
+    expected = [
+        RDFTriplet(
+            subject=URIRef("https://example.com/article1"),
+            predicate=URIRef(ZoteroItemTypeDefinition().uri),
+            object=Literal("journalArticle"),
+        ),
+        RDFTriplet(
+            subject=URIRef("https://example.com/book1"),
+            predicate=URIRef(ZoteroItemTypeDefinition().uri),
+            object=Literal("book"),
+        ),
+    ]
+
+    assert len(result) == len(expected)
+    for res, exp in zip(result, expected):
+        assert res.subject == exp.subject
+        assert res.predicate == exp.predicate
+        assert res.object == exp.object
+
+
+def test_convert_item_types_to_rdf_triplets_empty():
+    item_types = []
+    reference_urls = []
+    result = convert_item_types_to_rdf_triplets(item_types, reference_urls)
+    assert result == []
+
+
+def test_convert_item_types_to_rdf_triplets_mismatched_lengths():
+    item_types = ["preprint", "book"]
+    reference_urls = ["https://arxiv.org/abs/2402.04607"]
+
+    with pytest.raises(AssertionError):
+        convert_item_types_to_rdf_triplets(item_types, reference_urls)
+
+
+if __name__ == "__main__":
+    multi_config = create_multi_config_for_tests()
+    multi_config.post_process_type = PostProcessType.COMBINED
+    mcp = MultiChainParser(multi_config)
+    res = mcp.process_text(TEST_POST_TEXT_W_REF)
 
     # len(res.support.refs_meta) == 1
     # assert "test" in mcp.pparsers

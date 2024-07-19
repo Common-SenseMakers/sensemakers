@@ -48,6 +48,7 @@ export enum I18Keys {
 
   ignore = 's031',
   publish = 's030',
+  postsNames = 's032xc',
 
   connectOrcidTitle = 's032',
   connectOrcidPar01 = 's033',
@@ -169,6 +170,7 @@ const translationENG: Record<I18Keys, string> = {
 
   [I18Keys.ignore]: 'Ignore',
   [I18Keys.publish]: 'Nanopublish',
+  [I18Keys.postsNames]: 'Nanopubs',
 
   [I18Keys.connectOrcidTitle]: 'Your data, your identity',
   [I18Keys.connectOrcidPar01]:

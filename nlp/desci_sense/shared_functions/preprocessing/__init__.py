@@ -287,17 +287,24 @@ def preproc_parser_input(parser_input: ParserInput) -> PreprocParserInput:
     """
     orig_thread = parser_input.thread_post
     new_thread = trim_thread_by_length(orig_thread, parser_input.max_chars)
+    included_urls = new_thread.md_ref_urls()
 
     # get reference urls from trimmed posts
-    # TODO handle urls possibly trimmed from trimmed post (currently will be ignored!)
     excluded_urls = []
     num_posts_after_trim = len(new_thread.posts)
-    excluded_posts = orig_thread.posts[num_posts_after_trim:]
+
+    # (num_posts_after_trim - 1) to handle urls possibly trimmed from trimmed post
+    excluded_posts = orig_thread.posts[(num_posts_after_trim - 1) :]
     for p in excluded_posts:
-        excluded_urls += p.md_ref_urls()
+        potential_excluded_urls = p.md_ref_urls()
+        excluded_urls += [
+            url for url in potential_excluded_urls if url not in included_urls
+        ]
 
     # remove dups
     excluded_urls = remove_dups_ordered(excluded_urls)
+
+    assert set(included_urls + excluded_urls) == set(orig_thread.md_ref_urls())
 
     preprocessed_input = PreprocParserInput(
         post_to_parse=new_thread,

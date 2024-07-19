@@ -31,7 +31,7 @@ export const AppWelcome = (props: {}) => {
             primary
             disabled={isConnectingMagic}
             label={t(I18Keys.emailInputBtn)}
-            onClick={() => connectMagic(true)}></AppButton>
+            onClick={() => connectMagic(true, true)}></AppButton>
         </>
       );
     } else {

@@ -7,6 +7,7 @@ import { useServiceWorker } from '../app/ServiceWorkerContext';
 import { useToastContext } from '../app/ToastsContext';
 import { FilterIcon } from '../app/icons/FilterIcon';
 import { ReloadIcon } from '../app/icons/ReloadIcon';
+import { locationToPageIx } from '../app/layout/GlobalNav';
 import { ViewportPageScrollContext } from '../app/layout/Viewport';
 import { I18Keys } from '../i18n/i18n';
 import { PostCard } from '../post/PostCard';
@@ -59,6 +60,16 @@ export const UserHome = () => {
 
   const { isAtBottom } = useContext(ViewportPageScrollContext);
   const location = useLocation();
+
+  const pageIx = locationToPageIx(location);
+  const pageTitle = (() => {
+    if (pageIx === 0) {
+      return t(I18Keys.drafts);
+    }
+    if (pageIx === 1) {
+      return t(I18Keys.postsNames);
+    }
+  })();
 
   useEffect(() => {
     if (isAtBottom && !isLoading && moreToFetch) {
@@ -272,7 +283,7 @@ export const UserHome = () => {
       {updater}
       <Box direction="row" justify="between" align="center">
         <Box direction="row" align="center" gap="12px">
-          <AppHeading level="3">{t(I18Keys.drafts)}</AppHeading>
+          <AppHeading level="3">{pageTitle}</AppHeading>
           <Box>{reload}</Box>
         </Box>
         <Box>{menu}</Box>

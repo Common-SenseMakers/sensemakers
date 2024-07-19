@@ -20,7 +20,7 @@
       "request": "launch",
       "name": "craco-build",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run-script", "build"],
+      "runtimeArgs": ["run-script", "build-local"],
       "port": 9229,
       "timeout": 30000,
       "skipFiles": ["<node_internals>/**"],
