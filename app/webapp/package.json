@@ -21,6 +21,9 @@
     "build-types": "tsc -p tsconfig.dist.json",
     "copy-email-static": "cp ./build/**.* ./src/shared/emailRenderer"
   },
+  "resolutions": {
+    "strip-ansi": "6.0.1"
+  },
   "dependencies": {
     "@nanopub/sign": "^0.1.4",
     "@nytimes/react-prosemirror": "^0.5.0",
@@ -59,7 +62,6 @@
     "react-router-dom": "^6.21.3",
     "react-scripts": "5.0.1",
     "siwe": "^2.3.2",
-    "strip-ansi-cjs": "^8.0.0",
     "styled-components": "^5.3.5",
     "twitter-api-v2": "^1.16.2",
     "typescript": "^4.9.5",
