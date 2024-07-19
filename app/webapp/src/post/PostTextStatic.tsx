@@ -13,6 +13,7 @@ export const PostTextStatic = (props: {
 
   return (
     <div
+      className="editor"
       style={{ overflow: 'hidden' }}
       dangerouslySetInnerHTML={{ __html: textToHtml(text) }}
     />

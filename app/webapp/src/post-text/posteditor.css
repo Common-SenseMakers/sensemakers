@@ -9,6 +9,10 @@
   line-height: 24px; /* 150% */
 }
 
+.editor a {
+  color: #337fbd;
+}
+
 .editor p {
   margin: 0.5em 0px;
 }
