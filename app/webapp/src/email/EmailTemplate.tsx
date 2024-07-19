@@ -158,13 +158,23 @@ export function EmailTemplate(props: {
             </Box>
           </>
         )}
-        <Box margin={{ top: 'medium' }} width={{ max: '800px' }}>
+        <Box
+          align="center"
+          justify="center"
+          margin={{ top: 'medium' }}
+          width={{ max: '800px' }}>
           <Text
             size="small"
             margin={{
               top: 'medium',
             }}>
             {footer}
+          </Text>
+          <Text size="small" margin={{ top: 'medium' }}>
+            {t(I18Keys.copyright)}
+          </Text>
+          <Text weight="bold" size="small" margin={{ top: 'medium' }}>
+            sensenets
           </Text>
         </Box>
       </Box>

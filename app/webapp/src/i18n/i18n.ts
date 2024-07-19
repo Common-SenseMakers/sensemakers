@@ -99,6 +99,8 @@ export enum I18Keys {
   emailMorePostsNote = 's052',
   emailMorePostsNoteSingular = 's052_one',
   emailMorePostsNotePlural = 's052_other',
+
+  copyright = 's053',
 }
 
 const check = new Set();
@@ -227,6 +229,8 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.emailMorePostsNote]: '',
   [I18Keys.emailMorePostsNoteSingular]: '+{{count}} more post',
   [I18Keys.emailMorePostsNotePlural]: '+{{count}} more posts',
+
+  [I18Keys.copyright]: 'Copyright © 2024',
 };
 
 i18n.use(initReactI18next).init({
