@@ -62,8 +62,9 @@ export const NANOPUBS_PUBLISH_SERVERS_STR = envRuntime.NANOPUBS_PUBLISH_SERVERS;
 
 export const QUIET_SIGNUP_PERIOD = 5 * 60 * 1000; // 5 minutes
 export const AUTOFETCH_PERIOD = 'every 5 minutes';
-export const DAILY_NOTIFICATION_PERIOD = 'every day 00:00';
-export const WEEKLY_NOTIFICATION_PERIOD = 'every monday 00:00';
+
+export const DAILY_NOTIFICATION_PERIOD = 'every day 18:00';
+export const WEEKLY_NOTIFICATION_PERIOD = 'every monday 18:00';
 export const MONTHLY_NOTIFICATION_PERIOD = '0 0 1 * *';
 export const FETCH_RATE_LIMIT_MS = envRuntime.FETCH_RATE_LIMIT_MS;
 

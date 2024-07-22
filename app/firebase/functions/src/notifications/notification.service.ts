@@ -76,8 +76,23 @@ export class NotificationService {
   /** Aggregates all pending notifications of a user and sends them as an email */
   async notifyUser(userId: string) {
     await this.db.run(async (manager) => {
+      if (DEBUG) {
+        logger.debug(
+          `notifyUser ${userId} - getting user`,
+          { userId },
+          DEBUG_PREFIX
+        );
+      }
       const user = await this.usersRepo.getUser(userId, manager, true);
       const settings = user.settings;
+
+      if (DEBUG) {
+        logger.debug(
+          `notifyUser ${userId} - user got, getting pending notifications`,
+          { user },
+          DEBUG_PREFIX
+        );
+      }
 
       /** get pending notificatations */
       const pendingIds = await this.notificationsRepo.getUnotifiedOfUser(
@@ -86,7 +101,7 @@ export class NotificationService {
       );
 
       if (DEBUG) {
-        logger.debug(`notifyUser ${userId}`, { pendingIds }, DEBUG_PREFIX);
+        logger.debug(`pending got ${userId}`, { pendingIds }, DEBUG_PREFIX);
       }
 
       const pendingNotifications = await Promise.all(
@@ -147,9 +162,17 @@ export class NotificationService {
       }
 
       await Promise.all(
-        pendingNotifications.map((n) =>
-          this.notificationsRepo.markAsNotified(userId, n.id, manager)
-        )
+        pendingNotifications.map(async (n) => {
+          if (DEBUG) {
+            logger.debug(
+              `notifyUser ${userId} - markAsNotified`,
+              { n, userId },
+              DEBUG_PREFIX
+            );
+          }
+
+          return this.notificationsRepo.markAsNotified(userId, n.id, manager);
+        })
       );
     });
   }
