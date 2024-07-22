@@ -20,7 +20,7 @@ import { UsersRepository } from '../../users/users.repository';
 import { TwitterApiCredentials } from './twitter.service';
 import { handleTwitterError } from './twitter.utils';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export type GetClientResultInternal<T extends 'read' | 'write' = 'read'> =
   T extends 'read'
@@ -317,7 +317,6 @@ export class TwitterServiceClient {
       'user.fields': ['profile_image_url', 'name', 'username'],
     };
     const { data: user } = await result.client.v2.me(profileParams);
-    if (DEBUG) logger.debug('handleSignupData', user);
 
     if (!result.refreshToken) {
       throw new Error('Unexpected undefined refresh token');
@@ -333,6 +332,8 @@ export class TwitterServiceClient {
       expiresIn: result.expiresIn,
       expiresAtMs: this.time.now() + result.expiresIn * 1000,
     };
+
+    if (DEBUG) logger.debug('handleSignupData', { user, credentials });
 
     const twitter: TwitterUserDetails = {
       user_id: user.id,
