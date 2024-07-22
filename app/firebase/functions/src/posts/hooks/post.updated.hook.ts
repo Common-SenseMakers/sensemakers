@@ -10,7 +10,7 @@ import {
   AppPostRepublishedStatus,
 } from '../../@shared/types/types.posts';
 import { logger } from '../../instances/logger';
-import { createServices } from '../../instances/services';
+import { Services } from '../../instances/services';
 import { enqueueTask } from '../../tasksUtils/tasks.support';
 import { UsersHelper } from '../../users/users.helper';
 import { AUTOPOST_POST_TASK } from '../tasks/posts.autopost.task';
@@ -19,10 +19,14 @@ import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 const PREFIX = 'POST-UPDATED-HOOK';
 
 // TODO: change interface to receive post as the after value and also send the previous one
-export const postUpdatedHook = async (post: AppPost, postBefore?: AppPost) => {
+export const postUpdatedHook = async (
+  post: AppPost,
+  services: Services,
+  postBefore?: AppPost
+) => {
   const postId = post.id;
 
-  const { db, time, activity, users } = createServices();
+  const { db, time, activity, users } = services;
 
   /** Frontend watcher to react to changes in real-time */
   const updateRef = db.collections.updates.doc(`post-${postId}`);

@@ -1,6 +1,7 @@
 import { NanopubUserDetails } from './types.nanopubs';
 import { NotificationFreq } from './types.notifications';
 import { OrcidUserDetails } from './types.orcid';
+import { AppPostFull } from './types.posts';
 import { TwitterUserDetails } from './types.twitter';
 
 /** Support types */
@@ -97,14 +98,13 @@ export type UserSettingsUpdate = Partial<UserSettings>;
 
 export interface EmailDetails {
   email: string;
-  verified: boolean;
-  token: string;
-  expire: number;
+  source: 'MAGIC';
 }
 
 export interface UserWithSettings {
   settings: UserSettings;
   email?: EmailDetails;
+  signupDate: number;
 }
 
 /**
@@ -148,8 +148,6 @@ export interface UserPlatformProfile {
   profile: any;
 }
 
-export const EMAIL_VERIFY_TOKEN_NAME = 'verifyEmailToken';
-
 /** Test users support for mocks and tests */
 export interface TestUserCredentials {
   userId: string;
@@ -172,3 +170,10 @@ export interface OrcidAccountCredentials {
 export interface NanopubAccountCredentials {
   ethPrivateKey: HexStr;
 }
+
+export type RenderEmailFunction = (
+  posts: AppPostFull[],
+  notificationFrequency: NotificationFreq,
+  autopostOption: AutopostOption,
+  appUrl: string
+) => { html: string; plainText: string };

@@ -40,6 +40,10 @@ export const TweetAnchor = (props: {
     return <LoadingDiv></LoadingDiv>;
   }
 
+  if (!props.thread.tweets) {
+    throw new Error('Thread has no tweets');
+  }
+
   const threadId = props.thread.conversation_id;
   const label =
     props.thread.tweets.length > 1 ? t(I18Keys.ThreadX) : t(I18Keys.TweetX);

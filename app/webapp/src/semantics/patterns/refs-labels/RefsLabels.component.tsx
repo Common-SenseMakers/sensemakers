@@ -4,6 +4,8 @@ import { useMemo } from 'react';
 
 import { filterStore, writeRDF } from '../../../shared/utils/n3.utils';
 import { THIS_POST_NAME } from '../../../shared/utils/semantics.helper';
+import { AppLabel } from '../../../ui-components';
+import { splitArray } from '../../../ui-components/utils';
 import { useSemanticsStore } from '../common/use.semantics';
 import { PatternProps } from '../patterns';
 import { RefWithLabels } from './RefLabel';
@@ -11,6 +13,7 @@ import { RefsMap, processSemantics } from './process.semantics';
 
 export const RefLabelsComponent = (props: PatternProps) => {
   const { store, originalStore } = useSemanticsStore(props);
+  const size = props.size || 'normal  ';
 
   /** processed ref labels with metadata */
   const refs = useMemo<RefsMap>(
@@ -67,34 +70,47 @@ export const RefLabelsComponent = (props: PatternProps) => {
     return <></>;
   }
 
+  const allRefs = Array.from(refs.entries()).reverse();
+  const [visibleRefs, restOfRefs] =
+    size === 'compact' ? splitArray(allRefs, 2) : [allRefs, []];
+
   if (refs && refs.size > 0) {
     return (
       <Box margin={{ top: 'small' }}>
         <Box style={{ display: 'block' }}>
           <Box gap="large">
-            {Array.from(refs.entries())
-              .reverse()
-              .map(([ref, refData], ixref) => {
-                if (!props.originalParsed)
-                  throw new Error('Undexpected undefined');
+            {visibleRefs.map(([ref, refData], ixref) => {
+              if (!props.originalParsed)
+                throw new Error('Undexpected undefined');
 
-                return (
-                  <RefWithLabels
-                    ix={ixref}
-                    editable={props.editable}
-                    key={ixref}
-                    refUrl={ref}
-                    refData={refData}
-                    support={props.originalParsed?.support}
-                    removeLabel={(labelUri: string) =>
-                      removeLabel(ref, labelUri)
-                    }
-                    addLabel={(labelUri: string) =>
-                      addLabel(ref, labelUri)
-                    }></RefWithLabels>
-                );
-              })}
+              return (
+                <RefWithLabels
+                  ix={ixref}
+                  editable={props.editable}
+                  key={ixref}
+                  refUrl={ref}
+                  refData={refData}
+                  support={props.originalParsed?.support}
+                  removeLabel={(labelUri: string) => removeLabel(ref, labelUri)}
+                  addLabel={(labelUri: string) =>
+                    addLabel(ref, labelUri)
+                  }></RefWithLabels>
+              );
+            })}
           </Box>
+          {restOfRefs.length > 0 && (
+            <AppLabel
+              margin={{ top: '16px' }}
+              colors={{
+                font: '#6B7280',
+                background: 'transparent',
+                border: 'transparent',
+              }}
+              style={{
+                borderRadius: '4px',
+                border: 'none',
+              }}>{`+ ${restOfRefs.length} Reference${restOfRefs.length > 1 ? 's' : ''}`}</AppLabel>
+          )}
         </Box>
       </Box>
     );

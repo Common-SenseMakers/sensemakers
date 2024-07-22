@@ -1,6 +1,5 @@
-import { createServices } from '../instances/services';
+import { Services } from '../instances/services';
 
-export async function fetchNewPosts() {
-  const { postsManager } = createServices();
-  await postsManager.fetchAll();
+export async function fetchNewPosts(services: Services) {
+  await services.postsManager.fetchAll();
 }

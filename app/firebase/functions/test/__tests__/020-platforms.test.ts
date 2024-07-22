@@ -24,12 +24,12 @@ import {
 import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
-describe.skip('02-platforms', () => {
+describe('02-platforms', () => {
   let rsaKeys: RSAKeys | undefined;
   let user: AppUser | undefined;
 
   const services = getTestServices({
-    time: 'real',
+    time: 'mock',
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',

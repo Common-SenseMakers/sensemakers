@@ -17,7 +17,7 @@ const PAGE_SIZE = 5;
 const DEBUG = false;
 
 export const usePostsFetch = () => {
-  const { connectedUser } = useAccountContext();
+  const { connectedUser, twitterProfile } = useAccountContext();
 
   const appFetch = useAppFetch();
   const { status } = useQueryFilter();
@@ -149,7 +149,7 @@ export const usePostsFetch = () => {
 
   /** first data fill happens everytime the posts are empty and the firstFetched is false */
   useEffect(() => {
-    if (posts.length === 0 && !fetchedOlderFirst && connectedUser) {
+    if (posts.length === 0 && !fetchedOlderFirst && twitterProfile) {
       if (DEBUG) console.log('first fetch older');
       _fetchOlder(undefined);
     }

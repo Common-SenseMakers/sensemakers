@@ -5,46 +5,75 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { useSearchParams } from 'react-router-dom';
 
-import { _appFetch, useAppFetch } from '../../api/app.fetch';
+import { _appFetch } from '../../api/app.fetch';
+import { OrcidUserProfile } from '../../shared/types/types.orcid';
 import { TwitterUserProfile } from '../../shared/types/types.twitter';
 import {
   AppUserRead,
   EmailDetails,
   PLATFORM,
 } from '../../shared/types/types.user';
+import { usePersist } from '../../utils/use.persist';
 import { getAccount } from '../user.helper';
-import { LS_TWITTER_CONTEXT_KEY } from './platforms/TwitterContext';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const OUR_TOKEN_NAME = 'ourToken';
+export const LOGIN_STATUS = 'loginStatus';
+export const TWITTER_LOGIN_STATUS = 'twitterLoginStatus';
 
 export type AccountContextType = {
   connectedUser?: AppUserRead;
-  hasTriedFetchingUser: boolean;
   isConnected: boolean;
   twitterProfile?: TwitterUserProfile;
   email?: EmailDetails;
-  setEmail: (email: string) => void;
-  isSettingEmail: boolean;
   disconnect: () => void;
   refresh: () => void;
   token?: string;
   setToken: (token: string) => void;
-  setLoginStatus: (status: LoginStatus) => void;
-  loginStatus: LoginStatus;
+  setOverallLoginStatus: (status: OverallLoginStatus) => void;
+  overallLoginStatus: OverallLoginStatus | undefined;
+  setLoginFlowState: (status: LoginFlowState) => void;
+  loginFlowState: LoginFlowState;
+  setTwitterConnectedStatus: (status: TwitterConnectedStatus) => void;
+  twitterConnectedStatus: TwitterConnectedStatus | undefined;
+  orcidProfile?: OrcidUserProfile;
 };
 
 const AccountContextValue = createContext<AccountContextType | undefined>(
   undefined
 );
 
-export enum LoginStatus {
+/** explicit status of the login/signup process */
+export enum LoginFlowState {
+  Idle = 'Idle',
+  ConnectingSigner = 'ConnectingSigner',
+  ComputingAddress = 'ComputingAddress',
+  ComputingRSAKeys = 'ComputingsRSAKeys',
+  CreatingEthSignature = 'CreatingEthSignature',
+  SignningUpNanopub = 'SignningUpNanopub',
+  RegisteringEmail = 'RegisteringEmail',
+  ConnectingTwitter = 'ConnectingTwitter',
+  BasicLoggedIn = 'BasicLoggedIn',
+  Disconnecting = 'Disconnecting',
+}
+
+/** higher level status of the login flow. Persisted in localStorage helps
+ * make sense of the LoginFlowState on different situations
+ */
+export enum OverallLoginStatus {
+  NotKnown = 'NotKnown', // init value before we check localStorage
   LoggedOut = 'LoggedOut',
-  LoggingIn = 'LoggingIn',
-  LoggedIn = 'LoggedIn',
+  LogginIn = 'LogginIn',
+  PartialLoggedIn = 'PartialLoggedIn',
+  FullyLoggedIn = 'FullyLoggedIn',
+}
+
+export enum TwitterConnectedStatus {
+  Disconnected = 'Disconnected',
+  Connecting = 'Connecting',
+  Connected = 'Connected',
 }
 
 /**
@@ -55,109 +84,126 @@ export enum LoginStatus {
  */
 export const AccountContext = (props: PropsWithChildren) => {
   const [connectedUser, setConnectedUser] = useState<AppUserRead | null>();
-  const [hasTriedFetchingUser, setHasTriedFetchingUser] =
-    useState<boolean>(false);
 
-  const _token = localStorage.getItem(OUR_TOKEN_NAME);
-  const _twitterContext = localStorage.getItem(LS_TWITTER_CONTEXT_KEY);
-  const [token, setToken] = useState<string | undefined>(
-    _token ? _token : undefined
+  const [loginFlowState, _setLoginFlowState] = useState<LoginFlowState>(
+    LoginFlowState.Idle
   );
 
-  const [loginStatus, setLoginStatus] = useState<LoginStatus>(
-    _token || _twitterContext ? LoginStatus.LoggingIn : LoginStatus.LoggedOut
-  );
+  const [token, setToken] = usePersist<string>(OUR_TOKEN_NAME, null);
+  const [overallLoginStatus, _setOverallLoginStatus] =
+    usePersist<OverallLoginStatus>(LOGIN_STATUS, OverallLoginStatus.NotKnown);
 
-  const [isSettingEmail, setIsSettingEmail] = useState<boolean>(false);
+  const [twitterConnectedStatus, setTwitterConnectedStatus] =
+    usePersist<TwitterConnectedStatus>(
+      TWITTER_LOGIN_STATUS,
+      TwitterConnectedStatus.Disconnected
+    );
 
-  const checkToken = () => {
-    const _token = localStorage.getItem(OUR_TOKEN_NAME);
+  /** keep the conneccted user linkted to the current token */
+  useEffect(() => {
+    refresh();
+  }, [token]);
 
-    if (_token !== null) {
-      if (DEBUG) console.log('tokend found in localstorage');
-      setToken(_token);
-    } else {
-      setToken(undefined);
-      setConnectedUser(null);
-    }
+  const setOverallLoginStatus = (status: OverallLoginStatus) => {
+    if (DEBUG) console.log('setOverallLoginStatus', status);
+    _setOverallLoginStatus(status);
+  };
+
+  const setLoginFlowState = (status: LoginFlowState) => {
+    if (DEBUG) console.log('setLoginFlowState', status);
+    _setLoginFlowState(status);
   };
 
   const refresh = async () => {
     try {
       if (token) {
-        setLoginStatus(LoginStatus.LoggingIn);
+        if (DEBUG) console.log('getting me', { token });
         const user = await _appFetch<AppUserRead>('/api/auth/me', {}, token);
-        setLoginStatus(LoginStatus.LoggedIn);
-        if (DEBUG) console.log('got connected user', { user });
+        if (DEBUG) console.log('got connected user me', { user });
         setConnectedUser(user);
-        setHasTriedFetchingUser(true);
       } else {
+        if (DEBUG) console.log('setting connected user as null');
         setConnectedUser(null);
-        if (loginStatus === LoginStatus.LoggedIn)
-          setLoginStatus(LoginStatus.LoggedOut);
       }
     } catch (e) {
-      disconnect();
-      setLoginStatus(LoginStatus.LoggedOut);
+      setToken(null);
     }
   };
 
-  const setEmail = async (email: string) => {
-    if (token) {
-      setIsSettingEmail(true);
-      _appFetch<AppUserRead>('/api/auth/setEmail', { email }, token)
-        .then(() => {
-          setIsSettingEmail(false);
-          refresh();
-        })
-        .catch((e) => {
-          console.error(e);
-          setIsSettingEmail(false);
-        });
-    }
-  };
-
+  /** logged in status is strictly linked to the connected user,
+   * this should be the only place on the app where the status is set to loggedIn
+   */
   useEffect(() => {
-    checkToken();
-  }, []);
+    if (DEBUG)
+      console.log('connectedUser', {
+        connectedUser,
+        overallLoginStatus,
+        twitter: connectedUser?.email,
+      });
 
-  useEffect(() => {
-    if (token) {
-      localStorage.setItem(OUR_TOKEN_NAME, token);
+    if (connectedUser && connectedUser.email && !twitterProfile) {
+      setOverallLoginStatus(OverallLoginStatus.PartialLoggedIn);
+      return;
     }
-    refresh();
-  }, [token]);
+
+    if (
+      connectedUser &&
+      connectedUser.email &&
+      twitterProfile &&
+      loginFlowState !== LoginFlowState.Disconnecting
+    ) {
+      setTwitterConnectedStatus(TwitterConnectedStatus.Connected);
+      setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
+      return;
+    }
+
+    if (overallLoginStatus === OverallLoginStatus.NotKnown) {
+      setOverallLoginStatus(OverallLoginStatus.LoggedOut);
+      return;
+    }
+
+    if (
+      !token &&
+      !connectedUser &&
+      overallLoginStatus !== OverallLoginStatus.LogginIn
+    ) {
+      setOverallLoginStatus(OverallLoginStatus.LoggedOut);
+    }
+  }, [connectedUser, overallLoginStatus, token]);
 
   const disconnect = () => {
-    if (DEBUG) console.log('disconnecting');
-    localStorage.removeItem(OUR_TOKEN_NAME);
-    checkToken();
+    setConnectedUser(undefined);
+    setToken(null);
   };
 
   const twitterProfile = connectedUser
     ? getAccount(connectedUser, PLATFORM.Twitter)?.profile
     : undefined;
 
-  const email = connectedUser ? connectedUser.email : undefined;
+  const orcidProfile = connectedUser
+    ? getAccount(connectedUser, PLATFORM.Orcid)?.profile
+    : undefined;
 
-  console.log({ email, connectedUser });
+  const email = connectedUser ? connectedUser.email : undefined;
 
   return (
     <AccountContextValue.Provider
       value={{
         connectedUser: connectedUser === null ? undefined : connectedUser,
-        hasTriedFetchingUser,
         twitterProfile,
         email,
-        setEmail,
-        isSettingEmail,
         isConnected: connectedUser !== undefined && connectedUser !== null,
         disconnect,
         refresh,
         token,
         setToken,
-        setLoginStatus,
-        loginStatus,
+        setOverallLoginStatus,
+        overallLoginStatus,
+        loginFlowState,
+        setLoginFlowState,
+        setTwitterConnectedStatus,
+        twitterConnectedStatus,
+        orcidProfile,
       }}>
       {props.children}
     </AccountContextValue.Provider>

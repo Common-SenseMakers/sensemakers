@@ -27,6 +27,7 @@ import { envDeploy } from './config/typedenv.deploy';
 import { envRuntime } from './config/typedenv.runtime';
 import { getServices } from './controllers.utils';
 import { buildApp } from './instances/app';
+import { logger } from './instances/logger';
 import { createServices } from './instances/services';
 import {
   NOTIFY_USER_TASK,
@@ -55,6 +56,7 @@ const secrets = [
   envRuntime.TWITTER_CLIENT_SECRET,
   envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
   envRuntime.EMAIL_CLIENT_SECRET,
+  envRuntime.MAGIC_ADMIN_SECRET,
 ];
 
 // import { fetchNewPosts } from './posts/posts.job';
@@ -76,7 +78,7 @@ exports.accountFetch = onSchedule(
     schedule: AUTOFETCH_PERIOD,
     secrets,
   },
-  triggerAutofetchPosts
+  () => triggerAutofetchPosts(createServices())
 );
 
 exports.sendDailyNotifications = onSchedule(
@@ -111,7 +113,7 @@ exports[PARSE_POST_TASK] = onTaskDispatched(
     minInstances: envDeploy.CONFIG_MININSTANCE,
     secrets,
   },
-  parsePostTask
+  (req) => parsePostTask(req, createServices())
 );
 
 exports[AUTOFETCH_POSTS_TASK] = onTaskDispatched(
@@ -120,9 +122,12 @@ exports[AUTOFETCH_POSTS_TASK] = onTaskDispatched(
     memory: envDeploy.CONFIG_MEMORY,
     minInstances: envDeploy.CONFIG_MININSTANCE,
     secrets,
+    retryConfig: {
+      maxAttempts: 1,
+    },
   },
   async (req) => {
-    void (await autofetchUserPosts(req));
+    void (await autofetchUserPosts(req, createServices()));
   }
 );
 
@@ -133,7 +138,7 @@ exports[AUTOPOST_POST_TASK] = onTaskDispatched(
     minInstances: envDeploy.CONFIG_MININSTANCE,
     secrets,
   },
-  autopostPostTask
+  (req) => autopostPostTask(req, createServices())
 );
 
 exports[NOTIFY_USER_TASK] = onTaskDispatched(
@@ -198,7 +203,7 @@ exports.postUpdateListener = onDocumentUpdated(
       event,
       'postId'
     );
-    await postUpdatedHook(after, before);
+    await postUpdatedHook(after, createServices(), before);
   }
 );
 
@@ -209,7 +214,7 @@ exports.postCreateListener = onDocumentCreated(
   },
   async (event) => {
     const created = getCreatedOnCreate<AppPost>(event, 'postId');
-    await postUpdatedHook(created);
+    await postUpdatedHook(created, createServices());
   }
 );
 
@@ -223,7 +228,7 @@ exports.platformPostUpdateListener = onDocumentUpdated(
       event,
       'platformPostId'
     );
-    await platformPostUpdatedHook(after, before);
+    await platformPostUpdatedHook(after, createServices(), before);
   }
 );
 
@@ -238,31 +243,34 @@ exports.activityEventCreateListener = onDocumentCreated(
       'activityEventId'
     );
 
-    await activityEventCreatedHook(created);
+    await activityEventCreatedHook(created, createServices());
   }
 );
 
-/** EMULATOR ONLY ENDPOINTS used to simulate events on platforms, or cron jobs */
-// add enpoint when on emulator to trigger the scheduled task
-if (IS_EMULATOR) {
-  const emulatorTriggerRouter = express.Router();
+/** trigger endpoints to trigger scheduled tasks manually */
+const emulatorTriggerRouter = express.Router();
 
-  emulatorTriggerRouter.post('/autofetch', async (request, response) => {
-    await triggerAutofetchPosts();
-    response.status(200).send({ success: true });
-  });
+emulatorTriggerRouter.post('/autofetch', async (request, response) => {
+  logger.debug('autofetch triggered');
+  await triggerAutofetchPosts(createServices());
+  response.status(200).send({ success: true });
+});
 
-  emulatorTriggerRouter.post(
-    '/sendDailyNotifications',
-    async (request, response) => {
-      await triggerSendNotifications(
-        NotificationFreq.Daily,
-        getServices(request)
-      );
-      response.status(200).send({ success: true });
-    }
+emulatorTriggerRouter.post('/sendNotifications', async (request, response) => {
+  logger.debug('sendNotifications triggered');
+  const params = request.query;
+  if (!params.freq) {
+    throw new Error('freq parameter is required');
+  }
+
+  await triggerSendNotifications(
+    params.freq as NotificationFreq,
+    getServices(request)
   );
+  response.status(200).send({ success: true });
+});
 
+if (IS_EMULATOR) {
   emulatorTriggerRouter.post('/publishTwitter', async (request, response) => {
     const services = getServices(request);
     const { platforms } = services;
@@ -286,14 +294,14 @@ if (IS_EMULATOR) {
 
     response.status(200).send({ success: true });
   });
-
-  exports['trigger'] = functions
-    .region(envDeploy.REGION)
-    .runWith({
-      timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
-      memory: envDeploy.CONFIG_MEMORY,
-      minInstances: envDeploy.CONFIG_MININSTANCE,
-      secrets,
-    })
-    .https.onRequest(buildApp(emulatorTriggerRouter));
 }
+
+exports['trigger'] = functions
+  .region(envDeploy.REGION)
+  .runWith({
+    timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
+    memory: envDeploy.CONFIG_MEMORY,
+    minInstances: envDeploy.CONFIG_MININSTANCE,
+    secrets,
+  })
+  .https.onRequest(buildApp(emulatorTriggerRouter));

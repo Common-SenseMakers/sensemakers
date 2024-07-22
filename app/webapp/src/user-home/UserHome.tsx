@@ -7,6 +7,7 @@ import { useServiceWorker } from '../app/ServiceWorkerContext';
 import { useToastContext } from '../app/ToastsContext';
 import { FilterIcon } from '../app/icons/FilterIcon';
 import { ReloadIcon } from '../app/icons/ReloadIcon';
+import { locationToPageIx } from '../app/layout/GlobalNav';
 import { ViewportPageScrollContext } from '../app/layout/Viewport';
 import { I18Keys } from '../i18n/i18n';
 import { PostCard } from '../post/PostCard';
@@ -15,6 +16,7 @@ import { AppButton, AppHeading, AppModal, AppSelect } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
+import { usePersist } from '../utils/use.persist';
 import { IntroModal } from './IntroModal';
 import { useUserPosts } from './UserPostsContext';
 
@@ -34,19 +36,14 @@ export const UserHome = () => {
 
   const { hasUpdate, needsInstall, updateApp, install } = useServiceWorker();
 
+  const [introShown, setIntroShown] = usePersist<boolean>(INTRO_SHOWN, false);
   const [showIntro, setShowIntro] = useState<boolean>(false);
 
   useEffect(() => {
-    const shown = localStorage.getItem(INTRO_SHOWN);
-    if (!shown) {
+    if (!introShown) {
       setShowIntro(true);
     }
   }, []);
-
-  const introClosed = () => {
-    setShowIntro(false);
-    localStorage.setItem(INTRO_SHOWN, 'true');
-  };
 
   const {
     filterStatus,
@@ -63,6 +60,16 @@ export const UserHome = () => {
 
   const { isAtBottom } = useContext(ViewportPageScrollContext);
   const location = useLocation();
+
+  const pageIx = locationToPageIx(location);
+  const pageTitle = (() => {
+    if (pageIx === 0) {
+      return t(I18Keys.drafts);
+    }
+    if (pageIx === 1) {
+      return t(I18Keys.postsNames);
+    }
+  })();
 
   useEffect(() => {
     if (isAtBottom && !isLoading && moreToFetch) {
@@ -120,6 +127,11 @@ export const UserHome = () => {
     navigate(`/${filter.status}`);
   };
 
+  const closeIntro = () => {
+    setIntroShown(true);
+    setShowIntro(false);
+  };
+
   const content = (() => {
     if (!posts || isLoading) {
       return [1, 2, 4, 5, 6].map((ix) => (
@@ -144,7 +156,12 @@ export const UserHome = () => {
         <Box>
           {posts.map((post, ix) => (
             <Box key={ix} id={`post-${post.id}`}>
-              <PostCard post={post}></PostCard>
+              <PostCard
+                post={post}
+                handleClick={() => {
+                  const path = `/post/${post.id}`;
+                  navigate(path);
+                }}></PostCard>
             </Box>
           ))}
         </Box>
@@ -266,7 +283,7 @@ export const UserHome = () => {
       {updater}
       <Box direction="row" justify="between" align="center">
         <Box direction="row" align="center" gap="12px">
-          <AppHeading level="3">{t(I18Keys.drafts)}</AppHeading>
+          <AppHeading level="3">{pageTitle}</AppHeading>
           <Box>{reload}</Box>
         </Box>
         <Box>{menu}</Box>
@@ -277,8 +294,11 @@ export const UserHome = () => {
   const modal = (() => {
     if (showIntro) {
       return (
-        <AppModal onClosed={() => introClosed()}>
-          <IntroModal closeModal={() => setShowIntro(false)}></IntroModal>
+        <AppModal
+          type="small"
+          onModalClosed={() => closeIntro()}
+          layerProps={{}}>
+          <IntroModal closeModal={() => closeIntro()}></IntroModal>
         </AppModal>
       );
     }

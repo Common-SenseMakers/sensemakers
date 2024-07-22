@@ -21,7 +21,11 @@ import {
   GenericThread,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
-import { PLATFORM, UserDetailsBase } from '../../@shared/types/types.user';
+
+import {
+  PLATFORM,
+  UserDetailsBase,
+} from '../../@shared/types/types.user';
 import { getEthToRSAMessage } from '../../@shared/utils/nanopub.sign.util';
 import { cleanPrivateKey } from '../../@shared/utils/semantics.helper';
 import { TransactionManager } from '../../db/transaction.manager';
@@ -54,16 +58,16 @@ export class NanopubService
   ) {}
 
   async getSignupContext(
-    userId: string | undefined,
+    userId?: string,
     params?: NanupubSignupData
   ): Promise<NanopubUserProfile> {
     if (!params) {
       throw new Error('Missing params');
     }
-
+    
     const introNanopub = await createIntroNanopublication(
       params,
-      this.config.rsaKeys.publicKey
+      false
     );
 
     return { ...params, introNanopub: introNanopub.rdf() };

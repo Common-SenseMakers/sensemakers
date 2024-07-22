@@ -14,5 +14,7 @@ export const MAGIC_API_KEY = 'pk_live_A603B0287DAF3C97';
 
 export const NANOPUBS_SERVER = 'https://np.petapico.org/';
 // export const NANOPUBS_SERVER = 'https://np.knowledgepixels.com/';
+export const NANOPUB_EXPLORER_SERVER = 'https://np.knowledgepixels.com/';
+// export const NANOPUB_EXPLORER_SERVER = 'https://np.test.knowledgepixels.com/';
 
 export const BUILD_ID = process.env.REACT_APP_VERSION;

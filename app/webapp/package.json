@@ -1,21 +1,33 @@
 {
-  "name": "webapp",
+  "name": "@sensecast/webapp",
   "version": "0.1.0",
-  "private": true,
+  "main": "build/index.js",
+  "types": "build/index.lib.d.ts",
+  "files": [
+    "build/"
+  ],
   "scripts": {
     "preinstall": "npm install -g @craco/craco",
     "start": "export REACT_APP_VERSION=$(git rev-parse HEAD) && HOST=127.0.0.1 PORT=3000 craco start --config craco.config.js",
     "start-remote": "export REACT_APP_VERSION=$(git rev-parse HEAD) && FB_PROJECT=staging craco start --config craco.config.prod.js",
     "build": "export REACT_APP_VERSION=$(git rev-parse HEAD) && craco build --config craco.config.prod.js",
-    "build-local": "FB_PROJECT=staging yarn build",
+    "build-local": "FB_PROJECT=dev yarn build",
     "test": "craco test",
     "eject": "craco eject",
-    "test-functions": "FUNCTIONS_BASE=http://127.0.0.1:5001/sensenets-9ef26/us-central1 jest",
-    "serve-build": "serve -s build -l 3000"
+    "serve-build": "serve -s build -l 3000",
+    "test-email-template": "craco start --config craco.config.test.js",
+    "build-email": "yarn build-email-code && yarn build-email-types && yarn copy-email-static",
+    "build-email-code": "rm -rf ./build && craco build --config craco.config.email.bundle.js",
+    "build-email-types": "tsc -p tsconfig.dist.json",
+    "copy-email-static": "cp ./build/**.* ./src/shared/emailRenderer"
+  },
+  "resolutions": {
+    "strip-ansi": "6.0.1"
   },
   "dependencies": {
     "@nanopub/sign": "^0.1.4",
     "@nytimes/react-prosemirror": "^0.5.0",
+    "@react-email/components": "^0.0.21",
     "@tanstack/react-query": "^5.20.5",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -29,10 +41,12 @@
     "@types/validator": "^13.12.0",
     "@web3modal/wagmi": "^4.2.1",
     "axios": "^1.6.7",
+    "ethers": "^6.13.1",
     "firebase": "^10.11.0",
     "grommet": "^2.34.2",
     "grommet-icons": "^4.12.0",
     "i18next": "^23.8.1",
+    "juice": "^10.0.0",
     "jwt-decode": "^4.0.0",
     "libsodium": "^0.7.13",
     "magic-sdk": "^22.1.1",
@@ -48,7 +62,7 @@
     "react-i18next": "^14.0.1",
     "react-router-dom": "^6.21.3",
     "react-scripts": "5.0.1",
-    "react-tweet": "^3.2.1",
+    "siwe": "^2.3.2",
     "styled-components": "^5.3.5",
     "twitter-api-v2": "^1.16.2",
     "typescript": "^4.9.5",
@@ -75,9 +89,11 @@
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "jest": "^29.7.0",
     "node-fetch": "^3.3.2",
+    "nodemon": "^3.1.4",
     "prettier": "^3.2.4",
     "serve": "^14.2.3",
-    "ts-jest": "^29.1.2"
+    "ts-jest": "^29.1.2",
+    "ts-loader": "^9.5.1"
   },
   "eslintConfig": {
     "extends": [

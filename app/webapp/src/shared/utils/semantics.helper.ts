@@ -14,3 +14,13 @@ export const cleanPrivateKey = (rsaKeys: RSAKeys) => {
 
   return keyBody;
 };
+
+export const cleanPublicKey = (rsaKeys: RSAKeys) => {
+  const keyBody = rsaKeys.publicKey
+    .replace(/-----BEGIN PUBLIC KEY-----\n?/, '')
+    .replace(/\n?-----END PUBLIC KEY-----/, '')
+    .replace(/\r/g, '')
+    .replace(/\n/g, '');
+
+  return keyBody;
+};

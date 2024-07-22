@@ -41,7 +41,6 @@ if (process.env.FB_PROJECT === 'dev') {
   ];
 }
 
-
 if (process.env.FB_PROJECT === 'staging') {
   base.webpack.configure.plugins = [
     ...newPlugins,

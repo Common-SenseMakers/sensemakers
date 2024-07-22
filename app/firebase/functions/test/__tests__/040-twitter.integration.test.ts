@@ -13,7 +13,7 @@ const NUM_TWITTER_USERS = 1;
 /** skip for now as it will invalidate access tokens */
 describe.skip('twitter integration', () => {
   const services = getTestServices({
-    time: 'real',
+    time: 'mock',
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',

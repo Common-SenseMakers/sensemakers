@@ -1,5 +1,4 @@
 import { Box } from 'grommet';
-import { useLocation, useNavigate } from 'react-router-dom';
 
 import { TweetAnchor } from '../app/anchors/TwitterAnchor';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
@@ -9,31 +8,25 @@ import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { PLATFORM } from '../shared/types/types.user';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { NanopubStatus } from './NanopubStatus';
-import { PostText } from './PostText';
+import { PostTextStatic } from './PostTextStatic';
 import { concatenateThread } from './posts.helper';
 
 export const PostCard = (props: {
   post: AppPostFull;
   shade?: boolean;
   profile?: TwitterUserProfile;
+  handleClick: () => void;
+  isEmail?: boolean;
 }) => {
-  const { post, shade: _shade } = props;
+  const { post, shade: _shade, isEmail } = props;
   const profile = props.profile;
   const shade = _shade || false;
 
-  const navigate = useNavigate();
   const { constants } = useThemeContext();
 
-  const location = useLocation();
-
-  const handleClick = () => {
-    const path = profile
-      ? `${location.pathname}/${post.id}`
-      : `/post/${post.id}`;
-    navigate(path);
-  };
-
+  const handleClick = props.handleClick;
   const tweet = post.mirrors.find((m) => m.platformId === PLATFORM.Twitter);
+  const postText = concatenateThread(post.generic);
 
   return (
     <Box
@@ -43,7 +36,10 @@ export const PostCard = (props: {
         borderTop: '1px solid var(--Neutral-300, #D1D5DB)',
         borderRight: '1px solid var(--Neutral-300, #D1D5DB)',
         borderLeft: '1px solid var(--Neutral-300, #D1D5DB)',
-        cursor: 'pointer',
+        borderBottom: isEmail
+          ? '1px solid var(--Neutral-300, #D1D5DB)'
+          : 'none',
+        cursor: !isEmail ? 'pointer' : 'default',
         position: 'relative',
       }}
       onClick={handleClick}>
@@ -58,18 +54,18 @@ export const PostCard = (props: {
         isLoading={false}
         patternProps={{
           editable: false,
+          size: 'compact',
           semantics: post?.semantics,
           originalParsed: post?.originalParsed,
         }}></SemanticsEditor>
-      <PostText
-        truncate
-        shade={shade}
-        text={concatenateThread(post.generic)}></PostText>
+
+      <PostTextStatic truncate shade={shade} text={postText}></PostTextStatic>
 
       <SemanticsEditor
         include={[PATTERN_ID.REF_LABELS]}
         isLoading={false}
         patternProps={{
+          size: 'compact',
           editable: false,
           semantics: post?.semantics,
           originalParsed: post?.originalParsed,
