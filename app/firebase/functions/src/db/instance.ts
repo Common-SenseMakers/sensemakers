@@ -18,7 +18,7 @@ export const app = IS_EMULATOR
     })
   : initializeApp();
 
-const DEBUG = false;
+const DEBUG = true;
 
 export class DBInstance {
   public firestore: Firestore;
