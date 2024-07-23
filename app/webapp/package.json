@@ -19,7 +19,8 @@
     "build-email": "yarn build-email-code && yarn build-email-types && yarn copy-email-static",
     "build-email-code": "rm -rf ./build && craco build --config craco.config.email.bundle.js",
     "build-email-types": "tsc -p tsconfig.dist.json",
-    "copy-email-static": "cp ./build/**.* ./src/shared/emailRenderer"
+    "copy-email-static": "cp ./build/**.* ./src/shared/emailRenderer",
+    "dev": "email dev -d ./src/email"
   },
   "resolutions": {
     "strip-ansi": "6.0.1"
@@ -59,6 +60,7 @@
     "prosemirror-state": "^1.4.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-email": "^2.1.5",
     "react-i18next": "^14.0.1",
     "react-router-dom": "^6.21.3",
     "react-scripts": "5.0.1",
