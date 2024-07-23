@@ -19,7 +19,7 @@ import { PostsRepository } from '../posts/posts.repository';
 import { UsersRepository } from '../users/users.repository';
 import { NotificationsRepository } from './notifications.repository';
 
-export const DEBUG = true;
+export const DEBUG = false;
 export const DEBUG_PREFIX = `NOTIFICATION-SERVICE`;
 
 export interface EmailPostDetails {

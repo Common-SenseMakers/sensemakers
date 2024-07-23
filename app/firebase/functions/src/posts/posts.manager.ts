@@ -42,7 +42,7 @@ import { UsersService } from '../users/users.service';
 import { getUsernameTag } from '../users/users.utils';
 import { PostsProcessing } from './posts.processing';
 
-const DEBUG = true;
+const DEBUG = false;
 
 /**
  * Top level methods. They instantiate a TransactionManger and execute
