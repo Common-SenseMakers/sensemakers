@@ -19,7 +19,7 @@ import { PostsRepository } from '../posts/posts.repository';
 import { UsersRepository } from '../users/users.repository';
 import { NotificationsRepository } from './notifications.repository';
 
-export const DEBUG = true;
+export const DEBUG = false;
 export const DEBUG_PREFIX = `NOTIFICATION-SERVICE`;
 
 export interface EmailPostDetails {
@@ -75,83 +75,111 @@ export class NotificationService {
 
   /** Aggregates all pending notifications of a user and sends them as an email */
   async notifyUser(userId: string) {
-    await this.db.run(async (manager) => {
-      const user = await this.usersRepo.getUser(userId, manager, true);
-      const settings = user.settings;
-
-      /** get pending notificatations */
-      const pendingIds = await this.notificationsRepo.getUnotifiedOfUser(
-        userId,
-        manager
-      );
-
-      if (DEBUG) {
-        logger.debug(`notifyUser ${userId}`, { pendingIds }, DEBUG_PREFIX);
-      }
-
-      const pendingNotifications = await Promise.all(
-        pendingIds.map((notificationId) =>
-          this.getFull(userId, notificationId, manager)
-        )
-      );
-
-      /** check if user has enabled notififications */
-      if (settings.notificationFreq === NotificationFreq.None) {
-        return;
-      }
-
-      const autopostingOptions = [
-        AutopostOption.AI,
-        AutopostOption.DETERMINISTIC,
-      ];
-
-      if (pendingNotifications.length === 0) {
-        logger.debug(
-          `notifyUser ${userId} - no pending notifications`,
-          undefined,
-          DEBUG_PREFIX
-        );
-        return;
-      }
-
-      if (
-        autopostingOptions.includes(settings.autopost[PLATFORM.Nanopub].value)
-      ) {
+    await this.db.run(
+      async (manager) => {
         if (DEBUG) {
           logger.debug(
-            `notifyUser ${userId} - prepareAndSendDigestAuto`,
-            { pendingNotifications },
+            `notifyUser ${userId} - getting user`,
+            { userId },
+            DEBUG_PREFIX
+          );
+        }
+        const user = await this.usersRepo.getUser(userId, manager, true);
+        const settings = user.settings;
+
+        if (DEBUG) {
+          logger.debug(
+            `notifyUser ${userId} - user got, getting pending notifications`,
+            { user },
             DEBUG_PREFIX
           );
         }
 
-        await this.prepareAndSendDigestAuto(
+        /** get pending notificatations */
+        const pendingIds = await this.notificationsRepo.getUnotifiedOfUser(
           userId,
-          pendingNotifications,
           manager
         );
-      } else {
+
         if (DEBUG) {
+          logger.debug(`pending got ${userId}`, { pendingIds }, DEBUG_PREFIX);
+        }
+
+        const pendingNotifications = await Promise.all(
+          pendingIds.map((notificationId) =>
+            this.getFull(userId, notificationId, manager)
+          )
+        );
+
+        /** check if user has enabled notififications */
+        if (settings.notificationFreq === NotificationFreq.None) {
+          return;
+        }
+
+        const autopostingOptions = [
+          AutopostOption.AI,
+          AutopostOption.DETERMINISTIC,
+        ];
+
+        if (pendingNotifications.length === 0) {
           logger.debug(
-            `notifyUser ${userId} - prepareAndSendDigestManual`,
-            { pendingNotifications },
+            `notifyUser ${userId} - no pending notifications`,
+            undefined,
             DEBUG_PREFIX
+          );
+          return;
+        }
+
+        if (
+          autopostingOptions.includes(settings.autopost[PLATFORM.Nanopub].value)
+        ) {
+          if (DEBUG) {
+            logger.debug(
+              `notifyUser ${userId} - prepareAndSendDigestAuto`,
+              { pendingNotifications },
+              DEBUG_PREFIX
+            );
+          }
+
+          await this.prepareAndSendDigestAuto(
+            userId,
+            pendingNotifications,
+            manager
+          );
+        } else {
+          if (DEBUG) {
+            logger.debug(
+              `notifyUser ${userId} - prepareAndSendDigestManual`,
+              { pendingNotifications },
+              DEBUG_PREFIX
+            );
+          }
+
+          await this.prepareAndSendDigestManual(
+            userId,
+            pendingNotifications,
+            manager
           );
         }
 
-        await this.prepareAndSendDigestManual(
-          userId,
-          pendingNotifications,
-          manager
-        );
-      }
+        await Promise.all(
+          pendingNotifications.map(async (n) => {
+            if (DEBUG) {
+              logger.debug(
+                `notifyUser ${userId} - markAsNotified`,
+                { n, userId },
+                DEBUG_PREFIX
+              );
+            }
 
-      await Promise.all(
-        pendingNotifications.map((n) =>
-          this.notificationsRepo.markAsNotified(userId, n.id, manager)
-        )
-      );
-    });
+            return this.notificationsRepo.markAsNotified(userId, n.id, manager);
+          })
+        );
+      },
+      undefined,
+      undefined,
+      `[notifyUser ${userId}]`
+    );
   }
 
   async getPostEmailDetails(
@@ -196,7 +224,7 @@ export class NotificationService {
       )
     );
 
-    await this.sendDigest(userId, appPostFulls);
+    await this.sendDigest(userId, appPostFulls, manager);
   }
 
   async prepareAndSendDigestAuto(
@@ -214,14 +242,17 @@ export class NotificationService {
       )
     );
 
-    await this.sendDigest(userId, postsDetails);
+    await this.sendDigest(userId, postsDetails, manager);
   }
 
-  async sendDigest(userId: string, posts: AppPostFull[]) {
+  async sendDigest(
+    userId: string,
+    posts: AppPostFull[],
+    manager: TransactionManager
+  ) {
     try {
-      const user = await this.db.run((manager) =>
-        this.usersRepo.getUser(userId, manager, true)
-      );
+      const user = await this.usersRepo.getUser(userId, manager, true);
+
       const res = await this.emailSender.sendUserDigest(user, posts);
       if (DEBUG) logger.debug(`sendDigest`, { res }, DEBUG_PREFIX);
     } catch (e) {

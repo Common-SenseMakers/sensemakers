@@ -42,7 +42,7 @@ import { UsersService } from '../users/users.service';
 import { getUsernameTag } from '../users/users.utils';
 import { PostsProcessing } from './posts.processing';
 
-const DEBUG = true;
+const DEBUG = false;
 
 /**
  * Top level methods. They instantiate a TransactionManger and execute
@@ -317,11 +317,6 @@ export class PostsManager {
     return postsCreatedAll;
   }
 
-  async parseOfUser(userId: string) {
-    const postIds = await this.processing.posts.getNonParsedOfUser(userId);
-    await Promise.all(postIds.map((postId) => this.parsePost(postId)));
-  }
-
   /** get AppPost and fetch for new posts if necessary */
   private async getAndFetchIfNecessary(
     userId: string,
@@ -400,11 +395,11 @@ export class PostsManager {
     const shouldParse = await this.db.run(async (manager) => {
       const post = await this.processing.posts.get(postId, manager, true);
       if (post.parsingStatus === 'processing') {
-        logger.debug(`parseOfUser - already parsing ${postId}`);
+        logger.debug(`parsePost - already parsing ${postId}`);
         return false;
       }
 
-      logger.debug(`parseOfUser - marking as parsing ${postId}`);
+      logger.debug(`parsePost - marking as parsing ${postId}`);
       await this.updatePost(
         postId,
         { parsingStatus: AppPostParsingStatus.PROCESSING },

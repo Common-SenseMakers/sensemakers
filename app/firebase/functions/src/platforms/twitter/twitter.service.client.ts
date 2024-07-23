@@ -20,7 +20,8 @@ import { UsersRepository } from '../../users/users.repository';
 import { TwitterApiCredentials } from './twitter.service';
 import { handleTwitterError } from './twitter.utils';
 
-const DEBUG = false;
+const DEBUG = true;
+const DEBUG_PREFIX = 'TwitterServiceClient';
 
 export type GetClientResultInternal<T extends 'read' | 'write' = 'read'> =
   T extends 'read'
@@ -51,10 +52,14 @@ export class TwitterServiceClient {
    * */
   protected getGenericClient() {
     if (DEBUG) {
-      logger.debug('getGenericClient', {
-        clientId: this.apiCredentials.clientId.substring(0, 8),
-        clientSecret: this.apiCredentials.clientSecret.substring(0, 8),
-      });
+      logger.debug(
+        'getGenericClient',
+        {
+          clientId: this.apiCredentials.clientId.substring(0, 8),
+          clientSecret: this.apiCredentials.clientSecret.substring(0, 8),
+        },
+        DEBUG_PREFIX
+      );
     }
 
     return new TwitterApi({
@@ -91,7 +96,8 @@ export class TwitterServiceClient {
   }> {
     const client = new TwitterApi(credentials.accessToken);
 
-    if (DEBUG) logger.debug('getClientWithCredentials', { credentials });
+    if (DEBUG)
+      logger.debug('getClientWithCredentials', { credentials }, DEBUG_PREFIX);
 
     /** Check for refresh token anytime after ten minutes before expected expiration */
     if (this.time.now() >= credentials.expiresAtMs - 1000 * 60 * 10) {
@@ -100,7 +106,8 @@ export class TwitterServiceClient {
         if (DEBUG)
           logger.debug(
             'getClientWithCredentials - refreshOAuth2Token() - old token:',
-            credentials.refreshToken
+            credentials.refreshToken,
+            DEBUG_PREFIX
           );
 
         const {
@@ -124,7 +131,8 @@ export class TwitterServiceClient {
         if (DEBUG)
           logger.debug(
             'getClientWithCredentials - newCredentials',
-            newCredentials
+            newCredentials,
+            DEBUG_PREFIX
           );
 
         return {
@@ -165,7 +173,8 @@ export class TwitterServiceClient {
       if (DEBUG)
         logger.debug(
           'getUserClientAndUpdateDetails - newCredentials',
-          newCredentials
+          newCredentials,
+          DEBUG_PREFIX
         );
 
       newDetails = {
@@ -181,7 +190,11 @@ export class TwitterServiceClient {
       }
 
       if (DEBUG)
-        logger.debug('getUserClientAndUpdateDetails - newDetails', newDetails);
+        logger.debug(
+          'getUserClientAndUpdateDetails - newDetails',
+          newDetails,
+          DEBUG_PREFIX
+        );
 
       await this.usersRepo.setPlatformDetails(
         userId,
@@ -223,6 +236,13 @@ export class TwitterServiceClient {
     if (!details) {
       throw new Error('Unexpected');
     }
+
+    if (DEBUG)
+      logger.debug(
+        'getUserClientInternal',
+        { user_id, userId, details },
+        DEBUG_PREFIX
+      );
 
     const { client, newDetails } = await this.getUserClientAndUpdateDetails(
       user.userId,
@@ -304,7 +324,7 @@ export class TwitterServiceClient {
   }
 
   async handleSignupData(data: TwitterSignupData): Promise<TwitterUserDetails> {
-    if (DEBUG) logger.debug('handleSignupData', data);
+    if (DEBUG) logger.debug('handleSignupData', data, DEBUG_PREFIX);
     const client = this.getGenericClient();
 
     const result = await client.loginWithOAuth2({
@@ -317,7 +337,6 @@ export class TwitterServiceClient {
       'user.fields': ['profile_image_url', 'name', 'username'],
     };
     const { data: user } = await result.client.v2.me(profileParams);
-    if (DEBUG) logger.debug('handleSignupData', user);
 
     if (!result.refreshToken) {
       throw new Error('Unexpected undefined refresh token');
@@ -334,6 +353,9 @@ export class TwitterServiceClient {
       expiresAtMs: this.time.now() + result.expiresIn * 1000,
     };
 
+    if (DEBUG)
+      logger.debug('handleSignupData', { user, credentials }, DEBUG_PREFIX);
+
     const twitter: TwitterUserDetails = {
       user_id: user.id,
       signupDate: 0,
@@ -347,7 +369,7 @@ export class TwitterServiceClient {
       twitter['write'] = credentials;
     }
 
-    if (DEBUG) logger.debug('handleSignupData', twitter);
+    if (DEBUG) logger.debug('handleSignupData', twitter, DEBUG_PREFIX);
 
     return twitter;
   }
