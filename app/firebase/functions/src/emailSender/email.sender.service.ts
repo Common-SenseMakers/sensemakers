@@ -2,9 +2,13 @@ import { Message, ServerClient } from 'postmark';
 
 import { AppPostFull } from '../@shared/types/types.posts';
 import { AppUser, PLATFORM } from '../@shared/types/types.user';
+import { RenderEmailFunction } from '../@shared/types/types.user';
+import { APP_URL } from '../config/config.runtime';
 import { logger } from '../instances/logger';
 
-const { renderEmail } = require('../@shared/emailRenderer');
+const { renderEmail } = require('../@shared/emailRenderer') as {
+  renderEmail: RenderEmailFunction;
+};
 
 const postmark = require('postmark');
 
@@ -49,7 +53,8 @@ export class EmailSenderService {
     const { html, plainText } = renderEmail(
       posts,
       user.settings.notificationFreq,
-      user.settings.autopost[PLATFORM.Nanopub].value
+      user.settings.autopost[PLATFORM.Nanopub].value,
+      APP_URL.value()
     );
 
     const message: Message = {
