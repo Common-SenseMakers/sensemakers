@@ -66,23 +66,35 @@ export class DBInstance {
   ): Promise<R> {
     switch (config.mode) {
       case ManagerModes.TRANSACTION:
-        return this.firestore.runTransaction(async (transaction) => {
-          if (DEBUG) logger.debug(`Transaction started ${debugId}`);
-          try {
-            const manager = new TransactionManager(transaction);
+        const result = await this.firestore.runTransaction(
+          async (transaction) => {
+            if (DEBUG) logger.debug(`Transaction started ${debugId}`);
+            try {
+              const manager = new TransactionManager(transaction);
 
-            const result = await func(manager, payload);
-            if (DEBUG) logger.debug(`Transaction function executed ${debugId}`);
+              const result = await func(manager, payload);
+              if (DEBUG)
+                logger.debug(
+                  `Transaction function ran ${debugId} (writes not applied)`,
+                  {
+                    result,
+                  }
+                );
 
-            await manager.applyWrites();
-            if (DEBUG) logger.debug(`Transaction writes applied ${debugId}`);
+              await manager.applyWrites();
 
-            return result;
-          } catch (error: any) {
-            logger.error(`Transaction failed ${debugId}`, error);
-            throw new Error(error);
+              if (DEBUG) logger.debug(`Transaction writes applied ${debugId}`);
+
+              return result;
+            } catch (error: any) {
+              logger.error(`Transaction failed ${debugId}`, error);
+              throw new Error(error);
+            }
           }
-        });
+        );
+        if (DEBUG)
+          logger.debug(`Transaction fully executed ${debugId}`, { result });
+        return result;
 
       case ManagerModes.BATCH: {
         try {
