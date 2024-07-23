@@ -61,24 +61,25 @@ export class DBInstance {
   async run<R, P>(
     func: HandleWithTxManager<R, P>,
     payload?: P,
-    config: ManagerConfig = { mode: ManagerModes.TRANSACTION }
+    config: ManagerConfig = { mode: ManagerModes.TRANSACTION },
+    debugId: string = ''
   ): Promise<R> {
     switch (config.mode) {
       case ManagerModes.TRANSACTION:
         return this.firestore.runTransaction(async (transaction) => {
-          if (DEBUG) logger.debug('Transaction started');
+          if (DEBUG) logger.debug(`Transaction started ${debugId}`);
           try {
             const manager = new TransactionManager(transaction);
 
             const result = await func(manager, payload);
-            if (DEBUG) logger.debug('Transaction function executed');
+            if (DEBUG) logger.debug(`Transaction function executed ${debugId}`);
 
             await manager.applyWrites();
-            if (DEBUG) logger.debug('Transaction writes applied');
+            if (DEBUG) logger.debug(`Transaction writes applied ${debugId}`);
 
             return result;
           } catch (error: any) {
-            logger.error('Transaction failed', error);
+            logger.error(`Transaction failed ${debugId}`, error);
             throw new Error(error);
           }
         });
