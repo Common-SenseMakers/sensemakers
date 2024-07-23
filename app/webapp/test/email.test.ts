@@ -1,7 +1,9 @@
 import { render } from '@react-email/components';
 import React from 'react';
+import ReactDOM from 'react-dom';
 
-import { EmailTemplateWrapper } from '../src/email/EmailTemplateWrapper';
+import { EmailTemplate } from '../src/email/EmailTemplate';
+import { renderEmail as renderEmailUnbundled } from '../src/index.lib';
 import { getMockPost } from '../src/mocks/posts.mock';
 import { NotificationFreq } from '../src/shared/types/types.notifications';
 import { AutopostOption } from '../src/shared/types/types.user';
@@ -26,26 +28,33 @@ const posts = [
   getMockPost(),
 ];
 
-const root = document.getElementById('root');
+const html = (() => {
+  if (USE_BUNDLE) {
+    return renderEmail(
+      posts.slice(0, NUM_POSTS),
+      NOTIFICATION_FREQUENCY,
+      AUTOPOST_OPTION,
+      APP_URL
+    ).html;
+  } else {
+    return renderEmailUnbundled(
+      posts.slice(0, NUM_POSTS),
+      NOTIFICATION_FREQUENCY,
+      AUTOPOST_OPTION,
+      APP_URL
+    ).html;
+  }
+})();
+console.log(html);
 
-if (USE_BUNDLE) {
-  root
-    ? (root.innerHTML = renderEmail(
-        posts.slice(0, NUM_POSTS),
-        NOTIFICATION_FREQUENCY,
-        AUTOPOST_OPTION,
-        APP_URL
-      ).html)
-    : null;
-} else {
-  root
-    ? (root.innerHTML = render(
-        React.createElement(EmailTemplateWrapper, {
-          posts: posts.slice(0, NUM_POSTS),
-          notificationFrequency: NOTIFICATION_FREQUENCY,
-          autopostOption: AUTOPOST_OPTION,
-          appUrl: APP_URL,
-        })
-      ))
-    : null;
-}
+const root = document.getElementById('root');
+root ? (root.innerHTML = html) : null;
+// ReactDOM.render(
+//   React.createElement(EmailTemplate, {
+//     posts: posts.slice(0, NUM_POSTS),
+//     notificationFrequency: NOTIFICATION_FREQUENCY,
+//     autopostOption: AUTOPOST_OPTION,
+//     appUrl: APP_URL,
+//   }),
+//   root
+// );
