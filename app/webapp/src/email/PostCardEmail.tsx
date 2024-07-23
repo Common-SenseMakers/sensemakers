@@ -107,28 +107,9 @@ const Label = ({
   color: string;
 }) => {
   return (
-    <Button
-      style={{
-        borderRadius: '24px',
-        color,
-        backgroundColor,
-        border: `1px solid ${borderColor}`,
-        textAlign: 'center',
-        padding: '4px 8px',
-      }}>
-      <Text
-        id="text"
-        style={{
-          height: '16px',
-          fontSize: '14px',
-          fontStyle: 'normal',
-          fontWeight: '500',
-          lineHeight: '16px',
-          margin: '0 8px',
-        }}>
-        {keyword}
-      </Text>
-    </Button>
+    <span style={{ ...label, backgroundColor, borderColor, color }}>
+      {keyword}
+    </span>
   );
 };
 
@@ -146,43 +127,27 @@ const LabelsRow = ({
   color,
 }: LabelsRowProps) => {
   return (
-    <Row
-      style={{
-        backgroundColor: 'white',
-        padding: '6px',
-        justifyContent: 'space-between',
-        display: 'flex',
-      }}>
-      <Column>
-        <Section>
-          <Row>
-            {keywords.slice(0, MAX_KEYWORDS).map((keyword, idx) => {
-              return (
-                <Column key={idx} style={{ justifyContent: 'center' }}>
-                  <Label
-                    keyword={keyword}
-                    backgroundColor="#F5FCFC"
-                    color="#498283"
-                    borderColor="#BDD9D7"
-                  />
-                </Column>
-              );
-            })}
-            {keywords.length > MAX_KEYWORDS && (
-              <Column>
-                <Label
-                  keyword={`+${keywords.length - MAX_KEYWORDS}`}
-                  backgroundColor="#F5FCFC"
-                  color="#498283"
-                  borderColor="#BDD9D7"
-                />
-              </Column>
-            )}
-          </Row>
-        </Section>
-      </Column>
-      <Column></Column>
-    </Row>
+    <div style={labelContainer}>
+      {keywords.slice(0, MAX_KEYWORDS).map((keyword, idx) => {
+        return (
+          <Label
+            key={idx}
+            keyword={keyword}
+            backgroundColor={backgroundColor}
+            borderColor={borderColor}
+            color={color}
+          />
+        );
+      })}
+      {keywords.length > MAX_KEYWORDS && (
+        <Label
+          keyword={`+${keywords.length - MAX_KEYWORDS}`}
+          backgroundColor={backgroundColor}
+          borderColor={borderColor}
+          color={color}
+        />
+      )}
+    </div>
   );
 };
 
@@ -231,4 +196,17 @@ const boxInfos = {
 
 const paragraph = {
   fontSize: 16,
+};
+
+const labelContainer = {
+  display: 'flex',
+  flexWrap: 'wrap' as any,
+  gap: '6px',
+  justifyContent: 'flex-start',
+};
+
+const label = {
+  padding: '4px 10px',
+  borderRadius: '50px',
+  border: '1px solid',
 };
