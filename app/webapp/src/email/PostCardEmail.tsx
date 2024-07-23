@@ -15,7 +15,7 @@ import { AppPostFull } from '../shared/types/types.posts';
 import { PLATFORM } from '../shared/types/types.user';
 import { mapStoreElements } from '../shared/utils/n3.utils';
 
-const MAX_KEYWORDS = 3;
+const MAX_KEYWORDS = 6;
 interface PostCardEmailProps {
   post: AppPostFull;
 }
