@@ -10,6 +10,7 @@ import {
 import { DataFactory } from 'n3';
 
 import { semanticStringToStore } from '../semantics/patterns/common/use.semantics';
+import { processSemantics } from '../semantics/patterns/refs-labels/process.semantics';
 import { AppPostFull } from '../shared/types/types.posts';
 import { PLATFORM } from '../shared/types/types.user';
 import { mapStoreElements } from '../shared/utils/n3.utils';
@@ -34,20 +35,7 @@ export const PostCardEmail = ({ post }: PostCardEmailProps) => {
   const date = formatter.format(post.createdAtMs);
   const size = 12;
 
-  const store = semanticStringToStore(post.semantics);
-
-  const KEYWORD_PREDICATE =
-    post.originalParsed?.support?.ontology?.keyword_predicate?.uri;
-
-  const keywords = (() => {
-    if (!store || !KEYWORD_PREDICATE) return [];
-    return mapStoreElements<string>(
-      store,
-      (quad) => quad.object.value,
-      null,
-      DataFactory.namedNode(KEYWORD_PREDICATE)
-    );
-  })();
+  const { keywords } = parsePostSemantics(post);
 
   return (
     <Section style={content}>
@@ -92,43 +80,12 @@ export const PostCardEmail = ({ post }: PostCardEmailProps) => {
           </Link>
         </Column>
       </Row>
-      <Row
-        style={{
-          backgroundColor: 'white',
-          padding: '6px',
-          justifyContent: 'space-between',
-          display: 'flex',
-        }}>
-        <Column>
-          <Section>
-            <Row>
-              {keywords.slice(0, MAX_KEYWORDS).map((keyword, idx) => {
-                return (
-                  <Column key={idx} style={{ justifyContent: 'center' }}>
-                    <Label
-                      keyword={keyword}
-                      backgroundColor="#F5FCFC"
-                      color="#498283"
-                      borderColor="#BDD9D7"
-                    />
-                  </Column>
-                );
-              })}
-              {keywords.length > MAX_KEYWORDS && (
-                <Column>
-                  <Label
-                    keyword={`+${keywords.length - MAX_KEYWORDS}`}
-                    backgroundColor="#F5FCFC"
-                    color="#498283"
-                    borderColor="#BDD9D7"
-                  />
-                </Column>
-              )}
-            </Row>
-          </Section>
-        </Column>
-        <Column></Column>
-      </Row>
+      <LabelsRow
+        keywords={keywords}
+        backgroundColor="#F5FCFC"
+        color="#498283"
+        borderColor="#BDD9D7"
+      />
       <Row style={{ ...boxInfos, paddingBottom: '0' }}>
         <Column>
           <Markdown markdownContainerStyles={paragraph}>{postText}</Markdown>
@@ -173,6 +130,90 @@ const Label = ({
       </Text>
     </Button>
   );
+};
+
+interface LabelsRowProps {
+  keywords: string[];
+  backgroundColor: string;
+  borderColor: string;
+  color: string;
+}
+
+const LabelsRow = ({
+  keywords,
+  backgroundColor,
+  borderColor,
+  color,
+}: LabelsRowProps) => {
+  return (
+    <Row
+      style={{
+        backgroundColor: 'white',
+        padding: '6px',
+        justifyContent: 'space-between',
+        display: 'flex',
+      }}>
+      <Column>
+        <Section>
+          <Row>
+            {keywords.slice(0, MAX_KEYWORDS).map((keyword, idx) => {
+              return (
+                <Column key={idx} style={{ justifyContent: 'center' }}>
+                  <Label
+                    keyword={keyword}
+                    backgroundColor="#F5FCFC"
+                    color="#498283"
+                    borderColor="#BDD9D7"
+                  />
+                </Column>
+              );
+            })}
+            {keywords.length > MAX_KEYWORDS && (
+              <Column>
+                <Label
+                  keyword={`+${keywords.length - MAX_KEYWORDS}`}
+                  backgroundColor="#F5FCFC"
+                  color="#498283"
+                  borderColor="#BDD9D7"
+                />
+              </Column>
+            )}
+          </Row>
+        </Section>
+      </Column>
+      <Column></Column>
+    </Row>
+  );
+};
+
+const parsePostSemantics = (post: AppPostFull) => {
+  const store = semanticStringToStore(post.semantics);
+  const originalStore = semanticStringToStore(post.originalParsed?.semantics);
+
+  const KEYWORD_PREDICATE =
+    post.originalParsed?.support?.ontology?.keyword_predicate?.uri;
+
+  const keywords = (() => {
+    if (!store || !KEYWORD_PREDICATE) return [];
+    return mapStoreElements<string>(
+      store,
+      (quad) => quad.object.value,
+      null,
+      DataFactory.namedNode(KEYWORD_PREDICATE)
+    );
+  })();
+
+  const refs = processSemantics(
+    originalStore,
+    store,
+    post.originalParsed?.support
+  );
+  console.log(refs);
+
+  return {
+    keywords,
+    refs,
+  };
 };
 
 const content = {

@@ -102,7 +102,7 @@ export const EmailTemplate = ({
   return (
     <Html>
       <Head />
-      <Preview>Yelp recent login</Preview>
+      <Preview>{header}</Preview>
       <Body style={main}>
         <Container>
           <Section style={logo}>
@@ -163,7 +163,13 @@ export const EmailTemplate = ({
 
           <Markdown markdownContainerStyles={footerStyle}>{footer}</Markdown>
           <Text style={footerStyle}>{t(I18Keys.copyright)}</Text>
-          <Text style={{ ...footerStyle, color: 'black', fontWeight: 'bold' }}>
+          <Text
+            style={{
+              ...footerStyle,
+              color: 'black',
+              fontWeight: 'bold',
+              marginTop: '2px',
+            }}>
             sensenets
           </Text>
         </Container>
@@ -194,12 +200,8 @@ const footerStyle = {
 };
 
 const main = {
-  backgroundColor: '#E5E7EB',
+  backgroundColor: '#f3f4f6',
   fontFamily: '"Libre Franklin", sans-serif',
-};
-
-const paragraph = {
-  fontSize: 16,
 };
 
 const logo = {
