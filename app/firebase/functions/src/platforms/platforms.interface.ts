@@ -33,6 +33,10 @@ export interface PlatformService<
   UserDetails extends UserDetailsBase = UserDetailsBase,
   DraftType = any,
 > extends IdentityService<SignupContext, SignupData, UserDetails> {
+  get(
+    post_id: string,
+    userDetails: UserDetailsBase
+  ): Promise<PlatformPostPosted>;
   fetch(
     params: PlatformFetchParams,
     userDetails: UserDetailsBase,

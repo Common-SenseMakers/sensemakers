@@ -81,6 +81,15 @@ export class TwitterService
     super(time, usersRepo, apiCredentials);
   }
 
+  async get(
+    post_id: string,
+    userDetails: UserDetailsBase<any, any, any>,
+    manager: TransactionManager
+  ): Promise<PlatformPostPosted<any>> {
+    const tweet = await this.getPost(post_id, manager, userDetails.user_id);
+    ... thread?
+  }
+
   /**
    * Fetch for "around" _params.params.expectedResults threads.
    * beacuse we fetch is pages of 30, we may fetch more threads
@@ -280,6 +289,7 @@ export class TwitterService
       thread: genericThread,
     };
   }
+
   /** if user_id is provided it must be from the authenticated userId */
   public async getPost(
     tweetId: string,
