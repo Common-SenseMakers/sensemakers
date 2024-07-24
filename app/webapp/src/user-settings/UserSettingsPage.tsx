@@ -33,14 +33,12 @@ import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useDisconnectContext } from '../user-login/contexts/DisconnectUserContext';
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { getAccount } from '../user-login/user.helper';
+import { PlatformSection } from './PlatformsSection';
+import { SettingsOptionSelector } from './SettingsOptionsSelector';
+import { SettingsSection, SettingsSections } from './SettingsSection';
+import { SettingsSubPage } from './UserSettingsSubpage';
 
-enum SettingsSections {
-  Autopost = 'autopost',
-  Notifications = 'notifications',
-  Support = 'support',
-}
-
-const SettingSectionTitle = (props: { value: string }) => {
+export const SettingSectionTitle = (props: { value: string }) => {
   const { constants } = useThemeContext();
   return (
     <Text
@@ -48,150 +46,6 @@ const SettingSectionTitle = (props: { value: string }) => {
       style={{ fontWeight: 600, color: constants.colors.textLight }}>
       {props.value}
     </Text>
-  );
-};
-
-const SettingsSection = (props: {
-  icon: JSX.Element;
-  title: string;
-  onSectionClicked: () => void;
-}) => {
-  const { constants } = useThemeContext();
-
-  return (
-    <AppButton plain onClick={() => props.onSectionClicked()}>
-      <Box
-        pad={{ horizontal: '16px', vertical: '16px' }}
-        direction="row"
-        align="center"
-        style={{ border: `1px solid ${constants.colors.border}` }}>
-        <Box style={{ width: '30px' }}>{props.icon}</Box>
-        <Box
-          style={{
-            flexGrow: 1,
-            fontSize: '16px',
-            lineHeight: '18px',
-            fontWeight: 600,
-          }}
-          margin={{ horizontal: '8px' }}>
-          {props.title}
-        </Box>
-        <Box>
-          <RightChevronIcon size={20}></RightChevronIcon>
-        </Box>
-      </Box>
-    </AppButton>
-  );
-};
-
-const PlatformSection = (props: {
-  icon: JSX.Element;
-  platformName: string;
-  username: string;
-  buttonText: string;
-  onButtonClicked: () => void;
-  connected: boolean;
-}) => {
-  const { constants } = useThemeContext();
-
-  return (
-    <Box
-      pad={{ horizontal: '16px', vertical: '16px' }}
-      direction="row"
-      align="center"
-      style={{ border: `1px solid ${constants.colors.border}` }}>
-      <Box style={{ width: '50px' }}>{props.icon}</Box>
-      <Box
-        style={{
-          flexGrow: 1,
-          fontSize: '16px',
-          lineHeight: '18px',
-          fontWeight: 600,
-        }}
-        margin={{ horizontal: '8px' }}>
-        <Box>
-          <Text>{props.platformName}</Text>
-        </Box>
-        <Box>
-          <Text style={{ fontWeight: 500, color: constants.colors.textLight2 }}>
-            {props.username}
-          </Text>
-        </Box>
-      </Box>
-      <Box>
-        {!props.connected ? (
-          <AppButton
-            label={props.buttonText}
-            onClick={() => props.onButtonClicked()}></AppButton>
-        ) : (
-          <Box
-            direction="row"
-            align="center"
-            gap="4px"
-            pad={{ horizontal: 'small' }}>
-            <CheckIcon></CheckIcon>
-            <Text
-              style={{
-                fontSize: '12px',
-                lineHeight: '14px',
-                color: '#038153',
-              }}>
-              Connected
-            </Text>
-          </Box>
-        )}
-      </Box>
-    </Box>
-  );
-};
-
-interface SettingOption {
-  id: string;
-  title: string;
-  description: string;
-  selected?: boolean;
-  optionSelected: (id: string) => void;
-}
-
-const SettingsOptionSelector = (props: { options: SettingOption[] }) => {
-  const { constants } = useThemeContext();
-  return (
-    <Box>
-      {props.options.map((option, ix) => {
-        return (
-          <AppButton plain onClick={() => option.optionSelected(option.id)}>
-            <Box
-              key={ix}
-              direction="row"
-              align="center"
-              pad={{ horizontal: '20px', vertical: '16px' }}
-              gap="12px"
-              style={{
-                backgroundColor: option.selected ? '#EDF7FF' : '#ffffff',
-                border: `1px solid ${constants.colors.border}`,
-              }}>
-              <Box style={{ flexShrink: 0 }}>
-                <BulletIcon selected={option.selected}></BulletIcon>
-              </Box>
-              <Box>
-                <Box>
-                  <Text style={{ fontWeight: 500 }}>{option.title}</Text>
-                </Box>
-                <Box>
-                  <Text
-                    style={{
-                      color: constants.colors.textLight2,
-                      fontWeight: 400,
-                    }}>
-                    {option.description}
-                  </Text>
-                </Box>
-              </Box>
-            </Box>
-          </AppButton>
-        );
-      })}
-    </Box>
   );
 };
 
@@ -249,47 +103,6 @@ export const UserSettingsPage = () => {
 
   const orcid = getAccount(connectedUser, PLATFORM.Orcid);
 
-  const SettingsSubPage = (props: {
-    title: string;
-    subtitle: string;
-    content: JSX.Element;
-  }) => {
-    return (
-      <ViewportPage
-        content={
-          <Box style={{ flexGrow: 1 }}>
-            <Box>
-              <AppButton
-                style={{
-                  width: 'fit-content',
-                  padding: '8px 12px',
-                  fontWeight: 500,
-                }}
-                icon={
-                  <Box pad={{ top: '1.5px' }}>
-                    <LeftChevronIcon></LeftChevronIcon>
-                  </Box>
-                }
-                plain
-                label="Back"
-                onClick={() => setShowSettingsPage(undefined)}></AppButton>
-            </Box>
-
-            <Box style={{ textAlign: 'center' }} margin={{ bottom: '8px' }}>
-              <AppHeading level="3">{props.title}</AppHeading>
-            </Box>
-            <Box style={{ textAlign: 'center' }}>
-              <Paragraph>{props.subtitle}</Paragraph>
-            </Box>
-
-            <Box pad={{ horizontal: '16px', vertical: '24px' }}>
-              {props.content}
-            </Box>
-          </Box>
-        }></ViewportPage>
-    );
-  };
-
   const content = (() => {
     if (!connectedUser) {
       return (
@@ -304,6 +117,7 @@ export const UserSettingsPage = () => {
         <SettingsSubPage
           title={t(I18Keys.notificationsSettings)}
           subtitle={t(I18Keys.notificationsSettingsExplainer)}
+          onBack={() => setShowSettingsPage(undefined)}
           content={
             <Box>
               <SettingsOptionSelector
