@@ -102,6 +102,37 @@ export enum I18Keys {
   emailMorePostsNotePlural = 's052_other',
 
   copyright = 's053',
+
+  downloads = 's054',
+  installApp = 's055c',
+
+  usingApp = 's055',
+  publishingAutomation = 's056',
+  notificationsSettings = 's057',
+  notificationsSettingsExplainer = 's057c',
+  publishingAutomationExplainer = 's056c',
+  getSupport = 's058',
+
+  yourAccounts = 's059',
+  XTwitter = 's060c',
+  emailAddress = 's060',
+  ORCID = 's061',
+
+  notificationSettingsOpt1Title = 's062',
+  notificationSettingsOpt1Desc = 's063',
+  notificationSettingsOpt2Title = 's064',
+  notificationSettingsOpt2Desc = 's065',
+  notificationSettingsOpt3Title = 's066',
+  notificationSettingsOpt3Desc = 's067',
+  notificationSettingsOpt4Title = 's068',
+  notificationSettingsOpt4Desc = 's069',
+
+  publishingAutomationOpt1Title = 's070',
+  publishingAutomationOpt1Desc = 's071',
+  publishingAutomationOpt2Title = 's072',
+  publishingAutomationOpt2Desc = 's073',
+  publishingAutomationOpt3Title = 's074',
+  publishingAutomationOpt3Desc = 's075',
 }
 
 const check = new Set();
@@ -233,6 +264,44 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.emailMorePostsNotePlural]: '+{{count}} more posts',
 
   [I18Keys.copyright]: 'Copyright © 2024',
+
+  [I18Keys.downloads]: 'Downloads',
+  [I18Keys.installApp]: 'Install application on your device',
+
+  [I18Keys.usingApp]: 'Using Senscast',
+  [I18Keys.publishingAutomation]: 'Publishing Automation',
+  [I18Keys.publishingAutomationExplainer]: 'TBD',
+
+  [I18Keys.notificationsSettings]: 'Notification Settings',
+  [I18Keys.notificationsSettingsExplainer]:
+    'Choose how often you’d like to receive email notifications.',
+
+  [I18Keys.getSupport]: 'Get Support',
+  [I18Keys.yourAccounts]: 'Your Accounts',
+  [I18Keys.XTwitter]: 'X · Twitter',
+  [I18Keys.emailAddress]: 'Email Address',
+  [I18Keys.ORCID]: 'ORCID',
+
+  [I18Keys.notificationSettingsOpt1Title]: 'Daily summary',
+  [I18Keys.notificationSettingsOpt1Desc]:
+    'Receive a daily digest email of new relevant X · Twitter post that have been identified or autopublished.',
+  [I18Keys.notificationSettingsOpt2Title]: 'Weekly summary',
+  [I18Keys.notificationSettingsOpt2Desc]:
+    'Receive a weekly email with a list of all posts that have been identified or autopublished that week.',
+  [I18Keys.notificationSettingsOpt3Title]: 'Monthly summary',
+  [I18Keys.notificationSettingsOpt3Desc]:
+    'Receive a monthly email with a list of all posts that have been identified or autopublished that month.',
+  [I18Keys.notificationSettingsOpt4Title]:
+    'I don’t want to receive notifications',
+  [I18Keys.notificationSettingsOpt4Desc]:
+    'We won’t send you any email notifications, so you’ll need to check the app for updates.',
+
+  [I18Keys.publishingAutomationOpt1Title]: 'AI',
+  [I18Keys.publishingAutomationOpt1Desc]: 'Use AI TBD',
+  [I18Keys.publishingAutomationOpt2Title]: 'Deterministic',
+  [I18Keys.publishingAutomationOpt2Desc]: 'use citoid',
+  [I18Keys.publishingAutomationOpt3Title]: 'Manual',
+  [I18Keys.publishingAutomationOpt3Desc]: 'No autopost',
 };
 
 i18n.use(initReactI18next).init({

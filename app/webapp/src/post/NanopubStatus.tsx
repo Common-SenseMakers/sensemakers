@@ -1,9 +1,12 @@
 import { Anchor, Box, Text } from 'grommet';
 
 import { AppPostFull } from '../shared/types/types.posts';
+import { useThemeContext } from '../ui-components/ThemedApp';
 import { getPostStatuses } from './posts.helper';
 
 export const NanopubStatus = (props: { post?: AppPostFull }) => {
+  const { constants } = useThemeContext();
+
   const { post } = props;
 
   const {
@@ -44,7 +47,7 @@ export const NanopubStatus = (props: { post?: AppPostFull }) => {
         <StatusTag
           label="Processing"
           backgroundColor="transparent"
-          color="#6B7280"></StatusTag>
+          color={constants.colors.textLight2}></StatusTag>
       );
 
     if (errored)
@@ -52,14 +55,14 @@ export const NanopubStatus = (props: { post?: AppPostFull }) => {
         <StatusTag
           label="Error"
           backgroundColor="transparent"
-          color="#6B7280"></StatusTag>
+          color={constants.colors.textLight2}></StatusTag>
       );
 
     return (
       <StatusTag
         label="Not processed"
         backgroundColor="transparent"
-        color="#6B7280"></StatusTag>
+        color={constants.colors.textLight2}></StatusTag>
     );
   }
 
