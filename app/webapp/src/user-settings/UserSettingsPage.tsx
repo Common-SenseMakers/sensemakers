@@ -1,18 +1,12 @@
-import { Box, Image, Paragraph, Text } from 'grommet';
+import { Box, Text } from 'grommet';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import App from '../App';
 import { useAppFetch } from '../api/app.fetch';
 import { AutopostIcon } from '../app/icons/AutopostIcon';
 import { BellIcon } from '../app/icons/BellIcon';
-import { BulletIcon } from '../app/icons/BulletIcon';
 import { EmailIcon } from '../app/icons/EmailIcon';
-import { CheckIcon } from '../app/icons/FilterIcon copy';
-import { LeftChevronIcon } from '../app/icons/LeftChveronIcon';
-import { LeftIcon } from '../app/icons/LeftIcon';
 import { OrcidIcon } from '../app/icons/OrcidIcon';
-import { RightChevronIcon } from '../app/icons/RightChveronIcon';
 import { SupportIcon } from '../app/icons/SupportIcon';
 import { TwitterAvatar } from '../app/icons/TwitterAvatar';
 import { GlobalNav } from '../app/layout/GlobalNav';
@@ -63,7 +57,7 @@ export const UserSettingsPage = () => {
 
   const [showSettingsPage, setShowSettingsPage] = useState<
     SettingsSections | undefined
-  >(SettingsSections.Autopost);
+  >(undefined);
 
   const setSettings = (newSettings: UserSettingsUpdate) => {
     return appFetch('/api/auth/settings', newSettings).then(() => {
@@ -303,86 +297,6 @@ export const UserSettingsPage = () => {
           buttonText="connect"
           username={orcid ? `@${orcid.user_id}` : '- not connected -'}
           connected={orcid !== undefined}></PlatformSection>
-        {/* 
-        <>
-          <Box margin={{ bottom: 'medium' }}>
-            <Text>Email:</Text>
-            <Text>{connectedUser.email?.email}</Text>
-          </Box>
-          <Text>Choose:</Text>
-          <AppButton
-            disabled={isSetting}
-            primary={currentAutopost === AutopostOption.MANUAL}
-            label="Manual"
-            onClick={() => setAutopost(AutopostOption.MANUAL)}></AppButton>
-          <AppButton
-            disabled={isSetting}
-            primary={currentAutopost === AutopostOption.DETERMINISTIC}
-            label="Deterministic"
-            onClick={() =>
-              setAutopost(AutopostOption.DETERMINISTIC)
-            }></AppButton>
-          <AppButton
-            disabled={isSetting}
-            primary={currentAutopost === AutopostOption.AI}
-            label="AI"
-            onClick={() => setAutopost(AutopostOption.AI)}></AppButton>
-        </>
-
-        <Box pad="medium">
-          <Text>Orcid:</Text>
-
-          <AppButton
-            primary
-            disabled={orcid !== undefined}
-            label={orcid === undefined ? 'Connect Orcid' : orcid.user_id}
-            onClick={() => connectOrcid('/settings')}></AppButton>
-        </Box>
-
-        <Box pad="medium">
-          <Text>Twitter:</Text>
-
-          <AppButton
-            primary
-            disabled={twitterProfile !== undefined}
-            label={
-              twitterProfile === undefined
-                ? 'Connect Twitter'
-                : twitterProfile.username
-            }
-            onClick={() => {}}></AppButton>
-        </Box>
-
-        <Box pad="medium">
-          <Text>Notifications:</Text>
-
-          <AppButton
-            primary={currentNotifications === NotificationFreq.None}
-            label="None"
-            onClick={() => setNotifications(NotificationFreq.None)}></AppButton>
-          <AppButton
-            primary={currentNotifications === NotificationFreq.Daily}
-            label="Daily"
-            onClick={() =>
-              setNotifications(NotificationFreq.Daily)
-            }></AppButton>
-          <AppButton
-            primary={currentNotifications === NotificationFreq.Weekly}
-            label="Weekly"
-            onClick={() =>
-              setNotifications(NotificationFreq.Weekly)
-            }></AppButton>
-        </Box>
-
-        <Box pad="medium">
-          <Text>Logout:</Text>
-
-          <AppButton
-            margin={{ bottom: 'large' }}
-            primary
-            label="Logout"
-            onClick={() => disconnect()}></AppButton>
-        </Box>*/}
       </Box>
     );
   })();
