@@ -102,6 +102,19 @@ export enum I18Keys {
   emailMorePostsNotePlural = 's052_other',
 
   copyright = 's053',
+
+  downloads = 's054',
+  installApp = 's055c',
+
+  usingApp = 's055',
+  publishingAutomation = 's056',
+  notificationsSettings = 's057',
+  getSupport = 's058',
+
+  yourAccounts = 's059',
+  XTwitter = 's060c',
+  emailAddress = 's060',
+  ORCID = 's061',
 }
 
 const check = new Set();
@@ -233,6 +246,18 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.emailMorePostsNotePlural]: '+{{count}} more posts',
 
   [I18Keys.copyright]: 'Copyright © 2024',
+
+  [I18Keys.downloads]: 'Downloads',
+  [I18Keys.installApp]: 'Install application on your device',
+
+  [I18Keys.usingApp]: 'Using Senscast',
+  [I18Keys.publishingAutomation]: 'Publishing Automation',
+  [I18Keys.notificationsSettings]: 'Notification Settings',
+  [I18Keys.getSupport]: 'Get Support',
+  [I18Keys.yourAccounts]: 'Your Accounts',
+  [I18Keys.XTwitter]: 'X · Twitter',
+  [I18Keys.emailAddress]: 'Email Address',
+  [I18Keys.ORCID]: 'ORCID',
 };
 
 i18n.use(initReactI18next).init({

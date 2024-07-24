@@ -44,7 +44,7 @@ const constants: StyleConstants = {
     },
     small: {
       size: '14px',
-      height: '18px',
+      height: '16px',
     },
     xsmall: {
       size: '12px',
