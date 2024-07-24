@@ -1,5 +1,4 @@
 import {
-  Button,
   Column,
   Link,
   Markdown,
@@ -19,9 +18,9 @@ import { AppPostFull } from '../shared/types/types.posts';
 import { PLATFORM } from '../shared/types/types.user';
 import { mapStoreElements } from '../shared/utils/n3.utils';
 import { zoteroItemTypeDisplay } from '../utils/post.utils';
-import { RefCardEmail, cardItemStyle } from './RefCardEmail';
+import { RefCardEmail } from './RefCardEmail';
 
-const MAX_KEYWORDS = 3;
+const MAX_KEYWORDS = 2;
 interface PostCardEmailProps {
   post: AppPostFull;
 }
@@ -49,9 +48,8 @@ export const PostCardEmail = ({ post }: PostCardEmailProps) => {
     <Section style={content}>
       <div
         style={{
-          display: 'flex',
-          justifyContent: 'space-between',
           marginBottom: '16px',
+          overflow: 'hidden',
         }}>
         <Link
           style={{
@@ -61,6 +59,7 @@ export const PostCardEmail = ({ post }: PostCardEmailProps) => {
             lineHeight: '18px',
             textDecoration: 'none',
             alignContent: 'center',
+            float: 'left',
           }}
           target="_blank"
           href={`https://x.com/${post.generic.author.username}/status/${tweet?.posted?.post_id}`}>
@@ -99,6 +98,7 @@ export const PostCardEmail = ({ post }: PostCardEmailProps) => {
               fontSize: '16px',
               backgroundColor: '#FFEEDB',
               color: '#ED8F1C',
+              float: 'right',
             }}>
             For Review
           </Text>
@@ -113,6 +113,7 @@ export const PostCardEmail = ({ post }: PostCardEmailProps) => {
               fontSize: '16px',
               backgroundColor: '#d2e8df',
               color: '#058153',
+              float: 'right',
             }}>
             Autopublished
             <svg
@@ -153,17 +154,29 @@ const Label = ({
   backgroundColor,
   borderColor,
   color,
+  hasEmoji,
 }: {
   label: string;
   backgroundColor: string;
   borderColor: string;
   color: string;
+  hasEmoji?: boolean;
 }) => {
-  return (
-    <span style={{ ...labelStyle, backgroundColor, borderColor, color }}>
-      {label}
-    </span>
-  );
+  if (!hasEmoji) {
+    return (
+      <span style={{ ...labelStyle, backgroundColor, borderColor, color }}>
+        {label}
+      </span>
+    );
+  } else {
+    const [emoji, text] = [label.charAt(0), label.slice(1)];
+    return (
+      <span style={{ ...labelStyle, backgroundColor, borderColor, color }}>
+        <span style={{ fontSize: '10px' }}>{emoji}</span>
+        {text}
+      </span>
+    );
+  }
 };
 
 interface LabelsRowProps {
@@ -171,6 +184,7 @@ interface LabelsRowProps {
   backgroundColor: string;
   borderColor: string;
   color: string;
+  hasEmoji?: boolean;
 }
 
 const LabelsRow = ({
@@ -178,9 +192,10 @@ const LabelsRow = ({
   backgroundColor,
   borderColor,
   color,
+  hasEmoji,
 }: LabelsRowProps) => {
   return (
-    <div style={labelContainer}>
+    <div style={labelContainerNew}>
       {labels.slice(0, MAX_KEYWORDS).map((label, idx) => {
         return (
           <Label
@@ -189,6 +204,7 @@ const LabelsRow = ({
             backgroundColor={backgroundColor}
             borderColor={borderColor}
             color={color}
+            hasEmoji={hasEmoji}
           />
         );
       })}
@@ -265,30 +281,22 @@ const content = {
   backgroundColor: 'white',
 };
 
-const boxInfos = {
-  // padding: '20px',
-  // backgroundColor: 'white',
-};
+const boxInfos = {};
 
 const paragraph = {
   fontSize: 16,
 };
 
-const labelContainer = {
-  display: 'flex',
-  flexWrap: 'wrap' as any,
-  gap: '6px',
-  justifyContent: 'flex-start',
-};
-
+const labelContainerNew = {};
 const labelStyle = {
   padding: '4px 10px',
   borderRadius: '50px',
   border: '1px solid',
   maxHeight: '26px',
-  boxSizing: 'border-box' as any,
   alignItems: 'center',
-  display: 'flex',
+  display: 'inline-block',
+  verticalAlign: 'middle',
+  marginRight: '6px',
 };
 
 const PostCardReferenceEmail = ({
@@ -300,13 +308,15 @@ const PostCardReferenceEmail = ({
 }) => {
   const { title, summary, item_type } = refData.meta || {};
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+    <div style={{}}>
       <LabelsRow
         labels={refData.labelsUris}
         backgroundColor="#f0f9ff"
         color="#1f73b7"
         borderColor="#adcce5"
+        hasEmoji={true}
       />
+      <div style={{ margin: '8px 0px' }}></div>
       <RefCardEmail
         ix={referenceNumber}
         url={refUrl}

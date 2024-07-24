@@ -1,7 +1,6 @@
 import {
   Body,
   Button,
-  Column,
   Container,
   Head,
   Heading,
@@ -14,6 +13,7 @@ import {
   Text,
 } from '@react-email/components';
 import { t } from 'i18next';
+import { CSSProperties, ReactNode } from 'react';
 
 import { I18Keys } from '../i18n/i18n';
 import { getMockPost } from '../mocks/posts.mock';
@@ -106,9 +106,10 @@ export const EmailTemplate = ({
       <Preview>{header}</Preview>
       <Body style={main}>
         <Container>
-          <Section style={logo}>
+          <div style={{ margin: '30px 0px 0px' }}></div>
+          <EmailRow>
             <Img src={LOGO_URL} style={logoImg} />
-          </Section>
+          </EmailRow>
 
           <Row>
             <Heading
@@ -123,23 +124,21 @@ export const EmailTemplate = ({
           </Row>
           {posts.slice(0, MAX_POSTS_IN_EMAIL).map((post, idx) => {
             return (
-              <Section key={idx}>
+              <Section key={idx} style={{ margin: '16px 0px 0px' }}>
                 <PostCardEmail post={post} />
-                <Row style={{ ...boxInfos }}>
-                  <Column style={containerButton} colSpan={2}>
-                    <Button
-                      style={button}
-                      href={`${appUrl}${AbsoluteRoutes.Post(post.id)}`}>
-                      {t(I18Keys.emailReviewPostButton)}
-                    </Button>
-                  </Column>
-                </Row>
+                <EmailRow>
+                  <Button
+                    style={button}
+                    href={`${appUrl}${AbsoluteRoutes.Post(post.id)}`}>
+                    {t(I18Keys.emailReviewPostButton)}
+                  </Button>
+                </EmailRow>
               </Section>
             );
           })}
           {posts.length > MAX_POSTS_IN_EMAIL && (
             <>
-              <Row>
+              <EmailRow style={{ marginTop: '0px' }}>
                 <Text
                   style={{
                     justifyContent: 'center',
@@ -151,14 +150,12 @@ export const EmailTemplate = ({
                     count: posts.length - MAX_POSTS_IN_EMAIL,
                   })}
                 </Text>
-              </Row>
-              <Row style={{ ...boxInfos }}>
-                <Column style={containerButton} colSpan={2}>
-                  <Button style={button} href={reviewPostsLink}>
-                    {t(I18Keys.emailSeeAllButton)}
-                  </Button>
-                </Column>
-              </Row>
+              </EmailRow>
+              <EmailRow>
+                <Button style={button} href={reviewPostsLink}>
+                  {t(I18Keys.emailSeeAllButton)}
+                </Button>
+              </EmailRow>
             </>
           )}
 
@@ -220,12 +217,6 @@ const logoImg = {
   padding: '10px',
 };
 
-const containerButton = {
-  display: 'flex',
-  justifyContent: 'center',
-  width: '100%',
-};
-
 const button = {
   backgroundColor: 'black',
   borderRadius: 8,
@@ -235,6 +226,34 @@ const button = {
   padding: '12px 16px',
 };
 
-const boxInfos = {
-  padding: '20px',
+const EmailRow = ({
+  children,
+  style,
+}: {
+  children: ReactNode;
+  style?: CSSProperties;
+}) => {
+  const defaultStyle: CSSProperties = {
+    margin: '16px',
+    textAlign: 'center',
+  };
+
+  const combinedStyle = { ...defaultStyle, ...style };
+
+  return (
+    <table
+      role="presentation"
+      width="100%"
+      style={{ borderCollapse: 'collapse' }}>
+      <tr>
+        <td style={combinedStyle}>
+          <table role="presentation" style={{ margin: '0 auto' }}>
+            <tr>
+              <td>{children}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  );
 };

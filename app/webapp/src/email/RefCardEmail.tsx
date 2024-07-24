@@ -42,12 +42,12 @@ export const RefCardEmail = (props: {
           border: '1px solid #D1D5DB',
           width: '100%',
           padding: '6px 12px',
-          //   display: 'flex',
-          //   flexDirection: 'column',
-          //   gap: '4px',
         }}>
         <Row>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div
+            style={{
+              overflow: 'hidden',
+            }}>
             <Text
               style={{
                 ...cardItemStyle,
@@ -56,6 +56,7 @@ export const RefCardEmail = (props: {
                 color: '#6B7280',
                 backgroundColor: '#E5E7EB',
                 padding: '0px 4px',
+                float: 'left',
               }}>
               Reference {props.ix + 1}
             </Text>
@@ -66,6 +67,7 @@ export const RefCardEmail = (props: {
                   borderRadius: '4px',
                   border: 'none',
                   color: '#6B7280',
+                  float: 'right',
                 }}>
                 {props.itemType + (tweetId ? ' from Quoted Tweet' : '')}
               </Text>
@@ -110,12 +112,6 @@ export const RefCardEmail = (props: {
     </Button>
   );
 };
-function capitalizeWords(sentence: string) {
-  return sentence
-    .split(' ')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-}
 
 export const cardItemStyle = {
   margin: '4px 0px',
