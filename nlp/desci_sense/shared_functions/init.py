@@ -127,16 +127,11 @@ def init_multi_chain_parser_config(
         use_metadata=True,
         llm_config=LLMConfig(llm_type=llm_type),
     )
-    # refs_tagger_config = RefTaggerChainConfig(
-    #     name="refs_tagger",
-    #     use_metadata=True,
-    #     llm_config=LLMConfig(llm_type=llm_type),
-    # )
     multi_refs_tagger_config = MultiRefTaggerChainConfig(
         name="multi_refs_tagger",
         use_metadata=True,
         llm_config=LLMConfig(llm_type=llm_type),
-        post_renderer=PostRendererType.QUOTE_REF_POST,
+        post_renderer=PostRendererType.THREAD_REF_POST,
     )
     topics_config = TopicsPParserChainConfig(
         name="topics",
