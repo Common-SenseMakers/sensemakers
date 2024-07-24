@@ -33,8 +33,7 @@ __webpack_require__.r(__webpack_exports__);
 var FUNCTIONS_BASE = ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).FUNCTIONS_BASE;
 var ORCID_CLIENT_ID = ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).ORCID_CLIENT_ID;
 var ORCID_API_URL = 'https://orcid.org';
-// export const APP_URL = window.location.origin;
-var APP_URL = '';
+var APP_URL = ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).APP_URL;
 var ORCID_REDIRECT_URL = APP_URL;
 var TWITTER_API_URL = 'https://api.twitter.com';
 var TWITTER_CLIENT_ID = ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).TWITTER_CLIENT_ID;
@@ -48,6 +47,64 @@ var BUILD_ID = ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undef
 
 /***/ }),
 
+/***/ "./src/email/EmailRow.tsx":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EmailRow: () => (/* binding */ EmailRow)
+/* harmony export */ });
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/jsx-runtime.js");
+var __assign = undefined && undefined.__assign || function () {
+  __assign = Object.assign || function (t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+      s = arguments[i];
+      for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+    }
+    return t;
+  };
+  return __assign.apply(this, arguments);
+};
+
+var EmailRow = function (_a) {
+  var children = _a.children,
+    style = _a.style;
+  var defaultStyle = {
+    margin: '16px',
+    textAlign: 'center'
+  };
+  var combinedStyle = __assign(__assign({}, defaultStyle), style);
+  return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("table", __assign({
+    role: "presentation",
+    width: "100%",
+    style: {
+      borderCollapse: 'collapse'
+    }
+  }, {
+    children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("tr", {
+      children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("td", __assign({
+        style: combinedStyle
+      }, {
+        children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("table", __assign({
+          role: "presentation",
+          style: {
+            margin: '0 auto'
+          }
+        }, {
+          children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("tr", {
+            children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("td", {
+              children: children
+            })
+          })
+        }))
+      }))
+    })
+  }));
+};
+
+/***/ }),
+
 /***/ "./src/email/EmailTemplate.tsx":
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -58,19 +115,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/jsx-runtime.js");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__("./node_modules/@react-email/html/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__("./node_modules/@react-email/head/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__("./node_modules/@react-email/preview/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__("./node_modules/@react-email/body/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__("./node_modules/@react-email/container/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__("./node_modules/@react-email/section/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__("./node_modules/@react-email/img/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__("./node_modules/@react-email/row/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__("./node_modules/@react-email/heading/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__("./node_modules/@react-email/column/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__("./node_modules/@react-email/button/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__("./node_modules/@react-email/text/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__("./node_modules/@react-email/markdown/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__("./node_modules/@react-email/html/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__("./node_modules/@react-email/head/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__("./node_modules/@react-email/preview/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__("./node_modules/@react-email/body/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__("./node_modules/@react-email/container/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__("./node_modules/@react-email/img/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__("./node_modules/@react-email/row/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__("./node_modules/@react-email/heading/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__("./node_modules/@react-email/section/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__("./node_modules/@react-email/button/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__("./node_modules/@react-email/text/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__("./node_modules/@react-email/markdown/dist/index.mjs");
 /* harmony import */ var i18next__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/i18next/dist/esm/i18next.js");
 /* harmony import */ var _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/i18n/i18n.ts");
 /* harmony import */ var _mocks_posts_mock__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./src/mocks/posts.mock.ts");
@@ -78,7 +134,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./src/shared/types/types.notifications.ts");
 /* harmony import */ var _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./src/shared/types/types.posts.ts");
 /* harmony import */ var _shared_types_types_user__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__("./src/shared/types/types.user.ts");
-/* harmony import */ var _PostCardEmail__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__("./src/email/PostCardEmail.tsx");
+/* harmony import */ var _EmailRow__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__("./src/email/EmailRow.tsx");
+/* harmony import */ var _PostCardEmail__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__("./src/email/PostCardEmail.tsx");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__("./src/email/constants.ts");
+/* harmony import */ var _email_styles__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__("./src/email/email.styles.ts");
 var __assign = undefined && undefined.__assign || function () {
   __assign = Object.assign || function (t) {
     for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -99,8 +158,9 @@ var __assign = undefined && undefined.__assign || function () {
 
 
 
-var MAX_POSTS_IN_EMAIL = 3;
-var LOGO_URL = 'https://development--sensemakers.netlify.app/icons/logo.png';
+
+
+
 var EmailTemplate = function (_a) {
   var posts = _a.posts,
     notificationFrequency = _a.notificationFrequency,
@@ -164,22 +224,24 @@ var EmailTemplate = function (_a) {
     }(),
     header = _b.header,
     footer = _b.footer;
-  return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_9__.Html, {
-    children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_10__.Head, {}), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_11__.Preview, {
+  return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_12__.Html, {
+    children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_13__.Head, {}), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_14__.Preview, {
       children: header
-    }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_12__.Body, __assign({
-      style: main
+    }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_15__.Body, __assign({
+      style: _email_styles__WEBPACK_IMPORTED_MODULE_11__.main
     }, {
-      children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_13__.Container, {
-        children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_14__.Section, __assign({
-          style: logo
-        }, {
-          children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_15__.Img, {
-            src: LOGO_URL,
-            style: logoImg
+      children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_16__.Container, {
+        children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", {
+          style: {
+            margin: '30px 0px 0px'
+          }
+        }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_EmailRow__WEBPACK_IMPORTED_MODULE_8__.EmailRow, {
+          children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_17__.Img, {
+            src: _constants__WEBPACK_IMPORTED_MODULE_10__.LOGO_URL,
+            style: _email_styles__WEBPACK_IMPORTED_MODULE_11__.logoImg
           })
-        })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_16__.Row, {
-          children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_17__.Heading, __assign({
+        }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_18__.Row, {
+          children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_19__.Heading, __assign({
             as: "h2",
             style: {
               fontSize: 26,
@@ -189,29 +251,30 @@ var EmailTemplate = function (_a) {
           }, {
             children: header
           }))
-        }), posts.slice(0, MAX_POSTS_IN_EMAIL).map(function (post, idx) {
-          return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_14__.Section, {
-            children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_PostCardEmail__WEBPACK_IMPORTED_MODULE_8__.PostCardEmail, {
+        }), posts.slice(0, _constants__WEBPACK_IMPORTED_MODULE_10__.MAX_POSTS_IN_EMAIL).map(function (post, idx) {
+          return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_20__.Section, __assign({
+            style: {
+              margin: '16px 0px 0px'
+            }
+          }, {
+            children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_PostCardEmail__WEBPACK_IMPORTED_MODULE_9__.PostCardEmail, {
               post: post
-            }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_16__.Row, __assign({
-              style: __assign({}, boxInfos)
-            }, {
-              children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_18__.Column, __assign({
-                style: containerButton,
-                colSpan: 2
+            }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_EmailRow__WEBPACK_IMPORTED_MODULE_8__.EmailRow, {
+              children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_21__.Button, __assign({
+                style: _email_styles__WEBPACK_IMPORTED_MODULE_11__.button,
+                href: "".concat(appUrl).concat(_route_names__WEBPACK_IMPORTED_MODULE_4__.AbsoluteRoutes.Post(post.id))
               }, {
-                children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_19__.Button, __assign({
-                  style: button,
-                  href: "".concat(appUrl).concat(_route_names__WEBPACK_IMPORTED_MODULE_4__.AbsoluteRoutes.Post(post.id))
-                }, {
-                  children: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailReviewPostButton)
-                }))
+                children: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailReviewPostButton)
               }))
-            }))]
-          }, idx);
-        }), posts.length > MAX_POSTS_IN_EMAIL && (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.Fragment, {
-          children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_16__.Row, {
-            children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_20__.Text, __assign({
+            })]
+          }), idx);
+        }), posts.length > _constants__WEBPACK_IMPORTED_MODULE_10__.MAX_POSTS_IN_EMAIL && (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.Fragment, {
+          children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_EmailRow__WEBPACK_IMPORTED_MODULE_8__.EmailRow, __assign({
+            style: {
+              marginTop: '0px'
+            }
+          }, {
+            children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_22__.Text, __assign({
               style: {
                 justifyContent: 'center',
                 display: 'flex',
@@ -220,34 +283,27 @@ var EmailTemplate = function (_a) {
               }
             }, {
               children: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailMorePostsNote, {
-                count: posts.length - MAX_POSTS_IN_EMAIL
+                count: posts.length - _constants__WEBPACK_IMPORTED_MODULE_10__.MAX_POSTS_IN_EMAIL
               })
             }))
-          }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_16__.Row, __assign({
-            style: __assign({}, boxInfos)
-          }, {
-            children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_18__.Column, __assign({
-              style: containerButton,
-              colSpan: 2
+          })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_EmailRow__WEBPACK_IMPORTED_MODULE_8__.EmailRow, {
+            children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_21__.Button, __assign({
+              style: _email_styles__WEBPACK_IMPORTED_MODULE_11__.button,
+              href: reviewPostsLink
             }, {
-              children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_19__.Button, __assign({
-                style: button,
-                href: reviewPostsLink
-              }, {
-                children: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailSeeAllButton)
-              }))
+              children: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailSeeAllButton)
             }))
-          }))]
-        }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_21__.Markdown, __assign({
-          markdownContainerStyles: footerStyle
+          })]
+        }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_23__.Markdown, __assign({
+          markdownContainerStyles: _email_styles__WEBPACK_IMPORTED_MODULE_11__.footerStyle
         }, {
           children: footer
-        })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_20__.Text, __assign({
-          style: footerStyle
+        })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_22__.Text, __assign({
+          style: _email_styles__WEBPACK_IMPORTED_MODULE_11__.footerStyle
         }, {
           children: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.copyright)
-        })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_20__.Text, __assign({
-          style: __assign(__assign({}, footerStyle), {
+        })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_22__.Text, __assign({
+          style: __assign(__assign({}, _email_styles__WEBPACK_IMPORTED_MODULE_11__.footerStyle), {
             color: 'black',
             fontWeight: 'bold',
             marginTop: '2px'
@@ -266,43 +322,93 @@ EmailTemplate.PreviewProps = {
   appUrl: 'https://sample.com'
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (EmailTemplate);
-var footerStyle = {
-  textAlign: 'center',
-  fontSize: 12,
-  color: 'rgb(0,0,0, 0.7)'
+
+/***/ }),
+
+/***/ "./src/email/LabelsRow.tsx":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Label: () => (/* binding */ Label),
+/* harmony export */   LabelsRow: () => (/* binding */ LabelsRow)
+/* harmony export */ });
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/jsx-runtime.js");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/email/constants.ts");
+/* harmony import */ var _email_styles__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/email/email.styles.ts");
+var __assign = undefined && undefined.__assign || function () {
+  __assign = Object.assign || function (t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+      s = arguments[i];
+      for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+    }
+    return t;
+  };
+  return __assign.apply(this, arguments);
 };
-var main = {
-  backgroundColor: '#f3f4f6',
-  fontFamily: '"Libre Franklin", sans-serif'
+
+
+
+var Label = function (_a) {
+  var label = _a.label,
+    backgroundColor = _a.backgroundColor,
+    borderColor = _a.borderColor,
+    color = _a.color,
+    hasEmoji = _a.hasEmoji;
+  if (!hasEmoji) {
+    return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", __assign({
+      style: __assign(__assign({}, _email_styles__WEBPACK_IMPORTED_MODULE_2__.labelStyle), {
+        backgroundColor: backgroundColor,
+        borderColor: borderColor,
+        color: color
+      })
+    }, {
+      children: label
+    }));
+  } else {
+    var _b = [label.charAt(0), label.slice(1)],
+      emoji = _b[0],
+      text = _b[1];
+    return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("span", __assign({
+      style: __assign(__assign({}, _email_styles__WEBPACK_IMPORTED_MODULE_2__.labelStyle), {
+        backgroundColor: backgroundColor,
+        borderColor: borderColor,
+        color: color
+      })
+    }, {
+      children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", __assign({
+        style: {
+          fontSize: '10px'
+        }
+      }, {
+        children: emoji
+      })), text]
+    }));
+  }
 };
-var logo = {
-  padding: '30px 20px 0px',
-  justifyContent: 'center',
-  display: 'flex',
-  alignItems: 'center'
-};
-var logoImg = {
-  width: '50px',
-  height: '50px',
-  borderRadius: '50%',
-  backgroundColor: 'white',
-  padding: '10px'
-};
-var containerButton = {
-  display: 'flex',
-  justifyContent: 'center',
-  width: '100%'
-};
-var button = {
-  backgroundColor: 'black',
-  borderRadius: 8,
-  color: '#FFF',
-  border: '1px solid rgb(0,0,0, 0.1)',
-  cursor: 'pointer',
-  padding: '12px 16px'
-};
-var boxInfos = {
-  padding: '20px'
+var LabelsRow = function (_a) {
+  var labels = _a.labels,
+    backgroundColor = _a.backgroundColor,
+    borderColor = _a.borderColor,
+    color = _a.color,
+    hasEmoji = _a.hasEmoji;
+  return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", {
+    children: [labels.slice(0, _constants__WEBPACK_IMPORTED_MODULE_1__.MAX_KEYWORDS).map(function (label, idx) {
+      return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Label, {
+        label: label,
+        backgroundColor: backgroundColor,
+        borderColor: borderColor,
+        color: color,
+        hasEmoji: hasEmoji
+      }, idx);
+    }), labels.length > _constants__WEBPACK_IMPORTED_MODULE_1__.MAX_KEYWORDS && (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Label, {
+      label: "+".concat(labels.length - _constants__WEBPACK_IMPORTED_MODULE_1__.MAX_KEYWORDS),
+      backgroundColor: backgroundColor,
+      borderColor: borderColor,
+      color: color
+    })]
+  });
 };
 
 /***/ }),
@@ -316,20 +422,20 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   PostCardEmail: () => (/* binding */ PostCardEmail)
 /* harmony export */ });
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/jsx-runtime.js");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__("./node_modules/@react-email/section/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__("./node_modules/@react-email/link/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__("./node_modules/@react-email/text/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__("./node_modules/@react-email/row/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__("./node_modules/@react-email/column/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__("./node_modules/@react-email/markdown/dist/index.mjs");
-/* harmony import */ var n3__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__("./node_modules/n3/src/N3DataFactory.js");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__("./node_modules/@react-email/section/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__("./node_modules/@react-email/link/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__("./node_modules/@react-email/text/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__("./node_modules/@react-email/row/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__("./node_modules/@react-email/column/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__("./node_modules/@react-email/markdown/dist/index.mjs");
 /* harmony import */ var _post_posts_helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/post/posts.helper.ts");
-/* harmony import */ var _semantics_patterns_common_use_semantics__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/semantics/patterns/common/use.semantics.ts");
-/* harmony import */ var _semantics_patterns_refs_labels_process_semantics__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./src/semantics/patterns/refs-labels/process.semantics.ts");
-/* harmony import */ var _shared_types_types_user__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./src/shared/types/types.user.ts");
-/* harmony import */ var _shared_utils_n3_utils__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./src/shared/utils/n3.utils.ts");
-/* harmony import */ var _utils_post_utils__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./src/utils/post.utils.ts");
-/* harmony import */ var _RefCardEmail__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__("./src/email/RefCardEmail.tsx");
+/* harmony import */ var _shared_types_types_user__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/shared/types/types.user.ts");
+/* harmony import */ var _utils_post_utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./src/utils/post.utils.ts");
+/* harmony import */ var _LabelsRow__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./src/email/LabelsRow.tsx");
+/* harmony import */ var _RefCardEmail__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./src/email/RefCardEmail.tsx");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./src/email/constants.ts");
+/* harmony import */ var _email_styles__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__("./src/email/email.styles.ts");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__("./src/email/utils.ts");
 var __assign = undefined && undefined.__assign || function () {
   __assign = Object.assign || function (t) {
     for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -350,11 +456,11 @@ var __assign = undefined && undefined.__assign || function () {
 
 
 
-var MAX_KEYWORDS = 3;
 var PostCardEmail = function (_a) {
+  var _b;
   var post = _a.post;
   var tweet = post.mirrors.find(function (m) {
-    return m.platformId === _shared_types_types_user__WEBPACK_IMPORTED_MODULE_4__.PLATFORM.Twitter;
+    return m.platformId === _shared_types_types_user__WEBPACK_IMPORTED_MODULE_2__.PLATFORM.Twitter;
   });
   var postText = post.generic.thread.reduce(function (_acc, post, ix) {
     return _acc + "".concat(ix > 0 ? '<br><br>' : '').concat(post.content);
@@ -367,37 +473,33 @@ var PostCardEmail = function (_a) {
   });
   var date = formatter.format(post.createdAtMs);
   var size = 12;
-  var _b = parsePostSemantics(post),
-    keywords = _b.keywords,
-    references = _b.references;
-  console.log({
-    keywords: keywords,
-    references: references
-  });
-  var _c = (0,_post_posts_helper__WEBPACK_IMPORTED_MODULE_1__.getPostStatuses)(post),
-    nanopubUrl = _c.nanopubUrl,
-    pending = _c.pending;
-  return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_8__.Section, __assign({
-    style: content
+  var _c = (0,_utils__WEBPACK_IMPORTED_MODULE_8__.parsePostSemantics)(post),
+    keywords = _c.keywords,
+    references = _c.references;
+  var _d = (0,_post_posts_helper__WEBPACK_IMPORTED_MODULE_1__.getPostStatuses)(post),
+    nanopubUrl = _d.nanopubUrl,
+    pending = _d.pending;
+  return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_9__.Section, __assign({
+    style: _email_styles__WEBPACK_IMPORTED_MODULE_7__.content
   }, {
     children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", __assign({
       style: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        marginBottom: '16px'
+        marginBottom: '16px',
+        overflow: 'hidden'
       }
     }, {
-      children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_9__.Link, __assign({
+      children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_10__.Link, __assign({
         style: {
           fontSize: '16px',
           fontStyle: 'normal',
           fontWeight: '400',
           lineHeight: '18px',
           textDecoration: 'none',
-          alignContent: 'center'
+          alignContent: 'center',
+          float: 'left'
         },
         target: "_blank",
-        href: "https://x.com/".concat(post.generic.author.username, "/status/").concat(tweet === null || tweet === void 0 ? void 0 : tweet.id)
+        href: "https://x.com/".concat(post.generic.author.username, "/status/").concat((_b = tweet === null || tweet === void 0 ? void 0 : tweet.posted) === null || _b === void 0 ? void 0 : _b.post_id)
       }, {
         children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", __assign({
           style: {
@@ -428,7 +530,7 @@ var PostCardEmail = function (_a) {
             strokeLinejoin: "round"
           })
         }))]
-      })), pending && (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_10__.Text, __assign({
+      })), pending && (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_11__.Text, __assign({
         style: {
           borderRadius: '4px',
           border: 'none',
@@ -436,11 +538,12 @@ var PostCardEmail = function (_a) {
           margin: '0px',
           fontSize: '16px',
           backgroundColor: '#FFEEDB',
-          color: '#ED8F1C'
+          color: '#ED8F1C',
+          float: 'right'
         }
       }, {
         children: "For Review"
-      })), nanopubUrl && (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_10__.Text, __assign({
+      })), nanopubUrl && (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_11__.Text, __assign({
         style: {
           borderRadius: '4px',
           border: 'none',
@@ -448,7 +551,8 @@ var PostCardEmail = function (_a) {
           margin: '0px',
           fontSize: '16px',
           backgroundColor: '#d2e8df',
-          color: '#058153'
+          color: '#058153',
+          float: 'right'
         }
       }, {
         children: ["Autopublished", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("svg", __assign({
@@ -467,19 +571,19 @@ var PostCardEmail = function (_a) {
           })
         }))]
       }))]
-    })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(LabelsRow, {
+    })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_LabelsRow__WEBPACK_IMPORTED_MODULE_4__.LabelsRow, {
       labels: keywords,
       backgroundColor: "#F5FCFC",
       color: "#498283",
       borderColor: "#BDD9D7"
-    }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_11__.Row, __assign({
-      style: __assign(__assign({}, boxInfos), {
+    }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_12__.Row, __assign({
+      style: {
         paddingBottom: '0'
-      })
+      }
     }, {
-      children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_12__.Column, {
-        children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_13__.Markdown, __assign({
-          markdownContainerStyles: paragraph
+      children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_13__.Column, {
+        children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_14__.Markdown, __assign({
+          markdownContainerStyles: _email_styles__WEBPACK_IMPORTED_MODULE_7__.paragraph
         }, {
           children: postText
         }))
@@ -489,57 +593,315 @@ var PostCardEmail = function (_a) {
     })]
   }));
 };
-var Label = function (_a) {
-  var label = _a.label,
-    backgroundColor = _a.backgroundColor,
-    borderColor = _a.borderColor,
-    color = _a.color;
-  return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", __assign({
-    style: __assign(__assign({}, labelStyle), {
-      backgroundColor: backgroundColor,
-      borderColor: borderColor,
-      color: color
-    })
-  }, {
-    children: label
-  }));
-};
-var LabelsRow = function (_a) {
-  var labels = _a.labels,
-    backgroundColor = _a.backgroundColor,
-    borderColor = _a.borderColor,
-    color = _a.color;
+var PostCardReferenceEmail = function (_a) {
+  var _b = _a.reference,
+    refUrl = _b[0],
+    refData = _b[1],
+    referenceNumber = _a.referenceNumber;
+  var _c = refData.meta || {},
+    title = _c.title,
+    summary = _c.summary,
+    item_type = _c.item_type;
   return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", __assign({
-    style: labelContainer
+    style: {}
   }, {
-    children: [labels.slice(0, MAX_KEYWORDS).map(function (label, idx) {
-      return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Label, {
-        label: label,
-        backgroundColor: backgroundColor,
-        borderColor: borderColor,
-        color: color
-      }, idx);
-    }), labels.length > MAX_KEYWORDS && (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Label, {
-      label: "+".concat(labels.length - MAX_KEYWORDS),
-      backgroundColor: backgroundColor,
-      borderColor: borderColor,
-      color: color
+    children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_LabelsRow__WEBPACK_IMPORTED_MODULE_4__.LabelsRow, {
+      labels: refData.labelsUris,
+      backgroundColor: "#f0f9ff",
+      color: "#1f73b7",
+      borderColor: "#adcce5",
+      hasEmoji: true
+    }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", {
+      style: {
+        margin: '8px 0px'
+      }
+    }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_RefCardEmail__WEBPACK_IMPORTED_MODULE_5__.RefCardEmail, {
+      ix: referenceNumber,
+      url: refUrl,
+      title: title,
+      description: summary,
+      itemType: item_type ? (0,_utils_post_utils__WEBPACK_IMPORTED_MODULE_3__.zoteroItemTypeDisplay)(item_type) : item_type
     })]
   }));
 };
+var PostCardReferencesEmail = function (_a) {
+  var references = _a.references;
+  return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", {
+    children: [references.slice(0, _constants__WEBPACK_IMPORTED_MODULE_6__.MAX_REFERENCES).map(function (reference, idx) {
+      return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(PostCardReferenceEmail, {
+        reference: reference,
+        referenceNumber: idx
+      }, idx);
+    }), references.length > _constants__WEBPACK_IMPORTED_MODULE_6__.MAX_REFERENCES && (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_11__.Text, __assign({
+      style: {
+        color: '#6B7280',
+        fontSize: '14px',
+        margin: '0px'
+      }
+    }, {
+      children: ["+", references.length - _constants__WEBPACK_IMPORTED_MODULE_6__.MAX_REFERENCES, " more references"]
+    }))]
+  });
+};
+
+/***/ }),
+
+/***/ "./src/email/RefCardEmail.tsx":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   RefCardEmail: () => (/* binding */ RefCardEmail)
+/* harmony export */ });
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/jsx-runtime.js");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/@react-email/button/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./node_modules/@react-email/section/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./node_modules/@react-email/row/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./node_modules/@react-email/text/dist/index.mjs");
+/* harmony import */ var grommet__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./node_modules/grommet/es6/components/Header/Header.js");
+/* harmony import */ var _email_styles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/email/email.styles.ts");
+var __assign = undefined && undefined.__assign || function () {
+  __assign = Object.assign || function (t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+      s = arguments[i];
+      for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+    }
+    return t;
+  };
+  return __assign.apply(this, arguments);
+};
+
+
+
+
+var truncate = function (text, size) {
+  return text.slice(0, size) + (text.length > size ? '...' : '');
+};
+function getTweetId(url) {
+  var regex = /(?:twitter\.com|x\.com)\/(?:#!\/)?\w+\/status\/(\d+)/;
+  var match = url.match(regex);
+  return match ? match[1] : undefined;
+}
+var RefCardEmail = function (props) {
+  var titleTruncated = props.title && truncate(props.title, 50);
+  var descriptionTruncated = props.description && truncate(props.description, 150);
+  var tweetId = getTweetId(props.url);
+  var content = function () {
+    if (!titleTruncated && !props.description) {
+      var urlTruncated = truncate(props.url, 50);
+      return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_2__.Button, __assign({
+        href: props.url,
+        target: "_blank"
+      }, {
+        children: urlTruncated
+      }));
+    }
+    return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_3__.Section, __assign({
+      style: {
+        borderRadius: '12px',
+        border: '1px solid #D1D5DB',
+        width: '100%',
+        padding: '6px 12px'
+      }
+    }, {
+      children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_4__.Row, {
+        children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", __assign({
+          style: {
+            overflow: 'hidden'
+          }
+        }, {
+          children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_5__.Text, __assign({
+            style: __assign(__assign({}, _email_styles__WEBPACK_IMPORTED_MODULE_1__.cardItemStyle), {
+              borderRadius: '4px',
+              border: 'none',
+              color: '#6B7280',
+              backgroundColor: '#E5E7EB',
+              padding: '0px 4px',
+              float: 'left'
+            })
+          }, {
+            children: ["Reference ", props.ix + 1]
+          })), props.itemType && (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_5__.Text, __assign({
+            style: __assign(__assign({}, _email_styles__WEBPACK_IMPORTED_MODULE_1__.cardItemStyle), {
+              borderRadius: '4px',
+              border: 'none',
+              color: '#6B7280',
+              float: 'right'
+            })
+          }, {
+            children: props.itemType + (tweetId ? ' from Quoted Tweet' : '')
+          }))]
+        }))
+      }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_4__.Row, {
+        children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(grommet__WEBPACK_IMPORTED_MODULE_6__.Header, __assign({
+          color: "#374151",
+          style: {
+            fontWeight: '500'
+          }
+        }, {
+          children: titleTruncated
+        }))
+      }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_5__.Text, __assign({
+        style: __assign(__assign({}, _email_styles__WEBPACK_IMPORTED_MODULE_1__.cardItemStyle), {
+          lineHeight: '18px',
+          color: '#6B7280'
+        })
+      }, {
+        children: descriptionTruncated
+      })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_3__.Section, __assign({
+        style: {
+          overflow: 'hidden'
+        }
+      }, {
+        children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_5__.Text, __assign({
+          style: __assign(__assign({}, _email_styles__WEBPACK_IMPORTED_MODULE_1__.cardItemStyle), {
+            color: '#337FBD',
+            fontWeight: '400'
+          })
+        }, {
+          children: props.url
+        }))
+      }))]
+    }));
+  }();
+  return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_2__.Button, __assign({
+    href: props.url,
+    style: {
+      textDecoration: 'none',
+      color: 'inherit',
+      fontWeight: 'normal',
+      width: '100%'
+    },
+    target: "_blank"
+  }, {
+    children: content
+  }));
+};
+
+/***/ }),
+
+/***/ "./src/email/constants.ts":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   LOGO_URL: () => (/* binding */ LOGO_URL),
+/* harmony export */   MAX_KEYWORDS: () => (/* binding */ MAX_KEYWORDS),
+/* harmony export */   MAX_POSTS_IN_EMAIL: () => (/* binding */ MAX_POSTS_IN_EMAIL),
+/* harmony export */   MAX_REFERENCES: () => (/* binding */ MAX_REFERENCES)
+/* harmony export */ });
+var MAX_POSTS_IN_EMAIL = 3;
+var LOGO_URL = 'https://development--sensemakers.netlify.app/icons/logo-192.png';
+var MAX_KEYWORDS = 2;
+var MAX_REFERENCES = 1;
+
+/***/ }),
+
+/***/ "./src/email/email.styles.ts":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   button: () => (/* binding */ button),
+/* harmony export */   cardItemStyle: () => (/* binding */ cardItemStyle),
+/* harmony export */   content: () => (/* binding */ content),
+/* harmony export */   footerStyle: () => (/* binding */ footerStyle),
+/* harmony export */   labelStyle: () => (/* binding */ labelStyle),
+/* harmony export */   logoImg: () => (/* binding */ logoImg),
+/* harmony export */   main: () => (/* binding */ main),
+/* harmony export */   paragraph: () => (/* binding */ paragraph)
+/* harmony export */ });
+var footerStyle = {
+  textAlign: 'center',
+  fontSize: 12,
+  color: 'rgb(0,0,0, 0.7)'
+};
+var main = {
+  backgroundColor: '#f3f4f6',
+  fontFamily: '"Libre Franklin", sans-serif'
+};
+var logoImg = {
+  width: '50px',
+  height: '50px',
+  borderRadius: '50%',
+  backgroundColor: 'white',
+  padding: '10px'
+};
+var button = {
+  backgroundColor: 'black',
+  borderRadius: 8,
+  color: '#FFF',
+  border: '1px solid rgb(0,0,0, 0.1)',
+  cursor: 'pointer',
+  padding: '12px 16px'
+};
+var content = {
+  border: '1px solid rgb(0,0,0, 0.1)',
+  borderRadius: '3px',
+  overflow: 'hidden',
+  padding: '12px',
+  backgroundColor: 'white'
+};
+var paragraph = {
+  fontSize: 16
+};
+var labelStyle = {
+  padding: '4px 10px',
+  borderRadius: '50px',
+  border: '1px solid',
+  maxHeight: '26px',
+  alignItems: 'center',
+  display: 'inline-block',
+  verticalAlign: 'middle',
+  marginRight: '6px'
+};
+var cardItemStyle = {
+  margin: '4px 0px'
+};
+
+/***/ }),
+
+/***/ "./src/email/utils.ts":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   parsePostSemantics: () => (/* binding */ parsePostSemantics)
+/* harmony export */ });
+/* harmony import */ var n3__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./node_modules/n3/src/N3DataFactory.js");
+/* harmony import */ var _semantics_patterns_common_use_semantics__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/semantics/patterns/common/use.semantics.ts");
+/* harmony import */ var _semantics_patterns_refs_labels_process_semantics__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/semantics/patterns/refs-labels/process.semantics.ts");
+/* harmony import */ var _shared_utils_n3_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/shared/utils/n3.utils.ts");
+var __assign = undefined && undefined.__assign || function () {
+  __assign = Object.assign || function (t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+      s = arguments[i];
+      for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+    }
+    return t;
+  };
+  return __assign.apply(this, arguments);
+};
+
+
+
+
 var parsePostSemantics = function (post) {
   var _a, _b, _c, _d, _e, _f, _g, _h, _j;
-  var store = (0,_semantics_patterns_common_use_semantics__WEBPACK_IMPORTED_MODULE_2__.semanticStringToStore)(post.semantics);
-  var originalStore = (0,_semantics_patterns_common_use_semantics__WEBPACK_IMPORTED_MODULE_2__.semanticStringToStore)((_a = post.originalParsed) === null || _a === void 0 ? void 0 : _a.semantics);
+  var store = (0,_semantics_patterns_common_use_semantics__WEBPACK_IMPORTED_MODULE_0__.semanticStringToStore)(post.semantics);
+  var originalStore = (0,_semantics_patterns_common_use_semantics__WEBPACK_IMPORTED_MODULE_0__.semanticStringToStore)((_a = post.originalParsed) === null || _a === void 0 ? void 0 : _a.semantics);
   var KEYWORD_PREDICATE = (_e = (_d = (_c = (_b = post.originalParsed) === null || _b === void 0 ? void 0 : _b.support) === null || _c === void 0 ? void 0 : _c.ontology) === null || _d === void 0 ? void 0 : _d.keyword_predicate) === null || _e === void 0 ? void 0 : _e.uri;
   var keywords = function () {
     if (!store || !KEYWORD_PREDICATE) return [];
-    return (0,_shared_utils_n3_utils__WEBPACK_IMPORTED_MODULE_5__.mapStoreElements)(store, function (quad) {
+    return (0,_shared_utils_n3_utils__WEBPACK_IMPORTED_MODULE_2__.mapStoreElements)(store, function (quad) {
       return quad.object.value;
-    }, null, n3__WEBPACK_IMPORTED_MODULE_14__["default"].namedNode(KEYWORD_PREDICATE));
+    }, null, n3__WEBPACK_IMPORTED_MODULE_3__["default"].namedNode(KEYWORD_PREDICATE));
   }();
-  var refs = (0,_semantics_patterns_refs_labels_process_semantics__WEBPACK_IMPORTED_MODULE_3__.processSemantics)(originalStore, store, (_f = post.originalParsed) === null || _f === void 0 ? void 0 : _f.support);
-  console.log(refs);
+  var refs = (0,_semantics_patterns_refs_labels_process_semantics__WEBPACK_IMPORTED_MODULE_1__.processSemantics)(originalStore, store, (_f = post.originalParsed) === null || _f === void 0 ? void 0 : _f.support);
   var allRefs = Array.from(refs.entries()).reverse();
   var labelsOntology = (_j = (_h = (_g = post.originalParsed) === null || _g === void 0 ? void 0 : _g.support) === null || _h === void 0 ? void 0 : _h.ontology) === null || _j === void 0 ? void 0 : _j.semantic_predicates;
   var getLabelDisplayName = function (labelUri) {
@@ -561,230 +923,6 @@ var parsePostSemantics = function (post) {
     keywords: keywords,
     references: references
   };
-};
-var content = {
-  border: '1px solid rgb(0,0,0, 0.1)',
-  borderRadius: '3px',
-  overflow: 'hidden',
-  padding: '12px',
-  backgroundColor: 'white'
-};
-var boxInfos = {
-  // padding: '20px',
-  // backgroundColor: 'white',
-};
-var paragraph = {
-  fontSize: 16
-};
-var labelContainer = {
-  display: 'flex',
-  flexWrap: 'wrap',
-  gap: '6px',
-  justifyContent: 'flex-start'
-};
-var labelStyle = {
-  padding: '4px 10px',
-  borderRadius: '50px',
-  border: '1px solid',
-  maxHeight: '26px',
-  boxSizing: 'border-box',
-  alignItems: 'center',
-  display: 'flex'
-};
-var PostCardReferenceEmail = function (_a) {
-  var _b = _a.reference,
-    refUrl = _b[0],
-    refData = _b[1],
-    referenceNumber = _a.referenceNumber;
-  var _c = refData.meta || {},
-    title = _c.title,
-    summary = _c.summary,
-    item_type = _c.item_type;
-  return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", __assign({
-    style: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '6px'
-    }
-  }, {
-    children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(LabelsRow, {
-      labels: refData.labelsUris,
-      backgroundColor: "#f0f9ff",
-      color: "#1f73b7",
-      borderColor: "#adcce5"
-    }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_RefCardEmail__WEBPACK_IMPORTED_MODULE_7__.RefCardEmail, {
-      ix: referenceNumber,
-      url: refUrl,
-      title: title,
-      description: summary,
-      itemType: item_type ? (0,_utils_post_utils__WEBPACK_IMPORTED_MODULE_6__.zoteroItemTypeDisplay)(item_type) : item_type
-    })]
-  }));
-};
-var PostCardReferencesEmail = function (_a) {
-  var references = _a.references;
-  console.log('POSTCARD:', references);
-  var MAX_REFERENCES = 1;
-  return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", {
-    children: [references.slice(0, MAX_REFERENCES).map(function (reference, idx) {
-      return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(PostCardReferenceEmail, {
-        reference: reference,
-        referenceNumber: idx
-      }, idx);
-    }), references.length > MAX_REFERENCES && (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_10__.Text, __assign({
-      style: {
-        color: '#6B7280',
-        fontSize: '14px',
-        margin: '0px'
-      }
-    }, {
-      children: ["+", references.length - MAX_REFERENCES, " more references"]
-    }))]
-  });
-};
-
-/***/ }),
-
-/***/ "./src/email/RefCardEmail.tsx":
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   RefCardEmail: () => (/* binding */ RefCardEmail),
-/* harmony export */   cardItemStyle: () => (/* binding */ cardItemStyle)
-/* harmony export */ });
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/jsx-runtime.js");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/@react-email/button/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/@react-email/section/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./node_modules/@react-email/row/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./node_modules/@react-email/text/dist/index.mjs");
-/* harmony import */ var grommet__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./node_modules/grommet/es6/components/Header/Header.js");
-var __assign = undefined && undefined.__assign || function () {
-  __assign = Object.assign || function (t) {
-    for (var s, i = 1, n = arguments.length; i < n; i++) {
-      s = arguments[i];
-      for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
-    }
-    return t;
-  };
-  return __assign.apply(this, arguments);
-};
-
-
-
-var truncate = function (text, size) {
-  return text.slice(0, size) + (text.length > size ? '...' : '');
-};
-function getTweetId(url) {
-  var regex = /(?:twitter\.com|x\.com)\/(?:#!\/)?\w+\/status\/(\d+)/;
-  var match = url.match(regex);
-  return match ? match[1] : undefined;
-}
-var RefCardEmail = function (props) {
-  var titleTruncated = props.title && truncate(props.title, 50);
-  var descriptionTruncated = props.description && truncate(props.description, 150);
-  var tweetId = getTweetId(props.url);
-  var content = function () {
-    if (!titleTruncated && !props.description) {
-      var urlTruncated = truncate(props.url, 50);
-      return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_1__.Button, __assign({
-        href: props.url,
-        target: "_blank"
-      }, {
-        children: urlTruncated
-      }));
-    }
-    return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_2__.Section, __assign({
-      style: {
-        borderRadius: '12px',
-        border: '1px solid #D1D5DB',
-        width: '100%',
-        padding: '6px 12px'
-        //   display: 'flex',
-        //   flexDirection: 'column',
-        //   gap: '4px',
-      }
-    }, {
-      children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_3__.Row, {
-        children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", __assign({
-          style: {
-            display: 'flex',
-            justifyContent: 'space-between'
-          }
-        }, {
-          children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_4__.Text, __assign({
-            style: __assign(__assign({}, cardItemStyle), {
-              borderRadius: '4px',
-              border: 'none',
-              color: '#6B7280',
-              backgroundColor: '#E5E7EB',
-              padding: '0px 4px'
-            })
-          }, {
-            children: ["Reference ", props.ix + 1]
-          })), props.itemType && (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_4__.Text, __assign({
-            style: __assign(__assign({}, cardItemStyle), {
-              borderRadius: '4px',
-              border: 'none',
-              color: '#6B7280'
-            })
-          }, {
-            children: props.itemType + (tweetId ? ' from Quoted Tweet' : '')
-          }))]
-        }))
-      }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_3__.Row, {
-        children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(grommet__WEBPACK_IMPORTED_MODULE_5__.Header, __assign({
-          color: "#374151",
-          style: {
-            fontWeight: '500'
-          }
-        }, {
-          children: titleTruncated
-        }))
-      }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_4__.Text, __assign({
-        style: __assign(__assign({}, cardItemStyle), {
-          lineHeight: '18px',
-          color: '#6B7280'
-        })
-      }, {
-        children: descriptionTruncated
-      })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_2__.Section, __assign({
-        style: {
-          overflow: 'hidden'
-        }
-      }, {
-        children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_4__.Text, __assign({
-          style: __assign(__assign({}, cardItemStyle), {
-            color: '#337FBD',
-            fontWeight: '400'
-          })
-        }, {
-          children: props.url
-        }))
-      }))]
-    }));
-  }();
-  return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_1__.Button, __assign({
-    href: props.url,
-    style: {
-      textDecoration: 'none',
-      color: 'inherit',
-      fontWeight: 'normal',
-      width: '100%'
-    },
-    target: "_blank"
-  }, {
-    children: content
-  }));
-};
-function capitalizeWords(sentence) {
-  return sentence.split(' ').map(function (word) {
-    return word.charAt(0).toUpperCase() + word.slice(1);
-  }).join(' ');
-}
-var cardItemStyle = {
-  margin: '4px 0px'
 };
 
 /***/ }),
@@ -927,8 +1065,6 @@ var getMockPost = function () {
   var defaultGeneric = {
     thread: [{
       content: 'this is such a cool idea! https://arxiv.org/abs/2312.05230'
-    }, {
-      content: 'I disagree with this https://arxiv.org/abs/2401.14000'
     }],
     author: {
       id: '123456',
