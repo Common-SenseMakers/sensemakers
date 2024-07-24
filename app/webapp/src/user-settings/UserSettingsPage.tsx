@@ -103,6 +103,93 @@ export const UserSettingsPage = () => {
 
   const orcid = getAccount(connectedUser, PLATFORM.Orcid);
 
+  const autopostPage = (
+    <SettingsSubPage
+      title={t(I18Keys.publishingAutomation)}
+      subtitle={t(I18Keys.publishingAutomationExplainer)}
+      onBack={() => setShowSettingsPage(undefined)}
+      content={
+        <Box>
+          <SettingsOptionSelector
+            options={[
+              {
+                title: t(I18Keys.publishingAutomationOpt1Title),
+                description: t(I18Keys.publishingAutomationOpt1Desc),
+                id: AutopostOption.AI,
+                optionSelected: (id) => setAutopost(id as AutopostOption),
+                selected: currentAutopost === AutopostOption.AI,
+              },
+            ]}></SettingsOptionSelector>
+          <SettingsOptionSelector
+            options={[
+              {
+                title: t(I18Keys.publishingAutomationOpt2Title),
+                description: t(I18Keys.publishingAutomationOpt2Desc),
+                id: AutopostOption.DETERMINISTIC,
+                optionSelected: (id) => setAutopost(id as AutopostOption),
+                selected: currentAutopost === AutopostOption.DETERMINISTIC,
+              },
+            ]}></SettingsOptionSelector>
+          <SettingsOptionSelector
+            options={[
+              {
+                title: t(I18Keys.publishingAutomationOpt3Title),
+                description: t(I18Keys.publishingAutomationOpt3Desc),
+                id: AutopostOption.MANUAL,
+                optionSelected: (id) => setAutopost(id as AutopostOption),
+                selected: currentAutopost === AutopostOption.MANUAL,
+              },
+            ]}></SettingsOptionSelector>
+        </Box>
+      }></SettingsSubPage>
+  );
+
+  const notificationsPage = (
+    <SettingsSubPage
+      title={t(I18Keys.notificationsSettings)}
+      subtitle={t(I18Keys.notificationsSettingsExplainer)}
+      onBack={() => setShowSettingsPage(undefined)}
+      content={
+        <Box>
+          <SettingsOptionSelector
+            options={[
+              {
+                title: t(I18Keys.notificationSettingsOpt1Title),
+                description: t(I18Keys.notificationSettingsOpt1Desc),
+                id: NotificationFreq.Daily,
+                optionSelected: (id) =>
+                  setNotifications(id as NotificationFreq),
+                selected: currentNotifications === NotificationFreq.Daily,
+              },
+              {
+                title: t(I18Keys.notificationSettingsOpt2Title),
+                description: t(I18Keys.notificationSettingsOpt2Desc),
+                id: NotificationFreq.Weekly,
+                optionSelected: (id) =>
+                  setNotifications(id as NotificationFreq),
+                selected: currentNotifications === NotificationFreq.Weekly,
+              },
+              {
+                title: t(I18Keys.notificationSettingsOpt3Title),
+                description: t(I18Keys.notificationSettingsOpt3Desc),
+                id: NotificationFreq.Monthly,
+                optionSelected: (id) =>
+                  setNotifications(id as NotificationFreq),
+                selected: currentNotifications === NotificationFreq.Monthly,
+              },
+              {
+                title: t(I18Keys.notificationSettingsOpt4Title),
+                description: t(I18Keys.notificationSettingsOpt4Desc),
+                id: NotificationFreq.None,
+                optionSelected: (id) =>
+                  setNotifications(id as NotificationFreq),
+                selected: currentNotifications === NotificationFreq.None,
+              },
+            ]}></SettingsOptionSelector>
+        </Box>
+      }></SettingsSubPage>
+  );
+
   const content = (() => {
     if (!connectedUser) {
       return (
@@ -113,51 +200,11 @@ export const UserSettingsPage = () => {
     }
 
     if (showSettingsPage === SettingsSections.Autopost) {
-      return (
-        <SettingsSubPage
-          title={t(I18Keys.notificationsSettings)}
-          subtitle={t(I18Keys.notificationsSettingsExplainer)}
-          onBack={() => setShowSettingsPage(undefined)}
-          content={
-            <Box>
-              <SettingsOptionSelector
-                options={[
-                  {
-                    title: t(I18Keys.notificationSettingsOpt1Title),
-                    description: t(I18Keys.notificationSettingsOpt1Desc),
-                    id: NotificationFreq.Daily,
-                    optionSelected: (id) =>
-                      setNotifications(id as NotificationFreq),
-                    selected: currentNotifications === NotificationFreq.Daily,
-                  },
-                  {
-                    title: t(I18Keys.notificationSettingsOpt2Title),
-                    description: t(I18Keys.notificationSettingsOpt2Desc),
-                    id: NotificationFreq.Weekly,
-                    optionSelected: (id) =>
-                      setNotifications(id as NotificationFreq),
-                    selected: currentNotifications === NotificationFreq.Weekly,
-                  },
-                  {
-                    title: t(I18Keys.notificationSettingsOpt3Title),
-                    description: t(I18Keys.notificationSettingsOpt3Desc),
-                    id: NotificationFreq.Monthly,
-                    optionSelected: (id) =>
-                      setNotifications(id as NotificationFreq),
-                    selected: currentNotifications === NotificationFreq.Monthly,
-                  },
-                  {
-                    title: t(I18Keys.notificationSettingsOpt4Title),
-                    description: t(I18Keys.notificationSettingsOpt4Desc),
-                    id: NotificationFreq.None,
-                    optionSelected: (id) =>
-                      setNotifications(id as NotificationFreq),
-                    selected: currentNotifications === NotificationFreq.None,
-                  },
-                ]}></SettingsOptionSelector>
-            </Box>
-          }></SettingsSubPage>
-      );
+      return autopostPage;
+    }
+
+    if (showSettingsPage === SettingsSections.Notifications) {
+      return notificationsPage;
     }
 
     return (
@@ -206,14 +253,14 @@ export const UserSettingsPage = () => {
           icon={<BellIcon size={24}></BellIcon>}
           title={t(I18Keys.notificationsSettings)}
           onSectionClicked={() => {
-            setShowSettingsPage(SettingsSections.Autopost);
+            setShowSettingsPage(SettingsSections.Notifications);
           }}></SettingsSection>
 
         <SettingsSection
           icon={<SupportIcon size={24}></SupportIcon>}
           title={t(I18Keys.getSupport)}
           onSectionClicked={() => {
-            setShowSettingsPage(SettingsSections.Autopost);
+            setShowSettingsPage(SettingsSections.Support);
           }}></SettingsSection>
 
         <Box

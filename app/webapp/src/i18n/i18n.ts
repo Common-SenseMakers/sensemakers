@@ -110,6 +110,7 @@ export enum I18Keys {
   publishingAutomation = 's056',
   notificationsSettings = 's057',
   notificationsSettingsExplainer = 's057c',
+  publishingAutomationExplainer = 's056c',
   getSupport = 's058',
 
   yourAccounts = 's059',
@@ -125,6 +126,13 @@ export enum I18Keys {
   notificationSettingsOpt3Desc = 's067',
   notificationSettingsOpt4Title = 's068',
   notificationSettingsOpt4Desc = 's069',
+
+  publishingAutomationOpt1Title = 's070',
+  publishingAutomationOpt1Desc = 's071',
+  publishingAutomationOpt2Title = 's072',
+  publishingAutomationOpt2Desc = 's073',
+  publishingAutomationOpt3Title = 's074',
+  publishingAutomationOpt3Desc = 's075',
 }
 
 const check = new Set();
@@ -262,6 +270,8 @@ const translationENG: Record<I18Keys, string> = {
 
   [I18Keys.usingApp]: 'Using Senscast',
   [I18Keys.publishingAutomation]: 'Publishing Automation',
+  [I18Keys.publishingAutomationExplainer]: 'TBD',
+
   [I18Keys.notificationsSettings]: 'Notification Settings',
   [I18Keys.notificationsSettingsExplainer]:
     'Choose how often you’d like to receive email notifications.',
@@ -285,6 +295,13 @@ const translationENG: Record<I18Keys, string> = {
     'I don’t want to receive notifications',
   [I18Keys.notificationSettingsOpt4Desc]:
     'We won’t send you any email notifications, so you’ll need to check the app for updates.',
+
+  [I18Keys.publishingAutomationOpt1Title]: 'AI',
+  [I18Keys.publishingAutomationOpt1Desc]: 'Use AI TBD',
+  [I18Keys.publishingAutomationOpt2Title]: 'Deterministic',
+  [I18Keys.publishingAutomationOpt2Desc]: 'use citoid',
+  [I18Keys.publishingAutomationOpt3Title]: 'Manual',
+  [I18Keys.publishingAutomationOpt3Desc]: 'No autopost',
 };
 
 i18n.use(initReactI18next).init({
