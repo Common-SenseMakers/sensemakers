@@ -15,7 +15,7 @@ import {
 import { t } from 'i18next';
 
 import { I18Keys } from '../i18n/i18n';
-import { getMockPost } from '../mocks/posts.mock';
+import { getMockPendingPost } from '../mocks/posts.mock';
 import { AbsoluteRoutes } from '../route.names';
 import { NotificationFreq } from '../shared/types/types.notifications';
 import { AppPostFull, PostsQueryStatus } from '../shared/types/types.posts';
@@ -175,16 +175,8 @@ export const EmailTemplate = ({
 };
 
 EmailTemplate.PreviewProps = {
-  posts: [
-    getMockPost(),
-    getMockPost(),
-    getMockPost(),
-    getMockPost(),
-    getMockPost(),
-  ],
+  posts: [] as AppPostFull[],
   notificationFrequency: NotificationFreq.Monthly,
   autopostOption: AutopostOption.AI,
   appUrl: 'https://sample.com',
 };
-
-export default EmailTemplate;
