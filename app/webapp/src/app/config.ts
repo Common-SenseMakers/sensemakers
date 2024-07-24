@@ -2,7 +2,7 @@ export const FUNCTIONS_BASE = process.env.FUNCTIONS_BASE;
 
 export const ORCID_CLIENT_ID = process.env.ORCID_CLIENT_ID;
 export const ORCID_API_URL = 'https://orcid.org';
-export const APP_URL = window.location.origin;
+export const APP_URL = process.env.APP_URL;
 
 export const ORCID_REDIRECT_URL = APP_URL;
 

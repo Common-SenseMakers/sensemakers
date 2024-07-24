@@ -1,7 +1,6 @@
 import {
   Body,
   Button,
-  Column,
   Container,
   Head,
   Heading,
@@ -16,15 +15,15 @@ import {
 import { t } from 'i18next';
 
 import { I18Keys } from '../i18n/i18n';
-import { getMockPost } from '../mocks/posts.mock';
+import { getMockPendingPost } from '../mocks/posts.mock';
 import { AbsoluteRoutes } from '../route.names';
 import { NotificationFreq } from '../shared/types/types.notifications';
 import { AppPostFull, PostsQueryStatus } from '../shared/types/types.posts';
 import { AutopostOption } from '../shared/types/types.user';
+import { EmailRow } from './EmailRow';
 import { PostCardEmail } from './PostCardEmail';
-
-const MAX_POSTS_IN_EMAIL = 3;
-const LOGO_URL = 'https://development--sensemakers.netlify.app/icons/logo.png';
+import { LOGO_URL, MAX_POSTS_IN_EMAIL } from './constants';
+import { button, footerStyle, logoImg, main } from './email.styles';
 
 interface EmailTemplateProps {
   posts: AppPostFull[];
@@ -105,9 +104,10 @@ export const EmailTemplate = ({
       <Preview>{header}</Preview>
       <Body style={main}>
         <Container>
-          <Section style={logo}>
+          <div style={{ margin: '30px 0px 0px' }}></div>
+          <EmailRow>
             <Img src={LOGO_URL} style={logoImg} />
-          </Section>
+          </EmailRow>
 
           <Row>
             <Heading
@@ -122,23 +122,21 @@ export const EmailTemplate = ({
           </Row>
           {posts.slice(0, MAX_POSTS_IN_EMAIL).map((post, idx) => {
             return (
-              <Section key={idx}>
+              <Section key={idx} style={{ margin: '16px 0px 0px' }}>
                 <PostCardEmail post={post} />
-                <Row style={{ ...boxInfos }}>
-                  <Column style={containerButton} colSpan={2}>
-                    <Button
-                      style={button}
-                      href={`${appUrl}${AbsoluteRoutes.Post(post.id)}`}>
-                      {t(I18Keys.emailReviewPostButton)}
-                    </Button>
-                  </Column>
-                </Row>
+                <EmailRow>
+                  <Button
+                    style={button}
+                    href={`${appUrl}${AbsoluteRoutes.Post(post.id)}`}>
+                    {t(I18Keys.emailReviewPostButton)}
+                  </Button>
+                </EmailRow>
               </Section>
             );
           })}
           {posts.length > MAX_POSTS_IN_EMAIL && (
             <>
-              <Row>
+              <EmailRow style={{ marginTop: '0px' }}>
                 <Text
                   style={{
                     justifyContent: 'center',
@@ -150,14 +148,12 @@ export const EmailTemplate = ({
                     count: posts.length - MAX_POSTS_IN_EMAIL,
                   })}
                 </Text>
-              </Row>
-              <Row style={{ ...boxInfos }}>
-                <Column style={containerButton} colSpan={2}>
-                  <Button style={button} href={reviewPostsLink}>
-                    {t(I18Keys.emailSeeAllButton)}
-                  </Button>
-                </Column>
-              </Row>
+              </EmailRow>
+              <EmailRow>
+                <Button style={button} href={reviewPostsLink}>
+                  {t(I18Keys.emailSeeAllButton)}
+                </Button>
+              </EmailRow>
             </>
           )}
 
@@ -179,61 +175,8 @@ export const EmailTemplate = ({
 };
 
 EmailTemplate.PreviewProps = {
-  posts: [
-    getMockPost(),
-    getMockPost(),
-    getMockPost(),
-    getMockPost(),
-    getMockPost(),
-  ],
+  posts: [] as AppPostFull[],
   notificationFrequency: NotificationFreq.Monthly,
   autopostOption: AutopostOption.AI,
   appUrl: 'https://sample.com',
-};
-
-export default EmailTemplate;
-
-const footerStyle = {
-  textAlign: 'center' as any,
-  fontSize: 12,
-  color: 'rgb(0,0,0, 0.7)',
-};
-
-const main = {
-  backgroundColor: '#f3f4f6',
-  fontFamily: '"Libre Franklin", sans-serif',
-};
-
-const logo = {
-  padding: '30px 20px',
-  justifyContent: 'center',
-  display: 'flex',
-  alignItems: 'center',
-};
-
-const logoImg = {
-  width: '50px',
-  height: '50px',
-  borderRadius: '50%',
-  backgroundColor: 'white',
-  padding: '10px',
-};
-
-const containerButton = {
-  display: 'flex',
-  justifyContent: 'center',
-  width: '100%',
-};
-
-const button = {
-  backgroundColor: 'black',
-  borderRadius: 8,
-  color: '#FFF',
-  border: '1px solid rgb(0,0,0, 0.1)',
-  cursor: 'pointer',
-  padding: '12px 16px',
-};
-
-const boxInfos = {
-  padding: '20px',
 };

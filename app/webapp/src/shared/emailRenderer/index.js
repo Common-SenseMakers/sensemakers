@@ -11,37 +11,131 @@
 return /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./src/app/config.ts":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   APP_URL: () => (/* binding */ APP_URL),
+/* harmony export */   BUILD_ID: () => (/* binding */ BUILD_ID),
+/* harmony export */   FUNCTIONS_BASE: () => (/* binding */ FUNCTIONS_BASE),
+/* harmony export */   MAGIC_API_KEY: () => (/* binding */ MAGIC_API_KEY),
+/* harmony export */   NANOPUBS_SERVER: () => (/* binding */ NANOPUBS_SERVER),
+/* harmony export */   NANOPUB_EXPLORER_SERVER: () => (/* binding */ NANOPUB_EXPLORER_SERVER),
+/* harmony export */   ORCID_API_URL: () => (/* binding */ ORCID_API_URL),
+/* harmony export */   ORCID_CLIENT_ID: () => (/* binding */ ORCID_CLIENT_ID),
+/* harmony export */   ORCID_REDIRECT_URL: () => (/* binding */ ORCID_REDIRECT_URL),
+/* harmony export */   TWITTER_API_URL: () => (/* binding */ TWITTER_API_URL),
+/* harmony export */   TWITTER_CLIENT_ID: () => (/* binding */ TWITTER_CLIENT_ID),
+/* harmony export */   WALLETCONNECT_PROJECT_ID: () => (/* binding */ WALLETCONNECT_PROJECT_ID)
+/* harmony export */ });
+var FUNCTIONS_BASE = ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).FUNCTIONS_BASE;
+var ORCID_CLIENT_ID = ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).ORCID_CLIENT_ID;
+var ORCID_API_URL = 'https://orcid.org';
+var APP_URL = ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).APP_URL;
+var ORCID_REDIRECT_URL = APP_URL;
+var TWITTER_API_URL = 'https://api.twitter.com';
+var TWITTER_CLIENT_ID = ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).TWITTER_CLIENT_ID;
+var WALLETCONNECT_PROJECT_ID = 'c12fdc701fd336cf8dc059f6784906bc';
+var MAGIC_API_KEY = 'pk_live_A603B0287DAF3C97';
+var NANOPUBS_SERVER = 'https://np.petapico.org/';
+// export const NANOPUBS_SERVER = 'https://np.knowledgepixels.com/';
+var NANOPUB_EXPLORER_SERVER = 'https://np.knowledgepixels.com/';
+// export const NANOPUB_EXPLORER_SERVER = 'https://np.test.knowledgepixels.com/';
+var BUILD_ID = ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).REACT_APP_VERSION;
+
+/***/ }),
+
+/***/ "./src/email/EmailRow.tsx":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EmailRow: () => (/* binding */ EmailRow)
+/* harmony export */ });
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/jsx-runtime.js");
+var __assign = undefined && undefined.__assign || function () {
+  __assign = Object.assign || function (t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+      s = arguments[i];
+      for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+    }
+    return t;
+  };
+  return __assign.apply(this, arguments);
+};
+
+var EmailRow = function (_a) {
+  var children = _a.children,
+    style = _a.style;
+  var defaultStyle = {
+    margin: '16px',
+    textAlign: 'center'
+  };
+  var combinedStyle = __assign(__assign({}, defaultStyle), style);
+  return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("table", __assign({
+    role: "presentation",
+    width: "100%",
+    style: {
+      borderCollapse: 'collapse'
+    }
+  }, {
+    children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("tr", {
+      children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("td", __assign({
+        style: combinedStyle
+      }, {
+        children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("table", __assign({
+          role: "presentation",
+          style: {
+            margin: '0 auto'
+          }
+        }, {
+          children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("tr", {
+            children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("td", {
+              children: children
+            })
+          })
+        }))
+      }))
+    })
+  }));
+};
+
+/***/ }),
+
 /***/ "./src/email/EmailTemplate.tsx":
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   EmailTemplate: () => (/* binding */ EmailTemplate),
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */   EmailTemplate: () => (/* binding */ EmailTemplate)
 /* harmony export */ });
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/jsx-runtime.js");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__("./node_modules/@react-email/html/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__("./node_modules/@react-email/head/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__("./node_modules/@react-email/preview/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__("./node_modules/@react-email/body/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__("./node_modules/@react-email/container/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__("./node_modules/@react-email/section/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__("./node_modules/@react-email/img/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__("./node_modules/@react-email/row/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__("./node_modules/@react-email/heading/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__("./node_modules/@react-email/column/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__("./node_modules/@react-email/button/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__("./node_modules/@react-email/text/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__("./node_modules/@react-email/markdown/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__("./node_modules/@react-email/html/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__("./node_modules/@react-email/head/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__("./node_modules/@react-email/preview/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__("./node_modules/@react-email/body/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__("./node_modules/@react-email/container/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__("./node_modules/@react-email/img/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__("./node_modules/@react-email/row/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__("./node_modules/@react-email/heading/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__("./node_modules/@react-email/section/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__("./node_modules/@react-email/button/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__("./node_modules/@react-email/text/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__("./node_modules/@react-email/markdown/dist/index.mjs");
 /* harmony import */ var i18next__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/i18next/dist/esm/i18next.js");
 /* harmony import */ var _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/i18n/i18n.ts");
-/* harmony import */ var _mocks_posts_mock__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./src/mocks/posts.mock.ts");
-/* harmony import */ var _route_names__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./src/route.names.ts");
-/* harmony import */ var _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./src/shared/types/types.notifications.ts");
-/* harmony import */ var _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./src/shared/types/types.posts.ts");
-/* harmony import */ var _shared_types_types_user__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__("./src/shared/types/types.user.ts");
+/* harmony import */ var _route_names__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./src/route.names.ts");
+/* harmony import */ var _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./src/shared/types/types.notifications.ts");
+/* harmony import */ var _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./src/shared/types/types.posts.ts");
+/* harmony import */ var _shared_types_types_user__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./src/shared/types/types.user.ts");
+/* harmony import */ var _EmailRow__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__("./src/email/EmailRow.tsx");
 /* harmony import */ var _PostCardEmail__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__("./src/email/PostCardEmail.tsx");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__("./src/email/constants.ts");
+/* harmony import */ var _email_styles__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__("./src/email/email.styles.ts");
 var __assign = undefined && undefined.__assign || function () {
   __assign = Object.assign || function (t) {
     for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -62,26 +156,26 @@ var __assign = undefined && undefined.__assign || function () {
 
 
 
-var MAX_POSTS_IN_EMAIL = 3;
-var LOGO_URL = 'https://development--sensemakers.netlify.app/icons/logo.png';
+
+
 var EmailTemplate = function (_a) {
   var posts = _a.posts,
     notificationFrequency = _a.notificationFrequency,
     autopostOption = _a.autopostOption,
     appUrl = _a.appUrl;
-  var emailSettingsLink = "".concat(appUrl).concat(_route_names__WEBPACK_IMPORTED_MODULE_4__.AbsoluteRoutes.Settings);
-  var allPostsLink = "".concat(appUrl).concat(_route_names__WEBPACK_IMPORTED_MODULE_4__.AbsoluteRoutes.App);
-  var reviewPostsLink = "".concat(allPostsLink).concat(_shared_types_types_posts__WEBPACK_IMPORTED_MODULE_6__.PostsQueryStatus.PENDING);
-  var ignoredPostsLink = "".concat(allPostsLink).concat(_shared_types_types_posts__WEBPACK_IMPORTED_MODULE_6__.PostsQueryStatus.IGNORED);
-  var publishedPostsLink = "".concat(allPostsLink).concat(_shared_types_types_posts__WEBPACK_IMPORTED_MODULE_6__.PostsQueryStatus.PUBLISHED);
-  var automationSettingsLink = "".concat(appUrl).concat(_route_names__WEBPACK_IMPORTED_MODULE_4__.AbsoluteRoutes.Settings);
+  var emailSettingsLink = "".concat(appUrl).concat(_route_names__WEBPACK_IMPORTED_MODULE_3__.AbsoluteRoutes.Settings);
+  var allPostsLink = "".concat(appUrl).concat(_route_names__WEBPACK_IMPORTED_MODULE_3__.AbsoluteRoutes.App);
+  var reviewPostsLink = "".concat(allPostsLink).concat(_shared_types_types_posts__WEBPACK_IMPORTED_MODULE_5__.PostsQueryStatus.PENDING);
+  var ignoredPostsLink = "".concat(allPostsLink).concat(_shared_types_types_posts__WEBPACK_IMPORTED_MODULE_5__.PostsQueryStatus.IGNORED);
+  var publishedPostsLink = "".concat(allPostsLink).concat(_shared_types_types_posts__WEBPACK_IMPORTED_MODULE_5__.PostsQueryStatus.PUBLISHED);
+  var automationSettingsLink = "".concat(appUrl).concat(_route_names__WEBPACK_IMPORTED_MODULE_3__.AbsoluteRoutes.Settings);
   var headerTimeframeKey = function () {
     switch (notificationFrequency) {
-      case _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_5__.NotificationFreq.Daily:
+      case _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_4__.NotificationFreq.Daily:
         return _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailHeaderDailyNotificationTimeframe;
-      case _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_5__.NotificationFreq.Weekly:
+      case _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_4__.NotificationFreq.Weekly:
         return _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailHeaderWeeklyNotificationTimeframe;
-      case _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_5__.NotificationFreq.Monthly:
+      case _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_4__.NotificationFreq.Monthly:
         return _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailHeaderMonthlyNotificationTimeframe;
       default:
         return _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailHeaderDailyNotificationTimeframe;
@@ -89,18 +183,18 @@ var EmailTemplate = function (_a) {
   }();
   var footerTimeframeKey = function () {
     switch (notificationFrequency) {
-      case _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_5__.NotificationFreq.Daily:
+      case _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_4__.NotificationFreq.Daily:
         return _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailFooterDailyNotificationTimeframe;
-      case _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_5__.NotificationFreq.Weekly:
+      case _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_4__.NotificationFreq.Weekly:
         return _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailFooterWeeklyNotificationTimeframe;
-      case _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_5__.NotificationFreq.Monthly:
+      case _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_4__.NotificationFreq.Monthly:
         return _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailFooterMonthlyNotificationTimeframe;
       default:
         return _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailFooterDailyNotificationTimeframe;
     }
   }();
   var _b = function () {
-      if (autopostOption === _shared_types_types_user__WEBPACK_IMPORTED_MODULE_7__.AutopostOption.MANUAL) {
+      if (autopostOption === _shared_types_types_user__WEBPACK_IMPORTED_MODULE_6__.AutopostOption.MANUAL) {
         return {
           header: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.recommendedNanopubEmailHeader, {
             count: posts.length,
@@ -127,22 +221,24 @@ var EmailTemplate = function (_a) {
     }(),
     header = _b.header,
     footer = _b.footer;
-  return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_9__.Html, {
-    children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_10__.Head, {}), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_11__.Preview, {
+  return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_11__.Html, {
+    children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_12__.Head, {}), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_13__.Preview, {
       children: header
-    }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_12__.Body, __assign({
-      style: main
+    }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_14__.Body, __assign({
+      style: _email_styles__WEBPACK_IMPORTED_MODULE_10__.main
     }, {
-      children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_13__.Container, {
-        children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_14__.Section, __assign({
-          style: logo
-        }, {
-          children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_15__.Img, {
-            src: LOGO_URL,
-            style: logoImg
+      children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_15__.Container, {
+        children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", {
+          style: {
+            margin: '30px 0px 0px'
+          }
+        }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_EmailRow__WEBPACK_IMPORTED_MODULE_7__.EmailRow, {
+          children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_16__.Img, {
+            src: _constants__WEBPACK_IMPORTED_MODULE_9__.LOGO_URL,
+            style: _email_styles__WEBPACK_IMPORTED_MODULE_10__.logoImg
           })
-        })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_16__.Row, {
-          children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_17__.Heading, __assign({
+        }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_17__.Row, {
+          children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_18__.Heading, __assign({
             as: "h2",
             style: {
               fontSize: 26,
@@ -152,29 +248,30 @@ var EmailTemplate = function (_a) {
           }, {
             children: header
           }))
-        }), posts.slice(0, MAX_POSTS_IN_EMAIL).map(function (post, idx) {
-          return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_14__.Section, {
+        }), posts.slice(0, _constants__WEBPACK_IMPORTED_MODULE_9__.MAX_POSTS_IN_EMAIL).map(function (post, idx) {
+          return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_19__.Section, __assign({
+            style: {
+              margin: '16px 0px 0px'
+            }
+          }, {
             children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_PostCardEmail__WEBPACK_IMPORTED_MODULE_8__.PostCardEmail, {
               post: post
-            }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_16__.Row, __assign({
-              style: __assign({}, boxInfos)
-            }, {
-              children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_18__.Column, __assign({
-                style: containerButton,
-                colSpan: 2
+            }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_EmailRow__WEBPACK_IMPORTED_MODULE_7__.EmailRow, {
+              children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_20__.Button, __assign({
+                style: _email_styles__WEBPACK_IMPORTED_MODULE_10__.button,
+                href: "".concat(appUrl).concat(_route_names__WEBPACK_IMPORTED_MODULE_3__.AbsoluteRoutes.Post(post.id))
               }, {
-                children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_19__.Button, __assign({
-                  style: button,
-                  href: "".concat(appUrl).concat(_route_names__WEBPACK_IMPORTED_MODULE_4__.AbsoluteRoutes.Post(post.id))
-                }, {
-                  children: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailReviewPostButton)
-                }))
+                children: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailReviewPostButton)
               }))
-            }))]
-          }, idx);
-        }), posts.length > MAX_POSTS_IN_EMAIL && (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.Fragment, {
-          children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_16__.Row, {
-            children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_20__.Text, __assign({
+            })]
+          }), idx);
+        }), posts.length > _constants__WEBPACK_IMPORTED_MODULE_9__.MAX_POSTS_IN_EMAIL && (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.Fragment, {
+          children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_EmailRow__WEBPACK_IMPORTED_MODULE_7__.EmailRow, __assign({
+            style: {
+              marginTop: '0px'
+            }
+          }, {
+            children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_21__.Text, __assign({
               style: {
                 justifyContent: 'center',
                 display: 'flex',
@@ -183,34 +280,27 @@ var EmailTemplate = function (_a) {
               }
             }, {
               children: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailMorePostsNote, {
-                count: posts.length - MAX_POSTS_IN_EMAIL
+                count: posts.length - _constants__WEBPACK_IMPORTED_MODULE_9__.MAX_POSTS_IN_EMAIL
               })
             }))
-          }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_16__.Row, __assign({
-            style: __assign({}, boxInfos)
-          }, {
-            children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_18__.Column, __assign({
-              style: containerButton,
-              colSpan: 2
+          })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_EmailRow__WEBPACK_IMPORTED_MODULE_7__.EmailRow, {
+            children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_20__.Button, __assign({
+              style: _email_styles__WEBPACK_IMPORTED_MODULE_10__.button,
+              href: reviewPostsLink
             }, {
-              children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_19__.Button, __assign({
-                style: button,
-                href: reviewPostsLink
-              }, {
-                children: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailSeeAllButton)
-              }))
+              children: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailSeeAllButton)
             }))
-          }))]
-        }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_21__.Markdown, __assign({
-          markdownContainerStyles: footerStyle
+          })]
+        }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_22__.Markdown, __assign({
+          markdownContainerStyles: _email_styles__WEBPACK_IMPORTED_MODULE_10__.footerStyle
         }, {
           children: footer
-        })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_20__.Text, __assign({
-          style: footerStyle
+        })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_21__.Text, __assign({
+          style: _email_styles__WEBPACK_IMPORTED_MODULE_10__.footerStyle
         }, {
           children: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.copyright)
-        })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_20__.Text, __assign({
-          style: __assign(__assign({}, footerStyle), {
+        })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_21__.Text, __assign({
+          style: __assign(__assign({}, _email_styles__WEBPACK_IMPORTED_MODULE_10__.footerStyle), {
             color: 'black',
             fontWeight: 'bold',
             marginTop: '2px'
@@ -223,49 +313,98 @@ var EmailTemplate = function (_a) {
   });
 };
 EmailTemplate.PreviewProps = {
-  posts: [(0,_mocks_posts_mock__WEBPACK_IMPORTED_MODULE_3__.getMockPost)(), (0,_mocks_posts_mock__WEBPACK_IMPORTED_MODULE_3__.getMockPost)(), (0,_mocks_posts_mock__WEBPACK_IMPORTED_MODULE_3__.getMockPost)(), (0,_mocks_posts_mock__WEBPACK_IMPORTED_MODULE_3__.getMockPost)(), (0,_mocks_posts_mock__WEBPACK_IMPORTED_MODULE_3__.getMockPost)()],
-  notificationFrequency: _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_5__.NotificationFreq.Monthly,
-  autopostOption: _shared_types_types_user__WEBPACK_IMPORTED_MODULE_7__.AutopostOption.AI,
+  posts: [],
+  notificationFrequency: _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_4__.NotificationFreq.Monthly,
+  autopostOption: _shared_types_types_user__WEBPACK_IMPORTED_MODULE_6__.AutopostOption.AI,
   appUrl: 'https://sample.com'
 };
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (EmailTemplate);
-var footerStyle = {
-  textAlign: 'center',
-  fontSize: 12,
-  color: 'rgb(0,0,0, 0.7)'
+
+/***/ }),
+
+/***/ "./src/email/LabelsRow.tsx":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Label: () => (/* binding */ Label),
+/* harmony export */   LabelsRow: () => (/* binding */ LabelsRow)
+/* harmony export */ });
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/jsx-runtime.js");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/email/constants.ts");
+/* harmony import */ var _email_styles__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/email/email.styles.ts");
+var __assign = undefined && undefined.__assign || function () {
+  __assign = Object.assign || function (t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+      s = arguments[i];
+      for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+    }
+    return t;
+  };
+  return __assign.apply(this, arguments);
 };
-var main = {
-  backgroundColor: '#f3f4f6',
-  fontFamily: '"Libre Franklin", sans-serif'
+
+
+
+var Label = function (_a) {
+  var label = _a.label,
+    backgroundColor = _a.backgroundColor,
+    borderColor = _a.borderColor,
+    color = _a.color,
+    hasEmoji = _a.hasEmoji;
+  if (!hasEmoji) {
+    return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", __assign({
+      style: __assign(__assign({}, _email_styles__WEBPACK_IMPORTED_MODULE_2__.labelStyle), {
+        backgroundColor: backgroundColor,
+        borderColor: borderColor,
+        color: color
+      })
+    }, {
+      children: label
+    }));
+  } else {
+    var _b = [label.charAt(0), label.slice(1)],
+      emoji = _b[0],
+      text = _b[1];
+    return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("span", __assign({
+      style: __assign(__assign({}, _email_styles__WEBPACK_IMPORTED_MODULE_2__.labelStyle), {
+        backgroundColor: backgroundColor,
+        borderColor: borderColor,
+        color: color
+      })
+    }, {
+      children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", __assign({
+        style: {
+          fontSize: '10px'
+        }
+      }, {
+        children: emoji
+      })), text]
+    }));
+  }
 };
-var logo = {
-  padding: '30px 20px',
-  justifyContent: 'center',
-  display: 'flex',
-  alignItems: 'center'
-};
-var logoImg = {
-  width: '50px',
-  height: '50px',
-  borderRadius: '50%',
-  backgroundColor: 'white',
-  padding: '10px'
-};
-var containerButton = {
-  display: 'flex',
-  justifyContent: 'center',
-  width: '100%'
-};
-var button = {
-  backgroundColor: 'black',
-  borderRadius: 8,
-  color: '#FFF',
-  border: '1px solid rgb(0,0,0, 0.1)',
-  cursor: 'pointer',
-  padding: '12px 16px'
-};
-var boxInfos = {
-  padding: '20px'
+var LabelsRow = function (_a) {
+  var labels = _a.labels,
+    backgroundColor = _a.backgroundColor,
+    borderColor = _a.borderColor,
+    color = _a.color,
+    hasEmoji = _a.hasEmoji;
+  return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", {
+    children: [labels.slice(0, _constants__WEBPACK_IMPORTED_MODULE_1__.MAX_KEYWORDS).map(function (label, idx) {
+      return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Label, {
+        label: label,
+        backgroundColor: backgroundColor,
+        borderColor: borderColor,
+        color: color,
+        hasEmoji: hasEmoji
+      }, idx);
+    }), labels.length > _constants__WEBPACK_IMPORTED_MODULE_1__.MAX_KEYWORDS && (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Label, {
+      label: "+".concat(labels.length - _constants__WEBPACK_IMPORTED_MODULE_1__.MAX_KEYWORDS),
+      backgroundColor: backgroundColor,
+      borderColor: borderColor,
+      color: color
+    })]
+  });
 };
 
 /***/ }),
@@ -279,16 +418,20 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   PostCardEmail: () => (/* binding */ PostCardEmail)
 /* harmony export */ });
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/jsx-runtime.js");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./node_modules/@react-email/section/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./node_modules/@react-email/row/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__("./node_modules/@react-email/column/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__("./node_modules/@react-email/link/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__("./node_modules/@react-email/markdown/dist/index.mjs");
-/* harmony import */ var n3__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__("./node_modules/n3/src/N3DataFactory.js");
-/* harmony import */ var _semantics_patterns_common_use_semantics__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/semantics/patterns/common/use.semantics.ts");
-/* harmony import */ var _semantics_patterns_refs_labels_process_semantics__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/semantics/patterns/refs-labels/process.semantics.ts");
-/* harmony import */ var _shared_types_types_user__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./src/shared/types/types.user.ts");
-/* harmony import */ var _shared_utils_n3_utils__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./src/shared/utils/n3.utils.ts");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__("./node_modules/@react-email/section/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__("./node_modules/@react-email/link/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__("./node_modules/@react-email/text/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__("./node_modules/@react-email/row/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__("./node_modules/@react-email/column/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__("./node_modules/@react-email/markdown/dist/index.mjs");
+/* harmony import */ var _post_posts_helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/post/posts.helper.ts");
+/* harmony import */ var _shared_types_types_user__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/shared/types/types.user.ts");
+/* harmony import */ var _utils_post_utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./src/utils/post.utils.ts");
+/* harmony import */ var _LabelsRow__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./src/email/LabelsRow.tsx");
+/* harmony import */ var _RefCardEmail__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./src/email/RefCardEmail.tsx");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./src/email/constants.ts");
+/* harmony import */ var _email_styles__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__("./src/email/email.styles.ts");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__("./src/email/utils.ts");
 var __assign = undefined && undefined.__assign || function () {
   __assign = Object.assign || function (t) {
     for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -306,16 +449,19 @@ var __assign = undefined && undefined.__assign || function () {
 
 
 
-var MAX_KEYWORDS = 6;
+
+
+
 var PostCardEmail = function (_a) {
+  var _b;
   var post = _a.post;
   var tweet = post.mirrors.find(function (m) {
-    return m.platformId === _shared_types_types_user__WEBPACK_IMPORTED_MODULE_3__.PLATFORM.Twitter;
+    return m.platformId === _shared_types_types_user__WEBPACK_IMPORTED_MODULE_2__.PLATFORM.Twitter;
   });
   var postText = post.generic.thread.reduce(function (_acc, post, ix) {
     return _acc + "".concat(ix > 0 ? '<br><br>' : '').concat(post.content);
   }, '');
-  var label = 'X•Tweet';
+  var label = "X\u2022".concat(post.generic.thread.length > 1 ? 'Thread' : 'Tweet');
   var formatter = new Intl.DateTimeFormat('en-US', {
     month: 'long',
     day: 'numeric',
@@ -323,161 +469,461 @@ var PostCardEmail = function (_a) {
   });
   var date = formatter.format(post.createdAtMs);
   var size = 12;
-  var keywords = parsePostSemantics(post).keywords;
-  return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_5__.Section, __assign({
-    style: content
+  var _c = (0,_utils__WEBPACK_IMPORTED_MODULE_8__.parsePostSemantics)(post),
+    keywords = _c.keywords,
+    references = _c.references;
+  var _d = (0,_post_posts_helper__WEBPACK_IMPORTED_MODULE_1__.getPostStatuses)(post),
+    published = _d.published,
+    pending = _d.pending,
+    nanopubUrl = _d.nanopubUrl;
+  return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_9__.Section, __assign({
+    style: _email_styles__WEBPACK_IMPORTED_MODULE_7__.content
   }, {
-    children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_6__.Row, __assign({
+    children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", __assign({
       style: {
-        padding: '16px 12px',
-        backgroundColor: 'white'
+        marginBottom: '16px',
+        overflow: 'hidden'
       }
     }, {
-      children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_7__.Column, {
-        children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_8__.Link, __assign({
+      children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_10__.Link, __assign({
+        style: {
+          fontSize: '16px',
+          fontStyle: 'normal',
+          fontWeight: '400',
+          lineHeight: '18px',
+          textDecoration: 'none',
+          alignContent: 'center',
+          float: 'left'
+        },
+        target: "_blank",
+        href: "https://x.com/".concat(post.generic.author.username, "/status/").concat((_b = tweet === null || tweet === void 0 ? void 0 : tweet.posted) === null || _b === void 0 ? void 0 : _b.post_id)
+      }, {
+        children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", __assign({
           style: {
-            fontSize: '16px',
-            fontStyle: 'normal',
-            fontWeight: '400',
-            lineHeight: '18px',
-            textDecoration: 'none'
-          },
-          target: "_blank",
-          href: "https://x.com/".concat(post.generic.author.username, "/status/").concat(tweet === null || tweet === void 0 ? void 0 : tweet.id)
+            color: '#6B7280'
+          }
         }, {
-          children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_5__.Section, {
-            children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", __assign({
-              style: {
-                color: '#6B7280'
-              }
-            }, {
-              children: label
-            })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("span", __assign({
-              style: {
-                color: '#4B5563',
-                marginLeft: '8px',
-                marginRight: '6px'
-              }
-            }, {
-              children: [' ', date]
-            })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("svg", __assign({
-              xmlns: "http://www.w3.org/2000/svg",
-              width: size,
-              height: size,
-              viewBox: "0 0 12 12",
-              fill: "none"
-            }, {
-              children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("path", {
-                d: "M5.0999 3.2999H3.2999C2.80285 3.2999 2.3999 3.70285 2.3999 4.1999V8.6999C2.3999 9.19696 2.80285 9.5999 3.2999 9.5999H7.7999C8.29696 9.5999 8.6999 9.19696 8.6999 8.6999V6.8999M6.8999 2.3999H9.5999M9.5999 2.3999V5.0999M9.5999 2.3999L5.0999 6.8999",
-                stroke: "#4B5563",
-                strokeWidth: "1.2",
-                strokeLinecap: "round",
-                strokeLinejoin: "round"
-              })
-            }))]
+          children: label
+        })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("span", __assign({
+          style: {
+            color: '#4B5563',
+            marginLeft: '8px',
+            marginRight: '6px'
+          }
+        }, {
+          children: [' ', date]
+        })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("svg", __assign({
+          xmlns: "http://www.w3.org/2000/svg",
+          width: size,
+          height: size,
+          viewBox: "0 0 12 12",
+          fill: "none"
+        }, {
+          children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("path", {
+            d: "M5.0999 3.2999H3.2999C2.80285 3.2999 2.3999 3.70285 2.3999 4.1999V8.6999C2.3999 9.19696 2.80285 9.5999 3.2999 9.5999H7.7999C8.29696 9.5999 8.6999 9.19696 8.6999 8.6999V6.8999M6.8999 2.3999H9.5999M9.5999 2.3999V5.0999M9.5999 2.3999L5.0999 6.8999",
+            stroke: "#4B5563",
+            strokeWidth: "1.2",
+            strokeLinecap: "round",
+            strokeLinejoin: "round"
           })
+        }))]
+      })), pending && (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_11__.Text, __assign({
+        style: {
+          borderRadius: '4px',
+          border: 'none',
+          padding: '0px 4px',
+          margin: '0px',
+          fontSize: '16px',
+          backgroundColor: '#FFEEDB',
+          color: '#ED8F1C',
+          float: 'right'
+        }
+      }, {
+        children: "For Review"
+      })), published && (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_10__.Link, __assign({
+        href: nanopubUrl
+      }, {
+        children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_11__.Text, __assign({
+          style: {
+            borderRadius: '4px',
+            border: 'none',
+            padding: '0px 4px',
+            margin: '0px',
+            fontSize: '16px',
+            backgroundColor: '#d2e8df',
+            color: '#058153',
+            float: 'right'
+          }
+        }, {
+          children: ["Autopublished", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("svg", __assign({
+            xmlns: "http://www.w3.org/2000/svg",
+            width: size,
+            height: size,
+            viewBox: "0 0 12 12",
+            fill: "none"
+          }, {
+            children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("path", {
+              d: "M5.0999 3.2999H3.2999C2.80285 3.2999 2.3999 3.70285 2.3999 4.1999V8.6999C2.3999 9.19696 2.80285 9.5999 3.2999 9.5999H7.7999C8.29696 9.5999 8.6999 9.19696 8.6999 8.6999V6.8999M6.8999 2.3999H9.5999M9.5999 2.3999V5.0999M9.5999 2.3999L5.0999 6.8999",
+              stroke: "#058153",
+              strokeWidth: "1.2",
+              strokeLinecap: "round",
+              strokeLinejoin: "round"
+            })
+          }))]
         }))
-      })
-    })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(LabelsRow, {
-      keywords: keywords,
+      }))]
+    })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_LabelsRow__WEBPACK_IMPORTED_MODULE_4__.LabelsRow, {
+      labels: keywords,
       backgroundColor: "#F5FCFC",
       color: "#498283",
       borderColor: "#BDD9D7"
-    }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_6__.Row, __assign({
-      style: __assign(__assign({}, boxInfos), {
+    }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_12__.Row, __assign({
+      style: {
         paddingBottom: '0'
-      })
+      }
     }, {
-      children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_7__.Column, {
-        children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_9__.Markdown, __assign({
-          markdownContainerStyles: paragraph
+      children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_13__.Column, {
+        children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_14__.Markdown, __assign({
+          markdownContainerStyles: _email_styles__WEBPACK_IMPORTED_MODULE_7__.paragraph
         }, {
           children: postText
         }))
       })
-    }))]
-  }));
-};
-var Label = function (_a) {
-  var keyword = _a.keyword,
-    backgroundColor = _a.backgroundColor,
-    borderColor = _a.borderColor,
-    color = _a.color;
-  return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("span", __assign({
-    style: __assign(__assign({}, label), {
-      backgroundColor: backgroundColor,
-      borderColor: borderColor,
-      color: color
-    })
-  }, {
-    children: keyword
-  }));
-};
-var LabelsRow = function (_a) {
-  var keywords = _a.keywords,
-    backgroundColor = _a.backgroundColor,
-    borderColor = _a.borderColor,
-    color = _a.color;
-  return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", __assign({
-    style: labelContainer
-  }, {
-    children: [keywords.slice(0, MAX_KEYWORDS).map(function (keyword, idx) {
-      return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Label, {
-        keyword: keyword,
-        backgroundColor: backgroundColor,
-        borderColor: borderColor,
-        color: color
-      }, idx);
-    }), keywords.length > MAX_KEYWORDS && (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Label, {
-      keyword: "+".concat(keywords.length - MAX_KEYWORDS),
-      backgroundColor: backgroundColor,
-      borderColor: borderColor,
-      color: color
+    })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(PostCardReferencesEmail, {
+      references: references
     })]
   }));
 };
-var parsePostSemantics = function (post) {
-  var _a, _b, _c, _d, _e, _f;
-  var store = (0,_semantics_patterns_common_use_semantics__WEBPACK_IMPORTED_MODULE_1__.semanticStringToStore)(post.semantics);
-  var originalStore = (0,_semantics_patterns_common_use_semantics__WEBPACK_IMPORTED_MODULE_1__.semanticStringToStore)((_a = post.originalParsed) === null || _a === void 0 ? void 0 : _a.semantics);
-  var KEYWORD_PREDICATE = (_e = (_d = (_c = (_b = post.originalParsed) === null || _b === void 0 ? void 0 : _b.support) === null || _c === void 0 ? void 0 : _c.ontology) === null || _d === void 0 ? void 0 : _d.keyword_predicate) === null || _e === void 0 ? void 0 : _e.uri;
-  var keywords = function () {
-    if (!store || !KEYWORD_PREDICATE) return [];
-    return (0,_shared_utils_n3_utils__WEBPACK_IMPORTED_MODULE_4__.mapStoreElements)(store, function (quad) {
-      return quad.object.value;
-    }, null, n3__WEBPACK_IMPORTED_MODULE_10__["default"].namedNode(KEYWORD_PREDICATE));
-  }();
-  var refs = (0,_semantics_patterns_refs_labels_process_semantics__WEBPACK_IMPORTED_MODULE_2__.processSemantics)(originalStore, store, (_f = post.originalParsed) === null || _f === void 0 ? void 0 : _f.support);
-  console.log(refs);
-  return {
-    keywords: keywords,
-    refs: refs
+var PostCardReferenceEmail = function (_a) {
+  var _b = _a.reference,
+    refUrl = _b[0],
+    refData = _b[1],
+    referenceNumber = _a.referenceNumber;
+  var _c = refData.meta || {},
+    title = _c.title,
+    summary = _c.summary,
+    item_type = _c.item_type;
+  return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", __assign({
+    style: {}
+  }, {
+    children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_LabelsRow__WEBPACK_IMPORTED_MODULE_4__.LabelsRow, {
+      labels: refData.labelsUris,
+      backgroundColor: "#f0f9ff",
+      color: "#1f73b7",
+      borderColor: "#adcce5",
+      hasEmoji: true
+    }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", {
+      style: {
+        margin: '8px 0px'
+      }
+    }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_RefCardEmail__WEBPACK_IMPORTED_MODULE_5__.RefCardEmail, {
+      ix: referenceNumber,
+      url: refUrl,
+      title: title,
+      description: summary,
+      itemType: item_type ? (0,_utils_post_utils__WEBPACK_IMPORTED_MODULE_3__.zoteroItemTypeDisplay)(item_type) : item_type
+    })]
+  }));
+};
+var PostCardReferencesEmail = function (_a) {
+  var references = _a.references;
+  return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", {
+    children: [references.slice(0, _constants__WEBPACK_IMPORTED_MODULE_6__.MAX_REFERENCES).map(function (reference, idx) {
+      return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(PostCardReferenceEmail, {
+        reference: reference,
+        referenceNumber: idx
+      }, idx);
+    }), references.length > _constants__WEBPACK_IMPORTED_MODULE_6__.MAX_REFERENCES && (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_11__.Text, __assign({
+      style: {
+        color: '#6B7280',
+        fontSize: '14px',
+        margin: '0px'
+      }
+    }, {
+      children: ["+", references.length - _constants__WEBPACK_IMPORTED_MODULE_6__.MAX_REFERENCES, " more references"]
+    }))]
+  });
+};
+
+/***/ }),
+
+/***/ "./src/email/RefCardEmail.tsx":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   RefCardEmail: () => (/* binding */ RefCardEmail)
+/* harmony export */ });
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/jsx-runtime.js");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/@react-email/button/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./node_modules/@react-email/section/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./node_modules/@react-email/row/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./node_modules/@react-email/text/dist/index.mjs");
+/* harmony import */ var grommet__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./node_modules/grommet/es6/components/Header/Header.js");
+/* harmony import */ var _email_styles__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/email/email.styles.ts");
+var __assign = undefined && undefined.__assign || function () {
+  __assign = Object.assign || function (t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+      s = arguments[i];
+      for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+    }
+    return t;
   };
+  return __assign.apply(this, arguments);
+};
+
+
+
+
+var truncate = function (text, size) {
+  return text.slice(0, size) + (text.length > size ? '...' : '');
+};
+function getTweetId(url) {
+  var regex = /(?:twitter\.com|x\.com)\/(?:#!\/)?\w+\/status\/(\d+)/;
+  var match = url.match(regex);
+  return match ? match[1] : undefined;
+}
+var RefCardEmail = function (props) {
+  var titleTruncated = props.title && truncate(props.title, 50);
+  var descriptionTruncated = props.description && truncate(props.description, 150);
+  var tweetId = getTweetId(props.url);
+  var content = function () {
+    if (!titleTruncated && !props.description) {
+      var urlTruncated = truncate(props.url, 50);
+      return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_2__.Button, __assign({
+        href: props.url,
+        target: "_blank"
+      }, {
+        children: urlTruncated
+      }));
+    }
+    return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_3__.Section, __assign({
+      style: {
+        borderRadius: '12px',
+        border: '1px solid #D1D5DB',
+        width: '100%',
+        padding: '6px 12px'
+      }
+    }, {
+      children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_4__.Row, {
+        children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", __assign({
+          style: {
+            overflow: 'hidden'
+          }
+        }, {
+          children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_5__.Text, __assign({
+            style: __assign(__assign({}, _email_styles__WEBPACK_IMPORTED_MODULE_1__.cardItemStyle), {
+              borderRadius: '4px',
+              border: 'none',
+              color: '#6B7280',
+              backgroundColor: '#E5E7EB',
+              padding: '0px 4px',
+              float: 'left'
+            })
+          }, {
+            children: ["Reference ", props.ix + 1]
+          })), props.itemType && (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_5__.Text, __assign({
+            style: __assign(__assign({}, _email_styles__WEBPACK_IMPORTED_MODULE_1__.cardItemStyle), {
+              borderRadius: '4px',
+              border: 'none',
+              color: '#6B7280',
+              float: 'right'
+            })
+          }, {
+            children: props.itemType + (tweetId ? ' from Quoted Tweet' : '')
+          }))]
+        }))
+      }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_4__.Row, {
+        children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(grommet__WEBPACK_IMPORTED_MODULE_6__.Header, __assign({
+          color: "#374151",
+          style: {
+            fontWeight: '500'
+          }
+        }, {
+          children: titleTruncated
+        }))
+      }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_5__.Text, __assign({
+        style: __assign(__assign({}, _email_styles__WEBPACK_IMPORTED_MODULE_1__.cardItemStyle), {
+          lineHeight: '18px',
+          color: '#6B7280'
+        })
+      }, {
+        children: descriptionTruncated
+      })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_3__.Section, __assign({
+        style: {
+          overflow: 'hidden'
+        }
+      }, {
+        children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_5__.Text, __assign({
+          style: __assign(__assign({}, _email_styles__WEBPACK_IMPORTED_MODULE_1__.cardItemStyle), {
+            color: '#337FBD',
+            fontWeight: '400'
+          })
+        }, {
+          children: props.url
+        }))
+      }))]
+    }));
+  }();
+  return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_2__.Button, __assign({
+    href: props.url,
+    style: {
+      textDecoration: 'none',
+      color: 'inherit',
+      fontWeight: 'normal',
+      width: '100%'
+    },
+    target: "_blank"
+  }, {
+    children: content
+  }));
+};
+
+/***/ }),
+
+/***/ "./src/email/constants.ts":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   LOGO_URL: () => (/* binding */ LOGO_URL),
+/* harmony export */   MAX_KEYWORDS: () => (/* binding */ MAX_KEYWORDS),
+/* harmony export */   MAX_POSTS_IN_EMAIL: () => (/* binding */ MAX_POSTS_IN_EMAIL),
+/* harmony export */   MAX_REFERENCES: () => (/* binding */ MAX_REFERENCES)
+/* harmony export */ });
+var MAX_POSTS_IN_EMAIL = 3;
+var LOGO_URL = 'https://development--sensemakers.netlify.app/icons/logo-192.png';
+var MAX_KEYWORDS = 2;
+var MAX_REFERENCES = 1;
+
+/***/ }),
+
+/***/ "./src/email/email.styles.ts":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   button: () => (/* binding */ button),
+/* harmony export */   cardItemStyle: () => (/* binding */ cardItemStyle),
+/* harmony export */   content: () => (/* binding */ content),
+/* harmony export */   footerStyle: () => (/* binding */ footerStyle),
+/* harmony export */   labelStyle: () => (/* binding */ labelStyle),
+/* harmony export */   logoImg: () => (/* binding */ logoImg),
+/* harmony export */   main: () => (/* binding */ main),
+/* harmony export */   paragraph: () => (/* binding */ paragraph)
+/* harmony export */ });
+var footerStyle = {
+  textAlign: 'center',
+  fontSize: 12,
+  color: 'rgb(0,0,0, 0.7)'
+};
+var main = {
+  backgroundColor: '#f3f4f6',
+  fontFamily: '"Libre Franklin", sans-serif'
+};
+var logoImg = {
+  width: '50px',
+  height: '50px',
+  borderRadius: '50%',
+  backgroundColor: 'white',
+  padding: '10px'
+};
+var button = {
+  backgroundColor: 'black',
+  borderRadius: 8,
+  color: '#FFF',
+  border: '1px solid rgb(0,0,0, 0.1)',
+  cursor: 'pointer',
+  padding: '12px 16px'
 };
 var content = {
   border: '1px solid rgb(0,0,0, 0.1)',
   borderRadius: '3px',
   overflow: 'hidden',
-  padding: '20px',
+  padding: '12px',
   backgroundColor: 'white'
-};
-var boxInfos = {
-  // padding: '20px',
-  // backgroundColor: 'white',
 };
 var paragraph = {
   fontSize: 16
 };
-var labelContainer = {
-  display: 'flex',
-  flexWrap: 'wrap',
-  gap: '6px',
-  justifyContent: 'flex-start'
-};
-var label = {
+var labelStyle = {
   padding: '4px 10px',
   borderRadius: '50px',
-  border: '1px solid'
+  border: '1px solid',
+  maxHeight: '26px',
+  alignItems: 'center',
+  display: 'inline-block',
+  verticalAlign: 'middle',
+  marginRight: '6px'
+};
+var cardItemStyle = {
+  margin: '4px 0px'
+};
+
+/***/ }),
+
+/***/ "./src/email/utils.ts":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   parsePostSemantics: () => (/* binding */ parsePostSemantics)
+/* harmony export */ });
+/* harmony import */ var n3__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./node_modules/n3/src/N3DataFactory.js");
+/* harmony import */ var _semantics_patterns_common_use_semantics__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/semantics/patterns/common/use.semantics.ts");
+/* harmony import */ var _semantics_patterns_refs_labels_process_semantics__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/semantics/patterns/refs-labels/process.semantics.ts");
+/* harmony import */ var _shared_utils_n3_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/shared/utils/n3.utils.ts");
+var __assign = undefined && undefined.__assign || function () {
+  __assign = Object.assign || function (t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+      s = arguments[i];
+      for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+    }
+    return t;
+  };
+  return __assign.apply(this, arguments);
+};
+
+
+
+
+var parsePostSemantics = function (post) {
+  var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+  var store = (0,_semantics_patterns_common_use_semantics__WEBPACK_IMPORTED_MODULE_0__.semanticStringToStore)(post.semantics);
+  var originalStore = (0,_semantics_patterns_common_use_semantics__WEBPACK_IMPORTED_MODULE_0__.semanticStringToStore)((_a = post.originalParsed) === null || _a === void 0 ? void 0 : _a.semantics);
+  var KEYWORD_PREDICATE = (_e = (_d = (_c = (_b = post.originalParsed) === null || _b === void 0 ? void 0 : _b.support) === null || _c === void 0 ? void 0 : _c.ontology) === null || _d === void 0 ? void 0 : _d.keyword_predicate) === null || _e === void 0 ? void 0 : _e.uri;
+  var keywords = function () {
+    if (!store || !KEYWORD_PREDICATE) return [];
+    return (0,_shared_utils_n3_utils__WEBPACK_IMPORTED_MODULE_2__.mapStoreElements)(store, function (quad) {
+      return quad.object.value;
+    }, null, n3__WEBPACK_IMPORTED_MODULE_3__["default"].namedNode(KEYWORD_PREDICATE));
+  }();
+  var refs = (0,_semantics_patterns_refs_labels_process_semantics__WEBPACK_IMPORTED_MODULE_1__.processSemantics)(originalStore, store, (_f = post.originalParsed) === null || _f === void 0 ? void 0 : _f.support);
+  var allRefs = Array.from(refs.entries()).reverse();
+  var labelsOntology = (_j = (_h = (_g = post.originalParsed) === null || _g === void 0 ? void 0 : _g.support) === null || _h === void 0 ? void 0 : _h.ontology) === null || _j === void 0 ? void 0 : _j.semantic_predicates;
+  var getLabelDisplayName = function (labelUri) {
+    var label_ontology = labelsOntology ? labelsOntology.find(function (item) {
+      return item.uri === labelUri;
+    }) : undefined;
+    if (!label_ontology) throw new Error("Unexpected ontology not found for ".concat(labelUri));
+    return label_ontology.display_name;
+  };
+  var references = allRefs.map(function (_a) {
+    var ref = _a[0],
+      value = _a[1];
+    var labelsDisplayNames = value.labelsUris.map(getLabelDisplayName);
+    return [ref, __assign(__assign({}, value), {
+      labelsUris: labelsDisplayNames
+    })];
+  });
+  return {
+    keywords: keywords,
+    references: references
+  };
 };
 
 /***/ }),
@@ -576,6 +1022,32 @@ var I18Keys;
   I18Keys["emailMorePostsNoteSingular"] = "s052_one";
   I18Keys["emailMorePostsNotePlural"] = "s052_other";
   I18Keys["copyright"] = "s053";
+  I18Keys["downloads"] = "s054";
+  I18Keys["installApp"] = "s055c";
+  I18Keys["usingApp"] = "s055";
+  I18Keys["publishingAutomation"] = "s056";
+  I18Keys["notificationsSettings"] = "s057";
+  I18Keys["notificationsSettingsExplainer"] = "s057c";
+  I18Keys["publishingAutomationExplainer"] = "s056c";
+  I18Keys["getSupport"] = "s058";
+  I18Keys["yourAccounts"] = "s059";
+  I18Keys["XTwitter"] = "s060c";
+  I18Keys["emailAddress"] = "s060";
+  I18Keys["ORCID"] = "s061";
+  I18Keys["notificationSettingsOpt1Title"] = "s062";
+  I18Keys["notificationSettingsOpt1Desc"] = "s063";
+  I18Keys["notificationSettingsOpt2Title"] = "s064";
+  I18Keys["notificationSettingsOpt2Desc"] = "s065";
+  I18Keys["notificationSettingsOpt3Title"] = "s066";
+  I18Keys["notificationSettingsOpt3Desc"] = "s067";
+  I18Keys["notificationSettingsOpt4Title"] = "s068";
+  I18Keys["notificationSettingsOpt4Desc"] = "s069";
+  I18Keys["publishingAutomationOpt1Title"] = "s070";
+  I18Keys["publishingAutomationOpt1Desc"] = "s071";
+  I18Keys["publishingAutomationOpt2Title"] = "s072";
+  I18Keys["publishingAutomationOpt2Desc"] = "s073";
+  I18Keys["publishingAutomationOpt3Title"] = "s074";
+  I18Keys["publishingAutomationOpt3Desc"] = "s075";
 })(I18Keys || (I18Keys = {}));
 var check = new Set();
 for (var _i = 0, _b = Object.entries(I18Keys); _i < _b.length; _i++) {
@@ -583,7 +1055,7 @@ for (var _i = 0, _b = Object.entries(I18Keys); _i < _b.length; _i++) {
   if (check.has(entry[1])) throw new Error("repeated value ".concat(entry[1], " for I18Keys key ").concat(entry[0]));
   check.add(entry[1]);
 }
-var translationENG = (_a = {}, _a[I18Keys.introTitle] = 'Your ideas matter again', _a[I18Keys.introSubtitle] = 'Transform your social media activity into meaningful scientific contributions', _a[I18Keys.introParagraph1] = 'Social media posts are a valuable source of scientific knowledge, but they get buried in noisy feeds and locked away by platforms.', _a[I18Keys.introParagraph2] = 'Harness this knowledge by converting your social media posts into nanopublications, making your content <b>FAIR</b> (<b>F</b>indable, <b>A</b>ccessible, <b>I</b>nteroperable and <b>R</b>eusable), so your contributions can get proper recognition', _a[I18Keys.emailInputBtn] = 'Get started', _a[I18Keys.connectSocialsTitle] = 'Connect your socials', _a[I18Keys.connectSocialsParagraph] = 'Link your X·Twitter account to start transforming your tweets into nanopublications.', _a[I18Keys.connectSocialsParagraph2] = 'By connecting, you can easily identify and FAIRify your valuable scientific insights.', _a[I18Keys.signInX] = 'Sign in with X', _a[I18Keys.drafts] = 'Drafts', _a[I18Keys.introNextLabel] = 'Next Tip', _a[I18Keys.introFinalLabel] = 'Let’s nanopublish!', _a[I18Keys.introHeading01] = 'We’re finding your science posts', _a[I18Keys.introText011] = 'Our AI is scanning your latest X · Twitter posts to identify and tag your science-related content.  These tags make your posts machine-readable, enhancing their discoverability and usability. ', _a[I18Keys.introText012] = 'The posts tagged as "For Review" are those our AI recommends for nanopublishing.', _a[I18Keys.introHeading02] = 'Nanopublish your research and recommendations ', _a[I18Keys.introText021] = 'All your research-related posts make valuable nanopublications!', _a[I18Keys.introText022] = "Posts mentioning references with a DOI are perfect candidates, but don't stop there. Consider sharing research ideas, conference highlights, grant information, or job opportunities as well.", _a[I18Keys.introHeading03] = 'We’ve got you covered!', _a[I18Keys.introText031] = "As you continue posting on X · Twitter, we'll monitor your feed for relevant content to ensure your future research remains FAIR and under your control.", _a[I18Keys.introText032] = 'You can adjust your notification and publishing automation settings anytime in your preferences.', _a[I18Keys.connectAccounts] = 'Connect your accounts', _a[I18Keys.connectParagraph] = 'SenseNet loads your X (Twitter) feed and analyzes your posts using AI to deduct keywords and relations, which can be used to better interpret the meaning of your content.', _a[I18Keys.errorConnectTwitter] = 'Error connecting Twitter', _a[I18Keys.yourPublications] = 'Your publications', _a[I18Keys.TweetX] = 'X · Tweet', _a[I18Keys.ThreadX] = 'X · Thread', _a[I18Keys.addKeyword] = 'add keyword', _a[I18Keys.profile] = 'Profile', _a[I18Keys.updateAvailable] = 'An update is available, ', _a[I18Keys.updateNow] = 'update now', _a[I18Keys.installPrompt] = 'Please install this app, ', _a[I18Keys.installNow] = 'install', _a[I18Keys.noMorePosts] = 'No more posts to show', _a[I18Keys.settings] = 'Settings', _a[I18Keys.logout] = 'Logout', _a[I18Keys.ignore] = 'Ignore', _a[I18Keys.publish] = 'Nanopublish', _a[I18Keys.postsNames] = 'Nanopubs', _a[I18Keys.connectOrcidTitle] = 'Your data, your identity', _a[I18Keys.connectOrcidPar01] = 'Your nanopublications are owned by you and tied to your identity through cryptographic signing. You’ll sign these nanopubs with a wallet we created for you using your email. ', _a[I18Keys.connectOrcidPar02] = 'If you want, you can also <b>connect your ORCID</b> account to link your nanopubs to your professional profile, enhancing your recognition within the scientific community.', _a[I18Keys.connectOrcid] = 'Connect ORCID', _a[I18Keys.continue] = 'Continue', _a[I18Keys.publishWarningTitle] = 'Share your research', _a[I18Keys.publishWarningPar01] = 'Are you ready to publish this nanopublication?', _a[I18Keys.publishWarningPar02] = 'Once published, your nanopub will be added to the decentralized nanopublications network, making your research accessible and verifiable. ', _a[I18Keys.publishWarningPar03] = 'While you can retract a nanopub to make it invisible to most users, <b>it cannot be deleted</b>. This ensures the integrity of the scientific record.', _a[I18Keys.returnToDraft] = 'No, return to draft', _a[I18Keys.yesPublish] = 'Yes, I want to publish', _a[I18Keys.publishing] = 'Publishing', _a[I18Keys.publishedTitle] = 'Your nanopublication is live!', _a[I18Keys.publishedText] = 'Your post has been nanopublished.', _a[I18Keys.nextPost] = 'Next post for review', _a[I18Keys.openPublished] = 'See live nanopublication', _a[I18Keys.edit] = 'Edit', _a[I18Keys.retract] = 'Retract', _a[I18Keys.cancel] = 'Cancel', _a[I18Keys.recommendedNanopubEmailHeader] = '', _a[I18Keys.recommendedNanopubEmailHeaderSingular] = 'You have {{count}} potential nanopublication ready for review {{timeframe}}.', _a[I18Keys.recommendedNanopubEmailHeaderPlural] = 'You have {{count}} potential nanopublications ready for review {{timeframe}}.', _a[I18Keys.recommendedNanopubEmailFooter] = "This is your {{timeframe}} nanopub recommendation summary. You can [edit your email settings here]({{emailSettingsLink}}). Don't see a post you'd like to nanopublish? [Review all your recent posts here]({{ignoredPostsLink}}).", _a[I18Keys.publishedNanopubEmailHeader] = '', _a[I18Keys.publishedNanopubEmailHeaderSingular] = "We've automatically published {{count}} post {{timeframe}}.", _a[I18Keys.publishedNanopubEmailHeaderPlural] = "We've automatically published {{count}} posts {{timeframe}}.", _a[I18Keys.publishedNanopubEmailFooter] = 'These posts were automatically published according to your automation settings. You can [change your automation settings here]({{automationSettingsLink}}).\n\nSee any mistakes in your nanopublications? [Edit or retract your automated nanopublications here]({{publishedPostsLink}}).', _a[I18Keys.emailHeaderDailyNotificationTimeframe] = 'today', _a[I18Keys.emailHeaderWeeklyNotificationTimeframe] = 'this week', _a[I18Keys.emailHeaderMonthlyNotificationTimeframe] = 'this month', _a[I18Keys.emailFooterDailyNotificationTimeframe] = 'daily', _a[I18Keys.emailFooterWeeklyNotificationTimeframe] = 'weekly', _a[I18Keys.emailFooterMonthlyNotificationTimeframe] = 'monthly', _a[I18Keys.emailReviewPostButton] = 'Review Post', _a[I18Keys.emailSeeAllButton] = 'See All', _a[I18Keys.emailMorePostsNote] = '', _a[I18Keys.emailMorePostsNoteSingular] = '+{{count}} more post', _a[I18Keys.emailMorePostsNotePlural] = '+{{count}} more posts', _a[I18Keys.copyright] = 'Copyright © 2024', _a);
+var translationENG = (_a = {}, _a[I18Keys.introTitle] = 'Your ideas matter again', _a[I18Keys.introSubtitle] = 'Transform your social media activity into meaningful scientific contributions', _a[I18Keys.introParagraph1] = 'Social media posts are a valuable source of scientific knowledge, but they get buried in noisy feeds and locked away by platforms.', _a[I18Keys.introParagraph2] = 'Harness this knowledge by converting your social media posts into nanopublications, making your content <b>FAIR</b> (<b>F</b>indable, <b>A</b>ccessible, <b>I</b>nteroperable and <b>R</b>eusable), so your contributions can get proper recognition', _a[I18Keys.emailInputBtn] = 'Get started', _a[I18Keys.connectSocialsTitle] = 'Connect your socials', _a[I18Keys.connectSocialsParagraph] = 'Link your X·Twitter account to start transforming your tweets into nanopublications.', _a[I18Keys.connectSocialsParagraph2] = 'By connecting, you can easily identify and FAIRify your valuable scientific insights.', _a[I18Keys.signInX] = 'Sign in with X', _a[I18Keys.drafts] = 'Drafts', _a[I18Keys.introNextLabel] = 'Next Tip', _a[I18Keys.introFinalLabel] = 'Let’s nanopublish!', _a[I18Keys.introHeading01] = 'We’re finding your science posts', _a[I18Keys.introText011] = 'Our AI is scanning your latest X · Twitter posts to identify and tag your science-related content.  These tags make your posts machine-readable, enhancing their discoverability and usability. ', _a[I18Keys.introText012] = 'The posts tagged as "For Review" are those our AI recommends for nanopublishing.', _a[I18Keys.introHeading02] = 'Nanopublish your research and recommendations ', _a[I18Keys.introText021] = 'All your research-related posts make valuable nanopublications!', _a[I18Keys.introText022] = "Posts mentioning references with a DOI are perfect candidates, but don't stop there. Consider sharing research ideas, conference highlights, grant information, or job opportunities as well.", _a[I18Keys.introHeading03] = 'We’ve got you covered!', _a[I18Keys.introText031] = "As you continue posting on X · Twitter, we'll monitor your feed for relevant content to ensure your future research remains FAIR and under your control.", _a[I18Keys.introText032] = 'You can adjust your notification and publishing automation settings anytime in your preferences.', _a[I18Keys.connectAccounts] = 'Connect your accounts', _a[I18Keys.connectParagraph] = 'SenseNet loads your X (Twitter) feed and analyzes your posts using AI to deduct keywords and relations, which can be used to better interpret the meaning of your content.', _a[I18Keys.errorConnectTwitter] = 'Error connecting Twitter', _a[I18Keys.yourPublications] = 'Your publications', _a[I18Keys.TweetX] = 'X · Tweet', _a[I18Keys.ThreadX] = 'X · Thread', _a[I18Keys.addKeyword] = 'add keyword', _a[I18Keys.profile] = 'Profile', _a[I18Keys.updateAvailable] = 'An update is available, ', _a[I18Keys.updateNow] = 'update now', _a[I18Keys.installPrompt] = 'Please install this app, ', _a[I18Keys.installNow] = 'install', _a[I18Keys.noMorePosts] = 'No more posts to show', _a[I18Keys.settings] = 'Settings', _a[I18Keys.logout] = 'Logout', _a[I18Keys.ignore] = 'Ignore', _a[I18Keys.publish] = 'Nanopublish', _a[I18Keys.postsNames] = 'Nanopubs', _a[I18Keys.connectOrcidTitle] = 'Your data, your identity', _a[I18Keys.connectOrcidPar01] = 'Your nanopublications are owned by you and tied to your identity through cryptographic signing. You’ll sign these nanopubs with a wallet we created for you using your email. ', _a[I18Keys.connectOrcidPar02] = 'If you want, you can also <b>connect your ORCID</b> account to link your nanopubs to your professional profile, enhancing your recognition within the scientific community.', _a[I18Keys.connectOrcid] = 'Connect ORCID', _a[I18Keys.continue] = 'Continue', _a[I18Keys.publishWarningTitle] = 'Share your research', _a[I18Keys.publishWarningPar01] = 'Are you ready to publish this nanopublication?', _a[I18Keys.publishWarningPar02] = 'Once published, your nanopub will be added to the decentralized nanopublications network, making your research accessible and verifiable. ', _a[I18Keys.publishWarningPar03] = 'While you can retract a nanopub to make it invisible to most users, <b>it cannot be deleted</b>. This ensures the integrity of the scientific record.', _a[I18Keys.returnToDraft] = 'No, return to draft', _a[I18Keys.yesPublish] = 'Yes, I want to publish', _a[I18Keys.publishing] = 'Publishing', _a[I18Keys.publishedTitle] = 'Your nanopublication is live!', _a[I18Keys.publishedText] = 'Your post has been nanopublished.', _a[I18Keys.nextPost] = 'Next post for review', _a[I18Keys.openPublished] = 'See live nanopublication', _a[I18Keys.edit] = 'Edit', _a[I18Keys.retract] = 'Retract', _a[I18Keys.cancel] = 'Cancel', _a[I18Keys.recommendedNanopubEmailHeader] = '', _a[I18Keys.recommendedNanopubEmailHeaderSingular] = 'You have {{count}} potential nanopublication ready for review {{timeframe}}.', _a[I18Keys.recommendedNanopubEmailHeaderPlural] = 'You have {{count}} potential nanopublications ready for review {{timeframe}}.', _a[I18Keys.recommendedNanopubEmailFooter] = "This is your {{timeframe}} nanopub recommendation summary. You can [edit your email settings here]({{emailSettingsLink}}). Don't see a post you'd like to nanopublish? [Review all your recent posts here]({{ignoredPostsLink}}).", _a[I18Keys.publishedNanopubEmailHeader] = '', _a[I18Keys.publishedNanopubEmailHeaderSingular] = "We've automatically published {{count}} post {{timeframe}}.", _a[I18Keys.publishedNanopubEmailHeaderPlural] = "We've automatically published {{count}} posts {{timeframe}}.", _a[I18Keys.publishedNanopubEmailFooter] = 'These posts were automatically published according to your automation settings. You can [change your automation settings here]({{automationSettingsLink}}).\n\nSee any mistakes in your nanopublications? [Edit or retract your automated nanopublications here]({{publishedPostsLink}}).', _a[I18Keys.emailHeaderDailyNotificationTimeframe] = 'today', _a[I18Keys.emailHeaderWeeklyNotificationTimeframe] = 'this week', _a[I18Keys.emailHeaderMonthlyNotificationTimeframe] = 'this month', _a[I18Keys.emailFooterDailyNotificationTimeframe] = 'daily', _a[I18Keys.emailFooterWeeklyNotificationTimeframe] = 'weekly', _a[I18Keys.emailFooterMonthlyNotificationTimeframe] = 'monthly', _a[I18Keys.emailReviewPostButton] = 'Review Post', _a[I18Keys.emailSeeAllButton] = 'See All', _a[I18Keys.emailMorePostsNote] = '', _a[I18Keys.emailMorePostsNoteSingular] = '+{{count}} more post', _a[I18Keys.emailMorePostsNotePlural] = '+{{count}} more posts', _a[I18Keys.copyright] = 'Copyright © 2024', _a[I18Keys.downloads] = 'Downloads', _a[I18Keys.installApp] = 'Install application on your device', _a[I18Keys.usingApp] = 'Using Senscast', _a[I18Keys.publishingAutomation] = 'Publishing Automation', _a[I18Keys.publishingAutomationExplainer] = 'TBD', _a[I18Keys.notificationsSettings] = 'Notification Settings', _a[I18Keys.notificationsSettingsExplainer] = 'Choose how often you’d like to receive email notifications.', _a[I18Keys.getSupport] = 'Get Support', _a[I18Keys.yourAccounts] = 'Your Accounts', _a[I18Keys.XTwitter] = 'X · Twitter', _a[I18Keys.emailAddress] = 'Email Address', _a[I18Keys.ORCID] = 'ORCID', _a[I18Keys.notificationSettingsOpt1Title] = 'Daily summary', _a[I18Keys.notificationSettingsOpt1Desc] = 'Receive a daily digest email of new relevant X · Twitter post that have been identified or autopublished.', _a[I18Keys.notificationSettingsOpt2Title] = 'Weekly summary', _a[I18Keys.notificationSettingsOpt2Desc] = 'Receive a weekly email with a list of all posts that have been identified or autopublished that week.', _a[I18Keys.notificationSettingsOpt3Title] = 'Monthly summary', _a[I18Keys.notificationSettingsOpt3Desc] = 'Receive a monthly email with a list of all posts that have been identified or autopublished that month.', _a[I18Keys.notificationSettingsOpt4Title] = 'I don’t want to receive notifications', _a[I18Keys.notificationSettingsOpt4Desc] = 'We won’t send you any email notifications, so you’ll need to check the app for updates.', _a[I18Keys.publishingAutomationOpt1Title] = 'AI', _a[I18Keys.publishingAutomationOpt1Desc] = 'Use AI TBD', _a[I18Keys.publishingAutomationOpt2Title] = 'Deterministic', _a[I18Keys.publishingAutomationOpt2Desc] = 'use citoid', _a[I18Keys.publishingAutomationOpt3Title] = 'Manual', _a[I18Keys.publishingAutomationOpt3Desc] = 'No autopost', _a);
 i18next__WEBPACK_IMPORTED_MODULE_0__["default"].use(react_i18next__WEBPACK_IMPORTED_MODULE_1__.initReactI18next).init({
   resources: {
     ENG: {
@@ -600,453 +1072,51 @@ i18next__WEBPACK_IMPORTED_MODULE_0__["default"].use(react_i18next__WEBPACK_IMPOR
 
 /***/ }),
 
-/***/ "./src/mocks/posts.mock.ts":
+/***/ "./src/post/posts.helper.ts":
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   getMockPost: () => (/* binding */ getMockPost)
+/* harmony export */   concatenateThread: () => (/* binding */ concatenateThread),
+/* harmony export */   getPostStatuses: () => (/* binding */ getPostStatuses)
 /* harmony export */ });
-/* harmony import */ var _shared_types_types_platform_posts__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/shared/types/types.platform.posts.ts");
+/* harmony import */ var _app_config__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/app/config.ts");
 /* harmony import */ var _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/shared/types/types.posts.ts");
 /* harmony import */ var _shared_types_types_user__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/shared/types/types.user.ts");
 
 
 
-var getMockPost = function () {
-  var authorId = 'test-author-id';
-  var createdAtMs = Date.now();
-  var defaultGeneric = {
-    thread: [{
-      content: 'this is such a cool idea! https://arxiv.org/abs/2312.05230'
-    }],
-    author: {
-      id: '123456',
-      name: 'test author',
-      platformId: _shared_types_types_user__WEBPACK_IMPORTED_MODULE_2__.PLATFORM.Twitter,
-      username: 'test_author'
-    }
-  };
-  var originalParsed = last_output;
-  var post = {
-    id: 'post-id',
-    createdAtMs: createdAtMs,
-    authorId: authorId,
-    generic: defaultGeneric,
-    semantics: last_output.semantics,
-    origin: _shared_types_types_user__WEBPACK_IMPORTED_MODULE_2__.PLATFORM.Twitter,
-    parsedStatus: _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_1__.AppPostParsedStatus.PROCESSED,
-    parsingStatus: _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_1__.AppPostParsingStatus.IDLE,
-    reviewedStatus: _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_1__.AppPostReviewStatus.PENDING,
-    republishedStatus: _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_1__.AppPostRepublishedStatus.PENDING,
-    originalParsed: originalParsed,
-    mirrors: [{
-      id: 'pp-id',
-      platformId: _shared_types_types_user__WEBPACK_IMPORTED_MODULE_2__.PLATFORM.Twitter,
-      publishOrigin: _shared_types_types_platform_posts__WEBPACK_IMPORTED_MODULE_0__.PlatformPostPublishOrigin.FETCHED,
-      publishStatus: _shared_types_types_platform_posts__WEBPACK_IMPORTED_MODULE_0__.PlatformPostPublishStatus.PUBLISHED,
-      posted: {
-        post_id: '123456',
-        timestampMs: createdAtMs,
-        user_id: '123412341234',
-        post: {
-          conversation_id: '123456',
-          tweets: [],
-          id: 'post-id',
-          createdAtMs: createdAtMs,
-          authorId: authorId,
-          content: 'test content',
-          semantics: "\n                    @prefix ns1: <http://purl.org/spar/cito/> .\n                    @prefix schema: <https://schema.org/> .\n                    \n                    <http://purl.org/nanopub/temp/mynanopub#assertion> \n                      ns1:discusses <https://twitter.com/ori_goldberg/status/1781281656071946541> ;    \n                      ns1:includesQuotationFrom <https://twitter.com/ori_goldberg/status/1781281656071946541> ;    \n                      schema:keywords \"ExternalSecurity\",        \"Geopolitics\",        \"Israel\",        \"Kissinger\",        \"PoliticalScience\",        \"Security\" .\n                    ",
-          origin: _shared_types_types_user__WEBPACK_IMPORTED_MODULE_2__.PLATFORM.Twitter,
-          parsedStatus: _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_1__.AppPostParsedStatus.PROCESSED,
-          parsingStatus: _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_1__.AppPostParsingStatus.IDLE,
-          reviewedStatus: _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_1__.AppPostReviewStatus.PENDING,
-          republishedStatus: _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_1__.AppPostRepublishedStatus.PENDING
-        }
-      }
-    }]
-  };
-  return post;
+/** The prosemirror render assumes --- separates the posts and creates <p> for each */
+var concatenateThread = function (post) {
+  return post.thread.reduce(function (_acc, post, ix) {
+    return _acc + "".concat(ix > 0 ? '---' : '').concat(post.content);
+  }, '');
 };
-var last_output = {
-  semantics: '@prefix ns1: <http://purl.org/spar/cito/> .\n@prefix ns2: <https://sense-nets.xyz/> .\n@prefix schema: <https://schema.org/> .\n\n<http://purl.org/nanopub/temp/mynanopub#assertion> ns1:disagreesWith <https://arxiv.org/abs/2401.14000> ;\n    schema:keywords "agent-models",\n        "arXiv",\n        "language-models",\n        "machine-reasoning",\n        "social-media",\n        "user-hashtag",\n        "world-models" ;\n    ns2:endorses <https://arxiv.org/abs/2312.05230> .\n\n<https://arxiv.org/abs/2312.05230> ns2:hasZoteroItemType "preprint" .\n\n<https://arxiv.org/abs/2401.14000> ns2:hasZoteroItemType "conferencePaper" .\n\n',
-  support: {
-    ontology: {
-      semantic_predicates: [{
-        name: 'disagreesWith',
-        uri: 'http://purl.org/spar/cito/disagreesWith',
-        versions: ['v0'],
-        label: 'disagrees',
-        display_name: '👎 disagrees-with',
-        prompt: 'this post disputes or expresses disagreement with statements, ideas or conclusions presented in the mentioned reference.',
-        prompt_zero_ref: null,
-        prompt_single_ref: 'this post disputes or expresses disagreement with statements, ideas or conclusions presented in the mentioned reference.',
-        prompt_multi_ref: 'this reference is being disputed by the post. The post expresses disagreement with statements, ideas or conclusions presented in the mentioned reference.',
-        valid_subject_types: ['post', 'ref'],
-        valid_object_types: ['ref']
-      }, {
-        name: 'possibleMissingReference',
-        uri: 'https://sense-nets.xyz/possibleMissingReference',
-        versions: ['v0'],
-        label: 'missing-ref',
-        display_name: '⬛ possible-missing-reference',
-        prompt: 'this post seems to be referring to a reference by name but has not explicitly provided a URL link to the reference. For example, a post that discusses a book and mentions it by title, but contains no link to the book.',
-        prompt_zero_ref: 'this post seems to be referring to a reference by name but has not explicitly provided a URL link to the reference. For example, a post that discusses a book and mentions it by title, but contains no link to the book.',
-        prompt_single_ref: null,
-        prompt_multi_ref: null,
-        valid_subject_types: ['post'],
-        valid_object_types: ['nan']
-      }, {
-        name: 'reviews',
-        uri: 'http://purl.org/spar/cito/reviews',
-        versions: ['v0'],
-        label: 'review',
-        display_name: '🧐 reviews',
-        prompt: 'this post contains a review of another reference, such as a book, article or movie. The review could be positive or negative. A review can be detailed or a simple short endorsement.',
-        prompt_zero_ref: null,
-        prompt_single_ref: 'this post contains a review of another reference, such as a book, article or movie. The review could be positive or negative. A review can be detailed or a simple short endorsement.',
-        prompt_multi_ref: 'the reference is being reviewed by the post. The reference could be a book, article or movie, or other media content. The review could be positive or negative.',
-        valid_subject_types: ['post', 'ref'],
-        valid_object_types: ['ref']
-      }, {
-        name: 'question',
-        uri: 'https://schema.org/Question',
-        versions: ['v0'],
-        label: 'dg-question',
-        display_name: ' ❓ discourse-graph/question',
-        prompt: 'this post is raising a research question.',
-        prompt_zero_ref: 'this post is raising a research question.',
-        prompt_single_ref: null,
-        prompt_multi_ref: null,
-        valid_subject_types: ['post'],
-        valid_object_types: ['nan']
-      }, {
-        name: 'announcesResource',
-        uri: 'https://sense-nets.xyz/announcesResource',
-        versions: ['v0'],
-        label: 'announce',
-        display_name: '📢 announces',
-        prompt: 'this post contains an announcement of new research. The announcement is likely made by the authors but may be a third party. We use a broad definition of research that includes classic and non-traditional outputs. Classic outputs include papers, datasets or code. Non traditional outputs can include a podcast, blog post, video explainers, etc.',
-        prompt_zero_ref: null,
-        prompt_single_ref: 'this post contains an announcement of new research. The announcement is likely made by the authors but may be a third party. We use a broad definition of research that includes classic and non-traditional outputs. Classic outputs include papers, datasets or code. Non traditional outputs can include a podcast, blog post, video explainers, etc.',
-        prompt_multi_ref: 'the reference is a new research output being announced by the post. The announcement is likely made by the authors but may be a third party. A research output could be a paper, dataset or other type of research that is being announced publicly.',
-        valid_subject_types: ['post', 'ref'],
-        valid_object_types: ['ref']
-      }, {
-        name: 'endorses',
-        uri: 'https://sense-nets.xyz/endorses',
-        versions: ['v0'],
-        label: 'endorses',
-        display_name: '➕ endorses',
-        prompt: 'this post endorses the mentioned reference. This label can also be used for cases of implicit recommendation, where the author is expressing enjoyment of some content but not explicitly recommending it.',
-        prompt_zero_ref: null,
-        prompt_single_ref: 'this post endorses the mentioned reference. This label can also be used for cases of implicit recommendation, where the author is expressing enjoyment of some content but not explicitly recommending it.',
-        prompt_multi_ref: 'the post endorses this reference. This label can also be used for cases of implicit recommendation, where the author is expressing enjoyment of some content but not explicitly recommending it.',
-        valid_subject_types: ['post', 'ref'],
-        valid_object_types: ['ref']
-      }, {
-        name: 'discusses',
-        uri: 'http://purl.org/spar/cito/discusses',
-        versions: ['v0'],
-        label: 'discussion',
-        display_name: '🗣️ discusses',
-        prompt: 'this post discusses how the cited reference relates to other facts or claims. For example, post might discuss how the cited reference informs questions, provides evidence, or supports or opposes claims.',
-        prompt_zero_ref: null,
-        prompt_single_ref: 'this post discusses how the cited reference relates to other facts or claims. For example, post might discuss how the cited reference informs questions, provides evidence, or supports or opposes claims.',
-        prompt_multi_ref: 'this post discusses how the cited reference relates to other facts or claims. For example, post might discuss how the cited reference informs questions, provides evidence, or supports or opposes claims.',
-        valid_subject_types: ['post', 'ref'],
-        valid_object_types: ['ref']
-      }, {
-        name: 'mentionsListeningStatus',
-        uri: 'https://sense-nets.xyz/mentionsListeningStatus',
-        versions: ['v0'],
-        label: 'listening',
-        display_name: '🎧 listening-status',
-        prompt: 'this post describes the listening status of the author in relation to a reference, such as a podcast or radio station. The author may have listened to the content in the past, is listening to the content in the present, or is looking forward to listening the content in the future.',
-        prompt_zero_ref: 'this post describes the listening status of the author in relation to a reference, such as a podcast or radio station. The author may have listened to the content in the past, is listening to the content in the present, or is looking forward to listening the content in the future.',
-        prompt_single_ref: 'this post describes the listening status of the author in relation to a reference, such as a podcast or radio station. The author may have listened to the content in the past, is listening to the content in the present, or is looking forward to listening the content in the future.',
-        prompt_multi_ref: 'this post describes the listening status of the author in relation to this reference, such as a podcast or radio station. The author may have listened to the content in the past, is listening to the content in the present, or is looking forward to listening the content in the future.',
-        valid_subject_types: ['post'],
-        valid_object_types: ['ref', 'nan']
-      }, {
-        name: 'recommends',
-        uri: 'https://sense-nets.xyz/recommends',
-        versions: ['v0'],
-        label: 'recommendation',
-        display_name: '👌 recommends',
-        prompt: 'The author is recommending any kind of content: an article, a movie, podcast, book, another post, etc.',
-        prompt_zero_ref: null,
-        prompt_single_ref: 'The author is recommending any kind of content: an article, a movie, podcast, book, another post, etc.',
-        prompt_multi_ref: 'The author is recommending the reference, which can be any kind of content: an article, a movie, podcast, book, another post, etc. This tag can also be used for cases of implicit recommendation, where the author is expressing enjoyment of some content but not explicitly recommending it.',
-        valid_subject_types: ['post', 'ref'],
-        valid_object_types: ['ref']
-      }, {
-        name: 'mentionsCallForPapers',
-        uri: 'https://sense-nets.xyz/mentionsCallForPapers',
-        versions: ['v1'],
-        label: 'call-for-papers',
-        display_name: '📜 mentions-call-for-papers',
-        prompt: 'this post contains a call for research papers, for example to a journal, conference or workshop.',
-        prompt_zero_ref: 'this post contains a call for research papers, for example to a journal, conference or workshop.',
-        prompt_single_ref: 'this post contains a call for research papers, for example to a journal, conference or workshop.',
-        prompt_multi_ref: 'this reference contains a call for research papers, for example to a journal, conference or workshop.',
-        valid_subject_types: ['post'],
-        valid_object_types: ['ref', 'nan']
-      }, {
-        name: 'includesQuotationFrom',
-        uri: 'http://purl.org/spar/cito/includesQuotationFrom',
-        versions: ['v0'],
-        label: 'quote',
-        display_name: '📝 quotes-from',
-        prompt: 'this post is quoting text from an article it\'s referring to. Symbols like ">" or quotation marks are often used to indicate quotations.',
-        prompt_zero_ref: null,
-        prompt_single_ref: 'this post is quoting text from an article it\'s referring to. Symbols like ">" or quotation marks are often used to indicate quotations.',
-        prompt_multi_ref: 'this reference is being quoted in the post. Symbols like ">" or quotation marks are often used to indicate quotations. ',
-        valid_subject_types: ['post', 'ref'],
-        valid_object_types: ['ref']
-      }, {
-        name: 'asksQuestionAbout',
-        uri: 'https://sense-nets.xyz/asksQuestionAbout',
-        versions: ['v0'],
-        label: 'question',
-        display_name: '❔ ask-question-about',
-        prompt: "this post is raising a question or questions about some content it's referring to. The content could be a research paper or other media like a podcast, video or blog post.",
-        prompt_zero_ref: null,
-        prompt_single_ref: "this post is raising a question or questions about some content it's referring to. The content could be a research paper or other media like a podcast, video or blog post.",
-        prompt_multi_ref: 'this post is raising a question or questions about the reference. The content could be a research paper or other media like a podcast, video or blog post.',
-        valid_subject_types: ['post', 'ref'],
-        valid_object_types: ['ref']
-      }, {
-        name: 'agreesWith',
-        uri: 'http://purl.org/spar/cito/agreesWith',
-        versions: ['v0'],
-        label: 'agrees',
-        display_name: '👍 agrees-with',
-        prompt: 'this post expresses agreement with statements, ideas or conclusions presented in the mentioned reference.',
-        prompt_zero_ref: null,
-        prompt_single_ref: 'this post expresses agreement with statements, ideas or conclusions presented in the mentioned reference.',
-        prompt_multi_ref: 'this post expresses agreement with statements, ideas or conclusions presented in this reference.',
-        valid_subject_types: ['post', 'ref'],
-        valid_object_types: ['ref']
-      }, {
-        name: 'observation',
-        uri: 'https://schema.org/Observation',
-        versions: ['v0'],
-        label: 'dg-observation',
-        display_name: '🔭 discourse-graph/observation',
-        prompt: 'this post is articulating a single, highly observation. The intuition is that observation notes should be as close to “the data” as possible. They should be similar to how results are described in results sections of academic publications.',
-        prompt_zero_ref: 'this post is articulating a single, highly observation. The intuition is that observation notes should be as close to “the data” as possible. They should be similar to how results are described in results sections of academic publications.',
-        prompt_single_ref: null,
-        prompt_multi_ref: null,
-        valid_subject_types: ['post'],
-        valid_object_types: ['nan']
-      }, {
-        name: 'claim',
-        uri: 'https://schema.org/Claim',
-        versions: ['v0'],
-        label: 'dg-claim',
-        display_name: '🫴 discourse-graph/claim',
-        prompt: 'this post is articulating an idea or a claim',
-        prompt_zero_ref: 'this post is articulating an idea or a claim',
-        prompt_single_ref: null,
-        prompt_multi_ref: null,
-        valid_subject_types: ['post'],
-        valid_object_types: ['nan']
-      }, {
-        name: 'summarizes',
-        uri: 'https://sense-nets.xyz/summarizes',
-        versions: ['v0'],
-        label: 'summarizes',
-        display_name: '🗜️ summarizes',
-        prompt: 'this post contains a summary of the mentioned reference. The summary is likely provided by the authors but may be a third party.',
-        prompt_zero_ref: null,
-        prompt_single_ref: 'this post contains a summary of the mentioned reference. The summary is likely provided by the authors but may be a third party.',
-        prompt_multi_ref: 'this reference is summarized by the post. The summary is likely provided by the authors but may be a third party.',
-        valid_subject_types: [],
-        valid_object_types: []
-      }, {
-        name: 'mentionsFundingOpportunity',
-        uri: 'https://sense-nets.xyz/mentionsFundingOpportunity',
-        versions: ['v1'],
-        label: 'funding',
-        display_name: '🏦 mentions-funding',
-        prompt: 'this post mentions a funding opportunity, for example a research grant or prize.',
-        prompt_zero_ref: 'this post mentions a funding opportunity, for example a research grant or prize.',
-        prompt_single_ref: 'this post mentions a funding opportunity, for example a research grant or prize.',
-        prompt_multi_ref: 'this reference contains a funding opportunity, for example a research grant or prize.',
-        valid_subject_types: ['post'],
-        valid_object_types: ['ref', 'nan']
-      }, {
-        name: 'mentionsWatchingStatus',
-        uri: 'https://sense-nets.xyz/mentionsWatchingStatus',
-        versions: ['v0'],
-        label: 'watching',
-        display_name: '📺 watching-status',
-        prompt: 'this post describes the watching status of the author in relation to a reference, such as a video or movie. The author may have watched the content in the past, is watching the content in the present, or is looking forward to watching the content in the future.',
-        prompt_zero_ref: 'this post describes the watching status of the author in relation to a reference, such as a video or movie. The author may have watched the content in the past, is watching the content in the present, or is looking forward to watching the content in the future.',
-        prompt_single_ref: 'this post describes the watching status of the author in relation to a reference, such as a video or movie. The author may have watched the content in the past, is watching the content in the present, or is looking forward to watching the content in the future.',
-        prompt_multi_ref: 'this post describes the watching status of the author in relation to this reference, such as a video or movie. The author may have watched the content in the past, is watching the content in the present, or is looking forward to watching the content in the future.',
-        valid_subject_types: ['post'],
-        valid_object_types: ['ref', 'nan']
-      }, {
-        name: 'mentionsReadingStatus',
-        uri: 'https://sense-nets.xyz/mentionsReadingStatus',
-        versions: ['v0'],
-        label: 'reading',
-        display_name: '📑 reading-status',
-        prompt: 'this post describes the reading status of the author in relation to a reference, such as a book or article. The author may either have read the reference in the past, is reading the reference in the present, or is looking forward to reading the reference in the future.',
-        prompt_zero_ref: 'this post describes the reading status of the author in relation to a reference, such as a book or article. The author may either have read the reference in the past, is reading the reference in the present, or is looking forward to reading the reference in the future.',
-        prompt_single_ref: 'this post describes the reading status of the author in relation to a reference, such as a book or article. The author may either have read the reference in the past, is reading the reference in the present, or is looking forward to reading the reference in the future.',
-        prompt_multi_ref: 'this post describes the reading status of the author in relation to this reference, which could be a book, article or other written media. The author may either have read the reference in the past, is reading the reference in the present, or is looking forward to reading the reference in the future.',
-        valid_subject_types: ['post'],
-        valid_object_types: ['ref', 'nan']
-      }, {
-        name: 'announcesEvent',
-        uri: 'https://sense-nets.xyz/announcesEvent',
-        versions: ['v0'],
-        label: 'event',
-        display_name: '🗓️ announces-event',
-        prompt: 'this post includes an invitation to an event, either a real-world or an online event. Any kind of event is relevant, some examples of such events could be seminars, meetups, or hackathons. This tag should only be used for invitations to events, not for posts describing other kinds of events.',
-        prompt_zero_ref: 'this post includes an invitation to an event, either a real-world or an online event. Any kind of event is relevant, some examples of such events could be seminars, meetups, or hackathons. This tag should only be used for invitations to events, not for posts describing other kinds of events.',
-        prompt_single_ref: 'this post includes an invitation to an event, either a real-world or an online event. Any kind of event is relevant, some examples of such events could be seminars, meetups, or hackathons. This tag should only be used for invitations to events, not for posts describing other kinds of events.',
-        prompt_multi_ref: 'the reference is an invitation to an event, either a real-world or an online event. Any kind of event is relevant, some examples of such events could be seminars, meetups, or hackathons. This tag shold only be used for invitations to events, not for posts describing other kinds of events.',
-        valid_subject_types: ['post'],
-        valid_object_types: ['ref', 'nan']
-      }, {
-        name: 'announcesJob',
-        uri: 'https://sense-nets.xyz/announcesJob',
-        versions: ['v0'],
-        label: 'job',
-        display_name: '📢 announces-job',
-        prompt: 'this post describes a job listing, for example a call for graduate students or faculty applications.',
-        prompt_zero_ref: 'this post describes a job listing, for example a call for graduate students or faculty applications.',
-        prompt_single_ref: 'this post describes a job listing, for example a call for graduate students or faculty applications.',
-        prompt_multi_ref: 'the reference is a job listing, for example a call for graduate students or faculty applications.',
-        valid_subject_types: ['post'],
-        valid_object_types: ['ref', 'nan']
-      }, {
-        name: 'indicatesInterest',
-        uri: 'https://sense-nets.xyz/indicatesInterest',
-        versions: ['v1'],
-        label: 'indicates-interest',
-        display_name: '👀 indicates-interest',
-        prompt: 'this post indicates interest in a reference. This label is meant for cases where the post is not explicitly recommending or endorsing the cited reference.',
-        prompt_zero_ref: null,
-        prompt_single_ref: 'this post indicates interest in a reference. This label is meant for cases where the post is not explicitly recommending or endorsing the cited reference.',
-        prompt_multi_ref: 'the post is indicating interest in this reference. This label is meant for cases where the post is not explicitly recommending or endorsing this reference.',
-        valid_subject_types: ['post'],
-        valid_object_types: ['ref']
-      }, {
-        name: 'linksTo',
-        uri: 'http://purl.org/spar/cito/linksTo',
-        versions: ['v0'],
-        label: 'default',
-        display_name: '🔗 links-to',
-        prompt: 'This is a special tag. Use this tag if none of the tags above are suitable. If you tag a post with <default>, no other tag should be assigned to the post.',
-        prompt_zero_ref: null,
-        prompt_single_ref: 'This is a special tag. Use this tag if none of the tags above are suitable. If you tag a post with <default>, no other tag should be assigned to the post.',
-        prompt_multi_ref: 'This is a special tag. Use this tag if none of the other tags are suitable to characterize this reference.',
-        valid_subject_types: ['post'],
-        valid_object_types: ['ref']
-      }],
-      keyword_predicate: {
-        name: 'hasKeyword',
-        uri: 'https://schema.org/keywords',
-        versions: ['v0']
-      },
-      topics_predicate: {
-        name: 'hasTopic',
-        uri: 'https://schema.org/about',
-        versions: ['v0']
-      },
-      allowed_topics: ['technology', 'science', 'academia', 'research', 'design', 'climate', 'sustainability', 'software & hardware', 'philosophy', 'health', 'culture', 'economics', 'business', 'politics', 'news', 'finance', 'sports', 'entertainment & leisure', 'art', 'literature', 'travel', 'personal', 'humour', 'other'],
-      ontology_config: {
-        db_id: '50c9352aa26b442994148b3cd7cccfcc',
-        versions: ['v0', 'v1']
-      }
-    },
-    refs_meta: {
-      'https://arxiv.org/abs/2312.05230': {
-        citoid_url: 'http://arxiv.org/abs/2312.05230',
-        url: 'https://arxiv.org/abs/2312.05230',
-        item_type: 'preprint',
-        title: 'Language Models, Agent Models, and World Models: The LAW for Machine Reasoning and Planning',
-        summary: 'Despite their tremendous success in many applications, large language models often fall short of consistent reasoning and planning in various (language, embodied, and social) scenarios, due to inherent limitations in their inference, learning, and modeling capabilities. In this position paper, we present a new perspective of machine reasoning, LAW, that connects the concepts of Language models, Agent models, and World models, for more robust and versatile reasoning capabilities. In particular, w',
-        image: '',
-        debug: {
-          error: null
-        }
-      },
-      'https://arxiv.org/abs/2401.14000': {
-        citoid_url: 'http://arxiv.org/abs/2401.14000',
-        url: 'https://arxiv.org/abs/2401.14000',
-        item_type: 'conferencePaper',
-        title: 'Mapping the Design Space of Teachable Social Media Feed Experiences',
-        summary: "Social media feeds are deeply personal spaces that reflect individual values and preferences. However, top-down, platform-wide content algorithms can reduce users' sense of agency and fail to account for nuanced experiences and values. Drawing on the paradigm of interactive machine teaching (IMT), an interaction framework for non-expert algorithmic adaptation, we map out a design space for teachable social media feed experiences to empower agential, personalized feed curation. To do so, we condu",
-        image: '',
-        debug: {
-          error: null
-        }
-      }
-    }
-  },
-  filter_classification: 'citoid_detected_research',
-  metadata: {
-    model_debug: {
-      multi_reference_tagger: {
-        prompt: '\nYou are an expert annotator tasked with converting social media posts about scientific research to a structured semantic format. The post contains external references in the form of links (URLs). Your job is to select, for each reference, the tags best characterizing the relation of the post to the reference.\n\n# Instructions\n## Tag types\nThe tags are to be selected from a predefined set of tags. The available tag types are:\n<disagrees>: this reference is being disputed by the post. The post expresses disagreement with statements, ideas or conclusions presented in the mentioned reference.\n<review>: the reference is being reviewed by the post. The reference could be a book, article or movie, or other media content. The review could be positive or negative.\n<announce>: the reference is a new research output being announced by the post. The announcement is likely made by the authors but may be a third party. A research output could be a paper, dataset or other type of research that is being announced publicly.\n<endorses>: the post endorses this reference. This label can also be used for cases of implicit recommendation, where the author is expressing enjoyment of some content but not explicitly recommending it.\n<discussion>: this post discusses how the cited reference relates to other facts or claims. For example, post might discuss how the cited reference informs questions, provides evidence, or supports or opposes claims.\n<listening>: this post describes the listening status of the author in relation to this reference, such as a podcast or radio station. The author may have listened to the content in the past, is listening to the content in the present, or is looking forward to listening the content in the future.\n<recommendation>: The author is recommending the reference, which can be any kind of content: an article, a movie, podcast, book, another post, etc. This tag can also be used for cases of implicit recommendation, where the author is expressing enjoyment of some content but not explicitly recommending it.\n<call-for-papers>: this reference contains a call for research papers, for example to a journal, conference or workshop.\n<quote>: this reference is being quoted in the post. Symbols like ">" or quotation marks are often used to indicate quotations. \n<question>: this post is raising a question or questions about the reference. The content could be a research paper or other media like a podcast, video or blog post.\n<agrees>: this post expresses agreement with statements, ideas or conclusions presented in this reference.\n<funding>: this reference contains a funding opportunity, for example a research grant or prize.\n<watching>: this post describes the watching status of the author in relation to this reference, such as a video or movie. The author may have watched the content in the past, is watching the content in the present, or is looking forward to watching the content in the future.\n<reading>: this post describes the reading status of the author in relation to this reference, which could be a book, article or other written media. The author may either have read the reference in the past, is reading the reference in the present, or is looking forward to reading the reference in the future.\n<event>: the reference is an invitation to an event, either a real-world or an online event. Any kind of event is relevant, some examples of such events could be seminars, meetups, or hackathons. This tag shold only be used for invitations to events, not for posts describing other kinds of events.\n<job>: the reference is a job listing, for example a call for graduate students or faculty applications.\n<indicates-interest>: the post is indicating interest in this reference. This label is meant for cases where the post is not explicitly recommending or endorsing this reference.\n<default>: This is a special tag. Use this tag if none of the other tags are suitable to characterize this reference.\n\nA user will pass in a post, and you should reason step by step, before selecting a set of tags for each reference that best that reference\'s relation with the post.\n\n## Reference metadata\nEach reference will be marked by <ref_n> for convenient identification, where n is a number denoting the order of appearance in the post. The first reference will be <ref_1>, the second <ref_2>, etc. Additional metadata may also be provided for references, such as the author name, content type, and summary.\n\n### Quote posts\nQuote posts are a special kind of reference, where the post quotes another post. In which case, the quoted post content will be enclosed by <quote ref_n> (quote content) </quote>. Note that quote content may itself contain references.\n\n\n## Required output format\nYour final answer should be structured as a JSON Answer object with a list of SubAnswer objects, as described by the following schemas:\n\n\n```\nclass SubAnswer:\n\tref_number: int # ID number of current reference\n\treasoning_steps: str # your reasoning steps\n\tcandidate_tags: str # For potential each tag you choose, explain why you chose it.\n\tfinal_answer: List[str] # a set of final tags, based on the Candidate Tags. The final tags must be included in the Candidate Tags list!\n\nclass Answer:\n  sub_answers: List[SubAnswer]\n```\n\n\nFor example, for a post with 2 references, the output would be structured as follows:\n\n```\n{\n  "sub_answers": [\n  {\n    "ref_number": 1,\n    "reasoning_steps": "<your reasoning steps...>",\n    "candidate_tags": "[<tag1>, <tag2>]",\n    "final_answer": [\n      "<tag1>"\n    ]\n  },\n  {\n    "ref_number": 2,\n    "reasoning_steps": "<your reasoning steps...>",\n    "candidate_tags": "[<tag1>, <tag3>, <tag4>]",\n    "final_answer": [\n      "<tag3>",\n      "<tag4>"\n    ]\n  }\n]\n}\n```\n\n\n# Input post text:\n\n- Author: John Doe\n- Content: This is an interesting paper <ref_1> but I disagree with its sequel <ref_2>  #user-hashtag\n- References: \n<ref_1> \nurl: https://arxiv.org/abs/2312.05230\nitem_type: preprint\ntitle: Language Models, Agent Models, and World Models: The LAW for Machine Reasoning and Planning\nsummary: Despite their tremendous success in many applications, large language models often fall short of consistent reasoning and planning in various (language, embodied, and social) scenarios, due to inherent limitations in their inference, learning, and modeling capabilities. In this position paper, we present a new perspective of machine reasoning, LAW, that connects the concepts of Language models, Agent models, and World models, for more robust and versatile reasoning capabilities. In particular, w\n==========\n<ref_2> \nurl: https://arxiv.org/abs/2401.14000\nitem_type: conferencePaper\ntitle: Mapping the Design Space of Teachable Social Media Feed Experiences\nsummary: Social media feeds are deeply personal spaces that reflect individual values and preferences. However, top-down, platform-wide content algorithms can reduce users\' sense of agency and fail to account for nuanced experiences and values. Drawing on the paradigm of interactive machine teaching (IMT), an interaction framework for non-expert algorithmic adaptation, we map out a design space for teachable social media feed experiences to empower agential, personalized feed curation. To do so, we condu\n==========\n\n\n# Output:\n\n',
-        md_list: [{
-          citoid_url: 'http://arxiv.org/abs/2312.05230',
-          url: 'https://arxiv.org/abs/2312.05230',
-          item_type: 'preprint',
-          title: 'Language Models, Agent Models, and World Models: The LAW for Machine Reasoning and Planning',
-          summary: 'Despite their tremendous success in many applications, large language models often fall short of consistent reasoning and planning in various (language, embodied, and social) scenarios, due to inherent limitations in their inference, learning, and modeling capabilities. In this position paper, we present a new perspective of machine reasoning, LAW, that connects the concepts of Language models, Agent models, and World models, for more robust and versatile reasoning capabilities. In particular, w',
-          image: '',
-          debug: {
-            error: null
-          }
-        }, {
-          citoid_url: 'http://arxiv.org/abs/2401.14000',
-          url: 'https://arxiv.org/abs/2401.14000',
-          item_type: 'conferencePaper',
-          title: 'Mapping the Design Space of Teachable Social Media Feed Experiences',
-          summary: "Social media feeds are deeply personal spaces that reflect individual values and preferences. However, top-down, platform-wide content algorithms can reduce users' sense of agency and fail to account for nuanced experiences and values. Drawing on the paradigm of interactive machine teaching (IMT), an interaction framework for non-expert algorithmic adaptation, we map out a design space for teachable social media feed experiences to empower agential, personalized feed curation. To do so, we condu",
-          image: '',
-          debug: {
-            error: null
-          }
-        }],
-        allowed_terms: ['disagrees', 'review', 'announce', 'endorses', 'discussion', 'listening', 'recommendation', 'call-for-papers', 'quote', 'question', 'agrees', 'funding', 'watching', 'reading', 'event', 'job', 'indicates-interest', 'default'],
-        debug: {},
-        reasoning: {
-          '0': {
-            steps: 'The post describes the paper as interesting, indicating some level of endorsement or positive sentiment towards it.',
-            candidates: '[<endorses>, <recommendation>]'
-          },
-          '1': {
-            steps: 'The post explicitly states disagreement with the content of this reference.',
-            candidates: '[<disagrees>]'
-          }
-        }
-      },
-      topics: {
-        allowed_tags: ['technology', 'science', 'academia', 'research', 'design', 'climate', 'sustainability', 'software & hardware', 'philosophy', 'health', 'culture', 'economics', 'business', 'politics', 'news', 'finance', 'sports', 'entertainment & leisure', 'art', 'literature', 'travel', 'personal', 'humour', 'other'],
-        full_text: "Reasoning Steps:\n1. The post mentions two different papers from arXiv, which are related to machine reasoning, language models, agent models, and social media feed experiences.\n2. The post expresses disagreement with the second paper mentioned.\n3. The content of the papers involves discussions on machine reasoning, language models, social media algorithms, and personalized experiences.\n\nCandidate Topics:\n- academia: The post references academic papers from arXiv, indicating a discussion related to academic research.\n- research: The content of the papers involves research on machine reasoning, language models, and social media algorithms.\n- technology: The papers discuss machine reasoning, language models, and social media algorithms, all related to technology.\n\nFinal Answer:\n- academia\n- research\n- technology \n\n ##Allowed terms: ['technology', 'science', 'academia', 'research', 'design', 'climate', 'sustainability', 'software & hardware', 'philosophy', 'health', 'culture', 'economics', 'business', 'politics', 'news', 'finance', 'sports', 'entertainment & leisure', 'art', 'literature', 'travel', 'personal', 'humour', 'other']",
-        prompt: "\nYou are an expert annotator tasked with assigning topics to social media posts. The assigned topics should represent the most salient topics discussed by the post.  \n\nThe available topic types are:\n- technology\n- science\n- academia\n- research\n- design\n- climate\n- sustainability\n- software & hardware\n- philosophy\n- health\n- culture\n- economics\n- business\n- politics\n- news\n- finance\n- sports\n- entertainment & leisure\n- art\n- literature\n- travel\n- personal\n- humour\n- other\n\nA user will pass in a post, and you should think step by step, before selecting a set of topics that best match the post. You must only use the topics in the list!\n\n\nRules:\n- Your final answer should be structured as follows:\n    - Reasoning Steps: (your reasoning steps)\n    - Candidate Topics: (For potential each topic you choose, explain why you chose it.)\n    - Final Answer: (a set of final topics, based on the Candidate Topics. The rest of the final keywords must be included in the Candidate Topics list!)\n\n\n# Input post text:\n\n- Content: This is an interesting paper https://arxiv.org/abs/2312.05230 but I disagree with its sequel https://arxiv.org/abs/2401.14000  #user-hashtag\n- References:\n1: https://arxiv.org/abs/2312.05230\nItem type: preprint\nTitle: Language Models, Agent Models, and World Models: The LAW for Machine Reasoning and Planning\nSummary: Despite their tremendous success in many applications, large language models often fall short of consistent reasoning and planning in various (language, embodied, and social) scenarios, due to inherent limitations in their inference, learning, and modeling capabilities. In this position paper, we present a new perspective of machine reasoning, LAW, that connects the concepts of Language models, Agent models, and World models, for more robust and versatile reasoning capabilities. In particular, w\n------------------\n2: https://arxiv.org/abs/2401.14000\nItem type: conferencePaper\nTitle: Mapping the Design Space of Teachable Social Media Feed Experiences\nSummary: Social media feeds are deeply personal spaces that reflect individual values and preferences. However, top-down, platform-wide content algorithms can reduce users' sense of agency and fail to account for nuanced experiences and values. Drawing on the paradigm of interactive machine teaching (IMT), an interaction framework for non-expert algorithmic adaptation, we map out a design space for teachable social media feed experiences to empower agential, personalized feed curation. To do so, we condu\n------------------\n\n\n# Output:",
-        reasoning: '[Reasoning Steps]\n\n1. The post mentions two different papers from arXiv, which are related to machine reasoning, language models, agent models, and social media feed experiences.\n2. The post expresses disagreement with the second paper mentioned.\n3. The content of the papers involves discussions on machine reasoning, language models, social media algorithms, and personalized experiences.\n\n[Candidate Tags]\n\n- academia: The post references academic papers from arXiv, indicating a discussion related to academic research.\n- research: The content of the papers involves research on machine reasoning, language models, and social media algorithms.\n- technology: The papers discuss machine reasoning, language models, and social media algorithms, all related to technology.'
-      },
-      keywords: {
-        raw_text: 'Reasoning Steps:\n1. The post mentions two academic papers from arXiv, indicating a discussion related to academic research.\n2. The first paper discusses machine reasoning and planning using language models, agent models, and world models.\n3. The second paper explores the design space of teachable social media feed experiences.\n\nCandidate Keywords:\n1. #arXiv - Both papers are from arXiv, indicating an academic source.\n2. #machine-reasoning - Mentioned in the first paper title and summary.\n3. #social-media - Mentioned in the second paper title and summary.\n4. #language-models - Referenced in the first paper title and summary.\n5. #agent-models - Referenced in the first paper title and summary.\n6. #world-models - Referenced in the first paper title and summary.\n\nFinal Answer:\n1. #arXiv - Indicates academic source.\n2. #machine-reasoning - Specific to the discussion in the first paper.\n3. #social-media - Specific to the discussion in the second paper.\n4. #language-models - Specific to the discussion in the first paper.\n5. #agent-models - Specific to the discussion in the first paper.\n6. #world-models - Specific to the discussion in the first paper.\n7. #academic - Indicates the post is related to academic research.',
-        prompt: '\nYou are an expert annotator tasked with assigning keywords to social media posts. The keywords should represent the most salient topics discussed by the post. The keywords should consist of two types: general and specific. The general keywords should indicate the general topics discussed by the posts and its references, like "#AI" or "#blockchain". The specific keywords should highlight specific that will help people in the field better understand the post\'s contents (like "#monte-carlo-tree-search", or "#consensus-algorithms"). In addition to the above, you should also add a special \'#academic\' keyword if the post is related to academic research. Acaedmic research is to be defined broadly, as anything that the author is likely to see as related to their research, including academic job offers, code repositories, blog posts and so on. If the post is clearly not related in any way to academic research, add \'#not-academic\'. \n\nRules:\n- You should choose up to 6 keywords, plus the additional special academic/non-academic keyword!\n- Keywords should be prefixed with a hashtag, e.g., #AI\n- Your final answer should be structured as follows:\n    - Reasoning Steps: (your reasoning steps)\n    - Candidate Keywords: (For potential each keyword you choose, explain why you chose it.)\n    - Final Answer: (a set of 7 final keywords, based on the Candidate Keywords. One of the keywords should be #academic or #not-academic. The rest of the final keywords must be included in the Candidate Keywords list!)\n\n\n# Input post text:\n\n- Content: This is an interesting paper https://arxiv.org/abs/2312.05230 but I disagree with its sequel https://arxiv.org/abs/2401.14000  #user-hashtag\n- References:\n1: https://arxiv.org/abs/2312.05230\nItem type: preprint\nTitle: Language Models, Agent Models, and World Models: The LAW for Machine Reasoning and Planning\nSummary: Despite their tremendous success in many applications, large language models often fall short of consistent reasoning and planning in various (language, embodied, and social) scenarios, due to inherent limitations in their inference, learning, and modeling capabilities. In this position paper, we present a new perspective of machine reasoning, LAW, that connects the concepts of Language models, Agent models, and World models, for more robust and versatile reasoning capabilities. In particular, w\n------------------\n2: https://arxiv.org/abs/2401.14000\nItem type: conferencePaper\nTitle: Mapping the Design Space of Teachable Social Media Feed Experiences\nSummary: Social media feeds are deeply personal spaces that reflect individual values and preferences. However, top-down, platform-wide content algorithms can reduce users\' sense of agency and fail to account for nuanced experiences and values. Drawing on the paradigm of interactive machine teaching (IMT), an interaction framework for non-expert algorithmic adaptation, we map out a design space for teachable social media feed experiences to empower agential, personalized feed curation. To do so, we condu\n------------------\n\n\n# Output:',
-        reasoning: '[Reasoning Steps]\n\n1. The post mentions two academic papers from arXiv, indicating a discussion related to academic research.\n2. The first paper discusses machine reasoning and planning using language models, agent models, and world models.\n3. The second paper explores the design space of teachable social media feed experiences.\n\n[Candidate Keywords]\n\n1. #arXiv - Both papers are from arXiv, indicating an academic source.\n2. #machine-reasoning - Mentioned in the first paper title and summary.\n3. #social-media - Mentioned in the second paper title and summary.\n4. #language-models - Referenced in the first paper title and summary.\n5. #agent-models - Referenced in the first paper title and summary.\n6. #world-models - Referenced in the first paper title and summary.'
-      },
-      hashtags: {
-        prompt: 'This is an interesting paper https://arxiv.org/abs/2312.05230 but I disagree with its sequel https://arxiv.org/abs/2401.14000  #user-hashtag',
-        reasoning: null
-      }
-    }
-  }
+var getPostStatuses = function (post) {
+  var _a, _b;
+  var postedNanopub = (_b = (_a = post === null || post === void 0 ? void 0 : post.mirrors) === null || _a === void 0 ? void 0 : _a.find(function (m) {
+    return m.platformId === _shared_types_types_user__WEBPACK_IMPORTED_MODULE_2__.PLATFORM.Nanopub;
+  })) === null || _b === void 0 ? void 0 : _b.posted;
+  var nanopubHash = postedNanopub ? postedNanopub.post_id.split('/').pop() : undefined;
+  var nanopubUrl = postedNanopub ? "".concat(_app_config__WEBPACK_IMPORTED_MODULE_0__.NANOPUB_EXPLORER_SERVER).concat(nanopubHash) : undefined;
+  var processed = post && post.parsedStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_1__.AppPostParsedStatus.PROCESSED;
+  var errored = post && post.parsingStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_1__.AppPostParsingStatus.ERRORED;
+  var isParsing = post && post.parsingStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_1__.AppPostParsingStatus.PROCESSING;
+  var pending = post && post.reviewedStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_1__.AppPostReviewStatus.PENDING;
+  var ignored = post && post.reviewedStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_1__.AppPostReviewStatus.IGNORED;
+  var published = !!postedNanopub;
+  var isEditing = post && post.reviewedStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_1__.AppPostReviewStatus.DRAFT;
+  return {
+    processed: processed,
+    errored: errored,
+    isParsing: isParsing,
+    pending: pending,
+    ignored: ignored,
+    nanopubUrl: nanopubUrl,
+    published: published,
+    isEditing: isEditing
+  };
 };
 
 /***/ }),
@@ -1222,52 +1292,6 @@ var NotificationStatus;
   NotificationStatus["sent"] = "sent";
   NotificationStatus["seen"] = "seen";
 })(NotificationStatus || (NotificationStatus = {}));
-
-/***/ }),
-
-/***/ "./src/shared/types/types.platform.posts.ts":
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   PlatformPostDraftApproval: () => (/* binding */ PlatformPostDraftApproval),
-/* harmony export */   PlatformPostPublishOrigin: () => (/* binding */ PlatformPostPublishOrigin),
-/* harmony export */   PlatformPostPublishStatus: () => (/* binding */ PlatformPostPublishStatus),
-/* harmony export */   PlatformPostSignerType: () => (/* binding */ PlatformPostSignerType)
-/* harmony export */ });
-/**
- * Platform posts as stored in our DB. A platform post can be in one of these statuses
- * - 'draft': The post has an `id`, a `platformId` value, and a `draft` value.
- * - 'posted': The post has been published on the platform and has a defined `postedStatus`.
- * - 'fetched': The post was fetched from the platform, has a defined `postedStatus`
- * */
-/**
- * A PlatformPost is on object that was already stored on our DB
- * */
-var PlatformPostPublishStatus;
-(function (PlatformPostPublishStatus) {
-  PlatformPostPublishStatus["DRAFT"] = "draft";
-  PlatformPostPublishStatus["PUBLISHED"] = "published";
-})(PlatformPostPublishStatus || (PlatformPostPublishStatus = {}));
-var PlatformPostPublishOrigin;
-(function (PlatformPostPublishOrigin) {
-  PlatformPostPublishOrigin["FETCHED"] = "fetched";
-  PlatformPostPublishOrigin["POSTED"] = "posted";
-})(PlatformPostPublishOrigin || (PlatformPostPublishOrigin = {}));
-/**
- * The PlatformPostDraft status is defined prior to posting a PlatformPost
- */
-var PlatformPostDraftApproval;
-(function (PlatformPostDraftApproval) {
-  PlatformPostDraftApproval["PENDING"] = "pending";
-  PlatformPostDraftApproval["APPROVED"] = "approved";
-})(PlatformPostDraftApproval || (PlatformPostDraftApproval = {}));
-var PlatformPostSignerType;
-(function (PlatformPostSignerType) {
-  PlatformPostSignerType["USER"] = "user";
-  PlatformPostSignerType["DELEGATED"] = "delegated";
-})(PlatformPostSignerType || (PlatformPostSignerType = {}));
 
 /***/ }),
 
@@ -1623,6 +1647,655 @@ var replaceNodes = function (store, replaceMap) {
   });
   return newStore;
 };
+
+/***/ }),
+
+/***/ "./src/utils/post.utils.ts":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   getPlatformProfile: () => (/* binding */ getPlatformProfile),
+/* harmony export */   zoteroItemTypeDisplay: () => (/* binding */ zoteroItemTypeDisplay)
+/* harmony export */ });
+/* harmony import */ var _shared_types_types_user__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/shared/types/types.user.ts");
+
+function getPlatformProfile(user, platform, authorId) {
+  if (!user) {
+    return undefined;
+  }
+  if (platform === _shared_types_types_user__WEBPACK_IMPORTED_MODULE_0__.PLATFORM.Local) {
+    return undefined;
+  }
+  var platformProfiles = user[platform];
+  if (!platformProfiles) {
+    return undefined;
+  }
+  for (var _i = 0, platformProfiles_1 = platformProfiles; _i < platformProfiles_1.length; _i++) {
+    var platformProfile = platformProfiles_1[_i];
+    if ("".concat(platform, ":").concat(platformProfile.user_id) === authorId) {
+      switch (platform) {
+        case _shared_types_types_user__WEBPACK_IMPORTED_MODULE_0__.PLATFORM.Twitter:
+          var twitterProfile = platformProfile.profile;
+          if (!twitterProfile) {
+            return undefined;
+          }
+          return {
+            profileName: twitterProfile.name,
+            profileHandle: twitterProfile.username,
+            profileImageUrl: twitterProfile.profile_image_url
+          };
+        default:
+          return undefined;
+      }
+    }
+  }
+  return undefined;
+}
+function zoteroItemTypeDisplay(itemType) {
+  return itemType.split(/(?=[A-Z])/).map(function (word) {
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }).join(' ');
+}
+
+/***/ }),
+
+/***/ "./node_modules/@emotion/is-prop-valid/dist/emotion-is-prop-valid.esm.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ isPropValid)
+/* harmony export */ });
+/* harmony import */ var _emotion_memoize__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/@emotion/memoize/dist/emotion-memoize.esm.js");
+
+var reactPropsRegex = /^((children|dangerouslySetInnerHTML|key|ref|autoFocus|defaultValue|defaultChecked|innerHTML|suppressContentEditableWarning|suppressHydrationWarning|valueLink|abbr|accept|acceptCharset|accessKey|action|allow|allowUserMedia|allowPaymentRequest|allowFullScreen|allowTransparency|alt|async|autoComplete|autoPlay|capture|cellPadding|cellSpacing|challenge|charSet|checked|cite|classID|className|cols|colSpan|content|contentEditable|contextMenu|controls|controlsList|coords|crossOrigin|data|dateTime|decoding|default|defer|dir|disabled|disablePictureInPicture|disableRemotePlayback|download|draggable|encType|enterKeyHint|form|formAction|formEncType|formMethod|formNoValidate|formTarget|frameBorder|headers|height|hidden|high|href|hrefLang|htmlFor|httpEquiv|id|inputMode|integrity|is|keyParams|keyType|kind|label|lang|list|loading|loop|low|marginHeight|marginWidth|max|maxLength|media|mediaGroup|method|min|minLength|multiple|muted|name|nonce|noValidate|open|optimum|pattern|placeholder|playsInline|poster|preload|profile|radioGroup|readOnly|referrerPolicy|rel|required|reversed|role|rows|rowSpan|sandbox|scope|scoped|scrolling|seamless|selected|shape|size|sizes|slot|span|spellCheck|src|srcDoc|srcLang|srcSet|start|step|style|summary|tabIndex|target|title|translate|type|useMap|value|width|wmode|wrap|about|datatype|inlist|prefix|property|resource|typeof|vocab|autoCapitalize|autoCorrect|autoSave|color|incremental|fallback|inert|itemProp|itemScope|itemType|itemID|itemRef|on|option|results|security|unselectable|accentHeight|accumulate|additive|alignmentBaseline|allowReorder|alphabetic|amplitude|arabicForm|ascent|attributeName|attributeType|autoReverse|azimuth|baseFrequency|baselineShift|baseProfile|bbox|begin|bias|by|calcMode|capHeight|clip|clipPathUnits|clipPath|clipRule|colorInterpolation|colorInterpolationFilters|colorProfile|colorRendering|contentScriptType|contentStyleType|cursor|cx|cy|d|decelerate|descent|diffuseConstant|direction|display|divisor|dominantBaseline|dur|dx|dy|edgeMode|elevation|enableBackground|end|exponent|externalResourcesRequired|fill|fillOpacity|fillRule|filter|filterRes|filterUnits|floodColor|floodOpacity|focusable|fontFamily|fontSize|fontSizeAdjust|fontStretch|fontStyle|fontVariant|fontWeight|format|from|fr|fx|fy|g1|g2|glyphName|glyphOrientationHorizontal|glyphOrientationVertical|glyphRef|gradientTransform|gradientUnits|hanging|horizAdvX|horizOriginX|ideographic|imageRendering|in|in2|intercept|k|k1|k2|k3|k4|kernelMatrix|kernelUnitLength|kerning|keyPoints|keySplines|keyTimes|lengthAdjust|letterSpacing|lightingColor|limitingConeAngle|local|markerEnd|markerMid|markerStart|markerHeight|markerUnits|markerWidth|mask|maskContentUnits|maskUnits|mathematical|mode|numOctaves|offset|opacity|operator|order|orient|orientation|origin|overflow|overlinePosition|overlineThickness|panose1|paintOrder|pathLength|patternContentUnits|patternTransform|patternUnits|pointerEvents|points|pointsAtX|pointsAtY|pointsAtZ|preserveAlpha|preserveAspectRatio|primitiveUnits|r|radius|refX|refY|renderingIntent|repeatCount|repeatDur|requiredExtensions|requiredFeatures|restart|result|rotate|rx|ry|scale|seed|shapeRendering|slope|spacing|specularConstant|specularExponent|speed|spreadMethod|startOffset|stdDeviation|stemh|stemv|stitchTiles|stopColor|stopOpacity|strikethroughPosition|strikethroughThickness|string|stroke|strokeDasharray|strokeDashoffset|strokeLinecap|strokeLinejoin|strokeMiterlimit|strokeOpacity|strokeWidth|surfaceScale|systemLanguage|tableValues|targetX|targetY|textAnchor|textDecoration|textRendering|textLength|to|transform|u1|u2|underlinePosition|underlineThickness|unicode|unicodeBidi|unicodeRange|unitsPerEm|vAlphabetic|vHanging|vIdeographic|vMathematical|values|vectorEffect|version|vertAdvY|vertOriginX|vertOriginY|viewBox|viewTarget|visibility|widths|wordSpacing|writingMode|x|xHeight|x1|x2|xChannelSelector|xlinkActuate|xlinkArcrole|xlinkHref|xlinkRole|xlinkShow|xlinkTitle|xlinkType|xmlBase|xmlns|xmlnsXlink|xmlLang|xmlSpace|y|y1|y2|yChannelSelector|z|zoomAndPan|for|class|autofocus)|(([Dd][Aa][Tt][Aa]|[Aa][Rr][Ii][Aa]|x)-.*))$/; // https://esbench.com/bench/5bfee68a4cd7e6009ef61d23
+
+var isPropValid = /* #__PURE__ */(0,_emotion_memoize__WEBPACK_IMPORTED_MODULE_0__["default"])(function (prop) {
+  return reactPropsRegex.test(prop) || prop.charCodeAt(0) === 111
+  /* o */ && prop.charCodeAt(1) === 110
+  /* n */ && prop.charCodeAt(2) < 91;
+}
+/* Z+1 */);
+
+
+/***/ }),
+
+/***/ "./node_modules/@emotion/memoize/dist/emotion-memoize.esm.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ memoize)
+/* harmony export */ });
+function memoize(fn) {
+  var cache = Object.create(null);
+  return function (arg) {
+    if (cache[arg] === undefined) cache[arg] = fn(arg);
+    return cache[arg];
+  };
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/@emotion/stylis/dist/stylis.browser.esm.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+function stylis_min(W) {
+  function M(d, c, e, h, a) {
+    for (var m = 0, b = 0, v = 0, n = 0, q, g, x = 0, K = 0, k, u = k = q = 0, l = 0, r = 0, I = 0, t = 0, B = e.length, J = B - 1, y, f = '', p = '', F = '', G = '', C; l < B;) {
+      g = e.charCodeAt(l);
+      l === J && 0 !== b + n + v + m && (0 !== b && (g = 47 === b ? 10 : 47), n = v = m = 0, B++, J++);
+      if (0 === b + n + v + m) {
+        if (l === J && (0 < r && (f = f.replace(N, '')), 0 < f.trim().length)) {
+          switch (g) {
+            case 32:
+            case 9:
+            case 59:
+            case 13:
+            case 10:
+              break;
+            default:
+              f += e.charAt(l);
+          }
+          g = 59;
+        }
+        switch (g) {
+          case 123:
+            f = f.trim();
+            q = f.charCodeAt(0);
+            k = 1;
+            for (t = ++l; l < B;) {
+              switch (g = e.charCodeAt(l)) {
+                case 123:
+                  k++;
+                  break;
+                case 125:
+                  k--;
+                  break;
+                case 47:
+                  switch (g = e.charCodeAt(l + 1)) {
+                    case 42:
+                    case 47:
+                      a: {
+                        for (u = l + 1; u < J; ++u) {
+                          switch (e.charCodeAt(u)) {
+                            case 47:
+                              if (42 === g && 42 === e.charCodeAt(u - 1) && l + 2 !== u) {
+                                l = u + 1;
+                                break a;
+                              }
+                              break;
+                            case 10:
+                              if (47 === g) {
+                                l = u + 1;
+                                break a;
+                              }
+                          }
+                        }
+                        l = u;
+                      }
+                  }
+                  break;
+                case 91:
+                  g++;
+                case 40:
+                  g++;
+                case 34:
+                case 39:
+                  for (; l++ < J && e.charCodeAt(l) !== g;) {}
+              }
+              if (0 === k) break;
+              l++;
+            }
+            k = e.substring(t, l);
+            0 === q && (q = (f = f.replace(ca, '').trim()).charCodeAt(0));
+            switch (q) {
+              case 64:
+                0 < r && (f = f.replace(N, ''));
+                g = f.charCodeAt(1);
+                switch (g) {
+                  case 100:
+                  case 109:
+                  case 115:
+                  case 45:
+                    r = c;
+                    break;
+                  default:
+                    r = O;
+                }
+                k = M(c, r, k, g, a + 1);
+                t = k.length;
+                0 < A && (r = X(O, f, I), C = H(3, k, r, c, D, z, t, g, a, h), f = r.join(''), void 0 !== C && 0 === (t = (k = C.trim()).length) && (g = 0, k = ''));
+                if (0 < t) switch (g) {
+                  case 115:
+                    f = f.replace(da, ea);
+                  case 100:
+                  case 109:
+                  case 45:
+                    k = f + '{' + k + '}';
+                    break;
+                  case 107:
+                    f = f.replace(fa, '$1 $2');
+                    k = f + '{' + k + '}';
+                    k = 1 === w || 2 === w && L('@' + k, 3) ? '@-webkit-' + k + '@' + k : '@' + k;
+                    break;
+                  default:
+                    k = f + k, 112 === h && (k = (p += k, ''));
+                } else k = '';
+                break;
+              default:
+                k = M(c, X(c, f, I), k, h, a + 1);
+            }
+            F += k;
+            k = I = r = u = q = 0;
+            f = '';
+            g = e.charCodeAt(++l);
+            break;
+          case 125:
+          case 59:
+            f = (0 < r ? f.replace(N, '') : f).trim();
+            if (1 < (t = f.length)) switch (0 === u && (q = f.charCodeAt(0), 45 === q || 96 < q && 123 > q) && (t = (f = f.replace(' ', ':')).length), 0 < A && void 0 !== (C = H(1, f, c, d, D, z, p.length, h, a, h)) && 0 === (t = (f = C.trim()).length) && (f = '\x00\x00'), q = f.charCodeAt(0), g = f.charCodeAt(1), q) {
+              case 0:
+                break;
+              case 64:
+                if (105 === g || 99 === g) {
+                  G += f + e.charAt(l);
+                  break;
+                }
+              default:
+                58 !== f.charCodeAt(t - 1) && (p += P(f, q, g, f.charCodeAt(2)));
+            }
+            I = r = u = q = 0;
+            f = '';
+            g = e.charCodeAt(++l);
+        }
+      }
+      switch (g) {
+        case 13:
+        case 10:
+          47 === b ? b = 0 : 0 === 1 + q && 107 !== h && 0 < f.length && (r = 1, f += '\x00');
+          0 < A * Y && H(0, f, c, d, D, z, p.length, h, a, h);
+          z = 1;
+          D++;
+          break;
+        case 59:
+        case 125:
+          if (0 === b + n + v + m) {
+            z++;
+            break;
+          }
+        default:
+          z++;
+          y = e.charAt(l);
+          switch (g) {
+            case 9:
+            case 32:
+              if (0 === n + m + b) switch (x) {
+                case 44:
+                case 58:
+                case 9:
+                case 32:
+                  y = '';
+                  break;
+                default:
+                  32 !== g && (y = ' ');
+              }
+              break;
+            case 0:
+              y = '\\0';
+              break;
+            case 12:
+              y = '\\f';
+              break;
+            case 11:
+              y = '\\v';
+              break;
+            case 38:
+              0 === n + b + m && (r = I = 1, y = '\f' + y);
+              break;
+            case 108:
+              if (0 === n + b + m + E && 0 < u) switch (l - u) {
+                case 2:
+                  112 === x && 58 === e.charCodeAt(l - 3) && (E = x);
+                case 8:
+                  111 === K && (E = K);
+              }
+              break;
+            case 58:
+              0 === n + b + m && (u = l);
+              break;
+            case 44:
+              0 === b + v + n + m && (r = 1, y += '\r');
+              break;
+            case 34:
+            case 39:
+              0 === b && (n = n === g ? 0 : 0 === n ? g : n);
+              break;
+            case 91:
+              0 === n + b + v && m++;
+              break;
+            case 93:
+              0 === n + b + v && m--;
+              break;
+            case 41:
+              0 === n + b + m && v--;
+              break;
+            case 40:
+              if (0 === n + b + m) {
+                if (0 === q) switch (2 * x + 3 * K) {
+                  case 533:
+                    break;
+                  default:
+                    q = 1;
+                }
+                v++;
+              }
+              break;
+            case 64:
+              0 === b + v + n + m + u + k && (k = 1);
+              break;
+            case 42:
+            case 47:
+              if (!(0 < n + m + v)) switch (b) {
+                case 0:
+                  switch (2 * g + 3 * e.charCodeAt(l + 1)) {
+                    case 235:
+                      b = 47;
+                      break;
+                    case 220:
+                      t = l, b = 42;
+                  }
+                  break;
+                case 42:
+                  47 === g && 42 === x && t + 2 !== l && (33 === e.charCodeAt(t + 2) && (p += e.substring(t, l + 1)), y = '', b = 0);
+              }
+          }
+          0 === b && (f += y);
+      }
+      K = x;
+      x = g;
+      l++;
+    }
+    t = p.length;
+    if (0 < t) {
+      r = c;
+      if (0 < A && (C = H(2, p, r, d, D, z, t, h, a, h), void 0 !== C && 0 === (p = C).length)) return G + p + F;
+      p = r.join(',') + '{' + p + '}';
+      if (0 !== w * E) {
+        2 !== w || L(p, 2) || (E = 0);
+        switch (E) {
+          case 111:
+            p = p.replace(ha, ':-moz-$1') + p;
+            break;
+          case 112:
+            p = p.replace(Q, '::-webkit-input-$1') + p.replace(Q, '::-moz-$1') + p.replace(Q, ':-ms-input-$1') + p;
+        }
+        E = 0;
+      }
+    }
+    return G + p + F;
+  }
+  function X(d, c, e) {
+    var h = c.trim().split(ia);
+    c = h;
+    var a = h.length,
+      m = d.length;
+    switch (m) {
+      case 0:
+      case 1:
+        var b = 0;
+        for (d = 0 === m ? '' : d[0] + ' '; b < a; ++b) {
+          c[b] = Z(d, c[b], e).trim();
+        }
+        break;
+      default:
+        var v = b = 0;
+        for (c = []; b < a; ++b) {
+          for (var n = 0; n < m; ++n) {
+            c[v++] = Z(d[n] + ' ', h[b], e).trim();
+          }
+        }
+    }
+    return c;
+  }
+  function Z(d, c, e) {
+    var h = c.charCodeAt(0);
+    33 > h && (h = (c = c.trim()).charCodeAt(0));
+    switch (h) {
+      case 38:
+        return c.replace(F, '$1' + d.trim());
+      case 58:
+        return d.trim() + c.replace(F, '$1' + d.trim());
+      default:
+        if (0 < 1 * e && 0 < c.indexOf('\f')) return c.replace(F, (58 === d.charCodeAt(0) ? '' : '$1') + d.trim());
+    }
+    return d + c;
+  }
+  function P(d, c, e, h) {
+    var a = d + ';',
+      m = 2 * c + 3 * e + 4 * h;
+    if (944 === m) {
+      d = a.indexOf(':', 9) + 1;
+      var b = a.substring(d, a.length - 1).trim();
+      b = a.substring(0, d).trim() + b + ';';
+      return 1 === w || 2 === w && L(b, 1) ? '-webkit-' + b + b : b;
+    }
+    if (0 === w || 2 === w && !L(a, 1)) return a;
+    switch (m) {
+      case 1015:
+        return 97 === a.charCodeAt(10) ? '-webkit-' + a + a : a;
+      case 951:
+        return 116 === a.charCodeAt(3) ? '-webkit-' + a + a : a;
+      case 963:
+        return 110 === a.charCodeAt(5) ? '-webkit-' + a + a : a;
+      case 1009:
+        if (100 !== a.charCodeAt(4)) break;
+      case 969:
+      case 942:
+        return '-webkit-' + a + a;
+      case 978:
+        return '-webkit-' + a + '-moz-' + a + a;
+      case 1019:
+      case 983:
+        return '-webkit-' + a + '-moz-' + a + '-ms-' + a + a;
+      case 883:
+        if (45 === a.charCodeAt(8)) return '-webkit-' + a + a;
+        if (0 < a.indexOf('image-set(', 11)) return a.replace(ja, '$1-webkit-$2') + a;
+        break;
+      case 932:
+        if (45 === a.charCodeAt(4)) switch (a.charCodeAt(5)) {
+          case 103:
+            return '-webkit-box-' + a.replace('-grow', '') + '-webkit-' + a + '-ms-' + a.replace('grow', 'positive') + a;
+          case 115:
+            return '-webkit-' + a + '-ms-' + a.replace('shrink', 'negative') + a;
+          case 98:
+            return '-webkit-' + a + '-ms-' + a.replace('basis', 'preferred-size') + a;
+        }
+        return '-webkit-' + a + '-ms-' + a + a;
+      case 964:
+        return '-webkit-' + a + '-ms-flex-' + a + a;
+      case 1023:
+        if (99 !== a.charCodeAt(8)) break;
+        b = a.substring(a.indexOf(':', 15)).replace('flex-', '').replace('space-between', 'justify');
+        return '-webkit-box-pack' + b + '-webkit-' + a + '-ms-flex-pack' + b + a;
+      case 1005:
+        return ka.test(a) ? a.replace(aa, ':-webkit-') + a.replace(aa, ':-moz-') + a : a;
+      case 1e3:
+        b = a.substring(13).trim();
+        c = b.indexOf('-') + 1;
+        switch (b.charCodeAt(0) + b.charCodeAt(c)) {
+          case 226:
+            b = a.replace(G, 'tb');
+            break;
+          case 232:
+            b = a.replace(G, 'tb-rl');
+            break;
+          case 220:
+            b = a.replace(G, 'lr');
+            break;
+          default:
+            return a;
+        }
+        return '-webkit-' + a + '-ms-' + b + a;
+      case 1017:
+        if (-1 === a.indexOf('sticky', 9)) break;
+      case 975:
+        c = (a = d).length - 10;
+        b = (33 === a.charCodeAt(c) ? a.substring(0, c) : a).substring(d.indexOf(':', 7) + 1).trim();
+        switch (m = b.charCodeAt(0) + (b.charCodeAt(7) | 0)) {
+          case 203:
+            if (111 > b.charCodeAt(8)) break;
+          case 115:
+            a = a.replace(b, '-webkit-' + b) + ';' + a;
+            break;
+          case 207:
+          case 102:
+            a = a.replace(b, '-webkit-' + (102 < m ? 'inline-' : '') + 'box') + ';' + a.replace(b, '-webkit-' + b) + ';' + a.replace(b, '-ms-' + b + 'box') + ';' + a;
+        }
+        return a + ';';
+      case 938:
+        if (45 === a.charCodeAt(5)) switch (a.charCodeAt(6)) {
+          case 105:
+            return b = a.replace('-items', ''), '-webkit-' + a + '-webkit-box-' + b + '-ms-flex-' + b + a;
+          case 115:
+            return '-webkit-' + a + '-ms-flex-item-' + a.replace(ba, '') + a;
+          default:
+            return '-webkit-' + a + '-ms-flex-line-pack' + a.replace('align-content', '').replace(ba, '') + a;
+        }
+        break;
+      case 973:
+      case 989:
+        if (45 !== a.charCodeAt(3) || 122 === a.charCodeAt(4)) break;
+      case 931:
+      case 953:
+        if (!0 === la.test(d)) return 115 === (b = d.substring(d.indexOf(':') + 1)).charCodeAt(0) ? P(d.replace('stretch', 'fill-available'), c, e, h).replace(':fill-available', ':stretch') : a.replace(b, '-webkit-' + b) + a.replace(b, '-moz-' + b.replace('fill-', '')) + a;
+        break;
+      case 962:
+        if (a = '-webkit-' + a + (102 === a.charCodeAt(5) ? '-ms-' + a : '') + a, 211 === e + h && 105 === a.charCodeAt(13) && 0 < a.indexOf('transform', 10)) return a.substring(0, a.indexOf(';', 27) + 1).replace(ma, '$1-webkit-$2') + a;
+    }
+    return a;
+  }
+  function L(d, c) {
+    var e = d.indexOf(1 === c ? ':' : '{'),
+      h = d.substring(0, 3 !== c ? e : 10);
+    e = d.substring(e + 1, d.length - 1);
+    return R(2 !== c ? h : h.replace(na, '$1'), e, c);
+  }
+  function ea(d, c) {
+    var e = P(c, c.charCodeAt(0), c.charCodeAt(1), c.charCodeAt(2));
+    return e !== c + ';' ? e.replace(oa, ' or ($1)').substring(4) : '(' + c + ')';
+  }
+  function H(d, c, e, h, a, m, b, v, n, q) {
+    for (var g = 0, x = c, w; g < A; ++g) {
+      switch (w = S[g].call(B, d, x, e, h, a, m, b, v, n, q)) {
+        case void 0:
+        case !1:
+        case !0:
+        case null:
+          break;
+        default:
+          x = w;
+      }
+    }
+    if (x !== c) return x;
+  }
+  function T(d) {
+    switch (d) {
+      case void 0:
+      case null:
+        A = S.length = 0;
+        break;
+      default:
+        if ('function' === typeof d) S[A++] = d;else if ('object' === typeof d) for (var c = 0, e = d.length; c < e; ++c) {
+          T(d[c]);
+        } else Y = !!d | 0;
+    }
+    return T;
+  }
+  function U(d) {
+    d = d.prefix;
+    void 0 !== d && (R = null, d ? 'function' !== typeof d ? w = 1 : (w = 2, R = d) : w = 0);
+    return U;
+  }
+  function B(d, c) {
+    var e = d;
+    33 > e.charCodeAt(0) && (e = e.trim());
+    V = e;
+    e = [V];
+    if (0 < A) {
+      var h = H(-1, c, e, e, D, z, 0, 0, 0, 0);
+      void 0 !== h && 'string' === typeof h && (c = h);
+    }
+    var a = M(O, e, c, 0, 0);
+    0 < A && (h = H(-2, a, e, e, D, z, a.length, 0, 0, 0), void 0 !== h && (a = h));
+    V = '';
+    E = 0;
+    z = D = 1;
+    return a;
+  }
+  var ca = /^\0+/g,
+    N = /[\0\r\f]/g,
+    aa = /: */g,
+    ka = /zoo|gra/,
+    ma = /([,: ])(transform)/g,
+    ia = /,\r+?/g,
+    F = /([\t\r\n ])*\f?&/g,
+    fa = /@(k\w+)\s*(\S*)\s*/,
+    Q = /::(place)/g,
+    ha = /:(read-only)/g,
+    G = /[svh]\w+-[tblr]{2}/,
+    da = /\(\s*(.*)\s*\)/g,
+    oa = /([\s\S]*?);/g,
+    ba = /-self|flex-/g,
+    na = /[^]*?(:[rp][el]a[\w-]+)[^]*/,
+    la = /stretch|:\s*\w+\-(?:conte|avail)/,
+    ja = /([^-])(image-set\()/,
+    z = 1,
+    D = 1,
+    E = 0,
+    w = 1,
+    O = [],
+    S = [],
+    A = 0,
+    R = null,
+    Y = 0,
+    V = '';
+  B.use = T;
+  B.set = U;
+  void 0 !== W && U(W);
+  return B;
+}
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (stylis_min);
+
+/***/ }),
+
+/***/ "./node_modules/@emotion/unitless/dist/unitless.browser.esm.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+var unitlessKeys = {
+  animationIterationCount: 1,
+  borderImageOutset: 1,
+  borderImageSlice: 1,
+  borderImageWidth: 1,
+  boxFlex: 1,
+  boxFlexGroup: 1,
+  boxOrdinalGroup: 1,
+  columnCount: 1,
+  columns: 1,
+  flex: 1,
+  flexGrow: 1,
+  flexPositive: 1,
+  flexShrink: 1,
+  flexNegative: 1,
+  flexOrder: 1,
+  gridRow: 1,
+  gridRowEnd: 1,
+  gridRowSpan: 1,
+  gridRowStart: 1,
+  gridColumn: 1,
+  gridColumnEnd: 1,
+  gridColumnSpan: 1,
+  gridColumnStart: 1,
+  msGridRow: 1,
+  msGridRowSpan: 1,
+  msGridColumn: 1,
+  msGridColumnSpan: 1,
+  fontWeight: 1,
+  lineHeight: 1,
+  opacity: 1,
+  order: 1,
+  orphans: 1,
+  tabSize: 1,
+  widows: 1,
+  zIndex: 1,
+  zoom: 1,
+  WebkitLineClamp: 1,
+  // SVG-related properties
+  fillOpacity: 1,
+  floodOpacity: 1,
+  stopOpacity: 1,
+  strokeDasharray: 1,
+  strokeDashoffset: 1,
+  strokeMiterlimit: 1,
+  strokeOpacity: 1,
+  strokeWidth: 1
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (unitlessKeys);
 
 /***/ }),
 
@@ -4019,6 +4692,6481 @@ function eventTargetAgnosticAddListener(emitter, name, listener, flags) {
     throw new TypeError('The "emitter" argument must be of type EventEmitter. Received type ' + typeof emitter);
   }
 }
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/StyledIcon.js":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.StyledIcon = void 0;
+var _react = _interopRequireWildcard(__webpack_require__("./node_modules/react/index.js"));
+var _styledComponents = _interopRequireWildcard(__webpack_require__("./node_modules/styled-components/dist/styled-components.browser.esm.js"));
+var _defaultProps = __webpack_require__("./node_modules/grommet-icons/default-props.js");
+var _utils = __webpack_require__("./node_modules/grommet-icons/utils.js");
+var _excluded = ["a11yTitle", "color", "size", "theme"];
+function _getRequireWildcardCache(e) {
+  if ("function" != typeof WeakMap) return null;
+  var r = new WeakMap(),
+    t = new WeakMap();
+  return (_getRequireWildcardCache = function _getRequireWildcardCache(e) {
+    return e ? t : r;
+  })(e);
+}
+function _interopRequireWildcard(e, r) {
+  if (!r && e && e.__esModule) return e;
+  if (null === e || "object" != typeof e && "function" != typeof e) return {
+    "default": e
+  };
+  var t = _getRequireWildcardCache(r);
+  if (t && t.has(e)) return t.get(e);
+  var n = {
+      __proto__: null
+    },
+    a = Object.defineProperty && Object.getOwnPropertyDescriptor;
+  for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) {
+    var i = a ? Object.getOwnPropertyDescriptor(e, u) : null;
+    i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u];
+  }
+  return n["default"] = e, t && t.set(e, n), n;
+}
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+function _objectWithoutPropertiesLoose(source, excluded) {
+  if (source == null) return {};
+  var target = {};
+  var sourceKeys = Object.keys(source);
+  var key, i;
+  for (i = 0; i < sourceKeys.length; i++) {
+    key = sourceKeys[i];
+    if (excluded.indexOf(key) >= 0) continue;
+    target[key] = source[key];
+  }
+  return target;
+}
+// Returns the specific color that should be used according to the theme.
+// If 'dark' is supplied, it takes precedence over 'theme.dark'.
+// Can return undefined.
+var normalizeColor = function normalizeColor(color, theme, dark) {
+  var colorSpec = theme.global && theme.global.colors[color] !== undefined ? theme.global.colors[color] : color;
+  // If the color has a light or dark object, use that
+  var result = colorSpec;
+  if (colorSpec) {
+    if ((dark === true || dark === undefined && theme.dark) && colorSpec.dark !== undefined) {
+      result = colorSpec.dark;
+    } else if ((dark === false || !theme.dark) && colorSpec.light !== undefined) {
+      result = colorSpec.light;
+    }
+  }
+  // allow one level of indirection in color names
+  if (result && theme.global && theme.global.colors[result] !== undefined) {
+    result = normalizeColor(result, theme, dark);
+  }
+  return result;
+};
+var colorStyle = function colorStyle(name, value, theme, required) {
+  return (0, _styledComponents.css)(["", ":", ";"], name, normalizeColor(value, theme, required));
+};
+var colorCss = (0, _styledComponents.css)(["", " ", " g{fill:inherit;stroke:inherit;}*:not([stroke]){&[fill='none']{stroke-width:0;}}*[stroke*='#'],*[STROKE*='#']{stroke:inherit;fill:none;}*[fill-rule],*[FILL-RULE],*[fill*='#'],*[FILL*='#']{fill:inherit;stroke:none;}"], function (props) {
+  return colorStyle('fill', props.color || props.theme.global.colors.icon, props.theme);
+}, function (props) {
+  return colorStyle('stroke', props.color || props.theme.global.colors.icon, props.theme);
+});
+var IconInner = /*#__PURE__*/(0, _react.forwardRef)(function (_ref, ref) {
+  var a11yTitle = _ref.a11yTitle,
+    color = _ref.color,
+    size = _ref.size,
+    theme = _ref.theme,
+    rest = _objectWithoutPropertiesLoose(_ref, _excluded);
+  return /*#__PURE__*/_react["default"].createElement("svg", _extends({
+    ref: ref,
+    "aria-label": a11yTitle
+  }, rest));
+});
+IconInner.displayName = 'Icon';
+var StyledIcon = exports.StyledIcon = (0, _styledComponents["default"])(IconInner).withConfig({
+  // don't let height attribute leak to DOM
+  // https://styled-components.com/docs/api#shouldforwardprop
+  shouldForwardProp: function shouldForwardProp(prop) {
+    return !['height', 'width'].includes(prop);
+  }
+}).withConfig({
+  displayName: "StyledIcon",
+  componentId: "sc-ofa7kd-0"
+})(["display:inline-block;flex:0 0 auto;", " ", " ", " ", ""], function (_ref2) {
+  var _size$match;
+  var _ref2$size = _ref2.size,
+    sizeProp = _ref2$size === void 0 ? 'medium' : _ref2$size,
+    theme = _ref2.theme,
+    viewBox = _ref2.viewBox;
+  var _split = (viewBox || '0 0 24 24').split(' '),
+    w = _split[2],
+    h = _split[3];
+  var scale = w / h;
+  var size = theme.icon.size[sizeProp] || sizeProp;
+  var dimension = (0, _utils.parseMetricToNum)(size);
+  // grab rem, em, px value from resolved size value
+  var unit = ((_size$match = size.match(/[a-z]+$/)) == null ? void 0 : _size$match[0]) || 'px';
+  if (w < h) {
+    return "\n      width: " + dimension + unit + ";\n      height: " + dimension / scale + unit + ";\n    ";
+  }
+  if (h < w) {
+    return "\n      width: " + dimension * scale + unit + ";\n      height: " + dimension + unit + ";\n    ";
+  }
+  return "\n      width: " + dimension + unit + ";\n      height: " + dimension + unit + ";\n    ";
+}, function (_ref3) {
+  var color = _ref3.color;
+  return color !== 'plain' && colorCss;
+}, function (props) {
+  return (props.height || props.width) && (0, _utils.iconPad)(props);
+}, function (_ref4) {
+  var theme = _ref4.theme;
+  return theme && theme.icon.extend;
+});
+StyledIcon.defaultProps = {};
+Object.setPrototypeOf(StyledIcon.defaultProps, _defaultProps.defaultProps);
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/default-props.js":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.extendDefaultTheme = exports.defaultProps = void 0;
+var _utils = __webpack_require__("./node_modules/grommet-icons/utils.js");
+var _themes = __webpack_require__("./node_modules/grommet-icons/themes/index.js");
+var defaultProps = exports.defaultProps = {
+  theme: _themes.base
+};
+var extendDefaultTheme = exports.extendDefaultTheme = function extendDefaultTheme(theme) {
+  defaultProps.theme = (0, _utils.deepMerge)(_themes.base, theme);
+};
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/icons/Actions.js":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.Actions = void 0;
+var _react = _interopRequireWildcard(__webpack_require__("./node_modules/react/index.js"));
+var _StyledIcon = __webpack_require__("./node_modules/grommet-icons/StyledIcon.js");
+function _getRequireWildcardCache(e) {
+  if ("function" != typeof WeakMap) return null;
+  var r = new WeakMap(),
+    t = new WeakMap();
+  return (_getRequireWildcardCache = function _getRequireWildcardCache(e) {
+    return e ? t : r;
+  })(e);
+}
+function _interopRequireWildcard(e, r) {
+  if (!r && e && e.__esModule) return e;
+  if (null === e || "object" != typeof e && "function" != typeof e) return {
+    "default": e
+  };
+  var t = _getRequireWildcardCache(r);
+  if (t && t.has(e)) return t.get(e);
+  var n = {
+      __proto__: null
+    },
+    a = Object.defineProperty && Object.getOwnPropertyDescriptor;
+  for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) {
+    var i = a ? Object.getOwnPropertyDescriptor(e, u) : null;
+    i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u];
+  }
+  return n["default"] = e, t && t.set(e, n), n;
+}
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+var Actions = exports.Actions = /*#__PURE__*/(0, _react.forwardRef)(function (props, ref) {
+  return /*#__PURE__*/_react["default"].createElement(_StyledIcon.StyledIcon, _extends({
+    ref: ref,
+    viewBox: "0 0 24 24",
+    a11yTitle: "Actions"
+  }, props), /*#__PURE__*/_react["default"].createElement("path", {
+    fill: "none",
+    stroke: "#000",
+    strokeWidth: "2",
+    d: "M12 17.5a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11zm0-11V1m0 22v-5.5M1 12h5.5m11 0H23M4.437 4.437l4.125 4.125m6.876 6.876 4.124 4.124m0-15.125-4.125 4.125m-6.874 6.876-4.126 4.124"
+  }));
+});
+Actions.displayName = 'Actions';
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/icons/AssistListening.js":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.AssistListening = void 0;
+var _react = _interopRequireWildcard(__webpack_require__("./node_modules/react/index.js"));
+var _StyledIcon = __webpack_require__("./node_modules/grommet-icons/StyledIcon.js");
+function _getRequireWildcardCache(e) {
+  if ("function" != typeof WeakMap) return null;
+  var r = new WeakMap(),
+    t = new WeakMap();
+  return (_getRequireWildcardCache = function _getRequireWildcardCache(e) {
+    return e ? t : r;
+  })(e);
+}
+function _interopRequireWildcard(e, r) {
+  if (!r && e && e.__esModule) return e;
+  if (null === e || "object" != typeof e && "function" != typeof e) return {
+    "default": e
+  };
+  var t = _getRequireWildcardCache(r);
+  if (t && t.has(e)) return t.get(e);
+  var n = {
+      __proto__: null
+    },
+    a = Object.defineProperty && Object.getOwnPropertyDescriptor;
+  for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) {
+    var i = a ? Object.getOwnPropertyDescriptor(e, u) : null;
+    i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u];
+  }
+  return n["default"] = e, t && t.set(e, n), n;
+}
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+var AssistListening = exports.AssistListening = /*#__PURE__*/(0, _react.forwardRef)(function (props, ref) {
+  return /*#__PURE__*/_react["default"].createElement(_StyledIcon.StyledIcon, _extends({
+    ref: ref,
+    viewBox: "0 0 24 24",
+    a11yTitle: "AssistListening"
+  }, props), /*#__PURE__*/_react["default"].createElement("path", {
+    fill: "none",
+    stroke: "#000",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    strokeWidth: "2",
+    d: "M11 21c.757.667 1.424 1 2 1 2 0 3-1 3-3 0-1.333.667-2.667 2-4 1.267-1.267 2-3.067 2-5a7 7 0 0 0-14 0m11 0a4 4 0 1 0-8 0M3 20l5-6 1 4 5-6"
+  }));
+});
+AssistListening.displayName = 'AssistListening';
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/icons/CircleInformation.js":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.CircleInformation = void 0;
+var _react = _interopRequireWildcard(__webpack_require__("./node_modules/react/index.js"));
+var _StyledIcon = __webpack_require__("./node_modules/grommet-icons/StyledIcon.js");
+function _getRequireWildcardCache(e) {
+  if ("function" != typeof WeakMap) return null;
+  var r = new WeakMap(),
+    t = new WeakMap();
+  return (_getRequireWildcardCache = function _getRequireWildcardCache(e) {
+    return e ? t : r;
+  })(e);
+}
+function _interopRequireWildcard(e, r) {
+  if (!r && e && e.__esModule) return e;
+  if (null === e || "object" != typeof e && "function" != typeof e) return {
+    "default": e
+  };
+  var t = _getRequireWildcardCache(r);
+  if (t && t.has(e)) return t.get(e);
+  var n = {
+      __proto__: null
+    },
+    a = Object.defineProperty && Object.getOwnPropertyDescriptor;
+  for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) {
+    var i = a ? Object.getOwnPropertyDescriptor(e, u) : null;
+    i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u];
+  }
+  return n["default"] = e, t && t.set(e, n), n;
+}
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+var CircleInformation = exports.CircleInformation = /*#__PURE__*/(0, _react.forwardRef)(function (props, ref) {
+  return /*#__PURE__*/_react["default"].createElement(_StyledIcon.StyledIcon, _extends({
+    ref: ref,
+    viewBox: "0 0 24 24",
+    a11yTitle: "CircleInformation"
+  }, props), /*#__PURE__*/_react["default"].createElement("path", {
+    fill: "none",
+    stroke: "#000",
+    strokeWidth: "2",
+    d: "M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm0-12v8m0-12v2"
+  }));
+});
+CircleInformation.displayName = 'CircleInformation';
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/icons/ClosedCaption.js":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.ClosedCaption = void 0;
+var _react = _interopRequireWildcard(__webpack_require__("./node_modules/react/index.js"));
+var _StyledIcon = __webpack_require__("./node_modules/grommet-icons/StyledIcon.js");
+function _getRequireWildcardCache(e) {
+  if ("function" != typeof WeakMap) return null;
+  var r = new WeakMap(),
+    t = new WeakMap();
+  return (_getRequireWildcardCache = function _getRequireWildcardCache(e) {
+    return e ? t : r;
+  })(e);
+}
+function _interopRequireWildcard(e, r) {
+  if (!r && e && e.__esModule) return e;
+  if (null === e || "object" != typeof e && "function" != typeof e) return {
+    "default": e
+  };
+  var t = _getRequireWildcardCache(r);
+  if (t && t.has(e)) return t.get(e);
+  var n = {
+      __proto__: null
+    },
+    a = Object.defineProperty && Object.getOwnPropertyDescriptor;
+  for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) {
+    var i = a ? Object.getOwnPropertyDescriptor(e, u) : null;
+    i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u];
+  }
+  return n["default"] = e, t && t.set(e, n), n;
+}
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+var ClosedCaption = exports.ClosedCaption = /*#__PURE__*/(0, _react.forwardRef)(function (props, ref) {
+  return /*#__PURE__*/_react["default"].createElement(_StyledIcon.StyledIcon, _extends({
+    ref: ref,
+    viewBox: "0 0 24 24",
+    a11yTitle: "ClosedCaption"
+  }, props), /*#__PURE__*/_react["default"].createElement("path", {
+    fill: "none",
+    stroke: "#000",
+    strokeWidth: "2",
+    d: "M1 12c0-7 1.5-8 11-8s11 1 11 8-1.5 8-11 8-11-1-11-8zm4.25 2c0 1.5.75 2 2.5 2s2.5-.5 2.5-2h-.271c0 1.25-1 2-2.229 2-1.23 0-2.229-.75-2.229-2v-4C5.5 8.75 6.5 8 7.75 8s2.25.75 2.229 2h.271c0-1.25-1.021-2-2.5-2s-2.5.75-2.5 2v4zm8 0c0 1.5.75 2 2.5 2s2.5-.5 2.5-2h-.271c0 1.25-1 2-2.229 2-1.23 0-2.229-.75-2.229-2v-4c-.021-1.25.979-2 2.229-2s2.25.75 2.229 2h.271c0-1.25-1.021-2-2.5-2s-2.5.75-2.5 2v4z"
+  }));
+});
+ClosedCaption.displayName = 'ClosedCaption';
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/icons/Expand.js":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.Expand = void 0;
+var _react = _interopRequireWildcard(__webpack_require__("./node_modules/react/index.js"));
+var _StyledIcon = __webpack_require__("./node_modules/grommet-icons/StyledIcon.js");
+function _getRequireWildcardCache(e) {
+  if ("function" != typeof WeakMap) return null;
+  var r = new WeakMap(),
+    t = new WeakMap();
+  return (_getRequireWildcardCache = function _getRequireWildcardCache(e) {
+    return e ? t : r;
+  })(e);
+}
+function _interopRequireWildcard(e, r) {
+  if (!r && e && e.__esModule) return e;
+  if (null === e || "object" != typeof e && "function" != typeof e) return {
+    "default": e
+  };
+  var t = _getRequireWildcardCache(r);
+  if (t && t.has(e)) return t.get(e);
+  var n = {
+      __proto__: null
+    },
+    a = Object.defineProperty && Object.getOwnPropertyDescriptor;
+  for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) {
+    var i = a ? Object.getOwnPropertyDescriptor(e, u) : null;
+    i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u];
+  }
+  return n["default"] = e, t && t.set(e, n), n;
+}
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+var Expand = exports.Expand = /*#__PURE__*/(0, _react.forwardRef)(function (props, ref) {
+  return /*#__PURE__*/_react["default"].createElement(_StyledIcon.StyledIcon, _extends({
+    ref: ref,
+    viewBox: "0 0 24 24",
+    a11yTitle: "Expand"
+  }, props), /*#__PURE__*/_react["default"].createElement("path", {
+    fill: "none",
+    stroke: "#000",
+    strokeWidth: "2",
+    d: "m10 14-8 8m-1-7v8h8M22 2l-8 8m1-9h8v8"
+  }));
+});
+Expand.displayName = 'Expand';
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/icons/FormClose.js":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.FormClose = void 0;
+var _react = _interopRequireWildcard(__webpack_require__("./node_modules/react/index.js"));
+var _StyledIcon = __webpack_require__("./node_modules/grommet-icons/StyledIcon.js");
+function _getRequireWildcardCache(e) {
+  if ("function" != typeof WeakMap) return null;
+  var r = new WeakMap(),
+    t = new WeakMap();
+  return (_getRequireWildcardCache = function _getRequireWildcardCache(e) {
+    return e ? t : r;
+  })(e);
+}
+function _interopRequireWildcard(e, r) {
+  if (!r && e && e.__esModule) return e;
+  if (null === e || "object" != typeof e && "function" != typeof e) return {
+    "default": e
+  };
+  var t = _getRequireWildcardCache(r);
+  if (t && t.has(e)) return t.get(e);
+  var n = {
+      __proto__: null
+    },
+    a = Object.defineProperty && Object.getOwnPropertyDescriptor;
+  for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) {
+    var i = a ? Object.getOwnPropertyDescriptor(e, u) : null;
+    i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u];
+  }
+  return n["default"] = e, t && t.set(e, n), n;
+}
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+var FormClose = exports.FormClose = /*#__PURE__*/(0, _react.forwardRef)(function (props, ref) {
+  return /*#__PURE__*/_react["default"].createElement(_StyledIcon.StyledIcon, _extends({
+    ref: ref,
+    viewBox: "0 0 24 24",
+    a11yTitle: "FormClose"
+  }, props), /*#__PURE__*/_react["default"].createElement("path", {
+    fill: "none",
+    stroke: "#000",
+    strokeWidth: "2",
+    d: "m7 7 10 10M7 17 17 7"
+  }));
+});
+FormClose.displayName = 'FormClose';
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/icons/FormDown.js":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.FormDown = void 0;
+var _react = _interopRequireWildcard(__webpack_require__("./node_modules/react/index.js"));
+var _StyledIcon = __webpack_require__("./node_modules/grommet-icons/StyledIcon.js");
+function _getRequireWildcardCache(e) {
+  if ("function" != typeof WeakMap) return null;
+  var r = new WeakMap(),
+    t = new WeakMap();
+  return (_getRequireWildcardCache = function _getRequireWildcardCache(e) {
+    return e ? t : r;
+  })(e);
+}
+function _interopRequireWildcard(e, r) {
+  if (!r && e && e.__esModule) return e;
+  if (null === e || "object" != typeof e && "function" != typeof e) return {
+    "default": e
+  };
+  var t = _getRequireWildcardCache(r);
+  if (t && t.has(e)) return t.get(e);
+  var n = {
+      __proto__: null
+    },
+    a = Object.defineProperty && Object.getOwnPropertyDescriptor;
+  for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) {
+    var i = a ? Object.getOwnPropertyDescriptor(e, u) : null;
+    i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u];
+  }
+  return n["default"] = e, t && t.set(e, n), n;
+}
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+var FormDown = exports.FormDown = /*#__PURE__*/(0, _react.forwardRef)(function (props, ref) {
+  return /*#__PURE__*/_react["default"].createElement(_StyledIcon.StyledIcon, _extends({
+    ref: ref,
+    viewBox: "0 0 24 24",
+    a11yTitle: "FormDown"
+  }, props), /*#__PURE__*/_react["default"].createElement("path", {
+    fill: "none",
+    stroke: "#000",
+    strokeWidth: "2",
+    d: "m18 9-6 6-6-6"
+  }));
+});
+FormDown.displayName = 'FormDown';
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/icons/FormNext.js":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.FormNext = void 0;
+var _react = _interopRequireWildcard(__webpack_require__("./node_modules/react/index.js"));
+var _StyledIcon = __webpack_require__("./node_modules/grommet-icons/StyledIcon.js");
+function _getRequireWildcardCache(e) {
+  if ("function" != typeof WeakMap) return null;
+  var r = new WeakMap(),
+    t = new WeakMap();
+  return (_getRequireWildcardCache = function _getRequireWildcardCache(e) {
+    return e ? t : r;
+  })(e);
+}
+function _interopRequireWildcard(e, r) {
+  if (!r && e && e.__esModule) return e;
+  if (null === e || "object" != typeof e && "function" != typeof e) return {
+    "default": e
+  };
+  var t = _getRequireWildcardCache(r);
+  if (t && t.has(e)) return t.get(e);
+  var n = {
+      __proto__: null
+    },
+    a = Object.defineProperty && Object.getOwnPropertyDescriptor;
+  for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) {
+    var i = a ? Object.getOwnPropertyDescriptor(e, u) : null;
+    i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u];
+  }
+  return n["default"] = e, t && t.set(e, n), n;
+}
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+var FormNext = exports.FormNext = /*#__PURE__*/(0, _react.forwardRef)(function (props, ref) {
+  return /*#__PURE__*/_react["default"].createElement(_StyledIcon.StyledIcon, _extends({
+    ref: ref,
+    viewBox: "0 0 24 24",
+    a11yTitle: "FormNext"
+  }, props), /*#__PURE__*/_react["default"].createElement("path", {
+    fill: "none",
+    stroke: "#000",
+    strokeWidth: "2",
+    d: "m9 6 6 6-6 6"
+  }));
+});
+FormNext.displayName = 'FormNext';
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/icons/FormPin.js":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.FormPin = void 0;
+var _react = _interopRequireWildcard(__webpack_require__("./node_modules/react/index.js"));
+var _StyledIcon = __webpack_require__("./node_modules/grommet-icons/StyledIcon.js");
+function _getRequireWildcardCache(e) {
+  if ("function" != typeof WeakMap) return null;
+  var r = new WeakMap(),
+    t = new WeakMap();
+  return (_getRequireWildcardCache = function _getRequireWildcardCache(e) {
+    return e ? t : r;
+  })(e);
+}
+function _interopRequireWildcard(e, r) {
+  if (!r && e && e.__esModule) return e;
+  if (null === e || "object" != typeof e && "function" != typeof e) return {
+    "default": e
+  };
+  var t = _getRequireWildcardCache(r);
+  if (t && t.has(e)) return t.get(e);
+  var n = {
+      __proto__: null
+    },
+    a = Object.defineProperty && Object.getOwnPropertyDescriptor;
+  for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) {
+    var i = a ? Object.getOwnPropertyDescriptor(e, u) : null;
+    i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u];
+  }
+  return n["default"] = e, t && t.set(e, n), n;
+}
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+var FormPin = exports.FormPin = /*#__PURE__*/(0, _react.forwardRef)(function (props, ref) {
+  return /*#__PURE__*/_react["default"].createElement(_StyledIcon.StyledIcon, _extends({
+    ref: ref,
+    viewBox: "0 0 24 24",
+    a11yTitle: "FormPin"
+  }, props), /*#__PURE__*/_react["default"].createElement("path", {
+    fill: "none",
+    stroke: "#000",
+    strokeWidth: "2",
+    d: "m4 19 4.455-4.454M12.273 5 18 10.727m-4.454-4.454L9.727 10.09s-2.545-.636-4.454 1.273l6.363 6.363c1.91-1.909 1.273-4.454 1.273-4.454l3.818-3.818-3.181-3.182Z"
+  }));
+});
+FormPin.displayName = 'FormPin';
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/icons/FormPrevious.js":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.FormPrevious = void 0;
+var _react = _interopRequireWildcard(__webpack_require__("./node_modules/react/index.js"));
+var _StyledIcon = __webpack_require__("./node_modules/grommet-icons/StyledIcon.js");
+function _getRequireWildcardCache(e) {
+  if ("function" != typeof WeakMap) return null;
+  var r = new WeakMap(),
+    t = new WeakMap();
+  return (_getRequireWildcardCache = function _getRequireWildcardCache(e) {
+    return e ? t : r;
+  })(e);
+}
+function _interopRequireWildcard(e, r) {
+  if (!r && e && e.__esModule) return e;
+  if (null === e || "object" != typeof e && "function" != typeof e) return {
+    "default": e
+  };
+  var t = _getRequireWildcardCache(r);
+  if (t && t.has(e)) return t.get(e);
+  var n = {
+      __proto__: null
+    },
+    a = Object.defineProperty && Object.getOwnPropertyDescriptor;
+  for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) {
+    var i = a ? Object.getOwnPropertyDescriptor(e, u) : null;
+    i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u];
+  }
+  return n["default"] = e, t && t.set(e, n), n;
+}
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+var FormPrevious = exports.FormPrevious = /*#__PURE__*/(0, _react.forwardRef)(function (props, ref) {
+  return /*#__PURE__*/_react["default"].createElement(_StyledIcon.StyledIcon, _extends({
+    ref: ref,
+    viewBox: "0 0 24 24",
+    a11yTitle: "FormPrevious"
+  }, props), /*#__PURE__*/_react["default"].createElement("path", {
+    fill: "none",
+    stroke: "#000",
+    strokeWidth: "2",
+    d: "m15 6-6 6 6 6"
+  }));
+});
+FormPrevious.displayName = 'FormPrevious';
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/icons/FormUp.js":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.FormUp = void 0;
+var _react = _interopRequireWildcard(__webpack_require__("./node_modules/react/index.js"));
+var _StyledIcon = __webpack_require__("./node_modules/grommet-icons/StyledIcon.js");
+function _getRequireWildcardCache(e) {
+  if ("function" != typeof WeakMap) return null;
+  var r = new WeakMap(),
+    t = new WeakMap();
+  return (_getRequireWildcardCache = function _getRequireWildcardCache(e) {
+    return e ? t : r;
+  })(e);
+}
+function _interopRequireWildcard(e, r) {
+  if (!r && e && e.__esModule) return e;
+  if (null === e || "object" != typeof e && "function" != typeof e) return {
+    "default": e
+  };
+  var t = _getRequireWildcardCache(r);
+  if (t && t.has(e)) return t.get(e);
+  var n = {
+      __proto__: null
+    },
+    a = Object.defineProperty && Object.getOwnPropertyDescriptor;
+  for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) {
+    var i = a ? Object.getOwnPropertyDescriptor(e, u) : null;
+    i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u];
+  }
+  return n["default"] = e, t && t.set(e, n), n;
+}
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+var FormUp = exports.FormUp = /*#__PURE__*/(0, _react.forwardRef)(function (props, ref) {
+  return /*#__PURE__*/_react["default"].createElement(_StyledIcon.StyledIcon, _extends({
+    ref: ref,
+    viewBox: "0 0 24 24",
+    a11yTitle: "FormUp"
+  }, props), /*#__PURE__*/_react["default"].createElement("path", {
+    fill: "none",
+    stroke: "#000",
+    strokeWidth: "2",
+    d: "m18 15-6-6-6 6"
+  }));
+});
+FormUp.displayName = 'FormUp';
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/icons/Next.js":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.Next = void 0;
+var _react = _interopRequireWildcard(__webpack_require__("./node_modules/react/index.js"));
+var _StyledIcon = __webpack_require__("./node_modules/grommet-icons/StyledIcon.js");
+var _utils = __webpack_require__("./node_modules/grommet-icons/utils.js");
+function _getRequireWildcardCache(e) {
+  if ("function" != typeof WeakMap) return null;
+  var r = new WeakMap(),
+    t = new WeakMap();
+  return (_getRequireWildcardCache = function _getRequireWildcardCache(e) {
+    return e ? t : r;
+  })(e);
+}
+function _interopRequireWildcard(e, r) {
+  if (!r && e && e.__esModule) return e;
+  if (null === e || "object" != typeof e && "function" != typeof e) return {
+    "default": e
+  };
+  var t = _getRequireWildcardCache(r);
+  if (t && t.has(e)) return t.get(e);
+  var n = {
+      __proto__: null
+    },
+    a = Object.defineProperty && Object.getOwnPropertyDescriptor;
+  for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) {
+    var i = a ? Object.getOwnPropertyDescriptor(e, u) : null;
+    i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u];
+  }
+  return n["default"] = e, t && t.set(e, n), n;
+}
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+var Next = exports.Next = /*#__PURE__*/(0, _react.forwardRef)(function (props, ref) {
+  var scaleProps = (0, _utils.useScaleProps)(props);
+  return /*#__PURE__*/_react["default"].createElement(_StyledIcon.StyledIcon, _extends({
+    ref: ref,
+    viewBox: "0 0 24 24",
+    a11yTitle: "Next"
+  }, props), /*#__PURE__*/_react["default"].createElement("path", _extends({
+    fill: "none",
+    stroke: "#000",
+    strokeWidth: "2",
+    d: "m7 2 10 10L7 22"
+  }, scaleProps)));
+});
+Next.displayName = 'Next';
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/icons/Pause.js":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.Pause = void 0;
+var _react = _interopRequireWildcard(__webpack_require__("./node_modules/react/index.js"));
+var _StyledIcon = __webpack_require__("./node_modules/grommet-icons/StyledIcon.js");
+function _getRequireWildcardCache(e) {
+  if ("function" != typeof WeakMap) return null;
+  var r = new WeakMap(),
+    t = new WeakMap();
+  return (_getRequireWildcardCache = function _getRequireWildcardCache(e) {
+    return e ? t : r;
+  })(e);
+}
+function _interopRequireWildcard(e, r) {
+  if (!r && e && e.__esModule) return e;
+  if (null === e || "object" != typeof e && "function" != typeof e) return {
+    "default": e
+  };
+  var t = _getRequireWildcardCache(r);
+  if (t && t.has(e)) return t.get(e);
+  var n = {
+      __proto__: null
+    },
+    a = Object.defineProperty && Object.getOwnPropertyDescriptor;
+  for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) {
+    var i = a ? Object.getOwnPropertyDescriptor(e, u) : null;
+    i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u];
+  }
+  return n["default"] = e, t && t.set(e, n), n;
+}
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+var Pause = exports.Pause = /*#__PURE__*/(0, _react.forwardRef)(function (props, ref) {
+  return /*#__PURE__*/_react["default"].createElement(_StyledIcon.StyledIcon, _extends({
+    ref: ref,
+    viewBox: "0 0 24 24",
+    a11yTitle: "Pause"
+  }, props), /*#__PURE__*/_react["default"].createElement("path", {
+    fill: "none",
+    stroke: "#000",
+    strokeWidth: "2",
+    d: "M3 21h6V3H3v18zm12 0h6V3h-6v18z"
+  }));
+});
+Pause.displayName = 'Pause';
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/icons/Play.js":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.Play = void 0;
+var _react = _interopRequireWildcard(__webpack_require__("./node_modules/react/index.js"));
+var _StyledIcon = __webpack_require__("./node_modules/grommet-icons/StyledIcon.js");
+function _getRequireWildcardCache(e) {
+  if ("function" != typeof WeakMap) return null;
+  var r = new WeakMap(),
+    t = new WeakMap();
+  return (_getRequireWildcardCache = function _getRequireWildcardCache(e) {
+    return e ? t : r;
+  })(e);
+}
+function _interopRequireWildcard(e, r) {
+  if (!r && e && e.__esModule) return e;
+  if (null === e || "object" != typeof e && "function" != typeof e) return {
+    "default": e
+  };
+  var t = _getRequireWildcardCache(r);
+  if (t && t.has(e)) return t.get(e);
+  var n = {
+      __proto__: null
+    },
+    a = Object.defineProperty && Object.getOwnPropertyDescriptor;
+  for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) {
+    var i = a ? Object.getOwnPropertyDescriptor(e, u) : null;
+    i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u];
+  }
+  return n["default"] = e, t && t.set(e, n), n;
+}
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+var Play = exports.Play = /*#__PURE__*/(0, _react.forwardRef)(function (props, ref) {
+  return /*#__PURE__*/_react["default"].createElement(_StyledIcon.StyledIcon, _extends({
+    ref: ref,
+    viewBox: "0 0 24 24",
+    a11yTitle: "Play"
+  }, props), /*#__PURE__*/_react["default"].createElement("path", {
+    fill: "none",
+    stroke: "#000",
+    strokeWidth: "2",
+    d: "m3 22 18-10L3 2z"
+  }));
+});
+Play.displayName = 'Play';
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/icons/Previous.js":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.Previous = void 0;
+var _react = _interopRequireWildcard(__webpack_require__("./node_modules/react/index.js"));
+var _StyledIcon = __webpack_require__("./node_modules/grommet-icons/StyledIcon.js");
+var _utils = __webpack_require__("./node_modules/grommet-icons/utils.js");
+function _getRequireWildcardCache(e) {
+  if ("function" != typeof WeakMap) return null;
+  var r = new WeakMap(),
+    t = new WeakMap();
+  return (_getRequireWildcardCache = function _getRequireWildcardCache(e) {
+    return e ? t : r;
+  })(e);
+}
+function _interopRequireWildcard(e, r) {
+  if (!r && e && e.__esModule) return e;
+  if (null === e || "object" != typeof e && "function" != typeof e) return {
+    "default": e
+  };
+  var t = _getRequireWildcardCache(r);
+  if (t && t.has(e)) return t.get(e);
+  var n = {
+      __proto__: null
+    },
+    a = Object.defineProperty && Object.getOwnPropertyDescriptor;
+  for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) {
+    var i = a ? Object.getOwnPropertyDescriptor(e, u) : null;
+    i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u];
+  }
+  return n["default"] = e, t && t.set(e, n), n;
+}
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+var Previous = exports.Previous = /*#__PURE__*/(0, _react.forwardRef)(function (props, ref) {
+  var scaleProps = (0, _utils.useScaleProps)(props);
+  return /*#__PURE__*/_react["default"].createElement(_StyledIcon.StyledIcon, _extends({
+    ref: ref,
+    viewBox: "0 0 24 24",
+    a11yTitle: "Previous"
+  }, props), /*#__PURE__*/_react["default"].createElement("path", _extends({
+    fill: "none",
+    stroke: "#000",
+    strokeWidth: "2",
+    d: "M17 2 7 12l10 10"
+  }, scaleProps)));
+});
+Previous.displayName = 'Previous';
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/icons/StatusCriticalSmall.js":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.StatusCriticalSmall = void 0;
+var _react = _interopRequireWildcard(__webpack_require__("./node_modules/react/index.js"));
+var _StyledIcon = __webpack_require__("./node_modules/grommet-icons/StyledIcon.js");
+function _getRequireWildcardCache(e) {
+  if ("function" != typeof WeakMap) return null;
+  var r = new WeakMap(),
+    t = new WeakMap();
+  return (_getRequireWildcardCache = function _getRequireWildcardCache(e) {
+    return e ? t : r;
+  })(e);
+}
+function _interopRequireWildcard(e, r) {
+  if (!r && e && e.__esModule) return e;
+  if (null === e || "object" != typeof e && "function" != typeof e) return {
+    "default": e
+  };
+  var t = _getRequireWildcardCache(r);
+  if (t && t.has(e)) return t.get(e);
+  var n = {
+      __proto__: null
+    },
+    a = Object.defineProperty && Object.getOwnPropertyDescriptor;
+  for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) {
+    var i = a ? Object.getOwnPropertyDescriptor(e, u) : null;
+    i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u];
+  }
+  return n["default"] = e, t && t.set(e, n), n;
+}
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+var StatusCriticalSmall = exports.StatusCriticalSmall = /*#__PURE__*/(0, _react.forwardRef)(function (props, ref) {
+  return /*#__PURE__*/_react["default"].createElement(_StyledIcon.StyledIcon, _extends({
+    ref: ref,
+    viewBox: "0 0 12 12",
+    a11yTitle: "Status is critical"
+  }, props), /*#__PURE__*/_react["default"].createElement("path", {
+    fillRule: "evenodd",
+    stroke: "#000",
+    d: "M6.712 1.263a1.005 1.005 0 0 0-1.424 0L1.263 5.288a1.005 1.005 0 0 0 0 1.424l4.025 4.025a1.005 1.005 0 0 0 1.424 0l4.025-4.025a1.005 1.005 0 0 0 0-1.424L6.712 1.263z"
+  }));
+});
+StatusCriticalSmall.displayName = 'StatusCriticalSmall';
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/icons/StatusGoodSmall.js":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.StatusGoodSmall = void 0;
+var _react = _interopRequireWildcard(__webpack_require__("./node_modules/react/index.js"));
+var _StyledIcon = __webpack_require__("./node_modules/grommet-icons/StyledIcon.js");
+function _getRequireWildcardCache(e) {
+  if ("function" != typeof WeakMap) return null;
+  var r = new WeakMap(),
+    t = new WeakMap();
+  return (_getRequireWildcardCache = function _getRequireWildcardCache(e) {
+    return e ? t : r;
+  })(e);
+}
+function _interopRequireWildcard(e, r) {
+  if (!r && e && e.__esModule) return e;
+  if (null === e || "object" != typeof e && "function" != typeof e) return {
+    "default": e
+  };
+  var t = _getRequireWildcardCache(r);
+  if (t && t.has(e)) return t.get(e);
+  var n = {
+      __proto__: null
+    },
+    a = Object.defineProperty && Object.getOwnPropertyDescriptor;
+  for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) {
+    var i = a ? Object.getOwnPropertyDescriptor(e, u) : null;
+    i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u];
+  }
+  return n["default"] = e, t && t.set(e, n), n;
+}
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+var StatusGoodSmall = exports.StatusGoodSmall = /*#__PURE__*/(0, _react.forwardRef)(function (props, ref) {
+  return /*#__PURE__*/_react["default"].createElement(_StyledIcon.StyledIcon, _extends({
+    ref: ref,
+    viewBox: "0 0 12 12",
+    a11yTitle: "Status is okay"
+  }, props), /*#__PURE__*/_react["default"].createElement("circle", {
+    cx: "6",
+    cy: "6",
+    r: "5",
+    fillRule: "evenodd",
+    stroke: "#000"
+  }));
+});
+StatusGoodSmall.displayName = 'StatusGoodSmall';
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/icons/StatusUnknownSmall.js":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.StatusUnknownSmall = void 0;
+var _react = _interopRequireWildcard(__webpack_require__("./node_modules/react/index.js"));
+var _StyledIcon = __webpack_require__("./node_modules/grommet-icons/StyledIcon.js");
+function _getRequireWildcardCache(e) {
+  if ("function" != typeof WeakMap) return null;
+  var r = new WeakMap(),
+    t = new WeakMap();
+  return (_getRequireWildcardCache = function _getRequireWildcardCache(e) {
+    return e ? t : r;
+  })(e);
+}
+function _interopRequireWildcard(e, r) {
+  if (!r && e && e.__esModule) return e;
+  if (null === e || "object" != typeof e && "function" != typeof e) return {
+    "default": e
+  };
+  var t = _getRequireWildcardCache(r);
+  if (t && t.has(e)) return t.get(e);
+  var n = {
+      __proto__: null
+    },
+    a = Object.defineProperty && Object.getOwnPropertyDescriptor;
+  for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) {
+    var i = a ? Object.getOwnPropertyDescriptor(e, u) : null;
+    i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u];
+  }
+  return n["default"] = e, t && t.set(e, n), n;
+}
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+var StatusUnknownSmall = exports.StatusUnknownSmall = /*#__PURE__*/(0, _react.forwardRef)(function (props, ref) {
+  return /*#__PURE__*/_react["default"].createElement(_StyledIcon.StyledIcon, _extends({
+    ref: ref,
+    viewBox: "0 0 12 12",
+    a11yTitle: "Status is unknown"
+  }, props), /*#__PURE__*/_react["default"].createElement("rect", {
+    width: "10",
+    height: "10",
+    x: "1",
+    y: "1",
+    fillRule: "evenodd",
+    stroke: "#000",
+    rx: "1"
+  }));
+});
+StatusUnknownSmall.displayName = 'StatusUnknownSmall';
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/icons/StatusWarningSmall.js":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.StatusWarningSmall = void 0;
+var _react = _interopRequireWildcard(__webpack_require__("./node_modules/react/index.js"));
+var _StyledIcon = __webpack_require__("./node_modules/grommet-icons/StyledIcon.js");
+function _getRequireWildcardCache(e) {
+  if ("function" != typeof WeakMap) return null;
+  var r = new WeakMap(),
+    t = new WeakMap();
+  return (_getRequireWildcardCache = function _getRequireWildcardCache(e) {
+    return e ? t : r;
+  })(e);
+}
+function _interopRequireWildcard(e, r) {
+  if (!r && e && e.__esModule) return e;
+  if (null === e || "object" != typeof e && "function" != typeof e) return {
+    "default": e
+  };
+  var t = _getRequireWildcardCache(r);
+  if (t && t.has(e)) return t.get(e);
+  var n = {
+      __proto__: null
+    },
+    a = Object.defineProperty && Object.getOwnPropertyDescriptor;
+  for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) {
+    var i = a ? Object.getOwnPropertyDescriptor(e, u) : null;
+    i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u];
+  }
+  return n["default"] = e, t && t.set(e, n), n;
+}
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+var StatusWarningSmall = exports.StatusWarningSmall = /*#__PURE__*/(0, _react.forwardRef)(function (props, ref) {
+  return /*#__PURE__*/_react["default"].createElement(_StyledIcon.StyledIcon, _extends({
+    ref: ref,
+    viewBox: "0 0 12 12",
+    a11yTitle: "Status is warning"
+  }, props), /*#__PURE__*/_react["default"].createElement("path", {
+    fillRule: "evenodd",
+    stroke: "#000",
+    strokeLinejoin: "round",
+    d: "m6 1 5 9H1z"
+  }));
+});
+StatusWarningSmall.displayName = 'StatusWarningSmall';
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/icons/Subtract.js":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.Subtract = void 0;
+var _react = _interopRequireWildcard(__webpack_require__("./node_modules/react/index.js"));
+var _StyledIcon = __webpack_require__("./node_modules/grommet-icons/StyledIcon.js");
+function _getRequireWildcardCache(e) {
+  if ("function" != typeof WeakMap) return null;
+  var r = new WeakMap(),
+    t = new WeakMap();
+  return (_getRequireWildcardCache = function _getRequireWildcardCache(e) {
+    return e ? t : r;
+  })(e);
+}
+function _interopRequireWildcard(e, r) {
+  if (!r && e && e.__esModule) return e;
+  if (null === e || "object" != typeof e && "function" != typeof e) return {
+    "default": e
+  };
+  var t = _getRequireWildcardCache(r);
+  if (t && t.has(e)) return t.get(e);
+  var n = {
+      __proto__: null
+    },
+    a = Object.defineProperty && Object.getOwnPropertyDescriptor;
+  for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) {
+    var i = a ? Object.getOwnPropertyDescriptor(e, u) : null;
+    i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u];
+  }
+  return n["default"] = e, t && t.set(e, n), n;
+}
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+var Subtract = exports.Subtract = /*#__PURE__*/(0, _react.forwardRef)(function (props, ref) {
+  return /*#__PURE__*/_react["default"].createElement(_StyledIcon.StyledIcon, _extends({
+    ref: ref,
+    viewBox: "0 0 24 24",
+    a11yTitle: "Subtract"
+  }, props), /*#__PURE__*/_react["default"].createElement("path", {
+    fill: "none",
+    stroke: "#000",
+    strokeWidth: "2",
+    d: "M2 12h20"
+  }));
+});
+Subtract.displayName = 'Subtract';
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/icons/Volume.js":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.Volume = void 0;
+var _react = _interopRequireWildcard(__webpack_require__("./node_modules/react/index.js"));
+var _StyledIcon = __webpack_require__("./node_modules/grommet-icons/StyledIcon.js");
+function _getRequireWildcardCache(e) {
+  if ("function" != typeof WeakMap) return null;
+  var r = new WeakMap(),
+    t = new WeakMap();
+  return (_getRequireWildcardCache = function _getRequireWildcardCache(e) {
+    return e ? t : r;
+  })(e);
+}
+function _interopRequireWildcard(e, r) {
+  if (!r && e && e.__esModule) return e;
+  if (null === e || "object" != typeof e && "function" != typeof e) return {
+    "default": e
+  };
+  var t = _getRequireWildcardCache(r);
+  if (t && t.has(e)) return t.get(e);
+  var n = {
+      __proto__: null
+    },
+    a = Object.defineProperty && Object.getOwnPropertyDescriptor;
+  for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) {
+    var i = a ? Object.getOwnPropertyDescriptor(e, u) : null;
+    i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u];
+  }
+  return n["default"] = e, t && t.set(e, n), n;
+}
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+var Volume = exports.Volume = /*#__PURE__*/(0, _react.forwardRef)(function (props, ref) {
+  return /*#__PURE__*/_react["default"].createElement(_StyledIcon.StyledIcon, _extends({
+    ref: ref,
+    viewBox: "0 0 24 24",
+    a11yTitle: "Volume"
+  }, props), /*#__PURE__*/_react["default"].createElement("path", {
+    fill: "none",
+    stroke: "#000",
+    strokeWidth: "2",
+    d: "M15 16a4 4 0 0 0 0-8m0 12c5 0 8-3.589 8-8s-3.589-8-8-8M1 12V8h5l6-5v18l-6-5H1v-4"
+  }));
+});
+Volume.displayName = 'Volume';
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/icons/VolumeLow.js":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.VolumeLow = void 0;
+var _react = _interopRequireWildcard(__webpack_require__("./node_modules/react/index.js"));
+var _StyledIcon = __webpack_require__("./node_modules/grommet-icons/StyledIcon.js");
+function _getRequireWildcardCache(e) {
+  if ("function" != typeof WeakMap) return null;
+  var r = new WeakMap(),
+    t = new WeakMap();
+  return (_getRequireWildcardCache = function _getRequireWildcardCache(e) {
+    return e ? t : r;
+  })(e);
+}
+function _interopRequireWildcard(e, r) {
+  if (!r && e && e.__esModule) return e;
+  if (null === e || "object" != typeof e && "function" != typeof e) return {
+    "default": e
+  };
+  var t = _getRequireWildcardCache(r);
+  if (t && t.has(e)) return t.get(e);
+  var n = {
+      __proto__: null
+    },
+    a = Object.defineProperty && Object.getOwnPropertyDescriptor;
+  for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) {
+    var i = a ? Object.getOwnPropertyDescriptor(e, u) : null;
+    i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u];
+  }
+  return n["default"] = e, t && t.set(e, n), n;
+}
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+var VolumeLow = exports.VolumeLow = /*#__PURE__*/(0, _react.forwardRef)(function (props, ref) {
+  return /*#__PURE__*/_react["default"].createElement(_StyledIcon.StyledIcon, _extends({
+    ref: ref,
+    viewBox: "0 0 24 24",
+    a11yTitle: "VolumeLow"
+  }, props), /*#__PURE__*/_react["default"].createElement("path", {
+    fill: "none",
+    stroke: "#000",
+    strokeWidth: "2",
+    d: "M1 8v8h5.099L12 21V3L6 8H1zm14 8a4 4 0 1 0 0-8"
+  }));
+});
+VolumeLow.displayName = 'VolumeLow';
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/themes/base.js":
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.base = void 0;
+var base = exports.base = {
+  global: {
+    colors: {
+      icon: '#666666'
+    }
+  },
+  icon: {
+    size: {
+      small: '12px',
+      medium: '24px',
+      large: '48px',
+      xlarge: '96px'
+    }
+  }
+};
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/themes/index.js":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.base = void 0;
+var _base = __webpack_require__("./node_modules/grommet-icons/themes/base.js");
+exports.base = _base.base;
+
+/***/ }),
+
+/***/ "./node_modules/grommet-icons/utils.js":
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+exports.__esModule = true;
+exports.deepMerge = deepMerge;
+exports.generatePrefix = exports["default"] = void 0;
+exports.iconPad = iconPad;
+exports.isObject = isObject;
+exports.parseMetricToNum = void 0;
+exports.useScaleProps = useScaleProps;
+var _react = __webpack_require__("./node_modules/react/index.js");
+var _styledComponents = __webpack_require__("./node_modules/styled-components/dist/styled-components.browser.esm.js");
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+function isObject(item) {
+  return item && typeof item === 'object' && !Array.isArray(item);
+}
+function deepMerge(target) {
+  for (var _len = arguments.length, sources = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+    sources[_key - 1] = arguments[_key];
+  }
+  if (!sources.length) {
+    return target;
+  }
+  // making sure to not change target (immutable)
+  var output = _extends({}, target);
+  sources.forEach(function (source) {
+    if (isObject(source)) {
+      Object.keys(source).forEach(function (key) {
+        if (isObject(source[key])) {
+          if (!output[key]) {
+            output[key] = _extends({}, source[key]);
+          } else {
+            output[key] = deepMerge(output[key], source[key]);
+          }
+        } else {
+          output[key] = source[key];
+        }
+      });
+    }
+  });
+  return output;
+}
+var parseMetricToNum = exports.parseMetricToNum = function parseMetricToNum(string) {
+  if (string === void 0) {
+    string = '';
+  }
+  return parseFloat(string.match(/\d+(\.\d+)?/), 10);
+};
+
+// scaleProps sets path properties to prevent scaling the stroke
+// when the theme doesn't want it for small sizes.
+function useScaleProps(props) {
+  var _theme$icon;
+  var theme = (0, _react.useContext)(_styledComponents.ThemeContext);
+  var size = props.size;
+  var result = {};
+  if (theme != null && (_theme$icon = theme.icon) != null && _theme$icon.disableScaleDown) {
+    var dimension = parseMetricToNum(theme.icon.size[size] || size);
+    if (dimension < 24) result.vectorEffect = 'non-scaling-stroke';
+  }
+  return result;
+}
+var calculatePad = function calculatePad(value, iconDimension) {
+  return (value - iconDimension) / 2 + "px";
+};
+
+// iconPad applies padding to icon to ensure it aligns
+// with text line-height or desired width
+function iconPad(props) {
+  var _theme$icon2, _theme$text, _theme$text2;
+  var height = props.height,
+    _props$size = props.size,
+    size = _props$size === void 0 ? 'medium' : _props$size,
+    width = props.width;
+  var theme = (0, _react.useContext)(_styledComponents.ThemeContext);
+  var iconDimension = parseMetricToNum((theme == null || (_theme$icon2 = theme.icon) == null || (_theme$icon2 = _theme$icon2.size) == null ? void 0 : _theme$icon2[size]) || size);
+  var style = '';
+  if (height && theme != null && (_theme$text = theme.text) != null && (_theme$text = _theme$text[height]) != null && _theme$text.height) {
+    var lineHeight = parseMetricToNum(theme.text[height].height);
+    if (lineHeight > iconDimension) {
+      var pad = calculatePad(lineHeight, iconDimension);
+      style += "padding-top: " + pad + "; padding-bottom: " + pad + ";";
+    }
+  }
+  if (width && theme != null && (_theme$text2 = theme.text) != null && (_theme$text2 = _theme$text2[width]) != null && _theme$text2.height) {
+    var desiredWidth = parseMetricToNum(theme.text[width].height);
+    if (desiredWidth > iconDimension) {
+      var _pad = calculatePad(desiredWidth, iconDimension);
+      style += "padding-left: " + _pad + "; padding-right: " + _pad + ";";
+    }
+  }
+  return style;
+}
+
+// ensure icons that rely on urls don't have id collision
+// Date.now + Math.random is unique enough for icon use cases
+var generatePrefix = exports.generatePrefix = function generatePrefix(name) {
+  return "_grommeticons-" + name + "-" + (
+  // don't include time-based/random id generation in snapshot tests to avoid
+  // needing to update snapshots with every commit
+   true ? Date.now() + Math.random() : 0);
+};
+var _default = exports["default"] = {
+  deepMerge: deepMerge,
+  isObject: isObject,
+  parseMetricToNum: parseMetricToNum,
+  iconPad: iconPad,
+  useScaleProps: useScaleProps
+};
+
+/***/ }),
+
+/***/ "./node_modules/grommet/es6/components/Box/Box.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Box: () => (/* binding */ Box)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/index.js");
+/* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__("./node_modules/styled-components/dist/styled-components.browser.esm.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./node_modules/grommet/es6/utils/background.js");
+/* harmony import */ var _Keyboard__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__("./node_modules/grommet/es6/components/Keyboard/Keyboard.js");
+/* harmony import */ var _StyledBox__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./node_modules/grommet/es6/components/Box/StyledBox.js");
+/* harmony import */ var _propTypes__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__("./node_modules/grommet/es6/components/Box/propTypes.js");
+/* harmony import */ var _Skeleton__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./node_modules/grommet/es6/components/Skeleton/SkeletonContext.js");
+/* harmony import */ var _contexts_AnnounceContext__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./node_modules/grommet/es6/contexts/AnnounceContext/AnnounceContext.js");
+/* harmony import */ var _contexts_OptionsContext__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/grommet/es6/contexts/OptionsContext.js");
+/* harmony import */ var _utils_useThemeValue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/grommet/es6/utils/useThemeValue.js");
+var _excluded = ["a11yTitle", "background", "border", "children", "cssGap", "direction", "elevation", "fill", "gap", "kind", "onBlur", "onClick", "onFocus", "overflow", "responsive", "tag", "as", "wrap", "width", "height", "tabIndex", "skeleton"],
+  _excluded2 = ["colors", "size"];
+function _extends() {
+  return _extends = Object.assign ? Object.assign.bind() : function (n) {
+    for (var e = 1; e < arguments.length; e++) {
+      var t = arguments[e];
+      for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]);
+    }
+    return n;
+  }, _extends.apply(null, arguments);
+}
+function _objectWithoutPropertiesLoose(r, e) {
+  if (null == r) return {};
+  var t = {};
+  for (var n in r) if ({}.hasOwnProperty.call(r, n)) {
+    if (e.indexOf(n) >= 0) continue;
+    t[n] = r[n];
+  }
+  return t;
+}
+
+
+
+
+
+
+
+
+
+
+var Box = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.forwardRef)(function (_ref, ref) {
+  var a11yTitle = _ref.a11yTitle,
+    backgroundProp = _ref.background,
+    border = _ref.border,
+    children = _ref.children,
+    cssGap = _ref.cssGap,
+    _ref$direction = _ref.direction,
+    direction = _ref$direction === void 0 ? 'column' : _ref$direction,
+    elevation = _ref.elevation,
+    fill = _ref.fill,
+    gap = _ref.gap,
+    kind = _ref.kind,
+    _onBlur = _ref.onBlur,
+    onClick = _ref.onClick,
+    _onFocus = _ref.onFocus,
+    overflow = _ref.overflow,
+    _ref$responsive = _ref.responsive,
+    responsive = _ref$responsive === void 0 ? true : _ref$responsive,
+    tag = _ref.tag,
+    as = _ref.as,
+    wrap = _ref.wrap,
+    width = _ref.width,
+    height = _ref.height,
+    tabIndex = _ref.tabIndex,
+    skeletonProp = _ref.skeleton,
+    rest = _objectWithoutPropertiesLoose(_ref, _excluded);
+  var theme = (0,_utils_useThemeValue__WEBPACK_IMPORTED_MODULE_1__.useThemeValue)();
+  // boxOptions was created to preserve backwards compatibility but
+  // should not be supported in v3
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_contexts_OptionsContext__WEBPACK_IMPORTED_MODULE_2__.OptionsContext),
+    boxOptions = _useContext.box;
+  var skeleton = (0,_Skeleton__WEBPACK_IMPORTED_MODULE_3__.useSkeleton)();
+  var background = backgroundProp;
+  var announce = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_contexts_AnnounceContext__WEBPACK_IMPORTED_MODULE_4__.AnnounceContext);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    var _skeletonProp$message;
+    if (skeletonProp != null && (_skeletonProp$message = skeletonProp.message) != null && _skeletonProp$message.start) announce(skeletonProp.message.start);else if (typeof (skeletonProp == null ? void 0 : skeletonProp.message) === 'string') announce(skeletonProp.message);
+    return function () {
+      var _skeletonProp$message2;
+      return (skeletonProp == null || (_skeletonProp$message2 = skeletonProp.message) == null ? void 0 : _skeletonProp$message2.end) && announce(skeletonProp.message.end);
+    };
+  }, [announce, skeletonProp]);
+  var focusable = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    return onClick && !(tabIndex < 0);
+  }, [onClick, tabIndex]);
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(),
+    focus = _useState[0],
+    setFocus = _useState[1];
+  var clickProps = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    if (focusable) {
+      return {
+        onClick: onClick,
+        onFocus: function onFocus(event) {
+          setFocus(true);
+          if (_onFocus) _onFocus(event);
+        },
+        onBlur: function onBlur(event) {
+          setFocus(false);
+          if (_onBlur) _onBlur(event);
+        }
+      };
+    }
+    var result = {};
+    if (_onBlur) result.onBlur = _onBlur;
+    if (onClick) result.onClick = onClick;
+    if (_onFocus) result.onFocus = _onFocus;
+    return result;
+  }, [focusable, onClick, _onFocus, _onBlur]);
+  var adjustedTabIndex = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    if (tabIndex !== undefined) return tabIndex;
+    if (focusable) return 0;
+    return undefined;
+  }, [focusable, tabIndex]);
+  if ((border === 'between' || border && border.side === 'between' || Array.isArray(border) && border.find(function (b) {
+    return b.side === 'between';
+  })) && !gap) {
+    console.warn('Box must have a gap to use border between');
+  }
+  var contents = children;
+  if (gap && gap !== 'none' && (!(boxOptions != null && boxOptions.cssGap || cssGap || typeof gap === 'object') ||
+  // need this approach to show border between
+  border === 'between' || (border == null ? void 0 : border.side) === 'between' || Array.isArray(border) && border.find(function (b) {
+    return b.side === 'between';
+  }))) {
+    // if border is an array, we need to extract the border between object
+    var styledBoxGapBorder = Array.isArray(border) ? border.find(function (b) {
+      return b.side === 'between';
+    }) : border;
+    var boxAs = !as && tag ? tag : as;
+    contents = [];
+    var firstIndex;
+    react__WEBPACK_IMPORTED_MODULE_0__.Children.forEach(children, function (child, index) {
+      if (child) {
+        if (firstIndex === undefined) {
+          firstIndex = index;
+        } else {
+          contents.push( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_StyledBox__WEBPACK_IMPORTED_MODULE_5__.StyledBoxGap
+          // eslint-disable-next-line react/no-array-index-key
+          , {
+            key: "gap-" + index,
+            as: boxAs === 'span' ? boxAs : 'div',
+            gap: gap,
+            directionProp: direction,
+            responsive: responsive,
+            border: styledBoxGapBorder
+          }));
+        }
+      }
+      contents.push(child);
+    });
+  }
+  var nextSkeleton = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    // Decide if we need to add a new SkeletonContext. We need one if:
+    //   1. skeleton info was set in a property OR
+    //   2. there already is a SkeletonContext but this box has a
+    //      background or border. This means the box probably is more
+    //      distinguishable from the area around it.
+    // We keep track of a depth so we know how to alternate backgrounds.
+    if (skeletonProp || (background || border) && skeleton) {
+      var depth = skeleton ? skeleton.depth + 1 : 0;
+      return _extends({}, skeleton, {
+        depth: depth
+      }, typeof skeletonProp === 'object' ? skeletonProp : {});
+    }
+    return undefined;
+  }, [background, border, skeleton, skeletonProp]);
+  var skeletonProps = {};
+  if (nextSkeleton) {
+    var _theme$skeleton = theme.skeleton,
+      skeletonThemeColors = _theme$skeleton.colors,
+      skeletonThemeSize = _theme$skeleton.size,
+      skeletonThemeProps = _objectWithoutPropertiesLoose(_theme$skeleton, _excluded2);
+    var skeletonColors = nextSkeleton.colors ? nextSkeleton.colors[theme.dark ? 'dark' : 'light'] : skeletonThemeColors == null ? void 0 : skeletonThemeColors[theme.dark ? 'dark' : 'light'];
+    skeletonProps = _extends({}, skeletonThemeProps);
+    background = skeletonColors[nextSkeleton.depth % skeletonColors.length];
+    if (skeletonProp != null && skeletonProp.animation) {
+      skeletonProps.animation = skeletonProp.animation;
+    }
+    contents = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_Skeleton__WEBPACK_IMPORTED_MODULE_3__.SkeletonContext.Provider, {
+      value: nextSkeleton
+    }, contents);
+  }
+
+  // construct a new theme object in case we have a background that wants
+  // to change the background color context
+  var nextTheme = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    var result;
+    if (background || theme.darkChanged) {
+      var dark = (0,_utils__WEBPACK_IMPORTED_MODULE_6__.backgroundIsDark)(background, theme);
+      var darkChanged = dark !== undefined && dark !== theme.dark;
+      if (darkChanged || theme.darkChanged) {
+        result = _extends({}, theme);
+        result.dark = dark === undefined ? theme.dark : dark;
+        result.background = background;
+      } else if (background) {
+        // This allows DataTable to intelligently set the background
+        // of a pinned header or footer.
+        result = _extends({}, theme);
+        result.background = background;
+      }
+    }
+    return result || theme;
+  }, [background, theme]);
+  var content = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_StyledBox__WEBPACK_IMPORTED_MODULE_5__.StyledBox, _extends({
+    as: !as && tag ? tag : as,
+    "aria-label": a11yTitle,
+    background: background,
+    border: border,
+    ref: ref,
+    directionProp: direction,
+    elevationProp: elevation,
+    fillProp: fill,
+    focus: focus,
+    gap: ((boxOptions == null ? void 0 : boxOptions.cssGap) || cssGap || typeof gap === 'object') && gap && gap !== 'none' && border !== 'between' && (border == null ? void 0 : border.side) !== 'between' && (!Array.isArray(border) || !border.find(function (b) {
+      return b.side === 'between';
+    })) && gap,
+    kindProp: kind,
+    overflowProp: overflow,
+    wrapProp: wrap,
+    widthProp: width,
+    heightProp: height,
+    responsive: responsive,
+    tabIndex: adjustedTabIndex
+  }, clickProps, rest, skeletonProps), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(styled_components__WEBPACK_IMPORTED_MODULE_7__.ThemeContext.Provider, {
+    value: nextTheme
+  }, contents));
+  if (onClick) {
+    content = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_Keyboard__WEBPACK_IMPORTED_MODULE_8__.Keyboard, {
+      onEnter: onClick
+    }, content);
+  }
+  return content;
+});
+Box.displayName = 'Box';
+Box.propTypes = _propTypes__WEBPACK_IMPORTED_MODULE_9__.BoxPropTypes;
+
+
+/***/ }),
+
+/***/ "./node_modules/grommet/es6/components/Box/StyledBox.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   StyledBox: () => (/* binding */ StyledBox),
+/* harmony export */   StyledBoxGap: () => (/* binding */ StyledBoxGap)
+/* harmony export */ });
+/* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/styled-components/dist/styled-components.browser.esm.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/grommet/es6/utils/responsive.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/grommet/es6/utils/mixins.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./node_modules/grommet/es6/utils/background.js");
+/* harmony import */ var _utils_styles__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./node_modules/grommet/es6/utils/styles.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__("./node_modules/grommet/es6/utils/border.js");
+/* harmony import */ var _utils_animation__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./node_modules/grommet/es6/utils/animation.js");
+/* harmony import */ var _default_props__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./node_modules/grommet/es6/default-props.js");
+var _FLEX_MAP;
+function _extends() {
+  return _extends = Object.assign ? Object.assign.bind() : function (n) {
+    for (var e = 1; e < arguments.length; e++) {
+      var t = arguments[e];
+      for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]);
+    }
+    return n;
+  }, _extends.apply(null, arguments);
+}
+
+
+
+
+
+var BASIS_MAP = {
+  auto: 'auto',
+  full: '100%',
+  '1/2': '50%',
+  '1/4': '25%',
+  '2/4': '50%',
+  '3/4': '75%',
+  '1/3': '33.33%',
+  '2/3': '66.66%'
+};
+var basisStyle = (0,styled_components__WEBPACK_IMPORTED_MODULE_0__.css)(["flex-basis:", ";"], function (props) {
+  return BASIS_MAP[props.basis] || props.theme.global.size[props.basis] || props.basis;
+});
+
+// min-width and min-height needed because of this
+// https://stackoverflow.com/questions/36247140/why-doesnt-flex-item-shrink-past-content-size
+// we assume we are in the context of a Box going the other direction
+// TODO: revisit this
+var directionStyle = function directionStyle(direction, theme) {
+  var styles = [(0,styled_components__WEBPACK_IMPORTED_MODULE_0__.css)(["min-width:0;min-height:0;flex-direction:", ";"], direction === 'row-responsive' ? 'row' : direction)];
+  if (direction === 'row-responsive' && theme.box.responsiveBreakpoint) {
+    var breakpoint = (0,_utils__WEBPACK_IMPORTED_MODULE_1__.getBreakpointStyle)(theme, theme.box.responsiveBreakpoint);
+    if (breakpoint) {
+      styles.push((0,_utils__WEBPACK_IMPORTED_MODULE_2__.breakpointStyle)(breakpoint, "\n        flex-direction: column;\n        flex-basis: auto;\n        justify-content: flex-start;\n        align-items: stretch;\n      "));
+    }
+  }
+  return styles;
+};
+var elevationStyle = function elevationStyle(elevation) {
+  return (0,styled_components__WEBPACK_IMPORTED_MODULE_0__.css)(["box-shadow:", ";"], function (props) {
+    return props.theme.global.elevation[props.theme.dark ? 'dark' : 'light'][elevation];
+  });
+};
+var FLEX_MAP = (_FLEX_MAP = {}, _FLEX_MAP[true] = '1 1', _FLEX_MAP[false] = '0 0', _FLEX_MAP.grow = '1 0', _FLEX_MAP.shrink = '0 1', _FLEX_MAP);
+var flexGrowShrinkProp = function flexGrowShrinkProp(flex) {
+  if (typeof flex === 'boolean' || typeof flex === 'string') {
+    return FLEX_MAP[flex];
+  }
+  return (flex.grow ? flex.grow : 0) + " " + (flex.shrink ? flex.shrink : 0);
+};
+var flexStyle = (0,styled_components__WEBPACK_IMPORTED_MODULE_0__.css)(["flex:", ";"], function (props) {
+  return "" + flexGrowShrinkProp(props.flex) + (props.flex !== true && !props.basis ? ' auto' : '');
+});
+var JUSTIFY_MAP = {
+  around: 'space-around',
+  between: 'space-between',
+  center: 'center',
+  end: 'flex-end',
+  evenly: 'space-evenly',
+  start: 'flex-start'
+};
+var justifyStyle = (0,styled_components__WEBPACK_IMPORTED_MODULE_0__.css)(["justify-content:", ";"], function (props) {
+  return JUSTIFY_MAP[props.justify];
+});
+var WRAP_MAP = {
+  "true": 'wrap',
+  reverse: 'wrap-reverse'
+};
+var wrapStyle = (0,styled_components__WEBPACK_IMPORTED_MODULE_0__.css)(["flex-wrap:", ";"], function (props) {
+  return WRAP_MAP[props.wrapProp];
+});
+var animationItemStyle = function animationItemStyle(item, theme) {
+  if (typeof item === 'string') {
+    return (0,_utils_animation__WEBPACK_IMPORTED_MODULE_3__.animationObjectStyle)({
+      type: item
+    }, theme);
+  }
+  if (Array.isArray(item)) {
+    return item.reduce(function (style, a, index) {
+      return (0,styled_components__WEBPACK_IMPORTED_MODULE_0__.css)(["", "", " ", ""], style, index > 0 ? ',' : '', animationItemStyle(a, theme));
+    }, '');
+  }
+  if (typeof item === 'object') {
+    return (0,_utils_animation__WEBPACK_IMPORTED_MODULE_3__.animationObjectStyle)(item, theme);
+  }
+  return '';
+};
+var animationAncilaries = function animationAncilaries(animation) {
+  if (animation.type === 'flipIn' || animation.type === 'flipOut') {
+    return 'perspective: 1000px; transform-style: preserve-3d;';
+  }
+  return '';
+};
+var animationObjectInitialStyle = function animationObjectInitialStyle(animation) {
+  var bounds = (0,_utils_animation__WEBPACK_IMPORTED_MODULE_3__.animationBounds)(animation.type, animation.size);
+  if (bounds) {
+    return bounds[0] + " " + animationAncilaries(animation);
+  }
+  return '';
+};
+var animationInitialStyle = function animationInitialStyle(item) {
+  if (typeof item === 'string') {
+    return animationObjectInitialStyle({
+      type: item
+    });
+  }
+  if (Array.isArray(item)) {
+    return item.map(function (a) {
+      return typeof a === 'string' ? animationObjectInitialStyle({
+        type: a
+      }) : animationObjectInitialStyle(a);
+    }).join('');
+  }
+  if (typeof item === 'object') {
+    return animationObjectInitialStyle(item);
+  }
+  return '';
+};
+var animationStyle = (0,styled_components__WEBPACK_IMPORTED_MODULE_0__.css)(["", ";"], function (props) {
+  return (0,styled_components__WEBPACK_IMPORTED_MODULE_0__.css)(["", " animation:", ";"], animationInitialStyle(props.animation), animationItemStyle(props.animation, props.theme));
+});
+var interactiveStyle = (0,styled_components__WEBPACK_IMPORTED_MODULE_0__.css)(["cursor:pointer;&:hover{", " ", "}"], function (props) {
+  var _props$kindProp;
+  return ((_props$kindProp = props.kindProp) == null ? void 0 : _props$kindProp.hover) && (0,_utils__WEBPACK_IMPORTED_MODULE_4__.getHoverIndicatorStyle)(props.kindProp.hover, props.theme);
+}, function (props) {
+  return props.hoverIndicator && (0,_utils__WEBPACK_IMPORTED_MODULE_4__.getHoverIndicatorStyle)(props.hoverIndicator, props.theme);
+});
+var gapStyle = function gapStyle(directionProp, gap, responsive, wrap, theme) {
+  var metric = theme.global.edgeSize[gap] || gap;
+  var breakpoint = (0,_utils__WEBPACK_IMPORTED_MODULE_1__.getBreakpointStyle)(theme, theme.box.responsiveBreakpoint);
+  var responsiveMetric = responsive && breakpoint && breakpoint.edgeSize[gap];
+  var styles = [];
+  if (typeof gap === 'object') {
+    if (gap.row !== undefined && gap.column !== undefined) {
+      styles.push("gap: " + (theme.global.edgeSize[gap.row] || gap.row) + " " + (theme.global.edgeSize[gap.column] || gap.column) + ";");
+      if (responsiveMetric) {
+        styles.push((0,_utils__WEBPACK_IMPORTED_MODULE_2__.breakpointStyle)(breakpoint, "gap: " + responsiveMetric + ";"));
+      }
+    } else if (gap.row !== undefined) {
+      styles.push("row-gap: " + (theme.global.edgeSize[gap.row] || gap.row) + ";");
+      if (responsiveMetric) {
+        styles.push((0,_utils__WEBPACK_IMPORTED_MODULE_2__.breakpointStyle)(breakpoint, "row-gap: " + responsiveMetric + ";"));
+      }
+    } else if (gap.column !== undefined) {
+      styles.push("column-gap: " + (theme.global.edgeSize[gap.column] || gap.column) + ";");
+      if (responsiveMetric) {
+        styles.push((0,_utils__WEBPACK_IMPORTED_MODULE_2__.breakpointStyle)(breakpoint, "column-gap: " + responsiveMetric + ";"));
+      }
+    }
+  } else if (directionProp === 'column' || directionProp === 'column-reverse') {
+    styles.push("row-gap: " + metric + ";");
+    if (responsiveMetric) {
+      styles.push((0,_utils__WEBPACK_IMPORTED_MODULE_2__.breakpointStyle)(breakpoint, "row-gap: " + responsiveMetric + ";"));
+    }
+  } else {
+    styles.push("column-gap: " + metric + ";");
+    if (wrap) styles.push("row-gap: " + metric + ";");
+    if (responsiveMetric) {
+      if (directionProp === 'row' || directionProp === 'row-reverse') {
+        styles.push((0,_utils__WEBPACK_IMPORTED_MODULE_2__.breakpointStyle)(breakpoint, "column-gap: " + responsiveMetric + ";"));
+      } else if (directionProp === 'row-responsive') {
+        styles.push((0,_utils__WEBPACK_IMPORTED_MODULE_2__.breakpointStyle)(breakpoint, "\n          row-gap: " + responsiveMetric + ";\n        "));
+      }
+    }
+  }
+  return styles;
+};
+
+// NOTE: basis must be after flex! Otherwise, flex overrides basis
+var StyledBox = styled_components__WEBPACK_IMPORTED_MODULE_0__["default"].div.withConfig(_utils_styles__WEBPACK_IMPORTED_MODULE_5__.styledComponentsConfig).attrs(_default_props__WEBPACK_IMPORTED_MODULE_6__.withTheme).withConfig({
+  displayName: "StyledBox",
+  componentId: "sc-13pk1d4-0"
+})(["display:flex;box-sizing:border-box;", ";", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", ""], function (props) {
+  return !props.basis && 'max-width: 100%;';
+}, _utils_styles__WEBPACK_IMPORTED_MODULE_5__.genericStyles, function (props) {
+  return props.align && _utils_styles__WEBPACK_IMPORTED_MODULE_5__.alignStyle;
+}, function (props) {
+  return props.alignContent && _utils_styles__WEBPACK_IMPORTED_MODULE_5__.alignContentStyle;
+}, function (props) {
+  return props.background && (0,_utils__WEBPACK_IMPORTED_MODULE_4__.backgroundStyle)(props.background, props.theme);
+}, function (props) {
+  return props.border && (0,_utils__WEBPACK_IMPORTED_MODULE_7__.borderStyle)(props.border, props.responsive, props.theme);
+}, function (props) {
+  return props.directionProp && directionStyle(props.directionProp, props.theme);
+}, function (props) {
+  return props.heightProp && (0,_utils_styles__WEBPACK_IMPORTED_MODULE_5__.heightStyle)(props.heightProp, props.theme);
+}, function (props) {
+  return props.widthProp && (0,_utils_styles__WEBPACK_IMPORTED_MODULE_5__.widthStyle)(props.widthProp, props.theme);
+}, function (props) {
+  return props.flex !== undefined && flexStyle;
+}, function (props) {
+  return props.basis && basisStyle;
+}, function (props) {
+  return props.fillProp && (0,_utils_styles__WEBPACK_IMPORTED_MODULE_5__.fillStyle)(props.fillProp);
+}, function (props) {
+  return props.justify && justifyStyle;
+}, function (props) {
+  return props.pad && (0,_utils_styles__WEBPACK_IMPORTED_MODULE_5__.edgeStyle)('padding', props.pad, props.responsive, props.theme.box.responsiveBreakpoint, props.theme);
+}, function (props) {
+  return props.round && (0,_utils_styles__WEBPACK_IMPORTED_MODULE_5__.roundStyle)(props.round, props.responsive, props.theme);
+}, function (props) {
+  return props.wrapProp && wrapStyle;
+}, function (props) {
+  return props.overflowProp && (0,_utils_styles__WEBPACK_IMPORTED_MODULE_5__.overflowStyle)(props.overflowProp);
+}, function (props) {
+  return props.elevationProp && elevationStyle(props.elevationProp);
+}, function (props) {
+  return props.gap && gapStyle(props.directionProp, props.gap, props.responsive, props.wrapProp, props.theme);
+}, function (props) {
+  return props.animation && animationStyle;
+}, function (props) {
+  return props.onClick && interactiveStyle;
+}, function (props) {
+  return props.onClick && props.focus && props.focusIndicator !== false && (0,_utils_styles__WEBPACK_IMPORTED_MODULE_5__.focusStyle)();
+}, function (props) {
+  return props.theme.box && props.theme.box.extend;
+}, function (props) {
+  return props.kindProp && props.kindProp.extend;
+});
+var gapGapStyle = function gapGapStyle(directionProp, gap, responsive, border, theme) {
+  var metric = theme.global.edgeSize[gap] || gap;
+  var breakpoint = (0,_utils__WEBPACK_IMPORTED_MODULE_1__.getBreakpointStyle)(theme, theme.box.responsiveBreakpoint);
+  var responsiveMetric = responsive && breakpoint && breakpoint.edgeSize[gap];
+  var styles = [];
+  if (directionProp === 'column' || directionProp === 'column-reverse') {
+    styles.push("height: " + metric + ";");
+    if (responsiveMetric) {
+      styles.push((0,_utils__WEBPACK_IMPORTED_MODULE_2__.breakpointStyle)(breakpoint, "height: " + responsiveMetric + ";"));
+    }
+  } else {
+    styles.push("width: " + metric + ";");
+    if (responsiveMetric) {
+      if (directionProp === 'row' || directionProp === 'row-reverse') {
+        styles.push((0,_utils__WEBPACK_IMPORTED_MODULE_2__.breakpointStyle)(breakpoint, "width: " + responsiveMetric + ";"));
+      } else if (directionProp === 'row-responsive') {
+        styles.push((0,_utils__WEBPACK_IMPORTED_MODULE_2__.breakpointStyle)(breakpoint, "\n          width: auto;\n          height: " + responsiveMetric + ";\n        "));
+      }
+    }
+  }
+  if (border === 'between' || border && border.side === 'between') {
+    var borderSize = border.size || 'xsmall';
+    var borderMetric = theme.global.borderSize[borderSize] || borderSize;
+    var borderOffset = (0,_utils__WEBPACK_IMPORTED_MODULE_2__.parseMetricToNum)(metric) / 2 - (0,_utils__WEBPACK_IMPORTED_MODULE_2__.parseMetricToNum)(borderMetric) / 2 + "px";
+    var responsiveBorderMetric = responsive && breakpoint && (breakpoint.borderSize[borderSize] || borderSize);
+    var responsiveBorderOffset = responsiveBorderMetric && (0,_utils__WEBPACK_IMPORTED_MODULE_2__.parseMetricToNum)(responsiveMetric || metric) / 2 - (0,_utils__WEBPACK_IMPORTED_MODULE_2__.parseMetricToNum)(responsiveBorderMetric) / 2 + "px";
+    if (directionProp === 'column' || directionProp === 'column-reverse') {
+      var adjustedBorder = typeof border === 'string' ? 'top' : _extends({}, border, {
+        side: 'top'
+      });
+      styles.push((0,styled_components__WEBPACK_IMPORTED_MODULE_0__.css)(["position:relative;&:after{content:'';position:absolute;width:100%;top:", ";", "}"], borderOffset, (0,_utils__WEBPACK_IMPORTED_MODULE_7__.borderStyle)(adjustedBorder, responsive, theme)));
+      if (responsiveBorderOffset) {
+        styles.push((0,_utils__WEBPACK_IMPORTED_MODULE_2__.breakpointStyle)(breakpoint, "\n            &:after {\n              content: '';\n              top: " + responsiveBorderOffset + ";\n            }"));
+      }
+    } else {
+      var _adjustedBorder = typeof border === 'string' ? 'left' : _extends({}, border, {
+        side: 'left'
+      });
+      styles.push((0,styled_components__WEBPACK_IMPORTED_MODULE_0__.css)(["position:relative;&:after{content:'';position:absolute;height:100%;left:", ";", "}"], borderOffset, (0,_utils__WEBPACK_IMPORTED_MODULE_7__.borderStyle)(_adjustedBorder, directionProp !== 'row-responsive' && responsive, theme)));
+      if (responsiveBorderOffset) {
+        if (directionProp === 'row' || directionProp === 'row-reverse') {
+          styles.push((0,_utils__WEBPACK_IMPORTED_MODULE_2__.breakpointStyle)(breakpoint, "\n              &:after {\n                content: '';\n                left: " + responsiveBorderOffset + ";\n              }"));
+        } else if (directionProp === 'row-responsive') {
+          var adjustedBorder2 = typeof border === 'string' ? 'top' : _extends({}, border, {
+            side: 'top'
+          });
+          styles.push((0,_utils__WEBPACK_IMPORTED_MODULE_2__.breakpointStyle)(breakpoint, "\n              &:after {\n                content: '';\n                height: auto;\n                left: unset;\n                width: 100%;\n                top: " + responsiveBorderOffset + ";\n                border-left: none;\n                " + (0,_utils__WEBPACK_IMPORTED_MODULE_7__.responsiveBorderStyle)(adjustedBorder2, theme) + "\n              }"));
+        }
+      }
+    }
+  }
+  return styles;
+};
+var StyledBoxGap = styled_components__WEBPACK_IMPORTED_MODULE_0__["default"].div.withConfig(_utils_styles__WEBPACK_IMPORTED_MODULE_5__.styledComponentsConfig).attrs(_default_props__WEBPACK_IMPORTED_MODULE_6__.withTheme).withConfig({
+  displayName: "StyledBox__StyledBoxGap",
+  componentId: "sc-13pk1d4-1"
+})(["flex:0 0 auto;align-self:stretch;", ";"], function (props) {
+  return props.gap && gapGapStyle(props.directionProp, props.gap, props.responsive, props.border, props.theme);
+});
+
+
+/***/ }),
+
+/***/ "./node_modules/grommet/es6/components/Box/propTypes.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   BoxPropTypes: () => (/* binding */ BoxPropTypes)
+/* harmony export */ });
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/prop-types/index.js");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_0__);
+function _extends() {
+  return _extends = Object.assign ? Object.assign.bind() : function (n) {
+    for (var e = 1; e < arguments.length; e++) {
+      var t = arguments[e];
+      for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]);
+    }
+    return n;
+  }, _extends.apply(null, arguments);
+}
+
+
+var OVERFLOW_VALUES = ['auto', 'hidden', 'scroll', 'visible'];
+var BORDER_SHAPE = prop_types__WEBPACK_IMPORTED_MODULE_0___default().shape({
+  color: prop_types__WEBPACK_IMPORTED_MODULE_0___default().oneOfType([(prop_types__WEBPACK_IMPORTED_MODULE_0___default().string), prop_types__WEBPACK_IMPORTED_MODULE_0___default().shape({
+    dark: (prop_types__WEBPACK_IMPORTED_MODULE_0___default().string),
+    light: (prop_types__WEBPACK_IMPORTED_MODULE_0___default().string)
+  })]),
+  side: prop_types__WEBPACK_IMPORTED_MODULE_0___default().oneOf(['top', 'left', 'bottom', 'right', 'start', 'end', 'horizontal', 'vertical', 'all', 'between']),
+  size: prop_types__WEBPACK_IMPORTED_MODULE_0___default().oneOfType([prop_types__WEBPACK_IMPORTED_MODULE_0___default().oneOf(['xsmall', 'small', 'medium', 'large', 'xlarge']), (prop_types__WEBPACK_IMPORTED_MODULE_0___default().string)]),
+  style: prop_types__WEBPACK_IMPORTED_MODULE_0___default().oneOf(['solid', 'dashed', 'dotted', 'double', 'groove', 'ridge', 'inset', 'outset', 'hidden'])
+});
+
+// if you update values here, make sure to update in Drop/doc too.
+var overflowPropType = prop_types__WEBPACK_IMPORTED_MODULE_0___default().oneOfType([prop_types__WEBPACK_IMPORTED_MODULE_0___default().oneOf(OVERFLOW_VALUES), prop_types__WEBPACK_IMPORTED_MODULE_0___default().shape({
+  horizontal: prop_types__WEBPACK_IMPORTED_MODULE_0___default().oneOf(OVERFLOW_VALUES),
+  vertical: prop_types__WEBPACK_IMPORTED_MODULE_0___default().oneOf(OVERFLOW_VALUES)
+}), (prop_types__WEBPACK_IMPORTED_MODULE_0___default().string)]);
+var PropType = {};
+if (false) {}
+var BoxPropTypes = PropType;
+
+/***/ }),
+
+/***/ "./node_modules/grommet/es6/components/Header/Header.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Header: () => (/* binding */ Header)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/index.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/grommet/es6/utils/refs.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./node_modules/grommet/es6/utils/DOM.js");
+/* harmony import */ var _Box__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./node_modules/grommet/es6/components/Box/Box.js");
+/* harmony import */ var _utils_useThemeValue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/grommet/es6/utils/useThemeValue.js");
+var _excluded = ["sticky"];
+function _extends() {
+  return _extends = Object.assign ? Object.assign.bind() : function (n) {
+    for (var e = 1; e < arguments.length; e++) {
+      var t = arguments[e];
+      for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]);
+    }
+    return n;
+  }, _extends.apply(null, arguments);
+}
+function _objectWithoutPropertiesLoose(r, e) {
+  if (null == r) return {};
+  var t = {};
+  for (var n in r) if ({}.hasOwnProperty.call(r, n)) {
+    if (e.indexOf(n) >= 0) continue;
+    t[n] = r[n];
+  }
+  return t;
+}
+
+
+
+
+var Header = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.forwardRef(function (_ref, ref) {
+  var _theme$header2;
+  var sticky = _ref.sticky,
+    rest = _objectWithoutPropertiesLoose(_ref, _excluded);
+  var theme = (0,_utils_useThemeValue__WEBPACK_IMPORTED_MODULE_1__.useThemeValue)();
+  var headerRef = (0,_utils__WEBPACK_IMPORTED_MODULE_2__.useForwardedRef)(ref);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    var scrollTop = 0;
+    var updateScrollDir = function updateScrollDir() {
+      // target is its scroll parent
+      var target = (0,_utils__WEBPACK_IMPORTED_MODULE_3__.findScrollParent)(headerRef.current);
+      var header = headerRef.current;
+      if (target && sticky === 'scrollup') {
+        var nextScrollTop = target === document ? ({"location":{}}).pageYOffset : target.scrollTop;
+        if (scrollTop - nextScrollTop <= 0) {
+          header.style.top = "-" + header.getBoundingClientRect().height + "px";
+          header.style.zIndex = '';
+        } else if (scrollTop - nextScrollTop > 0) {
+          var _theme$header;
+          // ensure that header moves with the target
+          header.style.position = 'sticky';
+          header.style.top = '0px';
+          header.style.zIndex = "" + ((_theme$header = theme.header) == null || (_theme$header = _theme$header.sticky) == null ? void 0 : _theme$header.zIndex);
+          header.style.transition = 'top 0.6s';
+        }
+        scrollTop = nextScrollTop;
+      }
+    };
+    if (sticky === 'scrollup') {
+      updateScrollDir();
+      ({"location":{}}).addEventListener('resize', updateScrollDir);
+      ({"location":{}}).addEventListener('scroll', updateScrollDir, true);
+    }
+    return function () {
+      if (sticky === 'scrollup') {
+        ({"location":{}}).removeEventListener('resize', updateScrollDir);
+        ({"location":{}}).removeEventListener('scroll', updateScrollDir, true);
+      }
+    };
+  }, [headerRef, sticky, (_theme$header2 = theme.header) == null || (_theme$header2 = _theme$header2.sticky) == null ? void 0 : _theme$header2.zIndex]);
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_Box__WEBPACK_IMPORTED_MODULE_4__.Box, _extends({
+    align: "center",
+    as: "header",
+    direction: "row",
+    flex: false,
+    justify: "between",
+    gap: "medium",
+    ref: headerRef
+  }, rest));
+});
+Header.displayName = 'Header';
+
+
+/***/ }),
+
+/***/ "./node_modules/grommet/es6/components/Keyboard/Keyboard.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Keyboard: () => (/* binding */ Keyboard)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/index.js");
+/* harmony import */ var _propTypes__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/grommet/es6/components/Keyboard/propTypes.js");
+var _excluded = ["capture", "target", "children", "onKeyDown"];
+function _objectWithoutPropertiesLoose(r, e) {
+  if (null == r) return {};
+  var t = {};
+  for (var n in r) if ({}.hasOwnProperty.call(r, n)) {
+    if (e.indexOf(n) >= 0) continue;
+    t[n] = r[n];
+  }
+  return t;
+}
+
+
+var KEYS = {
+  8: 'onBackspace',
+  9: 'onTab',
+  13: 'onEnter',
+  27: 'onEsc',
+  32: 'onSpace',
+  37: 'onLeft',
+  38: 'onUp',
+  39: 'onRight',
+  40: 'onDown',
+  188: 'onComma',
+  16: 'onShift'
+};
+var Keyboard = function Keyboard(_ref) {
+  var capture = _ref.capture,
+    target = _ref.target,
+    children = _ref.children,
+    onKeyDown = _ref.onKeyDown,
+    restProps = _objectWithoutPropertiesLoose(_ref, _excluded);
+  var onKeyDownHandler = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function (event) {
+    var key = event.keyCode ? event.keyCode : event.which;
+    var callbackName = KEYS[key];
+    for (var _len = arguments.length, rest = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+      rest[_key - 1] = arguments[_key];
+    }
+    if (callbackName && restProps[callbackName]) {
+      restProps[callbackName].apply(restProps, [event].concat(rest));
+    }
+    if (onKeyDown) {
+      onKeyDown.apply(void 0, [event].concat(rest));
+    }
+  }, [onKeyDown, restProps]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    if (target === 'document') {
+      document.addEventListener('keydown', onKeyDownHandler, capture);
+    }
+    return function () {
+      if (target === 'document') {
+        document.removeEventListener('keydown', onKeyDownHandler, capture);
+      }
+    };
+  }, [capture, onKeyDownHandler, target]);
+  return target === 'document' ? children : /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.cloneElement)(react__WEBPACK_IMPORTED_MODULE_0__.Children.only(children), {
+    onKeyDown: onKeyDownHandler
+  });
+};
+Keyboard.propTypes = _propTypes__WEBPACK_IMPORTED_MODULE_1__.KeyboardPropTypes;
+
+
+/***/ }),
+
+/***/ "./node_modules/grommet/es6/components/Keyboard/propTypes.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   KeyboardPropTypes: () => (/* binding */ KeyboardPropTypes)
+/* harmony export */ });
+
+var PropType = {};
+if (false) {}
+var KeyboardPropTypes = PropType;
+
+/***/ }),
+
+/***/ "./node_modules/grommet/es6/components/Skeleton/SkeletonContext.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   SkeletonContext: () => (/* binding */ SkeletonContext),
+/* harmony export */   useSkeleton: () => (/* binding */ useSkeleton)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/index.js");
+
+var SkeletonContext = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createContext();
+var useSkeleton = function useSkeleton() {
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(SkeletonContext);
+};
+
+/***/ }),
+
+/***/ "./node_modules/grommet/es6/contexts/AnnounceContext/AnnounceContext.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   AnnounceContext: () => (/* binding */ AnnounceContext)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/index.js");
+/* harmony import */ var _propTypes__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/grommet/es6/contexts/AnnounceContext/propTypes.js");
+
+
+var createAnnouncer = function createAnnouncer() {
+  var announcer = document.createElement('div');
+  announcer.id = 'grommet-announcer';
+  announcer.style.left = '-100%';
+  announcer.style.right = '100%';
+  announcer.style.position = 'fixed';
+  announcer.style['z-index'] = '-1';
+  document.body.insertBefore(announcer, document.body.firstChild);
+  return announcer;
+};
+var AnnounceContext = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createContext(function (message, mode, timeout) {
+  if (mode === void 0) {
+    mode = 'polite';
+  }
+  if (timeout === void 0) {
+    timeout = 500;
+  }
+  // we only create a new container if we don't have one already
+  // we create a separate node so that grommet does not set aria-hidden to it
+  var announcer = document.body.querySelector("#grommet-announcer[aria-live]") || createAnnouncer();
+  announcer.setAttribute('aria-live', 'off');
+  announcer.innerHTML = message;
+  announcer.setAttribute('aria-live', mode);
+  setTimeout(function () {
+    announcer.innerHTML = '';
+  }, timeout);
+});
+AnnounceContext.propTypes = _propTypes__WEBPACK_IMPORTED_MODULE_1__.AnnounceContextPropTypes;
+
+/***/ }),
+
+/***/ "./node_modules/grommet/es6/contexts/AnnounceContext/propTypes.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   AnnounceContextPropTypes: () => (/* binding */ AnnounceContextPropTypes)
+/* harmony export */ });
+
+var PropType = {};
+if (false) {}
+var AnnounceContextPropTypes = PropType;
+
+/***/ }),
+
+/***/ "./node_modules/grommet/es6/contexts/OptionsContext.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   OptionsContext: () => (/* binding */ OptionsContext)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/index.js");
+
+var OptionsContext = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createContext({});
+
+/***/ }),
+
+/***/ "./node_modules/grommet/es6/default-props.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   defaultProps: () => (/* binding */ defaultProps),
+/* harmony export */   extendDefaultTheme: () => (/* binding */ extendDefaultTheme),
+/* harmony export */   withTheme: () => (/* binding */ withTheme)
+/* harmony export */ });
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/grommet/es6/utils/object.js");
+/* harmony import */ var _themes_base__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/grommet/es6/themes/base.js");
+
+
+var defaultProps = {
+  theme: _themes_base__WEBPACK_IMPORTED_MODULE_0__.base
+};
+var extendDefaultTheme = function extendDefaultTheme(theme) {
+  defaultProps.theme = (0,_utils__WEBPACK_IMPORTED_MODULE_1__.deepMerge)(_themes_base__WEBPACK_IMPORTED_MODULE_0__.base, theme);
+};
+
+/*
+  Pass `theme` for component which can be located outside of theme context.
+  To be used as argument for `attrs` method from `styled-components`.
+ */
+var withTheme = function withTheme(props) {
+  return {
+    theme: (0,_utils__WEBPACK_IMPORTED_MODULE_1__.deepMerge)(defaultProps.theme, props.theme)
+  };
+};
+
+/***/ }),
+
+/***/ "./node_modules/grommet/es6/themes/base.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   base: () => (/* binding */ base),
+/* harmony export */   generate: () => (/* binding */ generate)
+/* harmony export */ });
+/* harmony import */ var grommet_icons_icons_Actions__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__("./node_modules/grommet-icons/icons/Actions.js");
+/* harmony import */ var grommet_icons_icons_AssistListening__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__("./node_modules/grommet-icons/icons/AssistListening.js");
+/* harmony import */ var grommet_icons_icons_CircleInformation__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__("./node_modules/grommet-icons/icons/CircleInformation.js");
+/* harmony import */ var grommet_icons_icons_ClosedCaption__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__("./node_modules/grommet-icons/icons/ClosedCaption.js");
+/* harmony import */ var grommet_icons_icons_Expand__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__("./node_modules/grommet-icons/icons/Expand.js");
+/* harmony import */ var grommet_icons_icons_FormClose__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__("./node_modules/grommet-icons/icons/FormClose.js");
+/* harmony import */ var grommet_icons_icons_FormDown__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./node_modules/grommet-icons/icons/FormDown.js");
+/* harmony import */ var grommet_icons_icons_FormNext__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__("./node_modules/grommet-icons/icons/FormNext.js");
+/* harmony import */ var grommet_icons_icons_FormPrevious__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__("./node_modules/grommet-icons/icons/FormPrevious.js");
+/* harmony import */ var grommet_icons_icons_FormUp__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./node_modules/grommet-icons/icons/FormUp.js");
+/* harmony import */ var grommet_icons_icons_Next__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./node_modules/grommet-icons/icons/Next.js");
+/* harmony import */ var grommet_icons_icons_Pause__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__("./node_modules/grommet-icons/icons/Pause.js");
+/* harmony import */ var grommet_icons_icons_Play__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__("./node_modules/grommet-icons/icons/Play.js");
+/* harmony import */ var grommet_icons_icons_FormPin__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__("./node_modules/grommet-icons/icons/FormPin.js");
+/* harmony import */ var grommet_icons_icons_Previous__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./node_modules/grommet-icons/icons/Previous.js");
+/* harmony import */ var grommet_icons_icons_StatusCriticalSmall__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__("./node_modules/grommet-icons/icons/StatusCriticalSmall.js");
+/* harmony import */ var grommet_icons_icons_StatusGoodSmall__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__("./node_modules/grommet-icons/icons/StatusGoodSmall.js");
+/* harmony import */ var grommet_icons_icons_StatusWarningSmall__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__("./node_modules/grommet-icons/icons/StatusWarningSmall.js");
+/* harmony import */ var grommet_icons_icons_StatusUnknownSmall__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__("./node_modules/grommet-icons/icons/StatusUnknownSmall.js");
+/* harmony import */ var grommet_icons_icons_Subtract__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__("./node_modules/grommet-icons/icons/Subtract.js");
+/* harmony import */ var grommet_icons_icons_Volume__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__("./node_modules/grommet-icons/icons/Volume.js");
+/* harmony import */ var grommet_icons_icons_VolumeLow__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__("./node_modules/grommet-icons/icons/VolumeLow.js");
+/* harmony import */ var grommet_icons_themes_base__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/grommet-icons/themes/base.js");
+/* harmony import */ var _utils_object__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/grommet/es6/utils/object.js");
+/* harmony import */ var _utils_mixins__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/grommet/es6/utils/mixins.js");
+function _extends() {
+  return _extends = Object.assign ? Object.assign.bind() : function (n) {
+    for (var e = 1; e < arguments.length; e++) {
+      var t = arguments[e];
+      for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]);
+    }
+    return n;
+  }, _extends.apply(null, arguments);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var brandColor = '#7D4CDB';
+var accentColors = ['#6FFFB0', '#FD6FFF', '#81FCED', '#FFCA58'];
+var neutralColors = ['#00873D', '#3D138D', '#00739D', '#A2423D'];
+var statusColors = {
+  critical: '#FF4040',
+  error: '#B30000',
+  warning: '#FFAA15',
+  ok: '#00C781',
+  unknown: '#CCCCCC',
+  disabled: '#CCCCCC'
+};
+var darkColors = ['#333333', '#555555', '#777777', '#999999', '#999999', '#999999'];
+var lightColors = ['#F8F8F8', '#F2F2F2', '#EDEDED', '#DADADA', '#DADADA', '#DADADA'];
+var focusColor = accentColors[0];
+var colors = {
+  active: 'rgba(221, 221, 221, 0.5)',
+  'background-back': {
+    dark: '#33333308',
+    light: '#EDEDED'
+  },
+  'background-front': {
+    dark: '#444444',
+    light: '#FFFFFF'
+  },
+  'background-contrast': {
+    light: '#33333310',
+    dark: '#FFFFFF18'
+  },
+  'active-background': 'background-contrast',
+  'active-text': 'text-strong',
+  black: '#000000',
+  border: {
+    dark: 'rgba(255, 255, 255, 0.33)',
+    light: 'rgba(0, 0, 0, 0.33)'
+  },
+  brand: brandColor,
+  control: {
+    dark: 'accent-1',
+    light: 'brand'
+  },
+  focus: focusColor,
+  'graph-0': 'accent-1',
+  'graph-1': 'neutral-1',
+  'graph-2': 'neutral-2',
+  'graph-3': 'neutral-3',
+  'graph-4': 'neutral-4',
+  placeholder: '#AAAAAA',
+  selected: 'brand',
+  text: {
+    dark: '#f8f8f8',
+    light: '#444444'
+  },
+  'text-strong': {
+    dark: '#FFFFFF',
+    light: '#000000'
+  },
+  'text-weak': {
+    dark: '#CCCCCC',
+    light: '#555555'
+  },
+  'text-xweak': {
+    dark: '#BBBBBB',
+    light: '#666666'
+  },
+  icon: {
+    dark: '#f8f8f8',
+    light: '#666666'
+  },
+  'selected-background': 'brand',
+  'selected-text': 'text-strong',
+  white: '#FFFFFF'
+};
+var colorArray = function colorArray(array, prefix) {
+  return array.forEach(function (color, index) {
+    colors[prefix + "-" + (index + 1)] = color;
+  });
+};
+colorArray(accentColors, 'accent');
+colorArray(darkColors, 'dark');
+colorArray(lightColors, 'light');
+colorArray(neutralColors, 'neutral');
+Object.keys(statusColors).forEach(function (color) {
+  colors["status-" + color] = statusColors[color];
+});
+var generate = function generate(baseSpacing, scale) {
+  if (baseSpacing === void 0) {
+    baseSpacing = 24;
+  }
+  if (scale === void 0) {
+    scale = 6;
+  }
+  // 24
+  var baseFontSize = baseSpacing * 0.75; // 18
+  var fontScale = baseSpacing / scale; // 4
+
+  var fontSizing = function fontSizing(factor) {
+    return {
+      size: baseFontSize + factor * fontScale + "px",
+      height: baseSpacing + factor * fontScale + "px",
+      // maxWidth chosen to be ~50 characters wide
+      // see: https://ux.stackexchange.com/a/34125
+      maxWidth: baseSpacing * (baseFontSize + factor * fontScale) + "px"
+    };
+  };
+  var borderWidth = 2;
+  var controlBorderWidth = 1;
+  var result = (0,_utils_object__WEBPACK_IMPORTED_MODULE_0__.deepMerge)(grommet_icons_themes_base__WEBPACK_IMPORTED_MODULE_1__.base, {
+    global: {
+      active: {
+        background: {
+          color: 'active',
+          opacity: 'medium'
+        },
+        color: {
+          dark: 'white',
+          light: 'black'
+        }
+      },
+      animation: {
+        duration: '1s',
+        jiggle: {
+          duration: '0.1s'
+        }
+      },
+      // backgrounds: undefined,
+      borderSize: {
+        xsmall: '1px',
+        small: '2px',
+        medium: baseSpacing / 6 + "px",
+        // 4
+        large: baseSpacing / 2 + "px",
+        // 12
+        xlarge: baseSpacing + "px" // 24
+      },
+      breakpoints: {
+        small: {
+          value: baseSpacing * 32,
+          // 768
+          borderSize: {
+            xsmall: '1px',
+            small: '2px',
+            medium: baseSpacing / 6 + "px",
+            // 4
+            large: baseSpacing / 4 + "px",
+            // 6
+            xlarge: baseSpacing / 2 + "px" // 12
+          },
+          edgeSize: {
+            none: '0px',
+            hair: '1px',
+            // for Chart
+            xxsmall: '2px',
+            xsmall: baseSpacing / 8 + "px",
+            // 3
+            small: baseSpacing / 4 + "px",
+            // 6
+            medium: baseSpacing / 2 + "px",
+            // 12
+            large: baseSpacing + "px",
+            // 24
+            xlarge: baseSpacing * 2 + "px" // 48
+          },
+          size: {
+            xxsmall: baseSpacing + "px",
+            // 24
+            xsmall: baseSpacing * 2 + "px",
+            // 48
+            small: baseSpacing * 4 + "px",
+            // 96
+            medium: baseSpacing * 8 + "px",
+            // 192
+            large: baseSpacing * 16 + "px",
+            // 384
+            xlarge: baseSpacing * 32 + "px",
+            // 768
+            full: '100%'
+          }
+        },
+        medium: {
+          value: baseSpacing * 64 // 1536
+        },
+        large: {} // anything above 'medium'
+      },
+      // Breakpoints used at Server Side Rendering for the initial rendering
+      // These values correspond to the theme breakpoints
+      deviceBreakpoints: {
+        phone: 'small',
+        tablet: 'medium',
+        computer: 'large'
+      },
+      colors: colors,
+      control: {
+        border: {
+          width: controlBorderWidth + "px",
+          radius: '4px',
+          color: 'border'
+        },
+        disabled: {
+          opacity: 0.3
+        }
+      },
+      // The time to wait after the user stopped typing, measured in ms.
+      // A half second (500ms) debounce can be a helpful starting point.
+      // You want to give the user time to fill out a field, but capture
+      // their attention before they move on past it. 2 second (2000ms)
+      // might be too long depending on how fast people type, and 200ms
+      // would be an eye blink
+      debounceDelay: 500,
+      drop: {
+        // intelligentMargin: undefined,
+        background: {
+          dark: 'black',
+          light: 'white'
+        },
+        border: {
+          radius: '0px'
+        },
+        // margin: undefined
+        shadowSize: 'small',
+        // shadowSize is deprecated, use 'elevation'
+        zIndex: '20'
+      },
+      edgeSize: {
+        none: '0px',
+        hair: '1px',
+        // for Chart
+        xxsmall: baseSpacing / 8 + "px",
+        // 3
+        xsmall: baseSpacing / 4 + "px",
+        // 6
+        small: baseSpacing / 2 + "px",
+        // 12
+        medium: baseSpacing + "px",
+        // 24
+        large: baseSpacing * 2 + "px",
+        // 48
+        xlarge: baseSpacing * 4 + "px",
+        // 96
+        responsiveBreakpoint: 'small'
+      },
+      elevation: {
+        light: {
+          none: 'none',
+          xsmall: '0px 1px 2px rgba(0, 0, 0, 0.20)',
+          small: '0px 2px 4px rgba(0, 0, 0, 0.20)',
+          medium: '0px 4px 8px rgba(0, 0, 0, 0.20)',
+          large: '0px 8px 16px rgba(0, 0, 0, 0.20)',
+          xlarge: '0px 12px 24px rgba(0, 0, 0, 0.20)'
+        },
+        dark: {
+          none: 'none',
+          xsmall: '0px 2px 2px rgba(255, 255, 255, 0.40)',
+          small: '0px 4px 4px rgba(255, 255, 255, 0.40)',
+          medium: '0px 6px 8px rgba(255, 255, 255, 0.40)',
+          large: '0px 8px 16px rgba(255, 255, 255, 0.40)',
+          xlarge: '0px 12px 24px rgba(255, 255, 255, 0.40)'
+        }
+      },
+      focus: {
+        // shadow or outline are required for accessibility
+        border: {
+          // remove to only have shadow
+          color: 'focus'
+        },
+        // outline: { color: undefined, size: undefined },
+        shadow: {
+          color: 'focus',
+          size: '2px'
+        }
+      },
+      font: _extends({}, fontSizing(0)),
+      hover: {
+        background: {
+          color: 'active',
+          opacity: 'medium'
+        },
+        color: {
+          dark: 'white',
+          light: 'black'
+        }
+      },
+      input: {
+        padding: {
+          horizontal: (0,_utils_mixins__WEBPACK_IMPORTED_MODULE_2__.parseMetricToNum)(baseSpacing / 2 + "px") - (0,_utils_mixins__WEBPACK_IMPORTED_MODULE_2__.parseMetricToNum)(controlBorderWidth + "px") + "px",
+          vertical: (0,_utils_mixins__WEBPACK_IMPORTED_MODULE_2__.parseMetricToNum)(baseSpacing / 2 + "px") - (0,_utils_mixins__WEBPACK_IMPORTED_MODULE_2__.parseMetricToNum)(controlBorderWidth + "px") + "px"
+        },
+        font: {
+          // size: undefined,
+          // height: undefined,
+          weight: 600
+        },
+        // deprecate in v3
+        // weight: undefined,
+        readOnly: {
+          // background: undefined,
+          // border: {
+          //  color: undefined,
+          // },
+        }
+      },
+      opacity: {
+        strong: 0.8,
+        medium: 0.4,
+        weak: 0.1
+      },
+      selected: {
+        background: 'selected',
+        color: 'white'
+      },
+      spacing: baseSpacing + "px",
+      size: {
+        xxsmall: baseSpacing * 2 + "px",
+        // 48
+        xsmall: baseSpacing * 4 + "px",
+        // 96
+        small: baseSpacing * 8 + "px",
+        // 192
+        medium: baseSpacing * 16 + "px",
+        // 384
+        large: baseSpacing * 32 + "px",
+        // 768
+        xlarge: baseSpacing * 48 + "px",
+        // 1152
+        xxlarge: baseSpacing * 64 + "px",
+        // 1536
+        full: '100%'
+      }
+    },
+    // icon: {
+    //   extennd: undefined,
+    //   matchSize: undefined,
+    //   size: undefined,
+    // },
+    accordion: {
+      panel: {
+        // border: {
+        //   side: 'bottom',
+        //   color: 'border',
+        // },
+      },
+      border: {
+        side: 'bottom',
+        color: 'border'
+      },
+      heading: {
+        level: '4' // level ranges from 1-6
+        // margin: undefined
+      },
+      hover: {
+        // background: undefined,
+        color: {
+          dark: 'light-4',
+          light: 'dark-3'
+        },
+        // deprecated
+        heading: {
+          color: {
+            dark: 'light-4',
+            light: 'dark-3'
+          }
+        }
+      },
+      icons: {
+        collapse: grommet_icons_icons_FormUp__WEBPACK_IMPORTED_MODULE_3__.FormUp,
+        expand: grommet_icons_icons_FormDown__WEBPACK_IMPORTED_MODULE_4__.FormDown
+        // color: { dark: undefined, light: undefined },
+      }
+    },
+    anchor: {
+      color: {
+        dark: 'accent-1',
+        light: 'brand'
+      },
+      gap: 'small',
+      hover: {
+        textDecoration: 'underline'
+        // fontWeight: undefined,
+        // extend: undefined,
+      },
+      // icon: {
+      //   color: undefined
+      // },
+      textDecoration: 'none',
+      fontWeight: 600
+      // size: {
+      //   medium: {
+      //     color: undefined,
+      //     fontWeight: undefined,
+      //     textDecoration: undefined,
+      //   },
+      // },
+      // extend: undefined,
+    },
+    avatar: {
+      // extend: undefined,
+      size: {
+        xsmall: baseSpacing * 0.75 + "px",
+        // 18px
+        small: baseSpacing + "px",
+        // 24px
+        medium: baseSpacing * 2 + "px",
+        // default 48px
+        large: baseSpacing * 3 + "px",
+        // 72px
+        xlarge: baseSpacing * 4 + "px",
+        // 96px
+        '2xl': baseSpacing * 5 + "px",
+        // 120px
+        '3xl': baseSpacing * 6 + "px",
+        // 144px
+        '4xl': baseSpacing * 7 + "px",
+        // 168px
+        '5xl': baseSpacing * 8 + "px" // 192px
+      },
+      text: {
+        size: {
+          xsmall: 'small',
+          // 14px
+          small: 'medium',
+          // 18px
+          medium: 'large',
+          // 22px
+          large: 'xlarge',
+          // 26px
+          xlarge: 'xxlarge',
+          // 34px
+          '2xl': '3xl',
+          // 42px
+          '3xl': '4xl',
+          // 54px
+          '4xl': '5xl',
+          // 70px
+          '5xl': '6xl' // 90px
+        }
+        // fontWeight: undefined,
+        // extend: undefined
+      }
+    },
+    box: {
+      responsiveBreakpoint: 'small' // when we switch rows to columns
+      // extend: undefined,
+    },
+    button: {
+      badge: {
+        // align: undefined,,
+        container: {
+          background: 'brand'
+          // pad: undefined,
+          // extend: undefined,
+        },
+        size: {
+          medium: baseSpacing + "px" // 24px
+        },
+        text: {
+          size: {
+            medium: 'small' // 14px
+          }
+        }
+      },
+      gap: 'small',
+      size: {
+        small: {
+          border: {
+            radius: baseSpacing * 0.75 + "px"
+          },
+          pad: {
+            vertical: baseSpacing / 4 - borderWidth + "px",
+            // 4px
+            horizontal: baseSpacing - borderWidth * 2 + "px" // 20px,
+          }
+          // iconOnly: {
+          //   pad: undefined,
+          // },
+        },
+        medium: {
+          border: {
+            radius: baseSpacing * 0.75 + "px" // 18px
+          },
+          pad: {
+            vertical: baseSpacing / 4 - borderWidth + "px",
+            // 4px
+            horizontal: baseSpacing - borderWidth + "px" // 22px
+          }
+          // iconOnly: {
+          //   pad: undefined,
+          // },
+        },
+        large: {
+          border: {
+            radius: baseSpacing + "px" // 24px
+          },
+          pad: {
+            vertical: baseSpacing / 4 + borderWidth + "px",
+            // 8px
+            horizontal: baseSpacing + borderWidth * 4 + "px" // 32px,
+          }
+          // iconOnly: {
+          //   pad: undefined,
+          // },
+        }
+      },
+      border: {
+        // color: { dark: undefined, light: undefined }
+        width: borderWidth + "px",
+        radius: baseSpacing * 0.75 + "px"
+      },
+      // color: { dark: undefined, light: undefined }
+      // default: {
+      //   background: undefined,
+      //   border: undefined,
+      //   color: undefined,
+      //   direction: undefined,
+      //   font: {
+      //     size: undefined,
+      //     weight: undefined,
+      //   },
+      //   icon: undefined,
+      //   padding: {
+      //     vertical: undefined,
+      //     horizontal: undefined,
+      //   },
+      //   reverse: undefined,
+      //   extend: undefined,
+      // },
+      // primary: {
+      //   font: {
+      //     size: undefined,
+      //     weight: undefined,
+      //   },
+      //   background: undefined,
+      //   border: undefined,
+      //   color: undefined,
+      //   direction: undefined,
+      //   icon: undefined,
+      //   padding: {
+      //     vertical: undefined,
+      //     horizontal: undefined,
+      //   },
+      //   reverse: undefined,
+      //   extend: undefined,
+      // },
+      // secondary: {
+      //   font: {
+      //     size: undefined,
+      //     weight: undefined,
+      //   },
+      //   background: undefined,
+      //   border: undefined,
+      //   color: undefined,
+      //   direction: undefined,
+      //   icon: undefined,
+      //   padding: {
+      //     vertical: undefined,
+      //     horizontal: undefined,
+      //   },
+      //   reverse: undefined,
+      //   extend: undefined,
+      // },
+      // option: {
+      //   background: undefined,
+      //   border: undefined,
+      //   color: undefined,
+      //   direction: undefined,
+      //   icon: undefined,
+      //   padding: {
+      //     vertical: undefined,
+      //     horizontal: undefined,
+      //   },
+      //   reverse: undefined,
+      //   extend: undefined,
+      // },
+      active: {
+        background: 'active-background',
+        //   border: undefined,
+        color: 'active-text'
+        //   extend: undefined,
+        //   default: {},
+        //   primary: {},
+        //   secondary: {},
+      },
+      disabled: {
+        //   background: undefined,
+        //   border: undefined,
+        //   color: undefined,
+        opacity: 0.3
+        //   extend: undefined,
+        //   default: {},
+        //   primary: {},
+        //   secondary: {},
+      },
+      // hover: {
+      //   background: undefined,
+      //   border: undefined,
+      //   color: undefined,
+      //   extend: undefined,
+      //   default: {},
+      //   primary: {},
+      //   secondary: {},
+      // },
+      padding: {
+        vertical: baseSpacing / 4 - borderWidth + "px",
+        horizontal: baseSpacing - borderWidth + "px"
+      },
+      transition: {
+        timing: 'ease-in-out',
+        duration: 0.1,
+        properties: ['color', 'background-color', 'border-color', 'box-shadow']
+      },
+      skeleton: {
+        width: {
+          min: '100px'
+        }
+      }
+    },
+    calendar: {
+      // daySize must align with global.size
+      small: {
+        // title: {},
+        fontSize: baseFontSize - fontScale + "px",
+        lineHeight: 1.375,
+        daySize: baseSpacing * 8 / 7 + "px",
+        slideDuration: '0.2s'
+      },
+      medium: {
+        // title: {},
+        fontSize: baseFontSize + "px",
+        lineHeight: 1.45,
+        daySize: baseSpacing * 16 / 7 + "px",
+        slideDuration: '0.5s'
+      },
+      large: {
+        // title: {},
+        fontSize: baseFontSize + 3 * fontScale + "px",
+        lineHeight: 1.11,
+        daySize: baseSpacing * 32 / 7 + "px",
+        slideDuration: '0.8s'
+      },
+      icons: {
+        previous: grommet_icons_icons_Previous__WEBPACK_IMPORTED_MODULE_5__.Previous,
+        next: grommet_icons_icons_Next__WEBPACK_IMPORTED_MODULE_6__.Next,
+        small: {
+          previous: grommet_icons_icons_FormPrevious__WEBPACK_IMPORTED_MODULE_7__.FormPrevious,
+          next: grommet_icons_icons_FormNext__WEBPACK_IMPORTED_MODULE_8__.FormNext
+        }
+      },
+      heading: {
+        level: '4'
+      } // level ranges from 1-6
+    },
+    card: {
+      container: {
+        round: 'small',
+        elevation: 'small'
+        // extend: undefined,
+      },
+      // hover: {
+      //   container: {
+      //     elevation: undefined,
+      //   },
+      // },
+      header: {},
+      body: {},
+      footer: {}
+    },
+    cards: {
+      container: {
+        // any box props
+        gap: 'xsmall'
+        // extend: undefined,
+      }
+    },
+    carousel: {
+      icons: {
+        current: grommet_icons_icons_Subtract__WEBPACK_IMPORTED_MODULE_9__.Subtract,
+        next: grommet_icons_icons_Next__WEBPACK_IMPORTED_MODULE_6__.Next,
+        previous: grommet_icons_icons_Previous__WEBPACK_IMPORTED_MODULE_5__.Previous
+        // color: { dark: undefined, light: undefined },
+      },
+      animation: {
+        duration: 1000
+      },
+      disabled: {
+        icons: {
+          // color: { dark: undefined, light: undefined },
+        }
+      }
+    },
+    chart: {
+      color: 'graph-0'
+      // extend: undefined,
+    },
+    checkBox: {
+      border: {
+        color: {
+          dark: 'rgba(255, 255, 255, 0.5)',
+          light: 'rgba(0, 0, 0, 0.15)'
+        },
+        width: '2px'
+      },
+      check: {
+        // extend: undefined,
+        radius: '4px',
+        thickness: '4px'
+      },
+      label: {
+        align: 'center'
+      },
+      // color: { dark: undefined, light: undefined },
+      // extend: undefined,
+      // gap: undefined
+      hover: {
+        border: {
+          color: {
+            dark: 'white',
+            light: 'black'
+          }
+        }
+        // background: undefined,
+        // extend: undefined,
+      },
+      icon: {
+        // size: undefined,
+        // extend: undefined,
+      },
+      icons: {
+        // checked: undefined,
+        // indeterminate: undefined,
+      },
+      // pad: undefined,
+      size: baseSpacing + "px",
+      toggle: {
+        // background: undefined
+        color: {
+          dark: '#d9d9d9',
+          light: '#d9d9d9'
+        },
+        knob: {
+          // extend: undefined,
+        },
+        radius: baseSpacing + "px",
+        size: baseSpacing * 2 + "px"
+        // extend: undefined,
+      }
+    },
+    checkBoxGroup: {
+      // container: {
+      //   // any box props
+      //   extend: undefined,
+      // },
+    },
+    clock: {
+      analog: {
+        // extend: undefined,
+        hour: {
+          color: {
+            dark: 'light-2',
+            light: 'dark-3'
+          },
+          width: baseSpacing / 3 + "px",
+          size: baseSpacing + "px",
+          shape: 'round'
+        },
+        minute: {
+          color: {
+            dark: 'light-4',
+            light: 'dark-3'
+          },
+          width: baseSpacing / 6 + "px",
+          size: Math.round(baseSpacing / 2) + "px",
+          shape: 'round'
+        },
+        second: {
+          color: {
+            dark: 'accent-1',
+            light: 'accent-1'
+          },
+          width: baseSpacing / 8 + "px",
+          size: Math.round(baseSpacing / 2.666) + "px",
+          shape: 'round'
+        },
+        size: {
+          xsmall: baseSpacing * 2 + "px",
+          small: baseSpacing * 3 + "px",
+          medium: baseSpacing * 4 + "px",
+          large: baseSpacing * 6 + "px",
+          xlarge: baseSpacing * 9 + "px",
+          xxlarge: baseSpacing * 12 + "px",
+          huge: baseSpacing * 12 + "px" // kept for backwards compatibility
+        }
+      },
+      digital: {
+        text: {
+          xsmall: {
+            size: baseFontSize - 2 * fontScale + "px",
+            height: 1.5
+          },
+          small: {
+            size: baseFontSize - fontScale + "px",
+            height: 1.43
+          },
+          medium: {
+            size: baseFontSize + "px",
+            height: 1.375
+          },
+          large: {
+            size: baseFontSize + fontScale + "px",
+            height: 1.167
+          },
+          xlarge: {
+            size: baseFontSize + 2 * fontScale + "px",
+            height: 1.1875
+          },
+          xxlarge: {
+            size: baseFontSize + 4 * fontScale + "px",
+            height: 1.125
+          }
+        }
+      }
+    },
+    collapsible: {
+      minSpeed: 200,
+      baseline: 500
+    },
+    data: {
+      // button: {
+      //   kind: undefined,
+      // },
+    },
+    dateInput: {
+      container: {
+        round: 'xxsmall'
+      }
+      // icon: {
+      //   size: undefined,
+      // },
+    },
+    dataTable: {
+      // body: {
+      //   extend: undefined,
+      // },
+      pinned: {
+        // body: {
+        //    background: undefined,
+        //    extend: undefined,
+        // },
+        header: {
+          background: {
+            opacity: 'strong'
+          }
+          //  extend: undefined,
+        },
+        footer: {
+          background: {
+            opacity: 'strong'
+          }
+          //  extend: undefined,
+        }
+      },
+      container: {
+        // any box props
+        gap: 'xsmall'
+        // extend: undefined,
+      },
+      groupHeader: {
+        // background: undefined,
+        // border: undefined,
+        // pad: undefined,
+      },
+      groupEnd: {
+        border: {
+          side: 'bottom',
+          size: 'xsmall'
+        }
+      },
+      header: {
+        // background: undefined,
+        // border: undefined,
+        // color: undefined,
+        // extend: undefined,
+        // font: {
+        //   weight: undefined,
+        //   size: undefined,
+        // },
+        gap: 'small',
+        // hover: {
+        //   background: undefined,
+        // },
+        // pad: undefined,
+        units: {
+          color: 'text-xweak',
+          margin: {
+            left: 'xsmall'
+          },
+          alignSelf: 'end'
+        }
+      },
+      icons: {
+        ascending: grommet_icons_icons_FormDown__WEBPACK_IMPORTED_MODULE_4__.FormDown,
+        contract: grommet_icons_icons_FormUp__WEBPACK_IMPORTED_MODULE_3__.FormUp,
+        descending: grommet_icons_icons_FormUp__WEBPACK_IMPORTED_MODULE_3__.FormUp,
+        expand: grommet_icons_icons_FormDown__WEBPACK_IMPORTED_MODULE_4__.FormDown
+        // sortable: undefined,
+      },
+      primary: {
+        weight: 'bold'
+      },
+      resize: {
+        border: {
+          color: 'border',
+          side: 'end'
+        }
+        // hover: {
+        //   border: {
+        //     color: undefined,
+        //     side: undefined,
+        //     size: undefined,
+        //   },
+        // },
+      }
+    },
+    diagram: {
+      // extend: undefined,
+      line: {
+        color: 'graph-0'
+      }
+    },
+    // drop: {
+    //   extend: undefined,
+    //   maxHeight: undefined,
+    // },
+    fileInput: {
+      // background: {},
+      border: {
+        // color: undefined,
+        side: 'all',
+        size: 'small',
+        style: 'dashed'
+      },
+      dragOver: {
+        border: {
+          color: 'control'
+        }
+        // extend: undefined,
+      },
+      hover: {
+        border: {
+          color: 'brand'
+        }
+        // extend: undefined,
+      },
+      icons: {
+        remove: grommet_icons_icons_FormClose__WEBPACK_IMPORTED_MODULE_10__.FormClose
+      },
+      // pad: {},
+      label: {
+        margin: 'small'
+        // extend: undefined,
+      },
+      message: {
+        margin: 'small'
+        // extend: undefined,
+      }
+      // extend: undefined,
+    },
+    formField: {
+      border: {
+        color: 'border',
+        error: {
+          color: {
+            dark: 'white',
+            light: 'status-critical'
+          }
+        },
+        position: 'inner',
+        side: 'bottom'
+      },
+      // checkBox: {
+      //   pad: undefined,
+      // },
+      content: {
+        // margin: undefined,
+        pad: 'small'
+      },
+      disabled: {
+        background: {
+          color: 'status-disabled',
+          opacity: 'medium'
+        }
+        // border: {
+        //   color: undefined,
+        // },
+        // label: {
+        //   color: undefined,
+        // },
+      },
+      // focus: {
+      //   background: {
+      //     color: undefined,
+      //   },
+      //   border: {
+      //     color: undefined,
+      //   },
+      // },
+      error: {
+        color: 'status-critical',
+        margin: {
+          vertical: 'xsmall',
+          horizontal: 'small'
+        }
+        // background: undefined,
+        // container: {}, // any Box props
+        // icon: undefined,
+      },
+      // extend: undefined,
+      help: {
+        color: 'dark-3',
+        margin: {
+          start: 'small'
+        }
+      },
+      info: {
+        color: 'text-xweak',
+        margin: {
+          vertical: 'xsmall',
+          horizontal: 'small'
+        }
+        // container: {}, // any Box props
+        // icon: undefined,
+      },
+      label: {
+        margin: {
+          vertical: 'xsmall',
+          horizontal: 'small'
+        }
+        // requiredIndicator: undefined,
+      },
+      margin: {
+        bottom: 'small'
+      },
+      // round: undefined,
+      survey: {
+        label: {
+          margin: {
+            bottom: 'xsmall'
+          },
+          size: 'medium',
+          weight: 400
+        }
+      }
+    },
+    grommet: {
+      // extend: undefined
+    },
+    header: {
+      sticky: {
+        zIndex: '20'
+      }
+    },
+    heading: {
+      // color: undefined,
+      font: {
+        // family: undefined
+      },
+      level: {
+        1: {
+          font: {
+            // family: undefined,
+            // weight: undefined,
+          },
+          small: _extends({}, fontSizing(4)),
+          medium: _extends({}, fontSizing(8)),
+          large: _extends({}, fontSizing(16)),
+          xlarge: _extends({}, fontSizing(24))
+        },
+        2: {
+          font: {
+            // family: undefined,
+            // weight: undefined,
+          },
+          small: _extends({}, fontSizing(2)),
+          medium: _extends({}, fontSizing(4)),
+          large: _extends({}, fontSizing(8)),
+          xlarge: _extends({}, fontSizing(12))
+        },
+        3: {
+          font: {
+            // family: undefined,
+            // weight: undefined,
+          },
+          small: _extends({}, fontSizing(1)),
+          medium: _extends({}, fontSizing(2)),
+          large: _extends({}, fontSizing(4)),
+          xlarge: _extends({}, fontSizing(6))
+        },
+        4: {
+          font: {
+            // family: undefined,
+            // weight: undefined,
+          },
+          small: _extends({}, fontSizing(0)),
+          medium: _extends({}, fontSizing(0)),
+          large: _extends({}, fontSizing(0)),
+          xlarge: _extends({}, fontSizing(0))
+        },
+        5: {
+          font: {
+            // family: undefined,
+            // weight: undefined,
+          },
+          small: _extends({}, fontSizing(-0.5)),
+          medium: _extends({}, fontSizing(-0.5)),
+          large: _extends({}, fontSizing(-0.5)),
+          xlarge: _extends({}, fontSizing(-0.5))
+        },
+        6: {
+          font: {
+            // family: undefined,
+            // weight: undefined,
+          },
+          small: _extends({}, fontSizing(-1)),
+          medium: _extends({}, fontSizing(-1)),
+          large: _extends({}, fontSizing(-1)),
+          xlarge: _extends({}, fontSizing(-1))
+        }
+      },
+      responsiveBreakpoint: 'small',
+      // when we scale the font size down
+      weight: 600,
+      skeleton: {
+        width: {
+          min: '150px',
+          max: '200px'
+        }
+      }
+    },
+    layer: {
+      background: {
+        dark: 'black',
+        light: 'white'
+      },
+      border: {
+        radius: '4px'
+        // intelligentRounding: undefined,
+      },
+      container: {
+        // elevation: undefined,
+        zIndex: '20'
+      },
+      // extend: undefined,
+      overlay: {
+        background: 'rgba(0, 0, 0, 0.5)'
+        // backdropFilter: undefined,
+      },
+      responsiveBreakpoint: 'small',
+      // when Layer takes over the full screen
+      zIndex: '20'
+    },
+    list: {
+      container: {
+        // any box props
+        gap: 'xsmall'
+        // extend: undefined,
+      },
+      item: {
+        // background: undefined,
+        border: 'horizontal',
+        disabled: {
+          color: 'status-disabled',
+          cursor: 'default'
+        },
+        pinned: {
+          background: 'background-contrast',
+          icon: {
+            size: 'medium',
+            pad: 'small'
+          }
+        },
+        pad: {
+          horizontal: 'medium',
+          vertical: 'small'
+        }
+        // extend: undefined,
+      },
+      primaryKey: {
+        // any text props
+        weight: 'bold'
+      },
+      icons: {
+        down: grommet_icons_icons_FormDown__WEBPACK_IMPORTED_MODULE_4__.FormDown,
+        up: grommet_icons_icons_FormUp__WEBPACK_IMPORTED_MODULE_3__.FormUp,
+        pin: grommet_icons_icons_FormPin__WEBPACK_IMPORTED_MODULE_11__.FormPin
+      }
+      // extend: undefined,
+    },
+    maskedInput: {
+      // container: {
+      //   extend: undefined,
+      // },
+      // extend: undefined,
+      // disabled: { opacity: undefined },
+    },
+    menu: {
+      // background: undefined,
+      // item: undefined,
+      // extend: undefined,
+      drop: {
+        align: {
+          top: 'top',
+          left: 'left'
+        }
+        // any drop props
+      },
+      group: {
+        container: {
+          pad: {
+            vertical: 'xsmall'
+          }
+        },
+        separator: {
+          color: 'border',
+          size: 'xsmall',
+          pad: {
+            horizontal: 'small'
+          }
+        }
+      },
+      icons: {
+        down: grommet_icons_icons_FormDown__WEBPACK_IMPORTED_MODULE_4__.FormDown
+        // up: undefined,
+        // color: { dark: undefined, light: undefined },
+      }
+    },
+    meter: {
+      color: 'graph-0'
+      // colors: [] || colors: ['graph-0', 'graph-1', 'graph-2', 'graph-3'],
+      // extend: undefined,
+    },
+    nameValueList: {
+      gap: {
+        column: 'large',
+        row: 'small'
+      },
+      pair: {
+        column: {
+          gap: {
+            column: 'large',
+            row: 'medium'
+          }
+        }
+      },
+      name: {
+        width: 'small'
+      },
+      value: {
+        width: 'medium'
+      }
+    },
+    nameValuePair: {
+      column: {
+        gap: 'xxsmall'
+      },
+      name: {
+        // any text props
+        color: 'text',
+        weight: 'bold'
+      },
+      value: {
+        // any text props
+        color: 'text'
+      }
+    },
+    notification: {
+      actions: {
+        // any anchor props
+      },
+      direction: 'column',
+      container: {
+        // any box props
+        round: 'xsmall',
+        pad: {
+          horizontal: 'small',
+          vertical: 'xsmall'
+        },
+        background: {
+          color: 'background-front'
+        }
+      },
+      global: {
+        direction: 'row',
+        container: {
+          // any box props
+          round: 'none',
+          pad: {
+            horizontal: 'large',
+            vertical: 'xsmall'
+          }
+        }
+      },
+      toast: {
+        // direction: undefined,
+        container: {
+          // any box props
+          elevation: 'medium',
+          width: 'medium'
+        },
+        layer: {
+          position: 'top',
+          margin: 'medium'
+        },
+        time: 8000
+      },
+      iconContainer: {
+        // any box props
+        pad: {
+          right: 'small'
+        },
+        flex: false
+      },
+      textContainer: {
+        // any box props
+        gap: 'medium'
+      },
+      title: {
+        // any text props
+        weight: 'bold'
+      },
+      message: {
+        // any text props
+        margin: 'none'
+      },
+      close: {
+        icon: grommet_icons_icons_FormClose__WEBPACK_IMPORTED_MODULE_10__.FormClose
+      },
+      critical: {
+        icon: grommet_icons_icons_StatusCriticalSmall__WEBPACK_IMPORTED_MODULE_12__.StatusCriticalSmall,
+        background: {
+          color: 'status-critical',
+          opacity: 'weak'
+        },
+        color: 'status-critical',
+        // global: {},
+        toast: {
+          background: 'background-front'
+        }
+      },
+      warning: {
+        icon: grommet_icons_icons_StatusWarningSmall__WEBPACK_IMPORTED_MODULE_13__.StatusWarningSmall,
+        background: {
+          color: 'status-warning',
+          opacity: 'weak'
+        },
+        color: 'status-warning',
+        // global: {},
+        toast: {
+          background: 'background-front'
+        }
+      },
+      normal: {
+        icon: grommet_icons_icons_StatusGoodSmall__WEBPACK_IMPORTED_MODULE_14__.StatusGoodSmall,
+        background: {
+          color: 'status-ok',
+          opacity: 'weak'
+        },
+        color: 'status-ok',
+        // global: {},
+        toast: {
+          background: 'background-front'
+        }
+      },
+      info: {
+        icon: grommet_icons_icons_CircleInformation__WEBPACK_IMPORTED_MODULE_15__.CircleInformation,
+        background: 'background-contrast',
+        color: 'text-strong',
+        // global: {},
+        toast: {
+          background: 'background-front'
+        }
+      },
+      unknown: {
+        icon: grommet_icons_icons_StatusUnknownSmall__WEBPACK_IMPORTED_MODULE_16__.StatusUnknownSmall,
+        background: {
+          color: 'status-unknown',
+          opacity: 'weak'
+        },
+        color: 'status-unknown',
+        // global: {},
+        toast: {
+          background: 'background-front'
+        }
+      },
+      // deprecate "undefined" in v3
+      // and if undefined, no icon
+      undefined: {
+        icon: grommet_icons_icons_StatusUnknownSmall__WEBPACK_IMPORTED_MODULE_16__.StatusUnknownSmall,
+        // background: undefined,
+        color: 'status-unknown'
+        // global: {},
+        // toast: {},
+      }
+    },
+    page: {
+      wide: {
+        alignSelf: 'center',
+        width: {
+          min: 'medium',
+          max: 'xxlarge'
+        },
+        small: {
+          pad: {
+            horizontal: 'large'
+          }
+        },
+        medium: {
+          pad: {
+            horizontal: 'medium'
+          }
+        },
+        large: {
+          pad: {
+            horizontal: 'large'
+          }
+        }
+      },
+      narrow: {
+        alignSelf: 'center',
+        width: {
+          min: 'medium',
+          max: 'large'
+        },
+        small: {
+          pad: {
+            horizontal: 'large'
+          }
+        },
+        medium: {
+          pad: {
+            horizontal: 'medium'
+          }
+        },
+        large: {
+          pad: {
+            horizontal: 'large'
+          }
+        }
+      },
+      full: {
+        alignSelf: 'start',
+        width: {
+          min: 'medium',
+          max: '100%'
+        },
+        small: {
+          pad: {
+            horizontal: 'large'
+          }
+        },
+        medium: {
+          pad: {
+            horizontal: 'medium'
+          }
+        },
+        large: {
+          pad: {
+            horizontal: 'large'
+          }
+        }
+      }
+    },
+    pageHeader: {
+      actions: {
+        // any box props
+        align: 'end'
+      },
+      pad: {
+        top: 'large',
+        bottom: 'medium'
+      },
+      parent: {
+        // any box props
+        align: 'start'
+      },
+      responsive: {
+        actions: {
+          // any box props
+          align: 'start',
+          pad: {
+            top: 'small'
+          }
+        },
+        areas: [['parent'], ['title'], ['subtitle'], ['actions']],
+        breakpoints: ['small'],
+        columns: ['auto'],
+        rows: ['auto']
+        // gap: undefined,
+      },
+      subtitle: {
+        // any paragraph props
+        margin: 'none'
+      },
+      title: {
+        // any heading props
+        margin: 'none',
+        fill: true
+      },
+      size: {
+        small: {
+          pad: {
+            top: 'medium',
+            bottom: 'small'
+          },
+          subtitle: {
+            size: 'small'
+          },
+          title: {
+            size: 'small'
+          }
+        },
+        // medium: {
+        //   // pad: undefined,
+        //   // subtitle: {},
+        //   // title: {},
+        // },
+        large: {
+          pad: {
+            top: 'xlarge',
+            bottom: 'large'
+          },
+          subtitle: {
+            size: 'large'
+          },
+          title: {
+            size: 'large'
+          }
+        }
+      },
+      small: {
+        areas: [['parent', 'parent'], ['title', 'actions'], ['subtitle', 'actions']],
+        columns: [['small', 'flex'], 'auto'],
+        rows: ['auto', 'auto', 'auto'],
+        gap: {
+          row: 'xsmall',
+          column: 'large'
+        }
+      },
+      medium: {
+        areas: [['parent', 'parent'], ['title', 'actions'], ['subtitle', 'actions']],
+        columns: [['medium', 'flex'], 'auto'],
+        rows: ['auto', 'auto', 'auto'],
+        gap: {
+          row: 'xsmall',
+          column: 'medium'
+        }
+      },
+      large: {
+        areas: [['parent', 'parent'], ['title', 'actions'], ['subtitle', 'actions']],
+        columns: [['medium', 'flex'], 'auto'],
+        rows: ['auto', 'auto', 'auto'],
+        gap: {
+          row: 'xsmall',
+          column: 'large'
+        }
+      }
+    },
+    pagination: {
+      button: {
+        active: {
+          background: {
+            color: 'active-background'
+          }
+        },
+        color: 'text-strong',
+        hover: {
+          background: {
+            color: 'background-contrast'
+          },
+          color: undefined
+        },
+        size: {
+          small: {
+            border: {
+              radius: baseSpacing / 8 + "px",
+              // 3
+              width: '2px'
+            },
+            pad: {
+              vertical: "4px",
+              horizontal: "4px"
+            },
+            font: _extends({}, fontSizing(-1)),
+            height: baseSpacing * 1.25 + "px",
+            width: baseSpacing * 1.25 + "px"
+          },
+          medium: {
+            border: {
+              radius: baseSpacing / 6 + "px",
+              // 4
+              width: '2px'
+            },
+            pad: {
+              vertical: "4px",
+              horizontal: "4px"
+            },
+            font: _extends({}, fontSizing(0)),
+            height: baseSpacing * 1.5 + "px",
+            width: baseSpacing * 1.5 + "px"
+          },
+          large: {
+            border: {
+              radius: baseSpacing / 4 + "px",
+              // 6
+              width: '2px'
+            },
+            pad: {
+              vertical: "4px",
+              horizontal: "4px"
+            },
+            font: _extends({}, fontSizing(1)),
+            height: baseSpacing * 2 + "px",
+            width: baseSpacing * 2 + "px"
+          }
+        }
+      },
+      // container: {
+      //   // any box props,
+      //   extend: undefined,
+      // },
+      controls: {
+        align: 'center',
+        direction: 'row',
+        gap: 'xxsmall',
+        margin: 'none',
+        pad: 'none'
+      },
+      icons: {
+        // color: undefined,
+        next: grommet_icons_icons_Next__WEBPACK_IMPORTED_MODULE_6__.Next,
+        previous: grommet_icons_icons_Previous__WEBPACK_IMPORTED_MODULE_5__.Previous
+      }
+    },
+    paragraph: {
+      font: {
+        // family: undefined
+      },
+      small: _extends({}, fontSizing(-1)),
+      medium: _extends({}, fontSizing(0)),
+      large: _extends({}, fontSizing(1)),
+      xlarge: _extends({}, fontSizing(2)),
+      xxlarge: _extends({}, fontSizing(4))
+    },
+    thumbsRating: {
+      // dislike: {
+      //   color: undefined,
+      // },
+      // like: {
+      //   color: undefined,
+      // },
+    },
+    spinner: {
+      container: {
+        animation: 'rotateRight',
+        color: 'brand',
+        pad: 'small',
+        round: 'full',
+        size: 'small'
+      },
+      // icon: undefined
+      size: {
+        xsmall: baseSpacing * 0.75 + "px",
+        small: baseSpacing + "px",
+        // default 24
+        medium: baseSpacing * 2 + "px",
+        large: baseSpacing * 3 + "px",
+        xlarge: baseSpacing * 4 + "px"
+      }
+    },
+    radioButton: {
+      border: {
+        color: {
+          dark: 'rgba(255, 255, 255, 0.5)',
+          light: 'rgba(0, 0, 0, 0.15)'
+        },
+        width: '2px'
+      },
+      // background: {
+      //   color: undefined,
+      // },
+      check: {
+        radius: '100%'
+        // background: {
+        //  color: undefined,
+        // },
+        // color: { dark: undefined, light: undefined },
+        // extend: undefined,
+      },
+      // color: undefined,
+      hover: {
+        // background: {
+        //   color: undefined,
+        // },
+        border: {
+          color: {
+            dark: 'white',
+            light: 'black'
+          }
+        }
+      },
+      icon: {
+        // size: undefined,
+        // extend: undefined,
+      },
+      icons: {
+        // circle: undefined,
+      },
+      gap: 'small',
+      size: baseSpacing + "px",
+      font: {
+        // weight: undefined,
+      },
+      container: {
+        // extend: undefined
+      }
+    },
+    radioButtonGroup: {
+      // container: {}, // any box props
+    },
+    rangeInput: {
+      disabled: {
+        opacity: 0.3
+        //   thumb: {
+        //     color: undefined,
+        //   },
+        //   track: {
+        //     color: undefined,
+        //   },
+      },
+      // extend: undefined
+      track: {
+        height: '4px',
+        color: 'border'
+        // opacity: undefined,
+        // lower: {
+        //   color: 'undefined',
+        //   opacity: undefined,
+        // },
+        // upper: {
+        //   color: undefined,
+        //   opacity: undefined,
+        // },
+        // extend: undefined
+      },
+      thumb: {
+        // color: { dark: undefined, light: undefined },
+        // extend: undefined
+      }
+      // wheel: undefined
+    },
+    rangeSelector: {
+      background: {
+        invert: {
+          color: 'light-4'
+        }
+      }
+      // edge: {
+      //   type: undefined,
+      // },
+    },
+    select: {
+      // background: undefined,
+      clear: {
+        container: {
+          pad: 'small',
+          background: 'background-contrast'
+        },
+        // any box props
+        text: {
+          color: 'text-weak'
+        } // any text props
+      },
+      container: {
+        // extend: undefined,
+      },
+      control: {
+        // extend: undefined,
+        // open: undefined,
+      },
+      // emptySearchMessage: {
+      //   container: {}, // any box props
+      //   text: {}, // any text props
+      // },
+      icons: {
+        // color: { dark: undefined, light: undefined },
+        margin: {
+          horizontal: 'small'
+        },
+        down: grommet_icons_icons_FormDown__WEBPACK_IMPORTED_MODULE_4__.FormDown
+        // up: undefined
+      },
+      options: {
+        container: {
+          align: 'start',
+          pad: 'small'
+        },
+        text: {
+          margin: 'none'
+        }
+      },
+      // searchInput: undefined,
+      step: 20
+    },
+    selectMultiple: {
+      maxInline: 5
+    },
+    skeleton: {
+      border: false,
+      colors: {
+        dark: ['background', 'background-front'],
+        light: ['background', 'background-back']
+      }
+      // extend: undefined,
+    },
+    skipLinks: {
+      position: 'top',
+      container: {
+        elevation: 'large',
+        round: 'small',
+        pad: 'medium'
+      },
+      label: {
+        margin: {
+          bottom: 'medium'
+        },
+        size: 'medium'
+      }
+    },
+    starRating: {
+      // color: undefined,
+    },
+    tab: {
+      active: {
+        color: 'text'
+        // background: undefined,
+      },
+      // background: undefined,
+      border: {
+        side: 'bottom',
+        size: 'small',
+        color: {
+          dark: 'accent-1',
+          light: 'brand'
+        },
+        active: {
+          color: {
+            dark: 'white',
+            light: 'black'
+          }
+        },
+        disabled: {
+          // color: undefined,
+        },
+        hover: {
+          color: {
+            dark: 'white',
+            light: 'black'
+          }
+          // extend: undefined,
+        }
+      },
+      color: 'control',
+      // disabled: {
+      //   color: undefined,
+      // },
+      // extend: undefined,
+      hover: {
+        // background: undefined,
+        // extend: undefined,
+        color: {
+          dark: 'white',
+          light: 'black'
+        }
+      },
+      margin: {
+        vertical: 'xxsmall',
+        horizontal: 'small'
+      },
+      pad: {
+        bottom: 'xsmall'
+      }
+    },
+    tabs: {
+      // background: undefined,
+      // extend: undefined,
+      // gap: undefined,
+      header: {
+        // alignSelf: undefined,
+        // background: undefined,
+        // border: {
+        //   side: undefined,
+        //   size: undefined,
+        //   style: undefined,
+        //   color: undefined,
+        // },
+        // extend: undefined,
+      },
+      panel: {
+        // extend: undefined,
+      },
+      step: {
+        small: 1,
+        medium: 3,
+        large: 3
+      }
+    },
+    table: {
+      header: {
+        align: 'start',
+        pad: {
+          horizontal: 'small',
+          vertical: 'xsmall'
+        },
+        border: 'bottom'
+        // verticalAlign: undefined,
+        // background: undefined,
+        // extend: undefined,
+      },
+      body: {
+        align: 'start',
+        pad: {
+          horizontal: 'small',
+          vertical: 'xsmall'
+        }
+        // background: undefined,
+        // border: undefined,
+        // extend: undefined,
+      },
+      // row: {
+      //   hover: {
+      //     background: undefined,
+      //     color: undefined,
+      //   },
+      // },
+      footer: {
+        align: 'start',
+        pad: {
+          horizontal: 'small',
+          vertical: 'xsmall'
+        },
+        border: 'top'
+        // verticalAlign: undefined,
+        // background: undefined,
+        // extend: undefined,
+      }
+    },
+    tag: {
+      // background: undefined,
+      border: true,
+      round: 'large',
+      // name: undefined,
+      pad: {
+        horizontal: 'small',
+        vertical: 'xsmall'
+      },
+      remove: {
+        margin: {
+          right: 'xsmall'
+        }
+      },
+      separator: ' : ',
+      size: {
+        xsmall: {
+          pad: {
+            horizontal: baseSpacing / 3 + "px",
+            vertical: 'xxsmall'
+          },
+          icon: {
+            size: baseSpacing * 0.75 + "px"
+          }
+        },
+        small: {
+          pad: {
+            horizontal: baseSpacing * 0.4 + "px",
+            vertical: 'xxsmall'
+          },
+          icon: {
+            size: baseSpacing * 0.75 + "px"
+          }
+        },
+        large: {
+          pad: {
+            horizontal: baseSpacing / 3 * 2 + "px",
+            vertical: "xsmall"
+          },
+          icon: {
+            size: baseSpacing * 1.25 + "px"
+          }
+        },
+        xlarge: {
+          pad: {
+            horizontal: baseSpacing * 0.75 + "px",
+            vertical: 'xsmall'
+          },
+          icon: {
+            size: baseSpacing * 1.5 + "px"
+          }
+        }
+      },
+      value: {
+        weight: 600
+      },
+      icons: {
+        remove: grommet_icons_icons_FormClose__WEBPACK_IMPORTED_MODULE_10__.FormClose
+      }
+    },
+    text: {
+      font: {
+        // family: undefined
+      },
+      xsmall: _extends({}, fontSizing(-1.5)),
+      small: _extends({}, fontSizing(-1)),
+      medium: _extends({}, fontSizing(0)),
+      // 18px
+      large: _extends({}, fontSizing(1)),
+      // 22px
+      xlarge: _extends({}, fontSizing(2)),
+      xxlarge: _extends({}, fontSizing(4)),
+      '2xl': _extends({}, fontSizing(4)),
+      '3xl': _extends({}, fontSizing(6)),
+      '4xl': _extends({}, fontSizing(9)),
+      '5xl': _extends({}, fontSizing(13)),
+      '6xl': _extends({}, fontSizing(18)),
+      skeleton: {
+        width: {
+          width: '100px',
+          min: '100px'
+        },
+        margin: {
+          vertical: 'xsmall'
+        },
+        colors: {
+          dark: ['border', 'border'],
+          light: ['background-front', 'background-back']
+        }
+      }
+    },
+    textArea: {
+      // extend: undefined,
+      // disabled: { opacity: undefined },
+    },
+    textInput: {
+      // extend: undefined,
+      // disabled: { opacity: undefined },
+    },
+    tip: {
+      content: {
+        // any Box props
+        background: 'background-contrast',
+        elevation: 'small',
+        margin: 'xsmall',
+        pad: {
+          vertical: 'xsmall',
+          horizontal: 'small'
+        },
+        round: 'small'
+      },
+      drop: {
+        // any props for the drop
+        align: {
+          top: 'bottom'
+        },
+        // most common use case is Header with Buttons
+        background: 'none',
+        elevation: 'none',
+        margin: 'none'
+      }
+    },
+    toggleGroup: {
+      button: {
+        // iconOnly: {
+        //   pad: undefined,
+        // },
+        pad: {
+          horizontal: '11px',
+          vertical: '11px'
+        }
+      },
+      container: {
+        round: 'xsmall',
+        border: true
+      },
+      divider: {
+        color: 'border'
+      }
+    },
+    video: {
+      captions: {
+        background: 'rgba(0, 0, 0, 0.7)'
+      },
+      // controls: { background: undefined },
+      icons: {
+        closedCaption: grommet_icons_icons_ClosedCaption__WEBPACK_IMPORTED_MODULE_17__.ClosedCaption,
+        configure: grommet_icons_icons_Actions__WEBPACK_IMPORTED_MODULE_18__.Actions,
+        fullScreen: grommet_icons_icons_Expand__WEBPACK_IMPORTED_MODULE_19__.Expand,
+        pause: grommet_icons_icons_Pause__WEBPACK_IMPORTED_MODULE_20__.Pause,
+        play: grommet_icons_icons_Play__WEBPACK_IMPORTED_MODULE_21__.Play,
+        reduceVolume: grommet_icons_icons_VolumeLow__WEBPACK_IMPORTED_MODULE_22__.VolumeLow,
+        volume: grommet_icons_icons_Volume__WEBPACK_IMPORTED_MODULE_23__.Volume,
+        description: grommet_icons_icons_AssistListening__WEBPACK_IMPORTED_MODULE_24__.AssistListening
+        // color: { dark: undefined, light: undefined },
+      },
+      scrubber: {
+        color: 'light-4',
+        interval: 10
+        // track: { color: undefined }
+      }
+    },
+    worldMap: {
+      color: 'light-3',
+      continent: {
+        active: '8px',
+        base: '6px'
+      },
+      hover: {
+        color: 'light-4'
+      },
+      place: {
+        active: '20px',
+        base: '8px'
+      }
+    }
+  });
+  return (0,_utils_object__WEBPACK_IMPORTED_MODULE_0__.deepFreeze)(result);
+};
+var base = generate(24);
+
+/***/ }),
+
+/***/ "./node_modules/grommet/es6/utils/DOM.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   containsFocus: () => (/* binding */ containsFocus),
+/* harmony export */   findButtonParent: () => (/* binding */ findButtonParent),
+/* harmony export */   findScrollParent: () => (/* binding */ findScrollParent),
+/* harmony export */   findScrollParents: () => (/* binding */ findScrollParents),
+/* harmony export */   findVisibleParent: () => (/* binding */ findVisibleParent),
+/* harmony export */   getFirstFocusableDescendant: () => (/* binding */ getFirstFocusableDescendant),
+/* harmony export */   getNewContainer: () => (/* binding */ getNewContainer),
+/* harmony export */   isFocusable: () => (/* binding */ isFocusable),
+/* harmony export */   isNodeAfterScroll: () => (/* binding */ isNodeAfterScroll),
+/* harmony export */   isNodeBeforeScroll: () => (/* binding */ isNodeBeforeScroll),
+/* harmony export */   makeNodeFocusable: () => (/* binding */ makeNodeFocusable),
+/* harmony export */   makeNodeUnfocusable: () => (/* binding */ makeNodeUnfocusable),
+/* harmony export */   setFocusWithoutScroll: () => (/* binding */ setFocusWithoutScroll),
+/* harmony export */   shouldKeepFocus: () => (/* binding */ shouldKeepFocus),
+/* harmony export */   withinDropPortal: () => (/* binding */ withinDropPortal)
+/* harmony export */ });
+var findScrollParent = function findScrollParent(element, horizontal) {
+  var result;
+  if (element) {
+    var parent = element.parentNode;
+    while (!result && parent && parent.getBoundingClientRect) {
+      var rect = parent.getBoundingClientRect();
+      // 10px is to account for borders and scrollbars in a lazy way
+      if (horizontal) {
+        if (rect.width && parent.scrollWidth > rect.width + 10) {
+          result = parent;
+        }
+      } else if (rect.height && parent.scrollHeight > rect.height + 10) {
+        result = parent;
+      }
+      parent = parent.parentNode;
+    }
+    // last scrollable element will be the document
+    // if nothing else is scrollable in the page
+    if (!result) {
+      result = document;
+    } else if (result.tagName.toLowerCase() === 'body') {
+      result = document;
+    }
+  }
+  return result;
+};
+var documentTags = ['html', 'body'];
+var findScrollParents = function findScrollParents(element, horizontal) {
+  var result = [];
+  if (element) {
+    var parent = element.parentNode;
+    while (parent && parent.getBoundingClientRect) {
+      var rect = parent.getBoundingClientRect();
+      // 10px is to account for borders and scrollbars in a lazy way
+      if (horizontal) {
+        if (rect.width && parent.scrollWidth > rect.width + 10) {
+          result.push(parent);
+        }
+      } else if (rect.height && parent.scrollHeight > rect.height + 10) {
+        result.push(parent);
+      }
+      parent = parent.parentNode;
+    }
+    if (result.length && documentTags.includes(result[0].tagName.toLowerCase())) {
+      result.length = 0;
+    }
+    // last scrollable element will be the document
+    result.push(document);
+  }
+  return result;
+};
+var containsFocus = function containsFocus(node) {
+  var root = node.getRootNode();
+  var element = root.activeElement;
+  while (element) {
+    if (element === node) break;
+    element = element.parentElement;
+  }
+  return !!element;
+};
+var withinDropPortal = function withinDropPortal(node, portalContext) {
+  var root = node == null ? void 0 : node.getRootNode();
+  var element = node;
+  var portalId;
+  while (element && element !== root) {
+    if (element.hasAttribute('data-g-portal-id')) {
+      portalId = element.getAttribute('data-g-portal-id');
+      element = root;
+    } else {
+      element = element.parentElement;
+    }
+  }
+  // if portalContext doesn't contain the portalId then the
+  // portal is new and node is within a drop that just opened
+  if (portalId === undefined || portalContext.indexOf(parseInt(portalId, 10)) !== -1) return false;
+  return true;
+};
+
+// Check if the element.tagName is an input, select or textarea
+var isFocusable = function isFocusable(element) {
+  var tagName = element.tagName.toLowerCase();
+  return tagName === 'input' || tagName === 'select' || tagName === 'textarea';
+};
+
+// Get the first element that can receive focus
+var getFirstFocusableDescendant = function getFirstFocusableDescendant(element) {
+  var children = element.getElementsByTagName('*');
+  for (var i = 0; i < children.length; i += 1) {
+    var child = children[i];
+    if (isFocusable(child)) {
+      return child;
+    }
+  }
+  return undefined;
+};
+var shouldKeepFocus = function shouldKeepFocus(root) {
+  var element = root.activeElement;
+  if (isFocusable(element)) return true;
+  return !!getFirstFocusableDescendant(element);
+};
+var getNewContainer = function getNewContainer(target, targetChildPosition) {
+  if (target === void 0) {
+    target = document.body;
+  }
+  // setup DOM
+  var container = document.createElement('div');
+  if (targetChildPosition === 'first') {
+    // for SkipLinks
+    target.prepend(container);
+  } else {
+    target.appendChild(container);
+  }
+  return container;
+};
+var setFocusWithoutScroll = function setFocusWithoutScroll(element) {
+  var x = ({"location":{}}).scrollX;
+  var y = ({"location":{}}).scrollY;
+  element.focus();
+  ({"location":{}}).scrollTo(x, y);
+};
+var TABINDEX = 'tabindex';
+var TABINDEX_STATE = 'data-g-tabindex';
+var makeNodeFocusable = function makeNodeFocusable(node) {
+  // do not touch aria live containers so that announcements work
+  if (!node.hasAttribute('aria-live')) {
+    node.removeAttribute('aria-hidden');
+    // allow children to receive focus again
+    var elements = node.getElementsByTagName('*');
+    // only reset elements we've changed in makeNodeUnfocusable()
+    Array.prototype.filter.call(elements || [], function (element) {
+      return element.hasAttribute(TABINDEX_STATE);
+    }).forEach(function (element) {
+      var prior = element.getAttribute(TABINDEX_STATE);
+      if (prior >= 0) {
+        element.setAttribute(TABINDEX, element.getAttribute(TABINDEX_STATE));
+      } else if (prior === 'none') {
+        element.removeAttribute(TABINDEX);
+      }
+      element.removeAttribute(TABINDEX_STATE);
+    });
+  }
+};
+
+// Using ^ and $ to match the whole tagName, and not e.g. <meta> and <data>.
+var autoFocusingTags = /^(a|area|input|select|textarea|button|iframe)$/;
+var makeNodeUnfocusable = function makeNodeUnfocusable(node) {
+  // do not touch aria live containers so that announcements work
+  if (!node.hasAttribute('aria-live')) {
+    node.setAttribute('aria-hidden', true);
+    // prevent children to receive focus
+    var elements = node.getElementsByTagName('*');
+    // first, save off the tabIndex of any element with one
+    Array.prototype.filter.call(elements || [], function (element) {
+      return element.getAttribute(TABINDEX) !== null;
+    }).forEach(function (element) {
+      element.setAttribute(TABINDEX_STATE, element.getAttribute(TABINDEX));
+      element.setAttribute(TABINDEX, -1);
+    });
+    // then, if any element is inherently focusable and not handled above,
+    // give it a tabIndex of -1 so it can't receive focus
+    Array.prototype.filter.call(elements || [], function (element) {
+      var currentTag = element.tagName.toLowerCase();
+      return currentTag.match(autoFocusingTags) && element.focus && element.getAttribute(TABINDEX_STATE) === null;
+    }).forEach(function (element) {
+      element.setAttribute(TABINDEX_STATE, 'none');
+      element.setAttribute(TABINDEX, -1);
+    });
+  }
+};
+var findVisibleParent = function findVisibleParent(element) {
+  if (element) {
+    // Get the closest ancestor element that is positioned.
+    return element.offsetParent ? element : findVisibleParent(element.parentElement) || element;
+  }
+  return undefined;
+};
+var isNodeAfterScroll = function isNodeAfterScroll(node, target) {
+  var _node$getBoundingClie = node.getBoundingClientRect(),
+    bottom = _node$getBoundingClie.bottom;
+  // target will be the document from findScrollParent()
+  var _ref = target.getBoundingClientRect ? target.getBoundingClientRect() : {
+      height: 0,
+      top: 0
+    },
+    height = _ref.height,
+    top = _ref.top;
+  return bottom >= top + height;
+};
+var isNodeBeforeScroll = function isNodeBeforeScroll(node, target) {
+  var _node$getBoundingClie2 = node.getBoundingClientRect(),
+    top = _node$getBoundingClie2.top;
+  // target will be the document from findScrollParent()
+  var _ref2 = target.getBoundingClientRect ? target.getBoundingClientRect() : {
+      top: 0
+    },
+    targetTop = _ref2.top;
+  return top <= targetTop;
+};
+var findButtonParent = function findButtonParent(element) {
+  if (element && element.nodeName !== 'BUTTON' && element.nodeName !== 'A') return findButtonParent(element.parentElement);
+  return element;
+};
+
+/***/ }),
+
+/***/ "./node_modules/grommet/es6/utils/animation.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   animationBounds: () => (/* binding */ animationBounds),
+/* harmony export */   animationEnding: () => (/* binding */ animationEnding),
+/* harmony export */   animationObjectStyle: () => (/* binding */ animationObjectStyle),
+/* harmony export */   normalizeTiming: () => (/* binding */ normalizeTiming)
+/* harmony export */ });
+/* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/styled-components/dist/styled-components.browser.esm.js");
+
+var PULSE_SIZES = {
+  xsmall: 1.001,
+  small: 1.01,
+  medium: 1.1,
+  large: 1.5,
+  xlarge: 2
+};
+var SLIDE_SIZES = {
+  xsmall: 1,
+  small: 5,
+  medium: 10,
+  large: 50,
+  xlarge: 200
+};
+var JIGGLE_SIZES = {
+  xsmall: 0.1,
+  small: 1,
+  medium: 5,
+  large: 400,
+  xlarge: 1000
+};
+var ZOOM_SIZES = {
+  xsmall: 0.001,
+  small: 0.01,
+  medium: 0.05,
+  large: 0.1,
+  xlarge: 0.5
+};
+var animationBounds = function animationBounds(type, size) {
+  if (size === void 0) {
+    size = 'medium';
+  }
+  if (type === 'draw') {
+    return ['', "stroke-dashoffset: 0"];
+  }
+  if (type === 'fadeIn') {
+    return ['opacity: 0;', 'opacity: 1;'];
+  }
+  if (type === 'fadeOut') {
+    return ['opacity: 1;', 'opacity: 0;'];
+  }
+  if (type === 'jiggle') {
+    var deg = JIGGLE_SIZES[size];
+    return ["transform: rotate(-" + deg + "deg);", "transform: rotate(" + deg + "deg);"];
+  }
+  if (type === 'pulse') {
+    return ['transform: scale(1);', "transform: scale(" + PULSE_SIZES[size] + ")"];
+  }
+  if (type === 'rotateRight') {
+    return ["transform: rotate(0deg);", "transform: rotate(359deg);"];
+  }
+  if (type === 'rotateLeft') {
+    return ["transform: rotate(0deg);", "transform: rotate(-359deg);"];
+  }
+  if (type === 'flipIn') {
+    return ['transform: rotateY(90deg);', 'transform: rotateY(0);'];
+  }
+  if (type === 'flipOut') {
+    return ['transform: rotateY(0);', 'transform: rotateY(90deg);'];
+  }
+  if (type === 'slideDown') {
+    return ["transform: translateY(-" + SLIDE_SIZES[size] + "%);", 'transform: none;'];
+  }
+  if (type === 'slideLeft') {
+    return ["transform: translateX(" + SLIDE_SIZES[size] + "%);", 'transform: none;'];
+  }
+  if (type === 'slideRight') {
+    return ["transform: translateX(-" + SLIDE_SIZES[size] + "%);", 'transform: none;'];
+  }
+  if (type === 'slideUp') {
+    return ["transform: translateY(" + SLIDE_SIZES[size] + "%);", 'transform: none;'];
+  }
+  if (type === 'zoomIn') {
+    return ["transform: scale(" + (1 - ZOOM_SIZES[size]) + ");", 'transform: none;'];
+  }
+  if (type === 'zoomOut') {
+    return ["transform: scale(" + (1 + ZOOM_SIZES[size]) + ");", 'transform: none;'];
+  }
+  return [];
+};
+var normalizeTiming = function normalizeTiming(time, defaultTiming) {
+  return typeof time === 'number' ? time / 1000.0 + "s" : time || defaultTiming;
+};
+var animationEnding = function animationEnding(type) {
+  if (type === 'draw') {
+    return 'linear forwards';
+  }
+  if (type === 'jiggle') {
+    return 'alternate infinite';
+  }
+  if (type === 'pulse') {
+    return 'alternate infinite';
+  }
+  if (type === 'rotateRight' || type === 'rotateLeft') {
+    return 'infinite linear';
+  }
+  return 'forwards';
+};
+var animationObjectStyle = function animationObjectStyle(animation, theme, themeObj) {
+  var bounds = animationBounds(animation.type, animation.size);
+  var animationTheme = themeObj && themeObj.animation || theme.global.animation;
+  if (bounds) {
+    var animationTransition = (0,styled_components__WEBPACK_IMPORTED_MODULE_0__.css)(["from{", ";}to{", ";}"], bounds[0], bounds[1]);
+    var defaultDuration = function defaultDuration() {
+      return normalizeTiming(animationTheme[animation.type] ? animationTheme[animation.type].duration : animation.duration, animationTheme.duration);
+    };
+    return (0,styled_components__WEBPACK_IMPORTED_MODULE_0__.css)(["", " ", " ", " ", ""], (0,styled_components__WEBPACK_IMPORTED_MODULE_0__.keyframes)(["", ""], animationTransition), normalizeTiming(animation.duration, defaultDuration()), normalizeTiming(animation.delay, '0s'), animationEnding(animation.type));
+  }
+  return '';
+};
+
+/***/ }),
+
+/***/ "./node_modules/grommet/es6/utils/background.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   activeStyle: () => (/* binding */ activeStyle),
+/* harmony export */   backgroundAndTextColors: () => (/* binding */ backgroundAndTextColors),
+/* harmony export */   backgroundIsDark: () => (/* binding */ backgroundIsDark),
+/* harmony export */   backgroundStyle: () => (/* binding */ backgroundStyle),
+/* harmony export */   getHoverIndicatorStyle: () => (/* binding */ getHoverIndicatorStyle),
+/* harmony export */   normalizeBackground: () => (/* binding */ normalizeBackground),
+/* harmony export */   selectedStyle: () => (/* binding */ selectedStyle)
+/* harmony export */ });
+/* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/styled-components/dist/styled-components.browser.esm.js");
+/* harmony import */ var _colors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/grommet/es6/utils/colors.js");
+
+
+
+// evalStyle() converts a styled-components item into a string
+var evalStyle = function evalStyle(arg, theme) {
+  if (arg && Array.isArray(arg) && typeof arg[0] === 'function') {
+    return arg[0]({
+      theme: theme
+    });
+  }
+  return arg;
+};
+var normalizeBackground = function normalizeBackground(backgroundArg, theme) {
+  var _theme$global$backgro;
+  var background = ((_theme$global$backgro = theme.global.backgrounds) == null ? void 0 : _theme$global$backgro[backgroundArg]) || backgroundArg;
+  var result = background;
+  // If the background has a light or dark object, use that
+  if (background) {
+    if (theme.dark && background.dark && typeof background.dark !== 'boolean') {
+      result = background.dark;
+    } else if (!theme.dark && background.light && typeof background.light !== 'boolean') {
+      result = background.light;
+    }
+    result = evalStyle(result, theme);
+  }
+  return result;
+};
+var normalizeBackgroundColor = function normalizeBackgroundColor(backgroundArg, theme) {
+  var _theme$global$backgro2;
+  var background = backgroundArg.color || backgroundArg;
+  var result = (0,_colors__WEBPACK_IMPORTED_MODULE_0__.normalizeColor)(
+  // Background color may be defined by theme.global.backgrounds or
+  // theme.global.colors.
+  ((_theme$global$backgro2 = theme.global.backgrounds) == null ? void 0 : _theme$global$backgro2[background]) || background, theme, backgroundArg.dark);
+  return result;
+};
+var normalizeBackgroundImage = function normalizeBackgroundImage(background, theme) {
+  var result;
+  if (background.image) {
+    var _theme$global$backgro3, _theme$global$backgro4;
+    result = normalizeBackground(background.dark ? (_theme$global$backgro3 = theme.global.backgrounds) == null || (_theme$global$backgro3 = _theme$global$backgro3[background.image]) == null ? void 0 : _theme$global$backgro3.dark : (_theme$global$backgro4 = theme.global.backgrounds) == null ? void 0 : _theme$global$backgro4[background.image], theme) || background.image;
+  } else {
+    var _theme$global$backgro5;
+    var normalized = normalizeBackground((_theme$global$backgro5 = theme.global.backgrounds) == null ? void 0 : _theme$global$backgro5[background], theme);
+    result = typeof normalized === 'object' ? normalizeBackgroundImage(normalized, theme) : normalized;
+  }
+  return result;
+};
+var rotateBackground = function rotateBackground(background, theme) {
+  var backgroundImage = normalizeBackgroundImage(background, theme);
+  var result = backgroundImage;
+  if (backgroundImage.lastIndexOf('linear-gradient', 0) === 0) {
+    var regex = /\d{1,}deg\b,/gm; // Contains rotation specified in degrees. Only targets 'deg' string with a trailing comma. Do not match 'deg' string for hsl, etc..
+    result = backgroundImage.lastIndexOf('deg,') >= 0 ? backgroundImage.replace(regex, background.rotate + "deg,") : backgroundImage.replace('linear-gradient(', "linear-gradient(" + background.rotate + "deg, ");
+  } else {
+    console.warn(
+    // eslint-disable-next-line max-len
+    "'background.rotate' property only supports 'background.image' containing a linear-gradient string.");
+  }
+  return result;
+};
+var backgroundIsDark = function backgroundIsDark(backgroundArg, theme) {
+  var background = normalizeBackground(backgroundArg, theme);
+  var result;
+  if (background) {
+    if (typeof background === 'object') {
+      var color = background.color,
+        dark = background.dark,
+        opacity = background.opacity;
+      if (typeof dark === 'boolean') {
+        result = dark;
+      } else if (color && (
+      // weak opacity means we keep the existing darkness
+      !opacity || opacity !== 'weak')) {
+        var backgroundColor = (0,_colors__WEBPACK_IMPORTED_MODULE_0__.normalizeColor)(background.color, theme);
+        if (backgroundColor) {
+          result = (0,_colors__WEBPACK_IMPORTED_MODULE_0__.colorIsDark)(backgroundColor);
+        }
+      }
+    } else {
+      var _color = (0,_colors__WEBPACK_IMPORTED_MODULE_0__.normalizeColor)(background, theme);
+      if (_color) {
+        result = (0,_colors__WEBPACK_IMPORTED_MODULE_0__.colorIsDark)(_color);
+      }
+    }
+  }
+  return result;
+};
+var darkContext = function darkContext(backgroundColor) {
+  var isDark = (0,_colors__WEBPACK_IMPORTED_MODULE_0__.colorIsDark)(backgroundColor);
+  if (isDark === undefined) return undefined;
+  return isDark ? 'dark' : 'light';
+};
+
+// Returns an array of two CSS colors: [background, color]
+// Either could be undefined.
+// background could be a CSS gradient, like "linear-gradient(...)"
+var backgroundAndTextColors = function backgroundAndTextColors(backgroundArg, textArg, theme) {
+  if (!backgroundArg) return [undefined, textArg];
+  var global = theme.global;
+  var background = normalizeBackground(backgroundArg, theme);
+  var text = textArg || global.colors.text;
+  var backgroundColor;
+  var textColor;
+  if (typeof background === 'object') {
+    if (background.dark === false) {
+      textColor = text.light || text;
+    } else if (background.dark) {
+      textColor = text.dark || text;
+    }
+    if (background.color) {
+      var color = normalizeBackgroundColor(background, theme);
+      var opacity = background.opacity === true ? global.opacity.medium : global.opacity[background.opacity] || background.opacity;
+      backgroundColor = (0,_colors__WEBPACK_IMPORTED_MODULE_0__.getRGBA)(color, opacity) || color;
+
+      // If we don't have a textColor already, and we aren't too translucent,
+      // set the textColor to have the best contrast against the background
+      // color.
+      if (!textColor && (opacity === undefined || opacity > 0.3)) {
+        var shade = darkContext(backgroundColor, theme);
+        textColor = (0,_colors__WEBPACK_IMPORTED_MODULE_0__.normalizeColor)(shade && text[shade] || text, theme);
+      }
+    }
+  } else {
+    backgroundColor = normalizeBackgroundColor(background, theme);
+    var _shade = darkContext(backgroundColor, theme);
+    var transparent;
+    if (backgroundColor && (0,_colors__WEBPACK_IMPORTED_MODULE_0__.canExtractRGBArray)(backgroundColor)) {
+      var colorArray = (0,_colors__WEBPACK_IMPORTED_MODULE_0__.getRGBArray)(backgroundColor);
+      // check if the alpha value is less than 0.5
+      if (colorArray[3] < 0.5) transparent = true;
+    }
+    if (_shade) {
+      textColor = (0,_colors__WEBPACK_IMPORTED_MODULE_0__.normalizeColor)(text[_shade] || text, theme, _shade === 'dark');
+    } else if (transparent && text) {
+      textColor = (0,_colors__WEBPACK_IMPORTED_MODULE_0__.normalizeColor)(text, theme);
+    } else {
+      // If we can't determine the shade, we assume this isn't a simple color.
+      // It could be a gradient. backgroundStyle() will take care of that case.
+      if (backgroundColor !== 'transparent') backgroundColor = undefined;
+      if (text) textColor = (0,_colors__WEBPACK_IMPORTED_MODULE_0__.normalizeColor)(text, theme);
+    }
+  }
+  // if textArg is false, we don't want the textColor, used for Button hover
+  if (textArg === false) textColor = undefined;
+  return [backgroundColor, textColor];
+};
+var backgroundStyle = function backgroundStyle(backgroundArg, theme, textColorArg) {
+  // for Grommet component, if the background isn't defined, don't set it
+  if (backgroundArg === undefined) return undefined;
+  var background = normalizeBackground(backgroundArg, theme);
+  var _backgroundAndTextCol = backgroundAndTextColors(background, textColorArg, theme),
+    backgroundColor = _backgroundAndTextCol[0],
+    textColor = _backgroundAndTextCol[1];
+  var backgroundImage = background.rotate ? rotateBackground(background, theme) : normalizeBackgroundImage(background, theme);
+  var backgroundClipStyle = '';
+  if (background.clip) {
+    backgroundClipStyle = background.clip === 'text' ? "-webkit-text-fill-color: transparent; \n           -webkit-background-clip: text; \n           background-clip: text;" : "background-clip: " + background.clip + ";";
+  }
+  if (typeof background === 'string' && background.lastIndexOf('url', 0) === 0) {
+    return (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["background:", " no-repeat center center;background-size:cover;"], background);
+  }
+  if (backgroundImage) {
+    var backgroundStyles = "\n      " + (backgroundColor ? "background-color: " + backgroundColor + ";" : '') + "\n      background-image: " + backgroundImage + ";\n      background-repeat: " + (typeof background === 'object' && background.repeat || 'no-repeat') + ";\n      background-position: " + (background.position || 'center center') + ";\n      background-size: " + (background.size || 'cover') + ";\n      " + backgroundClipStyle + "\n    ";
+
+    // allow both background color and image, in case the image doesn't fill
+    // when image and opacity are used together, we need to use pseudo :before
+    // to ensure that only image and background color are affected by opacity
+    // but not the container contents
+    return (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["", " ", ""], textColor ? "color: " + textColor + ";" : '', !background.opacity ? backgroundStyles : "position: relative;\n        z-index: 0;\n        &:before {\n          content: '';\n          position: absolute;\n          top: 0;\n          right: 0;\n          left: 0;\n          bottom: 0;\n          z-index: -1;\n          border-radius: inherit;\n          " + backgroundStyles + "\n          opacity: " + (background.opacity === true ? theme.global.opacity.medium : theme.global.opacity[background.opacity] || background.opacity) + ";\n        }");
+  }
+  if (backgroundColor) {
+    return (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["background-color:", ";", ""], backgroundColor, textColor ? "color: " + textColor + ";" : '');
+  }
+  if (typeof background === 'string')
+    // This case takes care of gradients
+    // or theme colors that use CSS names like 'crimson' that we don't parse
+    return (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["background:", ";"], (0,_colors__WEBPACK_IMPORTED_MODULE_0__.normalizeColor)(background, theme));
+  return undefined;
+};
+var activeStyle = (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["", ""], function (props) {
+  return backgroundStyle((0,_colors__WEBPACK_IMPORTED_MODULE_0__.normalizeColor)(props.theme.global.active.background, props.theme), props.theme, props.theme.global.active.color);
+});
+var selectedStyle = (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["", ""], function (props) {
+  return backgroundStyle((0,_colors__WEBPACK_IMPORTED_MODULE_0__.normalizeColor)(props.theme.global.selected.background, props.theme), props.theme, props.theme.global.selected.color);
+});
+var getHoverIndicatorStyle = function getHoverIndicatorStyle(hoverIndicator, theme) {
+  var background;
+  var elevation;
+  if (hoverIndicator === true || hoverIndicator === 'background') {
+    background = theme.global.hover.background;
+  } else if (typeof hoverIndicator === 'object') {
+    if (hoverIndicator.elevation || hoverIndicator.background) {
+      elevation = hoverIndicator.elevation;
+      background = hoverIndicator.background;
+    } else background = hoverIndicator;
+  } else {
+    background = hoverIndicator;
+  }
+  return (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["", " ", ""], backgroundStyle(background, theme, theme.global.hover.color), elevation && "box-shadow: " + theme.global.elevation[theme.dark ? 'dark' : 'light'][elevation] + ";");
+};
+
+/***/ }),
+
+/***/ "./node_modules/grommet/es6/utils/border.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   borderStyle: () => (/* binding */ borderStyle),
+/* harmony export */   responsiveBorderStyle: () => (/* binding */ responsiveBorderStyle)
+/* harmony export */ });
+/* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/styled-components/dist/styled-components.browser.esm.js");
+/* harmony import */ var _colors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/grommet/es6/utils/colors.js");
+/* harmony import */ var _mixins__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/grommet/es6/utils/mixins.js");
+
+
+
+var responsiveBorderStyle = function responsiveBorderStyle(data, theme) {
+  var color = (0,_colors__WEBPACK_IMPORTED_MODULE_0__.normalizeColor)(data.color || 'border', theme);
+  var borderSize = data.size || 'xsmall';
+  var style = data.style || 'solid';
+  var side = typeof data === 'string' ? data : data.side || 'all';
+  var breakpoint = theme.box.responsiveBreakpoint && theme.global.breakpoints[theme.box.responsiveBreakpoint];
+  if (!breakpoint.borderSize) breakpoint.borderSize = theme.global.borderSize;
+  var value = breakpoint && (breakpoint.borderSize[borderSize] || borderSize) && style + " " + (breakpoint.borderSize[borderSize] || borderSize) + " " + color;
+  if (!value) return undefined;
+  if (side === 'top' || side === 'bottom' || side === 'left' || side === 'right') return "border-" + side + ": " + value + ";";
+  if (side === 'end' || side === 'start') return "border-inline-" + side + ": " + value + ";";
+  if (side === 'vertical') return "\n      border-left: " + value + ";\n      border-right: " + value + ";\n    ";
+  if (side === 'horizontal') return "\n      border-top: " + value + ";\n      border-bottom: " + value + ";\n    ";
+  if (side === 'between') return undefined; // no-op
+  return "border: " + value + ";";
+};
+var borderStyle = function borderStyle(borderData, responsive, theme) {
+  var borderStyles = [];
+  (Array.isArray(borderData) ? borderData : [borderData]).forEach(function (data) {
+    var styles = [];
+    var color = (0,_colors__WEBPACK_IMPORTED_MODULE_0__.normalizeColor)(data.color || 'border', theme);
+    var borderSize = data.size || 'xsmall';
+    var style = data.style || 'solid';
+    var side = typeof data === 'string' ? data : data.side || 'all';
+    var value = style + " " + (theme.global.borderSize[borderSize] || borderSize) + " " + color;
+    var responsiveStyle = responsive && responsiveBorderStyle(data, theme);
+    var breakpoint = responsiveStyle && theme.box.responsiveBreakpoint && theme.global.breakpoints[theme.box.responsiveBreakpoint];
+    if (side === 'top' || side === 'bottom' || side === 'left' || side === 'right') {
+      styles.push("border-" + side + ": " + value + ";");
+      if (responsiveStyle) {
+        styles.push((0,_mixins__WEBPACK_IMPORTED_MODULE_1__.breakpointStyle)(breakpoint, responsiveStyle));
+      }
+    } else if (side === 'end' || side === 'start') {
+      styles.push((0,styled_components__WEBPACK_IMPORTED_MODULE_2__.css)(["border-inline-", ":", ";"], side, value));
+      if (responsiveStyle) {
+        styles.push((0,_mixins__WEBPACK_IMPORTED_MODULE_1__.breakpointStyle)(breakpoint, responsiveStyle));
+      }
+    } else if (side === 'vertical') {
+      styles.push((0,styled_components__WEBPACK_IMPORTED_MODULE_2__.css)(["border-left:", ";border-right:", ";"], value, value));
+      if (responsiveStyle) {
+        styles.push((0,_mixins__WEBPACK_IMPORTED_MODULE_1__.breakpointStyle)(breakpoint, responsiveStyle));
+      }
+    } else if (side === 'horizontal') {
+      styles.push((0,styled_components__WEBPACK_IMPORTED_MODULE_2__.css)(["border-top:", ";border-bottom:", ";"], value, value));
+      if (responsiveStyle) {
+        styles.push((0,_mixins__WEBPACK_IMPORTED_MODULE_1__.breakpointStyle)(breakpoint, responsiveStyle));
+      }
+    } else if (side === 'between') {
+      // no-op
+    } else {
+      styles.push((0,styled_components__WEBPACK_IMPORTED_MODULE_2__.css)(["border:", ";"], value));
+      if (responsiveStyle) {
+        styles.push((0,_mixins__WEBPACK_IMPORTED_MODULE_1__.breakpointStyle)(breakpoint, responsiveStyle));
+      }
+    }
+    borderStyles.push(styles);
+  });
+  return borderStyles;
+};
+
+/***/ }),
+
+/***/ "./node_modules/grommet/es6/utils/colors.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   canExtractRGBArray: () => (/* binding */ canExtractRGBArray),
+/* harmony export */   colorIsDark: () => (/* binding */ colorIsDark),
+/* harmony export */   getRGBA: () => (/* binding */ getRGBA),
+/* harmony export */   getRGBArray: () => (/* binding */ getRGBArray),
+/* harmony export */   normalizeColor: () => (/* binding */ normalizeColor)
+/* harmony export */ });
+// Returns the specific color that should be used according to the theme.
+// If 'dark' is supplied, it takes precedence over 'theme.dark'.
+// Can return undefined.
+var normalizeColor = function normalizeColor(color, theme, dark) {
+  var colorSpec = theme.global && theme.global.colors[color] !== undefined ? theme.global.colors[color] : color;
+  // If the color has a light or dark object, use that
+  var result = colorSpec;
+  if (colorSpec) {
+    if ((dark === true || dark === undefined && theme.dark) && colorSpec.dark !== undefined) {
+      result = colorSpec.dark;
+    } else if ((dark === false || !theme.dark) && colorSpec.light !== undefined) {
+      result = colorSpec.light;
+    }
+  }
+  // allow one level of indirection in color names
+  if (result && theme.global && theme.global.colors[result] !== undefined) {
+    result = normalizeColor(result, theme, dark);
+  }
+  return result;
+};
+var parseHexToRGB = function parseHexToRGB(color) {
+  return color.length < 7 // 7 is what's needed for '#RRGGBB'
+  ? color.match(/[A-Za-z0-9]{1}/g).map(function (v) {
+    return parseInt("" + v + v, 16);
+  }) :
+  // https://stackoverflow.com/a/42429333
+  color.match(/[A-Za-z0-9]{2}/g).map(function (v) {
+    return parseInt(v, 16);
+  });
+};
+
+// From: https://stackoverflow.com/a/9493060/8513067
+// Converts an HSL color value to RGB. Conversion formula
+// adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+// Assumes h, s, and l are contained in the set [0, 1] and
+// returns r, g, and b in the set [0, 255].
+var hslToRGB = function hslToRGB(h, s, l) {
+  var r;
+  var g;
+  var b;
+  if (s === 0 || s === '0') {
+    // achromatic
+    r = l;
+    g = l;
+    b = l;
+  } else {
+    var hue2rgb = function hue2rgb(p, q, inT) {
+      var t = inT;
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 0.16666667) return p + (q - p) * 6 * t;
+      if (t < 1 / 2) return q;
+      if (t < 0.66666667) return p + (q - p) * (0.66666667 - t) * 6;
+      return p;
+    };
+    var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    var p = 2 * l - q;
+    r = hue2rgb(p, q, h + 0.33333333);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 0.33333333);
+  }
+  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+};
+
+// allow for alpha: #RGB, #RGBA, #RRGGBB, or #RRGGBBAA
+var hexExp = /^#[A-Za-z0-9]{3,4}$|^#[A-Za-z0-9]{6,8}$/;
+var rgbExp = /^rgba?\(\s?([0-9]*)\s?,\s?([0-9]*)\s?,\s?([0-9]*)\s?\)/;
+var rgbaExp = /^rgba?\(\s?([0-9]*)\s?,\s?([0-9]*)\s?,\s?([0-9]*)\s?,\s?([.0-9]*)\s?\)/;
+// e.g. hsl(240, 60%, 50%)
+var hslExp = /^hsla?\(\s?([0-9]*)\s?,\s?([0-9]*)%?\s?,\s?([0-9]*)%?\s?.*?\)/;
+var canExtractRGBArray = function canExtractRGBArray(color) {
+  return hexExp.test(color) || rgbExp.test(color) || rgbaExp.test(color) || hslExp.test(color);
+};
+var getRGBArray = function getRGBArray(color) {
+  if (hexExp.test(color)) {
+    var _parseHexToRGB = parseHexToRGB(color),
+      red = _parseHexToRGB[0],
+      green = _parseHexToRGB[1],
+      blue = _parseHexToRGB[2],
+      alpha = _parseHexToRGB[3];
+    return [red, green, blue, alpha !== undefined ? alpha / 255.0 : undefined];
+  }
+  var match = color.match(rgbExp);
+  if (match) {
+    return match.splice(1).map(function (v) {
+      return parseInt(v, 10);
+    });
+  }
+  match = color.match(rgbaExp);
+  if (match) {
+    return match.splice(1).map(function (v) {
+      return parseFloat(v, 10);
+    });
+  }
+  match = color.match(hslExp);
+  if (match) {
+    var _match$splice$map = match.splice(1).map(function (v) {
+        return parseInt(v, 10);
+      }),
+      h = _match$splice$map[0],
+      s = _match$splice$map[1],
+      l = _match$splice$map[2];
+    return hslToRGB(h / 360.0, s / 100.0, l / 100.0);
+  }
+  return color;
+};
+var colorIsDark = function colorIsDark(color) {
+  if (color && canExtractRGBArray(color)) {
+    var _getRGBArray = getRGBArray(color),
+      red = _getRGBArray[0],
+      green = _getRGBArray[1],
+      blue = _getRGBArray[2],
+      alpha = _getRGBArray[3];
+    // if there is an alpha and it's greater than 50%, we can't really tell
+    if (alpha < 0.5) return undefined;
+    var brightness = (299 * red + 587 * green + 114 * blue) / 1000;
+    // From: http://www.had2know.com/technology/color-contrast-calculator-web-design.html
+    // Above domain is no longer registered.
+    return brightness < 125;
+  }
+  return undefined;
+};
+var getRGBA = function getRGBA(color, opacity) {
+  if (color && canExtractRGBArray(color)) {
+    var _getRGBArray2 = getRGBArray(color),
+      red = _getRGBArray2[0],
+      green = _getRGBArray2[1],
+      blue = _getRGBArray2[2],
+      alpha = _getRGBArray2[3];
+    var normalizedAlpha;
+    if (opacity !== undefined) {
+      normalizedAlpha = opacity;
+    } else if (alpha !== undefined) {
+      normalizedAlpha = alpha;
+    } else {
+      normalizedAlpha = 1;
+    }
+    return "rgba(" + red + ", " + green + ", " + blue + ", " + normalizedAlpha + ")";
+  }
+  return undefined;
+};
+
+/***/ }),
+
+/***/ "./node_modules/grommet/es6/utils/mixins.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   breakpointStyle: () => (/* binding */ breakpointStyle),
+/* harmony export */   edgeToNum: () => (/* binding */ edgeToNum),
+/* harmony export */   findAllByType: () => (/* binding */ findAllByType),
+/* harmony export */   fontSize: () => (/* binding */ fontSize),
+/* harmony export */   getAvailableAtBadge: () => (/* binding */ getAvailableAtBadge),
+/* harmony export */   parseMetricToNum: () => (/* binding */ parseMetricToNum)
+/* harmony export */ });
+/* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/styled-components/dist/styled-components.browser.esm.js");
+
+var parseMetricToNum = function parseMetricToNum(metric) {
+  if (typeof metric === 'number') return metric;
+  if (metric.match(/\s/) && "production" !== 'production') {}
+  return parseFloat(metric.match(/\d+(\.\d+)?/), 10);
+};
+var edgeToNum = function edgeToNum(size, theme) {
+  return size ? parseMetricToNum(theme.global.edgeSize[size] || size) : 0;
+};
+var fontSize = function fontSize(size, lineHeight) {
+  return (0,styled_components__WEBPACK_IMPORTED_MODULE_0__.css)(["font-size:", ";line-height:", ";"], function (props) {
+    return parseMetricToNum(size) / parseMetricToNum(props.theme.global.font.size) * 1 + "rem";
+  }, function (props) {
+    return lineHeight || Math.ceil(parseMetricToNum(size) / parseMetricToNum(props.theme.global.lineHeight)) * (parseMetricToNum(props.theme.global.lineHeight) / parseMetricToNum(size)) + "px";
+  });
+};
+var breakpointStyle = function breakpointStyle(breakpoint, content) {
+  return (0,styled_components__WEBPACK_IMPORTED_MODULE_0__.css)(["@media only screen ", "{", ";}"], breakpoint.value && "and (max-width: " + breakpoint.value + "px)", content);
+};
+var findAllByType = function findAllByType(component, type) {
+  var matches = [];
+  if (component.type === type) {
+    matches.push(component);
+  }
+  if (component.children) {
+    component.children.forEach(function (child) {
+      matches = matches.concat(findAllByType(child, type));
+    });
+  }
+  return matches;
+};
+var getAvailableAtBadge = function getAvailableAtBadge(availableAt, componentType) {
+  return [{
+    url: "https://storybook.grommet.io/?selectedKind=" + componentType + "-" + availableAt + "&full=0&stories=1&panelRight=0",
+    badge: 'https://cdn-images-1.medium.com/fit/c/120/120/1*TD1P0HtIH9zF0UEH28zYtw.png',
+    label: 'Storybook'
+  }, {
+    url: "https://codesandbox.io/s/github/grommet/grommet-sandbox?initialpath=/" + availableAt.toLowerCase() + "&module=%2Fsrc%2F" + availableAt + ".js",
+    badge: 'https://codesandbox.io/static/img/play-codesandbox.svg',
+    label: 'CodeSandbox'
+  }];
+};
+
+/***/ }),
+
+/***/ "./node_modules/grommet/es6/utils/object.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   deepFreeze: () => (/* binding */ deepFreeze),
+/* harmony export */   deepMerge: () => (/* binding */ deepMerge),
+/* harmony export */   isObject: () => (/* binding */ isObject),
+/* harmony export */   removeUndefined: () => (/* binding */ removeUndefined)
+/* harmony export */ });
+function _extends() {
+  return _extends = Object.assign ? Object.assign.bind() : function (n) {
+    for (var e = 1; e < arguments.length; e++) {
+      var t = arguments[e];
+      for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]);
+    }
+    return n;
+  }, _extends.apply(null, arguments);
+}
+var isObject = function isObject(item) {
+  return item && typeof item === 'object' && !Array.isArray(item);
+};
+var deepFreeze = function deepFreeze(obj) {
+  Object.keys(obj).forEach(function (key) {
+    return key && isObject(obj[key]) && Object.freeze(obj[key]);
+  });
+  return Object.freeze(obj);
+};
+var deepMerge = function deepMerge(target) {
+  for (var _len = arguments.length, sources = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+    sources[_key - 1] = arguments[_key];
+  }
+  if (!sources.length) {
+    return target;
+  }
+  // making sure to not change target (immutable)
+  var output = _extends({}, target);
+  sources.forEach(function (source) {
+    if (isObject(source)) {
+      Object.keys(source).forEach(function (key) {
+        if (isObject(source[key])) {
+          if (!output[key]) {
+            output[key] = _extends({}, source[key]);
+          } else {
+            output[key] = deepMerge(output[key], source[key]);
+          }
+        } else {
+          output[key] = source[key];
+        }
+      });
+    }
+  });
+  return output;
+};
+var removeUndefined = function removeUndefined(obj) {
+  var result = {};
+  Object.keys(obj).forEach(function (key) {
+    if (obj[key] !== undefined) {
+      result[key] = obj[key];
+    }
+  });
+  return result;
+};
+
+/***/ }),
+
+/***/ "./node_modules/grommet/es6/utils/refs.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   useForwardedRef: () => (/* binding */ useForwardedRef)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/index.js");
+
+var useForwardedRef = function useForwardedRef(ref) {
+  var innerRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useImperativeHandle)(ref, function () {
+    return innerRef.current;
+  }, [innerRef]);
+  return innerRef;
+};
+
+/***/ }),
+
+/***/ "./node_modules/grommet/es6/utils/responsive.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   getBreakpoint: () => (/* binding */ getBreakpoint),
+/* harmony export */   getBreakpointStyle: () => (/* binding */ getBreakpointStyle),
+/* harmony export */   getDeviceBreakpoint: () => (/* binding */ getDeviceBreakpoint),
+/* harmony export */   isSmall: () => (/* binding */ isSmall)
+/* harmony export */ });
+var getBreakpoint = function getBreakpoint(viewportWidth, theme) {
+  var sortedBreakpoints = Object.keys(theme.global.breakpoints).sort(function (a, b) {
+    var first = theme.global.breakpoints[a];
+    var second = theme.global.breakpoints[b];
+    if (!first) return 1;
+    if (!second) return -1;
+    if (!first.value) return 1;
+    if (!second.value) return -1;
+    return first.value - second.value;
+  });
+
+  // the last breakpoint on the sorted array should have
+  // no windowWidth boundaries
+  var lastBreakpoint = sortedBreakpoints[sortedBreakpoints.length - 1];
+  var result = sortedBreakpoints.find(function (name) {
+    var breakpoint = theme.global.breakpoints[name];
+    return !breakpoint.value || breakpoint.value >= viewportWidth ? name : false;
+  });
+  return result || lastBreakpoint;
+};
+var getDeviceBreakpoint = function getDeviceBreakpoint(type, theme) {
+  return theme.global.deviceBreakpoints[type];
+};
+var getBreakpointStyle = function getBreakpointStyle(theme, breakpointSize) {
+  var breakpoint = breakpointSize && theme.global.breakpoints[breakpointSize] || {};
+  if (!breakpoint.edgeSize) breakpoint.edgeSize = theme.global.edgeSize;
+  if (!breakpoint.borderSize) breakpoint.borderSize = theme.global.borderSize;
+  if (!breakpoint.size) breakpoint.size = theme.global.size;
+  return breakpoint;
+};
+
+// for checks that look for a small screen size, flag for xsmall
+// as well since we use xsmall in the hpe theme
+var isSmall = function isSmall(size) {
+  return ['xsmall', 'small'].includes(size);
+};
+
+/***/ }),
+
+/***/ "./node_modules/grommet/es6/utils/styles.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   alignContentStyle: () => (/* binding */ alignContentStyle),
+/* harmony export */   alignStyle: () => (/* binding */ alignStyle),
+/* harmony export */   baseStyle: () => (/* binding */ baseStyle),
+/* harmony export */   controlBorderStyle: () => (/* binding */ controlBorderStyle),
+/* harmony export */   disabledStyle: () => (/* binding */ disabledStyle),
+/* harmony export */   edgeStyle: () => (/* binding */ edgeStyle),
+/* harmony export */   fillStyle: () => (/* binding */ fillStyle),
+/* harmony export */   focusStyle: () => (/* binding */ focusStyle),
+/* harmony export */   genericStyles: () => (/* binding */ genericStyles),
+/* harmony export */   getInputPadBySide: () => (/* binding */ getInputPadBySide),
+/* harmony export */   heightStyle: () => (/* binding */ heightStyle),
+/* harmony export */   inputPadForIcon: () => (/* binding */ inputPadForIcon),
+/* harmony export */   inputStyle: () => (/* binding */ inputStyle),
+/* harmony export */   kindPartStyles: () => (/* binding */ kindPartStyles),
+/* harmony export */   overflowStyle: () => (/* binding */ overflowStyle),
+/* harmony export */   plainInputStyle: () => (/* binding */ plainInputStyle),
+/* harmony export */   roundStyle: () => (/* binding */ roundStyle),
+/* harmony export */   sizeStyle: () => (/* binding */ sizeStyle),
+/* harmony export */   styledComponentsConfig: () => (/* binding */ styledComponentsConfig),
+/* harmony export */   textAlignStyle: () => (/* binding */ textAlignStyle),
+/* harmony export */   unfocusStyle: () => (/* binding */ unfocusStyle),
+/* harmony export */   widthStyle: () => (/* binding */ widthStyle)
+/* harmony export */ });
+/* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/styled-components/dist/styled-components.browser.esm.js");
+/* harmony import */ var _emotion_is_prop_valid__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/@emotion/is-prop-valid/dist/emotion-is-prop-valid.esm.js");
+/* harmony import */ var _background__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/grommet/es6/utils/background.js");
+/* harmony import */ var _colors__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./node_modules/grommet/es6/utils/colors.js");
+/* harmony import */ var _responsive__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./node_modules/grommet/es6/utils/responsive.js");
+/* harmony import */ var _mixins__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./node_modules/grommet/es6/utils/mixins.js");
+
+
+
+
+
+
+
+// ensure only valid DOM attributes are forwarded onto DOM
+var styledComponentsConfig = {
+  shouldForwardProp: _emotion_is_prop_valid__WEBPACK_IMPORTED_MODULE_0__["default"]
+};
+var baseStyle = (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["font-family:", ";font-size:", ";line-height:", ";font-weight:", ";", " ", " box-sizing:border-box;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased;"], function (props) {
+  return props.theme.global.font.family;
+}, function (props) {
+  return props.theme.global.font.size;
+}, function (props) {
+  return props.theme.global.font.height;
+}, function (props) {
+  return props.theme.global.font.weight;
+}, function (props) {
+  return props.theme.global.font.variant && "\n    font-variant:" + props.theme.global.font.variant + ";\n  ";
+}, function (props) {
+  return !props.plain && (0,_background__WEBPACK_IMPORTED_MODULE_2__.backgroundStyle)(props.theme.baseBackground, props.theme);
+});
+var controlBorderStyle = (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["border:", " solid ", ";border-radius:", ";"], function (props) {
+  return props.theme.global.control.border.width;
+}, function (props) {
+  return (0,_colors__WEBPACK_IMPORTED_MODULE_3__.normalizeColor)(props.theme.global.control.border.color || 'border', props.theme);
+}, function (props) {
+  return props.theme.global.control.border.radius;
+});
+var edgeStyle = function edgeStyle(kind, data, responsive, responsiveBreakpoint, theme) {
+  var breakpoint = responsiveBreakpoint && theme.global.breakpoints[responsiveBreakpoint];
+  if (typeof data === 'string') {
+    return (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["", ":", ";", ";"], kind, theme.global.edgeSize[data] || data, responsive && breakpoint ? (0,_mixins__WEBPACK_IMPORTED_MODULE_4__.breakpointStyle)(breakpoint, "\n        " + kind + ": " + (breakpoint.edgeSize[data] || data) + ";\n      ") : '');
+  }
+  var result = [];
+  var horizontal = data.horizontal,
+    vertical = data.vertical,
+    top = data.top,
+    bottom = data.bottom,
+    left = data.left,
+    right = data.right;
+
+  // if horizontal and vertical are equal OR all sides are equal,
+  // we can just return a single css value such as padding: 12px
+  // instead of breaking out by sides.
+  var horizontalVerticalEqual = horizontal && vertical && horizontal === vertical;
+  var allSidesEqual = top && bottom && left && right && top === bottom === left === right;
+  if (horizontalVerticalEqual || allSidesEqual) {
+    // since the values will be the same between vertical & horizontal OR
+    // left, right, top, & bottom, we can just choose one
+    var value = horizontalVerticalEqual ? horizontal : top;
+    return (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["", ":", ";", ";"], kind, theme.global.edgeSize[value] || value, responsive && breakpoint ? (0,_mixins__WEBPACK_IMPORTED_MODULE_4__.breakpointStyle)(breakpoint, "\n        " + kind + ": " + (breakpoint.edgeSize[value] || value) + ";\n      ") : '');
+  }
+  if (horizontal) {
+    result.push((0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["", "-left:", ";", "-right:", ";", ";"], kind, theme.global.edgeSize[horizontal] || horizontal, kind, theme.global.edgeSize[horizontal] || horizontal, responsive && breakpoint ? (0,_mixins__WEBPACK_IMPORTED_MODULE_4__.breakpointStyle)(breakpoint, "\n          " + kind + "-left: " + (breakpoint.edgeSize[horizontal] || horizontal) + ";\n          " + kind + "-right: " + (breakpoint.edgeSize[horizontal] || horizontal) + ";\n        ") : ''));
+  }
+  if (vertical) {
+    result.push((0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["", "-top:", ";", "-bottom:", ";", ";"], kind, theme.global.edgeSize[vertical] || vertical, kind, theme.global.edgeSize[vertical] || vertical, responsive && breakpoint ? (0,_mixins__WEBPACK_IMPORTED_MODULE_4__.breakpointStyle)(breakpoint, "\n          " + kind + "-top: " + (breakpoint.edgeSize[vertical] || vertical) + ";\n          " + kind + "-bottom: " + (breakpoint.edgeSize[vertical] || vertical) + ";\n        ") : ''));
+  }
+  if (top) {
+    result.push((0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["", "-top:", ";", ";"], kind, theme.global.edgeSize[top] || top, responsive && breakpoint ? (0,_mixins__WEBPACK_IMPORTED_MODULE_4__.breakpointStyle)(breakpoint, "\n          " + kind + "-top: " + (breakpoint.edgeSize[top] || top) + ";\n        ") : ''));
+  }
+  if (bottom) {
+    result.push((0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["", "-bottom:", ";", ";"], kind, theme.global.edgeSize[bottom] || bottom, responsive && breakpoint ? (0,_mixins__WEBPACK_IMPORTED_MODULE_4__.breakpointStyle)(breakpoint, "\n          " + kind + "-bottom: " + (breakpoint.edgeSize[bottom] || bottom) + ";\n        ") : ''));
+  }
+  if (left) {
+    result.push((0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["", "-left:", ";", ";"], kind, theme.global.edgeSize[left] || left, responsive && breakpoint ? (0,_mixins__WEBPACK_IMPORTED_MODULE_4__.breakpointStyle)(breakpoint, "\n          " + kind + "-left: " + (breakpoint.edgeSize[left] || left) + ";\n        ") : ''));
+  }
+  if (right) {
+    result.push((0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["", "-right:", ";", ";"], kind, theme.global.edgeSize[right] || right, responsive && breakpoint ? (0,_mixins__WEBPACK_IMPORTED_MODULE_4__.breakpointStyle)(breakpoint, "\n          " + kind + "-right: " + (breakpoint.edgeSize[right] || right) + ";\n        ") : ''));
+  }
+  if (data.start) {
+    result.push((0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["", "-inline-start:", ";", ";"], kind, theme.global.edgeSize[data.start] || data.start, responsive && breakpoint ? (0,_mixins__WEBPACK_IMPORTED_MODULE_4__.breakpointStyle)(breakpoint, "\n          " + kind + "-inline-start: " + (breakpoint.edgeSize[data.start] || data.start) + ";\n        ") : ''));
+  }
+  if (data.end) {
+    result.push((0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["", "-inline-end:", ";", ";"], kind, theme.global.edgeSize[data.end] || data.end, responsive && breakpoint ? (0,_mixins__WEBPACK_IMPORTED_MODULE_4__.breakpointStyle)(breakpoint, "\n          " + kind + "-inline-end: " + (breakpoint.edgeSize[data.end] || data.end) + ";\n        ") : ''));
+  }
+  return result;
+};
+var fillStyle = function fillStyle(fillProp) {
+  if (fillProp === 'horizontal') {
+    return 'width: 100%;';
+  }
+  if (fillProp === 'vertical') {
+    return 'height: 100%;';
+  }
+  if (fillProp) {
+    return "\n      width: 100%;\n      height: 100%;\n    ";
+  }
+  return undefined;
+};
+var focusStyles = function focusStyles(props, _temp) {
+  var _ref = _temp === void 0 ? {} : _temp,
+    forceOutline = _ref.forceOutline,
+    justBorder = _ref.justBorder;
+  var focus = props.theme.global.focus;
+  if (!focus || forceOutline && !focus.outline) {
+    var color = (0,_colors__WEBPACK_IMPORTED_MODULE_3__.normalizeColor)('focus', props.theme);
+    if (color) return "outline: 2px solid " + color + ";";
+    return ''; // native
+  }
+  if (focus.outline && (!focus.border || !justBorder)) {
+    if (typeof focus.outline === 'object') {
+      var _color = (0,_colors__WEBPACK_IMPORTED_MODULE_3__.normalizeColor)(focus.outline.color || 'focus', props.theme);
+      var size = focus.outline.size || '2px';
+      return "\n        outline-offset: 0px;\n        outline: " + size + " solid " + _color + ";\n      ";
+    }
+    return "outline: " + focus.outline + ";";
+  }
+  if (focus.shadow && (!focus.border || !justBorder)) {
+    if (typeof focus.shadow === 'object') {
+      var _color2 = (0,_colors__WEBPACK_IMPORTED_MODULE_3__.normalizeColor)(
+      // If there is a focus.border.color, use that for shadow too.
+      // This is for backwards compatibility in v2.
+      focus.border && focus.border.color || focus.shadow.color || 'focus', props.theme);
+      var _size = focus.shadow.size || '2px'; // backwards compatible default
+      return "\n        outline: none;\n        box-shadow: 0 0 " + _size + " " + _size + " " + _color2 + ";\n      ";
+    }
+    return "\n      outline: none;\n      box-shadow: " + focus.shadow + ";\n    ";
+  }
+  if (focus.border) {
+    var _color3 = (0,_colors__WEBPACK_IMPORTED_MODULE_3__.normalizeColor)(focus.border.color || 'focus', props.theme);
+    return "\n      outline: none;\n      border-color: " + _color3 + ";\n    ";
+  }
+  return ''; // defensive
+};
+var unfocusStyles = function unfocusStyles(props, _temp2) {
+  var _ref2 = _temp2 === void 0 ? {} : _temp2,
+    forceOutline = _ref2.forceOutline,
+    justBorder = _ref2.justBorder;
+  var focus = props.theme.global.focus;
+  if (!focus || forceOutline && !focus.outline) {
+    var color = (0,_colors__WEBPACK_IMPORTED_MODULE_3__.normalizeColor)('focus', props.theme);
+    if (color) return "outline: none;";
+    return ''; // native
+  }
+  if (focus.outline && (!focus.border || !justBorder)) {
+    if (typeof focus.outline === 'object') {
+      return "\n        outline-offset: 0px;\n        outline: none;\n      ";
+    }
+    return "outline: none;";
+  }
+  if (focus.shadow && (!focus.border || !justBorder)) {
+    if (typeof focus.shadow === 'object') {
+      return "\n        outline: none;\n        box-shadow: none;\n      ";
+    }
+    return "\n      outline: none;\n      box-shadow: none;\n    ";
+  }
+  if (focus.border) {
+    return "\n      outline: none;\n      border-color: none;\n    ";
+  }
+  return ''; // defensive
+};
+
+// focus also supports clickable elements inside svg
+var focusStyle = function focusStyle(_temp3) {
+  var _ref3 = _temp3 === void 0 ? {} : _temp3,
+    forceOutline = _ref3.forceOutline,
+    justBorder = _ref3.justBorder,
+    skipSvgChildren = _ref3.skipSvgChildren;
+  return (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["", " ", " ", ""], function (props) {
+    return !skipSvgChildren && "\n  > circle,\n  > ellipse,\n  > line,\n  > path,\n  > polygon,\n  > polyline,\n  > rect {\n    " + focusStyles(props) + "\n  }";
+  }, function (props) {
+    return focusStyles(props, {
+      forceOutline: forceOutline,
+      justBorder: justBorder
+    });
+  }, !forceOutline && "\n  ::-moz-focus-inner {\n    border: 0;\n  }\n  ");
+};
+
+// This is placed next to focusStyle for easy maintainability
+// of code since changes to focusStyle should be reflected in
+// unfocusStyle as well.
+// this function can be used to reset focus styles which is
+// applicable when turning the focus ring off when using the mouse
+// see https://nelo.is/writing/styling-better-focus-states/
+var unfocusStyle = function unfocusStyle(_temp4) {
+  var _ref4 = _temp4 === void 0 ? {} : _temp4,
+    forceOutline = _ref4.forceOutline,
+    justBorder = _ref4.justBorder,
+    skipSvgChildren = _ref4.skipSvgChildren;
+  return (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["", " ", " ", ""], function (props) {
+    return !skipSvgChildren && "\n  > circle,\n  > ellipse,\n  > line,\n  > path,\n  > polygon,\n  > polyline,\n  > rect {\n    " + unfocusStyles(props) + "\n  }";
+  }, function (props) {
+    return unfocusStyles(props, {
+      forceOutline: forceOutline,
+      justBorder: justBorder
+    });
+  }, !forceOutline && "\n  ::-moz-focus-inner {\n    border: 0;\n  }\n  ");
+};
+
+// For backwards compatibility we need to add back the control border width.
+// Based on how grommet was functioning prior to https://github.com/grommet/grommet/pull/3939,
+// the padding was subtracting the border width from the theme value, but the
+// placeholder was not. Because we're now placing the subtraction into the
+// theme itself, we have to add back in the border width here.
+// This is used for placeholder/icon in TextInput and MaskedInput.
+var adjustPad = function adjustPad(props, value) {
+  return (0,_mixins__WEBPACK_IMPORTED_MODULE_4__.parseMetricToNum)((props.theme.global.edgeSize[value] || value) + "px") + (0,_mixins__WEBPACK_IMPORTED_MODULE_4__.parseMetricToNum)(props.theme.global.control.border.width + "px") + "px";
+};
+var getInputPadBySide = function getInputPadBySide(props, side) {
+  if (typeof props.theme.global.input.padding !== 'object') {
+    var _adjustedPad = adjustPad(props, props.theme.global.input.padding);
+    return _adjustedPad;
+  }
+  var orientation;
+  if (side === 'left' || side === 'right') orientation = 'horizontal';else if (side === 'top' || side === 'bottom') orientation = 'vertical';else orientation = undefined;
+
+  // if individual side isn't available, fallback to the
+  // orientation if possible
+  var pad = props.theme.global.input.padding[side] || props.theme.global.input.padding[orientation];
+  var adjustedPad = adjustPad(props, pad);
+  return adjustedPad;
+};
+var placeholderColor = (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["color:", ";"], function (props) {
+  return (0,_colors__WEBPACK_IMPORTED_MODULE_3__.normalizeColor)(props.theme.global.colors.placeholder, props.theme);
+});
+var placeholderStyle = (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["&::-webkit-input-placeholder{", ";}&::-moz-placeholder{", ";}&:-ms-input-placeholder{", ";}"], placeholderColor, placeholderColor, placeholderColor);
+var inputSizeStyle = function inputSizeStyle(props) {
+  var data = props.theme.text[props.size];
+  if (!data) {
+    return (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["font-size:", ";"], props.size);
+  }
+  return (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["font-size:", ";line-height:", ";"], data.size, data.height);
+};
+var inputStyle = (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["box-sizing:border-box;", " font-family:inherit;border:none;-webkit-appearance:none;background:transparent;color:inherit;width:100%;", " ", " ", " margin:0;", " &:focus{", ";}", " ", "::-webkit-search-decoration{-webkit-appearance:none;}&::-moz-focus-inner{border:none;outline:none;}&:-moz-placeholder,&::-moz-placeholder{opacity:1;}", ""], function (props) {
+  var _props$theme$text$pro;
+  return "font-size: " + (props.theme.global.input.font.size ? ((_props$theme$text$pro = props.theme.text[props.theme.global.input.font.size]) == null ? void 0 : _props$theme$text$pro.size) || props.theme.global.input.font.size : 'inherit') + ";";
+}, function (props) {
+  return props.theme.global.input.font.height && "line-height: " + props.theme.global.input.font.height + ";";
+}, function (props) {
+  return props.theme.global.input.padding && typeof props.theme.global.input.padding !== 'object' ?
+  // On a breaking change release, this condition could be removed and
+  // just the edgeStyle could remain. Currently, this is needed for
+  // backwards compatibility since we are placing the calculation in
+  // base.js
+  "padding: " + ((0,_mixins__WEBPACK_IMPORTED_MODULE_4__.parseMetricToNum)(props.theme.global.edgeSize[props.theme.global.input.padding] || props.theme.global.input.padding) - (0,_mixins__WEBPACK_IMPORTED_MODULE_4__.parseMetricToNum)(props.theme.global.control.border.width)) + "px;" : edgeStyle('padding', props.theme.global.input.padding, props.responsive, props.theme.box.responsiveBreakpoint, props.theme);
+}, function (props) {
+  return (
+    // for backwards compatibility, check if props.theme.global.input.weight
+    (props.theme.global.input.weight || props.theme.global.input.font.weight) && (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["font-weight:", ";"], props.theme.global.input.weight || props.theme.global.input.font.weight)
+  );
+}, function (props) {
+  return props.size && inputSizeStyle(props);
+}, function (props) {
+  return (!props.plain || props.focusIndicator) && focusStyle();
+}, controlBorderStyle, placeholderStyle, function (props) {
+  return props.theme.global.input.extend;
+});
+
+// Apply padding on input to create space for icon.
+// When theme.icon.matchSize is true, the space for the
+// icon should equal the icon dimension + 12px (edgeSize.medium)
+// to ensure there is reasonable space between the icon and value or placeholder
+var inputPadForIcon = (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["", ""], function (props) {
+  var _props$theme, _props$theme$icon;
+  var pad = (_props$theme = props.theme) != null && (_props$theme = _props$theme.icon) != null && _props$theme.matchSize ? (0,_mixins__WEBPACK_IMPORTED_MODULE_4__.parseMetricToNum)((_props$theme$icon = props.theme.icon) == null || (_props$theme$icon = _props$theme$icon.size) == null ? void 0 : _props$theme$icon[(props == null ? void 0 : props.size) || 'medium']) + (0,_mixins__WEBPACK_IMPORTED_MODULE_4__.parseMetricToNum)(props.theme.global.edgeSize.medium) + "px" : props.theme.global.edgeSize.large;
+  return props.reverse ? "padding-right: " + pad + ";" : "padding-left: " + pad + ";";
+});
+var overflowStyle = function overflowStyle(overflowProp) {
+  if (typeof overflowProp === 'string') {
+    return (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["overflow:", ";"], overflowProp);
+  }
+  return (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["", " ", ";"], overflowProp.horizontal && "overflow-x: " + overflowProp.horizontal + ";", overflowProp.vertical && "overflow-y: " + overflowProp.vertical + ";");
+};
+var ALIGN_SELF_MAP = {
+  center: 'center',
+  end: 'flex-end',
+  start: 'flex-start',
+  stretch: 'stretch',
+  baseline: 'baseline'
+};
+var genericStyles = (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["", " ", " ", ""], function (props) {
+  return props.alignSelf && "align-self: " + ALIGN_SELF_MAP[props.alignSelf] + ";";
+}, function (props) {
+  return props.gridArea && "grid-area: " + props.gridArea + ";";
+}, function (props) {
+  return props.margin && props.theme.global && edgeStyle('margin', props.margin, props.responsive, props.theme.global.edgeSize.responsiveBreakpoint, props.theme);
+});
+var disabledStyle = function disabledStyle(componentStyle) {
+  return (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["opacity:", ";cursor:default;"], function (props) {
+    return componentStyle || props.theme.global.control.disabled.opacity;
+  });
+};
+var sizeStyle = function sizeStyle(name, value, theme) {
+  return (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["", ":", ";"], name, theme.global.size[value] || value);
+};
+var plainInputStyle = (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["outline:none;border:none;"]);
+
+// CSS for this sub-object in the theme
+var kindPartStyles = function kindPartStyles(obj, theme, colorValue) {
+  var styles = [];
+  if (obj.padding || obj.pad) {
+    // button uses `padding` but other components use Grommet `pad`
+    var pad = obj.padding || obj.pad;
+    if (pad.vertical || pad.horizontal) styles.push("padding: " + (theme.global.edgeSize[pad.vertical] || pad.vertical || 0) + " " + (theme.global.edgeSize[pad.horizontal] || pad.horizontal || 0) + ";");else styles.push("padding: " + (theme.global.edgeSize[pad] || pad || 0) + ";");
+  }
+  if (obj.background) styles.push((0,_background__WEBPACK_IMPORTED_MODULE_2__.backgroundStyle)(colorValue || obj.background, theme, obj.color || (Object.prototype.hasOwnProperty.call(obj, 'color') && obj.color === undefined ? false : undefined)));else if (obj.color) styles.push("color: " + (0,_colors__WEBPACK_IMPORTED_MODULE_3__.normalizeColor)(obj.color, theme) + ";");
+  if (obj.border) {
+    if (obj.border.width) styles.push((0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["border-style:solid;border-width:", ";"], obj.border.width));
+    if (obj.border.color) styles.push((0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["border-color:", ";"], (0,_colors__WEBPACK_IMPORTED_MODULE_3__.normalizeColor)(!obj.background && colorValue || obj.border.color || 'border', theme)));
+    if (obj.border.radius) styles.push((0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["border-radius:", ";"], obj.border.radius));
+  } else if (obj.border === false) styles.push('border: none;');
+  if (colorValue && !obj.border && !obj.background) styles.push("color: " + (0,_colors__WEBPACK_IMPORTED_MODULE_3__.normalizeColor)(colorValue, theme) + ";");
+  if (obj.font) {
+    if (obj.font.size) {
+      styles.push("font-size: " + (theme.text[obj.font.size].size || obj.font.size) + ";");
+    }
+    if (obj.font.height) {
+      styles.push("line-height: " + obj.font.height + ";");
+    }
+    if (obj.font.weight) {
+      styles.push("font-weight: " + obj.font.weight + ";");
+    }
+  }
+  if (obj.opacity) {
+    var opacity = obj.opacity === true ? theme.global.opacity.medium : theme.global.opacity[obj.opacity] || obj.opacity;
+    styles.push("opacity: " + opacity + ";");
+  }
+  if (obj.extend) styles.push(obj.extend);
+  return styles;
+};
+var ROUND_MAP = {
+  full: '100%'
+};
+var roundStyle = function roundStyle(data, responsive, theme) {
+  var breakpoint = (0,_responsive__WEBPACK_IMPORTED_MODULE_5__.getBreakpointStyle)(theme, theme.box.responsiveBreakpoint);
+  var styles = [];
+  if (typeof data === 'object') {
+    var size = ROUND_MAP[data.size] || theme.global.edgeSize[data.size || 'medium'] || data.size;
+    var responsiveSize = responsive && breakpoint && breakpoint.edgeSize[data.size] && (breakpoint.edgeSize[data.size] || data.size);
+    if (data.corner === 'top') {
+      styles.push((0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["border-top-left-radius:", ";border-top-right-radius:", ";"], size, size));
+      if (responsiveSize) {
+        styles.push((0,_mixins__WEBPACK_IMPORTED_MODULE_4__.breakpointStyle)(breakpoint, "\n          border-top-left-radius: " + responsiveSize + ";\n          border-top-right-radius: " + responsiveSize + ";\n        "));
+      }
+    } else if (data.corner === 'bottom') {
+      styles.push((0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["border-bottom-left-radius:", ";border-bottom-right-radius:", ";"], size, size));
+      if (responsiveSize) {
+        styles.push((0,_mixins__WEBPACK_IMPORTED_MODULE_4__.breakpointStyle)(breakpoint, "\n          border-bottom-left-radius: " + responsiveSize + ";\n          border-bottom-right-radius: " + responsiveSize + ";\n        "));
+      }
+    } else if (data.corner === 'left') {
+      styles.push((0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["border-top-left-radius:", ";border-bottom-left-radius:", ";"], size, size));
+      if (responsiveSize) {
+        styles.push((0,_mixins__WEBPACK_IMPORTED_MODULE_4__.breakpointStyle)(breakpoint, "\n          border-top-left-radius: " + responsiveSize + ";\n          border-bottom-left-radius: " + responsiveSize + ";\n        "));
+      }
+    } else if (data.corner === 'right') {
+      styles.push((0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["border-top-right-radius:", ";border-bottom-right-radius:", ";"], size, size));
+      if (responsiveSize) {
+        styles.push((0,_mixins__WEBPACK_IMPORTED_MODULE_4__.breakpointStyle)(breakpoint, "\n          border-top-right-radius: " + responsiveSize + ";\n          border-bottom-right-radius: " + responsiveSize + ";\n        "));
+      }
+    } else if (data.corner) {
+      styles.push((0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["border-", "-radius:", ";"], data.corner, size));
+      if (responsiveSize) {
+        styles.push((0,_mixins__WEBPACK_IMPORTED_MODULE_4__.breakpointStyle)(breakpoint, "\n          border-" + data.corner + "-radius: " + responsiveSize + ";\n        "));
+      }
+    } else {
+      styles.push((0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["border-radius:", ";"], size));
+      if (responsiveSize) {
+        styles.push((0,_mixins__WEBPACK_IMPORTED_MODULE_4__.breakpointStyle)(breakpoint, "\n          border-radius: " + responsiveSize + ";\n        "));
+      }
+    }
+  } else {
+    var _size2 = data === true ? 'medium' : data;
+    styles.push((0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["border-radius:", ";"], ROUND_MAP[_size2] || theme.global.edgeSize[_size2] || _size2));
+    var _responsiveSize = responsive && breakpoint && breakpoint.edgeSize[_size2];
+    if (_responsiveSize) {
+      styles.push((0,_mixins__WEBPACK_IMPORTED_MODULE_4__.breakpointStyle)(breakpoint, "\n        border-radius: " + _responsiveSize + ";\n      "));
+    }
+  }
+  return styles;
+};
+var TEXT_ALIGN_MAP = {
+  center: 'center',
+  end: 'right',
+  justify: 'justify',
+  start: 'left'
+};
+var textAlignStyle = (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["text-align:", ";"], function (props) {
+  return TEXT_ALIGN_MAP[props.textAlign];
+});
+var ALIGN_ITEMS_MAP = {
+  baseline: 'baseline',
+  center: 'center',
+  end: 'flex-end',
+  start: 'flex-start',
+  stretch: 'stretch'
+};
+var alignStyle = (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["align-items:", ";"], function (props) {
+  var _ALIGN_ITEMS_MAP$prop;
+  return (_ALIGN_ITEMS_MAP$prop = ALIGN_ITEMS_MAP[props.align]) != null ? _ALIGN_ITEMS_MAP$prop : props.align;
+});
+var ALIGN_CONTENT_MAP = {
+  around: 'space-around',
+  baseline: 'baseline',
+  between: 'space-between',
+  center: 'center',
+  evenly: 'space-evenly',
+  end: 'flex-end',
+  start: 'flex-start',
+  stretch: 'stretch'
+};
+var alignContentStyle = (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["align-content:", ";"], function (props) {
+  var _ALIGN_CONTENT_MAP$pr;
+  return (_ALIGN_CONTENT_MAP$pr = ALIGN_CONTENT_MAP[props.alignContent]) != null ? _ALIGN_CONTENT_MAP$pr : props.alignContent;
+});
+var getSize = function getSize(theme, size) {
+  return theme.global.size[size] || size;
+};
+var widthObjectStyle = function widthObjectStyle(width, theme) {
+  var result = [];
+  if (width.max) result.push((0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["max-width:", ";"], getSize(theme, width.max)));
+  if (width.min) result.push((0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["min-width:", ";"], getSize(theme, width.min)));
+  if (width.width) result.push((0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["width:", ";"], getSize(theme, width.width)));
+  return result;
+};
+var widthStringStyle = function widthStringStyle(width, theme) {
+  return (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["width:", ";"], getSize(theme, width));
+};
+var widthStyle = function widthStyle(width, theme) {
+  return typeof width === 'object' ? widthObjectStyle(width, theme) : widthStringStyle(width, theme);
+};
+var heightObjectStyle = function heightObjectStyle(height, theme) {
+  var result = [];
+  if (height.max) result.push((0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["max-height:", ";"], getSize(theme, height.max)));
+  if (height.min) result.push((0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["min-height:", ";"], getSize(theme, height.min)));
+  // backwards compatibile
+  if (height.width) result.push((0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["height:", ";"], getSize(theme, height.height)));
+  if (height.height) result.push((0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["height:", ";"], getSize(theme, height.height)));
+  return result;
+};
+var heightStringStyle = function heightStringStyle(height, theme) {
+  return (0,styled_components__WEBPACK_IMPORTED_MODULE_1__.css)(["height:", ";"], getSize(theme, height));
+};
+var heightStyle = function heightStyle(height, theme) {
+  return typeof height === 'object' ? heightObjectStyle(height, theme) : heightStringStyle(height, theme);
+};
+
+/***/ }),
+
+/***/ "./node_modules/grommet/es6/utils/useThemeValue.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   useThemeValue: () => (/* binding */ useThemeValue)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/index.js");
+/* harmony import */ var styled_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/styled-components/dist/styled-components.browser.esm.js");
+/* harmony import */ var _default_props__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/grommet/es6/default-props.js");
+
+
+
+
+/*
+  Hook that returns theme value.
+  If used outside of `<Grommet>` wrapper, falls back to default theme.
+*/
+var useThemeValue = function useThemeValue() {
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(styled_components__WEBPACK_IMPORTED_MODULE_1__.ThemeContext) || _default_props__WEBPACK_IMPORTED_MODULE_2__.defaultProps.theme;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/hoist-non-react-statics/dist/hoist-non-react-statics.cjs.js":
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var reactIs = __webpack_require__("./node_modules/react-is/index.js");
+
+/**
+ * Copyright 2015, Yahoo! Inc.
+ * Copyrights licensed under the New BSD License. See the accompanying LICENSE file for terms.
+ */
+var REACT_STATICS = {
+  childContextTypes: true,
+  contextType: true,
+  contextTypes: true,
+  defaultProps: true,
+  displayName: true,
+  getDefaultProps: true,
+  getDerivedStateFromError: true,
+  getDerivedStateFromProps: true,
+  mixins: true,
+  propTypes: true,
+  type: true
+};
+var KNOWN_STATICS = {
+  name: true,
+  length: true,
+  prototype: true,
+  caller: true,
+  callee: true,
+  arguments: true,
+  arity: true
+};
+var FORWARD_REF_STATICS = {
+  '$$typeof': true,
+  render: true,
+  defaultProps: true,
+  displayName: true,
+  propTypes: true
+};
+var MEMO_STATICS = {
+  '$$typeof': true,
+  compare: true,
+  defaultProps: true,
+  displayName: true,
+  propTypes: true,
+  type: true
+};
+var TYPE_STATICS = {};
+TYPE_STATICS[reactIs.ForwardRef] = FORWARD_REF_STATICS;
+TYPE_STATICS[reactIs.Memo] = MEMO_STATICS;
+function getStatics(component) {
+  // React v16.11 and below
+  if (reactIs.isMemo(component)) {
+    return MEMO_STATICS;
+  } // React v16.12 and above
+
+  return TYPE_STATICS[component['$$typeof']] || REACT_STATICS;
+}
+var defineProperty = Object.defineProperty;
+var getOwnPropertyNames = Object.getOwnPropertyNames;
+var getOwnPropertySymbols = Object.getOwnPropertySymbols;
+var getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
+var getPrototypeOf = Object.getPrototypeOf;
+var objectPrototype = Object.prototype;
+function hoistNonReactStatics(targetComponent, sourceComponent, blacklist) {
+  if (typeof sourceComponent !== 'string') {
+    // don't hoist over string (html) components
+    if (objectPrototype) {
+      var inheritedComponent = getPrototypeOf(sourceComponent);
+      if (inheritedComponent && inheritedComponent !== objectPrototype) {
+        hoistNonReactStatics(targetComponent, inheritedComponent, blacklist);
+      }
+    }
+    var keys = getOwnPropertyNames(sourceComponent);
+    if (getOwnPropertySymbols) {
+      keys = keys.concat(getOwnPropertySymbols(sourceComponent));
+    }
+    var targetStatics = getStatics(targetComponent);
+    var sourceStatics = getStatics(sourceComponent);
+    for (var i = 0; i < keys.length; ++i) {
+      var key = keys[i];
+      if (!KNOWN_STATICS[key] && !(blacklist && blacklist[key]) && !(sourceStatics && sourceStatics[key]) && !(targetStatics && targetStatics[key])) {
+        var descriptor = getOwnPropertyDescriptor(sourceComponent, key);
+        try {
+          // Avoid failures from read-only properties
+          defineProperty(targetComponent, key, descriptor);
+        } catch (e) {}
+      }
+    }
+  }
+  return targetComponent;
+}
+module.exports = hoistNonReactStatics;
 
 /***/ }),
 
@@ -22211,6 +29359,106 @@ process.umask = function () {
 
 /***/ }),
 
+/***/ "./node_modules/prop-types/factoryWithThrowingShims.js":
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+
+
+var ReactPropTypesSecret = __webpack_require__("./node_modules/prop-types/lib/ReactPropTypesSecret.js");
+function emptyFunction() {}
+function emptyFunctionWithReset() {}
+emptyFunctionWithReset.resetWarningCache = emptyFunction;
+module.exports = function () {
+  function shim(props, propName, componentName, location, propFullName, secret) {
+    if (secret === ReactPropTypesSecret) {
+      // It is still safe when called from React.
+      return;
+    }
+    var err = new Error('Calling PropTypes validators directly is not supported by the `prop-types` package. ' + 'Use PropTypes.checkPropTypes() to call them. ' + 'Read more at http://fb.me/use-check-prop-types');
+    err.name = 'Invariant Violation';
+    throw err;
+  }
+  ;
+  shim.isRequired = shim;
+  function getShim() {
+    return shim;
+  }
+  ;
+  // Important!
+  // Keep this list in sync with production version in `./factoryWithTypeCheckers.js`.
+  var ReactPropTypes = {
+    array: shim,
+    bigint: shim,
+    bool: shim,
+    func: shim,
+    number: shim,
+    object: shim,
+    string: shim,
+    symbol: shim,
+    any: shim,
+    arrayOf: getShim,
+    element: shim,
+    elementType: shim,
+    instanceOf: getShim,
+    node: shim,
+    objectOf: getShim,
+    oneOf: getShim,
+    oneOfType: getShim,
+    shape: getShim,
+    exact: getShim,
+    checkPropTypes: emptyFunctionWithReset,
+    resetWarningCache: emptyFunction
+  };
+  ReactPropTypes.PropTypes = ReactPropTypes;
+  return ReactPropTypes;
+};
+
+/***/ }),
+
+/***/ "./node_modules/prop-types/index.js":
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+if (false) { var throwOnDirectAccess, ReactIs; } else {
+  // By explicitly using `prop-types` you are opting into new production behavior.
+  // http://fb.me/prop-types-in-prod
+  module.exports = __webpack_require__("./node_modules/prop-types/factoryWithThrowingShims.js")();
+}
+
+/***/ }),
+
+/***/ "./node_modules/prop-types/lib/ReactPropTypesSecret.js":
+/***/ ((module) => {
+
+"use strict";
+/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+
+
+var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
+module.exports = ReactPropTypesSecret;
+
+/***/ }),
+
 /***/ "./node_modules/queue-microtask/index.js":
 /***/ ((module) => {
 
@@ -25630,6 +32878,142 @@ exports.renderToReadableStream = s.renderToReadableStream;
 
 /***/ }),
 
+/***/ "./node_modules/react-is/cjs/react-is.production.min.js":
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+/** @license React v16.13.1
+ * react-is.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+
+
+var b = "function" === typeof Symbol && Symbol.for,
+  c = b ? Symbol.for("react.element") : 60103,
+  d = b ? Symbol.for("react.portal") : 60106,
+  e = b ? Symbol.for("react.fragment") : 60107,
+  f = b ? Symbol.for("react.strict_mode") : 60108,
+  g = b ? Symbol.for("react.profiler") : 60114,
+  h = b ? Symbol.for("react.provider") : 60109,
+  k = b ? Symbol.for("react.context") : 60110,
+  l = b ? Symbol.for("react.async_mode") : 60111,
+  m = b ? Symbol.for("react.concurrent_mode") : 60111,
+  n = b ? Symbol.for("react.forward_ref") : 60112,
+  p = b ? Symbol.for("react.suspense") : 60113,
+  q = b ? Symbol.for("react.suspense_list") : 60120,
+  r = b ? Symbol.for("react.memo") : 60115,
+  t = b ? Symbol.for("react.lazy") : 60116,
+  v = b ? Symbol.for("react.block") : 60121,
+  w = b ? Symbol.for("react.fundamental") : 60117,
+  x = b ? Symbol.for("react.responder") : 60118,
+  y = b ? Symbol.for("react.scope") : 60119;
+function z(a) {
+  if ("object" === typeof a && null !== a) {
+    var u = a.$$typeof;
+    switch (u) {
+      case c:
+        switch (a = a.type, a) {
+          case l:
+          case m:
+          case e:
+          case g:
+          case f:
+          case p:
+            return a;
+          default:
+            switch (a = a && a.$$typeof, a) {
+              case k:
+              case n:
+              case t:
+              case r:
+              case h:
+                return a;
+              default:
+                return u;
+            }
+        }
+      case d:
+        return u;
+    }
+  }
+}
+function A(a) {
+  return z(a) === m;
+}
+exports.AsyncMode = l;
+exports.ConcurrentMode = m;
+exports.ContextConsumer = k;
+exports.ContextProvider = h;
+exports.Element = c;
+exports.ForwardRef = n;
+exports.Fragment = e;
+exports.Lazy = t;
+exports.Memo = r;
+exports.Portal = d;
+exports.Profiler = g;
+exports.StrictMode = f;
+exports.Suspense = p;
+exports.isAsyncMode = function (a) {
+  return A(a) || z(a) === l;
+};
+exports.isConcurrentMode = A;
+exports.isContextConsumer = function (a) {
+  return z(a) === k;
+};
+exports.isContextProvider = function (a) {
+  return z(a) === h;
+};
+exports.isElement = function (a) {
+  return "object" === typeof a && null !== a && a.$$typeof === c;
+};
+exports.isForwardRef = function (a) {
+  return z(a) === n;
+};
+exports.isFragment = function (a) {
+  return z(a) === e;
+};
+exports.isLazy = function (a) {
+  return z(a) === t;
+};
+exports.isMemo = function (a) {
+  return z(a) === r;
+};
+exports.isPortal = function (a) {
+  return z(a) === d;
+};
+exports.isProfiler = function (a) {
+  return z(a) === g;
+};
+exports.isStrictMode = function (a) {
+  return z(a) === f;
+};
+exports.isSuspense = function (a) {
+  return z(a) === p;
+};
+exports.isValidElementType = function (a) {
+  return "string" === typeof a || "function" === typeof a || a === e || a === m || a === g || a === f || a === p || a === q || "object" === typeof a && null !== a && (a.$$typeof === t || a.$$typeof === r || a.$$typeof === h || a.$$typeof === k || a.$$typeof === n || a.$$typeof === w || a.$$typeof === x || a.$$typeof === y || a.$$typeof === v);
+};
+exports.typeOf = z;
+
+/***/ }),
+
+/***/ "./node_modules/react-is/index.js":
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+if (true) {
+  module.exports = __webpack_require__("./node_modules/react-is/cjs/react-is.production.min.js");
+} else {}
+
+/***/ }),
+
 /***/ "./node_modules/react/cjs/react-jsx-runtime.production.min.js":
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
@@ -26129,6 +33513,47 @@ SafeBuffer.allocUnsafeSlow = function (size) {
 
 /***/ }),
 
+/***/ "./node_modules/shallowequal/index.js":
+/***/ ((module) => {
+
+//
+
+module.exports = function shallowEqual(objA, objB, compare, compareContext) {
+  var ret = compare ? compare.call(compareContext, objA, objB) : void 0;
+  if (ret !== void 0) {
+    return !!ret;
+  }
+  if (objA === objB) {
+    return true;
+  }
+  if (typeof objA !== "object" || !objA || typeof objB !== "object" || !objB) {
+    return false;
+  }
+  var keysA = Object.keys(objA);
+  var keysB = Object.keys(objB);
+  if (keysA.length !== keysB.length) {
+    return false;
+  }
+  var bHasOwnProperty = Object.prototype.hasOwnProperty.bind(objB);
+
+  // Test for A's keys different from B.
+  for (var idx = 0; idx < keysA.length; idx++) {
+    var key = keysA[idx];
+    if (!bHasOwnProperty(key)) {
+      return false;
+    }
+    var valueA = objA[key];
+    var valueB = objB[key];
+    ret = compare ? compare.call(compareContext, valueA, valueB, key) : void 0;
+    if (ret === false || ret === void 0 && valueA !== valueB) {
+      return false;
+    }
+  }
+  return true;
+};
+
+/***/ }),
+
 /***/ "./node_modules/string_decoder/lib/string_decoder.js":
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
@@ -26436,6 +33861,793 @@ function simpleEnd(buf) {
 
 /***/ }),
 
+/***/ "./node_modules/styled-components/dist/styled-components.browser.esm.js":
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ServerStyleSheet: () => (/* binding */ Ue),
+/* harmony export */   StyleSheetConsumer: () => (/* binding */ ue),
+/* harmony export */   StyleSheetContext: () => (/* binding */ ce),
+/* harmony export */   StyleSheetManager: () => (/* binding */ me),
+/* harmony export */   ThemeConsumer: () => (/* binding */ Ge),
+/* harmony export */   ThemeContext: () => (/* binding */ Me),
+/* harmony export */   ThemeProvider: () => (/* binding */ Le),
+/* harmony export */   __PRIVATE__: () => (/* binding */ Ze),
+/* harmony export */   createGlobalStyle: () => (/* binding */ $e),
+/* harmony export */   css: () => (/* binding */ Ae),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
+/* harmony export */   isStyledComponent: () => (/* binding */ _),
+/* harmony export */   keyframes: () => (/* binding */ We),
+/* harmony export */   useTheme: () => (/* binding */ Xe),
+/* harmony export */   version: () => (/* binding */ A),
+/* harmony export */   withTheme: () => (/* binding */ Je)
+/* harmony export */ });
+/* harmony import */ var react_is__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react-is/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/react/index.js");
+/* harmony import */ var shallowequal__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/shallowequal/index.js");
+/* harmony import */ var shallowequal__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(shallowequal__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _emotion_stylis__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./node_modules/@emotion/stylis/dist/stylis.browser.esm.js");
+/* harmony import */ var _emotion_unitless__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./node_modules/@emotion/unitless/dist/unitless.browser.esm.js");
+/* harmony import */ var _emotion_is_prop_valid__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./node_modules/@emotion/is-prop-valid/dist/emotion-is-prop-valid.esm.js");
+/* harmony import */ var hoist_non_react_statics__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./node_modules/hoist-non-react-statics/dist/hoist-non-react-statics.cjs.js");
+/* harmony import */ var hoist_non_react_statics__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(hoist_non_react_statics__WEBPACK_IMPORTED_MODULE_6__);
+
+
+
+
+
+
+
+function y() {
+  return (y = Object.assign || function (e) {
+    for (var t = 1; t < arguments.length; t++) {
+      var n = arguments[t];
+      for (var r in n) Object.prototype.hasOwnProperty.call(n, r) && (e[r] = n[r]);
+    }
+    return e;
+  }).apply(this, arguments);
+}
+var v = function (e, t) {
+    for (var n = [e[0]], r = 0, o = t.length; r < o; r += 1) n.push(t[r], e[r + 1]);
+    return n;
+  },
+  g = function (t) {
+    return null !== t && "object" == typeof t && "[object Object]" === (t.toString ? t.toString() : Object.prototype.toString.call(t)) && !(0,react_is__WEBPACK_IMPORTED_MODULE_0__.typeOf)(t);
+  },
+  S = Object.freeze([]),
+  w = Object.freeze({});
+function E(e) {
+  return "function" == typeof e;
+}
+function b(e) {
+  return  false || e.displayName || e.name || "Component";
+}
+function _(e) {
+  return e && "string" == typeof e.styledComponentId;
+}
+var N = "undefined" != typeof process && void 0 !== ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}) && (({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).REACT_APP_SC_ATTR || ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).SC_ATTR) || "data-styled",
+  A = "5.3.11",
+  C =  true && "HTMLElement" in ({"location":{}}),
+  I = Boolean("boolean" == typeof SC_DISABLE_SPEEDY ? SC_DISABLE_SPEEDY : "undefined" != typeof process && void 0 !== ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}) && (void 0 !== ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).REACT_APP_SC_DISABLE_SPEEDY && "" !== ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).REACT_APP_SC_DISABLE_SPEEDY ? "false" !== ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).REACT_APP_SC_DISABLE_SPEEDY && ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).REACT_APP_SC_DISABLE_SPEEDY : void 0 !== ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).SC_DISABLE_SPEEDY && "" !== ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).SC_DISABLE_SPEEDY ? "false" !== ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).SC_DISABLE_SPEEDY && ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).SC_DISABLE_SPEEDY : "production" !== "production")),
+  P = {},
+  O =  false ? 0 : {};
+function R() {
+  for (var e = arguments.length <= 0 ? void 0 : arguments[0], t = [], n = 1, r = arguments.length; n < r; n += 1) t.push(n < 0 || arguments.length <= n ? void 0 : arguments[n]);
+  return t.forEach(function (t) {
+    e = e.replace(/%[a-z]/, t);
+  }), e;
+}
+function D(e) {
+  for (var t = arguments.length, n = new Array(t > 1 ? t - 1 : 0), r = 1; r < t; r++) n[r - 1] = arguments[r];
+  throw  true ? new Error("An error occurred. See https://git.io/JUIaE#" + e + " for more information." + (n.length > 0 ? " Args: " + n.join(", ") : "")) : 0;
+}
+var j = function () {
+    function e(e) {
+      this.groupSizes = new Uint32Array(512), this.length = 512, this.tag = e;
+    }
+    var t = e.prototype;
+    return t.indexOfGroup = function (e) {
+      for (var t = 0, n = 0; n < e; n++) t += this.groupSizes[n];
+      return t;
+    }, t.insertRules = function (e, t) {
+      if (e >= this.groupSizes.length) {
+        for (var n = this.groupSizes, r = n.length, o = r; e >= o;) (o <<= 1) < 0 && D(16, "" + e);
+        this.groupSizes = new Uint32Array(o), this.groupSizes.set(n), this.length = o;
+        for (var s = r; s < o; s++) this.groupSizes[s] = 0;
+      }
+      for (var i = this.indexOfGroup(e + 1), a = 0, c = t.length; a < c; a++) this.tag.insertRule(i, t[a]) && (this.groupSizes[e]++, i++);
+    }, t.clearGroup = function (e) {
+      if (e < this.length) {
+        var t = this.groupSizes[e],
+          n = this.indexOfGroup(e),
+          r = n + t;
+        this.groupSizes[e] = 0;
+        for (var o = n; o < r; o++) this.tag.deleteRule(n);
+      }
+    }, t.getGroup = function (e) {
+      var t = "";
+      if (e >= this.length || 0 === this.groupSizes[e]) return t;
+      for (var n = this.groupSizes[e], r = this.indexOfGroup(e), o = r + n, s = r; s < o; s++) t += this.tag.getRule(s) + "/*!sc*/\n";
+      return t;
+    }, e;
+  }(),
+  T = new Map(),
+  x = new Map(),
+  k = 1,
+  V = function (e) {
+    if (T.has(e)) return T.get(e);
+    for (; x.has(k);) k++;
+    var t = k++;
+    return  false && 0, T.set(e, t), x.set(t, e), t;
+  },
+  B = function (e) {
+    return x.get(e);
+  },
+  z = function (e, t) {
+    t >= k && (k = t + 1), T.set(e, t), x.set(t, e);
+  },
+  M = "style[" + N + '][data-styled-version="5.3.11"]',
+  G = new RegExp("^" + N + '\\.g(\\d+)\\[id="([\\w\\d-]+)"\\].*?"([^"]*)'),
+  L = function (e, t, n) {
+    for (var r, o = n.split(","), s = 0, i = o.length; s < i; s++) (r = o[s]) && e.registerName(t, r);
+  },
+  F = function (e, t) {
+    for (var n = (t.textContent || "").split("/*!sc*/\n"), r = [], o = 0, s = n.length; o < s; o++) {
+      var i = n[o].trim();
+      if (i) {
+        var a = i.match(G);
+        if (a) {
+          var c = 0 | parseInt(a[1], 10),
+            u = a[2];
+          0 !== c && (z(u, c), L(e, u, a[3]), e.getTag().insertRules(c, r)), r.length = 0;
+        } else r.push(i);
+      }
+    }
+  },
+  Y = function () {
+    return  true ? __webpack_require__.nc : 0;
+  },
+  q = function (e) {
+    var t = document.head,
+      n = e || t,
+      r = document.createElement("style"),
+      o = function (e) {
+        for (var t = e.childNodes, n = t.length; n >= 0; n--) {
+          var r = t[n];
+          if (r && 1 === r.nodeType && r.hasAttribute(N)) return r;
+        }
+      }(n),
+      s = void 0 !== o ? o.nextSibling : null;
+    r.setAttribute(N, "active"), r.setAttribute("data-styled-version", "5.3.11");
+    var i = Y();
+    return i && r.setAttribute("nonce", i), n.insertBefore(r, s), r;
+  },
+  H = function () {
+    function e(e) {
+      var t = this.element = q(e);
+      t.appendChild(document.createTextNode("")), this.sheet = function (e) {
+        if (e.sheet) return e.sheet;
+        for (var t = document.styleSheets, n = 0, r = t.length; n < r; n++) {
+          var o = t[n];
+          if (o.ownerNode === e) return o;
+        }
+        D(17);
+      }(t), this.length = 0;
+    }
+    var t = e.prototype;
+    return t.insertRule = function (e, t) {
+      try {
+        return this.sheet.insertRule(t, e), this.length++, !0;
+      } catch (e) {
+        return !1;
+      }
+    }, t.deleteRule = function (e) {
+      this.sheet.deleteRule(e), this.length--;
+    }, t.getRule = function (e) {
+      var t = this.sheet.cssRules[e];
+      return void 0 !== t && "string" == typeof t.cssText ? t.cssText : "";
+    }, e;
+  }(),
+  $ = function () {
+    function e(e) {
+      var t = this.element = q(e);
+      this.nodes = t.childNodes, this.length = 0;
+    }
+    var t = e.prototype;
+    return t.insertRule = function (e, t) {
+      if (e <= this.length && e >= 0) {
+        var n = document.createTextNode(t),
+          r = this.nodes[e];
+        return this.element.insertBefore(n, r || null), this.length++, !0;
+      }
+      return !1;
+    }, t.deleteRule = function (e) {
+      this.element.removeChild(this.nodes[e]), this.length--;
+    }, t.getRule = function (e) {
+      return e < this.length ? this.nodes[e].textContent : "";
+    }, e;
+  }(),
+  W = function () {
+    function e(e) {
+      this.rules = [], this.length = 0;
+    }
+    var t = e.prototype;
+    return t.insertRule = function (e, t) {
+      return e <= this.length && (this.rules.splice(e, 0, t), this.length++, !0);
+    }, t.deleteRule = function (e) {
+      this.rules.splice(e, 1), this.length--;
+    }, t.getRule = function (e) {
+      return e < this.length ? this.rules[e] : "";
+    }, e;
+  }(),
+  U = C,
+  J = {
+    isServer: !C,
+    useCSSOMInjection: !I
+  },
+  X = function () {
+    function e(e, t, n) {
+      void 0 === e && (e = w), void 0 === t && (t = {}), this.options = y({}, J, {}, e), this.gs = t, this.names = new Map(n), this.server = !!e.isServer, !this.server && C && U && (U = !1, function (e) {
+        for (var t = document.querySelectorAll(M), n = 0, r = t.length; n < r; n++) {
+          var o = t[n];
+          o && "active" !== o.getAttribute(N) && (F(e, o), o.parentNode && o.parentNode.removeChild(o));
+        }
+      }(this));
+    }
+    e.registerId = function (e) {
+      return V(e);
+    };
+    var t = e.prototype;
+    return t.reconstructWithOptions = function (t, n) {
+      return void 0 === n && (n = !0), new e(y({}, this.options, {}, t), this.gs, n && this.names || void 0);
+    }, t.allocateGSInstance = function (e) {
+      return this.gs[e] = (this.gs[e] || 0) + 1;
+    }, t.getTag = function () {
+      return this.tag || (this.tag = (n = (t = this.options).isServer, r = t.useCSSOMInjection, o = t.target, e = n ? new W(o) : r ? new H(o) : new $(o), new j(e)));
+      var e, t, n, r, o;
+    }, t.hasNameForId = function (e, t) {
+      return this.names.has(e) && this.names.get(e).has(t);
+    }, t.registerName = function (e, t) {
+      if (V(e), this.names.has(e)) this.names.get(e).add(t);else {
+        var n = new Set();
+        n.add(t), this.names.set(e, n);
+      }
+    }, t.insertRules = function (e, t, n) {
+      this.registerName(e, t), this.getTag().insertRules(V(e), n);
+    }, t.clearNames = function (e) {
+      this.names.has(e) && this.names.get(e).clear();
+    }, t.clearRules = function (e) {
+      this.getTag().clearGroup(V(e)), this.clearNames(e);
+    }, t.clearTag = function () {
+      this.tag = void 0;
+    }, t.toString = function () {
+      return function (e) {
+        for (var t = e.getTag(), n = t.length, r = "", o = 0; o < n; o++) {
+          var s = B(o);
+          if (void 0 !== s) {
+            var i = e.names.get(s),
+              a = t.getGroup(o);
+            if (i && a && i.size) {
+              var c = N + ".g" + o + '[id="' + s + '"]',
+                u = "";
+              void 0 !== i && i.forEach(function (e) {
+                e.length > 0 && (u += e + ",");
+              }), r += "" + a + c + '{content:"' + u + '"}/*!sc*/\n';
+            }
+          }
+        }
+        return r;
+      }(this);
+    }, e;
+  }(),
+  Z = /(a)(d)/gi,
+  K = function (e) {
+    return String.fromCharCode(e + (e > 25 ? 39 : 97));
+  };
+function Q(e) {
+  var t,
+    n = "";
+  for (t = Math.abs(e); t > 52; t = t / 52 | 0) n = K(t % 52) + n;
+  return (K(t % 52) + n).replace(Z, "$1-$2");
+}
+var ee = function (e, t) {
+    for (var n = t.length; n;) e = 33 * e ^ t.charCodeAt(--n);
+    return e;
+  },
+  te = function (e) {
+    return ee(5381, e);
+  };
+function ne(e) {
+  for (var t = 0; t < e.length; t += 1) {
+    var n = e[t];
+    if (E(n) && !_(n)) return !1;
+  }
+  return !0;
+}
+var re = te("5.3.11"),
+  oe = function () {
+    function e(e, t, n) {
+      this.rules = e, this.staticRulesId = "", this.isStatic =  true && (void 0 === n || n.isStatic) && ne(e), this.componentId = t, this.baseHash = ee(re, t), this.baseStyle = n, X.registerId(t);
+    }
+    return e.prototype.generateAndInjectStyles = function (e, t, n) {
+      var r = this.componentId,
+        o = [];
+      if (this.baseStyle && o.push(this.baseStyle.generateAndInjectStyles(e, t, n)), this.isStatic && !n.hash) {
+        if (this.staticRulesId && t.hasNameForId(r, this.staticRulesId)) o.push(this.staticRulesId);else {
+          var s = _e(this.rules, e, t, n).join(""),
+            i = Q(ee(this.baseHash, s) >>> 0);
+          if (!t.hasNameForId(r, i)) {
+            var a = n(s, "." + i, void 0, r);
+            t.insertRules(r, i, a);
+          }
+          o.push(i), this.staticRulesId = i;
+        }
+      } else {
+        for (var c = this.rules.length, u = ee(this.baseHash, n.hash), l = "", d = 0; d < c; d++) {
+          var h = this.rules[d];
+          if ("string" == typeof h) l += h,  false && (0);else if (h) {
+            var p = _e(h, e, t, n),
+              f = Array.isArray(p) ? p.join("") : p;
+            u = ee(u, f + d), l += f;
+          }
+        }
+        if (l) {
+          var m = Q(u >>> 0);
+          if (!t.hasNameForId(r, m)) {
+            var y = n(l, "." + m, void 0, r);
+            t.insertRules(r, m, y);
+          }
+          o.push(m);
+        }
+      }
+      return o.join(" ");
+    }, e;
+  }(),
+  se = /^\s*\/\/.*$/gm,
+  ie = [":", "[", ".", "#"];
+function ae(e) {
+  var t,
+    n,
+    r,
+    o,
+    s = void 0 === e ? w : e,
+    i = s.options,
+    a = void 0 === i ? w : i,
+    c = s.plugins,
+    u = void 0 === c ? S : c,
+    l = new _emotion_stylis__WEBPACK_IMPORTED_MODULE_3__["default"](a),
+    d = [],
+    p = function (e) {
+      function t(t) {
+        if (t) try {
+          e(t + "}");
+        } catch (e) {}
+      }
+      return function (n, r, o, s, i, a, c, u, l, d) {
+        switch (n) {
+          case 1:
+            if (0 === l && 64 === r.charCodeAt(0)) return e(r + ";"), "";
+            break;
+          case 2:
+            if (0 === u) return r + "/*|*/";
+            break;
+          case 3:
+            switch (u) {
+              case 102:
+              case 112:
+                return e(o[0] + r), "";
+              default:
+                return r + (0 === d ? "/*|*/" : "");
+            }
+          case -2:
+            r.split("/*|*/}").forEach(t);
+        }
+      };
+    }(function (e) {
+      d.push(e);
+    }),
+    f = function (e, r, s) {
+      return 0 === r && -1 !== ie.indexOf(s[n.length]) || s.match(o) ? e : "." + t;
+    };
+  function m(e, s, i, a) {
+    void 0 === a && (a = "&");
+    var c = e.replace(se, ""),
+      u = s && i ? i + " " + s + " { " + c + " }" : c;
+    return t = a, n = s, r = new RegExp("\\" + n + "\\b", "g"), o = new RegExp("(\\" + n + "\\b){2,}"), l(i || !s ? "" : s, u);
+  }
+  return l.use([].concat(u, [function (e, t, o) {
+    2 === e && o.length && o[0].lastIndexOf(n) > 0 && (o[0] = o[0].replace(r, f));
+  }, p, function (e) {
+    if (-2 === e) {
+      var t = d;
+      return d = [], t;
+    }
+  }])), m.hash = u.length ? u.reduce(function (e, t) {
+    return t.name || D(15), ee(e, t.name);
+  }, 5381).toString() : "", m;
+}
+var ce = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createContext(),
+  ue = ce.Consumer,
+  le = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createContext(),
+  de = (le.Consumer, new X()),
+  he = ae();
+function pe() {
+  return (0,react__WEBPACK_IMPORTED_MODULE_1__.useContext)(ce) || de;
+}
+function fe() {
+  return (0,react__WEBPACK_IMPORTED_MODULE_1__.useContext)(le) || he;
+}
+function me(e) {
+  var t = (0,react__WEBPACK_IMPORTED_MODULE_1__.useState)(e.stylisPlugins),
+    n = t[0],
+    s = t[1],
+    c = pe(),
+    u = (0,react__WEBPACK_IMPORTED_MODULE_1__.useMemo)(function () {
+      var t = c;
+      return e.sheet ? t = e.sheet : e.target && (t = t.reconstructWithOptions({
+        target: e.target
+      }, !1)), e.disableCSSOMInjection && (t = t.reconstructWithOptions({
+        useCSSOMInjection: !1
+      })), t;
+    }, [e.disableCSSOMInjection, e.sheet, e.target]),
+    l = (0,react__WEBPACK_IMPORTED_MODULE_1__.useMemo)(function () {
+      return ae({
+        options: {
+          prefix: !e.disableVendorPrefixes
+        },
+        plugins: n
+      });
+    }, [e.disableVendorPrefixes, n]);
+  return (0,react__WEBPACK_IMPORTED_MODULE_1__.useEffect)(function () {
+    shallowequal__WEBPACK_IMPORTED_MODULE_2___default()(n, e.stylisPlugins) || s(e.stylisPlugins);
+  }, [e.stylisPlugins]), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(ce.Provider, {
+    value: u
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(le.Provider, {
+    value: l
+  },  false ? 0 : e.children));
+}
+var ye = function () {
+    function e(e, t) {
+      var n = this;
+      this.inject = function (e, t) {
+        void 0 === t && (t = he);
+        var r = n.name + t.hash;
+        e.hasNameForId(n.id, r) || e.insertRules(n.id, r, t(n.rules, r, "@keyframes"));
+      }, this.toString = function () {
+        return D(12, String(n.name));
+      }, this.name = e, this.id = "sc-keyframes-" + e, this.rules = t;
+    }
+    return e.prototype.getName = function (e) {
+      return void 0 === e && (e = he), this.name + e.hash;
+    }, e;
+  }(),
+  ve = /([A-Z])/,
+  ge = /([A-Z])/g,
+  Se = /^ms-/,
+  we = function (e) {
+    return "-" + e.toLowerCase();
+  };
+function Ee(e) {
+  return ve.test(e) ? e.replace(ge, we).replace(Se, "-ms-") : e;
+}
+var be = function (e) {
+  return null == e || !1 === e || "" === e;
+};
+function _e(e, n, r, o) {
+  if (Array.isArray(e)) {
+    for (var s, i = [], a = 0, c = e.length; a < c; a += 1) "" !== (s = _e(e[a], n, r, o)) && (Array.isArray(s) ? i.push.apply(i, s) : i.push(s));
+    return i;
+  }
+  if (be(e)) return "";
+  if (_(e)) return "." + e.styledComponentId;
+  if (E(e)) {
+    if ("function" != typeof (l = e) || l.prototype && l.prototype.isReactComponent || !n) return e;
+    var u = e(n);
+    return  false && 0, _e(u, n, r, o);
+  }
+  var l;
+  return e instanceof ye ? r ? (e.inject(r, o), e.getName(o)) : e : g(e) ? function e(t, n) {
+    var r,
+      o,
+      s = [];
+    for (var i in t) t.hasOwnProperty(i) && !be(t[i]) && (Array.isArray(t[i]) && t[i].isCss || E(t[i]) ? s.push(Ee(i) + ":", t[i], ";") : g(t[i]) ? s.push.apply(s, e(t[i], i)) : s.push(Ee(i) + ": " + (r = i, null == (o = t[i]) || "boolean" == typeof o || "" === o ? "" : "number" != typeof o || 0 === o || r in _emotion_unitless__WEBPACK_IMPORTED_MODULE_4__["default"] || r.startsWith("--") ? String(o).trim() : o + "px") + ";"));
+    return n ? [n + " {"].concat(s, ["}"]) : s;
+  }(e) : e.toString();
+}
+var Ne = function (e) {
+  return Array.isArray(e) && (e.isCss = !0), e;
+};
+function Ae(e) {
+  for (var t = arguments.length, n = new Array(t > 1 ? t - 1 : 0), r = 1; r < t; r++) n[r - 1] = arguments[r];
+  return E(e) || g(e) ? Ne(_e(v(S, [e].concat(n)))) : 0 === n.length && 1 === e.length && "string" == typeof e[0] ? e : Ne(_e(v(e, n)));
+}
+var Ce = /invalid hook call/i,
+  Ie = new Set(),
+  Pe = function (e, t) {
+    if (false) { var o, n, r; }
+  },
+  Oe = function (e, t, n) {
+    return void 0 === n && (n = w), e.theme !== n.theme && e.theme || t || n.theme;
+  },
+  Re = /[!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~-]+/g,
+  De = /(^-|-$)/g;
+function je(e) {
+  return e.replace(Re, "-").replace(De, "");
+}
+var Te = function (e) {
+  return Q(te(e) >>> 0);
+};
+function xe(e) {
+  return "string" == typeof e && ( true || 0);
+}
+var ke = function (e) {
+    return "function" == typeof e || "object" == typeof e && null !== e && !Array.isArray(e);
+  },
+  Ve = function (e) {
+    return "__proto__" !== e && "constructor" !== e && "prototype" !== e;
+  };
+function Be(e, t, n) {
+  var r = e[n];
+  ke(t) && ke(r) ? ze(r, t) : e[n] = t;
+}
+function ze(e) {
+  for (var t = arguments.length, n = new Array(t > 1 ? t - 1 : 0), r = 1; r < t; r++) n[r - 1] = arguments[r];
+  for (var o = 0, s = n; o < s.length; o++) {
+    var i = s[o];
+    if (ke(i)) for (var a in i) Ve(a) && Be(e, i[a], a);
+  }
+  return e;
+}
+var Me = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createContext(),
+  Ge = Me.Consumer;
+function Le(e) {
+  var t = (0,react__WEBPACK_IMPORTED_MODULE_1__.useContext)(Me),
+    n = (0,react__WEBPACK_IMPORTED_MODULE_1__.useMemo)(function () {
+      return function (e, t) {
+        if (!e) return D(14);
+        if (E(e)) {
+          var n = e(t);
+          return  true ? n : 0;
+        }
+        return Array.isArray(e) || "object" != typeof e ? D(8) : t ? y({}, t, {}, e) : e;
+      }(e.theme, t);
+    }, [e.theme, t]);
+  return e.children ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(Me.Provider, {
+    value: n
+  }, e.children) : null;
+}
+var Fe = {};
+function Ye(e, t, n) {
+  var o = _(e),
+    i = !xe(e),
+    a = t.attrs,
+    c = void 0 === a ? S : a,
+    l = t.componentId,
+    d = void 0 === l ? function (e, t) {
+      var n = "string" != typeof e ? "sc" : je(e);
+      Fe[n] = (Fe[n] || 0) + 1;
+      var r = n + "-" + Te("5.3.11" + n + Fe[n]);
+      return t ? t + "-" + r : r;
+    }(t.displayName, t.parentComponentId) : l,
+    h = t.displayName,
+    p = void 0 === h ? function (e) {
+      return xe(e) ? "styled." + e : "Styled(" + b(e) + ")";
+    }(e) : h,
+    v = t.displayName && t.componentId ? je(t.displayName) + "-" + t.componentId : t.componentId || d,
+    g = o && e.attrs ? Array.prototype.concat(e.attrs, c).filter(Boolean) : c,
+    N = t.shouldForwardProp;
+  o && e.shouldForwardProp && (N = t.shouldForwardProp ? function (n, r, o) {
+    return e.shouldForwardProp(n, r, o) && t.shouldForwardProp(n, r, o);
+  } : e.shouldForwardProp);
+  var A,
+    C = new oe(n, v, o ? e.componentStyle : void 0),
+    I = C.isStatic && 0 === c.length,
+    P = function (e, t) {
+      return function (e, t, n, r) {
+        var o = e.attrs,
+          i = e.componentStyle,
+          a = e.defaultProps,
+          c = e.foldedComponentIds,
+          l = e.shouldForwardProp,
+          d = e.styledComponentId,
+          h = e.target,
+          p = function (e, t, n) {
+            void 0 === e && (e = w);
+            var r = y({}, t, {
+                theme: e
+              }),
+              o = {};
+            return n.forEach(function (e) {
+              var t,
+                n,
+                s,
+                i = e;
+              for (t in E(i) && (i = i(r)), i) r[t] = o[t] = "className" === t ? (n = o[t], s = i[t], n && s ? n + " " + s : n || s) : i[t];
+            }), [r, o];
+          }(Oe(t, (0,react__WEBPACK_IMPORTED_MODULE_1__.useContext)(Me), a) || w, t, o),
+          m = p[0],
+          v = p[1],
+          g = function (e, t, n, r) {
+            var o = pe(),
+              s = fe(),
+              i = t ? e.generateAndInjectStyles(w, o, s) : e.generateAndInjectStyles(n, o, s);
+            return  false && 0, i;
+          }(i, r, m,  false ? 0 : void 0),
+          S = n,
+          b = v.$as || t.$as || v.as || t.as || h,
+          _ = xe(b),
+          N = v !== t ? y({}, t, {}, v) : t,
+          A = {};
+        for (var C in N) "$" !== C[0] && "as" !== C && ("forwardedAs" === C ? A.as = N[C] : (l ? l(C, _emotion_is_prop_valid__WEBPACK_IMPORTED_MODULE_5__["default"], b) : !_ || (0,_emotion_is_prop_valid__WEBPACK_IMPORTED_MODULE_5__["default"])(C)) && (A[C] = N[C]));
+        return t.style && v.style !== t.style && (A.style = y({}, t.style, {}, v.style)), A.className = Array.prototype.concat(c, d, g !== d ? g : null, t.className, v.className).filter(Boolean).join(" "), A.ref = S, /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(b, A);
+      }(A, e, t, I);
+    };
+  return P.displayName = p, (A = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.forwardRef(P)).attrs = g, A.componentStyle = C, A.displayName = p, A.shouldForwardProp = N, A.foldedComponentIds = o ? Array.prototype.concat(e.foldedComponentIds, e.styledComponentId) : S, A.styledComponentId = v, A.target = o ? e.target : e, A.withComponent = function (e) {
+    var r = t.componentId,
+      o = function (e, t) {
+        if (null == e) return {};
+        var n,
+          r,
+          o = {},
+          s = Object.keys(e);
+        for (r = 0; r < s.length; r++) n = s[r], t.indexOf(n) >= 0 || (o[n] = e[n]);
+        return o;
+      }(t, ["componentId"]),
+      s = r && r + "-" + (xe(e) ? e : je(b(e)));
+    return Ye(e, y({}, o, {
+      attrs: g,
+      componentId: s
+    }), n);
+  }, Object.defineProperty(A, "defaultProps", {
+    get: function () {
+      return this._foldedDefaultProps;
+    },
+    set: function (t) {
+      this._foldedDefaultProps = o ? ze({}, e.defaultProps, t) : t;
+    }
+  }),  false && (0), Object.defineProperty(A, "toString", {
+    value: function () {
+      return "." + A.styledComponentId;
+    }
+  }), i && hoist_non_react_statics__WEBPACK_IMPORTED_MODULE_6___default()(A, e, {
+    attrs: !0,
+    componentStyle: !0,
+    displayName: !0,
+    foldedComponentIds: !0,
+    shouldForwardProp: !0,
+    styledComponentId: !0,
+    target: !0,
+    withComponent: !0
+  }), A;
+}
+var qe = function (e) {
+  return function e(t, r, o) {
+    if (void 0 === o && (o = w), !(0,react_is__WEBPACK_IMPORTED_MODULE_0__.isValidElementType)(r)) return D(1, String(r));
+    var s = function () {
+      return t(r, o, Ae.apply(void 0, arguments));
+    };
+    return s.withConfig = function (n) {
+      return e(t, r, y({}, o, {}, n));
+    }, s.attrs = function (n) {
+      return e(t, r, y({}, o, {
+        attrs: Array.prototype.concat(o.attrs, n).filter(Boolean)
+      }));
+    }, s;
+  }(Ye, e);
+};
+["a", "abbr", "address", "area", "article", "aside", "audio", "b", "base", "bdi", "bdo", "big", "blockquote", "body", "br", "button", "canvas", "caption", "cite", "code", "col", "colgroup", "data", "datalist", "dd", "del", "details", "dfn", "dialog", "div", "dl", "dt", "em", "embed", "fieldset", "figcaption", "figure", "footer", "form", "h1", "h2", "h3", "h4", "h5", "h6", "head", "header", "hgroup", "hr", "html", "i", "iframe", "img", "input", "ins", "kbd", "keygen", "label", "legend", "li", "link", "main", "map", "mark", "marquee", "menu", "menuitem", "meta", "meter", "nav", "noscript", "object", "ol", "optgroup", "option", "output", "p", "param", "picture", "pre", "progress", "q", "rp", "rt", "ruby", "s", "samp", "script", "section", "select", "small", "source", "span", "strong", "style", "sub", "summary", "sup", "table", "tbody", "td", "textarea", "tfoot", "th", "thead", "time", "title", "tr", "track", "u", "ul", "var", "video", "wbr", "circle", "clipPath", "defs", "ellipse", "foreignObject", "g", "image", "line", "linearGradient", "marker", "mask", "path", "pattern", "polygon", "polyline", "radialGradient", "rect", "stop", "svg", "text", "textPath", "tspan"].forEach(function (e) {
+  qe[e] = qe(e);
+});
+var He = function () {
+  function e(e, t) {
+    this.rules = e, this.componentId = t, this.isStatic = ne(e), X.registerId(this.componentId + 1);
+  }
+  var t = e.prototype;
+  return t.createStyles = function (e, t, n, r) {
+    var o = r(_e(this.rules, t, n, r).join(""), ""),
+      s = this.componentId + e;
+    n.insertRules(s, s, o);
+  }, t.removeStyles = function (e, t) {
+    t.clearRules(this.componentId + e);
+  }, t.renderStyles = function (e, t, n, r) {
+    e > 2 && X.registerId(this.componentId + e), this.removeStyles(e, n), this.createStyles(e, t, n, r);
+  }, e;
+}();
+function $e(e) {
+  for (var t = arguments.length, n = new Array(t > 1 ? t - 1 : 0), o = 1; o < t; o++) n[o - 1] = arguments[o];
+  var i = Ae.apply(void 0, [e].concat(n)),
+    a = "sc-global-" + Te(JSON.stringify(i)),
+    u = new He(i, a);
+  function d(e) {
+    var t = pe(),
+      n = fe(),
+      o = (0,react__WEBPACK_IMPORTED_MODULE_1__.useContext)(Me),
+      d = (0,react__WEBPACK_IMPORTED_MODULE_1__.useRef)(t.allocateGSInstance(a)).current;
+    return  false && 0,  false && 0, t.server && h(d, e, t, o, n), (0,react__WEBPACK_IMPORTED_MODULE_1__.useLayoutEffect)(function () {
+      if (!t.server) return h(d, e, t, o, n), function () {
+        return u.removeStyles(d, t);
+      };
+    }, [d, e, t, o, n]), null;
+  }
+  function h(e, t, n, r, o) {
+    if (u.isStatic) u.renderStyles(e, P, n, o);else {
+      var s = y({}, t, {
+        theme: Oe(t, r, d.defaultProps)
+      });
+      u.renderStyles(e, s, n, o);
+    }
+  }
+  return  false && 0, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.memo(d);
+}
+function We(e) {
+   false && 0;
+  for (var t = arguments.length, n = new Array(t > 1 ? t - 1 : 0), r = 1; r < t; r++) n[r - 1] = arguments[r];
+  var o = Ae.apply(void 0, [e].concat(n)).join(""),
+    s = Te(o);
+  return new ye(s, o);
+}
+var Ue = function () {
+    function e() {
+      var e = this;
+      this._emitSheetCSS = function () {
+        var t = e.instance.toString();
+        if (!t) return "";
+        var n = Y();
+        return "<style " + [n && 'nonce="' + n + '"', N + '="true"', 'data-styled-version="5.3.11"'].filter(Boolean).join(" ") + ">" + t + "</style>";
+      }, this.getStyleTags = function () {
+        return e.sealed ? D(2) : e._emitSheetCSS();
+      }, this.getStyleElement = function () {
+        var t;
+        if (e.sealed) return D(2);
+        var n = ((t = {})[N] = "", t["data-styled-version"] = "5.3.11", t.dangerouslySetInnerHTML = {
+            __html: e.instance.toString()
+          }, t),
+          o = Y();
+        return o && (n.nonce = o), [/*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement("style", y({}, n, {
+          key: "sc-0-0"
+        }))];
+      }, this.seal = function () {
+        e.sealed = !0;
+      }, this.instance = new X({
+        isServer: !0
+      }), this.sealed = !1;
+    }
+    var t = e.prototype;
+    return t.collectStyles = function (e) {
+      return this.sealed ? D(2) : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(me, {
+        sheet: this.instance
+      }, e);
+    }, t.interleaveWithNodeStream = function (e) {
+      return D(3);
+    }, e;
+  }(),
+  Je = function (e) {
+    var t = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.forwardRef(function (t, n) {
+      var o = (0,react__WEBPACK_IMPORTED_MODULE_1__.useContext)(Me),
+        i = e.defaultProps,
+        a = Oe(t, o, i);
+      return  false && 0, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(e, y({}, t, {
+        theme: a,
+        ref: n
+      }));
+    });
+    return hoist_non_react_statics__WEBPACK_IMPORTED_MODULE_6___default()(t, e), t.displayName = "WithTheme(" + b(e) + ")", t;
+  },
+  Xe = function () {
+    return (0,react__WEBPACK_IMPORTED_MODULE_1__.useContext)(Me);
+  },
+  Ze = {
+    StyleSheet: X,
+    masterSheet: de
+  };
+ false && 0,  false && (0);
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (qe);
+
+
+/***/ }),
+
 /***/ "./node_modules/void-elements/index.js":
 /***/ ((module) => {
 
@@ -26615,155 +34827,6 @@ function _typeof(o) {
     return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
   }, _typeof(o);
 }
-
-
-/***/ }),
-
-/***/ "./node_modules/@radix-ui/react-compose-refs/dist/index.mjs":
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   composeRefs: () => (/* binding */ $6ed0406888f73fc4$export$43e446d32b3d21af),
-/* harmony export */   useComposedRefs: () => (/* binding */ $6ed0406888f73fc4$export$c7b2cbe3552a0d05)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/index.js");
-
-
-/**
- * Set a given ref to a given value
- * This utility takes care of different types of refs: callback refs and RefObject(s)
- */
-function $6ed0406888f73fc4$var$setRef(ref, value) {
-  if (typeof ref === 'function') ref(value);else if (ref !== null && ref !== undefined) ref.current = value;
-}
-/**
- * A utility to compose multiple refs together
- * Accepts callback refs and RefObject(s)
- */
-function $6ed0406888f73fc4$export$43e446d32b3d21af() {
-  for (var _len = arguments.length, refs = new Array(_len), _key = 0; _key < _len; _key++) {
-    refs[_key] = arguments[_key];
-  }
-  return node => refs.forEach(ref => $6ed0406888f73fc4$var$setRef(ref, node));
-}
-/**
- * A custom hook that composes multiple refs
- * Accepts callback refs and RefObject(s)
- */
-function $6ed0406888f73fc4$export$c7b2cbe3552a0d05() {
-  for (var _len2 = arguments.length, refs = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-    refs[_key2] = arguments[_key2];
-  }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  return (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)($6ed0406888f73fc4$export$43e446d32b3d21af(...refs), refs);
-}
-
-
-/***/ }),
-
-/***/ "./node_modules/@radix-ui/react-slot/dist/index.mjs":
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   Root: () => (/* binding */ $5e63c961fc1ce211$export$be92b6f5f03c0fe9),
-/* harmony export */   Slot: () => (/* binding */ $5e63c961fc1ce211$export$8c6ed5c666ac1360),
-/* harmony export */   Slottable: () => (/* binding */ $5e63c961fc1ce211$export$d9f1ccf0bdb05d45)
-/* harmony export */ });
-/* harmony import */ var _babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/extends.js");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/react/index.js");
-/* harmony import */ var _radix_ui_react_compose_refs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/@radix-ui/react-compose-refs/dist/index.mjs");
-
-
-
-
-/* -------------------------------------------------------------------------------------------------
- * Slot
- * -----------------------------------------------------------------------------------------------*/
-const $5e63c961fc1ce211$export$8c6ed5c666ac1360 = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.forwardRef)((props, forwardedRef) => {
-  const {
-    children: children,
-    ...slotProps
-  } = props;
-  const childrenArray = react__WEBPACK_IMPORTED_MODULE_1__.Children.toArray(children);
-  const slottable = childrenArray.find($5e63c961fc1ce211$var$isSlottable);
-  if (slottable) {
-    // the new element to render is the one passed as a child of `Slottable`
-    const newElement = slottable.props.children;
-    const newChildren = childrenArray.map(child => {
-      if (child === slottable) {
-        // because the new element will be the one rendered, we are only interested
-        // in grabbing its children (`newElement.props.children`)
-        if (react__WEBPACK_IMPORTED_MODULE_1__.Children.count(newElement) > 1) return react__WEBPACK_IMPORTED_MODULE_1__.Children.only(null);
-        return /*#__PURE__*/ /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.isValidElement)(newElement) ? newElement.props.children : null;
-      } else return child;
-    });
-    return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)($5e63c961fc1ce211$var$SlotClone, (0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({}, slotProps, {
-      ref: forwardedRef
-    }), /*#__PURE__*/ /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.isValidElement)(newElement) ? /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.cloneElement)(newElement, undefined, newChildren) : null);
-  }
-  return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)($5e63c961fc1ce211$var$SlotClone, (0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({}, slotProps, {
-    ref: forwardedRef
-  }), children);
-});
-$5e63c961fc1ce211$export$8c6ed5c666ac1360.displayName = 'Slot';
-/* -------------------------------------------------------------------------------------------------
- * SlotClone
- * -----------------------------------------------------------------------------------------------*/
-const $5e63c961fc1ce211$var$SlotClone = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.forwardRef)((props, forwardedRef) => {
-  const {
-    children: children,
-    ...slotProps
-  } = props;
-  if ( /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.isValidElement)(children)) return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.cloneElement)(children, {
-    ...$5e63c961fc1ce211$var$mergeProps(slotProps, children.props),
-    ref: forwardedRef ? (0,_radix_ui_react_compose_refs__WEBPACK_IMPORTED_MODULE_2__.composeRefs)(forwardedRef, children.ref) : children.ref
-  });
-  return react__WEBPACK_IMPORTED_MODULE_1__.Children.count(children) > 1 ? react__WEBPACK_IMPORTED_MODULE_1__.Children.only(null) : null;
-});
-$5e63c961fc1ce211$var$SlotClone.displayName = 'SlotClone';
-/* -------------------------------------------------------------------------------------------------
- * Slottable
- * -----------------------------------------------------------------------------------------------*/
-const $5e63c961fc1ce211$export$d9f1ccf0bdb05d45 = _ref => {
-  let {
-    children: children
-  } = _ref;
-  return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(react__WEBPACK_IMPORTED_MODULE_1__.Fragment, null, children);
-};
-/* ---------------------------------------------------------------------------------------------- */
-function $5e63c961fc1ce211$var$isSlottable(child) {
-  return /*#__PURE__*/ /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.isValidElement)(child) && child.type === $5e63c961fc1ce211$export$d9f1ccf0bdb05d45;
-}
-function $5e63c961fc1ce211$var$mergeProps(slotProps, childProps) {
-  // all child props should override
-  const overrideProps = {
-    ...childProps
-  };
-  for (const propName in childProps) {
-    const slotPropValue = slotProps[propName];
-    const childPropValue = childProps[propName];
-    const isHandler = /^on[A-Z]/.test(propName);
-    if (isHandler) {
-      // if the handler exists on both, we compose them
-      if (slotPropValue && childPropValue) overrideProps[propName] = function () {
-        childPropValue(...arguments);
-        slotPropValue(...arguments);
-      };else if (slotPropValue) overrideProps[propName] = slotPropValue;
-    } else if (propName === 'style') overrideProps[propName] = {
-      ...slotPropValue,
-      ...childPropValue
-    };else if (propName === 'className') overrideProps[propName] = [slotPropValue, childPropValue].filter(Boolean).join(' ');
-  }
-  return {
-    ...slotProps,
-    ...overrideProps
-  };
-}
-const $5e63c961fc1ce211$export$be92b6f5f03c0fe9 = $5e63c961fc1ce211$export$8c6ed5c666ac1360;
 
 
 /***/ }),
@@ -27227,7 +35290,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Heading: () => (/* binding */ Heading)
 /* harmony export */ });
-/* harmony import */ var _radix_ui_react_slot__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/@radix-ui/react-slot/dist/index.mjs");
+/* harmony import */ var _radix_ui_react_slot__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/@react-email/heading/node_modules/@radix-ui/react-slot/dist/index.mjs");
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/jsx-runtime.js");
 var __defProp = Object.defineProperty;
 var __defProps = Object.defineProperties;
@@ -27312,6 +35375,155 @@ var Heading = _a => {
     })
   }));
 };
+
+
+/***/ }),
+
+/***/ "./node_modules/@react-email/heading/node_modules/@radix-ui/react-compose-refs/dist/index.mjs":
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   composeRefs: () => (/* binding */ $6ed0406888f73fc4$export$43e446d32b3d21af),
+/* harmony export */   useComposedRefs: () => (/* binding */ $6ed0406888f73fc4$export$c7b2cbe3552a0d05)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/index.js");
+
+
+/**
+ * Set a given ref to a given value
+ * This utility takes care of different types of refs: callback refs and RefObject(s)
+ */
+function $6ed0406888f73fc4$var$setRef(ref, value) {
+  if (typeof ref === 'function') ref(value);else if (ref !== null && ref !== undefined) ref.current = value;
+}
+/**
+ * A utility to compose multiple refs together
+ * Accepts callback refs and RefObject(s)
+ */
+function $6ed0406888f73fc4$export$43e446d32b3d21af() {
+  for (var _len = arguments.length, refs = new Array(_len), _key = 0; _key < _len; _key++) {
+    refs[_key] = arguments[_key];
+  }
+  return node => refs.forEach(ref => $6ed0406888f73fc4$var$setRef(ref, node));
+}
+/**
+ * A custom hook that composes multiple refs
+ * Accepts callback refs and RefObject(s)
+ */
+function $6ed0406888f73fc4$export$c7b2cbe3552a0d05() {
+  for (var _len2 = arguments.length, refs = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    refs[_key2] = arguments[_key2];
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)($6ed0406888f73fc4$export$43e446d32b3d21af(...refs), refs);
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/@react-email/heading/node_modules/@radix-ui/react-slot/dist/index.mjs":
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Root: () => (/* binding */ $5e63c961fc1ce211$export$be92b6f5f03c0fe9),
+/* harmony export */   Slot: () => (/* binding */ $5e63c961fc1ce211$export$8c6ed5c666ac1360),
+/* harmony export */   Slottable: () => (/* binding */ $5e63c961fc1ce211$export$d9f1ccf0bdb05d45)
+/* harmony export */ });
+/* harmony import */ var _babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/extends.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/react/index.js");
+/* harmony import */ var _radix_ui_react_compose_refs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/@react-email/heading/node_modules/@radix-ui/react-compose-refs/dist/index.mjs");
+
+
+
+
+/* -------------------------------------------------------------------------------------------------
+ * Slot
+ * -----------------------------------------------------------------------------------------------*/
+const $5e63c961fc1ce211$export$8c6ed5c666ac1360 = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.forwardRef)((props, forwardedRef) => {
+  const {
+    children: children,
+    ...slotProps
+  } = props;
+  const childrenArray = react__WEBPACK_IMPORTED_MODULE_1__.Children.toArray(children);
+  const slottable = childrenArray.find($5e63c961fc1ce211$var$isSlottable);
+  if (slottable) {
+    // the new element to render is the one passed as a child of `Slottable`
+    const newElement = slottable.props.children;
+    const newChildren = childrenArray.map(child => {
+      if (child === slottable) {
+        // because the new element will be the one rendered, we are only interested
+        // in grabbing its children (`newElement.props.children`)
+        if (react__WEBPACK_IMPORTED_MODULE_1__.Children.count(newElement) > 1) return react__WEBPACK_IMPORTED_MODULE_1__.Children.only(null);
+        return /*#__PURE__*/ /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.isValidElement)(newElement) ? newElement.props.children : null;
+      } else return child;
+    });
+    return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)($5e63c961fc1ce211$var$SlotClone, (0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({}, slotProps, {
+      ref: forwardedRef
+    }), /*#__PURE__*/ /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.isValidElement)(newElement) ? /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.cloneElement)(newElement, undefined, newChildren) : null);
+  }
+  return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)($5e63c961fc1ce211$var$SlotClone, (0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({}, slotProps, {
+    ref: forwardedRef
+  }), children);
+});
+$5e63c961fc1ce211$export$8c6ed5c666ac1360.displayName = 'Slot';
+/* -------------------------------------------------------------------------------------------------
+ * SlotClone
+ * -----------------------------------------------------------------------------------------------*/
+const $5e63c961fc1ce211$var$SlotClone = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.forwardRef)((props, forwardedRef) => {
+  const {
+    children: children,
+    ...slotProps
+  } = props;
+  if ( /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.isValidElement)(children)) return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.cloneElement)(children, {
+    ...$5e63c961fc1ce211$var$mergeProps(slotProps, children.props),
+    ref: forwardedRef ? (0,_radix_ui_react_compose_refs__WEBPACK_IMPORTED_MODULE_2__.composeRefs)(forwardedRef, children.ref) : children.ref
+  });
+  return react__WEBPACK_IMPORTED_MODULE_1__.Children.count(children) > 1 ? react__WEBPACK_IMPORTED_MODULE_1__.Children.only(null) : null;
+});
+$5e63c961fc1ce211$var$SlotClone.displayName = 'SlotClone';
+/* -------------------------------------------------------------------------------------------------
+ * Slottable
+ * -----------------------------------------------------------------------------------------------*/
+const $5e63c961fc1ce211$export$d9f1ccf0bdb05d45 = _ref => {
+  let {
+    children: children
+  } = _ref;
+  return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(react__WEBPACK_IMPORTED_MODULE_1__.Fragment, null, children);
+};
+/* ---------------------------------------------------------------------------------------------- */
+function $5e63c961fc1ce211$var$isSlottable(child) {
+  return /*#__PURE__*/ /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.isValidElement)(child) && child.type === $5e63c961fc1ce211$export$d9f1ccf0bdb05d45;
+}
+function $5e63c961fc1ce211$var$mergeProps(slotProps, childProps) {
+  // all child props should override
+  const overrideProps = {
+    ...childProps
+  };
+  for (const propName in childProps) {
+    const slotPropValue = slotProps[propName];
+    const childPropValue = childProps[propName];
+    const isHandler = /^on[A-Z]/.test(propName);
+    if (isHandler) {
+      // if the handler exists on both, we compose them
+      if (slotPropValue && childPropValue) overrideProps[propName] = function () {
+        childPropValue(...arguments);
+        slotPropValue(...arguments);
+      };else if (slotPropValue) overrideProps[propName] = slotPropValue;
+    } else if (propName === 'style') overrideProps[propName] = {
+      ...slotPropValue,
+      ...childPropValue
+    };else if (propName === 'className') overrideProps[propName] = [slotPropValue, childPropValue].filter(Boolean).join(' ');
+  }
+  return {
+    ...slotProps,
+    ...overrideProps
+  };
+}
+const $5e63c961fc1ce211$export$be92b6f5f03c0fe9 = $5e63c961fc1ce211$export$8c6ed5c666ac1360;
 
 
 /***/ }),
@@ -38022,9 +46234,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   use: () => (/* binding */ use),
 /* harmony export */   walkTokens: () => (/* binding */ walkTokens)
 /* harmony export */ });
-/* harmony import */ var _home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_classPrivateMethodInitSpec_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/classPrivateMethodInitSpec.js");
-/* harmony import */ var _home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_assertClassBrand_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/assertClassBrand.js");
-/* harmony import */ var _home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/defineProperty.js");
+/* harmony import */ var _Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_classPrivateMethodInitSpec_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/classPrivateMethodInitSpec.js");
+/* harmony import */ var _Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_assertClassBrand_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/assertClassBrand.js");
+/* harmony import */ var _Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/defineProperty.js");
 
 
 
@@ -38347,10 +46559,10 @@ function indentCodeCompensation(raw, text) {
  */
 class _Tokenizer {
   constructor(options) {
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
     // TODO: Fix this rules type
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "rules", void 0);
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "lexer", void 0);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "rules", void 0);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "lexer", void 0);
     this.options = options || _defaults;
   }
   space(src) {
@@ -39228,11 +47440,11 @@ function mangle(text) {
  */
 class _Lexer {
   constructor(options) {
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "tokens", void 0);
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "state", void 0);
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "tokenizer", void 0);
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "inlineQueue", void 0);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "tokens", void 0);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "state", void 0);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "tokenizer", void 0);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "inlineQueue", void 0);
     // TokenList cannot be created in one go
     // @ts-expect-error
     this.tokens = [];
@@ -39657,7 +47869,7 @@ class _Lexer {
  */
 class _Renderer {
   constructor(options) {
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
     this.options = options || _defaults;
   }
   code(code, infostring, escaped) {
@@ -39808,7 +48020,7 @@ class _TextRenderer {
  */
 class _Slugger {
   constructor() {
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "seen", void 0);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "seen", void 0);
     this.seen = {};
   }
   serialize(value) {
@@ -39852,10 +48064,10 @@ class _Slugger {
  */
 class _Parser {
   constructor(options) {
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "renderer", void 0);
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "textRenderer", void 0);
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "slugger", void 0);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "renderer", void 0);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "textRenderer", void 0);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "slugger", void 0);
     this.options = options || _defaults;
     this.options.renderer = this.options.renderer || new _Renderer();
     this.renderer = this.options.renderer;
@@ -40121,7 +48333,7 @@ class _Parser {
 }
 class _Hooks {
   constructor(options) {
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
     this.options = options || _defaults;
   }
   /**
@@ -40137,24 +48349,24 @@ class _Hooks {
     return html;
   }
 }
-(0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(_Hooks, "passThroughHooks", new Set(['preprocess', 'postprocess']));
+(0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(_Hooks, "passThroughHooks", new Set(['preprocess', 'postprocess']));
 var _Marked_brand = /*#__PURE__*/new WeakSet();
 class Marked {
   constructor() {
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_classPrivateMethodInitSpec_js__WEBPACK_IMPORTED_MODULE_0__["default"])(this, _Marked_brand);
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "defaults", _getDefaults());
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", this.setOptions);
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "parse", (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_assertClassBrand_js__WEBPACK_IMPORTED_MODULE_1__["default"])(_Marked_brand, this, _parseMarkdown).call(this, _Lexer.lex, _Parser.parse));
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "parseInline", (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_assertClassBrand_js__WEBPACK_IMPORTED_MODULE_1__["default"])(_Marked_brand, this, _parseMarkdown).call(this, _Lexer.lexInline, _Parser.parseInline));
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Parser", _Parser);
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "parser", _Parser.parse);
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Renderer", _Renderer);
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "TextRenderer", _TextRenderer);
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Lexer", _Lexer);
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "lexer", _Lexer.lex);
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Tokenizer", _Tokenizer);
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Slugger", _Slugger);
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Hooks", _Hooks);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_classPrivateMethodInitSpec_js__WEBPACK_IMPORTED_MODULE_0__["default"])(this, _Marked_brand);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "defaults", _getDefaults());
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", this.setOptions);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "parse", (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_assertClassBrand_js__WEBPACK_IMPORTED_MODULE_1__["default"])(_Marked_brand, this, _parseMarkdown).call(this, _Lexer.lex, _Parser.parse));
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "parseInline", (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_assertClassBrand_js__WEBPACK_IMPORTED_MODULE_1__["default"])(_Marked_brand, this, _parseMarkdown).call(this, _Lexer.lexInline, _Parser.parseInline));
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Parser", _Parser);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "parser", _Parser.parse);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Renderer", _Renderer);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "TextRenderer", _TextRenderer);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Lexer", _Lexer);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "lexer", _Lexer.lex);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Tokenizer", _Tokenizer);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Slugger", _Slugger);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Hooks", _Hooks);
     this.use(...arguments);
   }
   /**
@@ -40396,7 +48608,7 @@ function _parseMarkdown(lexer, parser) {
       }
       opt.async = true;
     }
-    const throwError = (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_assertClassBrand_js__WEBPACK_IMPORTED_MODULE_1__["default"])(_Marked_brand, this, _onError).call(this, !!opt.silent, !!opt.async, callback);
+    const throwError = (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_assertClassBrand_js__WEBPACK_IMPORTED_MODULE_1__["default"])(_Marked_brand, this, _onError).call(this, !!opt.silent, !!opt.async, callback);
     // throw error in case of non string input
     if (typeof src === 'undefined' || src === null) {
       return throwError(new Error('marked(): input parameter is undefined or null'));
@@ -40593,7 +48805,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   parseCssInJsToInlineCss: () => (/* binding */ parseCssInJsToInlineCss),
 /* harmony export */   parseMarkdownToJSX: () => (/* binding */ parseMarkdownToJSX)
 /* harmony export */ });
-/* harmony import */ var _home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/defineProperty.js");
+/* harmony import */ var _Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/defineProperty.js");
 /* harmony import */ var marked__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/marked/lib/marked.esm.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/react/index.js");
 
@@ -40800,7 +49012,7 @@ var MarkdownParser = class MarkdownParser {
     let {
       customStyles
     } = _ref3;
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__["default"])(this, "renderer", void 0);
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__["default"])(this, "renderer", void 0);
     this.renderer = initRenderer({
       customStyles
     });
@@ -42107,7 +50319,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   setDefaults: () => (/* reexport safe */ _defaults_js__WEBPACK_IMPORTED_MODULE_2__.setDefaults),
 /* harmony export */   setI18n: () => (/* reexport safe */ _i18nInstance_js__WEBPACK_IMPORTED_MODULE_3__.setI18n)
 /* harmony export */ });
-/* harmony import */ var _home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/defineProperty.js");
+/* harmony import */ var _Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/defineProperty.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/react/index.js");
 /* harmony import */ var _defaults_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/react-i18next/dist/es/defaults.js");
 /* harmony import */ var _i18nInstance_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./node_modules/react-i18next/dist/es/i18nInstance.js");
@@ -42121,7 +50333,7 @@ __webpack_require__.r(__webpack_exports__);
 const I18nContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.createContext)();
 class ReportNamespaces {
   constructor() {
-    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__["default"])(this, "getUsedNamespaces", () => Object.keys(this.usedNamespaces));
+    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__["default"])(this, "getUsedNamespaces", () => Object.keys(this.usedNamespaces));
     this.usedNamespaces = {};
   }
   addUsedNamespaces(namespaces) {
@@ -43238,6 +51450,11 @@ function comparatorPreferLast(acc, next) {
 /******/ 			}
 /******/ 			Object.defineProperty(exports, '__esModule', { value: true });
 /******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/nonce */
+/******/ 	(() => {
+/******/ 		__webpack_require__.nc = undefined;
 /******/ 	})();
 /******/ 	
 /************************************************************************/

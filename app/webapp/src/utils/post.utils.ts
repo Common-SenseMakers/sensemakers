@@ -38,3 +38,10 @@ export function getPlatformProfile(
   }
   return undefined;
 }
+
+export function zoteroItemTypeDisplay(itemType: string) {
+  return itemType
+    .split(/(?=[A-Z])/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
