@@ -1,12 +1,16 @@
-import { Box, Text } from 'grommet';
+import { Box, Image, Text } from 'grommet';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useAppFetch } from '../api/app.fetch';
 import { AutopostIcon } from '../app/icons/AutopostIcon';
 import { BellIcon } from '../app/icons/BellIcon';
+import { EmailIcon } from '../app/icons/EmailIcon';
+import { CheckIcon } from '../app/icons/FilterIcon copy';
+import { OrcidIcon } from '../app/icons/OrcidIcon';
 import { RightChevronIcon } from '../app/icons/RightChveronIcon';
 import { SupportIcon } from '../app/icons/SupportIcon';
+import { TwitterAvatar } from '../app/icons/TwitterAvatar';
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { I18Keys } from '../i18n/i18n';
@@ -61,6 +65,67 @@ export const SettingsSection = (props: {
       </Box>
       <Box>
         <RightChevronIcon size={20}></RightChevronIcon>
+      </Box>
+    </Box>
+  );
+};
+
+export const PlatformSection = (props: {
+  icon: JSX.Element;
+  platformName: string;
+  username: string;
+  buttonText: string;
+  onButtonClicked: () => void;
+  connected: boolean;
+}) => {
+  const { constants } = useThemeContext();
+
+  return (
+    <Box
+      pad={{ horizontal: '16px', vertical: '16px' }}
+      direction="row"
+      align="center"
+      style={{ border: `1px solid ${constants.colors.border}` }}>
+      <Box style={{ width: '50px' }}>{props.icon}</Box>
+      <Box
+        style={{
+          flexGrow: 1,
+          fontSize: '16px',
+          lineHeight: '18px',
+          fontWeight: 600,
+        }}
+        margin={{ horizontal: '8px' }}>
+        <Box>
+          <Text>{props.platformName}</Text>
+        </Box>
+        <Box>
+          <Text style={{ fontWeight: 500, color: constants.colors.textLight2 }}>
+            {props.username}
+          </Text>
+        </Box>
+      </Box>
+      <Box>
+        {!props.connected ? (
+          <AppButton
+            label={props.buttonText}
+            onClick={() => props.onButtonClicked()}></AppButton>
+        ) : (
+          <Box
+            direction="row"
+            align="center"
+            gap="4px"
+            pad={{ horizontal: 'small' }}>
+            <CheckIcon></CheckIcon>
+            <Text
+              style={{
+                fontSize: '12px',
+                lineHeight: '14px',
+                color: '#038153',
+              }}>
+              Connected
+            </Text>
+          </Box>
+        )}
       </Box>
     </Box>
   );
@@ -180,6 +245,40 @@ export const UserSettingsPage = () => {
             value={t(I18Keys.yourAccounts)}></SettingSectionTitle>
         </Box>
 
+        <PlatformSection
+          icon={<TwitterAvatar profile={twitterProfile} />}
+          platformName={t(I18Keys.XTwitter)}
+          onButtonClicked={() => {}}
+          buttonText=""
+          username={twitterProfile ? `@${twitterProfile.username}` : ''}
+          connected></PlatformSection>
+
+        <PlatformSection
+          icon={
+            <BoxCentered
+              style={{
+                height: '40px',
+                width: '40px',
+                backgroundColor: '#498283',
+                borderRadius: '20px',
+              }}>
+              <EmailIcon></EmailIcon>
+            </BoxCentered>
+          }
+          platformName={t(I18Keys.emailAddress)}
+          onButtonClicked={() => {}}
+          buttonText=""
+          username={connectedUser?.email ? connectedUser.email?.email : ''}
+          connected></PlatformSection>
+
+        <PlatformSection
+          icon={<OrcidIcon size={40}></OrcidIcon>}
+          platformName={t(I18Keys.ORCID)}
+          onButtonClicked={() => connectOrcid('/settings')}
+          buttonText="connect"
+          username={orcid ? `@${orcid.user_id}` : '- not connected -'}
+          connected={orcid !== undefined}></PlatformSection>
+        {/* 
         <>
           <Box margin={{ bottom: 'medium' }}>
             <Text>Email:</Text>
@@ -258,7 +357,7 @@ export const UserSettingsPage = () => {
             primary
             label="Logout"
             onClick={() => disconnect()}></AppButton>
-        </Box>
+        </Box>*/}
       </Box>
     );
   })();

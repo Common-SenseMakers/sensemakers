@@ -1,6 +1,7 @@
 import { Anchor, Box, Paragraph, Text } from 'grommet';
 
 import { AppHeading, AppLabel } from '../../../ui-components';
+import { useThemeContext } from '../../../ui-components/ThemedApp';
 
 const truncate = (text: string, size: number) => {
   return text.slice(0, size) + (text.length > size ? '...' : '');
@@ -22,6 +23,7 @@ export const RefCard = (props: {
 }) => {
   const titleTruncated = props.title && truncate(props.title, 50);
   const tweetId = getTweetId(props.url);
+  const { constants } = useThemeContext();
 
   const content = (() => {
     if (!titleTruncated && !props.description) {
@@ -49,7 +51,7 @@ export const RefCard = (props: {
           justify="between">
           <AppLabel
             colors={{
-              font: '#6B7280',
+              font: constants.colors.textLight2,
               background: '#E5E7EB',
               border: 'transparent',
             }}
@@ -59,7 +61,7 @@ export const RefCard = (props: {
           {tweetId ? (
             <AppLabel
               colors={{
-                font: '#6B7280',
+                font: constants.colors.textLight2,
                 background: 'transparent',
                 border: 'transparent',
               }}
@@ -78,7 +80,7 @@ export const RefCard = (props: {
         <Paragraph
           margin={{ vertical: '4px' }}
           size="medium"
-          style={{ lineHeight: '18px', color: '#6B7280' }}
+          style={{ lineHeight: '18px', color: constants.colors.textLight2 }}
           maxLines={2}>
           {props.description}
         </Paragraph>

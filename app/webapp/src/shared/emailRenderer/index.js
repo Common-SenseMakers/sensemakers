@@ -306,7 +306,7 @@ var __assign = undefined && undefined.__assign || function () {
 
 
 
-var MAX_KEYWORDS = 3;
+var MAX_KEYWORDS = 6;
 var PostCardEmail = function (_a) {
   var post = _a.post;
   var tweet = post.mirrors.find(function (m) {
@@ -620,8 +620,6 @@ var getMockPost = function () {
   var defaultGeneric = {
     thread: [{
       content: 'this is such a cool idea! https://arxiv.org/abs/2312.05230'
-    }, {
-      content: 'I disagree with this https://arxiv.org/abs/2401.14000'
     }],
     author: {
       id: '123456',
@@ -26621,6 +26619,155 @@ function _typeof(o) {
 
 /***/ }),
 
+/***/ "./node_modules/@radix-ui/react-compose-refs/dist/index.mjs":
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   composeRefs: () => (/* binding */ $6ed0406888f73fc4$export$43e446d32b3d21af),
+/* harmony export */   useComposedRefs: () => (/* binding */ $6ed0406888f73fc4$export$c7b2cbe3552a0d05)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/index.js");
+
+
+/**
+ * Set a given ref to a given value
+ * This utility takes care of different types of refs: callback refs and RefObject(s)
+ */
+function $6ed0406888f73fc4$var$setRef(ref, value) {
+  if (typeof ref === 'function') ref(value);else if (ref !== null && ref !== undefined) ref.current = value;
+}
+/**
+ * A utility to compose multiple refs together
+ * Accepts callback refs and RefObject(s)
+ */
+function $6ed0406888f73fc4$export$43e446d32b3d21af() {
+  for (var _len = arguments.length, refs = new Array(_len), _key = 0; _key < _len; _key++) {
+    refs[_key] = arguments[_key];
+  }
+  return node => refs.forEach(ref => $6ed0406888f73fc4$var$setRef(ref, node));
+}
+/**
+ * A custom hook that composes multiple refs
+ * Accepts callback refs and RefObject(s)
+ */
+function $6ed0406888f73fc4$export$c7b2cbe3552a0d05() {
+  for (var _len2 = arguments.length, refs = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    refs[_key2] = arguments[_key2];
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)($6ed0406888f73fc4$export$43e446d32b3d21af(...refs), refs);
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/@radix-ui/react-slot/dist/index.mjs":
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Root: () => (/* binding */ $5e63c961fc1ce211$export$be92b6f5f03c0fe9),
+/* harmony export */   Slot: () => (/* binding */ $5e63c961fc1ce211$export$8c6ed5c666ac1360),
+/* harmony export */   Slottable: () => (/* binding */ $5e63c961fc1ce211$export$d9f1ccf0bdb05d45)
+/* harmony export */ });
+/* harmony import */ var _babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/extends.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/react/index.js");
+/* harmony import */ var _radix_ui_react_compose_refs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/@radix-ui/react-compose-refs/dist/index.mjs");
+
+
+
+
+/* -------------------------------------------------------------------------------------------------
+ * Slot
+ * -----------------------------------------------------------------------------------------------*/
+const $5e63c961fc1ce211$export$8c6ed5c666ac1360 = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.forwardRef)((props, forwardedRef) => {
+  const {
+    children: children,
+    ...slotProps
+  } = props;
+  const childrenArray = react__WEBPACK_IMPORTED_MODULE_1__.Children.toArray(children);
+  const slottable = childrenArray.find($5e63c961fc1ce211$var$isSlottable);
+  if (slottable) {
+    // the new element to render is the one passed as a child of `Slottable`
+    const newElement = slottable.props.children;
+    const newChildren = childrenArray.map(child => {
+      if (child === slottable) {
+        // because the new element will be the one rendered, we are only interested
+        // in grabbing its children (`newElement.props.children`)
+        if (react__WEBPACK_IMPORTED_MODULE_1__.Children.count(newElement) > 1) return react__WEBPACK_IMPORTED_MODULE_1__.Children.only(null);
+        return /*#__PURE__*/ /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.isValidElement)(newElement) ? newElement.props.children : null;
+      } else return child;
+    });
+    return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)($5e63c961fc1ce211$var$SlotClone, (0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({}, slotProps, {
+      ref: forwardedRef
+    }), /*#__PURE__*/ /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.isValidElement)(newElement) ? /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.cloneElement)(newElement, undefined, newChildren) : null);
+  }
+  return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)($5e63c961fc1ce211$var$SlotClone, (0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({}, slotProps, {
+    ref: forwardedRef
+  }), children);
+});
+$5e63c961fc1ce211$export$8c6ed5c666ac1360.displayName = 'Slot';
+/* -------------------------------------------------------------------------------------------------
+ * SlotClone
+ * -----------------------------------------------------------------------------------------------*/
+const $5e63c961fc1ce211$var$SlotClone = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.forwardRef)((props, forwardedRef) => {
+  const {
+    children: children,
+    ...slotProps
+  } = props;
+  if ( /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.isValidElement)(children)) return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.cloneElement)(children, {
+    ...$5e63c961fc1ce211$var$mergeProps(slotProps, children.props),
+    ref: forwardedRef ? (0,_radix_ui_react_compose_refs__WEBPACK_IMPORTED_MODULE_2__.composeRefs)(forwardedRef, children.ref) : children.ref
+  });
+  return react__WEBPACK_IMPORTED_MODULE_1__.Children.count(children) > 1 ? react__WEBPACK_IMPORTED_MODULE_1__.Children.only(null) : null;
+});
+$5e63c961fc1ce211$var$SlotClone.displayName = 'SlotClone';
+/* -------------------------------------------------------------------------------------------------
+ * Slottable
+ * -----------------------------------------------------------------------------------------------*/
+const $5e63c961fc1ce211$export$d9f1ccf0bdb05d45 = _ref => {
+  let {
+    children: children
+  } = _ref;
+  return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(react__WEBPACK_IMPORTED_MODULE_1__.Fragment, null, children);
+};
+/* ---------------------------------------------------------------------------------------------- */
+function $5e63c961fc1ce211$var$isSlottable(child) {
+  return /*#__PURE__*/ /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.isValidElement)(child) && child.type === $5e63c961fc1ce211$export$d9f1ccf0bdb05d45;
+}
+function $5e63c961fc1ce211$var$mergeProps(slotProps, childProps) {
+  // all child props should override
+  const overrideProps = {
+    ...childProps
+  };
+  for (const propName in childProps) {
+    const slotPropValue = slotProps[propName];
+    const childPropValue = childProps[propName];
+    const isHandler = /^on[A-Z]/.test(propName);
+    if (isHandler) {
+      // if the handler exists on both, we compose them
+      if (slotPropValue && childPropValue) overrideProps[propName] = function () {
+        childPropValue(...arguments);
+        slotPropValue(...arguments);
+      };else if (slotPropValue) overrideProps[propName] = slotPropValue;
+    } else if (propName === 'style') overrideProps[propName] = {
+      ...slotPropValue,
+      ...childPropValue
+    };else if (propName === 'className') overrideProps[propName] = [slotPropValue, childPropValue].filter(Boolean).join(' ');
+  }
+  return {
+    ...slotProps,
+    ...overrideProps
+  };
+}
+const $5e63c961fc1ce211$export$be92b6f5f03c0fe9 = $5e63c961fc1ce211$export$8c6ed5c666ac1360;
+
+
+/***/ }),
+
 /***/ "./node_modules/@react-email/body/dist/index.mjs":
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
@@ -27080,7 +27227,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Heading: () => (/* binding */ Heading)
 /* harmony export */ });
-/* harmony import */ var _radix_ui_react_slot__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/@react-email/heading/node_modules/@radix-ui/react-slot/dist/index.mjs");
+/* harmony import */ var _radix_ui_react_slot__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/@radix-ui/react-slot/dist/index.mjs");
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/jsx-runtime.js");
 var __defProp = Object.defineProperty;
 var __defProps = Object.defineProperties;
@@ -27165,155 +27312,6 @@ var Heading = _a => {
     })
   }));
 };
-
-
-/***/ }),
-
-/***/ "./node_modules/@react-email/heading/node_modules/@radix-ui/react-compose-refs/dist/index.mjs":
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   composeRefs: () => (/* binding */ $6ed0406888f73fc4$export$43e446d32b3d21af),
-/* harmony export */   useComposedRefs: () => (/* binding */ $6ed0406888f73fc4$export$c7b2cbe3552a0d05)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/index.js");
-
-
-/**
- * Set a given ref to a given value
- * This utility takes care of different types of refs: callback refs and RefObject(s)
- */
-function $6ed0406888f73fc4$var$setRef(ref, value) {
-  if (typeof ref === 'function') ref(value);else if (ref !== null && ref !== undefined) ref.current = value;
-}
-/**
- * A utility to compose multiple refs together
- * Accepts callback refs and RefObject(s)
- */
-function $6ed0406888f73fc4$export$43e446d32b3d21af() {
-  for (var _len = arguments.length, refs = new Array(_len), _key = 0; _key < _len; _key++) {
-    refs[_key] = arguments[_key];
-  }
-  return node => refs.forEach(ref => $6ed0406888f73fc4$var$setRef(ref, node));
-}
-/**
- * A custom hook that composes multiple refs
- * Accepts callback refs and RefObject(s)
- */
-function $6ed0406888f73fc4$export$c7b2cbe3552a0d05() {
-  for (var _len2 = arguments.length, refs = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-    refs[_key2] = arguments[_key2];
-  }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  return (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)($6ed0406888f73fc4$export$43e446d32b3d21af(...refs), refs);
-}
-
-
-/***/ }),
-
-/***/ "./node_modules/@react-email/heading/node_modules/@radix-ui/react-slot/dist/index.mjs":
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   Root: () => (/* binding */ $5e63c961fc1ce211$export$be92b6f5f03c0fe9),
-/* harmony export */   Slot: () => (/* binding */ $5e63c961fc1ce211$export$8c6ed5c666ac1360),
-/* harmony export */   Slottable: () => (/* binding */ $5e63c961fc1ce211$export$d9f1ccf0bdb05d45)
-/* harmony export */ });
-/* harmony import */ var _babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/extends.js");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/react/index.js");
-/* harmony import */ var _radix_ui_react_compose_refs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/@react-email/heading/node_modules/@radix-ui/react-compose-refs/dist/index.mjs");
-
-
-
-
-/* -------------------------------------------------------------------------------------------------
- * Slot
- * -----------------------------------------------------------------------------------------------*/
-const $5e63c961fc1ce211$export$8c6ed5c666ac1360 = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.forwardRef)((props, forwardedRef) => {
-  const {
-    children: children,
-    ...slotProps
-  } = props;
-  const childrenArray = react__WEBPACK_IMPORTED_MODULE_1__.Children.toArray(children);
-  const slottable = childrenArray.find($5e63c961fc1ce211$var$isSlottable);
-  if (slottable) {
-    // the new element to render is the one passed as a child of `Slottable`
-    const newElement = slottable.props.children;
-    const newChildren = childrenArray.map(child => {
-      if (child === slottable) {
-        // because the new element will be the one rendered, we are only interested
-        // in grabbing its children (`newElement.props.children`)
-        if (react__WEBPACK_IMPORTED_MODULE_1__.Children.count(newElement) > 1) return react__WEBPACK_IMPORTED_MODULE_1__.Children.only(null);
-        return /*#__PURE__*/ /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.isValidElement)(newElement) ? newElement.props.children : null;
-      } else return child;
-    });
-    return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)($5e63c961fc1ce211$var$SlotClone, (0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({}, slotProps, {
-      ref: forwardedRef
-    }), /*#__PURE__*/ /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.isValidElement)(newElement) ? /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.cloneElement)(newElement, undefined, newChildren) : null);
-  }
-  return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)($5e63c961fc1ce211$var$SlotClone, (0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({}, slotProps, {
-    ref: forwardedRef
-  }), children);
-});
-$5e63c961fc1ce211$export$8c6ed5c666ac1360.displayName = 'Slot';
-/* -------------------------------------------------------------------------------------------------
- * SlotClone
- * -----------------------------------------------------------------------------------------------*/
-const $5e63c961fc1ce211$var$SlotClone = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.forwardRef)((props, forwardedRef) => {
-  const {
-    children: children,
-    ...slotProps
-  } = props;
-  if ( /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.isValidElement)(children)) return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.cloneElement)(children, {
-    ...$5e63c961fc1ce211$var$mergeProps(slotProps, children.props),
-    ref: forwardedRef ? (0,_radix_ui_react_compose_refs__WEBPACK_IMPORTED_MODULE_2__.composeRefs)(forwardedRef, children.ref) : children.ref
-  });
-  return react__WEBPACK_IMPORTED_MODULE_1__.Children.count(children) > 1 ? react__WEBPACK_IMPORTED_MODULE_1__.Children.only(null) : null;
-});
-$5e63c961fc1ce211$var$SlotClone.displayName = 'SlotClone';
-/* -------------------------------------------------------------------------------------------------
- * Slottable
- * -----------------------------------------------------------------------------------------------*/
-const $5e63c961fc1ce211$export$d9f1ccf0bdb05d45 = _ref => {
-  let {
-    children: children
-  } = _ref;
-  return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(react__WEBPACK_IMPORTED_MODULE_1__.Fragment, null, children);
-};
-/* ---------------------------------------------------------------------------------------------- */
-function $5e63c961fc1ce211$var$isSlottable(child) {
-  return /*#__PURE__*/ /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.isValidElement)(child) && child.type === $5e63c961fc1ce211$export$d9f1ccf0bdb05d45;
-}
-function $5e63c961fc1ce211$var$mergeProps(slotProps, childProps) {
-  // all child props should override
-  const overrideProps = {
-    ...childProps
-  };
-  for (const propName in childProps) {
-    const slotPropValue = slotProps[propName];
-    const childPropValue = childProps[propName];
-    const isHandler = /^on[A-Z]/.test(propName);
-    if (isHandler) {
-      // if the handler exists on both, we compose them
-      if (slotPropValue && childPropValue) overrideProps[propName] = function () {
-        childPropValue(...arguments);
-        slotPropValue(...arguments);
-      };else if (slotPropValue) overrideProps[propName] = slotPropValue;
-    } else if (propName === 'style') overrideProps[propName] = {
-      ...slotPropValue,
-      ...childPropValue
-    };else if (propName === 'className') overrideProps[propName] = [slotPropValue, childPropValue].filter(Boolean).join(' ');
-  }
-  return {
-    ...slotProps,
-    ...overrideProps
-  };
-}
-const $5e63c961fc1ce211$export$be92b6f5f03c0fe9 = $5e63c961fc1ce211$export$8c6ed5c666ac1360;
 
 
 /***/ }),
@@ -38024,9 +38022,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   use: () => (/* binding */ use),
 /* harmony export */   walkTokens: () => (/* binding */ walkTokens)
 /* harmony export */ });
-/* harmony import */ var _Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_classPrivateMethodInitSpec_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/classPrivateMethodInitSpec.js");
-/* harmony import */ var _Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_assertClassBrand_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/assertClassBrand.js");
-/* harmony import */ var _Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/defineProperty.js");
+/* harmony import */ var _home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_classPrivateMethodInitSpec_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/classPrivateMethodInitSpec.js");
+/* harmony import */ var _home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_assertClassBrand_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/assertClassBrand.js");
+/* harmony import */ var _home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/defineProperty.js");
 
 
 
@@ -38349,10 +38347,10 @@ function indentCodeCompensation(raw, text) {
  */
 class _Tokenizer {
   constructor(options) {
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
     // TODO: Fix this rules type
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "rules", void 0);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "lexer", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "rules", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "lexer", void 0);
     this.options = options || _defaults;
   }
   space(src) {
@@ -39230,11 +39228,11 @@ function mangle(text) {
  */
 class _Lexer {
   constructor(options) {
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "tokens", void 0);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "state", void 0);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "tokenizer", void 0);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "inlineQueue", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "tokens", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "state", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "tokenizer", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "inlineQueue", void 0);
     // TokenList cannot be created in one go
     // @ts-expect-error
     this.tokens = [];
@@ -39659,7 +39657,7 @@ class _Lexer {
  */
 class _Renderer {
   constructor(options) {
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
     this.options = options || _defaults;
   }
   code(code, infostring, escaped) {
@@ -39810,7 +39808,7 @@ class _TextRenderer {
  */
 class _Slugger {
   constructor() {
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "seen", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "seen", void 0);
     this.seen = {};
   }
   serialize(value) {
@@ -39854,10 +39852,10 @@ class _Slugger {
  */
 class _Parser {
   constructor(options) {
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "renderer", void 0);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "textRenderer", void 0);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "slugger", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "renderer", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "textRenderer", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "slugger", void 0);
     this.options = options || _defaults;
     this.options.renderer = this.options.renderer || new _Renderer();
     this.renderer = this.options.renderer;
@@ -40123,7 +40121,7 @@ class _Parser {
 }
 class _Hooks {
   constructor(options) {
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
     this.options = options || _defaults;
   }
   /**
@@ -40139,24 +40137,24 @@ class _Hooks {
     return html;
   }
 }
-(0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(_Hooks, "passThroughHooks", new Set(['preprocess', 'postprocess']));
+(0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(_Hooks, "passThroughHooks", new Set(['preprocess', 'postprocess']));
 var _Marked_brand = /*#__PURE__*/new WeakSet();
 class Marked {
   constructor() {
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_classPrivateMethodInitSpec_js__WEBPACK_IMPORTED_MODULE_0__["default"])(this, _Marked_brand);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "defaults", _getDefaults());
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", this.setOptions);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "parse", (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_assertClassBrand_js__WEBPACK_IMPORTED_MODULE_1__["default"])(_Marked_brand, this, _parseMarkdown).call(this, _Lexer.lex, _Parser.parse));
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "parseInline", (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_assertClassBrand_js__WEBPACK_IMPORTED_MODULE_1__["default"])(_Marked_brand, this, _parseMarkdown).call(this, _Lexer.lexInline, _Parser.parseInline));
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Parser", _Parser);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "parser", _Parser.parse);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Renderer", _Renderer);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "TextRenderer", _TextRenderer);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Lexer", _Lexer);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "lexer", _Lexer.lex);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Tokenizer", _Tokenizer);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Slugger", _Slugger);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Hooks", _Hooks);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_classPrivateMethodInitSpec_js__WEBPACK_IMPORTED_MODULE_0__["default"])(this, _Marked_brand);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "defaults", _getDefaults());
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", this.setOptions);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "parse", (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_assertClassBrand_js__WEBPACK_IMPORTED_MODULE_1__["default"])(_Marked_brand, this, _parseMarkdown).call(this, _Lexer.lex, _Parser.parse));
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "parseInline", (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_assertClassBrand_js__WEBPACK_IMPORTED_MODULE_1__["default"])(_Marked_brand, this, _parseMarkdown).call(this, _Lexer.lexInline, _Parser.parseInline));
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Parser", _Parser);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "parser", _Parser.parse);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Renderer", _Renderer);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "TextRenderer", _TextRenderer);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Lexer", _Lexer);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "lexer", _Lexer.lex);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Tokenizer", _Tokenizer);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Slugger", _Slugger);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Hooks", _Hooks);
     this.use(...arguments);
   }
   /**
@@ -40398,7 +40396,7 @@ function _parseMarkdown(lexer, parser) {
       }
       opt.async = true;
     }
-    const throwError = (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_assertClassBrand_js__WEBPACK_IMPORTED_MODULE_1__["default"])(_Marked_brand, this, _onError).call(this, !!opt.silent, !!opt.async, callback);
+    const throwError = (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_assertClassBrand_js__WEBPACK_IMPORTED_MODULE_1__["default"])(_Marked_brand, this, _onError).call(this, !!opt.silent, !!opt.async, callback);
     // throw error in case of non string input
     if (typeof src === 'undefined' || src === null) {
       return throwError(new Error('marked(): input parameter is undefined or null'));
@@ -40595,7 +40593,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   parseCssInJsToInlineCss: () => (/* binding */ parseCssInJsToInlineCss),
 /* harmony export */   parseMarkdownToJSX: () => (/* binding */ parseMarkdownToJSX)
 /* harmony export */ });
-/* harmony import */ var _Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/defineProperty.js");
+/* harmony import */ var _home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/defineProperty.js");
 /* harmony import */ var marked__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/marked/lib/marked.esm.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/react/index.js");
 
@@ -40802,7 +40800,7 @@ var MarkdownParser = class MarkdownParser {
     let {
       customStyles
     } = _ref3;
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__["default"])(this, "renderer", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__["default"])(this, "renderer", void 0);
     this.renderer = initRenderer({
       customStyles
     });
@@ -42109,7 +42107,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   setDefaults: () => (/* reexport safe */ _defaults_js__WEBPACK_IMPORTED_MODULE_2__.setDefaults),
 /* harmony export */   setI18n: () => (/* reexport safe */ _i18nInstance_js__WEBPACK_IMPORTED_MODULE_3__.setI18n)
 /* harmony export */ });
-/* harmony import */ var _Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/defineProperty.js");
+/* harmony import */ var _home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/defineProperty.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/react/index.js");
 /* harmony import */ var _defaults_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/react-i18next/dist/es/defaults.js");
 /* harmony import */ var _i18nInstance_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./node_modules/react-i18next/dist/es/i18nInstance.js");
@@ -42123,7 +42121,7 @@ __webpack_require__.r(__webpack_exports__);
 const I18nContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.createContext)();
 class ReportNamespaces {
   constructor() {
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__["default"])(this, "getUsedNamespaces", () => Object.keys(this.usedNamespaces));
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__["default"])(this, "getUsedNamespaces", () => Object.keys(this.usedNamespaces));
     this.usedNamespaces = {};
   }
   addUsedNamespaces(namespaces) {

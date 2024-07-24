@@ -1,14 +1,11 @@
 {
   "files": {
-    "main.css": "/static/css/main.6aa63299.css",
     "main.js": "/index.js",
     "service-worker.js": "/service-worker.js",
     "index.html": "/index.html",
-    "main.6aa63299.css.map": "/static/css/main.6aa63299.css.map",
     "index.js.map": "/index.js.map"
   },
   "entrypoints": [
-    "static/css/main.6aa63299.css",
     "index.js"
   ]
 }
