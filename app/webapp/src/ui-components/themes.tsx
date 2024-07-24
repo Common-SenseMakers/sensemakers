@@ -4,28 +4,28 @@ import { css } from 'styled-components';
 
 export const theme = {};
 
+interface FontStyle {
+  size: string;
+  height: string;
+}
+
 export interface StyleConstants {
-  headingFontSizes: {
-    1: string;
-    2: string;
-    3: string;
-    4: string;
-  };
-  textFontSizes: {
-    large: string;
-    medium: string;
-    normal: string;
-    small: string;
-    xsmall: string;
+  fontSize: {
+    large: FontStyle;
+    medium: FontStyle;
+    small: FontStyle;
+    xsmall: FontStyle;
   };
   colors: {
     primary: string;
     textLight: string;
+    textLight2: string;
     shade: string;
     links: string;
     text: string;
     textOnPrimary: string;
     border: string;
+    checkboxes: string;
   };
 }
 
@@ -34,27 +34,34 @@ export interface ExtendedThemeType extends ThemeType {
 }
 
 const constants: StyleConstants = {
-  headingFontSizes: {
-    1: '28px',
-    2: '24px',
-    3: '20px',
-    4: '18px',
-  },
-  textFontSizes: {
-    large: '24px',
-    medium: '18px',
-    normal: '16px',
-    small: '18px',
-    xsmall: '14px',
+  fontSize: {
+    large: {
+      size: '18px',
+      height: '24px',
+    },
+    medium: {
+      size: '16px',
+      height: '24px',
+    },
+    small: {
+      size: '14px',
+      height: '16px',
+    },
+    xsmall: {
+      size: '12px',
+      height: '14px',
+    },
   },
   colors: {
     primary: '#111827',
     textLight: '#4B5563',
+    textLight2: '#6B7280',
     shade: '#F9FAFB',
     text: '#111827',
     links: '#3182CE',
     textOnPrimary: '#ffffff',
     border: '#D1D5DB',
+    checkboxes: '#337FBD',
   },
 };
 
@@ -66,11 +73,11 @@ const extension: ExtendedThemeType = {
       text: constants.colors.text,
     },
     font: {
-      size: constants.textFontSizes.normal,
+      size: constants.fontSize.medium.size,
     },
     input: {
       font: {
-        size: constants.textFontSizes.small,
+        size: constants.fontSize.small.size,
       },
     },
     breakpoints: {
@@ -91,22 +98,40 @@ const extension: ExtendedThemeType = {
       },
       shadow: 'none',
     },
+    edgeSize: {
+      large: '40px',
+      medium: '16px',
+      small: '12px',
+      xsmall: '8px',
+    },
   },
   heading: {
     level: {
       1: {
+        font: {
+          weight: '600',
+        },
         medium: {
-          size: constants.headingFontSizes[1],
+          size: '28px',
+          height: '36px',
         },
       },
       2: {
         medium: {
-          size: constants.headingFontSizes[2],
+          size: '22px',
+          height: '28px',
         },
       },
       3: {
         medium: {
-          size: constants.headingFontSizes[3],
+          size: '18px',
+          height: '24px',
+        },
+      },
+      4: {
+        medium: {
+          size: '16px',
+          height: '18px',
         },
       },
     },
@@ -117,27 +142,32 @@ const extension: ExtendedThemeType = {
       letter-spacing: -0.4px;
     `,
   },
+  paragraph: {
+    small: {
+      size: '14px',
+      height: '18px',
+      maxWidth: 'auto',
+    },
+    medium: {
+      size: '16px',
+      height: '24px',
+      maxWidth: 'auto',
+    },
+  },
   button: {
     padding: { vertical: '15px', horizontal: '30px' },
     border: {
-      radius: '4px',
+      radius: '8px',
     },
     primary: {
       color: constants.colors.primary,
       extend: css`
         & {
           color: #ffffff;
-          font-weight: 800;
         }
       `,
     },
-    secondary: {
-      extend: css`
-        & {
-          font-weight: 500;
-        }
-      `,
-    },
+    secondary: {},
   },
   formField: {
     checkBox: {
@@ -145,22 +175,24 @@ const extension: ExtendedThemeType = {
     },
     label: {
       weight: 700,
-      size: constants.textFontSizes.small,
+      size: constants.fontSize.small.size,
       margin: '0px 0px 8px 0px',
     },
     border: false,
   },
   fileInput: {
     message: {
-      size: constants.textFontSizes.small,
+      size: constants.fontSize.small.size,
     },
   },
   select: {
+    icons: {
+      down: <></>,
+    },
     control: {
       extend: css`
         & {
           border-style: none;
-          font-size: 14px;
           font-style: normal;
           font-weight: 500;
           line-height: 16px; /* 114.286% */
@@ -197,7 +229,22 @@ const extension: ExtendedThemeType = {
     },
   },
   checkBox: {
-    color: constants.colors.primary,
+    color: constants.colors.textOnPrimary,
+    size: '18px',
+    icon: {
+      size: '16px',
+    },
+    border: {
+      width: '0px',
+    },
+    toggle: {
+      color: constants.colors.textOnPrimary,
+    },
+    check: {
+      extend: css`
+        background-color: ${constants.colors.checkboxes};
+      `,
+    },
   },
   table: {
     header: {
@@ -226,14 +273,8 @@ const extension: ExtendedThemeType = {
     color: constants.colors.links,
     textDecoration: 'underline',
     extend: css`
-      font-size: ${constants.textFontSizes.small};
+      font-size: ${constants.fontSize.small.size};
     `,
-  },
-  paragraph: {
-    medium: {
-      size: constants.textFontSizes.normal,
-    },
-    extend: css``,
   },
 };
 

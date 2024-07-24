@@ -1,16 +1,28 @@
 import re
 import requests
+from typing import List, Optional, Tuple
 from jinja2 import Environment, BaseLoader
 from enum import Enum
 import json
+from jsoncomment import JsonComment
 import html2text
+from loguru import logger
 from urllib.parse import urlparse
 
 from url_normalize import url_normalize
 
 
 def extract_twitter_status_id(url):
-    pattern = r"twitter\.com\/\w+\/status\/(\d+)"
+    """
+    Extract the status ID from Twitter or x.com post URLs.
+
+    Parameters:
+    url (str): The URL of the Twitter or x.com post.
+
+    Returns:
+    str: The extracted status ID or None if not found.
+    """
+    pattern = r"(?:twitter\.com|x\.com)\/\w+\/status\/(\d+)"
     match = re.search(pattern, url)
     if match:
         return match.group(1)
@@ -84,7 +96,15 @@ def identify_social_media(url):
     parsed_url = urlparse(url)
     domain = parsed_url.netloc.lower()
 
-    if any(twitter_domain in domain for twitter_domain in twitter_domains):
+    # Remove 'www.' prefix if present
+    try:
+        if domain.startswith("www."):
+            domain = domain[4:]
+    except Exception:
+        # for invalid urls
+        return "Unknown"
+
+    if domain in twitter_domains:
         return "twitter"
 
     else:
@@ -97,9 +117,10 @@ def identify_social_media(url):
 
 def unshorten_url(url):
     try:
-        response = requests.head(url, allow_redirects=True)
+        response = requests.head(url, allow_redirects=True, timeout=10)
         return response.url
-    except requests.RequestException as e:
+    except requests.RequestException:
+        logger.warning(f"[unshorten_url] RequestException for url {url}")
         # return original url in case of errors
         return url
 
@@ -134,15 +155,50 @@ def normalize_url(url):
     return res
 
 
-def extract_and_expand_urls(text):
+def extract_and_expand_urls(text, return_orig_urls: bool = False):
     """_summary_
 
     Args:
         text (_type_): _description_
     """
+    # original unmodified urls
+    orig_urls = extract_urls(text)
 
-    expanded_urls = [normalize_url(url) for url in extract_urls(text)]
-    return expanded_urls
+    # unshortened and normalized urls
+    expanded_urls = [normalize_url(url) for url in orig_urls]
+
+    if return_orig_urls:
+        return expanded_urls, orig_urls
+    else:
+        return expanded_urls
+
+
+def extract_external_urls_from_status_tweet(
+    tweet_url: str, tweet_content: str
+) -> List[str]:
+    """
+    Extract list of non-internal URLs referenced by `tweet_content`.
+    In this context, internal URLs are URLs of media items associated with the tweet, such as images or videos.
+    Internal URLs share the same ID as the referencing tweet.
+    Shortened URLs are expanded to long form.
+    """
+    tweet_id = extract_twitter_status_id(tweet_url)
+    external = []
+    urls = extract_and_expand_urls(tweet_content)
+
+    for url in urls:
+        # extract twitter id from url if the url is a twitter post
+        url_twitter_id = extract_twitter_status_id(url)
+        if url_twitter_id:  # check if a twitter url
+            if (
+                url_twitter_id != tweet_id
+            ):  # check if url does not share same status id with parsed tweet
+                external.append(url)
+        else:
+            # not twitter url, add
+            external.append(url)
+
+    return remove_dups_ordered(external)
 
 
 def render_to_py_dict(obj_dict, obj_name: str = "object", out_path: str = "output.py"):
@@ -202,6 +258,10 @@ def _find_json_object(input_string):
     input_string = input_string.replace("\\_", "_")
     input_string = input_string.replace("\\[", "[")
     input_string = input_string.replace("\\]", "]")  # remove escaping for underscore
+
+    # to handle generated JSONs with comments, trailing commas
+    jsonc = JsonComment()
+
     start = input_string.find("{")
     if start == -1:
         return (
@@ -220,7 +280,7 @@ def _find_json_object(input_string):
                     end = i + 1
                     try:
                         # Try to parse the substring as JSON
-                        parsed_json = json.loads(input_string[start:end])
+                        parsed_json = jsonc.loads(input_string[start:end])
                         return input_string[
                             start:end
                         ]  # Return the valid JSON substring
@@ -234,3 +294,196 @@ def _find_json_object(input_string):
 
 def find_json_object(input_msg):
     return _find_json_object(input_msg.content)
+
+
+def remove_dups_ordered(input_list: list):
+    """
+    Remove duplicate occurrences of elements while preserving the
+    first occurrence of each element in the original list order.
+    eg, `remove_dups([5,4,2,5,2,4]) -> [5,4,2]`
+    """
+    seen = set()
+    result = []
+    for item in input_list:
+        if item not in seen:
+            seen.add(item)
+            result.append(item)
+
+    return result
+
+
+def find_last_occurence_of_any(input: str, strings: List[str]) -> Optional[str]:
+    """
+    Returns element of `strings` that appears last in `input`, or None
+    if none of the elements in `strings` appears in `input`
+    """
+    last_occurrence = None
+    last_index = -1
+
+    for s in strings:
+        index = input.rfind(s)
+        if index > last_index:
+            last_index = index
+            last_occurrence = s
+
+    return last_occurrence
+
+
+def trim_str_with_urls(txt: str, max_length: int) -> str:
+    """
+    Takes input string `txt` which may contain any number of urls. Trims `txt`
+    to `max_length` chars while preserving any urls if the cutoff happens in
+    the middle of a url.
+    E.g., trim_str_with_urls("testing https://x.com/FDAadcomms/status/1798107142219796794", 10) = "testing https://x.com/FDAadcomms/status/1798107142219796794"
+    trim_str_with_urls("testing not a valid url", 10) = 'testing no'
+
+    """
+    # Regular expression to match URLs
+    url_pattern = re.compile(r"https?://[^\s]+")
+
+    # Find all URLs in the text
+    urls = list(url_pattern.finditer(txt))
+
+    # If the text is shorter than or equal to the max_length, return it as is
+    if len(txt) <= max_length:
+        return txt
+
+    # Determine if the cut-off point is within a URL
+    for url in urls:
+        url_start, url_end = url.span()
+        if url_start < max_length < url_end:
+            # If the cut-off point is within a URL, return the text up to the end of that URL
+            return txt[:url_end]
+
+    # If the cut-off point is not within any URL, return the text up to max_length
+    return txt[:max_length]
+
+
+def trim_str_with_urls_by_sep(
+    txt: str,
+    max_length: int,
+    sep: str,
+) -> Tuple[List[str], bool]:
+    """
+    Takes an input string `txt` which may contain any number of urls, and also
+    optionally contains any number of special separator strings `sep`.
+    Returns a list of strings `sep_strs: List[str]` containing the substrings of
+    `txt` separated by the `sep` occurences (without including the separators).
+    The returned result `sep_strs`
+    should be uphold `len("".join(sep_strs))<= max_length + M` (for cases where the cutoff
+    occurs in the middle of a URL).
+    Eg, `trim_str_with_urls_by_sep("123<SEP>456789",4,"<SEP>") ==["123", "4"]`
+    Also returns `trimmed` that is `True` if input was trimmed and `False` o.w
+    """
+    # Split the input string by the separator
+    parts = txt.split(sep)
+    sep_strs = []
+    current_length = 0
+    trimmed = False
+
+    for i, part in enumerate(parts):
+        # Calculate the potential length if this part is added
+        potential_length = current_length + len(part)
+
+        # Check if adding this part would exceed the max_length
+        if potential_length > max_length:
+            # Trim the part to fit within the remaining length
+            trimmed_part = trim_str_with_urls(part, max_length - current_length)
+            sep_strs.append(trimmed_part)
+
+            # check if last part was trimmed or we still have parts left
+            if trimmed_part != part or (i + 1) < len(parts):
+                trimmed = True
+            break
+        else:
+            sep_strs.append(part)
+            current_length += len(part)
+
+    return sep_strs, trimmed
+
+
+def trim_parts(parts: List, max_chars: int) -> Tuple[List[str], bool]:
+    """
+    Takes a list of string parts and trims them such that the total length of the
+    concatenated parts does not exceed the specified maximum number of characters.
+    Preserves URLs by ensuring they are not cut off mid-way.
+
+    Args:
+        parts (List[str]): List of string parts to trim.
+        max_chars (int): Maximum number of characters to trim to.
+
+    Returns:
+        Tuple[List[str], bool]: A tuple where the first element is the list of trimmed parts,
+        and the second element is a boolean indicating whether the input was trimmed (True) or not (False).
+    """
+    sep = "<<<SEP>>>"
+    joined_parts = sep.join(parts)
+    res = trim_str_with_urls_by_sep(
+        joined_parts,
+        max_length=max_chars,
+        sep=sep,
+    )
+    return res
+
+
+def trim_parts_to_length(part_lengths: List[int], max_length: int) -> List[int]:
+    """Given a list of part lengths and max_length,
+    return a new list of trimmed part lengths `trimmed_part_lengths`
+    such that `sum(trimmed_part_lengths) <= max_length` while preserving
+    as much of `part_lengths` as possible.
+    E.g., `trim_parts_to_length([1,2,3], 3) == [1,2])`
+    `trim_parts_to_length([1,2,3], 4) == [1,2,1])`
+    """
+    trimmed_part_lengths = []
+    current_length = 0
+
+    for length in part_lengths:
+        if current_length + length <= max_length:
+            trimmed_part_lengths.append(length)
+            current_length += length
+        else:
+            remaining_length = max_length - current_length
+            if remaining_length > 0:
+                trimmed_part_lengths.append(remaining_length)
+            break
+
+    return trimmed_part_lengths
+
+
+def normalize_tweet_url(url):
+    """
+    Normalize Twitter post URLs to use the x.com domain.
+
+    Parameters:
+    url (str): The original Twitter URL.
+
+    Returns:
+    str: The normalized URL with x.com domain.
+    """
+    if "twitter.com" in url:
+        return url.replace("twitter.com", "x.com")
+    else:
+        return url
+
+
+def normalize_tweet_urls_in_text(text: str) -> str:
+    """
+    Normalize all occurrences of Twitter URLs to uniform format (using x.com).
+
+    Args:
+        text (str): Input string.
+
+    Returns:
+        str: String after normalization.
+    """
+    extracted_urls, orig_urls = extract_and_expand_urls(
+        text,
+        return_orig_urls=True,
+    )
+    normalized_urls = [normalize_tweet_url(url) for url in extracted_urls]
+
+    # Replace all occurrences of orig_urls in text with normalized_urls
+    for orig_url, normalized_url in zip(orig_urls, normalized_urls):
+        text = text.replace(orig_url, normalized_url)
+
+    return text

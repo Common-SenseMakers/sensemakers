@@ -1,23 +1,30 @@
 import { anything, instance, spy, when } from 'ts-mockito';
 import { TweetV2SingleResult } from 'twitter-api-v2';
 
-import {
-  PlatformFetchParams,
-  UserDetailsBase,
-} from '../../../@shared/types/types';
+import { PlatformFetchParams } from '../../../@shared/types/types.fetch';
 import {
   PlatformPostPosted,
   PlatformPostPublish,
 } from '../../../@shared/types/types.platform.posts';
 import {
+  AppTweet,
   TwitterDraft,
   TwitterGetContextParams,
+  TwitterSignupContext,
   TwitterThread,
   TwitterUserDetails,
 } from '../../../@shared/types/types.twitter';
+import {
+  TestUserCredentials,
+  UserDetailsBase,
+} from '../../../@shared/types/types.user';
+import { APP_URL } from '../../../config/config.runtime';
+import { TransactionManager } from '../../../db/transaction.manager';
 import { logger } from '../../../instances/logger';
 import { TwitterService } from '../twitter.service';
-import { dateStrToTimestampMs } from '../twitter.utils';
+import { convertToAppTweetBase, dateStrToTimestampMs } from '../twitter.utils';
+
+const DEBUG = false;
 
 interface TwitterTestState {
   latestTweetId: number;
@@ -33,15 +40,13 @@ let state: TwitterTestState = {
 
 export type TwitterMockConfig = 'real' | 'mock-publish' | 'mock-signup';
 
-export const TWITTER_USER_ID_MOCKS = '1773032135814717440';
-
 const getSampleTweet = (
   id: string,
   authorId: string,
   createdAt: number,
   conversation_id: string,
   content: string
-) => {
+): AppTweet => {
   const date = new Date(createdAt);
 
   return {
@@ -50,58 +55,68 @@ const getSampleTweet = (
     text: `This is an interesting paper https://arxiv.org/abs/2312.05230 ${id} | ${content}`,
     author_id: authorId,
     created_at: date.toISOString(),
-    edit_history_tweet_ids: [],
+    entities: {
+      urls: [
+        {
+          start: 50,
+          end: 73,
+          url: 'https://t.co/gguJOKvN37',
+          expanded_url: 'https://arxiv.org/abs/2312.05230',
+          display_url: 'x.com/sense_nets_bot…',
+          unwound_url: 'https://arxiv.org/abs/2312.05230',
+        },
+      ],
+      annotations: [],
+      hashtags: [],
+      mentions: [],
+      cashtags: [],
+    },
   };
 };
 
-const now = Date.now();
+export const initThreads = (
+  testThreads: string[][],
+  testUser: TestUserCredentials
+) => {
+  const now = 1720805241;
 
-const threads = [
-  ['', ''],
-  [''],
-  ['', '', '', '', '', '', '', '', ''],
-  [''],
-  [''],
-  ['', '', ''],
-  [''],
-  [''],
-  ['', '', ''],
-  [''],
-  [''],
-  ['', ''],
-  [''],
-  [''],
-  ['', '', '', '', '', '', '', '', '', '', '', ''],
-  [''],
-  [''],
-  ['', '', ''],
-  [''],
-].map((thread, ixThread): TwitterThread => {
-  const tweets = thread.map((content, ixTweet) => {
-    const idTweet = ixThread * 100 + ixTweet;
-    const createdAt = now + ixThread * 100 + 10 * ixTweet;
-    state.latestTweetId = idTweet;
-    return getSampleTweet(
-      idTweet.toString().padStart(5, '0'),
-      TWITTER_USER_ID_MOCKS,
-      createdAt,
-      ixThread.toString().padStart(5, '0'),
-      content
-    );
+  const threads = testThreads.map((thread, ixThread): TwitterThread => {
+    const tweets = thread.map((content, ixTweet) => {
+      const idTweet = ixThread * 100 + ixTweet;
+      const createdAt = now + ixThread * 100 + 10 * ixTweet;
+      state.latestTweetId = idTweet;
+      return getSampleTweet(
+        idTweet.toString().padStart(5, '0'),
+        testUser.twitter.id,
+        createdAt,
+        ixThread.toString().padStart(5, '0'),
+        content
+      );
+    });
+    state.latestConvId = ixThread;
+    return {
+      conversation_id: `${ixThread}`,
+      tweets,
+      author: {
+        id: testUser.twitter.id,
+        name: testUser.twitter.username,
+        username: testUser.twitter.username,
+      },
+    };
   });
-  state.latestConvId = ixThread;
-  return {
-    conversation_id: `${ixThread}`,
-    tweets,
-  };
-});
 
-state.threads.push(...threads);
-state.threads.reverse();
+  state.threads = threads;
+  state.threads.reverse();
+  if (DEBUG)
+    console.log('twitter mock state initialized', {
+      state: JSON.stringify(state),
+    });
+};
 
 /** make private methods public */
-type MockedType = Omit<TwitterService, 'fetchInternal'> & {
+type MockedType = Omit<TwitterService, 'fetchInternal' | 'getUserClient'> & {
   fetchInternal: TwitterService['fetchInternal'];
+  getUserClient: TwitterService['getUserClient'];
 };
 
 /**
@@ -110,22 +125,28 @@ type MockedType = Omit<TwitterService, 'fetchInternal'> & {
  */
 export const getTwitterMock = (
   twitterService: TwitterService,
-  type: TwitterMockConfig
+  type: TwitterMockConfig,
+  testUser?: TestUserCredentials
 ) => {
   if (type === 'real') {
     return twitterService;
   }
 
   if (type === 'mock-publish' || type === 'mock-signup') {
-    const Mocked = spy(twitterService) as unknown as MockedType;
+    const mocked = spy(twitterService) as unknown as MockedType;
 
-    when(Mocked.publish(anything(), anything())).thenCall(
+    when(mocked.publish(anything(), anything())).thenCall(
       (postPublish: PlatformPostPublish<TwitterDraft>) => {
         logger.warn(`called twitter publish mock`, postPublish);
+
+        if (!testUser) {
+          throw new Error('test user not provided');
+        }
 
         const tweet: TweetV2SingleResult = {
           data: {
             id: (++state.latestTweetId).toString(),
+            conversation_id: (++state.latestConvId).toString(),
             text: postPublish.draft.text,
             edit_history_tweet_ids: [],
             author_id: postPublish.userDetails.user_id,
@@ -135,7 +156,12 @@ export const getTwitterMock = (
 
         const thread = {
           conversation_id: (++state.latestConvId).toString(),
-          tweets: [tweet.data],
+          tweets: [convertToAppTweetBase(tweet.data)],
+          author: {
+            id: testUser.twitter.id,
+            name: testUser.twitter.username,
+            username: testUser.twitter.username,
+          },
         };
 
         state.threads.push(thread);
@@ -150,10 +176,11 @@ export const getTwitterMock = (
       }
     );
 
-    when(Mocked.fetchInternal(anything(), anything(), anything())).thenCall(
+    when(mocked.fetchInternal(anything(), anything(), anything())).thenCall(
       async (
         params: PlatformFetchParams,
-        userDetails?: UserDetailsBase
+        userDetails: UserDetailsBase,
+        manager: TransactionManager
       ): Promise<TwitterThread[]> => {
         const threads = state.threads.filter((thread) => {
           if (params.since_id) {
@@ -174,23 +201,29 @@ export const getTwitterMock = (
       }
     );
 
-    if (type === 'mock-signup') {
-      when(Mocked.getSignupContext(anything(), anything())).thenCall(
-        (userId?: string, params?: TwitterGetContextParams) => {
-          return {};
-        }
-      );
+    when(mocked.getSignupContext(anything(), anything())).thenCall(
+      (
+        userId?: string,
+        params?: TwitterGetContextParams
+      ): TwitterSignupContext => {
+        return {
+          url: `${APP_URL.value()}?code=testCode&state=testState`,
+          state: 'testState',
+          codeVerifier: 'testCodeVerifier',
+          codeChallenge: '',
+          callback_url: APP_URL.value(),
+          type: 'read',
+        };
+      }
+    );
 
-      when(Mocked.handleSignupData(anything())).thenCall(
-        (data: TwitterUserDetails): TwitterUserDetails => {
-          return {
-            ...data,
-          };
-        }
-      );
-    }
+    when(mocked.handleSignupData(anything())).thenCall(
+      (data: TwitterUserDetails): TwitterUserDetails => {
+        return data;
+      }
+    );
 
-    return instance(Mocked) as unknown as TwitterService;
+    return instance(mocked) as unknown as TwitterService;
   }
 
   throw new Error('Unexpected');

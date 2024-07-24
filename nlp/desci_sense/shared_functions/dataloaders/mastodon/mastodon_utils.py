@@ -5,7 +5,7 @@ import re
 from datetime import datetime
 from urllib.parse import urlparse
 
-from ...schema.post import RefPost
+from ...schema.post import RefPost, QuoteRefPost
 from ...utils import convert_html_to_plain_text, extract_and_expand_urls, normalize_url
 
 
@@ -91,7 +91,7 @@ def convert_post_json_to_ref_post(post_json: dict) -> RefPost:
     # extract external reference urls from post
     ext_ref_urls = extract_external_masto_ref_urls(post_json)
 
-    post = RefPost(
+    post = QuoteRefPost(
         author=author,
         content=text,
         url=url,

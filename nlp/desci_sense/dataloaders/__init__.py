@@ -38,7 +38,10 @@ def scrape_post(post_url):
         result = scrape_mastodon_post(post_url)
 
     else:
-        logger.warn(f"Unknown post type: {post_url}")
-        result = None
+        logger.error(f"Unknown post type: {post_url}")
+        raise UnknownSocialMediaTypeError(post_url)
+
+    if result is None:
+        raise PostNotFoundError(post_url)
 
     return result

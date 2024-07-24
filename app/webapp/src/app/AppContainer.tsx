@@ -1,19 +1,20 @@
+import { constants } from 'buffer';
 import { Box } from 'grommet';
 import { createContext, useContext, useMemo, useState } from 'react';
 import { Outlet, Route, Routes, useLocation } from 'react-router-dom';
 
 import { AppHome } from '../pages/AppHome';
 import { PostPage } from '../post/PostPage';
+import { PostingPage } from '../post/PostingPage';
 import { ProfilePage } from '../profile/ProfilePage';
 import { ProfilePostPage } from '../profile/ProfilePostPage';
 import { ProfileRoot } from '../profile/ProfileRoot';
 import { RouteNames } from '../route.names';
 import { ResponsiveApp } from '../ui-components/ResponsiveApp';
-import { ThemedApp } from '../ui-components/ThemedApp';
-import { useAccountContext } from '../user-login/contexts/AccountContext';
+import { ThemedApp, useThemeContext } from '../ui-components/ThemedApp';
 import { ConnectedUserWrapper } from '../user-login/contexts/ConnectedUserWrapper';
+import { UserSettingsPage } from '../user-settings/UserSettingsPage';
 import { LoadingContext } from './LoadingContext';
-import { GlobalNav } from './layout/GlobalNav';
 import { GlobalStyles } from './layout/GlobalStyles';
 import { MAX_WIDTH_APP, ViewportContainer } from './layout/Viewport';
 
@@ -22,9 +23,7 @@ export interface SetPageTitleType {
   main: string;
 }
 
-export type AppContainerContextType = {
-  setTitle: (title: SetPageTitleType) => void;
-};
+export type AppContainerContextType = {};
 
 const AppContainerContextValue = createContext<
   AppContainerContextType | undefined
@@ -48,15 +47,18 @@ export const AppContainer0 = (props: React.PropsWithChildren) => {
 };
 
 export const AppContainer = (props: React.PropsWithChildren) => {
-  const { connectedUser } = useAccountContext();
-  const [title, setTitle] = useState<SetPageTitleType>();
+  const { constants } = useThemeContext();
 
   const topHeight = '0px';
 
   return (
     <>
-      <AppContainerContextValue.Provider value={{ setTitle }}>
-        <ViewportContainer style={{ maxWidth: MAX_WIDTH_APP }}>
+      <AppContainerContextValue.Provider value={{}}>
+        <ViewportContainer
+          style={{
+            maxWidth: MAX_WIDTH_APP,
+            backgroundColor: constants.colors.shade,
+          }}>
           <Box style={{ height: `calc(100% - ${topHeight})` }}>
             <Routes>
               <Route path={RouteNames.AppHome} element={<Outlet />}>
@@ -73,8 +75,16 @@ export const AppContainer = (props: React.PropsWithChildren) => {
                 </Route>
 
                 <Route
+                  path={`${RouteNames.Posting}`}
+                  element={<PostingPage></PostingPage>}></Route>
+
+                <Route
                   path={`${RouteNames.Post}/:postId`}
                   element={<PostPage></PostPage>}></Route>
+
+                <Route
+                  path={`${RouteNames.Settings}`}
+                  element={<UserSettingsPage></UserSettingsPage>}></Route>
                 <Route path={''} element={<AppHome></AppHome>}></Route>
                 <Route path={'/*'} element={<AppHome></AppHome>}></Route>
               </Route>

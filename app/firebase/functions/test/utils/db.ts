@@ -1,5 +1,9 @@
 import { getFirestore } from 'firebase-admin/firestore';
 
+import { initThreads } from '../../src/platforms/twitter/mock/twitter.service.mock';
+import { TEST_THREADS, globalTestServices } from '../__tests__/setup';
+import { testCredentials } from '../__tests__/test.accounts';
+
 export const resetDB = async () => {
   /** DO NOT DELETE */
   if (!process.env.FIRESTORE_EMULATOR_HOST) {
@@ -22,4 +26,10 @@ export const resetDB = async () => {
       return db.recursiveDelete(collection);
     })
   );
+
+  /** reset twitter mock timeline */
+  initThreads(TEST_THREADS, testCredentials[0]);
+
+  /** reset time in time mock */
+  globalTestServices.time.reset();
 };

@@ -5,6 +5,7 @@ from firebase_admin import initialize_app
 
 from loguru import logger
 
+from shared_functions.interface import ParsePostRequest
 from shared_functions.main import (
     SM_FUNCTION_post_parser_config,
     SM_FUNCTION_post_parser_imp,
@@ -35,7 +36,12 @@ def SM_FUNCTION_post_parser(request):
 
     logger.info(f"Calling SM_FUNCTION_post_parser_imp with config: {config}")
 
-    parser_result = SM_FUNCTION_post_parser_imp(post["content"], parameters, config)
+    request: ParsePostRequest = {
+        "post": post,
+        "parameters": parameters,
+    }
+
+    parser_result = SM_FUNCTION_post_parser_imp(request, config)
     parser_json = parser_result.model_dump_json()
 
     return https_fn.Response(

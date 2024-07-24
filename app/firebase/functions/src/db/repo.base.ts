@@ -1,8 +1,21 @@
-import { DefinedIfTrue } from '../@shared/types/types';
+import { DefinedIfTrue } from '../@shared/types/types.user';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
 
 const DEBUG = false;
+
+export function removeUndefined(obj: any): any {
+  if (obj !== null && typeof obj === 'object') {
+    for (const key in obj) {
+      if (obj[key] === undefined) {
+        delete obj[key]; // Delete the property if it's undefined
+      } else if (typeof obj[key] === 'object') {
+        removeUndefined(obj[key]); // Recurse into nested objects
+      }
+    }
+  }
+  return obj;
+}
 
 export class BaseRepository<TT, CC> {
   constructor(protected collection: FirebaseFirestore.CollectionReference) {}
@@ -42,7 +55,7 @@ export class BaseRepository<TT, CC> {
 
     if (!doc.exists) {
       if (DEBUG) logger.debug(`Doc dont exists ${doc.ref.id}`);
-      if (_shouldThrow) throw new Error(`PlatformPost ${id} not found`);
+      if (_shouldThrow) throw new Error(`Doc ${id} not found`);
       else return undefined as DefinedIfTrue<T, R>;
     }
 

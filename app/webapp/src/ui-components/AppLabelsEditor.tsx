@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { I18Keys } from '../i18n/i18n';
 import { AppButton } from './AppButton';
 import { AppInput } from './AppInput';
-import { AppLabel } from './AppLabel';
+import { AppLabel, LabelColors } from './AppLabel';
 import { useThemeContext } from './ThemedApp';
 import useOutsideClick from './hooks/OutsideClickHook';
 
@@ -18,11 +18,11 @@ export const AppLabelsEditor = (props: {
   addLabel?: (label: string) => void;
   removeLabel?: (label: string) => void;
   hashtag?: boolean;
-  color: string;
+  colors: LabelColors;
   editable?: boolean;
 }) => {
   const editable = props.editable !== undefined ? props.editable : false;
-  const color = props.color;
+  const colors = props.colors;
   const hashtag = props.hashtag !== undefined ? props.hashtag : false;
 
   const { constants } = useThemeContext();
@@ -117,7 +117,7 @@ export const AppLabelsEditor = (props: {
           onClick={() => addLabel()}
           style={{ textTransform: 'none' }}>
           <Box direction="row" align="center">
-            <AppLabel margin={{ right: 'small' }} color={color}>
+            <AppLabel margin={{ right: 'small' }} colors={colors}>
               {input}
             </AppLabel>
             <Text
@@ -145,7 +145,7 @@ export const AppLabelsEditor = (props: {
                 <Box
                   style={{ display: 'block', float: 'left' }}
                   margin={{ right: 'small', bottom: 'xsmall' }}>
-                  <AppLabel color={color}>{option}</AppLabel>
+                  <AppLabel colors={colors}>{option}</AppLabel>
                 </Box>
               );
             })();
@@ -181,7 +181,7 @@ export const AppLabelsEditor = (props: {
               key={ix}
               style={{ display: 'block', float: 'left', paddingTop: '5.5px' }}>
               <AppLabel
-                color={color}
+                colors={colors}
                 showClose={adding}
                 remove={() => removeLabel(label)}
                 key={ix}

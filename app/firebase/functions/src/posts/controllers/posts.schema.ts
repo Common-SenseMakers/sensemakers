@@ -1,17 +1,26 @@
 import { array, mixed, number, object, string } from 'yup';
 
-import { PLATFORM } from '../../@shared/types/types';
 import { PostsQueryStatus } from '../../@shared/types/types.posts';
+import { PLATFORM } from '../../@shared/types/types.user';
 
 export const postIdValidation = object({
   postId: string().required(),
 }).noUnknown(true);
 
 export const approvePostSchema = object({
-  id: string().required(),
-  content: string().required(),
-  semantics: string().required(),
-  mirrors: array().of(object().shape({})).required(),
+  post: object({
+    id: string().required(),
+    content: array().of(
+      object().shape({
+        content: string().required(),
+      })
+    ),
+    semantics: string().required(),
+    mirrors: array().of(object().shape({})).required(),
+  }).required(),
+  platformIds: array()
+    .of(string().oneOf([...Object.values(PLATFORM)]))
+    .required(),
 }).noUnknown(true);
 
 export const createDraftPostSchema = object({

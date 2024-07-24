@@ -14,41 +14,19 @@ import { useThemeContext } from '../ui-components/ThemedApp';
 import { useUserPosts } from '../user-home/UserPostsContext';
 import { usePost } from './PostContext';
 
-const getNextAndPrev = (postId?: string, posts?: AppPostFull[]) => {
-  if (!posts || !postId) {
-    return {};
-  }
-
-  const currPostIndex = posts?.findIndex((p) => p.id === postId);
-  const prevPostId =
-    posts && currPostIndex != undefined && currPostIndex > 0
-      ? posts[currPostIndex - 1].id
-      : undefined;
-
-  const nextPostId =
-    posts && currPostIndex != undefined && currPostIndex < posts.length - 1
-      ? posts[currPostIndex + 1].id
-      : undefined;
-
-  return { prevPostId, nextPostId };
-};
-
 export const PostNav = (props: {
   profile?: TwitterUserProfile;
   isProfile: boolean;
 }) => {
   const { show } = useToastContext();
+
   const profile = props.profile;
-  const { post } = usePost();
-  const { fetchOlder, posts, isFetchingOlder, errorFetchingOlder } =
-    useUserPosts();
+  const { post, nextPostId, prevPostId } = usePost();
+
+  const { fetchOlder, isFetchingOlder, errorFetchingOlder } = useUserPosts();
+
   const navigate = useNavigate();
   const { constants } = useThemeContext();
-
-  const { prevPostId, nextPostId } = useMemo(
-    () => getNextAndPrev(post?.id, posts),
-    [post, posts]
-  );
 
   useEffect(() => {
     if (errorFetchingOlder) {
@@ -90,7 +68,11 @@ export const PostNav = (props: {
       <NavButton
         icon={props.isProfile ? <LeftIcon></LeftIcon> : <HomeIcon></HomeIcon>}
         label={props.isProfile ? 'Back' : 'Home'}
-        onClick={() => (profile ? navigate('..') : navigate('/'))}></NavButton>
+        onClick={() =>
+          profile
+            ? navigate('..', { state: { postId: post?.id } })
+            : navigate('/')
+        }></NavButton>
       {!props.isProfile ? (
         <Box direction="row" gap="8px">
           <NavButton

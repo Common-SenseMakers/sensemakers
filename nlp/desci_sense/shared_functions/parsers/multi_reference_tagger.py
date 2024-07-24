@@ -17,6 +17,7 @@ from ..schema.post import RefPost
 from ..prompting.jinja.multi_ref.zero_ref_template import zero_ref_template
 from ..prompting.jinja.multi_ref.single_ref_template import single_ref_template
 from ..prompting.jinja.multi_ref.multi_ref_template import multi_ref_template
+
 from ..web_extractors.metadata_extractors import (
     RefMetadata,
     get_refs_metadata_portion,
@@ -32,6 +33,14 @@ class PromptCase(EnumDictKey):
     ZERO_REF = "ZERO_REF"
     SINGLE_REF = "SINGLE_REF"
     MULTI_REF = "MULTI_REF"
+
+
+def return_fallback(input):
+    return ParserChainOutput(
+        answer=[],
+        pparser_type=ParserChainType.MULTI_REF_TAGGER,
+        extra={"errors": "fallback"},
+    )
 
 
 def check_equivalence(string1, string2):
@@ -228,6 +237,8 @@ class MultiRefTaggerParserChain(PostParserChain):
         self._allowed_terms_name = f"{self.input_name}_allowed_terms"
         self.pydantic_parser = PydanticAnswerParser(pydantic_object=Answer)
 
+        self.runnable_fallback = RunnableLambda(return_fallback)
+
         # init chains
         llm_chain = (
             self.input_prompt | self.model | find_json_object | self.pydantic_parser
@@ -245,7 +256,7 @@ class MultiRefTaggerParserChain(PostParserChain):
 
     @property
     def chain(self):
-        return self._chain
+        return self._chain.with_retry().with_fallbacks([self.runnable_fallback])
 
     @property
     def allowed_terms_name(self) -> str:
@@ -320,12 +331,12 @@ class MultiRefTaggerParserChain(PostParserChain):
             metadata_list = []
 
         # check how many external references post mentions
-        if len(post.ref_urls) == 0:
+        if len(post.md_ref_urls()) == 0:
             case = PromptCase.ZERO_REF
 
         else:
             # at least one external reference
-            if len(post.ref_urls) == 1:
+            if len(post.md_ref_urls()) == 1:
                 case = PromptCase.SINGLE_REF
                 # if metadata flag is active, retreive metadata
 
@@ -344,7 +355,7 @@ class MultiRefTaggerParserChain(PostParserChain):
             self.input_name: prompt,
             self.allowed_terms_name: self.prompt_case_dict[case]["labels"],
             "ref_metadata": metadata_list,  # TODO this might get overriden by other chains
-            "ref_urls": post.ref_urls,
+            "ref_urls": post.md_ref_urls(),
         }
 
         return full_prompt
@@ -368,16 +379,23 @@ class MultiRefTaggerParserChain(PostParserChain):
             str: full instantiated prompt
         """
         metadata_list = metadata_list if metadata_list else list()
-        references_metadata = metadata_list
         prompt_j2_template = self.prompt_case_dict[case]["prompt_j2_template"]
         type_templates = self.prompt_case_dict[case]["type_templates"]
+
+        # render instructions for reference metadata
+        rendered_instructions = self.post_renderer.render_instructions(post)
+
+        # render post with metadata for prompt
+        rendered_post = self.post_renderer.render(
+            post,
+            metadata_list,
+        )
 
         # instantiate prompt with ref post details
         full_prompt = prompt_j2_template.render(
             type_templates=type_templates,
-            author_name=post.author,
-            content=post.content,
-            references_metadata=references_metadata,
+            ref_metadata_instructions=rendered_instructions,
+            rendered_post=rendered_post,
         )
 
         return full_prompt

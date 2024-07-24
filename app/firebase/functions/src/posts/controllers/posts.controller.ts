@@ -1,18 +1,20 @@
 import { RequestHandler } from 'express';
 
-import { UserProfileQuery } from '../../@shared/types/types';
 import {
-  AppPostFull,
+  PublishPostPayload,
+  UserProfileQuery,
+} from '../../@shared/types/types.fetch';
+import {
   PostUpdatePayload,
   ProfilePostsQuery,
   UserPostsQuery,
 } from '../../@shared/types/types.posts';
 import { IS_EMULATOR } from '../../config/config.runtime';
-import { envRuntime } from '../../config/typedenv.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
+import { enqueueTask } from '../../tasksUtils/tasks.support';
 import { canReadPost } from '../posts.access.control';
-import { enqueueParsePost } from '../posts.task';
+import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 import {
   approvePostSchema,
   createDraftPostSchema,
@@ -159,9 +161,9 @@ export const approvePostController: RequestHandler = async (
 
     const payload = (await approvePostSchema.validate(
       request.body
-    )) as AppPostFull;
+    )) as PublishPostPayload;
 
-    await postsManager.approvePost(payload, userId);
+    await postsManager.publishPost(payload.post, payload.platformIds, userId);
 
     if (DEBUG)
       logger.debug(`${request.path}: approvePost`, {
@@ -184,10 +186,7 @@ export const parsePostController: RequestHandler = async (
       postId: string;
     };
 
-    const task = enqueueParsePost(
-      payload.postId,
-      envRuntime.REGION || 'us-central1'
-    );
+    const task = enqueueTask(PARSE_POST_TASK, { postId: payload.postId });
 
     if (!IS_EMULATOR) {
       // can await if not emulator

@@ -1,18 +1,26 @@
+import { Magic } from '@magic-sdk/admin';
 import * as jwt from 'jsonwebtoken';
 
+import {
+  HandleSignupResult,
+  OurTokenConfig,
+} from '../@shared/types/types.fetch';
 import {
   ALL_IDENTITY_PLATFORMS,
   AccountDetailsRead,
   AppUserRead,
-  HandleSignupResult,
-  OurTokenConfig,
+  EmailDetails,
   PLATFORM,
-  UserWithPlatformIds,
-} from '../@shared/types/types';
+  UserSettings,
+  UserSettingsUpdate,
+} from '../@shared/types/types.user';
+import { USER_INIT_SETTINGS } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
+import { EmailSenderService } from '../emailSender/email.sender.service';
 import { logger } from '../instances/logger';
 import { IdentityServicesMap } from '../platforms/platforms.service';
+import { TimeService } from '../time/time.service';
 import { UsersHelper } from './users.helper';
 import { UsersRepository } from './users.repository';
 import { getPrefixedUserId, getUsernameTag } from './users.utils';
@@ -35,6 +43,8 @@ export class UsersService {
     public db: DBInstance,
     public repo: UsersRepository,
     public identityPlatforms: IdentityServicesMap,
+    public time: TimeService,
+    public emailSender: EmailSenderService,
     protected ourToken: OurTokenConfig
   ) {}
 
@@ -102,11 +112,16 @@ export class UsersService {
       authenticatedDetails.user_id
     );
 
-    const existingUserWithAccount = await this.repo.getUserWithPlatformAccount(
-      platform,
-      authenticatedDetails.user_id,
-      manager
-    );
+    const existingUserWithAccountId =
+      await this.repo.getUserWithPlatformAccount(
+        platform,
+        authenticatedDetails.user_id,
+        manager
+      );
+
+    const existingUserWithAccount = existingUserWithAccountId
+      ? await this.repo.getUser(existingUserWithAccountId, manager)
+      : undefined;
 
     if (DEBUG)
       logger.debug('UsersService: handleSignup', {
@@ -204,12 +219,14 @@ export class UsersService {
          * and we need to create a new user.
          * */
 
-        const platformIds_property: keyof UserWithPlatformIds = 'platformIds';
+        const initSettings: UserSettings = USER_INIT_SETTINGS;
 
         await this.repo.createUser(
           prefixed_user_id,
           {
-            [platformIds_property]: [prefixed_user_id],
+            settings: initSettings,
+            signupDate: this.time.now(),
+            platformIds: [prefixed_user_id],
             [platform]: [authenticatedDetails],
           },
           manager
@@ -268,11 +285,21 @@ export class UsersService {
   public async getUserProfile(userId: string, manager: TransactionManager) {
     const user = await this.repo.getUser(userId, manager, true);
 
-    /** extract the profile for each account */
+    /** delete the token, from the public profile */
+    const email: EmailDetails | undefined = user.email
+      ? {
+          ...user.email,
+        }
+      : undefined;
+
     const userRead: AppUserRead = {
       userId,
+      email,
+      signupDate: user.signupDate,
+      settings: user.settings,
     };
 
+    /** extract the profile for each account */
     ALL_IDENTITY_PLATFORMS.forEach((platform) => {
       const accounts = UsersHelper.getAccounts(user, platform);
 
@@ -290,5 +317,67 @@ export class UsersService {
     });
 
     return userRead;
+  }
+
+  updateSettings(userId: string, settings: UserSettingsUpdate) {
+    return this.db.run(async (manager) => {
+      await this.repo.updateSettings(userId, settings, manager);
+    });
+  }
+
+  setEmail(userId: string, emailDetails: EmailDetails) {
+    return this.db.run(async (manager) => {
+      const user = await this.repo.getUser(userId, manager, true);
+      if (user.email) {
+        throw new Error('Email already set');
+      }
+
+      await this.repo.setEmail(user.userId, emailDetails, manager);
+    });
+  }
+
+  async setEmailFromMagic(userId: string, idToken: string, magic: Magic) {
+    const userMetadata = await magic.users.getMetadataByToken(idToken);
+    if (DEBUG) {
+      logger.debug('setEmailFromMagic', { userId, userMetadata });
+    }
+
+    await this.db.run(async (manager) => {
+      const user = await this.repo.getUser(userId, manager, true);
+      if (user.email) {
+        throw new Error('Email already set');
+      }
+
+      const accounts = UsersHelper.getAccounts(user, PLATFORM.Nanopub);
+      const addresses = accounts.map((a) => a.user_id.toLocaleLowerCase());
+
+      if (DEBUG) {
+        logger.debug('setEmailFromMagic - addresses', { accounts, addresses });
+      }
+
+      /** check the magic user has a wallet that is owned by the logged in user */
+      if (
+        userMetadata.publicAddress &&
+        addresses.includes(userMetadata.publicAddress.toLocaleLowerCase())
+      ) {
+        if (userMetadata.email) {
+          if (DEBUG) {
+            logger.debug('setEmailFromMagic- email', {
+              email: userMetadata.email,
+            });
+          }
+
+          await this.repo.setEmail(
+            user.userId,
+            { email: userMetadata.email, source: 'MAGIC' },
+            manager
+          );
+        } else {
+          throw new Error('No email found');
+        }
+      } else {
+        throw new Error('No wallet found');
+      }
+    });
   }
 }

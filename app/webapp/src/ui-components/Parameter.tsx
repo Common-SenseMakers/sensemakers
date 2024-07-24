@@ -17,7 +17,7 @@ export const Parameter = (props: IParameter): JSX.Element => {
           color: constants.colors.text,
           marginBottom: '13px',
           textTransform: 'uppercase',
-          fontSize: constants.textFontSizes.small,
+          fontSize: constants.fontSize.small.size,
           fontWeight: '700',
         }}>
         {props.label}
@@ -29,7 +29,7 @@ export const Parameter = (props: IParameter): JSX.Element => {
           <Box
             style={{
               fontWeight: '500',
-              fontSize: constants.textFontSizes.normal,
+              fontSize: constants.fontSize.medium.size,
             }}>
             {props.text}
           </Box>

@@ -1,8 +1,17 @@
 import { spy, when } from 'ts-mockito';
 
-import { PLATFORM } from '../../src/@shared/types/types';
+import { PLATFORM } from '../../src/@shared/types/types.user';
+import { ActivityRepository } from '../../src/activity/activity.repository';
+import { ActivityService } from '../../src/activity/activity.service';
 import { DBInstance } from '../../src/db/instance';
+import { EmailSenderService } from '../../src/emailSender/email.sender.service';
+import {
+  EmailSenderMockConfig,
+  getEmailSenderMock,
+} from '../../src/emailSender/email.sender.service.mock';
 import { Services } from '../../src/instances/services';
+import { NotificationService } from '../../src/notifications/notification.service';
+import { NotificationsRepository } from '../../src/notifications/notifications.repository';
 import {
   ParserMockConfig,
   getParserMock,
@@ -28,20 +37,25 @@ import { PlatformPostsRepository } from '../../src/posts/platform.posts.reposito
 import { PostsManager } from '../../src/posts/posts.manager';
 import { PostsProcessing } from '../../src/posts/posts.processing';
 import { PostsRepository } from '../../src/posts/posts.repository';
-import { getTimeMock } from '../../src/time/mock/time.service.mock';
+import { TriplesRepository } from '../../src/semantics/triples.repository';
+import { TimeMock, getTimeMock } from '../../src/time/mock/time.service.mock';
 import { TimeService } from '../../src/time/time.service';
 import { UsersRepository } from '../../src/users/users.repository';
 import { UsersService } from '../../src/users/users.service';
-import { TriplesRepository } from '../../src/semantics/triples.repository';
+import { testCredentials } from './test.accounts';
 
 export interface TestServicesConfig {
   twitter: TwitterMockConfig;
   nanopub: NanopubMockConfig;
   parser: ParserMockConfig;
   time: 'real' | 'mock';
+  emailSender: EmailSenderMockConfig;
 }
 
-export type TestServices = Services;
+export type TestServices = Services & {
+  emailMock?: EmailSenderService;
+  time: TimeMock;
+};
 
 export const getTestServices = (config: TestServicesConfig) => {
   const mandatory = [
@@ -50,6 +64,8 @@ export const getTestServices = (config: TestServicesConfig) => {
     'TEST_USER_ACCOUNTS',
     'OUR_TOKEN_SECRET',
     'NANOPUBS_PUBLISH_SERVERS',
+    'NP_PUBLISH_RSA_PRIVATE_KEY',
+    'NP_PUBLISH_RSA_PUBLIC_KEY',
   ];
 
   mandatory.forEach((varName) => {
@@ -65,6 +81,8 @@ export const getTestServices = (config: TestServicesConfig) => {
   const postsRepo = new PostsRepository(db);
   const triplesRepo = new TriplesRepository(db);
   const platformPostsRepo = new PlatformPostsRepository(db);
+  const notificationsRepo = new NotificationsRepository(db);
+  const activityRepo = new ActivityRepository(db);
 
   const identityServices: IdentityServicesMap = new Map();
   const platformsMap: PlatformsMap = new Map();
@@ -85,10 +103,17 @@ export const getTestServices = (config: TestServicesConfig) => {
     clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
   });
 
-  const twitter = getTwitterMock(_twitter, config.twitter);
+  const testUser = testCredentials[0];
+  const twitter = getTwitterMock(_twitter, config.twitter, testUser);
 
   /** nanopub */
-  const _nanopub = new NanopubService(time);
+  const _nanopub = new NanopubService(time, {
+    servers: JSON.parse(process.env.NANOPUBS_PUBLISH_SERVERS as string),
+    rsaKeys: {
+      privateKey: process.env.NP_PUBLISH_RSA_PRIVATE_KEY as string,
+      publicKey: process.env.NP_PUBLISH_RSA_PUBLIC_KEY as string,
+    },
+  });
   const nanopub = getNanopubMock(_nanopub, config.nanopub);
 
   /** all identity services */
@@ -96,11 +121,27 @@ export const getTestServices = (config: TestServicesConfig) => {
   identityServices.set(PLATFORM.Twitter, twitter);
   identityServices.set(PLATFORM.Nanopub, nanopub);
 
-  /** users service */
-  const usersService = new UsersService(userRepo, identityServices, {
-    tokenSecret: process.env.OUR_TOKEN_SECRET as string,
-    expiresIn: '30d',
+  const _email = new EmailSenderService({
+    apiKey: process.env.EMAIL_CLIENT_SECRET as string,
   });
+
+  const { instance: email, mock: emailMock } = getEmailSenderMock(
+    _email,
+    config.emailSender
+  );
+
+  /** users service */
+  const usersService = new UsersService(
+    db,
+    userRepo,
+    identityServices,
+    time,
+    email,
+    {
+      tokenSecret: process.env.OUR_TOKEN_SECRET as string,
+      expiresIn: '30d',
+    }
+  );
 
   /** all platforms */
   platformsMap.set(PLATFORM.Twitter, twitter);
@@ -135,12 +176,27 @@ export const getTestServices = (config: TestServicesConfig) => {
     parser
   );
 
+  const notifications = new NotificationService(
+    db,
+    notificationsRepo,
+    postsRepo,
+    platformPostsRepo,
+    activityRepo,
+    userRepo,
+    email
+  );
+
+  const activity = new ActivityService(activityRepo);
+
   const services: TestServices = {
     users: usersService,
-    postsManager: postsManager,
+    postsManager,
     platforms: platformsService,
-    time: time,
+    time: time as TimeMock,
     db,
+    notifications,
+    emailMock,
+    activity,
   };
 
   return services;

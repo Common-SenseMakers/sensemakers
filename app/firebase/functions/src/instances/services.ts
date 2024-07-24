@@ -1,15 +1,26 @@
-import { PLATFORM } from '../@shared/types/types';
+import { PLATFORM } from '../@shared/types/types.user';
+import { ActivityRepository } from '../activity/activity.repository';
+import { ActivityService } from '../activity/activity.service';
 import {
+  EMAIL_CLIENT_SECRET,
   FUNCTIONS_PY_URL,
+  NANOPUBS_PUBLISH_SERVERS,
+  NP_PUBLISH_RSA_PRIVATE_KEY,
+  NP_PUBLISH_RSA_PUBLIC_KEY,
   OUR_EXPIRES_IN,
   OUR_TOKEN_SECRET,
   TWITTER_CLIENT_ID,
   TWITTER_CLIENT_SECRET,
+  USE_REAL_EMAIL,
   USE_REAL_NANOPUB,
   USE_REAL_PARSER,
   USE_REAL_TWITTERX,
 } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
+import { EmailSenderService } from '../emailSender/email.sender.service';
+import { getEmailSenderMock } from '../emailSender/email.sender.service.mock';
+import { NotificationService } from '../notifications/notification.service';
+import { NotificationsRepository } from '../notifications/notifications.repository';
 import { getParserMock } from '../parser/mock/parser.service.mock';
 import { ParserService } from '../parser/parser.service';
 import { getNanopubMock } from '../platforms/nanopub/mock/nanopub.service.mock';
@@ -21,6 +32,7 @@ import {
   PlatformsMap,
   PlatformsService,
 } from '../platforms/platforms.service';
+import { getTestCredentials } from '../platforms/twitter/mock/test.users';
 import { getTwitterMock } from '../platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../platforms/twitter/twitter.service';
 import { PlatformPostsRepository } from '../posts/platform.posts.repository';
@@ -31,6 +43,9 @@ import { TriplesRepository } from '../semantics/triples.repository';
 import { TimeService } from '../time/time.service';
 import { UsersRepository } from '../users/users.repository';
 import { UsersService } from '../users/users.service';
+import { logger } from './logger';
+
+const DEBUG = false;
 
 export interface Services {
   users: UsersService;
@@ -38,6 +53,8 @@ export interface Services {
   platforms: PlatformsService;
   time: TimeService;
   db: DBInstance;
+  notifications: NotificationService;
+  activity: ActivityService;
 }
 
 export const createServices = () => {
@@ -46,6 +63,8 @@ export const createServices = () => {
   const postsRepo = new PostsRepository(db);
   const triplesRepo = new TriplesRepository(db);
   const platformPostsRepo = new PlatformPostsRepository(db);
+  const activityRepo = new ActivityRepository(db);
+  const notificationsRepo = new NotificationsRepository(db);
 
   const identityPlatforms: IdentityServicesMap = new Map();
   const platformsMap: PlatformsMap = new Map();
@@ -57,12 +76,22 @@ export const createServices = () => {
     clientSecret: TWITTER_CLIENT_SECRET.value(),
   });
 
+  const testCredentials = getTestCredentials();
+  const testUser = testCredentials && testCredentials[0];
+
   const twitter = getTwitterMock(
     _twitter,
-    USE_REAL_TWITTERX.value() ? 'real' : 'mock-publish'
+    USE_REAL_TWITTERX.value() ? 'real' : 'mock-signup',
+    testUser
   );
 
-  const _nanopub = new NanopubService(time);
+  const _nanopub = new NanopubService(time, {
+    servers: JSON.parse(NANOPUBS_PUBLISH_SERVERS.value()),
+    rsaKeys: {
+      privateKey: NP_PUBLISH_RSA_PRIVATE_KEY.value(),
+      publicKey: NP_PUBLISH_RSA_PUBLIC_KEY.value(),
+    },
+  });
   const nanopub = getNanopubMock(
     _nanopub,
     USE_REAL_NANOPUB.value() ? 'real' : 'mock-publish'
@@ -77,11 +106,30 @@ export const createServices = () => {
   platformsMap.set(PLATFORM.Twitter, twitter);
   platformsMap.set(PLATFORM.Nanopub, nanopub);
 
-  /** users service */
-  const usersService = new UsersService(db, userRepo, identityPlatforms, {
-    tokenSecret: OUR_TOKEN_SECRET.value(),
-    expiresIn: OUR_EXPIRES_IN,
+  /** email sender service */
+  const _email = new EmailSenderService({
+    apiKey: EMAIL_CLIENT_SECRET.value(),
   });
+
+  const { instance: email } = getEmailSenderMock(
+    _email,
+    USE_REAL_EMAIL.value() ? 'real' : 'mock'
+  );
+
+  /** users service */
+  const usersService = new UsersService(
+    db,
+    userRepo,
+    identityPlatforms,
+    time,
+    email,
+    {
+      tokenSecret: OUR_TOKEN_SECRET.value(),
+      expiresIn: OUR_EXPIRES_IN,
+    }
+  );
+
+  // trigger magic init
 
   /** platforms service */
   const platformsService = new PlatformsService(
@@ -115,6 +163,21 @@ export const createServices = () => {
     parser
   );
 
+  /** activity service */
+  const activity = new ActivityService(activityRepo);
+
+  /** notification service */
+
+  const notifications = new NotificationService(
+    db,
+    notificationsRepo,
+    postsRepo,
+    platformPostsRepo,
+    activityRepo,
+    userRepo,
+    email
+  );
+
   /** all services */
   const services: Services = {
     users: usersService,
@@ -122,7 +185,17 @@ export const createServices = () => {
     platforms: platformsService,
     time,
     db,
+    notifications,
+    activity,
   };
 
+  if (DEBUG) {
+    logger.debug('services', {
+      USE_REAL_PARSER: USE_REAL_PARSER.value(),
+      USE_REAL_TWITTER: USE_REAL_TWITTERX.value(),
+      USE_REAL_NANOPUB: USE_REAL_NANOPUB.value(),
+      USE_REAL_EMAIL: USE_REAL_EMAIL.value(),
+    });
+  }
   return services;
 };

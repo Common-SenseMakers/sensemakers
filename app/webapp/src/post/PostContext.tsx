@@ -11,25 +11,33 @@ import React, {
 import { useAppFetch } from '../api/app.fetch';
 import { useToastContext } from '../app/ToastsContext';
 import { subscribeToUpdates } from '../firestore/realtime.listener';
-import { AppUserRead, PLATFORM } from '../shared/types/types';
+import { PublishPostPayload } from '../shared/types/types.fetch';
+import { NotificationFreq } from '../shared/types/types.notifications';
 import {
   PlatformPost,
   PlatformPostDraft,
   PlatformPostDraftApproval,
+  PlatformPostSignerType,
 } from '../shared/types/types.platform.posts';
 import {
   AppPostFull,
+  AppPostRepublishedStatus,
   AppPostReviewStatus,
   PostUpdate,
   PostUpdatePayload,
   PostsQueryStatus,
 } from '../shared/types/types.posts';
 import { TwitterThread } from '../shared/types/types.twitter';
-import { UserPostsContext, useUserPosts } from '../user-home/UserPostsContext';
+import {
+  AppUserRead,
+  AutopostOption,
+  PLATFORM,
+} from '../shared/types/types.user';
+import { useUserPosts } from '../user-home/UserPostsContext';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { getAccount } from '../user-login/user.helper';
-import { AppPostStatus, usePostStatuses } from './usePostStatuses';
+import { AppPostStatus, getPostStatuses } from './posts.helper';
 
 const DEBUG = false;
 
@@ -39,11 +47,16 @@ interface PostContextType {
   reparse: () => void;
   nanopubDraft: PlatformPostDraft | undefined;
   tweet?: PlatformPost<TwitterThread>;
+  editable: boolean; // can be true if not published
+  enabledEdit: boolean; // only true if editing after publishing
+  setEnabledEdit: (enabled: boolean) => void;
   updateSemantics: (newSemantics: string) => Promise<void>;
   postStatuses: AppPostStatus;
   updatePost: (update: PostUpdate) => Promise<void>;
   isUpdating: boolean;
-  approve: () => Promise<void>;
+  approveOrUpdate: () => Promise<void>;
+  prevPostId?: string;
+  nextPostId?: string;
 }
 
 const PostContextValue = createContext<PostContextType | undefined>(undefined);
@@ -62,10 +75,11 @@ export const PostContext: React.FC<{
   const [postEdited, setPostEdited] = React.useState<AppPostFull | undefined>(
     undefined
   );
+  const [enabledEdit, setEnabledEdit] = React.useState<boolean>(false);
 
   const [requesteDraft, setRequestedDraft] = React.useState(false);
 
-  const { filterStatus, removePost } = useUserPosts();
+  const { filterStatus, removePost, getNextAndPrev } = useUserPosts();
   const [isUpdating, setIsUpdating] = React.useState(false);
 
   const appFetch = useAppFetch();
@@ -181,10 +195,17 @@ export const PostContext: React.FC<{
     }
   }, [post, connectedUser]);
 
-  /** TODO: The post author needs not be the connected user. We can probably have an
+  /** TODO: This is a placeholder. The post author may not be the connected user. We can probably have an
    * endpoint to get user profiles by userIds */
   const author: AppUserRead = {
     userId: '1234',
+    signupDate: 1720702932,
+    settings: {
+      notificationFreq: NotificationFreq.None,
+      autopost: {
+        [PLATFORM.Nanopub]: { value: AutopostOption.MANUAL },
+      },
+    },
     twitter: [
       {
         user_id: '1234',
@@ -267,11 +288,11 @@ export const PostContext: React.FC<{
     _updatePost(update);
   };
 
-  const postStatuses = usePostStatuses(post);
+  const postStatuses = getPostStatuses(post);
 
   const { signNanopublication } = useNanopubContext();
 
-  const approve = async () => {
+  const approveOrUpdate = async () => {
     // mark nanopub draft as approved
     setIsUpdating(true);
     const nanopub = post?.mirrors.find(
@@ -282,15 +303,42 @@ export const PostContext: React.FC<{
       throw new Error(`Unexpected nanopub mirror not found`);
     }
 
-    if (signNanopublication) {
-      const signed = await signNanopublication(nanopub.draft.post);
-      nanopub.draft.postApproval = PlatformPostDraftApproval.APPROVED;
-      nanopub.draft.post = signed.rdf();
+    if (nanopub.draft.signerType === PlatformPostSignerType.USER) {
+      if (!signNanopublication) {
+        throw new Error(`Unexpected signNanopublication undefined`);
+      }
 
-      await appFetch<void, AppPostFull>('/api/posts/approve', post);
+      const signed = await signNanopublication(nanopub.draft.unsignedPost);
+      nanopub.draft.signedPost = signed.rdf();
     }
-    // setIsUpdating(false); should be set by the refetech flow
+
+    /** approve is set the first time a post is published (should be set
+     * also set in the backend anyway) */
+    if (post && post.republishedStatus === AppPostRepublishedStatus.PENDING) {
+      nanopub.draft.postApproval = PlatformPostDraftApproval.APPROVED;
+    }
+
+    if (post) {
+      await appFetch<void, PublishPostPayload>('/api/posts/approve', {
+        post,
+        platformIds: [PLATFORM.Nanopub],
+      });
+    }
+
+    setEnabledEdit(false);
+
+    // setIsUpdating(false); should be set by the re-fetch flow
   };
+
+  const editable =
+    connectedUser &&
+    connectedUser.userId === post?.authorId &&
+    (!postStatuses.published || enabledEdit);
+
+  const { prevPostId, nextPostId } = useMemo(
+    () => getNextAndPrev(post?.id),
+    [post]
+  );
 
   return (
     <PostContextValue.Provider
@@ -304,7 +352,12 @@ export const PostContext: React.FC<{
         updateSemantics,
         updatePost,
         isUpdating,
-        approve,
+        approveOrUpdate,
+        editable: editable !== undefined ? editable : false,
+        setEnabledEdit,
+        enabledEdit,
+        prevPostId,
+        nextPostId,
       }}>
       {children}
     </PostContextValue.Provider>

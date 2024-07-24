@@ -1,14 +1,11 @@
-import { Nanopub } from '@nanopub/sign';
+import { Nanopub, NpProfile } from '@nanopub/sign';
 import { verifyMessage } from 'viem';
 
-import {
-  FetchParams,
-  PLATFORM,
-  UserDetailsBase,
-} from '../../@shared/types/types';
+import { FetchParams } from '../../@shared/types/types.fetch';
 import {
   NanopubUserProfile,
   NanupubSignupData,
+  RSAKeys,
 } from '../../@shared/types/types.nanopubs';
 import {
   FetchedResult,
@@ -17,14 +14,20 @@ import {
   PlatformPostDraftApproval,
   PlatformPostPosted,
   PlatformPostPublish,
+  PlatformPostUpdate,
 } from '../../@shared/types/types.platform.posts';
 import {
   AppPostMirror,
-  GenericPostData,
+  GenericThread,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
+
+import {
+  PLATFORM,
+  UserDetailsBase,
+} from '../../@shared/types/types.user';
 import { getEthToRSAMessage } from '../../@shared/utils/nanopub.sign.util';
-import { NANOPUBS_PUBLISH_SERVERS_STR } from '../../config/config.runtime';
+import { cleanPrivateKey } from '../../@shared/utils/semantics.helper';
 import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
@@ -35,9 +38,9 @@ import { createNanopublication } from './create.nanopub';
 
 const DEBUG = false;
 
-export interface TwitterApiCredentials {
-  clientId: string;
-  clientSecret: string;
+export interface NanopubServiceConfig {
+  servers: string[];
+  rsaKeys: RSAKeys;
 }
 
 /** Twitter service handles all interactions with Twitter API */
@@ -49,17 +52,24 @@ export class NanopubService
       UserDetailsBase<NanopubUserProfile>
     >
 {
-  constructor(protected time: TimeService) {}
+  constructor(
+    protected time: TimeService,
+    protected config: NanopubServiceConfig
+  ) {}
 
   async getSignupContext(
-    userId: string | undefined,
+    userId?: string,
     params?: NanupubSignupData
   ): Promise<NanopubUserProfile> {
     if (!params) {
       throw new Error('Missing params');
     }
+    
+    const introNanopub = await createIntroNanopublication(
+      params,
+      false
+    );
 
-    const introNanopub = await createIntroNanopublication(params);
     return { ...params, introNanopub: introNanopub.rdf() };
   }
 
@@ -124,10 +134,29 @@ export class NanopubService
     );
 
     return {
-      post: nanopubDraft.rdf(),
+      unsignedPost: nanopubDraft.rdf(),
       user_id: account.user_id,
       postApproval: PlatformPostDraftApproval.PENDING,
     };
+  }
+
+  async signDraft(
+    post: PlatformPostDraft<any>,
+    account: UserDetailsBase<any, any, any>
+  ): Promise<string> {
+    try {
+      const profile = new NpProfile(
+        cleanPrivateKey({
+          privateKey: this.config.rsaKeys.privateKey,
+          publicKey: this.config.rsaKeys.publicKey,
+        })
+      );
+      const signed = new Nanopub(post.unsignedPost).sign(profile);
+      return signed.rdf();
+    } catch (error) {
+      logger.error('Error signing nanopub', error);
+      throw error;
+    }
   }
 
   async publishInternal(signed: string) {
@@ -138,16 +167,12 @@ export class NanopubService
 
     let published: Nanopub | undefined = undefined;
 
-    const NANOPUBS_PUBLISH_SERVERS = JSON.parse(
-      NANOPUBS_PUBLISH_SERVERS_STR.value()
-    );
-
     while (!stop) {
       try {
-        if (serverIx < NANOPUBS_PUBLISH_SERVERS.length) {
+        if (serverIx < this.config.servers.length) {
           published = await nanopub.publish(
             undefined,
-            NANOPUBS_PUBLISH_SERVERS[serverIx]
+            this.config.servers[serverIx]
           );
           stop = true;
         } else {
@@ -155,7 +180,7 @@ export class NanopubService
         }
       } catch (error) {
         logger.error(
-          `Error publishing nanopub from ${NANOPUBS_PUBLISH_SERVERS[serverIx]}, retrying`,
+          `Error publishing nanopub from ${this.config.servers[serverIx]}, retrying`,
           error
         );
         serverIx++;
@@ -188,7 +213,26 @@ export class NanopubService
     throw new Error('Could not publish nanopub');
   }
 
-  convertToGeneric(platformPost: PlatformPost<any>): Promise<GenericPostData> {
+  async update(
+    postPublish: PlatformPostUpdate<any>,
+    _manager: TransactionManager
+  ) {
+    const published = await this.publishInternal(postPublish.draft);
+
+    if (published) {
+      const platfformPostPosted: PlatformPostPosted = {
+        post_id: published.info().uri,
+        timestampMs: Date.now(),
+        user_id: postPublish.userDetails.user_id,
+        post: published.rdf(),
+      };
+      return platfformPostPosted;
+    }
+
+    throw new Error('Could not publish nanopub');
+  }
+
+  convertToGeneric(platformPost: PlatformPost<any>): Promise<GenericThread> {
     throw new Error('Method not implemented.');
   }
 

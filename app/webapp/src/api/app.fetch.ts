@@ -49,7 +49,9 @@ export const useAppFetch = () => {
 
   const appFetch = useCallback(
     async <T, D = any>(path: string, data?: D, auth: boolean = false) => {
-      if (auth && !token) throw new Error('No token available');
+      if (auth && !token) {
+        throw new Error('No token available');
+      }
       return _appFetch<T, D>(path, data, token);
     },
     [token]

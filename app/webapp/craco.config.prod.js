@@ -17,6 +17,30 @@ if (!process.env.FB_PROJECT) {
   throw new Error('FB_PROJECT is not set');
 }
 
+if (process.env.FB_PROJECT === 'dev') {
+  base.webpack.configure.plugins = [
+    ...newPlugins,
+    new webpack.DefinePlugin({
+      ...definePlugin.definitions,
+      process: {
+        ...definePlugin.definitions.process,
+        env: {
+          ...definePlugin.definitions.process.env,
+          NODE_ENV: '"development"',
+          FUNCTIONS_BASE:
+            '"https://us-central1-sensenets-dev.cloudfunctions.net"',
+          FB_APIKEY: '"AIzaSyDTGlezOv68B6_sZHbUZP8xrvKgCaO614c"',
+          FB_AUTHDOMAIN: '"sensenets-dev.firebaseapp.com"',
+          FB_PROJECTID: '"sensenets-dev"',
+          FB_STORAGE_BUCKET: '"sensenets-dev.appspot.com"',
+          FB_MESSAGING_SENDER_ID: '"943634188972"',
+          FB_APPID: '"1:943634188972:web:7c68eb87a4e517af63ad09"',
+        },
+      },
+    }),
+  ];
+}
+
 if (process.env.FB_PROJECT === 'staging') {
   base.webpack.configure.plugins = [
     ...newPlugins,

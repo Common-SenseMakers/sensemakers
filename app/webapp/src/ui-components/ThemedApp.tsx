@@ -33,7 +33,9 @@ export const ThemedApp = (props: ThemeContextProps): JSX.Element => {
   return (
     <ThemeContextValue.Provider
       value={{ theme, constants: theme.constants, setTheme }}>
-      <Grommet theme={theme}>{props.children}</Grommet>
+      <Grommet theme={theme} background={theme.constants.colors.shade}>
+        {props.children}
+      </Grommet>
     </ThemeContextValue.Provider>
   );
 };

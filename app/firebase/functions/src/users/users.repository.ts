@@ -1,15 +1,20 @@
 import { firestore } from 'firebase-admin';
 
+import { NotificationFreq } from '../@shared/types/types.notifications';
 import {
   AppUser,
   AppUserCreate,
+  AutopostOption,
   DefinedIfTrue,
+  EmailDetails,
   FetchedDetails,
   PLATFORM,
   UserDetailsBase,
   UserPlatformProfile,
+  UserSettings,
+  UserSettingsUpdate,
   UserWithPlatformIds,
-} from '../@shared/types/types';
+} from '../@shared/types/types.user';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
@@ -78,7 +83,7 @@ export class UsersRepository {
     user_id: string,
     manager: TransactionManager,
     shouldThrow?: T
-  ): Promise<DefinedIfTrue<T, AppUser>> {
+  ): Promise<DefinedIfTrue<T, string>> {
     const prefixed_user_id = getPrefixedUserId(platform, user_id);
 
     /** protect against changes in the property name */
@@ -97,7 +102,7 @@ export class UsersRepository {
         throw new Error(
           `User with user_id: ${user_id} and platform ${platform} not found`
         );
-      else return undefined as DefinedIfTrue<T, AppUser>;
+      else return undefined as DefinedIfTrue<T, string>;
     }
 
     if (snap.size > 1) {
@@ -106,10 +111,8 @@ export class UsersRepository {
       );
     }
 
-    return { userId: snap.docs[0].id, ...snap.docs[0].data() } as DefinedIfTrue<
-      T,
-      AppUser
-    >;
+    /** should not return the data as it does not include the tx manager cache */
+    return snap.docs[0].id as DefinedIfTrue<T, string>;
   }
 
   public async getByPlatformUsername<T extends boolean>(
@@ -190,15 +193,14 @@ export class UsersRepository {
     manager: TransactionManager
   ) {
     /** check if this platform user_id already exists */
-    const existingUser = await this.getUserWithPlatformAccount(
+    const existingUserId = await this.getUserWithPlatformAccount(
       platform,
       user_id,
-      manager
+      manager,
+      true
     );
 
-    if (!existingUser) {
-      throw new Error(`User not found ${platform}:${user_id}`);
-    }
+    const existingUser = await this.getUser(existingUserId, manager, true);
 
     if (platform === PLATFORM.Local) {
       throw new Error('Unexpected');
@@ -252,11 +254,15 @@ export class UsersRepository {
      * one from userId
      */
     const user = await (async () => {
-      const existWithAccount = await this.getUserWithPlatformAccount(
+      const existWithAccountId = await this.getUserWithPlatformAccount(
         platform,
         details.user_id,
         manager
       );
+
+      const existWithAccount = existWithAccountId
+        ? await this.getUser(existWithAccountId, manager)
+        : undefined;
 
       if (existWithAccount) {
         if (DEBUG)
@@ -270,7 +276,7 @@ export class UsersRepository {
       return this.getUser(userId, manager, true);
     })();
 
-    /** set theuser account */
+    /** set the user account */
     const { accounts, platformIds } = await (async () => {
       /**  overwrite previous details for that user account*/
       if (platform === PLATFORM.Local) {
@@ -367,17 +373,26 @@ export class UsersRepository {
     });
   }
 
+  public async getWithAutopostValues(
+    platformId: PLATFORM,
+    values: AutopostOption[]
+  ): Promise<string[]> {
+    const settingsKey: keyof AppUser = 'settings';
+    const autopostKey: keyof UserSettings = 'autopost';
+
+    const query = this.db.collections.users.where(
+      `${settingsKey}.${autopostKey}.${platformId}.value`,
+      'in',
+      values
+    );
+
+    const result = await query.get();
+    return result.docs.map((doc) => doc.id) as string[];
+  }
+
   public async getAll() {
     const snapshot = await this.db.collections.users.get();
-    const users: AppUser[] = [];
-    snapshot.forEach((doc) => {
-      users.push({
-        userId: doc.id,
-        ...(doc.data() as Omit<AppUser, 'userId'>),
-      });
-    });
-
-    return users;
+    return snapshot.docs.map((doc) => doc.id);
   }
 
   public async getAllIds() {
@@ -388,5 +403,88 @@ export class UsersRepository {
     });
 
     return usersIds;
+  }
+
+  public async updateSettings(
+    userId: string,
+    updateSettings: UserSettingsUpdate,
+    manager: TransactionManager
+  ) {
+    const ref = await this.getUserRef(userId, manager, true);
+    const existing = await this.getUser(userId, manager, true);
+
+    const newSettings: UserSettings = {
+      ...existing.settings,
+      ...updateSettings,
+    };
+
+    manager.update(ref, {
+      settings: newSettings,
+    });
+  }
+
+  public async getByNotificationFreq(
+    notificationFrequency: NotificationFreq,
+    manager: TransactionManager
+  ) {
+    const settingsKey: keyof AppUser = 'settings';
+    const notificationFrequencyKey: keyof UserSettings = 'notificationFreq';
+
+    const query = this.db.collections.users.where(
+      `${settingsKey}.${notificationFrequencyKey}`,
+      '==',
+      notificationFrequency
+    );
+
+    const result = await manager.query(query);
+
+    return result.docs.map((doc) => doc.id) as string[];
+  }
+
+  public async getByEmail<T extends boolean, R = string>(
+    email: string,
+    manager: TransactionManager,
+    _shouldThrow?: boolean
+  ) {
+    const emailKey: keyof AppUser = 'email';
+    const emailStrKey: keyof EmailDetails = 'email';
+
+    const query = this.db.collections.users.where(
+      `${emailKey}.${emailStrKey}`,
+      '==',
+      email
+    );
+    const users = await manager.query(query);
+
+    const shouldThrow = _shouldThrow !== undefined ? _shouldThrow : false;
+
+    if (users.empty) {
+      if (shouldThrow) throw new Error(`User with email:${email} not found`);
+      else return undefined as DefinedIfTrue<T, R>;
+    }
+
+    const doc = users.docs[0];
+
+    return {
+      id: doc.id,
+      ...doc.data(),
+    } as unknown as DefinedIfTrue<T, R>;
+  }
+
+  public async setEmail(
+    userId: string,
+    email: AppUser['email'],
+    manager: TransactionManager
+  ) {
+    if (!email) {
+      throw new Error(`Email details expected`);
+    }
+    const existing = await this.getByEmail(email.email, manager);
+    if (existing) {
+      throw new Error(`User with email ${email.email} already exist`);
+    }
+
+    const ref = await this.getUserRef(userId, manager, true);
+    manager.update(ref, { email });
   }
 }
