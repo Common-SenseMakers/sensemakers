@@ -205,7 +205,7 @@ const main = {
 };
 
 const logo = {
-  padding: '30px 20px',
+  padding: '30px 20px 0px',
   justifyContent: 'center',
   display: 'flex',
   alignItems: 'center',
