@@ -63,7 +63,7 @@ export const PostCardEmail = ({ post }: PostCardEmailProps) => {
             alignContent: 'center',
           }}
           target="_blank"
-          href={`https://x.com/${post.generic.author.username}/status/${tweet?.id}`}>
+          href={`https://x.com/${post.generic.author.username}/status/${tweet?.posted?.post_id}`}>
           <span style={{ color: '#6B7280' }}>{label}</span>
           <span
             style={{
