@@ -1,12 +1,16 @@
-import { Box, Image, Text } from 'grommet';
+import { Box, Image, Paragraph, Text } from 'grommet';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import App from '../App';
 import { useAppFetch } from '../api/app.fetch';
 import { AutopostIcon } from '../app/icons/AutopostIcon';
 import { BellIcon } from '../app/icons/BellIcon';
+import { BulletIcon } from '../app/icons/BulletIcon';
 import { EmailIcon } from '../app/icons/EmailIcon';
 import { CheckIcon } from '../app/icons/FilterIcon copy';
+import { LeftChevronIcon } from '../app/icons/LeftChveronIcon';
+import { LeftIcon } from '../app/icons/LeftIcon';
 import { OrcidIcon } from '../app/icons/OrcidIcon';
 import { RightChevronIcon } from '../app/icons/RightChveronIcon';
 import { SupportIcon } from '../app/icons/SupportIcon';
@@ -21,6 +25,7 @@ import {
   UserSettingsUpdate,
 } from '../shared/types/types.user';
 import { AppButton, AppHeading } from '../ui-components';
+import { AppRadioButtom } from '../ui-components/AppRadioButton';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
@@ -29,7 +34,13 @@ import { useDisconnectContext } from '../user-login/contexts/DisconnectUserConte
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { getAccount } from '../user-login/user.helper';
 
-export const SettingSectionTitle = (props: { value: string }) => {
+enum SettingsSections {
+  Autopost = 'autopost',
+  Notifications = 'notifications',
+  Support = 'support',
+}
+
+const SettingSectionTitle = (props: { value: string }) => {
   const { constants } = useThemeContext();
   return (
     <Text
@@ -40,37 +51,40 @@ export const SettingSectionTitle = (props: { value: string }) => {
   );
 };
 
-export const SettingsSection = (props: {
+const SettingsSection = (props: {
   icon: JSX.Element;
   title: string;
+  onSectionClicked: () => void;
 }) => {
   const { constants } = useThemeContext();
 
   return (
-    <Box
-      pad={{ horizontal: '16px', vertical: '16px' }}
-      direction="row"
-      align="center"
-      style={{ border: `1px solid ${constants.colors.border}` }}>
-      <Box style={{ width: '30px' }}>{props.icon}</Box>
+    <AppButton plain onClick={() => props.onSectionClicked()}>
       <Box
-        style={{
-          flexGrow: 1,
-          fontSize: '16px',
-          lineHeight: '18px',
-          fontWeight: 600,
-        }}
-        margin={{ horizontal: '8px' }}>
-        {props.title}
+        pad={{ horizontal: '16px', vertical: '16px' }}
+        direction="row"
+        align="center"
+        style={{ border: `1px solid ${constants.colors.border}` }}>
+        <Box style={{ width: '30px' }}>{props.icon}</Box>
+        <Box
+          style={{
+            flexGrow: 1,
+            fontSize: '16px',
+            lineHeight: '18px',
+            fontWeight: 600,
+          }}
+          margin={{ horizontal: '8px' }}>
+          {props.title}
+        </Box>
+        <Box>
+          <RightChevronIcon size={20}></RightChevronIcon>
+        </Box>
       </Box>
-      <Box>
-        <RightChevronIcon size={20}></RightChevronIcon>
-      </Box>
-    </Box>
+    </AppButton>
   );
 };
 
-export const PlatformSection = (props: {
+const PlatformSection = (props: {
   icon: JSX.Element;
   platformName: string;
   username: string;
@@ -131,9 +145,58 @@ export const PlatformSection = (props: {
   );
 };
 
+interface SettingOption {
+  id: string;
+  title: string;
+  description: string;
+  selected?: boolean;
+  optionSelected: (id: string) => void;
+}
+
+const SettingsOptionSelector = (props: { options: SettingOption[] }) => {
+  const { constants } = useThemeContext();
+  return (
+    <Box>
+      {props.options.map((option, ix) => {
+        return (
+          <AppButton plain onClick={() => option.optionSelected(option.id)}>
+            <Box
+              key={ix}
+              direction="row"
+              align="center"
+              pad={{ horizontal: '20px', vertical: '16px' }}
+              gap="12px"
+              style={{
+                backgroundColor: option.selected ? '#EDF7FF' : '#ffffff',
+                border: `1px solid ${constants.colors.border}`,
+              }}>
+              <Box style={{ flexShrink: 0 }}>
+                <BulletIcon selected={option.selected}></BulletIcon>
+              </Box>
+              <Box>
+                <Box>
+                  <Text style={{ fontWeight: 500 }}>{option.title}</Text>
+                </Box>
+                <Box>
+                  <Text
+                    style={{
+                      color: constants.colors.textLight2,
+                      fontWeight: 400,
+                    }}>
+                    {option.description}
+                  </Text>
+                </Box>
+              </Box>
+            </Box>
+          </AppButton>
+        );
+      })}
+    </Box>
+  );
+};
+
 /** extract the postId from the route and pass it to a PostContext */
 export const UserSettingsPage = () => {
-  const { disconnect } = useDisconnectContext();
   const { constants } = useThemeContext();
   const { t } = useTranslation();
 
@@ -143,6 +206,10 @@ export const UserSettingsPage = () => {
   const [isSetting, setIsSetting] = useState(false);
 
   const { connect: connectOrcid } = useOrcidContext();
+
+  const [showSettingsPage, setShowSettingsPage] = useState<
+    SettingsSections | undefined
+  >(SettingsSections.Autopost);
 
   const setSettings = (newSettings: UserSettingsUpdate) => {
     return appFetch('/api/auth/settings', newSettings).then(() => {
@@ -182,12 +249,100 @@ export const UserSettingsPage = () => {
 
   const orcid = getAccount(connectedUser, PLATFORM.Orcid);
 
+  const SettingsSubPage = (props: {
+    title: string;
+    subtitle: string;
+    content: JSX.Element;
+  }) => {
+    return (
+      <ViewportPage
+        content={
+          <Box style={{ flexGrow: 1 }}>
+            <Box>
+              <AppButton
+                style={{
+                  width: 'fit-content',
+                  padding: '8px 12px',
+                  fontWeight: 500,
+                }}
+                icon={
+                  <Box pad={{ top: '1.5px' }}>
+                    <LeftChevronIcon></LeftChevronIcon>
+                  </Box>
+                }
+                plain
+                label="Back"
+                onClick={() => setShowSettingsPage(undefined)}></AppButton>
+            </Box>
+
+            <Box style={{ textAlign: 'center' }} margin={{ bottom: '8px' }}>
+              <AppHeading level="3">{props.title}</AppHeading>
+            </Box>
+            <Box style={{ textAlign: 'center' }}>
+              <Paragraph>{props.subtitle}</Paragraph>
+            </Box>
+
+            <Box pad={{ horizontal: '16px', vertical: '24px' }}>
+              {props.content}
+            </Box>
+          </Box>
+        }></ViewportPage>
+    );
+  };
+
   const content = (() => {
     if (!connectedUser) {
       return (
         <BoxCentered fill>
           <Loading></Loading>
         </BoxCentered>
+      );
+    }
+
+    if (showSettingsPage === SettingsSections.Autopost) {
+      return (
+        <SettingsSubPage
+          title={t(I18Keys.notificationsSettings)}
+          subtitle={t(I18Keys.notificationsSettingsExplainer)}
+          content={
+            <Box>
+              <SettingsOptionSelector
+                options={[
+                  {
+                    title: t(I18Keys.notificationSettingsOpt1Title),
+                    description: t(I18Keys.notificationSettingsOpt1Desc),
+                    id: NotificationFreq.Daily,
+                    optionSelected: (id) =>
+                      setNotifications(id as NotificationFreq),
+                    selected: currentNotifications === NotificationFreq.Daily,
+                  },
+                  {
+                    title: t(I18Keys.notificationSettingsOpt2Title),
+                    description: t(I18Keys.notificationSettingsOpt2Desc),
+                    id: NotificationFreq.Weekly,
+                    optionSelected: (id) =>
+                      setNotifications(id as NotificationFreq),
+                    selected: currentNotifications === NotificationFreq.Weekly,
+                  },
+                  {
+                    title: t(I18Keys.notificationSettingsOpt3Title),
+                    description: t(I18Keys.notificationSettingsOpt3Desc),
+                    id: NotificationFreq.Monthly,
+                    optionSelected: (id) =>
+                      setNotifications(id as NotificationFreq),
+                    selected: currentNotifications === NotificationFreq.Monthly,
+                  },
+                  {
+                    title: t(I18Keys.notificationSettingsOpt4Title),
+                    description: t(I18Keys.notificationSettingsOpt4Desc),
+                    id: NotificationFreq.None,
+                    optionSelected: (id) =>
+                      setNotifications(id as NotificationFreq),
+                    selected: currentNotifications === NotificationFreq.None,
+                  },
+                ]}></SettingsOptionSelector>
+            </Box>
+          }></SettingsSubPage>
       );
     }
 
@@ -228,15 +383,24 @@ export const UserSettingsPage = () => {
 
         <SettingsSection
           icon={<AutopostIcon size={24}></AutopostIcon>}
-          title={t(I18Keys.publishingAutomation)}></SettingsSection>
+          title={t(I18Keys.publishingAutomation)}
+          onSectionClicked={() => {
+            setShowSettingsPage(SettingsSections.Autopost);
+          }}></SettingsSection>
 
         <SettingsSection
           icon={<BellIcon size={24}></BellIcon>}
-          title={t(I18Keys.notificationsSettings)}></SettingsSection>
+          title={t(I18Keys.notificationsSettings)}
+          onSectionClicked={() => {
+            setShowSettingsPage(SettingsSections.Autopost);
+          }}></SettingsSection>
 
         <SettingsSection
           icon={<SupportIcon size={24}></SupportIcon>}
-          title={t(I18Keys.getSupport)}></SettingsSection>
+          title={t(I18Keys.getSupport)}
+          onSectionClicked={() => {
+            setShowSettingsPage(SettingsSections.Autopost);
+          }}></SettingsSection>
 
         <Box
           pad={{ horizontal: 'medium' }}
