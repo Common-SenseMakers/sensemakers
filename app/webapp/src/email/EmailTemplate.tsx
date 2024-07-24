@@ -13,7 +13,6 @@ import {
   Text,
 } from '@react-email/components';
 import { t } from 'i18next';
-import { CSSProperties, ReactNode } from 'react';
 
 import { I18Keys } from '../i18n/i18n';
 import { getMockPost } from '../mocks/posts.mock';
@@ -21,11 +20,10 @@ import { AbsoluteRoutes } from '../route.names';
 import { NotificationFreq } from '../shared/types/types.notifications';
 import { AppPostFull, PostsQueryStatus } from '../shared/types/types.posts';
 import { AutopostOption } from '../shared/types/types.user';
+import { EmailRow } from './EmailRow';
 import { PostCardEmail } from './PostCardEmail';
-
-const MAX_POSTS_IN_EMAIL = 3;
-const LOGO_URL =
-  'https://development--sensemakers.netlify.app/icons/logo-192.png';
+import { LOGO_URL, MAX_POSTS_IN_EMAIL } from './constants';
+import { button, footerStyle, logoImg, main } from './email.styles';
 
 interface EmailTemplateProps {
   posts: AppPostFull[];
@@ -190,70 +188,3 @@ EmailTemplate.PreviewProps = {
 };
 
 export default EmailTemplate;
-
-const footerStyle = {
-  textAlign: 'center' as any,
-  fontSize: 12,
-  color: 'rgb(0,0,0, 0.7)',
-};
-
-const main = {
-  backgroundColor: '#f3f4f6',
-  fontFamily: '"Libre Franklin", sans-serif',
-};
-
-const logo = {
-  padding: '30px 20px 0px',
-  justifyContent: 'center',
-  display: 'flex',
-  alignItems: 'center',
-};
-
-const logoImg = {
-  width: '50px',
-  height: '50px',
-  borderRadius: '50%',
-  backgroundColor: 'white',
-  padding: '10px',
-};
-
-const button = {
-  backgroundColor: 'black',
-  borderRadius: 8,
-  color: '#FFF',
-  border: '1px solid rgb(0,0,0, 0.1)',
-  cursor: 'pointer',
-  padding: '12px 16px',
-};
-
-const EmailRow = ({
-  children,
-  style,
-}: {
-  children: ReactNode;
-  style?: CSSProperties;
-}) => {
-  const defaultStyle: CSSProperties = {
-    margin: '16px',
-    textAlign: 'center',
-  };
-
-  const combinedStyle = { ...defaultStyle, ...style };
-
-  return (
-    <table
-      role="presentation"
-      width="100%"
-      style={{ borderCollapse: 'collapse' }}>
-      <tr>
-        <td style={combinedStyle}>
-          <table role="presentation" style={{ margin: '0 auto' }}>
-            <tr>
-              <td>{children}</td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-  );
-};

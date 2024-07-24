@@ -6,21 +6,18 @@ import {
   Section,
   Text,
 } from '@react-email/components';
-import { DataFactory } from 'n3';
 
 import { getPostStatuses } from '../post/posts.helper';
-import { semanticStringToStore } from '../semantics/patterns/common/use.semantics';
-import {
-  RefData,
-  processSemantics,
-} from '../semantics/patterns/refs-labels/process.semantics';
+import { RefData } from '../semantics/patterns/refs-labels/process.semantics';
 import { AppPostFull } from '../shared/types/types.posts';
 import { PLATFORM } from '../shared/types/types.user';
-import { mapStoreElements } from '../shared/utils/n3.utils';
 import { zoteroItemTypeDisplay } from '../utils/post.utils';
+import { LabelsRow } from './LabelsRow';
 import { RefCardEmail } from './RefCardEmail';
+import { MAX_REFERENCES } from './constants';
+import { content, paragraph } from './email.styles';
+import { parsePostSemantics } from './utils';
 
-const MAX_KEYWORDS = 2;
 interface PostCardEmailProps {
   post: AppPostFull;
 }
@@ -41,7 +38,6 @@ export const PostCardEmail = ({ post }: PostCardEmailProps) => {
   const size = 12;
 
   const { keywords, references } = parsePostSemantics(post);
-  console.log({ keywords, references });
   const { nanopubUrl, pending } = getPostStatuses(post);
 
   return (
@@ -139,7 +135,7 @@ export const PostCardEmail = ({ post }: PostCardEmailProps) => {
         color="#498283"
         borderColor="#BDD9D7"
       />
-      <Row style={{ ...boxInfos, paddingBottom: '0' }}>
+      <Row style={{ paddingBottom: '0' }}>
         <Column>
           <Markdown markdownContainerStyles={paragraph}>{postText}</Markdown>
         </Column>
@@ -147,156 +143,6 @@ export const PostCardEmail = ({ post }: PostCardEmailProps) => {
       <PostCardReferencesEmail references={references} />
     </Section>
   );
-};
-
-const Label = ({
-  label,
-  backgroundColor,
-  borderColor,
-  color,
-  hasEmoji,
-}: {
-  label: string;
-  backgroundColor: string;
-  borderColor: string;
-  color: string;
-  hasEmoji?: boolean;
-}) => {
-  if (!hasEmoji) {
-    return (
-      <span style={{ ...labelStyle, backgroundColor, borderColor, color }}>
-        {label}
-      </span>
-    );
-  } else {
-    const [emoji, text] = [label.charAt(0), label.slice(1)];
-    return (
-      <span style={{ ...labelStyle, backgroundColor, borderColor, color }}>
-        <span style={{ fontSize: '10px' }}>{emoji}</span>
-        {text}
-      </span>
-    );
-  }
-};
-
-interface LabelsRowProps {
-  labels: string[];
-  backgroundColor: string;
-  borderColor: string;
-  color: string;
-  hasEmoji?: boolean;
-}
-
-const LabelsRow = ({
-  labels,
-  backgroundColor,
-  borderColor,
-  color,
-  hasEmoji,
-}: LabelsRowProps) => {
-  return (
-    <div style={labelContainerNew}>
-      {labels.slice(0, MAX_KEYWORDS).map((label, idx) => {
-        return (
-          <Label
-            key={idx}
-            label={label}
-            backgroundColor={backgroundColor}
-            borderColor={borderColor}
-            color={color}
-            hasEmoji={hasEmoji}
-          />
-        );
-      })}
-      {labels.length > MAX_KEYWORDS && (
-        <Label
-          label={`+${labels.length - MAX_KEYWORDS}`}
-          backgroundColor={backgroundColor}
-          borderColor={borderColor}
-          color={color}
-        />
-      )}
-    </div>
-  );
-};
-
-const parsePostSemantics = (post: AppPostFull) => {
-  const store = semanticStringToStore(post.semantics);
-  const originalStore = semanticStringToStore(post.originalParsed?.semantics);
-
-  const KEYWORD_PREDICATE =
-    post.originalParsed?.support?.ontology?.keyword_predicate?.uri;
-
-  const keywords = (() => {
-    if (!store || !KEYWORD_PREDICATE) return [];
-    return mapStoreElements<string>(
-      store,
-      (quad) => quad.object.value,
-      null,
-      DataFactory.namedNode(KEYWORD_PREDICATE)
-    );
-  })();
-
-  const refs = processSemantics(
-    originalStore,
-    store,
-    post.originalParsed?.support
-  );
-  console.log(refs);
-  const allRefs = Array.from(refs.entries()).reverse();
-
-  const labelsOntology =
-    post.originalParsed?.support?.ontology?.semantic_predicates;
-
-  const getLabelDisplayName = (labelUri: string) => {
-    const label_ontology = labelsOntology
-      ? labelsOntology.find((item) => item.uri === labelUri)
-      : undefined;
-
-    if (!label_ontology)
-      throw new Error(`Unexpected ontology not found for ${labelUri}`);
-
-    return label_ontology.display_name as string;
-  };
-
-  const references = allRefs.map(([ref, value]) => {
-    const labelsDisplayNames = value.labelsUris.map(getLabelDisplayName);
-    return [ref, { ...value, labelsUris: labelsDisplayNames }] as [
-      string,
-      RefData,
-    ];
-  });
-
-  return {
-    keywords,
-    references,
-  };
-};
-
-const content = {
-  border: '1px solid rgb(0,0,0, 0.1)',
-  borderRadius: '3px',
-  overflow: 'hidden',
-  padding: '12px',
-  backgroundColor: 'white',
-};
-
-const boxInfos = {};
-
-const paragraph = {
-  fontSize: 16,
-};
-
-const labelContainerNew = {};
-const labelStyle = {
-  padding: '4px 10px',
-  borderRadius: '50px',
-  border: '1px solid',
-  maxHeight: '26px',
-  alignItems: 'center',
-  display: 'inline-block',
-  verticalAlign: 'middle',
-  marginRight: '6px',
 };
 
 const PostCardReferenceEmail = ({
@@ -333,8 +179,6 @@ const PostCardReferencesEmail = ({
 }: {
   references: [string, RefData][];
 }) => {
-  console.log('POSTCARD:', references);
-  const MAX_REFERENCES = 1;
   return (
     <div>
       {references.slice(0, MAX_REFERENCES).map((reference, idx) => (

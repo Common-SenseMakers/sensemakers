@@ -1,6 +1,8 @@
 import { Button, Row, Section, Text } from '@react-email/components';
 import { Header } from 'grommet';
 
+import { cardItemStyle } from './email.styles';
+
 const truncate = (text: string, size: number) => {
   return text.slice(0, size) + (text.length > size ? '...' : '');
 };
@@ -18,7 +20,6 @@ export const RefCardEmail = (props: {
   description?: string;
   image?: string;
   itemType?: string;
-  onClick?: () => void;
 }) => {
   const titleTruncated = props.title && truncate(props.title, 50);
   const descriptionTruncated =
@@ -111,8 +112,4 @@ export const RefCardEmail = (props: {
       {content}
     </Button>
   );
-};
-
-export const cardItemStyle = {
-  margin: '4px 0px',
 };
