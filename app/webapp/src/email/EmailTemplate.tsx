@@ -24,7 +24,8 @@ import { AutopostOption } from '../shared/types/types.user';
 import { PostCardEmail } from './PostCardEmail';
 
 const MAX_POSTS_IN_EMAIL = 3;
-const LOGO_URL = 'https://development--sensemakers.netlify.app/icons/logo.png';
+const LOGO_URL =
+  'https://development--sensemakers.netlify.app/icons/logo-192.png';
 
 interface EmailTemplateProps {
   posts: AppPostFull[];
