@@ -1,13 +1,4 @@
-import {
-  ALL_PUBLISH_PLATFORMS,
-  AppUser,
-  FetchParams,
-  FetchedDetails,
-  PLATFORM,
-  PUBLISHABLE_PLATFORMS,
-  PlatformFetchParams,
-  UserDetailsBase,
-} from '../@shared/types/types';
+import { FetchParams, PlatformFetchParams } from '../@shared/types/types.fetch';
 import {
   PARSER_MODE,
   ParsePostRequest,
@@ -18,9 +9,9 @@ import {
   PlatformPost,
   PlatformPostCreate,
   PlatformPostCreated,
-  PlatformPostDraftApproval,
   PlatformPostPublishOrigin,
   PlatformPostPublishStatus,
+  PlatformPostSignerType,
 } from '../@shared/types/types.platform.posts';
 import {
   AppPost,
@@ -33,6 +24,14 @@ import {
   PostsQueryStatus,
   UserPostsQuery,
 } from '../@shared/types/types.posts';
+import {
+  ALL_PUBLISH_PLATFORMS,
+  AppUser,
+  FetchedDetails,
+  PLATFORM,
+  PUBLISHABLE_PLATFORMS,
+  UserDetailsBase,
+} from '../@shared/types/types.user';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
@@ -43,7 +42,7 @@ import { UsersService } from '../users/users.service';
 import { getUsernameTag } from '../users/users.utils';
 import { PostsProcessing } from './posts.processing';
 
-const DEBUG = true;
+const DEBUG = false;
 
 /**
  * Top level methods. They instantiate a TransactionManger and execute
@@ -63,12 +62,12 @@ export class PostsManager {
    * and authors
    * */
   async fetchAll() {
-    const users = await this.users.repo.getAll();
+    const usersIds = await this.users.repo.getAll();
 
     /** Call fetch for each user */
     const posts = await Promise.all(
-      users.map(async (user) =>
-        this.fetchUser({ user, params: { expectedAmount: 10 } })
+      usersIds.map(async (userId) =>
+        this.fetchUser({ userId, params: { expectedAmount: 10 } })
       )
     );
 
@@ -81,55 +80,17 @@ export class PostsManager {
     account: UserDetailsBase,
     manager: TransactionManager
   ) {
-    const platformParams = await (async (): Promise<PlatformFetchParams> => {
-      if (params.sinceId) {
-        const since = await this.processing.platformPosts.getPostedFromPostId(
-          params.sinceId,
-          platformId,
-          account.user_id,
-          manager
-        );
+    const platformParams = await this.preparePlatformParams(
+      params,
+      platformId,
+      account.user_id,
+      manager,
+      account?.fetched
+    );
 
-        return {
-          since_id: since ? since.posted?.post_id : undefined,
-          expectedAmount: params.expectedAmount,
-        };
-      }
+    if (DEBUG) logger.debug(`Twitter Service - fetch ${platformId}`);
 
-      if (params.untilId) {
-        const until = await this.processing.platformPosts.getPostedFromPostId(
-          params.untilId,
-          platformId,
-          account.user_id,
-          manager
-        );
-
-        return {
-          until_id: until ? until.posted?.post_id : undefined,
-          expectedAmount: params.expectedAmount,
-        };
-      }
-
-      /**
-       * if no parameters are provided, if user has
-       * newestId, fetch forward since then, if not
-       * fetch without parameters (which is equivalent to
-       * latest backwards)
-       */
-
-      if (account.fetched?.newest_id) {
-        return {
-          since_id: account.fetched?.newest_id,
-          expectedAmount: params.expectedAmount,
-        };
-      }
-
-      return {
-        expectedAmount: params.expectedAmount,
-      };
-    })();
-
-    const fetched = await this.platforms.fetch(
+    const fetchedPosts = await this.platforms.fetch(
       platformId,
       platformParams,
       account,
@@ -138,39 +99,16 @@ export class PostsManager {
 
     if (DEBUG)
       logger.debug(
-        `fetchUser - platformPosts: ${fetched.platformPosts.length}`,
+        `fetchUser ${platformId} - platformPosts: ${fetchedPosts.platformPosts.length}`,
         {
-          fetched,
+          fetched: fetchedPosts,
         }
       );
 
-    /** keep track of the newest and oldest posts */
-    const newFetchedDetails: FetchedDetails = {};
-
-    /**
-     * if until_id was requested, the fetched oldest_id will be the
-     * new oldest_id
-     */
-    if (platformParams.until_id && fetched.fetched.oldest_id) {
-      newFetchedDetails.oldest_id = fetched.fetched.oldest_id;
-    }
-
-    /**
-     * if since_id was requested, the fetched newest_id will be the
-     * new newest_id
-     */
-    if (platformParams.since_id && fetched.fetched.newest_id) {
-      newFetchedDetails.newest_id = fetched.fetched.newest_id;
-    }
-
-    /**
-     * if neither since_id nor until_id were requested, both
-     * the newest and oldest fetched ids will be the absolute ones
-     */
-    if (!platformParams.since_id && !platformParams.until_id) {
-      newFetchedDetails.newest_id = fetched.fetched.newest_id;
-      newFetchedDetails.oldest_id = fetched.fetched.oldest_id;
-    }
+    const newFetchedDetails = await this.getNewFetchedStatus(
+      platformParams,
+      fetchedPosts.fetched
+    );
 
     await this.users.repo.setAccountFetched(
       platformId,
@@ -180,7 +118,7 @@ export class PostsManager {
     );
 
     /** convert them into a PlatformPost */
-    return fetched.platformPosts.map((fetchedPost) => {
+    return fetchedPosts.platformPosts.map((fetchedPost) => {
       const platformPost: PlatformPostCreate = {
         platformId: platformId as PUBLISHABLE_PLATFORMS,
         publishStatus: PlatformPostPublishStatus.PUBLISHED,
@@ -193,88 +131,190 @@ export class PostsManager {
   }
 
   /**
+   * From a requested FetchedDetails, derive the actual
+   * PlatformFetchParams based on that user account fetched
+   * values
+   */
+  async preparePlatformParams(
+    params: FetchParams,
+    platformId: PLATFORM,
+    user_id: string,
+    manager: TransactionManager,
+    fetched?: FetchedDetails
+  ): Promise<PlatformFetchParams> {
+    if (params.sinceId) {
+      const since = await this.processing.platformPosts.getPostedFromPostId(
+        params.sinceId,
+        platformId,
+        user_id,
+        manager
+      );
+
+      return {
+        since_id: since ? since.posted?.post_id : undefined,
+        expectedAmount: params.expectedAmount,
+      };
+    }
+
+    if (params.untilId) {
+      const until = await this.processing.platformPosts.getPostedFromPostId(
+        params.untilId,
+        platformId,
+        user_id,
+        manager
+      );
+
+      return {
+        until_id: until ? until.posted?.post_id : undefined,
+        expectedAmount: params.expectedAmount,
+      };
+    }
+
+    /**
+     * if no parameters are provided, if user has
+     * newestId, fetch forward since then, if not
+     * fetch without parameters (which is equivalent to
+     * latest backwards)
+     */
+
+    if (fetched?.newest_id) {
+      return {
+        since_id: fetched?.newest_id,
+        expectedAmount: params.expectedAmount,
+      };
+    }
+
+    return {
+      expectedAmount: params.expectedAmount,
+    };
+  }
+
+  /**
+   * From the PlatformFetchParams and the actual
+   * fetched results, update the user profile fetched
+   * value
+   */
+  protected async getNewFetchedStatus(
+    platformParams: PlatformFetchParams,
+    fetched: FetchedDetails
+  ) {
+    /** keep track of the newest and oldest posts */
+    const newFetchedDetails: FetchedDetails = {};
+
+    /**
+     * if until_id was requested, the fetched oldest_id will be the
+     * new oldest_id
+     */
+    if (platformParams.until_id && fetched.oldest_id) {
+      newFetchedDetails.oldest_id = fetched.oldest_id;
+    }
+
+    /**
+     * if since_id was requested, the fetched newest_id will be the
+     * new newest_id
+     */
+    if (platformParams.since_id && fetched.newest_id) {
+      newFetchedDetails.newest_id = fetched.newest_id;
+    }
+
+    /**
+     * if neither since_id nor until_id were requested, both
+     * the newest and oldest fetched ids will be the absolute ones
+     */
+    if (!platformParams.since_id && !platformParams.until_id) {
+      newFetchedDetails.newest_id = fetched.newest_id;
+      newFetchedDetails.oldest_id = fetched.oldest_id;
+    }
+
+    return newFetchedDetails;
+  }
+
+  /**
    * Fetch and store platform posts of one user
    * in one Transaction.
    *
    * if mode === 'forward' fetches from the newset fetched date
    * if mode === 'backwards' fetches from the oldest fetched date
    * */
-  async fetchUser(
-    inputs: {
-      userId?: string;
-      user?: AppUser;
-      params: FetchParams;
-    },
-    _manager?: TransactionManager
-  ) {
-    const fetch = async (manager: TransactionManager): Promise<void> => {
-      const user =
-        inputs.user ||
-        (await this.users.repo.getUser(inputs.userId as string, manager, true));
-
-      if (DEBUG) logger.debug('fetchUser', { user });
-
-      await Promise.all(
-        ALL_PUBLISH_PLATFORMS.map(async (platformId) => {
-          const accounts = UsersHelper.getAccounts(user, platformId);
-          /** Call fetch for each account */
-          return Promise.all(
-            accounts.map(
-              async (account): Promise<PlatformPostCreated[] | undefined> => {
-                /** Fetch */
-                try {
-                  if (DEBUG)
-                    logger.debug('fetchUser - fetchAccount', {
-                      platformId,
-                    });
-
-                  const platformPostsCreate = await this.fetchUserFromPlatform(
-                    platformId,
-                    inputs.params,
-                    account,
-                    manager
-                  );
-
-                  /** Create the PlatformPosts */
-                  const platformPostsCreated =
-                    await this.processing.createPlatformPosts(
-                      platformPostsCreate,
-                      manager
-                    );
-
-                  if (DEBUG)
-                    logger.debug(
-                      `fetchUser - platformPostsCreated: ${platformPostsCreated.length}`,
-                      {
-                        platformPostsCreated,
-                      }
-                    );
-
-                  return platformPostsCreated;
-                } catch (err: any) {
-                  logger.error(
-                    `Error fetching posts for user ${user.userId} on platform ${platformId}`,
-                    err
-                  );
-                  throw new Error(err.message);
-                }
-              }
-            )
-          );
-        })
-      );
-    };
-
+  async fetchUser(inputs: {
+    userId?: string;
+    user?: AppUser;
+    params: FetchParams;
+  }) {
     /** can be called as part of a transaction or independently */
-    if (_manager) {
-      return fetch(_manager);
-    }
-    return this.db.run((manager) => fetch(manager));
-  }
+    const postsCreated = await this.db.run(
+      async (manager: TransactionManager) => {
+        const user =
+          inputs.user ||
+          (await this.users.repo.getUser(
+            inputs.userId as string,
+            manager,
+            true
+          ));
 
-  async parseOfUser(userId: string) {
-    const postIds = await this.processing.posts.getNonParsedOfUser(userId);
-    await Promise.all(postIds.map((postId) => this.parsePost(postId)));
+        if (DEBUG) logger.debug(`fetchUser user: ${user.userId}`, { user });
+
+        return Promise.all(
+          ALL_PUBLISH_PLATFORMS.map(async (platformId) => {
+            const accounts = UsersHelper.getAccounts(user, platformId);
+            /** Call fetch for each account */
+            return Promise.all(
+              accounts.map(
+                async (account): Promise<PlatformPostCreated[] | undefined> => {
+                  /** Fetch */
+                  try {
+                    if (DEBUG)
+                      logger.debug(
+                        `fetchUser - fetchAccount. platformId:${platformId} - account:${account.user_id}`,
+                        {
+                          platformId,
+                        }
+                      );
+
+                    const platformPostsCreate =
+                      await this.fetchUserFromPlatform(
+                        platformId,
+                        inputs.params,
+                        account,
+                        manager
+                      );
+
+                    /** Create the PlatformPosts */
+                    const platformPostsCreated =
+                      await this.processing.createPlatformPosts(
+                        platformPostsCreate,
+                        manager
+                      );
+
+                    if (DEBUG)
+                      logger.debug(
+                        `fetchUser - platformId:${platformId} - account:${account.user_id} - platformPostsCreated: ${platformPostsCreated.length}`,
+                        {
+                          platformPostsCreated,
+                        }
+                      );
+
+                    return platformPostsCreated;
+                  } catch (err: any) {
+                    logger.error(
+                      `Error fetching posts for user ${user.userId} on platform ${platformId}`,
+                      err
+                    );
+                    throw new Error(err.message);
+                  }
+                }
+              )
+            );
+          })
+        );
+      }
+    );
+
+    const postsCreatedAll = postsCreated
+      .flat(2)
+      .filter((p) => p !== undefined) as PlatformPostCreated[];
+
+    return postsCreatedAll;
   }
 
   /** get AppPost and fetch for new posts if necessary */
@@ -345,7 +385,7 @@ export class PostsManager {
     };
   }
 
-  async getPost<T extends boolean>(postId: string, shouldThrow: T) {
+  async getPost<T extends boolean>(postId: string, shouldThrow?: T) {
     return this.db.run(async (manager) =>
       this.processing.getPostFull(postId, manager, shouldThrow)
     );
@@ -355,11 +395,11 @@ export class PostsManager {
     const shouldParse = await this.db.run(async (manager) => {
       const post = await this.processing.posts.get(postId, manager, true);
       if (post.parsingStatus === 'processing') {
-        logger.debug(`parseOfUser - already parsing ${postId}`);
+        logger.debug(`parsePost - already parsing ${postId}`);
         return false;
       }
 
-      logger.debug(`parseOfUser - marking as parsing ${postId}`);
+      logger.debug(`parsePost - marking as parsing ${postId}`);
       await this.updatePost(
         postId,
         { parsingStatus: AppPostParsingStatus.PROCESSING },
@@ -391,7 +431,7 @@ export class PostsManager {
     if (DEBUG) logger.debug(`parsePost - start ${postId}`, { postId, post });
 
     const params: ParsePostRequest<TopicsParams> = {
-      post: { content: post.content },
+      post: post.generic,
       parameters: {
         [PARSER_MODE.TOPICS]: { topics: ['science', 'technology'] },
       },
@@ -405,10 +445,12 @@ export class PostsManager {
     }
 
     /** science filter hack */
-    const reviewedStatus: AppPostReviewStatus =
-      parserResult.filter_classification !== SciFilterClassfication.RESEARCH
-        ? AppPostReviewStatus.IGNORED
-        : AppPostReviewStatus.PENDING;
+    const reviewedStatus: AppPostReviewStatus = [
+      SciFilterClassfication.AI_DETECTED_RESEARCH,
+      SciFilterClassfication.CITOID_DETECTED_RESEARCH,
+    ].includes(parserResult.filter_classification)
+      ? AppPostReviewStatus.PENDING
+      : AppPostReviewStatus.IGNORED;
 
     const update: PostUpdate = {
       semantics: parserResult.semantics,
@@ -420,6 +462,7 @@ export class PostsManager {
 
     if (DEBUG) logger.debug(`parsePost - done ${postId}`, { postId, update });
 
+    /** store the semantics and mark as processed */
     await this.updatePost(post.id, update, manager);
   }
 
@@ -432,7 +475,7 @@ export class PostsManager {
     if (DEBUG) logger.debug(`updatePost ${postId}`, { postId, postUpdate });
     await this.processing.posts.updateContent(postId, postUpdate, manager);
 
-    if (postUpdate.semantics || postUpdate.content) {
+    if (postUpdate.semantics || postUpdate.generic) {
       /** rebuild the platform drafts with the new post content */
       if (DEBUG)
         logger.debug(`updatePost - semantics, content found ${postId}`, {
@@ -443,21 +486,9 @@ export class PostsManager {
       await this.processing.createOrUpdatePostDrafts(postId, manager);
     }
 
-    /** index the semantics as triples when the post is published */
-    if (postUpdate.republishedStatus === AppPostRepublishedStatus.REPUBLISHED) {
-      await this.processing.triples.deleteOfPost(postId, manager);
-      const semantics = await (async () => {
-        if (postUpdate.semantics) {
-          return postUpdate.semantics;
-        }
-        const post = await this.processing.posts.get(postId, manager, true);
-        return post.semantics;
-      })();
-
-      if (semantics) {
-        await this.processing.storeTriples(postId, semantics, manager);
-      }
-    }
+    /** sync the semantics as triples when the post is updated */
+    const postUpdated = await this.processing.posts.get(postId, manager, true);
+    await this.processing.upsertTriples(postId, manager, postUpdated.semantics);
   }
 
   /**
@@ -465,26 +496,40 @@ export class PostsManager {
    * - The content and the semantics might have changed.
    * - The draft value on the mirrors array might have changed.
    *
+   * The platformIds are the platforms where the post will be published
+   * (or updated/republished)
+   *
    * userId must be the authenticated user to prevent posting on
    * behalf of others.
    */
-  async approvePost(post: AppPostFull, userId: string) {
-    await this.db.run(async (manager) => {
-      if (DEBUG) logger.debug(`approvePost ${post.id}`, { post, userId });
+  async publishPost(
+    newPost: AppPostFull,
+    platformIds: PLATFORM[],
+    userId: string,
+    manager?: TransactionManager,
+    auto?: boolean
+  ) {
+    const publishFunction = async (manager: TransactionManager) => {
+      if (DEBUG)
+        logger.debug(`approvePost ${newPost.id}`, { post: newPost, userId });
       const user = await this.users.repo.getUser(userId, manager, true);
-      const existing = await this.processing.posts.get(post.id, manager, true);
-      if (!existing) {
-        throw new Error(`Post not found: ${post.id}`);
+      const existingPost = await this.processing.posts.get(
+        newPost.id,
+        manager,
+        true
+      );
+      if (!existingPost) {
+        throw new Error(`Post not found: ${newPost.id}`);
       }
 
-      if (existing.authorId !== userId) {
-        throw new Error(`Only the author can approve a post: ${post.id}`);
+      if (existingPost.authorId !== userId) {
+        throw new Error(`Only the author can approve a post: ${newPost.id}`);
       }
 
       /** for now its either ignore all, or approve all */
-      if (post.reviewedStatus === AppPostReviewStatus.IGNORED) {
+      if (newPost.reviewedStatus === AppPostReviewStatus.IGNORED) {
         await this.updatePost(
-          post.id,
+          newPost.id,
           {
             reviewedStatus: AppPostReviewStatus.IGNORED,
           },
@@ -493,42 +538,45 @@ export class PostsManager {
         return;
       }
 
-      /** else mark as approved */
+      /** set review status */
+      const reviewedStatus =
+        existingPost.republishedStatus !== AppPostRepublishedStatus.PENDING
+          ? AppPostReviewStatus.UPDATED
+          : AppPostReviewStatus.APPROVED;
 
-      /** force status transition */
       await this.updatePost(
-        post.id,
+        newPost.id,
         {
-          reviewedStatus: AppPostReviewStatus.APPROVED,
+          reviewedStatus,
         },
         manager
       );
 
-      /** check if content or semantics changed (other changes are not expected and omited) */
-      if (
-        existing.content !== post.content ||
-        existing.semantics !== post.semantics
-      ) {
-        if (DEBUG)
-          logger.debug('approvePost - updateContent', { existing, post });
-        await this.updatePost(
-          post.id,
-          {
-            reviewedStatus: AppPostReviewStatus.APPROVED,
-            content: post.content,
-            semantics: post.semantics,
-          },
-          manager
-        );
-      }
+      if (DEBUG)
+        logger.debug('approvePost - updateContent', {
+          existing: existingPost,
+          post: newPost,
+        });
 
-      /** publish approved drafts */
+      /**
+       * Force update the content and semantics. The updatePost method makes sure
+       * the mirrors and triples are aligned with the post. So its safer to always
+       * call it
+       */
+      await this.updatePost(
+        newPost.id,
+        {
+          reviewedStatus: AppPostReviewStatus.APPROVED,
+          generic: newPost.generic,
+          semantics: newPost.semantics,
+        },
+        manager
+      );
+
+      /** publish drafts */
       const published = await Promise.all(
-        post.mirrors.map(async (mirror) => {
-          if (
-            mirror.draft &&
-            mirror.draft.postApproval === PlatformPostDraftApproval.APPROVED
-          ) {
+        newPost.mirrors.map(async (mirror) => {
+          if (platformIds.includes(mirror.platformId) && mirror.draft) {
             const account = UsersHelper.getAccount(
               user,
               mirror.platformId,
@@ -539,12 +587,27 @@ export class PostsManager {
             if (DEBUG)
               logger.debug('approvePost - publish mirror', { mirror, account });
 
-            const posted = await this.platforms
-              .get(mirror.platformId)
-              .publish(
-                { draft: mirror.draft.post, userDetails: account },
-                manager
+            const platform = this.platforms.get(mirror.platformId);
+
+            if (
+              mirror.draft.signerType === undefined ||
+              mirror.draft.signerType === PlatformPostSignerType.DELEGATED
+            ) {
+              const signedPost = await platform.signDraft(
+                mirror.draft,
+                account
               );
+              mirror.draft.signedPost = signedPost;
+            }
+
+            if (!mirror.draft.signedPost) {
+              throw new Error(`Expected signed post to be provided`);
+            }
+
+            const posted = await platform.publish(
+              { draft: mirror.draft.signedPost, userDetails: account },
+              manager
+            );
 
             /**  update platform post status and posted values*/
             await this.processing.platformPosts.update(
@@ -568,15 +631,24 @@ export class PostsManager {
 
       /** if all mirrors where published */
       if (published.every((v) => v === true)) {
+        const wasAuto = auto !== undefined ? auto : false;
         await this.updatePost(
-          post.id,
+          newPost.id,
           {
-            republishedStatus: AppPostRepublishedStatus.REPUBLISHED,
+            republishedStatus: wasAuto
+              ? AppPostRepublishedStatus.AUTO_REPUBLISHED
+              : AppPostRepublishedStatus.REPUBLISHED,
           },
           manager
         );
       }
-    });
+    };
+
+    if (manager) {
+      return publishFunction(manager);
+    } else {
+      return this.db.run((manager) => publishFunction(manager));
+    }
   }
 
   /** Get posts AppPostFull of user, cannot be part of a transaction

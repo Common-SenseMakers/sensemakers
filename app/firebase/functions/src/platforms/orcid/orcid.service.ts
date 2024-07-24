@@ -1,10 +1,12 @@
 import {
+  AuthenticationResult,
   OrcidSignupContext,
   OrcidSignupData,
+  OrcidUserCredentials,
   OrcidUserDetails,
+  OrcidUserProfile,
 } from '../../@shared/types/types.orcid';
 import {
-  ORCID_REDIRECT_URL,
   ORCID_API_URL,
   ORCID_CLIENT_ID,
   ORCID_SECRET,
@@ -16,20 +18,21 @@ export class OrcidService
   implements
     IdentityService<OrcidSignupContext, OrcidSignupData, OrcidUserDetails>
 {
-  public async getSignupContext() {
-    return {
-      link: `${ORCID_API_URL}/oauth/authorize?client_id=${ORCID_CLIENT_ID.value()}&response_type=code&scope=/authenticate&redirect_uri=${ORCID_REDIRECT_URL.value()}`,
-    };
+  public async getSignupContext(): Promise<OrcidSignupContext> {
+    throw new Error('not implemented');
   }
 
-  protected async fetchUserFromCode(code: string): Promise<OrcidUserDetails> {
+  protected async fetchCredentialsFromCode(
+    code: string,
+    redirect_uri: string
+  ): Promise<AuthenticationResult> {
     const params = new URLSearchParams();
 
     params.append('client_id', ORCID_CLIENT_ID.value());
     params.append('client_secret', ORCID_SECRET.value());
     params.append('grant_type', 'authorization_code');
     params.append('code', code);
-    params.append('redirect_uri', ORCID_REDIRECT_URL.value());
+    params.append('redirect_uri', redirect_uri);
 
     const response = await fetch(`${ORCID_API_URL}/oauth/token`, {
       headers: [
@@ -55,7 +58,29 @@ export class OrcidService
   }
 
   public async handleSignupData(data: OrcidSignupData) {
-    const user = await this.fetchUserFromCode(data.code);
-    return user;
+    const result = await this.fetchCredentialsFromCode(
+      data.code,
+      data.callbackUrl
+    );
+    const credentials: OrcidUserCredentials = {
+      access_token: result.access_token,
+      refresh_token: result.refresh_token,
+      expires_in: result.expires_in,
+      scope: result.scope,
+      token_type: result.token_type,
+    };
+
+    const profile: OrcidUserProfile = {
+      name: result.name,
+    };
+
+    const orcid: OrcidUserDetails = {
+      user_id: result.orcid,
+      signupDate: 0,
+      profile,
+      read: credentials,
+    };
+
+    return orcid;
   }
 }

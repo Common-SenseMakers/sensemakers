@@ -1,17 +1,18 @@
 import { Anchor, Box, Text } from 'grommet';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
 import { AppLogo } from '../app/brand/AppLogo';
 import { ViewportPage } from '../app/layout/Viewport';
 import { PostCard } from '../post/PostCard';
-import { PLATFORM } from '../shared/types/types';
 import {
   AppPostFull,
   ProfilePostsQuery,
   UserPostsQuery,
 } from '../shared/types/types.posts';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
+import { PLATFORM } from '../shared/types/types.user';
 import { AppButton } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
@@ -19,7 +20,7 @@ import { useThemeContext } from '../ui-components/ThemedApp';
 import { ProfileHeader } from './ProfileHeader';
 import { TABS_CONFIG } from './TABS.CONFIG';
 
-const DEBUG = true;
+const DEBUG = false;
 
 const PAGE_SIZE = 20;
 
@@ -140,6 +141,7 @@ export const ProfileView = (props: {
     _fetchOlder({ selectedTab, oldestPostId: _oldestPostId });
   }, [_fetchOlder, _oldestPostId, selectedTab]);
 
+  const navigate = useNavigate();
   const content = (() => {
     if (!username) {
       return (
@@ -189,7 +191,9 @@ export const ProfileView = (props: {
           <PostCard
             post={post}
             shade={ix % 2 === 1}
-            profile={profile}></PostCard>
+            profile={profile}
+            handleClick={() => {
+            }}></PostCard>
         </Box>
       ));
     })();

@@ -1,5 +1,8 @@
 import { object, string } from 'yup';
 
+import { NotificationFreq } from '../../@shared/types/types.notifications';
+import { AutopostOption, PLATFORM } from '../../@shared/types/types.user';
+
 export const twitterGetSignupContextSchema = object({
   callback_url: string().required(),
   type: string().oneOf(['read', 'write']).required(),
@@ -10,6 +13,8 @@ export const nanopubGetSignupContextSchema = object({
   ethAddress: string().required(),
   ethToRsaSignature: string().required(),
 }).noUnknown(true);
+
+export const orcidGetSignupContextSchema = object({}).noUnknown(true);
 
 export const twitterSignupDataSchema = object({
   code: string().required(),
@@ -24,8 +29,26 @@ export const nanopubSignupDataSchema = object({
   introNanopub: string().required(),
 }).noUnknown(true);
 
-export const mirrorPostSchema = object({
-  id: string().required(),
-  content: string().required(),
-  semantics: string().required(),
+export const orcidSignupDataSchema = object({
+  code: string().required(),
+  callbackUrl: string().required(),
+}).noUnknown(true);
+
+export const userSettingsUpdateSchema = object({
+  autopost: object({
+    [PLATFORM.Nanopub]: object({
+      value: string()
+        .oneOf([...Object.values(AutopostOption)])
+        .required(),
+    }),
+  })
+    .optional()
+    .default(undefined),
+  notificationFreq: string()
+    .oneOf([...Object.values(NotificationFreq)])
+    .optional(),
+}).noUnknown(true);
+
+export const magicEmailSetSchema = object({
+  idToken: string().required(),
 }).noUnknown(true);

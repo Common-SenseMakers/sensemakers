@@ -16,6 +16,7 @@ export const GlobalStyles = createGlobalStyle`
 
   body {
     margin: 0;
+    background-color: #F9FAFB;
   }
 
   b {
@@ -44,6 +45,7 @@ export const GlobalStyles = createGlobalStyle`
     --tweet-header-font-size: 0.8rem;
     --tweet-body-font-size: 0.8rem;
     --tweet-body-line-height: 0.9rem;
+    --tweet-container-margin: 0rem;
   }
   
 `;

@@ -16,6 +16,7 @@ from .configs import (
     MultiRefTaggerChainConfig,
     ParserChainType,
     PostProcessType,
+    PostRendererType,
 )
 
 MAX_SUMMARY_LENGTH = 500
@@ -126,15 +127,11 @@ def init_multi_chain_parser_config(
         use_metadata=True,
         llm_config=LLMConfig(llm_type=llm_type),
     )
-    refs_tagger_config = RefTaggerChainConfig(
-        name="refs_tagger",
-        use_metadata=True,
-        llm_config=LLMConfig(llm_type=llm_type),
-    )
     multi_refs_tagger_config = MultiRefTaggerChainConfig(
         name="multi_refs_tagger",
         use_metadata=True,
         llm_config=LLMConfig(llm_type=llm_type),
+        post_renderer=PostRendererType.THREAD_REF_POST,
     )
     topics_config = TopicsPParserChainConfig(
         name="topics",
@@ -155,7 +152,7 @@ def init_multi_chain_parser_config(
     multi_config = MultiParserChainConfig(
         openrouter_api_config=open_router_api_config,
         parser_configs=[
-            refs_tagger_config,
+            # refs_tagger_config,
             multi_refs_tagger_config,
             topics_config,
             kw_config,

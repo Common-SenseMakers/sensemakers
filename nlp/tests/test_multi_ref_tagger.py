@@ -97,15 +97,19 @@ def test_normalize_labels():
 
 
 if __name__ == "__main__":
-    ont = OntologyBase()
-    ans = Answer(sub_answers=[SubAnswer(final_answer=["disagrees"])])
-    print(normalize_labels(ans, allowed_terms=ont.get_all_labels()))
 
     # output = res["topic_test"]
     # prompt = output.extra["prompt"]
-    # multi_config = create_multi_config_for_tests(llm_type="google/gemma-7b-it:free")
-    # multi_config.post_process_type = PostProcessType.COMBINED
-    # mcp = MultiChainParser(multi_config)
+    multi_config = MultiParserChainConfig(
+        parser_configs=[
+            MultiRefTaggerChainConfig(
+                name="multi_ref_tagger",
+                llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
+            )
+        ],
+        metadata_extract_config=MetadataExtractionConfig(extraction_method="citoid"),
+    )
+    mcp = MultiChainParser(multi_config)
     # res = mcp.process_text(TEST_POST_TEXT_W_REF)
     # assert "test" in mcp.pparsers
     # assert "Google Scholar is manipulatable" in prompt

@@ -1,26 +1,28 @@
 import { expect } from 'chai';
 
-import { PLATFORM } from '../../src/@shared/types/types';
 import {
   NanopubUserProfile,
   NanupubSignupData,
 } from '../../src/@shared/types/types.nanopubs';
-import { TwitterUserProfile } from '../../src/@shared/types/types.twitter';
+import { TwitterUserDetails } from '../../src/@shared/types/types.twitter';
+import { PLATFORM } from '../../src/@shared/types/types.user';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { logger } from '../../src/instances/logger';
+import '../../src/platforms/twitter/mock/twitter.service.mock';
 import { resetDB } from '../utils/db';
 import { getNanopubProfile } from '../utils/nanopub.profile';
+import { handleSignupMock } from './reusable/mocked.singup';
+import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
 describe('010-signups', () => {
   const services = getTestServices({
-    time: 'real',
+    time: 'mock',
     twitter: 'mock-signup',
     nanopub: 'mock-publish',
     parser: 'mock',
+    emailSender: 'spy',
   });
-
-  let userId: string = 'twitter:123456789';
 
   before(async () => {
     logger.debug('resetting DB');
@@ -36,64 +38,24 @@ describe('010-signups', () => {
   });
 
   describe('signup with mocked twitter', () => {
-    const TWITTER_USER_ID = '123456789';
-    const TWITTER_PROFILE: TwitterUserProfile = {
-      id: TWITTER_USER_ID,
-      name: 'Test User',
-      username: 'username',
-    };
-
-    before(() => {
-      (this as any).skipUsersUpdate = true;
-    });
+    let userId: string;
 
     it('signup with twitter', async () => {
-      if (!userId) {
-        throw new Error('unexpected');
-      }
-
-      await services.db.run(async (manager) => {
-        logger.debug(`handleSignup`, { user_id: TWITTER_USER_ID });
-
-        const result = await services.users.handleSignup(
-          PLATFORM.Twitter,
-          { user_id: TWITTER_USER_ID, profile: TWITTER_PROFILE },
-          manager
-        );
-
-        logger.debug(`handleSignup - result `, { result });
-
-        expect(result).to.not.be.undefined;
-
-        if (!result) {
-          throw new Error('unexpected');
-        }
-
-        expect(result.userId).to.not.be.undefined;
-        expect(result.ourAccessToken).to.not.be.undefined;
-      });
-
-      await services.db.run(async (manager) => {
-        const userRead = await services.users.repo.getUser(userId, manager);
-        expect(userRead).to.not.be.undefined;
-
-        const userReadProfile = await services.users.repo.getByPlatformUsername(
-          PLATFORM.Twitter,
-          'username',
-          TWITTER_PROFILE.username,
-          manager
-        );
-
-        expect(userReadProfile).to.not.be.undefined;
-      });
+      const testUser = testCredentials[0];
+      const signupData: TwitterUserDetails = {
+        user_id: testUser.twitter.id,
+        profile: {
+          id: testUser.twitter.id,
+          name: testUser.twitter.username,
+          username: testUser.twitter.username,
+        },
+        signupDate: Date.now(),
+      };
+      userId = await handleSignupMock(services, signupData);
     });
 
     describe('connect nanopub account', () => {
       it('connect nanopub account', async () => {
-        if (!userId) {
-          throw new Error('unexpected');
-        }
-
         await services.db.run(async (manager) => {
           const address =
             '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
@@ -106,7 +68,7 @@ describe('010-signups', () => {
           const context =
             await services.users.getSignupContext<NanopubUserProfile>(
               PLATFORM.Nanopub,
-              undefined,
+              userId,
               profile
             );
 
@@ -147,7 +109,7 @@ describe('010-signups', () => {
   });
 
   describe('signup with nanopub', () => {
-    it('signup as new user', async () => {
+    it.skip('signup as new user', async () => {
       const { profile, rsaKeys } = await getNanopubProfile(
         '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
       );

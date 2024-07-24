@@ -1,7 +1,7 @@
 import { privateKeyToAccount } from 'viem/accounts';
 
-import { HexStr } from '../../src/@shared/types/types';
 import { NanupubSignupData } from '../../src/@shared/types/types.nanopubs';
+import { HexStr } from '../../src/@shared/types/types.user';
 import {
   DETERMINISTIC_MESSAGE,
   getEthToRSAMessage,

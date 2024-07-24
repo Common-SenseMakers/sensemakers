@@ -1,58 +1,92 @@
-import { LayerExtendedProps, LayerPositionType, ResponsiveContext, Box, Layer } from 'grommet';
+import { Box, Layer, LayerExtendedProps, LayerPositionType } from 'grommet';
 import { Close } from 'grommet-icons';
 import React from 'react';
 
-import { AppHeading } from './AppHeading';
+import { MAX_WIDTH_APP } from '../app/layout/Viewport';
 
 export interface IAppModal extends LayerExtendedProps {
-  heading: string;
-  position?: LayerPositionType;
-  onClosed?: () => void;
+  type: 'small' | 'normal';
+  layerProps?: LayerExtendedProps;
+  windowStyle?: React.CSSProperties;
+  onModalClosed?: () => void;
   onSuccess?: () => void;
   onError?: () => void;
 }
 
 export const AppModal = (props: IAppModal) => {
+  if (!props.children || Array.isArray(props.children)) {
+    throw new Error('Modal must have exactly one child');
+  }
   const child = React.cloneElement(props.children as React.ReactElement, {
     onSuccess: props.onSuccess,
-    onClosed: props.onClosed,
+    onModalClosed: props.onModalClosed,
     onError: props.onError,
   });
 
   const close = (): void => {
-    if (props.onClosed) props.onClosed();
+    if (props.onModalClosed) props.onModalClosed();
   };
 
-  const size = React.useContext(ResponsiveContext);
-  const mobile = size ? size.includes('small') : true;
+  const position = props.position !== undefined ? props.position : 'center';
 
-  const position = props.position !== undefined ? props.position : 'right';
+  const content = (
+    <>
+      <Box style={{ flexShrink: '0' }}>
+        <Box
+          direction="row"
+          onClick={(): void => close()}
+          align="center"
+          justify="end">
+          <Close style={{ height: '12px', width: '12px' }}></Close>
+        </Box>
+      </Box>
+      <Box style={{ flexGrow: 1, maxHeight: '90vh' }}>{child}</Box>
+    </>
+  );
+
+  const wrappedContent = (() => {
+    if (props.type === 'small') {
+      return (
+        <Box
+          pad={{ vertical: '24px', horizontal: '24px' }}
+          style={{
+            backgroundColor: 'white',
+            borderRadius: '6px',
+            boxShadow:
+              '0px 6px 15px -2px rgba(16, 24, 40, 0.08), 0px 6px 15px -2px rgba(16, 24, 40, 0.08)',
+            minHeight: '60vh',
+            width: '100%',
+            maxWidth: `${MAX_WIDTH_APP * 0.8}px`,
+            flexShrink: '0',
+          }}>
+          {content}
+        </Box>
+      );
+    }
+
+    return <Box pad={{ vertical: '24px', horizontal: '24px' }}>{content}</Box>;
+  })();
 
   return (
     <Layer
-      {...props}
-      style={{ ...props.style }}
+      {...props.layerProps}
+      style={{
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        ...props.style,
+      }}
       position={position}
       onEsc={(): void => close()}
-      onClickOutside={(): void => close()}>
+      onClickOutside={(): void => close()}
+      animate={false}>
       <Box
+        align="center"
+        justify="center"
         style={{
-          paddingTop: '5vh',
-          height: '100vh',
-          width: mobile ? 'auto' : '550px',
-          flexShrink: '0',
+          width: '100%',
+          flexGrow: 1,
+          ...props.windowStyle,
         }}>
-        <Box style={{ padding: '0 2.5vw', flexShrink: '0' }}>
-          <Box
-            direction="row"
-            style={{ marginBottom: '20px', padding: '4px 0px' }}
-            onClick={(): void => close()}
-            align="center">
-            <Close style={{ height: '12px', width: '12px' }}></Close>
-          </Box>
-          <AppHeading level="2">{props.heading}</AppHeading>
-        </Box>
-        <div style={{ overflowY: 'auto', padding: '0 2.5vw' }}>{child}</div>
+        {wrappedContent}
       </Box>
     </Layer>
   );

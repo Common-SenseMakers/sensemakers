@@ -80,7 +80,7 @@ export const KeywordsComponent = (props: PatternProps) => {
         direction="row">
         <AppLabelsEditor
           editable={props.editable}
-          color="#498283"
+          colors={{ font: '#498283', background: '#F5FCFC', border: '#BDD9D7' }}
           labels={keywords}
           addLabel={(newLabel) => addKeyword(newLabel)}
           removeLabel={(newLabel) => removeKeyword(newLabel)}></AppLabelsEditor>

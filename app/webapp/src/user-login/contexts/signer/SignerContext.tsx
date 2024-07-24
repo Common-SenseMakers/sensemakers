@@ -5,17 +5,28 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from 'react';
 import { WalletClient } from 'viem';
-import { useCall, useDisconnect, useWalletClient } from 'wagmi';
+import { useDisconnect, useWalletClient } from 'wagmi';
 
-import { HexStr } from '../../../shared/types/types';
+import { useAppFetch } from '../../../api/app.fetch';
+import { HexStr } from '../../../shared/types/types.user';
+import {
+  LoginFlowState,
+  OverallLoginStatus,
+  useAccountContext,
+} from '../AccountContext';
 import { createMagicSigner, magic } from './magic.signer';
+
+const DEBUG = false;
 
 export type SignerContextType = {
   connect: () => void;
   connectWeb3: () => void;
+  connectMagic: (openUI: boolean, setLogginIn: boolean) => void;
+  isConnectingMagic: boolean;
   errorConnecting: boolean;
   hasInjected: boolean;
   signer?: WalletClient;
@@ -31,29 +42,50 @@ const ProviderContextValue = createContext<SignerContextType | undefined>(
 export const SignerContext = (props: PropsWithChildren) => {
   const { open: openConnectModal } = useWeb3Modal();
   const modalEvents = useWeb3ModalEvents();
+  const {
+    connectedUser,
+    refresh: refreshUser,
+    setLoginFlowState,
+    setOverallLoginStatus,
+    overallLoginStatus,
+  } = useAccountContext();
+
+  const appFetch = useAppFetch();
 
   const [address, setAddress] = useState<HexStr>();
   const [magicSigner, setMagicSigner] = useState<WalletClient>();
+  const [isConnectingMagic, setIsConnectingMagic] = useState<boolean>(false);
 
   const { data: injectedSigner } = useWalletClient();
 
   const [errorConnecting, setErrorConnecting] = useState<boolean>(false);
 
-  const signer: WalletClient | undefined = injectedSigner
-    ? injectedSigner
-    : magicSigner;
+  const signer: WalletClient | undefined = useMemo(() => {
+    return injectedSigner ? injectedSigner : magicSigner;
+  }, [injectedSigner, magicSigner]);
 
   useEffect(() => {
-    magic.user.isLoggedIn().then((res) => {
-      if (res && !magicSigner) {
-        console.log('Autoconnecting Magic');
-        connectMagic(false);
-      }
-    });
-  }, []);
+    if (!signer) {
+      magic.user.isLoggedIn().then((res) => {
+        if (DEBUG) console.log('Magic connection check done', { res });
 
+        if (res && !magicSigner) {
+          if (DEBUG) console.log('Autoconnecting Magic');
+          connectMagic(false, false);
+        } else {
+          if (overallLoginStatus === OverallLoginStatus.LogginIn) {
+            console.warn('Unexpected situation, resetting login status');
+            setOverallLoginStatus(OverallLoginStatus.LoggedOut);
+          }
+        }
+      });
+    }
+  }, [signer]);
+
+  /** keep the address strictly linked to the signer */
   useEffect(() => {
     if (signer) {
+      setLoginFlowState(LoginFlowState.ComputingAddress);
       if (injectedSigner) {
         setAddress(injectedSigner.account.address);
       } else {
@@ -67,23 +99,62 @@ export const SignerContext = (props: PropsWithChildren) => {
     }
   }, [signer]);
 
+  /** wrapper of signMessage */
+  const _signMessage = useCallback(
+    (message: string) => {
+      if (!signer || !address)
+        throw new Error(
+          'Unexpected signer or address undefined and signMessage called'
+        );
+      return (signer as any).signMessage({ account: address, message });
+    },
+    [address, signer]
+  );
+
   const { disconnect: disconnectInjected } = useDisconnect();
 
   const connectMagic = useCallback(
-    (openUI: boolean) => {
-      setErrorConnecting(false);
-      console.log('connecting magic signer', { signer });
-      createMagicSigner(openUI)
-        .then((signer) => {
-          console.log('connected magic signer', { signer });
-          setMagicSigner(signer);
-        })
-        .catch((e) => {
-          setErrorConnecting(true);
-        });
+    (openUI: boolean, setLogginIn: boolean) => {
+      if (!signer) {
+        if (DEBUG) console.log('connectMagic called');
+        setErrorConnecting(false);
+        setIsConnectingMagic(true);
+
+        if (setLogginIn) {
+          setOverallLoginStatus(OverallLoginStatus.LogginIn);
+        }
+
+        setLoginFlowState(LoginFlowState.ConnectingSigner);
+
+        if (DEBUG) console.log('connecting magic signer', { signer });
+        createMagicSigner(openUI)
+          .then((signer) => {
+            if (DEBUG) console.log('connected magic signer', { signer });
+
+            setIsConnectingMagic(false);
+            setMagicSigner(signer);
+          })
+          .catch((e) => {
+            setErrorConnecting(true);
+            setIsConnectingMagic(false);
+          });
+      }
     },
     [signer]
   );
+
+  /** authenticate magic email to backend (one way call that should endup with the user email updated) */
+  useEffect(() => {
+    if (DEBUG) console.log('check setEmail', { magicSigner, connectedUser });
+    if (magicSigner && connectedUser && connectedUser.email === undefined) {
+      setLoginFlowState(LoginFlowState.RegisteringEmail);
+      magic.user.getIdToken().then((idToken) => {
+        appFetch('/api/auth/setMagicEmail', { idToken }, true).then(() => {
+          refreshUser();
+        });
+      });
+    }
+  }, [magicSigner, connectedUser, appFetch]);
 
   const connectWeb3 = useCallback(() => {
     setErrorConnecting(false);
@@ -91,7 +162,7 @@ export const SignerContext = (props: PropsWithChildren) => {
   }, [openConnectModal]);
 
   useEffect(() => {
-    console.log(modalEvents.data.event);
+    if (DEBUG) console.log(`Modal event: ${modalEvents.data.event}`);
     if (modalEvents.data.event === 'MODAL_CLOSE') {
       setErrorConnecting(true);
     }
@@ -106,20 +177,9 @@ export const SignerContext = (props: PropsWithChildren) => {
     if (hasInjected) {
       connectWeb3();
     } else {
-      connectMagic(true);
+      connectMagic(true, true);
     }
   }, [hasInjected, connectWeb3, connectMagic]);
-
-  const _signMessage = useCallback(
-    (message: string) => {
-      if (!signer || !address)
-        throw new Error(
-          'Unexpected signer or address undefined and signMessage called'
-        );
-      return (signer as any).signMessage({ account: address, message });
-    },
-    [address, signer]
-  );
 
   /** set signMessage as undefined when not available */
   const signMessage = !signer || !address ? undefined : _signMessage;
@@ -136,6 +196,8 @@ export const SignerContext = (props: PropsWithChildren) => {
       value={{
         connect,
         connectWeb3,
+        connectMagic,
+        isConnectingMagic,
         errorConnecting,
         signMessage,
         hasInjected,

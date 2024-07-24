@@ -11,7 +11,7 @@ import {
   UserPostsQuery,
 } from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
-import { BaseRepository } from '../db/repo.base';
+import { BaseRepository, removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 
 export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
@@ -31,10 +31,10 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     }
 
     const ref = this.getRef(postId);
-    manager.update(ref, postUpdate);
+    manager.update(ref, removeUndefined(postUpdate));
   }
 
-  public async addMirror(
+  public addMirror(
     postId: string,
     mirrorId: string,
     manager: TransactionManager
@@ -63,8 +63,8 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       if (queryParams.status === PostsQueryStatus.PUBLISHED) {
         return base.where(
           republishedStatusKey,
-          '==',
-          AppPostRepublishedStatus.REPUBLISHED
+          '!=',
+          AppPostRepublishedStatus.PENDING
         );
       }
       if (queryParams.status === PostsQueryStatus.IGNORED) {

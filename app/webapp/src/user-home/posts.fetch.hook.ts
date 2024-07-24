@@ -17,12 +17,14 @@ const PAGE_SIZE = 5;
 const DEBUG = false;
 
 export const usePostsFetch = () => {
-  const { connectedUser } = useAccountContext();
+  const { connectedUser, twitterProfile } = useAccountContext();
+
   const appFetch = useAppFetch();
   const { status } = useQueryFilter();
 
   const [posts, setPosts] = useState<AppPostFull[]>([]);
-  const [fetchedFirst, setFetchedFirst] = useState(false);
+  const [fetchedOlderFirst, setFetchedOlderFirst] = useState(false);
+  const [fetchedNewerFirst, setFetchedNewerFirst] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -31,6 +33,7 @@ export const usePostsFetch = () => {
 
   const [isFetchingNewer, setIsFetchingNewer] = useState(false);
   const [errorFetchingNewer, setErrorFetchingNewer] = useState<Error>();
+  const [moreToFetch, setMoreToFetch] = useState(true);
 
   const unsubscribeCallbacks = useRef<Record<string, () => void>>({});
 
@@ -146,16 +149,24 @@ export const usePostsFetch = () => {
 
   /** first data fill happens everytime the posts are empty and the firstFetched is false */
   useEffect(() => {
-    if (posts.length === 0 && !fetchedFirst && connectedUser) {
-      if (DEBUG) console.log('first fetch');
+    if (posts.length === 0 && !fetchedOlderFirst && twitterProfile) {
+      if (DEBUG) console.log('first fetch older');
       _fetchOlder(undefined);
     }
-  }, [posts, fetchedFirst, connectedUser]);
+  }, [posts, fetchedOlderFirst, connectedUser]);
+
+  /** whenever posts have been fetched, check if we have fetched for newer posts yet, and if not, fetch for newer */
+  useEffect(() => {
+    if (posts.length !== 0 && !fetchedNewerFirst && connectedUser) {
+      if (DEBUG) console.log('first fetch newer');
+      _fetchNewer(posts[0].id);
+    }
+  }, [posts]);
 
   const reset = () => {
     if (DEBUG) console.log('resetting posts');
     removeAllPosts();
-    setFetchedFirst(false);
+    setFetchedOlderFirst(false);
     setIsLoading(true);
   };
 
@@ -179,7 +190,7 @@ export const usePostsFetch = () => {
 
       if (DEBUG) console.log(`fetching for older`);
       setIsFetchingOlder(true);
-      setFetchedFirst(true);
+      setFetchedOlderFirst(true);
       try {
         const params: UserPostsQuery = {
           status,
@@ -198,6 +209,11 @@ export const usePostsFetch = () => {
         addPosts(readPosts, 'end');
         setIsFetchingOlder(false);
         setIsLoading(false);
+        if (readPosts.length < params.fetchParams.expectedAmount) {
+          setMoreToFetch(false);
+        } else {
+          setMoreToFetch(true);
+        }
       } catch (e: any) {
         setIsFetchingOlder(false);
         setErrorFetchingOlder(e);
@@ -227,6 +243,7 @@ export const usePostsFetch = () => {
 
       if (DEBUG) console.log(`fetching for newer`);
       setIsFetchingNewer(true);
+      setFetchedNewerFirst(true);
 
       try {
         const params: UserPostsQuery = {
@@ -290,5 +307,6 @@ export const usePostsFetch = () => {
     errorFetchingNewer,
     isLoading,
     status,
+    moreToFetch,
   };
 };

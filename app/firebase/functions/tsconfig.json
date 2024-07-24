@@ -11,13 +11,11 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "preserveSymlinks": true,
-    "baseUrl": "./",
     "resolveJsonModule": true,
-    "paths": {
-      "*": ["*", "node_modules/*"],
-    },
     "typeRoots": ["./src/types", "node_modules/@types", "./src/custom.d.ts"],
+    "allowJs": true,
+    "checkJs": false
   },
   "compileOnSave": true,
-  "include": ["src/index.ts", "src/custom.d.ts"],
+  "include": ["src/index.ts", "src/@shared/", "src/custom.d.ts"]
 }

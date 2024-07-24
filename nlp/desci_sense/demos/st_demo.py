@@ -461,7 +461,7 @@ if __name__ == "__main__":
                     # get labels selected by human
                     selected_human = extract_reference_labels(
                         edited_df,
-                        st.session_state.result["post"].ref_urls,
+                        st.session_state.result["post"].md_ref_urls(),
                     )
 
                     # convert from predicate display names to labels

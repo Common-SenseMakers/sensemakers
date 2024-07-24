@@ -1,14 +1,19 @@
 import { RequestHandler } from 'express';
-import { logger } from 'firebase-functions/v1';
 
-import { PLATFORM } from '../../@shared/types/types';
+import { PLATFORM } from '../../@shared/types/types.user';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
+import { logger } from '../../instances/logger';
 import {
   nanopubGetSignupContextSchema,
   nanopubSignupDataSchema,
+  orcidGetSignupContextSchema,
+  orcidSignupDataSchema,
   twitterGetSignupContextSchema,
   twitterSignupDataSchema,
 } from './auth.schema';
+
+const DEBUG = true;
+const DEBUG_PREFIX = '[AUTH-CONTROLLER]';
 
 export const getSignupContextController: RequestHandler = async (
   request,
@@ -29,8 +34,16 @@ export const getSignupContextController: RequestHandler = async (
         return nanopubGetSignupContextSchema.validate(request.body);
       }
 
+      if (platform === PLATFORM.Orcid) {
+        return orcidGetSignupContextSchema.validate(request.body);
+      }
+
       throw new Error(`Unexpected platform ${platform}`);
     })();
+
+    if (DEBUG) {
+      logger.debug('getSignupContext', payload, DEBUG_PREFIX);
+    }
 
     const context = await services.users.getSignupContext(
       platform,
@@ -64,8 +77,16 @@ export const handleSignupController: RequestHandler = async (
         return nanopubSignupDataSchema.validate(request.body);
       }
 
+      if (platform === PLATFORM.Orcid) {
+        return orcidSignupDataSchema.validate(request.body);
+      }
+
       throw new Error(`Unexpected platform ${platform}`);
     })();
+
+    if (DEBUG) {
+      logger.debug('handleSignupController', payload, DEBUG_PREFIX);
+    }
 
     const result = await services.db.run(async (manager) => {
       /** handle signup and refetch user posts */

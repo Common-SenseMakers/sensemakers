@@ -75,11 +75,9 @@ export class LocalLogger {
         : 'no-message'
       : args;
 
-    const obj = Array.isArray(args)
-      ? typeof args[0] !== 'string'
-        ? args[0]
-        : args[1]
-      : undefined;
+    const obj = Array.isArray(args) ? args[1] : undefined;
+
+    const prefix = Array.isArray(args) ? args[2] : undefined;
 
     const showCtx = level.num >= ctxConfig.num;
 
@@ -90,13 +88,15 @@ export class LocalLogger {
       }
     }
 
+    const marker = `[${level.tag}]${prefix ? `[${prefix}]` : ''}`;
+
     if (showCtx) {
       console[method](
-        `[${level.tag}]: ${msg}`,
+        `${marker}: ${msg}`,
         util.inspect(obj, { depth: 5, colors: true }) || ''
       );
     } else {
-      console[method](`[${level.tag}]: ${msg}`);
+      console[method](`${marker}: ${msg}`);
     }
   }
 

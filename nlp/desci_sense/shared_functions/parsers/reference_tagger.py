@@ -17,6 +17,15 @@ from ..postprocessing import ParserChainOutput
 from ..postprocessing.output_processors import KeywordParser
 from ..schema.ontology_base import OntologyBase
 from ..enum_dict import EnumDict, EnumDictKey
+from ..configs import ParserChainType
+
+
+def return_fallback(input):
+    return ParserChainOutput(
+        answer=[],
+        pparser_type=ParserChainType.REFERENCE_TAGGER,
+        extra={"errors": "fallback"},
+    )
 
 
 class PromptCase(EnumDictKey):
@@ -75,6 +84,8 @@ class ReferenceTaggerParserChain(AllowedTermsPParserChain):
 
         self.init_prompt_case_dict(ontology)
 
+        self.runnable_fallback = RunnableLambda(return_fallback)
+
         self.ref_tag_chain = {
             "raw_tags_chain": self._chain,
             "ref_urls": itemgetter("ref_urls"),
@@ -82,7 +93,7 @@ class ReferenceTaggerParserChain(AllowedTermsPParserChain):
 
     @property
     def chain(self):
-        return self.ref_tag_chain
+        return self.ref_tag_chain.with_retry().with_fallbacks([self.runnable_fallback])
 
     def process_ref_post(
         self,
@@ -153,12 +164,12 @@ class ReferenceTaggerParserChain(AllowedTermsPParserChain):
             metadata_list = []
 
         # check how many external references post mentions
-        if len(post.ref_urls) == 0:
+        if len(post.md_ref_urls()) == 0:
             case = PromptCase.ZERO_REF
 
         else:
             # at least one external reference
-            if len(post.ref_urls) == 1:
+            if len(post.md_ref_urls()) == 1:
                 case = PromptCase.SINGLE_REF
                 # if metadata flag is active, retreive metadata
 
@@ -176,7 +187,7 @@ class ReferenceTaggerParserChain(AllowedTermsPParserChain):
         full_prompt = {
             self.input_name: prompt,
             self.allowed_terms_name: self.prompt_case_dict[case]["labels"],
-            "ref_urls": post.ref_urls,
+            "ref_urls": post.md_ref_urls(),
         }
 
         return full_prompt

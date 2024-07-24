@@ -14,9 +14,7 @@ Rules:
 
 
 # Input post text:
-Content: {{ content }}
-
-{{ references_metadata }}
+{{ rendered_post }}
 
 # Output:
 """

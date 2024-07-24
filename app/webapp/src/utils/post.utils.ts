@@ -1,5 +1,5 @@
-import { AppUserRead, PLATFORM } from '../shared/types/types';
 import { TwitterUserDetails } from '../shared/types/types.twitter';
+import { AppUserRead, PLATFORM } from '../shared/types/types.user';
 
 export function getPlatformProfile(
   user: AppUserRead,

@@ -1,4 +1,4 @@
-import { AppUser } from '../../src/@shared/types/types';
+import { AppUser } from '../../src/@shared/types/types.user';
 import { TransactionManager } from '../../src/db/transaction.manager';
 import { Services } from '../../src/instances/services';
 
