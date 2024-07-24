@@ -12,7 +12,7 @@ const { renderEmail } = require('../@shared/emailRenderer') as {
 
 const postmark = require('postmark');
 
-export const DEBUG = true;
+export const DEBUG = false;
 export const DEBUG_PREFIX = `EMAIL-SENDER-SERVICE`;
 
 export enum EmailType {

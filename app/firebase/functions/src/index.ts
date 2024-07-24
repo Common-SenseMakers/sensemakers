@@ -153,7 +153,7 @@ exports[NOTIFY_USER_TASK] = onTaskDispatched(
       throw new Error('userId not found for task notifyUserTask');
     }
 
-    notifyUserTask(req.data.userId, createServices());
+    return notifyUserTask(req.data.userId, createServices());
   }
 );
 
