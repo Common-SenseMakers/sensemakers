@@ -17,7 +17,7 @@ import { getMockedUser } from '../utils/users.mock';
 
 const DEBUG = false;
 
-describe.only('nanopublication format', () => {
+describe('nanopublication format', () => {
   it('publishes a correctly formatted mock nanopub to the test server and updates it', async () => {
     const post = getMockPost({
       authorId: 'test-user-id',

@@ -12,7 +12,7 @@ const { renderEmail } = require('../../src/@shared/emailRenderer') as {
   renderEmail: RenderEmailFunction;
 };
 
-describe.only('renders email', () => {
+describe('renders email', () => {
   it('imports the bundled render email function and successfully calls it', async () => {
     const posts: AppPostFull[] = [
       getMockPostNew(),
