@@ -14,3 +14,7 @@ node_modules/
 .secret.*
 
 test/__tests__/test.users.json
+
+# service account credentials
+**/*firebase-adminsdk*.json
+/scripts/.script.env

@@ -1,10 +1,11 @@
+import dotenv from 'dotenv';
+import * as admin from 'firebase-admin';
 import { initializeApp } from 'firebase-admin/app';
 import { Firestore, getFirestore } from 'firebase-admin/firestore';
 
 import { CollectionNames } from '../@shared/utils/collectionNames';
 import { IS_EMULATOR } from '../config/config.runtime';
 import { logger } from '../instances/logger';
-// import { SERVICE_ACCOUNT_ID } from '../config/config.runtime';
 import {
   HandleWithTxManager,
   ManagerConfig,
@@ -12,11 +13,27 @@ import {
   TransactionManager,
 } from './transaction.manager';
 
-export const app = IS_EMULATOR
-  ? initializeApp({
+dotenv.config({ path: './scripts/.script.env' });
+
+export const app = (() => {
+  if (IS_EMULATOR) {
+    return initializeApp({
       projectId: 'demo-sensenets',
-    })
-  : initializeApp();
+    });
+  }
+
+  /** used locally to run scripts connected to a given project */
+  if (process.env.FB_CERT_PATH) {
+    const serviceAccount = require('../../' + process.env.FB_CERT_PATH);
+
+    return initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      projectId: process.env.FB_PROJECT_ID,
+    });
+  }
+  /** used on deployment with the current app */
+  return initializeApp();
+})();
 
 const DEBUG = false;
 

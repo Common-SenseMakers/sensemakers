@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "lib-scripts",
+    "rootDir": ".",
+    "baseUrl": "./"
+  },
+  "compileOnSave": true,
+  "include": ["src/index.ts", "src/custom.d.ts", "scripts/**/*"]
+}

@@ -19,7 +19,7 @@ import { PostsRepository } from '../posts/posts.repository';
 import { UsersRepository } from '../users/users.repository';
 import { NotificationsRepository } from './notifications.repository';
 
-export const DEBUG = false;
+export const DEBUG = true;
 export const DEBUG_PREFIX = `NOTIFICATION-SERVICE`;
 
 export interface EmailPostDetails {
@@ -95,7 +95,7 @@ export class NotificationService {
           );
         }
 
-        /** get pending notificatations */
+        /** get pending notifications */
         const pendingIds = await this.notificationsRepo.getUnotifiedOfUser(
           userId,
           manager
@@ -205,7 +205,9 @@ export class NotificationService {
         mirrors: mirrors.filter((m) => m !== undefined) as PlatformPost[],
       };
     } else {
-      throw new Error('Unsupported notification type');
+      throw new Error(
+        `Unsupported notification type ${notification.activity.type}. Supported types: ${JSON.stringify(types)}`
+      );
     }
   }
 
