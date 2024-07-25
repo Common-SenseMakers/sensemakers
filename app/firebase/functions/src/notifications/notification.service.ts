@@ -7,8 +7,6 @@ import {
 } from '../@shared/types/types.notifications';
 import { PlatformPost } from '../@shared/types/types.platform.posts';
 import { AppPostFull } from '../@shared/types/types.posts';
-import { PLATFORM } from '../@shared/types/types.user';
-import { AutopostOption } from '../@shared/types/types.user';
 import { ActivityRepository } from '../activity/activity.repository';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
@@ -19,7 +17,7 @@ import { PostsRepository } from '../posts/posts.repository';
 import { UsersRepository } from '../users/users.repository';
 import { NotificationsRepository } from './notifications.repository';
 
-export const DEBUG = false;
+export const DEBUG = true;
 export const DEBUG_PREFIX = `NOTIFICATION-SERVICE`;
 
 export interface EmailPostDetails {
@@ -95,7 +93,7 @@ export class NotificationService {
           );
         }
 
-        /** get pending notificatations */
+        /** get pending notifications */
         const pendingIds = await this.notificationsRepo.getUnotifiedOfUser(
           userId,
           manager
@@ -116,11 +114,6 @@ export class NotificationService {
           return;
         }
 
-        const autopostingOptions = [
-          AutopostOption.AI,
-          AutopostOption.DETERMINISTIC,
-        ];
-
         if (pendingNotifications.length === 0) {
           logger.debug(
             `notifyUser ${userId} - no pending notifications`,
@@ -130,37 +123,15 @@ export class NotificationService {
           return;
         }
 
-        if (
-          autopostingOptions.includes(settings.autopost[PLATFORM.Nanopub].value)
-        ) {
-          if (DEBUG) {
-            logger.debug(
-              `notifyUser ${userId} - prepareAndSendDigestAuto`,
-              { pendingNotifications },
-              DEBUG_PREFIX
-            );
-          }
-
-          await this.prepareAndSendDigestAuto(
-            userId,
-            pendingNotifications,
-            manager
-          );
-        } else {
-          if (DEBUG) {
-            logger.debug(
-              `notifyUser ${userId} - prepareAndSendDigestManual`,
-              { pendingNotifications },
-              DEBUG_PREFIX
-            );
-          }
-
-          await this.prepareAndSendDigestManual(
-            userId,
-            pendingNotifications,
-            manager
+        if (DEBUG) {
+          logger.debug(
+            `notifyUser ${userId} - prepareAndSendDigestAuto`,
+            { pendingNotifications },
+            DEBUG_PREFIX
           );
         }
+
+        await this.prepareAndSendDigest(userId, pendingNotifications, manager);
 
         await Promise.all(
           pendingNotifications.map(async (n) => {
@@ -205,29 +176,13 @@ export class NotificationService {
         mirrors: mirrors.filter((m) => m !== undefined) as PlatformPost[],
       };
     } else {
-      throw new Error('Unsupported notification type');
+      throw new Error(
+        `Unsupported notification type ${notification.activity.type}. Supported types: ${JSON.stringify(types)}`
+      );
     }
   }
 
-  async prepareAndSendDigestManual(
-    userId: string,
-    notifications: NotificationFull[],
-    manager: TransactionManager
-  ) {
-    const appPostFulls: AppPostFull[] = await Promise.all(
-      notifications.map(async (notification) =>
-        this.getPostEmailDetails(
-          notification,
-          [ActivityType.PostParsed],
-          manager
-        )
-      )
-    );
-
-    await this.sendDigest(userId, appPostFulls, manager);
-  }
-
-  async prepareAndSendDigestAuto(
+  async prepareAndSendDigest(
     userId: string,
     notifications: NotificationFull[],
     manager: TransactionManager
@@ -236,7 +191,7 @@ export class NotificationService {
       notifications.map(async (notification) =>
         this.getPostEmailDetails(
           notification,
-          [ActivityType.PostAutoposted],
+          [ActivityType.PostAutoposted, ActivityType.PostParsed],
           manager
         )
       )

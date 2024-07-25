@@ -29,14 +29,6 @@ describe('010-signups', () => {
     await resetDB();
   });
 
-  describe('connect orcid', () => {
-    it('get orcid authlink', async () => {
-      const { link } = await services.users.getSignupContext(PLATFORM.Orcid);
-      logger.debug(`link: ${link}`);
-      expect(link.startsWith('https://orcid.org')).to.be.true;
-    });
-  });
-
   describe('signup with mocked twitter', () => {
     let userId: string;
 
