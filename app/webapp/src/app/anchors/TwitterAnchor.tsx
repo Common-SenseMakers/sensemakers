@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { I18Keys } from '../../i18n/i18n';
 import { TwitterThread } from '../../shared/types/types.twitter';
 import { LoadingDiv } from '../../ui-components/LoadingDiv';
+import { useThemeContext } from '../../ui-components/ThemedApp';
 import { OpenLinkIcon } from '../icons/OpenLinkIcon';
 
 export const TwitterProfileAnchor = (props: { screen_name?: string }) => {
@@ -28,6 +29,7 @@ export const TweetAnchor = (props: {
 }) => {
   const { t } = useTranslation();
   const timestamp = props.timestamp || Date.now();
+  const { constants } = useThemeContext();
 
   const formatter = new Intl.DateTimeFormat('en-US', {
     month: 'long', // full name of the month
@@ -38,6 +40,10 @@ export const TweetAnchor = (props: {
 
   if (!props.thread) {
     return <LoadingDiv></LoadingDiv>;
+  }
+
+  if (!props.thread.tweets) {
+    throw new Error('Thread has no tweets');
   }
 
   const threadId = props.thread.conversation_id;
@@ -57,7 +63,7 @@ export const TweetAnchor = (props: {
       href={`https://twitter.com/x/status/${threadId}`}
       size="medium">
       <Box direction="row" align="center">
-        <span style={{ color: '#6B7280' }}>{label}</span>
+        <span style={{ color: constants.colors.textLight2 }}>{label}</span>
         <span
           style={{ color: '#4B5563', marginLeft: '8px', marginRight: '6px' }}>
           {' '}

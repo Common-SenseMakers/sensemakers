@@ -39,7 +39,7 @@ describe('030-process', () => {
   let rsaKeys = getRSAKeys('');
 
   const services = getTestServices({
-    time: 'real',
+    time: 'mock',
     twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',

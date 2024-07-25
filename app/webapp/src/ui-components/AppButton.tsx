@@ -44,6 +44,7 @@ export const AppButton = (props: IButton & { isLoading?: boolean }) => {
         style={{
           fontSize: constants.fontSize.small.size,
           fontStyle: 'normal',
+          fontWeight: 500,
           padding: !props.plain ? '6px 12px' : '0px',
           minHeight: '42px',
           ...props.style,
@@ -111,7 +112,7 @@ export const AppModalButtonResponsive = (props: {
         {...props.buttonProps}></AppButton>
       {showDrop ? (
         <AppModal
-          onClosed={() => setShowDrop(false)}
+          onModalClosed={() => setShowDrop(false)}
           {...props.modalProps}></AppModal>
       ) : (
         <></>

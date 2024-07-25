@@ -5,14 +5,14 @@ import {
   NotificationFull,
   PostParsedNotification,
 } from '../@shared/types/types.notifications';
-import { PLATFORM } from '../@shared/types/types.user';
-import { AutopostOption } from '../@shared/types/types.user';
+import { PlatformPost } from '../@shared/types/types.platform.posts';
+import { AppPostFull } from '../@shared/types/types.posts';
 import { ActivityRepository } from '../activity/activity.repository';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { EmailSenderService } from '../emailSender/email.sender.service';
 import { logger } from '../instances/logger';
-import { PostsHelper } from '../posts/posts.helper';
+import { PlatformPostsRepository } from '../posts/platform.posts.repository';
 import { PostsRepository } from '../posts/posts.repository';
 import { UsersRepository } from '../users/users.repository';
 import { NotificationsRepository } from './notifications.repository';
@@ -34,6 +34,7 @@ export class NotificationService {
     public db: DBInstance,
     public notificationsRepo: NotificationsRepository,
     public postsRepo: PostsRepository,
+    public platformPostsRepo: PlatformPostsRepository,
     public activityRepo: ActivityRepository,
     public usersRepo: UsersRepository,
     public emailSender: EmailSenderService
@@ -72,90 +73,91 @@ export class NotificationService {
 
   /** Aggregates all pending notifications of a user and sends them as an email */
   async notifyUser(userId: string) {
-    await this.db.run(async (manager) => {
-      const user = await this.usersRepo.getUser(userId, manager, true);
-      const settings = user.settings;
-
-      /** get pending notificatations */
-      const pendingIds = await this.notificationsRepo.getUnotifiedOfUser(
-        userId,
-        manager
-      );
-
-      if (DEBUG) {
-        logger.debug(`notifyUser ${userId}`, { pendingIds }, DEBUG_PREFIX);
-      }
-
-      const pendingNotifications = await Promise.all(
-        pendingIds.map((notificationId) =>
-          this.getFull(userId, notificationId, manager)
-        )
-      );
-
-      /** check if user has enabled notififications */
-      if (settings.notificationFreq === NotificationFreq.None) {
-        return;
-      }
-
-      const autopostingOptions = [
-        AutopostOption.AI,
-        AutopostOption.DETERMINISTIC,
-      ];
-
-      if (pendingNotifications.length === 0) {
-        logger.debug(
-          `notifyUser ${userId} - no pending notifications`,
-          undefined,
-          DEBUG_PREFIX
-        );
-        return;
-      }
-
-      if (
-        autopostingOptions.includes(settings.autopost[PLATFORM.Nanopub].value)
-      ) {
+    await this.db.run(
+      async (manager) => {
         if (DEBUG) {
           logger.debug(
-            `notifyUser ${userId} - prepareAndSendDigestAuto`,
+            `notifyUser ${userId} - getting user`,
+            { userId },
+            DEBUG_PREFIX
+          );
+        }
+        const user = await this.usersRepo.getUser(userId, manager, true);
+        const settings = user.settings;
+
+        if (DEBUG) {
+          logger.debug(
+            `notifyUser ${userId} - user got, getting pending notifications`,
+            { user },
+            DEBUG_PREFIX
+          );
+        }
+
+        /** get pending notifications */
+        const pendingIds = await this.notificationsRepo.getUnotifiedOfUser(
+          userId,
+          manager
+        );
+
+        if (DEBUG) {
+          logger.debug(`pending got ${userId}`, { pendingIds }, DEBUG_PREFIX);
+        }
+
+        const pendingNotifications = await Promise.all(
+          pendingIds.map((notificationId) =>
+            this.getFull(userId, notificationId, manager)
+          )
+        );
+
+        /** check if user has enabled notififications */
+        if (settings.notificationFreq === NotificationFreq.None) {
+          return;
+        }
+
+        if (pendingNotifications.length === 0) {
+          logger.debug(
+            `notifyUser ${userId} - no pending notifications`,
+            undefined,
+            DEBUG_PREFIX
+          );
+          return;
+        }
+
+        if (DEBUG) {
+          logger.debug(
+            `notifyUser ${userId} - prepareAndSendDiges`,
             { pendingNotifications },
             DEBUG_PREFIX
           );
         }
 
-        await this.prepareAndSendDigestAuto(
-          userId,
-          pendingNotifications,
-          manager
-        );
-      } else {
-        if (DEBUG) {
-          logger.debug(
-            `notifyUser ${userId} - prepareAndSendDigestManual`,
-            { pendingNotifications },
-            DEBUG_PREFIX
-          );
-        }
+        await this.prepareAndSendDigest(userId, pendingNotifications, manager);
 
-        await this.prepareAndSendDigestManual(
-          userId,
-          pendingNotifications,
-          manager
-        );
-      }
+        await Promise.all(
+          pendingNotifications.map(async (n) => {
+            if (DEBUG) {
+              logger.debug(
+                `notifyUser ${userId} - markAsNotified`,
+                { n, userId },
+                DEBUG_PREFIX
+              );
+            }
 
-      await Promise.all(
-        pendingNotifications.map((n) =>
-          this.notificationsRepo.markAsNotified(userId, n.id, manager)
-        )
-      );
-    });
+            return this.notificationsRepo.markAsNotified(userId, n.id, manager);
+          })
+        );
+      },
+      undefined,
+      undefined,
+      `[notifyUser ${userId}]`
+    );
   }
 
   async getPostEmailDetails(
     notification: NotificationFull,
     types: ActivityType[],
     manager: TransactionManager
-  ) {
+  ): Promise<AppPostFull> {
     if (types.includes(notification.activity.type)) {
       const post = await this.postsRepo.get(
         (notification as PostParsedNotification).activity.data.postId,
@@ -163,63 +165,49 @@ export class NotificationService {
         true
       );
 
-      const postText = PostsHelper.concatenateThread(post.generic);
+      const mirrors = await Promise.all(
+        post.mirrorsIds.map((mirrorId) =>
+          this.platformPostsRepo.get(mirrorId, manager)
+        )
+      );
 
       return {
-        content: postText,
-        url: PostsHelper.getPostUrl(post.id),
+        ...post,
+        mirrors: mirrors.filter((m) => m !== undefined) as PlatformPost[],
       };
     } else {
-      throw new Error('Unsupported notification type');
-    }
-  }
-
-  async prepareAndSendDigestManual(
-    userId: string,
-    notifications: NotificationFull[],
-    manager: TransactionManager
-  ) {
-    /** */
-    const postsDetails: EmailPostDetails[] = await Promise.all(
-      notifications.map(async (notification) =>
-        this.getPostEmailDetails(
-          notification,
-          [ActivityType.PostParsed],
-          manager
-        )
-      )
-    );
-
-    await this.sendDigest(userId, postsDetails);
-  }
-
-  async prepareAndSendDigestAuto(
-    userId: string,
-    notifications: NotificationFull[],
-    manager: TransactionManager
-  ) {
-    const postsDetails: EmailPostDetails[] = await Promise.all(
-      notifications.map(async (notification) =>
-        this.getPostEmailDetails(
-          notification,
-          [ActivityType.PostAutoposted],
-          manager
-        )
-      )
-    );
-
-    await this.sendDigest(userId, postsDetails);
-  }
-
-  async sendDigest(userId: string, posts: EmailPostDetails[]) {
-    try {
-      const user = await this.db.run((manager) =>
-        this.usersRepo.getUser(userId, manager, true)
+      throw new Error(
+        `Unsupported notification type ${notification.activity.type}. Supported types: ${JSON.stringify(types)}`
       );
-      const res = await this.emailSender.sendUserDigest(user, posts);
-      logger.debug(`sendDigest`, { res }, DEBUG_PREFIX);
-    } catch (e) {
-      logger.error(`sendDigest`, { e }, DEBUG_PREFIX);
     }
+  }
+
+  async prepareAndSendDigest(
+    userId: string,
+    notifications: NotificationFull[],
+    manager: TransactionManager
+  ) {
+    const postsDetails: AppPostFull[] = await Promise.all(
+      notifications.map(async (notification) =>
+        this.getPostEmailDetails(
+          notification,
+          [ActivityType.PostAutoposted, ActivityType.PostParsed],
+          manager
+        )
+      )
+    );
+
+    await this.sendDigest(userId, postsDetails, manager);
+  }
+
+  async sendDigest(
+    userId: string,
+    posts: AppPostFull[],
+    manager: TransactionManager
+  ) {
+    const user = await this.usersRepo.getUser(userId, manager, true);
+
+    const res = await this.emailSender.sendUserDigest(user, posts);
+    if (DEBUG) logger.debug(`sendDigest`, { res }, DEBUG_PREFIX);
   }
 }

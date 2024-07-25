@@ -1,10 +1,11 @@
+import dotenv from 'dotenv';
+import * as admin from 'firebase-admin';
 import { initializeApp } from 'firebase-admin/app';
 import { Firestore, getFirestore } from 'firebase-admin/firestore';
 
 import { CollectionNames } from '../@shared/utils/collectionNames';
 import { IS_EMULATOR } from '../config/config.runtime';
 import { logger } from '../instances/logger';
-// import { SERVICE_ACCOUNT_ID } from '../config/config.runtime';
 import {
   HandleWithTxManager,
   ManagerConfig,
@@ -12,11 +13,30 @@ import {
   TransactionManager,
 } from './transaction.manager';
 
-export const app = IS_EMULATOR
-  ? initializeApp({
+dotenv.config({ path: './scripts/.script.env' });
+
+export const app = (() => {
+  if (IS_EMULATOR) {
+    logger.info('Running in emulator mode');
+    return initializeApp({
       projectId: 'demo-sensenets',
-    })
-  : initializeApp();
+    });
+  }
+
+  /** used locally to run scripts connected to a given project */
+  if (process.env.FB_CERT_PATH) {
+    const serviceAccount = require('../../' + process.env.FB_CERT_PATH);
+
+    logger.info('Running in local mode with certificate');
+    return initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      projectId: process.env.FB_PROJECT_ID,
+    });
+  }
+  /** used on deployment with the current app */
+  logger.info('Running in depolyed mode');
+  return initializeApp();
+})();
 
 const DEBUG = false;
 
@@ -61,27 +81,40 @@ export class DBInstance {
   async run<R, P>(
     func: HandleWithTxManager<R, P>,
     payload?: P,
-    config: ManagerConfig = { mode: ManagerModes.TRANSACTION }
+    config: ManagerConfig = { mode: ManagerModes.TRANSACTION },
+    debugId: string = ''
   ): Promise<R> {
     switch (config.mode) {
       case ManagerModes.TRANSACTION:
-        return this.firestore.runTransaction(async (transaction) => {
-          if (DEBUG) logger.debug('Transaction started');
-          try {
-            const manager = new TransactionManager(transaction);
+        const result = await this.firestore.runTransaction(
+          async (transaction) => {
+            if (DEBUG) logger.debug(`Transaction started ${debugId}`);
+            try {
+              const manager = new TransactionManager(transaction);
 
-            const result = await func(manager, payload);
-            if (DEBUG) logger.debug('Transaction function executed');
+              const result = await func(manager, payload);
+              if (DEBUG)
+                logger.debug(
+                  `Transaction function ran ${debugId} (writes not applied)`,
+                  {
+                    result,
+                  }
+                );
 
-            await manager.applyWrites();
-            if (DEBUG) logger.debug('Transaction writes applied');
+              await manager.applyWrites();
 
-            return result;
-          } catch (error: any) {
-            logger.error('Transaction failed', error);
-            throw new Error(error);
+              if (DEBUG) logger.debug(`Transaction writes applied ${debugId}`);
+
+              return result;
+            } catch (error: any) {
+              logger.error(`Transaction failed ${debugId}`, error);
+              throw new Error(error);
+            }
           }
-        });
+        );
+        if (DEBUG)
+          logger.debug(`Transaction fully executed ${debugId}`, { result });
+        return result;
 
       case ManagerModes.BATCH: {
         try {

@@ -26,6 +26,7 @@ def create_thread_from_posts(posts: List[QuoteRefPost]):
         author=author,
         content=content,
         url=posts[0].url,
+        quoted_url=posts[0].quoted_url,
         source_network=posts[0].source_network,
         ref_urls=all_ref_urls,
         posts=posts_copy,

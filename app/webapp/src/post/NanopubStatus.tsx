@@ -1,25 +1,27 @@
 import { Anchor, Box, Text } from 'grommet';
 
-import { NanopubIcon } from '../app/icons/NanopubIcon';
 import { AppPostFull } from '../shared/types/types.posts';
-import { usePostStatuses } from './usePostStatuses';
+import { useThemeContext } from '../ui-components/ThemedApp';
+import { getPostStatuses } from './posts.helper';
 
 export const NanopubStatus = (props: { post?: AppPostFull }) => {
+  const { constants } = useThemeContext();
+
   const { post } = props;
 
   const {
-    nanopubPublished,
+    nanopubUrl,
     processed,
     isParsing,
     errored,
     pending,
     ignored,
     isEditing,
-  } = usePostStatuses(post);
+  } = getPostStatuses(post);
 
-  if (nanopubPublished && isEditing) {
+  if (nanopubUrl && isEditing) {
     return (
-      <Anchor href={nanopubPublished.uri} target="_blank">
+      <Anchor href={nanopubUrl} target="_blank">
         <StatusTag
           label="Editing (not published)"
           backgroundColor="transparent"
@@ -28,9 +30,9 @@ export const NanopubStatus = (props: { post?: AppPostFull }) => {
     );
   }
 
-  if (nanopubPublished) {
+  if (nanopubUrl) {
     return (
-      <Anchor href={nanopubPublished.uri} target="_blank">
+      <Anchor href={nanopubUrl} target="_blank">
         <StatusTag
           label="Published"
           backgroundColor="transparent"
@@ -45,7 +47,7 @@ export const NanopubStatus = (props: { post?: AppPostFull }) => {
         <StatusTag
           label="Processing"
           backgroundColor="transparent"
-          color="#6B7280"></StatusTag>
+          color={constants.colors.textLight2}></StatusTag>
       );
 
     if (errored)
@@ -53,14 +55,14 @@ export const NanopubStatus = (props: { post?: AppPostFull }) => {
         <StatusTag
           label="Error"
           backgroundColor="transparent"
-          color="#6B7280"></StatusTag>
+          color={constants.colors.textLight2}></StatusTag>
       );
 
     return (
       <StatusTag
         label="Not processed"
         backgroundColor="transparent"
-        color="#6B7280"></StatusTag>
+        color={constants.colors.textLight2}></StatusTag>
     );
   }
 

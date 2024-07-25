@@ -5,6 +5,7 @@ export const RouteNames = {
   Post: 'post',
   Profile: 'profile',
   Settings: 'settings',
+  Posting: 'posting', // callback when singing up while posting
   Test: 'test',
 };
 

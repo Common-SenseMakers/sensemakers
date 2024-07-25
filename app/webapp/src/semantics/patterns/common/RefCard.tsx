@@ -1,15 +1,14 @@
-import { Anchor, Box, Image, Paragraph, Text } from 'grommet';
-import { Tweet } from 'react-tweet';
+import { Anchor, Box, Paragraph, Text } from 'grommet';
 
 import { AppHeading, AppLabel } from '../../../ui-components';
-import { AppTweet } from './AppTweet';
+import { useThemeContext } from '../../../ui-components/ThemedApp';
 
 const truncate = (text: string, size: number) => {
   return text.slice(0, size) + (text.length > size ? '...' : '');
 };
 
 function getTweetId(url: string): string | undefined {
-  const regex = /twitter\.com\/(?:#!\/)?\w+\/status\/(\d+)/;
+  const regex = /(?:twitter\.com|x\.com)\/(?:#!\/)?\w+\/status\/(\d+)/;
   const match = url.match(regex);
   return match ? match[1] : undefined;
 }
@@ -24,11 +23,8 @@ export const RefCard = (props: {
 }) => {
   const titleTruncated = props.title && truncate(props.title, 50);
   const tweetId = getTweetId(props.url);
+  const { constants } = useThemeContext();
 
-  if (tweetId) {
-    // return <blockquote className="twitter-tweet">{props.url}</blockquote>;
-    return <AppTweet id={tweetId}></AppTweet>;
-  }
   const content = (() => {
     if (!titleTruncated && !props.description) {
       const urlTruncated = truncate(props.url, 50);
@@ -43,17 +39,38 @@ export const RefCard = (props: {
       <Box
         align="start"
         pad={{ horizontal: '12px', vertical: '8px' }}
-        style={{ borderRadius: '12px', border: '1px solid #D1D5DB' }}>
-        <Box margin={{ bottom: '4px' }}>
+        style={{
+          borderRadius: '12px',
+          border: '1px solid #D1D5DB',
+          width: '100%',
+        }}>
+        <Box
+          margin={{ bottom: '4px' }}
+          width="100%"
+          direction="row"
+          justify="between">
           <AppLabel
             colors={{
-              font: '#6B7280',
+              font: constants.colors.textLight2,
               background: '#E5E7EB',
               border: 'transparent',
             }}
             style={{ borderRadius: '4px', border: 'none' }}>
             Reference {props.ix}
           </AppLabel>
+          {tweetId ? (
+            <AppLabel
+              colors={{
+                font: constants.colors.textLight2,
+                background: 'transparent',
+                border: 'transparent',
+              }}
+              style={{ borderRadius: '4px', border: 'none' }}>
+              Quoted Tweet
+            </AppLabel>
+          ) : (
+            <></>
+          )}
         </Box>
 
         <AppHeading level={4} color="#374151" style={{ fontWeight: '500' }}>
@@ -63,12 +80,12 @@ export const RefCard = (props: {
         <Paragraph
           margin={{ vertical: '4px' }}
           size="medium"
-          style={{ lineHeight: '18px', color: '#6B7280' }}
+          style={{ lineHeight: '18px', color: constants.colors.textLight2 }}
           maxLines={2}>
           {props.description}
         </Paragraph>
 
-        <Box>
+        <Box style={{ overflow: 'hidden' }}>
           <Text
             style={{ fontSize: '16px', color: '#337FBD', fontWeight: '400' }}>
             {props.url}
@@ -85,6 +102,7 @@ export const RefCard = (props: {
         textDecoration: 'none',
         color: 'inherit',
         fontWeight: 'normal',
+        width: '100%',
       }}
       target="_blank">
       {content}

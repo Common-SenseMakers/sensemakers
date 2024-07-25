@@ -2,15 +2,19 @@ import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { UserHome } from '../user-home/UserHome';
-import { EmailInput } from '../user-login/EmailInput';
+import { ConnectSocialsPage } from '../user-login/ConnectSocialsPage';
 import {
-  LoginStatus,
+  OverallLoginStatus,
+  TwitterConnectedStatus,
   useAccountContext,
 } from '../user-login/contexts/AccountContext';
 import { AppWelcome } from '../welcome/AppWelcome';
 
+const DEBUG = false;
+
 export const AppHome = (props: {}) => {
-  const { email, loginStatus } = useAccountContext();
+  const { overallLoginStatus, twitterProfile, twitterConnectedStatus } =
+    useAccountContext();
 
   const LoadingPlaceholder = (
     <>
@@ -19,7 +23,7 @@ export const AppHome = (props: {}) => {
         width="100%"
         height="120px"></LoadingDiv>
       {(() => {
-        return [1, 2, 4, 5, 6].map((ix) => (
+        return [1, 2, 4, 5, 6, 7, 8].map((ix) => (
           <LoadingDiv
             key={ix}
             height="108px"
@@ -31,19 +35,29 @@ export const AppHome = (props: {}) => {
   );
 
   const { content, nav } = (() => {
-    if (loginStatus === LoginStatus.LoggedOut) {
-      return { content: <AppWelcome></AppWelcome>, nav: <></> };
-    } else if (loginStatus === LoginStatus.LoggingIn) {
-      return { content: LoadingPlaceholder, nav: <></> };
-    } else if (loginStatus === LoginStatus.LoggedIn) {
-      if (!email || !email.verified) {
-        return { content: <EmailInput></EmailInput>, nav: <></> };
-      } else {
-        return { content: <UserHome></UserHome>, nav: <GlobalNav></GlobalNav> };
-      }
-    } else {
-      return { content: LoadingPlaceholder, nav: <></> };
+    if (DEBUG) console.log('AppHome', { overallLoginStatus, twitterProfile });
+
+    if (overallLoginStatus === OverallLoginStatus.NotKnown) {
+      return { content: <></>, nav: <></> };
     }
+
+    if (overallLoginStatus === OverallLoginStatus.LoggedOut) {
+      return { content: <AppWelcome></AppWelcome>, nav: <></> };
+    }
+
+    if (
+      overallLoginStatus === OverallLoginStatus.PartialLoggedIn &&
+      twitterConnectedStatus !== TwitterConnectedStatus.Connecting
+    ) {
+      return { content: <ConnectSocialsPage></ConnectSocialsPage>, nav: <></> };
+    }
+
+    if (overallLoginStatus === OverallLoginStatus.FullyLoggedIn) {
+      return { content: <UserHome></UserHome>, nav: <GlobalNav></GlobalNav> };
+    }
+
+    /** everything that is not the satus above shows the loadingDivs */
+    return { content: LoadingPlaceholder, nav: <></> };
   })();
 
   return (

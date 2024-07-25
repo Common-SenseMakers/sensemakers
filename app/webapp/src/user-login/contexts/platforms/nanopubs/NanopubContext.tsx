@@ -14,14 +14,13 @@ import { HexStr } from '../../../../shared/types/types.user';
 import { signNanopublication as _signNanopublication } from '../../../../shared/utils/nanopub.sign.util';
 import { cleanPrivateKey } from '../../../../shared/utils/semantics.helper';
 import { useNanopubKeys } from './derive.keys.hook';
+import { useNanopubSignup } from './nanopub.signup.hook';
 
 const DEBUG = false;
 
 export type NanopubContextType = {
   profile?: NpProfile;
   profileAddress?: HexStr;
-  connect: () => void;
-  connectWithWeb3: () => void;
   disconnect: () => void;
   needAuthorize?: boolean;
   signNanopublication: ((nanopubStr: string) => Promise<Nanopub>) | undefined;
@@ -31,28 +30,21 @@ const NanopubContextValue = createContext<NanopubContextType | undefined>(
   undefined
 );
 
-export type ConnectIntention = undefined | 'available' | 'web3';
-
 /** Manages the authentication process */
 export const NanopubContext = (props: PropsWithChildren) => {
-  const { open, close } = useLoadingContext();
+  const { close } = useLoadingContext();
   const { show } = useToastContext();
-  const [connectIntention, setConnectIntention] =
-    useState<ConnectIntention>(undefined);
-  const { rsaKeys, readKeys, removeKeys, errorConnecting } =
-    useNanopubKeys(connectIntention);
+
+  const { rsaKeys, removeKeys, errorConnecting } = useNanopubKeys();
 
   const [profile, setProfile] = useState<NpProfile>();
   const [profileAddress, setProfileAddress] = useState<HexStr>();
 
+  useNanopubSignup(rsaKeys);
+
   const disconnect = () => {
     removeKeys();
   };
-
-  /** check profile once */
-  useEffect(() => {
-    readKeys();
-  }, []);
 
   useEffect(() => {
     if (errorConnecting) {
@@ -84,28 +76,7 @@ export const NanopubContext = (props: PropsWithChildren) => {
     }
   }, [rsaKeys]);
 
-  useEffect(() => {
-    if (profile) {
-      /** finally, when a profile is set, the connect intention is fullfilled */
-      if (DEBUG) console.log('final setConnectionIntention false');
-      setConnectIntention(undefined);
-      close();
-      return;
-    }
-  }, [profile]);
-
-  const connect = () => {
-    open({ title: 'Connecting to Nanopub', subtitle: 'Please wait' });
-    setConnectIntention('available');
-  };
-
-  const connectWithWeb3 = () => {
-    open({ title: 'Connecting to Nanopub', subtitle: 'Please wait' });
-    setConnectIntention('web3');
-  };
-
   const reset = () => {
-    setConnectIntention(undefined);
     setProfile(undefined);
   };
 
@@ -122,8 +93,6 @@ export const NanopubContext = (props: PropsWithChildren) => {
   return (
     <NanopubContextValue.Provider
       value={{
-        connect,
-        connectWithWeb3,
         disconnect,
         profile,
         profileAddress,

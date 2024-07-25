@@ -37,7 +37,7 @@ import { useUserPosts } from '../user-home/UserPostsContext';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { getAccount } from '../user-login/user.helper';
-import { AppPostStatus, usePostStatuses } from './usePostStatuses';
+import { AppPostStatus, getPostStatuses } from './posts.helper';
 
 const DEBUG = false;
 
@@ -55,6 +55,8 @@ interface PostContextType {
   updatePost: (update: PostUpdate) => Promise<void>;
   isUpdating: boolean;
   approveOrUpdate: () => Promise<void>;
+  prevPostId?: string;
+  nextPostId?: string;
 }
 
 const PostContextValue = createContext<PostContextType | undefined>(undefined);
@@ -77,7 +79,7 @@ export const PostContext: React.FC<{
 
   const [requesteDraft, setRequestedDraft] = React.useState(false);
 
-  const { filterStatus, removePost } = useUserPosts();
+  const { filterStatus, removePost, getNextAndPrev } = useUserPosts();
   const [isUpdating, setIsUpdating] = React.useState(false);
 
   const appFetch = useAppFetch();
@@ -197,6 +199,7 @@ export const PostContext: React.FC<{
    * endpoint to get user profiles by userIds */
   const author: AppUserRead = {
     userId: '1234',
+    signupDate: 1720702932,
     settings: {
       notificationFreq: NotificationFreq.None,
       autopost: {
@@ -285,7 +288,7 @@ export const PostContext: React.FC<{
     _updatePost(update);
   };
 
-  const postStatuses = usePostStatuses(post);
+  const postStatuses = getPostStatuses(post);
 
   const { signNanopublication } = useNanopubContext();
 
@@ -332,6 +335,11 @@ export const PostContext: React.FC<{
     connectedUser.userId === post?.authorId &&
     (!postStatuses.published || enabledEdit);
 
+  const { prevPostId, nextPostId } = useMemo(
+    () => getNextAndPrev(post?.id),
+    [post]
+  );
+
   return (
     <PostContextValue.Provider
       value={{
@@ -348,6 +356,8 @@ export const PostContext: React.FC<{
         editable: editable !== undefined ? editable : false,
         setEnabledEdit,
         enabledEdit,
+        prevPostId,
+        nextPostId,
       }}>
       {children}
     </PostContextValue.Provider>

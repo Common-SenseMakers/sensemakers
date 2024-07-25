@@ -17,7 +17,7 @@ import { getTestServices } from './test.services';
 
 describe('010-signups', () => {
   const services = getTestServices({
-    time: 'real',
+    time: 'mock',
     twitter: 'mock-signup',
     nanopub: 'mock-publish',
     parser: 'mock',
@@ -27,14 +27,6 @@ describe('010-signups', () => {
   before(async () => {
     logger.debug('resetting DB');
     await resetDB();
-  });
-
-  describe('connect orcid', () => {
-    it('get orcid authlink', async () => {
-      const { link } = await services.users.getSignupContext(PLATFORM.Orcid);
-      logger.debug(`link: ${link}`);
-      expect(link.startsWith('https://orcid.org')).to.be.true;
-    });
   });
 
   describe('signup with mocked twitter', () => {

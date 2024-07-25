@@ -44,20 +44,6 @@ export const PostHeader = (
       {!props.isProfile ? (
         <Box gap="small" align="end">
           <NanopubStatus post={post}></NanopubStatus>
-          {!editable ? (
-            <AppButton
-              style={{ height: '24px', padding: '0px 12px' }}
-              icon={
-                <Edit
-                  color={constants.colors.textOnPrimary}
-                  style={{ height: '12px', width: '12px' }}></Edit>
-              }
-              primary
-              label="edit"
-              onClick={() => setEnabledEdit(true)}></AppButton>
-          ) : (
-            <></>
-          )}
         </Box>
       ) : (
         <></>

@@ -14,6 +14,8 @@ export const nanopubGetSignupContextSchema = object({
   ethToRsaSignature: string().required(),
 }).noUnknown(true);
 
+export const orcidGetSignupContextSchema = object({}).noUnknown(true);
+
 export const twitterSignupDataSchema = object({
   code: string().required(),
   codeVerifier: string().required(),
@@ -25,6 +27,11 @@ export const nanopubSignupDataSchema = object({
   ethAddress: string().required(),
   ethToRsaSignature: string().required(),
   introNanopub: string().required(),
+}).noUnknown(true);
+
+export const orcidSignupDataSchema = object({
+  code: string().required(),
+  callbackUrl: string().required(),
 }).noUnknown(true);
 
 export const userSettingsUpdateSchema = object({
@@ -42,10 +49,6 @@ export const userSettingsUpdateSchema = object({
     .optional(),
 }).noUnknown(true);
 
-export const emailUpdateSchema = object({
-  email: string().email().required(),
-}).noUnknown(true);
-
-export const emailVerificationSchema = object({
-  token: string().required(),
+export const magicEmailSetSchema = object({
+  idToken: string().required(),
 }).noUnknown(true);

@@ -19,7 +19,7 @@ export const triggerSendNotifications = async (
   notificationFrequency: NotificationFreq,
   services: Services
 ) => {
-  logger.debug(`triggerSendNotifications`);
+  logger.debug(`triggerSendNotifications ${notificationFrequency}`);
   const { users, db } = services;
 
   const usersIdsWithFrequency = await db.run((manager) =>

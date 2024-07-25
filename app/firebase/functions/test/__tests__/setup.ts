@@ -30,50 +30,44 @@ export const TEST_THREADS: string[][] = process.env.TEST_THREADS
 // TestContext will be used by all the test
 export type TestContext = Mocha.Context & Context;
 
-let mochaHooksExport: () => Mocha.RootHookObject;
+export let globalTestServices = getTestServices({
+  time: 'mock',
+  twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
+  nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
+  parser: USE_REAL_PARSER ? 'real' : 'mock',
+  emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
+});
 
-/** conditionally add hooks in case running tests without firebase emulator */
-if (!process.env.NO_MOCHA_HOOKS) {
-  mochaHooksExport = (): Mocha.RootHookObject => {
-    const services = getTestServices({
-      time: 'real',
-      twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
-      nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
-      parser: USE_REAL_PARSER ? 'real' : 'mock',
-      emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
-    });
+export const mochaHooks = (): Mocha.RootHookObject => {
+  return {
+    async beforeAll(this: Mocha.Context) {
+      const context: InjectableContext = {};
 
-    return {
-      async beforeAll(this: Mocha.Context) {
-        const context: InjectableContext = {};
+      /** reset db */
+      await resetDB();
 
-        /** reset db */
-        await resetDB();
+      /** mock enqueueTask */
+      (global as any).enqueueTaskStub = sinon
+        .stub(tasksSupport, 'enqueueTask')
+        .callsFake((name: string, params: any) =>
+          enqueueTaskMockOnTests(name, params, globalTestServices)
+        );
 
-        /** mock enqueueTask */
-        (global as any).enqueueTaskStub = sinon
-          .stub(tasksSupport, 'enqueueTask')
-          .callsFake(enqueueTaskMockOnTests);
+      /** prepare/authenticate users  */
+      await globalTestServices.db.run(async (manager) => {
+        await Promise.all(
+          testCredentials.map(async (accountCredentials) => {
+            const user = await authenticateTestUser(
+              accountCredentials,
+              globalTestServices,
+              manager
+            );
+            testUsers.push(user);
+          })
+        );
+      });
 
-        /** prepare/authenticate users  */
-        await services.db.run(async (manager) => {
-          await Promise.all(
-            testCredentials.map(async (accountCredentials) => {
-              const user = await authenticateTestUser(
-                accountCredentials,
-                services,
-                manager
-              );
-              testUsers.push(user);
-            })
-          );
-        });
-
-        Object.assign(this, context);
-      },
-    };
+      Object.assign(this, context);
+    },
   };
-} else {
-  mochaHooksExport = () => ({});
-}
-export const mochaHooks = mochaHooksExport;
+};

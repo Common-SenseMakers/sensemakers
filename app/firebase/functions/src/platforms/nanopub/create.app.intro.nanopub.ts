@@ -3,8 +3,12 @@ import { DataFactory, Writer } from 'n3';
 import * as URI from './constants';
 
 import { buildNpHead } from './utils';
+import { logger } from '../../instances/logger';
+
+const DEBUG = false;
 
 const { namedNode, literal } = DataFactory;
+
 
 export const buildAppIntroNp = async (
   ethAddress1: string,
@@ -243,16 +247,16 @@ export const buildAppIntroNp = async (
     // End the writer and handle the resulting TriG data
     writer.end(async (error, result) => {
       if (error) {
-        console.error('Error writing the TriG data:', error);
+        logger.error('Error writing the TriG data:', error);
         reject(error);
       } else {
-        console.log('TriG data:', result);
+        if (DEBUG) logger.debug('TriG data:', result);
         try {
           // Create and sign the nanopub
           const np = new Nanopub(result);
           resolve(np);
         } catch (e) {
-          console.error('Error creating or signing Nanopub:', e);
+          logger.error('Error creating or signing Nanopub:', e);
           reject(e);
         }
       }

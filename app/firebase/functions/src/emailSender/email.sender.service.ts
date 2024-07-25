@@ -1,12 +1,18 @@
 import { Message, ServerClient } from 'postmark';
 
-import { AppUser, EMAIL_VERIFY_TOKEN_NAME } from '../@shared/types/types.user';
+import { AppPostFull } from '../@shared/types/types.posts';
+import { AppUser, PLATFORM } from '../@shared/types/types.user';
+import { RenderEmailFunction } from '../@shared/types/types.user';
 import { APP_URL } from '../config/config.runtime';
 import { logger } from '../instances/logger';
 
+const { renderEmail } = require('../@shared/emailRenderer') as {
+  renderEmail: RenderEmailFunction;
+};
+
 const postmark = require('postmark');
 
-export const DEBUG = true;
+export const DEBUG = false;
 export const DEBUG_PREFIX = `EMAIL-SENDER-SERVICE`;
 
 export enum EmailType {
@@ -31,45 +37,36 @@ export class EmailSenderService {
   }
 
   private async callSendEmail(message: Message) {
+    const res = await this.postmark.sendEmail(message);
+    logger.debug(`sendDigest - success`, { res }, DEBUG_PREFIX);
+  }
+
+  async sendUserDigest(user: AppUser, posts: AppPostFull[]) {
+    if (!user.email) {
+      throw new Error(`User ${user.userId} has no email`);
+    }
+
+    const { html, plainText } = renderEmail(
+      posts,
+      user.settings.notificationFreq,
+      user.settings.autopost[PLATFORM.Nanopub].value,
+      APP_URL.value()
+    );
+
+    const message: Message = {
+      From: ' pepo@microrevolutions.com',
+      To: user.email?.email,
+      Subject: 'Hello from Sensecast',
+      HtmlBody: html,
+      TextBody: plainText,
+      MessageStream: 'outbound',
+    };
+
     try {
-      const res = await this.postmark.sendEmail(message);
-      logger.debug(`sendDigest - success`, { res }, DEBUG_PREFIX);
+      await this.callSendEmail(message);
     } catch (e) {
-      logger.error(`sendDigest - error`, { e }, DEBUG_PREFIX);
+      logger.error(`Error on callSendEmail`, { e, message }, DEBUG_PREFIX);
+      throw e;
     }
-  }
-
-  async sendUserDigest(user: AppUser, posts: EmailPostDetails[]) {
-    if (!user.email) {
-      throw new Error(`User ${user.userId} has no email`);
-    }
-
-    const message: Message = {
-      From: 'pepo@microrevolutions.com',
-      To: user.email?.email,
-      Subject: 'Hello from Sensecast',
-      HtmlBody: `<strong>Hello</strong> dear Sensecast user. ${JSON.stringify(posts)}`,
-      TextBody: `Hello dear Postmark user ${JSON.stringify(posts)}`,
-      MessageStream: 'outbound',
-    };
-
-    await this.callSendEmail(message);
-  }
-
-  async sendVerificationEmail(user: AppUser) {
-    if (!user.email) {
-      throw new Error(`User ${user.userId} has no email`);
-    }
-
-    const link = `${APP_URL.value()}?${EMAIL_VERIFY_TOKEN_NAME}=${user.email?.token}`;
-    const message: Message = {
-      From: 'pepo@microrevolutions.com',
-      To: user.email?.email,
-      Subject: 'Hello from Sensecast',
-      HtmlBody: `<strong>Click</strong> <a href=${link}>${link}</a>`,
-      MessageStream: 'outbound',
-    };
-
-    await this.callSendEmail(message);
   }
 }

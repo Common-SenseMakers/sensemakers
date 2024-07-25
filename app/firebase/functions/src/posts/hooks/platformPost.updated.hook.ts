@@ -1,13 +1,14 @@
 import { PlatformPost } from '../../@shared/types/types.platform.posts';
 import { logger } from '../../instances/logger';
-import { createServices } from '../../instances/services';
+import { Services } from '../../instances/services';
 
 export const platformPostUpdatedHook = async (
   platformPost: PlatformPost,
+  services: Services,
   platformPostBefore?: PlatformPost
 ) => {
   const platformPostId = platformPost.id;
-  const { db, time } = createServices();
+  const { db, time } = services;
 
   const updateRef = db.collections.updates.doc(
     `platformPost-${platformPostId}`

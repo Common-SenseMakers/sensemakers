@@ -42,7 +42,7 @@ def render_quote_post_content(
 
     processed_content = post.content
 
-    if post.quoted_url:
+    if post.quoted_url and post.quoted_url in ordered_refs:
         # add quoted post url to end of quote post content if not present there
         if post.quoted_url not in processed_content:
             processed_content += f" {post.quoted_url}"

@@ -1,12 +1,27 @@
-import { Store } from 'n3';
+import { Parser, Store } from 'n3';
 import { useEffect, useState } from 'react';
 
 import { parseRDF } from '../../../shared/utils/n3.utils';
 import { PatternProps } from '../patterns';
 
+/** construct RDF Store synchronously */
+export const semanticStringToStore = (semantics?: string) => {
+  const parser = new Parser();
+  const store = new Store();
+  if (!semantics) return store;
+
+  const quads = parser.parse(semantics);
+  store.addQuads(quads);
+  return store;
+};
+
 export const useSemanticsStore = (props: PatternProps) => {
-  const [store, setStore] = useState<Store>();
-  const [originalStore, setOriginalStore] = useState<Store>();
+  const [store, setStore] = useState<Store>(
+    semanticStringToStore(props.semantics)
+  );
+  const [originalStore, setOriginalStore] = useState<Store>(
+    semanticStringToStore(props.originalParsed?.semantics)
+  );
 
   useEffect(() => {
     if (props.originalParsed) {
@@ -26,6 +41,5 @@ export const useSemanticsStore = (props: PatternProps) => {
       parseRDF(props.semantics).then((_store) => setStore(_store));
     }
   }, [originalStore, props.semantics]);
-
   return { store, originalStore };
 };

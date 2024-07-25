@@ -448,12 +448,12 @@ export class UsersRepository {
   ) {
     const emailKey: keyof AppUser = 'email';
     const emailStrKey: keyof EmailDetails = 'email';
-    const verifiedKey: keyof EmailDetails = 'verified';
 
-    const query = this.db.collections.users
-      .where(`${emailKey}.${emailStrKey}`, '==', email)
-      .where(`${emailKey}.${verifiedKey}`, '==', true);
-
+    const query = this.db.collections.users.where(
+      `${emailKey}.${emailStrKey}`,
+      '==',
+      email
+    );
     const users = await manager.query(query);
 
     const shouldThrow = _shouldThrow !== undefined ? _shouldThrow : false;

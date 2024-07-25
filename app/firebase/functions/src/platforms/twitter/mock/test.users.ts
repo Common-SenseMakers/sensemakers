@@ -7,9 +7,10 @@ import { logger } from '../../../instances/logger';
 
 /** must be a function to make sure it is called at runtime */
 export const getTestCredentials = () => {
-  if (!USE_REAL_TWITTERX.value()) {
-    logger.debug('using mock twitter', TEST_USER_ACCOUNTS.value());
-    const testCredentials = JSON.parse(TEST_USER_ACCOUNTS.value());
+  const testUserAccountsStr = TEST_USER_ACCOUNTS.value();
+  if (!USE_REAL_TWITTERX.value() && testUserAccountsStr) {
+    logger.debug('using mock twitter', testUserAccountsStr);
+    const testCredentials = JSON.parse(testUserAccountsStr);
 
     if (!testCredentials) {
       throw new Error('test acccounts undefined');

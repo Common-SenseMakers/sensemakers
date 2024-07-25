@@ -64,8 +64,8 @@ export class NanopubService
     if (!params) {
       throw new Error('Missing params');
     }
-
-  const introNanopub = await createIntroNanopublication(
+    
+    const introNanopub = await createIntroNanopublication(
       params,
       false
     );

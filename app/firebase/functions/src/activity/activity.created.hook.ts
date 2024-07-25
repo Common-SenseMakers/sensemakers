@@ -8,18 +8,20 @@ import {
   NotificationStatus,
 } from '../@shared/types/types.notifications';
 import { PlatformPostPublishStatus } from '../@shared/types/types.platform.posts';
+import { QUIET_SIGNUP_PERIOD } from '../config/config.runtime';
 import { logger } from '../instances/logger';
-import { createServices } from '../instances/services';
+import { Services } from '../instances/services';
 import { UsersHelper } from '../users/users.helper';
 
-const DEBUG = true;
+const DEBUG = false;
 const PREFIX = 'ACTIVITY-CREATED-HOOK';
 
 // receive the data of the created activity
 export const activityEventCreatedHook = async (
-  activityEvent: ActivityEventBase
+  activityEvent: ActivityEventBase,
+  services: Services
 ) => {
-  const { db, postsManager, users, notifications } = createServices();
+  const { db, postsManager, users, notifications, time } = services;
 
   await db.run(async (manager) => {
     /**
@@ -46,8 +48,19 @@ export const activityEventCreatedHook = async (
       );
 
       const author = await users.repo.getUser(post.authorId, manager, true);
+      const isQuiet = time.now() < author.signupDate + QUIET_SIGNUP_PERIOD;
 
-      if (author.settings.notificationFreq !== NotificationFreq.None) {
+      if (DEBUG)
+        logger.debug(
+          `PostParsed or PostAutoposted activity check ${activityEvent.data.postId}`,
+          { notificationFreq: author.settings.notificationFreq, isQuiet },
+          PREFIX
+        );
+
+      if (
+        author.settings.notificationFreq !== NotificationFreq.None &&
+        !isQuiet
+      ) {
         const autopostPlatformIds = UsersHelper.autopostPlatformIds(author);
 
         const onAutpostPlatform = post.mirrors.some((mirror) => {

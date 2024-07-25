@@ -1,7 +1,10 @@
 import { Nanopub } from '@nanopub/sign';
 import { DataFactory, Quad, Store, Writer } from 'n3';
 
+import { logger } from '../../instances/logger';
 import * as URI from './constants';
+
+const DEBUG = false;
 
 const { namedNode, quad, literal } = DataFactory;
 
@@ -369,16 +372,16 @@ export const buildSpostNp = async (
     // End the writer and display the TriG content
     writer.end(async (error, result) => {
       if (error) {
-        console.error('Error writing the TriG data:', error);
+        logger.error('Error writing the TriG data:', error);
         reject(error);
       } else {
-        console.log('TriG data:', result);
+        if (DEBUG) logger.debug('Nanopub prepared', { text: result });
 
         try {
           const np = new Nanopub(result);
           resolve(np);
         } catch (e) {
-          console.error('Error creating or publishing Nanopub:', e);
+          logger.error('Error creating or publishing Nanopub:', e);
           reject(e);
         }
       }
@@ -396,13 +399,16 @@ export const buildIntroNp = async (
     const { orcidId, signDelegation, oldNpUri } = options;
     const headStore = buildNpHead();
 
+    // TODO: remove twitter from intro NP
+    const twitterHandle = 'TBD';
+
     // Define the graph URIs
     const assertionGraph = namedNode(URI.ASSERTION_URI);
     const provenanceGraph = namedNode(URI.PROVENANCE_URI);
     const pubinfoGraph = namedNode(URI.PUBINFO_URI);
-    // const x = URI.X_PREFIX;
+    const x = URI.X_PREFIX;
     const keyDeclarationNode = namedNode(`${URI.BASE_URI}${ethAddress}`);
-    // const twitterNode = namedNode(`${x}${twitterHandle}`);
+    const twitterNode = namedNode(`${x}${twitterHandle}`);
 
     // Create a writer and add prefixes
     const writer = new Writer({ format: 'application/trig' });
@@ -586,16 +592,16 @@ export const buildIntroNp = async (
     // End the writer and handle the resulting TriG data
     writer.end(async (error, result) => {
       if (error) {
-        console.error('Error writing the TriG data:', error);
+        logger.error('Error writing the TriG data:', error);
         reject(error);
       } else {
-        console.log('TriG data:', result);
+        if (DEBUG) logger.debug('Intro nanopub prepared', { text: result });
         try {
           // Create and sign the nanopub
           const np = new Nanopub(result);
           resolve(np);
         } catch (e) {
-          console.error('Error creating or signing Nanopub:', e);
+          logger.error('Error creating or signing Nanopub:', e);
           reject(e);
         }
       }
@@ -692,16 +698,16 @@ export const buildRetractionNp = async (
   return new Promise((resolve, reject) => {
     writer.end(async (error, result) => {
       if (error) {
-        console.error('Error writing the TriG data:', error);
+        logger.error('Error writing the TriG data:', error);
         reject(error);
       } else {
-        console.log('TriG data:', result);
+        if (DEBUG) logger.debug('Retract nanopub prepared', { text: result });
 
         try {
           const np = new Nanopub(result);
           resolve(np);
         } catch (e) {
-          console.error('Error creating or signing Nanopub:', e);
+          logger.error('Error creating or signing Nanopub:', e);
           reject(e);
         }
       }

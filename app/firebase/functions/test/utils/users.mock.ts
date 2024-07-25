@@ -9,6 +9,7 @@ import {
 export const getMockedUser = (credentials: TestUserCredentials): AppUser => {
   return {
     userId: credentials.userId,
+    signupDate: 1719938012425,
     settings: {
       autopost: {
         [PLATFORM.Nanopub]: {

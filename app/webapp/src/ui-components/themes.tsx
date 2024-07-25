@@ -19,6 +19,7 @@ export interface StyleConstants {
   colors: {
     primary: string;
     textLight: string;
+    textLight2: string;
     shade: string;
     links: string;
     text: string;
@@ -44,7 +45,7 @@ const constants: StyleConstants = {
     },
     small: {
       size: '14px',
-      height: '18px',
+      height: '16px',
     },
     xsmall: {
       size: '12px',
@@ -54,6 +55,7 @@ const constants: StyleConstants = {
   colors: {
     primary: '#111827',
     textLight: '#4B5563',
+    textLight2: '#6B7280',
     shade: '#F9FAFB',
     text: '#111827',
     links: '#3182CE',
@@ -162,17 +164,10 @@ const extension: ExtendedThemeType = {
       extend: css`
         & {
           color: #ffffff;
-          font-weight: 500;
         }
       `,
     },
-    secondary: {
-      extend: css`
-        & {
-          font-weight: 500;
-        }
-      `,
-    },
+    secondary: {},
   },
   formField: {
     checkBox: {

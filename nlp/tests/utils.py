@@ -5,6 +5,7 @@ ROOT = Path(__file__).parents[1]
 sys.path.append(str(ROOT))
 
 from typing import Optional
+from rdflib import Graph, URIRef
 from confection import Config
 
 # from desci_sense.configs import OPENROUTER_API_BASE, environ
@@ -165,6 +166,12 @@ def get_thread_single_post():
     return thread_post
 
 
+def get_thread_single_quote_post():
+    thread_posts = [scrape_post("https://x.com/rtk254/status/1813272072400859611")]
+    thread_post = create_thread_from_posts(thread_posts)
+    return thread_post
+
+
 def create_multi_config_for_tests(llm_type: str = "open-orca/mistral-7b-openorca"):
     kp = KeywordPParserChainConfig(
         name="kw_test",
@@ -194,6 +201,24 @@ def create_multi_config_for_tests(llm_type: str = "open-orca/mistral-7b-openorca
 def create_multi_chain_for_tests():
     multi_config = create_multi_config_for_tests()
     return MultiChainParser(multi_config)
+
+
+def check_uris_in_graph(graph: Graph, uris: list):
+    """
+    Test to assert the presence of a list of URIs in the given RDFLib graph.
+
+    :param graph: The RDFLib graph to test.
+    :param uris: A list of URIs (as strings) to check for presence in the graph.
+    :raises AssertionError: If any URI is not found in the graph.
+    """
+    for uri in uris:
+        uri_ref = URIRef(uri)
+        if (
+            (uri_ref, None, None) not in graph
+            and (None, uri_ref, None) not in graph
+            and (None, None, uri_ref) not in graph
+        ):
+            raise AssertionError(f"URI {uri} not found in the graph")
 
 
 # def default_init_parser_config():
