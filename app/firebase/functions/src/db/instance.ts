@@ -17,6 +17,7 @@ dotenv.config({ path: './scripts/.script.env' });
 
 export const app = (() => {
   if (IS_EMULATOR) {
+    logger.info('Running in emulator mode');
     return initializeApp({
       projectId: 'demo-sensenets',
     });
@@ -26,12 +27,14 @@ export const app = (() => {
   if (process.env.FB_CERT_PATH) {
     const serviceAccount = require('../../' + process.env.FB_CERT_PATH);
 
+    logger.info('Running in local mode with certificate');
     return initializeApp({
       credential: admin.credential.cert(serviceAccount),
       projectId: process.env.FB_PROJECT_ID,
     });
   }
   /** used on deployment with the current app */
+  logger.info('Running in depolyed mode');
   return initializeApp();
 })();
 
