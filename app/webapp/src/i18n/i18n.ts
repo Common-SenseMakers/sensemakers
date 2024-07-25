@@ -270,7 +270,8 @@ const translationENG: Record<I18Keys, string> = {
 
   [I18Keys.usingApp]: 'Using Senscast',
   [I18Keys.publishingAutomation]: 'Publishing Automation',
-  [I18Keys.publishingAutomationExplainer]: 'TBD',
+  [I18Keys.publishingAutomationExplainer]:
+    'Choose how you’d like to nanopublish your future X · Twitter posts.',
 
   [I18Keys.notificationsSettings]: 'Notification Settings',
   [I18Keys.notificationsSettingsExplainer]:
@@ -296,12 +297,16 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.notificationSettingsOpt4Desc]:
     'We won’t send you any email notifications, so you’ll need to check the app for updates.',
 
-  [I18Keys.publishingAutomationOpt1Title]: 'AI',
-  [I18Keys.publishingAutomationOpt1Desc]: 'Use AI TBD',
-  [I18Keys.publishingAutomationOpt2Title]: 'Deterministic',
-  [I18Keys.publishingAutomationOpt2Desc]: 'use citoid',
-  [I18Keys.publishingAutomationOpt3Title]: 'Manual',
-  [I18Keys.publishingAutomationOpt3Desc]: 'No autopost',
+  [I18Keys.publishingAutomationOpt1Title]: 'AI automated publishing',
+  [I18Keys.publishingAutomationOpt1Desc]:
+    'All science posts detected with our AI filter will be automatically nanopublished.',
+  [I18Keys.publishingAutomationOpt2Title]:
+    'Reference-Based Automated Publishing',
+  [I18Keys.publishingAutomationOpt2Desc]:
+    'Any post mentioning research with academic reference identifiers such as DOIs, PMIDs, PMCIDs, or ISBNs will be automatically nanopublished.',
+  [I18Keys.publishingAutomationOpt3Title]: 'Supervised publishing',
+  [I18Keys.publishingAutomationOpt3Desc]:
+    'Receive a notification when a new science post is detected, and manually review it before publishing.',
 };
 
 i18n.use(initReactI18next).init({
