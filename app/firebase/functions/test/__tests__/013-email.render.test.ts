@@ -28,6 +28,6 @@ describe('renders email', () => {
       AutopostOption.MANUAL,
       'http://localhost:3000'
     );
-    fs.writeFileSync('email.html', html);
+    fs.writeFileSync('test.email.html', html);
   });
 });
