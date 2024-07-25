@@ -1,5 +1,6 @@
 import { Nanopub } from '@nanopub/sign';
 import { DataFactory, Quad, Store, Writer } from 'n3';
+
 import * as URI from './constants';
 
 const { namedNode, quad, literal } = DataFactory;
@@ -87,12 +88,10 @@ export const buildSpostProv = (
     provenanceGraphUri
   );
   store.addQuad(
-    
     activity,
     namedNode(URI.PROV_WAS_ASSOCIATED_WITH),
     cosmo,
     provenanceGraphUri
-    
   );
   store.addQuad(
     assertion,
@@ -206,12 +205,7 @@ export const buildSpostPubinfo = (
   if (orcidId) {
     const orcidNode = namedNode(URI.ORCID_PREFIX + orcidId);
     store.addQuad(
-      quad(
-        orcidNode,
-        namedNode(URI.FOAF_NAME),
-        literal(name),
-        pubinfoGraphUri
-      )
+      quad(orcidNode, namedNode(URI.FOAF_NAME), literal(name), pubinfoGraphUri)
     );
     store.addQuad(
       quad(
@@ -346,48 +340,28 @@ export const buildSpostNp = async (
     writer.addPrefixes(URI.sPostPrefixes);
 
     headStore
-      .getQuads(
-        null,
-        null,
-        null,
-        namedNode(URI.HEAD_URI)
-      )
+      .getQuads(null, null, null, namedNode(URI.HEAD_URI))
       .forEach((quad: Quad) => {
         writer.addQuad(quad);
       });
 
     // Add quads from the store to the writer
     assertionStore
-      .getQuads(
-        null,
-        null,
-        null,
-        namedNode(URI.ASSERTION_URI)
-      )
+      .getQuads(null, null, null, namedNode(URI.ASSERTION_URI))
       .forEach((quad: Quad) => {
         writer.addQuad(quad);
       });
 
     // Add quads from the store to the writer
     provStore
-      .getQuads(
-        null,
-        null,
-        null,
-        namedNode(URI.PROVENANCE_URI)
-      )
+      .getQuads(null, null, null, namedNode(URI.PROVENANCE_URI))
       .forEach((quad: Quad) => {
         writer.addQuad(quad);
       });
 
     // Add quads from the store to the writer
     pubinfoStore
-      .getQuads(
-        null,
-        null,
-        null,
-        namedNode(URI.PUBINFO_URI)
-      )
+      .getQuads(null, null, null, namedNode(URI.PUBINFO_URI))
       .forEach((quad: Quad) => {
         writer.addQuad(quad);
       });
