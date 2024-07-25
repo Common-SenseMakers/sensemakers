@@ -125,7 +125,7 @@ export class NotificationService {
 
         if (DEBUG) {
           logger.debug(
-            `notifyUser ${userId} - prepareAndSendDigestAuto`,
+            `notifyUser ${userId} - prepareAndSendDiges`,
             { pendingNotifications },
             DEBUG_PREFIX
           );

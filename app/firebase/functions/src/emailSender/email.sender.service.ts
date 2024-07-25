@@ -37,12 +37,8 @@ export class EmailSenderService {
   }
 
   private async callSendEmail(message: Message) {
-    try {
-      const res = await this.postmark.sendEmail(message);
-      logger.debug(`sendDigest - success`, { res }, DEBUG_PREFIX);
-    } catch (e) {
-      logger.error(`sendDigest - error`, { e }, DEBUG_PREFIX);
-    }
+    const res = await this.postmark.sendEmail(message);
+    logger.debug(`sendDigest - success`, { res }, DEBUG_PREFIX);
   }
 
   async sendUserDigest(user: AppUser, posts: AppPostFull[]) {
