@@ -399,16 +399,11 @@ export const buildIntroNp = async (
     const { orcidId, signDelegation, oldNpUri } = options;
     const headStore = buildNpHead();
 
-    // TODO: remove twitter from intro NP
-    const twitterHandle = 'TBD';
-
     // Define the graph URIs
     const assertionGraph = namedNode(URI.ASSERTION_URI);
     const provenanceGraph = namedNode(URI.PROVENANCE_URI);
     const pubinfoGraph = namedNode(URI.PUBINFO_URI);
-    const x = URI.X_PREFIX;
     const keyDeclarationNode = namedNode(`${URI.BASE_URI}${ethAddress}`);
-    const twitterNode = namedNode(`${x}${twitterHandle}`);
 
     // Create a writer and add prefixes
     const writer = new Writer({ format: 'application/trig' });
