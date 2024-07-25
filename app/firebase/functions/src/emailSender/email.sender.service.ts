@@ -62,6 +62,11 @@ export class EmailSenderService {
       MessageStream: 'outbound',
     };
 
-    await this.callSendEmail(message);
+    try {
+      await this.callSendEmail(message);
+    } catch (e) {
+      logger.error(`Error on callSendEmail`, { e, message }, DEBUG_PREFIX);
+      throw e;
+    }
   }
 }

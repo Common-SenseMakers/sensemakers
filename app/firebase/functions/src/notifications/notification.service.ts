@@ -205,13 +205,9 @@ export class NotificationService {
     posts: AppPostFull[],
     manager: TransactionManager
   ) {
-    try {
-      const user = await this.usersRepo.getUser(userId, manager, true);
+    const user = await this.usersRepo.getUser(userId, manager, true);
 
-      const res = await this.emailSender.sendUserDigest(user, posts);
-      if (DEBUG) logger.debug(`sendDigest`, { res }, DEBUG_PREFIX);
-    } catch (e) {
-      logger.error(`error in sendUserDigest`, { e }, DEBUG_PREFIX);
-    }
+    const res = await this.emailSender.sendUserDigest(user, posts);
+    if (DEBUG) logger.debug(`sendDigest`, { res }, DEBUG_PREFIX);
   }
 }
