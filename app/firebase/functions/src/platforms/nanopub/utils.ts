@@ -546,12 +546,12 @@ export const buildIntroNp = async (
     }
 
     // Add triples to the provenance graph
-    // writer.addQuad(
-    //   namedNode(URI.ASSERTION_URI),
-    //   namedNode(URI.PROV_WAS_ATTRIBUTED_TO),
-    //   twitterNode,
-    //   provenanceGraph
-    // );
+    writer.addQuad(
+      namedNode(URI.ASSERTION_URI),
+      namedNode(URI.PROV_WAS_ATTRIBUTED_TO),
+      keyDeclarationNode,
+      provenanceGraph
+    );
     if (orcidId) {
       const orcidNode = namedNode(URI.ORCID_PREFIX + orcidId);
       writer.addQuad(
