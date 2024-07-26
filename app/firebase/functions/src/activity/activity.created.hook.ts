@@ -13,7 +13,7 @@ import { logger } from '../instances/logger';
 import { Services } from '../instances/services';
 import { UsersHelper } from '../users/users.helper';
 
-const DEBUG = false;
+const DEBUG = true;
 const PREFIX = 'ACTIVITY-CREATED-HOOK';
 
 // receive the data of the created activity
