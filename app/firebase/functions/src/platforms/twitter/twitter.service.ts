@@ -1,6 +1,7 @@
 import {
   TweetV2UserTimelineParams,
   Tweetv2FieldsParams,
+  Tweetv2SearchParams,
   UserV2,
 } from 'twitter-api-v2';
 
@@ -86,8 +87,103 @@ export class TwitterService
     userDetails: UserDetailsBase<any, any, any>,
     manager: TransactionManager
   ): Promise<PlatformPostPosted<any>> {
-    const tweet = await this.getPost(post_id, manager, userDetails.user_id);
-    ... thread?
+    const MAX_TWEETS = 30;
+    const readOnlyClient = await this.getUserClient(
+      userDetails.user_id,
+      'read',
+      manager
+    );
+    try {
+      const _searchParams: Tweetv2SearchParams = {
+        query: `conversation_id:${post_id} from:${userDetails.user_id}`,
+        max_results: 30,
+        expansions,
+        'tweet.fields': tweetFields,
+      };
+
+      let nextToken: string | undefined = undefined;
+      let originalAuthor: UserV2 | undefined = undefined;
+      let allTweets: AppTweet[] = [];
+      let conversationIds: Set<string> = new Set();
+
+      do {
+        const searchParams = _searchParams;
+        if (nextToken) {
+          searchParams.next_token = nextToken;
+        }
+
+        try {
+          const result = await readOnlyClient.v2.search(searchParams);
+
+          if (result.meta.result_count > 0) {
+            if (result.data.data === undefined) {
+              throw new Error('Unexpected undefined data');
+            }
+
+            if (result.data.includes === undefined) {
+              throw new Error('Unexpected undefined data');
+            }
+
+            const appTweets = convertToAppTweets(
+              result.data.data,
+              result.data.includes
+            );
+            /** keep track of the number of threads */
+            appTweets.forEach((tweet) => {
+              if (tweet.conversation_id) {
+                conversationIds.add(tweet.conversation_id);
+              } else {
+                throw new Error('tweet does not have a conversation_id');
+              }
+            });
+
+            if (!originalAuthor) {
+              originalAuthor = result.data.includes?.users?.find(
+                (user) => user.id === userDetails.user_id
+              );
+            }
+            allTweets.push(...appTweets);
+
+            nextToken = result.meta.next_token;
+          }
+        } catch (e: any) {
+          if (e.rateLimit) {
+            /** if we hit the rate limit after haven gotten some tweets, return what we got so far  */
+            if (conversationIds.size > 0) {
+              break;
+            } else {
+              /** otherwise throw */
+              throw new Error(handleTwitterError(e));
+            }
+          } else {
+            throw new Error(handleTwitterError(e));
+          }
+        }
+
+        if (allTweets.length >= MAX_TWEETS) {
+          break;
+        }
+      } while (nextToken !== undefined);
+
+      const threads =
+        allTweets.length > 0 && originalAuthor
+          ? convertTweetsToThreads(allTweets, originalAuthor)
+          : [];
+
+      if (threads.length !== 1) {
+        throw new Error(`Unexpected search for thread did not return 1 thread`);
+      }
+      const thread = threads[0];
+
+      return {
+        post_id: thread.conversation_id,
+        user_id: thread.author.id,
+        timestampMs: dateStrToTimestampMs(thread.tweets[0].created_at),
+        post: thread,
+      };
+    } catch (e: any) {
+      throw new Error(handleTwitterError(e));
+    }
   }
 
   /**
