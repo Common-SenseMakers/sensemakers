@@ -56,7 +56,8 @@ export const TEST_USER_ACCOUNTS = envRuntime.TEST_USER_ACCOUNTS;
 
 export const OUR_TOKEN_SECRET = envRuntime.OUR_TOKEN_SECRET;
 export const OUR_EXPIRES_IN = '30d';
-export const EMAIL_VER_TOKEN_EXPIRE = 24 * 60 * 60 * 1000; // 24 hours
+
+export const EMAIL_SENDER_FROM = envRuntime.EMAIL_SENDER_FROM;
 
 export const NANOPUBS_PUBLISH_SERVERS_STR = envRuntime.NANOPUBS_PUBLISH_SERVERS;
 

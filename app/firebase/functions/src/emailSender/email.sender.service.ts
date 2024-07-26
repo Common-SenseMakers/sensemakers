@@ -3,7 +3,7 @@ import { Message, ServerClient } from 'postmark';
 import { AppPostFull } from '../@shared/types/types.posts';
 import { AppUser, PLATFORM } from '../@shared/types/types.user';
 import { RenderEmailFunction } from '../@shared/types/types.user';
-import { APP_URL } from '../config/config.runtime';
+import { APP_URL, EMAIL_SENDER_FROM } from '../config/config.runtime';
 import { logger } from '../instances/logger';
 
 const { renderEmail } = require('../@shared/emailRenderer') as {
@@ -12,7 +12,7 @@ const { renderEmail } = require('../@shared/emailRenderer') as {
 
 const postmark = require('postmark');
 
-export const DEBUG = false;
+export const DEBUG = true;
 export const DEBUG_PREFIX = `EMAIL-SENDER-SERVICE`;
 
 export enum EmailType {
@@ -46,7 +46,7 @@ export class EmailSenderService {
       throw new Error(`User ${user.userId} has no email`);
     }
 
-    const { html, plainText } = renderEmail(
+    const { html, plainText, subject } = renderEmail(
       posts,
       user.settings.notificationFreq,
       user.settings.autopost[PLATFORM.Nanopub].value,
@@ -54,9 +54,10 @@ export class EmailSenderService {
     );
 
     const message: Message = {
-      From: ' pepo@microrevolutions.com',
+      From: EMAIL_SENDER_FROM.value(),
+      ReplyTo: EMAIL_SENDER_FROM.value(),
       To: user.email?.email,
-      Subject: 'Hello from Sensecast',
+      Subject: subject,
       HtmlBody: html,
       TextBody: plainText,
       MessageStream: 'outbound',
