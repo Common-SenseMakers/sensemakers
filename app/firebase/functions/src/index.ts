@@ -1,4 +1,5 @@
 import express from 'express';
+import { initializeApp } from 'firebase-admin/app';
 import * as functions from 'firebase-functions';
 import {
   FirestoreEvent,
@@ -58,6 +59,19 @@ const secrets = [
   envRuntime.EMAIL_CLIENT_SECRET,
   envRuntime.MAGIC_ADMIN_SECRET,
 ];
+
+export const app = (() => {
+  if (IS_EMULATOR) {
+    logger.info('Running in emulator mode');
+    return initializeApp({
+      projectId: 'demo-sensenets',
+    });
+  }
+
+  /** used on deployment with the current app */
+  logger.info('Running in depolyed mode');
+  return initializeApp();
+})();
 
 // import { fetchNewPosts } from './posts/posts.job';
 
