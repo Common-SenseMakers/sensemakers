@@ -55,6 +55,7 @@ export interface Services {
   db: DBInstance;
   notifications: NotificationService;
   activity: ActivityService;
+  email: EmailSenderService;
 }
 
 export const createServices = () => {
@@ -187,6 +188,7 @@ export const createServices = () => {
     db,
     notifications,
     activity,
+    email,
   };
 
   if (DEBUG) {

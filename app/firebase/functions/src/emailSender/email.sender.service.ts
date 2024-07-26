@@ -36,7 +36,7 @@ export class EmailSenderService {
     this.postmark = new postmark.ServerClient(config.apiKey);
   }
 
-  private async callSendEmail(message: Message) {
+  async callSendEmail(message: Message) {
     const res = await this.postmark.sendEmail(message);
     logger.debug(`sendDigest - success`, { res }, DEBUG_PREFIX);
   }
