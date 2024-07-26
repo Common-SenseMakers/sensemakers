@@ -67,15 +67,27 @@ export const createNanopublication = async (
   const orcidDetails = user[PLATFORM.Orcid];
   const orcidId = orcidDetails && orcidDetails[0].user_id;
   const tweetUrl = `https://x.com/${twitterPath}/status/${originalPlatformPostId}`;
+  const introUri = 'https://example.org/intro' //need to fetch intro uri
+  const supersedesOptions = {} //Need to fetch original np uri as root, and latest np as latest
+  //And add to options when needed
+  let options = {}
+  if (supersedesOptions){
+     options = {
+      supersedesOptions:supersedesOptions,
+      orcidId: orcidId
+    };
+  }
+  else if (orcidId){
+     options = {
+      orcidId: orcidId
+    };
+  }
 
-  //Need to fetch oldNpUri when update,  hardcoded for now.
-  const options = {
-    oldNpUri,
-    orcidId: orcidId,
-  };
+  
 
   return await buildSpostNp(
     ethAddress,
+    introUri,
     twitterUsername,
     'sup', // hardcoded for now. Update to get from post
     twitterName,
