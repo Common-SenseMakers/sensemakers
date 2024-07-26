@@ -300,7 +300,7 @@ emulatorTriggerRouter.post('/emailTest', async (request, response) => {
     MessageStream: 'outbound',
   };
 
-  services.email.callSendEmail(message);
+  await services.email.callSendEmail(message);
   response.status(200).send({ success: true });
 });
 

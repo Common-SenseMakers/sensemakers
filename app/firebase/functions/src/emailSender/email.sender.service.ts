@@ -5,6 +5,7 @@ import { AppUser, PLATFORM } from '../@shared/types/types.user';
 import { RenderEmailFunction } from '../@shared/types/types.user';
 import { APP_URL, EMAIL_SENDER_FROM } from '../config/config.runtime';
 import { logger } from '../instances/logger';
+import { cleanHtml } from './utils';
 
 const { renderEmail } = require('../@shared/emailRenderer') as {
   renderEmail: RenderEmailFunction;
@@ -12,7 +13,7 @@ const { renderEmail } = require('../@shared/emailRenderer') as {
 
 const postmark = require('postmark');
 
-export const DEBUG = true;
+export const DEBUG = false;
 export const DEBUG_PREFIX = `EMAIL-SENDER-SERVICE`;
 
 export enum EmailType {
@@ -33,10 +34,18 @@ export class EmailSenderService {
   protected postmark: ServerClient;
 
   constructor(config: EmailServiceConfig) {
+    logger.debug(
+      'EMAIL-SENDER-SERVICE - constructor',
+      { key: config.apiKey.slice(0, 8) },
+      DEBUG_PREFIX
+    );
     this.postmark = new postmark.ServerClient(config.apiKey);
   }
 
   async callSendEmail(message: Message) {
+    if (message.HtmlBody) {
+      message.HtmlBody = cleanHtml(message.HtmlBody);
+    }
     const res = await this.postmark.sendEmail(message);
     logger.debug(`sendDigest - success`, { res }, DEBUG_PREFIX);
   }

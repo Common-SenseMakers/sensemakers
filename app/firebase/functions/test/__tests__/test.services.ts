@@ -197,6 +197,7 @@ export const getTestServices = (config: TestServicesConfig) => {
     notifications,
     emailMock,
     activity,
+    email,
   };
 
   return services;
