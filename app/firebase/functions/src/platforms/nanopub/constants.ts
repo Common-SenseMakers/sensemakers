@@ -8,7 +8,7 @@ export const HEAD_URI = BASE_URI + 'head';
 export const DERIVATION_PROOF_URI = BASE_URI + 'derivationProof';
 export const SIGNING_DELEGATION_URI = BASE_URI + 'signingDelegation';
 export const RETRACTS_URI = BASE_URI + 'assertion';
-
+export const KEY_DECLARATION_URI = BASE_URI + 'RSAkeyDeclaration';
 // Specific Activity URIs
 export const SUPERVISED_ACTIVITY = 'https://sense-nets.xyz/supervisedActivity';
 export const UNSUPERVISED_ACTIVITY = 'https://sense-nets.xyz/unsupervisedActivity';
@@ -43,13 +43,14 @@ export const PROV_HAS_SIGNATURE = 'http://www.w3.org/ns/prov#hasSignature';
 
 // Other URIs
 export const FOAF_NAME = 'http://xmlns.com/foaf/0.1/name';
+export const FOAF_ACCOUNT = 'http://xmlns.com/foaf/0.1/account';
 export const RDFS_COMMENT = 'http://www.w3.org/2000/01/rdf-schema#comment';
 export const NP_HAS_ASSERTION = 'http://www.nanopub.org/nschema#hasAssertion';
 export const NP_HAS_PROVENANCE = 'http://www.nanopub.org/nschema#hasProvenance';
 export const NP_HAS_PUBLICATION_INFO = 'http://www.nanopub.org/nschema#hasPublicationInfo';
 export const NP_NANOPUBLICATION = 'http://www.nanopub.org/nschema#Nanopublication';
 export const NP_SIGNED_BY = 'http://purl.org/nanopub/x/singedBy';
-export const NP_SUPERSEDES = 'http://purl.org/nanopub/x/supersedes';
+export const NP_SUPERSEDES = 'http://purl.org/nanopub/x/supersesdes';
 export const NP_RETRACTS = 'http://purl.org/nanopub/x/retracts';
 export const NP_HAS_NANOPUB_TYPE = 'http://purl.org/nanopub/x/hasNanopubType';
 export const NP_WAS_CREATED_AT = 'http://purl.org/nanopub/x/wasCreatedAt';
@@ -68,6 +69,7 @@ export const NP_DELEGATED_TO = 'https://sense-nets.xyz/DelegatedTo';
 export const NP_DELEGATED_BY = 'https://sense-nets.xyz/DelegatedBy';
 export const NP_WITH_KEY_DECLARATION = 'https://sense-nets.xyz/withKeyDecleration';
 export const COSMO_SEMANTIC_POST = 'https://sense-nets.xyz/SemanticPost'
+export const NP_HAS_ORIGNAL_VERSION = NPX_PREFIX+'hasOriginalVersion'
 // Other constants
 export const ETHEREUM_EIP_191 = 'https://eips.ethereum.org/EIPS/eip-191';
 export const SCHEMA = 'https://schema.org/';
