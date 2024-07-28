@@ -603,6 +603,7 @@ var PostCardReferenceEmail = function (_a) {
     title = _c.title,
     summary = _c.summary,
     item_type = _c.item_type;
+  // TODO reenable emoji but dont use unicode escape strings
   return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", __assign({
     style: {}
   }, {
@@ -611,7 +612,7 @@ var PostCardReferenceEmail = function (_a) {
       backgroundColor: "#f0f9ff",
       color: "#1f73b7",
       borderColor: "#adcce5",
-      hasEmoji: true
+      hasEmoji: false
     }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", {
       style: {
         margin: '8px 0px'
