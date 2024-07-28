@@ -18,6 +18,7 @@ export const USE_REAL_TWITTER = process.env.USE_REAL_TWITTERX === 'true';
 export const USE_REAL_NANOPUB = process.env.USE_REAL_NANOPUB === 'true';
 export const USE_REAL_PARSER = process.env.USE_REAL_PARSER === 'true';
 export const USE_REAL_EMAIL = process.env.USE_REAL_EMAIL === 'true';
+export const EMAIL_SENDER_FROM = process.env.EMAIL_SENDER_FROM as string;
 
 export type InjectableContext = Readonly<{
   // properties injected using the Root Mocha Hooks
