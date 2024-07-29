@@ -34,11 +34,12 @@ export class EmailSenderService {
   protected postmark: ServerClient;
 
   constructor(config: EmailServiceConfig) {
-    logger.debug(
-      'EMAIL-SENDER-SERVICE - constructor',
-      { key: config.apiKey.slice(0, 8) },
-      DEBUG_PREFIX
-    );
+    if (DEBUG)
+      logger.debug(
+        'EMAIL-SENDER-SERVICE - constructor',
+        { key: config.apiKey.slice(0, 8) },
+        DEBUG_PREFIX
+      );
     this.postmark = new postmark.ServerClient(config.apiKey);
   }
 
