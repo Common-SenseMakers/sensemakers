@@ -98,8 +98,12 @@ export class PostsManager {
     const user = await this.users.repo.getUser(userId as string, manager, true);
     const platform = this.platforms.get(platformId);
     const account = UsersHelper.getAccount(user, platformId);
+    if (!account) {
+      throw new Error(`Account not found for platform ${platformId}`);
+    }
 
-    const platformPost = await platform.get(post_id, account);
+    const platformPost = await platform.get(post_id, account, manager);
+    return platformPost;
   }
 
   private async fetchUserFromPlatform(

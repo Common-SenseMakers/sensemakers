@@ -35,6 +35,7 @@ import { UsersHelper } from '../../users/users.helper';
 import { PlatformService } from '../platforms.interface';
 import { createIntroNanopublication } from './create.intro.nanopub';
 import { createNanopublication } from './create.nanopub';
+import { NANOPUBS_PUBLISH_SERVERS } from '../../config/config.runtime';
 
 const DEBUG = false;
 
@@ -241,6 +242,20 @@ export class NanopubService
     userDetails: UserDetailsBase
   ): Promise<FetchedResult> {
     return { fetched: {}, platformPosts: [] };
+  }
+
+  async get(
+    post_id: string,
+    userDetails: UserDetailsBase,
+  ): Promise<PlatformPostPosted<string>> {
+    const nanopubServers = JSON.parse(NANOPUBS_PUBLISH_SERVERS.value()) as string[];
+    const fetchedNanopub = await Nanopub.fetch(`${nanopubServers[0]}${post_id}`);
+    return {
+      post_id,
+      post: fetchedNanopub.rdf(),
+      timestampMs: Date.now(),
+      user_id: userDetails.user_id,
+    };
   }
 
   mirror(postsToMirror: AppPostMirror[]): Promise<PlatformPost<any>[]> {

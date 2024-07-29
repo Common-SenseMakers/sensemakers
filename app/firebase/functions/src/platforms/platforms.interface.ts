@@ -35,7 +35,8 @@ export interface PlatformService<
 > extends IdentityService<SignupContext, SignupData, UserDetails> {
   get(
     post_id: string,
-    userDetails: UserDetailsBase
+    userDetails: UserDetailsBase,
+    manager?: TransactionManager
   ): Promise<PlatformPostPosted>;
   fetch(
     params: PlatformFetchParams,
