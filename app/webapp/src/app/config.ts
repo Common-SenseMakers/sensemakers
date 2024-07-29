@@ -13,6 +13,4 @@ export const WALLETCONNECT_PROJECT_ID = 'c12fdc701fd336cf8dc059f6784906bc';
 export const MAGIC_API_KEY = 'pk_live_A603B0287DAF3C97';
 
 export const NANOPUB_EXPLORER_SERVER = process.env.NANOPUB_EXPLORER_SERVER;
-('https://np.knowledgepixels.com/');
-
 export const BUILD_ID = process.env.REACT_APP_VERSION;
