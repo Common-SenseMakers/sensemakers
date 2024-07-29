@@ -176,4 +176,4 @@ export type RenderEmailFunction = (
   notificationFrequency: NotificationFreq,
   autopostOption: AutopostOption,
   appUrl: string
-) => { html: string; plainText: string };
+) => { html: string; plainText: string; subject: string };

@@ -8,7 +8,7 @@ import {
   NotificationStatus,
 } from '../@shared/types/types.notifications';
 import { PlatformPostPublishStatus } from '../@shared/types/types.platform.posts';
-import { QUIET_SIGNUP_PERIOD } from '../config/config.runtime';
+import { IS_EMULATOR, QUIET_SIGNUP_PERIOD } from '../config/config.runtime';
 import { logger } from '../instances/logger';
 import { Services } from '../instances/services';
 import { UsersHelper } from '../users/users.helper';
@@ -48,7 +48,8 @@ export const activityEventCreatedHook = async (
       );
 
       const author = await users.repo.getUser(post.authorId, manager, true);
-      const isQuiet = time.now() < author.signupDate + QUIET_SIGNUP_PERIOD;
+      const isQuiet =
+        time.now() < author.signupDate + QUIET_SIGNUP_PERIOD && !IS_EMULATOR;
 
       if (DEBUG)
         logger.debug(

@@ -1,10 +1,6 @@
-import dotenv from 'dotenv';
-import * as admin from 'firebase-admin';
-import { initializeApp } from 'firebase-admin/app';
 import { Firestore, getFirestore } from 'firebase-admin/firestore';
 
 import { CollectionNames } from '../@shared/utils/collectionNames';
-import { IS_EMULATOR } from '../config/config.runtime';
 import { logger } from '../instances/logger';
 import {
   HandleWithTxManager,
@@ -12,31 +8,6 @@ import {
   ManagerModes,
   TransactionManager,
 } from './transaction.manager';
-
-dotenv.config({ path: './scripts/.script.env' });
-
-export const app = (() => {
-  if (IS_EMULATOR) {
-    logger.info('Running in emulator mode');
-    return initializeApp({
-      projectId: 'demo-sensenets',
-    });
-  }
-
-  /** used locally to run scripts connected to a given project */
-  if (process.env.FB_CERT_PATH) {
-    const serviceAccount = require('../../' + process.env.FB_CERT_PATH);
-
-    logger.info('Running in local mode with certificate');
-    return initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-      projectId: process.env.FB_PROJECT_ID,
-    });
-  }
-  /** used on deployment with the current app */
-  logger.info('Running in depolyed mode');
-  return initializeApp();
-})();
 
 const DEBUG = false;
 

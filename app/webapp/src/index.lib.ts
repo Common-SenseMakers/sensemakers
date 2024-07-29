@@ -30,5 +30,11 @@ export const renderEmail: RenderEmailFunction = (
     }),
     { plainText: true }
   );
-  return { html, plainText };
+
+  const subject =
+    autopostOption === AutopostOption.MANUAL
+      ? `We found ${posts.length} new posts for review`
+      : `We have FAIRified ${posts.length} new posts for you`;
+
+  return { html, plainText, subject };
 };
