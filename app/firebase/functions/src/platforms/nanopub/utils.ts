@@ -12,8 +12,8 @@ const { namedNode, quad, literal } = DataFactory;
 
 //define interface for possible extra values
 interface SupersedesOptions {
-  latest: string
-  root: string
+  latest: string;
+  root: string;
 }
 interface BuildSpostNpOptions {
   supersedesOptions?: SupersedesOptions;
@@ -72,7 +72,7 @@ export const buildSpostProv = (
   const xHandle = namedNode(URI.X_PREFIX + twitterHandle);
   const assertion = namedNode(URI.ASSERTION_URI);
   const activity = namedNode(URI.ACTIVITY_URI);
-  const introNode = namedNode(introUri)
+  const introNode = namedNode(introUri);
 
   // Add quads to the store based on post_type
   const activityType =
@@ -207,7 +207,7 @@ export const buildSpostPubinfo = (
   const baseGraphUri = namedNode(URI.BASE_URI);
   const pubinfoGraphUri = namedNode(URI.PUBINFO_URI);
   //const xHandle = namedNode(URI.X_PREFIX + twitterHandle);
-  const introNode = namedNode(introUri)
+  const introNode = namedNode(introUri);
   // Create a new store for the assertion
   const store = new Store();
   //adding constant triplets
@@ -228,20 +228,16 @@ export const buildSpostPubinfo = (
   if (orcidId) {
     const orcidNode = namedNode(URI.ORCID_PREFIX + orcidId);
     store.addQuad(
-      
       introNode,
       namedNode(URI.FOAF_ACCOUNT),
       orcidNode,
       pubinfoGraphUri
-      
     );
     store.addQuad(
-      
       baseGraphUri,
       namedNode(URI.PROV_WAS_ATTRIBUTED_TO),
       orcidNode,
       pubinfoGraphUri
-      
     );
   }
 
@@ -276,8 +272,8 @@ export const buildSpostPubinfo = (
     pubinfoGraphUri
   );
   //If we call this function to update, then supersedesOptions is non empty and we add  triplets
-  if (supersedesOptions) { 
-    const {latest, root} = supersedesOptions
+  if (supersedesOptions) {
+    const { latest, root } = supersedesOptions;
     store.addQuad(
       namedNode(URI.BASE_URI),
       namedNode(URI.NP_SUPERSEDES),
@@ -352,11 +348,7 @@ export const buildSpostNp = async (
   options: BuildSpostNpOptions = {}
 ): Promise<Nanopub> => {
   return new Promise((resolve, reject) => {
-    const assertionStore = buildSpostAssertion(
-      semantics,
-      introUri,
-      postText
-    );
+    const assertionStore = buildSpostAssertion(semantics, introUri, postText);
     const provStore = buildSpostProv(
       postType,
       introUri,
@@ -397,16 +389,9 @@ export const buildSpostNp = async (
       });
 
     // Add quads from the store to the writer
-    pubinfoStore
-      .getQuads(
-        null,
-        null,
-        null,
-        null
-      )
-      .forEach((quad: Quad) => {
-        writer.addQuad(quad);
-      });
+    pubinfoStore.getQuads(null, null, null, null).forEach((quad: Quad) => {
+      writer.addQuad(quad);
+    });
 
     // End the writer and display the TriG content
     writer.end(async (error, result) => {
@@ -443,9 +428,11 @@ export const buildIntroNp = async (
     const provenanceGraph = namedNode(URI.PROVENANCE_URI);
     const pubinfoGraph = namedNode(URI.PUBINFO_URI);
     const x = URI.X_PREFIX;
-    const keyDeclarationNode = namedNode(`${URI.KEY_DECLARATION_URI}${ethAddress}`);
-    const baseNode = namedNode(URI.BASE_URI)
-    const ethNode = namedNode(`${URI.BASE_URI}${ethAddress}`)
+    const keyDeclarationNode = namedNode(
+      `${URI.KEY_DECLARATION_URI}${ethAddress}`
+    );
+    const baseNode = namedNode(URI.BASE_URI);
+    const ethNode = namedNode(`${URI.BASE_URI}${ethAddress}`);
     // Create a writer and add prefixes
     const writer = new Writer({ format: 'application/trig' });
     writer.addPrefixes(URI.introPrefixes);
@@ -455,14 +442,6 @@ export const buildIntroNp = async (
       writer.addQuad(quad);
     });
 
-    // Add triples to the assertion graph
-    writer.addQuad(
-      baseNode,
-      namedNode(URI.FOAF_NAME),
-      literal(name),
-      assertionGraph
-    );
-    
     writer.addQuad(
       baseNode,
       namedNode(URI.FOAF_ACCOUNT),
@@ -472,7 +451,7 @@ export const buildIntroNp = async (
     writer.addQuad(
       keyDeclarationNode,
       namedNode(URI.NP_DECLARED_BY),
-      namedNode(URI.BASE_URI+ethAddress),
+      namedNode(URI.BASE_URI + ethAddress),
       assertionGraph
     );
     writer.addQuad(
@@ -648,8 +627,8 @@ export const buildIntroNp = async (
         provenanceGraph
       );
     }
-    if (supersedesOptions) { 
-      const {latest, root} = supersedesOptions
+    if (supersedesOptions) {
+      const { latest, root } = supersedesOptions;
       writer.addQuad(
         namedNode(URI.BASE_URI),
         namedNode(URI.NP_SUPERSEDES),
@@ -701,7 +680,7 @@ export const buildRetractionNp = async (
   const assertionGraph = namedNode(URI.ASSERTION_URI);
   const provenanceGraph = namedNode(URI.PROVENANCE_URI);
   const pubinfoGraph = namedNode(URI.PUBINFO_URI);
-  const introNode = namedNode(introUri)
+  const introNode = namedNode(introUri);
   const writer = new Writer({ format: 'application/trig' });
   writer.addPrefixes(URI.retractionPrefixes);
 
