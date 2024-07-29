@@ -1,6 +1,10 @@
 import { Nanopub } from '@nanopub/sign';
 import { expect } from 'chai';
 
+import {
+  PlatformPostPublishOrigin,
+  PlatformPostPublishStatus,
+} from '../../src/@shared/types/types.platform.posts';
 import { PLATFORM } from '../../src/@shared/types/types.user';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
@@ -87,11 +91,34 @@ describe('nanopublication format', () => {
     expect(fetchedPub).to.not.be.undefined;
 
     /** update the nanopublication */
-    const updatedNanopub = await createNanopublication(
-      post,
-      mockUser,
-      fetchedPub.info().published
-    );
+    const updatedPost = getMockPost({
+      authorId: 'test-user-id',
+      id: 'post-id-1',
+      semantics: `
+        @prefix ns1: <http://purl.org/spar/cito/> .
+        @prefix schema: <https://schema.org/> .
+        
+        <http://purl.org/nanopub/temp/mynanopub#assertion> 
+          ns1:discusses <https://twitter.com/ori_goldberg/status/1781281656071946541> ;    
+          ns1:includesQuotationFrom <https://twitter.com/ori_goldberg/status/1781281656071946541> ;    
+          schema:keywords "ExternalSecurity",        "Geopolitics",        "Israel",        "Kissinger",        "PoliticalScience",        "Security" .
+        `,
+      mirrors: [
+        {
+          id: 'post-id-1',
+          publishOrigin: PlatformPostPublishOrigin.POSTED,
+          publishStatus: PlatformPostPublishStatus.PUBLISHED,
+          platformId: PLATFORM.Nanopub,
+          posted: {
+            post_id: published.info().uri as string,
+            user_id: 'test-user-id',
+            timestampMs: Date.now(),
+            post: published.rdf(),
+          },
+        },
+      ],
+    });
+    const updatedNanopub = await createNanopublication(updatedPost, mockUser);
     const updatedSigned = await signNanopublication(
       updatedNanopub.rdf(),
       rsaKeys,

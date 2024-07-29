@@ -2,7 +2,11 @@ import { Store } from 'n3';
 
 import { AppPostFull } from '../../@shared/types/types.posts';
 import { TwitterUserDetails } from '../../@shared/types/types.twitter';
-import { AppUser, PLATFORM } from '../../@shared/types/types.user';
+import {
+  AppUser,
+  AutopostOption,
+  PLATFORM,
+} from '../../@shared/types/types.user';
 import { parseRDF } from '../../@shared/utils/n3.utils';
 import { logger } from '../../instances/logger';
 import { PostsHelper } from '../../posts/posts.helper';
@@ -13,9 +17,10 @@ const DEBUG = false;
 
 export const createNanopublication = async (
   post: AppPostFull,
-  user: AppUser,
-  oldNpUri?: string
+  user: AppUser
 ) => {
+  const autopostOption: AutopostOption =
+    user.settings.autopost[PLATFORM.Nanopub].value;
   const semantics = post.semantics;
   const content = PostsHelper.concatenateThread(post.generic);
   const twitter = UsersHelper.getAccount(
@@ -38,6 +43,10 @@ export const createNanopublication = async (
   const originalPlatformPost = post.mirrors.find(
     (platformPost) => platformPost.platformId === PLATFORM.Twitter
   )?.posted;
+  const postedNanopub = post.mirrors.find(
+    (platformPost) => platformPost.platformId === PLATFORM.Nanopub
+  )?.posted;
+  const originalNanopubUri = postedNanopub?.post_id; // confirm if this is latest or root and if it includes the domain or just the nanopub hash
 
   const originalPlatformPostId = originalPlatformPost?.post_id;
 
@@ -67,29 +76,20 @@ export const createNanopublication = async (
   const orcidDetails = user[PLATFORM.Orcid];
   const orcidId = orcidDetails && orcidDetails[0].user_id;
   const tweetUrl = `https://x.com/${twitterPath}/status/${originalPlatformPostId}`;
-  const introUri = 'https://example.org/intro' //need to fetch intro uri
-  const supersedesOptions = {} //Need to fetch original np uri as root, and latest np as latest
+  const introUri = 'https://example.org/intro'; //need to fetch intro uri
   //And add to options when needed
-  let options = {}
-  if (supersedesOptions){
-     options = {
-      supersedesOptions:supersedesOptions,
-      orcidId: orcidId
-    };
-  }
-  else if (orcidId){
-     options = {
-      orcidId: orcidId
-    };
-  }
-
-  
+  const options = {
+    supersedesOptions: originalNanopubUri
+      ? { root: originalNanopubUri, latest: originalNanopubUri }
+      : undefined, //Need to fetch original np uri as root, and latest np as latest
+    orcidId: orcidId,
+  };
 
   return await buildSpostNp(
     ethAddress,
     introUri,
     twitterUsername,
-    'sup', // hardcoded for now. Update to get from post
+    autopostOption,
     twitterName,
     semanticsStore,
     content,

@@ -1,6 +1,8 @@
 import { Nanopub } from '@nanopub/sign';
 import { DataFactory, Quad, Store, Writer } from 'n3';
 
+import { GenericAuthor } from '../../@shared/types/types.posts';
+import { AutopostOption, PLATFORM } from '../../@shared/types/types.user';
 import { logger } from '../../instances/logger';
 import * as URI from './constants';
 
@@ -22,7 +24,7 @@ interface BuildSpostNpOptions {
 //ORCID and keyDelegation
 interface BuildIntroNpOptions {
   orcidId?: string;
-  twitterHandle?: string;
+  author?: GenericAuthor;
   signDelegation?: boolean;
   supersedesOptions?: SupersedesOptions;
   //Add to function
@@ -74,7 +76,7 @@ export const buildSpostProv = (
 
   // Add quads to the store based on post_type
   const activityType =
-    postType === 'sup'
+    postType === AutopostOption.MANUAL
       ? namedNode(URI.SUPERVISED_ACTIVITY)
       : namedNode(URI.UNSUPERVISED_ACTIVITY);
 
@@ -433,7 +435,7 @@ export const buildIntroNp = async (
   options: BuildIntroNpOptions = {}
 ): Promise<Nanopub> => {
   return new Promise((resolve, reject) => {
-    const { orcidId, twitterHandle, signDelegation, supersedesOptions } = options;
+    const { orcidId, author, signDelegation, supersedesOptions } = options;
     const headStore = buildNpHead();
 
     // Define the graph URIs
@@ -615,9 +617,15 @@ export const buildIntroNp = async (
       literal(ethAddress),
       namedNode(URI.PUBINFO_URI)
     );
-    if (twitterHandle){
-      const twitterNode = namedNode(`${x}${twitterHandle}`);
+    if (author?.platformId === PLATFORM.Twitter) {
+      const twitterNode = namedNode(`${x}${author.username}`);
 
+      writer.addQuad(
+        baseNode,
+        namedNode(URI.FOAF_NAME),
+        literal(author.name),
+        assertionGraph
+      );
       writer.addQuad(
         baseNode,
         namedNode(URI.FOAF_ACCOUNT),
