@@ -184,7 +184,12 @@ export const PostView = (props: {
   };
 
   const openNanopublication = () => {
-    console.log('openNanopublication');
+    if (postStatuses.nanopubUrl && window) {
+      const opened = window.open(postStatuses.nanopubUrl, '_blank');
+      if (opened) {
+        window.focus();
+      }
+    }
   };
 
   const action = (() => {
