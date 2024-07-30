@@ -1,9 +1,14 @@
 import { render } from '@react-email/components';
+import { t } from 'i18next';
 import React from 'react';
 
+import { I18Keys } from '../src/i18n/i18n';
 import { EmailTemplate } from './email/EmailTemplate';
 import { NotificationFreq } from './shared/types/types.notifications';
-import { AppPostFull } from './shared/types/types.posts';
+import {
+  AppPostFull,
+  AppPostRepublishedStatus,
+} from './shared/types/types.posts';
 import { AutopostOption, RenderEmailFunction } from './shared/types/types.user';
 
 export const renderEmail: RenderEmailFunction = (
@@ -31,10 +36,29 @@ export const renderEmail: RenderEmailFunction = (
     { plainText: true }
   );
 
+  const pointInTime = (() => {
+    if (notificationFrequency === NotificationFreq.Daily) {
+      return t(I18Keys.today);
+    }
+    if (notificationFrequency === NotificationFreq.Weekly) {
+      return t(I18Keys.thisWeek);
+    }
+    if (notificationFrequency === NotificationFreq.Monthly) {
+      return t(I18Keys.thisMonth);
+    }
+  })();
+
+  const nReview = posts.filter(
+    (p) => p.republishedStatus === AppPostRepublishedStatus.PENDING
+  ).length;
+  const nPublished = posts.filter(
+    (p) => p.republishedStatus === AppPostRepublishedStatus.AUTO_REPUBLISHED
+  ).length;
+
   const subject =
-    autopostOption === AutopostOption.MANUAL
-      ? `We found ${posts.length} new posts for review`
-      : `We have FAIRified ${posts.length} new posts for you`;
+    nReview > nPublished
+      ? t(I18Keys.emailSubjectReview, { nPosts: nReview, pointInTime })
+      : t(I18Keys.emailSubjectAutoposted, { nPosts: nPublished, pointInTime });
 
   return { html, plainText, subject };
 };

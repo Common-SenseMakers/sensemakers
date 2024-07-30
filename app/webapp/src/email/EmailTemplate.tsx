@@ -15,7 +15,6 @@ import {
 import { t } from 'i18next';
 
 import { I18Keys } from '../i18n/i18n';
-import { getMockPendingPost } from '../mocks/posts.mock';
 import { AbsoluteRoutes } from '../route.names';
 import { NotificationFreq } from '../shared/types/types.notifications';
 import { AppPostFull, PostsQueryStatus } from '../shared/types/types.posts';

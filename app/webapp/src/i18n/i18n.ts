@@ -142,6 +142,12 @@ export enum I18Keys {
 
   reviewSettings = 's080',
   notNow = 's081',
+
+  emailSubjectReview = 's082',
+  emailSubjectAutoposted = 's083',
+  today = 's084',
+  thisWeek = 's085',
+  thisMonth = 's086',
 }
 
 const check = new Set();
@@ -326,6 +332,13 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.dontShowAgain]: 'Don’t show this message again',
   [I18Keys.reviewSettings]: 'Review settings',
   [I18Keys.notNow]: 'Not now',
+  [I18Keys.emailSubjectReview]:
+    'You have {{nPosts}} potential nanopublications for review {{pointInTime}}',
+  [I18Keys.emailSubjectAutoposted]:
+    'You nanopublished {{nPosts}} posts {{pointInTime}}',
+  [I18Keys.today]: 'today',
+  [I18Keys.thisWeek]: 'this week',
+  [I18Keys.thisMonth]: 'this month',
 };
 
 i18n.use(initReactI18next).init({
