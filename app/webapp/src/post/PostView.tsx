@@ -44,10 +44,7 @@ enum PublishPostAction {
 }
 
 /** extract the postId from the route and pass it to a PostContext */
-export const PostView = (props: {
-  profile?: TwitterUserProfile;
-  isProfile: boolean;
-}) => {
+export const PostView = (props: { profile?: TwitterUserProfile }) => {
   const [approveIntent, setApproveIntent] = useState(false);
   const [askedOrcid, setAskedOrcid] = useState(false);
   const [publishing, setPublishing] = useState(false);
@@ -584,7 +581,7 @@ export const PostView = (props: {
 
   if (DEBUG) console.log(publishStatusModal);
 
-  const editable = _editable && !props.isProfile;
+  const editable = _editable;
 
   const content = (() => {
     if (!post) {
@@ -601,7 +598,6 @@ export const PostView = (props: {
       <>
         <Box pad="medium">
           <PostHeader
-            isProfile={props.isProfile}
             profile={props.profile}
             margin={{ bottom: '16px' }}></PostHeader>
           {postStatuses.isParsing ? (
@@ -655,9 +651,7 @@ export const PostView = (props: {
     <ViewportPage
       content={
         <Box fill>
-          <PostNav
-            isProfile={props.isProfile}
-            profile={props.profile}></PostNav>
+          <PostNav profile={props.profile}></PostNav>
           {content}
         </Box>
       }></ViewportPage>

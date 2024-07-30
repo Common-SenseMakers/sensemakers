@@ -19,13 +19,15 @@ import {
   PLATFORM,
   UserSettingsUpdate,
 } from '../shared/types/types.user';
-import { AppHeading } from '../ui-components';
+import { AppButton, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
+import { useDisconnectContext } from '../user-login/contexts/DisconnectUserContext';
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { getAccount } from '../user-login/user.helper';
+import { cap } from '../utils/general';
 import { usePersist } from '../utils/use.persist';
 import { PlatformSection } from './PlatformsSection';
 import { SettingsOptionSelector } from './SettingsOptionsSelector';
@@ -52,6 +54,7 @@ export const UserSettingsPage = () => {
 
   const { connectedUser, refresh, twitterProfile } = useAccountContext();
   const [isSetting, setIsSetting] = useState(false);
+  const { disconnect } = useDisconnectContext();
 
   const { connect: connectOrcid } = useOrcidContext();
 
@@ -308,6 +311,12 @@ export const UserSettingsPage = () => {
           buttonText="connect"
           username={orcid ? `@${orcid.user_id}` : '- not connected -'}
           connected={orcid !== undefined}></PlatformSection>
+
+        <Box margin={{ vertical: '36px' }} pad={{ horizontal: '16px' }}>
+          <AppButton
+            onClick={() => disconnect()}
+            label={t(I18Keys.logout)}></AppButton>
+        </Box>
       </Box>
     );
   })();
