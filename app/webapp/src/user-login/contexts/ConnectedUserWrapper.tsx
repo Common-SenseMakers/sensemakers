@@ -6,6 +6,7 @@ import {
   SetStateAction,
   createContext,
   useContext,
+  useEffect,
   useState,
 } from 'react';
 import { Trans } from 'react-i18next';
@@ -14,7 +15,6 @@ import { useNavigate } from 'react-router-dom';
 import { RobotIcon } from '../../app/icons/RobotIcon';
 import { I18Keys } from '../../i18n/i18n';
 import { AbsoluteRoutes } from '../../route.names';
-import { useEffect } from '../../shared/emailRenderer';
 import { AppButton, AppHeading, AppModal } from '../../ui-components';
 import { AppCheckBox } from '../../ui-components/AppCheckBox';
 import { AppParagraph } from '../../ui-components/AppParagraph';
