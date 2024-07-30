@@ -1,12 +1,11 @@
-import { Box, Text } from 'grommet';
+import { Box } from 'grommet';
 import { Refresh } from 'grommet-icons';
-import { act, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { CelebrateIcon } from '../app/icons/CelebrateIcon';
 import { ClearIcon } from '../app/icons/ClearIcon';
-import { RobotIcon } from '../app/icons/RobotIcon';
 import { SendIcon } from '../app/icons/SendIcon';
 import { ViewportPage } from '../app/layout/Viewport';
 import { I18Keys } from '../i18n/i18n';
@@ -16,12 +15,12 @@ import { PATTERN_ID } from '../semantics/patterns/patterns';
 import { AppPostReviewStatus } from '../shared/types/types.posts';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { AppButton, AppHeading, AppModal } from '../ui-components';
-import { AppCheckBox } from '../ui-components/AppCheckBox';
 import { AppParagraph } from '../ui-components/AppParagraph';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
+import { FIRST_PUBLISHED_FLAG } from '../user-login/contexts/ConnectedUserWrapper';
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { usePersist } from '../utils/use.persist';
@@ -33,9 +32,6 @@ import { POSTING_POST_ID } from './PostingPage';
 import { concatenateThread } from './posts.helper';
 
 const DEBUG = false;
-export const FIRST_PUBLISHED_FLAG = 'firstPublished';
-export const AUTO_POST_INVITE_DISABLED = 'autopostInviteDisabled';
-export const REVIEW_AUTOPOST_INTENTION = 'reviewAutopostIntention';
 
 enum PublishPostAction {
   None = 'None',
@@ -50,16 +46,10 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   const [publishing, setPublishing] = useState(false);
   const [reviewedPublished, setReviewedPublished] = useState(false);
 
-  const [showInvite, setShowInvite] = useState(false);
   const [firstPublished, setFirstPublished] = usePersist<boolean>(
     FIRST_PUBLISHED_FLAG,
     false
   );
-  const [autopostInviteDisabled, setAutopostInviteDisabled] =
-    usePersist<boolean>(AUTO_POST_INVITE_DISABLED, false);
-  const [reviewAutopostIntention, setReviewAutopostIntention] =
-    usePersist<boolean>(REVIEW_AUTOPOST_INTENTION, false);
-  const [dontShowAgain, setDontShowAgain] = useState(false);
 
   const navigate = useNavigate();
 
@@ -85,15 +75,6 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     setEnabledEdit,
     nextPostId,
   } = usePost();
-
-  /** count time and open autopost invite modal */
-  useEffect(() => {
-    if (firstPublished && !autopostInviteDisabled) {
-      setTimeout(() => {
-        setShowInvite(true);
-      }, 5000);
-    }
-  }, [firstPublished, autopostInviteDisabled]);
 
   const reset = () => {
     setApproveIntent(false);
@@ -238,15 +219,6 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
         window.focus();
       }
     }
-  };
-
-  const notNow = () => {
-    setShowInvite(false);
-  };
-
-  const reviewSettings = () => {
-    setReviewAutopostIntention(true);
-    navigate(AbsoluteRoutes.Settings);
   };
 
   const action = (() => {
@@ -506,79 +478,6 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     return <></>;
   })();
 
-  const inviteAutopostModal = (() => {
-    if (showInvite) {
-      return (
-        <AppModal type="small" onModalClosed={() => setShowInvite(false)}>
-          <>
-            <Box style={{ flexGrow: 1 }} justify="center">
-              <Box align="center">
-                <BoxCentered
-                  style={{
-                    height: '80px',
-                    width: '80px',
-                    borderRadius: '40px',
-                    backgroundColor: '#CEE2F2',
-                  }}
-                  margin={{ bottom: '16px' }}>
-                  <RobotIcon size={40}></RobotIcon>
-                </BoxCentered>
-                <AppHeading level={3} style={{ textAlign: 'center' }}>
-                  <Trans
-                    i18nKey={I18Keys.autopostInviteTitle}
-                    components={{ br: <br></br> }}></Trans>
-                </AppHeading>
-                <AppParagraph
-                  style={{
-                    marginTop: '8px',
-                    width: '100%',
-                    textAlign: 'center',
-                  }}>
-                  <Trans
-                    i18nKey={I18Keys.autpostInvitePar01}
-                    components={{ b: <b></b> }}></Trans>
-                </AppParagraph>
-                <AppParagraph
-                  style={{
-                    textAlign: 'center',
-                    marginTop: '8px',
-                    marginBottom: '20px',
-                    width: '100%',
-                  }}>
-                  <Trans
-                    i18nKey={I18Keys.autopostInvitePar02}
-                    components={{ b: <b></b> }}></Trans>
-                </AppParagraph>
-                <Box direction="row" margin={{ bottom: '24px' }} gap="12px">
-                  <AppCheckBox
-                    onChange={(e) =>
-                      setAutopostInviteDisabled(e.target.checked)
-                    }
-                    checked={dontShowAgain}></AppCheckBox>
-                  <Box>
-                    <Text size="small">{t(I18Keys.dontShowAgain)}</Text>
-                  </Box>
-                </Box>
-              </Box>
-
-              <Box style={{ width: '100%' }} gap="12px" direction="row">
-                <AppButton
-                  onClick={() => notNow()}
-                  label={t(I18Keys.notNow)}
-                  style={{ width: '100%' }}></AppButton>
-                <AppButton
-                  primary
-                  onClick={() => reviewSettings()}
-                  label={t(I18Keys.reviewSettings)}
-                  style={{ width: '100%' }}></AppButton>
-              </Box>
-            </Box>
-          </>
-        </AppModal>
-      );
-    }
-  })();
-
   if (DEBUG) console.log(publishStatusModal);
 
   const editable = _editable;
@@ -642,7 +541,6 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
           )}
         </Box>
         {publishStatusModal}
-        {inviteAutopostModal}
       </>
     );
   })();

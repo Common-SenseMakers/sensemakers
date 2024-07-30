@@ -6518,7 +6518,7 @@ __webpack_require__.r(__webpack_exports__);
 // Their URLs are injected into the manifest variable below.
 // This variable must be present somewhere in your service worker file,
 // even if you decide not to use precaching. See https://cra.link/PWA
-(0,workbox_precaching__WEBPACK_IMPORTED_MODULE_2__.precacheAndRoute)([{'revision':'68888889ad24de2432a4dd93ac47b6fe','url':'/index.html'},{'revision':'9c476568c709ffa3e7ae5f74b45e5db2','url':'/index.js'}]);
+(0,workbox_precaching__WEBPACK_IMPORTED_MODULE_2__.precacheAndRoute)([{'revision':'68888889ad24de2432a4dd93ac47b6fe','url':'/index.html'},{'revision':'2ef7d7cafa4630a451de88da3960c637','url':'/index.js'}]);
 // Set up App Shell-style routing, so that all navigation requests
 // are fulfilled with your index.html shell. Learn more at
 // https://developers.google.com/web/fundamentals/architecture/app-shell

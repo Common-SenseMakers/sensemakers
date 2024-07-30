@@ -12,7 +12,6 @@ import { TwitterAvatar } from '../app/icons/TwitterAvatar';
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { I18Keys } from '../i18n/i18n';
-import { REVIEW_AUTOPOST_INTENTION } from '../post/PostView';
 import { NotificationFreq } from '../shared/types/types.notifications';
 import {
   AutopostOption,
@@ -24,6 +23,10 @@ import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
+import {
+  REVIEW_AUTOPOST_INTENTION,
+  useConnectedUser,
+} from '../user-login/contexts/ConnectedUserWrapper';
 import { useDisconnectContext } from '../user-login/contexts/DisconnectUserContext';
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { getAccount } from '../user-login/user.helper';
@@ -56,14 +59,14 @@ export const UserSettingsPage = () => {
   const [isSetting, setIsSetting] = useState(false);
   const { disconnect } = useDisconnectContext();
 
+  const { reviewAutopostIntention, setReviewAutopostIntention } =
+    useConnectedUser();
+
   const { connect: connectOrcid } = useOrcidContext();
 
   const [showSettingsPage, setShowSettingsPage] = useState<
     SettingsSections | undefined
   >(undefined);
-
-  const [reviewAutopostIntention, setReviewAutopostIntention] =
-    usePersist<boolean>(REVIEW_AUTOPOST_INTENTION, null);
 
   // receive the autopost invite
   useEffect(() => {
