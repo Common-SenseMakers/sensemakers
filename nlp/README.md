@@ -18,6 +18,14 @@ Code is being developed on Ubuntu 22.04 with Python 3.11
   ```
 - Copy the .env.sample file as .env and fill in the required values
 
+## Generating the ontology
+
+Generate the ontology using the `load_ontology` script. From `nlp` folder run: 
+
+```
+python scripts/load_ontology.py --config=path/to/config
+```
+
 ## Streamlit Demo
 
 ### Local Usage
