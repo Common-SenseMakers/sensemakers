@@ -18,7 +18,7 @@
         "USE_REAL_EMAIL": "false"
       },
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/mocha",
-      "args": ["--config", "./.mocharc.js", "test/__tests__/**/*.test.ts"],
+      "args": ["--config", "./.mocharc.js", "test/__tests__/**/*.ts"],
       "outputCapture": "std",
       "console": "integratedTerminal"
     },
