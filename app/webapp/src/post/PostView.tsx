@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
+import { AppModalStandard } from '../app/AppInfoModal';
 import { CelebrateIcon } from '../app/icons/CelebrateIcon';
 import { ClearIcon } from '../app/icons/ClearIcon';
 import { SendIcon } from '../app/icons/SendIcon';
@@ -14,10 +15,8 @@ import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID } from '../semantics/patterns/patterns';
 import { AppPostReviewStatus } from '../shared/types/types.posts';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
-import { AppButton, AppHeading, AppModal } from '../ui-components';
-import { AppParagraph } from '../ui-components/AppParagraph';
-import { BoxCentered } from '../ui-components/BoxCentered';
-import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
+import { AppButton } from '../ui-components';
+import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { FIRST_PUBLISHED_FLAG } from '../user-login/contexts/ConnectedUserWrapper';
@@ -303,141 +302,111 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
 
   const askOrcid = (() => {
     return (
-      <AppModal type="small" onModalClosed={() => setApproveIntent(false)}>
-        <>
-          <Box width="100%" height="16px"></Box>
-          <AppHeading level="1">{t(I18Keys.connectOrcidTitle)}</AppHeading>
-
-          <Box width="100%" height="16px"></Box>
-          <AppParagraph>{t(I18Keys.connectOrcidPar01)}</AppParagraph>
-          <AppParagraph>
+      <AppModalStandard
+        onModalClosed={() => setApproveIntent(false)}
+        type="normal"
+        contentProps={{
+          type: 'normal',
+          title: t(I18Keys.connectOrcidTitle),
+          parragraphs: [
+            <Trans
+              i18nKey={I18Keys.connectOrcidPar01}
+              components={{ b: <b></b> }}></Trans>,
             <Trans
               i18nKey={I18Keys.connectOrcidPar02}
-              components={{ b: <b></b> }}></Trans>
-          </AppParagraph>
-
-          <AppParagraph addMargin></AppParagraph>
-
-          <Box direction="row" gap="small" margin={{ top: 'medium' }}>
-            <Box width="50%" style={{ flexGrow: 1 }}>
-              <AppButton
-                disabled={isUpdating}
-                onClick={() => connectOrcid()}
-                label={t(I18Keys.connectOrcid)}></AppButton>
-            </Box>
-            <Box width="50%" align="end" gap="small">
-              <AppButton
-                primary
-                disabled={isUpdating}
-                onClick={() => setAskedOrcid(true)}
-                label={t(I18Keys.continue)}
-                style={{ width: '100%' }}></AppButton>
-            </Box>
-          </Box>
-        </>
-      </AppModal>
+              components={{ b: <b></b> }}></Trans>,
+          ],
+          primaryButton: {
+            disabled: isUpdating,
+            label: t(I18Keys.continue),
+            onClick: () => setAskedOrcid(true),
+          },
+          secondaryButton: {
+            disabled: isUpdating,
+            label: t(I18Keys.connectOrcid),
+            onClick: () => connectOrcid(),
+          },
+        }}></AppModalStandard>
     );
   })();
 
   const finalApprove = (() => {
     return (
-      <AppModal type="small" onModalClosed={() => setApproveIntent(false)}>
-        <>
-          <Box width="100%" height="16px"></Box>
-          <AppHeading level="1">{t(I18Keys.publishWarningTitle)}</AppHeading>
-
-          <Box width="100%" height="16px"></Box>
-          <AppParagraph>{t(I18Keys.publishWarningPar01)}</AppParagraph>
-          <AppParagraph addMargin>
+      <AppModalStandard
+        onModalClosed={() => setApproveIntent(false)}
+        type="normal"
+        contentProps={{
+          type: 'normal',
+          title: t(I18Keys.publishWarningTitle),
+          parragraphs: [
+            <Trans
+              i18nKey={I18Keys.publishWarningPar01}
+              components={{ b: <b></b> }}></Trans>,
             <Trans
               i18nKey={I18Keys.publishWarningPar02}
-              components={{ b: <b></b> }}></Trans>
-          </AppParagraph>
-          <AppParagraph addMargin>
+              components={{ b: <b></b> }}></Trans>,
             <Trans
               i18nKey={I18Keys.publishWarningPar03}
-              components={{ b: <b></b> }}></Trans>
-          </AppParagraph>
-
-          <Box direction="row" gap="small" margin={{ top: 'large' }}>
-            <Box width="50%" style={{ flexGrow: 1 }}>
-              <AppButton
-                disabled={isUpdating}
-                onClick={() => reset()}
-                label={t(I18Keys.returnToDraft)}></AppButton>
-            </Box>
-            <Box width="50%" align="end" gap="small">
-              <AppButton
-                primary
-                disabled={isUpdating}
-                onClick={() => approveClicked()}
-                label={t(I18Keys.yesPublish)}
-                style={{ width: '100%' }}></AppButton>
-            </Box>
-          </Box>
-        </>
-      </AppModal>
+              components={{ b: <b></b> }}></Trans>,
+          ],
+          primaryButton: {
+            disabled: isUpdating,
+            label: t(I18Keys.yesPublish),
+            onClick: () => approveClicked(),
+          },
+          secondaryButton: {
+            disabled: isUpdating,
+            label: t(I18Keys.returnToDraft),
+            onClick: () => reset(),
+          },
+        }}></AppModalStandard>
     );
   })();
 
   const publishingModal = (() => {
     return (
-      <AppModal
-        type="small"
-        onModalClosed={() => setPublishing(false)}
-        windowStyle={{ flexGrow: 1 }}>
-        <Box pad="medium" align="center">
-          <AppHeading level="3">{t(I18Keys.publishing)}</AppHeading>
-          <Box pad="24px">
-            <Loading></Loading>
-          </Box>
-        </Box>
-      </AppModal>
+      <AppModalStandard
+        onModalClosed={() => setApproveIntent(false)}
+        type="normal"
+        contentProps={{
+          type: 'normal',
+          title: t(I18Keys.publishing),
+        }}></AppModalStandard>
     );
   })();
 
   const publishedModal = (() => {
     return (
-      <AppModal
-        type="small"
+      <AppModalStandard
         onModalClosed={() => publishedModalClosed(PublishPostAction.None)}
-        windowStyle={{ backgroundColor: '#D1E8DF', flexGrow: 1 }}>
-        <>
-          <Box style={{ flexGrow: 1 }} justify="center">
-            <Box align="center">
-              <BoxCentered
-                style={{
-                  height: '80px',
-                  width: '80px',
-                  borderRadius: '40px',
-                  backgroundColor: '#AECFC2',
-                }}
-                margin={{ bottom: '16px' }}>
-                <CelebrateIcon size={40}></CelebrateIcon>
-              </BoxCentered>
-              <AppHeading level={3}>{t(I18Keys.publishedTitle)}</AppHeading>
-              <AppParagraph style={{ marginTop: '8px', marginBottom: '24px' }}>
-                <Trans
-                  i18nKey={I18Keys.publishedText}
-                  components={{ b: <b></b> }}></Trans>
-              </AppParagraph>
-            </Box>
-
-            <Box style={{ width: '100%' }} gap="12px">
-              <AppButton
-                primary
-                disabled={nextPostId === undefined}
-                onClick={() => openNextPost()}
-                label={t(I18Keys.nextPost)}
-                style={{ width: '100%' }}></AppButton>
-              <AppButton
-                onClick={() => openNanopublication()}
-                label={t(I18Keys.openPublished)}
-                style={{ width: '100%' }}></AppButton>
-            </Box>
-          </Box>
-        </>
-      </AppModal>
+        backgroundColor="#D1E8DF"
+        type="normal"
+        contentProps={{
+          icon: <CelebrateIcon size={40}></CelebrateIcon>,
+          title: t(I18Keys.publishWarningTitle),
+          parragraphs: [
+            <Trans
+              i18nKey={I18Keys.publishWarningPar01}
+              components={{ b: <b></b> }}></Trans>,
+            <Trans
+              i18nKey={I18Keys.publishWarningPar02}
+              components={{ b: <b></b> }}></Trans>,
+            <Trans
+              i18nKey={I18Keys.publishWarningPar03}
+              components={{ b: <b></b> }}></Trans>,
+          ],
+          buttonsDirection: 'column',
+          primaryButton: {
+            disabled: nextPostId === undefined,
+            label: t(I18Keys.nextPost),
+            onClick: () => openNextPost(),
+          },
+          secondaryButton: {
+            disabled: isUpdating,
+            label: t(I18Keys.openPublished),
+            onClick: () => openNanopublication(),
+          },
+        }}></AppModalStandard>
     );
   })();
 

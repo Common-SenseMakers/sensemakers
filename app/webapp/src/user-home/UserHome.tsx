@@ -11,13 +11,14 @@ import { locationToPageIx } from '../app/layout/GlobalNav';
 import { ViewportPageScrollContext } from '../app/layout/Viewport';
 import { I18Keys } from '../i18n/i18n';
 import { PostCard } from '../post/PostCard';
+import { PostCardLoading } from '../post/PostCardLoading';
 import { PostsQueryStatus, UserPostsQuery } from '../shared/types/types.posts';
 import { AppButton, AppHeading, AppModal, AppSelect } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { usePersist } from '../utils/use.persist';
-import { IntroModal } from './IntroModal';
+import { IntroModals } from './IntroModal';
 import { useUserPosts } from './UserPostsContext';
 
 const statusPretty: Record<PostsQueryStatus, string> = {
@@ -134,12 +135,8 @@ export const UserHome = () => {
 
   const content = (() => {
     if (!posts || isLoading) {
-      return [1, 2, 4, 5, 6].map((ix) => (
-        <LoadingDiv
-          key={ix}
-          height="220px"
-          width="100%"
-          margin={{ bottom: '2px' }}></LoadingDiv>
+      return [1, 2, 4, 5, 6, 7, 8].map((ix) => (
+        <PostCardLoading key={ix}></PostCardLoading>
       ));
     }
 
@@ -293,11 +290,8 @@ export const UserHome = () => {
   const modal = (() => {
     if (showIntro) {
       return (
-        <AppModal
-          type="small"
-          onModalClosed={() => closeIntro()}
-          layerProps={{}}>
-          <IntroModal closeModal={() => closeIntro()}></IntroModal>
+        <AppModal type="small" onModalClosed={() => closeIntro()}>
+          <IntroModals closeModal={() => closeIntro()}></IntroModals>
         </AppModal>
       );
     }
