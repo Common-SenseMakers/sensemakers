@@ -96,7 +96,7 @@ export class TwitterService
     try {
       const _searchParams: Tweetv2SearchParams = {
         query: `conversation_id:${post_id} from:${userDetails.user_id}`,
-        max_results: 30,
+        max_results: MAX_TWEETS > 100 ? 100 : MAX_TWEETS,
         expansions,
         'tweet.fields': tweetFields,
       };
@@ -104,7 +104,6 @@ export class TwitterService
       let nextToken: string | undefined = undefined;
       let originalAuthor: UserV2 | undefined = undefined;
       let allTweets: AppTweet[] = [];
-      let conversationIds: Set<string> = new Set();
 
       do {
         const searchParams = _searchParams;
@@ -114,7 +113,7 @@ export class TwitterService
 
         try {
           const result = await readOnlyClient.v2.search(searchParams);
-
+          const tweetResults = result.data.data;
           if (result.meta.result_count > 0) {
             if (result.data.data === undefined) {
               throw new Error('Unexpected undefined data');
@@ -123,19 +122,23 @@ export class TwitterService
             if (result.data.includes === undefined) {
               throw new Error('Unexpected undefined data');
             }
+            /* if original tweet is not yet included, make sure to inlude it */
+            if (
+              !tweetResults.some((tweet) => tweet.id === post_id) &&
+              !allTweets.some((tweet) => tweet.id === post_id)
+            ) {
+              const originalTweet = result.data.includes?.tweets?.find(
+                (refTweet) => refTweet.id === post_id
+              );
+              if (originalTweet) {
+                tweetResults.push(originalTweet);
+              }
+            }
 
             const appTweets = convertToAppTweets(
-              result.data.data,
+              tweetResults,
               result.data.includes
             );
-            /** keep track of the number of threads */
-            appTweets.forEach((tweet) => {
-              if (tweet.conversation_id) {
-                conversationIds.add(tweet.conversation_id);
-              } else {
-                throw new Error('tweet does not have a conversation_id');
-              }
-            });
 
             if (!originalAuthor) {
               originalAuthor = result.data.includes?.users?.find(
@@ -149,7 +152,7 @@ export class TwitterService
         } catch (e: any) {
           if (e.rateLimit) {
             /** if we hit the rate limit after haven gotten some tweets, return what we got so far  */
-            if (conversationIds.size > 0) {
+            if (allTweets.length > 0) {
               break;
             } else {
               /** otherwise throw */
