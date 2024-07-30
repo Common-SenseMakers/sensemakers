@@ -144,19 +144,8 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     nanopubDraft &&
     !postStatuses.published;
 
-  const { action: rightClicked, label: rightLabel } = (() => {
-    if (canPublishNanopub && nanopubDraft && !postStatuses.published) {
-      return {
-        action: () => setApproveIntent(true),
-        label: t(I18Keys.publish),
-      };
-    }
-
-    return {
-      action: () => {},
-      label: '',
-    };
-  })();
+  const readyToNanopublish =
+    canPublishNanopub && nanopubDraft && !postStatuses.published;
 
   const connectOrcid = () => {
     if (post) {
@@ -232,6 +221,17 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       );
     }
 
+    if (postStatuses.ignored) {
+      return (
+        <AppButton
+          disabled={isUpdating}
+          margin={{ top: 'medium' }}
+          primary
+          onClick={() => reviewForPublication()}
+          label="Review for publication"></AppButton>
+      );
+    }
+
     if (!postStatuses.published && !postStatuses.ignored) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
@@ -245,59 +245,63 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
           <Box width="50%" align="end" gap="small">
             <AppButton
               primary
-              disabled={isUpdating}
+              disabled={isUpdating || !readyToNanopublish}
               icon={<SendIcon></SendIcon>}
-              onClick={() => rightClicked()}
-              label={rightLabel}
+              onClick={() => setApproveIntent(true)}
+              label={t(I18Keys.publish)}
               style={{ width: '100%' }}></AppButton>
           </Box>
         </Box>
       );
-    } else {
-      if (!enabledEdit) {
-        return (
-          <Box direction="row" gap="small" margin={{ top: 'medium' }}>
-            <Box width="50%" style={{ flexGrow: 1 }}>
-              <AppButton
-                disabled={isUpdating}
-                icon={<ClearIcon></ClearIcon>}
-                onClick={() => retract()}
-                label={t(I18Keys.retract)}></AppButton>
-            </Box>
-            <Box width="50%" align="end" gap="small">
-              <AppButton
-                primary
-                disabled={isUpdating}
-                icon={<SendIcon></SendIcon>}
-                onClick={() => enableEditOrUpdate()}
-                label={t(I18Keys.edit)}
-                style={{ width: '100%' }}></AppButton>
-            </Box>
-          </Box>
-        );
-      } else {
-        return (
-          <Box direction="row" gap="small" margin={{ top: 'medium' }}>
-            <Box width="50%" style={{ flexGrow: 1 }}>
-              <AppButton
-                disabled={isUpdating}
-                icon={<ClearIcon></ClearIcon>}
-                onClick={() => cancelEdit()}
-                label={t(I18Keys.cancel)}></AppButton>
-            </Box>
-            <Box width="50%" align="end" gap="small">
-              <AppButton
-                primary
-                disabled={isUpdating}
-                icon={<SendIcon></SendIcon>}
-                onClick={() => enableEditOrUpdate()}
-                label={t(I18Keys.publish)}
-                style={{ width: '100%' }}></AppButton>
-            </Box>
-          </Box>
-        );
-      }
     }
+
+    if (postStatuses.published && !enabledEdit) {
+      return (
+        <Box direction="row" gap="small" margin={{ top: 'medium' }}>
+          <Box width="50%" style={{ flexGrow: 1 }}>
+            <AppButton
+              disabled={isUpdating}
+              icon={<ClearIcon></ClearIcon>}
+              onClick={() => retract()}
+              label={t(I18Keys.retract)}></AppButton>
+          </Box>
+          <Box width="50%" align="end" gap="small">
+            <AppButton
+              primary
+              disabled={isUpdating}
+              icon={<SendIcon></SendIcon>}
+              onClick={() => enableEditOrUpdate()}
+              label={t(I18Keys.edit)}
+              style={{ width: '100%' }}></AppButton>
+          </Box>
+        </Box>
+      );
+    }
+
+    if (postStatuses.published && enabledEdit) {
+      return (
+        <Box direction="row" gap="small" margin={{ top: 'medium' }}>
+          <Box width="50%" style={{ flexGrow: 1 }}>
+            <AppButton
+              disabled={isUpdating}
+              icon={<ClearIcon></ClearIcon>}
+              onClick={() => cancelEdit()}
+              label={t(I18Keys.cancel)}></AppButton>
+          </Box>
+          <Box width="50%" align="end" gap="small">
+            <AppButton
+              primary
+              disabled={isUpdating}
+              icon={<SendIcon></SendIcon>}
+              onClick={() => enableEditOrUpdate()}
+              label={t(I18Keys.publish)}
+              style={{ width: '100%' }}></AppButton>
+          </Box>
+        </Box>
+      );
+    }
+
+    return <></>;
   })();
 
   const askOrcid = (() => {
@@ -498,16 +502,6 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
               include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
           )}
           {action}
-          {postStatuses.ignored ? (
-            <AppButton
-              disabled={isUpdating}
-              margin={{ top: 'medium' }}
-              primary
-              onClick={() => reviewForPublication()}
-              label="Review for publication"></AppButton>
-          ) : (
-            <></>
-          )}
         </Box>
         {publishStatusModal}
       </>
