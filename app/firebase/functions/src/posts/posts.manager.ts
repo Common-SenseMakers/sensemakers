@@ -103,7 +103,16 @@ export class PostsManager {
     }
 
     const platformPost = await platform.get(post_id, account, manager);
-    return platformPost;
+    const platformPostCreate = this.initPlatformPost(platformId, platformPost);
+    const platformPostCreated = await this.processing.createPlatformPost(
+      platformPostCreate,
+      manager
+    );
+    if (!platformPostCreated) {
+      throw new Error(`PlatformPost already exists: ${post_id}`);
+    }
+
+    return platformPostCreated;
   }
 
   private async fetchUserFromPlatform(
