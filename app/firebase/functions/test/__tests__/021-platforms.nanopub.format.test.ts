@@ -14,6 +14,7 @@ import { buildAppIntroNp } from '../../src/platforms/nanopub/create.app.intro.na
 import { createIntroNanopublication } from '../../src/platforms/nanopub/create.intro.nanopub';
 import { createNanopublication } from '../../src/platforms/nanopub/create.nanopub';
 import { NanopubService } from '../../src/platforms/nanopub/nanopub.service';
+import { buildIntroNp } from '../../src/platforms/nanopub/utils';
 import { TimeService } from '../../src/time/time.service';
 import { getNanopubProfile } from '../utils/nanopub.profile';
 import { getMockPost } from '../utils/posts.utils';
@@ -167,11 +168,24 @@ describe('nanopublication format', () => {
     )) as Nanopub;
     expect(fetchedPub).to.not.be.undefined;
 
-    /** update the intro nanopublication */
-    const updatedIntroNanopub = await createIntroNanopublication(
-      profile,
-      true,
-      published.info().published
+    /** update the intro nanopublication with twitter info */
+    const updatedIntroNanopub = await buildIntroNp(
+      profile.ethAddress,
+      profile.rsaPublickey,
+      profile.ethToRsaSignature,
+      {
+        signDelegation: true,
+        supersedesOptions: {
+          root: published.info().uri,
+          latest: published.info().uri,
+        },
+        author: {
+          platformId: PLATFORM.Twitter,
+          id: '1773032135814717440',
+          username: 'sense_nets_bot',
+          name: 'SenseNet Bot',
+        },
+      }
     );
 
     if (!updatedIntroNanopub) {
@@ -197,6 +211,58 @@ describe('nanopublication format', () => {
       updatedPublished.info().published
     )) as Nanopub;
     expect(updatedFetchedPub).to.not.be.undefined;
+
+    /** update the intro nanopublication with orcid id */
+    const orcidUpdatedIntroNanopub = await buildIntroNp(
+      profile.ethAddress,
+      profile.rsaPublickey,
+      profile.ethToRsaSignature,
+      {
+        signDelegation: true,
+        supersedesOptions: {
+          root: published.info().uri,
+          latest: published.info().uri,
+        },
+        author: {
+          platformId: PLATFORM.Twitter,
+          id: '1773032135814717440',
+          username: 'sense_nets_bot',
+          name: 'SenseNet Bot',
+        },
+        orcidId: '0000-0000-0000-0000',
+      }
+    );
+
+    if (!orcidUpdatedIntroNanopub) {
+      throw new Error('Post not created');
+    }
+
+    const orcidUpdatedSigned = await signNanopublication(
+      orcidUpdatedIntroNanopub.rdf(),
+      rsaKeys,
+      ''
+    );
+    expect(orcidUpdatedSigned).to.not.be.undefined;
+
+    const orcidUpdatedPublished: Nanopub = await orcidUpdatedSigned.publish(
+      undefined,
+      nanopubServer
+    );
+
+    expect(orcidUpdatedPublished).to.not.be.undefined;
+    if (DEBUG)
+      logger.debug(
+        'orcid update published at: ',
+        orcidUpdatedPublished.info().published
+      );
+    console.log(
+      'orcid update published at: ',
+      orcidUpdatedPublished.info().published
+    );
+    const orcidUpdatedFetchedPub = (await Nanopub.fetch(
+      orcidUpdatedPublished.info().published
+    )) as Nanopub;
+    expect(orcidUpdatedFetchedPub).to.not.be.undefined;
   });
 
   it('publishes a correctly formatted mock app intro nanopub to the test server', async () => {
