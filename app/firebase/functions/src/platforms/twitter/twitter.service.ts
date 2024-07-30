@@ -1,4 +1,6 @@
+import fs from 'fs';
 import {
+  TweetSearchRecentV2Paginator,
   TweetV2UserTimelineParams,
   Tweetv2FieldsParams,
   Tweetv2SearchParams,
@@ -63,6 +65,7 @@ export interface TwitterApiCredentials {
 }
 
 const DEBUG = false;
+const USE_CACHE = true;
 
 /** Twitter service handles all interactions with Twitter API */
 export class TwitterService
@@ -74,12 +77,19 @@ export class TwitterService
       TwitterUserDetails
     >
 {
+  protected cache: any;
+
   constructor(
     protected time: TimeService,
     protected usersRepo: UsersRepository,
     protected apiCredentials: TwitterApiCredentials
   ) {
     super(time, usersRepo, apiCredentials);
+    if (fs.existsSync('twitterApiCache.json')) {
+      this.cache = JSON.parse(fs.readFileSync('twitterApiCache.json', 'utf8'));
+    } else {
+      this.cache = {};
+    }
   }
 
   async get(
@@ -112,7 +122,30 @@ export class TwitterService
         }
 
         try {
-          const result = await readOnlyClient.v2.search(searchParams);
+          // const result = await readOnlyClient.v2.search(searchParams);
+          const result = await (async () => {
+            if (USE_CACHE) {
+              if (
+                this.cache['search'] &&
+                this.cache['search'][JSON.stringify(searchParams)]
+              ) {
+                return this.cache['search'][
+                  JSON.stringify(searchParams)
+                ] as TweetSearchRecentV2Paginator;
+              } else {
+                const result = await readOnlyClient.v2.search(searchParams);
+                this.cache['search'] = this.cache['search'] || {};
+                this.cache['search'][JSON.stringify(searchParams)] = result;
+                fs.writeFileSync(
+                  'twitterApiCache.json',
+                  JSON.stringify(this.cache)
+                );
+                return result;
+              }
+            } else {
+              return await readOnlyClient.v2.search(searchParams);
+            }
+          })();
           const tweetResults = result.data.data;
           if (result.meta.result_count > 0) {
             if (result.data.data === undefined) {
