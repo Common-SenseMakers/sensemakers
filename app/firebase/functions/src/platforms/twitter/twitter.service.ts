@@ -1,9 +1,9 @@
 import fs from 'fs';
 import {
-  TweetSearchRecentV2Paginator,
   TweetV2UserTimelineParams,
   Tweetv2FieldsParams,
   Tweetv2SearchParams,
+  Tweetv2SearchResult,
   UserV2,
 } from 'twitter-api-v2';
 
@@ -65,7 +65,7 @@ export interface TwitterApiCredentials {
 }
 
 const DEBUG = false;
-const USE_CACHE = true;
+const USE_CACHE = false;
 
 /** Twitter service handles all interactions with Twitter API */
 export class TwitterService
@@ -122,16 +122,15 @@ export class TwitterService
         }
 
         try {
-          // const result = await readOnlyClient.v2.search(searchParams);
           const result = await (async () => {
             if (USE_CACHE) {
               if (
                 this.cache['search'] &&
                 this.cache['search'][JSON.stringify(searchParams)]
               ) {
-                return this.cache['search'][
-                  JSON.stringify(searchParams)
-                ] as TweetSearchRecentV2Paginator;
+                return this.cache['search'][JSON.stringify(searchParams)][
+                  '_realData'
+                ] as Tweetv2SearchResult;
               } else {
                 const result = await readOnlyClient.v2.search(searchParams);
                 this.cache['search'] = this.cache['search'] || {};
@@ -140,19 +139,20 @@ export class TwitterService
                   'twitterApiCache.json',
                   JSON.stringify(this.cache)
                 );
-                return result;
+                return result.data;
               }
             } else {
-              return await readOnlyClient.v2.search(searchParams);
+              const result = await readOnlyClient.v2.search(searchParams);
+              return result.data;
             }
           })();
-          const tweetResults = result.data.data;
+          const tweetResults = result.data;
           if (result.meta.result_count > 0) {
-            if (result.data.data === undefined) {
+            if (result.data === undefined) {
               throw new Error('Unexpected undefined data');
             }
 
-            if (result.data.includes === undefined) {
+            if (result.includes === undefined) {
               throw new Error('Unexpected undefined data');
             }
             /* if original tweet is not yet included, make sure to inlude it */
@@ -160,7 +160,7 @@ export class TwitterService
               !tweetResults.some((tweet) => tweet.id === post_id) &&
               !allTweets.some((tweet) => tweet.id === post_id)
             ) {
-              const originalTweet = result.data.includes?.tweets?.find(
+              const originalTweet = result.includes?.tweets?.find(
                 (refTweet) => refTweet.id === post_id
               );
               if (originalTweet) {
@@ -168,13 +168,10 @@ export class TwitterService
               }
             }
 
-            const appTweets = convertToAppTweets(
-              tweetResults,
-              result.data.includes
-            );
+            const appTweets = convertToAppTweets(tweetResults, result.includes);
 
             if (!originalAuthor) {
-              originalAuthor = result.data.includes?.users?.find(
+              originalAuthor = result.includes?.users?.find(
                 (user) => user.id === userDetails.user_id
               );
             }
