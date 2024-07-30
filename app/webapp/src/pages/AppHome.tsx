@@ -26,7 +26,7 @@ export const AppHome = (props: {}) => {
         return [1, 2, 4, 5, 6, 7, 8].map((ix) => (
           <LoadingDiv
             key={ix}
-            height="108px"
+            height="220px"
             width="100%"
             margin={{ bottom: '2px' }}></LoadingDiv>
         ));

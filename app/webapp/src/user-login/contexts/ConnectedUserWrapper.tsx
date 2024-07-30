@@ -70,11 +70,22 @@ export const ConnectedUserWrapper = (props: PropsWithChildren) => {
   /** count time and open autopost invite modal */
   useEffect(() => {
     if (firstPublished && !autopostInviteDisabled) {
-      setTimeout(() => {
+      const to = setTimeout(() => {
         setShowInvite(true);
       }, 2500);
+      return () => clearTimeout(to);
     }
   }, [firstPublished, autopostInviteDisabled]);
+
+  const notNow = () => {
+    setShowInvite(false);
+  };
+
+  const reviewSettings = () => {
+    setShowInvite(false);
+    setReviewAutopostIntention(true);
+    navigate(AbsoluteRoutes.Settings);
+  };
 
   const inviteAutopostModal = (() => {
     if (showInvite) {
@@ -148,15 +159,6 @@ export const ConnectedUserWrapper = (props: PropsWithChildren) => {
       );
     }
   })();
-
-  const notNow = () => {
-    setShowInvite(false);
-  };
-
-  const reviewSettings = () => {
-    setReviewAutopostIntention(true);
-    navigate(AbsoluteRoutes.Settings);
-  };
 
   return (
     <ConnectedUserWrapperValue.Provider
