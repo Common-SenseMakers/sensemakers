@@ -279,7 +279,6 @@ export const UserHome = () => {
         flexShrink: 0,
         minHeight: '40px',
       }}>
-      {installer}
       {updater}
       <Box direction="row" justify="between" align="center">
         <Box direction="row" align="center" gap="12px">
