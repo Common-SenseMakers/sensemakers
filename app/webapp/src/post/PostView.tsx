@@ -1,11 +1,12 @@
-import { Box } from 'grommet';
+import { Box, Text } from 'grommet';
 import { Refresh } from 'grommet-icons';
-import { useEffect, useState } from 'react';
+import { act, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { CelebrateIcon } from '../app/icons/CelebrateIcon';
 import { ClearIcon } from '../app/icons/ClearIcon';
+import { RobotIcon } from '../app/icons/RobotIcon';
 import { SendIcon } from '../app/icons/SendIcon';
 import { ViewportPage } from '../app/layout/Viewport';
 import { I18Keys } from '../i18n/i18n';
@@ -15,6 +16,7 @@ import { PATTERN_ID } from '../semantics/patterns/patterns';
 import { AppPostReviewStatus } from '../shared/types/types.posts';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { AppButton, AppHeading, AppModal } from '../ui-components';
+import { AppCheckBox } from '../ui-components/AppCheckBox';
 import { AppParagraph } from '../ui-components/AppParagraph';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
@@ -31,6 +33,15 @@ import { POSTING_POST_ID } from './PostingPage';
 import { concatenateThread } from './posts.helper';
 
 const DEBUG = false;
+export const FIRST_PUBLISHED_FLAG = 'firstPublished';
+export const AUTO_POST_INVITE_DISABLED = 'autopostInviteDisabled';
+export const REVIEW_AUTOPOST_INTENTION = 'reviewAutopostIntention';
+
+enum PublishPostAction {
+  None = 'None',
+  openNanopublication = 'openNanopublication',
+  nextPost = 'nextPost',
+}
 
 /** extract the postId from the route and pass it to a PostContext */
 export const PostView = (props: {
@@ -40,7 +51,18 @@ export const PostView = (props: {
   const [approveIntent, setApproveIntent] = useState(false);
   const [askedOrcid, setAskedOrcid] = useState(false);
   const [publishing, setPublishing] = useState(false);
-  const [reviewedPublished, setReviewPublished] = useState(false);
+  const [reviewedPublished, setReviewedPublished] = useState(false);
+
+  const [showInvite, setShowInvite] = useState(false);
+  const [firstPublished, setFirstPublished] = usePersist<boolean>(
+    FIRST_PUBLISHED_FLAG,
+    false
+  );
+  const [autopostInviteDisabled, setAutopostInviteDisabled] =
+    usePersist<boolean>(AUTO_POST_INVITE_DISABLED, false);
+  const [reviewAutopostIntention, setReviewAutopostIntention] =
+    usePersist<boolean>(REVIEW_AUTOPOST_INTENTION, false);
+  const [dontShowAgain, setDontShowAgain] = useState(false);
 
   const navigate = useNavigate();
 
@@ -67,11 +89,20 @@ export const PostView = (props: {
     nextPostId,
   } = usePost();
 
+  /** count time and open autopost invite modal */
+  useEffect(() => {
+    if (firstPublished && !autopostInviteDisabled) {
+      setTimeout(() => {
+        setShowInvite(true);
+      }, 5000);
+    }
+  }, [firstPublished, autopostInviteDisabled]);
+
   const reset = () => {
     setApproveIntent(false);
     setAskedOrcid(false);
     setPublishing(false);
-    setReviewPublished(false);
+    setReviewedPublished(false);
     setPostingPostId(null);
   };
 
@@ -177,6 +208,26 @@ export const PostView = (props: {
     }
   }, [postStatuses]);
 
+  // single place to receive the last step of the publishing process
+  const publishedModalClosed = (action: PublishPostAction) => {
+    setFirstPublished(true);
+
+    if (action === PublishPostAction.None) {
+      setReviewedPublished(true);
+      return;
+    }
+
+    if (action === PublishPostAction.openNanopublication) {
+      openNanopublication();
+      return;
+    }
+
+    if (action === PublishPostAction.nextPost) {
+      openNextPost();
+      return;
+    }
+  };
+
   const openNextPost = () => {
     if (nextPostId) {
       navigate(AbsoluteRoutes.Post(nextPostId));
@@ -190,6 +241,15 @@ export const PostView = (props: {
         window.focus();
       }
     }
+  };
+
+  const notNow = () => {
+    setShowInvite(false);
+  };
+
+  const reviewSettings = () => {
+    setReviewAutopostIntention(true);
+    navigate(AbsoluteRoutes.Settings);
   };
 
   const action = (() => {
@@ -371,7 +431,7 @@ export const PostView = (props: {
     return (
       <AppModal
         type="small"
-        onModalClosed={() => setReviewPublished(true)}
+        onModalClosed={() => publishedModalClosed(PublishPostAction.None)}
         windowStyle={{ backgroundColor: '#D1E8DF', flexGrow: 1 }}>
         <>
           <Box style={{ flexGrow: 1 }} justify="center">
@@ -449,6 +509,79 @@ export const PostView = (props: {
     return <></>;
   })();
 
+  const inviteAutopostModal = (() => {
+    if (showInvite) {
+      return (
+        <AppModal type="small" onModalClosed={() => setShowInvite(false)}>
+          <>
+            <Box style={{ flexGrow: 1 }} justify="center">
+              <Box align="center">
+                <BoxCentered
+                  style={{
+                    height: '80px',
+                    width: '80px',
+                    borderRadius: '40px',
+                    backgroundColor: '#CEE2F2',
+                  }}
+                  margin={{ bottom: '16px' }}>
+                  <RobotIcon size={40}></RobotIcon>
+                </BoxCentered>
+                <AppHeading level={3} style={{ textAlign: 'center' }}>
+                  <Trans
+                    i18nKey={I18Keys.autopostInviteTitle}
+                    components={{ br: <br></br> }}></Trans>
+                </AppHeading>
+                <AppParagraph
+                  style={{
+                    marginTop: '8px',
+                    width: '100%',
+                    textAlign: 'center',
+                  }}>
+                  <Trans
+                    i18nKey={I18Keys.autpostInvitePar01}
+                    components={{ b: <b></b> }}></Trans>
+                </AppParagraph>
+                <AppParagraph
+                  style={{
+                    textAlign: 'center',
+                    marginTop: '8px',
+                    marginBottom: '20px',
+                    width: '100%',
+                  }}>
+                  <Trans
+                    i18nKey={I18Keys.autopostInvitePar02}
+                    components={{ b: <b></b> }}></Trans>
+                </AppParagraph>
+                <Box direction="row" margin={{ bottom: '24px' }} gap="12px">
+                  <AppCheckBox
+                    onChange={(e) =>
+                      setAutopostInviteDisabled(e.target.checked)
+                    }
+                    checked={dontShowAgain}></AppCheckBox>
+                  <Box>
+                    <Text size="small">{t(I18Keys.dontShowAgain)}</Text>
+                  </Box>
+                </Box>
+              </Box>
+
+              <Box style={{ width: '100%' }} gap="12px" direction="row">
+                <AppButton
+                  onClick={() => notNow()}
+                  label={t(I18Keys.notNow)}
+                  style={{ width: '100%' }}></AppButton>
+                <AppButton
+                  primary
+                  onClick={() => reviewSettings()}
+                  label={t(I18Keys.reviewSettings)}
+                  style={{ width: '100%' }}></AppButton>
+              </Box>
+            </Box>
+          </>
+        </AppModal>
+      );
+    }
+  })();
+
   if (DEBUG) console.log(publishStatusModal);
 
   const editable = _editable && !props.isProfile;
@@ -513,6 +646,7 @@ export const PostView = (props: {
           )}
         </Box>
         {publishStatusModal}
+        {inviteAutopostModal}
       </>
     );
   })();

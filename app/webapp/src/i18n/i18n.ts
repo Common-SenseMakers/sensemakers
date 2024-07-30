@@ -133,6 +133,15 @@ export enum I18Keys {
   publishingAutomationOpt2Desc = 's073',
   publishingAutomationOpt3Title = 's074',
   publishingAutomationOpt3Desc = 's075',
+
+  autopostInviteTitle = 's076',
+  autpostInvitePar01 = 's077',
+  autopostInvitePar02 = 's078',
+
+  dontShowAgain = 's079',
+
+  reviewSettings = 's080',
+  notNow = 's081',
 }
 
 const check = new Set();
@@ -307,6 +316,16 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.publishingAutomationOpt3Title]: 'Supervised publishing',
   [I18Keys.publishingAutomationOpt3Desc]:
     'Receive a notification when a new science post is detected, and manually review it before publishing.',
+
+  [I18Keys.autopostInviteTitle]:
+    'Make your content FAIR,<br> without even thinking about it.',
+  [I18Keys.autpostInvitePar01]:
+    'Nanopublishing could be even easier. Take control of your content by choosing how you’d like future posts to be nanopublished. ',
+  [I18Keys.autopostInvitePar02]: 'You can always change this in your settings.',
+
+  [I18Keys.dontShowAgain]: 'Don’t show this message again',
+  [I18Keys.reviewSettings]: 'Review settings',
+  [I18Keys.notNow]: 'Not now',
 };
 
 i18n.use(initReactI18next).init({

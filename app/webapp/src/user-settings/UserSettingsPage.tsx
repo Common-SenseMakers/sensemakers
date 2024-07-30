@@ -1,5 +1,5 @@
 import { Box, Text } from 'grommet';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useAppFetch } from '../api/app.fetch';
@@ -12,21 +12,21 @@ import { TwitterAvatar } from '../app/icons/TwitterAvatar';
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { I18Keys } from '../i18n/i18n';
+import { REVIEW_AUTOPOST_INTENTION } from '../post/PostView';
 import { NotificationFreq } from '../shared/types/types.notifications';
 import {
   AutopostOption,
   PLATFORM,
   UserSettingsUpdate,
 } from '../shared/types/types.user';
-import { AppButton, AppHeading } from '../ui-components';
-import { AppRadioButtom } from '../ui-components/AppRadioButton';
+import { AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
-import { useDisconnectContext } from '../user-login/contexts/DisconnectUserContext';
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { getAccount } from '../user-login/user.helper';
+import { usePersist } from '../utils/use.persist';
 import { PlatformSection } from './PlatformsSection';
 import { SettingsOptionSelector } from './SettingsOptionsSelector';
 import { SettingsSection, SettingsSections } from './SettingsSection';
@@ -59,7 +59,18 @@ export const UserSettingsPage = () => {
     SettingsSections | undefined
   >(undefined);
 
-  const setSettings = (newSettings: UserSettingsUpdate) => {
+  const [reviewAutopostIntention, setReviewAutopostIntention] =
+    usePersist<boolean>(REVIEW_AUTOPOST_INTENTION, null);
+
+  // receive the autopost invite
+  useEffect(() => {
+    if (reviewAutopostIntention) {
+      setReviewAutopostIntention(false);
+      setShowSettingsPage(SettingsSections.Autopost);
+    }
+  }, [reviewAutopostIntention]);
+
+  const setSettings = async (newSettings: UserSettingsUpdate) => {
     return appFetch('/api/auth/settings', newSettings).then(() => {
       setIsSetting(false);
       refresh();
