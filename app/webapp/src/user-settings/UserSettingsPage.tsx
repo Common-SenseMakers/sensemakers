@@ -23,7 +23,7 @@ import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
-import { useConnectedUser } from '../user-login/contexts/ConnectedUserWrapper';
+import { useAutopostInviteContext } from '../user-login/contexts/AutopostInviteContext';
 import { useDisconnectContext } from '../user-login/contexts/DisconnectUserContext';
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { getAccount } from '../user-login/user.helper';
@@ -56,17 +56,20 @@ export const UserSettingsPage = () => {
 
   const { connect: connectOrcid } = useOrcidContext();
 
+  const { reviewAutopostIntention, setReviewAutopostIntention } =
+    useAutopostInviteContext();
+
   const [showSettingsPage, setShowSettingsPage] = useState<
     SettingsSections | undefined
   >(undefined);
 
-  // // receive the autopost invite
-  // useEffect(() => {
-  //   if (reviewAutopostIntention) {
-  //     setReviewAutopostIntention(false);
-  //     setShowSettingsPage(SettingsSections.Autopost);
-  //   }
-  // }, [reviewAutopostIntention]);
+  // receive the autopost invite
+  useEffect(() => {
+    if (reviewAutopostIntention) {
+      setReviewAutopostIntention(false);
+      setShowSettingsPage(SettingsSections.Autopost);
+    }
+  }, [reviewAutopostIntention]);
 
   const setSettings = async (newSettings: UserSettingsUpdate) => {
     return appFetch('/api/auth/settings', newSettings).then(() => {
