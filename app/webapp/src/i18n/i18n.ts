@@ -148,6 +148,9 @@ export enum I18Keys {
   today = 's084',
   thisWeek = 's085',
   thisMonth = 's086',
+
+  noPostsFound = 's087',
+  noPostsFoundDesc = 's088',
 }
 
 const check = new Set();
@@ -339,6 +342,8 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.today]: 'today',
   [I18Keys.thisWeek]: 'this week',
   [I18Keys.thisMonth]: 'this month',
+  [I18Keys.noPostsFound]: 'No posts found',
+  [I18Keys.noPostsFoundDesc]: 'We couldn’t find any posts.',
 };
 
 i18n.use(initReactI18next).init({

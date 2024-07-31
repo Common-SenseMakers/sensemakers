@@ -1,5 +1,3 @@
-import { PLATFORM } from './shared/types/types.user';
-
 export const RouteNames = {
   AppHome: '',
   Post: 'post',

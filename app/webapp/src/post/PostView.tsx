@@ -19,7 +19,7 @@ import { AppButton } from '../ui-components';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
-import { FIRST_PUBLISHED_FLAG } from '../user-login/contexts/ConnectedUserWrapper';
+import { useAutopostInviteContext } from '../user-login/contexts/AutopostInviteContext';
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { usePersist } from '../utils/use.persist';
@@ -45,10 +45,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   const [publishing, setPublishing] = useState(false);
   const [reviewedPublished, setReviewedPublished] = useState(false);
 
-  const [firstPublished, setFirstPublished] = usePersist<boolean>(
-    FIRST_PUBLISHED_FLAG,
-    false
-  );
+  const { setJustPublished } = useAutopostInviteContext();
 
   const navigate = useNavigate();
 
@@ -176,7 +173,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
 
   // single place to receive the last step of the publishing process
   const publishedModalClosed = (action: PublishPostAction) => {
-    setFirstPublished(true);
+    setJustPublished(true);
 
     if (action === PublishPostAction.None) {
       setReviewedPublished(true);

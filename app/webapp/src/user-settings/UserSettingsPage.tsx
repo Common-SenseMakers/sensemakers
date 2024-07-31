@@ -23,15 +23,10 @@ import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
-import {
-  REVIEW_AUTOPOST_INTENTION,
-  useConnectedUser,
-} from '../user-login/contexts/ConnectedUserWrapper';
+import { useConnectedUser } from '../user-login/contexts/ConnectedUserWrapper';
 import { useDisconnectContext } from '../user-login/contexts/DisconnectUserContext';
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { getAccount } from '../user-login/user.helper';
-import { cap } from '../utils/general';
-import { usePersist } from '../utils/use.persist';
 import { PlatformSection } from './PlatformsSection';
 import { SettingsOptionSelector } from './SettingsOptionsSelector';
 import { SettingsSection, SettingsSections } from './SettingsSection';
@@ -59,22 +54,19 @@ export const UserSettingsPage = () => {
   const [isSetting, setIsSetting] = useState(false);
   const { disconnect } = useDisconnectContext();
 
-  const { reviewAutopostIntention, setReviewAutopostIntention } =
-    useConnectedUser();
-
   const { connect: connectOrcid } = useOrcidContext();
 
   const [showSettingsPage, setShowSettingsPage] = useState<
     SettingsSections | undefined
   >(undefined);
 
-  // receive the autopost invite
-  useEffect(() => {
-    if (reviewAutopostIntention) {
-      setReviewAutopostIntention(false);
-      setShowSettingsPage(SettingsSections.Autopost);
-    }
-  }, [reviewAutopostIntention]);
+  // // receive the autopost invite
+  // useEffect(() => {
+  //   if (reviewAutopostIntention) {
+  //     setReviewAutopostIntention(false);
+  //     setShowSettingsPage(SettingsSections.Autopost);
+  //   }
+  // }, [reviewAutopostIntention]);
 
   const setSettings = async (newSettings: UserSettingsUpdate) => {
     return appFetch('/api/auth/settings', newSettings).then(() => {

@@ -3,9 +3,11 @@ import { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 
+import { ModalContent } from '../app/AppInfoModal';
 import { useServiceWorker } from '../app/ServiceWorkerContext';
 import { useToastContext } from '../app/ToastsContext';
 import { FilterIcon } from '../app/icons/FilterIcon';
+import { HmmIcon } from '../app/icons/HmmIcon';
 import { ReloadIcon } from '../app/icons/ReloadIcon';
 import { locationToPageIx } from '../app/layout/GlobalNav';
 import { ViewportPageScrollContext } from '../app/layout/Viewport';
@@ -141,7 +143,26 @@ export const UserHome = () => {
     }
 
     if (posts.length === 0) {
-      return <BoxCentered></BoxCentered>;
+      return (
+        <BoxCentered style={{ height: '100%' }}>
+          <ModalContent
+            type="small"
+            title={t(I18Keys.noPostsFound)}
+            icon={
+              <BoxCentered
+                style={{
+                  height: '60px',
+                  width: '60px',
+                  borderRadius: '40px',
+                  backgroundColor: '#CEE2F2',
+                }}
+                margin={{ bottom: '16px' }}>
+                <HmmIcon size={40}></HmmIcon>
+              </BoxCentered>
+            }
+            parragraphs={[<>{t(I18Keys.noPostsFoundDesc)}</>]}></ModalContent>
+        </BoxCentered>
+      );
     }
 
     return (
