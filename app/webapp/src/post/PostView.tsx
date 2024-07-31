@@ -472,35 +472,28 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
           <PostHeader
             profile={props.profile}
             margin={{ bottom: '16px' }}></PostHeader>
-          {postStatuses.isParsing ? (
-            <LoadingDiv height="60px" width="100%"></LoadingDiv>
-          ) : (
-            <SemanticsEditor
-              isLoading={false}
-              patternProps={{
-                editable,
-                semantics: post?.semantics,
-                originalParsed: post?.originalParsed,
-                semanticsUpdated: semanticsUpdated,
-              }}
-              include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
-          )}
+          <SemanticsEditor
+            patternProps={{
+              isLoading: postStatuses.isParsing,
+              editable,
+              semantics: post?.semantics,
+              originalParsed: post?.originalParsed,
+              semanticsUpdated: semanticsUpdated,
+            }}
+            include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
 
           <PostTextEditable text={postText}></PostTextEditable>
 
-          {postStatuses.isParsing ? (
-            <LoadingDiv height="120px" width="100%"></LoadingDiv>
-          ) : (
-            <SemanticsEditor
-              isLoading={false}
-              patternProps={{
-                editable,
-                semantics: post?.semantics,
-                originalParsed: post?.originalParsed,
-                semanticsUpdated: semanticsUpdated,
-              }}
-              include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
-          )}
+          <SemanticsEditor
+            patternProps={{
+              isLoading: postStatuses.isParsing,
+              editable,
+              semantics: post?.semantics,
+              originalParsed: post?.originalParsed,
+              semanticsUpdated: semanticsUpdated,
+            }}
+            include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
+
           {action}
         </Box>
         {publishStatusModal}

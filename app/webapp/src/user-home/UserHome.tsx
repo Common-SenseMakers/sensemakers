@@ -141,11 +141,7 @@ export const UserHome = () => {
     }
 
     if (posts.length === 0) {
-      return (
-        <BoxCentered>
-          <Text>No posts found</Text>
-        </BoxCentered>
-      );
+      return <BoxCentered></BoxCentered>;
     }
 
     return (

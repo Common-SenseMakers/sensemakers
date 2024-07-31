@@ -9,6 +9,7 @@ import {
 } from '../../../shared/utils/n3.utils';
 import { THIS_POST_NAME } from '../../../shared/utils/semantics.helper';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
+import { LoadingDiv } from '../../../ui-components/LoadingDiv';
 import { useThemeContext } from '../../../ui-components/ThemedApp';
 import { useSemanticsStore } from '../common/use.semantics';
 import { PatternProps } from '../patterns';
@@ -70,6 +71,18 @@ export const KeywordsComponent = (props: PatternProps) => {
       props.semanticsUpdated(newSemantics);
     }
   };
+
+  if (props.isLoading) {
+    return (
+      <Box direction="row" gap="10px" pad={{ vertical: '8px' }}>
+        {[0, 1, 2].map((n) => (
+          <LoadingDiv
+            height={'24px'}
+            style={{ borderRadius: '8px', width: '120px' }}></LoadingDiv>
+        ))}
+      </Box>
+    );
+  }
 
   return (
     <Box direction="row">
