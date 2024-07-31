@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { NavButton } from '../app/NavButton';
 import { useToastContext } from '../app/ToastsContext';
 import { HomeIcon } from '../app/icons/HomeIcon';
+import { LeftChevronIcon } from '../app/icons/LeftChveronIcon';
 import { LeftIcon } from '../app/icons/LeftIcon';
 import { RightIcon } from '../app/icons/RightIcon';
 import { AppPostFull } from '../shared/types/types.posts';
@@ -63,8 +64,8 @@ export const PostNav = (props: { profile?: TwitterUserProfile }) => {
       direction="row"
       justify="between">
       <NavButton
-        icon={<HomeIcon></HomeIcon>}
-        label={'Home'}
+        icon={<LeftChevronIcon></LeftChevronIcon>}
+        label={'Back'}
         onClick={() =>
           profile
             ? navigate('..', { state: { postId: post?.id } })
