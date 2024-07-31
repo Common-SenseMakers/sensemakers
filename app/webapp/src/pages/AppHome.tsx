@@ -1,5 +1,6 @@
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
+import { PostCardLoading } from '../post/PostCardLoading';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { UserHome } from '../user-home/UserHome';
 import { ConnectSocialsPage } from '../user-login/ConnectSocialsPage';
@@ -24,11 +25,7 @@ export const AppHome = (props: {}) => {
         height="120px"></LoadingDiv>
       {(() => {
         return [1, 2, 4, 5, 6, 7, 8].map((ix) => (
-          <LoadingDiv
-            key={ix}
-            height="108px"
-            width="100%"
-            margin={{ bottom: '2px' }}></LoadingDiv>
+          <PostCardLoading key={ix}></PostCardLoading>
         ));
       })()}
     </>

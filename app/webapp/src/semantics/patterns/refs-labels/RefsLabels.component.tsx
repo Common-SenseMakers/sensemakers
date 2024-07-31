@@ -5,6 +5,7 @@ import { useMemo } from 'react';
 import { filterStore, writeRDF } from '../../../shared/utils/n3.utils';
 import { THIS_POST_NAME } from '../../../shared/utils/semantics.helper';
 import { AppLabel } from '../../../ui-components';
+import { LoadingDiv } from '../../../ui-components/LoadingDiv';
 import { splitArray } from '../../../ui-components/utils';
 import { useSemanticsStore } from '../common/use.semantics';
 import { PatternProps } from '../patterns';
@@ -65,6 +66,20 @@ export const RefLabelsComponent = (props: PatternProps) => {
       props.semanticsUpdated(newSemantics);
     }
   };
+
+  if (props.isLoading) {
+    return (
+      <Box gap="10px" pad={{ vertical: '8px' }}>
+        <LoadingDiv
+          height={'24px'}
+          style={{ borderRadius: '12px', width: '120px' }}></LoadingDiv>
+
+        <LoadingDiv
+          height={'80px'}
+          style={{ borderRadius: '12px', width: '100%' }}></LoadingDiv>
+      </Box>
+    );
+  }
 
   if (!props.originalParsed) {
     return <></>;

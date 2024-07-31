@@ -14,10 +14,7 @@ import { useThemeContext } from '../ui-components/ThemedApp';
 import { useUserPosts } from '../user-home/UserPostsContext';
 import { usePost } from './PostContext';
 
-export const PostNav = (props: {
-  profile?: TwitterUserProfile;
-  isProfile: boolean;
-}) => {
+export const PostNav = (props: { profile?: TwitterUserProfile }) => {
   const { show } = useToastContext();
 
   const profile = props.profile;
@@ -66,32 +63,27 @@ export const PostNav = (props: {
       direction="row"
       justify="between">
       <NavButton
-        icon={props.isProfile ? <LeftIcon></LeftIcon> : <HomeIcon></HomeIcon>}
-        label={props.isProfile ? 'Back' : 'Home'}
+        icon={<HomeIcon></HomeIcon>}
+        label={'Home'}
         onClick={() =>
           profile
             ? navigate('..', { state: { postId: post?.id } })
             : navigate('/')
         }></NavButton>
-      {!props.isProfile ? (
-        <Box direction="row" gap="8px">
-          <NavButton
-            icon={<LeftIcon></LeftIcon>}
-            disabled={!prevPostId}
-            label="Previous"
-            onClick={() => goToPrev()}></NavButton>
-          <NavButton
-            reverse
-            icon={
-              isFetchingOlder ? <Loading></Loading> : <RightIcon></RightIcon>
-            }
-            disabled={!nextPostId}
-            label="Next"
-            onClick={() => goToNext()}></NavButton>
-        </Box>
-      ) : (
-        <></>
-      )}
+
+      <Box direction="row" gap="8px">
+        <NavButton
+          icon={<LeftIcon></LeftIcon>}
+          disabled={!prevPostId}
+          label="Previous"
+          onClick={() => goToPrev()}></NavButton>
+        <NavButton
+          reverse
+          icon={isFetchingOlder ? <Loading></Loading> : <RightIcon></RightIcon>}
+          disabled={!nextPostId}
+          label="Next"
+          onClick={() => goToNext()}></NavButton>
+      </Box>
     </Box>
   );
 };

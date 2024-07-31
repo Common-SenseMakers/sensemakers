@@ -1,8 +1,9 @@
-import { disconnect } from 'process';
 import { PropsWithChildren, createContext, useContext } from 'react';
 
+import { RobotIcon } from '../../app/icons/RobotIcon';
 import { UserPostsContext } from '../../user-home/UserPostsContext';
 import { AccountContext } from './AccountContext';
+import { AutopostInviteContext } from './AutopostInviteContext';
 import { DisconnectUserContext } from './DisconnectUserContext';
 import { OrcidContext } from './platforms/OrcidContext';
 import { TwitterContext } from './platforms/TwitterContext';
@@ -12,7 +13,7 @@ import { SignerContext } from './signer/SignerContext';
 
 const DEBUG = false;
 
-export type ConnectedUserContextType = {};
+export interface ConnectedUserContextType {}
 
 const ConnectedUserWrapperValue = createContext<
   ConnectedUserContextType | undefined
@@ -34,7 +35,11 @@ export const ConnectedUserWrapper = (props: PropsWithChildren) => {
               <NanopubContext>
                 <OrcidContext>
                   <DisconnectUserContext>
-                    <UserPostsContext>{props.children}</UserPostsContext>
+                    <UserPostsContext>
+                      <AutopostInviteContext>
+                        {props.children}
+                      </AutopostInviteContext>
+                    </UserPostsContext>
                   </DisconnectUserContext>
                 </OrcidContext>
               </NanopubContext>

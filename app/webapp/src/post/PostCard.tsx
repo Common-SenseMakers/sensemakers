@@ -9,7 +9,7 @@ import { PLATFORM } from '../shared/types/types.user';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { NanopubStatus } from './NanopubStatus';
 import { PostTextStatic } from './PostTextStatic';
-import { concatenateThread } from './posts.helper';
+import { concatenateThread, getPostStatuses } from './posts.helper';
 
 export const PostCard = (props: {
   post: AppPostFull;
@@ -27,6 +27,8 @@ export const PostCard = (props: {
   const handleClick = props.handleClick;
   const tweet = post.mirrors.find((m) => m.platformId === PLATFORM.Twitter);
   const postText = concatenateThread(post.generic);
+
+  const { isParsing } = getPostStatuses(post);
 
   return (
     <Box
@@ -51,8 +53,8 @@ export const PostCard = (props: {
       </Box>
       <SemanticsEditor
         include={[PATTERN_ID.KEYWORDS]}
-        isLoading={false}
         patternProps={{
+          isLoading: isParsing !== undefined ? isParsing : false,
           editable: false,
           size: 'compact',
           semantics: post?.semantics,
@@ -63,8 +65,8 @@ export const PostCard = (props: {
 
       <SemanticsEditor
         include={[PATTERN_ID.REF_LABELS]}
-        isLoading={false}
         patternProps={{
+          isLoading: isParsing !== undefined ? isParsing : false,
           size: 'compact',
           editable: false,
           semantics: post?.semantics,

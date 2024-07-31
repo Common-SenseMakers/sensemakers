@@ -1,5 +1,5 @@
 import { Box, Text } from 'grommet';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useAppFetch } from '../api/app.fetch';
@@ -19,11 +19,11 @@ import {
   UserSettingsUpdate,
 } from '../shared/types/types.user';
 import { AppButton, AppHeading } from '../ui-components';
-import { AppRadioButtom } from '../ui-components/AppRadioButton';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
+import { useConnectedUser } from '../user-login/contexts/ConnectedUserWrapper';
 import { useDisconnectContext } from '../user-login/contexts/DisconnectUserContext';
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { getAccount } from '../user-login/user.helper';
@@ -52,6 +52,7 @@ export const UserSettingsPage = () => {
 
   const { connectedUser, refresh, twitterProfile } = useAccountContext();
   const [isSetting, setIsSetting] = useState(false);
+  const { disconnect } = useDisconnectContext();
 
   const { connect: connectOrcid } = useOrcidContext();
 
@@ -59,7 +60,15 @@ export const UserSettingsPage = () => {
     SettingsSections | undefined
   >(undefined);
 
-  const setSettings = (newSettings: UserSettingsUpdate) => {
+  // // receive the autopost invite
+  // useEffect(() => {
+  //   if (reviewAutopostIntention) {
+  //     setReviewAutopostIntention(false);
+  //     setShowSettingsPage(SettingsSections.Autopost);
+  //   }
+  // }, [reviewAutopostIntention]);
+
+  const setSettings = async (newSettings: UserSettingsUpdate) => {
     return appFetch('/api/auth/settings', newSettings).then(() => {
       setIsSetting(false);
       refresh();
@@ -297,6 +306,12 @@ export const UserSettingsPage = () => {
           buttonText="connect"
           username={orcid ? `@${orcid.user_id}` : '- not connected -'}
           connected={orcid !== undefined}></PlatformSection>
+
+        <Box margin={{ vertical: '36px' }} pad={{ horizontal: '16px' }}>
+          <AppButton
+            onClick={() => disconnect()}
+            label={t(I18Keys.logout)}></AppButton>
+        </Box>
       </Box>
     );
   })();

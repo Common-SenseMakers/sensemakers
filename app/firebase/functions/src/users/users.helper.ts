@@ -1,3 +1,5 @@
+import { SciFilterClassfication } from '../@shared/types/types.parser';
+import { AppPost } from '../@shared/types/types.posts';
 import {
   ALL_PUBLISH_PLATFORMS,
   AppUser,
@@ -82,7 +84,7 @@ export class UsersHelper {
     return allAccounts;
   }
 
-  static autopostPlatformIds(user: AppUser): PLATFORM[] {
+  static getAutopostPlatformIds(user: AppUser, post: AppPost): PLATFORM[] {
     const platformIds = (
       Object.keys(user.settings.autopost) as PLATFORM[]
     ).filter((platformId: PLATFORM) => {
@@ -90,7 +92,17 @@ export class UsersHelper {
         throw new Error('Only autopost to nanopub is suported for now');
       }
 
-      return user.settings.autopost[platformId].value !== AutopostOption.MANUAL;
+      /** only if the user has autopost configured as deterministic
+       * and the post was detected as reserach using citoid */
+      if (
+        user.settings.autopost[platformId].value !== AutopostOption.MANUAL &&
+        post.originalParsed?.filter_classification ===
+          SciFilterClassfication.CITOID_DETECTED_RESEARCH
+      ) {
+        return true;
+      }
+
+      return false;
     });
 
     return platformIds;
