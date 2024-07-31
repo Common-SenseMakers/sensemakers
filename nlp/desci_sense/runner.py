@@ -30,6 +30,7 @@ def load_config(config_path: str = None) -> MultiParserChainConfig:
         config = init_multi_chain_parser_config(
             llm_type="mistralai/mixtral-8x7b-instruct:nitro",
             post_process_type="combined",
+            post_renderer_type="quote_ref_post",
         )
     return config
 
