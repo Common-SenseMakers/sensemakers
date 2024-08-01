@@ -20,3 +20,5 @@ app/firebase/functions/src/config/env.ts
 nlp/desci_sense/shared_functions/prompting/jinja/j2/kw.j2
 .pre-commit-config.yaml
 app/last_output.json
+
+twitterApiCache.json
