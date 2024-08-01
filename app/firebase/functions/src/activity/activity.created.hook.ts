@@ -7,7 +7,7 @@ import {
   NotificationFreq,
   NotificationStatus,
 } from '../@shared/types/types.notifications';
-import { IS_EMULATOR, QUIET_SIGNUP_PERIOD } from '../config/config.runtime';
+import { QUIET_SIGNUP_PERIOD } from '../config/config.runtime';
 import { logger } from '../instances/logger';
 import { Services } from '../instances/services';
 
@@ -47,7 +47,8 @@ export const activityEventCreatedHook = async (
 
       const author = await users.repo.getUser(post.authorId, manager, true);
       const isQuiet =
-        time.now() < author.signupDate + QUIET_SIGNUP_PERIOD && !IS_EMULATOR;
+        time.now() < author.signupDate + QUIET_SIGNUP_PERIOD &&
+        notifications.haveQuiet;
 
       if (DEBUG)
         logger.debug(

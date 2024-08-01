@@ -1,5 +1,5 @@
 export enum ActivityType {
-  PostParsed = 'postParsed',
+  PostParsed = 'PostParsed',
   PostAutoposted = 'PostAutoposted',
 }
 

@@ -146,8 +146,11 @@ describe('051-autofetch-autopost', () => {
           })
         );
 
-        expect(userNotifications).to.have.length(1);
-        const autopostNotification = userNotifications[0];
+        expect(userNotifications).to.have.length(2);
+
+        const autopostNotification = userNotifications.find(
+          (n) => n.activity.type === ActivityType.PostAutoposted
+        );
 
         if (!autopostNotification) {
           throw new Error('autopostNotification not found');
@@ -157,9 +160,15 @@ describe('051-autofetch-autopost', () => {
           postOfThread2.id
         );
 
-        expect(autopostNotification.activity.type).to.eq(
-          ActivityType.PostAutoposted
+        const parsedNotification = userNotifications.find(
+          (n) => n.activity.type === ActivityType.PostParsed
         );
+
+        if (!parsedNotification) {
+          throw new Error('autopostNotification not found');
+        }
+
+        expect(parsedNotification.activity.data.postId).to.eq(postOfThread2.id);
       });
     });
   });

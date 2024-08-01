@@ -11,7 +11,7 @@ import { EMAIL_SENDER_FROM, globalTestServices } from './setup';
 
 const services = globalTestServices;
 
-describe.only('014-email.send', () => {
+describe('014-email.send', () => {
   describe('create and process', () => {
     it('sets users email', async () => {
       logger.debug('emailTest triggered');
