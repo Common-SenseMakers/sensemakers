@@ -198,7 +198,12 @@ export class NotificationService {
       )
     );
 
-    await this.sendDigest(userId, postsDetails, manager);
+    // remove duplicates
+    const filteredPosts = postsDetails.filter(
+      (post, index, self) => index === self.findIndex((p) => p.id === post.id)
+    );
+
+    await this.sendDigest(userId, filteredPosts, manager);
   }
 
   async sendDigest(
