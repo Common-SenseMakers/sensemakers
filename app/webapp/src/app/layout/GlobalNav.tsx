@@ -28,10 +28,6 @@ export const locationToPageIx = (location: Location) => {
     return 1;
   }
 
-  if (location.pathname.startsWith(`/${RouteNames.Profile}`)) {
-    return 2;
-  }
-
   if (location.pathname.startsWith(`/${RouteNames.Settings}`)) {
     return 3;
   }

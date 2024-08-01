@@ -20,7 +20,7 @@
     "build-email-code": "rm -rf ./build && craco build --config craco.config.email.bundle.js",
     "build-email-types": "tsc -p tsconfig.dist.json",
     "copy-email-static": "cp ./build/**.* ./src/shared/emailRenderer",
-    "dev": "email dev -d ./src/email"
+    "dev-email": "email dev -d ./src/email"
   },
   "resolutions": {
     "strip-ansi": "6.0.1"

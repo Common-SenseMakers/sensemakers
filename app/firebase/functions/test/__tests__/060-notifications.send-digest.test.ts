@@ -47,7 +47,7 @@ describe('060-send-digest-no-autpost', () => {
         throw new Error('user not created');
       }
       await services.users.setEmail(user.userId, {
-        email: 'sample@email.com',
+        email: process.env.TEST_EMAIL || 'sample@email.com',
         source: 'MAGIC',
       });
     });

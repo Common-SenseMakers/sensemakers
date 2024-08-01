@@ -12,6 +12,7 @@
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
+    "run-script": "ts-node --project ./tsconfig.scripts.json",
     "logs": "firebase functions:log"
   },
   "engines": {

@@ -88,18 +88,18 @@ export const useNanopubSignup = (rsaKeys?: RSAKeys) => {
         details
       ).then(async (context) => {
         /** sign introNanopub */
-        if (!context.introNanopub)
-          throw new Error(`Unexpected introNanopub not found`);
+        if (!context.introNanopubDraft)
+          throw new Error(`Unexpected introNanopub draft not found`);
 
         if (DEBUG) console.log(`signing intro nanopub`, { context });
 
         const introNanopub = await signNanopublication(
-          context.introNanopub,
+          context.introNanopubDraft,
           rsaKeys
         );
 
         /** replace draft with signed */
-        context.introNanopub = introNanopub.rdf();
+        context.introNanopubSigned = introNanopub.rdf();
         if (DEBUG) console.log('posting user details', { details });
 
         /** post */

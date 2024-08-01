@@ -12,7 +12,7 @@ const { renderEmail } = require('../../src/@shared/emailRenderer') as {
   renderEmail: RenderEmailFunction;
 };
 
-describe.only('renders email', () => {
+describe('renders email', () => {
   it('imports the bundled render email function and successfully calls it', async () => {
     const posts: AppPostFull[] = [
       getMockPostNew(),
@@ -28,8 +28,6 @@ describe.only('renders email', () => {
       AutopostOption.MANUAL,
       'http://localhost:3000'
     );
-    // save html to txt file
-    fs.writeFileSync('email.html', html);
-    console.log(html);
+    fs.writeFileSync('test.email.html', html);
   });
 });

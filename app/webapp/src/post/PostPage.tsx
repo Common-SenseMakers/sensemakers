@@ -19,7 +19,7 @@ export const PostPage = () => {
 
   return (
     <PostContext postId={postId} postInit={postInit}>
-      <PostView profile={twitterProfile} isProfile={false}></PostView>
+      <PostView profile={twitterProfile}></PostView>
     </PostContext>
   );
 };

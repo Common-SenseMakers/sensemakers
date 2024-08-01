@@ -32,10 +32,18 @@ export class NotificationsRepository {
     return repo.get(notificationId, manager, shouldThrow);
   }
 
+  public async getOfUser(userId: string, manager: TransactionManager) {
+    const query = this.db.collections.userNotifications(userId);
+    const snap = await manager.query(query);
+    const ids = snap.docs.map((doc) => doc.id);
+
+    return ids;
+  }
+
   public async getUnotifiedOfUser(userId: string, manager: TransactionManager) {
     const status_property: keyof Notification = 'status';
 
-    const query = await this.db.collections
+    const query = this.db.collections
       .userNotifications(userId)
       .where(status_property, '==', NotificationStatus.pending);
 

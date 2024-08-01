@@ -121,6 +121,7 @@ def init_multi_chain_parser_config(
     open_router_api_config: OpenrouterAPIConfig = None,
     llm_type: str = "openai/gpt-4-turbo",
     post_process_type: str = "firebase",
+    post_renderer_type: str = "thread_ref_post",
 ):
     kw_config = KeywordPParserChainConfig(
         name="keywords",
@@ -131,7 +132,7 @@ def init_multi_chain_parser_config(
         name="multi_refs_tagger",
         use_metadata=True,
         llm_config=LLMConfig(llm_type=llm_type),
-        post_renderer=PostRendererType.THREAD_REF_POST,
+        post_renderer=PostRendererType(post_renderer_type),
     )
     topics_config = TopicsPParserChainConfig(
         name="topics",

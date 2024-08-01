@@ -1,0 +1,3 @@
+*.test.email.html
+/test/__tests__/sample.html.ts
+/test/__tests__/014-email.send.test.ts
