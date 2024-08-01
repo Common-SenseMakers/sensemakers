@@ -183,7 +183,8 @@ export const getTestServices = (config: TestServicesConfig) => {
     platformPostsRepo,
     activityRepo,
     userRepo,
-    email
+    email,
+    true
   );
 
   const activity = new ActivityService(activityRepo);

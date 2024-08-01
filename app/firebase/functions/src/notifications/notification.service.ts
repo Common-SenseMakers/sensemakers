@@ -37,7 +37,8 @@ export class NotificationService {
     public platformPostsRepo: PlatformPostsRepository,
     public activityRepo: ActivityRepository,
     public usersRepo: UsersRepository,
-    public emailSender: EmailSenderService
+    public emailSender: EmailSenderService,
+    public haveQuiet: boolean
   ) {}
 
   createNotification(
