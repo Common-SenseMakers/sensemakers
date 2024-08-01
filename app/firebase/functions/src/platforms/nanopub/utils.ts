@@ -22,7 +22,7 @@ interface BuildSpostNpOptions {
 
 //Interface for optional intro input.
 //ORCID and keyDelegation
-interface BuildIntroNpOptions {
+export interface BuildIntroNpOptions {
   orcidId?: string;
   author?: GenericAuthor;
   signDelegation?: boolean;

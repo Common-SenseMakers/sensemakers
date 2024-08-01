@@ -15,7 +15,7 @@ import { ActivityEventBase } from './@shared/types/types.activity';
 import { NotificationFreq } from './@shared/types/types.notifications';
 import { PlatformPost } from './@shared/types/types.platform.posts';
 import { AppPost } from './@shared/types/types.posts';
-import { PLATFORM } from './@shared/types/types.user';
+import { AppUser, PLATFORM } from './@shared/types/types.user';
 import { CollectionNames } from './@shared/utils/collectionNames';
 import { activityEventCreatedHook } from './activity/activity.created.hook';
 import {
@@ -51,6 +51,7 @@ import {
 } from './posts/tasks/posts.autopost.task';
 import { PARSE_POST_TASK, parsePostTask } from './posts/tasks/posts.parse.task';
 import { router } from './router';
+import { userUpdatedHook } from './users/user.updated.hook';
 
 // all secrets are available to all functions
 const secrets = [
@@ -260,6 +261,20 @@ exports.activityEventCreateListener = onDocumentCreated(
     );
 
     await activityEventCreatedHook(created, createServices());
+  }
+);
+
+exports.userUpdateListener = onDocumentUpdated(
+  {
+    document: `${CollectionNames.Users}/{userId}`,
+    secrets,
+  },
+  async (event) => {
+    const { before, after } = getBeforeAndAfterOnUpdate<AppUser>(
+      event,
+      'userId'
+    );
+    await userUpdatedHook(after, createServices(), before);
   }
 );
 
