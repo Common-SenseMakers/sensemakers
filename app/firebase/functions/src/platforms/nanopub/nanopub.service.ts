@@ -102,7 +102,7 @@ export class NanopubService
       profile: {
         rsaPublickey: signupData.rsaPublickey,
         ethAddress: signupData.ethAddress,
-        introNanopubUri: published.info().uri,
+        rootIntroNanopubUri: published.info().uri,
         ethToRsaSignature: signupData.ethToRsaSignature,
       },
     };

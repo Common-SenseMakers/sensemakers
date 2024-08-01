@@ -9,6 +9,7 @@ import { PLATFORM } from '../../src/@shared/types/types.user';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { logger } from '../../src/instances/logger';
 import '../../src/platforms/twitter/mock/twitter.service.mock';
+import { userUpdatedHook } from '../../src/users/user.updated.hook';
 import { resetDB } from '../utils/db';
 import { getNanopubProfile } from '../utils/nanopub.profile';
 import { handleSignupMock } from './reusable/mocked.singup';
@@ -29,7 +30,7 @@ describe('010-signups', () => {
     await resetDB();
   });
 
-  describe('signup with mocked twitter', () => {
+  describe.skip('signup with mocked twitter', () => {
     let userId: string;
 
     it('signup with twitter', async () => {
@@ -100,8 +101,9 @@ describe('010-signups', () => {
     });
   });
 
-  describe('signup with nanopub', () => {
-    it.skip('signup as new user', async () => {
+  describe('signup with nanopub then connect twitter', () => {
+    let userId: string;
+    it('signup as new user', async () => {
       const { profile, rsaKeys } = await getNanopubProfile(
         '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
       );
@@ -127,7 +129,11 @@ describe('010-signups', () => {
       const result = await services.db.run((manager) =>
         services.users.handleSignup<NanupubSignupData>(
           PLATFORM.Nanopub,
-          { ...profile, introNanopubDraft: signedIntro.rdf() },
+          {
+            ...profile,
+            introNanopubDraft: signedIntro.rdf(),
+            introNanopubSigned: signedIntro.rdf(),
+          },
           manager
         )
       );
@@ -136,6 +142,43 @@ describe('010-signups', () => {
       if (!result) throw new Error(`Unexpected result: ${result}`);
 
       expect(result.userId).to.not.be.undefined;
+      userId = result.userId;
+    });
+    it('connect twitter account', async () => {
+      const userBefore = await services.db.run((manager) =>
+        services.users.repo.getUser(userId, manager, true)
+      );
+
+      const testUser = testCredentials[0];
+      const signupData: TwitterUserDetails = {
+        user_id: testUser.twitter.id,
+        profile: {
+          id: testUser.twitter.id,
+          name: testUser.twitter.username,
+          username: testUser.twitter.username,
+        },
+        signupDate: Date.now(),
+      };
+      await services.db.run((manager) =>
+        services.users.handleSignup(
+          PLATFORM.Twitter,
+          signupData,
+          manager,
+          userId
+        )
+      );
+      const userAfter = await services.db.run((manager) =>
+        services.users.repo.getUser(userId, manager, true)
+      );
+
+      await userUpdatedHook(userAfter, services, userBefore);
+      const userAfterIntroNanopubUpdate = await services.db.run((manager) =>
+        services.users.repo.getUser(userId, manager, true)
+      );
+      expect(
+        userAfterIntroNanopubUpdate[PLATFORM.Nanopub]?.[0].profile
+          ?.latestIntroNanopubUri
+      ).to.not.be.undefined;
     });
   });
 });

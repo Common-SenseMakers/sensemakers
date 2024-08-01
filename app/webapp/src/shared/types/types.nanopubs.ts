@@ -10,7 +10,8 @@ export interface NanopubUserProfile {
   ethAddress: HexStr;
   introNanopubDraft?: string;
   introNanopubSigned?: string;
-  introNanopubUri?: string;
+  rootIntroNanopubUri?: string;
+  latestIntroNanopubUri?: string;
   ethToRsaSignature: HexStr;
 }
 

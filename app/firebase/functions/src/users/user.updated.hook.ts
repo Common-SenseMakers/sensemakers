@@ -27,7 +27,9 @@ export const userUpdatedHook = async (
   /** if a new platform hasn't been added (excluding nanopub), don't do anything */
   if (
     addedPlatformIds.length === 0 ||
-    addedPlatformIds.includes(PLATFORM.Nanopub)
+    addedPlatformIds.some((platformId) =>
+      platformId.startsWith(PLATFORM.Nanopub)
+    )
   ) {
     return;
   }
@@ -35,7 +37,7 @@ export const userUpdatedHook = async (
   const orcidAccountDetails = user[PLATFORM.Orcid]?.[0].profile;
   const nanopubAccountDetails = user[PLATFORM.Nanopub]?.[0];
   const nanopubProfile = nanopubAccountDetails?.profile;
-  if (!nanopubProfile) {
+  if (!nanopubAccountDetails || !nanopubProfile) {
     throw new Error(
       'Nanopub account details are missing cannot signup other platforms before nanopub account is set'
     );
@@ -47,10 +49,10 @@ export const userUpdatedHook = async (
 
   let introNanopubOptions: BuildIntroNpOptions = {
     signDelegation: true,
-    supersedesOptions: nanopubProfile.introNanopubUri
+    supersedesOptions: nanopubProfile.rootIntroNanopubUri
       ? {
-          root: nanopubProfile.introNanopubUri,
-          latest: nanopubProfile.introNanopubUri,
+          root: nanopubProfile.rootIntroNanopubUri,
+          latest: nanopubProfile.rootIntroNanopubUri,
         }
       : undefined,
     author: twitterAccountDetails
@@ -81,10 +83,35 @@ export const userUpdatedHook = async (
     PLATFORM.Nanopub
   ) as NanopubService;
   const signedUpdatedIntroNanopub = await nanopubService.signDraft(
-    { unsignedPost: updatedIntroNanopub } as PlatformPostDraft<any>,
+    { unsignedPost: updatedIntroNanopub.rdf() } as PlatformPostDraft<any>,
     nanopubAccountDetails
   );
   const published = await nanopubService.publishInternal(
     signedUpdatedIntroNanopub
+  );
+  if (!published) {
+    throw new Error(`Error publishing updated intro nanopub`);
+  }
+
+  const latestIntroNanopubUri = published.info().uri as string;
+
+  let updatedNanopubAccountDetails = nanopubAccountDetails;
+  updatedNanopubAccountDetails.profile = {
+    ...nanopubProfile,
+    latestIntroNanopubUri,
+  };
+
+  logger.debug(
+    `updating nanopub account with latest intro nanopub uri`,
+    updatedNanopubAccountDetails,
+    PREFIX
+  );
+  await services.db.run((manager) =>
+    services.users.repo.setPlatformDetails(
+      user.userId,
+      PLATFORM.Nanopub,
+      updatedNanopubAccountDetails,
+      manager
+    )
   );
 };
