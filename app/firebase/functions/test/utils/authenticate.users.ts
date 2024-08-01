@@ -41,6 +41,12 @@ export const authenticateTestUser = async (
           name: credentials.twitter.username,
           username: credentials.twitter.username,
         },
+        read: {
+          accessToken: 'mocked',
+          refreshToken: 'mocked',
+          expiresIn: 0,
+          expiresAtMs: 0,
+        },
       });
 
       return services.users.repo.getUser(userId, manager, true);
