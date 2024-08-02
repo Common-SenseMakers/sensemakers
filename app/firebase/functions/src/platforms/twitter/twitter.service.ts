@@ -3,7 +3,6 @@ import {
   TweetV2UserTimelineParams,
   Tweetv2FieldsParams,
   Tweetv2SearchParams,
-  Tweetv2SearchResult,
   UserV2,
 } from 'twitter-api-v2';
 
@@ -64,8 +63,7 @@ export interface TwitterApiCredentials {
   clientSecret: string;
 }
 
-const DEBUG = false;
-const USE_CACHE = false;
+const DEBUG = true;
 
 /** Twitter service handles all interactions with Twitter API */
 export class TwitterService
@@ -98,11 +96,13 @@ export class TwitterService
     manager: TransactionManager
   ): Promise<PlatformPostPosted<any>> {
     const MAX_TWEETS = 30;
+
     const readOnlyClient = await this.getUserClient(
       userDetails.user_id,
       'read',
       manager
     );
+
     try {
       const _searchParams: Tweetv2SearchParams = {
         query: `conversation_id:${post_id} from:${userDetails.user_id}`,
@@ -122,31 +122,15 @@ export class TwitterService
         }
 
         try {
-          const result = await (async () => {
-            if (USE_CACHE) {
-              if (
-                this.cache['search'] &&
-                this.cache['search'][JSON.stringify(searchParams)]
-              ) {
-                return this.cache['search'][JSON.stringify(searchParams)][
-                  '_realData'
-                ] as Tweetv2SearchResult;
-              } else {
-                const result = await readOnlyClient.v2.search(searchParams);
-                this.cache['search'] = this.cache['search'] || {};
-                this.cache['search'][JSON.stringify(searchParams)] = result;
-                fs.writeFileSync(
-                  'twitterApiCache.json',
-                  JSON.stringify(this.cache)
-                );
-                return result.data;
-              }
-            } else {
-              const result = await readOnlyClient.v2.search(searchParams);
-              return result.data;
-            }
-          })();
-          const tweetResults = result.data;
+          if (DEBUG)
+            logger.debug('Twitter Service - search - start', { searchParams });
+
+          const result = await readOnlyClient.v2.search(searchParams);
+          const tweetResults = result.data.data;
+
+          if (DEBUG)
+            logger.debug('Twitter Service - search - result', { tweetResults });
+
           if (result.meta.result_count > 0) {
             if (result.data === undefined) {
               throw new Error('Unexpected undefined data');
@@ -155,6 +139,7 @@ export class TwitterService
             if (result.includes === undefined) {
               throw new Error('Unexpected undefined data');
             }
+
             /* if original tweet is not yet included, make sure to inlude it */
             if (
               !tweetResults.some((tweet) => tweet.id === post_id) &&
