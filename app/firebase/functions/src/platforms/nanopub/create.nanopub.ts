@@ -1,5 +1,6 @@
 import { Store } from 'n3';
 
+import { NanopubUserDetails } from '../../@shared/types/types.nanopubs';
 import { AppPostFull } from '../../@shared/types/types.posts';
 import { TwitterUserDetails } from '../../@shared/types/types.twitter';
 import {
@@ -32,6 +33,13 @@ export const createNanopublication = async (
   const twitterUsername = twitter.profile?.username;
   const twitterName = twitter.profile?.name;
 
+  const nanopubAccount = UsersHelper.getAccount(
+    user,
+    PLATFORM.Nanopub,
+    undefined,
+    true
+  ) as NanopubUserDetails;
+
   if (!twitterUsername) {
     throw new Error('Twitter username not found');
   }
@@ -43,10 +51,11 @@ export const createNanopublication = async (
   const originalPlatformPost = post.mirrors.find(
     (platformPost) => platformPost.platformId === PLATFORM.Twitter
   )?.posted;
-  const postedNanopub = post.mirrors.find(
+  const nanopubPlatformPost = post.mirrors.find(
     (platformPost) => platformPost.platformId === PLATFORM.Nanopub
-  )?.posted;
-  const originalNanopubUri = postedNanopub?.post_id; // confirm if this is latest or root and if it includes the domain or just the nanopub hash
+  );
+  const latestNanopubUri = nanopubPlatformPost?.posted?.post_id;
+  const rootNanopubUri = nanopubPlatformPost?.post_id;
 
   const originalPlatformPostId = originalPlatformPost?.post_id;
 
@@ -76,13 +85,25 @@ export const createNanopublication = async (
   const orcidDetails = user[PLATFORM.Orcid];
   const orcidId = orcidDetails && orcidDetails[0].user_id;
   const tweetUrl = `https://x.com/${twitterPath}/status/${originalPlatformPostId}`;
-  const introUri = 'https://example.org/intro'; //need to fetch intro uri
-  //And add to options when needed
+  const introUri = nanopubAccount.profile?.introNanopubUri;
+  if (!introUri) {
+    throw new Error('Intro nanopub uri not found');
+  }
+
+  const supersedesOptions = (() => {
+    if (rootNanopubUri && latestNanopubUri) {
+      return {
+        root: rootNanopubUri,
+        latest: latestNanopubUri,
+      };
+    } else {
+      return undefined;
+    }
+  })();
+
   const options = {
-    supersedesOptions: originalNanopubUri
-      ? { root: originalNanopubUri, latest: originalNanopubUri }
-      : undefined, //Need to fetch original np uri as root, and latest np as latest
     orcidId: orcidId,
+    supersedesOptions,
   };
 
   return await buildSpostNp(
