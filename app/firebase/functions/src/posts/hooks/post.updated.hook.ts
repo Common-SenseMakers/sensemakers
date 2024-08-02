@@ -111,9 +111,11 @@ export const postUpdatedHook = async (
     const author = await db.run(async (manager) =>
       users.repo.getUser(post.authorId, manager, true)
     );
-    /** autopost when parsed and author has autopost enabled */
-    /** trigger autopost task if author has autopost configured  */
-    const autopostOnPlatforms = UsersHelper.autopostPlatformIds(author);
+    /** autopost when parsed, author has autopost enabled, and post detected as research using deterministic approach */
+    const autopostOnPlatforms = UsersHelper.getAutopostPlatformIds(
+      author,
+      post
+    );
 
     if (autopostOnPlatforms.length > 0) {
       logger.debug(

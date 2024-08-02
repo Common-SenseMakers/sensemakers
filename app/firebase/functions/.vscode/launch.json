@@ -48,6 +48,20 @@
       "console": "integratedTerminal"
     },
     {
+      "type": "node",
+      "request": "launch",
+      "name": "Script: 01-user.notifications",
+      "runtimeExecutable": "ts-node",
+      "args": [
+        "--project",
+        "./tsconfig.scripts.json",
+        "./scripts/01-user.notifications.ts"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
       "name": "attach",
       "type": "node",
       "request": "attach",

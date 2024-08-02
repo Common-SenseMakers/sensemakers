@@ -183,7 +183,8 @@ export const getTestServices = (config: TestServicesConfig) => {
     platformPostsRepo,
     activityRepo,
     userRepo,
-    email
+    email,
+    true
   );
 
   const activity = new ActivityService(activityRepo);
@@ -197,6 +198,7 @@ export const getTestServices = (config: TestServicesConfig) => {
     notifications,
     emailMock,
     activity,
+    email,
   };
 
   return services;

@@ -21,11 +21,7 @@ import {
   GenericThread,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
-
-import {
-  PLATFORM,
-  UserDetailsBase,
-} from '../../@shared/types/types.user';
+import { PLATFORM, UserDetailsBase } from '../../@shared/types/types.user';
 import { getEthToRSAMessage } from '../../@shared/utils/nanopub.sign.util';
 import { cleanPrivateKey } from '../../@shared/utils/semantics.helper';
 import { TransactionManager } from '../../db/transaction.manager';
@@ -64,13 +60,10 @@ export class NanopubService
     if (!params) {
       throw new Error('Missing params');
     }
-    
-    const introNanopub = await createIntroNanopublication(
-      params,
-      false
-    );
 
-    return { ...params, introNanopub: introNanopub.rdf() };
+    const introNanopub = await createIntroNanopublication(params, false);
+
+    return { ...params, introNanopubDraft: introNanopub.rdf() };
   }
 
   /** verifies signatures, creates intro nanopub */
@@ -91,11 +84,11 @@ export class NanopubService
     }
 
     /** publish nanopub */
-    if (!signupData.introNanopub) {
-      throw new Error(`Intro nanopub not found`);
+    if (!signupData.introNanopubSigned) {
+      throw new Error(`Signed intro nanopub not found`);
     }
 
-    const published = await this.publishInternal(signupData.introNanopub);
+    const published = await this.publishInternal(signupData.introNanopubSigned);
     if (!published) {
       throw new Error(`Error publishing intro nanopub`);
     }
@@ -109,7 +102,7 @@ export class NanopubService
       profile: {
         rsaPublickey: signupData.rsaPublickey,
         ethAddress: signupData.ethAddress,
-        introNanopub: signupData.introNanopub,
+        introNanopubUri: published.info().uri,
         ethToRsaSignature: signupData.ethToRsaSignature,
       },
     };

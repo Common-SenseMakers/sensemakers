@@ -26,7 +26,7 @@ export const nanopubSignupDataSchema = object({
   rsaPublickey: string().required(),
   ethAddress: string().required(),
   ethToRsaSignature: string().required(),
-  introNanopub: string().required(),
+  introNanopubSigned: string().required(),
 }).noUnknown(true);
 
 export const orcidSignupDataSchema = object({

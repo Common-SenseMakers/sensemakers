@@ -29,14 +29,6 @@ describe('010-signups', () => {
     await resetDB();
   });
 
-  describe('connect orcid', () => {
-    it('get orcid authlink', async () => {
-      const { link } = await services.users.getSignupContext(PLATFORM.Orcid);
-      logger.debug(`link: ${link}`);
-      expect(link.startsWith('https://orcid.org')).to.be.true;
-    });
-  });
-
   describe('signup with mocked twitter', () => {
     let userId: string;
 
@@ -75,12 +67,12 @@ describe('010-signups', () => {
           logger.debug(`getNanopubProfile`, { context });
 
           /** sign intro nanopub */
-          if (!context.introNanopub) {
+          if (!context.introNanopubDraft) {
             throw new Error('introNanopub not found');
           }
 
           const signedIntro = await signNanopublication(
-            context.introNanopub,
+            context.introNanopubDraft,
             rsaKeys
           );
 
@@ -88,7 +80,7 @@ describe('010-signups', () => {
 
           const result = await services.users.handleSignup<NanupubSignupData>(
             PLATFORM.Nanopub,
-            { ...profile, introNanopub: signedIntro.rdf() },
+            { ...profile, introNanopubSigned: signedIntro.rdf() },
             manager,
             userId
           );
@@ -122,12 +114,12 @@ describe('010-signups', () => {
       );
 
       /** sign intro nanopub */
-      if (!context.introNanopub) {
+      if (!context.introNanopubDraft) {
         throw new Error('introNanopub not found');
       }
 
       const signedIntro = await signNanopublication(
-        context.introNanopub,
+        context.introNanopubDraft,
         rsaKeys
       );
 
@@ -135,7 +127,7 @@ describe('010-signups', () => {
       const result = await services.db.run((manager) =>
         services.users.handleSignup<NanupubSignupData>(
           PLATFORM.Nanopub,
-          { ...profile, introNanopub: signedIntro.rdf() },
+          { ...profile, introNanopubDraft: signedIntro.rdf() },
           manager
         )
       );

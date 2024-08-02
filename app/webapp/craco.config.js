@@ -18,6 +18,8 @@ module.exports = {
               TWITTER_CLIENT_ID: '"N0czb28xek5ldjRxdWpIRVVvZFg6MTpjaQ"',
               FB_PROJECTID: '"demo-sensenets"',
               PROJECT_TWITTER_ACCOUNT: '"rtk254"',
+              APP_URL: '"http://localhost:3000"',
+              NANOPUB_EXPLORER_SERVER: '"https://np.test.knowledgepixels.com/"',
             },
           },
         }),

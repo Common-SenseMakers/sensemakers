@@ -15,7 +15,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from rdflib import URIRef, Literal, Graph
 from .prompting.jinja.topics_template import ALLOWED_TOPICS
 from .filters import SciFilterClassfication
-from .utils import normalize_tweet_urls_in_text, normalize_tweet_url
+from .utils import (
+    normalize_tweet_urls_in_text,
+    normalize_tweet_url,
+    clean_notion_text,
+)
 
 # for calculating thread length limits
 MAX_CHARS_PER_POST = 280
@@ -161,6 +165,22 @@ class LLMOntologyConceptDefinition(OntologyConceptDefinition):
 
     def can_be_object(self):
         return "nan" in self.valid_object_types
+
+    @validator("*", pre=True)
+    def clean_all_text_fields(cls, value):
+        if isinstance(value, str):
+            return clean_notion_text(value)
+        elif isinstance(value, list):
+            return [
+                clean_notion_text(item) if isinstance(item, str) else item
+                for item in value
+            ]
+        elif isinstance(value, dict):
+            return {
+                k: clean_notion_text(v) if isinstance(v, str) else v
+                for k, v in value.items()
+            }
+        return value
 
 
 class OntologyInterface(BaseModel):

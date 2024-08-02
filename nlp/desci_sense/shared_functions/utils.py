@@ -487,3 +487,24 @@ def normalize_tweet_urls_in_text(text: str) -> str:
         text = text.replace(orig_url, normalized_url)
 
     return text
+
+
+def clean_notion_text(raw_text: str):
+    """
+    Cleans a given text by replacing non-breaking space characters with regular space characters.
+
+    Args:
+        raw_text (str): The input string that may contain non-breaking space characters (represented as '\xa0').
+
+    Returns:
+        str: The cleaned string with all non-breaking space characters replaced by regular space characters.
+
+    Example:
+        >>> clean_notion_text("This is\xa0a test")
+        'This is a test'
+
+    This function is particularly useful for processing text from sources that might include non-breaking spaces,
+    ensuring that the text is uniformly formatted with regular spaces.
+    """
+    clean_string = re.sub(r"\xa0", " ", raw_text)
+    return clean_string

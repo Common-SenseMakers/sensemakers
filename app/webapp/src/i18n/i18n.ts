@@ -133,6 +133,24 @@ export enum I18Keys {
   publishingAutomationOpt2Desc = 's073',
   publishingAutomationOpt3Title = 's074',
   publishingAutomationOpt3Desc = 's075',
+
+  autopostInviteTitle = 's076',
+  autpostInvitePar01 = 's077',
+  autopostInvitePar02 = 's078',
+
+  dontShowAgain = 's079',
+
+  reviewSettings = 's080',
+  notNow = 's081',
+
+  emailSubjectReview = 's082',
+  emailSubjectAutoposted = 's083',
+  today = 's084',
+  thisWeek = 's085',
+  thisMonth = 's086',
+
+  noPostsFound = 's087',
+  noPostsFoundDesc = 's088',
 }
 
 const check = new Set();
@@ -270,7 +288,8 @@ const translationENG: Record<I18Keys, string> = {
 
   [I18Keys.usingApp]: 'Using Senscast',
   [I18Keys.publishingAutomation]: 'Publishing Automation',
-  [I18Keys.publishingAutomationExplainer]: 'TBD',
+  [I18Keys.publishingAutomationExplainer]:
+    'Choose how you’d like to nanopublish your future X · Twitter posts.',
 
   [I18Keys.notificationsSettings]: 'Notification Settings',
   [I18Keys.notificationsSettingsExplainer]:
@@ -296,12 +315,35 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.notificationSettingsOpt4Desc]:
     'We won’t send you any email notifications, so you’ll need to check the app for updates.',
 
-  [I18Keys.publishingAutomationOpt1Title]: 'AI',
-  [I18Keys.publishingAutomationOpt1Desc]: 'Use AI TBD',
-  [I18Keys.publishingAutomationOpt2Title]: 'Deterministic',
-  [I18Keys.publishingAutomationOpt2Desc]: 'use citoid',
-  [I18Keys.publishingAutomationOpt3Title]: 'Manual',
-  [I18Keys.publishingAutomationOpt3Desc]: 'No autopost',
+  [I18Keys.publishingAutomationOpt1Title]: 'AI automated publishing',
+  [I18Keys.publishingAutomationOpt1Desc]:
+    'All science posts detected with our AI filter will be automatically nanopublished.',
+  [I18Keys.publishingAutomationOpt2Title]:
+    'Reference-Based Automated Publishing',
+  [I18Keys.publishingAutomationOpt2Desc]:
+    'Any post mentioning research with academic reference identifiers such as DOIs, PMIDs, PMCIDs, or ISBNs will be automatically nanopublished.',
+  [I18Keys.publishingAutomationOpt3Title]: 'Supervised publishing',
+  [I18Keys.publishingAutomationOpt3Desc]:
+    'Receive a notification when a new science post is detected, and manually review it before publishing.',
+
+  [I18Keys.autopostInviteTitle]:
+    'Make your content FAIR,<br> without even thinking about it.',
+  [I18Keys.autpostInvitePar01]:
+    'Nanopublishing could be even easier. Take control of your content by choosing how you’d like future posts to be nanopublished. ',
+  [I18Keys.autopostInvitePar02]: 'You can always change this in your settings.',
+
+  [I18Keys.dontShowAgain]: 'Don’t show this message again',
+  [I18Keys.reviewSettings]: 'Review settings',
+  [I18Keys.notNow]: 'Not now',
+  [I18Keys.emailSubjectReview]:
+    'You have {{nPosts}} potential nanopublications for review {{pointInTime}}',
+  [I18Keys.emailSubjectAutoposted]:
+    'You nanopublished {{nPosts}} posts {{pointInTime}}',
+  [I18Keys.today]: 'today',
+  [I18Keys.thisWeek]: 'this week',
+  [I18Keys.thisMonth]: 'this month',
+  [I18Keys.noPostsFound]: 'No posts found',
+  [I18Keys.noPostsFoundDesc]: 'We couldn’t find any posts.',
 };
 
 i18n.use(initReactI18next).init({

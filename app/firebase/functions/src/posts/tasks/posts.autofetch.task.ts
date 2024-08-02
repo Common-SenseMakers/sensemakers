@@ -23,7 +23,7 @@ export const triggerAutofetchPosts = async (services: Services) => {
         undefined,
         DEBUG_PREFIX
       );
-      return enqueueTask(AUTOFETCH_POSTS_TASK, { userId });
+      return (enqueueTask as any)(AUTOFETCH_POSTS_TASK, { userId }, services);
     })
   );
 };

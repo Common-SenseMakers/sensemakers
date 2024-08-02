@@ -1,4 +1,5 @@
 import express from 'express';
+import { initializeApp } from 'firebase-admin/app';
 import * as functions from 'firebase-functions';
 import {
   FirestoreEvent,
@@ -8,6 +9,7 @@ import {
 } from 'firebase-functions/v2/firestore';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { onTaskDispatched } from 'firebase-functions/v2/tasks';
+import { Message } from 'postmark';
 
 import { ActivityEventBase } from './@shared/types/types.activity';
 import { NotificationFreq } from './@shared/types/types.notifications';
@@ -19,6 +21,7 @@ import { activityEventCreatedHook } from './activity/activity.created.hook';
 import {
   AUTOFETCH_PERIOD,
   DAILY_NOTIFICATION_PERIOD,
+  EMAIL_SENDER_FROM,
   IS_EMULATOR,
   MONTHLY_NOTIFICATION_PERIOD,
   WEEKLY_NOTIFICATION_PERIOD,
@@ -58,6 +61,19 @@ const secrets = [
   envRuntime.EMAIL_CLIENT_SECRET,
   envRuntime.MAGIC_ADMIN_SECRET,
 ];
+
+export const app = (() => {
+  if (IS_EMULATOR) {
+    logger.info('Running in emulator mode');
+    return initializeApp({
+      projectId: 'demo-sensenets',
+    });
+  }
+
+  /** used on deployment with the current app */
+  logger.info('Running in depolyed mode');
+  return initializeApp();
+})();
 
 // import { fetchNewPosts } from './posts/posts.job';
 
@@ -267,6 +283,24 @@ emulatorTriggerRouter.post('/sendNotifications', async (request, response) => {
     params.freq as NotificationFreq,
     getServices(request)
   );
+  response.status(200).send({ success: true });
+});
+
+emulatorTriggerRouter.post('/emailTest', async (request, response) => {
+  logger.debug('emailTest triggered');
+
+  const services = createServices();
+  const message: Message = {
+    From: EMAIL_SENDER_FROM.value(),
+    ReplyTo: EMAIL_SENDER_FROM.value(),
+    To: 'pepo@sense-nets.xyz',
+    Subject: 'Test email',
+    HtmlBody: '<h1>Test email</h1><p>This is a test email</p>',
+    TextBody: 'Test email\nThis is a test email',
+    MessageStream: 'outbound',
+  };
+
+  await services.email.callSendEmail(message);
   response.status(200).send({ success: true });
 });
 
