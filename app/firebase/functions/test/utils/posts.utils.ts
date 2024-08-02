@@ -658,6 +658,12 @@ export const getMockPost = (refPost: Partial<AppPostFull>) => {
       {
         content: 'test content',
       },
+      {
+        content: 'test content 2',
+      },
+      {
+        content: 'test content 3',
+      },
     ],
     author: {
       id: '123456',
