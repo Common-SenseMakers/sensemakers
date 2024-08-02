@@ -24,6 +24,8 @@ export const getNanopubProfile = async (privateKey: HexStr) => {
   const profile: NanupubSignupData = {
     rsaPublickey: rsaKeys.publicKey,
     ethAddress: ethAccount.address,
+    introNanopubUri:
+      'https://w3id.org/np/RAffsv5cH41cAXA_HOasEJ74XyQXOENnB9lc-iyUCoM4w',
     ethToRsaSignature,
   };
 
