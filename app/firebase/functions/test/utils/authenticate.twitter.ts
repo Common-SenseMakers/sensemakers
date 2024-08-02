@@ -30,7 +30,7 @@ export const authenticateTwitterUser = async (
   services: Services,
   manager: TransactionManager
 ): Promise<AppUser> => {
-  const browser = await puppeteer.launch({ headless: false });
+  const browser = await puppeteer.launch({ headless: true });
   const signupData = await runAuthenticateTwitterUser(
     testAccount,
     services.platforms.get<TwitterService>(PLATFORM.Twitter),
