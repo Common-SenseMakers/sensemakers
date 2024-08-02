@@ -617,6 +617,7 @@ export class PostsManager {
                 posted: posted,
                 publishOrigin: PlatformPostPublishOrigin.POSTED,
                 publishStatus: PlatformPostPublishStatus.PUBLISHED,
+                ...(mirror.post_id ? {} : { post_id: posted.post_id }),
               },
               manager
             );
