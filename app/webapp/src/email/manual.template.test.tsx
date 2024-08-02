@@ -14,7 +14,7 @@ EmailTemplate.PreviewProps = {
   ],
   notificationFrequency: NotificationFreq.Daily,
   autopostOption: AutopostOption.MANUAL,
-  appUrl: 'https://sample.com',
+  appUrl: 'https://sample.com/',
 };
 
 export default EmailTemplate;

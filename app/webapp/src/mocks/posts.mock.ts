@@ -56,7 +56,7 @@ export const getMockPublishedPost = () => {
         publishOrigin: PlatformPostPublishOrigin.FETCHED,
         publishStatus: PlatformPostPublishStatus.PUBLISHED,
         posted: {
-          post_id: '123456',
+          post_id: 'https://np.test.knowledgepixels.com/123456',
           timestampMs: createdAtMs,
           user_id: '123412341234',
           post: {},

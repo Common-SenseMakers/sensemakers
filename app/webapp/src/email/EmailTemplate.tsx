@@ -37,12 +37,24 @@ export const EmailTemplate = ({
   autopostOption,
   appUrl,
 }: EmailTemplateProps) => {
-  const emailSettingsLink = `${appUrl}${AbsoluteRoutes.Settings}`;
-  const allPostsLink = `${appUrl}${AbsoluteRoutes.App}`;
-  const reviewPostsLink = `${allPostsLink}${PostsQueryStatus.PENDING}`;
-  const ignoredPostsLink = `${allPostsLink}${PostsQueryStatus.IGNORED}`;
-  const publishedPostsLink = `${allPostsLink}${PostsQueryStatus.PUBLISHED}`;
-  const automationSettingsLink = `${appUrl}${AbsoluteRoutes.Settings}`;
+  const emailSettingsLink = new URL(AbsoluteRoutes.Settings, appUrl).toString();
+  const allPostsLink = new URL(AbsoluteRoutes.App, appUrl).toString();
+  const reviewPostsLink = new URL(
+    PostsQueryStatus.PENDING,
+    allPostsLink
+  ).toString();
+  const ignoredPostsLink = new URL(
+    PostsQueryStatus.IGNORED,
+    allPostsLink
+  ).toString();
+  const publishedPostsLink = new URL(
+    PostsQueryStatus.PUBLISHED,
+    allPostsLink
+  ).toString();
+  const automationSettingsLink = new URL(
+    AbsoluteRoutes.Settings,
+    appUrl
+  ).toString();
 
   const headerTimeframeKey = (() => {
     switch (notificationFrequency) {
@@ -120,13 +132,15 @@ export const EmailTemplate = ({
             </Heading>
           </Row>
           {posts.slice(0, MAX_POSTS_IN_EMAIL).map((post, idx) => {
+            const postUrl = new URL(
+              AbsoluteRoutes.Post(post.id),
+              appUrl
+            ).toString();
             return (
               <Section key={idx} style={{ margin: '16px 0px 0px' }}>
                 <PostCardEmail post={post} />
                 <EmailRow>
-                  <Button
-                    style={button}
-                    href={`${appUrl}${AbsoluteRoutes.Post(post.id)}`}>
+                  <Button style={button} href={postUrl}>
                     {t(I18Keys.emailReviewPostButton)}
                   </Button>
                 </EmailRow>
@@ -177,5 +191,5 @@ EmailTemplate.PreviewProps = {
   posts: [] as AppPostFull[],
   notificationFrequency: NotificationFreq.Monthly,
   autopostOption: AutopostOption.AI,
-  appUrl: 'https://sample.com',
+  appUrl: 'https://sample.com/',
 };
