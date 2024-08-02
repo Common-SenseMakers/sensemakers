@@ -12,7 +12,10 @@ export interface PlatformDetails {
 
 export class PostsHelper {
   static concatenateThread(generic: { thread: GenericPost[] }): string {
-    return generic.thread.reduce((_acc, post) => `${post.content}\n\n`, '');
+    return generic.thread.reduce(
+      (acc, post) => acc + `${post.content}\n\n`,
+      ''
+    );
   }
 
   static getPostUrl(postId: string): string {
