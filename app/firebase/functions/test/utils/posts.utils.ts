@@ -738,6 +738,29 @@ export const fetchPostsInTests = async (
   );
 };
 
+export const fetchPostInTests = async (
+  userId: string,
+  post_id: string,
+  services: Services
+) => {
+  /** fetch will store the posts in the DB */
+  const { post } = await services.db.run((manager) =>
+    services.postsManager.fetchPostFromPlatform(
+      userId,
+      PLATFORM.Twitter,
+      post_id,
+      manager
+    )
+  );
+  /**
+   * We need to manually call the postUpdate hook that would have been called
+   * when creating the AppPost as part of the fetch
+   */
+  await postUpdatedHook(post, services);
+
+  return post;
+};
+
 // auto triggfe the acivity create hook
 export const postUpdatedHookOnTest = async (
   post: AppPost,

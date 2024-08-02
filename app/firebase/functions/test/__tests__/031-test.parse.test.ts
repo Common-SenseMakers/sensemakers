@@ -6,6 +6,7 @@ import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
+import { fetchPostInTests } from '../utils/posts.utils';
 import { createUsers } from '../utils/users.utils';
 import {
   _01_createAndFetchUsers,
@@ -55,27 +56,22 @@ describe.only('031 test parse', () => {
     });
 
     it('gets a post (thread) from twitter and parses it', async () => {
-      if (!user) {
-        throw new Error('user not created');
-      }
-      const { postsManager, db } = services;
+      const { postsManager } = services;
 
-      const platformPostId = process.env.TEST_THREAD_ID;
+      const post_id = process.env.TEST_THREAD_ID;
 
-      if (!platformPostId) {
+      if (!post_id) {
         throw new Error('TEST_THREAD_ID not defined in .env.test file');
       }
 
-      const { post } = await db.run((manager) =>
-        postsManager.fetchPostFromPlatform(
-          user!.userId,
-          PLATFORM.Twitter,
-          platformPostId,
-          manager
-        )
-      );
+      if (!user) {
+        throw new Error('user not created');
+      }
+
+      const post = await fetchPostInTests(user.userId, post_id, services);
 
       await postsManager.parsePost(post.id);
+
       const parsedPost = await postsManager.getPost(post.id, true);
       expect(parsedPost).to.not.be.undefined;
       expect(parsedPost.parsingStatus).to.equal(AppPostParsingStatus.IDLE);
