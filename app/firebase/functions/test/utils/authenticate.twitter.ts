@@ -1,3 +1,4 @@
+import { logger } from 'firebase-functions';
 import puppeteer, { Browser } from 'puppeteer';
 import { IOAuth2RequestTokenResult } from 'twitter-api-v2';
 
@@ -30,6 +31,8 @@ export const authenticateTwitterUser = async (
   services: Services,
   manager: TransactionManager
 ): Promise<AppUser> => {
+  logger.debug('authenticateTwitterUser', { testAccount });
+
   const browser = await puppeteer.launch({ headless: true });
   const signupData = await runAuthenticateTwitterUser(
     testAccount,
@@ -37,6 +40,8 @@ export const authenticateTwitterUser = async (
     browser
   );
   await browser.close();
+
+  logger.debug('authenticatedTwitterUser', { testAccount });
 
   /** create users using the Twitter profiles */
   /** store the user in the DB (build the user profile object and derive the ID) */

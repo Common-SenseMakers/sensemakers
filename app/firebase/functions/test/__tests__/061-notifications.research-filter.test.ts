@@ -2,7 +2,6 @@ import { expect } from 'chai';
 
 import { AppPostParsingStatus } from '../../src/@shared/types/types.posts';
 import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
-import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
@@ -13,16 +12,16 @@ import {
   _02_publishTweet,
   _03_fetchAfterPublish,
 } from './reusable/create-post-fetch';
-import { USE_REAL_NANOPUB, USE_REAL_PARSER, testUsers } from './setup';
+import { testUsers } from './setup';
 import { getTestServices } from './test.services';
 
-describe.skip('031 test parse', () => {
+describe.skip('061 notifications - research filter', () => {
   const services = getTestServices({
     time: 'mock',
-    twitter: undefined,
-    nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
-    parser: USE_REAL_PARSER ? 'real' : 'mock',
-    emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
+    twitter: { get: true },
+    nanopub: 'mock-publish',
+    parser: 'mock',
+    emailSender: 'mock',
   });
 
   before(async () => {

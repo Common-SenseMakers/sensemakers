@@ -38,7 +38,12 @@ let state: TwitterTestState = {
   threads: [],
 };
 
-export type TwitterMockConfig = 'real' | 'mock-publish' | 'mock-signup';
+export interface TwitterMockConfig {
+  publish?: boolean;
+  signup?: boolean;
+  fetch?: boolean;
+  get?: boolean;
+}
 
 const getSampleTweet = (
   id: string,
@@ -125,16 +130,16 @@ type MockedType = Omit<TwitterService, 'fetchInternal' | 'getUserClient'> & {
  */
 export const getTwitterMock = (
   twitterService: TwitterService,
-  type: TwitterMockConfig,
+  type?: TwitterMockConfig,
   testUser?: TestUserCredentials
 ) => {
-  if (type === 'real') {
+  if (!type || Object.keys(type).length === 0) {
     return twitterService;
   }
 
-  if (type === 'mock-publish' || type === 'mock-signup') {
-    const mocked = spy(twitterService) as unknown as MockedType;
+  const mocked = spy(twitterService) as unknown as MockedType;
 
+  if (type.publish) {
     when(mocked.publish(anything(), anything())).thenCall(
       (postPublish: PlatformPostPublish<TwitterDraft>) => {
         logger.warn(`called twitter publish mock`, postPublish);
@@ -175,7 +180,9 @@ export const getTwitterMock = (
         return post;
       }
     );
+  }
 
+  if (type.fetch) {
     when(mocked.fetchInternal(anything(), anything(), anything())).thenCall(
       async (
         params: PlatformFetchParams,
@@ -200,7 +207,9 @@ export const getTwitterMock = (
           : threads;
       }
     );
+  }
 
+  if (type.signup) {
     when(mocked.getSignupContext(anything(), anything())).thenCall(
       (
         userId?: string,
@@ -222,9 +231,7 @@ export const getTwitterMock = (
         return data;
       }
     );
-
-    return instance(mocked) as unknown as TwitterService;
   }
 
-  throw new Error('Unexpected');
+  return instance(mocked) as unknown as TwitterService;
 };
