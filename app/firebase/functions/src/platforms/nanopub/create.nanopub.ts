@@ -8,7 +8,7 @@ import {
   AutopostOption,
   PLATFORM,
 } from '../../@shared/types/types.user';
-import { parseRDF } from '../../@shared/utils/n3.utils';
+import { parseRDF, replaceNodes } from '../../@shared/utils/n3.utils';
 import { logger } from '../../instances/logger';
 import { PostsHelper } from '../../posts/posts.helper';
 import { UsersHelper } from '../../users/users.helper';
@@ -70,11 +70,20 @@ export const createNanopublication = async (
       twitterPath,
     });
 
-  const semanticsStore = await (async () => {
+  const semanticsParserStore = await (async () => {
     if (!semantics) return new Store();
 
     return await parseRDF(semantics);
   })();
+  // Define the replacement map that swaps our placeholder with np placeholder 
+  const replaceMap: Record<string, string> = {
+    'https://sense-nets.xyz/mySemanticPost': 'http://purl.org/nanopub/temp/mynanopub#'
+  };
+
+  
+  const semanticsStore = replaceNodes(semanticsParserStore, replaceMap);
+  
+ 
 
   const nanoDetails = user[PLATFORM.Nanopub];
   const ethAddress = nanoDetails && nanoDetails[0].profile?.ethAddress;
