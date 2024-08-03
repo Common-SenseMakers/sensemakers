@@ -7,7 +7,6 @@ export const APP_URL = process.env.APP_URL;
 export const ORCID_REDIRECT_URL = APP_URL;
 
 export const TWITTER_API_URL = 'https://api.twitter.com';
-export const TWITTER_CLIENT_ID = process.env.TWITTER_CLIENT_ID;
 
 export const WALLETCONNECT_PROJECT_ID = 'c12fdc701fd336cf8dc059f6784906bc';
 export const MAGIC_API_KEY = 'pk_live_A603B0287DAF3C97';
