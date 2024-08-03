@@ -288,16 +288,20 @@ export const buildSpostPubinfo = (
     );
   }
   //if post type is unsupervised then add
-  if (postType == 'unsup') {
-    store.addQuad(
-      quad(
-        namedNode(URI.BASE_URI + 'sig'),
-        namedNode(URI.NP_SIGNED_BY),
-        namedNode(URI.COSMO_PREFIX),
-        pubinfoGraphUri
-      )
-    );
-  }
+  
+  store.addQuad(
+    namedNode(URI.SIGNATURE_URI),
+    namedNode(URI.NP_SIGNED_BY),
+    namedNode(URI.COSMO_PREFIX),
+    pubinfoGraphUri
+  );
+  
+  store.addQuad(
+    namedNode(URI.SIGNATURE_URI),
+    namedNode(URI.PROV_WAS_ASSOCIATED_WITH),
+    namedNode(introUri+URI.DELEGATION_STRING),
+    pubinfoGraphUri
+  );
   return store;
 };
 

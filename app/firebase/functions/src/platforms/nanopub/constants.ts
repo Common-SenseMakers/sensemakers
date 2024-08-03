@@ -9,6 +9,7 @@ export const DERIVATION_PROOF_URI = BASE_URI + 'derivationProof';
 export const SIGNING_DELEGATION_URI = BASE_URI + 'signingDelegation';
 export const RETRACTS_URI = BASE_URI + 'assertion';
 export const KEY_DECLARATION_URI = BASE_URI + 'RSAkeyDeclaration';
+export const SIGNATURE_URI = BASE_URI + 'sig';
 // Specific Activity URIs
 export const SUPERVISED_ACTIVITY = 'https://sense-nets.xyz/supervisedActivity';
 export const UNSUPERVISED_ACTIVITY =
@@ -93,6 +94,12 @@ export const LABEL = 'http://www.w3.org/2000/01/rdf-schema#label';
 export const RDF_SYNTAX_NS_TYPE =
   'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 export const CREATIVECOMMONS4 = 'https://creativecommons.org/licenses/by/4.0/';
+
+//cosmo special constants
+export const APP_SPOST_PLACEHOLDER = 'https://sense-nets.xyz/mySemanticPost';
+//Strings
+export const DELEGATION_STRING = 'signingDelegation'
+
 // Prefixes JSONs
 export const sPostPrefixes = {
   base: BASE_URI,
