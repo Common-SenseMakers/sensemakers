@@ -11,7 +11,7 @@ const DEBUG = false;
 const { namedNode, quad, literal } = DataFactory;
 
 //define interface for possible extra values
-interface SupersedesOptions {
+export interface SupersedesOptions {
   latest: string;
   root: string;
 }

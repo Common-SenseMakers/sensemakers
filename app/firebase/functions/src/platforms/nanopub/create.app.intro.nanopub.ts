@@ -2,7 +2,7 @@ import { Nanopub } from '@nanopub/sign';
 import { DataFactory, Writer } from 'n3';
 import * as URI from './constants';
 
-import { buildNpHead } from './utils';
+import { buildNpHead, SupersedesOptions } from './utils';
 import { logger } from '../../instances/logger';
 
 const DEBUG = false;
@@ -17,12 +17,13 @@ export const buildAppIntroNp = async (
   pubKey2: string,
   signature1: string,
   signature2: string,
-  oldNpUri?: string
+  supersedesOptions?: SupersedesOptions
 ): Promise<Nanopub> => {
   return new Promise((resolve, reject) => {
     const headStore = buildNpHead();
 
     // Define the graph URIs
+    
     const baseNode = namedNode(URI.BASE_URI);
     const assertionGraph = namedNode(URI.ASSERTION_URI);
     const provenanceGraph = namedNode(URI.PROVENANCE_URI);
@@ -227,11 +228,17 @@ export const buildAppIntroNp = async (
       appAgentNode,
       pubinfoGraph
     );
-    if (oldNpUri) {
+    if (supersedesOptions) {
         writer.addQuad(
           baseNode,
           namedNode(URI.NP_SUPERSEDES),
-          namedNode(oldNpUri),
+          namedNode(supersedesOptions.latest),
+          pubinfoGraph
+        );
+        writer.addQuad(
+          namedNode(URI.BASE_URI),
+          namedNode(URI.NP_HAS_ORIGNAL_VERSION),
+          namedNode(supersedesOptions.root),
           pubinfoGraph
         );
       }
