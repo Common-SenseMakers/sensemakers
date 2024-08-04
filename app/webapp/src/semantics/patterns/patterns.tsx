@@ -16,13 +16,13 @@ export enum PATTERN_ID {
 
 export interface PatternProps {
   size?: 'compact' | 'normal';
+  isLoading?: boolean;
   editable?: boolean;
   originalParsed?: ParsePostResult;
   semantics?: AppPostSemantics;
   semanticsUpdated?: (semantics: AppPostSemantics) => void;
 }
 
-const appButton = AppButton;
 export const patternsLib: Record<
   PATTERN_ID,
   React.ComponentType<PatternProps>

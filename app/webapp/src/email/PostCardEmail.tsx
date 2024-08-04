@@ -155,6 +155,7 @@ const PostCardReferenceEmail = ({
   referenceNumber: number;
 }) => {
   const { title, summary, item_type } = refData.meta || {};
+  // TODO reenable emoji but dont use unicode escape strings
   return (
     <div style={{}}>
       <LabelsRow
@@ -162,7 +163,7 @@ const PostCardReferenceEmail = ({
         backgroundColor="#f0f9ff"
         color="#1f73b7"
         borderColor="#adcce5"
-        hasEmoji={true}
+        hasEmoji={false}
       />
       <div style={{ margin: '8px 0px' }}></div>
       <RefCardEmail

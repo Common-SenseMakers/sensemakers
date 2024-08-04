@@ -1,3 +1,4 @@
+import { initializeApp } from 'firebase-admin/app';
 import { Context } from 'mocha';
 import * as sinon from 'sinon';
 
@@ -17,6 +18,7 @@ export const USE_REAL_TWITTER = process.env.USE_REAL_TWITTERX === 'true';
 export const USE_REAL_NANOPUB = process.env.USE_REAL_NANOPUB === 'true';
 export const USE_REAL_PARSER = process.env.USE_REAL_PARSER === 'true';
 export const USE_REAL_EMAIL = process.env.USE_REAL_EMAIL === 'true';
+export const EMAIL_SENDER_FROM = process.env.EMAIL_SENDER_FROM as string;
 
 export type InjectableContext = Readonly<{
   // properties injected using the Root Mocha Hooks
@@ -29,6 +31,10 @@ export const TEST_THREADS: string[][] = process.env.TEST_THREADS
 
 // TestContext will be used by all the test
 export type TestContext = Mocha.Context & Context;
+
+export const app = initializeApp({
+  projectId: 'demo-sensenets',
+});
 
 export let globalTestServices = getTestServices({
   time: 'mock',

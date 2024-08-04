@@ -15,6 +15,7 @@
     "deploy-prod": "firebase deploy --project prod",
     "prepare:hooks": "husky install",
     "reset-dev": "firebase firestore:delete --all-collections --project sensenets-dev",
+    "reset-staging": "firebase firestore:delete --all-collections --project sensenets-staging",
     "trigger-autofetch": "curl -X POST http://127.0.0.1:5001/demo-sensenets/us-central1/trigger/autofetch",
     "trigger-notifications": "curl -X POST http://127.0.0.1:5001/demo-sensenets/us-central1/trigger/sendNotifications?freq=weekly",
     "trigger-autofetch-dev": "curl -X POST https://us-central1-sensenets-dev.cloudfunctions.net/trigger/autofetch",

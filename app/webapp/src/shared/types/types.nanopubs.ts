@@ -8,7 +8,9 @@ import { HexStr, UserDetailsBase } from './types.user';
 export interface NanopubUserProfile {
   rsaPublickey: string;
   ethAddress: HexStr;
-  introNanopub?: string;
+  introNanopubDraft?: string;
+  introNanopubSigned?: string;
+  introNanopubUri?: string;
   ethToRsaSignature: HexStr;
 }
 

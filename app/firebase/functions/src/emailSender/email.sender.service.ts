@@ -3,8 +3,9 @@ import { Message, ServerClient } from 'postmark';
 import { AppPostFull } from '../@shared/types/types.posts';
 import { AppUser, PLATFORM } from '../@shared/types/types.user';
 import { RenderEmailFunction } from '../@shared/types/types.user';
-import { APP_URL } from '../config/config.runtime';
+import { APP_URL, EMAIL_SENDER_FROM } from '../config/config.runtime';
 import { logger } from '../instances/logger';
+import { cleanHtml } from './utils';
 
 const { renderEmail } = require('../@shared/emailRenderer') as {
   renderEmail: RenderEmailFunction;
@@ -33,10 +34,19 @@ export class EmailSenderService {
   protected postmark: ServerClient;
 
   constructor(config: EmailServiceConfig) {
+    if (DEBUG)
+      logger.debug(
+        'EMAIL-SENDER-SERVICE - constructor',
+        { key: config.apiKey.slice(0, 8) },
+        DEBUG_PREFIX
+      );
     this.postmark = new postmark.ServerClient(config.apiKey);
   }
 
-  private async callSendEmail(message: Message) {
+  async callSendEmail(message: Message) {
+    if (message.HtmlBody) {
+      message.HtmlBody = cleanHtml(message.HtmlBody);
+    }
     const res = await this.postmark.sendEmail(message);
     logger.debug(`sendDigest - success`, { res }, DEBUG_PREFIX);
   }
@@ -46,7 +56,7 @@ export class EmailSenderService {
       throw new Error(`User ${user.userId} has no email`);
     }
 
-    const { html, plainText } = renderEmail(
+    const { html, plainText, subject } = renderEmail(
       posts,
       user.settings.notificationFreq,
       user.settings.autopost[PLATFORM.Nanopub].value,
@@ -54,9 +64,10 @@ export class EmailSenderService {
     );
 
     const message: Message = {
-      From: ' pepo@microrevolutions.com',
+      From: EMAIL_SENDER_FROM.value(),
+      ReplyTo: EMAIL_SENDER_FROM.value(),
       To: user.email?.email,
-      Subject: 'Hello from Sensecast',
+      Subject: subject,
       HtmlBody: html,
       TextBody: plainText,
       MessageStream: 'outbound',

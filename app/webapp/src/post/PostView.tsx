@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
+import { AppModalStandard } from '../app/AppInfoModal';
 import { CelebrateIcon } from '../app/icons/CelebrateIcon';
 import { ClearIcon } from '../app/icons/ClearIcon';
 import { SendIcon } from '../app/icons/SendIcon';
@@ -14,12 +15,11 @@ import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID } from '../semantics/patterns/patterns';
 import { AppPostReviewStatus } from '../shared/types/types.posts';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
-import { AppButton, AppHeading, AppModal } from '../ui-components';
-import { AppParagraph } from '../ui-components/AppParagraph';
-import { BoxCentered } from '../ui-components/BoxCentered';
-import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
+import { AppButton } from '../ui-components';
+import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
+import { useAutopostInviteContext } from '../user-login/contexts/AutopostInviteContext';
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { usePersist } from '../utils/use.persist';
@@ -32,15 +32,20 @@ import { concatenateThread } from './posts.helper';
 
 const DEBUG = false;
 
+enum PublishPostAction {
+  None = 'None',
+  openNanopublication = 'openNanopublication',
+  nextPost = 'nextPost',
+}
+
 /** extract the postId from the route and pass it to a PostContext */
-export const PostView = (props: {
-  profile?: TwitterUserProfile;
-  isProfile: boolean;
-}) => {
+export const PostView = (props: { profile?: TwitterUserProfile }) => {
   const [approveIntent, setApproveIntent] = useState(false);
   const [askedOrcid, setAskedOrcid] = useState(false);
   const [publishing, setPublishing] = useState(false);
-  const [reviewedPublished, setReviewPublished] = useState(false);
+  const [reviewedPublished, setReviewedPublished] = useState(false);
+
+  const { setJustPublished } = useAutopostInviteContext();
 
   const navigate = useNavigate();
 
@@ -71,7 +76,7 @@ export const PostView = (props: {
     setApproveIntent(false);
     setAskedOrcid(false);
     setPublishing(false);
-    setReviewPublished(false);
+    setReviewedPublished(false);
     setPostingPostId(null);
   };
 
@@ -136,19 +141,8 @@ export const PostView = (props: {
     nanopubDraft &&
     !postStatuses.published;
 
-  const { action: rightClicked, label: rightLabel } = (() => {
-    if (canPublishNanopub && nanopubDraft && !postStatuses.published) {
-      return {
-        action: () => setApproveIntent(true),
-        label: t(I18Keys.publish),
-      };
-    }
-
-    return {
-      action: () => {},
-      label: '',
-    };
-  })();
+  const readyToNanopublish =
+    canPublishNanopub && nanopubDraft && !postStatuses.published;
 
   const connectOrcid = () => {
     if (post) {
@@ -177,6 +171,26 @@ export const PostView = (props: {
     }
   }, [postStatuses]);
 
+  // single place to receive the last step of the publishing process
+  const publishedModalClosed = (action: PublishPostAction) => {
+    setJustPublished(true);
+
+    if (action === PublishPostAction.None) {
+      setReviewedPublished(true);
+      return;
+    }
+
+    if (action === PublishPostAction.openNanopublication) {
+      openNanopublication();
+      return;
+    }
+
+    if (action === PublishPostAction.nextPost) {
+      openNextPost();
+      return;
+    }
+  };
+
   const openNextPost = () => {
     if (nextPostId) {
       navigate(AbsoluteRoutes.Post(nextPostId));
@@ -184,7 +198,12 @@ export const PostView = (props: {
   };
 
   const openNanopublication = () => {
-    console.log('openNanopublication');
+    if (postStatuses.nanopubUrl && window) {
+      const opened = window.open(postStatuses.nanopubUrl, '_blank');
+      if (opened) {
+        window.focus();
+      }
+    }
   };
 
   const action = (() => {
@@ -196,6 +215,17 @@ export const PostView = (props: {
           style={{ width: '100%' }}
           onClick={() => reparse()}
           label="Process"></AppButton>
+      );
+    }
+
+    if (postStatuses.ignored) {
+      return (
+        <AppButton
+          disabled={isUpdating}
+          margin={{ top: 'medium' }}
+          primary
+          onClick={() => reviewForPublication()}
+          label="Review for publication"></AppButton>
       );
     }
 
@@ -212,198 +242,172 @@ export const PostView = (props: {
           <Box width="50%" align="end" gap="small">
             <AppButton
               primary
-              disabled={isUpdating}
+              disabled={isUpdating || !readyToNanopublish}
               icon={<SendIcon></SendIcon>}
-              onClick={() => rightClicked()}
-              label={rightLabel}
+              onClick={() => setApproveIntent(true)}
+              label={t(I18Keys.publish)}
               style={{ width: '100%' }}></AppButton>
           </Box>
         </Box>
       );
-    } else {
-      if (!enabledEdit) {
-        return (
-          <Box direction="row" gap="small" margin={{ top: 'medium' }}>
-            <Box width="50%" style={{ flexGrow: 1 }}>
-              <AppButton
-                disabled={isUpdating}
-                icon={<ClearIcon></ClearIcon>}
-                onClick={() => retract()}
-                label={t(I18Keys.retract)}></AppButton>
-            </Box>
-            <Box width="50%" align="end" gap="small">
-              <AppButton
-                primary
-                disabled={isUpdating}
-                icon={<SendIcon></SendIcon>}
-                onClick={() => enableEditOrUpdate()}
-                label={t(I18Keys.edit)}
-                style={{ width: '100%' }}></AppButton>
-            </Box>
-          </Box>
-        );
-      } else {
-        return (
-          <Box direction="row" gap="small" margin={{ top: 'medium' }}>
-            <Box width="50%" style={{ flexGrow: 1 }}>
-              <AppButton
-                disabled={isUpdating}
-                icon={<ClearIcon></ClearIcon>}
-                onClick={() => cancelEdit()}
-                label={t(I18Keys.cancel)}></AppButton>
-            </Box>
-            <Box width="50%" align="end" gap="small">
-              <AppButton
-                primary
-                disabled={isUpdating}
-                icon={<SendIcon></SendIcon>}
-                onClick={() => enableEditOrUpdate()}
-                label={t(I18Keys.publish)}
-                style={{ width: '100%' }}></AppButton>
-            </Box>
-          </Box>
-        );
-      }
     }
+
+    if (postStatuses.published && !enabledEdit) {
+      return (
+        <Box direction="row" gap="small" margin={{ top: 'medium' }}>
+          <Box width="50%" style={{ flexGrow: 1 }}>
+            <AppButton
+              disabled={isUpdating}
+              icon={<ClearIcon></ClearIcon>}
+              onClick={() => retract()}
+              label={t(I18Keys.retract)}></AppButton>
+          </Box>
+          <Box width="50%" align="end" gap="small">
+            <AppButton
+              primary
+              disabled={isUpdating}
+              icon={<SendIcon></SendIcon>}
+              onClick={() => enableEditOrUpdate()}
+              label={t(I18Keys.edit)}
+              style={{ width: '100%' }}></AppButton>
+          </Box>
+        </Box>
+      );
+    }
+
+    if (postStatuses.published && enabledEdit) {
+      return (
+        <Box direction="row" gap="small" margin={{ top: 'medium' }}>
+          <Box width="50%" style={{ flexGrow: 1 }}>
+            <AppButton
+              disabled={isUpdating}
+              icon={<ClearIcon></ClearIcon>}
+              onClick={() => cancelEdit()}
+              label={t(I18Keys.cancel)}></AppButton>
+          </Box>
+          <Box width="50%" align="end" gap="small">
+            <AppButton
+              primary
+              disabled={isUpdating}
+              icon={<SendIcon></SendIcon>}
+              onClick={() => enableEditOrUpdate()}
+              label={t(I18Keys.publish)}
+              style={{ width: '100%' }}></AppButton>
+          </Box>
+        </Box>
+      );
+    }
+
+    return <></>;
   })();
 
   const askOrcid = (() => {
     return (
-      <AppModal type="small" onModalClosed={() => setApproveIntent(false)}>
-        <>
-          <Box width="100%" height="16px"></Box>
-          <AppHeading level="1">{t(I18Keys.connectOrcidTitle)}</AppHeading>
-
-          <Box width="100%" height="16px"></Box>
-          <AppParagraph>{t(I18Keys.connectOrcidPar01)}</AppParagraph>
-          <AppParagraph>
+      <AppModalStandard
+        onModalClosed={() => setApproveIntent(false)}
+        type="normal"
+        contentProps={{
+          type: 'normal',
+          title: t(I18Keys.connectOrcidTitle),
+          parragraphs: [
+            <Trans
+              i18nKey={I18Keys.connectOrcidPar01}
+              components={{ b: <b></b> }}></Trans>,
             <Trans
               i18nKey={I18Keys.connectOrcidPar02}
-              components={{ b: <b></b> }}></Trans>
-          </AppParagraph>
-
-          <AppParagraph addMargin></AppParagraph>
-
-          <Box direction="row" gap="small" margin={{ top: 'medium' }}>
-            <Box width="50%" style={{ flexGrow: 1 }}>
-              <AppButton
-                disabled={isUpdating}
-                onClick={() => connectOrcid()}
-                label={t(I18Keys.connectOrcid)}></AppButton>
-            </Box>
-            <Box width="50%" align="end" gap="small">
-              <AppButton
-                primary
-                disabled={isUpdating}
-                onClick={() => setAskedOrcid(true)}
-                label={t(I18Keys.continue)}
-                style={{ width: '100%' }}></AppButton>
-            </Box>
-          </Box>
-        </>
-      </AppModal>
+              components={{ b: <b></b> }}></Trans>,
+          ],
+          primaryButton: {
+            disabled: isUpdating,
+            label: t(I18Keys.continue),
+            onClick: () => setAskedOrcid(true),
+          },
+          secondaryButton: {
+            disabled: isUpdating,
+            label: t(I18Keys.connectOrcid),
+            onClick: () => connectOrcid(),
+          },
+        }}></AppModalStandard>
     );
   })();
 
   const finalApprove = (() => {
     return (
-      <AppModal type="small" onModalClosed={() => setApproveIntent(false)}>
-        <>
-          <Box width="100%" height="16px"></Box>
-          <AppHeading level="1">{t(I18Keys.publishWarningTitle)}</AppHeading>
-
-          <Box width="100%" height="16px"></Box>
-          <AppParagraph>{t(I18Keys.publishWarningPar01)}</AppParagraph>
-          <AppParagraph addMargin>
+      <AppModalStandard
+        onModalClosed={() => setApproveIntent(false)}
+        type="normal"
+        contentProps={{
+          type: 'normal',
+          title: t(I18Keys.publishWarningTitle),
+          parragraphs: [
+            <Trans
+              i18nKey={I18Keys.publishWarningPar01}
+              components={{ b: <b></b> }}></Trans>,
             <Trans
               i18nKey={I18Keys.publishWarningPar02}
-              components={{ b: <b></b> }}></Trans>
-          </AppParagraph>
-          <AppParagraph addMargin>
+              components={{ b: <b></b> }}></Trans>,
             <Trans
               i18nKey={I18Keys.publishWarningPar03}
-              components={{ b: <b></b> }}></Trans>
-          </AppParagraph>
-
-          <Box direction="row" gap="small" margin={{ top: 'large' }}>
-            <Box width="50%" style={{ flexGrow: 1 }}>
-              <AppButton
-                disabled={isUpdating}
-                onClick={() => reset()}
-                label={t(I18Keys.returnToDraft)}></AppButton>
-            </Box>
-            <Box width="50%" align="end" gap="small">
-              <AppButton
-                primary
-                disabled={isUpdating}
-                onClick={() => approveClicked()}
-                label={t(I18Keys.yesPublish)}
-                style={{ width: '100%' }}></AppButton>
-            </Box>
-          </Box>
-        </>
-      </AppModal>
+              components={{ b: <b></b> }}></Trans>,
+          ],
+          primaryButton: {
+            disabled: isUpdating,
+            label: t(I18Keys.yesPublish),
+            onClick: () => approveClicked(),
+          },
+          secondaryButton: {
+            disabled: isUpdating,
+            label: t(I18Keys.returnToDraft),
+            onClick: () => reset(),
+          },
+        }}></AppModalStandard>
     );
   })();
 
   const publishingModal = (() => {
     return (
-      <AppModal
-        type="small"
-        onModalClosed={() => setPublishing(false)}
-        windowStyle={{ flexGrow: 1 }}>
-        <Box pad="medium" align="center">
-          <AppHeading level="3">{t(I18Keys.publishing)}</AppHeading>
-          <Box pad="24px">
-            <Loading></Loading>
-          </Box>
-        </Box>
-      </AppModal>
+      <AppModalStandard
+        onModalClosed={() => setApproveIntent(false)}
+        type="normal"
+        contentProps={{
+          type: 'normal',
+          title: t(I18Keys.publishing),
+        }}></AppModalStandard>
     );
   })();
 
   const publishedModal = (() => {
     return (
-      <AppModal
-        type="small"
-        onModalClosed={() => setReviewPublished(true)}
-        windowStyle={{ backgroundColor: '#D1E8DF', flexGrow: 1 }}>
-        <>
-          <Box style={{ flexGrow: 1 }} justify="center">
-            <Box align="center">
-              <BoxCentered
-                style={{
-                  height: '80px',
-                  width: '80px',
-                  borderRadius: '40px',
-                  backgroundColor: '#AECFC2',
-                }}
-                margin={{ bottom: '16px' }}>
-                <CelebrateIcon size={40}></CelebrateIcon>
-              </BoxCentered>
-              <AppHeading level={3}>{t(I18Keys.publishedTitle)}</AppHeading>
-              <AppParagraph style={{ marginTop: '8px', marginBottom: '24px' }}>
-                <Trans
-                  i18nKey={I18Keys.publishedText}
-                  components={{ b: <b></b> }}></Trans>
-              </AppParagraph>
-            </Box>
-
-            <Box style={{ width: '100%' }} gap="12px">
-              <AppButton
-                primary
-                disabled={nextPostId === undefined}
-                onClick={() => openNextPost()}
-                label={t(I18Keys.nextPost)}
-                style={{ width: '100%' }}></AppButton>
-              <AppButton
-                onClick={() => openNanopublication()}
-                label={t(I18Keys.openPublished)}
-                style={{ width: '100%' }}></AppButton>
-            </Box>
-          </Box>
-        </>
-      </AppModal>
+      <AppModalStandard
+        onModalClosed={() => publishedModalClosed(PublishPostAction.None)}
+        backgroundColor="#D1E8DF"
+        type="normal"
+        contentProps={{
+          icon: <CelebrateIcon size={40}></CelebrateIcon>,
+          title: t(I18Keys.publishWarningTitle),
+          parragraphs: [
+            <Trans
+              i18nKey={I18Keys.publishWarningPar01}
+              components={{ b: <b></b> }}></Trans>,
+            <Trans
+              i18nKey={I18Keys.publishWarningPar02}
+              components={{ b: <b></b> }}></Trans>,
+            <Trans
+              i18nKey={I18Keys.publishWarningPar03}
+              components={{ b: <b></b> }}></Trans>,
+          ],
+          buttonsDirection: 'column',
+          primaryButton: {
+            disabled: nextPostId === undefined,
+            label: t(I18Keys.nextPost),
+            onClick: () => openNextPost(),
+          },
+          secondaryButton: {
+            disabled: isUpdating,
+            label: t(I18Keys.openPublished),
+            onClick: () => openNanopublication(),
+          },
+        }}></AppModalStandard>
     );
   })();
 
@@ -446,7 +450,7 @@ export const PostView = (props: {
 
   if (DEBUG) console.log(publishStatusModal);
 
-  const editable = _editable && !props.isProfile;
+  const editable = _editable;
 
   const content = (() => {
     if (!post) {
@@ -463,49 +467,31 @@ export const PostView = (props: {
       <>
         <Box pad="medium">
           <PostHeader
-            isProfile={props.isProfile}
             profile={props.profile}
             margin={{ bottom: '16px' }}></PostHeader>
-          {postStatuses.isParsing ? (
-            <LoadingDiv height="60px" width="100%"></LoadingDiv>
-          ) : (
-            <SemanticsEditor
-              isLoading={false}
-              patternProps={{
-                editable,
-                semantics: post?.semantics,
-                originalParsed: post?.originalParsed,
-                semanticsUpdated: semanticsUpdated,
-              }}
-              include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
-          )}
+          <SemanticsEditor
+            patternProps={{
+              isLoading: postStatuses.isParsing,
+              editable,
+              semantics: post?.semantics,
+              originalParsed: post?.originalParsed,
+              semanticsUpdated: semanticsUpdated,
+            }}
+            include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
 
           <PostTextEditable text={postText}></PostTextEditable>
 
-          {postStatuses.isParsing ? (
-            <LoadingDiv height="120px" width="100%"></LoadingDiv>
-          ) : (
-            <SemanticsEditor
-              isLoading={false}
-              patternProps={{
-                editable,
-                semantics: post?.semantics,
-                originalParsed: post?.originalParsed,
-                semanticsUpdated: semanticsUpdated,
-              }}
-              include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
-          )}
+          <SemanticsEditor
+            patternProps={{
+              isLoading: postStatuses.isParsing,
+              editable,
+              semantics: post?.semantics,
+              originalParsed: post?.originalParsed,
+              semanticsUpdated: semanticsUpdated,
+            }}
+            include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
+
           {action}
-          {postStatuses.ignored ? (
-            <AppButton
-              disabled={isUpdating}
-              margin={{ top: 'medium' }}
-              primary
-              onClick={() => reviewForPublication()}
-              label="Review for publication"></AppButton>
-          ) : (
-            <></>
-          )}
         </Box>
         {publishStatusModal}
       </>
@@ -516,9 +502,7 @@ export const PostView = (props: {
     <ViewportPage
       content={
         <Box fill>
-          <PostNav
-            isProfile={props.isProfile}
-            profile={props.profile}></PostNav>
+          <PostNav profile={props.profile}></PostNav>
           {content}
         </Box>
       }></ViewportPage>

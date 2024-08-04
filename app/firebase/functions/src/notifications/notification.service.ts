@@ -17,7 +17,7 @@ import { PostsRepository } from '../posts/posts.repository';
 import { UsersRepository } from '../users/users.repository';
 import { NotificationsRepository } from './notifications.repository';
 
-export const DEBUG = true;
+export const DEBUG = false;
 export const DEBUG_PREFIX = `NOTIFICATION-SERVICE`;
 
 export interface EmailPostDetails {
@@ -37,7 +37,8 @@ export class NotificationService {
     public platformPostsRepo: PlatformPostsRepository,
     public activityRepo: ActivityRepository,
     public usersRepo: UsersRepository,
-    public emailSender: EmailSenderService
+    public emailSender: EmailSenderService,
+    public haveQuiet: boolean
   ) {}
 
   createNotification(
@@ -197,7 +198,12 @@ export class NotificationService {
       )
     );
 
-    await this.sendDigest(userId, postsDetails, manager);
+    // remove duplicates
+    const filteredPosts = postsDetails.filter(
+      (post, index, self) => index === self.findIndex((p) => p.id === post.id)
+    );
+
+    await this.sendDigest(userId, filteredPosts, manager);
   }
 
   async sendDigest(

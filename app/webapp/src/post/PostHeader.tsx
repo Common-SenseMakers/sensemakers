@@ -11,7 +11,7 @@ import { NanopubStatus, StatusTag } from './NanopubStatus';
 import { usePost } from './PostContext';
 
 export const PostHeader = (
-  props: BoxExtendedProps & { profile?: TwitterUserProfile; isProfile: boolean }
+  props: BoxExtendedProps & { profile?: TwitterUserProfile }
 ) => {
   const { constants } = useThemeContext();
   const { tweet, post, setEnabledEdit, editable } = usePost();
@@ -41,13 +41,9 @@ export const PostHeader = (
         </Box>
       </Box>
 
-      {!props.isProfile ? (
-        <Box gap="small" align="end">
-          <NanopubStatus post={post}></NanopubStatus>
-        </Box>
-      ) : (
-        <></>
-      )}
+      <Box gap="small" align="end">
+        <NanopubStatus post={post}></NanopubStatus>
+      </Box>
     </Box>
   );
 };

@@ -4,6 +4,7 @@ import { ActivityService } from '../activity/activity.service';
 import {
   EMAIL_CLIENT_SECRET,
   FUNCTIONS_PY_URL,
+  IS_EMULATOR,
   NANOPUBS_PUBLISH_SERVERS,
   NP_PUBLISH_RSA_PRIVATE_KEY,
   NP_PUBLISH_RSA_PUBLIC_KEY,
@@ -55,6 +56,7 @@ export interface Services {
   db: DBInstance;
   notifications: NotificationService;
   activity: ActivityService;
+  email: EmailSenderService;
 }
 
 export const createServices = () => {
@@ -175,7 +177,8 @@ export const createServices = () => {
     platformPostsRepo,
     activityRepo,
     userRepo,
-    email
+    email,
+    !IS_EMULATOR
   );
 
   /** all services */
@@ -187,6 +190,7 @@ export const createServices = () => {
     db,
     notifications,
     activity,
+    email,
   };
 
   if (DEBUG) {

@@ -3,21 +3,24 @@ import { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 
+import { ModalContent } from '../app/AppInfoModal';
 import { useServiceWorker } from '../app/ServiceWorkerContext';
 import { useToastContext } from '../app/ToastsContext';
 import { FilterIcon } from '../app/icons/FilterIcon';
+import { HmmIcon } from '../app/icons/HmmIcon';
 import { ReloadIcon } from '../app/icons/ReloadIcon';
 import { locationToPageIx } from '../app/layout/GlobalNav';
 import { ViewportPageScrollContext } from '../app/layout/Viewport';
 import { I18Keys } from '../i18n/i18n';
 import { PostCard } from '../post/PostCard';
+import { PostCardLoading } from '../post/PostCardLoading';
 import { PostsQueryStatus, UserPostsQuery } from '../shared/types/types.posts';
 import { AppButton, AppHeading, AppModal, AppSelect } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { usePersist } from '../utils/use.persist';
-import { IntroModal } from './IntroModal';
+import { IntroModals } from './IntroModal';
 import { useUserPosts } from './UserPostsContext';
 
 const statusPretty: Record<PostsQueryStatus, string> = {
@@ -134,19 +137,30 @@ export const UserHome = () => {
 
   const content = (() => {
     if (!posts || isLoading) {
-      return [1, 2, 4, 5, 6].map((ix) => (
-        <LoadingDiv
-          key={ix}
-          height="108px"
-          width="100%"
-          margin={{ bottom: '2px' }}></LoadingDiv>
+      return [1, 2, 4, 5, 6, 7, 8].map((ix) => (
+        <PostCardLoading key={ix}></PostCardLoading>
       ));
     }
 
     if (posts.length === 0) {
       return (
-        <BoxCentered>
-          <Text>No posts found</Text>
+        <BoxCentered style={{ height: '100%' }}>
+          <ModalContent
+            type="small"
+            title={t(I18Keys.noPostsFound)}
+            icon={
+              <BoxCentered
+                style={{
+                  height: '60px',
+                  width: '60px',
+                  borderRadius: '40px',
+                  backgroundColor: '#CEE2F2',
+                }}
+                margin={{ bottom: '16px' }}>
+                <HmmIcon size={40}></HmmIcon>
+              </BoxCentered>
+            }
+            parragraphs={[<>{t(I18Keys.noPostsFoundDesc)}</>]}></ModalContent>
         </BoxCentered>
       );
     }
@@ -279,7 +293,6 @@ export const UserHome = () => {
         flexShrink: 0,
         minHeight: '40px',
       }}>
-      {installer}
       {updater}
       <Box direction="row" justify="between" align="center">
         <Box direction="row" align="center" gap="12px">
@@ -294,11 +307,8 @@ export const UserHome = () => {
   const modal = (() => {
     if (showIntro) {
       return (
-        <AppModal
-          type="small"
-          onModalClosed={() => closeIntro()}
-          layerProps={{}}>
-          <IntroModal closeModal={() => closeIntro()}></IntroModal>
+        <AppModal type="small" onModalClosed={() => closeIntro()}>
+          <IntroModals closeModal={() => closeIntro()}></IntroModals>
         </AppModal>
       );
     }

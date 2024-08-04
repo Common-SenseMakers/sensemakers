@@ -288,7 +288,7 @@ export const PostContext: React.FC<{
     _updatePost(update);
   };
 
-  const postStatuses = getPostStatuses(post);
+  const postStatuses = useMemo(() => getPostStatuses(post), [post]);
 
   const { signNanopublication } = useNanopubContext();
 

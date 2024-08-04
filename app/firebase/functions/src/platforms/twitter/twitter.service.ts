@@ -130,6 +130,9 @@ export class TwitterService
         }
 
         try {
+          logger.debug(
+            `Twitter Service - userTimeline - ${userDetails.profile?.username}`
+          );
           const result = await readOnlyClient.v2.userTimeline(
             userDetails.user_id,
             timelineParams
