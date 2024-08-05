@@ -707,7 +707,9 @@ export const getMockPost = (refPost: Partial<AppPostFull>) => {
     parsingStatus: AppPostParsingStatus.IDLE,
     reviewedStatus: AppPostReviewStatus.PENDING,
     republishedStatus: AppPostRepublishedStatus.PENDING,
-    mirrors: [twitterMirror],
+    mirrors: refPost.mirrors
+      ? [...refPost.mirrors, twitterMirror]
+      : [twitterMirror],
   };
   return post;
 };
