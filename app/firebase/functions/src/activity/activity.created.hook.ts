@@ -7,6 +7,7 @@ import {
   NotificationFreq,
   NotificationStatus,
 } from '../@shared/types/types.notifications';
+import { SciFilterClassfication } from '../@shared/types/types.parser';
 import { QUIET_SIGNUP_PERIOD } from '../config/config.runtime';
 import { logger } from '../instances/logger';
 import { Services } from '../instances/services';
@@ -59,7 +60,12 @@ export const activityEventCreatedHook = async (
 
       if (
         author.settings.notificationFreq !== NotificationFreq.None &&
-        !isQuiet
+        !isQuiet &&
+        post.originalParsed &&
+        [
+          SciFilterClassfication.CITOID_DETECTED_RESEARCH,
+          SciFilterClassfication.AI_DETECTED_RESEARCH,
+        ].includes(post.originalParsed.filter_classification)
       ) {
         logger.debug(
           `Create notification of ${activityEvent.type} on post: ${post.id} to user: ${author.userId}`,

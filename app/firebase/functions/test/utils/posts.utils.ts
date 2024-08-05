@@ -733,7 +733,7 @@ export const fetchPostsInTests = async (
    */
   await Promise.all(
     postsCreated.map((postCreated) =>
-      postUpdatedHook(postCreated.post, services)
+      postUpdatedHookOnTest(postCreated.post, services)
     )
   );
 };
@@ -756,7 +756,7 @@ export const fetchPostInTests = async (
    * We need to manually call the postUpdate hook that would have been called
    * when creating the AppPost as part of the fetch
    */
-  await postUpdatedHook(post, services);
+  await postUpdatedHookOnTest(post, services);
 
   return post;
 };
