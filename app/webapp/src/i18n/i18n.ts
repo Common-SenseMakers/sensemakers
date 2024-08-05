@@ -321,10 +321,10 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.publishingAutomationOpt2Title]:
     'Reference-Based Automated Publishing',
   [I18Keys.publishingAutomationOpt2Desc]:
-    'Any post mentioning research with academic reference identifiers such as DOIs, PMIDs, PMCIDs, or ISBNs will be automatically nanopublished.',
+    'We will automatically nanopublish any post mentioning research with academic reference identifiers such as DOIs, PMIDs, PMCIDs, or ISBNs.',
   [I18Keys.publishingAutomationOpt3Title]: 'Supervised publishing',
   [I18Keys.publishingAutomationOpt3Desc]:
-    'Receive a notification when a new science post is detected, and manually review it before publishing.',
+    'You receive a notification when new science posts are detected, and can manually review them before publishing.',
 
   [I18Keys.autopostInviteTitle]:
     'Make your content FAIR,<br> without even thinking about it.',

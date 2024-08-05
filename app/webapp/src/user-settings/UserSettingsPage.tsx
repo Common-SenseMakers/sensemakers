@@ -120,16 +120,6 @@ export const UserSettingsPage = () => {
           <SettingsOptionSelector
             options={[
               {
-                title: t(I18Keys.publishingAutomationOpt1Title),
-                description: t(I18Keys.publishingAutomationOpt1Desc),
-                id: AutopostOption.AI,
-                optionSelected: (id) => setAutopost(id as AutopostOption),
-                selected: currentAutopost === AutopostOption.AI,
-              },
-            ]}></SettingsOptionSelector>
-          <SettingsOptionSelector
-            options={[
-              {
                 title: t(I18Keys.publishingAutomationOpt2Title),
                 description: t(I18Keys.publishingAutomationOpt2Desc),
                 id: AutopostOption.DETERMINISTIC,

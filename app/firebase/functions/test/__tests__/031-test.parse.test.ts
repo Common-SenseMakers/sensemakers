@@ -41,19 +41,11 @@ describe('031 test parse', () => {
     let user: AppUser | undefined;
 
     before(async () => {
-      const platformAuthorId = process.env.TEST_THREAD_AUTHOR_ID;
-
-      if (!platformAuthorId) {
-        throw new Error('TEST_THREAD_AUTHOR_ID not defined in .env.test file');
-      }
-
       const users = await services.db.run((manager) => {
         return createUsers(services, testUsers, manager);
       });
       user = users.find(
-        (u) =>
-          UsersHelper.getAccount(u, PLATFORM.Twitter, platformAuthorId) !==
-          undefined
+        (u) => UsersHelper.getAccount(u, PLATFORM.Twitter) !== undefined
       );
     });
 

@@ -46,41 +46,43 @@ export const activityEventCreatedHook = async (
         true
       );
 
-      const author = await users.repo.getUser(post.authorId, manager, true);
-      const isQuiet =
-        time.now() < author.signupDate + QUIET_SIGNUP_PERIOD &&
-        notifications.haveQuiet;
+      if (post.authorId) {
+        const author = await users.repo.getUser(post.authorId, manager, true);
+        const isQuiet =
+          time.now() < author.signupDate + QUIET_SIGNUP_PERIOD &&
+          notifications.haveQuiet;
 
-      if (DEBUG)
-        logger.debug(
-          `PostParsed or PostAutoposted activity check ${activityEvent.data.postId}`,
-          { notificationFreq: author.settings.notificationFreq, isQuiet },
-          PREFIX
-        );
+        if (DEBUG)
+          logger.debug(
+            `PostParsed or PostAutoposted activity check ${activityEvent.data.postId}`,
+            { notificationFreq: author.settings.notificationFreq, isQuiet },
+            PREFIX
+          );
 
-      if (
-        author.settings.notificationFreq !== NotificationFreq.None &&
-        !isQuiet &&
-        post.originalParsed &&
-        [
-          SciFilterClassfication.CITOID_DETECTED_RESEARCH,
-          SciFilterClassfication.AI_DETECTED_RESEARCH,
-        ].includes(post.originalParsed.filter_classification)
-      ) {
-        logger.debug(
-          `Create notification of ${activityEvent.type} on post: ${post.id} to user: ${author.userId}`,
-          activityEvent,
-          PREFIX
-        );
+        if (
+          author.settings.notificationFreq !== NotificationFreq.None &&
+          !isQuiet &&
+          post.originalParsed &&
+          [
+            SciFilterClassfication.CITOID_DETECTED_RESEARCH,
+            SciFilterClassfication.AI_DETECTED_RESEARCH,
+          ].includes(post.originalParsed.filter_classification)
+        ) {
+          logger.debug(
+            `Create notification of ${activityEvent.type} on post: ${post.id} to user: ${author.userId}`,
+            activityEvent,
+            PREFIX
+          );
 
-        notifications.createNotification(
-          {
-            userId: post.authorId,
-            activityId: activityEvent.id,
-            status: NotificationStatus.pending,
-          },
-          manager
-        );
+          notifications.createNotification(
+            {
+              userId: post.authorId,
+              activityId: activityEvent.id,
+              status: NotificationStatus.pending,
+            },
+            manager
+          );
+        }
       }
     }
   });

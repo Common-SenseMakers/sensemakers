@@ -28,6 +28,10 @@ export const autopostPostTask = async (req: Request, services: Services) => {
       true
     );
 
+    if (!post.authorId) {
+      throw new Error(`Post ${post.id} does not have an author`);
+    }
+
     await postsManager.publishPost(
       post,
       platformIds,
