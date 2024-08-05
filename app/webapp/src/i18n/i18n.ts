@@ -120,12 +120,12 @@ export enum I18Keys {
 
   autoPublishedNanopubEmailFooter = 's043a',
 
-  emailHeaderDailyNotificationTimeframe = 's044',
-  emailHeaderWeeklyNotificationTimeframe = 's045',
-  emailHeaderMonthlyNotificationTimeframe = 's046',
-  emailFooterDailyNotificationTimeframe = 's047',
-  emailFooterWeeklyNotificationTimeframe = 's048',
-  emailFooterMonthlyNotificationTimeframe = 's049',
+  daily = 's047',
+  Daily = 's047a',
+  weekly = 's048',
+  Weekly = 's048a',
+  monthly = 's049',
+  Monthly = 's049a',
 
   emailReviewPostButton = 's050',
   emailSeeAllButton = 's051',
@@ -175,6 +175,7 @@ export enum I18Keys {
   reviewSettings = 's080',
   notNow = 's081',
 
+  emailSubject = 's0820',
   emailSubjectReview = 's082',
   emailSubjectAutoposted = 's083',
   today = 's084',
@@ -342,13 +343,12 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.autoPublishedNanopubEmailPreviewSingular]: '{{count}} autopublished',
   [I18Keys.autoPublishedNanopubEmailPreviewPlural]: '{{count}} autopublished',
 
-  [I18Keys.emailHeaderDailyNotificationTimeframe]: 'today',
-  [I18Keys.emailHeaderWeeklyNotificationTimeframe]: 'this week',
-  [I18Keys.emailHeaderMonthlyNotificationTimeframe]: 'this month',
-
-  [I18Keys.emailFooterDailyNotificationTimeframe]: 'daily',
-  [I18Keys.emailFooterWeeklyNotificationTimeframe]: 'weekly',
-  [I18Keys.emailFooterMonthlyNotificationTimeframe]: 'monthly',
+  [I18Keys.daily]: 'daily',
+  [I18Keys.weekly]: 'weekly',
+  [I18Keys.monthly]: 'monthly',
+  [I18Keys.Daily]: 'Daily',
+  [I18Keys.Weekly]: 'Weekly',
+  [I18Keys.Monthly]: 'Monthly',
 
   [I18Keys.emailReviewPostButton]: 'Review Post',
   [I18Keys.emailSeeAllButton]: 'See All',
@@ -411,6 +411,7 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.dontShowAgain]: 'Don’t show this message again',
   [I18Keys.reviewSettings]: 'Review settings',
   [I18Keys.notNow]: 'Not now',
+  [I18Keys.emailSubject]: 'Your {{timeframe}} SenseNets Activity Summary',
   [I18Keys.emailSubjectReview]:
     'You have {{nPosts}} potential nanopublications for review {{pointInTime}}',
   [I18Keys.emailSubjectAutoposted]:

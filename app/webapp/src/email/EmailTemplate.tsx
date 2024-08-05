@@ -18,7 +18,6 @@ import { I18Keys } from '../i18n/i18n';
 import { AbsoluteRoutes } from '../route.names';
 import { NotificationFreq } from '../shared/types/types.notifications';
 import { AppPostFull, PostsQueryStatus } from '../shared/types/types.posts';
-import { AutopostOption } from '../shared/types/types.user';
 import { splitPostsByStatus } from '../utils/post.utils';
 import { EmailRow } from './EmailRow';
 import { PostCardEmail } from './PostCardEmail';
@@ -34,7 +33,6 @@ import {
 interface EmailTemplateProps {
   posts: AppPostFull[];
   notificationFrequency: NotificationFreq;
-  autopostOption: AutopostOption;
   appUrl: string;
 }
 
@@ -61,26 +59,26 @@ export const EmailTemplate = ({
   const headerTimeframeKey = (() => {
     switch (notificationFrequency) {
       case NotificationFreq.Daily:
-        return I18Keys.emailHeaderDailyNotificationTimeframe;
+        return I18Keys.today;
       case NotificationFreq.Weekly:
-        return I18Keys.emailHeaderWeeklyNotificationTimeframe;
+        return I18Keys.thisWeek;
       case NotificationFreq.Monthly:
-        return I18Keys.emailHeaderMonthlyNotificationTimeframe;
+        return I18Keys.thisMonth;
       default:
-        return I18Keys.emailHeaderDailyNotificationTimeframe;
+        return I18Keys.today;
     }
   })();
 
   const footerTimeframeKey = (() => {
     switch (notificationFrequency) {
       case NotificationFreq.Daily:
-        return I18Keys.emailFooterDailyNotificationTimeframe;
+        return I18Keys.daily;
       case NotificationFreq.Weekly:
-        return I18Keys.emailFooterWeeklyNotificationTimeframe;
+        return I18Keys.weekly;
       case NotificationFreq.Monthly:
-        return I18Keys.emailFooterMonthlyNotificationTimeframe;
+        return I18Keys.monthly;
       default:
-        return I18Keys.emailFooterDailyNotificationTimeframe;
+        return I18Keys.daily;
     }
   })();
 
@@ -269,6 +267,5 @@ export const EmailTemplate = ({
 EmailTemplate.PreviewProps = {
   posts: [] as AppPostFull[],
   notificationFrequency: NotificationFreq.Monthly,
-  autopostOption: AutopostOption.AI,
   appUrl: 'https://sample.com/',
 };
