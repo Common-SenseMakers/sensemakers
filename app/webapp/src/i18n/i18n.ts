@@ -286,7 +286,7 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.downloads]: 'Downloads',
   [I18Keys.installApp]: 'Install application on your device',
 
-  [I18Keys.usingApp]: 'Using Senscast',
+  [I18Keys.usingApp]: 'Using Sensenets',
   [I18Keys.publishingAutomation]: 'Publishing Automation',
   [I18Keys.publishingAutomationExplainer]:
     'Choose how you’d like to nanopublish your future X · Twitter posts.',
