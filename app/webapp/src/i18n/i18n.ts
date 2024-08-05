@@ -76,9 +76,16 @@ export enum I18Keys {
 
   cancel = 's039',
 
+  emailHeader = 's0400',
+  emailSummary = 's0400a',
+
   recommendedNanopubEmailHeader = 's040',
   recommendedNanopubEmailHeaderSingular = 's040_one',
   recommendedNanopubEmailHeaderPlural = 's040_other',
+
+  recommendedNanopubEmailSummary = 's040a',
+  recommendedNanopubEmailSummarySingular = 's040a_one',
+  recommendedNanopubEmailSummaryPlural = 's040a_other',
 
   recommendedNanopubEmailFooter = 's041',
   emailFooter = 's041a',
@@ -87,7 +94,19 @@ export enum I18Keys {
   publishedNanopubEmailHeaderSingular = 's042_one',
   publishedNanopubEmailHeaderPlural = 's042_other',
 
-  publishedNanopubEmailFooter = 's043',
+  publishedNanopubEmailSummary = 's0420',
+  publishedNanopubEmailSummarySingular = 's0420_one',
+  publishedNanopubEmailSummaryPlural = 's0420_other',
+
+  autoPublishedNanopubEmailHeader = 's042a',
+  autoPublishedNanopubEmailHeaderSingular = 's042a_one',
+  autoPublishedNanopubEmailHeaderPlural = 's042a_other',
+
+  autoPublishedNanopubEmailSummary = 's042aa',
+  autoPublishedNanopubEmailSummarySingular = 's042aa_one',
+  autoPublishedNanopubEmailSummaryPlural = 's042aa_other',
+
+  autoPublishedNanopubEmailFooter = 's043a',
 
   emailHeaderDailyNotificationTimeframe = 's044',
   emailHeaderWeeklyNotificationTimeframe = 's045',
@@ -152,6 +171,10 @@ export enum I18Keys {
 
   noPostsFound = 's087',
   noPostsFoundDesc = 's088',
+
+  postStatusForReview = 's089',
+  postStatusPublished = 's090',
+  postStatusAutopublished = 's091',
 }
 
 const check = new Set();
@@ -251,6 +274,9 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.retract]: 'Retract',
   [I18Keys.cancel]: 'Cancel',
 
+  [I18Keys.emailHeader]: 'Activity Summary',
+  [I18Keys.emailSummary]: "Here's what happened {{timeframe}}:",
+
   [I18Keys.recommendedNanopubEmailHeader]: '',
   [I18Keys.recommendedNanopubEmailHeaderSingular]:
     'You have {{count}} potential nanopublication ready for review {{timeframe}}.',
@@ -258,17 +284,39 @@ const translationENG: Record<I18Keys, string> = {
     'You have {{count}} potential nanopublications ready for review {{timeframe}}.',
   [I18Keys.recommendedNanopubEmailFooter]:
     "This is your {{timeframe}} nanopub recommendation summary. You can [edit your email settings here]({{emailSettingsLink}}). Don't see a post you'd like to nanopublish? [Review all your recent posts here]({{ignoredPostsLink}}).",
+  [I18Keys.recommendedNanopubEmailSummary]: '',
+  [I18Keys.recommendedNanopubEmailSummarySingular]:
+    'You have {{count}} potential nanopublication for review.',
+  [I18Keys.recommendedNanopubEmailSummaryPlural]:
+    'You have {{count}} potential nanopublications for review.',
 
   [I18Keys.emailFooter]:
     "This is your {{timeframe}} activity summary. You can [edit your email or automation settings here]({{emailSettingsLink}}). Don't see a post you'd like to nanopublish? [Review all your recent posts here]({{ignoredPostsLink}}). See any mistakes in your nanopublications? [Edit or retract your automated nanopublications here]({{publishedPostsLink}}).",
 
   [I18Keys.publishedNanopubEmailHeader]: '',
   [I18Keys.publishedNanopubEmailHeaderSingular]:
-    "We've automatically published {{count}} post {{timeframe}}.",
+    'You published {{count}} post {{timeframe}}.',
   [I18Keys.publishedNanopubEmailHeaderPlural]:
+    'You published {{count}} posts {{timeframe}}.',
+  [I18Keys.publishedNanopubEmailSummary]: '',
+  [I18Keys.publishedNanopubEmailSummarySingular]:
+    'You manually nanopublished {{count}} post.',
+  [I18Keys.publishedNanopubEmailSummaryPlural]:
+    'You manually nanopublished {{count}} posts.',
+
+  [I18Keys.autoPublishedNanopubEmailHeader]: '',
+  [I18Keys.autoPublishedNanopubEmailHeaderSingular]:
+    "We've automatically published {{count}} post {{timeframe}}.",
+  [I18Keys.autoPublishedNanopubEmailHeaderPlural]:
     "We've automatically published {{count}} posts {{timeframe}}.",
-  [I18Keys.publishedNanopubEmailFooter]:
+
+  [I18Keys.autoPublishedNanopubEmailFooter]:
     'These posts were automatically published according to your automation settings. You can [change your automation settings here]({{automationSettingsLink}}).\n\nSee any mistakes in your nanopublications? [Edit or retract your automated nanopublications here]({{publishedPostsLink}}).',
+  [I18Keys.autoPublishedNanopubEmailSummary]: '',
+  [I18Keys.autoPublishedNanopubEmailSummarySingular]:
+    'We autopublished {{count}} post for you.',
+  [I18Keys.autoPublishedNanopubEmailSummaryPlural]:
+    'We autopublished {{count}} posts for you.',
 
   [I18Keys.emailHeaderDailyNotificationTimeframe]: 'today',
   [I18Keys.emailHeaderWeeklyNotificationTimeframe]: 'this week',
@@ -348,6 +396,10 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.thisMonth]: 'this month',
   [I18Keys.noPostsFound]: 'No posts found',
   [I18Keys.noPostsFoundDesc]: 'We couldn’t find any posts.',
+
+  [I18Keys.postStatusForReview]: 'For Review',
+  [I18Keys.postStatusPublished]: 'Published',
+  [I18Keys.postStatusAutopublished]: 'Autopublished',
 };
 
 i18n.use(initReactI18next).init({
