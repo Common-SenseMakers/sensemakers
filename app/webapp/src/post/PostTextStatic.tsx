@@ -4,6 +4,7 @@ export const PostTextStatic = (props: {
   text?: string;
   truncate?: boolean;
   shade?: boolean;
+  onClick?: (e: React.MouseEvent) => void;
 }) => {
   const text = props.text;
 
@@ -13,6 +14,7 @@ export const PostTextStatic = (props: {
 
   return (
     <div
+      onClick={props.onClick}
       className="editor"
       style={{ overflow: 'hidden' }}
       dangerouslySetInnerHTML={{ __html: textToHtml(text) }}
