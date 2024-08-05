@@ -87,6 +87,10 @@ export enum I18Keys {
   recommendedNanopubEmailSummarySingular = 's040a_one',
   recommendedNanopubEmailSummaryPlural = 's040a_other',
 
+  recommendedNanopubEmailPreview = 's040b',
+  recommendedNanopubEmailPreviewSingular = 's040b_one',
+  recommendedNanopubEmailPreviewPlural = 's040b_other',
+
   recommendedNanopubEmailFooter = 's041',
   emailFooter = 's041a',
 
@@ -98,6 +102,10 @@ export enum I18Keys {
   publishedNanopubEmailSummarySingular = 's0420_one',
   publishedNanopubEmailSummaryPlural = 's0420_other',
 
+  publishedNanopubEmailPreview = 's0421',
+  publishedNanopubEmailPreviewSingular = 's0421_one',
+  publishedNanopubEmailPreviewPlural = 's0421_other',
+
   autoPublishedNanopubEmailHeader = 's042a',
   autoPublishedNanopubEmailHeaderSingular = 's042a_one',
   autoPublishedNanopubEmailHeaderPlural = 's042a_other',
@@ -105,6 +113,10 @@ export enum I18Keys {
   autoPublishedNanopubEmailSummary = 's042aa',
   autoPublishedNanopubEmailSummarySingular = 's042aa_one',
   autoPublishedNanopubEmailSummaryPlural = 's042aa_other',
+
+  autoPublishedNanopubEmailPreview = 's042ab',
+  autoPublishedNanopubEmailPreviewSingular = 's042ab_one',
+  autoPublishedNanopubEmailPreviewPlural = 's042ab_other',
 
   autoPublishedNanopubEmailFooter = 's043a',
 
@@ -289,6 +301,11 @@ const translationENG: Record<I18Keys, string> = {
     'You have {{count}} potential nanopublication for review.',
   [I18Keys.recommendedNanopubEmailSummaryPlural]:
     'You have {{count}} potential nanopublications for review.',
+  [I18Keys.recommendedNanopubEmailPreview]: '',
+  [I18Keys.recommendedNanopubEmailPreviewSingular]:
+    '{{count}} potential nanopublication for review.',
+  [I18Keys.recommendedNanopubEmailPreviewPlural]:
+    '{{count}} potential nanopublications for review.',
 
   [I18Keys.emailFooter]:
     "This is your {{timeframe}} activity summary. You can [edit your email or automation settings here]({{emailSettingsLink}}). Don't see a post you'd like to nanopublish? [Review all your recent posts here]({{ignoredPostsLink}}). See any mistakes in your nanopublications? [Edit or retract your automated nanopublications here]({{publishedPostsLink}}).",
@@ -303,6 +320,10 @@ const translationENG: Record<I18Keys, string> = {
     'You manually nanopublished {{count}} post.',
   [I18Keys.publishedNanopubEmailSummaryPlural]:
     'You manually nanopublished {{count}} posts.',
+  [I18Keys.publishedNanopubEmailPreview]: '',
+  [I18Keys.publishedNanopubEmailPreviewSingular]:
+    '{{count}} manually published',
+  [I18Keys.publishedNanopubEmailPreviewPlural]: '{{count}} manually published',
 
   [I18Keys.autoPublishedNanopubEmailHeader]: '',
   [I18Keys.autoPublishedNanopubEmailHeaderSingular]:
@@ -317,6 +338,9 @@ const translationENG: Record<I18Keys, string> = {
     'We autopublished {{count}} post for you.',
   [I18Keys.autoPublishedNanopubEmailSummaryPlural]:
     'We autopublished {{count}} posts for you.',
+  [I18Keys.autoPublishedNanopubEmailPreview]: '',
+  [I18Keys.autoPublishedNanopubEmailPreviewSingular]: '{{count}} autopublished',
+  [I18Keys.autoPublishedNanopubEmailPreviewPlural]: '{{count}} autopublished',
 
   [I18Keys.emailHeaderDailyNotificationTimeframe]: 'today',
   [I18Keys.emailHeaderWeeklyNotificationTimeframe]: 'this week',

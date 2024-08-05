@@ -84,8 +84,23 @@ export const EmailTemplate = ({
     }
   })();
 
-  const { header, summary, footer } = (() => {
+  const { header, preview, summary, footer } = (() => {
     const header = t(I18Keys.emailHeader);
+    const { pendingPosts, manuallyPublishedPosts, autoPublishedPosts } =
+      splitPostsByStatus(posts);
+    const preview = `${
+      autoPublishedPosts.length > 0
+        ? `${t(I18Keys.autoPublishedNanopubEmailPreview, { count: autoPublishedPosts.length })}, `
+        : ''
+    }${
+      manuallyPublishedPosts.length > 0
+        ? `${t(I18Keys.publishedNanopubEmailPreview, { count: manuallyPublishedPosts.length })}, `
+        : ''
+    }${
+      pendingPosts.length > 0
+        ? `${t(I18Keys.recommendedNanopubEmailPreview, { count: pendingPosts.length })}`
+        : ''
+    }`;
     let footer = t(I18Keys.emailFooter, {
       timeframe: t(footerTimeframeKey),
       emailSettingsLink,
@@ -93,7 +108,7 @@ export const EmailTemplate = ({
       publishedPostsLink,
     });
     const summary = (
-      <>
+      <div style={{ margin: '0px 6px' }}>
         <Text style={{ marginTop: '8px', ...summaryStyle }}>
           {t(I18Keys.emailSummary, { timeframe: t(headerTimeframeKey) })}
         </Text>
@@ -118,9 +133,9 @@ export const EmailTemplate = ({
             );
           }
         })}
-      </>
+      </div>
     );
-    return { header, summary, footer };
+    return { header, preview, summary, footer };
   })();
 
   const postCardsEmailSection = (posts: AppPostFull[]) => {
@@ -215,7 +230,7 @@ export const EmailTemplate = ({
   return (
     <Html>
       <Head />
-      <Preview>{'previewHeader'}</Preview>
+      <Preview>{preview}</Preview>
       <Body style={main}>
         <Container>
           <div style={{ margin: '30px 0px 0px' }}></div>
