@@ -237,7 +237,7 @@ const last_output = {
           uri: 'https://schema.org/Question',
           versions: ['v0'],
           label: 'dg-question',
-          display_name: ' ❓ discourse-graph/question',
+          display_name: '❓ discourse-graph/question',
           prompt: 'this post is raising a research question.',
           prompt_zero_ref: 'this post is raising a research question.',
           prompt_single_ref: null,
@@ -266,7 +266,7 @@ const last_output = {
           uri: 'https://sense-nets.xyz/endorses',
           versions: ['v0'],
           label: 'endorses',
-          display_name: '➕ endorses',
+          display_name: '➕ endorses',
           prompt:
             'this post endorses the mentioned reference. This label can also be used for cases of implicit recommendation, where the author is expressing enjoyment of some content but not explicitly recommending it.',
           prompt_zero_ref: null,
@@ -424,7 +424,7 @@ const last_output = {
           uri: 'https://sense-nets.xyz/summarizes',
           versions: ['v0'],
           label: 'summarizes',
-          display_name: '🗜️ summarizes',
+          display_name: '🗜️ summarizes',
           prompt:
             'this post contains a summary of the mentioned reference. The summary is likely provided by the authors but may be a third party.',
           prompt_zero_ref: null,
@@ -440,7 +440,7 @@ const last_output = {
           uri: 'https://sense-nets.xyz/mentionsFundingOpportunity',
           versions: ['v1'],
           label: 'funding',
-          display_name: '🏦 mentions-funding',
+          display_name: '🏦 mentions-funding',
           prompt:
             'this post mentions a funding opportunity, for example a research grant or prize.',
           prompt_zero_ref:
@@ -525,7 +525,7 @@ const last_output = {
           uri: 'https://sense-nets.xyz/indicatesInterest',
           versions: ['v1'],
           label: 'indicates-interest',
-          display_name: '👀 indicates-interest',
+          display_name: '👀 indicates-interest',
           prompt:
             'this post indicates interest in a reference. This label is meant for cases where the post is not explicitly recommending or endorsing the cited reference.',
           prompt_zero_ref: null,
