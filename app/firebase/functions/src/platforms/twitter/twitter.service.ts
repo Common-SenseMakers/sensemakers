@@ -1,6 +1,8 @@
+import fs from 'fs';
 import {
   TweetV2UserTimelineParams,
   Tweetv2FieldsParams,
+  Tweetv2SearchParams,
   UserV2,
 } from 'twitter-api-v2';
 
@@ -61,7 +63,7 @@ export interface TwitterApiCredentials {
   clientSecret: string;
 }
 
-const DEBUG = false;
+const DEBUG = true;
 
 /** Twitter service handles all interactions with Twitter API */
 export class TwitterService
@@ -73,12 +75,133 @@ export class TwitterService
       TwitterUserDetails
     >
 {
+  protected cache: any;
+
   constructor(
     protected time: TimeService,
     protected usersRepo: UsersRepository,
     protected apiCredentials: TwitterApiCredentials
   ) {
     super(time, usersRepo, apiCredentials);
+    if (fs.existsSync('twitterApiCache.json')) {
+      this.cache = JSON.parse(fs.readFileSync('twitterApiCache.json', 'utf8'));
+    } else {
+      this.cache = {};
+    }
+  }
+
+  async get(
+    post_id: string,
+    userDetails: UserDetailsBase<any, any, any>,
+    manager: TransactionManager
+  ): Promise<PlatformPostPosted<TwitterThread>> {
+    const MAX_TWEETS = 30;
+
+    const readOnlyClient = await this.getUserClient(
+      userDetails.user_id,
+      'read',
+      manager
+    );
+
+    try {
+      const _searchParams: Tweetv2SearchParams = {
+        query: `conversation_id:${post_id} from:${userDetails.user_id}`,
+        max_results: MAX_TWEETS > 100 ? 100 : MAX_TWEETS,
+        expansions,
+        'tweet.fields': tweetFields,
+      };
+
+      let nextToken: string | undefined = undefined;
+      let originalAuthor: UserV2 | undefined = undefined;
+      let allTweets: AppTweet[] = [];
+
+      do {
+        const searchParams = _searchParams;
+        if (nextToken) {
+          searchParams.next_token = nextToken;
+        }
+
+        try {
+          if (DEBUG)
+            logger.debug('Twitter Service - search - start', { searchParams });
+
+          const result = await readOnlyClient.v2.search(searchParams);
+          const tweetResults = result.data.data;
+
+          if (DEBUG)
+            logger.debug('Twitter Service - search - result', { tweetResults });
+
+          if (result.meta.result_count > 0) {
+            if (result.data === undefined) {
+              throw new Error('Unexpected undefined data');
+            }
+
+            if (result.includes === undefined) {
+              throw new Error('Unexpected undefined data');
+            }
+
+            /* if original tweet is not yet included, make sure to inlude it */
+            if (
+              !tweetResults.some((tweet) => tweet.id === post_id) &&
+              !allTweets.some((tweet) => tweet.id === post_id)
+            ) {
+              const originalTweet = result.includes?.tweets?.find(
+                (refTweet) => refTweet.id === post_id
+              );
+              if (originalTweet) {
+                tweetResults.push(originalTweet);
+              }
+            }
+
+            const appTweets = convertToAppTweets(tweetResults, result.includes);
+
+            if (!originalAuthor) {
+              originalAuthor = result.includes?.users?.find(
+                (user) => user.id === userDetails.user_id
+              );
+            }
+            allTweets.push(...appTweets);
+
+            nextToken = result.meta.next_token;
+          }
+        } catch (e: any) {
+          if (e.rateLimit) {
+            /** if we hit the rate limit after haven gotten some tweets, return what we got so far  */
+            if (allTweets.length > 0) {
+              break;
+            } else {
+              /** otherwise throw */
+              throw new Error(handleTwitterError(e));
+            }
+          } else {
+            throw new Error(handleTwitterError(e));
+          }
+        }
+
+        if (allTweets.length >= MAX_TWEETS) {
+          break;
+        }
+      } while (nextToken !== undefined);
+
+      const threads =
+        allTweets.length > 0 && originalAuthor
+          ? convertTweetsToThreads(allTweets, originalAuthor)
+          : [];
+
+      if (threads.length !== 1) {
+        throw new Error(`Unexpected search for thread did not return 1 thread`);
+      }
+      const thread = threads[0];
+
+      return {
+        post_id: thread.conversation_id,
+        user_id: thread.author.id,
+        timestampMs: dateStrToTimestampMs(thread.tweets[0].created_at),
+        post: thread,
+      };
+    } catch (e: any) {
+      throw new Error(handleTwitterError(e));
+    }
   }
 
   /**
@@ -283,6 +406,7 @@ export class TwitterService
       thread: genericThread,
     };
   }
+
   /** if user_id is provided it must be from the authenticated userId */
   public async getPost(
     tweetId: string,

@@ -9,6 +9,7 @@ import {
   PlatformPost,
   PlatformPostCreate,
   PlatformPostCreated,
+  PlatformPostPosted,
   PlatformPostPublishOrigin,
   PlatformPostPublishStatus,
   PlatformPostSignerType,
@@ -74,6 +75,49 @@ export class PostsManager {
     return posts.flat();
   }
 
+  private initPlatformPost<T = any>(
+    platformId: PLATFORM,
+    fetchedPost: PlatformPostPosted<T>
+  ) {
+    const platformPost: PlatformPostCreate = {
+      platformId: platformId as PUBLISHABLE_PLATFORMS,
+      publishStatus: PlatformPostPublishStatus.PUBLISHED,
+      publishOrigin: PlatformPostPublishOrigin.FETCHED,
+      posted: fetchedPost,
+    };
+
+    return platformPost;
+  }
+
+  public async fetchPostFromPlatform(
+    userId: string,
+    platformId: PUBLISHABLE_PLATFORMS,
+    post_id: string,
+    manager: TransactionManager
+  ) {
+    const user = await this.users.repo.getUser(userId as string, manager, true);
+    const platform = this.platforms.get(platformId);
+
+    const account = UsersHelper.getAccount(user, platformId);
+    if (!account) {
+      throw new Error(`Account not found for platform ${platformId}`);
+    }
+
+    const platformPost = await platform.get(post_id, account, manager);
+    const platformPostCreate = this.initPlatformPost(platformId, platformPost);
+
+    const platformPostCreated = await this.processing.createPlatformPost(
+      platformPostCreate,
+      manager
+    );
+
+    if (!platformPostCreated) {
+      throw new Error(`PlatformPost already exists: ${post_id}`);
+    }
+
+    return platformPostCreated;
+  }
+
   private async fetchUserFromPlatform(
     platformId: PLATFORM,
     params: FetchParams,
@@ -118,16 +162,9 @@ export class PostsManager {
     );
 
     /** convert them into a PlatformPost */
-    return fetchedPosts.platformPosts.map((fetchedPost) => {
-      const platformPost: PlatformPostCreate = {
-        platformId: platformId as PUBLISHABLE_PLATFORMS,
-        publishStatus: PlatformPostPublishStatus.PUBLISHED,
-        publishOrigin: PlatformPostPublishOrigin.FETCHED,
-        posted: fetchedPost,
-      };
-
-      return platformPost;
-    });
+    return fetchedPosts.platformPosts.map((fetchedPost) =>
+      this.initPlatformPost(platformId, fetchedPost)
+    );
   }
 
   /**
