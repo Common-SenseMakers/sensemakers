@@ -36,9 +36,14 @@ export const postUpdatedHook = async (
   if (DEBUG)
     logger.debug(`postUpdatedHook post-${postId}-${now}`, undefined, PREFIX);
 
-  await db.run(async (manager) => {
-    manager.set(updateRef, { value: now });
-  });
+  await db.run(
+    async (manager) => {
+      manager.set(updateRef, { value: now });
+    },
+    undefined,
+    undefined,
+    `postUpdatedHook - ref ${postId}`
+  );
 
   /** Handle post create */
   if (postBefore === undefined) {
@@ -50,70 +55,75 @@ export const postUpdatedHook = async (
   const activitiesCreated: ActivityEventBase[] = [];
 
   /** Create the activity elements */
-  const { wasParsed } = await db.run(async (manager) => {
-    /** detect parsed state change */
-    const wasParsed =
-      postBefore &&
-      postBefore.parsedStatus === AppPostParsedStatus.UNPROCESSED &&
-      post.parsedStatus === AppPostParsedStatus.PROCESSED;
+  const { wasParsed } = await db.run(
+    async (manager) => {
+      /** detect parsed state change */
+      const wasParsed =
+        postBefore &&
+        postBefore.parsedStatus === AppPostParsedStatus.UNPROCESSED &&
+        post.parsedStatus === AppPostParsedStatus.PROCESSED;
 
-    if (wasParsed) {
+      if (wasParsed) {
+        if (DEBUG)
+          logger.debug(
+            `wasParsed ${PARSE_POST_TASK}-${postId}`,
+            undefined,
+            PREFIX
+          );
+        const event: ActivityEventCreate<PostActData> = {
+          type: ActivityType.PostParsed,
+          data: {
+            postId: post.id,
+          },
+          timestamp: time.now(),
+        };
+
+        const parsedActivity = activity.repo.create(event, manager);
+        activitiesCreated.push(parsedActivity);
+      }
+
+      // if was parsed and user has autopost, then also trigger autopost
+      const wasAutoposted =
+        postBefore &&
+        postBefore.republishedStatus === AppPostRepublishedStatus.PENDING &&
+        post.republishedStatus !== AppPostRepublishedStatus.PENDING;
+
+      if (wasAutoposted) {
+        if (DEBUG)
+          logger.debug(
+            `wasAutoposted ${PARSE_POST_TASK}-${postId}`,
+            undefined,
+            PREFIX
+          );
+        const event: ActivityEventCreate<PostActData> = {
+          type: ActivityType.PostAutoposted,
+          data: {
+            postId: post.id,
+          },
+          timestamp: time.now(),
+        };
+
+        const autopostedActivity = activity.repo.create(event, manager);
+        activitiesCreated.push(autopostedActivity);
+      }
+
       if (DEBUG)
         logger.debug(
-          `wasParsed ${PARSE_POST_TASK}-${postId}`,
-          undefined,
+          `postUpdatedHook -${postId}`,
+          {
+            post,
+            wasAutoposted,
+            wasParsed,
+          },
           PREFIX
         );
-      const event: ActivityEventCreate<PostActData> = {
-        type: ActivityType.PostParsed,
-        data: {
-          postId: post.id,
-        },
-        timestamp: time.now(),
-      };
 
-      const parsedActivity = activity.repo.create(event, manager);
-      activitiesCreated.push(parsedActivity);
-    }
-
-    // if was parsed and user has autopost, then also trigger autopost
-    const wasAutoposted =
-      postBefore &&
-      postBefore.republishedStatus === AppPostRepublishedStatus.PENDING &&
-      post.republishedStatus !== AppPostRepublishedStatus.PENDING;
-
-    if (wasAutoposted) {
-      if (DEBUG)
-        logger.debug(
-          `wasAutoposted ${PARSE_POST_TASK}-${postId}`,
-          undefined,
-          PREFIX
-        );
-      const event: ActivityEventCreate<PostActData> = {
-        type: ActivityType.PostAutoposted,
-        data: {
-          postId: post.id,
-        },
-        timestamp: time.now(),
-      };
-
-      const autopostedActivity = activity.repo.create(event, manager);
-      activitiesCreated.push(autopostedActivity);
-    }
-
-    if (DEBUG)
-      logger.debug(
-        `postUpdatedHook -${postId}`,
-        {
-          post,
-          wasAutoposted,
-          wasParsed,
-        },
-        PREFIX
-      );
-
-    return { wasParsed };
-  });
+      return { wasParsed };
+    },
+    undefined,
+    undefined,
+    `postUpdatedHook - wasParsed - wasAutoposted ${postId}`
+  );
 
   /** trigger Autopost*/
   if (wasParsed) {

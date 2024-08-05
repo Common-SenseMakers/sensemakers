@@ -47,15 +47,20 @@ const fetchAndGetNotifications = async (
   expect(parsedPost.semantics).to.not.be.undefined;
 
   /** check that the notifications were marked as disabled */
-  return await services.db.run(async (manager) => {
-    const notificationsIds =
-      await services.notifications.notificationsRepo.getUnotifiedOfUser(
-        userId,
-        manager
-      );
+  return await services.db.run(
+    async (manager) => {
+      const notificationsIds =
+        await services.notifications.notificationsRepo.getUnotifiedOfUser(
+          userId,
+          manager
+        );
 
-    return notificationsIds;
-  });
+      return notificationsIds;
+    },
+    undefined,
+    undefined,
+    'getUnotifiedOfUser'
+  );
 };
 
 describe.only('061 parse tweet, ', () => {
@@ -80,8 +85,14 @@ describe.only('061 parse tweet, ', () => {
         const users = await services.db.run((manager) => {
           return createUsers(services, testUsers, manager);
         });
+
         user = users.find(
-          (u) => UsersHelper.getAccount(u, PLATFORM.Twitter) !== undefined
+          (u) =>
+            UsersHelper.getAccount(
+              u,
+              PLATFORM.Twitter,
+              '1753077743816777728'
+            ) !== undefined
         );
 
         await updateUserSettings(
@@ -152,7 +163,12 @@ describe.only('061 parse tweet, ', () => {
           return createUsers(services, testUsers, manager);
         });
         user = users.find(
-          (u) => UsersHelper.getAccount(u, PLATFORM.Twitter) !== undefined
+          (u) =>
+            UsersHelper.getAccount(
+              u,
+              PLATFORM.Twitter,
+              '1753077743816777728'
+            ) !== undefined
         );
 
         await updateUserSettings(
@@ -222,8 +238,14 @@ describe.only('061 parse tweet, ', () => {
         const users = await services.db.run((manager) => {
           return createUsers(services, testUsers, manager);
         });
+
         user = users.find(
-          (u) => UsersHelper.getAccount(u, PLATFORM.Twitter) !== undefined
+          (u) =>
+            UsersHelper.getAccount(
+              u,
+              PLATFORM.Twitter,
+              '1753077743816777728'
+            ) !== undefined
         );
 
         await updateUserSettings(

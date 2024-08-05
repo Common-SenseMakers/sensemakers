@@ -22,68 +22,73 @@ export const activityEventCreatedHook = async (
 ) => {
   const { db, postsManager, users, notifications, time } = services;
 
-  await db.run(async (manager) => {
-    /**
-     * create a notification object for parsed or autoposted activities
-     * depending on the notifications and autpost configuration of the user
-     */
-    if (
-      [ActivityType.PostAutoposted, ActivityType.PostParsed].includes(
-        activityEvent.type
-      )
-    ) {
-      if (DEBUG)
-        logger.debug(
-          `PostParsed or PostAutoposted activity created-${activityEvent.data.postId}`,
-          undefined,
-          PREFIX
-        );
-
-      // get the author of the post and create one notification for them
-      const post = await postsManager.processing.getPostFull(
-        (activityEvent as ActivityEventBase<PostActData>).data.postId,
-        manager,
-        true
-      );
-
-      if (post.authorId) {
-        const author = await users.repo.getUser(post.authorId, manager, true);
-        const isQuiet =
-          time.now() < author.signupDate + QUIET_SIGNUP_PERIOD &&
-          notifications.haveQuiet;
-
+  await db.run(
+    async (manager) => {
+      /**
+       * create a notification object for parsed or autoposted activities
+       * depending on the notifications and autpost configuration of the user
+       */
+      if (
+        [ActivityType.PostAutoposted, ActivityType.PostParsed].includes(
+          activityEvent.type
+        )
+      ) {
         if (DEBUG)
           logger.debug(
-            `PostParsed or PostAutoposted activity check ${activityEvent.data.postId}`,
-            { notificationFreq: author.settings.notificationFreq, isQuiet },
+            `PostParsed or PostAutoposted activity created-${activityEvent.data.postId}`,
+            undefined,
             PREFIX
           );
 
-        if (
-          author.settings.notificationFreq !== NotificationFreq.None &&
-          !isQuiet &&
-          post.originalParsed &&
-          [
-            SciFilterClassfication.CITOID_DETECTED_RESEARCH,
-            SciFilterClassfication.AI_DETECTED_RESEARCH,
-          ].includes(post.originalParsed.filter_classification)
-        ) {
-          logger.debug(
-            `Create notification of ${activityEvent.type} on post: ${post.id} to user: ${author.userId}`,
-            activityEvent,
-            PREFIX
-          );
+        // get the author of the post and create one notification for them
+        const post = await postsManager.processing.getPostFull(
+          (activityEvent as ActivityEventBase<PostActData>).data.postId,
+          manager,
+          true
+        );
 
-          notifications.createNotification(
-            {
-              userId: post.authorId,
-              activityId: activityEvent.id,
-              status: NotificationStatus.pending,
-            },
-            manager
-          );
+        if (post.authorId) {
+          const author = await users.repo.getUser(post.authorId, manager, true);
+          const isQuiet =
+            time.now() < author.signupDate + QUIET_SIGNUP_PERIOD &&
+            notifications.haveQuiet;
+
+          if (DEBUG)
+            logger.debug(
+              `PostParsed or PostAutoposted activity check ${activityEvent.data.postId}`,
+              { notificationFreq: author.settings.notificationFreq, isQuiet },
+              PREFIX
+            );
+
+          if (
+            author.settings.notificationFreq !== NotificationFreq.None &&
+            !isQuiet &&
+            post.originalParsed &&
+            [
+              SciFilterClassfication.CITOID_DETECTED_RESEARCH,
+              SciFilterClassfication.AI_DETECTED_RESEARCH,
+            ].includes(post.originalParsed.filter_classification)
+          ) {
+            logger.debug(
+              `Create notification of ${activityEvent.type} on post: ${post.id} to user: ${author.userId}`,
+              activityEvent,
+              PREFIX
+            );
+
+            notifications.createNotification(
+              {
+                userId: post.authorId,
+                activityId: activityEvent.id,
+                status: NotificationStatus.pending,
+              },
+              manager
+            );
+          }
         }
       }
-    }
-  });
+    },
+    undefined,
+    undefined,
+    `activityCreatedHook ${activityEvent.type} ${activityEvent.data.postId}`
+  );
 };
