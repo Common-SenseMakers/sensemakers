@@ -209,6 +209,31 @@ export const getTwitterMock = (
     );
   }
 
+  if (type.get) {
+    when(mocked.get(anything(), anything(), anything())).thenCall(
+      async (
+        post_id: string,
+        userDetails: UserDetailsBase,
+        manager: TransactionManager
+      ): Promise<PlatformPostPosted<TwitterThread>> => {
+        const thread = state.threads.find(
+          (thread) => thread.conversation_id === post_id
+        );
+
+        if (!thread) {
+          throw new Error(`thread ${post_id} not found`);
+        }
+
+        return {
+          post_id: thread.conversation_id,
+          user_id: thread.author.id,
+          timestampMs: dateStrToTimestampMs(thread.tweets[0].created_at),
+          post: thread,
+        };
+      }
+    );
+  }
+
   if (type.signup) {
     when(mocked.getSignupContext(anything(), anything())).thenCall(
       (

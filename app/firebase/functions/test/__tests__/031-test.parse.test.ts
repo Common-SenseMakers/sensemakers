@@ -13,13 +13,20 @@ import {
   _02_publishTweet,
   _03_fetchAfterPublish,
 } from './reusable/create-post-fetch';
-import { USE_REAL_NANOPUB, USE_REAL_PARSER, testUsers } from './setup';
+import {
+  USE_REAL_NANOPUB,
+  USE_REAL_PARSER,
+  USE_REAL_TWITTER,
+  testUsers,
+} from './setup';
 import { getTestServices } from './test.services';
 
-describe.skip('031 test parse', () => {
+describe.only('031 test parse', () => {
   const services = getTestServices({
     time: 'mock',
-    twitter: undefined,
+    twitter: USE_REAL_TWITTER
+      ? undefined
+      : { publish: true, signup: true, fetch: true, get: true },
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
     emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
@@ -53,7 +60,7 @@ describe.skip('031 test parse', () => {
     it('gets a post (thread) from twitter and parses it', async () => {
       const { postsManager } = services;
 
-      const post_id = process.env.TEST_THREAD_ID;
+      const post_id = process.env.TEST_THREAD_ID || '0';
 
       if (!post_id) {
         throw new Error('TEST_THREAD_ID not defined in .env.test file');

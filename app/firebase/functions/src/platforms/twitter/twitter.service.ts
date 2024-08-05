@@ -94,7 +94,7 @@ export class TwitterService
     post_id: string,
     userDetails: UserDetailsBase<any, any, any>,
     manager: TransactionManager
-  ): Promise<PlatformPostPosted<any>> {
+  ): Promise<PlatformPostPosted<TwitterThread>> {
     const MAX_TWEETS = 30;
 
     const readOnlyClient = await this.getUserClient(
