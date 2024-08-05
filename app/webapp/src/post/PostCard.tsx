@@ -58,6 +58,7 @@ export const PostCard = (props: {
           timestamp={tweet?.posted?.timestampMs}></TweetAnchor>
         {!profile ? <NanopubStatus post={post}></NanopubStatus> : <></>}
       </Box>
+
       <SemanticsEditor
         include={[PATTERN_ID.KEYWORDS]}
         patternProps={{
