@@ -433,11 +433,11 @@ export class PostsManager {
       async (manager) => {
         const post = await this.processing.posts.get(postId, manager, true);
         if (post.parsingStatus === 'processing') {
-          logger.debug(`parsePost - already parsing ${postId}`);
+          if (DEBUG) logger.debug(`parsePost - already parsing ${postId}`);
           return false;
         }
 
-        logger.debug(`parsePost - marking as parsing ${postId}`);
+        if (DEBUG) logger.debug(`parsePost - marking as parsing ${postId}`);
         await this.updatePost(
           postId,
           { parsingStatus: AppPostParsingStatus.PROCESSING },
@@ -753,10 +753,11 @@ export class PostsManager {
       appPosts.map((post) => this.appendMirrors(post))
     );
 
-    logger.debug(
-      `getUserProfile query for user ${username} has ${appPosts.length} results for query params: `,
-      { platformId, username, labelsUris, fetchParams }
-    );
+    if (DEBUG)
+      logger.debug(
+        `getUserProfile query for user ${username} has ${appPosts.length} results for query params: `,
+        { platformId, username, labelsUris, fetchParams }
+      );
 
     return postsFull;
   }

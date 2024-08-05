@@ -63,7 +63,7 @@ const fetchAndGetNotifications = async (
   );
 };
 
-describe.only('061 parse tweet, ', () => {
+describe('061 parse tweet, ', () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER
@@ -154,7 +154,7 @@ describe.only('061 parse tweet, ', () => {
       });
     });
 
-    describe.only('manual daily-notifications', async () => {
+    describe('manual daily-notifications', async () => {
       before(async () => {
         logger.debug('resetting DB');
         await resetDB();
