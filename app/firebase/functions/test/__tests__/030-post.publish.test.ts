@@ -85,7 +85,7 @@ describe('030-process', () => {
       });
 
       if (!USE_REAL_TWITTER && TEST_THREADS.length > 1) {
-        expect(pendingPosts).to.have.length(TEST_THREADS.length + 1);
+        expect(pendingPosts).to.have.length(TEST_THREADS.length + 1 - 1); // one post is ignored
       }
 
       await Promise.all(
@@ -150,7 +150,7 @@ describe('030-process', () => {
 
       if (!USE_REAL_TWITTER) {
         if (TEST_THREADS.length > 1) {
-          expect(pendingPosts).to.have.length(TEST_THREADS.length - 1);
+          expect(pendingPosts).to.have.length(TEST_THREADS.length - 1 - 1); // 1 ifnored post
         } else {
           expect(pendingPosts).to.have.length(0);
         }
@@ -253,7 +253,7 @@ describe('030-process', () => {
         }
       );
 
-      expect(publishedPosts).to.have.length(TEST_THREADS.length + 1);
+      expect(publishedPosts).to.have.length(TEST_THREADS.length + 1 - 1); // 1 ignored post
 
       const post = publishedPosts[0];
 

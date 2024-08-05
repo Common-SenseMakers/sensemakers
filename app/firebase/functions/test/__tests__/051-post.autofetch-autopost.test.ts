@@ -45,6 +45,7 @@ describe('051-autofetch-autopost', () => {
 
     before(async () => {
       const testUser = testCredentials[0];
+
       user = await _01_createAndFetchUsers(services, testUser.twitter.id, {
         DEBUG,
         DEBUG_PREFIX,
@@ -55,7 +56,9 @@ describe('051-autofetch-autopost', () => {
       await updateUserSettings(
         services,
         {
-          autopost: { [PLATFORM.Nanopub]: { value: AutopostOption.AI } },
+          autopost: {
+            [PLATFORM.Nanopub]: { value: AutopostOption.DETERMINISTIC },
+          },
           notificationFreq: NotificationFreq.Daily,
         },
         user
@@ -63,7 +66,7 @@ describe('051-autofetch-autopost', () => {
     });
 
     it('publish a tweet in the name of the test user', async () => {
-      const TEST_CONTENT = `This is a test post ${USE_REAL_TWITTER ? Date.now() : ''}`;
+      const TEST_CONTENT = `This is a test post F ${USE_REAL_TWITTER ? Date.now() : ''}`; // It should result on a citoid labeled post
 
       thread = await _02_publishTweet(services, TEST_CONTENT, user);
     });
