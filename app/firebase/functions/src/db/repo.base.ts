@@ -24,7 +24,7 @@ export class BaseRepository<TT, CC> {
     const postRef = this.collection.doc();
 
     if (DEBUG) logger.debug(`Creating ${postRef.id}`, { id: postRef.id, post });
-    manager.create(postRef, post);
+    manager.create(postRef, removeUndefined(post));
 
     return {
       id: postRef.id,

@@ -429,37 +429,47 @@ export class PostsManager {
   }
 
   async parsePost(postId: string) {
-    const shouldParse = await this.db.run(async (manager) => {
-      const post = await this.processing.posts.get(postId, manager, true);
-      if (post.parsingStatus === 'processing') {
-        logger.debug(`parsePost - already parsing ${postId}`);
-        return false;
-      }
+    const shouldParse = await this.db.run(
+      async (manager) => {
+        const post = await this.processing.posts.get(postId, manager, true);
+        if (post.parsingStatus === 'processing') {
+          logger.debug(`parsePost - already parsing ${postId}`);
+          return false;
+        }
 
-      logger.debug(`parsePost - marking as parsing ${postId}`);
-      await this.updatePost(
-        postId,
-        { parsingStatus: AppPostParsingStatus.PROCESSING },
-        manager
-      );
+        logger.debug(`parsePost - marking as parsing ${postId}`);
+        await this.updatePost(
+          postId,
+          { parsingStatus: AppPostParsingStatus.PROCESSING },
+          manager
+        );
 
-      return true;
-    });
+        return true;
+      },
+      undefined,
+      undefined,
+      `parsePost - shouldParse ${postId}`
+    );
 
     if (shouldParse) {
       /** then process */
-      await this.db.run(async (manager) => {
-        try {
-          await this._parsePost(postId, manager);
-        } catch (err: any) {
-          logger.error(`Error parsing post ${postId}`, err);
-          await this.updatePost(
-            postId,
-            { parsingStatus: AppPostParsingStatus.ERRORED },
-            manager
-          );
-        }
-      });
+      await this.db.run(
+        async (manager) => {
+          try {
+            await this._parsePost(postId, manager);
+          } catch (err: any) {
+            logger.error(`Error parsing post ${postId}`, err);
+            await this.updatePost(
+              postId,
+              { parsingStatus: AppPostParsingStatus.ERRORED },
+              manager
+            );
+          }
+        },
+        undefined,
+        undefined,
+        `parsePost - parsing ${postId}`
+      );
     }
   }
 

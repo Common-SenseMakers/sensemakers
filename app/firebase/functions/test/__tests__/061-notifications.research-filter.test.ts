@@ -36,7 +36,7 @@ const fetchAndGetNotifications = async (
   const { postsManager } = services;
 
   if (!post_id) {
-    throw new Error('TEST_THREAD_ID not defined in .env.test file');
+    throw new Error('post_id not defined');
   }
 
   const post = await fetchPostInTests(userId, post_id, services);
@@ -47,18 +47,23 @@ const fetchAndGetNotifications = async (
   expect(parsedPost.semantics).to.not.be.undefined;
 
   /** check that the notifications were marked as disabled */
-  return await services.db.run(async (manager) => {
-    const notificationsIds =
-      await services.notifications.notificationsRepo.getUnotifiedOfUser(
-        userId,
-        manager
-      );
+  return await services.db.run(
+    async (manager) => {
+      const notificationsIds =
+        await services.notifications.notificationsRepo.getUnotifiedOfUser(
+          userId,
+          manager
+        );
 
-    return notificationsIds;
-  });
+      return notificationsIds;
+    },
+    undefined,
+    undefined,
+    'getUnotifiedOfUser'
+  );
 };
 
-describe('061 parse tweet, ', () => {
+describe.only('061 parse tweet, ', () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER
@@ -77,21 +82,17 @@ describe('061 parse tweet, ', () => {
         logger.debug('resetting DB');
         await resetDB();
 
-        const platformAuthorId = process.env.TEST_THREAD_AUTHOR_ID;
-
-        if (!platformAuthorId) {
-          throw new Error(
-            'TEST_THREAD_AUTHOR_ID not defined in .env.test file'
-          );
-        }
-
         const users = await services.db.run((manager) => {
           return createUsers(services, testUsers, manager);
         });
+
         user = users.find(
           (u) =>
-            UsersHelper.getAccount(u, PLATFORM.Twitter, platformAuthorId) !==
-            undefined
+            UsersHelper.getAccount(
+              u,
+              PLATFORM.Twitter,
+              '1753077743816777728'
+            ) !== undefined
         );
 
         await updateUserSettings(
@@ -153,26 +154,21 @@ describe('061 parse tweet, ', () => {
       });
     });
 
-    describe('manual daily-notifications', async () => {
+    describe.only('manual daily-notifications', async () => {
       before(async () => {
         logger.debug('resetting DB');
         await resetDB();
-
-        const platformAuthorId = process.env.TEST_THREAD_AUTHOR_ID;
-
-        if (!platformAuthorId) {
-          throw new Error(
-            'TEST_THREAD_AUTHOR_ID not defined in .env.test file'
-          );
-        }
 
         const users = await services.db.run((manager) => {
           return createUsers(services, testUsers, manager);
         });
         user = users.find(
           (u) =>
-            UsersHelper.getAccount(u, PLATFORM.Twitter, platformAuthorId) !==
-            undefined
+            UsersHelper.getAccount(
+              u,
+              PLATFORM.Twitter,
+              '1753077743816777728'
+            ) !== undefined
         );
 
         await updateUserSettings(
@@ -239,21 +235,17 @@ describe('061 parse tweet, ', () => {
         logger.debug('resetting DB');
         await resetDB();
 
-        const platformAuthorId = process.env.TEST_THREAD_AUTHOR_ID;
-
-        if (!platformAuthorId) {
-          throw new Error(
-            'TEST_THREAD_AUTHOR_ID not defined in .env.test file'
-          );
-        }
-
         const users = await services.db.run((manager) => {
           return createUsers(services, testUsers, manager);
         });
+
         user = users.find(
           (u) =>
-            UsersHelper.getAccount(u, PLATFORM.Twitter, platformAuthorId) !==
-            undefined
+            UsersHelper.getAccount(
+              u,
+              PLATFORM.Twitter,
+              '1753077743816777728'
+            ) !== undefined
         );
 
         await updateUserSettings(

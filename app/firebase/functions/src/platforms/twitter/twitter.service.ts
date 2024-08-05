@@ -63,7 +63,7 @@ export interface TwitterApiCredentials {
   clientSecret: string;
 }
 
-const DEBUG = true;
+const DEBUG = false;
 
 /** Twitter service handles all interactions with Twitter API */
 export class TwitterService
@@ -104,15 +104,28 @@ export class TwitterService
     );
 
     try {
+      const options: Partial<Tweetv2FieldsParams> = {
+        'tweet.fields': tweetFields,
+        expansions,
+      };
+
+      const original = await readOnlyClient.v2.singleTweet(post_id, options);
+      const authorId = original.data.author_id;
+
+      if (!authorId) {
+        throw new Error('author_id not found');
+      }
+
+      const originalAuthor = await readOnlyClient.v2.user(authorId);
+
       const _searchParams: Tweetv2SearchParams = {
-        query: `conversation_id:${post_id} from:${userDetails.user_id}`,
+        query: `conversation_id:${post_id} from:${authorId}`,
         max_results: MAX_TWEETS > 100 ? 100 : MAX_TWEETS,
         expansions,
         'tweet.fields': tweetFields,
       };
 
       let nextToken: string | undefined = undefined;
-      let originalAuthor: UserV2 | undefined = undefined;
       let allTweets: AppTweet[] = [];
 
       do {
@@ -155,11 +168,6 @@ export class TwitterService
 
             const appTweets = convertToAppTweets(tweetResults, result.includes);
 
-            if (!originalAuthor) {
-              originalAuthor = result.includes?.users?.find(
-                (user) => user.id === userDetails.user_id
-              );
-            }
             allTweets.push(...appTweets);
 
             nextToken = result.meta.next_token;
@@ -183,14 +191,17 @@ export class TwitterService
         }
       } while (nextToken !== undefined);
 
-      const threads =
-        allTweets.length > 0 && originalAuthor
-          ? convertTweetsToThreads(allTweets, originalAuthor)
-          : [];
+      const threads = (() => {
+        if (allTweets.length > 0) {
+          return convertTweetsToThreads(allTweets, originalAuthor.data);
+        }
+        return [];
+      })();
 
       if (threads.length !== 1) {
         throw new Error(`Unexpected search for thread did not return 1 thread`);
       }
+
       const thread = threads[0];
 
       return {

@@ -384,16 +384,10 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
         type="normal"
         contentProps={{
           icon: <CelebrateIcon size={40}></CelebrateIcon>,
-          title: t(I18Keys.publishWarningTitle),
+          title: t(I18Keys.publishedTitle),
           parragraphs: [
             <Trans
-              i18nKey={I18Keys.publishWarningPar01}
-              components={{ b: <b></b> }}></Trans>,
-            <Trans
-              i18nKey={I18Keys.publishWarningPar02}
-              components={{ b: <b></b> }}></Trans>,
-            <Trans
-              i18nKey={I18Keys.publishWarningPar03}
+              i18nKey={I18Keys.publishedText}
               components={{ b: <b></b> }}></Trans>,
           ],
           buttonsDirection: 'column',

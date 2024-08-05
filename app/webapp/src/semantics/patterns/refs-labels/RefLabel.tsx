@@ -87,7 +87,8 @@ export const RefWithLabels = (props: {
           url={props.refUrl}
           title={refData.meta?.title}
           description={refData.meta?.summary}
-          image={refData.meta?.image}></RefCard>
+          image={refData.meta?.image}
+          refType={refData.meta.item_type}></RefCard>
       ) : (
         <Anchor target="_blank" href={props.refUrl}>
           {props.refUrl}

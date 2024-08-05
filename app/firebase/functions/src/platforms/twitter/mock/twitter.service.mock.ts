@@ -221,7 +221,7 @@ export const getTwitterMock = (
         );
 
         if (!thread) {
-          throw new Error(`thread ${post_id} not found`);
+          throw new Error(`thread ${post_id} not found in mock`);
         }
 
         return {

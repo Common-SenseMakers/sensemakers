@@ -744,13 +744,17 @@ export const fetchPostInTests = async (
   services: Services
 ) => {
   /** fetch will store the posts in the DB */
-  const { post } = await services.db.run((manager) =>
-    services.postsManager.fetchPostFromPlatform(
-      userId,
-      PLATFORM.Twitter,
-      post_id,
-      manager
-    )
+  const { post } = await services.db.run(
+    (manager) =>
+      services.postsManager.fetchPostFromPlatform(
+        userId,
+        PLATFORM.Twitter,
+        post_id,
+        manager
+      ),
+    undefined,
+    undefined,
+    `fetchPostInTests ${userId} ${post_id}`
   );
   /**
    * We need to manually call the postUpdate hook that would have been called
