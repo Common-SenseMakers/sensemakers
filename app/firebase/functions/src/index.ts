@@ -15,7 +15,6 @@ import { ActivityEventBase } from './@shared/types/types.activity';
 import { NotificationFreq } from './@shared/types/types.notifications';
 import { PlatformPost } from './@shared/types/types.platform.posts';
 import { AppPost } from './@shared/types/types.posts';
-import { PLATFORM } from './@shared/types/types.user';
 import { CollectionNames } from './@shared/utils/collectionNames';
 import { activityEventCreatedHook } from './activity/activity.created.hook';
 import {
@@ -24,7 +23,6 @@ import {
   EMAIL_SENDER_FROM,
   IS_EMULATOR,
   MONTHLY_NOTIFICATION_PERIOD,
-  TEST_USER_ACCOUNTS,
   WEEKLY_NOTIFICATION_PERIOD,
 } from './config/config.runtime';
 import { envDeploy } from './config/typedenv.deploy';
@@ -304,32 +302,6 @@ emulatorTriggerRouter.post('/emailTest', async (request, response) => {
   await services.email.callSendEmail(message);
   response.status(200).send({ success: true });
 });
-
-if (IS_EMULATOR) {
-  emulatorTriggerRouter.post('/publishTwitter', async (request, response) => {
-    const services = getServices(request);
-    const { platforms } = services;
-    const params = request.query;
-    const text = params.text || 'test tweet';
-
-    const testCredentials = getTestCredentials(TEST_USER_ACCOUNTS.value());
-    if (!testCredentials) {
-      throw new Error('test credentials not found');
-    }
-
-    await platforms.get(PLATFORM.Twitter).publish(
-      {
-        draft: { text },
-        userDetails: {
-          user_id: testCredentials[0].twitter.id,
-        } as any,
-      },
-      undefined as any
-    );
-
-    response.status(200).send({ success: true });
-  });
-}
 
 exports['trigger'] = functions
   .region(envDeploy.REGION)
