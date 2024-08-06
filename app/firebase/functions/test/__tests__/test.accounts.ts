@@ -7,6 +7,3 @@ export const testCredentials: TestUserCredentials[] = JSON.parse(
 if (!testCredentials) {
   throw new Error('test acccounts undefined');
 }
-if (testCredentials.length < 1) {
-  throw new Error('not enough twitter account credentials provided');
-}
