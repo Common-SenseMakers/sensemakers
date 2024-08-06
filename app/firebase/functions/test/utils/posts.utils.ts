@@ -756,11 +756,13 @@ export const fetchPostInTests = async (
     undefined,
     `fetchPostInTests ${userId} ${post_id}`
   );
-  /**
-   * We need to manually call the postUpdate hook that would have been called
-   * when creating the AppPost as part of the fetch
-   */
-  await postUpdatedHookOnTest(post, services);
+  if (post) {
+    /**
+     * We need to manually call the postUpdate hook that would have been called
+     * when creating the AppPost as part of the fetch
+     */
+    await postUpdatedHookOnTest(post, services);
+  }
 
   return post;
 };
