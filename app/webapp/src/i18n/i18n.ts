@@ -287,7 +287,7 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.retract]: 'Retract',
   [I18Keys.cancel]: 'Cancel',
 
-  [I18Keys.emailHeader]: 'Activity Summary',
+  [I18Keys.emailHeader]: '{{timeframe}} Activity Summary',
   [I18Keys.emailSummary]: "Here's what happened {{timeframe}}:",
 
   [I18Keys.recommendedNanopubEmailHeader]: '',

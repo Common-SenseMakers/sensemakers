@@ -56,34 +56,38 @@ export const EmailTemplate = ({
     allPostsLink
   ).toString();
 
-  const headerTimeframeKey = (() => {
-    switch (notificationFrequency) {
-      case NotificationFreq.Daily:
-        return I18Keys.today;
-      case NotificationFreq.Weekly:
-        return I18Keys.thisWeek;
-      case NotificationFreq.Monthly:
-        return I18Keys.thisMonth;
-      default:
-        return I18Keys.today;
-    }
-  })();
-
-  const footerTimeframeKey = (() => {
-    switch (notificationFrequency) {
-      case NotificationFreq.Daily:
-        return I18Keys.daily;
-      case NotificationFreq.Weekly:
-        return I18Keys.weekly;
-      case NotificationFreq.Monthly:
-        return I18Keys.monthly;
-      default:
-        return I18Keys.daily;
-    }
-  })();
+  const { sectionHeaderTimeframeKey, footerTimeframeKey, headerTimeframeKey } =
+    (() => {
+      switch (notificationFrequency) {
+        case NotificationFreq.Daily:
+          return {
+            sectionHeaderTimeframeKey: I18Keys.today,
+            footerTimeframeKey: I18Keys.daily,
+            headerTimeframeKey: I18Keys.Daily,
+          };
+        case NotificationFreq.Weekly:
+          return {
+            sectionHeaderTimeframeKey: I18Keys.thisWeek,
+            footerTimeframeKey: I18Keys.weekly,
+            headerTimeframeKey: I18Keys.Weekly,
+          };
+        case NotificationFreq.Monthly:
+          return {
+            sectionHeaderTimeframeKey: I18Keys.thisMonth,
+            footerTimeframeKey: I18Keys.monthly,
+            headerTimeframeKey: I18Keys.Monthly,
+          };
+        default:
+          return {
+            sectionHeaderTimeframeKey: I18Keys.today,
+            footerTimeframeKey: I18Keys.daily,
+            headerTimeframeKey: I18Keys.Daily,
+          };
+      }
+    })();
 
   const { header, preview, summary, footer } = (() => {
-    const header = t(I18Keys.emailHeader);
+    const header = t(I18Keys.emailHeader, { timeframe: t(headerTimeframeKey) });
     const { pendingPosts, manuallyPublishedPosts, autoPublishedPosts } =
       splitPostsByStatus(posts);
     const preview = `${
@@ -108,7 +112,7 @@ export const EmailTemplate = ({
     const summary = (
       <div style={{ margin: '0px 6px' }}>
         <Text style={{ marginTop: '8px', ...summaryStyle }}>
-          {t(I18Keys.emailSummary, { timeframe: t(headerTimeframeKey) })}
+          {t(I18Keys.emailSummary, { timeframe: t(sectionHeaderTimeframeKey) })}
         </Text>
         {Object.values(splitPostsByStatus(posts)).map((postsByStatus, idx) => {
           if (postsByStatus.length > 0) {
@@ -164,7 +168,7 @@ export const EmailTemplate = ({
         })();
         const sectionHeader = t(sectionHeaderKey, {
           count: postsByStatus.length,
-          timeframe: t(headerTimeframeKey),
+          timeframe: t(sectionHeaderTimeframeKey),
         });
         return (
           <>
