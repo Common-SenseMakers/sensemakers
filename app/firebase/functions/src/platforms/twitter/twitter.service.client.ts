@@ -51,16 +51,14 @@ export class TwitterServiceClient {
    * Get generic client user app credentials
    * */
   protected getGenericClient() {
-    if (DEBUG) {
-      logger.debug(
-        'getGenericClient',
-        {
-          clientId: this.apiCredentials.clientId.substring(0, 8),
-          clientSecret: this.apiCredentials.clientSecret.substring(0, 8),
-        },
-        DEBUG_PREFIX
-      );
-    }
+    logger.debug(
+      'getGenericClient',
+      {
+        clientId: this.apiCredentials.clientId.substring(0, 8),
+        clientSecret: this.apiCredentials.clientSecret.substring(0, 8),
+      },
+      DEBUG_PREFIX
+    );
 
     return new TwitterApi({
       clientId: this.apiCredentials.clientId,
