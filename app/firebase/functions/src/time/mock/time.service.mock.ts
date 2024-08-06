@@ -3,6 +3,7 @@ import { instance, mock, when } from 'ts-mockito';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../time.service';
 
+const DEBUG = false;
 export const TIME_ZERO = 1720805241;
 let time = TIME_ZERO;
 
@@ -27,7 +28,7 @@ export const getTimeMock = (
   const Mocked = mock(TimeService);
 
   when(Mocked.now()).thenCall((): number => {
-    logger.debug(`get time ${time}`);
+    if (DEBUG) logger.debug(`get time ${time}`);
     return time;
   });
 

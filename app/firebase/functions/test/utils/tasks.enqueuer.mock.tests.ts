@@ -29,14 +29,22 @@ export const enqueueTaskMockOnTests = async (
     if (name === PARSE_POST_TASK) {
       const { db, postsManager } = services;
 
-      const postBefore = await db.run(async (manager) =>
-        postsManager.processing.posts.get(params.postId, manager, true)
+      const postBefore = await db.run(
+        async (manager) =>
+          postsManager.processing.posts.get(params.postId, manager, true),
+        undefined,
+        undefined,
+        `enqueueTaskStub - postBefore ${params.postId}`
       );
 
       await parsePostTask({ data: params } as any, services);
 
-      const postAfter = await db.run(async (manager) =>
-        postsManager.processing.posts.get(params.postId, manager, true)
+      const postAfter = await db.run(
+        async (manager) =>
+          postsManager.processing.posts.get(params.postId, manager, true),
+        undefined,
+        undefined,
+        `enqueueTaskStub - postAfter ${params.postId}`
       );
 
       /** should detect the parse and trigger the autopost if needed */

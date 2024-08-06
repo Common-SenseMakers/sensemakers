@@ -24,11 +24,18 @@ export const PostCard = (props: {
 
   const { constants } = useThemeContext();
 
-  const handleClick = props.handleClick;
+  const handleClick = () => {
+    props.handleClick();
+  };
+
   const tweet = post.mirrors.find((m) => m.platformId === PLATFORM.Twitter);
   const postText = concatenateThread(post.generic);
 
   const { isParsing } = getPostStatuses(post);
+
+  const handleInternalClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
 
   return (
     <Box
@@ -51,6 +58,7 @@ export const PostCard = (props: {
           timestamp={tweet?.posted?.timestampMs}></TweetAnchor>
         {!profile ? <NanopubStatus post={post}></NanopubStatus> : <></>}
       </Box>
+
       <SemanticsEditor
         include={[PATTERN_ID.KEYWORDS]}
         patternProps={{
@@ -61,7 +69,11 @@ export const PostCard = (props: {
           originalParsed: post?.originalParsed,
         }}></SemanticsEditor>
 
-      <PostTextStatic truncate shade={shade} text={postText}></PostTextStatic>
+      <PostTextStatic
+        onClick={handleInternalClick}
+        truncate
+        shade={shade}
+        text={postText}></PostTextStatic>
 
       <SemanticsEditor
         include={[PATTERN_ID.REF_LABELS]}

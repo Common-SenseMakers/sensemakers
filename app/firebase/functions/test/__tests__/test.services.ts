@@ -45,7 +45,7 @@ import { UsersService } from '../../src/users/users.service';
 import { testCredentials } from './test.accounts';
 
 export interface TestServicesConfig {
-  twitter: TwitterMockConfig;
+  twitter?: TwitterMockConfig;
   nanopub: NanopubMockConfig;
   parser: ParserMockConfig;
   time: 'real' | 'mock';
@@ -184,7 +184,7 @@ export const getTestServices = (config: TestServicesConfig) => {
     activityRepo,
     userRepo,
     email,
-    true
+    false
   );
 
   const activity = new ActivityService(activityRepo);
