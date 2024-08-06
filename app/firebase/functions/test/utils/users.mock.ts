@@ -52,6 +52,8 @@ export const getMockedUser = (credentials: TestUserCredentials): AppUser => {
         signupDate: 0,
         user_id: '0x59b277c77F738e9B758B73Dd9Bfc6DE36D6e0EB1',
         profile: {
+          introNanopubUri:
+            'https://w3id.org/np/RAffsv5cH41cAXA_HOasEJ74XyQXOENnB9lc-iyUCoM4w',
           ethAddress: '0x59b277c77F738e9B758B73Dd9Bfc6DE36D6e0EB1',
           rsaPublickey:
             '-----BEGIN PUBLIC KEY-----\r\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAj7mSvsl6URu4Vt7hzYWh\r\nn4AqqGHpUabpOUl5YErTWP7xcuK25dVd2RE2NHqL6fUeJQFB9ijKr9jUkVGVVLXa\r\n+A1HOsJXSMVhB8Owv/VnDJwA+92qjA3bN3//H98PR3UOXBmZDNUiwZ2IB6jmDkjO\r\n2NknJKsOpYVE3lc/VRKOATNoi1MFDR4dyDU9XjyPcn/p420GYafEkdoEnuihvML+\r\nr5UwIBzkhs20IQhEZivExUBnxLE/jC2sdUmN0aHlqAGKU0x7uMmrMpx1MekAJ3Ic\r\nLtoUYLyo39eOqfeGE5mgom/XRI4J7TPoFDQdzbKdz+wgkzPDRrQ9L4MCMKc0YJL6\r\nMwIDAQAB\r\n-----END PUBLIC KEY-----\r\n',

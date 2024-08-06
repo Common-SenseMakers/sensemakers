@@ -2,7 +2,7 @@ import { Nanopub } from '@nanopub/sign';
 import { DataFactory, Writer } from 'n3';
 import * as URI from './constants';
 
-import { buildNpHead } from './utils';
+import { buildNpHead, SupersedesOptions } from './utils';
 import { logger } from '../../instances/logger';
 
 const DEBUG = false;
@@ -12,30 +12,29 @@ const { namedNode, literal } = DataFactory;
 
 export const buildAppIntroNp = async (
   ethAddress1: string,
-  ethAddress2: string,
+  ethAddress2:string,
   pubKey1: string,
   pubKey2: string,
   signature1: string,
   signature2: string,
-  oldNpUri?: string
+  supersedesOptions?: SupersedesOptions
 ): Promise<Nanopub> => {
   return new Promise((resolve, reject) => {
     const headStore = buildNpHead();
 
     // Define the graph URIs
+    
+    const baseNode = namedNode(URI.BASE_URI);
     const assertionGraph = namedNode(URI.ASSERTION_URI);
     const provenanceGraph = namedNode(URI.PROVENANCE_URI);
     const pubinfoGraph = namedNode(URI.PUBINFO_URI);
-    const keyDeclarationNode1 = namedNode(`${URI.BASE_URI}${ethAddress1}`);
-    const keyDeclarationNode2 = namedNode(`${URI.BASE_URI}${ethAddress2}`);
+    const keyDeclarationNode1 = namedNode(`${URI.KEY_DECLARATION_URI}${ethAddress1}`);
+    const keyDeclarationNode2 = namedNode(`${URI.KEY_DECLARATION_URI}${ethAddress2}`);
     const appAgentNode = namedNode(URI.COSMO_PREFIX);
-    const npx = URI.NPX_PREFIX;
-    const name = 'SenseCast';
+    const name = 'Sense Cast'  
     // Create a writer and add prefixes
     const writer = new Writer({ format: 'application/trig' });
-    writer.addPrefixes(
-      URI.introPrefixes
-    );
+    writer.addPrefixes(URI.introPrefixes);
 
     // Add headStore quads to the writer
     headStore.getQuads(null, null, null, null).forEach((quad) => {
@@ -88,9 +87,7 @@ export const buildAppIntroNp = async (
       assertionGraph
     );
 
-    const derivationProofNode1 = namedNode(
-      `${URI.BASE_URI}derivationProof${ethAddress1}`
-    );
+    const derivationProofNode1 = namedNode(`${URI.DERIVATION_PROOF_URI}${ethAddress1}`);
     writer.addQuad(
       keyDeclarationNode1,
       namedNode(URI.NP_HAS_DERIVATION_PROOF),
@@ -117,13 +114,13 @@ export const buildAppIntroNp = async (
     );
     writer.addQuad(
       derivationProofNode1,
-      namedNode(URI.NP_HAS_ALGORITHM),
+      namedNode(URI.NP_HAS_SIGNATURE),
       literal(signature1),
       assertionGraph
     );
 
     //Declare the second RSA key
-
+   
     writer.addQuad(
       keyDeclarationNode2,
       namedNode(URI.NP_DECLARED_BY),
@@ -162,9 +159,7 @@ export const buildAppIntroNp = async (
       assertionGraph
     );
 
-    const derivationProofNode2 = namedNode(
-      `${URI.BASE_URI}derivationProof${ethAddress2}`
-    );
+    const derivationProofNode2 = namedNode(`${URI.DERIVATION_PROOF_URI}${ethAddress2}`);
     writer.addQuad(
       keyDeclarationNode2,
       namedNode(URI.NP_HAS_DERIVATION_PROOF),
@@ -191,55 +186,62 @@ export const buildAppIntroNp = async (
     );
     writer.addQuad(
       derivationProofNode2,
-      namedNode(`${npx}hasSignature`),
+      namedNode(URI.NP_HAS_SIGNATURE),
       literal(signature2),
       assertionGraph
     );
 
     // Add triples to the provenance graph
     writer.addQuad(
-      namedNode(URI.ASSERTION_URI),
+      assertionGraph,
       namedNode(URI.PROV_WAS_ATTRIBUTED_TO),
       appAgentNode,
       provenanceGraph
     );
+    
 
     // Add triples to the pubinfo graph
     writer.addQuad(
-      namedNode(URI.BASE_URI),
+      baseNode,
       namedNode(URI.NP_WAS_CREATED_AT),
       namedNode(URI.COSMO_PREFIX),
       pubinfoGraph
     );
 
     writer.addQuad(
-      namedNode(URI.BASE_URI),
+      baseNode,
       namedNode(URI.LABEL),
       literal('CoSMO Sensemaker intro'),
       pubinfoGraph
     );
 
     writer.addQuad(
-      namedNode(URI.BASE_URI),
+      baseNode,
       namedNode(URI.NP_HAS_ROOT_SIGNER),
       literal(ethAddress1),
       pubinfoGraph
     );
 
     writer.addQuad(
-      namedNode(URI.BASE_URI),
+      baseNode,
       namedNode(URI.CREATOR),
       appAgentNode,
       pubinfoGraph
     );
-    if (oldNpUri) {
-      writer.addQuad(
-        namedNode(URI.BASE_URI),
-        namedNode(URI.NP_SUPERSEDES),
-        namedNode(oldNpUri),
-        pubinfoGraph
-      );
-    }
+    if (supersedesOptions) {
+        writer.addQuad(
+          baseNode,
+          namedNode(URI.NP_SUPERSEDES),
+          namedNode(supersedesOptions.latest),
+          pubinfoGraph
+        );
+        writer.addQuad(
+          namedNode(URI.BASE_URI),
+          namedNode(URI.NP_HAS_ORIGNAL_VERSION),
+          namedNode(supersedesOptions.root),
+          pubinfoGraph
+        );
+      }
 
     // Instantiate Nanopub profile (ORCID and name are optional)
     //const profile = new NpProfile(privateKey, "https://orcid.org/" + orcidId, name);

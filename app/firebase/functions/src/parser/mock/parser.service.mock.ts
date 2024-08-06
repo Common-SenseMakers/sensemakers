@@ -35,7 +35,7 @@ export const MOCKED_PARSER_RESULTS: ParsePostResult[] = [
   {
     filter_classification: SciFilterClassfication.NOT_RESEARCH,
     semantics:
-      '<http://sensentes/ThisText> <https://schema.org/keywords> "rerer" .',
+      '<https://sense-nets.xyz/mySemanticPost> <https://schema.org/keywords> "rerer" .',
   },
 ];
 

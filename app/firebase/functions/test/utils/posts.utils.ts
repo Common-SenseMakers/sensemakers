@@ -658,6 +658,12 @@ export const getMockPost = (refPost: Partial<AppPostFull>) => {
       {
         content: 'test content',
       },
+      {
+        content: 'test content 2',
+      },
+      {
+        content: 'test content 3',
+      },
     ],
     author: {
       id: '123456',
@@ -707,7 +713,9 @@ export const getMockPost = (refPost: Partial<AppPostFull>) => {
     parsingStatus: AppPostParsingStatus.IDLE,
     reviewedStatus: AppPostReviewStatus.PENDING,
     republishedStatus: AppPostRepublishedStatus.PENDING,
-    mirrors: [twitterMirror],
+    mirrors: refPost.mirrors
+      ? [...refPost.mirrors, twitterMirror]
+      : [twitterMirror],
   };
   return post;
 };

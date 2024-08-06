@@ -62,7 +62,7 @@ export class NanopubService
       throw new Error('Missing params');
     }
 
-    const introNanopub = await createIntroNanopublication(params, false);
+    const introNanopub = await createIntroNanopublication(params, true);
 
     return { ...params, introNanopubDraft: introNanopub.rdf() };
   }
