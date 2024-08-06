@@ -40,7 +40,9 @@ describe('030-process', () => {
 
   const services = getTestServices({
     time: 'mock',
-    twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
+    twitter: USE_REAL_TWITTER
+      ? undefined
+      : { publish: true, signup: true, fetch: true },
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
     emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
@@ -83,7 +85,7 @@ describe('030-process', () => {
       });
 
       if (!USE_REAL_TWITTER && TEST_THREADS.length > 1) {
-        expect(pendingPosts).to.have.length(TEST_THREADS.length + 1);
+        expect(pendingPosts).to.have.length(TEST_THREADS.length + 1 - 1); // one post is ignored
       }
 
       await Promise.all(
@@ -148,7 +150,7 @@ describe('030-process', () => {
 
       if (!USE_REAL_TWITTER) {
         if (TEST_THREADS.length > 1) {
-          expect(pendingPosts).to.have.length(TEST_THREADS.length - 1);
+          expect(pendingPosts).to.have.length(TEST_THREADS.length - 1 - 1); // 1 ifnored post
         } else {
           expect(pendingPosts).to.have.length(0);
         }
@@ -251,7 +253,7 @@ describe('030-process', () => {
         }
       );
 
-      expect(publishedPosts).to.have.length(TEST_THREADS.length + 1);
+      expect(publishedPosts).to.have.length(TEST_THREADS.length + 1 - 1); // 1 ignored post
 
       const post = publishedPosts[0];
 

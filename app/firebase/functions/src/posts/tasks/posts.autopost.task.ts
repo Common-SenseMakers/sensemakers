@@ -4,11 +4,12 @@ import { PLATFORM } from '../../@shared/types/types.user';
 import { logger } from '../../instances/logger';
 import { Services } from '../../instances/services';
 
+const DEBUG = false;
 export const AUTOPOST_POST_TASK = 'autopostPost';
 
 /** Sensitive (cannot be public) */
 export const autopostPostTask = async (req: Request, services: Services) => {
-  logger.debug(`autopostPost: postId: ${req.data.postId}`);
+  if (DEBUG) logger.debug(`autopostPost: postId: ${req.data.postId}`);
   const postId = req.data.postId as string;
   const platformIds = req.data.platformIds as PLATFORM[];
 
@@ -27,6 +28,10 @@ export const autopostPostTask = async (req: Request, services: Services) => {
       manager,
       true
     );
+
+    if (!post.authorId) {
+      throw new Error(`Post ${post.id} does not have an author`);
+    }
 
     await postsManager.publishPost(
       post,

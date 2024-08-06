@@ -73,7 +73,7 @@ export const textToHtml = (text: string) => {
     const truncatedUrl =
       noParametersUrl.length > 50 ? noParametersUrl.slice(0, 50) + '...' : '';
 
-    return `<a href="${url}">${truncatedUrl}</a>${endsWithPeriod ? '.' : ''}`;
+    return `<a href="${url}" target="_blank">${truncatedUrl}</a>${endsWithPeriod ? '.' : ''}`;
   });
 
   return html;

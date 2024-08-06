@@ -23,7 +23,7 @@ describe.skip('011-twitter refresh', () => {
 
   const services = getTestServices({
     time: 'mock',
-    twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
+    twitter: USE_REAL_TWITTER ? undefined : { publish: true, signup: true },
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
     emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
