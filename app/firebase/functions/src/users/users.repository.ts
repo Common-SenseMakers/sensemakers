@@ -1,4 +1,4 @@
-import { firestore } from 'firebase-admin';
+import { FieldValue } from 'firebase-admin/firestore';
 
 import { NotificationFreq } from '../@shared/types/types.notifications';
 import {
@@ -389,7 +389,7 @@ export class UsersRepository {
 
     manager.update(doc.ref, {
       [platformIds_property]: newPlatformIds,
-      [platform]: firestore.FieldValue.arrayRemove(details),
+      [platform]: FieldValue.arrayRemove(details),
     });
   }
 

@@ -195,6 +195,8 @@ export class PostsManager {
           account.user_id,
           manager
         );
+
+        return undefined;
       }
 
       throw new Error(err);
@@ -349,6 +351,10 @@ export class PostsManager {
                         account,
                         manager
                       );
+
+                    if (!platformPostsCreate) {
+                      return;
+                    }
 
                     /** Create the PlatformPosts */
                     const platformPostsCreated =
