@@ -10,9 +10,6 @@ export const getTestCredentials = (testUserAccountsStr: string) => {
     if (!testCredentials) {
       throw new Error('test acccounts undefined');
     }
-    if (testCredentials.length < 1) {
-      throw new Error('not enough twitter account credentials provided');
-    }
 
     return testCredentials as TestUserCredentials[];
   }
