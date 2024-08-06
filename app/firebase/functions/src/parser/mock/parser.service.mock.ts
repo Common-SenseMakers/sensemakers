@@ -55,8 +55,8 @@ export const getParserMock = (
 
   when(Mocked.parsePost(anything())).thenCall(
     async (post: ParsePostRequest<TopicsParams>) => {
-      const path = '../../firebase-py/functions/last_output.json';
-      if (fs.existsSync(path)) {
+      const path = process.env.PARSER_MOCK_FILE;
+      if (path && fs.existsSync(path)) {
         const jsonData = fs.readFileSync(path, 'utf8');
         logger.warn(`read parser data from file`, post);
         return JSON.parse(jsonData);
@@ -74,9 +74,11 @@ export const getParserMock = (
           mockedResult
         );
 
-      await new Promise((resolve) =>
-        setTimeout(resolve, 1 + Math.random() * 5000)
-      );
+      if (process.env.PARSER_MOCK_DELAY === 'true') {
+        await new Promise((resolve) =>
+          setTimeout(resolve, 1 + Math.random() * 5000)
+        );
+      }
       return mockedResult;
     }
   );

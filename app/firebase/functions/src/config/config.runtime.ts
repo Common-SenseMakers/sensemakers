@@ -78,5 +78,5 @@ export const MAGIC_ADMIN_SECRET = envRuntime.MAGIC_ADMIN_SECRET;
 
 export const USER_INIT_SETTINGS: UserSettings = {
   autopost: { [PLATFORM.Nanopub]: { value: AutopostOption.MANUAL } },
-  notificationFreq: NotificationFreq.Weekly,
+  notificationFreq: NotificationFreq.Daily,
 };

@@ -17,6 +17,7 @@ import { AUTOPOST_POST_TASK } from '../tasks/posts.autopost.task';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 
 const PREFIX = 'POST-UPDATED-HOOK';
+const DEBUG = false;
 
 // TODO: change interface to receive post as the after value and also send the previous one
 export const postUpdatedHook = async (
@@ -32,102 +33,126 @@ export const postUpdatedHook = async (
   const updateRef = db.collections.updates.doc(`post-${postId}`);
   const now = time.now();
 
-  logger.debug(`postUpdatedHook post-${postId}-${now}`, undefined, PREFIX);
+  if (DEBUG)
+    logger.debug(`postUpdatedHook post-${postId}-${now}`, undefined, PREFIX);
 
-  await db.run(async (manager) => {
-    manager.set(updateRef, { value: now });
-  });
+  await db.run(
+    async (manager) => {
+      manager.set(updateRef, { value: now });
+    },
+    undefined,
+    undefined,
+    `postUpdatedHook - ref ${postId}`
+  );
 
   /** Handle post create */
   if (postBefore === undefined) {
     // trigger parsePostTask
-    logger.debug(`triggerTask ${PARSE_POST_TASK}-${postId}`);
+    if (DEBUG) logger.debug(`triggerTask ${PARSE_POST_TASK}-${postId}`);
     await enqueueTask(PARSE_POST_TASK, { postId });
   }
 
   const activitiesCreated: ActivityEventBase[] = [];
 
   /** Create the activity elements */
-  const { wasParsed } = await db.run(async (manager) => {
-    /** detect parsed state change */
-    const wasParsed =
-      postBefore &&
-      postBefore.parsedStatus === AppPostParsedStatus.UNPROCESSED &&
-      post.parsedStatus === AppPostParsedStatus.PROCESSED;
+  const { wasParsed } = await db.run(
+    async (manager) => {
+      /** detect parsed state change */
+      const wasParsed =
+        postBefore &&
+        postBefore.parsedStatus === AppPostParsedStatus.UNPROCESSED &&
+        post.parsedStatus === AppPostParsedStatus.PROCESSED;
 
-    if (wasParsed) {
-      logger.debug(`wasParsed ${PARSE_POST_TASK}-${postId}`, undefined, PREFIX);
-      const event: ActivityEventCreate<PostActData> = {
-        type: ActivityType.PostParsed,
-        data: {
-          postId: post.id,
-        },
-        timestamp: time.now(),
-      };
+      if (wasParsed) {
+        if (DEBUG)
+          logger.debug(
+            `wasParsed ${PARSE_POST_TASK}-${postId}`,
+            undefined,
+            PREFIX
+          );
+        const event: ActivityEventCreate<PostActData> = {
+          type: ActivityType.PostParsed,
+          data: {
+            postId: post.id,
+          },
+          timestamp: time.now(),
+        };
 
-      const parsedActivity = activity.repo.create(event, manager);
-      activitiesCreated.push(parsedActivity);
-    }
+        const parsedActivity = activity.repo.create(event, manager);
+        activitiesCreated.push(parsedActivity);
+      }
 
-    // if was parsed and user has autopost, then also trigger autopost
-    const wasAutoposted =
-      postBefore &&
-      postBefore.republishedStatus === AppPostRepublishedStatus.PENDING &&
-      post.republishedStatus !== AppPostRepublishedStatus.PENDING;
+      // if was parsed and user has autopost, then also trigger autopost
+      const wasAutoposted =
+        postBefore &&
+        postBefore.republishedStatus === AppPostRepublishedStatus.PENDING &&
+        post.republishedStatus !== AppPostRepublishedStatus.PENDING;
 
-    if (wasAutoposted) {
-      logger.debug(
-        `wasAutoposted ${PARSE_POST_TASK}-${postId}`,
-        undefined,
-        PREFIX
-      );
-      const event: ActivityEventCreate<PostActData> = {
-        type: ActivityType.PostAutoposted,
-        data: {
-          postId: post.id,
-        },
-        timestamp: time.now(),
-      };
+      if (wasAutoposted) {
+        if (DEBUG)
+          logger.debug(
+            `wasAutoposted ${PARSE_POST_TASK}-${postId}`,
+            undefined,
+            PREFIX
+          );
+        const event: ActivityEventCreate<PostActData> = {
+          type: ActivityType.PostAutoposted,
+          data: {
+            postId: post.id,
+          },
+          timestamp: time.now(),
+        };
 
-      const autopostedActivity = activity.repo.create(event, manager);
-      activitiesCreated.push(autopostedActivity);
-    }
+        const autopostedActivity = activity.repo.create(event, manager);
+        activitiesCreated.push(autopostedActivity);
+      }
 
-    logger.debug(
-      `postUpdatedHook -${postId}`,
-      {
-        post,
-        wasAutoposted,
-        wasParsed,
-      },
-      PREFIX
-    );
+      if (DEBUG)
+        logger.debug(
+          `postUpdatedHook -${postId}`,
+          {
+            post,
+            wasAutoposted,
+            wasParsed,
+          },
+          PREFIX
+        );
 
-    return { wasParsed };
-  });
+      return { wasParsed };
+    },
+    undefined,
+    undefined,
+    `postUpdatedHook - wasParsed - wasAutoposted ${postId}`
+  );
 
   /** trigger Autopost*/
   if (wasParsed) {
-    const author = await db.run(async (manager) =>
-      users.repo.getUser(post.authorId, manager, true)
-    );
-    /** autopost when parsed, author has autopost enabled, and post detected as research using deterministic approach */
-    const autopostOnPlatforms = UsersHelper.getAutopostPlatformIds(
-      author,
-      post
-    );
+    const author = await db.run(async (manager) => {
+      return post.authorId
+        ? users.repo.getUser(post.authorId, manager, true)
+        : undefined;
+    });
 
-    if (autopostOnPlatforms.length > 0) {
-      logger.debug(
-        `trigger ${AUTOPOST_POST_TASK}-${postId}`,
-        { autopostOnPlatforms },
-        PREFIX
+    if (author) {
+      /** autopost when parsed, author has autopost enabled, and post detected as research using deterministic approach */
+      const autopostOnPlatforms = UsersHelper.getAutopostPlatformIds(
+        author,
+        post
       );
 
-      await enqueueTask(AUTOPOST_POST_TASK, {
-        postId,
-        platformIds: autopostOnPlatforms,
-      });
+      if (autopostOnPlatforms.length > 0) {
+        if (DEBUG)
+          logger.debug(
+            `trigger ${AUTOPOST_POST_TASK}-${postId}`,
+            { autopostOnPlatforms },
+            PREFIX
+          );
+
+        await enqueueTask(AUTOPOST_POST_TASK, {
+          postId,
+          platformIds: autopostOnPlatforms,
+        });
+      }
     }
   }
 

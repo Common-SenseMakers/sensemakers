@@ -42,7 +42,11 @@ export const ModalContent = (props: ModalContentProps) => {
 
   return (
     <Box id="page" style={{ flexGrow: 1, minHeight: '400px' }}>
-      <Box align="center" style={{ flexGrow: 1 }} justify="center">
+      <Box
+        align="center"
+        style={{ flexGrow: 1 }}
+        justify="start"
+        pad={{ top: '24px' }}>
         {icon ? <Box margin={{ bottom: '20px' }}>{icon}</Box> : <></>}
         <AppHeading level={props.type === 'small' ? 3 : 1}>{title}</AppHeading>
         <Box margin={{ top: '8px' }}>

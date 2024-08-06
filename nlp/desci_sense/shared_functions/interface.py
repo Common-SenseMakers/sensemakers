@@ -237,11 +237,10 @@ class RefMetadata(BaseModel):
         return "\n".join(result)
 
 
-# TODO fix default subject to be semantic post
 class RDFTriplet(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     subject: Union[Literal, URIRef] = Field(
-        default=URIRef("http://purl.org/nanopub/temp/mynanopub#assertion"),
+        default=URIRef("https://sense-nets.xyz/mySemanticPost"),
         description="Subject of the triplet",
     )
     predicate: Union[Literal, URIRef] = Field(description="Predicate of the triplet")

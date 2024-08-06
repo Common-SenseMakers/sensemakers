@@ -9,6 +9,7 @@ import {
   PlatformPost,
   PlatformPostCreate,
   PlatformPostCreated,
+  PlatformPostPosted,
   PlatformPostPublishOrigin,
   PlatformPostPublishStatus,
   PlatformPostSignerType,
@@ -74,6 +75,69 @@ export class PostsManager {
     return posts.flat();
   }
 
+  private initPlatformPost<T = any>(
+    platformId: PLATFORM,
+    fetchedPost: PlatformPostPosted<T>
+  ) {
+    const platformPost: PlatformPostCreate = {
+      platformId: platformId as PUBLISHABLE_PLATFORMS,
+      publishStatus: PlatformPostPublishStatus.PUBLISHED,
+      publishOrigin: PlatformPostPublishOrigin.FETCHED,
+      posted: fetchedPost,
+    };
+
+    return platformPost;
+  }
+
+  public async fetchPostFromPlatform(
+    userId: string,
+    platformId: PUBLISHABLE_PLATFORMS,
+    post_id: string,
+    manager: TransactionManager
+  ) {
+    const user = await this.users.repo.getUser(userId as string, manager, true);
+    const platform = this.platforms.get(platformId);
+
+    const account = UsersHelper.getAccount(user, platformId);
+    if (!account) {
+      throw new Error(`Account not found for platform ${platformId}`);
+    }
+
+    try {
+      const platformPost = await platform.get(post_id, account, manager);
+      const platformPostCreate = this.initPlatformPost(
+        platformId,
+        platformPost
+      );
+
+      const platformPostCreated = await this.processing.createPlatformPost(
+        platformPostCreate,
+        manager
+      );
+
+      if (!platformPostCreated) {
+        throw new Error(`PlatformPost already exists: ${post_id}`);
+      }
+
+      return platformPostCreated;
+    } catch (err: any) {
+      if (err.message.includes('Value passed for the token was invalid')) {
+        logger.error(
+          `Token error fetching from platform ${platformId}. Reset credentials`
+        );
+        await this.users.repo.removePlatformDetails(
+          platformId,
+          account.user_id,
+          manager
+        );
+
+        return { post: undefined };
+      }
+
+      throw new Error(err);
+    }
+  }
+
   private async fetchUserFromPlatform(
     platformId: PLATFORM,
     params: FetchParams,
@@ -89,45 +153,54 @@ export class PostsManager {
     );
 
     if (DEBUG) logger.debug(`Twitter Service - fetch ${platformId}`);
-
-    const fetchedPosts = await this.platforms.fetch(
-      platformId,
-      platformParams,
-      account,
-      manager
-    );
-
-    if (DEBUG)
-      logger.debug(
-        `fetchUser ${platformId} - platformPosts: ${fetchedPosts.platformPosts.length}`,
-        {
-          fetched: fetchedPosts,
-        }
+    try {
+      const fetchedPosts = await this.platforms.fetch(
+        platformId,
+        platformParams,
+        account,
+        manager
       );
 
-    const newFetchedDetails = await this.getNewFetchedStatus(
-      platformParams,
-      fetchedPosts.fetched
-    );
+      if (DEBUG)
+        logger.debug(
+          `fetchUser ${platformId} - platformPosts: ${fetchedPosts.platformPosts.length}`,
+          {
+            fetched: fetchedPosts,
+          }
+        );
 
-    await this.users.repo.setAccountFetched(
-      platformId,
-      account.user_id,
-      newFetchedDetails,
-      manager
-    );
+      const newFetchedDetails = await this.getNewFetchedStatus(
+        platformParams,
+        fetchedPosts.fetched
+      );
 
-    /** convert them into a PlatformPost */
-    return fetchedPosts.platformPosts.map((fetchedPost) => {
-      const platformPost: PlatformPostCreate = {
-        platformId: platformId as PUBLISHABLE_PLATFORMS,
-        publishStatus: PlatformPostPublishStatus.PUBLISHED,
-        publishOrigin: PlatformPostPublishOrigin.FETCHED,
-        posted: fetchedPost,
-      };
+      await this.users.repo.setAccountFetched(
+        platformId,
+        account.user_id,
+        newFetchedDetails,
+        manager
+      );
 
-      return platformPost;
-    });
+      /** convert them into a PlatformPost */
+      return fetchedPosts.platformPosts.map((fetchedPost) =>
+        this.initPlatformPost(platformId, fetchedPost)
+      );
+    } catch (err: any) {
+      if (err.message.includes('Value passed for the token was invalid')) {
+        logger.error(
+          `Token error fetching from platform ${platformId}. Reset credentials`
+        );
+        await this.users.repo.removePlatformDetails(
+          platformId,
+          account.user_id,
+          manager
+        );
+
+        return undefined;
+      }
+
+      throw new Error(err);
+    }
   }
 
   /**
@@ -279,6 +352,10 @@ export class PostsManager {
                         manager
                       );
 
+                    if (!platformPostsCreate) {
+                      return;
+                    }
+
                     /** Create the PlatformPosts */
                     const platformPostsCreated =
                       await this.processing.createPlatformPosts(
@@ -392,37 +469,47 @@ export class PostsManager {
   }
 
   async parsePost(postId: string) {
-    const shouldParse = await this.db.run(async (manager) => {
-      const post = await this.processing.posts.get(postId, manager, true);
-      if (post.parsingStatus === 'processing') {
-        logger.debug(`parsePost - already parsing ${postId}`);
-        return false;
-      }
+    const shouldParse = await this.db.run(
+      async (manager) => {
+        const post = await this.processing.posts.get(postId, manager, true);
+        if (post.parsingStatus === 'processing') {
+          if (DEBUG) logger.debug(`parsePost - already parsing ${postId}`);
+          return false;
+        }
 
-      logger.debug(`parsePost - marking as parsing ${postId}`);
-      await this.updatePost(
-        postId,
-        { parsingStatus: AppPostParsingStatus.PROCESSING },
-        manager
-      );
+        if (DEBUG) logger.debug(`parsePost - marking as parsing ${postId}`);
+        await this.updatePost(
+          postId,
+          { parsingStatus: AppPostParsingStatus.PROCESSING },
+          manager
+        );
 
-      return true;
-    });
+        return true;
+      },
+      undefined,
+      undefined,
+      `parsePost - shouldParse ${postId}`
+    );
 
     if (shouldParse) {
       /** then process */
-      await this.db.run(async (manager) => {
-        try {
-          await this._parsePost(postId, manager);
-        } catch (err: any) {
-          logger.error(`Error parsing post ${postId}`, err);
-          await this.updatePost(
-            postId,
-            { parsingStatus: AppPostParsingStatus.ERRORED },
-            manager
-          );
-        }
-      });
+      await this.db.run(
+        async (manager) => {
+          try {
+            await this._parsePost(postId, manager);
+          } catch (err: any) {
+            logger.error(`Error parsing post ${postId}`, err);
+            await this.updatePost(
+              postId,
+              { parsingStatus: AppPostParsingStatus.ERRORED },
+              manager
+            );
+          }
+        },
+        undefined,
+        undefined,
+        `parsePost - parsing ${postId}`
+      );
     }
   }
 
@@ -706,10 +793,11 @@ export class PostsManager {
       appPosts.map((post) => this.appendMirrors(post))
     );
 
-    logger.debug(
-      `getUserProfile query for user ${username} has ${appPosts.length} results for query params: `,
-      { platformId, username, labelsUris, fetchParams }
-    );
+    if (DEBUG)
+      logger.debug(
+        `getUserProfile query for user ${username} has ${appPosts.length} results for query params: `,
+        { platformId, username, labelsUris, fetchParams }
+      );
 
     return postsFull;
   }

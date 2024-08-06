@@ -10,6 +10,7 @@ import {
   NP_PUBLISH_RSA_PUBLIC_KEY,
   OUR_EXPIRES_IN,
   OUR_TOKEN_SECRET,
+  TEST_USER_ACCOUNTS,
   TWITTER_CLIENT_ID,
   TWITTER_CLIENT_SECRET,
   USE_REAL_EMAIL,
@@ -78,12 +79,12 @@ export const createServices = () => {
     clientSecret: TWITTER_CLIENT_SECRET.value(),
   });
 
-  const testCredentials = getTestCredentials();
+  const testCredentials = getTestCredentials(TEST_USER_ACCOUNTS.value());
   const testUser = testCredentials && testCredentials[0];
 
   const twitter = getTwitterMock(
     _twitter,
-    USE_REAL_TWITTERX.value() ? 'real' : 'mock-signup',
+    USE_REAL_TWITTERX.value() ? undefined : { signup: true },
     testUser
   );
 

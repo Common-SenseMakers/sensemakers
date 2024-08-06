@@ -3,13 +3,12 @@ import { EditorProps } from '@nytimes/react-prosemirror/dist/types/hooks/useEdit
 import { Box } from 'grommet';
 import { baseKeymap, splitBlock } from 'prosemirror-commands';
 import { keymap } from 'prosemirror-keymap';
-import { DOMParser, DOMSerializer } from 'prosemirror-model';
+import { DOMParser } from 'prosemirror-model';
 import { Schema } from 'prosemirror-model';
 import { EditorState } from 'prosemirror-state';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useThemeContext } from '../ui-components/ThemedApp';
 import { EditorAutoFocus } from './editor.autofocus';
 import placeholder from './placeholder.plugin';
 import { textToHtml } from './post.content.format';

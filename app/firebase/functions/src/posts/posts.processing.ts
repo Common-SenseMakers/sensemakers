@@ -22,6 +22,7 @@ import {
   PLATFORM,
 } from '../@shared/types/types.user';
 import { mapStoreElements, parseRDF } from '../@shared/utils/n3.utils';
+import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
 import { PlatformsService } from '../platforms/platforms.service';
@@ -90,7 +91,7 @@ export class PostsProcessing {
       PLATFORM.Twitter,
       user_id,
       manager,
-      true
+      false
     );
 
     /** create AppPost */
@@ -128,6 +129,11 @@ export class PostsProcessing {
   /** Create and store all platform posts for one post */
   async createOrUpdatePostDrafts(postId: string, manager: TransactionManager) {
     const appPostFull = await this.getPostFull(postId, manager, true);
+
+    // posts without authors does not have mirrors
+    if (!appPostFull.authorId) {
+      return;
+    }
 
     const user = await this.users.repo.getUser(
       appPostFull.authorId,
@@ -280,7 +286,7 @@ export class PostsProcessing {
     };
 
     /** Create the post */
-    const post = this.posts.create(postCreate, manager);
+    const post = this.posts.create(removeUndefined(postCreate), manager);
     return post;
   }
 

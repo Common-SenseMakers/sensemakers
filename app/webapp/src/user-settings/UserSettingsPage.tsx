@@ -54,7 +54,8 @@ export const UserSettingsPage = () => {
   const [isSetting, setIsSetting] = useState(false);
   const { disconnect } = useDisconnectContext();
 
-  const { connect: connectOrcid } = useOrcidContext();
+  const { connect: connectOrcid, connecting: connectingOrcid } =
+    useOrcidContext();
 
   const { reviewAutopostIntention, setReviewAutopostIntention } =
     useAutopostInviteContext();
@@ -116,16 +117,6 @@ export const UserSettingsPage = () => {
       onBack={() => setShowSettingsPage(undefined)}
       content={
         <Box>
-          <SettingsOptionSelector
-            options={[
-              {
-                title: t(I18Keys.publishingAutomationOpt1Title),
-                description: t(I18Keys.publishingAutomationOpt1Desc),
-                id: AutopostOption.AI,
-                optionSelected: (id) => setAutopost(id as AutopostOption),
-                selected: currentAutopost === AutopostOption.AI,
-              },
-            ]}></SettingsOptionSelector>
           <SettingsOptionSelector
             options={[
               {
@@ -308,7 +299,8 @@ export const UserSettingsPage = () => {
           onButtonClicked={() => connectOrcid('/settings')}
           buttonText="connect"
           username={orcid ? `@${orcid.user_id}` : '- not connected -'}
-          connected={orcid !== undefined}></PlatformSection>
+          connected={orcid !== undefined}
+          connecting={connectingOrcid}></PlatformSection>
 
         <Box margin={{ vertical: '36px' }} pad={{ horizontal: '16px' }}>
           <AppButton
