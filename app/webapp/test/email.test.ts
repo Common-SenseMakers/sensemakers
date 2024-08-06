@@ -8,7 +8,7 @@ import {
   getMockAutoPublishedPost,
   getMockPendingPost,
   getMockPublishedPost,
-} from '../src/mocks/posts.mock';
+} from '../src/shared/mocks/posts.mock';
 import { NotificationFreq } from '../src/shared/types/types.notifications';
 
 const pkg = require('../build/index.js');
