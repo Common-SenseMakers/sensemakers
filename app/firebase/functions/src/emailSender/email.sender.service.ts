@@ -1,7 +1,7 @@
 import { Message, ServerClient } from 'postmark';
 
 import { AppPostFull } from '../@shared/types/types.posts';
-import { AppUser, PLATFORM } from '../@shared/types/types.user';
+import { AppUser } from '../@shared/types/types.user';
 import { RenderEmailFunction } from '../@shared/types/types.user';
 import { APP_URL, EMAIL_SENDER_FROM } from '../config/config.runtime';
 import { logger } from '../instances/logger';
@@ -59,7 +59,6 @@ export class EmailSenderService {
     const { html, plainText, subject } = renderEmail(
       posts,
       user.settings.notificationFreq,
-      user.settings.autopost[PLATFORM.Nanopub].value,
       APP_URL.value()
     );
 
