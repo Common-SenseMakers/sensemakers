@@ -314,7 +314,7 @@ describe('nanopublication format', () => {
       cleanPublicKey(rsaKeys2),
       profile1.ethToRsaSignature,
       profile2.ethToRsaSignature,
-      published.info().published
+      { latest: published.info().uri, root: published.info().uri }
     );
 
     if (!updatedAppIntroNp) {
