@@ -19,14 +19,7 @@ export const RefCard = (props: {
   const titleTruncated = props.title && truncate(props.title, 50);
   const { constants } = useThemeContext();
 
-  if (!titleTruncated && !props.description) {
-    const urlTruncated = truncate(props.url, 50);
-    return (
-      <Anchor href={props.url} target="_blank">
-        {urlTruncated}
-      </Anchor>
-    );
-  }
+  const urlTruncated = truncate(props.url, 50);
 
   const onCardClicked = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>

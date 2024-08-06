@@ -36,7 +36,6 @@ import {
   notifyUserTask,
   triggerSendNotifications,
 } from './notifications/notification.task';
-import { getTestCredentials } from './platforms/twitter/mock/test.users';
 import { platformPostUpdatedHook } from './posts/hooks/platformPost.updated.hook';
 import { postUpdatedHook } from './posts/hooks/post.updated.hook';
 import {
