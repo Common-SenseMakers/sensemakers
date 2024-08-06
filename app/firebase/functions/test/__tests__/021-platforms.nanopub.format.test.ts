@@ -21,6 +21,7 @@ import { getMockPost } from '../utils/posts.utils';
 import { getMockedUser } from '../utils/users.mock';
 
 const DEBUG = false;
+const PUBLISH = true;
 
 describe('nanopublication format', () => {
   it('publishes a correctly formatted mock nanopub to the test server and updates it', async () => {
@@ -82,14 +83,26 @@ describe('nanopublication format', () => {
       throw new Error('Nanopub server not defined');
     }
 
-    const published: Nanopub = await signed.publish(undefined, nanopubServer);
+    const published: Nanopub = await (async () => {
+      if (!PUBLISH) {
+        return signed;
+      }
+      return await signed.publish(undefined, nanopubServer);
+    })();
 
     expect(published).to.not.be.undefined;
-    if (DEBUG) logger.debug('published at: ', published.info().published);
-    const fetchedPub = (await Nanopub.fetch(
-      published.info().published
-    )) as Nanopub;
-    expect(fetchedPub).to.not.be.undefined;
+    if (DEBUG)
+      logger.debug(
+        'published at: ',
+        published.info().published,
+        published.rdf()
+      );
+    if (PUBLISH) {
+      const fetchedPub = (await Nanopub.fetch(
+        published.info().published
+      )) as Nanopub;
+      expect(fetchedPub).to.not.be.undefined;
+    }
 
     /** update the nanopublication */
     const updatedPost = getMockPost({
@@ -126,17 +139,25 @@ describe('nanopublication format', () => {
       ''
     );
 
-    const updatedPublished: Nanopub = await updatedSigned.publish(
-      undefined,
-      nanopubServer
-    );
+    const updatedPublished: Nanopub = await (async () => {
+      if (!PUBLISH) {
+        return updatedSigned;
+      }
+      return await updatedSigned.publish(undefined, nanopubServer);
+    })();
     expect(updatedPublished).to.not.be.undefined;
     if (DEBUG)
-      logger.debug('update published at: ', updatedPublished.info().published);
-    const fetchedUpdatedPub = (await Nanopub.fetch(
-      updatedPublished.info().published
-    )) as Nanopub;
-    expect(fetchedUpdatedPub).to.not.be.undefined;
+      logger.debug(
+        'update published at: ',
+        updatedPublished.info().published,
+        updatedPublished.rdf()
+      );
+    if (PUBLISH) {
+      const fetchedUpdatedPub = (await Nanopub.fetch(
+        updatedPublished.info().published
+      )) as Nanopub;
+      expect(fetchedUpdatedPub).to.not.be.undefined;
+    }
   });
 
   it('publishes a correctly formatted mock intronanopub to the test server', async () => {
@@ -159,14 +180,26 @@ describe('nanopublication format', () => {
       throw new Error('Nanopub server not defined');
     }
 
-    const published: Nanopub = await signed.publish(undefined, nanopubServer);
+    const published: Nanopub = await (async () => {
+      if (!PUBLISH) {
+        return signed;
+      }
+      return await signed.publish(undefined, nanopubServer);
+    })();
 
     expect(published).to.not.be.undefined;
-    if (DEBUG) logger.debug('published at: ', published.info().published);
-    const fetchedPub = (await Nanopub.fetch(
-      published.info().published
-    )) as Nanopub;
-    expect(fetchedPub).to.not.be.undefined;
+    if (DEBUG)
+      logger.debug(
+        'published at: ',
+        published.info().published,
+        published.rdf()
+      );
+    if (PUBLISH) {
+      const fetchedPub = (await Nanopub.fetch(
+        published.info().published
+      )) as Nanopub;
+      expect(fetchedPub).to.not.be.undefined;
+    }
 
     /** update the intro nanopublication with twitter info */
     const updatedIntroNanopub = await buildIntroNp(
@@ -199,18 +232,26 @@ describe('nanopublication format', () => {
     );
     expect(updatedSigned).to.not.be.undefined;
 
-    const updatedPublished: Nanopub = await updatedSigned.publish(
-      undefined,
-      nanopubServer
-    );
+    const updatedPublished: Nanopub = await (() => {
+      if (!PUBLISH) {
+        return updatedSigned;
+      }
+      return updatedSigned.publish(undefined, nanopubServer);
+    })();
 
     expect(updatedPublished).to.not.be.undefined;
     if (DEBUG)
-      logger.debug('update published at: ', updatedPublished.info().published);
-    const updatedFetchedPub = (await Nanopub.fetch(
-      updatedPublished.info().published
-    )) as Nanopub;
-    expect(updatedFetchedPub).to.not.be.undefined;
+      logger.debug(
+        'update published at: ',
+        updatedPublished.info().published,
+        updatedPublished.rdf()
+      );
+    if (PUBLISH) {
+      const updatedFetchedPub = (await Nanopub.fetch(
+        updatedPublished.info().published
+      )) as Nanopub;
+      expect(updatedFetchedPub).to.not.be.undefined;
+    }
 
     /** update the intro nanopublication with orcid id */
     const orcidUpdatedIntroNanopub = await buildIntroNp(
@@ -244,25 +285,26 @@ describe('nanopublication format', () => {
     );
     expect(orcidUpdatedSigned).to.not.be.undefined;
 
-    const orcidUpdatedPublished: Nanopub = await orcidUpdatedSigned.publish(
-      undefined,
-      nanopubServer
-    );
+    const orcidUpdatedPublished: Nanopub = await (() => {
+      if (!PUBLISH) {
+        return orcidUpdatedSigned;
+      }
+      return orcidUpdatedSigned.publish(undefined, nanopubServer);
+    })();
 
     expect(orcidUpdatedPublished).to.not.be.undefined;
     if (DEBUG)
       logger.debug(
         'orcid update published at: ',
-        orcidUpdatedPublished.info().published
+        orcidUpdatedPublished.info().published,
+        orcidUpdatedPublished.rdf()
       );
-    console.log(
-      'orcid update published at: ',
-      orcidUpdatedPublished.info().published
-    );
-    const orcidUpdatedFetchedPub = (await Nanopub.fetch(
-      orcidUpdatedPublished.info().published
-    )) as Nanopub;
-    expect(orcidUpdatedFetchedPub).to.not.be.undefined;
+    if (PUBLISH) {
+      const orcidUpdatedFetchedPub = (await Nanopub.fetch(
+        orcidUpdatedPublished.info().published
+      )) as Nanopub;
+      expect(orcidUpdatedFetchedPub).to.not.be.undefined;
+    }
   });
 
   it('publishes a correctly formatted mock app intro nanopub to the test server', async () => {
@@ -297,14 +339,26 @@ describe('nanopublication format', () => {
       throw new Error('Nanopub server not defined');
     }
 
-    const published: Nanopub = await signed.publish(undefined, nanopubServer);
+    const published: Nanopub = await (async () => {
+      if (!PUBLISH) {
+        return signed;
+      }
+      return await signed.publish(undefined, nanopubServer);
+    })();
 
     expect(published).to.not.be.undefined;
-    if (DEBUG) logger.debug('published at: ', published.info().published);
-    const fetchedPub = (await Nanopub.fetch(
-      published.info().published
-    )) as Nanopub;
-    expect(fetchedPub).to.not.be.undefined;
+    if (DEBUG)
+      logger.debug(
+        'published at: ',
+        published.info().published,
+        published.rdf()
+      );
+    if (PUBLISH) {
+      const fetchedPub = (await Nanopub.fetch(
+        published.info().published
+      )) as Nanopub;
+      expect(fetchedPub).to.not.be.undefined;
+    }
 
     /** update the intro nanopublication */
     const updatedAppIntroNp = await buildAppIntroNp(
@@ -328,17 +382,25 @@ describe('nanopublication format', () => {
     );
     expect(updatedSigned).to.not.be.undefined;
 
-    const updatedPublished: Nanopub = await updatedSigned.publish(
-      undefined,
-      nanopubServer
-    );
+    const updatedPublished: Nanopub = await (() => {
+      if (!PUBLISH) {
+        return updatedSigned;
+      }
+      return updatedSigned.publish(undefined, nanopubServer);
+    })();
 
     expect(updatedPublished).to.not.be.undefined;
     if (DEBUG)
-      logger.debug('update published at: ', updatedPublished.info().published);
-    const updatedFetchedPub = (await Nanopub.fetch(
-      updatedPublished.info().published
-    )) as Nanopub;
-    expect(updatedFetchedPub).to.not.be.undefined;
+      logger.debug(
+        'update published at: ',
+        updatedPublished.info().published,
+        updatedPublished.rdf()
+      );
+    if (PUBLISH) {
+      const updatedFetchedPub = (await Nanopub.fetch(
+        updatedPublished.info().published
+      )) as Nanopub;
+      expect(updatedFetchedPub).to.not.be.undefined;
+    }
   });
 });
