@@ -64,6 +64,10 @@ describe('031 test parse', () => {
 
       const post = await fetchPostInTests(user.userId, post_id, services);
 
+      if (!post) {
+        throw new Error('post undefined');
+      }
+
       const parsedPost = await postsManager.getPost(post.id, true);
       expect(parsedPost).to.not.be.undefined;
       expect(parsedPost.parsingStatus).to.equal(AppPostParsingStatus.IDLE);

@@ -24,6 +24,7 @@ import {
   EMAIL_SENDER_FROM,
   IS_EMULATOR,
   MONTHLY_NOTIFICATION_PERIOD,
+  TEST_USER_ACCOUNTS,
   WEEKLY_NOTIFICATION_PERIOD,
 } from './config/config.runtime';
 import { envDeploy } from './config/typedenv.deploy';
@@ -311,7 +312,7 @@ if (IS_EMULATOR) {
     const params = request.query;
     const text = params.text || 'test tweet';
 
-    const testCredentials = getTestCredentials();
+    const testCredentials = getTestCredentials(TEST_USER_ACCOUNTS.value());
     if (!testCredentials) {
       throw new Error('test credentials not found');
     }

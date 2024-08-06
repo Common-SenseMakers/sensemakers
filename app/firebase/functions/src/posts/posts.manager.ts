@@ -103,19 +103,39 @@ export class PostsManager {
       throw new Error(`Account not found for platform ${platformId}`);
     }
 
-    const platformPost = await platform.get(post_id, account, manager);
-    const platformPostCreate = this.initPlatformPost(platformId, platformPost);
+    try {
+      const platformPost = await platform.get(post_id, account, manager);
+      const platformPostCreate = this.initPlatformPost(
+        platformId,
+        platformPost
+      );
 
-    const platformPostCreated = await this.processing.createPlatformPost(
-      platformPostCreate,
-      manager
-    );
+      const platformPostCreated = await this.processing.createPlatformPost(
+        platformPostCreate,
+        manager
+      );
 
-    if (!platformPostCreated) {
-      throw new Error(`PlatformPost already exists: ${post_id}`);
+      if (!platformPostCreated) {
+        throw new Error(`PlatformPost already exists: ${post_id}`);
+      }
+
+      return platformPostCreated;
+    } catch (err: any) {
+      if (err.message.includes('Value passed for the token was invalid')) {
+        logger.error(
+          `Token error fetching from platform ${platformId}. Reset credentials`
+        );
+        await this.users.repo.removePlatformDetails(
+          platformId,
+          account.user_id,
+          manager
+        );
+
+        return { post: undefined };
+      }
+
+      throw new Error(err);
     }
-
-    return platformPostCreated;
   }
 
   private async fetchUserFromPlatform(
@@ -133,38 +153,52 @@ export class PostsManager {
     );
 
     if (DEBUG) logger.debug(`Twitter Service - fetch ${platformId}`);
-
-    const fetchedPosts = await this.platforms.fetch(
-      platformId,
-      platformParams,
-      account,
-      manager
-    );
-
-    if (DEBUG)
-      logger.debug(
-        `fetchUser ${platformId} - platformPosts: ${fetchedPosts.platformPosts.length}`,
-        {
-          fetched: fetchedPosts,
-        }
+    try {
+      const fetchedPosts = await this.platforms.fetch(
+        platformId,
+        platformParams,
+        account,
+        manager
       );
 
-    const newFetchedDetails = await this.getNewFetchedStatus(
-      platformParams,
-      fetchedPosts.fetched
-    );
+      if (DEBUG)
+        logger.debug(
+          `fetchUser ${platformId} - platformPosts: ${fetchedPosts.platformPosts.length}`,
+          {
+            fetched: fetchedPosts,
+          }
+        );
 
-    await this.users.repo.setAccountFetched(
-      platformId,
-      account.user_id,
-      newFetchedDetails,
-      manager
-    );
+      const newFetchedDetails = await this.getNewFetchedStatus(
+        platformParams,
+        fetchedPosts.fetched
+      );
 
-    /** convert them into a PlatformPost */
-    return fetchedPosts.platformPosts.map((fetchedPost) =>
-      this.initPlatformPost(platformId, fetchedPost)
-    );
+      await this.users.repo.setAccountFetched(
+        platformId,
+        account.user_id,
+        newFetchedDetails,
+        manager
+      );
+
+      /** convert them into a PlatformPost */
+      return fetchedPosts.platformPosts.map((fetchedPost) =>
+        this.initPlatformPost(platformId, fetchedPost)
+      );
+    } catch (err: any) {
+      if (err.message.includes('Value passed for the token was invalid')) {
+        logger.error(
+          `Token error fetching from platform ${platformId}. Reset credentials`
+        );
+        await this.users.repo.removePlatformDetails(
+          platformId,
+          account.user_id,
+          manager
+        );
+      }
+
+      throw new Error(err);
+    }
   }
 
   /**
