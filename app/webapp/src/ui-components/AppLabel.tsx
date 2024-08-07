@@ -57,7 +57,7 @@ export const AppLabel = (
         {props.showClose ? (
           <AppButton margin={{ left: '8px' }} plain onClick={() => remove()}>
             <Box justify="center">
-              <Close color={colors.font} size="small"></Close>
+              <Close color={colors.font} size={'12px'}></Close>
             </Box>
           </AppButton>
         ) : (

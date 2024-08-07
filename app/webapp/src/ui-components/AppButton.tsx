@@ -46,7 +46,7 @@ export const AppButton = (props: IButton & { isLoading?: boolean }) => {
           fontStyle: 'normal',
           fontWeight: 500,
           padding: !props.plain ? '6px 12px' : '0px',
-          minHeight: '42px',
+          minHeight: !props.plain ? '42px' : 'auto',
           ...props.style,
         }}
       />
