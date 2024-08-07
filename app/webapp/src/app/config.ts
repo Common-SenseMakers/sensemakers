@@ -13,3 +13,5 @@ export const MAGIC_API_KEY = 'pk_live_A603B0287DAF3C97';
 
 export const NANOPUB_EXPLORER_SERVER = process.env.NANOPUB_EXPLORER_SERVER;
 export const BUILD_ID = process.env.REACT_APP_VERSION;
+
+export const SUPPORT_EMAIL_ADDRESS = 'support@sense-nets.xyz';

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { AppModalStandard } from '../app/AppInfoModal';
+import { AppModalStandard } from '../app/AppModalStandard';
 import { CelebrateIcon } from '../app/icons/CelebrateIcon';
 import { ClearIcon } from '../app/icons/ClearIcon';
 import { SendIcon } from '../app/icons/SendIcon';
@@ -177,11 +177,6 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
 
     if (action === PublishPostAction.None) {
       setReviewedPublished(true);
-      return;
-    }
-
-    if (action === PublishPostAction.openNanopublication) {
-      openNanopublication();
       return;
     }
 
@@ -394,7 +389,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
           primaryButton: {
             disabled: nextPostId === undefined,
             label: t(I18Keys.nextPost),
-            onClick: () => openNextPost(),
+            onClick: () => publishedModalClosed(PublishPostAction.nextPost),
           },
           secondaryButton: {
             disabled: isUpdating,

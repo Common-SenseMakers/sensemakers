@@ -25,8 +25,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ORCID_API_URL: () => (/* binding */ ORCID_API_URL),
 /* harmony export */   ORCID_CLIENT_ID: () => (/* binding */ ORCID_CLIENT_ID),
 /* harmony export */   ORCID_REDIRECT_URL: () => (/* binding */ ORCID_REDIRECT_URL),
+/* harmony export */   SUPPORT_EMAIL_ADDRESS: () => (/* binding */ SUPPORT_EMAIL_ADDRESS),
 /* harmony export */   TWITTER_API_URL: () => (/* binding */ TWITTER_API_URL),
-/* harmony export */   TWITTER_CLIENT_ID: () => (/* binding */ TWITTER_CLIENT_ID),
 /* harmony export */   WALLETCONNECT_PROJECT_ID: () => (/* binding */ WALLETCONNECT_PROJECT_ID)
 /* harmony export */ });
 var FUNCTIONS_BASE = ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).FUNCTIONS_BASE;
@@ -35,11 +35,11 @@ var ORCID_API_URL = 'https://orcid.org';
 var APP_URL = ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).APP_URL;
 var ORCID_REDIRECT_URL = APP_URL;
 var TWITTER_API_URL = 'https://api.twitter.com';
-var TWITTER_CLIENT_ID = ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).TWITTER_CLIENT_ID;
 var WALLETCONNECT_PROJECT_ID = 'c12fdc701fd336cf8dc059f6784906bc';
 var MAGIC_API_KEY = 'pk_live_A603B0287DAF3C97';
 var NANOPUB_EXPLORER_SERVER = ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).NANOPUB_EXPLORER_SERVER;
 var BUILD_ID = ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).REACT_APP_VERSION;
+var SUPPORT_EMAIL_ADDRESS = 'support@sense-nets.xyz';
 
 /***/ }),
 
@@ -110,28 +110,29 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   EmailTemplate: () => (/* binding */ EmailTemplate)
 /* harmony export */ });
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/react/jsx-runtime.js");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__("./node_modules/@react-email/html/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__("./node_modules/@react-email/head/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__("./node_modules/@react-email/preview/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__("./node_modules/@react-email/body/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__("./node_modules/@react-email/container/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__("./node_modules/@react-email/img/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__("./node_modules/@react-email/row/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__("./node_modules/@react-email/heading/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__("./node_modules/@react-email/section/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__("./node_modules/@react-email/button/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__("./node_modules/@react-email/text/dist/index.mjs");
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__("./node_modules/@react-email/markdown/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__("./node_modules/@react-email/html/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__("./node_modules/@react-email/head/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__("./node_modules/@react-email/preview/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__("./node_modules/@react-email/body/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__("./node_modules/@react-email/container/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__("./node_modules/@react-email/img/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__("./node_modules/@react-email/row/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__("./node_modules/@react-email/heading/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__("./node_modules/@react-email/section/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__("./node_modules/@react-email/button/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__("./node_modules/@react-email/text/dist/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__("./node_modules/@react-email/markdown/dist/index.mjs");
 /* harmony import */ var i18next__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/i18next/dist/esm/i18next.js");
 /* harmony import */ var _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/i18n/i18n.ts");
-/* harmony import */ var _route_names__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./src/route.names.ts");
-/* harmony import */ var _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./src/shared/types/types.notifications.ts");
-/* harmony import */ var _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./src/shared/types/types.posts.ts");
-/* harmony import */ var _shared_types_types_user__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./src/shared/types/types.user.ts");
-/* harmony import */ var _EmailRow__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__("./src/email/EmailRow.tsx");
-/* harmony import */ var _PostCardEmail__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__("./src/email/PostCardEmail.tsx");
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__("./src/email/constants.ts");
-/* harmony import */ var _email_styles__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__("./src/email/email.styles.ts");
+/* harmony import */ var _post_posts_helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./src/post/posts.helper.ts");
+/* harmony import */ var _route_names__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./src/route.names.ts");
+/* harmony import */ var _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./src/shared/types/types.notifications.ts");
+/* harmony import */ var _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./src/shared/types/types.posts.ts");
+/* harmony import */ var _shared_types_types_user__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__("./src/shared/types/types.user.ts");
+/* harmony import */ var _EmailRow__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__("./src/email/EmailRow.tsx");
+/* harmony import */ var _PostCardEmail__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__("./src/email/PostCardEmail.tsx");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__("./src/email/constants.ts");
+/* harmony import */ var _email_styles__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__("./src/email/email.styles.ts");
 var __assign = undefined && undefined.__assign || function () {
   __assign = Object.assign || function (t) {
     for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -154,24 +155,30 @@ var __assign = undefined && undefined.__assign || function () {
 
 
 
+
 var EmailTemplate = function (_a) {
   var posts = _a.posts,
     notificationFrequency = _a.notificationFrequency,
-    autopostOption = _a.autopostOption,
     appUrl = _a.appUrl;
-  var emailSettingsLink = "".concat(appUrl).concat(_route_names__WEBPACK_IMPORTED_MODULE_3__.AbsoluteRoutes.Settings);
-  var allPostsLink = "".concat(appUrl).concat(_route_names__WEBPACK_IMPORTED_MODULE_3__.AbsoluteRoutes.App);
-  var reviewPostsLink = "".concat(allPostsLink).concat(_shared_types_types_posts__WEBPACK_IMPORTED_MODULE_5__.PostsQueryStatus.PENDING);
-  var ignoredPostsLink = "".concat(allPostsLink).concat(_shared_types_types_posts__WEBPACK_IMPORTED_MODULE_5__.PostsQueryStatus.IGNORED);
-  var publishedPostsLink = "".concat(allPostsLink).concat(_shared_types_types_posts__WEBPACK_IMPORTED_MODULE_5__.PostsQueryStatus.PUBLISHED);
-  var automationSettingsLink = "".concat(appUrl).concat(_route_names__WEBPACK_IMPORTED_MODULE_3__.AbsoluteRoutes.Settings);
+  var pendingPosts = posts.filter(function (post) {
+    return post.reviewedStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_6__.AppPostReviewStatus.PENDING;
+  });
+  var publishedPosts = posts.filter(function (post) {
+    return (0,_post_posts_helper__WEBPACK_IMPORTED_MODULE_3__.getPostStatuses)(post).published;
+  });
+  var emailSettingsLink = new URL(_route_names__WEBPACK_IMPORTED_MODULE_4__.AbsoluteRoutes.Settings, appUrl).toString();
+  var allPostsLink = new URL(_route_names__WEBPACK_IMPORTED_MODULE_4__.AbsoluteRoutes.App, appUrl).toString();
+  var reviewPostsLink = new URL(_shared_types_types_posts__WEBPACK_IMPORTED_MODULE_6__.PostsQueryStatus.PENDING, allPostsLink).toString();
+  var ignoredPostsLink = new URL(_shared_types_types_posts__WEBPACK_IMPORTED_MODULE_6__.PostsQueryStatus.IGNORED, allPostsLink).toString();
+  var publishedPostsLink = new URL(_shared_types_types_posts__WEBPACK_IMPORTED_MODULE_6__.PostsQueryStatus.PUBLISHED, allPostsLink).toString();
+  var automationSettingsLink = new URL(_route_names__WEBPACK_IMPORTED_MODULE_4__.AbsoluteRoutes.Settings, appUrl).toString();
   var headerTimeframeKey = function () {
     switch (notificationFrequency) {
-      case _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_4__.NotificationFreq.Daily:
+      case _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_5__.NotificationFreq.Daily:
         return _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailHeaderDailyNotificationTimeframe;
-      case _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_4__.NotificationFreq.Weekly:
+      case _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_5__.NotificationFreq.Weekly:
         return _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailHeaderWeeklyNotificationTimeframe;
-      case _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_4__.NotificationFreq.Monthly:
+      case _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_5__.NotificationFreq.Monthly:
         return _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailHeaderMonthlyNotificationTimeframe;
       default:
         return _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailHeaderDailyNotificationTimeframe;
@@ -179,21 +186,48 @@ var EmailTemplate = function (_a) {
   }();
   var footerTimeframeKey = function () {
     switch (notificationFrequency) {
-      case _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_4__.NotificationFreq.Daily:
+      case _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_5__.NotificationFreq.Daily:
         return _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailFooterDailyNotificationTimeframe;
-      case _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_4__.NotificationFreq.Weekly:
+      case _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_5__.NotificationFreq.Weekly:
         return _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailFooterWeeklyNotificationTimeframe;
-      case _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_4__.NotificationFreq.Monthly:
+      case _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_5__.NotificationFreq.Monthly:
         return _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailFooterMonthlyNotificationTimeframe;
       default:
         return _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailFooterDailyNotificationTimeframe;
     }
   }();
   var _b = function () {
-      if (autopostOption === _shared_types_types_user__WEBPACK_IMPORTED_MODULE_6__.AutopostOption.MANUAL) {
+      if (pendingPosts.length > 0 && publishedPosts.length > 0) {
         return {
-          header: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.recommendedNanopubEmailHeader, {
-            count: posts.length,
+          previewHeader: "".concat((0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.recommendedNanopubEmailHeader, {
+            count: pendingPosts.length,
+            timeframe: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(headerTimeframeKey)
+          }), " & ").concat((0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.publishedNanopubEmailHeader, {
+            count: publishedPosts.length,
+            timeframe: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(headerTimeframeKey)
+          })),
+          footer: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailFooter, {
+            timeframe: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(footerTimeframeKey),
+            emailSettingsLink: emailSettingsLink,
+            ignoredPostsLink: ignoredPostsLink,
+            publishedPostsLink: publishedPostsLink
+          })
+        };
+      } else if (pendingPosts.length === 0) {
+        return {
+          previewHeader: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.publishedNanopubEmailHeader, {
+            count: publishedPosts.length,
+            timeframe: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(headerTimeframeKey)
+          }),
+          footer: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.publishedNanopubEmailFooter, {
+            automationSettingsLink: automationSettingsLink,
+            publishedPostsLink: publishedPostsLink
+          })
+        };
+      } else {
+        return {
+          previewHeader: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.recommendedNanopubEmailHeader, {
+            count: pendingPosts.length,
             timeframe: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(headerTimeframeKey)
           }),
           footer: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.recommendedNanopubEmailFooter, {
@@ -202,101 +236,156 @@ var EmailTemplate = function (_a) {
             ignoredPostsLink: ignoredPostsLink
           })
         };
-      } else {
-        return {
-          header: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.publishedNanopubEmailHeader, {
-            count: posts.length,
-            timeframe: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(headerTimeframeKey)
-          }),
-          footer: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.publishedNanopubEmailFooter, {
-            automationSettingsLink: automationSettingsLink,
-            publishedPostsLink: publishedPostsLink
-          })
-        };
       }
     }(),
-    header = _b.header,
+    previewHeader = _b.previewHeader,
     footer = _b.footer;
-  return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_11__.Html, {
-    children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_12__.Head, {}), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_13__.Preview, {
-      children: header
-    }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_14__.Body, __assign({
-      style: _email_styles__WEBPACK_IMPORTED_MODULE_10__.main
+  return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_12__.Html, {
+    children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_13__.Head, {}), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_14__.Preview, {
+      children: previewHeader
+    }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_15__.Body, __assign({
+      style: _email_styles__WEBPACK_IMPORTED_MODULE_11__.main
     }, {
-      children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_15__.Container, {
+      children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_16__.Container, {
         children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", {
           style: {
             margin: '30px 0px 0px'
           }
-        }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_EmailRow__WEBPACK_IMPORTED_MODULE_7__.EmailRow, {
-          children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_16__.Img, {
-            src: _constants__WEBPACK_IMPORTED_MODULE_9__.LOGO_URL,
-            style: _email_styles__WEBPACK_IMPORTED_MODULE_10__.logoImg
+        }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_EmailRow__WEBPACK_IMPORTED_MODULE_8__.EmailRow, {
+          children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_17__.Img, {
+            src: _constants__WEBPACK_IMPORTED_MODULE_10__.LOGO_URL,
+            style: _email_styles__WEBPACK_IMPORTED_MODULE_11__.logoImg
           })
-        }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_17__.Row, {
-          children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_18__.Heading, __assign({
-            as: "h2",
-            style: {
-              fontSize: 26,
-              fontWeight: 'bold',
-              textAlign: 'center'
-            }
-          }, {
-            children: header
-          }))
-        }), posts.slice(0, _constants__WEBPACK_IMPORTED_MODULE_9__.MAX_POSTS_IN_EMAIL).map(function (post, idx) {
-          return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_19__.Section, __assign({
-            style: {
-              margin: '16px 0px 0px'
-            }
-          }, {
-            children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_PostCardEmail__WEBPACK_IMPORTED_MODULE_8__.PostCardEmail, {
-              post: post
-            }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_EmailRow__WEBPACK_IMPORTED_MODULE_7__.EmailRow, {
-              children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_20__.Button, __assign({
-                style: _email_styles__WEBPACK_IMPORTED_MODULE_10__.button,
-                href: "".concat(appUrl).concat(_route_names__WEBPACK_IMPORTED_MODULE_3__.AbsoluteRoutes.Post(post.id))
-              }, {
-                children: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailReviewPostButton)
-              }))
-            })]
-          }), idx);
-        }), posts.length > _constants__WEBPACK_IMPORTED_MODULE_9__.MAX_POSTS_IN_EMAIL && (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.Fragment, {
-          children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_EmailRow__WEBPACK_IMPORTED_MODULE_7__.EmailRow, __assign({
-            style: {
-              marginTop: '0px'
-            }
-          }, {
-            children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_21__.Text, __assign({
+        }), publishedPosts.length > 0 && (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.Fragment, {
+          children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_18__.Row, {
+            children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_19__.Heading, __assign({
+              as: "h2",
               style: {
-                justifyContent: 'center',
-                display: 'flex',
-                alignItems: 'center',
-                fontSize: 18
+                fontSize: 26,
+                fontWeight: 'bold',
+                textAlign: 'center'
               }
             }, {
-              children: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailMorePostsNote, {
-                count: posts.length - _constants__WEBPACK_IMPORTED_MODULE_9__.MAX_POSTS_IN_EMAIL
+              children: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.publishedNanopubEmailHeader, {
+                count: publishedPosts.length,
+                timeframe: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(headerTimeframeKey)
               })
             }))
-          })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_EmailRow__WEBPACK_IMPORTED_MODULE_7__.EmailRow, {
-            children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_20__.Button, __assign({
-              style: _email_styles__WEBPACK_IMPORTED_MODULE_10__.button,
-              href: reviewPostsLink
+          }), publishedPosts.slice(0, _constants__WEBPACK_IMPORTED_MODULE_10__.MAX_POSTS_IN_EMAIL).map(function (post, idx) {
+            var postUrl = new URL(_route_names__WEBPACK_IMPORTED_MODULE_4__.AbsoluteRoutes.Post(post.id), appUrl).toString();
+            return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_20__.Section, __assign({
+              style: {
+                margin: '16px 0px 0px'
+              }
             }, {
-              children: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailSeeAllButton)
-            }))
+              children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_PostCardEmail__WEBPACK_IMPORTED_MODULE_9__.PostCardEmail, {
+                post: post
+              }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_EmailRow__WEBPACK_IMPORTED_MODULE_8__.EmailRow, {
+                children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_21__.Button, __assign({
+                  style: _email_styles__WEBPACK_IMPORTED_MODULE_11__.button,
+                  href: postUrl
+                }, {
+                  children: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailReviewPostButton)
+                }))
+              })]
+            }), idx);
+          }), publishedPosts.length > _constants__WEBPACK_IMPORTED_MODULE_10__.MAX_POSTS_IN_EMAIL && (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.Fragment, {
+            children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_EmailRow__WEBPACK_IMPORTED_MODULE_8__.EmailRow, __assign({
+              style: {
+                marginTop: '0px'
+              }
+            }, {
+              children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_22__.Text, __assign({
+                style: {
+                  justifyContent: 'center',
+                  display: 'flex',
+                  alignItems: 'center',
+                  fontSize: 18
+                }
+              }, {
+                children: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailMorePostsNote, {
+                  count: publishedPosts.length - _constants__WEBPACK_IMPORTED_MODULE_10__.MAX_POSTS_IN_EMAIL
+                })
+              }))
+            })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_EmailRow__WEBPACK_IMPORTED_MODULE_8__.EmailRow, {
+              children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_21__.Button, __assign({
+                style: _email_styles__WEBPACK_IMPORTED_MODULE_11__.button,
+                href: publishedPostsLink
+              }, {
+                children: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailSeeAllButton)
+              }))
+            })]
           })]
-        }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_22__.Markdown, __assign({
-          markdownContainerStyles: _email_styles__WEBPACK_IMPORTED_MODULE_10__.footerStyle
+        }), pendingPosts.length > 0 && (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.Fragment, {
+          children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_18__.Row, {
+            children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_19__.Heading, __assign({
+              as: "h2",
+              style: {
+                fontSize: 26,
+                fontWeight: 'bold',
+                textAlign: 'center'
+              }
+            }, {
+              children: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.recommendedNanopubEmailHeader, {
+                count: pendingPosts.length,
+                timeframe: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(headerTimeframeKey)
+              })
+            }))
+          }), pendingPosts.slice(0, _constants__WEBPACK_IMPORTED_MODULE_10__.MAX_POSTS_IN_EMAIL).map(function (post, idx) {
+            var postUrl = new URL(_route_names__WEBPACK_IMPORTED_MODULE_4__.AbsoluteRoutes.Post(post.id), appUrl).toString();
+            return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_react_email_components__WEBPACK_IMPORTED_MODULE_20__.Section, __assign({
+              style: {
+                margin: '16px 0px 0px'
+              }
+            }, {
+              children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_PostCardEmail__WEBPACK_IMPORTED_MODULE_9__.PostCardEmail, {
+                post: post
+              }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_EmailRow__WEBPACK_IMPORTED_MODULE_8__.EmailRow, {
+                children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_21__.Button, __assign({
+                  style: _email_styles__WEBPACK_IMPORTED_MODULE_11__.button,
+                  href: postUrl
+                }, {
+                  children: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailReviewPostButton)
+                }))
+              })]
+            }), idx);
+          }), pendingPosts.length > _constants__WEBPACK_IMPORTED_MODULE_10__.MAX_POSTS_IN_EMAIL && (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.Fragment, {
+            children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_EmailRow__WEBPACK_IMPORTED_MODULE_8__.EmailRow, __assign({
+              style: {
+                marginTop: '0px'
+              }
+            }, {
+              children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_22__.Text, __assign({
+                style: {
+                  justifyContent: 'center',
+                  display: 'flex',
+                  alignItems: 'center',
+                  fontSize: 18
+                }
+              }, {
+                children: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailMorePostsNote, {
+                  count: pendingPosts.length - _constants__WEBPACK_IMPORTED_MODULE_10__.MAX_POSTS_IN_EMAIL
+                })
+              }))
+            })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_EmailRow__WEBPACK_IMPORTED_MODULE_8__.EmailRow, {
+              children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_21__.Button, __assign({
+                style: _email_styles__WEBPACK_IMPORTED_MODULE_11__.button,
+                href: reviewPostsLink
+              }, {
+                children: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailSeeAllButton)
+              }))
+            })]
+          })]
+        }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_23__.Markdown, __assign({
+          markdownContainerStyles: _email_styles__WEBPACK_IMPORTED_MODULE_11__.footerStyle
         }, {
           children: footer
-        })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_21__.Text, __assign({
-          style: _email_styles__WEBPACK_IMPORTED_MODULE_10__.footerStyle
+        })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_22__.Text, __assign({
+          style: _email_styles__WEBPACK_IMPORTED_MODULE_11__.footerStyle
         }, {
           children: (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.copyright)
-        })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_21__.Text, __assign({
-          style: __assign(__assign({}, _email_styles__WEBPACK_IMPORTED_MODULE_10__.footerStyle), {
+        })), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_22__.Text, __assign({
+          style: __assign(__assign({}, _email_styles__WEBPACK_IMPORTED_MODULE_11__.footerStyle), {
             color: 'black',
             fontWeight: 'bold',
             marginTop: '2px'
@@ -310,9 +399,9 @@ var EmailTemplate = function (_a) {
 };
 EmailTemplate.PreviewProps = {
   posts: [],
-  notificationFrequency: _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_4__.NotificationFreq.Monthly,
-  autopostOption: _shared_types_types_user__WEBPACK_IMPORTED_MODULE_6__.AutopostOption.AI,
-  appUrl: 'https://sample.com'
+  notificationFrequency: _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_5__.NotificationFreq.Monthly,
+  autopostOption: _shared_types_types_user__WEBPACK_IMPORTED_MODULE_7__.AutopostOption.AI,
+  appUrl: 'https://sample.com/'
 };
 
 /***/ }),
@@ -788,12 +877,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   LOGO_URL: () => (/* binding */ LOGO_URL),
 /* harmony export */   MAX_KEYWORDS: () => (/* binding */ MAX_KEYWORDS),
 /* harmony export */   MAX_POSTS_IN_EMAIL: () => (/* binding */ MAX_POSTS_IN_EMAIL),
-/* harmony export */   MAX_REFERENCES: () => (/* binding */ MAX_REFERENCES)
+/* harmony export */   MAX_REFERENCES: () => (/* binding */ MAX_REFERENCES),
+/* harmony export */   NANOPUB_EXPLORER_URL_EMAIL: () => (/* binding */ NANOPUB_EXPLORER_URL_EMAIL)
 /* harmony export */ });
 var MAX_POSTS_IN_EMAIL = 3;
 var LOGO_URL = 'https://development--sensemakers.netlify.app/icons/logo-192.png';
 var MAX_KEYWORDS = 2;
 var MAX_REFERENCES = 1;
+var NANOPUB_EXPLORER_URL_EMAIL = 'https://np.knowledgepixels.com/';
 
 /***/ }),
 
@@ -965,6 +1056,7 @@ var I18Keys;
   I18Keys["noMorePosts"] = "s023";
   I18Keys["settings"] = "s024";
   I18Keys["logout"] = "s025";
+  I18Keys["logoutTitle"] = "s025c";
   I18Keys["drafts"] = "s026";
   I18Keys["introNextLabel"] = "s026x";
   I18Keys["introFinalLabel"] = "s026y";
@@ -1003,6 +1095,7 @@ var I18Keys;
   I18Keys["recommendedNanopubEmailHeaderSingular"] = "s040_one";
   I18Keys["recommendedNanopubEmailHeaderPlural"] = "s040_other";
   I18Keys["recommendedNanopubEmailFooter"] = "s041";
+  I18Keys["emailFooter"] = "s041a";
   I18Keys["publishedNanopubEmailHeader"] = "s042";
   I18Keys["publishedNanopubEmailHeaderSingular"] = "s042_one";
   I18Keys["publishedNanopubEmailHeaderPlural"] = "s042_other";
@@ -1027,6 +1120,7 @@ var I18Keys;
   I18Keys["notificationsSettingsExplainer"] = "s057c";
   I18Keys["publishingAutomationExplainer"] = "s056c";
   I18Keys["getSupport"] = "s058";
+  I18Keys["getSupportDescription"] = "s058c";
   I18Keys["yourAccounts"] = "s059";
   I18Keys["XTwitter"] = "s060c";
   I18Keys["emailAddress"] = "s060";
@@ -1065,7 +1159,7 @@ for (var _i = 0, _b = Object.entries(I18Keys); _i < _b.length; _i++) {
   if (check.has(entry[1])) throw new Error("repeated value ".concat(entry[1], " for I18Keys key ").concat(entry[0]));
   check.add(entry[1]);
 }
-var translationENG = (_a = {}, _a[I18Keys.introTitle] = 'Your ideas matter again', _a[I18Keys.introSubtitle] = 'Transform your social media activity into meaningful scientific contributions', _a[I18Keys.introParagraph1] = 'Social media posts are a valuable source of scientific knowledge, but they get buried in noisy feeds and locked away by platforms.', _a[I18Keys.introParagraph2] = 'Harness this knowledge by converting your social media posts into nanopublications, making your content <b>FAIR</b> (<b>F</b>indable, <b>A</b>ccessible, <b>I</b>nteroperable and <b>R</b>eusable), so your contributions can get proper recognition', _a[I18Keys.emailInputBtn] = 'Get started', _a[I18Keys.connectSocialsTitle] = 'Connect your socials', _a[I18Keys.connectSocialsParagraph] = 'Link your X·Twitter account to start transforming your tweets into nanopublications.', _a[I18Keys.connectSocialsParagraph2] = 'By connecting, you can easily identify and FAIRify your valuable scientific insights.', _a[I18Keys.signInX] = 'Sign in with X', _a[I18Keys.drafts] = 'Drafts', _a[I18Keys.introNextLabel] = 'Next Tip', _a[I18Keys.introFinalLabel] = 'Let’s nanopublish!', _a[I18Keys.introHeading01] = 'We’re finding your science posts', _a[I18Keys.introText011] = 'Our AI is scanning your latest X · Twitter posts to identify and tag your science-related content.  These tags make your posts machine-readable, enhancing their discoverability and usability. ', _a[I18Keys.introText012] = 'The posts tagged as "For Review" are those our AI recommends for nanopublishing.', _a[I18Keys.introHeading02] = 'Nanopublish your research and recommendations ', _a[I18Keys.introText021] = 'All your research-related posts make valuable nanopublications!', _a[I18Keys.introText022] = "Posts mentioning references with a DOI are perfect candidates, but don't stop there. Consider sharing research ideas, conference highlights, grant information, or job opportunities as well.", _a[I18Keys.introHeading03] = 'We’ve got you covered!', _a[I18Keys.introText031] = "As you continue posting on X · Twitter, we'll monitor your feed for relevant content to ensure your future research remains FAIR and under your control.", _a[I18Keys.introText032] = 'You can adjust your notification and publishing automation settings anytime in your preferences.', _a[I18Keys.connectAccounts] = 'Connect your accounts', _a[I18Keys.connectParagraph] = 'SenseNet loads your X (Twitter) feed and analyzes your posts using AI to deduct keywords and relations, which can be used to better interpret the meaning of your content.', _a[I18Keys.errorConnectTwitter] = 'Error connecting Twitter', _a[I18Keys.yourPublications] = 'Your publications', _a[I18Keys.TweetX] = 'X · Tweet', _a[I18Keys.ThreadX] = 'X · Thread', _a[I18Keys.addKeyword] = 'add keyword', _a[I18Keys.profile] = 'Profile', _a[I18Keys.updateAvailable] = 'An update is available, ', _a[I18Keys.updateNow] = 'update now', _a[I18Keys.installPrompt] = 'Please install this app, ', _a[I18Keys.installNow] = 'install', _a[I18Keys.noMorePosts] = 'No more posts to show', _a[I18Keys.settings] = 'Settings', _a[I18Keys.logout] = 'Logout', _a[I18Keys.ignore] = 'Ignore', _a[I18Keys.publish] = 'Nanopublish', _a[I18Keys.postsNames] = 'Nanopubs', _a[I18Keys.connectOrcidTitle] = 'Your data, your identity', _a[I18Keys.connectOrcidPar01] = 'Your nanopublications are owned by you and tied to your identity through cryptographic signing. You’ll sign these nanopubs with a wallet we created for you using your email. ', _a[I18Keys.connectOrcidPar02] = 'If you want, you can also <b>connect your ORCID</b> account to link your nanopubs to your professional profile, enhancing your recognition within the scientific community.', _a[I18Keys.connectOrcid] = 'Connect ORCID', _a[I18Keys.continue] = 'Continue', _a[I18Keys.publishWarningTitle] = 'Share your research', _a[I18Keys.publishWarningPar01] = 'Are you ready to publish this nanopublication?', _a[I18Keys.publishWarningPar02] = 'Once published, your nanopub will be added to the decentralized nanopublications network, making your research accessible and verifiable. ', _a[I18Keys.publishWarningPar03] = 'While you can retract a nanopub to make it invisible to most users, <b>it cannot be deleted</b>. This ensures the integrity of the scientific record.', _a[I18Keys.returnToDraft] = 'No, return to draft', _a[I18Keys.yesPublish] = 'Yes, I want to publish', _a[I18Keys.publishing] = 'Publishing', _a[I18Keys.publishedTitle] = 'Your nanopublication is live!', _a[I18Keys.publishedText] = 'Your post has been nanopublished.', _a[I18Keys.nextPost] = 'Next post for review', _a[I18Keys.openPublished] = 'See live nanopublication', _a[I18Keys.edit] = 'Edit', _a[I18Keys.retract] = 'Retract', _a[I18Keys.cancel] = 'Cancel', _a[I18Keys.recommendedNanopubEmailHeader] = '', _a[I18Keys.recommendedNanopubEmailHeaderSingular] = 'You have {{count}} potential nanopublication ready for review {{timeframe}}.', _a[I18Keys.recommendedNanopubEmailHeaderPlural] = 'You have {{count}} potential nanopublications ready for review {{timeframe}}.', _a[I18Keys.recommendedNanopubEmailFooter] = "This is your {{timeframe}} nanopub recommendation summary. You can [edit your email settings here]({{emailSettingsLink}}). Don't see a post you'd like to nanopublish? [Review all your recent posts here]({{ignoredPostsLink}}).", _a[I18Keys.publishedNanopubEmailHeader] = '', _a[I18Keys.publishedNanopubEmailHeaderSingular] = "We've automatically published {{count}} post {{timeframe}}.", _a[I18Keys.publishedNanopubEmailHeaderPlural] = "We've automatically published {{count}} posts {{timeframe}}.", _a[I18Keys.publishedNanopubEmailFooter] = 'These posts were automatically published according to your automation settings. You can [change your automation settings here]({{automationSettingsLink}}).\n\nSee any mistakes in your nanopublications? [Edit or retract your automated nanopublications here]({{publishedPostsLink}}).', _a[I18Keys.emailHeaderDailyNotificationTimeframe] = 'today', _a[I18Keys.emailHeaderWeeklyNotificationTimeframe] = 'this week', _a[I18Keys.emailHeaderMonthlyNotificationTimeframe] = 'this month', _a[I18Keys.emailFooterDailyNotificationTimeframe] = 'daily', _a[I18Keys.emailFooterWeeklyNotificationTimeframe] = 'weekly', _a[I18Keys.emailFooterMonthlyNotificationTimeframe] = 'monthly', _a[I18Keys.emailReviewPostButton] = 'Review Post', _a[I18Keys.emailSeeAllButton] = 'See All', _a[I18Keys.emailMorePostsNote] = '', _a[I18Keys.emailMorePostsNoteSingular] = '+{{count}} more post', _a[I18Keys.emailMorePostsNotePlural] = '+{{count}} more posts', _a[I18Keys.copyright] = 'Copyright © 2024', _a[I18Keys.downloads] = 'Downloads', _a[I18Keys.installApp] = 'Install application on your device', _a[I18Keys.usingApp] = 'Using Senscast', _a[I18Keys.publishingAutomation] = 'Publishing Automation', _a[I18Keys.publishingAutomationExplainer] = 'Choose how you’d like to nanopublish your future X · Twitter posts.', _a[I18Keys.notificationsSettings] = 'Notification Settings', _a[I18Keys.notificationsSettingsExplainer] = 'Choose how often you’d like to receive email notifications.', _a[I18Keys.getSupport] = 'Get Support', _a[I18Keys.yourAccounts] = 'Your Accounts', _a[I18Keys.XTwitter] = 'X · Twitter', _a[I18Keys.emailAddress] = 'Email Address', _a[I18Keys.ORCID] = 'ORCID', _a[I18Keys.notificationSettingsOpt1Title] = 'Daily summary', _a[I18Keys.notificationSettingsOpt1Desc] = 'Receive a daily digest email of new relevant X · Twitter post that have been identified or autopublished.', _a[I18Keys.notificationSettingsOpt2Title] = 'Weekly summary', _a[I18Keys.notificationSettingsOpt2Desc] = 'Receive a weekly email with a list of all posts that have been identified or autopublished that week.', _a[I18Keys.notificationSettingsOpt3Title] = 'Monthly summary', _a[I18Keys.notificationSettingsOpt3Desc] = 'Receive a monthly email with a list of all posts that have been identified or autopublished that month.', _a[I18Keys.notificationSettingsOpt4Title] = 'I don’t want to receive notifications', _a[I18Keys.notificationSettingsOpt4Desc] = 'We won’t send you any email notifications, so you’ll need to check the app for updates.', _a[I18Keys.publishingAutomationOpt1Title] = 'AI automated publishing', _a[I18Keys.publishingAutomationOpt1Desc] = 'All science posts detected with our AI filter will be automatically nanopublished.', _a[I18Keys.publishingAutomationOpt2Title] = 'Reference-Based Automated Publishing', _a[I18Keys.publishingAutomationOpt2Desc] = 'Any post mentioning research with academic reference identifiers such as DOIs, PMIDs, PMCIDs, or ISBNs will be automatically nanopublished.', _a[I18Keys.publishingAutomationOpt3Title] = 'Supervised publishing', _a[I18Keys.publishingAutomationOpt3Desc] = 'Receive a notification when a new science post is detected, and manually review it before publishing.', _a[I18Keys.autopostInviteTitle] = 'Make your content FAIR,<br> without even thinking about it.', _a[I18Keys.autpostInvitePar01] = 'Nanopublishing could be even easier. Take control of your content by choosing how you’d like future posts to be nanopublished. ', _a[I18Keys.autopostInvitePar02] = 'You can always change this in your settings.', _a[I18Keys.dontShowAgain] = 'Don’t show this message again', _a[I18Keys.reviewSettings] = 'Review settings', _a[I18Keys.notNow] = 'Not now', _a[I18Keys.emailSubjectReview] = 'You have {{nPosts}} potential nanopublications for review {{pointInTime}}', _a[I18Keys.emailSubjectAutoposted] = 'You nanopublished {{nPosts}} posts {{pointInTime}}', _a[I18Keys.today] = 'today', _a[I18Keys.thisWeek] = 'this week', _a[I18Keys.thisMonth] = 'this month', _a[I18Keys.noPostsFound] = 'No posts found', _a[I18Keys.noPostsFoundDesc] = 'We couldn’t find any posts.', _a);
+var translationENG = (_a = {}, _a[I18Keys.introTitle] = 'Your ideas matter again', _a[I18Keys.introSubtitle] = 'Transform your social media activity into meaningful scientific contributions', _a[I18Keys.introParagraph1] = 'Social media posts are a valuable source of scientific knowledge, but they get buried in noisy feeds and locked away by platforms.', _a[I18Keys.introParagraph2] = 'Harness this knowledge by converting your social media posts into nanopublications, making your content <b>FAIR</b> (<b>F</b>indable, <b>A</b>ccessible, <b>I</b>nteroperable and <b>R</b>eusable), so your contributions can get proper recognition', _a[I18Keys.emailInputBtn] = 'Get started', _a[I18Keys.connectSocialsTitle] = 'Connect your socials', _a[I18Keys.connectSocialsParagraph] = 'Link your X·Twitter account to start transforming your tweets into nanopublications.', _a[I18Keys.connectSocialsParagraph2] = 'By connecting, you can easily identify and FAIRify your valuable scientific insights.', _a[I18Keys.signInX] = 'Sign in with X', _a[I18Keys.drafts] = 'Drafts', _a[I18Keys.introNextLabel] = 'Next Tip', _a[I18Keys.introFinalLabel] = 'Let’s nanopublish!', _a[I18Keys.introHeading01] = 'We’re finding your science posts', _a[I18Keys.introText011] = 'Our AI is scanning your latest X · Twitter posts to identify and tag your science-related content.  These tags make your posts machine-readable, enhancing their discoverability and usability. ', _a[I18Keys.introText012] = 'The posts tagged as "For Review" are those our AI recommends for nanopublishing.', _a[I18Keys.introHeading02] = 'Nanopublish your research and recommendations ', _a[I18Keys.introText021] = 'All your research-related posts make valuable nanopublications!', _a[I18Keys.introText022] = "Posts mentioning references with a DOI are perfect candidates, but don't stop there. Consider sharing research ideas, conference highlights, grant information, or job opportunities as well.", _a[I18Keys.introHeading03] = 'We’ve got you covered!', _a[I18Keys.introText031] = "As you continue posting on X · Twitter, we'll monitor your feed for relevant content to ensure your future research remains FAIR and under your control.", _a[I18Keys.introText032] = 'You can adjust your notification and publishing automation settings anytime in your preferences.', _a[I18Keys.connectAccounts] = 'Connect your accounts', _a[I18Keys.connectParagraph] = 'SenseNet loads your X (Twitter) feed and analyzes your posts using AI to deduct keywords and relations, which can be used to better interpret the meaning of your content.', _a[I18Keys.errorConnectTwitter] = 'Error connecting Twitter', _a[I18Keys.yourPublications] = 'Your publications', _a[I18Keys.TweetX] = 'X · Tweet', _a[I18Keys.ThreadX] = 'X · Thread', _a[I18Keys.addKeyword] = 'add keyword', _a[I18Keys.profile] = 'Profile', _a[I18Keys.updateAvailable] = 'An update is available, ', _a[I18Keys.updateNow] = 'update now', _a[I18Keys.installPrompt] = 'Please install this app, ', _a[I18Keys.installNow] = 'install', _a[I18Keys.noMorePosts] = 'No more posts to show', _a[I18Keys.settings] = 'Settings', _a[I18Keys.logoutTitle] = 'Logout', _a[I18Keys.logout] = 'Logout', _a[I18Keys.ignore] = 'Ignore', _a[I18Keys.publish] = 'Nanopublish', _a[I18Keys.postsNames] = 'Nanopubs', _a[I18Keys.connectOrcidTitle] = 'Your data, your identity', _a[I18Keys.connectOrcidPar01] = 'Your nanopublications are owned by you and tied to your identity through cryptographic signing. You’ll sign these nanopubs with a wallet we created for you using your email. ', _a[I18Keys.connectOrcidPar02] = 'If you want, you can also <b>connect your ORCID</b> account to link your nanopubs to your professional profile, enhancing your recognition within the scientific community.', _a[I18Keys.connectOrcid] = 'Connect ORCID', _a[I18Keys.continue] = 'Continue', _a[I18Keys.publishWarningTitle] = 'Share your research', _a[I18Keys.publishWarningPar01] = 'Are you ready to publish this nanopublication?', _a[I18Keys.publishWarningPar02] = 'Once published, your nanopub will be added to the decentralized nanopublications network, making your research accessible and verifiable. ', _a[I18Keys.publishWarningPar03] = 'While you can retract a nanopub to make it invisible to most users, <b>it cannot be deleted</b>. This ensures the integrity of the scientific record.', _a[I18Keys.returnToDraft] = 'No, return to draft', _a[I18Keys.yesPublish] = 'Yes, I want to publish', _a[I18Keys.publishing] = 'Publishing', _a[I18Keys.publishedTitle] = 'Your nanopublication is live!', _a[I18Keys.publishedText] = 'Your post has been nanopublished.', _a[I18Keys.nextPost] = 'Next post for review', _a[I18Keys.openPublished] = 'See live nanopublication', _a[I18Keys.edit] = 'Edit', _a[I18Keys.retract] = 'Retract', _a[I18Keys.cancel] = 'Cancel', _a[I18Keys.recommendedNanopubEmailHeader] = '', _a[I18Keys.recommendedNanopubEmailHeaderSingular] = 'You have {{count}} potential nanopublication ready for review {{timeframe}}.', _a[I18Keys.recommendedNanopubEmailHeaderPlural] = 'You have {{count}} potential nanopublications ready for review {{timeframe}}.', _a[I18Keys.recommendedNanopubEmailFooter] = "This is your {{timeframe}} nanopub recommendation summary. You can [edit your email settings here]({{emailSettingsLink}}). Don't see a post you'd like to nanopublish? [Review all your recent posts here]({{ignoredPostsLink}}).", _a[I18Keys.emailFooter] = "This is your {{timeframe}} activity summary. You can [edit your email or automation settings here]({{emailSettingsLink}}). Don't see a post you'd like to nanopublish? [Review all your recent posts here]({{ignoredPostsLink}}). See any mistakes in your nanopublications? [Edit or retract your automated nanopublications here]({{publishedPostsLink}}).", _a[I18Keys.publishedNanopubEmailHeader] = '', _a[I18Keys.publishedNanopubEmailHeaderSingular] = "We've automatically published {{count}} post {{timeframe}}.", _a[I18Keys.publishedNanopubEmailHeaderPlural] = "We've automatically published {{count}} posts {{timeframe}}.", _a[I18Keys.publishedNanopubEmailFooter] = 'These posts were automatically published according to your automation settings. You can [change your automation settings here]({{automationSettingsLink}}).\n\nSee any mistakes in your nanopublications? [Edit or retract your automated nanopublications here]({{publishedPostsLink}}).', _a[I18Keys.emailHeaderDailyNotificationTimeframe] = 'today', _a[I18Keys.emailHeaderWeeklyNotificationTimeframe] = 'this week', _a[I18Keys.emailHeaderMonthlyNotificationTimeframe] = 'this month', _a[I18Keys.emailFooterDailyNotificationTimeframe] = 'daily', _a[I18Keys.emailFooterWeeklyNotificationTimeframe] = 'weekly', _a[I18Keys.emailFooterMonthlyNotificationTimeframe] = 'monthly', _a[I18Keys.emailReviewPostButton] = 'Review Post', _a[I18Keys.emailSeeAllButton] = 'See All', _a[I18Keys.emailMorePostsNote] = '', _a[I18Keys.emailMorePostsNoteSingular] = '+{{count}} more post', _a[I18Keys.emailMorePostsNotePlural] = '+{{count}} more posts', _a[I18Keys.copyright] = 'Copyright © 2024', _a[I18Keys.downloads] = 'Downloads', _a[I18Keys.installApp] = 'Install application on your device', _a[I18Keys.usingApp] = 'Using Sensenets', _a[I18Keys.publishingAutomation] = 'Publishing Automation', _a[I18Keys.publishingAutomationExplainer] = 'Choose how you’d like to nanopublish your future X · Twitter posts.', _a[I18Keys.notificationsSettings] = 'Notification Settings', _a[I18Keys.notificationsSettingsExplainer] = 'Choose how often you’d like to receive email notifications.', _a[I18Keys.getSupport] = 'Get Support', _a[I18Keys.yourAccounts] = 'Your Accounts', _a[I18Keys.XTwitter] = 'X · Twitter', _a[I18Keys.emailAddress] = 'Email Address', _a[I18Keys.ORCID] = 'ORCID', _a[I18Keys.notificationSettingsOpt1Title] = 'Daily summary', _a[I18Keys.notificationSettingsOpt1Desc] = 'Receive a daily digest email of new relevant X · Twitter post that have been identified or autopublished.', _a[I18Keys.notificationSettingsOpt2Title] = 'Weekly summary', _a[I18Keys.notificationSettingsOpt2Desc] = 'Receive a weekly email with a list of all posts that have been identified or autopublished that week.', _a[I18Keys.notificationSettingsOpt3Title] = 'Monthly summary', _a[I18Keys.notificationSettingsOpt3Desc] = 'Receive a monthly email with a list of all posts that have been identified or autopublished that month.', _a[I18Keys.notificationSettingsOpt4Title] = 'I don’t want to receive notifications', _a[I18Keys.notificationSettingsOpt4Desc] = 'We won’t send you any email notifications, so you’ll need to check the app for updates.', _a[I18Keys.publishingAutomationOpt1Title] = 'AI automated publishing', _a[I18Keys.publishingAutomationOpt1Desc] = 'All science posts detected with our AI filter will be automatically nanopublished.', _a[I18Keys.publishingAutomationOpt2Title] = 'Reference-Based Automated Publishing', _a[I18Keys.publishingAutomationOpt2Desc] = 'We will automatically nanopublish any post mentioning research with academic reference identifiers such as DOIs, PMIDs, PMCIDs, or ISBNs.', _a[I18Keys.publishingAutomationOpt3Title] = 'Supervised publishing', _a[I18Keys.publishingAutomationOpt3Desc] = 'You receive a notification when new science posts are detected, and can manually review them before publishing.', _a[I18Keys.autopostInviteTitle] = 'Make your content FAIR,<br> without even thinking about it.', _a[I18Keys.autpostInvitePar01] = 'Nanopublishing could be even easier. Take control of your content by choosing how you’d like future posts to be nanopublished. ', _a[I18Keys.autopostInvitePar02] = 'You can always change this in your settings.', _a[I18Keys.dontShowAgain] = 'Don’t show this message again', _a[I18Keys.reviewSettings] = 'Review settings', _a[I18Keys.notNow] = 'Not now', _a[I18Keys.emailSubjectReview] = 'You have {{nPosts}} potential nanopublications for review {{pointInTime}}', _a[I18Keys.emailSubjectAutoposted] = 'You nanopublished {{nPosts}} posts {{pointInTime}}', _a[I18Keys.today] = 'today', _a[I18Keys.thisWeek] = 'this week', _a[I18Keys.thisMonth] = 'this month', _a[I18Keys.noPostsFound] = 'No posts found', _a[I18Keys.noPostsFoundDesc] = 'We couldn’t find any posts.', _a[I18Keys.getSupportDescription] = '<a href=mailto:support@sense-nets.xyz>support@sense-nets.xyz</a>', _a);
 i18next__WEBPACK_IMPORTED_MODULE_0__["default"].use(react_i18next__WEBPACK_IMPORTED_MODULE_1__.initReactI18next).init({
   resources: {
     ENG: {
@@ -1092,8 +1186,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   getPostStatuses: () => (/* binding */ getPostStatuses)
 /* harmony export */ });
 /* harmony import */ var _app_config__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/app/config.ts");
-/* harmony import */ var _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/shared/types/types.posts.ts");
-/* harmony import */ var _shared_types_types_user__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/shared/types/types.user.ts");
+/* harmony import */ var _email_constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/email/constants.ts");
+/* harmony import */ var _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/shared/types/types.posts.ts");
+/* harmony import */ var _shared_types_types_user__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./src/shared/types/types.user.ts");
+
 
 
 
@@ -1106,17 +1202,17 @@ var concatenateThread = function (post) {
 var getPostStatuses = function (post) {
   var _a, _b;
   var postedNanopub = (_b = (_a = post === null || post === void 0 ? void 0 : post.mirrors) === null || _a === void 0 ? void 0 : _a.find(function (m) {
-    return m.platformId === _shared_types_types_user__WEBPACK_IMPORTED_MODULE_2__.PLATFORM.Nanopub;
+    return m.platformId === _shared_types_types_user__WEBPACK_IMPORTED_MODULE_3__.PLATFORM.Nanopub;
   })) === null || _b === void 0 ? void 0 : _b.posted;
   var nanopubHash = postedNanopub ? postedNanopub.post_id.split('/').pop() : undefined;
-  var nanopubUrl = postedNanopub ? "".concat(_app_config__WEBPACK_IMPORTED_MODULE_0__.NANOPUB_EXPLORER_SERVER).concat(nanopubHash) : undefined;
-  var processed = post && post.parsedStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_1__.AppPostParsedStatus.PROCESSED;
-  var errored = post && post.parsingStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_1__.AppPostParsingStatus.ERRORED;
-  var isParsing = post && post.parsingStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_1__.AppPostParsingStatus.PROCESSING;
-  var pending = post && post.reviewedStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_1__.AppPostReviewStatus.PENDING;
-  var ignored = post && post.reviewedStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_1__.AppPostReviewStatus.IGNORED;
+  var nanopubUrl = postedNanopub ? "".concat(_app_config__WEBPACK_IMPORTED_MODULE_0__.NANOPUB_EXPLORER_SERVER ? _app_config__WEBPACK_IMPORTED_MODULE_0__.NANOPUB_EXPLORER_SERVER : _email_constants__WEBPACK_IMPORTED_MODULE_1__.NANOPUB_EXPLORER_URL_EMAIL).concat(nanopubHash) : undefined;
+  var processed = post && post.parsedStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_2__.AppPostParsedStatus.PROCESSED;
+  var errored = post && post.parsingStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_2__.AppPostParsingStatus.ERRORED;
+  var isParsing = post && post.parsingStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_2__.AppPostParsingStatus.PROCESSING;
+  var pending = post && post.reviewedStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_2__.AppPostReviewStatus.PENDING;
+  var ignored = post && post.reviewedStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_2__.AppPostReviewStatus.IGNORED;
   var published = !!postedNanopub;
-  var isEditing = post && post.reviewedStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_1__.AppPostReviewStatus.DRAFT;
+  var isEditing = post && post.reviewedStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_2__.AppPostReviewStatus.DRAFT;
   return {
     processed: processed,
     errored: errored,

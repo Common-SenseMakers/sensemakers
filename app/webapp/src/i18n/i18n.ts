@@ -28,6 +28,7 @@ export enum I18Keys {
   noMorePosts = 's023',
   settings = 's024',
   logout = 's025',
+  logoutTitle = 's025c',
 
   drafts = 's026',
 
@@ -81,6 +82,7 @@ export enum I18Keys {
   recommendedNanopubEmailHeaderPlural = 's040_other',
 
   recommendedNanopubEmailFooter = 's041',
+  emailFooter = 's041a',
 
   publishedNanopubEmailHeader = 's042',
   publishedNanopubEmailHeaderSingular = 's042_one',
@@ -112,6 +114,7 @@ export enum I18Keys {
   notificationsSettingsExplainer = 's057c',
   publishingAutomationExplainer = 's056c',
   getSupport = 's058',
+  getSupportDescription = 's058c',
 
   yourAccounts = 's059',
   XTwitter = 's060c',
@@ -215,6 +218,7 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.installNow]: 'install',
   [I18Keys.noMorePosts]: 'No more posts to show',
   [I18Keys.settings]: 'Settings',
+  [I18Keys.logoutTitle]: 'Logout',
   [I18Keys.logout]: 'Logout',
 
   [I18Keys.ignore]: 'Ignore',
@@ -257,6 +261,9 @@ const translationENG: Record<I18Keys, string> = {
     'You have {{count}} potential nanopublications ready for review {{timeframe}}.',
   [I18Keys.recommendedNanopubEmailFooter]:
     "This is your {{timeframe}} nanopub recommendation summary. You can [edit your email settings here]({{emailSettingsLink}}). Don't see a post you'd like to nanopublish? [Review all your recent posts here]({{ignoredPostsLink}}).",
+
+  [I18Keys.emailFooter]:
+    "This is your {{timeframe}} activity summary. You can [edit your email or automation settings here]({{emailSettingsLink}}). Don't see a post you'd like to nanopublish? [Review all your recent posts here]({{ignoredPostsLink}}). See any mistakes in your nanopublications? [Edit or retract your automated nanopublications here]({{publishedPostsLink}}).",
 
   [I18Keys.publishedNanopubEmailHeader]: '',
   [I18Keys.publishedNanopubEmailHeaderSingular]:
@@ -344,6 +351,8 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.thisMonth]: 'this month',
   [I18Keys.noPostsFound]: 'No posts found',
   [I18Keys.noPostsFoundDesc]: 'We couldn’t find any posts.',
+  [I18Keys.getSupportDescription]:
+    '<a href=mailto:support@sense-nets.xyz>support@sense-nets.xyz</a>',
 };
 
 i18n.use(initReactI18next).init({
