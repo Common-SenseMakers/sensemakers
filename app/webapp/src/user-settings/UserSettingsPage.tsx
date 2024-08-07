@@ -1,8 +1,9 @@
 import { Anchor, Box, Text } from 'grommet';
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { useAppFetch } from '../api/app.fetch';
+import { SUPPORT_EMAIL_ADDRESS } from '../app/config';
 import { AutopostIcon } from '../app/icons/AutopostIcon';
 import { BellIcon } from '../app/icons/BellIcon';
 import { EmailIcon } from '../app/icons/EmailIcon';
@@ -102,6 +103,10 @@ export const UserSettingsPage = () => {
 
       void setSettings(newSettings);
     }
+  };
+
+  const getSupportClicked = () => {
+    window.open(`mailto: ${SUPPORT_EMAIL_ADDRESS}`, '_blank');
   };
 
   const currentAutopost =
@@ -256,9 +261,12 @@ export const UserSettingsPage = () => {
         <SettingsSection
           icon={<SupportIcon size={24}></SupportIcon>}
           title={t(I18Keys.getSupport)}
-          onSectionClicked={() => {
-            setShowSettingsPage(SettingsSections.Support);
-          }}></SettingsSection>
+          description={
+            <Trans
+              i18nKey={I18Keys.getSupportDescription}
+              components={{ a: <a></a> }}></Trans>
+          }
+          showChevron={false}></SettingsSection>
 
         <Box
           pad={{ horizontal: 'medium' }}

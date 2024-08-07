@@ -114,6 +114,7 @@ export enum I18Keys {
   notificationsSettingsExplainer = 's057c',
   publishingAutomationExplainer = 's056c',
   getSupport = 's058',
+  getSupportDescription = 's058c',
 
   yourAccounts = 's059',
   XTwitter = 's060c',
@@ -350,6 +351,8 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.thisMonth]: 'this month',
   [I18Keys.noPostsFound]: 'No posts found',
   [I18Keys.noPostsFoundDesc]: 'We couldn’t find any posts.',
+  [I18Keys.getSupportDescription]:
+    '<a href=mailto:support@sense-nets.xyz>support@sense-nets.xyz</a>',
 };
 
 i18n.use(initReactI18next).init({
