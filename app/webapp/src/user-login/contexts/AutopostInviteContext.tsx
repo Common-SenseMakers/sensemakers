@@ -13,11 +13,11 @@ import { Trans } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { AppModalStandard } from '../../app/AppModalStandard';
+import { AppCheckBox } from '../../app/icons/AppCheckBox';
 import { RobotIcon } from '../../app/icons/RobotIcon';
 import { I18Keys } from '../../i18n/i18n';
 import { AbsoluteRoutes } from '../../route.names';
 import { AppButton, AppHeading, AppModal } from '../../ui-components';
-import { AppCheckBox } from '../../ui-components/AppCheckBox';
 import { AppParagraph } from '../../ui-components/AppParagraph';
 import { BoxCentered } from '../../ui-components/BoxCentered';
 import { usePersist } from '../../utils/use.persist';
@@ -46,8 +46,6 @@ export const AutopostInviteContext = (props: PropsWithChildren) => {
   const [autopostInviteDisabled, setAutopostInviteDisabled] =
     usePersist<boolean>(AUTO_POST_INVITE_DISABLED, false);
 
-  const [dontShowAgain, setDontShowAgain] = useState(false);
-
   /** count time and open autopost invite modal */
   useEffect(() => {
     if (justPublished && !autopostInviteDisabled) {
@@ -70,7 +68,7 @@ export const AutopostInviteContext = (props: PropsWithChildren) => {
   };
 
   const inviteAutopostModal = (() => {
-    if (showInvite || true) {
+    if (showInvite) {
       return (
         <AppModalStandard
           onModalClosed={() => setShowInvite(false)}
@@ -88,10 +86,11 @@ export const AutopostInviteContext = (props: PropsWithChildren) => {
                 i18nKey={I18Keys.autpostInvitePar01}
                 components={{ br: <br></br> }}></Trans>,
               <Text>{t(I18Keys.autopostInvitePar02)}</Text>,
-              <Box direction="row" gap="12px" justify="center">
+              <Box direction="row" gap="12px" justify="center" align="center">
                 <AppCheckBox
-                  onChange={(e) => setAutopostInviteDisabled(e.target.checked)}
-                  checked={dontShowAgain}></AppCheckBox>
+                  size={18}
+                  onCheckChange={(v) => setAutopostInviteDisabled(v)}
+                  checked={autopostInviteDisabled}></AppCheckBox>
                 <Box>
                   <Text size="small">{t(I18Keys.dontShowAgain)}</Text>
                 </Box>
@@ -99,7 +98,7 @@ export const AutopostInviteContext = (props: PropsWithChildren) => {
             ],
             secondaryButton: {
               label: t(I18Keys.notNow),
-              onClick: () => reviewSettings(),
+              onClick: () => notNow(),
             },
             primaryButton: {
               label: t(I18Keys.reviewSettings),

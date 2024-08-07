@@ -28,6 +28,7 @@ export enum I18Keys {
   noMorePosts = 's023',
   settings = 's024',
   logout = 's025',
+  logoutTitle = 's025c',
 
   drafts = 's026',
 
@@ -215,6 +216,7 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.installNow]: 'install',
   [I18Keys.noMorePosts]: 'No more posts to show',
   [I18Keys.settings]: 'Settings',
+  [I18Keys.logoutTitle]: 'Logout',
   [I18Keys.logout]: 'Logout',
 
   [I18Keys.ignore]: 'Ignore',
