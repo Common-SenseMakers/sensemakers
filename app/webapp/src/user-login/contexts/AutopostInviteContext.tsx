@@ -22,6 +22,7 @@ import { AppParagraph } from '../../ui-components/AppParagraph';
 import { BoxCentered } from '../../ui-components/BoxCentered';
 import { usePersist } from '../../utils/use.persist';
 
+const DEBUG = true;
 export const AUTO_POST_INVITE_DISABLED = 'autopostInviteDisabled';
 
 export interface AutopostInviteContextType {
@@ -48,8 +49,28 @@ export const AutopostInviteContext = (props: PropsWithChildren) => {
 
   /** count time and open autopost invite modal */
   useEffect(() => {
+    if (DEBUG) {
+      console.log('useEffect', { justPublished, autopostInviteDisabled });
+    }
+
     if (justPublished && !autopostInviteDisabled) {
+      if (DEBUG) {
+        console.log('trigger timeout', {
+          justPublished,
+          autopostInviteDisabled,
+          showInvite,
+        });
+      }
+
       const to = setTimeout(() => {
+        if (DEBUG) {
+          console.log('timeout reached', {
+            justPublished,
+            autopostInviteDisabled,
+            showInvite,
+          });
+        }
+
         setJustPublished(false);
         setShowInvite(true);
       }, 2500);
@@ -58,14 +79,31 @@ export const AutopostInviteContext = (props: PropsWithChildren) => {
   }, [justPublished, autopostInviteDisabled]);
 
   const notNow = () => {
+    if (DEBUG) {
+      console.log('notNow', {
+        justPublished,
+        autopostInviteDisabled,
+        showInvite,
+      });
+    }
     setShowInvite(false);
   };
 
   const reviewSettings = () => {
+    if (DEBUG) {
+      console.log('reviewSettings', {
+        justPublished,
+        autopostInviteDisabled,
+        showInvite,
+      });
+    }
+
     setShowInvite(false);
     setReviewAutopostIntention(true);
     navigate(AbsoluteRoutes.Settings);
   };
+
+  console.log('autopostInviteDisabled', { showInvite });
 
   const inviteAutopostModal = (() => {
     if (showInvite) {

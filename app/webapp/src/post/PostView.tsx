@@ -394,12 +394,13 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
           primaryButton: {
             disabled: nextPostId === undefined,
             label: t(I18Keys.nextPost),
-            onClick: () => openNextPost(),
+            onClick: () => publishedModalClosed(PublishPostAction.nextPost),
           },
           secondaryButton: {
             disabled: isUpdating,
             label: t(I18Keys.openPublished),
-            onClick: () => openNanopublication(),
+            onClick: () =>
+              publishedModalClosed(PublishPostAction.openNanopublication),
           },
         }}></AppModalStandard>
     );

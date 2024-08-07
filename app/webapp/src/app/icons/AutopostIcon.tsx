@@ -14,9 +14,9 @@ export const AutopostIcon = (props: { size?: number }) => {
         <path
           d="M12.0001 18.5334L20.4001 20.4001L12.0001 3.6001L3.6001 20.4001L12.0001 18.5334ZM12.0001 18.5334V11.0668"
           stroke="#1F2937"
-          stroke-width="1.6"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
       </svg>
     </Box>

@@ -13,9 +13,9 @@ export const RightChevronIcon = (props: { size?: number }) => {
         <path
           d="M7 5L12 10L7 15"
           stroke="#1F2937"
-          stroke-width="1.6"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
       </svg>
     </Box>
