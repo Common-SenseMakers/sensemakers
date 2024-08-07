@@ -82,6 +82,7 @@ export enum I18Keys {
   recommendedNanopubEmailHeaderPlural = 's040_other',
 
   recommendedNanopubEmailFooter = 's041',
+  emailFooter = 's041a',
 
   publishedNanopubEmailHeader = 's042',
   publishedNanopubEmailHeaderSingular = 's042_one',
@@ -259,6 +260,9 @@ const translationENG: Record<I18Keys, string> = {
     'You have {{count}} potential nanopublications ready for review {{timeframe}}.',
   [I18Keys.recommendedNanopubEmailFooter]:
     "This is your {{timeframe}} nanopub recommendation summary. You can [edit your email settings here]({{emailSettingsLink}}). Don't see a post you'd like to nanopublish? [Review all your recent posts here]({{ignoredPostsLink}}).",
+
+  [I18Keys.emailFooter]:
+    "This is your {{timeframe}} activity summary. You can [edit your email or automation settings here]({{emailSettingsLink}}). Don't see a post you'd like to nanopublish? [Review all your recent posts here]({{ignoredPostsLink}}). See any mistakes in your nanopublications? [Edit or retract your automated nanopublications here]({{publishedPostsLink}}).",
 
   [I18Keys.publishedNanopubEmailHeader]: '',
   [I18Keys.publishedNanopubEmailHeaderSingular]:

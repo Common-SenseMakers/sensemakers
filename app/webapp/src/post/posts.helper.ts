@@ -1,4 +1,5 @@
 import { NANOPUB_EXPLORER_SERVER } from '../app/config';
+import { NANOPUB_EXPLORER_URL_EMAIL } from '../email/constants';
 import {
   AppPost,
   AppPostFull,
@@ -38,7 +39,7 @@ export const getPostStatuses = (post?: AppPostFull): AppPostStatus => {
     : undefined;
 
   const nanopubUrl = postedNanopub
-    ? `${NANOPUB_EXPLORER_SERVER}${nanopubHash}`
+    ? `${NANOPUB_EXPLORER_SERVER ? NANOPUB_EXPLORER_SERVER : NANOPUB_EXPLORER_URL_EMAIL}${nanopubHash}`
     : undefined;
 
   const processed = post && post.parsedStatus === AppPostParsedStatus.PROCESSED;
