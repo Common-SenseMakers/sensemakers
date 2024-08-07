@@ -2,7 +2,7 @@ import { Box, Text } from 'grommet';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ModalContent, ModalIcon } from '../app/AppInfoModal';
+import { ModalContent, ModalIcon } from '../app/AppModalStandard';
 import { I18Keys } from '../i18n/i18n';
 import { CarouselDots } from '../ui-components/CarouselDots';
 

@@ -12,6 +12,7 @@ import {
 import { Trans } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
+import { AppModalStandard } from '../../app/AppModalStandard';
 import { RobotIcon } from '../../app/icons/RobotIcon';
 import { I18Keys } from '../../i18n/i18n';
 import { AbsoluteRoutes } from '../../route.names';
@@ -69,74 +70,43 @@ export const AutopostInviteContext = (props: PropsWithChildren) => {
   };
 
   const inviteAutopostModal = (() => {
-    if (showInvite) {
+    if (showInvite || true) {
       return (
-        <AppModal type="small" onModalClosed={() => setShowInvite(false)}>
-          <>
-            <Box style={{ flexGrow: 1 }} justify="center">
-              <Box align="center">
-                <BoxCentered
-                  style={{
-                    height: '60px',
-                    width: '80px',
-                    borderRadius: '40px',
-                    backgroundColor: '#CEE2F2',
-                  }}
-                  margin={{ bottom: '16px' }}>
-                  <RobotIcon size={40}></RobotIcon>
-                </BoxCentered>
-                <AppHeading level={3} style={{ textAlign: 'center' }}>
-                  <Trans
-                    i18nKey={I18Keys.autopostInviteTitle}
-                    components={{ br: <br></br> }}></Trans>
-                </AppHeading>
-                <AppParagraph
-                  style={{
-                    marginTop: '8px',
-                    width: '100%',
-                    textAlign: 'center',
-                  }}>
-                  <Trans
-                    i18nKey={I18Keys.autpostInvitePar01}
-                    components={{ b: <b></b> }}></Trans>
-                </AppParagraph>
-                <AppParagraph
-                  style={{
-                    textAlign: 'center',
-                    marginTop: '8px',
-                    marginBottom: '20px',
-                    width: '100%',
-                  }}>
-                  <Trans
-                    i18nKey={I18Keys.autopostInvitePar02}
-                    components={{ b: <b></b> }}></Trans>
-                </AppParagraph>
-                <Box direction="row" margin={{ bottom: '24px' }} gap="12px">
-                  <AppCheckBox
-                    onChange={(e) =>
-                      setAutopostInviteDisabled(e.target.checked)
-                    }
-                    checked={dontShowAgain}></AppCheckBox>
-                  <Box>
-                    <Text size="small">{t(I18Keys.dontShowAgain)}</Text>
-                  </Box>
+        <AppModalStandard
+          onModalClosed={() => setShowInvite(false)}
+          contentProps={{
+            icon: <RobotIcon size={40}></RobotIcon>,
+            title: (
+              <Box style={{ textAlign: 'center' }}>
+                <Trans
+                  i18nKey={I18Keys.autopostInviteTitle}
+                  components={{ br: <br></br> }}></Trans>
+              </Box>
+            ),
+            parragraphs: [
+              <Trans
+                i18nKey={I18Keys.autpostInvitePar01}
+                components={{ br: <br></br> }}></Trans>,
+              <Text>{t(I18Keys.autopostInvitePar02)}</Text>,
+              <Box direction="row" gap="12px" justify="center">
+                <AppCheckBox
+                  onChange={(e) => setAutopostInviteDisabled(e.target.checked)}
+                  checked={dontShowAgain}></AppCheckBox>
+                <Box>
+                  <Text size="small">{t(I18Keys.dontShowAgain)}</Text>
                 </Box>
-              </Box>
-
-              <Box style={{ width: '100%' }} gap="12px" direction="row">
-                <AppButton
-                  onClick={() => notNow()}
-                  label={t(I18Keys.notNow)}
-                  style={{ width: '100%' }}></AppButton>
-                <AppButton
-                  primary
-                  onClick={() => reviewSettings()}
-                  label={t(I18Keys.reviewSettings)}
-                  style={{ width: '100%' }}></AppButton>
-              </Box>
-            </Box>
-          </>
-        </AppModal>
+              </Box>,
+            ],
+            secondaryButton: {
+              label: t(I18Keys.notNow),
+              onClick: () => reviewSettings(),
+            },
+            primaryButton: {
+              label: t(I18Keys.reviewSettings),
+              onClick: () => reviewSettings(),
+            },
+          }}
+          type="normal"></AppModalStandard>
       );
     }
   })();
