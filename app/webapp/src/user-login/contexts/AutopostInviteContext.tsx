@@ -13,13 +13,10 @@ import { Trans } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { AppModalStandard } from '../../app/AppModalStandard';
-import { AppCheckBox } from '../../app/icons/AppCheckBox';
+import { AppCheckBoxMessage } from '../../app/icons/AppCheckBoxMessage';
 import { RobotIcon } from '../../app/icons/RobotIcon';
 import { I18Keys } from '../../i18n/i18n';
 import { AbsoluteRoutes } from '../../route.names';
-import { AppButton, AppHeading, AppModal } from '../../ui-components';
-import { AppParagraph } from '../../ui-components/AppParagraph';
-import { BoxCentered } from '../../ui-components/BoxCentered';
 import { usePersist } from '../../utils/use.persist';
 
 const DEBUG = true;
@@ -106,7 +103,7 @@ export const AutopostInviteContext = (props: PropsWithChildren) => {
   console.log('autopostInviteDisabled', { showInvite });
 
   const inviteAutopostModal = (() => {
-    if (showInvite) {
+    if (showInvite || true) {
       return (
         <AppModalStandard
           onModalClosed={() => setShowInvite(false)}
@@ -124,15 +121,11 @@ export const AutopostInviteContext = (props: PropsWithChildren) => {
                 i18nKey={I18Keys.autpostInvitePar01}
                 components={{ br: <br></br> }}></Trans>,
               <Text>{t(I18Keys.autopostInvitePar02)}</Text>,
-              <Box direction="row" gap="12px" justify="center" align="center">
-                <AppCheckBox
-                  size={18}
-                  onCheckChange={(v) => setAutopostInviteDisabled(v)}
-                  checked={autopostInviteDisabled}></AppCheckBox>
-                <Box>
-                  <Text size="small">{t(I18Keys.dontShowAgain)}</Text>
-                </Box>
-              </Box>,
+              <AppCheckBoxMessage
+                message={t(I18Keys.dontShowAgain)}
+                checked={autopostInviteDisabled}
+                onCheckChange={(value) => setAutopostInviteDisabled(value)}
+                size={18}></AppCheckBoxMessage>,
             ],
             secondaryButton: {
               label: t(I18Keys.notNow),

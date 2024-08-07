@@ -1,20 +1,16 @@
-import { Box, BoxExtendedProps } from 'grommet';
+import { Box, BoxExtendedProps, Text } from 'grommet';
 
 import { AppButton } from '../../ui-components';
 import { BoxCentered } from '../../ui-components/BoxCentered';
 
-export const AppCheckBox = (
-  props: BoxExtendedProps & {
-    checked?: boolean;
-    onCheckChange: (value: boolean) => void;
-    size: number;
-  }
-) => {
+export const AppCheckBox = (props: { checked?: boolean; size?: number }) => {
+  const size = props.size || 18;
+
   const checkedSvg = (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width={props.size}
-      height={props.size}
+      width={size}
+      height={size}
       viewBox="0 0 18 18"
       fill="none">
       <rect width="18" height="18" rx="4" fill="#337FBD" />
@@ -49,9 +45,31 @@ export const AppCheckBox = (
       />
     </svg>
   );
+  return <BoxCentered>{props.checked ? checkedSvg : uncheckedSvg}</BoxCentered>;
+};
+
+export const AppCheckBoxMessage = (props: {
+  message: string | JSX.Element;
+  onCheckChange: (value: boolean) => void;
+  checked?: boolean;
+  size?: number;
+  boxProps?: BoxExtendedProps;
+}) => {
+  const { boxProps, message } = props;
+
   return (
     <AppButton onClick={() => props.onCheckChange(!props.checked)} plain>
-      <BoxCentered>{props.checked ? checkedSvg : uncheckedSvg}</BoxCentered>
+      <Box
+        direction="row"
+        gap="12px"
+        justify="center"
+        align="center"
+        {...boxProps}>
+        <AppCheckBox checked={props.checked} size={props.size}></AppCheckBox>
+        <Box>
+          <Text size="small">{message}</Text>
+        </Box>
+      </Box>
     </AppButton>
   );
 };

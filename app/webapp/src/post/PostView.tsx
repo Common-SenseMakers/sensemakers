@@ -180,11 +180,6 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       return;
     }
 
-    if (action === PublishPostAction.openNanopublication) {
-      openNanopublication();
-      return;
-    }
-
     if (action === PublishPostAction.nextPost) {
       openNextPost();
       return;
@@ -399,8 +394,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
           secondaryButton: {
             disabled: isUpdating,
             label: t(I18Keys.openPublished),
-            onClick: () =>
-              publishedModalClosed(PublishPostAction.openNanopublication),
+            onClick: () => openNanopublication(),
           },
         }}></AppModalStandard>
     );
