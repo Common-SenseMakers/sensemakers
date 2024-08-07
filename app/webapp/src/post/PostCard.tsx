@@ -16,8 +16,9 @@ export const PostCard = (props: {
   shade?: boolean;
   profile?: TwitterUserProfile;
   handleClick: () => void;
+  isEmail?: boolean;
 }) => {
-  const { post, shade: _shade } = props;
+  const { post, shade: _shade, isEmail } = props;
   const profile = props.profile;
   const shade = _shade || false;
 
@@ -31,6 +32,12 @@ export const PostCard = (props: {
   const postText = concatenateThread(post.generic);
 
   const { isParsing } = getPostStatuses(post);
+
+  const handleInternalClick = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).tagName === 'A') {
+      e.stopPropagation();
+    }
+  };
 
   return (
     <Box
@@ -62,7 +69,11 @@ export const PostCard = (props: {
           originalParsed: post?.originalParsed,
         }}></SemanticsEditor>
 
-      <PostTextStatic truncate shade={shade} text={postText}></PostTextStatic>
+      <PostTextStatic
+        onClick={handleInternalClick}
+        truncate
+        shade={shade}
+        text={postText}></PostTextStatic>
 
       <SemanticsEditor
         include={[PATTERN_ID.REF_LABELS]}
