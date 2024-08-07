@@ -89,6 +89,7 @@ export interface UserSettings {
   autopost: {
     [PLATFORM.Nanopub]: {
       value: AutopostOption;
+      after?: number;
     };
   };
   notificationFreq: NotificationFreq;

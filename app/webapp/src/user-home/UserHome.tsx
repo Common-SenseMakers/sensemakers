@@ -299,7 +299,7 @@ export const UserHome = () => {
           <AppHeading level="3">{pageTitle}</AppHeading>
           <Box>{reload}</Box>
         </Box>
-        <Box>{menu}</Box>
+        {pageIx === 0 && <Box>{menu}</Box>}
       </Box>
     </Box>
   );

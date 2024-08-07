@@ -20,7 +20,7 @@ import { UsersRepository } from '../../users/users.repository';
 import { TwitterApiCredentials } from './twitter.service';
 import { handleTwitterError } from './twitter.utils';
 
-const DEBUG = true;
+const DEBUG = false;
 const DEBUG_PREFIX = 'TwitterServiceClient';
 
 export type GetClientResultInternal<T extends 'read' | 'write' = 'read'> =

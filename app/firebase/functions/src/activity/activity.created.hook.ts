@@ -8,6 +8,7 @@ import {
   NotificationStatus,
 } from '../@shared/types/types.notifications';
 import { SciFilterClassfication } from '../@shared/types/types.parser';
+import { PLATFORM } from '../@shared/types/types.user';
 import { QUIET_SIGNUP_PERIOD } from '../config/config.runtime';
 import { logger } from '../instances/logger';
 import { Services } from '../instances/services';
@@ -49,26 +50,32 @@ export const activityEventCreatedHook = async (
 
         if (post.authorId) {
           const author = await users.repo.getUser(post.authorId, manager, true);
+
           const isQuiet =
             time.now() < author.signupDate + QUIET_SIGNUP_PERIOD &&
             notifications.haveQuiet;
 
-          if (DEBUG)
-            logger.debug(
-              `PostParsed or PostAutoposted activity check ${activityEvent.data.postId}`,
-              { notificationFreq: author.settings.notificationFreq, isQuiet },
-              PREFIX
-            );
+          const hasAutopost =
+            author.settings.notificationFreq !== NotificationFreq.None;
 
-          if (
-            author.settings.notificationFreq !== NotificationFreq.None &&
-            !isQuiet &&
+          const after = author.settings.autopost[PLATFORM.Nanopub].after;
+          const isNewPost = after && post.createdAtMs > after;
+
+          const isResearch =
             post.originalParsed &&
             [
               SciFilterClassfication.CITOID_DETECTED_RESEARCH,
               SciFilterClassfication.AI_DETECTED_RESEARCH,
-            ].includes(post.originalParsed.filter_classification)
-          ) {
+            ].includes(post.originalParsed.filter_classification);
+
+          if (DEBUG)
+            logger.debug(
+              `PostParsed or PostAutoposted activity check ${activityEvent.data.postId}`,
+              { hasAutopost, isQuiet, isNewPost, isResearch, author, post },
+              PREFIX
+            );
+
+          if (hasAutopost && !isQuiet && isResearch && isNewPost) {
             logger.debug(
               `Create notification of ${activityEvent.type} on post: ${post.id} to user: ${author.userId}`,
               activityEvent,
