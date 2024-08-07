@@ -103,7 +103,7 @@ export const AutopostInviteContext = (props: PropsWithChildren) => {
   console.log('autopostInviteDisabled', { showInvite });
 
   const inviteAutopostModal = (() => {
-    if (showInvite || true) {
+    if (showInvite) {
       return (
         <AppModalStandard
           onModalClosed={() => setShowInvite(false)}
