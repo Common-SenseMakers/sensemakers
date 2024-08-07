@@ -1,9 +1,11 @@
 import { NANOPUB_EXPLORER_SERVER } from '../app/config';
+import { NANOPUB_EXPLORER_URL_EMAIL } from '../email/constants';
 import {
   AppPost,
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
+  AppPostRepublishedStatus,
   AppPostReviewStatus,
 } from '../shared/types/types.posts';
 import { PLATFORM } from '../shared/types/types.user';
@@ -26,6 +28,8 @@ export interface AppPostStatus {
   ignored?: boolean;
   nanopubUrl?: string;
   published?: boolean;
+  manuallyPublished?: boolean;
+  autoPublished?: boolean;
   isEditing?: boolean;
 }
 export const getPostStatuses = (post?: AppPostFull): AppPostStatus => {
@@ -38,7 +42,7 @@ export const getPostStatuses = (post?: AppPostFull): AppPostStatus => {
     : undefined;
 
   const nanopubUrl = postedNanopub
-    ? `${NANOPUB_EXPLORER_SERVER}${nanopubHash}`
+    ? `${NANOPUB_EXPLORER_SERVER ? NANOPUB_EXPLORER_SERVER : NANOPUB_EXPLORER_URL_EMAIL}${nanopubHash}`
     : undefined;
 
   const processed = post && post.parsedStatus === AppPostParsedStatus.PROCESSED;
@@ -49,6 +53,12 @@ export const getPostStatuses = (post?: AppPostFull): AppPostStatus => {
   const pending = post && post.reviewedStatus === AppPostReviewStatus.PENDING;
   const ignored = post && post.reviewedStatus === AppPostReviewStatus.IGNORED;
   const published = !!postedNanopub;
+  const manuallyPublished =
+    !!postedNanopub &&
+    post.republishedStatus === AppPostRepublishedStatus.REPUBLISHED;
+  const autoPublished =
+    !!postedNanopub &&
+    post.republishedStatus === AppPostRepublishedStatus.AUTO_REPUBLISHED;
 
   const isEditing = post && post.reviewedStatus === AppPostReviewStatus.DRAFT;
 
@@ -60,6 +70,8 @@ export const getPostStatuses = (post?: AppPostFull): AppPostStatus => {
     ignored,
     nanopubUrl,
     published,
+    manuallyPublished,
+    autoPublished,
     isEditing,
   };
 };

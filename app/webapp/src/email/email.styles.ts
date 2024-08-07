@@ -3,6 +3,10 @@ export const footerStyle = {
   fontSize: 12,
   color: 'rgb(0,0,0, 0.7)',
 };
+export const summaryStyle = {
+  fontSize: 16,
+  color: 'rgb(0,0,0, 0.7)',
+};
 
 export const main = {
   backgroundColor: '#f3f4f6',

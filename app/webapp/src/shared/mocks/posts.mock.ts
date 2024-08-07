@@ -1,8 +1,8 @@
-import { ParsePostResult } from '../shared/types/types.parser';
+import { ParsePostResult } from '../types/types.parser';
 import {
   PlatformPostPublishOrigin,
   PlatformPostPublishStatus,
-} from '../shared/types/types.platform.posts';
+} from '../types/types.platform.posts';
 import {
   AppPostFull,
   AppPostParsedStatus,
@@ -10,8 +10,8 @@ import {
   AppPostRepublishedStatus,
   AppPostReviewStatus,
   GenericThread,
-} from '../shared/types/types.posts';
-import { PLATFORM } from '../shared/types/types.user';
+} from '../types/types.posts';
+import { PLATFORM } from '../types/types.user';
 
 export const getMockPublishedPost = () => {
   const authorId = 'test-author-id';
