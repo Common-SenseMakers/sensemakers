@@ -14,7 +14,6 @@ export const PostTextStatic = (props: {
 
   return (
     <div
-      onClick={props.onClick}
       className="editor"
       style={{ overflow: 'hidden' }}
       dangerouslySetInnerHTML={{ __html: textToHtml(text) }}

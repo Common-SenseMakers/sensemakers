@@ -20,7 +20,7 @@ import { UsersRepository } from '../../users/users.repository';
 import { TwitterApiCredentials } from './twitter.service';
 import { handleTwitterError } from './twitter.utils';
 
-const DEBUG = false;
+const DEBUG = true;
 const DEBUG_PREFIX = 'TwitterServiceClient';
 
 export type GetClientResultInternal<T extends 'read' | 'write' = 'read'> =
@@ -51,14 +51,16 @@ export class TwitterServiceClient {
    * Get generic client user app credentials
    * */
   protected getGenericClient() {
-    logger.debug(
-      'getGenericClient',
-      {
-        clientId: this.apiCredentials.clientId.substring(0, 8),
-        clientSecret: this.apiCredentials.clientSecret.substring(0, 8),
-      },
-      DEBUG_PREFIX
-    );
+    if (DEBUG) {
+      logger.debug(
+        'getGenericClient',
+        {
+          clientId: this.apiCredentials.clientId.substring(0, 8),
+          clientSecret: this.apiCredentials.clientSecret.substring(0, 8),
+        },
+        DEBUG_PREFIX
+      );
+    }
 
     return new TwitterApi({
       clientId: this.apiCredentials.clientId,
@@ -317,6 +319,8 @@ export class TwitterServiceClient {
     const authDetails = client.generateOAuth2AuthLink(params.callback_url, {
       scope,
     });
+
+    if (DEBUG) logger.debug('getSignupContext', authDetails, DEBUG_PREFIX);
 
     return { ...authDetails, ...params };
   }
