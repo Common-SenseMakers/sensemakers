@@ -1,8 +1,9 @@
-import { Box, Text } from 'grommet';
+import { Anchor, Box, Text } from 'grommet';
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { useAppFetch } from '../api/app.fetch';
+import { SUPPORT_EMAIL_ADDRESS } from '../app/config';
 import { AutopostIcon } from '../app/icons/AutopostIcon';
 import { BellIcon } from '../app/icons/BellIcon';
 import { EmailIcon } from '../app/icons/EmailIcon';
@@ -102,6 +103,10 @@ export const UserSettingsPage = () => {
 
       void setSettings(newSettings);
     }
+  };
+
+  const getSupportClicked = () => {
+    window.open(`mailto: ${SUPPORT_EMAIL_ADDRESS}`, '_blank');
   };
 
   const currentAutopost =
@@ -256,9 +261,12 @@ export const UserSettingsPage = () => {
         <SettingsSection
           icon={<SupportIcon size={24}></SupportIcon>}
           title={t(I18Keys.getSupport)}
-          onSectionClicked={() => {
-            setShowSettingsPage(SettingsSections.Support);
-          }}></SettingsSection>
+          description={
+            <Trans
+              i18nKey={I18Keys.getSupportDescription}
+              components={{ a: <a></a> }}></Trans>
+          }
+          showChevron={false}></SettingsSection>
 
         <Box
           pad={{ horizontal: 'medium' }}
@@ -302,10 +310,20 @@ export const UserSettingsPage = () => {
           connected={orcid !== undefined}
           connecting={connectingOrcid}></PlatformSection>
 
-        <Box margin={{ vertical: '36px' }} pad={{ horizontal: '16px' }}>
+        <Box
+          direction="row"
+          align="center"
+          justify="between"
+          pad={{ horizontal: '20px' }}
+          margin={{ top: '54px', bottom: '8px' }}>
+          <SettingSectionTitle
+            value={
+              t(I18Keys.logoutTitle) +
+              (twitterProfile ? ` @${twitterProfile.username}` : '')
+            }></SettingSectionTitle>
           <AppButton
-            onClick={() => disconnect()}
-            label={t(I18Keys.logout)}></AppButton>
+            label={t(I18Keys.logout)}
+            onClick={() => disconnect()}></AppButton>
         </Box>
       </Box>
     );

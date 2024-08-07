@@ -1,4 +1,4 @@
-import { getMockPendingPost } from '../mocks/posts.mock';
+import { getMockPendingPost, getMockPublishedPost } from '../mocks/posts.mock';
 import { NotificationFreq } from '../shared/types/types.notifications';
 import { AutopostOption } from '../shared/types/types.user';
 import { EmailTemplate } from './EmailTemplate';
@@ -11,6 +11,14 @@ EmailTemplate.PreviewProps = {
     getMockPendingPost(),
     getMockPendingPost(),
     getMockPendingPost(),
+    getMockPublishedPost(),
+    getMockPublishedPost(),
+    getMockPublishedPost(),
+    getMockPublishedPost(),
+    getMockPublishedPost(),
+    getMockPublishedPost(),
+    getMockPublishedPost(),
+    getMockPublishedPost(),
   ],
   notificationFrequency: NotificationFreq.Daily,
   autopostOption: AutopostOption.MANUAL,

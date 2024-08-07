@@ -191,12 +191,17 @@ export const AppLabelsEditor = (props: {
             </Box>
           );
         })}
-        <Box style={{ display: 'block', float: 'left', paddingTop: '5px' }}>
+        <Box
+          style={{
+            display: 'block',
+            float: 'left',
+            paddingTop: '5px',
+          }}>
           {adding ? (
             <Keyboard
               onEnter={() => enterPressed()}
               onEsc={() => setAdding(false)}>
-              <Box>
+              <Box margin={{ left: 'small' }}>
                 <AppInput
                   style={{
                     color: constants.colors.text,
