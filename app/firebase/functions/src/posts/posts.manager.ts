@@ -45,6 +45,10 @@ import { PostsProcessing } from './posts.processing';
 
 const DEBUG = false;
 
+const areCredentialsInvalid = (err: { message: string }) => {
+  return err.message.includes('Value passed for the token was invalid');
+};
+
 /**
  * Top level methods. They instantiate a TransactionManger and execute
  * read and writes to the DB
@@ -89,6 +93,21 @@ export class PostsManager {
     return platformPost;
   }
 
+  private async resetCredentials(
+    platformId: PLATFORM,
+    account: UserDetailsBase,
+    manager: TransactionManager
+  ) {
+    logger.error(
+      `Token error fetching from platform ${platformId}. Reset credentials`
+    );
+    await this.users.repo.removePlatformDetails(
+      platformId,
+      account.user_id,
+      manager
+    );
+  }
+
   public async fetchPostFromPlatform(
     userId: string,
     platformId: PUBLISHABLE_PLATFORMS,
@@ -121,16 +140,8 @@ export class PostsManager {
 
       return platformPostCreated;
     } catch (err: any) {
-      if (err.message.includes('Value passed for the token was invalid')) {
-        logger.error(
-          `Token error fetching from platform ${platformId}. Reset credentials`
-        );
-        await this.users.repo.removePlatformDetails(
-          platformId,
-          account.user_id,
-          manager
-        );
-
+      if (areCredentialsInvalid(err)) {
+        await this.resetCredentials(platformId, account, manager);
         return { post: undefined };
       }
 
@@ -186,16 +197,8 @@ export class PostsManager {
         this.initPlatformPost(platformId, fetchedPost)
       );
     } catch (err: any) {
-      if (err.message.includes('Value passed for the token was invalid')) {
-        logger.error(
-          `Token error fetching from platform ${platformId}. Reset credentials`
-        );
-        await this.users.repo.removePlatformDetails(
-          platformId,
-          account.user_id,
-          manager
-        );
-
+      if (areCredentialsInvalid(err)) {
+        await this.resetCredentials(platformId, account, manager);
         return undefined;
       }
 
