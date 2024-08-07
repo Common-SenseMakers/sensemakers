@@ -4,6 +4,7 @@ import {
 } from '../@shared/types/types.parser';
 import { logger } from '../instances/logger';
 
+const DEBUG = false;
 export class ParserService {
   constructor(protected url: string) {}
 
@@ -21,7 +22,7 @@ export class ParserService {
 
     try {
       const body = await response.json();
-      logger.debug('getPostSemantics', body);
+      if (DEBUG) logger.debug('getPostSemantics', body);
       return body as ParsePostResult;
     } catch (e) {
       logger.error(`error: ${JSON.stringify(e)}`);

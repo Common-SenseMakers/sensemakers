@@ -16,9 +16,8 @@ export const PostCard = (props: {
   shade?: boolean;
   profile?: TwitterUserProfile;
   handleClick: () => void;
-  isEmail?: boolean;
 }) => {
-  const { post, shade: _shade, isEmail } = props;
+  const { post, shade: _shade } = props;
   const profile = props.profile;
   const shade = _shade || false;
 
@@ -33,10 +32,6 @@ export const PostCard = (props: {
 
   const { isParsing } = getPostStatuses(post);
 
-  const handleInternalClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
-
   return (
     <Box
       pad={{ top: '16px', bottom: '24px', horizontal: '12px' }}
@@ -45,10 +40,8 @@ export const PostCard = (props: {
         borderTop: '1px solid var(--Neutral-300, #D1D5DB)',
         borderRight: '1px solid var(--Neutral-300, #D1D5DB)',
         borderLeft: '1px solid var(--Neutral-300, #D1D5DB)',
-        borderBottom: isEmail
-          ? '1px solid var(--Neutral-300, #D1D5DB)'
-          : 'none',
-        cursor: !isEmail ? 'pointer' : 'default',
+        borderBottom: 'none',
+        cursor: 'pointer',
         position: 'relative',
       }}
       onClick={handleClick}>
@@ -69,11 +62,7 @@ export const PostCard = (props: {
           originalParsed: post?.originalParsed,
         }}></SemanticsEditor>
 
-      <PostTextStatic
-        onClick={handleInternalClick}
-        truncate
-        shade={shade}
-        text={postText}></PostTextStatic>
+      <PostTextStatic truncate shade={shade} text={postText}></PostTextStatic>
 
       <SemanticsEditor
         include={[PATTERN_ID.REF_LABELS]}
