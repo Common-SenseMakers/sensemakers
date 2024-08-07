@@ -321,6 +321,14 @@ export class UsersService {
 
   updateSettings(userId: string, settings: UserSettingsUpdate) {
     return this.db.run(async (manager) => {
+      // set timestamp
+      if (settings.autopost) {
+        settings.autopost[PLATFORM.Nanopub] = {
+          value: settings.autopost[PLATFORM.Nanopub].value,
+          after: this.time.now(),
+        };
+      }
+
       await this.repo.updateSettings(userId, settings, manager);
     });
   }
