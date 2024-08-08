@@ -16,7 +16,6 @@ import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
-import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
 import {
   _01_createAndFetchUsers,
@@ -195,48 +194,6 @@ describe('030-process', () => {
           );
         })
       );
-    });
-
-    it.skip('get user profile', async () => {
-      if (!user) {
-        throw new Error('user not created');
-      }
-
-      const twitter = UsersHelper.getAccount(
-        user,
-        PLATFORM.Twitter,
-        undefined,
-        true
-      );
-
-      const username = twitter.profile?.username;
-      if (!username) {
-        throw new Error('username not found in profile');
-      }
-
-      const LABELS_URIS = ['http://purl.org/spar/cito/linksTo'];
-
-      const profilePosts = await services.postsManager.getUserProfile(
-        PLATFORM.Twitter,
-        username,
-        { expectedAmount: 100 },
-        LABELS_URIS
-      );
-
-      expect(profilePosts).to.not.be.undefined;
-      expect(profilePosts).to.have.length(2);
-
-      const LABELS_URIS_2 = ['http://purl.org/spar/cito/linksTo'];
-
-      const profilePosts2 = await services.postsManager.getUserProfile(
-        PLATFORM.Twitter,
-        username,
-        { expectedAmount: 100 },
-        LABELS_URIS_2
-      );
-
-      expect(profilePosts2).to.not.be.undefined;
-      expect(profilePosts2).to.have.length(2);
     });
 
     it('edits a published post', async () => {
