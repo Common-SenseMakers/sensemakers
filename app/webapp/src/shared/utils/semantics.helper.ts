@@ -1,6 +1,6 @@
 import { RSAKeys } from '../types/types.nanopubs';
 
-export const THIS_POST_NAME = 'http://sensentes/ThisText';
+export const THIS_POST_NAME = 'https://sense-nets.xyz/mySemanticPost';
 export const NANOPUB_PLACEHOLDER = 'http://purl.org/nanopub/temp/mynanopub#';
 export const ASSERTION_URI = `${NANOPUB_PLACEHOLDER}assertion`;
 export const HAS_COMMENT_URI = 'http://www.w3.org/2000/01/rdf-schema#comment';
