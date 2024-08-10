@@ -146,11 +146,11 @@ export enum I18Keys {
   reviewSettings = 's080',
   notNow = 's081',
 
-  emailSubjectReview = 's082',
-  emailSubjectAutoposted = 's083',
-  today = 's084',
-  thisWeek = 's085',
-  thisMonth = 's086',
+  emailSubject = 's082',
+
+  daily = 's084',
+  weekly = 's085',
+  monthly = 's086',
 
   noPostsFound = 's087',
   noPostsFoundDesc = 's088',
@@ -342,17 +342,15 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.dontShowAgain]: 'Don’t show this message again',
   [I18Keys.reviewSettings]: 'Review settings',
   [I18Keys.notNow]: 'Not now',
-  [I18Keys.emailSubjectReview]:
-    'You have {{nPosts}} potential nanopublications for review {{pointInTime}}',
-  [I18Keys.emailSubjectAutoposted]:
-    'You nanopublished {{nPosts}} posts {{pointInTime}}',
-  [I18Keys.today]: 'today',
-  [I18Keys.thisWeek]: 'this week',
-  [I18Keys.thisMonth]: 'this month',
+  [I18Keys.emailSubject]: 'Your {{pointInTime}} SenseNets Activity Summary',
   [I18Keys.noPostsFound]: 'No posts found',
   [I18Keys.noPostsFoundDesc]: 'We couldn’t find any posts.',
   [I18Keys.getSupportDescription]:
     '<a href=mailto:support@sense-nets.xyz>support@sense-nets.xyz</a>',
+
+  [I18Keys.daily]: 'Daily',
+  [I18Keys.weekly]: 'Weekly',
+  [I18Keys.monthly]: 'Monthly',
 };
 
 i18n.use(initReactI18next).init({

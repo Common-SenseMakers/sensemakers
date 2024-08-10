@@ -19,7 +19,7 @@ import {
 import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
-describe.only('011-twitter refresh', () => {
+describe('011-twitter refresh', () => {
   let user: AppUser | undefined;
 
   const services = getTestServices({
@@ -190,7 +190,7 @@ describe.only('011-twitter refresh', () => {
     });
   });
 
-  describe.only('remove platform on invalid token', () => {
+  describe('remove platform on invalid token', () => {
     it('removes platform', async () => {
       if (!USE_REAL_TWITTER) {
         logger.debug(
