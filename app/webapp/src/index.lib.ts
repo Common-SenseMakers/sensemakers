@@ -38,27 +38,17 @@ export const renderEmail: RenderEmailFunction = (
 
   const pointInTime = (() => {
     if (notificationFrequency === NotificationFreq.Daily) {
-      return t(I18Keys.today);
+      return t(I18Keys.daily);
     }
     if (notificationFrequency === NotificationFreq.Weekly) {
-      return t(I18Keys.thisWeek);
+      return t(I18Keys.weekly);
     }
     if (notificationFrequency === NotificationFreq.Monthly) {
-      return t(I18Keys.thisMonth);
+      return t(I18Keys.monthly);
     }
   })();
 
-  const nReview = posts.filter(
-    (p) => p.republishedStatus === AppPostRepublishedStatus.PENDING
-  ).length;
-  const nPublished = posts.filter(
-    (p) => p.republishedStatus === AppPostRepublishedStatus.AUTO_REPUBLISHED
-  ).length;
-
-  const subject =
-    nReview > nPublished
-      ? t(I18Keys.emailSubjectReview, { nPosts: nReview, pointInTime })
-      : t(I18Keys.emailSubjectAutoposted, { nPosts: nPublished, pointInTime });
+  const subject = t(I18Keys.emailSubject, { pointInTime });
 
   return { html, plainText, subject };
 };

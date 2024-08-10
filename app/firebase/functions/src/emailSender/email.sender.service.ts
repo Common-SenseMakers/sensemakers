@@ -56,11 +56,17 @@ export class EmailSenderService {
       throw new Error(`User ${user.userId} has no email`);
     }
 
+    const appUrl = APP_URL.value();
+
+    if (!appUrl) {
+      throw new Error(`APP_URL is not set`);
+    }
+
     const { html, plainText, subject } = renderEmail(
       posts,
       user.settings.notificationFreq,
       user.settings.autopost[PLATFORM.Nanopub].value,
-      APP_URL.value()
+      appUrl
     );
 
     const message: Message = {
