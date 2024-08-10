@@ -59,7 +59,7 @@ export const activityEventCreatedHook = async (
             author.settings.notificationFreq !== NotificationFreq.None;
 
           const after = author.settings.autopost[PLATFORM.Nanopub].after;
-          const isNewPost = after && post.createdAtMs > after;
+          const isNewPost = after === undefined || post.createdAtMs > after;
 
           const isResearch =
             post.originalParsed &&
