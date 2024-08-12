@@ -1,5 +1,5 @@
 import { Box } from 'grommet';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { NavButton } from '../app/NavButton';
@@ -17,16 +17,34 @@ export const PostNav = (props: { profile?: TwitterUserProfile }) => {
   const { post, nextPostId, prevPostId } = usePost();
 
   const { fetchOlder, isFetchingOlder, errorFetchingOlder } = useUserPosts();
+  const [triggeredFetchOlder, setTriggeredFetchedOlder] = useState(false);
 
   const navigate = useNavigate();
   const { constants } = useThemeContext();
 
   useEffect(() => {
-    if (!nextPostId && !isFetchingOlder && !errorFetchingOlder) {
-      console.log('fetching older');
+    if (
+      !nextPostId &&
+      !isFetchingOlder &&
+      !errorFetchingOlder &&
+      !triggeredFetchOlder
+    ) {
+      setTriggeredFetchedOlder(true);
+      console.log('fetching older', {
+        nextPostId,
+        isFetchingOlder,
+        errorFetchingOlder,
+        triggeredFetchOlder,
+      });
+
       fetchOlder();
     }
-  }, [isFetchingOlder, nextPostId]);
+
+    /** reset triggeredFetchedOlder once the nextPostId was obtained */
+    if (nextPostId) {
+      setTriggeredFetchedOlder(false);
+    }
+  }, [errorFetchingOlder, isFetchingOlder, nextPostId, triggeredFetchOlder]);
 
   const goToPrev = () => {
     navigate(`/post/${prevPostId}`);
