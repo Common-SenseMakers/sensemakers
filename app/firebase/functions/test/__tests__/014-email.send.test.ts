@@ -15,8 +15,8 @@ import {
 } from './reusable/create-post-fetch';
 import {
   EMAIL_SENDER_FROM,
-  EMAIL_SENDER_TO,
   globalTestServices,
+  TEST_EMAIL,
 } from './setup';
 
 const { renderEmail } = require('../../src/@shared/emailRenderer') as {
@@ -51,7 +51,7 @@ describe.only('014-email.send', () => {
       const message: Message = {
         From: EMAIL_SENDER_FROM,
         ReplyTo: EMAIL_SENDER_FROM,
-        To: EMAIL_SENDER_TO ? EMAIL_SENDER_TO : 'wesleyfinck@gmail.com',
+        To: TEST_EMAIL,
         Subject: subject,
         HtmlBody: html,
         TextBody: plainText,

@@ -19,7 +19,7 @@ export const USE_REAL_NANOPUB = process.env.USE_REAL_NANOPUB === 'true';
 export const USE_REAL_PARSER = process.env.USE_REAL_PARSER === 'true';
 export const USE_REAL_EMAIL = process.env.USE_REAL_EMAIL === 'true';
 export const EMAIL_SENDER_FROM = process.env.EMAIL_SENDER_FROM as string;
-export const EMAIL_SENDER_TO = process.env.EMAIL_SENDER_TO as string;
+export const TEST_EMAIL = process.env.TEST_EMAIL as string;
 
 export type InjectableContext = Readonly<{
   // properties injected using the Root Mocha Hooks
