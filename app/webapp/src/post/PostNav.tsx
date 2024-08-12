@@ -88,7 +88,7 @@ export const PostNav = (props: { profile?: TwitterUserProfile }) => {
           reverse
           icon={
             <Box justify="center" style={{ width: '22px' }}>
-              {isFetchingOlder || true ? (
+              {isFetchingOlder ? (
                 <Loading size="16px"></Loading>
               ) : (
                 <RightIcon></RightIcon>
