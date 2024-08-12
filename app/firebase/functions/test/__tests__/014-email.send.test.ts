@@ -25,7 +25,7 @@ const { renderEmail } = require('../../src/@shared/emailRenderer') as {
 
 const services = globalTestServices;
 
-describe.only('014-email.send', () => {
+describe('014-email.send', () => {
   describe('create and process', () => {
     it('sends a formatted users email', async () => {
       const posts: AppPostFull[] = [
