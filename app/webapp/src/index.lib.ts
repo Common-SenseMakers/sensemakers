@@ -7,6 +7,7 @@ import { EmailTemplate } from './email/EmailTemplate';
 import { NotificationFreq } from './shared/types/types.notifications';
 import { AppPostFull } from './shared/types/types.posts';
 import { RenderEmailFunction } from './shared/types/types.user';
+import { cap } from './utils/general';
 
 export const renderEmail: RenderEmailFunction = (
   posts: AppPostFull[],
@@ -40,9 +41,10 @@ export const renderEmail: RenderEmailFunction = (
     if (notificationFrequency === NotificationFreq.Monthly) {
       return t(I18Keys.monthly);
     }
+    return '';
   })();
 
-  const subject = t(I18Keys.emailSubject, { timeframe });
+  const subject = t(I18Keys.emailSubject, { timeframe: cap(timeframe) });
 
   return { html, plainText, subject };
 };
