@@ -77,9 +77,20 @@ export enum I18Keys {
 
   cancel = 's039',
 
+  emailHeader = 's0400',
+  emailSummary = 's0400a',
+
   recommendedNanopubEmailHeader = 's040',
   recommendedNanopubEmailHeaderSingular = 's040_one',
   recommendedNanopubEmailHeaderPlural = 's040_other',
+
+  recommendedNanopubEmailSummary = 's040a',
+  recommendedNanopubEmailSummarySingular = 's040a_one',
+  recommendedNanopubEmailSummaryPlural = 's040a_other',
+
+  recommendedNanopubEmailPreview = 's040b',
+  recommendedNanopubEmailPreviewSingular = 's040b_one',
+  recommendedNanopubEmailPreviewPlural = 's040b_other',
 
   recommendedNanopubEmailFooter = 's041',
   emailFooter = 's041a',
@@ -88,14 +99,31 @@ export enum I18Keys {
   publishedNanopubEmailHeaderSingular = 's042_one',
   publishedNanopubEmailHeaderPlural = 's042_other',
 
-  publishedNanopubEmailFooter = 's043',
+  publishedNanopubEmailSummary = 's0420',
+  publishedNanopubEmailSummarySingular = 's0420_one',
+  publishedNanopubEmailSummaryPlural = 's0420_other',
 
-  emailHeaderDailyNotificationTimeframe = 's044',
-  emailHeaderWeeklyNotificationTimeframe = 's045',
-  emailHeaderMonthlyNotificationTimeframe = 's046',
-  emailFooterDailyNotificationTimeframe = 's047',
-  emailFooterWeeklyNotificationTimeframe = 's048',
-  emailFooterMonthlyNotificationTimeframe = 's049',
+  publishedNanopubEmailPreview = 's0421',
+  publishedNanopubEmailPreviewSingular = 's0421_one',
+  publishedNanopubEmailPreviewPlural = 's0421_other',
+
+  autoPublishedNanopubEmailHeader = 's042a',
+  autoPublishedNanopubEmailHeaderSingular = 's042a_one',
+  autoPublishedNanopubEmailHeaderPlural = 's042a_other',
+
+  autoPublishedNanopubEmailSummary = 's042aa',
+  autoPublishedNanopubEmailSummarySingular = 's042aa_one',
+  autoPublishedNanopubEmailSummaryPlural = 's042aa_other',
+
+  autoPublishedNanopubEmailPreview = 's042ab',
+  autoPublishedNanopubEmailPreviewSingular = 's042ab_one',
+  autoPublishedNanopubEmailPreviewPlural = 's042ab_other',
+
+  autoPublishedNanopubEmailFooter = 's043a',
+
+  daily = 's047',
+  weekly = 's048',
+  monthly = 's049',
 
   emailReviewPostButton = 's050',
   emailSeeAllButton = 's051',
@@ -148,12 +176,12 @@ export enum I18Keys {
 
   emailSubject = 's082',
 
-  daily = 's084',
-  weekly = 's085',
-  monthly = 's086',
-
   noPostsFound = 's087',
   noPostsFoundDesc = 's088',
+
+  postStatusForReview = 's089',
+  postStatusPublished = 's090',
+  postStatusAutopublished = 's091',
 }
 
 const check = new Set();
@@ -254,6 +282,9 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.retract]: 'Retract',
   [I18Keys.cancel]: 'Cancel',
 
+  [I18Keys.emailHeader]: '{{timeframe}} Activity Summary',
+  [I18Keys.emailSummary]: "Here's what happened {{timeframe}}:",
+
   [I18Keys.recommendedNanopubEmailHeader]: '',
   [I18Keys.recommendedNanopubEmailHeaderSingular]:
     'You have {{count}} potential nanopublication ready for review {{timeframe}}.',
@@ -261,25 +292,55 @@ const translationENG: Record<I18Keys, string> = {
     'You have {{count}} potential nanopublications ready for review {{timeframe}}.',
   [I18Keys.recommendedNanopubEmailFooter]:
     "This is your {{timeframe}} nanopub recommendation summary. You can [edit your email settings here]({{emailSettingsLink}}). Don't see a post you'd like to nanopublish? [Review all your recent posts here]({{ignoredPostsLink}}).",
+  [I18Keys.recommendedNanopubEmailSummary]: '',
+  [I18Keys.recommendedNanopubEmailSummarySingular]:
+    'You have {{count}} potential nanopublication for review.',
+  [I18Keys.recommendedNanopubEmailSummaryPlural]:
+    'You have {{count}} potential nanopublications for review.',
+  [I18Keys.recommendedNanopubEmailPreview]: '',
+  [I18Keys.recommendedNanopubEmailPreviewSingular]:
+    '{{count}} potential nanopublication for review.',
+  [I18Keys.recommendedNanopubEmailPreviewPlural]:
+    '{{count}} potential nanopublications for review.',
 
   [I18Keys.emailFooter]:
     "This is your {{timeframe}} activity summary. You can [edit your email or automation settings here]({{emailSettingsLink}}). Don't see a post you'd like to nanopublish? [Review all your recent posts here]({{ignoredPostsLink}}). See any mistakes in your nanopublications? [Edit or retract your automated nanopublications here]({{publishedPostsLink}}).",
 
   [I18Keys.publishedNanopubEmailHeader]: '',
   [I18Keys.publishedNanopubEmailHeaderSingular]:
-    "We've automatically published {{count}} post {{timeframe}}.",
+    'You published {{count}} post {{timeframe}}.',
   [I18Keys.publishedNanopubEmailHeaderPlural]:
+    'You published {{count}} posts {{timeframe}}.',
+  [I18Keys.publishedNanopubEmailSummary]: '',
+  [I18Keys.publishedNanopubEmailSummarySingular]:
+    'You manually nanopublished {{count}} post.',
+  [I18Keys.publishedNanopubEmailSummaryPlural]:
+    'You manually nanopublished {{count}} posts.',
+  [I18Keys.publishedNanopubEmailPreview]: '',
+  [I18Keys.publishedNanopubEmailPreviewSingular]:
+    '{{count}} manually published',
+  [I18Keys.publishedNanopubEmailPreviewPlural]: '{{count}} manually published',
+
+  [I18Keys.autoPublishedNanopubEmailHeader]: '',
+  [I18Keys.autoPublishedNanopubEmailHeaderSingular]:
+    "We've automatically published {{count}} post {{timeframe}}.",
+  [I18Keys.autoPublishedNanopubEmailHeaderPlural]:
     "We've automatically published {{count}} posts {{timeframe}}.",
-  [I18Keys.publishedNanopubEmailFooter]:
+
+  [I18Keys.autoPublishedNanopubEmailFooter]:
     'These posts were automatically published according to your automation settings. You can [change your automation settings here]({{automationSettingsLink}}).\n\nSee any mistakes in your nanopublications? [Edit or retract your automated nanopublications here]({{publishedPostsLink}}).',
+  [I18Keys.autoPublishedNanopubEmailSummary]: '',
+  [I18Keys.autoPublishedNanopubEmailSummarySingular]:
+    'We autopublished {{count}} post for you.',
+  [I18Keys.autoPublishedNanopubEmailSummaryPlural]:
+    'We autopublished {{count}} posts for you.',
+  [I18Keys.autoPublishedNanopubEmailPreview]: '',
+  [I18Keys.autoPublishedNanopubEmailPreviewSingular]: '{{count}} autopublished',
+  [I18Keys.autoPublishedNanopubEmailPreviewPlural]: '{{count}} autopublished',
 
-  [I18Keys.emailHeaderDailyNotificationTimeframe]: 'today',
-  [I18Keys.emailHeaderWeeklyNotificationTimeframe]: 'this week',
-  [I18Keys.emailHeaderMonthlyNotificationTimeframe]: 'this month',
-
-  [I18Keys.emailFooterDailyNotificationTimeframe]: 'daily',
-  [I18Keys.emailFooterWeeklyNotificationTimeframe]: 'weekly',
-  [I18Keys.emailFooterMonthlyNotificationTimeframe]: 'monthly',
+  [I18Keys.daily]: 'daily',
+  [I18Keys.weekly]: 'weekly',
+  [I18Keys.monthly]: 'monthly',
 
   [I18Keys.emailReviewPostButton]: 'Review Post',
   [I18Keys.emailSeeAllButton]: 'See All',
@@ -351,6 +412,12 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.daily]: 'Daily',
   [I18Keys.weekly]: 'Weekly',
   [I18Keys.monthly]: 'Monthly',
+
+  [I18Keys.emailSubject]: 'Your {{timeframe}} SenseNets Activity Summary',
+
+  [I18Keys.postStatusForReview]: 'For Review',
+  [I18Keys.postStatusPublished]: 'Published',
+  [I18Keys.postStatusAutopublished]: 'Autopublished',
 };
 
 i18n.use(initReactI18next).init({
