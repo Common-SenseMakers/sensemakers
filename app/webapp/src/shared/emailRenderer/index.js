@@ -51811,12 +51811,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   renderEmail: () => (/* binding */ renderEmail)
 /* harmony export */ });
-/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./node_modules/@react-email/render/dist/browser/index.mjs");
+/* harmony import */ var _react_email_components__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./node_modules/@react-email/render/dist/browser/index.mjs");
 /* harmony import */ var i18next__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/i18next/dist/esm/i18next.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/react/index.js");
 /* harmony import */ var _src_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/i18n/i18n.ts");
 /* harmony import */ var _email_EmailTemplate__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./src/email/EmailTemplate.tsx");
 /* harmony import */ var _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./src/shared/types/types.notifications.ts");
+/* harmony import */ var _utils_general__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./src/utils/general.ts");
+
 
 
 
@@ -51824,12 +51826,12 @@ __webpack_require__.r(__webpack_exports__);
 
 
 var renderEmail = function (posts, notificationFrequency, appUrl) {
-  var html = (0,_react_email_components__WEBPACK_IMPORTED_MODULE_5__.render)( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(_email_EmailTemplate__WEBPACK_IMPORTED_MODULE_3__.EmailTemplate, {
+  var html = (0,_react_email_components__WEBPACK_IMPORTED_MODULE_6__.render)( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(_email_EmailTemplate__WEBPACK_IMPORTED_MODULE_3__.EmailTemplate, {
     posts: posts,
     notificationFrequency: notificationFrequency,
     appUrl: appUrl
   }));
-  var plainText = (0,_react_email_components__WEBPACK_IMPORTED_MODULE_5__.render)( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(_email_EmailTemplate__WEBPACK_IMPORTED_MODULE_3__.EmailTemplate, {
+  var plainText = (0,_react_email_components__WEBPACK_IMPORTED_MODULE_6__.render)( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement(_email_EmailTemplate__WEBPACK_IMPORTED_MODULE_3__.EmailTemplate, {
     posts: posts,
     notificationFrequency: notificationFrequency,
     appUrl: appUrl
@@ -51846,9 +51848,10 @@ var renderEmail = function (posts, notificationFrequency, appUrl) {
     if (notificationFrequency === _shared_types_types_notifications__WEBPACK_IMPORTED_MODULE_4__.NotificationFreq.Monthly) {
       return (0,i18next__WEBPACK_IMPORTED_MODULE_0__.t)(_src_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.monthly);
     }
+    return '';
   }();
   var subject = (0,i18next__WEBPACK_IMPORTED_MODULE_0__.t)(_src_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailSubject, {
-    timeframe: timeframe
+    timeframe: (0,_utils_general__WEBPACK_IMPORTED_MODULE_5__.cap)(timeframe)
   });
   return {
     html: html,

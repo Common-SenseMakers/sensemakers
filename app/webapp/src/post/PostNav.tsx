@@ -7,6 +7,7 @@ import { LeftChevronIcon } from '../app/icons/LeftChveronIcon';
 import { LeftIcon } from '../app/icons/LeftIcon';
 import { RightIcon } from '../app/icons/RightIcon';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
+import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useUserPosts } from '../user-home/UserPostsContext';
@@ -56,6 +57,8 @@ export const PostNav = (props: { profile?: TwitterUserProfile }) => {
     }
   };
 
+  console.log('PostNav', { nextPostId, prevPostId });
+
   return (
     <Box
       style={{
@@ -84,11 +87,13 @@ export const PostNav = (props: { profile?: TwitterUserProfile }) => {
         <NavButton
           reverse
           icon={
-            isFetchingOlder ? (
-              <Loading size="16px"></Loading>
-            ) : (
-              <RightIcon></RightIcon>
-            )
+            <Box justify="center" style={{ width: '22px' }}>
+              {isFetchingOlder || true ? (
+                <Loading size="16px"></Loading>
+              ) : (
+                <RightIcon></RightIcon>
+              )}
+            </Box>
           }
           disabled={!nextPostId}
           label="Next"

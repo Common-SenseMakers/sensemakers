@@ -337,7 +337,7 @@ export const PostContext: React.FC<{
 
   const { prevPostId, nextPostId } = useMemo(
     () => getNextAndPrev(post?.id),
-    [post]
+    [post, getNextAndPrev]
   );
 
   return (
