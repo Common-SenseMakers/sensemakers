@@ -18,6 +18,7 @@ import { I18Keys } from '../i18n/i18n';
 import { AbsoluteRoutes } from '../route.names';
 import { NotificationFreq } from '../shared/types/types.notifications';
 import { AppPostFull, PostsQueryStatus } from '../shared/types/types.posts';
+import { cap } from '../utils/general';
 import { splitPostsByStatus } from '../utils/post.utils';
 import { EmailRow } from './EmailRow';
 import { PostCardEmail } from './PostCardEmail';
@@ -56,38 +57,35 @@ export const EmailTemplate = ({
     allPostsLink
   ).toString();
 
-  const { sectionHeaderTimeframeKey, footerTimeframeKey, headerTimeframeKey } =
-    (() => {
-      switch (notificationFrequency) {
-        case NotificationFreq.Daily:
-          return {
-            sectionHeaderTimeframeKey: I18Keys.today,
-            footerTimeframeKey: I18Keys.daily,
-            headerTimeframeKey: I18Keys.Daily,
-          };
-        case NotificationFreq.Weekly:
-          return {
-            sectionHeaderTimeframeKey: I18Keys.thisWeek,
-            footerTimeframeKey: I18Keys.weekly,
-            headerTimeframeKey: I18Keys.Weekly,
-          };
-        case NotificationFreq.Monthly:
-          return {
-            sectionHeaderTimeframeKey: I18Keys.thisMonth,
-            footerTimeframeKey: I18Keys.monthly,
-            headerTimeframeKey: I18Keys.Monthly,
-          };
-        default:
-          return {
-            sectionHeaderTimeframeKey: I18Keys.today,
-            footerTimeframeKey: I18Keys.daily,
-            headerTimeframeKey: I18Keys.Daily,
-          };
-      }
-    })();
+  const { sectionHeaderTimeframeKey, timeframeKey } = (() => {
+    switch (notificationFrequency) {
+      case NotificationFreq.Daily:
+        return {
+          sectionHeaderTimeframeKey: I18Keys.today,
+          timeframeKey: I18Keys.daily,
+        };
+      case NotificationFreq.Weekly:
+        return {
+          sectionHeaderTimeframeKey: I18Keys.thisWeek,
+          timeframeKey: I18Keys.weekly,
+        };
+      case NotificationFreq.Monthly:
+        return {
+          sectionHeaderTimeframeKey: I18Keys.thisMonth,
+          timeframeKey: I18Keys.monthly,
+        };
+      default:
+        return {
+          sectionHeaderTimeframeKey: I18Keys.today,
+          timeframeKey: I18Keys.daily,
+        };
+    }
+  })();
 
   const { header, preview, summary, footer } = (() => {
-    const header = t(I18Keys.emailHeader, { timeframe: t(headerTimeframeKey) });
+    const header = t(I18Keys.emailHeader, {
+      timeframe: cap(t(timeframeKey)),
+    });
     const { pendingPosts, manuallyPublishedPosts, autoPublishedPosts } =
       splitPostsByStatus(posts);
     const preview = `${
@@ -104,7 +102,7 @@ export const EmailTemplate = ({
         : ''
     }`;
     let footer = t(I18Keys.emailFooter, {
-      timeframe: t(footerTimeframeKey),
+      timeframe: t(timeframeKey),
       emailSettingsLink,
       ignoredPostsLink,
       publishedPostsLink,

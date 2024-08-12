@@ -125,6 +125,10 @@ export enum I18Keys {
   weekly = 's048',
   monthly = 's049',
 
+  today = 's049c',
+  thisWeek = 's049d',
+  thisMonth = 's049e',
+
   emailReviewPostButton = 's050',
   emailSeeAllButton = 's051',
   emailMorePostsNote = 's052',
@@ -409,9 +413,13 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.getSupportDescription]:
     '<a href=mailto:support@sense-nets.xyz>support@sense-nets.xyz</a>',
 
-  [I18Keys.daily]: 'Daily',
-  [I18Keys.weekly]: 'Weekly',
-  [I18Keys.monthly]: 'Monthly',
+  [I18Keys.daily]: 'daily',
+  [I18Keys.weekly]: 'weekly',
+  [I18Keys.monthly]: 'monthly',
+
+  [I18Keys.today]: 'today',
+  [I18Keys.thisWeek]: 'this week',
+  [I18Keys.thisMonth]: 'this month',
 
   [I18Keys.emailSubject]: 'Your {{timeframe}} SenseNets Activity Summary',
 

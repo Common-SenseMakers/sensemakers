@@ -1,7 +1,7 @@
 import { Message, ServerClient } from 'postmark';
 
 import { AppPostFull } from '../@shared/types/types.posts';
-import { AppUser } from '../@shared/types/types.user';
+import { AppUser, PLATFORM } from '../@shared/types/types.user';
 import { RenderEmailFunction } from '../@shared/types/types.user';
 import { APP_URL, EMAIL_SENDER_FROM } from '../config/config.runtime';
 import { logger } from '../instances/logger';
