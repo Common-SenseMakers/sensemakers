@@ -120,6 +120,7 @@ describe('nanopublication format', () => {
       mirrors: [
         {
           id: 'post-id-1',
+          post_id: published.info().uri as string,
           publishOrigin: PlatformPostPublishOrigin.POSTED,
           publishStatus: PlatformPostPublishStatus.PUBLISHED,
           platformId: PLATFORM.Nanopub,
