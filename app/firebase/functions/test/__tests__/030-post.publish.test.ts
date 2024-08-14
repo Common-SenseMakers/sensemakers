@@ -265,15 +265,45 @@ describe.only('030-process', () => {
       const nanopubPlatformPost = post.mirrors.find(
         (platformPost) => platformPost.platformId === PLATFORM.Nanopub
       );
+      if (!nanopubPlatformPost) {
+        throw new Error('nanopubPlatformPost undefined');
+      }
+
+      const nonUpdatedMirrors = post.mirrors.filter(
+        (platformPost) => platformPost.platformId !== PLATFORM.Nanopub
+      );
+
       const rootNanopubUri = nanopubPlatformPost?.post_id;
       const latestNanopubUri = nanopubPlatformPost?.posted?.post_id;
       expect(rootNanopubUri).to.not.be.undefined;
       expect(latestNanopubUri).to.not.be.undefined;
       expect(rootNanopubUri).to.equal(latestNanopubUri);
 
+      const nanopubDraft = await services.platforms
+        .get(PLATFORM.Nanopub)
+        .convertFromGeneric({ post: newPost, author: user });
+
+      if (!nanopubDraft.unsignedPost) {
+        throw new Error('unsignedPost undefined');
+      }
+
+      /** if signer type is set to user, sign the updated nanopub before publishing it */
+      if (
+        nanopubPlatformPost?.draft?.signerType === PlatformPostSignerType.USER
+      ) {
+        const signed = await signNanopublication(
+          nanopubDraft.unsignedPost as string,
+          rsaKeys,
+          ''
+        );
+        nanopubDraft.signedPost = signed;
+      }
+
+      nanopubPlatformPost.draft = nanopubDraft;
+
       /** send updated post (content and semantics did not changed) */
       await services.postsManager.publishPost(
-        newPost,
+        { ...newPost, mirrors: [...nonUpdatedMirrors, nanopubPlatformPost] },
         [PLATFORM.Nanopub],
         user.userId
       );
