@@ -105,10 +105,6 @@ export const UserSettingsPage = () => {
     }
   };
 
-  const getSupportClicked = () => {
-    window.open(`mailto: ${SUPPORT_EMAIL_ADDRESS}`, '_blank');
-  };
-
   const currentAutopost =
     connectedUser?.settings?.autopost[PLATFORM.Nanopub].value;
   const currentNotifications = connectedUser?.settings?.notificationFreq;
@@ -157,7 +153,6 @@ export const UserSettingsPage = () => {
             options={[
               {
                 title: t(I18Keys.notificationSettingsOpt1Title),
-                description: t(I18Keys.notificationSettingsOpt1Desc),
                 id: NotificationFreq.Daily,
                 optionSelected: (id) =>
                   setNotifications(id as NotificationFreq),
@@ -165,7 +160,6 @@ export const UserSettingsPage = () => {
               },
               {
                 title: t(I18Keys.notificationSettingsOpt2Title),
-                description: t(I18Keys.notificationSettingsOpt2Desc),
                 id: NotificationFreq.Weekly,
                 optionSelected: (id) =>
                   setNotifications(id as NotificationFreq),
@@ -173,7 +167,6 @@ export const UserSettingsPage = () => {
               },
               {
                 title: t(I18Keys.notificationSettingsOpt3Title),
-                description: t(I18Keys.notificationSettingsOpt3Desc),
                 id: NotificationFreq.Monthly,
                 optionSelected: (id) =>
                   setNotifications(id as NotificationFreq),
@@ -181,7 +174,6 @@ export const UserSettingsPage = () => {
               },
               {
                 title: t(I18Keys.notificationSettingsOpt4Title),
-                description: t(I18Keys.notificationSettingsOpt4Desc),
                 id: NotificationFreq.None,
                 optionSelected: (id) =>
                   setNotifications(id as NotificationFreq),

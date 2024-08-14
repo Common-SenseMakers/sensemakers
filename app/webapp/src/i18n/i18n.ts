@@ -34,6 +34,7 @@ export enum I18Keys {
 
   introNextLabel = 's026x',
   introFinalLabel = 's026y',
+  goBack = 's026z',
 
   introHeading01 = 's027',
   introText011 = 's028',
@@ -60,7 +61,6 @@ export enum I18Keys {
   publishWarningTitle = 's0320',
   publishWarningPar01 = 's0331',
   publishWarningPar02 = 's0342',
-  publishWarningPar03 = 's0353c',
 
   returnToDraft = 's0353',
   yesPublish = 's0364',
@@ -154,13 +154,9 @@ export enum I18Keys {
   ORCID = 's061',
 
   notificationSettingsOpt1Title = 's062',
-  notificationSettingsOpt1Desc = 's063',
   notificationSettingsOpt2Title = 's064',
-  notificationSettingsOpt2Desc = 's065',
   notificationSettingsOpt3Title = 's066',
-  notificationSettingsOpt3Desc = 's067',
   notificationSettingsOpt4Title = 's068',
-  notificationSettingsOpt4Desc = 's069',
 
   publishingAutomationOpt1Title = 's070',
   publishingAutomationOpt1Desc = 's071',
@@ -259,18 +255,16 @@ const translationENG: Record<I18Keys, string> = {
 
   [I18Keys.connectOrcidTitle]: 'Your data, your identity',
   [I18Keys.connectOrcidPar01]:
-    'Your nanopublications are owned by you and tied to your identity through cryptographic signing. You’ll sign these nanopubs with a wallet we created for you using your email. ',
+    'Your nanopublications are owned by you and tied to your identity through cryptographic signing. We created a wallet for you using your email to sign each nanopub.',
   [I18Keys.connectOrcidPar02]:
-    'If you want, you can also <b>connect your ORCID</b> account to link your nanopubs to your professional profile, enhancing your recognition within the scientific community.',
+    'You can also <b>connect your ORCID</b> account, so your nanopubs are linked to your professional profile. This can be done at any time in your settings.',
   [I18Keys.connectOrcid]: 'Connect ORCID',
   [I18Keys.continue]: 'Continue',
 
   [I18Keys.publishWarningTitle]: 'Share your research',
   [I18Keys.publishWarningPar01]:
-    'Are you ready to publish this nanopublication?',
+    'Once published, your nanopub will be added to the decentralized nanopublications network, making your research accessible and verifiable.',
   [I18Keys.publishWarningPar02]:
-    'Once published, your nanopub will be added to the decentralized nanopublications network, making your research accessible and verifiable. ',
-  [I18Keys.publishWarningPar03]:
     'While you can retract a nanopub to make it invisible to most users, <b>it cannot be deleted</b>. This ensures the integrity of the scientific record.',
   [I18Keys.returnToDraft]: 'No, return to draft',
   [I18Keys.yesPublish]: 'Yes, I want to publish',
@@ -374,26 +368,18 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.ORCID]: 'ORCID',
 
   [I18Keys.notificationSettingsOpt1Title]: 'Daily summary',
-  [I18Keys.notificationSettingsOpt1Desc]:
-    'Receive a daily digest email of new relevant X · Twitter post that have been identified or autopublished.',
   [I18Keys.notificationSettingsOpt2Title]: 'Weekly summary',
-  [I18Keys.notificationSettingsOpt2Desc]:
-    'Receive a weekly email with a list of all posts that have been identified or autopublished that week.',
   [I18Keys.notificationSettingsOpt3Title]: 'Monthly summary',
-  [I18Keys.notificationSettingsOpt3Desc]:
-    'Receive a monthly email with a list of all posts that have been identified or autopublished that month.',
   [I18Keys.notificationSettingsOpt4Title]:
     'I don’t want to receive notifications',
-  [I18Keys.notificationSettingsOpt4Desc]:
-    'We won’t send you any email notifications, so you’ll need to check the app for updates.',
 
   [I18Keys.publishingAutomationOpt1Title]: 'AI automated publishing',
   [I18Keys.publishingAutomationOpt1Desc]:
     'All science posts detected with our AI filter will be automatically nanopublished.',
   [I18Keys.publishingAutomationOpt2Title]:
-    'Reference-Based Automated Publishing',
+    'Reference-Based automated publishing',
   [I18Keys.publishingAutomationOpt2Desc]:
-    'We will automatically nanopublish any post mentioning research with academic reference identifiers such as DOIs, PMIDs, PMCIDs, or ISBNs.',
+    'We will automatically nanopublish with academic reference identifiers such as DOIs, PMIDs, PMCIDs, or ISBNs. (No AI.)',
   [I18Keys.publishingAutomationOpt3Title]: 'Supervised publishing',
   [I18Keys.publishingAutomationOpt3Desc]:
     'You receive a notification when new science posts are detected, and can manually review them before publishing.',
@@ -426,6 +412,7 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.postStatusForReview]: 'For Review',
   [I18Keys.postStatusPublished]: 'Published',
   [I18Keys.postStatusAutopublished]: 'Autopublished',
+  [I18Keys.goBack]: 'Go back',
 };
 
 i18n.use(initReactI18next).init({
