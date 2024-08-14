@@ -47,34 +47,38 @@ export const textToHtml = (text: string) => {
   const urlRegex =
     /\bhttps?:\/\/[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
 
-  html = html.replace(urlRegex, (url) => {
-    let endsWithPeriod = false;
-    let urlClean = url;
-    try {
-      if (url.endsWith('.')) {
-        endsWithPeriod = true;
-        url = url.slice(0, -1);
-      }
-
-      if (url.endsWith('</p>')) {
-        url = url.slice(0, -4);
-      }
-
-      const urlObj = new URL(url);
-      urlClean = `${urlObj.protocol}//${urlObj.hostname}${urlObj.pathname}`;
-      if (urlObj.search) {
-        urlClean += urlObj.search;
-      }
-    } catch (e) {
-      console.error(`Error parsing URL: ${url}`, e);
-    }
-
-    const noParametersUrl = cleanUrlParams(urlClean);
-    const truncatedUrl =
-      noParametersUrl.length > 50 ? noParametersUrl.slice(0, 50) + '...' : '';
-
-    return `<a href="${url}" target="_blank">${truncatedUrl}</a>${endsWithPeriod ? '.' : ''}`;
-  });
+  html = html.replace(urlRegex, replaceUrlCallback);
 
   return html;
+};
+
+const replaceUrlCallback = (url: string) => {
+  let endsWithPeriod = false;
+  let urlClean = url;
+  try {
+    if (url.endsWith('.')) {
+      endsWithPeriod = true;
+      url = url.slice(0, -1);
+    }
+
+    if (url.endsWith('</p>')) {
+      url = url.slice(0, -4);
+    }
+
+    const urlObj = new URL(url);
+    urlClean = `${urlObj.protocol}//${urlObj.hostname}${urlObj.pathname}`;
+    if (urlObj.search) {
+      urlClean += urlObj.search;
+    }
+  } catch (e) {
+    console.error(`Error parsing URL: ${url}`, e);
+  }
+
+  const noParametersUrl = cleanUrlParams(urlClean);
+  const truncatedUrl =
+    noParametersUrl.length > 50
+      ? noParametersUrl.slice(0, 50) + '...'
+      : noParametersUrl;
+
+  return `<a href="${url}" target="_blank">${truncatedUrl}</a>${endsWithPeriod ? '.' : ''}`;
 };
