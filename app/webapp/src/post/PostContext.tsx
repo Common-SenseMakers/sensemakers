@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import { use } from 'i18next';
 import React, {
   createContext,
   useCallback,
