@@ -1,4 +1,3 @@
-import { logger } from 'firebase-functions';
 import puppeteer, { Browser } from 'puppeteer';
 import { IOAuth2RequestTokenResult } from 'twitter-api-v2';
 
@@ -12,6 +11,7 @@ import {
   TwitterAccountCredentials,
 } from '../../src/@shared/types/types.user';
 import { TransactionManager } from '../../src/db/transaction.manager';
+import { logger } from '../../src/instances/logger';
 import { Services } from '../../src/instances/services';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 
@@ -22,6 +22,9 @@ const AUTHORIZE_APP_BUTTON_TEXT = 'Authorize app';
 const USERNAME_INPUT_SELECTOR = 'input[autocomplete="username"]';
 const PASSWORD_INPUT_SELECTOR = 'input[autocomplete="current-password"]';
 
+const DEBUG = true;
+const DEBUG_PREFIX = 'authenticateTwitterUser';
+
 /**
  * From a set of platform credentials, authenticate the users and
  * return their full profiles
@@ -31,9 +34,9 @@ export const authenticateTwitterUser = async (
   services: Services,
   manager: TransactionManager
 ): Promise<AppUser> => {
-  logger.debug('authenticateTwitterUser', { testAccount });
+  if (DEBUG) logger.debug('authenticateTwitterUser', { testAccount });
 
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({ headless: false });
   const signupData = await runAuthenticateTwitterUser(
     testAccount,
     services.platforms.get<TwitterService>(PLATFORM.Twitter),
@@ -41,7 +44,7 @@ export const authenticateTwitterUser = async (
   );
   await browser.close();
 
-  logger.debug('authenticatedTwitterUser', { testAccount });
+  if (DEBUG) logger.debug('authenticatedTwitterUser', { testAccount });
 
   /** create users using the Twitter profiles */
   /** store the user in the DB (build the user profile object and derive the ID) */
@@ -71,8 +74,45 @@ const runAuthenticateTwitterUser = async (
     type: user.type,
   });
 
+  if (DEBUG)
+    logger.debug(
+      'context',
+      { context: twitterOAuthTokenRequestResult },
+      DEBUG_PREFIX
+    );
+
   const page = await browser.newPage();
+
+  if (DEBUG) {
+    page
+      .on('console', (message) =>
+        logger.debug(
+          `console: ${message.type().substr(0, 3).toUpperCase()} ${message.text()}`
+        )
+      )
+      .on('pageerror', ({ message }) => logger.debug(`pageerror: ${message}`))
+      .on('response', (response) => {
+        const status = response.status();
+        if (status >= 400) {
+          logger.debug(`response: ${status} ${response.url()}`);
+
+          response.text().then((text) => {
+            logger.debug(`async full response ${response.url()}: ${text}`);
+          });
+        }
+      })
+      .on('requestfailed', (request) => {
+        const failure = request.failure();
+        if (failure !== null) {
+          logger.debug(`requestfailed: ${failure.errorText} ${request.url()}`);
+        }
+      });
+  }
+
   await page.goto(twitterOAuthTokenRequestResult.url);
+
+  if (DEBUG) logger.debug('waitForClick', undefined, DEBUG_PREFIX);
+
   await page.waitForSelector(USERNAME_INPUT_SELECTOR);
   await page.type(USERNAME_INPUT_SELECTOR, user.username);
   await page.evaluate((nextButtonText) => {
@@ -89,13 +129,19 @@ const runAuthenticateTwitterUser = async (
     if (targetElement) targetElement.click();
   }, LOG_IN_BUTTON_TEXT);
 
+  if (DEBUG) logger.debug('waitForNavigation', undefined, DEBUG_PREFIX);
   await page.waitForNavigation();
+
+  if (DEBUG) logger.debug('waitForFunction', undefined, DEBUG_PREFIX);
   await page.waitForFunction(
     (authorizeAppButtonText) =>
       document.body.textContent?.includes(authorizeAppButtonText),
     {},
     AUTHORIZE_APP_BUTTON_TEXT
   );
+
+  if (DEBUG)
+    logger.debug('wait for authorizeAppButton click', undefined, DEBUG_PREFIX);
   await page.evaluate((authorizeAppButtonText) => {
     const elements = [...document.querySelectorAll('span')];
     const targetElement = elements.find(
@@ -104,8 +150,12 @@ const runAuthenticateTwitterUser = async (
     if (targetElement) targetElement.click();
   }, AUTHORIZE_APP_BUTTON_TEXT);
 
+  if (DEBUG) logger.debug('waitForNavigation', undefined, DEBUG_PREFIX);
   await page.waitForNavigation();
+
   const currentUrl = page.url();
+
+  if (DEBUG) logger.debug('closing page', undefined, DEBUG_PREFIX);
   await page.close();
 
   const queryParams = new URLSearchParams(new URL(currentUrl).search);
@@ -115,7 +165,7 @@ const runAuthenticateTwitterUser = async (
     throw new Error('twitterOAuthCode undefined');
   }
 
-  return {
+  const result = {
     code: twitterOAuthCode,
     callback_url: twitterOAuthTokenRequestResult.callback_url,
     codeChallenge: twitterOAuthTokenRequestResult.codeChallenge,
@@ -124,6 +174,10 @@ const runAuthenticateTwitterUser = async (
     type: twitterOAuthTokenRequestResult.type,
     url: twitterOAuthTokenRequestResult.url,
   };
+
+  if (DEBUG) logger.debug('done', result, DEBUG_PREFIX);
+
+  return result;
 };
 
 export const checkOutdatedTwitterTokens = (appUsers: AppUser[]) => {

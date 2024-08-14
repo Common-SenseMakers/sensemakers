@@ -21,7 +21,7 @@ import {
 } from './setup';
 import { getTestServices } from './test.services';
 
-describe('031 test parse', () => {
+describe.only('031 test parse', () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER
@@ -72,6 +72,10 @@ describe('031 test parse', () => {
       expect(parsedPost).to.not.be.undefined;
       expect(parsedPost.parsingStatus).to.equal(AppPostParsingStatus.IDLE);
       expect(parsedPost.semantics).to.not.be.undefined;
+
+      if (process.env.TEST_THREAD_ID) {
+        console.log('parsedPost', JSON.stringify(parsedPost, null, 2));
+      }
     });
   });
 });
