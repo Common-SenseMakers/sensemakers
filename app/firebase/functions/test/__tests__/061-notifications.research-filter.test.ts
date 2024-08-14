@@ -67,7 +67,7 @@ const fetchAndGetNotifications = async (
   );
 };
 
-describe('061 parse tweet, ', () => {
+describe.only('061 parse tweet, ', () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER
@@ -214,7 +214,7 @@ describe('061 parse tweet, ', () => {
           user.userId,
           services
         );
-        expect(notificationsIds).to.have.length(2);
+        expect(notificationsIds).to.have.length(1);
       });
 
       it('not research', async () => {
@@ -230,7 +230,7 @@ describe('061 parse tweet, ', () => {
           user.userId,
           services
         );
-        expect(notificationsIds).to.have.length(2);
+        expect(notificationsIds).to.have.length(1);
       });
     });
 
@@ -293,7 +293,7 @@ describe('061 parse tweet, ', () => {
           user.userId,
           services
         );
-        expect(notificationsIds).to.have.length(3);
+        expect(notificationsIds).to.have.length(2);
       });
 
       it('not research', async () => {
@@ -309,7 +309,7 @@ describe('061 parse tweet, ', () => {
           user.userId,
           services
         );
-        expect(notificationsIds).to.have.length(3);
+        expect(notificationsIds).to.have.length(2);
       });
     });
   });

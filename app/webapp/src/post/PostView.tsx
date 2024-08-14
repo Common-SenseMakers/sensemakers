@@ -341,9 +341,6 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
             <Trans
               i18nKey={I18Keys.publishWarningPar02}
               components={{ b: <b></b> }}></Trans>,
-            <Trans
-              i18nKey={I18Keys.publishWarningPar03}
-              components={{ b: <b></b> }}></Trans>,
           ],
           primaryButton: {
             disabled: isUpdating,

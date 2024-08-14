@@ -204,6 +204,35 @@ export const postUpdatedHookOnTest = async (
   );
 };
 
+export const fetchPostInTests = async (
+  userId: string,
+  post_id: string,
+  services: Services
+) => {
+  /** fetch will store the posts in the DB */
+  const { post } = await services.db.run(
+    (manager) =>
+      services.postsManager.fetchPostFromPlatform(
+        userId,
+        PLATFORM.Twitter,
+        post_id,
+        manager
+      ),
+    undefined,
+    undefined,
+    `fetchPostInTests ${userId} ${post_id}`
+  );
+  if (post) {
+    /**
+     * We need to manually call the postUpdate hook that would have been called
+     * when creating the AppPost as part of the fetch
+     */
+    await postUpdatedHookOnTest(post, services);
+  }
+
+  return post;
+};
+
 const last_output = {
   semantics:
     '@prefix ns1: <https://sense-nets.xyz/> .\n@prefix ns2: <http://purl.org/spar/cito/> .\n@prefix schema: <https://schema.org/> .\n\nns1:mySemanticPost ns2:disagreesWith <https://x.com/FDAadcomms/status/1798104612635070611>,\n        <https://x.com/FDAadcomms/status/1798107142219796794> ;\n    ns2:includesQuotationFrom <https://x.com/FDAadcomms/status/1798104612635070611>,\n        <https://x.com/FDAadcomms/status/1798107142219796794>,\n        <https://x.com/eturnermd1/status/1798046087737180395> ;\n    schema:keywords "BigPharma",\n        "FDA",\n        "MDMA",\n        "PTSD",\n        "ReviewPaper",\n        "ValidityThreats" ;\n    ns1:endorses <https://journals.sagepub.com/doi/10.1177/20451253231198466>,\n        <https://www.youtube.com/watch?feature=youtu.be&si=kjMtNR1Hwe7NZ8as&v=WknlkmJee4E>,\n        <https://x.com/eturnermd1/status/1798046087737180395> ;\n    ns1:mentionsWatchingStatus <https://www.youtube.com/watch?feature=youtu.be&si=kjMtNR1Hwe7NZ8as&v=WknlkmJee4E> ;\n    ns1:quotesPost <https://x.com/FDAadcomms/status/1798104612635070611> ;\n    ns1:summarizes <https://journals.sagepub.com/doi/10.1177/20451253231198466>,\n        <https://www.youtube.com/watch?feature=youtu.be&si=kjMtNR1Hwe7NZ8as&v=WknlkmJee4E> .\n\n<https://journals.sagepub.com/doi/10.1177/20451253231198466> ns1:hasZoteroItemType "journalArticle" .\n\n<https://x.com/FDAadcomms/status/1798107142219796794> ns1:hasZoteroItemType "forumPost" .\n\n<https://x.com/eturnermd1/status/1798046087737180395> ns1:hasZoteroItemType "forumPost" .\n\n<https://www.youtube.com/watch?feature=youtu.be&si=kjMtNR1Hwe7NZ8as&v=WknlkmJee4E> ns1:hasZoteroItemType "videoRecording" .\n\n<https://x.com/FDAadcomms/status/1798104612635070611> ns1:hasZoteroItemType "forumPost" .\n\n',
