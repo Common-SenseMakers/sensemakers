@@ -7,7 +7,7 @@ import { useThemeContext } from '../ui-components/ThemedApp';
 interface SettingOption {
   id: string;
   title: string;
-  description: string;
+  description?: string;
   selected?: boolean;
   optionSelected: (id: string) => void;
 }
