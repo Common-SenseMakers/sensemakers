@@ -67,7 +67,7 @@ const fetchAndGetNotifications = async (
   );
 };
 
-describe.only('061 parse tweet, ', () => {
+describe('061 parse tweet, ', () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER
