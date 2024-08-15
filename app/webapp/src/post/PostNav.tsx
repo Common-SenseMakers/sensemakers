@@ -1,5 +1,5 @@
 import { Box } from 'grommet';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { NavButton } from '../app/NavButton';
@@ -7,6 +7,7 @@ import { LeftChevronIcon } from '../app/icons/LeftChveronIcon';
 import { LeftIcon } from '../app/icons/LeftIcon';
 import { RightIcon } from '../app/icons/RightIcon';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
+import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useUserPosts } from '../user-home/UserPostsContext';
@@ -17,16 +18,34 @@ export const PostNav = (props: { profile?: TwitterUserProfile }) => {
   const { post, nextPostId, prevPostId } = usePost();
 
   const { fetchOlder, isFetchingOlder, errorFetchingOlder } = useUserPosts();
+  const [triggeredFetchOlder, setTriggeredFetchedOlder] = useState(false);
 
   const navigate = useNavigate();
   const { constants } = useThemeContext();
 
   useEffect(() => {
-    if (!nextPostId && !isFetchingOlder && !errorFetchingOlder) {
-      console.log('fetching older');
+    if (
+      !nextPostId &&
+      !isFetchingOlder &&
+      !errorFetchingOlder &&
+      !triggeredFetchOlder
+    ) {
+      setTriggeredFetchedOlder(true);
+      console.log('fetching older', {
+        nextPostId,
+        isFetchingOlder,
+        errorFetchingOlder,
+        triggeredFetchOlder,
+      });
+
       fetchOlder();
     }
-  }, [isFetchingOlder, nextPostId]);
+
+    /** reset triggeredFetchedOlder once the nextPostId was obtained */
+    if (nextPostId) {
+      setTriggeredFetchedOlder(false);
+    }
+  }, [errorFetchingOlder, isFetchingOlder, nextPostId, triggeredFetchOlder]);
 
   const goToPrev = () => {
     navigate(`/post/${prevPostId}`);
@@ -37,6 +56,8 @@ export const PostNav = (props: { profile?: TwitterUserProfile }) => {
       navigate(`/post/${nextPostId}`);
     }
   };
+
+  console.log('PostNav', { nextPostId, prevPostId });
 
   return (
     <Box
@@ -66,11 +87,13 @@ export const PostNav = (props: { profile?: TwitterUserProfile }) => {
         <NavButton
           reverse
           icon={
-            isFetchingOlder ? (
-              <Loading size="16px"></Loading>
-            ) : (
-              <RightIcon></RightIcon>
-            )
+            <Box justify="center" style={{ width: '22px' }}>
+              {isFetchingOlder ? (
+                <Loading size="16px"></Loading>
+              ) : (
+                <RightIcon></RightIcon>
+              )}
+            </Box>
           }
           disabled={!nextPostId}
           label="Next"

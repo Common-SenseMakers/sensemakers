@@ -1,12 +1,13 @@
 import fs from 'fs';
 
+import {
+  getMockAutoPublishedPost,
+  getMockPendingPost,
+  getMockPublishedPost,
+} from '../../src/@shared/mocks/posts.mock';
 import { NotificationFreq } from '../../src/@shared/types/types.notifications';
 import { AppPostFull } from '../../src/@shared/types/types.posts';
-import {
-  AutopostOption,
-  RenderEmailFunction,
-} from '../../src/@shared/types/types.user';
-import { getMockPostNew } from '../utils/posts.utils';
+import { RenderEmailFunction } from '../../src/@shared/types/types.user';
 
 const { renderEmail } = require('../../src/@shared/emailRenderer') as {
   renderEmail: RenderEmailFunction;
@@ -15,18 +16,23 @@ const { renderEmail } = require('../../src/@shared/emailRenderer') as {
 describe('renders email', () => {
   it('imports the bundled render email function and successfully calls it', async () => {
     const posts: AppPostFull[] = [
-      getMockPostNew(),
-      getMockPostNew(),
-      getMockPostNew(),
-      getMockPostNew(),
-      getMockPostNew(),
-      getMockPostNew(),
+      getMockAutoPublishedPost(),
+      getMockAutoPublishedPost(),
+      getMockAutoPublishedPost(),
+      getMockAutoPublishedPost(),
+      getMockPendingPost(),
+      getMockPendingPost(),
+      getMockPendingPost(),
+      getMockPublishedPost(),
+      getMockPublishedPost(),
+      getMockPublishedPost(),
+      getMockPublishedPost(),
+      getMockPublishedPost(),
     ];
     const { html } = renderEmail(
       posts,
       NotificationFreq.Daily,
-      AutopostOption.MANUAL,
-      'http://localhost:3000'
+      'http://localhost:3000/'
     );
     fs.writeFileSync('test.email.html', html);
   });
