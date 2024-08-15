@@ -9,7 +9,7 @@ const AUTHORIZE_APP_BUTTON_TEXT = 'Authorize app';
 const USERNAME_INPUT_SELECTOR = 'input[autocomplete="username"]';
 const PASSWORD_INPUT_SELECTOR = 'input[autocomplete="current-password"]';
 
-const DEBUG = true;
+const DEBUG = false;
 const DEBUG_PREFIX = 'authenticateTwitterUser';
 
 export const runAuthenticateTwitterUser = async (
