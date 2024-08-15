@@ -298,6 +298,9 @@ export const PostContext: React.FC<{
     const nanopub = post?.mirrors.find(
       (m) => m.platformId === PLATFORM.Nanopub
     );
+    const allOtherMirrors = post?.mirrors.filter(
+      (m) => m.platformId !== PLATFORM.Nanopub
+    );
 
     if (!nanopub || !nanopub.draft) {
       throw new Error(`Unexpected nanopub mirror not found`);
@@ -320,7 +323,10 @@ export const PostContext: React.FC<{
 
     if (post) {
       await appFetch<void, PublishPostPayload>('/api/posts/approve', {
-        post,
+        post: {
+          ...post,
+          mirrors: [...(allOtherMirrors ? allOtherMirrors : []), nanopub],
+        },
         platformIds: [PLATFORM.Nanopub],
       });
     }
