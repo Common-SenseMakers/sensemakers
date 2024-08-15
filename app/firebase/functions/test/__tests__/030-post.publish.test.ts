@@ -34,7 +34,7 @@ import { getTestServices } from './test.services';
 const DEBUG_PREFIX = `030-process`;
 const DEBUG = false;
 
-describe.only('030-process', () => {
+describe('030-process', () => {
   let rsaKeys = getRSAKeys('');
 
   const services = getTestServices({
@@ -140,6 +140,13 @@ describe.only('030-process', () => {
           expect(publishedLatestNanopubUri).to.not.be.undefined;
           expect(publishedRootNanopubUri).to.equal(publishedLatestNanopubUri);
 
+          if (USE_REAL_NANOPUB) {
+            console.log('signed published urls', {
+              publishedRootNanopubUri,
+              publishedLatestNanopubUri,
+            });
+          }
+
           expect(published).to.not.be.undefined;
           expect(published.reviewedStatus).to.equal(
             AppPostReviewStatus.APPROVED
@@ -213,6 +220,13 @@ describe.only('030-process', () => {
           expect(publishedRootNanopubUri).to.not.be.undefined;
           expect(publishedLatestNanopubUri).to.not.be.undefined;
           expect(publishedRootNanopubUri).to.equal(publishedLatestNanopubUri);
+
+          if (USE_REAL_NANOPUB) {
+            console.log('delegated published urls', {
+              publishedRootNanopubUri,
+              publishedLatestNanopubUri,
+            });
+          }
 
           expect(published).to.not.be.undefined;
           expect(published.reviewedStatus).to.equal(
@@ -322,6 +336,15 @@ describe.only('030-process', () => {
       expect(updatedLatestNanopubUri).to.not.be.undefined;
       expect(rootNanopubUri).to.equal(updatedRootNanopubUri);
       expect(latestNanopubUri).to.not.equal(updatedLatestNanopubUri);
+
+      if (USE_REAL_NANOPUB) {
+        console.log('edited published urls', {
+          rootNanopubUri,
+          latestNanopubUri,
+          updatedRootNanopubUri,
+          updatedLatestNanopubUri,
+        });
+      }
     });
   });
 });
