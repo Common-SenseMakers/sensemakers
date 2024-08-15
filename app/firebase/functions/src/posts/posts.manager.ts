@@ -683,26 +683,8 @@ export class PostsManager {
               mirror.draft.signerType === undefined ||
               mirror.draft.signerType === PlatformPostSignerType.DELEGATED
             ) {
-              const draftToUpdate = await (async () => {
-                const newDraft = await platform.convertFromGeneric({
-                  post: newPost,
-                  author: user,
-                });
-                if (!newDraft.unsignedPost) {
-                  throw new Error(
-                    `Expected unsigned post to be provided in updated nanopub`
-                  );
-                }
-                if (newDraft.unsignedPost !== mirror.draft?.unsignedPost) {
-                  return newDraft;
-                }
-                return mirror.draft;
-              })();
-              if (!draftToUpdate) {
-                throw new Error(`Expected draft to be provided`);
-              }
               const signedPost = await platform.signDraft(
-                draftToUpdate,
+                mirror.draft,
                 account
               );
               mirror.draft.signedPost = signedPost;
