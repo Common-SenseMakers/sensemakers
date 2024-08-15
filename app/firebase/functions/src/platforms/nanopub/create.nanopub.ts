@@ -75,15 +75,13 @@ export const createNanopublication = async (
 
     return await parseRDF(semantics);
   })();
-  // Define the replacement map that swaps our placeholder with np placeholder 
+  // Define the replacement map that swaps our placeholder with np placeholder
   const replaceMap: Record<string, string> = {
-    'https://sense-nets.xyz/mySemanticPost': 'http://purl.org/nanopub/temp/mynanopub#'
+    'https://sense-nets.xyz/mySemanticPost':
+      'http://purl.org/nanopub/temp/mynanopub#',
   };
 
-  
   const semanticsStore = replaceNodes(semanticsParserStore, replaceMap);
-  
- 
 
   const nanoDetails = user[PLATFORM.Nanopub];
   const ethAddress = nanoDetails && nanoDetails[0].profile?.ethAddress;

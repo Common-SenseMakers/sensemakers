@@ -2,13 +2,22 @@ import { PlatformFetchParams } from '../@shared/types/types.fetch';
 import {
   FetchedResult,
   PlatformPostCreate,
+  PlatformPostDeleteDraft,
   PlatformPostDraft,
   PlatformPostPosted,
   PlatformPostPublish,
   PlatformPostUpdate,
 } from '../@shared/types/types.platform.posts';
-import { GenericThread, PostAndAuthor } from '../@shared/types/types.posts';
-import { PLATFORM, UserDetailsBase } from '../@shared/types/types.user';
+import {
+  AppPostFull,
+  GenericThread,
+  PostAndAuthor,
+} from '../@shared/types/types.posts';
+import {
+  AppUser,
+  PLATFORM,
+  UserDetailsBase,
+} from '../@shared/types/types.user';
 import { TransactionManager } from '../db/transaction.manager';
 
 /** use conditional types to dynamically assign credential types for each platform */
@@ -57,4 +66,9 @@ export interface PlatformService<
   ): Promise<PlatformPostPosted>;
   convertToGeneric(platformPost: PlatformPostCreate): Promise<GenericThread>;
   convertFromGeneric(postAndAuthor: PostAndAuthor): Promise<PlatformPostDraft>;
+  buildDeleteDraft?(
+    post_id: string,
+    post: AppPostFull,
+    author: AppUser
+  ): Promise<PlatformPostDeleteDraft>; // prepares a draft post that represents the action of deleting an existing post
 }

@@ -24,6 +24,7 @@ import {
 import { PLATFORM, UserDetailsBase } from '../../@shared/types/types.user';
 import { getEthToRSAMessage } from '../../@shared/utils/nanopub.sign.util';
 import { cleanPrivateKey } from '../../@shared/utils/semantics.helper';
+import { NANOPUBS_PUBLISH_SERVERS } from '../../config/config.runtime';
 import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
@@ -31,7 +32,6 @@ import { UsersHelper } from '../../users/users.helper';
 import { PlatformService } from '../platforms.interface';
 import { createIntroNanopublication } from './create.intro.nanopub';
 import { createNanopublication } from './create.nanopub';
-import { NANOPUBS_PUBLISH_SERVERS } from '../../config/config.runtime';
 
 const DEBUG = false;
 
@@ -239,10 +239,14 @@ export class NanopubService
 
   async get(
     post_id: string,
-    userDetails: UserDetailsBase,
+    userDetails: UserDetailsBase
   ): Promise<PlatformPostPosted<string>> {
-    const nanopubServers = JSON.parse(NANOPUBS_PUBLISH_SERVERS.value()) as string[];
-    const fetchedNanopub = await Nanopub.fetch(`${nanopubServers[0]}${post_id}`);
+    const nanopubServers = JSON.parse(
+      NANOPUBS_PUBLISH_SERVERS.value()
+    ) as string[];
+    const fetchedNanopub = await Nanopub.fetch(
+      `${nanopubServers[0]}${post_id}`
+    );
     return {
       post_id,
       post: fetchedNanopub.rdf(),

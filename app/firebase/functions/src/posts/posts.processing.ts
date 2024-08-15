@@ -159,9 +159,12 @@ export class PostsProcessing {
         return Promise.all(
           accounts.map(async (account) => {
             /** create/update the draft for that platform and account */
-            const draftPost = await this.platforms
-              .get(platformId)
-              .convertFromGeneric({ post: appPostFull, author: user });
+            const platform = await this.platforms.get(platformId);
+
+            const draftPost = platform.convertFromGeneric({
+              post: appPostFull,
+              author: user,
+            });
 
             if (DEBUG)
               logger.debug(
@@ -220,6 +223,13 @@ export class PostsProcessing {
 
               this.posts.addMirror(postId, plaformPost.id, manager);
             } else {
+              // once updated, create the delete draft
+
+              const deleteDraft = platform;
+
+              //
+              HERE IM ABOUT TO STORE THE DELETE DRAFT
+
               if (DEBUG)
                 logger.debug(`createPostDrafts- update ${postId}`, {
                   postId,

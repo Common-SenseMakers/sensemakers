@@ -44,6 +44,7 @@ export enum AppPostRepublishedStatus {
   PENDING = 'pending',
   REPUBLISHED = 'republished',
   AUTO_REPUBLISHED = 'autoRepublished',
+  UNREPUBLISHED = 'unrepublished',
 }
 
 export interface AppPost {

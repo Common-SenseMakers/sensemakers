@@ -581,6 +581,93 @@ export class PostsManager {
     await this.processing.upsertTriples(postId, manager, postUpdated.semantics);
   }
 
+  /** deletes the mirror of a post from a platform. userId MUST be a verified user */
+  async unpublishPost(
+    postId: string,
+    userId: string,
+    platformId: PLATFORM,
+    user_id?: string
+  ) {
+    this.db.run(async (manager) => {
+      const user = await this.users.repo.getUser(userId, manager, true);
+      const post = await this.processing.getPostFull(postId, manager, true);
+
+      if (post.authorId !== userId) {
+        throw new Error(`Only the author can delete a mirror: ${postId}`);
+      }
+
+      const mirror = post.mirrors.find((m) => m.platformId === platformId);
+
+      if (!mirror) {
+        throw new Error(`Mirror on ${platformId} not found for post ${postId}`);
+      }
+
+      if (mirror.publishStatus !== PlatformPostPublishStatus.PUBLISHED) {
+        throw new Error(`Mirror of ${postId} on ${platformId} not published`);
+      }
+
+      const post_id = mirror.postId;
+
+      if (post_id === undefined) {
+        throw new Error(`PostId not found for mirror ${mirror.id}`);
+      }
+
+      const account = UsersHelper.getAccount(
+        user,
+        mirror.platformId,
+        user_id,
+        true
+      );
+
+      const platform = this.platforms.get(mirror.platformId);
+
+      if (
+        mirror.deleteDraft &&
+        (mirror.deleteDraft.signerType === undefined ||
+          mirror.deleteDraft.signerType === PlatformPostSignerType.DELEGATED)
+      ) {
+        const signedPost = await platform.signDraft(
+          mirror.deleteDraft,
+          account
+        );
+        mirror.deleteDraft.signedPost = signedPost;
+      }
+
+      if (!mirror.deleteDraft || !mirror.deleteDraft.signedPost) {
+        throw new Error(`Expected signed post to be provided`);
+      }
+
+      const posted = await platform.publish(
+        {
+          draft: mirror.deleteDraft.signedPost,
+          userDetails: account,
+        },
+        manager
+      );
+
+      /** update the platformPost */
+      await this.processing.platformPosts.update(
+        mirror.id,
+        {
+          posted: posted,
+          publishOrigin: PlatformPostPublishOrigin.POSTED,
+          publishStatus: PlatformPostPublishStatus.UNPUBLISHED,
+          ...(mirror.post_id ? {} : { post_id: posted.post_id }),
+        },
+        manager
+      );
+
+      /** mark post (TODO: what about multiplatform?) */
+      await this.updatePost(
+        postId,
+        {
+          republishedStatus: AppPostRepublishedStatus.UNREPUBLISHED,
+        },
+        manager
+      );
+    });
+  }
+
   /**
    * Approving a post receives an AppPostFull.
    * - The content and the semantics might have changed.
