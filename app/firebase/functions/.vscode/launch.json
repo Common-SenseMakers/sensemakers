@@ -25,31 +25,6 @@
       "console": "integratedTerminal"
     },
     {
-      "name": "nanopub-test",
-      "type": "node",
-      "request": "launch",
-      "skipFiles": ["<node_internals>/**"],
-      "cwd": "${workspaceFolder}",
-      "env": {
-        "NODE_ENV": "test",
-        "FIRESTORE_EMULATOR_HOST": "127.0.0.1:8080",
-        "LOG_LEVEL_MSG": "debug",
-        "LOG_LEVEL_OBJ": "error",
-        "USE_REAL_TWITTERX": "true",
-        "USE_REAL_NANOPUB": "false",
-        "USE_REAL_PARSER": "false",
-        "USE_REAL_EMAIL": "false"
-      },
-      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/mocha",
-      "args": [
-        "--config",
-        "./.mocharc.nanopub.js",
-        "test/__tests__/021-platforms.nanopub.format.test.ts"
-      ],
-      "outputCapture": "std",
-      "console": "integratedTerminal"
-    },
-    {
       "type": "node",
       "request": "launch",
       "name": "Script: 01-user.notifications",
