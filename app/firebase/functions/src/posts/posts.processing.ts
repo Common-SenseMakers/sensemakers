@@ -31,6 +31,7 @@ import { TimeService } from '../time/time.service';
 import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { PlatformPostsRepository } from './platform.posts.repository';
+import { PostsHelper } from './posts.helper';
 import { PostsRepository } from './posts.repository';
 
 const DEBUG = false;
@@ -159,9 +160,9 @@ export class PostsProcessing {
         return Promise.all(
           accounts.map(async (account) => {
             /** create/update the draft for that platform and account */
-            const platform = await this.platforms.get(platformId);
+            const platform = this.platforms.get(platformId);
 
-            const draftPost = platform.convertFromGeneric({
+            const draftPost = await platform.convertFromGeneric({
               post: appPostFull,
               author: user,
             });
@@ -175,11 +176,10 @@ export class PostsProcessing {
                 }
               );
 
-            const existingMirror = appPostFull.mirrors.find(
-              (m) =>
-                m.platformId === platformId &&
-                ((m.draft && m.draft.user_id === account.user_id) ||
-                  (m.posted && m.posted.user_id))
+            const existingMirror = PostsHelper.getPostMirror(
+              appPostFull,
+              platformId,
+              account.user_id
             );
 
             if (DEBUG)
@@ -223,19 +223,27 @@ export class PostsProcessing {
 
               this.posts.addMirror(postId, plaformPost.id, manager);
             } else {
-              // once updated, create the delete draft
+              const post_id = existingMirror.post_id;
 
-              const deleteDraft = platform;
+              const deleteDraft = await (async () => {
+                if (platform.buildDeleteDraft && post_id) {
+                  return platform.buildDeleteDraft(post_id, appPostFull, user);
+                }
 
-              //
-              HERE IM ABOUT TO STORE THE DELETE DRAFT
+                return undefined;
+              })();
 
               if (DEBUG)
                 logger.debug(`createPostDrafts- update ${postId}`, {
                   postId,
                   draft,
                 });
-              this.platformPosts.update(existingMirror.id, { draft }, manager);
+
+              this.platformPosts.update(
+                existingMirror.id,
+                { draft, deleteDraft },
+                manager
+              );
             }
           })
         );

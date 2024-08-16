@@ -105,6 +105,11 @@ export interface PlatformPostCreated {
 export type PlatformPostStatusUpdate = Partial<
   Pick<
     PlatformPost,
-    'post_id' | 'posted' | 'publishOrigin' | 'publishStatus' | 'draft'
+    | 'post_id'
+    | 'posted'
+    | 'publishOrigin'
+    | 'publishStatus'
+    | 'draft'
+    | 'deleteDraft'
   >
 >;

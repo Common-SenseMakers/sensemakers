@@ -66,9 +66,12 @@ export interface PlatformService<
   ): Promise<PlatformPostPosted>;
   convertToGeneric(platformPost: PlatformPostCreate): Promise<GenericThread>;
   convertFromGeneric(postAndAuthor: PostAndAuthor): Promise<PlatformPostDraft>;
+
+  /** for signature based platforms, this creates the draft that represents
+   * a delete of a post. The draft is then signed by the user */
   buildDeleteDraft?(
     post_id: string,
     post: AppPostFull,
     author: AppUser
-  ): Promise<PlatformPostDeleteDraft>; // prepares a draft post that represents the action of deleting an existing post
+  ): Promise<PlatformPostDeleteDraft>;
 }
