@@ -7,6 +7,7 @@ import {
 import {
   PostUpdatePayload,
   ProfilePostsQuery,
+  RetractPlatformPostPayload,
   UserPostsQuery,
 } from '../../@shared/types/types.posts';
 import { IS_EMULATOR } from '../../config/config.runtime';
@@ -22,6 +23,7 @@ import {
   getUserProfilePostsSchema,
   getUserProfileSchema,
   postIdValidation,
+  retractPostSchema,
   updatePostSchema,
 } from './posts.schema';
 
@@ -264,6 +266,34 @@ export const updatePostController: RequestHandler = async (
         manager
       );
     });
+
+    if (DEBUG) logger.debug(`${request.path}: updatePost`, payload);
+
+    response.status(200).send({ success: true });
+  } catch (error) {
+    logger.error('error', error);
+    response.status(500).send({ success: false, error });
+  }
+};
+
+export const unpublishPlatformPostController: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    const userId = getAuthenticatedUser(request, true);
+    const { postsManager } = getServices(request);
+
+    const payload = (await retractPostSchema.validate(
+      request.body
+    )) as RetractPlatformPostPayload;
+
+    await postsManager.unpublishPost(
+      payload.postId,
+      userId,
+      payload.platformId,
+      payload.post_id
+    );
 
     if (DEBUG) logger.debug(`${request.path}: updatePost`, payload);
 

@@ -367,9 +367,19 @@ describe.only('030-process', () => {
 
       const post = publishedPosts[0];
 
-      const publishedMirror = PostsHelper.getPostMirror(post, {
-        platformId: PLATFORM.Nanopub,
-      });
+      const publishedMirror = PostsHelper.getPostMirror(
+        post,
+        {
+          platformId: PLATFORM.Nanopub,
+        },
+        true
+      );
+
+      const post_id = publishedMirror.post_id;
+
+      if (!post_id) {
+        throw new Error('post_id undefined');
+      }
 
       if (!publishedMirror) {
         throw new Error('nanopubPlatformPost undefined');
@@ -379,7 +389,8 @@ describe.only('030-process', () => {
       await services.postsManager.unpublishPost(
         post.id,
         user.userId,
-        PLATFORM.Nanopub
+        PLATFORM.Nanopub,
+        post_id
       );
 
       const readPost = await services.postsManager.getPost(post.id, true);

@@ -41,6 +41,7 @@ import { PlatformsService } from '../platforms/platforms.service';
 import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { getUsernameTag } from '../users/users.utils';
+import { PostsHelper } from './posts.helper';
 import { PostsProcessing } from './posts.processing';
 
 const DEBUG = false;
@@ -586,7 +587,7 @@ export class PostsManager {
     postId: string,
     userId: string,
     platformId: PLATFORM,
-    user_id?: string
+    post_id: string
   ) {
     return this.db.run(async (manager) => {
       const user = await this.users.repo.getUser(userId, manager, true);
@@ -596,26 +597,30 @@ export class PostsManager {
         throw new Error(`Only the author can delete a mirror: ${postId}`);
       }
 
-      const mirror = post.mirrors.find((m) => m.platformId === platformId);
+      const mirror = PostsHelper.getPostMirror(
+        post,
+        { platformId, post_id },
+        true
+      );
 
       if (!mirror) {
         throw new Error(`Mirror on ${platformId} not found for post ${postId}`);
+      }
+
+      if (!mirror.posted) {
+        throw new Error(
+          `Mirror on ${platformId} not posted for post ${postId}`
+        );
       }
 
       if (mirror.publishStatus !== PlatformPostPublishStatus.PUBLISHED) {
         throw new Error(`Mirror of ${postId} on ${platformId} not published`);
       }
 
-      const post_id = mirror.post_id;
-
-      if (post_id === undefined) {
-        throw new Error(`PostId not found for mirror ${mirror.id}`);
-      }
-
       const account = UsersHelper.getAccount(
         user,
         mirror.platformId,
-        user_id,
+        mirror.posted.user_id,
         true
       );
 

@@ -116,6 +116,12 @@ export enum PostsQueryStatus {
   ALL = 'all',
 }
 
+export interface RetractPlatformPostPayload {
+  postId: string;
+  platformId: PLATFORM;
+  post_id: string;
+}
+
 export interface UserPostsQuery {
   status: PostsQueryStatus;
   fetchParams: FetchParams;
