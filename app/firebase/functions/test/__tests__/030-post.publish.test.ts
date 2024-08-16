@@ -367,7 +367,9 @@ describe.only('030-process', () => {
 
       const post = publishedPosts[0];
 
-      const publishedMirror = PostsHelper.getPostMirror(post, PLATFORM.Nanopub);
+      const publishedMirror = PostsHelper.getPostMirror(post, {
+        platformId: PLATFORM.Nanopub,
+      });
 
       if (!publishedMirror) {
         throw new Error('nanopubPlatformPost undefined');
@@ -384,8 +386,7 @@ describe.only('030-process', () => {
 
       const unpublishedMirror = PostsHelper.getPostMirror(
         post,
-        PLATFORM.Nanopub,
-        undefined,
+        { platformId: PLATFORM.Nanopub },
         true
       );
 

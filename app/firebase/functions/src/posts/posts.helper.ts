@@ -27,26 +27,32 @@ export class PostsHelper {
 
   static getPostMirror<T extends boolean>(
     post: AppPostFull,
-    platformId: PLATFORM,
-    user_id?: string,
+    filters: { platformId: PLATFORM; user_id?: string; post_id?: string },
     shouldThrow?: T
   ): DefinedIfTrue<T, PlatformPost> {
     const mirror = post.mirrors.find((m) => {
-      if (!user_id) {
-        return m.platformId === platformId;
-      } else {
-        return (
-          m.platformId === platformId &&
-          ((m.draft && m.draft.user_id === user_id) ||
-            (m.posted && m.posted.user_id))
-        );
+      let match = m.platformId === filters.platformId;
+
+      if (filters.user_id) {
+        const author_user_id = m.posted
+          ? m.posted.user_id
+          : m.draft
+            ? m.draft.user_id
+            : undefined;
+        match = match && filters.user_id === author_user_id;
       }
+
+      if (filters.post_id) {
+        match = match && filters.post_id === m.post_id;
+      }
+
+      return match;
     });
 
     if (!mirror) {
       if (shouldThrow) {
         throw new Error(
-          `Mirror of platform ${platformId} not found on post ${post.id}`
+          `Mirror with filter ${JSON.stringify(filters)} not found on post ${post.id}`
         );
       } else {
         return undefined as DefinedIfTrue<T, PlatformPost>;

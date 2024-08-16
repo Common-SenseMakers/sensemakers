@@ -73,5 +73,5 @@ export interface PlatformService<
     post_id: string,
     post: AppPostFull,
     author: AppUser
-  ): Promise<PlatformPostDeleteDraft>;
+  ): Promise<PlatformPostDeleteDraft | undefined>;
 }

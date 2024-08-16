@@ -540,12 +540,12 @@ export class TwitterService
     };
   }
 
-  buildDeleteDraft(
+  async buildDeleteDraft(
     post_id: string,
     post: AppPostFull,
     author: AppUser
-  ): Promise<PlatformPostDeleteDraft> {
-    throw new Error('Method not implemented.');
+  ): Promise<PlatformPostDeleteDraft | undefined> {
+    return undefined;
   }
 
   async signDraft(

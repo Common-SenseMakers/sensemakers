@@ -176,11 +176,10 @@ export class PostsProcessing {
                 }
               );
 
-            const existingMirror = PostsHelper.getPostMirror(
-              appPostFull,
+            const existingMirror = PostsHelper.getPostMirror(appPostFull, {
               platformId,
-              account.user_id
-            );
+              user_id: account.user_id,
+            });
 
             if (DEBUG)
               logger.debug(
@@ -227,7 +226,7 @@ export class PostsProcessing {
 
               let deleteDraft: undefined | any = undefined;
 
-              if (platform.buildDeleteDraft !== undefined && post_id) {
+              if (post_id) {
                 deleteDraft = await platform.buildDeleteDraft(
                   post_id,
                   appPostFull,
@@ -241,7 +240,7 @@ export class PostsProcessing {
                   draft,
                 });
 
-              this.platformPosts.update(
+              await this.platformPosts.update(
                 existingMirror.id,
                 { draft, deleteDraft },
                 manager
