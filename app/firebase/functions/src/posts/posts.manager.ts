@@ -359,7 +359,7 @@ export class PostsManager {
                       return;
                     }
 
-                    /** Create the PlatformPosts */
+                    /** Create the PlatformPosts and AppPosts */
                     const platformPostsCreated =
                       await this.processing.createPlatformPosts(
                         platformPostsCreate,

@@ -10,6 +10,7 @@ import {
 import {
   FetchedResult,
   PlatformPost,
+  PlatformPostDeleteDraft,
   PlatformPostDraft,
   PlatformPostDraftApproval,
   PlatformPostPosted,
@@ -17,11 +18,17 @@ import {
   PlatformPostUpdate,
 } from '../../@shared/types/types.platform.posts';
 import {
+  AppPostFull,
   AppPostMirror,
   GenericThread,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
-import { PLATFORM, UserDetailsBase } from '../../@shared/types/types.user';
+import {
+  AppUser,
+  PLATFORM,
+  UserDetailsBase,
+} from '../../@shared/types/types.user';
+import {createRetractionNanopub} from './create.retraction.nanopub';
 import { getEthToRSAMessage } from '../../@shared/utils/nanopub.sign.util';
 import { cleanPrivateKey } from '../../@shared/utils/semantics.helper';
 import { NANOPUBS_PUBLISH_SERVERS } from '../../config/config.runtime';
@@ -132,6 +139,16 @@ export class NanopubService
       user_id: account.user_id,
       postApproval: PlatformPostDraftApproval.PENDING,
     };
+  }
+
+  buildDeleteDraft(
+    post_id: string,
+    post: AppPostFull,
+    author: AppUser
+  ): Promise<PlatformPostDeleteDraft> {
+    
+    const draftDelete = await createRetractionNanopub()
+    
   }
 
   async signDraft(

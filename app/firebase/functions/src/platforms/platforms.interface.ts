@@ -69,7 +69,7 @@ export interface PlatformService<
 
   /** for signature based platforms, this creates the draft that represents
    * a delete of a post. The draft is then signed by the user */
-  buildDeleteDraft?(
+  buildDeleteDraft(
     post_id: string,
     post: AppPostFull,
     author: AppUser

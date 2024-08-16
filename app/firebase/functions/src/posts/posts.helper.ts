@@ -43,12 +43,16 @@ export class PostsHelper {
       }
     });
 
-    if (!mirror && shouldThrow) {
-      throw new Error(
-        `Mirror of platform ${platformId} not found on post ${post.id}`
-      );
+    if (!mirror) {
+      if (shouldThrow) {
+        throw new Error(
+          `Mirror of platform ${platformId} not found on post ${post.id}`
+        );
+      } else {
+        return undefined as DefinedIfTrue<T, PlatformPost>;
+      }
     }
 
-    return undefined as DefinedIfTrue<T, PlatformPost>;
+    return mirror;
   }
 }

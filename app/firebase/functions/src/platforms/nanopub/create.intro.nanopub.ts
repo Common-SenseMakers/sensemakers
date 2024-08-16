@@ -1,5 +1,5 @@
 import { NanupubSignupData } from '../../@shared/types/types.nanopubs';
-import { buildIntroNp } from './utils';
+import { buildIntroNp } from './nanopub.utils';
 
 export const createIntroNanopublication = async (
   details: NanupubSignupData,

@@ -34,7 +34,7 @@ import { PlatformPostsRepository } from './platform.posts.repository';
 import { PostsHelper } from './posts.helper';
 import { PostsRepository } from './posts.repository';
 
-const DEBUG = false;
+const DEBUG = true;
 
 /**
  * Per-PlatformPost or Per-AppPost methods.
@@ -225,13 +225,15 @@ export class PostsProcessing {
             } else {
               const post_id = existingMirror.post_id;
 
-              const deleteDraft = await (async () => {
-                if (platform.buildDeleteDraft && post_id) {
-                  return platform.buildDeleteDraft(post_id, appPostFull, user);
-                }
+              let deleteDraft: undefined | any = undefined;
 
-                return undefined;
-              })();
+              if (platform.buildDeleteDraft !== undefined && post_id) {
+                deleteDraft = await platform.buildDeleteDraft(
+                  post_id,
+                  appPostFull,
+                  user
+                );
+              }
 
               if (DEBUG)
                 logger.debug(`createPostDrafts- update ${postId}`, {

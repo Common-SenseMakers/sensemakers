@@ -12,12 +12,12 @@
         "FIRESTORE_EMULATOR_HOST": "127.0.0.1:8080",
         "LOG_LEVEL_MSG": "debug",
         "LOG_LEVEL_OBJ": "debug",
-        "USE_REAL_TWITTERX": "true",
+        "USE_REAL_TWITTERX": "false",
         "USE_REAL_NANOPUB": "false",
         "USE_REAL_PARSER": "false",
         "USE_REAL_EMAIL": "false",
-        "APP_URL": "http://localhost:3000",
-        "TEST_THREAD_ID": "1823373556643688718"
+        "APP_URL": "http://localhost:3000"
+        // "TEST_THREAD_ID": "1823373556643688718"
       },
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/mocha",
       "args": ["--config", "./.mocharc.js", "test/__tests__/**/*.ts"],
