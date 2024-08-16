@@ -588,7 +588,7 @@ export class PostsManager {
     platformId: PLATFORM,
     user_id?: string
   ) {
-    this.db.run(async (manager) => {
+    return this.db.run(async (manager) => {
       const user = await this.users.repo.getUser(userId, manager, true);
       const post = await this.processing.getPostFull(postId, manager, true);
 
@@ -606,7 +606,7 @@ export class PostsManager {
         throw new Error(`Mirror of ${postId} on ${platformId} not published`);
       }
 
-      const post_id = mirror.postId;
+      const post_id = mirror.post_id;
 
       if (post_id === undefined) {
         throw new Error(`PostId not found for mirror ${mirror.id}`);

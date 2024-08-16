@@ -385,7 +385,7 @@ describe.only('030-process', () => {
       const readPost = await services.postsManager.getPost(post.id, true);
 
       const unpublishedMirror = PostsHelper.getPostMirror(
-        post,
+        readPost,
         { platformId: PLATFORM.Nanopub },
         true
       );
