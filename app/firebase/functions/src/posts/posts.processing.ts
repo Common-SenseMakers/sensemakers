@@ -129,6 +129,8 @@ export class PostsProcessing {
 
   /** Create and store all platform posts for one post */
   async createOrUpdatePostDrafts(postId: string, manager: TransactionManager) {
+    if (DEBUG) logger.debug(`createOrUpdatePostDrafts ${postId}`);
+
     const appPostFull = await this.getPostFull(postId, manager, true);
 
     // posts without authors does not have mirrors
@@ -224,6 +226,11 @@ export class PostsProcessing {
             } else {
               const post_id = existingMirror.post_id;
 
+              if (DEBUG)
+                logger.debug(
+                  `createPostDrafts- buildDeleteDraft for post ${postId}, existingMirror post_id:${post_id}`
+                );
+
               let deleteDraft: undefined | any = undefined;
 
               if (post_id) {
@@ -238,6 +245,7 @@ export class PostsProcessing {
                 logger.debug(`createPostDrafts- update ${postId}`, {
                   postId,
                   draft,
+                  deleteDraft,
                 });
 
               await this.platformPosts.update(

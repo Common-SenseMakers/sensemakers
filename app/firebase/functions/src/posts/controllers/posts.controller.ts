@@ -7,7 +7,7 @@ import {
 import {
   PostUpdatePayload,
   ProfilePostsQuery,
-  RetractPlatformPostPayload,
+  UnpublishPlatformPostPayload,
   UserPostsQuery,
 } from '../../@shared/types/types.posts';
 import { IS_EMULATOR } from '../../config/config.runtime';
@@ -286,7 +286,7 @@ export const unpublishPlatformPostController: RequestHandler = async (
 
     const payload = (await retractPostSchema.validate(
       request.body
-    )) as RetractPlatformPostPayload;
+    )) as UnpublishPlatformPostPayload;
 
     await postsManager.unpublishPlatformPost(
       payload.postId,

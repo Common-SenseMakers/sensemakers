@@ -70,6 +70,8 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     enabledEdit,
     setEnabledEdit,
     nextPostId,
+    retractNanopublication,
+    isRetracting,
   } = usePost();
 
   const reset = () => {
@@ -128,7 +130,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   };
 
   const retract = () => {
-    console.log('retract tbd');
+    retractNanopublication();
   };
 
   const { signNanopublication } = useNanopubContext();
@@ -252,7 +254,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
           <Box width="50%" style={{ flexGrow: 1 }}>
             <AppButton
-              disabled={isUpdating}
+              disabled={isUpdating || isRetracting}
               icon={<ClearIcon></ClearIcon>}
               onClick={() => retract()}
               label={t(I18Keys.retract)}></AppButton>
@@ -260,7 +262,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
           <Box width="50%" align="end" gap="small">
             <AppButton
               primary
-              disabled={isUpdating}
+              disabled={isUpdating || isRetracting}
               icon={<SendIcon></SendIcon>}
               onClick={() => enableEditOrUpdate()}
               label={t(I18Keys.edit)}

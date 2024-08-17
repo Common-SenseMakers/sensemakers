@@ -116,7 +116,7 @@ export enum PostsQueryStatus {
   ALL = 'all',
 }
 
-export interface RetractPlatformPostPayload {
+export interface UnpublishPlatformPostPayload {
   postId: string;
   platformId: PLATFORM;
   post_id: string;

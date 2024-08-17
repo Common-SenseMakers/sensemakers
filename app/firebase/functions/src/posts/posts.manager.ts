@@ -13,6 +13,7 @@ import {
   PlatformPostPublishOrigin,
   PlatformPostPublishStatus,
   PlatformPostSignerType,
+  PlatformPostStatusUpdate,
 } from '../@shared/types/types.platform.posts';
 import {
   AppPost,
@@ -44,7 +45,7 @@ import { getUsernameTag } from '../users/users.utils';
 import { PostsHelper } from './posts.helper';
 import { PostsProcessing } from './posts.processing';
 
-const DEBUG = false;
+const DEBUG = true;
 
 const areCredentialsInvalid = (err: { message: string }) => {
   return err.message.includes('Value passed for the token was invalid');
@@ -565,17 +566,7 @@ export class PostsManager {
   ) {
     if (DEBUG) logger.debug(`updatePost ${postId}`, { postId, postUpdate });
     await this.processing.posts.updateContent(postId, postUpdate, manager);
-
-    if (postUpdate.semantics || postUpdate.generic) {
-      /** rebuild the platform drafts with the new post content */
-      if (DEBUG)
-        logger.debug(`updatePost - semantics, content found ${postId}`, {
-          postId,
-          postUpdate,
-        });
-
-      await this.processing.createOrUpdatePostDrafts(postId, manager);
-    }
+    await this.processing.createOrUpdatePostDrafts(postId, manager);
 
     /** sync the semantics as triples when the post is updated */
     const postUpdated = await this.processing.posts.get(postId, manager, true);
@@ -791,16 +782,28 @@ export class PostsManager {
               manager
             );
 
+            const platformPostUpdate: PlatformPostStatusUpdate = {
+              draft: mirror.draft,
+              posted: posted,
+              publishOrigin: PlatformPostPublishOrigin.POSTED,
+              publishStatus: PlatformPostPublishStatus.PUBLISHED,
+            };
+
+            /** set the original post_id */
+            if (!mirror.post_id && posted.post_id) {
+              platformPostUpdate.post_id = posted.post_id;
+            }
+
+            if (DEBUG)
+              logger.debug('approvePost - update platformPost', {
+                platformPostId: mirror.id,
+                platformPostUpdate,
+              });
+
             /**  update platform post status and posted values*/
             await this.processing.platformPosts.update(
               mirror.id,
-              {
-                draft: mirror.draft,
-                posted: posted,
-                publishOrigin: PlatformPostPublishOrigin.POSTED,
-                publishStatus: PlatformPostPublishStatus.PUBLISHED,
-                ...(mirror.post_id ? {} : { post_id: posted.post_id }),
-              },
+              platformPostUpdate,
               manager
             );
 
