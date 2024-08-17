@@ -288,7 +288,7 @@ export const unpublishPlatformPostController: RequestHandler = async (
       request.body
     )) as RetractPlatformPostPayload;
 
-    await postsManager.unpublishPost(
+    await postsManager.unpublishPlatformPost(
       payload.postId,
       userId,
       payload.platformId,

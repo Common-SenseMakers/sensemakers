@@ -583,7 +583,7 @@ export class PostsManager {
   }
 
   /** deletes the mirror of a post from a platform. userId MUST be a verified user */
-  async unpublishPost(
+  async unpublishPlatformPost(
     postId: string,
     userId: string,
     platformId: PLATFORM,

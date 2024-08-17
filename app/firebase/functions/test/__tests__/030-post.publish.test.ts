@@ -386,7 +386,7 @@ describe.only('030-process', () => {
       }
 
       /** unpublish */
-      await services.postsManager.unpublishPost(
+      await services.postsManager.unpublishPlatformPost(
         post.id,
         user.userId,
         PLATFORM.Nanopub,
