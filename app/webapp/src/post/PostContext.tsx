@@ -387,7 +387,7 @@ export const PostContext: React.FC<{
   const editable =
     connectedUser &&
     connectedUser.userId === post?.authorId &&
-    (!postStatuses.published || enabledEdit);
+    (!postStatuses.live || enabledEdit);
 
   const { prevPostId, nextPostId } = useMemo(
     () => getNextAndPrev(post?.id),

@@ -62,6 +62,9 @@ export enum I18Keys {
   publishWarningPar01 = 's0331',
   publishWarningPar02 = 's0342',
 
+  retractWarningTitle = 's0343',
+  retractWarningPar01 = 's0344',
+
   returnToDraft = 's0353',
   yesPublish = 's0364',
 
@@ -413,6 +416,10 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.postStatusPublished]: 'Published',
   [I18Keys.postStatusAutopublished]: 'Autopublished',
   [I18Keys.goBack]: 'Go back',
+
+  [I18Keys.retractWarningTitle]: 'Retract your nanopublication',
+  [I18Keys.retractWarningPar01]:
+    'You will formally retract your nanopublication, but it will remain available as part of the scientific record. You can republish it later if you wish.',
 };
 
 i18n.use(initReactI18next).init({

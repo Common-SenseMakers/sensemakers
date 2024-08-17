@@ -30,7 +30,7 @@ import { PostTextEditable } from './PostTextEditable';
 import { POSTING_POST_ID } from './PostingPage';
 import { concatenateThread } from './posts.helper';
 
-const DEBUG = false;
+const DEBUG = true;
 
 enum PublishPostAction {
   None = 'None',
@@ -38,9 +38,16 @@ enum PublishPostAction {
   nextPost = 'nextPost',
 }
 
+enum PublishType {
+  'publish',
+  'unpublish',
+}
+
 /** extract the postId from the route and pass it to a PostContext */
 export const PostView = (props: { profile?: TwitterUserProfile }) => {
-  const [approveIntent, setApproveIntent] = useState(false);
+  const [publishIntent, setPublishIntent] = useState<boolean>(false);
+  const [retractIntent, setRetractIntent] = useState<boolean>(false);
+
   const [askedOrcid, setAskedOrcid] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [reviewedPublished, setReviewedPublished] = useState(false);
@@ -75,7 +82,8 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   } = usePost();
 
   const reset = () => {
-    setApproveIntent(false);
+    setPublishIntent(false);
+    setRetractIntent(false);
     setAskedOrcid(false);
     setPublishing(false);
     setReviewedPublished(false);
@@ -129,8 +137,8 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     setEnabledEdit(false);
   };
 
-  const retract = () => {
-    retractNanopublication();
+  const startRetract = () => {
+    setRetractIntent(true);
   };
 
   const { signNanopublication } = useNanopubContext();
@@ -140,11 +148,10 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     connectedUser.nanopub &&
     connectedUser.nanopub.length > 0 &&
     signNanopublication &&
-    nanopubDraft &&
-    !postStatuses.published;
+    nanopubDraft;
 
   const readyToNanopublish =
-    canPublishNanopub && nanopubDraft && !postStatuses.published;
+    canPublishNanopub && nanopubDraft && !postStatuses.live;
 
   const connectOrcid = () => {
     if (post) {
@@ -157,7 +164,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   useEffect(() => {
     if (postingPostId && connectedUser) {
       setPostingPostId(null);
-      setApproveIntent(true);
+      setPublishIntent(true);
     }
   }, [postingPostId, connectedUser]);
 
@@ -166,9 +173,13 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     approveOrUpdate();
   };
 
+  const retractClicked = () => {
+    retractNanopublication();
+  };
+
   // publishing is set to false only after the nanopub status is published
   useEffect(() => {
-    if (postStatuses.published) {
+    if (postStatuses.live) {
       setPublishing(false);
     }
   }, [postStatuses]);
@@ -226,7 +237,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       );
     }
 
-    if (!postStatuses.published && !postStatuses.ignored) {
+    if (!postStatuses.live && !postStatuses.ignored) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
           <Box width="50%" style={{ flexGrow: 1 }}>
@@ -241,7 +252,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
               primary
               disabled={isUpdating || !readyToNanopublish}
               icon={<SendIcon></SendIcon>}
-              onClick={() => setApproveIntent(true)}
+              onClick={() => setPublishIntent(true)}
               label={t(I18Keys.publish)}
               style={{ width: '100%' }}></AppButton>
           </Box>
@@ -249,14 +260,14 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       );
     }
 
-    if (postStatuses.published && !enabledEdit) {
+    if (postStatuses.live && !enabledEdit) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
           <Box width="50%" style={{ flexGrow: 1 }}>
             <AppButton
               disabled={isUpdating || isRetracting}
               icon={<ClearIcon></ClearIcon>}
-              onClick={() => retract()}
+              onClick={() => startRetract()}
               label={t(I18Keys.retract)}></AppButton>
           </Box>
           <Box width="50%" align="end" gap="small">
@@ -272,7 +283,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       );
     }
 
-    if (postStatuses.published && enabledEdit) {
+    if (postStatuses.live && enabledEdit) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
           <Box width="50%" style={{ flexGrow: 1 }}>
@@ -301,7 +312,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   const askOrcid = (() => {
     return (
       <AppModalStandard
-        onModalClosed={() => setApproveIntent(false)}
+        onModalClosed={() => setPublishIntent(false)}
         type="normal"
         contentProps={{
           type: 'normal',
@@ -331,7 +342,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   const finalApprove = (() => {
     return (
       <AppModalStandard
-        onModalClosed={() => setApproveIntent(false)}
+        onModalClosed={() => setPublishIntent(false)}
         type="normal"
         contentProps={{
           type: 'normal',
@@ -361,11 +372,38 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   const publishingModal = (() => {
     return (
       <AppModalStandard
-        onModalClosed={() => setApproveIntent(false)}
+        onModalClosed={() => setPublishIntent(false)}
         type="normal"
         contentProps={{
           type: 'normal',
           title: t(I18Keys.publishing),
+        }}></AppModalStandard>
+    );
+  })();
+
+  const retractApprove = (() => {
+    return (
+      <AppModalStandard
+        onModalClosed={() => setPublishIntent(false)}
+        type="normal"
+        contentProps={{
+          type: 'normal',
+          title: t(I18Keys.retractWarningTitle),
+          parragraphs: [
+            <Trans
+              i18nKey={I18Keys.retractWarningPar01}
+              components={{ b: <b></b> }}></Trans>,
+          ],
+          primaryButton: {
+            disabled: isUpdating,
+            label: t(I18Keys.yesPublish),
+            onClick: () => retractClicked(),
+          },
+          secondaryButton: {
+            disabled: isUpdating,
+            label: t(I18Keys.returnToDraft),
+            onClick: () => reset(),
+          },
         }}></AppModalStandard>
     );
   })();
@@ -402,21 +440,21 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   const publishStatusModal = (() => {
     if (DEBUG)
       console.log({
-        approveIntent,
+        approveIntent: publishIntent,
         publishing,
         askedOrcid,
         orcidProfile,
-        published: postStatuses.published,
+        published: postStatuses.live,
         reviewedPublished,
       });
 
-    if (approveIntent) {
+    if (publishIntent) {
       if (publishing) {
         if (DEBUG) console.log('publishingModal');
         return publishingModal;
       }
 
-      if (!postStatuses.published) {
+      if (!postStatuses.live) {
         if (!askedOrcid && !orcidProfile) {
           if (DEBUG) console.log('askOrcid');
           return askOrcid;
@@ -482,6 +520,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
           {action}
         </Box>
         {publishStatusModal}
+        {retractIntent ? retractApprove : <></>}
       </>
     );
   })();
