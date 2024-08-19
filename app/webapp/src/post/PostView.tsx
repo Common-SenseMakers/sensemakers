@@ -16,7 +16,8 @@ import { PATTERN_ID } from '../semantics/patterns/patterns';
 import { AppPostReviewStatus } from '../shared/types/types.posts';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { AppButton } from '../ui-components';
-import { LoadingDiv } from '../ui-components/LoadingDiv';
+import { BoxCentered } from '../ui-components/BoxCentered';
+import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useAutopostInviteContext } from '../user-login/contexts/AutopostInviteContext';
@@ -391,7 +392,15 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
         type="normal"
         contentProps={{
           type: 'normal',
-          title: t(I18Keys.publishing),
+          title: t(I18Keys.publishingTitle),
+          parragraphs: [
+            <Trans
+              i18nKey={I18Keys.publishingPar01}
+              components={{ b: <b></b> }}></Trans>,
+            <BoxCentered>
+              <Loading></Loading>
+            </BoxCentered>,
+          ],
         }}></AppModalStandard>
     );
   })();
