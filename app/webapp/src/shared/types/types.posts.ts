@@ -44,6 +44,7 @@ export enum AppPostRepublishedStatus {
   PENDING = 'pending',
   REPUBLISHED = 'republished',
   AUTO_REPUBLISHED = 'autoRepublished',
+  UNREPUBLISHED = 'unrepublished',
 }
 
 export interface AppPost {
@@ -113,6 +114,12 @@ export enum PostsQueryStatus {
   IGNORED = 'ignored',
   PENDING = 'pending',
   ALL = 'all',
+}
+
+export interface UnpublishPlatformPostPayload {
+  postId: string;
+  platformId: PLATFORM;
+  post_id: string;
 }
 
 export interface UserPostsQuery {

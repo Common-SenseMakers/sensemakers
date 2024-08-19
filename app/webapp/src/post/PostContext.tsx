@@ -26,6 +26,7 @@ import {
   PostUpdate,
   PostUpdatePayload,
   PostsQueryStatus,
+  UnpublishPlatformPostPayload,
 } from '../shared/types/types.posts';
 import { TwitterThread } from '../shared/types/types.twitter';
 import {
@@ -57,6 +58,8 @@ interface PostContextType {
   approveOrUpdate: () => Promise<void>;
   prevPostId?: string;
   nextPostId?: string;
+  retractNanopublication: () => Promise<void>;
+  isRetracting: boolean;
 }
 
 const PostContextValue = createContext<PostContextType | undefined>(undefined);
@@ -81,6 +84,7 @@ export const PostContext: React.FC<{
 
   const { filterStatus, removePost, getNextAndPrev } = useUserPosts();
   const [isUpdating, setIsUpdating] = React.useState(false);
+  const [isRetracting, setIsRetracting] = React.useState(false);
 
   const appFetch = useAppFetch();
 
@@ -113,6 +117,7 @@ export const PostContext: React.FC<{
     if (isLoading) return postInit;
     if (postFetched && postFetched !== null) {
       setIsUpdating(false);
+      setIsRetracting(false);
       return { ...postFetched, ...postEdited };
     }
     return undefined;
@@ -336,10 +341,53 @@ export const PostContext: React.FC<{
     // setIsUpdating(false); should be set by the re-fetch flow
   };
 
+  const retractNanopublication = async () => {
+    setIsRetracting(true);
+
+    const nanopub = post?.mirrors.find(
+      (m) => m.platformId === PLATFORM.Nanopub
+    );
+
+    if (!nanopub || !nanopub.post_id) {
+      throw new Error(`Unexpected nanopub mirror not found`);
+    }
+
+    if (!nanopub.deleteDraft) {
+      throw new Error(`Delete draft not available`);
+    }
+
+    if (nanopub.deleteDraft.signerType === PlatformPostSignerType.USER) {
+      if (!signNanopublication) {
+        throw new Error(`Unexpected signNanopublication undefined`);
+      }
+
+      const signed = await signNanopublication(
+        nanopub.deleteDraft.unsignedPost
+      );
+      nanopub.deleteDraft.signedPost = signed.rdf();
+    }
+
+    nanopub.deleteDraft.postApproval = PlatformPostDraftApproval.APPROVED;
+
+    if (post) {
+      await appFetch<void, UnpublishPlatformPostPayload>(
+        '/api/posts/unpublish',
+        {
+          post_id: nanopub.post_id,
+          platformId: PLATFORM.Nanopub,
+          postId: post.id,
+        }
+      );
+    }
+
+    // setIsUpdating(false); should be set by the re-fetch flow
+    // setIsRetracting(false); should be set by the re-fetch flow
+  };
+
   const editable =
     connectedUser &&
     connectedUser.userId === post?.authorId &&
-    (!postStatuses.published || enabledEdit);
+    (!postStatuses.live || enabledEdit);
 
   const { prevPostId, nextPostId } = useMemo(
     () => getNextAndPrev(post?.id),
@@ -364,6 +412,8 @@ export const PostContext: React.FC<{
         enabledEdit,
         prevPostId,
         nextPostId,
+        retractNanopublication,
+        isRetracting,
       }}>
       {children}
     </PostContextValue.Provider>

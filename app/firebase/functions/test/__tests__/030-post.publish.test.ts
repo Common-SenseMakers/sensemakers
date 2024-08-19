@@ -2,6 +2,7 @@ import { expect } from 'chai';
 
 import {
   PlatformPostDraftApproval,
+  PlatformPostPublishStatus,
   PlatformPostSignerType,
 } from '../../src/@shared/types/types.platform.posts';
 import {
@@ -16,6 +17,7 @@ import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
+import { PostsHelper } from '../../src/posts/posts.helper';
 import { resetDB } from '../utils/db';
 import {
   _01_createAndFetchUsers,
@@ -345,6 +347,66 @@ describe('030-process', () => {
           updatedLatestNanopubUri,
         });
       }
+    });
+
+    it('retracts a published post', async () => {
+      if (!user) {
+        throw new Error('user not created');
+      }
+
+      /** get published posts of user */
+      const publishedPosts = await services.postsManager.getOfUser(
+        user.userId,
+        {
+          status: PostsQueryStatus.PUBLISHED,
+          fetchParams: { expectedAmount: 10 },
+        }
+      );
+
+      expect(publishedPosts).to.have.length(TEST_THREADS.length + 1 - 1); // 1 ignored post
+
+      const post = publishedPosts[0];
+
+      const publishedMirror = PostsHelper.getPostMirror(
+        post,
+        {
+          platformId: PLATFORM.Nanopub,
+        },
+        true
+      );
+
+      const post_id = publishedMirror.post_id;
+
+      if (!post_id) {
+        throw new Error('post_id undefined');
+      }
+
+      if (!publishedMirror) {
+        throw new Error('nanopubPlatformPost undefined');
+      }
+
+      /** unpublish */
+      await services.postsManager.unpublishPlatformPost(
+        post.id,
+        user.userId,
+        PLATFORM.Nanopub,
+        post_id
+      );
+
+      const readPost = await services.postsManager.getPost(post.id, true);
+
+      const unpublishedMirror = PostsHelper.getPostMirror(
+        readPost,
+        { platformId: PLATFORM.Nanopub },
+        true
+      );
+
+      expect(readPost.republishedStatus).to.equal(
+        AppPostRepublishedStatus.UNREPUBLISHED
+      );
+      expect(unpublishedMirror.publishStatus).to.equal(
+        PlatformPostPublishStatus.UNPUBLISHED
+      );
     });
   });
 });

@@ -55,7 +55,7 @@ export const activityEventCreatedHook = async (
             time.now() < author.signupDate + QUIET_SIGNUP_PERIOD &&
             notifications.haveQuiet;
 
-          const hasAutopost =
+          const hasNotifications =
             author.settings.notificationFreq !== NotificationFreq.None;
 
           const after = author.settings.autopost[PLATFORM.Nanopub].after;
@@ -71,11 +71,18 @@ export const activityEventCreatedHook = async (
           if (DEBUG)
             logger.debug(
               `PostParsed or PostAutoposted activity check ${activityEvent.data.postId}`,
-              { hasAutopost, isQuiet, isNewPost, isResearch, author, post },
+              {
+                hasNotifications,
+                isQuiet,
+                isNewPost,
+                isResearch,
+                author,
+                post,
+              },
               PREFIX
             );
 
-          if (hasAutopost && !isQuiet && isResearch && isNewPost) {
+          if (hasNotifications && !isQuiet && isResearch && isNewPost) {
             logger.debug(
               `Create notification of ${activityEvent.type} on post: ${post.id} to user: ${author.userId}`,
               activityEvent,

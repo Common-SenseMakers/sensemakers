@@ -14,7 +14,7 @@ import { buildAppIntroNp } from '../../src/platforms/nanopub/create.app.intro.na
 import { createIntroNanopublication } from '../../src/platforms/nanopub/create.intro.nanopub';
 import { createNanopublication } from '../../src/platforms/nanopub/create.nanopub';
 import { NanopubService } from '../../src/platforms/nanopub/nanopub.service';
-import { buildIntroNp } from '../../src/platforms/nanopub/utils';
+import { buildIntroNp } from '../../src/platforms/nanopub/nanopub.utils';
 import { TimeService } from '../../src/time/time.service';
 import { getNanopubProfile } from '../utils/nanopub.profile';
 import { getMockPost } from '../utils/posts.utils';

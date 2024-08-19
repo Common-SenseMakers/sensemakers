@@ -44,7 +44,7 @@ export const PostCard = (props: {
       pad={{ top: '16px', bottom: '24px', horizontal: '12px' }}
       style={{
         backgroundColor: shade ? constants.colors.shade : 'white',
-        borderTop: '1px solid var(--Neutral-300, #D1D5DB)',
+        borderTop: '2px solid var(--Neutral-300, #D1D5DB)',
         borderRight: '1px solid var(--Neutral-300, #D1D5DB)',
         borderLeft: '1px solid var(--Neutral-300, #D1D5DB)',
         borderBottom: 'none',

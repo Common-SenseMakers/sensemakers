@@ -19,6 +19,7 @@ import {
 export enum PlatformPostPublishStatus {
   DRAFT = 'draft',
   PUBLISHED = 'published',
+  UNPUBLISHED = 'unpublished',
 }
 
 export enum PlatformPostPublishOrigin {
@@ -35,6 +36,7 @@ export interface PlatformPost<C = any, D = any> {
   publishOrigin: PlatformPostPublishOrigin;
   posted?: PlatformPostPosted<C>;
   draft?: PlatformPostDraft<D>;
+  deleteDraft?: PlatformPostDeleteDraft; // a draft of the "delete publication" ready in case it needs to be signed
 }
 
 export type PlatformPostCreate<C = any> = Omit<PlatformPost<C>, 'id'>;
@@ -44,8 +46,7 @@ export type PlatformPostCreate<C = any> = Omit<PlatformPost<C>, 'id'>;
  * has been published to its platform
  */
 export interface PlatformPostPosted<C = any> {
-  user_id: string; // The itended user_id of when publishing
-  // platformId?: PUBLISHABLE_PLATFORMS; // Only needed in some cases
+  user_id: string; // The intended user_id when publishing
   post_id: string; // The id of the platform post on the platform
   timestampMs: number; // timestamp in ms
   post: C;
@@ -79,6 +80,9 @@ export interface PlatformPostDraft<D = any> {
   signedPost?: D;
 }
 
+export interface PlatformPostDeleteDraft<D = any>
+  extends PlatformPostDraft<D> {}
+
 /**
  * The PlatformPostPublish object is used to publish a post on a platform
  * */
@@ -101,6 +105,11 @@ export interface PlatformPostCreated {
 export type PlatformPostStatusUpdate = Partial<
   Pick<
     PlatformPost,
-    'post_id' | 'posted' | 'publishOrigin' | 'publishStatus' | 'draft'
+    | 'post_id'
+    | 'posted'
+    | 'publishOrigin'
+    | 'publishStatus'
+    | 'draft'
+    | 'deleteDraft'
   >
 >;
