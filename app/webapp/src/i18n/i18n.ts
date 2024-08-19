@@ -62,11 +62,13 @@ export enum I18Keys {
   publishWarningPar01 = 's0331',
   publishWarningPar02 = 's0342',
 
-  retractWarningTitle = 's0343',
-  retractWarningPar01 = 's0344',
+  unpublishWarningTitle = 's0343',
+  unpublishWarningPar01 = 's0344',
 
   returnToDraft = 's0353',
   yesPublish = 's0364',
+  returnToNanopub = 's0353x',
+  yesUnpublish = 's0365x',
 
   publishing = 's0365',
 
@@ -76,7 +78,7 @@ export enum I18Keys {
   openPublished = 's0369',
 
   edit = 's037',
-  retract = 's038',
+  unpublish = 's038',
 
   cancel = 's039',
 
@@ -271,6 +273,8 @@ const translationENG: Record<I18Keys, string> = {
     'While you can retract a nanopub to make it invisible to most users, <b>it cannot be deleted</b>. This ensures the integrity of the scientific record.',
   [I18Keys.returnToDraft]: 'No, return to draft',
   [I18Keys.yesPublish]: 'Yes, I want to publish',
+  [I18Keys.returnToNanopub]: 'Go back',
+  [I18Keys.yesUnpublish]: 'Yes, I want to retract',
 
   [I18Keys.publishing]: 'Publishing',
 
@@ -280,7 +284,7 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.openPublished]: 'See live nanopublication',
 
   [I18Keys.edit]: 'Edit',
-  [I18Keys.retract]: 'Retract',
+  [I18Keys.unpublish]: 'Retract',
   [I18Keys.cancel]: 'Cancel',
 
   [I18Keys.emailHeader]: '{{timeframe}} Activity Summary',
@@ -417,8 +421,8 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.postStatusAutopublished]: 'Autopublished',
   [I18Keys.goBack]: 'Go back',
 
-  [I18Keys.retractWarningTitle]: 'Retract your nanopublication',
-  [I18Keys.retractWarningPar01]:
+  [I18Keys.unpublishWarningTitle]: 'Retract your nanopublication',
+  [I18Keys.unpublishWarningPar01]:
     'You will formally retract your nanopublication, but it will remain available as part of the scientific record. You can republish it later if you wish.',
 };
 
