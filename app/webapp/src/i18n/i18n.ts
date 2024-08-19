@@ -279,7 +279,7 @@ const translationENG: Record<I18Keys, string> = {
 
   [I18Keys.publishingTitle]: 'Publishing',
   [I18Keys.publishingPar01]:
-    'Your nanopublication is being sen to the network. Please wait a moment.',
+    'Your nanopublication is being sent to the network. Please wait a moment.',
 
   [I18Keys.publishedTitle]: 'Your nanopublication is live!',
   [I18Keys.publishedText]: 'Your post has been nanopublished.',
