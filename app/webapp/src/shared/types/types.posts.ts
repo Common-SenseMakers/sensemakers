@@ -28,6 +28,7 @@ export enum AppPostParsingStatus {
   IDLE = 'idle',
   PROCESSING = 'processing',
   ERRORED = 'errored',
+  EXPIRED = 'expired',
 }
 export enum AppPostParsedStatus {
   UNPROCESSED = 'unprocessed',
@@ -54,6 +55,7 @@ export interface AppPost {
   origin: PLATFORM; // The platform where the post originated
   createdAtMs: number;
   parsingStatus: AppPostParsingStatus;
+  parsingStartedAtMs?: number;
   parsedStatus: AppPostParsedStatus;
   reviewedStatus: AppPostReviewStatus;
   republishedStatus: AppPostRepublishedStatus;
@@ -98,6 +100,7 @@ export type PostUpdate = Partial<
     | 'semantics'
     | 'originalParsed'
     | 'parsingStatus'
+    | 'parsingStartedAtMs'
     | 'parsedStatus'
     | 'reviewedStatus'
     | 'republishedStatus'
