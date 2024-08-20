@@ -65,6 +65,9 @@ export enum I18Keys {
   unpublishWarningTitle = 's0343',
   unpublishWarningPar01 = 's0344',
 
+  unpublishingTitle = 's0345x',
+  unpublishingPar01 = 's0345xw',
+
   returnToDraft = 's0353',
   yesPublish = 's0364',
   returnToNanopub = 's0353x',
@@ -281,6 +284,10 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.publishingTitle]: 'Publishing',
   [I18Keys.publishingPar01]:
     'Your nanopublication is being sent to the network. Please wait a moment.',
+
+  [I18Keys.unpublishingTitle]: 'Retracting',
+  [I18Keys.unpublishingPar01]:
+    'Your nanopublication is marked as retracted. Please wait a moment.',
 
   [I18Keys.publishedTitle]: 'Your nanopublication is live!',
   [I18Keys.publishedText]: 'Your post has been nanopublished.',
