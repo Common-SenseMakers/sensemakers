@@ -14,7 +14,7 @@ import { PLATFORM } from '../../../shared/types/types.user';
 import { usePersist } from '../../../utils/use.persist';
 import { useAccountContext } from '../AccountContext';
 
-const DEBUG = false;
+const DEBUG = true;
 const WAS_CONNECTING_ORCID = 'was-connecting-orcid';
 const ORCID_REDIRECT_PATH = 'orcid-redirect-path';
 

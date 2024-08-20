@@ -32,7 +32,7 @@ import { PostTextEditable } from './PostTextEditable';
 import { POSTING_POST_ID } from './PostingPage';
 import { concatenateThread } from './posts.helper';
 
-const DEBUG = true;
+const DEBUG = false;
 
 enum PublishPostAction {
   None = 'None',

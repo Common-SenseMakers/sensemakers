@@ -11,6 +11,7 @@ import {
 } from '../user-login/contexts/AccountContext';
 import { usePersist } from '../utils/use.persist';
 
+const DEBUG = true;
 export const POSTING_POST_ID = 'postingPostId';
 
 /** extract the postId from the route and pass it to a PostContext */
@@ -21,11 +22,19 @@ export const PostingPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (DEBUG)
+      console.log('PostingPage', { postingPostId, overallLoginStatus });
+
     if (
       postingPostId &&
       overallLoginStatus === OverallLoginStatus.FullyLoggedIn &&
       orcidProfile
     ) {
+      if (DEBUG)
+        console.log('PostingPage - navigating to post', {
+          postingPostId,
+          overallLoginStatus,
+        });
       navigate(AbsoluteRoutes.Post(postingPostId));
     }
   }, [postingPostId, overallLoginStatus]);
