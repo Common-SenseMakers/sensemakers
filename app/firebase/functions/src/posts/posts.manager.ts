@@ -34,11 +34,13 @@ import {
   PUBLISHABLE_PLATFORMS,
   UserDetailsBase,
 } from '../@shared/types/types.user';
+import { PARSING_TIMEOUT_MS } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
 import { ParserService } from '../parser/parser.service';
 import { PlatformsService } from '../platforms/platforms.service';
+import { TimeService } from '../time/time.service';
 import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { getUsernameTag } from '../users/users.utils';
@@ -61,7 +63,8 @@ export class PostsManager {
     protected users: UsersService,
     public processing: PostsProcessing,
     protected platforms: PlatformsService,
-    protected parserService: ParserService
+    protected parserService: ParserService,
+    protected time: TimeService
   ) {}
 
   /**
@@ -468,9 +471,33 @@ export class PostsManager {
   }
 
   async getPost<T extends boolean>(postId: string, shouldThrow?: T) {
-    return this.db.run(async (manager) =>
-      this.processing.getPostFull(postId, manager, shouldThrow)
-    );
+    return this.db.run(async (manager) => {
+      const post = await this.processing.getPostFull(
+        postId,
+        manager,
+        shouldThrow
+      );
+      // use this occassion to check if post processing expired
+      if (post && post.parsingStatus === AppPostParsingStatus.PROCESSING) {
+        if (
+          post.parsingStartedAtMs &&
+          this.time.now() >= post.parsingStartedAtMs + PARSING_TIMEOUT_MS
+        ) {
+          await this.updatePost(
+            postId,
+            {
+              parsingStatus: AppPostParsingStatus.EXPIRED,
+            },
+            manager
+          );
+
+          // re-read post with latest parsingStatus
+          return this.processing.getPostFull(postId, manager, shouldThrow);
+        }
+      }
+
+      return post;
+    });
   }
 
   async parsePost(postId: string) {
@@ -485,7 +512,10 @@ export class PostsManager {
         if (DEBUG) logger.debug(`parsePost - marking as parsing ${postId}`);
         await this.updatePost(
           postId,
-          { parsingStatus: AppPostParsingStatus.PROCESSING },
+          {
+            parsingStatus: AppPostParsingStatus.PROCESSING,
+            parsingStartedAtMs: this.time.now(),
+          },
           manager
         );
 
