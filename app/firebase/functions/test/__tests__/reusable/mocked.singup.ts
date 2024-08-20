@@ -1,17 +1,18 @@
 import { expect } from 'chai';
 import { logger } from 'firebase-functions';
 
-import { TwitterUserDetails } from '../../../src/@shared/types/types.twitter';
+import { TwitterSignupData } from '../../../src/@shared/types/types.twitter';
 import { PLATFORM } from '../../../src/@shared/types/types.user';
+import { UsersHelper } from '../../../src/users/users.helper';
 import { getPrefixedUserId } from '../../../src/users/users.utils';
 import { TestServices } from '../test.services';
 
 export const handleSignupMock = async (
   services: TestServices,
-  signupData: TwitterUserDetails
+  signupData: TwitterSignupData
 ) => {
   const userId = await services.db.run(async (manager) => {
-    logger.debug(`handleSignup`, { user_id: signupData.user_id });
+    logger.debug(`handleSignup`, { user_id: signupData.codeChallenge });
 
     const result = await services.users.handleSignup(
       PLATFORM.Twitter,
@@ -28,7 +29,7 @@ export const handleSignupMock = async (
     }
 
     expect(result.userId).to.eq(
-      getPrefixedUserId(PLATFORM.Twitter, signupData.user_id)
+      getPrefixedUserId(PLATFORM.Twitter, signupData.codeChallenge)
     );
     expect(result.ourAccessToken).to.not.be.undefined;
 
@@ -41,14 +42,15 @@ export const handleSignupMock = async (
 
     expect(userRead).to.not.be.undefined;
 
-    if (!signupData.profile) {
+    const account = UsersHelper.getAccount(userRead, PLATFORM.Twitter);
+    if (!account?.profile) {
       throw new Error('unexpected');
     }
 
     const userReadProfile = await services.users.repo.getByPlatformUsername(
       PLATFORM.Twitter,
       'username',
-      signupData.profile.username,
+      account.profile.username,
       manager
     );
 

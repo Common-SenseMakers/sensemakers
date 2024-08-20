@@ -4,7 +4,7 @@ import {
   NanopubUserProfile,
   NanupubSignupData,
 } from '../../src/@shared/types/types.nanopubs';
-import { TwitterUserDetails } from '../../src/@shared/types/types.twitter';
+import { TwitterSignupContext } from '../../src/@shared/types/types.twitter';
 import { PLATFORM } from '../../src/@shared/types/types.user';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { logger } from '../../src/instances/logger';
@@ -34,16 +34,15 @@ describe('010-signups', () => {
 
     it('signup with twitter', async () => {
       const testUser = testCredentials[0];
-      const signupData: TwitterUserDetails = {
-        user_id: testUser.twitter.id,
-        profile: {
-          id: testUser.twitter.id,
-          name: testUser.twitter.username,
-          username: testUser.twitter.username,
-        },
-        signupDate: Date.now(),
-      };
-      userId = await handleSignupMock(services, signupData);
+      const twitterSignupContext: TwitterSignupContext =
+        await services.users.getSignupContext(
+          PLATFORM.Twitter,
+          testUser.twitter.id
+        );
+      userId = await handleSignupMock(services, {
+        ...twitterSignupContext,
+        code: 'mocked',
+      });
     });
 
     describe('connect nanopub account', () => {
