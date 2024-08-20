@@ -274,6 +274,7 @@ const translationENG: Record<I18Keys, string> = {
     'While you can retract a nanopub to make it invisible to most users, <b>it cannot be deleted</b>. This ensures the integrity of the scientific record.',
   [I18Keys.returnToDraft]: 'No, return to draft',
   [I18Keys.yesPublish]: 'Yes, I want to publish',
+
   [I18Keys.returnToNanopub]: 'Go back',
   [I18Keys.yesUnpublish]: 'Yes, I want to retract',
 
@@ -426,7 +427,7 @@ const translationENG: Record<I18Keys, string> = {
 
   [I18Keys.unpublishWarningTitle]: 'Retract your nanopublication',
   [I18Keys.unpublishWarningPar01]:
-    'You will formally retract your nanopublication, but it will remain available as part of the scientific record. You can republish it later if you wish.',
+    'This action marks your nanopublication as retracted. You can republish it later if you wish.',
 };
 
 i18n.use(initReactI18next).init({
