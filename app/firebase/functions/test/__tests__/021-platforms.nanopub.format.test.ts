@@ -9,7 +9,6 @@ import { PLATFORM } from '../../src/@shared/types/types.user';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { cleanPublicKey } from '../../src/@shared/utils/semantics.helper';
-import { logger } from '../../src/instances/logger';
 import { buildAppIntroNp } from '../../src/platforms/nanopub/create.app.intro.nanopub';
 import { createIntroNanopublication } from '../../src/platforms/nanopub/create.intro.nanopub';
 import { createNanopublication } from '../../src/platforms/nanopub/create.nanopub';
@@ -20,7 +19,7 @@ import { getNanopubProfile } from '../utils/nanopub.profile';
 import { getMockPost } from '../utils/posts.utils';
 import { getMockedUser } from '../utils/users.mock';
 
-const DEBUG = false;
+const DEBUG = true;
 const PUBLISH = true;
 
 describe('nanopublication format', () => {
@@ -92,7 +91,7 @@ describe('nanopublication format', () => {
 
     expect(published).to.not.be.undefined;
     if (DEBUG)
-      logger.debug(
+      console.log(
         'published at: ',
         published.info().published,
         published.rdf()
@@ -148,7 +147,7 @@ describe('nanopublication format', () => {
     })();
     expect(updatedPublished).to.not.be.undefined;
     if (DEBUG)
-      logger.debug(
+      console.log(
         'update published at: ',
         updatedPublished.info().published,
         updatedPublished.rdf()
@@ -190,7 +189,7 @@ describe('nanopublication format', () => {
 
     expect(published).to.not.be.undefined;
     if (DEBUG)
-      logger.debug(
+      console.log(
         'published at: ',
         published.info().published,
         published.rdf()
@@ -242,7 +241,7 @@ describe('nanopublication format', () => {
 
     expect(updatedPublished).to.not.be.undefined;
     if (DEBUG)
-      logger.debug(
+      console.log(
         'update published at: ',
         updatedPublished.info().published,
         updatedPublished.rdf()
@@ -295,7 +294,7 @@ describe('nanopublication format', () => {
 
     expect(orcidUpdatedPublished).to.not.be.undefined;
     if (DEBUG)
-      logger.debug(
+      console.log(
         'orcid update published at: ',
         orcidUpdatedPublished.info().published,
         orcidUpdatedPublished.rdf()
@@ -349,7 +348,7 @@ describe('nanopublication format', () => {
 
     expect(published).to.not.be.undefined;
     if (DEBUG)
-      logger.debug(
+      console.log(
         'published at: ',
         published.info().published,
         published.rdf()
@@ -392,7 +391,7 @@ describe('nanopublication format', () => {
 
     expect(updatedPublished).to.not.be.undefined;
     if (DEBUG)
-      logger.debug(
+      console.log(
         'update published at: ',
         updatedPublished.info().published,
         updatedPublished.rdf()
