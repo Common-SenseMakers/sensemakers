@@ -9,8 +9,6 @@ import {
   TransactionManager,
 } from './transaction.manager';
 
-const DEBUG = false;
-
 export class DBInstance {
   public firestore: Firestore;
 
@@ -53,7 +51,8 @@ export class DBInstance {
     func: HandleWithTxManager<R, P>,
     payload?: P,
     config: ManagerConfig = { mode: ManagerModes.TRANSACTION },
-    debugId: string = ''
+    debugId: string = '',
+    DEBUG: boolean = false
   ): Promise<R> {
     switch (config.mode) {
       case ManagerModes.TRANSACTION:

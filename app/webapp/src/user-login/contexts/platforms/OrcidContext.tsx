@@ -14,7 +14,7 @@ import { PLATFORM } from '../../../shared/types/types.user';
 import { usePersist } from '../../../utils/use.persist';
 import { useAccountContext } from '../AccountContext';
 
-const DEBUG = true;
+const DEBUG = false;
 const WAS_CONNECTING_ORCID = 'was-connecting-orcid';
 const ORCID_REDIRECT_PATH = 'orcid-redirect-path';
 
@@ -50,15 +50,16 @@ export const OrcidContext = (props: PropsWithChildren) => {
   const code = searchParams.get('code');
 
   /** React to the code, force single reaction */
-  if (DEBUG)
-    console.log('OrcidContext', {
-      codeHandled,
-      code,
-      connectedUser,
-      wasConnecting,
-      redirectPath,
-    });
   useEffect(() => {
+    if (DEBUG)
+      console.log('OrcidContext', {
+        codeHandled,
+        code,
+        connectedUser,
+        wasConnecting,
+        redirectPath,
+      });
+
     if (
       !codeHandled.current &&
       code &&

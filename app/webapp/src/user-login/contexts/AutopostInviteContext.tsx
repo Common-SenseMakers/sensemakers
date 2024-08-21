@@ -100,8 +100,6 @@ export const AutopostInviteContext = (props: PropsWithChildren) => {
     navigate(AbsoluteRoutes.Settings);
   };
 
-  console.log('autopostInviteDisabled', { showInvite });
-
   const inviteAutopostModal = (() => {
     if (showInvite) {
       return (
