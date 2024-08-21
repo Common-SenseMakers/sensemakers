@@ -1,5 +1,7 @@
 import { Anchor, Box, Text } from 'grommet';
+import { t } from 'i18next';
 
+import { I18Keys } from '../i18n/i18n';
 import { AppPostFull } from '../shared/types/types.posts';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { getPostStatuses } from './posts.helper';
@@ -18,6 +20,8 @@ export const NanopubStatus = (props: { post?: AppPostFull }) => {
     ignored,
     isEditing,
     unpublished,
+    manuallyPublished,
+    autoPublished,
   } = getPostStatuses(post);
 
   if (unpublished) {
@@ -42,13 +46,42 @@ export const NanopubStatus = (props: { post?: AppPostFull }) => {
     );
   }
 
-  if (nanopubUrl) {
+  if (manuallyPublished) {
     return (
       <Anchor href={nanopubUrl} target="_blank">
         <StatusTag
-          label="Published"
+          label={t(I18Keys.postStatusPublished)}
           backgroundColor="transparent"
           color="#337FBD"></StatusTag>
+      </Anchor>
+    );
+  }
+
+  if (autoPublished) {
+    return (
+      <Anchor
+        href={nanopubUrl}
+        target="_blank"
+        style={{ textDecoration: 'none' }}>
+        <StatusTag
+          label={t(I18Keys.postStatusAutopublished)}
+          backgroundColor="#d2e8df"
+          color="#058153">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width={12}
+            height={12}
+            viewBox="0 0 12 12"
+            fill="none">
+            <path
+              d="M5.0999 3.2999H3.2999C2.80285 3.2999 2.3999 3.70285 2.3999 4.1999V8.6999C2.3999 9.19696 2.80285 9.5999 3.2999 9.5999H7.7999C8.29696 9.5999 8.6999 9.19696 8.6999 8.6999V6.8999M6.8999 2.3999H9.5999M9.5999 2.3999V5.0999M9.5999 2.3999L5.0999 6.8999"
+              stroke="#058153"
+              strokeWidth="1.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </StatusTag>
       </Anchor>
     );
   }
@@ -112,12 +145,13 @@ export const StatusTag = (props: {
   label: string;
   color: string;
   backgroundColor: string;
+  children?: React.ReactNode;
 }) => {
-  const { label, color, backgroundColor } = props;
+  const { label, color, backgroundColor, children } = props;
   return (
     <Box
       direction="row"
-      gap="small"
+      gap="xxsmall"
       align="center"
       style={{
         borderRadius: '4px',
@@ -135,6 +169,7 @@ export const StatusTag = (props: {
         }}>
         {label}
       </Text>
+      {children}
     </Box>
   );
 };
