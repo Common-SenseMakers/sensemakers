@@ -1,8 +1,9 @@
-import { Box, Text } from 'grommet';
+import { Anchor, Box, Text } from 'grommet';
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { useAppFetch } from '../api/app.fetch';
+import { SUPPORT_EMAIL_ADDRESS } from '../app/config';
 import { AutopostIcon } from '../app/icons/AutopostIcon';
 import { BellIcon } from '../app/icons/BellIcon';
 import { EmailIcon } from '../app/icons/EmailIcon';
@@ -54,7 +55,8 @@ export const UserSettingsPage = () => {
   const [isSetting, setIsSetting] = useState(false);
   const { disconnect } = useDisconnectContext();
 
-  const { connect: connectOrcid } = useOrcidContext();
+  const { connect: connectOrcid, connecting: connectingOrcid } =
+    useOrcidContext();
 
   const { reviewAutopostIntention, setReviewAutopostIntention } =
     useAutopostInviteContext();
@@ -119,16 +121,6 @@ export const UserSettingsPage = () => {
           <SettingsOptionSelector
             options={[
               {
-                title: t(I18Keys.publishingAutomationOpt1Title),
-                description: t(I18Keys.publishingAutomationOpt1Desc),
-                id: AutopostOption.AI,
-                optionSelected: (id) => setAutopost(id as AutopostOption),
-                selected: currentAutopost === AutopostOption.AI,
-              },
-            ]}></SettingsOptionSelector>
-          <SettingsOptionSelector
-            options={[
-              {
                 title: t(I18Keys.publishingAutomationOpt2Title),
                 description: t(I18Keys.publishingAutomationOpt2Desc),
                 id: AutopostOption.DETERMINISTIC,
@@ -161,7 +153,6 @@ export const UserSettingsPage = () => {
             options={[
               {
                 title: t(I18Keys.notificationSettingsOpt1Title),
-                description: t(I18Keys.notificationSettingsOpt1Desc),
                 id: NotificationFreq.Daily,
                 optionSelected: (id) =>
                   setNotifications(id as NotificationFreq),
@@ -169,7 +160,6 @@ export const UserSettingsPage = () => {
               },
               {
                 title: t(I18Keys.notificationSettingsOpt2Title),
-                description: t(I18Keys.notificationSettingsOpt2Desc),
                 id: NotificationFreq.Weekly,
                 optionSelected: (id) =>
                   setNotifications(id as NotificationFreq),
@@ -177,7 +167,6 @@ export const UserSettingsPage = () => {
               },
               {
                 title: t(I18Keys.notificationSettingsOpt3Title),
-                description: t(I18Keys.notificationSettingsOpt3Desc),
                 id: NotificationFreq.Monthly,
                 optionSelected: (id) =>
                   setNotifications(id as NotificationFreq),
@@ -185,7 +174,6 @@ export const UserSettingsPage = () => {
               },
               {
                 title: t(I18Keys.notificationSettingsOpt4Title),
-                description: t(I18Keys.notificationSettingsOpt4Desc),
                 id: NotificationFreq.None,
                 optionSelected: (id) =>
                   setNotifications(id as NotificationFreq),
@@ -265,9 +253,12 @@ export const UserSettingsPage = () => {
         <SettingsSection
           icon={<SupportIcon size={24}></SupportIcon>}
           title={t(I18Keys.getSupport)}
-          onSectionClicked={() => {
-            setShowSettingsPage(SettingsSections.Support);
-          }}></SettingsSection>
+          description={
+            <Trans
+              i18nKey={I18Keys.getSupportDescription}
+              components={{ a: <a></a> }}></Trans>
+          }
+          showChevron={false}></SettingsSection>
 
         <Box
           pad={{ horizontal: 'medium' }}
@@ -308,12 +299,23 @@ export const UserSettingsPage = () => {
           onButtonClicked={() => connectOrcid('/settings')}
           buttonText="connect"
           username={orcid ? `@${orcid.user_id}` : '- not connected -'}
-          connected={orcid !== undefined}></PlatformSection>
+          connected={orcid !== undefined}
+          connecting={connectingOrcid}></PlatformSection>
 
-        <Box margin={{ vertical: '36px' }} pad={{ horizontal: '16px' }}>
+        <Box
+          direction="row"
+          align="center"
+          justify="between"
+          pad={{ horizontal: '20px' }}
+          margin={{ top: '54px', bottom: '8px' }}>
+          <SettingSectionTitle
+            value={
+              t(I18Keys.logoutTitle) +
+              (twitterProfile ? ` @${twitterProfile.username}` : '')
+            }></SettingSectionTitle>
           <AppButton
-            onClick={() => disconnect()}
-            label={t(I18Keys.logout)}></AppButton>
+            label={t(I18Keys.logout)}
+            onClick={() => disconnect()}></AppButton>
         </Box>
       </Box>
     );

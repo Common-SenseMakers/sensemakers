@@ -93,7 +93,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
     return (
       <Box margin={{ top: 'small' }}>
         <Box style={{ display: 'block' }}>
-          <Box gap="large">
+          <Box gap="16px">
             {visibleRefs.map(([ref, refData], ixref) => {
               if (!props.originalParsed)
                 throw new Error('Undexpected undefined');

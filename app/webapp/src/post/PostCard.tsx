@@ -24,24 +24,31 @@ export const PostCard = (props: {
 
   const { constants } = useThemeContext();
 
-  const handleClick = props.handleClick;
+  const handleClick = () => {
+    props.handleClick();
+  };
+
   const tweet = post.mirrors.find((m) => m.platformId === PLATFORM.Twitter);
   const postText = concatenateThread(post.generic);
 
   const { isParsing } = getPostStatuses(post);
+
+  const handleInternalClick = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).tagName === 'A') {
+      e.stopPropagation();
+    }
+  };
 
   return (
     <Box
       pad={{ top: '16px', bottom: '24px', horizontal: '12px' }}
       style={{
         backgroundColor: shade ? constants.colors.shade : 'white',
-        borderTop: '1px solid var(--Neutral-300, #D1D5DB)',
+        borderTop: '2px solid var(--Neutral-300, #D1D5DB)',
         borderRight: '1px solid var(--Neutral-300, #D1D5DB)',
         borderLeft: '1px solid var(--Neutral-300, #D1D5DB)',
-        borderBottom: isEmail
-          ? '1px solid var(--Neutral-300, #D1D5DB)'
-          : 'none',
-        cursor: !isEmail ? 'pointer' : 'default',
+        borderBottom: 'none',
+        cursor: 'pointer',
         position: 'relative',
       }}
       onClick={handleClick}>
@@ -51,6 +58,7 @@ export const PostCard = (props: {
           timestamp={tweet?.posted?.timestampMs}></TweetAnchor>
         {!profile ? <NanopubStatus post={post}></NanopubStatus> : <></>}
       </Box>
+
       <SemanticsEditor
         include={[PATTERN_ID.KEYWORDS]}
         patternProps={{
@@ -61,7 +69,11 @@ export const PostCard = (props: {
           originalParsed: post?.originalParsed,
         }}></SemanticsEditor>
 
-      <PostTextStatic truncate shade={shade} text={postText}></PostTextStatic>
+      <PostTextStatic
+        onClick={handleInternalClick}
+        truncate
+        shade={shade}
+        text={postText}></PostTextStatic>
 
       <SemanticsEditor
         include={[PATTERN_ID.REF_LABELS]}

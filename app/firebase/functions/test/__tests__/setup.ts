@@ -19,6 +19,7 @@ export const USE_REAL_NANOPUB = process.env.USE_REAL_NANOPUB === 'true';
 export const USE_REAL_PARSER = process.env.USE_REAL_PARSER === 'true';
 export const USE_REAL_EMAIL = process.env.USE_REAL_EMAIL === 'true';
 export const EMAIL_SENDER_FROM = process.env.EMAIL_SENDER_FROM as string;
+export const TEST_EMAIL = process.env.TEST_EMAIL as string;
 
 export type InjectableContext = Readonly<{
   // properties injected using the Root Mocha Hooks
@@ -38,7 +39,9 @@ export const app = initializeApp({
 
 export let globalTestServices = getTestServices({
   time: 'mock',
-  twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
+  twitter: USE_REAL_TWITTER
+    ? undefined
+    : { publish: true, signup: true, fetch: true },
   nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
   parser: USE_REAL_PARSER ? 'real' : 'mock',
   emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',

@@ -7,12 +7,6 @@ const truncate = (text: string, size: number) => {
   return text.slice(0, size) + (text.length > size ? '...' : '');
 };
 
-function getTweetId(url: string): string | undefined {
-  const regex = /(?:twitter\.com|x\.com)\/(?:#!\/)?\w+\/status\/(\d+)/;
-  const match = url.match(regex);
-  return match ? match[1] : undefined;
-}
-
 export const RefCard = (props: {
   ix: number;
   url: string;
@@ -20,19 +14,12 @@ export const RefCard = (props: {
   description?: string;
   image?: string;
   onClick?: () => void;
+  refType?: string;
 }) => {
   const titleTruncated = props.title && truncate(props.title, 50);
-  const tweetId = getTweetId(props.url);
   const { constants } = useThemeContext();
 
-  if (!titleTruncated && !props.description) {
-    const urlTruncated = truncate(props.url, 50);
-    return (
-      <Anchor href={props.url} target="_blank">
-        {urlTruncated}
-      </Anchor>
-    );
-  }
+  const urlTruncated = truncate(props.url, 50);
 
   const onCardClicked = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -65,7 +52,7 @@ export const RefCard = (props: {
           style={{ borderRadius: '4px', border: 'none' }}>
           Reference {props.ix}
         </AppLabel>
-        {tweetId ? (
+        {props.refType ? (
           <AppLabel
             colors={{
               font: constants.colors.textLight2,
@@ -73,7 +60,7 @@ export const RefCard = (props: {
               border: 'transparent',
             }}
             style={{ borderRadius: '4px', border: 'none' }}>
-            Quoted Tweet
+            {props.refType}
           </AppLabel>
         ) : (
           <></>

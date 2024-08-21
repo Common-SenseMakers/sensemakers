@@ -8,11 +8,7 @@ import {
 import { useSearchParams } from 'react-router-dom';
 
 import { useAppFetch } from '../../../api/app.fetch';
-import {
-  ORCID_API_URL,
-  ORCID_CLIENT_ID,
-  ORCID_REDIRECT_URL,
-} from '../../../app/config';
+import { ORCID_API_URL, ORCID_CLIENT_ID } from '../../../app/config';
 import { HandleSignupResult } from '../../../shared/types/types.fetch';
 import { PLATFORM } from '../../../shared/types/types.user';
 import { usePersist } from '../../../utils/use.persist';
@@ -24,6 +20,7 @@ const ORCID_REDIRECT_PATH = 'orcid-redirect-path';
 
 export type OrcidContextType = {
   connect: (path: string) => void;
+  connecting: boolean;
 };
 
 const OrcidContextValue = createContext<OrcidContextType | undefined>(
@@ -53,15 +50,16 @@ export const OrcidContext = (props: PropsWithChildren) => {
   const code = searchParams.get('code');
 
   /** React to the code, force single reaction */
-  if (DEBUG)
-    console.log('OrcidContext', {
-      codeHandled,
-      code,
-      connectedUser,
-      wasConnecting,
-      redirectPath,
-    });
   useEffect(() => {
+    if (DEBUG)
+      console.log('OrcidContext', {
+        codeHandled,
+        code,
+        connectedUser,
+        wasConnecting,
+        redirectPath,
+      });
+
     if (
       !codeHandled.current &&
       code &&
@@ -83,7 +81,6 @@ export const OrcidContext = (props: PropsWithChildren) => {
 
         searchParams.delete('code');
         setSearchParams(searchParams);
-        setWasConnecting(false);
         refreshConnected();
       });
     }
@@ -96,10 +93,17 @@ export const OrcidContext = (props: PropsWithChildren) => {
     window.location.href = `${ORCID_API_URL}/oauth/authorize?client_id=${ORCID_CLIENT_ID}&response_type=code&scope=/authenticate&redirect_uri=${window.location.origin + path}`;
   };
 
+  useEffect(() => {
+    if (connectedUser && connectedUser[PLATFORM.Orcid]) {
+      setWasConnecting(false);
+    }
+  }, [connectedUser]);
+
   return (
     <OrcidContextValue.Provider
       value={{
         connect,
+        connecting: wasConnecting !== undefined ? wasConnecting : false,
       }}>
       {props.children}
     </OrcidContextValue.Provider>

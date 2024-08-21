@@ -1,4 +1,4 @@
-import { firestore } from 'firebase-admin';
+import { FieldValue } from 'firebase-admin/firestore';
 
 import { NotificationFreq } from '../@shared/types/types.notifications';
 import {
@@ -339,18 +339,31 @@ export class UsersRepository {
 
   /** remove userDetails of a given platform */
   public async removePlatformDetails(
-    userId: string,
     platform: PLATFORM,
     user_id: string,
     manager: TransactionManager
   ) {
+    const userId = await this.getUserWithPlatformAccount(
+      platform,
+      user_id,
+      manager
+    );
+
+    if (!userId) {
+      throw new Error('User not found');
+    }
+
     const doc = await this.getUserDoc(userId, manager);
 
     if (!doc.exists) {
       throw new Error(`User ${userId} not found`);
     }
 
-    const user = doc.data();
+    const user = doc.data() as AppUser;
+
+    if (platform === PLATFORM.Local) {
+      throw new Error('Unexpected');
+    }
 
     if (
       !user ||
@@ -368,8 +381,15 @@ export class UsersRepository {
       throw new Error(`Details for user ${userId} not found`);
     }
 
+    const platformIds = user.platformIds;
+    const platformIds_property: keyof UserWithPlatformIds = 'platformIds';
+    const newPlatformIds = platformIds.filter(
+      (p) => p !== getPrefixedUserId(platform, details.user_id)
+    );
+
     manager.update(doc.ref, {
-      [platform]: firestore.FieldValue.arrayRemove(details),
+      [platformIds_property]: newPlatformIds,
+      [platform]: FieldValue.arrayRemove(details),
     });
   }
 

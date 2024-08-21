@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
 import { subscribeToUpdates } from '../firestore/realtime.listener';
@@ -37,10 +38,14 @@ export const usePostsFetch = () => {
 
   const unsubscribeCallbacks = useRef<Record<string, () => void>>({});
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const code = searchParams.get('code');
+
   /** refetch a post and overwrite its value in the array */
   const refetchPost = useCallback(
     async (postId: string) => {
-      if (!connectedUser) {
+      // skip fetching if we are in the middle of a code management
+      if (!connectedUser || code) {
         return;
       }
 
@@ -70,19 +75,19 @@ export const usePostsFetch = () => {
   );
 
   const addPosts = useCallback(
-    (posts: AppPostFull[], position: 'start' | 'end') => {
-      if (DEBUG) console.log(`addPosts called`, { posts });
+    (newPosts: AppPostFull[], position: 'start' | 'end') => {
+      if (DEBUG) console.log(`addPosts called`, { posts: newPosts });
 
       /** add posts  */
       setPosts((prev) => {
         const allPosts =
-          position === 'end' ? prev.concat(posts) : posts.concat(prev);
+          position === 'end' ? prev.concat(newPosts) : newPosts.concat(prev);
         if (DEBUG) console.log(`pushing posts`, { prev, allPosts });
         return allPosts;
       });
 
       /** subscribe to updates */
-      posts.forEach((post) => {
+      newPosts.forEach((post) => {
         if (!unsubscribeCallbacks.current) {
           unsubscribeCallbacks.current = {};
         }
@@ -108,7 +113,7 @@ export const usePostsFetch = () => {
       });
 
       /** trigger parse if not parsed and not parsing */
-      posts.forEach((post) => {
+      newPosts.forEach((post) => {
         if (
           post.parsedStatus === AppPostParsedStatus.UNPROCESSED &&
           post.parsingStatus !== AppPostParsingStatus.PROCESSING
@@ -184,11 +189,16 @@ export const usePostsFetch = () => {
   /** fetch for more post backwards */
   const _fetchOlder = useCallback(
     async (oldestPostId?: string) => {
-      if (!connectedUser) {
+      if (!connectedUser || isFetchingOlder || code) {
         return;
       }
 
-      if (DEBUG) console.log(`fetching for older`);
+      if (DEBUG)
+        console.log(`fetching for older`, {
+          oldestPostId,
+          isFetchingOlder,
+          fetchedOlderFirst,
+        });
       setIsFetchingOlder(true);
       setFetchedOlderFirst(true);
       try {
@@ -199,7 +209,7 @@ export const usePostsFetch = () => {
             untilId: oldestPostId,
           },
         };
-        if (DEBUG) console.log(`fetching for older`, params);
+        if (DEBUG) console.log(`fetching for older - twitter`, params);
         const readPosts = await appFetch<AppPostFull[], UserPostsQuery>(
           '/api/posts/getOfUser',
           params
@@ -215,12 +225,13 @@ export const usePostsFetch = () => {
           setMoreToFetch(true);
         }
       } catch (e: any) {
+        console.error(`error fetching older`, { e, isFetchingOlder });
         setIsFetchingOlder(false);
         setErrorFetchingOlder(e);
         setIsLoading(false);
       }
     },
-    [appFetch, status, connectedUser]
+    [appFetch, status, connectedUser, isFetchingOlder]
   );
 
   /** public function to trigger fetching for older posts */
@@ -237,7 +248,7 @@ export const usePostsFetch = () => {
 
   const _fetchNewer = useCallback(
     async (_newestPostId: string) => {
-      if (!connectedUser || !_newestPostId) {
+      if (!connectedUser || !_newestPostId || code) {
         return;
       }
 

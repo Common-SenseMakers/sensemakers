@@ -24,6 +24,24 @@
         },
         {
           "fieldPath": "createdAtMs",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "republishedStatus",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "authorId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAtMs",
           "order": "DESCENDING"
         }
       ]
@@ -61,6 +79,24 @@
         {
           "fieldPath": "createdAtMs",
           "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "authorId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "reviewedStatus",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAtMs",
+          "order": "ASCENDING"
         }
       ]
     },

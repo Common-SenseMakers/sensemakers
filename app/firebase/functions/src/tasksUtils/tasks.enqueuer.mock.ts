@@ -17,12 +17,14 @@ import {
   parsePostTask,
 } from '../posts/tasks/posts.parse.task';
 
+const DEBUG = false;
+
 export const enqueueTaskMockLocal = async (
   name: string,
   params: any,
   services: Services
 ) => {
-  logger.debug('enqueueTaskStub', { name, params });
+  if (DEBUG) logger.debug('enqueueTaskStub', { name, params });
 
   try {
     await (async () => {

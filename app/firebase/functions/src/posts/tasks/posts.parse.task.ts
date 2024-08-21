@@ -5,8 +5,10 @@ import { Services } from '../../instances/services';
 
 export const PARSE_POST_TASK = 'parsePost';
 
+const DEBUG = false;
+
 export const parsePostTask = async (req: Request, services: Services) => {
-  logger.debug(`parsePostTask: postId: ${req.data.postId}`);
+  if (DEBUG) logger.debug(`parsePostTask: postId: ${req.data.postId}`);
   const postId = req.data.postId as string;
 
   if (!postId) {

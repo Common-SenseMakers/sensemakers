@@ -320,6 +320,8 @@ export class TwitterServiceClient {
       scope,
     });
 
+    if (DEBUG) logger.debug('getSignupContext', authDetails, DEBUG_PREFIX);
+
     return { ...authDetails, ...params };
   }
 

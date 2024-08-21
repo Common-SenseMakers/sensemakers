@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { AppModalStandard } from '../app/AppInfoModal';
+import { AppModalStandard } from '../app/AppModalStandard';
+import { AppCheckBoxMessage } from '../app/icons/AppCheckBoxMessage';
 import { CelebrateIcon } from '../app/icons/CelebrateIcon';
 import { ClearIcon } from '../app/icons/ClearIcon';
 import { SendIcon } from '../app/icons/SendIcon';
@@ -16,7 +17,8 @@ import { PATTERN_ID } from '../semantics/patterns/patterns';
 import { AppPostReviewStatus } from '../shared/types/types.posts';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { AppButton } from '../ui-components';
-import { LoadingDiv } from '../ui-components/LoadingDiv';
+import { BoxCentered } from '../ui-components/BoxCentered';
+import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useAutopostInviteContext } from '../user-login/contexts/AutopostInviteContext';
@@ -38,12 +40,29 @@ enum PublishPostAction {
   nextPost = 'nextPost',
 }
 
+enum PublishType {
+  'publish',
+  'unpublish',
+}
+
+const ORCID_INVITE_DISABLE = 'orcidInviteDisabled';
+
 /** extract the postId from the route and pass it to a PostContext */
 export const PostView = (props: { profile?: TwitterUserProfile }) => {
-  const [approveIntent, setApproveIntent] = useState(false);
+  const [publishIntent, setPublishIntent] = useState<boolean>(false);
+  const [unpublishIntent, setUnpublishIntent] = useState<boolean>(false);
+  const [isUnpublishing, setIsUnpublishing] = useState<boolean>(false);
+
+  const [orcidInviteDisabled, setOrcidInviteDisabled] = usePersist(
+    ORCID_INVITE_DISABLE,
+    false
+  );
+  const [disableOrcidInvite, setDisableOrcidInvite] = usePersist(
+    ORCID_INVITE_DISABLE,
+    false
+  );
   const [askedOrcid, setAskedOrcid] = useState(false);
   const [publishing, setPublishing] = useState(false);
-  const [reviewedPublished, setReviewedPublished] = useState(false);
 
   const { setJustPublished } = useAutopostInviteContext();
 
@@ -54,10 +73,14 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     POSTING_POST_ID,
     null
   );
+  // local state to prevent detecting the returning before leaving
+  const [justSetPostId, setJustSetPostId] = useState<boolean>(false);
+
   const { connect: _connectOrcid } = useOrcidContext();
 
   const { constants } = useThemeContext();
   const {
+    postId,
     post,
     nanopubDraft,
     updateSemantics,
@@ -70,14 +93,16 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     enabledEdit,
     setEnabledEdit,
     nextPostId,
+    retractNanopublication,
+    isRetracting,
   } = usePost();
 
   const reset = () => {
-    setApproveIntent(false);
+    setPublishIntent(false);
+    setUnpublishIntent(false);
+    setIsUnpublishing(false);
     setAskedOrcid(false);
     setPublishing(false);
-    setReviewedPublished(false);
-    setPostingPostId(null);
   };
 
   // reset if post changes
@@ -127,8 +152,8 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     setEnabledEdit(false);
   };
 
-  const retract = () => {
-    console.log('retract tbd');
+  const startUnpublish = () => {
+    setUnpublishIntent(true);
   };
 
   const { signNanopublication } = useNanopubContext();
@@ -138,36 +163,67 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     connectedUser.nanopub &&
     connectedUser.nanopub.length > 0 &&
     signNanopublication &&
-    nanopubDraft &&
-    !postStatuses.published;
+    nanopubDraft;
 
   const readyToNanopublish =
-    canPublishNanopub && nanopubDraft && !postStatuses.published;
+    canPublishNanopub && nanopubDraft && !postStatuses.live;
+
+  const clickedNextAfterOrcid = () => {
+    if (disableOrcidInvite) {
+      // disable after having cli
+      setDisableOrcidInvite(true);
+    }
+    setAskedOrcid(true);
+  };
 
   const connectOrcid = () => {
     if (post) {
+      if (DEBUG) console.log(`connectOrcid. Setting postId ${post.id}`);
       setPostingPostId(post.id);
+      setJustSetPostId(true);
       _connectOrcid('/posting');
     }
   };
 
   // receives the navigate from PostingPage and opens the post intent
   useEffect(() => {
-    if (postingPostId && connectedUser) {
+    if (postingPostId && connectedUser && !justSetPostId && postId) {
+      if (DEBUG) console.log(`posting post detected for ${postingPostId}`);
       setPostingPostId(null);
-      setApproveIntent(true);
+      setPublishIntent(true);
     }
-  }, [postingPostId, connectedUser]);
+  }, [postingPostId, connectedUser, justSetPostId, postId]);
 
-  const approveClicked = () => {
+  const publishApproved = () => {
     setPublishing(true);
     approveOrUpdate();
   };
 
+  const unpublishApproved = () => {
+    setIsUnpublishing(true);
+    retractNanopublication();
+  };
+
   // publishing is set to false only after the nanopub status is published
   useEffect(() => {
-    if (postStatuses.published) {
-      setPublishing(false);
+    if (DEBUG) console.log('postStatuses', postStatuses);
+
+    if (!unpublishIntent && postStatuses.live) {
+      if (DEBUG)
+        console.log(
+          'postStatuses.live true setPublishing(false)',
+          postStatuses
+        );
+      reset();
+    }
+
+    if (postStatuses.unpublished) {
+      if (DEBUG)
+        console.log(
+          'postStatuses.unpublished true setUnpublishIntent(false)',
+          postStatuses
+        );
+      reset();
     }
   }, [postStatuses]);
 
@@ -176,12 +232,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     setJustPublished(true);
 
     if (action === PublishPostAction.None) {
-      setReviewedPublished(true);
-      return;
-    }
-
-    if (action === PublishPostAction.openNanopublication) {
-      openNanopublication();
+      setPublishIntent(false);
       return;
     }
 
@@ -229,7 +280,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       );
     }
 
-    if (!postStatuses.published && !postStatuses.ignored) {
+    if (!postStatuses.live && !postStatuses.ignored) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
           <Box width="50%" style={{ flexGrow: 1 }}>
@@ -244,7 +295,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
               primary
               disabled={isUpdating || !readyToNanopublish}
               icon={<SendIcon></SendIcon>}
-              onClick={() => setApproveIntent(true)}
+              onClick={() => setPublishIntent(true)}
               label={t(I18Keys.publish)}
               style={{ width: '100%' }}></AppButton>
           </Box>
@@ -252,20 +303,20 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       );
     }
 
-    if (postStatuses.published && !enabledEdit) {
+    if (postStatuses.live && !enabledEdit) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
           <Box width="50%" style={{ flexGrow: 1 }}>
             <AppButton
-              disabled={isUpdating}
+              disabled={isUpdating || isRetracting}
               icon={<ClearIcon></ClearIcon>}
-              onClick={() => retract()}
-              label={t(I18Keys.retract)}></AppButton>
+              onClick={() => startUnpublish()}
+              label={t(I18Keys.unpublish)}></AppButton>
           </Box>
           <Box width="50%" align="end" gap="small">
             <AppButton
               primary
-              disabled={isUpdating}
+              disabled={isUpdating || isRetracting}
               icon={<SendIcon></SendIcon>}
               onClick={() => enableEditOrUpdate()}
               label={t(I18Keys.edit)}
@@ -275,7 +326,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       );
     }
 
-    if (postStatuses.published && enabledEdit) {
+    if (postStatuses.live && enabledEdit) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
           <Box width="50%" style={{ flexGrow: 1 }}>
@@ -304,7 +355,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   const askOrcid = (() => {
     return (
       <AppModalStandard
-        onModalClosed={() => setApproveIntent(false)}
+        onModalClosed={() => setPublishIntent(false)}
         type="normal"
         contentProps={{
           type: 'normal',
@@ -316,11 +367,16 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
             <Trans
               i18nKey={I18Keys.connectOrcidPar02}
               components={{ b: <b></b> }}></Trans>,
+            <AppCheckBoxMessage
+              message={t(I18Keys.dontShowAgain)}
+              checked={disableOrcidInvite}
+              onCheckChange={(value) => setDisableOrcidInvite(value)}
+              size={18}></AppCheckBoxMessage>,
           ],
           primaryButton: {
             disabled: isUpdating,
             label: t(I18Keys.continue),
-            onClick: () => setAskedOrcid(true),
+            onClick: () => clickedNextAfterOrcid(),
           },
           secondaryButton: {
             disabled: isUpdating,
@@ -334,7 +390,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   const finalApprove = (() => {
     return (
       <AppModalStandard
-        onModalClosed={() => setApproveIntent(false)}
+        onModalClosed={() => setPublishIntent(false)}
         type="normal"
         contentProps={{
           type: 'normal',
@@ -346,14 +402,11 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
             <Trans
               i18nKey={I18Keys.publishWarningPar02}
               components={{ b: <b></b> }}></Trans>,
-            <Trans
-              i18nKey={I18Keys.publishWarningPar03}
-              components={{ b: <b></b> }}></Trans>,
           ],
           primaryButton: {
             disabled: isUpdating,
             label: t(I18Keys.yesPublish),
-            onClick: () => approveClicked(),
+            onClick: () => publishApproved(),
           },
           secondaryButton: {
             disabled: isUpdating,
@@ -367,11 +420,66 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   const publishingModal = (() => {
     return (
       <AppModalStandard
-        onModalClosed={() => setApproveIntent(false)}
+        onModalClosed={() => setPublishIntent(false)}
         type="normal"
         contentProps={{
           type: 'normal',
-          title: t(I18Keys.publishing),
+          title: t(I18Keys.publishingTitle),
+          parragraphs: [
+            <Trans
+              i18nKey={I18Keys.publishingPar01}
+              components={{ b: <b></b> }}></Trans>,
+            <BoxCentered>
+              <Loading></Loading>
+            </BoxCentered>,
+          ],
+        }}></AppModalStandard>
+    );
+  })();
+
+  const unpublishingModal = (() => {
+    return (
+      <AppModalStandard
+        onModalClosed={() => setUnpublishIntent(false)}
+        type="normal"
+        contentProps={{
+          type: 'normal',
+          title: t(I18Keys.unpublishingTitle),
+          parragraphs: [
+            <Trans
+              i18nKey={I18Keys.unpublishingPar01}
+              components={{ b: <b></b> }}></Trans>,
+            <BoxCentered>
+              <Loading></Loading>
+            </BoxCentered>,
+          ],
+        }}></AppModalStandard>
+    );
+  })();
+
+  const unpublishApprove = (() => {
+    return (
+      <AppModalStandard
+        onModalClosed={() => setUnpublishIntent(false)}
+        type="normal"
+        contentProps={{
+          type: 'normal',
+          title: t(I18Keys.unpublishWarningTitle),
+          parragraphs: [
+            <Trans
+              i18nKey={I18Keys.unpublishWarningPar01}
+              components={{ b: <b></b> }}></Trans>,
+          ],
+          primaryButton: {
+            disabled: isUpdating,
+            label: t(I18Keys.yesUnpublish),
+            onClick: () => unpublishApproved(),
+          },
+          secondaryButton: {
+            disabled: isUpdating,
+            label: t(I18Keys.returnToNanopub),
+            onClick: () => reset(),
+          },
         }}></AppModalStandard>
     );
   })();
@@ -384,23 +492,17 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
         type="normal"
         contentProps={{
           icon: <CelebrateIcon size={40}></CelebrateIcon>,
-          title: t(I18Keys.publishWarningTitle),
+          title: t(I18Keys.publishedTitle),
           parragraphs: [
             <Trans
-              i18nKey={I18Keys.publishWarningPar01}
-              components={{ b: <b></b> }}></Trans>,
-            <Trans
-              i18nKey={I18Keys.publishWarningPar02}
-              components={{ b: <b></b> }}></Trans>,
-            <Trans
-              i18nKey={I18Keys.publishWarningPar03}
+              i18nKey={I18Keys.publishedText}
               components={{ b: <b></b> }}></Trans>,
           ],
           buttonsDirection: 'column',
           primaryButton: {
             disabled: nextPostId === undefined,
             label: t(I18Keys.nextPost),
-            onClick: () => openNextPost(),
+            onClick: () => publishedModalClosed(PublishPostAction.nextPost),
           },
           secondaryButton: {
             disabled: isUpdating,
@@ -414,22 +516,21 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   const publishStatusModal = (() => {
     if (DEBUG)
       console.log({
-        approveIntent,
+        approveIntent: publishIntent,
         publishing,
         askedOrcid,
         orcidProfile,
-        published: postStatuses.published,
-        reviewedPublished,
+        published: postStatuses.live,
       });
 
-    if (approveIntent) {
+    if (publishIntent) {
       if (publishing) {
         if (DEBUG) console.log('publishingModal');
         return publishingModal;
       }
 
-      if (!postStatuses.published) {
-        if (!askedOrcid && !orcidProfile) {
+      if (!postStatuses.live) {
+        if (!askedOrcid && !orcidProfile && !orcidInviteDisabled) {
           if (DEBUG) console.log('askOrcid');
           return askOrcid;
         } else {
@@ -438,10 +539,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
         }
       }
 
-      if (!reviewedPublished) {
-        if (DEBUG) console.log('publishedModal');
-        return publishedModal;
-      }
+      return publishedModal;
     }
 
     if (DEBUG) console.log('no modal');
@@ -494,6 +592,15 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
           {action}
         </Box>
         {publishStatusModal}
+        {unpublishIntent ? (
+          !isUnpublishing ? (
+            unpublishApprove
+          ) : (
+            unpublishingModal
+          )
+        ) : (
+          <></>
+        )}
       </>
     );
   })();

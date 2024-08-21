@@ -47,6 +47,94 @@ export const getMockPublishedPost = () => {
     parsedStatus: AppPostParsedStatus.PROCESSED,
     parsingStatus: AppPostParsingStatus.IDLE,
     reviewedStatus: AppPostReviewStatus.APPROVED,
+    republishedStatus: AppPostRepublishedStatus.REPUBLISHED,
+    originalParsed,
+    mirrors: [
+      {
+        id: 'pp-id-nanopub',
+        platformId: PLATFORM.Nanopub,
+        publishOrigin: PlatformPostPublishOrigin.FETCHED,
+        publishStatus: PlatformPostPublishStatus.PUBLISHED,
+        posted: {
+          post_id: 'https://np.test.knowledgepixels.com/123456',
+          timestampMs: createdAtMs,
+          user_id: '123412341234',
+          post: {},
+        },
+      },
+      {
+        id: 'pp-id',
+        platformId: PLATFORM.Twitter,
+        publishOrigin: PlatformPostPublishOrigin.FETCHED,
+        publishStatus: PlatformPostPublishStatus.PUBLISHED,
+        posted: {
+          post_id: '123456',
+          timestampMs: createdAtMs,
+          user_id: '123412341234',
+          post: {
+            conversation_id: '123456',
+            tweets: [],
+            id: 'post-id',
+            createdAtMs: createdAtMs,
+            authorId: authorId,
+            content: 'test content',
+            semantics: `
+                    @prefix ns1: <http://purl.org/spar/cito/> .
+                    @prefix schema: <https://schema.org/> .
+                    
+                    <http://purl.org/nanopub/temp/mynanopub#assertion> 
+                      ns1:discusses <https://twitter.com/ori_goldberg/status/1781281656071946541> ;    
+                      ns1:includesQuotationFrom <https://twitter.com/ori_goldberg/status/1781281656071946541> ;    
+                      schema:keywords "ExternalSecurity",        "Geopolitics",        "Israel",        "Kissinger",        "PoliticalScience",        "Security" .
+                    `,
+
+            origin: PLATFORM.Twitter,
+            parsedStatus: AppPostParsedStatus.PROCESSED,
+            parsingStatus: AppPostParsingStatus.IDLE,
+            reviewedStatus: AppPostReviewStatus.PENDING,
+            republishedStatus: AppPostRepublishedStatus.PENDING,
+          },
+        },
+      },
+    ],
+  };
+  return post;
+};
+
+export const getMockAutoPublishedPost = () => {
+  const authorId = 'test-author-id';
+  const createdAtMs = Date.now();
+
+  const defaultGeneric: GenericThread = {
+    thread: [
+      {
+        content: 'this is such a cool idea! https://arxiv.org/abs/2312.05230',
+      },
+      {
+        content: 'I disagree with this: https://arxiv.org/abs/2401.14000',
+      },
+    ],
+    author: {
+      id: '123456',
+      name: 'test author',
+      platformId: PLATFORM.Twitter,
+      username: 'test_author',
+    },
+  };
+
+  const originalParsed: ParsePostResult =
+    last_output as unknown as ParsePostResult;
+
+  const post: AppPostFull = {
+    id: 'post-id',
+    createdAtMs: createdAtMs,
+    authorId: authorId,
+    generic: defaultGeneric,
+    semantics: last_output.semantics,
+    origin: PLATFORM.Twitter,
+    parsedStatus: AppPostParsedStatus.PROCESSED,
+    parsingStatus: AppPostParsingStatus.IDLE,
+    reviewedStatus: AppPostReviewStatus.APPROVED,
     republishedStatus: AppPostRepublishedStatus.AUTO_REPUBLISHED,
     originalParsed,
     mirrors: [
@@ -56,7 +144,7 @@ export const getMockPublishedPost = () => {
         publishOrigin: PlatformPostPublishOrigin.FETCHED,
         publishStatus: PlatformPostPublishStatus.PUBLISHED,
         posted: {
-          post_id: '123456',
+          post_id: 'https://np.test.knowledgepixels.com/123456',
           timestampMs: createdAtMs,
           user_id: '123412341234',
           post: {},
@@ -237,7 +325,7 @@ const last_output = {
           uri: 'https://schema.org/Question',
           versions: ['v0'],
           label: 'dg-question',
-          display_name: ' ❓ discourse-graph/question',
+          display_name: '❓ discourse-graph/question',
           prompt: 'this post is raising a research question.',
           prompt_zero_ref: 'this post is raising a research question.',
           prompt_single_ref: null,
@@ -266,7 +354,7 @@ const last_output = {
           uri: 'https://sense-nets.xyz/endorses',
           versions: ['v0'],
           label: 'endorses',
-          display_name: '➕ endorses',
+          display_name: '➕ endorses',
           prompt:
             'this post endorses the mentioned reference. This label can also be used for cases of implicit recommendation, where the author is expressing enjoyment of some content but not explicitly recommending it.',
           prompt_zero_ref: null,
@@ -424,7 +512,7 @@ const last_output = {
           uri: 'https://sense-nets.xyz/summarizes',
           versions: ['v0'],
           label: 'summarizes',
-          display_name: '🗜️ summarizes',
+          display_name: '🗜️ summarizes',
           prompt:
             'this post contains a summary of the mentioned reference. The summary is likely provided by the authors but may be a third party.',
           prompt_zero_ref: null,
@@ -440,7 +528,7 @@ const last_output = {
           uri: 'https://sense-nets.xyz/mentionsFundingOpportunity',
           versions: ['v1'],
           label: 'funding',
-          display_name: '🏦 mentions-funding',
+          display_name: '🏦 mentions-funding',
           prompt:
             'this post mentions a funding opportunity, for example a research grant or prize.',
           prompt_zero_ref:
@@ -525,7 +613,7 @@ const last_output = {
           uri: 'https://sense-nets.xyz/indicatesInterest',
           versions: ['v1'],
           label: 'indicates-interest',
-          display_name: '👀 indicates-interest',
+          display_name: '👀 indicates-interest',
           prompt:
             'this post indicates interest in a reference. This label is meant for cases where the post is not explicitly recommending or endorsing the cited reference.',
           prompt_zero_ref: null,

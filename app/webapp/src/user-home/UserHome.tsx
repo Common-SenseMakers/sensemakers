@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { ModalContent } from '../app/AppInfoModal';
+import { ModalContent } from '../app/AppModalStandard';
 import { useServiceWorker } from '../app/ServiceWorkerContext';
 import { useToastContext } from '../app/ToastsContext';
 import { FilterIcon } from '../app/icons/FilterIcon';
@@ -246,17 +246,6 @@ export const UserHome = () => {
     </AppSelect>
   );
 
-  const reload = isFetchingNewer ? (
-    <Box>
-      <Loading color={constants.colors.primary} size="20px"></Loading>
-    </Box>
-  ) : (
-    <AppButton
-      plain
-      icon={<ReloadIcon size={20}></ReloadIcon>}
-      onClick={() => fetchNewer()}></AppButton>
-  );
-
   const updater = (() => {
     if (hasUpdate) {
       return (
@@ -271,19 +260,16 @@ export const UserHome = () => {
     return <></>;
   })();
 
-  const installer = (() => {
-    if (needsInstall) {
-      return (
-        <Box direction="row" align="center" gap="4px">
-          <Text style={{ fontSize: '14px' }}>{t(I18Keys.installPrompt)}</Text>
-          <Anchor onClick={() => install()}>
-            <Text style={{ fontSize: '14px' }}>{t(I18Keys.installNow)}</Text>
-          </Anchor>
-        </Box>
-      );
-    }
-    return <></>;
-  })();
+  const reload = isFetchingNewer ? (
+    <Box>
+      <Loading color={constants.colors.primary} size="20px"></Loading>
+    </Box>
+  ) : (
+    <AppButton
+      plain
+      icon={<ReloadIcon size={20}></ReloadIcon>}
+      onClick={() => fetchNewer()}></AppButton>
+  );
 
   const header = (
     <Box
@@ -297,9 +283,9 @@ export const UserHome = () => {
       <Box direction="row" justify="between" align="center">
         <Box direction="row" align="center" gap="12px">
           <AppHeading level="3">{pageTitle}</AppHeading>
-          <Box>{reload}</Box>
+          <BoxCentered style={{ height: '40px' }}>{reload}</BoxCentered>
         </Box>
-        <Box>{menu}</Box>
+        {pageIx === 0 && <Box>{menu}</Box>}
       </Box>
     </Box>
   );

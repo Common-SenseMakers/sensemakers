@@ -2,6 +2,7 @@ import { expect } from 'chai';
 
 import {
   PlatformPostDraftApproval,
+  PlatformPostPublishStatus,
   PlatformPostSignerType,
 } from '../../src/@shared/types/types.platform.posts';
 import {
@@ -16,7 +17,7 @@ import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
-import { UsersHelper } from '../../src/users/users.helper';
+import { PostsHelper } from '../../src/posts/posts.helper';
 import { resetDB } from '../utils/db';
 import {
   _01_createAndFetchUsers,
@@ -40,7 +41,9 @@ describe('030-process', () => {
 
   const services = getTestServices({
     time: 'mock',
-    twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
+    twitter: USE_REAL_TWITTER
+      ? undefined
+      : { publish: true, signup: true, fetch: true },
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
     emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
@@ -83,7 +86,7 @@ describe('030-process', () => {
       });
 
       if (!USE_REAL_TWITTER && TEST_THREADS.length > 1) {
-        expect(pendingPosts).to.have.length(TEST_THREADS.length + 1);
+        expect(pendingPosts).to.have.length(TEST_THREADS.length + 1 - 1); // one post is ignored
       }
 
       await Promise.all(
@@ -112,6 +115,11 @@ describe('030-process', () => {
             throw new Error('user not created');
           }
 
+          const rootNanopubUri = nanopub?.post_id;
+          const latestNanopubUri = nanopub?.posted?.post_id;
+          expect(rootNanopubUri).to.be.undefined;
+          expect(latestNanopubUri).to.be.undefined;
+
           /** send updated post (content and semantics did not changed) */
           await services.postsManager.publishPost(
             pendingPost,
@@ -123,6 +131,23 @@ describe('030-process', () => {
             pendingPost.id,
             true
           );
+
+          const publishedNanopubPlatformPost = published.mirrors.find(
+            (platformPost) => platformPost.platformId === PLATFORM.Nanopub
+          );
+          const publishedRootNanopubUri = publishedNanopubPlatformPost?.post_id;
+          const publishedLatestNanopubUri =
+            publishedNanopubPlatformPost?.posted?.post_id;
+          expect(publishedRootNanopubUri).to.not.be.undefined;
+          expect(publishedLatestNanopubUri).to.not.be.undefined;
+          expect(publishedRootNanopubUri).to.equal(publishedLatestNanopubUri);
+
+          if (USE_REAL_NANOPUB) {
+            console.log('signed published urls', {
+              publishedRootNanopubUri,
+              publishedLatestNanopubUri,
+            });
+          }
 
           expect(published).to.not.be.undefined;
           expect(published.reviewedStatus).to.equal(
@@ -148,7 +173,7 @@ describe('030-process', () => {
 
       if (!USE_REAL_TWITTER) {
         if (TEST_THREADS.length > 1) {
-          expect(pendingPosts).to.have.length(TEST_THREADS.length - 1);
+          expect(pendingPosts).to.have.length(TEST_THREADS.length - 1 - 1); // 1 ifnored post
         } else {
           expect(pendingPosts).to.have.length(0);
         }
@@ -172,6 +197,10 @@ describe('030-process', () => {
             throw new Error('user not created');
           }
 
+          const rootNanopubUri = nanopub?.post_id;
+          const latestNanopubUri = nanopub?.posted?.post_id;
+          expect(rootNanopubUri).to.be.undefined;
+          expect(latestNanopubUri).to.be.undefined;
           /** send updated post (content and semantics did not changed) */
           await services.postsManager.publishPost(
             pendingPost,
@@ -184,6 +213,23 @@ describe('030-process', () => {
             true
           );
 
+          const publishedNanopubPlatformPost = published.mirrors.find(
+            (platformPost) => platformPost.platformId === PLATFORM.Nanopub
+          );
+          const publishedRootNanopubUri = publishedNanopubPlatformPost?.post_id;
+          const publishedLatestNanopubUri =
+            publishedNanopubPlatformPost?.posted?.post_id;
+          expect(publishedRootNanopubUri).to.not.be.undefined;
+          expect(publishedLatestNanopubUri).to.not.be.undefined;
+          expect(publishedRootNanopubUri).to.equal(publishedLatestNanopubUri);
+
+          if (USE_REAL_NANOPUB) {
+            console.log('delegated published urls', {
+              publishedRootNanopubUri,
+              publishedLatestNanopubUri,
+            });
+          }
+
           expect(published).to.not.be.undefined;
           expect(published.reviewedStatus).to.equal(
             AppPostReviewStatus.APPROVED
@@ -195,54 +241,12 @@ describe('030-process', () => {
       );
     });
 
-    it.skip('get user profile', async () => {
-      if (!user) {
-        throw new Error('user not created');
-      }
-
-      const twitter = UsersHelper.getAccount(
-        user,
-        PLATFORM.Twitter,
-        undefined,
-        true
-      );
-
-      const username = twitter.profile?.username;
-      if (!username) {
-        throw new Error('username not found in profile');
-      }
-
-      const LABELS_URIS = ['http://purl.org/spar/cito/linksTo'];
-
-      const profilePosts = await services.postsManager.getUserProfile(
-        PLATFORM.Twitter,
-        username,
-        { expectedAmount: 100 },
-        LABELS_URIS
-      );
-
-      expect(profilePosts).to.not.be.undefined;
-      expect(profilePosts).to.have.length(2);
-
-      const LABELS_URIS_2 = ['http://purl.org/spar/cito/linksTo'];
-
-      const profilePosts2 = await services.postsManager.getUserProfile(
-        PLATFORM.Twitter,
-        username,
-        { expectedAmount: 100 },
-        LABELS_URIS_2
-      );
-
-      expect(profilePosts2).to.not.be.undefined;
-      expect(profilePosts2).to.have.length(2);
-    });
-
     it('edits a published post', async () => {
       if (!user) {
         throw new Error('user not created');
       }
 
-      /** get pending posts of user */
+      /** get published posts of user */
       const publishedPosts = await services.postsManager.getOfUser(
         user.userId,
         {
@@ -251,7 +255,7 @@ describe('030-process', () => {
         }
       );
 
-      expect(publishedPosts).to.have.length(TEST_THREADS.length + 1);
+      expect(publishedPosts).to.have.length(TEST_THREADS.length + 1 - 1); // 1 ignored post
 
       const post = publishedPosts[0];
 
@@ -274,9 +278,48 @@ describe('030-process', () => {
         generic: newGeneric,
       };
 
+      const nanopubPlatformPost = post.mirrors.find(
+        (platformPost) => platformPost.platformId === PLATFORM.Nanopub
+      );
+      if (!nanopubPlatformPost) {
+        throw new Error('nanopubPlatformPost undefined');
+      }
+
+      const nonUpdatedMirrors = post.mirrors.filter(
+        (platformPost) => platformPost.platformId !== PLATFORM.Nanopub
+      );
+
+      const rootNanopubUri = nanopubPlatformPost?.post_id;
+      const latestNanopubUri = nanopubPlatformPost?.posted?.post_id;
+      expect(rootNanopubUri).to.not.be.undefined;
+      expect(latestNanopubUri).to.not.be.undefined;
+      expect(rootNanopubUri).to.equal(latestNanopubUri);
+
+      const nanopubDraft = await services.platforms
+        .get(PLATFORM.Nanopub)
+        .convertFromGeneric({ post: newPost, author: user });
+
+      if (!nanopubDraft.unsignedPost) {
+        throw new Error('unsignedPost undefined');
+      }
+
+      /** if signer type is set to user, sign the updated nanopub before publishing it */
+      if (
+        nanopubPlatformPost?.draft?.signerType === PlatformPostSignerType.USER
+      ) {
+        const signed = await signNanopublication(
+          nanopubDraft.unsignedPost as string,
+          rsaKeys,
+          ''
+        );
+        nanopubDraft.signedPost = signed;
+      }
+
+      nanopubPlatformPost.draft = nanopubDraft;
+
       /** send updated post (content and semantics did not changed) */
       await services.postsManager.publishPost(
-        newPost,
+        { ...newPost, mirrors: [...nonUpdatedMirrors, nanopubPlatformPost] },
         [PLATFORM.Nanopub],
         user.userId
       );
@@ -285,6 +328,85 @@ describe('030-process', () => {
 
       expect(readPost.generic.thread).to.have.length(threadPrev.length);
       expect(readPost.generic.thread[0].content).to.equal(newThread[0].content);
+      const updatedNanopubPlatformPost = readPost.mirrors.find(
+        (platformPost) => platformPost.platformId === PLATFORM.Nanopub
+      );
+      const updatedRootNanopubUri = updatedNanopubPlatformPost?.post_id;
+      const updatedLatestNanopubUri =
+        updatedNanopubPlatformPost?.posted?.post_id;
+      expect(updatedRootNanopubUri).to.not.be.undefined;
+      expect(updatedLatestNanopubUri).to.not.be.undefined;
+      expect(rootNanopubUri).to.equal(updatedRootNanopubUri);
+      expect(latestNanopubUri).to.not.equal(updatedLatestNanopubUri);
+
+      if (USE_REAL_NANOPUB) {
+        console.log('edited published urls', {
+          rootNanopubUri,
+          latestNanopubUri,
+          updatedRootNanopubUri,
+          updatedLatestNanopubUri,
+        });
+      }
+    });
+
+    it('retracts a published post', async () => {
+      if (!user) {
+        throw new Error('user not created');
+      }
+
+      /** get published posts of user */
+      const publishedPosts = await services.postsManager.getOfUser(
+        user.userId,
+        {
+          status: PostsQueryStatus.PUBLISHED,
+          fetchParams: { expectedAmount: 10 },
+        }
+      );
+
+      expect(publishedPosts).to.have.length(TEST_THREADS.length + 1 - 1); // 1 ignored post
+
+      const post = publishedPosts[0];
+
+      const publishedMirror = PostsHelper.getPostMirror(
+        post,
+        {
+          platformId: PLATFORM.Nanopub,
+        },
+        true
+      );
+
+      const post_id = publishedMirror.post_id;
+
+      if (!post_id) {
+        throw new Error('post_id undefined');
+      }
+
+      if (!publishedMirror) {
+        throw new Error('nanopubPlatformPost undefined');
+      }
+
+      /** unpublish */
+      await services.postsManager.unpublishPlatformPost(
+        post.id,
+        user.userId,
+        PLATFORM.Nanopub,
+        post_id
+      );
+
+      const readPost = await services.postsManager.getPost(post.id, true);
+
+      const unpublishedMirror = PostsHelper.getPostMirror(
+        readPost,
+        { platformId: PLATFORM.Nanopub },
+        true
+      );
+
+      expect(readPost.republishedStatus).to.equal(
+        AppPostRepublishedStatus.UNREPUBLISHED
+      );
+      expect(unpublishedMirror.publishStatus).to.equal(
+        PlatformPostPublishStatus.UNPUBLISHED
+      );
     });
   });
 });

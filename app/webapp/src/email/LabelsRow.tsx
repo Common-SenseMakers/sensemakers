@@ -21,11 +21,12 @@ export const Label = ({
       </span>
     );
   } else {
-    const [emoji, text] = [label.charAt(0), label.slice(1)];
+    // NOTE assumes that the emoji is separated by a space
+    const [emoji, text] = label.split(' ');
     return (
       <span style={{ ...labelStyle, backgroundColor, borderColor, color }}>
         <span style={{ fontSize: '10px' }}>{emoji}</span>
-        {text}
+        {` ${text}`}
       </span>
     );
   }

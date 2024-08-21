@@ -15,9 +15,8 @@ module.exports = {
               FUNCTIONS_BASE:
                 '"http://127.0.0.1:5001/demo-sensenets/us-central1"',
               ORCID_CLIENT_ID: '"APP-M1QE4V5MBUYC7Y54"',
-              TWITTER_CLIENT_ID: '"N0czb28xek5ldjRxdWpIRVVvZFg6MTpjaQ"',
               FB_PROJECTID: '"demo-sensenets"',
-              PROJECT_TWITTER_ACCOUNT: '"rtk254"',
+              PROJECT_TWITTER_ACCOUNT: '"CSensemakers"',
               APP_URL: '"http://localhost:3000"',
               NANOPUB_EXPLORER_SERVER: '"https://np.test.knowledgepixels.com/"',
             },

@@ -22,6 +22,7 @@ import {
   PLATFORM,
 } from '../@shared/types/types.user';
 import { mapStoreElements, parseRDF } from '../@shared/utils/n3.utils';
+import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
 import { PlatformsService } from '../platforms/platforms.service';
@@ -30,6 +31,7 @@ import { TimeService } from '../time/time.service';
 import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { PlatformPostsRepository } from './platform.posts.repository';
+import { PostsHelper } from './posts.helper';
 import { PostsRepository } from './posts.repository';
 
 const DEBUG = false;
@@ -90,7 +92,7 @@ export class PostsProcessing {
       PLATFORM.Twitter,
       user_id,
       manager,
-      true
+      false
     );
 
     /** create AppPost */
@@ -127,7 +129,14 @@ export class PostsProcessing {
 
   /** Create and store all platform posts for one post */
   async createOrUpdatePostDrafts(postId: string, manager: TransactionManager) {
+    if (DEBUG) logger.debug(`createOrUpdatePostDrafts ${postId}`);
+
     const appPostFull = await this.getPostFull(postId, manager, true);
+
+    // posts without authors does not have mirrors
+    if (!appPostFull.authorId) {
+      return;
+    }
 
     const user = await this.users.repo.getUser(
       appPostFull.authorId,
@@ -153,9 +162,12 @@ export class PostsProcessing {
         return Promise.all(
           accounts.map(async (account) => {
             /** create/update the draft for that platform and account */
-            const draftPost = await this.platforms
-              .get(platformId)
-              .convertFromGeneric({ post: appPostFull, author: user });
+            const platform = this.platforms.get(platformId);
+
+            const draftPost = await platform.convertFromGeneric({
+              post: appPostFull,
+              author: user,
+            });
 
             if (DEBUG)
               logger.debug(
@@ -166,12 +178,10 @@ export class PostsProcessing {
                 }
               );
 
-            const existingMirror = appPostFull.mirrors.find(
-              (m) =>
-                m.platformId === platformId &&
-                ((m.draft && m.draft.user_id === account.user_id) ||
-                  (m.posted && m.posted.user_id))
-            );
+            const existingMirror = PostsHelper.getPostMirror(appPostFull, {
+              platformId,
+              user_id: account.user_id,
+            });
 
             if (DEBUG)
               logger.debug(
@@ -214,12 +224,35 @@ export class PostsProcessing {
 
               this.posts.addMirror(postId, plaformPost.id, manager);
             } else {
+              const post_id = existingMirror.post_id;
+
+              if (DEBUG)
+                logger.debug(
+                  `createPostDrafts- buildDeleteDraft for post ${postId}, existingMirror post_id:${post_id}`
+                );
+
+              let deleteDraft: undefined | any = undefined;
+
+              if (post_id) {
+                deleteDraft = await platform.buildDeleteDraft(
+                  post_id,
+                  appPostFull,
+                  user
+                );
+              }
+
               if (DEBUG)
                 logger.debug(`createPostDrafts- update ${postId}`, {
                   postId,
                   draft,
+                  deleteDraft,
                 });
-              this.platformPosts.update(existingMirror.id, { draft }, manager);
+
+              await this.platformPosts.update(
+                existingMirror.id,
+                { draft, deleteDraft },
+                manager
+              );
             }
           })
         );
@@ -280,7 +313,7 @@ export class PostsProcessing {
     };
 
     /** Create the post */
-    const post = this.posts.create(postCreate, manager);
+    const post = this.posts.create(removeUndefined(postCreate), manager);
     return post;
   }
 

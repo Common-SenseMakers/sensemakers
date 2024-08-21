@@ -18,6 +18,7 @@ import { useResponsive } from '../../ui-components/ResponsiveApp';
 import { useThemeContext } from '../../ui-components/ThemedApp';
 import { TwitterIcon } from '../common/Icons';
 import { BUILD_ID } from '../config';
+import { AppIcon } from '../icons/AppIcon';
 
 export const MAX_WIDTH_LANDING = 1600;
 export const MAX_WIDTH_APP = 600;
@@ -44,7 +45,7 @@ export const ViewportContainer = (props: React.HTMLProps<HTMLDivElement>) => {
         style={{
           height: footerHeight,
           flexShrink: 0,
-          backgroundColor: constants.colors.primary,
+          backgroundColor: constants.colors.shade,
         }}
         pad="medium"
         justify="center"
@@ -54,11 +55,13 @@ export const ViewportContainer = (props: React.HTMLProps<HTMLDivElement>) => {
           justify="center"
           fill
           align="center"
-          style={{ position: 'relative' }}>
+          style={{
+            position: 'relative',
+          }}>
           <Anchor
             href={`https://twitter.com/${process.env.PROJECT_TWITTER_ACCOUNT}`}
             target="_blank">
-            <TwitterIcon size={14} style={{}}></TwitterIcon>
+            <AppIcon size={14}></AppIcon>
           </Anchor>
           <Box
             style={{

@@ -12,15 +12,14 @@ import {
 import { Trans } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
+import { AppModalStandard } from '../../app/AppModalStandard';
+import { AppCheckBoxMessage } from '../../app/icons/AppCheckBoxMessage';
 import { RobotIcon } from '../../app/icons/RobotIcon';
 import { I18Keys } from '../../i18n/i18n';
 import { AbsoluteRoutes } from '../../route.names';
-import { AppButton, AppHeading, AppModal } from '../../ui-components';
-import { AppCheckBox } from '../../ui-components/AppCheckBox';
-import { AppParagraph } from '../../ui-components/AppParagraph';
-import { BoxCentered } from '../../ui-components/BoxCentered';
 import { usePersist } from '../../utils/use.persist';
 
+const DEBUG = false;
 export const AUTO_POST_INVITE_DISABLED = 'autopostInviteDisabled';
 
 export interface AutopostInviteContextType {
@@ -45,12 +44,30 @@ export const AutopostInviteContext = (props: PropsWithChildren) => {
   const [autopostInviteDisabled, setAutopostInviteDisabled] =
     usePersist<boolean>(AUTO_POST_INVITE_DISABLED, false);
 
-  const [dontShowAgain, setDontShowAgain] = useState(false);
-
   /** count time and open autopost invite modal */
   useEffect(() => {
+    if (DEBUG) {
+      console.log('useEffect', { justPublished, autopostInviteDisabled });
+    }
+
     if (justPublished && !autopostInviteDisabled) {
+      if (DEBUG) {
+        console.log('trigger timeout', {
+          justPublished,
+          autopostInviteDisabled,
+          showInvite,
+        });
+      }
+
       const to = setTimeout(() => {
+        if (DEBUG) {
+          console.log('timeout reached', {
+            justPublished,
+            autopostInviteDisabled,
+            showInvite,
+          });
+        }
+
         setJustPublished(false);
         setShowInvite(true);
       }, 2500);
@@ -59,10 +76,25 @@ export const AutopostInviteContext = (props: PropsWithChildren) => {
   }, [justPublished, autopostInviteDisabled]);
 
   const notNow = () => {
+    if (DEBUG) {
+      console.log('notNow', {
+        justPublished,
+        autopostInviteDisabled,
+        showInvite,
+      });
+    }
     setShowInvite(false);
   };
 
   const reviewSettings = () => {
+    if (DEBUG) {
+      console.log('reviewSettings', {
+        justPublished,
+        autopostInviteDisabled,
+        showInvite,
+      });
+    }
+
     setShowInvite(false);
     setReviewAutopostIntention(true);
     navigate(AbsoluteRoutes.Settings);
@@ -71,72 +103,38 @@ export const AutopostInviteContext = (props: PropsWithChildren) => {
   const inviteAutopostModal = (() => {
     if (showInvite) {
       return (
-        <AppModal type="small" onModalClosed={() => setShowInvite(false)}>
-          <>
-            <Box style={{ flexGrow: 1 }} justify="center">
-              <Box align="center">
-                <BoxCentered
-                  style={{
-                    height: '60px',
-                    width: '80px',
-                    borderRadius: '40px',
-                    backgroundColor: '#CEE2F2',
-                  }}
-                  margin={{ bottom: '16px' }}>
-                  <RobotIcon size={40}></RobotIcon>
-                </BoxCentered>
-                <AppHeading level={3} style={{ textAlign: 'center' }}>
-                  <Trans
-                    i18nKey={I18Keys.autopostInviteTitle}
-                    components={{ br: <br></br> }}></Trans>
-                </AppHeading>
-                <AppParagraph
-                  style={{
-                    marginTop: '8px',
-                    width: '100%',
-                    textAlign: 'center',
-                  }}>
-                  <Trans
-                    i18nKey={I18Keys.autpostInvitePar01}
-                    components={{ b: <b></b> }}></Trans>
-                </AppParagraph>
-                <AppParagraph
-                  style={{
-                    textAlign: 'center',
-                    marginTop: '8px',
-                    marginBottom: '20px',
-                    width: '100%',
-                  }}>
-                  <Trans
-                    i18nKey={I18Keys.autopostInvitePar02}
-                    components={{ b: <b></b> }}></Trans>
-                </AppParagraph>
-                <Box direction="row" margin={{ bottom: '24px' }} gap="12px">
-                  <AppCheckBox
-                    onChange={(e) =>
-                      setAutopostInviteDisabled(e.target.checked)
-                    }
-                    checked={dontShowAgain}></AppCheckBox>
-                  <Box>
-                    <Text size="small">{t(I18Keys.dontShowAgain)}</Text>
-                  </Box>
-                </Box>
+        <AppModalStandard
+          onModalClosed={() => setShowInvite(false)}
+          contentProps={{
+            icon: <RobotIcon size={40}></RobotIcon>,
+            title: (
+              <Box style={{ textAlign: 'center' }}>
+                <Trans
+                  i18nKey={I18Keys.autopostInviteTitle}
+                  components={{ br: <br></br> }}></Trans>
               </Box>
-
-              <Box style={{ width: '100%' }} gap="12px" direction="row">
-                <AppButton
-                  onClick={() => notNow()}
-                  label={t(I18Keys.notNow)}
-                  style={{ width: '100%' }}></AppButton>
-                <AppButton
-                  primary
-                  onClick={() => reviewSettings()}
-                  label={t(I18Keys.reviewSettings)}
-                  style={{ width: '100%' }}></AppButton>
-              </Box>
-            </Box>
-          </>
-        </AppModal>
+            ),
+            parragraphs: [
+              <Trans
+                i18nKey={I18Keys.autpostInvitePar01}
+                components={{ br: <br></br> }}></Trans>,
+              <Text>{t(I18Keys.autopostInvitePar02)}</Text>,
+              <AppCheckBoxMessage
+                message={t(I18Keys.dontShowAgain)}
+                checked={autopostInviteDisabled}
+                onCheckChange={(value) => setAutopostInviteDisabled(value)}
+                size={18}></AppCheckBoxMessage>,
+            ],
+            secondaryButton: {
+              label: t(I18Keys.notNow),
+              onClick: () => notNow(),
+            },
+            primaryButton: {
+              label: t(I18Keys.reviewSettings),
+              onClick: () => reviewSettings(),
+            },
+          }}
+          type="normal"></AppModalStandard>
       );
     }
   })();

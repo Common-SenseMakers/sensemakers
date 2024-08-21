@@ -1,47 +1,52 @@
-import { Box, Text } from 'grommet';
-import { useEffect, useMemo } from 'react';
+import { Box } from 'grommet';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { NavButton } from '../app/NavButton';
-import { useToastContext } from '../app/ToastsContext';
-import { HomeIcon } from '../app/icons/HomeIcon';
 import { LeftChevronIcon } from '../app/icons/LeftChveronIcon';
 import { LeftIcon } from '../app/icons/LeftIcon';
 import { RightIcon } from '../app/icons/RightIcon';
-import { AppPostFull } from '../shared/types/types.posts';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useUserPosts } from '../user-home/UserPostsContext';
 import { usePost } from './PostContext';
 
-export const PostNav = (props: { profile?: TwitterUserProfile }) => {
-  const { show } = useToastContext();
+const DEBUG = false;
 
+export const PostNav = (props: { profile?: TwitterUserProfile }) => {
   const profile = props.profile;
   const { post, nextPostId, prevPostId } = usePost();
 
   const { fetchOlder, isFetchingOlder, errorFetchingOlder } = useUserPosts();
+  const [triggeredFetchOlder, setTriggeredFetchedOlder] = useState(false);
 
   const navigate = useNavigate();
   const { constants } = useThemeContext();
 
   useEffect(() => {
-    if (errorFetchingOlder) {
-      show({
-        title: 'Error getting users posts',
-        message: errorFetchingOlder.message.includes('429')
-          ? "Too many requests to Twitter's API. Please retry in 10-15 minutes"
-          : errorFetchingOlder.message,
+    if (
+      !nextPostId &&
+      !isFetchingOlder &&
+      !errorFetchingOlder &&
+      !triggeredFetchOlder
+    ) {
+      setTriggeredFetchedOlder(true);
+      console.log('fetching older', {
+        nextPostId,
+        isFetchingOlder,
+        errorFetchingOlder,
+        triggeredFetchOlder,
       });
-    }
-  }, [errorFetchingOlder]);
 
-  useEffect(() => {
-    if (!nextPostId && !isFetchingOlder && !errorFetchingOlder) {
       fetchOlder();
     }
-  }, [isFetchingOlder, nextPostId]);
+
+    /** reset triggeredFetchedOlder once the nextPostId was obtained */
+    if (nextPostId) {
+      setTriggeredFetchedOlder(false);
+    }
+  }, [errorFetchingOlder, isFetchingOlder, nextPostId, triggeredFetchOlder]);
 
   const goToPrev = () => {
     navigate(`/post/${prevPostId}`);
@@ -52,6 +57,8 @@ export const PostNav = (props: { profile?: TwitterUserProfile }) => {
       navigate(`/post/${nextPostId}`);
     }
   };
+
+  if (DEBUG) console.log('PostNav', { nextPostId, prevPostId });
 
   return (
     <Box
@@ -80,7 +87,15 @@ export const PostNav = (props: { profile?: TwitterUserProfile }) => {
           onClick={() => goToPrev()}></NavButton>
         <NavButton
           reverse
-          icon={isFetchingOlder ? <Loading></Loading> : <RightIcon></RightIcon>}
+          icon={
+            <Box justify="center" style={{ width: '22px' }}>
+              {isFetchingOlder ? (
+                <Loading size="16px"></Loading>
+              ) : (
+                <RightIcon></RightIcon>
+              )}
+            </Box>
+          }
           disabled={!nextPostId}
           label="Next"
           onClick={() => goToNext()}></NavButton>

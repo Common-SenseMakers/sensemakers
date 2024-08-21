@@ -5,6 +5,8 @@ import { NanopubService } from '../nanopub.service';
 
 let count = 0;
 
+const DEBUG = false;
+
 export type NanopubMockConfig = 'real' | 'mock-publish';
 
 /** make private methods public */
@@ -23,9 +25,9 @@ export const getNanopubMock = (
   const Mocked = spy(service) as unknown as MockedType;
 
   when(Mocked.publishInternal(anything())).thenCall((signed: string) => {
-    logger.warn(`called nanopub publishInternal`, signed);
+    if (DEBUG) logger.warn(`called nanopub publishInternal`, signed);
     return {
-      info: () => ({ uri: `ABC${count++}` }),
+      info: () => ({ uri: `https://w3id.org/np/ABC${count++}` }),
       rdf: () => signed,
     };
   });

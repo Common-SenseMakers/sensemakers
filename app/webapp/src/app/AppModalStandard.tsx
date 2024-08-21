@@ -1,11 +1,11 @@
 import { Box, Paragraph } from 'grommet';
 import React from 'react';
 
-import { ImageIcon } from '../app/icons/ImageIcon';
 import { AppModal } from '../ui-components';
 import { AppButton } from '../ui-components/AppButton';
 import { AppHeading } from '../ui-components/AppHeading';
 import { BoxCentered } from '../ui-components/BoxCentered';
+import { ImageIcon } from './icons/ImageIcon';
 
 export interface ButtonConfig {
   disabled?: boolean;
@@ -16,7 +16,7 @@ export interface ButtonConfig {
 export interface ModalContentProps {
   type?: 'small' | 'normal';
   icon?: JSX.Element;
-  title: string;
+  title: string | JSX.Element;
   parragraphs?: JSX.Element[];
   buttonsDirection?: 'row' | 'column';
   primaryButton?: ButtonConfig;
@@ -42,10 +42,14 @@ export const ModalContent = (props: ModalContentProps) => {
 
   return (
     <Box id="page" style={{ flexGrow: 1, minHeight: '400px' }}>
-      <Box align="center" style={{ flexGrow: 1 }} justify="center">
+      <Box
+        align="center"
+        style={{ flexGrow: 1 }}
+        justify="start"
+        pad={{ top: '24px' }}>
         {icon ? <Box margin={{ bottom: '20px' }}>{icon}</Box> : <></>}
         <AppHeading level={props.type === 'small' ? 3 : 1}>{title}</AppHeading>
-        <Box margin={{ top: '8px' }}>
+        <Box margin={{ top: '16px' }}>
           {parragraphs ? (
             parragraphs.map((p: JSX.Element, ix: number) => (
               <Paragraph

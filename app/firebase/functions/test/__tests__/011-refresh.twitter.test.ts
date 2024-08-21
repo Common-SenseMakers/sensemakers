@@ -4,6 +4,7 @@ import { TwitterUserDetails } from '../../src/@shared/types/types.twitter';
 import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
 import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
+import { getTestCredentials } from '../../src/platforms/twitter/mock/test.users';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { GetClientResultInternal } from '../../src/platforms/twitter/twitter.service.client';
 import { UsersHelper } from '../../src/users/users.helper';
@@ -23,7 +24,7 @@ describe.skip('011-twitter refresh', () => {
 
   const services = getTestServices({
     time: 'mock',
-    twitter: USE_REAL_TWITTER ? 'real' : 'mock-publish',
+    twitter: USE_REAL_TWITTER ? undefined : { publish: true, signup: true },
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
     emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
@@ -51,6 +52,12 @@ describe.skip('011-twitter refresh', () => {
 
   describe('refresh token manually', () => {
     it('refresh token', async () => {
+      if (!USE_REAL_TWITTER) {
+        logger.debug(
+          'skipping refresh token test. Enabled only with real twitter'
+        );
+        return;
+      }
       const twitterService = (services.platforms as any).platforms.get(
         PLATFORM.Twitter
       ) as TwitterService;
@@ -118,7 +125,7 @@ describe.skip('011-twitter refresh', () => {
     });
   });
 
-  describe.skip('refresh token through getOfUser', () => {
+  describe('refresh token through getOfUser', () => {
     it('refresh token', async () => {
       if (!user) {
         throw new Error('unexpected');
@@ -144,7 +151,7 @@ describe.skip('011-twitter refresh', () => {
         );
       });
 
-      logger.debug(`-- TEST -- account ${account.read?.refreshToken}`, {
+      logger.debug(`account ${account.read?.refreshToken}`, {
         account,
       });
 
@@ -173,16 +180,171 @@ describe.skip('011-twitter refresh', () => {
         );
       });
 
-      logger.debug(
-        `-- TEST -- accountAfter ${accountAfter.read?.refreshToken}`,
-        {
-          accountAfter,
-        }
-      );
+      logger.debug(`accountAfter ${accountAfter.read?.refreshToken}`, {
+        accountAfter,
+      });
 
       expect(account.read?.refreshToken).to.not.equal(
         accountAfter.read?.refreshToken
       );
+    });
+  });
+
+  describe('remove platform on invalid token', () => {
+    it('removes platform', async () => {
+      if (!USE_REAL_TWITTER) {
+        logger.debug(
+          'skipping refresh token test. Enabled only with real twitter'
+        );
+        return;
+      }
+
+      const twitterService = (services.platforms as any).platforms.get(
+        PLATFORM.Twitter
+      ) as TwitterService;
+
+      const tweetId = '1818267753016381936';
+      const testCredentials = getTestCredentials(
+        process.env.TEST_USER_ACCOUNTS as string
+      );
+      if (!testCredentials) {
+        throw new Error('test credentials not found');
+      }
+
+      if (!user) {
+        throw new Error('unexpected');
+      }
+
+      const userId = user.userId;
+      const user_id = testCredentials[0].twitter.id;
+
+      const tweet = await services.db.run(async (manager) =>
+        twitterService.getPost(tweetId, manager, user_id)
+      );
+
+      expect(tweet).to.not.be.undefined;
+
+      const account = UsersHelper.getAccount(
+        user,
+        PLATFORM.Twitter,
+        undefined,
+        true
+      );
+
+      let expectedDetails: TwitterUserDetails | undefined = undefined;
+
+      await services.db.run(async (manager) => {
+        (services.time as any).set(account?.read.expiresAtMs);
+
+        const { client, oldDetails, newDetails } = (await (
+          twitterService as any
+        ).getUserClientInternal(
+          account.user_id,
+          'read',
+          manager
+        )) as GetClientResultInternal;
+
+        expect(client).to.not.be.undefined;
+
+        expectedDetails = newDetails;
+
+        logger.debug(`oldDetails, newDetails`, { oldDetails, newDetails });
+      });
+
+      await services.db.run(async (manager) => {
+        const userRead = await services.users.repo.getUser(
+          userId,
+          manager,
+          true
+        );
+
+        const accountRead = UsersHelper.getAccount(
+          userRead,
+          PLATFORM.Twitter,
+          account.user_id
+        );
+
+        expect(accountRead?.read.refreshToken).to.equal(
+          expectedDetails?.read?.refreshToken
+        );
+
+        logger.debug(`accountRead`, { accountRead });
+      });
+
+      // check refresh token is valid
+      const tweet2 = await services.db.run(async (manager) =>
+        twitterService.getPost(tweetId, manager, user_id)
+      );
+
+      expect(tweet2).to.not.be.undefined;
+
+      // corrupt the refresh token
+      await services.db.run(async (manager) => {
+        const latestUser = await services.users.repo.getUser(
+          userId,
+          manager,
+          true
+        );
+
+        const latestDetails = UsersHelper.getAccount(
+          latestUser,
+          PLATFORM.Twitter,
+          account.user_id
+        ) as TwitterUserDetails;
+
+        if (!latestDetails.read) {
+          throw new Error('unexpected read undefined');
+        }
+
+        const currentRefresh = latestDetails?.read?.refreshToken;
+
+        if (!currentRefresh) {
+          throw new Error('unexpected refresh token undefined');
+        }
+        const newRefresh = 'ABCD' + currentRefresh.slice(4);
+
+        latestDetails.read.refreshToken = newRefresh;
+
+        await services.users.repo.setPlatformDetails(
+          userId,
+          PLATFORM.Twitter,
+          latestDetails,
+          manager
+        );
+      });
+
+      // check refresh token is not valid
+      await services.db.run(async (manager) => {
+        const latestUser = await services.users.repo.getUser(
+          userId,
+          manager,
+          true
+        );
+
+        const latestDetails = UsersHelper.getAccount(
+          latestUser,
+          PLATFORM.Twitter,
+          account.user_id
+        ) as TwitterUserDetails;
+
+        if (!latestDetails || !latestDetails.read) {
+          throw new Error('unexpected');
+        }
+
+        (services.time as any).set(latestDetails.read.expiresAtMs);
+      });
+
+      // check refresh token is valid
+      const { post } = await services.db.run(async (manager) =>
+        services.postsManager.fetchPostFromPlatform(
+          userId,
+          PLATFORM.Twitter,
+          tweetId,
+          manager
+        )
+      );
+
+      expect(post).to.be.undefined;
     });
   });
 });
