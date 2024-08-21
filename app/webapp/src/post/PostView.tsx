@@ -80,6 +80,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
 
   const { constants } = useThemeContext();
   const {
+    postId,
     post,
     nanopubDraft,
     updateSemantics,
@@ -186,12 +187,12 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
 
   // receives the navigate from PostingPage and opens the post intent
   useEffect(() => {
-    if (postingPostId && connectedUser && !justSetPostId) {
+    if (postingPostId && connectedUser && !justSetPostId && postId) {
       if (DEBUG) console.log(`posting post detected for ${postingPostId}`);
       setPostingPostId(null);
       setPublishIntent(true);
     }
-  }, [postingPostId, connectedUser]);
+  }, [postingPostId, connectedUser, justSetPostId, postId]);
 
   const publishApproved = () => {
     setPublishing(true);
