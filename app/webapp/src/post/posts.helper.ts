@@ -1,10 +1,12 @@
 import { NANOPUB_EXPLORER_SERVER } from '../app/config';
 import { NANOPUB_EXPLORER_URL_EMAIL } from '../email/constants';
+import { PlatformPostPublishStatus } from '../shared/types/types.platform.posts';
 import {
   AppPost,
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
+  AppPostRepublishedStatus,
   AppPostReviewStatus,
 } from '../shared/types/types.posts';
 import { PLATFORM } from '../shared/types/types.user';
@@ -26,13 +28,18 @@ export interface AppPostStatus {
   pending?: boolean;
   ignored?: boolean;
   nanopubUrl?: string;
-  published?: boolean;
+  live?: boolean;
+  manuallyPublished?: boolean;
+  autoPublished?: boolean;
   isEditing?: boolean;
+  unpublished?: boolean;
 }
 export const getPostStatuses = (post?: AppPostFull): AppPostStatus => {
-  const postedNanopub = post?.mirrors?.find(
+  const nanopubPlatformPost = post?.mirrors?.find(
     (m) => m.platformId === PLATFORM.Nanopub
-  )?.posted;
+  );
+
+  const postedNanopub = nanopubPlatformPost?.posted;
 
   const nanopubHash = postedNanopub
     ? postedNanopub.post_id.split('/').pop()
@@ -41,6 +48,10 @@ export const getPostStatuses = (post?: AppPostFull): AppPostStatus => {
   const nanopubUrl = postedNanopub
     ? `${NANOPUB_EXPLORER_SERVER ? NANOPUB_EXPLORER_SERVER : NANOPUB_EXPLORER_URL_EMAIL}${nanopubHash}`
     : undefined;
+
+  const unpublished =
+    nanopubPlatformPost?.publishStatus ===
+    PlatformPostPublishStatus.UNPUBLISHED;
 
   const processed = post && post.parsedStatus === AppPostParsedStatus.PROCESSED;
   const errored = post && post.parsingStatus === AppPostParsingStatus.ERRORED;
@@ -51,7 +62,19 @@ export const getPostStatuses = (post?: AppPostFull): AppPostStatus => {
   const ignored = post && post.reviewedStatus === AppPostReviewStatus.IGNORED;
   const published = !!postedNanopub;
 
+  const manuallyPublished =
+    post &&
+    !!postedNanopub &&
+    post.republishedStatus === AppPostRepublishedStatus.REPUBLISHED;
+
+  const autoPublished =
+    post &&
+    !!postedNanopub &&
+    post.republishedStatus === AppPostRepublishedStatus.AUTO_REPUBLISHED;
+
   const isEditing = post && post.reviewedStatus === AppPostReviewStatus.DRAFT;
+
+  const live = published && !unpublished;
 
   return {
     processed,
@@ -60,7 +83,10 @@ export const getPostStatuses = (post?: AppPostFull): AppPostStatus => {
     pending,
     ignored,
     nanopubUrl,
-    published,
+    live,
+    manuallyPublished,
+    autoPublished,
     isEditing,
+    unpublished,
   };
 };

@@ -50,15 +50,16 @@ export const OrcidContext = (props: PropsWithChildren) => {
   const code = searchParams.get('code');
 
   /** React to the code, force single reaction */
-  if (DEBUG)
-    console.log('OrcidContext', {
-      codeHandled,
-      code,
-      connectedUser,
-      wasConnecting,
-      redirectPath,
-    });
   useEffect(() => {
+    if (DEBUG)
+      console.log('OrcidContext', {
+        codeHandled,
+        code,
+        connectedUser,
+        wasConnecting,
+        redirectPath,
+      });
+
     if (
       !codeHandled.current &&
       code &&

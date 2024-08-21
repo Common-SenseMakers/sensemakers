@@ -1,6 +1,10 @@
 import { Nanopub } from '@nanopub/sign';
 import { expect } from 'chai';
 
+import {
+  PlatformPostPublishOrigin,
+  PlatformPostPublishStatus,
+} from '../../src/@shared/types/types.platform.posts';
 import { PLATFORM } from '../../src/@shared/types/types.user';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
@@ -10,12 +14,14 @@ import { buildAppIntroNp } from '../../src/platforms/nanopub/create.app.intro.na
 import { createIntroNanopublication } from '../../src/platforms/nanopub/create.intro.nanopub';
 import { createNanopublication } from '../../src/platforms/nanopub/create.nanopub';
 import { NanopubService } from '../../src/platforms/nanopub/nanopub.service';
+import { buildIntroNp } from '../../src/platforms/nanopub/nanopub.utils';
 import { TimeService } from '../../src/time/time.service';
 import { getNanopubProfile } from '../utils/nanopub.profile';
 import { getMockPost } from '../utils/posts.utils';
 import { getMockedUser } from '../utils/users.mock';
 
-const DEBUG = false;
+const DEBUG = true;
+const PUBLISH = true;
 
 describe('nanopublication format', () => {
   it('publishes a correctly formatted mock nanopub to the test server and updates it', async () => {
@@ -77,38 +83,80 @@ describe('nanopublication format', () => {
       throw new Error('Nanopub server not defined');
     }
 
-    const published: Nanopub = await signed.publish(undefined, nanopubServer);
+    const published: Nanopub = await (async () => {
+      if (!PUBLISH) {
+        return signed;
+      }
+      return await signed.publish(undefined, nanopubServer);
+    })();
 
     expect(published).to.not.be.undefined;
-    if (DEBUG) logger.debug('published at: ', published.info().published);
-    const fetchedPub = (await Nanopub.fetch(
-      published.info().published
-    )) as Nanopub;
-    expect(fetchedPub).to.not.be.undefined;
+    if (DEBUG)
+      logger.debug('published at: ', {
+        published: published.info().published,
+        rdf: published.rdf(),
+      });
+    if (PUBLISH) {
+      const fetchedPub = (await Nanopub.fetch(
+        published.info().published
+      )) as Nanopub;
+      expect(fetchedPub).to.not.be.undefined;
+    }
 
     /** update the nanopublication */
-    const updatedNanopub = await createNanopublication(
-      post,
-      mockUser,
-      fetchedPub.info().published
-    );
+    const updatedPost = getMockPost({
+      authorId: 'test-user-id',
+      id: 'post-id-1',
+      semantics: `
+        @prefix ns1: <http://purl.org/spar/cito/> .
+        @prefix schema: <https://schema.org/> .
+        
+        <http://purl.org/nanopub/temp/mynanopub#assertion> 
+          ns1:discusses <https://twitter.com/ori_goldberg/status/1781281656071946541> ;    
+          ns1:includesQuotationFrom <https://twitter.com/ori_goldberg/status/1781281656071946541> ;    
+          schema:keywords "ExternalSecurity",        "Geopolitics",        "Israel",        "Kissinger",        "PoliticalScience",        "Security" .
+        `,
+      mirrors: [
+        {
+          id: 'post-id-1',
+          post_id: published.info().uri as string,
+          publishOrigin: PlatformPostPublishOrigin.POSTED,
+          publishStatus: PlatformPostPublishStatus.PUBLISHED,
+          platformId: PLATFORM.Nanopub,
+          posted: {
+            post_id: published.info().uri as string,
+            user_id: 'test-user-id',
+            timestampMs: Date.now(),
+            post: published.rdf(),
+          },
+        },
+      ],
+    });
+    const updatedNanopub = await createNanopublication(updatedPost, mockUser);
     const updatedSigned = await signNanopublication(
       updatedNanopub.rdf(),
       rsaKeys,
       ''
     );
 
-    const updatedPublished: Nanopub = await updatedSigned.publish(
-      undefined,
-      nanopubServer
-    );
+    const updatedPublished: Nanopub = await (async () => {
+      if (!PUBLISH) {
+        return updatedSigned;
+      }
+      return await updatedSigned.publish(undefined, nanopubServer);
+    })();
     expect(updatedPublished).to.not.be.undefined;
     if (DEBUG)
-      logger.debug('update published at: ', updatedPublished.info().published);
-    const fetchedUpdatedPub = (await Nanopub.fetch(
-      updatedPublished.info().published
-    )) as Nanopub;
-    expect(fetchedUpdatedPub).to.not.be.undefined;
+      logger.debug('update published at: ', {
+        published: updatedPublished.info().published,
+        rdf: updatedPublished.rdf(),
+      });
+    if (PUBLISH) {
+      const fetchedUpdatedPub = (await Nanopub.fetch(
+        updatedPublished.info().published
+      )) as Nanopub;
+      expect(fetchedUpdatedPub).to.not.be.undefined;
+    }
   });
 
   it('publishes a correctly formatted mock intronanopub to the test server', async () => {
@@ -131,20 +179,45 @@ describe('nanopublication format', () => {
       throw new Error('Nanopub server not defined');
     }
 
-    const published: Nanopub = await signed.publish(undefined, nanopubServer);
+    const published: Nanopub = await (async () => {
+      if (!PUBLISH) {
+        return signed;
+      }
+      return await signed.publish(undefined, nanopubServer);
+    })();
 
     expect(published).to.not.be.undefined;
-    if (DEBUG) logger.debug('published at: ', published.info().published);
-    const fetchedPub = (await Nanopub.fetch(
-      published.info().published
-    )) as Nanopub;
-    expect(fetchedPub).to.not.be.undefined;
+    if (DEBUG)
+      logger.debug('published at: ', {
+        published: published.info().published,
+        rdf: published.rdf(),
+      });
 
-    /** update the intro nanopublication */
-    const updatedIntroNanopub = await createIntroNanopublication(
-      profile,
-      true,
-      published.info().published
+    if (PUBLISH) {
+      const fetchedPub = (await Nanopub.fetch(
+        published.info().published
+      )) as Nanopub;
+      expect(fetchedPub).to.not.be.undefined;
+    }
+
+    /** update the intro nanopublication with twitter info */
+    const updatedIntroNanopub = await buildIntroNp(
+      profile.ethAddress,
+      profile.rsaPublickey,
+      profile.ethToRsaSignature,
+      {
+        signDelegation: true,
+        supersedesOptions: {
+          root: published.info().uri,
+          latest: published.info().uri,
+        },
+        author: {
+          platformId: PLATFORM.Twitter,
+          id: '1773032135814717440',
+          username: 'sense_nets_bot',
+          name: 'SenseNet Bot',
+        },
+      }
     );
 
     if (!updatedIntroNanopub) {
@@ -158,18 +231,77 @@ describe('nanopublication format', () => {
     );
     expect(updatedSigned).to.not.be.undefined;
 
-    const updatedPublished: Nanopub = await updatedSigned.publish(
-      undefined,
-      nanopubServer
-    );
+    const updatedPublished: Nanopub = await (() => {
+      if (!PUBLISH) {
+        return updatedSigned;
+      }
+      return updatedSigned.publish(undefined, nanopubServer);
+    })();
 
     expect(updatedPublished).to.not.be.undefined;
     if (DEBUG)
-      logger.debug('update published at: ', updatedPublished.info().published);
-    const updatedFetchedPub = (await Nanopub.fetch(
-      updatedPublished.info().published
-    )) as Nanopub;
-    expect(updatedFetchedPub).to.not.be.undefined;
+      logger.debug('update published at: ', {
+        published: updatedPublished.info().published,
+        rdf: updatedPublished.rdf(),
+      });
+    if (PUBLISH) {
+      const updatedFetchedPub = (await Nanopub.fetch(
+        updatedPublished.info().published
+      )) as Nanopub;
+      expect(updatedFetchedPub).to.not.be.undefined;
+    }
+
+    /** update the intro nanopublication with orcid id */
+    const orcidUpdatedIntroNanopub = await buildIntroNp(
+      profile.ethAddress,
+      profile.rsaPublickey,
+      profile.ethToRsaSignature,
+      {
+        signDelegation: true,
+        supersedesOptions: {
+          root: published.info().uri,
+          latest: published.info().uri,
+        },
+        author: {
+          platformId: PLATFORM.Twitter,
+          id: '1773032135814717440',
+          username: 'sense_nets_bot',
+          name: 'SenseNet Bot',
+        },
+        orcidId: '0000-0000-0000-0000',
+      }
+    );
+
+    if (!orcidUpdatedIntroNanopub) {
+      throw new Error('Post not created');
+    }
+
+    const orcidUpdatedSigned = await signNanopublication(
+      orcidUpdatedIntroNanopub.rdf(),
+      rsaKeys,
+      ''
+    );
+    expect(orcidUpdatedSigned).to.not.be.undefined;
+
+    const orcidUpdatedPublished: Nanopub = await (() => {
+      if (!PUBLISH) {
+        return orcidUpdatedSigned;
+      }
+      return orcidUpdatedSigned.publish(undefined, nanopubServer);
+    })();
+
+    expect(orcidUpdatedPublished).to.not.be.undefined;
+    if (DEBUG)
+      logger.debug('orcid update published at: ', {
+        published: orcidUpdatedPublished.info().published,
+        rdf: orcidUpdatedPublished.rdf(),
+      });
+    if (PUBLISH) {
+      const orcidUpdatedFetchedPub = (await Nanopub.fetch(
+        orcidUpdatedPublished.info().published
+      )) as Nanopub;
+      expect(orcidUpdatedFetchedPub).to.not.be.undefined;
+    }
   });
 
   it('publishes a correctly formatted mock app intro nanopub to the test server', async () => {
@@ -204,14 +336,25 @@ describe('nanopublication format', () => {
       throw new Error('Nanopub server not defined');
     }
 
-    const published: Nanopub = await signed.publish(undefined, nanopubServer);
+    const published: Nanopub = await (async () => {
+      if (!PUBLISH) {
+        return signed;
+      }
+      return await signed.publish(undefined, nanopubServer);
+    })();
 
     expect(published).to.not.be.undefined;
-    if (DEBUG) logger.debug('published at: ', published.info().published);
-    const fetchedPub = (await Nanopub.fetch(
-      published.info().published
-    )) as Nanopub;
-    expect(fetchedPub).to.not.be.undefined;
+    if (DEBUG)
+      logger.debug('published at: ', {
+        published: published.info().published,
+        rdf: published.rdf(),
+      });
+    if (PUBLISH) {
+      const fetchedPub = (await Nanopub.fetch(
+        published.info().published
+      )) as Nanopub;
+      expect(fetchedPub).to.not.be.undefined;
+    }
 
     /** update the intro nanopublication */
     const updatedAppIntroNp = await buildAppIntroNp(
@@ -221,7 +364,7 @@ describe('nanopublication format', () => {
       cleanPublicKey(rsaKeys2),
       profile1.ethToRsaSignature,
       profile2.ethToRsaSignature,
-      published.info().published
+      { latest: published.info().uri, root: published.info().uri }
     );
 
     if (!updatedAppIntroNp) {
@@ -235,17 +378,24 @@ describe('nanopublication format', () => {
     );
     expect(updatedSigned).to.not.be.undefined;
 
-    const updatedPublished: Nanopub = await updatedSigned.publish(
-      undefined,
-      nanopubServer
-    );
+    const updatedPublished: Nanopub = await (() => {
+      if (!PUBLISH) {
+        return updatedSigned;
+      }
+      return updatedSigned.publish(undefined, nanopubServer);
+    })();
 
     expect(updatedPublished).to.not.be.undefined;
     if (DEBUG)
-      logger.debug('update published at: ', updatedPublished.info().published);
-    const updatedFetchedPub = (await Nanopub.fetch(
-      updatedPublished.info().published
-    )) as Nanopub;
-    expect(updatedFetchedPub).to.not.be.undefined;
+      logger.debug('update published at: ', {
+        published: updatedPublished.info().published,
+        rdf: updatedPublished.rdf(),
+      });
+    if (PUBLISH) {
+      const updatedFetchedPub = (await Nanopub.fetch(
+        updatedPublished.info().published
+      )) as Nanopub;
+      expect(updatedFetchedPub).to.not.be.undefined;
+    }
   });
 });

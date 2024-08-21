@@ -173,7 +173,8 @@ export const getTestServices = (config: TestServicesConfig) => {
     usersService,
     postsProcessing,
     platformsService,
-    parser
+    parser,
+    time
   );
 
   const notifications = new NotificationService(

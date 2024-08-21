@@ -17,7 +17,19 @@ export const NanopubStatus = (props: { post?: AppPostFull }) => {
     pending,
     ignored,
     isEditing,
+    unpublished,
   } = getPostStatuses(post);
+
+  if (unpublished) {
+    return (
+      <Anchor href={nanopubUrl} target="_blank">
+        <StatusTag
+          label="Retracted"
+          backgroundColor="transparent"
+          color={constants.colors.textLight2}></StatusTag>
+      </Anchor>
+    );
+  }
 
   if (nanopubUrl && isEditing) {
     return (

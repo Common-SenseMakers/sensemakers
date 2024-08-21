@@ -37,7 +37,12 @@ export const IntroModals = (props: { closeModal: () => void }) => {
       primaryButton={{
         label: t(I18Keys.introNextLabel),
         onClick: () => next(),
+      }}
+      secondaryButton={{
+        label: t(I18Keys.goBack),
+        onClick: () => prev(),
       }}></ModalContent>,
+
     <ModalContent
       type="small"
       icon={ModalIcon('/icons/intro/icon03.png')}
@@ -49,6 +54,10 @@ export const IntroModals = (props: { closeModal: () => void }) => {
       primaryButton={{
         label: t(I18Keys.introFinalLabel),
         onClick: () => next(),
+      }}
+      secondaryButton={{
+        label: t(I18Keys.goBack),
+        onClick: () => prev(),
       }}></ModalContent>,
   ];
 
@@ -58,6 +67,12 @@ export const IntroModals = (props: { closeModal: () => void }) => {
     }
     if (step < pages.length - 1) {
       setStep(step + 1);
+    }
+  };
+
+  const prev = () => {
+    if (step > 0) {
+      setStep(step - 1);
     }
   };
 

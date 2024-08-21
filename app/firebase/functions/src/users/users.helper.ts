@@ -41,7 +41,7 @@ export class UsersHelper {
    * */
   static getAccount<T extends boolean>(
     user: AppUser,
-    platformId: PUBLISHABLE_PLATFORMS,
+    platformId: IDENTITY_PLATFORMS,
     user_id?: string,
     _throw?: T
   ): DefinedIfTrue<T, UserDetailsBase> {
