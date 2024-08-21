@@ -413,15 +413,10 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.dontShowAgain]: 'Don’t show this message again',
   [I18Keys.reviewSettings]: 'Review settings',
   [I18Keys.notNow]: 'Not now',
-  [I18Keys.emailSubject]: 'Your {{pointInTime}} SenseNets Activity Summary',
   [I18Keys.noPostsFound]: 'No posts found',
   [I18Keys.noPostsFoundDesc]: 'We couldn’t find any posts.',
   [I18Keys.getSupportDescription]:
     '<a href=mailto:support@sense-nets.xyz>support@sense-nets.xyz</a>',
-
-  [I18Keys.daily]: 'daily',
-  [I18Keys.weekly]: 'weekly',
-  [I18Keys.monthly]: 'monthly',
 
   [I18Keys.today]: 'today',
   [I18Keys.thisWeek]: 'this week',
