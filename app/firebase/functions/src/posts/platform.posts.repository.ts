@@ -6,7 +6,7 @@ import {
 } from '../@shared/types/types.platform.posts';
 import { DefinedIfTrue, PLATFORM } from '../@shared/types/types.user';
 import { DBInstance } from '../db/instance';
-import { BaseRepository } from '../db/repo.base';
+import { BaseRepository, removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 
 export class PlatformPostsRepository extends BaseRepository<
@@ -75,7 +75,7 @@ export class PlatformPostsRepository extends BaseRepository<
     }
 
     const ref = this.getRef(post_id);
-    manager.update(ref, postUpdate);
+    manager.update(ref, removeUndefined(postUpdate));
   }
 
   /** Get the platform post from the published post_id */

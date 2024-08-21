@@ -69,3 +69,9 @@ export const updatePostSchema = object({
 })
   .required()
   .noUnknown(true);
+
+export const retractPostSchema = object({
+  postId: string().required(),
+  platformId: string().oneOf([...Object.values(PLATFORM)]),
+  post_id: string().required(),
+}).noUnknown(true);

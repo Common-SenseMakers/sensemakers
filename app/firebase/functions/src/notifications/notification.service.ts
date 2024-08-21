@@ -203,7 +203,9 @@ export class NotificationService {
       (post, index, self) => index === self.findIndex((p) => p.id === post.id)
     );
 
-    await this.sendDigest(userId, filteredPosts, manager);
+    if (filteredPosts.length > 0) {
+      await this.sendDigest(userId, filteredPosts, manager);
+    }
   }
 
   async sendDigest(

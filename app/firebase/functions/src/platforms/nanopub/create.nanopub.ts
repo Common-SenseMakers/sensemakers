@@ -1,83 +1,68 @@
 import { Store } from 'n3';
 
 import { AppPostFull } from '../../@shared/types/types.posts';
-import { TwitterUserDetails } from '../../@shared/types/types.twitter';
-import { AppUser, PLATFORM } from '../../@shared/types/types.user';
-import { parseRDF } from '../../@shared/utils/n3.utils';
-import { logger } from '../../instances/logger';
+import { AppUser } from '../../@shared/types/types.user';
+import { parseRDF, replaceNodes } from '../../@shared/utils/n3.utils';
+import {
+  ASSERTION_URI,
+  THIS_POST_NAME,
+} from '../../@shared/utils/semantics.helper';
 import { PostsHelper } from '../../posts/posts.helper';
-import { UsersHelper } from '../../users/users.helper';
-import { buildSpostNp } from './utils';
-
-const DEBUG = false;
+import { buildSpostNp } from './nanopub.utils';
+import { prepareNanopubDetails } from './prepare.nanopub.details';
 
 export const createNanopublication = async (
   post: AppPostFull,
-  user: AppUser,
-  oldNpUri?: string
+  user: AppUser
 ) => {
+  const {
+    introUri,
+    twitterUsername,
+    twitterName,
+    autopostOption,
+    ethAddress,
+    orcidId,
+    tweetUrl,
+    latestNanopubUri,
+    rootNanopubUri,
+  } = prepareNanopubDetails(user, post);
+
   const semantics = post.semantics;
   const content = PostsHelper.concatenateThread(post.generic);
-  const twitter = UsersHelper.getAccount(
-    user,
-    PLATFORM.Twitter,
-    undefined,
-    true
-  ) as TwitterUserDetails;
-  const twitterUsername = twitter.profile?.username;
-  const twitterName = twitter.profile?.name;
 
-  if (!twitterUsername) {
-    throw new Error('Twitter username not found');
-  }
-
-  if (!twitterName) {
-    throw new Error('Twitter name not found');
-  }
-
-  const originalPlatformPost = post.mirrors.find(
-    (platformPost) => platformPost.platformId === PLATFORM.Twitter
-  )?.posted;
-
-  const originalPlatformPostId = originalPlatformPost?.post_id;
-
-  if (!originalPlatformPostId) {
-    throw new Error('Original platform post id not found');
-  }
-
-  const twitterPath = `${twitterUsername}`;
-
-  if (DEBUG)
-    logger.debug(`Creating nanopub twitterPath:${twitterPath}`, {
-      twitterPath,
-    });
-
-  const semanticsStore = await (async () => {
+  const semanticsParserStore = await (async () => {
     if (!semantics) return new Store();
 
     return await parseRDF(semantics);
   })();
-
-  const nanoDetails = user[PLATFORM.Nanopub];
-  const ethAddress = nanoDetails && nanoDetails[0].profile?.ethAddress;
-  if (!ethAddress) {
-    throw new Error('Eth address not found');
-  }
-
-  const orcidDetails = user[PLATFORM.Orcid];
-  const orcidId = orcidDetails && orcidDetails[0].user_id;
-  const tweetUrl = `https://x.com/${twitterPath}/status/${originalPlatformPostId}`;
-
-  //Need to fetch oldNpUri when update,  hardcoded for now.
-  const options = {
-    oldNpUri,
-    orcidId: orcidId,
+  // Define the replacement map that swaps our placeholder with np placeholder
+  const replaceMap: Record<string, string> = {
+    [THIS_POST_NAME]: ASSERTION_URI,
   };
 
-  return await buildSpostNp(
+  const semanticsStore = replaceNodes(semanticsParserStore, replaceMap);
+
+  const supersedesOptions = (() => {
+    if (rootNanopubUri && latestNanopubUri) {
+      return {
+        root: rootNanopubUri,
+        latest: latestNanopubUri,
+      };
+    } else {
+      return undefined;
+    }
+  })();
+
+  const options = {
+    orcidId: orcidId,
+    supersedesOptions,
+  };
+
+  return buildSpostNp(
     ethAddress,
+    introUri,
     twitterUsername,
-    'sup', // hardcoded for now. Update to get from post
+    autopostOption,
     twitterName,
     semanticsStore,
     content,

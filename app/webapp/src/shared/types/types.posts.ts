@@ -28,6 +28,7 @@ export enum AppPostParsingStatus {
   IDLE = 'idle',
   PROCESSING = 'processing',
   ERRORED = 'errored',
+  EXPIRED = 'expired',
 }
 export enum AppPostParsedStatus {
   UNPROCESSED = 'unprocessed',
@@ -44,6 +45,7 @@ export enum AppPostRepublishedStatus {
   PENDING = 'pending',
   REPUBLISHED = 'republished',
   AUTO_REPUBLISHED = 'autoRepublished',
+  UNREPUBLISHED = 'unrepublished',
 }
 
 export interface AppPost {
@@ -53,6 +55,7 @@ export interface AppPost {
   origin: PLATFORM; // The platform where the post originated
   createdAtMs: number;
   parsingStatus: AppPostParsingStatus;
+  parsingStartedAtMs?: number;
   parsedStatus: AppPostParsedStatus;
   reviewedStatus: AppPostReviewStatus;
   republishedStatus: AppPostRepublishedStatus;
@@ -97,6 +100,7 @@ export type PostUpdate = Partial<
     | 'semantics'
     | 'originalParsed'
     | 'parsingStatus'
+    | 'parsingStartedAtMs'
     | 'parsedStatus'
     | 'reviewedStatus'
     | 'republishedStatus'
@@ -113,6 +117,12 @@ export enum PostsQueryStatus {
   IGNORED = 'ignored',
   PENDING = 'pending',
   ALL = 'all',
+}
+
+export interface UnpublishPlatformPostPayload {
+  postId: string;
+  platformId: PLATFORM;
+  post_id: string;
 }
 
 export interface UserPostsQuery {

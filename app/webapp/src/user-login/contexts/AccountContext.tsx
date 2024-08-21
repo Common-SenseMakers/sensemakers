@@ -3,6 +3,7 @@ import {
   createContext,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from 'react';
 
@@ -119,7 +120,7 @@ export const AccountContext = (props: PropsWithChildren) => {
       if (token) {
         if (DEBUG) console.log('getting me', { token });
         const user = await _appFetch<AppUserRead>('/api/auth/me', {}, token);
-        if (DEBUG) console.log('got connected user me', { user });
+        if (DEBUG) console.log('set connectedUser after fetch', { user });
         setConnectedUser(user);
       } else {
         if (DEBUG) console.log('setting connected user as null');
@@ -176,13 +177,25 @@ export const AccountContext = (props: PropsWithChildren) => {
     setToken(null);
   };
 
-  const twitterProfile = connectedUser
-    ? getAccount(connectedUser, PLATFORM.Twitter)?.profile
-    : undefined;
+  const twitterProfile = useMemo(() => {
+    const profile = connectedUser
+      ? getAccount(connectedUser, PLATFORM.Twitter)?.profile
+      : undefined;
 
-  const orcidProfile = connectedUser
-    ? getAccount(connectedUser, PLATFORM.Orcid)?.profile
-    : undefined;
+    if (DEBUG) console.log('twitterProfile', { profile });
+
+    return profile;
+  }, [connectedUser]);
+
+  const orcidProfile = useMemo(() => {
+    const profile = connectedUser
+      ? getAccount(connectedUser, PLATFORM.Orcid)?.profile
+      : undefined;
+
+    if (DEBUG) console.log('orcidProfile', { profile });
+
+    return profile;
+  }, [connectedUser]);
 
   const email = connectedUser ? connectedUser.email : undefined;
 

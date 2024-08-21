@@ -18,7 +18,7 @@ mandatory.forEach((varName) => {
   }
 });
 
-const serviceAccount = require('../../' + process.env.FB_CERT_PATH);
+const serviceAccount = require('../' + process.env.FB_CERT_PATH);
 
 logger.info('Running in local mode with certificate');
 export const app = initializeApp({

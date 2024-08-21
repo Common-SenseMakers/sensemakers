@@ -13,6 +13,7 @@ import {
 import {
   FetchedResult,
   PlatformPostCreate,
+  PlatformPostDeleteDraft,
   PlatformPostDraft,
   PlatformPostDraftApproval,
   PlatformPostPosted,
@@ -22,6 +23,7 @@ import {
 } from '../../@shared/types/types.platform.posts';
 import '../../@shared/types/types.posts';
 import {
+  AppPostFull,
   GenericAuthor,
   GenericPost,
   GenericThread,
@@ -36,6 +38,7 @@ import {
   TwitterUserDetails,
 } from '../../@shared/types/types.twitter';
 import {
+  AppUser,
   FetchedDetails,
   PLATFORM,
   UserDetailsBase,
@@ -535,6 +538,14 @@ export class TwitterService
       signerType: PlatformPostSignerType.DELEGATED,
       postApproval: PlatformPostDraftApproval.PENDING,
     };
+  }
+
+  async buildDeleteDraft(
+    post_id: string,
+    post: AppPostFull,
+    author: AppUser
+  ): Promise<PlatformPostDeleteDraft | undefined> {
+    return undefined;
   }
 
   async signDraft(

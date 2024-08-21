@@ -8,6 +8,7 @@ import {
   getUserProfileController,
   getUserProfilePostsController,
   parsePostController,
+  unpublishPlatformPostController,
   updatePostController,
 } from './posts/controllers/posts.controller';
 import {
@@ -38,3 +39,4 @@ router.post('/posts/createDraft', createDraftPostController);
 router.post('/posts/approve', approvePostController);
 router.post('/posts/parse', parsePostController);
 router.post('/posts/update', updatePostController);
+router.post('/posts/unpublish', unpublishPlatformPostController);

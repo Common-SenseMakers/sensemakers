@@ -54,6 +54,8 @@ export const USE_REAL_EMAIL = envRuntime.USE_REAL_EMAIL;
 
 export const TEST_USER_ACCOUNTS = envRuntime.TEST_USER_ACCOUNTS;
 
+export const PARSING_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+
 export const OUR_TOKEN_SECRET = envRuntime.OUR_TOKEN_SECRET;
 export const OUR_EXPIRES_IN = '30d';
 

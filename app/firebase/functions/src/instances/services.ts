@@ -163,7 +163,8 @@ export const createServices = () => {
     usersService,
     postsProcessing,
     platformsService,
-    parser
+    parser,
+    time
   );
 
   /** activity service */

@@ -12,7 +12,7 @@ import {
   twitterSignupDataSchema,
 } from './auth.schema';
 
-const DEBUG = false;
+const DEBUG = true;
 const DEBUG_PREFIX = '[AUTH-CONTROLLER]';
 
 export const getSignupContextController: RequestHandler = async (
@@ -88,15 +88,25 @@ export const handleSignupController: RequestHandler = async (
       logger.debug('handleSignupController', payload, DEBUG_PREFIX);
     }
 
-    const result = await services.db.run(async (manager) => {
-      /** handle signup and refetch user posts */
-      return await services.users.handleSignup(
-        platform,
-        payload,
-        manager,
-        userId
-      );
-    });
+    const debugId = (payload as any).code
+      ? (payload as any).code
+      : (payload as any).ethAddress;
+
+    const result = await services.db.run(
+      async (manager) => {
+        /** handle signup and refetch user posts */
+        return await services.users.handleSignup(
+          platform,
+          payload,
+          manager,
+          userId
+        );
+      },
+      undefined,
+      undefined,
+      `handleSignupController ${debugId}`,
+      DEBUG
+    );
 
     response.status(200).send({ success: true, data: result });
   } catch (error: any) {

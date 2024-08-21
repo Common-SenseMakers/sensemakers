@@ -10,6 +10,7 @@ import {
 import {
   FetchedResult,
   PlatformPost,
+  PlatformPostDeleteDraft,
   PlatformPostDraft,
   PlatformPostDraftApproval,
   PlatformPostPosted,
@@ -17,21 +18,28 @@ import {
   PlatformPostUpdate,
 } from '../../@shared/types/types.platform.posts';
 import {
+  AppPostFull,
   AppPostMirror,
   GenericThread,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
-import { PLATFORM, UserDetailsBase } from '../../@shared/types/types.user';
+import {
+  AppUser,
+  PLATFORM,
+  UserDetailsBase,
+} from '../../@shared/types/types.user';
 import { getEthToRSAMessage } from '../../@shared/utils/nanopub.sign.util';
 import { cleanPrivateKey } from '../../@shared/utils/semantics.helper';
+import { NANOPUBS_PUBLISH_SERVERS } from '../../config/config.runtime';
 import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
+import { PostsHelper } from '../../posts/posts.helper';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
 import { PlatformService } from '../platforms.interface';
 import { createIntroNanopublication } from './create.intro.nanopub';
 import { createNanopublication } from './create.nanopub';
-import { NANOPUBS_PUBLISH_SERVERS } from '../../config/config.runtime';
+import { createRetractionNanopub } from './create.retraction.nanopub';
 
 const DEBUG = false;
 
@@ -62,7 +70,7 @@ export class NanopubService
       throw new Error('Missing params');
     }
 
-    const introNanopub = await createIntroNanopublication(params, false);
+    const introNanopub = await createIntroNanopublication(params, true);
 
     return { ...params, introNanopubDraft: introNanopub.rdf() };
   }
@@ -131,6 +139,24 @@ export class NanopubService
       unsignedPost: nanopubDraft.rdf(),
       user_id: account.user_id,
       postApproval: PlatformPostDraftApproval.PENDING,
+    };
+  }
+
+  async buildDeleteDraft(
+    post_id: string,
+    post: AppPostFull,
+    author: AppUser
+  ): Promise<PlatformPostDeleteDraft> {
+    const draftDelete = await createRetractionNanopub(post_id, post, author);
+    const mirror = PostsHelper.getPostMirror(post, {
+      post_id,
+      platformId: PLATFORM.Nanopub,
+    });
+
+    return {
+      user_id: mirror?.posted?.post.user_id,
+      postApproval: PlatformPostDraftApproval.PENDING,
+      unsignedPost: draftDelete.rdf(),
     };
   }
 
@@ -239,10 +265,14 @@ export class NanopubService
 
   async get(
     post_id: string,
-    userDetails: UserDetailsBase,
+    userDetails: UserDetailsBase
   ): Promise<PlatformPostPosted<string>> {
-    const nanopubServers = JSON.parse(NANOPUBS_PUBLISH_SERVERS.value()) as string[];
-    const fetchedNanopub = await Nanopub.fetch(`${nanopubServers[0]}${post_id}`);
+    const nanopubServers = JSON.parse(
+      NANOPUBS_PUBLISH_SERVERS.value()
+    ) as string[];
+    const fetchedNanopub = await Nanopub.fetch(
+      `${nanopubServers[0]}${post_id}`
+    );
     return {
       post_id,
       post: fetchedNanopub.rdf(),
