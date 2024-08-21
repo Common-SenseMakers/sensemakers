@@ -32,7 +32,7 @@ import { PostTextEditable } from './PostTextEditable';
 import { POSTING_POST_ID } from './PostingPage';
 import { concatenateThread } from './posts.helper';
 
-const DEBUG = true;
+const DEBUG = false;
 
 enum PublishPostAction {
   None = 'None',
@@ -73,6 +73,9 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     POSTING_POST_ID,
     null
   );
+  // local state to prevent detecting the returning before leaving
+  const [justSetPostId, setJustSetPostId] = useState<boolean>(false);
+
   const { connect: _connectOrcid } = useOrcidContext();
 
   const { constants } = useThemeContext();
@@ -99,7 +102,6 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     setIsUnpublishing(false);
     setAskedOrcid(false);
     setPublishing(false);
-    setPostingPostId(null);
   };
 
   // reset if post changes
@@ -175,14 +177,17 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
 
   const connectOrcid = () => {
     if (post) {
+      if (DEBUG) console.log(`connectOrcid. Setting postId ${post.id}`);
       setPostingPostId(post.id);
+      setJustSetPostId(true);
       _connectOrcid('/posting');
     }
   };
 
   // receives the navigate from PostingPage and opens the post intent
   useEffect(() => {
-    if (postingPostId && connectedUser) {
+    if (postingPostId && connectedUser && !justSetPostId) {
+      if (DEBUG) console.log(`posting post detected for ${postingPostId}`);
       setPostingPostId(null);
       setPublishIntent(true);
     }

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
 import { subscribeToUpdates } from '../firestore/realtime.listener';
@@ -37,10 +38,14 @@ export const usePostsFetch = () => {
 
   const unsubscribeCallbacks = useRef<Record<string, () => void>>({});
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const code = searchParams.get('code');
+
   /** refetch a post and overwrite its value in the array */
   const refetchPost = useCallback(
     async (postId: string) => {
-      if (!connectedUser) {
+      // skip fetching if we are in the middle of a code management
+      if (!connectedUser || code) {
         return;
       }
 
@@ -184,7 +189,7 @@ export const usePostsFetch = () => {
   /** fetch for more post backwards */
   const _fetchOlder = useCallback(
     async (oldestPostId?: string) => {
-      if (!connectedUser || isFetchingOlder) {
+      if (!connectedUser || isFetchingOlder || code) {
         return;
       }
 
@@ -243,7 +248,7 @@ export const usePostsFetch = () => {
 
   const _fetchNewer = useCallback(
     async (_newestPostId: string) => {
-      if (!connectedUser || !_newestPostId) {
+      if (!connectedUser || !_newestPostId || code) {
         return;
       }
 
