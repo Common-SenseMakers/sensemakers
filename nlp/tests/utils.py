@@ -157,6 +157,13 @@ def get_thread_1():
     thread_post = create_thread_from_posts(thread_posts)
     return thread_post
 
+def get_short_thread():
+    thread_urls = [
+        "https://x.com/pepoospina/status/1752682076417994994",
+    ]
+    thread_posts = [scrape_post(url) for url in thread_urls]
+    thread_post = create_thread_from_posts(thread_posts)
+    return thread_post
 
 def get_thread_single_post():
     thread_posts = [
