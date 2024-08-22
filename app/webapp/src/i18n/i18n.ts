@@ -68,6 +68,8 @@ export enum I18Keys {
 
   unpublishingTitle = 's0345x',
   unpublishingPar01 = 's0345xw',
+  unpublishingErrorTitle = 's0345x0',
+  unpublishingErrorPar01 = 's0345xw1',
 
   returnToDraft = 's0353',
   yesPublish = 's0364',
@@ -76,6 +78,8 @@ export enum I18Keys {
 
   publishingTitle = 's0365',
   publishingPar01 = 's0365xw',
+  publishingErrorTitle = 's03650',
+  publishingErrorPar01 = 's03651',
 
   publishedTitle = 's0366',
   publishedText = 's0367',
@@ -286,10 +290,16 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.publishingTitle]: 'Publishing',
   [I18Keys.publishingPar01]:
     'Your nanopublication is being sent to the network. Please wait a moment.',
+  [I18Keys.publishingErrorTitle]: 'Error Publishing Nanopublication',
+  [I18Keys.publishingErrorPar01]:
+    'There was an error while attempting to publish your post. Please try again. If it persists, contact support.',
 
   [I18Keys.unpublishingTitle]: 'Retracting',
   [I18Keys.unpublishingPar01]:
     'Your nanopublication is marked as retracted. Please wait a moment.',
+  [I18Keys.unpublishingErrorTitle]: 'Error Retracting Nanopublication',
+  [I18Keys.unpublishingErrorPar01]:
+    'There was an error while attempting to retract your post. Please try again. If it persists, contact support.',
 
   [I18Keys.publishedTitle]: 'Your nanopublication is live!',
   [I18Keys.publishedText]: 'Your post has been nanopublished.',
