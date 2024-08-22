@@ -55,6 +55,8 @@ export const GlobalNav = (props: {}) => {
     const externalBoxProps: BoxExtendedProps = {
       style: {
         flexGrow: 1,
+        height: '100%',
+        justifyContent: 'center',
       },
       border: {
         color: isSelected ? constants.colors.primary : 'transparent',
@@ -67,6 +69,7 @@ export const GlobalNav = (props: {}) => {
       <Box {...externalBoxProps}>
         <AppButton
           plain
+          style={{ height: '100%' }}
           onClick={() => {
             navigate(route);
           }}>
