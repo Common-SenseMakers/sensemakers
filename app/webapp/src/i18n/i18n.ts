@@ -26,6 +26,7 @@ export enum I18Keys {
   installPrompt = 's021',
   installNow = 's022',
   noMorePosts = 's023',
+  loadMorePosts = 's023b',
   settings = 's024',
   logout = 's025',
   logoutTitle = 's025c',
@@ -254,6 +255,7 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.installPrompt]: 'Please install this app, ',
   [I18Keys.installNow]: 'install',
   [I18Keys.noMorePosts]: 'No more posts to show',
+  [I18Keys.loadMorePosts]: 'Load more posts',
   [I18Keys.settings]: 'Settings',
   [I18Keys.logoutTitle]: 'Logout',
   [I18Keys.logout]: 'Logout',
@@ -411,15 +413,10 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.dontShowAgain]: 'Don’t show this message again',
   [I18Keys.reviewSettings]: 'Review settings',
   [I18Keys.notNow]: 'Not now',
-  [I18Keys.emailSubject]: 'Your {{pointInTime}} SenseNets Activity Summary',
   [I18Keys.noPostsFound]: 'No posts found',
   [I18Keys.noPostsFoundDesc]: 'We couldn’t find any posts.',
   [I18Keys.getSupportDescription]:
     '<a href=mailto:support@sense-nets.xyz>support@sense-nets.xyz</a>',
-
-  [I18Keys.daily]: 'daily',
-  [I18Keys.weekly]: 'weekly',
-  [I18Keys.monthly]: 'monthly',
 
   [I18Keys.today]: 'today',
   [I18Keys.thisWeek]: 'this week',
