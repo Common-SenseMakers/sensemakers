@@ -186,12 +186,20 @@ def test_convert_item_types_to_rdf_triplets_mismatched_lengths():
     with pytest.raises(AssertionError):
         convert_item_types_to_rdf_triplets(item_types, reference_urls)
 
+def test_short_post_no_ref_i146():
+    multi_config = create_multi_config_for_tests()
+    multi_config.post_process_type = PostProcessType.FIREBASE
+    mcp = MultiChainParser(multi_config)
+    res = mcp.process_text("yup")
+    assert URIRef('https://sense-nets.xyz/mySemanticPost') in res.semantics.all_nodes()
+    
 
 if __name__ == "__main__":
     multi_config = create_multi_config_for_tests()
-    multi_config.post_process_type = PostProcessType.COMBINED
+    multi_config.post_process_type = PostProcessType.FIREBASE
     mcp = MultiChainParser(multi_config)
-    res = mcp.process_text(TEST_POST_TEXT_W_REF)
+    res = mcp.process_text("yup")
+    print(res.semantics.serialize())
 
     # len(res.support.refs_meta) == 1
     # assert "test" in mcp.pparsers

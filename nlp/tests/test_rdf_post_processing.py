@@ -53,6 +53,28 @@ def test_no_ref():
     )
     assert triplet.object == URIRef("https://sense-nets.xyz/possibleMissingReference")
 
+def test_default_pred_i146():
+    multi_config = MultiParserChainConfig(
+        parser_configs=[
+            MultiRefTaggerChainConfig(
+                name="multi_ref_tagger",
+                llm_config=LLMConfig(llm_type="mistralai/mixtral-8x7b-instruct:nitro"),
+            )
+        ],
+        metadata_extract_config=MetadataExtractionConfig(extraction_method="citoid"),
+    )
+    mcp = MultiChainParser(multi_config)
+    reference_urls = []
+    no_ref = len(reference_urls) == 0
+    reference_tags = [[mcp.ontology.default_label(no_ref)]]
+    triplets = convert_ref_tags_to_rdf_triplets(
+        reference_urls,
+        reference_tags,
+        mcp.ontology,
+    )
+    triplet = triplets[0]
+    assert triplet.object == URIRef("https://sense-nets.xyz/other")
+    
 
 if __name__ == "__main__":
     multi_config = MultiParserChainConfig(
@@ -65,8 +87,9 @@ if __name__ == "__main__":
         metadata_extract_config=MetadataExtractionConfig(extraction_method="citoid"),
     )
     mcp = MultiChainParser(multi_config)
-    reference_urls = ["www.example.com"]
-    reference_tags = ["missing-ref"]
+    reference_urls = []
+    no_ref = len(reference_urls) == 0
+    reference_tags = [[mcp.ontology.default_label(no_ref)]]
     triplets = convert_ref_tags_to_rdf_triplets(
         reference_urls,
         reference_tags,

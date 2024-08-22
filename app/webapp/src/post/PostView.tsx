@@ -1,4 +1,4 @@
-import { Box } from 'grommet';
+import { Box, Text } from 'grommet';
 import { Refresh } from 'grommet-icons';
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -32,7 +32,7 @@ import { PostTextEditable } from './PostTextEditable';
 import { POSTING_POST_ID } from './PostingPage';
 import { concatenateThread } from './posts.helper';
 
-const DEBUG = false;
+const DEBUG = true;
 
 enum PublishPostAction {
   None = 'None',
@@ -95,6 +95,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     nextPostId,
     retractNanopublication,
     isRetracting,
+    errorApprovingMsg,
   } = usePost();
 
   const reset = () => {
@@ -214,7 +215,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
           'postStatuses.live true setPublishing(false)',
           postStatuses
         );
-      reset();
+      setPublishing(false);
     }
 
     if (postStatuses.unpublished) {
@@ -424,15 +425,26 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
         type="normal"
         contentProps={{
           type: 'normal',
-          title: t(I18Keys.publishingTitle),
-          parragraphs: [
-            <Trans
-              i18nKey={I18Keys.publishingPar01}
-              components={{ b: <b></b> }}></Trans>,
-            <BoxCentered>
-              <Loading></Loading>
-            </BoxCentered>,
-          ],
+          title: errorApprovingMsg
+            ? t(I18Keys.publishingErrorTitle)
+            : t(I18Keys.publishingTitle),
+          parragraphs: errorApprovingMsg
+            ? [
+                <Trans
+                  i18nKey={I18Keys.publishingErrorPar01}
+                  components={{ b: <b></b> }}></Trans>,
+                <BoxCentered>
+                  <Text>{errorApprovingMsg}</Text>
+                </BoxCentered>,
+              ]
+            : [
+                <Trans
+                  i18nKey={I18Keys.publishingPar01}
+                  components={{ b: <b></b> }}></Trans>,
+                <BoxCentered>
+                  <Loading></Loading>
+                </BoxCentered>,
+              ],
         }}></AppModalStandard>
     );
   })();
@@ -444,15 +456,26 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
         type="normal"
         contentProps={{
           type: 'normal',
-          title: t(I18Keys.unpublishingTitle),
-          parragraphs: [
-            <Trans
-              i18nKey={I18Keys.unpublishingPar01}
-              components={{ b: <b></b> }}></Trans>,
-            <BoxCentered>
-              <Loading></Loading>
-            </BoxCentered>,
-          ],
+          title: errorApprovingMsg
+            ? t(I18Keys.unpublishingErrorTitle)
+            : t(I18Keys.unpublishingTitle),
+          parragraphs: errorApprovingMsg
+            ? [
+                <Trans
+                  i18nKey={I18Keys.unpublishingErrorPar01}
+                  components={{ b: <b></b> }}></Trans>,
+                <BoxCentered>
+                  <Text>{errorApprovingMsg}</Text>
+                </BoxCentered>,
+              ]
+            : [
+                <Trans
+                  i18nKey={I18Keys.unpublishingPar01}
+                  components={{ b: <b></b> }}></Trans>,
+                <BoxCentered>
+                  <Loading></Loading>
+                </BoxCentered>,
+              ],
         }}></AppModalStandard>
     );
   })();
