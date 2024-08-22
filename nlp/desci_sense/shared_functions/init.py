@@ -119,25 +119,27 @@ def init_multi_stage_parser_config(
 
 def init_multi_chain_parser_config(
     open_router_api_config: OpenrouterAPIConfig = None,
-    llm_type: str = "openai/gpt-4-turbo",
+    ref_tagger_llm_type: str = "openai/gpt-4-turbo",
+    kw_llm_type: str = "mistralai/mixtral-8x7b-instruct:nitro",
+    topic_llm_type: str = "mistralai/mixtral-8x7b-instruct:nitro",
     post_process_type: str = "firebase",
     post_renderer_type: str = "thread_ref_post",
 ):
     kw_config = KeywordPParserChainConfig(
         name="keywords",
         use_metadata=True,
-        llm_config=LLMConfig(llm_type=llm_type),
+        llm_config=LLMConfig(llm_type=kw_llm_type),
     )
     multi_refs_tagger_config = MultiRefTaggerChainConfig(
         name="multi_refs_tagger",
         use_metadata=True,
-        llm_config=LLMConfig(llm_type=llm_type),
+        llm_config=LLMConfig(llm_type=ref_tagger_llm_type),
         post_renderer=PostRendererType(post_renderer_type),
     )
     topics_config = TopicsPParserChainConfig(
         name="topics",
         use_metadata=True,
-        llm_config=LLMConfig(llm_type=llm_type),
+        llm_config=LLMConfig(llm_type=topic_llm_type),
     )
     hashtags_config = HashtagPParserChainConfig(
         name="hashtags",
