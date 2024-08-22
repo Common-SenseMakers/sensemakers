@@ -84,7 +84,9 @@ export const createServices = () => {
 
   const twitter = getTwitterMock(
     _twitter,
-    USE_REAL_TWITTERX.value() ? undefined : { signup: true },
+    USE_REAL_TWITTERX.value()
+      ? undefined
+      : { signup: true, fetch: true, publish: true, get: true },
     testUser
   );
 

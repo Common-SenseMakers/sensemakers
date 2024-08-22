@@ -100,6 +100,22 @@ thread_data = {
         },
     ],
 }
+
+thread_data_2 = {
+    "author": {
+        "id": "2111",
+        "name": "Eiko Fried",
+        "username": "Eiko Fried",
+        "platformId": "twitter",
+    },
+    "url": "https://x.com/EikoFried/status/1798166869574398271",
+    "thread": [
+        {
+            "content": "Yup",
+            "url": "https://x.com/EikoFried/status/1798166869574398271",
+        },
+    ],
+}
 parameters = {}
 
 parser_request = {"post": thread_data, "parameters": parameters}

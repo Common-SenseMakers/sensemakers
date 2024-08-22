@@ -13,6 +13,7 @@ from ..utils import render_to_py_dict
 
 # TODO this should be validated in construction of the ontology
 DEFAULT_LABEL = "default"
+DEFAULT_NO_REF_LABEL = "other"
 
 
 def load_ontology_from_model(ont_model: dict) -> OntologyInterface:
@@ -165,3 +166,23 @@ class OntologyBase:
         Return label corresponding to a default `mentions` predicate
         """
         return DEFAULT_LABEL
+
+    def default_no_ref_label(self) -> str:
+        """
+        Return default label for case where no reference is present
+        """
+        return DEFAULT_NO_REF_LABEL
+
+    def default_label(self, no_ref: bool):
+        """
+        Return the default label depending on if in relation to a reference or not.
+
+
+        Args:
+            no_ref (bool): True if for case where no reference is present,
+                            False if in relation to a reference.
+        """
+        if no_ref:
+            return self.default_no_ref_label()
+        else:
+            return self.default_mention_label()
