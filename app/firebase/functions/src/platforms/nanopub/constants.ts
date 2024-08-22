@@ -97,6 +97,7 @@ export const CREATIVECOMMONS4 = 'https://creativecommons.org/licenses/by/4.0/';
 
 //cosmo special constants
 export const APP_SPOST_PLACEHOLDER = 'https://sense-nets.xyz/mySemanticPost';
+export const APP_RSA_DECLERATION_URI = 'https://example.org/appKeyDecleration';
 //Strings
 export const DELEGATION_STRING = 'signingDelegation'
 
