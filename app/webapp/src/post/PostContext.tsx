@@ -61,6 +61,7 @@ interface PostContextType {
   nextPostId?: string;
   retractNanopublication: () => Promise<void>;
   isRetracting: boolean;
+  errorApprovingMsg?: string;
 }
 
 const PostContextValue = createContext<PostContextType | undefined>(undefined);
@@ -86,6 +87,9 @@ export const PostContext: React.FC<{
   const { filterStatus, removePost, getNextAndPrev } = useUserPosts();
   const [isUpdating, setIsUpdating] = React.useState(false);
   const [isRetracting, setIsRetracting] = React.useState(false);
+  const [errorApprovingMsg, setErrorApprovingMsg] = React.useState<
+    string | undefined
+  >(undefined);
 
   const appFetch = useAppFetch();
 
@@ -328,13 +332,21 @@ export const PostContext: React.FC<{
     }
 
     if (post) {
-      await appFetch<void, PublishPostPayload>('/api/posts/approve', {
-        post: {
-          ...post,
-          mirrors: [...(allOtherMirrors ? allOtherMirrors : []), nanopub],
-        },
-        platformIds: [PLATFORM.Nanopub],
-      });
+      if (errorApprovingMsg) {
+        setErrorApprovingMsg(undefined);
+      }
+      try {
+        await appFetch<void, PublishPostPayload>('/api/posts/approve', {
+          post: {
+            ...post,
+            mirrors: [...(allOtherMirrors ? allOtherMirrors : []), nanopub],
+          },
+          platformIds: [PLATFORM.Nanopub],
+        });
+      } catch (e: any) {
+        setErrorApprovingMsg(e.message);
+        setIsUpdating(false);
+      }
     }
 
     setEnabledEdit(false);
@@ -371,14 +383,22 @@ export const PostContext: React.FC<{
     nanopub.deleteDraft.postApproval = PlatformPostDraftApproval.APPROVED;
 
     if (post) {
-      await appFetch<void, UnpublishPlatformPostPayload>(
-        '/api/posts/unpublish',
-        {
-          post_id: nanopub.post_id,
-          platformId: PLATFORM.Nanopub,
-          postId: post.id,
-        }
-      );
+      if (errorApprovingMsg) {
+        setErrorApprovingMsg(undefined);
+      }
+      try {
+        await appFetch<void, UnpublishPlatformPostPayload>(
+          '/api/posts/unpublish',
+          {
+            post_id: nanopub.post_id,
+            platformId: PLATFORM.Nanopub,
+            postId: post.id,
+          }
+        );
+      } catch (e: any) {
+        setErrorApprovingMsg(e.message);
+        setIsRetracting(false);
+      }
     }
 
     // setIsUpdating(false); should be set by the re-fetch flow
@@ -418,6 +438,7 @@ export const PostContext: React.FC<{
         nextPostId,
         retractNanopublication,
         isRetracting,
+        errorApprovingMsg,
       }}>
       {children}
     </PostContextValue.Provider>
