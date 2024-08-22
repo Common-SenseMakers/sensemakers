@@ -38,7 +38,7 @@ export const usePersist = <T>(
         localStorage.setItem(name, JSON.stringify(value));
         setState(value);
       }
-      if (DEBUG) console.log(name, value);
+      if (DEBUG) console.log(`setting usePersist ${name}`, value);
     },
     [name]
   );

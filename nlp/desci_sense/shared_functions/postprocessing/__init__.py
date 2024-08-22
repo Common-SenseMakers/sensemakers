@@ -476,7 +476,10 @@ def combine_from_raw_results(
 
     # add default label to any empty prediction (no predicted tags)
     if combined.multi_reference_tagger:
-        default_label = ontology.default_mention_label()
+        # check if no reference case
+        no_ref = len(combined.reference_urls) == 0
+
+        default_label = ontology.default_label(no_ref=no_ref)
         for pred_labels in combined.multi_reference_tagger:
             if len(pred_labels) == 0:
                 logger.debug(f"Empty prediction replaced by {default_label}")

@@ -3,6 +3,10 @@ import { Store } from 'n3';
 import { AppPostFull } from '../../@shared/types/types.posts';
 import { AppUser } from '../../@shared/types/types.user';
 import { parseRDF, replaceNodes } from '../../@shared/utils/n3.utils';
+import {
+  ASSERTION_URI,
+  THIS_POST_NAME,
+} from '../../@shared/utils/semantics.helper';
 import { PostsHelper } from '../../posts/posts.helper';
 import { buildSpostNp } from './nanopub.utils';
 import { prepareNanopubDetails } from './prepare.nanopub.details';
@@ -33,8 +37,7 @@ export const createNanopublication = async (
   })();
   // Define the replacement map that swaps our placeholder with np placeholder
   const replaceMap: Record<string, string> = {
-    'https://sense-nets.xyz/mySemanticPost':
-      'http://purl.org/nanopub/temp/mynanopub#',
+    [THIS_POST_NAME]: ASSERTION_URI,
   };
 
   const semanticsStore = replaceNodes(semanticsParserStore, replaceMap);

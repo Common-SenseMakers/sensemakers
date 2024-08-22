@@ -43,6 +43,7 @@ import { AppPostStatus, getPostStatuses } from './posts.helper';
 const DEBUG = false;
 
 interface PostContextType {
+  postId?: string;
   post: AppPostFull | undefined;
   author: AppUserRead;
   reparse: () => void;
@@ -394,9 +395,12 @@ export const PostContext: React.FC<{
     [post, getNextAndPrev]
   );
 
+  const postIdFinal = useMemo(() => post?.id, [post]);
+
   return (
     <PostContextValue.Provider
       value={{
+        postId: postIdFinal,
         post,
         postStatuses,
         author,
