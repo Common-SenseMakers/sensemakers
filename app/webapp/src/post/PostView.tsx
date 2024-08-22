@@ -32,7 +32,7 @@ import { PostTextEditable } from './PostTextEditable';
 import { POSTING_POST_ID } from './PostingPage';
 import { concatenateThread } from './posts.helper';
 
-const DEBUG = false;
+const DEBUG = true;
 
 enum PublishPostAction {
   None = 'None',
@@ -215,7 +215,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
           'postStatuses.live true setPublishing(false)',
           postStatuses
         );
-      reset();
+      setPublishing(false);
     }
 
     if (postStatuses.unpublished) {
