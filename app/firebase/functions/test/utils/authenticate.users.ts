@@ -1,3 +1,4 @@
+import { TwitterSignupContext } from '../../src/@shared/types/types.twitter';
 import {
   AppUser,
   NanopubAccountCredentials,
@@ -33,14 +34,14 @@ export const authenticateTestUser = async (
     if (USE_REAL_TWITTER) {
       return authenticateTwitterUser(credentials.twitter, services, manager);
     } else {
+      const twitterSignupContext: TwitterSignupContext =
+        await services.users.getSignupContext(
+          PLATFORM.Twitter,
+          credentials.twitter.id
+        );
       const userId = await handleSignupMock(services, {
-        signupDate: 1719938012425,
-        user_id: credentials.twitter.id,
-        profile: {
-          id: credentials.twitter.id,
-          name: credentials.twitter.username,
-          username: credentials.twitter.username,
-        },
+        ...twitterSignupContext,
+        code: 'mocked',
       });
 
       return services.users.repo.getUser(userId, manager, true);

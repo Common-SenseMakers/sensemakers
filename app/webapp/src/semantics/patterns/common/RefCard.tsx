@@ -2,6 +2,7 @@ import { Anchor, Box, Paragraph, Text } from 'grommet';
 
 import { AppHeading, AppLabel } from '../../../ui-components';
 import { useThemeContext } from '../../../ui-components/ThemedApp';
+import { zoteroItemTypeDisplay } from '../../../utils/post.utils';
 
 const truncate = (text: string, size: number) => {
   return text.slice(0, size) + (text.length > size ? '...' : '');
@@ -60,7 +61,7 @@ export const RefCard = (props: {
               border: 'transparent',
             }}
             style={{ borderRadius: '4px', border: 'none' }}>
-            {props.refType}
+            {zoteroItemTypeDisplay(props.refType)}
           </AppLabel>
         ) : (
           <></>
