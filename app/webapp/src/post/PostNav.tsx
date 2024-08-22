@@ -7,11 +7,12 @@ import { LeftChevronIcon } from '../app/icons/LeftChveronIcon';
 import { LeftIcon } from '../app/icons/LeftIcon';
 import { RightIcon } from '../app/icons/RightIcon';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
-import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useUserPosts } from '../user-home/UserPostsContext';
 import { usePost } from './PostContext';
+
+const DEBUG = false;
 
 export const PostNav = (props: { profile?: TwitterUserProfile }) => {
   const profile = props.profile;
@@ -57,7 +58,7 @@ export const PostNav = (props: { profile?: TwitterUserProfile }) => {
     }
   };
 
-  console.log('PostNav', { nextPostId, prevPostId });
+  if (DEBUG) console.log('PostNav', { nextPostId, prevPostId });
 
   return (
     <Box

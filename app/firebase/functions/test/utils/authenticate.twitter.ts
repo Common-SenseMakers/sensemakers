@@ -17,7 +17,7 @@ import { runAuthenticateTwitterUser } from './authenticate.twitter.puppetter';
 
 const CALLBACK_URL = 'https://sense-nets.xyz/';
 
-const DEBUG = true;
+const DEBUG = false;
 
 /**
  * From a set of platform credentials, authenticate the users and

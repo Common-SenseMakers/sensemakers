@@ -19,7 +19,7 @@ import { I18Keys } from '../../i18n/i18n';
 import { AbsoluteRoutes } from '../../route.names';
 import { usePersist } from '../../utils/use.persist';
 
-const DEBUG = true;
+const DEBUG = false;
 export const AUTO_POST_INVITE_DISABLED = 'autopostInviteDisabled';
 
 export interface AutopostInviteContextType {
@@ -99,8 +99,6 @@ export const AutopostInviteContext = (props: PropsWithChildren) => {
     setReviewAutopostIntention(true);
     navigate(AbsoluteRoutes.Settings);
   };
-
-  console.log('autopostInviteDisabled', { showInvite });
 
   const inviteAutopostModal = (() => {
     if (showInvite) {

@@ -1,6 +1,25 @@
 {
     "semantic_predicates": [
         {
+            "name": "other",
+            "uri": "https://sense-nets.xyz/other",
+            "versions": [
+                "v0"
+            ],
+            "label": "other",
+            "display_name": "⬜ other",
+            "prompt": "This is a special tag. Use this tag if none of the tags above are suitable. If you tag a post with <other>, no other tag should be assigned to the post.",
+            "prompt_zero_ref": "This is a special tag. Use this tag if none of the tags above are suitable. If you tag a post with <other>, no other tag should be assigned to the post.",
+            "prompt_single_ref": null,
+            "prompt_multi_ref": null,
+            "valid_subject_types": [
+                "post"
+            ],
+            "valid_object_types": [
+                "nan"
+            ]
+        },
+        {
             "name": "disagreesWith",
             "uri": "http://purl.org/spar/cito/disagreesWith",
             "versions": [

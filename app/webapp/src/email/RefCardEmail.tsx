@@ -70,7 +70,7 @@ export const RefCardEmail = (props: {
                   color: '#6B7280',
                   float: 'right',
                 }}>
-                {props.itemType + (tweetId ? ' from Quoted Tweet' : '')}
+                {props.itemType}
               </Text>
             )}
           </div>

@@ -20,7 +20,7 @@ import { getNanopubProfile } from '../utils/nanopub.profile';
 import { getMockPost } from '../utils/posts.utils';
 import { getMockedUser } from '../utils/users.mock';
 
-const DEBUG = false;
+const DEBUG = true;
 const PUBLISH = true;
 
 describe('nanopublication format', () => {
@@ -92,11 +92,10 @@ describe('nanopublication format', () => {
 
     expect(published).to.not.be.undefined;
     if (DEBUG)
-      logger.debug(
-        'published at: ',
-        published.info().published,
-        published.rdf()
-      );
+      logger.debug('published at: ', {
+        published: published.info().published,
+        rdf: published.rdf(),
+      });
     if (PUBLISH) {
       const fetchedPub = (await Nanopub.fetch(
         published.info().published
@@ -148,11 +147,10 @@ describe('nanopublication format', () => {
     })();
     expect(updatedPublished).to.not.be.undefined;
     if (DEBUG)
-      logger.debug(
-        'update published at: ',
-        updatedPublished.info().published,
-        updatedPublished.rdf()
-      );
+      logger.debug('update published at: ', {
+        published: updatedPublished.info().published,
+        rdf: updatedPublished.rdf(),
+      });
     if (PUBLISH) {
       const fetchedUpdatedPub = (await Nanopub.fetch(
         updatedPublished.info().published
@@ -190,11 +188,11 @@ describe('nanopublication format', () => {
 
     expect(published).to.not.be.undefined;
     if (DEBUG)
-      logger.debug(
-        'published at: ',
-        published.info().published,
-        published.rdf()
-      );
+      logger.debug('published at: ', {
+        published: published.info().published,
+        rdf: published.rdf(),
+      });
+
     if (PUBLISH) {
       const fetchedPub = (await Nanopub.fetch(
         published.info().published
@@ -242,11 +240,10 @@ describe('nanopublication format', () => {
 
     expect(updatedPublished).to.not.be.undefined;
     if (DEBUG)
-      logger.debug(
-        'update published at: ',
-        updatedPublished.info().published,
-        updatedPublished.rdf()
-      );
+      logger.debug('update published at: ', {
+        published: updatedPublished.info().published,
+        rdf: updatedPublished.rdf(),
+      });
     if (PUBLISH) {
       const updatedFetchedPub = (await Nanopub.fetch(
         updatedPublished.info().published
@@ -295,11 +292,10 @@ describe('nanopublication format', () => {
 
     expect(orcidUpdatedPublished).to.not.be.undefined;
     if (DEBUG)
-      logger.debug(
-        'orcid update published at: ',
-        orcidUpdatedPublished.info().published,
-        orcidUpdatedPublished.rdf()
-      );
+      logger.debug('orcid update published at: ', {
+        published: orcidUpdatedPublished.info().published,
+        rdf: orcidUpdatedPublished.rdf(),
+      });
     if (PUBLISH) {
       const orcidUpdatedFetchedPub = (await Nanopub.fetch(
         orcidUpdatedPublished.info().published
@@ -349,11 +345,10 @@ describe('nanopublication format', () => {
 
     expect(published).to.not.be.undefined;
     if (DEBUG)
-      logger.debug(
-        'published at: ',
-        published.info().published,
-        published.rdf()
-      );
+      logger.debug('published at: ', {
+        published: published.info().published,
+        rdf: published.rdf(),
+      });
     if (PUBLISH) {
       const fetchedPub = (await Nanopub.fetch(
         published.info().published
@@ -392,11 +387,10 @@ describe('nanopublication format', () => {
 
     expect(updatedPublished).to.not.be.undefined;
     if (DEBUG)
-      logger.debug(
-        'update published at: ',
-        updatedPublished.info().published,
-        updatedPublished.rdf()
-      );
+      logger.debug('update published at: ', {
+        published: updatedPublished.info().published,
+        rdf: updatedPublished.rdf(),
+      });
     if (PUBLISH) {
       const updatedFetchedPub = (await Nanopub.fetch(
         updatedPublished.info().published

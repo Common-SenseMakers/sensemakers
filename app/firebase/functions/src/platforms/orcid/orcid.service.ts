@@ -14,6 +14,9 @@ import {
 import { logger } from '../../instances/logger';
 import { IdentityService } from '../platforms.interface';
 
+const DEBUG = true;
+const DEBUG_PREFIX = 'OrcidService';
+
 export class OrcidService
   implements
     IdentityService<OrcidSignupContext, OrcidSignupData, OrcidUserDetails>
@@ -33,6 +36,14 @@ export class OrcidService
     params.append('grant_type', 'authorization_code');
     params.append('code', code);
     params.append('redirect_uri', redirect_uri);
+
+    if (DEBUG) {
+      logger.debug(
+        `Fetching credentials from code ${code}`,
+        { params: params.toString() },
+        DEBUG_PREFIX
+      );
+    }
 
     const response = await fetch(`${ORCID_API_URL}/oauth/token`, {
       headers: [
@@ -58,10 +69,19 @@ export class OrcidService
   }
 
   public async handleSignupData(data: OrcidSignupData) {
+    if (DEBUG) {
+      logger.debug(
+        `handleSignupData code: ${data.code}`,
+        { data },
+        DEBUG_PREFIX
+      );
+    }
+
     const result = await this.fetchCredentialsFromCode(
       data.code,
       data.callbackUrl
     );
+
     const credentials: OrcidUserCredentials = {
       access_token: result.access_token,
       refresh_token: result.refresh_token,
@@ -80,6 +100,14 @@ export class OrcidService
       profile,
       read: credentials,
     };
+
+    if (DEBUG) {
+      logger.debug(
+        `handleSignupData done: ${data.code}`,
+        { orcid },
+        DEBUG_PREFIX
+      );
+    }
 
     return orcid;
   }
