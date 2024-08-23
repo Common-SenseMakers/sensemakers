@@ -166,7 +166,9 @@ def test_citoid_unprocessed_urls():
 
 def test_app_config():
     multi_config = init_multi_chain_parser_config(
-        llm_type="mistralai/mistral-7b-instruct:free",
+        ref_tagger_llm_type="mistralai/mistral-7b-instruct:free",
+        kw_llm_type="mistralai/mistral-7b-instruct:free",
+        topic_llm_type="mistralai/mistral-7b-instruct:free",
         post_process_type="firebase",
     )
     mcp = MultiChainParser(multi_config)
