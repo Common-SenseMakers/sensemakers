@@ -1,7 +1,7 @@
 import { Store } from 'n3';
 
 import { AppPostFull } from '../../@shared/types/types.posts';
-import { AppUser } from '../../@shared/types/types.user';
+import { AppUser, AutopostOption } from '../../@shared/types/types.user';
 import { parseRDF, replaceNodes } from '../../@shared/utils/n3.utils';
 import {
   ASSERTION_URI,
@@ -62,7 +62,7 @@ export const createNanopublication = async (
     ethAddress,
     introUri,
     twitterUsername,
-    autopostOption,
+    supersedesOptions ? AutopostOption.MANUAL : autopostOption,
     twitterName,
     semanticsStore,
     content,
