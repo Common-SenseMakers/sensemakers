@@ -13,23 +13,29 @@ class SM_FUNCTION_post_parser_config(TypedDict, total=True):
     openrouter_api_base: str
     openrouter_api_key: str
     openrouter_referer: int
-    llm_type: str
+    ref_tagger_llm_type: str
+    kw_llm_type: str
+    topic_llm_type: str
 
 
 def SM_FUNCTION_post_parser_imp(
     parserRequest: ParsePostRequest, parser_config: SM_FUNCTION_post_parser_config
 ) -> ParserResult:
-    llm_type = parser_config.pop("llm_type")
+    ref_tagger_llm_type = parser_config.pop("ref_tagger_llm_type")
+    kw_llm_type = parser_config.pop("kw_llm_type")
+    topic_llm_type = parser_config.pop("topic_llm_type")
     open_router_api_config = OpenrouterAPIConfig(**parser_config)
     multi_chain_parser_config = init_multi_chain_parser_config(
         open_router_api_config=open_router_api_config,
-        llm_type=llm_type,
+        ref_tagger_llm_type=ref_tagger_llm_type,
+        kw_llm_type=kw_llm_type,
+        topic_llm_type=topic_llm_type,
     )
 
     val_parser_request = ParsePostRequest.model_validate(parserRequest)
 
     parser = MultiChainParser(multi_chain_parser_config)
-
+    logger.info(f"Parser config: {multi_chain_parser_config}")
     logger.info(f"Running parser on content: {val_parser_request}...")
 
     # TODO change this to handle post and not text
