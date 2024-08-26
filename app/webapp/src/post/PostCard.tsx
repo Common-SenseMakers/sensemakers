@@ -10,7 +10,11 @@ import { PLATFORM } from '../shared/types/types.user';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { NanopubStatus } from './NanopubStatus';
 import { PostTextStatic } from './PostTextStatic';
-import { concatenateThread, getPostStatuses } from './posts.helper';
+import {
+  concatenateThread,
+  getPostStatuses,
+  hideSemanticsHelper,
+} from './posts.helper';
 
 export const PostCard = (props: {
   post: AppPostFull;
@@ -40,10 +44,7 @@ export const PostCard = (props: {
     }
   };
 
-  const hideSemantics =
-    post?.originalParsed?.filter_classification &&
-    post?.originalParsed?.filter_classification ===
-      SciFilterClassfication.NOT_RESEARCH;
+  const hideSemantics = hideSemanticsHelper(post);
 
   return (
     <Box

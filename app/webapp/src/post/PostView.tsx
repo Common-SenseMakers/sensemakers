@@ -31,7 +31,7 @@ import { PostHeader } from './PostHeader';
 import { PostNav } from './PostNav';
 import { PostTextEditable } from './PostTextEditable';
 import { POSTING_POST_ID } from './PostingPage';
-import { concatenateThread } from './posts.helper';
+import { concatenateThread, hideSemanticsHelper } from './posts.helper';
 
 const DEBUG = true;
 
@@ -573,10 +573,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   if (DEBUG) console.log(publishStatusModal);
 
   const editable = _editable;
-  const hideSemantics =
-    post?.originalParsed?.filter_classification &&
-    post?.originalParsed?.filter_classification ===
-      SciFilterClassfication.NOT_RESEARCH;
+  const hideSemantics = hideSemanticsHelper(post);
 
   const content = (() => {
     if (!post) {

@@ -90,3 +90,8 @@ export const getPostStatuses = (post?: AppPostFull): AppPostStatus => {
     unpublished,
   };
 };
+
+export const hideSemanticsHelper = (post?: AppPostFull): boolean => {
+  const hide = post && post.reviewedStatus === AppPostReviewStatus.IGNORED;
+  return hide !== undefined && hide;
+};
