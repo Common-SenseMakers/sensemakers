@@ -22,9 +22,9 @@ mandatory.forEach((varName) => {
 const rootPrivateKey = process.env.PRIVATE_KEY_1 as HexStr;
 const approvedPrivateKey = process.env.PRIVATE_KEY_2 as HexStr;
 
-const publishLinkedKeysNanopub = async (privateKey: string) => {
+const publishLinkedKeysNanopub = async (privateKey: HexStr) => {
   const { profile: approvedProfile, rsaKeys: approvedRsaKeys } =
-    await getNanopubProfile(rootPrivateKey);
+    await getNanopubProfile(privateKey);
 
   const approvedKeysLinking = await buildLinkAccountsNanopub(
     approvedProfile.ethAddress,
