@@ -147,8 +147,7 @@ export const buildLinkAccountsNanopub = async (
 
 export const buildAppIntroNp = async (
   rootKeysUri: string,
-  approvedKeysUri: string,
-  supersedesOptions?: SupersedesOptions
+  approvedKeysUri: string
 ): Promise<Nanopub> => {
   return new Promise((resolve, reject) => {
     const headStore = buildNpHead();

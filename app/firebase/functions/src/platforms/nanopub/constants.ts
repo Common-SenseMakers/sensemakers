@@ -99,6 +99,7 @@ export const CREATIVECOMMONS4 = 'https://creativecommons.org/licenses/by/4.0/';
 export const APP_SPOST_PLACEHOLDER = 'https://sense-nets.xyz/mySemanticPost';
 //Strings
 export const DELEGATION_STRING = 'signingDelegation';
+export const APPROVES_PUBLISHING_AS_US = 'approvesPublishingAsUs';
 
 // Prefixes JSONs
 export const sPostPrefixes = {
