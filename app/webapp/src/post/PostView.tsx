@@ -14,6 +14,7 @@ import { I18Keys } from '../i18n/i18n';
 import { AbsoluteRoutes } from '../route.names';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID } from '../semantics/patterns/patterns';
+import { SciFilterClassfication } from '../shared/types/types.parser';
 import { AppPostReviewStatus } from '../shared/types/types.posts';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { AppButton } from '../ui-components';
@@ -572,6 +573,10 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   if (DEBUG) console.log(publishStatusModal);
 
   const editable = _editable;
+  const hideSemantics =
+    post?.originalParsed?.filter_classification &&
+    post?.originalParsed?.filter_classification ===
+      SciFilterClassfication.NOT_RESEARCH;
 
   const content = (() => {
     if (!post) {
@@ -590,27 +595,31 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
           <PostHeader
             profile={props.profile}
             margin={{ bottom: '16px' }}></PostHeader>
-          <SemanticsEditor
-            patternProps={{
-              isLoading: postStatuses.isParsing,
-              editable,
-              semantics: post?.semantics,
-              originalParsed: post?.originalParsed,
-              semanticsUpdated: semanticsUpdated,
-            }}
-            include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
+          {!hideSemantics && (
+            <SemanticsEditor
+              patternProps={{
+                isLoading: postStatuses.isParsing,
+                editable,
+                semantics: post?.semantics,
+                originalParsed: post?.originalParsed,
+                semanticsUpdated: semanticsUpdated,
+              }}
+              include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
+          )}
 
           <PostTextEditable text={postText}></PostTextEditable>
 
-          <SemanticsEditor
-            patternProps={{
-              isLoading: postStatuses.isParsing,
-              editable,
-              semantics: post?.semantics,
-              originalParsed: post?.originalParsed,
-              semanticsUpdated: semanticsUpdated,
-            }}
-            include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
+          {!hideSemantics && (
+            <SemanticsEditor
+              patternProps={{
+                isLoading: postStatuses.isParsing,
+                editable,
+                semantics: post?.semantics,
+                originalParsed: post?.originalParsed,
+                semanticsUpdated: semanticsUpdated,
+              }}
+              include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
+          )}
 
           {action}
         </Box>
