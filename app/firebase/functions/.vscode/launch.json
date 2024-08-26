@@ -25,9 +25,9 @@
       "console": "integratedTerminal"
     },
     {
+      "name": "Script: 01-user.notifications",
       "type": "node",
       "request": "launch",
-      "name": "Script: 01-user.notifications",
       "runtimeExecutable": "ts-node",
       "args": [
         "--project",
