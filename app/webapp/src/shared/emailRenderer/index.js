@@ -877,7 +877,7 @@ var EmailTitle = function (_a) {
     style: {
       color: '#374151',
       fontWeight: 500,
-      margin: '10px 0',
+      margin: '2px 0 4px',
       fontSize: '16px',
       width: '100%',
       boxSizing: 'border-box',
