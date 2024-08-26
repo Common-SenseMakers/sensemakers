@@ -541,15 +541,22 @@ var __assign = undefined && undefined.__assign || function () {
 
 
 
+var MAX_POST_CARD_TEXT_LENGTH = 500;
 var PostCardEmail = function (_a) {
   var _b;
   var post = _a.post;
   var tweet = post.mirrors.find(function (m) {
     return m.platformId === _shared_types_types_user__WEBPACK_IMPORTED_MODULE_4__.PLATFORM.Twitter;
   });
-  var postText = post.generic.thread.reduce(function (_acc, post, ix) {
-    return _acc + "".concat(ix > 0 ? '<br><br>' : '').concat(post.content);
-  }, '');
+  var postText = function () {
+    var text = post.generic.thread.reduce(function (_acc, post, ix) {
+      return _acc + "".concat(ix > 0 ? '<br><br>' : '').concat(post.content);
+    }, '');
+    if (text.length > MAX_POST_CARD_TEXT_LENGTH) {
+      return text.slice(0, MAX_POST_CARD_TEXT_LENGTH) + '...';
+    }
+    return text;
+  }();
   var label = "X\u2022".concat(post.generic.thread.length > 1 ? 'Thread' : 'Tweet');
   var formatter = new Intl.DateTimeFormat('en-US', {
     month: 'long',
