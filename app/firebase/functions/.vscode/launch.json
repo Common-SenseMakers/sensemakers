@@ -25,14 +25,14 @@
       "console": "integratedTerminal"
     },
     {
-      "name": "Script: 01-user.notifications",
+      "name": "script: 020",
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "ts-node",
       "args": [
         "--project",
         "./tsconfig.scripts.json",
-        "./scripts/01-user.notifications.ts"
+        "./scripts/020-build.app.intro.ts"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",

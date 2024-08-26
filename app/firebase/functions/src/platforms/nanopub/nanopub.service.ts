@@ -221,13 +221,13 @@ export class NanopubService
     const published = await this.publishInternal(postPublish.draft);
 
     if (published) {
-      const platfformPostPosted: PlatformPostPosted = {
+      const platformPostPosted: PlatformPostPosted = {
         post_id: published.info().uri,
         timestampMs: Date.now(),
         user_id: postPublish.userDetails.user_id,
         post: published.rdf(),
       };
-      return platfformPostPosted;
+      return platformPostPosted;
     }
 
     throw new Error('Could not publish nanopub');
