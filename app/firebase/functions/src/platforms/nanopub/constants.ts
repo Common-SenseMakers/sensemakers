@@ -100,7 +100,8 @@ export const APP_SPOST_PLACEHOLDER = 'https://sense-nets.xyz/mySemanticPost';
 export const COSMO_APP_INTRO = 'https://sense-nets.xyz/AppIntro';
 export const LINKING_KEYS_DOCUMENT =
   'https://sense-nets.xyz/LinkingKeysDocument';
-export const APP_RSA_DECLARATION_URI = 'https://example.org/appKeyDeclaration';
+export const APP_RSA_DECLARATION_URI =
+  'https://w3id.org/np/RAy9QxREM5clpg5l-XDvYoyE55kBCO6pb2950R5ZSwigo#RSAkeyDeclaration-root';
 //Strings
 export const DELEGATION_STRING = 'signingDelegation';
 export const APPROVES_PUBLISHING_AS_US =
