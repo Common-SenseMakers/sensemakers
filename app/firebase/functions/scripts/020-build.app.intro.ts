@@ -72,5 +72,6 @@ const publishLinkedKeysNanopub = async (privateKey: HexStr) => {
     approvedLinkingNanopub: approvedLinkingNanopub?.rdf(),
     rootLinkingNanopub: rootLinkingNanopub?.rdf(),
     introNanopub: introNanopub?.rdf(),
+    approvedRsaKeys,
   });
 })();
