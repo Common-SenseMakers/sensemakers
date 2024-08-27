@@ -4,7 +4,7 @@ import { DataFactory, Writer } from 'n3';
 import { getEthToRSAMessage } from '../../@shared/utils/nanopub.sign.util';
 import { logger } from '../../instances/logger';
 import * as URI from './constants';
-import { SupersedesOptions, buildNpHead } from './nanopub.utils';
+import { buildNpHead } from './nanopub.utils';
 
 const DEBUG = false;
 
@@ -147,7 +147,9 @@ export const buildLinkAccountsNanopub = async (
 
 export const buildAppIntroNp = async (
   rootKeysUri: string,
-  approvedKeysUri: string
+  rootRSAKey: string,
+  approvedKeysUri: string,
+  approvedRSAKey: string
 ): Promise<Nanopub> => {
   return new Promise((resolve, reject) => {
     const headStore = buildNpHead();
@@ -171,7 +173,7 @@ export const buildAppIntroNp = async (
     });
 
     // Add triples to the assertion graph
-    // first key declaration, for the official key
+    // useful FOAF_NAME
     writer.addQuad(
       appAgentNode,
       namedNode(URI.FOAF_NAME),
@@ -179,7 +181,51 @@ export const buildAppIntroNp = async (
       assertionGraph
     );
 
-    // Add triples to the provenance graph
+    // Keys declaration nodes
+    const rootKeyDeclarationNode = namedNode(`${URI.KEY_DECLARATION_URI}-root`);
+    const approvedKeyDeclarationNode = namedNode(
+      `${URI.KEY_DECLARATION_URI}-approved`
+    );
+
+    writer.addQuad(
+      rootKeyDeclarationNode,
+      namedNode(URI.NP_HAS_ALGORITHM),
+      literal('RSA'),
+      assertionGraph
+    );
+    writer.addQuad(
+      rootKeyDeclarationNode,
+      namedNode(URI.NP_HAS_PUBLIC_KEY),
+      literal(rootRSAKey),
+      assertionGraph
+    );
+    writer.addQuad(
+      rootKeyDeclarationNode,
+      namedNode(URI.HAS_KEYS_LINKING_DOCUMENT),
+      namedNode(rootKeysUri),
+      assertionGraph
+    );
+
+    writer.addQuad(
+      approvedKeyDeclarationNode,
+      namedNode(URI.NP_HAS_ALGORITHM),
+      literal('RSA'),
+      assertionGraph
+    );
+    writer.addQuad(
+      approvedKeyDeclarationNode,
+      namedNode(URI.NP_HAS_PUBLIC_KEY),
+      literal(approvedRSAKey),
+      assertionGraph
+    );
+    writer.addQuad(
+      approvedKeyDeclarationNode,
+      namedNode(URI.HAS_KEYS_LINKING_DOCUMENT),
+      namedNode(approvedKeysUri),
+      assertionGraph
+    );
+
+    // attribution
     writer.addQuad(
       assertionGraph,
       namedNode(URI.PROV_WAS_ATTRIBUTED_TO),
@@ -187,12 +233,12 @@ export const buildAppIntroNp = async (
       provenanceGraph
     );
 
-    //
+    // explicit approval from root to approved key
     writer.addQuad(
-      namedNode(rootKeysUri),
+      rootKeyDeclarationNode,
       namedNode(URI.APPROVES_PUBLISHING_AS_US),
-      namedNode(approvedKeysUri),
-      provenanceGraph
+      approvedKeyDeclarationNode,
+      assertionGraph
     );
 
     // Add triples to the pubinfo graph
