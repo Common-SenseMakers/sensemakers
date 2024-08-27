@@ -28,7 +28,7 @@ export const TweetAnchor = (props: {
   timestamp?: number;
 }) => {
   const { t } = useTranslation();
-  const timestamp = props.timestamp || Date.now();
+  const timestamp = props.timestamp;
   const { constants } = useThemeContext();
 
   const formatter = new Intl.DateTimeFormat('en-US', {
@@ -36,7 +36,7 @@ export const TweetAnchor = (props: {
     day: 'numeric', // numeric day
     year: 'numeric', // numeric year
   });
-  const date = formatter.format(timestamp);
+  const date = timestamp ? formatter.format(timestamp) : '';
 
   if (!props.thread) {
     return <LoadingDiv></LoadingDiv>;
