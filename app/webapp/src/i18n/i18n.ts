@@ -247,7 +247,7 @@ const translationENG: Record<I18Keys, string> = {
 
   [I18Keys.connectAccounts]: 'Connect your accounts',
   [I18Keys.connectParagraph]:
-    'SenseNet loads your X (Twitter) feed and analyzes your posts using AI to deduct keywords and relations, which can be used to better interpret the meaning of your content.',
+    'SenseNets loads your X (Twitter) feed and analyzes your posts using AI to deduct keywords and relations, which can be used to better interpret the meaning of your content.',
   [I18Keys.errorConnectTwitter]: 'Error connecting Twitter',
   [I18Keys.yourPublications]: 'Your publications',
   [I18Keys.TweetX]: 'X · Tweet',
@@ -382,7 +382,7 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.downloads]: 'Downloads',
   [I18Keys.installApp]: 'Install application on your device',
 
-  [I18Keys.usingApp]: 'Using Sensenets',
+  [I18Keys.usingApp]: 'Using SenseNets',
   [I18Keys.publishingAutomation]: 'Publishing Automation',
   [I18Keys.publishingAutomationExplainer]:
     'Choose how you’d like to nanopublish your future X · Twitter posts.',

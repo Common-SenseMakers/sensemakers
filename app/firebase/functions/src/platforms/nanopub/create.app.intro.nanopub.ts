@@ -23,9 +23,8 @@ export const buildLinkAccountsNanopub = async (
     const assertionGraph = namedNode(URI.ASSERTION_URI);
     const provenanceGraph = namedNode(URI.PROVENANCE_URI);
     const pubinfoGraph = namedNode(URI.PUBINFO_URI);
-    const keyDeclarationNode = namedNode(
-      `${URI.KEY_DECLARATION_URI}${ethAddress}`
-    );
+    const appAgentNode = namedNode(URI.COSMO_PREFIX);
+
     // Create a writer and add prefixes
     const writer = new Writer({ format: 'application/trig' });
     writer.addPrefixes(URI.introPrefixes);
@@ -38,30 +37,36 @@ export const buildLinkAccountsNanopub = async (
     // Add triples to the assertion graph
     // first key declaration, for the official key
     writer.addQuad(
-      keyDeclarationNode,
+      assertionGraph,
+      namedNode(URI.NP_DECLARED_BY),
+      appAgentNode,
+      assertionGraph
+    );
+    writer.addQuad(
+      assertionGraph,
       namedNode(URI.NP_HAS_ALGORITHM),
       literal('RSA'),
       assertionGraph
     );
     writer.addQuad(
-      keyDeclarationNode,
+      assertionGraph,
       namedNode(URI.NP_HAS_PUBLIC_KEY),
       literal(pubKey),
       assertionGraph
     );
 
     writer.addQuad(
-      keyDeclarationNode,
+      assertionGraph,
       namedNode(URI.PROV_WAS_DERIVED_FROM),
       literal(ethAddress),
       assertionGraph
     );
 
     const verificationProofNode = namedNode(
-      `${URI.VERIFICATION_PROOF_URI}${ethAddress}`
+      `${URI.DERIVATION_PROOF_URI}${ethAddress}`
     );
     writer.addQuad(
-      keyDeclarationNode,
+      assertionGraph,
       namedNode(URI.NP_HAS_DERIVATION_PROOF),
       verificationProofNode,
       assertionGraph
@@ -91,8 +96,6 @@ export const buildLinkAccountsNanopub = async (
       assertionGraph
     );
 
-    const appAgentNode = namedNode(URI.COSMO_PREFIX);
-
     // Add triples to the provenance graph
     writer.addQuad(
       assertionGraph,
@@ -104,7 +107,7 @@ export const buildLinkAccountsNanopub = async (
     writer.addQuad(
       baseNode,
       namedNode(URI.LABEL),
-      literal('CoSMO Sensemaker RSA-ETH Keys Linking'),
+      literal('CoSMO RSA-ETH Keys Linking'),
       pubinfoGraph
     );
 
@@ -119,6 +122,18 @@ export const buildLinkAccountsNanopub = async (
       baseNode,
       namedNode(URI.CREATOR),
       appAgentNode,
+      pubinfoGraph
+    );
+    writer.addQuad(
+      namedNode(URI.BASE_URI),
+      namedNode(URI.LICENSE),
+      namedNode(URI.CREATIVECOMMONS4),
+      pubinfoGraph
+    );
+    writer.addQuad(
+      namedNode(URI.BASE_URI),
+      namedNode(URI.NP_HAS_NANOPUB_TYPE),
+      namedNode(URI.LINKING_KEYS_DOCUMENT),
       pubinfoGraph
     );
 
@@ -186,7 +201,12 @@ export const buildAppIntroNp = async (
     const approvedKeyDeclarationNode = namedNode(
       `${URI.KEY_DECLARATION_URI}-approved`
     );
-
+    writer.addQuad(
+      rootKeyDeclarationNode,
+      namedNode(URI.NP_DECLARED_BY),
+      appAgentNode,
+      assertionGraph
+    );
     writer.addQuad(
       rootKeyDeclarationNode,
       namedNode(URI.NP_HAS_ALGORITHM),
@@ -205,7 +225,12 @@ export const buildAppIntroNp = async (
       namedNode(rootKeysUri),
       assertionGraph
     );
-
+    writer.addQuad(
+      approvedKeyDeclarationNode,
+      namedNode(URI.NP_DECLARED_BY),
+      appAgentNode,
+      assertionGraph
+    );
     writer.addQuad(
       approvedKeyDeclarationNode,
       namedNode(URI.NP_HAS_ALGORITHM),
@@ -234,12 +259,12 @@ export const buildAppIntroNp = async (
     );
 
     // explicit approval from root to approved key
-    writer.addQuad(
+    /*writer.addQuad(
       rootKeyDeclarationNode,
       namedNode(URI.APPROVES_PUBLISHING_AS_US),
       approvedKeyDeclarationNode,
       assertionGraph
-    );
+    );*/
 
     // Add triples to the pubinfo graph
     writer.addQuad(
@@ -252,7 +277,7 @@ export const buildAppIntroNp = async (
     writer.addQuad(
       baseNode,
       namedNode(URI.LABEL),
-      literal('CoSMO Sensemaker intro'),
+      literal('CoSMO Sensemaking Networks app intro'),
       pubinfoGraph
     );
 
@@ -262,7 +287,18 @@ export const buildAppIntroNp = async (
       appAgentNode,
       pubinfoGraph
     );
-
+    writer.addQuad(
+      namedNode(URI.BASE_URI),
+      namedNode(URI.LICENSE),
+      namedNode(URI.CREATIVECOMMONS4),
+      pubinfoGraph
+    );
+    writer.addQuad(
+      namedNode(URI.BASE_URI),
+      namedNode(URI.NP_HAS_NANOPUB_TYPE),
+      namedNode(URI.COSMO_APP_INTRO),
+      pubinfoGraph
+    );
     // Instantiate Nanopub profile (ORCID and name are optional)
     //const profile = new NpProfile(privateKey, "https://orcid.org/" + orcidId, name);
 
