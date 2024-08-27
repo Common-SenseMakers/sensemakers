@@ -3,13 +3,18 @@ import { Box } from 'grommet';
 import { TweetAnchor } from '../app/anchors/TwitterAnchor';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID } from '../semantics/patterns/patterns';
+import { SciFilterClassfication } from '../shared/types/types.parser';
 import { AppPostFull } from '../shared/types/types.posts';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { PLATFORM } from '../shared/types/types.user';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { NanopubStatus } from './NanopubStatus';
 import { PostTextStatic } from './PostTextStatic';
-import { concatenateThread, getPostStatuses } from './posts.helper';
+import {
+  concatenateThread,
+  getPostStatuses,
+  hideSemanticsHelper,
+} from './posts.helper';
 
 export const PostCard = (props: {
   post: AppPostFull;
@@ -39,6 +44,8 @@ export const PostCard = (props: {
     }
   };
 
+  const hideSemantics = hideSemanticsHelper(post);
+
   return (
     <Box
       pad={{ top: '16px', bottom: '24px', horizontal: '12px' }}
@@ -59,15 +66,17 @@ export const PostCard = (props: {
         {!profile ? <NanopubStatus post={post}></NanopubStatus> : <></>}
       </Box>
 
-      <SemanticsEditor
-        include={[PATTERN_ID.KEYWORDS]}
-        patternProps={{
-          isLoading: isParsing !== undefined ? isParsing : false,
-          editable: false,
-          size: 'compact',
-          semantics: post?.semantics,
-          originalParsed: post?.originalParsed,
-        }}></SemanticsEditor>
+      {!hideSemantics && (
+        <SemanticsEditor
+          include={[PATTERN_ID.KEYWORDS]}
+          patternProps={{
+            isLoading: isParsing !== undefined ? isParsing : false,
+            editable: false,
+            size: 'compact',
+            semantics: post?.semantics,
+            originalParsed: post?.originalParsed,
+          }}></SemanticsEditor>
+      )}
 
       <PostTextStatic
         onClick={handleInternalClick}
@@ -75,15 +84,17 @@ export const PostCard = (props: {
         shade={shade}
         text={postText}></PostTextStatic>
 
-      <SemanticsEditor
-        include={[PATTERN_ID.REF_LABELS]}
-        patternProps={{
-          isLoading: isParsing !== undefined ? isParsing : false,
-          size: 'compact',
-          editable: false,
-          semantics: post?.semantics,
-          originalParsed: post?.originalParsed,
-        }}></SemanticsEditor>
+      {!hideSemantics && (
+        <SemanticsEditor
+          include={[PATTERN_ID.REF_LABELS]}
+          patternProps={{
+            isLoading: isParsing !== undefined ? isParsing : false,
+            size: 'compact',
+            editable: false,
+            semantics: post?.semantics,
+            originalParsed: post?.originalParsed,
+          }}></SemanticsEditor>
+      )}
     </Box>
   );
 };

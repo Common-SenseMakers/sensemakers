@@ -305,15 +305,16 @@ describe('nanopublication format', () => {
   });
 
   it('publishes a correctly formatted mock app intro nanopub to the test server', async () => {
-    const address1 =
+    const privateKey1 =
       '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
-    const address2 =
+    const privateKey2 =
       '0xac0974bec38b27e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 
     const { profile: profile1, rsaKeys: rsaKeys1 } =
-      await getNanopubProfile(address1);
+      await getNanopubProfile(privateKey1);
     const { profile: profile2, rsaKeys: rsaKeys2 } =
-      await getNanopubProfile(address2);
+      await getNanopubProfile(privateKey2);
+
     const appIntroNp = await buildAppIntroNp(
       profile1.ethAddress,
       profile2.ethAddress,
