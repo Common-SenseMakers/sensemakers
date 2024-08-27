@@ -546,7 +546,7 @@ export const buildIntroNp = async (
       writer.addQuad(
         signingDelegationNode,
         namedNode(URI.NP_WITH_KEY_DECLARATION),
-        namedNode('https://example.org/appKeyDecleration'),
+        namedNode(URI.APP_RSA_DECLERATION_URI),
         assertionGraph
       );
     }
