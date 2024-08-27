@@ -9,7 +9,7 @@ export const AppLogo = (props: BoxExtendedProps) => {
     <Box direction="row" align="center" gap="4px" {...props}>
       <AppIcon></AppIcon>
       <Text weight={600} color={constants.colors.primary}>
-        sensenet
+        SenseNets
       </Text>
     </Box>
   );
