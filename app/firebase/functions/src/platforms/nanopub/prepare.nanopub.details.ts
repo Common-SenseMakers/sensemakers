@@ -1,3 +1,4 @@
+import { SciFilterClassfication } from '../../@shared/types/types.parser';
 import { AppPostFull } from '../../@shared/types/types.posts';
 import {
   AppUser,
@@ -49,8 +50,27 @@ export const prepareNanopubDetails = (user: AppUser, post: AppPostFull) => {
 
   const orcidId = orcidAccount ? orcidAccount.user_id : undefined;
 
-  const autopostOption: AutopostOption =
-    user.settings.autopost[PLATFORM.Nanopub].value;
+  const autopostOption: AutopostOption = (() => {
+    /** anything that isn't citoid detected doesn't get autopublished */
+    if (
+      post.originalParsed?.filter_classification !==
+      SciFilterClassfication.CITOID_DETECTED_RESEARCH
+    )
+      return AutopostOption.MANUAL;
+
+    /** only indicate it was autopublished if it was created after the autoposting settings were set */
+    if (
+      user.settings.autopost[PLATFORM.Nanopub].after &&
+      post.createdAtMs > user.settings.autopost[PLATFORM.Nanopub].after
+    )
+      return user.settings.autopost[PLATFORM.Nanopub].value;
+
+    return AutopostOption.MANUAL;
+  })();
+  post.originalParsed?.filter_classification ===
+  SciFilterClassfication.CITOID_DETECTED_RESEARCH
+    ? user.settings.autopost[PLATFORM.Nanopub].value
+    : AutopostOption.MANUAL;
 
   const tweet = post.mirrors.find(
     (platformPost) => platformPost.platformId === PLATFORM.Twitter

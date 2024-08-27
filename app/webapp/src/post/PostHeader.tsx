@@ -14,7 +14,7 @@ export const PostHeader = (
   props: BoxExtendedProps & { profile?: TwitterUserProfile }
 ) => {
   const { constants } = useThemeContext();
-  const { tweet, post, setEnabledEdit, editable } = usePost();
+  const { tweet, post } = usePost();
 
   const username = props.profile?.name;
 
