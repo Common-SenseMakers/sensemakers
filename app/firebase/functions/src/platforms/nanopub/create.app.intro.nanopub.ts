@@ -6,6 +6,7 @@ import { logger } from '../../instances/logger';
 import * as URI from './constants';
 import { buildNpHead } from './nanopub.utils';
 
+
 const DEBUG = false;
 
 const { namedNode, literal } = DataFactory;
@@ -23,9 +24,9 @@ export const buildLinkAccountsNanopub = async (
     const assertionGraph = namedNode(URI.ASSERTION_URI);
     const provenanceGraph = namedNode(URI.PROVENANCE_URI);
     const pubinfoGraph = namedNode(URI.PUBINFO_URI);
-    const keyDeclarationNode = namedNode(
-      `${URI.KEY_DECLARATION_URI}${ethAddress}`
-    );
+    const appAgentNode = namedNode(URI.COSMO_PREFIX);
+
+    
     // Create a writer and add prefixes
     const writer = new Writer({ format: 'application/trig' });
     writer.addPrefixes(URI.introPrefixes);
@@ -38,20 +39,26 @@ export const buildLinkAccountsNanopub = async (
     // Add triples to the assertion graph
     // first key declaration, for the official key
     writer.addQuad(
-      keyDeclarationNode,
+      assertionGraph,
+      namedNode(URI.NP_DECLARED_BY),
+      appAgentNode,
+      assertionGraph
+    );
+    writer.addQuad(
+      assertionGraph,
       namedNode(URI.NP_HAS_ALGORITHM),
       literal('RSA'),
       assertionGraph
     );
     writer.addQuad(
-      keyDeclarationNode,
+      assertionGraph,
       namedNode(URI.NP_HAS_PUBLIC_KEY),
       literal(pubKey),
       assertionGraph
     );
 
     writer.addQuad(
-      keyDeclarationNode,
+      assertionGraph,
       namedNode(URI.PROV_WAS_DERIVED_FROM),
       literal(ethAddress),
       assertionGraph
@@ -61,7 +68,7 @@ export const buildLinkAccountsNanopub = async (
       `${URI.VERIFICATION_PROOF_URI}${ethAddress}`
     );
     writer.addQuad(
-      keyDeclarationNode,
+      assertionGraph,
       namedNode(URI.NP_HAS_DERIVATION_PROOF),
       verificationProofNode,
       assertionGraph
@@ -91,7 +98,6 @@ export const buildLinkAccountsNanopub = async (
       assertionGraph
     );
 
-    const appAgentNode = namedNode(URI.COSMO_PREFIX);
 
     // Add triples to the provenance graph
     writer.addQuad(
@@ -104,7 +110,7 @@ export const buildLinkAccountsNanopub = async (
     writer.addQuad(
       baseNode,
       namedNode(URI.LABEL),
-      literal('CoSMO Sensemaker RSA-ETH Keys Linking'),
+      literal('CoSMO RSA-ETH Keys Linking and declaration'),
       pubinfoGraph
     );
 
