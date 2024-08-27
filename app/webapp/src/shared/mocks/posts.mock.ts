@@ -15,7 +15,8 @@ import { PLATFORM } from '../types/types.user';
 
 export const getMockPublishedPost = () => {
   const authorId = 'test-author-id';
-  const createdAtMs = Date.now();
+  const createdAtMs =
+    Date.now() - Math.floor(Math.random() * 20 + 1) * 24 * 60 * 60 * 1000;
 
   const defaultGeneric: GenericThread = {
     thread: [
@@ -103,7 +104,8 @@ export const getMockPublishedPost = () => {
 
 export const getMockAutoPublishedPost = () => {
   const authorId = 'test-author-id';
-  const createdAtMs = Date.now();
+  const createdAtMs =
+    Date.now() - Math.floor(Math.random() * 20 + 1) * 24 * 60 * 60 * 1000;
 
   const defaultGeneric: GenericThread = {
     thread: [
@@ -190,7 +192,8 @@ export const getMockAutoPublishedPost = () => {
 };
 export const getMockPendingPost = () => {
   const authorId = 'test-author-id';
-  const createdAtMs = Date.now();
+  const createdAtMs =
+    Date.now() - Math.floor(Math.random() * 20 + 1) * 24 * 60 * 60 * 1000;
 
   const defaultGeneric: GenericThread = {
     thread: [
