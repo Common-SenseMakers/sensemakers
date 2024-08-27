@@ -97,6 +97,8 @@ export const CREATIVECOMMONS4 = 'https://creativecommons.org/licenses/by/4.0/';
 
 //cosmo special constants
 export const APP_SPOST_PLACEHOLDER = 'https://sense-nets.xyz/mySemanticPost';
+export const COSMO_APP_INTRO = 'https://sense-nets.xyz/AppIntro';
+export const LINKING_KEYS_DOCUMENT = 'https://sense-nets.xyz/LinkingKeysDocument';
 //Strings
 export const DELEGATION_STRING = 'signingDelegation';
 export const APPROVES_PUBLISHING_AS_US =
