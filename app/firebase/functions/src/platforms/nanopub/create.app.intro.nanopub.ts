@@ -6,7 +6,6 @@ import { logger } from '../../instances/logger';
 import * as URI from './constants';
 import { buildNpHead } from './nanopub.utils';
 
-
 const DEBUG = false;
 
 const { namedNode, literal } = DataFactory;
@@ -26,7 +25,6 @@ export const buildLinkAccountsNanopub = async (
     const pubinfoGraph = namedNode(URI.PUBINFO_URI);
     const appAgentNode = namedNode(URI.COSMO_PREFIX);
 
-    
     // Create a writer and add prefixes
     const writer = new Writer({ format: 'application/trig' });
     writer.addPrefixes(URI.introPrefixes);
@@ -65,7 +63,7 @@ export const buildLinkAccountsNanopub = async (
     );
 
     const verificationProofNode = namedNode(
-      `${URI.VERIFICATION_PROOF_URI}${ethAddress}`
+      `${URI.DERIVATION_PROOF_URI}${ethAddress}`
     );
     writer.addQuad(
       assertionGraph,
@@ -97,7 +95,6 @@ export const buildLinkAccountsNanopub = async (
       literal(signature),
       assertionGraph
     );
-
 
     // Add triples to the provenance graph
     writer.addQuad(

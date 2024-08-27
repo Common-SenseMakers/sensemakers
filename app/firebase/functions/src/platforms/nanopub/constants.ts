@@ -5,7 +5,7 @@ export const PROVENANCE_URI = BASE_URI + 'provenance';
 export const ACTIVITY_URI = BASE_URI + 'activity';
 export const PUBINFO_URI = BASE_URI + 'pubinfo';
 export const HEAD_URI = BASE_URI + 'head';
-export const VERIFICATION_PROOF_URI = BASE_URI + 'verificationProof';
+export const DERIVATION_PROOF_URI = BASE_URI + 'derivationProof';
 export const SIGNING_DELEGATION_URI = BASE_URI + 'signingDelegation';
 export const RETRACTS_URI = BASE_URI + 'assertion';
 export const KEY_DECLARATION_URI = BASE_URI + 'RSAkeyDeclaration';
@@ -98,7 +98,8 @@ export const CREATIVECOMMONS4 = 'https://creativecommons.org/licenses/by/4.0/';
 //cosmo special constants
 export const APP_SPOST_PLACEHOLDER = 'https://sense-nets.xyz/mySemanticPost';
 export const COSMO_APP_INTRO = 'https://sense-nets.xyz/AppIntro';
-export const LINKING_KEYS_DOCUMENT = 'https://sense-nets.xyz/LinkingKeysDocument';
+export const LINKING_KEYS_DOCUMENT =
+  'https://sense-nets.xyz/LinkingKeysDocument';
 //Strings
 export const DELEGATION_STRING = 'signingDelegation';
 export const APPROVES_PUBLISHING_AS_US =
