@@ -205,8 +205,11 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   };
 
   const unpublishApproved = () => {
+    if (!post) {
+      throw new Error(`Unexpected post not found`);
+    }
     setIsUnpublishing(true);
-    retractNanopublication();
+    retractNanopublication(post);
   };
 
   // publishing is set to false only after the nanopub status is published
