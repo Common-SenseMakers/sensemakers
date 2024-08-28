@@ -401,9 +401,22 @@ def test_thread_render_single_post():
 
 
 if __name__ == "__main__":
-    ref_post = convert_text_to_ref_post(TEST_POST_TEXT_W_2_REFS)
-    md_dict = extract_posts_ref_metadata_dict([ref_post])
-    md_list = get_ref_post_metadata_list(ref_post, md_dict)
-    ref_post_renderer = RefPostRenderer()
-    rendered = ref_post_renderer.render(ref_post, md_list)
-    target = RENDER_TARGET_MULTI_REF
+    tweet_url = "https://x.com/StephensonJones/status/1799035911042482210"
+    quote_ref_post = scrape_post(tweet_url)
+    multi_config = MultiParserChainConfig(
+        parser_configs=[
+            MultiRefTaggerChainConfig(
+                name="multi_ref_tagger",
+                llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
+                post_renderer=PostRendererType.QUOTE_REF_POST,
+            )
+        ],
+        metadata_extract_config=MetadataExtractionConfig(extraction_method="citoid"),
+    )
+    mcp = MultiChainParser(multi_config)
+    md_dict = extract_posts_ref_metadata_dict([quote_ref_post])
+    prompt = mcp.instantiate_prompts(quote_ref_post, md_dict)
+    prompt_str = prompt["multi_ref_tagger_input"]
+    assert RENDER_QUOTE_TWEET_1_TARGET in prompt_str
+    assert RENDER_QT_MD_1_TARGET in prompt_str
+    assert postr.quote_ref_post_renderer.MULTI_REF_INSTRUCTIONS in prompt_str
