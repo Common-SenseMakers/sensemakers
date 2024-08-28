@@ -131,9 +131,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     if (!post) {
       throw new Error(`Unexpected post not found`);
     }
-    updatePost({
-      reviewedStatus: AppPostReviewStatus.PENDING,
-    });
+    await approveOrUpdate([post]);
   };
 
   const ignore = async () => {
