@@ -60,6 +60,22 @@ export const MultiSelectMode: React.FC<MultiSelectModeProps> = ({ posts }) => {
 
   return (
     <>
+      <Box
+        direction="row"
+        justify="center"
+        gap="medium"
+        margin={{ bottom: 'medium' }}>
+        <AppButton
+          onClick={() => handleAction('ignore')}
+          label={t(I18Keys.ignore)}
+          disabled={selectedPosts.length === 0}
+        />
+        <AppButton
+          onClick={() => handleAction('publish')}
+          label={t(I18Keys.publish)}
+          disabled={selectedPosts.length === 0}
+        />
+      </Box>
       {posts.map((post) => (
         <Box key={post.id} direction="row" align="center">
           <CheckBox
@@ -74,22 +90,6 @@ export const MultiSelectMode: React.FC<MultiSelectModeProps> = ({ posts }) => {
           </Box>
         </Box>
       ))}
-      <Box
-        direction="row"
-        justify="center"
-        gap="medium"
-        margin={{ top: 'medium' }}>
-        <AppButton
-          onClick={() => handleAction('ignore')}
-          label={t(I18Keys.ignore)}
-          disabled={selectedPosts.length === 0}
-        />
-        <AppButton
-          onClick={() => handleAction('publish')}
-          label={t(I18Keys.publish)}
-          disabled={selectedPosts.length === 0}
-        />
-      </Box>
       {showConfirmModal && (
         <AppModalStandard
           onModalClosed={() => setShowConfirmModal(false)}
