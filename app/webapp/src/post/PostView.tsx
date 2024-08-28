@@ -26,7 +26,7 @@ import { useAutopostInviteContext } from '../user-login/contexts/AutopostInviteC
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { usePersist } from '../utils/use.persist';
-import { usePost } from './PostContext';
+import { usePost, usePostActions } from './PostContext';
 import { PostHeader } from './PostHeader';
 import { PostNav } from './PostNav';
 import { PostTextEditable } from './PostTextEditable';
@@ -88,16 +88,19 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     postStatuses,
     reparse,
     updatePost,
-    isUpdating,
-    approveOrUpdate,
     editable: _editable,
     enabledEdit,
     setEnabledEdit,
     nextPostId,
-    retractNanopublication,
-    isRetracting,
-    errorApprovingMsg,
   } = usePost();
+
+  const {
+    approveOrUpdate,
+    retractNanopublication,
+    isUpdating,
+    isRetracting,
+    errorMessage: errorApprovingMsg,
+  } = usePostActions();
 
   const reset = () => {
     setPublishIntent(false);
