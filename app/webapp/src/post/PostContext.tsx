@@ -3,15 +3,16 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from '
 import { useAppFetch } from '../api/app.fetch';
 import { subscribeToUpdates } from '../firestore/realtime.listener';
 import { NotificationFreq } from '../shared/types/types.notifications';
-import { PlatformPost, PlatformPostDraft } from '../shared/types/types.platform.posts';
+import { PlatformPost, PlatformPostDraft, PlatformPostSignerType, PlatformPostDraftApproval } from '../shared/types/types.platform.posts';
 import { AppPostFull, AppPostReviewStatus, PostUpdate, PostUpdatePayload, PostsQueryStatus } from '../shared/types/types.posts';
 import { TwitterThread } from '../shared/types/types.twitter';
 import { AppUserRead, AutopostOption, PLATFORM } from '../shared/types/types.user';
 import { useUserPosts } from '../user-home/UserPostsContext';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
+import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { getAccount } from '../user-login/user.helper';
 import { AppPostStatus, getPostStatuses } from './posts.helper';
-import { usePostActions } from './PostActionsContext';
+import { useToastContext } from '../app/ToastsContext';
 
 const DEBUG = false;
 
@@ -50,7 +51,6 @@ export const PostContext: React.FC<{
 
   const { filterStatus, removePost, getNextAndPrev } = useUserPosts();
   const appFetch = useAppFetch();
-  const { approveOrUpdate, ignore, retractNanopublication } = usePostActions();
 
   const postId = useMemo(() => (_postId ? _postId : (postInit as AppPostFull).id), [_postId, postInit]);
 
@@ -221,13 +221,6 @@ export const usePost = () => {
   }
   return context;
 };
-// import React, { createContext, useContext, useState } from 'react';
-// import { useAppFetch } from '../api/app.fetch';
-import { useToastContext } from '../app/ToastsContext';
-// import { AppPostFull, AppPostReviewStatus, PostUpdate } from '../shared/types/types.posts';
-// import { PLATFORM } from '../shared/types/types.user';
-import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
-import { PlatformPostSignerType, PlatformPostDraftApproval } from '../shared/types/types.platform.posts';
 
 interface PostActionsContextType {
   approveOrUpdate: (posts: AppPostFull[]) => Promise<void>;
