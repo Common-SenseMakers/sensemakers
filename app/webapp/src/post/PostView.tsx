@@ -422,7 +422,10 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   const publishingModal = (() => {
     return (
       <AppModalStandard
-        onModalClosed={() => setPublishIntent(false)}
+        onModalClosed={() => {
+          if (errorApprovingMsg) setPublishing(false);
+          setPublishIntent(false);
+        }}
         type="normal"
         contentProps={{
           type: 'normal',
