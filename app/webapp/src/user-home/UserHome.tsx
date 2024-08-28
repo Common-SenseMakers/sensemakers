@@ -22,6 +22,7 @@ import { useThemeContext } from '../ui-components/ThemedApp';
 import { usePersist } from '../utils/use.persist';
 import { IntroModals } from './IntroModal';
 import { useUserPosts } from './UserPostsContext';
+import { MultiSelectMode } from './MultiSelectMode';
 
 const statusPretty: Record<PostsQueryStatus, string> = {
   all: 'All Drafts',
@@ -41,6 +42,7 @@ export const UserHome = () => {
 
   const [introShown, setIntroShown] = usePersist<boolean>(INTRO_SHOWN, false);
   const [showIntro, setShowIntro] = useState<boolean>(false);
+  const [isMultiSelectMode, setIsMultiSelectMode] = useState<boolean>(false);
 
   useEffect(() => {
     if (!introShown) {
@@ -60,6 +62,10 @@ export const UserHome = () => {
     isLoading,
     moreToFetch,
   } = useUserPosts();
+
+  const toggleMultiSelectMode = () => {
+    setIsMultiSelectMode(!isMultiSelectMode);
+  };
 
   const { isAtBottom } = useContext(ViewportPageScrollContext);
   const location = useLocation();
@@ -168,16 +174,20 @@ export const UserHome = () => {
     return (
       <>
         <Box>
-          {posts.map((post, ix) => (
-            <Box key={ix} id={`post-${post.id}`}>
-              <PostCard
-                post={post}
-                handleClick={() => {
-                  const path = `/post/${post.id}`;
-                  navigate(path);
-                }}></PostCard>
-            </Box>
-          ))}
+          {isMultiSelectMode ? (
+            <MultiSelectMode posts={posts} />
+          ) : (
+            posts.map((post, ix) => (
+              <Box key={ix} id={`post-${post.id}`}>
+                <PostCard
+                  post={post}
+                  handleClick={() => {
+                    const path = `/post/${post.id}`;
+                    navigate(path);
+                  }}></PostCard>
+              </Box>
+            ))
+          )}
         </Box>
         {isFetchingOlder && (
           <Box>
@@ -305,7 +315,13 @@ export const UserHome = () => {
           <AppHeading level="3">{pageTitle}</AppHeading>
           <BoxCentered style={{ height: '40px' }}>{reload}</BoxCentered>
         </Box>
-        {pageIx === 0 && <Box>{menu}</Box>}
+        <Box direction="row" align="center" gap="12px">
+          {pageIx === 0 && <Box>{menu}</Box>}
+          <AppButton
+            onClick={toggleMultiSelectMode}
+            label={isMultiSelectMode ? t(I18Keys.exitMultiSelect) : t(I18Keys.multiSelect)}
+          />
+        </Box>
       </Box>
     </Box>
   );
