@@ -33,6 +33,9 @@ const statusPretty: Record<PostsQueryStatus, string> = {
 
 const INTRO_SHOWN = 'introShown';
 
+import { MultiSelectMode } from './MultiSelectMode';
+import { PostContext } from '../post/PostContext';
+
 export const UserHome = () => {
   const { constants } = useThemeContext();
   const { t } = useTranslation();
