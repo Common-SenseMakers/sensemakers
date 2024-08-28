@@ -33,34 +33,27 @@ export const AppHome = (props: {}) => {
   const { content, nav } = (() => {
     if (DEBUG) console.log('AppHome', { overallLoginStatus, twitterProfile });
 
-    if (overallLoginStatus === OverallLoginStatus.NotKnown) {
-      return { content: null, nav: null };
+    switch (overallLoginStatus) {
+      case OverallLoginStatus.NotKnown:
+        return { content: null, nav: null };
+      case OverallLoginStatus.LoggedOut:
+        return { content: <AppWelcome />, nav: null };
+      case OverallLoginStatus.PartialLoggedIn:
+        return twitterConnectedStatus !== TwitterConnectedStatus.Connecting
+          ? { content: <ConnectSocialsPage />, nav: null }
+          : { content: LoadingPlaceholder, nav: null };
+      case OverallLoginStatus.FullyLoggedIn:
+        return {
+          content: (
+            <PostActionsProvider>
+              <UserHome />
+            </PostActionsProvider>
+          ),
+          nav: <GlobalNav />
+        };
+      default:
+        return { content: LoadingPlaceholder, nav: null };
     }
-
-    if (overallLoginStatus === OverallLoginStatus.LoggedOut) {
-      return { content: <AppWelcome />, nav: null };
-    }
-
-    if (
-      overallLoginStatus === OverallLoginStatus.PartialLoggedIn &&
-      twitterConnectedStatus !== TwitterConnectedStatus.Connecting
-    ) {
-      return { content: <ConnectSocialsPage />, nav: null };
-    }
-
-    if (overallLoginStatus === OverallLoginStatus.FullyLoggedIn) {
-      return { 
-        content: (
-          <PostActionsProvider>
-            <UserHome />
-          </PostActionsProvider>
-        ), 
-        nav: <GlobalNav />
-      };
-    }
-
-    /** everything that is not the status above shows the loadingDivs */
-    return { content: LoadingPlaceholder, nav: null };
   })();
 
   return (
