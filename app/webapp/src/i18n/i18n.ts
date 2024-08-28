@@ -196,6 +196,14 @@ export enum I18Keys {
   postStatusForReview = 's089',
   postStatusPublished = 's090',
   postStatusAutopublished = 's091',
+
+  multiSelect = 's092',
+  exitMultiSelect = 's093',
+  ignoreConfirmTitle = 's094',
+  publishConfirmTitle = 's095',
+  ignoreConfirmMessage = 's096',
+  publishConfirmMessage = 's097',
+  confirm = 's098',
 }
 
 const check = new Set();
