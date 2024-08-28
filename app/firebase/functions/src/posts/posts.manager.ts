@@ -776,9 +776,21 @@ export class PostsManager {
         manager
       );
 
+      /**
+       * Get the full updated post with it's mirrors to make sure any semantic updates
+       * are reflected in the mirrors (because of optimistic updates in the frontend).
+       * We could additionally add some checks here to see if there is a difference
+       * between the updated and newPost and handle that accordingly.
+       */
+      const updatedPostFull = await this.processing.getPostFull(
+        newPost.id,
+        manager,
+        true
+      );
+
       /** publish drafts */
       const published = await Promise.all(
-        newPost.mirrors.map(async (mirror) => {
+        updatedPostFull.mirrors.map(async (mirror) => {
           if (platformIds.includes(mirror.platformId) && mirror.draft) {
             const account = UsersHelper.getAccount(
               user,
