@@ -19,42 +19,50 @@ export const AppHome = (props: {}) => {
     useAccountContext();
 
   const LoadingPlaceholder = (
-    <>
+    <div>
       <LoadingDiv
         margin={{ bottom: '4px' }}
         width="100%"
         height="120px" />
-      {[1, 2, 4, 5, 6, 7, 8].map((ix) => (
-        <PostCardLoading key={ix} />
-      ))}
-    </>
+      {[1, 2, 4, 5, 6, 7, 8].map(ix => <PostCardLoading key={ix} />)}
+    </div>
   );
 
-  const { content, nav } = (() => {
-    if (DEBUG) console.log('AppHome', { overallLoginStatus, twitterProfile });
+  let content: React.ReactNode;
+  let nav: React.ReactNode;
 
-    switch (overallLoginStatus) {
-      case OverallLoginStatus.NotKnown:
-        return { content: null, nav: null };
-      case OverallLoginStatus.LoggedOut:
-        return { content: <AppWelcome />, nav: null };
-      case OverallLoginStatus.PartialLoggedIn:
-        return twitterConnectedStatus !== TwitterConnectedStatus.Connecting
-          ? { content: <ConnectSocialsPage />, nav: null }
-          : { content: LoadingPlaceholder, nav: null };
-      case OverallLoginStatus.FullyLoggedIn:
-        return {
-          content: (
-            <PostActionsProvider>
-              <UserHome />
-            </PostActionsProvider>
-          ),
-          nav: <GlobalNav />
-        };
-      default:
-        return { content: LoadingPlaceholder, nav: null };
-    }
-  })();
+  if (DEBUG) console.log('AppHome', { overallLoginStatus, twitterProfile });
+
+  switch (overallLoginStatus) {
+    case OverallLoginStatus.NotKnown:
+      content = null;
+      nav = null;
+      break;
+    case OverallLoginStatus.LoggedOut:
+      content = <AppWelcome />;
+      nav = null;
+      break;
+    case OverallLoginStatus.PartialLoggedIn:
+      if (twitterConnectedStatus !== TwitterConnectedStatus.Connecting) {
+        content = <ConnectSocialsPage />;
+        nav = null;
+      } else {
+        content = LoadingPlaceholder;
+        nav = null;
+      }
+      break;
+    case OverallLoginStatus.FullyLoggedIn:
+      content = (
+        <PostActionsProvider>
+          <UserHome />
+        </PostActionsProvider>
+      );
+      nav = <GlobalNav />;
+      break;
+    default:
+      content = LoadingPlaceholder;
+      nav = null;
+  }
 
   return (
     <ViewportPage content={content} nav={nav} justify="start" />
