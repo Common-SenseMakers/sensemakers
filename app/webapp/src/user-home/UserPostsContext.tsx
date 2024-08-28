@@ -1,10 +1,8 @@
-import React, { useCallback, useContext } from 'react';
-import { createContext } from 'react';
-
+import React, { useCallback, useContext, createContext } from 'react';
 import { AppPostFull, PostsQueryStatus } from '../shared/types/types.posts';
 import { usePostsFetch } from './posts.fetch.hook';
 
-interface PostContextType {
+interface UserPostsContextType {
   posts?: AppPostFull[];
   isLoading: boolean;
   isFetchingOlder: boolean;
@@ -23,13 +21,9 @@ interface PostContextType {
   };
 }
 
-export const UserPostsContextValue = createContext<PostContextType | undefined>(
-  undefined
-);
+const UserPostsContextValue = createContext<UserPostsContextType | undefined>(undefined);
 
-export const UserPostsContext: React.FC<{
-  children: React.ReactNode;
-}> = ({ children }) => {
+export const UserPostsContext: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const {
     posts,
     fetchOlder,
@@ -45,10 +39,7 @@ export const UserPostsContext: React.FC<{
   } = usePostsFetch();
 
   const getPost = useCallback(
-    (postId: string) => {
-      const ix = posts.findIndex((p) => p.id === postId);
-      return ix !== -1 ? posts[ix] : undefined;
-    },
+    (postId: string) => posts?.find((p) => p.id === postId),
     [posts]
   );
 
@@ -58,16 +49,9 @@ export const UserPostsContext: React.FC<{
         return {};
       }
 
-      const currPostIndex = posts?.findIndex((p) => p.id === postId);
-      const prevPostId =
-        posts && currPostIndex != undefined && currPostIndex > 0
-          ? posts[currPostIndex - 1].id
-          : undefined;
-
-      const nextPostId =
-        posts && currPostIndex != undefined && currPostIndex < posts.length - 1
-          ? posts[currPostIndex + 1].id
-          : undefined;
+      const currPostIndex = posts.findIndex((p) => p.id === postId);
+      const prevPostId = currPostIndex > 0 ? posts[currPostIndex - 1].id : undefined;
+      const nextPostId = currPostIndex < posts.length - 1 ? posts[currPostIndex + 1].id : undefined;
 
       return { prevPostId, nextPostId };
     },
@@ -79,10 +63,10 @@ export const UserPostsContext: React.FC<{
       value={{
         posts,
         isLoading,
-        isFetchingOlder: isFetchingOlder,
-        errorFetchingOlder: errorFetchingOlder,
-        isFetchingNewer: isFetchingNewer,
-        errorFetchingNewer: errorFetchingNewer,
+        isFetchingOlder,
+        errorFetchingOlder,
+        isFetchingNewer,
+        errorFetchingNewer,
         fetchNewer,
         fetchOlder,
         filterStatus: status,
@@ -99,7 +83,7 @@ export const UserPostsContext: React.FC<{
 export const useUserPosts = () => {
   const context = useContext(UserPostsContextValue);
   if (!context) {
-    throw new Error('usePosts must be used within a PostProvider');
+    throw new Error('useUserPosts must be used within a UserPostsContext');
   }
   return context;
 };

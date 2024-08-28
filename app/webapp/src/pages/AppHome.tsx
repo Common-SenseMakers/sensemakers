@@ -1,6 +1,7 @@
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { PostCardLoading } from '../post/PostCardLoading';
+import { PostActionsProvider } from '../post/PostActionsContext';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { UserHome } from '../user-home/UserHome';
 import { ConnectSocialsPage } from '../user-login/ConnectSocialsPage';
@@ -50,10 +51,17 @@ export const AppHome = (props: {}) => {
     }
 
     if (overallLoginStatus === OverallLoginStatus.FullyLoggedIn) {
-      return { content: <UserHome></UserHome>, nav: <GlobalNav></GlobalNav> };
+      return { 
+        content: (
+          <PostActionsProvider>
+            <UserHome />
+          </PostActionsProvider>
+        ), 
+        nav: <GlobalNav />
+      };
     }
 
-    /** everything that is not the satus above shows the loadingDivs */
+    /** everything that is not the status above shows the loadingDivs */
     return { content: LoadingPlaceholder, nav: <></> };
   })();
 
