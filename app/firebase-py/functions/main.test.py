@@ -141,5 +141,13 @@ serialized = result.model_dump_json()
 json_obj = json.loads(serialized)
 print(f"semantics: {json_obj['semantics']}")
 
+# Sorting the refs metadata dictionary by the 'order' attribute
+sorted_refs = sorted(
+    json_obj["support"]["refs_meta"].items(),
+    key=lambda x: x[1]["order"],
+)
+
+print(f"ordered references: {[url for url, _ in sorted_refs]}")
+
 with open("last_output.json", "wb") as file:
     file.write(serialized.encode("utf-8"))

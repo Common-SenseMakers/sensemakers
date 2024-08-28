@@ -201,6 +201,13 @@ class RefMetadata(BaseModel):
     mentioned in a post.
     """
 
+    ref_id: int = Field(
+        description="Unique ID of reference (1 indexed)",
+    )
+    order: int = Field(
+        default=0,
+        description="1 indexed ordering of reference, sorted by ascending appearance order in the post. 1 - first, 2 - 2nd,. 0 - unassigned",
+    )
     citoid_url: Union[str, None] = Field(
         description="URL used by citoid (might have different subdomain or final slashes).",
     )

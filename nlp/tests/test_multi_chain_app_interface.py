@@ -183,6 +183,10 @@ def test_app_config():
         "https://x.com/FDAadcomms/status/1798107142219796794",
     ]
     check_uris_in_graph(res.semantics, expected_uris)
+    # check ordering
+    for i, url in enumerate(expected_uris):
+        assert res.support.refs_meta[url].order == i + 1
+        assert res.support.refs_meta[url].url == url
 
 
 # "mistralai/mixtral-8x7b-instruct"
@@ -190,9 +194,16 @@ def test_app_config():
 # "google/gemma-7b-it"
 if __name__ == "__main__":
     multi_config = init_multi_chain_parser_config(
-        llm_type="mistralai/mistral-7b-instruct:free", post_process_type="firebase"
+        # ref_tagger_llm_type="mistralai/mistral-7b-instruct",
+        # kw_llm_type="mistralai/mistral-7b-instruct",
+        # topic_llm_type="mistralai/mistral-7b-instruct",
+        ref_tagger_llm_type="mistralai/mistral-7b-instruct:free",
+        kw_llm_type="mistralai/mistral-7b-instruct:free",
+        topic_llm_type="mistralai/mistral-7b-instruct:free",
+        post_process_type="firebase",
     )
     mcp = MultiChainParser(multi_config)
-    thread = get_short_thread()
+    thread = get_thread_1()
     pi = ParserInput(thread_post=thread, max_posts=30)
     res = mcp.process_parser_input(pi)
+    refs = list(res.support.refs_meta.values())

@@ -37,12 +37,13 @@ def normalize_citoid_metadata(
 ):
     assert len(target_urls) == len(metadata_list)
     results = []
-    for url, metadata in zip(target_urls, metadata_list):
+    for i, (url, metadata) in enumerate(zip(target_urls, metadata_list)):
         metadata["original_url"] = url
         summary = metadata.get("abstractNote", "")
         results.append(
             RefMetadata(
                 **{
+                    "ref_id": i + 1,
                     "citoid_url": metadata.get("url", None),
                     "url": metadata.get("original_url", None),
                     "item_type": metadata.get("itemType", None),
@@ -198,12 +199,14 @@ def get_ref_post_metadata_list(
     post: RefPost,
     md_dict: Dict[str, RefMetadata],
     extra_urls: List[str] = None,
+    add_ordering: bool = True,
 ) -> List[RefMetadata]:
     """
     Returns list of the post's reference metadata.
     If extra urls are provided, they are also counted as part of the post ref
     urls (for example extra_urls could include unprocessed urls due to max length
     limits).
+    If `add_ordering`, add reference ordering info to each metadata item.
     """
     all_ref_urls = post.md_ref_urls()
 
@@ -212,9 +215,12 @@ def get_ref_post_metadata_list(
     all_ref_urls += remove_dups_ordered(extra_urls)
 
     md_list = []
-    for ref in all_ref_urls:
+    for i, ref in enumerate(all_ref_urls):
         if ref in md_dict:
             md = md_dict.get(ref)
             if md:
+                if add_ordering:
+                    # add ordering info (1-indexed)
+                    md.order = i + 1
                 md_list.append(md)
     return md_list
