@@ -175,7 +175,9 @@ export const UserHome = () => {
       <>
         <Box>
           {isMultiSelectMode ? (
-            <MultiSelectMode posts={posts} />
+            <PostContext postInit={posts[0]}>
+              <MultiSelectMode posts={posts} />
+            </PostContext>
           ) : (
             posts.map((post, ix) => (
               <Box key={ix} id={`post-${post.id}`}>

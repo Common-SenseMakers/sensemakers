@@ -7,6 +7,7 @@ import { AppButton } from '../ui-components';
 import { usePost } from '../post/PostContext';
 import { AppModalStandard } from '../app/AppModalStandard';
 import { I18Keys } from '../i18n/i18n';
+import { useAppFetch } from '../api/app.fetch';
 
 interface MultiSelectModeProps {
   posts: AppPostFull[];
@@ -17,7 +18,7 @@ export const MultiSelectMode: React.FC<MultiSelectModeProps> = ({ posts }) => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [action, setAction] = useState<'ignore' | 'publish' | null>(null);
   const { t } = useTranslation();
-  const { updatePost } = usePost();
+  const appFetch = useAppFetch();
 
   const handleSelect = (postId: string) => {
     setSelectedPosts(prev =>
@@ -35,14 +36,16 @@ export const MultiSelectMode: React.FC<MultiSelectModeProps> = ({ posts }) => {
   const confirmAction = async () => {
     if (action === 'ignore') {
       await Promise.all(selectedPosts.map(postId =>
-        updatePost({
-          reviewedStatus: AppPostReviewStatus.IGNORED,
+        appFetch('/api/posts/update', {
+          postId,
+          postUpdate: { reviewedStatus: AppPostReviewStatus.IGNORED },
         })
       ));
     } else if (action === 'publish') {
       await Promise.all(selectedPosts.map(postId =>
-        updatePost({
-          reviewedStatus: AppPostReviewStatus.PENDING,
+        appFetch('/api/posts/update', {
+          postId,
+          postUpdate: { reviewedStatus: AppPostReviewStatus.PENDING },
         })
       ));
     }
