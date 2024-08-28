@@ -217,6 +217,13 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.introTitle]: 'Your ideas matter again',
   [I18Keys.introSubtitle]:
     'Transform your social media activity into meaningful scientific contributions',
+  [I18Keys.multiSelect]: 'Multi-select',
+  [I18Keys.exitMultiSelect]: 'Exit multi-select',
+  [I18Keys.ignoreConfirmTitle]: 'Ignore Selected Posts',
+  [I18Keys.publishConfirmTitle]: 'Publish Selected Posts',
+  [I18Keys.ignoreConfirmMessage]: 'Are you sure you want to ignore {{count}} selected posts?',
+  [I18Keys.publishConfirmMessage]: 'Are you sure you want to publish {{count}} selected posts?',
+  [I18Keys.confirm]: 'Confirm',
   [I18Keys.introParagraph1]:
     'Social media posts are a valuable source of scientific knowledge, but they get buried in noisy feeds and locked away by platforms.',
   [I18Keys.introParagraph2]:
