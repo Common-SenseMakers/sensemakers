@@ -36,14 +36,12 @@ export const MultiSelectMode: React.FC<MultiSelectModeProps> = ({ posts }) => {
     if (action === 'ignore') {
       await Promise.all(selectedPosts.map(postId =>
         updatePost({
-          id: postId,
           reviewedStatus: AppPostReviewStatus.IGNORED,
         })
       ));
     } else if (action === 'publish') {
       await Promise.all(selectedPosts.map(postId =>
         updatePost({
-          id: postId,
           reviewedStatus: AppPostReviewStatus.PENDING,
         })
       ));
@@ -88,7 +86,7 @@ export const MultiSelectMode: React.FC<MultiSelectModeProps> = ({ posts }) => {
             type: 'normal',
             title: action === 'ignore' ? t(I18Keys.ignoreConfirmTitle) : t(I18Keys.publishConfirmTitle),
             parragraphs: [
-              t(action === 'ignore' ? I18Keys.ignoreConfirmMessage : I18Keys.publishConfirmMessage, { count: selectedPosts.length }),
+              <>{t(action === 'ignore' ? I18Keys.ignoreConfirmMessage : I18Keys.publishConfirmMessage, { count: selectedPosts.length })}</>,
             ],
             primaryButton: {
               label: t(I18Keys.confirm),
