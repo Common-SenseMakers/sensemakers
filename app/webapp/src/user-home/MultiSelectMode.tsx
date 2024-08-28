@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
 import { Box, CheckBox } from 'grommet';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PostCard } from '../post/PostCard';
-import { AppPostFull, AppPostReviewStatus } from '../shared/types/types.posts';
-import { AppButton } from '../ui-components';
-import { usePost } from '../post/PostContext';
+
+import { useAppFetch } from '../api/app.fetch';
 import { AppModalStandard } from '../app/AppModalStandard';
 import { I18Keys } from '../i18n/i18n';
-import { useAppFetch } from '../api/app.fetch';
+import { PostCard } from '../post/PostCard';
+import { usePost } from '../post/PostContext';
+import { AppPostFull, AppPostReviewStatus } from '../shared/types/types.posts';
+import { AppButton } from '../ui-components';
 
 interface MultiSelectModeProps {
   posts: AppPostFull[];
@@ -21,9 +22,9 @@ export const MultiSelectMode: React.FC<MultiSelectModeProps> = ({ posts }) => {
   const appFetch = useAppFetch();
 
   const handleSelect = (postId: string) => {
-    setSelectedPosts(prev =>
+    setSelectedPosts((prev) =>
       prev.includes(postId)
-        ? prev.filter(id => id !== postId)
+        ? prev.filter((id) => id !== postId)
         : [...prev, postId]
     );
   };
@@ -35,19 +36,23 @@ export const MultiSelectMode: React.FC<MultiSelectModeProps> = ({ posts }) => {
 
   const confirmAction = async () => {
     if (action === 'ignore') {
-      await Promise.all(selectedPosts.map(postId =>
-        appFetch('/api/posts/update', {
-          postId,
-          postUpdate: { reviewedStatus: AppPostReviewStatus.IGNORED },
-        })
-      ));
+      await Promise.all(
+        selectedPosts.map((postId) =>
+          appFetch('/api/posts/update', {
+            postId,
+            postUpdate: { reviewedStatus: AppPostReviewStatus.IGNORED },
+          })
+        )
+      );
     } else if (action === 'publish') {
-      await Promise.all(selectedPosts.map(postId =>
-        appFetch('/api/posts/update', {
-          postId,
-          postUpdate: { reviewedStatus: AppPostReviewStatus.PENDING },
-        })
-      ));
+      await Promise.all(
+        selectedPosts.map((postId) =>
+          appFetch('/api/posts/update', {
+            postId,
+            postUpdate: { reviewedStatus: AppPostReviewStatus.PENDING },
+          })
+        )
+      );
     }
     setSelectedPosts([]);
     setShowConfirmModal(false);
@@ -69,7 +74,11 @@ export const MultiSelectMode: React.FC<MultiSelectModeProps> = ({ posts }) => {
           </Box>
         </Box>
       ))}
-      <Box direction="row" justify="center" gap="medium" margin={{ top: 'medium' }}>
+      <Box
+        direction="row"
+        justify="center"
+        gap="medium"
+        margin={{ top: 'medium' }}>
         <AppButton
           onClick={() => handleAction('ignore')}
           label={t(I18Keys.ignore)}
@@ -87,9 +96,19 @@ export const MultiSelectMode: React.FC<MultiSelectModeProps> = ({ posts }) => {
           type="normal"
           contentProps={{
             type: 'normal',
-            title: action === 'ignore' ? t(I18Keys.ignoreConfirmTitle) : t(I18Keys.publishConfirmTitle),
+            title:
+              action === 'ignore'
+                ? t(I18Keys.ignoreConfirmTitle)
+                : t(I18Keys.publishConfirmTitle),
             parragraphs: [
-              <>{t(action === 'ignore' ? I18Keys.ignoreConfirmMessage : I18Keys.publishConfirmMessage, { count: selectedPosts.length })}</>,
+              <>
+                {t(
+                  action === 'ignore'
+                    ? I18Keys.ignoreConfirmMessage
+                    : I18Keys.publishConfirmMessage,
+                  { count: selectedPosts.length }
+                )}
+              </>,
             ],
             primaryButton: {
               label: t(I18Keys.confirm),
