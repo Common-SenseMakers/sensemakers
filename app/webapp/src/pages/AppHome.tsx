@@ -23,12 +23,10 @@ export const AppHome = (props: {}) => {
       <LoadingDiv
         margin={{ bottom: '4px' }}
         width="100%"
-        height="120px"></LoadingDiv>
-      {(() => {
-        return [1, 2, 4, 5, 6, 7, 8].map((ix) => (
-          <PostCardLoading key={ix}></PostCardLoading>
-        ));
-      })()}
+        height="120px" />
+      {[1, 2, 4, 5, 6, 7, 8].map((ix) => (
+        <PostCardLoading key={ix} />
+      ))}
     </>
   );
 
@@ -36,18 +34,18 @@ export const AppHome = (props: {}) => {
     if (DEBUG) console.log('AppHome', { overallLoginStatus, twitterProfile });
 
     if (overallLoginStatus === OverallLoginStatus.NotKnown) {
-      return { content: <></>, nav: <></> };
+      return { content: null, nav: null };
     }
 
     if (overallLoginStatus === OverallLoginStatus.LoggedOut) {
-      return { content: <AppWelcome></AppWelcome>, nav: <></> };
+      return { content: <AppWelcome />, nav: null };
     }
 
     if (
       overallLoginStatus === OverallLoginStatus.PartialLoggedIn &&
       twitterConnectedStatus !== TwitterConnectedStatus.Connecting
     ) {
-      return { content: <ConnectSocialsPage></ConnectSocialsPage>, nav: <></> };
+      return { content: <ConnectSocialsPage />, nav: null };
     }
 
     if (overallLoginStatus === OverallLoginStatus.FullyLoggedIn) {
@@ -62,10 +60,10 @@ export const AppHome = (props: {}) => {
     }
 
     /** everything that is not the status above shows the loadingDivs */
-    return { content: LoadingPlaceholder, nav: <></> };
+    return { content: LoadingPlaceholder, nav: null };
   })();
 
   return (
-    <ViewportPage content={content} nav={nav} justify="start"></ViewportPage>
+    <ViewportPage content={content} nav={nav} justify="start" />
   );
 };
