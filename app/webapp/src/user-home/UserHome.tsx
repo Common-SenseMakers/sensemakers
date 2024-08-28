@@ -14,6 +14,7 @@ import { ViewportPageScrollContext } from '../app/layout/Viewport';
 import { I18Keys } from '../i18n/i18n';
 import { PostCard } from '../post/PostCard';
 import { PostCardLoading } from '../post/PostCardLoading';
+import { PostContext } from '../post/PostContext';
 import { PostsQueryStatus, UserPostsQuery } from '../shared/types/types.posts';
 import { AppButton, AppHeading, AppModal, AppSelect } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
@@ -21,8 +22,8 @@ import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { usePersist } from '../utils/use.persist';
 import { IntroModals } from './IntroModal';
-import { useUserPosts } from './UserPostsContext';
 import { MultiSelectMode } from './MultiSelectMode';
+import { useUserPosts } from './UserPostsContext';
 
 const statusPretty: Record<PostsQueryStatus, string> = {
   all: 'All Drafts',
@@ -32,9 +33,6 @@ const statusPretty: Record<PostsQueryStatus, string> = {
 };
 
 const INTRO_SHOWN = 'introShown';
-
-import { MultiSelectMode } from './MultiSelectMode';
-import { PostContext } from '../post/PostContext';
 
 export const UserHome = () => {
   const { constants } = useThemeContext();
@@ -324,7 +322,11 @@ export const UserHome = () => {
           {pageIx === 0 && <Box>{menu}</Box>}
           <AppButton
             onClick={toggleMultiSelectMode}
-            label={isMultiSelectMode ? t(I18Keys.exitMultiSelect) : t(I18Keys.multiSelect)}
+            label={
+              isMultiSelectMode
+                ? t(I18Keys.exitMultiSelect)
+                : t(I18Keys.multiSelect)
+            }
           />
         </Box>
       </Box>
