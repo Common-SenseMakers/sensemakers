@@ -254,25 +254,6 @@ export const PostContext: React.FC<{
     }
   };
 
-  /** updatePost and optimistically update the post object */
-  const optimisticUpdate = useCallback(
-    async (update: PostUpdate) => {
-      if (!post) {
-        return;
-      }
-
-      setPostEdited({ ...post, ...update });
-      _updatePost(update);
-    },
-    [post]
-  );
-
-  const updateSemantics = (newSemantics: string) =>
-    optimisticUpdate({
-      reviewedStatus: AppPostReviewStatus.DRAFT,
-      semantics: newSemantics,
-    });
-
   /** updatePost and optimistically update the posts lists */
   const updatePost = async (update: PostUpdate) => {
     /** optimistic remove the post from the filtered list */
@@ -297,6 +278,25 @@ export const PostContext: React.FC<{
 
     _updatePost(update);
   };
+
+  /** updatePost and optimistically update the post object */
+  const optimisticUpdate = useCallback(
+    async (update: PostUpdate) => {
+      if (!post) {
+        return;
+      }
+
+      setPostEdited({ ...post, ...update });
+      updatePost(update);
+    },
+    [post]
+  );
+
+  const updateSemantics = (newSemantics: string) =>
+    optimisticUpdate({
+      reviewedStatus: AppPostReviewStatus.DRAFT,
+      semantics: newSemantics,
+    });
 
   const postStatuses = useMemo(() => getPostStatuses(post), [post]);
 
@@ -329,6 +329,7 @@ export const PostContext: React.FC<{
      * also set in the backend anyway) */
     if (post && post.republishedStatus === AppPostRepublishedStatus.PENDING) {
       nanopub.draft.postApproval = PlatformPostDraftApproval.APPROVED;
+      removeDraft(post.id);
     }
 
     if (post) {
