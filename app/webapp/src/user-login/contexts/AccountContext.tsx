@@ -37,6 +37,7 @@ export type AccountContextType = {
   overallLoginStatus: OverallLoginStatus | undefined;
   setLoginFlowState: (status: LoginFlowState) => void;
   loginFlowState: LoginFlowState;
+  resetLogin: () => void;
   setTwitterConnectedStatus: (status: TwitterConnectedStatus) => void;
   twitterConnectedStatus: TwitterConnectedStatus | undefined;
   orcidProfile?: OrcidUserProfile;
@@ -113,6 +114,11 @@ export const AccountContext = (props: PropsWithChildren) => {
   const setLoginFlowState = (status: LoginFlowState) => {
     if (DEBUG) console.log('setLoginFlowState', status);
     _setLoginFlowState(status);
+  };
+
+  const resetLogin = () => {
+    setLoginFlowState(LoginFlowState.Idle);
+    setOverallLoginStatus(OverallLoginStatus.NotKnown);
   };
 
   const refresh = async () => {
@@ -214,6 +220,7 @@ export const AccountContext = (props: PropsWithChildren) => {
         overallLoginStatus,
         loginFlowState,
         setLoginFlowState,
+        resetLogin,
         setTwitterConnectedStatus,
         twitterConnectedStatus,
         orcidProfile,
