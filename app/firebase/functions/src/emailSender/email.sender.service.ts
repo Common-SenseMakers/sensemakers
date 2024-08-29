@@ -3,7 +3,11 @@ import { Message, ServerClient } from 'postmark';
 import { AppPostFull } from '../@shared/types/types.posts';
 import { AppUser } from '../@shared/types/types.user';
 import { RenderEmailFunction } from '../@shared/types/types.user';
-import { APP_URL, EMAIL_SENDER_FROM } from '../config/config.runtime';
+import {
+  ADMIN_EMAIL,
+  APP_URL,
+  EMAIL_SENDER_FROM,
+} from '../config/config.runtime';
 import { logger } from '../instances/logger';
 import { cleanHtml } from './utils';
 
@@ -49,6 +53,30 @@ export class EmailSenderService {
     }
     const res = await this.postmark.sendEmail(message);
     logger.debug(`sendDigest - success`, { res }, DEBUG_PREFIX);
+  }
+
+  async sendAdminEmail(subject: string, content: string) {
+    const adminEmail = ADMIN_EMAIL.value();
+
+    if (!adminEmail) {
+      logger.debug('sendAdminEmail - no admin email', {}, DEBUG_PREFIX);
+    }
+
+    const message: Message = {
+      From: EMAIL_SENDER_FROM.value(),
+      ReplyTo: EMAIL_SENDER_FROM.value(),
+      To: adminEmail,
+      Subject: subject,
+      TextBody: content,
+      MessageStream: 'outbound',
+    };
+
+    try {
+      await this.callSendEmail(message);
+    } catch (e) {
+      logger.error(`Error on callSendEmail`, { e, message }, DEBUG_PREFIX);
+      throw e;
+    }
   }
 
   async sendUserDigest(user: AppUser, posts: AppPostFull[]) {
