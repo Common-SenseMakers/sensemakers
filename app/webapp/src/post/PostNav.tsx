@@ -14,9 +14,9 @@ import { usePost } from './PostContext';
 
 const DEBUG = false;
 
-export const PostNav = (props: { profile?: TwitterUserProfile }) => {
-  const profile = props.profile;
-  const { post, nextPostId, prevPostId } = usePost();
+export const PostNav = () => {
+  const { post, nextPostId, prevPostId, tweet } = usePost();
+  const profile = tweet?.posted?.author;
 
   const { fetchOlder, isFetchingOlder, errorFetchingOlder } = useUserPosts();
   const [triggeredFetchOlder, setTriggeredFetchedOlder] = useState(false);
@@ -74,9 +74,7 @@ export const PostNav = (props: { profile?: TwitterUserProfile }) => {
         icon={<LeftChevronIcon></LeftChevronIcon>}
         label={'Back'}
         onClick={() =>
-          profile
-            ? navigate('..', { state: { postId: post?.id } })
-            : navigate('/')
+          navigate('..', { state: { postId: post?.id } })
         }></NavButton>
 
       <Box direction="row" gap="8px">
