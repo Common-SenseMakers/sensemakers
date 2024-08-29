@@ -1,6 +1,7 @@
 import fs from 'fs';
 
 import { PostsQueryStatus } from '../src/@shared/types/types.posts';
+import { PLATFORM } from '../src/@shared/types/types.user';
 import { services } from './scripts.services';
 
 (async () => {
@@ -21,7 +22,7 @@ import { services } from './scripts.services';
         const user = await services.users.getUserProfile(userId, manager);
 
         console.log(
-          `User ${user.email?.email} has ${publications.length} publications`
+          `User ${user.email?.email} has ${publications.length} publications and autopost: ${user.settings.autopost[PLATFORM.Nanopub].value}`
         );
 
         data[userId] = { user, publications };
