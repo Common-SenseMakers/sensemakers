@@ -20,16 +20,24 @@ import { MAX_REFERENCES } from './constants';
 import { content, paragraph } from './email.styles';
 import { parsePostSemantics } from './utils';
 
+const MAX_POST_CARD_TEXT_LENGTH = 500;
+
 interface PostCardEmailProps {
   post: AppPostFull;
 }
 
 export const PostCardEmail = ({ post }: PostCardEmailProps) => {
   const tweet = post.mirrors.find((m) => m.platformId === PLATFORM.Twitter);
-  const postText = post.generic.thread.reduce(
-    (_acc, post, ix) => _acc + `${ix > 0 ? '<br><br>' : ''}${post.content}`,
-    ''
-  );
+  const postText = (() => {
+    const text = post.generic.thread.reduce(
+      (_acc, post, ix) => _acc + `${ix > 0 ? '<br><br>' : ''}${post.content}`,
+      ''
+    );
+    if (text.length > MAX_POST_CARD_TEXT_LENGTH) {
+      return text.slice(0, MAX_POST_CARD_TEXT_LENGTH) + '...';
+    }
+    return text;
+  })();
   const label = `X•${post.generic.thread.length > 1 ? 'Thread' : 'Tweet'}`;
   const formatter = new Intl.DateTimeFormat('en-US', {
     month: 'long', // full name of the month

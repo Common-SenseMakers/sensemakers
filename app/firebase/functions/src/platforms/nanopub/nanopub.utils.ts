@@ -490,7 +490,7 @@ export const buildIntroNp = async (
       assertionGraph
     );
 
-    const verifivationProofNode = namedNode(URI.VERIFICATION_PROOF_URI);
+    const verifivationProofNode = namedNode(URI.DERIVATION_PROOF_URI);
     writer.addQuad(
       keyDeclarationNode,
       namedNode(URI.NP_HAS_DERIVATION_PROOF),
@@ -546,7 +546,7 @@ export const buildIntroNp = async (
       writer.addQuad(
         signingDelegationNode,
         namedNode(URI.NP_WITH_KEY_DECLARATION),
-        namedNode('https://example.org/appKeyDecleration'),
+        namedNode(URI.APP_RSA_DECLARATION_URI),
         assertionGraph
       );
     }
