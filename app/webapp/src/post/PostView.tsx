@@ -147,7 +147,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     if (!enabledEdit) {
       setEnabledEdit(true);
     } else {
-      approveOrUpdate();
+      approveOrUpdate(post ? [post] : []);
     }
   };
 
@@ -199,7 +199,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
 
   const publishApproved = () => {
     setPublishing(true);
-    approveOrUpdate();
+    approveOrUpdate(post ? [post] : []);
   };
 
   const unpublishApproved = () => {
@@ -207,7 +207,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       throw new Error(`Unexpected post not found`);
     }
     setIsUnpublishing(true);
-    retractNanopublication(post);
+    retractNanopublication(post ? [post] : []);
   };
 
   // publishing is set to false only after the nanopub status is published

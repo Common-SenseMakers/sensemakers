@@ -1,7 +1,7 @@
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { PostCardLoading } from '../post/PostCardLoading';
-import { PostActionsProvider } from '../post/PostActionsContext';
+import { PostActionsProvider } from '../post/PostContext';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { UserHome } from '../user-home/UserHome';
 import { ConnectSocialsPage } from '../user-login/ConnectSocialsPage';
@@ -20,11 +20,10 @@ export const AppHome = (props: {}) => {
 
   const LoadingPlaceholder = (
     <div>
-      <LoadingDiv
-        margin={{ bottom: '4px' }}
-        width="100%"
-        height="120px" />
-      {[1, 2, 4, 5, 6, 7, 8].map(ix => <PostCardLoading key={ix} />)}
+      <LoadingDiv margin={{ bottom: '4px' }} width="100%" height="120px" />
+      {[1, 2, 4, 5, 6, 7, 8].map((ix) => (
+        <PostCardLoading key={ix} />
+      ))}
     </div>
   );
 
@@ -64,7 +63,5 @@ export const AppHome = (props: {}) => {
       nav = null;
   }
 
-  return (
-    <ViewportPage content={content} nav={nav} justify="start" />
-  );
+  return <ViewportPage content={content} nav={nav} justify="start" />;
 };

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { AppModalStandard } from '../app/AppModalStandard';
 import { I18Keys } from '../i18n/i18n';
 import { PostCard } from '../post/PostCard';
-import { usePostActions } from '../post/PostActionsContext';
+import { usePostActions } from '../post/PostContext';
 import { AppPostFull } from '../shared/types/types.posts';
 import { AppButton } from '../ui-components';
 
@@ -64,7 +64,7 @@ export const MultiSelectMode: React.FC<MultiSelectModeProps> = ({ posts }) => {
       {posts.map((post) => (
         <Box key={post.id} direction="row" align="center">
           <CheckBox
-            checked={selectedPosts.some(p => p.id === post.id)}
+            checked={selectedPosts.some((p) => p.id === post.id)}
             onChange={() => handleSelect(post)}
           />
           <Box flex>
