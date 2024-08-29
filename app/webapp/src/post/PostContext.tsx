@@ -277,7 +277,7 @@ export const PostContext: React.FC<{
   const updatePost = async (update: PostUpdate) => {
     /** optimistic remove the post from the filtered list */
     const statusKept = (() => {
-      if (filterStatus === PostsQueryStatus.ALL) {
+      if (filterStatus === PostsQueryStatus.DRAFTS) {
         return true;
       }
       if (filterStatus === PostsQueryStatus.PENDING) {
@@ -428,7 +428,7 @@ export const PostContext: React.FC<{
         nanopubDraft,
         reparse,
         updateSemantics,
-        updatePost,
+        updatePost: optimisticUpdate,
         isUpdating,
         approveOrUpdate,
         editable: editable !== undefined ? editable : false,

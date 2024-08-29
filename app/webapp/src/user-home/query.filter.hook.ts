@@ -6,7 +6,9 @@ import { PostsQueryStatus } from '../shared/types/types.posts';
 const DEBUG = false;
 
 export const useQueryFilter = () => {
-  const [status, setStatus] = useState<PostsQueryStatus>(PostsQueryStatus.ALL);
+  const [status, setStatus] = useState<PostsQueryStatus>(
+    PostsQueryStatus.DRAFTS
+  );
   const location = useLocation();
   /** listen to the URL and set the filter status based on it */
   useEffect(() => {

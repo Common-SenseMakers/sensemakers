@@ -1,4 +1,5 @@
 import { FieldValue } from 'firebase-admin/firestore';
+import { logger } from 'firebase-functions/v1';
 
 import {
   AppPost,
@@ -14,6 +15,8 @@ import { DBInstance } from '../db/instance';
 import { BaseRepository, removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 
+const DEBUG = true;
+const DEBUG_PREFIX = 'PostsRepository';
 export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   constructor(protected db: DBInstance) {
     super(db.collections.posts);
@@ -53,9 +56,14 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
     const base = this.db.collections.posts.where(authorKey, '==', userId);
 
+    if (DEBUG) logger.debug('getOfUser', queryParams, DEBUG_PREFIX);
+
     const filtered = (() => {
-      if (queryParams.status === PostsQueryStatus.ALL) {
-        return base;
+      if (queryParams.status === PostsQueryStatus.DRAFTS) {
+        return base.where(republishedStatusKey, 'in', [
+          AppPostRepublishedStatus.PENDING,
+          AppPostRepublishedStatus.UNREPUBLISHED,
+        ]);
       }
       if (queryParams.status === PostsQueryStatus.PENDING) {
         return base.where(reviewedStatusKey, '==', AppPostReviewStatus.PENDING);

@@ -17,7 +17,7 @@ export const locationToPageIx = (location: Location) => {
 
   if (
     location.pathname === '/' ||
-    location.pathname.startsWith(`/${PostsQueryStatus.ALL}`) ||
+    location.pathname.startsWith(`/${PostsQueryStatus.DRAFTS}`) ||
     location.pathname.startsWith(`/${PostsQueryStatus.IGNORED}`) ||
     location.pathname.startsWith(`/${PostsQueryStatus.PENDING}`)
   ) {
@@ -89,7 +89,7 @@ export const GlobalNav = (props: {}) => {
       {button(
         'Drafts',
         <DraftsIcon></DraftsIcon>,
-        `/${PostsQueryStatus.ALL}`,
+        `/${PostsQueryStatus.DRAFTS}`,
         pageIx === 0
       )}
       {button(

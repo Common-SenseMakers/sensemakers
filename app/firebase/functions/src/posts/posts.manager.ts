@@ -419,7 +419,7 @@ export class PostsManager {
         queryParams
       );
 
-      if (queryParams.status === PostsQueryStatus.ALL) {
+      if (queryParams.status === PostsQueryStatus.DRAFTS) {
         if (appPosts.length < queryParams.fetchParams.expectedAmount) {
           await this.fetchUser({ userId, params: queryParams.fetchParams });
           return this.processing.posts.getOfUser(userId, queryParams);
@@ -435,7 +435,7 @@ export class PostsManager {
   async getOfUser(userId: string, _queryParams?: UserPostsQuery) {
     const queryParams: UserPostsQuery = {
       fetchParams: { expectedAmount: 10 },
-      status: PostsQueryStatus.ALL,
+      status: PostsQueryStatus.DRAFTS,
       ..._queryParams,
     };
 
