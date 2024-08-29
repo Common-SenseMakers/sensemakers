@@ -329,7 +329,7 @@ export const PostContext: React.FC<{
      * also set in the backend anyway) */
     if (post && post.republishedStatus === AppPostRepublishedStatus.PENDING) {
       nanopub.draft.postApproval = PlatformPostDraftApproval.APPROVED;
-      removeDraft(post.id);
+      // removeDraft(post.id);
     }
 
     if (post) {
