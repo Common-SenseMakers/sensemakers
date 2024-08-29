@@ -35,18 +35,21 @@ export const AppHome = (props: {}) => {
     if (DEBUG) console.log('AppHome', { overallLoginStatus, twitterProfile });
 
     if (overallLoginStatus === OverallLoginStatus.NotKnown) {
-      return { content: <></>, nav: <></> };
+      return { content: <></>, nav: undefined };
     }
 
     if (overallLoginStatus === OverallLoginStatus.LoggedOut) {
-      return { content: <AppWelcome></AppWelcome>, nav: <></> };
+      return { content: <AppWelcome></AppWelcome>, nav: undefined };
     }
 
     if (
       overallLoginStatus === OverallLoginStatus.PartialLoggedIn &&
       twitterConnectedStatus !== TwitterConnectedStatus.Connecting
     ) {
-      return { content: <ConnectSocialsPage></ConnectSocialsPage>, nav: <></> };
+      return {
+        content: <ConnectSocialsPage></ConnectSocialsPage>,
+        nav: undefined,
+      };
     }
 
     if (overallLoginStatus === OverallLoginStatus.FullyLoggedIn) {
@@ -54,7 +57,7 @@ export const AppHome = (props: {}) => {
     }
 
     /** everything that is not the satus above shows the loadingDivs */
-    return { content: LoadingPlaceholder, nav: <></> };
+    return { content: LoadingPlaceholder, nav: undefined };
   })();
 
   return (
