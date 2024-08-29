@@ -428,7 +428,7 @@ export const PostContext: React.FC<{
         nanopubDraft,
         reparse,
         updateSemantics,
-        updatePost,
+        updatePost: optimisticUpdate,
         isUpdating,
         approveOrUpdate,
         editable: editable !== undefined ? editable : false,
