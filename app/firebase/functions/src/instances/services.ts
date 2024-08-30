@@ -37,6 +37,7 @@ import {
 import { getTestCredentials } from '../platforms/twitter/mock/test.users';
 import { getTwitterMock } from '../platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../platforms/twitter/twitter.service';
+import { MastodonService } from '../platforms/mastodon/mastodon.service';
 import { PlatformPostsRepository } from '../posts/platform.posts.repository';
 import { PostsManager } from '../posts/posts.manager';
 import { PostsProcessing } from '../posts/posts.processing';
@@ -102,14 +103,18 @@ export const createServices = () => {
     USE_REAL_NANOPUB.value() ? 'real' : 'mock-publish'
   );
 
+  const mastodon = new MastodonService(time, userRepo);
+
   /** all identity services */
   identityPlatforms.set(PLATFORM.Orcid, orcid);
   identityPlatforms.set(PLATFORM.Twitter, twitter);
   identityPlatforms.set(PLATFORM.Nanopub, nanopub);
+  identityPlatforms.set(PLATFORM.Mastodon, mastodon);
 
   /** all platforms */
   platformsMap.set(PLATFORM.Twitter, twitter);
   platformsMap.set(PLATFORM.Nanopub, nanopub);
+  platformsMap.set(PLATFORM.Mastodon, mastodon);
 
   /** email sender service */
   const _email = new EmailSenderService({
