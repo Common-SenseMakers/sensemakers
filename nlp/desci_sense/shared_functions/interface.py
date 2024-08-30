@@ -210,7 +210,9 @@ class RefMetadata(BaseModel):
         description="1 indexed ordering of reference, sorted by ascending appearance order in the post. 1 - first, 2 - 2nd,. 0 - unassigned",
     )
     ref_source_url: Union[str, None] = Field(
-        description="source url referencing this url or None if N/A.",
+        description="source url referencing this url or None if N/A."
+        "`ref_source_url` refers to the thread url (top post) if the reference is mentioned by any of the thread posts."
+        "If the reference is mentioned by a quoted post, `source_ref_url` will be the url of the quoted post",
         default=None,
     )
     citoid_url: Union[str, None] = Field(
