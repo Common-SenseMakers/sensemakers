@@ -155,7 +155,7 @@ export const StatusTag = (props: {
       align="center"
       style={{
         borderRadius: '4px',
-        height: '20px',
+        minHeight: '20px',
         padding: '2px 4px',
         backgroundColor,
       }}>
