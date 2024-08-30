@@ -22,7 +22,6 @@ const editorStyles = `
     overflow-wrap: break-word;
     word-wrap: break-word;
     word-break: break-word;
-    hyphens: auto;
   }
   .editor a {
     word-break: break-all;

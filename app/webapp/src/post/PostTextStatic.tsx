@@ -21,7 +21,6 @@ export const PostTextStatic = (props: {
         overflowWrap: 'break-word',
         wordWrap: 'break-word',
         wordBreak: 'break-word',
-        hyphens: 'auto',
       }}
       dangerouslySetInnerHTML={{ __html: textToHtml(text) }}
     />
