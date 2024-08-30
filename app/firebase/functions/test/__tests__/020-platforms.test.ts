@@ -211,4 +211,41 @@ describe('02-platforms', () => {
       }
     });
   });
+
+  describe('mastodon', () => {
+    it('fetches the latest posts', async () => {
+      if (!user) {
+        throw new Error('appUser not created');
+      }
+
+      const mastodonService = services.platforms.get(PLATFORM.Mastodon);
+      const userDetails: MastodonUserDetails = {
+        user_id: 'test_user_id',
+        signupDate: Date.now(),
+        profile: {
+          id: 'test_user_id',
+          username: 'test_username',
+          displayName: 'Test User',
+          avatar: 'https://example.com/avatar.jpg',
+          mastodonServer: process.env.MASTODON_SERVER_DOMAIN as string,
+        },
+        read: {
+          accessToken: process.env.MASTODON_ACCESS_TOKEN as string,
+        },
+      };
+
+      const fetchParams: PlatformFetchParams = {
+        expectedAmount: 5,
+      };
+
+      const result = await services.db.run((manager) =>
+        mastodonService.fetch(fetchParams, userDetails, manager)
+      );
+
+      expect(result).to.not.be.undefined;
+      expect(result.platformPosts.length).to.be.greaterThan(0);
+      expect(result.platformPosts[0].post).to.have.property('id');
+      expect(result.platformPosts[0].post).to.have.property('content');
+    });
+  });
 });
