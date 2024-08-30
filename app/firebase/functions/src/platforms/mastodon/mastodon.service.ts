@@ -33,11 +33,6 @@ import { PlatformService } from '../platforms.interface';
 
 const REDIRECT_URL = 'http://localhost:3000';
 
-export interface MastodonApiCredentials {
-  clientId: string;
-  clientSecret: string;
-}
-
 export class MastodonService
   implements
     PlatformService<
@@ -48,8 +43,7 @@ export class MastodonService
 {
   constructor(
     protected time: TimeService,
-    protected usersRepo: UsersRepository,
-    protected apiCredentials: MastodonApiCredentials
+    protected usersRepo: UsersRepository
   ) {}
 
   protected async createApp(params: MastodonGetContextParams) {
@@ -93,6 +87,8 @@ export class MastodonService
 
     return {
       authorizationUrl,
+      clientId: app.clientId,
+      clientSecret: app.clientSecret,
     };
   }
 
@@ -104,8 +100,8 @@ export class MastodonService
     });
 
     const token = await client.token.create({
-      clientId: this.apiCredentials.clientId,
-      clientSecret: this.apiCredentials.clientSecret,
+      clientId: signupData.clientId,
+      clientSecret: signupData.clientSecret,
       redirectUri: REDIRECT_URL,
       code: signupData.code,
       grantType: 'authorization_code',
