@@ -26,8 +26,12 @@ export interface MastodonGetContextParams {
 
 export interface MastodonSignupContext {
   authorizationUrl: string;
+  clientId: string;
+  clientSecret: string;
 }
 
 export interface MastodonSignupData extends MastodonGetContextParams {
   code: string;
+  clientId: string;
+  clientSecret: string;
 }
