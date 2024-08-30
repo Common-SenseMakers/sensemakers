@@ -8,26 +8,26 @@ export interface MastodonUserProfile {
   mastodonServer: string;
 }
 
-export interface MastodonUserRead {
-  accessToken: string;
-}
-
-export interface MastodonUserWrite {
+export interface MastodonUserCredentials {
   accessToken: string;
 }
 
 export type MastodonUserDetails = UserDetailsBase<
   MastodonUserProfile,
-  MastodonUserRead,
-  MastodonUserWrite
+  MastodonUserCredentials,
+  MastodonUserCredentials
 >;
 
-export interface MastodonSignupContext {
+export interface MastodonGetContextParams {
+  domain: string;
+  callback_url: string;
+  type: 'read' | 'write';
+}
+
+export interface MastodonSignupContext extends MastodonGetContextParams {
   authorizationUrl: string;
 }
 
-export interface MastodonSignupData {
+export interface MastodonSignupData extends MastodonGetContextParams {
   code: string;
-  domain: string;
-  type: 'read' | 'write';
 }
