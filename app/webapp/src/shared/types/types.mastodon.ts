@@ -1,18 +1,19 @@
 import { UserDetailsBase } from './types.user';
 
 export interface MastodonUserProfile {
+  id: string;
   username: string;
-  display_name: string;
+  displayName: string;
   avatar: string;
-  url: string;
+  mastodonServer: string;
 }
 
 export interface MastodonUserRead {
-  access_token: string;
+  accessToken: string;
 }
 
 export interface MastodonUserWrite {
-  access_token: string;
+  accessToken: string;
 }
 
 export type MastodonUserDetails = UserDetailsBase<
@@ -20,3 +21,13 @@ export type MastodonUserDetails = UserDetailsBase<
   MastodonUserRead,
   MastodonUserWrite
 >;
+
+export interface MastodonSignupContext {
+  authorizationUrl: string;
+}
+
+export interface MastodonSignupData {
+  code: string;
+  domain: string;
+  type: 'read' | 'write';
+}

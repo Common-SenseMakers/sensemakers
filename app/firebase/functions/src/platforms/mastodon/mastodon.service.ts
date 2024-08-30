@@ -2,6 +2,11 @@ import { createOAuthAPIClient, createRestAPIClient, mastodon } from 'masto';
 
 import { PlatformFetchParams } from '../../@shared/types/types.fetch';
 import {
+  MastodonSignupContext,
+  MastodonSignupData,
+  MastodonUserDetails,
+} from '../../@shared/types/types.mastodon';
+import {
   FetchedResult,
   PlatformPostCreate,
   PlatformPostDeleteDraft,
@@ -19,11 +24,7 @@ import {
   GenericThread,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
-import {
-  AppUser,
-  PLATFORM,
-  UserDetailsBase,
-} from '../../@shared/types/types.user';
+import { AppUser, PLATFORM } from '../../@shared/types/types.user';
 import { TransactionManager } from '../../db/transaction.manager';
 import { TimeService } from '../../time/time.service';
 import { UsersRepository } from '../../users/users.repository';
@@ -34,23 +35,6 @@ const REDIRECT_URL = 'http://localhost:3000';
 export interface MastodonApiCredentials {
   clientId: string;
   clientSecret: string;
-}
-
-export interface MastodonSignupContext {
-  url: string;
-  clientId: string;
-  clientSecret: string;
-  authorizationUrl: string;
-}
-
-export interface MastodonSignupData {
-  code: string;
-  domain: string;
-}
-
-export interface MastodonUserDetails extends UserDetailsBase {
-  domain: string;
-  accessToken: string;
 }
 
 export class MastodonService
@@ -103,9 +87,6 @@ export class MastodonService
       `response_type=code`;
 
     return {
-      url: `https://${params.domain}`,
-      clientId: app.clientId,
-      clientSecret: app.clientSecret,
       authorizationUrl,
     };
   }
@@ -131,19 +112,25 @@ export class MastodonService
     });
 
     const account = await mastoClient.v1.accounts.verifyCredentials();
-
-    return {
+    const mastodon: MastodonUserDetails = {
       user_id: account.id,
-      domain: signupData.domain,
-      accessToken: token.accessToken,
       signupDate: this.time.now(),
       profile: {
         id: account.id,
         username: account.username,
         displayName: account.displayName,
         avatar: account.avatar,
+        mastodonServer: signupData.domain,
+      },
+      read: {
+        accessToken: token.accessToken,
       },
     };
+    if (signupData.type === 'write') {
+      mastodon['write'] = { accessToken: token.accessToken };
+    }
+
+    return mastodon;
   }
 
   public async fetch(
@@ -151,9 +138,12 @@ export class MastodonService
     userDetails: MastodonUserDetails,
     manager: TransactionManager
   ): Promise<FetchedResult<mastodon.v1.Status>> {
+    if (!userDetails.profile || !userDetails.read) {
+      throw new Error('profile and/or read credentials are not provided');
+    }
     const client = createRestAPIClient({
-      url: `https://${userDetails.domain}`,
-      accessToken: userDetails.accessToken,
+      url: `https://${userDetails.profile.mastodonServer}`,
+      accessToken: userDetails.read.accessToken,
     });
 
     const statuses = await client.v1.accounts
@@ -207,9 +197,12 @@ export class MastodonService
     manager: TransactionManager
   ): Promise<PlatformPostPosted<mastodon.v1.Status>> {
     const userDetails = postPublish.userDetails as MastodonUserDetails;
+    if (!userDetails.profile || !userDetails.write) {
+      throw new Error('profile and/or write credentials are not provided');
+    }
     const client = createRestAPIClient({
-      url: `https://${userDetails.domain}`,
-      accessToken: userDetails.accessToken,
+      url: `https://${userDetails.profile.mastodonServer}`,
+      accessToken: userDetails.write.accessToken,
     });
 
     const status = await client.v1.statuses.create({
@@ -243,9 +236,12 @@ export class MastodonService
     userDetails: MastodonUserDetails,
     manager?: TransactionManager
   ): Promise<PlatformPostPosted<mastodon.v1.Status>> {
+    if (!userDetails.profile || !userDetails.read) {
+      throw new Error('profile and/or read credentials are not provided');
+    }
     const client = createRestAPIClient({
-      url: `https://${userDetails.domain}`,
-      accessToken: userDetails.accessToken,
+      url: `https://${userDetails.profile.mastodonServer}`,
+      accessToken: userDetails.read.accessToken,
     });
 
     const status = await client.v1.statuses.$select(post_id).fetch();
