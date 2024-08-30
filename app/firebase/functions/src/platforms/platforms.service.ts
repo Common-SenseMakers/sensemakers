@@ -8,6 +8,7 @@ import { TransactionManager } from '../db/transaction.manager';
 import { TimeService } from '../time/time.service';
 import { UsersService } from '../users/users.service';
 import { IdentityService, PlatformService } from './platforms.interface';
+import { MastodonService } from './mastodon/mastodon.service';
 
 interface FetchUserParams {
   params: FetchParams;
@@ -31,7 +32,14 @@ export class PlatformsService {
     protected platforms: PlatformsMap,
     protected time: TimeService,
     protected users: UsersService
-  ) {}
+  ) {
+    // Initialize MastodonService
+    const mastodonService = new MastodonService(time, users.usersRepo, {
+      clientId: process.env.MASTODON_CLIENT_ID || '',
+      clientSecret: process.env.MASTODON_CLIENT_SECRET || '',
+    });
+    this.platforms.set(PLATFORM.Mastodon, mastodonService);
+  }
 
   public get<T extends PlatformService>(platformId: PLATFORM): T {
     const platform = this.platforms.get(platformId);
