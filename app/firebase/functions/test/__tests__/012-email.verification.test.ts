@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 
-import { TwitterUserDetails } from '../../src/@shared/types/types.twitter';
+import { TwitterSignupContext } from '../../src/@shared/types/types.twitter';
+import { PLATFORM } from '../../src/@shared/types/types.user';
 import { logger } from '../../src/instances/logger';
 import { resetDB } from '../utils/db';
 import { handleSignupMock } from './reusable/mocked.singup';
@@ -27,17 +28,16 @@ describe('012-email verification', () => {
     let userId: string;
 
     it('signup with twitter', async () => {
-      const signupData: TwitterUserDetails = {
-        user_id: testCredentials[0].twitter.id,
-        profile: {
-          id: testCredentials[0].twitter.id,
-          name: testCredentials[0].twitter.username,
-          username: testCredentials[0].twitter.username,
-        },
-        signupDate: Date.now(),
-      };
+      const twitterSignupContext: TwitterSignupContext =
+        await services.users.getSignupContext(
+          PLATFORM.Twitter,
+          testCredentials[0].twitter.id
+        );
 
-      userId = await handleSignupMock(services, signupData);
+      userId = await handleSignupMock(services, {
+        ...twitterSignupContext,
+        code: 'mocked',
+      });
     });
 
     it('set email', async () => {

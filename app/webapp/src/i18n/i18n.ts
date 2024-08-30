@@ -26,6 +26,7 @@ export enum I18Keys {
   installPrompt = 's021',
   installNow = 's022',
   noMorePosts = 's023',
+  loadMorePosts = 's023b',
   settings = 's024',
   logout = 's025',
   logoutTitle = 's025c',
@@ -67,6 +68,8 @@ export enum I18Keys {
 
   unpublishingTitle = 's0345x',
   unpublishingPar01 = 's0345xw',
+  unpublishingErrorTitle = 's0345x0',
+  unpublishingErrorPar01 = 's0345xw1',
 
   returnToDraft = 's0353',
   yesPublish = 's0364',
@@ -75,6 +78,8 @@ export enum I18Keys {
 
   publishingTitle = 's0365',
   publishingPar01 = 's0365xw',
+  publishingErrorTitle = 's03650',
+  publishingErrorPar01 = 's03651',
 
   publishedTitle = 's0366',
   publishedText = 's0367',
@@ -242,7 +247,7 @@ const translationENG: Record<I18Keys, string> = {
 
   [I18Keys.connectAccounts]: 'Connect your accounts',
   [I18Keys.connectParagraph]:
-    'SenseNet loads your X (Twitter) feed and analyzes your posts using AI to deduct keywords and relations, which can be used to better interpret the meaning of your content.',
+    'SenseNets loads your X (Twitter) feed and analyzes your posts using AI to deduct keywords and relations, which can be used to better interpret the meaning of your content.',
   [I18Keys.errorConnectTwitter]: 'Error connecting Twitter',
   [I18Keys.yourPublications]: 'Your publications',
   [I18Keys.TweetX]: 'X · Tweet',
@@ -254,6 +259,7 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.installPrompt]: 'Please install this app, ',
   [I18Keys.installNow]: 'install',
   [I18Keys.noMorePosts]: 'No more posts to show',
+  [I18Keys.loadMorePosts]: 'Load more posts',
   [I18Keys.settings]: 'Settings',
   [I18Keys.logoutTitle]: 'Logout',
   [I18Keys.logout]: 'Logout',
@@ -284,10 +290,16 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.publishingTitle]: 'Publishing',
   [I18Keys.publishingPar01]:
     'Your nanopublication is being sent to the network. Please wait a moment.',
+  [I18Keys.publishingErrorTitle]: 'Error Publishing Nanopublication',
+  [I18Keys.publishingErrorPar01]:
+    'There was an error while attempting to publish your post. Please try again. If it persists, contact support.',
 
   [I18Keys.unpublishingTitle]: 'Retracting',
   [I18Keys.unpublishingPar01]:
     'Your nanopublication is marked as retracted. Please wait a moment.',
+  [I18Keys.unpublishingErrorTitle]: 'Error Retracting Nanopublication',
+  [I18Keys.unpublishingErrorPar01]:
+    'There was an error while attempting to retract your post. Please try again. If it persists, contact support.',
 
   [I18Keys.publishedTitle]: 'Your nanopublication is live!',
   [I18Keys.publishedText]: 'Your post has been nanopublished.',
@@ -370,7 +382,7 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.downloads]: 'Downloads',
   [I18Keys.installApp]: 'Install application on your device',
 
-  [I18Keys.usingApp]: 'Using Sensenets',
+  [I18Keys.usingApp]: 'Using SenseNets',
   [I18Keys.publishingAutomation]: 'Publishing Automation',
   [I18Keys.publishingAutomationExplainer]:
     'Choose how you’d like to nanopublish your future X · Twitter posts.',
@@ -411,15 +423,10 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.dontShowAgain]: 'Don’t show this message again',
   [I18Keys.reviewSettings]: 'Review settings',
   [I18Keys.notNow]: 'Not now',
-  [I18Keys.emailSubject]: 'Your {{pointInTime}} SenseNets Activity Summary',
   [I18Keys.noPostsFound]: 'No posts found',
   [I18Keys.noPostsFoundDesc]: 'We couldn’t find any posts.',
   [I18Keys.getSupportDescription]:
     '<a href=mailto:support@sense-nets.xyz>support@sense-nets.xyz</a>',
-
-  [I18Keys.daily]: 'daily',
-  [I18Keys.weekly]: 'weekly',
-  [I18Keys.monthly]: 'monthly',
 
   [I18Keys.today]: 'today',
   [I18Keys.thisWeek]: 'this week',

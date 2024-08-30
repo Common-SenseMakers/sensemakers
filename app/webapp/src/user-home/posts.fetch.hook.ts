@@ -7,7 +7,10 @@ import {
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
+  AppPostRepublishedStatus,
+  AppPostReviewStatus,
   PostUpdate,
+  PostsQueryStatus,
   UserPostsQuery,
 } from '../shared/types/types.posts';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
@@ -55,14 +58,40 @@ export const usePostsFetch = () => {
           { postId },
           true
         );
+
         if (DEBUG) console.log(`refetch post returned`, { post, posts });
+
+        const shouldRemove = (() => {
+          if (status === PostsQueryStatus.DRAFTS) {
+            return [
+              AppPostRepublishedStatus.AUTO_REPUBLISHED,
+              AppPostRepublishedStatus.REPUBLISHED,
+            ].includes(post.republishedStatus);
+          }
+          if (status === PostsQueryStatus.IGNORED) {
+            return post.reviewedStatus !== AppPostReviewStatus.IGNORED;
+          }
+          if (status === PostsQueryStatus.PENDING) {
+            return post.reviewedStatus !== AppPostReviewStatus.PENDING;
+          }
+          if (status === PostsQueryStatus.PUBLISHED) {
+            return post.republishedStatus === AppPostRepublishedStatus.PENDING;
+          }
+        })();
 
         setPosts((prev) => {
           const newPosts = [...prev];
           const ix = prev.findIndex((p) => p.id === postId);
+
           if (DEBUG) console.log(`setPosts called`, { ix, newPosts });
+
           if (ix !== -1) {
-            newPosts[ix] = post;
+            if (DEBUG) console.log(`settingPost`, { ix, shouldRemove });
+            if (shouldRemove) {
+              newPosts.splice(ix, 1);
+            } else {
+              newPosts[ix] = post;
+            }
           }
           return newPosts;
         });
@@ -71,7 +100,7 @@ export const usePostsFetch = () => {
         throw new Error(`Error fetching post ${postId}`);
       }
     },
-    [posts, connectedUser]
+    [posts, connectedUser, status]
   );
 
   const addPosts = useCallback(
@@ -174,6 +203,10 @@ export const usePostsFetch = () => {
     setFetchedOlderFirst(false);
     setIsLoading(true);
   };
+
+  const checkPostRemove = useCallback(() => {
+    const found = posts.find((p) => p.id === 'to-remove');
+  }, [posts]);
 
   /** reset at every status change  */
   useEffect(() => {

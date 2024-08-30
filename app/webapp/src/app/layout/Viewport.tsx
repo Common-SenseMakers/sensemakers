@@ -126,7 +126,7 @@ export const ViewportPage = (props: {
       const options = {
         root: viewportPageRef.current,
         rootMargin: '0px',
-        threshold: 1.0,
+        threshold: 0,
       };
 
       const observer = new IntersectionObserver((entries, observer) => {
@@ -166,7 +166,7 @@ export const ViewportPage = (props: {
             justify={props.justify || 'center'}>
             {props.content}
           </Box>
-          <div ref={bottomMarkerRef}></div>
+          <div style={{ padding: '1px' }} ref={bottomMarkerRef}></div>
         </Box>
         {props.nav ? (
           <Box id="nav" style={{ height: '48px', flexShrink: 0 }}>

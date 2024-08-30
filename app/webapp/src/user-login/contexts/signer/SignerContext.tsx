@@ -48,6 +48,7 @@ export const SignerContext = (props: PropsWithChildren) => {
     setLoginFlowState,
     setOverallLoginStatus,
     overallLoginStatus,
+    resetLogin,
   } = useAccountContext();
 
   const appFetch = useAppFetch();
@@ -142,6 +143,7 @@ export const SignerContext = (props: PropsWithChildren) => {
             console.error('Error connecting magic signer', e);
             setErrorConnecting(true);
             setIsConnectingMagic(false);
+            resetLogin();
           });
       }
     },

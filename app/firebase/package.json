@@ -20,7 +20,9 @@
     "trigger-autofetch": "curl -X POST http://127.0.0.1:5001/demo-sensenets/us-central1/trigger/autofetch",
     "trigger-notifications": "curl -X POST http://127.0.0.1:5001/demo-sensenets/us-central1/trigger/sendNotifications?freq=daily",
     "trigger-autofetch-dev": "curl -X POST https://us-central1-sensenets-dev.cloudfunctions.net/trigger/autofetch",
-    "trigger-notifications-dev": "curl -X POST https://us-central1-sensenets-dev.cloudfunctions.net/trigger/sendNotifications?freq=daily"
+    "trigger-notifications-dev": "curl -X POST https://us-central1-sensenets-dev.cloudfunctions.net/trigger/sendNotifications?freq=daily",
+    "trigger-autofetch-prod": "curl -X POST https://us-central1-sensenets-prod.cloudfunctions.net/trigger/autofetch",
+    "trigger-notifications-prod": "curl -X POST https://us-central1-sensenets-prod.cloudfunctions.net/trigger/sendNotifications?freq=daily"
   },
   "author": "",
   "license": "ISC",

@@ -61,6 +61,7 @@ interface PostContextType {
   nextPostId?: string;
   retractNanopublication: () => Promise<void>;
   isRetracting: boolean;
+  errorApprovingMsg?: string;
 }
 
 const PostContextValue = createContext<PostContextType | undefined>(undefined);
@@ -86,6 +87,9 @@ export const PostContext: React.FC<{
   const { filterStatus, removePost, getNextAndPrev } = useUserPosts();
   const [isUpdating, setIsUpdating] = React.useState(false);
   const [isRetracting, setIsRetracting] = React.useState(false);
+  const [errorApprovingMsg, setErrorApprovingMsg] = React.useState<
+    string | undefined
+  >(undefined);
 
   const appFetch = useAppFetch();
 
@@ -250,30 +254,11 @@ export const PostContext: React.FC<{
     }
   };
 
-  /** updatePost and optimistically update the post object */
-  const optimisticUpdate = useCallback(
-    async (update: PostUpdate) => {
-      if (!post) {
-        return;
-      }
-
-      setPostEdited({ ...post, ...update });
-      _updatePost(update);
-    },
-    [post]
-  );
-
-  const updateSemantics = (newSemantics: string) =>
-    optimisticUpdate({
-      reviewedStatus: AppPostReviewStatus.DRAFT,
-      semantics: newSemantics,
-    });
-
   /** updatePost and optimistically update the posts lists */
   const updatePost = async (update: PostUpdate) => {
     /** optimistic remove the post from the filtered list */
     const statusKept = (() => {
-      if (filterStatus === PostsQueryStatus.ALL) {
+      if (filterStatus === PostsQueryStatus.DRAFTS) {
         return true;
       }
       if (filterStatus === PostsQueryStatus.PENDING) {
@@ -293,6 +278,25 @@ export const PostContext: React.FC<{
 
     _updatePost(update);
   };
+
+  /** updatePost and optimistically update the post object */
+  const optimisticUpdate = useCallback(
+    async (update: PostUpdate) => {
+      if (!post) {
+        return;
+      }
+
+      setPostEdited({ ...post, ...update });
+      updatePost(update);
+    },
+    [post]
+  );
+
+  const updateSemantics = (newSemantics: string) =>
+    optimisticUpdate({
+      reviewedStatus: AppPostReviewStatus.DRAFT,
+      semantics: newSemantics,
+    });
 
   const postStatuses = useMemo(() => getPostStatuses(post), [post]);
 
@@ -325,16 +329,25 @@ export const PostContext: React.FC<{
      * also set in the backend anyway) */
     if (post && post.republishedStatus === AppPostRepublishedStatus.PENDING) {
       nanopub.draft.postApproval = PlatformPostDraftApproval.APPROVED;
+      // removeDraft(post.id);
     }
 
     if (post) {
-      await appFetch<void, PublishPostPayload>('/api/posts/approve', {
-        post: {
-          ...post,
-          mirrors: [...(allOtherMirrors ? allOtherMirrors : []), nanopub],
-        },
-        platformIds: [PLATFORM.Nanopub],
-      });
+      if (errorApprovingMsg) {
+        setErrorApprovingMsg(undefined);
+      }
+      try {
+        await appFetch<void, PublishPostPayload>('/api/posts/approve', {
+          post: {
+            ...post,
+            mirrors: [...(allOtherMirrors ? allOtherMirrors : []), nanopub],
+          },
+          platformIds: [PLATFORM.Nanopub],
+        });
+      } catch (e: any) {
+        setErrorApprovingMsg(e.message);
+        setIsUpdating(false);
+      }
     }
 
     setEnabledEdit(false);
@@ -371,14 +384,22 @@ export const PostContext: React.FC<{
     nanopub.deleteDraft.postApproval = PlatformPostDraftApproval.APPROVED;
 
     if (post) {
-      await appFetch<void, UnpublishPlatformPostPayload>(
-        '/api/posts/unpublish',
-        {
-          post_id: nanopub.post_id,
-          platformId: PLATFORM.Nanopub,
-          postId: post.id,
-        }
-      );
+      if (errorApprovingMsg) {
+        setErrorApprovingMsg(undefined);
+      }
+      try {
+        await appFetch<void, UnpublishPlatformPostPayload>(
+          '/api/posts/unpublish',
+          {
+            post_id: nanopub.post_id,
+            platformId: PLATFORM.Nanopub,
+            postId: post.id,
+          }
+        );
+      } catch (e: any) {
+        setErrorApprovingMsg(e.message);
+        setIsRetracting(false);
+      }
     }
 
     // setIsUpdating(false); should be set by the re-fetch flow
@@ -408,7 +429,7 @@ export const PostContext: React.FC<{
         nanopubDraft,
         reparse,
         updateSemantics,
-        updatePost,
+        updatePost: optimisticUpdate,
         isUpdating,
         approveOrUpdate,
         editable: editable !== undefined ? editable : false,
@@ -418,6 +439,7 @@ export const PostContext: React.FC<{
         nextPostId,
         retractNanopublication,
         isRetracting,
+        errorApprovingMsg,
       }}>
       {children}
     </PostContextValue.Provider>

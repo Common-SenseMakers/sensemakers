@@ -1,4 +1,4 @@
-import { Box } from 'grommet';
+import { Box, Text } from 'grommet';
 import { Refresh } from 'grommet-icons';
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -14,6 +14,7 @@ import { I18Keys } from '../i18n/i18n';
 import { AbsoluteRoutes } from '../route.names';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID } from '../semantics/patterns/patterns';
+import { SciFilterClassfication } from '../shared/types/types.parser';
 import { AppPostReviewStatus } from '../shared/types/types.posts';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { AppButton } from '../ui-components';
@@ -30,9 +31,9 @@ import { PostHeader } from './PostHeader';
 import { PostNav } from './PostNav';
 import { PostTextEditable } from './PostTextEditable';
 import { POSTING_POST_ID } from './PostingPage';
-import { concatenateThread } from './posts.helper';
+import { concatenateThread, hideSemanticsHelper } from './posts.helper';
 
-const DEBUG = false;
+const DEBUG = true;
 
 enum PublishPostAction {
   None = 'None',
@@ -95,6 +96,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     nextPostId,
     retractNanopublication,
     isRetracting,
+    errorApprovingMsg,
   } = usePost();
 
   const reset = () => {
@@ -214,7 +216,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
           'postStatuses.live true setPublishing(false)',
           postStatuses
         );
-      reset();
+      setPublishing(false);
     }
 
     if (postStatuses.unpublished) {
@@ -420,19 +422,33 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   const publishingModal = (() => {
     return (
       <AppModalStandard
-        onModalClosed={() => setPublishIntent(false)}
+        onModalClosed={() => {
+          if (errorApprovingMsg) setPublishing(false);
+          setPublishIntent(false);
+        }}
         type="normal"
         contentProps={{
           type: 'normal',
-          title: t(I18Keys.publishingTitle),
-          parragraphs: [
-            <Trans
-              i18nKey={I18Keys.publishingPar01}
-              components={{ b: <b></b> }}></Trans>,
-            <BoxCentered>
-              <Loading></Loading>
-            </BoxCentered>,
-          ],
+          title: errorApprovingMsg
+            ? t(I18Keys.publishingErrorTitle)
+            : t(I18Keys.publishingTitle),
+          parragraphs: errorApprovingMsg
+            ? [
+                <Trans
+                  i18nKey={I18Keys.publishingErrorPar01}
+                  components={{ b: <b></b> }}></Trans>,
+                <BoxCentered>
+                  <Text>{errorApprovingMsg}</Text>
+                </BoxCentered>,
+              ]
+            : [
+                <Trans
+                  i18nKey={I18Keys.publishingPar01}
+                  components={{ b: <b></b> }}></Trans>,
+                <BoxCentered>
+                  <Loading></Loading>
+                </BoxCentered>,
+              ],
         }}></AppModalStandard>
     );
   })();
@@ -444,15 +460,26 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
         type="normal"
         contentProps={{
           type: 'normal',
-          title: t(I18Keys.unpublishingTitle),
-          parragraphs: [
-            <Trans
-              i18nKey={I18Keys.unpublishingPar01}
-              components={{ b: <b></b> }}></Trans>,
-            <BoxCentered>
-              <Loading></Loading>
-            </BoxCentered>,
-          ],
+          title: errorApprovingMsg
+            ? t(I18Keys.unpublishingErrorTitle)
+            : t(I18Keys.unpublishingTitle),
+          parragraphs: errorApprovingMsg
+            ? [
+                <Trans
+                  i18nKey={I18Keys.unpublishingErrorPar01}
+                  components={{ b: <b></b> }}></Trans>,
+                <BoxCentered>
+                  <Text>{errorApprovingMsg}</Text>
+                </BoxCentered>,
+              ]
+            : [
+                <Trans
+                  i18nKey={I18Keys.unpublishingPar01}
+                  components={{ b: <b></b> }}></Trans>,
+                <BoxCentered>
+                  <Loading></Loading>
+                </BoxCentered>,
+              ],
         }}></AppModalStandard>
     );
   })();
@@ -549,6 +576,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   if (DEBUG) console.log(publishStatusModal);
 
   const editable = _editable;
+  const hideSemantics = hideSemanticsHelper(post);
 
   const content = (() => {
     if (!post) {
@@ -567,27 +595,31 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
           <PostHeader
             profile={props.profile}
             margin={{ bottom: '16px' }}></PostHeader>
-          <SemanticsEditor
-            patternProps={{
-              isLoading: postStatuses.isParsing,
-              editable,
-              semantics: post?.semantics,
-              originalParsed: post?.originalParsed,
-              semanticsUpdated: semanticsUpdated,
-            }}
-            include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
+          {!hideSemantics && (
+            <SemanticsEditor
+              patternProps={{
+                isLoading: postStatuses.isParsing,
+                editable,
+                semantics: post?.semantics,
+                originalParsed: post?.originalParsed,
+                semanticsUpdated: semanticsUpdated,
+              }}
+              include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
+          )}
 
           <PostTextEditable text={postText}></PostTextEditable>
 
-          <SemanticsEditor
-            patternProps={{
-              isLoading: postStatuses.isParsing,
-              editable,
-              semantics: post?.semantics,
-              originalParsed: post?.originalParsed,
-              semanticsUpdated: semanticsUpdated,
-            }}
-            include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
+          {!hideSemantics && (
+            <SemanticsEditor
+              patternProps={{
+                isLoading: postStatuses.isParsing,
+                editable,
+                semantics: post?.semantics,
+                originalParsed: post?.originalParsed,
+                semanticsUpdated: semanticsUpdated,
+              }}
+              include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
+          )}
 
           {action}
         </Box>

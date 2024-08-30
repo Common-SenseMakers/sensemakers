@@ -24,7 +24,7 @@ import { IntroModals } from './IntroModal';
 import { useUserPosts } from './UserPostsContext';
 
 const statusPretty: Record<PostsQueryStatus, string> = {
-  all: 'All Drafts',
+  drafts: 'All Drafts',
   ignored: 'Ignored',
   pending: 'For Review',
   published: 'Published',
@@ -184,6 +184,26 @@ export const UserHome = () => {
             <LoadingDiv height="120px" width="100%"></LoadingDiv>
           </Box>
         )}
+        {moreToFetch && !isFetchingOlder && (
+          <Box
+            margin={{ vertical: 'medium', horizontal: 'medium' }}
+            align="center"
+            justify="center">
+            <Text
+              style={{
+                fontSize: '14px',
+                fontStyle: 'normal',
+                fontWeight: '500',
+                lineHeight: '16px',
+                color: 'grey',
+                textDecoration: 'underline',
+                cursor: 'pointer',
+              }}
+              onClick={() => fetchOlder()}>
+              {t(I18Keys.loadMorePosts)}
+            </Text>
+          </Box>
+        )}
         {!moreToFetch && (
           <Box
             margin={{ vertical: 'medium', horizontal: 'medium' }}
@@ -220,7 +240,7 @@ export const UserHome = () => {
   };
 
   const options: PostsQueryStatus[] = [
-    PostsQueryStatus.ALL,
+    PostsQueryStatus.DRAFTS,
     PostsQueryStatus.PENDING,
     PostsQueryStatus.IGNORED,
   ];

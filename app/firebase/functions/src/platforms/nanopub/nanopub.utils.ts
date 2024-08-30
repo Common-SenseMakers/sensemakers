@@ -288,18 +288,18 @@ export const buildSpostPubinfo = (
     );
   }
   //if post type is unsupervised then add
-  
+
   store.addQuad(
     namedNode(URI.SIGNATURE_URI),
     namedNode(URI.NP_SIGNED_BY),
     namedNode(URI.COSMO_PREFIX),
     pubinfoGraphUri
   );
-  
+
   store.addQuad(
     namedNode(URI.SIGNATURE_URI),
     namedNode(URI.PROV_WAS_ASSOCIATED_WITH),
-    namedNode(introUri+URI.DELEGATION_STRING),
+    namedNode(introUri + URI.DELEGATION_STRING),
     pubinfoGraphUri
   );
   return store;
@@ -490,33 +490,33 @@ export const buildIntroNp = async (
       assertionGraph
     );
 
-    const derivationProofNode = namedNode(URI.DERIVATION_PROOF_URI);
+    const verifivationProofNode = namedNode(URI.DERIVATION_PROOF_URI);
     writer.addQuad(
       keyDeclarationNode,
       namedNode(URI.NP_HAS_DERIVATION_PROOF),
-      derivationProofNode,
+      verifivationProofNode,
       assertionGraph
     );
     writer.addQuad(
-      derivationProofNode,
+      verifivationProofNode,
       namedNode(URI.NP_HAS_ALGORITHM),
       namedNode(URI.ETHEREUM_EIP_191),
       assertionGraph
     );
     writer.addQuad(
-      derivationProofNode,
+      verifivationProofNode,
       namedNode(URI.NP_HAS_PUBLIC_KEY),
       literal(ethAddress),
       assertionGraph
     );
     writer.addQuad(
-      derivationProofNode,
+      verifivationProofNode,
       namedNode(URI.NP_HAS_SIGNATURE_TARGET),
       literal(`This account controls the RSA public key: ${pubKey}`),
       assertionGraph
     );
     writer.addQuad(
-      derivationProofNode,
+      verifivationProofNode,
       namedNode(URI.PROV_HAS_SIGNATURE),
       literal(signature),
       assertionGraph
@@ -546,7 +546,7 @@ export const buildIntroNp = async (
       writer.addQuad(
         signingDelegationNode,
         namedNode(URI.NP_WITH_KEY_DECLARATION),
-        namedNode('https://example.org/appKeyDecleration'),
+        namedNode(URI.APP_RSA_DECLARATION_URI),
         assertionGraph
       );
     }

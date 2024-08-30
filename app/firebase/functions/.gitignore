@@ -18,5 +18,6 @@ test/__tests__/test.users.json
 # service account credentials
 **/*firebase-adminsdk*.json
 /scripts/.script.env
+users.dashboard.output.json
 
 test.email.html

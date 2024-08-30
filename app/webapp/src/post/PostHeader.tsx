@@ -14,7 +14,7 @@ export const PostHeader = (
   props: BoxExtendedProps & { profile?: TwitterUserProfile }
 ) => {
   const { constants } = useThemeContext();
-  const { tweet, post, setEnabledEdit, editable } = usePost();
+  const { tweet, post } = usePost();
 
   const username = props.profile?.name;
 
@@ -37,7 +37,9 @@ export const PostHeader = (
             </Text>
           </Box>
           <Box margin={{ bottom: '6px' }}></Box>
-          <TweetAnchor thread={tweet?.posted?.post}></TweetAnchor>
+          <TweetAnchor
+            thread={tweet?.posted?.post}
+            timestamp={tweet?.posted?.timestampMs}></TweetAnchor>
         </Box>
       </Box>
 

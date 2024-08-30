@@ -97,8 +97,19 @@ export const CREATIVECOMMONS4 = 'https://creativecommons.org/licenses/by/4.0/';
 
 //cosmo special constants
 export const APP_SPOST_PLACEHOLDER = 'https://sense-nets.xyz/mySemanticPost';
+export const COSMO_APP_INTRO = 'https://sense-nets.xyz/AppIntro';
+export const LINKING_KEYS_DOCUMENT =
+  'https://sense-nets.xyz/LinkingKeysDocument';
+export const APP_RSA_DECLARATION_URI =
+  'https://w3id.org/np/RAy9QxREM5clpg5l-XDvYoyE55kBCO6pb2950R5ZSwigo#RSAkeyDeclaration-approved';
+
 //Strings
-export const DELEGATION_STRING = 'signingDelegation'
+export const DELEGATION_STRING = 'signingDelegation';
+export const APPROVES_PUBLISHING_AS_US =
+  'https://sense-nets.xyz/approvesPublishingAsUs';
+
+export const HAS_KEYS_LINKING_DOCUMENT =
+  'https://sense-nets.xyz/hasLinkingKeysDocument';
 
 // Prefixes JSONs
 export const sPostPrefixes = {

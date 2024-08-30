@@ -116,7 +116,7 @@ export enum PostsQueryStatus {
   PUBLISHED = 'published',
   IGNORED = 'ignored',
   PENDING = 'pending',
-  ALL = 'all',
+  DRAFTS = 'drafts',
 }
 
 export interface UnpublishPlatformPostPayload {
