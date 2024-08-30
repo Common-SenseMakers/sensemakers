@@ -92,7 +92,6 @@ export class MastodonService
       `response_type=code`;
 
     return {
-      ...params,
       authorizationUrl,
     };
   }

@@ -24,7 +24,7 @@ export interface MastodonGetContextParams {
   type: 'read' | 'write';
 }
 
-export interface MastodonSignupContext extends MastodonGetContextParams {
+export interface MastodonSignupContext {
   authorizationUrl: string;
 }
 
