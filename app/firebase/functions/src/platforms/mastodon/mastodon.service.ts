@@ -2,6 +2,7 @@ import { createOAuthAPIClient, createRestAPIClient, mastodon } from 'masto';
 
 import { PlatformFetchParams } from '../../@shared/types/types.fetch';
 import {
+  MastodonGetContextParams,
   MastodonSignupContext,
   MastodonSignupData,
   MastodonUserDetails,
@@ -51,16 +52,18 @@ export class MastodonService
     protected apiCredentials: MastodonApiCredentials
   ) {}
 
-  protected async createApp(domain: string) {
+  protected async createApp(params: MastodonGetContextParams) {
     const client = createRestAPIClient({
-      url: `https://${domain}`,
+      url: `https://${params.domain}`,
     });
+
+    const scopes = params.type === 'write' ? 'read write' : 'read';
 
     const app = await client.v1.apps.create({
       clientName: 'SenseNets',
-      redirectUris: REDIRECT_URL,
-      scopes: 'read write',
-      website: domain,
+      redirectUris: params.callback_url,
+      scopes,
+      website: params.domain,
     });
 
     return app;
@@ -68,25 +71,28 @@ export class MastodonService
 
   public async getSignupContext(
     userId?: string,
-    params?: { domain: string }
+    params?: MastodonGetContextParams
   ): Promise<MastodonSignupContext> {
-    if (!params || !params.domain) {
-      throw new Error('Mastodon domain is required');
+    if (!params || !params.domain || !params.callback_url) {
+      throw new Error('Mastodon domain and callback URL are required');
     }
 
-    const app = await this.createApp(params.domain);
+    const app = await this.createApp(params);
     if (!app.clientId || !app.clientSecret) {
       throw new Error('Failed to create Mastodon app');
     }
 
+    const scopes = params.type === 'write' ? 'read+write' : 'read';
+
     const authorizationUrl =
       `https://${params.domain}/oauth/authorize?` +
       `client_id=${app.clientId}&` +
-      `scope=read+write&` +
-      `redirect_uri=${REDIRECT_URL}&` +
+      `scope=${scopes}&` +
+      `redirect_uri=${params.callback_url}&` +
       `response_type=code`;
 
     return {
+      ...params,
       authorizationUrl,
     };
   }
