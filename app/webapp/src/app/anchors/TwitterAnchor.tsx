@@ -70,8 +70,7 @@ export const TweetAnchor = (props: {
           gap: '8px',
           display: 'inline-flex',
           flexWrap: 'wrap',
-        }}
-      >
+        }}>
         <span style={{ color: constants.colors.textLight2 }}>{label}</span>
         <span style={{ color: '#4B5563' }}>{date}</span>
         <OpenLinkIcon size={12} />
