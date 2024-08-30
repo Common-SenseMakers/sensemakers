@@ -223,13 +223,12 @@ def test_short_post_no_ref_i146():
     
 
 if __name__ == "__main__":
-    # get a few posts for input
-    urls = [
-        "https://mastodon.social/@psmaldino@qoto.org/111405098400404613",
-        "https://mastodon.social/@UlrikeHahn@fediscience.org/111732713776994953",
-        "https://mastodon.social/@ronent/111687038322549430",
-    ]
-    post = scrape_post(urls[2])
+    multi_config = create_multi_config_for_tests()
+    multi_config.post_process_type = PostProcessType.COMBINED
+    mcp = MultiChainParser(multi_config)
+    res = mcp.process_text(TEST_POST_TEXT_W_REF)
+    assert res.item_types == ["preprint"]
+    assert len(res.keywords) > 0
 #     posts = [scrape_post(url) for url in urls]
 #     multi_config = create_multi_config_for_tests(llm_type="google/gemma-7b-it:free")
 #     multi_chain_parser = MultiChainParser(multi_config)

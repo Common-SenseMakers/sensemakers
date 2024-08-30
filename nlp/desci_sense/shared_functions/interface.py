@@ -202,11 +202,16 @@ class RefMetadata(BaseModel):
     """
 
     ref_id: int = Field(
-        description="Unique ID of reference (1 indexed)",
+        description="Unique ID of reference. 0 is the original post id,"
+        "so all references will be positive integers.",
     )
     order: int = Field(
         default=0,
         description="1 indexed ordering of reference, sorted by ascending appearance order in the post. 1 - first, 2 - 2nd,. 0 - unassigned",
+    )
+    ref_source_url: Union[str, None] = Field(
+        description="source url referencing this url or None if N/A.",
+        default=None,
     )
     citoid_url: Union[str, None] = Field(
         description="URL used by citoid (might have different subdomain or final slashes).",
@@ -229,7 +234,9 @@ class RefMetadata(BaseModel):
             v = "unknown"
         return v
 
-    def to_str(self, skip_list: List[str] = ["citoid_url", "image", "debug"]):
+    def to_str(
+        self, skip_list: List[str] = ["citoid_url", "image", "debug", "ref_source_url"]
+    ):
         """
         Prints each attribute on a new line in the form: attribute: value
         """
@@ -255,6 +262,11 @@ class RDFTriplet(BaseModel):
 
     def to_tuple(self):
         return (self.subject, self.predicate, self.object)
+
+    def __eq__(self, other):
+        if not isinstance(other, RDFTriplet):
+            return NotImplemented
+        return self.to_tuple() == other.to_tuple()
 
 
 class ParserSupport(BaseModel):

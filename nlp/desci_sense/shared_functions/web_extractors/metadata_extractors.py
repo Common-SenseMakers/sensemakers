@@ -223,4 +223,9 @@ def get_ref_post_metadata_list(
                     # add ordering info (1-indexed)
                     md.order = i + 1
                 md_list.append(md)
+
+    # sort if ordering added
+    if add_ordering:
+        md_list = sorted(md_list, key=lambda x: x.order)
+
     return md_list

@@ -22,6 +22,7 @@ from desci_sense.shared_functions.dataloaders import (
     scrape_post,
     convert_text_to_ref_post,
 )
+from test_utils import unidiff_output
 from utils import get_thread_1, get_thread_single_post
 from desci_sense.shared_functions.parsers.multi_reference_tagger import normalize_labels
 from desci_sense.shared_functions.postprocessing import Answer, SubAnswer
@@ -401,22 +402,19 @@ def test_thread_render_single_post():
 
 
 if __name__ == "__main__":
-    tweet_url = "https://x.com/StephensonJones/status/1799035911042482210"
-    quote_ref_post = scrape_post(tweet_url)
+    thread_post = get_thread_single_post()
     multi_config = MultiParserChainConfig(
         parser_configs=[
             MultiRefTaggerChainConfig(
                 name="multi_ref_tagger",
                 llm_config=LLMConfig(llm_type="mistralai/mistral-7b-instruct:free"),
-                post_renderer=PostRendererType.QUOTE_REF_POST,
+                post_renderer=PostRendererType.THREAD_REF_POST,
             )
         ],
         metadata_extract_config=MetadataExtractionConfig(extraction_method="citoid"),
     )
     mcp = MultiChainParser(multi_config)
-    md_dict = extract_posts_ref_metadata_dict([quote_ref_post])
-    prompt = mcp.instantiate_prompts(quote_ref_post, md_dict)
+    md_dict = extract_posts_ref_metadata_dict([thread_post])
+    prompt = mcp.instantiate_prompts(thread_post, md_dict)
     prompt_str = prompt["multi_ref_tagger_input"]
-    assert RENDER_QUOTE_TWEET_1_TARGET in prompt_str
-    assert RENDER_QT_MD_1_TARGET in prompt_str
-    assert postr.quote_ref_post_renderer.MULTI_REF_INSTRUCTIONS in prompt_str
+    assert TARGET_RENDER_SINGLE_POST_THREAD in prompt_str, unidiff_output(TARGET_RENDER_SINGLE_POST_THREAD, prompt_str)

@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from abc import ABC, abstractmethod
 from functools import partial
-from typing import Any, Literal, Sequence, List, Optional
+from typing import Any, Literal, Sequence, List, Optional, Dict
 from datetime import datetime
 
 from langchain.load.serializable import Serializable
@@ -73,15 +73,25 @@ class RefPost(Post):
 
     type: Literal["ReferencePost"] = "ReferencePost"
 
+    @property
+    def has_quote_post(self) -> bool:
+        return False
+
     def has_refs(self):
         return len(self.md_ref_urls()) > 0
 
-    def md_ref_urls(self) -> List[str]:
+    def md_ref_urls(self, include_quoted_ref_urls: bool = False) -> List[str]:
         """
         Return list of reference urls for metadata extraction
         ordered by place of appearance and uniqueified.
         """
         return remove_dups_ordered(self.ref_urls)
+
+    def thread_posts(self):
+        """
+        Return list of posts comprising the thread this post begins
+        """
+        return [self]
 
     # @classmethod
     # def from_basic_post_interface(
@@ -144,6 +154,9 @@ class QuoteRefPost(RefPost):
         quoted_len = len(self.quoted_post.content) if self.quoted_post else 0
         return post_len + quoted_len
 
+    def thread_posts(self):
+        return [self]
+
 
 class ThreadRefPost(RefPost):
     """
@@ -177,3 +190,6 @@ class ThreadRefPost(RefPost):
 
     def char_length(self) -> int:
         return sum([p.char_length() for p in self.posts])
+
+    def thread_posts(self):
+        return self.posts
