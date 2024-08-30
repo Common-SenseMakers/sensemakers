@@ -16,7 +16,13 @@ export const PostTextStatic = (props: {
     <div
       onClick={props.onClick}
       className="editor"
-      style={{ overflow: 'hidden' }}
+      style={{
+        overflow: 'hidden',
+        overflowWrap: 'break-word',
+        wordWrap: 'break-word',
+        wordBreak: 'break-word',
+        hyphens: 'auto',
+      }}
       dangerouslySetInnerHTML={{ __html: textToHtml(text) }}
     />
   );

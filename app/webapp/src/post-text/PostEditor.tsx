@@ -16,6 +16,19 @@ import './posteditor.css';
 
 const DEBUG = false;
 
+// Add CSS for handling long URLs
+const editorStyles = `
+  .editor {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+  }
+  .editor a {
+    word-break: break-all;
+  }
+`;
+
 export interface IStatementEditable {
   placeholder?: string;
   editable?: boolean;
@@ -146,6 +159,7 @@ export const PostEditor = (props: IStatementEditable) => {
 
   return (
     <>
+      <style>{editorStyles}</style>
       <Box>
         <ProseMirror mount={mount} {...editorProps}>
           <div className="editor" ref={setMount} />
