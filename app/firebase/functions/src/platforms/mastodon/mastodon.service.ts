@@ -147,9 +147,18 @@ export class MastodonService
       accessToken: userDetails.read.accessToken,
     });
 
+    const fetchParams: any = {
+      limit: params.expectedAmount,
+    };
+    if (params.since_id) {
+      fetchParams.sinceId = params.since_id;
+    }
+    if (params.until_id) {
+      fetchParams.maxId = params.until_id;
+    }
     const statuses = await client.v1.accounts
       .$select(userDetails.user_id)
-      .statuses.list();
+      .statuses.list({ limit: params.expectedAmount });
 
     const platformPosts = statuses.map((status) => ({
       post_id: status.id,
