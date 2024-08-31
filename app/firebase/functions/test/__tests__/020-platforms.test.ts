@@ -1,6 +1,10 @@
 import { expect } from 'chai';
 
-import { FetchParams } from '../../src/@shared/types/types.fetch';
+import {
+  FetchParams,
+  PlatformFetchParams,
+} from '../../src/@shared/types/types.fetch';
+import { MastodonUserDetails } from '../../src/@shared/types/types.mastodon';
 import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
 import { PlatformPostCreate } from '../../src/@shared/types/types.platform.posts';
 import { AppTweet, TwitterThread } from '../../src/@shared/types/types.twitter';
@@ -218,19 +222,27 @@ describe('02-platforms', () => {
         throw new Error('appUser not created');
       }
 
+      const user_id = process.env.MASTODON_ACCOUNT_ID as string;
+      const accessToken = process.env.MASTODON_ACCESS_TOKEN as string;
+      const mastodonServer = process.env.MASTODON_SERVER_DOMAIN as string;
+
+      if (!user_id || !accessToken || !mastodonServer) {
+        throw new Error('Mastodon credentials not set');
+      }
+
       const mastodonService = services.platforms.get(PLATFORM.Mastodon);
       const userDetails: MastodonUserDetails = {
-        user_id: 'test_user_id',
+        user_id,
         signupDate: Date.now(),
         profile: {
-          id: 'test_user_id',
+          id: user_id,
           username: 'test_username',
           displayName: 'Test User',
           avatar: 'https://example.com/avatar.jpg',
-          mastodonServer: process.env.MASTODON_SERVER_DOMAIN as string,
+          mastodonServer,
         },
         read: {
-          accessToken: process.env.MASTODON_ACCESS_TOKEN as string,
+          accessToken,
         },
       };
 
