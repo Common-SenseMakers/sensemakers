@@ -38,10 +38,16 @@ export class BaseRepository<TT, CC> {
     return ref;
   }
 
+
   protected async getDoc(userId: string, manager: TransactionManager) {
     const ref = this.getRef(userId);
     if (DEBUG) logger.debug(`Getting doc ${ref.id}`);
     return manager.get(ref);
+  }
+
+  public async getAll(): Promise<string[]> {
+    const snapshot = await this.collection.get();
+    return snapshot.docs.map((doc) => doc.id);
   }
 
   public async get<T extends boolean, R = TT>(
