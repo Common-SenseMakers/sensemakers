@@ -4,6 +4,7 @@ import { PLATFORM } from '../../@shared/types/types.user';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
 import {
+  mastodonGetSignupContextSchema,
   nanopubGetSignupContextSchema,
   nanopubSignupDataSchema,
   orcidGetSignupContextSchema,
@@ -36,6 +37,10 @@ export const getSignupContextController: RequestHandler = async (
 
       if (platform === PLATFORM.Orcid) {
         return orcidGetSignupContextSchema.validate(request.body);
+      }
+
+      if (platform === PLATFORM.Mastodon) {
+        return mastodonGetSignupContextSchema.validate(request.body);
       }
 
       throw new Error(`Unexpected platform ${platform}`);
