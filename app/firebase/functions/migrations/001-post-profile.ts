@@ -9,7 +9,8 @@ import { servicesSource } from './migrations.services';
 
   logger.info(`Processing ${platformPostsIds.length} platformPosts`);
 
-  for (const platformPostsId of platformPostsIds) {
+  await Promise.all(platformPostsIds.map(async (platformPostsId) => {
+    // for (const platformPostsId of platformPostsIds) {
     await servicesSource.db.run(async (manager) => {
       const platformPost =
         await servicesSource.postsManager.processing.platformPosts.get(
