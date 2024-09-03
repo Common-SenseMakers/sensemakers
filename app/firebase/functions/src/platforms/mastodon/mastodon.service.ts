@@ -31,8 +31,6 @@ import { TimeService } from '../../time/time.service';
 import { UsersRepository } from '../../users/users.repository';
 import { PlatformService } from '../platforms.interface';
 
-const REDIRECT_URL = 'http://localhost:3000';
-
 export class MastodonService
   implements
     PlatformService<
@@ -102,7 +100,7 @@ export class MastodonService
     const token = await client.token.create({
       clientId: signupData.clientId,
       clientSecret: signupData.clientSecret,
-      redirectUri: REDIRECT_URL,
+      redirectUri: signupData.callback_url,
       code: signupData.code,
       grantType: 'authorization_code',
     });
