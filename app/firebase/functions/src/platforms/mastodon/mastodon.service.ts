@@ -57,7 +57,7 @@ export class MastodonService
       clientName: 'SenseNets',
       redirectUris: params.callback_url,
       scopes,
-      website: params.domain,
+      website: `https://${params.domain}`,
     });
 
     return app;
