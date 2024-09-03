@@ -40,6 +40,15 @@ export const orcidSignupDataSchema = object({
   callbackUrl: string().required(),
 }).noUnknown(true);
 
+export const mastodonSignupDataSchema = object({
+  code: string().required(),
+  domain: string().required(),
+  callback_url: string().required(),
+  type: string().oneOf(['read', 'write']).required(),
+  clientId: string().required(),
+  clientSecret: string().required(),
+}).noUnknown(true);
+
 export const userSettingsUpdateSchema = object({
   autopost: object({
     [PLATFORM.Nanopub]: object({
