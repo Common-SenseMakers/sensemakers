@@ -36,10 +36,11 @@ import { servicesSource } from './migrations.services';
             true
           );
 
-          console.log(
-            `Processing platformPostsId: ${platformPostsId} - author: ${author.email?.email} - account: ${account.profile?.username}`
-          );
           platformPost.posted.author = account.profile;
+
+          console.log(
+            `Updating platformPostsId: ${platformPostsId} - author: ${author.email?.email} - account: ${account.profile?.username}`
+          );
 
           await servicesSource.postsManager.processing.platformPosts.update(
             platformPostsId,

@@ -1,4 +1,5 @@
 import { Firestore } from 'firebase-admin/firestore';
+
 import { PLATFORM } from '../@shared/types/types.user';
 import { ActivityRepository } from '../activity/activity.repository';
 import { ActivityService } from '../activity/activity.service';
@@ -62,6 +63,9 @@ export interface Services {
 }
 
 export const createServices = (firestore: Firestore) => {
+  logger.info('Creating services');
+  console.log('Creating services');
+
   const db = new DBInstance(firestore);
   const userRepo = new UsersRepository(db);
   const postsRepo = new PostsRepository(db);

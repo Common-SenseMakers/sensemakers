@@ -1,5 +1,6 @@
 import express from 'express';
 import { initializeApp } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
 import * as functions from 'firebase-functions';
 import {
   FirestoreEvent,
@@ -49,7 +50,6 @@ import {
 } from './posts/tasks/posts.autopost.task';
 import { PARSE_POST_TASK, parsePostTask } from './posts/tasks/posts.parse.task';
 import { router } from './router';
-import { getFirestore } from 'firebase-admin/firestore';
 
 // all secrets are available to all functions
 const secrets = [
@@ -61,20 +61,24 @@ const secrets = [
   envRuntime.MAGIC_ADMIN_SECRET,
 ];
 
+console.log('Running index.ts');
+
 export const app = (() => {
   if (IS_EMULATOR) {
-    logger.info('Running in emulator mode');
+    console.log('Running in emulator mode');
     return initializeApp({
       projectId: 'demo-sensenets',
     });
   }
 
   /** used on deployment with the current app */
-  logger.info('Running in depolyed mode');
+  logger.info('Running in deployed mode');
   return initializeApp();
 })();
 
 const firestore = getFirestore();
+
+console.log('Got firestore');
 
 // import { fetchNewPosts } from './posts/posts.job';
 
@@ -103,7 +107,8 @@ exports.sendDailyNotifications = onSchedule(
     schedule: DAILY_NOTIFICATION_PERIOD,
     secrets,
   },
-  () => triggerSendNotifications(NotificationFreq.Daily, createServices(firestore))
+  () =>
+    triggerSendNotifications(NotificationFreq.Daily, createServices(firestore))
 );
 
 exports.sendWeeklyNotifications = onSchedule(
@@ -111,7 +116,8 @@ exports.sendWeeklyNotifications = onSchedule(
     schedule: WEEKLY_NOTIFICATION_PERIOD,
     secrets,
   },
-  () => triggerSendNotifications(NotificationFreq.Weekly, createServices(firestore))
+  () =>
+    triggerSendNotifications(NotificationFreq.Weekly, createServices(firestore))
 );
 
 exports.sendMonthlyNotifications = onSchedule(
@@ -119,7 +125,11 @@ exports.sendMonthlyNotifications = onSchedule(
     schedule: MONTHLY_NOTIFICATION_PERIOD,
     secrets,
   },
-  () => triggerSendNotifications(NotificationFreq.Monthly, createServices(firestore))
+  () =>
+    triggerSendNotifications(
+      NotificationFreq.Monthly,
+      createServices(firestore)
+    )
 );
 
 /** tasks */
@@ -314,3 +324,5 @@ exports['trigger'] = functions
     secrets,
   })
   .https.onRequest(buildApp(emulatorTriggerRouter));
+
+console.log('Finished index.ts');
