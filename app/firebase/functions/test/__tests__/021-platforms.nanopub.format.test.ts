@@ -316,9 +316,9 @@ describe.only('021-nanopublication format', () => {
       await getNanopubProfile(privateKey2);
 
     const appIntroNp = await buildAppIntroNp(
-      profile1.ethAddress,
+      `http://${profile1.ethAddress}`,
       cleanPublicKey(rsaKeys1),
-      profile2.ethAddress,
+      `http://${profile2.ethAddress}`,
       cleanPublicKey(rsaKeys2)
     );
 
@@ -357,9 +357,9 @@ describe.only('021-nanopublication format', () => {
 
     /** update the intro nanopublication */
     const updatedAppIntroNp = await buildAppIntroNp(
-      profile1.ethAddress,
+      `http://${profile1.ethAddress}`,
       cleanPublicKey(rsaKeys1),
-      profile2.ethAddress,
+      `http://${profile2.ethAddress}`,
       cleanPublicKey(rsaKeys2)
     );
 
