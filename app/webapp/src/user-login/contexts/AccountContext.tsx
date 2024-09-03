@@ -163,20 +163,25 @@ export const AccountContext = (props: PropsWithChildren) => {
         twitter: connectedUser?.email,
       });
 
-    if (connectedUser && connectedUser.email && !twitterProfile) {
-      setOverallLoginStatus(OverallLoginStatus.PartialLoggedIn);
-      return;
-    }
+    if (connectedUser && connectedUser.email) {
+      const hasTwitter = !!getAccount(connectedUser, PLATFORM.Twitter);
+      const hasMastodon = !!getAccount(connectedUser, PLATFORM.Mastodon);
 
-    if (
-      connectedUser &&
-      connectedUser.email &&
-      twitterProfile &&
-      loginFlowState !== LoginFlowState.Disconnecting
-    ) {
-      setTwitterConnectedStatus(TwitterConnectedStatus.Connected);
-      setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
-      return;
+      if (!hasTwitter && !hasMastodon) {
+        setOverallLoginStatus(OverallLoginStatus.PartialLoggedIn);
+        return;
+      }
+
+      if (loginFlowState !== LoginFlowState.Disconnecting) {
+        if (hasTwitter) {
+          setTwitterConnectedStatus(TwitterConnectedStatus.Connected);
+        }
+        if (hasMastodon) {
+          setMastodonConnectedStatus(MastodonConnectedStatus.Connected);
+        }
+        setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
+        return;
+      }
     }
 
     if (overallLoginStatus === OverallLoginStatus.NotKnown) {
@@ -191,7 +196,7 @@ export const AccountContext = (props: PropsWithChildren) => {
     ) {
       setOverallLoginStatus(OverallLoginStatus.LoggedOut);
     }
-  }, [connectedUser, overallLoginStatus, token]);
+  }, [connectedUser, overallLoginStatus, token, loginFlowState]);
 
   const disconnect = () => {
     setConnectedUser(undefined);
