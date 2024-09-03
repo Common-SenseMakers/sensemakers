@@ -25,11 +25,20 @@ import { servicesSource } from './migrations.services';
         ) {
           logger.info(`Processing platformPostsId: ${platformPostsId}`);
 
+          const authorId =
+            await servicesSource.users.repo.getUserWithPlatformAccount(
+              platformPost.platformId,
+              platformPost.posted.user_id,
+              manager,
+              true
+            );
+
           const author = await servicesSource.users.repo.getUser(
-            platformPost.posted.user_id,
+            authorId,
             manager,
             true
           );
+
           const account = UsersHelper.getAccount(
             author,
             platformPost.platformId,

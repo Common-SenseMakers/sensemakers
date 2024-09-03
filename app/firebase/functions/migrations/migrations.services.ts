@@ -2,11 +2,18 @@ import dotenv from 'dotenv';
 import * as admin from 'firebase-admin';
 import { AppOptions } from 'firebase-admin';
 
+import { LocalLogger, LogLevel } from '../src/instances/local.logger';
 import { logger } from '../src/instances/logger';
 import { createServices } from '../src/instances/services';
 
 // Load environment variables from .env file
 dotenv.config({ path: './migrations/.migrations.env' });
+
+// update log levels
+if (process.env.LOG_LEVEL_MSG && process.env.LOG_LEVEL_OBJ) {
+  (logger as LocalLogger).msgLevel = process.env.LOG_LEVEL_MSG as LogLevel;
+  (logger as LocalLogger).ctxLevel = process.env.LOG_LEVEL_OBJ as LogLevel;
+}
 
 const mandatory = [
   'FB_CERT_PATH_SOURCE',
