@@ -19,5 +19,6 @@ test/__tests__/test.users.json
 **/*firebase-adminsdk*.json
 /scripts/.script.env
 users.dashboard.output.json
+/migrations/.migrations.env
 
 test.email.html
