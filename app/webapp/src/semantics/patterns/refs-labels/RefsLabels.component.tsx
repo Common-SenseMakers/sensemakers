@@ -2,6 +2,7 @@ import { Box } from 'grommet';
 import { DataFactory } from 'n3';
 import { useMemo } from 'react';
 
+import { RefMeta } from '../../../shared/types/types.parser';
 import { filterStore, writeRDF } from '../../../shared/utils/n3.utils';
 import { THIS_POST_NAME } from '../../../shared/utils/semantics.helper';
 import { AppLabel } from '../../../ui-components';
@@ -10,7 +11,7 @@ import { splitArray } from '../../../ui-components/utils';
 import { useSemanticsStore } from '../common/use.semantics';
 import { PatternProps } from '../patterns';
 import { RefWithLabels } from './RefLabel';
-import { RefsMap, processSemantics } from './process.semantics';
+import { RefData, RefsMap, processSemantics } from './process.semantics';
 
 export const RefLabelsComponent = (props: PatternProps) => {
   const { store, originalStore } = useSemanticsStore(props);
@@ -107,9 +108,8 @@ export const RefLabelsComponent = (props: PatternProps) => {
                   refData={refData}
                   support={props.originalParsed?.support}
                   removeLabel={(labelUri: string) => removeLabel(ref, labelUri)}
-                  addLabel={(labelUri: string) =>
-                    addLabel(ref, labelUri)
-                  }></RefWithLabels>
+                  addLabel={(labelUri: string) => addLabel(ref, labelUri)}
+                  allRefs={visibleRefs}></RefWithLabels>
               );
             })}
           </Box>
