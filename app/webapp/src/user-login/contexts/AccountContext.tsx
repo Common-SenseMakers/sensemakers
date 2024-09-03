@@ -40,6 +40,8 @@ export type AccountContextType = {
   resetLogin: () => void;
   setTwitterConnectedStatus: (status: TwitterConnectedStatus) => void;
   twitterConnectedStatus: TwitterConnectedStatus | undefined;
+  setMastodonConnectedStatus: (status: MastodonConnectedStatus) => void;
+  mastodonConnectedStatus: MastodonConnectedStatus | undefined;
   orcidProfile?: OrcidUserProfile;
 };
 
@@ -78,6 +80,12 @@ export enum TwitterConnectedStatus {
   Connected = 'Connected',
 }
 
+export enum MastodonConnectedStatus {
+  Disconnected = 'Disconnected',
+  Connecting = 'Connecting',
+  Connected = 'Connected',
+}
+
 /**
  * Manages the logged-in user. We use JWT tokens to authenticate
  * a logged in user to our backend. The JWT is set when the user
@@ -99,6 +107,12 @@ export const AccountContext = (props: PropsWithChildren) => {
     usePersist<TwitterConnectedStatus>(
       TWITTER_LOGIN_STATUS,
       TwitterConnectedStatus.Disconnected
+    );
+
+  const [mastodonConnectedStatus, setMastodonConnectedStatus] =
+    usePersist<MastodonConnectedStatus>(
+      'MASTODON_LOGIN_STATUS',
+      MastodonConnectedStatus.Disconnected
     );
 
   /** keep the conneccted user linkted to the current token */
@@ -223,6 +237,8 @@ export const AccountContext = (props: PropsWithChildren) => {
         resetLogin,
         setTwitterConnectedStatus,
         twitterConnectedStatus,
+        setMastodonConnectedStatus,
+        mastodonConnectedStatus,
         orcidProfile,
       }}>
       {props.children}
