@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import * as admin from 'firebase-admin';
+import { AppOptions } from 'firebase-admin';
 
 import { logger } from '../src/instances/logger';
 import { createServices } from '../src/instances/services';
@@ -27,7 +28,7 @@ const projectIdTarget = process.env.FB_PROJECT_ID_TARGET;
 const certPathSource = process.env.FB_CERT_PATH_SOURCE;
 const certPathTarget = process.env.FB_CERT_PATH_TARGET;
 
-// const serviceAccountSource = require('../' + certPathSource);
+const serviceAccountSource = require('../' + certPathSource);
 const serviceAccountTarget = require('../' + certPathTarget);
 
 logger.info('Running in local mode with certificate', {
@@ -42,17 +43,30 @@ logger.info('Running in local mode with certificate', {
 //   projectId: process.env.FB_PROJECT_ID_SOURCE,
 // });
 
-export const appSource = admin.initializeApp(
+const initApp = (config: AppOptions, name: string) => {
+  const app = admin.initializeApp(config, name);
+
+  if (projectIdSource?.startsWith('demo-')) {
+    app.firestore().settings({
+      host: 'localhost:8080',
+      ssl: false,
+    });
+  }
+
+  return app;
+};
+
+export const appSource = initApp(
   {
     projectId: projectIdSource,
+    credential: admin.credential.cert(serviceAccountSource),
   },
   'source'
 );
-
-export const appTarget = admin.initializeApp(
+export const appTarget = initApp(
   {
-    credential: admin.credential.cert(serviceAccountTarget),
     projectId: projectIdTarget,
+    credential: admin.credential.cert(serviceAccountTarget),
   },
   'target'
 );
