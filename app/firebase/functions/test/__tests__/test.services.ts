@@ -1,3 +1,4 @@
+import { getFirestore } from 'firebase-admin/firestore';
 import { spy, when } from 'ts-mockito';
 
 import { PLATFORM } from '../../src/@shared/types/types.user';
@@ -76,7 +77,7 @@ export const getTestServices = (config: TestServicesConfig) => {
     }
   });
 
-  const db = new DBInstance();
+  const db = new DBInstance(getFirestore());
   const userRepo = new UsersRepository(db);
   const postsRepo = new PostsRepository(db);
   const triplesRepo = new TriplesRepository(db);

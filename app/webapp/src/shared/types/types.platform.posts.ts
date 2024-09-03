@@ -45,11 +45,12 @@ export type PlatformPostCreate<C = any> = Omit<PlatformPost<C>, 'id'>;
  * The PlatformPostPosted status is defined after a PlatformPost
  * has been published to its platform
  */
-export interface PlatformPostPosted<C = any> {
+export interface PlatformPostPosted<C = any, P = any> {
   user_id: string; // The intended user_id when publishing
   post_id: string; // The id of the platform post on the platform
   timestampMs: number; // timestamp in ms
   post: C;
+  author?: P;
 }
 
 export type PlatformPostSigned<C = any> = C;

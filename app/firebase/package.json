@@ -6,6 +6,8 @@
   "scripts": {
     "set-secret": "firebase functions:secrets:set",
     "emulate": "NODE_ENV=local FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 firebase --project demo-sensenets emulators:start",
+    "emulate-prod": "NODE_ENV=development FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 firebase --project sensenets-prod emulators:start --import ",
+    "emulate-prod-db": "NODE_ENV=development FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 firebase --only firestore --project sensenets-prod emulators:start --import ",
     "emulate-verbose": "NODE_ENV=local FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 firebase --project demo-sensenets --debug emulators:start",
     "emulate-debug": "yarn emulate --inspect-functions",
     "emulate-test": "yarn emulate-debug --only firestore",
@@ -22,7 +24,8 @@
     "trigger-autofetch-dev": "curl -X POST https://us-central1-sensenets-dev.cloudfunctions.net/trigger/autofetch",
     "trigger-notifications-dev": "curl -X POST https://us-central1-sensenets-dev.cloudfunctions.net/trigger/sendNotifications?freq=daily",
     "trigger-autofetch-prod": "curl -X POST https://us-central1-sensenets-prod.cloudfunctions.net/trigger/autofetch",
-    "trigger-notifications-prod": "curl -X POST https://us-central1-sensenets-prod.cloudfunctions.net/trigger/sendNotifications?freq=daily"
+    "trigger-notifications-prod": "curl -X POST https://us-central1-sensenets-prod.cloudfunctions.net/trigger/sendNotifications?freq=daily",
+    "configure-backups-prod": "firebase firestore:backups:schedules:create --project sensenets-prod --recurrence 'DAILY' --retention 14w"
   },
   "author": "",
   "license": "ISC",
