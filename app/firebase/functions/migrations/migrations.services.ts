@@ -5,7 +5,7 @@ import { logger } from '../src/instances/logger';
 import { createServices } from '../src/instances/services';
 
 // Load environment variables from .env file
-dotenv.config({ path: './scripts/.script.env' });
+dotenv.config({ path: './migrations/.migrations.env' });
 
 const mandatory = [
   'FB_CERT_PATH_SOURCE',
@@ -22,20 +22,40 @@ mandatory.forEach((varName) => {
   }
 });
 
-const serviceAccountSource = require('../' + process.env.FB_CERT_PATH_SOURCE);
-const serviceAccountTarget = require('../' + process.env.FB_CERT_PATH_TARGET);
+const projectIdSource = process.env.FB_PROJECT_ID_SOURCE;
+const projectIdTarget = process.env.FB_PROJECT_ID_TARGET;
+const certPathSource = process.env.FB_CERT_PATH_SOURCE;
+const certPathTarget = process.env.FB_CERT_PATH_TARGET;
 
-logger.info('Running in local mode with certificate');
+// const serviceAccountSource = require('../' + certPathSource);
+const serviceAccountTarget = require('../' + certPathTarget);
 
-export const appSource = admin.initializeApp({
-  credential: admin.credential.cert(serviceAccountSource),
-  projectId: process.env.FB_PROJECT_ID_SOURCE,
+logger.info('Running in local mode with certificate', {
+  projectIdSource,
+  projectIdTarget,
+  certPathSource,
+  certPathTarget,
 });
 
-export const appTarget = admin.initializeApp({
-  credential: admin.credential.cert(serviceAccountTarget),
-  projectId: process.env.FB_PROJECT_ID_TARGET,
-});
+// export const appSource = admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccountSource),
+//   projectId: process.env.FB_PROJECT_ID_SOURCE,
+// });
+
+export const appSource = admin.initializeApp(
+  {
+    projectId: projectIdSource,
+  },
+  'source'
+);
+
+export const appTarget = admin.initializeApp(
+  {
+    credential: admin.credential.cert(serviceAccountTarget),
+    projectId: projectIdTarget,
+  },
+  'target'
+);
 
 export const servicesSource = createServices(appSource.firestore());
 export const servicesTarget = createServices(appTarget.firestore());

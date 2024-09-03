@@ -9,7 +9,7 @@ fi
 # Assign the project ID to a variable
 PROJECT_ID=$1
 BACKUP=$2
-OUTDIR=./backups/$PROJECT_ID
+OUTDIR=./migrations/backups/$PROJECT_ID
 CLOUD_URL=gs://$PROJECT_ID/backups/$BACKUP
 
 echo ""

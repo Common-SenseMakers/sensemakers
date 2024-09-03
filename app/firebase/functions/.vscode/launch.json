@@ -39,6 +39,20 @@
       "internalConsoleOptions": "neverOpen"
     },
     {
+      "name": "migration: 001",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "ts-node",
+      "args": [
+        "--project",
+        "./tsconfig.scripts.json",
+        "./migrations/001-post-profile.ts"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
       "name": "attach",
       "type": "node",
       "request": "attach",
