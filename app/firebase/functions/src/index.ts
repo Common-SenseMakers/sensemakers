@@ -1,6 +1,5 @@
 import express from 'express';
-import { initializeApp } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import {
   FirestoreEvent,
@@ -61,19 +60,14 @@ const secrets = [
   envRuntime.MAGIC_ADMIN_SECRET,
 ];
 
-export const app = (() => {
-  if (IS_EMULATOR) {
-    return initializeApp({
+export const config = IS_EMULATOR
+  ? {
       projectId: 'demo-sensenets',
-    });
-  }
+    }
+  : {};
 
-  /** used on deployment with the current app */
-  logger.info('Running in deployed mode');
-  return initializeApp();
-})();
-
-const firestore = getFirestore();
+const app = admin.initializeApp(config);
+const firestore = app.firestore();
 
 // import { fetchNewPosts } from './posts/posts.job';
 
