@@ -1,6 +1,5 @@
 import dotenv from 'dotenv';
 import * as admin from 'firebase-admin';
-import { initializeApp } from 'firebase-admin/app';
 
 import { logger } from '../src/instances/logger';
 import { createServices } from '../src/instances/services';
@@ -21,9 +20,9 @@ mandatory.forEach((varName) => {
 const serviceAccount = require('../' + process.env.FB_CERT_PATH);
 
 logger.info('Running in local mode with certificate');
-export const app = initializeApp({
+export const app = admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   projectId: process.env.FB_PROJECT_ID,
 });
 
-export const services = createServices();
+export const services = createServices(app.firestore());
