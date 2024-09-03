@@ -85,7 +85,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
     return <></>;
   }
 
-  const allRefs = Array.from(refs.entries()).reverse();
+  const allRefs = Array.from(refs.entries());
   const [visibleRefs, restOfRefs] =
     size === 'compact' ? splitArray(allRefs, 2) : [allRefs, []];
 
@@ -94,15 +94,15 @@ export const RefLabelsComponent = (props: PatternProps) => {
       <Box margin={{ top: 'small' }}>
         <Box style={{ display: 'block' }}>
           <Box gap="16px">
-            {visibleRefs.map(([ref, refData], ixref) => {
+            {visibleRefs.map(([ref, refData], index) => {
               if (!props.originalParsed)
-                throw new Error('Undexpected undefined');
+                throw new Error('Unexpected undefined');
 
               return (
                 <RefWithLabels
-                  ix={ixref}
+                  ix={index}
                   editable={props.editable}
-                  key={ixref}
+                  key={ref}
                   refUrl={ref}
                   refData={refData}
                   support={props.originalParsed?.support}
