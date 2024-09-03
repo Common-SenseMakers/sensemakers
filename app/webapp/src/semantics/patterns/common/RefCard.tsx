@@ -82,7 +82,7 @@ export const RefCard = (props: {
 
       <Box style={{ overflow: 'hidden' }}>
         <Text style={{ fontSize: '16px', color: '#337FBD', fontWeight: '400' }}>
-          {props.url}
+          {urlTruncated}
         </Text>
       </Box>
     </Box>
