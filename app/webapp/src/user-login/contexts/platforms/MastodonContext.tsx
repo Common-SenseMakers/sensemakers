@@ -1,5 +1,12 @@
 // TODO implement the mastodon context
-import { PropsWithChildren, createContext, useContext, useEffect, useRef, useState } from 'react';
+import {
+  PropsWithChildren,
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 
@@ -16,8 +23,8 @@ import { PLATFORM } from '../../../shared/types/types.user';
 import { usePersist } from '../../../utils/use.persist';
 import {
   LoginFlowState,
-  OverallLoginStatus,
   MastodonConnectedStatus,
+  OverallLoginStatus,
   useAccountContext,
 } from '../AccountContext';
 
@@ -31,7 +38,9 @@ export type MastodonContextType = {
   needConnect?: boolean;
 };
 
-const MastodonContextValue = createContext<MastodonContextType | undefined>(undefined);
+const MastodonContextValue = createContext<MastodonContextType | undefined>(
+  undefined
+);
 
 export const MastodonContext = (props: PropsWithChildren) => {
   const { show } = useToastContext();
@@ -57,7 +66,10 @@ export const MastodonContext = (props: PropsWithChildren) => {
 
   const needConnect = !connectedUser || !connectedUser[PLATFORM.Mastodon];
 
-  const connect = async (domain: string, type: MastodonGetContextParams['type']) => {
+  const connect = async (
+    domain: string,
+    type: MastodonGetContextParams['type']
+  ) => {
     setLoginFlowState(LoginFlowState.ConnectingMastodon);
     setMastodonConnectedStatus(MastodonConnectedStatus.Connecting);
 
@@ -71,7 +83,10 @@ export const MastodonContext = (props: PropsWithChildren) => {
       params
     );
 
-    localStorage.setItem(LS_MASTODON_CONTEXT_KEY, JSON.stringify(signupContext));
+    localStorage.setItem(
+      LS_MASTODON_CONTEXT_KEY,
+      JSON.stringify(signupContext)
+    );
 
     if (signupContext) {
       setWasConnecting(true);
@@ -106,12 +121,17 @@ export const MastodonContext = (props: PropsWithChildren) => {
           const context = JSON.parse(contextStr) as MastodonSignupContext;
 
           if (DEBUG)
-            console.log(`calling api/auth/${PLATFORM.Mastodon}/signup`, context);
+            console.log(
+              `calling api/auth/${PLATFORM.Mastodon}/signup`,
+              context
+            );
 
           const signupData: MastodonSignupData = {
             ...context,
             code: code_param,
             domain: new URL(context.authorizationUrl).hostname,
+            callback_url: window.location.href,
+            type: 'read',
           };
 
           appFetch<HandleSignupResult>(

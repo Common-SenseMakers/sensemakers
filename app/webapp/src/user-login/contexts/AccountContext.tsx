@@ -59,6 +59,7 @@ export enum LoginFlowState {
   SignningUpNanopub = 'SignningUpNanopub',
   RegisteringEmail = 'RegisteringEmail',
   ConnectingTwitter = 'ConnectingTwitter',
+  ConnectingMastodon = 'ConnectingMastodon',
   BasicLoggedIn = 'BasicLoggedIn',
   Disconnecting = 'Disconnecting',
 }

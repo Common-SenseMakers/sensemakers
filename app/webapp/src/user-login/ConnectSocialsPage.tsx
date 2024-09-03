@@ -1,17 +1,17 @@
 import { Anchor, Box, TextInput } from 'grommet';
-import { Trans, useTranslation } from 'react-i18next';
 import { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { AppLogo } from '../app/brand/AppLogo';
-import { TwitterIcon, MastodonIcon } from '../app/common/Icons';
+import { MastodonIcon, TwitterIcon } from '../app/common/Icons';
 import { I18Keys } from '../i18n/i18n';
 import { AppButton, AppHeading } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
 import { Loading } from '../ui-components/LoadingDiv';
 import { LoginFlowState, useAccountContext } from './contexts/AccountContext';
 import { useDisconnectContext } from './contexts/DisconnectUserContext';
-import { useTwitterContext } from './contexts/platforms/TwitterContext';
 import { useMastodonContext } from './contexts/platforms/MastodonContext';
+import { useTwitterContext } from './contexts/platforms/TwitterContext';
 
 export const ConnectSocialsPage = (props: {}) => {
   const { t } = useTranslation();
@@ -39,21 +39,26 @@ export const ConnectSocialsPage = (props: {}) => {
               primary
               disabled={loginFlowState === LoginFlowState.ConnectingTwitter}
               icon={<TwitterIcon></TwitterIcon>}
-              label={t(I18Keys.signInTwitter)}
+              label={t(I18Keys.signInX)}
               onClick={() => connectTwitter('read')}></AppButton>
             <Box margin={{ top: 'medium' }}>
               <TextInput
-                placeholder={t(I18Keys.mastodonDomainPlaceholder)}
+                placeholder={'e.g. mastodon.social'}
                 value={mastodonDomain}
                 onChange={(event) => setMastodonDomain(event.target.value)}
               />
               <AppButton
                 margin={{ top: 'small' }}
                 primary
-                disabled={loginFlowState === LoginFlowState.ConnectingMastodon || !mastodonDomain}
+                disabled={
+                  loginFlowState === LoginFlowState.ConnectingMastodon ||
+                  !mastodonDomain
+                }
                 icon={<MastodonIcon></MastodonIcon>}
-                label={t(I18Keys.signInMastodon)}
-                onClick={() => connectMastodon(mastodonDomain, 'read')}></AppButton>
+                label={'sign in with mastodon'}
+                onClick={() =>
+                  connectMastodon(mastodonDomain, 'read')
+                }></AppButton>
             </Box>
           </Box>
           <Box align="center">

@@ -5,6 +5,7 @@ import { UserPostsContext } from '../../user-home/UserPostsContext';
 import { AccountContext } from './AccountContext';
 import { AutopostInviteContext } from './AutopostInviteContext';
 import { DisconnectUserContext } from './DisconnectUserContext';
+import { MastodonContext } from './platforms/MastodonContext';
 import { OrcidContext } from './platforms/OrcidContext';
 import { TwitterContext } from './platforms/TwitterContext';
 import { NanopubContext } from './platforms/nanopubs/NanopubContext';
@@ -32,17 +33,19 @@ export const ConnectedUserWrapper = (props: PropsWithChildren) => {
         <ConnectedWallet>
           <SignerContext>
             <TwitterContext>
-              <NanopubContext>
-                <OrcidContext>
-                  <DisconnectUserContext>
-                    <UserPostsContext>
-                      <AutopostInviteContext>
-                        {props.children}
-                      </AutopostInviteContext>
-                    </UserPostsContext>
-                  </DisconnectUserContext>
-                </OrcidContext>
-              </NanopubContext>
+              <MastodonContext>
+                <NanopubContext>
+                  <OrcidContext>
+                    <DisconnectUserContext>
+                      <UserPostsContext>
+                        <AutopostInviteContext>
+                          {props.children}
+                        </AutopostInviteContext>
+                      </UserPostsContext>
+                    </DisconnectUserContext>
+                  </OrcidContext>
+                </NanopubContext>
+              </MastodonContext>
             </TwitterContext>
           </SignerContext>
         </ConnectedWallet>
