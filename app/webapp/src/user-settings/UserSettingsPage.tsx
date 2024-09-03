@@ -7,6 +7,7 @@ import { SUPPORT_EMAIL_ADDRESS } from '../app/config';
 import { AutopostIcon } from '../app/icons/AutopostIcon';
 import { BellIcon } from '../app/icons/BellIcon';
 import { EmailIcon } from '../app/icons/EmailIcon';
+import { MastodonIcon } from '../app/icons/MastodonIcon';
 import { OrcidIcon } from '../app/icons/OrcidIcon';
 import { SupportIcon } from '../app/icons/SupportIcon';
 import { TwitterAvatar } from '../app/icons/TwitterAvatar';
@@ -26,6 +27,7 @@ import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useAutopostInviteContext } from '../user-login/contexts/AutopostInviteContext';
 import { useDisconnectContext } from '../user-login/contexts/DisconnectUserContext';
+import { useMastodonContext } from '../user-login/contexts/platforms/MastodonContext';
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { getAccount } from '../user-login/user.helper';
 import { PlatformSection } from './PlatformsSection';
@@ -57,6 +59,9 @@ export const UserSettingsPage = () => {
 
   const { connect: connectOrcid, connecting: connectingOrcid } =
     useOrcidContext();
+
+  const { connect: connectMastodon, needConnect: needConnectMastodon } =
+    useMastodonContext();
 
   const { reviewAutopostIntention, setReviewAutopostIntention } =
     useAutopostInviteContext();
@@ -273,7 +278,7 @@ export const UserSettingsPage = () => {
           onButtonClicked={() => {}}
           buttonText=""
           username={twitterProfile ? `@${twitterProfile.username}` : ''}
-          connected></PlatformSection>
+          connected={!!twitterProfile}></PlatformSection>
 
         <PlatformSection
           icon={
@@ -291,7 +296,15 @@ export const UserSettingsPage = () => {
           onButtonClicked={() => {}}
           buttonText=""
           username={connectedUser?.email ? connectedUser.email?.email : ''}
-          connected></PlatformSection>
+          connected={!!connectedUser?.email}></PlatformSection>
+
+        <PlatformSection
+          icon={<MastodonIcon size={40}></MastodonIcon>}
+          platformName={t(I18Keys.Mastodon)}
+          onButtonClicked={() => connectMastodon('', 'read')}
+          buttonText={needConnectMastodon ? "connect" : ""}
+          username={connectedUser?.mastodon ? `@${connectedUser.mastodon.username}@${connectedUser.mastodon.domain}` : '- not connected -'}
+          connected={!!connectedUser?.mastodon}></PlatformSection>
 
         <PlatformSection
           icon={<OrcidIcon size={40}></OrcidIcon>}
