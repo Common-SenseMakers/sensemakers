@@ -1,8 +1,9 @@
-import { Anchor, Box } from 'grommet';
+import { Anchor, Box, TextInput } from 'grommet';
 import { Trans, useTranslation } from 'react-i18next';
+import { useState } from 'react';
 
 import { AppLogo } from '../app/brand/AppLogo';
-import { TwitterIcon } from '../app/common/Icons';
+import { TwitterIcon, MastodonIcon } from '../app/common/Icons';
 import { I18Keys } from '../i18n/i18n';
 import { AppButton, AppHeading } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
@@ -10,15 +11,18 @@ import { Loading } from '../ui-components/LoadingDiv';
 import { LoginFlowState, useAccountContext } from './contexts/AccountContext';
 import { useDisconnectContext } from './contexts/DisconnectUserContext';
 import { useTwitterContext } from './contexts/platforms/TwitterContext';
+import { useMastodonContext } from './contexts/platforms/MastodonContext';
 
 export const ConnectSocialsPage = (props: {}) => {
   const { t } = useTranslation();
   const { loginFlowState } = useAccountContext();
   const { connect: connectTwitter } = useTwitterContext();
+  const { connect: connectMastodon } = useMastodonContext();
   const { disconnect } = useDisconnectContext();
+  const [mastodonDomain, setMastodonDomain] = useState('');
 
   const content = (() => {
-    if (connectTwitter) {
+    if (connectTwitter && connectMastodon) {
       return (
         <Box style={{ flexGrow: 1 }}>
           <Box style={{ flexGrow: 1 }}>
@@ -35,8 +39,22 @@ export const ConnectSocialsPage = (props: {}) => {
               primary
               disabled={loginFlowState === LoginFlowState.ConnectingTwitter}
               icon={<TwitterIcon></TwitterIcon>}
-              label={t(I18Keys.signInX)}
+              label={t(I18Keys.signInTwitter)}
               onClick={() => connectTwitter('read')}></AppButton>
+            <Box margin={{ top: 'medium' }}>
+              <TextInput
+                placeholder={t(I18Keys.mastodonDomainPlaceholder)}
+                value={mastodonDomain}
+                onChange={(event) => setMastodonDomain(event.target.value)}
+              />
+              <AppButton
+                margin={{ top: 'small' }}
+                primary
+                disabled={loginFlowState === LoginFlowState.ConnectingMastodon || !mastodonDomain}
+                icon={<MastodonIcon></MastodonIcon>}
+                label={t(I18Keys.signInMastodon)}
+                onClick={() => connectMastodon(mastodonDomain, 'read')}></AppButton>
+            </Box>
           </Box>
           <Box align="center">
             <Anchor onClick={() => disconnect()}>{t(I18Keys.logout)}</Anchor>
