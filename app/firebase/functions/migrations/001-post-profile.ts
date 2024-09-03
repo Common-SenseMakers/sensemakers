@@ -1,4 +1,5 @@
 import { PLATFORM } from '../src/@shared/types/types.user';
+import { logger } from '../src/instances/logger';
 import { UsersHelper } from '../src/users/users.helper';
 import { servicesSource } from './migrations.services';
 
@@ -6,7 +7,7 @@ import { servicesSource } from './migrations.services';
   const platformPostsIds =
     await servicesSource.postsManager.processing.platformPosts.getAll();
 
-  console.log(`Processing ${platformPostsIds.length} platformPosts`);
+  logger.info(`Processing ${platformPostsIds.length} platformPosts`);
 
   await Promise.all(
     platformPostsIds.map(async (platformPostsId) => {
@@ -22,7 +23,7 @@ import { servicesSource } from './migrations.services';
           platformPost.posted &&
           platformPost.platformId === PLATFORM.Twitter
         ) {
-          console.log(`Processing platformPostsId: ${platformPostsId}`);
+          logger.info(`Processing platformPostsId: ${platformPostsId}`);
 
           const author = await servicesSource.users.repo.getUser(
             platformPost.posted.user_id,
@@ -38,7 +39,7 @@ import { servicesSource } from './migrations.services';
 
           platformPost.posted.author = account.profile;
 
-          console.log(
+          logger.info(
             `Updating platformPostsId: ${platformPostsId} - author: ${author.email?.email} - account: ${account.profile?.username}`
           );
 

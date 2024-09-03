@@ -63,8 +63,7 @@ export interface Services {
 }
 
 export const createServices = (firestore: Firestore) => {
-  logger.info('Creating services');
-  console.log('Creating services');
+  if (DEBUG) logger.info('Creating services');
 
   const db = new DBInstance(firestore);
   const userRepo = new UsersRepository(db);

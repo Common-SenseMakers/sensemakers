@@ -9,6 +9,8 @@ import {
   TransactionManager,
 } from './transaction.manager';
 
+const DEBUG = false;
+
 export class DBInstance {
   public firestore: Firestore;
 
@@ -27,6 +29,7 @@ export class DBInstance {
   };
 
   constructor(firestore: Firestore) {
+    if (DEBUG) logger.debug('Creating DBInstance');
     this.firestore = firestore;
 
     this.collections = {

@@ -61,11 +61,8 @@ const secrets = [
   envRuntime.MAGIC_ADMIN_SECRET,
 ];
 
-console.log('Running index.ts');
-
 export const app = (() => {
   if (IS_EMULATOR) {
-    console.log('Running in emulator mode');
     return initializeApp({
       projectId: 'demo-sensenets',
     });
@@ -77,8 +74,6 @@ export const app = (() => {
 })();
 
 const firestore = getFirestore();
-
-console.log('Got firestore');
 
 // import { fetchNewPosts } from './posts/posts.job';
 
@@ -324,5 +319,3 @@ exports['trigger'] = functions
     secrets,
   })
   .https.onRequest(buildApp(emulatorTriggerRouter));
-
-console.log('Finished index.ts');

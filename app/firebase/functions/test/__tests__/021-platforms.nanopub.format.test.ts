@@ -23,7 +23,7 @@ import { getMockedUser } from '../utils/users.mock';
 const DEBUG = true;
 const PUBLISH = true;
 
-describe('nanopublication format', () => {
+describe.only('021-nanopublication format', () => {
   it('publishes a correctly formatted mock nanopub to the test server and updates it', async () => {
     const post = getMockPost({
       authorId: 'test-user-id',
@@ -317,11 +317,9 @@ describe('nanopublication format', () => {
 
     const appIntroNp = await buildAppIntroNp(
       profile1.ethAddress,
-      profile2.ethAddress,
       cleanPublicKey(rsaKeys1),
-      cleanPublicKey(rsaKeys2),
-      profile1.ethToRsaSignature,
-      profile2.ethToRsaSignature
+      profile2.ethAddress,
+      cleanPublicKey(rsaKeys2)
     );
 
     if (!appIntroNp) {
@@ -360,12 +358,9 @@ describe('nanopublication format', () => {
     /** update the intro nanopublication */
     const updatedAppIntroNp = await buildAppIntroNp(
       profile1.ethAddress,
-      profile2.ethAddress,
       cleanPublicKey(rsaKeys1),
-      cleanPublicKey(rsaKeys2),
-      profile1.ethToRsaSignature,
-      profile2.ethToRsaSignature,
-      { latest: published.info().uri, root: published.info().uri }
+      profile2.ethAddress,
+      cleanPublicKey(rsaKeys2)
     );
 
     if (!updatedAppIntroNp) {
