@@ -3,11 +3,11 @@ import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { useAppFetch } from '../api/app.fetch';
+import { MastodonIcon } from '../app/common/Icons';
 import { SUPPORT_EMAIL_ADDRESS } from '../app/config';
 import { AutopostIcon } from '../app/icons/AutopostIcon';
 import { BellIcon } from '../app/icons/BellIcon';
 import { EmailIcon } from '../app/icons/EmailIcon';
-import { MastodonIcon } from '../app/icons/MastodonIcon';
 import { OrcidIcon } from '../app/icons/OrcidIcon';
 import { SupportIcon } from '../app/icons/SupportIcon';
 import { TwitterAvatar } from '../app/icons/TwitterAvatar';
@@ -276,7 +276,7 @@ export const UserSettingsPage = () => {
           icon={<TwitterAvatar profile={twitterProfile} />}
           platformName={t(I18Keys.XTwitter)}
           onButtonClicked={() => {}}
-          buttonText=""
+          buttonText="connect"
           username={twitterProfile ? `@${twitterProfile.username}` : ''}
           connected={!!twitterProfile}></PlatformSection>
 
@@ -300,10 +300,14 @@ export const UserSettingsPage = () => {
 
         <PlatformSection
           icon={<MastodonIcon size={40}></MastodonIcon>}
-          platformName={t(I18Keys.Mastodon)}
-          onButtonClicked={() => connectMastodon('', 'read')}
-          buttonText={needConnectMastodon ? "connect" : ""}
-          username={connectedUser?.mastodon ? `@${connectedUser.mastodon.username}@${connectedUser.mastodon.domain}` : '- not connected -'}
+          platformName={'mastodon'}
+          onButtonClicked={() => connectMastodon && connectMastodon('', 'read')}
+          buttonText={needConnectMastodon ? 'connect' : ''}
+          username={
+            connectedUser?.mastodon
+              ? `@${getAccount(connectedUser, PLATFORM.Mastodon)?.profile.username}@${getAccount(connectedUser, PLATFORM.Mastodon)?.profile.mastodonServer}`
+              : '- not connected -'
+          }
           connected={!!connectedUser?.mastodon}></PlatformSection>
 
         <PlatformSection
