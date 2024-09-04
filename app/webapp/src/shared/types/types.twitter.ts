@@ -47,7 +47,10 @@ export interface TwitterDraft {
   text: string;
 }
 
-export type TwitterUser = Required<Pick<UserV2, 'id' | 'username' | 'name'>>;
+export type TwitterUser = Required<
+  Pick<Omit<UserV2, 'profile_image_url'>, 'id' | 'username' | 'name'>
+> & { profile_image_url?: string };
+
 export interface TwitterThread {
   conversation_id: string;
   tweets: AppTweet[];

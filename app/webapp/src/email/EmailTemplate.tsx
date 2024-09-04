@@ -181,24 +181,27 @@ export const EmailTemplate = ({
                 {sectionHeader}
               </Heading>
             </Row>
-            {postsByStatus.slice(0, MAX_POSTS_IN_EMAIL).map((post, idx) => {
-              const postUrl = new URL(
-                AbsoluteRoutes.Post(post.id),
-                appUrl
-              ).toString();
-              return (
-                <Section key={idx} style={{ margin: '16px 0px 0px' }}>
-                  <PostCardEmail post={post} />
-                  <EmailRow>
-                    <Button
-                      style={{ marginTop: '16px', ...button }}
-                      href={postUrl}>
-                      {t(I18Keys.emailReviewPostButton)}
-                    </Button>
-                  </EmailRow>
-                </Section>
-              );
-            })}
+            {postsByStatus
+              .sort((a, b) => b.createdAtMs - a.createdAtMs)
+              .slice(0, MAX_POSTS_IN_EMAIL)
+              .map((post, idx) => {
+                const postUrl = new URL(
+                  AbsoluteRoutes.Post(post.id),
+                  appUrl
+                ).toString();
+                return (
+                  <Section key={idx} style={{ margin: '16px 0px 0px' }}>
+                    <PostCardEmail post={post} />
+                    <EmailRow>
+                      <Button
+                        style={{ marginTop: '16px', ...button }}
+                        href={postUrl}>
+                        {t(I18Keys.emailReviewPostButton)}
+                      </Button>
+                    </EmailRow>
+                  </Section>
+                );
+              })}
             {postsByStatus.length > MAX_POSTS_IN_EMAIL && (
               <>
                 <EmailRow style={{ marginTop: '0px' }}>
