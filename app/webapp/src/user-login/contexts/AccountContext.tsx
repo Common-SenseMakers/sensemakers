@@ -8,6 +8,7 @@ import {
 } from 'react';
 
 import { _appFetch } from '../../api/app.fetch';
+import { MastodonUserProfile } from '../../shared/types/types.mastodon';
 import { OrcidUserProfile } from '../../shared/types/types.orcid';
 import { TwitterUserProfile } from '../../shared/types/types.twitter';
 import {
@@ -28,6 +29,7 @@ export type AccountContextType = {
   connectedUser?: AppUserRead;
   isConnected: boolean;
   twitterProfile?: TwitterUserProfile;
+  mastodonProfile?: MastodonUserProfile;
   email?: EmailDetails;
   disconnect: () => void;
   refresh: () => void;
@@ -213,6 +215,16 @@ export const AccountContext = (props: PropsWithChildren) => {
     return profile;
   }, [connectedUser]);
 
+  const mastodonProfile = useMemo(() => {
+    const profile = connectedUser
+      ? getAccount(connectedUser, PLATFORM.Mastodon)?.profile
+      : undefined;
+
+    if (DEBUG) console.log('mastodonProfile', { profile });
+
+    return profile;
+  }, [connectedUser]);
+
   const orcidProfile = useMemo(() => {
     const profile = connectedUser
       ? getAccount(connectedUser, PLATFORM.Orcid)?.profile
@@ -230,6 +242,7 @@ export const AccountContext = (props: PropsWithChildren) => {
       value={{
         connectedUser: connectedUser === null ? undefined : connectedUser,
         twitterProfile,
+        mastodonProfile,
         email,
         isConnected: connectedUser !== undefined && connectedUser !== null,
         disconnect,

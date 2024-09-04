@@ -5,17 +5,23 @@ import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { UserHome } from '../user-home/UserHome';
 import { ConnectSocialsPage } from '../user-login/ConnectSocialsPage';
 import {
+  MastodonConnectedStatus,
   OverallLoginStatus,
   TwitterConnectedStatus,
   useAccountContext,
 } from '../user-login/contexts/AccountContext';
 import { AppWelcome } from '../welcome/AppWelcome';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export const AppHome = (props: {}) => {
-  const { overallLoginStatus, twitterProfile, twitterConnectedStatus } =
-    useAccountContext();
+  const {
+    overallLoginStatus,
+    twitterProfile,
+    mastodonProfile,
+    twitterConnectedStatus,
+    mastodonConnectedStatus,
+  } = useAccountContext();
 
   const LoadingPlaceholder = (
     <>
@@ -32,7 +38,12 @@ export const AppHome = (props: {}) => {
   );
 
   const { content, nav } = (() => {
-    if (DEBUG) console.log('AppHome', { overallLoginStatus, twitterProfile });
+    if (DEBUG)
+      console.log('AppHome', {
+        overallLoginStatus,
+        twitterProfile,
+        mastodonProfile,
+      });
 
     if (overallLoginStatus === OverallLoginStatus.NotKnown) {
       return { content: <></>, nav: undefined };
@@ -44,7 +55,8 @@ export const AppHome = (props: {}) => {
 
     if (
       overallLoginStatus === OverallLoginStatus.PartialLoggedIn &&
-      twitterConnectedStatus !== TwitterConnectedStatus.Connecting
+      (mastodonConnectedStatus !== MastodonConnectedStatus.Connecting ||
+        twitterConnectedStatus !== TwitterConnectedStatus.Connecting)
     ) {
       return {
         content: <ConnectSocialsPage></ConnectSocialsPage>,
