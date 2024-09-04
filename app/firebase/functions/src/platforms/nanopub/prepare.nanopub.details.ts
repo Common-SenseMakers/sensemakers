@@ -86,22 +86,38 @@ export const prepareNanopubDetails = (user: AppUser, post: AppPostFull) => {
     ? user.settings.autopost[PLATFORM.Nanopub].value
     : AutopostOption.MANUAL;
 
-  const tweet = post.mirrors.find(
-    (platformPost) => platformPost.platformId === PLATFORM.Twitter
-  )?.posted;
+  const platformPost = (() => {
+    const twitterPost = post.mirrors.find(
+      (platformPost) => platformPost.platformId === PLATFORM.Twitter
+    )?.posted;
+    const mastodonPost = post.mirrors.find(
+      (platformPost) => platformPost.platformId === PLATFORM.Mastodon
+    )?.posted;
+    return twitterPost || mastodonPost;
+  })();
+
   const nanopub = post.mirrors.find(
     (platformPost) => platformPost.platformId === PLATFORM.Nanopub
   );
   const latestNanopubUri = nanopub?.posted?.post_id;
   const rootNanopubUri = nanopub?.post_id;
 
-  const tweetId = tweet?.post_id;
+  const platformPostId = platformPost?.post_id;
 
-  if (!tweetId) {
+  if (!platformPostId) {
     throw new Error('Original platform post id not found');
   }
 
-  const tweetUrl = `https://x.com/${twitterUsername}/status/${tweetId}`;
+  const platformPostUrl = (() => {
+    if (twitterAccount) {
+      return `https://x.com/${platformUsername}/status/${platformPostId}`;
+    }
+    if (mastodonAccount) {
+      const mastodonServer = mastodonAccount.profile?.mastodonServer;
+      return `https://${mastodonServer}/@${platformUsername}/${platformPostId}`;
+    }
+    throw new Error('Unable to construct platform post URL');
+  })();
 
   return {
     introUri,
@@ -110,7 +126,7 @@ export const prepareNanopubDetails = (user: AppUser, post: AppPostFull) => {
     autopostOption,
     ethAddress,
     orcidId,
-    tweetUrl,
+    platformPostUrl,
     latestNanopubUri,
     rootNanopubUri,
   };
