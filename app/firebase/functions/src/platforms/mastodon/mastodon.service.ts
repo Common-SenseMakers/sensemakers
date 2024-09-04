@@ -28,6 +28,7 @@ import {
 import { AppUser, PLATFORM } from '../../@shared/types/types.user';
 import { TransactionManager } from '../../db/transaction.manager';
 import { TimeService } from '../../time/time.service';
+import { UsersHelper } from '../../users/users.helper';
 import { UsersRepository } from '../../users/users.repository';
 import { PlatformService } from '../platforms.interface';
 
@@ -228,11 +229,17 @@ export class MastodonService
   public async convertFromGeneric(
     postAndAuthor: PostAndAuthor
   ): Promise<PlatformPostDraft<string>> {
+    const account = UsersHelper.getAccount(
+      postAndAuthor.author,
+      PLATFORM.Mastodon,
+      undefined,
+      true
+    );
     const content = postAndAuthor.post.generic.thread
       .map((post) => post.content)
       .join('\n\n');
     return {
-      user_id: postAndAuthor.author.userId,
+      user_id: account.user_id,
       signerType: PlatformPostSignerType.DELEGATED,
       postApproval: PlatformPostDraftApproval.PENDING,
       unsignedPost: content,
