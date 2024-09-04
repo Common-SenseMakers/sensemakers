@@ -143,7 +143,7 @@ describe('030-process', () => {
           expect(publishedRootNanopubUri).to.equal(publishedLatestNanopubUri);
 
           if (USE_REAL_NANOPUB) {
-            console.log('signed published urls', {
+            logger.debug('signed published urls', {
               publishedRootNanopubUri,
               publishedLatestNanopubUri,
             });
@@ -224,7 +224,7 @@ describe('030-process', () => {
           expect(publishedRootNanopubUri).to.equal(publishedLatestNanopubUri);
 
           if (USE_REAL_NANOPUB) {
-            console.log('delegated published urls', {
+            logger.debug('delegated published urls', {
               publishedRootNanopubUri,
               publishedLatestNanopubUri,
             });
@@ -340,7 +340,7 @@ describe('030-process', () => {
       expect(latestNanopubUri).to.not.equal(updatedLatestNanopubUri);
 
       if (USE_REAL_NANOPUB) {
-        console.log('edited published urls', {
+        logger.debug('edited published urls', {
           rootNanopubUri,
           latestNanopubUri,
           updatedRootNanopubUri,

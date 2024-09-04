@@ -1,3 +1,4 @@
+import { logger } from '../src/instances/logger';
 import { services } from './scripts.services';
 
 const mandatory = ['USER_ID'];
@@ -11,6 +12,8 @@ mandatory.forEach((varName) => {
 });
 
 const userId = process.env.USER_ID as string;
+
+const DEBUG = false;
 
 services.db.run(async (manager) => {
   const user = await services.users.repo.getUser(userId, manager, true);
@@ -27,9 +30,6 @@ services.db.run(async (manager) => {
     )
   );
 
-  /** print all user notifications */
-  console.log({ user });
-
   await Promise.all(
     notifications.map(async (notification) => {
       const activity = await services.activity.repo.get(
@@ -37,7 +37,7 @@ services.db.run(async (manager) => {
         manager,
         true
       );
-      console.log({ notification, activity });
+      if (DEBUG) logger.debug('user notification', { notification, activity });
     })
   );
 });

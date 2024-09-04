@@ -49,7 +49,7 @@ enum PublishType {
 const ORCID_INVITE_DISABLE = 'orcidInviteDisabled';
 
 /** extract the postId from the route and pass it to a PostContext */
-export const PostView = (props: { profile?: TwitterUserProfile }) => {
+export const PostView = () => {
   const [publishIntent, setPublishIntent] = useState<boolean>(false);
   const [unpublishIntent, setUnpublishIntent] = useState<boolean>(false);
   const [isUnpublishing, setIsUnpublishing] = useState<boolean>(false);
@@ -422,7 +422,10 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   const publishingModal = (() => {
     return (
       <AppModalStandard
-        onModalClosed={() => setPublishIntent(false)}
+        onModalClosed={() => {
+          if (errorApprovingMsg) setPublishing(false);
+          setPublishIntent(false);
+        }}
         type="normal"
         contentProps={{
           type: 'normal',
@@ -589,9 +592,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     return (
       <>
         <Box pad="medium">
-          <PostHeader
-            profile={props.profile}
-            margin={{ bottom: '16px' }}></PostHeader>
+          <PostHeader margin={{ bottom: '16px' }}></PostHeader>
           {!hideSemantics && (
             <SemanticsEditor
               patternProps={{
@@ -638,7 +639,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     <ViewportPage
       content={
         <Box fill>
-          <PostNav profile={props.profile}></PostNav>
+          <PostNav></PostNav>
           {content}
         </Box>
       }></ViewportPage>

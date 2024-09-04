@@ -24,7 +24,7 @@ import { IntroModals } from './IntroModal';
 import { useUserPosts } from './UserPostsContext';
 
 const statusPretty: Record<PostsQueryStatus, string> = {
-  all: 'All Drafts',
+  drafts: 'All Drafts',
   ignored: 'Ignored',
   pending: 'For Review',
   published: 'Published',
@@ -240,7 +240,7 @@ export const UserHome = () => {
   };
 
   const options: PostsQueryStatus[] = [
-    PostsQueryStatus.ALL,
+    PostsQueryStatus.DRAFTS,
     PostsQueryStatus.PENDING,
     PostsQueryStatus.IGNORED,
   ];

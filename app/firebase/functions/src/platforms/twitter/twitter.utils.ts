@@ -176,6 +176,7 @@ export const convertTweetsToThreads = (
         id: author.id,
         name: author.name,
         username: author.username,
+        profile_image_url: author.profile_image_url,
       },
     };
   });
