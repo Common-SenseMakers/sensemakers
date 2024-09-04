@@ -19,9 +19,17 @@ export const prepareNanopubDetails = (user: AppUser, post: AppPostFull) => {
   const twitterAccount = UsersHelper.getAccount(
     user,
     PLATFORM.Twitter,
-    undefined,
-    true
+    undefined
   );
+  const mastodonAccount = UsersHelper.getAccount(
+    user,
+    PLATFORM.Mastodon,
+    undefined
+  );
+
+  if (!twitterAccount && !mastodonAccount) {
+    throw new Error('Twitter or Mastodon account not found');
+  }
 
   const orcidAccount = UsersHelper.getAccount(user, PLATFORM.Orcid, undefined);
 
@@ -32,15 +40,21 @@ export const prepareNanopubDetails = (user: AppUser, post: AppPostFull) => {
     throw new Error('Intro nanopub uri not found');
   }
 
-  const twitterUsername = twitterAccount.profile?.username;
-  const twitterName = twitterAccount.profile?.name;
+  const platformUsername = (() => {
+    if (twitterAccount) return twitterAccount.profile?.username;
+    if (mastodonAccount) return mastodonAccount.profile?.username;
+  })();
+  const platformName = (() => {
+    if (twitterAccount) return twitterAccount.profile?.name;
+    if (mastodonAccount) return mastodonAccount.profile?.displayName;
+  })();
 
-  if (!twitterUsername) {
-    throw new Error('Twitter username not found');
+  if (!platformUsername) {
+    throw new Error('platform username not found');
   }
 
-  if (!twitterName) {
-    throw new Error('Twitter name not found');
+  if (!platformName) {
+    throw new Error('platform name not found');
   }
 
   const ethAddress = nanopubAccount && nanopubAccount.profile?.ethAddress;
@@ -91,8 +105,8 @@ export const prepareNanopubDetails = (user: AppUser, post: AppPostFull) => {
 
   return {
     introUri,
-    twitterUsername,
-    twitterName,
+    platformUsername,
+    platformName,
     autopostOption,
     ethAddress,
     orcidId,
