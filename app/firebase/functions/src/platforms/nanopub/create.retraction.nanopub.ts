@@ -8,14 +8,14 @@ export const createRetractionNanopub = async (
   post: AppPostFull,
   author: AppUser
 ) => {
-  const { introUri, twitterUsername, twitterName, ethAddress, orcidId } =
+  const { introUri, platformUsername, platformName, ethAddress, orcidId } =
     prepareNanopubDetails(author, post);
 
   return buildRetractionNp(
     post_id,
     introUri,
-    twitterUsername,
-    twitterName,
+    platformUsername,
+    platformName,
     ethAddress,
     orcidId
   );

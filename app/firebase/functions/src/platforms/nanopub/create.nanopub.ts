@@ -17,12 +17,12 @@ export const createNanopublication = async (
 ) => {
   const {
     introUri,
-    twitterUsername,
-    twitterName,
+    platformUsername,
+    platformName,
     autopostOption,
     ethAddress,
     orcidId,
-    tweetUrl,
+    platformPostUrl,
     latestNanopubUri,
     rootNanopubUri,
   } = prepareNanopubDetails(user, post);
@@ -61,12 +61,12 @@ export const createNanopublication = async (
   return buildSpostNp(
     ethAddress,
     introUri,
-    twitterUsername,
+    platformUsername,
     supersedesOptions ? AutopostOption.MANUAL : autopostOption,
-    twitterName,
+    platformName,
     semanticsStore,
     content,
-    tweetUrl,
+    platformPostUrl,
     options
   );
 };

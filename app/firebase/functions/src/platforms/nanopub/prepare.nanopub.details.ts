@@ -86,15 +86,9 @@ export const prepareNanopubDetails = (user: AppUser, post: AppPostFull) => {
     ? user.settings.autopost[PLATFORM.Nanopub].value
     : AutopostOption.MANUAL;
 
-  const platformPost = (() => {
-    const twitterPost = post.mirrors.find(
-      (platformPost) => platformPost.platformId === PLATFORM.Twitter
-    )?.posted;
-    const mastodonPost = post.mirrors.find(
-      (platformPost) => platformPost.platformId === PLATFORM.Mastodon
-    )?.posted;
-    return twitterPost || mastodonPost;
-  })();
+  const platformPost = post.mirrors.find(
+    (platformPost) => platformPost.platformId === post.origin
+  )?.posted;
 
   const nanopub = post.mirrors.find(
     (platformPost) => platformPost.platformId === PLATFORM.Nanopub
