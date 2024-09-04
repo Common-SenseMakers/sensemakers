@@ -88,12 +88,33 @@ export class PostsProcessing {
       manager
     );
 
-    const authorId = await this.users.repo.getUserWithPlatformAccount(
-      PLATFORM.Twitter,
-      user_id,
-      manager,
-      false
-    );
+    const authorId = await (async () => {
+      const authorIdFromTwitter =
+        await this.users.repo.getUserWithPlatformAccount(
+          PLATFORM.Twitter,
+          user_id,
+          manager,
+          false
+        );
+      if (authorIdFromTwitter) {
+        return authorIdFromTwitter;
+      }
+      const authorIdFromMastodon =
+        await this.users.repo.getUserWithPlatformAccount(
+          PLATFORM.Mastodon,
+          user_id,
+          manager,
+          false
+        );
+      if (authorIdFromMastodon) {
+        return authorIdFromMastodon;
+      }
+      return undefined;
+    })();
+
+    if (!authorId) {
+      throw new Error(`Author not found for user_id ${user_id}`);
+    }
 
     /** create AppPost */
     const post = await this.createAppPost(
