@@ -207,20 +207,21 @@ export const postUpdatedHookOnTest = async (
 export const fetchPostInTests = async (
   userId: string,
   post_id: string,
-  services: Services
+  services: Services,
+  platform: PLATFORM
 ) => {
   /** fetch will store the posts in the DB */
   const { post } = await services.db.run(
     (manager) =>
       services.postsManager.fetchPostFromPlatform(
         userId,
-        PLATFORM.Twitter,
+        platform,
         post_id,
         manager
       ),
     undefined,
     undefined,
-    `fetchPostInTests ${userId} ${post_id}`
+    `fetchPostInTests ${userId} ${post_id} ${platform}`
   );
   if (post) {
     /**
