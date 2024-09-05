@@ -30,8 +30,18 @@ export interface MastodonSignupContext {
   clientSecret: string;
 }
 
-export interface MastodonSignupData extends MastodonGetContextParams {
+export interface MastodonOAuthSignupData extends MastodonGetContextParams {
   code: string;
   clientId: string;
   clientSecret: string;
 }
+
+export interface MastodonAccessTokenSignupData {
+  domain: string;
+  accessToken: string;
+  type: 'read' | 'write';
+}
+
+export type MastodonSignupData =
+  | MastodonOAuthSignupData
+  | MastodonAccessTokenSignupData;

@@ -94,17 +94,21 @@ export class MastodonService
   public async handleSignupData(
     signupData: MastodonSignupData
   ): Promise<MastodonUserDetails> {
-    const client = createOAuthAPIClient({
-      url: `https://${signupData.domain}`,
-    });
-
-    const token = await client.token.create({
-      clientId: signupData.clientId,
-      clientSecret: signupData.clientSecret,
-      redirectUri: signupData.callback_url,
-      code: signupData.code,
-      grantType: 'authorization_code',
-    });
+    const token = await (async () => {
+      if ('accessToken' in signupData) {
+        return { accessToken: signupData.accessToken };
+      }
+      const client = createOAuthAPIClient({
+        url: `https://${signupData.domain}`,
+      });
+      return await client.token.create({
+        clientId: signupData.clientId,
+        clientSecret: signupData.clientSecret,
+        redirectUri: signupData.callback_url,
+        code: signupData.code,
+        grantType: 'authorization_code',
+      });
+    })();
 
     const mastoClient = createRestAPIClient({
       url: `https://${signupData.domain}`,
