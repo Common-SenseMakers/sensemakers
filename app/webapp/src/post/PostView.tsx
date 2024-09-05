@@ -1,6 +1,6 @@
 import { Box, Text } from 'grommet';
 import { Refresh } from 'grommet-icons';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -23,7 +23,6 @@ import { usePersist } from '../utils/use.persist';
 import { usePost } from './PostContext';
 import { PostHeader } from './PostHeader';
 import { PostNav } from './PostNav';
-import { PostPublish } from './PostPublishStatusModals';
 import { PostTextEditable } from './PostTextEditable';
 import { POSTING_POST_ID } from './PostingPage';
 import { concatenateThread, hideSemanticsHelper } from './posts.helper';
@@ -47,30 +46,18 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   const { connect: _connectOrcid } = useOrcidContext();
 
   const { constants } = useThemeContext();
-  const {
-    postId,
-    post,
-    nanopubDraft,
-    updateSemantics,
-    postStatuses,
-    reparse,
-    updatePost,
-    isUpdating,
-    approveOrUpdate,
-    editable: _editable,
-    enabledEdit,
-    setEnabledEdit,
-    isRetracting,
-  } = usePost();
+  const { current, update } = usePost();
 
-  const postText = post ? concatenateThread(post.generic) : undefined;
+  const postText = current.post
+    ? concatenateThread(current.post.generic)
+    : undefined;
 
   const { connectedUser, orcidProfile } = useAccountContext();
 
   const { t } = useTranslation();
 
   const semanticsUpdated = (newSemantics: string) => {
-    updateSemantics(newSemantics);
+    update.updateSemantics(newSemantics);
   };
 
   const reviewForPublication = async () => {
