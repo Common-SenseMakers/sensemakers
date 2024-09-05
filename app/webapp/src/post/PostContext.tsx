@@ -6,10 +6,12 @@ import React, {
   useEffect,
   useMemo,
 } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
 import { useToastContext } from '../app/ToastsContext';
 import { subscribeToUpdates } from '../firestore/realtime.listener';
+import { AbsoluteRoutes } from '../route.names';
 import { PublishPostPayload } from '../shared/types/types.fetch';
 import { NotificationFreq } from '../shared/types/types.notifications';
 import {
@@ -37,30 +39,44 @@ import { useUserPosts } from '../user-home/UserPostsContext';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { getAccount } from '../user-login/user.helper';
+import { PostPublishStatusModals } from './PostPublishStatusModals';
 import { AppPostStatus, getPostStatuses } from './posts.helper';
 
 const DEBUG = false;
 
 interface PostContextType {
-  postId?: string;
-  post: AppPostFull | undefined;
-  author: AppUserRead;
-  reparse: () => void;
-  nanopubDraft: PlatformPostDraft | undefined;
-  tweet?: PlatformPost<TwitterThread>;
-  editable: boolean; // can be true if not published
-  enabledEdit: boolean; // only true if editing after publishing
-  setEnabledEdit: (enabled: boolean) => void;
-  updateSemantics: (newSemantics: string) => Promise<void>;
-  postStatuses: AppPostStatus;
-  updatePost: (update: PostUpdate) => Promise<void>;
-  isUpdating: boolean;
-  approveOrUpdate: () => Promise<void>;
-  prevPostId?: string;
-  nextPostId?: string;
-  retractNanopublication: () => Promise<void>;
-  isRetracting: boolean;
-  errorApprovingMsg?: string;
+  current: {
+    postId?: string;
+    post: AppPostFull | undefined;
+    author: AppUserRead;
+    nanopubDraft: PlatformPostDraft | undefined;
+    tweet?: PlatformPost<TwitterThread>;
+    statuses: AppPostStatus;
+  };
+  actions: {
+    reparse: () => void;
+  };
+  edit: {
+    editable: boolean; // can be true if not published
+    enabledEdit: boolean; // only true if editing after publishing
+    setEnabledEdit: (enabled: boolean) => void;
+  };
+  update: {
+    isUpdating: boolean;
+    updateSemantics: (newSemantics: string) => Promise<void>;
+    updatePost: (update: PostUpdate) => Promise<void>;
+  };
+  publish: {
+    publishOrRepublish: () => Promise<void>;
+    retractNanopublication: () => Promise<void>;
+    isRetracting: boolean;
+    errorApprovingMsg?: string;
+  };
+  posts: {
+    prevPostId?: string;
+    nextPostId?: string;
+    openNextPost: () => void;
+  };
 }
 
 const PostContextValue = createContext<PostContextType | undefined>(undefined);
@@ -75,6 +91,8 @@ export const PostContext: React.FC<{
   }
 
   const { show } = useToastContext();
+  const navigate = useNavigate();
+
   const { connectedUser } = useAccountContext();
   const [postEdited, setPostEdited] = React.useState<AppPostFull | undefined>(
     undefined
@@ -297,11 +315,11 @@ export const PostContext: React.FC<{
       semantics: newSemantics,
     });
 
-  const postStatuses = useMemo(() => getPostStatuses(post), [post]);
+  const statuses = useMemo(() => getPostStatuses(post), [post]);
 
   const { signNanopublication } = useNanopubContext();
 
-  const approveOrUpdate = async () => {
+  const publishOrRepublish = async () => {
     // mark nanopub draft as approved
     setIsUpdating(true);
     const nanopub = post?.mirrors.find(
@@ -406,40 +424,60 @@ export const PostContext: React.FC<{
   };
 
   const editable =
-    connectedUser &&
+    connectedUser !== undefined &&
     connectedUser.userId === post?.authorId &&
-    (!postStatuses.live || enabledEdit);
+    (!statuses.live || enabledEdit);
 
   const { prevPostId, nextPostId } = useMemo(
     () => getNextAndPrev(post?.id),
     [post, getNextAndPrev]
   );
 
+  const openNextPost = () => {
+    if (nextPostId) {
+      navigate(AbsoluteRoutes.Post(nextPostId));
+    }
+  };
+
   const postIdFinal = useMemo(() => post?.id, [post]);
 
   return (
     <PostContextValue.Provider
       value={{
-        postId: postIdFinal,
-        post,
-        postStatuses,
-        author,
-        tweet,
-        nanopubDraft,
-        reparse,
-        updateSemantics,
-        updatePost: optimisticUpdate,
-        isUpdating,
-        approveOrUpdate,
-        editable: editable !== undefined ? editable : false,
-        setEnabledEdit,
-        enabledEdit,
-        prevPostId,
-        nextPostId,
-        retractNanopublication,
-        isRetracting,
-        errorApprovingMsg,
+        current: {
+          postId: postIdFinal,
+          post,
+          author,
+          nanopubDraft,
+          tweet,
+          statuses,
+        },
+        actions: {
+          reparse,
+        },
+        edit: {
+          editable,
+          enabledEdit,
+          setEnabledEdit,
+        },
+        update: {
+          isUpdating,
+          updateSemantics,
+          updatePost,
+        },
+        publish: {
+          publishOrRepublish,
+          retractNanopublication,
+          isRetracting,
+          errorApprovingMsg,
+        },
+        posts: {
+          prevPostId,
+          nextPostId,
+          openNextPost,
+        },
       }}>
+      <PostPublishStatusModals></PostPublishStatusModals>
       {children}
     </PostContextValue.Provider>
   );

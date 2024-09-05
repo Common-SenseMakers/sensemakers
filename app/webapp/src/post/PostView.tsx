@@ -23,7 +23,7 @@ import { usePersist } from '../utils/use.persist';
 import { usePost } from './PostContext';
 import { PostHeader } from './PostHeader';
 import { PostNav } from './PostNav';
-import { PostPublish } from './PostPublish';
+import { PostPublish } from './PostPublishStatusModals';
 import { PostTextEditable } from './PostTextEditable';
 import { POSTING_POST_ID } from './PostingPage';
 import { concatenateThread, hideSemanticsHelper } from './posts.helper';
@@ -60,10 +60,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     editable: _editable,
     enabledEdit,
     setEnabledEdit,
-    nextPostId,
-    retractNanopublication,
     isRetracting,
-    errorApprovingMsg,
   } = usePost();
 
   const postText = post ? concatenateThread(post.generic) : undefined;
@@ -112,14 +109,6 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
 
   const readyToNanopublish =
     canPublishNanopub && nanopubDraft && !postStatuses.live;
-
-  const clickedNextAfterOrcid = () => {
-    if (disableOrcidInvite) {
-      // disable after having cli
-      setDisableOrcidInvite(true);
-    }
-    setAskedOrcid(true);
-  };
 
   const connectOrcid = () => {
     if (post) {
