@@ -29,7 +29,7 @@ def convert_mastodon_time_to_datetime(date_str):
         print(f"Error in date conversion: {e}")
         return None
 
-
+# TODO need to handle ordering
 def extract_external_masto_ref_urls(post: dict, add_qrt_url: bool = True):
     """
     Extract list of URLs referenced by this post (in the post text body).
