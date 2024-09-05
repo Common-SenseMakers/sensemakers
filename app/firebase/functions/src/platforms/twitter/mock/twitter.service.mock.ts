@@ -23,9 +23,9 @@ import { ENVIRONMENTS } from '../../../config/ENVIRONMENTS';
 import { APP_URL, NODE_ENV } from '../../../config/config.runtime';
 import { TransactionManager } from '../../../db/transaction.manager';
 import { logger } from '../../../instances/logger';
+import { getTestCredentials } from '../../mock/test.users';
 import { TwitterService } from '../twitter.service';
 import { convertToAppTweetBase, dateStrToTimestampMs } from '../twitter.utils';
-import { getTestCredentials } from './test.users';
 
 const DEBUG = false;
 

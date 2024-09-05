@@ -28,6 +28,7 @@ import { getParserMock } from '../parser/mock/parser.service.mock';
 import { ParserService } from '../parser/parser.service';
 import { MastodonService } from '../platforms/mastodon/mastodon.service';
 import { getMastodonMock } from '../platforms/mastodon/mock/mastodon.service.mock';
+import { getTestCredentials } from '../platforms/mock/test.users';
 import { getNanopubMock } from '../platforms/nanopub/mock/nanopub.service.mock';
 import { NanopubService } from '../platforms/nanopub/nanopub.service';
 // import { ParserService } from '../parser/parser.service';
@@ -37,7 +38,6 @@ import {
   PlatformsMap,
   PlatformsService,
 } from '../platforms/platforms.service';
-import { getTestCredentials } from '../platforms/twitter/mock/test.users';
 import { getTwitterMock } from '../platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../platforms/twitter/twitter.service';
 import { PlatformPostsRepository } from '../posts/platform.posts.repository';
