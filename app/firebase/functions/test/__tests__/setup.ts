@@ -43,6 +43,9 @@ export let globalTestServices = getTestServices({
   twitter: USE_REAL_TWITTER
     ? undefined
     : { publish: true, signup: true, fetch: true, get: true },
+  mastodon: USE_REAL_MASTODON
+    ? undefined
+    : { publish: true, signup: true, fetch: true, get: true },
   nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
   parser: USE_REAL_PARSER ? 'real' : 'mock',
   emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
