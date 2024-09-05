@@ -214,24 +214,8 @@ export const UserSettingsPage = () => {
         </Box>
 
         <Box
-          pad={{ horizontal: 'medium', top: '8px' }}
-          margin={{ bottom: '24px' }}>
-          <SettingSectionTitle
-            value={t(I18Keys.downloads)}></SettingSectionTitle>
-          <Box pad={{ vertical: '8px' }}>
-            <Text
-              style={{
-                fontSize: '16px',
-                color: constants.colors.checkboxes,
-                fontWeight: '500',
-                cursor: 'pointer',
-              }}>
-              {t(I18Keys.installApp)}
-            </Text>
-          </Box>
-        </Box>
-
-        <Box pad={{ horizontal: 'medium' }} margin={{ bottom: '8px' }}>
+          pad={{ horizontal: 'medium', top: '24px' }}
+          margin={{ bottom: '8px' }}>
           <SettingSectionTitle
             value={t(I18Keys.usingApp)}></SettingSectionTitle>
         </Box>
@@ -249,6 +233,16 @@ export const UserSettingsPage = () => {
           onSectionClicked={() => {
             setShowSettingsPage(SettingsSections.Notifications);
           }}></SettingsSection>
+
+        <SettingsSection
+          icon={<SupportIcon size={24}></SupportIcon>}
+          title={t(I18Keys.readTheDocs)}
+          description={
+            <Trans
+              i18nKey={I18Keys.readTheDocsDescription}
+              components={{ a: <a></a> }}></Trans>
+          }
+          showChevron={false}></SettingsSection>
 
         <SettingsSection
           icon={<SupportIcon size={24}></SupportIcon>}

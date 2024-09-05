@@ -159,6 +159,10 @@ export enum I18Keys {
   notificationsSettings = 's057',
   notificationsSettingsExplainer = 's057c',
   publishingAutomationExplainer = 's056c',
+
+  readTheDocs = 's058d',
+  readTheDocsDescription = 's058cd',
+
   getSupport = 's058',
   getSupportDescription = 's058c',
 
@@ -442,6 +446,10 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.unpublishWarningTitle]: 'Retract your nanopublication',
   [I18Keys.unpublishWarningPar01]:
     'This action marks your nanopublication as retracted. You can republish it later if you wish.',
+
+  [I18Keys.readTheDocs]: 'Documentation',
+  [I18Keys.readTheDocsDescription]:
+    '<a href="https://sense-nets.xyz/docs" target="_blank">https://sense-nets.xyz/docs</a>',
 };
 
 i18n.use(initReactI18next).init({
