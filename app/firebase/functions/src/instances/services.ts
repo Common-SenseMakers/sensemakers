@@ -206,6 +206,7 @@ export const createServices = () => {
     logger.debug('services', {
       USE_REAL_PARSER: USE_REAL_PARSER.value(),
       USE_REAL_TWITTER: USE_REAL_TWITTERX.value(),
+      USE_REAL_MASTODON: USE_REAL_MASTODON.value(),
       USE_REAL_NANOPUB: USE_REAL_NANOPUB.value(),
       USE_REAL_EMAIL: USE_REAL_EMAIL.value(),
     });
