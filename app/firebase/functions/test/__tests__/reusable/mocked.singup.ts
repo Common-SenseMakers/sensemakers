@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { logger } from 'firebase-functions';
 
 import { TwitterSignupData } from '../../../src/@shared/types/types.twitter';
+import { MastodonSignupData } from '../../../src/@shared/types/types.mastodon';
 import { PLATFORM } from '../../../src/@shared/types/types.user';
 import { UsersHelper } from '../../../src/users/users.helper';
 import { getPrefixedUserId } from '../../../src/users/users.utils';
@@ -9,13 +10,14 @@ import { TestServices } from '../test.services';
 
 export const handleSignupMock = async (
   services: TestServices,
-  signupData: TwitterSignupData
+  signupData: TwitterSignupData | MastodonSignupData
 ) => {
+  const platform = 'codeChallenge' in signupData ? PLATFORM.Twitter : PLATFORM.Mastodon;
   const userId = await services.db.run(async (manager) => {
-    logger.debug(`handleSignup`, { user_id: signupData.codeChallenge });
+    logger.debug(`handleSignup`, { user_id: 'codeChallenge' in signupData ? signupData.codeChallenge : signupData.code });
 
     const result = await services.users.handleSignup(
-      PLATFORM.Twitter,
+      platform,
       signupData,
       manager
     );
@@ -29,7 +31,7 @@ export const handleSignupMock = async (
     }
 
     expect(result.userId).to.eq(
-      getPrefixedUserId(PLATFORM.Twitter, signupData.codeChallenge)
+      getPrefixedUserId(platform, 'codeChallenge' in signupData ? signupData.codeChallenge : signupData.code)
     );
     expect(result.ourAccessToken).to.not.be.undefined;
 
@@ -42,13 +44,13 @@ export const handleSignupMock = async (
 
     expect(userRead).to.not.be.undefined;
 
-    const account = UsersHelper.getAccount(userRead, PLATFORM.Twitter);
+    const account = UsersHelper.getAccount(userRead, platform);
     if (!account?.profile) {
       throw new Error('unexpected');
     }
 
     const userReadProfile = await services.users.repo.getByPlatformUsername(
-      PLATFORM.Twitter,
+      platform,
       'username',
       account.profile.username,
       manager

@@ -1,4 +1,5 @@
 import { TwitterSignupContext } from '../../src/@shared/types/types.twitter';
+import { MastodonSignupContext } from '../../src/@shared/types/types.mastodon';
 import {
   AppUser,
   NanopubAccountCredentials,
@@ -8,9 +9,10 @@ import {
 import { TransactionManager } from '../../src/db/transaction.manager';
 import { getPrefixedUserId } from '../../src/users/users.utils';
 import { handleSignupMock } from '../__tests__/reusable/mocked.singup';
-import { USE_REAL_TWITTER } from '../__tests__/setup';
+import { USE_REAL_TWITTER, USE_REAL_MASTODON } from '../__tests__/setup';
 import { TestServices } from '../__tests__/test.services';
 import { authenticateTwitterUser } from './authenticate.twitter';
+import { authenticateMastodonUser } from './authenticate.mastodon';
 import { getNanopubProfile } from './nanopub.profile';
 
 export const authenticateTestUsers = async (
@@ -28,39 +30,96 @@ export const authenticateTestUsers = async (
 export const authenticateTestUser = async (
   credentials: TestUserCredentials,
   services: TestServices,
-  manager: TransactionManager
+  manager: TransactionManager,
+  platforms: PLATFORM[] = [PLATFORM.Twitter, PLATFORM.Nanopub, PLATFORM.Mastodon]
 ): Promise<AppUser> => {
-  const user0 = await (async () => {
-    if (USE_REAL_TWITTER) {
-      return authenticateTwitterUser(credentials.twitter, services, manager);
-    } else {
-      const twitterSignupContext: TwitterSignupContext =
-        await services.users.getSignupContext(
-          PLATFORM.Twitter,
-          credentials.twitter.id
-        );
-      const userId = await handleSignupMock(services, {
-        ...twitterSignupContext,
-        code: 'mocked',
-      });
+  let user: AppUser | undefined;
 
-      return services.users.repo.getUser(userId, manager, true);
-    }
-  })();
-
-  if (!USE_REAL_TWITTER) {
-    // authenticateTwitterUser dont add nanopub credentials, getMockedUser does
-    return await authenticateNanopub(user0, credentials.nanopub);
+  if (platforms.includes(PLATFORM.Twitter)) {
+    user = await authenticateTwitterForUser(credentials, services, manager);
   }
 
-  return user0;
+  if (platforms.includes(PLATFORM.Mastodon)) {
+    user = await authenticateMastodonForUser(credentials, services, manager, user);
+  }
+
+  if (platforms.includes(PLATFORM.Nanopub)) {
+    user = await authenticateNanopubForUser(credentials, user);
+  }
+
+  if (!user) {
+    throw new Error('No platforms were authenticated');
+  }
+
+  return user;
 };
 
-const authenticateNanopub = async (
-  user: AppUser,
-  credentials: NanopubAccountCredentials
+const authenticateTwitterForUser = async (
+  credentials: TestUserCredentials,
+  services: TestServices,
+  manager: TransactionManager
 ): Promise<AppUser> => {
-  const { profile } = await getNanopubProfile(credentials.ethPrivateKey);
+  if (USE_REAL_TWITTER) {
+    return authenticateTwitterUser(credentials.twitter, services, manager);
+  } else {
+    const twitterSignupContext: TwitterSignupContext =
+      await services.users.getSignupContext(
+        PLATFORM.Twitter,
+        credentials.twitter.id
+      );
+    const userId = await handleSignupMock(services, {
+      ...twitterSignupContext,
+      code: 'mocked',
+    });
+
+    return services.users.repo.getUser(userId, manager, true);
+  }
+};
+
+const authenticateMastodonForUser = async (
+  credentials: TestUserCredentials,
+  services: TestServices,
+  manager: TransactionManager,
+  user?: AppUser
+): Promise<AppUser> => {
+  if (USE_REAL_MASTODON) {
+    return authenticateMastodonUser(credentials.mastodon, services, manager);
+  } else {
+    const mastodonSignupContext: MastodonSignupContext =
+      await services.users.getSignupContext(
+        PLATFORM.Mastodon,
+        credentials.mastodon.id
+      );
+    const userId = await handleSignupMock(services, {
+      ...mastodonSignupContext,
+      code: 'mocked',
+    });
+
+    return services.users.repo.getUser(userId, manager, true);
+  }
+};
+
+const authenticateNanopubForUser = async (
+  credentials: TestUserCredentials,
+  user?: AppUser
+): Promise<AppUser> => {
+  const { profile } = await getNanopubProfile(credentials.nanopub.ethPrivateKey);
+
+  if (!user) {
+    user = {
+      userId: getPrefixedUserId(PLATFORM.Nanopub, profile.ethAddress),
+      platformIds: [],
+      settings: {
+        autopost: {
+          [PLATFORM.Nanopub]: {
+            value: 'MANUAL',
+          },
+        },
+        notificationFreq: 'DAILY',
+      },
+      signupDate: Date.now(),
+    };
+  }
 
   user.platformIds.push(
     getPrefixedUserId(PLATFORM.Nanopub, profile.ethAddress)

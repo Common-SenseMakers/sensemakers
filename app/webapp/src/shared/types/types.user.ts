@@ -163,7 +163,15 @@ export interface UserPlatformProfile {
 export interface TestUserCredentials {
   userId: string;
   twitter: TwitterAccountCredentials;
+  mastodon: MastodonAccountCredentials;
   nanopub: NanopubAccountCredentials;
+}
+
+export interface MastodonAccountCredentials {
+  id: string;
+  username: string;
+  password: string;
+  type: 'read' | 'write';
 }
 
 export interface TwitterAccountCredentials {
