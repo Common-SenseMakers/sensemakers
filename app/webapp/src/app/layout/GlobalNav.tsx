@@ -17,7 +17,7 @@ export const locationToPageIx = (location: Location) => {
 
   if (
     location.pathname === '/' ||
-    location.pathname.startsWith(`/${PostsQueryStatus.ALL}`) ||
+    location.pathname.startsWith(`/${PostsQueryStatus.DRAFTS}`) ||
     location.pathname.startsWith(`/${PostsQueryStatus.IGNORED}`) ||
     location.pathname.startsWith(`/${PostsQueryStatus.PENDING}`)
   ) {
@@ -55,6 +55,8 @@ export const GlobalNav = (props: {}) => {
     const externalBoxProps: BoxExtendedProps = {
       style: {
         flexGrow: 1,
+        height: '100%',
+        justifyContent: 'center',
       },
       border: {
         color: isSelected ? constants.colors.primary : 'transparent',
@@ -67,6 +69,7 @@ export const GlobalNav = (props: {}) => {
       <Box {...externalBoxProps}>
         <AppButton
           plain
+          style={{ height: '100%' }}
           onClick={() => {
             navigate(route);
           }}>
@@ -86,7 +89,7 @@ export const GlobalNav = (props: {}) => {
       {button(
         'Drafts',
         <DraftsIcon></DraftsIcon>,
-        `/${PostsQueryStatus.ALL}`,
+        `/${PostsQueryStatus.DRAFTS}`,
         pageIx === 0
       )}
       {button(

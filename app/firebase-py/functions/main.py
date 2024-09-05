@@ -10,7 +10,12 @@ from shared_functions.main import (
     SM_FUNCTION_post_parser_config,
     SM_FUNCTION_post_parser_imp,
 )
-from env_config import openai_api_key, model
+from env_config import (
+    openai_api_key,
+    ref_tagger_model,
+    topic_model,
+    kw_model,
+)
 
 app = initialize_app()
 
@@ -31,7 +36,9 @@ def SM_FUNCTION_post_parser(request):
         "openrouter_api_key": openai_api_key,
         "openrouter_api_base": "https://openrouter.ai/api/v1",
         "openrouter_referer": "https://127.0.0.1:3000/",
-        "llm_type": model,
+        "ref_tagger_llm_type": ref_tagger_model,
+        "kw_llm_type": kw_model,
+        "topic_llm_type": topic_model,
     }
 
     logger.info(f"Calling SM_FUNCTION_post_parser_imp with config: {config}")

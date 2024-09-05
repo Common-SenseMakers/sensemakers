@@ -25,6 +25,7 @@ import {
   PostUpdate,
   PostUpdatePayload,
   PostsQueryStatus,
+  UnpublishPlatformPostPayload,
 } from '../shared/types/types.posts';
 import { TwitterThread } from '../shared/types/types.twitter';
 import {
@@ -41,6 +42,7 @@ import { AppPostStatus, getPostStatuses } from './posts.helper';
 const DEBUG = false;
 
 interface PostContextType {
+  postId?: string;
   post: AppPostFull | undefined;
   author: AppUserRead;
   reparse: () => void;
@@ -56,6 +58,9 @@ interface PostContextType {
   approveOrUpdate: () => Promise<void>;
   prevPostId?: string;
   nextPostId?: string;
+  retractNanopublication: () => Promise<void>;
+  isRetracting: boolean;
+  errorApprovingMsg?: string;
 }
 
 const PostContextValue = createContext<PostContextType | undefined>(undefined);
@@ -80,6 +85,10 @@ export const PostContext: React.FC<{
 
   const { filterStatus, removePost, getNextAndPrev } = useUserPosts();
   const [isUpdating, setIsUpdating] = React.useState(false);
+  const [isRetracting, setIsRetracting] = React.useState(false);
+  const [errorApprovingMsg, setErrorApprovingMsg] = React.useState<
+    string | undefined
+  >(undefined);
 
   const appFetch = useAppFetch();
 
@@ -112,6 +121,7 @@ export const PostContext: React.FC<{
     if (isLoading) return postInit;
     if (postFetched && postFetched !== null) {
       setIsUpdating(false);
+      setIsRetracting(false);
       return { ...postFetched, ...postEdited };
     }
     return undefined;
@@ -243,30 +253,11 @@ export const PostContext: React.FC<{
     }
   };
 
-  /** updatePost and optimistically update the post object */
-  const optimisticUpdate = useCallback(
-    async (update: PostUpdate) => {
-      if (!post) {
-        return;
-      }
-
-      setPostEdited({ ...post, ...update });
-      _updatePost(update);
-    },
-    [post]
-  );
-
-  const updateSemantics = (newSemantics: string) =>
-    optimisticUpdate({
-      reviewedStatus: AppPostReviewStatus.DRAFT,
-      semantics: newSemantics,
-    });
-
   /** updatePost and optimistically update the posts lists */
   const updatePost = async (update: PostUpdate) => {
     /** optimistic remove the post from the filtered list */
     const statusKept = (() => {
-      if (filterStatus === PostsQueryStatus.ALL) {
+      if (filterStatus === PostsQueryStatus.DRAFTS) {
         return true;
       }
       if (filterStatus === PostsQueryStatus.PENDING) {
@@ -287,6 +278,25 @@ export const PostContext: React.FC<{
     _updatePost(update);
   };
 
+  /** updatePost and optimistically update the post object */
+  const optimisticUpdate = useCallback(
+    async (update: PostUpdate) => {
+      if (!post) {
+        return;
+      }
+
+      setPostEdited({ ...post, ...update });
+      updatePost(update);
+    },
+    [post]
+  );
+
+  const updateSemantics = (newSemantics: string) =>
+    optimisticUpdate({
+      reviewedStatus: AppPostReviewStatus.DRAFT,
+      semantics: newSemantics,
+    });
+
   const postStatuses = useMemo(() => getPostStatuses(post), [post]);
 
   const { signNanopublication } = useNanopubContext();
@@ -296,6 +306,9 @@ export const PostContext: React.FC<{
     setIsUpdating(true);
     const nanopub = post?.mirrors.find(
       (m) => m.platformId === PLATFORM.Nanopub
+    );
+    const allOtherMirrors = post?.mirrors.filter(
+      (m) => m.platformId !== PLATFORM.Nanopub
     );
 
     if (!nanopub || !nanopub.draft) {
@@ -315,13 +328,25 @@ export const PostContext: React.FC<{
      * also set in the backend anyway) */
     if (post && post.republishedStatus === AppPostRepublishedStatus.PENDING) {
       nanopub.draft.postApproval = PlatformPostDraftApproval.APPROVED;
+      // removeDraft(post.id);
     }
 
     if (post) {
-      await appFetch<void, PublishPostPayload>('/api/posts/approve', {
-        post,
-        platformIds: [PLATFORM.Nanopub],
-      });
+      if (errorApprovingMsg) {
+        setErrorApprovingMsg(undefined);
+      }
+      try {
+        await appFetch<void, PublishPostPayload>('/api/posts/approve', {
+          post: {
+            ...post,
+            mirrors: [...(allOtherMirrors ? allOtherMirrors : []), nanopub],
+          },
+          platformIds: [PLATFORM.Nanopub],
+        });
+      } catch (e: any) {
+        setErrorApprovingMsg(e.message);
+        setIsUpdating(false);
+      }
     }
 
     setEnabledEdit(false);
@@ -329,19 +354,73 @@ export const PostContext: React.FC<{
     // setIsUpdating(false); should be set by the re-fetch flow
   };
 
+  const retractNanopublication = async () => {
+    setIsRetracting(true);
+
+    const nanopub = post?.mirrors.find(
+      (m) => m.platformId === PLATFORM.Nanopub
+    );
+
+    if (!nanopub || !nanopub.post_id) {
+      throw new Error(`Unexpected nanopub mirror not found`);
+    }
+
+    if (!nanopub.deleteDraft) {
+      throw new Error(`Delete draft not available`);
+    }
+
+    if (nanopub.deleteDraft.signerType === PlatformPostSignerType.USER) {
+      if (!signNanopublication) {
+        throw new Error(`Unexpected signNanopublication undefined`);
+      }
+
+      const signed = await signNanopublication(
+        nanopub.deleteDraft.unsignedPost
+      );
+      nanopub.deleteDraft.signedPost = signed.rdf();
+    }
+
+    nanopub.deleteDraft.postApproval = PlatformPostDraftApproval.APPROVED;
+
+    if (post) {
+      if (errorApprovingMsg) {
+        setErrorApprovingMsg(undefined);
+      }
+      try {
+        await appFetch<void, UnpublishPlatformPostPayload>(
+          '/api/posts/unpublish',
+          {
+            post_id: nanopub.post_id,
+            platformId: PLATFORM.Nanopub,
+            postId: post.id,
+          }
+        );
+      } catch (e: any) {
+        setErrorApprovingMsg(e.message);
+        setIsRetracting(false);
+      }
+    }
+
+    // setIsUpdating(false); should be set by the re-fetch flow
+    // setIsRetracting(false); should be set by the re-fetch flow
+  };
+
   const editable =
     connectedUser &&
     connectedUser.userId === post?.authorId &&
-    (!postStatuses.published || enabledEdit);
+    (!postStatuses.live || enabledEdit);
 
   const { prevPostId, nextPostId } = useMemo(
     () => getNextAndPrev(post?.id),
     [post, getNextAndPrev]
   );
 
+  const postIdFinal = useMemo(() => post?.id, [post]);
+
   return (
     <PostContextValue.Provider
       value={{
+        postId: postIdFinal,
         post,
         postStatuses,
         author,
@@ -349,7 +428,7 @@ export const PostContext: React.FC<{
         nanopubDraft,
         reparse,
         updateSemantics,
-        updatePost,
+        updatePost: optimisticUpdate,
         isUpdating,
         approveOrUpdate,
         editable: editable !== undefined ? editable : false,
@@ -357,6 +436,9 @@ export const PostContext: React.FC<{
         enabledEdit,
         prevPostId,
         nextPostId,
+        retractNanopublication,
+        isRetracting,
+        errorApprovingMsg,
       }}>
       {children}
     </PostContextValue.Provider>

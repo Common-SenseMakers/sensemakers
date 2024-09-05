@@ -1,4 +1,4 @@
-import { Box } from 'grommet';
+import { Box, Text } from 'grommet';
 import { Refresh } from 'grommet-icons';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router-dom';
 
 import { ClearIcon } from '../app/icons/ClearIcon';
 import { SendIcon } from '../app/icons/SendIcon';
-import { ViewportPage } from '../app/layout/Viewport';
 import { I18Keys } from '../i18n/i18n';
 import { AbsoluteRoutes } from '../route.names';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
@@ -27,9 +26,9 @@ import { PostNav } from './PostNav';
 import { PostPublish } from './PostPublish';
 import { PostTextEditable } from './PostTextEditable';
 import { POSTING_POST_ID } from './PostingPage';
-import { concatenateThread } from './posts.helper';
+import { concatenateThread, hideSemanticsHelper } from './posts.helper';
 
-const DEBUG = false;
+const DEBUG = true;
 
 /** extract the postId from the route and pass it to a PostContext */
 export const PostView = (props: { profile?: TwitterUserProfile }) => {
@@ -42,10 +41,14 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     POSTING_POST_ID,
     null
   );
+  // local state to prevent detecting the returning before leaving
+  const [justSetPostId, setJustSetPostId] = useState<boolean>(false);
+
   const { connect: _connectOrcid } = useOrcidContext();
 
   const { constants } = useThemeContext();
   const {
+    postId,
     post,
     nanopubDraft,
     updateSemantics,
@@ -58,6 +61,9 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     enabledEdit,
     setEnabledEdit,
     nextPostId,
+    retractNanopublication,
+    isRetracting,
+    errorApprovingMsg,
   } = usePost();
 
   const postText = post ? concatenateThread(post.generic) : undefined;
@@ -91,8 +97,8 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     setEnabledEdit(false);
   };
 
-  const retract = () => {
-    console.log('retract tbd');
+  const startUnpublish = () => {
+    setUnpublishIntent(true);
   };
 
   const { signNanopublication } = useNanopubContext();
@@ -102,25 +108,35 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     connectedUser.nanopub &&
     connectedUser.nanopub.length > 0 &&
     signNanopublication &&
-    nanopubDraft &&
-    !postStatuses.published;
+    nanopubDraft;
 
   const readyToNanopublish =
-    canPublishNanopub && nanopubDraft && !postStatuses.published;
+    canPublishNanopub && nanopubDraft && !postStatuses.live;
+
+  const clickedNextAfterOrcid = () => {
+    if (disableOrcidInvite) {
+      // disable after having cli
+      setDisableOrcidInvite(true);
+    }
+    setAskedOrcid(true);
+  };
 
   const connectOrcid = () => {
     if (post) {
+      if (DEBUG) console.log(`connectOrcid. Setting postId ${post.id}`);
       setPostingPostId(post.id);
+      setJustSetPostId(true);
       _connectOrcid('/posting');
     }
   };
 
   // receives the navigate from PostingPage and opens the post intent
   useEffect(() => {
-    if (postingPostId && connectedUser) {
+    if (postingPostId && connectedUser && !justSetPostId && postId) {
+      if (DEBUG) console.log(`posting post detected for ${postingPostId}`);
       setPostingPostId(null);
     }
-  }, [postingPostId, connectedUser]);
+  }, [postingPostId, connectedUser, justSetPostId, postId]);
 
   const openNextPost = () => {
     if (nextPostId) {
@@ -155,20 +171,20 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       return <PostPublish></PostPublish>;
     }
 
-    if (postStatuses.published && !enabledEdit) {
+    if (postStatuses.live && !enabledEdit) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
           <Box width="50%" style={{ flexGrow: 1 }}>
             <AppButton
-              disabled={isUpdating}
+              disabled={isUpdating || isRetracting}
               icon={<ClearIcon></ClearIcon>}
-              onClick={() => retract()}
-              label={t(I18Keys.retract)}></AppButton>
+              onClick={() => startUnpublish()}
+              label={t(I18Keys.unpublish)}></AppButton>
           </Box>
           <Box width="50%" align="end" gap="small">
             <AppButton
               primary
-              disabled={isUpdating}
+              disabled={isUpdating || isRetracting}
               icon={<SendIcon></SendIcon>}
               onClick={() => enableEditOrUpdate()}
               label={t(I18Keys.edit)}
@@ -178,7 +194,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       );
     }
 
-    if (postStatuses.published && enabledEdit) {
+    if (postStatuses.live && enabledEdit) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
           <Box width="50%" style={{ flexGrow: 1 }}>
@@ -205,6 +221,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   })();
 
   const editable = _editable;
+  const hideSemantics = hideSemanticsHelper(post);
 
   const content = (() => {
     if (!post) {
@@ -220,30 +237,32 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     return (
       <>
         <Box pad="medium">
-          <PostHeader
-            profile={props.profile}
-            margin={{ bottom: '16px' }}></PostHeader>
-          <SemanticsEditor
-            patternProps={{
-              isLoading: postStatuses.isParsing,
-              editable,
-              semantics: post?.semantics,
-              originalParsed: post?.originalParsed,
-              semanticsUpdated: semanticsUpdated,
-            }}
-            include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
+          <PostHeader margin={{ bottom: '16px' }}></PostHeader>
+          {!hideSemantics && (
+            <SemanticsEditor
+              patternProps={{
+                isLoading: postStatuses.isParsing,
+                editable,
+                semantics: post?.semantics,
+                originalParsed: post?.originalParsed,
+                semanticsUpdated: semanticsUpdated,
+              }}
+              include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
+          )}
 
           <PostTextEditable text={postText}></PostTextEditable>
 
-          <SemanticsEditor
-            patternProps={{
-              isLoading: postStatuses.isParsing,
-              editable,
-              semantics: post?.semantics,
-              originalParsed: post?.originalParsed,
-              semanticsUpdated: semanticsUpdated,
-            }}
-            include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
+          {!hideSemantics && (
+            <SemanticsEditor
+              patternProps={{
+                isLoading: postStatuses.isParsing,
+                editable,
+                semantics: post?.semantics,
+                originalParsed: post?.originalParsed,
+                semanticsUpdated: semanticsUpdated,
+              }}
+              include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
+          )}
 
           {action}
         </Box>
@@ -255,7 +274,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     <ViewportPage
       content={
         <Box fill>
-          <PostNav profile={props.profile}></PostNav>
+          <PostNav></PostNav>
           {content}
         </Box>
       }></ViewportPage>

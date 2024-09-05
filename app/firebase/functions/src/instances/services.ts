@@ -1,3 +1,5 @@
+import { Firestore } from 'firebase-admin/firestore';
+
 import { PLATFORM } from '../@shared/types/types.user';
 import { ActivityRepository } from '../activity/activity.repository';
 import { ActivityService } from '../activity/activity.service';
@@ -60,8 +62,10 @@ export interface Services {
   email: EmailSenderService;
 }
 
-export const createServices = () => {
-  const db = new DBInstance();
+export const createServices = (firestore: Firestore) => {
+  if (DEBUG) logger.info('Creating services');
+
+  const db = new DBInstance(firestore);
   const userRepo = new UsersRepository(db);
   const postsRepo = new PostsRepository(db);
   const triplesRepo = new TriplesRepository(db);
@@ -84,7 +88,9 @@ export const createServices = () => {
 
   const twitter = getTwitterMock(
     _twitter,
-    USE_REAL_TWITTERX.value() ? undefined : { signup: true },
+    USE_REAL_TWITTERX.value()
+      ? undefined
+      : { signup: true, fetch: true, publish: true, get: true },
     testUser
   );
 
@@ -163,7 +169,8 @@ export const createServices = () => {
     usersService,
     postsProcessing,
     platformsService,
-    parser
+    parser,
+    time
   );
 
   /** activity service */

@@ -3,7 +3,12 @@ from shared_functions.main import (
     SM_FUNCTION_post_parser_imp,
     SM_FUNCTION_post_parser_config,
 )
-from env_config import openai_api_key
+from env_config import (
+    openai_api_key,
+    ref_tagger_model,
+    topic_model,
+    kw_model,
+)
 
 # content = 'This is definititely an announcement of https://www.alink.com and I dont agree with https://anotherlink.io'
 # author_data = {
@@ -91,12 +96,28 @@ thread_data = {
                 "url": "https://x.com/FDAadcomms/status/1798107142219796794",
                 "thread": [
                     {
-                        "content": "@eturnermd1 #MDMAadcomm VOTE 2/2: Do the benefits of midomafetamine with FDA’s proposed risk evaluation and mitigation strategy (REMS) outweigh its risks for the treatment of patients with PTSD?\n1-Yes\n10-No\n0-Abstain https://twitter.com/FDAadcomms/status/1798107142219796794/photo/1",
+                        "content": "@eturnermd1 #MDMAadcomm VOTE 2/2 at https://x.com/FDAadcomms/status/12345: Do the benefits of midomafetamine with FDA’s proposed risk evaluation and mitigation strategy (REMS) outweigh its risks for the treatment of patients with PTSD?\n1-Yes\n10-No\n0-Abstain https://twitter.com/FDAadcomms/status/1798107142219796794/photo/1",
                         "url": "https://x.com/FDAadcomms/status/1798107142219796794",
                         "quotedThread": None,
                     }
                 ],
             },
+        },
+    ],
+}
+
+thread_data_2 = {
+    "author": {
+        "id": "2111",
+        "name": "Eiko Fried",
+        "username": "Eiko Fried",
+        "platformId": "twitter",
+    },
+    "url": "https://x.com/EikoFried/status/1798166869574398271",
+    "thread": [
+        {
+            "content": "Yup",
+            "url": "https://x.com/EikoFried/status/1798166869574398271",
         },
     ],
 }
@@ -108,7 +129,9 @@ config: SM_FUNCTION_post_parser_config = {
     "openrouter_api_key": openai_api_key,
     "openrouter_api_base": "https://openrouter.ai/api/v1",
     "openrouter_referer": "https://127.0.0.1:3000/",
-    "llm_type": "openai/gpt-3.5-turbo",
+    "ref_tagger_llm_type": ref_tagger_model,
+    "kw_llm_type": kw_model,
+    "topic_llm_type": topic_model,
 }
 
 result = SM_FUNCTION_post_parser_imp(parser_request, config)
@@ -117,6 +140,14 @@ serialized = result.model_dump_json()
 
 json_obj = json.loads(serialized)
 print(f"semantics: {json_obj['semantics']}")
+
+# Sorting the refs metadata dictionary by the 'order' attribute
+sorted_refs = sorted(
+    json_obj["support"]["refs_meta"].items(),
+    key=lambda x: x[1]["order"],
+)
+
+print(f"ordered references: {[url for url, _ in sorted_refs]}")
 
 with open("last_output.json", "wb") as file:
     file.write(serialized.encode("utf-8"))

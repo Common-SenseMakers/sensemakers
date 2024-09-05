@@ -44,6 +44,13 @@ I really liked this paper!
 https://arxiv.org/abs/2402.04607
 """
 
+TEST_POST_TEXT_W_2_REF = """
+I really liked these two papers!
+https://arxiv.org/abs/2402.04607
+
+https://arxiv.org/abs/2401.14000
+"""
+
 
 def test_combined_pp():
     multi_config = create_multi_config_for_tests()
@@ -54,7 +61,22 @@ def test_combined_pp():
     assert len(res.keywords) > 0
     assert len(res.metadata_list) == 1
     assert res.filter_classification == SciFilterClassfication.CITOID_DETECTED_RESEARCH
+    assert res.metadata_list[0].order == 1
+    
 
+def test_combined_2_pp():
+    multi_config = create_multi_config_for_tests()
+    multi_config.post_process_type = PostProcessType.COMBINED
+    mcp = MultiChainParser(multi_config)
+    res = mcp.process_text(TEST_POST_TEXT_W_2_REF)
+    assert res.item_types == ["preprint", "conferencePaper"]
+    assert len(res.keywords) > 0
+    assert len(res.metadata_list) == 2
+    assert res.filter_classification == SciFilterClassfication.CITOID_DETECTED_RESEARCH
+    assert res.metadata_list[0].order == 1
+    assert res.metadata_list[0].url == "https://arxiv.org/abs/2402.04607"
+    assert res.metadata_list[1].order == 2
+    assert res.metadata_list[1].url == "https://arxiv.org/abs/2401.14000"
 
 def test_firebase_pp():
     multi_config = create_multi_config_for_tests()
@@ -109,6 +131,7 @@ def test_multi_chain_batch_pp_combined():
         == "https://royalsocietypublishing.org/doi/10.1098/rstb.2022.0267"
     )
     assert len(out_0.metadata_list) == 1
+    assert out_0.metadata_list[0].order == 1
 
     out_1 = res[1]
     assert len(out_1.metadata_list) == 1
@@ -116,15 +139,20 @@ def test_multi_chain_batch_pp_combined():
         out_1.metadata_list[0].url
         == "https://write.as/ulrikehahn/some-thoughts-on-social-media-for-science"
     )
+    assert out_1.metadata_list[0].order == 1
 
     out_2 = res[2]
     assert len(out_2.metadata_list) == 2
+    
+    # ordering not preserved yet for masto so don't test that yet
     assert set(out_2.reference_urls) == set(
         [
             "https://paragraph.xyz/@sense-nets/sense-nets-intro",
             "https://paragraph.xyz/@sense-nets/2-project-plan",
         ]
     )
+    
+    
 
 
 def test_convert_item_types_to_rdf_triplets_single_entry():
@@ -186,13 +214,55 @@ def test_convert_item_types_to_rdf_triplets_mismatched_lengths():
     with pytest.raises(AssertionError):
         convert_item_types_to_rdf_triplets(item_types, reference_urls)
 
+def test_short_post_no_ref_i146():
+    multi_config = create_multi_config_for_tests()
+    multi_config.post_process_type = PostProcessType.FIREBASE
+    mcp = MultiChainParser(multi_config)
+    res = mcp.process_text("yup")
+    assert URIRef('https://sense-nets.xyz/mySemanticPost') in res.semantics.all_nodes()
+    
 
 if __name__ == "__main__":
     multi_config = create_multi_config_for_tests()
     multi_config.post_process_type = PostProcessType.COMBINED
     mcp = MultiChainParser(multi_config)
     res = mcp.process_text(TEST_POST_TEXT_W_REF)
+    assert res.item_types == ["preprint"]
+    assert len(res.keywords) > 0
+#     posts = [scrape_post(url) for url in urls]
+#     multi_config = create_multi_config_for_tests(llm_type="google/gemma-7b-it:free")
+#     multi_chain_parser = MultiChainParser(multi_config)
+#     multi_chain_parser.config.post_process_type = PostProcessType.COMBINED
+#     res = multi_chain_parser.batch_process_ref_posts(posts)
 
-    # len(res.support.refs_meta) == 1
-    # assert "test" in mcp.pparsers
-    # assert "Google Scholar is manipulatable" in prompt
+#     out_0 = res[0]
+#     assert (
+#         out_0.metadata_list[0].url
+#         == "https://royalsocietypublishing.org/doi/10.1098/rstb.2022.0267"
+#     )
+#     assert len(out_0.metadata_list) == 1
+#     assert out_0.metadata_list[0].order == 1
+
+#     out_1 = res[1]
+#     assert len(out_1.metadata_list) == 1
+#     assert (
+#         out_1.metadata_list[0].url
+#         == "https://write.as/ulrikehahn/some-thoughts-on-social-media-for-science"
+#     )
+#     assert out_1.metadata_list[0].order == 1
+
+#     out_2 = res[2]
+#     assert len(out_2.metadata_list) == 2
+#     assert set(out_2.reference_urls) == set(
+#         [
+#             "https://paragraph.xyz/@sense-nets/sense-nets-intro",
+#             "https://paragraph.xyz/@sense-nets/2-project-plan",
+#         ]
+#     )
+    
+#     sorted_refs = sorted(
+#     out_2.metadata_list,
+#     key=lambda x: x.order,
+# )
+#     assert sorted_refs[0].url == "https://paragraph.xyz/@sense-nets/sense-nets-intro"
+#     assert sorted_refs[1].url == "https://paragraph.xyz/@sense-nets/2-project-plan"

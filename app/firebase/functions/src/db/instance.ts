@@ -1,4 +1,4 @@
-import { Firestore, getFirestore } from 'firebase-admin/firestore';
+import { Firestore } from 'firebase-admin/firestore';
 
 import { CollectionNames } from '../@shared/utils/collectionNames';
 import { logger } from '../instances/logger';
@@ -28,8 +28,9 @@ export class DBInstance {
     ) => FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
   };
 
-  constructor() {
-    this.firestore = getFirestore();
+  constructor(firestore: Firestore) {
+    if (DEBUG) logger.debug('Creating DBInstance');
+    this.firestore = firestore;
 
     this.collections = {
       signup: this.firestore.collection(CollectionNames.Signup),
@@ -53,7 +54,8 @@ export class DBInstance {
     func: HandleWithTxManager<R, P>,
     payload?: P,
     config: ManagerConfig = { mode: ManagerModes.TRANSACTION },
-    debugId: string = ''
+    debugId: string = '',
+    DEBUG: boolean = false
   ): Promise<R> {
     switch (config.mode) {
       case ManagerModes.TRANSACTION:

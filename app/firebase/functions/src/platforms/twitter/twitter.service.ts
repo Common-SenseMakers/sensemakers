@@ -4,6 +4,7 @@ import {
   Tweetv2FieldsParams,
   Tweetv2SearchParams,
   UserV2,
+  UsersV2Params,
 } from 'twitter-api-v2';
 
 import {
@@ -13,6 +14,7 @@ import {
 import {
   FetchedResult,
   PlatformPostCreate,
+  PlatformPostDeleteDraft,
   PlatformPostDraft,
   PlatformPostDraftApproval,
   PlatformPostPosted,
@@ -22,6 +24,7 @@ import {
 } from '../../@shared/types/types.platform.posts';
 import '../../@shared/types/types.posts';
 import {
+  AppPostFull,
   GenericAuthor,
   GenericPost,
   GenericThread,
@@ -33,9 +36,11 @@ import {
   TwitterSignupContext,
   TwitterSignupData,
   TwitterThread,
+  TwitterUser,
   TwitterUserDetails,
 } from '../../@shared/types/types.twitter';
 import {
+  AppUser,
   FetchedDetails,
   PLATFORM,
   UserDetailsBase,
@@ -94,7 +99,7 @@ export class TwitterService
     post_id: string,
     userDetails: UserDetailsBase<any, any, any>,
     manager: TransactionManager
-  ): Promise<PlatformPostPosted<TwitterThread>> {
+  ): Promise<PlatformPostPosted<TwitterThread, TwitterUser>> {
     const MAX_TWEETS = 30;
 
     const readOnlyClient = await this.getUserClient(
@@ -116,7 +121,7 @@ export class TwitterService
         throw new Error('author_id not found');
       }
 
-      const originalAuthor = await readOnlyClient.v2.user(authorId);
+      const { data: originalAuthor } = await readOnlyClient.v2.user(authorId);
 
       const _searchParams: Tweetv2SearchParams = {
         query: `conversation_id:${post_id} from:${authorId}`,
@@ -193,7 +198,7 @@ export class TwitterService
 
       const threads = (() => {
         if (allTweets.length > 0) {
-          return convertTweetsToThreads(allTweets, originalAuthor.data);
+          return convertTweetsToThreads(allTweets, originalAuthor);
         }
         return [];
       })();
@@ -209,6 +214,7 @@ export class TwitterService
         user_id: thread.author.id,
         timestampMs: dateStrToTimestampMs(thread.tweets[0].created_at),
         post: thread,
+        author: originalAuthor,
       };
     } catch (e: any) {
       throw new Error(handleTwitterError(e));
@@ -295,9 +301,16 @@ export class TwitterService
             });
 
             if (!originalAuthor) {
-              originalAuthor = result.data.includes?.users?.find(
-                (user) => user.id === userDetails.user_id
+              const profileParams: Partial<UsersV2Params> = {
+                'user.fields': ['profile_image_url', 'name', 'username'],
+              };
+
+              const originalAuthorData = await readOnlyClient.v2.user(
+                userDetails.user_id,
+                profileParams
               );
+
+              originalAuthor = originalAuthorData.data;
             }
             allTweets.push(...appTweets);
 
@@ -339,7 +352,7 @@ export class TwitterService
 
     const threads = await this.fetchInternal(params, userDetails, manager);
 
-    const platformPosts = threads.map((thread) => {
+    const platformPosts = threads.map((thread): PlatformPostPosted => {
       if (!thread.tweets[0].author_id) {
         throw new Error(`Unexpected author_id undefined`);
       }
@@ -353,6 +366,7 @@ export class TwitterService
         user_id: thread.tweets[0].author_id,
         timestampMs: dateStrToTimestampMs(thread.tweets[0].created_at),
         post: thread,
+        author: thread.author,
       };
     });
 
@@ -535,6 +549,14 @@ export class TwitterService
       signerType: PlatformPostSignerType.DELEGATED,
       postApproval: PlatformPostDraftApproval.PENDING,
     };
+  }
+
+  async buildDeleteDraft(
+    post_id: string,
+    post: AppPostFull,
+    author: AppUser
+  ): Promise<PlatformPostDeleteDraft | undefined> {
+    return undefined;
   }
 
   async signDraft(

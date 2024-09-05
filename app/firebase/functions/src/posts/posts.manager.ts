@@ -13,6 +13,7 @@ import {
   PlatformPostPublishOrigin,
   PlatformPostPublishStatus,
   PlatformPostSignerType,
+  PlatformPostStatusUpdate,
 } from '../@shared/types/types.platform.posts';
 import {
   AppPost,
@@ -33,14 +34,17 @@ import {
   PUBLISHABLE_PLATFORMS,
   UserDetailsBase,
 } from '../@shared/types/types.user';
+import { PARSING_TIMEOUT_MS } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
 import { ParserService } from '../parser/parser.service';
 import { PlatformsService } from '../platforms/platforms.service';
+import { TimeService } from '../time/time.service';
 import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { getUsernameTag } from '../users/users.utils';
+import { PostsHelper } from './posts.helper';
 import { PostsProcessing } from './posts.processing';
 
 const DEBUG = false;
@@ -59,7 +63,8 @@ export class PostsManager {
     protected users: UsersService,
     public processing: PostsProcessing,
     protected platforms: PlatformsService,
-    protected parserService: ParserService
+    protected parserService: ParserService,
+    protected time: TimeService
   ) {}
 
   /**
@@ -359,7 +364,7 @@ export class PostsManager {
                       return;
                     }
 
-                    /** Create the PlatformPosts */
+                    /** Create the PlatformPosts and AppPosts */
                     const platformPostsCreated =
                       await this.processing.createPlatformPosts(
                         platformPostsCreate,
@@ -414,7 +419,7 @@ export class PostsManager {
         queryParams
       );
 
-      if (queryParams.status === PostsQueryStatus.ALL) {
+      if (queryParams.status === PostsQueryStatus.DRAFTS) {
         if (appPosts.length < queryParams.fetchParams.expectedAmount) {
           await this.fetchUser({ userId, params: queryParams.fetchParams });
           return this.processing.posts.getOfUser(userId, queryParams);
@@ -430,7 +435,7 @@ export class PostsManager {
   async getOfUser(userId: string, _queryParams?: UserPostsQuery) {
     const queryParams: UserPostsQuery = {
       fetchParams: { expectedAmount: 10 },
-      status: PostsQueryStatus.ALL,
+      status: PostsQueryStatus.DRAFTS,
       ..._queryParams,
     };
 
@@ -466,9 +471,33 @@ export class PostsManager {
   }
 
   async getPost<T extends boolean>(postId: string, shouldThrow?: T) {
-    return this.db.run(async (manager) =>
-      this.processing.getPostFull(postId, manager, shouldThrow)
-    );
+    return this.db.run(async (manager) => {
+      const post = await this.processing.getPostFull(
+        postId,
+        manager,
+        shouldThrow
+      );
+      // use this occassion to check if post processing expired
+      if (post && post.parsingStatus === AppPostParsingStatus.PROCESSING) {
+        if (
+          post.parsingStartedAtMs &&
+          this.time.now() >= post.parsingStartedAtMs + PARSING_TIMEOUT_MS
+        ) {
+          await this.updatePost(
+            postId,
+            {
+              parsingStatus: AppPostParsingStatus.EXPIRED,
+            },
+            manager
+          );
+
+          // re-read post with latest parsingStatus
+          return this.processing.getPostFull(postId, manager, shouldThrow);
+        }
+      }
+
+      return post;
+    });
   }
 
   async parsePost(postId: string) {
@@ -483,7 +512,10 @@ export class PostsManager {
         if (DEBUG) logger.debug(`parsePost - marking as parsing ${postId}`);
         await this.updatePost(
           postId,
-          { parsingStatus: AppPostParsingStatus.PROCESSING },
+          {
+            parsingStatus: AppPostParsingStatus.PROCESSING,
+            parsingStartedAtMs: this.time.now(),
+          },
           manager
         );
 
@@ -564,21 +596,102 @@ export class PostsManager {
   ) {
     if (DEBUG) logger.debug(`updatePost ${postId}`, { postId, postUpdate });
     await this.processing.posts.updateContent(postId, postUpdate, manager);
-
-    if (postUpdate.semantics || postUpdate.generic) {
-      /** rebuild the platform drafts with the new post content */
-      if (DEBUG)
-        logger.debug(`updatePost - semantics, content found ${postId}`, {
-          postId,
-          postUpdate,
-        });
-
-      await this.processing.createOrUpdatePostDrafts(postId, manager);
-    }
+    await this.processing.createOrUpdatePostDrafts(postId, manager);
 
     /** sync the semantics as triples when the post is updated */
     const postUpdated = await this.processing.posts.get(postId, manager, true);
     await this.processing.upsertTriples(postId, manager, postUpdated.semantics);
+  }
+
+  /** deletes the mirror of a post from a platform. userId MUST be a verified user */
+  async unpublishPlatformPost(
+    postId: string,
+    userId: string,
+    platformId: PLATFORM,
+    post_id: string
+  ) {
+    return this.db.run(async (manager) => {
+      const user = await this.users.repo.getUser(userId, manager, true);
+      const post = await this.processing.getPostFull(postId, manager, true);
+
+      if (post.authorId !== userId) {
+        throw new Error(`Only the author can delete a mirror: ${postId}`);
+      }
+
+      const mirror = PostsHelper.getPostMirror(
+        post,
+        { platformId, post_id },
+        true
+      );
+
+      if (!mirror) {
+        throw new Error(`Mirror on ${platformId} not found for post ${postId}`);
+      }
+
+      if (!mirror.posted) {
+        throw new Error(
+          `Mirror on ${platformId} not posted for post ${postId}`
+        );
+      }
+
+      if (mirror.publishStatus !== PlatformPostPublishStatus.PUBLISHED) {
+        throw new Error(`Mirror of ${postId} on ${platformId} not published`);
+      }
+
+      const account = UsersHelper.getAccount(
+        user,
+        mirror.platformId,
+        mirror.posted.user_id,
+        true
+      );
+
+      const platform = this.platforms.get(mirror.platformId);
+
+      if (
+        mirror.deleteDraft &&
+        (mirror.deleteDraft.signerType === undefined ||
+          mirror.deleteDraft.signerType === PlatformPostSignerType.DELEGATED)
+      ) {
+        const signedPost = await platform.signDraft(
+          mirror.deleteDraft,
+          account
+        );
+        mirror.deleteDraft.signedPost = signedPost;
+      }
+
+      if (!mirror.deleteDraft || !mirror.deleteDraft.signedPost) {
+        throw new Error(`Expected signed post to be provided`);
+      }
+
+      const posted = await platform.publish(
+        {
+          draft: mirror.deleteDraft.signedPost,
+          userDetails: account,
+        },
+        manager
+      );
+
+      /** update the platformPost */
+      await this.processing.platformPosts.update(
+        mirror.id,
+        {
+          posted: posted,
+          publishOrigin: PlatformPostPublishOrigin.POSTED,
+          publishStatus: PlatformPostPublishStatus.UNPUBLISHED,
+          ...(mirror.post_id ? {} : { post_id: posted.post_id }),
+        },
+        manager
+      );
+
+      /** mark post (TODO: what about multiplatform?) */
+      await this.updatePost(
+        postId,
+        {
+          republishedStatus: AppPostRepublishedStatus.UNREPUBLISHED,
+        },
+        manager
+      );
+    });
   }
 
   /**
@@ -663,9 +776,21 @@ export class PostsManager {
         manager
       );
 
+      /**
+       * Get the full updated post with it's mirrors to make sure any semantic updates
+       * are reflected in the mirrors (because of optimistic updates in the frontend).
+       * We could additionally add some checks here to see if there is a difference
+       * between the updated and newPost and handle that accordingly.
+       */
+      const updatedPostFull = await this.processing.getPostFull(
+        newPost.id,
+        manager,
+        true
+      );
+
       /** publish drafts */
       const published = await Promise.all(
-        newPost.mirrors.map(async (mirror) => {
+        updatedPostFull.mirrors.map(async (mirror) => {
           if (platformIds.includes(mirror.platformId) && mirror.draft) {
             const account = UsersHelper.getAccount(
               user,
@@ -699,15 +824,28 @@ export class PostsManager {
               manager
             );
 
+            const platformPostUpdate: PlatformPostStatusUpdate = {
+              draft: mirror.draft,
+              posted: posted,
+              publishOrigin: PlatformPostPublishOrigin.POSTED,
+              publishStatus: PlatformPostPublishStatus.PUBLISHED,
+            };
+
+            /** set the original post_id */
+            if (!mirror.post_id && posted.post_id) {
+              platformPostUpdate.post_id = posted.post_id;
+            }
+
+            if (DEBUG)
+              logger.debug('approvePost - update platformPost', {
+                platformPostId: mirror.id,
+                platformPostUpdate,
+              });
+
             /**  update platform post status and posted values*/
             await this.processing.platformPosts.update(
               mirror.id,
-              {
-                draft: mirror.draft,
-                posted: posted,
-                publishOrigin: PlatformPostPublishOrigin.POSTED,
-                publishStatus: PlatformPostPublishStatus.PUBLISHED,
-              },
+              platformPostUpdate,
               manager
             );
 

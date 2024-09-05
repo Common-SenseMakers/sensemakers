@@ -105,10 +105,6 @@ export const UserSettingsPage = () => {
     }
   };
 
-  const getSupportClicked = () => {
-    window.open(`mailto: ${SUPPORT_EMAIL_ADDRESS}`, '_blank');
-  };
-
   const currentAutopost =
     connectedUser?.settings?.autopost[PLATFORM.Nanopub].value;
   const currentNotifications = connectedUser?.settings?.notificationFreq;
@@ -157,7 +153,6 @@ export const UserSettingsPage = () => {
             options={[
               {
                 title: t(I18Keys.notificationSettingsOpt1Title),
-                description: t(I18Keys.notificationSettingsOpt1Desc),
                 id: NotificationFreq.Daily,
                 optionSelected: (id) =>
                   setNotifications(id as NotificationFreq),
@@ -165,7 +160,6 @@ export const UserSettingsPage = () => {
               },
               {
                 title: t(I18Keys.notificationSettingsOpt2Title),
-                description: t(I18Keys.notificationSettingsOpt2Desc),
                 id: NotificationFreq.Weekly,
                 optionSelected: (id) =>
                   setNotifications(id as NotificationFreq),
@@ -173,7 +167,6 @@ export const UserSettingsPage = () => {
               },
               {
                 title: t(I18Keys.notificationSettingsOpt3Title),
-                description: t(I18Keys.notificationSettingsOpt3Desc),
                 id: NotificationFreq.Monthly,
                 optionSelected: (id) =>
                   setNotifications(id as NotificationFreq),
@@ -181,7 +174,6 @@ export const UserSettingsPage = () => {
               },
               {
                 title: t(I18Keys.notificationSettingsOpt4Title),
-                description: t(I18Keys.notificationSettingsOpt4Desc),
                 id: NotificationFreq.None,
                 optionSelected: (id) =>
                   setNotifications(id as NotificationFreq),
@@ -222,24 +214,8 @@ export const UserSettingsPage = () => {
         </Box>
 
         <Box
-          pad={{ horizontal: 'medium', top: '8px' }}
-          margin={{ bottom: '24px' }}>
-          <SettingSectionTitle
-            value={t(I18Keys.downloads)}></SettingSectionTitle>
-          <Box pad={{ vertical: '8px' }}>
-            <Text
-              style={{
-                fontSize: '16px',
-                color: constants.colors.checkboxes,
-                fontWeight: '500',
-                cursor: 'pointer',
-              }}>
-              {t(I18Keys.installApp)}
-            </Text>
-          </Box>
-        </Box>
-
-        <Box pad={{ horizontal: 'medium' }} margin={{ bottom: '8px' }}>
+          pad={{ horizontal: 'medium', top: '24px' }}
+          margin={{ bottom: '8px' }}>
           <SettingSectionTitle
             value={t(I18Keys.usingApp)}></SettingSectionTitle>
         </Box>
@@ -257,6 +233,16 @@ export const UserSettingsPage = () => {
           onSectionClicked={() => {
             setShowSettingsPage(SettingsSections.Notifications);
           }}></SettingsSection>
+
+        <SettingsSection
+          icon={<SupportIcon size={24}></SupportIcon>}
+          title={t(I18Keys.readTheDocs)}
+          description={
+            <Trans
+              i18nKey={I18Keys.readTheDocsDescription}
+              components={{ a: <a></a> }}></Trans>
+          }
+          showChevron={false}></SettingsSection>
 
         <SettingsSection
           icon={<SupportIcon size={24}></SupportIcon>}

@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+from loguru import logger
 
 # Determine the environment and choose the appropriate .env file
 environment = os.getenv(
@@ -17,8 +18,21 @@ else:
         os.path.dirname(__file__), ".env"
     )  # Default to .env for development
 
+
 # Load the environment variables from the chosen file
+logger.debug(f"Loading environment variables from {dotenv_path}...")
 load_dotenv(dotenv_path)
 
 openai_api_key = os.environ.get("OPENROUTER_API_KEY")
-model = os.environ.get("MODEL")
+
+# default model to be used if no task specific models defined
+default_model = os.environ.get("MODEL")
+
+# if there are specific per task models defined, use those
+ref_tagger_model = os.environ.get("REF_MODEL", default_model)
+kw_model = os.environ.get("KW_MODEL", default_model)
+topic_model = os.environ.get("TOPIC_MODEL", default_model)
+
+logger.debug(f"ref_tagger_model={ref_tagger_model}")
+logger.debug(f"kw_model={kw_model}")
+logger.debug(f"topic_model={topic_model}")

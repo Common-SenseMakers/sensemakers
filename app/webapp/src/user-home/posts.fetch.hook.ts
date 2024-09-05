@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
 import { subscribeToUpdates } from '../firestore/realtime.listener';
@@ -6,7 +7,10 @@ import {
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
+  AppPostRepublishedStatus,
+  AppPostReviewStatus,
   PostUpdate,
+  PostsQueryStatus,
   UserPostsQuery,
 } from '../shared/types/types.posts';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
@@ -37,10 +41,14 @@ export const usePostsFetch = () => {
 
   const unsubscribeCallbacks = useRef<Record<string, () => void>>({});
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const code = searchParams.get('code');
+
   /** refetch a post and overwrite its value in the array */
   const refetchPost = useCallback(
     async (postId: string) => {
-      if (!connectedUser) {
+      // skip fetching if we are in the middle of a code management
+      if (!connectedUser || code) {
         return;
       }
 
@@ -50,14 +58,40 @@ export const usePostsFetch = () => {
           { postId },
           true
         );
+
         if (DEBUG) console.log(`refetch post returned`, { post, posts });
+
+        const shouldRemove = (() => {
+          if (status === PostsQueryStatus.DRAFTS) {
+            return [
+              AppPostRepublishedStatus.AUTO_REPUBLISHED,
+              AppPostRepublishedStatus.REPUBLISHED,
+            ].includes(post.republishedStatus);
+          }
+          if (status === PostsQueryStatus.IGNORED) {
+            return post.reviewedStatus !== AppPostReviewStatus.IGNORED;
+          }
+          if (status === PostsQueryStatus.PENDING) {
+            return post.reviewedStatus !== AppPostReviewStatus.PENDING;
+          }
+          if (status === PostsQueryStatus.PUBLISHED) {
+            return post.republishedStatus === AppPostRepublishedStatus.PENDING;
+          }
+        })();
 
         setPosts((prev) => {
           const newPosts = [...prev];
           const ix = prev.findIndex((p) => p.id === postId);
+
           if (DEBUG) console.log(`setPosts called`, { ix, newPosts });
+
           if (ix !== -1) {
-            newPosts[ix] = post;
+            if (DEBUG) console.log(`settingPost`, { ix, shouldRemove });
+            if (shouldRemove) {
+              newPosts.splice(ix, 1);
+            } else {
+              newPosts[ix] = post;
+            }
           }
           return newPosts;
         });
@@ -66,7 +100,7 @@ export const usePostsFetch = () => {
         throw new Error(`Error fetching post ${postId}`);
       }
     },
-    [posts, connectedUser]
+    [posts, connectedUser, status]
   );
 
   const addPosts = useCallback(
@@ -170,6 +204,10 @@ export const usePostsFetch = () => {
     setIsLoading(true);
   };
 
+  const checkPostRemove = useCallback(() => {
+    const found = posts.find((p) => p.id === 'to-remove');
+  }, [posts]);
+
   /** reset at every status change  */
   useEffect(() => {
     reset();
@@ -184,7 +222,7 @@ export const usePostsFetch = () => {
   /** fetch for more post backwards */
   const _fetchOlder = useCallback(
     async (oldestPostId?: string) => {
-      if (!connectedUser || isFetchingOlder) {
+      if (!connectedUser || isFetchingOlder || code) {
         return;
       }
 
@@ -243,7 +281,7 @@ export const usePostsFetch = () => {
 
   const _fetchNewer = useCallback(
     async (_newestPostId: string) => {
-      if (!connectedUser || !_newestPostId) {
+      if (!connectedUser || !_newestPostId || code) {
         return;
       }
 

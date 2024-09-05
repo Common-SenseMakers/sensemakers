@@ -7,15 +7,16 @@ import { LeftChevronIcon } from '../app/icons/LeftChveronIcon';
 import { LeftIcon } from '../app/icons/LeftIcon';
 import { RightIcon } from '../app/icons/RightIcon';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
-import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useUserPosts } from '../user-home/UserPostsContext';
 import { usePost } from './PostContext';
 
-export const PostNav = (props: { profile?: TwitterUserProfile }) => {
-  const profile = props.profile;
-  const { post, nextPostId, prevPostId } = usePost();
+const DEBUG = false;
+
+export const PostNav = () => {
+  const { post, nextPostId, prevPostId, tweet } = usePost();
+  const profile = tweet?.posted?.author;
 
   const { fetchOlder, isFetchingOlder, errorFetchingOlder } = useUserPosts();
   const [triggeredFetchOlder, setTriggeredFetchedOlder] = useState(false);
@@ -57,7 +58,7 @@ export const PostNav = (props: { profile?: TwitterUserProfile }) => {
     }
   };
 
-  console.log('PostNav', { nextPostId, prevPostId });
+  if (DEBUG) console.log('PostNav', { nextPostId, prevPostId });
 
   return (
     <Box
@@ -73,9 +74,7 @@ export const PostNav = (props: { profile?: TwitterUserProfile }) => {
         icon={<LeftChevronIcon></LeftChevronIcon>}
         label={'Back'}
         onClick={() =>
-          profile
-            ? navigate('..', { state: { postId: post?.id } })
-            : navigate('/')
+          navigate('..', { state: { postId: post?.id } })
         }></NavButton>
 
       <Box direction="row" gap="8px">

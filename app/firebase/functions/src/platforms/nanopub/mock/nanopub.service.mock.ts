@@ -27,7 +27,7 @@ export const getNanopubMock = (
   when(Mocked.publishInternal(anything())).thenCall((signed: string) => {
     if (DEBUG) logger.warn(`called nanopub publishInternal`, signed);
     return {
-      info: () => ({ uri: `ABC${count++}` }),
+      info: () => ({ uri: `https://w3id.org/np/ABC${count++}` }),
       rdf: () => signed,
     };
   });

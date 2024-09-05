@@ -157,6 +157,34 @@ def get_thread_1():
     thread_post = create_thread_from_posts(thread_posts)
     return thread_post
 
+def get_thread_w_qt_refs():
+    thread_urls = [
+        "https://x.com/MetacogniShane/status/1828491803387121797",
+    ]
+    thread_posts = [scrape_post(url) for url in thread_urls]
+    thread_post = create_thread_from_posts(thread_posts)
+    return thread_post
+
+def get_long_thread_w_qt_refs():
+    thread_urls = [
+        "https://x.com/LChoshen/status/1732938491045245101",
+        "https://x.com/LChoshen/status/1732938497085071871",
+        "https://x.com/LChoshen/status/1732938501312930058",
+        "https://x.com/LChoshen/status/1732938516693483571",
+        "https://x.com/LChoshen/status/1794050821962997805",
+        
+    ]
+    thread_posts = [scrape_post(url) for url in thread_urls]
+    thread_post = create_thread_from_posts(thread_posts)
+    return thread_post
+
+def get_short_thread():
+    thread_urls = [
+        "https://x.com/pepoospina/status/1752682076417994994",
+    ]
+    thread_posts = [scrape_post(url) for url in thread_urls]
+    thread_post = create_thread_from_posts(thread_posts)
+    return thread_post
 
 def get_thread_single_post():
     thread_posts = [
@@ -172,7 +200,7 @@ def get_thread_single_quote_post():
     return thread_post
 
 
-def create_multi_config_for_tests(llm_type: str = "open-orca/mistral-7b-openorca"):
+def create_multi_config_for_tests(llm_type: str = "mistralai/mistral-7b-instruct-v0.3"):
     kp = KeywordPParserChainConfig(
         name="kw_test",
         use_metadata=True,

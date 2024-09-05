@@ -54,15 +54,18 @@ export const USE_REAL_EMAIL = envRuntime.USE_REAL_EMAIL;
 
 export const TEST_USER_ACCOUNTS = envRuntime.TEST_USER_ACCOUNTS;
 
+export const PARSING_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+
 export const OUR_TOKEN_SECRET = envRuntime.OUR_TOKEN_SECRET;
 export const OUR_EXPIRES_IN = '30d';
 
 export const EMAIL_SENDER_FROM = envRuntime.EMAIL_SENDER_FROM;
+export const ADMIN_EMAIL = envRuntime.ADMIN_EMAIL;
 
 export const NANOPUBS_PUBLISH_SERVERS_STR = envRuntime.NANOPUBS_PUBLISH_SERVERS;
 
 export const QUIET_SIGNUP_PERIOD = 5 * 60 * 1000; // 5 minutes
-export const AUTOFETCH_PERIOD = 'every 5 minutes';
+export const AUTOFETCH_PERIOD = 'every 30 minutes';
 
 export const DAILY_NOTIFICATION_PERIOD = 'every day 18:00';
 export const WEEKLY_NOTIFICATION_PERIOD = 'every monday 18:00';

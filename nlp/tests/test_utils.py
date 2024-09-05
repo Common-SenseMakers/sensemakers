@@ -1,9 +1,13 @@
 import sys
 import pytest
+import difflib
+from pprint import pprint
 from pathlib import Path
+
 
 ROOT = Path(__file__).parents[1]
 sys.path.append(str(ROOT))
+
 
 from desci_sense.shared_functions.utils import (
     identify_social_media,
@@ -247,6 +251,17 @@ def test_trim_parts_to_length():
     assert trim_parts_to_length([1, 2, 3], 1) == [1]
     assert trim_parts_to_length([3, 2, 1], 5) == [3, 2]
 
+def unidiff_output(expected, actual):
+    """
+    Helper function. Returns a string containing the unified diff of two multiline strings.
+    https://stackoverflow.com/a/845432
+    """
+    expected=expected.splitlines(1)
+    actual=actual.splitlines(1)
+
+    diff=difflib.unified_diff(expected, actual)
+
+    return ''.join(diff)
 
 if __name__ == "__main__":
     sep_strs, trimmed = trim_str_with_urls_by_sep(

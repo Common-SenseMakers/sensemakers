@@ -22,3 +22,4 @@ nlp/desci_sense/shared_functions/prompting/jinja/j2/kw.j2
 app/last_output.json
 
 twitterApiCache.json
+.aider*

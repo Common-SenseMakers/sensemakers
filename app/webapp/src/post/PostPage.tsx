@@ -10,7 +10,6 @@ import { PostView } from './PostView';
 export const PostPage = () => {
   const { postId } = useParams();
   const { getPost } = useUserPosts();
-  const { twitterProfile } = useAccountContext();
 
   const postInit = useMemo(
     () => (postId ? getPost(postId) : undefined),
@@ -19,7 +18,7 @@ export const PostPage = () => {
 
   return (
     <PostContext postId={postId} postInit={postInit}>
-      <PostView profile={twitterProfile}></PostView>
+      <PostView></PostView>
     </PostContext>
   );
 };

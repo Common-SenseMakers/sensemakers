@@ -1,5 +1,5 @@
 {
-  "semantics": "<http://sensentes/ThisText> <https://sparontologies.github.io/cito/current/cito.html#d4e441> \"cancer-research\" . <http://sensentes/ThisText> <https://sparontologies.github.io/cito/current/cito.html#d4e441> \"science\" .  <http://sensentes/ThisText> <https://sparontologies.github.io/cito/current/cito.html#d4e10010> <https://abook.com/> .",
+  "semantics": "<https://sense-nets.xyz/mySemanticPost> <https://sparontologies.github.io/cito/current/cito.html#d4e441> \"cancer-research\" . <https://sense-nets.xyz/mySemanticPost> <https://sparontologies.github.io/cito/current/cito.html#d4e441> \"science\" .  <https://sense-nets.xyz/mySemanticPost> <https://sparontologies.github.io/cito/current/cito.html#d4e10010> <https://abook.com/> .",
   "support": {
     "keywords": {
       "keyWordsOntology": {
