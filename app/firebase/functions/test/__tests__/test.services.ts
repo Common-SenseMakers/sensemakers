@@ -34,6 +34,10 @@ import {
 } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { MastodonService } from '../../src/platforms/mastodon/mastodon.service';
+import {
+  MastodonMockConfig,
+  getMastodonMock,
+} from '../../src/platforms/mastodon/mock/mastodon.service.mock';
 import { PlatformPostsRepository } from '../../src/posts/platform.posts.repository';
 import { PostsManager } from '../../src/posts/posts.manager';
 import { PostsProcessing } from '../../src/posts/posts.processing';
@@ -47,6 +51,7 @@ import { testCredentials } from './test.accounts';
 
 export interface TestServicesConfig {
   twitter?: TwitterMockConfig;
+  mastodon?: MastodonMockConfig;
   nanopub: NanopubMockConfig;
   parser: ParserMockConfig;
   time: 'real' | 'mock';
@@ -108,7 +113,8 @@ export const getTestServices = (config: TestServicesConfig) => {
   const twitter = getTwitterMock(_twitter, config.twitter, testUser);
 
   /** mocked mastodon */
-  const mastodon = new MastodonService(time, userRepo);
+  const _mastodon = new MastodonService(time, userRepo);
+  const mastodon = getMastodonMock(_mastodon, config.mastodon, testUser);
 
   /** nanopub */
   const _nanopub = new NanopubService(time, {
