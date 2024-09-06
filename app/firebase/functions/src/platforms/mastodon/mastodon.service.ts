@@ -173,7 +173,7 @@ export class MastodonService
     let newestId: string | undefined;
     let oldestId: string | undefined;
 
-    while (allStatuses.length < params.expectedAmount) {
+    while (true) {
       const result = await paginator.next();
       if (result.done) break;
 
@@ -185,7 +185,14 @@ export class MastodonService
       if (!newestId) newestId = statuses[0].id;
       oldestId = statuses[statuses.length - 1].id;
 
-      if (allStatuses.length >= params.expectedAmount) break;
+      const threads = convertMastodonPostsToThreads(
+        allStatuses,
+        allStatuses[0].account
+      );
+
+      if (threads.length >= params.expectedAmount) {
+        break;
+      }
     }
 
     const threads = convertMastodonPostsToThreads(
@@ -193,7 +200,7 @@ export class MastodonService
       allStatuses[0].account
     );
 
-    const platformPosts = threads.map((thread) => ({
+    const platformPosts = threads.slice(0, params.expectedAmount).map((thread) => ({
       post_id: thread.thread_id,
       user_id: thread.author.id,
       timestampMs: new Date(thread.posts[0].createdAt).getTime(),
