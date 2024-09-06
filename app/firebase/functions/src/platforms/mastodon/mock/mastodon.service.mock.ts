@@ -1,4 +1,3 @@
-import { mastodon } from 'masto';
 import { anything, instance, spy, when } from 'ts-mockito';
 
 import { PlatformFetchParams } from '../../../@shared/types/types.fetch';
@@ -8,31 +7,15 @@ import {
   MastodonSignupData,
   MastodonUserDetails,
 } from '../../../@shared/types/types.mastodon';
+import { PlatformPostPublish } from '../../../@shared/types/types.platform.posts';
 import {
-  PlatformPostPosted,
-  PlatformPostPublish,
-} from '../../../@shared/types/types.platform.posts';
-import {
+  PLATFORM,
   TestUserCredentials,
   UserDetailsBase,
 } from '../../../@shared/types/types.user';
-import { ENVIRONMENTS } from '../../../config/ENVIRONMENTS';
-import { APP_URL, NODE_ENV } from '../../../config/config.runtime';
 import { TransactionManager } from '../../../db/transaction.manager';
-import { logger } from '../../../instances/logger';
+import { getTestCredentials } from '../../mock/test.users';
 import { MastodonService } from '../mastodon.service';
-
-const DEBUG = false;
-
-interface MastodonTestState {
-  latestStatusId: number;
-  statuses: mastodon.v1.Status[];
-}
-
-let state: MastodonTestState = {
-  latestStatusId: 0,
-  statuses: [],
-};
 
 export interface MastodonMockConfig {
   publish?: boolean;
@@ -734,7 +717,124 @@ export const getMastodonMock = (
         userDetails: UserDetailsBase,
         manager: TransactionManager
       ) => {
-        // Implementation goes here
+        return {
+          post_id: '112961900843400369',
+          user_id: '111971425782516559',
+          timestampMs: 1723661817071,
+          post: {
+            id: '112961900843400369',
+            createdAt: '2024-08-14T18:56:57.071Z',
+            inReplyToId: null,
+            inReplyToAccountId: null,
+            sensitive: false,
+            spoilerText: '',
+            visibility: 'public',
+            language: 'en',
+            uri: 'https://cosocial.ca/users/weswalla/statuses/112961900843400369',
+            url: 'https://cosocial.ca/@weswalla/112961900843400369',
+            repliesCount: 0,
+            reblogsCount: 0,
+            favouritesCount: 0,
+            editedAt: null,
+            favourited: false,
+            reblogged: false,
+            muted: false,
+            bookmarked: false,
+            pinned: false,
+            content:
+              '<p><a href="https://cosocial.ca/tags/DWebCamp2024" class="mention hashtag" rel="tag">#<span>DWebCamp2024</span></a> was full of discussion and exploration which I&#39;d love to see in the space between conference and unconference with something like the triopticon workshop method to see what kind of synthesis emerges. <a href="https://cynefin.io/index.php/Triopticon" target="_blank" rel="nofollow noopener noreferrer" translate="no"><span class="invisible">https://</span><span class="ellipsis">cynefin.io/index.php/Trioptico</span><span class="invisible">n</span></a></p><p>&quot;The Triopticon process was designed to provide a fresh compromise between a formal conference and the more unstructured unconference.&quot;</p>',
+            filtered: [],
+            reblog: null,
+            application: {
+              name: 'Web',
+              website: null,
+            },
+            account: {
+              id: '111971425782516559',
+              username: 'weswalla',
+              acct: 'weswalla',
+              displayName: 'Wesley Finck',
+              locked: false,
+              bot: false,
+              discoverable: null,
+              group: false,
+              createdAt: '2024-02-21T00:00:00.000Z',
+              note: '<p>Full-Stack Engineer building knowledge management and sense-making tooling<br />prev: Holochain dev</p>',
+              url: 'https://cosocial.ca/@weswalla',
+              uri: 'https://cosocial.ca/users/weswalla',
+              avatar:
+                'https://media.cosocial.ca/accounts/avatars/111/971/425/782/516/559/original/963c30efd081957e.jpeg',
+              avatarStatic:
+                'https://media.cosocial.ca/accounts/avatars/111/971/425/782/516/559/original/963c30efd081957e.jpeg',
+              header: 'https://cosocial.ca/headers/original/missing.png',
+              headerStatic: 'https://cosocial.ca/headers/original/missing.png',
+              followersCount: 11,
+              followingCount: 17,
+              statusesCount: 10,
+              lastStatusAt: '2024-08-31',
+              noindex: false,
+              emojis: [],
+              roles: [],
+              fields: [],
+            },
+            mediaAttachments: [
+              {
+                id: '112961900717373589',
+                type: 'image',
+                url: 'https://media.cosocial.ca/media_attachments/files/112/961/900/717/373/589/original/e87de14ed106ae7b.png',
+                previewUrl:
+                  'https://media.cosocial.ca/media_attachments/files/112/961/900/717/373/589/small/e87de14ed106ae7b.png',
+                remoteUrl: null,
+                previewRemoteUrl: null,
+                textUrl: null,
+                meta: {
+                  original: {
+                    width: 1648,
+                    height: 750,
+                    size: '1648x750',
+                    aspect: 2.1973333333333334,
+                  },
+                  small: {
+                    width: 712,
+                    height: 324,
+                    size: '712x324',
+                    aspect: 2.197530864197531,
+                  },
+                },
+                description: null,
+                blurhash: 'UBQmVE0J^+xuO+E0xbs:-qofNFj[nT%3NFog',
+              },
+            ],
+            mentions: [],
+            tags: [
+              {
+                name: 'dwebcamp2024',
+                url: 'https://cosocial.ca/tags/dwebcamp2024',
+              },
+            ],
+            emojis: [],
+            card: {
+              url: 'https://cynefin.io/wiki/Triopticon',
+              title: 'Triopticon',
+              description: '',
+              language: 'en',
+              type: 'link',
+              authorName: '',
+              authorUrl: '',
+              providerName: 'Cynefin.io',
+              providerUrl: '',
+              html: '',
+              width: 150,
+              height: 150,
+              image: null,
+              imageDescription: '',
+              embedUrl: '',
+              blurhash: 'USECk7D%~qD%WB%2M{NG_3R*WBjFNGs:aeay',
+              publishedAt: '2023-03-07T12:47:16.000Z',
+            },
+            poll: null,
+          },
+        };
       }
     );
   }
@@ -749,25 +849,39 @@ export const getMastodonMock = (
           authorizationUrl:
             'https://cosocial.ca/oauth/authorize?client_id=SE2qVBbK1J_-6za-JX-6H-NsGrbdIuARZk4Q6gpUxbk&scope=read+write+follow+push&redirect_uri=https%3A%2F%2Fphanpy.social%2F&response_type=code',
           clientId: 'SE2qVBbK1J_-6za-JX-6H-NsGrbdIuARZk4Q6gpUxbk',
-          clientSecret: 'Y2XQ6wv2',
+          clientSecret: user_id ? user_id : '12341234',
         };
       }
     );
     when(mocked.handleSignupData(anything())).thenCall(
       (data: MastodonSignupData): MastodonUserDetails => {
+        const user_id = data.domain; // for testing purposes we pass the user_id as the domain
+        const testCredentials = getTestCredentials(
+          process.env.TEST_USER_ACCOUNTS as string
+        );
+        const currentUserCredentials =
+          testCredentials?.find(
+            (credentials) => credentials[PLATFORM.Mastodon].id === user_id
+          ) || testCredentials?.[0];
+        const currentMastodonCredentials =
+          currentUserCredentials?.[PLATFORM.Mastodon];
+
+        if (!currentMastodonCredentials) {
+          throw new Error('test credentials not found');
+        }
         return {
-          user_id: '111971425782516559',
+          user_id: currentMastodonCredentials.id,
           signupDate: 1725473415250,
           profile: {
-            id: '111971425782516559',
-            username: 'weswalla',
-            displayName: 'Wesley Finck',
+            id: currentMastodonCredentials.id,
+            username: currentMastodonCredentials.username,
+            displayName: currentMastodonCredentials.displayName,
             avatar:
               'https://media.cosocial.ca/accounts/avatars/111/971/425/782/516/559/original/963c30efd081957e.jpeg',
-            mastodonServer: 'cosocial.ca',
+            mastodonServer: currentMastodonCredentials.mastodonServer,
           },
           read: {
-            accessToken: '12341234',
+            accessToken: currentMastodonCredentials.accessToken,
           },
         };
       }
