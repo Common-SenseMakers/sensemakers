@@ -5,6 +5,7 @@ import {
   MastodonGetContextParams,
   MastodonSignupContext,
   MastodonSignupData,
+  MastodonThread,
   MastodonUserDetails,
 } from '../../@shared/types/types.mastodon';
 import {
@@ -31,6 +32,7 @@ import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
 import { UsersRepository } from '../../users/users.repository';
 import { PlatformService } from '../platforms.interface';
+import { convertMastodonPostsToThreads } from './mastodon.utils';
 
 export class MastodonService
   implements
@@ -141,7 +143,7 @@ export class MastodonService
     params: PlatformFetchParams,
     userDetails: MastodonUserDetails,
     manager: TransactionManager
-  ): Promise<FetchedResult<mastodon.v1.Status>> {
+  ): Promise<FetchedResult<MastodonThread>> {
     if (!userDetails.profile || !userDetails.read) {
       throw new Error('profile and/or read credentials are not provided');
     }
@@ -151,29 +153,57 @@ export class MastodonService
     });
 
     const fetchParams: any = {
-      limit: params.expectedAmount,
+      limit: 40, // Default limit
+      excludeReplies: true,
+      excludeReblogs: true,
     };
+
     if (params.since_id) {
-      fetchParams.sinceId = params.since_id;
+      fetchParams.minId = params.since_id;
     }
     if (params.until_id) {
       fetchParams.maxId = params.until_id;
     }
-    const statuses = await client.v1.accounts
-      .$select(userDetails.user_id)
-      .statuses.list({ limit: params.expectedAmount });
 
-    const platformPosts = statuses.map((status) => ({
-      post_id: status.id,
-      user_id: status.account.id,
-      timestampMs: new Date(status.createdAt).getTime(),
-      post: status,
+    const paginator = client.v1.accounts
+      .$select(userDetails.user_id)
+      .statuses.list(fetchParams);
+
+    let allStatuses: mastodon.v1.Status[] = [];
+    let newestId: string | undefined;
+    let oldestId: string | undefined;
+
+    while (allStatuses.length < params.expectedAmount) {
+      const result = await paginator.next();
+      if (result.done) break;
+
+      const statuses = result.value;
+      if (statuses.length === 0) break;
+
+      allStatuses.push(...statuses);
+
+      if (!newestId) newestId = statuses[0].id;
+      oldestId = statuses[statuses.length - 1].id;
+
+      if (allStatuses.length >= params.expectedAmount) break;
+    }
+
+    const threads = convertMastodonPostsToThreads(
+      allStatuses,
+      allStatuses[0].account
+    );
+
+    const platformPosts = threads.map((thread) => ({
+      post_id: thread.thread_id,
+      user_id: thread.author.id,
+      timestampMs: new Date(thread.posts[0].createdAt).getTime(),
+      post: thread,
     }));
 
     return {
       fetched: {
-        newest_id: platformPosts[0]?.post_id,
-        oldest_id: platformPosts[platformPosts.length - 1]?.post_id,
+        newest_id: newestId,
+        oldest_id: oldestId,
       },
       platformPosts,
     };
