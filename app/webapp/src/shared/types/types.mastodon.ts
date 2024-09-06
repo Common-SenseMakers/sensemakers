@@ -1,3 +1,5 @@
+import { mastodon } from 'masto';
+
 import { UserDetailsBase } from './types.user';
 
 export interface MastodonUserProfile {
@@ -45,3 +47,12 @@ export interface MastodonAccessTokenSignupData {
 export type MastodonSignupData =
   | MastodonOAuthSignupData
   | MastodonAccessTokenSignupData;
+
+export interface MastodonThread {
+  thread_id: string;
+  posts: mastodon.v1.Status[];
+  author: MastodonAccount;
+}
+
+export type MastodonPost = mastodon.v1.Status;
+export type MastodonAccount = mastodon.v1.Account;
