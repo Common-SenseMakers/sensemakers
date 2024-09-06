@@ -32,7 +32,10 @@ import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
 import { UsersRepository } from '../../users/users.repository';
 import { PlatformService } from '../platforms.interface';
-import { convertMastodonPostsToThreads } from './mastodon.utils';
+import {
+  cleanMastodonContent,
+  convertMastodonPostsToThreads,
+} from './mastodon.utils';
 
 export class MastodonService
   implements
@@ -200,7 +203,7 @@ export class MastodonService
       allStatuses[0].account
     );
 
-    const platformPosts = threads.slice(0, params.expectedAmount).map((thread) => ({
+    const platformPosts = threads.map((thread) => ({
       post_id: thread.thread_id,
       user_id: thread.author.id,
       timestampMs: new Date(thread.posts[0].createdAt).getTime(),
@@ -217,28 +220,28 @@ export class MastodonService
   }
 
   public async convertToGeneric(
-    platformPost: PlatformPostCreate<mastodon.v1.Status>
+    platformPost: PlatformPostCreate<MastodonThread>
   ): Promise<GenericThread> {
     if (!platformPost.posted) {
       throw new Error('Unexpected undefined posted');
     }
 
-    const status = platformPost.posted.post;
+    const thread = platformPost.posted.post;
     const genericAuthor: GenericAuthor = {
       platformId: PLATFORM.Mastodon,
-      id: status.account.id,
-      username: status.account.username,
-      name: status.account.displayName,
+      id: thread.author.id,
+      username: thread.author.username,
+      name: thread.author.displayName,
     };
 
-    const genericPost: GenericPost = {
+    const genericPosts: GenericPost[] = thread.posts.map((status) => ({
       url: status.url ? status.url : undefined,
-      content: status.content,
-    };
+      content: cleanMastodonContent(status.content),
+    }));
 
     return {
       author: genericAuthor,
-      thread: [genericPost],
+      thread: genericPosts,
     };
   }
 
