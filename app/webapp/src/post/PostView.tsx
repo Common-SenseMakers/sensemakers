@@ -46,10 +46,10 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   const { connect: _connectOrcid } = useOrcidContext();
 
   const { constants } = useThemeContext();
-  const { fetched, derived, update, merged, publish } = usePost();
+  const { derived, update, merged, publish } = usePost();
 
-  const postText = fetched.post
-    ? concatenateThread(fetched.post.generic)
+  const postText = merged.post
+    ? concatenateThread(merged.post.generic)
     : undefined;
 
   const { connectedUser } = useAccountContext();
@@ -63,7 +63,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   const reparse = async () => {
     try {
       setIsReparsing(true);
-      await appFetch('/api/posts/parse', { postId: fetched.postId });
+      await appFetch('/api/posts/parse', { postId: merged.post?.id });
       setIsReparsing(false);
     } catch (e: any) {
       setIsReparsing(false);
@@ -73,7 +73,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   };
 
   const ignore = async () => {
-    if (!fetched.post) {
+    if (!merged.post) {
       throw new Error(`Unexpected post not found`);
     }
     update.updatePost({
@@ -82,7 +82,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   };
 
   const reviewForPublication = async () => {
-    if (!fetched.post) {
+    if (!merged.post) {
       throw new Error(`Unexpected post not found`);
     }
     update.updatePost({
@@ -116,11 +116,11 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
 
   // receives the navigate from PostingPage and opens the post intent
   useEffect(() => {
-    if (postingPostId && connectedUser && !justSetPostId && fetched.postId) {
+    if (postingPostId && connectedUser && !justSetPostId && merged.post?.id) {
       if (DEBUG) console.log(`posting post detected for ${postingPostId}`);
       setPostingPostId(null);
     }
-  }, [postingPostId, connectedUser, justSetPostId, fetched.postId]);
+  }, [postingPostId, connectedUser, justSetPostId, merged.post?.id]);
 
   const action = (() => {
     if (!derived.statuses.processed && !derived.statuses.isParsing) {
@@ -218,10 +218,10 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   })();
 
   const editable = update.editable;
-  const hideSemantics = hideSemanticsHelper(fetched.post);
+  const hideSemantics = hideSemanticsHelper(merged.post);
 
   const content = (() => {
-    if (!fetched.post) {
+    if (!merged.post) {
       return (
         <Box gap="12px" pad="medium">
           <LoadingDiv height="90px" width="100%"></LoadingDiv>
