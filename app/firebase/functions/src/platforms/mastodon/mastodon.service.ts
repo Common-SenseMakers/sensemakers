@@ -36,6 +36,7 @@ import { PlatformService } from '../platforms.interface';
 import {
   cleanMastodonContent,
   convertMastodonPostsToThreads,
+  extractPrimaryThread,
 } from './mastodon.utils';
 
 export class MastodonService
@@ -323,10 +324,11 @@ export class MastodonService
     userId: string
   ): MastodonThread {
     const allStatuses = [...context.ancestors, status, ...context.descendants];
-    const authorStatuses = allStatuses.filter(s => s.account.id === userId);
-    
+    const authorStatuses = allStatuses.filter((s) => s.account.id === userId);
+
     const sortedStatuses = authorStatuses.sort(
-      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      (a, b) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
 
     const rootStatus = sortedStatuses[0];
