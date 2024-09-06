@@ -2,7 +2,11 @@ import { expect } from 'chai';
 import { logger } from 'firebase-functions';
 import { user } from 'firebase-functions/v1/auth';
 
-import { AppUser, PLATFORM } from '../../../src/@shared/types/types.user';
+import {
+  AppUser,
+  IDENTITY_PLATFORMS,
+  PLATFORM,
+} from '../../../src/@shared/types/types.user';
 import { TwitterService } from '../../../src/platforms/twitter/twitter.service';
 import { UsersHelper } from '../../../src/users/users.helper';
 import { fetchPostsInTests } from '../../utils/posts.utils';
@@ -12,7 +16,8 @@ import { TestServices } from '../test.services';
 
 export const _01_createAndFetchUsers = async (
   services: TestServices,
-  twitterUserId: string,
+  platform: IDENTITY_PLATFORMS,
+  platformAccountId: string,
   debug: { DEBUG: boolean; DEBUG_PREFIX: string }
 ) => {
   let user: AppUser | undefined;
@@ -26,7 +31,7 @@ export const _01_createAndFetchUsers = async (
 
     user = users.find(
       (u) =>
-        UsersHelper.getAccount(u, PLATFORM.Twitter, twitterUserId) !== undefined
+        UsersHelper.getAccount(u, platform, platformAccountId) !== undefined
     );
     if (DEBUG)
       logger.debug(`test user ${user?.userId}`, { user }, DEBUG_PREFIX);
