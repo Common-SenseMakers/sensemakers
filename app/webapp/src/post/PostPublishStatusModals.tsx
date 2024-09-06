@@ -29,7 +29,7 @@ const ORCID_INVITE_DISABLE = 'orcidInviteDisabled';
 
 export const PostPublishStatusModals = () => {
   const { setJustPublished } = useAutopostInviteContext();
-  const { update, current, posts, publish } = usePost();
+  const { update, current, navigatePost, publish } = usePost();
   const { orcidProfile } = useAccountContext();
 
   const { connect: _connectOrcid } = useOrcidContext();
@@ -52,15 +52,6 @@ export const PostPublishStatusModals = () => {
   );
 
   const [justSetPostId, setJustSetPostId] = useState<boolean>(false);
-
-  const ignore = async () => {
-    if (!current.post) {
-      throw new Error(`Unexpected post not found`);
-    }
-    update.updatePost({
-      reviewedStatus: AppPostReviewStatus.IGNORED,
-    });
-  };
 
   const publishApproved = () => {
     setPublishing(true);
@@ -89,7 +80,7 @@ export const PostPublishStatusModals = () => {
     }
 
     if (action === PublishPostAction.nextPost) {
-      posts.openNextPost();
+      navigatePost.openNextPost();
       return;
     }
   };
@@ -301,7 +292,7 @@ export const PostPublishStatusModals = () => {
           ],
           buttonsDirection: 'column',
           primaryButton: {
-            disabled: posts.nextPostId === undefined,
+            disabled: navigatePost.nextPostId === undefined,
             label: t(I18Keys.nextPost),
             onClick: () => publishedModalClosed(PublishPostAction.nextPost),
           },

@@ -4,19 +4,19 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
+import { useAppFetch } from '../api/app.fetch';
 import { ClearIcon } from '../app/icons/ClearIcon';
 import { SendIcon } from '../app/icons/SendIcon';
+import { ViewportPage } from '../app/layout/Viewport';
 import { I18Keys } from '../i18n/i18n';
-import { AbsoluteRoutes } from '../route.names';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
-import { PATTERN_ID } from '../semantics/patterns/patterns';
+import { PATTERN_ID, PatternProps } from '../semantics/patterns/patterns';
 import { AppPostReviewStatus } from '../shared/types/types.posts';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { AppButton } from '../ui-components';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
-import { useAutopostInviteContext } from '../user-login/contexts/AutopostInviteContext';
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { usePersist } from '../utils/use.persist';
@@ -31,7 +31,7 @@ const DEBUG = true;
 
 /** extract the postId from the route and pass it to a PostContext */
 export const PostView = (props: { profile?: TwitterUserProfile }) => {
-  const navigate = useNavigate();
+  const appFetch = useAppFetch();
 
   // shared persisted state with PostingPage.tsx
   const [postingPostId, setPostingPostId] = usePersist<string>(
@@ -46,7 +46,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   const { connect: _connectOrcid } = useOrcidContext();
 
   const { constants } = useThemeContext();
-  const { current, update, edit, publish } = usePost();
+  const { current, update, publish } = usePost();
 
   const postText = current.post
     ? concatenateThread(current.post.generic)
@@ -60,6 +60,27 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     update.updateSemantics(newSemantics);
   };
 
+  const reparse = async () => {
+    try {
+      setIsReparsing(true);
+      await appFetch('/api/posts/parse', { postId: current.postId });
+      setIsReparsing(false);
+    } catch (e: any) {
+      setIsReparsing(false);
+      console.error(e);
+      throw new Error(e);
+    }
+  };
+
+  const ignore = async () => {
+    if (!current.post) {
+      throw new Error(`Unexpected post not found`);
+    }
+    update.updatePost({
+      reviewedStatus: AppPostReviewStatus.IGNORED,
+    });
+  };
+
   const reviewForPublication = async () => {
     if (!current.post) {
       throw new Error(`Unexpected post not found`);
@@ -70,31 +91,15 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   };
 
   const enableEditOrUpdate = () => {
-    if (!edit.enabledEdit) {
-      edit.setEnabledEdit(true);
+    if (!update.enabledEdit) {
+      update.setEnabledEdit(true);
     } else {
       publish.publishOrRepublish();
     }
   };
 
   const cancelEdit = () => {
-    edit.setEnabledEdit(false);
-  };
-
-  const startUnpublish = () => {
-    setUnpublishIntent(true);
-  };
-
-  const reparse = async () => {
-    try {
-      setIsReparsing(true);
-      await appFetch('/api/posts/parse', { postId: post?.id });
-      setIsReparsing(false);
-    } catch (e: any) {
-      setIsReparsing(false);
-      console.error(e);
-      throw new Error(e);
-    }
+    update.setEnabledEdit(false);
   };
 
   const { signNanopublication } = useNanopubContext();
@@ -104,36 +109,21 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     connectedUser.nanopub &&
     connectedUser.nanopub.length > 0 &&
     signNanopublication &&
-    nanopubDraft;
+    current.nanopubDraft;
 
   const readyToNanopublish =
-    canPublishNanopub && nanopubDraft && !postStatuses.live;
-
-  const connectOrcid = () => {
-    if (post) {
-      if (DEBUG) console.log(`connectOrcid. Setting postId ${post.id}`);
-      setPostingPostId(post.id);
-      setJustSetPostId(true);
-      _connectOrcid('/posting');
-    }
-  };
+    canPublishNanopub && current.nanopubDraft && !current.statuses.live;
 
   // receives the navigate from PostingPage and opens the post intent
   useEffect(() => {
-    if (postingPostId && connectedUser && !justSetPostId && postId) {
+    if (postingPostId && connectedUser && !justSetPostId && current.postId) {
       if (DEBUG) console.log(`posting post detected for ${postingPostId}`);
       setPostingPostId(null);
     }
-  }, [postingPostId, connectedUser, justSetPostId, postId]);
-
-  const openNextPost = () => {
-    if (nextPostId) {
-      navigate(AbsoluteRoutes.Post(nextPostId));
-    }
-  };
+  }, [postingPostId, connectedUser, justSetPostId, current.postId]);
 
   const action = (() => {
-    if (!postStatuses.processed && !postStatuses.isParsing) {
+    if (!current.statuses.processed && !current.statuses.isParsing) {
       return (
         <AppButton
           margin={{ top: 'medium' }}
@@ -144,10 +134,10 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       );
     }
 
-    if (postStatuses.ignored) {
+    if (current.statuses.ignored) {
       return (
         <AppButton
-          disabled={isUpdating}
+          disabled={update.isUpdating}
           margin={{ top: 'medium' }}
           primary
           onClick={() => reviewForPublication()}
@@ -155,24 +145,43 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       );
     }
 
-    if (!postStatuses.published && !postStatuses.ignored) {
-      return <PostPublish></PostPublish>;
-    }
-
-    if (postStatuses.live && !enabledEdit) {
+    if (!current.statuses.live && !current.statuses.ignored) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
           <Box width="50%" style={{ flexGrow: 1 }}>
             <AppButton
-              disabled={isUpdating || isRetracting}
+              disabled={update.isUpdating}
               icon={<ClearIcon></ClearIcon>}
-              onClick={() => startUnpublish()}
+              onClick={() => ignore()}
+              label={t(I18Keys.ignore)}></AppButton>
+          </Box>
+          <Box width="50%" align="end" gap="small">
+            <AppButton
+              primary
+              disabled={update.isUpdating || !readyToNanopublish}
+              icon={<SendIcon></SendIcon>}
+              onClick={() => setApproveIntent(true)}
+              label={t(I18Keys.publish)}
+              style={{ width: '100%' }}></AppButton>
+          </Box>
+        </Box>
+      );
+    }
+
+    if (current.statuses.live && !update.enabledEdit) {
+      return (
+        <Box direction="row" gap="small" margin={{ top: 'medium' }}>
+          <Box width="50%" style={{ flexGrow: 1 }}>
+            <AppButton
+              disabled={update.isUpdating || publish.isRetracting}
+              icon={<ClearIcon></ClearIcon>}
+              onClick={() => setUnpublishIntent(true)}
               label={t(I18Keys.unpublish)}></AppButton>
           </Box>
           <Box width="50%" align="end" gap="small">
             <AppButton
               primary
-              disabled={isUpdating || isRetracting}
+              disabled={update.isUpdating || publish.isRetracting}
               icon={<SendIcon></SendIcon>}
               onClick={() => enableEditOrUpdate()}
               label={t(I18Keys.edit)}
@@ -182,12 +191,12 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       );
     }
 
-    if (postStatuses.live && enabledEdit) {
+    if (current.statuses.live && update.enabledEdit) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
           <Box width="50%" style={{ flexGrow: 1 }}>
             <AppButton
-              disabled={isUpdating}
+              disabled={update.isUpdating}
               icon={<ClearIcon></ClearIcon>}
               onClick={() => cancelEdit()}
               label={t(I18Keys.cancel)}></AppButton>
@@ -195,7 +204,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
           <Box width="50%" align="end" gap="small">
             <AppButton
               primary
-              disabled={isUpdating}
+              disabled={update.isUpdating}
               icon={<SendIcon></SendIcon>}
               onClick={() => enableEditOrUpdate()}
               label={t(I18Keys.publish)}
@@ -208,11 +217,11 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     return <></>;
   })();
 
-  const editable = _editable;
-  const hideSemantics = hideSemanticsHelper(post);
+  const editable = update.editable;
+  const hideSemantics = hideSemanticsHelper(current.post);
 
   const content = (() => {
-    if (!post) {
+    if (!current.post) {
       return (
         <Box gap="12px" pad="medium">
           <LoadingDiv height="90px" width="100%"></LoadingDiv>
@@ -222,19 +231,21 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       );
     }
 
+    const patternProps: PatternProps = {
+      isLoading: current.statuses.isParsing,
+      editable,
+      semantics: current.post.semantics,
+      originalParsed: current.post.originalParsed,
+      semanticsUpdated: semanticsUpdated,
+    };
+
     return (
       <>
         <Box pad="medium">
           <PostHeader margin={{ bottom: '16px' }}></PostHeader>
           {!hideSemantics && (
             <SemanticsEditor
-              patternProps={{
-                isLoading: postStatuses.isParsing,
-                editable,
-                semantics: post?.semantics,
-                originalParsed: post?.originalParsed,
-                semanticsUpdated: semanticsUpdated,
-              }}
+              patternProps={patternProps}
               include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
           )}
 
@@ -242,13 +253,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
 
           {!hideSemantics && (
             <SemanticsEditor
-              patternProps={{
-                isLoading: postStatuses.isParsing,
-                editable,
-                semantics: post?.semantics,
-                originalParsed: post?.originalParsed,
-                semanticsUpdated: semanticsUpdated,
-              }}
+              patternProps={patternProps}
               include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
           )}
 
