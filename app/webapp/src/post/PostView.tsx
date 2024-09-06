@@ -1,8 +1,7 @@
-import { Box, Text } from 'grommet';
+import { Box } from 'grommet';
 import { Refresh } from 'grommet-icons';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
 import { ClearIcon } from '../app/icons/ClearIcon';
