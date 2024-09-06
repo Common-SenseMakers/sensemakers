@@ -29,11 +29,12 @@ export const authenticateTestUsers = async (
 export const authenticateTestUser = async (
   credentials: TestUserCredentials,
   services: TestServices,
-  manager: TransactionManager
+  manager: TransactionManager,
+  excludePlatforms: PLATFORM[] = []
 ): Promise<AppUser> => {
   let user: AppUser | undefined;
 
-  if (PLATFORM.Twitter in credentials) {
+  if (!excludePlatforms.includes(PLATFORM.Twitter)) {
     user = await authenticateTwitterForUser(
       credentials,
       services,
@@ -42,7 +43,7 @@ export const authenticateTestUser = async (
     );
   }
 
-  if (PLATFORM.Mastodon in credentials) {
+  if (!excludePlatforms.includes(PLATFORM.Mastodon)) {
     user = await authenticateMastodonForUser(
       credentials,
       services,
