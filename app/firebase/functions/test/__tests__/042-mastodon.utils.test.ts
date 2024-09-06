@@ -3,7 +3,10 @@ import fs from 'fs';
 
 import { MastodonPost } from '../../src/@shared/types/types.mastodon';
 import { FetchedResult } from '../../src/@shared/types/types.platform.posts';
-import { convertMastodonPostsToThreads } from '../../src/platforms/mastodon/mastodon.utils';
+import {
+  cleanMastodonContent,
+  convertMastodonPostsToThreads,
+} from '../../src/platforms/mastodon/mastodon.utils';
 
 describe.only('mastodon utility functions', () => {
   it('converts mastodon posts to threads', async () => {
@@ -31,5 +34,16 @@ describe.only('mastodon utility functions', () => {
     expect(threads[0].posts.map((post) => post.id)).to.deep.equal(
       expectedThreadIds
     );
+  });
+
+  it('cleans Mastodon content', () => {
+    const input =
+      '<p><a href="https://cosocial.ca/tags/DWebCamp2024" class="mention hashtag" rel="tag">#<span>DWebCamp2024</span></a> was full of discussion and exploration which I&#39;d love to see in the space between conference and unconference with something like the triopticon workshop method to see what kind of synthesis emerges. <a href="https://cynefin.io/index.php/Triopticon" target="_blank" rel="nofollow noopener noreferrer" translate="no"><span class="invisible">https://</span><span class="ellipsis">cynefin.io/index.php/Trioptico</span><span class="invisible">n</span></a></p><p>&quot;The Triopticon process was designed to provide a fresh compromise between a formal conference and the more unstructured unconference.&quot;</p>';
+
+    const expectedOutput =
+      '#DWebCamp2024 was full of discussion and exploration which I\'d love to see in the space between conference and unconference with something like the triopticon workshop method to see what kind of synthesis emerges. https://cynefin.io/index.php/Triopticon\n\n"The Triopticon process was designed to provide a fresh compromise between a formal conference and the more unstructured unconference."';
+
+    const cleanedContent = cleanMastodonContent(input);
+    expect(cleanedContent).to.equal(expectedOutput);
   });
 });

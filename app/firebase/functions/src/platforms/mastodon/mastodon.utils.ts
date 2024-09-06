@@ -100,3 +100,24 @@ const getEarliestResponse = (id: string, posts: MastodonPost[]) => {
 export const getPostUrl = (username: string, id: string) => {
   return `https://mastodon.social/@${username}/${id}`;
 };
+
+export const cleanMastodonContent = (content: string): string => {
+  // Remove HTML tags
+  let cleanedContent = content.replace(/<[^>]*>/g, '');
+
+  // Decode HTML entities
+  cleanedContent = cleanedContent
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+
+  // Replace multiple newlines with a single newline
+  cleanedContent = cleanedContent.replace(/\n+/g, '\n');
+
+  // Trim leading and trailing whitespace
+  cleanedContent = cleanedContent.trim();
+
+  return cleanedContent;
+};
