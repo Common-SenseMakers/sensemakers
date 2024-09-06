@@ -102,8 +102,8 @@ export const getPostUrl = (username: string, id: string) => {
 };
 
 export const cleanMastodonContent = (content: string): string => {
-  // Remove HTML tags
-  let cleanedContent = content.replace(/<[^>]*>/g, '');
+  // Remove HTML tags, keeping paragraph structure
+  let cleanedContent = content.replace(/<\/p><p>/g, '\n\n\n').replace(/<[^>]*>/g, '');
 
   // Decode HTML entities
   cleanedContent = cleanedContent
@@ -113,8 +113,8 @@ export const cleanMastodonContent = (content: string): string => {
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'");
 
-  // Replace multiple newlines with a single newline
-  cleanedContent = cleanedContent.replace(/\n+/g, '\n');
+  // Replace multiple newlines with two newlines
+  cleanedContent = cleanedContent.replace(/\n{3,}/g, '\n\n');
 
   // Trim leading and trailing whitespace
   cleanedContent = cleanedContent.trim();
