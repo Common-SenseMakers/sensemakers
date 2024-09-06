@@ -141,7 +141,3 @@ export interface MastodonGetContextParams {
   callback_url: string;
   type: 'read' | 'write';
 }
-
-export interface MastodonSignupContext extends MastodonGetContextParams {
-  authorizationUrl: string;
-}
