@@ -14,6 +14,7 @@ import { ViewportPageScrollContext } from '../app/layout/Viewport';
 import { I18Keys } from '../i18n/i18n';
 import { PostCard } from '../post/PostCard';
 import { PostCardLoading } from '../post/PostCardLoading';
+import { PostContext } from '../post/PostContext';
 import { PostsQueryStatus, UserPostsQuery } from '../shared/types/types.posts';
 import { AppButton, AppHeading, AppModal, AppSelect } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
@@ -170,12 +171,14 @@ export const UserHome = () => {
         <Box>
           {posts.map((post, ix) => (
             <Box key={ix} id={`post-${post.id}`}>
-              <PostCard
-                post={post}
-                handleClick={() => {
-                  const path = `/post/${post.id}`;
-                  navigate(path);
-                }}></PostCard>
+              <PostContext postInit={post}>
+                <PostCard
+                  post={post}
+                  handleClick={() => {
+                    const path = `/post/${post.id}`;
+                    navigate(path);
+                  }}></PostCard>
+              </PostContext>
             </Box>
           ))}
         </Box>

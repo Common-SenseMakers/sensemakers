@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useUserPosts } from '../user-home/UserPostsContext';
-import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { PostContext } from './PostContext';
 import { PostView } from './PostView';
 

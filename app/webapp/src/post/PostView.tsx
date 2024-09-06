@@ -46,10 +46,10 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   const { connect: _connectOrcid } = useOrcidContext();
 
   const { constants } = useThemeContext();
-  const { current, update, publish } = usePost();
+  const { fetched, derived, update, merged, publish } = usePost();
 
-  const postText = current.post
-    ? concatenateThread(current.post.generic)
+  const postText = fetched.post
+    ? concatenateThread(fetched.post.generic)
     : undefined;
 
   const { connectedUser } = useAccountContext();
@@ -63,7 +63,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   const reparse = async () => {
     try {
       setIsReparsing(true);
-      await appFetch('/api/posts/parse', { postId: current.postId });
+      await appFetch('/api/posts/parse', { postId: fetched.postId });
       setIsReparsing(false);
     } catch (e: any) {
       setIsReparsing(false);
@@ -73,7 +73,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   };
 
   const ignore = async () => {
-    if (!current.post) {
+    if (!fetched.post) {
       throw new Error(`Unexpected post not found`);
     }
     update.updatePost({
@@ -82,7 +82,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   };
 
   const reviewForPublication = async () => {
-    if (!current.post) {
+    if (!fetched.post) {
       throw new Error(`Unexpected post not found`);
     }
     update.updatePost({
@@ -109,21 +109,21 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     connectedUser.nanopub &&
     connectedUser.nanopub.length > 0 &&
     signNanopublication &&
-    current.nanopubDraft;
+    derived.nanopubDraft;
 
   const readyToNanopublish =
-    canPublishNanopub && current.nanopubDraft && !current.statuses.live;
+    canPublishNanopub && derived.nanopubDraft && !derived.statuses.live;
 
   // receives the navigate from PostingPage and opens the post intent
   useEffect(() => {
-    if (postingPostId && connectedUser && !justSetPostId && current.postId) {
+    if (postingPostId && connectedUser && !justSetPostId && fetched.postId) {
       if (DEBUG) console.log(`posting post detected for ${postingPostId}`);
       setPostingPostId(null);
     }
-  }, [postingPostId, connectedUser, justSetPostId, current.postId]);
+  }, [postingPostId, connectedUser, justSetPostId, fetched.postId]);
 
   const action = (() => {
-    if (!current.statuses.processed && !current.statuses.isParsing) {
+    if (!derived.statuses.processed && !derived.statuses.isParsing) {
       return (
         <AppButton
           margin={{ top: 'medium' }}
@@ -134,18 +134,18 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       );
     }
 
-    if (current.statuses.ignored) {
+    if (derived.statuses.ignored) {
       return (
         <AppButton
           disabled={update.isUpdating}
           margin={{ top: 'medium' }}
           primary
           onClick={() => reviewForPublication()}
-          label="Review for publication"></AppButton>
+          label={t(I18Keys.unignorePost)}></AppButton>
       );
     }
 
-    if (!current.statuses.live && !current.statuses.ignored) {
+    if (!derived.statuses.live && !derived.statuses.ignored) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
           <Box width="50%" style={{ flexGrow: 1 }}>
@@ -168,7 +168,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       );
     }
 
-    if (current.statuses.live && !update.enabledEdit) {
+    if (derived.statuses.live && !update.enabledEdit) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
           <Box width="50%" style={{ flexGrow: 1 }}>
@@ -191,7 +191,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       );
     }
 
-    if (current.statuses.live && update.enabledEdit) {
+    if (derived.statuses.live && update.enabledEdit) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
           <Box width="50%" style={{ flexGrow: 1 }}>
@@ -218,10 +218,10 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   })();
 
   const editable = update.editable;
-  const hideSemantics = hideSemanticsHelper(current.post);
+  const hideSemantics = hideSemanticsHelper(fetched.post);
 
   const content = (() => {
-    if (!current.post) {
+    if (!fetched.post) {
       return (
         <Box gap="12px" pad="medium">
           <LoadingDiv height="90px" width="100%"></LoadingDiv>
@@ -232,10 +232,10 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     }
 
     const patternProps: PatternProps = {
-      isLoading: current.statuses.isParsing,
+      isLoading: derived.statuses.isParsing,
       editable,
-      semantics: current.post.semantics,
-      originalParsed: current.post.originalParsed,
+      semantics: merged.post?.semantics,
+      originalParsed: merged.post?.originalParsed,
       semanticsUpdated: semanticsUpdated,
     };
 

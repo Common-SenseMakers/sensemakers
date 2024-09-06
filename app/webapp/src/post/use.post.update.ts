@@ -11,7 +11,8 @@ import {
 } from '../shared/types/types.posts';
 import { AppUserRead } from '../shared/types/types.user';
 import { useUserPosts } from '../user-home/UserPostsContext';
-import { CurrentPostContext } from './use.current.post';
+import { PostFetchContext } from './use.current.post';
+import { PostDerivedContext } from './use.post.derived';
 
 export interface PostUpdateContext {
   editable: boolean; // can be true if not published
@@ -25,7 +26,8 @@ export interface PostUpdateContext {
 }
 
 export const usePostUpdate = (
-  current: CurrentPostContext,
+  fetched: PostFetchContext,
+  derived: PostDerivedContext,
   connectedUser?: AppUserRead
 ): PostUpdateContext => {
   const { show } = useToastContext();
@@ -41,25 +43,25 @@ export const usePostUpdate = (
 
   const editable =
     connectedUser !== undefined &&
-    connectedUser.userId === current.post?.authorId &&
-    (!current.statuses.live || enabledEdit);
+    connectedUser.userId === fetched.post?.authorId &&
+    (!derived.statuses.live || enabledEdit);
 
   useEffect(() => {
-    if (current.post) {
+    if (fetched.post) {
       setPostEdited(undefined);
     }
-  }, [current.post]);
+  }, [fetched.post]);
 
   /** actuall call to update the post in the backend */
   const _updatePost = async (update: PostUpdate) => {
-    if (!current.post) {
+    if (!fetched.post) {
       return;
     }
 
     setIsUpdating(true);
     try {
       await appFetch<void, PostUpdatePayload>('/api/posts/update', {
-        postId: current.post.id,
+        postId: fetched.post.id,
         postUpdate: update,
       });
       // setIsUpdating(false); let the refetch set the udpate flow to false
@@ -73,14 +75,14 @@ export const usePostUpdate = (
   /** updatePost and optimistically update the post object */
   const optimisticUpdate = useCallback(
     async (update: PostUpdate) => {
-      if (!current.post) {
+      if (!fetched.post) {
         return;
       }
 
-      setPostEdited({ ...current.post, ...update });
+      setPostEdited({ ...fetched.post, ...update });
       updatePost(update);
     },
-    [current.post]
+    [fetched.post]
   );
 
   const updateSemantics = (newSemantics: string) =>
@@ -107,8 +109,8 @@ export const usePostUpdate = (
       }
     })();
 
-    if (!statusKept && current.postId) {
-      removePost(current.postId);
+    if (!statusKept && fetched.postId) {
+      removePost(fetched.postId);
     }
 
     _updatePost(update);
@@ -122,6 +124,6 @@ export const usePostUpdate = (
     isUpdating,
     setIsUpdating,
     updateSemantics,
-    updatePost,
+    updatePost: optimisticUpdate,
   };
 };

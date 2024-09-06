@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { AbsoluteRoutes } from '../route.names';
 import { useUserPosts } from '../user-home/UserPostsContext';
-import { CurrentPostContext } from './use.current.post';
+import { PostFetchContext } from './use.current.post';
 
 export interface PostNavContext {
   prevPostId?: string;
@@ -11,13 +11,13 @@ export interface PostNavContext {
   openNextPost: () => void;
 }
 
-export const usePostNav = (current: CurrentPostContext): PostNavContext => {
+export const usePostNav = (fetched: PostFetchContext): PostNavContext => {
   const navigate = useNavigate();
   const { getNextAndPrev } = useUserPosts();
 
   const { prevPostId, nextPostId } = useMemo(
-    () => getNextAndPrev(current.postId),
-    [current.post]
+    () => getNextAndPrev(fetched.postId),
+    [fetched.post]
   );
 
   const openNextPost = () => {

@@ -29,7 +29,7 @@ const ORCID_INVITE_DISABLE = 'orcidInviteDisabled';
 
 export const PostPublishStatusModals = () => {
   const { setJustPublished } = useAutopostInviteContext();
-  const { update, current, navigatePost, publish } = usePost();
+  const { update, fetched, derived, navigatePost, publish } = usePost();
   const { orcidProfile } = useAccountContext();
 
   const { connect: _connectOrcid } = useOrcidContext();
@@ -63,10 +63,10 @@ export const PostPublishStatusModals = () => {
 
   // publishing is set to false only after the nanopub status is published
   useEffect(() => {
-    if (current.statuses.live) {
+    if (derived.statuses.live) {
       setPublishing(false);
     }
-  }, [current.statuses]);
+  }, [derived.statuses]);
 
   // single place to receive the last step of the publishing process
   const publishedModalClosed = (action: PublishPostAction) => {
@@ -92,8 +92,8 @@ export const PostPublishStatusModals = () => {
   };
 
   const openNanopublication = () => {
-    if (current.statuses.nanopubUrl && window) {
-      const opened = window.open(current.statuses.nanopubUrl, '_blank');
+    if (derived.statuses.nanopubUrl && window) {
+      const opened = window.open(derived.statuses.nanopubUrl, '_blank');
       if (opened) {
         window.focus();
       }
@@ -109,9 +109,9 @@ export const PostPublishStatusModals = () => {
   };
 
   const connectOrcid = () => {
-    if (current.post) {
-      if (DEBUG) console.log(`connectOrcid. Setting postId ${current.post.id}`);
-      setPostingPostId(current.post.id);
+    if (fetched.post) {
+      if (DEBUG) console.log(`connectOrcid. Setting postId ${fetched.post.id}`);
+      setPostingPostId(fetched.post.id);
       setJustSetPostId(true);
       _connectOrcid('/posting');
     }
@@ -310,7 +310,7 @@ export const PostPublishStatusModals = () => {
         publishing,
         askedOrcid,
         orcidProfile: orcidProfile,
-        published: current.statuses.live,
+        published: derived.statuses.live,
       });
 
     if (publish.publishIntent) {
@@ -319,7 +319,7 @@ export const PostPublishStatusModals = () => {
         return publishingModal;
       }
 
-      if (!current.statuses.live) {
+      if (!derived.statuses.live) {
         if (!askedOrcid && !orcidProfile && !disableOrcidInvite) {
           if (DEBUG) console.log('askOrcid');
           return askOrcid;
