@@ -199,6 +199,15 @@ export class MastodonService
         break;
       }
     }
+    if (allStatuses.length === 0) {
+      return {
+        fetched: {
+          newest_id: undefined,
+          oldest_id: undefined,
+        },
+        platformPosts: [],
+      };
+    }
 
     const threads = convertMastodonPostsToThreads(
       allStatuses,
