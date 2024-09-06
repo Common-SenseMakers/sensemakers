@@ -2,24 +2,24 @@ import { expect } from 'chai';
 import { logger } from 'firebase-functions';
 
 import { TwitterSignupData } from '../../../src/@shared/types/types.twitter';
-import { MastodonSignupData } from '../../../src/@shared/types/types.mastodon';
 import { PLATFORM } from '../../../src/@shared/types/types.user';
 import { UsersHelper } from '../../../src/users/users.helper';
 import { getPrefixedUserId } from '../../../src/users/users.utils';
 import { TestServices } from '../test.services';
 
-export const handleSignupMock = async (
+export const handleTwitterSignupMock = async (
   services: TestServices,
-  signupData: TwitterSignupData | MastodonSignupData
+  signupData: TwitterSignupData,
+  _userId?: string
 ) => {
-  const platform = 'codeChallenge' in signupData ? PLATFORM.Twitter : PLATFORM.Mastodon;
   const userId = await services.db.run(async (manager) => {
-    logger.debug(`handleSignup`, { user_id: 'codeChallenge' in signupData ? signupData.codeChallenge : signupData.code });
+    logger.debug(`handleSignup`, { user_id: signupData.codeChallenge });
 
     const result = await services.users.handleSignup(
-      platform,
+      PLATFORM.Twitter,
       signupData,
-      manager
+      manager,
+      _userId
     );
 
     logger.debug(`handleSignup - result `, { result });
@@ -31,7 +31,7 @@ export const handleSignupMock = async (
     }
 
     expect(result.userId).to.eq(
-      getPrefixedUserId(platform, 'codeChallenge' in signupData ? signupData.codeChallenge : signupData.code)
+      getPrefixedUserId(PLATFORM.Twitter, signupData.codeChallenge)
     );
     expect(result.ourAccessToken).to.not.be.undefined;
 
@@ -44,13 +44,13 @@ export const handleSignupMock = async (
 
     expect(userRead).to.not.be.undefined;
 
-    const account = UsersHelper.getAccount(userRead, platform);
+    const account = UsersHelper.getAccount(userRead, PLATFORM.Twitter);
     if (!account?.profile) {
       throw new Error('unexpected');
     }
 
     const userReadProfile = await services.users.repo.getByPlatformUsername(
-      platform,
+      PLATFORM.Twitter,
       'username',
       account.profile.username,
       manager

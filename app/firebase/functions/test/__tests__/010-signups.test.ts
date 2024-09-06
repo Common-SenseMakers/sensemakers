@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 
+import { MastodonAccessTokenSignupData } from '../../src/@shared/types/types.mastodon';
 import {
   NanopubUserProfile,
   NanupubSignupData,
@@ -11,7 +12,7 @@ import { logger } from '../../src/instances/logger';
 import '../../src/platforms/twitter/mock/twitter.service.mock';
 import { resetDB } from '../utils/db';
 import { getNanopubProfile } from '../utils/nanopub.profile';
-import { handleSignupMock } from './reusable/mocked.singup';
+import { handleTwitterSignupMock } from './reusable/mocked.singup';
 import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
@@ -39,7 +40,7 @@ describe('010-signups', () => {
           PLATFORM.Twitter,
           testUser.twitter.id
         );
-      userId = await handleSignupMock(services, {
+      userId = await handleTwitterSignupMock(services, {
         ...twitterSignupContext,
         code: 'mocked',
       });
@@ -94,6 +95,35 @@ describe('010-signups', () => {
 
           expect(user).to.not.be.undefined;
           expect(user.platformIds).to.have.length(2);
+        });
+      });
+    });
+    describe('connect mastodon account', () => {
+      it('connect mastodon account', async () => {
+        await services.db.run(async (manager) => {
+          const mastodonCredentials = testCredentials[0].mastodon;
+          const result =
+            await services.users.handleSignup<MastodonAccessTokenSignupData>(
+              PLATFORM.Mastodon,
+              {
+                accessToken: mastodonCredentials.accessToken,
+                domain: mastodonCredentials.mastodonServer,
+                type: mastodonCredentials.type,
+              },
+              manager,
+              userId
+            );
+
+          logger.debug(`handleSignup`, { result });
+
+          expect(result).to.be.undefined;
+
+          const user = await services.users.repo.getUser(userId, manager, true);
+
+          logger.debug(`user`, { user });
+
+          expect(user).to.not.be.undefined;
+          expect(user.platformIds).to.have.length(3);
         });
       });
     });

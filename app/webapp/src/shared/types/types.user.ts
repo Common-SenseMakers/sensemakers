@@ -170,7 +170,9 @@ export interface TestUserCredentials {
 export interface MastodonAccountCredentials {
   id: string;
   username: string;
-  password: string;
+  displayName: string;
+  mastodonServer: string;
+  accessToken: string;
   type: 'read' | 'write';
 }
 

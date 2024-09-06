@@ -15,7 +15,10 @@ import {
   GenericThread,
 } from '../../src/@shared/types/types.posts';
 import { TwitterThread } from '../../src/@shared/types/types.twitter';
-import { PLATFORM } from '../../src/@shared/types/types.user';
+import {
+  PLATFORM,
+  PUBLISHABLE_PLATFORMS,
+} from '../../src/@shared/types/types.user';
 import { activityEventCreatedHook } from '../../src/activity/activity.created.hook';
 import { Services } from '../../src/instances/services';
 import { postUpdatedHook } from '../../src/posts/hooks/post.updated.hook';
@@ -208,7 +211,7 @@ export const fetchPostInTests = async (
   userId: string,
   post_id: string,
   services: Services,
-  platform: PLATFORM
+  platform: PUBLISHABLE_PLATFORMS
 ) => {
   /** fetch will store the posts in the DB */
   const { post } = await services.db.run(

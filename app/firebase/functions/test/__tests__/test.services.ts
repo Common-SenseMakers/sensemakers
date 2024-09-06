@@ -17,6 +17,11 @@ import {
   getParserMock,
 } from '../../src/parser/mock/parser.service.mock';
 import { ParserService } from '../../src/parser/parser.service';
+import { MastodonService } from '../../src/platforms/mastodon/mastodon.service';
+import {
+  MastodonMockConfig,
+  getMastodonMock,
+} from '../../src/platforms/mastodon/mock/mastodon.service.mock';
 import {
   NanopubMockConfig,
   getNanopubMock,
@@ -33,11 +38,6 @@ import {
   getTwitterMock,
 } from '../../src/platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
-import { MastodonService } from '../../src/platforms/mastodon/mastodon.service';
-import {
-  MastodonMockConfig,
-  getMastodonMock,
-} from '../../src/platforms/mastodon/mock/mastodon.service.mock';
 import { PlatformPostsRepository } from '../../src/posts/platform.posts.repository';
 import { PostsManager } from '../../src/posts/posts.manager';
 import { PostsProcessing } from '../../src/posts/posts.processing';
