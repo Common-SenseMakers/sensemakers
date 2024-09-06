@@ -94,7 +94,7 @@ describe('031 test parse', () => {
     it('gets a post from mastodon and parses it', async () => {
       const { postsManager } = services;
 
-      const post_id = process.env.TEST_MASTODON_POST_ID || '0';
+      const post_id = '113091870835600081'; //https://cosocial.ca/@weswalla/113091870835600081
 
       if (!post_id) {
         throw new Error('TEST_MASTODON_POST_ID not defined in .env.test file');
