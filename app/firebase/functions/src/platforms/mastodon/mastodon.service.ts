@@ -7,6 +7,7 @@ import {
   MastodonSignupData,
   MastodonThread,
   MastodonUserDetails,
+  MastodonPost,
 } from '../../@shared/types/types.mastodon';
 import {
   FetchedResult,
@@ -294,7 +295,7 @@ export class MastodonService
     post_id: string,
     userDetails: MastodonUserDetails,
     manager?: TransactionManager
-  ): Promise<PlatformPostPosted<mastodon.v1.Status>> {
+  ): Promise<PlatformPostPosted<MastodonThread>> {
     if (!userDetails.profile || !userDetails.read) {
       throw new Error('profile and/or read credentials are not provided');
     }
@@ -303,13 +304,39 @@ export class MastodonService
       accessToken: userDetails.read.accessToken,
     });
 
-    const status = await client.v1.statuses.$select(post_id).fetch();
+    const thread = await this.getThreadRecursively(client, post_id, userDetails.user_id);
 
     return {
-      post_id: status.id,
-      user_id: status.account.id,
-      timestampMs: new Date(status.createdAt).getTime(),
-      post: status,
+      post_id: thread.thread_id,
+      user_id: thread.author.id,
+      timestampMs: new Date(thread.posts[0].createdAt).getTime(),
+      post: thread,
+    };
+  }
+
+  private async getThreadRecursively(
+    client: mastodon.rest.Client,
+    statusId: string,
+    userId: string
+  ): Promise<MastodonThread> {
+    const status = await client.v1.statuses.$select(statusId).fetch();
+    const thread: MastodonPost[] = [status];
+
+    let currentStatus = status;
+    while (currentStatus.replies_count > 0) {
+      const context = await client.v1.statuses.$select(currentStatus.id).context.fetch();
+      const nextReply = context.descendants.find(reply => reply.account.id === userId);
+      
+      if (!nextReply) break;
+
+      thread.push(nextReply);
+      currentStatus = nextReply;
+    }
+
+    return {
+      thread_id: status.id,
+      posts: thread,
+      author: status.account,
     };
   }
 
