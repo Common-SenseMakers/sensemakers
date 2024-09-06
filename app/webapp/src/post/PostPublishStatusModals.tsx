@@ -34,8 +34,6 @@ export const PostPublishStatusModals = () => {
 
   const { connect: _connectOrcid } = useOrcidContext();
 
-  const [publishIntent, setPublishIntent] = useState<boolean>(false);
-  const [unpublishIntent, setUnpublishIntent] = useState<boolean>(false);
   const [isUnpublishing, setIsUnpublishing] = useState<boolean>(false);
 
   const [askedOrcid, setAskedOrcid] = useState(false);
@@ -75,7 +73,7 @@ export const PostPublishStatusModals = () => {
     setJustPublished(true);
 
     if (action === PublishPostAction.None) {
-      setPublishIntent(false);
+      publish.setPublishIntent(false);
       return;
     }
 
@@ -86,8 +84,8 @@ export const PostPublishStatusModals = () => {
   };
 
   const reset = () => {
-    setPublishIntent(false);
-    setUnpublishIntent(false);
+    publish.setPublishIntent(false);
+    publish.setUnpublishIntent(false);
     setIsUnpublishing(false);
     setAskedOrcid(false);
     setPublishing(false);
@@ -122,7 +120,7 @@ export const PostPublishStatusModals = () => {
   const askOrcid = (() => {
     return (
       <AppModalStandard
-        onModalClosed={() => setPublishIntent(false)}
+        onModalClosed={() => publish.setPublishIntent(false)}
         type="normal"
         contentProps={{
           type: 'normal',
@@ -157,7 +155,7 @@ export const PostPublishStatusModals = () => {
   const finalApprove = (() => {
     return (
       <AppModalStandard
-        onModalClosed={() => setPublishIntent(false)}
+        onModalClosed={() => publish.setPublishIntent(false)}
         type="normal"
         contentProps={{
           type: 'normal',
@@ -189,7 +187,7 @@ export const PostPublishStatusModals = () => {
       <AppModalStandard
         onModalClosed={() => {
           if (publish.errorApprovingMsg) setPublishing(false);
-          setPublishIntent(false);
+          publish.setPublishIntent(false);
         }}
         type="normal"
         contentProps={{
@@ -221,7 +219,7 @@ export const PostPublishStatusModals = () => {
   const unpublishingModal = (() => {
     return (
       <AppModalStandard
-        onModalClosed={() => setUnpublishIntent(false)}
+        onModalClosed={() => publish.setUnpublishIntent(false)}
         type="normal"
         contentProps={{
           type: 'normal',
@@ -252,7 +250,7 @@ export const PostPublishStatusModals = () => {
   const unpublishApprove = (() => {
     return (
       <AppModalStandard
-        onModalClosed={() => setUnpublishIntent(false)}
+        onModalClosed={() => publish.setUnpublishIntent(false)}
         type="normal"
         contentProps={{
           type: 'normal',
@@ -308,14 +306,14 @@ export const PostPublishStatusModals = () => {
   const publishStatusModal = (() => {
     if (DEBUG)
       console.log({
-        approveIntent: publishIntent,
+        publishIntent: publish.publishIntent,
         publishing,
         askedOrcid,
         orcidProfile: orcidProfile,
         published: current.statuses.live,
       });
 
-    if (publishIntent) {
+    if (publish.publishIntent) {
       if (publishing) {
         if (DEBUG) console.log('publishingModal');
         return publishingModal;
@@ -339,7 +337,7 @@ export const PostPublishStatusModals = () => {
   })();
 
   const unPublishStatusModal = (() => {
-    return unpublishIntent ? (
+    return publish.unpublishIntent ? (
       !isUnpublishing ? (
         unpublishApprove
       ) : (

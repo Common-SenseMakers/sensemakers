@@ -8,9 +8,9 @@ import { usePost } from './PostContext';
 
 export const PostHeader = (props: BoxExtendedProps) => {
   const { constants } = useThemeContext();
-  const { tweet, post } = usePost();
+  const { current } = usePost();
 
-  const profile = tweet?.posted?.author;
+  const profile = current.tweet?.posted?.author;
 
   return (
     <Box direction="row" justify="between" {...props}>
@@ -32,13 +32,13 @@ export const PostHeader = (props: BoxExtendedProps) => {
           </Box>
           <Box margin={{ bottom: '6px' }}></Box>
           <TweetAnchor
-            thread={tweet?.posted?.post}
-            timestamp={tweet?.posted?.timestampMs}></TweetAnchor>
+            thread={current.tweet?.posted?.post}
+            timestamp={current.tweet?.posted?.timestampMs}></TweetAnchor>
         </Box>
       </Box>
 
       <Box gap="small" align="end">
-        <NanopubStatus post={post}></NanopubStatus>
+        <NanopubStatus post={current.post}></NanopubStatus>
       </Box>
     </Box>
   );

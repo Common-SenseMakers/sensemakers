@@ -15,8 +15,8 @@ import { usePost } from './PostContext';
 const DEBUG = false;
 
 export const PostNav = () => {
-  const { post, nextPostId, prevPostId, tweet } = usePost();
-  const profile = tweet?.posted?.author;
+  const { current, navigatePost } = usePost();
+  const profile = current.tweet?.posted?.author;
 
   const { fetchOlder, isFetchingOlder, errorFetchingOlder } = useUserPosts();
   const [triggeredFetchOlder, setTriggeredFetchedOlder] = useState(false);
@@ -26,14 +26,14 @@ export const PostNav = () => {
 
   useEffect(() => {
     if (
-      !nextPostId &&
+      !navigatePost.nextPostId &&
       !isFetchingOlder &&
       !errorFetchingOlder &&
       !triggeredFetchOlder
     ) {
       setTriggeredFetchedOlder(true);
       console.log('fetching older', {
-        nextPostId,
+        nextPostId: navigatePost.nextPostId,
         isFetchingOlder,
         errorFetchingOlder,
         triggeredFetchOlder,
@@ -43,22 +43,31 @@ export const PostNav = () => {
     }
 
     /** reset triggeredFetchedOlder once the nextPostId was obtained */
-    if (nextPostId) {
+    if (navigatePost.nextPostId) {
       setTriggeredFetchedOlder(false);
     }
-  }, [errorFetchingOlder, isFetchingOlder, nextPostId, triggeredFetchOlder]);
+  }, [
+    errorFetchingOlder,
+    isFetchingOlder,
+    navigatePost.nextPostId,
+    triggeredFetchOlder,
+  ]);
 
   const goToPrev = () => {
-    navigate(`/post/${prevPostId}`);
+    navigate(`/post/${navigatePost.prevPostId}`);
   };
 
   const goToNext = () => {
-    if (nextPostId) {
-      navigate(`/post/${nextPostId}`);
+    if (navigatePost.nextPostId) {
+      navigate(`/post/${navigatePost.nextPostId}`);
     }
   };
 
-  if (DEBUG) console.log('PostNav', { nextPostId, prevPostId });
+  if (DEBUG)
+    console.log('PostNav', {
+      nextPostId: navigatePost.nextPostId,
+      prevPostId: navigatePost.prevPostId,
+    });
 
   return (
     <Box
@@ -74,13 +83,13 @@ export const PostNav = () => {
         icon={<LeftChevronIcon></LeftChevronIcon>}
         label={'Back'}
         onClick={() =>
-          navigate('..', { state: { postId: post?.id } })
+          navigate('..', { state: { postId: current.postId } })
         }></NavButton>
 
       <Box direction="row" gap="8px">
         <NavButton
           icon={<LeftIcon></LeftIcon>}
-          disabled={!prevPostId}
+          disabled={!navigatePost.prevPostId}
           label="Previous"
           onClick={() => goToPrev()}></NavButton>
         <NavButton
@@ -94,7 +103,7 @@ export const PostNav = () => {
               )}
             </Box>
           }
-          disabled={!nextPostId}
+          disabled={!navigatePost.nextPostId}
           label="Next"
           onClick={() => goToNext()}></NavButton>
       </Box>

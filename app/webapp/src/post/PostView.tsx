@@ -160,7 +160,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
               primary
               disabled={update.isUpdating || !readyToNanopublish}
               icon={<SendIcon></SendIcon>}
-              onClick={() => setApproveIntent(true)}
+              onClick={() => publish.setPublishIntent(true)}
               label={t(I18Keys.publish)}
               style={{ width: '100%' }}></AppButton>
           </Box>
@@ -175,7 +175,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
             <AppButton
               disabled={update.isUpdating || publish.isRetracting}
               icon={<ClearIcon></ClearIcon>}
-              onClick={() => setUnpublishIntent(true)}
+              onClick={() => publish.setUnpublishIntent(true)}
               label={t(I18Keys.unpublish)}></AppButton>
           </Box>
           <Box width="50%" align="end" gap="small">

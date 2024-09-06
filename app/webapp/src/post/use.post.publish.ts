@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 
 import { useAppFetch } from '../api/app.fetch';
 import { PublishPostPayload } from '../shared/types/types.fetch';
@@ -20,6 +20,10 @@ export interface PostPublishContext {
   retractNanopublication: () => Promise<void>;
   isRetracting: boolean;
   errorApprovingMsg?: string;
+  publishIntent: boolean;
+  setPublishIntent: Dispatch<SetStateAction<boolean>>;
+  unpublishIntent: boolean;
+  setUnpublishIntent: Dispatch<SetStateAction<boolean>>;
 }
 
 export const usePostPublish = (
@@ -27,6 +31,9 @@ export const usePostPublish = (
   update: PostUpdateContext
 ): PostPublishContext => {
   const appFetch = useAppFetch();
+
+  const [publishIntent, setPublishIntent] = useState<boolean>(false);
+  const [unpublishIntent, setUnpublishIntent] = useState<boolean>(false);
 
   const [errorApprovingMsg, setErrorApprovingMsg] = useState<
     string | undefined
@@ -144,5 +151,9 @@ export const usePostPublish = (
     retractNanopublication,
     isRetracting,
     errorApprovingMsg,
+    publishIntent,
+    setPublishIntent,
+    unpublishIntent,
+    setUnpublishIntent,
   };
 };
