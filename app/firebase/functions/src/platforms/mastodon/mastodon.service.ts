@@ -326,9 +326,8 @@ export class MastodonService
     const allStatuses = [...context.ancestors, status, ...context.descendants];
     const authorStatuses = allStatuses.filter((s) => s.account.id === userId);
 
-    const sortedStatuses = authorStatuses.sort(
-      (a, b) =>
-        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    const sortedStatuses = authorStatuses.sort((a, b) => 
+      BigInt(a.id) < BigInt(b.id) ? -1 : BigInt(a.id) > BigInt(b.id) ? 1 : 0
     );
 
     const rootStatus = sortedStatuses[0];
