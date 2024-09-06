@@ -304,11 +304,10 @@ export class MastodonService
       accessToken: userDetails.read.accessToken,
     });
 
-    const thread = await this.getThreadRecursively(
-      client,
-      post_id,
-      userDetails.user_id
-    );
+    const status = await client.v1.statuses.$select(post_id).fetch();
+    const context = await client.v1.statuses.$select(post_id).context.fetch();
+
+    const thread = this.constructThread(status, context, userDetails.user_id);
 
     return {
       post_id: thread.thread_id,
@@ -318,33 +317,25 @@ export class MastodonService
     };
   }
 
-  private async getThreadRecursively(
-    client: mastodon.rest.Client,
-    statusId: string,
+  private constructThread(
+    status: mastodon.v1.Status,
+    context: mastodon.v1.Context,
     userId: string
-  ): Promise<MastodonThread> {
-    const status = await client.v1.statuses.$select(statusId).fetch();
-    const thread: MastodonPost[] = [status];
+  ): MastodonThread {
+    const allStatuses = [...context.ancestors, status, ...context.descendants];
+    const authorStatuses = allStatuses.filter(s => s.account.id === userId);
+    
+    const sortedStatuses = authorStatuses.sort(
+      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
 
-    let currentStatus = status;
-    while (currentStatus.repliesCount > 0) {
-      const context = await client.v1.statuses
-        .$select(currentStatus.id)
-        .context.fetch();
-      const nextReply = context.descendants.find(
-        (reply) => reply.account.id === userId
-      );
-
-      if (!nextReply) break;
-
-      thread.push(nextReply);
-      currentStatus = nextReply;
-    }
+    const rootStatus = sortedStatuses[0];
+    const thread = extractPrimaryThread(rootStatus.id, sortedStatuses);
 
     return {
-      thread_id: status.id,
+      thread_id: rootStatus.id,
       posts: thread,
-      author: status.account,
+      author: rootStatus.account,
     };
   }
 

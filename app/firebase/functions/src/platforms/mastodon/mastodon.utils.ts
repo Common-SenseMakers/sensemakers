@@ -63,38 +63,22 @@ const findRootId = (post: MastodonPost, posts: MastodonPost[]): string => {
   return currentPost.id; // Return the true root (post without inReplyToId)
 };
 
-const extractPrimaryThread = (
-  id: string,
+export const extractPrimaryThread = (
+  rootId: string,
   posts: MastodonPost[]
 ): MastodonPost[] => {
-  const primaryPost = posts.find((post) => post.id === id);
-  if (!primaryPost) {
-    throw new Error(`Could not find primary post with id: ${id}`);
+  const thread: MastodonPost[] = [];
+  let currentId = rootId;
+
+  while (currentId) {
+    const currentPost = posts.find(post => post.id === currentId);
+    if (!currentPost) break;
+
+    thread.push(currentPost);
+    currentId = posts.find(post => post.inReplyToId === currentId)?.id;
   }
 
-  const earliestResponse = getEarliestResponse(id, posts);
-  if (!earliestResponse) {
-    return [primaryPost];
-  }
-
-  return [primaryPost, ...extractPrimaryThread(earliestResponse.id, posts)];
-};
-
-const getEarliestResponse = (id: string, posts: MastodonPost[]) => {
-  const allPostReplies = posts.filter((post) => post.inReplyToId === id);
-
-  if (allPostReplies.length === 0) {
-    return null;
-  }
-
-  return allPostReplies.reduce(
-    (earliestPost, post) =>
-      new Date(post.createdAt).getTime() <
-      new Date(earliestPost.createdAt).getTime()
-        ? post
-        : earliestPost,
-    allPostReplies[0]
-  );
+  return thread;
 };
 
 export const getPostUrl = (username: string, id: string) => {
