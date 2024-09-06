@@ -3,11 +3,11 @@ import { createOAuthAPIClient, createRestAPIClient, mastodon } from 'masto';
 import { PlatformFetchParams } from '../../@shared/types/types.fetch';
 import {
   MastodonGetContextParams,
+  MastodonPost,
   MastodonSignupContext,
   MastodonSignupData,
   MastodonThread,
   MastodonUserDetails,
-  MastodonPost,
 } from '../../@shared/types/types.mastodon';
 import {
   FetchedResult,
@@ -304,7 +304,11 @@ export class MastodonService
       accessToken: userDetails.read.accessToken,
     });
 
-    const thread = await this.getThreadRecursively(client, post_id, userDetails.user_id);
+    const thread = await this.getThreadRecursively(
+      client,
+      post_id,
+      userDetails.user_id
+    );
 
     return {
       post_id: thread.thread_id,
@@ -323,10 +327,14 @@ export class MastodonService
     const thread: MastodonPost[] = [status];
 
     let currentStatus = status;
-    while (currentStatus.replies_count > 0) {
-      const context = await client.v1.statuses.$select(currentStatus.id).context.fetch();
-      const nextReply = context.descendants.find(reply => reply.account.id === userId);
-      
+    while (currentStatus.repliesCount > 0) {
+      const context = await client.v1.statuses
+        .$select(currentStatus.id)
+        .context.fetch();
+      const nextReply = context.descendants.find(
+        (reply) => reply.account.id === userId
+      );
+
       if (!nextReply) break;
 
       thread.push(nextReply);
