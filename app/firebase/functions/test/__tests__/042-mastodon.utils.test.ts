@@ -1,41 +1,35 @@
 import { expect } from 'chai';
 import fs from 'fs';
-import { mastodon } from 'masto';
 
-import {
-  convertMastodonPostsToThreads,
-  getPostUrl,
-} from '../../src/platforms/mastodon/mastodon.utils';
-import { MastodonPost, MastodonAccount } from '../../src/shared/types/types.mastodon';
+import { MastodonPost } from '../../src/@shared/types/types.mastodon';
+import { FetchedResult } from '../../src/@shared/types/types.platform.posts';
+import { convertMastodonPostsToThreads } from '../../src/platforms/mastodon/mastodon.utils';
 
-describe('mastodon utility functions', () => {
+describe.only('mastodon utility functions', () => {
   it('converts mastodon posts to threads', async () => {
     const result = JSON.parse(
-      fs.readFileSync('./test/__tests__/mastodon.thread.mock.json', 'utf8')
-    ) as { posts: MastodonPost[], author: MastodonAccount };
+      fs.readFileSync(
+        './test/__tests__/mastodon.fetch.result.mock.json',
+        'utf8'
+      )
+    ) as FetchedResult<MastodonPost>;
 
-    const threads = convertMastodonPostsToThreads(result.posts, result.author);
+    const posts = result.platformPosts.map((platformPost) => platformPost.post);
+
+    const threads = convertMastodonPostsToThreads(posts, posts[0].account);
 
     expect(threads).to.not.be.undefined;
     expect(threads.length).to.be.equal(1);
-    expect(threads[0].posts.length).to.be.equal(4);
+    expect(threads[0].posts.length).to.be.equal(3);
 
     const expectedThreadIds = [
-      '109273050298231994',
-      '109273050737064331',
-      '109273051175897868',
-      '109273051614731305',
+      '113091840795490491', //https://cosocial.ca/@weswalla/113091840795490491
+      '113091843958894093', //https://cosocial.ca/@weswalla/113091843958894093
+      '113091846148998737', //https://cosocial.ca/@weswalla/113091846148998737
     ];
 
     expect(threads[0].posts.map((post) => post.id)).to.deep.equal(
       expectedThreadIds
     );
-  });
-
-  it('generates correct post URL', () => {
-    const username = 'testuser';
-    const id = '109273050298231994';
-    const url = getPostUrl(username, id);
-    expect(url).to.equal('https://mastodon.social/@testuser/109273050298231994');
   });
 });

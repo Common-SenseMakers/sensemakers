@@ -10,14 +10,16 @@ export const convertMastodonPostsToThreads = (
 ): MastodonThread[] => {
   const postThreadsMap = new Map<string, MastodonPost[]>();
 
-  posts.forEach((post) => {
-    const rootId = findRootId(post, posts); // Find the true root by following the chain
-    if (!postThreadsMap.has(rootId)) {
-      postThreadsMap.set(rootId, []);
-    }
+  posts
+    .filter((post) => post.account.id === author.id)
+    .forEach((post) => {
+      const rootId = findRootId(post, posts); // Find the true root by following the chain
+      if (!postThreadsMap.has(rootId)) {
+        postThreadsMap.set(rootId, []);
+      }
 
-    postThreadsMap.get(rootId)?.push(post);
-  });
+      postThreadsMap.get(rootId)?.push(post);
+    });
 
   const postsArrays = Array.from(postThreadsMap.values());
 
