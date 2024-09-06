@@ -64,21 +64,37 @@ const findRootId = (post: MastodonPost, posts: MastodonPost[]): string => {
 };
 
 export const extractPrimaryThread = (
-  rootId: string,
+  id: string,
   posts: MastodonPost[]
 ): MastodonPost[] => {
-  const thread: MastodonPost[] = [];
-  let currentId = rootId;
-
-  while (currentId) {
-    const currentPost = posts.find(post => post.id === currentId);
-    if (!currentPost) break;
-
-    thread.push(currentPost);
-    currentId = posts.find(post => post.inReplyToId === currentId)?.id;
+  const primaryPost = posts.find((post) => post.id === id);
+  if (!primaryPost) {
+    throw new Error(`Could not find primary post with id: ${id}`);
   }
 
-  return thread;
+  const earliestResponse = getEarliestResponse(id, posts);
+  if (!earliestResponse) {
+    return [primaryPost];
+  }
+
+  return [primaryPost, ...extractPrimaryThread(earliestResponse.id, posts)];
+};
+
+const getEarliestResponse = (id: string, posts: MastodonPost[]) => {
+  const allPostReplies = posts.filter((post) => post.inReplyToId === id);
+
+  if (allPostReplies.length === 0) {
+    return null;
+  }
+
+  return allPostReplies.reduce(
+    (earliestPost, post) =>
+      new Date(post.createdAt).getTime() <
+      new Date(earliestPost.createdAt).getTime()
+        ? post
+        : earliestPost,
+    allPostReplies[0]
+  );
 };
 
 export const getPostUrl = (username: string, id: string) => {
@@ -87,7 +103,9 @@ export const getPostUrl = (username: string, id: string) => {
 
 export const cleanMastodonContent = (content: string): string => {
   // Remove HTML tags, keeping paragraph structure
-  let cleanedContent = content.replace(/<\/p><p>/g, '\n\n\n').replace(/<[^>]*>/g, '');
+  let cleanedContent = content
+    .replace(/<\/p><p>/g, '\n\n\n')
+    .replace(/<[^>]*>/g, '');
 
   // Decode HTML entities
   cleanedContent = cleanedContent

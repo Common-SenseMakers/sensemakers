@@ -174,7 +174,7 @@ export class MastodonService
       .$select(userDetails.user_id)
       .statuses.list(fetchParams);
 
-    let allStatuses: mastodon.v1.Status[] = [];
+    let allStatuses: MastodonPost[] = [];
     let newestId: string | undefined;
     let oldestId: string | undefined;
 
@@ -326,8 +326,8 @@ export class MastodonService
     const allStatuses = [...context.ancestors, status, ...context.descendants];
     const authorStatuses = allStatuses.filter((s) => s.account.id === userId);
 
-    const sortedStatuses = authorStatuses.sort((a, b) => 
-      BigInt(a.id) < BigInt(b.id) ? -1 : BigInt(a.id) > BigInt(b.id) ? 1 : 0
+    const sortedStatuses = authorStatuses.sort(
+      (a, b) => Number(a.id) - Number(b.id)
     );
 
     const rootStatus = sortedStatuses[0];
