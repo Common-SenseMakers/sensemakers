@@ -305,10 +305,28 @@ export class MastodonService
       accessToken: userDetails.read.accessToken,
     });
 
-    const status = await client.v1.statuses.$select(post_id).fetch();
     const context = await client.v1.statuses.$select(post_id).context.fetch();
+    const rootStatus = await (async () => {
+      if (context.ancestors.length === 0) {
+        return await client.v1.statuses.$select(post_id).fetch();
+      }
 
-    const thread = this.constructThread(status, context, userDetails.user_id);
+      return context.ancestors.reduce((oldestStatus, currStatus) => {
+        return Number(oldestStatus.id) < Number(currStatus.id)
+          ? oldestStatus
+          : currStatus;
+      }, context.ancestors[0]);
+    })();
+
+    const contextOfRoot = await client.v1.statuses
+      .$select(rootStatus.id)
+      .context.fetch();
+
+    const thread = this.constructThread(
+      rootStatus,
+      contextOfRoot,
+      userDetails.user_id
+    );
 
     return {
       post_id: thread.thread_id,
