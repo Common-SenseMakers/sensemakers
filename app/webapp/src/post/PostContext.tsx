@@ -1,82 +1,34 @@
-import { useQuery } from '@tanstack/react-query';
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-} from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { useAppFetch } from '../api/app.fetch';
-import { useToastContext } from '../app/ToastsContext';
-import { subscribeToUpdates } from '../firestore/realtime.listener';
 import { AbsoluteRoutes } from '../route.names';
 import { PublishPostPayload } from '../shared/types/types.fetch';
-import { NotificationFreq } from '../shared/types/types.notifications';
 import {
-  PlatformPost,
-  PlatformPostDraft,
   PlatformPostDraftApproval,
   PlatformPostSignerType,
 } from '../shared/types/types.platform.posts';
 import {
   AppPostFull,
   AppPostRepublishedStatus,
-  AppPostReviewStatus,
-  PostUpdate,
-  PostUpdatePayload,
-  PostsQueryStatus,
   UnpublishPlatformPostPayload,
 } from '../shared/types/types.posts';
-import { TwitterThread } from '../shared/types/types.twitter';
-import {
-  AppUserRead,
-  AutopostOption,
-  PLATFORM,
-} from '../shared/types/types.user';
+import { PLATFORM } from '../shared/types/types.user';
 import { useUserPosts } from '../user-home/UserPostsContext';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
-import { getAccount } from '../user-login/user.helper';
 import { PostPublishStatusModals } from './PostPublishStatusModals';
-import { AppPostStatus, getPostStatuses } from './posts.helper';
+import { CurrentPostContext, useCurrentPost } from './use.current.post';
+import { PostNavContext, usePostNav } from './use.post.nav';
+import { PostPublishContext, usePostPublish } from './use.post.publish';
+import { PostUpdateContext, usePostUpdate } from './use.post.update';
 
 const DEBUG = false;
 
 interface PostContextType {
-  current: {
-    postId?: string;
-    post: AppPostFull | undefined;
-    author: AppUserRead;
-    nanopubDraft: PlatformPostDraft | undefined;
-    tweet?: PlatformPost<TwitterThread>;
-    statuses: AppPostStatus;
-  };
-  actions: {
-    reparse: () => void;
-  };
-  edit: {
-    editable: boolean; // can be true if not published
-    enabledEdit: boolean; // only true if editing after publishing
-    setEnabledEdit: (enabled: boolean) => void;
-  };
-  update: {
-    isUpdating: boolean;
-    updateSemantics: (newSemantics: string) => Promise<void>;
-    updatePost: (update: PostUpdate) => Promise<void>;
-  };
-  publish: {
-    publishOrRepublish: () => Promise<void>;
-    retractNanopublication: () => Promise<void>;
-    isRetracting: boolean;
-    errorApprovingMsg?: string;
-  };
-  posts: {
-    prevPostId?: string;
-    nextPostId?: string;
-    openNextPost: () => void;
-  };
+  current: CurrentPostContext;
+  update: PostUpdateContext;
+  publish: PostPublishContext;
+  navigatePost: PostNavContext;
 }
 
 const PostContextValue = createContext<PostContextType | undefined>(undefined);
@@ -90,392 +42,29 @@ export const PostContext: React.FC<{
     throw new Error(`Both postId and post were undefined`);
   }
 
-  const { show } = useToastContext();
-  const navigate = useNavigate();
-
   const { connectedUser } = useAccountContext();
-  const [postEdited, setPostEdited] = React.useState<AppPostFull | undefined>(
-    undefined
-  );
-  const [enabledEdit, setEnabledEdit] = React.useState<boolean>(false);
 
-  const [requesteDraft, setRequestedDraft] = React.useState(false);
-
-  const { filterStatus, removePost, getNextAndPrev } = useUserPosts();
-  const [isUpdating, setIsUpdating] = React.useState(false);
-  const [isRetracting, setIsRetracting] = React.useState(false);
-  const [errorApprovingMsg, setErrorApprovingMsg] = React.useState<
-    string | undefined
-  >(undefined);
-
-  const appFetch = useAppFetch();
-
-  const postId = useMemo(
-    () => (_postId ? _postId : (postInit as AppPostFull).id),
-    [_postId, postInit]
-  );
-
-  /** if postInit not provided get post from the DB */
-  const {
-    data: postFetched,
-    refetch,
-    isLoading,
-  } = useQuery({
-    queryKey: ['postId', postId, connectedUser],
-    queryFn: () => {
-      try {
-        if (postId) {
-          return appFetch<AppPostFull>('/api/posts/get', { postId });
-        }
-      } catch (e: any) {
-        console.error(e);
-        throw new Error(e);
-      }
-    },
-  });
+  const current = useCurrentPost(connectedUser, _postId, postInit);
+  const update = usePostUpdate(current, connectedUser);
+  const publish = usePostPublish(current, update);
+  const navigatePost = usePostNav(current);
 
   /** the post is the combination of the postFetched and the edited */
   const post = useMemo<AppPostFull | undefined>(() => {
-    if (isLoading) return postInit;
-    if (postFetched && postFetched !== null) {
-      setIsUpdating(false);
-      setIsRetracting(false);
-      return { ...postFetched, ...postEdited };
+    if (current.isLoading) return postInit;
+    if (current.post && current.post !== null) {
+      return { ...current.post, ...update.postEdited };
     }
     return undefined;
-  }, [postFetched, postInit, postEdited]);
-
-  /**
-   * subscribe to real time updates of this post and trigger a refetch everytime
-   * one is received*/
-  useEffect(() => {
-    const unsubscribe = subscribeToUpdates(`post-${postId}`, refetch);
-    return () => {
-      if (DEBUG) console.log('unsubscribing to updates post', postId);
-      unsubscribe();
-    };
-  }, []);
-
-  /**
-   * subscribe to real time updates of this post platform posts */
-  useEffect(() => {
-    if (post && post.mirrors) {
-      const unsubscribes = post.mirrors.map((m) => {
-        return {
-          unsubscribe: subscribeToUpdates(`platformPost-${m.id}`, refetch),
-          platformPostId: m.id,
-        };
-      });
-
-      return () => {
-        unsubscribes.forEach((unsubscribe) => {
-          if (DEBUG)
-            console.log(
-              'unsubscribing to updates platformPost',
-              unsubscribe.platformPostId
-            );
-          unsubscribe.unsubscribe();
-        });
-      };
-    }
-  }, [post]);
-
-  useEffect(() => {
-    if (postFetched) {
-      setPostEdited(undefined);
-    }
-  }, [postFetched]);
-
-  const [_isReparsing, setIsReparsing] = React.useState(false);
-
-  const reparse = async () => {
-    try {
-      setIsReparsing(true);
-      await appFetch('/api/posts/parse', { postId: post?.id });
-      setIsReparsing(false);
-    } catch (e: any) {
-      setIsReparsing(false);
-      console.error(e);
-      throw new Error(e);
-    }
-  };
-
-  const nanopubDraft = useMemo(() => {
-    const nanopub = post?.mirrors?.find(
-      (m) => m.platformId === PLATFORM.Nanopub
-    );
-    if (!nanopub) return undefined;
-
-    return nanopub.draft;
-  }, [post]);
-
-  /** create drafts if connected user has account and draft for that platform does
-   * not exists */
-  useEffect(() => {
-    const nanopubAccount = getAccount(connectedUser, PLATFORM.Nanopub);
-    if (nanopubAccount && !nanopubDraft && !requesteDraft) {
-      /** if draft not available, create it */
-      setRequestedDraft(true);
-      appFetch('/api/posts/createDraft', { postId }).then(() => {
-        setRequestedDraft(false);
-      });
-    }
-  }, [post, connectedUser]);
-
-  /** TODO: This is a placeholder. The post author may not be the connected user. We can probably have an
-   * endpoint to get user profiles by userIds */
-  const author: AppUserRead = {
-    userId: '1234',
-    signupDate: 1720702932,
-    settings: {
-      notificationFreq: NotificationFreq.None,
-      autopost: {
-        [PLATFORM.Nanopub]: { value: AutopostOption.MANUAL },
-      },
-    },
-    twitter: [
-      {
-        user_id: '1234',
-        read: true,
-        write: true,
-        profile: {
-          id: '1234',
-          name: 'SenseNet Bot',
-          username: 'sense_nets_bot',
-          profile_image_url:
-            'https://pbs.twimg.com/profile_images/1783977034038882304/RGn66lGT_normal.jpg',
-        },
-      },
-    ],
-  };
-
-  const tweet = post?.mirrors?.find((m) => m.platformId === PLATFORM.Twitter);
-
-  /** actuall call to update the post in the backend */
-  const _updatePost = async (update: PostUpdate) => {
-    if (!post) {
-      return;
-    }
-
-    setIsUpdating(true);
-    try {
-      await appFetch<void, PostUpdatePayload>('/api/posts/update', {
-        postId: post.id,
-        postUpdate: update,
-      });
-      // setIsUpdating(false); let the refetch set the udpate flow to false
-    } catch (e: any) {
-      console.error(e);
-      show({ title: 'Error updating post', message: e.message });
-      setIsUpdating(false);
-    }
-  };
-
-  /** updatePost and optimistically update the posts lists */
-  const updatePost = async (update: PostUpdate) => {
-    /** optimistic remove the post from the filtered list */
-    const statusKept = (() => {
-      if (filterStatus === PostsQueryStatus.DRAFTS) {
-        return true;
-      }
-      if (filterStatus === PostsQueryStatus.PENDING) {
-        return update.reviewedStatus === AppPostReviewStatus.PENDING;
-      }
-      if (filterStatus === PostsQueryStatus.PUBLISHED) {
-        return update.reviewedStatus === AppPostReviewStatus.APPROVED;
-      }
-      if (filterStatus === PostsQueryStatus.IGNORED) {
-        return update.reviewedStatus === AppPostReviewStatus.IGNORED;
-      }
-    })();
-
-    if (!statusKept) {
-      removePost(postId);
-    }
-
-    _updatePost(update);
-  };
-
-  /** updatePost and optimistically update the post object */
-  const optimisticUpdate = useCallback(
-    async (update: PostUpdate) => {
-      if (!post) {
-        return;
-      }
-
-      setPostEdited({ ...post, ...update });
-      updatePost(update);
-    },
-    [post]
-  );
-
-  const updateSemantics = (newSemantics: string) =>
-    optimisticUpdate({
-      reviewedStatus: AppPostReviewStatus.DRAFT,
-      semantics: newSemantics,
-    });
-
-  const statuses = useMemo(() => getPostStatuses(post), [post]);
-
-  const { signNanopublication } = useNanopubContext();
-
-  const publishOrRepublish = async () => {
-    // mark nanopub draft as approved
-    setIsUpdating(true);
-    const nanopub = post?.mirrors.find(
-      (m) => m.platformId === PLATFORM.Nanopub
-    );
-    const allOtherMirrors = post?.mirrors.filter(
-      (m) => m.platformId !== PLATFORM.Nanopub
-    );
-
-    if (!nanopub || !nanopub.draft) {
-      throw new Error(`Unexpected nanopub mirror not found`);
-    }
-
-    if (nanopub.draft.signerType === PlatformPostSignerType.USER) {
-      if (!signNanopublication) {
-        throw new Error(`Unexpected signNanopublication undefined`);
-      }
-
-      const signed = await signNanopublication(nanopub.draft.unsignedPost);
-      nanopub.draft.signedPost = signed.rdf();
-    }
-
-    /** approve is set the first time a post is published (should be set
-     * also set in the backend anyway) */
-    if (post && post.republishedStatus === AppPostRepublishedStatus.PENDING) {
-      nanopub.draft.postApproval = PlatformPostDraftApproval.APPROVED;
-      // removeDraft(post.id);
-    }
-
-    if (post) {
-      if (errorApprovingMsg) {
-        setErrorApprovingMsg(undefined);
-      }
-      try {
-        await appFetch<void, PublishPostPayload>('/api/posts/approve', {
-          post: {
-            ...post,
-            mirrors: [...(allOtherMirrors ? allOtherMirrors : []), nanopub],
-          },
-          platformIds: [PLATFORM.Nanopub],
-        });
-      } catch (e: any) {
-        setErrorApprovingMsg(e.message);
-        setIsUpdating(false);
-      }
-    }
-
-    setEnabledEdit(false);
-
-    // setIsUpdating(false); should be set by the re-fetch flow
-  };
-
-  const retractNanopublication = async () => {
-    setIsRetracting(true);
-
-    const nanopub = post?.mirrors.find(
-      (m) => m.platformId === PLATFORM.Nanopub
-    );
-
-    if (!nanopub || !nanopub.post_id) {
-      throw new Error(`Unexpected nanopub mirror not found`);
-    }
-
-    if (!nanopub.deleteDraft) {
-      throw new Error(`Delete draft not available`);
-    }
-
-    if (nanopub.deleteDraft.signerType === PlatformPostSignerType.USER) {
-      if (!signNanopublication) {
-        throw new Error(`Unexpected signNanopublication undefined`);
-      }
-
-      const signed = await signNanopublication(
-        nanopub.deleteDraft.unsignedPost
-      );
-      nanopub.deleteDraft.signedPost = signed.rdf();
-    }
-
-    nanopub.deleteDraft.postApproval = PlatformPostDraftApproval.APPROVED;
-
-    if (post) {
-      if (errorApprovingMsg) {
-        setErrorApprovingMsg(undefined);
-      }
-      try {
-        await appFetch<void, UnpublishPlatformPostPayload>(
-          '/api/posts/unpublish',
-          {
-            post_id: nanopub.post_id,
-            platformId: PLATFORM.Nanopub,
-            postId: post.id,
-          }
-        );
-      } catch (e: any) {
-        setErrorApprovingMsg(e.message);
-        setIsRetracting(false);
-      }
-    }
-
-    // setIsUpdating(false); should be set by the re-fetch flow
-    // setIsRetracting(false); should be set by the re-fetch flow
-  };
-
-  const editable =
-    connectedUser !== undefined &&
-    connectedUser.userId === post?.authorId &&
-    (!statuses.live || enabledEdit);
-
-  const { prevPostId, nextPostId } = useMemo(
-    () => getNextAndPrev(post?.id),
-    [post, getNextAndPrev]
-  );
-
-  const openNextPost = () => {
-    if (nextPostId) {
-      navigate(AbsoluteRoutes.Post(nextPostId));
-    }
-  };
-
-  const postIdFinal = useMemo(() => post?.id, [post]);
+  }, [current.post, postInit, update.postEdited, current.isLoading]);
 
   return (
     <PostContextValue.Provider
       value={{
-        current: {
-          postId: postIdFinal,
-          post,
-          author,
-          nanopubDraft,
-          tweet,
-          statuses,
-        },
-        actions: {
-          reparse,
-        },
-        edit: {
-          editable,
-          enabledEdit,
-          setEnabledEdit,
-        },
-        update: {
-          isUpdating,
-          updateSemantics,
-          updatePost,
-        },
-        publish: {
-          publishOrRepublish,
-          retractNanopublication,
-          isRetracting,
-          errorApprovingMsg,
-        },
-        posts: {
-          prevPostId,
-          nextPostId,
-          openNextPost,
-        },
+        current,
+        update,
+        publish,
+        navigatePost,
       }}>
       <PostPublishStatusModals></PostPublishStatusModals>
       {children}

@@ -31,8 +31,6 @@ const DEBUG = true;
 
 /** extract the postId from the route and pass it to a PostContext */
 export const PostView = (props: { profile?: TwitterUserProfile }) => {
-  const { setJustPublished } = useAutopostInviteContext();
-
   const navigate = useNavigate();
 
   // shared persisted state with PostingPage.tsx
@@ -43,16 +41,18 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   // local state to prevent detecting the returning before leaving
   const [justSetPostId, setJustSetPostId] = useState<boolean>(false);
 
+  const [_isReparsing, setIsReparsing] = useState(false);
+
   const { connect: _connectOrcid } = useOrcidContext();
 
   const { constants } = useThemeContext();
-  const { current, update } = usePost();
+  const { current, update, edit, publish } = usePost();
 
   const postText = current.post
     ? concatenateThread(current.post.generic)
     : undefined;
 
-  const { connectedUser, orcidProfile } = useAccountContext();
+  const { connectedUser } = useAccountContext();
 
   const { t } = useTranslation();
 
@@ -61,28 +61,40 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   };
 
   const reviewForPublication = async () => {
-    if (!post) {
+    if (!current.post) {
       throw new Error(`Unexpected post not found`);
     }
-    updatePost({
+    update.updatePost({
       reviewedStatus: AppPostReviewStatus.PENDING,
     });
   };
 
   const enableEditOrUpdate = () => {
-    if (!enabledEdit) {
-      setEnabledEdit(true);
+    if (!edit.enabledEdit) {
+      edit.setEnabledEdit(true);
     } else {
-      approveOrUpdate();
+      publish.publishOrRepublish();
     }
   };
 
   const cancelEdit = () => {
-    setEnabledEdit(false);
+    edit.setEnabledEdit(false);
   };
 
   const startUnpublish = () => {
     setUnpublishIntent(true);
+  };
+
+  const reparse = async () => {
+    try {
+      setIsReparsing(true);
+      await appFetch('/api/posts/parse', { postId: post?.id });
+      setIsReparsing(false);
+    } catch (e: any) {
+      setIsReparsing(false);
+      console.error(e);
+      throw new Error(e);
+    }
   };
 
   const { signNanopublication } = useNanopubContext();
