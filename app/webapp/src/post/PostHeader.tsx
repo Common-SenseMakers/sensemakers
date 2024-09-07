@@ -1,7 +1,7 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
 import { Clear, Edit, Send } from 'grommet-icons';
 
-import { TweetAnchor } from '../app/anchors/TwitterAnchor';
+import { PlatformPostAnchor } from '../app/anchors/PlatformPostAnchor';
 import { SendIcon } from '../app/icons/SendIcon';
 import { TwitterAvatar } from '../app/icons/TwitterAvatar';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
@@ -14,7 +14,11 @@ export const PostHeader = (
   props: BoxExtendedProps & { profile?: TwitterUserProfile }
 ) => {
   const { constants } = useThemeContext();
-  const { tweet, post } = usePost();
+  const { post } = usePost();
+  const originalPlatformPost = post?.mirrors.find(
+    (m) => m.platformId === post.origin
+  );
+  const originalPostUrl = post?.generic.thread[0].url;
 
   const username = props.profile?.name;
 
@@ -37,9 +41,10 @@ export const PostHeader = (
             </Text>
           </Box>
           <Box margin={{ bottom: '6px' }}></Box>
-          <TweetAnchor
-            thread={tweet?.posted?.post}
-            timestamp={tweet?.posted?.timestampMs}></TweetAnchor>
+          <PlatformPostAnchor
+            platformPostPosted={originalPlatformPost?.posted}
+            platformId={post?.origin}
+            postUrl={originalPostUrl}></PlatformPostAnchor>
         </Box>
       </Box>
 
