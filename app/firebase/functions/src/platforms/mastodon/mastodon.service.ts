@@ -187,8 +187,18 @@ export class MastodonService
 
       allStatuses.push(...statuses);
 
-      if (!newestId) newestId = statuses[0].id;
-      oldestId = statuses[statuses.length - 1].id;
+      const sortedStatuses = statuses.sort(
+        (a, b) => Number(b.id) - Number(a.id)
+      );
+
+      if (!newestId) newestId = sortedStatuses[0].id;
+      newestId =
+        sortedStatuses[0].id > newestId ? sortedStatuses[0].id : newestId;
+      if (!oldestId) oldestId = sortedStatuses[sortedStatuses.length - 1].id;
+      oldestId =
+        sortedStatuses[sortedStatuses.length - 1].id < oldestId
+          ? sortedStatuses[sortedStatuses.length - 1].id
+          : oldestId;
 
       const threads = convertMastodonPostsToThreads(
         allStatuses,
