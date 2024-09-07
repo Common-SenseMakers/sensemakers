@@ -232,7 +232,12 @@ export class PostsManager {
       );
 
       return {
-        since_id: since ? since.posted?.post_id : undefined,
+        since_id: since?.posted
+          ? PostsHelper.getNewestPostIdInPlatformPostThread(
+              platformId,
+              since.posted
+            )
+          : undefined,
         expectedAmount: params.expectedAmount,
       };
     }
