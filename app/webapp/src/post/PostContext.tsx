@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import { use } from 'i18next';
 import React, {
   createContext,
   useCallback,
@@ -413,7 +412,7 @@ export const PostContext: React.FC<{
 
   const { prevPostId, nextPostId } = useMemo(
     () => getNextAndPrev(post?.id),
-    [post, getNextAndPrev]
+    [post]
   );
 
   const postIdFinal = useMemo(() => post?.id, [post]);
