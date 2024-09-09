@@ -8,7 +8,7 @@ import {
   THIS_POST_NAME,
 } from '../../@shared/utils/semantics.helper';
 import { PostsHelper } from '../../posts/posts.helper';
-import { buildSpostNp } from './nanopub.utils';
+import { buildSpostNp, cleanAndTruncate } from './nanopub.utils';
 import { prepareNanopubDetails } from './prepare.nanopub.details';
 
 export const createNanopublication = async (
@@ -28,7 +28,8 @@ export const createNanopublication = async (
   } = prepareNanopubDetails(user, post);
 
   const semantics = post.semantics;
-  const content = PostsHelper.concatenateThread(post.generic);
+  const long_content = PostsHelper.concatenateThread(post.generic);
+  const content = cleanAndTruncate(long_content,80)
 
   const semanticsParserStore = await (async () => {
     if (!semantics) return new Store();

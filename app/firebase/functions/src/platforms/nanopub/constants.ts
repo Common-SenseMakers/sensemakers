@@ -57,7 +57,7 @@ export const NP_HAS_PUBLICATION_INFO =
   'http://www.nanopub.org/nschema#hasPublicationInfo';
 export const NP_NANOPUBLICATION =
   'http://www.nanopub.org/nschema#Nanopublication';
-export const NP_SIGNED_BY = 'http://purl.org/nanopub/x/singedBy';
+export const NP_SIGNED_BY = 'http://purl.org/nanopub/x/signedBy';
 export const NP_SUPERSEDES = 'http://purl.org/nanopub/x/supersedes';
 export const NP_RETRACTS = 'http://purl.org/nanopub/x/retracts';
 export const NP_HAS_NANOPUB_TYPE = 'http://purl.org/nanopub/x/hasNanopubType';
