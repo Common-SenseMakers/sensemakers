@@ -38,6 +38,10 @@ import {
   convertMastodonPostsToThreads,
   extractPrimaryThread,
 } from './mastodon.utils';
+import { logger } from '../../instances/logger';
+
+const DEBUG = false;
+const DEBUG_PREFIX = 'MastodonService';
 
 export class MastodonService
   implements
@@ -53,6 +57,8 @@ export class MastodonService
   ) {}
 
   protected async createApp(params: MastodonGetContextParams) {
+    if (DEBUG) logger.debug('createApp', { params }, DEBUG_PREFIX);
+
     const client = createRestAPIClient({
       url: `https://${params.domain}`,
     });
@@ -66,6 +72,8 @@ export class MastodonService
       website: `https://${params.domain}`,
     });
 
+    if (DEBUG) logger.debug('createApp result', { app }, DEBUG_PREFIX);
+
     return app;
   }
 
@@ -73,6 +81,8 @@ export class MastodonService
     userId?: string,
     params?: MastodonGetContextParams
   ): Promise<MastodonSignupContext> {
+    if (DEBUG) logger.debug('getSignupContext', { userId, params }, DEBUG_PREFIX);
+
     if (!params || !params.domain || !params.callback_url) {
       throw new Error('Mastodon domain and callback URL are required');
     }
@@ -91,16 +101,22 @@ export class MastodonService
       `redirect_uri=${params.callback_url}&` +
       `response_type=code`;
 
-    return {
+    const result = {
       authorizationUrl,
       clientId: app.clientId,
       clientSecret: app.clientSecret,
     };
+
+    if (DEBUG) logger.debug('getSignupContext result', result, DEBUG_PREFIX);
+
+    return result;
   }
 
   public async handleSignupData(
     signupData: MastodonSignupData
   ): Promise<MastodonUserDetails> {
+    if (DEBUG) logger.debug('handleSignupData', { signupData }, DEBUG_PREFIX);
+
     const token = await (async () => {
       if ('accessToken' in signupData) {
         return { accessToken: signupData.accessToken };
@@ -116,6 +132,8 @@ export class MastodonService
         grantType: 'authorization_code',
       });
     })();
+
+    if (DEBUG) logger.debug('handleSignupData token', { token }, DEBUG_PREFIX);
 
     const mastoClient = createRestAPIClient({
       url: `https://${signupData.domain}`,
@@ -141,6 +159,8 @@ export class MastodonService
       mastodon['write'] = { accessToken: token.accessToken };
     }
 
+    if (DEBUG) logger.debug('handleSignupData result', { mastodon }, DEBUG_PREFIX);
+
     return mastodon;
   }
 
@@ -149,6 +169,8 @@ export class MastodonService
     userDetails: MastodonUserDetails,
     manager: TransactionManager
   ): Promise<FetchedResult<MastodonThread>> {
+    if (DEBUG) logger.debug('fetch', { params, userDetails }, DEBUG_PREFIX);
+
     if (!userDetails.profile || !userDetails.read) {
       throw new Error('profile and/or read credentials are not provided');
     }
@@ -169,6 +191,8 @@ export class MastodonService
     if (params.until_id) {
       fetchParams.maxId = params.until_id;
     }
+
+    if (DEBUG) logger.debug('fetch params', { fetchParams }, DEBUG_PREFIX);
 
     const paginator = client.v1.accounts
       .$select(userDetails.user_id)
@@ -205,11 +229,20 @@ export class MastodonService
         allStatuses[0].account
       );
 
+      if (DEBUG) logger.debug('fetch iteration', { 
+        statusesCount: statuses.length, 
+        allStatusesCount: allStatuses.length,
+        threadsCount: threads.length,
+        newestId,
+        oldestId
+      }, DEBUG_PREFIX);
+
       if (threads.length >= params.expectedAmount) {
         break;
       }
     }
     if (allStatuses.length === 0) {
+      if (DEBUG) logger.debug('fetch no statuses found', {}, DEBUG_PREFIX);
       return {
         fetched: {
           newest_id: undefined,
@@ -231,13 +264,21 @@ export class MastodonService
       post: thread,
     }));
 
-    return {
+    const result = {
       fetched: {
         newest_id: newestId,
         oldest_id: oldestId,
       },
       platformPosts,
     };
+
+    if (DEBUG) logger.debug('fetch result', { 
+      newestId, 
+      oldestId, 
+      platformPostsCount: platformPosts.length 
+    }, DEBUG_PREFIX);
+
+    return result;
   }
 
   public async convertToGeneric(
