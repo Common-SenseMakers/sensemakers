@@ -28,19 +28,14 @@ export const ConnectSocialsPage = (props: {}) => {
           <Box style={{ flexGrow: 1 }}>
             <AppHeading level="1">{t(I18Keys.connectSocialsTitle)}</AppHeading>
             <Box width="100%" height="16px"></Box>
-            <AppParagraph>{t(I18Keys.connectSocialsParagraph)}</AppParagraph>
+            <AppParagraph>
+              {t(I18Keys.connectSocialsParagraphMastodon)}
+            </AppParagraph>
             <AppParagraph addMargin>
               <Trans
                 i18nKey={I18Keys.connectSocialsParagraph2}
                 components={{ b: <b></b> }}></Trans>
             </AppParagraph>
-            <AppButton
-              margin={{ top: 'large' }}
-              primary
-              disabled={loginFlowState === LoginFlowState.ConnectingTwitter}
-              icon={<TwitterIcon></TwitterIcon>}
-              label={t(I18Keys.signInX)}
-              onClick={() => connectTwitter('read')}></AppButton>
             <Box margin={{ top: 'medium' }}>
               <TextInput
                 placeholder={'e.g. mastodon.social'}
@@ -55,7 +50,7 @@ export const ConnectSocialsPage = (props: {}) => {
                   !mastodonDomain
                 }
                 icon={<MastodonIcon></MastodonIcon>}
-                label={'sign in with mastodon'}
+                label={t(I18Keys.signInMastodon)}
                 onClick={() =>
                   connectMastodon(mastodonDomain, 'read')
                 }></AppButton>
