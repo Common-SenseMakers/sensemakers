@@ -49,6 +49,7 @@ export const usePostUpdate = (
   useEffect(() => {
     if (fetched.post) {
       setPostEdited(undefined);
+      setIsUpdating(false);
     }
   }, [fetched.post]);
 

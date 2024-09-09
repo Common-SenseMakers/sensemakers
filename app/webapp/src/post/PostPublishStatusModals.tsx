@@ -30,7 +30,7 @@ const ORCID_INVITE_DISABLE = 'orcidInviteDisabled';
 export const PostPublishStatusModals = () => {
   const { setJustPublished } = useAutopostInviteContext();
   const { update, fetched, derived, navigatePost, publish } = usePost();
-  const { orcidProfile } = useAccountContext();
+  const { orcid } = useAccountContext();
 
   const { connect: _connectOrcid } = useOrcidContext();
 
@@ -309,7 +309,7 @@ export const PostPublishStatusModals = () => {
         publishIntent: publish.publishIntent,
         publishing,
         askedOrcid,
-        orcidProfile: orcidProfile,
+        orcid,
         published: derived.statuses.live,
       });
 
@@ -320,7 +320,7 @@ export const PostPublishStatusModals = () => {
       }
 
       if (!derived.statuses.live) {
-        if (!askedOrcid && !orcidProfile && !disableOrcidInvite) {
+        if (!askedOrcid && !orcid && !disableOrcidInvite) {
           if (DEBUG) console.log('askOrcid');
           return askOrcid;
         } else {

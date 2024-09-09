@@ -1,9 +1,8 @@
-import { Anchor, Box, Text } from 'grommet';
+import { Box, Text } from 'grommet';
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { useAppFetch } from '../api/app.fetch';
-import { SUPPORT_EMAIL_ADDRESS } from '../app/config';
 import { AutopostIcon } from '../app/icons/AutopostIcon';
 import { BellIcon } from '../app/icons/BellIcon';
 import { EmailIcon } from '../app/icons/EmailIcon';
@@ -51,7 +50,14 @@ export const UserSettingsPage = () => {
 
   const appFetch = useAppFetch();
 
-  const { connectedUser, refresh, twitterProfile } = useAccountContext();
+  const {
+    connectedUser,
+    refresh,
+    twitterProfile,
+    currentAutopost,
+    currentNotifications,
+    orcid,
+  } = useAccountContext();
   const [isSetting, setIsSetting] = useState(false);
   const { disconnect } = useDisconnectContext();
 
@@ -104,12 +110,6 @@ export const UserSettingsPage = () => {
       void setSettings(newSettings);
     }
   };
-
-  const currentAutopost =
-    connectedUser?.settings?.autopost[PLATFORM.Nanopub].value;
-  const currentNotifications = connectedUser?.settings?.notificationFreq;
-
-  const orcid = getAccount(connectedUser, PLATFORM.Orcid);
 
   const autopostPage = (
     <SettingsSubPage

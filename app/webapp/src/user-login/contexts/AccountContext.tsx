@@ -8,10 +8,13 @@ import {
 } from 'react';
 
 import { _appFetch } from '../../api/app.fetch';
+import { NotificationFreq } from '../../shared/types/types.notifications';
 import { OrcidUserProfile } from '../../shared/types/types.orcid';
 import { TwitterUserProfile } from '../../shared/types/types.twitter';
 import {
+  AccountDetailsRead,
   AppUserRead,
+  AutopostOption,
   EmailDetails,
   PLATFORM,
 } from '../../shared/types/types.user';
@@ -40,7 +43,9 @@ export type AccountContextType = {
   resetLogin: () => void;
   setTwitterConnectedStatus: (status: TwitterConnectedStatus) => void;
   twitterConnectedStatus: TwitterConnectedStatus | undefined;
-  orcidProfile?: OrcidUserProfile;
+  orcid?: AccountDetailsRead<OrcidUserProfile>;
+  currentAutopost?: AutopostOption;
+  currentNotifications?: NotificationFreq;
 };
 
 const AccountContextValue = createContext<AccountContextType | undefined>(
@@ -193,15 +198,20 @@ export const AccountContext = (props: PropsWithChildren) => {
     return profile;
   }, [connectedUser]);
 
-  const orcidProfile = useMemo(() => {
+  const orcid = useMemo(() => {
     const profile = connectedUser
-      ? getAccount(connectedUser, PLATFORM.Orcid)?.profile
+      ? getAccount<OrcidUserProfile>(connectedUser, PLATFORM.Orcid)
       : undefined;
 
     if (DEBUG) console.log('orcidProfile', { profile });
 
     return profile;
   }, [connectedUser]);
+
+  const currentAutopost =
+    connectedUser?.settings?.autopost[PLATFORM.Nanopub].value;
+
+  const currentNotifications = connectedUser?.settings?.notificationFreq;
 
   const email = connectedUser ? connectedUser.email : undefined;
 
@@ -223,7 +233,9 @@ export const AccountContext = (props: PropsWithChildren) => {
         resetLogin,
         setTwitterConnectedStatus,
         twitterConnectedStatus,
-        orcidProfile,
+        orcid,
+        currentAutopost,
+        currentNotifications,
       }}>
       {props.children}
     </AccountContextValue.Provider>
