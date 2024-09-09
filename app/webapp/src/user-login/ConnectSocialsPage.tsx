@@ -5,7 +5,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { AppLogo } from '../app/brand/AppLogo';
 import { MastodonIcon, TwitterIcon } from '../app/common/Icons';
 import { I18Keys } from '../i18n/i18n';
-import { AppButton, AppHeading } from '../ui-components';
+import { AppButton, AppHeading, AppInput } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
 import { Loading } from '../ui-components/LoadingDiv';
 import { LoginFlowState, useAccountContext } from './contexts/AccountContext';
@@ -37,10 +37,12 @@ export const ConnectSocialsPage = (props: {}) => {
                 components={{ b: <b></b> }}></Trans>
             </AppParagraph>
             <Box margin={{ top: 'medium' }}>
-              <TextInput
-                placeholder={'e.g. mastodon.social'}
+              <AppParagraph>Mastodon Instance: </AppParagraph>
+              <AppInput
+                placeholder={'e.g. "mastodon.social"'}
                 value={mastodonDomain}
                 onChange={(event) => setMastodonDomain(event.target.value)}
+                style={{ width: '100%' }}
               />
               <AppButton
                 margin={{ top: 'small' }}
