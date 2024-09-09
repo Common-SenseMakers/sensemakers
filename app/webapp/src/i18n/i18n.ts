@@ -18,6 +18,7 @@ export enum I18Keys {
   connectAccounts = 's010',
   connectParagraph = 's011',
   errorConnectTwitter = 's013',
+  errorConnectMastodon = 's013a',
   yourPublications = 's014',
   TweetX = 's015',
   ThreadX = 's016',
@@ -256,6 +257,8 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.connectParagraph]:
     'SenseNets loads your X (Twitter) feed and analyzes your posts using AI to deduct keywords and relations, which can be used to better interpret the meaning of your content.',
   [I18Keys.errorConnectTwitter]: 'Error connecting Twitter',
+  [I18Keys.errorConnectMastodon]:
+    'An error occurred while connecting to the Mastodon server: {{mastodonServer}}',
   [I18Keys.yourPublications]: 'Your publications',
   [I18Keys.TweetX]: 'X · Tweet',
   [I18Keys.ThreadX]: 'X · Thread',

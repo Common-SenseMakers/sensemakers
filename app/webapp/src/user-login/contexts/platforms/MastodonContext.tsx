@@ -2,11 +2,11 @@
 import {
   PropsWithChildren,
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useRef,
   useState,
-  useCallback,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
@@ -35,7 +35,10 @@ const WAS_CONNECTING_MASTODON = 'was-connecting-mastodon';
 export const LS_MASTODON_CONTEXT_KEY = 'mastodon-signin-context';
 
 export type MastodonContextType = {
-  connect?: (domain: string, type: MastodonGetContextParams['type']) => Promise<void>;
+  connect?: (
+    domain: string,
+    type: MastodonGetContextParams['type']
+  ) => Promise<void>;
   needConnect?: boolean;
   error?: string;
 };
@@ -69,40 +72,49 @@ export const MastodonContext = (props: PropsWithChildren) => {
 
   const needConnect = !connectedUser || !connectedUser[PLATFORM.Mastodon];
 
-  const connect = useCallback(async (
-    domain: string,
-    type: MastodonGetContextParams['type']
-  ) => {
-    setLoginFlowState(LoginFlowState.ConnectingMastodon);
-    setMastodonConnectedStatus(MastodonConnectedStatus.Connecting);
-    setError(undefined);
-
-    try {
-      const params: MastodonGetContextParams = {
-        domain,
-        callback_url: window.location.href,
-        type,
-      };
-      const signupContext = await appFetch<MastodonSignupContext>(
-        `/api/auth/${PLATFORM.Mastodon}/context`,
-        params
-      );
-
-      localStorage.setItem(
-        LS_MASTODON_CONTEXT_KEY,
-        JSON.stringify(signupContext)
-      );
-
-      if (signupContext) {
-        setWasConnecting(true);
-        window.location.href = signupContext.authorizationUrl;
-      }
-    } catch (err) {
-      setError(err.message || 'An error occurred while connecting to Mastodon');
-      setLoginFlowState(LoginFlowState.Idle);
-      setMastodonConnectedStatus(MastodonConnectedStatus.Disconnected);
+  useEffect(() => {
+    if (error) {
+      show({
+        title: 'Error Connecting Mastodon',
+        message: error,
+      });
     }
-  }, [appFetch, setLoginFlowState, setMastodonConnectedStatus]);
+  }, [error]);
+
+  const connect = useCallback(
+    async (domain: string, type: MastodonGetContextParams['type']) => {
+      setLoginFlowState(LoginFlowState.ConnectingMastodon);
+      setMastodonConnectedStatus(MastodonConnectedStatus.Connecting);
+      setError(undefined);
+
+      try {
+        const params: MastodonGetContextParams = {
+          domain,
+          callback_url: window.location.href,
+          type,
+        };
+        const signupContext = await appFetch<MastodonSignupContext>(
+          `/api/auth/${PLATFORM.Mastodon}/context`,
+          params
+        );
+
+        localStorage.setItem(
+          LS_MASTODON_CONTEXT_KEY,
+          JSON.stringify(signupContext)
+        );
+
+        if (signupContext) {
+          setWasConnecting(true);
+          window.location.href = signupContext.authorizationUrl;
+        }
+      } catch (err: any) {
+        setError(t(I18Keys.errorConnectMastodon, { mastodonServer: domain }));
+        setLoginFlowState(LoginFlowState.Idle);
+        setMastodonConnectedStatus(MastodonConnectedStatus.Disconnected);
+      }
+    },
+    [appFetch, setLoginFlowState, setMastodonConnectedStatus]
+  );
 
   useEffect(() => {
     if (!verifierHandled.current) {
