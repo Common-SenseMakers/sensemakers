@@ -9,8 +9,8 @@ import { AutopostIcon } from '../app/icons/AutopostIcon';
 import { BellIcon } from '../app/icons/BellIcon';
 import { EmailIcon } from '../app/icons/EmailIcon';
 import { OrcidIcon } from '../app/icons/OrcidIcon';
+import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { SupportIcon } from '../app/icons/SupportIcon';
-import { TwitterAvatar } from '../app/icons/TwitterAvatar';
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { I18Keys } from '../i18n/i18n';
@@ -273,7 +273,11 @@ export const UserSettingsPage = () => {
         </Box>
 
         <PlatformSection
-          icon={<TwitterAvatar profile={twitterProfile} />}
+          icon={
+            <PlatformAvatar
+              profileImageUrl={twitterProfile?.profile_image_url}
+            />
+          }
           platformName={t(I18Keys.XTwitter)}
           onButtonClicked={() => {}}
           buttonText="connect"

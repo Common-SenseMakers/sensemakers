@@ -2,16 +2,18 @@ import { Box, BoxExtendedProps, Text } from 'grommet';
 import { Clear, Edit, Send } from 'grommet-icons';
 
 import { PlatformPostAnchor } from '../app/anchors/PlatformPostAnchor';
+import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { SendIcon } from '../app/icons/SendIcon';
-import { TwitterAvatar } from '../app/icons/TwitterAvatar';
+import { MastodonUserProfile } from '../shared/types/types.mastodon';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
+import { AccountDetailsRead, PLATFORM } from '../shared/types/types.user';
 import { AppButton } from '../ui-components';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { NanopubStatus, StatusTag } from './NanopubStatus';
 import { usePost } from './PostContext';
 
 export const PostHeader = (
-  props: BoxExtendedProps & { profile?: TwitterUserProfile }
+  props: BoxExtendedProps & { profile?: AccountDetailsRead<any> }
 ) => {
   const { constants } = useThemeContext();
   const { post } = usePost();
@@ -20,12 +22,23 @@ export const PostHeader = (
   );
   const originalPostUrl = post?.generic.thread[0].url;
 
-  const username = props.profile?.name;
+  const name = post?.generic.author.name;
+  const profileImageUrl = (() => {
+    if (post?.origin === PLATFORM.Twitter) {
+      return (props.profile?.profile as TwitterUserProfile)?.profile_image_url;
+    }
+    if (post?.origin === PLATFORM.Mastodon) {
+      return (props.profile?.profile as MastodonUserProfile)?.avatar;
+    }
+    return undefined;
+  })();
 
   return (
     <Box direction="row" justify="between" {...props}>
       <Box direction="row">
-        <TwitterAvatar size={48} profile={props.profile}></TwitterAvatar>
+        <PlatformAvatar
+          size={48}
+          profileImageUrl={profileImageUrl}></PlatformAvatar>
         <Box width="100%" margin={{ left: 'medium' }}>
           <Box direction="row" justify="between">
             <Text
@@ -37,7 +50,7 @@ export const PostHeader = (
                 lineHeight: '18px',
                 textDecoration: 'none',
               }}>
-              {username}
+              {name}
             </Text>
           </Box>
           <Box margin={{ bottom: '6px' }}></Box>

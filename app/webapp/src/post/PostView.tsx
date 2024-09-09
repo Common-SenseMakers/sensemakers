@@ -25,6 +25,7 @@ import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useAutopostInviteContext } from '../user-login/contexts/AutopostInviteContext';
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
+import { getAccount } from '../user-login/user.helper';
 import { usePersist } from '../utils/use.persist';
 import { usePost } from './PostContext';
 import { PostHeader } from './PostHeader';
@@ -593,7 +594,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       <>
         <Box pad="medium">
           <PostHeader
-            profile={props.profile}
+            profile={getAccount(connectedUser, post.origin)}
             margin={{ bottom: '16px' }}></PostHeader>
           {!hideSemantics && (
             <SemanticsEditor
