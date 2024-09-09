@@ -37,22 +37,16 @@ interface BuildSpostNpOptions {
   orcidId?: string;
 }
 
-// Define the function
-export const sendTriplets = (): Store => {
-  // Create a store
-  const store = new Store();
+export function cleanAndTruncate(input: string, maxLength: number): string {
+  // Remove triple quotes (optional based on use case)
+  let cleanedText = input.replace(/"""/g, "").trim();
 
-  // Create a simple triple with a literal as the object
-  store.addQuad(
-    quad(
-      namedNode('http://example.org/mosquito'),
-      namedNode('http://example.org/hasLabel'),
-      literal('Mosquito')
-    )
-  );
-
-  return store;
-};
+  // Truncate and append "..." if the text exceeds maxLength
+  if (cleanedText.length > maxLength) {
+      return cleanedText.substring(0, maxLength).trim() + "...";
+  }
+  return cleanedText;
+}
 
 export const buildSpostProv = (
   postType: string,
