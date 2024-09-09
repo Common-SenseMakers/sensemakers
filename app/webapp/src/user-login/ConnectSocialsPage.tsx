@@ -1,5 +1,5 @@
 import { Anchor, Box, TextInput } from 'grommet';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { AppLogo } from '../app/brand/AppLogo';
@@ -17,7 +17,7 @@ export const ConnectSocialsPage = (props: {}) => {
   const { t } = useTranslation();
   const { loginFlowState } = useAccountContext();
   const { connect: connectTwitter } = useTwitterContext();
-  const { connect: connectMastodon } = useMastodonContext();
+  const { connect: connectMastodon, error: mastodonError } = useMastodonContext();
   const { disconnect } = useDisconnectContext();
   const [mastodonDomain, setMastodonDomain] = useState('');
 
@@ -62,6 +62,11 @@ export const ConnectSocialsPage = (props: {}) => {
                 onClick={() =>
                   connectMastodon(mastodonDomain, 'read')
                 }></AppButton>
+              {mastodonError && (
+                <Box margin={{ top: 'small' }}>
+                  <AppParagraph color="status-error">{mastodonError}</AppParagraph>
+                </Box>
+              )}
             </Box>
           </Box>
           <Box align="center">
