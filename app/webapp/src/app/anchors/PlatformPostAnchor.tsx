@@ -2,6 +2,7 @@ import { Anchor, AnchorExtendedProps, Box } from 'grommet';
 import { useTranslation } from 'react-i18next';
 
 import { I18Keys } from '../../i18n/i18n';
+import { MastodonThread } from '../../shared/types/types.mastodon';
 import { PlatformPostPosted } from '../../shared/types/types.platform.posts';
 import { TwitterThread } from '../../shared/types/types.twitter';
 import { PLATFORM } from '../../shared/types/types.user';
@@ -44,7 +45,6 @@ export const PlatformPostAnchor = (props: {
   const date = props.platformPostPosted.timestampMs
     ? formatter.format(props.platformPostPosted.timestampMs)
     : '';
-  console.log('date in POST CARD', date, props.platformPostPosted);
 
   const label = (() => {
     if (props.platformId === PLATFORM.Twitter) {
@@ -53,7 +53,9 @@ export const PlatformPostAnchor = (props: {
         : t(I18Keys.TweetX);
     }
     if (props.platformId === PLATFORM.Mastodon) {
-      return 'Mastodon toot';
+      return (props.platformPostPosted.post as MastodonThread).posts.length > 1
+        ? t(I18Keys.ThreadMastodon)
+        : t(I18Keys.TootMastodon);
     }
   })();
 
