@@ -11,8 +11,8 @@ import {
 } from '../shared/types/types.posts';
 import { AppUserRead } from '../shared/types/types.user';
 import { useUserPosts } from '../user-home/UserPostsContext';
-import { PostFetchContext } from './use.current.post';
 import { PostDerivedContext } from './use.post.derived';
+import { PostFetchContext } from './use.post.fetch';
 
 export interface PostUpdateContext {
   editable: boolean; // can be true if not published

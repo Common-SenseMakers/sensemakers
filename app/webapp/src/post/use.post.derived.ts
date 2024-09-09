@@ -15,7 +15,7 @@ import {
 } from '../shared/types/types.user';
 import { getAccount } from '../user-login/user.helper';
 import { AppPostStatus, getPostStatuses } from './posts.helper';
-import { PostFetchContext } from './use.current.post';
+import { PostFetchContext } from './use.post.fetch';
 
 export interface PostDerivedContext {
   author: AppUserRead;

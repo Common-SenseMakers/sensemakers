@@ -12,7 +12,7 @@ import {
 } from '../shared/types/types.posts';
 import { PLATFORM } from '../shared/types/types.user';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
-import { PostFetchContext } from './use.current.post';
+import { PostFetchContext } from './use.post.fetch';
 import { PostMergeContext } from './use.post.merge';
 import { PostUpdateContext } from './use.post.update';
 

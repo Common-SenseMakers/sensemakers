@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 
 import { AppPostFull } from '../shared/types/types.posts';
 import { AppPostStatus, getPostStatuses } from './posts.helper';
-import { PostFetchContext } from './use.current.post';
+import { PostFetchContext } from './use.post.fetch';
 import { PostUpdateContext } from './use.post.update';
 
 export interface PostMergeContext {

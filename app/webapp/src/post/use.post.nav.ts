@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { AbsoluteRoutes } from '../route.names';
 import { useUserPosts } from '../user-home/UserPostsContext';
-import { PostFetchContext } from './use.current.post';
+import { PostFetchContext } from './use.post.fetch';
 
 export interface PostNavContext {
   prevPostId?: string;
