@@ -1,17 +1,17 @@
 import { Dispatch, SetStateAction, useState } from 'react';
 
-import { useAppFetch } from '../api/app.fetch';
-import { PublishPostPayload } from '../shared/types/types.fetch';
+import { useAppFetch } from '../../api/app.fetch';
+import { PublishPostPayload } from '../../shared/types/types.fetch';
 import {
   PlatformPostDraftApproval,
   PlatformPostSignerType,
-} from '../shared/types/types.platform.posts';
+} from '../../shared/types/types.platform.posts';
 import {
   AppPostRepublishedStatus,
   UnpublishPlatformPostPayload,
-} from '../shared/types/types.posts';
-import { PLATFORM } from '../shared/types/types.user';
-import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
+} from '../../shared/types/types.posts';
+import { PLATFORM } from '../../shared/types/types.user';
+import { useNanopubContext } from '../../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { PostFetchContext } from './use.post.fetch';
 import { PostMergeContext } from './use.post.merge';
 import { PostUpdateContext } from './use.post.update';

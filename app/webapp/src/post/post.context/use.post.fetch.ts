@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
 
-import { useAppFetch } from '../api/app.fetch';
-import { subscribeToUpdates } from '../firestore/realtime.listener';
-import { AppPostFull } from '../shared/types/types.posts';
-import { AppUserRead } from '../shared/types/types.user';
+import { useAppFetch } from '../../api/app.fetch';
+import { subscribeToUpdates } from '../../firestore/realtime.listener';
+import { AppPostFull } from '../../shared/types/types.posts';
+import { AppUserRead } from '../../shared/types/types.user';
 
 export interface PostFetchContext {
   postId?: string;

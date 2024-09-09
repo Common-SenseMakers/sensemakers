@@ -14,7 +14,7 @@ import { ViewportPageScrollContext } from '../app/layout/Viewport';
 import { I18Keys } from '../i18n/i18n';
 import { PostCard } from '../post/PostCard';
 import { PostCardLoading } from '../post/PostCardLoading';
-import { PostContext } from '../post/PostContext';
+import { PostContext } from '../post/post.context/PostContext';
 import { PostsQueryStatus, UserPostsQuery } from '../shared/types/types.posts';
 import { AppButton, AppHeading, AppModal, AppSelect } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';

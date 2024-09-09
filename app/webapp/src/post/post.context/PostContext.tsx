@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useMemo } from 'react';
 
-import { AppPostFull } from '../shared/types/types.posts';
-import { useAccountContext } from '../user-login/contexts/AccountContext';
-import { PostPublishStatusModals } from './PostPublishStatusModals';
+import { AppPostFull } from '../../shared/types/types.posts';
+import { useAccountContext } from '../../user-login/contexts/AccountContext';
+import { PostPublishStatusModals } from '../PostPublishStatusModals';
 import { PostDerivedContext, usePostDerived } from './use.post.derived';
 import { PostFetchContext, usePostFetch } from './use.post.fetch';
 import { PostMergeContext, usePostMerge } from './use.post.merge';

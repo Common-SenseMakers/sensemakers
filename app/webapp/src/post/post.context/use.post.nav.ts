@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { AbsoluteRoutes } from '../route.names';
-import { useUserPosts } from '../user-home/UserPostsContext';
+import { AbsoluteRoutes } from '../../route.names';
+import { useUserPosts } from '../../user-home/UserPostsContext';
 import { PostFetchContext } from './use.post.fetch';
 
 export interface PostNavContext {

@@ -14,8 +14,8 @@ import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useAutopostInviteContext } from '../user-login/contexts/AutopostInviteContext';
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { usePersist } from '../utils/use.persist';
-import { usePost } from './PostContext';
 import { POSTING_POST_ID } from './PostingPage';
+import { usePost } from './post.context/PostContext';
 
 const DEBUG = false;
 

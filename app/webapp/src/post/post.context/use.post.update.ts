@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { useAppFetch } from '../api/app.fetch';
-import { useToastContext } from '../app/ToastsContext';
+import { useAppFetch } from '../../api/app.fetch';
+import { useToastContext } from '../../app/ToastsContext';
 import {
   AppPostFull,
   AppPostReviewStatus,
   PostUpdate,
   PostUpdatePayload,
   PostsQueryStatus,
-} from '../shared/types/types.posts';
-import { AppUserRead } from '../shared/types/types.user';
-import { useUserPosts } from '../user-home/UserPostsContext';
+} from '../../shared/types/types.posts';
+import { AppUserRead } from '../../shared/types/types.user';
+import { useUserPosts } from '../../user-home/UserPostsContext';
 import { PostDerivedContext } from './use.post.derived';
 import { PostFetchContext } from './use.post.fetch';
 

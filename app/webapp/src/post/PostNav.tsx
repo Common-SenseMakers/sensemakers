@@ -10,7 +10,7 @@ import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useUserPosts } from '../user-home/UserPostsContext';
-import { usePost } from './PostContext';
+import { usePost } from './post.context/PostContext';
 
 const DEBUG = false;
 

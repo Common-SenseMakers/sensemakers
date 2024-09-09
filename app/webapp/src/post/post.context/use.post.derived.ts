@@ -1,20 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { useAppFetch } from '../api/app.fetch';
-import { NotificationFreq } from '../shared/types/types.notifications';
+import { useAppFetch } from '../../api/app.fetch';
+import { NotificationFreq } from '../../shared/types/types.notifications';
 import {
   PlatformPost,
   PlatformPostDraft,
-} from '../shared/types/types.platform.posts';
-import { AppPostFull } from '../shared/types/types.posts';
-import { TwitterThread } from '../shared/types/types.twitter';
+} from '../../shared/types/types.platform.posts';
+import { AppPostFull } from '../../shared/types/types.posts';
+import { TwitterThread } from '../../shared/types/types.twitter';
 import {
   AppUserRead,
   AutopostOption,
   PLATFORM,
-} from '../shared/types/types.user';
-import { getAccount } from '../user-login/user.helper';
-import { AppPostStatus, getPostStatuses } from './posts.helper';
+} from '../../shared/types/types.user';
+import { getAccount } from '../../user-login/user.helper';
+import { AppPostStatus, getPostStatuses } from '../posts.helper';
 import { PostFetchContext } from './use.post.fetch';
 
 export interface PostDerivedContext {
