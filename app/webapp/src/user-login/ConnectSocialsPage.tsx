@@ -1,5 +1,5 @@
 import { Anchor, Box, TextInput } from 'grommet';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { AppLogo } from '../app/brand/AppLogo';
@@ -20,6 +20,12 @@ export const ConnectSocialsPage = (props: {}) => {
   const { connect: connectMastodon } = useMastodonContext();
   const { disconnect } = useDisconnectContext();
   const [mastodonDomain, setMastodonDomain] = useState('');
+
+  const isValidMastodonDomain = (input: string): boolean => {
+    const domainRegex =
+      /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/;
+    return domainRegex.test(input);
+  };
 
   const content = (() => {
     if (connectTwitter && connectMastodon) {
@@ -49,9 +55,9 @@ export const ConnectSocialsPage = (props: {}) => {
                 primary
                 disabled={
                   loginFlowState === LoginFlowState.ConnectingMastodon ||
-                  !mastodonDomain
+                  !isValidMastodonDomain(mastodonDomain)
                 }
-                icon={<MastodonIcon></MastodonIcon>}
+                icon={<MastodonIcon color="white"></MastodonIcon>}
                 label={t(I18Keys.signInMastodon)}
                 onClick={() =>
                   connectMastodon(mastodonDomain, 'read')
