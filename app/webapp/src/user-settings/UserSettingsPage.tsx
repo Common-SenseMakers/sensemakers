@@ -53,7 +53,8 @@ export const UserSettingsPage = () => {
 
   const appFetch = useAppFetch();
 
-  const { connectedUser, refresh, twitterProfile } = useAccountContext();
+  const { connectedUser, refresh, twitterProfile, mastodonProfile } =
+    useAccountContext();
   const [isSetting, setIsSetting] = useState(false);
   const { disconnect } = useDisconnectContext();
 
@@ -271,19 +272,6 @@ export const UserSettingsPage = () => {
           <SettingSectionTitle
             value={t(I18Keys.yourAccounts)}></SettingSectionTitle>
         </Box>
-
-        <PlatformSection
-          icon={
-            <PlatformAvatar
-              profileImageUrl={twitterProfile?.profile_image_url}
-            />
-          }
-          platformName={t(I18Keys.XTwitter)}
-          onButtonClicked={() => {}}
-          buttonText="connect"
-          username={twitterProfile ? `@${twitterProfile.username}` : ''}
-          connected={!!twitterProfile}></PlatformSection>
-
         <PlatformSection
           icon={
             <BoxCentered
@@ -303,8 +291,14 @@ export const UserSettingsPage = () => {
           connected={!!connectedUser?.email}></PlatformSection>
 
         <PlatformSection
-          icon={<MastodonIcon size={40}></MastodonIcon>}
-          platformName={'mastodon'}
+          icon={
+            mastodonProfile ? (
+              <PlatformAvatar profileImageUrl={mastodonProfile?.avatar} />
+            ) : (
+              <MastodonIcon size={40} color="purple"></MastodonIcon>
+            )
+          }
+          platformName={'Mastodon'}
           onButtonClicked={() => connectMastodon && connectMastodon('', 'read')}
           buttonText={needConnectMastodon ? 'connect' : ''}
           username={
