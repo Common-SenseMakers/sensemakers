@@ -200,6 +200,8 @@ export enum I18Keys {
   postStatusForReview = 's089',
   postStatusPublished = 's090',
   postStatusAutopublished = 's091',
+
+  unignorePost = 's092',
 }
 
 const check = new Set();
@@ -450,6 +452,7 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.readTheDocs]: 'Documentation',
   [I18Keys.readTheDocsDescription]:
     '<a href="https://sense-nets.xyz/docs" target="_blank">https://sense-nets.xyz/docs</a>',
+  [I18Keys.unignorePost]: 'Review for publication',
 };
 
 i18n.use(initReactI18next).init({

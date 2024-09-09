@@ -4,13 +4,13 @@ import { TweetAnchor } from '../app/anchors/TwitterAnchor';
 import { TwitterAvatar } from '../app/icons/TwitterAvatar';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { NanopubStatus } from './NanopubStatus';
-import { usePost } from './PostContext';
+import { usePost } from './post.context/PostContext';
 
 export const PostHeader = (props: BoxExtendedProps) => {
   const { constants } = useThemeContext();
-  const { tweet, post } = usePost();
+  const { derived, merged } = usePost();
 
-  const profile = tweet?.posted?.author;
+  const profile = derived.tweet?.posted?.author;
 
   return (
     <Box direction="row" justify="between" {...props}>
@@ -32,13 +32,13 @@ export const PostHeader = (props: BoxExtendedProps) => {
           </Box>
           <Box margin={{ bottom: '6px' }}></Box>
           <TweetAnchor
-            thread={tweet?.posted?.post}
-            timestamp={tweet?.posted?.timestampMs}></TweetAnchor>
+            thread={derived.tweet?.posted?.post}
+            timestamp={derived.tweet?.posted?.timestampMs}></TweetAnchor>
         </Box>
       </Box>
 
       <Box gap="small" align="end">
-        <NanopubStatus post={post}></NanopubStatus>
+        <NanopubStatus post={merged.post}></NanopubStatus>
       </Box>
     </Box>
   );
