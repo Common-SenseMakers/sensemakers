@@ -111,7 +111,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     derived.nanopubDraft;
 
   const readyToNanopublish =
-    canPublishNanopub && derived.nanopubDraft && !derived.statuses.live;
+    canPublishNanopub && derived.nanopubDraft && !merged.statuses.live;
 
   // receives the navigate from PostingPage and opens the post intent
   useEffect(() => {
@@ -122,7 +122,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   }, [postingPostId, connectedUser, justSetPostId, merged.post?.id]);
 
   const action = (() => {
-    if (!derived.statuses.processed && !derived.statuses.isParsing) {
+    if (!merged.statuses.processed && !merged.statuses.isParsing) {
       return (
         <AppButton
           margin={{ top: 'medium' }}
@@ -133,7 +133,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       );
     }
 
-    if (derived.statuses.ignored) {
+    if (merged.statuses.ignored) {
       return (
         <AppButton
           disabled={update.isUpdating}
@@ -144,7 +144,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       );
     }
 
-    if (!derived.statuses.live && !derived.statuses.ignored) {
+    if (!merged.statuses.live && !merged.statuses.ignored) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
           <Box width="50%" style={{ flexGrow: 1 }}>
@@ -167,7 +167,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       );
     }
 
-    if (derived.statuses.live && !update.enabledEdit) {
+    if (merged.statuses.live && !update.enabledEdit) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
           <Box width="50%" style={{ flexGrow: 1 }}>
@@ -190,7 +190,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       );
     }
 
-    if (derived.statuses.live && update.enabledEdit) {
+    if (merged.statuses.live && update.enabledEdit) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
           <Box width="50%" style={{ flexGrow: 1 }}>
@@ -231,7 +231,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     }
 
     const patternProps: PatternProps = {
-      isLoading: derived.statuses.isParsing,
+      isLoading: merged.statuses.isParsing,
       editable,
       semantics: merged.post?.semantics,
       originalParsed: merged.post?.originalParsed,

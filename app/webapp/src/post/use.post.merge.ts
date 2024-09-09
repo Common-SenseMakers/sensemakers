@@ -1,11 +1,13 @@
 import { useMemo } from 'react';
 
 import { AppPostFull } from '../shared/types/types.posts';
+import { AppPostStatus, getPostStatuses } from './posts.helper';
 import { PostFetchContext } from './use.current.post';
 import { PostUpdateContext } from './use.post.update';
 
 export interface PostMergeContext {
   post?: AppPostFull;
+  statuses: AppPostStatus;
 }
 
 export const usePostMerge = (
@@ -22,7 +24,12 @@ export const usePostMerge = (
     return undefined;
   }, [fetched.post, postInit, update.postEdited, fetched.isLoading]);
 
+  const statuses = useMemo(() => {
+    return getPostStatuses(post);
+  }, [post]);
+
   return {
     post,
+    statuses,
   };
 };
