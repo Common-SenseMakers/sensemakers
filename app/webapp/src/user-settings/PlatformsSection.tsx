@@ -12,6 +12,9 @@ export const PlatformSection = (props: {
   onButtonClicked: () => void;
   connected: boolean;
   connecting?: boolean;
+  isMastodon?: boolean;
+  mastodonDomain?: string;
+  onMastodonDomainChange?: (domain: string) => void;
 }) => {
   const { constants } = useThemeContext();
 
@@ -34,15 +37,24 @@ export const PlatformSection = (props: {
           <Text>{props.platformName}</Text>
         </Box>
         <Box>
-          <Text style={{ fontWeight: 500, color: constants.colors.textLight2 }}>
-            {props.username}
-          </Text>
+          {props.isMastodon && !props.connected ? (
+            <AppInput
+              placeholder="Enter Mastodon server"
+              value={props.mastodonDomain}
+              onChange={(event) => props.onMastodonDomainChange && props.onMastodonDomainChange(event.target.value)}
+              style={{ width: '100%' }}
+            />
+          ) : (
+            <Text style={{ fontWeight: 500, color: constants.colors.textLight2 }}>
+              {props.username}
+            </Text>
+          )}
         </Box>
       </Box>
       <Box>
         {!props.connected ? (
           <AppButton
-            disabled={props.connecting}
+            disabled={props.connecting || (props.isMastodon && !isValidMastodonDomain(props.mastodonDomain || ''))}
             label={props.connecting ? 'connecting' : props.buttonText}
             onClick={() => props.onButtonClicked()}></AppButton>
         ) : (

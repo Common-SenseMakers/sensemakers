@@ -1,5 +1,5 @@
 import { Box, Text } from 'grommet';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { useAppFetch } from '../api/app.fetch';
@@ -19,7 +19,7 @@ import {
   PLATFORM,
   UserSettingsUpdate,
 } from '../shared/types/types.user';
-import { AppButton, AppHeading } from '../ui-components';
+import { AppButton, AppHeading, AppInput } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
@@ -313,14 +313,18 @@ export const UserSettingsPage = () => {
             )
           }
           platformName={'Mastodon'}
-          onButtonClicked={() => connectMastodon && connectMastodon('', 'read')}
+          onButtonClicked={() => connectMastodon && connectMastodon(mastodonDomain, 'read')}
           buttonText={needConnectMastodon ? 'connect' : ''}
           username={
             connectedUser?.mastodon
               ? `@${getAccount(connectedUser, PLATFORM.Mastodon)?.profile.username}@${getAccount(connectedUser, PLATFORM.Mastodon)?.profile.mastodonServer}`
               : '- not connected -'
           }
-          connected={!!connectedUser?.mastodon}></PlatformSection>
+          connected={!!connectedUser?.mastodon}
+          isMastodon={true}
+          mastodonDomain={mastodonDomain}
+          onMastodonDomainChange={setMastodonDomain}
+        ></PlatformSection>
 
         <PlatformSection
           icon={<OrcidIcon size={40}></OrcidIcon>}
