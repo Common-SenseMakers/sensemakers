@@ -4,23 +4,19 @@ import { CheckIcon } from '../app/icons/FilterIcon copy';
 import { AppButton, AppInput } from '../ui-components';
 import { useThemeContext } from '../ui-components/ThemedApp';
 
-const isValidMastodonDomain = (input: string): boolean => {
-  const domainRegex =
-    /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/;
-  return domainRegex.test(input);
-};
-
 export const PlatformSection = (props: {
   icon: JSX.Element;
   platformName: string;
   username: string;
   buttonText: string;
-  onButtonClicked: () => void;
+  onButtonClicked: (inputText?: string) => void;
   connected: boolean;
   connecting?: boolean;
-  isMastodon?: boolean;
-  mastodonDomain?: string;
-  onMastodonDomainChange?: (domain: string) => void;
+  showInput?: boolean;
+  inputPlaceholder?: string;
+  inputValue?: string;
+  onInputChange?: (value: string) => void;
+  isValidInput?: (input: string) => boolean;
 }) => {
   const { constants } = useThemeContext();
 
@@ -43,11 +39,11 @@ export const PlatformSection = (props: {
           <Text>{props.platformName}</Text>
         </Box>
         <Box>
-          {props.isMastodon && !props.connected ? (
+          {props.showInput && !props.connected ? (
             <AppInput
-              placeholder="Enter Mastodon server"
-              value={props.mastodonDomain}
-              onChange={(event) => props.onMastodonDomainChange && props.onMastodonDomainChange(event.target.value)}
+              placeholder={props.inputPlaceholder}
+              value={props.inputValue}
+              onChange={(event) => props.onInputChange && props.onInputChange(event.target.value)}
               style={{ width: '100%' }}
             />
           ) : (
@@ -60,9 +56,9 @@ export const PlatformSection = (props: {
       <Box>
         {!props.connected ? (
           <AppButton
-            disabled={props.connecting || (props.isMastodon && !isValidMastodonDomain(props.mastodonDomain || ''))}
+            disabled={props.connecting || (props.showInput && props.isValidInput && !props.isValidInput(props.inputValue || ''))}
             label={props.connecting ? 'connecting' : props.buttonText}
-            onClick={() => props.onButtonClicked()}></AppButton>
+            onClick={() => props.onButtonClicked(props.inputValue)}></AppButton>
         ) : (
           <Box
             direction="row"
