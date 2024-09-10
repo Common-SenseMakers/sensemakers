@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { useAppFetch } from '../api/app.fetch';
-import { MastodonIcon } from '../app/common/Icons';
+import { MastodonIcon, TwitterIcon } from '../app/common/Icons';
 import { AutopostIcon } from '../app/icons/AutopostIcon';
 import { BellIcon } from '../app/icons/BellIcon';
 import { EmailIcon } from '../app/icons/EmailIcon';
@@ -28,6 +28,7 @@ import { useAutopostInviteContext } from '../user-login/contexts/AutopostInviteC
 import { useDisconnectContext } from '../user-login/contexts/DisconnectUserContext';
 import { useMastodonContext } from '../user-login/contexts/platforms/MastodonContext';
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
+import { useTwitterContext } from '../user-login/contexts/platforms/TwitterContext';
 import { getAccount } from '../user-login/user.helper';
 import { PlatformSection } from './PlatformsSection';
 import { SettingsOptionSelector } from './SettingsOptionsSelector';
@@ -69,6 +70,8 @@ export const UserSettingsPage = () => {
 
   const { connect: connectMastodon, needConnect: needConnectMastodon } =
     useMastodonContext();
+  const { connect: connectTwitter, needConnect: needConnectTwitter } =
+    useTwitterContext();
 
   const { reviewAutopostIntention, setReviewAutopostIntention } =
     useAutopostInviteContext();
@@ -284,6 +287,23 @@ export const UserSettingsPage = () => {
           username={connectedUser?.email ? connectedUser.email?.email : ''}
           connected={!!connectedUser?.email}></PlatformSection>
 
+        <PlatformSection
+          icon={
+            twitterProfile ? (
+              <PlatformAvatar
+                profileImageUrl={twitterProfile?.profile_image_url}
+              />
+            ) : (
+              <TwitterIcon size={40} color="black"></TwitterIcon>
+            )
+          }
+          platformName={t(I18Keys.XTwitter)}
+          onButtonClicked={() => {
+            connectTwitter && connectTwitter('read');
+          }}
+          buttonText={needConnectTwitter ? 'connect' : ''}
+          username={twitterProfile ? `@${twitterProfile.username}` : ''}
+          connected={!!twitterProfile}></PlatformSection>
         <PlatformSection
           icon={
             mastodonProfile ? (

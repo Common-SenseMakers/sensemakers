@@ -54,6 +54,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
     overallLoginStatus,
     setLoginFlowState,
     setTwitterConnectedStatus,
+    twitterConnectedStatus,
   } = useAccountContext();
 
   const [wasConnecting, setWasConnecting] = usePersist<boolean>(
@@ -110,9 +111,10 @@ export const TwitterContext = (props: PropsWithChildren) => {
       if (
         code_param &&
         state_param &&
-        overallLoginStatus === OverallLoginStatus.PartialLoggedIn &&
         connectedUser &&
-        wasConnecting
+        wasConnecting &&
+        (overallLoginStatus === OverallLoginStatus.PartialLoggedIn ||
+          twitterConnectedStatus === TwitterConnectedStatus.Connecting)
       ) {
         if (DEBUG)
           console.log('useEffect TwitterSignup', {

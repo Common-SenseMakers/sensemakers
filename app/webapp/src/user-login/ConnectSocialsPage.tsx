@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { AppLogo } from '../app/brand/AppLogo';
-import { MastodonIcon } from '../app/common/Icons';
+import { MastodonIcon, TwitterIcon } from '../app/common/Icons';
 import { I18Keys } from '../i18n/i18n';
 import { AppButton, AppHeading, AppInput } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
@@ -43,6 +43,13 @@ export const ConnectSocialsPage = (props: {}) => {
                 i18nKey={I18Keys.connectSocialsParagraph2}
                 components={{ b: <b></b> }}></Trans>
             </AppParagraph>
+            <AppButton
+              margin={{ top: 'large' }}
+              primary
+              disabled={loginFlowState === LoginFlowState.ConnectingTwitter}
+              icon={<TwitterIcon></TwitterIcon>}
+              label={t(I18Keys.signInX)}
+              onClick={() => connectTwitter('read')}></AppButton>
             <Box margin={{ top: 'medium' }}>
               <AppParagraph>Mastodon Instance: </AppParagraph>
               <AppInput

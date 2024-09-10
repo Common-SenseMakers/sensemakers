@@ -406,12 +406,18 @@ export const getTwitterMock = (
         user_id?: string,
         params?: TwitterGetContextParams
       ): TwitterSignupContext => {
+        const callbackUrl = new URL(
+          params?.callback_url ? params.callback_url : APP_URL.value()
+        );
+        callbackUrl.searchParams.set('code', 'testCode');
+        callbackUrl.searchParams.set('state', 'testState');
+        console.log('callbackUrl', callbackUrl.toString());
         return {
-          url: `${APP_URL.value()}?code=testCode&state=testState`,
+          url: callbackUrl.toString(),
           state: 'testState',
           codeVerifier: 'testCodeVerifier',
           codeChallenge: user_id ? user_id : '', // include the user_id in the code challenge so the mock handle signup data knows which user to select from
-          callback_url: APP_URL.value(),
+          callback_url: callbackUrl.toString(),
           type: 'read',
         };
       }
