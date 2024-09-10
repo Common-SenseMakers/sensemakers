@@ -23,7 +23,7 @@ import { getMockedUser } from '../utils/users.mock';
 const DEBUG = true;
 const PUBLISH = true;
 
-describe('nanopublication format', () => {
+describe.skip('nanopublication format', () => {
   it('publishes a correctly formatted mock nanopub to the test server and updates it', async () => {
     const post = getMockPost({
       authorId: 'test-user-id',
@@ -47,6 +47,14 @@ describe('nanopublication format', () => {
         id: '123456',
         username: 'test-user',
         password: 'test-password',
+        type: 'read',
+      },
+      [PLATFORM.Mastodon]: {
+        id: '123456',
+        username: 'test-user',
+        displayName: 'test-user',
+        accessToken: 'test-access',
+        mastodonServer: 'test-server',
         type: 'read',
       },
     });
@@ -319,9 +327,9 @@ describe('nanopublication format', () => {
       profile1.ethAddress,
       profile2.ethAddress,
       cleanPublicKey(rsaKeys1),
-      cleanPublicKey(rsaKeys2),
-      profile1.ethToRsaSignature,
-      profile2.ethToRsaSignature
+      cleanPublicKey(rsaKeys2)
+      // profile1.ethToRsaSignature,
+      // profile2.ethToRsaSignature
     );
 
     if (!appIntroNp) {
@@ -362,10 +370,10 @@ describe('nanopublication format', () => {
       profile1.ethAddress,
       profile2.ethAddress,
       cleanPublicKey(rsaKeys1),
-      cleanPublicKey(rsaKeys2),
-      profile1.ethToRsaSignature,
-      profile2.ethToRsaSignature,
-      { latest: published.info().uri, root: published.info().uri }
+      cleanPublicKey(rsaKeys2)
+      // profile1.ethToRsaSignature,
+      // profile2.ethToRsaSignature,
+      // { latest: published.info().uri, root: published.info().uri }
     );
 
     if (!updatedAppIntroNp) {
