@@ -10,13 +10,13 @@ import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useUserPosts } from '../user-home/UserPostsContext';
-import { usePost } from './PostContext';
+import { usePost } from './post.context/PostContext';
 
 const DEBUG = false;
 
-export const PostNav = (props: { profile?: TwitterUserProfile }) => {
-  const profile = props.profile;
-  const { post, nextPostId, prevPostId } = usePost();
+export const PostNav = () => {
+  const { fetched, derived, navigatePost } = usePost();
+  const profile = derived.tweet?.posted?.author;
 
   const { fetchOlder, isFetchingOlder, errorFetchingOlder } = useUserPosts();
   const [triggeredFetchOlder, setTriggeredFetchedOlder] = useState(false);
@@ -26,14 +26,14 @@ export const PostNav = (props: { profile?: TwitterUserProfile }) => {
 
   useEffect(() => {
     if (
-      !nextPostId &&
+      !navigatePost.nextPostId &&
       !isFetchingOlder &&
       !errorFetchingOlder &&
       !triggeredFetchOlder
     ) {
       setTriggeredFetchedOlder(true);
       console.log('fetching older', {
-        nextPostId,
+        nextPostId: navigatePost.nextPostId,
         isFetchingOlder,
         errorFetchingOlder,
         triggeredFetchOlder,
@@ -43,22 +43,31 @@ export const PostNav = (props: { profile?: TwitterUserProfile }) => {
     }
 
     /** reset triggeredFetchedOlder once the nextPostId was obtained */
-    if (nextPostId) {
+    if (navigatePost.nextPostId) {
       setTriggeredFetchedOlder(false);
     }
-  }, [errorFetchingOlder, isFetchingOlder, nextPostId, triggeredFetchOlder]);
+  }, [
+    errorFetchingOlder,
+    isFetchingOlder,
+    navigatePost.nextPostId,
+    triggeredFetchOlder,
+  ]);
 
   const goToPrev = () => {
-    navigate(`/post/${prevPostId}`);
+    navigate(`/post/${navigatePost.prevPostId}`);
   };
 
   const goToNext = () => {
-    if (nextPostId) {
-      navigate(`/post/${nextPostId}`);
+    if (navigatePost.nextPostId) {
+      navigate(`/post/${navigatePost.nextPostId}`);
     }
   };
 
-  if (DEBUG) console.log('PostNav', { nextPostId, prevPostId });
+  if (DEBUG)
+    console.log('PostNav', {
+      nextPostId: navigatePost.nextPostId,
+      prevPostId: navigatePost.prevPostId,
+    });
 
   return (
     <Box
@@ -74,15 +83,13 @@ export const PostNav = (props: { profile?: TwitterUserProfile }) => {
         icon={<LeftChevronIcon></LeftChevronIcon>}
         label={'Back'}
         onClick={() =>
-          profile
-            ? navigate('..', { state: { postId: post?.id } })
-            : navigate('/')
+          navigate('..', { state: { postId: fetched.postId } })
         }></NavButton>
 
       <Box direction="row" gap="8px">
         <NavButton
           icon={<LeftIcon></LeftIcon>}
-          disabled={!prevPostId}
+          disabled={!navigatePost.prevPostId}
           label="Previous"
           onClick={() => goToPrev()}></NavButton>
         <NavButton
@@ -96,7 +103,7 @@ export const PostNav = (props: { profile?: TwitterUserProfile }) => {
               )}
             </Box>
           }
-          disabled={!nextPostId}
+          disabled={!navigatePost.nextPostId}
           label="Next"
           onClick={() => goToNext()}></NavButton>
       </Box>

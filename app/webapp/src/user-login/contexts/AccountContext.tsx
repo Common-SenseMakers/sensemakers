@@ -9,10 +9,13 @@ import {
 
 import { _appFetch } from '../../api/app.fetch';
 import { MastodonUserProfile } from '../../shared/types/types.mastodon';
+import { NotificationFreq } from '../../shared/types/types.notifications';
 import { OrcidUserProfile } from '../../shared/types/types.orcid';
 import { TwitterUserProfile } from '../../shared/types/types.twitter';
 import {
+  AccountDetailsRead,
   AppUserRead,
+  AutopostOption,
   EmailDetails,
   PLATFORM,
 } from '../../shared/types/types.user';
@@ -42,6 +45,9 @@ export type AccountContextType = {
   resetLogin: () => void;
   setTwitterConnectedStatus: (status: TwitterConnectedStatus) => void;
   twitterConnectedStatus: TwitterConnectedStatus | undefined;
+  orcid?: AccountDetailsRead<OrcidUserProfile>;
+  currentAutopost?: AutopostOption;
+  currentNotifications?: NotificationFreq;
   setMastodonConnectedStatus: (status: MastodonConnectedStatus) => void;
   mastodonConnectedStatus: MastodonConnectedStatus | undefined;
   orcidProfile?: OrcidUserProfile;
@@ -225,15 +231,20 @@ export const AccountContext = (props: PropsWithChildren) => {
     return profile;
   }, [connectedUser]);
 
-  const orcidProfile = useMemo(() => {
+  const orcid = useMemo(() => {
     const profile = connectedUser
-      ? getAccount(connectedUser, PLATFORM.Orcid)?.profile
+      ? getAccount<OrcidUserProfile>(connectedUser, PLATFORM.Orcid)
       : undefined;
 
     if (DEBUG) console.log('orcidProfile', { profile });
 
     return profile;
   }, [connectedUser]);
+
+  const currentAutopost =
+    connectedUser?.settings?.autopost[PLATFORM.Nanopub].value;
+
+  const currentNotifications = connectedUser?.settings?.notificationFreq;
 
   const email = connectedUser ? connectedUser.email : undefined;
 
@@ -256,9 +267,11 @@ export const AccountContext = (props: PropsWithChildren) => {
         resetLogin,
         setTwitterConnectedStatus,
         twitterConnectedStatus,
+        orcid,
+        currentAutopost,
+        currentNotifications,
         setMastodonConnectedStatus,
         mastodonConnectedStatus,
-        orcidProfile,
       }}>
       {props.children}
     </AccountContextValue.Provider>

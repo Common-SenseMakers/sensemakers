@@ -1,22 +1,21 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
-import { Clear, Edit, Send } from 'grommet-icons';
 
 import { PlatformPostAnchor } from '../app/anchors/PlatformPostAnchor';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
-import { SendIcon } from '../app/icons/SendIcon';
 import { MastodonUserProfile } from '../shared/types/types.mastodon';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { AccountDetailsRead, PLATFORM } from '../shared/types/types.user';
-import { AppButton } from '../ui-components';
 import { useThemeContext } from '../ui-components/ThemedApp';
-import { NanopubStatus, StatusTag } from './NanopubStatus';
-import { usePost } from './PostContext';
+import { NanopubStatus } from './NanopubStatus';
+import { usePost } from './post.context/PostContext';
 
 export const PostHeader = (
   props: BoxExtendedProps & { profile?: AccountDetailsRead<any> }
 ) => {
   const { constants } = useThemeContext();
-  const { post } = usePost();
+  const { merged } = usePost();
+  const post = merged.post;
+
   const originalPlatformPost = post?.mirrors.find(
     (m) => m.platformId === post.origin
   );
@@ -62,7 +61,7 @@ export const PostHeader = (
       </Box>
 
       <Box gap="small" align="end">
-        <NanopubStatus post={post}></NanopubStatus>
+        <NanopubStatus post={merged.post}></NanopubStatus>
       </Box>
     </Box>
   );

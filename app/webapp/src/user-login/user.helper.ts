@@ -6,7 +6,7 @@ import {
   PLATFORM,
 } from '../shared/types/types.user';
 
-export const getAccount = (
+export const getAccount = <P = any>(
   user?: AppUserRead,
   platformId?: PLATFORM,
   user_id?: string,
@@ -24,7 +24,7 @@ export const getAccount = (
     throw Error('undexpected');
   }
 
-  const accounts = user[platformId] as AccountDetailsRead<any>[] | undefined;
+  const accounts = user[platformId] as AccountDetailsRead<P>[] | undefined;
 
   if (!accounts) {
     return undefined;
@@ -39,8 +39,8 @@ export const getAccount = (
     : accounts.find((a) =>
         user_id
           ? a.user_id === user_id
-          : username
-            ? a.profile.username === username
+          : username && (a.profile as any).username !== undefined
+            ? (a.profile as any).username === username
             : false
       );
 };

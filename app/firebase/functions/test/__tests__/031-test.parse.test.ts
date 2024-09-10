@@ -87,7 +87,7 @@ describe('031 test parse', () => {
       expect(parsedPost.semantics).to.not.be.undefined;
 
       if (process.env.TEST_THREAD_ID) {
-        console.log('parsedPost', JSON.stringify(parsedPost, null, 2));
+        logger.debug('parsedPost', JSON.stringify(parsedPost, null, 2));
       }
     });
 

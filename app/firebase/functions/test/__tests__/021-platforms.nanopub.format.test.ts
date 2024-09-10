@@ -324,12 +324,10 @@ describe.skip('nanopublication format', () => {
       await getNanopubProfile(privateKey2);
 
     const appIntroNp = await buildAppIntroNp(
-      profile1.ethAddress,
-      profile2.ethAddress,
+      `http://${profile1.ethAddress}`,
       cleanPublicKey(rsaKeys1),
+      `http://${profile2.ethAddress}`,
       cleanPublicKey(rsaKeys2)
-      // profile1.ethToRsaSignature,
-      // profile2.ethToRsaSignature
     );
 
     if (!appIntroNp) {
@@ -367,13 +365,10 @@ describe.skip('nanopublication format', () => {
 
     /** update the intro nanopublication */
     const updatedAppIntroNp = await buildAppIntroNp(
-      profile1.ethAddress,
-      profile2.ethAddress,
+      `http://${profile1.ethAddress}`,
       cleanPublicKey(rsaKeys1),
+      `http://${profile2.ethAddress}`,
       cleanPublicKey(rsaKeys2)
-      // profile1.ethToRsaSignature,
-      // profile2.ethToRsaSignature,
-      // { latest: published.info().uri, root: published.info().uri }
     );
 
     if (!updatedAppIntroNp) {

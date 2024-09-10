@@ -19,7 +19,7 @@ from ..interface import (
 from ..configs import ParserChainType, PostProcessType
 from ..filters import SciFilterClassfication
 from ..schema.ontology_base import OntologyBase
-from ..schema.post import RefPost
+from ..schema.post import RefPost, ThreadRefPost
 from ..web_extractors.metadata_extractors import (
     RefMetadata,
     get_ref_post_metadata_list,
@@ -97,6 +97,7 @@ def nested_list_init():
 
 
 class CombinedParserOutput(BaseModel):
+    post_url: str = Field(description="Target post URL.")
     research_keyword: str = Field(
         description="Output of keywords submodule for research classification",
         default="not-detected",
@@ -298,24 +299,30 @@ def convert_ref_tags_to_rdf_triplets(
             ]
     else:
         # non zero refs - add labels as predicates to corresponding urls
-        assert len(all_reference_tags) == len(reference_urls)
-        for ref_tags, ref_url in zip(all_reference_tags, reference_urls):
-            if len(ref_tags) == 0:
-                # if no ref tags provided, add default mention label
-                # add warning since this should be handled prior
-                logger.warning("No ref tags provided, adding default label!")
-                updated_ref_tags = [ontology.default_mention_label()]
-            else:
-                updated_ref_tags = ref_tags
-            for label in updated_ref_tags:
-                concept = ontology.get_concept_by_label(label)
-                assert concept.can_be_predicate()
-                triplets += [
-                    RDFTriplet(
-                        predicate=URIRef(concept.uri),
-                        object=URIRef(ref_url),
-                    )
-                ]
+        if len(all_reference_tags) == len(reference_urls):
+            for ref_tags, ref_url in zip(all_reference_tags, reference_urls):
+                if len(ref_tags) == 0:
+                    # if no ref tags provided, add default mention label
+                    # add warning since this should be handled prior
+                    logger.warning("No ref tags provided, adding default label!")
+                    updated_ref_tags = [ontology.default_mention_label()]
+                else:
+                    updated_ref_tags = ref_tags
+                for label in updated_ref_tags:
+                    concept = ontology.get_concept_by_label(label)
+                    assert concept.can_be_predicate()
+                    triplets += [
+                        RDFTriplet(
+                            predicate=URIRef(concept.uri),
+                            object=URIRef(ref_url),
+                        )
+                    ]
+        else:
+            logger.warning(
+                "No predictions in input corresponding to references!\n"
+                f"{all_reference_tags} != {reference_urls}"
+            )
+            # logger.warning(f"{all_reference_tags} != {reference_urls}")
     return triplets
 
     # # for each tag decide if it's the object or predicate
@@ -388,6 +395,106 @@ def create_quoted_post_triplet(quoted_post_url: str):
     return triplet
 
 
+def create_links_to_triplet(
+    source_url: str,
+    target_url: str,
+    ontology: OntologyBase,
+) -> RDFTriplet:
+    """
+    Returns RDF triplet of (subject_url, linksTo, target_url)
+    """
+    triplet = convert_ref_tags_to_rdf_triplets(
+        [target_url],
+        all_reference_tags=[[ontology.default_mention_label()]],
+        ontology=ontology,
+    )[0]
+    triplet.subject = URIRef(source_url)
+    return triplet
+
+
+def add_quote_post_ref_links(
+    post_url: str,
+    md_list: List[RefMetadata],
+    ontology: OntologyBase,
+) -> List[RDFTriplet]:
+    """Return list of triplets representing links between
+    quoted posts and references mentioned by quoted post.
+    E.g., triplets of format (subject_url, linksTo, target_url),
+    where subject_url is the url of a quoted post and target_url is the url of
+    the reference mentioned in source_url
+    """
+    triplets = []
+    for md in md_list:
+        if md.ref_source_url != post_url:
+            # if refernce source is not the orig thread, add to list
+            triplet = create_links_to_triplet(
+                md.ref_source_url,
+                md.url,
+                ontology,
+            )
+            triplets.append(triplet)
+
+    return triplets
+
+
+def add_ref_ordering_info(
+    post: RefPost,
+    md_dict: Dict[str, RefMetadata],
+) -> Dict[str, RefMetadata]:
+    """_summary_
+
+    Args:
+        post (RefPost): _description_
+        md_dict (Dict[str, RefMetadata]): _description_
+
+    Returns:
+        Dict[str, RefMetadata]: _description_
+    """
+    all_ref_urls = post.md_ref_urls()
+
+    for i, ref in enumerate(all_ref_urls):
+        if ref in md_dict:
+            md = md_dict.get(ref)
+            if md:
+                # add ordering info (1-indexed)
+                md.order = i + 1
+    return md_dict
+
+
+def add_ref_source_info(
+    threaded_post: RefPost,
+    md_dict: Dict[str, RefMetadata],
+) -> Dict[str, RefMetadata]:
+    """
+    Adds quote tweet reference source information to RefMetadata.
+    See `RefMetadata:ref_source_url`.
+
+
+    Note: assumes metadata is only used for this thread, and not shared
+    over a batch!
+
+    Args:
+        thread (ThreadRefPost): _description_
+        md_dict (Dict[str,RefMetadata]): _description_
+
+    Returns:
+        Dict[str, RefMetadata]
+    """
+    for post in threaded_post.thread_posts():
+        # link all directly referenced url to thread url
+        for ref_url in post.md_ref_urls(include_quoted_ref_urls=False):
+            if ref_url in md_dict:
+                md_dict[ref_url].ref_source_url = threaded_post.url
+        if post.has_quote_post:
+            # link urls mentioned in quoted posts to quoting post
+            quoted_post = post.quoted_post
+            source_url = quoted_post.url
+            for ref_url in quoted_post.md_ref_urls():
+                if ref_url in md_dict:
+                    md_dict[ref_url].ref_source_url = source_url
+    return md_dict
+
+
 def convert_item_types_to_rdf_triplets(
     item_types: List[str], reference_urls: List[str]
 ) -> List[RDFTriplet]:
@@ -437,12 +544,20 @@ def combine_from_raw_results(
     if unprocessed_urls is None:
         unprocessed_urls = []
 
+    # add source reference info to reference metadata
+    md_dict = add_ref_source_info(post, md_dict)
+
+    # get metadata list, add ordering info
     md_list = get_ref_post_metadata_list(
         post,
         md_dict,
         extra_urls=unprocessed_urls,
+        add_ordering=True,
     )
+
+    # init output object
     combined_parser_output = {
+        "post_url": post.url,
         "reference_urls": post.md_ref_urls(),
         "item_types": [md.item_type for md in md_list],
         "metadata_list": md_list,
@@ -492,13 +607,17 @@ def get_support_data(
     ontology_interface: OntologyInterface,
     metadata_list: List[RefMetadata],
 ) -> ParserSupport:
-    md_dict = {}  # Initialize an empty dictionary
+    # Initialize an empty dictionary
+    md_dict = {}
 
     for m in metadata_list:
         if hasattr(m, "url"):
             md_dict[m.url] = m
 
-    return ParserSupport(ontology=ontology_interface, refs_meta=md_dict)
+    return ParserSupport(
+        ontology=ontology_interface,
+        refs_meta=md_dict,
+    )
 
 
 def post_process_firebase(
@@ -544,6 +663,15 @@ def post_process_firebase(
     if combined_parser_output.quoted_post_url:
         triplet = create_quoted_post_triplet(combined_parser_output.quoted_post_url)
         graph.add(triplet.to_tuple())
+
+    # add links between quote posts and references they mention
+    quote_ref_triplets = add_quote_post_ref_links(
+        combined_parser_output.post_url,
+        metadata_list,
+        ontology_base,
+    )
+    for t in quote_ref_triplets:
+        graph.add(t.to_tuple())
 
     # gather support info
     parser_support: ParserSupport = get_support_data(

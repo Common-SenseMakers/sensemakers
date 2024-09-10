@@ -61,6 +61,7 @@ export const OUR_TOKEN_SECRET = envRuntime.OUR_TOKEN_SECRET;
 export const OUR_EXPIRES_IN = '30d';
 
 export const EMAIL_SENDER_FROM = envRuntime.EMAIL_SENDER_FROM;
+export const ADMIN_EMAIL = envRuntime.ADMIN_EMAIL;
 
 export const NANOPUBS_PUBLISH_SERVERS_STR = envRuntime.NANOPUBS_PUBLISH_SERVERS;
 

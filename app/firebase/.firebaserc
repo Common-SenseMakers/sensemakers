@@ -2,7 +2,8 @@
   "projects": {
     "dev": "sensenets-dev",
     "staging": "sensenets-staging",
-    "prod": "sensenets-prod"
+    "prod": "sensenets-prod",
+    "dev-md": "sensenets-dev-md"
   },
   "targets": {},
   "etags": {}
