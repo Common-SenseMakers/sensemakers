@@ -168,7 +168,7 @@ export class PostsManager {
       account?.fetched
     );
 
-    if (DEBUG) logger.debug(`Twitter Service - fetch ${platformId}`);
+    if (DEBUG) logger.debug(`Platform Service - fetch ${platformId}`);
     try {
       const fetchedPosts = await this.platforms.fetch(
         platformId,
@@ -224,34 +224,15 @@ export class PostsManager {
     fetched?: FetchedDetails
   ): Promise<PlatformFetchParams> {
     if (params.sinceId) {
-      const since = await this.processing.platformPosts.getPostedFromPostId(
-        params.sinceId,
-        platformId,
-        user_id,
-        manager
-      );
-
       return {
-        since_id: since?.posted
-          ? PostsHelper.getNewestPostIdInPlatformPostThread(
-              platformId,
-              since.posted
-            )
-          : undefined,
+        since_id: fetched?.newest_id,
         expectedAmount: params.expectedAmount,
       };
     }
 
     if (params.untilId) {
-      const until = await this.processing.platformPosts.getPostedFromPostId(
-        params.untilId,
-        platformId,
-        user_id,
-        manager
-      );
-
       return {
-        until_id: until ? until.posted?.post_id : undefined,
+        until_id: fetched?.oldest_id,
         expectedAmount: params.expectedAmount,
       };
     }
