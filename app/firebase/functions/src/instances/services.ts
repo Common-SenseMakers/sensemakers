@@ -16,6 +16,7 @@ import {
   TWITTER_CLIENT_ID,
   TWITTER_CLIENT_SECRET,
   USE_REAL_EMAIL,
+  USE_REAL_MASTODON,
   USE_REAL_NANOPUB,
   USE_REAL_PARSER,
   USE_REAL_TWITTERX,
@@ -27,6 +28,9 @@ import { NotificationService } from '../notifications/notification.service';
 import { NotificationsRepository } from '../notifications/notifications.repository';
 import { getParserMock } from '../parser/mock/parser.service.mock';
 import { ParserService } from '../parser/parser.service';
+import { MastodonService } from '../platforms/mastodon/mastodon.service';
+import { getMastodonMock } from '../platforms/mastodon/mock/mastodon.service.mock';
+import { getTestCredentials } from '../platforms/mock/test.users';
 import { getNanopubMock } from '../platforms/nanopub/mock/nanopub.service.mock';
 import { NanopubService } from '../platforms/nanopub/nanopub.service';
 // import { ParserService } from '../parser/parser.service';
@@ -36,7 +40,6 @@ import {
   PlatformsMap,
   PlatformsService,
 } from '../platforms/platforms.service';
-import { getTestCredentials } from '../platforms/twitter/mock/test.users';
 import { getTwitterMock } from '../platforms/twitter/mock/twitter.service.mock';
 import { TwitterService } from '../platforms/twitter/twitter.service';
 import { PlatformPostsRepository } from '../posts/platform.posts.repository';
@@ -106,14 +109,25 @@ export const createServices = (firestore: Firestore) => {
     USE_REAL_NANOPUB.value() ? 'real' : 'mock-publish'
   );
 
+  const _mastodon = new MastodonService(time, userRepo);
+  const mastodon = getMastodonMock(
+    _mastodon,
+    USE_REAL_MASTODON.value()
+      ? undefined
+      : { signup: true, fetch: true, publish: true, get: true },
+    testUser
+  );
+
   /** all identity services */
   identityPlatforms.set(PLATFORM.Orcid, orcid);
   identityPlatforms.set(PLATFORM.Twitter, twitter);
   identityPlatforms.set(PLATFORM.Nanopub, nanopub);
+  identityPlatforms.set(PLATFORM.Mastodon, mastodon);
 
   /** all platforms */
   platformsMap.set(PLATFORM.Twitter, twitter);
   platformsMap.set(PLATFORM.Nanopub, nanopub);
+  platformsMap.set(PLATFORM.Mastodon, mastodon);
 
   /** email sender service */
   const _email = new EmailSenderService({
@@ -205,6 +219,7 @@ export const createServices = (firestore: Firestore) => {
     logger.debug('services', {
       USE_REAL_PARSER: USE_REAL_PARSER.value(),
       USE_REAL_TWITTER: USE_REAL_TWITTERX.value(),
+      USE_REAL_MASTODON: USE_REAL_MASTODON.value(),
       USE_REAL_NANOPUB: USE_REAL_NANOPUB.value(),
       USE_REAL_EMAIL: USE_REAL_EMAIL.value(),
     });

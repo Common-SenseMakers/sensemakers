@@ -1,15 +1,13 @@
 import { Box, Image } from 'grommet';
 
-import { TwitterUserProfile } from '../../shared/types/types.twitter';
-
-export const TwitterAvatar = (props: {
-  profile?: TwitterUserProfile;
+export const PlatformAvatar = (props: {
+  profileImageUrl?: string;
   size?: number;
 }) => {
   const size = props.size || 40;
   const content = (() => {
-    if (!props.profile || !props.profile.profile_image_url) return <></>;
-    return <Image src={props.profile.profile_image_url}></Image>;
+    if (!props.profileImageUrl) return <></>;
+    return <Image src={props.profileImageUrl}></Image>;
   })();
 
   return (

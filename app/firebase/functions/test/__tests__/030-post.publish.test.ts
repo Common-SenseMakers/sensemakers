@@ -26,6 +26,7 @@ import {
 } from './reusable/create-post-fetch';
 import {
   TEST_THREADS,
+  USE_REAL_MASTODON,
   USE_REAL_NANOPUB,
   USE_REAL_PARSER,
   USE_REAL_TWITTER,
@@ -44,6 +45,9 @@ describe('030-process', () => {
     twitter: USE_REAL_TWITTER
       ? undefined
       : { publish: true, signup: true, fetch: true },
+    mastodon: USE_REAL_MASTODON
+      ? undefined
+      : { publish: true, signup: true, fetch: true },
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
     emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
@@ -59,10 +63,15 @@ describe('030-process', () => {
 
     before(async () => {
       const testUser = testCredentials[0];
-      user = await _01_createAndFetchUsers(services, testUser.twitter.id, {
-        DEBUG,
-        DEBUG_PREFIX,
-      });
+      user = await _01_createAndFetchUsers(
+        services,
+        PLATFORM.Twitter,
+        testUser[PLATFORM.Twitter].id,
+        {
+          DEBUG,
+          DEBUG_PREFIX,
+        }
+      );
     });
 
     it('publish a tweet in the name of the test user', async () => {
@@ -80,10 +89,16 @@ describe('030-process', () => {
       }
 
       /** get pending posts of user */
-      const pendingPosts = await services.postsManager.getOfUser(user.userId, {
-        status: PostsQueryStatus.PENDING,
-        fetchParams: { expectedAmount: 10 },
-      });
+      const allPendingPosts = await services.postsManager.getOfUser(
+        user.userId,
+        {
+          status: PostsQueryStatus.PENDING,
+          fetchParams: { expectedAmount: 10 },
+        }
+      );
+      const pendingPosts = allPendingPosts.filter(
+        (pendingPost) => pendingPost.origin === PLATFORM.Twitter
+      );
 
       if (!USE_REAL_TWITTER && TEST_THREADS.length > 1) {
         expect(pendingPosts).to.have.length(TEST_THREADS.length + 1 - 1); // one post is ignored
@@ -166,10 +181,16 @@ describe('030-process', () => {
       }
 
       /** get pending posts of user */
-      const pendingPosts = await services.postsManager.getOfUser(user.userId, {
-        status: PostsQueryStatus.PENDING,
-        fetchParams: { expectedAmount: 10 },
-      });
+      const allPendingPosts = await services.postsManager.getOfUser(
+        user.userId,
+        {
+          status: PostsQueryStatus.PENDING,
+          fetchParams: { expectedAmount: 10 },
+        }
+      );
+      const pendingPosts = allPendingPosts.filter(
+        (pendingPost) => pendingPost.origin === PLATFORM.Twitter
+      );
 
       if (!USE_REAL_TWITTER) {
         if (TEST_THREADS.length > 1) {

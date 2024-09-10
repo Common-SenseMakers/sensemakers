@@ -4,7 +4,7 @@ import { TwitterUserDetails } from '../../src/@shared/types/types.twitter';
 import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
 import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
-import { getTestCredentials } from '../../src/platforms/twitter/mock/test.users';
+import { getTestCredentials } from '../../src/platforms/mock/test.users';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { GetClientResultInternal } from '../../src/platforms/twitter/twitter.service.client';
 import { UsersHelper } from '../../src/users/users.helper';

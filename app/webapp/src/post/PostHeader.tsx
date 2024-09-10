@@ -1,21 +1,43 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
 
-import { TweetAnchor } from '../app/anchors/TwitterAnchor';
-import { TwitterAvatar } from '../app/icons/TwitterAvatar';
+import { PlatformPostAnchor } from '../app/anchors/PlatformPostAnchor';
+import { PlatformAvatar } from '../app/icons/PlatformAvatar';
+import { MastodonUserProfile } from '../shared/types/types.mastodon';
+import { TwitterUserProfile } from '../shared/types/types.twitter';
+import { AccountDetailsRead, PLATFORM } from '../shared/types/types.user';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { NanopubStatus } from './NanopubStatus';
 import { usePost } from './post.context/PostContext';
 
-export const PostHeader = (props: BoxExtendedProps) => {
+export const PostHeader = (
+  props: BoxExtendedProps & { profile?: AccountDetailsRead<any> }
+) => {
   const { constants } = useThemeContext();
-  const { derived, merged } = usePost();
+  const { merged } = usePost();
+  const post = merged.post;
 
-  const profile = derived.tweet?.posted?.author;
+  const originalPlatformPost = post?.mirrors.find(
+    (m) => m.platformId === post.origin
+  );
+  const originalPostUrl = post?.generic.thread[0].url;
+
+  const name = post?.generic.author.name;
+  const profileImageUrl = (() => {
+    if (post?.origin === PLATFORM.Twitter) {
+      return (props.profile?.profile as TwitterUserProfile)?.profile_image_url;
+    }
+    if (post?.origin === PLATFORM.Mastodon) {
+      return (props.profile?.profile as MastodonUserProfile)?.avatar;
+    }
+    return undefined;
+  })();
 
   return (
     <Box direction="row" justify="between" {...props}>
       <Box direction="row">
-        <TwitterAvatar size={48} profile={profile}></TwitterAvatar>
+        <PlatformAvatar
+          size={48}
+          profileImageUrl={profileImageUrl}></PlatformAvatar>
         <Box width="100%" margin={{ left: 'medium' }}>
           <Box direction="row" justify="between">
             <Text
@@ -27,13 +49,14 @@ export const PostHeader = (props: BoxExtendedProps) => {
                 lineHeight: '18px',
                 textDecoration: 'none',
               }}>
-              {profile.name}
+              {name}
             </Text>
           </Box>
           <Box margin={{ bottom: '6px' }}></Box>
-          <TweetAnchor
-            thread={derived.tweet?.posted?.post}
-            timestamp={derived.tweet?.posted?.timestampMs}></TweetAnchor>
+          <PlatformPostAnchor
+            platformPostPosted={originalPlatformPost?.posted}
+            platformId={post?.origin}
+            postUrl={originalPostUrl}></PlatformPostAnchor>
         </Box>
       </Box>
 

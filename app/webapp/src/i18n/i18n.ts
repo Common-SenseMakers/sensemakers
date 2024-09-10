@@ -10,15 +10,20 @@ export enum I18Keys {
 
   connectSocialsTitle = 's0090',
   connectSocialsParagraph = 's0091',
+  connectSocialsParagraphMastodon = 's0091a',
   connectSocialsParagraph2 = 's0092',
   signInX = 's012',
+  signInMastodon = 's012a',
 
   connectAccounts = 's010',
   connectParagraph = 's011',
   errorConnectTwitter = 's013',
+  errorConnectMastodon = 's013a',
   yourPublications = 's014',
   TweetX = 's015',
   ThreadX = 's016',
+  TootMastodon = 's016b',
+  ThreadMastodon = 's016c',
   addKeyword = 's017',
   profile = 's018',
   updateAvailable = 's019',
@@ -224,9 +229,12 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.connectSocialsTitle]: 'Connect your socials',
   [I18Keys.connectSocialsParagraph]:
     'Link your X·Twitter account to start transforming your tweets into nanopublications.',
+  [I18Keys.connectSocialsParagraphMastodon]:
+    'Link your Mastodon account to start transforming your posts into nanopublications.',
   [I18Keys.connectSocialsParagraph2]:
     'By connecting, you can easily identify and FAIRify your valuable scientific insights.',
   [I18Keys.signInX]: 'Sign in with X',
+  [I18Keys.signInMastodon]: 'Sign in with Mastodon',
 
   [I18Keys.drafts]: 'Drafts',
 
@@ -255,9 +263,13 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.connectParagraph]:
     'SenseNets loads your X (Twitter) feed and analyzes your posts using AI to deduct keywords and relations, which can be used to better interpret the meaning of your content.',
   [I18Keys.errorConnectTwitter]: 'Error connecting Twitter',
+  [I18Keys.errorConnectMastodon]:
+    'An error occurred while connecting to the Mastodon server: {{mastodonServer}}',
   [I18Keys.yourPublications]: 'Your publications',
   [I18Keys.TweetX]: 'X · Tweet',
   [I18Keys.ThreadX]: 'X · Thread',
+  [I18Keys.TootMastodon]: 'Mastodon · Toot',
+  [I18Keys.ThreadMastodon]: 'Mastodon · Thread',
   [I18Keys.addKeyword]: 'add keyword',
   [I18Keys.profile]: 'Profile',
   [I18Keys.updateAvailable]: 'An update is available, ',

@@ -1,3 +1,4 @@
+import { MastodonUserDetails } from './types.mastodon';
 import { NanopubUserDetails } from './types.nanopubs';
 import { NotificationFreq } from './types.notifications';
 import { OrcidUserDetails } from './types.orcid';
@@ -16,24 +17,31 @@ export enum PLATFORM {
   Orcid = 'orcid',
   Twitter = 'twitter',
   Nanopub = 'nanopub',
+  Mastodon = 'mastodon',
 }
 
-export type PUBLISHABLE_PLATFORMS = PLATFORM.Twitter | PLATFORM.Nanopub;
+export type PUBLISHABLE_PLATFORMS =
+  | PLATFORM.Twitter
+  | PLATFORM.Nanopub
+  | PLATFORM.Mastodon;
 
 export const ALL_PUBLISH_PLATFORMS: PUBLISHABLE_PLATFORMS[] = [
   PLATFORM.Twitter,
   PLATFORM.Nanopub,
+  PLATFORM.Mastodon,
 ];
 
 export type IDENTITY_PLATFORMS =
   | PLATFORM.Orcid
   | PLATFORM.Twitter
-  | PLATFORM.Nanopub;
+  | PLATFORM.Nanopub
+  | PLATFORM.Mastodon;
 
 export const ALL_IDENTITY_PLATFORMS: IDENTITY_PLATFORMS[] = [
   PLATFORM.Twitter,
   PLATFORM.Nanopub,
   PLATFORM.Orcid,
+  PLATFORM.Mastodon,
 ];
 
 /** The user details has, for each PLATFORM, a details object
@@ -120,6 +128,7 @@ export interface AppUser
   [PLATFORM.Orcid]?: OrcidUserDetails[];
   [PLATFORM.Twitter]?: TwitterUserDetails[];
   [PLATFORM.Nanopub]?: NanopubUserDetails[];
+  [PLATFORM.Mastodon]?: MastodonUserDetails[];
 }
 
 export type AppUserCreate = Omit<AppUser, 'userId'>;
@@ -139,6 +148,7 @@ export interface AppUserRead extends UserWithId, UserWithSettings {
   [PLATFORM.Orcid]?: AccountDetailsRead<OrcidUserDetails['profile']>[];
   [PLATFORM.Twitter]?: AccountDetailsRead<TwitterUserDetails['profile']>[];
   [PLATFORM.Nanopub]?: AccountDetailsRead<NanopubUserDetails['profile']>[];
+  [PLATFORM.Mastodon]?: AccountDetailsRead<MastodonUserDetails['profile']>[];
 }
 
 /** Support collection with all the profiles from all platforms */
@@ -153,7 +163,17 @@ export interface UserPlatformProfile {
 export interface TestUserCredentials {
   userId: string;
   twitter: TwitterAccountCredentials;
+  mastodon: MastodonAccountCredentials;
   nanopub: NanopubAccountCredentials;
+}
+
+export interface MastodonAccountCredentials {
+  id: string;
+  username: string;
+  displayName: string;
+  mastodonServer: string;
+  accessToken: string;
+  type: 'read' | 'write';
 }
 
 export interface TwitterAccountCredentials {

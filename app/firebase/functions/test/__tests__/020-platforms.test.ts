@@ -1,6 +1,9 @@
 import { expect } from 'chai';
 
-import { FetchParams } from '../../src/@shared/types/types.fetch';
+import {
+  FetchParams,
+  PlatformFetchParams,
+} from '../../src/@shared/types/types.fetch';
 import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
 import { PlatformPostCreate } from '../../src/@shared/types/types.platform.posts';
 import { AppTweet, TwitterThread } from '../../src/@shared/types/types.twitter';
@@ -16,6 +19,7 @@ import { resetDB } from '../utils/db';
 import { getMockPost } from '../utils/posts.utils';
 import { createUsers } from '../utils/users.utils';
 import {
+  USE_REAL_MASTODON,
   USE_REAL_NANOPUB,
   USE_REAL_PARSER,
   USE_REAL_TWITTER,
@@ -30,7 +34,12 @@ describe('02-platforms', () => {
 
   const services = getTestServices({
     time: 'mock',
-    twitter: USE_REAL_TWITTER ? undefined : { publish: true, signup: true },
+    twitter: USE_REAL_TWITTER
+      ? undefined
+      : { publish: true, signup: true, fetch: true, get: true },
+    mastodon: USE_REAL_MASTODON
+      ? undefined
+      : { publish: true, signup: true, fetch: true, get: true },
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
     emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
@@ -53,7 +62,9 @@ describe('02-platforms', () => {
       user = users.find(
         (u) =>
           UsersHelper.getAccount(u, PLATFORM.Twitter, testUser.twitter.id) !==
-          undefined
+            undefined &&
+          UsersHelper.getAccount(u, PLATFORM.Mastodon, testUser.mastodon.id) !==
+            undefined
       );
     });
   });
@@ -209,6 +220,59 @@ describe('02-platforms', () => {
         console.error('error: ', error);
         throw error;
       }
+    });
+  });
+
+  describe('mastodon', () => {
+    it('fetches the latest posts', async () => {
+      if (!user) {
+        throw new Error('appUser not created');
+      }
+      const allUserDetails = user[PLATFORM.Mastodon];
+      if (!allUserDetails || allUserDetails.length < 0) {
+        throw new Error('Unexpected');
+      }
+      const userDetails = allUserDetails[0];
+      if (userDetails.read === undefined) {
+        throw new Error('Unexpected');
+      }
+
+      // const user_id = process.env.MASTODON_ACCOUNT_ID as string;
+      // const accessToken = process.env.MASTODON_ACCESS_TOKEN as string;
+      // const mastodonServer = process.env.MASTODON_SERVER_DOMAIN as string;
+
+      // if (!user_id || !accessToken || !mastodonServer) {
+      //   throw new Error('Mastodon credentials not set');
+      // }
+
+      const mastodonService = services.platforms.get(PLATFORM.Mastodon);
+      // const userDetails: MastodonUserDetails = {
+      //   user_id,
+      //   signupDate: Date.now(),
+      //   profile: {
+      //     id: user_id,
+      //     username: 'test_username',
+      //     displayName: 'Test User',
+      //     avatar: 'https://example.com/avatar.jpg',
+      //     mastodonServer,
+      //   },
+      //   read: {
+      //     accessToken,
+      //   },
+      // };
+
+      const fetchParams: PlatformFetchParams = {
+        expectedAmount: 5,
+      };
+
+      const result = await services.db.run((manager) =>
+        mastodonService.fetch(fetchParams, userDetails, manager)
+      );
+
+      expect(result).to.not.be.undefined;
+      expect(result.platformPosts.length).to.be.greaterThan(0);
+      expect(result.platformPosts[0].post).to.have.property('id');
+      expect(result.platformPosts[0].post).to.have.property('content');
     });
   });
 });

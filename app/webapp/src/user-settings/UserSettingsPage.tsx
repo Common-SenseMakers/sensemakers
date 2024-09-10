@@ -3,12 +3,13 @@ import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { useAppFetch } from '../api/app.fetch';
+import { MastodonIcon } from '../app/common/Icons';
 import { AutopostIcon } from '../app/icons/AutopostIcon';
 import { BellIcon } from '../app/icons/BellIcon';
 import { EmailIcon } from '../app/icons/EmailIcon';
 import { OrcidIcon } from '../app/icons/OrcidIcon';
+import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { SupportIcon } from '../app/icons/SupportIcon';
-import { TwitterAvatar } from '../app/icons/TwitterAvatar';
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { I18Keys } from '../i18n/i18n';
@@ -25,6 +26,7 @@ import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useAutopostInviteContext } from '../user-login/contexts/AutopostInviteContext';
 import { useDisconnectContext } from '../user-login/contexts/DisconnectUserContext';
+import { useMastodonContext } from '../user-login/contexts/platforms/MastodonContext';
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { getAccount } from '../user-login/user.helper';
 import { PlatformSection } from './PlatformsSection';
@@ -54,6 +56,7 @@ export const UserSettingsPage = () => {
     connectedUser,
     refresh,
     twitterProfile,
+    mastodonProfile,
     currentAutopost,
     currentNotifications,
     orcid,
@@ -63,6 +66,9 @@ export const UserSettingsPage = () => {
 
   const { connect: connectOrcid, connecting: connectingOrcid } =
     useOrcidContext();
+
+  const { connect: connectMastodon, needConnect: needConnectMastodon } =
+    useMastodonContext();
 
   const { reviewAutopostIntention, setReviewAutopostIntention } =
     useAutopostInviteContext();
@@ -260,15 +266,6 @@ export const UserSettingsPage = () => {
           <SettingSectionTitle
             value={t(I18Keys.yourAccounts)}></SettingSectionTitle>
         </Box>
-
-        <PlatformSection
-          icon={<TwitterAvatar profile={twitterProfile} />}
-          platformName={t(I18Keys.XTwitter)}
-          onButtonClicked={() => {}}
-          buttonText=""
-          username={twitterProfile ? `@${twitterProfile.username}` : ''}
-          connected></PlatformSection>
-
         <PlatformSection
           icon={
             <BoxCentered
@@ -285,7 +282,25 @@ export const UserSettingsPage = () => {
           onButtonClicked={() => {}}
           buttonText=""
           username={connectedUser?.email ? connectedUser.email?.email : ''}
-          connected></PlatformSection>
+          connected={!!connectedUser?.email}></PlatformSection>
+
+        <PlatformSection
+          icon={
+            mastodonProfile ? (
+              <PlatformAvatar profileImageUrl={mastodonProfile?.avatar} />
+            ) : (
+              <MastodonIcon size={40} color="purple"></MastodonIcon>
+            )
+          }
+          platformName={'Mastodon'}
+          onButtonClicked={() => connectMastodon && connectMastodon('', 'read')}
+          buttonText={needConnectMastodon ? 'connect' : ''}
+          username={
+            connectedUser?.mastodon
+              ? `@${getAccount(connectedUser, PLATFORM.Mastodon)?.profile.username}@${getAccount(connectedUser, PLATFORM.Mastodon)?.profile.mastodonServer}`
+              : '- not connected -'
+          }
+          connected={!!connectedUser?.mastodon}></PlatformSection>
 
         <PlatformSection
           icon={<OrcidIcon size={40}></OrcidIcon>}

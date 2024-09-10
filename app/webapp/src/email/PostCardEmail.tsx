@@ -27,7 +27,7 @@ interface PostCardEmailProps {
 }
 
 export const PostCardEmail = ({ post }: PostCardEmailProps) => {
-  const tweet = post.mirrors.find((m) => m.platformId === PLATFORM.Twitter);
+  const postUrl = post.generic.thread[0].url;
   const postText = (() => {
     const text = post.generic.thread.reduce(
       (_acc, post, ix) => _acc + `${ix > 0 ? '<br><br>' : ''}${post.content}`,
@@ -38,7 +38,9 @@ export const PostCardEmail = ({ post }: PostCardEmailProps) => {
     }
     return text;
   })();
-  const label = `X•${post.generic.thread.length > 1 ? 'Thread' : 'Tweet'}`;
+  const capitalizedPlatform =
+    post.origin.charAt(0).toUpperCase() + post.origin.slice(1);
+  const label = `${post.origin === PLATFORM.Twitter ? 'X•' : `${capitalizedPlatform} `}${post.generic.thread.length > 1 ? 'Thread' : post.origin === PLATFORM.Twitter ? 'Tweet' : 'Post'}`;
   const formatter = new Intl.DateTimeFormat('en-US', {
     month: 'long', // full name of the month
     day: 'numeric', // numeric day
@@ -69,7 +71,7 @@ export const PostCardEmail = ({ post }: PostCardEmailProps) => {
             float: 'left',
           }}
           target="_blank"
-          href={`https://x.com/${post.generic.author.username}/status/${tweet?.posted?.post_id}`}>
+          href={postUrl}>
           <span style={{ color: '#6B7280' }}>{label}</span>
           <span
             style={{

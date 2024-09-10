@@ -1,6 +1,6 @@
 import { Box } from 'grommet';
 
-import { TweetAnchor } from '../app/anchors/TwitterAnchor';
+import { PlatformPostAnchor } from '../app/anchors/PlatformPostAnchor';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID } from '../semantics/patterns/patterns';
 import { SciFilterClassfication } from '../shared/types/types.parser';
@@ -33,7 +33,11 @@ export const PostCard = (props: {
     props.handleClick();
   };
 
-  const tweet = post.mirrors.find((m) => m.platformId === PLATFORM.Twitter);
+  const originalPlatformPost = post.mirrors.find(
+    (m) => m.platformId === post.origin
+  );
+  const originalPostUrl = post.generic.thread[0].url;
+
   const postText = concatenateThread(post.generic);
 
   const { isParsing } = getPostStatuses(post);
@@ -60,9 +64,10 @@ export const PostCard = (props: {
       }}
       onClick={handleClick}>
       <Box direction="row" justify="between">
-        <TweetAnchor
-          thread={tweet?.posted?.post}
-          timestamp={tweet?.posted?.timestampMs}></TweetAnchor>
+        <PlatformPostAnchor
+          platformPostPosted={originalPlatformPost?.posted}
+          platformId={post.origin}
+          postUrl={originalPostUrl}></PlatformPostAnchor>
         {!profile ? <NanopubStatus post={post}></NanopubStatus> : <></>}
       </Box>
 

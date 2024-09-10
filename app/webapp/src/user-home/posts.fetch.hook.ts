@@ -1,3 +1,4 @@
+import { connected } from 'process';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
@@ -18,10 +19,11 @@ import { useQueryFilter } from './query.filter.hook';
 
 const PAGE_SIZE = 5;
 
-const DEBUG = false;
+const DEBUG = true;
 
 export const usePostsFetch = () => {
-  const { connectedUser, twitterProfile } = useAccountContext();
+  const { connectedUser, twitterProfile, mastodonProfile } =
+    useAccountContext();
 
   const appFetch = useAppFetch();
   const { status } = useQueryFilter();
@@ -183,7 +185,11 @@ export const usePostsFetch = () => {
 
   /** first data fill happens everytime the posts are empty and the firstFetched is false */
   useEffect(() => {
-    if (posts.length === 0 && !fetchedOlderFirst && twitterProfile) {
+    if (
+      posts.length === 0 &&
+      !fetchedOlderFirst &&
+      (twitterProfile || mastodonProfile)
+    ) {
       if (DEBUG) console.log('first fetch older');
       _fetchOlder(undefined);
     }
@@ -222,6 +228,13 @@ export const usePostsFetch = () => {
   /** fetch for more post backwards */
   const _fetchOlder = useCallback(
     async (oldestPostId?: string) => {
+      if (DEBUG)
+        console.log(`fetching for older`, {
+          oldestPostId,
+          connectedUser,
+          isFetchingOlder,
+          code,
+        });
       if (!connectedUser || isFetchingOlder || code) {
         return;
       }

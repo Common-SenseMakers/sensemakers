@@ -8,6 +8,7 @@ import {
 } from 'react';
 
 import { _appFetch } from '../../api/app.fetch';
+import { MastodonUserProfile } from '../../shared/types/types.mastodon';
 import { NotificationFreq } from '../../shared/types/types.notifications';
 import { OrcidUserProfile } from '../../shared/types/types.orcid';
 import { TwitterUserProfile } from '../../shared/types/types.twitter';
@@ -31,6 +32,7 @@ export type AccountContextType = {
   connectedUser?: AppUserRead;
   isConnected: boolean;
   twitterProfile?: TwitterUserProfile;
+  mastodonProfile?: MastodonUserProfile;
   email?: EmailDetails;
   disconnect: () => void;
   refresh: () => void;
@@ -46,6 +48,9 @@ export type AccountContextType = {
   orcid?: AccountDetailsRead<OrcidUserProfile>;
   currentAutopost?: AutopostOption;
   currentNotifications?: NotificationFreq;
+  setMastodonConnectedStatus: (status: MastodonConnectedStatus) => void;
+  mastodonConnectedStatus: MastodonConnectedStatus | undefined;
+  orcidProfile?: OrcidUserProfile;
 };
 
 const AccountContextValue = createContext<AccountContextType | undefined>(
@@ -62,6 +67,7 @@ export enum LoginFlowState {
   SignningUpNanopub = 'SignningUpNanopub',
   RegisteringEmail = 'RegisteringEmail',
   ConnectingTwitter = 'ConnectingTwitter',
+  ConnectingMastodon = 'ConnectingMastodon',
   BasicLoggedIn = 'BasicLoggedIn',
   Disconnecting = 'Disconnecting',
 }
@@ -78,6 +84,12 @@ export enum OverallLoginStatus {
 }
 
 export enum TwitterConnectedStatus {
+  Disconnected = 'Disconnected',
+  Connecting = 'Connecting',
+  Connected = 'Connected',
+}
+
+export enum MastodonConnectedStatus {
   Disconnected = 'Disconnected',
   Connecting = 'Connecting',
   Connected = 'Connected',
@@ -104,6 +116,12 @@ export const AccountContext = (props: PropsWithChildren) => {
     usePersist<TwitterConnectedStatus>(
       TWITTER_LOGIN_STATUS,
       TwitterConnectedStatus.Disconnected
+    );
+
+  const [mastodonConnectedStatus, setMastodonConnectedStatus] =
+    usePersist<MastodonConnectedStatus>(
+      'MASTODON_LOGIN_STATUS',
+      MastodonConnectedStatus.Disconnected
     );
 
   /** keep the conneccted user linkted to the current token */
@@ -153,20 +171,25 @@ export const AccountContext = (props: PropsWithChildren) => {
         twitter: connectedUser?.email,
       });
 
-    if (connectedUser && connectedUser.email && !twitterProfile) {
-      setOverallLoginStatus(OverallLoginStatus.PartialLoggedIn);
-      return;
-    }
+    if (connectedUser && connectedUser.email) {
+      const hasTwitter = !!getAccount(connectedUser, PLATFORM.Twitter);
+      const hasMastodon = !!getAccount(connectedUser, PLATFORM.Mastodon);
 
-    if (
-      connectedUser &&
-      connectedUser.email &&
-      twitterProfile &&
-      loginFlowState !== LoginFlowState.Disconnecting
-    ) {
-      setTwitterConnectedStatus(TwitterConnectedStatus.Connected);
-      setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
-      return;
+      if (!hasTwitter && !hasMastodon) {
+        setOverallLoginStatus(OverallLoginStatus.PartialLoggedIn);
+        return;
+      }
+
+      if (loginFlowState !== LoginFlowState.Disconnecting) {
+        if (hasTwitter) {
+          setTwitterConnectedStatus(TwitterConnectedStatus.Connected);
+        }
+        if (hasMastodon) {
+          setMastodonConnectedStatus(MastodonConnectedStatus.Connected);
+        }
+        setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
+        return;
+      }
     }
 
     if (overallLoginStatus === OverallLoginStatus.NotKnown) {
@@ -181,7 +204,7 @@ export const AccountContext = (props: PropsWithChildren) => {
     ) {
       setOverallLoginStatus(OverallLoginStatus.LoggedOut);
     }
-  }, [connectedUser, overallLoginStatus, token]);
+  }, [connectedUser, overallLoginStatus, token, loginFlowState]);
 
   const disconnect = () => {
     setConnectedUser(undefined);
@@ -194,6 +217,16 @@ export const AccountContext = (props: PropsWithChildren) => {
       : undefined;
 
     if (DEBUG) console.log('twitterProfile', { profile });
+
+    return profile;
+  }, [connectedUser]);
+
+  const mastodonProfile = useMemo(() => {
+    const profile = connectedUser
+      ? getAccount(connectedUser, PLATFORM.Mastodon)?.profile
+      : undefined;
+
+    if (DEBUG) console.log('mastodonProfile', { profile });
 
     return profile;
   }, [connectedUser]);
@@ -220,6 +253,7 @@ export const AccountContext = (props: PropsWithChildren) => {
       value={{
         connectedUser: connectedUser === null ? undefined : connectedUser,
         twitterProfile,
+        mastodonProfile,
         email,
         isConnected: connectedUser !== undefined && connectedUser !== null,
         disconnect,
@@ -236,6 +270,8 @@ export const AccountContext = (props: PropsWithChildren) => {
         orcid,
         currentAutopost,
         currentNotifications,
+        setMastodonConnectedStatus,
+        mastodonConnectedStatus,
       }}>
       {props.children}
     </AccountContextValue.Provider>

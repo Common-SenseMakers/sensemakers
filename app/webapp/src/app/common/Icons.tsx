@@ -32,3 +32,18 @@ export const NanopubsIcon = (props: { size?: number; color?: string }) => {
     </Box>
   );
 };
+
+export const MastodonIcon = (
+  props: {
+    size?: number;
+    color?: 'white' | 'black' | 'purple';
+  } & BoxExtendedProps
+) => {
+  const color = props.color || 'white';
+  const size = props.size || 20;
+  return (
+    <Box style={{ height: `${size}px`, width: `${size}px` }}>
+      <Image src={`/icons/mastodon-${color}.svg`}></Image>
+    </Box>
+  );
+};
