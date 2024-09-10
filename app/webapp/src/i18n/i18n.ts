@@ -10,10 +10,11 @@ export enum I18Keys {
 
   connectSocialsTitle = 's0090',
   connectSocialsParagraph = 's0091',
-  connectSocialsParagraphMastodon = 's0091a',
   connectSocialsParagraph2 = 's0092',
   signInX = 's012',
   signInMastodon = 's012a',
+  mastodonServer = 's012b',
+  mastodonServerPlaceholder = 's012c',
 
   connectAccounts = 's010',
   connectParagraph = 's011',
@@ -228,13 +229,13 @@ const translationENG: Record<I18Keys, string> = {
 
   [I18Keys.connectSocialsTitle]: 'Connect your socials',
   [I18Keys.connectSocialsParagraph]:
-    'Link your X·Twitter account to start transforming your tweets into nanopublications.',
-  [I18Keys.connectSocialsParagraphMastodon]:
-    'Link your Mastodon account to start transforming your posts into nanopublications.',
+    'Link your X·Twitter or Mastodon account to start transforming your posts into nanopublications.',
   [I18Keys.connectSocialsParagraph2]:
     'By connecting, you can easily identify and FAIRify your valuable scientific insights.',
   [I18Keys.signInX]: 'Sign in with X',
   [I18Keys.signInMastodon]: 'Sign in with Mastodon',
+  [I18Keys.mastodonServer]: 'Mastodon Server: ',
+  [I18Keys.mastodonServerPlaceholder]: 'e.g. "mastodon.social"',
 
   [I18Keys.drafts]: 'Drafts',
 

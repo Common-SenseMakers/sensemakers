@@ -324,7 +324,7 @@ export const UserSettingsPage = () => {
           }
           connected={!!connectedUser?.mastodon}
           hasInput={true}
-          inputPlaceholder="Enter Mastodon server"
+          inputPlaceholder={t(I18Keys.mastodonServerPlaceholder)}
           isValidInput={isValidMastodonDomain}></PlatformSection>
 
         <PlatformSection

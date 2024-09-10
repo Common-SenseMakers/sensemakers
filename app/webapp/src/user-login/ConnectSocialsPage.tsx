@@ -1,5 +1,5 @@
-import { Anchor, Box, TextInput } from 'grommet';
-import { useCallback, useEffect, useState } from 'react';
+import { Anchor, Box } from 'grommet';
+import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { AppLogo } from '../app/brand/AppLogo';
@@ -30,9 +30,7 @@ export const ConnectSocialsPage = (props: {}) => {
           <Box style={{ flexGrow: 1 }}>
             <AppHeading level="1">{t(I18Keys.connectSocialsTitle)}</AppHeading>
             <Box width="100%" height="16px"></Box>
-            <AppParagraph>
-              {t(I18Keys.connectSocialsParagraphMastodon)}
-            </AppParagraph>
+            <AppParagraph>{t(I18Keys.connectSocialsParagraph)}</AppParagraph>
             <AppParagraph addMargin>
               <Trans
                 i18nKey={I18Keys.connectSocialsParagraph2}
@@ -46,9 +44,9 @@ export const ConnectSocialsPage = (props: {}) => {
               label={t(I18Keys.signInX)}
               onClick={() => connectTwitter('read')}></AppButton>
             <Box margin={{ top: 'medium' }}>
-              <AppParagraph>Mastodon Instance: </AppParagraph>
+              <AppParagraph>{t(I18Keys.mastodonServer)}</AppParagraph>
               <AppInput
-                placeholder={'e.g. "mastodon.social"'}
+                placeholder={t(I18Keys.mastodonServerPlaceholder)}
                 value={mastodonDomain}
                 onChange={(event) => setMastodonDomain(event.target.value)}
                 style={{ width: '100%' }}
