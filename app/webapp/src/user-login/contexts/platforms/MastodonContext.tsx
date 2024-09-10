@@ -62,6 +62,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
     overallLoginStatus,
     setLoginFlowState,
     setMastodonConnectedStatus,
+    mastodonConnectedStatus,
   } = useAccountContext();
 
   const [wasConnecting, setWasConnecting] = usePersist<boolean>(
@@ -111,7 +112,10 @@ export const MastodonContext = (props: PropsWithChildren) => {
 
         if (signupContext) {
           setWasConnecting(true);
-          log('Redirecting to Mastodon authorization URL', signupContext.authorizationUrl);
+          log(
+            'Redirecting to Mastodon authorization URL',
+            signupContext.authorizationUrl
+          );
           window.location.href = signupContext.authorizationUrl;
         }
       } catch (err: any) {
@@ -128,9 +132,10 @@ export const MastodonContext = (props: PropsWithChildren) => {
     if (!verifierHandled.current) {
       if (
         code_param &&
-        overallLoginStatus === OverallLoginStatus.PartialLoggedIn &&
         connectedUser &&
-        wasConnecting
+        wasConnecting &&
+        (overallLoginStatus === OverallLoginStatus.PartialLoggedIn ||
+          mastodonConnectedStatus === MastodonConnectedStatus.Connecting)
       ) {
         log('useEffect MastodonSignup', {
           code_param,
