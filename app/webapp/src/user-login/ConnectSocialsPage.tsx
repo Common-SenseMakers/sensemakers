@@ -12,6 +12,7 @@ import { LoginFlowState, useAccountContext } from './contexts/AccountContext';
 import { useDisconnectContext } from './contexts/DisconnectUserContext';
 import { useMastodonContext } from './contexts/platforms/MastodonContext';
 import { useTwitterContext } from './contexts/platforms/TwitterContext';
+import { isValidMastodonDomain } from './user.helper';
 
 export const ConnectSocialsPage = (props: {}) => {
   const { t } = useTranslation();
@@ -21,12 +22,6 @@ export const ConnectSocialsPage = (props: {}) => {
     useMastodonContext();
   const { disconnect } = useDisconnectContext();
   const [mastodonDomain, setMastodonDomain] = useState('');
-
-  const isValidMastodonDomain = (input: string): boolean => {
-    const domainRegex =
-      /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/;
-    return domainRegex.test(input);
-  };
 
   const content = (() => {
     if (connectTwitter && connectMastodon) {

@@ -1,5 +1,5 @@
 import { Box, Text } from 'grommet';
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { useAppFetch } from '../api/app.fetch';
@@ -29,7 +29,7 @@ import { useDisconnectContext } from '../user-login/contexts/DisconnectUserConte
 import { useMastodonContext } from '../user-login/contexts/platforms/MastodonContext';
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { useTwitterContext } from '../user-login/contexts/platforms/TwitterContext';
-import { getAccount } from '../user-login/user.helper';
+import { getAccount, isValidMastodonDomain } from '../user-login/user.helper';
 import { PlatformSection } from './PlatformsSection';
 import { SettingsOptionSelector } from './SettingsOptionsSelector';
 import { SettingsSection, SettingsSections } from './SettingsSection';
@@ -313,7 +313,9 @@ export const UserSettingsPage = () => {
             )
           }
           platformName={'Mastodon'}
-          onButtonClicked={(inputText) => connectMastodon && connectMastodon(inputText || '', 'read')}
+          onButtonClicked={(inputText) =>
+            connectMastodon && connectMastodon(inputText || '', 'read')
+          }
           buttonText={needConnectMastodon ? 'connect' : ''}
           username={
             connectedUser?.mastodon
@@ -321,15 +323,9 @@ export const UserSettingsPage = () => {
               : '- not connected -'
           }
           connected={!!connectedUser?.mastodon}
-          showInput={true}
+          hasInput={true}
           inputPlaceholder="Enter Mastodon server"
-          inputValue={mastodonDomain}
-          onInputChange={setMastodonDomain}
-          isValidInput={(input) => {
-            const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/;
-            return domainRegex.test(input);
-          }}
-        ></PlatformSection>
+          isValidInput={isValidMastodonDomain}></PlatformSection>
 
         <PlatformSection
           icon={<OrcidIcon size={40}></OrcidIcon>}

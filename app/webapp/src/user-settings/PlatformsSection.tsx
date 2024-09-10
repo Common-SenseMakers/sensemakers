@@ -1,4 +1,5 @@
 import { Box, Text } from 'grommet';
+import { useState } from 'react';
 
 import { CheckIcon } from '../app/icons/FilterIcon copy';
 import { AppButton, AppInput } from '../ui-components';
@@ -12,13 +13,13 @@ export const PlatformSection = (props: {
   onButtonClicked: (inputText?: string) => void;
   connected: boolean;
   connecting?: boolean;
-  showInput?: boolean;
+  hasInput?: boolean;
   inputPlaceholder?: string;
   inputValue?: string;
-  onInputChange?: (value: string) => void;
   isValidInput?: (input: string) => boolean;
 }) => {
   const { constants } = useThemeContext();
+  const [inputValue, setInputValue] = useState<string>(props.inputValue || '');
 
   return (
     <Box
@@ -39,15 +40,16 @@ export const PlatformSection = (props: {
           <Text>{props.platformName}</Text>
         </Box>
         <Box>
-          {props.showInput && !props.connected ? (
+          {props.hasInput && !props.connected ? (
             <AppInput
               placeholder={props.inputPlaceholder}
               value={props.inputValue}
-              onChange={(event) => props.onInputChange && props.onInputChange(event.target.value)}
+              onChange={(event) => setInputValue(event.target.value)}
               style={{ width: '100%' }}
             />
           ) : (
-            <Text style={{ fontWeight: 500, color: constants.colors.textLight2 }}>
+            <Text
+              style={{ fontWeight: 500, color: constants.colors.textLight2 }}>
               {props.username}
             </Text>
           )}
@@ -56,9 +58,14 @@ export const PlatformSection = (props: {
       <Box>
         {!props.connected ? (
           <AppButton
-            disabled={props.connecting || (props.showInput && props.isValidInput && !props.isValidInput(props.inputValue || ''))}
+            disabled={
+              props.connecting ||
+              (props.hasInput &&
+                props.isValidInput &&
+                !props.isValidInput(inputValue))
+            }
             label={props.connecting ? 'connecting' : props.buttonText}
-            onClick={() => props.onButtonClicked(props.inputValue)}></AppButton>
+            onClick={() => props.onButtonClicked(inputValue)}></AppButton>
         ) : (
           <Box
             direction="row"
