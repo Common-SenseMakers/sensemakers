@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useAppFetch } from '../../api/app.fetch';
 import { useToastContext } from '../../app/ToastsContext';
@@ -11,6 +11,7 @@ import {
 } from '../../shared/types/types.posts';
 import { AppUserRead } from '../../shared/types/types.user';
 import { useUserPosts } from '../../user-home/UserPostsContext';
+import { AppPostStatus, getPostStatuses } from '../posts.helper';
 import { PostDerivedContext } from './use.post.derived';
 import { PostFetchContext } from './use.post.fetch';
 
@@ -18,6 +19,8 @@ export interface PostUpdateContext {
   editable: boolean; // can be true if not published
   enabledEdit: boolean; // only true if editing after publishing
   postEdited: AppPostFull | undefined;
+  postMerged?: AppPostFull;
+  statusesMerged: AppPostStatus;
   setEnabledEdit: (enabled: boolean) => void;
   isUpdating: boolean;
   setIsUpdating: (updating: boolean) => void;
@@ -28,6 +31,7 @@ export interface PostUpdateContext {
 export const usePostUpdate = (
   fetched: PostFetchContext,
   derived: PostDerivedContext,
+  postInit?: AppPostFull,
   connectedUser?: AppUserRead
 ): PostUpdateContext => {
   const { show } = useToastContext();
@@ -117,10 +121,25 @@ export const usePostUpdate = (
     _updatePost(update);
   };
 
+  /** combine edited and fetched posts to get the current local version of a post */
+  const postMerged = useMemo<AppPostFull | undefined>(() => {
+    if (fetched.isLoading) return postInit;
+    if (fetched.post && fetched.post !== null) {
+      return { ...fetched.post, ...postEdited };
+    }
+    return undefined;
+  }, [fetched.post, postInit, postEdited, fetched.isLoading]);
+
+  const statusesMerged = useMemo(() => {
+    return getPostStatuses(postMerged);
+  }, [postMerged]);
+
   return {
     editable,
     enabledEdit,
     postEdited,
+    postMerged,
+    statusesMerged,
     setEnabledEdit,
     isUpdating,
     setIsUpdating,

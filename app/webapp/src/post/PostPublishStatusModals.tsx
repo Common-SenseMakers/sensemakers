@@ -29,7 +29,7 @@ const ORCID_INVITE_DISABLE = 'orcidInviteDisabled';
 
 export const PostPublishStatusModals = () => {
   const { setJustPublished } = useAutopostInviteContext();
-  const { update, fetched, derived, navigatePost, publish } = usePost();
+  const { updated, fetched, derived, navigatePost, publish } = usePost();
   const { orcid } = useAccountContext();
 
   const { connect: _connectOrcid } = useOrcidContext();
@@ -139,12 +139,12 @@ export const PostPublishStatusModals = () => {
               size={18}></AppCheckBoxMessage>,
           ],
           primaryButton: {
-            disabled: update.isUpdating,
+            disabled: updated.isUpdating,
             label: t(I18Keys.continue),
             onClick: () => clickedNextAfterOrcid(),
           },
           secondaryButton: {
-            disabled: update.isUpdating,
+            disabled: updated.isUpdating,
             label: t(I18Keys.connectOrcid),
             onClick: () => connectOrcid(),
           },
@@ -169,12 +169,12 @@ export const PostPublishStatusModals = () => {
               components={{ b: <b></b> }}></Trans>,
           ],
           primaryButton: {
-            disabled: update.isUpdating,
+            disabled: updated.isUpdating,
             label: t(I18Keys.yesPublish),
             onClick: () => publishApproved(),
           },
           secondaryButton: {
-            disabled: update.isUpdating,
+            disabled: updated.isUpdating,
             label: t(I18Keys.returnToDraft),
             onClick: () => reset(),
           },
@@ -295,7 +295,7 @@ export const PostPublishStatusModals = () => {
             onClick: () => publishedModalClosed(PublishPostAction.nextPost),
           },
           secondaryButton: {
-            disabled: update.isUpdating,
+            disabled: updated.isUpdating,
             label: t(I18Keys.openPublished),
             onClick: () => openNanopublication(),
           },
