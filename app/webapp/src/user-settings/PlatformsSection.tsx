@@ -1,8 +1,14 @@
 import { Box, Text } from 'grommet';
 
 import { CheckIcon } from '../app/icons/FilterIcon copy';
-import { AppButton } from '../ui-components';
+import { AppButton, AppInput } from '../ui-components';
 import { useThemeContext } from '../ui-components/ThemedApp';
+
+const isValidMastodonDomain = (input: string): boolean => {
+  const domainRegex =
+    /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/;
+  return domainRegex.test(input);
+};
 
 export const PlatformSection = (props: {
   icon: JSX.Element;
