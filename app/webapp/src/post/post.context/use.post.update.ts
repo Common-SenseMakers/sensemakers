@@ -14,6 +14,7 @@ import { useUserPosts } from '../../user-home/UserPostsContext';
 import { AppPostStatus, getPostStatuses } from '../posts.helper';
 import { PostDerivedContext } from './use.post.derived';
 import { PostFetchContext } from './use.post.fetch';
+import { usePostMergeDeltas } from './use.post.merge.deltas';
 
 export interface PostUpdateContext {
   editable: boolean; // can be true if not published
@@ -24,7 +25,7 @@ export interface PostUpdateContext {
   setEnabledEdit: (enabled: boolean) => void;
   isUpdating: boolean;
   setIsUpdating: (updating: boolean) => void;
-  updateSemantics: (newSemantics: string) => Promise<void>;
+  updateSemantics: (newSemantics: string) => void;
   updatePost: (update: PostUpdate) => Promise<void>;
 }
 
@@ -44,6 +45,8 @@ export const usePostUpdate = (
     undefined
   );
   const [isUpdating, setIsUpdating] = useState(false);
+
+  const { mergedSemantics, updateSemantics } = usePostMergeDeltas(fetched);
 
   const editable =
     connectedUser !== undefined &&
@@ -90,12 +93,6 @@ export const usePostUpdate = (
     [fetched.post]
   );
 
-  const updateSemantics = (newSemantics: string) =>
-    optimisticUpdate({
-      reviewedStatus: AppPostReviewStatus.DRAFT,
-      semantics: newSemantics,
-    });
-
   /** updatePost and optimistically update the posts lists */
   const updatePost = async (update: PostUpdate) => {
     /** optimistic remove the post from the filtered list */
@@ -121,11 +118,18 @@ export const usePostUpdate = (
     _updatePost(update);
   };
 
-  /** combine edited and fetched posts to get the current local version of a post */
+  /**
+   * combine edited and fetched posts to get the current local version of a post
+   * semantics are merged independently in the usePostMergeDeltas hook
+   */
   const postMerged = useMemo<AppPostFull | undefined>(() => {
     if (fetched.isLoading) return postInit;
     if (fetched.post && fetched.post !== null) {
-      return { ...fetched.post, ...postEdited };
+      return {
+        ...fetched.post,
+        ...postEdited,
+        semantics: mergedSemantics,
+      };
     }
     return undefined;
   }, [fetched.post, postInit, postEdited, fetched.isLoading]);
