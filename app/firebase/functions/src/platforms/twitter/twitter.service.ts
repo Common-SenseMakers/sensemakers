@@ -568,10 +568,13 @@ export class TwitterService
 
   async getAccountByUsername(
     username: string,
-    manager: TransactionManager
+    manager: TransactionManager,
+    userDetails?: TwitterUserDetails
   ): Promise<TwitterUser | null> {
     try {
-      const client = this.getGenericClient();
+      const client = userDetails
+        ? await this.getUserClient(userDetails.user_id, 'read', manager)
+        : this.getGenericClient();
       const userResponse = await client.v2.userByUsername(username, {
         'user.fields': ['id', 'name', 'username', 'profile_image_url'],
       });

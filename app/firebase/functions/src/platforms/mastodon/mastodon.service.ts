@@ -455,12 +455,18 @@ export class MastodonService
   public async getAccountByUsername(
     username: string,
     server: string,
-    manager: TransactionManager
+    manager: TransactionManager,
+    userDetails?: MastodonUserDetails
   ): Promise<MastodonUserDetails['profile'] | null> {
     try {
-      const client = createRestAPIClient({
-        url: `https://${server}`,
-      });
+      const client = userDetails && userDetails.read
+        ? createRestAPIClient({
+            url: `https://${server}`,
+            accessToken: userDetails.read.accessToken,
+          })
+        : createRestAPIClient({
+            url: `https://${server}`,
+          });
 
       const account = await client.v1.accounts.lookup({ acct: username });
 
