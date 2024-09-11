@@ -565,4 +565,28 @@ export class TwitterService
   ): Promise<any> {
     return post;
   }
+
+  async getAccountByUsername(
+    username: string,
+    manager: TransactionManager
+  ): Promise<TwitterUser | null> {
+    try {
+      const client = this.getGenericClient();
+      const userResponse = await client.v2.userByUsername(username, {
+        'user.fields': ['id', 'name', 'username', 'profile_image_url'],
+      });
+
+      if (userResponse.data) {
+        return {
+          id: userResponse.data.id,
+          name: userResponse.data.name,
+          username: userResponse.data.username,
+          profile_image_url: userResponse.data.profile_image_url,
+        };
+      }
+      return null;
+    } catch (e: any) {
+      throw new Error(handleTwitterError(e));
+    }
+  }
 }

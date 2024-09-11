@@ -451,4 +451,31 @@ export class MastodonService
   ): Promise<string> {
     return post.unsignedPost || '';
   }
+
+  public async getAccountByUsername(
+    username: string,
+    server: string,
+    manager: TransactionManager
+  ): Promise<MastodonUserDetails['profile'] | null> {
+    try {
+      const client = createRestAPIClient({
+        url: `https://${server}`,
+      });
+
+      const account = await client.v1.accounts.lookup({ acct: username });
+
+      if (account) {
+        return {
+          id: account.id,
+          username: account.username,
+          displayName: account.displayName,
+          avatar: account.avatar,
+          mastodonServer: server,
+        };
+      }
+      return null;
+    } catch (e: any) {
+      throw new Error(`Error fetching Mastodon account: ${e.message}`);
+    }
+  }
 }
