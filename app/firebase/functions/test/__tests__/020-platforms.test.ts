@@ -310,4 +310,35 @@ describe('02-platforms', () => {
       }
     });
   });
+
+  describe('twitter', () => {
+    it('gets account by username', async () => {
+      if (!user) {
+        throw new Error('appUser not created');
+      }
+      const allUserDetails = user[PLATFORM.Twitter];
+      if (!allUserDetails || allUserDetails.length < 0) {
+        throw new Error('Unexpected');
+      }
+      const userDetails = allUserDetails[0];
+      if (userDetails.read === undefined) {
+        throw new Error('Unexpected');
+      }
+
+      const twitterService = services.platforms.get(PLATFORM.Twitter) as TwitterService;
+      const username = 'twitter';  // Using Twitter's official account as an example
+
+      const result = await services.db.run((manager) =>
+        twitterService.getAccountByUsername(username, manager, userDetails)
+      );
+
+      expect(result).to.not.be.null;
+      if (result) {
+        expect(result.id).to.be.a('string');
+        expect(result.username).to.equal(username);
+        expect(result.name).to.be.a('string');
+        expect(result.profile_image_url).to.be.a('string');
+      }
+    });
+  });
 });
