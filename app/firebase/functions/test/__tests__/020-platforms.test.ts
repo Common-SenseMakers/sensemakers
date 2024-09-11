@@ -275,5 +275,36 @@ describe('02-platforms', () => {
       expect(result).to.not.be.undefined;
       expect(result.platformPosts.length).to.be.greaterThan(0);
     });
+
+    it('gets account by username', async () => {
+      if (!user) {
+        throw new Error('appUser not created');
+      }
+      const allUserDetails = user[PLATFORM.Mastodon];
+      if (!allUserDetails || allUserDetails.length < 0) {
+        throw new Error('Unexpected');
+      }
+      const userDetails = allUserDetails[0];
+      if (userDetails.read === undefined) {
+        throw new Error('Unexpected');
+      }
+
+      const mastodonService = services.platforms.get(PLATFORM.Mastodon);
+      const username = 'testuser';
+      const server = userDetails.profile.mastodonServer;
+
+      const result = await services.db.run((manager) =>
+        mastodonService.getAccountByUsername(username, server, userDetails, manager)
+      );
+
+      expect(result).to.not.be.null;
+      if (result) {
+        expect(result.id).to.be.a('string');
+        expect(result.username).to.equal(username);
+        expect(result.displayName).to.be.a('string');
+        expect(result.avatar).to.be.a('string');
+        expect(result.mastodonServer).to.equal(server);
+      }
+    });
   });
 });
