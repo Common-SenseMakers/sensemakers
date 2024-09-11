@@ -4,6 +4,7 @@ import {
   FetchParams,
   PlatformFetchParams,
 } from '../../src/@shared/types/types.fetch';
+import { MastodonUserDetails } from '../../src/@shared/types/types.mastodon';
 import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
 import { PlatformPostCreate } from '../../src/@shared/types/types.platform.posts';
 import { AppTweet, TwitterThread } from '../../src/@shared/types/types.twitter';
@@ -12,6 +13,7 @@ import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
+import { MastodonService } from '../../src/platforms/mastodon/mastodon.service';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { convertToAppTweets } from '../../src/platforms/twitter/twitter.utils';
 import { UsersHelper } from '../../src/users/users.helper';
@@ -276,25 +278,26 @@ describe('02-platforms', () => {
       expect(result.platformPosts.length).to.be.greaterThan(0);
     });
 
-    it('gets account by username', async () => {
-      if (!user) {
-        throw new Error('appUser not created');
-      }
-      const allUserDetails = user[PLATFORM.Mastodon];
-      if (!allUserDetails || allUserDetails.length < 0) {
-        throw new Error('Unexpected');
-      }
-      const userDetails = allUserDetails[0];
-      if (userDetails.read === undefined) {
-        throw new Error('Unexpected');
+    it.only('gets account by username', async () => {
+      // https://fediscience.org/@petergleick
+      const username = 'petergleick';
+      const server = 'fediscience.org';
+
+      const accessToken = process.env.MASTODON_ACCESS_TOKEN;
+      if (!accessToken) {
+        throw new Error('Missing MASTODON_ACCESS_TOKEN');
       }
 
-      const mastodonService = services.platforms.get(PLATFORM.Mastodon);
-      const username = 'testuser';
-      const server = userDetails.profile.mastodonServer;
+      const mastodonService = services.platforms.get(
+        PLATFORM.Mastodon
+      ) as MastodonService;
 
-      const result = await services.db.run((manager) =>
-        mastodonService.getAccountByUsername(username, server, userDetails, manager)
+      const result = await mastodonService.getAccountByUsername(
+        username,
+        server,
+        {
+          read: { accessToken: accessToken },
+        } as MastodonUserDetails
       );
 
       expect(result).to.not.be.null;

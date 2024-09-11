@@ -455,18 +455,16 @@ export class MastodonService
   public async getAccountByUsername(
     username: string,
     server: string,
-    manager: TransactionManager,
-    userDetails?: MastodonUserDetails
+    userDetails: MastodonUserDetails
   ): Promise<MastodonUserDetails['profile'] | null> {
     try {
-      const client = userDetails && userDetails.read
-        ? createRestAPIClient({
-            url: `https://${server}`,
-            accessToken: userDetails.read.accessToken,
-          })
-        : createRestAPIClient({
-            url: `https://${server}`,
-          });
+      if (!userDetails.read) {
+        throw new Error('read credentials are not provided');
+      }
+      const client = createRestAPIClient({
+        url: `https://${server}`,
+        accessToken: userDetails.read.accessToken,
+      });
 
       const account = await client.v1.accounts.lookup({ acct: username });
 
