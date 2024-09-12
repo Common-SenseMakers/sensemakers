@@ -5,12 +5,13 @@ import { HexStr, PLATFORM } from '../src/@shared/types/types.user';
 import { signNanopublication } from '../src/@shared/utils/nanopub.sign.util';
 import { cleanPublicKey } from '../src/@shared/utils/semantics.helper';
 import {
-  buildAppIntroNp,
-  buildLinkAccountsNanopub,
+  buildAppIntroNp
 } from '../src/platforms/nanopub/create.app.intro.nanopub';
 import { NanopubService } from '../src/platforms/nanopub/nanopub.service';
 import { getNanopubProfile } from '../test/utils/nanopub.profile';
 import { services } from './scripts.services';
+import { buildLinkAccountsNanopub } from '../src/platforms/nanopub/nanopub.utils';
+
 
 const mandatory = ['PRIVATE_KEY_ROOT', 'PRIVATE_KEY_APPROVED'];
 
