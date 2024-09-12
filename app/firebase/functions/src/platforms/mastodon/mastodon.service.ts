@@ -40,7 +40,7 @@ import {
   extractPrimaryThread,
 } from './mastodon.utils';
 
-const DEBUG = false;
+const DEBUG = true;
 const DEBUG_PREFIX = 'MastodonService';
 
 export class MastodonService
