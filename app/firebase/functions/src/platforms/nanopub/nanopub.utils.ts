@@ -792,7 +792,7 @@ export const buildRetractionNp = async (
 
 export const buildLinkAccountsNanopub = async (
   ethAddress: string,
-  pubKey: string,
+  rsaPubKey: string,
   signature: string
 ): Promise<Nanopub> => {
   return new Promise((resolve, reject) => {
