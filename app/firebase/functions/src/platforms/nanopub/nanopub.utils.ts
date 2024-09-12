@@ -2,7 +2,7 @@ import { Nanopub } from '@nanopub/sign';
 import { DataFactory, Quad, Store, Writer } from 'n3';
 
 import { GenericAuthor } from '../../@shared/types/types.posts';
-import { AutopostOption, PLATFORM } from '../../@shared/types/types.user';
+import { AutopostOption } from '../../@shared/types/types.user';
 import { logger } from '../../instances/logger';
 import * as URI from './constants';
 
@@ -431,7 +431,6 @@ export const buildIntroNp = async (
     const assertionGraph = namedNode(URI.ASSERTION_URI);
     const provenanceGraph = namedNode(URI.PROVENANCE_URI);
     const pubinfoGraph = namedNode(URI.PUBINFO_URI);
-    const x = URI.X_PREFIX;
     const keyDeclarationNode = namedNode(
       `${URI.KEY_DECLARATION_URI}${ethAddress}`
     );
@@ -600,8 +599,8 @@ export const buildIntroNp = async (
       literal(ethAddress),
       namedNode(URI.PUBINFO_URI)
     );
-    if (author?.platformId === PLATFORM.Twitter) {
-      const twitterNode = namedNode(`${x}${author.username}`);
+    if (author) {
+      const platformAuthorNode = namedNode(`${author.username}`);
 
       writer.addQuad(
         baseNode,
@@ -612,7 +611,7 @@ export const buildIntroNp = async (
       writer.addQuad(
         baseNode,
         namedNode(URI.FOAF_ACCOUNT),
-        twitterNode,
+        platformAuthorNode,
         assertionGraph
       );
     }

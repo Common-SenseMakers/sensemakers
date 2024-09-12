@@ -40,24 +40,40 @@ export const prepareNanopubDetails = (user: AppUser, post: AppPostFull) => {
     throw new Error('Intro nanopub uri not found');
   }
 
-  const platformAccountUrl = (() => {
-    if (twitterAccount) {
+  const {
+    platformUsername,
+    platformAccountUrl,
+  }: {
+    platformUsername: string | undefined;
+    platformAccountUrl: string | undefined;
+  } = (() => {
+    if (twitterAccount && post.origin === PLATFORM.Twitter) {
       const username = twitterAccount.profile?.username;
-      return username ? `https://twitter.com/${username}` : undefined;
+      return {
+        platformUsername: username,
+        platformAccountUrl: username ? `https://x.com/${username}` : undefined,
+      };
     }
-    if (mastodonAccount) {
+    if (mastodonAccount && post.origin === PLATFORM.Mastodon) {
       const username = mastodonAccount.profile?.username;
       const server = mastodonAccount.profile?.mastodonServer;
-      return username && server ? `https://${server}/@${username}` : undefined;
+      return {
+        platformUsername: username,
+        platformAccountUrl:
+          username && server ? `https://${server}/@${username}` : undefined,
+      };
     }
+    return { platformUsername: undefined, platformAccountUrl: undefined };
   })();
   const platformName = (() => {
-    if (twitterAccount) return twitterAccount.profile?.name;
-    if (mastodonAccount) return mastodonAccount.profile?.displayName;
+    if (twitterAccount && post.origin === PLATFORM.Twitter)
+      return twitterAccount.profile?.name;
+    if (mastodonAccount && post.origin === PLATFORM.Mastodon)
+      return mastodonAccount.profile?.displayName;
   })();
 
-  if (!platformAccountUrl) {
-    throw new Error('platform account URL not found');
+  if (!platformAccountUrl || !platformUsername) {
+    throw new Error('platform account URL and/or username not found');
   }
 
   if (!platformName) {
@@ -110,10 +126,10 @@ export const prepareNanopubDetails = (user: AppUser, post: AppPostFull) => {
   }
 
   const platformPostUrl = (() => {
-    if (twitterAccount) {
+    if (twitterAccount && post.origin === PLATFORM.Twitter) {
       return `https://x.com/${platformUsername}/status/${platformPostId}`;
     }
-    if (mastodonAccount) {
+    if (mastodonAccount && post.origin === PLATFORM.Mastodon) {
       const mastodonServer = mastodonAccount.profile?.mastodonServer;
       return `https://${mastodonServer}/@${platformUsername}/${platformPostId}`;
     }
