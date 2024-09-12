@@ -113,57 +113,94 @@ export class MastodonService
     return result;
   }
 
+  public async handleSignupData(signupData: MastodonSignupData): Promise<MastodonUserDetails>;
+  public async handleSignupData(accessToken: string, username: string, mastodonServer: string): Promise<MastodonUserDetails>;
   public async handleSignupData(
-    signupData: MastodonSignupData
+    signupDataOrAccessToken: MastodonSignupData | string,
+    username?: string,
+    mastodonServer?: string
   ): Promise<MastodonUserDetails> {
-    if (DEBUG) logger.debug('handleSignupData', { signupData }, DEBUG_PREFIX);
+    if (typeof signupDataOrAccessToken === 'string' && username && mastodonServer) {
+      // Handle the new overload
+      const accessToken = signupDataOrAccessToken;
+      if (DEBUG) logger.debug('handleSignupData (token)', { accessToken, username, mastodonServer }, DEBUG_PREFIX);
 
-    const token = await (async () => {
-      if ('accessToken' in signupData) {
-        return { accessToken: signupData.accessToken };
+      const account = await this.getAccountByUsername(username, mastodonServer, { read: { accessToken } } as MastodonUserDetails);
+      
+      if (!account) {
+        throw new Error('Failed to fetch account details');
       }
-      const client = createOAuthAPIClient({
+
+      const mastodon: MastodonUserDetails = {
+        user_id: account.id,
+        signupDate: this.time.now(),
+        profile: {
+          id: account.id,
+          username: account.username,
+          displayName: account.displayName,
+          avatar: account.avatar,
+          mastodonServer: mastodonServer,
+        },
+        read: {
+          accessToken: accessToken,
+        },
+      };
+
+      if (DEBUG) logger.debug('handleSignupData (token) result', { mastodon }, DEBUG_PREFIX);
+
+      return mastodon;
+    } else {
+      // Handle the existing implementation
+      const signupData = signupDataOrAccessToken as MastodonSignupData;
+      if (DEBUG) logger.debug('handleSignupData', { signupData }, DEBUG_PREFIX);
+
+      const token = await (async () => {
+        if ('accessToken' in signupData) {
+          return { accessToken: signupData.accessToken };
+        }
+        const client = createOAuthAPIClient({
+          url: `https://${signupData.domain}`,
+        });
+        return await client.token.create({
+          clientId: signupData.clientId,
+          clientSecret: signupData.clientSecret,
+          redirectUri: signupData.callback_url,
+          code: signupData.code,
+          grantType: 'authorization_code',
+        });
+      })();
+
+      if (DEBUG) logger.debug('handleSignupData token', { token }, DEBUG_PREFIX);
+
+      const mastoClient = createRestAPIClient({
         url: `https://${signupData.domain}`,
-      });
-      return await client.token.create({
-        clientId: signupData.clientId,
-        clientSecret: signupData.clientSecret,
-        redirectUri: signupData.callback_url,
-        code: signupData.code,
-        grantType: 'authorization_code',
-      });
-    })();
-
-    if (DEBUG) logger.debug('handleSignupData token', { token }, DEBUG_PREFIX);
-
-    const mastoClient = createRestAPIClient({
-      url: `https://${signupData.domain}`,
-      accessToken: token.accessToken,
-    });
-
-    const account = await mastoClient.v1.accounts.verifyCredentials();
-    const mastodon: MastodonUserDetails = {
-      user_id: account.id,
-      signupDate: this.time.now(),
-      profile: {
-        id: account.id,
-        username: account.username,
-        displayName: account.displayName,
-        avatar: account.avatar,
-        mastodonServer: signupData.domain,
-      },
-      read: {
         accessToken: token.accessToken,
-      },
-    };
-    if (signupData.type === 'write') {
-      mastodon['write'] = { accessToken: token.accessToken };
+      });
+
+      const account = await mastoClient.v1.accounts.verifyCredentials();
+      const mastodon: MastodonUserDetails = {
+        user_id: account.id,
+        signupDate: this.time.now(),
+        profile: {
+          id: account.id,
+          username: account.username,
+          displayName: account.displayName,
+          avatar: account.avatar,
+          mastodonServer: signupData.domain,
+        },
+        read: {
+          accessToken: token.accessToken,
+        },
+      };
+      if (signupData.type === 'write') {
+        mastodon['write'] = { accessToken: token.accessToken };
+      }
+
+      if (DEBUG)
+        logger.debug('handleSignupData result', { mastodon }, DEBUG_PREFIX);
+
+      return mastodon;
     }
-
-    if (DEBUG)
-      logger.debug('handleSignupData result', { mastodon }, DEBUG_PREFIX);
-
-    return mastodon;
   }
 
   public async fetch(
