@@ -8,7 +8,7 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { WalletClient } from 'viem';
+import { WalletClient, createWalletClient, custom } from 'viem';
 import { useDisconnect, useWalletClient } from 'wagmi';
 
 import { useAppFetch } from '../../../api/app.fetch';
@@ -18,15 +18,18 @@ import {
   OverallLoginStatus,
   useAccountContext,
 } from '../AccountContext';
-import { createMagicSigner, magic } from './magic.signer';
+import { chain } from './ConnectedWalletContext';
+import { magic } from './magic.signer';
 
 const DEBUG = false;
 
+export enum ConnectMode {
+  email = 'email',
+  googleOAuth = 'google-oauth',
+}
 export type SignerContextType = {
-  connect: () => void;
-  connectWeb3: () => void;
-  connectMagic: (openUI: boolean, setLogginIn: boolean) => void;
-  isConnectingMagic: boolean;
+  connect: (mode: ConnectMode) => Promise<void>;
+  isConnecting: boolean;
   errorConnecting: boolean;
   hasInjected: boolean;
   signer?: WalletClient;
@@ -40,8 +43,6 @@ const ProviderContextValue = createContext<SignerContextType | undefined>(
 );
 
 export const SignerContext = (props: PropsWithChildren) => {
-  const { open: openConnectModal } = useWeb3Modal();
-  const modalEvents = useWeb3ModalEvents();
   const {
     connectedUser,
     refresh: refreshUser,
@@ -72,7 +73,7 @@ export const SignerContext = (props: PropsWithChildren) => {
 
         if (res && !magicSigner) {
           if (DEBUG) console.log('Autoconnecting Magic');
-          connectMagic(false, false);
+          connectMagicWallet();
         } else {
           if (overallLoginStatus === OverallLoginStatus.LogginIn) {
             console.warn('Unexpected situation, resetting login status');
@@ -114,41 +115,47 @@ export const SignerContext = (props: PropsWithChildren) => {
 
   const { disconnect: disconnectInjected } = useDisconnect();
 
-  const connectMagic = useCallback(
-    (openUI: boolean, setLogginIn: boolean) => {
-      if (!signer) {
-        if (DEBUG) console.log('connectMagic called');
-        setErrorConnecting(false);
-        setIsConnectingMagic(true);
+  /** should be called after magic is connected */
+  const connectMagicWallet = async () => {
+    const provider = await magic.wallet.getProvider();
 
-        if (setLogginIn) {
-          setOverallLoginStatus(OverallLoginStatus.LogginIn);
-        }
+    const signer = createWalletClient({
+      transport: custom(provider),
+      chain: chain,
+    });
 
-        setLoginFlowState(LoginFlowState.ConnectingSigner);
+    setIsConnectingMagic(false);
+    setMagicSigner(signer);
+  };
 
-        if (DEBUG) console.log('connecting magic signer', { signer });
-        createMagicSigner(openUI)
-          .then((signer) => {
-            if (DEBUG) console.log('connected magic signer', { signer });
+  const connectMagic = async (mode: ConnectMode) => {
+    if (!signer) {
+      if (DEBUG) console.log('connectMagic called');
+      setErrorConnecting(false);
+      setIsConnectingMagic(true);
 
-            if (!signer) {
-              throw new Error('Signer undefined');
-            }
+      setOverallLoginStatus(OverallLoginStatus.LogginIn);
+      setLoginFlowState(LoginFlowState.ConnectingSigner);
 
-            setIsConnectingMagic(false);
-            setMagicSigner(signer);
-          })
-          .catch((e) => {
-            console.error('Error connecting magic signer', e);
-            setErrorConnecting(true);
-            setIsConnectingMagic(false);
-            resetLogin();
+      if (DEBUG) console.log('connecting magic signer', { signer });
+      try {
+        if (mode === ConnectMode.email) {
+          await magic.wallet.connectWithUI();
+          connectMagicWallet();
+        } else if (mode === ConnectMode.googleOAuth) {
+          const loggingInOauth = magic.oauth2.loginWithRedirect({
+            redirectURI: window.location.href,
+            provider: 'google',
           });
+        }
+      } catch (e) {
+        console.error('Error connecting magic signer', e);
+        setErrorConnecting(true);
+        setIsConnectingMagic(false);
+        resetLogin();
       }
-    },
-    [signer]
-  );
+    }
+  };
 
   /** authenticate magic email to backend (one way call that should endup with the user email updated) */
   useEffect(() => {
@@ -163,30 +170,7 @@ export const SignerContext = (props: PropsWithChildren) => {
     }
   }, [magicSigner, connectedUser, appFetch]);
 
-  const connectWeb3 = useCallback(() => {
-    setErrorConnecting(false);
-    openConnectModal();
-  }, [openConnectModal]);
-
-  useEffect(() => {
-    if (DEBUG) console.log(`Modal event: ${modalEvents.data.event}`);
-    if (modalEvents.data.event === 'MODAL_CLOSE') {
-      setErrorConnecting(true);
-    }
-    if (modalEvents.data.event === 'CONNECT_ERROR') {
-      setErrorConnecting(true);
-    }
-  }, [modalEvents]);
-
   const hasInjected = (window as any).ethereum !== undefined;
-
-  const connect = useCallback(() => {
-    if (hasInjected) {
-      connectWeb3();
-    } else {
-      connectMagic(true, true);
-    }
-  }, [hasInjected, connectWeb3, connectMagic]);
 
   /** set signMessage as undefined when not available */
   const signMessage = !signer || !address ? undefined : _signMessage;
@@ -201,10 +185,8 @@ export const SignerContext = (props: PropsWithChildren) => {
   return (
     <ProviderContextValue.Provider
       value={{
-        connect,
-        connectWeb3,
-        connectMagic,
-        isConnectingMagic,
+        connect: connectMagic,
+        isConnecting: isConnectingMagic,
         errorConnecting,
         signMessage,
         hasInjected,
