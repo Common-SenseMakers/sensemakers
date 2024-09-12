@@ -4,14 +4,9 @@ import {
   FetchParams,
   PlatformFetchParams,
 } from '../../src/@shared/types/types.fetch';
-import { MastodonUserDetails } from '../../src/@shared/types/types.mastodon';
 import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
 import { PlatformPostCreate } from '../../src/@shared/types/types.platform.posts';
-import {
-  AppTweet,
-  TwitterThread,
-  TwitterUserDetails,
-} from '../../src/@shared/types/types.twitter';
+import { AppTweet, TwitterThread } from '../../src/@shared/types/types.twitter';
 import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
@@ -76,7 +71,7 @@ describe('02-platforms', () => {
   });
 
   // TODO, fix this test
-  describe.skip('twitter', () => {
+  describe('twitter', () => {
     it('fetch the latest 5 threads', async () => {
       if (!user) {
         throw new Error('appUser not created');
@@ -176,7 +171,7 @@ describe('02-platforms', () => {
         throw error;
       }
     });
-    it('gets account by username', async () => {
+    it.only('gets account by username', async () => {
       const twitterService = services.platforms.get(
         PLATFORM.Twitter
       ) as TwitterService;
@@ -186,9 +181,10 @@ describe('02-platforms', () => {
         throw new Error('Missing TWITTER_BEARER_TOKEN');
       }
 
-      const result = await twitterService.getAccountByUsername(username, {
-        read: { accessToken: bearerToken },
-      } as TwitterUserDetails);
+      const result = await twitterService.getAccountByUsername(
+        username,
+        bearerToken
+      );
 
       expect(result).to.not.be.null;
       if (result) {
@@ -304,7 +300,7 @@ describe('02-platforms', () => {
       expect(result.platformPosts.length).to.be.greaterThan(0);
     });
 
-    it('gets account by username', async () => {
+    it.only('gets account by username', async () => {
       // https://fediscience.org/@petergleick
       const username = 'petergleick';
       const server = 'fediscience.org';
@@ -321,9 +317,7 @@ describe('02-platforms', () => {
       const result = await mastodonService.getAccountByUsername(
         username,
         server,
-        {
-          read: { accessToken: accessToken },
-        } as MastodonUserDetails
+        accessToken
       );
 
       expect(result).to.not.be.null;

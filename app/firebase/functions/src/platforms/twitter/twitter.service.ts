@@ -565,36 +565,4 @@ export class TwitterService
   ): Promise<any> {
     return post;
   }
-
-  async getAccountByUsername(
-    username: string,
-    userDetails: TwitterUserDetails
-  ): Promise<TwitterUser | null> {
-    try {
-      const { client } = await this.getClientWithCredentials(
-        {
-          accessToken: userDetails.read!.accessToken,
-          expiresAtMs: 2041631581000,
-          expiresIn: 315360000,
-          refreshToken: userDetails.read!.refreshToken,
-        },
-        'read'
-      );
-      const userResponse = await client.v2.userByUsername(username, {
-        'user.fields': ['id', 'name', 'username', 'profile_image_url'],
-      });
-
-      if (userResponse.data) {
-        return {
-          id: userResponse.data.id,
-          name: userResponse.data.name,
-          username: userResponse.data.username,
-          profile_image_url: userResponse.data.profile_image_url,
-        };
-      }
-      return null;
-    } catch (e: any) {
-      throw new Error(handleTwitterError(e));
-    }
-  }
 }

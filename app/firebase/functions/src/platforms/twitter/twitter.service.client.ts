@@ -327,52 +327,109 @@ export class TwitterServiceClient {
 
   async handleSignupData(data: TwitterSignupData): Promise<TwitterUserDetails> {
     if (DEBUG) logger.debug('handleSignupData', data, DEBUG_PREFIX);
-    const client = this.getGenericClient();
 
-    const result = await client.loginWithOAuth2({
-      code: data.code,
-      codeVerifier: data.codeVerifier,
-      redirectUri: data.callback_url,
-    });
-
-    const profileParams: Partial<UsersV2Params> = {
-      'user.fields': ['profile_image_url', 'name', 'username'],
-    };
-    const { data: user } = await result.client.v2.me(profileParams);
-
-    if (!result.refreshToken) {
-      throw new Error('Unexpected undefined refresh token');
+    if ('isGhost' in data) {
+      const ghostTwitterUserProfile = await this.getAccountByUsername(
+        data.username,
+        data.accessToken
+      );
+      if (!ghostTwitterUserProfile) {
+        throw new Error(`account not found for ${data.username}`);
+      }
+      return {
+        user_id: ghostTwitterUserProfile.id,
+        signupDate: 0,
+        profile: ghostTwitterUserProfile,
+        read: {
+          accessToken: data.accessToken,
+          refreshToken: data.accessToken,
+          expiresIn: 315360000,
+          expiresAtMs: 2041712750000, // Tuesday, September 12, 2034 10:25:50 PM
+        },
+      };
     }
+    if ('code' in data) {
+      const client = this.getGenericClient();
 
-    if (!result.expiresIn) {
-      throw new Error('Unexpected undefined refresh token');
+      const result = await client.loginWithOAuth2({
+        code: data.code,
+        codeVerifier: data.codeVerifier,
+        redirectUri: data.callback_url,
+      });
+
+      const profileParams: Partial<UsersV2Params> = {
+        'user.fields': ['profile_image_url', 'name', 'username'],
+      };
+      const { data: user } = await result.client.v2.me(profileParams);
+
+      if (!result.refreshToken) {
+        throw new Error('Unexpected undefined refresh token');
+      }
+
+      if (!result.expiresIn) {
+        throw new Error('Unexpected undefined refresh token');
+      }
+
+      const credentials: TwitterUserCredentials = {
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+        expiresIn: result.expiresIn,
+        expiresAtMs: this.time.now() + result.expiresIn * 1000,
+      };
+
+      if (DEBUG)
+        logger.debug('handleSignupData', { user, credentials }, DEBUG_PREFIX);
+
+      const twitter: TwitterUserDetails = {
+        user_id: user.id,
+        signupDate: 0,
+        profile: user as TwitterUserProfile,
+      };
+
+      /** always store the credential as read credentials */
+      twitter.read = credentials;
+      /** the same credentials apply for reading and writing */
+      if (data.type === 'write') {
+        twitter['write'] = credentials;
+      }
+
+      if (DEBUG) logger.debug('handleSignupData', twitter, DEBUG_PREFIX);
+
+      return twitter;
     }
+    throw new Error(
+      'TwitterServiceClient.handleSignupData() invalid signup data'
+    );
+  }
+  async getAccountByUsername(
+    username: string,
+    accessToken: string
+  ): Promise<TwitterUserProfile | null> {
+    try {
+      const { client } = await this.getClientWithCredentials(
+        {
+          accessToken,
+          expiresAtMs: 2041631581000,
+          expiresIn: 315360000,
+          refreshToken: accessToken,
+        },
+        'read'
+      );
+      const userResponse = await client.v2.userByUsername(username, {
+        'user.fields': ['id', 'name', 'username', 'profile_image_url'],
+      });
 
-    const credentials: TwitterUserCredentials = {
-      accessToken: result.accessToken,
-      refreshToken: result.refreshToken,
-      expiresIn: result.expiresIn,
-      expiresAtMs: this.time.now() + result.expiresIn * 1000,
-    };
-
-    if (DEBUG)
-      logger.debug('handleSignupData', { user, credentials }, DEBUG_PREFIX);
-
-    const twitter: TwitterUserDetails = {
-      user_id: user.id,
-      signupDate: 0,
-      profile: user as TwitterUserProfile,
-    };
-
-    /** always store the credential as read credentials */
-    twitter.read = credentials;
-    /** the same credentials apply for reading and writing */
-    if (data.type === 'write') {
-      twitter['write'] = credentials;
+      if (userResponse.data) {
+        return {
+          id: userResponse.data.id,
+          name: userResponse.data.name,
+          username: userResponse.data.username,
+          profile_image_url: userResponse.data.profile_image_url,
+        };
+      }
+      return null;
+    } catch (e: any) {
+      throw new Error(handleTwitterError(e));
     }
-
-    if (DEBUG) logger.debug('handleSignupData', twitter, DEBUG_PREFIX);
-
-    return twitter;
   }
 }
