@@ -14,7 +14,7 @@ import {
   twitterSignupDataSchema,
 } from './auth.schema';
 
-const DEBUG = false;
+const DEBUG = true;
 const DEBUG_PREFIX = '[AUTH-CONTROLLER]';
 
 export const getSignupContextController: RequestHandler = async (

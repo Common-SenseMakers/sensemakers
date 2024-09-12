@@ -29,6 +29,7 @@ import {
 } from '../../@shared/types/types.posts';
 import { AppUser, PLATFORM } from '../../@shared/types/types.user';
 import { TransactionManager } from '../../db/transaction.manager';
+import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
 import { UsersRepository } from '../../users/users.repository';
@@ -38,9 +39,8 @@ import {
   convertMastodonPostsToThreads,
   extractPrimaryThread,
 } from './mastodon.utils';
-import { logger } from '../../instances/logger';
 
-const DEBUG = false;
+const DEBUG = true;
 const DEBUG_PREFIX = 'MastodonService';
 
 export class MastodonService
@@ -81,7 +81,8 @@ export class MastodonService
     userId?: string,
     params?: MastodonGetContextParams
   ): Promise<MastodonSignupContext> {
-    if (DEBUG) logger.debug('getSignupContext', { userId, params }, DEBUG_PREFIX);
+    if (DEBUG)
+      logger.debug('getSignupContext', { userId, params }, DEBUG_PREFIX);
 
     if (!params || !params.domain || !params.callback_url) {
       throw new Error('Mastodon domain and callback URL are required');
@@ -159,7 +160,8 @@ export class MastodonService
       mastodon['write'] = { accessToken: token.accessToken };
     }
 
-    if (DEBUG) logger.debug('handleSignupData result', { mastodon }, DEBUG_PREFIX);
+    if (DEBUG)
+      logger.debug('handleSignupData result', { mastodon }, DEBUG_PREFIX);
 
     return mastodon;
   }
@@ -229,13 +231,18 @@ export class MastodonService
         allStatuses[0].account
       );
 
-      if (DEBUG) logger.debug('fetch iteration', { 
-        statusesCount: statuses.length, 
-        allStatusesCount: allStatuses.length,
-        threadsCount: threads.length,
-        newestId,
-        oldestId
-      }, DEBUG_PREFIX);
+      if (DEBUG)
+        logger.debug(
+          'fetch iteration',
+          {
+            statusesCount: statuses.length,
+            allStatusesCount: allStatuses.length,
+            threadsCount: threads.length,
+            newestId,
+            oldestId,
+          },
+          DEBUG_PREFIX
+        );
 
       if (threads.length >= params.expectedAmount) {
         break;
@@ -272,11 +279,16 @@ export class MastodonService
       platformPosts,
     };
 
-    if (DEBUG) logger.debug('fetch result', { 
-      newestId, 
-      oldestId, 
-      platformPostsCount: platformPosts.length 
-    }, DEBUG_PREFIX);
+    if (DEBUG)
+      logger.debug(
+        'fetch result',
+        {
+          newestId,
+          oldestId,
+          platformPostsCount: platformPosts.length,
+        },
+        DEBUG_PREFIX
+      );
 
     return result;
   }

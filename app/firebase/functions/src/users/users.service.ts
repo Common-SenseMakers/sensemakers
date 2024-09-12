@@ -25,7 +25,7 @@ import { UsersHelper } from './users.helper';
 import { UsersRepository } from './users.repository';
 import { getPrefixedUserId, getUsernameTag } from './users.utils';
 
-const DEBUG = false;
+const DEBUG = true;
 
 interface TokenData {
   userId: string;
