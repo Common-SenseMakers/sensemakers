@@ -7,7 +7,11 @@ import {
 import { MastodonUserDetails } from '../../src/@shared/types/types.mastodon';
 import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
 import { PlatformPostCreate } from '../../src/@shared/types/types.platform.posts';
-import { AppTweet, TwitterThread } from '../../src/@shared/types/types.twitter';
+import {
+  AppTweet,
+  TwitterThread,
+  TwitterUserDetails,
+} from '../../src/@shared/types/types.twitter';
 import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
@@ -172,6 +176,28 @@ describe('02-platforms', () => {
         throw error;
       }
     });
+    it('gets account by username', async () => {
+      const twitterService = services.platforms.get(
+        PLATFORM.Twitter
+      ) as TwitterService;
+      const username = 'wesleyfinck';
+      const bearerToken = process.env.TWITTER_BEARER_TOKEN;
+      if (!bearerToken) {
+        throw new Error('Missing TWITTER_BEARER_TOKEN');
+      }
+
+      const result = await twitterService.getAccountByUsername(username, {
+        read: { accessToken: bearerToken },
+      } as TwitterUserDetails);
+
+      expect(result).to.not.be.null;
+      if (result) {
+        expect(result.id).to.be.a('string');
+        expect(result.username).to.equal(username);
+        expect(result.name).to.be.a('string');
+        expect(result.profile_image_url).to.be.a('string');
+      }
+    });
   });
 
   describe('nanopub', () => {
@@ -278,7 +304,7 @@ describe('02-platforms', () => {
       expect(result.platformPosts.length).to.be.greaterThan(0);
     });
 
-    it.only('gets account by username', async () => {
+    it('gets account by username', async () => {
       // https://fediscience.org/@petergleick
       const username = 'petergleick';
       const server = 'fediscience.org';
@@ -307,37 +333,6 @@ describe('02-platforms', () => {
         expect(result.displayName).to.be.a('string');
         expect(result.avatar).to.be.a('string');
         expect(result.mastodonServer).to.equal(server);
-      }
-    });
-  });
-
-  describe('twitter', () => {
-    it('gets account by username', async () => {
-      if (!user) {
-        throw new Error('appUser not created');
-      }
-      const allUserDetails = user[PLATFORM.Twitter];
-      if (!allUserDetails || allUserDetails.length < 0) {
-        throw new Error('Unexpected');
-      }
-      const userDetails = allUserDetails[0];
-      if (userDetails.read === undefined) {
-        throw new Error('Unexpected');
-      }
-
-      const twitterService = services.platforms.get(PLATFORM.Twitter) as TwitterService;
-      const username = 'twitter';  // Using Twitter's official account as an example
-
-      const result = await services.db.run((manager) =>
-        twitterService.getAccountByUsername(username, manager, userDetails)
-      );
-
-      expect(result).to.not.be.null;
-      if (result) {
-        expect(result.id).to.be.a('string');
-        expect(result.username).to.equal(username);
-        expect(result.name).to.be.a('string');
-        expect(result.profile_image_url).to.be.a('string');
       }
     });
   });
