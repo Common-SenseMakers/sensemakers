@@ -21,7 +21,7 @@ export type MastodonUserDetails = UserDetailsBase<
 >;
 
 export interface MastodonGetContextParams {
-  domain: string;
+  mastodonServer: string;
   callback_url: string;
   type: 'read' | 'write';
 }
@@ -39,14 +39,22 @@ export interface MastodonOAuthSignupData extends MastodonGetContextParams {
 }
 
 export interface MastodonAccessTokenSignupData {
-  domain: string;
+  mastodonServer: string;
   accessToken: string;
   type: 'read' | 'write';
 }
 
 export type MastodonSignupData =
   | MastodonOAuthSignupData
-  | MastodonAccessTokenSignupData;
+  | MastodonAccessTokenSignupData
+  | MastodonGhostSignupData;
+
+export type MastodonGhostSignupData = {
+  accessToken: string;
+  username: string;
+  mastodonServer: string;
+  isGhost: true;
+};
 
 export interface MastodonThread {
   thread_id: string;

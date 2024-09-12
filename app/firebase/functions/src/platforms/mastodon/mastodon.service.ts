@@ -60,7 +60,7 @@ export class MastodonService
     if (DEBUG) logger.debug('createApp', { params }, DEBUG_PREFIX);
 
     const client = createRestAPIClient({
-      url: `https://${params.domain}`,
+      url: `https://${params.mastodonServer}`,
     });
 
     const scopes = params.type === 'write' ? 'read write' : 'read';
@@ -69,7 +69,7 @@ export class MastodonService
       clientName: 'SenseNets',
       redirectUris: params.callback_url,
       scopes,
-      website: `https://${params.domain}`,
+      website: `https://${params.mastodonServer}`,
     });
 
     if (DEBUG) logger.debug('createApp result', { app }, DEBUG_PREFIX);
@@ -84,8 +84,8 @@ export class MastodonService
     if (DEBUG)
       logger.debug('getSignupContext', { userId, params }, DEBUG_PREFIX);
 
-    if (!params || !params.domain || !params.callback_url) {
-      throw new Error('Mastodon domain and callback URL are required');
+    if (!params || !params.mastodonServer || !params.callback_url) {
+      throw new Error('Mastodon server and callback URL are required');
     }
 
     const app = await this.createApp(params);
@@ -96,7 +96,7 @@ export class MastodonService
     const scopes = params.type === 'write' ? 'read+write' : 'read';
 
     const authorizationUrl =
-      `https://${params.domain}/oauth/authorize?` +
+      `https://${params.mastodonServer}/oauth/authorize?` +
       `client_id=${app.clientId}&` +
       `scope=${scopes}&` +
       `redirect_uri=${params.callback_url}&` +
@@ -113,20 +113,20 @@ export class MastodonService
     return result;
   }
 
-  public async handleSignupData(signupData: MastodonSignupData): Promise<MastodonUserDetails>;
-  public async handleSignupData(accessToken: string, username: string, mastodonServer: string): Promise<MastodonUserDetails>;
   public async handleSignupData(
-    signupDataOrAccessToken: MastodonSignupData | string,
-    username?: string,
-    mastodonServer?: string
+    signupData: MastodonSignupData
   ): Promise<MastodonUserDetails> {
-    if (typeof signupDataOrAccessToken === 'string' && username && mastodonServer) {
+    if ('isGhost' in signupData) {
       // Handle the new overload
-      const accessToken = signupDataOrAccessToken;
-      if (DEBUG) logger.debug('handleSignupData (token)', { accessToken, username, mastodonServer }, DEBUG_PREFIX);
+      if (DEBUG)
+        logger.debug('handleSignupData (token)', { signupData }, DEBUG_PREFIX);
 
-      const account = await this.getAccountByUsername(username, mastodonServer, { read: { accessToken } } as MastodonUserDetails);
-      
+      const account = await this.getAccountByUsername(
+        signupData.username,
+        signupData.mastodonServer,
+        signupData.accessToken
+      );
+
       if (!account) {
         throw new Error('Failed to fetch account details');
       }
@@ -139,27 +139,28 @@ export class MastodonService
           username: account.username,
           displayName: account.displayName,
           avatar: account.avatar,
-          mastodonServer: mastodonServer,
+          mastodonServer: account.mastodonServer,
         },
         read: {
-          accessToken: accessToken,
+          accessToken: signupData.accessToken,
         },
       };
 
-      if (DEBUG) logger.debug('handleSignupData (token) result', { mastodon }, DEBUG_PREFIX);
+      if (DEBUG)
+        logger.debug(
+          'handleSignupData (token) result',
+          { mastodon },
+          DEBUG_PREFIX
+        );
 
       return mastodon;
     } else {
-      // Handle the existing implementation
-      const signupData = signupDataOrAccessToken as MastodonSignupData;
-      if (DEBUG) logger.debug('handleSignupData', { signupData }, DEBUG_PREFIX);
-
       const token = await (async () => {
         if ('accessToken' in signupData) {
           return { accessToken: signupData.accessToken };
         }
         const client = createOAuthAPIClient({
-          url: `https://${signupData.domain}`,
+          url: `https://${signupData.mastodonServer}`,
         });
         return await client.token.create({
           clientId: signupData.clientId,
@@ -170,10 +171,11 @@ export class MastodonService
         });
       })();
 
-      if (DEBUG) logger.debug('handleSignupData token', { token }, DEBUG_PREFIX);
+      if (DEBUG)
+        logger.debug('handleSignupData token', { token }, DEBUG_PREFIX);
 
       const mastoClient = createRestAPIClient({
-        url: `https://${signupData.domain}`,
+        url: `https://${signupData.mastodonServer}`,
         accessToken: token.accessToken,
       });
 
@@ -186,7 +188,7 @@ export class MastodonService
           username: account.username,
           displayName: account.displayName,
           avatar: account.avatar,
-          mastodonServer: signupData.domain,
+          mastodonServer: signupData.mastodonServer,
         },
         read: {
           accessToken: token.accessToken,
@@ -492,15 +494,12 @@ export class MastodonService
   public async getAccountByUsername(
     username: string,
     server: string,
-    userDetails: MastodonUserDetails
+    accessToken: string
   ): Promise<MastodonUserDetails['profile'] | null> {
     try {
-      if (!userDetails.read) {
-        throw new Error('read credentials are not provided');
-      }
       const client = createRestAPIClient({
         url: `https://${server}`,
-        accessToken: userDetails.read.accessToken,
+        accessToken,
       });
 
       const account = await client.v1.accounts.lookup({ acct: username });

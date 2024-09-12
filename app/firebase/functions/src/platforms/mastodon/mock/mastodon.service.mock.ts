@@ -1368,7 +1368,7 @@ export const getMastodonMock = (
     );
     when(mocked.handleSignupData(anything())).thenCall(
       (data: MastodonSignupData): MastodonUserDetails => {
-        const user_id = data.domain; // for testing purposes we pass the user_id as the domain
+        const user_id = data.mastodonServer; // for testing purposes we pass the user_id as the mastodon server
         const testCredentials = getTestCredentials(
           process.env.TEST_USER_ACCOUNTS as string
         );
