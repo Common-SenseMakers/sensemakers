@@ -17,7 +17,7 @@ export const createNanopublication = async (
 ) => {
   const {
     introUri,
-    platformUsername,
+    platformAccountUrl,
     platformName,
     autopostOption,
     ethAddress,
@@ -61,7 +61,7 @@ export const createNanopublication = async (
   return buildSpostNp(
     ethAddress,
     introUri,
-    platformUsername,
+    platformAccountUrl,
     supersedesOptions ? AutopostOption.MANUAL : autopostOption,
     platformName,
     semanticsStore,
