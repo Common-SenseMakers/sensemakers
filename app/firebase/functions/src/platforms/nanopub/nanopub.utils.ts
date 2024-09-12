@@ -110,12 +110,12 @@ export const buildSpostProv = (
     xHandle,
     provenanceGraphUri
   );
-  store.addQuad(
+  /*store.addQuad(
     assertion,
     namedNode(URI.PROV_WAS_ASSOCIATED_WITH),
     xHandle,
     provenanceGraphUri
-  );
+  );*/
   store.addQuad(
     assertion,
     namedNode(URI.PROV_WAS_GENERATED_BY),
@@ -565,6 +565,13 @@ export const buildIntroNp = async (
       namedNode(URI.BASE_URI),
       namedNode(URI.NP_WAS_CREATED_AT),
       namedNode(URI.COSMO_PREFIX),
+      pubinfoGraph
+    );
+
+    writer.addQuad(
+      namedNode(URI.SIGNATURE_URI),
+      namedNode(URI.NP_SIGNED_BY),
+      namedNode(URI.BASE_URI),
       pubinfoGraph
     );
 

@@ -1,0 +1,37 @@
+[
+    {
+        "User": "John Doe",
+        "Title": "Post about AI",
+        "Content": "Artificial intelligence is revolutionizing industries with its innovative approaches.",
+        "Recommendations": [
+            "https://example.com/ai1",
+            "https://example.com/ai2"
+        ]
+    },
+    {
+        "User": "Jane Smith",
+        "Title": "Post about Data Science",
+        "Content": "Data science helps uncover insights from vast amounts of data.",
+        "Recommendations": [
+            "https://example.com/ds1"
+        ]
+    },
+    {
+        "User": "Alice Johnson",
+        "Title": "Post about Machine Learning",
+        "Content": "Machine learning algorithms are key to developing intelligent systems.",
+        "Recommendations": [
+            "https://example.com/ml1",
+            "https://example.com/ml2"
+        ]
+    },
+    {
+        "User": "Bob Brown",
+        "Title": "Post about Generative AI",
+        "Content": "Generative AI creates new possibilities by generating realistic content.",
+        "Recommendations": [
+            "https://example.com/genai1",
+            "https://example.com/genai2"
+        ]
+    }
+]
