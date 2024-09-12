@@ -2,7 +2,7 @@
  * Keep track of changes to semantics and intelligently merged updates on the fetched
  * post giving priority to local changes not yet applied
  */
-import { DataFactory, Quad } from 'n3';
+import { Quad } from 'n3';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { semanticStringToStore } from '../../semantics/patterns/common/use.semantics';
@@ -67,31 +67,52 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
         });
 
         if (DEBUG)
-          console.log('setOperations', { operations: [...operations] });
+          console.log('reset base', {
+            operations: [...operations],
+            fetchedPost: fetched.post,
+          });
+
         setOperations([...operations]);
+        setBasePost(fetched.post);
       }
     }
   }, [fetched.post]);
 
-  /** the base store is the store derive from the base post */
+  useEffect(() => {
+    setOperations([]);
+    setBasePost(fetched.post);
+    setMergedSemantics(fetched.post?.semantics);
+  }, [fetched.postId]);
+
+  /** the base store is the store derived from the base post */
   const baseStore = useMemo(() => {
     if (!basePost) return;
+
     if (DEBUG)
       console.log('baseStore computed', {
         basePostSemantic: basePost.semantics,
       });
+
     return semanticStringToStore(basePost.semantics);
-  }, []);
+  }, [basePost]);
 
   /** the merged semantics is the base post with the base semantics applied to it */
   useEffect(() => {
+    if (DEBUG)
+      console.log(
+        'computing merged semantics - merge semantics merged effect',
+        {
+          operations,
+          baseStoreSize: baseStore?.size,
+        }
+      );
+
     if (!baseStore) return;
 
     const mergedStore = cloneStore(baseStore);
 
     if (DEBUG)
-      console.log('merge semantics merged effect', {
-        operations,
+      console.log('computing merged semantics - mergedStore', {
         mergedStoreSize: mergedStore.size,
       });
 
@@ -99,42 +120,61 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
     operations.forEach((operation) => {
       if (operation.type === 'add') {
         if (!baseStore.has(operation.quad)) {
+          if (DEBUG)
+            console.log(
+              'computing merged semantics - applying "add" operation',
+              {
+                operation,
+              }
+            );
           mergedStore.addQuad(operation.quad);
         }
       } else {
         if (baseStore.has(operation.quad)) {
+          if (DEBUG)
+            console.log(
+              'computing merged semantics - applying "remove" operation',
+              {
+                operation,
+              }
+            );
           mergedStore.removeQuad(operation.quad);
         }
       }
     });
 
-    writeRDF(mergedStore).then((_semantics) => setMergedSemantics(_semantics));
+    console.log('computing merged semantics - writing RDF', {
+      mergedStoreSize: mergedStore.size,
+    });
+    writeRDF(mergedStore).then((_semantics) => {
+      if (DEBUG)
+        console.log('computing merged semantics - semantics computed', {
+          _semantics,
+        });
+      setMergedSemantics(_semantics);
+    });
   }, [baseStore, operations]);
 
-  const addOperation = useCallback(
-    (operation: QuadOperation) => {
-      operations.push(operation);
-      setOperations([...operations]);
-    },
-    [operations]
-  );
-
-  const hasOperation = useCallback(
-    (_operation: QuadOperation) => {
-      return (
-        operations.find(
-          (operation) =>
-            operation.quad.equals(operation.quad) &&
-            _operation.type === operation.type
-        ) !== undefined
-      );
-    },
-    [operations]
-  );
+  const hasOperation = (
+    operations: QuadOperation[],
+    _operation: QuadOperation
+  ) => {
+    return (
+      operations.find(
+        (op) => op.quad.equals(_operation.quad) && op.type === _operation.type
+      ) !== undefined
+    );
+  };
 
   /** external function to add or remove quads */
   const updateSemantics = useCallback(
     (newSemantics: string) => {
+      if (DEBUG)
+        console.log('calling updateSemantics', {
+          newSemantics,
+          baseStore,
+        });
+
       if (!baseStore) return;
 
       const newStore = semanticStringToStore(newSemantics);
@@ -146,8 +186,15 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
          * baseStore nor a pending operation
          */
         if (!baseStore.has(quad)) {
-          if (!hasOperation({ type: 'add', quad })) {
-            addOperation({ type: 'add', quad });
+          const operation: QuadOperation = { type: 'add', quad };
+
+          if (!hasOperation(operations, operation)) {
+            if (DEBUG)
+              console.log('"add" operation found on newSemantics', {
+                newSemantics,
+                quad,
+              });
+            operations.push(operation);
           }
         }
       });
@@ -155,11 +202,18 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
       /** add "remove" operations */
       forEachStore(baseStore, (quad) => {
         if (!newStore.has(quad)) {
-          addOperation({ type: 'remove', quad });
+          if (DEBUG)
+            console.log('"remove" operation found on newSemantics', {
+              newSemantics,
+              quad,
+            });
+          operations.push({ type: 'remove', quad });
         }
       });
+
+      setOperations([...operations]);
     },
-    [baseStore, addOperation]
+    [baseStore]
   );
 
   return { mergedSemantics, updateSemantics };

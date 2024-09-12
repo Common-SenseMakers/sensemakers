@@ -16,6 +16,8 @@ import { PostDerivedContext } from './use.post.derived';
 import { PostFetchContext } from './use.post.fetch';
 import { usePostMergeDeltas } from './use.post.merge.deltas';
 
+const DEBUG = true;
+
 export interface PostUpdateContext {
   editable: boolean; // can be true if not published
   enabledEdit: boolean; // only true if editing after publishing
@@ -46,7 +48,8 @@ export const usePostUpdate = (
   );
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const { mergedSemantics, updateSemantics } = usePostMergeDeltas(fetched);
+  const { mergedSemantics, updateSemantics: updateSemanticsLocal } =
+    usePostMergeDeltas(fetched);
 
   const editable =
     connectedUser !== undefined &&
@@ -118,11 +121,27 @@ export const usePostUpdate = (
     _updatePost(update);
   };
 
+  const updateSemantics = (newSemantics: string) => {
+    updateSemanticsLocal(newSemantics);
+    updatePost({
+      semantics: newSemantics,
+      reviewedStatus: AppPostReviewStatus.DRAFT,
+    });
+  };
+
   /**
    * combine edited and fetched posts to get the current local version of a post
    * semantics are merged independently in the usePostMergeDeltas hook
    */
   const postMerged = useMemo<AppPostFull | undefined>(() => {
+    if (DEBUG)
+      console.log('updating postMerged', {
+        fetchedIsLoading: fetched.isLoading,
+        fetchedPost: fetched.post,
+        postInit,
+        postEdited,
+        mergedSemantics,
+      });
     if (fetched.isLoading) return postInit;
     if (fetched.post && fetched.post !== null) {
       return {
@@ -132,7 +151,7 @@ export const usePostUpdate = (
       };
     }
     return undefined;
-  }, [fetched.post, postInit, postEdited, fetched.isLoading]);
+  }, [fetched.post, postInit, postEdited, fetched.isLoading, mergedSemantics]);
 
   const statusesMerged = useMemo(() => {
     return getPostStatuses(postMerged);
