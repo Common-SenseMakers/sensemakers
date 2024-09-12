@@ -8,7 +8,7 @@ import { usePost } from './post.context/PostContext';
 
 export const PostHeader = (props: BoxExtendedProps) => {
   const { constants } = useThemeContext();
-  const { derived, merged } = usePost();
+  const { derived, updated } = usePost();
 
   const profile = derived.tweet?.posted?.author;
 
@@ -38,7 +38,7 @@ export const PostHeader = (props: BoxExtendedProps) => {
       </Box>
 
       <Box gap="small" align="end">
-        <NanopubStatus post={merged.post}></NanopubStatus>
+        <NanopubStatus post={updated.postMerged}></NanopubStatus>
       </Box>
     </Box>
   );

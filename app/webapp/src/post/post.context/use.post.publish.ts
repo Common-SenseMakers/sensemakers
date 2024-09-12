@@ -12,8 +12,6 @@ import {
 } from '../../shared/types/types.posts';
 import { PLATFORM } from '../../shared/types/types.user';
 import { useNanopubContext } from '../../user-login/contexts/platforms/nanopubs/NanopubContext';
-import { PostFetchContext } from './use.post.fetch';
-import { PostMergeContext } from './use.post.merge';
 import { PostUpdateContext } from './use.post.update';
 
 export interface PostPublishContext {
@@ -28,8 +26,7 @@ export interface PostPublishContext {
 }
 
 export const usePostPublish = (
-  merged: PostMergeContext,
-  update: PostUpdateContext
+  updated: PostUpdateContext
 ): PostPublishContext => {
   const appFetch = useAppFetch();
 
@@ -45,10 +42,10 @@ export const usePostPublish = (
   const { signNanopublication } = useNanopubContext();
 
   const publishOrRepublish = async () => {
-    const nanopub = merged.post?.mirrors.find(
+    const nanopub = updated.postMerged?.mirrors.find(
       (m) => m.platformId === PLATFORM.Nanopub
     );
-    const allOtherMirrors = merged.post?.mirrors.filter(
+    const allOtherMirrors = updated.postMerged?.mirrors.filter(
       (m) => m.platformId !== PLATFORM.Nanopub
     );
 
@@ -68,38 +65,38 @@ export const usePostPublish = (
     /** approve is set the first time a post is published (should be set
      * also set in the backend anyway) */
     if (
-      merged.post &&
-      merged.post.republishedStatus === AppPostRepublishedStatus.PENDING
+      updated.postMerged &&
+      updated.postMerged.republishedStatus === AppPostRepublishedStatus.PENDING
     ) {
       nanopub.draft.postApproval = PlatformPostDraftApproval.APPROVED;
       // removeDraft(post.id);
     }
 
-    if (merged.post) {
+    if (updated.postMerged) {
       if (errorApprovingMsg) {
         setErrorApprovingMsg(undefined);
       }
       try {
         await appFetch<void, PublishPostPayload>('/api/posts/approve', {
           post: {
-            ...merged.post,
+            ...updated.postMerged,
             mirrors: [...(allOtherMirrors ? allOtherMirrors : []), nanopub],
           },
           platformIds: [PLATFORM.Nanopub],
         });
       } catch (e: any) {
         setErrorApprovingMsg(e.message);
-        update.setIsUpdating(false);
+        updated.setIsUpdating(false);
       }
     }
 
-    update.setEnabledEdit(false);
+    updated.setEnabledEdit(false);
   };
 
   const retractNanopublication = async () => {
     setIsRetracting(true);
 
-    const nanopub = merged.post?.mirrors.find(
+    const nanopub = updated.postMerged?.mirrors.find(
       (m) => m.platformId === PLATFORM.Nanopub
     );
 
@@ -124,7 +121,7 @@ export const usePostPublish = (
 
     nanopub.deleteDraft.postApproval = PlatformPostDraftApproval.APPROVED;
 
-    if (merged.post?.id) {
+    if (updated.postMerged?.id) {
       if (errorApprovingMsg) {
         setErrorApprovingMsg(undefined);
       }
@@ -134,7 +131,7 @@ export const usePostPublish = (
           {
             post_id: nanopub.post_id,
             platformId: PLATFORM.Nanopub,
-            postId: merged.post.id,
+            postId: updated.postMerged.id,
           }
         );
       } catch (e: any) {

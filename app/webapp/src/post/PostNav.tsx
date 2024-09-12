@@ -6,7 +6,6 @@ import { NavButton } from '../app/NavButton';
 import { LeftChevronIcon } from '../app/icons/LeftChveronIcon';
 import { LeftIcon } from '../app/icons/LeftIcon';
 import { RightIcon } from '../app/icons/RightIcon';
-import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useUserPosts } from '../user-home/UserPostsContext';
@@ -15,8 +14,7 @@ import { usePost } from './post.context/PostContext';
 const DEBUG = false;
 
 export const PostNav = () => {
-  const { fetched, derived, navigatePost } = usePost();
-  const profile = derived.tweet?.posted?.author;
+  const { fetched, navigatePost } = usePost();
 
   const { fetchOlder, isFetchingOlder, errorFetchingOlder } = useUserPosts();
   const [triggeredFetchOlder, setTriggeredFetchedOlder] = useState(false);
@@ -32,12 +30,13 @@ export const PostNav = () => {
       !triggeredFetchOlder
     ) {
       setTriggeredFetchedOlder(true);
-      console.log('fetching older', {
-        nextPostId: navigatePost.nextPostId,
-        isFetchingOlder,
-        errorFetchingOlder,
-        triggeredFetchOlder,
-      });
+      if (DEBUG)
+        console.log('fetching older', {
+          nextPostId: navigatePost.nextPostId,
+          isFetchingOlder,
+          errorFetchingOlder,
+          triggeredFetchOlder,
+        });
 
       fetchOlder();
     }
