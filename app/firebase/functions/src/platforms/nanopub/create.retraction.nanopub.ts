@@ -8,13 +8,13 @@ export const createRetractionNanopub = async (
   post: AppPostFull,
   author: AppUser
 ) => {
-  const { introUri, platformUsername, platformName, ethAddress, orcidId } =
+  const { introUri, platformAccountUrl, platformName, ethAddress, orcidId } =
     prepareNanopubDetails(author, post);
 
   return buildRetractionNp(
     post_id,
     introUri,
-    platformUsername,
+    platformAccountUrl,
     platformName,
     ethAddress,
     orcidId

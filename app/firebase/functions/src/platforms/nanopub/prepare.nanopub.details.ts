@@ -40,17 +40,24 @@ export const prepareNanopubDetails = (user: AppUser, post: AppPostFull) => {
     throw new Error('Intro nanopub uri not found');
   }
 
-  const platformUsername = (() => {
-    if (twitterAccount) return twitterAccount.profile?.username;
-    if (mastodonAccount) return mastodonAccount.profile?.username;
+  const platformAccountUrl = (() => {
+    if (twitterAccount) {
+      const username = twitterAccount.profile?.username;
+      return username ? `https://twitter.com/${username}` : undefined;
+    }
+    if (mastodonAccount) {
+      const username = mastodonAccount.profile?.username;
+      const server = mastodonAccount.profile?.mastodonServer;
+      return username && server ? `https://${server}/@${username}` : undefined;
+    }
   })();
   const platformName = (() => {
     if (twitterAccount) return twitterAccount.profile?.name;
     if (mastodonAccount) return mastodonAccount.profile?.displayName;
   })();
 
-  if (!platformUsername) {
-    throw new Error('platform username not found');
+  if (!platformAccountUrl) {
+    throw new Error('platform account URL not found');
   }
 
   if (!platformName) {
@@ -115,7 +122,7 @@ export const prepareNanopubDetails = (user: AppUser, post: AppPostFull) => {
 
   return {
     introUri,
-    platformUsername,
+    platformAccountUrl,
     platformName,
     autopostOption,
     ethAddress,
