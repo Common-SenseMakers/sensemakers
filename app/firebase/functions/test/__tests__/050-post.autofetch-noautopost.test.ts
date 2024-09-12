@@ -41,6 +41,7 @@ describe('050-autofetch-no-autopost', () => {
       const testUser = testCredentials[0];
       user = await _01_createAndFetchUsers(
         globalTestServices,
+        PLATFORM.Twitter,
         testUser.twitter.id,
         {
           DEBUG,
