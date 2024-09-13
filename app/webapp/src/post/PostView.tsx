@@ -157,7 +157,6 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
           <Box width="50%" style={{ flexGrow: 1 }}>
             <AppButton
-              disabled={updated.isUpdating}
               icon={<ClearIcon></ClearIcon>}
               onClick={() => ignore()}
               label={t(I18Keys.ignore)}></AppButton>
@@ -165,7 +164,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
           <Box width="50%" align="end" gap="small">
             <AppButton
               primary
-              disabled={updated.isUpdating || !readyToNanopublish}
+              disabled={!readyToNanopublish}
               icon={<SendIcon></SendIcon>}
               onClick={() => publish.setPublishIntent(true)}
               label={t(I18Keys.publish)}

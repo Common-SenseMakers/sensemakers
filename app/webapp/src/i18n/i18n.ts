@@ -82,7 +82,8 @@ export enum I18Keys {
   publishingErrorPar01 = 's03651',
 
   publishedTitle = 's0366',
-  publishedText = 's0367',
+  publishedTextPar1 = 's0367',
+  publishedTextPar2 = 's0367cdc',
   nextPost = 's0368',
   openPublished = 's0369',
 
@@ -308,7 +309,9 @@ const translationENG: Record<I18Keys, string> = {
     'There was an error while attempting to retract your post. Please try again. If it persists, contact support.',
 
   [I18Keys.publishedTitle]: 'Your nanopublication is live!',
-  [I18Keys.publishedText]: 'Your post has been nanopublished.',
+  [I18Keys.publishedTextPar1]: 'Your post has been nanopublished.',
+  [I18Keys.publishedTextPar2]:
+    'You can find this post now under the "Nanopubs" section.',
   [I18Keys.nextPost]: 'Next post for review',
   [I18Keys.openPublished]: 'See live nanopublication',
 
