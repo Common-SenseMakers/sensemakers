@@ -189,12 +189,24 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
           const operation: QuadOperation = { type: 'add', quad };
 
           if (!hasOperation(operations, operation)) {
-            if (DEBUG)
-              console.log('"add" operation found on newSemantics', {
-                newSemantics,
-                quad,
-              });
-            operations.push(operation);
+            const removeOperation: QuadOperation = { type: 'remove', quad };
+
+            /** if there was a remove operation remove that one */
+            if (hasOperation(operations, removeOperation)) {
+              if (DEBUG)
+                console.log(
+                  'operation "add" applied by removing a "remove" operation',
+                  removeOperation
+                );
+              operations.splice(operations.indexOf(removeOperation), 1);
+            } else {
+              if (DEBUG)
+                console.log('"add" operation found on newSemantics', {
+                  newSemantics,
+                  quad,
+                });
+              operations.push(operation);
+            }
           }
         }
       });
@@ -202,14 +214,34 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
       /** add "remove" operations */
       forEachStore(baseStore, (quad) => {
         if (!newStore.has(quad)) {
-          if (DEBUG)
-            console.log('"remove" operation found on newSemantics', {
-              newSemantics,
-              quad,
-            });
-          operations.push({ type: 'remove', quad });
+          const addOperation: QuadOperation = { type: 'add', quad };
+
+          if (hasOperation(operations, addOperation)) {
+            if (DEBUG)
+              console.log(
+                'operation "remove" applied by removing add operation',
+                {
+                  newSemantics,
+                  quad,
+                }
+              );
+            operations.splice(operations.indexOf(addOperation), 1);
+          } else {
+            if (DEBUG)
+              console.log('"remove" operation found on newSemantics', {
+                newSemantics,
+                quad,
+              });
+            operations.push({ type: 'remove', quad });
+          }
         }
       });
+
+      if (DEBUG)
+        console.log('"update finishing, setting new operations', {
+          newSemantics,
+          operations,
+        });
 
       setOperations([...operations]);
     },
