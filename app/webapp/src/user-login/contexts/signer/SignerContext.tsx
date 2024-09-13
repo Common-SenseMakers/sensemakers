@@ -8,6 +8,7 @@ import {
   useMemo,
   useState,
 } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { WalletClient, createWalletClient, custom } from 'viem';
 import { useDisconnect, useWalletClient } from 'wagmi';
 
@@ -65,6 +66,12 @@ export const SignerContext = (props: PropsWithChildren) => {
   const signer: WalletClient | undefined = useMemo(() => {
     return injectedSigner ? injectedSigner : magicSigner;
   }, [injectedSigner, magicSigner]);
+
+  /** return params from google oauth */
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const state_param = searchParams.get('state');
+  const code_param = searchParams.get('code');
 
   useEffect(() => {
     if (!signer) {
