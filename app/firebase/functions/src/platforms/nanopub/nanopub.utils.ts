@@ -105,13 +105,13 @@ export const buildSpostProv = (
     introNode,
     provenanceGraphUri
   );
-  store.addQuad(
+  /*store.addQuad(
     introNode,
     namedNode(URI.FOAF_ACCOUNT),
     xHandle,
     provenanceGraphUri
   );
-  /*store.addQuad(
+  store.addQuad(
     assertion,
     namedNode(URI.PROV_WAS_ASSOCIATED_WITH),
     xHandle,
