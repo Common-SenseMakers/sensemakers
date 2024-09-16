@@ -24,7 +24,6 @@ export type TwitterSignupData =
 
 export type TwitterGhostSignupData = {
   username: string;
-  accessToken: string;
   isGhost: true;
 };
 

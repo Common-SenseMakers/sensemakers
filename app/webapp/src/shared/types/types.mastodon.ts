@@ -50,7 +50,6 @@ export type MastodonSignupData =
   | MastodonGhostSignupData;
 
 export type MastodonGhostSignupData = {
-  accessToken: string;
   username: string;
   mastodonServer: string;
   isGhost: true;

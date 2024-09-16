@@ -13,6 +13,7 @@ import {
   TwitterUserProfile,
 } from '../../@shared/types/types.twitter';
 import { PLATFORM, UserDetailsBase } from '../../@shared/types/types.user';
+import { TWITTER_BEARER_TOKEN } from '../../config/config.runtime';
 import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
@@ -329,9 +330,10 @@ export class TwitterServiceClient {
     if (DEBUG) logger.debug('handleSignupData', data, DEBUG_PREFIX);
 
     if ('isGhost' in data) {
+      const accessToken = TWITTER_BEARER_TOKEN.value();
       const ghostTwitterUserProfile = await this.getAccountByUsername(
         data.username,
-        data.accessToken
+        accessToken
       );
       if (!ghostTwitterUserProfile) {
         throw new Error(`account not found for ${data.username}`);
@@ -341,8 +343,8 @@ export class TwitterServiceClient {
         signupDate: 0,
         profile: ghostTwitterUserProfile,
         read: {
-          accessToken: data.accessToken,
-          refreshToken: data.accessToken,
+          accessToken: accessToken,
+          refreshToken: accessToken,
           expiresIn: 315360000,
           expiresAtMs: 2041712750000, // Tuesday, September 12, 2034 10:25:50 PM
         },

@@ -28,6 +28,7 @@ import {
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
 import { AppUser, PLATFORM } from '../../@shared/types/types.user';
+import { MASTODON_ACCESS_TOKEN } from '../../config/config.runtime';
 import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
@@ -117,6 +118,7 @@ export class MastodonService
     signupData: MastodonSignupData
   ): Promise<MastodonUserDetails> {
     if ('isGhost' in signupData) {
+      const accessToken = MASTODON_ACCESS_TOKEN.value();
       // Handle the new overload
       if (DEBUG)
         logger.debug('handleSignupData (token)', { signupData }, DEBUG_PREFIX);
@@ -124,7 +126,7 @@ export class MastodonService
       const account = await this.getAccountByUsername(
         signupData.username,
         signupData.mastodonServer,
-        signupData.accessToken
+        accessToken
       );
 
       if (!account) {
@@ -142,7 +144,7 @@ export class MastodonService
           mastodonServer: account.mastodonServer,
         },
         read: {
-          accessToken: signupData.accessToken,
+          accessToken: accessToken,
         },
       };
 
