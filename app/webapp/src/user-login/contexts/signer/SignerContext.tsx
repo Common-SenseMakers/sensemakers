@@ -1,4 +1,3 @@
-import { useWeb3Modal, useWeb3ModalEvents } from '@web3modal/wagmi/react';
 import {
   PropsWithChildren,
   createContext,
@@ -8,11 +7,12 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { WalletClient, createWalletClient, custom } from 'viem';
 import { useDisconnect, useWalletClient } from 'wagmi';
 
 import { useAppFetch } from '../../../api/app.fetch';
+import { AbsoluteRoutes } from '../../../route.names';
 import { HexStr } from '../../../shared/types/types.user';
 import {
   LoginFlowState,
@@ -22,7 +22,7 @@ import {
 import { chain } from './ConnectedWalletContext';
 import { magic } from './magic.signer';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export enum ConnectMode {
   email = 'email',
@@ -52,6 +52,7 @@ export const SignerContext = (props: PropsWithChildren) => {
     overallLoginStatus,
     resetLogin,
   } = useAccountContext();
+  const location = useLocation();
 
   const appFetch = useAppFetch();
 
@@ -63,20 +64,48 @@ export const SignerContext = (props: PropsWithChildren) => {
 
   const [errorConnecting, setErrorConnecting] = useState<boolean>(false);
 
-  const signer: WalletClient | undefined = useMemo(() => {
-    return injectedSigner ? injectedSigner : magicSigner;
-  }, [injectedSigner, magicSigner]);
-
-  /** return params from google oauth */
+  const navigate = useNavigate();
+  const [googleHandled, setGoogleHandled] = useState<boolean>(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const state_param = searchParams.get('state');
-  const code_param = searchParams.get('code');
+  useEffect(() => {
+    if (DEBUG) console.log('Location effect', { location });
+
+    if (
+      location.key === 'default' &&
+      location.pathname === '/google' &&
+      !googleHandled
+    ) {
+      if (DEBUG) console.log('Google path detefcted', { googleHandled });
+
+      const state_param = searchParams.get('state');
+      const code_param = searchParams.get('code');
+
+      if (code_param && state_param) {
+        if (DEBUG) console.log('getting redirect result');
+
+        const result = magic.oauth2.getRedirectResult();
+        setGoogleHandled(true);
+
+        result.addListener('done', () => {
+          if (DEBUG) console.log('redirect result obtained');
+          connectMagicWallet();
+        });
+
+        if (DEBUG) console.log('redirecting to home route', { googleHandled });
+        navigate(AbsoluteRoutes.App);
+      }
+    }
+  }, [location]);
 
   useEffect(() => {
-    if (!signer) {
+    if (!magicSigner) {
       magic.user.isLoggedIn().then((res) => {
-        if (DEBUG) console.log('Magic connection check done', { res });
+        if (DEBUG)
+          console.log('Magic connection check done', {
+            res,
+            overallLoginStatus,
+          });
 
         if (res && !magicSigner) {
           if (DEBUG) console.log('Autoconnecting Magic');
@@ -89,54 +118,58 @@ export const SignerContext = (props: PropsWithChildren) => {
         }
       });
     }
-  }, [signer]);
+  }, [magicSigner, overallLoginStatus]);
 
   /** keep the address strictly linked to the signer */
   useEffect(() => {
-    if (signer) {
+    if (magicSigner) {
+      if (DEBUG) console.log('LoginFlowState.ComputingAddress');
       setLoginFlowState(LoginFlowState.ComputingAddress);
-      if (injectedSigner) {
-        setAddress(injectedSigner.account.address);
-      } else {
-        if (!magicSigner) throw new Error('unexpected');
-        (magicSigner as any).getAddresses().then((addresses: HexStr[]) => {
-          setAddress(addresses[0]);
-        });
-      }
+
+      if (!magicSigner) throw new Error('unexpected');
+      if (DEBUG) console.log('Getting Magic addresses');
+      (magicSigner as any).getAddresses().then((addresses: HexStr[]) => {
+        if (DEBUG) console.log('Magic addresses received', { addresses });
+        setAddress(addresses[0]);
+      });
     } else {
       setAddress(undefined);
     }
-  }, [signer]);
+  }, [magicSigner]);
 
   /** wrapper of signMessage */
   const _signMessage = useCallback(
     (message: string) => {
-      if (!signer || !address)
+      if (!magicSigner || !address)
         throw new Error(
           'Unexpected signer or address undefined and signMessage called'
         );
-      return (signer as any).signMessage({ account: address, message });
+      return (magicSigner as any).signMessage({ account: address, message });
     },
-    [address, signer]
+    [address, magicSigner]
   );
 
   const { disconnect: disconnectInjected } = useDisconnect();
 
   /** should be called after magic is connected */
   const connectMagicWallet = async () => {
+    if (DEBUG) console.log('connecting magic signer');
     const provider = await magic.wallet.getProvider();
 
+    if (DEBUG) console.log('magic provider obtained', { provider });
     const signer = createWalletClient({
       transport: custom(provider),
       chain: chain,
     });
+
+    if (DEBUG) console.log('magic signer created', { signer });
 
     setIsConnectingMagic(false);
     setMagicSigner(signer);
   };
 
   const connectMagic = async (mode: ConnectMode) => {
-    if (!signer) {
+    if (!magicSigner) {
       if (DEBUG) console.log('connectMagic called');
       setErrorConnecting(false);
       setIsConnectingMagic(true);
@@ -144,14 +177,14 @@ export const SignerContext = (props: PropsWithChildren) => {
       setOverallLoginStatus(OverallLoginStatus.LogginIn);
       setLoginFlowState(LoginFlowState.ConnectingSigner);
 
-      if (DEBUG) console.log('connecting magic signer', { signer });
+      if (DEBUG) console.log('connecting magic signer', { magicSigner });
       try {
         if (mode === ConnectMode.email) {
           await magic.wallet.connectWithUI();
           connectMagicWallet();
         } else if (mode === ConnectMode.googleOAuth) {
           const loggingInOauth = magic.oauth2.loginWithRedirect({
-            redirectURI: window.location.href,
+            redirectURI: window.location.href + 'google',
             provider: 'google',
           });
         }
@@ -180,7 +213,7 @@ export const SignerContext = (props: PropsWithChildren) => {
   const hasInjected = (window as any).ethereum !== undefined;
 
   /** set signMessage as undefined when not available */
-  const signMessage = !signer || !address ? undefined : _signMessage;
+  const signMessage = !magicSigner || !address ? undefined : _signMessage;
 
   const disconnect = () => {
     disconnectInjected();
@@ -197,7 +230,7 @@ export const SignerContext = (props: PropsWithChildren) => {
         errorConnecting,
         signMessage,
         hasInjected,
-        signer: signer as any,
+        signer: magicSigner as any,
         address,
         disconnect,
       }}>

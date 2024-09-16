@@ -15,7 +15,7 @@ import { getAccount } from '../../../user.helper';
 import { LoginFlowState, useAccountContext } from '../../AccountContext';
 import { useAppSigner } from '../../signer/SignerContext';
 
-const DEBUG = false;
+const DEBUG = true;
 
 /**
  * separated logic to sign-up with nanopub/signer and RSA keys
