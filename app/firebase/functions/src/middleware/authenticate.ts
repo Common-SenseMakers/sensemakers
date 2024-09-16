@@ -6,10 +6,6 @@ import { getServices } from '../controllers.utils';
 import { logger } from '../instances/logger';
 
 export const authenticate: RequestHandler = async (request, response, next) => {
-  if ('isGhost' in request.body) {
-    (request as any).userId = request.headers['userid'];
-    return next();
-  }
   if (!request.headers.authorization) {
     logger.debug(`${request.path}: Unauthenticated request`);
     return next();

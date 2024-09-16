@@ -75,9 +75,6 @@ export const handleSignupController: RequestHandler = async (
     const userId = getAuthenticatedUser(request);
 
     const payload = await (async () => {
-      if (request.body.isGhost) {
-        return request.body;
-      }
       if (platform === PLATFORM.Twitter) {
         return twitterSignupDataSchema.validate(request.body);
       }
