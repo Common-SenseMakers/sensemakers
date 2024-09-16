@@ -7,6 +7,7 @@ AMOUNT=""
 MASTODON_SERVER=""
 LATEST=""
 USER_ID=""
+ADMIN_KEY=""
 IS_GHOST=true  # isGhost is hardcoded to true
 
 # Parse command-line arguments using flags
@@ -18,14 +19,15 @@ while [[ "$#" -gt 0 ]]; do
         --mastodonServer) MASTODON_SERVER="$2"; shift ;;
         --latest) LATEST="$2"; shift ;;
         --userId) USER_ID="$2"; shift ;;
+        --adminKey) ADMIN_KEY="$2"; shift ;;  # Admin key flag
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
 done
 
 # Check if required parameters are provided
-if [[ -z "$USERNAME" || -z "$PLATFORM_ID" || -z "$AMOUNT" ]]; then
-    echo "Usage: $0 --username <username> --platformId <platformId> --amount <amount> [--mastodonServer <mastodonServer>] [--latest <latest>] [--userId <userId>]"
+if [[ -z "$USERNAME" || -z "$PLATFORM_ID" || -z "$AMOUNT" || -z "$ADMIN_KEY" ]]; then
+    echo "Usage: $0 --username <username> --platformId <platformId> --amount <amount> --adminKey <adminKey> [--mastodonServer <mastodonServer>] [--latest <latest>] [--userId <userId>]"
     exit 1
 fi
 
@@ -52,7 +54,8 @@ fi
 # Close the JSON body
 JSON_BODY+="}"
 
-# Execute the curl command with the constructed JSON body
-curl -X POST http://127.0.0.1:5001/demo-sensenets/us-central1/api/posts/addUserData \
+# Execute the curl command with the constructed JSON body and admin key
+curl -X POST http://127.0.0.1:5001/demo-sensenets/us-central1/admin/addUserData \
 -H "Content-Type: application/json" \
+-H "admin-api-key: $ADMIN_KEY" \
 -d "$JSON_BODY"

@@ -27,7 +27,7 @@ import {
 import { envDeploy } from './config/typedenv.deploy';
 import { envRuntime } from './config/typedenv.runtime';
 import { getServices } from './controllers.utils';
-import { buildApp } from './instances/app';
+import { buildAdminApp, buildApp } from './instances/app';
 import { logger } from './instances/logger';
 import { createServices } from './instances/services';
 import {
@@ -47,7 +47,7 @@ import {
   autopostPostTask,
 } from './posts/tasks/posts.autopost.task';
 import { PARSE_POST_TASK, parsePostTask } from './posts/tasks/posts.parse.task';
-import { router } from './router';
+import { adminRouter, router } from './router';
 
 // all secrets are available to all functions
 const secrets = [
@@ -82,6 +82,15 @@ exports['api'] = functions
     secrets,
   })
   .https.onRequest(buildApp(router));
+exports['admin'] = functions
+  .region(envDeploy.REGION)
+  .runWith({
+    timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
+    memory: envDeploy.CONFIG_MEMORY,
+    minInstances: envDeploy.CONFIG_MININSTANCE,
+    secrets: [...secrets, envRuntime.ADMIN_API_KEY],
+  })
+  .https.onRequest(buildAdminApp(adminRouter));
 
 /** jobs */
 // exports.accountFetch = onSchedule(

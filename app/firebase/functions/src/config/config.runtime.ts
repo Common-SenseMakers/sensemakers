@@ -20,6 +20,7 @@ const mandatory: Array<keyof typeof envRuntime> = [
   'NP_PUBLISH_RSA_PRIVATE_KEY',
   'NP_PUBLISH_RSA_PUBLIC_KEY',
   'EMAIL_CLIENT_SECRET',
+  'ADMIN_API_KEY',
 ];
 
 mandatory.forEach((varName) => {
@@ -45,6 +46,7 @@ export const TWITTER_CLIENT_ID = envRuntime.TWITTER_CLIENT_ID;
 export const TWITTER_CLIENT_SECRET = envRuntime.TWITTER_CLIENT_SECRET;
 export const TWITTER_BEARER_TOKEN = envRuntime.TWITTER_BEARER_TOKEN;
 export const MASTODON_ACCESS_TOKEN = envRuntime.MASTODON_ACCESS_TOKEN;
+export const ADMIN_API_KEY = envRuntime.ADMIN_API_KEY;
 
 export const TWITTER_CALLBACK_URL = envRuntime.TWITTER_CALLBACK_URL;
 export const TWITTER_REVOKE_URL = envRuntime.TWITTER_REVOKE_URL;
