@@ -55,7 +55,7 @@ fi
 JSON_BODY+="}"
 
 # Execute the curl command with the constructed JSON body and admin key
-curl -X POST http://127.0.0.1:5001/demo-sensenets/us-central1/admin/addUserData \
+curl -X POST https://us-central1-sensenets-dataset.cloudfunctions.net/admin/addUserData \
 -H "Content-Type: application/json" \
 -H "admin-api-key: $ADMIN_KEY" \
 -d "$JSON_BODY"
