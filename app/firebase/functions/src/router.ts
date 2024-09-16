@@ -1,6 +1,7 @@
 import express from 'express';
 
 import {
+  addUserDataController,
   approvePostController,
   createDraftPostController,
   getPostController,
@@ -33,6 +34,7 @@ router.post('/users/profile', getUserProfileController);
 
 router.post('/posts/getOfUser', getUserPostsController);
 router.post('/posts/getProfilePosts', getUserProfilePostsController);
+router.post('/posts/addUserData', addUserDataController);
 
 router.post('/posts/get', getPostController);
 router.post('/posts/createDraft', createDraftPostController);
