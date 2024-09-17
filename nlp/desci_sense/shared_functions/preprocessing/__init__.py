@@ -69,6 +69,7 @@ def convert_app_post_to_ref_post(
         content=app_post.content,
         ref_urls=ref_urls,
         source_network=source_network,
+        quoted_url=None
     )
 
 
