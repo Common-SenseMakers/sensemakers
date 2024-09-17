@@ -9,7 +9,7 @@ import {
 } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { WalletClient, createWalletClient, custom } from 'viem';
-import { useDisconnect, useWalletClient } from 'wagmi';
+import { useDisconnect } from 'wagmi';
 
 import { useAppFetch } from '../../../api/app.fetch';
 import { AbsoluteRoutes } from '../../../route.names';
@@ -52,19 +52,17 @@ export const SignerContext = (props: PropsWithChildren) => {
     overallLoginStatus,
     resetLogin,
   } = useAccountContext();
-  const location = useLocation();
 
+  const navigate = useNavigate();
+  const location = useLocation();
   const appFetch = useAppFetch();
 
   const [address, setAddress] = useState<HexStr>();
   const [magicSigner, setMagicSigner] = useState<WalletClient>();
   const [isConnectingMagic, setIsConnectingMagic] = useState<boolean>(false);
 
-  const { data: injectedSigner } = useWalletClient();
-
   const [errorConnecting, setErrorConnecting] = useState<boolean>(false);
 
-  const navigate = useNavigate();
   const [googleHandled, setGoogleHandled] = useState<boolean>(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -84,16 +82,19 @@ export const SignerContext = (props: PropsWithChildren) => {
       if (code_param && state_param) {
         if (DEBUG) console.log('getting redirect result');
 
-        const result = magic.oauth2.getRedirectResult();
+        const redirecting = magic.oauth2.getRedirectResult();
         setGoogleHandled(true);
 
-        result.addListener('done', () => {
-          if (DEBUG) console.log('redirect result obtained');
+        redirecting.addListener('done', (result) => {
+          if (DEBUG) console.log('redirect result obtained', { result });
+
+          if (result.magic.userMetadata.publicAddress) {
+            setAddress(result.magic.userMetadata.publicAddress as HexStr);
+          } else {
+            throw new Error('Unexpected address undefined');
+          }
           connectMagicWallet();
         });
-
-        if (DEBUG) console.log('redirecting to home route', { googleHandled });
-        navigate(AbsoluteRoutes.App);
       }
     }
   }, [location]);
@@ -128,10 +129,17 @@ export const SignerContext = (props: PropsWithChildren) => {
 
       if (!magicSigner) throw new Error('unexpected');
       if (DEBUG) console.log('Getting Magic addresses');
-      (magicSigner as any).getAddresses().then((addresses: HexStr[]) => {
-        if (DEBUG) console.log('Magic addresses received', { addresses });
-        setAddress(addresses[0]);
-      });
+
+      if (!address) {
+        (magicSigner as any).getAddresses().then((addresses: HexStr[]) => {
+          console.log('addresses', addresses);
+          if (addresses.length === 0) {
+            throw new Error('Unexpected addresses empty');
+          }
+          console.log('setting address', { address: addresses[0] });
+          setAddress(addresses[0]);
+        });
+      }
     } else {
       setAddress(undefined);
     }
@@ -166,6 +174,11 @@ export const SignerContext = (props: PropsWithChildren) => {
 
     setIsConnectingMagic(false);
     setMagicSigner(signer);
+
+    if (location.pathname === '/google') {
+      if (DEBUG) console.log('removing google path');
+      navigate(AbsoluteRoutes.App);
+    }
   };
 
   const connectMagic = async (mode: ConnectMode) => {
@@ -183,7 +196,7 @@ export const SignerContext = (props: PropsWithChildren) => {
           await magic.wallet.connectWithUI();
           connectMagicWallet();
         } else if (mode === ConnectMode.googleOAuth) {
-          const loggingInOauth = magic.oauth2.loginWithRedirect({
+          magic.oauth2.loginWithRedirect({
             redirectURI: window.location.href + 'google',
             provider: 'google',
           });
