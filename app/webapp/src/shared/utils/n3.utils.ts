@@ -67,6 +67,8 @@ export const mapStore = (
   return newStore;
 };
 
+export const cloneStore = (store: Store) => mapStore(store, (q) => q);
+
 export const mapStoreElements = <T>(
   store: Store,
   callback: (q: Quad) => T,

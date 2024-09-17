@@ -15,8 +15,6 @@ import { useSemanticsStore } from '../common/use.semantics';
 import { PatternProps } from '../patterns';
 
 export const KeywordsComponent = (props: PatternProps) => {
-  const { constants } = useThemeContext();
-
   /** actual semantics */
   const { store } = useSemanticsStore(props);
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useAppFetch } from '../../api/app.fetch';
 import { useToastContext } from '../../app/ToastsContext';
@@ -11,23 +11,30 @@ import {
 } from '../../shared/types/types.posts';
 import { AppUserRead } from '../../shared/types/types.user';
 import { useUserPosts } from '../../user-home/UserPostsContext';
+import { AppPostStatus, getPostStatuses } from '../posts.helper';
 import { PostDerivedContext } from './use.post.derived';
 import { PostFetchContext } from './use.post.fetch';
+import { usePostMergeDeltas } from './use.post.merge.deltas';
+
+const DEBUG = true;
 
 export interface PostUpdateContext {
   editable: boolean; // can be true if not published
   enabledEdit: boolean; // only true if editing after publishing
   postEdited: AppPostFull | undefined;
+  postMerged?: AppPostFull;
+  statusesMerged: AppPostStatus;
   setEnabledEdit: (enabled: boolean) => void;
   isUpdating: boolean;
   setIsUpdating: (updating: boolean) => void;
-  updateSemantics: (newSemantics: string) => Promise<void>;
+  updateSemantics: (newSemantics: string) => void;
   updatePost: (update: PostUpdate) => Promise<void>;
 }
 
 export const usePostUpdate = (
   fetched: PostFetchContext,
   derived: PostDerivedContext,
+  postInit?: AppPostFull,
   connectedUser?: AppUserRead
 ): PostUpdateContext => {
   const { show } = useToastContext();
@@ -40,6 +47,9 @@ export const usePostUpdate = (
     undefined
   );
   const [isUpdating, setIsUpdating] = useState(false);
+
+  const { mergedSemantics, updateSemantics: updateSemanticsLocal } =
+    usePostMergeDeltas(fetched);
 
   const editable =
     connectedUser !== undefined &&
@@ -86,12 +96,6 @@ export const usePostUpdate = (
     [fetched.post]
   );
 
-  const updateSemantics = (newSemantics: string) =>
-    optimisticUpdate({
-      reviewedStatus: AppPostReviewStatus.DRAFT,
-      semantics: newSemantics,
-    });
-
   /** updatePost and optimistically update the posts lists */
   const updatePost = async (update: PostUpdate) => {
     /** optimistic remove the post from the filtered list */
@@ -117,10 +121,48 @@ export const usePostUpdate = (
     _updatePost(update);
   };
 
+  const updateSemantics = (newSemantics: string) => {
+    updateSemanticsLocal(newSemantics);
+    updatePost({
+      semantics: newSemantics,
+      reviewedStatus: AppPostReviewStatus.DRAFT,
+    });
+  };
+
+  /**
+   * combine edited and fetched posts to get the current local version of a post
+   * semantics are merged independently in the usePostMergeDeltas hook
+   */
+  const postMerged = useMemo<AppPostFull | undefined>(() => {
+    if (DEBUG)
+      console.log('updating postMerged', {
+        fetchedIsLoading: fetched.isLoading,
+        fetchedPost: fetched.post,
+        postInit,
+        postEdited,
+        mergedSemantics,
+      });
+    if (fetched.isLoading) return postInit;
+    if (fetched.post && fetched.post !== null) {
+      return {
+        ...fetched.post,
+        ...postEdited,
+        semantics: mergedSemantics,
+      };
+    }
+    return undefined;
+  }, [fetched.post, postInit, postEdited, fetched.isLoading, mergedSemantics]);
+
+  const statusesMerged = useMemo(() => {
+    return getPostStatuses(postMerged);
+  }, [postMerged]);
+
   return {
     editable,
     enabledEdit,
     postEdited,
+    postMerged,
+    statusesMerged,
     setEnabledEdit,
     isUpdating,
     setIsUpdating,
