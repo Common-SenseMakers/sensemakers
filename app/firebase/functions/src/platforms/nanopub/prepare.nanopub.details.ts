@@ -40,37 +40,22 @@ export const prepareNanopubDetails = (user: AppUser, post: AppPostFull) => {
     throw new Error('Intro nanopub uri not found');
   }
 
-  const {
-    platformUsername,
-    platformAccountUrl,
-  }: {
-    platformUsername: string | undefined;
-    platformAccountUrl: string | undefined;
-  } = (() => {
+  const platformUsername = post.generic.author.username;
+  const platformAccountUrl = (() => {
     if (twitterAccount && post.origin === PLATFORM.Twitter) {
-      const username = twitterAccount.profile?.username;
-      return {
-        platformUsername: username,
-        platformAccountUrl: username ? `https://x.com/${username}` : undefined,
-      };
+      return platformUsername ? `https://x.com/${platformUsername}` : undefined;
     }
     if (mastodonAccount && post.origin === PLATFORM.Mastodon) {
-      const username = mastodonAccount.profile?.username;
       const server = mastodonAccount.profile?.mastodonServer;
-      return {
-        platformUsername: username,
-        platformAccountUrl:
-          username && server ? `https://${server}/@${username}` : undefined,
-      };
+      return platformUsername && server
+        ? `https://${server}/@${platformUsername}`
+        : undefined;
     }
-    return { platformUsername: undefined, platformAccountUrl: undefined };
+    return undefined;
   })();
-  const platformName = (() => {
-    if (twitterAccount && post.origin === PLATFORM.Twitter)
-      return twitterAccount.profile?.name;
-    if (mastodonAccount && post.origin === PLATFORM.Mastodon)
-      return mastodonAccount.profile?.displayName;
-  })();
+
+  /** if name isn't set, use username instead */
+  const platformName = post.generic.author.name || platformUsername;
 
   if (!platformAccountUrl || !platformUsername) {
     throw new Error('platform account URL and/or username not found');
