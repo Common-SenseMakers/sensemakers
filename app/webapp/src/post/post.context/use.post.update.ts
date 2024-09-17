@@ -11,6 +11,7 @@ import {
 } from '../../shared/types/types.posts';
 import { AppUserRead } from '../../shared/types/types.user';
 import { useUserPosts } from '../../user-home/UserPostsContext';
+import { useNanopubContext } from '../../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { AppPostStatus, getPostStatuses } from '../posts.helper';
 import { PostDerivedContext } from './use.post.derived';
 import { PostFetchContext } from './use.post.fetch';
@@ -29,6 +30,7 @@ export interface PostUpdateContext {
   setIsUpdating: (updating: boolean) => void;
   updateSemantics: (newSemantics: string) => void;
   updatePost: (update: PostUpdate) => Promise<void>;
+  readyToNanopublish: boolean;
 }
 
 export const usePostUpdate = (
@@ -157,6 +159,18 @@ export const usePostUpdate = (
     return getPostStatuses(postMerged);
   }, [postMerged]);
 
+  const { signNanopublication } = useNanopubContext();
+
+  const canPublishNanopub =
+    connectedUser &&
+    connectedUser.nanopub &&
+    connectedUser.nanopub.length > 0 &&
+    signNanopublication &&
+    derived.nanopubDraft;
+
+  const readyToNanopublish =
+    canPublishNanopub && derived.nanopubDraft && !statusesMerged.live;
+
   return {
     editable,
     enabledEdit,
@@ -168,5 +182,7 @@ export const usePostUpdate = (
     setIsUpdating,
     updateSemantics,
     updatePost: optimisticUpdate,
+    readyToNanopublish:
+      readyToNanopublish !== undefined ? readyToNanopublish : false,
   };
 };

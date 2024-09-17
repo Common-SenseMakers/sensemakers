@@ -8,6 +8,7 @@ import {
 } from '../../shared/types/types.platform.posts';
 import {
   AppPostRepublishedStatus,
+  AppPostReviewStatus,
   UnpublishPlatformPostPayload,
 } from '../../shared/types/types.posts';
 import { PLATFORM } from '../../shared/types/types.user';
@@ -15,6 +16,7 @@ import { useNanopubContext } from '../../user-login/contexts/platforms/nanopubs/
 import { PostUpdateContext } from './use.post.update';
 
 export interface PostPublishContext {
+  ignorePost: () => void;
   publishOrRepublish: () => Promise<void>;
   retractNanopublication: () => Promise<void>;
   isRetracting: boolean;
@@ -40,6 +42,15 @@ export const usePostPublish = (
   const [isRetracting, setIsRetracting] = useState(false);
 
   const { signNanopublication } = useNanopubContext();
+
+  const ignorePost = async () => {
+    if (!updated.postMerged) {
+      throw new Error(`Unexpected post not found`);
+    }
+    updated.updatePost({
+      reviewedStatus: AppPostReviewStatus.IGNORED,
+    });
+  };
 
   const publishOrRepublish = async () => {
     const nanopub = updated.postMerged?.mirrors.find(
@@ -145,6 +156,7 @@ export const usePostPublish = (
   };
 
   return {
+    ignorePost,
     publishOrRepublish,
     retractNanopublication,
     isRetracting,

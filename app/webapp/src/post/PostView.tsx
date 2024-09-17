@@ -71,15 +71,6 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     }
   };
 
-  const ignore = async () => {
-    if (!updated.postMerged) {
-      throw new Error(`Unexpected post not found`);
-    }
-    updated.updatePost({
-      reviewedStatus: AppPostReviewStatus.IGNORED,
-    });
-  };
-
   const reviewForPublication = async () => {
     if (!updated.postMerged) {
       throw new Error(`Unexpected post not found`);
@@ -100,18 +91,6 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   const cancelEdit = () => {
     updated.setEnabledEdit(false);
   };
-
-  const { signNanopublication } = useNanopubContext();
-
-  const canPublishNanopub =
-    connectedUser &&
-    connectedUser.nanopub &&
-    connectedUser.nanopub.length > 0 &&
-    signNanopublication &&
-    derived.nanopubDraft;
-
-  const readyToNanopublish =
-    canPublishNanopub && derived.nanopubDraft && !updated.statusesMerged.live;
 
   // receives the navigate from PostingPage and opens the post intent
   useEffect(() => {
@@ -158,13 +137,13 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
           <Box width="50%" style={{ flexGrow: 1 }}>
             <AppButton
               icon={<ClearIcon></ClearIcon>}
-              onClick={() => ignore()}
+              onClick={() => publish.ignorePost()}
               label={t(I18Keys.ignore)}></AppButton>
           </Box>
           <Box width="50%" align="end" gap="small">
             <AppButton
               primary
-              disabled={!readyToNanopublish}
+              disabled={!updated.readyToNanopublish}
               icon={<SendIcon></SendIcon>}
               onClick={() => publish.setPublishIntent(true)}
               label={t(I18Keys.publish)}
