@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 
 import { useAppFetch } from '../../api/app.fetch';
+import { useToastContext } from '../../app/ToastsContext';
 import { PublishPostPayload } from '../../shared/types/types.fetch';
 import {
   PlatformPostDraftApproval,
@@ -32,6 +33,8 @@ export const usePostPublish = (
   fetched: PostFetchContext,
   updated: PostUpdateContext
 ): PostPublishContext => {
+  const { show } = useToastContext();
+
   const appFetch = useAppFetch();
 
   const [publishIntent, setPublishIntent] = useState<boolean>(false);
@@ -114,6 +117,10 @@ export const usePostPublish = (
     }
 
     updated.setEnabledEdit(false);
+    show({
+      title: 'Post published',
+      message: 'Your post has been published - Find it under the "Nanopub" tab',
+    });
   };
 
   const retractNanopublication = async () => {

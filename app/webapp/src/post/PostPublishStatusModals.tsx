@@ -16,7 +16,7 @@ import { usePersist } from '../utils/use.persist';
 import { POSTING_POST_ID } from './PostingPage';
 import { usePost } from './post.context/PostContext';
 
-const DEBUG = true;
+const DEBUG = false;
 
 enum PublishPostAction {
   None = 'None',
@@ -89,6 +89,10 @@ export const PostPublishStatusModals = () => {
     setAskedOrcid(false);
     setPublishing(false);
   };
+
+  useEffect(() => {
+    reset();
+  }, [fetched.postId]);
 
   const openNanopublication = () => {
     if (derived.statuses.nanopubUrl && window) {

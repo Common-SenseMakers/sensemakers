@@ -154,7 +154,14 @@ export const usePostUpdate = (
       };
     }
     return undefined;
-  }, [fetched.post, postInit, postEdited, fetched.isLoading, mergedSemantics]);
+  }, [
+    fetched.postId,
+    fetched.post,
+    postInit,
+    postEdited,
+    fetched.isLoading,
+    mergedSemantics,
+  ]);
 
   const statusesMerged = useMemo(() => {
     return getPostStatuses(postMerged);
