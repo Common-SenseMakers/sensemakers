@@ -13,6 +13,7 @@ import {
   TestUserCredentials,
   UserDetailsBase,
 } from '../../../@shared/types/types.user';
+import { APP_URL } from '../../../config/config.runtime';
 import { TransactionManager } from '../../../db/transaction.manager';
 import { getTestCredentials } from '../../mock/test.users';
 import { MastodonService } from '../mastodon.service';
@@ -1358,9 +1359,12 @@ export const getMastodonMock = (
         user_id?: string,
         params?: MastodonGetContextParams
       ): MastodonSignupContext => {
+        const callbackUrl = new URL(
+          params?.callback_url ? params.callback_url : APP_URL.value()
+        );
+        callbackUrl.searchParams.set('code', 'testCode');
         return {
-          authorizationUrl:
-            'https://cosocial.ca/oauth/authorize?client_id=SE2qVBbK1J_-6za-JX-6H-NsGrbdIuARZk4Q6gpUxbk&scope=read+write+follow+push&redirect_uri=https%3A%2F%2Fphanpy.social%2F&response_type=code',
+          authorizationUrl: callbackUrl.toString(),
           clientId: 'SE2qVBbK1J_-6za-JX-6H-NsGrbdIuARZk4Q6gpUxbk',
           clientSecret: user_id ? user_id : '12341234',
         };
