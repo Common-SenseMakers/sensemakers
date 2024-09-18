@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 
 import { useAppFetch } from '../../api/app.fetch';
 import { PublishPostPayload } from '../../shared/types/types.fetch';
@@ -13,6 +13,7 @@ import {
 } from '../../shared/types/types.posts';
 import { PLATFORM } from '../../shared/types/types.user';
 import { useNanopubContext } from '../../user-login/contexts/platforms/nanopubs/NanopubContext';
+import { PostFetchContext } from './use.post.fetch';
 import { PostUpdateContext } from './use.post.update';
 
 export interface PostPublishContext {
@@ -28,6 +29,7 @@ export interface PostPublishContext {
 }
 
 export const usePostPublish = (
+  fetched: PostFetchContext,
   updated: PostUpdateContext
 ): PostPublishContext => {
   const appFetch = useAppFetch();
@@ -42,6 +44,16 @@ export const usePostPublish = (
   const [isRetracting, setIsRetracting] = useState(false);
 
   const { signNanopublication } = useNanopubContext();
+
+  const reset = () => {
+    setPublishIntent(false);
+    setUnpublishIntent(false);
+    setErrorApprovingMsg(undefined);
+  };
+
+  useEffect(() => {
+    reset();
+  }, [fetched.postId]);
 
   const ignorePost = async () => {
     if (!updated.postMerged) {

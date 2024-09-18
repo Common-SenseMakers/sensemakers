@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { parseRDF } from '../../../shared/utils/n3.utils';
 import { PatternProps } from '../patterns';
 
-const DEBUG = true;
+const DEBUG = false;
 
 /** construct RDF Store synchronously */
 export const semanticStringToStore = (semantics?: string) => {

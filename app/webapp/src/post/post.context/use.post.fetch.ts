@@ -13,7 +13,7 @@ export interface PostFetchContext {
   refetch: () => void;
 }
 
-const DEBUG = false;
+const DEBUG = true;
 
 /** hook in charge of fething the current post, and keeping it
  * and its derived values updated in real time */
@@ -48,11 +48,16 @@ export const usePostFetch = (
     },
   });
 
+  const _refetch = () => {
+    if (DEBUG) console.log(`updated to post${postId} detected - refetching`);
+    refetch();
+  };
+
   /**
    * subscribe to real time updates of this post and trigger a refetch everytime
    * one is received*/
   useEffect(() => {
-    const unsubscribe = subscribeToUpdates(`post-${postId}`, refetch);
+    const unsubscribe = subscribeToUpdates(`post-${postId}`, _refetch);
     return () => {
       if (DEBUG) console.log('unsubscribing to updates post', postId);
       unsubscribe();

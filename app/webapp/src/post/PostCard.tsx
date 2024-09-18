@@ -1,17 +1,14 @@
 import { Box } from 'grommet';
 
 import { TweetAnchor } from '../app/anchors/TwitterAnchor';
-import { ClearIcon } from '../app/icons/ClearIcon';
-import { CheckIcon } from '../app/icons/FilterIcon copy';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID } from '../semantics/patterns/patterns';
-import { SciFilterClassfication } from '../shared/types/types.parser';
 import { AppPostFull } from '../shared/types/types.posts';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { PLATFORM } from '../shared/types/types.user';
-import { AppButton } from '../ui-components';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { NanopubStatus } from './NanopubStatus';
+import { PublishButtons } from './PostPublishButtons';
 import { PostTextStatic } from './PostTextStatic';
 import { usePost } from './post.context/PostContext';
 import {
@@ -106,21 +103,8 @@ export const PostCard = (props: {
             }}></SemanticsEditor>
         )}
       </Box>
-      <Box
-        direction="row"
-        justify="end"
-        gap="16px"
-        align="center"
-        pad={{ bottom: '12px' }}>
-        <AppButton
-          plain
-          icon={<ClearIcon size={38}></ClearIcon>}
-          onClick={() => publish.ignorePost()}></AppButton>
-        <AppButton
-          plain
-          disabled={!updated.readyToNanopublish}
-          icon={<CheckIcon size={38}></CheckIcon>}
-          onClick={() => publish.setPublishIntent(true)}></AppButton>
+      <Box pad={{ top: 'medium' }}>
+        {updated.inPrePublish && <PublishButtons compact></PublishButtons>}
       </Box>
     </Box>
   );

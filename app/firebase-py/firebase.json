@@ -1,7 +1,7 @@
 {
   "functions": [
     {
-      "runtime": "python311",
+      "runtime": "python312",
       "source": "functions",
       "codebase": "python",
       "ignore": [

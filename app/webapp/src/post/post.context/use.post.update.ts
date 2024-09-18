@@ -17,7 +17,7 @@ import { PostDerivedContext } from './use.post.derived';
 import { PostFetchContext } from './use.post.fetch';
 import { usePostMergeDeltas } from './use.post.merge.deltas';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export interface PostUpdateContext {
   editable: boolean; // can be true if not published
@@ -31,6 +31,7 @@ export interface PostUpdateContext {
   updateSemantics: (newSemantics: string) => void;
   updatePost: (update: PostUpdate) => Promise<void>;
   readyToNanopublish: boolean;
+  inPrePublish: boolean;
 }
 
 export const usePostUpdate = (
@@ -171,6 +172,8 @@ export const usePostUpdate = (
   const readyToNanopublish =
     canPublishNanopub && derived.nanopubDraft && !statusesMerged.live;
 
+  const inPrePublish = !statusesMerged.live && !statusesMerged.ignored;
+
   return {
     editable,
     enabledEdit,
@@ -184,5 +187,6 @@ export const usePostUpdate = (
     updatePost: optimisticUpdate,
     readyToNanopublish:
       readyToNanopublish !== undefined ? readyToNanopublish : false,
+    inPrePublish,
   };
 };
