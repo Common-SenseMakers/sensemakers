@@ -24,12 +24,12 @@ export const PublishButtons = (props: { compact?: boolean }) => {
         pad={{ bottom: '12px' }}>
         <AppButton
           plain
-          icon={<ClearIcon color="#1F2937" size={38}></ClearIcon>}
+          icon={<ClearIcon color="#1F2937" size={20}></ClearIcon>}
           onClick={() => publish.ignorePost()}></AppButton>
         <AppButton
           plain
           disabled={!updated.readyToNanopublish}
-          icon={<SendIcon color="#1F2937" size={38}></SendIcon>}
+          icon={<SendIcon color="#1F2937" size={20}></SendIcon>}
           onClick={() => publish.setPublishIntent(true)}></AppButton>
       </Box>
     );
