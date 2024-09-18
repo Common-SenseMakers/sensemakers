@@ -11,12 +11,13 @@ import {
 } from '../../shared/types/types.posts';
 import { AppUserRead } from '../../shared/types/types.user';
 import { useUserPosts } from '../../user-home/UserPostsContext';
+import { useNanopubContext } from '../../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { AppPostStatus, getPostStatuses } from '../posts.helper';
 import { PostDerivedContext } from './use.post.derived';
 import { PostFetchContext } from './use.post.fetch';
 import { usePostMergeDeltas } from './use.post.merge.deltas';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export interface PostUpdateContext {
   editable: boolean; // can be true if not published
@@ -29,6 +30,8 @@ export interface PostUpdateContext {
   setIsUpdating: (updating: boolean) => void;
   updateSemantics: (newSemantics: string) => void;
   updatePost: (update: PostUpdate) => Promise<void>;
+  readyToNanopublish: boolean;
+  inPrePublish: boolean;
 }
 
 export const usePostUpdate = (
@@ -151,11 +154,32 @@ export const usePostUpdate = (
       };
     }
     return undefined;
-  }, [fetched.post, postInit, postEdited, fetched.isLoading, mergedSemantics]);
+  }, [
+    fetched.postId,
+    fetched.post,
+    postInit,
+    postEdited,
+    fetched.isLoading,
+    mergedSemantics,
+  ]);
 
   const statusesMerged = useMemo(() => {
     return getPostStatuses(postMerged);
   }, [postMerged]);
+
+  const { signNanopublication } = useNanopubContext();
+
+  const canPublishNanopub =
+    connectedUser &&
+    connectedUser.nanopub &&
+    connectedUser.nanopub.length > 0 &&
+    signNanopublication &&
+    derived.nanopubDraft;
+
+  const readyToNanopublish =
+    canPublishNanopub && derived.nanopubDraft && !statusesMerged.live;
+
+  const inPrePublish = !statusesMerged.live && !statusesMerged.ignored;
 
   return {
     editable,
@@ -168,5 +192,8 @@ export const usePostUpdate = (
     setIsUpdating,
     updateSemantics,
     updatePost: optimisticUpdate,
+    readyToNanopublish:
+      readyToNanopublish !== undefined ? readyToNanopublish : false,
+    inPrePublish,
   };
 };

@@ -35,7 +35,7 @@ export const PostContext: React.FC<{
   const fetched = usePostFetch(connectedUser, _postId, postInit);
   const derived = usePostDerived(fetched, connectedUser);
   const updated = usePostUpdate(fetched, derived, postInit, connectedUser);
-  const publish = usePostPublish(updated);
+  const publish = usePostPublish(fetched, updated);
   const navigatePost = usePostNav(fetched);
 
   return (

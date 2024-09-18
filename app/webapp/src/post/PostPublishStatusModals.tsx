@@ -7,7 +7,6 @@ import { AppModalStandard } from '../app/AppModalStandard';
 import { AppCheckBoxMessage } from '../app/icons/AppCheckBoxMessage';
 import { CelebrateIcon } from '../app/icons/CelebrateIcon';
 import { I18Keys } from '../i18n/i18n';
-import { AppPostReviewStatus } from '../shared/types/types.posts';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
@@ -90,6 +89,10 @@ export const PostPublishStatusModals = () => {
     setAskedOrcid(false);
     setPublishing(false);
   };
+
+  useEffect(() => {
+    reset();
+  }, [fetched.postId]);
 
   const openNanopublication = () => {
     if (derived.statuses.nanopubUrl && window) {
@@ -305,6 +308,7 @@ export const PostPublishStatusModals = () => {
   const publishStatusModal = (() => {
     if (DEBUG)
       console.log({
+        id: updated.postMerged?.id,
         publishIntent: publish.publishIntent,
         publishing,
         askedOrcid,
@@ -318,7 +322,7 @@ export const PostPublishStatusModals = () => {
         return publishingModal;
       }
 
-      if (!derived.statuses.live) {
+      if (!updated.statusesMerged.live) {
         if (!askedOrcid && !orcid && !disableOrcidInvite) {
           if (DEBUG) console.log('askOrcid');
           return askOrcid;
@@ -328,6 +332,7 @@ export const PostPublishStatusModals = () => {
         }
       }
 
+      if (DEBUG) console.log('publishedModal');
       return publishedModal;
     }
 

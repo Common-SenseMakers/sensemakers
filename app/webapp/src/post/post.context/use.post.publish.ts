@@ -1,6 +1,7 @@
-import { Dispatch, SetStateAction, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 
 import { useAppFetch } from '../../api/app.fetch';
+import { useToastContext } from '../../app/ToastsContext';
 import { PublishPostPayload } from '../../shared/types/types.fetch';
 import {
   PlatformPostDraftApproval,
@@ -8,13 +9,16 @@ import {
 } from '../../shared/types/types.platform.posts';
 import {
   AppPostRepublishedStatus,
+  AppPostReviewStatus,
   UnpublishPlatformPostPayload,
 } from '../../shared/types/types.posts';
 import { PLATFORM } from '../../shared/types/types.user';
 import { useNanopubContext } from '../../user-login/contexts/platforms/nanopubs/NanopubContext';
+import { PostFetchContext } from './use.post.fetch';
 import { PostUpdateContext } from './use.post.update';
 
 export interface PostPublishContext {
+  ignorePost: () => void;
   publishOrRepublish: () => Promise<void>;
   retractNanopublication: () => Promise<void>;
   isRetracting: boolean;
@@ -26,8 +30,11 @@ export interface PostPublishContext {
 }
 
 export const usePostPublish = (
+  fetched: PostFetchContext,
   updated: PostUpdateContext
 ): PostPublishContext => {
+  const { show } = useToastContext();
+
   const appFetch = useAppFetch();
 
   const [publishIntent, setPublishIntent] = useState<boolean>(false);
@@ -40,6 +47,25 @@ export const usePostPublish = (
   const [isRetracting, setIsRetracting] = useState(false);
 
   const { signNanopublication } = useNanopubContext();
+
+  const reset = () => {
+    setPublishIntent(false);
+    setUnpublishIntent(false);
+    setErrorApprovingMsg(undefined);
+  };
+
+  useEffect(() => {
+    reset();
+  }, [fetched.postId]);
+
+  const ignorePost = async () => {
+    if (!updated.postMerged) {
+      throw new Error(`Unexpected post not found`);
+    }
+    updated.updatePost({
+      reviewedStatus: AppPostReviewStatus.IGNORED,
+    });
+  };
 
   const publishOrRepublish = async () => {
     const nanopub = updated.postMerged?.mirrors.find(
@@ -91,6 +117,10 @@ export const usePostPublish = (
     }
 
     updated.setEnabledEdit(false);
+    show({
+      title: 'Post published',
+      message: 'Your post has been published - Find it under the "Nanopub" tab',
+    });
   };
 
   const retractNanopublication = async () => {
@@ -145,6 +175,7 @@ export const usePostPublish = (
   };
 
   return {
+    ignorePost,
     publishOrRepublish,
     retractNanopublication,
     isRetracting,

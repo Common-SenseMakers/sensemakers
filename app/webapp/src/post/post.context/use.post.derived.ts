@@ -13,6 +13,7 @@ import {
   AutopostOption,
   PLATFORM,
 } from '../../shared/types/types.user';
+import { useNanopubContext } from '../../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { getAccount } from '../../user-login/user.helper';
 import { AppPostStatus, getPostStatuses } from '../posts.helper';
 import { PostFetchContext } from './use.post.fetch';

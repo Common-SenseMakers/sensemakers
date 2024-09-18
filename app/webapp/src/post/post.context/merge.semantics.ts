@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const DEBUG = true;
+const DEBUG = false;
 
 type ListAction = {
   type: 'add' | 'remove';

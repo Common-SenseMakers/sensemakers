@@ -21,12 +21,13 @@ import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/Nan
 import { usePersist } from '../utils/use.persist';
 import { PostHeader } from './PostHeader';
 import { PostNav } from './PostNav';
+import { PublishButtons } from './PostPublishButtons';
 import { PostTextEditable } from './PostTextEditable';
 import { POSTING_POST_ID } from './PostingPage';
 import { usePost } from './post.context/PostContext';
 import { concatenateThread, hideSemanticsHelper } from './posts.helper';
 
-const DEBUG = true;
+const DEBUG = false;
 
 /** extract the postId from the route and pass it to a PostContext */
 export const PostView = (props: { profile?: TwitterUserProfile }) => {
@@ -45,7 +46,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   const { connect: _connectOrcid } = useOrcidContext();
 
   const { constants } = useThemeContext();
-  const { derived, updated, publish } = usePost();
+  const { updated, publish } = usePost();
 
   const postText = updated.postMerged
     ? concatenateThread(updated.postMerged.generic)
@@ -71,15 +72,6 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     }
   };
 
-  const ignore = async () => {
-    if (!updated.postMerged) {
-      throw new Error(`Unexpected post not found`);
-    }
-    updated.updatePost({
-      reviewedStatus: AppPostReviewStatus.IGNORED,
-    });
-  };
-
   const reviewForPublication = async () => {
     if (!updated.postMerged) {
       throw new Error(`Unexpected post not found`);
@@ -100,18 +92,6 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   const cancelEdit = () => {
     updated.setEnabledEdit(false);
   };
-
-  const { signNanopublication } = useNanopubContext();
-
-  const canPublishNanopub =
-    connectedUser &&
-    connectedUser.nanopub &&
-    connectedUser.nanopub.length > 0 &&
-    signNanopublication &&
-    derived.nanopubDraft;
-
-  const readyToNanopublish =
-    canPublishNanopub && derived.nanopubDraft && !updated.statusesMerged.live;
 
   // receives the navigate from PostingPage and opens the post intent
   useEffect(() => {
@@ -152,26 +132,8 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       );
     }
 
-    if (!updated.statusesMerged.live && !updated.statusesMerged.ignored) {
-      return (
-        <Box direction="row" gap="small" margin={{ top: 'medium' }}>
-          <Box width="50%" style={{ flexGrow: 1 }}>
-            <AppButton
-              icon={<ClearIcon></ClearIcon>}
-              onClick={() => ignore()}
-              label={t(I18Keys.ignore)}></AppButton>
-          </Box>
-          <Box width="50%" align="end" gap="small">
-            <AppButton
-              primary
-              disabled={!readyToNanopublish}
-              icon={<SendIcon></SendIcon>}
-              onClick={() => publish.setPublishIntent(true)}
-              label={t(I18Keys.publish)}
-              style={{ width: '100%' }}></AppButton>
-          </Box>
-        </Box>
-      );
+    if (updated.inPrePublish) {
+      return <PublishButtons></PublishButtons>;
     }
 
     if (updated.statusesMerged.live && !updated.enabledEdit) {

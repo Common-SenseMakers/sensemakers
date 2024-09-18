@@ -14,7 +14,7 @@ import {
 } from '../../shared/utils/n3.utils';
 import { PostFetchContext } from './use.post.fetch';
 
-export const DEBUG = true;
+export const DEBUG = false;
 
 interface QuadOperation {
   type: 'add' | 'remove';
@@ -143,9 +143,11 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
       }
     });
 
-    console.log('computing merged semantics - writing RDF', {
-      mergedStoreSize: mergedStore.size,
-    });
+    if (DEBUG)
+      console.log('computing merged semantics - writing RDF', {
+        mergedStoreSize: mergedStore.size,
+      });
+
     writeRDF(mergedStore).then((_semantics) => {
       if (DEBUG)
         console.log('computing merged semantics - semantics computed', {
