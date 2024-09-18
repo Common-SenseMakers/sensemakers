@@ -153,9 +153,13 @@ export const AccountContext = (props: PropsWithChildren) => {
         twitter: connectedUser?.email,
       });
 
-    if (connectedUser && connectedUser.email && !twitterProfile) {
+    if (
+      connectedUser &&
+      connectedUser.email &&
+      !twitterProfile &&
+      overallLoginStatus === OverallLoginStatus.LogginIn
+    ) {
       setOverallLoginStatus(OverallLoginStatus.PartialLoggedIn);
-      return;
     }
 
     if (
@@ -166,12 +170,10 @@ export const AccountContext = (props: PropsWithChildren) => {
     ) {
       setTwitterConnectedStatus(TwitterConnectedStatus.Connected);
       setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
-      return;
     }
 
-    if (overallLoginStatus === OverallLoginStatus.NotKnown) {
+    if (overallLoginStatus === OverallLoginStatus.NotKnown && !connectedUser) {
       setOverallLoginStatus(OverallLoginStatus.LoggedOut);
-      return;
     }
 
     if (

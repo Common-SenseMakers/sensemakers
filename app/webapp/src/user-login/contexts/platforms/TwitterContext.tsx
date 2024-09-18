@@ -1,11 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
 import {
   PropsWithChildren,
   createContext,
   useContext,
   useEffect,
   useRef,
-  useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
@@ -26,8 +24,9 @@ import {
   TwitterConnectedStatus,
   useAccountContext,
 } from '../AccountContext';
+import { useDisconnectContext } from '../DisconnectUserContext';
 
-const DEBUG = false;
+const DEBUG = true;
 const WAS_CONNECTING_TWITTER = 'was-connecting-twitter';
 
 export const LS_TWITTER_CONTEXT_KEY = 'twitter-signin-context';
@@ -55,6 +54,8 @@ export const TwitterContext = (props: PropsWithChildren) => {
     setLoginFlowState,
     setTwitterConnectedStatus,
   } = useAccountContext();
+
+  const { disconnect } = useDisconnectContext();
 
   const [wasConnecting, setWasConnecting] = usePersist<boolean>(
     WAS_CONNECTING_TWITTER,
@@ -105,6 +106,18 @@ export const TwitterContext = (props: PropsWithChildren) => {
         searchParams.delete('error');
         searchParams.delete('state');
         setSearchParams(searchParams);
+      }
+
+      if (wasConnecting && !state_param && !code_param) {
+        if (DEBUG)
+          console.log('was connecting true but no state params - logout', {
+            state_param,
+            code_param,
+            overallLoginStatus,
+          });
+
+        setWasConnecting(false);
+        disconnect();
       }
 
       if (
