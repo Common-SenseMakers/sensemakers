@@ -21,7 +21,7 @@ import {
 import { usePersist } from '../../utils/use.persist';
 import { getAccount } from '../user.helper';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export const OUR_TOKEN_NAME = 'ourToken';
 export const LOGIN_STATUS = 'loginStatus';
@@ -147,21 +147,24 @@ export const AccountContext = (props: PropsWithChildren) => {
    */
   useEffect(() => {
     if (DEBUG)
-      console.log('connectedUser', {
+      console.log('overallStatus update effect', {
         connectedUser,
         overallLoginStatus,
         twitter: connectedUser?.email,
       });
 
-    if (
-      connectedUser &&
-      connectedUser.email &&
-      !twitterProfile &&
-      overallLoginStatus === OverallLoginStatus.LogginIn
-    ) {
+    /**
+     * once connected user is defined and has an email, but there is no
+     * twitter, the user is partially logged in
+     */
+    if (connectedUser && connectedUser.email && !twitterProfile) {
       setOverallLoginStatus(OverallLoginStatus.PartialLoggedIn);
     }
 
+    /**
+     * once the user is partiallyLoggedIn and has a twitter profile
+     * then the user is FullyLoggedIn
+     */
     if (
       connectedUser &&
       connectedUser.email &&
@@ -172,22 +175,20 @@ export const AccountContext = (props: PropsWithChildren) => {
       setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
     }
 
-    if (overallLoginStatus === OverallLoginStatus.NotKnown && !connectedUser) {
-      setOverallLoginStatus(OverallLoginStatus.LoggedOut);
-    }
-
+    /** If finished fetching for connected user and is undefined, then
+     * the status is not not-known, its a confirmed LoggedOut */
     if (
-      !token &&
-      !connectedUser &&
-      overallLoginStatus !== OverallLoginStatus.LogginIn
+      overallLoginStatus === OverallLoginStatus.NotKnown &&
+      connectedUser === undefined
     ) {
-      setOverallLoginStatus(OverallLoginStatus.LoggedOut);
+      disconnect();
     }
   }, [connectedUser, overallLoginStatus, token]);
 
   const disconnect = () => {
     setConnectedUser(undefined);
     setToken(null);
+    setOverallLoginStatus(OverallLoginStatus.LoggedOut);
   };
 
   const twitterProfile = useMemo(() => {
