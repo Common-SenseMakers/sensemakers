@@ -60,7 +60,7 @@ export const getMastodonMock = (
             {
               post_id: '113093259230165857',
               user_id: '111971425782516559',
-              timestampMs: 1725666186984,
+              timestampMs: Date.now() - 24 * 60 * 60 * 1000 * 1,
               post: {
                 thread_id: '113093259230165857',
                 posts: [
@@ -249,7 +249,7 @@ export const getMastodonMock = (
             {
               post_id: '113092008685099862',
               user_id: '111971425782516559',
-              timestampMs: 1725647105180,
+              timestampMs: Date.now() - 24 * 60 * 60 * 1000 * 2,
               post: {
                 thread_id: '113092008685099862',
                 posts: [
@@ -464,7 +464,7 @@ export const getMastodonMock = (
             {
               post_id: '113091840795490491',
               user_id: '111971425782516559',
-              timestampMs: 1725644543392,
+              timestampMs: Date.now() - 24 * 60 * 60 * 1000 * 3,
               post: {
                 thread_id: '113091840795490491',
                 posts: [
@@ -739,7 +739,7 @@ export const getMastodonMock = (
             {
               post_id: '112961900843400369',
               user_id: '111971425782516559',
-              timestampMs: 1723661817071,
+              timestampMs: Date.now() - 24 * 60 * 60 * 1000 * 4,
               post: {
                 thread_id: '112961900843400369',
                 posts: [
@@ -893,7 +893,7 @@ export const getMastodonMock = (
             {
               post_id: '112639305281497968',
               user_id: '111971425782516559',
-              timestampMs: 1718739399445,
+              timestampMs: Date.now() - 24 * 60 * 60 * 1000 * 5,
               post: {
                 thread_id: '112639305281497968',
                 posts: [
@@ -1025,7 +1025,7 @@ export const getMastodonMock = (
             {
               post_id: '112276902679185529',
               user_id: '111971425782516559',
-              timestampMs: 1713209574613,
+              timestampMs: Date.now() - 24 * 60 * 60 * 1000 * 6,
               post: {
                 thread_id: '112276902679185529',
                 posts: [
