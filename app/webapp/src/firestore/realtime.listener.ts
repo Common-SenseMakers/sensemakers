@@ -2,7 +2,7 @@ import { onSnapshot } from 'firebase/firestore';
 
 import { collections } from './config';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export const subscribeToUpdates = (updateId: string, callback: () => void) => {
   const postUpdates = collections.updates(updateId);

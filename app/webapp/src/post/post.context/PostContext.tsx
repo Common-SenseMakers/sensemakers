@@ -9,8 +9,6 @@ import { PostNavContext, usePostNav } from './use.post.nav';
 import { PostPublishContext, usePostPublish } from './use.post.publish';
 import { PostUpdateContext, usePostUpdate } from './use.post.update';
 
-const DEBUG = false;
-
 interface PostContextType {
   fetched: PostFetchContext;
   derived: PostDerivedContext;

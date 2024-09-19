@@ -1,6 +1,6 @@
 import { Text } from 'grommet';
 import { t } from 'i18next';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Trans } from 'react-i18next';
 
 import { AppModalStandard } from '../app/AppModalStandard';
@@ -16,7 +16,7 @@ import { usePersist } from '../utils/use.persist';
 import { POSTING_POST_ID } from './PostingPage';
 import { usePost } from './post.context/PostContext';
 
-const DEBUG = false;
+const DEBUG = true;
 
 enum PublishPostAction {
   None = 'None',
@@ -61,6 +61,8 @@ export const PostPublishStatusModals = () => {
   const [justSetPostId, setJustSetPostId] = useState<boolean>(false);
 
   const publishApproved = () => {
+    if (DEBUG) console.log(`publishApproved ${fetched.post?.id}`);
+
     if (disablePubWarningLocal) {
       // disable after having clicked on next
       setDisablePubWarningPers(true);
@@ -76,11 +78,13 @@ export const PostPublishStatusModals = () => {
       disableOrcidInvitePers &&
       disablePubWarningPers
     ) {
+      if (DEBUG) console.log(`publishApproved directly ${fetched.post?.id}`);
       publishApproved();
     }
   }, [publish.publishIntent]);
 
   const unpublishApproved = () => {
+    if (DEBUG) console.log(`unpublishApproved ${fetched.postId}`);
     setIsUnpublishing(true);
     publish.retractNanopublication();
   };
@@ -88,6 +92,7 @@ export const PostPublishStatusModals = () => {
   // publishing is set to false only after the nanopub status is published
   useEffect(() => {
     if (derived.statuses.live) {
+      if (DEBUG) console.log(`post live ${fetched.postId}`);
       setPublishing(false);
     }
   }, [derived.statuses]);
@@ -108,6 +113,7 @@ export const PostPublishStatusModals = () => {
   };
 
   const reset = () => {
+    if (DEBUG) console.log(`reset ${fetched.postId}`);
     setDisableOrcidInviteLocal(false);
     setDisablePubWarningLocal(false);
     publish.setPublishIntent(false);
@@ -118,6 +124,7 @@ export const PostPublishStatusModals = () => {
   };
 
   useEffect(() => {
+    if (DEBUG) console.log(`reset due to postId change`);
     reset();
   }, [fetched.postId]);
 
@@ -167,12 +174,14 @@ export const PostPublishStatusModals = () => {
             <Trans
               i18nKey={I18Keys.connectOrcidPar02}
               components={{ b: <b></b> }}></Trans>,
+          ],
+          after: (
             <AppCheckBoxMessage
               message={t(I18Keys.dontShowAgain)}
               checked={disableOrcidInviteLocal}
               onCheckChange={(value) => setDisableOrcidInviteLocal(value)}
-              size={18}></AppCheckBoxMessage>,
-          ],
+              size={18}></AppCheckBoxMessage>
+          ),
           primaryButton: {
             label: !disablePubWarningPers
               ? t(I18Keys.continue)
@@ -202,12 +211,14 @@ export const PostPublishStatusModals = () => {
             <Trans
               i18nKey={I18Keys.publishWarningPar02}
               components={{ b: <b></b> }}></Trans>,
+          ],
+          after: (
             <AppCheckBoxMessage
               message={t(I18Keys.dontShowAgain)}
               checked={disablePubWarningLocal}
               onCheckChange={(value) => setDisablePubWarningLocal(value)}
-              size={18}></AppCheckBoxMessage>,
-          ],
+              size={18}></AppCheckBoxMessage>
+          ),
           primaryButton: {
             label: t(I18Keys.yesPublish),
             onClick: () => publishApproved(),
@@ -344,9 +355,9 @@ export const PostPublishStatusModals = () => {
     );
   })();
 
-  const publishStatusModal = (() => {
+  const publishStatusModal = useMemo(() => {
     if (DEBUG)
-      console.log({
+      console.log(`publishStatusModal memo ${fetched.postId}`, {
         id: updated.postMerged?.id,
         publishIntent: publish.publishIntent,
         publishing,
@@ -357,27 +368,36 @@ export const PostPublishStatusModals = () => {
 
     if (publish.publishIntent) {
       if (publishing) {
-        if (DEBUG) console.log('publishingModal');
+        if (DEBUG) console.log(`publishingModal ${fetched.postId}`);
         return publishingModal;
       }
 
       if (!updated.statusesMerged.live) {
         if (!askedOrcid && !orcid && !disableOrcidInvitePers) {
-          if (DEBUG) console.log('askOrcid');
+          if (DEBUG) console.log(`askOrcid ${fetched.postId}`);
           return askOrcid;
         } else if (!disablePubWarningPers) {
-          if (DEBUG) console.log('finalApprove');
+          if (DEBUG) console.log(`finalApprove ${fetched.postId}`);
           return finalApprove;
         }
       } else {
-        if (DEBUG) console.log('publishedModal');
+        if (DEBUG) console.log(`publishedModal ${fetched.postId}`);
         return publishedModal;
       }
     }
 
-    if (DEBUG) console.log('no modal');
+    if (DEBUG) console.log(`no modal ${fetched.postId}`);
     return <></>;
-  })();
+  }, [
+    updated,
+    publish,
+    derived,
+    publishing,
+    askedOrcid,
+    orcid,
+    disableOrcidInvitePers,
+    disablePubWarningPers,
+  ]);
 
   const unPublishStatusModal = (() => {
     return publish.unpublishIntent ? (

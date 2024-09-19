@@ -13,7 +13,7 @@ export interface PostFetchContext {
   refetch: () => void;
 }
 
-const DEBUG = false;
+const DEBUG = true;
 
 /** hook in charge of fething the current post, and keeping it
  * and its derived values updated in real time */
@@ -24,10 +24,11 @@ export const usePostFetch = (
 ): PostFetchContext => {
   const appFetch = useAppFetch();
 
-  const postId = useMemo(
-    () => (_postId ? _postId : (postInit as AppPostFull).id),
-    [_postId, postInit]
-  );
+  const postId = useMemo(() => {
+    if (DEBUG) console.log('useMemo postId', { _postId, postInit });
+    const actualPostId = _postId ? _postId : (postInit as AppPostFull).id;
+    return actualPostId;
+  }, [_postId, postInit]);
 
   /** if postInit not provided get post from the DB */
   const {
@@ -39,6 +40,7 @@ export const usePostFetch = (
     queryFn: () => {
       try {
         if (postId) {
+          if (DEBUG) console.log('fetching', { postId });
           return appFetch<AppPostFull>('/api/posts/get', { postId });
         }
       } catch (e: any) {
@@ -67,6 +69,8 @@ export const usePostFetch = (
   /**
    * subscribe to real time updates of this post platform posts */
   useEffect(() => {
+    if (DEBUG) console.log(`useEffect post ${postId}`, { post });
+
     if (post && post.mirrors) {
       const unsubscribes = post.mirrors.map((m) => {
         return {

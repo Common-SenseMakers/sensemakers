@@ -18,6 +18,7 @@ export interface ModalContentProps {
   icon?: JSX.Element;
   title: string | JSX.Element;
   parragraphs?: JSX.Element[];
+  after?: JSX.Element;
   buttonsDirection?: 'row' | 'column';
   primaryButton?: ButtonConfig;
   secondaryButton?: ButtonConfig;
@@ -28,6 +29,7 @@ export const ModalContent = (props: ModalContentProps) => {
     icon,
     title,
     parragraphs,
+    after,
     primaryButton,
     secondaryButton,
     buttonsDirection,
@@ -50,7 +52,7 @@ export const ModalContent = (props: ModalContentProps) => {
         {icon ? <Box margin={{ bottom: '20px' }}>{icon}</Box> : <></>}
         <AppHeading level={props.type === 'small' ? 3 : 1}>{title}</AppHeading>
         <Box margin={{ top: '16px' }}>
-          {parragraphs ? (
+          {parragraphs &&
             parragraphs.map((p: JSX.Element, ix: number) => (
               <Paragraph
                 key={ix}
@@ -60,10 +62,8 @@ export const ModalContent = (props: ModalContentProps) => {
                 }}>
                 {p}
               </Paragraph>
-            ))
-          ) : (
-            <></>
-          )}
+            ))}
+          {after}
         </Box>
       </Box>
 

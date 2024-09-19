@@ -27,7 +27,7 @@ export const PostHeader = (props: BoxExtendedProps) => {
                 lineHeight: '18px',
                 textDecoration: 'none',
               }}>
-              {profile.name}
+              {profile?.name}
             </Text>
           </Box>
           <Box margin={{ bottom: '6px' }}></Box>
