@@ -24,12 +24,12 @@ export const PostCard = (props: {
   const { updated } = usePost();
   const post = updated.postMerged;
 
+  const { constants } = useThemeContext();
+
   if (!post) {
     console.warn('unexpected post undefined in PostCard');
     return <></>;
   }
-
-  const { constants } = useThemeContext();
 
   const handleClick = () => {
     props.handleClick();
