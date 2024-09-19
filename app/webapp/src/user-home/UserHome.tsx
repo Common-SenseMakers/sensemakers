@@ -190,7 +190,6 @@ export const UserHome = () => {
             <Box key={ix} id={`post-${post.id}`}>
               <PostContext postInit={post}>
                 <PostCard
-                  post={post}
                   handleClick={() => {
                     const path = `/post/${post.id}`;
                     navigate(path);

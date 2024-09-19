@@ -11,22 +11,23 @@ import { NanopubStatus } from './NanopubStatus';
 import { PublishButtons } from './PostPublishButtons';
 import { PostTextStatic } from './PostTextStatic';
 import { usePost } from './post.context/PostContext';
-import {
-  concatenateThread,
-  getPostStatuses,
-  hideSemanticsHelper,
-} from './posts.helper';
+import { concatenateThread, hideSemanticsHelper } from './posts.helper';
 
 export const PostCard = (props: {
-  post: AppPostFull;
   shade?: boolean;
-  profile?: TwitterUserProfile;
   handleClick: () => void;
   isEmail?: boolean;
 }) => {
-  const { post, shade: _shade, isEmail } = props;
-  const profile = props.profile;
+  const { shade: _shade } = props;
   const shade = _shade || false;
+
+  const { updated } = usePost();
+  const post = updated.postMerged;
+
+  if (!post) {
+    console.warn('unexpected post undefined in PostCard');
+    return <></>;
+  }
 
   const { constants } = useThemeContext();
 
@@ -36,8 +37,6 @@ export const PostCard = (props: {
 
   const tweet = post.mirrors.find((m) => m.platformId === PLATFORM.Twitter);
   const postText = concatenateThread(post.generic);
-
-  const { updated, publish } = usePost();
 
   const handleInternalClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).tagName === 'A') {
@@ -64,7 +63,7 @@ export const PostCard = (props: {
           <TweetAnchor
             thread={tweet?.posted?.post}
             timestamp={tweet?.posted?.timestampMs}></TweetAnchor>
-          {!profile ? <NanopubStatus post={post}></NanopubStatus> : <></>}
+          <NanopubStatus post={post}></NanopubStatus>
         </Box>
 
         {!hideSemantics && (
