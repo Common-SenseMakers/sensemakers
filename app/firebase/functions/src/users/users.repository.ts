@@ -328,12 +328,21 @@ export class UsersRepository {
 
     manager.update(userRef, update);
 
-    // update mirror collection profiles
+    // update or create mirror collection profiles
     if (details.profile) {
       const profileRef = this.db.collections.profiles.doc(
         getProfileId(userId, platform, details.user_id)
       );
-      manager.set(profileRef, { profile: details.profile }, { merge: true });
+      manager.set(
+        profileRef,
+        {
+          userId,
+          profile: details.profile,
+          platformId: platform,
+          user_id: details.user_id,
+        },
+        { merge: true }
+      );
     }
   }
 
