@@ -24,6 +24,8 @@ import { usePersist } from '../utils/use.persist';
 import { IntroModals } from './IntroModal';
 import { useUserPosts } from './UserPostsContext';
 
+const DEBUG = true;
+
 const statusPretty: Record<PostsQueryStatus, string> = {
   drafts: 'All Drafts',
   ignored: 'Ignored',
@@ -38,7 +40,7 @@ export const UserHome = () => {
   const { t } = useTranslation();
   const { show } = useToastContext();
 
-  const { hasUpdate, needsInstall, updateApp, install } = useServiceWorker();
+  const { hasUpdate, updateApp } = useServiceWorker();
 
   const [introShown, setIntroShown] = usePersist<boolean>(INTRO_SHOWN, false);
   const [showIntro, setShowIntro] = useState<boolean>(false);
@@ -61,6 +63,21 @@ export const UserHome = () => {
     isLoading,
     moreToFetch,
   } = useUserPosts();
+
+  if (DEBUG) {
+    console.log('UserHome', {
+      filterStatus,
+      posts,
+      fetchOlder,
+      errorFetchingOlder,
+      isFetchingOlder,
+      fetchNewer,
+      isFetchingNewer,
+      errorFetchingNewer,
+      isLoading,
+      moreToFetch,
+    });
+  }
 
   const { isAtBottom } = useContext(ViewportPageScrollContext);
   const location = useLocation();

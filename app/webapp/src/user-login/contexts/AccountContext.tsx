@@ -187,6 +187,9 @@ export const AccountContext = (props: PropsWithChildren) => {
 
   const disconnect = () => {
     setConnectedUser(undefined);
+    _setLoginFlowState(LoginFlowState.Idle);
+    _setOverallLoginStatus(OverallLoginStatus.LoggedOut);
+    setTwitterConnectedStatus(TwitterConnectedStatus.Disconnected);
     setToken(null);
     setOverallLoginStatus(OverallLoginStatus.LoggedOut);
   };
