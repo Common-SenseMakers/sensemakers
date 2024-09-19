@@ -25,6 +25,7 @@ enum PublishPostAction {
 }
 
 const ORCID_INVITE_DISABLE = 'orcidInviteDisabled';
+const PUB_WARNING_DISABLE = 'pubWarningDisabled';
 
 export const PostPublishStatusModals = () => {
   const { setJustPublished } = useAutopostInviteContext();
@@ -38,10 +39,19 @@ export const PostPublishStatusModals = () => {
   const [askedOrcid, setAskedOrcid] = useState(false);
   const [publishing, setPublishing] = useState(false);
 
-  const [disableOrcidInvite, setDisableOrcidInvite] = usePersist(
+  const [disableOrcidInvitePers, setDisableOrcidInvitePers] = usePersist(
     ORCID_INVITE_DISABLE,
     false
   );
+
+  const [disableOrcidInviteLocal, setDisableOrcidInviteLocal] = useState(false);
+
+  const [disablePubWarningPers, setDisablePubWarningPers] = usePersist(
+    PUB_WARNING_DISABLE,
+    false
+  );
+
+  const [disablePubWarningLocal, setDisablePubWarningLocal] = useState(false);
 
   const [postingPostId, setPostingPostId] = usePersist<string>(
     POSTING_POST_ID,
@@ -51,9 +61,24 @@ export const PostPublishStatusModals = () => {
   const [justSetPostId, setJustSetPostId] = useState<boolean>(false);
 
   const publishApproved = () => {
+    if (disablePubWarningLocal) {
+      // disable after having clicked on next
+      setDisablePubWarningPers(true);
+    }
+
     setPublishing(true);
     publish.publishOrRepublish();
   };
+
+  useEffect(() => {
+    if (
+      publish.publishIntent &&
+      disableOrcidInvitePers &&
+      disablePubWarningPers
+    ) {
+      publishApproved();
+    }
+  }, [publish.publishIntent]);
 
   const unpublishApproved = () => {
     setIsUnpublishing(true);
@@ -83,6 +108,8 @@ export const PostPublishStatusModals = () => {
   };
 
   const reset = () => {
+    setDisableOrcidInviteLocal(false);
+    setDisablePubWarningLocal(false);
     publish.setPublishIntent(false);
     publish.setUnpublishIntent(false);
     setIsUnpublishing(false);
@@ -104,11 +131,16 @@ export const PostPublishStatusModals = () => {
   };
 
   const clickedNextAfterOrcid = () => {
-    if (disableOrcidInvite) {
-      // disable after having cli
-      setDisableOrcidInvite(true);
+    if (disableOrcidInviteLocal) {
+      // disable after having clicked on next
+      setDisableOrcidInvitePers(true);
     }
     setAskedOrcid(true);
+
+    /** if warning was approved just publish */
+    if (disablePubWarningPers) {
+      publishApproved();
+    }
   };
 
   const connectOrcid = () => {
@@ -137,12 +169,14 @@ export const PostPublishStatusModals = () => {
               components={{ b: <b></b> }}></Trans>,
             <AppCheckBoxMessage
               message={t(I18Keys.dontShowAgain)}
-              checked={disableOrcidInvite}
-              onCheckChange={(value) => setDisableOrcidInvite(value)}
+              checked={disableOrcidInviteLocal}
+              onCheckChange={(value) => setDisableOrcidInviteLocal(value)}
               size={18}></AppCheckBoxMessage>,
           ],
           primaryButton: {
-            label: t(I18Keys.continue),
+            label: !disablePubWarningPers
+              ? t(I18Keys.continue)
+              : t(I18Keys.publish),
             onClick: () => clickedNextAfterOrcid(),
           },
           secondaryButton: {
@@ -168,6 +202,11 @@ export const PostPublishStatusModals = () => {
             <Trans
               i18nKey={I18Keys.publishWarningPar02}
               components={{ b: <b></b> }}></Trans>,
+            <AppCheckBoxMessage
+              message={t(I18Keys.dontShowAgain)}
+              checked={disablePubWarningLocal}
+              onCheckChange={(value) => setDisablePubWarningLocal(value)}
+              size={18}></AppCheckBoxMessage>,
           ],
           primaryButton: {
             label: t(I18Keys.yesPublish),
@@ -323,17 +362,17 @@ export const PostPublishStatusModals = () => {
       }
 
       if (!updated.statusesMerged.live) {
-        if (!askedOrcid && !orcid && !disableOrcidInvite) {
+        if (!askedOrcid && !orcid && !disableOrcidInvitePers) {
           if (DEBUG) console.log('askOrcid');
           return askOrcid;
-        } else {
+        } else if (!disablePubWarningPers) {
           if (DEBUG) console.log('finalApprove');
           return finalApprove;
         }
+      } else {
+        if (DEBUG) console.log('publishedModal');
+        return publishedModal;
       }
-
-      if (DEBUG) console.log('publishedModal');
-      return publishedModal;
     }
 
     if (DEBUG) console.log('no modal');

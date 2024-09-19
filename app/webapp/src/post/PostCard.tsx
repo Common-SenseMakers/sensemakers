@@ -3,7 +3,7 @@ import { Box } from 'grommet';
 import { TweetAnchor } from '../app/anchors/TwitterAnchor';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID } from '../semantics/patterns/patterns';
-import { AppPostFull } from '../shared/types/types.posts';
+import { AppPostFull, AppPostParsedStatus } from '../shared/types/types.posts';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { PLATFORM } from '../shared/types/types.user';
 import { useThemeContext } from '../ui-components/ThemedApp';
@@ -103,7 +103,11 @@ export const PostCard = (props: {
         )}
       </Box>
       <Box pad={{ top: 'medium' }}>
-        {updated.inPrePublish && <PublishButtons compact></PublishButtons>}
+        {updated.inPrePublish &&
+          updated.postMerged?.parsedStatus ===
+            AppPostParsedStatus.PROCESSED && (
+            <PublishButtons compact></PublishButtons>
+          )}
       </Box>
     </Box>
   );
