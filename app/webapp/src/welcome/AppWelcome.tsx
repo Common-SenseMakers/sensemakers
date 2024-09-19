@@ -39,13 +39,13 @@ export const AppWelcome = (props: {}) => {
               disabled={isConnecting}
               label={t(I18Keys.emailInputBtn)}
               onClick={() => connect(ConnectMode.email)}></AppButton>
-            <AppButton
+            {/* <AppButton
               margin={{ top: 'small' }}
               icon={<Google size={'18px'}></Google>}
               primary
               disabled={isConnecting}
               label={t(I18Keys.googleOAuthInputBtn)}
-              onClick={() => connect(ConnectMode.googleOAuth)}></AppButton>
+              onClick={() => connect(ConnectMode.googleOAuth)}></AppButton> */}
           </Box>
           <Box align="center">
             <Anchor href="https://sense-nets.xyz/privacy-policy">

@@ -221,7 +221,7 @@ const translationENG: Record<I18Keys, string> = {
     'Social media posts are a valuable source of scientific knowledge, but they get buried in noisy feeds and locked away by platforms.',
   [I18Keys.introParagraph2]:
     'Harness this knowledge by converting your social media posts into nanopublications, making your content <b>FAIR</b> (<b>F</b>indable, <b>A</b>ccessible, <b>I</b>nteroperable and <b>R</b>eusable), so your contributions can get proper recognition',
-  [I18Keys.emailInputBtn]: 'Continue with Email',
+  [I18Keys.emailInputBtn]: 'Get started',
   [I18Keys.googleOAuthInputBtn]: 'Continue with Google',
 
   [I18Keys.connectSocialsTitle]: 'Connect your socials',
