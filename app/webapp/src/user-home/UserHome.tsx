@@ -24,7 +24,7 @@ import { usePersist } from '../utils/use.persist';
 import { IntroModals } from './IntroModal';
 import { useUserPosts } from './UserPostsContext';
 
-const DEBUG = true;
+const DEBUG = false;
 
 const statusPretty: Record<PostsQueryStatus, string> = {
   drafts: 'All Drafts',

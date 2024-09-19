@@ -21,7 +21,7 @@ import {
 import { chain } from './ConnectedWalletContext';
 import { magic } from './magic.signer';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export enum ConnectMode {
   email = 'email',

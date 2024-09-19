@@ -26,7 +26,7 @@ import {
 } from '../AccountContext';
 import { useDisconnectContext } from '../DisconnectUserContext';
 
-const DEBUG = true;
+const DEBUG = false;
 const WAS_CONNECTING_TWITTER = 'was-connecting-twitter';
 
 export const LS_TWITTER_CONTEXT_KEY = 'twitter-signin-context';

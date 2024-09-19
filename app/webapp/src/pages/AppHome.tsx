@@ -11,7 +11,7 @@ import {
 } from '../user-login/contexts/AccountContext';
 import { AppWelcome } from '../welcome/AppWelcome';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const AppHome = (props: {}) => {
   const { overallLoginStatus, twitterProfile, twitterConnectedStatus } =

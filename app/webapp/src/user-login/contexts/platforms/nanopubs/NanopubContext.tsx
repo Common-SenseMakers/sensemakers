@@ -16,7 +16,7 @@ import { cleanPrivateKey } from '../../../../shared/utils/semantics.helper';
 import { useNanopubKeys } from './derive.keys.hook';
 import { useNanopubSignup } from './nanopub.signup.hook';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export type NanopubContextType = {
   profile?: NpProfile;
