@@ -12,7 +12,7 @@ import { WalletClient } from 'viem';
 import { useDisconnect, useWalletClient } from 'wagmi';
 
 import { useAppFetch } from '../../../api/app.fetch';
-import { HexStr } from '../../../shared/types/types.user';
+import { HexStr, toHexStr } from '../../../shared/types/types.user';
 import {
   LoginFlowState,
   OverallLoginStatus,
@@ -90,9 +90,10 @@ export const SignerContext = (props: PropsWithChildren) => {
       if (injectedSigner) {
         setAddress(injectedSigner.account.address);
       } else {
-        if (!magicSigner) throw new Error('unexpected');
-        (magicSigner as any).getAddresses().then((addresses: HexStr[]) => {
-          setAddress(addresses[0]);
+        magic.user.getInfo().then((info) => {
+          if (info.publicAddress) {
+            setAddress(toHexStr(info.publicAddress));
+          }
         });
       }
     } else {
