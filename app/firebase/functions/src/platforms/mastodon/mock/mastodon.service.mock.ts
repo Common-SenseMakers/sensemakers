@@ -51,6 +51,18 @@ export const getMastodonMock = (
         userDetails: UserDetailsBase,
         manager: TransactionManager
       ) => {
+        if (params.since_id) {
+          return {
+            fetched: {},
+            platformPosts: [],
+          };
+        }
+        if (params.until_id) {
+          return {
+            fetched: {},
+            platformPosts: [],
+          };
+        }
         return {
           fetched: {
             newest_id: '113093358996832469',
