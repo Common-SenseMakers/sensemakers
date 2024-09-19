@@ -9,6 +9,14 @@ export type DefinedIfTrue<V, R> = V extends true ? R : R | undefined;
 
 export type HexStr = `0x${string}`;
 
+export const toHexStr = (str: string): HexStr => {
+  if (str.startsWith('0x')) {
+    return str as HexStr;
+  } else {
+    throw new Error(`Invalid HexStr ${str}`);
+  }
+};
+
 /** user types */
 
 export enum PLATFORM {
