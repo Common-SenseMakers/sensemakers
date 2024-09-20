@@ -17,6 +17,8 @@ import { useNanopubContext } from '../../user-login/contexts/platforms/nanopubs/
 import { PostFetchContext } from './use.post.fetch';
 import { PostUpdateContext } from './use.post.update';
 
+const DEBUG = false;
+
 export interface PostPublishContext {
   ignorePost: () => void;
   publishOrRepublish: () => Promise<void>;
@@ -24,7 +26,7 @@ export interface PostPublishContext {
   isRetracting: boolean;
   errorApprovingMsg?: string;
   publishIntent: boolean;
-  setPublishIntent: Dispatch<SetStateAction<boolean>>;
+  setPublishIntent: (value: boolean) => void;
   unpublishIntent: boolean;
   setUnpublishIntent: Dispatch<SetStateAction<boolean>>;
 }
@@ -37,7 +39,7 @@ export const usePostPublish = (
 
   const appFetch = useAppFetch();
 
-  const [publishIntent, setPublishIntent] = useState<boolean>(false);
+  const [publishIntent, _setPublishIntent] = useState<boolean>(false);
   const [unpublishIntent, setUnpublishIntent] = useState<boolean>(false);
 
   const [errorApprovingMsg, setErrorApprovingMsg] = useState<
@@ -57,6 +59,11 @@ export const usePostPublish = (
   useEffect(() => {
     reset();
   }, [fetched.postId]);
+
+  const setPublishIntent = (value: boolean) => {
+    if (DEBUG) console.log('setPublishIntent', value);
+    _setPublishIntent(value);
+  };
 
   const ignorePost = async () => {
     if (!updated.postMerged) {
