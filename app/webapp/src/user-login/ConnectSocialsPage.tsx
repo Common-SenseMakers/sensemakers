@@ -43,7 +43,7 @@ export const ConnectSocialsPage = () => {
   const content = (() => {
     if (connectTwitter && connectMastodon) {
       return (
-        <Box style={{ flexGrow: 1 }}>
+        <Box>
           <Box style={{ flexGrow: 1 }}>
             <AppHeading level="1">{t(I18Keys.connectSocialsTitle)}</AppHeading>
             <Box width="100%" height="16px"></Box>
@@ -100,19 +100,13 @@ export const ConnectSocialsPage = () => {
               </Box>
             )}
           </Box>
-          <Box align="center" margin={{ top: 'medium' }}>
+          <Box align="center" margin={{ top: 'large' }}>
             <AppButton
               primary
               label={t(I18Keys.continue)}
               onClick={handleContinue}
               disabled={!twitterProfile && !mastodonProfile}
-            />
-          </Box>
-          <Box align="center" margin={{ top: 'small' }}>
-            <AppButton
-              plain
-              label={t(I18Keys.logout)}
-              onClick={() => disconnect()}
+              style={{ width: '100%' }}
             />
           </Box>
         </Box>
