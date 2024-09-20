@@ -16,7 +16,7 @@ import { usePersist } from '../utils/use.persist';
 import { POSTING_POST_ID } from './PostingPage';
 import { usePost } from './post.context/PostContext';
 
-const DEBUG = true;
+const DEBUG = false;
 
 enum PublishPostAction {
   None = 'None',
@@ -30,8 +30,8 @@ const PUB_WARNING_DISABLE = 'pubWarningDisabled';
 export const PostPublishStatusModals = () => {
   const { setJustPublished } = useAutopostInviteContext();
   const { updated, fetched, derived, navigatePost, publish } = usePost();
-  const { orcid } = useAccountContext();
 
+  const { orcid } = useAccountContext();
   const { connect: _connectOrcid } = useOrcidContext();
 
   const [isUnpublishing, setIsUnpublishing] = useState<boolean>(false);
@@ -53,6 +53,32 @@ export const PostPublishStatusModals = () => {
 
   const [disablePubWarningLocal, setDisablePubWarningLocal] = useState(false);
 
+  useEffect(() => {
+    if (DEBUG)
+      console.log('useEffect disableOrcidInvitePers', {
+        disableOrcidInvitePers,
+        disableOrcidInviteLocal,
+      });
+    if (
+      disableOrcidInvitePers !== null &&
+      disableOrcidInvitePers !== undefined
+    ) {
+      setDisableOrcidInviteLocal(disableOrcidInvitePers);
+    }
+  }, [disableOrcidInvitePers]);
+
+  useEffect(() => {
+    if (DEBUG)
+      console.log('useEffect disablePubWarningPers', {
+        disablePubWarningPers,
+        disablePubWarningLocal,
+      });
+
+    if (disablePubWarningPers !== null && disablePubWarningPers !== undefined) {
+      setDisablePubWarningLocal(disablePubWarningPers);
+    }
+  }, [disablePubWarningPers]);
+
   const [postingPostId, setPostingPostId] = usePersist<string>(
     POSTING_POST_ID,
     null
@@ -63,10 +89,7 @@ export const PostPublishStatusModals = () => {
   const publishApproved = () => {
     if (DEBUG) console.log(`publishApproved ${fetched.post?.id}`);
 
-    if (disablePubWarningLocal) {
-      // disable after having clicked on next
-      setDisablePubWarningPers(true);
-    }
+    persistPubWarnDisable();
 
     setPublishing(true);
     publish.publishOrRepublish();
@@ -137,17 +160,29 @@ export const PostPublishStatusModals = () => {
     }
   };
 
-  const clickedNextAfterOrcid = () => {
+  const persistOrcidInviteDisable = () => {
     if (disableOrcidInviteLocal) {
       // disable after having clicked on next
       setDisableOrcidInvitePers(true);
     }
+  };
+
+  const persistPubWarnDisable = () => {
+    if (disablePubWarningLocal) {
+      // disable after having clicked on next
+      setDisablePubWarningPers(true);
+    }
+  };
+
+  const clickedNextAfterOrcid = () => {
     setAskedOrcid(true);
 
     /** if warning was approved just publish */
     if (disablePubWarningPers) {
       publishApproved();
     }
+
+    persistOrcidInviteDisable();
   };
 
   const connectOrcid = () => {
@@ -159,201 +194,213 @@ export const PostPublishStatusModals = () => {
     }
   };
 
-  const askOrcid = (() => {
-    return (
-      <AppModalStandard
-        onModalClosed={() => publish.setPublishIntent(false)}
-        type="normal"
-        contentProps={{
-          type: 'normal',
-          title: t(I18Keys.connectOrcidTitle),
-          parragraphs: [
-            <Trans
-              i18nKey={I18Keys.connectOrcidPar01}
-              components={{ b: <b></b> }}></Trans>,
-            <Trans
-              i18nKey={I18Keys.connectOrcidPar02}
-              components={{ b: <b></b> }}></Trans>,
-          ],
-          after: (
-            <AppCheckBoxMessage
-              message={t(I18Keys.dontShowAgain)}
-              checked={disableOrcidInviteLocal}
-              onCheckChange={(value) => setDisableOrcidInviteLocal(value)}
-              size={18}></AppCheckBoxMessage>
-          ),
-          primaryButton: {
-            label: !disablePubWarningPers
-              ? t(I18Keys.continue)
-              : t(I18Keys.publish),
-            onClick: () => clickedNextAfterOrcid(),
-          },
-          secondaryButton: {
-            label: t(I18Keys.connectOrcid),
-            onClick: () => connectOrcid(),
-          },
-        }}></AppModalStandard>
-    );
-  })();
+  console.log('publishModal disables', {
+    disableOrcidInviteLocal,
+    disableOrcidInvitePers,
+    disablePubWarningLocal,
+    disablePubWarningPers,
+  });
 
-  const finalApprove = (() => {
-    return (
-      <AppModalStandard
-        onModalClosed={() => publish.setPublishIntent(false)}
-        type="normal"
-        contentProps={{
-          type: 'normal',
-          title: t(I18Keys.publishWarningTitle),
-          parragraphs: [
-            <Trans
-              i18nKey={I18Keys.publishWarningPar01}
-              components={{ b: <b></b> }}></Trans>,
-            <Trans
-              i18nKey={I18Keys.publishWarningPar02}
-              components={{ b: <b></b> }}></Trans>,
-          ],
-          after: (
-            <AppCheckBoxMessage
-              message={t(I18Keys.dontShowAgain)}
-              checked={disablePubWarningLocal}
-              onCheckChange={(value) => setDisablePubWarningLocal(value)}
-              size={18}></AppCheckBoxMessage>
-          ),
-          primaryButton: {
-            label: t(I18Keys.yesPublish),
-            onClick: () => publishApproved(),
-          },
-          secondaryButton: {
-            label: t(I18Keys.returnToDraft),
-            onClick: () => reset(),
-          },
-        }}></AppModalStandard>
-    );
-  })();
+  const askOrcid = (
+    <AppModalStandard
+      onModalClosed={() => {
+        persistOrcidInviteDisable();
+        publish.setPublishIntent(false);
+      }}
+      type="normal"
+      contentProps={{
+        type: 'normal',
+        title: t(I18Keys.connectOrcidTitle),
+        parragraphs: [
+          <Trans
+            i18nKey={I18Keys.connectOrcidPar01}
+            components={{ b: <b></b> }}></Trans>,
+          <Trans
+            i18nKey={I18Keys.connectOrcidPar02}
+            components={{ b: <b></b> }}></Trans>,
+        ],
+        after: (
+          <AppCheckBoxMessage
+            message={t(I18Keys.dontShowAgain)}
+            checked={disableOrcidInviteLocal}
+            onCheckChange={(value) => {
+              if (DEBUG)
+                console.log('askOrcid disable checkbox changed', { value });
+              setDisableOrcidInviteLocal(value);
+            }}
+            size={18}></AppCheckBoxMessage>
+        ),
+        primaryButton: {
+          label: !disablePubWarningPers
+            ? t(I18Keys.continue)
+            : t(I18Keys.publish),
+          onClick: () => clickedNextAfterOrcid(),
+        },
+        secondaryButton: {
+          label: t(I18Keys.connectOrcid),
+          onClick: () => connectOrcid(),
+        },
+      }}></AppModalStandard>
+  );
 
-  const publishingModal = (() => {
-    return (
-      <AppModalStandard
-        onModalClosed={() => {
-          if (publish.errorApprovingMsg) setPublishing(false);
-          publish.setPublishIntent(false);
-        }}
-        type="normal"
-        contentProps={{
-          type: 'normal',
-          title: publish.errorApprovingMsg
-            ? t(I18Keys.publishingErrorTitle)
-            : t(I18Keys.publishingTitle),
-          parragraphs: publish.errorApprovingMsg
-            ? [
-                <Trans
-                  i18nKey={I18Keys.publishingErrorPar01}
-                  components={{ b: <b></b> }}></Trans>,
-                <BoxCentered>
-                  <Text>{publish.errorApprovingMsg}</Text>
-                </BoxCentered>,
-              ]
-            : [
-                <Trans
-                  i18nKey={I18Keys.publishingPar01}
-                  components={{ b: <b></b> }}></Trans>,
-                <BoxCentered>
-                  <Loading></Loading>
-                </BoxCentered>,
-              ],
-        }}></AppModalStandard>
-    );
-  })();
+  const finalApprove = (
+    <AppModalStandard
+      onModalClosed={() => {
+        persistPubWarnDisable();
+        publish.setPublishIntent(false);
+      }}
+      type="normal"
+      contentProps={{
+        type: 'normal',
+        title: t(I18Keys.publishWarningTitle),
+        parragraphs: [
+          <Trans
+            i18nKey={I18Keys.publishWarningPar01}
+            components={{ b: <b></b> }}></Trans>,
+          <Trans
+            i18nKey={I18Keys.publishWarningPar02}
+            components={{ b: <b></b> }}></Trans>,
+        ],
+        after: (
+          <AppCheckBoxMessage
+            message={t(I18Keys.dontShowAgain)}
+            checked={disablePubWarningLocal}
+            onCheckChange={(value) => {
+              if (DEBUG)
+                console.log('PubWarning disable checkbox changed', { value });
+              setDisablePubWarningLocal(value);
+            }}
+            size={18}></AppCheckBoxMessage>
+        ),
+        primaryButton: {
+          label: t(I18Keys.yesPublish),
+          onClick: () => publishApproved(),
+        },
+        secondaryButton: {
+          label: t(I18Keys.returnToDraft),
+          onClick: () => {
+            persistPubWarnDisable();
+            reset();
+          },
+        },
+      }}></AppModalStandard>
+  );
 
-  const unpublishingModal = (() => {
-    return (
-      <AppModalStandard
-        onModalClosed={() => publish.setUnpublishIntent(false)}
-        type="normal"
-        contentProps={{
-          type: 'normal',
-          title: publish.errorApprovingMsg
-            ? t(I18Keys.unpublishingErrorTitle)
-            : t(I18Keys.unpublishingTitle),
-          parragraphs: publish.errorApprovingMsg
-            ? [
-                <Trans
-                  i18nKey={I18Keys.unpublishingErrorPar01}
-                  components={{ b: <b></b> }}></Trans>,
-                <BoxCentered>
-                  <Text>{publish.errorApprovingMsg}</Text>
-                </BoxCentered>,
-              ]
-            : [
-                <Trans
-                  i18nKey={I18Keys.unpublishingPar01}
-                  components={{ b: <b></b> }}></Trans>,
-                <BoxCentered>
-                  <Loading></Loading>
-                </BoxCentered>,
-              ],
-        }}></AppModalStandard>
-    );
-  })();
+  const publishingModal = (
+    <AppModalStandard
+      onModalClosed={() => {
+        if (publish.errorApprovingMsg) setPublishing(false);
+        publish.setPublishIntent(false);
+      }}
+      type="normal"
+      contentProps={{
+        type: 'normal',
+        title: publish.errorApprovingMsg
+          ? t(I18Keys.publishingErrorTitle)
+          : t(I18Keys.publishingTitle),
+        parragraphs: publish.errorApprovingMsg
+          ? [
+              <Trans
+                i18nKey={I18Keys.publishingErrorPar01}
+                components={{ b: <b></b> }}></Trans>,
+              <BoxCentered>
+                <Text>{publish.errorApprovingMsg}</Text>
+              </BoxCentered>,
+            ]
+          : [
+              <Trans
+                i18nKey={I18Keys.publishingPar01}
+                components={{ b: <b></b> }}></Trans>,
+              <BoxCentered>
+                <Loading></Loading>
+              </BoxCentered>,
+            ],
+      }}></AppModalStandard>
+  );
 
-  const unpublishApprove = (() => {
-    return (
-      <AppModalStandard
-        onModalClosed={() => publish.setUnpublishIntent(false)}
-        type="normal"
-        contentProps={{
-          type: 'normal',
-          title: t(I18Keys.unpublishWarningTitle),
-          parragraphs: [
-            <Trans
-              i18nKey={I18Keys.unpublishWarningPar01}
-              components={{ b: <b></b> }}></Trans>,
-          ],
-          primaryButton: {
-            disabled: publish.isRetracting,
-            label: t(I18Keys.yesUnpublish),
-            onClick: () => unpublishApproved(),
-          },
-          secondaryButton: {
-            disabled: publish.isRetracting,
-            label: t(I18Keys.returnToNanopub),
-            onClick: () => reset(),
-          },
-        }}></AppModalStandard>
-    );
-  })();
+  const unpublishingModal = (
+    <AppModalStandard
+      onModalClosed={() => publish.setUnpublishIntent(false)}
+      type="normal"
+      contentProps={{
+        type: 'normal',
+        title: publish.errorApprovingMsg
+          ? t(I18Keys.unpublishingErrorTitle)
+          : t(I18Keys.unpublishingTitle),
+        parragraphs: publish.errorApprovingMsg
+          ? [
+              <Trans
+                i18nKey={I18Keys.unpublishingErrorPar01}
+                components={{ b: <b></b> }}></Trans>,
+              <BoxCentered>
+                <Text>{publish.errorApprovingMsg}</Text>
+              </BoxCentered>,
+            ]
+          : [
+              <Trans
+                i18nKey={I18Keys.unpublishingPar01}
+                components={{ b: <b></b> }}></Trans>,
+              <BoxCentered>
+                <Loading></Loading>
+              </BoxCentered>,
+            ],
+      }}></AppModalStandard>
+  );
 
-  const publishedModal = (() => {
-    return (
-      <AppModalStandard
-        onModalClosed={() => publishedModalClosed(PublishPostAction.None)}
-        backgroundColor="#D1E8DF"
-        type="normal"
-        contentProps={{
-          icon: <CelebrateIcon size={40}></CelebrateIcon>,
-          title: t(I18Keys.publishedTitle),
-          parragraphs: [
-            <Trans
-              i18nKey={I18Keys.publishedTextPar1}
-              components={{ b: <b></b> }}></Trans>,
-            <Trans
-              i18nKey={I18Keys.publishedTextPar2}
-              components={{ b: <b></b> }}></Trans>,
-          ],
-          buttonsDirection: 'column',
-          primaryButton: {
-            disabled: navigatePost.nextPostId === undefined,
-            label: t(I18Keys.nextPost),
-            onClick: () => publishedModalClosed(PublishPostAction.nextPost),
-          },
-          secondaryButton: {
-            disabled: updated.isUpdating,
-            label: t(I18Keys.openPublished),
-            onClick: () => openNanopublication(),
-          },
-        }}></AppModalStandard>
-    );
-  })();
+  const unpublishApprove = (
+    <AppModalStandard
+      onModalClosed={() => publish.setUnpublishIntent(false)}
+      type="normal"
+      contentProps={{
+        type: 'normal',
+        title: t(I18Keys.unpublishWarningTitle),
+        parragraphs: [
+          <Trans
+            i18nKey={I18Keys.unpublishWarningPar01}
+            components={{ b: <b></b> }}></Trans>,
+        ],
+        primaryButton: {
+          disabled: publish.isRetracting,
+          label: t(I18Keys.yesUnpublish),
+          onClick: () => unpublishApproved(),
+        },
+        secondaryButton: {
+          disabled: publish.isRetracting,
+          label: t(I18Keys.returnToNanopub),
+          onClick: () => reset(),
+        },
+      }}></AppModalStandard>
+  );
+
+  const publishedModal = (
+    <AppModalStandard
+      onModalClosed={() => publishedModalClosed(PublishPostAction.None)}
+      backgroundColor="#D1E8DF"
+      type="normal"
+      contentProps={{
+        icon: <CelebrateIcon size={40}></CelebrateIcon>,
+        title: t(I18Keys.publishedTitle),
+        parragraphs: [
+          <Trans
+            i18nKey={I18Keys.publishedTextPar1}
+            components={{ b: <b></b> }}></Trans>,
+          <Trans
+            i18nKey={I18Keys.publishedTextPar2}
+            components={{ b: <b></b> }}></Trans>,
+        ],
+        buttonsDirection: 'column',
+        primaryButton: {
+          disabled: navigatePost.nextPostId === undefined,
+          label: t(I18Keys.nextPost),
+          onClick: () => publishedModalClosed(PublishPostAction.nextPost),
+        },
+        secondaryButton: {
+          disabled: updated.isUpdating,
+          label: t(I18Keys.openPublished),
+          onClick: () => openNanopublication(),
+        },
+      }}></AppModalStandard>
+  );
 
   const publishStatusModal = useMemo(() => {
     if (DEBUG)
@@ -397,6 +444,10 @@ export const PostPublishStatusModals = () => {
     orcid,
     disableOrcidInvitePers,
     disablePubWarningPers,
+    finalApprove,
+    askOrcid,
+    publishedModal,
+    publishingModal,
   ]);
 
   const unPublishStatusModal = (() => {
@@ -410,8 +461,6 @@ export const PostPublishStatusModals = () => {
       <></>
     );
   })();
-
-  if (DEBUG) console.log(publishStatusModal);
 
   return (
     <>
