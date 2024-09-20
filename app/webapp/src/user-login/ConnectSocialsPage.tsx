@@ -4,22 +4,33 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { AppLogo } from '../app/brand/AppLogo';
 import { MastodonIcon, TwitterIcon } from '../app/common/Icons';
+import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { I18Keys } from '../i18n/i18n';
 import { AppButton, AppHeading } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
 import { Loading } from '../ui-components/LoadingDiv';
-import { LoginFlowState, OverallLoginStatus, useAccountContext } from './contexts/AccountContext';
+import { PlatformSection } from '../user-settings/PlatformsSection';
+import {
+  LoginFlowState,
+  OverallLoginStatus,
+  useAccountContext,
+} from './contexts/AccountContext';
 import { useDisconnectContext } from './contexts/DisconnectUserContext';
 import { useMastodonContext } from './contexts/platforms/MastodonContext';
 import { useTwitterContext } from './contexts/platforms/TwitterContext';
 import { isValidMastodonDomain } from './user.helper';
-import { PlatformSection } from '../user-settings/PlatformsSection';
 
 export const ConnectSocialsPage = () => {
   const { t } = useTranslation();
-  const { loginFlowState, twitterProfile, mastodonProfile, setOverallLoginStatus } = useAccountContext();
+  const {
+    loginFlowState,
+    twitterProfile,
+    mastodonProfile,
+    setOverallLoginStatus,
+  } = useAccountContext();
   const { connect: connectTwitter } = useTwitterContext();
-  const { connect: connectMastodon, error: mastodonError } = useMastodonContext();
+  const { connect: connectMastodon, error: mastodonError } =
+    useMastodonContext();
   const { disconnect } = useDisconnectContext();
   const [mastodonDomain, setMastodonDomain] = useState('');
 
@@ -43,7 +54,15 @@ export const ConnectSocialsPage = () => {
                 components={{ b: <b></b> }}></Trans>
             </AppParagraph>
             <PlatformSection
-              icon={<TwitterIcon size={40} color="black"></TwitterIcon>}
+              icon={
+                twitterProfile ? (
+                  <PlatformAvatar
+                    profileImageUrl={twitterProfile?.profile_image_url}
+                  />
+                ) : (
+                  <TwitterIcon size={40} color="black"></TwitterIcon>
+                )
+              }
               platformName={t(I18Keys.XTwitter)}
               onButtonClicked={() => connectTwitter('read')}
               buttonText={twitterProfile ? '' : 'connect'}
@@ -51,11 +70,23 @@ export const ConnectSocialsPage = () => {
               connected={!!twitterProfile}
             />
             <PlatformSection
-              icon={<MastodonIcon size={40} color="purple"></MastodonIcon>}
+              icon={
+                mastodonProfile ? (
+                  <PlatformAvatar profileImageUrl={mastodonProfile?.avatar} />
+                ) : (
+                  <MastodonIcon size={40} color="white"></MastodonIcon>
+                )
+              }
               platformName={'Mastodon'}
-              onButtonClicked={(inputText) => connectMastodon(inputText || '', 'read')}
+              onButtonClicked={(inputText) =>
+                connectMastodon(inputText || '', 'read')
+              }
               buttonText={mastodonProfile ? '' : 'connect'}
-              username={mastodonProfile ? `@${mastodonProfile.username}@${mastodonProfile.mastodonServer}` : ''}
+              username={
+                mastodonProfile
+                  ? `@${mastodonProfile.username}@${mastodonProfile.mastodonServer}`
+                  : ''
+              }
               connected={!!mastodonProfile}
               hasInput={true}
               inputPlaceholder={t(I18Keys.mastodonServerPlaceholder)}
@@ -78,7 +109,11 @@ export const ConnectSocialsPage = () => {
             />
           </Box>
           <Box align="center" margin={{ top: 'small' }}>
-            <AppButton plain label={t(I18Keys.logout)} onClick={() => disconnect()} />
+            <AppButton
+              plain
+              label={t(I18Keys.logout)}
+              onClick={() => disconnect()}
+            />
           </Box>
         </Box>
       );
