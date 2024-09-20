@@ -96,11 +96,7 @@ export const PostPublishStatusModals = () => {
   };
 
   useEffect(() => {
-    if (
-      publish.publishIntent &&
-      disableOrcidInvitePers &&
-      disablePubWarningPers
-    ) {
+    if (publish.publishIntent && disablePubWarningPers) {
       if (DEBUG) console.log(`publishApproved directly ${fetched.post?.id}`);
       publishApproved();
     }
