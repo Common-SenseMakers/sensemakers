@@ -107,4 +107,15 @@ export class UsersHelper {
 
     return platformIds;
   }
+
+  /** return a list of platformIds which have at least one account that hasn't yet fetched from platform */
+  static platformsWithoutFetch(user: AppUser): PUBLISHABLE_PLATFORMS[] {
+    return Array.from(
+      new Set(
+        UsersHelper.getAllAccounts(user)
+          .filter((platformDetails) => !platformDetails.account.fetched)
+          .map((platformDetails) => platformDetails.platform)
+      )
+    );
+  }
 }

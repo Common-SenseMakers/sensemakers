@@ -223,7 +223,7 @@ export const getTwitterMock = (
                   getSampleTweet(
                     '500',
                     userDetails.user_id,
-                    Date.now() + 5,
+                    Date.now() - 24 * 60 * 60 * 1000 * 1,
                     '500',
                     ''
                   ),
@@ -240,21 +240,21 @@ export const getTwitterMock = (
                   getSampleTweet(
                     '400',
                     userDetails.user_id,
-                    Date.now() + 4,
+                    Date.now() - 24 * 60 * 60 * 1000 * 2,
                     '400',
                     ''
                   ),
                   getSampleTweet(
                     '401',
                     userDetails.user_id,
-                    Date.now() + 4,
+                    Date.now() - 24 * 60 * 60 * 1000 * 2,
                     '401',
                     ''
                   ),
                   getSampleTweet(
                     '402',
                     userDetails.user_id,
-                    Date.now() + 4,
+                    Date.now() - 24 * 60 * 60 * 1000 * 2,
                     '402',
                     ''
                   ),
@@ -271,14 +271,14 @@ export const getTwitterMock = (
                   getSampleTweet(
                     '300',
                     userDetails.user_id,
-                    Date.now() + 3,
+                    Date.now() - 24 * 60 * 60 * 1000 * 3,
                     '300',
                     ''
                   ),
                   getSampleTweet(
                     '301',
                     userDetails.user_id,
-                    Date.now() + 3,
+                    Date.now() - 24 * 60 * 60 * 1000 * 3,
                     '301',
                     ''
                   ),
@@ -295,21 +295,21 @@ export const getTwitterMock = (
                   getSampleTweet(
                     '200',
                     userDetails.user_id,
-                    Date.now() + 2,
+                    Date.now() - 24 * 60 * 60 * 1000 * 4,
                     '200',
                     ''
                   ),
                   getSampleTweet(
                     '201',
                     userDetails.user_id,
-                    Date.now() + 2,
+                    Date.now() - 24 * 60 * 60 * 1000 * 4,
                     '201',
                     ''
                   ),
                   getSampleTweet(
                     '202',
                     userDetails.user_id,
-                    Date.now() + 2,
+                    Date.now() - 24 * 60 * 60 * 1000 * 4,
                     '202',
                     ''
                   ),
@@ -326,21 +326,21 @@ export const getTwitterMock = (
                   getSampleTweet(
                     '100',
                     userDetails.user_id,
-                    Date.now() + 1,
+                    Date.now() - 24 * 60 * 60 * 1000 * 5,
                     '100',
                     ''
                   ),
                   getSampleTweet(
                     '101',
                     userDetails.user_id,
-                    Date.now() + 1,
+                    Date.now() - 24 * 60 * 60 * 1000 * 5,
                     '101',
                     ''
                   ),
                   getSampleTweet(
                     '102',
                     userDetails.user_id,
-                    Date.now() + 1,
+                    Date.now() - 24 * 60 * 60 * 1000 * 5,
                     '102',
                     ''
                   ),

@@ -322,61 +322,65 @@ export class PostsManager {
         if (DEBUG) logger.debug(`fetchUser user: ${user.userId}`, { user });
 
         return Promise.all(
-          ALL_PUBLISH_PLATFORMS.map(async (platformId) => {
-            const accounts = UsersHelper.getAccounts(user, platformId);
-            /** Call fetch for each account */
-            return Promise.all(
-              accounts.map(
-                async (account): Promise<PlatformPostCreated[] | undefined> => {
-                  /** Fetch */
-                  try {
-                    if (DEBUG)
-                      logger.debug(
-                        `fetchUser - fetchAccount. platformId:${platformId} - account:${account.user_id}`,
-                        {
+          (inputs.params.platformIds || ALL_PUBLISH_PLATFORMS).map(
+            async (platformId) => {
+              const accounts = UsersHelper.getAccounts(user, platformId);
+              /** Call fetch for each account */
+              return Promise.all(
+                accounts.map(
+                  async (
+                    account
+                  ): Promise<PlatformPostCreated[] | undefined> => {
+                    /** Fetch */
+                    try {
+                      if (DEBUG)
+                        logger.debug(
+                          `fetchUser - fetchAccount. platformId:${platformId} - account:${account.user_id}`,
+                          {
+                            platformId,
+                          }
+                        );
+
+                      const platformPostsCreate =
+                        await this.fetchUserFromPlatform(
                           platformId,
-                        }
-                      );
+                          inputs.params,
+                          account,
+                          manager
+                        );
 
-                    const platformPostsCreate =
-                      await this.fetchUserFromPlatform(
-                        platformId,
-                        inputs.params,
-                        account,
-                        manager
-                      );
+                      if (!platformPostsCreate) {
+                        return;
+                      }
 
-                    if (!platformPostsCreate) {
-                      return;
+                      /** Create the PlatformPosts and AppPosts */
+                      const platformPostsCreated =
+                        await this.processing.createPlatformPosts(
+                          platformPostsCreate,
+                          manager
+                        );
+
+                      if (DEBUG)
+                        logger.debug(
+                          `fetchUser - platformId:${platformId} - account:${account.user_id} - platformPostsCreated: ${platformPostsCreated.length}`,
+                          {
+                            platformPostsCreated,
+                          }
+                        );
+
+                      return platformPostsCreated;
+                    } catch (err: any) {
+                      logger.error(
+                        `Error fetching posts for user ${user.userId} on platform ${platformId}`,
+                        err
+                      );
+                      throw new Error(err.message);
                     }
-
-                    /** Create the PlatformPosts and AppPosts */
-                    const platformPostsCreated =
-                      await this.processing.createPlatformPosts(
-                        platformPostsCreate,
-                        manager
-                      );
-
-                    if (DEBUG)
-                      logger.debug(
-                        `fetchUser - platformId:${platformId} - account:${account.user_id} - platformPostsCreated: ${platformPostsCreated.length}`,
-                        {
-                          platformPostsCreated,
-                        }
-                      );
-
-                    return platformPostsCreated;
-                  } catch (err: any) {
-                    logger.error(
-                      `Error fetching posts for user ${user.userId} on platform ${platformId}`,
-                      err
-                    );
-                    throw new Error(err.message);
                   }
-                }
-              )
-            );
-          })
+                )
+              );
+            }
+          )
         );
       }
     );
@@ -408,6 +412,20 @@ export class PostsManager {
       if (queryParams.status === PostsQueryStatus.DRAFTS) {
         if (appPosts.length < queryParams.fetchParams.expectedAmount) {
           await this.fetchUser({ userId, params: queryParams.fetchParams });
+          return this.processing.posts.getOfUser(userId, queryParams);
+        }
+        const user = await this.db.run((manager) => {
+          return this.users.repo.getUser(userId, manager, true);
+        });
+        const platformsWithoutFetch = UsersHelper.platformsWithoutFetch(user);
+        if (platformsWithoutFetch.length > 0) {
+          await this.fetchUser({
+            userId,
+            params: {
+              ...queryParams.fetchParams,
+              platformIds: platformsWithoutFetch,
+            },
+          });
           return this.processing.posts.getOfUser(userId, queryParams);
         }
       }

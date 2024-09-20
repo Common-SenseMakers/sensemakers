@@ -13,6 +13,7 @@ import {
   TestUserCredentials,
   UserDetailsBase,
 } from '../../../@shared/types/types.user';
+import { APP_URL } from '../../../config/config.runtime';
 import { TransactionManager } from '../../../db/transaction.manager';
 import { getTestCredentials } from '../../mock/test.users';
 import { MastodonService } from '../mastodon.service';
@@ -50,6 +51,18 @@ export const getMastodonMock = (
         userDetails: UserDetailsBase,
         manager: TransactionManager
       ) => {
+        if (params.since_id) {
+          return {
+            fetched: {},
+            platformPosts: [],
+          };
+        }
+        if (params.until_id) {
+          return {
+            fetched: {},
+            platformPosts: [],
+          };
+        }
         return {
           fetched: {
             newest_id: '113093358996832469',
@@ -59,7 +72,7 @@ export const getMastodonMock = (
             {
               post_id: '113093259230165857',
               user_id: '111971425782516559',
-              timestampMs: 1725666186984,
+              timestampMs: Date.now() - 24 * 60 * 60 * 1000 * 1,
               post: {
                 thread_id: '113093259230165857',
                 posts: [
@@ -248,7 +261,7 @@ export const getMastodonMock = (
             {
               post_id: '113092008685099862',
               user_id: '111971425782516559',
-              timestampMs: 1725647105180,
+              timestampMs: Date.now() - 24 * 60 * 60 * 1000 * 2,
               post: {
                 thread_id: '113092008685099862',
                 posts: [
@@ -463,7 +476,7 @@ export const getMastodonMock = (
             {
               post_id: '113091840795490491',
               user_id: '111971425782516559',
-              timestampMs: 1725644543392,
+              timestampMs: Date.now() - 24 * 60 * 60 * 1000 * 3,
               post: {
                 thread_id: '113091840795490491',
                 posts: [
@@ -738,7 +751,7 @@ export const getMastodonMock = (
             {
               post_id: '112961900843400369',
               user_id: '111971425782516559',
-              timestampMs: 1723661817071,
+              timestampMs: Date.now() - 24 * 60 * 60 * 1000 * 4,
               post: {
                 thread_id: '112961900843400369',
                 posts: [
@@ -892,7 +905,7 @@ export const getMastodonMock = (
             {
               post_id: '112639305281497968',
               user_id: '111971425782516559',
-              timestampMs: 1718739399445,
+              timestampMs: Date.now() - 24 * 60 * 60 * 1000 * 5,
               post: {
                 thread_id: '112639305281497968',
                 posts: [
@@ -1024,7 +1037,7 @@ export const getMastodonMock = (
             {
               post_id: '112276902679185529',
               user_id: '111971425782516559',
-              timestampMs: 1713209574613,
+              timestampMs: Date.now() - 24 * 60 * 60 * 1000 * 6,
               post: {
                 thread_id: '112276902679185529',
                 posts: [
@@ -1358,9 +1371,12 @@ export const getMastodonMock = (
         user_id?: string,
         params?: MastodonGetContextParams
       ): MastodonSignupContext => {
+        const callbackUrl = new URL(
+          params?.callback_url ? params.callback_url : APP_URL.value()
+        );
+        callbackUrl.searchParams.set('code', 'testCode');
         return {
-          authorizationUrl:
-            'https://cosocial.ca/oauth/authorize?client_id=SE2qVBbK1J_-6za-JX-6H-NsGrbdIuARZk4Q6gpUxbk&scope=read+write+follow+push&redirect_uri=https%3A%2F%2Fphanpy.social%2F&response_type=code',
+          authorizationUrl: callbackUrl.toString(),
           clientId: 'SE2qVBbK1J_-6za-JX-6H-NsGrbdIuARZk4Q6gpUxbk',
           clientSecret: user_id ? user_id : '12341234',
         };

@@ -195,6 +195,14 @@ export const usePostsFetch = () => {
     }
   }, [posts, fetchedOlderFirst, connectedUser]);
 
+  useEffect(() => {
+    if (posts.length > 0 && twitterProfile && mastodonProfile) {
+      if (DEBUG) console.log('first fetch older with new platform added');
+      reset();
+      _fetchOlder(undefined);
+    }
+  }, [connectedUser]);
+
   /** whenever posts have been fetched, check if we have fetched for newer posts yet, and if not, fetch for newer */
   useEffect(() => {
     if (posts.length !== 0 && !fetchedNewerFirst && connectedUser) {
