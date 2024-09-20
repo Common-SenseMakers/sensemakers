@@ -104,7 +104,7 @@ export const PostPublishStatusModals = () => {
       if (DEBUG) console.log(`publishApproved directly ${fetched.post?.id}`);
       publishApproved();
     }
-  }, [publish.publishIntent]);
+  }, [publish.publishIntent, disableOrcidInvitePers, disablePubWarningPers]);
 
   const unpublishApproved = () => {
     if (DEBUG) console.log(`unpublishApproved ${fetched.postId}`);
@@ -194,12 +194,13 @@ export const PostPublishStatusModals = () => {
     }
   };
 
-  console.log('publishModal disables', {
-    disableOrcidInviteLocal,
-    disableOrcidInvitePers,
-    disablePubWarningLocal,
-    disablePubWarningPers,
-  });
+  if (DEBUG)
+    console.log('publishModal disables', {
+      disableOrcidInviteLocal,
+      disableOrcidInvitePers,
+      disablePubWarningLocal,
+      disablePubWarningPers,
+    });
 
   const askOrcid = (
     <AppModalStandard
