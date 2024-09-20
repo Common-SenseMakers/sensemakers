@@ -1,27 +1,33 @@
-import { Anchor, Box } from 'grommet';
+import { Box } from 'grommet';
 import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { AppLogo } from '../app/brand/AppLogo';
 import { MastodonIcon, TwitterIcon } from '../app/common/Icons';
 import { I18Keys } from '../i18n/i18n';
-import { AppButton, AppHeading, AppInput } from '../ui-components';
+import { AppButton, AppHeading } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
 import { Loading } from '../ui-components/LoadingDiv';
-import { LoginFlowState, useAccountContext } from './contexts/AccountContext';
+import { LoginFlowState, OverallLoginStatus, useAccountContext } from './contexts/AccountContext';
 import { useDisconnectContext } from './contexts/DisconnectUserContext';
 import { useMastodonContext } from './contexts/platforms/MastodonContext';
 import { useTwitterContext } from './contexts/platforms/TwitterContext';
 import { isValidMastodonDomain } from './user.helper';
+import { PlatformSection } from '../user-settings/PlatformsSection';
 
-export const ConnectSocialsPage = (props: {}) => {
+export const ConnectSocialsPage = () => {
   const { t } = useTranslation();
-  const { loginFlowState } = useAccountContext();
+  const { loginFlowState, twitterProfile, mastodonProfile, setOverallLoginStatus } = useAccountContext();
   const { connect: connectTwitter } = useTwitterContext();
-  const { connect: connectMastodon, error: mastodonError } =
-    useMastodonContext();
+  const { connect: connectMastodon, error: mastodonError } = useMastodonContext();
   const { disconnect } = useDisconnectContext();
   const [mastodonDomain, setMastodonDomain] = useState('');
+
+  const handleContinue = () => {
+    if (twitterProfile || mastodonProfile) {
+      setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
+    }
+  };
 
   const content = (() => {
     if (connectTwitter && connectMastodon) {
@@ -36,44 +42,43 @@ export const ConnectSocialsPage = (props: {}) => {
                 i18nKey={I18Keys.connectSocialsParagraph2}
                 components={{ b: <b></b> }}></Trans>
             </AppParagraph>
-            <AppButton
-              margin={{ top: 'large' }}
-              primary
-              disabled={loginFlowState === LoginFlowState.ConnectingTwitter}
-              icon={<TwitterIcon></TwitterIcon>}
-              label={t(I18Keys.signInX)}
-              onClick={() => connectTwitter('read')}></AppButton>
-            <Box margin={{ top: 'medium' }}>
-              <AppParagraph>{t(I18Keys.mastodonServer)}</AppParagraph>
-              <AppInput
-                placeholder={t(I18Keys.mastodonServerPlaceholder)}
-                value={mastodonDomain}
-                onChange={(event) => setMastodonDomain(event.target.value)}
-                style={{ width: '100%' }}
-              />
-              <AppButton
-                margin={{ top: 'small' }}
-                primary
-                disabled={
-                  loginFlowState === LoginFlowState.ConnectingMastodon ||
-                  !isValidMastodonDomain(mastodonDomain)
-                }
-                icon={<MastodonIcon color="white"></MastodonIcon>}
-                label={t(I18Keys.signInMastodon)}
-                onClick={() =>
-                  connectMastodon(mastodonDomain, 'read')
-                }></AppButton>
-              {mastodonError && (
-                <Box margin={{ top: 'small' }}>
-                  <AppParagraph color="status-error">
-                    {mastodonError}
-                  </AppParagraph>
-                </Box>
-              )}
-            </Box>
+            <PlatformSection
+              icon={<TwitterIcon size={40} color="black"></TwitterIcon>}
+              platformName={t(I18Keys.XTwitter)}
+              onButtonClicked={() => connectTwitter('read')}
+              buttonText={twitterProfile ? '' : 'connect'}
+              username={twitterProfile ? `@${twitterProfile.username}` : ''}
+              connected={!!twitterProfile}
+            />
+            <PlatformSection
+              icon={<MastodonIcon size={40} color="purple"></MastodonIcon>}
+              platformName={'Mastodon'}
+              onButtonClicked={(inputText) => connectMastodon(inputText || '', 'read')}
+              buttonText={mastodonProfile ? '' : 'connect'}
+              username={mastodonProfile ? `@${mastodonProfile.username}@${mastodonProfile.mastodonServer}` : ''}
+              connected={!!mastodonProfile}
+              hasInput={true}
+              inputPlaceholder={t(I18Keys.mastodonServerPlaceholder)}
+              isValidInput={isValidMastodonDomain}
+            />
+            {mastodonError && (
+              <Box margin={{ top: 'small' }}>
+                <AppParagraph color="status-error">
+                  {mastodonError}
+                </AppParagraph>
+              </Box>
+            )}
           </Box>
-          <Box align="center">
-            <Anchor onClick={() => disconnect()}>{t(I18Keys.logout)}</Anchor>
+          <Box align="center" margin={{ top: 'medium' }}>
+            <AppButton
+              primary
+              label={t(I18Keys.continue)}
+              onClick={handleContinue}
+              disabled={!twitterProfile && !mastodonProfile}
+            />
+          </Box>
+          <Box align="center" margin={{ top: 'small' }}>
+            <AppButton plain label={t(I18Keys.logout)} onClick={() => disconnect()} />
           </Box>
         </Box>
       );
@@ -81,6 +86,7 @@ export const ConnectSocialsPage = (props: {}) => {
       return <Loading></Loading>;
     }
   })();
+
   return (
     <Box
       pad={{ horizontal: 'medium', vertical: 'large' }}
