@@ -96,9 +96,26 @@ export const PostPublishStatusModals = () => {
   };
 
   useEffect(() => {
-    if (publish.publishIntent && disablePubWarningPers) {
+    if (
+      publish.publishIntent &&
+      disableOrcidInvitePers &&
+      disablePubWarningPers
+    ) {
       if (DEBUG) console.log(`publishApproved directly ${fetched.post?.id}`);
       publishApproved();
+    }
+
+    if (publish.publishIntent && disablePubWarningPers) {
+      if (!orcid) {
+        if (DEBUG) console.log(`force show askOrcid modal ${fetched.post?.id}`);
+        setAskedOrcid(true);
+      } else {
+        if (DEBUG)
+          console.log(
+            `just publish the user already have orcid ${fetched.post?.id}`
+          );
+        publishApproved();
+      }
     }
   }, [publish.publishIntent, disableOrcidInvitePers, disablePubWarningPers]);
 
