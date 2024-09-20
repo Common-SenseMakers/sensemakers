@@ -15,8 +15,6 @@ import { useSemanticsStore } from '../common/use.semantics';
 import { PatternProps } from '../patterns';
 
 export const KeywordsComponent = (props: PatternProps) => {
-  const { constants } = useThemeContext();
-
   /** actual semantics */
   const { store } = useSemanticsStore(props);
 
@@ -77,6 +75,7 @@ export const KeywordsComponent = (props: PatternProps) => {
       <Box direction="row" gap="10px" pad={{ vertical: '8px' }}>
         {[0, 1, 2].map((n) => (
           <LoadingDiv
+            key={n}
             height={'24px'}
             style={{ borderRadius: '8px', width: '120px' }}></LoadingDiv>
         ))}

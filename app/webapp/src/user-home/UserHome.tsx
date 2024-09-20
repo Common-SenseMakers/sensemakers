@@ -14,6 +14,7 @@ import { ViewportPageScrollContext } from '../app/layout/Viewport';
 import { I18Keys } from '../i18n/i18n';
 import { PostCard } from '../post/PostCard';
 import { PostCardLoading } from '../post/PostCardLoading';
+import { PostContext } from '../post/post.context/PostContext';
 import { PostsQueryStatus, UserPostsQuery } from '../shared/types/types.posts';
 import { AppButton, AppHeading, AppModal, AppSelect } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
@@ -22,6 +23,8 @@ import { useThemeContext } from '../ui-components/ThemedApp';
 import { usePersist } from '../utils/use.persist';
 import { IntroModals } from './IntroModal';
 import { useUserPosts } from './UserPostsContext';
+
+const DEBUG = false;
 
 const statusPretty: Record<PostsQueryStatus, string> = {
   drafts: 'All Drafts',
@@ -37,7 +40,7 @@ export const UserHome = () => {
   const { t } = useTranslation();
   const { show } = useToastContext();
 
-  const { hasUpdate, needsInstall, updateApp, install } = useServiceWorker();
+  const { hasUpdate, updateApp } = useServiceWorker();
 
   const [introShown, setIntroShown] = usePersist<boolean>(INTRO_SHOWN, false);
   const [showIntro, setShowIntro] = useState<boolean>(false);
@@ -60,6 +63,21 @@ export const UserHome = () => {
     isLoading,
     moreToFetch,
   } = useUserPosts();
+
+  if (DEBUG) {
+    console.log('UserHome', {
+      filterStatus,
+      posts,
+      fetchOlder,
+      errorFetchingOlder,
+      isFetchingOlder,
+      fetchNewer,
+      isFetchingNewer,
+      errorFetchingNewer,
+      isLoading,
+      moreToFetch,
+    });
+  }
 
   const { isAtBottom } = useContext(ViewportPageScrollContext);
   const location = useLocation();
@@ -170,12 +188,13 @@ export const UserHome = () => {
         <Box>
           {posts.map((post, ix) => (
             <Box key={ix} id={`post-${post.id}`}>
-              <PostCard
-                post={post}
-                handleClick={() => {
-                  const path = `/post/${post.id}`;
-                  navigate(path);
-                }}></PostCard>
+              <PostContext postInit={post}>
+                <PostCard
+                  handleClick={() => {
+                    const path = `/post/${post.id}`;
+                    navigate(path);
+                  }}></PostCard>
+              </PostContext>
             </Box>
           ))}
         </Box>

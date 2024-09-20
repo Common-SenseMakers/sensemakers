@@ -52,14 +52,22 @@ export const processSemantics = (
   }
 
   /** then append the metadata for each ref */
-  for (const [ref, value] of Array.from(refs.entries())) {
+  const refsArray = Array.from(refs.entries());
+  refsArray.sort((a, b) => {
+    const orderA = support?.refs_meta?.[a[0]]?.order ?? Infinity;
+    const orderB = support?.refs_meta?.[b[0]]?.order ?? Infinity;
+    return orderA - orderB;
+  });
+
+  const sortedRefs: RefsMap = new Map();
+  for (const [ref, value] of refsArray) {
     const meta = support?.refs_meta ? support.refs_meta[ref] : undefined;
 
-    refs.set(ref, {
+    sortedRefs.set(ref, {
       labelsUris: value ? value.labelsUris : [],
       meta,
     });
   }
 
-  return refs;
+  return sortedRefs;
 };

@@ -18,6 +18,7 @@ export const RefWithLabels = (props: {
   addLabel: (labelUri: string) => void;
   removeLabel: (labelUri: string) => void;
   editable?: boolean;
+  allRefs: [string, RefData][];
 }) => {
   const labelsOntology = props.support?.ontology?.semantic_predicates;
   const refData = props.refData;
@@ -88,7 +89,8 @@ export const RefWithLabels = (props: {
           title={refData.meta?.title}
           description={refData.meta?.summary}
           image={refData.meta?.image}
-          refType={refData.meta.item_type}></RefCard>
+          refType={refData.meta.item_type}
+          sourceRef={getSourceRefNumber(refData.meta, props.allRefs)}></RefCard>
       ) : (
         <Anchor target="_blank" href={props.refUrl}>
           {props.refUrl}
@@ -96,4 +98,13 @@ export const RefWithLabels = (props: {
       )}
     </Box>
   );
+};
+
+const getSourceRefNumber = (meta: RefMeta, allRefs: [string, RefData][]) => {
+  const currRefData = allRefs.find(([ref]) => ref === meta.url);
+
+  const refSource = allRefs.find(
+    ([ref]) => ref === currRefData?.[1].meta?.ref_source_url
+  );
+  return refSource?.[1].meta?.order ? refSource[1].meta.order : undefined;
 };

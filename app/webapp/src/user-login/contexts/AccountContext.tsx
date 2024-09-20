@@ -8,10 +8,13 @@ import {
 } from 'react';
 
 import { _appFetch } from '../../api/app.fetch';
+import { NotificationFreq } from '../../shared/types/types.notifications';
 import { OrcidUserProfile } from '../../shared/types/types.orcid';
 import { TwitterUserProfile } from '../../shared/types/types.twitter';
 import {
+  AccountDetailsRead,
   AppUserRead,
+  AutopostOption,
   EmailDetails,
   PLATFORM,
 } from '../../shared/types/types.user';
@@ -40,7 +43,9 @@ export type AccountContextType = {
   resetLogin: () => void;
   setTwitterConnectedStatus: (status: TwitterConnectedStatus) => void;
   twitterConnectedStatus: TwitterConnectedStatus | undefined;
-  orcidProfile?: OrcidUserProfile;
+  orcid?: AccountDetailsRead<OrcidUserProfile>;
+  currentAutopost?: AutopostOption;
+  currentNotifications?: NotificationFreq;
 };
 
 const AccountContextValue = createContext<AccountContextType | undefined>(
@@ -142,17 +147,24 @@ export const AccountContext = (props: PropsWithChildren) => {
    */
   useEffect(() => {
     if (DEBUG)
-      console.log('connectedUser', {
+      console.log('overallStatus update effect', {
         connectedUser,
         overallLoginStatus,
         twitter: connectedUser?.email,
       });
 
+    /**
+     * once connected user is defined and has an email, but there is no
+     * twitter, the user is partially logged in
+     */
     if (connectedUser && connectedUser.email && !twitterProfile) {
       setOverallLoginStatus(OverallLoginStatus.PartialLoggedIn);
-      return;
     }
 
+    /**
+     * once the user is partiallyLoggedIn and has a twitter profile
+     * then the user is FullyLoggedIn
+     */
     if (
       connectedUser &&
       connectedUser.email &&
@@ -161,26 +173,25 @@ export const AccountContext = (props: PropsWithChildren) => {
     ) {
       setTwitterConnectedStatus(TwitterConnectedStatus.Connected);
       setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
-      return;
     }
 
-    if (overallLoginStatus === OverallLoginStatus.NotKnown) {
-      setOverallLoginStatus(OverallLoginStatus.LoggedOut);
-      return;
-    }
-
+    /** If finished fetching for connected user and is undefined, then
+     * the status is not not-known, its a confirmed LoggedOut */
     if (
-      !token &&
-      !connectedUser &&
-      overallLoginStatus !== OverallLoginStatus.LogginIn
+      overallLoginStatus === OverallLoginStatus.NotKnown &&
+      connectedUser === undefined
     ) {
-      setOverallLoginStatus(OverallLoginStatus.LoggedOut);
+      disconnect();
     }
   }, [connectedUser, overallLoginStatus, token]);
 
   const disconnect = () => {
     setConnectedUser(undefined);
+    _setLoginFlowState(LoginFlowState.Idle);
+    _setOverallLoginStatus(OverallLoginStatus.LoggedOut);
+    setTwitterConnectedStatus(TwitterConnectedStatus.Disconnected);
     setToken(null);
+    setOverallLoginStatus(OverallLoginStatus.LoggedOut);
   };
 
   const twitterProfile = useMemo(() => {
@@ -193,15 +204,20 @@ export const AccountContext = (props: PropsWithChildren) => {
     return profile;
   }, [connectedUser]);
 
-  const orcidProfile = useMemo(() => {
+  const orcid = useMemo(() => {
     const profile = connectedUser
-      ? getAccount(connectedUser, PLATFORM.Orcid)?.profile
+      ? getAccount<OrcidUserProfile>(connectedUser, PLATFORM.Orcid)
       : undefined;
 
     if (DEBUG) console.log('orcidProfile', { profile });
 
     return profile;
   }, [connectedUser]);
+
+  const currentAutopost =
+    connectedUser?.settings?.autopost[PLATFORM.Nanopub].value;
+
+  const currentNotifications = connectedUser?.settings?.notificationFreq;
 
   const email = connectedUser ? connectedUser.email : undefined;
 
@@ -223,7 +239,9 @@ export const AccountContext = (props: PropsWithChildren) => {
         resetLogin,
         setTwitterConnectedStatus,
         twitterConnectedStatus,
-        orcidProfile,
+        orcid,
+        currentAutopost,
+        currentNotifications,
       }}>
       {props.children}
     </AccountContextValue.Provider>
