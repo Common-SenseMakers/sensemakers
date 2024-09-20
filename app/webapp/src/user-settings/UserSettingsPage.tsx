@@ -5,6 +5,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useAppFetch } from '../api/app.fetch';
 import { AutopostIcon } from '../app/icons/AutopostIcon';
 import { BellIcon } from '../app/icons/BellIcon';
+import { DocIcon } from '../app/icons/DocIcon';
 import { EmailIcon } from '../app/icons/EmailIcon';
 import { OrcidIcon } from '../app/icons/OrcidIcon';
 import { SupportIcon } from '../app/icons/SupportIcon';
@@ -235,7 +236,7 @@ export const UserSettingsPage = () => {
           }}></SettingsSection>
 
         <SettingsSection
-          icon={<SupportIcon size={24}></SupportIcon>}
+          icon={<DocIcon size={24}></DocIcon>}
           title={t(I18Keys.readTheDocs)}
           description={
             <Trans
