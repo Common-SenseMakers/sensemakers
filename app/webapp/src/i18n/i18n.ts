@@ -227,9 +227,9 @@ const translationENG: Record<I18Keys, string> = {
     'Harness this knowledge by converting your social media posts into nanopublications, making your content <b>FAIR</b> (<b>F</b>indable, <b>A</b>ccessible, <b>I</b>nteroperable and <b>R</b>eusable), so your contributions can get proper recognition',
   [I18Keys.emailInputBtn]: 'Get started',
 
-  [I18Keys.connectSocialsTitle]: 'Connect your socials',
+  [I18Keys.connectSocialsTitle]: 'Connect your accounts',
   [I18Keys.connectSocialsParagraph]:
-    'Link your X·Twitter or Mastodon account to start transforming your posts into nanopublications.',
+    'Link your accounts to start transforming your posts into nanopublications. You can always change this in your settings.',
   [I18Keys.connectSocialsParagraph2]:
     'By connecting, you can easily identify and FAIRify your valuable scientific insights.',
   [I18Keys.signInX]: 'Sign in with X',

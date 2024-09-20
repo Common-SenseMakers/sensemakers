@@ -1,6 +1,5 @@
 import { Box } from 'grommet';
-import { useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 import { AppLogo } from '../app/brand/AppLogo';
 import { MastodonIcon, TwitterIcon } from '../app/common/Icons';
@@ -11,28 +10,20 @@ import { AppParagraph } from '../ui-components/AppParagraph';
 import { Loading } from '../ui-components/LoadingDiv';
 import { PlatformSection } from '../user-settings/PlatformsSection';
 import {
-  LoginFlowState,
   OverallLoginStatus,
   useAccountContext,
 } from './contexts/AccountContext';
-import { useDisconnectContext } from './contexts/DisconnectUserContext';
 import { useMastodonContext } from './contexts/platforms/MastodonContext';
 import { useTwitterContext } from './contexts/platforms/TwitterContext';
 import { isValidMastodonDomain } from './user.helper';
 
 export const ConnectSocialsPage = () => {
   const { t } = useTranslation();
-  const {
-    loginFlowState,
-    twitterProfile,
-    mastodonProfile,
-    setOverallLoginStatus,
-  } = useAccountContext();
+  const { twitterProfile, mastodonProfile, setOverallLoginStatus } =
+    useAccountContext();
   const { connect: connectTwitter } = useTwitterContext();
   const { connect: connectMastodon, error: mastodonError } =
     useMastodonContext();
-  const { disconnect } = useDisconnectContext();
-  const [mastodonDomain, setMastodonDomain] = useState('');
 
   const handleContinue = () => {
     if (twitterProfile || mastodonProfile) {
@@ -47,11 +38,8 @@ export const ConnectSocialsPage = () => {
           <Box style={{ flexGrow: 1 }}>
             <AppHeading level="1">{t(I18Keys.connectSocialsTitle)}</AppHeading>
             <Box width="100%" height="16px"></Box>
-            <AppParagraph>{t(I18Keys.connectSocialsParagraph)}</AppParagraph>
-            <AppParagraph addMargin>
-              <Trans
-                i18nKey={I18Keys.connectSocialsParagraph2}
-                components={{ b: <b></b> }}></Trans>
+            <AppParagraph margin={{ bottom: 'medium' }}>
+              {t(I18Keys.connectSocialsParagraph)}
             </AppParagraph>
             <PlatformSection
               icon={
