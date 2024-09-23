@@ -1,0 +1,498 @@
+"""Script to map posts from the app to Notion.
+
+Usage:
+  laod_posts_to_notion.py [--Ms=<Ms>] [--count=<count>] 
+
+
+Options:
+--Ms=<Ms> Optional createdAtMs to start from
+--count=<count> Optional amounts of posts to load.
+
+"""
+import os
+from dotenv import load_dotenv
+from notion_client import Client
+import firebase_admin
+from firebase_admin import credentials, firestore
+import datetime
+import docopt
+
+
+#functions for mapping json to Notion profile table
+def lookup_notion_profile(firebase_id):
+    response = notion.databases.query(
+        **{
+            "database_id": PROFILES_DATABASE_ID,
+            "filter": {
+                "property": "firebase_id",  # The property name in Notion
+                "rich_text": {
+                    "equals": firebase_id  # Use 'equals' to match the authorId exactly
+                }
+            }
+        }
+    )
+    
+    # Check if any results are found
+    if response["results"]:
+        print(f"Profile found for authorId: {firebase_id}")
+        return response["results"][0]["id"]  # Return the first matched profile ID if it exists
+    else:
+        print(f"No profile found for authorId: {firebase_id}")
+        return None
+    
+def build_base_notion_profile(profile_doc:dict,profile_id:str):
+    print("in build profile page")
+    platform = profile_doc["platformIds"][0].split(':')[0]
+    profile = profile_doc[platform][0]["profile"]
+    #make handle modular to include mastodon
+    handle = profile["username"]
+    if platform == 'mastodon':
+        handle_field = "Mastodon Handle"
+        platformId_field = "mastodon_id"
+        name = profile['displayName']
+        server = profile['mastodonServer']
+
+    else:
+        handle_field = "Twitter Handle"
+        platformId_field = "twitter_id"
+        name = profile['name']
+        server = ''
+
+    platform_id = profile['id']
+    firebase_id = profile_id
+    response = notion.pages.create(
+        **{
+            "parent": {"database_id": PROFILES_DATABASE_ID},
+            "properties": {
+                "Name": {
+                    "title": [
+                        {
+                            "text": {"content": name}
+                        }
+                    ]
+                },
+                handle_field: {
+                     "rich_text": [
+                        {
+                            "text": {"content": handle}
+                        }
+                    ]
+                },
+                "firebase_id": {
+                     "rich_text": [
+                        {
+                            "text": {"content": firebase_id}
+                        }
+                    ]
+                },
+                "Server": {
+                     "rich_text": [
+                        {
+                            "text": {"content": server}
+                        }
+                    ]
+                },
+                platformId_field: {
+                     "rich_text": [
+                        {
+                            "text": {"content": platform_id}
+                        }
+                    ]
+                },
+                 "Platforms": {
+                    "multi_select": [
+                        {"name": platform} 
+                    ]
+                }
+            }
+        }
+    )
+    
+    print(f"Created new page for profile with name: {name}")
+    return response["id"]  # Return the page ID of the created URL page
+def get_firebase_profile_doc(firebase_id):
+    # Query the profile collection by postId
+    profile_ref = db.collection('users').document(firebase_id)
+
+    # Execute the query
+    doc = profile_ref.get()
+    if doc.exists:
+        print(f'Document data: {doc.to_dict()}')
+        return doc.to_dict()
+    else:
+        print('No such document!')
+        return None
+    
+def load_profile_to_notion(firebase_id:str):
+    notion_id = lookup_notion_profile(firebase_id)
+    if  not notion_id:
+        profile_dict = get_firebase_profile_doc(firebase_id)
+        notion_id = build_base_notion_profile(profile_dict,firebase_id)
+    return notion_id
+
+#Updating Zotero Item types from triples when creating the url object
+def get_url_zotero_triples(url:str):
+    triples_ref = db.collection('triples').where('subject','==',url).where('predicate','==','https://sense-nets.xyz/hasZoteroItemType')
+
+    # Execute the query
+    docs = triples_ref.stream()
+    triples = []
+    # Print the results
+    for doc in docs:
+        triples.append(doc.to_dict())
+        #print(f'{doc.id} => {doc.to_dict()}')
+    print(f'query resulted with {len(triples)} triples')
+    return triples
+
+def get_zotero_types_from_triples(triples:list):
+    types = set(triple["object"] for triple in triples)
+    return types
+
+def get_zotero_types_from_url(url:str):
+    return get_zotero_types_from_triples(get_url_zotero_triples(url))
+
+#Creating URL pages
+def url_notion_lookup(url:str):
+    response = notion.databases.query(
+        **{
+            "database_id": URLS_DATABASE_ID,
+            "filter": {
+                "property": "URL",  # The property name in Notion
+                "url": {
+                    "equals": url  # Use 'equals' to match the authorId exactly
+                }
+            }
+        }
+    )
+    
+    # Check if any results are found
+    if response["results"]:
+        print(f"page found for url: {url}")
+        return response["results"][0]["id"]  # Return the first matched profile ID if it exists
+    else:
+        print(f"No page found for url: {url}")
+        return None
+    
+def create_url_notion_page(url:str):
+    print("in create url page")
+    types = get_zotero_types_from_url(url)
+    response = notion.pages.create(
+        **{
+            "parent": {"database_id": URLS_DATABASE_ID},
+            "properties": {
+                "Name": {
+                    "title": [
+                        {
+                            "text": {"content": url}
+                        }
+                    ]
+                },
+                "URL": {
+                    "url": url
+                },
+                "hasZoteroItemType":{
+                    "multi_select": [{'name':typ} for typ in types]
+                }
+            }
+        }
+    )
+    
+    print(f"Created new page for URL: {url}")
+    return response["id"]  # Return the page ID of the created URL page
+
+#Create Keyword page
+def keyword_notion_lookup(keyword:str):
+    response = notion.databases.query(
+        **{
+            "database_id": KEYWORDS_DATABASE_ID,
+            "filter": {
+                "property": "Name",  # The property name in Notion
+                "title": {
+                    "equals": keyword  # Use 'equals' to match the authorId exactly
+                }
+            }
+        }
+    )
+    
+    # Check if any results are found
+    if response["results"]:
+        print(f"page found for keyword: {keyword}")
+        return response["results"][0]["id"]  # Return the first matched profile ID if it exists
+    else:
+        print(f"No page found for keyword: {keyword}")
+        return None
+
+def create_keyword_notion_page(keyword:str):
+    print("in create page")
+    response = notion.pages.create(
+        **{
+            "parent": {"database_id": KEYWORDS_DATABASE_ID},
+            "properties": {
+                "Name": {
+                    "title": [
+                        {
+                            "text": {"content": keyword}
+                        }
+                    ]
+                }
+            }
+        }
+    )
+    
+    print(f"Created new page for keyword: {keyword}")
+    return response["id"]  # Return the page ID of the created URL page
+
+#Concatenate Threads
+def get_thread(thread_list:list):
+    full_text = ''
+    url = thread_list[0]["url"]
+    for post_dict in thread_list:
+        full_text = f'{full_text} {post_dict["content"]}'
+    return full_text,url
+
+def get_post_triples(post_firebase_id:str):
+    # Query the latest 10 users, ordered by the 'created_at' timestamp in descending order
+    triples_ref = db.collection('triples').where('postId','==',post_firebase_id).where('predicate','in',props)
+
+    # Execute the query
+    docs = triples_ref.stream()
+    triples = []
+    # Print the results
+    for doc in docs:
+        triples.append(doc.to_dict())
+        #print(f'{doc.id} => {doc.to_dict()}')
+    print(f'query resulted with {len(triples)} triples')
+    return triples
+
+#RDF properties to filter triples by
+props = ['https://sense-nets.xyz/summarizes',
+'https://sense-nets.xyz/mentionsCallForPapers',
+'https://sense-nets.xyz/endorses',
+'http://purl.org/spar/cito/disagreesWith',
+'http://purl.org/spar/cito/agreesWith',
+'https://sense-nets.xyz/indicatesInterest',
+'https://sense-nets.xyz/mentionsFundingOpportunity',
+'https://sense-nets.xyz/mentionsWatchingStatus',
+'https://sense-nets.xyz/mentionsReadingStatus',
+'https://sense-nets.xyz/mentionsListeningStatus',
+'http://purl.org/spar/cito/reviews',
+'https://sense-nets.xyz/recommends',
+'https://sense-nets.xyz/asksQuestionAbout',
+'http://purl.org/spar/cito/includesQuotationFrom',
+'http://purl.org/spar/cito/discusses',
+'https://sense-nets.xyz/announcesEvent',
+'https://sense-nets.xyz/announcesJob',
+'https://sense-nets.xyz/announcesResource',
+'https://sense-nets.xyz/possibleMissingReference',
+'https://schema.org/Observation',
+'https://schema.org/Claim',
+'https://schema.org/Question',
+'https://schema.org/keywords']
+
+def get_uri_property_name(props:list):
+    return [uri.split('/')[-1] for uri in props]
+
+def post_notion_lookup(postDocId:str):
+    response = notion.databases.query(
+        **{
+            "database_id": POSTS_DATABASE_ID,
+            "filter": {
+                "property": "firebase_id",  # The property name in Notion
+                "rich_text": {
+                    "equals": postDocId  # Use 'equals' to match the authorId exactly
+                }
+            }
+        }
+    )
+    
+    # Check if any results are found
+    if response["results"]:
+        print(f"page found for post with id: {postDocId}")
+        return response["results"][0]["id"]  # Return the first matched profile ID if it exists
+    else:
+        print(f"No page found for post with id: {postDocId}")
+        return None
+
+def convert_timestamp_to_notion_date(createdAtMs):
+    # Convert milliseconds to seconds
+    timestamp_s = createdAtMs / 1000
+    # Convert to a Python datetime object (in UTC)
+    dt = datetime.datetime.utcfromtimestamp(timestamp_s)
+    # Convert to ISO 8601 format
+    return dt.isoformat()  # Notion expects ISO 8601 format
+
+def build_dynamic_postpage_properties(post_dict: dict, post_firebase_id: str):
+    post_text, post_url = get_thread(post_dict["generic"]["thread"])
+    author_handle = post_dict["generic"]["author"]["username"]
+    post_title = create_post_name(post_text, author_handle)
+    profile_notion_id = load_profile_to_notion(post_dict["authorId"])
+    post_Ms = post_dict["createdAtMs"]
+    creation_time =  convert_timestamp_to_notion_date(post_Ms)
+    properties = {
+        "Name": {
+            "title": [
+                {
+                    "text": {"content": post_title}
+                }
+            ]
+        },
+        "Text": {
+            "rich_text": [
+                {
+                    "text": {"content": post_text[:1900]}
+                }
+            ]
+        },
+        "Creators handle": {
+            "rich_text": [
+                {
+                    "text": {"content": author_handle}
+                }
+            ]
+        },
+        "firebase_id": {
+            "rich_text": [
+                {
+                    "text": {"content": post_firebase_id}
+                }
+            ]
+        },
+        "createdAtMs": {
+            "rich_text": [
+                {
+                    "text": {"content": str(post_Ms)}
+                }
+            ]
+        },
+        "Author": {
+            "relation": [{"id": profile_notion_id}]
+        },
+        "Post URL": {
+            "url": post_url
+            },
+        "publish date": {
+            "date": {
+                "start": creation_time  # Notion date field
+            }
+        }
+    }
+    
+
+    # Initialize a dictionary to collect multiple relations for each prop_name
+    relations = {}
+    # Initialize a list for all urls to add under linksTo 
+    urls = []
+    prop_name_set = set()
+    # Get triples from the post
+    triples = get_post_triples(post_firebase_id)
+    print("got triplets")
+    for triple in triples:
+        prop_name = triple["predicate"].split('/')[-1]
+        
+        # Initialize the relation list for each property if it doesn't exist
+        if prop_name not in relations:
+            relations[prop_name] = []
+
+
+        # Handle keywords as an example
+        if prop_name == "keywords":
+            keyword_id = keyword_notion_lookup(triple["object"])
+            if not keyword_id:
+                keyword_id = create_keyword_notion_page(triple["object"])
+
+            # Append keyword_id to the relations dictionary under the "keywords" key
+            relations[prop_name].append({"id": keyword_id})
+
+        else:
+            # Handle other relation properties dynamically (e.g., URLs)
+            url_id = url_notion_lookup(triple["object"])
+            if not url_id:
+                url_id = create_url_notion_page(triple["object"])
+
+            # Append the new relation to the corresponding prop_name
+            relations[prop_name].append({"id": url_id})
+            urls.append({"id": url_id})
+            prop_name_set.add(prop_name)
+            print(f'prop name set is {prop_name_set}')
+
+    # After processing all triples, update the properties with collected relations
+    for prop_name, relation_list in relations.items():
+        properties[prop_name] = {"relation": relation_list}
+    properties["linksTo"] = {"relation":urls}
+    properties["relations tags"] = {"multi_select":[{"name":p} for p in prop_name_set]}
+    return properties
+
+def create_notion_post_page(post_dict:dict,post_firebase_id:str):
+    post_text, post_url = get_thread(post_dict["generic"]["thread"])
+    author_handle = post_dict["generic"]["author"]["username"]
+    post_title = create_post_name(post_text,author_handle)
+    response = notion.pages.create(
+        **{
+            "parent": {"database_id": POSTS_DATABASE_ID},
+            "properties": build_dynamic_postpage_properties(post_dict,post_firebase_id)
+        }
+    )
+    print(f"Created new post page for '{post_title}'.")
+    return response["id"]  # Return the page ID of the created post page
+
+
+def create_post_name(post_text,post_handle):
+    # Create the post name as "User name : First 10 characters of content"
+    return f"{post_handle}: {post_text[:60]}"
+
+def load_posts_to_notion(post_tuple_list:list):
+    for post_dict, post_id in post_tuple_list:
+        if not post_notion_lookup(post_id):
+            create_notion_post_page(post_dict,post_id)
+            print(f'post page with id {post_id} was loaded to Notion')
+
+def get_posts(start_Ms = 0,count_limit = None):
+    posts_ref = db.collection('posts').where("createdAtMs",'>',start_Ms).limit(count_limit)
+
+    # Execute the query
+    docs = posts_ref.stream()
+    posts = []
+    # Print the results
+    for doc in docs:
+        posts.append((doc.to_dict(),doc.id))
+        #print(f'{doc.id} => {doc.to_dict()}')
+    print(f'query resulted with {len(posts)} posts')
+    return posts
+
+if __name__ == "__main__":
+
+    load_dotenv()
+
+    NOTION_API_TOKEN = os.getenv('NOTION_SENSENETS_TOKEN')
+    URLS_DATABASE_ID = os.getenv('NOTION_URLS_DATABASE_ID')
+    POSTS_DATABASE_ID = os.getenv('NOTION_POSTS_DATABASE_ID')
+    PROFILES_DATABASE_ID =os.getenv('NOTION_PROFILES_DATABASE_ID')
+    KEYWORDS_DATABASE_ID = os.getenv("NOTION_KEYWORDS_DATABASE_ID")
+    notion = Client(auth=NOTION_API_TOKEN)
+
+    #Initiate firebase client
+    cred = credentials.Certificate('nlp/scripts/creds/sensenets-dataset-firebase-adminsdk-rpero-9c552cac56.json')
+    firebase_admin.initialize_app(cred)
+
+    # Initialize Firestore DB
+    db = firestore.client()
+
+    arguments = docopt.docopt(__doc__)
+
+    first_post_to_load = arguments.get("--Ms")
+    post_count_limit = arguments.get("--count")
+
+    if first_post_to_load:
+        first_post_to_load = int(first_post_to_load)
+    else:
+        first_post_to_load = 0
+    if post_count_limit:
+        post_count_limit = int(post_count_limit)
+    else:
+        post_count_limit = None
+    print(f'limit to {post_count_limit} posts')
+    posts = get_posts(first_post_to_load,post_count_limit)
+
+    load_posts_to_notion(posts)
+
+
