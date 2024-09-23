@@ -38,10 +38,13 @@ export const ConnectMastodonPage = () => {
       style={{ flexGrow: 1 }}>
       <AppLogo margin={{ bottom: 'xlarge' }} />
       <Box style={{ flexGrow: 1 }}>
-        <AppHeading level="1">{'connect to mastodon'}</AppHeading>
+        <AppHeading level="1">{t(I18Keys.connectMastodonTitle)}</AppHeading>
         <Box width="100%" height="16px" />
         <AppParagraph margin={{ bottom: 'medium' }}>
-          {'enter your mastodon server below'}
+          {t(I18Keys.connectMastodonParagraph)}
+        </AppParagraph>
+        <AppParagraph margin={{ bottom: 'medium' }}>
+          {t(I18Keys.mastodonServer)}
         </AppParagraph>
         <Box margin={{ bottom: 'medium' }}>
           <AppInput
