@@ -1,20 +1,30 @@
 import { Box } from 'grommet';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { AppLogo } from '../app/brand/AppLogo';
 import { I18Keys } from '../i18n/i18n';
+import { AbsoluteRoutes, RouteNames } from '../route.names';
 import { AppButton, AppHeading, AppInput } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
+import { useAccountContext } from './contexts/AccountContext';
 import { useMastodonContext } from './contexts/platforms/MastodonContext';
 import { isValidMastodonDomain } from './user.helper';
 
 export const ConnectMastodonPage = () => {
   const { t } = useTranslation();
   const location = useLocation();
+  const navigate = useNavigate();
   const { connect, error } = useMastodonContext();
+  const { mastodonProfile } = useAccountContext();
   const [mastodonServer, setMastodonServer] = useState('');
+
+  useEffect(() => {
+    if (mastodonProfile) {
+      navigate(AbsoluteRoutes.App);
+    }
+  }, [mastodonProfile, navigate]);
 
   const handleConnect = () => {
     if (connect) {
