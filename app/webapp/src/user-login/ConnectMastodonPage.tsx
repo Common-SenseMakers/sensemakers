@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { AppLogo } from '../app/brand/AppLogo';
 import { I18Keys } from '../i18n/i18n';
-import { AbsoluteRoutes, RouteNames } from '../route.names';
+import { AbsoluteRoutes } from '../route.names';
 import { AppButton, AppHeading, AppInput } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
 import { useAccountContext } from './contexts/AccountContext';
@@ -43,7 +43,10 @@ export const ConnectMastodonPage = () => {
         <AppParagraph margin={{ bottom: 'medium' }}>
           {t(I18Keys.connectMastodonParagraph)}
         </AppParagraph>
-        <AppParagraph margin={{ bottom: 'medium' }}>
+        <AppParagraph
+          margin={{ bottom: 'small' }}
+          size="small"
+          style={{ fontWeight: 'bold' }}>
           {t(I18Keys.mastodonServer)}
         </AppParagraph>
         <Box margin={{ bottom: 'medium' }}>
@@ -54,12 +57,13 @@ export const ConnectMastodonPage = () => {
             style={{ width: '100%' }}
           />
         </Box>
-        <Box direction="row" justify="between">
+        <Box align="center" margin={{ top: 'medium' }}>
           <AppButton
             primary
-            label={'connect'}
+            label={t(I18Keys.continue)}
             onClick={handleConnect}
             disabled={!isValidMastodonDomain(mastodonServer)}
+            style={{ width: '100%' }}
           />
         </Box>
         {error && (
