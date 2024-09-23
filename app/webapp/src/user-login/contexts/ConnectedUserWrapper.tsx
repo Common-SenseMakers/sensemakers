@@ -1,6 +1,5 @@
 import { PropsWithChildren, createContext, useContext } from 'react';
 
-import { RobotIcon } from '../../app/icons/RobotIcon';
 import { UserPostsContext } from '../../user-home/UserPostsContext';
 import { AccountContext } from './AccountContext';
 import { AutopostInviteContext } from './AutopostInviteContext';

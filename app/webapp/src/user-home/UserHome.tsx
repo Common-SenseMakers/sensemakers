@@ -90,6 +90,9 @@ export const UserHome = () => {
     if (pageIx === 1) {
       return t(I18Keys.postsNames);
     }
+    if (pageIx === 2) {
+      return t(I18Keys.feedTitle);
+    }
   })();
 
   useEffect(() => {

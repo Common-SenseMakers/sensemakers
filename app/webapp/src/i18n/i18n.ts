@@ -33,6 +33,7 @@ export enum I18Keys {
   logoutTitle = 's025c',
 
   drafts = 's026',
+  feedTitle = 's026a',
 
   introNextLabel = 's026x',
   introFinalLabel = 's026y',
@@ -232,6 +233,7 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.signInX]: 'Sign in with X',
 
   [I18Keys.drafts]: 'Drafts',
+  [I18Keys.feedTitle]: 'Explore',
 
   [I18Keys.introNextLabel]: 'Next Tip',
   [I18Keys.introFinalLabel]: 'Let’s nanopublish!',

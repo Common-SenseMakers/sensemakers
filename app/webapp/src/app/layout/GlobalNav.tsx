@@ -1,12 +1,15 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Location, useLocation, useNavigate } from 'react-router-dom';
 
+import { I18Keys } from '../../i18n/i18n';
 import { AbsoluteRoutes, RouteNames } from '../../route.names';
 import { PostsQueryStatus } from '../../shared/types/types.posts';
 import { AppButton } from '../../ui-components';
 import { useThemeContext } from '../../ui-components/ThemedApp';
 import { DraftsIcon } from '../icons/DraftsIcon';
+import { FeedIcon } from '../icons/FeedIcon';
 import { PublishedIcon } from '../icons/PublishedIcon';
 import { SettignsIcon } from '../icons/SettingsIcon';
 
@@ -28,12 +31,17 @@ export const locationToPageIx = (location: Location) => {
     return 1;
   }
 
+  if (location.pathname.startsWith(`/${RouteNames.Feed}`)) {
+    return 2;
+  }
+
   if (location.pathname.startsWith(`/${RouteNames.Settings}`)) {
     return 3;
   }
 };
 
 export const GlobalNav = (props: {}) => {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { constants } = useThemeContext();
@@ -97,6 +105,12 @@ export const GlobalNav = (props: {}) => {
         <PublishedIcon></PublishedIcon>,
         `/${PostsQueryStatus.PUBLISHED}`,
         pageIx === 1
+      )}
+      {button(
+        t(I18Keys.feedTitle),
+        <FeedIcon></FeedIcon>,
+        AbsoluteRoutes.Feed,
+        pageIx === 2
       )}
       {button(
         'Settings',
