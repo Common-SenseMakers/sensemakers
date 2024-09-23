@@ -1,4 +1,3 @@
-// TODO implement the mastodon context
 import {
   PropsWithChildren,
   createContext,
@@ -41,7 +40,8 @@ export const LS_MASTODON_CONTEXT_KEY = 'mastodon-signin-context';
 export type MastodonContextType = {
   connect?: (
     domain: string,
-    type: MastodonGetContextParams['type']
+    type: MastodonGetContextParams['type'],
+    callbackUrl?: string
   ) => Promise<void>;
   needConnect?: boolean;
   error?: string;
@@ -87,7 +87,11 @@ export const MastodonContext = (props: PropsWithChildren) => {
   }, [error]);
 
   const connect = useCallback(
-    async (domain: string, type: MastodonGetContextParams['type']) => {
+    async (
+      domain: string,
+      type: MastodonGetContextParams['type'],
+      callbackUrl?: string
+    ) => {
       setLoginFlowState(LoginFlowState.ConnectingMastodon);
       setMastodonConnectedStatus(MastodonConnectedStatus.Connecting);
       setError(undefined);
@@ -95,7 +99,8 @@ export const MastodonContext = (props: PropsWithChildren) => {
       try {
         const params: MastodonGetContextParams = {
           domain,
-          callback_url: window.location.href,
+          // callback_url: `${window.location.origin}${callbackUrl}`,
+          callback_url: callbackUrl || window.location.href,
           type,
         };
         log('Fetching Mastodon signup context', params);

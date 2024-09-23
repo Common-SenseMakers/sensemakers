@@ -1,6 +1,7 @@
 import { Box, Text } from 'grommet';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
 import { MastodonIcon, TwitterIcon } from '../app/common/Icons';
@@ -13,13 +14,14 @@ import { SupportIcon } from '../app/icons/SupportIcon';
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { I18Keys } from '../i18n/i18n';
+import { RouteNames } from '../route.names';
 import { NotificationFreq } from '../shared/types/types.notifications';
 import {
   AutopostOption,
   PLATFORM,
   UserSettingsUpdate,
 } from '../shared/types/types.user';
-import { AppButton, AppHeading, AppInput } from '../ui-components';
+import { AppButton, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
@@ -29,7 +31,7 @@ import { useDisconnectContext } from '../user-login/contexts/DisconnectUserConte
 import { useMastodonContext } from '../user-login/contexts/platforms/MastodonContext';
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { useTwitterContext } from '../user-login/contexts/platforms/TwitterContext';
-import { getAccount, isValidMastodonDomain } from '../user-login/user.helper';
+import { getAccount } from '../user-login/user.helper';
 import { PlatformSection } from './PlatformsSection';
 import { SettingsOptionSelector } from './SettingsOptionsSelector';
 import { SettingsSection, SettingsSections } from './SettingsSection';
@@ -50,6 +52,7 @@ export const SettingSectionTitle = (props: { value: string }) => {
 export const UserSettingsPage = () => {
   const { constants } = useThemeContext();
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const appFetch = useAppFetch();
 
@@ -313,19 +316,18 @@ export const UserSettingsPage = () => {
             )
           }
           platformName={'Mastodon'}
-          onButtonClicked={(inputText) =>
-            connectMastodon && connectMastodon(inputText || '', 'read')
-          }
+          onButtonClicked={() => {
+            navigate(`../${RouteNames.ConnectMastodon}`, {
+              state: { callbackUrl: window.location.href },
+            });
+          }}
           buttonText={needConnectMastodon ? 'connect' : ''}
           username={
             connectedUser?.mastodon
               ? `@${getAccount(connectedUser, PLATFORM.Mastodon)?.profile.username}@${getAccount(connectedUser, PLATFORM.Mastodon)?.profile.mastodonServer}`
               : '- not connected -'
           }
-          connected={!!connectedUser?.mastodon}
-          hasInput={true}
-          inputPlaceholder={t(I18Keys.mastodonServerPlaceholder)}
-          isValidInput={isValidMastodonDomain}></PlatformSection>
+          connected={!!connectedUser?.mastodon}></PlatformSection>
 
         <PlatformSection
           icon={<OrcidIcon size={40}></OrcidIcon>}
