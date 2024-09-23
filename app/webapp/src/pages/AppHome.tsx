@@ -14,7 +14,7 @@ import { AppWelcome } from '../welcome/AppWelcome';
 
 const DEBUG = true;
 
-export const AppHome = (props: {}) => {
+export const AppHome = () => {
   const {
     overallLoginStatus,
     twitterProfile,
@@ -50,29 +50,24 @@ export const AppHome = (props: {}) => {
     }
 
     if (overallLoginStatus === OverallLoginStatus.LoggedOut) {
-      return { content: <AppWelcome></AppWelcome>, nav: undefined };
+      return { content: <AppWelcome />, nav: undefined };
     }
 
-    if (
-      overallLoginStatus === OverallLoginStatus.PartialLoggedIn &&
-      (mastodonConnectedStatus !== MastodonConnectedStatus.Connecting ||
-        twitterConnectedStatus !== TwitterConnectedStatus.Connecting)
-    ) {
+    if (overallLoginStatus === OverallLoginStatus.PartialLoggedIn) {
       return {
-        content: <ConnectSocialsPage></ConnectSocialsPage>,
+        content: <ConnectSocialsPage />,
         nav: undefined,
       };
     }
 
     if (overallLoginStatus === OverallLoginStatus.FullyLoggedIn) {
-      return { content: <UserHome></UserHome>, nav: <GlobalNav></GlobalNav> };
+      return { content: <UserHome />, nav: <GlobalNav /> };
     }
 
-    /** everything that is not the satus above shows the loadingDivs */
     return { content: LoadingPlaceholder, nav: undefined };
   })();
 
   return (
-    <ViewportPage content={content} nav={nav} justify="start"></ViewportPage>
+    <ViewportPage content={content} nav={nav} justify="start" />
   );
 };

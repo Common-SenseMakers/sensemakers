@@ -187,7 +187,8 @@ export const AccountContext = (props: PropsWithChildren) => {
         if (hasMastodon) {
           setMastodonConnectedStatus(MastodonConnectedStatus.Connected);
         }
-        setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
+        // Don't automatically set to FullyLoggedIn here
+        // It will be set when the user clicks "Continue" in ConnectSocialsPage
         return;
       }
     }

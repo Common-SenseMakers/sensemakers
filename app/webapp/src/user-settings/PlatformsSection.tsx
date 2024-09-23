@@ -1,8 +1,7 @@
 import { Box, Text } from 'grommet';
-import { useState } from 'react';
 
 import { CheckIcon } from '../app/icons/FilterIcon copy';
-import { AppButton, AppInput } from '../ui-components';
+import { AppButton } from '../ui-components';
 import { useThemeContext } from '../ui-components/ThemedApp';
 
 export const PlatformSection = (props: {
@@ -10,16 +9,12 @@ export const PlatformSection = (props: {
   platformName: string;
   username: string;
   buttonText: string;
-  onButtonClicked: (inputText?: string) => void;
+  onButtonClicked: () => void;
   connected: boolean;
   connecting?: boolean;
-  hasInput?: boolean;
-  inputPlaceholder?: string;
-  inputValue?: string;
   isValidInput?: (input: string) => boolean;
 }) => {
   const { constants } = useThemeContext();
-  const [inputValue, setInputValue] = useState<string>(props.inputValue || '');
 
   return (
     <Box
@@ -40,14 +35,7 @@ export const PlatformSection = (props: {
           <Text>{props.platformName}</Text>
         </Box>
         <Box>
-          {props.hasInput && !props.connected ? (
-            <AppInput
-              placeholder={props.inputPlaceholder}
-              value={props.inputValue}
-              onChange={(event) => setInputValue(event.target.value)}
-              style={{ width: '100%' }}
-            />
-          ) : (
+          {props.connected && (
             <Text
               style={{ fontWeight: 500, color: constants.colors.textLight2 }}>
               {props.username}
@@ -58,14 +46,10 @@ export const PlatformSection = (props: {
       <Box>
         {!props.connected ? (
           <AppButton
-            disabled={
-              props.connecting ||
-              (props.hasInput &&
-                props.isValidInput &&
-                !props.isValidInput(inputValue))
-            }
+            disabled={props.connecting}
             label={props.connecting ? 'connecting' : props.buttonText}
-            onClick={() => props.onButtonClicked(inputValue)}></AppButton>
+            onClick={props.onButtonClicked}
+          />
         ) : (
           <Box
             direction="row"

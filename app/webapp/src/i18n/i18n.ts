@@ -9,8 +9,10 @@ export enum I18Keys {
   emailInputBtn = 's0095',
 
   connectSocialsTitle = 's0090',
+  connectMastodonTitle = 's0090a',
   connectSocialsParagraph = 's0091',
   connectSocialsParagraph2 = 's0092',
+  connectMastodonParagraph = 's0091a',
   signInX = 's012',
   signInMastodon = 's012a',
   mastodonServer = 's012b',
@@ -227,14 +229,17 @@ const translationENG: Record<I18Keys, string> = {
     'Harness this knowledge by converting your social media posts into nanopublications, making your content <b>FAIR</b> (<b>F</b>indable, <b>A</b>ccessible, <b>I</b>nteroperable and <b>R</b>eusable), so your contributions can get proper recognition',
   [I18Keys.emailInputBtn]: 'Get started',
 
-  [I18Keys.connectSocialsTitle]: 'Connect your socials',
+  [I18Keys.connectSocialsTitle]: 'Connect your accounts',
+  [I18Keys.connectMastodonTitle]: 'Connect to Mastodon',
   [I18Keys.connectSocialsParagraph]:
-    'Link your X·Twitter or Mastodon account to start transforming your posts into nanopublications.',
+    'Link your accounts to start transforming your posts into nanopublications. You can always change this in your settings.',
   [I18Keys.connectSocialsParagraph2]:
     'By connecting, you can easily identify and FAIRify your valuable scientific insights.',
+  [I18Keys.connectMastodonParagraph]:
+    "To connect your account, we need to know your Mastodon server domain. If you're unsure, check the domain in your Mastodon profile URL.",
   [I18Keys.signInX]: 'Sign in with X',
   [I18Keys.signInMastodon]: 'Sign in with Mastodon',
-  [I18Keys.mastodonServer]: 'Mastodon Server: ',
+  [I18Keys.mastodonServer]: 'Server domain ',
   [I18Keys.mastodonServerPlaceholder]: 'e.g. "mastodon.social"',
 
   [I18Keys.drafts]: 'Drafts',
