@@ -229,6 +229,12 @@ def trim_thread_by_length(thread: ThreadRefPost, max_chars: int) -> ThreadRefPos
 
 class ParserInput(BaseModel):
     """
+    ThreadRefPost does not include validation
+    """
+    class Config:
+        arbitrary_types_allowed = True
+
+    """
     Format of input for processing by parser.
     """
 
@@ -268,6 +274,12 @@ def convert_parse_request_to_parser_input(
 
 
 class PreprocParserInput(BaseModel):
+    """
+     ThreadRefPost does not include validation
+    """
+    class Config:
+        arbitrary_types_allowed = True
+    
     post_to_parse: ThreadRefPost = Field(
         description="Post in input format for parser after preprocessing"
     )
