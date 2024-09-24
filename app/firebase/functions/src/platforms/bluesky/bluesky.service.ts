@@ -1,6 +1,6 @@
 import AtpAgent, { AppBskyFeedDefs, RichText } from '@atproto/api';
 
-import { BlueskySignupContext } from '../../../../../webapp/src/shared/types/types.bluesky';
+import { BlueskySignupContext } from '../../@shared/types/types.bluesky';
 import {
   BlueskyPost,
   BlueskySignupData,
@@ -105,14 +105,17 @@ export class BlueskyService
     const response = await this.agent.getAuthorFeed({
       actor: userDetails.user_id,
       limit: params.expectedAmount,
+      filter: 'posts_and_author_threads',
     });
 
-    const posts = response.data.feed.map((item) => ({
-      post_id: item.post.uri,
-      user_id: item.post.author.did,
-      timestampMs: new Date(item.post.indexedAt).getTime(),
-      post: item.post,
-    }));
+    const posts = response.data.feed
+      .map((item) => ({
+        post_id: item.post.uri,
+        user_id: item.post.author.did,
+        timestampMs: new Date(item.post.indexedAt).getTime(),
+        post: item.post,
+      }))
+      .filter((item) => item.post.author.did === userDetails.user_id);
 
     return {
       fetched: {
