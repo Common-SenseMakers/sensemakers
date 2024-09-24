@@ -1,4 +1,4 @@
-import { BlueskyUserDetails, BlueskyProfile } from './types.bluesky';
+import { BlueskyUserDetails } from './types.bluesky';
 import { MastodonUserDetails } from './types.mastodon';
 import { NanopubUserDetails } from './types.nanopubs';
 import { NotificationFreq } from './types.notifications';
