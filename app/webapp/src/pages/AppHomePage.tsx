@@ -13,7 +13,7 @@ import { AppWelcome } from '../welcome/AppWelcome';
 
 const DEBUG = false;
 
-export const AppHome = (props: {}) => {
+export const AppHomePage = (props: {}) => {
   const { overallLoginStatus, twitterProfile, twitterConnectedStatus } =
     useAccountContext();
 

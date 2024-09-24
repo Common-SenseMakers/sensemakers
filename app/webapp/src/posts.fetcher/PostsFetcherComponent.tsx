@@ -40,7 +40,7 @@ export const PostsFetcherComponent = (props: {
   feed: PostFetcherInterface;
   pageTitle: string;
   filterOptions: FilterOption[];
-  status: PostsQueryStatus;
+  status: string;
   onFilterOptionChanged: (filter: UserPostsQuery) => void;
 }) => {
   const { show } = useToastContext();

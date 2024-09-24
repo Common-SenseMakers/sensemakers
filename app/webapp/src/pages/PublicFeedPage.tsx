@@ -1,18 +1,12 @@
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
+import { PublicFeed } from '../feed/PublicFeed';
 import { PostCardLoading } from '../post/PostCardLoading';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
-import { UserPostsFeed } from '../user-home/UserPostsFeed';
-import { ConnectSocialsPage } from '../user-login/ConnectSocialsPage';
-import {
-  OverallLoginStatus,
-  TwitterConnectedStatus,
-} from '../user-login/contexts/AccountContext';
-import { AppWelcome } from '../welcome/AppWelcome';
 
 const DEBUG = false;
 
-export const UserFeedPage = (props: {}) => {
+export const PublicFeedPage = (props: {}) => {
   const LoadingPlaceholder = (
     <>
       <LoadingDiv
@@ -29,7 +23,7 @@ export const UserFeedPage = (props: {}) => {
 
   const { content, nav } = (() => {
     /** everything that is not the satus above shows the loadingDivs */
-    return { content: LoadingPlaceholder, nav: undefined };
+    return { content: <PublicFeed></PublicFeed>, nav: <GlobalNav></GlobalNav> };
   })();
 
   return (

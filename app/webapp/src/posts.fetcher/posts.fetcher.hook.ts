@@ -38,9 +38,9 @@ export interface PostFetcherInterface {
  */
 export const usePostsFetcher = (
   endpoint: string,
-  status: PostsQueryStatus,
-  subscribe: boolean,
-  onPostsAdded: (posts: AppPostFull[]) => void,
+  _status?: PostsQueryStatus,
+  subscribe?: boolean,
+  onPostsAdded?: (posts: AppPostFull[]) => void,
   PAGE_SIZE: number = 5
 ): PostFetcherInterface => {
   const { connectedUser, twitterProfile } = useAccountContext();
@@ -64,6 +64,8 @@ export const usePostsFetcher = (
 
   const [searchParams, setSearchParams] = useSearchParams();
   const code = searchParams.get('code');
+
+  const status = _status || PostsQueryStatus.PUBLISHED;
 
   /** refetch a post and overwrite its value in the array */
   const refetchPost = useCallback(
@@ -164,7 +166,9 @@ export const usePostsFetcher = (
         }
       });
 
-      onPostsAdded(newPosts);
+      if (onPostsAdded) {
+        onPostsAdded(newPosts);
+      }
     },
     [appFetch, refetchPost]
   );
