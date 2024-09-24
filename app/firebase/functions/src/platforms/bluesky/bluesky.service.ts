@@ -1,5 +1,4 @@
 import AtpAgent, { AppBskyFeedDefs, RichText } from '@atproto/api';
-import { convertBlueskyPostsToThreads, cleanBlueskyContent } from './bluesky.utils';
 
 import {
   BlueskyPost,
@@ -24,6 +23,7 @@ import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersRepository } from '../../users/users.repository';
 import { PlatformService } from '../platforms.interface';
+import { convertBlueskyPostsToThreads } from './bluesky.utils';
 
 const DEBUG = true;
 const DEBUG_PREFIX = 'BlueskyService';
@@ -110,16 +110,9 @@ export class BlueskyService
       filter: 'posts_and_author_threads',
     });
 
-    const posts = response.data.feed
-      .map((item) => ({
-        post_id: item.post.uri,
-        user_id: item.post.author.did,
-        timestampMs: new Date(item.post.indexedAt).getTime(),
-        post: item.post,
-      }))
-      .filter((item) => item.post.author.did === userDetails.user_id);
+    const posts = response.data.feed.map((item) => item.post) as BlueskyPost[];
 
-    const threads = convertBlueskyPostsToThreads(posts.map(item => item.post), userDetails.user_id);
+    const threads = convertBlueskyPostsToThreads(posts, userDetails.user_id);
 
     return {
       fetched: {
@@ -134,7 +127,6 @@ export class BlueskyService
       })),
     };
   }
-
 
   public async convertToGeneric(
     platformPost: PlatformPostCreate<any>

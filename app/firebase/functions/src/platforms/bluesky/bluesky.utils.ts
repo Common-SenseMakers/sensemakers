@@ -47,7 +47,9 @@ const findRootId = (post: BlueskyPost, posts: BlueskyPost[]): string => {
   let currentPost = post;
 
   while (currentPost.record.reply) {
-    const parentPost = posts.find((p) => p.uri === currentPost.record.reply?.parent.uri);
+    const parentPost = posts.find(
+      (p) => p.uri === currentPost.record.reply?.parent.uri
+    );
     if (!parentPost) {
       // If we don't have the parent in the list, treat the current post as root
       return currentPost.uri;
@@ -76,7 +78,9 @@ export const extractPrimaryThread = (
 };
 
 const getEarliestResponse = (id: string, posts: BlueskyPost[]) => {
-  const allPostReplies = posts.filter((post) => post.record.reply?.parent.uri === id);
+  const allPostReplies = posts.filter(
+    (post) => post.record.reply?.parent.uri === id
+  );
 
   if (allPostReplies.length === 0) {
     return null;

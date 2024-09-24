@@ -1,4 +1,8 @@
-import { AppBskyActorDefs, AppBskyFeedDefs } from '@atproto/api';
+import {
+  AppBskyActorDefs,
+  AppBskyFeedDefs,
+  AppBskyFeedPost,
+} from '@atproto/api';
 
 import { UserDetailsBase } from './types.user';
 
@@ -31,7 +35,9 @@ export interface BlueskyThread {
   author: BlueskyAccount;
 }
 
-export type BlueskyPost = AppBskyFeedDefs.PostView;
+export type BlueskyPost = AppBskyFeedDefs.PostView & {
+  record: AppBskyFeedPost.Record;
+};
 export type BlueskyAccount = AppBskyActorDefs.ProfileViewDetailed;
 export interface BlueskyProfile {
   id: string;
