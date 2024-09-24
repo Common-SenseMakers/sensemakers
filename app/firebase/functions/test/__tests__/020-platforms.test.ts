@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 
+import { BlueskyUserDetails } from '../../src/@shared/types/types.bluesky';
 import {
   FetchParams,
   PlatformFetchParams,
@@ -8,11 +9,11 @@ import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
 import { PlatformPostCreate } from '../../src/@shared/types/types.platform.posts';
 import { AppTweet, TwitterThread } from '../../src/@shared/types/types.twitter';
 import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
-import { BlueskyService } from '../../src/platforms/bluesky/bluesky.service';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
+import { BlueskyService } from '../../src/platforms/bluesky/bluesky.service';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { convertToAppTweets } from '../../src/platforms/twitter/twitter.utils';
 import { UsersHelper } from '../../src/users/users.helper';
@@ -284,24 +285,33 @@ describe('02-platforms', () => {
     let blueskyService: BlueskyService;
 
     before(() => {
-      blueskyService = new BlueskyService(services.time, services.users);
+      blueskyService = new BlueskyService(services.time, services.users.repo);
     });
 
-    it('fetches the latest posts', async () => {
+    it.only('fetches the latest posts', async () => {
       if (!user) {
         throw new Error('appUser not created');
       }
-      const allUserDetails = user[PLATFORM.Bluesky];
-      if (!allUserDetails || allUserDetails.length < 0) {
-        throw new Error('Unexpected');
-      }
-      const userDetails = allUserDetails[0];
-      if (userDetails.read === undefined) {
-        throw new Error('Unexpected');
+      if (
+        process.env.BLUESKY_HANDLE === undefined ||
+        process.env.BLUESKY_APP_PASSWORD === undefined ||
+        process.env.BLUESKY_USER_ID === undefined
+      ) {
+        throw new Error('Missing Bluesky credentials');
       }
 
+      const userDetails = {
+        user_id: process.env.BLUESKY_USER_ID,
+        profile: {
+          username: process.env.BLUESKY_HANDLE,
+        },
+        read: {
+          appPassword: process.env.BLUESKY_APP_PASSWORD,
+        },
+      } as BlueskyUserDetails;
+
       const fetchParams: PlatformFetchParams = {
-        expectedAmount: 3,
+        expectedAmount: 10,
       };
 
       const result = await services.db.run((manager) =>
