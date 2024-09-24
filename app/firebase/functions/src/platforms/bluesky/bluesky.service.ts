@@ -1,4 +1,5 @@
 import AtpAgent, { AppBskyFeedDefs, RichText } from '@atproto/api';
+import { convertBlueskyPostsToThreads, cleanBlueskyContent } from './bluesky.utils';
 
 import {
   BlueskyPost,
@@ -118,7 +119,7 @@ export class BlueskyService
       }))
       .filter((item) => item.post.author.did === userDetails.user_id);
 
-    const threads = this.extractThreads(posts);
+    const threads = convertBlueskyPostsToThreads(posts.map(item => item.post), userDetails.user_id);
 
     return {
       fetched: {
@@ -134,42 +135,6 @@ export class BlueskyService
     };
   }
 
-  private extractThreads(posts: any[]): BlueskyThread[] {
-    const rootPosts = posts.filter((post) => !post.post.record.reply);
-
-    return rootPosts.map((rootPost) => this.buildThread(rootPost, posts));
-  }
-
-  private buildThread(rootPost: any, allPosts: any[]): BlueskyThread {
-    const thread: any[] = [rootPost.post];
-    let currentPost = rootPost;
-
-    while (true) {
-      const children = allPosts.filter(
-        (post) =>
-          post.post.record.reply &&
-          post.post.record.reply.parent.uri === currentPost.post.uri
-      );
-
-      if (children.length === 0) break;
-
-      const earliestChild = children.reduce((earliest, current) =>
-        new Date(current.post.record.createdAt) <
-        new Date(earliest.post.record.createdAt)
-          ? current
-          : earliest
-      );
-
-      thread.push(earliestChild.post);
-      currentPost = earliestChild;
-    }
-
-    return {
-      thread_id: rootPost.post.uri,
-      posts: thread,
-      author: rootPost.post.author,
-    };
-  }
 
   public async convertToGeneric(
     platformPost: PlatformPostCreate<any>
