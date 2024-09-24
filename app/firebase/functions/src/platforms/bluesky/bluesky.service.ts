@@ -110,10 +110,13 @@ export class BlueskyService
     let oldestId: string | undefined;
     let cursor: string | undefined;
 
+    const sincePost = params.since_id ? await this.getPost(params.since_id, userDetails) : undefined;
+    const untilPost = params.until_id ? await this.getPost(params.until_id, userDetails) : undefined;
+
     while (true) {
       const response = await this.agent.getAuthorFeed({
         actor: userDetails.user_id,
-        limit: 40,
+        limit: 100,
         cursor: cursor,
         filter: 'posts_and_author_threads',
       });
@@ -123,10 +126,18 @@ export class BlueskyService
       ) as BlueskyPost[];
       if (posts.length === 0) break;
 
-      allPosts.push(...posts);
+      // Filter posts based on since_id and until_id
+      const filteredPosts = posts.filter(post => {
+        const postDate = new Date(post.indexedAt).getTime();
+        if (sincePost && postDate <= new Date(sincePost.indexedAt).getTime()) return false;
+        if (untilPost && postDate >= new Date(untilPost.indexedAt).getTime()) return false;
+        return true;
+      });
 
-      if (!newestId) newestId = posts[0].uri;
-      oldestId = posts[posts.length - 1].uri;
+      allPosts.push(...filteredPosts);
+
+      if (!newestId) newestId = filteredPosts[0]?.uri;
+      oldestId = filteredPosts[filteredPosts.length - 1]?.uri;
 
       const threads = convertBlueskyPostsToThreads(
         allPosts,
@@ -137,7 +148,7 @@ export class BlueskyService
         logger.debug(
           'fetch iteration',
           {
-            postsCount: posts.length,
+            postsCount: filteredPosts.length,
             allPostsCount: allPosts.length,
             threadsCount: threads.length,
             newestId,
@@ -146,12 +157,11 @@ export class BlueskyService
           DEBUG_PREFIX
         );
 
-      if (threads.length >= params.expectedAmount) {
+      if (threads.length >= params.expectedAmount || !response.data.cursor) {
         break;
       }
 
       cursor = response.data.cursor;
-      if (!cursor) break;
     }
 
     if (allPosts.length === 0) {
@@ -194,6 +204,16 @@ export class BlueskyService
       );
 
     return result;
+  }
+
+  private async getPost(postId: string, userDetails: BlueskyUserDetails): Promise<BlueskyPost | undefined> {
+    try {
+      const response = await this.agent.getPost({ uri: postId });
+      return response.data.thread.post as BlueskyPost;
+    } catch (error) {
+      logger.error('Error fetching post', { postId, error }, DEBUG_PREFIX);
+      return undefined;
+    }
   }
 
   public async convertToGeneric(
