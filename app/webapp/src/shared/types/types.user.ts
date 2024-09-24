@@ -1,4 +1,4 @@
-import { BlueskyUserDetails } from './types.bluesky';
+import { BlueskyUserDetails, BlueskyProfile } from './types.bluesky';
 import { MastodonUserDetails } from './types.mastodon';
 import { NanopubUserDetails } from './types.nanopubs';
 import { NotificationFreq } from './types.notifications';
@@ -186,9 +186,8 @@ export interface MastodonAccountCredentials {
 }
 
 export interface BlueskyAccountCredentials {
-  id: string;
-  handle: string;
-  appPassword: string;
+  identifier: string;
+  password: string;
 }
 
 export interface TwitterAccountCredentials {

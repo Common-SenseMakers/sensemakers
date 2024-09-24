@@ -33,3 +33,9 @@ export interface BlueskyThread {
 
 export type BlueskyPost = AppBskyFeedPost.Record;
 export type BlueskyAccount = AppBskyActorDefs.ProfileViewDetailed;
+export interface BlueskyProfile {
+  id: string;
+  handle: string;
+  displayName?: string;
+  avatar?: string;
+}
