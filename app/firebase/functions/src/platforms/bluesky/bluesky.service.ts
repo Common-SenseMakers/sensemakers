@@ -1,9 +1,10 @@
 import AtpAgent, { AppBskyFeedDefs, RichText } from '@atproto/api';
 
-import { BlueskySignupContext } from '../../@shared/types/types.bluesky';
 import {
   BlueskyPost,
+  BlueskySignupContext,
   BlueskySignupData,
+  BlueskyThread,
   BlueskyUserDetails,
 } from '../../@shared/types/types.bluesky';
 import { PlatformFetchParams } from '../../@shared/types/types.fetch';
@@ -92,7 +93,7 @@ export class BlueskyService
     params: PlatformFetchParams,
     userDetails: BlueskyUserDetails,
     manager: TransactionManager
-  ): Promise<FetchedResult<any>> {
+  ): Promise<FetchedResult<BlueskyThread>> {
     if (DEBUG) logger.debug('fetch', { params, userDetails }, DEBUG_PREFIX);
 
     if (!userDetails.profile?.username || !userDetails.read?.appPassword) {
@@ -104,7 +105,7 @@ export class BlueskyService
     });
     const response = await this.agent.getAuthorFeed({
       actor: userDetails.user_id,
-      limit: params.expectedAmount,
+      limit: params.expectedAmount * 2, // Fetch more to account for filtering
       filter: 'posts_and_author_threads',
     });
 
@@ -117,12 +118,56 @@ export class BlueskyService
       }))
       .filter((item) => item.post.author.did === userDetails.user_id);
 
+    const threads = this.extractThreads(posts);
+
     return {
       fetched: {
-        newest_id: posts[0]?.post_id,
-        oldest_id: posts[posts.length - 1]?.post_id,
+        newest_id: threads[0]?.thread_id,
+        oldest_id: threads[threads.length - 1]?.thread_id,
       },
-      platformPosts: posts,
+      platformPosts: threads.map((thread) => ({
+        post_id: thread.thread_id,
+        user_id: thread.author.did,
+        timestampMs: new Date(thread.posts[0].indexedAt).getTime(),
+        post: thread,
+      })),
+    };
+  }
+
+  private extractThreads(posts: any[]): BlueskyThread[] {
+    const rootPosts = posts.filter((post) => !post.post.record.reply);
+
+    return rootPosts.map((rootPost) => this.buildThread(rootPost, posts));
+  }
+
+  private buildThread(rootPost: any, allPosts: any[]): BlueskyThread {
+    const thread: any[] = [rootPost.post];
+    let currentPost = rootPost;
+
+    while (true) {
+      const children = allPosts.filter(
+        (post) =>
+          post.post.record.reply &&
+          post.post.record.reply.parent.uri === currentPost.post.uri
+      );
+
+      if (children.length === 0) break;
+
+      const earliestChild = children.reduce((earliest, current) =>
+        new Date(current.post.record.createdAt) <
+        new Date(earliest.post.record.createdAt)
+          ? current
+          : earliest
+      );
+
+      thread.push(earliestChild.post);
+      currentPost = earliestChild;
+    }
+
+    return {
+      thread_id: rootPost.post.uri,
+      posts: thread,
+      author: rootPost.post.author,
     };
   }
 
