@@ -104,28 +104,96 @@ export class BlueskyService
       identifier: userDetails.profile.username,
       password: userDetails.read.appPassword,
     });
-    const response = await this.agent.getAuthorFeed({
-      actor: userDetails.user_id,
-      limit: params.expectedAmount * 2, // Fetch more to account for filtering
-      filter: 'posts_and_author_threads',
-    });
 
-    const posts = response.data.feed.map((item) => item.post) as BlueskyPost[];
+    let allPosts: BlueskyPost[] = [];
+    let newestId: string | undefined;
+    let oldestId: string | undefined;
+    let cursor: string | undefined;
 
-    const threads = convertBlueskyPostsToThreads(posts, userDetails.user_id);
+    while (true) {
+      const response = await this.agent.getAuthorFeed({
+        actor: userDetails.user_id,
+        limit: 40,
+        cursor: cursor,
+        filter: 'posts_and_author_threads',
+      });
 
-    return {
+      const posts = response.data.feed.map(
+        (item) => item.post
+      ) as BlueskyPost[];
+      if (posts.length === 0) break;
+
+      allPosts.push(...posts);
+
+      if (!newestId) newestId = posts[0].uri;
+      oldestId = posts[posts.length - 1].uri;
+
+      const threads = convertBlueskyPostsToThreads(
+        allPosts,
+        userDetails.user_id
+      );
+
+      if (DEBUG)
+        logger.debug(
+          'fetch iteration',
+          {
+            postsCount: posts.length,
+            allPostsCount: allPosts.length,
+            threadsCount: threads.length,
+            newestId,
+            oldestId,
+          },
+          DEBUG_PREFIX
+        );
+
+      if (threads.length >= params.expectedAmount) {
+        break;
+      }
+
+      cursor = response.data.cursor;
+      if (!cursor) break;
+    }
+
+    if (allPosts.length === 0) {
+      if (DEBUG) logger.debug('fetch no posts found', {}, DEBUG_PREFIX);
+      return {
+        fetched: {
+          newest_id: undefined,
+          oldest_id: undefined,
+        },
+        platformPosts: [],
+      };
+    }
+
+    const threads = convertBlueskyPostsToThreads(allPosts, userDetails.user_id);
+
+    const platformPosts = threads.map((thread) => ({
+      post_id: thread.thread_id,
+      user_id: thread.author.did,
+      timestampMs: new Date(thread.posts[0].indexedAt).getTime(),
+      post: thread,
+    }));
+
+    const result = {
       fetched: {
-        newest_id: threads[0]?.thread_id,
-        oldest_id: threads[threads.length - 1]?.thread_id,
+        newest_id: newestId,
+        oldest_id: oldestId,
       },
-      platformPosts: threads.map((thread) => ({
-        post_id: thread.thread_id,
-        user_id: thread.author.did,
-        timestampMs: new Date(thread.posts[0].indexedAt).getTime(),
-        post: thread,
-      })),
+      platformPosts,
     };
+
+    if (DEBUG)
+      logger.debug(
+        'fetch result',
+        {
+          newestId,
+          oldestId,
+          platformPostsCount: platformPosts.length,
+        },
+        DEBUG_PREFIX
+      );
+
+    return result;
   }
 
   public async convertToGeneric(
