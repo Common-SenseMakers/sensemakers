@@ -906,10 +906,10 @@ export class PostsManager {
     /** get AppPost from userId and labels (no manager) */
     const appPosts = await (async () => {
       if (labelsUris !== undefined) {
-        const triples = await this.processing.triples.getWithPredicatesOfUser(
-          userId,
+        const triples = await this.processing.triples.getWithPredicates(
+          fetchParams,
           labelsUris,
-          fetchParams
+          userId
         );
         const uniquePostIds = new Set(triples.map((triple) => triple.postId));
 

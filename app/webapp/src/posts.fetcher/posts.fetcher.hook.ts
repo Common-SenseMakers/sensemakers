@@ -38,7 +38,7 @@ export interface PostFetcherInterface {
  */
 export const usePostsFetcher = (
   endpoint: string,
-  _status?: PostsQueryStatus,
+  _status?: string,
   subscribe?: boolean,
   onPostsAdded?: (posts: AppPostFull[]) => void,
   PAGE_SIZE: number = 5

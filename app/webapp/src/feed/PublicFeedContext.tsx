@@ -21,7 +21,7 @@ export const FeedPostsContextValue = createContext<FeedContextType | undefined>(
 export const FeedPostsContext: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
-  const feed = usePostsFetcher('/api/posts/feed');
+  const feed = usePostsFetcher('/api/feed/get');
 
   return (
     <FeedPostsContextValue.Provider

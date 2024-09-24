@@ -126,7 +126,7 @@ export interface UnpublishPlatformPostPayload {
 }
 
 export interface UserPostsQuery {
-  status: PostsQueryStatus;
+  status: string;
   fetchParams: FetchParams;
 }
 

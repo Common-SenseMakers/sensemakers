@@ -19,7 +19,7 @@ const DEBUG = true;
 const DEBUG_PREFIX = 'PostsRepository';
 export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   constructor(protected db: DBInstance) {
-    super(db.collections.posts);
+    super(db.collections.posts, db);
   }
 
   public async updateContent(

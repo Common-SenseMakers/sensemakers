@@ -284,7 +284,7 @@ export class PostsProcessing {
         this.triples.create(
           {
             postId,
-            createdAtMs,
+            postCreatedAtMs: createdAtMs,
             authorId,
             subject: q.subject.value,
             predicate: q.predicate.value,
