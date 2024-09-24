@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
+import { subscribeToUpdates } from '../firestore/realtime.listener';
 import {
   AppPostFull,
   AppPostRepublishedStatus,
@@ -10,17 +11,16 @@ import {
   UserPostsQuery,
 } from '../shared/types/types.posts';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
-
-const PAGE_SIZE = 5;
+import { useQueryFilter } from './query.filter.hook';
 
 const DEBUG = false;
 
 export const usePostsFetcher = (
   endpoint: string,
-  stauts: PostsQueryStatus,
+  status: PostsQueryStatus,
+  subscribe: boolean,
   onPostsAdded: (posts: AppPostFull[]) => void,
-  onRemovePost: (postId: string) => void,
-  onRemoveAll: () => void
+  PAGE_SIZE: number = 5
 ) => {
   const { connectedUser, twitterProfile } = useAccountContext();
 
@@ -34,16 +34,74 @@ export const usePostsFetcher = (
 
   const [isFetchingOlder, setIsFetchingOlder] = useState(false);
   const [errorFetchingOlder, setErrorFetchingOlder] = useState<Error>();
-,
+
   const [isFetchingNewer, setIsFetchingNewer] = useState(false);
   const [errorFetchingNewer, setErrorFetchingNewer] = useState<Error>();
   const [moreToFetch, setMoreToFetch] = useState(true);
+
+  const unsubscribeCallbacks = useRef<Record<string, () => void>>({});
 
   const [searchParams, setSearchParams] = useSearchParams();
   const code = searchParams.get('code');
 
   /** refetch a post and overwrite its value in the array */
-  
+  const refetchPost = useCallback(
+    async (postId: string) => {
+      // skip fetching if we are in the middle of a code management
+      if (!connectedUser || code) {
+        return;
+      }
+
+      try {
+        const post = await appFetch<AppPostFull>(
+          `/api/posts/get`,
+          { postId },
+          true
+        );
+
+        if (DEBUG) console.log(`refetch post returned`, { post, posts });
+
+        const shouldRemove = (() => {
+          if (status === PostsQueryStatus.DRAFTS) {
+            return [
+              AppPostRepublishedStatus.AUTO_REPUBLISHED,
+              AppPostRepublishedStatus.REPUBLISHED,
+            ].includes(post.republishedStatus);
+          }
+          if (status === PostsQueryStatus.IGNORED) {
+            return post.reviewedStatus !== AppPostReviewStatus.IGNORED;
+          }
+          if (status === PostsQueryStatus.PENDING) {
+            return post.reviewedStatus !== AppPostReviewStatus.PENDING;
+          }
+          if (status === PostsQueryStatus.PUBLISHED) {
+            return post.republishedStatus === AppPostRepublishedStatus.PENDING;
+          }
+        })();
+
+        setPosts((prev) => {
+          const newPosts = [...prev];
+          const ix = prev.findIndex((p) => p.id === postId);
+
+          if (DEBUG) console.log(`setPosts called`, { ix, newPosts });
+
+          if (ix !== -1) {
+            if (DEBUG) console.log(`settingPost`, { ix, shouldRemove });
+            if (shouldRemove) {
+              newPosts.splice(ix, 1);
+            } else {
+              newPosts[ix] = post;
+            }
+          }
+          return newPosts;
+        });
+      } catch (e) {
+        console.error(e);
+        throw new Error(`Error fetching post ${postId}`);
+      }
+    },
+    [posts, connectedUser, status]
+  );
 
   const addPosts = useCallback(
     (newPosts: AppPostFull[], position: 'start' | 'end') => {
@@ -57,14 +115,60 @@ export const usePostsFetcher = (
         return allPosts;
       });
 
+      /** subscribe to updates */
+      newPosts.forEach((post) => {
+        if (!unsubscribeCallbacks.current) {
+          unsubscribeCallbacks.current = {};
+        }
+
+        const current = unsubscribeCallbacks.current[post.id];
+        /** unsubscribe from previous */
+        if (current) {
+          if (DEBUG)
+            console.log(`current unsubscribe for post ${post.id} found`);
+          current();
+        }
+
+        if (subscribe) {
+          const unsubscribe = subscribeToUpdates(`post-${post.id}`, () => {
+            if (DEBUG) console.log(`update detected`, post.id);
+            refetchPost(post.id);
+          });
+
+          if (DEBUG)
+            console.log(
+              `unsubscribefor post ${post.id} stored on unsubscribeCallbacks`
+            );
+          unsubscribeCallbacks.current[post.id] = unsubscribe;
+        }
+      });
+
       onPostsAdded(newPosts);
     },
-    [appFetch]
+    [appFetch, refetchPost]
   );
 
+  /** unsubscribe from all updates when unmounting */
+  useEffect(() => {
+    return () => {
+      Object.entries(unsubscribeCallbacks.current).forEach(
+        ([postId, unsubscribe]) => {
+          if (DEBUG)
+            console.log(`unsubscribing from post ${postId} at unmount`);
+          unsubscribe();
+        }
+      );
+    };
+  }, []);
+
   const removeAllPosts = () => {
-    onRemoveAll();
-    
+    /** unsubscribe from all posts */
+    Object.entries(unsubscribeCallbacks.current).forEach(
+      ([postId, unsubscribe]) => {
+        if (DEBUG) console.log(`unsubscribing from ${postId}`);
+        unsubscribe();
+      }
+    );
     /** reset the array */
     if (DEBUG) console.log(`settings pots to empty array`);
     setPosts([]);
@@ -129,7 +233,7 @@ export const usePostsFetcher = (
         };
         if (DEBUG) console.log(`fetching for older - twitter`, params);
         const readPosts = await appFetch<AppPostFull[], UserPostsQuery>(
-          '/api/posts/getOfUser',
+          endpoint,
           params
         );
 
@@ -184,7 +288,7 @@ export const usePostsFetcher = (
         };
         if (DEBUG) console.log(`fetching for newer`, params);
         const readPosts = await appFetch<AppPostFull[], UserPostsQuery>(
-          '/api/posts/getOfUser',
+          endpoint,
           params
         );
 
@@ -222,13 +326,12 @@ export const usePostsFetcher = (
   const removePost = (postId: string) => {
     if (DEBUG) console.log(`removing post ${postId} from list`);
     setPosts((prev) => prev.filter((p) => p.id !== postId));
-    onRemovePost(postId);
+    unsubscribeCallbacks.current[postId]?.();
   };
-
-  
 
   return {
     posts,
+    removePost,
     fetchOlder,
     isFetchingOlder,
     errorFetchingOlder,
@@ -236,7 +339,7 @@ export const usePostsFetcher = (
     isFetchingNewer,
     errorFetchingNewer,
     isLoading,
-    removePost,
+    status,
     moreToFetch,
   };
 };

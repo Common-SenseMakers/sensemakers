@@ -19,31 +19,6 @@ export const usePostsFetch = () => {
   const { status } = useQueryFilter();
 
   const onPostsAdded = (newPosts: AppPostFull[]) => {
-    /** subscribe to updates */
-    newPosts.forEach((post) => {
-      if (!unsubscribeCallbacks.current) {
-        unsubscribeCallbacks.current = {};
-      }
-
-      const current = unsubscribeCallbacks.current[post.id];
-      /** unsubscribe from previous */
-      if (current) {
-        if (DEBUG) console.log(`current unsubscribe for post ${post.id} found`);
-        current();
-      }
-
-      const unsubscribe = subscribeToUpdates(`post-${post.id}`, () => {
-        if (DEBUG) console.log(`update detected`, post.id);
-        refetchPost(post.id);
-      });
-
-      if (DEBUG)
-        console.log(
-          `unsubscribefor post ${post.id} stored on unsubscribeCallbacks`
-        );
-      unsubscribeCallbacks.current[post.id] = unsubscribe;
-    });
-
     /** trigger parse if not parsed and not parsing */
     newPosts.forEach((post) => {
       if (
@@ -56,63 +31,11 @@ export const usePostsFetch = () => {
     });
   };
 
-  /** unsubscribe from all updates when unmounting */
-  useEffect(() => {
-    return () => {
-      Object.entries(unsubscribeCallbacks.current).forEach(
-        ([postId, unsubscribe]) => {
-          if (DEBUG)
-            console.log(`unsubscribing from post ${postId} at unmount`);
-          unsubscribe();
-        }
-      );
-    };
-  }, []);
-
-  const onRemovePost = (postId: string) => {
-    unsubscribeCallbacks.current[postId]?.();
-  };
-
-  const onRemoveAll = () => {
-    /** unsubscribe from all posts */
-    Object.entries(unsubscribeCallbacks.current).forEach(
-      ([postId, unsubscribe]) => {
-        if (DEBUG) console.log(`unsubscribing from ${postId}`);
-        unsubscribe();
-      }
-    );
-  };
-
-  const {
-    posts,
-    fetchOlder,
-    isFetchingOlder,
-    errorFetchingOlder,
-    fetchNewer,
-    isFetchingNewer,
-    errorFetchingNewer,
-    isLoading,
-    removePost,
-    moreToFetch,
-  } = usePostsFetcher(
-    'api/posts/getOfUser',
+  const fetching = usePostsFetcher(
+    '/api/posts/getOfUser',
     status,
-    onPostsAdded,
-    onRemovePost,
-    onRemoveAll
+    true,
+    onPostsAdded
   );
-
-  return {
-    posts,
-    removePost,
-    fetchOlder,
-    isFetchingOlder,
-    errorFetchingOlder,
-    fetchNewer,
-    isFetchingNewer,
-    errorFetchingNewer,
-    isLoading,
-    status,
-    moreToFetch,
-  };
+  return fetching;
 };
