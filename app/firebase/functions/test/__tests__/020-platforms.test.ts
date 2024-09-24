@@ -8,6 +8,7 @@ import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
 import { PlatformPostCreate } from '../../src/@shared/types/types.platform.posts';
 import { AppTweet, TwitterThread } from '../../src/@shared/types/types.twitter';
 import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
+import { BlueskyService } from '../../src/platforms/bluesky/bluesky.service';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
@@ -276,6 +277,65 @@ describe('02-platforms', () => {
         expect(result).to.not.be.undefined;
         expect(result.platformPosts.length).to.be.greaterThan(0);
       }
+    });
+  });
+
+  describe('bluesky', () => {
+    let blueskyService: BlueskyService;
+
+    before(() => {
+      blueskyService = new BlueskyService(services.time, services.users);
+    });
+
+    it('fetches the latest posts', async () => {
+      if (!user) {
+        throw new Error('appUser not created');
+      }
+      const allUserDetails = user[PLATFORM.Bluesky];
+      if (!allUserDetails || allUserDetails.length < 0) {
+        throw new Error('Unexpected');
+      }
+      const userDetails = allUserDetails[0];
+      if (userDetails.read === undefined) {
+        throw new Error('Unexpected');
+      }
+
+      const fetchParams: PlatformFetchParams = {
+        expectedAmount: 3,
+      };
+
+      const result = await services.db.run((manager) =>
+        blueskyService.fetch(fetchParams, userDetails, manager)
+      );
+
+      expect(result).to.not.be.undefined;
+      expect(result.platformPosts.length).to.be.greaterThan(0);
+    });
+
+    it('fetches posts until a certain id', async () => {
+      if (!user) {
+        throw new Error('appUser not created');
+      }
+      const allUserDetails = user[PLATFORM.Bluesky];
+      if (!allUserDetails || allUserDetails.length < 0) {
+        throw new Error('Unexpected');
+      }
+      const userDetails = allUserDetails[0];
+      if (userDetails.read === undefined) {
+        throw new Error('Unexpected');
+      }
+
+      const fetchParams: PlatformFetchParams = {
+        expectedAmount: 5,
+        until_id: 'some-bluesky-post-id', // Replace with an actual Bluesky post ID
+      };
+
+      const result = await services.db.run((manager) =>
+        blueskyService.fetch(fetchParams, userDetails, manager)
+      );
+
+      expect(result).to.not.be.undefined;
+      expect(result.platformPosts.length).to.be.greaterThan(0);
     });
   });
 });
