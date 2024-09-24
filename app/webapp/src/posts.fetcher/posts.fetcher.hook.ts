@@ -11,17 +11,38 @@ import {
   UserPostsQuery,
 } from '../shared/types/types.posts';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
-import { useQueryFilter } from './query.filter.hook';
 
 const DEBUG = false;
 
+export interface PostFetcherInterface {
+  posts?: AppPostFull[];
+  isLoading: boolean;
+  isFetchingOlder: boolean;
+  errorFetchingOlder?: Error;
+  isFetchingNewer: boolean;
+  errorFetchingNewer?: Error;
+  fetchOlder: () => void;
+  fetchNewer: () => void;
+  getPost: (postId: string) => AppPostFull | undefined;
+  removePost: (postId: string) => void;
+  moreToFetch: boolean;
+  getNextAndPrev: (postId?: string) => {
+    prevPostId?: string;
+    nextPostId?: string;
+  };
+}
+
+/**
+ * Handles one array of posts by keeping track of the newest and oldest post ids and
+ * fething newer and older posts as requested by a consuming component
+ */
 export const usePostsFetcher = (
   endpoint: string,
   status: PostsQueryStatus,
   subscribe: boolean,
   onPostsAdded: (posts: AppPostFull[]) => void,
   PAGE_SIZE: number = 5
-) => {
+): PostFetcherInterface => {
   const { connectedUser, twitterProfile } = useAccountContext();
 
   const appFetch = useAppFetch();
@@ -329,8 +350,39 @@ export const usePostsFetcher = (
     unsubscribeCallbacks.current[postId]?.();
   };
 
+  const getPost = useCallback(
+    (postId: string) => {
+      const ix = posts.findIndex((p) => p.id === postId);
+      return ix !== -1 ? posts[ix] : undefined;
+    },
+    [posts]
+  );
+
+  const getNextAndPrev = useCallback(
+    (postId?: string) => {
+      if (!posts || !postId) {
+        return {};
+      }
+
+      const currPostIndex = posts?.findIndex((p) => p.id === postId);
+      const prevPostId =
+        posts && currPostIndex != undefined && currPostIndex > 0
+          ? posts[currPostIndex - 1].id
+          : undefined;
+
+      const nextPostId =
+        posts && currPostIndex != undefined && currPostIndex < posts.length - 1
+          ? posts[currPostIndex + 1].id
+          : undefined;
+
+      return { prevPostId, nextPostId };
+    },
+    [posts]
+  );
+
   return {
     posts,
+    getPost,
     removePost,
     fetchOlder,
     isFetchingOlder,
@@ -339,7 +391,7 @@ export const usePostsFetcher = (
     isFetchingNewer,
     errorFetchingNewer,
     isLoading,
-    status,
     moreToFetch,
+    getNextAndPrev,
   };
 };

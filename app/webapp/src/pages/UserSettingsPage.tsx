@@ -28,10 +28,13 @@ import { useAutopostInviteContext } from '../user-login/contexts/AutopostInviteC
 import { useDisconnectContext } from '../user-login/contexts/DisconnectUserContext';
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { getAccount } from '../user-login/user.helper';
-import { PlatformSection } from './PlatformsSection';
-import { SettingsOptionSelector } from './SettingsOptionsSelector';
-import { SettingsSection, SettingsSections } from './SettingsSection';
-import { SettingsSubPage } from './UserSettingsSubpage';
+import { PlatformSection } from '../user-settings/PlatformsSection';
+import { SettingsOptionSelector } from '../user-settings/SettingsOptionsSelector';
+import {
+  SettingsSection,
+  SettingsSections,
+} from '../user-settings/SettingsSection';
+import { SettingsSubPage } from '../user-settings/UserSettingsSubpage';
 
 export const SettingSectionTitle = (props: { value: string }) => {
   const { constants } = useThemeContext();

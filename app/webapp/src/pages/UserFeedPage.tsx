@@ -7,16 +7,12 @@ import { ConnectSocialsPage } from '../user-login/ConnectSocialsPage';
 import {
   OverallLoginStatus,
   TwitterConnectedStatus,
-  useAccountContext,
 } from '../user-login/contexts/AccountContext';
 import { AppWelcome } from '../welcome/AppWelcome';
 
 const DEBUG = false;
 
-export const AppHome = (props: {}) => {
-  const { overallLoginStatus, twitterProfile, twitterConnectedStatus } =
-    useAccountContext();
-
+export const UserFeedPage = (props: {}) => {
   const LoadingPlaceholder = (
     <>
       <LoadingDiv
@@ -32,33 +28,6 @@ export const AppHome = (props: {}) => {
   );
 
   const { content, nav } = (() => {
-    if (DEBUG) console.log('AppHome', { overallLoginStatus, twitterProfile });
-
-    if (overallLoginStatus === OverallLoginStatus.NotKnown) {
-      return { content: <></>, nav: undefined };
-    }
-
-    if (overallLoginStatus === OverallLoginStatus.LoggedOut) {
-      return { content: <AppWelcome></AppWelcome>, nav: undefined };
-    }
-
-    if (
-      overallLoginStatus === OverallLoginStatus.PartialLoggedIn &&
-      twitterConnectedStatus !== TwitterConnectedStatus.Connecting
-    ) {
-      return {
-        content: <ConnectSocialsPage></ConnectSocialsPage>,
-        nav: undefined,
-      };
-    }
-
-    if (overallLoginStatus === OverallLoginStatus.FullyLoggedIn) {
-      return {
-        content: <UserPostsFeed></UserPostsFeed>,
-        nav: <GlobalNav></GlobalNav>,
-      };
-    }
-
     /** everything that is not the satus above shows the loadingDivs */
     return { content: LoadingPlaceholder, nav: undefined };
   })();

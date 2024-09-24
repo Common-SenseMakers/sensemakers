@@ -16,7 +16,8 @@ const DEBUG = false;
 export const PostNav = () => {
   const { fetched, navigatePost } = usePost();
 
-  const { fetchOlder, isFetchingOlder, errorFetchingOlder } = useUserPosts();
+  const { feed } = useUserPosts();
+  const { fetchOlder, isFetchingOlder, errorFetchingOlder } = feed;
   const [triggeredFetchOlder, setTriggeredFetchedOlder] = useState(false);
 
   const navigate = useNavigate();

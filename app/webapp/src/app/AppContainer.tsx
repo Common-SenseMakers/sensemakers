@@ -1,16 +1,16 @@
-import { constants } from 'buffer';
 import { Box } from 'grommet';
-import { createContext, useContext, useMemo, useState } from 'react';
-import { Outlet, Route, Routes, useLocation } from 'react-router-dom';
+import { createContext, useContext } from 'react';
+import { Outlet, Route, Routes } from 'react-router-dom';
 
 import { AppHome } from '../pages/AppHome';
+import { UserFeedPage } from '../pages/UserFeedPage';
+import { UserSettingsPage } from '../pages/UserSettingsPage';
 import { PostPage } from '../post/PostPage';
 import { PostingPage } from '../post/PostingPage';
 import { RouteNames } from '../route.names';
 import { ResponsiveApp } from '../ui-components/ResponsiveApp';
 import { ThemedApp, useThemeContext } from '../ui-components/ThemedApp';
 import { ConnectedUserWrapper } from '../user-login/contexts/ConnectedUserWrapper';
-import { UserSettingsPage } from '../user-settings/UserSettingsPage';
 import { LoadingContext } from './LoadingContext';
 import { GlobalStyles } from './layout/GlobalStyles';
 import { MAX_WIDTH_APP, ViewportContainer } from './layout/Viewport';
@@ -70,7 +70,13 @@ export const AppContainer = (props: React.PropsWithChildren) => {
                 <Route
                   path={`${RouteNames.Settings}`}
                   element={<UserSettingsPage></UserSettingsPage>}></Route>
+
+                <Route
+                  path={`${RouteNames.Feed}`}
+                  element={<UserFeedPage></UserFeedPage>}></Route>
+
                 <Route path={''} element={<AppHome></AppHome>}></Route>
+
                 <Route path={'/*'} element={<AppHome></AppHome>}></Route>
               </Route>
             </Routes>
