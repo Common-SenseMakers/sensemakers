@@ -284,24 +284,18 @@ describe('02-platforms', () => {
 
   describe('bluesky', () => {
     let blueskyService: BlueskyService;
+    let userDetails: BlueskyUserDetails;
 
     before(() => {
       blueskyService = new BlueskyService(services.time, services.users.repo);
-    });
-
-    it('fetches the latest posts', async () => {
-      if (!user) {
-        throw new Error('appUser not created');
-      }
       if (
-        process.env.BLUESKY_HANDLE === undefined ||
-        process.env.BLUESKY_APP_PASSWORD === undefined ||
-        process.env.BLUESKY_USER_ID === undefined
+        !process.env.BLUESKY_HANDLE ||
+        !process.env.BLUESKY_APP_PASSWORD ||
+        !process.env.BLUESKY_USER_ID
       ) {
         throw new Error('Missing Bluesky credentials');
       }
-
-      const userDetails = {
+      userDetails = {
         user_id: process.env.BLUESKY_USER_ID,
         profile: {
           username: process.env.BLUESKY_HANDLE,
@@ -310,7 +304,9 @@ describe('02-platforms', () => {
           appPassword: process.env.BLUESKY_APP_PASSWORD,
         },
       } as BlueskyUserDetails;
+    });
 
+    it('fetches the latest posts without since_id or until_id', async () => {
       const fetchParams: PlatformFetchParams = {
         expectedAmount: 10,
       };
@@ -321,24 +317,19 @@ describe('02-platforms', () => {
 
       expect(result).to.not.be.undefined;
       expect(result.platformPosts.length).to.be.greaterThan(0);
+      expect(result.platformPosts.length).to.be.at.most(fetchParams.expectedAmount);
     });
 
-    it('fetches posts until a certain id', async () => {
-      if (!user) {
-        throw new Error('appUser not created');
-      }
-      const allUserDetails = user[PLATFORM.Bluesky];
-      if (!allUserDetails || allUserDetails.length < 0) {
-        throw new Error('Unexpected');
-      }
-      const userDetails = allUserDetails[0];
-      if (userDetails.read === undefined) {
-        throw new Error('Unexpected');
-      }
+    it('fetches posts with a since_id', async () => {
+      // First, fetch some posts to get a valid since_id
+      const initialFetch = await services.db.run((manager) =>
+        blueskyService.fetch({ expectedAmount: 5 }, userDetails, manager)
+      );
+      const sinceId = initialFetch.platformPosts[0].post_id;
 
       const fetchParams: PlatformFetchParams = {
-        expectedAmount: 5,
-        until_id: 'some-bluesky-post-id', // Replace with an actual Bluesky post ID
+        expectedAmount: 10,
+        since_id: sinceId,
       };
 
       const result = await services.db.run((manager) =>
@@ -346,47 +337,37 @@ describe('02-platforms', () => {
       );
 
       expect(result).to.not.be.undefined;
-      expect(result.platformPosts.length).to.be.greaterThan(0);
+      expect(result.platformPosts.length).to.be.at.most(fetchParams.expectedAmount);
+      result.platformPosts.forEach(post => {
+        expect(new Date(post.timestampMs).getTime()).to.be.greaterThan(
+          new Date(initialFetch.platformPosts[0].timestampMs).getTime()
+        );
+      });
     });
 
-    it('tests the Bluesky cursor parameter in getAuthorFeed', async () => {
-      if (
-        process.env.BLUESKY_HANDLE === undefined ||
-        process.env.BLUESKY_APP_PASSWORD === undefined ||
-        process.env.BLUESKY_USER_ID === undefined
-      ) {
-        console.warn('Skipping Bluesky test due to missing credentials');
-        return;
-      }
+    it('fetches posts with an until_id', async () => {
+      // First, fetch some posts to get a valid until_id
+      const initialFetch = await services.db.run((manager) =>
+        blueskyService.fetch({ expectedAmount: 15 }, userDetails, manager)
+      );
+      const untilId = initialFetch.platformPosts[5].post_id; // Use the 6th post as until_id
 
-      const agent = new AtpAgent({ service: 'https://bsky.social' });
-      await agent.login({
-        identifier: process.env.BLUESKY_HANDLE,
-        password: process.env.BLUESKY_APP_PASSWORD,
-      });
+      const fetchParams: PlatformFetchParams = {
+        expectedAmount: 10,
+        until_id: untilId,
+      };
 
-      const firstResponse = await agent.getAuthorFeed({
-        actor: process.env.BLUESKY_USER_ID,
-        limit: 100,
-        filter: 'posts_and_author_threads',
-      });
-      expect(firstResponse).to.not.be.undefined;
+      const result = await services.db.run((manager) =>
+        blueskyService.fetch(fetchParams, userDetails, manager)
+      );
 
-      const secondResponse = await agent.getAuthorFeed({
-        actor: process.env.BLUESKY_USER_ID,
-        limit: 10,
-        filter: 'posts_and_author_threads',
-        cursor: firstResponse.data.cursor,
+      expect(result).to.not.be.undefined;
+      expect(result.platformPosts.length).to.be.at.most(fetchParams.expectedAmount);
+      result.platformPosts.forEach(post => {
+        expect(new Date(post.timestampMs).getTime()).to.be.at.most(
+          new Date(initialFetch.platformPosts[5].timestampMs).getTime()
+        );
       });
-      expect(secondResponse).to.not.be.undefined;
-
-      const thirdResponse = await agent.getAuthorFeed({
-        actor: process.env.BLUESKY_USER_ID,
-        limit: 10,
-        filter: 'posts_and_author_threads',
-        cursor: '2024-09-23T18:18:25.568Z', // https://bsky.app/profile/weswalla.bsky.social/post/3l4tpp5hujn2v
-      });
-      expect(thirdResponse).to.not.be.undefined;
     });
   });
 });
