@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { BlueskyUserDetails } from '../../src/@shared/types/types.bluesky';
+import { BlueskyUserDetails, BlueskyThread } from '../../src/@shared/types/types.bluesky';
 import {
   FetchParams,
   PlatformFetchParams,
@@ -342,8 +342,12 @@ describe('02-platforms', () => {
 
       expect(result).to.not.be.undefined;
       if (result.platformPosts.length > 0) {
-        result.platformPosts.forEach((post) => {
-          expect(post.timestampMs).to.be.greaterThan(sinceTimestamp);
+        result.platformPosts.forEach((platformPost) => {
+          const thread = platformPost.post as BlueskyThread;
+          thread.posts.forEach((post) => {
+            const createdAt = new Date(post.record.createdAt).getTime();
+            expect(createdAt).to.be.greaterThan(sinceTimestamp);
+          });
         });
       }
     });
@@ -374,8 +378,12 @@ describe('02-platforms', () => {
         fetchParams.expectedAmount
       );
       if (result.platformPosts.length > 0) {
-        result.platformPosts.forEach((post) => {
-          expect(post.timestampMs).to.be.at.most(untilTimestamp);
+        result.platformPosts.forEach((platformPost) => {
+          const thread = platformPost.post as BlueskyThread;
+          thread.posts.forEach((post) => {
+            const createdAt = new Date(post.record.createdAt).getTime();
+            expect(createdAt).to.be.at.most(untilTimestamp);
+          });
         });
       }
     });
