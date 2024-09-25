@@ -104,7 +104,7 @@ export const cleanBlueskyContent = (post: BlueskyPost): string => {
     post.record.facets.forEach((facet) => {
       const feature = facet.features[0];
       if (feature.$type === 'app.bsky.richtext.facet#link') {
-        const fullUrl = feature.uri;
+        const fullUrl = feature.uri as string;
         const truncatedText = cleanedContent.substring(
           facet.index.byteStart,
           facet.index.byteEnd
@@ -113,15 +113,6 @@ export const cleanBlueskyContent = (post: BlueskyPost): string => {
       }
     });
   }
-
-  // Remove mentions (e.g., @handle.bsky.social)
-  cleanedContent = cleanedContent.replace(/@[\w.-]+/g, '');
-
-  // Trim leading and trailing whitespace
-  cleanedContent = cleanedContent.trim();
-
-  // Remove extra whitespace
-  cleanedContent = cleanedContent.replace(/\s+/g, ' ');
 
   return cleanedContent;
 };
