@@ -62,14 +62,18 @@ export const TweetAnchor = (props: {
       target="_blank"
       href={`https://twitter.com/x/status/${threadId}`}
       size="medium">
-      <Box direction="row" align="center">
+      <Box
+        direction="row"
+        align="center"
+        wrap
+        style={{
+          gap: '8px',
+          display: 'inline-flex',
+          flexWrap: 'wrap',
+        }}>
         <span style={{ color: constants.colors.textLight2 }}>{label}</span>
-        <span
-          style={{ color: '#4B5563', marginLeft: '8px', marginRight: '6px' }}>
-          {' '}
-          {date}
-        </span>
-        <OpenLinkIcon size={12}></OpenLinkIcon>
+        <span style={{ color: '#4B5563' }}>{date}</span>
+        <OpenLinkIcon size={12} />
       </Box>
     </Anchor>
   );
