@@ -1,6 +1,9 @@
 import { expect } from 'chai';
 
-import { BlueskyUserDetails, BlueskyThread } from '../../src/@shared/types/types.bluesky';
+import {
+  BlueskyThread,
+  BlueskyUserDetails,
+} from '../../src/@shared/types/types.bluesky';
 import {
   FetchParams,
   PlatformFetchParams,
@@ -69,7 +72,6 @@ describe('02-platforms', () => {
             undefined
       );
     });
-
   });
 
   // TODO, fix this test
@@ -282,7 +284,7 @@ describe('02-platforms', () => {
     });
   });
 
-  describe.only('bluesky', () => {
+  describe('bluesky', () => {
     let blueskyService: BlueskyService;
     let userDetails: BlueskyUserDetails;
 
@@ -307,18 +309,13 @@ describe('02-platforms', () => {
     });
 
     it('fetches the main thread of a post', async () => {
-      const postId = 'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z';
+      const postId =
+        'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wdgnynfq2h';
+      // https://bsky.app/profile/weswalla.bsky.social/post/3l4wdgnynfq2h
 
       const result = await services.db.run((manager) =>
         blueskyService.get(postId, userDetails, manager)
       );
-
-      expect(result).to.not.be.undefined;
-      expect(result.post).to.be.an('object');
-      expect(result.post.thread_id).to.equal(postId);
-      expect(result.post.posts).to.be.an('array');
-      expect(result.post.posts.length).to.equal(4);
-      
       const expectedThreadIds = [
         'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z',
         'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd52krts24',
@@ -326,18 +323,30 @@ describe('02-platforms', () => {
         'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wdcb3w322z',
       ];
 
-      expect(result.post.posts.map(post => post.uri)).to.deep.equal(expectedThreadIds);
+      expect(result).to.not.be.undefined;
+      expect(result.post).to.be.an('object');
+      expect(result.post.thread_id).to.equal(expectedThreadIds[0]);
+      expect(result.post.posts).to.be.an('array');
+      expect(result.post.posts.length).to.equal(4);
+
+      expect(result.post.posts.map((post) => post.uri)).to.deep.equal(
+        expectedThreadIds
+      );
 
       // Check that all posts in the thread are from the same author
       const authorDid = result.post.author.did;
-      result.post.posts.forEach(post => {
+      result.post.posts.forEach((post) => {
         expect(post.author.did).to.equal(authorDid);
       });
 
       // Check that posts are in chronological order
       for (let i = 1; i < result.post.posts.length; i++) {
-        const prevTimestamp = new Date(result.post.posts[i-1].indexedAt).getTime();
-        const currTimestamp = new Date(result.post.posts[i].indexedAt).getTime();
+        const prevTimestamp = new Date(
+          result.post.posts[i - 1].indexedAt
+        ).getTime();
+        const currTimestamp = new Date(
+          result.post.posts[i].indexedAt
+        ).getTime();
         expect(currTimestamp).to.be.at.least(prevTimestamp);
       }
     });
