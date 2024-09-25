@@ -290,10 +290,32 @@ export class BlueskyService
       name: thread.author.displayName || thread.author.handle,
     };
 
-    const genericPosts: GenericPost[] = thread.posts.map((post) => ({
-      url: `https://bsky.app/profile/${post.author.handle}/post/${extractRKeyFromURI(post.uri)}`,
-      content: cleanBlueskyContent(post),
-    }));
+    const genericPosts: GenericPost[] = thread.posts.map((post) => {
+      const genericPost: GenericPost = {
+        url: `https://bsky.app/profile/${post.author.handle}/post/${extractRKeyFromURI(post.uri)}`,
+        content: cleanBlueskyContent(post),
+      };
+
+      if (post.embed && post.embed.$type === 'app.bsky.embed.record#view') {
+        const quotedPost = post.embed.record;
+        if (quotedPost.$type === 'app.bsky.embed.record#viewRecord') {
+          genericPost.quotedThread = {
+            author: {
+              platformId: PLATFORM.Bluesky,
+              id: quotedPost.author.did,
+              username: quotedPost.author.handle,
+              name: quotedPost.author.displayName || quotedPost.author.handle,
+            },
+            thread: [{
+              url: `https://bsky.app/profile/${quotedPost.author.handle}/post/${extractRKeyFromURI(quotedPost.uri)}`,
+              content: cleanBlueskyContent(quotedPost as BlueskyPost),
+            }],
+          };
+        }
+      }
+
+      return genericPost;
+    });
 
     return {
       author: genericAuthor,

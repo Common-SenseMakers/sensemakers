@@ -96,14 +96,15 @@ const getEarliestResponse = (id: string, posts: BlueskyPost[]) => {
   );
 };
 
-export const cleanBlueskyContent = (post: BlueskyPost): string => {
-  let cleanedContent = post.record.text;
+export const cleanBlueskyContent = (post: BlueskyPost | { value: { text: string; facets?: any[] } }): string => {
+  let cleanedContent = 'value' in post ? post.value.text : post.record.text;
+  const facets = 'value' in post ? post.value.facets : post.record.facets;
 
   // Replace truncated URLs with full URLs using facets
-  if (post.record.facets) {
+  if (facets) {
     const replacements: { start: number; end: number; url: string }[] = [];
 
-    post.record.facets.forEach((facet) => {
+    facets.forEach((facet) => {
       const feature = facet.features[0];
       if (feature.$type === 'app.bsky.richtext.facet#link') {
         replacements.push({

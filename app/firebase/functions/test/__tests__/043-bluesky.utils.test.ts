@@ -86,6 +86,41 @@ describe('bluesky utility functions', () => {
     const cleanedContent = cleanBlueskyContent(post);
     expect(cleanedContent).to.equal(expectedOutput);
   });
+
+  it('handles quoted posts correctly', () => {
+    const post = {
+      record: {
+        text: 'Quoting an interesting post',
+        facets: [],
+      },
+      embed: {
+        $type: 'app.bsky.embed.record#view',
+        record: {
+          $type: 'app.bsky.embed.record#viewRecord',
+          value: {
+            text: 'Original post with a link: example.com/short',
+            facets: [
+              {
+                index: { byteStart: 30, byteEnd: 45 },
+                features: [
+                  {
+                    $type: 'app.bsky.richtext.facet#link',
+                    uri: 'https://example.com/full-link',
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      },
+    } as unknown as BlueskyPost;
+
+    const cleanedContent = cleanBlueskyContent(post);
+    expect(cleanedContent).to.equal('Quoting an interesting post');
+
+    const quotedContent = cleanBlueskyContent(post.embed.record as any);
+    expect(quotedContent).to.equal('Original post with a link: https://example.com/full-link');
+  });
   it('extracts rKey from URI', () => {
     const uri = 'at://did:plc:example/app.bsky.feed.post/3j5sy9apqv2';
     const rkey = extractRKeyFromURI(uri);
