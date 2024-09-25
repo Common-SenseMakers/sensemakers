@@ -283,7 +283,7 @@ export class BlueskyService
     };
 
     const genericPosts: GenericPost[] = thread.posts.map((post) => ({
-      url: post.uri,
+      url: `https://bsky.app/profile/${post.author.handle}/post/${extractRKeyFromURI(post.uri)}`,
       content: cleanBlueskyContent(post.record.text),
     }));
 
