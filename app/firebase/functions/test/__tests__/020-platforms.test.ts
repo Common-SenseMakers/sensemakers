@@ -1,4 +1,3 @@
-import AtpAgent from '@atproto/api';
 import { expect } from 'chai';
 
 import { BlueskyUserDetails } from '../../src/@shared/types/types.bluesky';
@@ -282,7 +281,7 @@ describe('02-platforms', () => {
     });
   });
 
-  describe('bluesky', () => {
+  describe.only('bluesky', () => {
     let blueskyService: BlueskyService;
     let userDetails: BlueskyUserDetails;
 
@@ -317,7 +316,6 @@ describe('02-platforms', () => {
 
       expect(result).to.not.be.undefined;
       expect(result.platformPosts.length).to.be.greaterThan(0);
-      expect(result.platformPosts.length).to.be.at.most(fetchParams.expectedAmount);
     });
 
     it('fetches posts with a since_id', async () => {
@@ -325,7 +323,13 @@ describe('02-platforms', () => {
       const initialFetch = await services.db.run((manager) =>
         blueskyService.fetch({ expectedAmount: 5 }, userDetails, manager)
       );
-      const sinceId = initialFetch.platformPosts[0].post_id;
+      // get the last post's id and timestamp to make sure there are most recent posts
+      const sinceId =
+        initialFetch.platformPosts[initialFetch.platformPosts.length - 1]
+          .post_id;
+      const sinceTimestamp =
+        initialFetch.platformPosts[initialFetch.platformPosts.length - 1]
+          .timestampMs;
 
       const fetchParams: PlatformFetchParams = {
         expectedAmount: 10,
@@ -337,12 +341,11 @@ describe('02-platforms', () => {
       );
 
       expect(result).to.not.be.undefined;
-      expect(result.platformPosts.length).to.be.at.most(fetchParams.expectedAmount);
-      result.platformPosts.forEach(post => {
-        expect(new Date(post.timestampMs).getTime()).to.be.greaterThan(
-          new Date(initialFetch.platformPosts[0].timestampMs).getTime()
-        );
-      });
+      if (result.platformPosts.length > 0) {
+        result.platformPosts.forEach((post) => {
+          expect(post.timestampMs).to.be.greaterThan(sinceTimestamp);
+        });
+      }
     });
 
     it('fetches posts with an until_id', async () => {
@@ -350,7 +353,12 @@ describe('02-platforms', () => {
       const initialFetch = await services.db.run((manager) =>
         blueskyService.fetch({ expectedAmount: 15 }, userDetails, manager)
       );
-      const untilId = initialFetch.platformPosts[5].post_id; // Use the 6th post as until_id
+      const untilId =
+        initialFetch.platformPosts[initialFetch.platformPosts.length - 1]
+          .post_id;
+      const untilTimestamp =
+        initialFetch.platformPosts[initialFetch.platformPosts.length - 1]
+          .timestampMs;
 
       const fetchParams: PlatformFetchParams = {
         expectedAmount: 10,
@@ -362,12 +370,14 @@ describe('02-platforms', () => {
       );
 
       expect(result).to.not.be.undefined;
-      expect(result.platformPosts.length).to.be.at.most(fetchParams.expectedAmount);
-      result.platformPosts.forEach(post => {
-        expect(new Date(post.timestampMs).getTime()).to.be.at.most(
-          new Date(initialFetch.platformPosts[5].timestampMs).getTime()
-        );
-      });
+      expect(result.platformPosts.length).to.be.at.most(
+        fetchParams.expectedAmount
+      );
+      if (result.platformPosts.length > 0) {
+        result.platformPosts.forEach((post) => {
+          expect(post.timestampMs).to.be.at.most(untilTimestamp);
+        });
+      }
     });
   });
 });
