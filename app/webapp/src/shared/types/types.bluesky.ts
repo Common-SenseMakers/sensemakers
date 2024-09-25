@@ -1,5 +1,10 @@
 import {
   AppBskyActorDefs,
+  AppBskyEmbedExternal,
+  AppBskyEmbedImages,
+  AppBskyEmbedRecord,
+  AppBskyEmbedRecordWithMedia,
+  AppBskyEmbedVideo,
   AppBskyFeedDefs,
   AppBskyFeedPost,
   AppBskyRichtextFacet,
@@ -51,6 +56,13 @@ export interface QuotedBlueskyPost {
     $type: string;
     createdAt: string;
     facets?: AppBskyRichtextFacet.Main[];
+    embed?:
+      | AppBskyEmbedImages.Main
+      | AppBskyEmbedVideo.Main
+      | AppBskyEmbedExternal.Main
+      | AppBskyEmbedRecord.Main
+      | AppBskyEmbedRecordWithMedia.Main
+      | { $type: string; [k: string]: unknown };
   };
   indexedAt: string;
 }

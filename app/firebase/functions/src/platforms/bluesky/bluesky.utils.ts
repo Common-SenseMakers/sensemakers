@@ -1,4 +1,4 @@
-import { AppBskyFeedPost } from '@atproto/api';
+import { AppBskyEmbedExternal, AppBskyFeedPost } from '@atproto/api';
 
 import {
   BlueskyPost,
@@ -139,8 +139,12 @@ export const cleanBlueskyContent = (
 
   // Check for embed URL
   if (post.embed && post.embed.$type === 'app.bsky.embed.external') {
-    const embedUrl = post.embed.external.uri;
-    if (embedUrl && !cleanedContent.includes(embedUrl) && !appendedUrls.includes(embedUrl)) {
+    const embedUrl = (post.embed as AppBskyEmbedExternal.Main).external.uri;
+    if (
+      embedUrl &&
+      !cleanedContent.includes(embedUrl) &&
+      !appendedUrls.includes(embedUrl)
+    ) {
       appendedUrls.push(embedUrl);
     }
   }
