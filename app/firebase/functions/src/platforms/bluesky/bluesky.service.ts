@@ -17,22 +17,31 @@ import {
   PlatformPostCreate,
   PlatformPostDeleteDraft,
   PlatformPostDraft,
+  PlatformPostDraftApproval,
   PlatformPostPosted,
+  PlatformPostSignerType,
   PlatformPostUpdate,
 } from '../../@shared/types/types.platform.posts';
-import { AppPostFull, GenericAuthor, GenericPost, GenericThread, PostAndAuthor } from '../../@shared/types/types.posts';
+import {
+  AppPostFull,
+  GenericAuthor,
+  GenericPost,
+  GenericThread,
+  PostAndAuthor,
+} from '../../@shared/types/types.posts';
 import { PLATFORM } from '../../@shared/types/types.user';
 import { AppUser } from '../../@shared/types/types.user';
 import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
+import { UsersHelper } from '../../users/users.helper';
 import { UsersRepository } from '../../users/users.repository';
 import { PlatformService } from '../platforms.interface';
 import {
-  convertBlueskyPostsToThreads,
-  extractRKeyFromURI,
-  extractPrimaryThread,
   cleanBlueskyContent,
+  convertBlueskyPostsToThreads,
+  extractPrimaryThread,
+  extractRKeyFromURI,
 } from './bluesky.utils';
 
 const DEBUG = true;
@@ -324,14 +333,16 @@ export class BlueskyService
     };
   }
 
-  public async convertFromGeneric(postAndAuthor: PostAndAuthor): Promise<PlatformPostDraft<string>> {
+  public async convertFromGeneric(
+    postAndAuthor: PostAndAuthor
+  ): Promise<PlatformPostDraft<string>> {
     const account = UsersHelper.getAccount(
       postAndAuthor.author,
       PLATFORM.Bluesky,
       undefined,
       true
     );
-    
+
     const content = postAndAuthor.post.generic.thread
       .map((post) => post.content)
       .join('\n\n');
@@ -362,27 +373,43 @@ export class BlueskyService
       password: userDetails.read.appPassword,
     });
 
-    const response = await this.agent.getPostThread({ uri: post_id, depth: 100, parentHeight: 100 });
+    const response = await this.agent.getPostThread({
+      uri: post_id,
+      depth: 100,
+      parentHeight: 100,
+    });
 
     if (response.data.thread.$type !== 'app.bsky.feed.defs#threadViewPost') {
       throw new Error('Unexpected thread type');
     }
 
-    const threadViewPost = response.data.thread as AppBskyFeedDefs.ThreadViewPost;
+    const threadViewPost = response.data
+      .thread as AppBskyFeedDefs.ThreadViewPost;
     const rootPost = this.findRootPost(threadViewPost);
 
     // If the initial post is not the root, fetch the root thread
-    const rootResponse = rootPost.post.uri !== post_id
-      ? await this.agent.getPostThread({ uri: rootPost.post.uri, depth: 100, parentHeight: 100 })
-      : response;
+    const rootResponse =
+      rootPost.post.uri !== post_id
+        ? await this.agent.getPostThread({
+            uri: rootPost.post.uri,
+            depth: 100,
+            parentHeight: 100,
+          })
+        : response;
 
-    if (rootResponse.data.thread.$type !== 'app.bsky.feed.defs#threadViewPost') {
+    if (
+      rootResponse.data.thread.$type !== 'app.bsky.feed.defs#threadViewPost'
+    ) {
       throw new Error('Unexpected root thread type');
     }
 
-    const rootThreadViewPost = rootResponse.data.thread as AppBskyFeedDefs.ThreadViewPost;
+    const rootThreadViewPost = rootResponse.data
+      .thread as AppBskyFeedDefs.ThreadViewPost;
     const allPosts = this.collectAllPosts(rootThreadViewPost);
-    const mainThread = extractPrimaryThread(rootThreadViewPost.post.uri, allPosts);
+    const mainThread = extractPrimaryThread(
+      rootThreadViewPost.post.uri,
+      allPosts
+    );
 
     const blueskyThread: BlueskyThread = {
       thread_id: rootThreadViewPost.post.uri,
@@ -398,22 +425,33 @@ export class BlueskyService
     };
   }
 
-  private findRootPost(thread: AppBskyFeedDefs.ThreadViewPost): AppBskyFeedDefs.ThreadViewPost {
-    if (!thread.parent || thread.parent.$type !== 'app.bsky.feed.defs#threadViewPost') {
+  private findRootPost(
+    thread: AppBskyFeedDefs.ThreadViewPost
+  ): AppBskyFeedDefs.ThreadViewPost {
+    if (
+      !thread.parent ||
+      thread.parent.$type !== 'app.bsky.feed.defs#threadViewPost'
+    ) {
       return thread;
     }
     return this.findRootPost(thread.parent as AppBskyFeedDefs.ThreadViewPost);
   }
 
-  private collectAllPosts(thread: AppBskyFeedDefs.ThreadViewPost): BlueskyPost[] {
-    const posts: BlueskyPost[] = [{
-      ...thread.post,
-      record: thread.post.record as AppBskyFeedPost.Record
-    }];
+  private collectAllPosts(
+    thread: AppBskyFeedDefs.ThreadViewPost
+  ): BlueskyPost[] {
+    const posts: BlueskyPost[] = [
+      {
+        ...thread.post,
+        record: thread.post.record as AppBskyFeedPost.Record,
+      },
+    ];
     if (thread.replies) {
       for (const reply of thread.replies) {
         if (reply.$type === 'app.bsky.feed.defs#threadViewPost') {
-          posts.push(...this.collectAllPosts(reply as AppBskyFeedDefs.ThreadViewPost));
+          posts.push(
+            ...this.collectAllPosts(reply as AppBskyFeedDefs.ThreadViewPost)
+          );
         }
       }
     }
