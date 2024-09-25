@@ -35,8 +35,29 @@ export interface BlueskyThread {
   author: BlueskyAccount;
 }
 
+export interface QuotedBlueskyPost {
+  uri: string;
+  cid: string;
+  author: {
+    did: string;
+    handle: string;
+    displayName?: string;
+    avatar?: string;
+  };
+  record: {
+    text: string;
+    $type: string;
+    createdAt: string;
+  };
+  indexedAt: string;
+}
+
 export type BlueskyPost = AppBskyFeedDefs.PostView & {
   record: AppBskyFeedPost.Record;
+  embed?: {
+    $type: string;
+    record: QuotedBlueskyPost;
+  };
 };
 export type BlueskyAccount = AppBskyActorDefs.ProfileViewDetailed;
 export interface BlueskyProfile {
