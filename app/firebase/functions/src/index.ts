@@ -127,7 +127,16 @@ exports[PARSE_POST_TASK] = onTaskDispatched(
     timeoutSeconds: envDeploy.CONFIG_TIMEOUT_PARSER,
     memory: envDeploy.CONFIG_MEMORY,
     minInstances: envDeploy.CONFIG_MININSTANCE,
+    maxInstances: 100,
     secrets,
+    retryConfig: {
+      maxAttempts: 5,
+    },
+    concurrency: 190,
+    rateLimits: {
+      maxConcurrentDispatches: 190,
+      maxDispatchesPerSecond: 190,
+    },
   },
   (req) => parsePostTask(req, createServices(firestore))
 );
