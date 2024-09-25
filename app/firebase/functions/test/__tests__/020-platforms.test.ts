@@ -435,7 +435,8 @@ describe('02-platforms', () => {
     });
 
     it('fetches a post with a quote and converts it to generic format', async () => {
-      const postId = 'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4ebss5mmt2f';
+      const postId =
+        'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4ebss5mmt2f';
 
       const result = await services.db.run((manager) =>
         blueskyService.get(postId, userDetails, manager)
@@ -448,8 +449,6 @@ describe('02-platforms', () => {
         posted: result,
       } as PlatformPostCreate<BlueskyThread>);
 
-      expect(genericThread).to.be.an('object');
-      expect(genericThread.thread).to.be.an('array');
       expect(genericThread.thread.length).to.be.greaterThan(0);
 
       const mainPost = genericThread.thread[0];
@@ -460,7 +459,9 @@ describe('02-platforms', () => {
 
       const quotedPost = mainPost.quotedThread?.thread[0];
       expect(quotedPost?.content).to.be.a('string');
-      expect(quotedPost?.url).to.be.a('string');
+      expect(quotedPost?.url).to.be.equal(
+        'https://bsky.app/profile/thetyee.ca/post/3l4eak57v5y2h'
+      );
     });
   });
 });
