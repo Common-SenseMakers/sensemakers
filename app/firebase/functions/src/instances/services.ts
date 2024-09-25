@@ -28,6 +28,7 @@ import { NotificationService } from '../notifications/notification.service';
 import { NotificationsRepository } from '../notifications/notifications.repository';
 import { getParserMock } from '../parser/mock/parser.service.mock';
 import { ParserService } from '../parser/parser.service';
+import { BlueskyService } from '../platforms/bluesky/bluesky.service';
 import { MastodonService } from '../platforms/mastodon/mastodon.service';
 import { getMastodonMock } from '../platforms/mastodon/mock/mastodon.service.mock';
 import { getTestCredentials } from '../platforms/mock/test.users';
@@ -117,17 +118,20 @@ export const createServices = (firestore: Firestore) => {
       : { signup: true, fetch: true, publish: true, get: true },
     testUser
   );
+  const bluesky = new BlueskyService(time, userRepo);
 
   /** all identity services */
   identityPlatforms.set(PLATFORM.Orcid, orcid);
   identityPlatforms.set(PLATFORM.Twitter, twitter);
   identityPlatforms.set(PLATFORM.Nanopub, nanopub);
   identityPlatforms.set(PLATFORM.Mastodon, mastodon);
+  identityPlatforms.set(PLATFORM.Bluesky, bluesky);
 
   /** all platforms */
   platformsMap.set(PLATFORM.Twitter, twitter);
   platformsMap.set(PLATFORM.Nanopub, nanopub);
   platformsMap.set(PLATFORM.Mastodon, mastodon);
+  platformsMap.set(PLATFORM.Bluesky, bluesky);
 
   /** email sender service */
   const _email = new EmailSenderService({
