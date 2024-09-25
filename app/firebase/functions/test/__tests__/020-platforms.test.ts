@@ -342,10 +342,10 @@ describe('02-platforms', () => {
       // Check that posts are in chronological order
       for (let i = 1; i < result.post.posts.length; i++) {
         const prevTimestamp = new Date(
-          result.post.posts[i - 1].indexedAt
+          result.post.posts[i - 1].record.createdAt
         ).getTime();
         const currTimestamp = new Date(
-          result.post.posts[i].indexedAt
+          result.post.posts[i].record.createdAt
         ).getTime();
         expect(currTimestamp).to.be.at.least(prevTimestamp);
       }

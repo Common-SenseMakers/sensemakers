@@ -197,7 +197,7 @@ export class BlueskyService
           ? new Date(sincePost.value.createdAt).getTime()
           : Infinity;
         const hasOlderPost = posts.some(
-          (post) => new Date(post.indexedAt).getTime() <= sinceDate
+          (post) => new Date(post.record.createdAt).getTime() <= sinceDate
         );
         if (hasOlderPost || !response.data.cursor) {
           shouldBreak = true;
@@ -209,7 +209,7 @@ export class BlueskyService
 
     // Filter posts based on since_id and until_id
     allPosts = allPosts.filter((post) => {
-      const postDate = new Date(post.indexedAt).getTime();
+      const postDate = new Date(post.record.createdAt).getTime();
       if (
         sincePost &&
         postDate <= new Date(sincePost.value.createdAt).getTime()
@@ -228,7 +228,7 @@ export class BlueskyService
     const platformPosts = threads.map((thread) => ({
       post_id: thread.thread_id,
       user_id: thread.author.did,
-      timestampMs: new Date(thread.posts[0].indexedAt).getTime(),
+      timestampMs: new Date(thread.posts[0].record.createdAt).getTime(),
       post: thread,
     }));
 
@@ -444,7 +444,7 @@ export class BlueskyService
     return {
       post_id: blueskyThread.thread_id,
       user_id: blueskyThread.author.did,
-      timestampMs: new Date(blueskyThread.posts[0].indexedAt).getTime(),
+      timestampMs: new Date(blueskyThread.posts[0].record.createdAt).getTime(),
       post: blueskyThread,
     };
   }

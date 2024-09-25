@@ -27,15 +27,16 @@ export const convertBlueskyPostsToThreads = (
   // Sort threads by the creation timestamp of the root post
   postsArrays.sort(
     (pA, pB) =>
-      new Date(pB[0].indexedAt).getTime() - new Date(pA[0].indexedAt).getTime()
+      new Date(pB[0].record.createdAt).getTime() -
+      new Date(pA[0].record.createdAt).getTime()
   );
 
   // Sort posts inside each thread and compose the BlueskyThread[] array
   const threads = postsArrays.map((thread): BlueskyThread => {
     const sortedPosts = thread.sort(
       (postA, postB) =>
-        new Date(postA.indexedAt).getTime() -
-        new Date(postB.indexedAt).getTime()
+        new Date(postA.record.createdAt).getTime() -
+        new Date(postB.record.createdAt).getTime()
     );
 
     const primaryThread = extractPrimaryThread(sortedPosts[0].uri, sortedPosts);
@@ -94,8 +95,8 @@ const getEarliestResponse = (id: string, posts: BlueskyPost[]) => {
 
   return allPostReplies.reduce(
     (earliestPost, post) =>
-      new Date(post.indexedAt).getTime() <
-      new Date(earliestPost.indexedAt).getTime()
+      new Date(post.record.createdAt).getTime() <
+      new Date(earliestPost.record.createdAt).getTime()
         ? post
         : earliestPost,
     allPostReplies[0]
