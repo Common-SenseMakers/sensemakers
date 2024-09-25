@@ -1,4 +1,6 @@
 import { BlueskyPost, BlueskyThread } from '../../@shared/types/types.bluesky';
+import { PLATFORM } from '../../@shared/types/types.user';
+import { GenericAuthor, GenericPost, GenericThread } from '../../@shared/types/types.posts';
 
 export const convertBlueskyPostsToThreads = (
   posts: BlueskyPost[],
@@ -100,8 +102,17 @@ export const cleanBlueskyContent = (content: string): string => {
   // Remove any Bluesky-specific formatting if needed
   let cleanedContent = content;
 
+  // Remove mentions (e.g., @handle.bsky.social)
+  cleanedContent = cleanedContent.replace(/@[\w.-]+/g, '');
+
+  // Remove URLs
+  cleanedContent = cleanedContent.replace(/https?:\/\/\S+/g, '');
+
   // Trim leading and trailing whitespace
   cleanedContent = cleanedContent.trim();
+
+  // Remove extra whitespace
+  cleanedContent = cleanedContent.replace(/\s+/g, ' ');
 
   return cleanedContent;
 };
