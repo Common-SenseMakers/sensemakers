@@ -347,5 +347,39 @@ describe('02-platforms', () => {
       expect(result).to.not.be.undefined;
       expect(result.platformPosts.length).to.be.greaterThan(0);
     });
+
+    it('tests the Bluesky cursor parameter in getAuthorFeed', async () => {
+      if (
+        process.env.BLUESKY_HANDLE === undefined ||
+        process.env.BLUESKY_APP_PASSWORD === undefined ||
+        process.env.BLUESKY_USER_ID === undefined
+      ) {
+        console.warn('Skipping Bluesky test due to missing credentials');
+        return;
+      }
+
+      const agent = new AtpAgent({ service: 'https://bsky.social' });
+      await agent.login({
+        identifier: process.env.BLUESKY_HANDLE,
+        password: process.env.BLUESKY_APP_PASSWORD,
+      });
+
+      const firstResponse = await agent.getAuthorFeed({
+        actor: process.env.BLUESKY_USER_ID,
+        limit: 10,
+      });
+
+      expect(firstResponse.data.feed.length).to.be.greaterThan(0);
+      expect(firstResponse.data.cursor).to.be.a('string');
+
+      const secondResponse = await agent.getAuthorFeed({
+        actor: process.env.BLUESKY_USER_ID,
+        limit: 10,
+        cursor: firstResponse.data.cursor,
+      });
+
+      expect(secondResponse.data.feed.length).to.be.greaterThan(0);
+      expect(secondResponse.data.feed[0].post.uri).to.not.equal(firstResponse.data.feed[0].post.uri);
+    });
   });
 });
