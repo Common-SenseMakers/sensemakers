@@ -20,7 +20,8 @@ import {
   PlatformPostPosted,
   PlatformPostUpdate,
 } from '../../@shared/types/types.platform.posts';
-import { AppPostFull, PostAndAuthor } from '../../@shared/types/types.posts';
+import { AppPostFull, GenericAuthor, GenericPost, GenericThread, PostAndAuthor } from '../../@shared/types/types.posts';
+import { PLATFORM } from '../../@shared/types/types.user';
 import { AppUser } from '../../@shared/types/types.user';
 import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
@@ -31,6 +32,7 @@ import {
   convertBlueskyPostsToThreads,
   extractRKeyFromURI,
   extractPrimaryThread,
+  cleanBlueskyContent,
 } from './bluesky.utils';
 
 const DEBUG = true;
@@ -266,10 +268,29 @@ export class BlueskyService
   }
 
   public async convertToGeneric(
-    platformPost: PlatformPostCreate<any>
-  ): Promise<any> {
-    // Implement conversion logic here
-    throw new Error('Method not implemented.');
+    platformPost: PlatformPostCreate<BlueskyThread>
+  ): Promise<GenericThread> {
+    if (!platformPost.posted) {
+      throw new Error('Unexpected undefined posted');
+    }
+
+    const thread = platformPost.posted.post;
+    const genericAuthor: GenericAuthor = {
+      platformId: PLATFORM.Bluesky,
+      id: thread.author.did,
+      username: thread.author.handle,
+      name: thread.author.displayName || thread.author.handle,
+    };
+
+    const genericPosts: GenericPost[] = thread.posts.map((post) => ({
+      url: post.uri,
+      content: cleanBlueskyContent(post.record.text),
+    }));
+
+    return {
+      author: genericAuthor,
+      thread: genericPosts,
+    };
   }
 
   public async publish(
