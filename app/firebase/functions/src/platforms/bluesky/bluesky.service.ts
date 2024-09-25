@@ -1,4 +1,8 @@
-import AtpAgent, { AppBskyFeedDefs, RichText } from '@atproto/api';
+import AtpAgent, {
+  AppBskyFeedDefs,
+  AppBskyFeedPost,
+  RichText,
+} from '@atproto/api';
 
 import {
   BlueskyPost,
@@ -23,7 +27,10 @@ import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersRepository } from '../../users/users.repository';
 import { PlatformService } from '../platforms.interface';
-import { convertBlueskyPostsToThreads } from './bluesky.utils';
+import {
+  convertBlueskyPostsToThreads,
+  extractRKeyFromURI,
+} from './bluesky.utils';
 
 const DEBUG = true;
 const DEBUG_PREFIX = 'BlueskyService';
@@ -110,8 +117,12 @@ export class BlueskyService
     let oldestId: string | undefined;
     let cursor: string | undefined;
 
-    const sincePost = params.since_id ? await this.getPost(params.since_id, userDetails) : undefined;
-    const untilPost = params.until_id ? await this.getPost(params.until_id, userDetails) : undefined;
+    const sincePost = params.since_id
+      ? await this.getPost(params.since_id, userDetails)
+      : undefined;
+    const untilPost = params.until_id
+      ? await this.getPost(params.until_id, userDetails)
+      : undefined;
 
     while (true) {
       const response = await this.agent.getAuthorFeed({
@@ -127,10 +138,18 @@ export class BlueskyService
       if (posts.length === 0) break;
 
       // Filter posts based on since_id and until_id
-      const filteredPosts = posts.filter(post => {
+      const filteredPosts = posts.filter((post) => {
         const postDate = new Date(post.indexedAt).getTime();
-        if (sincePost && postDate <= new Date(sincePost.indexedAt).getTime()) return false;
-        if (untilPost && postDate >= new Date(untilPost.indexedAt).getTime()) return false;
+        if (
+          sincePost &&
+          postDate < new Date(sincePost.value.createdAt).getTime()
+        )
+          return false;
+        if (
+          untilPost &&
+          postDate > new Date(untilPost.value.createdAt).getTime()
+        )
+          return false;
         return true;
       });
 
@@ -206,10 +225,23 @@ export class BlueskyService
     return result;
   }
 
-  private async getPost(postId: string, userDetails: BlueskyUserDetails): Promise<BlueskyPost | undefined> {
+  private async getPost(
+    postId: string,
+    userDetails: BlueskyUserDetails
+  ): Promise<
+    { uri: string; cid: string; value: AppBskyFeedPost.Record } | undefined
+  > {
+    const rkey = extractRKeyFromURI(postId);
+    if (!rkey) {
+      throw new Error('Invalid post ID');
+    }
     try {
-      const response = await this.agent.getPost({ uri: postId });
-      return response.data.thread.post as BlueskyPost;
+      this.agent.getPostThread;
+      const response = await this.agent.getPost({
+        repo: userDetails.user_id,
+        rkey,
+      });
+      return response;
     } catch (error) {
       logger.error('Error fetching post', { postId, error }, DEBUG_PREFIX);
       return undefined;

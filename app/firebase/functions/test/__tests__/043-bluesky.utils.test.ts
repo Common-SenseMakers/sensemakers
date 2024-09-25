@@ -6,10 +6,11 @@ import { BlueskyPost } from '../../src/@shared/types/types.bluesky';
 import {
   cleanBlueskyContent,
   convertBlueskyPostsToThreads,
+  extractRKeyFromURI,
 } from '../../src/platforms/bluesky/bluesky.utils';
 
 describe('bluesky utility functions', () => {
-  it.only('converts bluesky posts to threads', async () => {
+  it('converts bluesky posts to threads', async () => {
     const did = process.env.BLUESKY_USER_ID;
     if (!did) {
       throw new Error('BLUESKY_USER_ID is not set');
@@ -50,5 +51,10 @@ describe('bluesky utility functions', () => {
 
     const cleanedContent = cleanBlueskyContent(input);
     expect(cleanedContent).to.equal(expectedOutput);
+  });
+  it.only('extracts rKey from URI', () => {
+    const uri = 'at://did:plc:example/app.bsky.feed.post/3j5sy9apqv2';
+    const rkey = extractRKeyFromURI(uri);
+    expect(rkey).to.equal('3j5sy9apqv2');
   });
 });
