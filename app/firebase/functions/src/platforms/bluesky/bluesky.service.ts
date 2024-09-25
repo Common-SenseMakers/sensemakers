@@ -124,6 +124,11 @@ export class BlueskyService
       ? await this.getPost(params.until_id, userDetails)
       : undefined;
 
+    // If until_id is provided, use its createdAt as the initial cursor
+    if (untilPost) {
+      cursor = new Date(untilPost.value.createdAt).toISOString();
+    }
+
     let shouldBreak = false;
     while (!shouldBreak) {
       const response = await this.agent.getAuthorFeed({
@@ -169,19 +174,17 @@ export class BlueskyService
       }
       // Case 2: until_id is provided
       else if (params.until_id) {
-        const untilDate = untilPost ? new Date(untilPost.value.createdAt).getTime() : 0;
-        const olderThreads = threads.filter(thread => 
-          new Date(thread.posts[0].indexedAt).getTime() < untilDate
-        );
-        if (olderThreads.length >= params.expectedAmount || !response.data.cursor) {
+        if (threads.length >= params.expectedAmount || !response.data.cursor) {
           shouldBreak = true;
         }
       }
       // Case 3: since_id is provided
       else if (params.since_id) {
-        const sinceDate = sincePost ? new Date(sincePost.value.createdAt).getTime() : Infinity;
-        const hasOlderPost = posts.some(post => 
-          new Date(post.indexedAt).getTime() <= sinceDate
+        const sinceDate = sincePost
+          ? new Date(sincePost.value.createdAt).getTime()
+          : Infinity;
+        const hasOlderPost = posts.some(
+          (post) => new Date(post.indexedAt).getTime() <= sinceDate
         );
         if (hasOlderPost || !response.data.cursor) {
           shouldBreak = true;
@@ -194,23 +197,18 @@ export class BlueskyService
     // Filter posts based on since_id and until_id
     allPosts = allPosts.filter((post) => {
       const postDate = new Date(post.indexedAt).getTime();
-      if (sincePost && postDate <= new Date(sincePost.value.createdAt).getTime())
+      if (
+        sincePost &&
+        postDate <= new Date(sincePost.value.createdAt).getTime()
+      )
         return false;
-      if (untilPost && postDate >= new Date(untilPost.value.createdAt).getTime())
+      if (
+        untilPost &&
+        postDate >= new Date(untilPost.value.createdAt).getTime()
+      )
         return false;
       return true;
     });
-
-    if (allPosts.length === 0) {
-      if (DEBUG) logger.debug('fetch no posts found', {}, DEBUG_PREFIX);
-      return {
-        fetched: {
-          newest_id: undefined,
-          oldest_id: undefined,
-        },
-        platformPosts: [],
-      };
-    }
 
     const threads = convertBlueskyPostsToThreads(allPosts, userDetails.user_id);
 
