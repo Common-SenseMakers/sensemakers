@@ -107,6 +107,7 @@ export const cleanBlueskyContent = (
 ): string => {
   let cleanedContent = post.text;
   const facets = post.facets;
+  const appendedUrls: string[] = [];
 
   // Replace truncated URLs with full URLs using facets
   if (facets) {
@@ -115,11 +116,15 @@ export const cleanBlueskyContent = (
     facets.forEach((facet) => {
       const feature = facet.features[0];
       if (feature.$type === 'app.bsky.richtext.facet#link') {
-        replacements.push({
-          start: facet.index.byteStart,
-          end: facet.index.byteEnd,
-          url: feature.uri as string,
-        });
+        const url = feature.uri as string;
+        const start = facet.index.byteStart;
+        const end = facet.index.byteEnd;
+
+        if (cleanedContent.slice(start, end) !== url) {
+          replacements.push({ start, end, url });
+        } else if (!cleanedContent.includes(url)) {
+          appendedUrls.push(url);
+        }
       }
     });
 
@@ -130,6 +135,19 @@ export const cleanBlueskyContent = (
       cleanedContent =
         cleanedContent.slice(0, start) + url + cleanedContent.slice(end);
     }
+  }
+
+  // Check for embed URL
+  if (post.embed && post.embed.$type === 'app.bsky.embed.external') {
+    const embedUrl = post.embed.external.uri;
+    if (embedUrl && !cleanedContent.includes(embedUrl) && !appendedUrls.includes(embedUrl)) {
+      appendedUrls.push(embedUrl);
+    }
+  }
+
+  // Append URLs that weren't in the original text
+  if (appendedUrls.length > 0) {
+    cleanedContent += '\n\n' + appendedUrls.join('\n');
   }
 
   return cleanedContent;
