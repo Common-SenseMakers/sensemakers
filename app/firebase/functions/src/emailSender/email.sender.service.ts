@@ -58,7 +58,7 @@ export class EmailSenderService {
   async sendAdminEmail(subject: string, content: string) {
     const adminEmail = ADMIN_EMAIL.value();
 
-    if (!adminEmail) {
+    if (!adminEmail || adminEmail === '') {
       logger.debug('sendAdminEmail - no admin email', {}, DEBUG_PREFIX);
     }
 
