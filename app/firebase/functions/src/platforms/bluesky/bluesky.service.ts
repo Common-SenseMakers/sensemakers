@@ -124,7 +124,8 @@ export class BlueskyService
       ? await this.getPost(params.until_id, userDetails)
       : undefined;
 
-    while (true) {
+    let shouldBreak = false;
+    while (!shouldBreak) {
       const response = await this.agent.getAuthorFeed({
         actor: userDetails.user_id,
         limit: 100,
@@ -137,26 +138,10 @@ export class BlueskyService
       ) as BlueskyPost[];
       if (posts.length === 0) break;
 
-      // Filter posts based on since_id and until_id
-      const filteredPosts = posts.filter((post) => {
-        const postDate = new Date(post.indexedAt).getTime();
-        if (
-          sincePost &&
-          postDate < new Date(sincePost.value.createdAt).getTime()
-        )
-          return false;
-        if (
-          untilPost &&
-          postDate > new Date(untilPost.value.createdAt).getTime()
-        )
-          return false;
-        return true;
-      });
+      allPosts.push(...posts);
 
-      allPosts.push(...filteredPosts);
-
-      if (!newestId) newestId = filteredPosts[0]?.uri;
-      oldestId = filteredPosts[filteredPosts.length - 1]?.uri;
+      if (!newestId) newestId = posts[0]?.uri;
+      oldestId = posts[posts.length - 1]?.uri;
 
       const threads = convertBlueskyPostsToThreads(
         allPosts,
@@ -167,7 +152,7 @@ export class BlueskyService
         logger.debug(
           'fetch iteration',
           {
-            postsCount: filteredPosts.length,
+            postsCount: posts.length,
             allPostsCount: allPosts.length,
             threadsCount: threads.length,
             newestId,
@@ -176,12 +161,45 @@ export class BlueskyService
           DEBUG_PREFIX
         );
 
-      if (threads.length >= params.expectedAmount || !response.data.cursor) {
-        break;
+      // Case 1: No since_id or until_id
+      if (!params.since_id && !params.until_id) {
+        if (threads.length >= params.expectedAmount || !response.data.cursor) {
+          shouldBreak = true;
+        }
+      }
+      // Case 2: until_id is provided
+      else if (params.until_id) {
+        const untilDate = untilPost ? new Date(untilPost.value.createdAt).getTime() : 0;
+        const olderThreads = threads.filter(thread => 
+          new Date(thread.posts[0].indexedAt).getTime() < untilDate
+        );
+        if (olderThreads.length >= params.expectedAmount || !response.data.cursor) {
+          shouldBreak = true;
+        }
+      }
+      // Case 3: since_id is provided
+      else if (params.since_id) {
+        const sinceDate = sincePost ? new Date(sincePost.value.createdAt).getTime() : Infinity;
+        const hasOlderPost = posts.some(post => 
+          new Date(post.indexedAt).getTime() <= sinceDate
+        );
+        if (hasOlderPost || !response.data.cursor) {
+          shouldBreak = true;
+        }
       }
 
       cursor = response.data.cursor;
     }
+
+    // Filter posts based on since_id and until_id
+    allPosts = allPosts.filter((post) => {
+      const postDate = new Date(post.indexedAt).getTime();
+      if (sincePost && postDate <= new Date(sincePost.value.createdAt).getTime())
+        return false;
+      if (untilPost && postDate >= new Date(untilPost.value.createdAt).getTime())
+        return false;
+      return true;
+    });
 
     if (allPosts.length === 0) {
       if (DEBUG) logger.debug('fetch no posts found', {}, DEBUG_PREFIX);
