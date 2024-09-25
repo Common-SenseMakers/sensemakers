@@ -52,7 +52,7 @@ describe('bluesky utility functions', () => {
     const cleanedContent = cleanBlueskyContent(input);
     expect(cleanedContent).to.equal(expectedOutput);
   });
-  it.only('extracts rKey from URI', () => {
+  it('extracts rKey from URI', () => {
     const uri = 'at://did:plc:example/app.bsky.feed.post/3j5sy9apqv2';
     const rkey = extractRKeyFromURI(uri);
     expect(rkey).to.equal('3j5sy9apqv2');

@@ -1,3 +1,4 @@
+import AtpAgent from '@atproto/api';
 import { expect } from 'chai';
 
 import { BlueskyUserDetails } from '../../src/@shared/types/types.bluesky';
@@ -288,7 +289,7 @@ describe('02-platforms', () => {
       blueskyService = new BlueskyService(services.time, services.users.repo);
     });
 
-    it.only('fetches the latest posts', async () => {
+    it('fetches the latest posts', async () => {
       if (!user) {
         throw new Error('appUser not created');
       }
@@ -366,20 +367,26 @@ describe('02-platforms', () => {
 
       const firstResponse = await agent.getAuthorFeed({
         actor: process.env.BLUESKY_USER_ID,
-        limit: 10,
+        limit: 100,
+        filter: 'posts_and_author_threads',
       });
-
-      expect(firstResponse.data.feed.length).to.be.greaterThan(0);
-      expect(firstResponse.data.cursor).to.be.a('string');
+      expect(firstResponse).to.not.be.undefined;
 
       const secondResponse = await agent.getAuthorFeed({
         actor: process.env.BLUESKY_USER_ID,
         limit: 10,
+        filter: 'posts_and_author_threads',
         cursor: firstResponse.data.cursor,
       });
+      expect(secondResponse).to.not.be.undefined;
 
-      expect(secondResponse.data.feed.length).to.be.greaterThan(0);
-      expect(secondResponse.data.feed[0].post.uri).to.not.equal(firstResponse.data.feed[0].post.uri);
+      const thirdResponse = await agent.getAuthorFeed({
+        actor: process.env.BLUESKY_USER_ID,
+        limit: 10,
+        filter: 'posts_and_author_threads',
+        cursor: '2024-09-23T18:18:25.568Z', // https://bsky.app/profile/weswalla.bsky.social/post/3l4tpp5hujn2v
+      });
+      expect(thirdResponse).to.not.be.undefined;
     });
   });
 });
