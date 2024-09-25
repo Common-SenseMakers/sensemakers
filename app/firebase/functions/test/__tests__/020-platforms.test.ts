@@ -69,6 +69,37 @@ describe('02-platforms', () => {
             undefined
       );
     });
+
+    it('fetches the main thread of a post', async () => {
+      // First, fetch some posts to get a valid post_id
+      const initialFetch = await services.db.run((manager) =>
+        blueskyService.fetch({ expectedAmount: 5 }, userDetails, manager)
+      );
+      const postId = initialFetch.platformPosts[0].post_id;
+
+      const result = await services.db.run((manager) =>
+        blueskyService.get(postId, userDetails, manager)
+      );
+
+      expect(result).to.not.be.undefined;
+      expect(result.post).to.be.an('object');
+      expect(result.post.thread_id).to.equal(postId);
+      expect(result.post.posts).to.be.an('array');
+      expect(result.post.posts.length).to.be.at.least(1);
+      
+      // Check that all posts in the thread are from the same author
+      const authorDid = result.post.author.did;
+      result.post.posts.forEach(post => {
+        expect(post.author.did).to.equal(authorDid);
+      });
+
+      // Check that posts are in chronological order
+      for (let i = 1; i < result.post.posts.length; i++) {
+        const prevTimestamp = new Date(result.post.posts[i-1].indexedAt).getTime();
+        const currTimestamp = new Date(result.post.posts[i].indexedAt).getTime();
+        expect(currTimestamp).to.be.at.least(prevTimestamp);
+      }
+    });
   });
 
   // TODO, fix this test
