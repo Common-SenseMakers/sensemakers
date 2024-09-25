@@ -175,6 +175,21 @@ describe('02-platforms', () => {
         throw error;
       }
     });
+
+    it('fetches a specific post', async () => {
+      const postId = 'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4yumzzhlx2z';
+
+      const result = await services.db.run((manager) =>
+        blueskyService.get(postId, userDetails, manager)
+      );
+
+      expect(result).to.not.be.undefined;
+      expect(result.post).to.be.an('object');
+      expect(result.post.thread_id).to.equal(postId);
+      expect(result.post.posts).to.be.an('array');
+      expect(result.post.posts.length).to.be.at.least(1);
+      expect(result.post.posts[0].uri).to.equal(postId);
+    });
   });
 
   describe('nanopub', () => {
