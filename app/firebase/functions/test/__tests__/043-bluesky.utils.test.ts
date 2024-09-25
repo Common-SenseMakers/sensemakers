@@ -55,21 +55,43 @@ describe('bluesky utility functions', () => {
     expect(cleanedContent).to.equal(expectedOutput);
   });
 
-  it('replaces truncated URL with full URL', () => {
+  it('replaces truncated URLs with full URLs using facets', () => {
     const post = {
       record: {
-        text: 'one of the creators of the theory is one of the most cited academics I know of www.semanticscholar.org/author/Richa...',
-      },
-      embed: {
-        $type: 'app.bsky.embed.external#view',
-        external: {
-          uri: 'https://www.semanticscholar.org/author/Richard-M.-Ryan/2242812951',
-        },
+        text: 'lots of interesting papers on parenting:\n\nwww.semanticscholar.org/paper/For-th...\n\nwww.semanticscholar.org/paper/%E2%80...\n\nwww.semanticscholar.org/paper/Self-d...',
+        facets: [
+          {
+            index: { byteStart: 42, byteEnd: 81 },
+            features: [
+              {
+                $type: 'app.bsky.richtext.facet#link',
+                uri: 'https://www.semanticscholar.org/paper/For-the-love-of-my-child%3A-How-parents%E2%80%99-relative-for-Chen-Kim/abffb416b2ac8ca0ea55262e1b03d3df6e779f8a',
+              },
+            ],
+          },
+          {
+            index: { byteStart: 83, byteEnd: 122 },
+            features: [
+              {
+                $type: 'app.bsky.richtext.facet#link',
+                uri: 'https://www.semanticscholar.org/paper/%E2%80%9CTell-Me-About-Your-Child%2C-The-Relationship-with-A-Clercq-Prinzie/fc757da7a7c6d713df443de5680e9ac652582a8d',
+              },
+            ],
+          },
+          {
+            index: { byteStart: 124, byteEnd: 163 },
+            features: [
+              {
+                $type: 'app.bsky.richtext.facet#link',
+                uri: 'https://www.semanticscholar.org/paper/Self-determination-theory%3A-A-macrotheory-of-human-Deci-Ryan/a32f3435bb06e362704551cc62c7df3ef2f16ab1',
+              },
+            ],
+          },
+        ],
       },
     } as unknown as BlueskyPost;
 
-    const expectedOutput =
-      'one of the creators of the theory is one of the most cited academics I know of https://www.semanticscholar.org/author/Richard-M.-Ryan/2242812951';
+    const expectedOutput = 'lots of interesting papers on parenting: https://www.semanticscholar.org/paper/For-the-love-of-my-child%3A-How-parents%E2%80%99-relative-for-Chen-Kim/abffb416b2ac8ca0ea55262e1b03d3df6e779f8a https://www.semanticscholar.org/paper/%E2%80%9CTell-Me-About-Your-Child%2C-The-Relationship-with-A-Clercq-Prinzie/fc757da7a7c6d713df443de5680e9ac652582a8d https://www.semanticscholar.org/paper/Self-determination-theory%3A-A-macrotheory-of-human-Deci-Ryan/a32f3435bb06e362704551cc62c7df3ef2f16ab1';
 
     const cleanedContent = cleanBlueskyContent(post);
     expect(cleanedContent).to.equal(expectedOutput);

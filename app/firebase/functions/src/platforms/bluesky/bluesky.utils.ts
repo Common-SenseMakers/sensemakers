@@ -99,14 +99,19 @@ const getEarliestResponse = (id: string, posts: BlueskyPost[]) => {
 export const cleanBlueskyContent = (post: BlueskyPost): string => {
   let cleanedContent = post.record.text;
 
-  // Replace truncated URLs with full URLs
-  if (post.embed && post.embed.$type === 'app.bsky.embed.external#view') {
-    const fullUrl = (post.embed.external as any).uri;
-    const truncatedUrlRegex = new RegExp(
-      `${fullUrl.split('//')[1].substring(0, 30)}[.]{3}`,
-      'g'
-    );
-    cleanedContent = cleanedContent.replace(truncatedUrlRegex, fullUrl);
+  // Replace truncated URLs with full URLs using facets
+  if (post.record.facets) {
+    post.record.facets.forEach((facet) => {
+      const feature = facet.features[0];
+      if (feature.$type === 'app.bsky.richtext.facet#link') {
+        const fullUrl = feature.uri;
+        const truncatedText = cleanedContent.substring(
+          facet.index.byteStart,
+          facet.index.byteEnd
+        );
+        cleanedContent = cleanedContent.replace(truncatedText, fullUrl);
+      }
+    });
   }
 
   // Remove mentions (e.g., @handle.bsky.social)
