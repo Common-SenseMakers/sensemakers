@@ -30,6 +30,7 @@ import { PlatformService } from '../platforms.interface';
 import {
   convertBlueskyPostsToThreads,
   extractRKeyFromURI,
+  extractPrimaryThread,
 } from './bluesky.utils';
 
 const DEBUG = true;
@@ -330,13 +331,24 @@ export class BlueskyService
 
     const threadViewPost = response.data.thread as AppBskyFeedDefs.ThreadViewPost;
     const rootPost = this.findRootPost(threadViewPost);
-    const allPosts = this.collectAllPosts(rootPost);
-    const mainThread = this.extractMainThread(allPosts, rootPost.post.author.did);
+
+    // If the initial post is not the root, fetch the root thread
+    const rootResponse = rootPost.post.uri !== post_id
+      ? await this.agent.getPostThread({ uri: rootPost.post.uri, depth: 100, parentHeight: 100 })
+      : response;
+
+    if (rootResponse.data.thread.$type !== 'app.bsky.feed.defs#threadViewPost') {
+      throw new Error('Unexpected root thread type');
+    }
+
+    const rootThreadViewPost = rootResponse.data.thread as AppBskyFeedDefs.ThreadViewPost;
+    const allPosts = this.collectAllPosts(rootThreadViewPost);
+    const mainThread = extractPrimaryThread(rootThreadViewPost.post.uri, allPosts);
 
     const blueskyThread: BlueskyThread = {
-      thread_id: rootPost.post.uri,
+      thread_id: rootThreadViewPost.post.uri,
       posts: mainThread,
-      author: rootPost.post.author,
+      author: rootThreadViewPost.post.author,
     };
 
     return {
@@ -354,8 +366,11 @@ export class BlueskyService
     return this.findRootPost(thread.parent as AppBskyFeedDefs.ThreadViewPost);
   }
 
-  private collectAllPosts(thread: AppBskyFeedDefs.ThreadViewPost): AppBskyFeedDefs.PostView[] {
-    const posts: AppBskyFeedDefs.PostView[] = [thread.post];
+  private collectAllPosts(thread: AppBskyFeedDefs.ThreadViewPost): BlueskyPost[] {
+    const posts: BlueskyPost[] = [{
+      ...thread.post,
+      record: thread.post.record as AppBskyFeedPost.Record
+    }];
     if (thread.replies) {
       for (const reply of thread.replies) {
         if (reply.$type === 'app.bsky.feed.defs#threadViewPost') {
@@ -364,16 +379,6 @@ export class BlueskyService
       }
     }
     return posts;
-  }
-
-  private extractMainThread(posts: AppBskyFeedDefs.PostView[], authorDid: string): BlueskyPost[] {
-    const authorPosts = posts.filter(post => post.author.did === authorDid);
-    authorPosts.sort((a, b) => new Date(a.indexedAt).getTime() - new Date(b.indexedAt).getTime());
-    
-    return authorPosts.map(post => ({
-      ...post,
-      record: post.record as AppBskyFeedPost.Record
-    }));
   }
 
   // Implement other required methods here
