@@ -433,5 +433,34 @@ describe('02-platforms', () => {
         });
       }
     });
+
+    it('fetches a post with a quote and converts it to generic format', async () => {
+      const postId = 'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4ebss5mmt2f';
+
+      const result = await services.db.run((manager) =>
+        blueskyService.get(postId, userDetails, manager)
+      );
+
+      expect(result).to.not.be.undefined;
+      expect(result.post).to.be.an('object');
+
+      const genericThread = await blueskyService.convertToGeneric({
+        posted: result,
+      } as PlatformPostCreate<BlueskyThread>);
+
+      expect(genericThread).to.be.an('object');
+      expect(genericThread.thread).to.be.an('array');
+      expect(genericThread.thread.length).to.be.greaterThan(0);
+
+      const mainPost = genericThread.thread[0];
+      expect(mainPost.quotedThread).to.be.an('object');
+      expect(mainPost.quotedThread?.author).to.be.an('object');
+      expect(mainPost.quotedThread?.thread).to.be.an('array');
+      expect(mainPost.quotedThread?.thread.length).to.equal(1);
+
+      const quotedPost = mainPost.quotedThread?.thread[0];
+      expect(quotedPost?.content).to.be.a('string');
+      expect(quotedPost?.url).to.be.a('string');
+    });
   });
 });
