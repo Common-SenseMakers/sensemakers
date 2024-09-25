@@ -124,7 +124,7 @@ exports.sendMonthlyNotifications = onSchedule(
 /** tasks */
 exports[PARSE_POST_TASK] = onTaskDispatched(
   {
-    timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
+    timeoutSeconds: envDeploy.CONFIG_TIMEOUT_PARSER,
     memory: envDeploy.CONFIG_MEMORY,
     minInstances: envDeploy.CONFIG_MININSTANCE,
     secrets,
