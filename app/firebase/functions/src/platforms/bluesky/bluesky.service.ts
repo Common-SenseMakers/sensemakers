@@ -324,9 +324,27 @@ export class BlueskyService
     };
   }
 
-  public async convertFromGeneric(postAndAuthor: PostAndAuthor): Promise<any> {
-    // Implement conversion logic here
-    throw new Error('Method not implemented.');
+  public async convertFromGeneric(postAndAuthor: PostAndAuthor): Promise<PlatformPostDraft<string>> {
+    const account = UsersHelper.getAccount(
+      postAndAuthor.author,
+      PLATFORM.Bluesky,
+      undefined,
+      true
+    );
+    
+    const content = postAndAuthor.post.generic.thread
+      .map((post) => post.content)
+      .join('\n\n');
+
+    // Bluesky has a character limit of 300
+    const truncatedContent = content.slice(0, 300);
+
+    return {
+      user_id: account.user_id,
+      signerType: PlatformPostSignerType.DELEGATED,
+      postApproval: PlatformPostDraftApproval.PENDING,
+      unsignedPost: truncatedContent,
+    };
   }
 
   public async get(
