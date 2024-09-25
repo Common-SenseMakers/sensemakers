@@ -121,11 +121,12 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     const posts = await paginated
       .limit(queryParams.fetchParams.expectedAmount)
       .get();
-
-    return posts.docs.map((doc) => ({
+    const appPosts = posts.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     })) as AppPost[];
+
+    return appPosts.sort((a, b) => b.createdAtMs - a.createdAtMs);
   }
 
   /** Cannot be part of a transaction */
