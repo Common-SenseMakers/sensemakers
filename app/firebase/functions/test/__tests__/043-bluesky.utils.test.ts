@@ -83,7 +83,7 @@ describe('bluesky utility functions', () => {
     const expectedOutput =
       'lots of interesting papers on parenting:\n\nhttps://www.semanticscholar.org/paper/For-the-love-of-my-child%3A-How-parents%E2%80%99-relative-for-Chen-Kim/abffb416b2ac8ca0ea55262e1b03d3df6e779f8a\n\nhttps://www.semanticscholar.org/paper/%E2%80%9CTell-Me-About-Your-Child%2C-The-Relationship-with-A-Clercq-Prinzie/fc757da7a7c6d713df443de5680e9ac652582a8d\n\nhttps://www.semanticscholar.org/paper/Self-determination-theory%3A-A-macrotheory-of-human-Deci-Ryan/a32f3435bb06e362704551cc62c7df3ef2f16ab1';
 
-    const cleanedContent = cleanBlueskyContent(post);
+    const cleanedContent = cleanBlueskyContent(post.record);
     expect(cleanedContent).to.equal(expectedOutput);
   });
 
@@ -101,7 +101,7 @@ describe('bluesky utility functions', () => {
             text: 'Original post with a link: example.com/short',
             facets: [
               {
-                index: { byteStart: 30, byteEnd: 45 },
+                index: { byteStart: 27, byteEnd: 44 },
                 features: [
                   {
                     $type: 'app.bsky.richtext.facet#link',
@@ -115,11 +115,13 @@ describe('bluesky utility functions', () => {
       },
     } as unknown as BlueskyPost;
 
-    const cleanedContent = cleanBlueskyContent(post);
+    const cleanedContent = cleanBlueskyContent(post.record);
     expect(cleanedContent).to.equal('Quoting an interesting post');
 
-    const quotedContent = cleanBlueskyContent(post.embed.record as any);
-    expect(quotedContent).to.equal('Original post with a link: https://example.com/full-link');
+    const quotedContent = cleanBlueskyContent(post.embed!.record.value);
+    expect(quotedContent).to.equal(
+      'Original post with a link: https://example.com/full-link'
+    );
   });
   it('extracts rKey from URI', () => {
     const uri = 'at://did:plc:example/app.bsky.feed.post/3j5sy9apqv2';

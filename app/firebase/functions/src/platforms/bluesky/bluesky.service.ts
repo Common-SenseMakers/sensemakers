@@ -10,6 +10,7 @@ import {
   BlueskySignupData,
   BlueskyThread,
   BlueskyUserDetails,
+  QuotedBlueskyPost,
 } from '../../@shared/types/types.bluesky';
 import { PlatformFetchParams } from '../../@shared/types/types.fetch';
 import {
@@ -293,11 +294,11 @@ export class BlueskyService
     const genericPosts: GenericPost[] = thread.posts.map((post) => {
       const genericPost: GenericPost = {
         url: `https://bsky.app/profile/${post.author.handle}/post/${extractRKeyFromURI(post.uri)}`,
-        content: cleanBlueskyContent(post),
+        content: cleanBlueskyContent(post.record),
       };
 
       if (post.embed && post.embed.$type === 'app.bsky.embed.record#view') {
-        const quotedPost = post.embed.record;
+        const quotedPost = post.embed.record as QuotedBlueskyPost;
         if (quotedPost.$type === 'app.bsky.embed.record#viewRecord') {
           genericPost.quotedThread = {
             author: {
@@ -306,10 +307,12 @@ export class BlueskyService
               username: quotedPost.author.handle,
               name: quotedPost.author.displayName || quotedPost.author.handle,
             },
-            thread: [{
-              url: `https://bsky.app/profile/${quotedPost.author.handle}/post/${extractRKeyFromURI(quotedPost.uri)}`,
-              content: cleanBlueskyContent(quotedPost as BlueskyPost),
-            }],
+            thread: [
+              {
+                url: `https://bsky.app/profile/${quotedPost.author.handle}/post/${extractRKeyFromURI(quotedPost.uri)}`,
+                content: cleanBlueskyContent(quotedPost.value),
+              },
+            ],
           };
         }
       }
@@ -465,7 +468,7 @@ export class BlueskyService
       {
         ...thread.post,
         record: thread.post.record as AppBskyFeedPost.Record,
-      },
+      } as BlueskyPost,
     ];
     if (thread.replies) {
       for (const reply of thread.replies) {

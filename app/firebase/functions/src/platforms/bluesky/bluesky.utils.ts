@@ -1,4 +1,10 @@
-import { BlueskyPost, BlueskyThread } from '../../@shared/types/types.bluesky';
+import { AppBskyFeedPost } from '@atproto/api';
+
+import {
+  BlueskyPost,
+  BlueskyThread,
+  QuotedBlueskyPost,
+} from '../../@shared/types/types.bluesky';
 
 export const convertBlueskyPostsToThreads = (
   posts: BlueskyPost[],
@@ -96,9 +102,11 @@ const getEarliestResponse = (id: string, posts: BlueskyPost[]) => {
   );
 };
 
-export const cleanBlueskyContent = (post: BlueskyPost | { value: { text: string; facets?: any[] } }): string => {
-  let cleanedContent = 'value' in post ? post.value.text : post.record.text;
-  const facets = 'value' in post ? post.value.facets : post.record.facets;
+export const cleanBlueskyContent = (
+  post: AppBskyFeedPost.Record | QuotedBlueskyPost['value']
+): string => {
+  let cleanedContent = post.text;
+  const facets = post.facets;
 
   // Replace truncated URLs with full URLs using facets
   if (facets) {

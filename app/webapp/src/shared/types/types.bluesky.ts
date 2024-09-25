@@ -2,6 +2,7 @@ import {
   AppBskyActorDefs,
   AppBskyFeedDefs,
   AppBskyFeedPost,
+  AppBskyRichtextFacet,
 } from '@atproto/api';
 
 import { UserDetailsBase } from './types.user';
@@ -36,6 +37,7 @@ export interface BlueskyThread {
 }
 
 export interface QuotedBlueskyPost {
+  $type: string;
   uri: string;
   cid: string;
   author: {
@@ -44,10 +46,11 @@ export interface QuotedBlueskyPost {
     displayName?: string;
     avatar?: string;
   };
-  record: {
+  value: {
     text: string;
     $type: string;
     createdAt: string;
+    facets?: AppBskyRichtextFacet.Main[];
   };
   indexedAt: string;
 }
