@@ -264,7 +264,6 @@ export class BlueskyService
       throw new Error('Invalid post ID');
     }
     try {
-      this.agent.getPostThread;
       const response = await this.agent.getPost({
         repo: userDetails.user_id,
         rkey,
@@ -293,7 +292,7 @@ export class BlueskyService
 
     const genericPosts: GenericPost[] = thread.posts.map((post) => ({
       url: `https://bsky.app/profile/${post.author.handle}/post/${extractRKeyFromURI(post.uri)}`,
-      content: cleanBlueskyContent(post.record.text),
+      content: cleanBlueskyContent(post),
     }));
 
     return {

@@ -46,10 +46,32 @@ describe('bluesky utility functions', () => {
 
   it('cleans Bluesky content', () => {
     const input = 'This is a test post with a #hashtag and a @mention.';
-    const expectedOutput =
-      'This is a test post with a #hashtag and a @mention.';
+    const post = {
+      record: { text: input },
+    } as BlueskyPost;
+    const expectedOutput = 'This is a test post with a #hashtag and a .';
 
-    const cleanedContent = cleanBlueskyContent(input);
+    const cleanedContent = cleanBlueskyContent(post);
+    expect(cleanedContent).to.equal(expectedOutput);
+  });
+
+  it('replaces truncated URL with full URL', () => {
+    const post = {
+      record: {
+        text: 'one of the creators of the theory is one of the most cited academics I know of www.semanticscholar.org/author/Richa...',
+      },
+      embed: {
+        $type: 'app.bsky.embed.external#view',
+        external: {
+          uri: 'https://www.semanticscholar.org/author/Richard-M.-Ryan/2242812951',
+        },
+      },
+    } as unknown as BlueskyPost;
+
+    const expectedOutput =
+      'one of the creators of the theory is one of the most cited academics I know of https://www.semanticscholar.org/author/Richard-M.-Ryan/2242812951';
+
+    const cleanedContent = cleanBlueskyContent(post);
     expect(cleanedContent).to.equal(expectedOutput);
   });
   it('extracts rKey from URI', () => {

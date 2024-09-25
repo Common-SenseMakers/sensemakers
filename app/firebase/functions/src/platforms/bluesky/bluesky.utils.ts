@@ -1,6 +1,4 @@
 import { BlueskyPost, BlueskyThread } from '../../@shared/types/types.bluesky';
-import { PLATFORM } from '../../@shared/types/types.user';
-import { GenericAuthor, GenericPost, GenericThread } from '../../@shared/types/types.posts';
 
 export const convertBlueskyPostsToThreads = (
   posts: BlueskyPost[],
@@ -98,15 +96,21 @@ const getEarliestResponse = (id: string, posts: BlueskyPost[]) => {
   );
 };
 
-export const cleanBlueskyContent = (content: string): string => {
-  // Remove any Bluesky-specific formatting if needed
-  let cleanedContent = content;
+export const cleanBlueskyContent = (post: BlueskyPost): string => {
+  let cleanedContent = post.record.text;
+
+  // Replace truncated URLs with full URLs
+  if (post.embed && post.embed.$type === 'app.bsky.embed.external#view') {
+    const fullUrl = (post.embed.external as any).uri;
+    const truncatedUrlRegex = new RegExp(
+      `${fullUrl.split('//')[1].substring(0, 30)}[.]{3}`,
+      'g'
+    );
+    cleanedContent = cleanedContent.replace(truncatedUrlRegex, fullUrl);
+  }
 
   // Remove mentions (e.g., @handle.bsky.social)
   cleanedContent = cleanedContent.replace(/@[\w.-]+/g, '');
-
-  // Remove URLs
-  cleanedContent = cleanedContent.replace(/https?:\/\/\S+/g, '');
 
   // Trim leading and trailing whitespace
   cleanedContent = cleanedContent.trim();
