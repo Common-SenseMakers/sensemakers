@@ -127,7 +127,7 @@ exports[PARSE_POST_TASK] = onTaskDispatched(
     timeoutSeconds: envDeploy.CONFIG_TIMEOUT_PARSER,
     memory: envDeploy.CONFIG_MEMORY,
     minInstances: envDeploy.CONFIG_MININSTANCE,
-    maxInstances: 100,
+    maxInstances: 1,
     secrets,
     retryConfig: {
       maxAttempts: 5,
