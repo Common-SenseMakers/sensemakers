@@ -101,17 +101,26 @@ export const cleanBlueskyContent = (post: BlueskyPost): string => {
 
   // Replace truncated URLs with full URLs using facets
   if (post.record.facets) {
+    const replacements: { start: number; end: number; url: string }[] = [];
+
     post.record.facets.forEach((facet) => {
       const feature = facet.features[0];
       if (feature.$type === 'app.bsky.richtext.facet#link') {
-        const fullUrl = feature.uri as string;
-        const truncatedText = cleanedContent.substring(
-          facet.index.byteStart,
-          facet.index.byteEnd
-        );
-        cleanedContent = cleanedContent.replace(truncatedText, fullUrl);
+        replacements.push({
+          start: facet.index.byteStart,
+          end: facet.index.byteEnd,
+          url: feature.uri as string,
+        });
       }
     });
+
+    // Sort replacements in reverse order to avoid affecting positions
+    replacements.sort((a, b) => b.start - a.start);
+
+    for (const { start, end, url } of replacements) {
+      cleanedContent =
+        cleanedContent.slice(0, start) + url + cleanedContent.slice(end);
+    }
   }
 
   return cleanedContent;
