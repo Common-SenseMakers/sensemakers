@@ -16,7 +16,7 @@ export const PostPage = () => {
   );
 
   return (
-    <PostContext postId={postId} postInit={postInit}>
+    <PostContext postId={postId} postInit={postInit} showCelebration>
       <PostView></PostView>
     </PostContext>
   );

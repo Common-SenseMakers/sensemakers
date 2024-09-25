@@ -27,7 +27,9 @@ enum PublishPostAction {
 const ORCID_INVITE_DISABLE = 'orcidInviteDisabled';
 const PUB_WARNING_DISABLE = 'pubWarningDisabled';
 
-export const PostPublishStatusModals = () => {
+export const PostPublishStatusModals = (props: {
+  showCelebration?: boolean;
+}) => {
   const { setJustPublished } = useAutopostInviteContext();
   const { updated, fetched, derived, navigatePost, publish } = usePost();
 
@@ -143,6 +145,7 @@ export const PostPublishStatusModals = () => {
     }
 
     if (action === PublishPostAction.nextPost) {
+      publish.setPublishIntent(false);
       navigatePost.openNextPost();
       return;
     }
@@ -441,9 +444,11 @@ export const PostPublishStatusModals = () => {
           if (DEBUG) console.log(`finalApprove ${fetched.postId}`);
           return finalApprove;
         }
-      } else {
+      } else if (props.showCelebration) {
         if (DEBUG) console.log(`publishedModal ${fetched.postId}`);
         return publishedModal;
+      } else {
+        publishedModalClosed(PublishPostAction.None);
       }
     }
 

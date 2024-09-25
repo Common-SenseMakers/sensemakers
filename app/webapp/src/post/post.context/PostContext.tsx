@@ -23,7 +23,8 @@ export const PostContext: React.FC<{
   children: React.ReactNode;
   postInit?: AppPostFull;
   postId?: string;
-}> = ({ children, postInit, postId: _postId }) => {
+  showCelebration?: boolean;
+}> = ({ children, postInit, postId: _postId, showCelebration }) => {
   if (_postId === undefined && postInit === undefined) {
     throw new Error(`Both postId and post were undefined`);
   }
@@ -45,7 +46,8 @@ export const PostContext: React.FC<{
         publish,
         navigatePost,
       }}>
-      <PostPublishStatusModals></PostPublishStatusModals>
+      <PostPublishStatusModals
+        showCelebration={showCelebration}></PostPublishStatusModals>
       {children}
     </PostContextValue.Provider>
   );

@@ -124,9 +124,10 @@ export const usePostPublish = (
     }
 
     updated.setEnabledEdit(false);
+
     show({
       title: 'Post published',
-      message: 'Your post has been published - Find it under the "Nanopub" tab',
+      message: 'Your post has been published and moved to the "Nanopub" tab',
     });
   };
 
