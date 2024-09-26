@@ -146,7 +146,7 @@ export class BlueskyService
     while (!shouldBreak) {
       const response = await this.agent.getAuthorFeed({
         actor: userDetails.user_id,
-        limit: 100,
+        limit: 40,
         cursor: cursor,
         filter: 'posts_and_author_threads',
       });
