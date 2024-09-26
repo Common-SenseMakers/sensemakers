@@ -1,3 +1,4 @@
+import { BlueskyUserDetails } from '../../src/@shared/types/types.bluesky';
 import { NotificationFreq } from '../../src/@shared/types/types.notifications';
 import { TwitterSignupContext } from '../../src/@shared/types/types.twitter';
 import {
@@ -56,9 +57,66 @@ export const authenticateTestUser = async (
     user = await authenticateNanopubForUser(credentials, user);
   }
 
+  if (!excludePlatforms.includes(PLATFORM.Bluesky)) {
+    user = await authenticateBlueskyForUser(
+      credentials,
+      services,
+      manager,
+      user
+    );
+  }
+
   if (!user) {
     throw new Error('No platforms were authenticated');
   }
+
+  return user;
+};
+
+const authenticateBlueskyForUser = async (
+  credentials: TestUserCredentials,
+  services: TestServices,
+  manager: TransactionManager,
+  user?: AppUser
+): Promise<AppUser> => {
+  if (!user) {
+    user = {
+      userId: getPrefixedUserId(PLATFORM.Bluesky, credentials.bluesky.id),
+      platformIds: [],
+      settings: {
+        autopost: {
+          [PLATFORM.Nanopub]: {
+            value: AutopostOption.MANUAL,
+          },
+        },
+        notificationFreq: NotificationFreq.Daily,
+      },
+      signupDate: Date.now(),
+    };
+  }
+
+  user.platformIds.push(
+    getPrefixedUserId(PLATFORM.Bluesky, credentials.bluesky.id)
+  );
+
+  const blueskyUserDetails: BlueskyUserDetails = {
+    signupDate: 0,
+    user_id: credentials.bluesky.id,
+    profile: {
+      id: credentials.bluesky.id,
+      username: credentials.bluesky.username,
+      name: credentials.bluesky.name,
+      avatar: 'https://example.com/avatar.jpg', // You may want to update this with a real avatar URL
+    },
+    read: {
+      appPassword: credentials.bluesky.appPassword,
+    },
+    write: {
+      appPassword: credentials.bluesky.appPassword,
+    },
+  };
+
+  user[PLATFORM.Bluesky] = [blueskyUserDetails];
 
   return user;
 };
