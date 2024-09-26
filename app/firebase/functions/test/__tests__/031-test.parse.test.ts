@@ -23,7 +23,7 @@ import {
 } from './setup';
 import { getTestServices } from './test.services';
 
-describe.only('031 test parse', () => {
+describe('031 test parse', () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER
@@ -48,6 +48,7 @@ describe.only('031 test parse', () => {
   describe('get and process', () => {
     let twitterUser: AppUser | undefined;
     let mastodonUser: AppUser | undefined;
+    let blueskyUser: AppUser | undefined;
 
     before(async () => {
       const users = await services.db.run((manager) => {
@@ -58,6 +59,9 @@ describe.only('031 test parse', () => {
       );
       mastodonUser = users.find(
         (u) => UsersHelper.getAccount(u, PLATFORM.Mastodon) !== undefined
+      );
+      blueskyUser = users.find(
+        (u) => UsersHelper.getAccount(u, PLATFORM.Bluesky) !== undefined
       );
     });
 
@@ -132,15 +136,12 @@ describe.only('031 test parse', () => {
     it('gets a post from bluesky and parses it', async () => {
       const { postsManager } = services;
 
-      const post_id = 'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z';
+      const post_id =
+        'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z';
 
       if (!post_id) {
         throw new Error('TEST_BLUESKY_POST_ID not defined');
       }
-
-      const blueskyUser = users.find(
-        (u) => UsersHelper.getAccount(u, PLATFORM.Bluesky) !== undefined
-      );
 
       if (!blueskyUser) {
         throw new Error('Bluesky user not created');
@@ -161,8 +162,6 @@ describe.only('031 test parse', () => {
       expect(parsedPost).to.not.be.undefined;
       expect(parsedPost.parsingStatus).to.equal(AppPostParsingStatus.IDLE);
       expect(parsedPost.semantics).to.not.be.undefined;
-
-      console.log('parsedPost', JSON.stringify(parsedPost, null, 2));
     });
   });
 });

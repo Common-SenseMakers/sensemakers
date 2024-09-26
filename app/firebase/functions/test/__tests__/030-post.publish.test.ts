@@ -97,7 +97,7 @@ describe('030-process', () => {
         user.userId,
         {
           status: PostsQueryStatus.PENDING,
-          fetchParams: { expectedAmount: 10 },
+          fetchParams: { expectedAmount: 30 },
         }
       );
       const pendingPosts = allPendingPosts.filter(
@@ -189,7 +189,7 @@ describe('030-process', () => {
         user.userId,
         {
           status: PostsQueryStatus.PENDING,
-          fetchParams: { expectedAmount: 10 },
+          fetchParams: { expectedAmount: 30 },
         }
       );
       const pendingPosts = allPendingPosts.filter(
@@ -276,7 +276,7 @@ describe('030-process', () => {
         user.userId,
         {
           status: PostsQueryStatus.PUBLISHED,
-          fetchParams: { expectedAmount: 10 },
+          fetchParams: { expectedAmount: 30 },
         }
       );
 
@@ -384,7 +384,7 @@ describe('030-process', () => {
         user.userId,
         {
           status: PostsQueryStatus.PUBLISHED,
-          fetchParams: { expectedAmount: 10 },
+          fetchParams: { expectedAmount: 30 },
         }
       );
 
