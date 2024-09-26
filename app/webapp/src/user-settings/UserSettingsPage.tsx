@@ -28,6 +28,7 @@ import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useAutopostInviteContext } from '../user-login/contexts/AutopostInviteContext';
 import { useDisconnectContext } from '../user-login/contexts/DisconnectUserContext';
+import { useBlueskyContext } from '../user-login/contexts/platforms/BlueskyContext';
 import { useMastodonContext } from '../user-login/contexts/platforms/MastodonContext';
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { useTwitterContext } from '../user-login/contexts/platforms/TwitterContext';
@@ -61,6 +62,7 @@ export const UserSettingsPage = () => {
     refresh,
     twitterProfile,
     mastodonProfile,
+    blueskyProfile,
     currentAutopost,
     currentNotifications,
     orcid,
@@ -75,6 +77,8 @@ export const UserSettingsPage = () => {
     useMastodonContext();
   const { connect: connectTwitter, needConnect: needConnectTwitter } =
     useTwitterContext();
+  const { connect: connectBluesky, needConnect: needConnectBluesky } =
+    useBlueskyContext();
 
   const { reviewAutopostIntention, setReviewAutopostIntention } =
     useAutopostInviteContext();
@@ -328,6 +332,24 @@ export const UserSettingsPage = () => {
               : '- not connected -'
           }
           connected={!!connectedUser?.mastodon}></PlatformSection>
+
+        <PlatformSection
+          icon={
+            blueskyProfile ? (
+              <PlatformAvatar profileImageUrl={blueskyProfile?.avatar} />
+            ) : (
+              <div>Bluesky</div> // Placeholder for Bluesky icon
+            )
+          }
+          platformName={'Bluesky'}
+          onButtonClicked={() => {
+            navigate(`../${RouteNames.ConnectBluesky}`, {
+              state: { callbackUrl: window.location.href },
+            });
+          }}
+          buttonText={needConnectBluesky ? 'connect' : ''}
+          username={blueskyProfile ? `@${blueskyProfile.username}` : '- not connected -'}
+          connected={!!blueskyProfile}></PlatformSection>
 
         <PlatformSection
           icon={<OrcidIcon size={40}></OrcidIcon>}
