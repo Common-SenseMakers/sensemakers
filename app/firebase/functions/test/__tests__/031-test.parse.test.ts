@@ -14,6 +14,7 @@ import {
   _03_fetchAfterPublish,
 } from './reusable/create-post-fetch';
 import {
+  USE_REAL_BLUESKY,
   USE_REAL_MASTODON,
   USE_REAL_NANOPUB,
   USE_REAL_PARSER,
@@ -26,6 +27,9 @@ describe('031 test parse', () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER
+      ? undefined
+      : { publish: true, signup: true, fetch: true, get: true },
+    bluesky: USE_REAL_BLUESKY
       ? undefined
       : { publish: true, signup: true, fetch: true, get: true },
     mastodon: USE_REAL_MASTODON

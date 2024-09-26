@@ -186,8 +186,10 @@ export interface MastodonAccountCredentials {
 }
 
 export interface BlueskyAccountCredentials {
-  identifier: string;
-  password: string;
+  id: string;
+  username: string;
+  name: string;
+  appPassword: string;
 }
 
 export interface TwitterAccountCredentials {

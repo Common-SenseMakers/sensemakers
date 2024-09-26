@@ -24,6 +24,7 @@ import { resetDB } from '../utils/db';
 import { getMockPost } from '../utils/posts.utils';
 import { createUsers } from '../utils/users.utils';
 import {
+  USE_REAL_BLUESKY,
   USE_REAL_MASTODON,
   USE_REAL_NANOPUB,
   USE_REAL_PARSER,
@@ -40,6 +41,9 @@ describe('02-platforms', () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER
+      ? undefined
+      : { publish: true, signup: true, fetch: true, get: true },
+    bluesky: USE_REAL_BLUESKY
       ? undefined
       : { publish: true, signup: true, fetch: true, get: true },
     mastodon: USE_REAL_MASTODON

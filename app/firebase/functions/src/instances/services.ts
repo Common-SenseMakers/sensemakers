@@ -15,6 +15,7 @@ import {
   TEST_USER_ACCOUNTS,
   TWITTER_CLIENT_ID,
   TWITTER_CLIENT_SECRET,
+  USE_REAL_BLUESKY,
   USE_REAL_EMAIL,
   USE_REAL_MASTODON,
   USE_REAL_NANOPUB,
@@ -29,6 +30,7 @@ import { NotificationsRepository } from '../notifications/notifications.reposito
 import { getParserMock } from '../parser/mock/parser.service.mock';
 import { ParserService } from '../parser/parser.service';
 import { BlueskyService } from '../platforms/bluesky/bluesky.service';
+import { getBlueskyMock } from '../platforms/bluesky/mock/bluesky.service.mock';
 import { MastodonService } from '../platforms/mastodon/mastodon.service';
 import { getMastodonMock } from '../platforms/mastodon/mock/mastodon.service.mock';
 import { getTestCredentials } from '../platforms/mock/test.users';
@@ -118,7 +120,14 @@ export const createServices = (firestore: Firestore) => {
       : { signup: true, fetch: true, publish: true, get: true },
     testUser
   );
-  const bluesky = new BlueskyService(time, userRepo);
+  const _bluesky = new BlueskyService(time, userRepo);
+  const bluesky = getBlueskyMock(
+    _bluesky,
+    USE_REAL_BLUESKY.value()
+      ? undefined
+      : { signup: true, fetch: true, publish: true, get: true },
+    testUser
+  );
 
   /** all identity services */
   identityPlatforms.set(PLATFORM.Orcid, orcid);
@@ -224,6 +233,7 @@ export const createServices = (firestore: Firestore) => {
       USE_REAL_PARSER: USE_REAL_PARSER.value(),
       USE_REAL_TWITTER: USE_REAL_TWITTERX.value(),
       USE_REAL_MASTODON: USE_REAL_MASTODON.value(),
+      USE_REAL_BLUESKY: USE_REAL_BLUESKY.value(),
       USE_REAL_NANOPUB: USE_REAL_NANOPUB.value(),
       USE_REAL_EMAIL: USE_REAL_EMAIL.value(),
     });

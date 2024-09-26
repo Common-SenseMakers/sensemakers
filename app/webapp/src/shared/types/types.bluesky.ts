@@ -29,6 +29,10 @@ export type BlueskyUserDetails = UserDetailsBase<
   BlueskyUserCredentials
 >;
 
+export interface BlueskyGetContextParams {
+  callback_url: string;
+  type: 'read' | 'write';
+}
 export interface BlueskySignupContext {}
 
 export type BlueskySignupData = {

@@ -50,6 +50,7 @@ export const FUNCTIONS_PY_URL = envRuntime.FUNCTIONS_PY_URL;
 export const USE_REAL_PARSER = envRuntime.USE_REAL_PARSER;
 export const USE_REAL_TWITTERX = envRuntime.USE_REAL_TWITTERX;
 export const USE_REAL_MASTODON = envRuntime.USE_REAL_MASTODON;
+export const USE_REAL_BLUESKY = envRuntime.USE_REAL_BLUESKY;
 export const USE_REAL_NANOPUB = envRuntime.USE_REAL_NANOPUB;
 export const USE_REAL_EMAIL = envRuntime.USE_REAL_EMAIL;
 
