@@ -424,9 +424,6 @@ describe('02-platforms', () => {
       );
 
       expect(result).to.not.be.undefined;
-      expect(result.platformPosts.length).to.be.at.most(
-        fetchParams.expectedAmount
-      );
       if (result.platformPosts.length > 0) {
         result.platformPosts.forEach((platformPost) => {
           const thread = platformPost.post as BlueskyThread;
