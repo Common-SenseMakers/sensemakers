@@ -128,5 +128,41 @@ describe.only('031 test parse', () => {
         console.log('parsedPost', JSON.stringify(parsedPost, null, 2));
       }
     });
+
+    it('gets a post from bluesky and parses it', async () => {
+      const { postsManager } = services;
+
+      const post_id = 'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z';
+
+      if (!post_id) {
+        throw new Error('TEST_BLUESKY_POST_ID not defined');
+      }
+
+      const blueskyUser = users.find(
+        (u) => UsersHelper.getAccount(u, PLATFORM.Bluesky) !== undefined
+      );
+
+      if (!blueskyUser) {
+        throw new Error('Bluesky user not created');
+      }
+
+      const post = await fetchPostInTests(
+        blueskyUser.userId,
+        post_id,
+        services,
+        PLATFORM.Bluesky
+      );
+
+      if (!post) {
+        throw new Error('post undefined');
+      }
+
+      const parsedPost = await postsManager.getPost(post.id, true);
+      expect(parsedPost).to.not.be.undefined;
+      expect(parsedPost.parsingStatus).to.equal(AppPostParsingStatus.IDLE);
+      expect(parsedPost.semantics).to.not.be.undefined;
+
+      console.log('parsedPost', JSON.stringify(parsedPost, null, 2));
+    });
   });
 });
