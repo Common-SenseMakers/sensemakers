@@ -50,6 +50,8 @@ export type AccountContextType = {
   currentNotifications?: NotificationFreq;
   setMastodonConnectedStatus: (status: MastodonConnectedStatus) => void;
   mastodonConnectedStatus: MastodonConnectedStatus | undefined;
+  setBlueskyConnectedStatus: (status: BlueskyConnectedStatus) => void;
+  blueskyConnectedStatus: BlueskyConnectedStatus | undefined;
   orcidProfile?: OrcidUserProfile;
 };
 
@@ -68,6 +70,7 @@ export enum LoginFlowState {
   RegisteringEmail = 'RegisteringEmail',
   ConnectingTwitter = 'ConnectingTwitter',
   ConnectingMastodon = 'ConnectingMastodon',
+  ConnectingBluesky = 'ConnectingBluesky',
   BasicLoggedIn = 'BasicLoggedIn',
   Disconnecting = 'Disconnecting',
 }
@@ -90,6 +93,12 @@ export enum TwitterConnectedStatus {
 }
 
 export enum MastodonConnectedStatus {
+  Disconnected = 'Disconnected',
+  Connecting = 'Connecting',
+  Connected = 'Connected',
+}
+
+export enum BlueskyConnectedStatus {
   Disconnected = 'Disconnected',
   Connecting = 'Connecting',
   Connected = 'Connected',
@@ -122,6 +131,12 @@ export const AccountContext = (props: PropsWithChildren) => {
     usePersist<MastodonConnectedStatus>(
       'MASTODON_LOGIN_STATUS',
       MastodonConnectedStatus.Disconnected
+    );
+
+  const [blueskyConnectedStatus, setBlueskyConnectedStatus] =
+    usePersist<BlueskyConnectedStatus>(
+      'BLUESKY_LOGIN_STATUS',
+      BlueskyConnectedStatus.Disconnected
     );
 
   /** keep the conneccted user linkted to the current token */
@@ -273,6 +288,8 @@ export const AccountContext = (props: PropsWithChildren) => {
         currentNotifications,
         setMastodonConnectedStatus,
         mastodonConnectedStatus,
+        setBlueskyConnectedStatus,
+        blueskyConnectedStatus,
       }}>
       {props.children}
     </AccountContextValue.Provider>
