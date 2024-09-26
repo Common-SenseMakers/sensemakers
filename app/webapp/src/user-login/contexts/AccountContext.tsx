@@ -33,6 +33,7 @@ export type AccountContextType = {
   isConnected: boolean;
   twitterProfile?: TwitterUserProfile;
   mastodonProfile?: MastodonUserProfile;
+  blueskyProfile?: BlueskyUserProfile;
   email?: EmailDetails;
   disconnect: () => void;
   refresh: () => void;
@@ -247,6 +248,16 @@ export const AccountContext = (props: PropsWithChildren) => {
     return profile;
   }, [connectedUser]);
 
+  const blueskyProfile = useMemo(() => {
+    const profile = connectedUser
+      ? getAccount(connectedUser, PLATFORM.Bluesky)?.profile
+      : undefined;
+
+    if (DEBUG) console.log('blueskyProfile', { profile });
+
+    return profile;
+  }, [connectedUser]);
+
   const orcid = useMemo(() => {
     const profile = connectedUser
       ? getAccount<OrcidUserProfile>(connectedUser, PLATFORM.Orcid)
@@ -270,6 +281,7 @@ export const AccountContext = (props: PropsWithChildren) => {
         connectedUser: connectedUser === null ? undefined : connectedUser,
         twitterProfile,
         mastodonProfile,
+        blueskyProfile,
         email,
         isConnected: connectedUser !== undefined && connectedUser !== null,
         disconnect,
