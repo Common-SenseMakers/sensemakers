@@ -8,6 +8,7 @@ import {
   AppPostRepublishedStatus,
   AppPostReviewStatus,
   PostUpdate,
+  PostsQuery,
   PostsQueryStatus,
   UserPostsQuery,
 } from '../@shared/types/types.posts';
@@ -22,7 +23,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     super(db.collections.posts, db);
   }
 
-  public async updateContent(
+  public async update(
     postId: string,
     postUpdate: PostUpdate,
     manager: TransactionManager,
@@ -47,18 +48,25 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   }
 
   /** Cannot be part of a transaction */
-  public async getOfUser(userId: string, queryParams: UserPostsQuery) {
+  public async getMany(queryParams: PostsQuery) {
     /** type protection agains properties renaming */
     const createdAtKey: keyof AppPost = 'createdAtMs';
     const authorKey: keyof AppPost = 'authorId';
     const reviewedStatusKey: keyof AppPost = 'reviewedStatus';
     const republishedStatusKey: keyof AppPost = 'republishedStatus';
 
-    const base = this.db.collections.posts.where(authorKey, '==', userId);
+    const keywordsKey: keyof AppPost = 'keywords';
+    const labelsKey: keyof AppPost = 'labels';
+
+    const base = queryParams.userId
+      ? this.db.collections.posts.where(authorKey, '==', queryParams.userId)
+      : this.db.collections.posts;
 
     if (DEBUG) logger.debug('getOfUser', queryParams, DEBUG_PREFIX);
 
-    const filtered = (() => {
+    const statusFiltered = (() => {
+      if (!queryParams.status) return base;
+
       if (queryParams.status === PostsQueryStatus.DRAFTS) {
         return base.where(republishedStatusKey, 'in', [
           AppPostRepublishedStatus.PENDING,
@@ -78,8 +86,33 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       if (queryParams.status === PostsQueryStatus.IGNORED) {
         return base.where(reviewedStatusKey, '==', AppPostReviewStatus.IGNORED);
       }
+
       return base;
     })();
+
+    const semanticsFiltered = (() => {
+      let filtered = statusFiltered;
+
+      if (queryParams.keywords) {
+        filtered = statusFiltered.where(
+          keywordsKey,
+          'array-contains-any',
+          queryParams.keywords
+        );
+      }
+
+      if (queryParams.labels) {
+        filtered = statusFiltered.where(
+          labelsKey,
+          'array-contains-any',
+          queryParams.labels
+        );
+      }
+
+      return filtered;
+    })();
+
+    WIP;
 
     /** get the sinceCreatedAt and untilCreatedAt timestamps from the elements ids */
     const { sinceCreatedAt, untilCreatedAt } = await (async () => {
@@ -110,10 +143,10 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     /** two modes, forward sinceId or backwards untilId  */
     const paginated = await (async () => {
       if (sinceCreatedAt) {
-        const ordered = filtered.orderBy(createdAtKey, 'asc');
+        const ordered = semanticsFiltered.orderBy(createdAtKey, 'asc');
         return ordered.startAfter(sinceCreatedAt);
       } else {
-        const ordered = filtered.orderBy(createdAtKey, 'desc');
+        const ordered = semanticsFiltered.orderBy(createdAtKey, 'desc');
         return untilCreatedAt ? ordered.startAfter(untilCreatedAt) : ordered;
       }
     })();

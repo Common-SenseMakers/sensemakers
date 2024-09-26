@@ -1,3 +1,5 @@
+import { expect } from 'chai';
+
 import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
 import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
@@ -74,9 +76,20 @@ describe.only('070 test feed', () => {
 
     it('returns a feed', async () => {
       const { feed } = services;
-      const result = await feed.getFeed({ expectedAmount: 10 });
+      const result1 = await feed.getFeed({ expectedAmount: 10 }, [
+        'https://sense-nets.xyz/announcesResource',
+        'http://purl.org/spar/cito/discusses',
+      ]);
+      expect(result1).to.have.length(3);
 
-      console.log({ result });
+      const result2 = await feed.getFeed({ expectedAmount: 10 }, [
+        'https://sense-nets.xyz/asksQuestionAbout',
+        'http://purl.org/spar/cito/includesQuotationFrom',
+      ]);
+      expect(result2).to.have.length(2);
+
+      const result3 = await feed.getFeed({ expectedAmount: 10 }, []);
+      expect(result3).to.have.length(5);
     });
   });
 });

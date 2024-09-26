@@ -35,7 +35,7 @@ export class TriplesRepository extends BaseRepository<
       : this.db.collections.triples;
 
     const filtered = (() => {
-      return labelsUris
+      return labelsUris && labelsUris.length > 0
         ? base.where(predicate_property, 'in', labelsUris)
         : base;
     })();

@@ -8,9 +8,12 @@ export class FeedService {
     protected postsManager: PostsManager
   ) {}
 
-  async getFeed(fetchParams: FetchParams) {
+  async getFeed(fetchParams: FetchParams, labelsUris: string[]) {
     const triples =
-      await this.postsManager.processing.triples.getWithPredicates(fetchParams);
+      await this.postsManager.processing.triples.getWithPredicates(
+        fetchParams,
+        labelsUris
+      );
 
     const postsIdsSet = new Set<string>();
     const postsIds = new Array<string>();

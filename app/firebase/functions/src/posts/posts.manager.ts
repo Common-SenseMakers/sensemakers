@@ -411,18 +411,15 @@ export class PostsManager {
     if (queryParams.fetchParams.sinceId !== undefined) {
       /** fetch platforms for new PlatformPosts */
       await this.fetchUser({ userId, params: queryParams.fetchParams });
-      return this.processing.posts.getOfUser(userId, queryParams);
+      return this.processing.posts.getMany(userId, queryParams);
     } else {
       /** if untilId fetch backwards but only if not enough posts are already stored */
-      const appPosts = await this.processing.posts.getOfUser(
-        userId,
-        queryParams
-      );
+      const appPosts = await this.processing.posts.getMany(userId, queryParams);
 
       if (queryParams.status === PostsQueryStatus.DRAFTS) {
         if (appPosts.length < queryParams.fetchParams.expectedAmount) {
           await this.fetchUser({ userId, params: queryParams.fetchParams });
-          return this.processing.posts.getOfUser(userId, queryParams);
+          return this.processing.posts.getMany(userId, queryParams);
         }
       }
       return appPosts;
@@ -595,12 +592,20 @@ export class PostsManager {
     manager: TransactionManager
   ) {
     if (DEBUG) logger.debug(`updatePost ${postId}`, { postId, postUpdate });
-    await this.processing.posts.updateContent(postId, postUpdate, manager);
+    await this.processing.posts.update(postId, postUpdate, manager);
     await this.processing.createOrUpdatePostDrafts(postId, manager);
 
     /** sync the semantics as triples when the post is updated */
     const postUpdated = await this.processing.posts.get(postId, manager, true);
-    await this.processing.upsertTriples(postId, manager, postUpdated.semantics);
+    const strucured = await this.processing.processSemantics(
+      postId,
+      manager,
+      postUpdated.semantics
+    );
+
+    if (strucured) {
+      await this.processing.posts.update(postId, { ...strucured }, manager);
+    }
   }
 
   /** deletes the mirror of a post from a platform. userId MUST be a verified user */

@@ -23,7 +23,10 @@ export const getPublicFeedController: RequestHandler = async (
     const userId = getAuthenticatedUser(request, false);
     const { feed } = getServices(request);
 
-    const posts = await feed.getFeed(queryParams.fetchParams);
+    const posts = await feed.getFeed(
+      queryParams.fetchParams,
+      queryParams.labelsUris
+    );
 
     if (DEBUG) logger.debug(`${request.path}: posts`, { posts, userId });
     response.status(200).send({ success: true, data: posts });
