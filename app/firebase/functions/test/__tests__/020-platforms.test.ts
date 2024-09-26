@@ -293,26 +293,19 @@ describe('02-platforms', () => {
     let userDetails: BlueskyUserDetails;
 
     before(() => {
-      blueskyService = new BlueskyService(services.time, services.users.repo);
-      if (
-        !process.env.BLUESKY_HANDLE ||
-        !process.env.BLUESKY_APP_PASSWORD ||
-        !process.env.BLUESKY_USER_ID
-      ) {
-        throw new Error('Missing Bluesky credentials');
-      }
+      blueskyService = services.platforms.get(PLATFORM.Bluesky) as BlueskyService;
       userDetails = {
-        user_id: process.env.BLUESKY_USER_ID,
+        user_id: 'mock-bluesky-user-id',
         profile: {
-          username: process.env.BLUESKY_HANDLE,
+          username: 'mock-bluesky-handle',
         },
         read: {
-          appPassword: process.env.BLUESKY_APP_PASSWORD,
+          appPassword: 'mock-bluesky-app-password',
         },
       } as BlueskyUserDetails;
     });
 
-    it('fetches the main thread of a post', async () => {
+    (USE_REAL_BLUESKY ? it : it.skip)('fetches the main thread of a post', async () => {
       const postId =
         'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wdgnynfq2h';
       // https://bsky.app/profile/weswalla.bsky.social/post/3l4wdgnynfq2h
@@ -435,7 +428,7 @@ describe('02-platforms', () => {
       }
     });
 
-    it('fetches a post with a quote and converts it to generic format', async () => {
+    (USE_REAL_BLUESKY ? it : it.skip)('fetches a post with a quote and converts it to generic format', async () => {
       const postId =
         'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4ebss5mmt2f';
 
