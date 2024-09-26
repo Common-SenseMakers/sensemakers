@@ -23,7 +23,7 @@ import {
 } from './setup';
 import { getTestServices } from './test.services';
 
-describe('031 test parse', () => {
+describe.only('031 test parse', () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER
