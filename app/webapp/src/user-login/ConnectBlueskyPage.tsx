@@ -22,7 +22,7 @@ export const ConnectBlueskyPage = () => {
 
   useEffect(() => {
     if (blueskyProfile) {
-      navigate(AbsoluteRoutes.App);
+      navigate(-1);
     }
   }, [blueskyProfile, navigate]);
 
