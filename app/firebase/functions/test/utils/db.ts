@@ -4,7 +4,7 @@ import { initThreads } from '../../src/platforms/twitter/mock/twitter.service.mo
 import { TEST_THREADS, globalTestServices } from '../__tests__/setup';
 import { testCredentials } from '../__tests__/test.accounts';
 
-export const resetDB = async () => {
+export const resetDB = async (testThreads?: string[][]) => {
   /** DO NOT DELETE */
   if (!process.env.FIRESTORE_EMULATOR_HOST) {
     throw new Error(
@@ -28,7 +28,7 @@ export const resetDB = async () => {
   );
 
   /** reset twitter mock timeline */
-  initThreads(TEST_THREADS, testCredentials[0]);
+  initThreads(testThreads || TEST_THREADS, testCredentials);
 
   /** reset time in time mock */
   globalTestServices.time.reset();

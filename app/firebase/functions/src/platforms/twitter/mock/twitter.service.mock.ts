@@ -25,7 +25,7 @@ import { logger } from '../../../instances/logger';
 import { TwitterService } from '../twitter.service';
 import { convertToAppTweetBase, dateStrToTimestampMs } from '../twitter.utils';
 import { getTestCredentials } from './test.users';
-import { getSampleTweet } from './twitter.mock.utils';
+import { getSampleTweet, getTimelineMock } from './twitter.mock.utils';
 
 const DEBUG = false;
 
@@ -50,11 +50,13 @@ export interface TwitterMockConfig {
 
 export const initThreads = (
   testThreads: string[][],
-  testUser: TestUserCredentials
+  testUsers: TestUserCredentials[]
 ) => {
   const now = 1720805241;
 
   const threads = testThreads.map((thread, ixThread): TwitterThread => {
+    const testUser = testUsers[ixThread % testUsers.length];
+
     const tweets = thread.map((content, ixTweet) => {
       const idTweet = ixThread * 100 + ixTweet;
       const createdAt = now + ixThread * 100 + 10 * ixTweet;
@@ -182,7 +184,7 @@ export const getTwitterMock = (
           } else if (params.until_id) {
             return [];
           } else {
-            return [];
+            return getTimelineMock(userDetails);
           }
         }
 

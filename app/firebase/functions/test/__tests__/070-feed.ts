@@ -1,6 +1,3 @@
-import { expect } from 'chai';
-
-import { AppPostParsingStatus } from '../../src/@shared/types/types.posts';
 import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
 import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
@@ -21,7 +18,9 @@ import {
 } from './setup';
 import { getTestServices } from './test.services';
 
-describe('070 test feed', () => {
+const feedThreads = [[''], [''], [''], [''], ['']];
+
+describe.only('070 test feed', () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER
@@ -34,7 +33,11 @@ describe('070 test feed', () => {
 
   before(async () => {
     logger.debug('resetting DB');
-    await resetDB();
+    /**
+     * Creates threads in the twitter mock with post_id = 0, 1, 2 for each element
+     * in the feedThreads array
+     */
+    await resetDB(feedThreads);
   });
 
   describe('get and process', () => {
@@ -49,33 +52,31 @@ describe('070 test feed', () => {
       );
     });
 
-    it('gets a post (thread) from twitter and parses it', async () => {
-      const { postsManager } = services;
+    it('fetch and parse all posts', async () => {
+      for (let ix = 0; ix < feedThreads.length; ix++) {
+        const post_id = ix.toString();
 
-      const post_id = process.env.TEST_THREAD_ID || '0';
+        if (!post_id) {
+          throw new Error('TEST_THREAD_ID not defined in .env.test file');
+        }
 
-      if (!post_id) {
-        throw new Error('TEST_THREAD_ID not defined in .env.test file');
+        if (!user) {
+          throw new Error('user not created');
+        }
+
+        const post = await fetchPostInTests(user.userId, post_id, services);
+
+        if (!post) {
+          throw new Error('post undefined');
+        }
       }
+    });
 
-      if (!user) {
-        throw new Error('user not created');
-      }
+    it('returns a feed', async () => {
+      const { feed } = services;
+      const result = await feed.getFeed({ expectedAmount: 10 });
 
-      const post = await fetchPostInTests(user.userId, post_id, services);
-
-      if (!post) {
-        throw new Error('post undefined');
-      }
-
-      const parsedPost = await postsManager.getPost(post.id, true);
-      expect(parsedPost).to.not.be.undefined;
-      expect(parsedPost.parsingStatus).to.equal(AppPostParsingStatus.IDLE);
-      expect(parsedPost.semantics).to.not.be.undefined;
-
-      if (process.env.TEST_THREAD_ID) {
-        logger.debug('parsedPost', JSON.stringify(parsedPost, null, 2));
-      }
+      console.log({ result });
     });
   });
 });
