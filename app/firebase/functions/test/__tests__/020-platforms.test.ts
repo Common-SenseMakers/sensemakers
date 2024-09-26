@@ -293,60 +293,68 @@ describe('02-platforms', () => {
     let userDetails: BlueskyUserDetails;
 
     before(() => {
-      blueskyService = services.platforms.get(PLATFORM.Bluesky) as BlueskyService;
-      userDetails = {
-        user_id: 'mock-bluesky-user-id',
-        profile: {
-          username: 'mock-bluesky-handle',
-        },
-        read: {
-          appPassword: 'mock-bluesky-app-password',
-        },
-      } as BlueskyUserDetails;
-    });
-
-    (USE_REAL_BLUESKY ? it : it.skip)('fetches the main thread of a post', async () => {
-      const postId =
-        'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wdgnynfq2h';
-      // https://bsky.app/profile/weswalla.bsky.social/post/3l4wdgnynfq2h
-
-      const result = await services.db.run((manager) =>
-        blueskyService.get(postId, userDetails, manager)
-      );
-      const expectedThreadIds = [
-        'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z',
-        'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd52krts24',
-        'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wdaif3va2h',
-        'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wdcb3w322z',
-      ];
-
-      expect(result).to.not.be.undefined;
-      expect(result.post).to.be.an('object');
-      expect(result.post.thread_id).to.equal(expectedThreadIds[0]);
-      expect(result.post.posts).to.be.an('array');
-      expect(result.post.posts.length).to.equal(4);
-
-      expect(result.post.posts.map((post) => post.uri)).to.deep.equal(
-        expectedThreadIds
-      );
-
-      // Check that all posts in the thread are from the same author
-      const authorDid = result.post.author.did;
-      result.post.posts.forEach((post) => {
-        expect(post.author.did).to.equal(authorDid);
-      });
-
-      // Check that posts are in chronological order
-      for (let i = 1; i < result.post.posts.length; i++) {
-        const prevTimestamp = new Date(
-          result.post.posts[i - 1].record.createdAt
-        ).getTime();
-        const currTimestamp = new Date(
-          result.post.posts[i].record.createdAt
-        ).getTime();
-        expect(currTimestamp).to.be.at.least(prevTimestamp);
+      if (!user) {
+        throw new Error('appUser not created');
       }
+      const allUserDetails = user[PLATFORM.Bluesky];
+      if (!allUserDetails || allUserDetails.length < 0) {
+        throw new Error('Unexpected');
+      }
+      userDetails = allUserDetails[0];
+      if (userDetails.read === undefined) {
+        throw new Error('Unexpected');
+      }
+
+      blueskyService = services.platforms.get(
+        PLATFORM.Bluesky
+      ) as BlueskyService;
     });
+
+    (USE_REAL_BLUESKY ? it : it.skip)(
+      'fetches the main thread of a post',
+      async () => {
+        const postId =
+          'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wdgnynfq2h';
+        // https://bsky.app/profile/weswalla.bsky.social/post/3l4wdgnynfq2h
+
+        const result = await services.db.run((manager) =>
+          blueskyService.get(postId, userDetails, manager)
+        );
+        const expectedThreadIds = [
+          'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z',
+          'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd52krts24',
+          'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wdaif3va2h',
+          'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wdcb3w322z',
+        ];
+
+        expect(result).to.not.be.undefined;
+        expect(result.post).to.be.an('object');
+        expect(result.post.thread_id).to.equal(expectedThreadIds[0]);
+        expect(result.post.posts).to.be.an('array');
+        expect(result.post.posts.length).to.equal(4);
+
+        expect(result.post.posts.map((post) => post.uri)).to.deep.equal(
+          expectedThreadIds
+        );
+
+        // Check that all posts in the thread are from the same author
+        const authorDid = result.post.author.did;
+        result.post.posts.forEach((post) => {
+          expect(post.author.did).to.equal(authorDid);
+        });
+
+        // Check that posts are in chronological order
+        for (let i = 1; i < result.post.posts.length; i++) {
+          const prevTimestamp = new Date(
+            result.post.posts[i - 1].record.createdAt
+          ).getTime();
+          const currTimestamp = new Date(
+            result.post.posts[i].record.createdAt
+          ).getTime();
+          expect(currTimestamp).to.be.at.least(prevTimestamp);
+        }
+      }
+    );
 
     it('fetches the latest posts without since_id or until_id', async () => {
       const fetchParams: PlatformFetchParams = {
@@ -428,34 +436,37 @@ describe('02-platforms', () => {
       }
     });
 
-    (USE_REAL_BLUESKY ? it : it.skip)('fetches a post with a quote and converts it to generic format', async () => {
-      const postId =
-        'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4ebss5mmt2f';
+    (USE_REAL_BLUESKY ? it : it.skip)(
+      'fetches a post with a quote and converts it to generic format',
+      async () => {
+        const postId =
+          'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4ebss5mmt2f';
 
-      const result = await services.db.run((manager) =>
-        blueskyService.get(postId, userDetails, manager)
-      );
+        const result = await services.db.run((manager) =>
+          blueskyService.get(postId, userDetails, manager)
+        );
 
-      expect(result).to.not.be.undefined;
-      expect(result.post).to.be.an('object');
+        expect(result).to.not.be.undefined;
+        expect(result.post).to.be.an('object');
 
-      const genericThread = await blueskyService.convertToGeneric({
-        posted: result,
-      } as PlatformPostCreate<BlueskyThread>);
+        const genericThread = await blueskyService.convertToGeneric({
+          posted: result,
+        } as PlatformPostCreate<BlueskyThread>);
 
-      expect(genericThread.thread.length).to.be.greaterThan(0);
+        expect(genericThread.thread.length).to.be.greaterThan(0);
 
-      const mainPost = genericThread.thread[0];
-      expect(mainPost.quotedThread).to.be.an('object');
-      expect(mainPost.quotedThread?.author).to.be.an('object');
-      expect(mainPost.quotedThread?.thread).to.be.an('array');
-      expect(mainPost.quotedThread?.thread.length).to.equal(1);
+        const mainPost = genericThread.thread[0];
+        expect(mainPost.quotedThread).to.be.an('object');
+        expect(mainPost.quotedThread?.author).to.be.an('object');
+        expect(mainPost.quotedThread?.thread).to.be.an('array');
+        expect(mainPost.quotedThread?.thread.length).to.equal(1);
 
-      const quotedPost = mainPost.quotedThread?.thread[0];
-      expect(quotedPost?.content).to.be.a('string');
-      expect(quotedPost?.url).to.be.equal(
-        'https://bsky.app/profile/thetyee.ca/post/3l4eak57v5y2h'
-      );
-    });
+        const quotedPost = mainPost.quotedThread?.thread[0];
+        expect(quotedPost?.content).to.be.a('string');
+        expect(quotedPost?.url).to.be.equal(
+          'https://bsky.app/profile/thetyee.ca/post/3l4eak57v5y2h'
+        );
+      }
+    );
   });
 });
