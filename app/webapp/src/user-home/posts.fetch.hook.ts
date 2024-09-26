@@ -196,7 +196,7 @@ export const usePostsFetch = () => {
   }, [posts, fetchedOlderFirst, connectedUser]);
 
   useEffect(() => {
-    if (posts.length > 0 && twitterProfile && mastodonProfile) {
+    if (posts.length > 0) {
       if (DEBUG) console.log('first fetch older with new platform added');
       reset();
       _fetchOlder(undefined);
