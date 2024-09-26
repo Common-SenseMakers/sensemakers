@@ -348,7 +348,9 @@ export const UserSettingsPage = () => {
             });
           }}
           buttonText={needConnectBluesky ? 'connect' : ''}
-          username={blueskyProfile ? `@${blueskyProfile.username}` : '- not connected -'}
+          username={
+            blueskyProfile ? `@${blueskyProfile.username}` : '- not connected -'
+          }
           connected={!!blueskyProfile}></PlatformSection>
 
         <PlatformSection

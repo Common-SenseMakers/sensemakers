@@ -8,6 +8,7 @@ import {
 } from 'react';
 
 import { _appFetch } from '../../api/app.fetch';
+import { BlueskyUserProfile } from '../../shared/types/types.bluesky';
 import { MastodonUserProfile } from '../../shared/types/types.mastodon';
 import { NotificationFreq } from '../../shared/types/types.notifications';
 import { OrcidUserProfile } from '../../shared/types/types.orcid';
@@ -22,7 +23,7 @@ import {
 import { usePersist } from '../../utils/use.persist';
 import { getAccount } from '../user.helper';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export const OUR_TOKEN_NAME = 'ourToken';
 export const LOGIN_STATUS = 'loginStatus';
@@ -190,8 +191,9 @@ export const AccountContext = (props: PropsWithChildren) => {
     if (connectedUser && connectedUser.email) {
       const hasTwitter = !!getAccount(connectedUser, PLATFORM.Twitter);
       const hasMastodon = !!getAccount(connectedUser, PLATFORM.Mastodon);
+      const hasBluesky = !!getAccount(connectedUser, PLATFORM.Bluesky);
 
-      if (!hasTwitter && !hasMastodon) {
+      if (!hasTwitter && !hasMastodon && !hasBluesky) {
         setOverallLoginStatus(OverallLoginStatus.PartialLoggedIn);
         return;
       }
@@ -202,6 +204,9 @@ export const AccountContext = (props: PropsWithChildren) => {
         }
         if (hasMastodon) {
           setMastodonConnectedStatus(MastodonConnectedStatus.Connected);
+        }
+        if (hasBluesky) {
+          setBlueskyConnectedStatus(BlueskyConnectedStatus.Connected);
         }
         // Don't automatically set to FullyLoggedIn here
         // It will be set when the user clicks "Continue" in ConnectSocialsPage

@@ -38,20 +38,20 @@ export const ConnectBlueskyPage = () => {
       style={{ flexGrow: 1 }}>
       <AppLogo margin={{ bottom: 'xlarge' }} />
       <Box style={{ flexGrow: 1 }}>
-        <AppHeading level="1">{t(I18Keys.connectBlueskyTitle)}</AppHeading>
+        <AppHeading level="1">{'connect to bluesky'}</AppHeading>
         <Box width="100%" height="16px" />
         <AppParagraph margin={{ bottom: 'medium' }}>
-          {t(I18Keys.connectBlueskyParagraph)}
+          {'connect your bluesky account'}
         </AppParagraph>
         <AppParagraph
           margin={{ bottom: 'small' }}
           size="small"
           style={{ fontWeight: 'bold' }}>
-          {t(I18Keys.blueskyUsername)}
+          {'bluesky username'}
         </AppParagraph>
         <Box margin={{ bottom: 'medium' }}>
           <AppInput
-            placeholder={t(I18Keys.blueskyUsernamePlaceholder)}
+            placeholder={'username.bsky.app'}
             value={username}
             onChange={(event) => setUsername(event.target.value)}
             style={{ width: '100%' }}
@@ -61,12 +61,12 @@ export const ConnectBlueskyPage = () => {
           margin={{ bottom: 'small' }}
           size="small"
           style={{ fontWeight: 'bold' }}>
-          {t(I18Keys.blueskyAppPassword)}
+          {'app password'}
         </AppParagraph>
         <Box margin={{ bottom: 'medium' }}>
           <AppInput
             type="password"
-            placeholder={t(I18Keys.blueskyAppPasswordPlaceholder)}
+            placeholder={''}
             value={appPassword}
             onChange={(event) => setAppPassword(event.target.value)}
             style={{ width: '100%' }}

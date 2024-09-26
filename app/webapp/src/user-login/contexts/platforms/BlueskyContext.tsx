@@ -19,7 +19,7 @@ import {
   useAccountContext,
 } from '../AccountContext';
 
-const DEBUG = false;
+const DEBUG = true;
 
 const log = (...args: any[]) => {
   if (DEBUG) console.log(...args);
@@ -76,12 +76,8 @@ export const BlueskyContext = (props: PropsWithChildren) => {
 
         log('Bluesky signup result', result);
 
-        if (result) {
-          refreshConnected();
-          setBlueskyConnectedStatus(BlueskyConnectedStatus.Connected);
-        } else {
-          throw new Error('Signup failed');
-        }
+        refreshConnected();
+        setBlueskyConnectedStatus(BlueskyConnectedStatus.Connected);
       } catch (err: any) {
         log('Error connecting to Bluesky', err);
         setError('Error connecting to Bluesky');

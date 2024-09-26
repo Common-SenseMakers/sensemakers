@@ -21,13 +21,16 @@ import { useTwitterContext } from './contexts/platforms/TwitterContext';
 
 export const ConnectSocialsPage = () => {
   const { t } = useTranslation();
-  const { twitterProfile, mastodonProfile, blueskyProfile, setOverallLoginStatus } =
-    useAccountContext();
+  const {
+    twitterProfile,
+    mastodonProfile,
+    blueskyProfile,
+    setOverallLoginStatus,
+  } = useAccountContext();
   const { connect: connectTwitter } = useTwitterContext();
   const { connect: connectMastodon, error: mastodonError } =
     useMastodonContext();
-  const { connect: connectBluesky, error: blueskyError } =
-    useBlueskyContext();
+  const { connect: connectBluesky, error: blueskyError } = useBlueskyContext();
   const navigate = useNavigate();
 
   const handleContinue = () => {
@@ -111,9 +114,7 @@ export const ConnectSocialsPage = () => {
             )}
             {blueskyError && (
               <Box margin={{ top: 'small' }}>
-                <AppParagraph color="status-error">
-                  {blueskyError}
-                </AppParagraph>
+                <AppParagraph color="status-error">{blueskyError}</AppParagraph>
               </Box>
             )}
           </Box>
