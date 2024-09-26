@@ -19,7 +19,7 @@ export const convertBlueskyPostsToThreads = (
       if (!postThreadsMap.has(rootId)) {
         postThreadsMap.set(rootId, []);
       }
-      postThreadsMap.get(rootId)?.push(post);
+      postThreadsMap.get(rootId)?.push(cleanBlueskyPost(post));
     });
 
   const postsArrays = Array.from(postThreadsMap.values());
@@ -182,4 +182,41 @@ export function extractRKeyFromURI(uri: string): string | null {
     console.error(error.message);
     return null;
   }
+}
+
+export function cleanBlueskyPost(post: BlueskyPost): BlueskyPost {
+  const cleanEmbed = (embed: any): any => {
+    if (!embed || typeof embed !== 'object') return embed;
+
+    if (embed.$type === 'blob') {
+      return undefined; // Remove blob type
+    }
+
+    if (Array.isArray(embed)) {
+      return embed
+        .map((item) => cleanEmbed(item))
+        .filter((item) => item !== undefined);
+    }
+
+    const cleanedEmbed = { ...embed };
+
+    for (const key in cleanedEmbed) {
+      if (cleanedEmbed.hasOwnProperty(key)) {
+        cleanedEmbed[key] = cleanEmbed(cleanedEmbed[key]);
+      }
+    }
+
+    return cleanedEmbed;
+  };
+
+  const cleanedPost: BlueskyPost = {
+    ...post,
+    record: {
+      ...post.record,
+      embed: cleanEmbed(post.record.embed),
+    },
+    embed: cleanEmbed(post.embed),
+  };
+
+  return cleanedPost;
 }
