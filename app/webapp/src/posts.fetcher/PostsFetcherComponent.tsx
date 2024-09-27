@@ -38,6 +38,7 @@ export const PostsFetcherComponent = (props: {
   filterOptions: FilterOption[];
   status?: PostsQueryStatus;
   onFilterOptionChanged: (filter: PostsQuery) => void;
+  showAuthor?: boolean;
 }) => {
   const { show } = useToastContext();
   const { constants } = useThemeContext();
@@ -49,7 +50,10 @@ export const PostsFetcherComponent = (props: {
     filterOptions,
     onFilterOptionChanged,
     feed,
+    showAuthor: _showAuthor,
   } = props;
+
+  const showAuthor = _showAuthor !== undefined ? _showAuthor : false;
 
   const navigate = useNavigate();
 
@@ -137,6 +141,7 @@ export const PostsFetcherComponent = (props: {
             <Box key={ix} id={`post-${post.id}`}>
               <PostContext postInit={post}>
                 <PostCard
+                  showAuthor={showAuthor}
                   handleClick={() => {
                     const path = `/post/${post.id}`;
                     navigate(path);

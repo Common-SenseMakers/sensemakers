@@ -37,6 +37,7 @@ export const PublicFeed = () => {
     <>
       <Box fill justify="start">
         <PostsFetcherComponent
+          showAuthor={true}
           feed={feed}
           pageTitle={t(I18Keys.feedTitle)}
           filterOptions={[]}

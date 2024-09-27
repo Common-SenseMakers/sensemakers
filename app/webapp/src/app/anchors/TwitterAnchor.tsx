@@ -53,10 +53,10 @@ export const TweetAnchor = (props: {
   return (
     <Anchor
       style={{
-        fontSize: '16px',
+        fontSize: '14px',
         fontStyle: 'normal',
         fontWeight: '400',
-        lineHeight: '18px',
+        lineHeight: '16px',
         textDecoration: 'none',
       }}
       target="_blank"
