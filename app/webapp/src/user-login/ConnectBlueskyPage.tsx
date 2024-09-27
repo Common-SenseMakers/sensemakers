@@ -5,7 +5,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { AppLogo } from '../app/brand/AppLogo';
 import { I18Keys } from '../i18n/i18n';
-import { AbsoluteRoutes } from '../route.names';
 import { AppButton, AppHeading, AppInput } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
 import { useAccountContext } from './contexts/AccountContext';
@@ -13,7 +12,6 @@ import { useBlueskyContext } from './contexts/platforms/BlueskyContext';
 
 export const ConnectBlueskyPage = () => {
   const { t } = useTranslation();
-  const location = useLocation();
   const navigate = useNavigate();
   const { connect, error } = useBlueskyContext();
   const { blueskyProfile } = useAccountContext();
@@ -38,10 +36,14 @@ export const ConnectBlueskyPage = () => {
       style={{ flexGrow: 1 }}>
       <AppLogo margin={{ bottom: 'xlarge' }} />
       <Box style={{ flexGrow: 1 }}>
-        <AppHeading level="1">{'connect to bluesky'}</AppHeading>
+        <AppHeading level="1">{'Connect to Bluesky'}</AppHeading>
         <Box width="100%" height="16px" />
         <AppParagraph margin={{ bottom: 'medium' }}>
-          {'connect your bluesky account'}
+          To connect your Bluesky account, you need to{' '}
+          <a href="https://bsky.app/settings/app-passwords">
+            generate an app password
+          </a>
+          .
         </AppParagraph>
         <AppParagraph
           margin={{ bottom: 'small' }}
@@ -51,7 +53,7 @@ export const ConnectBlueskyPage = () => {
         </AppParagraph>
         <Box margin={{ bottom: 'medium' }}>
           <AppInput
-            placeholder={'username.bsky.app'}
+            placeholder={'username.bsky.social'}
             value={username}
             onChange={(event) => setUsername(event.target.value)}
             style={{ width: '100%' }}
