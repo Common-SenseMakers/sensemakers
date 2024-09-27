@@ -40,7 +40,6 @@ export const PublicFeed = () => {
           feed={feed}
           pageTitle={t(I18Keys.feedTitle)}
           filterOptions={[]}
-          status={''}
           onFilterOptionChanged={(value) => {}}></PostsFetcherComponent>
       </Box>
     </>

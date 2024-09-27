@@ -1,10 +1,11 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { createContext } from 'react';
 
 import {
   PostFetcherInterface,
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
+import { PostsQueryStatus } from '../shared/types/types.posts';
 
 interface FeedContextType {
   feed: PostFetcherInterface;
@@ -21,7 +22,15 @@ export const FeedPostsContextValue = createContext<FeedContextType | undefined>(
 export const FeedPostsContext: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
-  const feed = usePostsFetcher('/api/feed/get');
+  useEffect(() => {
+    console.log('FeedPostsContext mounted');
+    return () => console.log('FeedPostsContext cleanup');
+  }, []);
+
+  const feed = usePostsFetcher({
+    endpoint: '/api/feed/get',
+    status: PostsQueryStatus.PUBLISHED,
+  });
 
   return (
     <FeedPostsContextValue.Provider

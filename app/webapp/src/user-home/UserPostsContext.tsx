@@ -62,12 +62,12 @@ export const UserPostsContext: React.FC<{
     });
   };
 
-  const feed = usePostsFetcher(
-    '/api/posts/getOfUser',
+  const feed = usePostsFetcher({
+    endpoint: '/api/posts/getOfUser',
     status,
-    true,
-    onPostsAdded
-  );
+    subscribe: true,
+    onPostsAdded,
+  });
 
   return (
     <UserPostsContextValue.Provider

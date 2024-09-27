@@ -13,11 +13,7 @@ import { I18Keys } from '../i18n/i18n';
 import { PostCard } from '../post/PostCard';
 import { PostCardLoading } from '../post/PostCardLoading';
 import { PostContext } from '../post/post.context/PostContext';
-import {
-  AppPostFull,
-  PostsQueryStatus,
-  UserPostsQuery,
-} from '../shared/types/types.posts';
+import { PostsQuery, PostsQueryStatus } from '../shared/types/types.posts';
 import { AppButton, AppHeading, AppSelect } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
@@ -40,8 +36,8 @@ export const PostsFetcherComponent = (props: {
   feed: PostFetcherInterface;
   pageTitle: string;
   filterOptions: FilterOption[];
-  status: string;
-  onFilterOptionChanged: (filter: UserPostsQuery) => void;
+  status?: PostsQueryStatus;
+  onFilterOptionChanged: (filter: PostsQuery) => void;
 }) => {
   const { show } = useToastContext();
   const { constants } = useThemeContext();
@@ -197,7 +193,7 @@ export const PostsFetcherComponent = (props: {
 
   const FilterValue = (
     props: {
-      status: string;
+      status?: string;
       border?: boolean;
       padx?: boolean;
     } & BoxExtendedProps

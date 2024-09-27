@@ -10,7 +10,7 @@ import {
   FilterOption,
   PostsFetcherComponent,
 } from '../posts.fetcher/PostsFetcherComponent';
-import { PostsQueryStatus, UserPostsQuery } from '../shared/types/types.posts';
+import { PostsQuery, PostsQueryStatus } from '../shared/types/types.posts';
 import { AppModal } from '../ui-components';
 import { usePersist } from '../utils/use.persist';
 import { IntroModals } from './IntroModal';
@@ -78,7 +78,7 @@ export const UserPostsFeed = () => {
 
   const navigate = useNavigate();
 
-  const setFilter = (filter: UserPostsQuery) => {
+  const setFilter = (filter: PostsQuery) => {
     navigate(`/${filter.status}`);
   };
 

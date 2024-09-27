@@ -1,6 +1,7 @@
 import { FetchParams } from './types.fetch';
 
 export interface FeedQueryParams {
-  labelsUris: string[];
+  labels: string[];
+  keywords: string[];
   fetchParams: FetchParams;
 }

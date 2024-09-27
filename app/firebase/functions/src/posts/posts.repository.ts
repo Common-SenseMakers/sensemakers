@@ -57,25 +57,75 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     const keywordsKey: keyof AppPost = 'keywords';
     const labelsKey: keyof AppPost = 'labels';
 
-    const base = queryParams.userId
-      ? this.db.collections.posts.where(authorKey, '==', queryParams.userId)
-      : this.db.collections.posts;
+    if (DEBUG) logger.debug('getMany', queryParams, DEBUG_PREFIX);
+
+    const base = (() => {
+      if (queryParams.userId) {
+        if (DEBUG)
+          logger.debug(
+            'getMany - filter by userId',
+            queryParams.userId,
+            DEBUG_PREFIX
+          );
+
+        return this.db.collections.posts.where(
+          authorKey,
+          '==',
+          queryParams.userId
+        );
+      } else {
+        if (DEBUG)
+          logger.debug(
+            'getMany - dont filter by userId',
+            undefined,
+            DEBUG_PREFIX
+          );
+
+        return this.db.collections.posts;
+      }
+    })();
 
     if (DEBUG) logger.debug('getOfUser', queryParams, DEBUG_PREFIX);
 
     const statusFiltered = (() => {
-      if (!queryParams.status) return base;
+      if (!queryParams.status) {
+        if (DEBUG)
+          logger.debug(
+            'getMany - dont filter by status',
+            undefined,
+            DEBUG_PREFIX
+          );
+        return base;
+      }
 
       if (queryParams.status === PostsQueryStatus.DRAFTS) {
+        if (DEBUG)
+          logger.debug(
+            'getMany - filter by status',
+            PostsQueryStatus.DRAFTS,
+            DEBUG_PREFIX
+          );
         return base.where(republishedStatusKey, 'in', [
           AppPostRepublishedStatus.PENDING,
           AppPostRepublishedStatus.UNREPUBLISHED,
         ]);
       }
       if (queryParams.status === PostsQueryStatus.PENDING) {
+        if (DEBUG)
+          logger.debug(
+            'getMany - filter by status',
+            PostsQueryStatus.PENDING,
+            DEBUG_PREFIX
+          );
         return base.where(reviewedStatusKey, '==', AppPostReviewStatus.PENDING);
       }
       if (queryParams.status === PostsQueryStatus.PUBLISHED) {
+        if (DEBUG)
+          logger.debug(
+            'getMany - filter by status',
+            PostsQueryStatus.PUBLISHED,
+            DEBUG_PREFIX
+          );
         return base.where(
           republishedStatusKey,
           '!=',
@@ -83,6 +133,13 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
         );
       }
       if (queryParams.status === PostsQueryStatus.IGNORED) {
+        if (DEBUG)
+          logger.debug(
+            'getMany - filter by status',
+            PostsQueryStatus.IGNORED,
+            DEBUG_PREFIX
+          );
+
         return base.where(reviewedStatusKey, '==', AppPostReviewStatus.IGNORED);
       }
 
@@ -93,6 +150,13 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       let filtered = statusFiltered;
 
       if (queryParams.keywords && queryParams.keywords.length > 0) {
+        if (DEBUG)
+          logger.debug(
+            'getMany - filter by keywords',
+            JSON.stringify(queryParams.keywords),
+            DEBUG_PREFIX
+          );
+
         filtered = statusFiltered.where(
           keywordsKey,
           'array-contains-any',
@@ -101,6 +165,13 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       }
 
       if (queryParams.labels && queryParams.labels.length > 0) {
+        if (DEBUG)
+          logger.debug(
+            'getMany - filter by labels',
+            JSON.stringify(queryParams.labels),
+            DEBUG_PREFIX
+          );
+
         filtered = statusFiltered.where(
           labelsKey,
           'array-contains-any',

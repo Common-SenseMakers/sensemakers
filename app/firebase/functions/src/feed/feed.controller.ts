@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { logger } from 'firebase-functions/v1';
 
-import { FeedQueryParams } from '../@shared/types/types.feed';
+import { PostsQuery } from '../@shared/types/types.posts';
 import { getAuthenticatedUser, getServices } from '../controllers.utils';
 import { getFeedSchema } from './feed.schema';
 
@@ -17,16 +17,13 @@ export const getPublicFeedController: RequestHandler = async (
   try {
     const queryParams = (await getFeedSchema.validate(
       request.body
-    )) as FeedQueryParams;
+    )) as PostsQuery;
 
     logger.debug(`${request.path} - query parameters`, { queryParams });
     const userId = getAuthenticatedUser(request, false);
     const { feed } = getServices(request);
 
-    const posts = await feed.getFeed(
-      queryParams.fetchParams,
-      queryParams.labelsUris
-    );
+    const posts = await feed.getFeed(queryParams);
 
     if (DEBUG) logger.debug(`${request.path}: posts`, { posts, userId });
     response.status(200).send({ success: true, data: posts });

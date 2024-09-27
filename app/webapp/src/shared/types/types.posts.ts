@@ -133,9 +133,12 @@ export interface UnpublishPlatformPostPayload {
   post_id: string;
 }
 
-export interface PostsQuery extends StructuredSemantics {
+export interface PostsQueryParams extends StructuredSemantics {
   userId?: string;
   status?: string;
+}
+
+export interface PostsQuery extends PostsQueryParams {
   fetchParams: FetchParams;
 }
 

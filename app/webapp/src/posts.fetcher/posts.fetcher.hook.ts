@@ -7,12 +7,13 @@ import {
   AppPostFull,
   AppPostRepublishedStatus,
   AppPostReviewStatus,
+  PostsQuery,
+  PostsQueryParams,
   PostsQueryStatus,
-  UserPostsQuery,
 } from '../shared/types/types.posts';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export interface PostFetcherInterface {
   posts?: AppPostFull[];
@@ -36,18 +37,32 @@ export interface PostFetcherInterface {
  * Handles one array of posts by keeping track of the newest and oldest post ids and
  * fething newer and older posts as requested by a consuming component
  */
-export const usePostsFetcher = (
-  endpoint: string,
-  _status?: string,
-  subscribe?: boolean,
-  onPostsAdded?: (posts: AppPostFull[]) => void,
-  PAGE_SIZE: number = 5
-): PostFetcherInterface => {
+export const usePostsFetcher = (input: {
+  endpoint: string;
+  status?: string;
+  labels?: string[];
+  keywords?: string[];
+  subscribe?: boolean;
+  onPostsAdded?: (posts: AppPostFull[]) => void;
+  PAGE_SIZE?: number;
+}): PostFetcherInterface => {
   const { connectedUser, twitterProfile } = useAccountContext();
+
+  const {
+    endpoint,
+    status,
+    labels,
+    keywords,
+    subscribe,
+    onPostsAdded,
+    PAGE_SIZE: _PAGE_SIZE,
+  } = input;
+
+  const PAGE_SIZE = _PAGE_SIZE || 5;
 
   const appFetch = useAppFetch();
 
-  const [posts, setPosts] = useState<AppPostFull[]>([]);
+  const [posts, setPosts] = useState<AppPostFull[] | undefined>(undefined);
   const [fetchedOlderFirst, setFetchedOlderFirst] = useState(false);
   const [fetchedNewerFirst, setFetchedNewerFirst] = useState(false);
 
@@ -65,7 +80,15 @@ export const usePostsFetcher = (
   const [searchParams, setSearchParams] = useSearchParams();
   const code = searchParams.get('code');
 
-  const status = _status || PostsQueryStatus.PUBLISHED;
+  const _status = status || PostsQueryStatus.PUBLISHED;
+  const _labels = labels || [];
+  const _keywords = keywords || [];
+
+  const queryParams: PostsQueryParams = {
+    status: _status,
+    keywords: _keywords,
+    labels: _labels,
+  };
 
   /** refetch a post and overwrite its value in the array */
   const refetchPost = useCallback(
@@ -103,8 +126,8 @@ export const usePostsFetcher = (
         })();
 
         setPosts((prev) => {
-          const newPosts = [...prev];
-          const ix = prev.findIndex((p) => p.id === postId);
+          const newPosts = prev ? [...prev] : [];
+          const ix = prev ? prev.findIndex((p) => p.id === postId) : -1;
 
           if (DEBUG) console.log(`setPosts called`, { ix, newPosts });
 
@@ -133,7 +156,14 @@ export const usePostsFetcher = (
       /** add posts  */
       setPosts((prev) => {
         const allPosts =
-          position === 'end' ? prev.concat(newPosts) : newPosts.concat(prev);
+          position === 'end'
+            ? prev
+              ? prev.concat(newPosts)
+              : newPosts
+            : prev
+              ? newPosts.reverse().concat(prev)
+              : newPosts;
+
         if (DEBUG) console.log(`pushing posts`, { prev, allPosts });
         return allPosts;
       });
@@ -201,19 +231,26 @@ export const usePostsFetcher = (
 
   /** first data fill happens everytime the posts are empty and the firstFetched is false */
   useEffect(() => {
-    if (posts.length === 0 && !fetchedOlderFirst && twitterProfile) {
-      if (DEBUG) console.log('first fetch older');
+    if (posts && !fetchedOlderFirst && twitterProfile) {
+      if (DEBUG)
+        console.log('first fetch older', {
+          posts,
+          fetchedOlderFirst,
+          connectedUser,
+        });
+      setFetchedOlderFirst(true);
+
       _fetchOlder(undefined);
     }
   }, [posts, fetchedOlderFirst, connectedUser]);
 
   /** whenever posts have been fetched, check if we have fetched for newer posts yet, and if not, fetch for newer */
   useEffect(() => {
-    if (posts.length !== 0 && !fetchedNewerFirst && connectedUser) {
+    if (posts && posts.length > 0 && !fetchedNewerFirst && connectedUser) {
       if (DEBUG) console.log('first fetch newer');
       _fetchNewer(posts[0].id);
     }
-  }, [posts]);
+  }, [posts, fetchedNewerFirst]);
 
   const reset = () => {
     if (DEBUG) console.log('resetting posts');
@@ -247,17 +284,17 @@ export const usePostsFetcher = (
           fetchedOlderFirst,
         });
       setIsFetchingOlder(true);
-      setFetchedOlderFirst(true);
+
       try {
-        const params: UserPostsQuery = {
-          status,
+        const params: PostsQuery = {
+          ...queryParams,
           fetchParams: {
             expectedAmount: PAGE_SIZE,
             untilId: oldestPostId,
           },
         };
         if (DEBUG) console.log(`fetching for older - twitter`, params);
-        const readPosts = await appFetch<AppPostFull[], UserPostsQuery>(
+        const readPosts = await appFetch<AppPostFull[], PostsQuery>(
           endpoint,
           params
         );
@@ -304,15 +341,15 @@ export const usePostsFetcher = (
       setFetchedNewerFirst(true);
 
       try {
-        const params: UserPostsQuery = {
-          status,
+        const params: PostsQuery = {
+          ...queryParams,
           fetchParams: {
             expectedAmount: PAGE_SIZE,
             sinceId: _newestPostId,
           },
         };
         if (DEBUG) console.log(`fetching for newer`, params);
-        const readPosts = await appFetch<AppPostFull[], UserPostsQuery>(
+        const readPosts = await appFetch<AppPostFull[], PostsQuery>(
           endpoint,
           params
         );
@@ -350,12 +387,18 @@ export const usePostsFetcher = (
 
   const removePost = (postId: string) => {
     if (DEBUG) console.log(`removing post ${postId} from list`);
-    setPosts((prev) => prev.filter((p) => p.id !== postId));
+    setPosts((prev) =>
+      prev ? prev.filter((p) => p.id !== postId) : undefined
+    );
     unsubscribeCallbacks.current[postId]?.();
   };
 
   const getPost = useCallback(
     (postId: string) => {
+      if (!posts) {
+        return undefined;
+      }
+
       const ix = posts.findIndex((p) => p.id === postId);
       return ix !== -1 ? posts[ix] : undefined;
     },
