@@ -35,6 +35,8 @@ export interface RefMeta {
   summary: string;
   item_type: string;
   image: string;
+  ref_source_url?: string;
+  order: number;
 }
 
 export interface ParserOntology {

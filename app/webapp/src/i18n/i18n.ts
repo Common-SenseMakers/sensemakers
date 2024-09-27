@@ -7,6 +7,7 @@ export enum I18Keys {
   introParagraph1 = 's007',
   introParagraph2 = 's008',
   emailInputBtn = 's0095',
+  googleOAuthInputBtn = 's0095go',
 
   connectSocialsTitle = 's0090',
   connectSocialsParagraph = 's0091',
@@ -82,7 +83,8 @@ export enum I18Keys {
   publishingErrorPar01 = 's03651',
 
   publishedTitle = 's0366',
-  publishedText = 's0367',
+  publishedTextPar1 = 's0367',
+  publishedTextPar2 = 's0367cdc',
   nextPost = 's0368',
   openPublished = 's0369',
 
@@ -159,6 +161,10 @@ export enum I18Keys {
   notificationsSettings = 's057',
   notificationsSettingsExplainer = 's057c',
   publishingAutomationExplainer = 's056c',
+
+  readTheDocs = 's058d',
+  readTheDocsDescription = 's058cd',
+
   getSupport = 's058',
   getSupportDescription = 's058c',
 
@@ -196,6 +202,8 @@ export enum I18Keys {
   postStatusForReview = 's089',
   postStatusPublished = 's090',
   postStatusAutopublished = 's091',
+
+  unignorePost = 's092',
 }
 
 const check = new Set();
@@ -214,6 +222,7 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.introParagraph2]:
     'Harness this knowledge by converting your social media posts into nanopublications, making your content <b>FAIR</b> (<b>F</b>indable, <b>A</b>ccessible, <b>I</b>nteroperable and <b>R</b>eusable), so your contributions can get proper recognition',
   [I18Keys.emailInputBtn]: 'Get started',
+  [I18Keys.googleOAuthInputBtn]: 'Continue with Google',
 
   [I18Keys.connectSocialsTitle]: 'Connect your socials',
   [I18Keys.connectSocialsParagraph]:
@@ -302,7 +311,9 @@ const translationENG: Record<I18Keys, string> = {
     'There was an error while attempting to retract your post. Please try again. If it persists, contact support.',
 
   [I18Keys.publishedTitle]: 'Your nanopublication is live!',
-  [I18Keys.publishedText]: 'Your post has been nanopublished.',
+  [I18Keys.publishedTextPar1]: 'Your post has been nanopublished.',
+  [I18Keys.publishedTextPar2]:
+    'You can find this post now under the "Nanopubs" section.',
   [I18Keys.nextPost]: 'Next post for review',
   [I18Keys.openPublished]: 'See live nanopublication',
 
@@ -442,6 +453,11 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.unpublishWarningTitle]: 'Retract your nanopublication',
   [I18Keys.unpublishWarningPar01]:
     'This action marks your nanopublication as retracted. You can republish it later if you wish.',
+
+  [I18Keys.readTheDocs]: 'Documentation',
+  [I18Keys.readTheDocsDescription]:
+    '<a href="https://sense-nets.xyz/docs" target="_blank">https://sense-nets.xyz/docs</a>',
+  [I18Keys.unignorePost]: 'Review for publication',
 };
 
 i18n.use(initReactI18next).init({

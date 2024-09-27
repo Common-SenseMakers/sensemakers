@@ -1,19 +1,24 @@
 import { Anchor, Box } from 'grommet';
+import { Google } from 'grommet-icons';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { AppLogo } from '../app/brand/AppLogo';
+import { EmailIcon } from '../app/icons/EmailIcon';
 import { I18Keys } from '../i18n/i18n';
 import { AppButton, AppHeading, AppSubtitle } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
 import { Loading } from '../ui-components/LoadingDiv';
-import { useAppSigner } from '../user-login/contexts/signer/SignerContext';
+import {
+  ConnectMode,
+  useAppSigner,
+} from '../user-login/contexts/signer/SignerContext';
 
 export const AppWelcome = (props: {}) => {
   const { t } = useTranslation();
-  const { connectMagic, isConnectingMagic } = useAppSigner();
+  const { connect, isConnecting } = useAppSigner();
 
   const content = (() => {
-    if (connectMagic) {
+    if (connect) {
       return (
         <Box style={{ flexGrow: 1 }}>
           <Box style={{ flexGrow: 1 }}>
@@ -29,10 +34,18 @@ export const AppWelcome = (props: {}) => {
             </AppParagraph>
             <AppButton
               margin={{ top: 'large' }}
+              icon={<EmailIcon></EmailIcon>}
               primary
-              disabled={isConnectingMagic}
+              disabled={isConnecting}
               label={t(I18Keys.emailInputBtn)}
-              onClick={() => connectMagic(true, true)}></AppButton>
+              onClick={() => connect(ConnectMode.email)}></AppButton>
+            {/* <AppButton
+              margin={{ top: 'small' }}
+              icon={<Google size={'18px'}></Google>}
+              primary
+              disabled={isConnecting}
+              label={t(I18Keys.googleOAuthInputBtn)}
+              onClick={() => connect(ConnectMode.googleOAuth)}></AppButton> */}
           </Box>
           <Box align="center">
             <Anchor href="https://sense-nets.xyz/privacy-policy">

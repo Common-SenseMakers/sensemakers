@@ -17,7 +17,9 @@ import { AppCheckBoxMessage } from '../../app/icons/AppCheckBoxMessage';
 import { RobotIcon } from '../../app/icons/RobotIcon';
 import { I18Keys } from '../../i18n/i18n';
 import { AbsoluteRoutes } from '../../route.names';
+import { AutopostOption } from '../../shared/types/types.user';
 import { usePersist } from '../../utils/use.persist';
+import { useAccountContext } from './AccountContext';
 
 const DEBUG = false;
 export const AUTO_POST_INVITE_DISABLED = 'autopostInviteDisabled';
@@ -35,6 +37,7 @@ const AutopostInviteContextValue = createContext<
 export const AutopostInviteContext = (props: PropsWithChildren) => {
   const navigate = useNavigate();
 
+  const { currentAutopost } = useAccountContext();
   const [showInvite, setShowInvite] = useState(false);
 
   const [justPublished, setJustPublished] = useState<boolean>(false);
@@ -50,7 +53,11 @@ export const AutopostInviteContext = (props: PropsWithChildren) => {
       console.log('useEffect', { justPublished, autopostInviteDisabled });
     }
 
-    if (justPublished && !autopostInviteDisabled) {
+    if (
+      justPublished &&
+      !autopostInviteDisabled &&
+      currentAutopost === AutopostOption.MANUAL
+    ) {
       if (DEBUG) {
         console.log('trigger timeout', {
           justPublished,

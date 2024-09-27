@@ -1,11 +1,11 @@
-import { Anchor, Box, Text } from 'grommet';
+import { Box, Text } from 'grommet';
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { useAppFetch } from '../api/app.fetch';
-import { SUPPORT_EMAIL_ADDRESS } from '../app/config';
 import { AutopostIcon } from '../app/icons/AutopostIcon';
 import { BellIcon } from '../app/icons/BellIcon';
+import { DocIcon } from '../app/icons/DocIcon';
 import { EmailIcon } from '../app/icons/EmailIcon';
 import { OrcidIcon } from '../app/icons/OrcidIcon';
 import { SupportIcon } from '../app/icons/SupportIcon';
@@ -51,7 +51,14 @@ export const UserSettingsPage = () => {
 
   const appFetch = useAppFetch();
 
-  const { connectedUser, refresh, twitterProfile } = useAccountContext();
+  const {
+    connectedUser,
+    refresh,
+    twitterProfile,
+    currentAutopost,
+    currentNotifications,
+    orcid,
+  } = useAccountContext();
   const [isSetting, setIsSetting] = useState(false);
   const { disconnect } = useDisconnectContext();
 
@@ -104,12 +111,6 @@ export const UserSettingsPage = () => {
       void setSettings(newSettings);
     }
   };
-
-  const currentAutopost =
-    connectedUser?.settings?.autopost[PLATFORM.Nanopub].value;
-  const currentNotifications = connectedUser?.settings?.notificationFreq;
-
-  const orcid = getAccount(connectedUser, PLATFORM.Orcid);
 
   const autopostPage = (
     <SettingsSubPage
@@ -214,24 +215,8 @@ export const UserSettingsPage = () => {
         </Box>
 
         <Box
-          pad={{ horizontal: 'medium', top: '8px' }}
-          margin={{ bottom: '24px' }}>
-          <SettingSectionTitle
-            value={t(I18Keys.downloads)}></SettingSectionTitle>
-          <Box pad={{ vertical: '8px' }}>
-            <Text
-              style={{
-                fontSize: '16px',
-                color: constants.colors.checkboxes,
-                fontWeight: '500',
-                cursor: 'pointer',
-              }}>
-              {t(I18Keys.installApp)}
-            </Text>
-          </Box>
-        </Box>
-
-        <Box pad={{ horizontal: 'medium' }} margin={{ bottom: '8px' }}>
+          pad={{ horizontal: 'medium', top: '24px' }}
+          margin={{ bottom: '8px' }}>
           <SettingSectionTitle
             value={t(I18Keys.usingApp)}></SettingSectionTitle>
         </Box>
@@ -249,6 +234,16 @@ export const UserSettingsPage = () => {
           onSectionClicked={() => {
             setShowSettingsPage(SettingsSections.Notifications);
           }}></SettingsSection>
+
+        <SettingsSection
+          icon={<DocIcon size={24}></DocIcon>}
+          title={t(I18Keys.readTheDocs)}
+          description={
+            <Trans
+              i18nKey={I18Keys.readTheDocsDescription}
+              components={{ a: <a></a> }}></Trans>
+          }
+          showChevron={false}></SettingsSection>
 
         <SettingsSection
           icon={<SupportIcon size={24}></SupportIcon>}

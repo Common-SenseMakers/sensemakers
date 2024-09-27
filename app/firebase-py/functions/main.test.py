@@ -10,20 +10,6 @@ from env_config import (
     kw_model,
 )
 
-# content = 'This is definititely an announcement of https://www.alink.com and I dont agree with https://anotherlink.io'
-# author_data = {
-#     "platformId": "Twitter",
-#     "id": "12345",
-#     "username": "johndoe",
-#     "name": "John Doe",
-# }
-
-# post_data = {
-#     "content": "This is an interesting paper https://arxiv.org/abs/2312.05230 but I disagree with its sequel https://arxiv.org/abs/2401.14000  #user-hashtag"
-# }
-
-# thread_data = {"thread": [post_data], "author": author_data}
-
 thread_data = {
     "author": {
         "id": "2111",
@@ -96,7 +82,7 @@ thread_data = {
                 "url": "https://x.com/FDAadcomms/status/1798107142219796794",
                 "thread": [
                     {
-                        "content": "@eturnermd1 #MDMAadcomm VOTE 2/2: Do the benefits of midomafetamine with FDA’s proposed risk evaluation and mitigation strategy (REMS) outweigh its risks for the treatment of patients with PTSD?\n1-Yes\n10-No\n0-Abstain https://twitter.com/FDAadcomms/status/1798107142219796794/photo/1",
+                        "content": "@eturnermd1 #MDMAadcomm VOTE 2/2 at https://x.com/FDAadcomms/status/12345: Do the benefits of midomafetamine with FDA’s proposed risk evaluation and mitigation strategy (REMS) outweigh its risks for the treatment of patients with PTSD?\n1-Yes\n10-No\n0-Abstain https://twitter.com/FDAadcomms/status/1798107142219796794/photo/1",
                         "url": "https://x.com/FDAadcomms/status/1798107142219796794",
                         "quotedThread": None,
                     }
@@ -140,6 +126,14 @@ serialized = result.model_dump_json()
 
 json_obj = json.loads(serialized)
 print(f"semantics: {json_obj['semantics']}")
+
+# Sorting the refs metadata dictionary by the 'order' attribute
+sorted_refs = sorted(
+    json_obj["support"]["refs_meta"].items(),
+    key=lambda x: x[1]["order"],
+)
+
+print(f"ordered references: {[url for url, _ in sorted_refs]}")
 
 with open("last_output.json", "wb") as file:
     file.write(serialized.encode("utf-8"))

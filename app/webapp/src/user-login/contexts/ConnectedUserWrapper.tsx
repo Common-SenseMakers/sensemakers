@@ -31,19 +31,19 @@ export const ConnectedUserWrapper = (props: PropsWithChildren) => {
       <AccountContext>
         <ConnectedWallet>
           <SignerContext>
-            <TwitterContext>
-              <NanopubContext>
-                <OrcidContext>
-                  <DisconnectUserContext>
+            <NanopubContext>
+              <OrcidContext>
+                <DisconnectUserContext>
+                  <TwitterContext>
                     <UserPostsContext>
                       <AutopostInviteContext>
                         {props.children}
                       </AutopostInviteContext>
                     </UserPostsContext>
-                  </DisconnectUserContext>
-                </OrcidContext>
-              </NanopubContext>
-            </TwitterContext>
+                  </TwitterContext>
+                </DisconnectUserContext>
+              </OrcidContext>
+            </NanopubContext>
           </SignerContext>
         </ConnectedWallet>
       </AccountContext>

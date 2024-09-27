@@ -387,5 +387,10 @@ export class UsersService {
         throw new Error('No wallet found');
       }
     });
+
+    await this.emailSender.sendAdminEmail(
+      'User signup',
+      `User ${userMetadata.email} signed up`
+    );
   }
 }

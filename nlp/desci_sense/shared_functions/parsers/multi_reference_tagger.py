@@ -37,7 +37,7 @@ class PromptCase(EnumDictKey):
 
 def return_fallback(input):
     return ParserChainOutput(
-        answer=[],
+        answer=Answer(sub_answers=list(), debug={"errors": "fallback"}),
         pparser_type=ParserChainType.MULTI_REF_TAGGER,
         extra={"errors": "fallback"},
     )
