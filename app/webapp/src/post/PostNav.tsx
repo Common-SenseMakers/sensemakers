@@ -9,6 +9,7 @@ import { RightIcon } from '../app/icons/RightIcon';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useUserPosts } from '../user-home/UserPostsContext';
+import { useNavigationHistory } from '../user-login/contexts/NavHistoryContext';
 import { usePost } from './post.context/PostContext';
 
 const DEBUG = false;
@@ -21,6 +22,7 @@ export const PostNav = () => {
   const [triggeredFetchOlder, setTriggeredFetchedOlder] = useState(false);
 
   const navigate = useNavigate();
+  const { hasHistory } = useNavigationHistory();
   const { constants } = useThemeContext();
 
   useEffect(() => {
@@ -82,9 +84,10 @@ export const PostNav = () => {
       <NavButton
         icon={<LeftChevronIcon></LeftChevronIcon>}
         label={'Back'}
-        onClick={() =>
-          navigate('..', { state: { postId: fetched.postId } })
-        }></NavButton>
+        onClick={() => {
+          if (hasHistory) navigate(-1);
+          else navigate('..', { state: { postId: fetched.postId } });
+        }}></NavButton>
 
       <Box direction="row" gap="8px">
         <NavButton
