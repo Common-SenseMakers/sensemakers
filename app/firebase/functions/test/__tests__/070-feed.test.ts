@@ -22,7 +22,7 @@ import { getTestServices } from './test.services';
 
 const feedThreads = [[''], [''], [''], [''], ['']];
 
-describe.only('070 test feed', () => {
+describe('070 test feed', () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER
