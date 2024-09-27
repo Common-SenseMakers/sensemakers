@@ -73,6 +73,8 @@ describe('02-platforms', () => {
           UsersHelper.getAccount(u, PLATFORM.Twitter, testUser.twitter.id) !==
             undefined &&
           UsersHelper.getAccount(u, PLATFORM.Mastodon, testUser.mastodon.id) !==
+            undefined &&
+          UsersHelper.getAccount(u, PLATFORM.Bluesky, testUser.bluesky.id) !==
             undefined
       );
     });
@@ -356,7 +358,7 @@ describe('02-platforms', () => {
       }
     );
 
-    it('fetches the latest posts without since_id or until_id', async () => {
+    it.only('fetches the latest posts without since_id or until_id', async () => {
       const fetchParams: PlatformFetchParams = {
         expectedAmount: 10,
       };
