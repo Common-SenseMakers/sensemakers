@@ -1,6 +1,8 @@
 import AtpAgent, {
   AppBskyFeedDefs,
   AppBskyFeedPost,
+  AtpSessionData,
+  CredentialSession,
   RichText,
 } from '@atproto/api';
 
@@ -43,6 +45,7 @@ import {
   convertBlueskyPostsToThreads,
   extractPrimaryThread,
   extractRKeyFromURI,
+  removeUndefinedFields,
 } from './bluesky.utils';
 
 const DEBUG = true;
@@ -56,17 +59,23 @@ export class BlueskyService
       BlueskyUserDetails
     >
 {
-  private agent: AtpAgent;
-
   constructor(
     protected time: TimeService,
     protected usersRepo: UsersRepository
-  ) {
-    this.agent = new AtpAgent({ service: 'https://bsky.social' });
+  ) {}
+
+  private getAuthenticatedAtpAgent(session: AtpSessionData): AtpAgent {
+    const credentialSession = new CredentialSession(
+      new URL('https://bsky.social'),
+      fetch
+    );
+    credentialSession.session = session;
+
+    return new AtpAgent(credentialSession);
   }
 
   public async getSignupContext(userId?: string, params?: any): Promise<any> {
-    // Bluesky doesn't require a signup context for OAuth
+    // Bluesky doesn't require a signup context when using app password
     return {};
   }
 
@@ -75,16 +84,18 @@ export class BlueskyService
   ): Promise<BlueskyUserDetails> {
     if (DEBUG) logger.debug('handleSignupData', { signupData }, DEBUG_PREFIX);
 
-    await this.agent.login({
+    const agent = new AtpAgent({ service: 'https://bsky.social' });
+    await agent.login({
       identifier: signupData.username,
       password: signupData.appPassword,
     });
-    if (!this.agent.session) {
+    if (!agent.session) {
       throw new Error('Failed to login to Bluesky');
     }
+    const sessionData = removeUndefinedFields(agent.session);
 
-    const profile = await this.agent.getProfile({
-      actor: this.agent.session.did,
+    const profile = await agent.getProfile({
+      actor: sessionData.did,
     });
 
     const bluesky: BlueskyUserDetails = {
@@ -96,13 +107,11 @@ export class BlueskyService
         name: profile.data.displayName || profile.data.handle,
         avatar: profile.data.avatar || '',
       },
-      read: {
-        appPassword: signupData.appPassword,
-      },
-      write: {
-        appPassword: signupData.appPassword,
-      },
+      read: sessionData,
     };
+    if (signupData.type === 'write') {
+      bluesky['write'] = sessionData;
+    }
 
     if (DEBUG)
       logger.debug('handleSignupData result', { bluesky }, DEBUG_PREFIX);
@@ -117,13 +126,11 @@ export class BlueskyService
   ): Promise<FetchedResult<BlueskyThread>> {
     if (DEBUG) logger.debug('fetch', { params, userDetails }, DEBUG_PREFIX);
 
-    if (!userDetails.profile?.username || !userDetails.read?.appPassword) {
+    if (!userDetails.read) {
       throw new Error('Missing Bluesky user details');
     }
-    await this.agent.login({
-      identifier: userDetails.profile.username,
-      password: userDetails.read.appPassword,
-    });
+
+    const agent = this.getAuthenticatedAtpAgent(userDetails.read);
 
     let allPosts: BlueskyPost[] = [];
     let newestId: string | undefined;
@@ -144,7 +151,7 @@ export class BlueskyService
 
     let shouldBreak = false;
     while (!shouldBreak) {
-      const response = await this.agent.getAuthorFeed({
+      const response = await agent.getAuthorFeed({
         actor: userDetails.user_id,
         limit: 40,
         cursor: cursor,
@@ -260,12 +267,16 @@ export class BlueskyService
   ): Promise<
     { uri: string; cid: string; value: AppBskyFeedPost.Record } | undefined
   > {
+    if (!userDetails.read) {
+      throw new Error('Missing Bluesky user details');
+    }
+    const agent = this.getAuthenticatedAtpAgent(userDetails.read);
     const rkey = extractRKeyFromURI(postId);
     if (!rkey) {
       throw new Error('Invalid post ID');
     }
     try {
-      const response = await this.agent.getPost({
+      const response = await agent.getPost({
         repo: userDetails.user_id,
         rkey,
       });
@@ -333,25 +344,20 @@ export class BlueskyService
     if (DEBUG) logger.debug('publish', { postPublish }, DEBUG_PREFIX);
 
     const userDetails = postPublish.userDetails as BlueskyUserDetails;
-    if (!userDetails.profile?.username || !userDetails.read?.appPassword) {
-      throw new Error('Missing Bluesky user details');
-    }
-    await this.agent.login({
-      identifier: userDetails.profile.username,
-      password: userDetails.read.appPassword,
-    });
+    if (!userDetails.read) throw new Error('Missing Bluesky user details');
+    const agent = this.getAuthenticatedAtpAgent(userDetails.read);
 
     const rt = new RichText({ text: postPublish.draft });
-    await rt.detectFacets(this.agent);
+    await rt.detectFacets(agent);
 
-    const response = await this.agent.post({
+    const response = await agent.post({
       text: rt.text,
       facets: rt.facets,
     });
 
     return {
       post_id: response.uri,
-      user_id: this.agent.session?.did!,
+      user_id: agent.session?.did!,
       timestampMs: Date.now(),
       post: response,
     };
@@ -389,15 +395,12 @@ export class BlueskyService
   ): Promise<PlatformPostPosted<BlueskyThread>> {
     if (DEBUG) logger.debug('get', { post_id, userDetails }, DEBUG_PREFIX);
 
-    if (!userDetails.profile?.username || !userDetails.read?.appPassword) {
+    if (!userDetails.read) {
       throw new Error('Missing Bluesky user details');
     }
-    await this.agent.login({
-      identifier: userDetails.profile.username,
-      password: userDetails.read.appPassword,
-    });
+    const agent = this.getAuthenticatedAtpAgent(userDetails.read);
 
-    const response = await this.agent.getPostThread({
+    const response = await agent.getPostThread({
       uri: post_id,
       depth: 100,
       parentHeight: 100,
@@ -414,7 +417,7 @@ export class BlueskyService
     // If the initial post is not the root, fetch the root thread
     const rootResponse =
       rootPost.post.uri !== post_id
-        ? await this.agent.getPostThread({
+        ? await agent.getPostThread({
             uri: rootPost.post.uri,
             depth: 100,
             parentHeight: 100,

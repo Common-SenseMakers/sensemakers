@@ -10,7 +10,10 @@ import { useTranslation } from 'react-i18next';
 
 import { useAppFetch } from '../../../api/app.fetch';
 import { useToastContext } from '../../../app/ToastsContext';
-import { BlueskySignupData } from '../../../shared/types/types.bluesky';
+import {
+  BlueskyGetContextParams,
+  BlueskySignupData,
+} from '../../../shared/types/types.bluesky';
 import { HandleSignupResult } from '../../../shared/types/types.fetch';
 import { PLATFORM } from '../../../shared/types/types.user';
 import {
@@ -26,7 +29,11 @@ const log = (...args: any[]) => {
 };
 
 export type BlueskyContextType = {
-  connect?: (username: string, appPassword: string) => Promise<void>;
+  connect?: (
+    username: string,
+    appPassword: string,
+    type: BlueskyGetContextParams['type']
+  ) => Promise<void>;
   needConnect?: boolean;
   error?: string;
 };
@@ -55,7 +62,11 @@ export const BlueskyContext = (props: PropsWithChildren) => {
   const needConnect = !connectedUser || !connectedUser[PLATFORM.Bluesky];
 
   const connect = useCallback(
-    async (username: string, appPassword: string) => {
+    async (
+      username: string,
+      appPassword: string,
+      type: BlueskyGetContextParams['type']
+    ) => {
       setLoginFlowState(LoginFlowState.ConnectingBluesky);
       setBlueskyConnectedStatus(BlueskyConnectedStatus.Connecting);
       setError(undefined);
@@ -64,6 +75,7 @@ export const BlueskyContext = (props: PropsWithChildren) => {
         const signupData: BlueskySignupData = {
           username,
           appPassword,
+          type,
         };
 
         log('Calling Bluesky signup', signupData);

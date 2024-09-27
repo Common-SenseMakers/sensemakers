@@ -220,3 +220,14 @@ export function cleanBlueskyPost(post: BlueskyPost): BlueskyPost {
 
   return cleanedPost;
 }
+
+export function removeUndefinedFields<T extends Record<string, any>>(
+  obj: T
+): T {
+  Object.keys(obj).forEach((key) => {
+    if (obj[key] === undefined) {
+      delete obj[key];
+    }
+  });
+  return obj;
+}

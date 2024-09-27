@@ -26,7 +26,7 @@ export const ConnectBlueskyPage = () => {
 
   const handleConnect = () => {
     if (connect) {
-      connect(username, appPassword);
+      connect(username, appPassword, 'read');
     }
   };
 

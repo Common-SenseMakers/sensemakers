@@ -2472,7 +2472,11 @@ export const getBlueskyMock = (
               'https://media.cosocial.ca/accounts/avatars/111/971/425/782/516/559/original/963c30efd081957e.jpeg',
           },
           read: {
-            appPassword: '',
+            refreshJwt: '',
+            accessJwt: '',
+            handle: '',
+            did: '',
+            active: true,
           },
         };
       }

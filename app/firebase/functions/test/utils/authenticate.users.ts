@@ -1,3 +1,5 @@
+import AtpAgent from '@atproto/api';
+
 import { BlueskyUserDetails } from '../../src/@shared/types/types.bluesky';
 import { NotificationFreq } from '../../src/@shared/types/types.notifications';
 import { TwitterSignupContext } from '../../src/@shared/types/types.twitter';
@@ -8,6 +10,7 @@ import {
   TestUserCredentials,
 } from '../../src/@shared/types/types.user';
 import { TransactionManager } from '../../src/db/transaction.manager';
+import { removeUndefinedFields } from '../../src/platforms/bluesky/bluesky.utils';
 import { getPrefixedUserId } from '../../src/users/users.utils';
 import { handleTwitterSignupMock } from '../__tests__/reusable/mocked.singup';
 import { USE_REAL_TWITTER } from '../__tests__/setup';
@@ -98,6 +101,15 @@ const authenticateBlueskyForUser = async (
   user.platformIds.push(
     getPrefixedUserId(PLATFORM.Bluesky, credentials.bluesky.id)
   );
+  const agent = new AtpAgent({ service: 'https://bsky.social' });
+  await agent.login({
+    identifier: credentials.bluesky.username,
+    password: credentials.bluesky.appPassword,
+  });
+  if (!agent.session) {
+    throw new Error('Failed to login to Bluesky');
+  }
+  const sessionData = removeUndefinedFields(agent.session);
 
   const blueskyUserDetails: BlueskyUserDetails = {
     signupDate: 0,
@@ -108,12 +120,8 @@ const authenticateBlueskyForUser = async (
       name: credentials.bluesky.name,
       avatar: 'https://example.com/avatar.jpg', // You may want to update this with a real avatar URL
     },
-    read: {
-      appPassword: credentials.bluesky.appPassword,
-    },
-    write: {
-      appPassword: credentials.bluesky.appPassword,
-    },
+    read: sessionData,
+    write: sessionData,
   };
 
   user[PLATFORM.Bluesky] = [blueskyUserDetails];
