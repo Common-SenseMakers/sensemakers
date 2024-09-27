@@ -2,6 +2,7 @@ import { Anchor, AnchorExtendedProps, Box } from 'grommet';
 import { useTranslation } from 'react-i18next';
 
 import { I18Keys } from '../../i18n/i18n';
+import { BlueskyThread } from '../../shared/types/types.bluesky';
 import { MastodonThread } from '../../shared/types/types.mastodon';
 import { PlatformPostPosted } from '../../shared/types/types.platform.posts';
 import { TwitterThread } from '../../shared/types/types.twitter';
@@ -56,6 +57,11 @@ export const PlatformPostAnchor = (props: {
       return (props.platformPostPosted.post as MastodonThread).posts.length > 1
         ? t(I18Keys.ThreadMastodon)
         : t(I18Keys.TootMastodon);
+    }
+    if (props.platformId === PLATFORM.Bluesky) {
+      return (props.platformPostPosted.post as BlueskyThread).posts.length > 1
+        ? t(I18Keys.ThreadBluesky)
+        : t(I18Keys.PostBluesky);
     }
   })();
 

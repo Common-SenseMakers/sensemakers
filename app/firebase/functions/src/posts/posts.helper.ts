@@ -1,3 +1,4 @@
+import { BlueskyThread } from '../@shared/types/types.bluesky';
 import { MastodonThread } from '../@shared/types/types.mastodon';
 import {
   PlatformPost,
@@ -77,6 +78,18 @@ export class PostsHelper {
         mastodonThread.posts[0].id
       );
       return newestPostId;
+    }
+    if (platformId === PLATFORM.Bluesky) {
+      const blueskyThread = platformPosted.post as BlueskyThread;
+      const newestPost = blueskyThread.posts.reduce(
+        (acc, post) =>
+          new Date(post.record.createdAt).getTime() >
+          new Date(acc.record.createdAt).getTime()
+            ? post
+            : acc,
+        blueskyThread.posts[0]
+      );
+      return newestPost.uri;
     }
     return platformPosted.post_id;
   }

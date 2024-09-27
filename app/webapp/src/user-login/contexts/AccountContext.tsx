@@ -8,6 +8,7 @@ import {
 } from 'react';
 
 import { _appFetch } from '../../api/app.fetch';
+import { BlueskyUserProfile } from '../../shared/types/types.bluesky';
 import { MastodonUserProfile } from '../../shared/types/types.mastodon';
 import { NotificationFreq } from '../../shared/types/types.notifications';
 import { OrcidUserProfile } from '../../shared/types/types.orcid';
@@ -22,7 +23,7 @@ import {
 import { usePersist } from '../../utils/use.persist';
 import { getAccount } from '../user.helper';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export const OUR_TOKEN_NAME = 'ourToken';
 export const LOGIN_STATUS = 'loginStatus';
@@ -33,6 +34,7 @@ export type AccountContextType = {
   isConnected: boolean;
   twitterProfile?: TwitterUserProfile;
   mastodonProfile?: MastodonUserProfile;
+  blueskyProfile?: BlueskyUserProfile;
   email?: EmailDetails;
   disconnect: () => void;
   refresh: () => void;
@@ -50,6 +52,8 @@ export type AccountContextType = {
   currentNotifications?: NotificationFreq;
   setMastodonConnectedStatus: (status: MastodonConnectedStatus) => void;
   mastodonConnectedStatus: MastodonConnectedStatus | undefined;
+  setBlueskyConnectedStatus: (status: BlueskyConnectedStatus) => void;
+  blueskyConnectedStatus: BlueskyConnectedStatus | undefined;
   orcidProfile?: OrcidUserProfile;
 };
 
@@ -68,6 +72,7 @@ export enum LoginFlowState {
   RegisteringEmail = 'RegisteringEmail',
   ConnectingTwitter = 'ConnectingTwitter',
   ConnectingMastodon = 'ConnectingMastodon',
+  ConnectingBluesky = 'ConnectingBluesky',
   BasicLoggedIn = 'BasicLoggedIn',
   Disconnecting = 'Disconnecting',
 }
@@ -90,6 +95,12 @@ export enum TwitterConnectedStatus {
 }
 
 export enum MastodonConnectedStatus {
+  Disconnected = 'Disconnected',
+  Connecting = 'Connecting',
+  Connected = 'Connected',
+}
+
+export enum BlueskyConnectedStatus {
   Disconnected = 'Disconnected',
   Connecting = 'Connecting',
   Connected = 'Connected',
@@ -122,6 +133,12 @@ export const AccountContext = (props: PropsWithChildren) => {
     usePersist<MastodonConnectedStatus>(
       'MASTODON_LOGIN_STATUS',
       MastodonConnectedStatus.Disconnected
+    );
+
+  const [blueskyConnectedStatus, setBlueskyConnectedStatus] =
+    usePersist<BlueskyConnectedStatus>(
+      'BLUESKY_LOGIN_STATUS',
+      BlueskyConnectedStatus.Disconnected
     );
 
   /** keep the conneccted user linkted to the current token */
@@ -174,8 +191,9 @@ export const AccountContext = (props: PropsWithChildren) => {
     if (connectedUser && connectedUser.email) {
       const hasTwitter = !!getAccount(connectedUser, PLATFORM.Twitter);
       const hasMastodon = !!getAccount(connectedUser, PLATFORM.Mastodon);
+      const hasBluesky = !!getAccount(connectedUser, PLATFORM.Bluesky);
 
-      if (!hasTwitter && !hasMastodon) {
+      if (!hasTwitter && !hasMastodon && !hasBluesky) {
         setOverallLoginStatus(OverallLoginStatus.PartialLoggedIn);
         return;
       }
@@ -186,6 +204,9 @@ export const AccountContext = (props: PropsWithChildren) => {
         }
         if (hasMastodon) {
           setMastodonConnectedStatus(MastodonConnectedStatus.Connected);
+        }
+        if (hasBluesky) {
+          setBlueskyConnectedStatus(BlueskyConnectedStatus.Connected);
         }
         // Don't automatically set to FullyLoggedIn here
         // It will be set when the user clicks "Continue" in ConnectSocialsPage
@@ -232,6 +253,16 @@ export const AccountContext = (props: PropsWithChildren) => {
     return profile;
   }, [connectedUser]);
 
+  const blueskyProfile = useMemo(() => {
+    const profile = connectedUser
+      ? getAccount(connectedUser, PLATFORM.Bluesky)?.profile
+      : undefined;
+
+    if (DEBUG) console.log('blueskyProfile', { profile });
+
+    return profile;
+  }, [connectedUser]);
+
   const orcid = useMemo(() => {
     const profile = connectedUser
       ? getAccount<OrcidUserProfile>(connectedUser, PLATFORM.Orcid)
@@ -255,6 +286,7 @@ export const AccountContext = (props: PropsWithChildren) => {
         connectedUser: connectedUser === null ? undefined : connectedUser,
         twitterProfile,
         mastodonProfile,
+        blueskyProfile,
         email,
         isConnected: connectedUser !== undefined && connectedUser !== null,
         disconnect,
@@ -273,6 +305,8 @@ export const AccountContext = (props: PropsWithChildren) => {
         currentNotifications,
         setMastodonConnectedStatus,
         mastodonConnectedStatus,
+        setBlueskyConnectedStatus,
+        blueskyConnectedStatus,
       }}>
       {props.children}
     </AccountContextValue.Provider>

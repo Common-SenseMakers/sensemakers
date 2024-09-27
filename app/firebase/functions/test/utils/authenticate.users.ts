@@ -1,3 +1,6 @@
+import AtpAgent from '@atproto/api';
+
+import { BlueskyUserDetails } from '../../src/@shared/types/types.bluesky';
 import { NotificationFreq } from '../../src/@shared/types/types.notifications';
 import { TwitterSignupContext } from '../../src/@shared/types/types.twitter';
 import {
@@ -7,6 +10,7 @@ import {
   TestUserCredentials,
 } from '../../src/@shared/types/types.user';
 import { TransactionManager } from '../../src/db/transaction.manager';
+import { removeUndefinedFields } from '../../src/platforms/bluesky/bluesky.utils';
 import { getPrefixedUserId } from '../../src/users/users.utils';
 import { handleTwitterSignupMock } from '../__tests__/reusable/mocked.singup';
 import { USE_REAL_TWITTER } from '../__tests__/setup';
@@ -56,9 +60,71 @@ export const authenticateTestUser = async (
     user = await authenticateNanopubForUser(credentials, user);
   }
 
+  if (!excludePlatforms.includes(PLATFORM.Bluesky)) {
+    user = await authenticateBlueskyForUser(
+      credentials,
+      services,
+      manager,
+      user
+    );
+  }
+
   if (!user) {
     throw new Error('No platforms were authenticated');
   }
+
+  return user;
+};
+
+const authenticateBlueskyForUser = async (
+  credentials: TestUserCredentials,
+  services: TestServices,
+  manager: TransactionManager,
+  user?: AppUser
+): Promise<AppUser> => {
+  if (!user) {
+    user = {
+      userId: getPrefixedUserId(PLATFORM.Bluesky, credentials.bluesky.id),
+      platformIds: [],
+      settings: {
+        autopost: {
+          [PLATFORM.Nanopub]: {
+            value: AutopostOption.MANUAL,
+          },
+        },
+        notificationFreq: NotificationFreq.Daily,
+      },
+      signupDate: Date.now(),
+    };
+  }
+
+  user.platformIds.push(
+    getPrefixedUserId(PLATFORM.Bluesky, credentials.bluesky.id)
+  );
+  const agent = new AtpAgent({ service: 'https://bsky.social' });
+  await agent.login({
+    identifier: credentials.bluesky.username,
+    password: credentials.bluesky.appPassword,
+  });
+  if (!agent.session) {
+    throw new Error('Failed to login to Bluesky');
+  }
+  const sessionData = removeUndefinedFields(agent.session);
+
+  const blueskyUserDetails: BlueskyUserDetails = {
+    signupDate: 0,
+    user_id: credentials.bluesky.id,
+    profile: {
+      id: credentials.bluesky.id,
+      username: credentials.bluesky.username,
+      name: credentials.bluesky.name,
+      avatar: 'https://example.com/avatar.jpg', // You may want to update this with a real avatar URL
+    },
+    read: sessionData,
+    write: sessionData,
+  };
+
+  user[PLATFORM.Bluesky] = [blueskyUserDetails];
 
   return user;
 };

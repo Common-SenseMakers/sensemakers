@@ -19,8 +19,7 @@ export const AppHome = () => {
     overallLoginStatus,
     twitterProfile,
     mastodonProfile,
-    twitterConnectedStatus,
-    mastodonConnectedStatus,
+    blueskyProfile,
   } = useAccountContext();
 
   const LoadingPlaceholder = (
@@ -43,6 +42,7 @@ export const AppHome = () => {
         overallLoginStatus,
         twitterProfile,
         mastodonProfile,
+        blueskyProfile,
       });
 
     if (overallLoginStatus === OverallLoginStatus.NotKnown) {
@@ -67,7 +67,5 @@ export const AppHome = () => {
     return { content: LoadingPlaceholder, nav: undefined };
   })();
 
-  return (
-    <ViewportPage content={content} nav={nav} justify="start" />
-  );
+  return <ViewportPage content={content} nav={nav} justify="start" />;
 };

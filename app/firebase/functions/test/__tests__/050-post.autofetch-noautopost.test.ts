@@ -82,7 +82,7 @@ describe('050-autofetch-no-autopost', () => {
         user.userId,
         {
           status: PostsQueryStatus.DRAFTS,
-          fetchParams: { expectedAmount: TEST_THREADS.length + 1 + 6 },
+          fetchParams: { expectedAmount: 30 },
         }
       );
       expect(

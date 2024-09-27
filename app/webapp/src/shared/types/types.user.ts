@@ -1,3 +1,4 @@
+import { BlueskyUserDetails } from './types.bluesky';
 import { MastodonUserDetails } from './types.mastodon';
 import { NanopubUserDetails } from './types.nanopubs';
 import { NotificationFreq } from './types.notifications';
@@ -18,30 +19,35 @@ export enum PLATFORM {
   Twitter = 'twitter',
   Nanopub = 'nanopub',
   Mastodon = 'mastodon',
+  Bluesky = 'bluesky',
 }
 
 export type PUBLISHABLE_PLATFORMS =
   | PLATFORM.Twitter
   | PLATFORM.Nanopub
-  | PLATFORM.Mastodon;
+  | PLATFORM.Mastodon
+  | PLATFORM.Bluesky;
 
 export const ALL_PUBLISH_PLATFORMS: PUBLISHABLE_PLATFORMS[] = [
   PLATFORM.Twitter,
   PLATFORM.Nanopub,
   PLATFORM.Mastodon,
+  PLATFORM.Bluesky,
 ];
 
 export type IDENTITY_PLATFORMS =
   | PLATFORM.Orcid
   | PLATFORM.Twitter
   | PLATFORM.Nanopub
-  | PLATFORM.Mastodon;
+  | PLATFORM.Mastodon
+  | PLATFORM.Bluesky;
 
 export const ALL_IDENTITY_PLATFORMS: IDENTITY_PLATFORMS[] = [
   PLATFORM.Twitter,
   PLATFORM.Nanopub,
   PLATFORM.Orcid,
   PLATFORM.Mastodon,
+  PLATFORM.Bluesky,
 ];
 
 /** The user details has, for each PLATFORM, a details object
@@ -129,6 +135,7 @@ export interface AppUser
   [PLATFORM.Twitter]?: TwitterUserDetails[];
   [PLATFORM.Nanopub]?: NanopubUserDetails[];
   [PLATFORM.Mastodon]?: MastodonUserDetails[];
+  [PLATFORM.Bluesky]?: BlueskyUserDetails[];
 }
 
 export type AppUserCreate = Omit<AppUser, 'userId'>;
@@ -149,6 +156,7 @@ export interface AppUserRead extends UserWithId, UserWithSettings {
   [PLATFORM.Twitter]?: AccountDetailsRead<TwitterUserDetails['profile']>[];
   [PLATFORM.Nanopub]?: AccountDetailsRead<NanopubUserDetails['profile']>[];
   [PLATFORM.Mastodon]?: AccountDetailsRead<MastodonUserDetails['profile']>[];
+  [PLATFORM.Bluesky]?: AccountDetailsRead<BlueskyUserDetails['profile']>[];
 }
 
 /** Support collection with all the profiles from all platforms */
@@ -164,6 +172,7 @@ export interface TestUserCredentials {
   userId: string;
   twitter: TwitterAccountCredentials;
   mastodon: MastodonAccountCredentials;
+  bluesky: BlueskyAccountCredentials;
   nanopub: NanopubAccountCredentials;
 }
 
@@ -174,6 +183,13 @@ export interface MastodonAccountCredentials {
   mastodonServer: string;
   accessToken: string;
   type: 'read' | 'write';
+}
+
+export interface BlueskyAccountCredentials {
+  id: string;
+  username: string;
+  name: string;
+  appPassword: string;
 }
 
 export interface TwitterAccountCredentials {

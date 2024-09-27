@@ -22,7 +22,7 @@ const PAGE_SIZE = 5;
 const DEBUG = true;
 
 export const usePostsFetch = () => {
-  const { connectedUser, twitterProfile, mastodonProfile } =
+  const { connectedUser, twitterProfile, mastodonProfile, blueskyProfile } =
     useAccountContext();
 
   const appFetch = useAppFetch();
@@ -188,7 +188,7 @@ export const usePostsFetch = () => {
     if (
       posts.length === 0 &&
       !fetchedOlderFirst &&
-      (twitterProfile || mastodonProfile)
+      (twitterProfile || mastodonProfile || blueskyProfile)
     ) {
       if (DEBUG) console.log('first fetch older');
       _fetchOlder(undefined);
@@ -196,7 +196,7 @@ export const usePostsFetch = () => {
   }, [posts, fetchedOlderFirst, connectedUser]);
 
   useEffect(() => {
-    if (posts.length > 0 && twitterProfile && mastodonProfile) {
+    if (posts.length > 0) {
       if (DEBUG) console.log('first fetch older with new platform added');
       reset();
       _fetchOlder(undefined);

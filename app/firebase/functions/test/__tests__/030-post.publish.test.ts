@@ -26,6 +26,7 @@ import {
 } from './reusable/create-post-fetch';
 import {
   TEST_THREADS,
+  USE_REAL_BLUESKY,
   USE_REAL_MASTODON,
   USE_REAL_NANOPUB,
   USE_REAL_PARSER,
@@ -45,6 +46,9 @@ describe('030-process', () => {
     twitter: USE_REAL_TWITTER
       ? undefined
       : { publish: true, signup: true, fetch: true },
+    bluesky: USE_REAL_BLUESKY
+      ? undefined
+      : { publish: true, signup: true, fetch: true, get: true },
     mastodon: USE_REAL_MASTODON
       ? undefined
       : { publish: true, signup: true, fetch: true },
@@ -93,7 +97,7 @@ describe('030-process', () => {
         user.userId,
         {
           status: PostsQueryStatus.PENDING,
-          fetchParams: { expectedAmount: 10 },
+          fetchParams: { expectedAmount: 30 },
         }
       );
       const pendingPosts = allPendingPosts.filter(
@@ -185,7 +189,7 @@ describe('030-process', () => {
         user.userId,
         {
           status: PostsQueryStatus.PENDING,
-          fetchParams: { expectedAmount: 10 },
+          fetchParams: { expectedAmount: 30 },
         }
       );
       const pendingPosts = allPendingPosts.filter(
@@ -272,7 +276,7 @@ describe('030-process', () => {
         user.userId,
         {
           status: PostsQueryStatus.PUBLISHED,
-          fetchParams: { expectedAmount: 10 },
+          fetchParams: { expectedAmount: 30 },
         }
       );
 
@@ -380,7 +384,7 @@ describe('030-process', () => {
         user.userId,
         {
           status: PostsQueryStatus.PUBLISHED,
-          fetchParams: { expectedAmount: 10 },
+          fetchParams: { expectedAmount: 30 },
         }
       );
 
