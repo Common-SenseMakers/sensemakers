@@ -14,6 +14,7 @@ const DEBUG = false;
 
 export const AppLabelsEditor = (props: {
   labels: string[];
+  maxLabels?: number;
   options?: string[];
   addLabel?: (label: string) => void;
   removeLabel?: (label: string) => void;
@@ -105,6 +106,15 @@ export const AppLabelsEditor = (props: {
     setInput(input);
   };
 
+  const hasManyLabels =
+    props.maxLabels !== undefined && props.labels.length >= props.maxLabels;
+  const visibleLables =
+    props.maxLabels !== undefined
+      ? props.labels.slice(0, props.maxLabels)
+      : props.labels;
+  const nonVisibleLabels =
+    props.maxLabels !== undefined ? props.labels.slice(props.maxLabels) : [];
+
   const showCreator = !onlyOptions && input;
   const showOptions = onlyOptions && adding;
 
@@ -174,8 +184,8 @@ export const AppLabelsEditor = (props: {
         position: 'relative',
       }}>
       <Box style={{ display: 'block' }}>
-        {props.labels.map((label, ix) => {
-          const marginRight = ix < props.labels.length - 1 ? 'small' : '0';
+        {visibleLables.map((label, ix) => {
+          const marginRight = ix < visibleLables.length - 1 ? 'small' : '0';
           return (
             <Box
               key={ix}
@@ -191,6 +201,17 @@ export const AppLabelsEditor = (props: {
             </Box>
           );
         })}
+        {hasManyLabels && !adding ? (
+          <Box style={{ display: 'block', float: 'left', paddingTop: '5.5px' }}>
+            <AppLabel
+              colors={colors}
+              margin={{ left: 'small', bottom: 'xsmall' }}>
+              {`+${nonVisibleLabels.length}`}
+            </AppLabel>
+          </Box>
+        ) : (
+          <></>
+        )}
         <Box
           style={{
             display: 'block',
