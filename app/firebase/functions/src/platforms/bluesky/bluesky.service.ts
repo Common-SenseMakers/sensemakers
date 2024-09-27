@@ -158,9 +158,11 @@ export class BlueskyService
         filter: 'posts_and_author_threads',
       });
 
-      const posts = response.data.feed.map(
-        (item) => item.post
-      ) as BlueskyPost[];
+      const posts = response.data.feed
+        .map((item) => item.post)
+        .filter(
+          (post) => post.author.did === userDetails.user_id
+        ) as BlueskyPost[];
       if (posts.length === 0) break;
 
       allPosts.push(...posts);
