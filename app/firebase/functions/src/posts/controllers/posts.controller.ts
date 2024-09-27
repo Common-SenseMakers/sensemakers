@@ -45,7 +45,7 @@ export const getUserPostsController: RequestHandler = async (
     const userId = getAuthenticatedUser(request, true);
     const { postsManager } = getServices(request);
 
-    const posts = await postsManager.getOfUser(userId, queryParams);
+    const posts = await postsManager.getOfUser({ ...queryParams, userId });
 
     if (DEBUG) logger.debug(`${request.path}: posts`, { posts, userId });
     response.status(200).send({ success: true, data: posts });

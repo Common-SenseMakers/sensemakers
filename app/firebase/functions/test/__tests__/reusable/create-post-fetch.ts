@@ -105,7 +105,10 @@ export const _03_fetchAfterPublish = async (
   await fetchPostsInTests(userId, { expectedAmount: 10 }, services);
 
   /** read user post */
-  const postsRead = await services.postsManager.getOfUser(userId);
+  const postsRead = await services.postsManager.getOfUser({
+    userId,
+    fetchParams: { expectedAmount: 10 },
+  });
 
   expect(postsRead).to.not.be.undefined;
 

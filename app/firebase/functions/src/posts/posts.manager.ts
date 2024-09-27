@@ -403,26 +403,35 @@ export class PostsManager {
   }
 
   /** get AppPost and fetch for new posts if necessary */
-  private async getAndFetchIfNecessary(
-    userId: string,
-    queryParams: PostsQuery
-  ) {
+  private async getAndFetchIfNecessary(queryParams: PostsQuery) {
     /** if sinceId is provided fetch forward always */
     if (queryParams.fetchParams.sinceId !== undefined) {
       /** fetch platforms for new PlatformPosts */
-      await this.fetchUser({ userId, params: queryParams.fetchParams });
-      return this.processing.posts.getMany({ ...queryParams, userId });
+      await this.fetchUser({
+        userId: queryParams.userId,
+        params: queryParams.fetchParams,
+      });
+      return this.processing.posts.getMany({
+        ...queryParams,
+        userId: queryParams.userId,
+      });
     } else {
       /** if untilId fetch backwards but only if not enough posts are already stored */
       const appPosts = await this.processing.posts.getMany({
         ...queryParams,
-        userId,
+        userId: queryParams.userId,
       });
 
       if (queryParams.status === PostsQueryStatus.DRAFTS) {
         if (appPosts.length < queryParams.fetchParams.expectedAmount) {
-          await this.fetchUser({ userId, params: queryParams.fetchParams });
-          return this.processing.posts.getMany({ ...queryParams, userId });
+          await this.fetchUser({
+            userId: queryParams.userId,
+            params: queryParams.fetchParams,
+          });
+          return this.processing.posts.getMany({
+            ...queryParams,
+            userId: queryParams.userId,
+          });
         }
       }
       return appPosts;
@@ -432,21 +441,24 @@ export class PostsManager {
   /** Get posts AppPostFull of user, cannot be part of a transaction
    * We trigger fetching posts from the platforms from here
    */
-  async getOfUser(userId: string, _queryParams?: PostsQuery) {
+  async getOfUser(_queryParams: PostsQuery) {
+    if (!_queryParams.userId) {
+      throw new Error('userId is required');
+    }
+
     const queryParams: PostsQuery = {
-      fetchParams: { expectedAmount: 10 },
       status: PostsQueryStatus.DRAFTS,
       ..._queryParams,
     };
 
-    const appPosts = await this.getAndFetchIfNecessary(userId, queryParams);
+    const appPosts = await this.getAndFetchIfNecessary(queryParams);
 
     const postsFull = await Promise.all(
       appPosts.map((post) => this.appendMirrors(post))
     );
 
     logger.debug(
-      `getOfUser query for user ${userId} has ${appPosts.length} results for query params: `,
+      `getOfUser query for user ${queryParams.userId} has ${appPosts.length} results for query params: `,
       { queryParams }
     );
     return postsFull;
