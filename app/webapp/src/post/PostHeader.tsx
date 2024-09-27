@@ -2,6 +2,7 @@ import { Box, BoxExtendedProps, Text } from 'grommet';
 
 import { PlatformPostAnchor } from '../app/anchors/PlatformPostAnchor';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
+import { BlueskyUserProfile } from '../shared/types/types.bluesky';
 import { MastodonUserProfile } from '../shared/types/types.mastodon';
 import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { AccountDetailsRead, PLATFORM } from '../shared/types/types.user';
@@ -28,6 +29,9 @@ export const PostHeader = (
     }
     if (post?.origin === PLATFORM.Mastodon) {
       return (props.profile?.profile as MastodonUserProfile)?.avatar;
+    }
+    if (post?.origin === PLATFORM.Bluesky) {
+      return (props.profile?.profile as BlueskyUserProfile)?.avatar;
     }
     return undefined;
   })();
