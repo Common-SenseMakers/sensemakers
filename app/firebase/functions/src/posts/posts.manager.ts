@@ -23,8 +23,8 @@ import {
   AppPostRepublishedStatus,
   AppPostReviewStatus,
   PostUpdate,
+  PostsQuery,
   PostsQueryStatus,
-  UserPostsQuery,
 } from '../@shared/types/types.posts';
 import {
   ALL_PUBLISH_PLATFORMS,
@@ -405,21 +405,24 @@ export class PostsManager {
   /** get AppPost and fetch for new posts if necessary */
   private async getAndFetchIfNecessary(
     userId: string,
-    queryParams: UserPostsQuery
+    queryParams: PostsQuery
   ) {
     /** if sinceId is provided fetch forward always */
     if (queryParams.fetchParams.sinceId !== undefined) {
       /** fetch platforms for new PlatformPosts */
       await this.fetchUser({ userId, params: queryParams.fetchParams });
-      return this.processing.posts.getMany(userId, queryParams);
+      return this.processing.posts.getMany({ ...queryParams, userId });
     } else {
       /** if untilId fetch backwards but only if not enough posts are already stored */
-      const appPosts = await this.processing.posts.getMany(userId, queryParams);
+      const appPosts = await this.processing.posts.getMany({
+        ...queryParams,
+        userId,
+      });
 
       if (queryParams.status === PostsQueryStatus.DRAFTS) {
         if (appPosts.length < queryParams.fetchParams.expectedAmount) {
           await this.fetchUser({ userId, params: queryParams.fetchParams });
-          return this.processing.posts.getMany(userId, queryParams);
+          return this.processing.posts.getMany({ ...queryParams, userId });
         }
       }
       return appPosts;
@@ -429,8 +432,8 @@ export class PostsManager {
   /** Get posts AppPostFull of user, cannot be part of a transaction
    * We trigger fetching posts from the platforms from here
    */
-  async getOfUser(userId: string, _queryParams?: UserPostsQuery) {
-    const queryParams: UserPostsQuery = {
+  async getOfUser(userId: string, _queryParams?: PostsQuery) {
+    const queryParams: PostsQuery = {
       fetchParams: { expectedAmount: 10 },
       status: PostsQueryStatus.DRAFTS,
       ..._queryParams,
@@ -927,7 +930,8 @@ export class PostsManager {
         );
       } else {
         /** if not labels, get all published posts */
-        return this.processing.posts.getOfUser(userId, {
+        return this.processing.posts.getMany({
+          userId,
           status: PostsQueryStatus.PUBLISHED,
           fetchParams,
         });

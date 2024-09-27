@@ -301,7 +301,7 @@ export class PostsProcessing {
       if (q.predicate.value === 'https://schema.org/keywords') {
         keywords.add(q.object.value);
       } else {
-        labels.add(q.object.value);
+        labels.add(q.predicate.value);
       }
     });
 

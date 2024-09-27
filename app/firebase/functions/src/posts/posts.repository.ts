@@ -10,7 +10,6 @@ import {
   PostUpdate,
   PostsQuery,
   PostsQueryStatus,
-  UserPostsQuery,
 } from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
 import { BaseRepository, removeUndefined } from '../db/repo.base';
@@ -93,7 +92,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     const semanticsFiltered = (() => {
       let filtered = statusFiltered;
 
-      if (queryParams.keywords) {
+      if (queryParams.keywords && queryParams.keywords.length > 0) {
         filtered = statusFiltered.where(
           keywordsKey,
           'array-contains-any',
@@ -101,7 +100,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
         );
       }
 
-      if (queryParams.labels) {
+      if (queryParams.labels && queryParams.labels.length > 0) {
         filtered = statusFiltered.where(
           labelsKey,
           'array-contains-any',
@@ -111,8 +110,6 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
       return filtered;
     })();
-
-    WIP;
 
     /** get the sinceCreatedAt and untilCreatedAt timestamps from the elements ids */
     const { sinceCreatedAt, untilCreatedAt } = await (async () => {

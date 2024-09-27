@@ -6,9 +6,9 @@ import {
 } from '../../@shared/types/types.fetch';
 import {
   PostUpdatePayload,
+  PostsQuery,
   ProfilePostsQuery,
   UnpublishPlatformPostPayload,
-  UserPostsQuery,
 } from '../../@shared/types/types.posts';
 import { IS_EMULATOR } from '../../config/config.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
@@ -39,7 +39,7 @@ export const getUserPostsController: RequestHandler = async (
   try {
     const queryParams = (await getUserPostsQuerySchema.validate(
       request.body
-    )) as UserPostsQuery;
+    )) as PostsQuery;
 
     logger.debug(`${request.path} - query parameters`, { queryParams });
     const userId = getAuthenticatedUser(request, true);

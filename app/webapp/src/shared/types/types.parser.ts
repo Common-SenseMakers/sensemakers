@@ -17,8 +17,8 @@ export interface ParsePostRequest<P> {
 
 export type AppPostSemantics = string;
 export interface StructuredSemantics {
-  labels: string[];
-  keywords: string[];
+  labels?: string[];
+  keywords?: string[];
 }
 
 export interface OntologyItem {
