@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { AppLogo } from '../app/brand/AppLogo';
-import { MastodonIcon, TwitterIcon } from '../app/common/Icons';
+import { BlueskyIcon, MastodonIcon, TwitterIcon } from '../app/common/Icons';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { I18Keys } from '../i18n/i18n';
 import { RouteNames } from '../route.names';
@@ -92,7 +92,7 @@ export const ConnectSocialsPage = () => {
                 blueskyProfile ? (
                   <PlatformAvatar profileImageUrl={blueskyProfile?.avatar} />
                 ) : (
-                  <div>Bluesky</div> // Placeholder for Bluesky icon
+                  <BlueskyIcon size={40} color="white"></BlueskyIcon>
                 )
               }
               platformName={'Bluesky'}

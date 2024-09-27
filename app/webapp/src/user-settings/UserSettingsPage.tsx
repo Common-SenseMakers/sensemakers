@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
-import { MastodonIcon, TwitterIcon } from '../app/common/Icons';
+import { BlueskyIcon, MastodonIcon, TwitterIcon } from '../app/common/Icons';
 import { AutopostIcon } from '../app/icons/AutopostIcon';
 import { BellIcon } from '../app/icons/BellIcon';
 import { EmailIcon } from '../app/icons/EmailIcon';
@@ -338,7 +338,7 @@ export const UserSettingsPage = () => {
             blueskyProfile ? (
               <PlatformAvatar profileImageUrl={blueskyProfile?.avatar} />
             ) : (
-              <div>Bluesky</div> // Placeholder for Bluesky icon
+              <BlueskyIcon size={40} color="white"></BlueskyIcon>
             )
           }
           platformName={'Bluesky'}

@@ -53,3 +53,37 @@ export const MastodonIcon = (
     </Box>
   );
 };
+
+export const BlueskyIcon = (
+  props: {
+    size?: number;
+    color?: 'blue' | 'white';
+  } & BoxExtendedProps
+) => {
+  const color = props.color || 'white';
+  const size = props.size || 20;
+
+  return (
+    <Box
+      height={`${size}px`}
+      width={`${size}px`}
+      align="center"
+      justify="center"
+      style={{
+        borderRadius: `${size / 2}px`,
+        backgroundColor: 'black',
+      }}>
+      <Image
+        src={`/icons/bluesky.png`}
+        height={`${size * 0.6}px`}
+        style={
+          color === 'white'
+            ? {
+                filter: 'brightness(0) invert(1)', // Invert colors to make the image white
+              }
+            : {}
+        }
+      />
+    </Box>
+  );
+};
