@@ -15,12 +15,7 @@ if (process.env.LOG_LEVEL_MSG && process.env.LOG_LEVEL_OBJ) {
   (logger as LocalLogger).ctxLevel = process.env.LOG_LEVEL_OBJ as LogLevel;
 }
 
-const mandatory = [
-  'FB_CERT_PATH_SOURCE',
-  'FB_PROJECT_ID_SOURCE',
-  'FB_CERT_PATH_TARGET',
-  'FB_PROJECT_ID_TARGET',
-];
+const mandatory: string[] = [];
 
 mandatory.forEach((varName) => {
   if (!process.env[varName]) {
@@ -35,8 +30,8 @@ const projectIdTarget = process.env.FB_PROJECT_ID_TARGET;
 const certPathSource = process.env.FB_CERT_PATH_SOURCE;
 const certPathTarget = process.env.FB_CERT_PATH_TARGET;
 
-const serviceAccountSource = require('../' + certPathSource);
-const serviceAccountTarget = require('../' + certPathTarget);
+const serviceAccountSource = certPathSource && require('../' + certPathSource);
+const serviceAccountTarget = certPathTarget && require('../' + certPathTarget);
 
 logger.info('Running in local mode with certificate', {
   projectIdSource,
@@ -64,17 +59,21 @@ const initApp = (config: AppOptions, name: string) => {
 };
 
 export const appSource = initApp(
-  {
-    projectId: projectIdSource,
-    credential: admin.credential.cert(serviceAccountSource),
-  },
+  serviceAccountSource
+    ? {
+        projectId: projectIdSource,
+        credential: admin.credential.cert(serviceAccountSource),
+      }
+    : { projectId: projectIdSource },
   'source'
 );
 export const appTarget = initApp(
-  {
-    projectId: projectIdTarget,
-    credential: admin.credential.cert(serviceAccountTarget),
-  },
+  serviceAccountTarget
+    ? {
+        projectId: projectIdTarget,
+        credential: admin.credential.cert(serviceAccountTarget),
+      }
+    : { projectId: projectIdTarget },
   'target'
 );
 
