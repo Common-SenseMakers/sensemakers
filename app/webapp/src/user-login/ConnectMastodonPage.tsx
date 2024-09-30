@@ -17,8 +17,10 @@ export const ConnectMastodonPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { connect, error } = useMastodonContext();
-  const { mastodonProfile } = useAccountContext();
+  const { connectedUser } = useAccountContext();
   const [mastodonServer, setMastodonServer] = useState('');
+
+  const mastodonProfile = connectedUser?.profiles?.mastodon;
 
   useEffect(() => {
     if (mastodonProfile) {

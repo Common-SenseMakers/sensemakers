@@ -212,8 +212,9 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       <>
         <Box pad="medium">
           <PostHeader
-            profile={getAccount(connectedUser, merged.post.origin)}
-            margin={{ bottom: '16px' }}></PostHeader>
+            name="Name"
+            imageUrl="https://avatars.githubusercontent.com/u/1407693?v=4"
+            boxProps={{ margin: { bottom: '16px' } }}></PostHeader>
           {!hideSemantics && (
             <SemanticsEditor
               patternProps={patternProps}

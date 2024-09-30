@@ -46,8 +46,13 @@ export type AccountContextType = {
   resetLogin: () => void;
   currentAutopost?: AutopostOption;
   currentNotifications?: NotificationFreq;
-  setPlatformsConnectedStatus: (status: PlatformsConnectedStatus) => void;
-  platformsConnectedStatus?: PlatformsConnectedStatus;
+  setPlatformConnectedStatus: (
+    platform: PLATFORM,
+    status: PlatformConnectedStatus
+  ) => void;
+  getPlatformConnectedStatus: (
+    platformId: PLATFORM
+  ) => PlatformConnectedStatus | undefined;
 };
 
 const AccountContextValue = createContext<AccountContextType | undefined>(
@@ -285,6 +290,22 @@ export const AccountContext = (props: PropsWithChildren) => {
 
   const email = connectedUser ? connectedUser.email : undefined;
 
+  const setPlatformConnectedStatus = (
+    platformId: PLATFORM,
+    status: PlatformConnectedStatus
+  ) => {
+    setPlatformsConnectedStatus({
+      ...platformsConnectedStatus,
+      [platformId]: status,
+    });
+  };
+
+  const getPlatformConnectedStatus = (
+    platformId: PLATFORM
+  ): PlatformConnectedStatus | undefined => {
+    return platformsConnectedStatus && platformsConnectedStatus[platformId];
+  };
+
   return (
     <AccountContextValue.Provider
       value={{
@@ -302,8 +323,8 @@ export const AccountContext = (props: PropsWithChildren) => {
         resetLogin,
         currentAutopost,
         currentNotifications,
-        setPlatformsConnectedStatus,
-        platformsConnectedStatus,
+        setPlatformConnectedStatus,
+        getPlatformConnectedStatus,
       }}>
       {props.children}
     </AccountContextValue.Provider>

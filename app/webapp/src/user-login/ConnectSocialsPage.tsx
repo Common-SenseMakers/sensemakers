@@ -20,12 +20,14 @@ import { useTwitterContext } from './contexts/platforms/TwitterContext';
 
 export const ConnectSocialsPage = () => {
   const { t } = useTranslation();
-  const { twitterProfile, mastodonProfile, setOverallLoginStatus } =
-    useAccountContext();
+  const { connectedUser, setOverallLoginStatus } = useAccountContext();
   const { connect: connectTwitter } = useTwitterContext();
   const { connect: connectMastodon, error: mastodonError } =
     useMastodonContext();
   const navigate = useNavigate();
+
+  const twitterProfile = connectedUser?.profiles?.twitter;
+  const mastodonProfile = connectedUser?.profiles?.mastodon;
 
   const handleContinue = () => {
     if (twitterProfile || mastodonProfile) {
