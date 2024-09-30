@@ -1,3 +1,4 @@
+import { StructuredSemantics } from '../@shared/types/types.parser';
 import {
   PlatformPost,
   PlatformPostCreate,
@@ -264,36 +265,50 @@ export class PostsProcessing {
     return drafts.flat();
   }
 
-  async upsertTriples(
+  async processSemantics(
     postId: string,
     manager: TransactionManager,
     semantics?: string
-  ) {
+  ): Promise<StructuredSemantics | undefined> {
     /** always delete old triples */
     await this.triples.deleteOfPost(postId, manager);
 
-    if (semantics) {
-      const post = await this.posts.get(postId, manager, true);
-      const store = await parseRDF(semantics);
+    if (!semantics) return undefined;
 
-      const createdAtMs = post.createdAtMs;
-      const authorId = post.authorId;
+    const post = await this.posts.get(postId, manager, true);
+    const store = await parseRDF(semantics);
 
+    const createdAtMs = post.createdAtMs;
+    const authorId = post.authorId;
+
+    const labels: Set<string> = new Set();
+    const keywords: Set<string> = new Set();
+
+    mapStoreElements(store, (q) => {
       /** store the triples */
-      mapStoreElements(store, (q) => {
-        this.triples.create(
-          {
-            postId,
-            createdAtMs,
-            authorId,
-            subject: q.subject.value,
-            predicate: q.predicate.value,
-            object: q.object.value,
-          },
-          manager
-        );
-      });
-    }
+      this.triples.create(
+        {
+          postId,
+          postCreatedAtMs: createdAtMs,
+          authorId,
+          subject: q.subject.value,
+          predicate: q.predicate.value,
+          object: q.object.value,
+        },
+        manager
+      );
+
+      if (q.predicate.value === 'https://schema.org/keywords') {
+        keywords.add(q.object.value);
+      } else {
+        labels.add(q.predicate.value);
+      }
+    });
+
+    return {
+      labels: Array.from(labels),
+      keywords: Array.from(keywords),
+    };
   }
 
   async createAppPost(

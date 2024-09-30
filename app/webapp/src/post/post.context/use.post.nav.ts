@@ -13,10 +13,10 @@ export interface PostNavContext {
 
 export const usePostNav = (fetched: PostFetchContext): PostNavContext => {
   const navigate = useNavigate();
-  const { getNextAndPrev } = useUserPosts();
+  const { feed } = useUserPosts();
 
   const { prevPostId, nextPostId } = useMemo(
-    () => getNextAndPrev(fetched.postId),
+    () => feed.getNextAndPrev(fetched.postId),
     [fetched.post]
   );
 

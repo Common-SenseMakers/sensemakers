@@ -83,7 +83,10 @@ describe.skip('051-autofetch-autopost', () => {
       await triggerAutofetchPosts(globalTestServices);
 
       /** read user posts */
-      const postsRead = await services.postsManager.getOfUser(user.userId);
+      const postsRead = await services.postsManager.getOfUser({
+        userId: user.userId,
+        fetchParams: { expectedAmount: 10 },
+      });
       expect(postsRead).to.have.length(TEST_THREADS.length + 1);
 
       const postOfThread2 = postsRead.find((p) =>

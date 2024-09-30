@@ -76,6 +76,8 @@ export const mochaHooks = (): Mocha.RootHookObject => {
         );
       });
 
+      testUsers.sort((a, b) => a.userId.localeCompare(b.userId));
+
       Object.assign(this, context);
     },
   };

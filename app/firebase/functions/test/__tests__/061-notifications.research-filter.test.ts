@@ -26,6 +26,7 @@ import {
   USE_REAL_TWITTER,
   testUsers,
 } from './setup';
+import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
 const fetchAndGetNotifications = async (
@@ -84,7 +85,7 @@ describe('061 parse tweet, ', () => {
     describe('manual no-notifications', async () => {
       before(async () => {
         logger.debug('resetting DB');
-        await resetDB();
+        await resetDB([[''], [''], [''], [''], ['']], [testCredentials[0]]);
 
         const users = await services.db.run((manager) => {
           return createUsers(services, testUsers, manager);
@@ -98,6 +99,10 @@ describe('061 parse tweet, ', () => {
               '1753077743816777728'
             ) !== undefined
         );
+
+        if (!user) {
+          throw new Error('user not created');
+        }
 
         await updateUserSettings(
           services,
@@ -161,7 +166,7 @@ describe('061 parse tweet, ', () => {
     describe('manual daily-notifications', async () => {
       before(async () => {
         logger.debug('resetting DB');
-        await resetDB();
+        await resetDB([[''], [''], [''], [''], ['']], [testCredentials[0]]);
 
         const users = await services.db.run((manager) => {
           return createUsers(services, testUsers, manager);
@@ -174,6 +179,10 @@ describe('061 parse tweet, ', () => {
               '1753077743816777728'
             ) !== undefined
         );
+
+        if (!user) {
+          throw new Error('user not created');
+        }
 
         await updateUserSettings(
           services,
@@ -237,7 +246,7 @@ describe('061 parse tweet, ', () => {
     describe('autopost daily-notifications', async () => {
       before(async () => {
         logger.debug('resetting DB');
-        await resetDB();
+        await resetDB([[''], [''], [''], [''], ['']], [testCredentials[0]]);
 
         const users = await services.db.run((manager) => {
           return createUsers(services, testUsers, manager);
@@ -251,6 +260,10 @@ describe('061 parse tweet, ', () => {
               '1753077743816777728'
             ) !== undefined
         );
+
+        if (!user) {
+          throw new Error('user not created');
+        }
 
         await updateUserSettings(
           services,

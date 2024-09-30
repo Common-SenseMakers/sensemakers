@@ -7,7 +7,11 @@ import {
   PlatformPostDraft,
 } from '../../shared/types/types.platform.posts';
 import { AppPostFull } from '../../shared/types/types.posts';
-import { TwitterThread, TwitterUser } from '../../shared/types/types.twitter';
+import {
+  TwitterPlatformPost,
+  TwitterThread,
+  TwitterUser,
+} from '../../shared/types/types.twitter';
 import {
   AppUserRead,
   AutopostOption,
@@ -21,7 +25,7 @@ import { PostFetchContext } from './use.post.fetch';
 export interface PostDerivedContext {
   author: AppUserRead;
   nanopubDraft: PlatformPostDraft | undefined;
-  tweet?: PlatformPost<TwitterThread, any, TwitterUser>;
+  tweet?: TwitterPlatformPost;
   statuses: AppPostStatus;
 }
 

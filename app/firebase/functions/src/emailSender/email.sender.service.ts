@@ -60,6 +60,7 @@ export class EmailSenderService {
 
     if (!adminEmail || adminEmail === '') {
       logger.debug('sendAdminEmail - no admin email', {}, DEBUG_PREFIX);
+      return;
     }
 
     const message: Message = {

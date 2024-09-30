@@ -43,7 +43,8 @@ export const usePostUpdate = (
   const { show } = useToastContext();
   const appFetch = useAppFetch();
 
-  const { filterStatus, removePost } = useUserPosts();
+  const { filterStatus, feed } = useUserPosts();
+  const { removePost } = feed;
 
   const [enabledEdit, setEnabledEdit] = useState<boolean>(false);
   const [postEdited, setPostEdited] = useState<AppPostFull | undefined>(

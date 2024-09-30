@@ -23,8 +23,8 @@ import {
   AppPostRepublishedStatus,
   AppPostReviewStatus,
   PostUpdate,
+  PostsQuery,
   PostsQueryStatus,
-  UserPostsQuery,
 } from '../@shared/types/types.posts';
 import {
   ALL_PUBLISH_PLATFORMS,
@@ -403,26 +403,35 @@ export class PostsManager {
   }
 
   /** get AppPost and fetch for new posts if necessary */
-  private async getAndFetchIfNecessary(
-    userId: string,
-    queryParams: UserPostsQuery
-  ) {
+  private async getAndFetchIfNecessary(queryParams: PostsQuery) {
     /** if sinceId is provided fetch forward always */
     if (queryParams.fetchParams.sinceId !== undefined) {
       /** fetch platforms for new PlatformPosts */
-      await this.fetchUser({ userId, params: queryParams.fetchParams });
-      return this.processing.posts.getOfUser(userId, queryParams);
+      await this.fetchUser({
+        userId: queryParams.userId,
+        params: queryParams.fetchParams,
+      });
+      return this.processing.posts.getMany({
+        ...queryParams,
+        userId: queryParams.userId,
+      });
     } else {
       /** if untilId fetch backwards but only if not enough posts are already stored */
-      const appPosts = await this.processing.posts.getOfUser(
-        userId,
-        queryParams
-      );
+      const appPosts = await this.processing.posts.getMany({
+        ...queryParams,
+        userId: queryParams.userId,
+      });
 
       if (queryParams.status === PostsQueryStatus.DRAFTS) {
         if (appPosts.length < queryParams.fetchParams.expectedAmount) {
-          await this.fetchUser({ userId, params: queryParams.fetchParams });
-          return this.processing.posts.getOfUser(userId, queryParams);
+          await this.fetchUser({
+            userId: queryParams.userId,
+            params: queryParams.fetchParams,
+          });
+          return this.processing.posts.getMany({
+            ...queryParams,
+            userId: queryParams.userId,
+          });
         }
       }
       return appPosts;
@@ -432,21 +441,24 @@ export class PostsManager {
   /** Get posts AppPostFull of user, cannot be part of a transaction
    * We trigger fetching posts from the platforms from here
    */
-  async getOfUser(userId: string, _queryParams?: UserPostsQuery) {
-    const queryParams: UserPostsQuery = {
-      fetchParams: { expectedAmount: 10 },
+  async getOfUser(_queryParams: PostsQuery) {
+    if (!_queryParams.userId) {
+      throw new Error('userId is required');
+    }
+
+    const queryParams: PostsQuery = {
       status: PostsQueryStatus.DRAFTS,
       ..._queryParams,
     };
 
-    const appPosts = await this.getAndFetchIfNecessary(userId, queryParams);
+    const appPosts = await this.getAndFetchIfNecessary(queryParams);
 
     const postsFull = await Promise.all(
       appPosts.map((post) => this.appendMirrors(post))
     );
 
     logger.debug(
-      `getOfUser query for user ${userId} has ${appPosts.length} results for query params: `,
+      `getOfUser query for user ${queryParams.userId} has ${appPosts.length} results for query params: `,
       { queryParams }
     );
     return postsFull;
@@ -595,12 +607,20 @@ export class PostsManager {
     manager: TransactionManager
   ) {
     if (DEBUG) logger.debug(`updatePost ${postId}`, { postId, postUpdate });
-    await this.processing.posts.updateContent(postId, postUpdate, manager);
+    await this.processing.posts.update(postId, postUpdate, manager);
     await this.processing.createOrUpdatePostDrafts(postId, manager);
 
     /** sync the semantics as triples when the post is updated */
     const postUpdated = await this.processing.posts.get(postId, manager, true);
-    await this.processing.upsertTriples(postId, manager, postUpdated.semantics);
+    const strucured = await this.processing.processSemantics(
+      postId,
+      manager,
+      postUpdated.semantics
+    );
+
+    if (strucured) {
+      await this.processing.posts.update(postId, { ...strucured }, manager);
+    }
   }
 
   /** deletes the mirror of a post from a platform. userId MUST be a verified user */
@@ -906,10 +926,10 @@ export class PostsManager {
     /** get AppPost from userId and labels (no manager) */
     const appPosts = await (async () => {
       if (labelsUris !== undefined) {
-        const triples = await this.processing.triples.getWithPredicatesOfUser(
-          userId,
+        const triples = await this.processing.triples.getWithPredicates(
+          fetchParams,
           labelsUris,
-          fetchParams
+          userId
         );
         const uniquePostIds = new Set(triples.map((triple) => triple.postId));
 
@@ -922,7 +942,8 @@ export class PostsManager {
         );
       } else {
         /** if not labels, get all published posts */
-        return this.processing.posts.getOfUser(userId, {
+        return this.processing.posts.getMany({
+          userId,
           status: PostsQueryStatus.PUBLISHED,
           fetchParams,
         });

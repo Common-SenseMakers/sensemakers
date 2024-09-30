@@ -2,7 +2,7 @@ import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { PostCardLoading } from '../post/PostCardLoading';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
-import { UserHome } from '../user-home/UserHome';
+import { UserPostsFeed } from '../user-home/UserPostsFeed';
 import { ConnectSocialsPage } from '../user-login/ConnectSocialsPage';
 import {
   OverallLoginStatus,
@@ -13,7 +13,7 @@ import { AppWelcome } from '../welcome/AppWelcome';
 
 const DEBUG = false;
 
-export const AppHome = (props: {}) => {
+export const AppHomePage = (props: {}) => {
   const { overallLoginStatus, twitterProfile, twitterConnectedStatus } =
     useAccountContext();
 
@@ -53,7 +53,10 @@ export const AppHome = (props: {}) => {
     }
 
     if (overallLoginStatus === OverallLoginStatus.FullyLoggedIn) {
-      return { content: <UserHome></UserHome>, nav: <GlobalNav></GlobalNav> };
+      return {
+        content: <UserPostsFeed></UserPostsFeed>,
+        nav: <GlobalNav></GlobalNav>,
+      };
     }
 
     /** everything that is not the satus above shows the loadingDivs */

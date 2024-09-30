@@ -1,95 +1,84 @@
-import React, { useCallback, useContext } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { createContext } from 'react';
+import { useLocation } from 'react-router-dom';
 
-import { AppPostFull, PostsQueryStatus } from '../shared/types/types.posts';
-import { usePostsFetch } from './posts.fetch.hook';
+import { useAppFetch } from '../api/app.fetch';
+import { DEBUG } from '../post/post.context/use.post.merge.deltas';
+import {
+  FetcherConfig,
+  PostFetcherInterface,
+  usePostsFetcher,
+} from '../posts.fetcher/posts.fetcher.hook';
+import {
+  AppPostFull,
+  AppPostParsedStatus,
+  AppPostParsingStatus,
+  PostsQueryStatus,
+} from '../shared/types/types.posts';
 
 interface PostContextType {
-  posts?: AppPostFull[];
-  isLoading: boolean;
-  isFetchingOlder: boolean;
-  errorFetchingOlder?: Error;
-  isFetchingNewer: boolean;
-  errorFetchingNewer?: Error;
-  fetchOlder: () => void;
-  fetchNewer: () => void;
   filterStatus: PostsQueryStatus;
-  getPost: (postId: string) => AppPostFull | undefined;
-  removePost: (postId: string) => void;
-  moreToFetch: boolean;
-  getNextAndPrev: (postId?: string) => {
-    prevPostId?: string;
-    nextPostId?: string;
-  };
+  feed: PostFetcherInterface;
 }
 
 export const UserPostsContextValue = createContext<PostContextType | undefined>(
   undefined
 );
 
+/**
+ * wraps the usePostsFetcher around the filter status and serves
+ * the returned posts to lower level components as useUserPosts()
+ */
 export const UserPostsContext: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
-  const {
-    posts,
-    fetchOlder,
-    isFetchingOlder,
-    errorFetchingOlder,
-    fetchNewer,
-    isFetchingNewer,
-    errorFetchingNewer,
-    isLoading,
-    status,
-    removePost,
-    moreToFetch,
-  } = usePostsFetch();
+  const appFetch = useAppFetch();
 
-  const getPost = useCallback(
-    (postId: string) => {
-      const ix = posts.findIndex((p) => p.id === postId);
-      return ix !== -1 ? posts[ix] : undefined;
-    },
-    [posts]
-  );
+  const location = useLocation();
 
-  const getNextAndPrev = useCallback(
-    (postId?: string) => {
-      if (!posts || !postId) {
-        return {};
+  /** status is derived from location
+   * set the filter status based on it */
+  const status = useMemo(() => {
+    if (
+      Object.values(PostsQueryStatus)
+        .map((v) => `/${v}`)
+        .includes(location.pathname)
+    ) {
+      if (DEBUG) console.log('changing status based on location');
+      return location.pathname.slice(1) as PostsQueryStatus;
+    }
+    return PostsQueryStatus.DRAFTS;
+  }, [location]);
+
+  const onPostsAdded = (newPosts: AppPostFull[]) => {
+    /** trigger parse if not parsed and not parsing */
+    newPosts.forEach((post) => {
+      if (
+        post.parsedStatus === AppPostParsedStatus.UNPROCESSED &&
+        post.parsingStatus !== AppPostParsingStatus.PROCESSING
+      ) {
+        // async trigger parse
+        appFetch(`/api/posts/parse`, { postId: post.id });
       }
+    });
+  };
 
-      const currPostIndex = posts?.findIndex((p) => p.id === postId);
-      const prevPostId =
-        posts && currPostIndex != undefined && currPostIndex > 0
-          ? posts[currPostIndex - 1].id
-          : undefined;
+  const config = useMemo((): FetcherConfig => {
+    return {
+      endpoint: '/api/posts/getOfUser',
+      status,
+      subscribe: true,
+      onPostsAdded,
+    };
+  }, []);
 
-      const nextPostId =
-        posts && currPostIndex != undefined && currPostIndex < posts.length - 1
-          ? posts[currPostIndex + 1].id
-          : undefined;
-
-      return { prevPostId, nextPostId };
-    },
-    [posts]
-  );
+  const feed = usePostsFetcher(config);
 
   return (
     <UserPostsContextValue.Provider
       value={{
-        posts,
-        isLoading,
-        isFetchingOlder: isFetchingOlder,
-        errorFetchingOlder: errorFetchingOlder,
-        isFetchingNewer: isFetchingNewer,
-        errorFetchingNewer: errorFetchingNewer,
-        fetchNewer,
-        fetchOlder,
         filterStatus: status,
-        getPost,
-        removePost,
-        moreToFetch,
-        getNextAndPrev,
+        feed,
       }}>
       {children}
     </UserPostsContextValue.Provider>

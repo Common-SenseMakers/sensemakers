@@ -8,8 +8,8 @@ import {
   AppPostRepublishedStatus,
   AppPostReviewStatus,
   PostUpdate,
+  PostsQuery,
   PostsQueryStatus,
-  UserPostsQuery,
 } from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
 import { BaseRepository, removeUndefined } from '../db/repo.base';
@@ -19,10 +19,10 @@ const DEBUG = true;
 const DEBUG_PREFIX = 'PostsRepository';
 export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   constructor(protected db: DBInstance) {
-    super(db.collections.posts);
+    super(db.collections.posts, db);
   }
 
-  public async updateContent(
+  public async update(
     postId: string,
     postUpdate: PostUpdate,
     manager: TransactionManager,
@@ -47,28 +47,85 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   }
 
   /** Cannot be part of a transaction */
-  public async getOfUser(userId: string, queryParams: UserPostsQuery) {
+  public async getMany(queryParams: PostsQuery) {
     /** type protection agains properties renaming */
     const createdAtKey: keyof AppPost = 'createdAtMs';
     const authorKey: keyof AppPost = 'authorId';
     const reviewedStatusKey: keyof AppPost = 'reviewedStatus';
     const republishedStatusKey: keyof AppPost = 'republishedStatus';
 
-    const base = this.db.collections.posts.where(authorKey, '==', userId);
+    const keywordsKey: keyof AppPost = 'keywords';
+    const labelsKey: keyof AppPost = 'labels';
+
+    if (DEBUG) logger.debug('getMany', queryParams, DEBUG_PREFIX);
+
+    const base = (() => {
+      if (queryParams.userId) {
+        if (DEBUG)
+          logger.debug(
+            'getMany - filter by userId',
+            queryParams.userId,
+            DEBUG_PREFIX
+          );
+
+        return this.db.collections.posts.where(
+          authorKey,
+          '==',
+          queryParams.userId
+        );
+      } else {
+        if (DEBUG)
+          logger.debug(
+            'getMany - dont filter by userId',
+            undefined,
+            DEBUG_PREFIX
+          );
+
+        return this.db.collections.posts;
+      }
+    })();
 
     if (DEBUG) logger.debug('getOfUser', queryParams, DEBUG_PREFIX);
 
-    const filtered = (() => {
+    const statusFiltered = (() => {
+      if (!queryParams.status) {
+        if (DEBUG)
+          logger.debug(
+            'getMany - dont filter by status',
+            undefined,
+            DEBUG_PREFIX
+          );
+        return base;
+      }
+
       if (queryParams.status === PostsQueryStatus.DRAFTS) {
+        if (DEBUG)
+          logger.debug(
+            'getMany - filter by status',
+            PostsQueryStatus.DRAFTS,
+            DEBUG_PREFIX
+          );
         return base.where(republishedStatusKey, 'in', [
           AppPostRepublishedStatus.PENDING,
           AppPostRepublishedStatus.UNREPUBLISHED,
         ]);
       }
       if (queryParams.status === PostsQueryStatus.PENDING) {
+        if (DEBUG)
+          logger.debug(
+            'getMany - filter by status',
+            PostsQueryStatus.PENDING,
+            DEBUG_PREFIX
+          );
         return base.where(reviewedStatusKey, '==', AppPostReviewStatus.PENDING);
       }
       if (queryParams.status === PostsQueryStatus.PUBLISHED) {
+        if (DEBUG)
+          logger.debug(
+            'getMany - filter by status',
+            PostsQueryStatus.PUBLISHED,
+            DEBUG_PREFIX
+          );
         return base.where(
           republishedStatusKey,
           '!=',
@@ -76,9 +133,53 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
         );
       }
       if (queryParams.status === PostsQueryStatus.IGNORED) {
+        if (DEBUG)
+          logger.debug(
+            'getMany - filter by status',
+            PostsQueryStatus.IGNORED,
+            DEBUG_PREFIX
+          );
+
         return base.where(reviewedStatusKey, '==', AppPostReviewStatus.IGNORED);
       }
+
       return base;
+    })();
+
+    const semanticsFiltered = (() => {
+      let filtered = statusFiltered;
+
+      if (queryParams.keywords && queryParams.keywords.length > 0) {
+        if (DEBUG)
+          logger.debug(
+            'getMany - filter by keywords',
+            JSON.stringify(queryParams.keywords),
+            DEBUG_PREFIX
+          );
+
+        filtered = statusFiltered.where(
+          keywordsKey,
+          'array-contains-any',
+          queryParams.keywords
+        );
+      }
+
+      if (queryParams.labels && queryParams.labels.length > 0) {
+        if (DEBUG)
+          logger.debug(
+            'getMany - filter by labels',
+            JSON.stringify(queryParams.labels),
+            DEBUG_PREFIX
+          );
+
+        filtered = statusFiltered.where(
+          labelsKey,
+          'array-contains-any',
+          queryParams.labels
+        );
+      }
+
+      return filtered;
     })();
 
     /** get the sinceCreatedAt and untilCreatedAt timestamps from the elements ids */
@@ -110,10 +211,10 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     /** two modes, forward sinceId or backwards untilId  */
     const paginated = await (async () => {
       if (sinceCreatedAt) {
-        const ordered = filtered.orderBy(createdAtKey, 'asc');
+        const ordered = semanticsFiltered.orderBy(createdAtKey, 'asc');
         return ordered.startAfter(sinceCreatedAt);
       } else {
-        const ordered = filtered.orderBy(createdAtKey, 'desc');
+        const ordered = semanticsFiltered.orderBy(createdAtKey, 'desc');
         return untilCreatedAt ? ordered.startAfter(untilCreatedAt) : ordered;
       }
     })();

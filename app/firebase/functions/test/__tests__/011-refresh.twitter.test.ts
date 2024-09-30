@@ -159,7 +159,10 @@ describe.skip('011-twitter refresh', () => {
       (services.time as any).set(account.read?.expiresAtMs);
 
       // call getOfUsers (this should update the refresh token)
-      void (await services.postsManager.getOfUser(user?.userId));
+      void (await services.postsManager.getOfUser({
+        userId: user?.userId,
+        fetchParams: { expectedAmount: 10 },
+      }));
 
       const accountAfter = await services.db.run(async (manager) => {
         if (!user) {

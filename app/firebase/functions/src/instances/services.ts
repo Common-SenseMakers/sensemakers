@@ -23,6 +23,7 @@ import {
 import { DBInstance } from '../db/instance';
 import { EmailSenderService } from '../emailSender/email.sender.service';
 import { getEmailSenderMock } from '../emailSender/email.sender.service.mock';
+import { FeedService } from '../feed/feed.service';
 import { NotificationService } from '../notifications/notification.service';
 import { NotificationsRepository } from '../notifications/notifications.repository';
 import { getParserMock } from '../parser/mock/parser.service.mock';
@@ -54,6 +55,7 @@ const DEBUG = false;
 export interface Services {
   users: UsersService;
   postsManager: PostsManager;
+  feed: FeedService;
   platforms: PlatformsService;
   time: TimeService;
   db: DBInstance;
@@ -189,11 +191,15 @@ export const createServices = (firestore: Firestore) => {
     !IS_EMULATOR
   );
 
+  /** feed */
+  const feed = new FeedService(db, postsManager);
+
   /** all services */
   const services: Services = {
     users: usersService,
     postsManager: postsManager,
     platforms: platformsService,
+    feed,
     time,
     db,
     notifications,

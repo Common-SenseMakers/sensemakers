@@ -1,10 +1,11 @@
+import { Nav } from 'grommet';
 import { PropsWithChildren, createContext, useContext } from 'react';
 
-import { RobotIcon } from '../../app/icons/RobotIcon';
 import { UserPostsContext } from '../../user-home/UserPostsContext';
 import { AccountContext } from './AccountContext';
 import { AutopostInviteContext } from './AutopostInviteContext';
 import { DisconnectUserContext } from './DisconnectUserContext';
+import { NavHistoryContext } from './NavHistoryContext';
 import { OrcidContext } from './platforms/OrcidContext';
 import { TwitterContext } from './platforms/TwitterContext';
 import { NanopubContext } from './platforms/nanopubs/NanopubContext';
@@ -37,7 +38,7 @@ export const ConnectedUserWrapper = (props: PropsWithChildren) => {
                   <TwitterContext>
                     <UserPostsContext>
                       <AutopostInviteContext>
-                        {props.children}
+                        <NavHistoryContext>{props.children}</NavHistoryContext>
                       </AutopostInviteContext>
                     </UserPostsContext>
                   </TwitterContext>
