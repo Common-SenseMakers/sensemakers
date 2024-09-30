@@ -16,6 +16,9 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 import datetime
 import docopt
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import time
+from threading import Semaphore
 
 
 #functions for mapping json to Notion profile table
@@ -328,6 +331,7 @@ def build_dynamic_postpage_properties(post_dict: dict, post_firebase_id: str):
     profile_notion_id = load_profile_to_notion(post_dict["authorId"])
     post_Ms = post_dict["createdAtMs"]
     creation_time =  convert_timestamp_to_notion_date(post_Ms)
+    filter_classification = post_dict["originalParsed"]["filter_classification"]
     properties = {
         "Name": {
             "title": [
@@ -373,6 +377,11 @@ def build_dynamic_postpage_properties(post_dict: dict, post_firebase_id: str):
         "publish date": {
             "date": {
                 "start": creation_time  # Notion date field
+            }
+        },
+        "filter_classification": {
+            "select": {
+                "name": filter_classification  
             }
         }
     }
@@ -440,15 +449,42 @@ def create_post_name(post_text,post_handle):
     # Create the post name as "User name : First 10 characters of content"
     return f"{post_handle}: {post_text[:60]}"
 
-def load_posts_to_notion(post_tuple_list:list):
+# Define a rate limiter (3 requests per second)
+RATE_LIMIT = 3
+semaphore = Semaphore(RATE_LIMIT)
+
+# Function to handle each post loading task with rate limiting
+def load_post(post_dict, post_id):
+    with semaphore:  # This ensures no more than 3 requests per second
+        if not post_notion_lookup(post_id):
+            create_notion_post_page(post_dict, post_id)
+            print(f'post page with id {post_id} was loaded to Notion')
+
+        # Sleep to ensure we don’t exceed 3 requests per second
+        time.sleep(1 / RATE_LIMIT)
+
+# Function to load posts to Notion in parallel with rate limiting
+def load_posts_to_notion(post_tuple_list: list):
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = [executor.submit(load_post, post_dict, post_id) for post_dict, post_id in post_tuple_list]
+
+        for future in as_completed(futures):
+            try:
+                future.result()
+            except Exception as e:
+                print(f'Error occurred: {e}')
+
+"""def load_posts_to_notion(post_tuple_list:list):
     for post_dict, post_id in post_tuple_list:
         if not post_notion_lookup(post_id):
             create_notion_post_page(post_dict,post_id)
             print(f'post page with id {post_id} was loaded to Notion')
-
+"""
 def get_posts(start_Ms = 0,count_limit = None):
-    posts_ref = db.collection('posts').where("createdAtMs",'>',start_Ms).limit(count_limit)
-
+    if start_Ms:
+        posts_ref = db.collection('posts').where("parsedStatus", '==', "processed").where("createdAtMs", '>', start_Ms).limit(count_limit)
+    else:
+        posts_ref = db.collection('posts').where("parsedStatus", '==', "processed").limit(count_limit)
     # Execute the query
     docs = posts_ref.stream()
     posts = []
@@ -463,11 +499,17 @@ if __name__ == "__main__":
 
     load_dotenv()
 
-    NOTION_API_TOKEN = os.getenv('NOTION_SENSENETS_TOKEN')
+    """NOTION_API_TOKEN = os.getenv('NOTION_SENSENETS_TOKEN')
     URLS_DATABASE_ID = os.getenv('NOTION_URLS_DATABASE_ID')
     POSTS_DATABASE_ID = os.getenv('NOTION_POSTS_DATABASE_ID')
     PROFILES_DATABASE_ID =os.getenv('NOTION_PROFILES_DATABASE_ID')
-    KEYWORDS_DATABASE_ID = os.getenv("NOTION_KEYWORDS_DATABASE_ID")
+    KEYWORDS_DATABASE_ID = os.getenv("NOTION_KEYWORDS_DATABASE_ID")"""
+
+    NOTION_API_TOKEN = os.getenv('SN_NOTION_TOKEN')
+    URLS_DATABASE_ID = os.getenv('SN_URLS_DATABASE_ID')
+    POSTS_DATABASE_ID = os.getenv('SN_POSTS_DATABASE_ID')
+    PROFILES_DATABASE_ID =os.getenv('SN_PROFILES_DATABASE_ID')
+    KEYWORDS_DATABASE_ID = os.getenv("SN_KEYWORDS_DATABASE_ID")
     notion = Client(auth=NOTION_API_TOKEN)
 
     #Initiate firebase client
