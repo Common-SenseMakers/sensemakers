@@ -3,7 +3,6 @@ import { createContext } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
-import { DEBUG } from '../post/post.context/use.post.merge.deltas';
 import {
   FetcherConfig,
   PostFetcherInterface,
@@ -15,6 +14,8 @@ import {
   AppPostParsingStatus,
   PostsQueryStatus,
 } from '../shared/types/types.posts';
+
+const DEBUG = true;
 
 interface PostContextType {
   filterStatus: PostsQueryStatus;
@@ -44,8 +45,10 @@ export const UserPostsContext: React.FC<{
         .map((v) => `/${v}`)
         .includes(location.pathname)
     ) {
-      if (DEBUG) console.log('changing status based on location');
-      return location.pathname.slice(1) as PostsQueryStatus;
+      const newStatus = location.pathname.slice(1) as PostsQueryStatus;
+      if (DEBUG)
+        console.log(`changing status based on location to ${newStatus}`);
+      return newStatus;
     }
     return PostsQueryStatus.DRAFTS;
   }, [location]);
@@ -70,7 +73,7 @@ export const UserPostsContext: React.FC<{
       subscribe: true,
       onPostsAdded,
     };
-  }, []);
+  }, [status]);
 
   const feed = usePostsFetcher(config);
 
