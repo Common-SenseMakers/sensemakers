@@ -11,6 +11,7 @@ import { PostingPage } from '../post/PostingPage';
 import { RouteNames } from '../route.names';
 import { ResponsiveApp } from '../ui-components/ResponsiveApp';
 import { ThemedApp, useThemeContext } from '../ui-components/ThemedApp';
+import { ConnectMastodonPage } from '../user-login/ConnectMastodonPage';
 import { ConnectedUserWrapper } from '../user-login/contexts/ConnectedUserWrapper';
 import { LoadingContext } from './LoadingContext';
 import { GlobalStyles } from './layout/GlobalStyles';
@@ -85,6 +86,10 @@ export const AppContainer = (props: React.PropsWithChildren) => {
                 <Route
                   path={'/*'}
                   element={<AppHomePage></AppHomePage>}></Route>
+                <Route
+                  path={`${RouteNames.ConnectMastodon}`}
+                  element={<ConnectMastodonPage />}
+                />
               </Route>
             </Routes>
           </Box>

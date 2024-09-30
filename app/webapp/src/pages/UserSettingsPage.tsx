@@ -1,18 +1,21 @@
 import { Box, Text } from 'grommet';
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
+import { MastodonIcon, TwitterIcon } from '../app/common/Icons';
 import { AutopostIcon } from '../app/icons/AutopostIcon';
 import { BellIcon } from '../app/icons/BellIcon';
 import { DocIcon } from '../app/icons/DocIcon';
 import { EmailIcon } from '../app/icons/EmailIcon';
 import { OrcidIcon } from '../app/icons/OrcidIcon';
+import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { SupportIcon } from '../app/icons/SupportIcon';
-import { TwitterAvatar } from '../app/icons/TwitterAvatar';
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { I18Keys } from '../i18n/i18n';
+import { RouteNames } from '../route.names';
 import { NotificationFreq } from '../shared/types/types.notifications';
 import {
   AutopostOption,
@@ -26,7 +29,9 @@ import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useAutopostInviteContext } from '../user-login/contexts/AutopostInviteContext';
 import { useDisconnectContext } from '../user-login/contexts/DisconnectUserContext';
+import { useMastodonContext } from '../user-login/contexts/platforms/MastodonContext';
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
+import { useTwitterContext } from '../user-login/contexts/platforms/TwitterContext';
 import { getAccount } from '../user-login/user.helper';
 import { PlatformSection } from '../user-settings/PlatformsSection';
 import { SettingsOptionSelector } from '../user-settings/SettingsOptionsSelector';
@@ -51,6 +56,7 @@ export const SettingSectionTitle = (props: { value: string }) => {
 export const UserSettingsPage = () => {
   const { constants } = useThemeContext();
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const appFetch = useAppFetch();
 
@@ -58,6 +64,7 @@ export const UserSettingsPage = () => {
     connectedUser,
     refresh,
     twitterProfile,
+    mastodonProfile,
     currentAutopost,
     currentNotifications,
     orcid,
@@ -67,6 +74,11 @@ export const UserSettingsPage = () => {
 
   const { connect: connectOrcid, connecting: connectingOrcid } =
     useOrcidContext();
+
+  const { connect: connectMastodon, needConnect: needConnectMastodon } =
+    useMastodonContext();
+  const { connect: connectTwitter, needConnect: needConnectTwitter } =
+    useTwitterContext();
 
   const { reviewAutopostIntention, setReviewAutopostIntention } =
     useAutopostInviteContext();
@@ -264,15 +276,6 @@ export const UserSettingsPage = () => {
           <SettingSectionTitle
             value={t(I18Keys.yourAccounts)}></SettingSectionTitle>
         </Box>
-
-        <PlatformSection
-          icon={<TwitterAvatar profile={twitterProfile} />}
-          platformName={t(I18Keys.XTwitter)}
-          onButtonClicked={() => {}}
-          buttonText=""
-          username={twitterProfile ? `@${twitterProfile.username}` : ''}
-          connected></PlatformSection>
-
         <PlatformSection
           icon={
             <BoxCentered
@@ -289,7 +292,46 @@ export const UserSettingsPage = () => {
           onButtonClicked={() => {}}
           buttonText=""
           username={connectedUser?.email ? connectedUser.email?.email : ''}
-          connected></PlatformSection>
+          connected={!!connectedUser?.email}></PlatformSection>
+
+        <PlatformSection
+          icon={
+            twitterProfile ? (
+              <PlatformAvatar
+                profileImageUrl={twitterProfile?.profile_image_url}
+              />
+            ) : (
+              <TwitterIcon size={40} color="black"></TwitterIcon>
+            )
+          }
+          platformName={t(I18Keys.XTwitter)}
+          onButtonClicked={() => {
+            connectTwitter && connectTwitter('read');
+          }}
+          buttonText={needConnectTwitter ? 'connect' : ''}
+          username={twitterProfile ? `@${twitterProfile.username}` : ''}
+          connected={!!twitterProfile}></PlatformSection>
+        <PlatformSection
+          icon={
+            mastodonProfile ? (
+              <PlatformAvatar profileImageUrl={mastodonProfile?.avatar} />
+            ) : (
+              <MastodonIcon size={40} color="white"></MastodonIcon>
+            )
+          }
+          platformName={'Mastodon'}
+          onButtonClicked={() => {
+            navigate(`../${RouteNames.ConnectMastodon}`, {
+              state: { callbackUrl: window.location.href },
+            });
+          }}
+          buttonText={needConnectMastodon ? 'connect' : ''}
+          username={
+            connectedUser?.mastodon
+              ? `@${getAccount(connectedUser, PLATFORM.Mastodon)?.profile.username}@${getAccount(connectedUser, PLATFORM.Mastodon)?.profile.mastodonServer}`
+              : '- not connected -'
+          }
+          connected={!!connectedUser?.mastodon}></PlatformSection>
 
         <PlatformSection
           icon={<OrcidIcon size={40}></OrcidIcon>}

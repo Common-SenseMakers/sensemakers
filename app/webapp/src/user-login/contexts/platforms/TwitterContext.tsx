@@ -53,6 +53,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
     overallLoginStatus,
     setLoginFlowState,
     setTwitterConnectedStatus,
+    twitterConnectedStatus,
   } = useAccountContext();
 
   const { disconnect } = useDisconnectContext();
@@ -123,9 +124,10 @@ export const TwitterContext = (props: PropsWithChildren) => {
       if (
         code_param &&
         state_param &&
-        overallLoginStatus === OverallLoginStatus.PartialLoggedIn &&
         connectedUser &&
-        wasConnecting
+        wasConnecting &&
+        (overallLoginStatus === OverallLoginStatus.PartialLoggedIn ||
+          twitterConnectedStatus === TwitterConnectedStatus.Connecting)
       ) {
         if (DEBUG)
           console.log('useEffect TwitterSignup', {

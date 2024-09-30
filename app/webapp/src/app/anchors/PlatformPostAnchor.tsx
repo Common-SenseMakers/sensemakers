@@ -2,7 +2,10 @@ import { Anchor, AnchorExtendedProps, Box } from 'grommet';
 import { useTranslation } from 'react-i18next';
 
 import { I18Keys } from '../../i18n/i18n';
+import { MastodonThread } from '../../shared/types/types.mastodon';
+import { PlatformPostPosted } from '../../shared/types/types.platform.posts';
 import { TwitterThread } from '../../shared/types/types.twitter';
+import { PLATFORM } from '../../shared/types/types.user';
 import { LoadingDiv } from '../../ui-components/LoadingDiv';
 import { useThemeContext } from '../../ui-components/ThemedApp';
 import { OpenLinkIcon } from '../icons/OpenLinkIcon';
@@ -22,13 +25,12 @@ export const TwitterProfileAnchor = (props: { screen_name?: string }) => {
   );
 };
 
-export const TweetAnchor = (props: {
-  thread?: TwitterThread;
-  label?: string;
-  timestamp?: number;
+export const PlatformPostAnchor = (props: {
+  platformPostPosted?: PlatformPostPosted;
+  postUrl?: string;
+  platformId?: PLATFORM;
 }) => {
   const { t } = useTranslation();
-  const timestamp = props.timestamp;
   const { constants } = useThemeContext();
 
   const formatter = new Intl.DateTimeFormat('en-US', {
@@ -36,19 +38,26 @@ export const TweetAnchor = (props: {
     day: 'numeric', // numeric day
     year: 'numeric', // numeric year
   });
-  const date = timestamp ? formatter.format(timestamp) : '';
 
-  if (!props.thread) {
+  if (!props.platformPostPosted || !props.platformId) {
     return <LoadingDiv></LoadingDiv>;
   }
+  const date = props.platformPostPosted.timestampMs
+    ? formatter.format(props.platformPostPosted.timestampMs)
+    : '';
 
-  if (!props.thread.tweets) {
-    throw new Error('Thread has no tweets');
-  }
-
-  const threadId = props.thread.conversation_id;
-  const label =
-    props.thread.tweets.length > 1 ? t(I18Keys.ThreadX) : t(I18Keys.TweetX);
+  const label = (() => {
+    if (props.platformId === PLATFORM.Twitter) {
+      return (props.platformPostPosted.post as TwitterThread).tweets.length > 1
+        ? t(I18Keys.ThreadX)
+        : t(I18Keys.TweetX);
+    }
+    if (props.platformId === PLATFORM.Mastodon) {
+      return (props.platformPostPosted.post as MastodonThread).posts.length > 1
+        ? t(I18Keys.ThreadMastodon)
+        : t(I18Keys.TootMastodon);
+    }
+  })();
 
   return (
     <Anchor
@@ -60,7 +69,7 @@ export const TweetAnchor = (props: {
         textDecoration: 'none',
       }}
       target="_blank"
-      href={`https://twitter.com/x/status/${threadId}`}
+      href={props.postUrl}
       size="medium">
       <Box
         direction="row"

@@ -5,13 +5,14 @@ import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { UserPostsFeed } from '../user-home/UserPostsFeed';
 import { ConnectSocialsPage } from '../user-login/ConnectSocialsPage';
 import {
+  MastodonConnectedStatus,
   OverallLoginStatus,
   TwitterConnectedStatus,
   useAccountContext,
 } from '../user-login/contexts/AccountContext';
 import { AppWelcome } from '../welcome/AppWelcome';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export const AppHomePage = (props: {}) => {
   const { overallLoginStatus, twitterProfile, twitterConnectedStatus } =
@@ -32,22 +33,24 @@ export const AppHomePage = (props: {}) => {
   );
 
   const { content, nav } = (() => {
-    if (DEBUG) console.log('AppHome', { overallLoginStatus, twitterProfile });
+    if (DEBUG)
+      console.log('AppHome', {
+        overallLoginStatus,
+        twitterProfile,
+        mastodonProfile,
+      });
 
     if (overallLoginStatus === OverallLoginStatus.NotKnown) {
       return { content: <></>, nav: undefined };
     }
 
     if (overallLoginStatus === OverallLoginStatus.LoggedOut) {
-      return { content: <AppWelcome></AppWelcome>, nav: undefined };
+      return { content: <AppWelcome />, nav: undefined };
     }
 
-    if (
-      overallLoginStatus === OverallLoginStatus.PartialLoggedIn &&
-      twitterConnectedStatus !== TwitterConnectedStatus.Connecting
-    ) {
+    if (overallLoginStatus === OverallLoginStatus.PartialLoggedIn) {
       return {
-        content: <ConnectSocialsPage></ConnectSocialsPage>,
+        content: <ConnectSocialsPage />,
         nav: undefined,
       };
     }
@@ -59,11 +62,8 @@ export const AppHomePage = (props: {}) => {
       };
     }
 
-    /** everything that is not the satus above shows the loadingDivs */
     return { content: LoadingPlaceholder, nav: undefined };
   })();
 
-  return (
-    <ViewportPage content={content} nav={nav} justify="start"></ViewportPage>
-  );
+  return <ViewportPage content={content} nav={nav} justify="start" />;
 };

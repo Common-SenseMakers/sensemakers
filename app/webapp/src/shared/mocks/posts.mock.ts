@@ -22,9 +22,11 @@ export const getMockPublishedPost = () => {
     thread: [
       {
         content: 'this is such a cool idea! https://arxiv.org/abs/2312.05230',
+        url: 'https://x.com/test_user/status/postid',
       },
       {
         content: 'I disagree with this: https://arxiv.org/abs/2401.14000',
+        url: 'https://x.com/test_user/status/postid',
       },
     ],
     author: {
@@ -111,9 +113,11 @@ export const getMockAutoPublishedPost = () => {
     thread: [
       {
         content: 'this is such a cool idea! https://arxiv.org/abs/2312.05230',
+        url: 'https://x.com/test_user/status/postid',
       },
       {
         content: 'I disagree with this: https://arxiv.org/abs/2401.14000',
+        url: 'https://x.com/test_user/status/postid',
       },
     ],
     author: {
@@ -199,12 +203,15 @@ export const getMockPendingPost = () => {
     thread: [
       {
         content: 'an amazing result: https://arxiv.org/abs/2312.05230',
+        url: 'https://x.com/test_user/status/postid',
       },
       {
         content: 'but they forgot to mention https://arxiv.org/abs/2401.14000',
+        url: 'https://x.com/test_user/status/postid',
       },
       {
         content: 'which could invalidate their claims!',
+        url: 'https://x.com/test_user/status/postid',
       },
     ],
     author: {

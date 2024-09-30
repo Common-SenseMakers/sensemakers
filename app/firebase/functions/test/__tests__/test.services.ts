@@ -19,6 +19,11 @@ import {
   getParserMock,
 } from '../../src/parser/mock/parser.service.mock';
 import { ParserService } from '../../src/parser/parser.service';
+import { MastodonService } from '../../src/platforms/mastodon/mastodon.service';
+import {
+  MastodonMockConfig,
+  getMastodonMock,
+} from '../../src/platforms/mastodon/mock/mastodon.service.mock';
 import {
   NanopubMockConfig,
   getNanopubMock,
@@ -48,6 +53,7 @@ import { testCredentials } from './test.accounts';
 
 export interface TestServicesConfig {
   twitter?: TwitterMockConfig;
+  mastodon?: MastodonMockConfig;
   nanopub: NanopubMockConfig;
   parser: ParserMockConfig;
   time: 'real' | 'mock';
@@ -108,6 +114,10 @@ export const getTestServices = (config: TestServicesConfig) => {
   const testUser = testCredentials[0];
   const twitter = getTwitterMock(_twitter, config.twitter, testUser);
 
+  /** mocked mastodon */
+  const _mastodon = new MastodonService(time, userRepo);
+  const mastodon = getMastodonMock(_mastodon, config.mastodon, testUser);
+
   /** nanopub */
   const _nanopub = new NanopubService(time, {
     servers: JSON.parse(process.env.NANOPUBS_PUBLISH_SERVERS as string),
@@ -122,6 +132,7 @@ export const getTestServices = (config: TestServicesConfig) => {
   identityServices.set(PLATFORM.Orcid, orcid);
   identityServices.set(PLATFORM.Twitter, twitter);
   identityServices.set(PLATFORM.Nanopub, nanopub);
+  identityServices.set(PLATFORM.Mastodon, mastodon);
 
   const _email = new EmailSenderService({
     apiKey: process.env.EMAIL_CLIENT_SECRET as string,
@@ -148,6 +159,7 @@ export const getTestServices = (config: TestServicesConfig) => {
   /** all platforms */
   platformsMap.set(PLATFORM.Twitter, twitter);
   platformsMap.set(PLATFORM.Nanopub, nanopub);
+  platformsMap.set(PLATFORM.Mastodon, mastodon);
 
   /** platforms service */
   const platformsService = new PlatformsService(

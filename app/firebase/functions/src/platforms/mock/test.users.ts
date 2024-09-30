@@ -1,5 +1,5 @@
-import { TestUserCredentials } from '../../../@shared/types/types.user';
-import { logger } from '../../../instances/logger';
+import { TestUserCredentials } from '../../@shared/types/types.user';
+import { logger } from '../../instances/logger';
 
 const DEBUG = false;
 

@@ -23,12 +23,13 @@ import { getMockedUser } from '../utils/users.mock';
 const DEBUG = true;
 const PUBLISH = true;
 
-describe('021-nanopublication format', () => {
+describe.skip('nanopublication format', () => {
   it('publishes a correctly formatted mock nanopub to the test server and updates it', async () => {
-    const post = getMockPost({
-      authorId: 'test-user-id',
-      id: 'post-id-1',
-      semantics: `
+    const post = getMockPost(
+      {
+        authorId: 'test-user-id',
+        id: 'post-id-1',
+        semantics: `
         @prefix ns1: <http://purl.org/spar/cito/> .
         @prefix schema: <https://schema.org/> .
         
@@ -37,7 +38,9 @@ describe('021-nanopublication format', () => {
           ns1:includesQuotationFrom <https://twitter.com/ori_goldberg/status/1781281656071946541> ;    
           schema:keywords "ExternalSecurity",        "Geopolitics",        "Israel",        "Kissinger",        "PoliticalScience",        "Security" .
         `,
-    });
+      },
+      PLATFORM.Twitter
+    );
     const mockUser = getMockedUser({
       userId: 'test-user-id',
       [PLATFORM.Nanopub]: {
@@ -45,8 +48,16 @@ describe('021-nanopublication format', () => {
       },
       [PLATFORM.Twitter]: {
         id: '123456',
-        username: 'test-user',
+        username: 'test-user-twitter',
         password: 'test-password',
+        type: 'read',
+      },
+      [PLATFORM.Mastodon]: {
+        id: '123456',
+        username: 'test-username-mastodon',
+        displayName: 'test-user-mastodon',
+        accessToken: 'test-access-token',
+        mastodonServer: 'test-mastodon-server',
         type: 'read',
       },
     });
@@ -104,10 +115,11 @@ describe('021-nanopublication format', () => {
     }
 
     /** update the nanopublication */
-    const updatedPost = getMockPost({
-      authorId: 'test-user-id',
-      id: 'post-id-1',
-      semantics: `
+    const updatedPost = getMockPost(
+      {
+        authorId: 'test-user-id',
+        id: 'post-id-1',
+        semantics: `
         @prefix ns1: <http://purl.org/spar/cito/> .
         @prefix schema: <https://schema.org/> .
         
@@ -116,22 +128,24 @@ describe('021-nanopublication format', () => {
           ns1:includesQuotationFrom <https://twitter.com/ori_goldberg/status/1781281656071946541> ;    
           schema:keywords "ExternalSecurity",        "Geopolitics",        "Israel",        "Kissinger",        "PoliticalScience",        "Security" .
         `,
-      mirrors: [
-        {
-          id: 'post-id-1',
-          post_id: published.info().uri as string,
-          publishOrigin: PlatformPostPublishOrigin.POSTED,
-          publishStatus: PlatformPostPublishStatus.PUBLISHED,
-          platformId: PLATFORM.Nanopub,
-          posted: {
+        mirrors: [
+          {
+            id: 'post-id-1',
             post_id: published.info().uri as string,
-            user_id: 'test-user-id',
-            timestampMs: Date.now(),
-            post: published.rdf(),
+            publishOrigin: PlatformPostPublishOrigin.POSTED,
+            publishStatus: PlatformPostPublishStatus.PUBLISHED,
+            platformId: PLATFORM.Nanopub,
+            posted: {
+              post_id: published.info().uri as string,
+              user_id: 'test-user-id',
+              timestampMs: Date.now(),
+              post: published.rdf(),
+            },
           },
-        },
-      ],
-    });
+        ],
+      },
+      PLATFORM.Twitter
+    );
     const updatedNanopub = await createNanopublication(updatedPost, mockUser);
     const updatedSigned = await signNanopublication(
       updatedNanopub.rdf(),

@@ -22,6 +22,26 @@ export const getMockedUser = (credentials: TestUserCredentials): AppUser => {
       `${PLATFORM.Twitter}:${credentials.twitter.id}`,
       `${PLATFORM.Nanopub}:${credentials.nanopub.ethPrivateKey}`,
     ],
+    [PLATFORM.Mastodon]: [
+      {
+        user_id: credentials[PLATFORM.Mastodon].id,
+        signupDate: 0,
+        profile: {
+          id: credentials[PLATFORM.Mastodon].id,
+          displayName: credentials[PLATFORM.Mastodon].username,
+          username: credentials[PLATFORM.Mastodon].username,
+          avatar:
+            'https://files.mastodon.social/accounts/avatars/000/000/001/original/1f44b.png',
+          mastodonServer: 'mastodon.social',
+        },
+        read: {
+          accessToken: '',
+        },
+        write: {
+          accessToken: '',
+        },
+      },
+    ],
     [PLATFORM.Twitter]: [
       {
         user_id: credentials[PLATFORM.Twitter].id,

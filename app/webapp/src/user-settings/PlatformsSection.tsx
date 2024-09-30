@@ -12,6 +12,7 @@ export const PlatformSection = (props: {
   onButtonClicked: () => void;
   connected: boolean;
   connecting?: boolean;
+  isValidInput?: (input: string) => boolean;
 }) => {
   const { constants } = useThemeContext();
 
@@ -34,9 +35,12 @@ export const PlatformSection = (props: {
           <Text>{props.platformName}</Text>
         </Box>
         <Box>
-          <Text style={{ fontWeight: 500, color: constants.colors.textLight2 }}>
-            {props.username}
-          </Text>
+          {props.connected && (
+            <Text
+              style={{ fontWeight: 500, color: constants.colors.textLight2 }}>
+              {props.username}
+            </Text>
+          )}
         </Box>
       </Box>
       <Box>
@@ -44,7 +48,8 @@ export const PlatformSection = (props: {
           <AppButton
             disabled={props.connecting}
             label={props.connecting ? 'connecting' : props.buttonText}
-            onClick={() => props.onButtonClicked()}></AppButton>
+            onClick={props.onButtonClicked}
+          />
         ) : (
           <Box
             direction="row"

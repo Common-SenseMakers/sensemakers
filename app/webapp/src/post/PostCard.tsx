@@ -92,7 +92,11 @@ export const PostCard = (props: {
     props.handleClick();
   };
 
-  const tweet = post.mirrors.find((m) => m.platformId === PLATFORM.Twitter);
+  const originalPlatformPost = post.mirrors.find(
+    (m) => m.platformId === post.origin
+  );
+  const originalPostUrl = post.generic.thread[0].url;
+
   const postText = concatenateThread(post.generic);
 
   const handleInternalClick = (e: React.MouseEvent) => {

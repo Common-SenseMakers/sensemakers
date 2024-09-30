@@ -22,9 +22,9 @@ import { ENVIRONMENTS } from '../../../config/ENVIRONMENTS';
 import { APP_URL, NODE_ENV } from '../../../config/config.runtime';
 import { TransactionManager } from '../../../db/transaction.manager';
 import { logger } from '../../../instances/logger';
+import { getTestCredentials } from '../../mock/test.users';
 import { TwitterService } from '../twitter.service';
 import { convertToAppTweetBase, dateStrToTimestampMs } from '../twitter.utils';
-import { getTestCredentials } from './test.users';
 import { getSampleTweet, getTimelineMock } from './twitter.mock.utils';
 
 const DEBUG = false;
@@ -239,12 +239,18 @@ export const getTwitterMock = (
         user_id?: string,
         params?: TwitterGetContextParams
       ): TwitterSignupContext => {
+        const callbackUrl = new URL(
+          params?.callback_url ? params.callback_url : APP_URL.value()
+        );
+        callbackUrl.searchParams.set('code', 'testCode');
+        callbackUrl.searchParams.set('state', 'testState');
+        console.log('callbackUrl', callbackUrl.toString());
         return {
-          url: `${APP_URL.value()}?code=testCode&state=testState`,
+          url: callbackUrl.toString(),
           state: 'testState',
           codeVerifier: 'testCodeVerifier',
           codeChallenge: user_id ? user_id : '', // include the user_id in the code challenge so the mock handle signup data knows which user to select from
-          callback_url: APP_URL.value(),
+          callback_url: callbackUrl.toString(),
           type: 'read',
         };
       }

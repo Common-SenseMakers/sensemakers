@@ -1,21 +1,34 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
 
-import { TweetAnchor } from '../app/anchors/TwitterAnchor';
-import { TwitterAvatar } from '../app/icons/TwitterAvatar';
+import { PlatformPostAnchor } from '../app/anchors/PlatformPostAnchor';
+import { PlatformAvatar } from '../app/icons/PlatformAvatar';
+import { MastodonUserProfile } from '../shared/types/types.mastodon';
+import { TwitterUserProfile } from '../shared/types/types.twitter';
+import { AccountDetailsRead, PLATFORM } from '../shared/types/types.user';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { NanopubStatus } from './NanopubStatus';
 import { usePost } from './post.context/PostContext';
 
-export const PostHeader = (props: BoxExtendedProps) => {
+export const PostHeader = (props: {
+  boxProps: BoxExtendedProps;
+  name: string;
+  imageUrl?: string;
+}) => {
   const { constants } = useThemeContext();
-  const { derived, updated } = usePost();
+  const { updated } = usePost();
+  const post = updated.postMerged;
 
-  const profile = derived.tweet?.posted?.author;
+  const { boxProps, name, imageUrl } = props;
+
+  const originalPlatformPost = post?.mirrors.find(
+    (m) => m.platformId === post.origin
+  );
+  const originalPostUrl = post?.generic.thread[0].url;
 
   return (
-    <Box direction="row" justify="between" {...props}>
+    <Box direction="row" justify="between" {...boxProps}>
       <Box direction="row">
-        <TwitterAvatar size={48} profile={profile}></TwitterAvatar>
+        <PlatformAvatar size={48} profileImageUrl={imageUrl}></PlatformAvatar>
         <Box width="100%" margin={{ left: 'medium' }}>
           <Box direction="row" justify="between">
             <Text
@@ -27,13 +40,14 @@ export const PostHeader = (props: BoxExtendedProps) => {
                 lineHeight: '18px',
                 textDecoration: 'none',
               }}>
-              {profile?.name}
+              {name}
             </Text>
           </Box>
           <Box margin={{ bottom: '6px' }}></Box>
-          <TweetAnchor
-            thread={derived.tweet?.posted?.post}
-            timestamp={derived.tweet?.posted?.timestampMs}></TweetAnchor>
+          <PlatformPostAnchor
+            platformPostPosted={originalPlatformPost?.posted}
+            platformId={post?.origin}
+            postUrl={originalPostUrl}></PlatformPostAnchor>
         </Box>
       </Box>
 

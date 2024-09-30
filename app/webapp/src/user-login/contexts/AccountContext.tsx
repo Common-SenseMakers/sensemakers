@@ -8,15 +8,19 @@ import {
 } from 'react';
 
 import { _appFetch } from '../../api/app.fetch';
+import { MastodonUserProfile } from '../../shared/types/types.mastodon';
+import { NanopubUserProfile } from '../../shared/types/types.nanopubs';
 import { NotificationFreq } from '../../shared/types/types.notifications';
 import { OrcidUserProfile } from '../../shared/types/types.orcid';
 import { TwitterUserProfile } from '../../shared/types/types.twitter';
 import {
+  ALL_PUBLISH_PLATFORMS,
   AccountDetailsRead,
   AppUserRead,
   AutopostOption,
   EmailDetails,
   PLATFORM,
+  PUBLISHABLE_PLATFORM,
 } from '../../shared/types/types.user';
 import { usePersist } from '../../utils/use.persist';
 import { getAccount } from '../user.helper';
@@ -25,12 +29,13 @@ const DEBUG = false;
 
 export const OUR_TOKEN_NAME = 'ourToken';
 export const LOGIN_STATUS = 'loginStatus';
-export const TWITTER_LOGIN_STATUS = 'twitterLoginStatus';
+export const PLATFORMS_LOGIN_STATUS = 'platformsLoginStatus';
 
 export type AccountContextType = {
   connectedUser?: AppUserRead;
   isConnected: boolean;
   twitterProfile?: TwitterUserProfile;
+  mastodonProfile?: MastodonUserProfile;
   email?: EmailDetails;
   disconnect: () => void;
   refresh: () => void;
@@ -41,16 +46,24 @@ export type AccountContextType = {
   setLoginFlowState: (status: LoginFlowState) => void;
   loginFlowState: LoginFlowState;
   resetLogin: () => void;
-  setTwitterConnectedStatus: (status: TwitterConnectedStatus) => void;
-  twitterConnectedStatus: TwitterConnectedStatus | undefined;
-  orcid?: AccountDetailsRead<OrcidUserProfile>;
   currentAutopost?: AutopostOption;
   currentNotifications?: NotificationFreq;
+  setPlatformsConnectedStatus: (status: PlatformsConnectedStatus) => void;
+  platformsConnectedStatus?: PlatformsConnectedStatus;
 };
 
 const AccountContextValue = createContext<AccountContextType | undefined>(
   undefined
 );
+
+export interface ConnectedUser extends AppUserRead {
+  profiles?: {
+    [PLATFORM.Twitter]: TwitterUserProfile;
+    [PLATFORM.Mastodon]: MastodonUserProfile;
+    [PLATFORM.Nanopub]: NanopubUserProfile;
+    [PLATFORM.Orcid]: OrcidUserProfile;
+  };
+}
 
 /** explicit status of the login/signup process */
 export enum LoginFlowState {
@@ -62,6 +75,7 @@ export enum LoginFlowState {
   SignningUpNanopub = 'SignningUpNanopub',
   RegisteringEmail = 'RegisteringEmail',
   ConnectingTwitter = 'ConnectingTwitter',
+  ConnectingMastodon = 'ConnectingMastodon',
   BasicLoggedIn = 'BasicLoggedIn',
   Disconnecting = 'Disconnecting',
 }
@@ -77,11 +91,20 @@ export enum OverallLoginStatus {
   FullyLoggedIn = 'FullyLoggedIn',
 }
 
-export enum TwitterConnectedStatus {
+export enum PlatformConnectedStatus {
   Disconnected = 'Disconnected',
   Connecting = 'Connecting',
   Connected = 'Connected',
 }
+
+export type PlatformsConnectedStatus = Partial<
+  Record<PLATFORM, PlatformConnectedStatus>
+>;
+
+const platformsConnectedStatusInit: PlatformsConnectedStatus = {};
+ALL_PUBLISH_PLATFORMS.forEach((platform) => {
+  platformsConnectedStatusInit[platform] = PlatformConnectedStatus.Disconnected;
+});
 
 /**
  * Manages the logged-in user. We use JWT tokens to authenticate
@@ -90,7 +113,7 @@ export enum TwitterConnectedStatus {
  * in the localStorage
  */
 export const AccountContext = (props: PropsWithChildren) => {
-  const [connectedUser, setConnectedUser] = useState<AppUserRead | null>();
+  const [connectedUser, setConnectedUser] = useState<ConnectedUser | null>();
 
   const [loginFlowState, _setLoginFlowState] = useState<LoginFlowState>(
     LoginFlowState.Idle
@@ -100,10 +123,10 @@ export const AccountContext = (props: PropsWithChildren) => {
   const [overallLoginStatus, _setOverallLoginStatus] =
     usePersist<OverallLoginStatus>(LOGIN_STATUS, OverallLoginStatus.NotKnown);
 
-  const [twitterConnectedStatus, setTwitterConnectedStatus] =
-    usePersist<TwitterConnectedStatus>(
-      TWITTER_LOGIN_STATUS,
-      TwitterConnectedStatus.Disconnected
+  const [platformsConnectedStatus, setPlatformsConnectedStatus] =
+    usePersist<PlatformsConnectedStatus>(
+      PLATFORMS_LOGIN_STATUS,
+      platformsConnectedStatusInit
     );
 
   /** keep the conneccted user linkted to the current token */
@@ -157,23 +180,50 @@ export const AccountContext = (props: PropsWithChildren) => {
      * once connected user is defined and has an email, but there is no
      * twitter, the user is partially logged in
      */
-    if (connectedUser && connectedUser.email && !twitterProfile) {
-      setOverallLoginStatus(OverallLoginStatus.PartialLoggedIn);
+    if (connectedUser && connectedUser.email) {
+      /** if not a single platform has been connected, consider login partial */
+      if (
+        !connectedUser.profiles ||
+        Object.keys(connectedUser.profiles).length === 0
+      ) {
+        setOverallLoginStatus(OverallLoginStatus.PartialLoggedIn);
+      }
+
+      /** update each platform persisted connected status */
+      ALL_PUBLISH_PLATFORMS.forEach((platform) => {
+        if (
+          connectedUser.profiles &&
+          connectedUser.profiles[platform] &&
+          loginFlowState !== LoginFlowState.Disconnecting
+        ) {
+          setPlatformsConnectedStatus({
+            ...platformsConnectedStatus,
+            [platform]: PlatformConnectedStatus.Connected,
+          });
+        }
+      });
+
+      /** enable fully logged in when at least one platform is connected */
+      if (connectedUser.profiles) {
+        const some = Object.keys(connectedUser.profiles)
+          .map(
+            (platform) =>
+              connectedUser.profiles &&
+              connectedUser.profiles[platform as PUBLISHABLE_PLATFORM] !==
+                undefined
+          )
+          .some((profile) => profile);
+
+        if (some) {
+          setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
+        }
+      }
     }
 
     /**
      * once the user is partiallyLoggedIn and has a twitter profile
      * then the user is FullyLoggedIn
      */
-    if (
-      connectedUser &&
-      connectedUser.email &&
-      twitterProfile &&
-      loginFlowState !== LoginFlowState.Disconnecting
-    ) {
-      setTwitterConnectedStatus(TwitterConnectedStatus.Connected);
-      setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
-    }
 
     /** If finished fetching for connected user and is undefined, then
      * the status is not not-known, its a confirmed LoggedOut */
@@ -183,15 +233,21 @@ export const AccountContext = (props: PropsWithChildren) => {
     ) {
       disconnect();
     }
-  }, [connectedUser, overallLoginStatus, token]);
+  }, [connectedUser, overallLoginStatus, token, loginFlowState]);
 
   const disconnect = () => {
     setConnectedUser(undefined);
+    setToken(null);
+
+    ALL_PUBLISH_PLATFORMS.forEach((platform) => {
+      setPlatformsConnectedStatus({
+        ...platformsConnectedStatus,
+        [platform]: PlatformConnectedStatus.Disconnected,
+      });
+    });
+
     _setLoginFlowState(LoginFlowState.Idle);
     _setOverallLoginStatus(OverallLoginStatus.LoggedOut);
-    setTwitterConnectedStatus(TwitterConnectedStatus.Disconnected);
-    setToken(null);
-    setOverallLoginStatus(OverallLoginStatus.LoggedOut);
   };
 
   const twitterProfile = useMemo(() => {
@@ -200,6 +256,16 @@ export const AccountContext = (props: PropsWithChildren) => {
       : undefined;
 
     if (DEBUG) console.log('twitterProfile', { profile });
+
+    return profile;
+  }, [connectedUser]);
+
+  const mastodonProfile = useMemo(() => {
+    const profile = connectedUser
+      ? getAccount(connectedUser, PLATFORM.Mastodon)?.profile
+      : undefined;
+
+    if (DEBUG) console.log('mastodonProfile', { profile });
 
     return profile;
   }, [connectedUser]);
@@ -226,6 +292,7 @@ export const AccountContext = (props: PropsWithChildren) => {
       value={{
         connectedUser: connectedUser === null ? undefined : connectedUser,
         twitterProfile,
+        mastodonProfile,
         email,
         isConnected: connectedUser !== undefined && connectedUser !== null,
         disconnect,
@@ -237,11 +304,10 @@ export const AccountContext = (props: PropsWithChildren) => {
         loginFlowState,
         setLoginFlowState,
         resetLogin,
-        setTwitterConnectedStatus,
-        twitterConnectedStatus,
-        orcid,
         currentAutopost,
         currentNotifications,
+        setPlatformsConnectedStatus,
+        platformsConnectedStatus,
       }}>
       {props.children}
     </AccountContextValue.Provider>

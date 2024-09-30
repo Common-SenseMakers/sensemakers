@@ -1,4 +1,8 @@
-import { PlatformPost } from '../@shared/types/types.platform.posts';
+import { MastodonThread } from '../@shared/types/types.mastodon';
+import {
+  PlatformPost,
+  PlatformPostPosted,
+} from '../@shared/types/types.platform.posts';
 import { AppPostFull, GenericPost } from '../@shared/types/types.posts';
 import {
   DefinedIfTrue,
@@ -60,5 +64,20 @@ export class PostsHelper {
     }
 
     return mirror;
+  }
+
+  static getNewestPostIdInPlatformPostThread<P>(
+    platformId: PLATFORM,
+    platformPosted: PlatformPostPosted<P>
+  ): string {
+    if (platformId === PLATFORM.Mastodon) {
+      const mastodonThread = platformPosted.post as MastodonThread;
+      const newestPostId = mastodonThread.posts.reduce(
+        (acc, post) => (post.id > acc ? post.id : acc),
+        mastodonThread.posts[0].id
+      );
+      return newestPostId;
+    }
+    return platformPosted.post_id;
   }
 }

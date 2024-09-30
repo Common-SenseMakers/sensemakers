@@ -1,4 +1,5 @@
 import { FetchParams } from '../../src/@shared/types/types.fetch';
+import { MastodonThread } from '../../src/@shared/types/types.mastodon';
 import { ParsePostResult } from '../../src/@shared/types/types.parser';
 import {
   PlatformPost,
@@ -15,7 +16,10 @@ import {
   GenericThread,
 } from '../../src/@shared/types/types.posts';
 import { TwitterThread } from '../../src/@shared/types/types.twitter';
-import { PLATFORM } from '../../src/@shared/types/types.user';
+import {
+  PLATFORM,
+  PUBLISHABLE_PLATFORMS,
+} from '../../src/@shared/types/types.user';
 import { activityEventCreatedHook } from '../../src/activity/activity.created.hook';
 import { Services } from '../../src/instances/services';
 import { postUpdatedHook } from '../../src/posts/hooks/post.updated.hook';
@@ -94,7 +98,10 @@ export const getMockPostNew = () => {
   return post;
 };
 
-export const getMockPost = (refPost: Partial<AppPostFull>) => {
+export const getMockPost = (
+  refPost: Partial<AppPostFull>,
+  platformId?: PLATFORM
+) => {
   const authorId = refPost.authorId || 'test-author-id';
   const createdAtMs = refPost.createdAtMs || Date.now();
 
@@ -113,39 +120,236 @@ export const getMockPost = (refPost: Partial<AppPostFull>) => {
     author: {
       id: '123456',
       name: 'test author',
-      platformId: PLATFORM.Twitter,
+      platformId: platformId || PLATFORM.Twitter,
       username: 'test_author',
     },
   };
 
-  const twitterMirror: PlatformPost<TwitterThread> = {
-    id: 'pp-id',
-    platformId: PLATFORM.Twitter,
-    publishOrigin: PlatformPostPublishOrigin.FETCHED,
-    publishStatus: PlatformPostPublishStatus.PUBLISHED,
-    posted: {
-      post_id: '123456',
-      timestampMs: createdAtMs,
-      user_id: testCredentials[0].twitter.id,
-      post: {
-        conversation_id: '123456',
-        tweets: [
-          {
-            id: '123456',
-            created_at: '2021-01-01T00:00:00.000Z',
-            author_id: '123456',
-            conversation_id: '123456',
-            text: 'test content',
+  const platformMirror: PlatformPost<MastodonThread | TwitterThread> = (() => {
+    if (platformId === PLATFORM.Mastodon) {
+      return {
+        id: 'pp-mastodon-id',
+        platformId: PLATFORM.Mastodon,
+        publishOrigin: PlatformPostPublishOrigin.FETCHED,
+        publishStatus: PlatformPostPublishStatus.PUBLISHED,
+        posted: {
+          post_id: '113093259230165857',
+          user_id: testCredentials[0].mastodon.id,
+          timestampMs: createdAtMs,
+          post: {
+            thread_id: '113093259230165857',
+            posts: [
+              {
+                id: '113093259230165857',
+                createdAt: '2024-09-06T23:43:06.984Z',
+                inReplyToId: null,
+                inReplyToAccountId: null,
+                sensitive: false,
+                spoilerText: '',
+                visibility: 'public',
+                language: 'en',
+                uri: 'https://cosocial.ca/users/weswalla/statuses/113093259230165857',
+                url: 'https://cosocial.ca/@weswalla/113093259230165857',
+                repliesCount: 1,
+                reblogsCount: 0,
+                favouritesCount: 0,
+                editedAt: null,
+                favourited: false,
+                reblogged: false,
+                muted: false,
+                bookmarked: false,
+                pinned: false,
+                content:
+                  '<p>I like to try and ground my understanding of reality and what is possible in the future in ecological systems science <a href="https://www.sciencedirect.com/science/article/pii/S0921800919310067" target="_blank" rel="nofollow noopener noreferrer" translate="no"><span class="invisible">https://www.</span><span class="ellipsis">sciencedirect.com/science/arti</span><span class="invisible">cle/pii/S0921800919310067</span></a></p>',
+                filtered: [],
+                reblog: null,
+                application: {
+                  name: 'Web',
+                  website: null,
+                },
+                account: {
+                  id: '111971425782516559',
+                  username: 'weswalla',
+                  acct: 'weswalla',
+                  displayName: 'Wesley Finck',
+                  locked: false,
+                  bot: false,
+                  discoverable: null,
+                  group: false,
+                  createdAt: '2024-02-21T00:00:00.000Z',
+                  note: '<p>Full-Stack Engineer building knowledge management and sense-making tooling<br />prev: Holochain dev</p>',
+                  url: 'https://cosocial.ca/@weswalla',
+                  uri: 'https://cosocial.ca/users/weswalla',
+                  avatar:
+                    'https://media.cosocial.ca/accounts/avatars/111/971/425/782/516/559/original/963c30efd081957e.jpeg',
+                  avatarStatic:
+                    'https://media.cosocial.ca/accounts/avatars/111/971/425/782/516/559/original/963c30efd081957e.jpeg',
+                  header: 'https://cosocial.ca/headers/original/missing.png',
+                  headerStatic:
+                    'https://cosocial.ca/headers/original/missing.png',
+                  followersCount: 11,
+                  followingCount: 18,
+                  statusesCount: 21,
+                  lastStatusAt: '2024-09-07',
+                  noindex: false,
+                  emojis: [],
+                  roles: [],
+                  fields: [],
+                },
+                mediaAttachments: [],
+                mentions: [],
+                tags: [],
+                emojis: [],
+                card: null,
+                poll: null,
+              },
+              {
+                id: '113093358996832469',
+                createdAt: '2024-09-07T00:08:29.299Z',
+                inReplyToId: '113093259230165857',
+                inReplyToAccountId: '111971425782516559',
+                sensitive: false,
+                spoilerText: '',
+                visibility: 'public',
+                language: 'en',
+                uri: 'https://cosocial.ca/users/weswalla/statuses/113093358996832469',
+                url: 'https://cosocial.ca/@weswalla/113093358996832469',
+                repliesCount: 0,
+                reblogsCount: 0,
+                favouritesCount: 0,
+                editedAt: null,
+                favourited: false,
+                reblogged: false,
+                muted: false,
+                bookmarked: false,
+                pinned: false,
+                content:
+                  '<p>there&#39;s a great podcast all about this by the paper&#39;s author: <a href="https://www.thegreatsimplification.com/" target="_blank" rel="nofollow noopener noreferrer" translate="no"><span class="invisible">https://www.</span><span class="">thegreatsimplification.com/</span><span class="invisible"></span></a></p>',
+                filtered: [],
+                reblog: null,
+                application: {
+                  name: 'Web',
+                  website: null,
+                },
+                account: {
+                  id: '111971425782516559',
+                  username: 'weswalla',
+                  acct: 'weswalla',
+                  displayName: 'Wesley Finck',
+                  locked: false,
+                  bot: false,
+                  discoverable: null,
+                  group: false,
+                  createdAt: '2024-02-21T00:00:00.000Z',
+                  note: '<p>Full-Stack Engineer building knowledge management and sense-making tooling<br />prev: Holochain dev</p>',
+                  url: 'https://cosocial.ca/@weswalla',
+                  uri: 'https://cosocial.ca/users/weswalla',
+                  avatar:
+                    'https://media.cosocial.ca/accounts/avatars/111/971/425/782/516/559/original/963c30efd081957e.jpeg',
+                  avatarStatic:
+                    'https://media.cosocial.ca/accounts/avatars/111/971/425/782/516/559/original/963c30efd081957e.jpeg',
+                  header: 'https://cosocial.ca/headers/original/missing.png',
+                  headerStatic:
+                    'https://cosocial.ca/headers/original/missing.png',
+                  followersCount: 11,
+                  followingCount: 18,
+                  statusesCount: 21,
+                  lastStatusAt: '2024-09-07',
+                  noindex: false,
+                  emojis: [],
+                  roles: [],
+                  fields: [],
+                },
+                mediaAttachments: [],
+                mentions: [],
+                tags: [],
+                emojis: [],
+                card: {
+                  url: 'https://www.thegreatsimplification.com',
+                  title: 'The Great Simplification with Nate Hagens',
+                  description:
+                    'The Great Simplification with Nate Hagens explores money, energy, economy, and the environment with world experts and leaders to understand how everything fits together, and where we go from here.',
+                  language: 'en',
+                  type: 'link',
+                  authorName: '',
+                  authorUrl: '',
+                  providerName: 'The Great Simplification',
+                  providerUrl: '',
+                  html: '',
+                  width: 1500,
+                  height: 844,
+                  image:
+                    'https://media.cosocial.ca/cache/preview_cards/images/000/843/310/original/fb0235e0afb9c5c6.jpg',
+                  imageDescription: '',
+                  embedUrl: '',
+                  blurhash: 'UN9%xU-q4,D$?Jog9XITj]j[j?a{R%j[t8s;',
+                  publishedAt: null,
+                },
+                poll: null,
+              },
+            ],
+            author: {
+              id: '111971425782516559',
+              username: 'weswalla',
+              acct: 'weswalla',
+              displayName: 'Wesley Finck',
+              locked: false,
+              bot: false,
+              discoverable: null,
+              group: false,
+              createdAt: '2024-02-21T00:00:00.000Z',
+              note: '<p>Full-Stack Engineer building knowledge management and sense-making tooling<br />prev: Holochain dev</p>',
+              url: 'https://cosocial.ca/@weswalla',
+              uri: 'https://cosocial.ca/users/weswalla',
+              avatar:
+                'https://media.cosocial.ca/accounts/avatars/111/971/425/782/516/559/original/963c30efd081957e.jpeg',
+              avatarStatic:
+                'https://media.cosocial.ca/accounts/avatars/111/971/425/782/516/559/original/963c30efd081957e.jpeg',
+              header: 'https://cosocial.ca/headers/original/missing.png',
+              headerStatic: 'https://cosocial.ca/headers/original/missing.png',
+              followersCount: 11,
+              followingCount: 18,
+              statusesCount: 21,
+              lastStatusAt: '2024-09-07',
+              noindex: false,
+              emojis: [],
+              roles: [],
+              fields: [],
+            },
           },
-        ],
-        author: {
-          id: '123456',
-          username: 'test_author',
-          name: 'test author',
+        },
+      };
+    }
+
+    return {
+      id: 'pp-id',
+      platformId: PLATFORM.Twitter,
+      publishOrigin: PlatformPostPublishOrigin.FETCHED,
+      publishStatus: PlatformPostPublishStatus.PUBLISHED,
+      posted: {
+        post_id: '123456',
+        timestampMs: createdAtMs,
+        user_id: testCredentials[0].twitter.id,
+        post: {
+          conversation_id: '123456',
+          tweets: [
+            {
+              id: '123456',
+              created_at: '2021-01-01T00:00:00.000Z',
+              author_id: '123456',
+              conversation_id: '123456',
+              text: 'test content',
+            },
+          ],
+          author: {
+            id: '123456',
+            username: 'test_author',
+            name: 'test author',
+          },
         },
       },
-    },
-  };
+    };
+  })();
 
   const post: AppPostFull = {
     id: refPost.id || 'post-id',
@@ -153,14 +357,14 @@ export const getMockPost = (refPost: Partial<AppPostFull>) => {
     authorId: authorId,
     generic: refPost.generic || defaultGeneric,
     semantics: refPost.semantics || '',
-    origin: PLATFORM.Twitter,
+    origin: platformId || PLATFORM.Twitter,
     parsedStatus: AppPostParsedStatus.PROCESSED,
     parsingStatus: AppPostParsingStatus.IDLE,
     reviewedStatus: AppPostReviewStatus.PENDING,
     republishedStatus: AppPostRepublishedStatus.PENDING,
     mirrors: refPost.mirrors
-      ? [...refPost.mirrors, twitterMirror]
-      : [twitterMirror],
+      ? [...refPost.mirrors, platformMirror]
+      : [platformMirror],
   };
   return post;
 };
@@ -207,20 +411,21 @@ export const postUpdatedHookOnTest = async (
 export const fetchPostInTests = async (
   userId: string,
   post_id: string,
-  services: Services
+  services: Services,
+  platform: PUBLISHABLE_PLATFORMS
 ) => {
   /** fetch will store the posts in the DB */
   const { post } = await services.db.run(
     (manager) =>
       services.postsManager.fetchPostFromPlatform(
         userId,
-        PLATFORM.Twitter,
+        platform,
         post_id,
         manager
       ),
     undefined,
     undefined,
-    `fetchPostInTests ${userId} ${post_id}`
+    `fetchPostInTests ${userId} ${post_id} ${platform}`
   );
   if (post) {
     /**
