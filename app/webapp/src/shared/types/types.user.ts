@@ -28,24 +28,24 @@ export enum PLATFORM {
   Mastodon = 'mastodon',
 }
 
-export type PUBLISHABLE_PLATFORMS =
+export type PUBLISHABLE_PLATFORM =
   | PLATFORM.Twitter
   | PLATFORM.Nanopub
   | PLATFORM.Mastodon;
 
-export const ALL_PUBLISH_PLATFORMS: PUBLISHABLE_PLATFORMS[] = [
+export const ALL_PUBLISH_PLATFORMS: PUBLISHABLE_PLATFORM[] = [
   PLATFORM.Twitter,
   PLATFORM.Nanopub,
   PLATFORM.Mastodon,
 ];
 
-export type IDENTITY_PLATFORMS =
+export type IDENTITY_PLATFORM =
   | PLATFORM.Orcid
   | PLATFORM.Twitter
   | PLATFORM.Nanopub
   | PLATFORM.Mastodon;
 
-export const ALL_IDENTITY_PLATFORMS: IDENTITY_PLATFORMS[] = [
+export const ALL_IDENTITY_PLATFORMS: IDENTITY_PLATFORM[] = [
   PLATFORM.Twitter,
   PLATFORM.Nanopub,
   PLATFORM.Orcid,

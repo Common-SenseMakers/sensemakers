@@ -32,10 +32,8 @@ export const LOGIN_STATUS = 'loginStatus';
 export const PLATFORMS_LOGIN_STATUS = 'platformsLoginStatus';
 
 export type AccountContextType = {
-  connectedUser?: AppUserRead;
+  connectedUser?: ConnectedUser;
   isConnected: boolean;
-  twitterProfile?: TwitterUserProfile;
-  mastodonProfile?: MastodonUserProfile;
   email?: EmailDetails;
   disconnect: () => void;
   refresh: () => void;
@@ -291,8 +289,6 @@ export const AccountContext = (props: PropsWithChildren) => {
     <AccountContextValue.Provider
       value={{
         connectedUser: connectedUser === null ? undefined : connectedUser,
-        twitterProfile,
-        mastodonProfile,
         email,
         isConnected: connectedUser !== undefined && connectedUser !== null,
         disconnect,
