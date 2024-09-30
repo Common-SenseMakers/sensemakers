@@ -39,6 +39,7 @@ export const PostsFetcherComponent = (props: {
   status?: PostsQueryStatus;
   onFilterOptionChanged: (filter: PostsQuery) => void;
   showAuthor?: boolean;
+  showHeader?: boolean;
 }) => {
   const { show } = useToastContext();
   const { constants } = useThemeContext();
@@ -51,9 +52,11 @@ export const PostsFetcherComponent = (props: {
     onFilterOptionChanged,
     feed,
     showAuthor: _showAuthor,
+    showHeader: _showHeader,
   } = props;
 
   const showAuthor = _showAuthor !== undefined ? _showAuthor : false;
+  const showHeader = _showHeader !== undefined ? _showHeader : true;
 
   const navigate = useNavigate();
 
@@ -267,7 +270,7 @@ export const PostsFetcherComponent = (props: {
 
   return (
     <>
-      {header}
+      {showHeader && header}
       <Box fill justify="start">
         {content}
       </Box>

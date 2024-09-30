@@ -6,12 +6,14 @@ import { useLocation } from 'react-router-dom';
 
 import { I18Keys } from '../i18n/i18n';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
+import { FeedTabs } from './FeedTabs';
 import { useFeedPosts } from './PublicFeedContext';
 
 const DEBUG = false;
 
 export const PublicFeed = () => {
   const { t } = useTranslation();
+
   const { feed } = useFeedPosts();
 
   const location = useLocation();
@@ -36,7 +38,9 @@ export const PublicFeed = () => {
   return (
     <>
       <Box fill justify="start">
+        <FeedTabs></FeedTabs>
         <PostsFetcherComponent
+          showHeader={false}
           showAuthor={true}
           feed={feed}
           pageTitle={t(I18Keys.feedTitle)}

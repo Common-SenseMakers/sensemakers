@@ -73,7 +73,7 @@ export const AppContainer = (props: React.PropsWithChildren) => {
                   element={<UserSettingsPage></UserSettingsPage>}></Route>
 
                 <Route
-                  path={`${RouteNames.Feed}`}
+                  path={`${RouteNames.Feed}/*`}
                   element={
                     <FeedPostsContext>
                       <PublicFeedPage></PublicFeedPage>
