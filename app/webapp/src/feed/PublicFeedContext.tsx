@@ -1,11 +1,15 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useMemo } from 'react';
 import { createContext } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import {
+  FetcherConfig,
   PostFetcherInterface,
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
 import { PostsQueryStatus } from '../shared/types/types.posts';
+import { locationToFeedIx } from './FeedTabs';
+import { feedTabs } from './feed.config';
 
 interface FeedContextType {
   feed: PostFetcherInterface;
@@ -22,15 +26,41 @@ export const FeedPostsContextValue = createContext<FeedContextType | undefined>(
 export const FeedPostsContext: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
-  useEffect(() => {
-    console.log('FeedPostsContext mounted');
-    return () => console.log('FeedPostsContext cleanup');
-  }, []);
+  const location = useLocation();
 
-  const feed = usePostsFetcher({
+  const config = useMemo((): FetcherConfig => {
+    const feedIx = locationToFeedIx(location);
+    const labels = feedTabs[feedIx].labels;
+
+    return {
+      endpoint: '/api/feed/get',
+      status: PostsQueryStatus.PUBLISHED,
+      labels,
+    };
+  }, [location]);
+
+  const feed0 = usePostsFetcher({
     endpoint: '/api/feed/get',
     status: PostsQueryStatus.PUBLISHED,
+    labels: feedTabs[0].labels,
   });
+
+  const feed1 = usePostsFetcher({
+    endpoint: '/api/feed/get',
+    status: PostsQueryStatus.PUBLISHED,
+    labels: feedTabs[1].labels,
+  });
+
+  const feed2 = usePostsFetcher({
+    endpoint: '/api/feed/get',
+    status: PostsQueryStatus.PUBLISHED,
+    labels: feedTabs[2].labels,
+  });
+
+  const feeds = [feed0, feed1, feed2];
+
+  const feedIx = locationToFeedIx(location);
+  const feed = feeds[feedIx];
 
   return (
     <FeedPostsContextValue.Provider

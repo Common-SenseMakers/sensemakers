@@ -17,7 +17,7 @@ export const feedTabs: FeedTabConfig[] = [
     title: 'Research Announcements',
     tooltip: '',
     labels: [
-      'https://sense-nets.xyz/announcesResource',
+      'http://purl.org/spar/cito/linksTo',
       'http://purl.org/spar/cito/discusses',
     ],
   },

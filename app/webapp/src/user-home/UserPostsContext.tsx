@@ -5,6 +5,7 @@ import { useLocation } from 'react-router-dom';
 import { useAppFetch } from '../api/app.fetch';
 import { DEBUG } from '../post/post.context/use.post.merge.deltas';
 import {
+  FetcherConfig,
   PostFetcherInterface,
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
@@ -62,12 +63,16 @@ export const UserPostsContext: React.FC<{
     });
   };
 
-  const feed = usePostsFetcher({
-    endpoint: '/api/posts/getOfUser',
-    status,
-    subscribe: true,
-    onPostsAdded,
-  });
+  const config = useMemo((): FetcherConfig => {
+    return {
+      endpoint: '/api/posts/getOfUser',
+      status,
+      subscribe: true,
+      onPostsAdded,
+    };
+  }, []);
+
+  const feed = usePostsFetcher(config);
 
   return (
     <UserPostsContextValue.Provider

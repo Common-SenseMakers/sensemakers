@@ -10,7 +10,7 @@ import { feedTabs } from './feed.config';
 
 const DEBUG = false;
 
-export const locationToPageIx = (location: Location) => {
+export const locationToFeedIx = (location: Location) => {
   if (DEBUG) console.log(location);
 
   const pageIx = feedTabs.findIndex((tab) =>
@@ -30,7 +30,7 @@ export const FeedTabs = (props: {}) => {
   const navigate = useNavigate();
   const { constants } = useThemeContext();
 
-  const pageIx = locationToPageIx(location);
+  const feedIx = locationToFeedIx(location);
 
   const tabElement = (text: string, route: string, isSelected: boolean) => {
     const internalBoxProps: BoxExtendedProps = {
@@ -73,7 +73,7 @@ export const FeedTabs = (props: {}) => {
   return (
     <Box direction="row" align="center" style={{ height: '48px' }}>
       {feedTabs.map((tab, ix) =>
-        tabElement(tab.title, `/${RouteNames.Feed}/${tab.id}`, pageIx === ix)
+        tabElement(tab.title, `/${RouteNames.Feed}/${tab.id}`, feedIx === ix)
       )}
     </Box>
   );

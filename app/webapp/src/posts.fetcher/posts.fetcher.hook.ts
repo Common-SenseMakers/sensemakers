@@ -33,11 +33,7 @@ export interface PostFetcherInterface {
   };
 }
 
-/**
- * Handles one array of posts by keeping track of the newest and oldest post ids and
- * fething newer and older posts as requested by a consuming component
- */
-export const usePostsFetcher = (input: {
+export interface FetcherConfig {
   endpoint: string;
   status?: string;
   labels?: string[];
@@ -45,7 +41,13 @@ export const usePostsFetcher = (input: {
   subscribe?: boolean;
   onPostsAdded?: (posts: AppPostFull[]) => void;
   PAGE_SIZE?: number;
-}): PostFetcherInterface => {
+}
+
+/**
+ * Handles one array of posts by keeping track of the newest and oldest post ids and
+ * fething newer and older posts as requested by a consuming component
+ */
+export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
   const { connectedUser, twitterProfile } = useAccountContext();
 
   const {
@@ -262,7 +264,7 @@ export const usePostsFetcher = (input: {
   /** reset at every status change  */
   useEffect(() => {
     reset();
-  }, [status]);
+  }, [status, labels, keywords, endpoint]);
 
   const _oldestPostId = useMemo(() => {
     const oldest = posts ? posts[posts.length - 1]?.id : undefined;
