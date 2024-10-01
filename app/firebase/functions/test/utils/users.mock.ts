@@ -43,6 +43,33 @@ export const getMockedUser = (credentials: TestUserCredentials): AppUser => {
           },
         },
       ],
+      [PLATFORM.Bluesky]: [
+        {
+          user_id: credentials[PLATFORM.Mastodon].id,
+          signupDate: 0,
+          profile: {
+            id: credentials[PLATFORM.Bluesky].id,
+            name: credentials[PLATFORM.Bluesky].username,
+            username: credentials[PLATFORM.Bluesky].username,
+            avatar:
+              'https://files.mastodon.social/accounts/avatars/000/000/001/original/1f44b.png',
+          },
+          read: {
+            refreshJwt: '',
+            accessJwt: '',
+            handle: '',
+            did: '',
+            active: true,
+          },
+          write: {
+            refreshJwt: '',
+            accessJwt: '',
+            handle: '',
+            did: '',
+            active: true,
+          },
+        },
+      ],
       [PLATFORM.Twitter]: [
         {
           user_id: credentials[PLATFORM.Twitter].id,

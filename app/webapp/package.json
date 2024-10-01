@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@magic-ext/oauth2": "^9.9.0",
+    "@atproto/api": "^0.13.7",
     "@nanopub/sign": "^0.1.4",
     "@nytimes/react-prosemirror": "^0.5.0",
     "@react-email/components": "^0.0.21",

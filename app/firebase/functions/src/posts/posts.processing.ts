@@ -110,6 +110,16 @@ export class PostsProcessing {
       if (authorIdFromMastodon) {
         return authorIdFromMastodon;
       }
+      const authorIdFromBluesky =
+        await this.users.repo.getUserWithPlatformAccount(
+          PLATFORM.Bluesky,
+          user_id,
+          manager,
+          false
+        );
+      if (authorIdFromBluesky) {
+        return authorIdFromBluesky;
+      }
       return undefined;
     })();
 

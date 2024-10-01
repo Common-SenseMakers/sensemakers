@@ -20,6 +20,7 @@
   },
   "main": "lib/index.js",
   "dependencies": {
+    "@atproto/api": "^0.13.7",
     "@magic-sdk/admin": "^2.4.1",
     "@nanopub/sign": "^0.1.4",
     "@types/n3": "^1.16.4",

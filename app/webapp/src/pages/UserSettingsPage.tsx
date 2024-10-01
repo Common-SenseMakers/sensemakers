@@ -331,6 +331,26 @@ export const UserSettingsPage = () => {
           connected={mastodonProfile !== undefined}></PlatformSection>
 
         <PlatformSection
+          icon={
+            blueskyProfile ? (
+              <PlatformAvatar profileImageUrl={blueskyProfile?.avatar} />
+            ) : (
+              <BlueskyIcon size={40} color="white"></BlueskyIcon>
+            )
+          }
+          platformName={'Bluesky'}
+          onButtonClicked={() => {
+            navigate(`../${RouteNames.ConnectBluesky}`, {
+              state: { callbackUrl: window.location.href },
+            });
+          }}
+          buttonText={needConnectBluesky ? 'connect' : ''}
+          username={
+            blueskyProfile ? `@${blueskyProfile.username}` : '- not connected -'
+          }
+          connected={!!blueskyProfile}></PlatformSection>
+
+        <PlatformSection
           icon={<OrcidIcon size={40}></OrcidIcon>}
           platformName={t(I18Keys.ORCID)}
           onButtonClicked={() => connectOrcid('/settings')}

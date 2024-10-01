@@ -6,6 +6,7 @@ export const RouteNames = {
   Posting: 'posting', // callback when singing up while posting
   Test: 'test',
   ConnectMastodon: 'connect-mastodon',
+  ConnectBluesky: 'connect-bluesky',
 };
 
 export const AbsoluteRoutes = {
@@ -14,4 +15,5 @@ export const AbsoluteRoutes = {
   Feed: `/${RouteNames.Feed}`,
   Settings: `/${RouteNames.Settings}`,
   ConnectMastodon: `/${RouteNames.ConnectMastodon}`,
+  ConnectBluesky: `/${RouteNames.ConnectBluesky}`,
 };

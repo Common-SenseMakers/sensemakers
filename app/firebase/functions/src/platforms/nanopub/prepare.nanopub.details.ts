@@ -8,7 +8,6 @@ import {
 import { UsersHelper } from '../../users/users.helper';
 
 export const prepareNanopubDetails = (user: AppUser, post: AppPostFull) => {
-  // platform accounts
   const nanopubAccount = UsersHelper.getAccount(
     user,
     PLATFORM.Nanopub,
@@ -33,7 +32,6 @@ export const prepareNanopubDetails = (user: AppUser, post: AppPostFull) => {
 
   const orcidAccount = UsersHelper.getAccount(user, PLATFORM.Orcid, undefined);
 
-  // parameters
   const introUri = nanopubAccount.profile?.introNanopubUri;
 
   if (!introUri) {
@@ -73,14 +71,12 @@ export const prepareNanopubDetails = (user: AppUser, post: AppPostFull) => {
   const orcidId = orcidAccount ? orcidAccount.user_id : undefined;
 
   const autopostOption: AutopostOption = (() => {
-    /** anything that isn't citoid detected doesn't get autopublished */
     if (
       post.originalParsed?.filter_classification !==
       SciFilterClassfication.CITOID_DETECTED_RESEARCH
     )
       return AutopostOption.MANUAL;
 
-    /** only indicate it was autopublished if it was created after the autoposting settings were set */
     if (
       user.settings.autopost[PLATFORM.Nanopub].after &&
       post.createdAtMs > user.settings.autopost[PLATFORM.Nanopub].after
@@ -89,10 +85,6 @@ export const prepareNanopubDetails = (user: AppUser, post: AppPostFull) => {
 
     return AutopostOption.MANUAL;
   })();
-  post.originalParsed?.filter_classification ===
-  SciFilterClassfication.CITOID_DETECTED_RESEARCH
-    ? user.settings.autopost[PLATFORM.Nanopub].value
-    : AutopostOption.MANUAL;
 
   const platformPost = post.mirrors.find(
     (platformPost) => platformPost.platformId === post.origin

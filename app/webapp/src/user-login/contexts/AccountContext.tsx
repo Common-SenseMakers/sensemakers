@@ -83,6 +83,7 @@ export enum LoginFlowState {
   RegisteringEmail = 'RegisteringEmail',
   ConnectingTwitter = 'ConnectingTwitter',
   ConnectingMastodon = 'ConnectingMastodon',
+  ConnectingBluesky = 'ConnectingBluesky',
   BasicLoggedIn = 'BasicLoggedIn',
   Disconnecting = 'Disconnecting',
 }

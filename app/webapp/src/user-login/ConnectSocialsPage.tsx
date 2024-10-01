@@ -22,6 +22,7 @@ export const ConnectSocialsPage = () => {
 
   const twitterProfile = connectedUser?.profiles?.twitter;
   const mastodonProfile = connectedUser?.profiles?.mastodon;
+  const blueskyProfile = connectedUser?.profiles?.bluesky;
 
   const handleContinue = () => {
     setAlreadyConnected(true);
@@ -73,6 +74,23 @@ export const ConnectSocialsPage = () => {
               : ''
           }
           connected={!!mastodonProfile}
+        />
+
+        <PlatformSection
+          icon={
+            blueskyProfile ? (
+              <PlatformAvatar imageUrl={blueskyProfile?.avatar} />
+            ) : (
+              <BlueskyIcon size={40} color="white"></BlueskyIcon>
+            )
+          }
+          platformName={'Bluesky'}
+          onButtonClicked={() => {
+            navigate(RouteNames.ConnectBluesky);
+          }}
+          buttonText={blueskyProfile ? '' : 'connect'}
+          username={blueskyProfile ? `@${blueskyProfile.username}` : ''}
+          connected={!!blueskyProfile}
         />
       </Box>
 

@@ -17,6 +17,7 @@
         "USE_REAL_PARSER": "false",
         "USE_REAL_EMAIL": "false",
         "USE_REAL_MASTODON": "false",
+        "USE_REAL_BLUESKY": "false",
         "APP_URL": "http://localhost:3000"
         // "TEST_THREAD_ID": "1823373556643688718"
       },

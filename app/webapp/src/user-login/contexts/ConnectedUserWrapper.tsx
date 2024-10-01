@@ -6,6 +6,7 @@ import { AccountContext } from './AccountContext';
 import { AutopostInviteContext } from './AutopostInviteContext';
 import { DisconnectUserContext } from './DisconnectUserContext';
 import { NavHistoryContext } from './NavHistoryContext';
+import { BlueskyContext } from './platforms/BlueskyContext';
 import { MastodonContext } from './platforms/MastodonContext';
 import { OrcidContext } from './platforms/OrcidContext';
 import { TwitterContext } from './platforms/TwitterContext';
@@ -36,17 +37,19 @@ export const ConnectedUserWrapper = (props: PropsWithChildren) => {
             <NanopubContext>
               <OrcidContext>
                 <DisconnectUserContext>
-                  <MastodonContext>
-                    <TwitterContext>
-                      <UserPostsContext>
-                        <AutopostInviteContext>
-                          <NavHistoryContext>
-                            {props.children}
-                          </NavHistoryContext>
-                        </AutopostInviteContext>
-                      </UserPostsContext>
-                    </TwitterContext>
-                  </MastodonContext>
+                  <BlueskyContext>
+                    <MastodonContext>
+                      <TwitterContext>
+                        <UserPostsContext>
+                          <AutopostInviteContext>
+                            <NavHistoryContext>
+                              {props.children}
+                            </NavHistoryContext>
+                          </AutopostInviteContext>
+                        </UserPostsContext>
+                      </TwitterContext>
+                    </MastodonContext>
+                  </BlueskyContext>
                 </DisconnectUserContext>
               </OrcidContext>
             </NanopubContext>
