@@ -117,8 +117,8 @@ export const checkOutdatedTwitterTokens = (appUsers: AppUser[]) => {
   // appUsers = JSON.parse(fileContents);
   const outdatedUsers = appUsers.filter(
     (user) =>
-      user[PLATFORM.Twitter] &&
-      user[PLATFORM.Twitter].some((twitterAccount) => {
+      user.accounts[PLATFORM.Twitter] &&
+      user.accounts[PLATFORM.Twitter].some((twitterAccount) => {
         return (
           twitterAccount.read && twitterAccount.read.expiresAtMs < Date.now()
         );

@@ -1,5 +1,5 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -20,7 +20,7 @@ import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { PostFetcherInterface, usePostsFetcher } from './posts.fetcher.hook';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export interface FilterOption {
   value: string;
@@ -38,7 +38,7 @@ export const PostsFetcherComponent = (props: {
   filterOptions: FilterOption[];
   status?: PostsQueryStatus;
   onFilterOptionChanged: (filter: PostsQuery) => void;
-  showAuthor?: boolean;
+  isPublicFeed?: boolean;
   showHeader?: boolean;
 }) => {
   const { show } = useToastContext();
@@ -51,11 +51,11 @@ export const PostsFetcherComponent = (props: {
     filterOptions,
     onFilterOptionChanged,
     feed,
-    showAuthor: _showAuthor,
+    isPublicFeed: _isPublicFeed,
     showHeader: _showHeader,
   } = props;
 
-  const showAuthor = _showAuthor !== undefined ? _showAuthor : false;
+  const isPublicFeed = _isPublicFeed !== undefined ? _isPublicFeed : false;
   const showHeader = _showHeader !== undefined ? _showHeader : true;
 
   const navigate = useNavigate();
@@ -107,7 +107,16 @@ export const PostsFetcherComponent = (props: {
     }
   }, [errorFetchingOlder, errorFetchingNewer]);
 
-  const content = (() => {
+  const content = useMemo(() => {
+    if (DEBUG) {
+      console.log('PostsFetcherComponent - content', {
+        posts,
+        isLoading,
+        isPublicFeed,
+        isFetchingOlder,
+        moreToFetch,
+      });
+    }
     if (!posts || isLoading) {
       return [1, 2, 4, 5, 6, 7, 8].map((ix) => (
         <PostCardLoading key={ix}></PostCardLoading>
@@ -144,7 +153,7 @@ export const PostsFetcherComponent = (props: {
             <Box key={ix} id={`post-${post.id}`}>
               <PostContext postInit={post}>
                 <PostCard
-                  showAuthor={showAuthor}
+                  isPublicFeed={isPublicFeed}
                   handleClick={() => {
                     const path = `/post/${post.id}`;
                     navigate(path);
@@ -197,7 +206,14 @@ export const PostsFetcherComponent = (props: {
         )}
       </>
     );
-  })();
+  }, [
+    posts,
+    isLoading,
+    isPublicFeed,
+    isFetchingOlder,
+    moreToFetch,
+    fetchOlder,
+  ]);
 
   const FilterValue = (
     props: {

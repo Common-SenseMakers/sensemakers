@@ -1,21 +1,34 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
+import { useTranslation } from 'react-i18next';
 
-import { TweetAnchor } from '../app/anchors/TwitterAnchor';
-import { TwitterAvatar } from '../app/icons/TwitterAvatar';
+import { PlatformPostAnchor } from '../app/anchors/PlatformPostAnchor';
+import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { NanopubStatus } from './NanopubStatus';
+import {
+  getPlatformPostDetails,
+  getPostDetails,
+} from './platform.post.details';
 import { usePost } from './post.context/PostContext';
 
-export const PostHeader = (props: BoxExtendedProps) => {
+/** should be used inside a PostContext */
+export const PostHeader = (props: {
+  boxProps: BoxExtendedProps;
+  name: string;
+  imageUrl?: string;
+}) => {
   const { constants } = useThemeContext();
-  const { derived, updated } = usePost();
+  const { updated } = usePost();
+  const post = updated.postMerged;
 
-  const profile = derived.tweet?.posted?.author;
+  const { boxProps, name, imageUrl } = props;
+
+  const details = getPostDetails(post);
 
   return (
-    <Box direction="row" justify="between" {...props}>
+    <Box direction="row" justify="between" {...boxProps}>
       <Box direction="row">
-        <TwitterAvatar size={48} profile={profile}></TwitterAvatar>
+        <PlatformAvatar size={48} imageUrl={imageUrl}></PlatformAvatar>
         <Box width="100%" margin={{ left: 'medium' }}>
           <Box direction="row" justify="between">
             <Text
@@ -27,13 +40,13 @@ export const PostHeader = (props: BoxExtendedProps) => {
                 lineHeight: '18px',
                 textDecoration: 'none',
               }}>
-              {profile?.name}
+              {name}
             </Text>
           </Box>
           <Box margin={{ bottom: '6px' }}></Box>
-          <TweetAnchor
-            thread={derived.tweet?.posted?.post}
-            timestamp={derived.tweet?.posted?.timestampMs}></TweetAnchor>
+          <PlatformPostAnchor
+            loading={post === undefined}
+            details={details}></PlatformPostAnchor>
         </Box>
       </Box>
 

@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { PostCardLoading } from '../post/PostCardLoading';
@@ -6,16 +8,14 @@ import { UserPostsFeed } from '../user-home/UserPostsFeed';
 import { ConnectSocialsPage } from '../user-login/ConnectSocialsPage';
 import {
   OverallLoginStatus,
-  TwitterConnectedStatus,
   useAccountContext,
 } from '../user-login/contexts/AccountContext';
 import { AppWelcome } from '../welcome/AppWelcome';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export const AppHomePage = (props: {}) => {
-  const { overallLoginStatus, twitterProfile, twitterConnectedStatus } =
-    useAccountContext();
+  const { overallLoginStatus, alreadyConnected } = useAccountContext();
 
   const LoadingPlaceholder = (
     <>
@@ -31,23 +31,27 @@ export const AppHomePage = (props: {}) => {
     </>
   );
 
-  const { content, nav } = (() => {
-    if (DEBUG) console.log('AppHome', { overallLoginStatus, twitterProfile });
+  const { content, nav } = useMemo(() => {
+    if (DEBUG)
+      console.log('AppHome', {
+        overallLoginStatus,
+      });
 
     if (overallLoginStatus === OverallLoginStatus.NotKnown) {
       return { content: <></>, nav: undefined };
     }
 
     if (overallLoginStatus === OverallLoginStatus.LoggedOut) {
-      return { content: <AppWelcome></AppWelcome>, nav: undefined };
+      return { content: <AppWelcome />, nav: undefined };
     }
 
     if (
-      overallLoginStatus === OverallLoginStatus.PartialLoggedIn &&
-      twitterConnectedStatus !== TwitterConnectedStatus.Connecting
+      overallLoginStatus === OverallLoginStatus.PartialLoggedIn ||
+      (overallLoginStatus === OverallLoginStatus.FullyLoggedIn &&
+        !alreadyConnected)
     ) {
       return {
-        content: <ConnectSocialsPage></ConnectSocialsPage>,
+        content: <ConnectSocialsPage />,
         nav: undefined,
       };
     }
@@ -59,11 +63,8 @@ export const AppHomePage = (props: {}) => {
       };
     }
 
-    /** everything that is not the satus above shows the loadingDivs */
     return { content: LoadingPlaceholder, nav: undefined };
-  })();
+  }, [overallLoginStatus, alreadyConnected]);
 
-  return (
-    <ViewportPage content={content} nav={nav} justify="start"></ViewportPage>
-  );
+  return <ViewportPage content={content} nav={nav} justify="start" />;
 };

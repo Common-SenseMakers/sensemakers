@@ -46,10 +46,15 @@ describe.skip('051-autofetch-autopost', () => {
     before(async () => {
       const testUser = testCredentials[0];
 
-      user = await _01_createAndFetchUsers(services, testUser.twitter.id, {
-        DEBUG,
-        DEBUG_PREFIX,
-      });
+      user = await _01_createAndFetchUsers(
+        services,
+        PLATFORM.Twitter,
+        testUser.twitter.id,
+        {
+          DEBUG,
+          DEBUG_PREFIX,
+        }
+      );
     });
 
     it('upates user autopost settings', async () => {

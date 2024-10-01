@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { anything, capture, verify } from 'ts-mockito';
 
 import { NotificationFreq } from '../../src/@shared/types/types.notifications';
-import { AppUser } from '../../src/@shared/types/types.user';
+import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
 import { logger } from '../../src/instances/logger';
 import { triggerSendNotifications } from '../../src/notifications/notification.task';
 import { triggerAutofetchPosts } from '../../src/posts/tasks/posts.autofetch.task';
@@ -31,10 +31,15 @@ describe('060-send-digest-no-autpost', () => {
 
     before(async () => {
       const testUser = testCredentials[0];
-      user = await _01_createAndFetchUsers(services, testUser.twitter.id, {
-        DEBUG,
-        DEBUG_PREFIX,
-      });
+      user = await _01_createAndFetchUsers(
+        services,
+        PLATFORM.Twitter,
+        testUser.twitter.id,
+        {
+          DEBUG,
+          DEBUG_PREFIX,
+        }
+      );
     });
 
     it('sets users email', async () => {

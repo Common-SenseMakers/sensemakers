@@ -148,3 +148,8 @@ export interface ProfilePostsQuery {
   labelsUris?: string[];
   fetchParams: FetchParams;
 }
+export interface MastodonGetContextParams {
+  domain: string;
+  callback_url: string;
+  type: 'read' | 'write';
+}

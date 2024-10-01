@@ -4,7 +4,7 @@ import { useCallback } from 'react';
 import { FUNCTIONS_BASE } from '../app/config';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export interface AppFetch {
   post<T = any, R = AxiosResponse<T>['data'], D = any>(

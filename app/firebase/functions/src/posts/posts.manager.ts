@@ -31,7 +31,7 @@ import {
   AppUser,
   FetchedDetails,
   PLATFORM,
-  PUBLISHABLE_PLATFORMS,
+  PUBLISHABLE_PLATFORM,
   UserDetailsBase,
 } from '../@shared/types/types.user';
 import { PARSING_TIMEOUT_MS } from '../config/config.runtime';
@@ -47,7 +47,7 @@ import { getUsernameTag } from '../users/users.utils';
 import { PostsHelper } from './posts.helper';
 import { PostsProcessing } from './posts.processing';
 
-const DEBUG = false;
+const DEBUG = true;
 
 const areCredentialsInvalid = (err: { message: string }) => {
   return err.message.includes('Value passed for the token was invalid');
@@ -89,7 +89,7 @@ export class PostsManager {
     fetchedPost: PlatformPostPosted<T>
   ) {
     const platformPost: PlatformPostCreate = {
-      platformId: platformId as PUBLISHABLE_PLATFORMS,
+      platformId: platformId as PUBLISHABLE_PLATFORM,
       publishStatus: PlatformPostPublishStatus.PUBLISHED,
       publishOrigin: PlatformPostPublishOrigin.FETCHED,
       posted: fetchedPost,
@@ -115,7 +115,7 @@ export class PostsManager {
 
   public async fetchPostFromPlatform(
     userId: string,
-    platformId: PUBLISHABLE_PLATFORMS,
+    platformId: PUBLISHABLE_PLATFORM,
     post_id: string,
     manager: TransactionManager
   ) {
@@ -168,7 +168,7 @@ export class PostsManager {
       account?.fetched
     );
 
-    if (DEBUG) logger.debug(`Twitter Service - fetch ${platformId}`);
+    if (DEBUG) logger.debug(`Platform Service - fetch ${platformId}`);
     try {
       const fetchedPosts = await this.platforms.fetch(
         platformId,
@@ -224,29 +224,15 @@ export class PostsManager {
     fetched?: FetchedDetails
   ): Promise<PlatformFetchParams> {
     if (params.sinceId) {
-      const since = await this.processing.platformPosts.getPostedFromPostId(
-        params.sinceId,
-        platformId,
-        user_id,
-        manager
-      );
-
       return {
-        since_id: since ? since.posted?.post_id : undefined,
+        since_id: fetched?.newest_id,
         expectedAmount: params.expectedAmount,
       };
     }
 
     if (params.untilId) {
-      const until = await this.processing.platformPosts.getPostedFromPostId(
-        params.untilId,
-        platformId,
-        user_id,
-        manager
-      );
-
       return {
-        until_id: until ? until.posted?.post_id : undefined,
+        until_id: fetched?.oldest_id,
         expectedAmount: params.expectedAmount,
       };
     }
@@ -336,61 +322,66 @@ export class PostsManager {
         if (DEBUG) logger.debug(`fetchUser user: ${user.userId}`, { user });
 
         return Promise.all(
-          ALL_PUBLISH_PLATFORMS.map(async (platformId) => {
-            const accounts = UsersHelper.getAccounts(user, platformId);
-            /** Call fetch for each account */
-            return Promise.all(
-              accounts.map(
-                async (account): Promise<PlatformPostCreated[] | undefined> => {
-                  /** Fetch */
-                  try {
-                    if (DEBUG)
-                      logger.debug(
-                        `fetchUser - fetchAccount. platformId:${platformId} - account:${account.user_id}`,
-                        {
+          (inputs.params.platformIds || ALL_PUBLISH_PLATFORMS).map(
+            async (platformId) => {
+              const accounts = UsersHelper.getAccounts(user, platformId);
+              /** Call fetch for each account */
+              return Promise.all(
+                accounts.map(
+                  async (
+                    account
+                  ): Promise<PlatformPostCreated[] | undefined> => {
+                    /** Fetch */
+                    try {
+                      if (DEBUG)
+                        logger.debug(
+                          `fetchUser - fetchAccount. platformId:${platformId} - account:${account.user_id}`,
+                          {
+                            platformId,
+                          }
+                        );
+
+                      const platformPostsCreate =
+                        await this.fetchUserFromPlatform(
                           platformId,
-                        }
+                          inputs.params,
+                          account,
+                          manager
+                        );
+
+                      if (!platformPostsCreate) {
+                        return;
+                      }
+
+                      /** Create the PlatformPosts and AppPosts */
+                      const platformPostsCreated =
+                        await this.processing.createPlatformPosts(
+                          platformPostsCreate,
+                          manager
+                        );
+
+                      if (DEBUG)
+                        logger.debug(
+                          `fetchUser - platformId:${platformId} - account:${account.user_id} - platformPostsCreated: ${platformPostsCreated.length}`,
+                          {
+                            platformPostsCreated,
+                          }
+                        );
+
+                      return platformPostsCreated;
+                    } catch (err: any) {
+                      logger.error(
+                        `Error fetching posts for user ${user.userId} on platform ${platformId}`,
+                        err
                       );
 
-                    const platformPostsCreate =
-                      await this.fetchUserFromPlatform(
-                        platformId,
-                        inputs.params,
-                        account,
-                        manager
-                      );
-
-                    if (!platformPostsCreate) {
-                      return;
+                      return undefined;
                     }
-
-                    /** Create the PlatformPosts and AppPosts */
-                    const platformPostsCreated =
-                      await this.processing.createPlatformPosts(
-                        platformPostsCreate,
-                        manager
-                      );
-
-                    if (DEBUG)
-                      logger.debug(
-                        `fetchUser - platformId:${platformId} - account:${account.user_id} - platformPostsCreated: ${platformPostsCreated.length}`,
-                        {
-                          platformPostsCreated,
-                        }
-                      );
-
-                    return platformPostsCreated;
-                  } catch (err: any) {
-                    logger.error(
-                      `Error fetching posts for user ${user.userId} on platform ${platformId}`,
-                      err
-                    );
-                    throw new Error(err.message);
                   }
-                }
-              )
-            );
-          })
+                )
+              );
+            }
+          )
         );
       }
     );
@@ -402,40 +393,94 @@ export class PostsManager {
     return postsCreatedAll;
   }
 
-  /** get AppPost and fetch for new posts if necessary */
-  private async getAndFetchIfNecessary(queryParams: PostsQuery) {
+  /** single place where new posts are fetched from any platform */
+  private async fetchIfNecessary(queryParams: PostsQuery): Promise<{
+    posts: AppPost[];
+    enough: boolean;
+  }> {
     /** if sinceId is provided fetch forward always */
-    if (queryParams.fetchParams.sinceId !== undefined) {
+    if (queryParams.fetchParams.sinceId !== undefined && queryParams.userId) {
       /** fetch platforms for new PlatformPosts */
       await this.fetchUser({
         userId: queryParams.userId,
         params: queryParams.fetchParams,
       });
+    }
+
+    let enough: boolean = true;
+
+    /** if untilId is provided fetch backwards, but only if not enough posts are already stored */
+    const posts = await this.processing.posts.getMany({
+      ...queryParams,
+      userId: queryParams.userId,
+    });
+
+    if (queryParams.status === PostsQueryStatus.DRAFTS) {
+      /** fetch if older posts are less thant he expected amount */
+      if (posts.length < queryParams.fetchParams.expectedAmount) {
+        enough = false;
+
+        await this.fetchUser({
+          userId: queryParams.userId,
+          params: queryParams.fetchParams,
+        });
+      }
+
+      /** fetch if there is a platform (nay be a recenltly connected one) without fetched details */
+      const user = await this.db.run((manager) => {
+        if (!queryParams.userId) {
+          throw new Error('userId is required');
+        }
+
+        return this.users.repo.getUser(queryParams.userId, manager, true);
+      });
+
+      const platformsWithoutFetch = UsersHelper.platformsWithoutFetch(user);
+
+      if (platformsWithoutFetch.length > 0) {
+        enough = false;
+
+        await this.fetchUser({
+          userId: queryParams.userId,
+          params: {
+            ...queryParams.fetchParams,
+            platformIds: platformsWithoutFetch,
+          },
+        });
+      }
+    }
+
+    return {
+      posts,
+      enough,
+    };
+  }
+
+  /** get AppPost and fetch for new posts if necessary */
+  private async getAndFetchIfNecessary(queryParams: PostsQuery) {
+    if (!queryParams.userId) {
+      throw new Error('userId is required');
+    }
+
+    const { posts: older, enough } = await this.fetchIfNecessary(queryParams);
+
+    /**
+     * after fetching (if it was necessary), get the posts from
+     * the db. If there were enough posts already, then no need to
+     * read from the db again
+     */
+    const posts = await (async () => {
+      if (enough) {
+        return older;
+      }
+
       return this.processing.posts.getMany({
         ...queryParams,
         userId: queryParams.userId,
       });
-    } else {
-      /** if untilId fetch backwards but only if not enough posts are already stored */
-      const appPosts = await this.processing.posts.getMany({
-        ...queryParams,
-        userId: queryParams.userId,
-      });
+    })();
 
-      if (queryParams.status === PostsQueryStatus.DRAFTS) {
-        if (appPosts.length < queryParams.fetchParams.expectedAmount) {
-          await this.fetchUser({
-            userId: queryParams.userId,
-            params: queryParams.fetchParams,
-          });
-          return this.processing.posts.getMany({
-            ...queryParams,
-            userId: queryParams.userId,
-          });
-        }
-      }
-      return appPosts;
-    }
+    return posts;
   }
 
   /** Get posts AppPostFull of user, cannot be part of a transaction

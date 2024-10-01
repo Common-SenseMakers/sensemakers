@@ -33,8 +33,10 @@ export const PostPublishStatusModals = (props: {
   const { setJustPublished } = useAutopostInviteContext();
   const { updated, fetched, derived, navigatePost, publish } = usePost();
 
-  const { orcid } = useAccountContext();
+  const { connectedUser } = useAccountContext();
   const { connect: _connectOrcid } = useOrcidContext();
+
+  const orcid = connectedUser?.accounts?.orcid;
 
   const [isUnpublishing, setIsUnpublishing] = useState<boolean>(false);
 

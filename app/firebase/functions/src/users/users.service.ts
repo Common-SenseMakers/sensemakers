@@ -25,7 +25,7 @@ import { UsersHelper } from './users.helper';
 import { UsersRepository } from './users.repository';
 import { getPrefixedUserId, getUsernameTag } from './users.utils';
 
-const DEBUG = false;
+const DEBUG = true;
 
 interface TokenData {
   userId: string;
@@ -227,7 +227,9 @@ export class UsersService {
             settings: initSettings,
             signupDate: this.time.now(),
             platformIds: [prefixed_user_id],
-            [platform]: [authenticatedDetails],
+            accounts: {
+              [platform]: [authenticatedDetails],
+            },
           },
           manager
         );
@@ -297,6 +299,7 @@ export class UsersService {
       email,
       signupDate: user.signupDate,
       settings: user.settings,
+      accounts: {},
     };
 
     /** extract the profile for each account */
@@ -304,7 +307,7 @@ export class UsersService {
       const accounts = UsersHelper.getAccounts(user, platform);
 
       accounts.forEach((account) => {
-        const current = userRead[platform] || [];
+        const current = userRead.accounts[platform] || [];
         current.push({
           user_id: account.user_id,
           profile: account.profile,
@@ -312,7 +315,7 @@ export class UsersService {
           write: account.write !== undefined,
         });
 
-        userRead[platform] = current as AccountDetailsRead<any>[];
+        userRead.accounts[platform] = current as AccountDetailsRead<any>[];
       });
     });
 

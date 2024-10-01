@@ -18,9 +18,9 @@ import {
   AppPostReviewStatus,
 } from '../@shared/types/types.posts';
 import {
-  ALL_PUBLISH_PLATFORMS,
   DefinedIfTrue,
   PLATFORM,
+  PUBLISHABLE_PLATFORM,
 } from '../@shared/types/types.user';
 import { mapStoreElements, parseRDF } from '../@shared/utils/n3.utils';
 import { removeUndefined } from '../db/repo.base';
@@ -89,12 +89,43 @@ export class PostsProcessing {
       manager
     );
 
-    const authorId = await this.users.repo.getUserWithPlatformAccount(
-      PLATFORM.Twitter,
-      user_id,
-      manager,
-      false
-    );
+    const authorId = await (async () => {
+      const authorIdFromTwitter =
+        await this.users.repo.getUserWithPlatformAccount(
+          PLATFORM.Twitter,
+          user_id,
+          manager,
+          false
+        );
+      if (authorIdFromTwitter) {
+        return authorIdFromTwitter;
+      }
+      const authorIdFromMastodon =
+        await this.users.repo.getUserWithPlatformAccount(
+          PLATFORM.Mastodon,
+          user_id,
+          manager,
+          false
+        );
+      if (authorIdFromMastodon) {
+        return authorIdFromMastodon;
+      }
+      const authorIdFromBluesky =
+        await this.users.repo.getUserWithPlatformAccount(
+          PLATFORM.Bluesky,
+          user_id,
+          manager,
+          false
+        );
+      if (authorIdFromBluesky) {
+        return authorIdFromBluesky;
+      }
+      return undefined;
+    })();
+
+    if (!authorId) {
+      throw new Error(`Author not found for user_id ${user_id}`);
+    }
 
     /** create AppPost */
     const post = await this.createAppPost(
@@ -149,7 +180,7 @@ export class PostsProcessing {
      * Create platformPosts as drafts on all platforms
      * */
     const drafts = await Promise.all(
-      ALL_PUBLISH_PLATFORMS.map(async (platformId) => {
+      ([PLATFORM.Nanopub] as PUBLISHABLE_PLATFORM[]).map(async (platformId) => {
         const accounts = UsersHelper.getAccounts(user, platformId);
 
         if (DEBUG)

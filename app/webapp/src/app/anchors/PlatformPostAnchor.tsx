@@ -1,8 +1,7 @@
 import { Anchor, AnchorExtendedProps, Box } from 'grommet';
 import { useTranslation } from 'react-i18next';
 
-import { I18Keys } from '../../i18n/i18n';
-import { TwitterThread } from '../../shared/types/types.twitter';
+import { GenericPlatformPostDetails } from '../../post/platform.post.details';
 import { LoadingDiv } from '../../ui-components/LoadingDiv';
 import { useThemeContext } from '../../ui-components/ThemedApp';
 import { OpenLinkIcon } from '../icons/OpenLinkIcon';
@@ -22,33 +21,28 @@ export const TwitterProfileAnchor = (props: { screen_name?: string }) => {
   );
 };
 
-export const TweetAnchor = (props: {
-  thread?: TwitterThread;
-  label?: string;
-  timestamp?: number;
+export const PlatformPostAnchor = (props: {
+  loading?: boolean;
+  details?: GenericPlatformPostDetails;
 }) => {
   const { t } = useTranslation();
-  const timestamp = props.timestamp;
   const { constants } = useThemeContext();
+
+  const { loading, details } = props;
+  const { label, timestampMs, url } = details
+    ? details
+    : { label: '', timestampMs: 0, url: '' };
 
   const formatter = new Intl.DateTimeFormat('en-US', {
     month: 'long', // full name of the month
     day: 'numeric', // numeric day
     year: 'numeric', // numeric year
   });
-  const date = timestamp ? formatter.format(timestamp) : '';
 
-  if (!props.thread) {
+  if (loading) {
     return <LoadingDiv></LoadingDiv>;
   }
-
-  if (!props.thread.tweets) {
-    throw new Error('Thread has no tweets');
-  }
-
-  const threadId = props.thread.conversation_id;
-  const label =
-    props.thread.tweets.length > 1 ? t(I18Keys.ThreadX) : t(I18Keys.TweetX);
+  const date = timestampMs ? formatter.format(timestampMs) : '';
 
   return (
     <Anchor
@@ -60,7 +54,7 @@ export const TweetAnchor = (props: {
         textDecoration: 'none',
       }}
       target="_blank"
-      href={`https://twitter.com/x/status/${threadId}`}
+      href={url}
       size="medium">
       <Box
         direction="row"

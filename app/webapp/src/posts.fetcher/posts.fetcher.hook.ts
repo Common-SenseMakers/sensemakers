@@ -1,3 +1,4 @@
+import { connected } from 'process';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
@@ -11,7 +12,10 @@ import {
   PostsQueryParams,
   PostsQueryStatus,
 } from '../shared/types/types.posts';
-import { useAccountContext } from '../user-login/contexts/AccountContext';
+import {
+  OverallLoginStatus,
+  useAccountContext,
+} from '../user-login/contexts/AccountContext';
 
 const DEBUG = true;
 
@@ -48,7 +52,7 @@ export interface FetcherConfig {
  * fething newer and older posts as requested by a consuming component
  */
 export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
-  const { connectedUser, twitterProfile } = useAccountContext();
+  const { connectedUser, overallLoginStatus } = useAccountContext();
 
   const {
     endpoint,
@@ -233,7 +237,12 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
 
   /** first data fill happens everytime the posts are empty and the firstFetched is false */
   useEffect(() => {
-    if (posts && !fetchedOlderFirst && twitterProfile) {
+    if (
+      posts &&
+      !fetchedOlderFirst &&
+      overallLoginStatus === OverallLoginStatus.FullyLoggedIn &&
+      connectedUser
+    ) {
       if (DEBUG)
         console.log('first fetch older', {
           posts,
@@ -245,6 +254,15 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
       _fetchOlder(undefined);
     }
   }, [posts, fetchedOlderFirst, connectedUser]);
+
+  /** is this hook still needed? */
+  // useEffect(() => {
+  //   if (posts.length > 0 && twitterProfile && mastodonProfile) {
+  //     if (DEBUG) console.log('first fetch older with new platform added');
+  //     reset();
+  //     _fetchOlder(undefined);
+  //   }
+  // }, [connectedUser]);
 
   /** whenever posts have been fetched, check if we have fetched for newer posts yet, and if not, fetch for newer */
   useEffect(() => {
@@ -275,6 +293,13 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
   /** fetch for more post backwards */
   const _fetchOlder = useCallback(
     async (oldestPostId?: string) => {
+      if (DEBUG)
+        console.log(`fetching for older`, {
+          oldestPostId,
+          connectedUser,
+          isFetchingOlder,
+          code,
+        });
       if (!connectedUser || isFetchingOlder || code) {
         return;
       }

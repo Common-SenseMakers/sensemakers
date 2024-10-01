@@ -26,7 +26,8 @@ const DEBUG = false;
 export const authenticateTwitterUser = async (
   testAccount: TwitterAccountCredentials,
   services: Services,
-  manager: TransactionManager
+  manager: TransactionManager,
+  _userId?: string
 ): Promise<AppUser> => {
   if (DEBUG) logger.debug('authenticateTwitterUser', { testAccount });
 
@@ -63,7 +64,8 @@ export const authenticateTwitterUser = async (
   const result = await services.users.handleSignup(
     PLATFORM.Twitter,
     signupData,
-    manager
+    manager,
+    _userId
   );
   if (!result) {
     throw new Error('Unexpected');

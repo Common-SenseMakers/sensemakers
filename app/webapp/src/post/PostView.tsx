@@ -18,6 +18,7 @@ import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
+import { getAccount } from '../user-login/user.helper';
 import { usePersist } from '../utils/use.persist';
 import { PostHeader } from './PostHeader';
 import { PostNav } from './PostNav';
@@ -210,7 +211,10 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     return (
       <>
         <Box pad="medium">
-          <PostHeader margin={{ bottom: '16px' }}></PostHeader>
+          <PostHeader
+            name="Name"
+            imageUrl="https://avatars.githubusercontent.com/u/1407693?v=4"
+            boxProps={{ margin: { bottom: '16px' } }}></PostHeader>
           {!hideSemantics && (
             <SemanticsEditor
               patternProps={patternProps}

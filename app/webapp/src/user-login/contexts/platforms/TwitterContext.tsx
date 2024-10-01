@@ -21,12 +21,12 @@ import { usePersist } from '../../../utils/use.persist';
 import {
   LoginFlowState,
   OverallLoginStatus,
-  TwitterConnectedStatus,
+  PlatformConnectedStatus,
   useAccountContext,
 } from '../AccountContext';
 import { useDisconnectContext } from '../DisconnectUserContext';
 
-const DEBUG = false;
+const DEBUG = true;
 const WAS_CONNECTING_TWITTER = 'was-connecting-twitter';
 
 export const LS_TWITTER_CONTEXT_KEY = 'twitter-signin-context';
@@ -52,7 +52,8 @@ export const TwitterContext = (props: PropsWithChildren) => {
     refresh: refreshConnected,
     overallLoginStatus,
     setLoginFlowState,
-    setTwitterConnectedStatus,
+    setPlatformConnectedStatus,
+    getPlatformConnectedStatus,
   } = useAccountContext();
 
   const { disconnect } = useDisconnectContext();
@@ -68,11 +69,12 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
   const appFetch = useAppFetch();
 
-  const needConnect = !connectedUser || !connectedUser[PLATFORM.Twitter];
+  const needConnect =
+    !connectedUser || !connectedUser.accounts[PLATFORM.Twitter];
 
   const connect = async (type: TwitterGetContextParams['type']) => {
     setLoginFlowState(LoginFlowState.ConnectingTwitter);
-    setTwitterConnectedStatus(TwitterConnectedStatus.Connecting);
+    getPlatformConnectedStatus(PLATFORM.Twitter);
 
     const params: TwitterGetContextParams = {
       callback_url: window.location.href,
@@ -123,9 +125,11 @@ export const TwitterContext = (props: PropsWithChildren) => {
       if (
         code_param &&
         state_param &&
-        overallLoginStatus === OverallLoginStatus.PartialLoggedIn &&
         connectedUser &&
-        wasConnecting
+        wasConnecting &&
+        (overallLoginStatus === OverallLoginStatus.PartialLoggedIn ||
+          getPlatformConnectedStatus(PLATFORM.Twitter) ===
+            PlatformConnectedStatus.Connecting)
       ) {
         if (DEBUG)
           console.log('useEffect TwitterSignup', {

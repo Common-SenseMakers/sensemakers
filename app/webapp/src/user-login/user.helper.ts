@@ -24,7 +24,9 @@ export const getAccount = <P = any>(
     throw Error('undexpected');
   }
 
-  const accounts = user[platformId] as AccountDetailsRead<P>[] | undefined;
+  const accounts = user.accounts[platformId] as
+    | AccountDetailsRead<P>[]
+    | undefined;
 
   if (!accounts) {
     return undefined;
@@ -43,4 +45,10 @@ export const getAccount = <P = any>(
             ? (a.profile as any).username === username
             : false
       );
+};
+
+export const isValidMastodonDomain = (input: string): boolean => {
+  const domainRegex =
+    /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/;
+  return domainRegex.test(input);
 };

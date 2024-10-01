@@ -40,7 +40,12 @@ const fetchAndGetNotifications = async (
     throw new Error('post_id not defined');
   }
 
-  const post = await fetchPostInTests(userId, post_id, services);
+  const post = await fetchPostInTests(
+    userId,
+    post_id,
+    services,
+    PLATFORM.Twitter
+  );
 
   if (!post) {
     throw new Error('post undefined');

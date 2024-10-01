@@ -10,6 +10,7 @@ import {
   AppPostParsedStatus,
   AppPostParsingStatus,
   AppPostRepublishedStatus,
+  PostsQueryStatus,
 } from '../../src/@shared/types/types.posts';
 import { TwitterThread } from '../../src/@shared/types/types.twitter';
 import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
@@ -41,6 +42,7 @@ describe('050-autofetch-no-autopost', () => {
       const testUser = testCredentials[0];
       user = await _01_createAndFetchUsers(
         globalTestServices,
+        PLATFORM.Twitter,
         testUser.twitter.id,
         {
           DEBUG,
@@ -78,9 +80,12 @@ describe('050-autofetch-no-autopost', () => {
       /** read user posts */
       const postsRead = await globalTestServices.postsManager.getOfUser({
         userId: user.userId,
-        fetchParams: { expectedAmount: 10 },
+        status: PostsQueryStatus.DRAFTS,
+        fetchParams: { expectedAmount: TEST_THREADS.length + 1 + 6 },
       });
-      expect(postsRead).to.have.length(Math.ceil(TEST_THREADS.length / 2) + 1);
+      expect(
+        postsRead.filter((post) => post.origin === PLATFORM.Twitter)
+      ).to.have.length(Math.ceil(TEST_THREADS.length / 2) + 1);
 
       const postOfThread2 = postsRead.find((p) =>
         p.mirrors.find(
