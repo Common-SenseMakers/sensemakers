@@ -12,6 +12,7 @@ export interface GenericAuthor {
   id: string;
   username: string;
   name: string;
+  avatarUrl?: string;
 }
 
 export interface GenericPost {
