@@ -302,6 +302,7 @@ export class BlueskyService
       id: thread.author.did,
       username: thread.author.handle,
       name: thread.author.displayName || thread.author.handle,
+      avatarUrl: thread.author.avatar,
     };
 
     const genericPosts: GenericPost[] = thread.posts.map((post) => {
