@@ -1,3 +1,4 @@
+import { platform } from 'os';
 import {
   PropsWithChildren,
   createContext,
@@ -15,6 +16,7 @@ import { OrcidUserProfile } from '../../shared/types/types.orcid';
 import { TwitterUserProfile } from '../../shared/types/types.twitter';
 import {
   ALL_PUBLISH_PLATFORMS,
+  ALL_SOURCE_PLATFORMS,
   AppUserRead,
   AutopostOption,
   EmailDetails,
@@ -167,7 +169,7 @@ export const AccountContext = (props: PropsWithChildren) => {
     }
   };
 
-  /** update the user profiles from the accounts property */
+  /** update the user profiles from the accounts property. It assumes one account per platform */
   useEffect(() => {
     if (DEBUG) console.log('connectedUser update effect', { connectedUser });
     if (connectedUser) {
@@ -195,7 +197,6 @@ export const AccountContext = (props: PropsWithChildren) => {
       console.log('overallStatus update effect', {
         connectedUser,
         overallLoginStatus,
-        twitter: connectedUser?.email,
       });
 
     /**
@@ -203,12 +204,15 @@ export const AccountContext = (props: PropsWithChildren) => {
      * twitter, the user is partially logged in
      */
     if (connectedUser && connectedUser.email) {
-      /** if not a single platform has been connected, consider login partial */
+      /** if not a single source platform has been connected, consider login partial */
       if (
-        !connectedUser.profiles ||
-        Object.keys(connectedUser.profiles).length === 0
+        !ALL_SOURCE_PLATFORMS.some((platformId: PUBLISHABLE_PLATFORM) => {
+          return connectedUser.accounts[platformId] !== undefined;
+        })
       ) {
         setOverallLoginStatus(OverallLoginStatus.PartialLoggedIn);
+      } else {
+        setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
       }
 
       /** update each platform persisted connected status */
@@ -224,28 +228,7 @@ export const AccountContext = (props: PropsWithChildren) => {
           });
         }
       });
-
-      /** enable fully logged in when at least one platform is connected */
-      if (connectedUser.profiles) {
-        const some = Object.keys(connectedUser.profiles)
-          .map(
-            (platform) =>
-              connectedUser.profiles &&
-              connectedUser.profiles[platform as PUBLISHABLE_PLATFORM] !==
-                undefined
-          )
-          .some((profile) => profile);
-
-        if (some) {
-          setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
-        }
-      }
     }
-
-    /**
-     * once the user is partiallyLoggedIn and has a twitter profile
-     * then the user is FullyLoggedIn
-     */
 
     /** If finished fetching for connected user and is undefined, then
      * the status is not not-known, its a confirmed LoggedOut */
@@ -271,36 +254,6 @@ export const AccountContext = (props: PropsWithChildren) => {
     _setLoginFlowState(LoginFlowState.Idle);
     _setOverallLoginStatus(OverallLoginStatus.LoggedOut);
   };
-
-  const twitterProfile = useMemo(() => {
-    const profile = connectedUser
-      ? getAccount(connectedUser, PLATFORM.Twitter)?.profile
-      : undefined;
-
-    if (DEBUG) console.log('twitterProfile', { profile });
-
-    return profile;
-  }, [connectedUser]);
-
-  const mastodonProfile = useMemo(() => {
-    const profile = connectedUser
-      ? getAccount(connectedUser, PLATFORM.Mastodon)?.profile
-      : undefined;
-
-    if (DEBUG) console.log('mastodonProfile', { profile });
-
-    return profile;
-  }, [connectedUser]);
-
-  const orcid = useMemo(() => {
-    const profile = connectedUser
-      ? getAccount<OrcidUserProfile>(connectedUser, PLATFORM.Orcid)
-      : undefined;
-
-    if (DEBUG) console.log('orcidProfile', { profile });
-
-    return profile;
-  }, [connectedUser]);
 
   const currentAutopost =
     connectedUser?.settings?.autopost[PLATFORM.Nanopub].value;

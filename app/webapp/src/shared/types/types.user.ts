@@ -33,6 +33,11 @@ export type PUBLISHABLE_PLATFORM =
   | PLATFORM.Nanopub
   | PLATFORM.Mastodon;
 
+export const ALL_SOURCE_PLATFORMS: PUBLISHABLE_PLATFORM[] = [
+  PLATFORM.Twitter,
+  PLATFORM.Mastodon,
+];
+
 export const ALL_PUBLISH_PLATFORMS: PUBLISHABLE_PLATFORM[] = [
   PLATFORM.Twitter,
   PLATFORM.Nanopub,
