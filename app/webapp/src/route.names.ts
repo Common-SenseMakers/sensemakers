@@ -13,4 +13,5 @@ export const AbsoluteRoutes = {
   Post: (postId: string) => `/${RouteNames.Post}/${postId}`,
   Feed: `/${RouteNames.Feed}`,
   Settings: `/${RouteNames.Settings}`,
+  ConnectMastodon: `/${RouteNames.ConnectMastodon}`,
 };

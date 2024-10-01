@@ -12,6 +12,7 @@ export const PlatformSection = (props: {
   onButtonClicked: () => void;
   connected: boolean;
   connecting?: boolean;
+  disabled?: boolean;
   isValidInput?: (input: string) => boolean;
 }) => {
   const { constants } = useThemeContext();
@@ -46,7 +47,7 @@ export const PlatformSection = (props: {
       <Box>
         {!props.connected ? (
           <AppButton
-            disabled={props.connecting}
+            disabled={props.disabled}
             label={props.connecting ? 'connecting' : props.buttonText}
             onClick={props.onButtonClicked}
           />

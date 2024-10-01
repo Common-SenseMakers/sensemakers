@@ -31,6 +31,7 @@ const DEBUG = true;
 export const OUR_TOKEN_NAME = 'ourToken';
 export const LOGIN_STATUS = 'loginStatus';
 export const PLATFORMS_LOGIN_STATUS = 'platformsLoginStatus';
+export const ALREADY_CONNECTED_KEY = 'already-connected';
 
 export type AccountContextType = {
   connectedUser?: ConnectedUser;
@@ -54,6 +55,8 @@ export type AccountContextType = {
   getPlatformConnectedStatus: (
     platformId: PLATFORM
   ) => PlatformConnectedStatus | undefined;
+  alreadyConnected?: boolean;
+  setAlreadyConnected: (value: boolean) => void;
 };
 
 const AccountContextValue = createContext<AccountContextType | undefined>(
@@ -133,6 +136,11 @@ export const AccountContext = (props: PropsWithChildren) => {
       platformsConnectedStatusInit
     );
 
+  const [alreadyConnected, setAlreadyConnected] = usePersist(
+    ALREADY_CONNECTED_KEY,
+    false
+  );
+
   /** keep the conneccted user linkted to the current token */
   useEffect(() => {
     refresh();
@@ -179,7 +187,8 @@ export const AccountContext = (props: PropsWithChildren) => {
     }
   };
 
-  /** logged in status is strictly linked to the connected user,
+  /**
+   * logged in status is strictly linked to the connected user,
    * this should be the only place on the app where the status is set to loggedIn
    */
   useEffect(() => {
@@ -287,6 +296,8 @@ export const AccountContext = (props: PropsWithChildren) => {
         currentNotifications,
         setPlatformConnectedStatus,
         getPlatformConnectedStatus,
+        alreadyConnected,
+        setAlreadyConnected,
       }}>
       {props.children}
     </AccountContextValue.Provider>

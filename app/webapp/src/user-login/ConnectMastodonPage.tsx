@@ -42,15 +42,18 @@ export const ConnectMastodonPage = () => {
       <Box style={{ flexGrow: 1 }}>
         <AppHeading level="1">{t(I18Keys.connectMastodonTitle)}</AppHeading>
         <Box width="100%" height="16px" />
+
         <AppParagraph margin={{ bottom: 'medium' }}>
           {t(I18Keys.connectMastodonParagraph)}
         </AppParagraph>
+
         <AppParagraph
           margin={{ bottom: 'small' }}
           size="small"
           style={{ fontWeight: 'bold' }}>
           {t(I18Keys.mastodonServer)}
         </AppParagraph>
+
         <Box margin={{ bottom: 'medium' }}>
           <AppInput
             placeholder={t(I18Keys.mastodonServerPlaceholder)}
@@ -59,6 +62,7 @@ export const ConnectMastodonPage = () => {
             style={{ width: '100%' }}
           />
         </Box>
+
         <Box align="center" margin={{ top: 'medium' }}>
           <AppButton
             primary
@@ -68,6 +72,7 @@ export const ConnectMastodonPage = () => {
             style={{ width: '100%' }}
           />
         </Box>
+
         {error && (
           <Box margin={{ top: 'small' }}>
             <AppParagraph color="status-error">{error}</AppParagraph>

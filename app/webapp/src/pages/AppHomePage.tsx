@@ -15,7 +15,9 @@ import { AppWelcome } from '../welcome/AppWelcome';
 const DEBUG = true;
 
 export const AppHomePage = (props: {}) => {
-  const { overallLoginStatus } = useAccountContext();
+  const { overallLoginStatus, alreadyConnected } = useAccountContext();
+
+  console.log({ alreadyConnected });
 
   const LoadingPlaceholder = (
     <>
@@ -45,7 +47,11 @@ export const AppHomePage = (props: {}) => {
       return { content: <AppWelcome />, nav: undefined };
     }
 
-    if (overallLoginStatus === OverallLoginStatus.PartialLoggedIn) {
+    if (
+      overallLoginStatus === OverallLoginStatus.PartialLoggedIn ||
+      (overallLoginStatus === OverallLoginStatus.FullyLoggedIn &&
+        !alreadyConnected)
+    ) {
       return {
         content: <ConnectSocialsPage />,
         nav: undefined,
@@ -60,7 +66,7 @@ export const AppHomePage = (props: {}) => {
     }
 
     return { content: LoadingPlaceholder, nav: undefined };
-  }, [overallLoginStatus]);
+  }, [overallLoginStatus, alreadyConnected]);
 
   return <ViewportPage content={content} nav={nav} justify="start" />;
 };
