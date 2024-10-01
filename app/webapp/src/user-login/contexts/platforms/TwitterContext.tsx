@@ -75,6 +75,10 @@ export const TwitterContext = (props: PropsWithChildren) => {
   const connect = async (type: TwitterGetContextParams['type']) => {
     setLoginFlowState(LoginFlowState.ConnectingTwitter);
     getPlatformConnectedStatus(PLATFORM.Twitter);
+    setPlatformConnectedStatus(
+      PLATFORM.Twitter,
+      PlatformConnectedStatus.Connecting
+    );
 
     const params: TwitterGetContextParams = {
       callback_url: window.location.href,
@@ -104,6 +108,10 @@ export const TwitterContext = (props: PropsWithChildren) => {
             error_param,
           });
 
+        setPlatformConnectedStatus(
+          PLATFORM.Twitter,
+          PlatformConnectedStatus.Disconnected
+        );
         show({ title: t(I18Keys.errorConnectTwitter), message: error_param });
         searchParams.delete('error');
         searchParams.delete('state');
