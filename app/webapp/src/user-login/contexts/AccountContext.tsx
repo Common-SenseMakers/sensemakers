@@ -36,6 +36,7 @@ export const ALREADY_CONNECTED_KEY = 'already-connected';
 
 export type AccountContextType = {
   connectedUser?: ConnectedUser;
+  connectedSourcePlatforms: PUBLISHABLE_PLATFORM[];
   isConnected: boolean;
   email?: EmailDetails;
   disconnect: () => void;
@@ -281,10 +282,17 @@ export const AccountContext = (props: PropsWithChildren) => {
     return platformsConnectedStatus && platformsConnectedStatus[platformId];
   };
 
+  const connectedSourcePlatforms = useMemo(() => {
+    return ALL_SOURCE_PLATFORMS.filter((platform) => {
+      return connectedUser?.accounts[platform] !== undefined;
+    });
+  }, [connectedUser]);
+
   return (
     <AccountContextValue.Provider
       value={{
         connectedUser: connectedUser === null ? undefined : connectedUser,
+        connectedSourcePlatforms,
         email,
         isConnected: connectedUser !== undefined && connectedUser !== null,
         disconnect,
