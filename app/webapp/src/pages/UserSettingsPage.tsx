@@ -7,6 +7,7 @@ import { useAppFetch } from '../api/app.fetch';
 import { BlueskyIcon, MastodonIcon, TwitterIcon } from '../app/common/Icons';
 import { AutopostIcon } from '../app/icons/AutopostIcon';
 import { BellIcon } from '../app/icons/BellIcon';
+import { DocIcon } from '../app/icons/DocIcon';
 import { EmailIcon } from '../app/icons/EmailIcon';
 import { OrcidIcon } from '../app/icons/OrcidIcon';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
@@ -33,10 +34,13 @@ import { useMastodonContext } from '../user-login/contexts/platforms/MastodonCon
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { useTwitterContext } from '../user-login/contexts/platforms/TwitterContext';
 import { getAccount } from '../user-login/user.helper';
-import { PlatformSection } from './PlatformsSection';
-import { SettingsOptionSelector } from './SettingsOptionsSelector';
-import { SettingsSection, SettingsSections } from './SettingsSection';
-import { SettingsSubPage } from './UserSettingsSubpage';
+import { PlatformSection } from '../user-settings/PlatformsSection';
+import { SettingsOptionSelector } from '../user-settings/SettingsOptionsSelector';
+import {
+  SettingsSection,
+  SettingsSections,
+} from '../user-settings/SettingsSection';
+import { SettingsSubPage } from '../user-settings/UserSettingsSubpage';
 
 export const SettingSectionTitle = (props: { value: string }) => {
   const { constants } = useThemeContext();
@@ -57,28 +61,20 @@ export const UserSettingsPage = () => {
 
   const appFetch = useAppFetch();
 
-  const {
-    connectedUser,
-    refresh,
-    twitterProfile,
-    mastodonProfile,
-    blueskyProfile,
-    currentAutopost,
-    currentNotifications,
-    orcid,
-  } = useAccountContext();
+  const { connectedUser, refresh, currentAutopost, currentNotifications } =
+    useAccountContext();
   const [isSetting, setIsSetting] = useState(false);
   const { disconnect } = useDisconnectContext();
 
   const { connect: connectOrcid, connecting: connectingOrcid } =
     useOrcidContext();
 
-  const { connect: connectMastodon, needConnect: needConnectMastodon } =
-    useMastodonContext();
+  const { needConnect: needConnectMastodon } = useMastodonContext();
+
+  const { needConnect: needConnectBluesky } = useBlueskyContext();
+
   const { connect: connectTwitter, needConnect: needConnectTwitter } =
     useTwitterContext();
-  const { connect: connectBluesky, needConnect: needConnectBluesky } =
-    useBlueskyContext();
 
   const { reviewAutopostIntention, setReviewAutopostIntention } =
     useAutopostInviteContext();
@@ -86,6 +82,12 @@ export const UserSettingsPage = () => {
   const [showSettingsPage, setShowSettingsPage] = useState<
     SettingsSections | undefined
   >(undefined);
+
+  const twitterProfile = connectedUser?.profiles?.twitter;
+  const mastodonProfile = connectedUser?.profiles?.mastodon;
+  const blueskyProfile = connectedUser?.profiles?.bluesky;
+  const orcidAccounts = connectedUser?.accounts?.orcid;
+  const orcidAccount = orcidAccounts ? orcidAccounts[0] : undefined;
 
   // receive the autopost invite
   useEffect(() => {
@@ -251,7 +253,7 @@ export const UserSettingsPage = () => {
           }}></SettingsSection>
 
         <SettingsSection
-          icon={<SupportIcon size={24}></SupportIcon>}
+          icon={<DocIcon size={24}></DocIcon>}
           title={t(I18Keys.readTheDocs)}
           description={
             <Trans
@@ -297,9 +299,7 @@ export const UserSettingsPage = () => {
         <PlatformSection
           icon={
             twitterProfile ? (
-              <PlatformAvatar
-                profileImageUrl={twitterProfile?.profile_image_url}
-              />
+              <PlatformAvatar imageUrl={twitterProfile?.profile_image_url} />
             ) : (
               <TwitterIcon size={40} color="black"></TwitterIcon>
             )
@@ -310,11 +310,12 @@ export const UserSettingsPage = () => {
           }}
           buttonText={needConnectTwitter ? 'connect' : ''}
           username={twitterProfile ? `@${twitterProfile.username}` : ''}
-          connected={!!twitterProfile}></PlatformSection>
+          connected={twitterProfile !== undefined}></PlatformSection>
+
         <PlatformSection
           icon={
             mastodonProfile ? (
-              <PlatformAvatar profileImageUrl={mastodonProfile?.avatar} />
+              <PlatformAvatar imageUrl={mastodonProfile?.avatar} />
             ) : (
               <MastodonIcon size={40} color="white"></MastodonIcon>
             )
@@ -327,16 +328,16 @@ export const UserSettingsPage = () => {
           }}
           buttonText={needConnectMastodon ? 'connect' : ''}
           username={
-            connectedUser?.mastodon
-              ? `@${getAccount(connectedUser, PLATFORM.Mastodon)?.profile.username}@${getAccount(connectedUser, PLATFORM.Mastodon)?.profile.mastodonServer}`
+            mastodonProfile
+              ? `@${mastodonProfile.username}@${mastodonProfile.mastodonServer}`
               : '- not connected -'
           }
-          connected={!!connectedUser?.mastodon}></PlatformSection>
+          connected={mastodonProfile !== undefined}></PlatformSection>
 
         <PlatformSection
           icon={
             blueskyProfile ? (
-              <PlatformAvatar profileImageUrl={blueskyProfile?.avatar} />
+              <PlatformAvatar imageUrl={blueskyProfile?.avatar} />
             ) : (
               <BlueskyIcon size={40} color="white"></BlueskyIcon>
             )
@@ -358,8 +359,10 @@ export const UserSettingsPage = () => {
           platformName={t(I18Keys.ORCID)}
           onButtonClicked={() => connectOrcid('/settings')}
           buttonText="connect"
-          username={orcid ? `@${orcid.user_id}` : '- not connected -'}
-          connected={orcid !== undefined}
+          username={
+            orcidAccount ? `@${orcidAccount.user_id}` : '- not connected -'
+          }
+          connected={orcidAccount !== undefined}
           connecting={connectingOrcid}></PlatformSection>
 
         <Box

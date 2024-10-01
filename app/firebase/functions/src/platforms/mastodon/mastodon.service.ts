@@ -306,6 +306,7 @@ export class MastodonService
       id: thread.author.id,
       username: thread.author.username,
       name: thread.author.displayName,
+      avatarUrl: thread.author.avatar,
     };
 
     const genericPosts: GenericPost[] = thread.posts.map((status) => ({

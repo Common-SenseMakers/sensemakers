@@ -17,8 +17,8 @@ import {
 import { HandleSignupResult } from '../../../shared/types/types.fetch';
 import { PLATFORM } from '../../../shared/types/types.user';
 import {
-  BlueskyConnectedStatus,
   LoginFlowState,
+  PlatformConnectedStatus,
   useAccountContext,
 } from '../AccountContext';
 
@@ -51,15 +51,15 @@ export const BlueskyContext = (props: PropsWithChildren) => {
     refresh: refreshConnected,
     overallLoginStatus,
     setLoginFlowState,
-    setBlueskyConnectedStatus,
-    blueskyConnectedStatus,
+    setPlatformConnectedStatus,
   } = useAccountContext();
 
   const [error, setError] = useState<string | undefined>(undefined);
 
   const appFetch = useAppFetch();
 
-  const needConnect = !connectedUser || !connectedUser[PLATFORM.Bluesky];
+  const needConnect =
+    !connectedUser || !connectedUser.accounts[PLATFORM.Bluesky];
 
   const connect = useCallback(
     async (
@@ -68,7 +68,10 @@ export const BlueskyContext = (props: PropsWithChildren) => {
       type: BlueskyGetContextParams['type']
     ) => {
       setLoginFlowState(LoginFlowState.ConnectingBluesky);
-      setBlueskyConnectedStatus(BlueskyConnectedStatus.Connecting);
+      setPlatformConnectedStatus(
+        PLATFORM.Bluesky,
+        PlatformConnectedStatus.Connecting
+      );
       setError(undefined);
 
       try {
@@ -89,18 +92,24 @@ export const BlueskyContext = (props: PropsWithChildren) => {
         log('Bluesky signup result', result);
 
         refreshConnected();
-        setBlueskyConnectedStatus(BlueskyConnectedStatus.Connected);
+        setPlatformConnectedStatus(
+          PLATFORM.Bluesky,
+          PlatformConnectedStatus.Connected
+        );
       } catch (err: any) {
         log('Error connecting to Bluesky', err);
         setError('Error connecting to Bluesky');
         setLoginFlowState(LoginFlowState.Idle);
-        setBlueskyConnectedStatus(BlueskyConnectedStatus.Disconnected);
+        setPlatformConnectedStatus(
+          PLATFORM.Bluesky,
+          PlatformConnectedStatus.Disconnected
+        );
       }
     },
     [
       appFetch,
       setLoginFlowState,
-      setBlueskyConnectedStatus,
+      setPlatformConnectedStatus,
       refreshConnected,
       t,
     ]

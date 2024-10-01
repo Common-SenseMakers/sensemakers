@@ -1,46 +1,85 @@
-import { Box } from 'grommet';
+import { Box, Text } from 'grommet';
 
 import { PlatformPostAnchor } from '../app/anchors/PlatformPostAnchor';
+import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID } from '../semantics/patterns/patterns';
-import { SciFilterClassfication } from '../shared/types/types.parser';
-import { AppPostFull } from '../shared/types/types.posts';
-import { TwitterUserProfile } from '../shared/types/types.twitter';
-import { PLATFORM } from '../shared/types/types.user';
+import { AppPostFull, AppPostParsedStatus } from '../shared/types/types.posts';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { NanopubStatus } from './NanopubStatus';
+import { PublishButtons } from './PostPublishButtons';
 import { PostTextStatic } from './PostTextStatic';
-import {
-  concatenateThread,
-  getPostStatuses,
-  hideSemanticsHelper,
-} from './posts.helper';
+import { getPostDetails } from './platform.post.details';
+import { usePost } from './post.context/PostContext';
+import { concatenateThread, hideSemanticsHelper } from './posts.helper';
+
+const PostCardHeaderUser = (props: { post: AppPostFull }) => {
+  const details = getPostDetails(props.post);
+
+  return (
+    <>
+      <PlatformPostAnchor details={details}></PlatformPostAnchor>
+      <NanopubStatus post={props.post}></NanopubStatus>
+    </>
+  );
+};
+
+const PostCardHeaderFeed = (props: { post: AppPostFull }) => {
+  const { constants } = useThemeContext();
+  const details = getPostDetails(props.post);
+
+  return (
+    <Box direction="row" align="center" justify="between" width="100%">
+      <Box direction="row" align="center" gap="12px">
+        <PlatformAvatar
+          size={24}
+          imageUrl={details?.authorAvatarUrl}></PlatformAvatar>
+        <Box direction="row" justify="between">
+          <Text
+            color={constants.colors.grayIcon}
+            style={{
+              fontSize: '14px',
+              fontStyle: 'normal',
+              fontWeight: '500',
+              lineHeight: '16px',
+              textDecoration: 'none',
+            }}>
+            {details?.authorName}
+          </Text>
+        </Box>
+      </Box>
+      <Box>
+        <PlatformPostAnchor details={details}></PlatformPostAnchor>
+      </Box>
+    </Box>
+  );
+};
 
 export const PostCard = (props: {
-  post: AppPostFull;
+  isPublicFeed?: boolean;
   shade?: boolean;
-  profile?: TwitterUserProfile;
   handleClick: () => void;
   isEmail?: boolean;
 }) => {
-  const { post, shade: _shade, isEmail } = props;
-  const profile = props.profile;
+  const { shade: _shade } = props;
   const shade = _shade || false;
+  const isPublicFeed = props.isPublicFeed || false;
+
+  const { updated } = usePost();
+  const post = updated.postMerged;
 
   const { constants } = useThemeContext();
+
+  if (!post) {
+    console.warn('unexpected post undefined in PostCard');
+    return <></>;
+  }
 
   const handleClick = () => {
     props.handleClick();
   };
 
-  const originalPlatformPost = post.mirrors.find(
-    (m) => m.platformId === post.origin
-  );
-  const originalPostUrl = post.generic.thread[0].url;
-
   const postText = concatenateThread(post.generic);
-
-  const { isParsing } = getPostStatuses(post);
 
   const handleInternalClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).tagName === 'A') {
@@ -50,56 +89,72 @@ export const PostCard = (props: {
 
   const hideSemantics = hideSemanticsHelper(post);
 
+  const header = isPublicFeed ? (
+    <PostCardHeaderFeed post={post}></PostCardHeaderFeed>
+  ) : (
+    <PostCardHeaderUser post={post}></PostCardHeaderUser>
+  );
+
   return (
     <Box
-      pad={{ top: '16px', bottom: '24px', horizontal: '12px' }}
+      pad={{ top: '16px', horizontal: '12px' }}
       style={{
         backgroundColor: shade ? constants.colors.shade : 'white',
         borderTop: '2px solid var(--Neutral-300, #D1D5DB)',
         borderRight: '1px solid var(--Neutral-300, #D1D5DB)',
         borderLeft: '1px solid var(--Neutral-300, #D1D5DB)',
         borderBottom: 'none',
-        cursor: 'pointer',
-        position: 'relative',
-      }}
-      onClick={handleClick}>
-      <Box direction="row" justify="between">
-        <PlatformPostAnchor
-          platformPostPosted={originalPlatformPost?.posted}
-          platformId={post.origin}
-          postUrl={originalPostUrl}></PlatformPostAnchor>
-        {!profile ? <NanopubStatus post={post}></NanopubStatus> : <></>}
+      }}>
+      <Box
+        style={{ cursor: 'pointer', position: 'relative' }}
+        onClick={handleClick}>
+        <Box direction="row" justify="between" margin={{ bottom: '6.5px' }}>
+          {header}
+        </Box>
+
+        {!hideSemantics && (
+          <SemanticsEditor
+            include={[PATTERN_ID.KEYWORDS]}
+            patternProps={{
+              isLoading:
+                updated.statusesMerged.isParsing !== undefined
+                  ? updated.statusesMerged.isParsing
+                  : false,
+              editable: false,
+              size: 'compact',
+              semantics: post?.semantics,
+              originalParsed: post?.originalParsed,
+            }}></SemanticsEditor>
+        )}
+
+        <PostTextStatic
+          onClick={handleInternalClick}
+          truncate
+          shade={shade}
+          text={postText}></PostTextStatic>
+
+        {!hideSemantics && (
+          <SemanticsEditor
+            include={[PATTERN_ID.REF_LABELS]}
+            patternProps={{
+              isLoading:
+                updated.statusesMerged.isParsing !== undefined
+                  ? updated.statusesMerged.isParsing
+                  : false,
+              size: 'compact',
+              editable: false,
+              semantics: post?.semantics,
+              originalParsed: post?.originalParsed,
+            }}></SemanticsEditor>
+        )}
       </Box>
-
-      {!hideSemantics && (
-        <SemanticsEditor
-          include={[PATTERN_ID.KEYWORDS]}
-          patternProps={{
-            isLoading: isParsing !== undefined ? isParsing : false,
-            editable: false,
-            size: 'compact',
-            semantics: post?.semantics,
-            originalParsed: post?.originalParsed,
-          }}></SemanticsEditor>
-      )}
-
-      <PostTextStatic
-        onClick={handleInternalClick}
-        truncate
-        shade={shade}
-        text={postText}></PostTextStatic>
-
-      {!hideSemantics && (
-        <SemanticsEditor
-          include={[PATTERN_ID.REF_LABELS]}
-          patternProps={{
-            isLoading: isParsing !== undefined ? isParsing : false,
-            size: 'compact',
-            editable: false,
-            semantics: post?.semantics,
-            originalParsed: post?.originalParsed,
-          }}></SemanticsEditor>
-      )}
+      <Box pad={{ top: 'medium' }}>
+        {updated.inPrePublish &&
+          updated.postMerged?.parsedStatus ===
+            AppPostParsedStatus.PROCESSED && (
+            <PublishButtons compact></PublishButtons>
+          )}
+      </Box>
     </Box>
   );
 };

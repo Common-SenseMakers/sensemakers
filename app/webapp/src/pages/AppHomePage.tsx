@@ -1,26 +1,21 @@
+import { useMemo } from 'react';
+
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { PostCardLoading } from '../post/PostCardLoading';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
-import { UserHome } from '../user-home/UserHome';
+import { UserPostsFeed } from '../user-home/UserPostsFeed';
 import { ConnectSocialsPage } from '../user-login/ConnectSocialsPage';
 import {
-  MastodonConnectedStatus,
   OverallLoginStatus,
-  TwitterConnectedStatus,
   useAccountContext,
 } from '../user-login/contexts/AccountContext';
 import { AppWelcome } from '../welcome/AppWelcome';
 
 const DEBUG = true;
 
-export const AppHome = () => {
-  const {
-    overallLoginStatus,
-    twitterProfile,
-    mastodonProfile,
-    blueskyProfile,
-  } = useAccountContext();
+export const AppHomePage = (props: {}) => {
+  const { overallLoginStatus, alreadyConnected } = useAccountContext();
 
   const LoadingPlaceholder = (
     <>
@@ -36,13 +31,10 @@ export const AppHome = () => {
     </>
   );
 
-  const { content, nav } = (() => {
+  const { content, nav } = useMemo(() => {
     if (DEBUG)
       console.log('AppHome', {
         overallLoginStatus,
-        twitterProfile,
-        mastodonProfile,
-        blueskyProfile,
       });
 
     if (overallLoginStatus === OverallLoginStatus.NotKnown) {
@@ -53,7 +45,11 @@ export const AppHome = () => {
       return { content: <AppWelcome />, nav: undefined };
     }
 
-    if (overallLoginStatus === OverallLoginStatus.PartialLoggedIn) {
+    if (
+      overallLoginStatus === OverallLoginStatus.PartialLoggedIn ||
+      (overallLoginStatus === OverallLoginStatus.FullyLoggedIn &&
+        !alreadyConnected)
+    ) {
       return {
         content: <ConnectSocialsPage />,
         nav: undefined,
@@ -61,11 +57,14 @@ export const AppHome = () => {
     }
 
     if (overallLoginStatus === OverallLoginStatus.FullyLoggedIn) {
-      return { content: <UserHome />, nav: <GlobalNav /> };
+      return {
+        content: <UserPostsFeed></UserPostsFeed>,
+        nav: <GlobalNav></GlobalNav>,
+      };
     }
 
     return { content: LoadingPlaceholder, nav: undefined };
-  })();
+  }, [overallLoginStatus, alreadyConnected]);
 
   return <ViewportPage content={content} nav={nav} justify="start" />;
 };

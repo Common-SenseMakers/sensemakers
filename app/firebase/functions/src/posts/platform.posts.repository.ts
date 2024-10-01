@@ -14,7 +14,7 @@ export class PlatformPostsRepository extends BaseRepository<
   PlatformPostCreate
 > {
   constructor(protected db: DBInstance) {
-    super(db.collections.platformPosts);
+    super(db.collections.platformPosts, db);
   }
 
   /** Get the platform post from platform, account and the AppPost id */

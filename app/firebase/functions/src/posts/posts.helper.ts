@@ -8,13 +8,13 @@ import { AppPostFull, GenericPost } from '../@shared/types/types.posts';
 import {
   DefinedIfTrue,
   PLATFORM,
-  PUBLISHABLE_PLATFORMS,
+  PUBLISHABLE_PLATFORM,
   UserDetailsBase,
 } from '../@shared/types/types.user';
 import { APP_URL } from '../config/config.runtime';
 
 export interface PlatformDetails {
-  platform: PUBLISHABLE_PLATFORMS;
+  platform: PUBLISHABLE_PLATFORM;
   account: UserDetailsBase;
 }
 

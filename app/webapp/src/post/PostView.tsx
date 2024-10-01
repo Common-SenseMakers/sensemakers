@@ -22,12 +22,13 @@ import { getAccount } from '../user-login/user.helper';
 import { usePersist } from '../utils/use.persist';
 import { PostHeader } from './PostHeader';
 import { PostNav } from './PostNav';
+import { PublishButtons } from './PostPublishButtons';
 import { PostTextEditable } from './PostTextEditable';
 import { POSTING_POST_ID } from './PostingPage';
 import { usePost } from './post.context/PostContext';
 import { concatenateThread, hideSemanticsHelper } from './posts.helper';
 
-const DEBUG = true;
+const DEBUG = false;
 
 /** extract the postId from the route and pass it to a PostContext */
 export const PostView = (props: { profile?: TwitterUserProfile }) => {
@@ -46,10 +47,10 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   const { connect: _connectOrcid } = useOrcidContext();
 
   const { constants } = useThemeContext();
-  const { derived, update, merged, publish } = usePost();
+  const { updated, publish } = usePost();
 
-  const postText = merged.post
-    ? concatenateThread(merged.post.generic)
+  const postText = updated.postMerged
+    ? concatenateThread(updated.postMerged.generic)
     : undefined;
 
   const { connectedUser } = useAccountContext();
@@ -57,13 +58,13 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   const { t } = useTranslation();
 
   const semanticsUpdated = (newSemantics: string) => {
-    update.updateSemantics(newSemantics);
+    updated.updateSemantics(newSemantics);
   };
 
   const reparse = async () => {
     try {
       setIsReparsing(true);
-      await appFetch('/api/posts/parse', { postId: merged.post?.id });
+      await appFetch('/api/posts/parse', { postId: updated.postMerged?.id });
       setIsReparsing(false);
     } catch (e: any) {
       setIsReparsing(false);
@@ -72,58 +73,45 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     }
   };
 
-  const ignore = async () => {
-    if (!merged.post) {
-      throw new Error(`Unexpected post not found`);
-    }
-    update.updatePost({
-      reviewedStatus: AppPostReviewStatus.IGNORED,
-    });
-  };
-
   const reviewForPublication = async () => {
-    if (!merged.post) {
+    if (!updated.postMerged) {
       throw new Error(`Unexpected post not found`);
     }
-    update.updatePost({
+    updated.updatePost({
       reviewedStatus: AppPostReviewStatus.PENDING,
     });
   };
 
   const enableEditOrUpdate = () => {
-    if (!update.enabledEdit) {
-      update.setEnabledEdit(true);
+    if (!updated.enabledEdit) {
+      updated.setEnabledEdit(true);
     } else {
       publish.publishOrRepublish();
     }
   };
 
   const cancelEdit = () => {
-    update.setEnabledEdit(false);
+    updated.setEnabledEdit(false);
   };
-
-  const { signNanopublication } = useNanopubContext();
-
-  const canPublishNanopub =
-    connectedUser &&
-    connectedUser.nanopub &&
-    connectedUser.nanopub.length > 0 &&
-    signNanopublication &&
-    derived.nanopubDraft;
-
-  const readyToNanopublish =
-    canPublishNanopub && derived.nanopubDraft && !merged.statuses.live;
 
   // receives the navigate from PostingPage and opens the post intent
   useEffect(() => {
-    if (postingPostId && connectedUser && !justSetPostId && merged.post?.id) {
+    if (
+      postingPostId &&
+      connectedUser &&
+      !justSetPostId &&
+      updated.postMerged?.id
+    ) {
       if (DEBUG) console.log(`posting post detected for ${postingPostId}`);
       setPostingPostId(null);
     }
-  }, [postingPostId, connectedUser, justSetPostId, merged.post?.id]);
+  }, [postingPostId, connectedUser, justSetPostId, updated.postMerged?.id]);
 
   const action = (() => {
-    if (!merged.statuses.processed && !merged.statuses.isParsing) {
+    if (
+      !updated.statusesMerged.processed &&
+      !updated.statusesMerged.isParsing
+    ) {
       return (
         <AppButton
           margin={{ top: 'medium' }}
@@ -134,10 +122,10 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       );
     }
 
-    if (merged.statuses.ignored) {
+    if (updated.statusesMerged.ignored) {
       return (
         <AppButton
-          disabled={update.isUpdating}
+          disabled={updated.isUpdating}
           margin={{ top: 'medium' }}
           primary
           onClick={() => reviewForPublication()}
@@ -145,35 +133,16 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       );
     }
 
-    if (!merged.statuses.live && !merged.statuses.ignored) {
-      return (
-        <Box direction="row" gap="small" margin={{ top: 'medium' }}>
-          <Box width="50%" style={{ flexGrow: 1 }}>
-            <AppButton
-              disabled={update.isUpdating}
-              icon={<ClearIcon></ClearIcon>}
-              onClick={() => ignore()}
-              label={t(I18Keys.ignore)}></AppButton>
-          </Box>
-          <Box width="50%" align="end" gap="small">
-            <AppButton
-              primary
-              disabled={update.isUpdating || !readyToNanopublish}
-              icon={<SendIcon></SendIcon>}
-              onClick={() => publish.setPublishIntent(true)}
-              label={t(I18Keys.publish)}
-              style={{ width: '100%' }}></AppButton>
-          </Box>
-        </Box>
-      );
+    if (updated.inPrePublish) {
+      return <PublishButtons></PublishButtons>;
     }
 
-    if (merged.statuses.live && !update.enabledEdit) {
+    if (updated.statusesMerged.live && !updated.enabledEdit) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
           <Box width="50%" style={{ flexGrow: 1 }}>
             <AppButton
-              disabled={update.isUpdating || publish.isRetracting}
+              disabled={updated.isUpdating || publish.isRetracting}
               icon={<ClearIcon></ClearIcon>}
               onClick={() => publish.setUnpublishIntent(true)}
               label={t(I18Keys.unpublish)}></AppButton>
@@ -181,7 +150,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
           <Box width="50%" align="end" gap="small">
             <AppButton
               primary
-              disabled={update.isUpdating || publish.isRetracting}
+              disabled={updated.isUpdating || publish.isRetracting}
               icon={<SendIcon></SendIcon>}
               onClick={() => enableEditOrUpdate()}
               label={t(I18Keys.edit)}
@@ -191,12 +160,12 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
       );
     }
 
-    if (merged.statuses.live && update.enabledEdit) {
+    if (updated.statusesMerged.live && updated.enabledEdit) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
           <Box width="50%" style={{ flexGrow: 1 }}>
             <AppButton
-              disabled={update.isUpdating}
+              disabled={updated.isUpdating}
               icon={<ClearIcon></ClearIcon>}
               onClick={() => cancelEdit()}
               label={t(I18Keys.cancel)}></AppButton>
@@ -204,7 +173,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
           <Box width="50%" align="end" gap="small">
             <AppButton
               primary
-              disabled={update.isUpdating}
+              disabled={updated.isUpdating}
               icon={<SendIcon></SendIcon>}
               onClick={() => enableEditOrUpdate()}
               label={t(I18Keys.publish)}
@@ -217,11 +186,11 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     return <></>;
   })();
 
-  const editable = update.editable;
-  const hideSemantics = hideSemanticsHelper(merged.post);
+  const editable = updated.editable;
+  const hideSemantics = hideSemanticsHelper(updated.postMerged);
 
   const content = (() => {
-    if (!merged.post) {
+    if (!updated.postMerged) {
       return (
         <Box gap="12px" pad="medium">
           <LoadingDiv height="90px" width="100%"></LoadingDiv>
@@ -232,19 +201,17 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     }
 
     const patternProps: PatternProps = {
-      isLoading: merged.statuses.isParsing,
+      isLoading: updated.statusesMerged.isParsing,
       editable,
-      semantics: merged.post?.semantics,
-      originalParsed: merged.post?.originalParsed,
+      semantics: updated.postMerged?.semantics,
+      originalParsed: updated.postMerged?.originalParsed,
       semanticsUpdated: semanticsUpdated,
     };
 
     return (
       <>
         <Box pad="medium">
-          <PostHeader
-            profile={getAccount(connectedUser, merged.post.origin)}
-            margin={{ bottom: '16px' }}></PostHeader>
+          <PostHeader boxProps={{ margin: { bottom: '16px' } }}></PostHeader>
           {!hideSemantics && (
             <SemanticsEditor
               patternProps={patternProps}

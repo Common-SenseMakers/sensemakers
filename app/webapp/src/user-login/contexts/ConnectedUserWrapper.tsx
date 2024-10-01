@@ -1,10 +1,11 @@
+import { Nav } from 'grommet';
 import { PropsWithChildren, createContext, useContext } from 'react';
 
-import { RobotIcon } from '../../app/icons/RobotIcon';
 import { UserPostsContext } from '../../user-home/UserPostsContext';
 import { AccountContext } from './AccountContext';
 import { AutopostInviteContext } from './AutopostInviteContext';
 import { DisconnectUserContext } from './DisconnectUserContext';
+import { NavHistoryContext } from './NavHistoryContext';
 import { BlueskyContext } from './platforms/BlueskyContext';
 import { MastodonContext } from './platforms/MastodonContext';
 import { OrcidContext } from './platforms/OrcidContext';
@@ -33,23 +34,25 @@ export const ConnectedUserWrapper = (props: PropsWithChildren) => {
       <AccountContext>
         <ConnectedWallet>
           <SignerContext>
-            <TwitterContext>
-              <MastodonContext>
-                <BlueskyContext>
-                  <NanopubContext>
-                    <OrcidContext>
-                      <DisconnectUserContext>
+            <NanopubContext>
+              <OrcidContext>
+                <DisconnectUserContext>
+                  <BlueskyContext>
+                    <MastodonContext>
+                      <TwitterContext>
                         <UserPostsContext>
                           <AutopostInviteContext>
-                            {props.children}
+                            <NavHistoryContext>
+                              {props.children}
+                            </NavHistoryContext>
                           </AutopostInviteContext>
                         </UserPostsContext>
-                      </DisconnectUserContext>
-                    </OrcidContext>
-                  </NanopubContext>
-                </BlueskyContext>
-              </MastodonContext>
-            </TwitterContext>
+                      </TwitterContext>
+                    </MastodonContext>
+                  </BlueskyContext>
+                </DisconnectUserContext>
+              </OrcidContext>
+            </NanopubContext>
           </SignerContext>
         </ConnectedWallet>
       </AccountContext>

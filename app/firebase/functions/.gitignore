@@ -22,3 +22,5 @@ users.dashboard.output.json
 /migrations/.migrations.env
 
 test.email.html
+
+*-all.nanopubs.data

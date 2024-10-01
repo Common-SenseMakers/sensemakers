@@ -86,7 +86,7 @@ describe('02-platforms', () => {
       if (!user) {
         throw new Error('appUser not created');
       }
-      const allUserDetails = user[PLATFORM.Twitter];
+      const allUserDetails = user.accounts[PLATFORM.Twitter];
       if (!allUserDetails || allUserDetails.length < 0) {
         throw new Error('Unexpected');
       }
@@ -96,7 +96,7 @@ describe('02-platforms', () => {
         throw new Error('Unexpected');
       }
 
-      const twitter = user[PLATFORM.Twitter];
+      const twitter = user.accounts[PLATFORM.Twitter];
 
       if (!twitter) {
         throw new Error('User does not have Twitter credentials');
@@ -124,7 +124,7 @@ describe('02-platforms', () => {
       if (!user) {
         throw new Error('appUser not created');
       }
-      const twitterId = user[PLATFORM.Twitter]?.[0]?.user_id;
+      const twitterId = user.accounts[PLATFORM.Twitter]?.[0]?.user_id;
 
       const twitterService = services.platforms.get(
         PLATFORM.Twitter

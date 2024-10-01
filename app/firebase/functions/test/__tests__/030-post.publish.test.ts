@@ -93,19 +93,19 @@ describe('030-process', () => {
       }
 
       /** get pending posts of user */
-      const allPendingPosts = await services.postsManager.getOfUser(
-        user.userId,
-        {
-          status: PostsQueryStatus.PENDING,
-          fetchParams: { expectedAmount: 30 },
-        }
-      );
+      const allPendingPosts = await services.postsManager.getOfUser({
+        userId: user.userId,
+        status: PostsQueryStatus.PENDING,
+        fetchParams: { expectedAmount: 30 },
+      });
       const pendingPosts = allPendingPosts.filter(
         (pendingPost) => pendingPost.origin === PLATFORM.Twitter
       );
 
       if (!USE_REAL_TWITTER && TEST_THREADS.length > 1) {
-        expect(pendingPosts).to.have.length(TEST_THREADS.length + 1 - 1); // one post is ignored
+        expect(pendingPosts).to.have.length(
+          Math.ceil(TEST_THREADS.length / 2) + 1 - 1
+        ); // one post is ignored
       }
 
       await Promise.all(
@@ -185,20 +185,20 @@ describe('030-process', () => {
       }
 
       /** get pending posts of user */
-      const allPendingPosts = await services.postsManager.getOfUser(
-        user.userId,
-        {
-          status: PostsQueryStatus.PENDING,
-          fetchParams: { expectedAmount: 30 },
-        }
-      );
+      const allPendingPosts = await services.postsManager.getOfUser({
+        userId: user.userId,
+        status: PostsQueryStatus.PENDING,
+        fetchParams: { expectedAmount: 30 },
+      });
       const pendingPosts = allPendingPosts.filter(
         (pendingPost) => pendingPost.origin === PLATFORM.Twitter
       );
 
       if (!USE_REAL_TWITTER) {
         if (TEST_THREADS.length > 1) {
-          expect(pendingPosts).to.have.length(TEST_THREADS.length - 1 - 1); // 1 ifnored post
+          expect(pendingPosts).to.have.length(
+            Math.ceil(TEST_THREADS.length / 2) - 1 - 1
+          ); // 1 ifnored post
         } else {
           expect(pendingPosts).to.have.length(0);
         }
@@ -272,15 +272,15 @@ describe('030-process', () => {
       }
 
       /** get published posts of user */
-      const publishedPosts = await services.postsManager.getOfUser(
-        user.userId,
-        {
-          status: PostsQueryStatus.PUBLISHED,
-          fetchParams: { expectedAmount: 30 },
-        }
-      );
+      const publishedPosts = await services.postsManager.getOfUser({
+        userId: user.userId,
+        status: PostsQueryStatus.PUBLISHED,
+        fetchParams: { expectedAmount: 30 },
+      });
 
-      expect(publishedPosts).to.have.length(TEST_THREADS.length + 1 - 1); // 1 ignored post
+      expect(publishedPosts).to.have.length(
+        Math.ceil(TEST_THREADS.length / 2) + 1 - 1
+      ); // 1 ignored post
 
       const post = publishedPosts[0];
 
@@ -380,15 +380,15 @@ describe('030-process', () => {
       }
 
       /** get published posts of user */
-      const publishedPosts = await services.postsManager.getOfUser(
-        user.userId,
-        {
-          status: PostsQueryStatus.PUBLISHED,
-          fetchParams: { expectedAmount: 30 },
-        }
-      );
+      const publishedPosts = await services.postsManager.getOfUser({
+        userId: user.userId,
+        status: PostsQueryStatus.PUBLISHED,
+        fetchParams: { expectedAmount: 30 },
+      });
 
-      expect(publishedPosts).to.have.length(TEST_THREADS.length + 1 - 1); // 1 ignored post
+      expect(publishedPosts).to.have.length(
+        Math.ceil(TEST_THREADS.length / 2) + 1 - 1
+      ); // 1 ignored post
 
       const post = publishedPosts[0];
 
