@@ -32,7 +32,7 @@ describe.skip('twitter integration', () => {
     expect(appUsers).to.not.be.undefined;
     expect(appUsers.length).to.eq(NUM_TWITTER_USERS);
     for (const appUser of appUsers) {
-      for (const twitterDetails of appUser[PLATFORM.Twitter] ?? []) {
+      for (const twitterDetails of appUser.accounts[PLATFORM.Twitter] ?? []) {
         if (!twitterDetails.read?.accessToken) {
           throw new Error('unexpected: access token missing');
         }

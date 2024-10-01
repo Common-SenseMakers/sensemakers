@@ -114,6 +114,7 @@ const authenticateMastodonForUser = async (
         notificationFreq: NotificationFreq.Daily,
       },
       signupDate: Date.now(),
+      accounts: {},
     };
   }
 
@@ -121,7 +122,7 @@ const authenticateMastodonForUser = async (
     getPrefixedUserId(PLATFORM.Mastodon, credentials.mastodon.id)
   );
 
-  user[PLATFORM.Mastodon] = [
+  user.accounts[PLATFORM.Mastodon] = [
     {
       signupDate: 0,
       user_id: credentials.mastodon.id,
@@ -166,6 +167,7 @@ const authenticateNanopubForUser = async (
         notificationFreq: NotificationFreq.Daily,
       },
       signupDate: Date.now(),
+      accounts: {},
     };
   }
 
@@ -173,7 +175,7 @@ const authenticateNanopubForUser = async (
     getPrefixedUserId(PLATFORM.Nanopub, profile.ethAddress)
   );
 
-  user[PLATFORM.Nanopub] = [
+  user.accounts[PLATFORM.Nanopub] = [
     {
       signupDate: 0,
       user_id: profile.ethAddress,

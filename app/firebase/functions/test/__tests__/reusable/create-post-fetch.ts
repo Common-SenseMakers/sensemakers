@@ -4,7 +4,7 @@ import { user } from 'firebase-functions/v1/auth';
 
 import {
   AppUser,
-  IDENTITY_PLATFORMS,
+  IDENTITY_PLATFORM,
   PLATFORM,
 } from '../../../src/@shared/types/types.user';
 import { TwitterService } from '../../../src/platforms/twitter/twitter.service';
@@ -16,7 +16,7 @@ import { TestServices } from '../test.services';
 
 export const _01_createAndFetchUsers = async (
   services: TestServices,
-  platform: IDENTITY_PLATFORMS,
+  platform: IDENTITY_PLATFORM,
   platformAccountId: string,
   debug: { DEBUG: boolean; DEBUG_PREFIX: string }
 ) => {
@@ -66,7 +66,7 @@ export const _02_publishTweet = async (
       throw new Error('user not created');
     }
 
-    const accounts = user[PLATFORM.Twitter];
+    const accounts = user.accounts[PLATFORM.Twitter];
     if (!accounts) {
       throw new Error('Unexpected');
     }

@@ -18,7 +18,7 @@ import {
 import { TwitterThread } from '../../src/@shared/types/types.twitter';
 import {
   PLATFORM,
-  PUBLISHABLE_PLATFORMS,
+  PUBLISHABLE_PLATFORM,
 } from '../../src/@shared/types/types.user';
 import { activityEventCreatedHook } from '../../src/activity/activity.created.hook';
 import { Services } from '../../src/instances/services';
@@ -412,7 +412,7 @@ export const fetchPostInTests = async (
   userId: string,
   post_id: string,
   services: Services,
-  platform: PUBLISHABLE_PLATFORMS
+  platform: PUBLISHABLE_PLATFORM
 ) => {
   /** fetch will store the posts in the DB */
   const { post } = await services.db.run(

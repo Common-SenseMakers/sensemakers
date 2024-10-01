@@ -22,65 +22,67 @@ export const getMockedUser = (credentials: TestUserCredentials): AppUser => {
       `${PLATFORM.Twitter}:${credentials.twitter.id}`,
       `${PLATFORM.Nanopub}:${credentials.nanopub.ethPrivateKey}`,
     ],
-    [PLATFORM.Mastodon]: [
-      {
-        user_id: credentials[PLATFORM.Mastodon].id,
-        signupDate: 0,
-        profile: {
-          id: credentials[PLATFORM.Mastodon].id,
-          displayName: credentials[PLATFORM.Mastodon].username,
-          username: credentials[PLATFORM.Mastodon].username,
-          avatar:
-            'https://files.mastodon.social/accounts/avatars/000/000/001/original/1f44b.png',
-          mastodonServer: 'mastodon.social',
+    accounts: {
+      [PLATFORM.Mastodon]: [
+        {
+          user_id: credentials[PLATFORM.Mastodon].id,
+          signupDate: 0,
+          profile: {
+            id: credentials[PLATFORM.Mastodon].id,
+            displayName: credentials[PLATFORM.Mastodon].username,
+            username: credentials[PLATFORM.Mastodon].username,
+            avatar:
+              'https://files.mastodon.social/accounts/avatars/000/000/001/original/1f44b.png',
+            mastodonServer: 'mastodon.social',
+          },
+          read: {
+            accessToken: '',
+          },
+          write: {
+            accessToken: '',
+          },
         },
-        read: {
-          accessToken: '',
+      ],
+      [PLATFORM.Twitter]: [
+        {
+          user_id: credentials[PLATFORM.Twitter].id,
+          signupDate: 0,
+          profile: {
+            profile_image_url:
+              'https://pbs.twimg.com/profile_images/1753077803258449920/2vI5Y2Wx_normal.png',
+            id: credentials[PLATFORM.Twitter].id,
+            name: credentials[PLATFORM.Twitter].username,
+            username: credentials[PLATFORM.Twitter].username,
+          },
+          read: {
+            accessToken: '',
+            refreshToken: '',
+            expiresIn: 7200,
+            expiresAtMs: 9718901096756,
+          },
+          write: {
+            accessToken: '',
+            refreshToken: '',
+            expiresIn: 7200,
+            expiresAtMs: 9718901096756,
+          },
         },
-        write: {
-          accessToken: '',
+      ],
+      [PLATFORM.Nanopub]: [
+        {
+          signupDate: 0,
+          user_id: '0x59b277c77F738e9B758B73Dd9Bfc6DE36D6e0EB1',
+          profile: {
+            introNanopubUri:
+              'https://w3id.org/np/RAffsv5cH41cAXA_HOasEJ74XyQXOENnB9lc-iyUCoM4w',
+            ethAddress: '0x59b277c77F738e9B758B73Dd9Bfc6DE36D6e0EB1',
+            rsaPublickey:
+              '-----BEGIN PUBLIC KEY-----\r\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAj7mSvsl6URu4Vt7hzYWh\r\nn4AqqGHpUabpOUl5YErTWP7xcuK25dVd2RE2NHqL6fUeJQFB9ijKr9jUkVGVVLXa\r\n+A1HOsJXSMVhB8Owv/VnDJwA+92qjA3bN3//H98PR3UOXBmZDNUiwZ2IB6jmDkjO\r\n2NknJKsOpYVE3lc/VRKOATNoi1MFDR4dyDU9XjyPcn/p420GYafEkdoEnuihvML+\r\nr5UwIBzkhs20IQhEZivExUBnxLE/jC2sdUmN0aHlqAGKU0x7uMmrMpx1MekAJ3Ic\r\nLtoUYLyo39eOqfeGE5mgom/XRI4J7TPoFDQdzbKdz+wgkzPDRrQ9L4MCMKc0YJL6\r\nMwIDAQAB\r\n-----END PUBLIC KEY-----\r\n',
+            ethToRsaSignature:
+              '0xc0416f86379aecce40b0cf959adf40ea9043b1098cee66c80bfe667094ea88914112134c17090ae09ec86e98fc4651436377df05ef16c46afd6fe260bfac76fe1c',
+          },
         },
-      },
-    ],
-    [PLATFORM.Twitter]: [
-      {
-        user_id: credentials[PLATFORM.Twitter].id,
-        signupDate: 0,
-        profile: {
-          profile_image_url:
-            'https://pbs.twimg.com/profile_images/1753077803258449920/2vI5Y2Wx_normal.png',
-          id: credentials[PLATFORM.Twitter].id,
-          name: credentials[PLATFORM.Twitter].username,
-          username: credentials[PLATFORM.Twitter].username,
-        },
-        read: {
-          accessToken: '',
-          refreshToken: '',
-          expiresIn: 7200,
-          expiresAtMs: 9718901096756,
-        },
-        write: {
-          accessToken: '',
-          refreshToken: '',
-          expiresIn: 7200,
-          expiresAtMs: 9718901096756,
-        },
-      },
-    ],
-    [PLATFORM.Nanopub]: [
-      {
-        signupDate: 0,
-        user_id: '0x59b277c77F738e9B758B73Dd9Bfc6DE36D6e0EB1',
-        profile: {
-          introNanopubUri:
-            'https://w3id.org/np/RAffsv5cH41cAXA_HOasEJ74XyQXOENnB9lc-iyUCoM4w',
-          ethAddress: '0x59b277c77F738e9B758B73Dd9Bfc6DE36D6e0EB1',
-          rsaPublickey:
-            '-----BEGIN PUBLIC KEY-----\r\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAj7mSvsl6URu4Vt7hzYWh\r\nn4AqqGHpUabpOUl5YErTWP7xcuK25dVd2RE2NHqL6fUeJQFB9ijKr9jUkVGVVLXa\r\n+A1HOsJXSMVhB8Owv/VnDJwA+92qjA3bN3//H98PR3UOXBmZDNUiwZ2IB6jmDkjO\r\n2NknJKsOpYVE3lc/VRKOATNoi1MFDR4dyDU9XjyPcn/p420GYafEkdoEnuihvML+\r\nr5UwIBzkhs20IQhEZivExUBnxLE/jC2sdUmN0aHlqAGKU0x7uMmrMpx1MekAJ3Ic\r\nLtoUYLyo39eOqfeGE5mgom/XRI4J7TPoFDQdzbKdz+wgkzPDRrQ9L4MCMKc0YJL6\r\nMwIDAQAB\r\n-----END PUBLIC KEY-----\r\n',
-          ethToRsaSignature:
-            '0xc0416f86379aecce40b0cf959adf40ea9043b1098cee66c80bfe667094ea88914112134c17090ae09ec86e98fc4651436377df05ef16c46afd6fe260bfac76fe1c',
-        },
-      },
-    ],
+      ],
+    },
   };
 };
