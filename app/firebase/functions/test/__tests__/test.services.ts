@@ -10,6 +10,7 @@ import {
   EmailSenderMockConfig,
   getEmailSenderMock,
 } from '../../src/emailSender/email.sender.service.mock';
+import { FeedService } from '../../src/feed/feed.service';
 import { Services } from '../../src/instances/services';
 import { NotificationService } from '../../src/notifications/notification.service';
 import { NotificationsRepository } from '../../src/notifications/notifications.repository';
@@ -215,9 +216,12 @@ export const getTestServices = (config: TestServicesConfig) => {
 
   const activity = new ActivityService(activityRepo);
 
+  const feed = new FeedService(db, postsManager);
+
   const services: TestServices = {
     users: usersService,
     postsManager,
+    feed,
     platforms: platformsService,
     time: time as TimeMock,
     db,

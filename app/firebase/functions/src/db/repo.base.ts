@@ -1,6 +1,7 @@
 import { DefinedIfTrue } from '../@shared/types/types.user';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
+import { DBInstance } from './instance';
 
 const DEBUG = false;
 
@@ -18,7 +19,10 @@ export function removeUndefined(obj: any): any {
 }
 
 export class BaseRepository<TT, CC> {
-  constructor(protected collection: FirebaseFirestore.CollectionReference) {}
+  constructor(
+    protected collection: FirebaseFirestore.CollectionReference,
+    protected db: DBInstance
+  ) {}
 
   public create(post: CC, manager: TransactionManager): CC & { id: string } {
     const postRef = this.collection.doc();
@@ -32,12 +36,11 @@ export class BaseRepository<TT, CC> {
     };
   }
 
-  protected getRef(postId: string) {
-    const ref = this.collection.doc(postId);
+  protected getRef(id: string) {
+    const ref = this.collection.doc(id);
     if (DEBUG) logger.debug(`Getting ${ref.id}`);
     return ref;
   }
-
 
   protected async getDoc(userId: string, manager: TransactionManager) {
     const ref = this.getRef(userId);
@@ -48,6 +51,16 @@ export class BaseRepository<TT, CC> {
   public async getAll(): Promise<string[]> {
     const snapshot = await this.collection.get();
     return snapshot.docs.map((doc) => doc.id);
+  }
+
+  public async getFromIds(ids: string[]) {
+    if (ids.length === 0) return [];
+
+    const refs = Array.from(ids).map((id) => this.getRef(id));
+    const snapshot = await this.db.firestore.getAll(...refs);
+    return snapshot.map((doc) => {
+      return { id: doc.id, ...doc.data() } as TT;
+    });
   }
 
   public async get<T extends boolean, R = TT>(

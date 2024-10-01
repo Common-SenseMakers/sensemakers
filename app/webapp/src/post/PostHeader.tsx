@@ -2,46 +2,27 @@ import { Box, BoxExtendedProps, Text } from 'grommet';
 
 import { PlatformPostAnchor } from '../app/anchors/PlatformPostAnchor';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
-import { BlueskyUserProfile } from '../shared/types/types.bluesky';
-import { MastodonUserProfile } from '../shared/types/types.mastodon';
-import { TwitterUserProfile } from '../shared/types/types.twitter';
-import { AccountDetailsRead, PLATFORM } from '../shared/types/types.user';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { NanopubStatus } from './NanopubStatus';
+import { getPostDetails } from './platform.post.details';
 import { usePost } from './post.context/PostContext';
 
-export const PostHeader = (
-  props: BoxExtendedProps & { profile?: AccountDetailsRead<any> }
-) => {
+/** should be used inside a PostContext */
+export const PostHeader = (props: { boxProps: BoxExtendedProps }) => {
   const { constants } = useThemeContext();
-  const { merged } = usePost();
-  const post = merged.post;
+  const { updated } = usePost();
+  const post = updated.postMerged;
 
-  const originalPlatformPost = post?.mirrors.find(
-    (m) => m.platformId === post.origin
-  );
-  const originalPostUrl = post?.generic.thread[0].url;
+  const { boxProps } = props;
 
-  const name = post?.generic.author.name;
-  const profileImageUrl = (() => {
-    if (post?.origin === PLATFORM.Twitter) {
-      return (props.profile?.profile as TwitterUserProfile)?.profile_image_url;
-    }
-    if (post?.origin === PLATFORM.Mastodon) {
-      return (props.profile?.profile as MastodonUserProfile)?.avatar;
-    }
-    if (post?.origin === PLATFORM.Bluesky) {
-      return (props.profile?.profile as BlueskyUserProfile)?.avatar;
-    }
-    return undefined;
-  })();
+  const details = getPostDetails(post);
 
   return (
-    <Box direction="row" justify="between" {...props}>
+    <Box direction="row" justify="between" {...boxProps}>
       <Box direction="row">
         <PlatformAvatar
           size={48}
-          profileImageUrl={profileImageUrl}></PlatformAvatar>
+          imageUrl={details?.authorAvatarUrl}></PlatformAvatar>
         <Box width="100%" margin={{ left: 'medium' }}>
           <Box direction="row" justify="between">
             <Text
@@ -53,19 +34,18 @@ export const PostHeader = (
                 lineHeight: '18px',
                 textDecoration: 'none',
               }}>
-              {name}
+              {details?.authorName}
             </Text>
           </Box>
           <Box margin={{ bottom: '6px' }}></Box>
           <PlatformPostAnchor
-            platformPostPosted={originalPlatformPost?.posted}
-            platformId={post?.origin}
-            postUrl={originalPostUrl}></PlatformPostAnchor>
+            loading={post === undefined}
+            details={details}></PlatformPostAnchor>
         </Box>
       </Box>
 
       <Box gap="small" align="end">
-        <NanopubStatus post={merged.post}></NanopubStatus>
+        <NanopubStatus post={updated.postMerged}></NanopubStatus>
       </Box>
     </Box>
   );

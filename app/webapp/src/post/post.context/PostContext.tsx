@@ -5,18 +5,14 @@ import { useAccountContext } from '../../user-login/contexts/AccountContext';
 import { PostPublishStatusModals } from '../PostPublishStatusModals';
 import { PostDerivedContext, usePostDerived } from './use.post.derived';
 import { PostFetchContext, usePostFetch } from './use.post.fetch';
-import { PostMergeContext, usePostMerge } from './use.post.merge';
 import { PostNavContext, usePostNav } from './use.post.nav';
 import { PostPublishContext, usePostPublish } from './use.post.publish';
 import { PostUpdateContext, usePostUpdate } from './use.post.update';
 
-const DEBUG = false;
-
 interface PostContextType {
   fetched: PostFetchContext;
   derived: PostDerivedContext;
-  update: PostUpdateContext;
-  merged: PostMergeContext;
+  updated: PostUpdateContext;
   publish: PostPublishContext;
   navigatePost: PostNavContext;
 }
@@ -27,7 +23,8 @@ export const PostContext: React.FC<{
   children: React.ReactNode;
   postInit?: AppPostFull;
   postId?: string;
-}> = ({ children, postInit, postId: _postId }) => {
+  showCelebration?: boolean;
+}> = ({ children, postInit, postId: _postId, showCelebration }) => {
   if (_postId === undefined && postInit === undefined) {
     throw new Error(`Both postId and post were undefined`);
   }
@@ -36,9 +33,8 @@ export const PostContext: React.FC<{
 
   const fetched = usePostFetch(connectedUser, _postId, postInit);
   const derived = usePostDerived(fetched, connectedUser);
-  const update = usePostUpdate(fetched, derived, connectedUser);
-  const merged = usePostMerge(fetched, update, postInit);
-  const publish = usePostPublish(merged, update);
+  const updated = usePostUpdate(fetched, derived, postInit, connectedUser);
+  const publish = usePostPublish(fetched, updated);
   const navigatePost = usePostNav(fetched);
 
   return (
@@ -46,12 +42,12 @@ export const PostContext: React.FC<{
       value={{
         fetched,
         derived,
-        update,
-        merged,
+        updated,
         publish,
         navigatePost,
       }}>
-      <PostPublishStatusModals></PostPublishStatusModals>
+      <PostPublishStatusModals
+        showCelebration={showCelebration}></PostPublishStatusModals>
       {children}
     </PostContextValue.Provider>
   );

@@ -23,8 +23,8 @@ import { PLATFORM } from '../../../shared/types/types.user';
 import { usePersist } from '../../../utils/use.persist';
 import {
   LoginFlowState,
-  MastodonConnectedStatus,
   OverallLoginStatus,
+  PlatformConnectedStatus,
   useAccountContext,
 } from '../AccountContext';
 
@@ -61,8 +61,8 @@ export const MastodonContext = (props: PropsWithChildren) => {
     refresh: refreshConnected,
     overallLoginStatus,
     setLoginFlowState,
-    setMastodonConnectedStatus,
-    mastodonConnectedStatus,
+    setPlatformConnectedStatus,
+    getPlatformConnectedStatus,
   } = useAccountContext();
 
   const [wasConnecting, setWasConnecting] = usePersist<boolean>(
@@ -75,7 +75,8 @@ export const MastodonContext = (props: PropsWithChildren) => {
 
   const appFetch = useAppFetch();
 
-  const needConnect = !connectedUser || !connectedUser[PLATFORM.Mastodon];
+  const needConnect =
+    !connectedUser || !connectedUser.accounts[PLATFORM.Mastodon];
 
   useEffect(() => {
     if (error) {
@@ -93,7 +94,10 @@ export const MastodonContext = (props: PropsWithChildren) => {
       callbackUrl?: string
     ) => {
       setLoginFlowState(LoginFlowState.ConnectingMastodon);
-      setMastodonConnectedStatus(MastodonConnectedStatus.Connecting);
+      setPlatformConnectedStatus(
+        PLATFORM.Mastodon,
+        PlatformConnectedStatus.Connecting
+      );
       setError(undefined);
 
       try {
@@ -127,10 +131,13 @@ export const MastodonContext = (props: PropsWithChildren) => {
         log('Error connecting to Mastodon', err);
         setError(t(I18Keys.errorConnectMastodon, { mastodonServer: domain }));
         setLoginFlowState(LoginFlowState.Idle);
-        setMastodonConnectedStatus(MastodonConnectedStatus.Disconnected);
+        setPlatformConnectedStatus(
+          PLATFORM.Mastodon,
+          PlatformConnectedStatus.Disconnected
+        );
       }
     },
-    [appFetch, setLoginFlowState, setMastodonConnectedStatus]
+    [appFetch, setLoginFlowState]
   );
 
   useEffect(() => {
@@ -140,7 +147,8 @@ export const MastodonContext = (props: PropsWithChildren) => {
         connectedUser &&
         wasConnecting &&
         (overallLoginStatus === OverallLoginStatus.PartialLoggedIn ||
-          mastodonConnectedStatus === MastodonConnectedStatus.Connecting)
+          getPlatformConnectedStatus(PLATFORM.Mastodon) ===
+            PlatformConnectedStatus.Connecting)
       ) {
         log('useEffect MastodonSignup', {
           code_param,

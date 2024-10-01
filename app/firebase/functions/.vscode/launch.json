@@ -41,14 +41,14 @@
       "internalConsoleOptions": "neverOpen"
     },
     {
-      "name": "migration: 001",
+      "name": "migration: 00X",
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "ts-node",
       "args": [
         "--project",
         "./tsconfig.scripts.json",
-        "./migrations/001-post-profile.ts"
+        "./migrations/002-post-structured-semantics.ts"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",

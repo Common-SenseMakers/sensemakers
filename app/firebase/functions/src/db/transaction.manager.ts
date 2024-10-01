@@ -230,6 +230,10 @@ export class TransactionManager {
             break;
 
           case MutationType.update:
+            if (Object.keys(mut.data).length === 0) {
+              break;
+            }
+
             mut.precondition
               ? this.mutator.update(mut.documentRef, mut.data, mut.precondition)
               : this.mutator.update(mut.documentRef, mut.data);

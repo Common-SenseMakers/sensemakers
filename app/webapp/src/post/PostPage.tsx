@@ -8,15 +8,15 @@ import { PostContext } from './post.context/PostContext';
 /** extract the postId from the route and pass it to a PostContext */
 export const PostPage = () => {
   const { postId } = useParams();
-  const { getPost } = useUserPosts();
+  const { feed } = useUserPosts();
 
   const postInit = useMemo(
-    () => (postId ? getPost(postId) : undefined),
+    () => (postId ? feed.getPost(postId) : undefined),
     [postId]
   );
 
   return (
-    <PostContext postId={postId} postInit={postInit}>
+    <PostContext postId={postId} postInit={postInit} showCelebration>
       <PostView></PostView>
     </PostContext>
   );

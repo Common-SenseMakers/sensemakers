@@ -17,8 +17,10 @@ export const ConnectMastodonPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { connect, error } = useMastodonContext();
-  const { mastodonProfile } = useAccountContext();
+  const { connectedUser } = useAccountContext();
   const [mastodonServer, setMastodonServer] = useState('');
+
+  const mastodonProfile = connectedUser?.profiles?.mastodon;
 
   useEffect(() => {
     if (mastodonProfile) {
@@ -40,9 +42,11 @@ export const ConnectMastodonPage = () => {
       <Box style={{ flexGrow: 1 }}>
         <AppHeading level="1">{t(I18Keys.connectMastodonTitle)}</AppHeading>
         <Box width="100%" height="16px" />
+
         <AppParagraph margin={{ bottom: 'medium' }}>
           {t(I18Keys.connectMastodonParagraph)}
         </AppParagraph>
+
         <AppParagraph
           margin={{ bottom: 'small' }}
           size="small"

@@ -1,5 +1,6 @@
 import express from 'express';
 
+import { getPublicFeedController } from './feed/feed.controller';
 import {
   approvePostController,
   createDraftPostController,
@@ -40,3 +41,5 @@ router.post('/posts/approve', approvePostController);
 router.post('/posts/parse', parsePostController);
 router.post('/posts/update', updatePostController);
 router.post('/posts/unpublish', unpublishPlatformPostController);
+
+router.post('/feed/get', getPublicFeedController);

@@ -1,56 +1,66 @@
-import { Anchor, Box, BoxExtendedProps, Text } from 'grommet';
-import { useContext, useEffect, useState } from 'react';
+import { Box, BoxExtendedProps, Text } from 'grommet';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { ModalContent } from '../app/AppModalStandard';
-import { useServiceWorker } from '../app/ServiceWorkerContext';
 import { useToastContext } from '../app/ToastsContext';
 import { FilterIcon } from '../app/icons/FilterIcon';
 import { HmmIcon } from '../app/icons/HmmIcon';
 import { ReloadIcon } from '../app/icons/ReloadIcon';
-import { locationToPageIx } from '../app/layout/GlobalNav';
-import { ViewportPageScrollContext } from '../app/layout/Viewport';
+import { useViewport } from '../app/layout/Viewport';
 import { I18Keys } from '../i18n/i18n';
 import { PostCard } from '../post/PostCard';
 import { PostCardLoading } from '../post/PostCardLoading';
 import { PostContext } from '../post/post.context/PostContext';
-import { PostsQueryStatus, UserPostsQuery } from '../shared/types/types.posts';
-import { AppButton, AppHeading, AppModal, AppSelect } from '../ui-components';
+import { PostsQuery, PostsQueryStatus } from '../shared/types/types.posts';
+import { AppButton, AppHeading, AppSelect } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
-import { usePersist } from '../utils/use.persist';
-import { IntroModals } from './IntroModal';
-import { useUserPosts } from './UserPostsContext';
+import { PostFetcherInterface, usePostsFetcher } from './posts.fetcher.hook';
 
-const statusPretty: Record<PostsQueryStatus, string> = {
-  drafts: 'All Drafts',
-  ignored: 'Ignored',
-  pending: 'For Review',
-  published: 'Published',
-};
+const DEBUG = true;
 
-const INTRO_SHOWN = 'introShown';
+export interface FilterOption {
+  value: string;
+  pretty: string;
+}
 
-export const UserHome = () => {
+/**
+ * Receives a PostFetcherInterface object (with the posts array and methods
+ * to interact with it) and renders it as a feed of PostCard.
+ * It includes the infinite scrolling
+ */
+export const PostsFetcherComponent = (props: {
+  feed: PostFetcherInterface;
+  pageTitle: string;
+  filterOptions: FilterOption[];
+  status?: PostsQueryStatus;
+  onFilterOptionChanged: (filter: PostsQuery) => void;
+  isPublicFeed?: boolean;
+  showHeader?: boolean;
+}) => {
+  const { show } = useToastContext();
   const { constants } = useThemeContext();
   const { t } = useTranslation();
-  const { show } = useToastContext();
-
-  const { hasUpdate, needsInstall, updateApp, install } = useServiceWorker();
-
-  const [introShown, setIntroShown] = usePersist<boolean>(INTRO_SHOWN, false);
-  const [showIntro, setShowIntro] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (!introShown) {
-      setShowIntro(true);
-    }
-  }, []);
 
   const {
-    filterStatus,
+    pageTitle,
+    status: filterStatus,
+    filterOptions,
+    onFilterOptionChanged,
+    feed,
+    isPublicFeed: _isPublicFeed,
+    showHeader: _showHeader,
+  } = props;
+
+  const isPublicFeed = _isPublicFeed !== undefined ? _isPublicFeed : false;
+  const showHeader = _showHeader !== undefined ? _showHeader : true;
+
+  const navigate = useNavigate();
+
+  const {
     posts,
     fetchOlder,
     errorFetchingOlder,
@@ -60,20 +70,9 @@ export const UserHome = () => {
     errorFetchingNewer,
     isLoading,
     moreToFetch,
-  } = useUserPosts();
+  } = feed;
 
-  const { isAtBottom } = useContext(ViewportPageScrollContext);
-  const location = useLocation();
-
-  const pageIx = locationToPageIx(location);
-  const pageTitle = (() => {
-    if (pageIx === 0) {
-      return t(I18Keys.drafts);
-    }
-    if (pageIx === 1) {
-      return t(I18Keys.postsNames);
-    }
-  })();
+  const { isAtBottom } = useViewport();
 
   useEffect(() => {
     if (isAtBottom && !isLoading && moreToFetch) {
@@ -108,35 +107,16 @@ export const UserHome = () => {
     }
   }, [errorFetchingOlder, errorFetchingNewer]);
 
-  useEffect(() => {
-    let timeout: NodeJS.Timeout;
-    if (location.state?.postId) {
-      const postCard = document.querySelector(`#post-${location.state.postId}`);
-      const viewportPage = document.querySelector('#content');
-      if (postCard && viewportPage) {
-        timeout = setTimeout(() => {
-          postCard.scrollIntoView({
-            behavior: 'instant' as ScrollBehavior,
-            block: 'center',
-          });
-        }, 0);
-      }
+  const content = useMemo(() => {
+    if (DEBUG) {
+      console.log('PostsFetcherComponent - content', {
+        posts,
+        isLoading,
+        isPublicFeed,
+        isFetchingOlder,
+        moreToFetch,
+      });
     }
-    return () => clearTimeout(timeout);
-  }, []);
-
-  const navigate = useNavigate();
-
-  const setFilter = (filter: UserPostsQuery) => {
-    navigate(`/${filter.status}`);
-  };
-
-  const closeIntro = () => {
-    setIntroShown(true);
-    setShowIntro(false);
-  };
-
-  const content = (() => {
     if (!posts || isLoading) {
       return [1, 2, 4, 5, 6, 7, 8].map((ix) => (
         <PostCardLoading key={ix}></PostCardLoading>
@@ -173,7 +153,7 @@ export const UserHome = () => {
             <Box key={ix} id={`post-${post.id}`}>
               <PostContext postInit={post}>
                 <PostCard
-                  post={post}
+                  isPublicFeed={isPublicFeed}
                   handleClick={() => {
                     const path = `/post/${post.id}`;
                     navigate(path);
@@ -226,27 +206,33 @@ export const UserHome = () => {
         )}
       </>
     );
-  })();
+  }, [
+    posts,
+    isLoading,
+    isPublicFeed,
+    isFetchingOlder,
+    moreToFetch,
+    fetchOlder,
+  ]);
 
   const FilterValue = (
     props: {
-      status: PostsQueryStatus;
+      status?: string;
       border?: boolean;
       padx?: boolean;
     } & BoxExtendedProps
   ) => {
+    const pretty = filterOptions.find(
+      (opt) => opt.value === props.status
+    )?.pretty;
     return (
       <Box pad={{ horizontal: 'small', vertical: 'small' }} width="100%">
-        <Text size="small">{statusPretty[props.status]}</Text>
+        <Text size="small">{pretty}</Text>
       </Box>
     );
   };
 
-  const options: PostsQueryStatus[] = [
-    PostsQueryStatus.DRAFTS,
-    PostsQueryStatus.PENDING,
-    PostsQueryStatus.IGNORED,
-  ];
+  const options = filterOptions.map((opt) => opt.value);
 
   const menu = (
     <AppSelect
@@ -257,31 +243,17 @@ export const UserHome = () => {
         </Box>
       }
       options={options}
-      onChange={(e) =>
-        setFilter({
+      onChange={(e) => {
+        onFilterOptionChanged({
           status: e.target.value,
           fetchParams: { expectedAmount: 10 },
-        })
-      }>
+        });
+      }}>
       {(status) => {
         return <FilterValue padx status={status}></FilterValue>;
       }}
     </AppSelect>
   );
-
-  const updater = (() => {
-    if (hasUpdate) {
-      return (
-        <Box direction="row" align="center" gap="4px">
-          <Text style={{ fontSize: '14px' }}>{t(I18Keys.updateAvailable)}</Text>
-          <Anchor onClick={() => updateApp()}>
-            <Text style={{ fontSize: '14px' }}>{t(I18Keys.updateNow)}</Text>
-          </Anchor>
-        </Box>
-      );
-    }
-    return <></>;
-  })();
 
   const reload = isFetchingNewer ? (
     <Box>
@@ -302,33 +274,21 @@ export const UserHome = () => {
         flexShrink: 0,
         minHeight: '40px',
       }}>
-      {updater}
       <Box direction="row" justify="between" align="center">
         <Box direction="row" align="center" gap="12px">
           <AppHeading level="3">{pageTitle}</AppHeading>
           <BoxCentered style={{ height: '40px' }}>{reload}</BoxCentered>
         </Box>
-        {pageIx === 0 && <Box>{menu}</Box>}
+        <Box>{menu}</Box>
       </Box>
     </Box>
   );
 
-  const modal = (() => {
-    if (showIntro) {
-      return (
-        <AppModal type="small" onModalClosed={() => closeIntro()}>
-          <IntroModals closeModal={() => closeIntro()}></IntroModals>
-        </AppModal>
-      );
-    }
-  })();
-
   return (
     <>
-      {header}
+      {showHeader && header}
       <Box fill justify="start">
         {content}
-        {modal}
       </Box>
     </>
   );
