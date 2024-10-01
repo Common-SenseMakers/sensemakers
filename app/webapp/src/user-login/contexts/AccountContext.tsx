@@ -26,7 +26,7 @@ import {
 import { usePersist } from '../../utils/use.persist';
 import { getAccount } from '../user.helper';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export const OUR_TOKEN_NAME = 'ourToken';
 export const LOGIN_STATUS = 'loginStatus';
@@ -159,7 +159,17 @@ export const AccountContext = (props: PropsWithChildren) => {
         if (DEBUG) console.log('getting me', { token });
         const user = await _appFetch<AppUserRead>('/api/auth/me', {}, token);
         if (DEBUG) console.log('set connectedUser after fetch', { user });
-        setConnectedUser(user);
+
+        /** extract profiles for convenience */
+        const profiles: ConnectedUser['profiles'] = {
+          twitter: getAccount(user, PLATFORM.Twitter)?.profile,
+          mastodon: getAccount(user, PLATFORM.Mastodon)?.profile,
+          nanopub: getAccount(user, PLATFORM.Nanopub)?.profile,
+          orcid: getAccount(user, PLATFORM.Orcid)?.profile,
+        };
+
+        /** set user */
+        setConnectedUser({ ...user, profiles });
       } else {
         if (DEBUG) console.log('setting connected user as null');
         setConnectedUser(null);
@@ -168,26 +178,6 @@ export const AccountContext = (props: PropsWithChildren) => {
       setToken(null);
     }
   };
-
-  /** update the user profiles from the accounts property. It assumes one account per platform */
-  useEffect(() => {
-    if (DEBUG) console.log('connectedUser update effect', { connectedUser });
-    if (connectedUser) {
-      const profiles: ConnectedUser['profiles'] = {
-        twitter: getAccount(connectedUser, PLATFORM.Twitter)?.profile,
-        mastodon: getAccount(connectedUser, PLATFORM.Mastodon)?.profile,
-        nanopub: getAccount(connectedUser, PLATFORM.Nanopub)?.profile,
-        orcid: getAccount(connectedUser, PLATFORM.Orcid)?.profile,
-      };
-
-      if (profiles) {
-        setConnectedUser({
-          ...connectedUser,
-          profiles,
-        });
-      }
-    }
-  }, [connectedUser]);
 
   /** logged in status is strictly linked to the connected user,
    * this should be the only place on the app where the status is set to loggedIn

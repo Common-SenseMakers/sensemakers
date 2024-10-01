@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { PostCardLoading } from '../post/PostCardLoading';
@@ -29,7 +31,7 @@ export const AppHomePage = (props: {}) => {
     </>
   );
 
-  const { content, nav } = (() => {
+  const { content, nav } = useMemo(() => {
     if (DEBUG)
       console.log('AppHome', {
         overallLoginStatus,
@@ -58,7 +60,7 @@ export const AppHomePage = (props: {}) => {
     }
 
     return { content: LoadingPlaceholder, nav: undefined };
-  })();
+  }, [overallLoginStatus]);
 
   return <ViewportPage content={content} nav={nav} justify="start" />;
 };
