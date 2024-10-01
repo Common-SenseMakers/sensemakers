@@ -374,7 +374,8 @@ export class PostsManager {
                         `Error fetching posts for user ${user.userId} on platform ${platformId}`,
                         err
                       );
-                      throw new Error(err.message);
+
+                      return undefined;
                     }
                   }
                 )
