@@ -178,6 +178,7 @@ export const getTwitterMock = (
                   id: userDetails.user_id,
                   name: userDetails.profile.name,
                   username: userDetails.profile.username,
+                  profile_image_url: userDetails.profile.profile_image_url,
                 },
               },
             ];
