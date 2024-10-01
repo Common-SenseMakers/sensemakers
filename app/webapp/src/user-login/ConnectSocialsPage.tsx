@@ -99,7 +99,7 @@ export const ConnectSocialsPage = () => {
           primary
           label={t(I18Keys.continue)}
           onClick={handleContinue}
-          disabled={!twitterProfile && !mastodonProfile}
+          disabled={!twitterProfile && !mastodonProfile && !blueskyProfile}
           style={{ width: '100%' }}
         />
       </Box>
