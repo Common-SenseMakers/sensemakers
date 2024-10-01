@@ -1,5 +1,5 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -20,7 +20,7 @@ import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { PostFetcherInterface, usePostsFetcher } from './posts.fetcher.hook';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export interface FilterOption {
   value: string;
@@ -107,7 +107,16 @@ export const PostsFetcherComponent = (props: {
     }
   }, [errorFetchingOlder, errorFetchingNewer]);
 
-  const content = (() => {
+  const content = useMemo(() => {
+    if (DEBUG) {
+      console.log('PostsFetcherComponent - content', {
+        posts,
+        isLoading,
+        isPublicFeed,
+        isFetchingOlder,
+        moreToFetch,
+      });
+    }
     if (!posts || isLoading) {
       return [1, 2, 4, 5, 6, 7, 8].map((ix) => (
         <PostCardLoading key={ix}></PostCardLoading>
@@ -197,7 +206,14 @@ export const PostsFetcherComponent = (props: {
         )}
       </>
     );
-  })();
+  }, [
+    posts,
+    isLoading,
+    isPublicFeed,
+    isFetchingOlder,
+    moreToFetch,
+    fetchOlder,
+  ]);
 
   const FilterValue = (
     props: {

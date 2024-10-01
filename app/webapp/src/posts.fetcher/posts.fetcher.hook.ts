@@ -240,7 +240,8 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
     if (
       posts &&
       !fetchedOlderFirst &&
-      overallLoginStatus === OverallLoginStatus.FullyLoggedIn
+      overallLoginStatus === OverallLoginStatus.FullyLoggedIn &&
+      connectedUser
     ) {
       if (DEBUG)
         console.log('first fetch older', {

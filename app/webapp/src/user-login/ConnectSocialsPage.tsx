@@ -10,11 +10,7 @@ import { AbsoluteRoutes } from '../route.names';
 import { AppButton, AppHeading } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
 import { PlatformSection } from '../user-settings/PlatformsSection';
-import { usePersist } from '../utils/use.persist';
-import {
-  ALREADY_CONNECTED_KEY,
-  useAccountContext,
-} from './contexts/AccountContext';
+import { useAccountContext } from './contexts/AccountContext';
 import { useTwitterContext } from './contexts/platforms/TwitterContext';
 
 export const ConnectSocialsPage = () => {

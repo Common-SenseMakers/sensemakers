@@ -17,8 +17,6 @@ const DEBUG = true;
 export const AppHomePage = (props: {}) => {
   const { overallLoginStatus, alreadyConnected } = useAccountContext();
 
-  console.log({ alreadyConnected });
-
   const LoadingPlaceholder = (
     <>
       <LoadingDiv
