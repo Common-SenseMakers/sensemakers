@@ -16,6 +16,10 @@ const userId = process.env.USER_ID as string;
 const platformId = process.env.PLATFORM_ID as string;
 const firestore = app.firestore();
 
+if (process.env.FB_PROJECT_ID === 'sensenets-prod') {
+  throw new Error('Cannot run this script on production');
+}
+
 (async () => {
   // Step 1: Count posts authored by the user with the specified platformId
   const postsSnapshot = await firestore
