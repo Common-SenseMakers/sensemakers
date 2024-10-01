@@ -153,10 +153,12 @@ export interface AccountDetailsRead<P> {
 }
 
 export interface AppUserRead extends UserWithId, UserWithSettings {
-  [PLATFORM.Orcid]?: AccountDetailsRead<OrcidUserDetails['profile']>[];
-  [PLATFORM.Twitter]?: AccountDetailsRead<TwitterUserDetails['profile']>[];
-  [PLATFORM.Nanopub]?: AccountDetailsRead<NanopubUserDetails['profile']>[];
-  [PLATFORM.Mastodon]?: AccountDetailsRead<MastodonUserDetails['profile']>[];
+  accounts: {
+    [PLATFORM.Orcid]?: AccountDetailsRead<OrcidUserDetails['profile']>[];
+    [PLATFORM.Twitter]?: AccountDetailsRead<TwitterUserDetails['profile']>[];
+    [PLATFORM.Nanopub]?: AccountDetailsRead<NanopubUserDetails['profile']>[];
+    [PLATFORM.Mastodon]?: AccountDetailsRead<MastodonUserDetails['profile']>[];
+  };
 }
 
 /** Support collection with all the profiles from all platforms */

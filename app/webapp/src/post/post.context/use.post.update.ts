@@ -11,6 +11,7 @@ import {
 } from '../../shared/types/types.posts';
 import { AppUserRead } from '../../shared/types/types.user';
 import { useUserPosts } from '../../user-home/UserPostsContext';
+import { ConnectedUser } from '../../user-login/contexts/AccountContext';
 import { useNanopubContext } from '../../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { AppPostStatus, getPostStatuses } from '../posts.helper';
 import { PostDerivedContext } from './use.post.derived';
@@ -38,7 +39,7 @@ export const usePostUpdate = (
   fetched: PostFetchContext,
   derived: PostDerivedContext,
   postInit?: AppPostFull,
-  connectedUser?: AppUserRead
+  connectedUser?: ConnectedUser
 ): PostUpdateContext => {
   const { show } = useToastContext();
   const appFetch = useAppFetch();
@@ -172,8 +173,7 @@ export const usePostUpdate = (
 
   const canPublishNanopub =
     connectedUser &&
-    connectedUser.nanopub &&
-    connectedUser.nanopub.length > 0 &&
+    connectedUser.profiles?.nanopub &&
     signNanopublication &&
     derived.nanopubDraft;
 

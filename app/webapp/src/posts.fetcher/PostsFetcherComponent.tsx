@@ -38,7 +38,7 @@ export const PostsFetcherComponent = (props: {
   filterOptions: FilterOption[];
   status?: PostsQueryStatus;
   onFilterOptionChanged: (filter: PostsQuery) => void;
-  showAuthor?: boolean;
+  isPublicFeed?: boolean;
   showHeader?: boolean;
 }) => {
   const { show } = useToastContext();
@@ -51,11 +51,11 @@ export const PostsFetcherComponent = (props: {
     filterOptions,
     onFilterOptionChanged,
     feed,
-    showAuthor: _showAuthor,
+    isPublicFeed: _isPublicFeed,
     showHeader: _showHeader,
   } = props;
 
-  const showAuthor = _showAuthor !== undefined ? _showAuthor : false;
+  const isPublicFeed = _isPublicFeed !== undefined ? _isPublicFeed : false;
   const showHeader = _showHeader !== undefined ? _showHeader : true;
 
   const navigate = useNavigate();
@@ -144,7 +144,7 @@ export const PostsFetcherComponent = (props: {
             <Box key={ix} id={`post-${post.id}`}>
               <PostContext postInit={post}>
                 <PostCard
-                  showAuthor={showAuthor}
+                  isPublicFeed={isPublicFeed}
                   handleClick={() => {
                     const path = `/post/${post.id}`;
                     navigate(path);

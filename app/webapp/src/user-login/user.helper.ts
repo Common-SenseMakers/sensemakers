@@ -24,7 +24,9 @@ export const getAccount = <P = any>(
     throw Error('undexpected');
   }
 
-  const accounts = user[platformId] as AccountDetailsRead<P>[] | undefined;
+  const accounts = user.accounts[platformId] as
+    | AccountDetailsRead<P>[]
+    | undefined;
 
   if (!accounts) {
     return undefined;

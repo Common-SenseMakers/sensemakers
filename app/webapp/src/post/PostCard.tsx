@@ -1,50 +1,39 @@
 import { Box, Text } from 'grommet';
 
-import { TweetAnchor } from '../app/anchors/TwitterAnchor';
-import { TwitterAvatar } from '../app/icons/TwitterAvatar';
+import { PlatformPostAnchor } from '../app/anchors/PlatformPostAnchor';
+import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID } from '../semantics/patterns/patterns';
 import { AppPostFull, AppPostParsedStatus } from '../shared/types/types.posts';
-import {
-  TwitterPlatformPost,
-  TwitterUserProfile,
-} from '../shared/types/types.twitter';
-import { PLATFORM } from '../shared/types/types.user';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { NanopubStatus } from './NanopubStatus';
 import { PublishButtons } from './PostPublishButtons';
 import { PostTextStatic } from './PostTextStatic';
+import { getPostDetails } from './platform.post.details';
 import { usePost } from './post.context/PostContext';
 import { concatenateThread, hideSemanticsHelper } from './posts.helper';
 
-const PostCardHeaderBasic = (props: {
-  tweet?: TwitterPlatformPost;
-  post: AppPostFull;
-}) => {
-  const tweet = props.tweet;
-  const post = props.post;
+const PostCardHeaderUser = (props: { post: AppPostFull }) => {
+  const details = getPostDetails(props.post);
 
   return (
     <>
-      <TweetAnchor
-        thread={tweet?.posted?.post}
-        timestamp={tweet?.posted?.timestampMs}></TweetAnchor>
-      <NanopubStatus post={post}></NanopubStatus>
+      <PlatformPostAnchor details={details}></PlatformPostAnchor>
+      <NanopubStatus post={props.post}></NanopubStatus>
     </>
   );
 };
 
-const PostCardHeaderAuthor = (props: {
-  profile: TwitterUserProfile;
-  tweet?: TwitterPlatformPost;
-}) => {
+const PostCardHeaderFeed = (props: { post: AppPostFull }) => {
   const { constants } = useThemeContext();
-  const { profile, tweet } = props;
+  const details = getPostDetails(props.post);
 
   return (
     <Box direction="row" align="center" justify="between" width="100%">
       <Box direction="row" align="center" gap="12px">
-        <TwitterAvatar size={24} profile={profile}></TwitterAvatar>
+        <PlatformAvatar
+          size={24}
+          imageUrl={details?.authorAvatarUrl}></PlatformAvatar>
         <Box direction="row" justify="between">
           <Text
             color={constants.colors.grayIcon}
@@ -55,28 +44,26 @@ const PostCardHeaderAuthor = (props: {
               lineHeight: '16px',
               textDecoration: 'none',
             }}>
-            {profile?.name}
+            {details?.authorName}
           </Text>
         </Box>
       </Box>
       <Box>
-        <TweetAnchor
-          thread={tweet?.posted?.post}
-          timestamp={tweet?.posted?.timestampMs}></TweetAnchor>
+        <PlatformPostAnchor details={details}></PlatformPostAnchor>
       </Box>
     </Box>
   );
 };
 
 export const PostCard = (props: {
-  showAuthor?: boolean;
+  isPublicFeed?: boolean;
   shade?: boolean;
   handleClick: () => void;
   isEmail?: boolean;
 }) => {
   const { shade: _shade } = props;
   const shade = _shade || false;
-  const showAuthor = props.showAuthor || false;
+  const isPublicFeed = props.isPublicFeed || false;
 
   const { updated } = usePost();
   const post = updated.postMerged;
@@ -92,11 +79,6 @@ export const PostCard = (props: {
     props.handleClick();
   };
 
-  const originalPlatformPost = post.mirrors.find(
-    (m) => m.platformId === post.origin
-  );
-  const originalPostUrl = post.generic.thread[0].url;
-
   const postText = concatenateThread(post.generic);
 
   const handleInternalClick = (e: React.MouseEvent) => {
@@ -107,12 +89,10 @@ export const PostCard = (props: {
 
   const hideSemantics = hideSemanticsHelper(post);
 
-  const header = showAuthor ? (
-    <PostCardHeaderAuthor
-      tweet={tweet}
-      profile={tweet?.posted?.author}></PostCardHeaderAuthor>
+  const header = isPublicFeed ? (
+    <PostCardHeaderFeed post={post}></PostCardHeaderFeed>
   ) : (
-    <PostCardHeaderBasic tweet={tweet} post={post}></PostCardHeaderBasic>
+    <PostCardHeaderUser post={post}></PostCardHeaderUser>
   );
 
   return (

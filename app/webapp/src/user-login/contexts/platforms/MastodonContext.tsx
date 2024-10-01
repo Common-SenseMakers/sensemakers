@@ -75,7 +75,8 @@ export const MastodonContext = (props: PropsWithChildren) => {
 
   const appFetch = useAppFetch();
 
-  const needConnect = !connectedUser || !connectedUser[PLATFORM.Mastodon];
+  const needConnect =
+    !connectedUser || !connectedUser.accounts[PLATFORM.Mastodon];
 
   useEffect(() => {
     if (error) {

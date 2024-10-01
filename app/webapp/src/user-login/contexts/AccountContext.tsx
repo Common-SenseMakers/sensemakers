@@ -15,7 +15,6 @@ import { OrcidUserProfile } from '../../shared/types/types.orcid';
 import { TwitterUserProfile } from '../../shared/types/types.twitter';
 import {
   ALL_PUBLISH_PLATFORMS,
-  AccountDetailsRead,
   AppUserRead,
   AutopostOption,
   EmailDetails,
@@ -61,10 +60,10 @@ const AccountContextValue = createContext<AccountContextType | undefined>(
 
 export interface ConnectedUser extends AppUserRead {
   profiles?: {
-    [PLATFORM.Twitter]: TwitterUserProfile;
-    [PLATFORM.Mastodon]: MastodonUserProfile;
-    [PLATFORM.Nanopub]: NanopubUserProfile;
     [PLATFORM.Orcid]: OrcidUserProfile;
+    [PLATFORM.Twitter]: TwitterUserProfile;
+    [PLATFORM.Nanopub]: NanopubUserProfile;
+    [PLATFORM.Mastodon]: MastodonUserProfile;
   };
 }
 
@@ -167,6 +166,26 @@ export const AccountContext = (props: PropsWithChildren) => {
       setToken(null);
     }
   };
+
+  /** update the user profiles from the accounts property */
+  useEffect(() => {
+    if (DEBUG) console.log('connectedUser update effect', { connectedUser });
+    if (connectedUser) {
+      const profiles: ConnectedUser['profiles'] = {
+        twitter: getAccount(connectedUser, PLATFORM.Twitter)?.profile,
+        mastodon: getAccount(connectedUser, PLATFORM.Mastodon)?.profile,
+        nanopub: getAccount(connectedUser, PLATFORM.Nanopub)?.profile,
+        orcid: getAccount(connectedUser, PLATFORM.Orcid)?.profile,
+      };
+
+      if (profiles) {
+        setConnectedUser({
+          ...connectedUser,
+          profiles,
+        });
+      }
+    }
+  }, [connectedUser]);
 
   /** logged in status is strictly linked to the connected user,
    * this should be the only place on the app where the status is set to loggedIn

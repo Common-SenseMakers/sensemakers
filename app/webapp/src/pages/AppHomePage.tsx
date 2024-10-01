@@ -5,9 +5,7 @@ import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { UserPostsFeed } from '../user-home/UserPostsFeed';
 import { ConnectSocialsPage } from '../user-login/ConnectSocialsPage';
 import {
-  MastodonConnectedStatus,
   OverallLoginStatus,
-  TwitterConnectedStatus,
   useAccountContext,
 } from '../user-login/contexts/AccountContext';
 import { AppWelcome } from '../welcome/AppWelcome';
@@ -15,8 +13,7 @@ import { AppWelcome } from '../welcome/AppWelcome';
 const DEBUG = true;
 
 export const AppHomePage = (props: {}) => {
-  const { overallLoginStatus, twitterProfile, twitterConnectedStatus } =
-    useAccountContext();
+  const { overallLoginStatus } = useAccountContext();
 
   const LoadingPlaceholder = (
     <>
@@ -36,8 +33,6 @@ export const AppHomePage = (props: {}) => {
     if (DEBUG)
       console.log('AppHome', {
         overallLoginStatus,
-        twitterProfile,
-        mastodonProfile,
       });
 
     if (overallLoginStatus === OverallLoginStatus.NotKnown) {

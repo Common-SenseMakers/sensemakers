@@ -69,7 +69,8 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
   const appFetch = useAppFetch();
 
-  const needConnect = !connectedUser || !connectedUser[PLATFORM.Twitter];
+  const needConnect =
+    !connectedUser || !connectedUser.accounts[PLATFORM.Twitter];
 
   const connect = async (type: TwitterGetContextParams['type']) => {
     setLoginFlowState(LoginFlowState.ConnectingTwitter);

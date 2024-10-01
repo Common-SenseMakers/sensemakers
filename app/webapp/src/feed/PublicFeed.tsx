@@ -41,7 +41,7 @@ export const PublicFeed = () => {
         <FeedTabs></FeedTabs>
         <PostsFetcherComponent
           showHeader={false}
-          showAuthor={true}
+          isPublicFeed={true}
           feed={feed}
           pageTitle={t(I18Keys.feedTitle)}
           filterOptions={[]}

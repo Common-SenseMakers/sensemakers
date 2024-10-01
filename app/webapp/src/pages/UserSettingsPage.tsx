@@ -60,15 +60,8 @@ export const UserSettingsPage = () => {
 
   const appFetch = useAppFetch();
 
-  const {
-    connectedUser,
-    refresh,
-    twitterProfile,
-    mastodonProfile,
-    currentAutopost,
-    currentNotifications,
-    orcid,
-  } = useAccountContext();
+  const { connectedUser, refresh, currentAutopost, currentNotifications } =
+    useAccountContext();
   const [isSetting, setIsSetting] = useState(false);
   const { disconnect } = useDisconnectContext();
 
@@ -86,6 +79,11 @@ export const UserSettingsPage = () => {
   const [showSettingsPage, setShowSettingsPage] = useState<
     SettingsSections | undefined
   >(undefined);
+
+  const twitterProfile = connectedUser?.profiles?.twitter;
+  const mastodonProfile = connectedUser?.profiles?.mastodon;
+  const orcidAccounts = connectedUser?.accounts?.orcid;
+  const orcidAccount = orcidAccounts ? orcidAccounts[0] : undefined;
 
   // receive the autopost invite
   useEffect(() => {
@@ -297,9 +295,7 @@ export const UserSettingsPage = () => {
         <PlatformSection
           icon={
             twitterProfile ? (
-              <PlatformAvatar
-                profileImageUrl={twitterProfile?.profile_image_url}
-              />
+              <PlatformAvatar imageUrl={twitterProfile?.profile_image_url} />
             ) : (
               <TwitterIcon size={40} color="black"></TwitterIcon>
             )
@@ -310,11 +306,12 @@ export const UserSettingsPage = () => {
           }}
           buttonText={needConnectTwitter ? 'connect' : ''}
           username={twitterProfile ? `@${twitterProfile.username}` : ''}
-          connected={!!twitterProfile}></PlatformSection>
+          connected={twitterProfile !== undefined}></PlatformSection>
+
         <PlatformSection
           icon={
             mastodonProfile ? (
-              <PlatformAvatar profileImageUrl={mastodonProfile?.avatar} />
+              <PlatformAvatar imageUrl={mastodonProfile?.avatar} />
             ) : (
               <MastodonIcon size={40} color="white"></MastodonIcon>
             )
@@ -327,19 +324,21 @@ export const UserSettingsPage = () => {
           }}
           buttonText={needConnectMastodon ? 'connect' : ''}
           username={
-            connectedUser?.mastodon
-              ? `@${getAccount(connectedUser, PLATFORM.Mastodon)?.profile.username}@${getAccount(connectedUser, PLATFORM.Mastodon)?.profile.mastodonServer}`
+            mastodonProfile
+              ? `@${mastodonProfile.username}@${mastodonProfile.mastodonServer}`
               : '- not connected -'
           }
-          connected={!!connectedUser?.mastodon}></PlatformSection>
+          connected={mastodonProfile !== undefined}></PlatformSection>
 
         <PlatformSection
           icon={<OrcidIcon size={40}></OrcidIcon>}
           platformName={t(I18Keys.ORCID)}
           onButtonClicked={() => connectOrcid('/settings')}
           buttonText="connect"
-          username={orcid ? `@${orcid.user_id}` : '- not connected -'}
-          connected={orcid !== undefined}
+          username={
+            orcidAccount ? `@${orcidAccount.user_id}` : '- not connected -'
+          }
+          connected={orcidAccount !== undefined}
           connecting={connectingOrcid}></PlatformSection>
 
         <Box

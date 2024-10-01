@@ -49,7 +49,7 @@ export const ConnectSocialsPage = () => {
               icon={
                 twitterProfile ? (
                   <PlatformAvatar
-                    profileImageUrl={twitterProfile?.profile_image_url}
+                    imageUrl={twitterProfile?.profile_image_url}
                   />
                 ) : (
                   <TwitterIcon size={40} color="black"></TwitterIcon>
@@ -64,7 +64,7 @@ export const ConnectSocialsPage = () => {
             <PlatformSection
               icon={
                 mastodonProfile ? (
-                  <PlatformAvatar profileImageUrl={mastodonProfile?.avatar} />
+                  <PlatformAvatar imageUrl={mastodonProfile?.avatar} />
                 ) : (
                   <MastodonIcon size={40} color="white"></MastodonIcon>
                 )

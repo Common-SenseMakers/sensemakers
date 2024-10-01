@@ -1,14 +1,17 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
+import { useTranslation } from 'react-i18next';
 
 import { PlatformPostAnchor } from '../app/anchors/PlatformPostAnchor';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
-import { MastodonUserProfile } from '../shared/types/types.mastodon';
-import { TwitterUserProfile } from '../shared/types/types.twitter';
-import { AccountDetailsRead, PLATFORM } from '../shared/types/types.user';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { NanopubStatus } from './NanopubStatus';
+import {
+  getPlatformPostDetails,
+  getPostDetails,
+} from './platform.post.details';
 import { usePost } from './post.context/PostContext';
 
+/** should be used inside a PostContext */
 export const PostHeader = (props: {
   boxProps: BoxExtendedProps;
   name: string;
@@ -20,15 +23,12 @@ export const PostHeader = (props: {
 
   const { boxProps, name, imageUrl } = props;
 
-  const originalPlatformPost = post?.mirrors.find(
-    (m) => m.platformId === post.origin
-  );
-  const originalPostUrl = post?.generic.thread[0].url;
+  const details = getPostDetails(post);
 
   return (
     <Box direction="row" justify="between" {...boxProps}>
       <Box direction="row">
-        <PlatformAvatar size={48} profileImageUrl={imageUrl}></PlatformAvatar>
+        <PlatformAvatar size={48} imageUrl={imageUrl}></PlatformAvatar>
         <Box width="100%" margin={{ left: 'medium' }}>
           <Box direction="row" justify="between">
             <Text
@@ -45,9 +45,8 @@ export const PostHeader = (props: {
           </Box>
           <Box margin={{ bottom: '6px' }}></Box>
           <PlatformPostAnchor
-            platformPostPosted={originalPlatformPost?.posted}
-            platformId={post?.origin}
-            postUrl={originalPostUrl}></PlatformPostAnchor>
+            loading={post === undefined}
+            details={details}></PlatformPostAnchor>
         </Box>
       </Box>
 
