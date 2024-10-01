@@ -34,6 +34,7 @@ import {
 } from '../../@shared/types/types.posts';
 import { PLATFORM } from '../../@shared/types/types.user';
 import { AppUser } from '../../@shared/types/types.user';
+import { extractRKeyFromURI } from '../../@shared/utils/bluesky.utils';
 import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
@@ -44,7 +45,6 @@ import {
   cleanBlueskyContent,
   convertBlueskyPostsToThreads,
   extractPrimaryThread,
-  extractRKeyFromURI,
   removeUndefinedFields,
 } from './bluesky.utils';
 
