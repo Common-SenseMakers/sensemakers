@@ -14,9 +14,11 @@ export const ConnectBlueskyPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { connect, error } = useBlueskyContext();
-  const { blueskyProfile } = useAccountContext();
+  const { connectedUser } = useAccountContext();
   const [username, setUsername] = useState('');
   const [appPassword, setAppPassword] = useState('');
+
+  const blueskyProfile = connectedUser?.profiles?.bluesky;
 
   useEffect(() => {
     if (blueskyProfile) {

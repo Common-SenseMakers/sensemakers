@@ -3,10 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { AppLogo } from '../app/brand/AppLogo';
-import { MastodonIcon, TwitterIcon } from '../app/common/Icons';
+import { BlueskyIcon, MastodonIcon, TwitterIcon } from '../app/common/Icons';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { I18Keys } from '../i18n/i18n';
-import { AbsoluteRoutes } from '../route.names';
+import { AbsoluteRoutes, RouteNames } from '../route.names';
 import { AppButton, AppHeading } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
 import { PlatformSection } from '../user-settings/PlatformsSection';

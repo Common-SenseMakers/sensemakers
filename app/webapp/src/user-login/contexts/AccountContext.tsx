@@ -9,6 +9,7 @@ import {
 } from 'react';
 
 import { _appFetch } from '../../api/app.fetch';
+import { BlueskyUserProfile } from '../../shared/types/types.bluesky';
 import { MastodonUserProfile } from '../../shared/types/types.mastodon';
 import { NanopubUserProfile } from '../../shared/types/types.nanopubs';
 import { NotificationFreq } from '../../shared/types/types.notifications';
@@ -69,6 +70,7 @@ export interface ConnectedUser extends AppUserRead {
     [PLATFORM.Twitter]: TwitterUserProfile;
     [PLATFORM.Nanopub]: NanopubUserProfile;
     [PLATFORM.Mastodon]: MastodonUserProfile;
+    [PLATFORM.Bluesky]: BlueskyUserProfile;
   };
 }
 
@@ -175,6 +177,7 @@ export const AccountContext = (props: PropsWithChildren) => {
           mastodon: getAccount(user, PLATFORM.Mastodon)?.profile,
           nanopub: getAccount(user, PLATFORM.Nanopub)?.profile,
           orcid: getAccount(user, PLATFORM.Orcid)?.profile,
+          bluesky: getAccount(user, PLATFORM.Bluesky)?.profile,
         };
 
         /** set user */

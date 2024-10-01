@@ -1,5 +1,5 @@
 import { SciFilterClassfication } from '../@shared/types/types.parser';
-import { AppPost, AppPostFull } from '../@shared/types/types.posts';
+import { AppPost } from '../@shared/types/types.posts';
 import {
   ALL_PUBLISH_PLATFORMS,
   AppUser,
@@ -11,7 +11,6 @@ import {
   PUBLISHABLE_PLATFORM,
   UserDetailsBase,
 } from '../@shared/types/types.user';
-import { extractRKeyFromURI } from '../platforms/bluesky/bluesky.utils';
 
 export interface PlatformDetails {
   platform: PUBLISHABLE_PLATFORM;

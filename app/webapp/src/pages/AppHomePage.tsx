@@ -7,7 +7,6 @@ import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { UserPostsFeed } from '../user-home/UserPostsFeed';
 import { ConnectSocialsPage } from '../user-login/ConnectSocialsPage';
 import {
-  MastodonConnectedStatus,
   OverallLoginStatus,
   useAccountContext,
 } from '../user-login/contexts/AccountContext';

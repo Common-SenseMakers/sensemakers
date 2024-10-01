@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
-import { MastodonIcon, TwitterIcon } from '../app/common/Icons';
+import { BlueskyIcon, MastodonIcon, TwitterIcon } from '../app/common/Icons';
 import { AutopostIcon } from '../app/icons/AutopostIcon';
 import { BellIcon } from '../app/icons/BellIcon';
 import { DocIcon } from '../app/icons/DocIcon';
@@ -29,6 +29,7 @@ import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useAutopostInviteContext } from '../user-login/contexts/AutopostInviteContext';
 import { useDisconnectContext } from '../user-login/contexts/DisconnectUserContext';
+import { useBlueskyContext } from '../user-login/contexts/platforms/BlueskyContext';
 import { useMastodonContext } from '../user-login/contexts/platforms/MastodonContext';
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { useTwitterContext } from '../user-login/contexts/platforms/TwitterContext';
@@ -68,8 +69,10 @@ export const UserSettingsPage = () => {
   const { connect: connectOrcid, connecting: connectingOrcid } =
     useOrcidContext();
 
-  const { connect: connectMastodon, needConnect: needConnectMastodon } =
-    useMastodonContext();
+  const { needConnect: needConnectMastodon } = useMastodonContext();
+
+  const { needConnect: needConnectBluesky } = useBlueskyContext();
+
   const { connect: connectTwitter, needConnect: needConnectTwitter } =
     useTwitterContext();
 
@@ -82,6 +85,7 @@ export const UserSettingsPage = () => {
 
   const twitterProfile = connectedUser?.profiles?.twitter;
   const mastodonProfile = connectedUser?.profiles?.mastodon;
+  const blueskyProfile = connectedUser?.profiles?.bluesky;
   const orcidAccounts = connectedUser?.accounts?.orcid;
   const orcidAccount = orcidAccounts ? orcidAccounts[0] : undefined;
 
@@ -333,7 +337,7 @@ export const UserSettingsPage = () => {
         <PlatformSection
           icon={
             blueskyProfile ? (
-              <PlatformAvatar profileImageUrl={blueskyProfile?.avatar} />
+              <PlatformAvatar imageUrl={blueskyProfile?.avatar} />
             ) : (
               <BlueskyIcon size={40} color="white"></BlueskyIcon>
             )
