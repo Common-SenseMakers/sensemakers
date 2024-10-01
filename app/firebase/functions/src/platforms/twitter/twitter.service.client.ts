@@ -226,7 +226,7 @@ export class TwitterServiceClient {
 
     const user = await this.usersRepo.getUser(userId, manager, true);
 
-    const twitter = user[PLATFORM.Twitter];
+    const twitter = user.accounts[PLATFORM.Twitter];
 
     if (!twitter) {
       throw new Error('User dont have twitter credentials');

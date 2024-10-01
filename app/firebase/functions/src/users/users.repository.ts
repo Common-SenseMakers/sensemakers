@@ -206,7 +206,7 @@ export class UsersRepository {
       throw new Error('Unexpected');
     }
 
-    const accounts = existingUser[platform];
+    const accounts = existingUser.accounts[platform];
     if (accounts === undefined) {
       throw new Error(`User accounts not found`);
     }
@@ -283,7 +283,7 @@ export class UsersRepository {
         throw new Error('Unexpected');
       }
 
-      const accounts: UserDetailsBase[] = user[platform] || [];
+      const accounts: UserDetailsBase[] = user.accounts[platform] || [];
       let platformIds = user.platformIds;
 
       if (DEBUG)
@@ -376,13 +376,13 @@ export class UsersRepository {
 
     if (
       !user ||
-      !Array.isArray(user[platform]) ||
-      user[platform].length === 0
+      !Array.isArray(user.accounts[platform]) ||
+      user.accounts[platform].length === 0
     ) {
       throw new Error(`User ${userId} data as expected`);
     }
 
-    const details = (user[platform] as Array<UserDetailsBase>).find(
+    const details = (user.accounts[platform] as Array<UserDetailsBase>).find(
       (details) => details.user_id === user_id
     );
 

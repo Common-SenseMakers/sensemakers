@@ -131,12 +131,15 @@ export interface UserWithSettings {
  */
 export interface AppUser
   extends UserWithId,
+    UserWithId,
     UserWithPlatformIds,
     UserWithSettings {
-  [PLATFORM.Orcid]?: OrcidUserDetails[];
-  [PLATFORM.Twitter]?: TwitterUserDetails[];
-  [PLATFORM.Nanopub]?: NanopubUserDetails[];
-  [PLATFORM.Mastodon]?: MastodonUserDetails[];
+  accounts: {
+    [PLATFORM.Orcid]?: OrcidUserDetails[];
+    [PLATFORM.Twitter]?: TwitterUserDetails[];
+    [PLATFORM.Nanopub]?: NanopubUserDetails[];
+    [PLATFORM.Mastodon]?: MastodonUserDetails[];
+  };
 }
 
 export type AppUserCreate = Omit<AppUser, 'userId'>;
@@ -152,6 +155,7 @@ export interface AccountDetailsRead<P> {
   write: boolean;
 }
 
+/** accounts include the readable details (not sensitive details) */
 export interface AppUserRead extends UserWithId, UserWithSettings {
   accounts: {
     [PLATFORM.Orcid]?: AccountDetailsRead<OrcidUserDetails['profile']>[];

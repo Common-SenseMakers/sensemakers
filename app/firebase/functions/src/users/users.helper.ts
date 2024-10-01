@@ -6,14 +6,14 @@ import {
   AppUserCreate,
   AutopostOption,
   DefinedIfTrue,
-  IDENTITY_PLATFORMS,
+  IDENTITY_PLATFORM,
   PLATFORM,
-  PUBLISHABLE_PLATFORMS,
+  PUBLISHABLE_PLATFORM,
   UserDetailsBase,
 } from '../@shared/types/types.user';
 
 export interface PlatformDetails {
-  platform: PUBLISHABLE_PLATFORMS;
+  platform: PUBLISHABLE_PLATFORM;
   account: UserDetailsBase;
 }
 
@@ -24,9 +24,9 @@ export class UsersHelper {
    * */
   static getAccounts(
     user: AppUser | AppUserCreate,
-    platformId: IDENTITY_PLATFORMS
+    platformId: IDENTITY_PLATFORM
   ): UserDetailsBase[] {
-    const platformAccounts = user[platformId];
+    const platformAccounts = user.accounts[platformId];
 
     if (!platformAccounts) {
       return [];
@@ -41,7 +41,7 @@ export class UsersHelper {
    * */
   static getAccount<T extends boolean>(
     user: AppUser,
-    platformId: IDENTITY_PLATFORMS,
+    platformId: IDENTITY_PLATFORM,
     user_id?: string,
     _throw?: T
   ): DefinedIfTrue<T, UserDetailsBase> {
@@ -109,7 +109,7 @@ export class UsersHelper {
   }
 
   /** return a list of platformIds which have at least one account that hasn't yet fetched from platform */
-  static platformsWithoutFetch(user: AppUser): PUBLISHABLE_PLATFORMS[] {
+  static platformsWithoutFetch(user: AppUser): PUBLISHABLE_PLATFORM[] {
     return Array.from(
       new Set(
         UsersHelper.getAllAccounts(user)
