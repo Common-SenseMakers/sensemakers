@@ -1,3 +1,4 @@
+import AtpAgent from '@atproto/api';
 import { expect } from 'chai';
 
 import {
@@ -239,7 +240,7 @@ describe('02-platforms', () => {
       if (!user) {
         throw new Error('appUser not created');
       }
-      const allUserDetails = user[PLATFORM.Mastodon];
+      const allUserDetails = user.accounts[PLATFORM.Mastodon];
       if (!allUserDetails || allUserDetails.length < 0) {
         throw new Error('Unexpected');
       }
@@ -264,7 +265,7 @@ describe('02-platforms', () => {
       if (!user) {
         throw new Error('appUser not created');
       }
-      const allUserDetails = user[PLATFORM.Mastodon];
+      const allUserDetails = user.accounts[PLATFORM.Mastodon];
       if (!allUserDetails || allUserDetails.length < 0) {
         throw new Error('Unexpected');
       }
@@ -298,7 +299,7 @@ describe('02-platforms', () => {
       if (!user) {
         throw new Error('appUser not created');
       }
-      const allUserDetails = user[PLATFORM.Bluesky];
+      const allUserDetails = user.accounts[PLATFORM.Bluesky];
       if (!allUserDetails || allUserDetails.length < 0) {
         throw new Error('Unexpected');
       }
@@ -358,7 +359,7 @@ describe('02-platforms', () => {
       }
     );
 
-    it.only('fetches the latest posts without since_id or until_id', async () => {
+    it('fetches the latest posts without since_id or until_id', async () => {
       const fetchParams: PlatformFetchParams = {
         expectedAmount: 10,
       };
