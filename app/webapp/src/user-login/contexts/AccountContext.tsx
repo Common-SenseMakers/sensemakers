@@ -288,6 +288,12 @@ export const AccountContext = (props: PropsWithChildren) => {
     });
   }, [connectedUser]);
 
+  useEffect(() => {
+    connectedSourcePlatforms.forEach((platform) => {
+      setPlatformConnectedStatus(platform, PlatformConnectedStatus.Connected);
+    });
+  }, [connectedSourcePlatforms]);
+
   return (
     <AccountContextValue.Provider
       value={{

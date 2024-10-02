@@ -189,6 +189,10 @@ export const MastodonContext = (props: PropsWithChildren) => {
             }
 
             searchParams.delete('code');
+            setPlatformConnectedStatus(
+              PLATFORM.Mastodon,
+              PlatformConnectedStatus.Connected
+            );
             refreshConnected();
             setSearchParams(searchParams);
           });

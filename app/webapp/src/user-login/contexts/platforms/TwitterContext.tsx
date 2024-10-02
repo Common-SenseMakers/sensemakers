@@ -181,6 +181,10 @@ export const TwitterContext = (props: PropsWithChildren) => {
             searchParams.delete('state');
             searchParams.delete('code');
             refreshConnected();
+            setPlatformConnectedStatus(
+              PLATFORM.Twitter,
+              PlatformConnectedStatus.Connected
+            );
             setSearchParams(searchParams);
           });
         }
