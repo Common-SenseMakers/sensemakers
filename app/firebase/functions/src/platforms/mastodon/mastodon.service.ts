@@ -61,7 +61,7 @@ export class MastodonService
     if (DEBUG) logger.debug('createApp', { params }, DEBUG_PREFIX);
 
     const client = createRestAPIClient({
-      url: `https://${params.mastodonServer}`,
+      url: `https://${params.domain}`,
     });
 
     const scopes = params.type === 'write' ? 'read write' : 'read';
@@ -70,7 +70,7 @@ export class MastodonService
       clientName: 'SenseNets',
       redirectUris: params.callback_url,
       scopes,
-      website: `https://${params.mastodonServer}`,
+      website: `https://${params.domain}`,
     });
 
     if (DEBUG) logger.debug('createApp result', { app }, DEBUG_PREFIX);
@@ -85,7 +85,7 @@ export class MastodonService
     if (DEBUG)
       logger.debug('getSignupContext', { userId, params }, DEBUG_PREFIX);
 
-    if (!params || !params.mastodonServer || !params.callback_url) {
+    if (!params || !params.domain || !params.callback_url) {
       throw new Error('Mastodon server and callback URL are required');
     }
 
@@ -97,7 +97,7 @@ export class MastodonService
     const scopes = params.type === 'write' ? 'read+write' : 'read';
 
     const authorizationUrl =
-      `https://${params.mastodonServer}/oauth/authorize?` +
+      `https://${params.domain}/oauth/authorize?` +
       `client_id=${app.clientId}&` +
       `scope=${scopes}&` +
       `redirect_uri=${params.callback_url}&` +
@@ -125,7 +125,7 @@ export class MastodonService
 
       const account = await this.getAccountByUsername(
         signupData.username,
-        signupData.mastodonServer,
+        signupData.domain,
         accessToken
       );
 
@@ -141,7 +141,7 @@ export class MastodonService
           username: account.username,
           displayName: account.displayName,
           avatar: account.avatar,
-          mastodonServer: account.mastodonServer,
+          domain: account.domain,
         },
         read: {
           accessToken: accessToken,
@@ -162,7 +162,7 @@ export class MastodonService
           return { accessToken: signupData.accessToken };
         }
         const client = createOAuthAPIClient({
-          url: `https://${signupData.mastodonServer}`,
+          url: `https://${signupData.domain}`,
         });
         return await client.token.create({
           clientId: signupData.clientId,
@@ -177,7 +177,7 @@ export class MastodonService
         logger.debug('handleSignupData token', { token }, DEBUG_PREFIX);
 
       const mastoClient = createRestAPIClient({
-        url: `https://${signupData.mastodonServer}`,
+        url: `https://${signupData.domain}`,
         accessToken: token.accessToken,
       });
 
@@ -190,7 +190,7 @@ export class MastodonService
           username: account.username,
           displayName: account.displayName,
           avatar: account.avatar,
-          mastodonServer: signupData.mastodonServer,
+          domain: signupData.domain,
         },
         read: {
           accessToken: token.accessToken,
@@ -218,7 +218,7 @@ export class MastodonService
       throw new Error('profile and/or read credentials are not provided');
     }
     const client = createRestAPIClient({
-      url: `https://${userDetails.profile.mastodonServer}`,
+      url: `https://${userDetails.profile.domain}`,
       accessToken: userDetails.read.accessToken,
     });
 
@@ -369,7 +369,7 @@ export class MastodonService
       throw new Error('profile and/or write credentials are not provided');
     }
     const client = createRestAPIClient({
-      url: `https://${userDetails.profile.mastodonServer}`,
+      url: `https://${userDetails.profile.domain}`,
       accessToken: userDetails.write.accessToken,
     });
 
@@ -414,7 +414,7 @@ export class MastodonService
       throw new Error('profile and/or read credentials are not provided');
     }
     const client = createRestAPIClient({
-      url: `https://${userDetails.profile.mastodonServer}`,
+      url: `https://${userDetails.profile.domain}`,
       accessToken: userDetails.read.accessToken,
     });
 
@@ -512,7 +512,7 @@ export class MastodonService
           username: account.username,
           displayName: account.displayName,
           avatar: account.avatar,
-          mastodonServer: server,
+          domain: server,
         };
       }
       return null;

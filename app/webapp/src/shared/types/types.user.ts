@@ -200,7 +200,7 @@ export interface MastodonAccountCredentials {
   id: string;
   username: string;
   displayName: string;
-  mastodonServer: string;
+  domain: string;
   accessToken: string;
   type: 'read' | 'write';
 }

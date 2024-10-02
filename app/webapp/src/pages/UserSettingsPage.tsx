@@ -329,7 +329,7 @@ export const UserSettingsPage = () => {
           buttonText={needConnectMastodon ? 'connect' : ''}
           username={
             mastodonProfile
-              ? `@${mastodonProfile.username}@${mastodonProfile.mastodonServer}`
+              ? `@${mastodonProfile.username}@${mastodonProfile.domain}`
               : '- not connected -'
           }
           connected={mastodonProfile !== undefined}></PlatformSection>

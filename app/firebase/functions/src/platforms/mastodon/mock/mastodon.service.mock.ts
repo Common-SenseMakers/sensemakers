@@ -1384,7 +1384,7 @@ export const getMastodonMock = (
     );
     when(mocked.handleSignupData(anything())).thenCall(
       (data: MastodonSignupData): MastodonUserDetails => {
-        const user_id = data.mastodonServer; // for testing purposes we pass the user_id as the mastodon server
+        const user_id = data.domain; // for testing purposes we pass the user_id as the mastodon server
         const testCredentials = getTestCredentials(
           process.env.TEST_USER_ACCOUNTS as string
         );
@@ -1407,7 +1407,7 @@ export const getMastodonMock = (
             displayName: currentMastodonCredentials.displayName,
             avatar:
               'https://media.cosocial.ca/accounts/avatars/111/971/425/782/516/559/original/963c30efd081957e.jpeg',
-            mastodonServer: currentMastodonCredentials.mastodonServer,
+            domain: currentMastodonCredentials.domain,
           },
           read: {
             accessToken: currentMastodonCredentials.accessToken,

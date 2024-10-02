@@ -2,7 +2,6 @@ import express from 'express';
 
 import { getPublicFeedController } from './feed/feed.controller';
 import {
-  addUserDataController,
   approvePostController,
   createDraftPostController,
   getPostController,

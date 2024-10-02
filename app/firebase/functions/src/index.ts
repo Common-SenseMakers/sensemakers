@@ -17,6 +17,7 @@ import { PlatformPost } from './@shared/types/types.platform.posts';
 import { AppPost } from './@shared/types/types.posts';
 import { CollectionNames } from './@shared/utils/collectionNames';
 import { activityEventCreatedHook } from './activity/activity.created.hook';
+import { adminRouter } from './admin.router';
 import {
   // AUTOFETCH_PERIOD,
   // DAILY_NOTIFICATION_PERIOD,
@@ -47,7 +48,7 @@ import {
   autopostPostTask,
 } from './posts/tasks/posts.autopost.task';
 import { PARSE_POST_TASK, parsePostTask } from './posts/tasks/posts.parse.task';
-import { adminRouter, router } from './router';
+import { router } from './router';
 
 // all secrets are available to all functions
 const secrets = [
