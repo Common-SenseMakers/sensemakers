@@ -1,3 +1,4 @@
+import AtpAgent from '@atproto/api';
 import { expect } from 'chai';
 
 import {
@@ -182,7 +183,7 @@ describe('02-platforms', () => {
         throw error;
       }
     });
-    it.only('gets account by username', async () => {
+    it('gets account by username', async () => {
       const twitterService = services.platforms.get(
         PLATFORM.Twitter
       ) as TwitterService;
@@ -263,7 +264,7 @@ describe('02-platforms', () => {
       if (!user) {
         throw new Error('appUser not created');
       }
-      const allUserDetails = user[PLATFORM.Mastodon];
+      const allUserDetails = user.accounts[PLATFORM.Mastodon];
       if (!allUserDetails || allUserDetails.length < 0) {
         throw new Error('Unexpected');
       }
@@ -288,7 +289,7 @@ describe('02-platforms', () => {
       if (!user) {
         throw new Error('appUser not created');
       }
-      const allUserDetails = user[PLATFORM.Mastodon];
+      const allUserDetails = user.accounts[PLATFORM.Mastodon];
       if (!allUserDetails || allUserDetails.length < 0) {
         throw new Error('Unexpected');
       }
@@ -313,7 +314,7 @@ describe('02-platforms', () => {
       }
     });
 
-    it.only('gets account by username', async () => {
+    it('gets account by username', async () => {
       // https://fediscience.org/@petergleick
       const username = 'petergleick';
       const server = 'fediscience.org';
@@ -352,7 +353,7 @@ describe('02-platforms', () => {
       if (!user) {
         throw new Error('appUser not created');
       }
-      const allUserDetails = user[PLATFORM.Bluesky];
+      const allUserDetails = user.accounts[PLATFORM.Bluesky];
       if (!allUserDetails || allUserDetails.length < 0) {
         throw new Error('Unexpected');
       }
@@ -366,12 +367,18 @@ describe('02-platforms', () => {
       ) as BlueskyService;
     });
 
-    it('gets account by username', async () => {
-      const username = 'bsky.app';
-      const agent = new BskyAgent({ service: 'https://bsky.social' });
+    it.only('gets account by username', async () => {
+      const username = 'ronent.bsky.social';
+      const agent = new AtpAgent({ service: 'https://bsky.social' });
+      const blueskyUsername = process.env.BLUESKY_USERNAME;
+      const blueskyAppPassword = process.env.BLUESKY_APP_PASSWORD;
+      if (!blueskyUsername || !blueskyAppPassword) {
+        throw new Error('Missing BLUESKY_USERNAME or BLUESKY_APP_PASSWORD');
+      }
+
       await agent.login({
-        identifier: process.env.BLUESKY_USERNAME!,
-        password: process.env.BLUESKY_APP_PASSWORD!,
+        identifier: blueskyUsername,
+        password: blueskyAppPassword,
       });
 
       const result = await blueskyService.getAccountByUsername(username, agent);
@@ -431,7 +438,7 @@ describe('02-platforms', () => {
       }
     );
 
-    it.only('fetches the latest posts without since_id or until_id', async () => {
+    it('fetches the latest posts without since_id or until_id', async () => {
       const fetchParams: PlatformFetchParams = {
         expectedAmount: 10,
       };
