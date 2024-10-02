@@ -77,6 +77,8 @@ export const initThreads = (
         id: testUser.twitter.id,
         name: testUser.twitter.username,
         username: testUser.twitter.username,
+        profile_image_url:
+          'https://pbs.twimg.com/profile_images/1783977034038882304/RGn66lGT_normal.jpg',
       },
     };
   });

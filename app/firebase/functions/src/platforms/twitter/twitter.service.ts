@@ -403,7 +403,10 @@ export class TwitterService
 
     const twitterThread = platformPost.posted.post;
     const genericAuthor: GenericAuthor = {
-      ...twitterThread.author,
+      id: twitterThread.author.id,
+      name: twitterThread.author.name || twitterThread.author.username,
+      username: twitterThread.author.username,
+      avatarUrl: twitterThread.author.profile_image_url,
       platformId: PLATFORM.Twitter,
     };
 
