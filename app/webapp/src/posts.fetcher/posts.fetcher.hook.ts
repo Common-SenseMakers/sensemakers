@@ -268,6 +268,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
   /** reset at every status change  */
   useEffect(() => {
     reset();
+    _fetchOlder(undefined);
   }, [status, labels, keywords, endpoint]);
 
   const _oldestPostId = useMemo(() => {
