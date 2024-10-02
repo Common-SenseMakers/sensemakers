@@ -34,11 +34,21 @@ export interface BlueskyGetContextParams {
 }
 export interface BlueskySignupContext {}
 
-export type BlueskySignupData = {
+export type BlueskyAppPasswordSignupData = {
   username: string;
   appPassword: string;
   type: 'read' | 'write';
 };
+
+export type BlueskyGhostSignupData = {
+  username: string;
+  isGhost: true;
+};
+
+export type BlueskySignupData =
+  | BlueskyAppPasswordSignupData
+  | BlueskyGhostSignupData;
+
 export interface BlueskyThread {
   thread_id: string;
   posts: BlueskyPost[];
