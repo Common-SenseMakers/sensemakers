@@ -366,6 +366,25 @@ describe('02-platforms', () => {
       ) as BlueskyService;
     });
 
+    it('gets account by username', async () => {
+      const username = 'bsky.app';
+      const agent = new BskyAgent({ service: 'https://bsky.social' });
+      await agent.login({
+        identifier: process.env.BLUESKY_USERNAME!,
+        password: process.env.BLUESKY_APP_PASSWORD!,
+      });
+
+      const result = await blueskyService.getAccountByUsername(username, agent);
+
+      expect(result).to.not.be.null;
+      if (result) {
+        expect(result.id).to.be.a('string');
+        expect(result.username).to.equal(username);
+        expect(result.name).to.be.a('string');
+        expect(result.avatar).to.be.a('string');
+      }
+    });
+
     (USE_REAL_BLUESKY ? it : it.skip)(
       'fetches the main thread of a post',
       async () => {
