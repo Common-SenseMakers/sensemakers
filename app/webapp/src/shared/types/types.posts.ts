@@ -149,7 +149,7 @@ export interface ProfilePostsQuery {
   fetchParams: FetchParams;
 }
 export interface MastodonGetContextParams {
-  domain: string;
+  mastodonServer: string;
   callback_url: string;
   type: 'read' | 'write';
 }

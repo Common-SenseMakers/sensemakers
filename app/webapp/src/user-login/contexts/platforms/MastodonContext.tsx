@@ -39,7 +39,7 @@ export const LS_MASTODON_CONTEXT_KEY = 'mastodon-signin-context';
 
 export type MastodonContextType = {
   connect?: (
-    domain: string,
+    mastodonServer: string,
     type: MastodonGetContextParams['type'],
     callbackUrl?: string
   ) => Promise<void>;
@@ -89,7 +89,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
 
   const connect = useCallback(
     async (
-      domain: string,
+      mastodonServer: string,
       type: MastodonGetContextParams['type'],
       callbackUrl?: string
     ) => {
@@ -102,9 +102,8 @@ export const MastodonContext = (props: PropsWithChildren) => {
 
       try {
         const params: MastodonGetContextParams = {
-          domain,
-          // callback_url: `${window.location.origin}${callbackUrl}`,
-          callback_url: callbackUrl || window.location.href,
+          mastodonServer,
+          callback_url: window.location.href,
           type,
         };
         log('Fetching Mastodon signup context', params);
@@ -129,7 +128,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
         }
       } catch (err: any) {
         log('Error connecting to Mastodon', err);
-        setError(t(I18Keys.errorConnectMastodon, { mastodonServer: domain }));
+        setError(t(I18Keys.errorConnectMastodon, { mastodonServer }));
         setLoginFlowState(LoginFlowState.Idle);
         setPlatformConnectedStatus(
           PLATFORM.Mastodon,
@@ -173,7 +172,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
           const signupData: MastodonSignupData = {
             ...context,
             code: code_param,
-            domain: new URL(context.authorizationUrl).hostname,
+            mastodonServer: new URL(context.authorizationUrl).hostname,
             callback_url: window.location.href,
             type: 'read',
           };

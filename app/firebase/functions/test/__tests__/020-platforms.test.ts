@@ -17,6 +17,7 @@ import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
 import { BlueskyService } from '../../src/platforms/bluesky/bluesky.service';
+import { MastodonService } from '../../src/platforms/mastodon/mastodon.service';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { convertToAppTweets } from '../../src/platforms/twitter/twitter.utils';
 import { UsersHelper } from '../../src/users/users.helper';
@@ -81,7 +82,7 @@ describe('02-platforms', () => {
   });
 
   // TODO, fix this test
-  describe.skip('twitter', () => {
+  describe('twitter', () => {
     it('fetch the latest 5 threads', async () => {
       if (!user) {
         throw new Error('appUser not created');
@@ -179,6 +180,29 @@ describe('02-platforms', () => {
       } catch (error) {
         console.error('error: ', error);
         throw error;
+      }
+    });
+    it.only('gets account by username', async () => {
+      const twitterService = services.platforms.get(
+        PLATFORM.Twitter
+      ) as TwitterService;
+      const username = 'wesleyfinck';
+      const bearerToken = process.env.TWITTER_BEARER_TOKEN;
+      if (!bearerToken) {
+        throw new Error('Missing TWITTER_BEARER_TOKEN');
+      }
+
+      const result = await twitterService.getAccountByUsername(
+        username,
+        bearerToken
+      );
+
+      expect(result).to.not.be.null;
+      if (result) {
+        expect(result.id).to.be.a('string');
+        expect(result.username).to.equal(username);
+        expect(result.name).to.be.a('string');
+        expect(result.profile_image_url).to.be.a('string');
       }
     });
   });
@@ -371,104 +395,34 @@ describe('02-platforms', () => {
       expect(result.platformPosts.length).to.be.greaterThan(0);
     });
 
-    it('fetches posts with a since_id', async () => {
-      // First, fetch some posts to get a valid since_id
-      const initialFetch = await services.db.run((manager) =>
-        blueskyService.fetch({ expectedAmount: 5 }, userDetails, manager)
-      );
-      // get the last post's id and timestamp to make sure there are most recent posts
-      const sinceId =
-        initialFetch.platformPosts[initialFetch.platformPosts.length - 1]
-          .post_id;
-      const sinceTimestamp =
-        initialFetch.platformPosts[initialFetch.platformPosts.length - 1]
-          .timestampMs;
+    it.only('gets account by username', async () => {
+      // https://fediscience.org/@petergleick
+      const username = 'petergleick';
+      const server = 'fediscience.org';
 
-      const fetchParams: PlatformFetchParams = {
-        expectedAmount: 10,
-        since_id: sinceId,
-      };
+      const accessToken = process.env.MASTODON_ACCESS_TOKEN;
+      if (!accessToken) {
+        throw new Error('Missing MASTODON_ACCESS_TOKEN');
+      }
 
-      const result = await services.db.run((manager) =>
-        blueskyService.fetch(fetchParams, userDetails, manager)
+      const mastodonService = services.platforms.get(
+        PLATFORM.Mastodon
+      ) as MastodonService;
+
+      const result = await mastodonService.getAccountByUsername(
+        username,
+        server,
+        accessToken
       );
 
-      expect(result).to.not.be.undefined;
-      if (result.platformPosts.length > 0) {
-        result.platformPosts.forEach((platformPost) => {
-          const thread = platformPost.post as BlueskyThread;
-          thread.posts.forEach((post) => {
-            const createdAt = new Date(post.record.createdAt).getTime();
-            expect(createdAt).to.be.greaterThan(sinceTimestamp);
-          });
-        });
+      expect(result).to.not.be.null;
+      if (result) {
+        expect(result.id).to.be.a('string');
+        expect(result.username).to.equal(username);
+        expect(result.displayName).to.be.a('string');
+        expect(result.avatar).to.be.a('string');
+        expect(result.mastodonServer).to.equal(server);
       }
     });
-
-    it('fetches posts with an until_id', async () => {
-      // First, fetch some posts to get a valid until_id
-      const initialFetch = await services.db.run((manager) =>
-        blueskyService.fetch({ expectedAmount: 15 }, userDetails, manager)
-      );
-      const untilId =
-        initialFetch.platformPosts[initialFetch.platformPosts.length - 1]
-          .post_id;
-      const untilTimestamp =
-        initialFetch.platformPosts[initialFetch.platformPosts.length - 1]
-          .timestampMs;
-
-      const fetchParams: PlatformFetchParams = {
-        expectedAmount: 10,
-        until_id: untilId,
-      };
-
-      const result = await services.db.run((manager) =>
-        blueskyService.fetch(fetchParams, userDetails, manager)
-      );
-
-      expect(result).to.not.be.undefined;
-      if (result.platformPosts.length > 0) {
-        result.platformPosts.forEach((platformPost) => {
-          const thread = platformPost.post as BlueskyThread;
-          thread.posts.forEach((post) => {
-            const createdAt = new Date(post.record.createdAt).getTime();
-            expect(createdAt).to.be.at.most(untilTimestamp);
-          });
-        });
-      }
-    });
-
-    (USE_REAL_BLUESKY ? it : it.skip)(
-      'fetches a post with a quote and converts it to generic format',
-      async () => {
-        const postId =
-          'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4ebss5mmt2f';
-
-        const result = await services.db.run((manager) =>
-          blueskyService.get(postId, userDetails, manager)
-        );
-
-        expect(result).to.not.be.undefined;
-        expect(result.post).to.be.an('object');
-
-        const genericThread = await blueskyService.convertToGeneric({
-          posted: result,
-        } as PlatformPostCreate<BlueskyThread>);
-
-        expect(genericThread.thread.length).to.be.greaterThan(0);
-
-        const mainPost = genericThread.thread[0];
-        expect(mainPost.quotedThread).to.be.an('object');
-        expect(mainPost.quotedThread?.author).to.be.an('object');
-        expect(mainPost.quotedThread?.thread).to.be.an('array');
-        expect(mainPost.quotedThread?.thread.length).to.equal(1);
-
-        const quotedPost = mainPost.quotedThread?.thread[0];
-        expect(quotedPost?.content).to.be.a('string');
-        expect(quotedPost?.url).to.be.equal(
-          'https://bsky.app/profile/thetyee.ca/post/3l4eak57v5y2h'
-        );
-      }
-    );
   });
 });

@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { logger } from 'firebase-functions';
 
-import { TwitterSignupData } from '../../../src/@shared/types/types.twitter';
+import { TwitterAccountSignupData } from '../../../src/@shared/types/types.twitter';
 import { PLATFORM } from '../../../src/@shared/types/types.user';
 import { UsersHelper } from '../../../src/users/users.helper';
 import { getPrefixedUserId } from '../../../src/users/users.utils';
@@ -9,7 +9,7 @@ import { TestServices } from '../test.services';
 
 export const handleTwitterSignupMock = async (
   services: TestServices,
-  signupData: TwitterSignupData,
+  signupData: TwitterAccountSignupData,
   _userId?: string
 ) => {
   const userId = await services.db.run(async (manager) => {

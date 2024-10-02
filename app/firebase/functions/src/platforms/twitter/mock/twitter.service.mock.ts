@@ -7,10 +7,10 @@ import {
   PlatformPostPublish,
 } from '../../../@shared/types/types.platform.posts';
 import {
+  TwitterAccountSignupData,
   TwitterDraft,
   TwitterGetContextParams,
   TwitterSignupContext,
-  TwitterSignupData,
   TwitterThread,
   TwitterUserDetails,
 } from '../../../@shared/types/types.twitter';
@@ -256,7 +256,7 @@ export const getTwitterMock = (
       }
     );
     when(mocked.handleSignupData(anything())).thenCall(
-      (data: TwitterSignupData): TwitterUserDetails => {
+      (data: TwitterAccountSignupData): TwitterUserDetails => {
         const user_id = data.codeChallenge;
         const testCredentials = getTestCredentials(
           process.env.TEST_USER_ACCOUNTS as string

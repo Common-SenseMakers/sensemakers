@@ -16,8 +16,16 @@ export type TwitterGetContextParams = {
 export type TwitterSignupContext = IOAuth2RequestTokenResult &
   TwitterGetContextParams;
 
-export type TwitterSignupData = TwitterSignupContext & {
+export type TwitterAccountSignupData = TwitterSignupContext & {
   code: string;
+};
+export type TwitterSignupData =
+  | TwitterAccountSignupData
+  | TwitterGhostSignupData;
+
+export type TwitterGhostSignupData = {
+  username: string;
+  isGhost: true;
 };
 
 export interface TwitterUserCredentials {

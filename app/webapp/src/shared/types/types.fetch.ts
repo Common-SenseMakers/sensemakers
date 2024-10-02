@@ -38,3 +38,13 @@ export interface PublishPostPayload {
   post: AppPostFull;
   platformIds: PLATFORM[];
 }
+
+export interface AddUserDataPayload {
+  username: string;
+  mastodonServer?: string;
+  platformId: PLATFORM;
+  amount: number;
+  latest?: boolean;
+  userId?: string;
+  isGhost: true;
+}
