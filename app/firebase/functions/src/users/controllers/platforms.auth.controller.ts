@@ -4,6 +4,7 @@ import { PLATFORM } from '../../@shared/types/types.user';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
 import {
+  blueskySignupDataSchema,
   mastodonGetSignupContextSchema,
   mastodonSignupDataSchema,
   nanopubGetSignupContextSchema,
@@ -42,6 +43,10 @@ export const getSignupContextController: RequestHandler = async (
 
       if (platform === PLATFORM.Mastodon) {
         return mastodonGetSignupContextSchema.validate(request.body);
+      }
+
+      if (platform === PLATFORM.Bluesky) {
+        return request.body;
       }
 
       throw new Error(`Unexpected platform ${platform}`);
@@ -89,6 +94,10 @@ export const handleSignupController: RequestHandler = async (
 
       if (platform === PLATFORM.Mastodon) {
         return mastodonSignupDataSchema.validate(request.body);
+      }
+
+      if (platform === PLATFORM.Bluesky) {
+        return blueskySignupDataSchema.validate(request.body);
       }
 
       throw new Error(`Unexpected platform ${platform}`);

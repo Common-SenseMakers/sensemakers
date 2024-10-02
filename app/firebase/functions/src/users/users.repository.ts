@@ -206,7 +206,7 @@ export class UsersRepository {
       throw new Error('Unexpected');
     }
 
-    const accounts = existingUser[platform];
+    const accounts = existingUser.accounts[platform];
     if (accounts === undefined) {
       throw new Error(`User accounts not found`);
     }
@@ -238,8 +238,13 @@ export class UsersRepository {
 
     const userRef = await this.getUserRef(existingUser.userId, manager, true);
 
-    /** overwrite all the user account credentials */
-    manager.update(userRef, { [platform]: accounts });
+    /** update the specific platform accounts within the accounts field */
+    manager.update(userRef, {
+      accounts: {
+        ...existingUser.accounts,
+        [platform]: accounts
+      }
+    });
   }
 
   /** append or overwrite userDetails for an account of a given platform */
@@ -277,51 +282,54 @@ export class UsersRepository {
     })();
 
     /** set the user account */
-    const { accounts, platformIds } = await (async () => {
+    const { platformAccounts, platformIds } = await (async () => {
       /**  overwrite previous details for that user account*/
       if (platform === PLATFORM.Local) {
         throw new Error('Unexpected');
       }
 
-      const accounts: UserDetailsBase[] = user[platform] || [];
+      const platformAccounts: UserDetailsBase[] = user.accounts[platform] || [];
       let platformIds = user.platformIds;
 
       if (DEBUG)
         logger.debug(`setPlatformDetails accounts`, {
-          accounts,
+          platformAccounts,
           platformIds,
           details,
         });
 
       /** find the specific account */
-      const ix = accounts.findIndex((a) => a.user_id === details.user_id);
+      const ix = platformAccounts.findIndex(
+        (a) => a.user_id === details.user_id
+      );
       if (ix !== -1) {
         /** set the new details of that account */
         if (DEBUG)
           logger.debug(`setPlatformDetails account found - overwritting`);
         /** keep the fetched details */
-        accounts[ix] = { ...accounts[ix], ...details };
+        platformAccounts[ix] = { ...platformAccounts[ix], ...details };
       } else {
         if (DEBUG)
           logger.debug(`setPlatformDetails account not found - creating`);
-        accounts.push(details);
+        platformAccounts.push(details);
         platformIds.push(getPrefixedUserId(platform, details.user_id));
       }
 
-      return { accounts, platformIds };
+      return { platformAccounts, platformIds };
     })();
 
     if (DEBUG)
       logger.debug(`setPlatformDetails accounts and platformIds`, {
-        accounts,
+        accounts: platformAccounts,
         platformIds,
       });
 
     const userRef = await this.getUserRef(userId, manager, true);
+
     const platformIds_property: keyof UserWithPlatformIds = 'platformIds';
     const update: Partial<AppUser> = {
       [platformIds_property]: platformIds,
-      [platform]: accounts,
+      accounts: { ...user.accounts, [platform]: platformAccounts },
     };
 
     if (DEBUG) logger.debug(`Updating user ${userId}`, { update });
@@ -376,13 +384,13 @@ export class UsersRepository {
 
     if (
       !user ||
-      !Array.isArray(user[platform]) ||
-      user[platform].length === 0
+      !Array.isArray(user.accounts[platform]) ||
+      user.accounts[platform].length === 0
     ) {
       throw new Error(`User ${userId} data as expected`);
     }
 
-    const details = (user[platform] as Array<UserDetailsBase>).find(
+    const details = (user.accounts[platform] as Array<UserDetailsBase>).find(
       (details) => details.user_id === user_id
     );
 

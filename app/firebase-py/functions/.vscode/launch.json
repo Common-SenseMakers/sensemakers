@@ -7,7 +7,7 @@
           "request": "launch",
           "program": "${workspaceFolder}/main.test.py",
           "console": "integratedTerminal",
-          "python": "/home/pepo/anaconda3/envs/ENV_NAME/bin/python",
+          "python": "/home/pepo/miniconda3/envs/SENSENETS_DEV/bin/python",
           "env": {
           },
           "args": [

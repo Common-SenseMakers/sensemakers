@@ -14,6 +14,7 @@ import {
   _03_fetchAfterPublish,
 } from './reusable/create-post-fetch';
 import {
+  USE_REAL_BLUESKY,
   USE_REAL_MASTODON,
   USE_REAL_NANOPUB,
   USE_REAL_PARSER,
@@ -26,6 +27,9 @@ describe('031 test parse', () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER
+      ? undefined
+      : { publish: true, signup: true, fetch: true, get: true },
+    bluesky: USE_REAL_BLUESKY
       ? undefined
       : { publish: true, signup: true, fetch: true, get: true },
     mastodon: USE_REAL_MASTODON
@@ -44,6 +48,7 @@ describe('031 test parse', () => {
   describe('get and process', () => {
     let twitterUser: AppUser | undefined;
     let mastodonUser: AppUser | undefined;
+    let blueskyUser: AppUser | undefined;
 
     before(async () => {
       const users = await services.db.run((manager) => {
@@ -54,6 +59,9 @@ describe('031 test parse', () => {
       );
       mastodonUser = users.find(
         (u) => UsersHelper.getAccount(u, PLATFORM.Mastodon) !== undefined
+      );
+      blueskyUser = users.find(
+        (u) => UsersHelper.getAccount(u, PLATFORM.Bluesky) !== undefined
       );
     });
 
@@ -123,6 +131,37 @@ describe('031 test parse', () => {
       if (process.env.TEST_MASTODON_POST_ID) {
         console.log('parsedPost', JSON.stringify(parsedPost, null, 2));
       }
+    });
+
+    it('gets a post from bluesky and parses it', async () => {
+      const { postsManager } = services;
+
+      const post_id =
+        'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z';
+
+      if (!post_id) {
+        throw new Error('TEST_BLUESKY_POST_ID not defined');
+      }
+
+      if (!blueskyUser) {
+        throw new Error('Bluesky user not created');
+      }
+
+      const post = await fetchPostInTests(
+        blueskyUser.userId,
+        post_id,
+        services,
+        PLATFORM.Bluesky
+      );
+
+      if (!post) {
+        throw new Error('post undefined');
+      }
+
+      const parsedPost = await postsManager.getPost(post.id, true);
+      expect(parsedPost).to.not.be.undefined;
+      expect(parsedPost.parsingStatus).to.equal(AppPostParsingStatus.IDLE);
+      expect(parsedPost.semantics).to.not.be.undefined;
     });
   });
 });

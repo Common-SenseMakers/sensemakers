@@ -1,4 +1,3 @@
-// TODO implement the mastodon context
 import {
   PropsWithChildren,
   createContext,
@@ -24,8 +23,8 @@ import { PLATFORM } from '../../../shared/types/types.user';
 import { usePersist } from '../../../utils/use.persist';
 import {
   LoginFlowState,
-  MastodonConnectedStatus,
   OverallLoginStatus,
+  PlatformConnectedStatus,
   useAccountContext,
 } from '../AccountContext';
 
@@ -40,8 +39,9 @@ export const LS_MASTODON_CONTEXT_KEY = 'mastodon-signin-context';
 
 export type MastodonContextType = {
   connect?: (
-    mastodonServer: string,
-    type: MastodonGetContextParams['type']
+    domain: string,
+    type: MastodonGetContextParams['type'],
+    callbackUrl?: string
   ) => Promise<void>;
   needConnect?: boolean;
   error?: string;
@@ -61,8 +61,8 @@ export const MastodonContext = (props: PropsWithChildren) => {
     refresh: refreshConnected,
     overallLoginStatus,
     setLoginFlowState,
-    setMastodonConnectedStatus,
-    mastodonConnectedStatus,
+    setPlatformConnectedStatus,
+    getPlatformConnectedStatus,
   } = useAccountContext();
 
   const [wasConnecting, setWasConnecting] = usePersist<boolean>(
@@ -75,7 +75,8 @@ export const MastodonContext = (props: PropsWithChildren) => {
 
   const appFetch = useAppFetch();
 
-  const needConnect = !connectedUser || !connectedUser[PLATFORM.Mastodon];
+  const needConnect =
+    !connectedUser || !connectedUser.accounts[PLATFORM.Mastodon];
 
   useEffect(() => {
     if (error) {
@@ -87,15 +88,23 @@ export const MastodonContext = (props: PropsWithChildren) => {
   }, [error]);
 
   const connect = useCallback(
-    async (mastodonServer: string, type: MastodonGetContextParams['type']) => {
+    async (
+      domain: string,
+      type: MastodonGetContextParams['type'],
+      callbackUrl?: string
+    ) => {
       setLoginFlowState(LoginFlowState.ConnectingMastodon);
-      setMastodonConnectedStatus(MastodonConnectedStatus.Connecting);
+      setPlatformConnectedStatus(
+        PLATFORM.Mastodon,
+        PlatformConnectedStatus.Connecting
+      );
       setError(undefined);
 
       try {
         const params: MastodonGetContextParams = {
-          mastodonServer,
-          callback_url: window.location.href,
+          mastodonServer: domain,
+          // callback_url: `${window.location.origin}${callbackUrl}`,
+          callback_url: callbackUrl || window.location.href,
           type,
         };
         log('Fetching Mastodon signup context', params);
@@ -120,12 +129,15 @@ export const MastodonContext = (props: PropsWithChildren) => {
         }
       } catch (err: any) {
         log('Error connecting to Mastodon', err);
-        setError(t(I18Keys.errorConnectMastodon, { mastodonServer }));
+        setError(t(I18Keys.errorConnectMastodon, { mastodonServer: domain }));
         setLoginFlowState(LoginFlowState.Idle);
-        setMastodonConnectedStatus(MastodonConnectedStatus.Disconnected);
+        setPlatformConnectedStatus(
+          PLATFORM.Mastodon,
+          PlatformConnectedStatus.Disconnected
+        );
       }
     },
-    [appFetch, setLoginFlowState, setMastodonConnectedStatus]
+    [appFetch, setLoginFlowState]
   );
 
   useEffect(() => {
@@ -135,7 +147,8 @@ export const MastodonContext = (props: PropsWithChildren) => {
         connectedUser &&
         wasConnecting &&
         (overallLoginStatus === OverallLoginStatus.PartialLoggedIn ||
-          mastodonConnectedStatus === MastodonConnectedStatus.Connecting)
+          getPlatformConnectedStatus(PLATFORM.Mastodon) ===
+            PlatformConnectedStatus.Connecting)
       ) {
         log('useEffect MastodonSignup', {
           code_param,
@@ -176,6 +189,10 @@ export const MastodonContext = (props: PropsWithChildren) => {
             }
 
             searchParams.delete('code');
+            setPlatformConnectedStatus(
+              PLATFORM.Mastodon,
+              PlatformConnectedStatus.Connected
+            );
             refreshConnected();
             setSearchParams(searchParams);
           });

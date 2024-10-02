@@ -94,7 +94,7 @@ export const OrcidContext = (props: PropsWithChildren) => {
   };
 
   useEffect(() => {
-    if (connectedUser && connectedUser[PLATFORM.Orcid]) {
+    if (connectedUser && connectedUser.accounts[PLATFORM.Orcid]) {
       setWasConnecting(false);
     }
   }, [connectedUser]);

@@ -6,29 +6,69 @@ import { useAppFetch } from '../api/app.fetch';
 import { subscribeToUpdates } from '../firestore/realtime.listener';
 import {
   AppPostFull,
-  AppPostParsedStatus,
-  AppPostParsingStatus,
   AppPostRepublishedStatus,
   AppPostReviewStatus,
-  PostUpdate,
+  PostsQuery,
+  PostsQueryParams,
   PostsQueryStatus,
-  UserPostsQuery,
 } from '../shared/types/types.posts';
-import { useAccountContext } from '../user-login/contexts/AccountContext';
-import { useQueryFilter } from './query.filter.hook';
-
-const PAGE_SIZE = 5;
+import {
+  OverallLoginStatus,
+  useAccountContext,
+} from '../user-login/contexts/AccountContext';
 
 const DEBUG = true;
 
-export const usePostsFetch = () => {
-  const { connectedUser, twitterProfile, mastodonProfile } =
-    useAccountContext();
+export interface PostFetcherInterface {
+  posts?: AppPostFull[];
+  isLoading: boolean;
+  isFetchingOlder: boolean;
+  errorFetchingOlder?: Error;
+  isFetchingNewer: boolean;
+  errorFetchingNewer?: Error;
+  fetchOlder: () => void;
+  fetchNewer: () => void;
+  getPost: (postId: string) => AppPostFull | undefined;
+  removePost: (postId: string) => void;
+  moreToFetch: boolean;
+  getNextAndPrev: (postId?: string) => {
+    prevPostId?: string;
+    nextPostId?: string;
+  };
+}
+
+export interface FetcherConfig {
+  endpoint: string;
+  status?: string;
+  labels?: string[];
+  keywords?: string[];
+  subscribe?: boolean;
+  onPostsAdded?: (posts: AppPostFull[]) => void;
+  PAGE_SIZE?: number;
+}
+
+/**
+ * Handles one array of posts by keeping track of the newest and oldest post ids and
+ * fething newer and older posts as requested by a consuming component
+ */
+export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
+  const { connectedUser, connectedSourcePlatforms } = useAccountContext();
+
+  const {
+    endpoint,
+    status,
+    labels,
+    keywords,
+    subscribe,
+    onPostsAdded,
+    PAGE_SIZE: _PAGE_SIZE,
+  } = input;
+
+  const PAGE_SIZE = _PAGE_SIZE || 5;
 
   const appFetch = useAppFetch();
-  const { status } = useQueryFilter();
 
-  const [posts, setPosts] = useState<AppPostFull[]>([]);
+  const [posts, setPosts] = useState<AppPostFull[] | undefined>(undefined);
   const [fetchedOlderFirst, setFetchedOlderFirst] = useState(false);
   const [fetchedNewerFirst, setFetchedNewerFirst] = useState(false);
 
@@ -45,6 +85,16 @@ export const usePostsFetch = () => {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const code = searchParams.get('code');
+
+  const _status = status || PostsQueryStatus.PUBLISHED;
+  const _labels = labels || [];
+  const _keywords = keywords || [];
+
+  const queryParams: PostsQueryParams = {
+    status: _status,
+    keywords: _keywords,
+    labels: _labels,
+  };
 
   /** refetch a post and overwrite its value in the array */
   const refetchPost = useCallback(
@@ -82,8 +132,8 @@ export const usePostsFetch = () => {
         })();
 
         setPosts((prev) => {
-          const newPosts = [...prev];
-          const ix = prev.findIndex((p) => p.id === postId);
+          const newPosts = prev ? [...prev] : [];
+          const ix = prev ? prev.findIndex((p) => p.id === postId) : -1;
 
           if (DEBUG) console.log(`setPosts called`, { ix, newPosts });
 
@@ -112,7 +162,14 @@ export const usePostsFetch = () => {
       /** add posts  */
       setPosts((prev) => {
         const allPosts =
-          position === 'end' ? prev.concat(newPosts) : newPosts.concat(prev);
+          position === 'end'
+            ? prev
+              ? prev.concat(newPosts)
+              : newPosts
+            : prev
+              ? newPosts.reverse().concat(prev)
+              : newPosts;
+
         if (DEBUG) console.log(`pushing posts`, { prev, allPosts });
         return allPosts;
       });
@@ -131,28 +188,23 @@ export const usePostsFetch = () => {
           current();
         }
 
-        const unsubscribe = subscribeToUpdates(`post-${post.id}`, () => {
-          if (DEBUG) console.log(`update detected`, post.id);
-          refetchPost(post.id);
-        });
+        if (subscribe) {
+          const unsubscribe = subscribeToUpdates(`post-${post.id}`, () => {
+            if (DEBUG) console.log(`update detected`, post.id);
+            refetchPost(post.id);
+          });
 
-        if (DEBUG)
-          console.log(
-            `unsubscribefor post ${post.id} stored on unsubscribeCallbacks`
-          );
-        unsubscribeCallbacks.current[post.id] = unsubscribe;
-      });
-
-      /** trigger parse if not parsed and not parsing */
-      newPosts.forEach((post) => {
-        if (
-          post.parsedStatus === AppPostParsedStatus.UNPROCESSED &&
-          post.parsingStatus !== AppPostParsingStatus.PROCESSING
-        ) {
-          // async trigger parse
-          appFetch(`/api/posts/parse`, { postId: post.id });
+          if (DEBUG)
+            console.log(
+              `unsubscribefor post ${post.id} stored on unsubscribeCallbacks`
+            );
+          unsubscribeCallbacks.current[post.id] = unsubscribe;
         }
       });
+
+      if (onPostsAdded) {
+        onPostsAdded(newPosts);
+      }
     },
     [appFetch, refetchPost]
   );
@@ -183,33 +235,28 @@ export const usePostsFetch = () => {
     setPosts([]);
   };
 
-  /** first data fill happens everytime the posts are empty and the firstFetched is false */
+  /** first data fill happens everytime a new source platform is added/removed */
   useEffect(() => {
-    if (
-      posts.length === 0 &&
-      !fetchedOlderFirst &&
-      (twitterProfile || mastodonProfile)
-    ) {
-      if (DEBUG) console.log('first fetch older');
-      _fetchOlder(undefined);
-    }
-  }, [posts, fetchedOlderFirst, connectedUser]);
-
-  useEffect(() => {
-    if (posts.length > 0 && twitterProfile && mastodonProfile) {
-      if (DEBUG) console.log('first fetch older with new platform added');
+    if (DEBUG)
+      console.log('first fetch older with new platform added', {
+        posts,
+        fetchedOlderFirst,
+        connectedSourcePlatforms,
+      });
+    if (connectedSourcePlatforms.length > 0) {
       reset();
+      setFetchedOlderFirst(true);
       _fetchOlder(undefined);
     }
-  }, [connectedUser]);
+  }, [connectedSourcePlatforms]);
 
   /** whenever posts have been fetched, check if we have fetched for newer posts yet, and if not, fetch for newer */
   useEffect(() => {
-    if (posts.length !== 0 && !fetchedNewerFirst && connectedUser) {
+    if (posts && posts.length > 0 && !fetchedNewerFirst && connectedUser) {
       if (DEBUG) console.log('first fetch newer');
       _fetchNewer(posts[0].id);
     }
-  }, [posts]);
+  }, [posts, fetchedNewerFirst]);
 
   const reset = () => {
     if (DEBUG) console.log('resetting posts');
@@ -218,14 +265,11 @@ export const usePostsFetch = () => {
     setIsLoading(true);
   };
 
-  const checkPostRemove = useCallback(() => {
-    const found = posts.find((p) => p.id === 'to-remove');
-  }, [posts]);
-
   /** reset at every status change  */
   useEffect(() => {
     reset();
-  }, [status]);
+    _fetchOlder(undefined);
+  }, [status, labels, keywords, endpoint]);
 
   const _oldestPostId = useMemo(() => {
     const oldest = posts ? posts[posts.length - 1]?.id : undefined;
@@ -254,18 +298,18 @@ export const usePostsFetch = () => {
           fetchedOlderFirst,
         });
       setIsFetchingOlder(true);
-      setFetchedOlderFirst(true);
+
       try {
-        const params: UserPostsQuery = {
-          status,
+        const params: PostsQuery = {
+          ...queryParams,
           fetchParams: {
             expectedAmount: PAGE_SIZE,
             untilId: oldestPostId,
           },
         };
         if (DEBUG) console.log(`fetching for older - twitter`, params);
-        const readPosts = await appFetch<AppPostFull[], UserPostsQuery>(
-          '/api/posts/getOfUser',
+        const readPosts = await appFetch<AppPostFull[], PostsQuery>(
+          endpoint,
           params
         );
 
@@ -311,16 +355,16 @@ export const usePostsFetch = () => {
       setFetchedNewerFirst(true);
 
       try {
-        const params: UserPostsQuery = {
-          status,
+        const params: PostsQuery = {
+          ...queryParams,
           fetchParams: {
             expectedAmount: PAGE_SIZE,
             sinceId: _newestPostId,
           },
         };
         if (DEBUG) console.log(`fetching for newer`, params);
-        const readPosts = await appFetch<AppPostFull[], UserPostsQuery>(
-          '/api/posts/getOfUser',
+        const readPosts = await appFetch<AppPostFull[], PostsQuery>(
+          endpoint,
           params
         );
 
@@ -357,12 +401,49 @@ export const usePostsFetch = () => {
 
   const removePost = (postId: string) => {
     if (DEBUG) console.log(`removing post ${postId} from list`);
-    setPosts((prev) => prev.filter((p) => p.id !== postId));
+    setPosts((prev) =>
+      prev ? prev.filter((p) => p.id !== postId) : undefined
+    );
     unsubscribeCallbacks.current[postId]?.();
   };
 
+  const getPost = useCallback(
+    (postId: string) => {
+      if (!posts) {
+        return undefined;
+      }
+
+      const ix = posts.findIndex((p) => p.id === postId);
+      return ix !== -1 ? posts[ix] : undefined;
+    },
+    [posts]
+  );
+
+  const getNextAndPrev = useCallback(
+    (postId?: string) => {
+      if (!posts || !postId) {
+        return {};
+      }
+
+      const currPostIndex = posts?.findIndex((p) => p.id === postId);
+      const prevPostId =
+        posts && currPostIndex != undefined && currPostIndex > 0
+          ? posts[currPostIndex - 1].id
+          : undefined;
+
+      const nextPostId =
+        posts && currPostIndex != undefined && currPostIndex < posts.length - 1
+          ? posts[currPostIndex + 1].id
+          : undefined;
+
+      return { prevPostId, nextPostId };
+    },
+    [posts]
+  );
+
   return {
     posts,
+    getPost,
     removePost,
     fetchOlder,
     isFetchingOlder,
@@ -371,7 +452,7 @@ export const usePostsFetch = () => {
     isFetchingNewer,
     errorFetchingNewer,
     isLoading,
-    status,
     moreToFetch,
+    getNextAndPrev,
   };
 };

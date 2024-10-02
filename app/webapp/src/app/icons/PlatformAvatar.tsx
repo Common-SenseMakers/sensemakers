@@ -1,13 +1,10 @@
 import { Box, Image } from 'grommet';
 
-export const PlatformAvatar = (props: {
-  profileImageUrl?: string;
-  size?: number;
-}) => {
+export const PlatformAvatar = (props: { imageUrl?: string; size?: number }) => {
   const size = props.size || 40;
   const content = (() => {
-    if (!props.profileImageUrl) return <></>;
-    return <Image src={props.profileImageUrl}></Image>;
+    if (!props.imageUrl) return <></>;
+    return <Image src={props.imageUrl}></Image>;
   })();
 
   return (

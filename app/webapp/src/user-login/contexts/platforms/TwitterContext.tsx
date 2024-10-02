@@ -1,11 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
 import {
   PropsWithChildren,
   createContext,
   useContext,
   useEffect,
   useRef,
-  useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
@@ -23,11 +21,12 @@ import { usePersist } from '../../../utils/use.persist';
 import {
   LoginFlowState,
   OverallLoginStatus,
-  TwitterConnectedStatus,
+  PlatformConnectedStatus,
   useAccountContext,
 } from '../AccountContext';
+import { useDisconnectContext } from '../DisconnectUserContext';
 
-const DEBUG = false;
+const DEBUG = true;
 const WAS_CONNECTING_TWITTER = 'was-connecting-twitter';
 
 export const LS_TWITTER_CONTEXT_KEY = 'twitter-signin-context';
@@ -53,9 +52,11 @@ export const TwitterContext = (props: PropsWithChildren) => {
     refresh: refreshConnected,
     overallLoginStatus,
     setLoginFlowState,
-    setTwitterConnectedStatus,
-    twitterConnectedStatus,
+    setPlatformConnectedStatus,
+    getPlatformConnectedStatus,
   } = useAccountContext();
+
+  const { disconnect } = useDisconnectContext();
 
   const [wasConnecting, setWasConnecting] = usePersist<boolean>(
     WAS_CONNECTING_TWITTER,
@@ -68,11 +69,16 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
   const appFetch = useAppFetch();
 
-  const needConnect = !connectedUser || !connectedUser[PLATFORM.Twitter];
+  const needConnect =
+    !connectedUser || !connectedUser.accounts[PLATFORM.Twitter];
 
   const connect = async (type: TwitterGetContextParams['type']) => {
     setLoginFlowState(LoginFlowState.ConnectingTwitter);
-    setTwitterConnectedStatus(TwitterConnectedStatus.Connecting);
+    getPlatformConnectedStatus(PLATFORM.Twitter);
+    setPlatformConnectedStatus(
+      PLATFORM.Twitter,
+      PlatformConnectedStatus.Connecting
+    );
 
     const params: TwitterGetContextParams = {
       callback_url: window.location.href,
@@ -102,10 +108,26 @@ export const TwitterContext = (props: PropsWithChildren) => {
             error_param,
           });
 
+        setPlatformConnectedStatus(
+          PLATFORM.Twitter,
+          PlatformConnectedStatus.Disconnected
+        );
         show({ title: t(I18Keys.errorConnectTwitter), message: error_param });
         searchParams.delete('error');
         searchParams.delete('state');
         setSearchParams(searchParams);
+      }
+
+      if (wasConnecting && !state_param && !code_param) {
+        if (DEBUG)
+          console.log('was connecting true but no state params - logout', {
+            state_param,
+            code_param,
+            overallLoginStatus,
+          });
+
+        setWasConnecting(false);
+        disconnect();
       }
 
       if (
@@ -114,7 +136,8 @@ export const TwitterContext = (props: PropsWithChildren) => {
         connectedUser &&
         wasConnecting &&
         (overallLoginStatus === OverallLoginStatus.PartialLoggedIn ||
-          twitterConnectedStatus === TwitterConnectedStatus.Connecting)
+          getPlatformConnectedStatus(PLATFORM.Twitter) ===
+            PlatformConnectedStatus.Connecting)
       ) {
         if (DEBUG)
           console.log('useEffect TwitterSignup', {
@@ -158,6 +181,10 @@ export const TwitterContext = (props: PropsWithChildren) => {
             searchParams.delete('state');
             searchParams.delete('code');
             refreshConnected();
+            setPlatformConnectedStatus(
+              PLATFORM.Twitter,
+              PlatformConnectedStatus.Connected
+            );
             setSearchParams(searchParams);
           });
         }

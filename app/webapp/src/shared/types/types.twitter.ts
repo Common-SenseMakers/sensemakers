@@ -5,6 +5,7 @@ import {
   UserV2,
 } from 'twitter-api-v2';
 
+import { PlatformPost } from './types.platform.posts';
 import { UserDetailsBase } from './types.user';
 
 export type TwitterGetContextParams = {
@@ -64,6 +65,8 @@ export interface TwitterThread {
   tweets: AppTweet[];
   author: TwitterUser;
 }
+
+export type TwitterPlatformPost = PlatformPost<TwitterThread, any, TwitterUser>;
 
 export enum REQUIRED_TWEET_FIELDS {
   Id = 'id',

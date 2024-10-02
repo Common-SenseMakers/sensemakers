@@ -60,6 +60,12 @@ describe.skip('nanopublication format', () => {
         mastodonServer: 'test-mastodon-server',
         type: 'read',
       },
+      [PLATFORM.Bluesky]: {
+        id: '123456',
+        username: 'test-username-bluesky',
+        name: 'test-user-bluesky',
+        appPassword: 'test-app-password',
+      },
     });
     const rsaKeys = getRSAKeys('');
     const nanopub = await new NanopubService(new TimeService(), {

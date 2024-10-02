@@ -13,7 +13,8 @@ export class NotificationsRepository {
 
   private getBaseRepo(userId: string) {
     return new BaseRepository<Notification, NotificationCreate>(
-      this.db.collections.userNotifications(userId)
+      this.db.collections.userNotifications(userId),
+      this.db
     );
   }
 

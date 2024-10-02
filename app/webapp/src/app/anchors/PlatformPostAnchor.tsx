@@ -1,11 +1,7 @@
 import { Anchor, AnchorExtendedProps, Box } from 'grommet';
 import { useTranslation } from 'react-i18next';
 
-import { I18Keys } from '../../i18n/i18n';
-import { MastodonThread } from '../../shared/types/types.mastodon';
-import { PlatformPostPosted } from '../../shared/types/types.platform.posts';
-import { TwitterThread } from '../../shared/types/types.twitter';
-import { PLATFORM } from '../../shared/types/types.user';
+import { GenericPlatformPostDetails } from '../../post/platform.post.details';
 import { LoadingDiv } from '../../ui-components/LoadingDiv';
 import { useThemeContext } from '../../ui-components/ThemedApp';
 import { OpenLinkIcon } from '../icons/OpenLinkIcon';
@@ -26,12 +22,16 @@ export const TwitterProfileAnchor = (props: { screen_name?: string }) => {
 };
 
 export const PlatformPostAnchor = (props: {
-  platformPostPosted?: PlatformPostPosted;
-  postUrl?: string;
-  platformId?: PLATFORM;
+  loading?: boolean;
+  details?: GenericPlatformPostDetails;
 }) => {
   const { t } = useTranslation();
   const { constants } = useThemeContext();
+
+  const { loading, details } = props;
+  const { label, timestampMs, url } = details
+    ? details
+    : { label: '', timestampMs: 0, url: '' };
 
   const formatter = new Intl.DateTimeFormat('en-US', {
     month: 'long', // full name of the month
@@ -39,37 +39,22 @@ export const PlatformPostAnchor = (props: {
     year: 'numeric', // numeric year
   });
 
-  if (!props.platformPostPosted || !props.platformId) {
+  if (loading) {
     return <LoadingDiv></LoadingDiv>;
   }
-  const date = props.platformPostPosted.timestampMs
-    ? formatter.format(props.platformPostPosted.timestampMs)
-    : '';
-
-  const label = (() => {
-    if (props.platformId === PLATFORM.Twitter) {
-      return (props.platformPostPosted.post as TwitterThread).tweets.length > 1
-        ? t(I18Keys.ThreadX)
-        : t(I18Keys.TweetX);
-    }
-    if (props.platformId === PLATFORM.Mastodon) {
-      return (props.platformPostPosted.post as MastodonThread).posts.length > 1
-        ? t(I18Keys.ThreadMastodon)
-        : t(I18Keys.TootMastodon);
-    }
-  })();
+  const date = timestampMs ? formatter.format(timestampMs) : '';
 
   return (
     <Anchor
       style={{
-        fontSize: '16px',
+        fontSize: '14px',
         fontStyle: 'normal',
         fontWeight: '400',
-        lineHeight: '18px',
+        lineHeight: '16px',
         textDecoration: 'none',
       }}
       target="_blank"
-      href={props.postUrl}
+      href={url}
       size="medium">
       <Box
         direction="row"

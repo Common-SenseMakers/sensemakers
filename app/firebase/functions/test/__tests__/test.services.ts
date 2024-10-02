@@ -10,6 +10,7 @@ import {
   EmailSenderMockConfig,
   getEmailSenderMock,
 } from '../../src/emailSender/email.sender.service.mock';
+import { FeedService } from '../../src/feed/feed.service';
 import { Services } from '../../src/instances/services';
 import { NotificationService } from '../../src/notifications/notification.service';
 import { NotificationsRepository } from '../../src/notifications/notifications.repository';
@@ -18,6 +19,11 @@ import {
   getParserMock,
 } from '../../src/parser/mock/parser.service.mock';
 import { ParserService } from '../../src/parser/parser.service';
+import { BlueskyService } from '../../src/platforms/bluesky/bluesky.service';
+import {
+  BlueskyMockConfig,
+  getBlueskyMock,
+} from '../../src/platforms/bluesky/mock/bluesky.service.mock';
 import { MastodonService } from '../../src/platforms/mastodon/mastodon.service';
 import {
   MastodonMockConfig,
@@ -53,6 +59,7 @@ import { testCredentials } from './test.accounts';
 export interface TestServicesConfig {
   twitter?: TwitterMockConfig;
   mastodon?: MastodonMockConfig;
+  bluesky?: BlueskyMockConfig;
   nanopub: NanopubMockConfig;
   parser: ParserMockConfig;
   time: 'real' | 'mock';
@@ -117,6 +124,10 @@ export const getTestServices = (config: TestServicesConfig) => {
   const _mastodon = new MastodonService(time, userRepo);
   const mastodon = getMastodonMock(_mastodon, config.mastodon, testUser);
 
+  /** mocked mastodon */
+  const _bluesky = new BlueskyService(time, userRepo);
+  const bluesky = getBlueskyMock(_bluesky, config.bluesky, testUser);
+
   /** nanopub */
   const _nanopub = new NanopubService(time, {
     servers: JSON.parse(process.env.NANOPUBS_PUBLISH_SERVERS as string),
@@ -132,6 +143,7 @@ export const getTestServices = (config: TestServicesConfig) => {
   identityServices.set(PLATFORM.Twitter, twitter);
   identityServices.set(PLATFORM.Nanopub, nanopub);
   identityServices.set(PLATFORM.Mastodon, mastodon);
+  identityServices.set(PLATFORM.Bluesky, bluesky);
 
   const _email = new EmailSenderService({
     apiKey: process.env.EMAIL_CLIENT_SECRET as string,
@@ -159,6 +171,7 @@ export const getTestServices = (config: TestServicesConfig) => {
   platformsMap.set(PLATFORM.Twitter, twitter);
   platformsMap.set(PLATFORM.Nanopub, nanopub);
   platformsMap.set(PLATFORM.Mastodon, mastodon);
+  platformsMap.set(PLATFORM.Bluesky, bluesky);
 
   /** platforms service */
   const platformsService = new PlatformsService(
@@ -203,9 +216,12 @@ export const getTestServices = (config: TestServicesConfig) => {
 
   const activity = new ActivityService(activityRepo);
 
+  const feed = new FeedService(db, postsManager);
+
   const services: TestServices = {
     users: usersService,
     postsManager,
+    feed,
     platforms: platformsService,
     time: time as TimeMock,
     db,

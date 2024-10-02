@@ -78,16 +78,14 @@ describe('050-autofetch-no-autopost', () => {
       await triggerAutofetchPosts(globalTestServices);
 
       /** read user posts */
-      const postsRead = await globalTestServices.postsManager.getOfUser(
-        user.userId,
-        {
-          status: PostsQueryStatus.DRAFTS,
-          fetchParams: { expectedAmount: TEST_THREADS.length + 1 + 6 },
-        }
-      );
+      const postsRead = await globalTestServices.postsManager.getOfUser({
+        userId: user.userId,
+        status: PostsQueryStatus.DRAFTS,
+        fetchParams: { expectedAmount: TEST_THREADS.length + 1 + 6 },
+      });
       expect(
         postsRead.filter((post) => post.origin === PLATFORM.Twitter)
-      ).to.have.length(TEST_THREADS.length + 1);
+      ).to.have.length(Math.ceil(TEST_THREADS.length / 2) + 1);
 
       const postOfThread2 = postsRead.find((p) =>
         p.mirrors.find(

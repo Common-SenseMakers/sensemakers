@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from abc import ABC, abstractmethod
 from functools import partial
 from typing import Any, Literal, Sequence, List, Optional, Dict
@@ -12,16 +11,8 @@ from langchain.load.serializable import Serializable
 from langchain.pydantic_v1 import Field
 
 from ..utils import (
-    remove_dups_ordered,
-    extract_and_expand_urls,
-    extract_external_urls_from_status_tweet,
+    remove_dups_ordered
 )
-
-from ..interface import (
-    AppThread,
-    PlatformType,
-)
-
 
 class Post(Serializable):
     """Class for storing a piece of text and associated metadata."""
@@ -159,6 +150,7 @@ class QuoteRefPost(RefPost):
 
 
 class ThreadRefPost(RefPost):
+
     """
     Thread of multiple posts linked together in a sequence
     """

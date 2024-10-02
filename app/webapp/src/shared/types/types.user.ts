@@ -1,3 +1,4 @@
+import { BlueskyUserDetails } from './types.bluesky';
 import { MastodonUserDetails } from './types.mastodon';
 import { NanopubUserDetails } from './types.nanopubs';
 import { NotificationFreq } from './types.notifications';
@@ -10,6 +11,14 @@ export type DefinedIfTrue<V, R> = V extends true ? R : R | undefined;
 
 export type HexStr = `0x${string}`;
 
+export const toHexStr = (str: string): HexStr => {
+  if (str.startsWith('0x')) {
+    return str as HexStr;
+  } else {
+    throw new Error(`Invalid HexStr ${str}`);
+  }
+};
+
 /** user types */
 
 export enum PLATFORM {
@@ -18,30 +27,41 @@ export enum PLATFORM {
   Twitter = 'twitter',
   Nanopub = 'nanopub',
   Mastodon = 'mastodon',
+  Bluesky = 'bluesky',
 }
 
-export type PUBLISHABLE_PLATFORMS =
+export type PUBLISHABLE_PLATFORM =
   | PLATFORM.Twitter
   | PLATFORM.Nanopub
-  | PLATFORM.Mastodon;
+  | PLATFORM.Mastodon
+  | PLATFORM.Bluesky;
 
-export const ALL_PUBLISH_PLATFORMS: PUBLISHABLE_PLATFORMS[] = [
+export const ALL_SOURCE_PLATFORMS: PUBLISHABLE_PLATFORM[] = [
+  PLATFORM.Twitter,
+  PLATFORM.Mastodon,
+  PLATFORM.Bluesky,
+];
+
+export const ALL_PUBLISH_PLATFORMS: PUBLISHABLE_PLATFORM[] = [
   PLATFORM.Twitter,
   PLATFORM.Nanopub,
   PLATFORM.Mastodon,
+  PLATFORM.Bluesky,
 ];
 
-export type IDENTITY_PLATFORMS =
+export type IDENTITY_PLATFORM =
   | PLATFORM.Orcid
   | PLATFORM.Twitter
   | PLATFORM.Nanopub
-  | PLATFORM.Mastodon;
+  | PLATFORM.Mastodon
+  | PLATFORM.Bluesky;
 
-export const ALL_IDENTITY_PLATFORMS: IDENTITY_PLATFORMS[] = [
+export const ALL_IDENTITY_PLATFORMS: IDENTITY_PLATFORM[] = [
   PLATFORM.Twitter,
   PLATFORM.Nanopub,
   PLATFORM.Orcid,
   PLATFORM.Mastodon,
+  PLATFORM.Bluesky,
 ];
 
 /** The user details has, for each PLATFORM, a details object
@@ -123,12 +143,16 @@ export interface UserWithSettings {
  */
 export interface AppUser
   extends UserWithId,
+    UserWithId,
     UserWithPlatformIds,
     UserWithSettings {
-  [PLATFORM.Orcid]?: OrcidUserDetails[];
-  [PLATFORM.Twitter]?: TwitterUserDetails[];
-  [PLATFORM.Nanopub]?: NanopubUserDetails[];
-  [PLATFORM.Mastodon]?: MastodonUserDetails[];
+  accounts: {
+    [PLATFORM.Orcid]?: OrcidUserDetails[];
+    [PLATFORM.Twitter]?: TwitterUserDetails[];
+    [PLATFORM.Nanopub]?: NanopubUserDetails[];
+    [PLATFORM.Mastodon]?: MastodonUserDetails[];
+    [PLATFORM.Bluesky]?: BlueskyUserDetails[];
+  };
 }
 
 export type AppUserCreate = Omit<AppUser, 'userId'>;
@@ -144,11 +168,15 @@ export interface AccountDetailsRead<P> {
   write: boolean;
 }
 
+/** accounts include the readable details (not sensitive details) */
 export interface AppUserRead extends UserWithId, UserWithSettings {
-  [PLATFORM.Orcid]?: AccountDetailsRead<OrcidUserDetails['profile']>[];
-  [PLATFORM.Twitter]?: AccountDetailsRead<TwitterUserDetails['profile']>[];
-  [PLATFORM.Nanopub]?: AccountDetailsRead<NanopubUserDetails['profile']>[];
-  [PLATFORM.Mastodon]?: AccountDetailsRead<MastodonUserDetails['profile']>[];
+  accounts: {
+    [PLATFORM.Orcid]?: AccountDetailsRead<OrcidUserDetails['profile']>[];
+    [PLATFORM.Twitter]?: AccountDetailsRead<TwitterUserDetails['profile']>[];
+    [PLATFORM.Nanopub]?: AccountDetailsRead<NanopubUserDetails['profile']>[];
+    [PLATFORM.Mastodon]?: AccountDetailsRead<MastodonUserDetails['profile']>[];
+    [PLATFORM.Bluesky]?: AccountDetailsRead<BlueskyUserDetails['profile']>[];
+  };
 }
 
 /** Support collection with all the profiles from all platforms */
@@ -164,6 +192,7 @@ export interface TestUserCredentials {
   userId: string;
   twitter: TwitterAccountCredentials;
   mastodon: MastodonAccountCredentials;
+  bluesky: BlueskyAccountCredentials;
   nanopub: NanopubAccountCredentials;
 }
 
@@ -174,6 +203,13 @@ export interface MastodonAccountCredentials {
   mastodonServer: string;
   accessToken: string;
   type: 'read' | 'write';
+}
+
+export interface BlueskyAccountCredentials {
+  id: string;
+  username: string;
+  name: string;
+  appPassword: string;
 }
 
 export interface TwitterAccountCredentials {

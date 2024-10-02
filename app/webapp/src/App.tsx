@@ -1,5 +1,5 @@
 import { I18nextProvider } from 'react-i18next';
-import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import { AppContainer0 } from './app/AppContainer';
 import { ServiceWorker } from './app/ServiceWorkerContext';

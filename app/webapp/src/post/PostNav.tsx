@@ -6,22 +6,23 @@ import { NavButton } from '../app/NavButton';
 import { LeftChevronIcon } from '../app/icons/LeftChveronIcon';
 import { LeftIcon } from '../app/icons/LeftIcon';
 import { RightIcon } from '../app/icons/RightIcon';
-import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useUserPosts } from '../user-home/UserPostsContext';
+import { useNavigationHistory } from '../user-login/contexts/NavHistoryContext';
 import { usePost } from './post.context/PostContext';
 
 const DEBUG = false;
 
 export const PostNav = () => {
-  const { fetched, derived, navigatePost } = usePost();
-  const profile = derived.tweet?.posted?.author;
+  const { fetched, navigatePost } = usePost();
 
-  const { fetchOlder, isFetchingOlder, errorFetchingOlder } = useUserPosts();
+  const { feed } = useUserPosts();
+  const { fetchOlder, isFetchingOlder, errorFetchingOlder } = feed;
   const [triggeredFetchOlder, setTriggeredFetchedOlder] = useState(false);
 
   const navigate = useNavigate();
+  const { hasHistory } = useNavigationHistory();
   const { constants } = useThemeContext();
 
   useEffect(() => {
@@ -32,12 +33,13 @@ export const PostNav = () => {
       !triggeredFetchOlder
     ) {
       setTriggeredFetchedOlder(true);
-      console.log('fetching older', {
-        nextPostId: navigatePost.nextPostId,
-        isFetchingOlder,
-        errorFetchingOlder,
-        triggeredFetchOlder,
-      });
+      if (DEBUG)
+        console.log('fetching older', {
+          nextPostId: navigatePost.nextPostId,
+          isFetchingOlder,
+          errorFetchingOlder,
+          triggeredFetchOlder,
+        });
 
       fetchOlder();
     }
@@ -82,9 +84,10 @@ export const PostNav = () => {
       <NavButton
         icon={<LeftChevronIcon></LeftChevronIcon>}
         label={'Back'}
-        onClick={() =>
-          navigate('..', { state: { postId: fetched.postId } })
-        }></NavButton>
+        onClick={() => {
+          if (hasHistory) navigate(-1);
+          else navigate('..', { state: { postId: fetched.postId } });
+        }}></NavButton>
 
       <Box direction="row" gap="8px">
         <NavButton

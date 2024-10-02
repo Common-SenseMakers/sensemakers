@@ -49,6 +49,12 @@ export const mastodonSignupDataSchema = object({
   clientSecret: string().required(),
 }).noUnknown(true);
 
+export const blueskySignupDataSchema = object({
+  username: string().required(),
+  appPassword: string().required(),
+  type: string().oneOf(['read', 'write']).required(),
+}).noUnknown(true);
+
 export const userSettingsUpdateSchema = object({
   autopost: object({
     [PLATFORM.Nanopub]: object({

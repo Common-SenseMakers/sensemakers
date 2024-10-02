@@ -15,6 +15,7 @@ import {
   TEST_USER_ACCOUNTS,
   TWITTER_CLIENT_ID,
   TWITTER_CLIENT_SECRET,
+  USE_REAL_BLUESKY,
   USE_REAL_EMAIL,
   USE_REAL_MASTODON,
   USE_REAL_NANOPUB,
@@ -24,10 +25,13 @@ import {
 import { DBInstance } from '../db/instance';
 import { EmailSenderService } from '../emailSender/email.sender.service';
 import { getEmailSenderMock } from '../emailSender/email.sender.service.mock';
+import { FeedService } from '../feed/feed.service';
 import { NotificationService } from '../notifications/notification.service';
 import { NotificationsRepository } from '../notifications/notifications.repository';
 import { getParserMock } from '../parser/mock/parser.service.mock';
 import { ParserService } from '../parser/parser.service';
+import { BlueskyService } from '../platforms/bluesky/bluesky.service';
+import { getBlueskyMock } from '../platforms/bluesky/mock/bluesky.service.mock';
 import { MastodonService } from '../platforms/mastodon/mastodon.service';
 import { getMastodonMock } from '../platforms/mastodon/mock/mastodon.service.mock';
 import { getTestCredentials } from '../platforms/mock/test.users';
@@ -57,6 +61,7 @@ const DEBUG = false;
 export interface Services {
   users: UsersService;
   postsManager: PostsManager;
+  feed: FeedService;
   platforms: PlatformsService;
   time: TimeService;
   db: DBInstance;
@@ -117,17 +122,27 @@ export const createServices = (firestore: Firestore) => {
       : { signup: true, fetch: true, publish: true, get: true },
     testUser
   );
+  const _bluesky = new BlueskyService(time, userRepo);
+  const bluesky = getBlueskyMock(
+    _bluesky,
+    USE_REAL_BLUESKY.value()
+      ? undefined
+      : { signup: true, fetch: true, publish: true, get: true },
+    testUser
+  );
 
   /** all identity services */
   identityPlatforms.set(PLATFORM.Orcid, orcid);
   identityPlatforms.set(PLATFORM.Twitter, twitter);
   identityPlatforms.set(PLATFORM.Nanopub, nanopub);
   identityPlatforms.set(PLATFORM.Mastodon, mastodon);
+  identityPlatforms.set(PLATFORM.Bluesky, bluesky);
 
   /** all platforms */
   platformsMap.set(PLATFORM.Twitter, twitter);
   platformsMap.set(PLATFORM.Nanopub, nanopub);
   platformsMap.set(PLATFORM.Mastodon, mastodon);
+  platformsMap.set(PLATFORM.Bluesky, bluesky);
 
   /** email sender service */
   const _email = new EmailSenderService({
@@ -203,11 +218,15 @@ export const createServices = (firestore: Firestore) => {
     !IS_EMULATOR
   );
 
+  /** feed */
+  const feed = new FeedService(db, postsManager);
+
   /** all services */
   const services: Services = {
     users: usersService,
     postsManager: postsManager,
     platforms: platformsService,
+    feed,
     time,
     db,
     notifications,
@@ -220,6 +239,7 @@ export const createServices = (firestore: Firestore) => {
       USE_REAL_PARSER: USE_REAL_PARSER.value(),
       USE_REAL_TWITTER: USE_REAL_TWITTERX.value(),
       USE_REAL_MASTODON: USE_REAL_MASTODON.value(),
+      USE_REAL_BLUESKY: USE_REAL_BLUESKY.value(),
       USE_REAL_NANOPUB: USE_REAL_NANOPUB.value(),
       USE_REAL_EMAIL: USE_REAL_EMAIL.value(),
     });
