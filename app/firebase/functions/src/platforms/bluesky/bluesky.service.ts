@@ -106,12 +106,12 @@ export class BlueskyService
       }
 
       const bluesky: BlueskyUserDetails = {
-        user_id: profile.did,
+        user_id: profile.id,
         signupDate: this.time.now(),
         profile: {
-          id: profile.did,
-          username: profile.handle,
-          name: profile.displayName || profile.handle,
+          id: profile.id,
+          username: profile.username,
+          name: profile.name || profile.username,
           avatar: profile.avatar || '',
         },
         read: agent.session!,
