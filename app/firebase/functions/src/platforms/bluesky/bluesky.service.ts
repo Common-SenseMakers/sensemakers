@@ -2,7 +2,6 @@ import AtpAgent, {
   AppBskyFeedDefs,
   AppBskyFeedPost,
   AtpSessionData,
-  BskyAgent,
   CredentialSession,
   RichText,
 } from '@atproto/api';
@@ -90,7 +89,7 @@ export class BlueskyService
     if (DEBUG) logger.debug('handleSignupData', { signupData }, DEBUG_PREFIX);
 
     if ('isGhost' in signupData) {
-      const agent = new BskyAgent({ service: 'https://bsky.social' });
+      const agent = new AtpAgent({ service: 'https://bsky.social' });
       await agent.login({
         identifier: BLUESKY_USERNAME.value(),
         password: BLUESKY_APP_PASSWORD.value(),
@@ -105,6 +104,10 @@ export class BlueskyService
         throw new Error('Failed to fetch account details');
       }
 
+      if (!agent.session) {
+        throw new Error('Failed to login to Bluesky');
+      }
+      const sessionData = removeUndefinedFields(agent.session);
       const bluesky: BlueskyUserDetails = {
         user_id: profile.id,
         signupDate: this.time.now(),
@@ -114,7 +117,7 @@ export class BlueskyService
           name: profile.name || profile.username,
           avatar: profile.avatar || '',
         },
-        read: agent.session!,
+        read: sessionData,
       };
 
       if (DEBUG)
@@ -164,7 +167,7 @@ export class BlueskyService
 
   public async getAccountByUsername(
     username: string,
-    agent: BskyAgent
+    agent: AtpAgent
   ): Promise<BlueskyUserDetails['profile'] | null> {
     try {
       const profile = await agent.getProfile({ actor: username });
