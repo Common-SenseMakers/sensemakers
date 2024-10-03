@@ -1,4 +1,3 @@
-import AtpAgent from '@atproto/api';
 import { expect } from 'chai';
 
 import {

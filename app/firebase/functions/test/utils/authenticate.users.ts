@@ -10,7 +10,6 @@ import {
   TestUserCredentials,
 } from '../../src/@shared/types/types.user';
 import { TransactionManager } from '../../src/db/transaction.manager';
-import { removeUndefinedFields } from '../../src/platforms/bluesky/bluesky.utils';
 import { getPrefixedUserId } from '../../src/users/users.utils';
 import { handleTwitterSignupMock } from '../__tests__/reusable/mocked.singup';
 import { USE_REAL_TWITTER } from '../__tests__/setup';
@@ -110,7 +109,6 @@ const authenticateBlueskyForUser = async (
   if (!agent.session) {
     throw new Error('Failed to login to Bluesky');
   }
-  const sessionData = removeUndefinedFields(agent.session);
 
   const blueskyUserDetails: BlueskyUserDetails = {
     signupDate: 0,
