@@ -8,7 +8,6 @@ import {
   AppBskyFeedDefs,
   AppBskyFeedPost,
   AppBskyRichtextFacet,
-  AtpSessionData,
 } from '@atproto/api';
 
 import { UserDetailsBase } from './types.user';
@@ -20,7 +19,10 @@ export interface BlueskyUserProfile {
   avatar: string;
 }
 
-export type BlueskyUserCredentials = AtpSessionData;
+export type BlueskyUserCredentials = {
+  username: string;
+  appPassword: string;
+};
 
 export type BlueskyUserDetails = UserDetailsBase<
   BlueskyUserProfile,
