@@ -119,8 +119,8 @@ export class BlueskyService
           avatar: profile.avatar || '',
         },
         read: {
-          username: signupData.username,
-          appPassword: signupData.appPassword,
+          username: BLUESKY_USERNAME.value(),
+          appPassword: BLUESKY_APP_PASSWORD.value(),
         },
       };
 
