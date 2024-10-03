@@ -121,8 +121,14 @@ const authenticateBlueskyForUser = async (
       name: credentials.bluesky.name,
       avatar: 'https://example.com/avatar.jpg', // You may want to update this with a real avatar URL
     },
-    read: sessionData,
-    write: sessionData,
+    read: {
+      username: credentials.bluesky.username,
+      appPassword: credentials.bluesky.appPassword,
+    },
+    write: {
+      username: credentials.bluesky.username,
+      appPassword: credentials.bluesky.appPassword,
+    },
   };
 
   user[PLATFORM.Bluesky] = [blueskyUserDetails];
