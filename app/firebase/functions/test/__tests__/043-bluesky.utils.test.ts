@@ -3,10 +3,10 @@ import { expect } from 'chai';
 import fs from 'fs';
 
 import { BlueskyPost } from '../../src/@shared/types/types.bluesky';
+import { extractRKeyFromURI } from '../../src/@shared/utils/bluesky.utils';
 import {
   cleanBlueskyContent,
   convertBlueskyPostsToThreads,
-  extractRKeyFromURI,
 } from '../../src/platforms/bluesky/bluesky.utils';
 
 describe('bluesky utility functions', () => {

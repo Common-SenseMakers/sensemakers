@@ -34,6 +34,11 @@ import {
 } from '../../@shared/types/types.posts';
 import { PLATFORM } from '../../@shared/types/types.user';
 import { AppUser } from '../../@shared/types/types.user';
+import { extractRKeyFromURI } from '../../@shared/utils/bluesky.utils';
+import {
+  BLUESKY_APP_PASSWORD,
+  BLUESKY_USERNAME,
+} from '../../config/config.runtime';
 import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
@@ -44,7 +49,6 @@ import {
   cleanBlueskyContent,
   convertBlueskyPostsToThreads,
   extractPrimaryThread,
-  extractRKeyFromURI,
   removeUndefinedFields,
 } from './bluesky.utils';
 
@@ -84,39 +88,102 @@ export class BlueskyService
   ): Promise<BlueskyUserDetails> {
     if (DEBUG) logger.debug('handleSignupData', { signupData }, DEBUG_PREFIX);
 
-    const agent = new AtpAgent({ service: 'https://bsky.social' });
-    await agent.login({
-      identifier: signupData.username,
-      password: signupData.appPassword,
-    });
-    if (!agent.session) {
-      throw new Error('Failed to login to Bluesky');
+    if ('isGhost' in signupData) {
+      const agent = new AtpAgent({ service: 'https://bsky.social' });
+      await agent.login({
+        identifier: BLUESKY_USERNAME.value(),
+        password: BLUESKY_APP_PASSWORD.value(),
+      });
+
+      const profile = await this.getAccountByUsername(
+        signupData.username,
+        agent
+      );
+
+      if (!profile) {
+        throw new Error('Failed to fetch account details');
+      }
+
+      if (!agent.session) {
+        throw new Error('Failed to login to Bluesky');
+      }
+      const sessionData = removeUndefinedFields(agent.session);
+      const bluesky: BlueskyUserDetails = {
+        user_id: profile.id,
+        signupDate: this.time.now(),
+        profile: {
+          id: profile.id,
+          username: profile.username,
+          name: profile.name || profile.username,
+          avatar: profile.avatar || '',
+        },
+        read: sessionData,
+      };
+
+      if (DEBUG)
+        logger.debug(
+          'handleSignupData (ghost) result',
+          { bluesky },
+          DEBUG_PREFIX
+        );
+
+      return bluesky;
+    } else {
+      const agent = new AtpAgent({ service: 'https://bsky.social' });
+      await agent.login({
+        identifier: signupData.username,
+        password: signupData.appPassword,
+      });
+      if (!agent.session) {
+        throw new Error('Failed to login to Bluesky');
+      }
+      const sessionData = removeUndefinedFields(agent.session);
+
+      const profile = await agent.getProfile({
+        actor: sessionData.did,
+      });
+
+      const bluesky: BlueskyUserDetails = {
+        user_id: profile.data.did,
+        signupDate: this.time.now(),
+        profile: {
+          id: profile.data.did,
+          username: profile.data.handle,
+          name: profile.data.displayName || profile.data.handle,
+          avatar: profile.data.avatar || '',
+        },
+        read: sessionData,
+      };
+      if (signupData.type === 'write') {
+        bluesky['write'] = sessionData;
+      }
+
+      if (DEBUG)
+        logger.debug('handleSignupData result', { bluesky }, DEBUG_PREFIX);
+
+      return bluesky;
     }
-    const sessionData = removeUndefinedFields(agent.session);
+  }
 
-    const profile = await agent.getProfile({
-      actor: sessionData.did,
-    });
+  public async getAccountByUsername(
+    username: string,
+    agent: AtpAgent
+  ): Promise<BlueskyUserDetails['profile'] | null> {
+    try {
+      const profile = await agent.getProfile({ actor: username });
 
-    const bluesky: BlueskyUserDetails = {
-      user_id: profile.data.did,
-      signupDate: this.time.now(),
-      profile: {
-        id: profile.data.did,
-        username: profile.data.handle,
-        name: profile.data.displayName || profile.data.handle,
-        avatar: profile.data.avatar || '',
-      },
-      read: sessionData,
-    };
-    if (signupData.type === 'write') {
-      bluesky['write'] = sessionData;
+      if (profile.success) {
+        return {
+          id: profile.data.did,
+          username: profile.data.handle,
+          name: profile.data.displayName || profile.data.handle,
+          avatar: profile.data.avatar || '',
+        };
+      }
+      return null;
+    } catch (e: any) {
+      throw new Error(`Error fetching Bluesky account: ${e.message}`);
     }
-
-    if (DEBUG)
-      logger.debug('handleSignupData result', { bluesky }, DEBUG_PREFIX);
-
-    return bluesky;
   }
 
   public async fetch(
@@ -302,6 +369,7 @@ export class BlueskyService
       id: thread.author.did,
       username: thread.author.handle,
       name: thread.author.displayName || thread.author.handle,
+      avatarUrl: thread.author.avatar,
     };
 
     const genericPosts: GenericPost[] = thread.posts.map((post) => {

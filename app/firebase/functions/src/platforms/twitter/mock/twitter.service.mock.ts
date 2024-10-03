@@ -7,10 +7,10 @@ import {
   PlatformPostPublish,
 } from '../../../@shared/types/types.platform.posts';
 import {
+  TwitterAccountSignupData,
   TwitterDraft,
   TwitterGetContextParams,
   TwitterSignupContext,
-  TwitterSignupData,
   TwitterThread,
   TwitterUserDetails,
 } from '../../../@shared/types/types.twitter';
@@ -77,6 +77,8 @@ export const initThreads = (
         id: testUser.twitter.id,
         name: testUser.twitter.username,
         username: testUser.twitter.username,
+        profile_image_url:
+          'https://pbs.twimg.com/profile_images/1783977034038882304/RGn66lGT_normal.jpg',
       },
     };
   });
@@ -178,6 +180,7 @@ export const getTwitterMock = (
                   id: userDetails.user_id,
                   name: userDetails.profile.name,
                   username: userDetails.profile.username,
+                  profile_image_url: userDetails.profile.profile_image_url,
                 },
               },
             ];
@@ -256,7 +259,7 @@ export const getTwitterMock = (
       }
     );
     when(mocked.handleSignupData(anything())).thenCall(
-      (data: TwitterSignupData): TwitterUserDetails => {
+      (data: TwitterAccountSignupData): TwitterUserDetails => {
         const user_id = data.codeChallenge;
         const testCredentials = getTestCredentials(
           process.env.TEST_USER_ACCOUNTS as string

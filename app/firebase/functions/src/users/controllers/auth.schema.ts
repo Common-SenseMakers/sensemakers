@@ -4,7 +4,7 @@ import { NotificationFreq } from '../../@shared/types/types.notifications';
 import { AutopostOption, PLATFORM } from '../../@shared/types/types.user';
 
 export const mastodonGetSignupContextSchema = object({
-  domain: string().required(),
+  mastodonServer: string().required(),
   callback_url: string().required(),
   type: string().oneOf(['read', 'write']).required(),
 }).noUnknown(true);
@@ -42,7 +42,7 @@ export const orcidSignupDataSchema = object({
 
 export const mastodonSignupDataSchema = object({
   code: string().required(),
-  domain: string().required(),
+  mastodonServer: string().required(),
   callback_url: string().required(),
   type: string().oneOf(['read', 'write']).required(),
   clientId: string().required(),

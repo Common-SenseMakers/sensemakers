@@ -107,7 +107,7 @@ describe('010-signups', () => {
               PLATFORM.Mastodon,
               {
                 accessToken: mastodonCredentials.accessToken,
-                domain: mastodonCredentials.mastodonServer,
+                mastodonServer: mastodonCredentials.mastodonServer,
                 type: mastodonCredentials.type,
               },
               manager,

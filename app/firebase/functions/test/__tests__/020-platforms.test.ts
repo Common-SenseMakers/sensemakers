@@ -1,3 +1,4 @@
+import AtpAgent from '@atproto/api';
 import { expect } from 'chai';
 
 import {
@@ -17,6 +18,7 @@ import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
 import { BlueskyService } from '../../src/platforms/bluesky/bluesky.service';
+import { MastodonService } from '../../src/platforms/mastodon/mastodon.service';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { convertToAppTweets } from '../../src/platforms/twitter/twitter.utils';
 import { UsersHelper } from '../../src/users/users.helper';
@@ -81,7 +83,7 @@ describe('02-platforms', () => {
   });
 
   // TODO, fix this test
-  describe.skip('twitter', () => {
+  describe('twitter', () => {
     it('fetch the latest 5 threads', async () => {
       if (!user) {
         throw new Error('appUser not created');
@@ -181,6 +183,29 @@ describe('02-platforms', () => {
         throw error;
       }
     });
+    it('gets account by username', async () => {
+      const twitterService = services.platforms.get(
+        PLATFORM.Twitter
+      ) as TwitterService;
+      const username = 'wesleyfinck';
+      const bearerToken = process.env.TWITTER_BEARER_TOKEN;
+      if (!bearerToken) {
+        throw new Error('Missing TWITTER_BEARER_TOKEN');
+      }
+
+      const result = await twitterService.getAccountByUsername(
+        username,
+        bearerToken
+      );
+
+      expect(result).to.not.be.null;
+      if (result) {
+        expect(result.id).to.be.a('string');
+        expect(result.username).to.equal(username);
+        expect(result.name).to.be.a('string');
+        expect(result.profile_image_url).to.be.a('string');
+      }
+    });
   });
 
   describe('nanopub', () => {
@@ -239,7 +264,7 @@ describe('02-platforms', () => {
       if (!user) {
         throw new Error('appUser not created');
       }
-      const allUserDetails = user[PLATFORM.Mastodon];
+      const allUserDetails = user.accounts[PLATFORM.Mastodon];
       if (!allUserDetails || allUserDetails.length < 0) {
         throw new Error('Unexpected');
       }
@@ -264,7 +289,7 @@ describe('02-platforms', () => {
       if (!user) {
         throw new Error('appUser not created');
       }
-      const allUserDetails = user[PLATFORM.Mastodon];
+      const allUserDetails = user.accounts[PLATFORM.Mastodon];
       if (!allUserDetails || allUserDetails.length < 0) {
         throw new Error('Unexpected');
       }
@@ -288,6 +313,36 @@ describe('02-platforms', () => {
         expect(result.platformPosts.length).to.be.greaterThan(0);
       }
     });
+
+    it('gets account by username', async () => {
+      // https://fediscience.org/@petergleick
+      const username = 'petergleick';
+      const server = 'fediscience.org';
+
+      const accessToken = process.env.MASTODON_ACCESS_TOKEN;
+      if (!accessToken) {
+        throw new Error('Missing MASTODON_ACCESS_TOKEN');
+      }
+
+      const mastodonService = services.platforms.get(
+        PLATFORM.Mastodon
+      ) as MastodonService;
+
+      const result = await mastodonService.getAccountByUsername(
+        username,
+        server,
+        accessToken
+      );
+
+      expect(result).to.not.be.null;
+      if (result) {
+        expect(result.id).to.be.a('string');
+        expect(result.username).to.equal(username);
+        expect(result.displayName).to.be.a('string');
+        expect(result.avatar).to.be.a('string');
+        expect(result.mastodonServer).to.equal(server);
+      }
+    });
   });
 
   describe('bluesky', () => {
@@ -298,7 +353,7 @@ describe('02-platforms', () => {
       if (!user) {
         throw new Error('appUser not created');
       }
-      const allUserDetails = user[PLATFORM.Bluesky];
+      const allUserDetails = user.accounts[PLATFORM.Bluesky];
       if (!allUserDetails || allUserDetails.length < 0) {
         throw new Error('Unexpected');
       }
@@ -310,6 +365,31 @@ describe('02-platforms', () => {
       blueskyService = services.platforms.get(
         PLATFORM.Bluesky
       ) as BlueskyService;
+    });
+
+    it.only('gets account by username', async () => {
+      const username = 'ronent.bsky.social';
+      const agent = new AtpAgent({ service: 'https://bsky.social' });
+      const blueskyUsername = process.env.BLUESKY_USERNAME;
+      const blueskyAppPassword = process.env.BLUESKY_APP_PASSWORD;
+      if (!blueskyUsername || !blueskyAppPassword) {
+        throw new Error('Missing BLUESKY_USERNAME or BLUESKY_APP_PASSWORD');
+      }
+
+      await agent.login({
+        identifier: blueskyUsername,
+        password: blueskyAppPassword,
+      });
+
+      const result = await blueskyService.getAccountByUsername(username, agent);
+
+      expect(result).to.not.be.null;
+      if (result) {
+        expect(result.id).to.be.a('string');
+        expect(result.username).to.equal(username);
+        expect(result.name).to.be.a('string');
+        expect(result.avatar).to.be.a('string');
+      }
     });
 
     (USE_REAL_BLUESKY ? it : it.skip)(
@@ -358,7 +438,7 @@ describe('02-platforms', () => {
       }
     );
 
-    it.only('fetches the latest posts without since_id or until_id', async () => {
+    it('fetches the latest posts without since_id or until_id', async () => {
       const fetchParams: PlatformFetchParams = {
         expectedAmount: 10,
       };

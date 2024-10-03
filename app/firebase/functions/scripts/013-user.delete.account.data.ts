@@ -16,6 +16,10 @@ const userId = process.env.USER_ID as string;
 const platformId = process.env.PLATFORM_ID as string;
 const firestore = app.firestore();
 
+if (process.env.FB_PROJECT_ID === 'sensenets-prod') {
+  throw new Error('Cannot run this script on production');
+}
+
 (async () => {
   // Step 1: Count posts authored by the user with the specified platformId
   const postsSnapshot = await firestore
@@ -129,26 +133,30 @@ const firestore = app.firestore();
   if (userDocExists) {
     const userData = userDocRef.data();
 
-    if (userData && userData.platformIds) {
+    if (userData && userData.platformIds && userData.accounts) {
       const updatedPlatformIds = userData.platformIds.filter(
         (id: string) => !id.startsWith(platformId)
       );
 
-      // Update the document by removing the matching platformIds
+      // Create an object to update the accounts field
+      const updatedAccounts = { ...userData.accounts };
+      delete updatedAccounts[platformId];
+
+      // Update the document by removing the matching platformIds and updating the accounts
       await firestore
         .collection('users')
         .doc(userId)
         .update({
           platformIds: updatedPlatformIds,
-          [platformId]: FieldValue.delete(), // Remove the specific platformId field
+          accounts: updatedAccounts,
         });
 
       console.log(
-        `Field '${platformId}' removed from user document, and platformIds updated for userId: ${userId}`
+        `Platform '${platformId}' removed from accounts, and platformIds updated for userId: ${userId}`
       );
     } else {
       console.log(
-        `User document for userId: ${userId} does not contain platformIds or is missing.`
+        `User document for userId: ${userId} does not contain required fields or is missing.`
       );
     }
   } else {

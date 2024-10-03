@@ -2,6 +2,7 @@ import express from 'express';
 
 import { getPublicFeedController } from './feed/feed.controller';
 import {
+  addUserDataController,
   approvePostController,
   createDraftPostController,
   getPostController,
@@ -23,6 +24,7 @@ import {
 } from './users/controllers/platforms.auth.controller';
 
 export const router = express.Router();
+export const adminRouter = express.Router();
 
 router.post('/auth/:platform/context', getSignupContextController);
 router.post('/auth/:platform/signup', handleSignupController);
@@ -42,4 +44,5 @@ router.post('/posts/parse', parsePostController);
 router.post('/posts/update', updatePostController);
 router.post('/posts/unpublish', unpublishPlatformPostController);
 
+adminRouter.post('/addUserData', addUserDataController);
 router.post('/feed/get', getPublicFeedController);

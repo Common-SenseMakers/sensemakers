@@ -1,4 +1,8 @@
-import { TTweetv2Expansion, TTweetv2TweetField } from 'twitter-api-v2';
+import {
+  TTweetv2Expansion,
+  TTweetv2TweetField,
+  TTweetv2UserField,
+} from 'twitter-api-v2';
 
 export const expansions: TTweetv2Expansion[] = [
   'referenced_tweets.id',
@@ -12,4 +16,12 @@ export const tweetFields: TTweetv2TweetField[] = [
   'entities',
   'note_tweet',
   'conversation_id',
+];
+
+export const userFields: TTweetv2UserField[] = [
+  'id',
+  'description',
+  'name',
+  'profile_image_url',
+  'username',
 ];

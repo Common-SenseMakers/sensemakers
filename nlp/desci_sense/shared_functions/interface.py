@@ -31,6 +31,7 @@ MAX_POSTS_PER_REQUEST = 40
 class PlatformType(str, Enum):
     TWITTER = "twitter"
     MASTODON = "mastodon"
+    BLUESKY = "bluesky"
     LOCAL = "local"  # our platform
     ORCID = "orcid"
     UNKNOWN = "unknown"

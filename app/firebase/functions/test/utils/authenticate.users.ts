@@ -125,7 +125,7 @@ const authenticateBlueskyForUser = async (
     write: sessionData,
   };
 
-  user[PLATFORM.Bluesky] = [blueskyUserDetails];
+  user.accounts[PLATFORM.Bluesky] = [blueskyUserDetails];
 
   return user;
 };
@@ -189,7 +189,7 @@ const authenticateMastodonForUser = async (
     getPrefixedUserId(PLATFORM.Mastodon, credentials.mastodon.id)
   );
 
-  user[PLATFORM.Mastodon] = [
+  user.accounts[PLATFORM.Mastodon] = [
     {
       signupDate: 0,
       user_id: credentials.mastodon.id,

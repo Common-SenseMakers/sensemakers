@@ -216,3 +216,10 @@ const getEarliestResponse = (id: string, tweets: AppTweet[]) => {
 export const getTweetUrl = (username: string, id: string) => {
   return `https://x.com/${username}/status/${id}`;
 };
+
+export const getOriginalAuthor = (
+  user_id: string,
+  includes?: ApiV2Includes
+) => {
+  return includes?.users?.find((user) => user.id === user_id);
+};
