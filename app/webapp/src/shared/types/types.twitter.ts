@@ -34,7 +34,12 @@ export interface TwitterCredentials {
   expiresAtMs: number;
 }
 
-export interface TwitterSignupCredentials {
+export type TwitterAccountCredentials = AccountCredentials<
+  TwitterCredentials,
+  TwitterCredentials
+>;
+
+export interface TwitterSigninCredentials {
   id: string;
   username: string;
   password: string;

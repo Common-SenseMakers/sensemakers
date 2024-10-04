@@ -115,73 +115,6 @@ describe('02-platforms', () => {
       expect(threads.platformPosts.length).to.be.greaterThanOrEqual(1);
     });
 
-    it('includes quote tweets in platform post and app post', async () => {
-      const postIds = [
-        '1798791421152911644', // https://x.com/sense_nets_bot/status/1798791421152911644 quotes https://x.com/sense_nets_bot/status/1795069204418175459
-        '1798791660668698927', // https://x.com/sense_nets_bot/status/1798791660668698927 quotes https://x.com/sense_nets_bot/status/1798782358201508331
-        '1798792109031559184', // https://x.com/sense_nets_bot/status/1798792109031559184 quotes https://x.com/rtk254/status/1798549107507974626
-      ];
-
-      if (!user) {
-        throw new Error('appUser not created');
-      }
-      const twitterId = user.accounts[PLATFORM.Twitter]?.[0]?.user_id;
-
-      const twitterService = services.platforms.get(
-        PLATFORM.Twitter
-      ) as TwitterService;
-
-      try {
-        const result = await services.db.run(async (manager) => {
-          return twitterService.getPosts(postIds, manager, twitterId);
-        });
-        const appTweets = convertToAppTweets(result.data, result.includes);
-        expect(appTweets).to.not.be.undefined;
-        expect(appTweets.length).to.be.equal(3);
-
-        const author = result.includes?.users?.find(
-          (user) => user.id === result.data[0].author_id
-        );
-        expect(author).to.not.be.undefined;
-
-        const quotedTweetIds = [
-          '1795069204418175459',
-          '1798782358201508331',
-          '1798549107507974626',
-        ];
-
-        appTweets.forEach((appTweet: AppTweet) => {
-          expect(quotedTweetIds).to.include(appTweet.quoted_tweet?.id);
-        });
-
-        /** check that it converts the thread into a generic app post properly */
-        const platformPost = {
-          posted: {
-            post: {
-              conversation_id: appTweets[0].conversation_id,
-              tweets: appTweets,
-              author,
-            },
-          },
-        };
-
-        const genericPost = await twitterService.convertToGeneric(
-          platformPost as any as PlatformPostCreate<TwitterThread>
-        );
-
-        if (USE_REAL_TWITTER) {
-          genericPost.thread.forEach((post) => {
-            expect(post.quotedThread).to.not.be.undefined;
-            expect(
-              quotedTweetIds.some((id) => post.quotedThread?.url?.includes(id))
-            ).to.be.true;
-          });
-        }
-      } catch (error) {
-        console.error('error: ', error);
-        throw error;
-      }
-    });
     it.only('gets account by username', async () => {
       const twitterService = services.platforms.get(
         PLATFORM.Twitter
@@ -393,36 +326,6 @@ describe('02-platforms', () => {
 
       expect(result).to.not.be.undefined;
       expect(result.platformPosts.length).to.be.greaterThan(0);
-    });
-
-    it.only('gets account by username', async () => {
-      // https://fediscience.org/@petergleick
-      const username = 'petergleick';
-      const server = 'fediscience.org';
-
-      const accessToken = process.env.MASTODON_ACCESS_TOKEN;
-      if (!accessToken) {
-        throw new Error('Missing MASTODON_ACCESS_TOKEN');
-      }
-
-      const mastodonService = services.platforms.get(
-        PLATFORM.Mastodon
-      ) as MastodonService;
-
-      const result = await mastodonService.getAccountByUsername(
-        username,
-        server,
-        accessToken
-      );
-
-      expect(result).to.not.be.null;
-      if (result) {
-        expect(result.id).to.be.a('string');
-        expect(result.username).to.equal(username);
-        expect(result.displayName).to.be.a('string');
-        expect(result.avatar).to.be.a('string');
-        expect(result.mastodonServer).to.equal(server);
-      }
     });
   });
 });

@@ -21,7 +21,7 @@ import { WithPlatformUserId } from './types.profiles';
 import {
   TwitterAccountDetails,
   TwitterProfile,
-  TwitterSignupCredentials,
+  TwitterSigninCredentials,
 } from './types.twitter';
 
 /** Support types */
@@ -138,7 +138,7 @@ export interface AppUserRead extends UserWithId, UserWithSettings {
 /** Test users support for mocks and tests */
 export interface TestUserCredentials {
   userId: string;
-  twitter: TwitterSignupCredentials;
+  twitter: TwitterSigninCredentials;
   mastodon: MastodonSigninCredentials;
   bluesky: BlueskySigninCredentials;
   nanopub: NanopubSigninCredentials;

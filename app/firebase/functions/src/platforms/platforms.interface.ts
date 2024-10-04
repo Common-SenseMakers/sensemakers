@@ -44,6 +44,7 @@ export interface PlatformService<
     credentials?: AccountCredentials;
   }>;
   fetch(
+    userId: string,
     params: PlatformFetchParams,
     credentials?: AccountCredentials
   ): Promise<FetchedResult>;
