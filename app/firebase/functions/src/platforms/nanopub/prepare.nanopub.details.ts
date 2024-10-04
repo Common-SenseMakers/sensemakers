@@ -1,10 +1,7 @@
 import { SciFilterClassfication } from '../../@shared/types/types.parser';
+import { PLATFORM } from '../../@shared/types/types.platforms';
 import { AppPostFull } from '../../@shared/types/types.posts';
-import {
-  AppUser,
-  AutopostOption,
-  PLATFORM,
-} from '../../@shared/types/types.user';
+import { AppUser, AutopostOption } from '../../@shared/types/types.user';
 import { UsersHelper } from '../../users/users.helper';
 
 export const prepareNanopubDetails = (user: AppUser, post: AppPostFull) => {

@@ -189,6 +189,7 @@ export class PostsManager {
     if (DEBUG) logger.debug(`Platform Service - fetch ${platformId}`);
     try {
       const fetchedPosts = await this.platforms.fetch(
+        user_id,
         platformId,
         platformParams,
         credentials
@@ -774,10 +775,7 @@ export class PostsManager {
         (mirror.deleteDraft.signerType === undefined ||
           mirror.deleteDraft.signerType === PlatformPostSignerType.DELEGATED)
       ) {
-        const signedPost = await platform.signDraft(
-          mirror.deleteDraft,
-          account
-        );
+        const signedPost = await platform.signDraft(mirror.deleteDraft);
         mirror.deleteDraft.signedPost = signedPost;
       }
 
@@ -785,10 +783,20 @@ export class PostsManager {
         throw new Error(`Expected signed post to be provided`);
       }
 
-      const posted = await platform.publish({
+      const { post: posted, credentials } = await platform.publish({
         draft: mirror.deleteDraft.signedPost,
         credentials: account.credentials,
       });
+
+      if (credentials && userId) {
+        await this.users.updateAccountCredentials(
+          userId,
+          mirror.platformId,
+          account.user_id,
+          credentials,
+          manager
+        );
+      }
 
       /** update the platformPost */
       await this.processing.platformPosts.update(
@@ -946,10 +954,7 @@ export class PostsManager {
               mirror.draft.signerType === undefined ||
               mirror.draft.signerType === PlatformPostSignerType.DELEGATED
             ) {
-              const signedPost = await platform.signDraft(
-                mirror.draft,
-                account
-              );
+              const signedPost = await platform.signDraft(mirror.draft);
               mirror.draft.signedPost = signedPost;
             }
 
@@ -957,10 +962,20 @@ export class PostsManager {
               throw new Error(`Expected signed post to be provided`);
             }
 
-            const posted = await platform.publish({
+            const { post: posted, credentials } = await platform.publish({
               draft: mirror.draft.signedPost,
               credentials: account.credentials,
             });
+
+            if (credentials && authenticatedUserId) {
+              await this.users.updateAccountCredentials(
+                authenticatedUserId,
+                mirror.platformId,
+                account.user_id,
+                credentials,
+                manager
+              );
+            }
 
             const platformPostUpdate: PlatformPostStatusUpdate = {
               draft: mirror.draft,

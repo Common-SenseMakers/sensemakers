@@ -110,7 +110,7 @@ export class UsersService {
         userId: _userId,
       });
 
-    const authenticatedDetails =
+    const { accountDetails: authenticatedDetails } =
       await this.getIdentityService(platform).handleSignupData(signupData);
 
     const prefixed_user_id = getPrefixedUserId(

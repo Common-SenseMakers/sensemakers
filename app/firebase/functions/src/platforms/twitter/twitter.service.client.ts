@@ -187,9 +187,7 @@ export class TwitterServiceClient {
     return { ...authDetails, ...params };
   }
 
-  async handleSignupData(
-    data: TwitterSignupData
-  ): Promise<TwitterAccountDetails> {
+  async handleSignupData(data: TwitterSignupData) {
     if (DEBUG) logger.debug('handleSignupData', data, DEBUG_PREFIX);
 
     const client = this.getGenericClient();
@@ -238,7 +236,7 @@ export class TwitterServiceClient {
 
     if (DEBUG) logger.debug('handleSignupData', twitter, DEBUG_PREFIX);
 
-    return twitter;
+    return { accountDetails: twitter, profile: user };
   }
 
   async getProfileByUsername(

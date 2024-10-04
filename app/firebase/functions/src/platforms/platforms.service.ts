@@ -1,32 +1,17 @@
-import { FetchParams, PlatformFetchParams } from '../@shared/types/types.fetch';
+import { PlatformFetchParams } from '../@shared/types/types.fetch';
 import {
   PlatformPostCreate,
   PlatformPostPublish,
 } from '../@shared/types/types.platform.posts';
-import {
-  AccountCredentials,
-  PLATFORM,
-  UserDetailsBase,
-} from '../@shared/types/types.user';
+import { PLATFORM } from '../@shared/types/types.platforms';
+import { AccountCredentials } from '../@shared/types/types.user';
 import { TimeService } from '../time/time.service';
 import { UsersService } from '../users/users.service';
 import { IdentityService, PlatformService } from './platforms.interface';
 
-interface FetchUserParams {
-  params: FetchParams;
-  userDetails: UserDetailsBase;
-}
+export type PlatformsMap = Map<PLATFORM, PlatformService>;
 
-export type FetchAllUserPostsParams = Map<PLATFORM, FetchUserParams[]>;
-export type PlatformsMap = Map<
-  PLATFORM,
-  PlatformService<any, any, UserDetailsBase>
->;
-
-export type IdentityServicesMap = Map<
-  PLATFORM,
-  IdentityService<any, any, UserDetailsBase>
->;
+export type IdentityServicesMap = Map<PLATFORM, IdentityService>;
 
 /** a wrapper of the PlatformSerivces to get defined and typed Platform services */
 export class PlatformsService {
@@ -45,12 +30,17 @@ export class PlatformsService {
   }
 
   public async fetch(
+    user_id: string,
     platformId: PLATFORM,
     params: PlatformFetchParams,
     credentials?: AccountCredentials
   ) {
     /** all fetched posts from one platform */
-    const fetched = await this.get(platformId).fetch(params, credentials);
+    const fetched = await this.get(platformId).fetch(
+      user_id,
+      params,
+      credentials
+    );
     return fetched;
   }
 

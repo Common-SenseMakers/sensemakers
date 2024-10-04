@@ -19,15 +19,22 @@ import {
   AppUser,
 } from '../@shared/types/types.user';
 
+export interface WithCredentials {
+  credentials?: AccountCredentials;
+}
+
 export interface IdentityService<
-  SignupContext,
-  SignupData,
-  UserDetails extends AccountDetailsBase,
+  SignupContext = any,
+  SignupData = any,
+  AccountDetails extends AccountDetailsBase = AccountDetailsBase,
+  AccountProfile = any,
 > {
   /** provides info needed by the frontend to start the signup flow */
   getSignupContext: (userId?: string, params?: any) => Promise<SignupContext>;
   /** handles the data obtained by the frontend after the signup flow */
-  handleSignupData: (signupData: SignupData) => Promise<UserDetails>;
+  handleSignupData: (
+    signupData: SignupData
+  ) => Promise<{ accountDetails: AccountDetails; profile: AccountProfile }>;
 }
 
 export interface PlatformService<
@@ -39,21 +46,25 @@ export interface PlatformService<
   get(
     post_id: string,
     credentials?: AccountCredentials
-  ): Promise<{
-    platformPost: PlatformPostPosted;
-    credentials?: AccountCredentials;
-  }>;
+  ): Promise<
+    {
+      platformPost: PlatformPostPosted;
+    } & WithCredentials
+  >;
   fetch(
-    userId: string,
+    user_id: string,
     params: PlatformFetchParams,
     credentials?: AccountCredentials
   ): Promise<FetchedResult>;
-  signDraft(
-    post: PlatformPostDraft,
-    account: AccountDetailsBase
-  ): Promise<DraftType>;
-  publish(post: PlatformPostPublish): Promise<PlatformPostPosted>;
-  update(post: PlatformPostUpdate): Promise<PlatformPostPosted>;
+  publish(
+    post: PlatformPostPublish
+  ): Promise<{ post: PlatformPostPosted } & WithCredentials>;
+  update(
+    post: PlatformPostUpdate
+  ): Promise<{ post: PlatformPostPosted } & WithCredentials>;
+
+  signDraft(post: PlatformPostDraft): Promise<DraftType>;
+
   convertToGeneric(platformPost: PlatformPostCreate): Promise<GenericThread>;
   convertFromGeneric(postAndAuthor: PostAndAuthor): Promise<PlatformPostDraft>;
 

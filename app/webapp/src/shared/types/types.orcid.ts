@@ -20,7 +20,7 @@ export interface AuthenticationResult {
   orcid: string;
 }
 
-export type OrcidAccountCredentials = Pick<
+export type OrcidCredentials = Pick<
   AuthenticationResult,
   'access_token' | 'expires_in' | 'refresh_token' | 'scope' | 'token_type'
 >;
@@ -28,4 +28,4 @@ export type OrcidProfile = Pick<AuthenticationResult, 'name'>;
 
 /** For ORCID we only need to store the name of the user */
 export interface OrcidAccountDetails
-  extends AccountDetailsBase<{ read: OrcidAccountCredentials }> {}
+  extends AccountDetailsBase<{ read: OrcidCredentials }> {}

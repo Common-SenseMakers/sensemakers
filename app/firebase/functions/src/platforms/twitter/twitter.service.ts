@@ -7,7 +7,6 @@ import {
   UsersV2Params,
 } from 'twitter-api-v2';
 
-import { read } from '../../@shared/emailRenderer';
 import {
   FetchParams,
   PlatformFetchParams,
@@ -45,12 +44,11 @@ import {
   TwitterUser,
 } from '../../@shared/types/types.twitter';
 import { AppUser } from '../../@shared/types/types.user';
-import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
 import { UsersRepository } from '../../users/users.repository';
-import { PlatformService } from '../platforms.interface';
+import { PlatformService, WithCredentials } from '../platforms.interface';
 import { expansions, tweetFields } from './twitter.config';
 import { TwitterServiceClient } from './twitter.service.client';
 import {
@@ -97,15 +95,15 @@ export class TwitterService
 
   async get(
     post_id: string,
-    credentials?: TwitterCredentials
+    credentials?: TwitterAccountCredentials
   ): Promise<{
     platformPost: PlatformPostPosted<TwitterThread, TwitterUser>;
-    credentials?: TwitterCredentials;
+    credentials?: TwitterAccountCredentials;
   }> {
     const MAX_TWEETS = 30;
 
     const { client: readOnlyClient, credentials: newCredentials } =
-      await this.getClient(credentials, 'read');
+      await this.getClient(credentials?.read, 'read');
 
     try {
       const options: Partial<Tweetv2FieldsParams> = {
@@ -216,7 +214,14 @@ export class TwitterService
         author: originalAuthor,
       };
 
-      return { platformPost, credentials: newCredentials };
+      const newAccountCredentials: TwitterAccountCredentials | undefined =
+        newCredentials ? { read: newCredentials } : undefined;
+
+      if (credentials?.write && newAccountCredentials) {
+        newAccountCredentials.write = newCredentials;
+      }
+
+      return { platformPost, credentials: newAccountCredentials };
     } catch (e: any) {
       throw new Error(handleTwitterError(e));
     }
@@ -444,6 +449,18 @@ export class TwitterService
   }
 
   /** if user_id is provided it must be from the authenticated userId */
+  public async getPost(tweetId: string, credentials?: TwitterCredentials) {
+    const options: Partial<Tweetv2FieldsParams> = {
+      'tweet.fields': tweetFields,
+      expansions,
+    };
+
+    const { client } = await this.getClient(credentials, 'read');
+
+    return client.v2.singleTweet(tweetId, options);
+  }
+
+  /** if user_id is provided it must be from the authenticated userId */
   public async getPosts(tweetIds: string, credentials?: TwitterCredentials) {
     const options: Partial<Tweetv2FieldsParams> = {
       'tweet.fields': tweetFields,
@@ -459,14 +476,13 @@ export class TwitterService
 
   /** user_id must be from the authenticated userId */
   public async publish(
-    postPublish: PlatformPostPublish<TwitterDraft>,
-    manager: TransactionManager
-  ): Promise<PlatformPostPosted<TwitterThread>> {
+    postPublish: PlatformPostPublish<TwitterDraft, TwitterCredentials>
+  ): Promise<{ post: PlatformPostPosted<TwitterThread> } & WithCredentials> {
     // TODO udpate to support many
-    const userDetails = postPublish.userDetails;
     const post = postPublish.draft;
 
-    const client = await this.getClient<'write'>(manager, userDetails, 'write');
+    const { client, credentials: newCredentials } =
+      await this.getClient<'write'>(postPublish.credentials.write, 'write');
 
     try {
       // Post the tweet and also read the tweet
@@ -475,10 +491,9 @@ export class TwitterService
         throw new Error(`Error posting tweet`);
       }
 
-      const tweet = await this.getPosts(
-        [result.data.id],
-        manager,
-        userDetails.user_id
+      const tweet = await this.getPost(
+        result.data.id,
+        postPublish.credentials.read
       );
 
       if (!tweet.data.author_id) {
@@ -506,12 +521,21 @@ export class TwitterService
         author,
       };
 
-      return {
+      const posted = {
         post_id: tweet.data.id,
         user_id: tweet.data.author_id,
         timestampMs: dateStrToTimestampMs(tweet.data.created_at),
         post: thread,
       };
+
+      const newAccountCredentials: TwitterAccountCredentials | undefined =
+        newCredentials ? { read: newCredentials } : undefined;
+
+      if (postPublish.credentials?.write && newAccountCredentials) {
+        newAccountCredentials.write = newCredentials;
+      }
+
+      return { post: posted, credentials: newAccountCredentials };
     } catch (e: any) {
       throw new Error(handleTwitterError(e));
     }
@@ -545,10 +569,7 @@ export class TwitterService
     return undefined;
   }
 
-  async signDraft(
-    post: PlatformPostDraft<any>,
-    account: UserDetailsBase<any, any, any>
-  ): Promise<any> {
+  async signDraft(post: PlatformPostDraft<any>): Promise<any> {
     return post;
   }
 }

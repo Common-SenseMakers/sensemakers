@@ -85,9 +85,9 @@ export interface PlatformPostDeleteDraft<D = any>
 /**
  * The PlatformPostPublish object is used to publish a post on a platform
  * */
-export interface PlatformPostPublish<D = any> {
+export interface PlatformPostPublish<D = any, C = any> {
   draft: D;
-  credentials: AccountCredentials;
+  credentials: AccountCredentials<C>;
 }
 
 export interface PlatformPostUpdate<D = any> extends PlatformPostPublish<D> {

@@ -160,10 +160,7 @@ export class NanopubService
     };
   }
 
-  async signDraft(
-    post: PlatformPostDraft<any>,
-    account: UserDetailsBase<any, any, any>
-  ): Promise<string> {
+  async signDraft(post: PlatformPostDraft<any>): Promise<string> {
     try {
       const profile = new NpProfile(
         cleanPrivateKey({
