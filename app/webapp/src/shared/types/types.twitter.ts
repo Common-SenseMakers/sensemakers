@@ -6,7 +6,8 @@ import {
 } from 'twitter-api-v2';
 
 import { PlatformPost } from './types.platform.posts';
-import { UserDetailsBase } from './types.user';
+import { AccountProfile } from './types.profiles';
+import { AccountCredentials, AccountDetailsBase } from './types.user';
 
 export type TwitterGetContextParams = {
   callback_url: string;
@@ -19,36 +20,38 @@ export type TwitterSignupContext = IOAuth2RequestTokenResult &
 export type TwitterAccountSignupData = TwitterSignupContext & {
   code: string;
 };
-export type TwitterSignupData =
-  | TwitterAccountSignupData
-  | TwitterGhostSignupData;
 
-export type TwitterGhostSignupData = {
-  username: string;
-  isGhost: true;
-};
+export type TwitterSignupData = TwitterAccountSignupData;
 
-export interface TwitterUserCredentials {
+/**
+ * For Twitter we need to store the oAuth token and secret as part of the signup process
+ * and the access Token and Secret as the credentials need to post in the name of the user
+ */
+export interface TwitterCredentials {
   accessToken: string;
   refreshToken: string;
   expiresIn: number;
   expiresAtMs: number;
 }
 
-export type TwitterUserProfile = Pick<
+export interface TwitterSignupCredentials {
+  id: string;
+  username: string;
+  password: string;
+  type: 'read' | 'write';
+}
+
+export type TwitterProfile = Pick<
   UserV2,
   'profile_image_url' | 'name' | 'username' | 'id'
 >;
 
-/** For Twitter we need to store the oAuth token and secret as part of the signup process
- * and the access Token and Secret as the credentials need to post in the name of the user
- */
-export interface TwitterUserDetails
-  extends UserDetailsBase<
-    TwitterUserProfile,
-    TwitterUserCredentials,
-    TwitterUserCredentials
+export interface TwitterAccountDetails
+  extends AccountDetailsBase<
+    AccountCredentials<TwitterCredentials, TwitterCredentials>
   > {}
+
+export type TwitterAccountProfile = AccountProfile<TwitterProfile>;
 
 export type TweetRead = TweetV2PostTweetResult['data'];
 

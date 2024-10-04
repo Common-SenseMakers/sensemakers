@@ -1,10 +1,7 @@
 import { Restaurant } from 'grommet-icons';
 
-import {
-  AccountDetailsRead,
-  AppUserRead,
-  PLATFORM,
-} from '../shared/types/types.user';
+import { PLATFORM } from '../shared/types/types.platforms';
+import { AccountDetailsRead, AppUserRead } from '../shared/types/types.user';
 
 export const getAccount = <P = any>(
   user?: AppUserRead,

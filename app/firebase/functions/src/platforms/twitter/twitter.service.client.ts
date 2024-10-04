@@ -6,15 +6,12 @@ import {
 } from 'twitter-api-v2';
 
 import {
+  TwitterAccountDetails,
+  TwitterCredentials,
   TwitterGetContextParams,
+  TwitterProfile,
   TwitterSignupData,
-  TwitterUserCredentials,
-  TwitterUserDetails,
-  TwitterUserProfile,
 } from '../../@shared/types/types.twitter';
-import { PLATFORM, UserDetailsBase } from '../../@shared/types/types.user';
-import { TWITTER_BEARER_TOKEN } from '../../config/config.runtime';
-import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersRepository } from '../../users/users.repository';
@@ -24,21 +21,10 @@ import { handleTwitterError } from './twitter.utils';
 const DEBUG = false;
 const DEBUG_PREFIX = 'TwitterServiceClient';
 
-export type GetClientResultInternal<T extends 'read' | 'write' = 'read'> =
-  T extends 'read'
-    ? {
-        client: TwitterApiReadOnly;
-        oldDetails: TwitterUserDetails;
-        newDetails?: TwitterUserDetails;
-      }
-    : {
-        client: TwitterApi;
-        oldDetails: TwitterUserDetails;
-        newDetails?: TwitterUserDetails;
-      };
-
 export type GetClientResult<T extends 'read' | 'write' | undefined> =
-  T extends 'write' ? TwitterApi : TwitterApiReadOnly;
+  T extends 'write'
+    ? { client: TwitterApi; credentials: TwitterCredentials }
+    : { client: TwitterApiReadOnly; credentials: TwitterCredentials };
 
 /** check https://github.com/PLhery/node-twitter-api-v2/blob/master/doc/auth.md#oauth2-user-wide-authentication-flow for OAuth2 flow */
 
@@ -75,25 +61,25 @@ export class TwitterServiceClient {
    * expired
    * */
   protected async getClientWithCredentials(
-    credentials: TwitterUserCredentials,
+    credentials: TwitterCredentials,
     type: 'write'
   ): Promise<{
     client: TwitterApi;
-    credentials?: TwitterUserCredentials;
+    credentials?: TwitterCredentials;
   }>;
   protected async getClientWithCredentials(
-    credentials: TwitterUserCredentials,
+    credentials: TwitterCredentials,
     type: 'read'
   ): Promise<{
     client: TwitterApiReadOnly;
-    credentials?: TwitterUserCredentials;
+    credentials?: TwitterCredentials;
   }>;
   protected async getClientWithCredentials(
-    credentials: TwitterUserCredentials,
+    credentials: TwitterCredentials,
     type: 'read' | 'write'
   ): Promise<{
     client: TwitterApi | TwitterApiReadOnly;
-    credentials?: TwitterUserCredentials;
+    credentials?: TwitterCredentials;
   }> {
     const client = new TwitterApi(credentials.accessToken);
 
@@ -149,152 +135,27 @@ export class TwitterServiceClient {
     }
   }
 
-  /**  */
-  protected async getUserClientAndUpdateDetails(
-    userId: string,
-    details: TwitterUserDetails,
-    type: 'read' | 'write',
-    manager: TransactionManager
-  ) {
-    const credentials = details[type];
-
-    if (!credentials) {
-      throw new Error(
-        `User credentials for ${type} not found for user ${userId}`
-      );
-    }
-
-    const { client, credentials: newCredentials } =
-      await this.getClientWithCredentials(credentials, type as any);
-
-    let newDetails: TwitterUserDetails | undefined = undefined;
-
-    /** update user credentials */
-    if (newCredentials) {
-      if (DEBUG)
-        logger.debug(
-          'getUserClientAndUpdateDetails - newCredentials',
-          newCredentials,
-          DEBUG_PREFIX
-        );
-
-      newDetails = {
-        ...details,
-        read: {
-          ...newCredentials,
-        },
-      };
-
-      if (details.write !== undefined) {
-        /** if the user has both read and write credentials, update both together since write credentials overwrite read credentials */
-        newDetails['write'] = newCredentials;
-      }
-
-      if (DEBUG)
-        logger.debug(
-          'getUserClientAndUpdateDetails - newDetails',
-          newDetails,
-          DEBUG_PREFIX
-        );
-
-      await this.usersRepo.setPlatformDetails(
-        userId,
-        PLATFORM.Twitter,
-        newDetails,
-        manager
-      );
-    }
-
-    return { client, newDetails };
-  }
-
   /**
-   * Get a user-specific client by reading the credentials
-   * from the users database
-   * */
-  private async getUserClientInternal<T extends 'read' | 'write'>(
-    user_id: string,
-    type: T,
-    manager: TransactionManager
-  ): Promise<GetClientResultInternal<T>> {
-    /** read user from the DB */
-    const userId = await this.usersRepo.getUserWithPlatformAccount(
-      PLATFORM.Twitter,
-      user_id,
-      manager,
-      true
-    );
-
-    const user = await this.usersRepo.getUser(userId, manager, true);
-
-    const twitter = user.accounts[PLATFORM.Twitter];
-
-    if (!twitter) {
-      throw new Error('User dont have twitter credentials');
-    }
-
-    const details = twitter.find((c) => c.user_id === user_id);
-    if (!details) {
-      throw new Error('Unexpected');
-    }
-
-    if (DEBUG)
-      logger.debug(
-        'getUserClientInternal',
-        { user_id, userId, details },
-        DEBUG_PREFIX
-      );
-
-    const { client, newDetails } = await this.getUserClientAndUpdateDetails(
-      user.userId,
-      details,
-      type,
-      manager
-    );
-
-    return { client, oldDetails: details, newDetails };
-  }
-
-  /**
-   * Get a user-specific client by reading the credentials
-   * from the users database
-   * */
-  protected async getUserClient<T extends 'read' | 'write'>(
-    user_id: string,
-    type: T,
-    manager: TransactionManager
-  ): Promise<T extends 'read' ? TwitterApiReadOnly : TwitterApi> {
-    /** read user from the DB */
-    const { client } = await this.getUserClientInternal(user_id, type, manager);
-    return client as T extends 'read' ? TwitterApiReadOnly : TwitterApi;
-  }
-
-  /**
-   * A wrapper that adapts to the input user details and calls a diferent get client method
+   * A wrapper that adapts to the input credentials and calls a diferent get client method
    * accordingly
    */
   protected async getClient<T extends 'read' | 'write' | undefined = 'read'>(
-    manager: TransactionManager,
-    userDetails: UserDetailsBase,
-    userId: string,
+    credentials?: TwitterCredentials,
     type: T = 'read' as T
   ): Promise<GetClientResult<T>> {
-    if (!userDetails) {
+    if (!credentials) {
+      /** get a generic client if no credentials are provided */
       if (type === 'write') {
         throw new Error('Cannot provide a write client without user details');
       }
-      return this.getGenericClient().readOnly as GetClientResult<T>;
+      return { client: this.getGenericClient().readOnly } as GetClientResult<T>;
     }
 
     /** otherwise use those credentials directly (fast) */
-    const client = await this.getUserClientAndUpdateDetails(
-      userId,
-      userDetails,
-      type as any,
-      manager
-    );
+    const { client, credentials: newCredentials } =
+      await this.getClientWithCredentials(credentials, type as any);
 
-    return client.client as GetClientResult<T>;
+    return { client, credentials: newCredentials } as GetClientResult<T>;
   }
 
   public async getSignupContext(
@@ -326,97 +187,66 @@ export class TwitterServiceClient {
     return { ...authDetails, ...params };
   }
 
-  async handleSignupData(data: TwitterSignupData): Promise<TwitterUserDetails> {
+  async handleSignupData(
+    data: TwitterSignupData
+  ): Promise<TwitterAccountDetails> {
     if (DEBUG) logger.debug('handleSignupData', data, DEBUG_PREFIX);
 
-    if ('isGhost' in data) {
-      const accessToken = TWITTER_BEARER_TOKEN.value();
-      const ghostTwitterUserProfile = await this.getAccountByUsername(
-        data.username,
-        accessToken
-      );
-      if (!ghostTwitterUserProfile) {
-        throw new Error(`account not found for ${data.username}`);
-      }
-      return {
-        user_id: ghostTwitterUserProfile.id,
-        signupDate: 0,
-        profile: ghostTwitterUserProfile,
-        read: {
-          accessToken: accessToken,
-          refreshToken: accessToken,
-          expiresIn: 315360000,
-          expiresAtMs: 2041712750000, // Tuesday, September 12, 2034 10:25:50 PM
-        },
-      };
+    const client = this.getGenericClient();
+
+    const result = await client.loginWithOAuth2({
+      code: data.code,
+      codeVerifier: data.codeVerifier,
+      redirectUri: data.callback_url,
+    });
+
+    const profileParams: Partial<UsersV2Params> = {
+      'user.fields': ['profile_image_url', 'name', 'username'],
+    };
+    const { data: user } = await result.client.v2.me(profileParams);
+
+    if (!result.refreshToken) {
+      throw new Error('Unexpected undefined refresh token');
     }
-    if ('code' in data) {
-      const client = this.getGenericClient();
 
-      const result = await client.loginWithOAuth2({
-        code: data.code,
-        codeVerifier: data.codeVerifier,
-        redirectUri: data.callback_url,
-      });
-
-      const profileParams: Partial<UsersV2Params> = {
-        'user.fields': ['profile_image_url', 'name', 'username'],
-      };
-      const { data: user } = await result.client.v2.me(profileParams);
-
-      if (!result.refreshToken) {
-        throw new Error('Unexpected undefined refresh token');
-      }
-
-      if (!result.expiresIn) {
-        throw new Error('Unexpected undefined refresh token');
-      }
-
-      const credentials: TwitterUserCredentials = {
-        accessToken: result.accessToken,
-        refreshToken: result.refreshToken,
-        expiresIn: result.expiresIn,
-        expiresAtMs: this.time.now() + result.expiresIn * 1000,
-      };
-
-      if (DEBUG)
-        logger.debug('handleSignupData', { user, credentials }, DEBUG_PREFIX);
-
-      const twitter: TwitterUserDetails = {
-        user_id: user.id,
-        signupDate: 0,
-        profile: user as TwitterUserProfile,
-      };
-
-      /** always store the credential as read credentials */
-      twitter.read = credentials;
-      /** the same credentials apply for reading and writing */
-      if (data.type === 'write') {
-        twitter['write'] = credentials;
-      }
-
-      if (DEBUG) logger.debug('handleSignupData', twitter, DEBUG_PREFIX);
-
-      return twitter;
+    if (!result.expiresIn) {
+      throw new Error('Unexpected undefined refresh token');
     }
-    throw new Error(
-      'TwitterServiceClient.handleSignupData() invalid signup data'
-    );
+
+    const credentials: TwitterCredentials = {
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+      expiresIn: result.expiresIn,
+      expiresAtMs: this.time.now() + result.expiresIn * 1000,
+    };
+
+    if (DEBUG)
+      logger.debug('handleSignupData', { user, credentials }, DEBUG_PREFIX);
+
+    const twitter: TwitterAccountDetails = {
+      user_id: user.id,
+      signupDate: 0,
+      credentials: {
+        read: credentials,
+      },
+    };
+
+    /** the same credentials apply for reading and writing */
+    if (data.type === 'write') {
+      twitter.credentials['write'] = credentials;
+    }
+
+    if (DEBUG) logger.debug('handleSignupData', twitter, DEBUG_PREFIX);
+
+    return twitter;
   }
-  async getAccountByUsername(
+
+  async getProfileByUsername(
     username: string,
-    accessToken: string
-  ): Promise<TwitterUserProfile | null> {
+    credentials?: TwitterCredentials
+  ): Promise<TwitterProfile | null> {
     try {
-      const { client } = await this.getClientWithCredentials(
-        {
-          accessToken,
-          expiresAtMs: 2041631581000,
-          expiresIn: 315360000,
-          refreshToken: accessToken,
-        },
-        'read'
-      );
+      const { client } = await this.getClient(credentials, 'read');
       const userResponse = await client.v2.userByUsername(username, {
         'user.fields': ['id', 'name', 'username', 'profile_image_url'],
       });

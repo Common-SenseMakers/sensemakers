@@ -50,7 +50,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   public async getMany(queryParams: PostsQuery) {
     /** type protection agains properties renaming */
     const createdAtKey: keyof AppPost = 'createdAtMs';
-    const authorKey: keyof AppPost = 'authorId';
+    const authorProfileKey: keyof AppPost = 'authorProfileId';
     const reviewedStatusKey: keyof AppPost = 'reviewedStatus';
     const republishedStatusKey: keyof AppPost = 'republishedStatus';
 
@@ -60,18 +60,18 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     if (DEBUG) logger.debug('getMany', queryParams, DEBUG_PREFIX);
 
     const base = (() => {
-      if (queryParams.userId) {
+      if (queryParams.profileIds) {
         if (DEBUG)
           logger.debug(
-            'getMany - filter by userId',
-            queryParams.userId,
+            'getMany - filter by profileIds',
+            queryParams.profileIds,
             DEBUG_PREFIX
           );
 
         return this.db.collections.posts.where(
-          authorKey,
-          '==',
-          queryParams.userId
+          authorProfileKey,
+          'in',
+          queryParams.profileIds
         );
       } else {
         if (DEBUG)
@@ -222,6 +222,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     const posts = await paginated
       .limit(queryParams.fetchParams.expectedAmount)
       .get();
+
     const appPosts = posts.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
@@ -231,16 +232,16 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   }
 
   /** Cannot be part of a transaction */
-  public async getNonParsedOfUser(userId: string): Promise<string[]> {
+  public async getNonParsedOfProfiles(profilesIds: string): Promise<string[]> {
     /** type protection agains properties renaming */
     const statusKey: keyof AppPost = 'parsedStatus';
-    const authorKey: keyof AppPost = 'authorId';
+    const authorProfileIdKey: keyof AppPost = 'authorProfileId';
 
     const statusValue: AppPostParsedStatus = AppPostParsedStatus.UNPROCESSED;
 
     const posts = await this.db.collections.posts
       .where(statusKey, '==', statusValue)
-      .where(authorKey, '==', userId)
+      .where(authorProfileIdKey, 'in', profilesIds)
       .get();
 
     return posts.docs.map((doc) => doc.id) as string[];

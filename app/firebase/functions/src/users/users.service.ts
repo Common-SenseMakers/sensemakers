@@ -7,10 +7,13 @@ import {
 } from '../@shared/types/types.fetch';
 import {
   ALL_IDENTITY_PLATFORMS,
+  PLATFORM,
+} from '../@shared/types/types.platforms';
+import {
+  AccountCredentials,
   AccountDetailsRead,
   AppUserRead,
   EmailDetails,
-  PLATFORM,
   UserSettings,
   UserSettingsUpdate,
 } from '../@shared/types/types.user';
@@ -20,12 +23,14 @@ import { TransactionManager } from '../db/transaction.manager';
 import { EmailSenderService } from '../emailSender/email.sender.service';
 import { logger } from '../instances/logger';
 import { IdentityServicesMap } from '../platforms/platforms.service';
+import { ProfilesRepository } from '../profiles/profiles.repository';
 import { TimeService } from '../time/time.service';
 import { UsersHelper } from './users.helper';
 import { UsersRepository } from './users.repository';
-import { getPrefixedUserId, getUsernameTag } from './users.utils';
+import { getPrefixedUserId } from './users.utils';
 
 const DEBUG = true;
+const DEBUG_PREFIX = 'UsersService';
 
 interface TokenData {
   userId: string;
@@ -42,6 +47,7 @@ export class UsersService {
   constructor(
     public db: DBInstance,
     public repo: UsersRepository,
+    public profiles: ProfilesRepository,
     public identityPlatforms: IdentityServicesMap,
     public time: TimeService,
     public emailSender: EmailSenderService,
@@ -113,7 +119,7 @@ export class UsersService {
     );
 
     const existingUserWithAccountId =
-      await this.repo.getUserWithPlatformAccount(
+      await this.profiles.getUserIdWithPlatformAccount(
         platform,
         authenticatedDetails.user_id,
         manager
@@ -176,7 +182,7 @@ export class UsersService {
             { _userId, platform, authenticatedDetails }
           );
 
-        await this.repo.setPlatformDetails(
+        await this.repo.setAccountDetails(
           _userId,
           platform,
           authenticatedDetails,
@@ -200,7 +206,7 @@ export class UsersService {
             ' user exist with this platform user_id, then return an accessToken'
           );
 
-        await this.repo.setPlatformDetails(
+        await this.repo.setAccountDetails(
           userId,
           platform,
           authenticatedDetails,
@@ -226,7 +232,6 @@ export class UsersService {
           {
             settings: initSettings,
             signupDate: this.time.now(),
-            platformIds: [prefixed_user_id],
             accounts: {
               [platform]: [authenticatedDetails],
             },
@@ -251,6 +256,54 @@ export class UsersService {
     return;
   }
 
+  public async updateAccountCredentials(
+    userId: string,
+    platformId: PLATFORM,
+    user_id: string,
+    credentials: AccountCredentials,
+    manager: TransactionManager
+  ) {
+    if (DEBUG)
+      logger.debug(
+        'getUserClientAndUpdateDetails - newCredentials',
+        credentials,
+        DEBUG_PREFIX
+      );
+
+    const user = await this.repo.getUser(userId, manager, true);
+
+    if (platformId === PLATFORM.Local) {
+      throw new Error('Cannot update local credentials');
+    }
+
+    const accounts = user.accounts[platformId];
+    if (!accounts) {
+      throw new Error('Unexpected accounts not found');
+    }
+
+    const account = accounts.find((c) => c.user_id === user_id);
+    if (!account) {
+      throw new Error(`Unexpected account for user_id ${user_id} not found`);
+    }
+
+    /** update the credentials */
+    account.credentials = credentials;
+
+    if (DEBUG)
+      logger.debug(
+        'getUserClientAndUpdateDetails - newDetails',
+        account,
+        DEBUG_PREFIX
+      );
+
+    await this.repo.setAccountDetails(
+      userId,
+      PLATFORM.Twitter,
+      account,
+      manager
+    );
+  }
+
   protected generateOurAccessToken(data: TokenData) {
     return jwt.sign(data, this.ourToken.tokenSecret, {
       expiresIn: this.ourToken.expiresIn,
@@ -262,26 +315,6 @@ export class UsersService {
       complete: true,
     }) as unknown as jwt.JwtPayload & TokenData;
     return verified.payload.userId;
-  }
-
-  public async getUserProfileFromPlatformUsername(
-    platformId: PLATFORM,
-    username: string
-  ) {
-    const profile = await this.db.run(async (manager) => {
-      const usernameTag = getUsernameTag(platformId);
-      const userId = await this.repo.getByPlatformUsername(
-        platformId,
-        usernameTag,
-        username,
-        manager,
-        true
-      );
-
-      return this.getUserProfile(userId, manager);
-    });
-
-    return profile;
   }
 
   public async getUserProfile(userId: string, manager: TransactionManager) {
@@ -303,21 +336,33 @@ export class UsersService {
     };
 
     /** extract the profile for each account */
-    ALL_IDENTITY_PLATFORMS.forEach((platform) => {
-      const accounts = UsersHelper.getAccounts(user, platform);
+    await Promise.all(
+      ALL_IDENTITY_PLATFORMS.map(async (platform) => {
+        const accounts = UsersHelper.getAccounts(user, platform);
 
-      accounts.forEach((account) => {
-        const current = userRead.accounts[platform] || [];
-        current.push({
-          user_id: account.user_id,
-          profile: account.profile,
-          read: account.read !== undefined,
-          write: account.write !== undefined,
-        });
+        await Promise.all(
+          accounts.map(async (account) => {
+            const profile = await this.profiles.getProfile(
+              platform,
+              account.user_id,
+              manager,
+              true
+            );
 
-        userRead.accounts[platform] = current as AccountDetailsRead<any>[];
-      });
-    });
+            const current = userRead.accounts[platform] || [];
+
+            current.push({
+              user_id: account.user_id,
+              profile: profile.profile,
+              read: account.credentials.read !== undefined,
+              write: account.credentials.write !== undefined,
+            });
+
+            userRead.accounts[platform] = current as AccountDetailsRead<any>[];
+          })
+        );
+      })
+    );
 
     return userRead;
   }

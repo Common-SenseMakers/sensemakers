@@ -9,6 +9,10 @@ import {
   PlatformPostPublishStatus,
 } from '../@shared/types/types.platform.posts';
 import {
+  PLATFORM,
+  PUBLISHABLE_PLATFORM,
+} from '../@shared/types/types.platforms';
+import {
   AppPost,
   AppPostCreate,
   AppPostFull,
@@ -17,16 +21,13 @@ import {
   AppPostRepublishedStatus,
   AppPostReviewStatus,
 } from '../@shared/types/types.posts';
-import {
-  DefinedIfTrue,
-  PLATFORM,
-  PUBLISHABLE_PLATFORM,
-} from '../@shared/types/types.user';
+import { DefinedIfTrue } from '../@shared/types/types.user';
 import { mapStoreElements, parseRDF } from '../@shared/utils/n3.utils';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
 import { PlatformsService } from '../platforms/platforms.service';
+import { getProfileId } from '../profiles/profiles.repository';
 import { TriplesRepository } from '../semantics/triples.repository';
 import { TimeService } from '../time/time.service';
 import { UsersHelper } from '../users/users.helper';
@@ -89,50 +90,15 @@ export class PostsProcessing {
       manager
     );
 
-    const authorId = await (async () => {
-      const authorIdFromTwitter =
-        await this.users.repo.getUserWithPlatformAccount(
-          PLATFORM.Twitter,
-          user_id,
-          manager,
-          false
-        );
-      if (authorIdFromTwitter) {
-        return authorIdFromTwitter;
-      }
-      const authorIdFromMastodon =
-        await this.users.repo.getUserWithPlatformAccount(
-          PLATFORM.Mastodon,
-          user_id,
-          manager,
-          false
-        );
-      if (authorIdFromMastodon) {
-        return authorIdFromMastodon;
-      }
-      const authorIdFromBluesky =
-        await this.users.repo.getUserWithPlatformAccount(
-          PLATFORM.Bluesky,
-          user_id,
-          manager,
-          false
-        );
-      if (authorIdFromBluesky) {
-        return authorIdFromBluesky;
-      }
-      return undefined;
-    })();
-
-    if (!authorId) {
-      throw new Error(`Author not found for user_id ${user_id}`);
-    }
+    /** the profile may not exist in the Profiles collection */
+    const authorProfileId = getProfileId(platformPost.platformId, user_id);
 
     /** create AppPost */
     const post = await this.createAppPost(
       {
         generic: genericPostData,
         origin: platformPost.platformId,
-        authorId,
+        authorProfileId,
         mirrorsIds: [platformPostCreated.id],
         createdAtMs: platformPost.posted?.timestampMs || this.time.now(),
       },
@@ -165,22 +131,27 @@ export class PostsProcessing {
 
     const appPostFull = await this.getPostFull(postId, manager, true);
 
-    // posts without authors does not have mirrors
-    if (!appPostFull.authorId) {
-      return;
-    }
-
-    const user = await this.users.repo.getUser(
-      appPostFull.authorId,
-      manager,
-      true
-    );
-
     /**
-     * Create platformPosts as drafts on all platforms
+     * Create platformPosts as drafts on all platforms (nanopub only for now)
      * */
     const drafts = await Promise.all(
       ([PLATFORM.Nanopub] as PUBLISHABLE_PLATFORM[]).map(async (platformId) => {
+        const authorProfile = await this.users.profiles.getByProfileId(
+          appPostFull.authorProfileId,
+          manager,
+          true
+        );
+
+        if (!authorProfile.userId) {
+          throw new Error('Profile must be of a signed up userId');
+        }
+
+        const user = await this.users.repo.getUser(
+          authorProfile.userId,
+          manager,
+          true
+        );
+
         const accounts = UsersHelper.getAccounts(user, platformId);
 
         if (DEBUG)
@@ -310,7 +281,7 @@ export class PostsProcessing {
     const store = await parseRDF(semantics);
 
     const createdAtMs = post.createdAtMs;
-    const authorId = post.authorId;
+    const authorProfileId = post.authorProfileId;
 
     const labels: Set<string> = new Set();
     const keywords: Set<string> = new Set();
@@ -321,7 +292,7 @@ export class PostsProcessing {
         {
           postId,
           postCreatedAtMs: createdAtMs,
-          authorId,
+          authorProfileId,
           subject: q.subject.value,
           predicate: q.predicate.value,
           object: q.object.value,

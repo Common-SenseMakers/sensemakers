@@ -12,11 +12,11 @@ import { useAppFetch } from '../../../api/app.fetch';
 import { useToastContext } from '../../../app/ToastsContext';
 import { I18Keys } from '../../../i18n/i18n';
 import { HandleSignupResult } from '../../../shared/types/types.fetch';
+import { PLATFORM } from '../../../shared/types/types.platforms';
 import {
   TwitterGetContextParams,
   TwitterSignupContext,
 } from '../../../shared/types/types.twitter';
-import { PLATFORM } from '../../../shared/types/types.user';
 import { usePersist } from '../../../utils/use.persist';
 import {
   LoginFlowState,

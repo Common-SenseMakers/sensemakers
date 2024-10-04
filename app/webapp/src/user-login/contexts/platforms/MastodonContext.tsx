@@ -19,7 +19,7 @@ import {
   MastodonSignupContext,
   MastodonSignupData,
 } from '../../../shared/types/types.mastodon';
-import { PLATFORM } from '../../../shared/types/types.user';
+import { PLATFORM } from '../../../shared/types/types.platforms';
 import { usePersist } from '../../../utils/use.persist';
 import {
   LoginFlowState,

@@ -11,22 +11,28 @@ import {
   AtpSessionData,
 } from '@atproto/api';
 
-import { UserDetailsBase } from './types.user';
+import { AccountDetailsBase } from './types.user';
 
-export interface BlueskyUserProfile {
+export interface BlueskySigninCredentials {
   id: string;
   username: string;
   name: string;
-  avatar: string;
+  appPassword: string;
 }
 
 export type BlueskyUserCredentials = AtpSessionData;
 
-export type BlueskyUserDetails = UserDetailsBase<
-  BlueskyUserProfile,
-  BlueskyUserCredentials,
-  BlueskyUserCredentials
->;
+export type BlueskyAccountDetails = AccountDetailsBase<{
+  write: BlueskyUserCredentials;
+  read: BlueskyUserCredentials;
+}>;
+
+export interface BlueskyProfile {
+  id: string;
+  handle: string;
+  displayName?: string;
+  avatar?: string;
+}
 
 export interface BlueskyGetContextParams {
   callback_url: string;
@@ -79,9 +85,3 @@ export type BlueskyPost = AppBskyFeedDefs.PostView & {
   };
 };
 export type BlueskyAccount = AppBskyActorDefs.ProfileViewDetailed;
-export interface BlueskyProfile {
-  id: string;
-  handle: string;
-  displayName?: string;
-  avatar?: string;
-}

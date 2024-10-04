@@ -14,21 +14,15 @@ import {
   PostAndAuthor,
 } from '../@shared/types/types.posts';
 import {
+  AccountCredentials,
+  AccountDetailsBase,
   AppUser,
-  PLATFORM,
-  UserDetailsBase,
 } from '../@shared/types/types.user';
-import { TransactionManager } from '../db/transaction.manager';
-
-/** use conditional types to dynamically assign credential types for each platform */
-export type CredentialsForPlatform<P> = P extends PLATFORM.Twitter
-  ? { accessToken: string }
-  : any;
 
 export interface IdentityService<
   SignupContext,
   SignupData,
-  UserDetails extends UserDetailsBase,
+  UserDetails extends AccountDetailsBase,
 > {
   /** provides info needed by the frontend to start the signup flow */
   getSignupContext: (userId?: string, params?: any) => Promise<SignupContext>;
@@ -39,31 +33,26 @@ export interface IdentityService<
 export interface PlatformService<
   SignupContext = any,
   SignupData = any,
-  UserDetails extends UserDetailsBase = UserDetailsBase,
+  UserDetails extends AccountDetailsBase = AccountDetailsBase,
   DraftType = any,
 > extends IdentityService<SignupContext, SignupData, UserDetails> {
   get(
     post_id: string,
-    userDetails: UserDetailsBase,
-    manager?: TransactionManager
-  ): Promise<PlatformPostPosted>;
+    credentials?: AccountCredentials
+  ): Promise<{
+    platformPost: PlatformPostPosted;
+    credentials?: AccountCredentials;
+  }>;
   fetch(
     params: PlatformFetchParams,
-    userDetails: UserDetailsBase,
-    manager: TransactionManager
+    credentials?: AccountCredentials
   ): Promise<FetchedResult>;
   signDraft(
     post: PlatformPostDraft,
-    account: UserDetailsBase
+    account: AccountDetailsBase
   ): Promise<DraftType>;
-  publish(
-    post: PlatformPostPublish,
-    manager: TransactionManager
-  ): Promise<PlatformPostPosted>;
-  update(
-    post: PlatformPostUpdate,
-    manager: TransactionManager
-  ): Promise<PlatformPostPosted>;
+  publish(post: PlatformPostPublish): Promise<PlatformPostPosted>;
+  update(post: PlatformPostUpdate): Promise<PlatformPostPosted>;
   convertToGeneric(platformPost: PlatformPostCreate): Promise<GenericThread>;
   convertFromGeneric(postAndAuthor: PostAndAuthor): Promise<PlatformPostDraft>;
 

@@ -3,8 +3,11 @@ import {
   PlatformPostCreate,
   PlatformPostPublish,
 } from '../@shared/types/types.platform.posts';
-import { PLATFORM, UserDetailsBase } from '../@shared/types/types.user';
-import { TransactionManager } from '../db/transaction.manager';
+import {
+  AccountCredentials,
+  PLATFORM,
+  UserDetailsBase,
+} from '../@shared/types/types.user';
 import { TimeService } from '../time/time.service';
 import { UsersService } from '../users/users.service';
 import { IdentityService, PlatformService } from './platforms.interface';
@@ -44,15 +47,10 @@ export class PlatformsService {
   public async fetch(
     platformId: PLATFORM,
     params: PlatformFetchParams,
-    userDetails: UserDetailsBase,
-    manager: TransactionManager
+    credentials?: AccountCredentials
   ) {
     /** all fetched posts from one platform */
-    const fetched = await this.get(platformId).fetch(
-      params,
-      userDetails,
-      manager
-    );
+    const fetched = await this.get(platformId).fetch(params, credentials);
     return fetched;
   }
 
@@ -61,12 +59,8 @@ export class PlatformsService {
     return platform.convertToGeneric(platformPost);
   }
 
-  public publish(
-    platformId: PLATFORM,
-    postPublish: PlatformPostPublish,
-    manager: TransactionManager
-  ) {
+  public publish(platformId: PLATFORM, postPublish: PlatformPostPublish) {
     const platform = this.get(platformId);
-    return platform.publish(postPublish, manager);
+    return platform.publish(postPublish);
   }
 }

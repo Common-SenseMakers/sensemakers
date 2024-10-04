@@ -32,19 +32,15 @@ import {
 } from '../../@shared/types/types.posts';
 import {
   AppTweet,
+  TwitterAccountDetails,
+  TwitterCredentials,
   TwitterDraft,
   TwitterSignupContext,
   TwitterSignupData,
   TwitterThread,
   TwitterUser,
-  TwitterUserDetails,
 } from '../../@shared/types/types.twitter';
-import {
-  AppUser,
-  FetchedDetails,
-  PLATFORM,
-  UserDetailsBase,
-} from '../../@shared/types/types.user';
+import { AppUser } from '../../@shared/types/types.user';
 import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
@@ -77,7 +73,7 @@ export class TwitterService
     PlatformService<
       TwitterSignupContext,
       TwitterSignupData,
-      TwitterUserDetails
+      TwitterAccountDetails
     >
 {
   protected cache: any;
@@ -97,16 +93,15 @@ export class TwitterService
 
   async get(
     post_id: string,
-    userDetails: UserDetailsBase<any, any, any>,
-    manager: TransactionManager
-  ): Promise<PlatformPostPosted<TwitterThread, TwitterUser>> {
+    credentials?: TwitterCredentials
+  ): Promise<{
+    platformPost: PlatformPostPosted<TwitterThread, TwitterUser>;
+    credentials?: TwitterCredentials;
+  }> {
     const MAX_TWEETS = 30;
 
-    const readOnlyClient = await this.getUserClient(
-      userDetails.user_id,
-      'read',
-      manager
-    );
+    const { client: readOnlyClient, credentials: newCredentials } =
+      await this.getClient(credentials, 'read');
 
     try {
       const options: Partial<Tweetv2FieldsParams> = {
@@ -209,13 +204,15 @@ export class TwitterService
 
       const thread = threads[0];
 
-      return {
+      const platformPost: PlatformPostPosted<TwitterThread, TwitterUser> = {
         post_id: thread.conversation_id,
         user_id: thread.author.id,
         timestampMs: dateStrToTimestampMs(thread.tweets[0].created_at),
         post: thread,
         author: originalAuthor,
       };
+
+      return { platformPost, credentials: newCredentials };
     } catch (e: any) {
       throw new Error(handleTwitterError(e));
     }
@@ -230,7 +227,7 @@ export class TwitterService
    * */
   protected async fetchInternal(
     params: PlatformFetchParams,
-    userDetails: UserDetailsBase,
+    credentials: TwitterCredentials,
     manager: TransactionManager
   ): Promise<TwitterThread[]> {
     try {
@@ -528,10 +525,7 @@ export class TwitterService
     }
   }
 
-  update(
-    post: PlatformPostUpdate<any>,
-    manager: TransactionManager
-  ): Promise<PlatformPostPosted<any>> {
+  update(post: PlatformPostUpdate<any>): Promise<PlatformPostPosted<any>> {
     throw new Error('Method not implemented.');
   }
 

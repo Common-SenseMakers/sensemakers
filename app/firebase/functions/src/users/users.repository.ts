@@ -1,33 +1,28 @@
 import { FieldValue } from 'firebase-admin/firestore';
 
 import { NotificationFreq } from '../@shared/types/types.notifications';
+import { PLATFORM } from '../@shared/types/types.platforms';
 import {
+  AccountDetailsBase,
   AppUser,
   AppUserCreate,
   AutopostOption,
   DefinedIfTrue,
   EmailDetails,
-  FetchedDetails,
-  PLATFORM,
-  UserDetailsBase,
-  UserPlatformProfile,
   UserSettings,
-  UserSettingsUpdate,
-  UserWithPlatformIds,
 } from '../@shared/types/types.user';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
-import { UsersHelper } from './users.helper';
-import { getPrefixedUserId } from './users.utils';
+import { ProfilesRepository } from '../profiles/profiles.repository';
 
 const DEBUG = false;
 
-const getProfileId = (userId: string, platform: PLATFORM, user_id: string) =>
-  `${userId}-${platform}-${user_id}`;
-
 export class UsersRepository {
-  constructor(protected db: DBInstance) {}
+  constructor(
+    protected db: DBInstance,
+    protected profiles: ProfilesRepository
+  ) {}
 
   protected async getUserRef(
     userId: string,
@@ -77,80 +72,6 @@ export class UsersRepository {
     } as unknown as DefinedIfTrue<T, AppUser>;
   }
 
-  /** Sensistive method! Call only if the platform and user_id were authenticated */
-  public async getUserWithPlatformAccount<T extends boolean>(
-    platform: PLATFORM,
-    user_id: string,
-    manager: TransactionManager,
-    shouldThrow?: T
-  ): Promise<DefinedIfTrue<T, string>> {
-    const prefixed_user_id = getPrefixedUserId(platform, user_id);
-
-    /** protect against changes in the property name */
-    const platformIds_property: keyof UserWithPlatformIds = 'platformIds';
-    const query = this.db.collections.users.where(
-      platformIds_property,
-      'array-contains',
-      prefixed_user_id
-    );
-    const snap = await manager.query(query);
-
-    const _shouldThrow = shouldThrow !== undefined ? shouldThrow : false;
-
-    if (snap.empty) {
-      if (_shouldThrow)
-        throw new Error(
-          `User with user_id: ${user_id} and platform ${platform} not found`
-        );
-      else return undefined as DefinedIfTrue<T, string>;
-    }
-
-    if (snap.size > 1) {
-      throw new Error(
-        `Data corrupted. Unexpected multiple users with the same platform user_id ${prefixed_user_id}`
-      );
-    }
-
-    /** should not return the data as it does not include the tx manager cache */
-    return snap.docs[0].id as DefinedIfTrue<T, string>;
-  }
-
-  public async getByPlatformUsername<T extends boolean>(
-    platformId: PLATFORM,
-    usernameTag: string,
-    username: string,
-    manager: TransactionManager,
-    shouldThrow?: T
-  ) {
-    const platformId_property: keyof UserPlatformProfile = 'platformId';
-    const profile_property: keyof UserPlatformProfile = 'profile';
-
-    const query = this.db.collections.profiles
-      .where(platformId_property, '==', platformId)
-      .where(`${profile_property}.${usernameTag}`, '==', username);
-
-    const snap = await manager.query(query);
-
-    const _shouldThrow = shouldThrow !== undefined ? shouldThrow : false;
-
-    if (snap.empty) {
-      if (_shouldThrow)
-        throw new Error(
-          `User with profile.username: ${username} and platform ${platformId} not found`
-        );
-      else return undefined as DefinedIfTrue<T, string>;
-    }
-
-    if (snap.size > 1) {
-      throw new Error(
-        `Data corrupted. Unexpected multiple users with the same platform username ${username}`
-      );
-    }
-
-    const userId = (snap.docs[0].data() as UserPlatformProfile).userId;
-    return userId as DefinedIfTrue<T, string>;
-  }
-
   public async createUser(
     userId: string,
     user: AppUserCreate,
@@ -158,95 +79,14 @@ export class UsersRepository {
   ) {
     const ref = await this.getUserRef(userId, manager);
     manager.create(ref, user);
-
-    /** keep the profiles collection in sync */
-    const platformAccounts = UsersHelper.getAllAccounts(user);
-    platformAccounts.forEach((platformAccount) => {
-      if (platformAccount.account.profile) {
-        const profileRef = this.db.collections.profiles.doc(
-          getProfileId(
-            userId,
-            platformAccount.platform,
-            platformAccount.account.user_id
-          )
-        );
-        const data: UserPlatformProfile = {
-          userId,
-          profile: platformAccount.account.profile,
-          platformId: platformAccount.platform,
-          user_id: platformAccount.account.user_id,
-        };
-        manager.create(profileRef, data);
-      }
-    });
-
     return ref.id;
   }
 
-  /**
-   * Just update the lastFetchedMs value of a given account
-   * */
-  public async setAccountFetched(
-    platform: PLATFORM,
-    user_id: string,
-    fetched: FetchedDetails,
-    manager: TransactionManager
-  ) {
-    /** check if this platform user_id already exists */
-    const existingUserId = await this.getUserWithPlatformAccount(
-      platform,
-      user_id,
-      manager,
-      true
-    );
-
-    const existingUser = await this.getUser(existingUserId, manager, true);
-
-    if (platform === PLATFORM.Local) {
-      throw new Error('Unexpected');
-    }
-
-    const accounts = existingUser.accounts[platform];
-    if (accounts === undefined) {
-      throw new Error(`User accounts not found`);
-    }
-
-    /** find the ix */
-    const ix = accounts.findIndex((a) => a.user_id === user_id);
-
-    if (ix === -1) {
-      throw new Error(`Account ${platform}:${user_id} not found`);
-    }
-
-    const current = accounts[ix];
-
-    /** merge the new fetched value with the current one */
-    const newFetched = (() => {
-      const currentFetched = current.fetched || {};
-      if (fetched.newest_id) {
-        currentFetched.newest_id = fetched.newest_id;
-      }
-
-      if (fetched.oldest_id) {
-        currentFetched.oldest_id = fetched.oldest_id;
-      }
-
-      return currentFetched;
-    })();
-
-    current.fetched = newFetched;
-
-    const userRef = await this.getUserRef(existingUser.userId, manager, true);
-
-    /** overwrite all the user account credentials */
-    manager.update(userRef, { [platform]: accounts });
-  }
-
   /** append or overwrite userDetails for an account of a given platform */
-  public async setPlatformDetails(
+  public async setAccountDetails(
     userId: string,
     platform: PLATFORM,
-    details: UserDetailsBase,
+    details: AccountDetailsBase,
     manager: TransactionManager
   ) {
     /**
@@ -254,11 +94,12 @@ export class UsersRepository {
      * one from userId
      */
     const user = await (async () => {
-      const existWithAccountId = await this.getUserWithPlatformAccount(
-        platform,
-        details.user_id,
-        manager
-      );
+      const existWithAccountId =
+        await this.profiles.getUserIdWithPlatformAccount(
+          platform,
+          details.user_id,
+          manager
+        );
 
       const existWithAccount = existWithAccountId
         ? await this.getUser(existWithAccountId, manager)
@@ -277,19 +118,18 @@ export class UsersRepository {
     })();
 
     /** set the user account */
-    const { platformAccounts, platformIds } = await (async () => {
+    const { platformAccounts } = await (async () => {
       /**  overwrite previous details for that user account*/
       if (platform === PLATFORM.Local) {
         throw new Error('Unexpected');
       }
 
-      const platformAccounts: UserDetailsBase[] = user.accounts[platform] || [];
-      let platformIds = user.platformIds;
+      const platformAccounts: AccountDetailsBase[] =
+        user.accounts[platform] || [];
 
       if (DEBUG)
         logger.debug(`setPlatformDetails accounts`, {
           platformAccounts,
-          platformIds,
           details,
         });
 
@@ -297,6 +137,7 @@ export class UsersRepository {
       const ix = platformAccounts.findIndex(
         (a) => a.user_id === details.user_id
       );
+
       if (ix !== -1) {
         /** set the new details of that account */
         if (DEBUG)
@@ -307,63 +148,39 @@ export class UsersRepository {
         if (DEBUG)
           logger.debug(`setPlatformDetails account not found - creating`);
         platformAccounts.push(details);
-        platformIds.push(getPrefixedUserId(platform, details.user_id));
       }
 
-      return { platformAccounts, platformIds };
+      return { platformAccounts };
     })();
 
     if (DEBUG)
       logger.debug(`setPlatformDetails accounts and platformIds`, {
         accounts: platformAccounts,
-        platformIds,
       });
 
     const userRef = await this.getUserRef(userId, manager, true);
 
-    const platformIds_property: keyof UserWithPlatformIds = 'platformIds';
     const update: Partial<AppUser> = {
-      [platformIds_property]: platformIds,
       accounts: { ...user.accounts, [platform]: platformAccounts },
     };
 
     if (DEBUG) logger.debug(`Updating user ${userId}`, { update });
 
     manager.update(userRef, update);
-
-    // update or create mirror collection profiles
-    if (details.profile) {
-      const profileRef = this.db.collections.profiles.doc(
-        getProfileId(userId, platform, details.user_id)
-      );
-      manager.set(
-        profileRef,
-        {
-          userId,
-          profile: details.profile,
-          platformId: platform,
-          user_id: details.user_id,
-        },
-        { merge: true }
-      );
-    }
   }
 
   /** remove userDetails of a given platform */
-  public async removePlatformDetails(
+  public async removeAccountDetails(
     platform: PLATFORM,
     user_id: string,
     manager: TransactionManager
   ) {
-    const userId = await this.getUserWithPlatformAccount(
+    const userId = await this.profiles.getUserIdWithPlatformAccount(
       platform,
       user_id,
-      manager
+      manager,
+      true
     );
-
-    if (!userId) {
-      throw new Error('User not found');
-    }
 
     const doc = await this.getUserDoc(userId, manager);
 
@@ -385,7 +202,7 @@ export class UsersRepository {
       throw new Error(`User ${userId} data as expected`);
     }
 
-    const details = (user.accounts[platform] as Array<UserDetailsBase>).find(
+    const details = (user.accounts[platform] as Array<AccountDetailsBase>).find(
       (details) => details.user_id === user_id
     );
 
@@ -393,14 +210,7 @@ export class UsersRepository {
       throw new Error(`Details for user ${userId} not found`);
     }
 
-    const platformIds = user.platformIds;
-    const platformIds_property: keyof UserWithPlatformIds = 'platformIds';
-    const newPlatformIds = platformIds.filter(
-      (p) => p !== getPrefixedUserId(platform, details.user_id)
-    );
-
     manager.update(doc.ref, {
-      [platformIds_property]: newPlatformIds,
       [platform]: FieldValue.arrayRemove(details),
     });
   }
@@ -439,7 +249,7 @@ export class UsersRepository {
 
   public async updateSettings(
     userId: string,
-    updateSettings: UserSettingsUpdate,
+    updateSettings: Partial<UserSettings>,
     manager: TransactionManager
   ) {
     const ref = await this.getUserRef(userId, manager, true);

@@ -1,6 +1,6 @@
 import { Firestore } from 'firebase-admin/firestore';
 
-import { PLATFORM } from '../@shared/types/types.user';
+import { PLATFORM } from '../@shared/types/types.platforms';
 import { ActivityRepository } from '../activity/activity.repository';
 import { ActivityService } from '../activity/activity.service';
 import {
@@ -50,6 +50,7 @@ import { PlatformPostsRepository } from '../posts/platform.posts.repository';
 import { PostsManager } from '../posts/posts.manager';
 import { PostsProcessing } from '../posts/posts.processing';
 import { PostsRepository } from '../posts/posts.repository';
+import { ProfilesRepository } from '../profiles/profiles.repository';
 import { TriplesRepository } from '../semantics/triples.repository';
 import { TimeService } from '../time/time.service';
 import { UsersRepository } from '../users/users.repository';
@@ -74,7 +75,8 @@ export const createServices = (firestore: Firestore) => {
   if (DEBUG) logger.info('Creating services');
 
   const db = new DBInstance(firestore);
-  const userRepo = new UsersRepository(db);
+  const profilesRepo = new ProfilesRepository(db);
+  const userRepo = new UsersRepository(db, profilesRepo);
   const postsRepo = new PostsRepository(db);
   const triplesRepo = new TriplesRepository(db);
   const platformPostsRepo = new PlatformPostsRepository(db);

@@ -6,7 +6,8 @@ import {
   NanupubSignupData,
   RSAKeys,
 } from '../../../../shared/types/types.nanopubs';
-import { HexStr, PLATFORM } from '../../../../shared/types/types.user';
+import { PLATFORM } from '../../../../shared/types/types.platforms';
+import { HexStr } from '../../../../shared/types/types.user';
 import {
   getEthToRSAMessage,
   signNanopublication,

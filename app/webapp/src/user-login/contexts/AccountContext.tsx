@@ -14,15 +14,17 @@ import { MastodonUserProfile } from '../../shared/types/types.mastodon';
 import { NanopubUserProfile } from '../../shared/types/types.nanopubs';
 import { NotificationFreq } from '../../shared/types/types.notifications';
 import { OrcidUserProfile } from '../../shared/types/types.orcid';
-import { TwitterUserProfile } from '../../shared/types/types.twitter';
 import {
   ALL_PUBLISH_PLATFORMS,
   ALL_SOURCE_PLATFORMS,
+  PLATFORM,
+  PUBLISHABLE_PLATFORM,
+} from '../../shared/types/types.platforms';
+import { TwitterUserProfile } from '../../shared/types/types.twitter';
+import {
   AppUserRead,
   AutopostOption,
   EmailDetails,
-  PLATFORM,
-  PUBLISHABLE_PLATFORM,
 } from '../../shared/types/types.user';
 import { usePersist } from '../../utils/use.persist';
 import { getAccount } from '../user.helper';
