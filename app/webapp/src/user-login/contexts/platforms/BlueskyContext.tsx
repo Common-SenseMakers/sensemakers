@@ -59,7 +59,9 @@ export const BlueskyContext = (props: PropsWithChildren) => {
   const appFetch = useAppFetch();
 
   const needConnect =
-    !connectedUser || !connectedUser.accounts[PLATFORM.Bluesky];
+    !connectedUser ||
+    !connectedUser.profiles ||
+    !connectedUser.profiles[PLATFORM.Bluesky];
 
   const connect = useCallback(
     async (

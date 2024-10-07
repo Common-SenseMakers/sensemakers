@@ -92,6 +92,7 @@ export class OrcidService
 
     const profile: OrcidProfile = {
       name: result.name,
+      orcid: result.orcid,
     };
 
     const orcid: OrcidAccountDetails = {

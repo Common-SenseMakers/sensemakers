@@ -12,7 +12,6 @@ import {
   getEthToRSAMessage,
   signNanopublication,
 } from '../../../../shared/utils/nanopub.sign.util';
-import { getAccount } from '../../../user.helper';
 import { LoginFlowState, useAccountContext } from '../../AccountContext';
 import { useAppSigner } from '../../signer/SignerContext';
 
@@ -36,8 +35,8 @@ export const useNanopubSignup = (rsaKeys?: RSAKeys) => {
   const appFetch = useAppFetch();
 
   const nanopubProfile = useMemo(() => {
-    if (connectedUser) {
-      return getAccount(connectedUser, PLATFORM.Nanopub);
+    if (connectedUser && connectedUser.profiles) {
+      return connectedUser.profiles[PLATFORM.Nanopub];
     }
   }, [connectedUser]);
 

@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { ClearIcon } from '../app/icons/ClearIcon';
 import { SendIcon } from '../app/icons/SendIcon';
 import { I18Keys } from '../i18n/i18n';
-import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { AppButton } from '../ui-components';
 import { usePost } from './post.context/PostContext';
 

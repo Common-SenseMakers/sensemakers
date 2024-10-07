@@ -3,9 +3,9 @@ import { t } from 'i18next';
 import { I18Keys } from '../i18n/i18n';
 import { MastodonThread } from '../shared/types/types.mastodon';
 import { PlatformPost } from '../shared/types/types.platform.posts';
+import { PLATFORM } from '../shared/types/types.platforms';
 import { AppPostFull } from '../shared/types/types.posts';
 import { TwitterThread } from '../shared/types/types.twitter';
-import { PLATFORM } from '../shared/types/types.user';
 
 export interface GenericPlatformPostDetails {
   authorName?: string;

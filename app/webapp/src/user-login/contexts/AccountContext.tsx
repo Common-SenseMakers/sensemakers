@@ -1,33 +1,30 @@
-import { platform } from 'os';
 import {
   PropsWithChildren,
   createContext,
   useContext,
   useEffect,
-  useMemo,
   useState,
 } from 'react';
 
 import { _appFetch } from '../../api/app.fetch';
-import { BlueskyUserProfile } from '../../shared/types/types.bluesky';
-import { MastodonUserProfile } from '../../shared/types/types.mastodon';
-import { NanopubUserProfile } from '../../shared/types/types.nanopubs';
+import { BlueskyProfile } from '../../shared/types/types.bluesky';
+import { MastodonProfile } from '../../shared/types/types.mastodon';
+import { NanopubProfile } from '../../shared/types/types.nanopubs';
 import { NotificationFreq } from '../../shared/types/types.notifications';
-import { OrcidUserProfile } from '../../shared/types/types.orcid';
+import { OrcidProfile } from '../../shared/types/types.orcid';
 import {
   ALL_PUBLISH_PLATFORMS,
   ALL_SOURCE_PLATFORMS,
   PLATFORM,
   PUBLISHABLE_PLATFORM,
 } from '../../shared/types/types.platforms';
-import { TwitterUserProfile } from '../../shared/types/types.twitter';
+import { TwitterProfile } from '../../shared/types/types.twitter';
 import {
   AppUserRead,
   AutopostOption,
   EmailDetails,
 } from '../../shared/types/types.user';
 import { usePersist } from '../../utils/use.persist';
-import { getAccount } from '../user.helper';
 
 const DEBUG = true;
 
@@ -66,13 +63,14 @@ const AccountContextValue = createContext<AccountContextType | undefined>(
   undefined
 );
 
-export interface ConnectedUser extends AppUserRead {
+// assume one profile per platform for now
+export interface ConnectedUser extends Omit<AppUserRead, 'profiles'> {
   profiles?: {
-    [PLATFORM.Orcid]: OrcidUserProfile;
-    [PLATFORM.Twitter]: TwitterUserProfile;
-    [PLATFORM.Nanopub]: NanopubUserProfile;
-    [PLATFORM.Mastodon]: MastodonUserProfile;
-    [PLATFORM.Bluesky]: BlueskyUserProfile;
+    [PLATFORM.Orcid]?: OrcidProfile;
+    [PLATFORM.Twitter]?: TwitterProfile;
+    [PLATFORM.Nanopub]?: NanopubProfile;
+    [PLATFORM.Mastodon]?: MastodonProfile;
+    [PLATFORM.Bluesky]?: BlueskyProfile;
   };
 }
 
@@ -173,14 +171,29 @@ export const AccountContext = (props: PropsWithChildren) => {
         const user = await _appFetch<AppUserRead>('/api/auth/me', {}, token);
         if (DEBUG) console.log('set connectedUser after fetch', { user });
 
-        /** extract profiles for convenience */
-        const profiles: ConnectedUser['profiles'] = {
-          twitter: getAccount(user, PLATFORM.Twitter)?.profile,
-          mastodon: getAccount(user, PLATFORM.Mastodon)?.profile,
-          nanopub: getAccount(user, PLATFORM.Nanopub)?.profile,
-          orcid: getAccount(user, PLATFORM.Orcid)?.profile,
-          bluesky: getAccount(user, PLATFORM.Bluesky)?.profile,
-        };
+        /** extract the profile of each platform for convenience */
+        const profiles = ((): ConnectedUser['profiles'] => {
+          if (user.profiles) {
+            return {
+              twitter:
+                user.profiles[PLATFORM.Twitter] &&
+                user.profiles[PLATFORM.Twitter][0].profile,
+              mastodon:
+                user.profiles[PLATFORM.Mastodon] &&
+                user.profiles[PLATFORM.Mastodon][0].profile,
+              nanopub:
+                user.profiles[PLATFORM.Nanopub] &&
+                user.profiles[PLATFORM.Nanopub][0].profile,
+              orcid:
+                user.profiles[PLATFORM.Orcid] &&
+                user.profiles[PLATFORM.Orcid][0].profile,
+              bluesky:
+                user.profiles[PLATFORM.Bluesky] &&
+                user.profiles[PLATFORM.Bluesky][0].profile,
+            };
+          }
+          return {};
+        })();
 
         /** set user */
         setConnectedUser({ ...user, profiles });
@@ -212,7 +225,10 @@ export const AccountContext = (props: PropsWithChildren) => {
       /** if not a single source platform has been connected, consider login partial */
       if (
         !ALL_SOURCE_PLATFORMS.some((platformId: PUBLISHABLE_PLATFORM) => {
-          return connectedUser.accounts[platformId] !== undefined;
+          return (
+            connectedUser.profiles &&
+            connectedUser.profiles[platformId] !== undefined
+          );
         })
       ) {
         setOverallLoginStatus(OverallLoginStatus.PartialLoggedIn);
