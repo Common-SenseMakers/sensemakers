@@ -17,6 +17,7 @@ import {
 } from '../@shared/types/types.platform.posts';
 import {
   ALL_PUBLISH_PLATFORMS,
+  IDENTITY_PLATFORM,
   PLATFORM,
   PUBLISHABLE_PLATFORM,
 } from '../@shared/types/types.platforms';
@@ -383,7 +384,7 @@ export class PostsManager {
     userId?: string;
     user?: AppUser;
     params: FetchParams;
-    platformIds?: PUBLISHABLE_PLATFORM[];
+    platformIds?: IDENTITY_PLATFORM[];
   }) {
     /** can be called as part of a transaction or independently */
     const postsCreated = await this.db.run(

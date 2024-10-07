@@ -27,6 +27,7 @@ import {
   GenericThread,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
+import { AccountProfileCreate } from '../../@shared/types/types.profiles';
 import { AccountCredentials } from '../../@shared/types/types.user';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
@@ -155,12 +156,18 @@ export class MastodonService
     if (DEBUG)
       logger.debug('handleSignupData result', { mastodon }, DEBUG_PREFIX);
 
-    const profile: MastodonProfile = {
+    const mdProfile: MastodonProfile = {
       id: account.id,
       username: account.username,
       displayName: account.displayName,
       avatar: account.avatar,
       domain: signupData.domain,
+    };
+
+    const profile: AccountProfileCreate<MastodonProfile> = {
+      platformId: PLATFORM.Nanopub,
+      user_id: account.id,
+      profile: mdProfile,
     };
 
     return { accountDetails: mastodon, profile };

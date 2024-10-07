@@ -34,6 +34,7 @@ import {
   GenericThread,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
+import { AccountProfileCreate } from '../../@shared/types/types.profiles';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
@@ -78,10 +79,7 @@ export class BlueskyService
     return {};
   }
 
-  public async handleSignupData(signupData: BlueskySignupData): Promise<{
-    accountDetails: BlueskyAccountDetails;
-    profile: BlueskyProfile;
-  }> {
+  public async handleSignupData(signupData: BlueskySignupData) {
     if (DEBUG) logger.debug('handleSignupData', { signupData }, DEBUG_PREFIX);
 
     const agent = new AtpAgent({ service: 'https://bsky.social' });
@@ -94,21 +92,27 @@ export class BlueskyService
     }
     const sessionData = removeUndefinedFields(agent.session);
 
-    const bskProfile = await agent.getProfile({
+    const bskFullUser = await agent.getProfile({
       actor: sessionData.did,
     });
 
     const bluesky: BlueskyAccountDetails = {
-      user_id: bskProfile.data.did,
+      user_id: bskFullUser.data.did,
       signupDate: this.time.now(),
       credentials: { read: sessionData },
     };
 
-    const profile: BlueskyProfile = {
-      id: bskProfile.data.did,
-      username: bskProfile.data.handle,
-      displayName: bskProfile.data.displayName || bskProfile.data.handle,
-      avatar: bskProfile.data.avatar || '',
+    const bskSimpleUser: BlueskyProfile = {
+      id: bskFullUser.data.did,
+      username: bskFullUser.data.handle,
+      displayName: bskFullUser.data.displayName || bskFullUser.data.handle,
+      avatar: bskFullUser.data.avatar || '',
+    };
+
+    const profile: AccountProfileCreate<BlueskyProfile> = {
+      platformId: PLATFORM.Nanopub,
+      user_id: bskSimpleUser.id,
+      profile: bskSimpleUser,
     };
 
     if (signupData.type === 'write') {

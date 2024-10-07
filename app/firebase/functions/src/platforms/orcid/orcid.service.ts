@@ -6,6 +6,8 @@ import {
   OrcidSignupContext,
   OrcidSignupData,
 } from '../../@shared/types/types.orcid';
+import { PLATFORM } from '../../@shared/types/types.platforms';
+import { AccountProfileCreate } from '../../@shared/types/types.profiles';
 import {
   ORCID_API_URL,
   ORCID_CLIENT_ID,
@@ -90,7 +92,7 @@ export class OrcidService
       token_type: result.token_type,
     };
 
-    const profile: OrcidProfile = {
+    const orcidProfile: OrcidProfile = {
       name: result.name,
       orcid: result.orcid,
     };
@@ -108,6 +110,12 @@ export class OrcidService
         DEBUG_PREFIX
       );
     }
+
+    const profile: AccountProfileCreate<OrcidProfile> = {
+      platformId: PLATFORM.Orcid,
+      user_id: orcid.user_id,
+      profile: orcidProfile,
+    };
 
     return { accountDetails: orcid, profile };
   }

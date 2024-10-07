@@ -5,6 +5,8 @@ import {
   UsersV2Params,
 } from 'twitter-api-v2';
 
+import { PLATFORM } from '../../@shared/types/types.platforms';
+import { AccountProfileCreate } from '../../@shared/types/types.profiles';
 import {
   TwitterAccountDetails,
   TwitterCredentials,
@@ -201,7 +203,7 @@ export class TwitterServiceClient {
     const profileParams: Partial<UsersV2Params> = {
       'user.fields': ['profile_image_url', 'name', 'username'],
     };
-    const { data: user } = await result.client.v2.me(profileParams);
+    const { data: twitterUser } = await result.client.v2.me(profileParams);
 
     if (!result.refreshToken) {
       throw new Error('Unexpected undefined refresh token');
@@ -219,10 +221,14 @@ export class TwitterServiceClient {
     };
 
     if (DEBUG)
-      logger.debug('handleSignupData', { user, credentials }, DEBUG_PREFIX);
+      logger.debug(
+        'handleSignupData',
+        { account: twitterUser, credentials },
+        DEBUG_PREFIX
+      );
 
     const twitter: TwitterAccountDetails = {
-      user_id: user.id,
+      user_id: twitterUser.id,
       signupDate: 0,
       credentials: {
         read: credentials,
@@ -236,7 +242,13 @@ export class TwitterServiceClient {
 
     if (DEBUG) logger.debug('handleSignupData', twitter, DEBUG_PREFIX);
 
-    return { accountDetails: twitter, profile: user };
+    const profile: AccountProfileCreate<TwitterProfile> = {
+      platformId: PLATFORM.Twitter,
+      user_id: twitterUser.id,
+      profile: twitterUser,
+    };
+
+    return { accountDetails: twitter, profile };
   }
 
   async getProfileByUsername(

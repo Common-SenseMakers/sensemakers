@@ -4,6 +4,7 @@ import { verifyMessage } from 'viem';
 import { FetchParams } from '../../@shared/types/types.fetch';
 import {
   NanopubAccountDetails,
+  NanopubProfile,
   NanupubSignupContext,
   NanupubSignupData,
   RSAKeys,
@@ -23,6 +24,7 @@ import {
   GenericThread,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
+import { AccountProfileCreate } from '../../@shared/types/types.profiles';
 import {
   AccountCredentials,
   AppUserRead,
@@ -101,7 +103,7 @@ export class NanopubService
     if (DEBUG)
       logger.debug('nanopub: intro published', { published: published.info() });
 
-    const profile = {
+    const nanopubProfile = {
       rsaPublickey: signupData.rsaPublickey,
       ethAddress: signupData.ethAddress,
       introNanopubUri: published.info().uri,
@@ -112,6 +114,12 @@ export class NanopubService
       user_id: signupData.ethAddress,
       signupDate: this.time.now(),
       credentials: {},
+    };
+
+    const profile: AccountProfileCreate<NanopubProfile> = {
+      platformId: PLATFORM.Nanopub,
+      user_id: signupData.ethAddress,
+      profile: nanopubProfile,
     };
 
     return { accountDetails, profile };

@@ -13,6 +13,7 @@ import {
   GenericThread,
   PostAndAuthor,
 } from '../@shared/types/types.posts';
+import { AccountProfile } from '../@shared/types/types.profiles';
 import {
   AccountCredentials,
   AccountDetailsBase,
@@ -27,14 +28,15 @@ export interface IdentityService<
   SignupContext = any,
   SignupData = any,
   AccountDetails extends AccountDetailsBase = AccountDetailsBase,
-  AccountProfile = any,
+  PlatformAccountProfile extends AccountProfile = AccountProfile,
 > {
   /** provides info needed by the frontend to start the signup flow */
   getSignupContext: (userId?: string, params?: any) => Promise<SignupContext>;
   /** handles the data obtained by the frontend after the signup flow */
-  handleSignupData: (
-    signupData: SignupData
-  ) => Promise<{ accountDetails: AccountDetails; profile: AccountProfile }>;
+  handleSignupData: (signupData: SignupData) => Promise<{
+    accountDetails: AccountDetails;
+    profile: Omit<PlatformAccountProfile, 'id'>;
+  }>;
 }
 
 export interface PlatformService<

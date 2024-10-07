@@ -4,7 +4,7 @@
  * Other AccountProfile can be created for non singed-up users whose timelines/posts we fetch.
  * All fetch-status-related data is associated to an AccountProfile, not to a User.
  */
-import { PUBLISHABLE_PLATFORM } from './types.platforms';
+import { IDENTITY_PLATFORM } from './types.platforms';
 
 export interface WithPlatformUserId {
   /** We are using user_id to refer the id of the user on a given platform and leave
@@ -20,11 +20,11 @@ export interface FetchedDetails {
 /** Keep tracks of all Accounts known to the app. */
 export interface AccountProfile<P = any> {
   id: string;
-  platformId: PUBLISHABLE_PLATFORM;
+  platformId: IDENTITY_PLATFORM;
   user_id: string;
   userId?: string;
   profile?: P;
   fetched?: FetchedDetails;
 }
 
-export type AccountProfileCreate = Omit<AccountProfile, 'id'>;
+export type AccountProfileCreate<P = any> = Omit<AccountProfile<P>, 'id'>;

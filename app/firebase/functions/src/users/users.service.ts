@@ -110,7 +110,7 @@ export class UsersService {
         userId: _userId,
       });
 
-    const { accountDetails: authenticatedDetails } =
+    const { accountDetails: authenticatedDetails, profile } =
       await this.getIdentityService(platform).handleSignupData(signupData);
 
     const prefixed_user_id = getPrefixedUserId(
@@ -227,7 +227,7 @@ export class UsersService {
 
         const initSettings: UserSettings = USER_INIT_SETTINGS;
 
-        await this.repo.createUser(
+        const userId = await this.repo.createUser(
           prefixed_user_id,
           {
             settings: initSettings,
@@ -238,6 +238,10 @@ export class UsersService {
           },
           manager
         );
+
+        /** create profile and link it to the user */
+        profile.userId = userId;
+        this.profiles.create(profile, manager);
 
         if (DEBUG)
           logger.debug(

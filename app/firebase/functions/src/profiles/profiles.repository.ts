@@ -1,6 +1,7 @@
 import { PLATFORM } from '../@shared/types/types.platforms';
 import {
   AccountProfile,
+  AccountProfileCreate,
   FetchedDetails,
 } from '../@shared/types/types.profiles';
 import { DefinedIfTrue } from '../@shared/types/types.user';
@@ -14,7 +15,10 @@ export class ProfilesRepository {
   constructor(protected db: DBInstance) {}
 
   /**  creates an AccountProfile. It does not set the fetched property */
-  public create(accountProfile: AccountProfile, manager: TransactionManager) {
+  public create(
+    accountProfile: AccountProfileCreate,
+    manager: TransactionManager
+  ) {
     const profileRef = this.db.collections.profiles.doc(
       getProfileId(accountProfile.platformId, accountProfile.user_id)
     );
