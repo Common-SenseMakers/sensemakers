@@ -66,15 +66,18 @@ export const getPlatformPostDetails = (
   const url = (() => {
     if (platformPost && platformPost.posted) {
       if (platformPost.platformId === PLATFORM.Twitter) {
-        return `https://twitter.com/x/status/${platformPost.posted.post_id}`;
+        const twitterThread = platformPost.posted.post as TwitterThread;
+        return `https://x.com/${twitterThread.author.username}/status/${platformPost.posted.post_id}`;
       }
 
       if (platformPost.platformId === PLATFORM.Mastodon) {
-        return `https://mastodon.social/post/${platformPost.posted.post_id}`;
+        const mastodonThread = platformPost.posted.post as MastodonThread;
+        return mastodonThread.posts[0].url || mastodonThread.posts[0].uri;
       }
 
       if (platformPost.platformId === PLATFORM.Bluesky) {
-        return `https://bsky.app/post/${extractRKeyFromURI(platformPost.posted.post_id)}`;
+        const blueskyThread = platformPost.posted.post as BlueskyThread;
+        return `https://bsky.app/profile/${blueskyThread.author.handle}/post/${extractRKeyFromURI(platformPost.posted.post_id)}`;
       }
     }
 
