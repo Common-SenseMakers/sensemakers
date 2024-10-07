@@ -1,23 +1,23 @@
 import { SciFilterClassfication } from '../../@shared/types/types.parser';
 import { PLATFORM } from '../../@shared/types/types.platforms';
 import { AppPostFull } from '../../@shared/types/types.posts';
-import { AppUser, AutopostOption } from '../../@shared/types/types.user';
+import { AppUserRead, AutopostOption } from '../../@shared/types/types.user';
 import { UsersHelper } from '../../users/users.helper';
 
-export const prepareNanopubDetails = (user: AppUser, post: AppPostFull) => {
-  const nanopubAccount = UsersHelper.getAccount(
+export const prepareNanopubDetails = (user: AppUserRead, post: AppPostFull) => {
+  const nanopubAccount = UsersHelper.getProfile(
     user,
     PLATFORM.Nanopub,
     undefined,
     true
   );
 
-  const twitterAccount = UsersHelper.getAccount(
+  const twitterAccount = UsersHelper.getProfile(
     user,
     PLATFORM.Twitter,
     undefined
   );
-  const mastodonAccount = UsersHelper.getAccount(
+  const mastodonAccount = UsersHelper.getProfile(
     user,
     PLATFORM.Mastodon,
     undefined
@@ -27,7 +27,7 @@ export const prepareNanopubDetails = (user: AppUser, post: AppPostFull) => {
     throw new Error('Twitter or Mastodon account not found');
   }
 
-  const orcidAccount = UsersHelper.getAccount(user, PLATFORM.Orcid, undefined);
+  const orcidAccount = UsersHelper.getProfile(user, PLATFORM.Orcid, undefined);
 
   const introUri = nanopubAccount.profile?.introNanopubUri;
 

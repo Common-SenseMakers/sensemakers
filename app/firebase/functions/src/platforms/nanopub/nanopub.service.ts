@@ -3,20 +3,20 @@ import { verifyMessage } from 'viem';
 
 import { FetchParams } from '../../@shared/types/types.fetch';
 import {
-  NanopubUserProfile,
+  NanopubAccountDetails,
+  NanupubSignupContext,
   NanupubSignupData,
   RSAKeys,
 } from '../../@shared/types/types.nanopubs';
 import {
-  FetchedResult,
   PlatformPost,
-  PlatformPostDeleteDraft,
   PlatformPostDraft,
   PlatformPostDraftApproval,
   PlatformPostPosted,
   PlatformPostPublish,
   PlatformPostUpdate,
 } from '../../@shared/types/types.platform.posts';
+import { PLATFORM } from '../../@shared/types/types.platforms';
 import {
   AppPostFull,
   AppPostMirror,
@@ -24,14 +24,12 @@ import {
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
 import {
-  AppUser,
-  PLATFORM,
-  UserDetailsBase,
+  AccountCredentials,
+  AppUserRead,
 } from '../../@shared/types/types.user';
 import { getEthToRSAMessage } from '../../@shared/utils/nanopub.sign.util';
 import { cleanPrivateKey } from '../../@shared/utils/semantics.helper';
 import { NANOPUBS_PUBLISH_SERVERS } from '../../config/config.runtime';
-import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
 import { PostsHelper } from '../../posts/posts.helper';
 import { TimeService } from '../../time/time.service';
@@ -52,9 +50,9 @@ export interface NanopubServiceConfig {
 export class NanopubService
   implements
     PlatformService<
-      NanopubUserProfile,
+      NanupubSignupContext,
       NanupubSignupData,
-      UserDetailsBase<NanopubUserProfile>
+      NanopubAccountDetails
     >
 {
   constructor(
@@ -65,7 +63,7 @@ export class NanopubService
   async getSignupContext(
     userId?: string,
     params?: NanupubSignupData
-  ): Promise<NanopubUserProfile> {
+  ): Promise<NanupubSignupContext> {
     if (!params) {
       throw new Error('Missing params');
     }
@@ -76,9 +74,7 @@ export class NanopubService
   }
 
   /** verifies signatures, creates intro nanopub */
-  async handleSignupData(
-    signupData: NanupubSignupData
-  ): Promise<UserDetailsBase<NanopubUserProfile, any, any>> {
+  async handleSignupData(signupData: NanupubSignupData) {
     /** verify ethSignature */
     if (DEBUG) logger.debug('nanopub: handleSignupData', { signupData });
 
@@ -105,16 +101,20 @@ export class NanopubService
     if (DEBUG)
       logger.debug('nanopub: intro published', { published: published.info() });
 
-    return {
+    const profile = {
+      rsaPublickey: signupData.rsaPublickey,
+      ethAddress: signupData.ethAddress,
+      introNanopubUri: published.info().uri,
+      ethToRsaSignature: signupData.ethToRsaSignature,
+    };
+
+    const accountDetails: NanopubAccountDetails = {
       user_id: signupData.ethAddress,
       signupDate: this.time.now(),
-      profile: {
-        rsaPublickey: signupData.rsaPublickey,
-        ethAddress: signupData.ethAddress,
-        introNanopubUri: published.info().uri,
-        ethToRsaSignature: signupData.ethToRsaSignature,
-      },
+      credentials: {},
     };
+
+    return { accountDetails, profile };
   }
 
   /** converts a post into a nanopublication draft */
@@ -123,7 +123,7 @@ export class NanopubService
   ): Promise<PlatformPostDraft<string>> {
     /** TODO: What if one user has many nanopub accounts? */
 
-    const account = UsersHelper.getAccount(
+    const profile = UsersHelper.getProfile(
       postAndAuthor.author,
       PLATFORM.Nanopub,
       undefined,
@@ -137,7 +137,7 @@ export class NanopubService
 
     return {
       unsignedPost: nanopubDraft.rdf(),
-      user_id: account.user_id,
+      user_id: profile.user_id,
       postApproval: PlatformPostDraftApproval.PENDING,
     };
   }
@@ -145,8 +145,8 @@ export class NanopubService
   async buildDeleteDraft(
     post_id: string,
     post: AppPostFull,
-    author: AppUser
-  ): Promise<PlatformPostDeleteDraft> {
+    author: AppUserRead
+  ) {
     const draftDelete = await createRetractionNanopub(post_id, post, author);
     const mirror = PostsHelper.getPostMirror(post, {
       post_id,
@@ -212,16 +212,16 @@ export class NanopubService
    * a list of the updated platformPosts
    */
   async publish(
-    postPublish: PlatformPostPublish<any>,
-    _manager: TransactionManager
+    postPublish: PlatformPostPublish<any>
   ): Promise<PlatformPostPosted<any>> {
+    const user_id = postPublish.draft.user_id;
     const published = await this.publishInternal(postPublish.draft);
 
     if (published) {
       const platformPostPosted: PlatformPostPosted = {
         post_id: published.info().uri,
         timestampMs: Date.now(),
-        user_id: postPublish.userDetails.user_id,
+        user_id: user_id,
         post: published.rdf(),
       };
       return platformPostPosted;
@@ -230,20 +230,18 @@ export class NanopubService
     throw new Error('Could not publish nanopub');
   }
 
-  async update(
-    postPublish: PlatformPostUpdate<any>,
-    _manager: TransactionManager
-  ) {
+  async update(postPublish: PlatformPostUpdate<any>) {
+    const user_id = postPublish.draft.user_id;
     const published = await this.publishInternal(postPublish.draft);
 
     if (published) {
-      const platfformPostPosted: PlatformPostPosted = {
+      const platformPostPosted: PlatformPostPosted = {
         post_id: published.info().uri,
         timestampMs: Date.now(),
-        user_id: postPublish.userDetails.user_id,
+        user_id: user_id,
         post: published.rdf(),
       };
-      return platfformPostPosted;
+      return { post: platformPostPosted };
     }
 
     throw new Error('Could not publish nanopub');
@@ -254,28 +252,32 @@ export class NanopubService
   }
 
   async fetch(
+    user_id: string,
     params: FetchParams,
-    userDetails: UserDetailsBase
-  ): Promise<FetchedResult> {
+    credentials: AccountCredentials
+  ) {
     return { fetched: {}, platformPosts: [] };
   }
 
-  async get(
-    post_id: string,
-    userDetails: UserDetailsBase
-  ): Promise<PlatformPostPosted<string>> {
+  async get(post_id: string, credentials: AccountCredentials) {
     const nanopubServers = JSON.parse(
       NANOPUBS_PUBLISH_SERVERS.value()
     ) as string[];
+
     const fetchedNanopub = await Nanopub.fetch(
       `${nanopubServers[0]}${post_id}`
     );
-    return {
+
+    // TODO: the user_id should be derived from the nanopub
+
+    const platformPost = {
       post_id,
       post: fetchedNanopub.rdf(),
       timestampMs: Date.now(),
-      user_id: userDetails.user_id,
+      user_id: 'placeholder',
     };
+
+    return { platformPost: platformPost };
   }
 
   mirror(postsToMirror: AppPostMirror[]): Promise<PlatformPost<any>[]> {

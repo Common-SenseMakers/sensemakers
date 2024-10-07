@@ -773,7 +773,8 @@ export class PostsManager {
       if (
         mirror.deleteDraft &&
         (mirror.deleteDraft.signerType === undefined ||
-          mirror.deleteDraft.signerType === PlatformPostSignerType.DELEGATED)
+          mirror.deleteDraft.signerType === PlatformPostSignerType.DELEGATED) &&
+        platform.signDraft
       ) {
         const signedPost = await platform.signDraft(mirror.deleteDraft);
         mirror.deleteDraft.signedPost = signedPost;
@@ -951,8 +952,9 @@ export class PostsManager {
             const platform = this.platforms.get(mirror.platformId);
 
             if (
-              mirror.draft.signerType === undefined ||
-              mirror.draft.signerType === PlatformPostSignerType.DELEGATED
+              (mirror.draft.signerType === undefined ||
+                mirror.draft.signerType === PlatformPostSignerType.DELEGATED) &&
+              platform.signDraft
             ) {
               const signedPost = await platform.signDraft(mirror.draft);
               mirror.draft.signedPost = signedPost;

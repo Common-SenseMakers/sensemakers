@@ -43,7 +43,7 @@ import {
   TwitterThread,
   TwitterUser,
 } from '../../@shared/types/types.twitter';
-import { AppUser } from '../../@shared/types/types.user';
+import { AppUserRead } from '../../@shared/types/types.user';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
@@ -548,7 +548,7 @@ export class TwitterService
   async convertFromGeneric(
     postAndAuthor: PostAndAuthor
   ): Promise<PlatformPostDraft<any>> {
-    const account = UsersHelper.getAccount(
+    const account = UsersHelper.getProfile(
       postAndAuthor.author,
       PLATFORM.Twitter,
       undefined,
@@ -564,12 +564,8 @@ export class TwitterService
   async buildDeleteDraft(
     post_id: string,
     post: AppPostFull,
-    author: AppUser
+    author: AppUserRead
   ): Promise<PlatformPostDeleteDraft | undefined> {
     return undefined;
-  }
-
-  async signDraft(post: PlatformPostDraft<any>): Promise<any> {
-    return post;
   }
 }

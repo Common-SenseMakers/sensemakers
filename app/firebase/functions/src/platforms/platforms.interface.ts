@@ -16,7 +16,7 @@ import {
 import {
   AccountCredentials,
   AccountDetailsBase,
-  AppUser,
+  AppUserRead,
 } from '../@shared/types/types.user';
 
 export interface WithCredentials {
@@ -59,20 +59,19 @@ export interface PlatformService<
   publish(
     post: PlatformPostPublish
   ): Promise<{ post: PlatformPostPosted } & WithCredentials>;
-  update(
+  update?(
     post: PlatformPostUpdate
   ): Promise<{ post: PlatformPostPosted } & WithCredentials>;
-
-  signDraft(post: PlatformPostDraft): Promise<DraftType>;
 
   convertToGeneric(platformPost: PlatformPostCreate): Promise<GenericThread>;
   convertFromGeneric(postAndAuthor: PostAndAuthor): Promise<PlatformPostDraft>;
 
+  signDraft?(post: PlatformPostDraft): Promise<DraftType>;
   /** for signature based platforms, this creates the draft that represents
    * a delete of a post. The draft is then signed by the user */
-  buildDeleteDraft(
+  buildDeleteDraft?(
     post_id: string,
     post: AppPostFull,
-    author: AppUser
+    author: AppUserRead
   ): Promise<PlatformPostDeleteDraft | undefined>;
 }

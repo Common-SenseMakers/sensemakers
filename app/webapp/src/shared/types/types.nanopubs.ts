@@ -14,6 +14,8 @@ export interface NanopubProfile {
   ethToRsaSignature: HexStr;
 }
 
+export type NanupubSignupContext = NanopubProfile;
+
 export type NanupubSignupData = NanopubProfile & {
   ethToRsaSignature: HexStr;
 };

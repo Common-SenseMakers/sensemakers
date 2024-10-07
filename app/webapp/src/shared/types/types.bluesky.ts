@@ -1,5 +1,4 @@
 import {
-  AppBskyActorDefs,
   AppBskyEmbedExternal,
   AppBskyEmbedImages,
   AppBskyEmbedRecord,
@@ -20,16 +19,19 @@ export interface BlueskySigninCredentials {
   appPassword: string;
 }
 
-export type BlueskyUserCredentials = AtpSessionData;
+export type BlueskyCredentials = AtpSessionData;
 
-export type BlueskyAccountDetails = AccountDetailsBase<{
-  write: BlueskyUserCredentials;
-  read: BlueskyUserCredentials;
-}>;
+export interface BlueskyAccountCredentials {
+  write?: BlueskyCredentials;
+  read?: BlueskyCredentials;
+}
+
+export type BlueskyAccountDetails =
+  AccountDetailsBase<BlueskyAccountCredentials>;
 
 export interface BlueskyProfile {
   id: string;
-  handle: string;
+  username: string;
   displayName?: string;
   avatar?: string;
 }
@@ -45,10 +47,11 @@ export type BlueskySignupData = {
   appPassword: string;
   type: 'read' | 'write';
 };
+
 export interface BlueskyThread {
   thread_id: string;
   posts: BlueskyPost[];
-  author: BlueskyAccount;
+  author: BlueskyProfile;
 }
 
 export interface QuotedBlueskyPost {
@@ -84,4 +87,3 @@ export type BlueskyPost = AppBskyFeedDefs.PostView & {
     record: QuotedBlueskyPost;
   };
 };
-export type BlueskyAccount = AppBskyActorDefs.ProfileViewDetailed;

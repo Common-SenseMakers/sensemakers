@@ -117,7 +117,7 @@ export type AppUserCreate = Omit<AppUser, 'userId'>;
  * The AccountDetailsRead combines the AccountDetails (signup date and credentials
  * existence) with the account profile
  */
-export interface AccountDetailsRead<P> {
+export interface AccountDetailsRead<P = any> {
   user_id: string;
   profile: P;
   read: boolean;
@@ -126,7 +126,7 @@ export interface AccountDetailsRead<P> {
 
 /** accounts include the readable details (not sensitive details) */
 export interface AppUserRead extends UserWithId, UserWithSettings {
-  accounts: {
+  profiles: {
     [PLATFORM.Orcid]?: AccountDetailsRead<OrcidProfile>[];
     [PLATFORM.Twitter]?: AccountDetailsRead<TwitterProfile>[];
     [PLATFORM.Nanopub]?: AccountDetailsRead<NanopubProfile>[];
@@ -158,13 +158,3 @@ export type RenderEmailFunction = (
   notificationFrequency: NotificationFreq,
   appUrl: string
 ) => { html: string; plainText: string; subject: string };
-
-/**
- * This is the "account" object sent to the frontend. Instead of credentials, it
- * has a boolean flag to mark if the account have read/write credentials registered
- */
-export interface AccountDetailsReadBase<P> extends WithPlatformUserId {
-  profile?: P;
-  read: boolean;
-  write: boolean;
-}

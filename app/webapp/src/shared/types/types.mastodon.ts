@@ -10,13 +10,14 @@ export interface MastodonProfile {
   domain: string;
 }
 
-export interface MastodonCredentials {
+export interface MastodonAccountCredentials {
+  domain?: string;
   accessToken: string;
 }
 
 export type MastodonAccountDetails = AccountDetailsBase<{
-  write?: MastodonCredentials;
-  read?: MastodonCredentials;
+  write?: MastodonAccountCredentials;
+  read?: MastodonAccountCredentials;
 }>;
 
 export interface MastodonGetContextParams {
@@ -35,15 +36,6 @@ export interface MastodonOAuthSignupData extends MastodonGetContextParams {
   code: string;
   clientId: string;
   clientSecret: string;
-}
-
-export interface MastodonAccountCredentials {
-  id: string;
-  username: string;
-  displayName: string;
-  domain: string;
-  accessToken: string;
-  type: 'read' | 'write';
 }
 
 export interface MastodonAccessTokenSignupData {

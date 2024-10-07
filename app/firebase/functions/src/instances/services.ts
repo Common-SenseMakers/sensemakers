@@ -160,6 +160,7 @@ export const createServices = (firestore: Firestore) => {
   const usersService = new UsersService(
     db,
     userRepo,
+    profilesRepo,
     identityPlatforms,
     time,
     email,

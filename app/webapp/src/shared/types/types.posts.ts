@@ -6,7 +6,7 @@ import {
 } from './types.parser';
 import { PlatformPost } from './types.platform.posts';
 import { PLATFORM } from './types.platforms';
-import { AppUser } from './types.user';
+import { AppUserRead } from './types.user';
 
 export interface GenericAuthor {
   platformId: PLATFORM;
@@ -85,7 +85,7 @@ export interface AppPostFull extends Omit<AppPost, 'mirrorsIds'> {
 
 export interface PostAndAuthor {
   post: AppPostFull;
-  author: AppUser;
+  author: AppUserRead;
 }
 
 /**

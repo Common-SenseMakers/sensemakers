@@ -8,8 +8,10 @@ import {
 import { AppPost } from '../@shared/types/types.posts';
 import {
   AccountDetailsBase,
+  AccountDetailsRead,
   AppUser,
   AppUserCreate,
+  AppUserRead,
   AutopostOption,
   DefinedIfTrue,
 } from '../@shared/types/types.user';
@@ -108,5 +110,45 @@ export class UsersHelper {
     });
 
     return platformIds;
+  }
+
+  static getProfiles<P = any>(
+    user: AppUserRead,
+    platformId: IDENTITY_PLATFORM
+  ): AccountDetailsRead<P>[] {
+    const platformProfiles = user.profiles[platformId];
+
+    if (!platformProfiles) {
+      return [];
+    }
+
+    return platformProfiles as AccountDetailsRead<P>[];
+  }
+
+  static getProfile<T extends boolean, P = any>(
+    user: AppUserRead,
+    platformId: IDENTITY_PLATFORM,
+    user_id?: string,
+    _throw?: T
+  ): DefinedIfTrue<T, AccountDetailsRead> {
+    const platformProfiles = UsersHelper.getProfiles<P>(user, platformId);
+
+    if (platformProfiles.length === 0 && _throw) {
+      throw new Error('Platform profile not found');
+    }
+
+    if (platformProfiles.length === 0) {
+      return undefined as DefinedIfTrue<T, AccountDetailsRead>;
+    }
+
+    const account = user_id
+      ? platformProfiles.find((p) => p.user_id === user_id)
+      : platformProfiles[0];
+
+    if (!account) {
+      return undefined as DefinedIfTrue<T, AccountDetailsRead>;
+    }
+
+    return account as DefinedIfTrue<T, AccountDetailsRead>;
   }
 }

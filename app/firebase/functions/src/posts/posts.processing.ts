@@ -166,10 +166,14 @@ export class PostsProcessing {
           accounts.map(async (account) => {
             /** create/update the draft for that platform and account */
             const platform = this.platforms.get(platformId);
+            const userRead = await this.users.getUserWithProfiles(
+              user.userId,
+              manager
+            );
 
             const draftPost = await platform.convertFromGeneric({
               post: appPostFull,
-              author: user,
+              author: userRead,
             });
 
             if (DEBUG)
@@ -236,11 +240,16 @@ export class PostsProcessing {
 
               let deleteDraft: undefined | any = undefined;
 
-              if (post_id) {
+              if (post_id && platform.buildDeleteDraft) {
+                const userRead = await this.users.getUserWithProfiles(
+                  user.userId,
+                  manager
+                );
+
                 deleteDraft = await platform.buildDeleteDraft(
                   post_id,
                   appPostFull,
-                  user
+                  userRead
                 );
               }
 

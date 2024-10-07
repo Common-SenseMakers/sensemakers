@@ -1,4 +1,4 @@
-import { PLATFORM, PUBLISHABLE_PLATFORM } from './types.platforms';
+import { PLATFORM } from './types.platforms';
 import { AppPostFull } from './types.posts';
 
 export interface OurTokenConfig {

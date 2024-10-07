@@ -317,7 +317,10 @@ export class UsersService {
     return verified.payload.userId;
   }
 
-  public async getUserProfile(userId: string, manager: TransactionManager) {
+  public async getUserWithProfiles(
+    userId: string,
+    manager: TransactionManager
+  ) {
     const user = await this.repo.getUser(userId, manager, true);
 
     /** delete the token, from the public profile */
@@ -332,7 +335,7 @@ export class UsersService {
       email,
       signupDate: user.signupDate,
       settings: user.settings,
-      accounts: {},
+      profiles: {},
     };
 
     /** extract the profile for each account */
@@ -349,7 +352,7 @@ export class UsersService {
               true
             );
 
-            const current = userRead.accounts[platform] || [];
+            const current = userRead.profiles[platform] || [];
 
             current.push({
               user_id: account.user_id,
@@ -358,7 +361,7 @@ export class UsersService {
               write: account.credentials.write !== undefined,
             });
 
-            userRead.accounts[platform] = current as AccountDetailsRead<any>[];
+            userRead.profiles[platform] = current as AccountDetailsRead<any>[];
           })
         );
       })
