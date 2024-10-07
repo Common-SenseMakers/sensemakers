@@ -31,7 +31,7 @@ export class ProfilesRepository {
     manager: TransactionManager,
     onlyIfExists: boolean = false
   ) {
-    const ref = this.db.collections.users.doc(profileId);
+    const ref = this.db.collections.profiles.doc(profileId);
     if (onlyIfExists) {
       const doc = await this.getDoc(profileId, manager);
 
@@ -161,7 +161,7 @@ export class ProfilesRepository {
     }
 
     /** should not return the data as it does not include the tx manager cache */
-    return profile.user_id as DefinedIfTrue<T, string>;
+    return profile.userId as DefinedIfTrue<T, string>;
   }
 
   public async setAccountProfileFetched(

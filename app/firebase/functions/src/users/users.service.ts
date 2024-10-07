@@ -188,6 +188,10 @@ export class UsersService {
           authenticatedDetails,
           manager
         );
+
+        /** create the profile when addint that account */
+        profile.userId = _userId;
+        this.profiles.create(profile, manager);
       }
     } else {
       /**
@@ -352,20 +356,22 @@ export class UsersService {
             const profile = await this.profiles.getProfile(
               platform,
               account.user_id,
-              manager,
-              true
+              manager
             );
 
-            const current = userRead.profiles[platform] || [];
+            if (profile) {
+              const current = userRead.profiles[platform] || [];
 
-            current.push({
-              user_id: account.user_id,
-              profile: profile.profile,
-              read: account.credentials.read !== undefined,
-              write: account.credentials.write !== undefined,
-            });
+              current.push({
+                user_id: account.user_id,
+                profile: profile.profile,
+                read: account.credentials.read !== undefined,
+                write: account.credentials.write !== undefined,
+              });
 
-            userRead.profiles[platform] = current as AccountDetailsRead<any>[];
+              userRead.profiles[platform] =
+                current as AccountDetailsRead<any>[];
+            }
           })
         );
       })

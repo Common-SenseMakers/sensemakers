@@ -58,7 +58,8 @@ export class PostsProcessing {
    * */
   async createPlatformPost(
     platformPost: PlatformPostCreate,
-    manager: TransactionManager
+    manager: TransactionManager,
+    authorUserId?: string
   ): Promise<PlatformPostCreated | undefined> {
     const existing = platformPost.posted
       ? await this.platformPosts.getFrom_post_id(
@@ -99,6 +100,7 @@ export class PostsProcessing {
         generic: genericPostData,
         origin: platformPost.platformId,
         authorProfileId,
+        authorUserId,
         mirrorsIds: [platformPostCreated.id],
         createdAtMs: platformPost.posted?.timestampMs || this.time.now(),
       },
@@ -114,11 +116,16 @@ export class PostsProcessing {
   /** Store all platform posts */
   async createPlatformPosts(
     platformPosts: PlatformPostCreate[],
-    manager: TransactionManager
+    manager: TransactionManager,
+    authorUserId?: string
   ) {
     const postsCreated = await Promise.all(
       platformPosts.map(async (platformPost) => {
-        return await this.createPlatformPost(platformPost, manager);
+        return await this.createPlatformPost(
+          platformPost,
+          manager,
+          authorUserId
+        );
       })
     );
 

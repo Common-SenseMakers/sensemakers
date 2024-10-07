@@ -334,7 +334,7 @@ export class PostsManager {
 
       const platformPostsCreate = await this.fetchAccountFromPlatform(
         platformId,
-        platformId,
+        user_id,
         params,
         manager,
         credentials
@@ -344,10 +344,18 @@ export class PostsManager {
         return;
       }
 
+      const authorUserId =
+        await this.users.profiles.getUserIdWithPlatformAccount(
+          platformId,
+          user_id,
+          manager
+        );
+
       /** Create the PlatformPosts and AppPosts */
       const platformPostsCreated = await this.processing.createPlatformPosts(
         platformPostsCreate,
-        manager
+        manager,
+        authorUserId
       );
 
       if (DEBUG)
