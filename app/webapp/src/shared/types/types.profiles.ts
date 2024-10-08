@@ -28,3 +28,7 @@ export interface AccountProfile<P = any> {
 }
 
 export type AccountProfileCreate<P = any> = Omit<AccountProfile<P>, 'id'>;
+export type AccountProfileBase<P = any> = Omit<
+  AccountProfile<P>,
+  'id' | 'platformId'
+>;

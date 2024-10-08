@@ -1,6 +1,8 @@
+import { MastodonProfile } from '../../@shared/types/types.mastodon';
 import { SciFilterClassfication } from '../../@shared/types/types.parser';
 import { PLATFORM } from '../../@shared/types/types.platforms';
 import { AppPostFull } from '../../@shared/types/types.posts';
+import { TwitterProfile } from '../../@shared/types/types.twitter';
 import { AppUserRead, AutopostOption } from '../../@shared/types/types.user';
 import { UsersHelper } from '../../users/users.helper';
 
@@ -12,12 +14,12 @@ export const prepareNanopubDetails = (user: AppUserRead, post: AppPostFull) => {
     true
   );
 
-  const twitterAccount = UsersHelper.getProfile(
+  const twitterAccount = UsersHelper.getProfile<false, TwitterProfile>(
     user,
     PLATFORM.Twitter,
     undefined
   );
-  const mastodonAccount = UsersHelper.getProfile(
+  const mastodonAccount = UsersHelper.getProfile<false, MastodonProfile>(
     user,
     PLATFORM.Mastodon,
     undefined
@@ -41,7 +43,7 @@ export const prepareNanopubDetails = (user: AppUserRead, post: AppPostFull) => {
       return platformUsername ? `https://x.com/${platformUsername}` : undefined;
     }
     if (mastodonAccount && post.origin === PLATFORM.Mastodon) {
-      const server = mastodonAccount.profile?.mastodonServer;
+      const server = mastodonAccount.profile?.domain;
       return platformUsername && server
         ? `https://${server}/@${platformUsername}`
         : undefined;
@@ -104,8 +106,8 @@ export const prepareNanopubDetails = (user: AppUserRead, post: AppPostFull) => {
       return `https://x.com/${platformUsername}/status/${platformPostId}`;
     }
     if (mastodonAccount && post.origin === PLATFORM.Mastodon) {
-      const mastodonServer = mastodonAccount.profile?.mastodonServer;
-      return `https://${mastodonServer}/@${platformUsername}/${platformPostId}`;
+      const domain = mastodonAccount.profile?.domain;
+      return `https://${domain}/@${platformUsername}/${platformPostId}`;
     }
     throw new Error('Unable to construct platform post URL');
   })();

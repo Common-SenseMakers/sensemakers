@@ -7,8 +7,10 @@ import {
 } from '../@shared/types/types.fetch';
 import {
   ALL_IDENTITY_PLATFORMS,
+  IDENTITY_PLATFORM,
   PLATFORM,
 } from '../@shared/types/types.platforms';
+import { AccountProfileCreate } from '../@shared/types/types.profiles';
 import {
   AccountCredentials,
   AccountDetailsRead,
@@ -94,7 +96,7 @@ export class UsersService {
    * otherewise a new user is created.
    */
   public async handleSignup<T = any>(
-    platform: PLATFORM,
+    platform: IDENTITY_PLATFORM,
     signupData: T,
     manager: TransactionManager,
     _userId?: string // MUST be the authenticated userId if provided
@@ -190,8 +192,13 @@ export class UsersService {
         );
 
         /** create the profile when addint that account */
-        profile.userId = _userId;
-        this.profiles.create(profile, manager);
+        const profileCreate: AccountProfileCreate = {
+          ...profile,
+          userId: _userId,
+          platformId: platform,
+        };
+
+        this.profiles.create(profileCreate, manager);
       }
     } else {
       /**
@@ -244,8 +251,14 @@ export class UsersService {
         );
 
         /** create profile and link it to the user */
-        profile.userId = userId;
-        this.profiles.create(profile, manager);
+        /** create the profile when addint that account */
+        const profileCreate: AccountProfileCreate = {
+          ...profile,
+          userId,
+          platformId: platform,
+        };
+
+        this.profiles.create(profileCreate, manager);
 
         if (DEBUG)
           logger.debug(

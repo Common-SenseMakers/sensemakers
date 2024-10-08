@@ -23,7 +23,7 @@ export const authenticateMastodonUser = async (
   if (DEBUG) logger.debug('authenticateMastodonUser', { testAccount });
 
   const signupData: MastodonAccessTokenSignupData = {
-    mastodonServer: testAccount.mastodonServer,
+    domain: testAccount.mastodonServer,
     accessToken: testAccount.accessToken,
     type: testAccount.type,
   };

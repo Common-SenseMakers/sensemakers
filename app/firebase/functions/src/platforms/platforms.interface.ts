@@ -35,7 +35,7 @@ export interface IdentityService<
   /** handles the data obtained by the frontend after the signup flow */
   handleSignupData: (signupData: SignupData) => Promise<{
     accountDetails: AccountDetails;
-    profile: Omit<PlatformAccountProfile, 'id'>;
+    profile: Omit<PlatformAccountProfile, 'id' | 'platformId'>;
   }>;
 }
 
