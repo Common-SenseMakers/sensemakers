@@ -1,5 +1,3 @@
-import AtpAgent from '@atproto/api';
-
 import { BlueskyAccountDetails } from '../../src/@shared/types/types.bluesky';
 import { NotificationFreq } from '../../src/@shared/types/types.notifications';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
@@ -95,15 +93,6 @@ const authenticateBlueskyForUser = async (
       signupDate: Date.now(),
       accounts: {},
     };
-  }
-
-  const agent = new AtpAgent({ service: 'https://bsky.social' });
-  await agent.login({
-    identifier: credentials.bluesky.username,
-    password: credentials.bluesky.appPassword,
-  });
-  if (!agent.session) {
-    throw new Error('Failed to login to Bluesky');
   }
 
   const blueskyUserDetails: BlueskyAccountDetails = {
