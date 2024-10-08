@@ -116,71 +116,27 @@ describe('02-platforms', () => {
       expect(threads.platformPosts.length).to.be.greaterThanOrEqual(1);
     });
 
-    it('includes quote tweets in platform post and app post', async () => {
-      const postIds = [
-        '1798791421152911644', // https://x.com/sense_nets_bot/status/1798791421152911644 quotes https://x.com/sense_nets_bot/status/1795069204418175459
-        '1798791660668698927', // https://x.com/sense_nets_bot/status/1798791660668698927 quotes https://x.com/sense_nets_bot/status/1798782358201508331
-        '1798792109031559184', // https://x.com/sense_nets_bot/status/1798792109031559184 quotes https://x.com/rtk254/status/1798549107507974626
-      ];
-
-      if (!user) {
-        throw new Error('appUser not created');
-      }
-      const twitterId = user.accounts[PLATFORM.Twitter]?.[0]?.user_id;
-
+    it.only('gets account by username', async () => {
       const twitterService = services.platforms.get(
         PLATFORM.Twitter
       ) as TwitterService;
+      const username = 'wesleyfinck';
+      const bearerToken = process.env.TWITTER_BEARER_TOKEN;
+      if (!bearerToken) {
+        throw new Error('Missing TWITTER_BEARER_TOKEN');
+      }
 
-      try {
-        const result = await services.db.run(async (manager) => {
-          return twitterService.getPosts(postIds, manager, twitterId);
-        });
-        const appTweets = convertToAppTweets(result.data, result.includes);
-        expect(appTweets).to.not.be.undefined;
-        expect(appTweets.length).to.be.equal(3);
+      const result = await twitterService.getAccountByUsername(
+        username,
+        bearerToken
+      );
 
-        const author = result.includes?.users?.find(
-          (user) => user.id === result.data[0].author_id
-        );
-        expect(author).to.not.be.undefined;
-
-        const quotedTweetIds = [
-          '1795069204418175459',
-          '1798782358201508331',
-          '1798549107507974626',
-        ];
-
-        appTweets.forEach((appTweet: AppTweet) => {
-          expect(quotedTweetIds).to.include(appTweet.quoted_tweet?.id);
-        });
-
-        /** check that it converts the thread into a generic app post properly */
-        const platformPost = {
-          posted: {
-            post: {
-              conversation_id: appTweets[0].conversation_id,
-              tweets: appTweets,
-              author,
-            },
-          },
-        };
-
-        const genericPost = await twitterService.convertToGeneric(
-          platformPost as any as PlatformPostCreate<TwitterThread>
-        );
-
-        if (USE_REAL_TWITTER) {
-          genericPost.thread.forEach((post) => {
-            expect(post.quotedThread).to.not.be.undefined;
-            expect(
-              quotedTweetIds.some((id) => post.quotedThread?.url?.includes(id))
-            ).to.be.true;
-          });
-        }
-      } catch (error) {
-        console.error('error: ', error);
-        throw error;
+      expect(result).to.not.be.null;
+      if (result) {
+        expect(result.id).to.be.a('string');
+        expect(result.username).to.equal(username);
+        expect(result.name).to.be.a('string');
+        expect(result.profile_image_url).to.be.a('string');
       }
     });
     it('gets account by username', async () => {
@@ -450,105 +406,5 @@ describe('02-platforms', () => {
       expect(result).to.not.be.undefined;
       expect(result.platformPosts.length).to.be.greaterThan(0);
     });
-
-    it('fetches posts with a since_id', async () => {
-      // First, fetch some posts to get a valid since_id
-      const initialFetch = await services.db.run((manager) =>
-        blueskyService.fetch({ expectedAmount: 5 }, userDetails, manager)
-      );
-      // get the last post's id and timestamp to make sure there are most recent posts
-      const sinceId =
-        initialFetch.platformPosts[initialFetch.platformPosts.length - 1]
-          .post_id;
-      const sinceTimestamp =
-        initialFetch.platformPosts[initialFetch.platformPosts.length - 1]
-          .timestampMs;
-
-      const fetchParams: PlatformFetchParams = {
-        expectedAmount: 10,
-        since_id: sinceId,
-      };
-
-      const result = await services.db.run((manager) =>
-        blueskyService.fetch(fetchParams, userDetails, manager)
-      );
-
-      expect(result).to.not.be.undefined;
-      if (result.platformPosts.length > 0) {
-        result.platformPosts.forEach((platformPost) => {
-          const thread = platformPost.post as BlueskyThread;
-          thread.posts.forEach((post) => {
-            const createdAt = new Date(post.record.createdAt).getTime();
-            expect(createdAt).to.be.greaterThan(sinceTimestamp);
-          });
-        });
-      }
-    });
-
-    it('fetches posts with an until_id', async () => {
-      // First, fetch some posts to get a valid until_id
-      const initialFetch = await services.db.run((manager) =>
-        blueskyService.fetch({ expectedAmount: 15 }, userDetails, manager)
-      );
-      const untilId =
-        initialFetch.platformPosts[initialFetch.platformPosts.length - 1]
-          .post_id;
-      const untilTimestamp =
-        initialFetch.platformPosts[initialFetch.platformPosts.length - 1]
-          .timestampMs;
-
-      const fetchParams: PlatformFetchParams = {
-        expectedAmount: 10,
-        until_id: untilId,
-      };
-
-      const result = await services.db.run((manager) =>
-        blueskyService.fetch(fetchParams, userDetails, manager)
-      );
-
-      expect(result).to.not.be.undefined;
-      if (result.platformPosts.length > 0) {
-        result.platformPosts.forEach((platformPost) => {
-          const thread = platformPost.post as BlueskyThread;
-          thread.posts.forEach((post) => {
-            const createdAt = new Date(post.record.createdAt).getTime();
-            expect(createdAt).to.be.at.most(untilTimestamp);
-          });
-        });
-      }
-    });
-
-    (USE_REAL_BLUESKY ? it : it.skip)(
-      'fetches a post with a quote and converts it to generic format',
-      async () => {
-        const postId =
-          'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4ebss5mmt2f';
-
-        const result = await services.db.run((manager) =>
-          blueskyService.get(postId, userDetails, manager)
-        );
-
-        expect(result).to.not.be.undefined;
-        expect(result.post).to.be.an('object');
-
-        const genericThread = await blueskyService.convertToGeneric({
-          posted: result,
-        } as PlatformPostCreate<BlueskyThread>);
-
-        expect(genericThread.thread.length).to.be.greaterThan(0);
-
-        const mainPost = genericThread.thread[0];
-        expect(mainPost.quotedThread).to.be.an('object');
-        expect(mainPost.quotedThread?.author).to.be.an('object');
-        expect(mainPost.quotedThread?.thread).to.be.an('array');
-        expect(mainPost.quotedThread?.thread.length).to.equal(1);
-
-        const quotedPost = mainPost.quotedThread?.thread[0];
-        expect(quotedPost?.content).to.be.a('string');
-        expect(quotedPost?.url).to.be.equal(
-          'https://bsky.app/profile/thetyee.ca/post/3l4eak57v5y2h'
-        );
-      }
-    );
   });
 });

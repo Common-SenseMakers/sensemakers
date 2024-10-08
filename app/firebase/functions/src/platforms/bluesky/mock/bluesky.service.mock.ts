@@ -1,16 +1,16 @@
 import { anything, instance, spy, when } from 'ts-mockito';
 
 import {
+  BlueskyAccountDetails,
   BlueskyGetContextParams,
   BlueskySignupContext,
   BlueskySignupData,
-  BlueskyUserDetails,
 } from '../../../@shared/types/types.bluesky';
 import { PlatformFetchParams } from '../../../@shared/types/types.fetch';
 import { PlatformPostPublish } from '../../../@shared/types/types.platform.posts';
 import {
+  AccountDetailsBase,
   TestUserCredentials,
-  UserDetailsBase,
 } from '../../../@shared/types/types.user';
 import { TransactionManager } from '../../../db/transaction.manager';
 import { BlueskyService } from '../bluesky.service';
@@ -34,7 +34,7 @@ export const getBlueskyMock = (
   const mocked = spy(blueskyService);
 
   if (type.publish) {
-    when(mocked.publish(anything(), anything())).thenCall(
+    when(mocked.publish(anything())).thenCall(
       (postPublish: PlatformPostPublish<string>) => {
         // Implementation goes here
       }
@@ -45,7 +45,7 @@ export const getBlueskyMock = (
     when(mocked.fetch(anything(), anything(), anything())).thenCall(
       async (
         params: PlatformFetchParams,
-        userDetails: UserDetailsBase,
+        userDetails: BlueskyAccountDetails,
         manager: TransactionManager
       ) => {
         if (params.since_id) {
@@ -2141,10 +2141,10 @@ export const getBlueskyMock = (
   }
 
   if (type.get) {
-    when(mocked.get(anything(), anything(), anything())).thenCall(
+    when(mocked.get(anything(), anything())).thenCall(
       async (
         post_id: string,
-        userDetails: UserDetailsBase,
+        userDetails: AccountDetailsBase,
         manager: TransactionManager
       ) => {
         return {
@@ -2460,22 +2460,24 @@ export const getBlueskyMock = (
       }
     );
     when(mocked.handleSignupData(anything())).thenCall(
-      (data: BlueskySignupData): BlueskyUserDetails => {
-        return {
+      (data: BlueskySignupData) => {
+        const accountDetails = {
           user_id: 'did:plc:6z5botgrc5vekq7j26xnvawq',
           signupDate: 1725473415250,
-          profile: {
-            id: 'did:plc:6z5botgrc5vekq7j26xnvawq',
-            username: 'weswalla.bsky.social',
-            name: 'Wesley Finck',
-            avatar:
-              'https://media.cosocial.ca/accounts/avatars/111/971/425/782/516/559/original/963c30efd081957e.jpeg',
-          },
           read: {
             username: '',
             appPassword: '',
           },
         };
+        const profile = {
+          id: 'did:plc:6z5botgrc5vekq7j26xnvawq',
+          username: 'weswalla.bsky.social',
+          name: 'Wesley Finck',
+          avatar:
+            'https://media.cosocial.ca/accounts/avatars/111/971/425/782/516/559/original/963c30efd081957e.jpeg',
+        };
+
+        return { accountDetails, profile };
       }
     );
   }

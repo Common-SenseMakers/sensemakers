@@ -1,21 +1,18 @@
 import { SciFilterClassfication } from '../../@shared/types/types.parser';
+import { PLATFORM } from '../../@shared/types/types.platforms';
 import { AppPostFull } from '../../@shared/types/types.posts';
-import {
-  AppUser,
-  AutopostOption,
-  PLATFORM,
-} from '../../@shared/types/types.user';
+import { AppUserRead, AutopostOption } from '../../@shared/types/types.user';
 import { UsersHelper } from '../../users/users.helper';
 
-export const prepareNanopubDetails = (user: AppUser, post: AppPostFull) => {
-  const nanopubAccount = UsersHelper.getAccount(
+export const prepareNanopubDetails = (user: AppUserRead, post: AppPostFull) => {
+  const nanopubAccount = UsersHelper.getProfile(
     user,
     PLATFORM.Nanopub,
     undefined,
     true
   );
 
-  const orcidAccount = UsersHelper.getAccount(user, PLATFORM.Orcid, undefined);
+  const orcidAccount = UsersHelper.getProfile(user, PLATFORM.Orcid, undefined);
 
   const introUri = nanopubAccount.profile?.introNanopubUri;
 

@@ -1,5 +1,4 @@
 import { AppTweet } from '../../../@shared/types/types.twitter';
-import { UserDetailsBase } from '../../../@shared/types/types.user';
 
 export const getSampleTweet = (
   id: string,
@@ -35,73 +34,80 @@ export const getSampleTweet = (
   };
 };
 
-export const getTimelineMock = (userDetails: UserDetailsBase) => {
+export const getTimelineMock = (
+  user_id: string,
+  name: string,
+  username: string
+) => {
   return [
     {
       conversation_id: '500',
-      tweets: [
-        getSampleTweet('500', userDetails.user_id, Date.now() + 5, '500', ''),
-      ],
+      tweets: [getSampleTweet('500', user_id, Date.now() + 5, '500', '')],
       author: {
-        id: userDetails.user_id,
-        name: userDetails.profile.name,
-        username: userDetails.profile.username,
-        profile_image_url: userDetails.profile.profile_image_url,
+        id: user_id,
+        name,
+        username,
+        profile_image_url:
+          'https://pbs.twimg.com/profile_images/1783977034038882304/RGn66lGT_normal.jpg',
       },
     },
     {
       conversation_id: '400',
       tweets: [
-        getSampleTweet('400', userDetails.user_id, Date.now() + 4, '400', ''),
-        getSampleTweet('401', userDetails.user_id, Date.now() + 4, '401', ''),
-        getSampleTweet('402', userDetails.user_id, Date.now() + 4, '402', ''),
+        getSampleTweet('400', user_id, Date.now() + 4, '400', ''),
+        getSampleTweet('401', user_id, Date.now() + 4, '401', ''),
+        getSampleTweet('402', user_id, Date.now() + 4, '402', ''),
       ],
       author: {
-        id: userDetails.user_id,
-        name: userDetails.profile.name,
-        username: userDetails.profile.username,
-        profile_image_url: userDetails.profile.profile_image_url,
+        id: user_id,
+        name,
+        username,
+        profile_image_url:
+          'https://pbs.twimg.com/profile_images/1783977034038882304/RGn66lGT_normal.jpg',
       },
     },
     {
       conversation_id: '300',
       tweets: [
-        getSampleTweet('300', userDetails.user_id, Date.now() + 3, '300', ''),
-        getSampleTweet('301', userDetails.user_id, Date.now() + 3, '301', ''),
+        getSampleTweet('300', user_id, Date.now() + 3, '300', ''),
+        getSampleTweet('301', user_id, Date.now() + 3, '301', ''),
       ],
       author: {
-        id: userDetails.user_id,
-        name: userDetails.profile.name,
-        username: userDetails.profile.username,
-        profile_image_url: userDetails.profile.profile_image_url,
+        id: user_id,
+        name,
+        username,
+        profile_image_url:
+          'https://pbs.twimg.com/profile_images/1783977034038882304/RGn66lGT_normal.jpg',
       },
     },
     {
       conversation_id: '200',
       tweets: [
-        getSampleTweet('200', userDetails.user_id, Date.now() + 2, '200', ''),
-        getSampleTweet('201', userDetails.user_id, Date.now() + 2, '201', ''),
-        getSampleTweet('202', userDetails.user_id, Date.now() + 2, '202', ''),
+        getSampleTweet('200', user_id, Date.now() + 2, '200', ''),
+        getSampleTweet('201', user_id, Date.now() + 2, '201', ''),
+        getSampleTweet('202', user_id, Date.now() + 2, '202', ''),
       ],
       author: {
-        id: userDetails.user_id,
-        name: userDetails.profile.name,
-        username: userDetails.profile.username,
-        profile_image_url: userDetails.profile.profile_image_url,
+        id: user_id,
+        name,
+        username,
+        profile_image_url:
+          'https://pbs.twimg.com/profile_images/1783977034038882304/RGn66lGT_normal.jpg',
       },
     },
     {
       conversation_id: '100',
       tweets: [
-        getSampleTweet('100', userDetails.user_id, Date.now() + 1, '100', ''),
-        getSampleTweet('101', userDetails.user_id, Date.now() + 1, '101', ''),
-        getSampleTweet('102', userDetails.user_id, Date.now() + 1, '102', ''),
+        getSampleTweet('100', user_id, Date.now() + 1, '100', ''),
+        getSampleTweet('101', user_id, Date.now() + 1, '101', ''),
+        getSampleTweet('102', user_id, Date.now() + 1, '102', ''),
       ],
       author: {
-        id: userDetails.user_id,
-        name: userDetails.profile.name,
-        username: userDetails.profile.username,
-        profile_image_url: userDetails.profile.profile_image_url,
+        id: user_id,
+        name,
+        username,
+        profile_image_url:
+          'https://pbs.twimg.com/profile_images/1783977034038882304/RGn66lGT_normal.jpg',
       },
     },
   ];

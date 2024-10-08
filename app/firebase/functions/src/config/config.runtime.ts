@@ -1,9 +1,6 @@
 import { NotificationFreq } from '../@shared/types/types.notifications';
-import {
-  AutopostOption,
-  PLATFORM,
-  UserSettings,
-} from '../@shared/types/types.user';
+import { PLATFORM } from '../@shared/types/types.platforms';
+import { AutopostOption, UserSettings } from '../@shared/types/types.user';
 import { envRuntime } from './typedenv.runtime';
 
 /** Verify that all needed env variables were provided */

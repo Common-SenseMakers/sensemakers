@@ -5,6 +5,7 @@ import { useAppFetch } from '../../api/app.fetch';
 import { subscribeToUpdates } from '../../firestore/realtime.listener';
 import { AppPostFull } from '../../shared/types/types.posts';
 import { AppUserRead } from '../../shared/types/types.user';
+import { ConnectedUser } from '../../user-login/contexts/AccountContext';
 
 export interface PostFetchContext {
   postId?: string;
@@ -18,7 +19,7 @@ const DEBUG = false;
 /** hook in charge of fething the current post, and keeping it
  * and its derived values updated in real time */
 export const usePostFetch = (
-  connectedUser?: AppUserRead,
+  connectedUser?: ConnectedUser,
   _postId?: string,
   postInit?: AppPostFull
 ): PostFetchContext => {

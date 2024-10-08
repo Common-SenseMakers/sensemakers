@@ -58,7 +58,7 @@ export const usePostUpdate = (
 
   const editable =
     connectedUser !== undefined &&
-    connectedUser.userId === fetched.post?.authorId &&
+    connectedUser.userId === fetched.post?.authorUserId &&
     (!derived.statuses.live || enabledEdit);
 
   useEffect(() => {

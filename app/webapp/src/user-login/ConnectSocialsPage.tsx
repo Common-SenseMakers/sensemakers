@@ -71,7 +71,7 @@ export const ConnectSocialsPage = () => {
           buttonText={mastodonProfile ? '' : 'connect'}
           username={
             mastodonProfile
-              ? `@${mastodonProfile.username}@${mastodonProfile.mastodonServer}`
+              ? `@${mastodonProfile.username}@${mastodonProfile.domain}`
               : ''
           }
           connected={!!mastodonProfile}

@@ -11,14 +11,12 @@ import { I18Keys } from '../i18n/i18n';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID, PatternProps } from '../semantics/patterns/patterns';
 import { AppPostReviewStatus } from '../shared/types/types.posts';
-import { TwitterUserProfile } from '../shared/types/types.twitter';
+import { TwitterProfile } from '../shared/types/types.twitter';
 import { AppButton } from '../ui-components';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
-import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
-import { getAccount } from '../user-login/user.helper';
 import { usePersist } from '../utils/use.persist';
 import { PostHeader } from './PostHeader';
 import { PostNav } from './PostNav';
@@ -31,7 +29,7 @@ import { concatenateThread, hideSemanticsHelper } from './posts.helper';
 const DEBUG = false;
 
 /** extract the postId from the route and pass it to a PostContext */
-export const PostView = (props: { profile?: TwitterUserProfile }) => {
+export const PostView = (props: { profile?: TwitterProfile }) => {
   const appFetch = useAppFetch();
 
   // shared persisted state with PostingPage.tsx

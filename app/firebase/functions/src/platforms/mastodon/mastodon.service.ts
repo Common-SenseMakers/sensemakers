@@ -2,34 +2,34 @@ import { createOAuthAPIClient, createRestAPIClient, mastodon } from 'masto';
 
 import { PlatformFetchParams } from '../../@shared/types/types.fetch';
 import {
+  MastodonAccountCredentials,
+  MastodonAccountDetails,
   MastodonGetContextParams,
   MastodonPost,
+  MastodonProfile,
   MastodonSignupContext,
   MastodonSignupData,
   MastodonThread,
-  MastodonUserDetails,
 } from '../../@shared/types/types.mastodon';
 import {
   FetchedResult,
   PlatformPostCreate,
-  PlatformPostDeleteDraft,
   PlatformPostDraft,
   PlatformPostDraftApproval,
   PlatformPostPosted,
   PlatformPostPublish,
   PlatformPostSignerType,
-  PlatformPostUpdate,
 } from '../../@shared/types/types.platform.posts';
+import { PLATFORM } from '../../@shared/types/types.platforms';
 import {
-  AppPostFull,
   GenericAuthor,
   GenericPost,
   GenericThread,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
-import { AppUser, PLATFORM } from '../../@shared/types/types.user';
+import { AccountProfileCreate } from '../../@shared/types/types.profiles';
+import { AccountCredentials } from '../../@shared/types/types.user';
 import { MASTODON_ACCESS_TOKEN } from '../../config/config.runtime';
-import { TransactionManager } from '../../db/transaction.manager';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
@@ -49,7 +49,7 @@ export class MastodonService
     PlatformService<
       MastodonSignupContext,
       MastodonSignupData,
-      MastodonUserDetails
+      MastodonAccountDetails
     >
 {
   constructor(
@@ -114,48 +114,54 @@ export class MastodonService
     return result;
   }
 
-  public async handleSignupData(
-    signupData: MastodonSignupData
-  ): Promise<MastodonUserDetails> {
+  public async handleSignupData(signupData: MastodonSignupData) {
     if ('isGhost' in signupData) {
       const accessToken = MASTODON_ACCESS_TOKEN.value();
       // Handle the new overload
       if (DEBUG)
         logger.debug('handleSignupData (token)', { signupData }, DEBUG_PREFIX);
 
-      const account = await this.getAccountByUsername(
+      const profile = await this.getAccountByUsername(
         signupData.username,
         signupData.mastodonServer,
         accessToken
       );
 
-      if (!account) {
+      if (!profile) {
         throw new Error('Failed to fetch account details');
       }
-
-      const mastodon: MastodonUserDetails = {
-        user_id: account.id,
+      const mastodonAccountDetails: MastodonAccountDetails = {
+        user_id: profile.id,
         signupDate: this.time.now(),
-        profile: {
-          id: account.id,
-          username: account.username,
-          displayName: account.displayName,
-          avatar: account.avatar,
-          mastodonServer: account.mastodonServer,
+        credentials: {
+          read: {
+            accessToken: accessToken,
+          },
         },
-        read: {
-          accessToken: accessToken,
+      };
+      const mastodonProfile: AccountProfileCreate<MastodonProfile> = {
+        platformId: PLATFORM.Mastodon,
+        user_id: profile.id,
+        profile: {
+          id: profile.id,
+          username: profile.username,
+          displayName: profile.displayName || profile.username,
+          avatar: profile.avatar || '',
+          domain: profile.domain,
         },
       };
 
       if (DEBUG)
         logger.debug(
           'handleSignupData (token) result',
-          { mastodon },
+          { mastodonProfile, mastodonAccountDetails },
           DEBUG_PREFIX
         );
 
-      return mastodon;
+      return {
+        accountDetails: mastodonAccountDetails,
+        profile: mastodonProfile,
+      };
     } else {
       const token = await (async () => {
         if ('accessToken' in signupData) {
@@ -182,44 +188,58 @@ export class MastodonService
       });
 
       const account = await mastoClient.v1.accounts.verifyCredentials();
-      const mastodon: MastodonUserDetails = {
+      const credentials: MastodonAccountCredentials = {
+        accessToken: token.accessToken,
+      };
+
+      const mastodon: MastodonAccountDetails = {
         user_id: account.id,
         signupDate: this.time.now(),
-        profile: {
-          id: account.id,
-          username: account.username,
-          displayName: account.displayName,
-          avatar: account.avatar,
-          mastodonServer: signupData.mastodonServer,
-        },
-        read: {
-          accessToken: token.accessToken,
+        credentials: {
+          read: credentials,
         },
       };
       if (signupData.type === 'write') {
-        mastodon['write'] = { accessToken: token.accessToken };
+        mastodon.credentials['write'] = credentials;
       }
 
       if (DEBUG)
         logger.debug('handleSignupData result', { mastodon }, DEBUG_PREFIX);
 
-      return mastodon;
+      const mdProfile: MastodonProfile = {
+        id: account.id,
+        username: account.username,
+        displayName: account.displayName,
+        avatar: account.avatar,
+        domain: signupData.mastodonServer,
+      };
+
+      const profile: AccountProfileCreate<MastodonProfile> = {
+        platformId: PLATFORM.Nanopub,
+        user_id: account.id,
+        profile: mdProfile,
+      };
+
+      return { accountDetails: mastodon, profile };
     }
   }
 
   public async fetch(
+    user_id: string,
     params: PlatformFetchParams,
-    userDetails: MastodonUserDetails,
-    manager: TransactionManager
+    credentials: AccountCredentials<
+      MastodonAccountCredentials,
+      MastodonAccountCredentials
+    >
   ): Promise<FetchedResult<MastodonThread>> {
-    if (DEBUG) logger.debug('fetch', { params, userDetails }, DEBUG_PREFIX);
+    if (DEBUG) logger.debug('fetch', { params, credentials }, DEBUG_PREFIX);
 
-    if (!userDetails.profile || !userDetails.read) {
+    if (!credentials.read) {
       throw new Error('profile and/or read credentials are not provided');
     }
     const client = createRestAPIClient({
-      url: `https://${userDetails.profile.mastodonServer}`,
-      accessToken: userDetails.read.accessToken,
+      url: `https://${credentials.read.domain}`,
+      accessToken: credentials.read.accessToken,
     });
 
     const fetchParams: any = {
@@ -238,7 +258,7 @@ export class MastodonService
     if (DEBUG) logger.debug('fetch params', { fetchParams }, DEBUG_PREFIX);
 
     const paginator = client.v1.accounts
-      .$select(userDetails.user_id)
+      .$select(user_id)
       .statuses.list(fetchParams);
 
     let allStatuses: MastodonPost[] = [];
@@ -362,34 +382,33 @@ export class MastodonService
   }
 
   public async publish(
-    postPublish: PlatformPostPublish<string>,
-    manager: TransactionManager
-  ): Promise<PlatformPostPosted<mastodon.v1.Status>> {
-    const userDetails = postPublish.userDetails as MastodonUserDetails;
-    if (!userDetails.profile || !userDetails.write) {
-      throw new Error('profile and/or write credentials are not provided');
-    }
+    postPublish: PlatformPostPublish<string>
+  ): Promise<{ post: PlatformPostPosted<mastodon.v1.Status> }> {
+    const credentials = postPublish.credentials;
+
     const client = createRestAPIClient({
-      url: `https://${userDetails.profile.mastodonServer}`,
-      accessToken: userDetails.write.accessToken,
+      url: `https://${credentials.write.domain}`,
+      accessToken: credentials.write.accessToken,
     });
 
     const status = await client.v1.statuses.create({
       status: postPublish.draft,
     });
 
-    return {
+    const post = {
       post_id: status.id,
       user_id: status.account.id,
       timestampMs: new Date(status.createdAt).getTime(),
       post: status,
     };
+
+    return { post };
   }
 
   public async convertFromGeneric(
     postAndAuthor: PostAndAuthor
   ): Promise<PlatformPostDraft<string>> {
-    const account = UsersHelper.getAccount(
+    const account = UsersHelper.getProfile(
       postAndAuthor.author,
       PLATFORM.Mastodon,
       undefined,
@@ -408,15 +427,18 @@ export class MastodonService
 
   public async get(
     post_id: string,
-    userDetails: MastodonUserDetails,
-    manager?: TransactionManager
-  ): Promise<PlatformPostPosted<MastodonThread>> {
-    if (!userDetails.profile || !userDetails.read) {
-      throw new Error('profile and/or read credentials are not provided');
+    credentials: AccountCredentials<
+      MastodonAccountCredentials,
+      MastodonAccountCredentials
+    >
+  ): Promise<{ platformPost: PlatformPostPosted<MastodonThread> }> {
+    if (!credentials.read) {
+      throw new Error('read credentials are not provided');
     }
+
     const client = createRestAPIClient({
-      url: `https://${userDetails.profile.mastodonServer}`,
-      accessToken: userDetails.read.accessToken,
+      url: `https://${credentials.read.domain}`,
+      accessToken: credentials.read.accessToken,
     });
 
     const context = await client.v1.statuses.$select(post_id).context.fetch();
@@ -436,18 +458,18 @@ export class MastodonService
       .$select(rootStatus.id)
       .context.fetch();
 
-    const thread = this.constructThread(
-      rootStatus,
-      contextOfRoot,
-      userDetails.user_id
-    );
+    const user_id = rootStatus.account.id;
 
-    return {
+    const thread = this.constructThread(rootStatus, contextOfRoot, user_id);
+
+    const platformPost = {
       post_id: thread.thread_id,
       user_id: thread.author.id,
       timestampMs: new Date(thread.posts[0].createdAt).getTime(),
       post: thread,
     };
+
+    return { platformPost };
   }
 
   private constructThread(
@@ -472,33 +494,11 @@ export class MastodonService
     };
   }
 
-  public async update(
-    post: PlatformPostUpdate<string>,
-    manager: TransactionManager
-  ): Promise<PlatformPostPosted<mastodon.v1.Status>> {
-    throw new Error('Method not implemented.');
-  }
-
-  public async buildDeleteDraft(
-    post_id: string,
-    post: AppPostFull,
-    author: AppUser
-  ): Promise<PlatformPostDeleteDraft | undefined> {
-    return undefined;
-  }
-
-  public async signDraft(
-    post: PlatformPostDraft<string>,
-    account: MastodonUserDetails
-  ): Promise<string> {
-    return post.unsignedPost || '';
-  }
-
   public async getAccountByUsername(
     username: string,
     server: string,
     accessToken: string
-  ): Promise<MastodonUserDetails['profile'] | null> {
+  ): Promise<MastodonProfile | null> {
     try {
       const client = createRestAPIClient({
         url: `https://${server}`,
@@ -513,7 +513,7 @@ export class MastodonService
           username: account.username,
           displayName: account.displayName,
           avatar: account.avatar,
-          mastodonServer: server,
+          domain: server,
         };
       }
       return null;

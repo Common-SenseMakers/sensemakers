@@ -4,9 +4,9 @@ import { I18Keys } from '../i18n/i18n';
 import { BlueskyThread } from '../shared/types/types.bluesky';
 import { MastodonThread } from '../shared/types/types.mastodon';
 import { PlatformPost } from '../shared/types/types.platform.posts';
+import { PLATFORM } from '../shared/types/types.platforms';
 import { AppPostFull } from '../shared/types/types.posts';
 import { TwitterThread } from '../shared/types/types.twitter';
-import { PLATFORM } from '../shared/types/types.user';
 import { extractRKeyFromURI } from '../shared/utils/bluesky.utils';
 
 export interface GenericPlatformPostDetails {
@@ -77,7 +77,7 @@ export const getPlatformPostDetails = (
 
       if (platformPost.platformId === PLATFORM.Bluesky) {
         const blueskyThread = platformPost.posted.post as BlueskyThread;
-        return `https://bsky.app/profile/${blueskyThread.author.handle}/post/${extractRKeyFromURI(platformPost.posted.post_id)}`;
+        return `https://bsky.app/profile/${blueskyThread.author.username}/post/${extractRKeyFromURI(platformPost.posted.post_id)}`;
       }
     }
 

@@ -1,6 +1,6 @@
 import { randomBytes } from 'crypto';
 
-import { PLATFORM } from '../@shared/types/types.user';
+import { PLATFORM } from '../@shared/types/types.platforms';
 
 export function getPrefixedUserId(platform: PLATFORM, user_id: string) {
   return `${platform}:${user_id}`;

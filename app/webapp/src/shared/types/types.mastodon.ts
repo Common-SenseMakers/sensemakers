@@ -1,24 +1,24 @@
 import { mastodon } from 'masto';
 
-import { UserDetailsBase } from './types.user';
+import { AccountDetailsBase } from './types.user';
 
-export interface MastodonUserProfile {
+export interface MastodonProfile {
   id: string;
   username: string;
   displayName: string;
   avatar: string;
-  mastodonServer: string;
+  domain: string;
 }
 
-export interface MastodonUserCredentials {
+export interface MastodonAccountCredentials {
+  domain?: string;
   accessToken: string;
 }
 
-export type MastodonUserDetails = UserDetailsBase<
-  MastodonUserProfile,
-  MastodonUserCredentials,
-  MastodonUserCredentials
->;
+export type MastodonAccountDetails = AccountDetailsBase<{
+  write?: MastodonAccountCredentials;
+  read?: MastodonAccountCredentials;
+}>;
 
 export interface MastodonGetContextParams {
   mastodonServer: string;
@@ -63,3 +63,6 @@ export interface MastodonThread {
 
 export type MastodonPost = mastodon.v1.Status;
 export type MastodonAccount = mastodon.v1.Account;
+
+// TODO: Not sure what is needed to signin users on tests
+export interface MastodonSigninCredentials {}

@@ -1,10 +1,7 @@
+import { PLATFORM, PUBLISHABLE_PLATFORM } from './types.platforms';
 import { AppPost } from './types.posts';
-import {
-  FetchedDetails,
-  PLATFORM,
-  PUBLISHABLE_PLATFORM,
-  UserDetailsBase,
-} from './types.user';
+import { FetchedDetails } from './types.profiles';
+import { AccountCredentials } from './types.user';
 
 /**
  * Platform posts as stored in our DB. A platform post can be in one of these statuses
@@ -58,6 +55,7 @@ export type PlatformPostSigned<C = any> = C;
 export interface FetchedResult<C = any> {
   fetched: FetchedDetails;
   platformPosts: PlatformPostPosted<C>[];
+  credentials?: AccountCredentials;
 }
 
 /**
@@ -87,9 +85,9 @@ export interface PlatformPostDeleteDraft<D = any>
 /**
  * The PlatformPostPublish object is used to publish a post on a platform
  * */
-export interface PlatformPostPublish<D = any> {
+export interface PlatformPostPublish<D = any, C = any> {
   draft: D;
-  userDetails: UserDetailsBase;
+  credentials: AccountCredentials<C>;
 }
 
 export interface PlatformPostUpdate<D = any> extends PlatformPostPublish<D> {

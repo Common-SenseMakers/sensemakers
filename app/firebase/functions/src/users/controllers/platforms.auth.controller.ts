@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 
-import { PLATFORM } from '../../@shared/types/types.user';
+import { PLATFORM } from '../../@shared/types/types.platforms';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
 import {

@@ -22,6 +22,7 @@ import {
   PlatformPostSignerType,
   PlatformPostUpdate,
 } from '../../@shared/types/types.platform.posts';
+import { PLATFORM } from '../../@shared/types/types.platforms';
 import '../../@shared/types/types.posts';
 import {
   AppPostFull,
@@ -30,27 +31,24 @@ import {
   GenericThread,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
+import { FetchedDetails } from '../../@shared/types/types.profiles';
 import {
   AppTweet,
+  TwitterAccountCredentials,
+  TwitterAccountDetails,
+  TwitterCredentials,
   TwitterDraft,
   TwitterSignupContext,
   TwitterSignupData,
   TwitterThread,
   TwitterUser,
-  TwitterUserDetails,
 } from '../../@shared/types/types.twitter';
-import {
-  AppUser,
-  FetchedDetails,
-  PLATFORM,
-  UserDetailsBase,
-} from '../../@shared/types/types.user';
-import { TransactionManager } from '../../db/transaction.manager';
+import { AppUserRead } from '../../@shared/types/types.user';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
 import { UsersRepository } from '../../users/users.repository';
-import { PlatformService } from '../platforms.interface';
+import { PlatformService, WithCredentials } from '../platforms.interface';
 import { expansions, tweetFields, userFields } from './twitter.config';
 import { TwitterServiceClient } from './twitter.service.client';
 import {
@@ -78,7 +76,7 @@ export class TwitterService
     PlatformService<
       TwitterSignupContext,
       TwitterSignupData,
-      TwitterUserDetails
+      TwitterAccountDetails
     >
 {
   protected cache: any;
@@ -98,16 +96,15 @@ export class TwitterService
 
   async get(
     post_id: string,
-    userDetails: UserDetailsBase<any, any, any>,
-    manager: TransactionManager
-  ): Promise<PlatformPostPosted<TwitterThread, TwitterUser>> {
+    credentials?: TwitterAccountCredentials
+  ): Promise<{
+    platformPost: PlatformPostPosted<TwitterThread, TwitterUser>;
+    credentials?: TwitterAccountCredentials;
+  }> {
     const MAX_TWEETS = 30;
 
-    const readOnlyClient = await this.getUserClient(
-      userDetails.user_id,
-      'read',
-      manager
-    );
+    const { client: readOnlyClient, credentials: newCredentials } =
+      await this.getClient(credentials?.read, 'read');
 
     try {
       const options: Partial<Tweetv2FieldsParams> = {
@@ -211,13 +208,22 @@ export class TwitterService
 
       const thread = threads[0];
 
-      return {
+      const platformPost: PlatformPostPosted<TwitterThread, TwitterUser> = {
         post_id: thread.conversation_id,
         user_id: thread.author.id,
         timestampMs: dateStrToTimestampMs(thread.tweets[0].created_at),
         post: thread,
         author: originalAuthor,
       };
+
+      const newAccountCredentials: TwitterAccountCredentials | undefined =
+        newCredentials ? { read: newCredentials } : undefined;
+
+      if (credentials?.write && newAccountCredentials) {
+        newAccountCredentials.write = newCredentials;
+      }
+
+      return { platformPost, credentials: newAccountCredentials };
     } catch (e: any) {
       throw new Error(handleTwitterError(e));
     }
@@ -231,19 +237,16 @@ export class TwitterService
    * might also return less threads than expected.
    * */
   protected async fetchInternal(
+    user_id: string,
     params: PlatformFetchParams,
-    userDetails: UserDetailsBase,
-    manager: TransactionManager
-  ): Promise<TwitterThread[]> {
+    credentials?: TwitterCredentials
+  ): Promise<{ threads: TwitterThread[]; credentials: TwitterCredentials }> {
     try {
       if (DEBUG) logger.debug('Twitter Service - fetchInternal - start');
 
       const expectedAmount = params.expectedAmount;
-      const readOnlyClient = await this.getUserClient(
-        userDetails.user_id,
-        'read',
-        manager
-      );
+      const { client: readOnlyClient, credentials: newCredentials } =
+        await this.getClient(credentials, 'read');
 
       /**
        * TODO: because we are fetching 30 tweets per page, we
@@ -273,11 +276,9 @@ export class TwitterService
         }
 
         try {
-          logger.debug(
-            `Twitter Service - userTimeline - ${userDetails.profile?.username}`
-          );
+          logger.debug(`Twitter Service - userTimeline - ${user_id}`);
           const result = await readOnlyClient.v2.userTimeline(
-            userDetails.user_id,
+            user_id,
             timelineParams
           );
 
@@ -295,10 +296,7 @@ export class TwitterService
               result.data.includes
             );
 
-            originalAuthor = getOriginalAuthor(
-              userDetails.user_id,
-              result.data.includes
-            );
+            originalAuthor = getOriginalAuthor(user_id, result.data.includes);
 
             /** keep track of the number of threads */
             appTweets.forEach((tweet) => {
@@ -315,7 +313,7 @@ export class TwitterService
               };
 
               const originalAuthorData = await readOnlyClient.v2.user(
-                userDetails.user_id,
+                user_id,
                 profileParams
               );
 
@@ -344,22 +342,29 @@ export class TwitterService
         }
       } while (nextToken !== undefined);
 
-      return allTweets.length > 0 && originalAuthor
-        ? convertTweetsToThreads(allTweets, originalAuthor)
-        : [];
+      const threads =
+        allTweets.length > 0 && originalAuthor
+          ? convertTweetsToThreads(allTweets, originalAuthor)
+          : [];
+
+      return { threads, credentials: newCredentials };
     } catch (e: any) {
       throw new Error(handleTwitterError(e));
     }
   }
 
   public async fetch(
+    user_id: string,
     params: FetchParams,
-    userDetails: UserDetailsBase,
-    manager: TransactionManager
+    accountCredentials?: TwitterAccountCredentials
   ): Promise<FetchedResult<TwitterThread>> {
     if (DEBUG) logger.debug('Twitter Service - fetch - start');
 
-    const threads = await this.fetchInternal(params, userDetails, manager);
+    const { threads, credentials: newCredentials } = await this.fetchInternal(
+      user_id,
+      params,
+      accountCredentials?.read
+    );
 
     const platformPosts = threads.map((thread): PlatformPostPosted => {
       if (!thread.tweets[0].author_id) {
@@ -388,9 +393,17 @@ export class TwitterService
           : undefined,
     };
 
+    const newAccountCredentials: TwitterAccountCredentials | undefined =
+      newCredentials ? { read: newCredentials } : undefined;
+
+    if (newAccountCredentials && accountCredentials?.write) {
+      newAccountCredentials.write = newCredentials;
+    }
+
     return {
       fetched,
       platformPosts,
+      credentials: newAccountCredentials,
     };
   }
 
@@ -445,51 +458,40 @@ export class TwitterService
   }
 
   /** if user_id is provided it must be from the authenticated userId */
-  public async getPost(
-    tweetId: string,
-    manager: TransactionManager,
-    user_id?: string
-  ) {
+  public async getPost(tweetId: string, credentials?: TwitterCredentials) {
     const options: Partial<Tweetv2FieldsParams> = {
       'tweet.fields': tweetFields,
       expansions,
     };
 
-    const client = user_id
-      ? await this.getUserClient(user_id, 'read', manager)
-      : this.getGenericClient();
+    const { client } = await this.getClient(credentials, 'read');
 
     return client.v2.singleTweet(tweetId, options);
   }
 
   /** if user_id is provided it must be from the authenticated userId */
-  public async getPosts(
-    tweetIds: string[],
-    manager: TransactionManager,
-    user_id?: string
-  ) {
+  public async getPosts(tweetIds: string, credentials?: TwitterCredentials) {
     const options: Partial<Tweetv2FieldsParams> = {
       'tweet.fields': tweetFields,
       expansions,
     };
 
-    const client = user_id
-      ? await this.getUserClient(user_id, 'read', manager)
-      : this.getGenericClient();
-
-    return client.v2.tweets(tweetIds, options);
+    const { client } = await this.getClient(credentials, 'read');
+    tweetIds;
+    return tweetIds.length === 1
+      ? client.v2.singleTweet(tweetIds[0], options)
+      : client.v2.tweets(tweetIds, options);
   }
 
   /** user_id must be from the authenticated userId */
   public async publish(
-    postPublish: PlatformPostPublish<TwitterDraft>,
-    manager: TransactionManager
-  ): Promise<PlatformPostPosted<TwitterThread>> {
+    postPublish: PlatformPostPublish<TwitterDraft, TwitterCredentials>
+  ): Promise<{ post: PlatformPostPosted<TwitterThread> } & WithCredentials> {
     // TODO udpate to support many
-    const userDetails = postPublish.userDetails;
     const post = postPublish.draft;
 
-    const client = await this.getClient<'write'>(manager, userDetails, 'write');
+    const { client, credentials: newCredentials } =
+      await this.getClient<'write'>(postPublish.credentials.write, 'write');
 
     try {
       // Post the tweet and also read the tweet
@@ -500,8 +502,7 @@ export class TwitterService
 
       const tweet = await this.getPost(
         result.data.id,
-        manager,
-        userDetails.user_id
+        postPublish.credentials.read
       );
 
       if (!tweet.data.author_id) {
@@ -529,28 +530,34 @@ export class TwitterService
         author,
       };
 
-      return {
+      const posted = {
         post_id: tweet.data.id,
         user_id: tweet.data.author_id,
         timestampMs: dateStrToTimestampMs(tweet.data.created_at),
         post: thread,
       };
+
+      const newAccountCredentials: TwitterAccountCredentials | undefined =
+        newCredentials ? { read: newCredentials } : undefined;
+
+      if (postPublish.credentials?.write && newAccountCredentials) {
+        newAccountCredentials.write = newCredentials;
+      }
+
+      return { post: posted, credentials: newAccountCredentials };
     } catch (e: any) {
       throw new Error(handleTwitterError(e));
     }
   }
 
-  update(
-    post: PlatformPostUpdate<any>,
-    manager: TransactionManager
-  ): Promise<PlatformPostPosted<any>> {
+  update(post: PlatformPostUpdate<any>): Promise<PlatformPostPosted<any>> {
     throw new Error('Method not implemented.');
   }
 
   async convertFromGeneric(
     postAndAuthor: PostAndAuthor
   ): Promise<PlatformPostDraft<any>> {
-    const account = UsersHelper.getAccount(
+    const account = UsersHelper.getProfile(
       postAndAuthor.author,
       PLATFORM.Twitter,
       undefined,
@@ -566,15 +573,8 @@ export class TwitterService
   async buildDeleteDraft(
     post_id: string,
     post: AppPostFull,
-    author: AppUser
+    author: AppUserRead
   ): Promise<PlatformPostDeleteDraft | undefined> {
     return undefined;
-  }
-
-  async signDraft(
-    post: PlatformPostDraft<any>,
-    account: UserDetailsBase<any, any, any>
-  ): Promise<any> {
-    return post;
   }
 }

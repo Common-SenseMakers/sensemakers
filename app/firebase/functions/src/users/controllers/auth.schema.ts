@@ -1,7 +1,8 @@
 import { object, string } from 'yup';
 
 import { NotificationFreq } from '../../@shared/types/types.notifications';
-import { AutopostOption, PLATFORM } from '../../@shared/types/types.user';
+import { PLATFORM } from '../../@shared/types/types.platforms';
+import { AutopostOption } from '../../@shared/types/types.user';
 
 export const mastodonGetSignupContextSchema = object({
   mastodonServer: string().required(),
