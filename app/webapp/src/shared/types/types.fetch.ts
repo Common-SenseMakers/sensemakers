@@ -1,4 +1,4 @@
-import { PLATFORM } from './types.platforms';
+import { IDENTITY_PLATFORM, PLATFORM } from './types.platforms';
 import { AppPostFull } from './types.posts';
 
 export interface OurTokenConfig {
@@ -41,7 +41,7 @@ export interface PublishPostPayload {
 export interface AddUserDataPayload {
   username: string;
   mastodonServer?: string;
-  platformId: PLATFORM;
+  platformId: IDENTITY_PLATFORM;
   amount: number;
   latest?: boolean;
   userId?: string;
