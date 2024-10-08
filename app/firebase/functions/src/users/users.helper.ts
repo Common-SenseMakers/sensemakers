@@ -16,7 +16,7 @@ import {
   AutopostOption,
   DefinedIfTrue,
 } from '../@shared/types/types.user';
-import { extractRKeyFromURI } from '../@shared/utils/bluesky.utils';
+import { parseBlueskyURI } from '../@shared/utils/bluesky.utils';
 
 export interface PlatformAccount {
   platform: PUBLISHABLE_PLATFORM;
@@ -193,7 +193,7 @@ export class UsersHelper {
         ? `https://bsky.app/profile/${platformUsername}`
         : undefined;
       platformPostUrl = platformPostId
-        ? `https://bsky.app/profile/${platformUsername}/post/${extractRKeyFromURI(platformPostId)}`
+        ? `https://bsky.app/profile/${platformUsername}/post/${parseBlueskyURI(platformPostId).rkey}`
         : undefined;
     } else {
       throw new Error(

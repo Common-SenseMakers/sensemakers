@@ -7,7 +7,7 @@ import { PlatformPost } from '../shared/types/types.platform.posts';
 import { PLATFORM } from '../shared/types/types.platforms';
 import { AppPostFull } from '../shared/types/types.posts';
 import { TwitterThread } from '../shared/types/types.twitter';
-import { extractRKeyFromURI } from '../shared/utils/bluesky.utils';
+import { parseBlueskyURI } from '../shared/utils/bluesky.utils';
 
 export interface GenericPlatformPostDetails {
   authorName?: string;
@@ -77,7 +77,7 @@ export const getPlatformPostDetails = (
 
       if (platformPost.platformId === PLATFORM.Bluesky) {
         const blueskyThread = platformPost.posted.post as BlueskyThread;
-        return `https://bsky.app/profile/${blueskyThread.author.username}/post/${extractRKeyFromURI(platformPost.posted.post_id)}`;
+        return `https://bsky.app/profile/${blueskyThread.author.username}/post/${parseBlueskyURI(platformPost.posted.post_id).rkey}`;
       }
     }
 

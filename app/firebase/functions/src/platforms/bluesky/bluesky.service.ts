@@ -36,11 +36,7 @@ import {
   AccountProfileBase,
   AccountProfileCreate,
 } from '../../@shared/types/types.profiles';
-import { extractRKeyFromURI } from '../../@shared/utils/bluesky.utils';
-import {
-  BLUESKY_APP_PASSWORD,
-  BLUESKY_USERNAME,
-} from '../../config/config.runtime';
+import { parseBlueskyURI } from '../../@shared/utils/bluesky.utils';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
@@ -308,15 +304,13 @@ export class BlueskyService
     { uri: string; cid: string; value: AppBskyFeedPost.Record } | undefined
   > {
     const agent = await this.getAuthenticatedAtpAgent(credentials);
-    const rkey = extractRKeyFromURI(postId);
+    const { did, rkey } = parseBlueskyURI(postId);
     if (!rkey) {
       throw new Error('Invalid post ID');
     }
     try {
-      console.error('TODO: implement repo');
-      const repo = 'placeholder';
       const response = await agent.getPost({
-        repo,
+        repo: did,
         rkey,
       });
       return response;
@@ -345,7 +339,7 @@ export class BlueskyService
 
     const genericPosts: GenericPost[] = thread.posts.map((post) => {
       const genericPost: GenericPost = {
-        url: `https://bsky.app/profile/${post.author.handle}/post/${extractRKeyFromURI(post.uri)}`,
+        url: `https://bsky.app/profile/${post.author.handle}/post/${parseBlueskyURI(post.uri).rkey}`,
         content: cleanBlueskyContent(post.record),
       };
 
@@ -361,7 +355,7 @@ export class BlueskyService
             },
             thread: [
               {
-                url: `https://bsky.app/profile/${quotedPost.author.handle}/post/${extractRKeyFromURI(quotedPost.uri)}`,
+                url: `https://bsky.app/profile/${quotedPost.author.handle}/post/${parseBlueskyURI(quotedPost.uri).rkey}`,
                 content: cleanBlueskyContent(quotedPost.value),
               },
             ],

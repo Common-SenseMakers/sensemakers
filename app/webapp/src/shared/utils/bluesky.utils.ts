@@ -4,7 +4,7 @@ export interface BlueskyURI {
   rkey: string;
 }
 
-export function parseBlueskyURI(uri: string): BlueskyURI | null {
+export function parseBlueskyURI(uri: string): BlueskyURI {
   try {
     // Validate the URI starts with the correct protocol
     if (!uri.startsWith('at://')) {
@@ -20,12 +20,11 @@ export function parseBlueskyURI(uri: string): BlueskyURI | null {
     }
 
     // Extract the components
-    const [, did, , collection, rkey] = parts;
+    const [, , did, collection, rkey] = parts;
 
     // Return the parsed URI
     return { did, collection, rkey };
   } catch (error: any) {
-    console.error(error.message);
-    return null;
+    throw new Error(error.message);
   }
 }
