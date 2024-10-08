@@ -67,4 +67,6 @@ export type MastodonPost = mastodon.v1.Status;
 export type MastodonAccount = mastodon.v1.Account;
 
 // TODO: Not sure what is needed to signin users on tests
-export interface MastodonSigninCredentials {}
+export interface MastodonSigninCredentials {
+  id: string;
+}

@@ -32,7 +32,10 @@ import {
   GenericThread,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
-import { AccountProfileCreate } from '../../@shared/types/types.profiles';
+import {
+  AccountProfileBase,
+  AccountProfileCreate,
+} from '../../@shared/types/types.profiles';
 import { extractRKeyFromURI } from '../../@shared/utils/bluesky.utils';
 import {
   BLUESKY_APP_PASSWORD,
@@ -472,6 +475,22 @@ export class BlueskyService
       signerType: PlatformPostSignerType.DELEGATED,
       postApproval: PlatformPostDraftApproval.PENDING,
       unsignedPost: truncatedContent,
+    };
+  }
+
+  public async getProfile(
+    user_id: string,
+    credentials: any
+  ): Promise<AccountProfileBase<BlueskyProfile> | undefined> {
+    console.warn('placeholder');
+    return {
+      user_id: 'placeholder',
+      profile: {
+        id: 'placeholder',
+        username: 'placeholder',
+        avatar: 'placeholder',
+        displayName: 'placeholder',
+      },
     };
   }
 

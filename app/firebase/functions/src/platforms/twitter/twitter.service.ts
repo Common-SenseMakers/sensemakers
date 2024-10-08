@@ -31,13 +31,17 @@ import {
   GenericThread,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
-import { FetchedDetails } from '../../@shared/types/types.profiles';
+import {
+  AccountProfileBase,
+  FetchedDetails,
+} from '../../@shared/types/types.profiles';
 import {
   AppTweet,
   TwitterAccountCredentials,
   TwitterAccountDetails,
   TwitterCredentials,
   TwitterDraft,
+  TwitterProfile,
   TwitterSignupContext,
   TwitterSignupData,
   TwitterThread,
@@ -481,6 +485,27 @@ export class TwitterService
     return tweetIds.length === 1
       ? client.v2.singleTweet(tweetIds[0], options)
       : client.v2.tweets(tweetIds, options);
+  }
+
+  public async getProfile(
+    user_id: string,
+    credentials: TwitterCredentials
+  ): Promise<AccountProfileBase<TwitterProfile>> {
+    const { client } = await this.getClient(credentials, 'read');
+
+    const profileParams: Partial<UsersV2Params> = {
+      'user.fields': ['profile_image_url', 'name', 'username'],
+    };
+
+    const twitterProfile = await client.v2.user(user_id, profileParams);
+    const profile: TwitterProfile = {
+      id: twitterProfile.data.id,
+      name: twitterProfile.data.name,
+      username: twitterProfile.data.username,
+      profile_image_url: twitterProfile.data.profile_image_url,
+    };
+
+    return { user_id, profile };
   }
 
   /** user_id must be from the authenticated userId */

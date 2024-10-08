@@ -132,7 +132,7 @@ export class UsersHelper {
     platformId: IDENTITY_PLATFORM,
     user_id?: string,
     _throw?: T
-  ): DefinedIfTrue<T, AccountDetailsRead> {
+  ): DefinedIfTrue<T, AccountDetailsRead<P>> {
     const platformProfiles = UsersHelper.getProfiles<P>(user, platformId);
 
     if (platformProfiles.length === 0 && _throw) {
@@ -140,7 +140,7 @@ export class UsersHelper {
     }
 
     if (platformProfiles.length === 0) {
-      return undefined as DefinedIfTrue<T, AccountDetailsRead>;
+      return undefined as DefinedIfTrue<T, AccountDetailsRead<P>>;
     }
 
     const account = user_id

@@ -4,6 +4,7 @@ import { PLATFORM } from '../@shared/types/types.platforms';
 import { ActivityRepository } from '../activity/activity.repository';
 import { ActivityService } from '../activity/activity.service';
 import {
+  API_DOMAIN,
   EMAIL_CLIENT_SECRET,
   FUNCTIONS_PY_URL,
   IS_EMULATOR,
@@ -116,7 +117,9 @@ export const createServices = (firestore: Firestore) => {
     USE_REAL_NANOPUB.value() ? 'real' : 'mock-publish'
   );
 
-  const _mastodon = new MastodonService(time, userRepo);
+  const _mastodon = new MastodonService(time, userRepo, {
+    apiDomain: API_DOMAIN,
+  });
   const mastodon = getMastodonMock(
     _mastodon,
     USE_REAL_MASTODON.value()

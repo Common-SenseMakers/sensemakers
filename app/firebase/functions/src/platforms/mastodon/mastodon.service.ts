@@ -27,7 +27,7 @@ import {
   GenericThread,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
-import { AccountProfileCreate } from '../../@shared/types/types.profiles';
+import { AccountProfileBase } from '../../@shared/types/types.profiles';
 import { AccountCredentials } from '../../@shared/types/types.user';
 import { MASTODON_ACCESS_TOKEN } from '../../config/config.runtime';
 import { logger } from '../../instances/logger';
@@ -44,6 +44,10 @@ import {
 const DEBUG = true;
 const DEBUG_PREFIX = 'MastodonService';
 
+export interface MastodonServiceConfig {
+  apiDomain: string;
+}
+
 export class MastodonService
   implements
     PlatformService<
@@ -54,7 +58,8 @@ export class MastodonService
 {
   constructor(
     protected time: TimeService,
-    protected usersRepo: UsersRepository
+    protected usersRepo: UsersRepository,
+    protected config: MastodonServiceConfig
   ) {}
 
   protected async createApp(params: MastodonGetContextParams) {
@@ -124,7 +129,7 @@ export class MastodonService
       const profile = await this.getAccountByUsername(
         signupData.username,
         signupData.mastodonServer,
-        accessToken
+        { accessToken: accessToken }
       );
 
       if (!profile) {
@@ -139,8 +144,7 @@ export class MastodonService
           },
         },
       };
-      const mastodonProfile: AccountProfileCreate<MastodonProfile> = {
-        platformId: PLATFORM.Mastodon,
+      const mastodonProfile: AccountProfileBase<MastodonProfile> = {
         user_id: profile.id,
         profile: {
           id: profile.id,
@@ -214,8 +218,7 @@ export class MastodonService
         domain: signupData.mastodonServer,
       };
 
-      const profile: AccountProfileCreate<MastodonProfile> = {
-        platformId: PLATFORM.Nanopub,
+      const profile: AccountProfileBase<MastodonProfile> = {
         user_id: account.id,
         profile: mdProfile,
       };
@@ -238,7 +241,7 @@ export class MastodonService
       throw new Error('profile and/or read credentials are not provided');
     }
     const client = createRestAPIClient({
-      url: `https://${credentials.read.domain}`,
+      url: `https://${credentials.read.domain || this.config.apiDomain}`,
       accessToken: credentials.read.accessToken,
     });
 
@@ -497,12 +500,13 @@ export class MastodonService
   public async getAccountByUsername(
     username: string,
     server: string,
-    accessToken: string
+    credentials: MastodonAccountCredentials
   ): Promise<MastodonProfile | null> {
     try {
+      // TODO: support using a provided server or our default apiDomain
       const client = createRestAPIClient({
         url: `https://${server}`,
-        accessToken,
+        accessToken: credentials.accessToken,
       });
 
       const account = await client.v1.accounts.lookup({ acct: username });
@@ -520,5 +524,30 @@ export class MastodonService
     } catch (e: any) {
       throw new Error(`Error fetching Mastodon account: ${e.message}`);
     }
+  }
+
+  public async getProfile(
+    user_id: string,
+    credentials: MastodonAccountCredentials
+  ): Promise<AccountProfileBase<MastodonProfile>> {
+    const client = createRestAPIClient({
+      url: `https://${credentials.domain || this.config.apiDomain}`,
+      accessToken: credentials.accessToken,
+    });
+
+    const mdProfile = await client.v1.accounts.$select(user_id).fetch();
+
+    const profile: AccountProfileBase<MastodonProfile> = {
+      user_id,
+      profile: {
+        id: mdProfile.id,
+        avatar: mdProfile.avatar,
+        displayName: mdProfile.displayName,
+        domain: 'placeholder',
+        username: mdProfile.username,
+      },
+    };
+
+    return profile;
   }
 }
