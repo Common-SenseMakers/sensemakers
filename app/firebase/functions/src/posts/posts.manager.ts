@@ -641,8 +641,12 @@ export class PostsManager {
     };
   }
 
-  async getPost<T extends boolean>(postId: string, shouldThrow?: T) {
-    return this.db.run(async (manager) => {
+  async getPost<T extends boolean>(
+    postId: string,
+    shouldThrow?: T,
+    manager?: TransactionManager
+  ) {
+    const func = async (manager: TransactionManager) => {
       const post = await this.processing.getPostFull(
         postId,
         manager,
@@ -668,7 +672,10 @@ export class PostsManager {
       }
 
       return post;
-    });
+    };
+
+    if (manager) return func(manager);
+    else return this.db.run((manager) => func(manager));
   }
 
   async parsePost(postId: string) {

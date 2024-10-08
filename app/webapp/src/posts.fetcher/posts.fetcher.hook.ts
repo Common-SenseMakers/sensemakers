@@ -86,12 +86,11 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
   const [searchParams, setSearchParams] = useSearchParams();
   const code = searchParams.get('code');
 
-  const _status = status || PostsQueryStatus.PUBLISHED;
   const _labels = labels || [];
   const _keywords = keywords || [];
 
   const queryParams: PostsQueryParams = {
-    status: _status,
+    status,
     keywords: _keywords,
     labels: _labels,
   };
@@ -342,7 +341,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
         setIsLoading(false);
       }
     },
-    [appFetch, status, connectedUser, isFetchingOlder]
+    [appFetch, status, connectedUser, isFetchingOlder, queryParams]
   );
 
   /** public function to trigger fetching for older posts */
