@@ -193,98 +193,64 @@ export class TwitterServiceClient {
   async handleSignupData(data: TwitterSignupData) {
     if (DEBUG) logger.debug('handleSignupData', data, DEBUG_PREFIX);
 
-    if ('isGhost' in data) {
-      const accessToken = TWITTER_BEARER_TOKEN.value();
-      const profile = await this.getProfileByUsername(data.username);
-      if (!profile) {
-        throw new Error(`account not found for ${data.username}`);
-      }
-      const twitterAccountDetails: TwitterAccountDetails = {
-        user_id: profile.id,
-        signupDate: this.time.now(),
-        credentials: {
-          read: {
-            accessToken: accessToken,
-            refreshToken: accessToken,
-            expiresIn: 315360000,
-            expiresAtMs: 2041712750000, // Tuesday, September 12, 2034 10:25:50 PM
-          },
-        },
-      };
-      const twitterProfile: AccountProfileCreate<TwitterProfile> = {
-        platformId: PLATFORM.Twitter,
-        user_id: profile.id,
-        profile,
-      };
-      return {
-        accountDetails: twitterAccountDetails,
-        profile: twitterProfile,
-      };
+    const client = this.getGenericClient();
+
+    const result = await client.loginWithOAuth2({
+      code: data.code,
+      codeVerifier: data.codeVerifier,
+      redirectUri: data.callback_url,
+    });
+
+    const profileParams: Partial<UsersV2Params> = {
+      'user.fields': ['profile_image_url', 'name', 'username'],
+    };
+    const { data: user } = await result.client.v2.me(profileParams);
+
+    if (!result.refreshToken) {
+      throw new Error('Unexpected undefined refresh token');
     }
 
-    if ('code' in data) {
-      const client = this.getGenericClient();
-
-      const result = await client.loginWithOAuth2({
-        code: data.code,
-        codeVerifier: data.codeVerifier,
-        redirectUri: data.callback_url,
-      });
-
-      const profileParams: Partial<UsersV2Params> = {
-        'user.fields': ['profile_image_url', 'name', 'username'],
-      };
-      const { data: user } = await result.client.v2.me(profileParams);
-
-      if (!result.refreshToken) {
-        throw new Error('Unexpected undefined refresh token');
-      }
-
-      if (!result.expiresIn) {
-        throw new Error('Unexpected undefined refresh token');
-      }
-      const credentials: TwitterCredentials = {
-        accessToken: result.accessToken,
-        refreshToken: result.refreshToken,
-        expiresIn: result.expiresIn,
-        expiresAtMs: this.time.now() + result.expiresIn * 1000,
-      };
-      const twitterAccountDetails: TwitterAccountDetails = {
-        user_id: user.id,
-        signupDate: this.time.now(),
-        credentials: {
-          read: credentials,
-        },
-      };
-      const twitterProfile: AccountProfileCreate<TwitterProfile> = {
-        platformId: PLATFORM.Twitter,
-        user_id: user.id,
-        profile: user,
-      };
-
-      if (DEBUG)
-        logger.debug('handleSignupData', { user, credentials }, DEBUG_PREFIX);
-
-      /** the same credentials apply for reading and writing */
-      if (data.type === 'write') {
-        twitterAccountDetails.credentials['write'] = credentials;
-      }
-
-      if (DEBUG)
-        logger.debug(
-          'handleSignupData',
-          { twitterProfile, twitterAccountDetails },
-          DEBUG_PREFIX
-        );
-
-      return {
-        accountDetails: twitterAccountDetails,
-        profile: twitterProfile,
-      };
+    if (!result.expiresIn) {
+      throw new Error('Unexpected undefined refresh token');
     }
-    throw new Error(
-      'TwitterServiceClient.handleSignupData() invalid signup data'
-    );
+    const credentials: TwitterCredentials = {
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+      expiresIn: result.expiresIn,
+      expiresAtMs: this.time.now() + result.expiresIn * 1000,
+    };
+    const twitterAccountDetails: TwitterAccountDetails = {
+      user_id: user.id,
+      signupDate: this.time.now(),
+      credentials: {
+        read: credentials,
+      },
+    };
+    const twitterProfile: AccountProfileCreate<TwitterProfile> = {
+      platformId: PLATFORM.Twitter,
+      user_id: user.id,
+      profile: user,
+    };
+
+    if (DEBUG)
+      logger.debug('handleSignupData', { user, credentials }, DEBUG_PREFIX);
+
+    /** the same credentials apply for reading and writing */
+    if (data.type === 'write') {
+      twitterAccountDetails.credentials['write'] = credentials;
+    }
+
+    if (DEBUG)
+      logger.debug(
+        'handleSignupData',
+        { twitterProfile, twitterAccountDetails },
+        DEBUG_PREFIX
+      );
+
+    return {
+      accountDetails: twitterAccountDetails,
+      profile: twitterProfile,
+    };
   }
 
   async getProfileByUsername(

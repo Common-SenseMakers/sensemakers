@@ -89,103 +89,53 @@ export class BlueskyService
 
   public async handleSignupData(signupData: BlueskySignupData) {
     if (DEBUG) logger.debug('handleSignupData', { signupData }, DEBUG_PREFIX);
-    if ('isGhost' in signupData) {
-      const agent = new AtpAgent({ service: 'https://bsky.social' });
-      await agent.login({
-        identifier: BLUESKY_USERNAME.value(),
-        password: BLUESKY_APP_PASSWORD.value(),
-      });
+    const agent = new AtpAgent({ service: 'https://bsky.social' });
+    await agent.login({
+      identifier: signupData.username,
+      password: signupData.appPassword,
+    });
+    if (!agent.session) {
+      throw new Error('Failed to login to Bluesky');
+    }
+    const bskFullUser = await agent.getProfile({
+      actor: agent.session.did,
+    });
 
-      const profile = await this.getAccountByUsername(
-        signupData.username,
-        agent
-      );
-
-      if (!profile) {
-        throw new Error('Failed to fetch account details');
-      }
-
-      if (!agent.session) {
-        throw new Error('Failed to login to Bluesky');
-      }
-      const blueskyAccountDetails: BlueskyAccountDetails = {
-        user_id: profile.id,
-        signupDate: this.time.now(),
-        credentials: {
-          read: {
-            username: BLUESKY_USERNAME.value(),
-            appPassword: BLUESKY_APP_PASSWORD.value(),
-          },
-        },
-      };
-      const blueskyProfile: AccountProfileCreate<BlueskyProfile> = {
-        platformId: PLATFORM.Bluesky,
-        user_id: profile.id,
-        profile: {
-          id: profile.id,
-          username: profile.username,
-          displayName: profile.displayName || profile.username,
-          avatar: profile.avatar || '',
-        },
-      };
-
-      if (DEBUG)
-        logger.debug(
-          'handleSignupData (ghost) result',
-          { blueskyAccountDetails, blueskyProfile },
-          DEBUG_PREFIX
-        );
-
-      return { accountDetails: blueskyAccountDetails, profile: blueskyProfile };
-    } else {
-      const agent = new AtpAgent({ service: 'https://bsky.social' });
-      await agent.login({
-        identifier: signupData.username,
-        password: signupData.appPassword,
-      });
-      if (!agent.session) {
-        throw new Error('Failed to login to Bluesky');
-      }
-      const bskFullUser = await agent.getProfile({
-        actor: agent.session.did,
-      });
-
-      const bluesky: BlueskyAccountDetails = {
-        user_id: bskFullUser.data.did,
-        signupDate: this.time.now(),
-        credentials: {
-          read: {
-            username: signupData.username,
-            appPassword: signupData.appPassword,
-          },
-        },
-      };
-
-      const bskSimpleUser: BlueskyProfile = {
-        id: bskFullUser.data.did,
-        username: bskFullUser.data.handle,
-        displayName: bskFullUser.data.displayName || bskFullUser.data.handle,
-        avatar: bskFullUser.data.avatar || '',
-      };
-
-      const profile: AccountProfileCreate<BlueskyProfile> = {
-        platformId: PLATFORM.Bluesky,
-        user_id: bskSimpleUser.id,
-        profile: bskSimpleUser,
-      };
-
-      if (signupData.type === 'write') {
-        bluesky.credentials['write'] = {
+    const bluesky: BlueskyAccountDetails = {
+      user_id: bskFullUser.data.did,
+      signupDate: this.time.now(),
+      credentials: {
+        read: {
           username: signupData.username,
           appPassword: signupData.appPassword,
-        };
-      }
+        },
+      },
+    };
 
-      if (DEBUG)
-        logger.debug('handleSignupData result', { bluesky }, DEBUG_PREFIX);
+    const bskSimpleUser: BlueskyProfile = {
+      id: bskFullUser.data.did,
+      username: bskFullUser.data.handle,
+      displayName: bskFullUser.data.displayName || bskFullUser.data.handle,
+      avatar: bskFullUser.data.avatar || '',
+    };
 
-      return { accountDetails: bluesky, profile };
+    const profile: AccountProfileCreate<BlueskyProfile> = {
+      platformId: PLATFORM.Bluesky,
+      user_id: bskSimpleUser.id,
+      profile: bskSimpleUser,
+    };
+
+    if (signupData.type === 'write') {
+      bluesky.credentials['write'] = {
+        username: signupData.username,
+        appPassword: signupData.appPassword,
+      };
     }
+
+    if (DEBUG)
+      logger.debug('handleSignupData result', { bluesky }, DEBUG_PREFIX);
+
+    return { accountDetails: bluesky, profile };
   }
 
   public async getAccountByUsername(

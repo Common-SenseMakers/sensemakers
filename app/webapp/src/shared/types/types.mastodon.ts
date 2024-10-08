@@ -48,14 +48,7 @@ export interface MastodonAccessTokenSignupData {
 
 export type MastodonSignupData =
   | MastodonOAuthSignupData
-  | MastodonAccessTokenSignupData
-  | MastodonGhostSignupData;
-
-export type MastodonGhostSignupData = {
-  username: string;
-  mastodonServer: string;
-  isGhost: true;
-};
+  | MastodonAccessTokenSignupData;
 
 export interface MastodonThread {
   thread_id: string;
