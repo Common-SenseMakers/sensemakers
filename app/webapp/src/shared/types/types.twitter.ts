@@ -29,8 +29,6 @@ export type TwitterGhostSignupData = {
   isGhost: true;
 };
 
-export type TwitterSignupData = TwitterAccountSignupData;
-
 /**
  * For Twitter we need to store the oAuth token and secret as part of the signup process
  * and the access Token and Secret as the credentials need to post in the name of the user

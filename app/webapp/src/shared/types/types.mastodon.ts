@@ -1,5 +1,6 @@
 import { mastodon } from 'masto';
 
+import { AccountProfile } from './types.profiles';
 import { AccountDetailsBase } from './types.user';
 
 export interface MastodonProfile {
@@ -9,6 +10,7 @@ export interface MastodonProfile {
   avatar: string;
   domain: string;
 }
+export type MastodonAccountProfile = AccountProfile<MastodonProfile>;
 
 export interface MastodonAccountCredentials {
   domain?: string;
