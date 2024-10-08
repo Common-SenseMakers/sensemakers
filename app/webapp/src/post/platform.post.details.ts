@@ -65,5 +65,33 @@ export const getPlatformPostDetails = (
 
   const timestampMs = platformPost.posted?.timestampMs;
 
-  return { label, url, timestampMs };
+  const authorName = (() => {
+    if (platformPost && platformPost.posted) {
+      if (platformPost.platformId === PLATFORM.Twitter) {
+        return platformPost.posted?.author.name;
+      }
+
+      if (platformPost.platformId === PLATFORM.Mastodon) {
+        return `mastodon placeholder`;
+      }
+    }
+
+    return '';
+  })();
+
+  const authorAvatarUrl = (() => {
+    if (platformPost && platformPost.posted) {
+      if (platformPost.platformId === PLATFORM.Twitter) {
+        return platformPost.posted?.author.profile_image_url;
+      }
+
+      if (platformPost.platformId === PLATFORM.Mastodon) {
+        return `mastodon placeholder`;
+      }
+    }
+
+    return '';
+  })();
+
+  return { label, url, timestampMs, authorName, authorAvatarUrl };
 };
