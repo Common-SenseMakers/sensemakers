@@ -338,6 +338,12 @@ export class UsersService {
     return verified.payload.userId;
   }
 
+  public async getOrCreateProfile(
+    platformId: PLATFORM,
+    user_id: string,
+    manager: TransactionManager
+  ) {}
+
   public async getUserWithProfiles(
     userId: string,
     manager: TransactionManager

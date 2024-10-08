@@ -24,7 +24,10 @@ import {
   GenericThread,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
-import { AccountProfileCreate } from '../../@shared/types/types.profiles';
+import {
+  AccountProfileBase,
+  AccountProfileCreate,
+} from '../../@shared/types/types.profiles';
 import {
   AccountCredentials,
   AppUserRead,
@@ -166,6 +169,13 @@ export class NanopubService
       postApproval: PlatformPostDraftApproval.PENDING,
       unsignedPost: draftDelete.rdf(),
     };
+  }
+
+  getProfile(
+    user_id: string,
+    credentials: any
+  ): Promise<AccountProfileBase | undefined> {
+    throw new Error('Method not implemented.');
   }
 
   async signDraft(post: PlatformPostDraft<any>): Promise<string> {

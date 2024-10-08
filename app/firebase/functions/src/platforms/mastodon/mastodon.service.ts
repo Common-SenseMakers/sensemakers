@@ -449,12 +449,13 @@ export class MastodonService
   public async getAccountByUsername(
     username: string,
     server: string,
-    accessToken: string
+    credentials: MastodonAccountCredentials
   ): Promise<MastodonProfile | null> {
     try {
+      // TODO: support using a provided server or our default apiDomain
       const client = createRestAPIClient({
         url: `https://${server}`,
-        accessToken,
+        accessToken: credentials.accessToken,
       });
 
       const account = await client.v1.accounts.lookup({ acct: username });
@@ -472,5 +473,30 @@ export class MastodonService
     } catch (e: any) {
       throw new Error(`Error fetching Mastodon account: ${e.message}`);
     }
+  }
+
+  public async getProfile(
+    user_id: string,
+    credentials: MastodonAccountCredentials
+  ): Promise<AccountProfileBase<MastodonProfile>> {
+    const client = createRestAPIClient({
+      url: `https://${credentials.domain || this.config.apiDomain}`,
+      accessToken: credentials.accessToken,
+    });
+
+    const mdProfile = await client.v1.accounts.$select(user_id).fetch();
+
+    const profile: AccountProfileBase<MastodonProfile> = {
+      user_id,
+      profile: {
+        id: mdProfile.id,
+        avatar: mdProfile.avatar,
+        displayName: mdProfile.displayName,
+        domain: 'placeholder',
+        username: mdProfile.username,
+      },
+    };
+
+    return profile;
   }
 }

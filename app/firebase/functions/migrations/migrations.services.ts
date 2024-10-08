@@ -48,7 +48,7 @@ logger.info('Running in local mode with certificate', {
 const initApp = (config: AppOptions, name: string) => {
   const app = admin.initializeApp(config, name);
 
-  if (projectIdSource?.startsWith('demo-')) {
+  if (config.projectId?.startsWith('demo-')) {
     app.firestore().settings({
       host: 'localhost:8080',
       ssl: false,

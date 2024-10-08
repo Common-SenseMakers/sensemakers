@@ -53,4 +53,9 @@ export class PlatformsService {
     const platform = this.get(platformId);
     return platform.publish(postPublish);
   }
+
+  public getProfile(platformId: PLATFORM, user_id: string, credentials?: any) {
+    const platform = this.get(platformId);
+    return platform.getProfile(user_id, credentials);
+  }
 }
