@@ -2,17 +2,22 @@ import { anything, instance, spy, when } from 'ts-mockito';
 
 import { PlatformFetchParams } from '../../../@shared/types/types.fetch';
 import {
+  MastodonAccessTokenSignupData,
+  MastodonAccountDetails,
   MastodonGetContextParams,
+  MastodonProfile,
   MastodonSignupContext,
-  MastodonSignupData,
 } from '../../../@shared/types/types.mastodon';
 import { PlatformPostPublish } from '../../../@shared/types/types.platform.posts';
+import { PLATFORM } from '../../../@shared/types/types.platforms';
+import { AccountProfileCreate } from '../../../@shared/types/types.profiles';
 import {
   AccountDetailsBase,
   TestUserCredentials,
 } from '../../../@shared/types/types.user';
 import { APP_URL } from '../../../config/config.runtime';
 import { TransactionManager } from '../../../db/transaction.manager';
+import { getTestCredentials } from '../../mock/test.users';
 import { MastodonService } from '../mastodon.service';
 
 export interface MastodonMockConfig {
@@ -1391,37 +1396,47 @@ export const getMastodonMock = (
       //     ) || testCredentials?.[0];
       //   const currentMastodonCredentials =
       //     currentUserCredentials?.[PLATFORM.Mastodon];
-      (data: MastodonSignupData) => {
-        console.error('to be updated');
-        // const user_id = data.domain; // for testing purposes we pass the user_id as the mastodon server
-        // const testCredentials = getTestCredentials(
-        //   process.env.TEST_USER_ACCOUNTS as string
-        // );
-        // const currentUserCredentials =
-        //   testCredentials?.find(
-        //     (credentials) => credentials[PLATFORM.Mastodon].id === user_id
-        //   ) || testCredentials?.[0];
-        // const currentMastodonCredentials =
-        //   currentUserCredentials?.[PLATFORM.Mastodon];
+      (data: MastodonAccessTokenSignupData) => {
+        const user_id = data.mastodonServer; // for testing purposes we pass the user_id as the mastodon server
+        const testCredentials = getTestCredentials(
+          process.env.TEST_USER_ACCOUNTS as string
+        );
+        const currentUserCredentials =
+          testCredentials?.find(
+            (credentials) => credentials[PLATFORM.Mastodon].id === user_id
+          ) || testCredentials?.[0];
+        const currentMastodonCredentials =
+          currentUserCredentials?.[PLATFORM.Mastodon];
 
-        // if (!currentMastodonCredentials) {
-        //   throw new Error('test credentials not found');
-        // }
-        // return {
-        //   user_id: currentMastodonCredentials.id,
-        //   signupDate: 1725473415250,
-        //   profile: {
-        //     id: currentMastodonCredentials.id,
-        //     username: currentMastodonCredentials.username,
-        //     displayName: currentMastodonCredentials.displayName,
-        //     avatar:
-        //       'https://media.cosocial.ca/accounts/avatars/111/971/425/782/516/559/original/963c30efd081957e.jpeg',
-        //     domain: currentMastodonCredentials.domain,
-        //   },
-        //   read: {
-        //     accessToken: currentMastodonCredentials.accessToken,
-        //   },
-        // };
+        if (!currentMastodonCredentials) {
+          throw new Error('test credentials not found');
+        }
+        const accountDetails: MastodonAccountDetails = {
+          user_id,
+          signupDate: Date.now(),
+          credentials: {
+            read: {
+              accessToken:
+                'ZWJzaEJCU1BSaFZvLUIwRFNCNHNXVlQtTV9mY2VSaDlOSk5ETjJPci0zbmJtOjE3MTk0MzM5ODkyNTM6MTowOmF0OjE',
+            },
+          },
+        };
+        const profile: AccountProfileCreate<MastodonProfile> = {
+          platformId: PLATFORM.Mastodon,
+          user_id: user_id,
+          profile: {
+            id: user_id,
+            displayName: currentUserCredentials.mastodon.username,
+            username: currentUserCredentials.mastodon.username,
+            domain: 'mastodon.social',
+            avatar:
+              'https://pbs.twimg.com/profile_images/1783977034038882304/RGn66lGT_normal.jpg',
+          },
+        };
+        return {
+          accountDetails,
+          profile,
+        };
       }
     );
   }
