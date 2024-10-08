@@ -1,12 +1,12 @@
 import AtpAgent from '@atproto/api';
 
-import { BlueskyUserDetails } from '../../src/@shared/types/types.bluesky';
+import { BlueskyAccountDetails } from '../../src/@shared/types/types.bluesky';
 import { NotificationFreq } from '../../src/@shared/types/types.notifications';
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { TwitterSignupContext } from '../../src/@shared/types/types.twitter';
 import {
   AppUser,
   AutopostOption,
-  PLATFORM,
   TestUserCredentials,
 } from '../../src/@shared/types/types.user';
 import { TransactionManager } from '../../src/db/transaction.manager';
@@ -85,7 +85,6 @@ const authenticateBlueskyForUser = async (
   if (!user) {
     user = {
       userId: getPrefixedUserId(PLATFORM.Bluesky, credentials.bluesky.id),
-      platformIds: [],
       settings: {
         autopost: {
           [PLATFORM.Nanopub]: {
@@ -99,9 +98,6 @@ const authenticateBlueskyForUser = async (
     };
   }
 
-  user.platformIds.push(
-    getPrefixedUserId(PLATFORM.Bluesky, credentials.bluesky.id)
-  );
   const agent = new AtpAgent({ service: 'https://bsky.social' });
   await agent.login({
     identifier: credentials.bluesky.username,
@@ -112,17 +108,13 @@ const authenticateBlueskyForUser = async (
   }
   const sessionData = removeUndefinedFields(agent.session);
 
-  const blueskyUserDetails: BlueskyUserDetails = {
+  const blueskyUserDetails: BlueskyAccountDetails = {
     signupDate: 0,
     user_id: credentials.bluesky.id,
-    profile: {
-      id: credentials.bluesky.id,
-      username: credentials.bluesky.username,
-      name: credentials.bluesky.name,
-      avatar: 'https://example.com/avatar.jpg', // You may want to update this with a real avatar URL
+    credentials: {
+      read: sessionData,
+      write: sessionData,
     },
-    read: sessionData,
-    write: sessionData,
   };
 
   user[PLATFORM.Bluesky] = [blueskyUserDetails];
@@ -171,7 +163,6 @@ const authenticateMastodonForUser = async (
   if (!user) {
     user = {
       userId: getPrefixedUserId(PLATFORM.Mastodon, credentials.mastodon.id),
-      platformIds: [],
       settings: {
         autopost: {
           [PLATFORM.Nanopub]: {
@@ -185,27 +176,17 @@ const authenticateMastodonForUser = async (
     };
   }
 
-  user.platformIds.push(
-    getPrefixedUserId(PLATFORM.Mastodon, credentials.mastodon.id)
-  );
-
   user[PLATFORM.Mastodon] = [
     {
       signupDate: 0,
       user_id: credentials.mastodon.id,
-      profile: {
-        id: credentials.mastodon.id,
-        username: credentials.mastodon.username,
-        displayName: credentials.mastodon.displayName,
-        avatar:
-          'https://media.cosocial.ca/accounts/avatars/111/971/425/782/516/559/original/963c30efd081957e.jpeg',
-        mastodonServer: credentials.mastodon.mastodonServer,
-      },
-      read: {
-        accessToken: credentials.mastodon.accessToken,
-      },
-      write: {
-        accessToken: credentials.mastodon.accessToken,
+      credentials: {
+        read: {
+          accessToken: credentials.mastodon.id,
+        },
+        write: {
+          accessToken: credentials.mastodon.id,
+        },
       },
     },
   ];
@@ -224,7 +205,6 @@ const authenticateNanopubForUser = async (
   if (!user) {
     user = {
       userId: getPrefixedUserId(PLATFORM.Nanopub, profile.ethAddress),
-      platformIds: [],
       settings: {
         autopost: {
           [PLATFORM.Nanopub]: {
@@ -238,20 +218,11 @@ const authenticateNanopubForUser = async (
     };
   }
 
-  user.platformIds.push(
-    getPrefixedUserId(PLATFORM.Nanopub, profile.ethAddress)
-  );
-
   user.accounts[PLATFORM.Nanopub] = [
     {
       signupDate: 0,
       user_id: profile.ethAddress,
-      profile: {
-        ethAddress: profile.ethAddress,
-        rsaPublickey: profile.rsaPublickey,
-        ethToRsaSignature: profile.ethToRsaSignature,
-        introNanopubUri: profile.introNanopubUri,
-      },
+      credentials: {},
     },
   ];
 

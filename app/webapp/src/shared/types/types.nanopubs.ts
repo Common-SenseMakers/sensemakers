@@ -28,4 +28,6 @@ export interface RSAKeys {
   address?: HexStr;
 }
 
-export interface NanopubSigninCredentials {}
+export interface NanopubSigninCredentials {
+  ethPrivateKey: HexStr;
+}
