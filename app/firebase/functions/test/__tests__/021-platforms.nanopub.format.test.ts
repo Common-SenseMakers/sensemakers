@@ -5,7 +5,7 @@ import {
   PlatformPostPublishOrigin,
   PlatformPostPublishStatus,
 } from '../../src/@shared/types/types.platform.posts';
-import { PLATFORM } from '../../src/@shared/types/types.user';
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { cleanPublicKey } from '../../src/@shared/utils/semantics.helper';
@@ -18,7 +18,7 @@ import { buildIntroNp } from '../../src/platforms/nanopub/nanopub.utils';
 import { TimeService } from '../../src/time/time.service';
 import { getNanopubProfile } from '../utils/nanopub.profile';
 import { getMockPost } from '../utils/posts.utils';
-import { getMockedUser } from '../utils/users.mock';
+import { getMockedUserRead } from '../utils/users.mock';
 
 const DEBUG = true;
 const PUBLISH = true;
@@ -27,7 +27,7 @@ describe.skip('nanopublication format', () => {
   it('publishes a correctly formatted mock nanopub to the test server and updates it', async () => {
     const post = getMockPost(
       {
-        authorId: 'test-user-id',
+        authorUserId: 'test-user-id',
         id: 'post-id-1',
         semantics: `
         @prefix ns1: <http://purl.org/spar/cito/> .
@@ -41,7 +41,7 @@ describe.skip('nanopublication format', () => {
       },
       PLATFORM.Twitter
     );
-    const mockUser = getMockedUser({
+    const mockUser = getMockedUserRead({
       userId: 'test-user-id',
       [PLATFORM.Nanopub]: {
         ethPrivateKey: '0xprivate',
@@ -55,10 +55,8 @@ describe.skip('nanopublication format', () => {
       [PLATFORM.Mastodon]: {
         id: '123456',
         username: 'test-username-mastodon',
-        displayName: 'test-user-mastodon',
-        accessToken: 'test-access-token',
-        mastodonServer: 'test-mastodon-server',
-        type: 'read',
+        accessToken: 'test-access',
+        mastodonServer: 'test-server.com',
       },
       [PLATFORM.Bluesky]: {
         id: '123456',
@@ -68,6 +66,12 @@ describe.skip('nanopublication format', () => {
       },
     });
     const rsaKeys = getRSAKeys('');
+    // const userRead = await services.db.run((manager) => {
+    //   if (!user) {
+    //     throw new Error('user not created');
+    //   }
+    //   return services.users.getUserWithProfiles(user.userId, manager);
+    // });
     const nanopub = await new NanopubService(new TimeService(), {
       servers: JSON.parse(process.env.NANOPUBS_PUBLISH_SERVERS as string),
       rsaKeys: {
@@ -123,7 +127,7 @@ describe.skip('nanopublication format', () => {
     /** update the nanopublication */
     const updatedPost = getMockPost(
       {
-        authorId: 'test-user-id',
+        authorUserId: 'test-user-id',
         id: 'post-id-1',
         semantics: `
         @prefix ns1: <http://purl.org/spar/cito/> .

@@ -6,14 +6,17 @@ import {
   PlatformPostPosted,
   PlatformPostPublish,
 } from '../../../@shared/types/types.platform.posts';
+import { PLATFORM } from '../../../@shared/types/types.platforms';
+import { AccountProfileCreate } from '../../../@shared/types/types.profiles';
 import {
   TwitterAccountCredentials,
   TwitterAccountDetails,
-  TwitterAccountSignupData,
   TwitterCredentials,
   TwitterDraft,
   TwitterGetContextParams,
+  TwitterProfile,
   TwitterSignupContext,
+  TwitterSignupData,
   TwitterThread,
 } from '../../../@shared/types/types.twitter';
 import { TestUserCredentials } from '../../../@shared/types/types.user';
@@ -261,7 +264,7 @@ export const getTwitterMock = (
       }
     );
     when(mocked.handleSignupData(anything())).thenCall(
-      (data: TwitterAccountSignupData): TwitterAccountDetails => {
+      (data: TwitterSignupData) => {
         const user_id = data.codeChallenge;
         const testCredentials = getTestCredentials(
           process.env.TEST_USER_ACCOUNTS as string
@@ -274,9 +277,9 @@ export const getTwitterMock = (
         if (!currentUserCredentials) {
           throw new Error('test credentials not found');
         }
-        return {
-          user_id: currentUserCredentials.twitter.id,
-          signupDate: 0,
+        const twitterAccountDetails: TwitterAccountDetails = {
+          user_id,
+          signupDate: Date.now(),
           credentials: {
             read: {
               accessToken:
@@ -287,6 +290,21 @@ export const getTwitterMock = (
               expiresAtMs: 1719441189590,
             },
           },
+        };
+        const twitterProfile: AccountProfileCreate<TwitterProfile> = {
+          platformId: PLATFORM.Twitter,
+          user_id: user_id,
+          profile: {
+            id: user_id,
+            name: currentUserCredentials.twitter.username,
+            username: currentUserCredentials.twitter.username,
+            profile_image_url:
+              'https://pbs.twimg.com/profile_images/1783977034038882304/RGn66lGT_normal.jpg',
+          },
+        };
+        return {
+          accountDetails: twitterAccountDetails,
+          profile: twitterProfile,
         };
       }
     );

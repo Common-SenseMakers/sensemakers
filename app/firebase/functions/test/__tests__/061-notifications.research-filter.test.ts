@@ -1,12 +1,9 @@
 import { expect } from 'chai';
 
 import { NotificationFreq } from '../../src/@shared/types/types.notifications';
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { AppPostParsingStatus } from '../../src/@shared/types/types.posts';
-import {
-  AppUser,
-  AutopostOption,
-  PLATFORM,
-} from '../../src/@shared/types/types.user';
+import { AppUser, AutopostOption } from '../../src/@shared/types/types.user';
 import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
 import { Services } from '../../src/instances/services';

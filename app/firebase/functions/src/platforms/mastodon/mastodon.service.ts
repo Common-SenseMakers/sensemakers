@@ -29,7 +29,6 @@ import {
 } from '../../@shared/types/types.posts';
 import { AccountProfileBase } from '../../@shared/types/types.profiles';
 import { AccountCredentials } from '../../@shared/types/types.user';
-import { MASTODON_ACCESS_TOKEN } from '../../config/config.runtime';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';

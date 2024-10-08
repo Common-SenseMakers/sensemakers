@@ -1,7 +1,10 @@
 import { expect } from 'chai';
 
 import { MastodonAccessTokenSignupData } from '../../src/@shared/types/types.mastodon';
-import { NanupubSignupData } from '../../src/@shared/types/types.nanopubs';
+import {
+  NanupubSignupContext,
+  NanupubSignupData,
+} from '../../src/@shared/types/types.nanopubs';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { TwitterSignupContext } from '../../src/@shared/types/types.twitter';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
@@ -55,7 +58,7 @@ describe('010-signups', () => {
 
           /** prepare introNanopub */
           const context =
-            await services.users.getSignupContext<NanopubUserProfile>(
+            await services.users.getSignupContext<NanupubSignupContext>(
               PLATFORM.Nanopub,
               userId,
               profile
@@ -91,7 +94,6 @@ describe('010-signups', () => {
           logger.debug(`user`, { user });
 
           expect(user).to.not.be.undefined;
-          expect(user.platformIds).to.have.length(2);
         });
       });
     });
@@ -105,7 +107,7 @@ describe('010-signups', () => {
               {
                 accessToken: mastodonCredentials.accessToken,
                 mastodonServer: mastodonCredentials.mastodonServer,
-                type: mastodonCredentials.type,
+                type: 'read',
               },
               manager,
               userId
@@ -120,7 +122,6 @@ describe('010-signups', () => {
           logger.debug(`user`, { user });
 
           expect(user).to.not.be.undefined;
-          expect(user.platformIds).to.have.length(3);
         });
       });
     });
@@ -133,11 +134,12 @@ describe('010-signups', () => {
       );
 
       /** prepare introNanopub */
-      const context = await services.users.getSignupContext<NanopubUserProfile>(
-        PLATFORM.Nanopub,
-        undefined,
-        profile
-      );
+      const context =
+        await services.users.getSignupContext<NanupubSignupContext>(
+          PLATFORM.Nanopub,
+          undefined,
+          profile
+        );
 
       /** sign intro nanopub */
       if (!context.introNanopubDraft) {

@@ -3,10 +3,10 @@ import { logger } from 'firebase-functions';
 import { user } from 'firebase-functions/v1/auth';
 
 import {
-  AppUser,
   IDENTITY_PLATFORM,
   PLATFORM,
-} from '../../../src/@shared/types/types.user';
+} from '../../../src/@shared/types/types.platforms';
+import { AppUser } from '../../../src/@shared/types/types.user';
 import { TwitterService } from '../../../src/platforms/twitter/twitter.service';
 import { UsersHelper } from '../../../src/users/users.helper';
 import { fetchPostsInTests } from '../../utils/posts.utils';
@@ -77,13 +77,10 @@ export const _02_publishTweet = async (
 
     const thread = await services.platforms
       .get<TwitterService>(PLATFORM.Twitter)
-      .publish(
-        {
-          draft: { text },
-          userDetails: account,
-        },
-        manager
-      );
+      .publish({
+        draft: { text },
+        credentials: account.credentials,
+      });
 
     expect(thread).to.not.be.undefined;
 

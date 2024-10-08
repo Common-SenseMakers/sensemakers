@@ -14,7 +14,6 @@ import {
   TwitterProfile,
   TwitterSignupData,
 } from '../../@shared/types/types.twitter';
-import { TWITTER_BEARER_TOKEN } from '../../config/config.runtime';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersRepository } from '../../users/users.repository';
