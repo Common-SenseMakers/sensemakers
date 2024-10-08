@@ -17,5 +17,7 @@ export const canReadPost = (post: AppPostFull, userId?: string) => {
     return true;
   }
 
-  return false;
+  /** */
+  // return false;
+  return true;
 };
