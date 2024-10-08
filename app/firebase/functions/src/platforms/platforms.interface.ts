@@ -13,7 +13,10 @@ import {
   GenericThread,
   PostAndAuthor,
 } from '../@shared/types/types.posts';
-import { AccountProfile } from '../@shared/types/types.profiles';
+import {
+  AccountProfile,
+  AccountProfileBase,
+} from '../@shared/types/types.profiles';
 import {
   AccountCredentials,
   AccountDetailsBase,
@@ -67,6 +70,11 @@ export interface PlatformService<
 
   convertToGeneric(platformPost: PlatformPostCreate): Promise<GenericThread>;
   convertFromGeneric(postAndAuthor: PostAndAuthor): Promise<PlatformPostDraft>;
+
+  getProfile(
+    user_id: string,
+    credentials: any
+  ): Promise<AccountProfileBase | undefined>;
 
   signDraft?(post: PlatformPostDraft): Promise<DraftType>;
   /** for signature based platforms, this creates the draft that represents

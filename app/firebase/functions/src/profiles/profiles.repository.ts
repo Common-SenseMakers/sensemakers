@@ -1,4 +1,7 @@
-import { PLATFORM } from '../@shared/types/types.platforms';
+import {
+  ALL_IDENTITY_PLATFORMS,
+  PLATFORM,
+} from '../@shared/types/types.platforms';
 import {
   AccountProfile,
   AccountProfileCreate,
@@ -10,6 +13,18 @@ import { TransactionManager } from '../db/transaction.manager';
 
 export const getProfileId = (platform: PLATFORM, user_id: string) =>
   `${platform}-${user_id}`;
+
+export const splitProfileId = (profileId: string) => {
+  for (const platform of ALL_IDENTITY_PLATFORMS) {
+    if (profileId.startsWith(`${platform}-`)) {
+      return {
+        platform,
+        user_id: profileId.replace(`${platform}-`, ''),
+      };
+    }
+  }
+  throw new Error(`Cant split unexpected profileId ${profileId}`);
+};
 
 export class ProfilesRepository {
   constructor(protected db: DBInstance) {}
@@ -24,6 +39,8 @@ export class ProfilesRepository {
     );
 
     manager.create(profileRef, accountProfile);
+
+    return profileRef.id;
   }
 
   protected async getRef(
@@ -48,7 +65,7 @@ export class ProfilesRepository {
     return manager.get(ref);
   }
 
-  public async getByProfileId<T extends boolean>(
+  public async getByProfileId<T extends boolean, P = any>(
     profileId: string,
     manager: TransactionManager,
     shouldThrow?: T
@@ -60,13 +77,13 @@ export class ProfilesRepository {
     const data = doc.data();
     if (!doc.exists || !data || Object.keys(data).length === 0) {
       if (_shouldThrow) throw new Error(`Profile ${profileId} not found`);
-      else return undefined as DefinedIfTrue<T, AccountProfile>;
+      else return undefined as DefinedIfTrue<T, AccountProfile<P>>;
     }
 
     return {
       id: doc.id,
       ...doc.data(),
-    } as unknown as DefinedIfTrue<T, AccountProfile>;
+    } as unknown as DefinedIfTrue<T, AccountProfile<P>>;
   }
 
   public async getProfile<T extends boolean>(
