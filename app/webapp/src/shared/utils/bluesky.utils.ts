@@ -1,4 +1,10 @@
-export function extractRKeyFromURI(uri: string): string | null {
+export interface BlueskyURI {
+  did: string;
+  collection: string;
+  rkey: string;
+}
+
+export function parseBlueskyURI(uri: string): BlueskyURI | null {
   try {
     // Validate the URI starts with the correct protocol
     if (!uri.startsWith('at://')) {
@@ -9,15 +15,15 @@ export function extractRKeyFromURI(uri: string): string | null {
     const parts = uri.split('/');
 
     // Ensure the URI has the expected number of parts
-    if (parts.length < 4) {
-      throw new Error('Invalid URI: expected at least 4 parts.');
+    if (parts.length !== 5) {
+      throw new Error('Invalid URI: expected exactly 5 parts.');
     }
 
-    // The last part is the rkey
-    const rkey = parts[parts.length - 1];
+    // Extract the components
+    const [, did, , collection, rkey] = parts;
 
-    // Return the rkey
-    return rkey;
+    // Return the parsed URI
+    return { did, collection, rkey };
   } catch (error: any) {
     console.error(error.message);
     return null;
