@@ -42,7 +42,10 @@ export const TWITTER_API_URL = 'https://api.twitter.com';
 export const TWITTER_CLIENT_ID = envRuntime.TWITTER_CLIENT_ID;
 export const TWITTER_CLIENT_SECRET = envRuntime.TWITTER_CLIENT_SECRET;
 export const TWITTER_BEARER_TOKEN = envRuntime.TWITTER_BEARER_TOKEN;
+
 export const MASTODON_ACCESS_TOKEN = envRuntime.MASTODON_ACCESS_TOKEN;
+export const API_DOMAIN = 'mastodon.social';
+
 export const ADMIN_API_KEY = envRuntime.ADMIN_API_KEY;
 
 export const TWITTER_CALLBACK_URL = envRuntime.TWITTER_CALLBACK_URL;

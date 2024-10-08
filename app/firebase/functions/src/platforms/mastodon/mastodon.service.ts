@@ -27,7 +27,7 @@ import {
   GenericThread,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
-import { AccountProfileCreate } from '../../@shared/types/types.profiles';
+import { AccountProfileBase } from '../../@shared/types/types.profiles';
 import { AccountCredentials } from '../../@shared/types/types.user';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
@@ -43,6 +43,10 @@ import {
 const DEBUG = true;
 const DEBUG_PREFIX = 'MastodonService';
 
+export interface MastodonServiceConfig {
+  apiDomain: string;
+}
+
 export class MastodonService
   implements
     PlatformService<
@@ -53,7 +57,8 @@ export class MastodonService
 {
   constructor(
     protected time: TimeService,
-    protected usersRepo: UsersRepository
+    protected usersRepo: UsersRepository,
+    protected config: MastodonServiceConfig
   ) {}
 
   protected async createApp(params: MastodonGetContextParams) {
@@ -164,8 +169,7 @@ export class MastodonService
       domain: signupData.domain,
     };
 
-    const profile: AccountProfileCreate<MastodonProfile> = {
-      platformId: PLATFORM.Nanopub,
+    const profile: AccountProfileBase<MastodonProfile> = {
       user_id: account.id,
       profile: mdProfile,
     };
@@ -187,7 +191,7 @@ export class MastodonService
       throw new Error('profile and/or read credentials are not provided');
     }
     const client = createRestAPIClient({
-      url: `https://${credentials.read.domain}`,
+      url: `https://${credentials.read.domain || this.config.apiDomain}`,
       accessToken: credentials.read.accessToken,
     });
 
