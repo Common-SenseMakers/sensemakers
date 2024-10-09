@@ -17,6 +17,11 @@ import { TransactionManager } from '../db/transaction.manager';
 
 const DEBUG = true;
 const DEBUG_PREFIX = 'PostsRepository';
+
+type Query = FirebaseFirestore.Query<
+  FirebaseFirestore.DocumentData,
+  FirebaseFirestore.DocumentData
+>;
 export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   constructor(protected db: DBInstance) {
     super(db.collections.posts, db);
@@ -50,6 +55,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   public async getMany(queryParams: PostsQuery) {
     /** type protection agains properties renaming */
     const createdAtKey: keyof AppPost = 'createdAtMs';
+    const authorUserKey: keyof AppPost = 'authorUserId';
     const authorProfileKey: keyof AppPost = 'authorProfileId';
     const reviewedStatusKey: keyof AppPost = 'reviewedStatus';
     const republishedStatusKey: keyof AppPost = 'republishedStatus';
@@ -59,20 +65,16 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
     if (DEBUG) logger.debug('getMany', queryParams, DEBUG_PREFIX);
 
-    const base = (() => {
-      if (queryParams.profileIds) {
+    const ofUser = ((_base: Query) => {
+      if (queryParams.userId) {
         if (DEBUG)
           logger.debug(
-            'getMany - filter by profileIds',
-            queryParams.profileIds,
+            'getMany - filter by userId',
+            queryParams.userId,
             DEBUG_PREFIX
           );
 
-        return this.db.collections.posts.where(
-          authorProfileKey,
-          'in',
-          queryParams.profileIds
-        );
+        return _base.where(authorUserKey, '==', queryParams.userId);
       } else {
         if (DEBUG)
           logger.debug(
@@ -81,13 +83,35 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
             DEBUG_PREFIX
           );
 
-        return this.db.collections.posts;
+        return _base;
       }
-    })();
+    })(this.db.collections.posts);
+
+    const ofProfiles = ((_base: Query) => {
+      if (queryParams.profileIds && queryParams.profileIds.length > 0) {
+        if (DEBUG)
+          logger.debug(
+            'getMany - filter by profileIds',
+            queryParams.profileIds,
+            DEBUG_PREFIX
+          );
+
+        return _base.where(authorProfileKey, 'in', queryParams.profileIds);
+      } else {
+        if (DEBUG)
+          logger.debug(
+            'getMany - dont filter by profilesIds',
+            undefined,
+            DEBUG_PREFIX
+          );
+
+        return _base;
+      }
+    })(ofUser);
 
     if (DEBUG) logger.debug('getOfUser', queryParams, DEBUG_PREFIX);
 
-    const statusFiltered = (() => {
+    const withStatuses = ((_base: Query) => {
       if (!queryParams.status) {
         if (DEBUG)
           logger.debug(
@@ -95,7 +119,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
             undefined,
             DEBUG_PREFIX
           );
-        return base;
+        return _base;
       }
 
       if (queryParams.status === PostsQueryStatus.DRAFTS) {
@@ -105,7 +129,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
             PostsQueryStatus.DRAFTS,
             DEBUG_PREFIX
           );
-        return base.where(republishedStatusKey, 'in', [
+        return _base.where(republishedStatusKey, 'in', [
           AppPostRepublishedStatus.PENDING,
           AppPostRepublishedStatus.UNREPUBLISHED,
         ]);
@@ -117,7 +141,11 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
             PostsQueryStatus.PENDING,
             DEBUG_PREFIX
           );
-        return base.where(reviewedStatusKey, '==', AppPostReviewStatus.PENDING);
+        return _base.where(
+          reviewedStatusKey,
+          '==',
+          AppPostReviewStatus.PENDING
+        );
       }
       if (queryParams.status === PostsQueryStatus.PUBLISHED) {
         if (DEBUG)
@@ -126,7 +154,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
             PostsQueryStatus.PUBLISHED,
             DEBUG_PREFIX
           );
-        return base.where(
+        return _base.where(
           republishedStatusKey,
           '!=',
           AppPostRepublishedStatus.PENDING
@@ -140,15 +168,17 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
             DEBUG_PREFIX
           );
 
-        return base.where(reviewedStatusKey, '==', AppPostReviewStatus.IGNORED);
+        return _base.where(
+          reviewedStatusKey,
+          '==',
+          AppPostReviewStatus.IGNORED
+        );
       }
 
-      return base;
-    })();
+      return _base;
+    })(ofProfiles);
 
-    const semanticsFiltered = (() => {
-      let filtered = statusFiltered;
-
+    const withSemantics = ((_base: Query) => {
       if (queryParams.keywords && queryParams.keywords.length > 0) {
         if (DEBUG)
           logger.debug(
@@ -157,7 +187,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
             DEBUG_PREFIX
           );
 
-        filtered = statusFiltered.where(
+        return _base.where(
           keywordsKey,
           'array-contains-any',
           queryParams.keywords
@@ -172,15 +202,11 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
             DEBUG_PREFIX
           );
 
-        filtered = statusFiltered.where(
-          labelsKey,
-          'array-contains-any',
-          queryParams.labels
-        );
+        return _base.where(labelsKey, 'array-contains-any', queryParams.labels);
       }
 
-      return filtered;
-    })();
+      return _base;
+    })(withStatuses);
 
     /** get the sinceCreatedAt and untilCreatedAt timestamps from the elements ids */
     const { sinceCreatedAt, untilCreatedAt } = await (async () => {
@@ -209,15 +235,15 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     })();
 
     /** two modes, forward sinceId or backwards untilId  */
-    const paginated = await (async () => {
+    const paginated = await (async (_base: Query) => {
       if (sinceCreatedAt) {
-        const ordered = semanticsFiltered.orderBy(createdAtKey, 'asc');
+        const ordered = _base.orderBy(createdAtKey, 'asc');
         return ordered.startAfter(sinceCreatedAt);
       } else {
-        const ordered = semanticsFiltered.orderBy(createdAtKey, 'desc');
+        const ordered = _base.orderBy(createdAtKey, 'desc');
         return untilCreatedAt ? ordered.startAfter(untilCreatedAt) : ordered;
       }
-    })();
+    })(withSemantics);
 
     const posts = await paginated
       .limit(queryParams.fetchParams.expectedAmount)
