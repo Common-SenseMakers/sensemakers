@@ -278,7 +278,7 @@ export const getTwitterMock = (
           throw new Error('test credentials not found');
         }
         const twitterAccountDetails: TwitterAccountDetails = {
-          user_id,
+          user_id: currentUserCredentials.twitter.id,
           signupDate: Date.now(),
           credentials: {
             read: {
@@ -293,9 +293,9 @@ export const getTwitterMock = (
         };
         const twitterProfile: AccountProfileCreate<TwitterProfile> = {
           platformId: PLATFORM.Twitter,
-          user_id: user_id,
+          user_id: currentUserCredentials.twitter.id,
           profile: {
-            id: user_id,
+            id: currentUserCredentials.twitter.id,
             name: currentUserCredentials.twitter.username,
             username: currentUserCredentials.twitter.username,
             profile_image_url:

@@ -1385,17 +1385,6 @@ export const getMastodonMock = (
       }
     );
     when(mocked.handleSignupData(anything())).thenCall(
-      // (data: MastodonSignupData): MastodonUserDetails => {
-      //   const user_id = data.mastodonServer; // for testing purposes we pass the user_id as the mastodon server
-      //   const testCredentials = getTestCredentials(
-      //     process.env.TEST_USER_ACCOUNTS as string
-      //   );
-      //   const currentUserCredentials =
-      //     testCredentials?.find(
-      //       (credentials) => credentials[PLATFORM.Mastodon].id === user_id
-      //     ) || testCredentials?.[0];
-      //   const currentMastodonCredentials =
-      //     currentUserCredentials?.[PLATFORM.Mastodon];
       (data: MastodonAccessTokenSignupData) => {
         const user_id = data.mastodonServer; // for testing purposes we pass the user_id as the mastodon server
         const testCredentials = getTestCredentials(
@@ -1412,7 +1401,7 @@ export const getMastodonMock = (
           throw new Error('test credentials not found');
         }
         const accountDetails: MastodonAccountDetails = {
-          user_id,
+          user_id: currentMastodonCredentials.id,
           signupDate: Date.now(),
           credentials: {
             read: {
@@ -1423,12 +1412,12 @@ export const getMastodonMock = (
         };
         const profile: AccountProfileCreate<MastodonProfile> = {
           platformId: PLATFORM.Mastodon,
-          user_id: user_id,
+          user_id: currentMastodonCredentials.id,
           profile: {
-            id: user_id,
+            id: currentMastodonCredentials.id,
             displayName: currentUserCredentials.mastodon.username,
             username: currentUserCredentials.mastodon.username,
-            domain: 'mastodon.social',
+            mastodonServer: 'mastodon.social',
             avatar:
               'https://pbs.twimg.com/profile_images/1783977034038882304/RGn66lGT_normal.jpg',
           },
