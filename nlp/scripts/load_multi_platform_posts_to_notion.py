@@ -1,12 +1,12 @@
 """Script to map posts from the app to Notion.
 
 Usage:
-  laod_posts_to_notion.py [--Ms=<Ms>] [--count=<count>] 
+  laod_posts_to_notion.py [--count=<count>] [--origin=<origin>]
 
 
 Options:
---Ms=<Ms> Optional createdAtMs to start from
 --count=<count> Optional amounts of posts to load.
+--origin=<origin> optional platform
 
 """
 import os
@@ -18,8 +18,10 @@ import datetime
 import docopt
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
+import threading
 from threading import Semaphore
-
+# Create locks for profiles and keywords to ensure only one thread can create them at a time
+profile_lock = threading.Lock()
 
 #functions for mapping json to Notion profile table
 def lookup_notion_profile(firebase_id):
@@ -44,22 +46,31 @@ def lookup_notion_profile(firebase_id):
         return None
     
 def build_base_notion_profile(profile_doc:dict,profile_id:str):
-    print("in build profile page")
     platform = profile_doc["platformIds"][0].split(':')[0]
-    profile = profile_doc[platform][0]["profile"]
     #make handle modular to include mastodon
-    handle = profile["username"]
-    if platform == 'mastodon':
-        handle_field = "Mastodon Handle"
-        platformId_field = "mastodon_id"
-        name = profile['displayName']
-        server = profile['mastodonServer']
-
-    else:
-        handle_field = "Twitter Handle"
-        platformId_field = "twitter_id"
+    print('before if')
+    if platform == 'bluesky':
+        profile = profile_doc['accounts'][platform][0]["profile"]
+        print(f'profile is {profile}')
+        handle_field = "Bluesky Handle"
+        platformId_field = "bluesky_id"
         name = profile['name']
-        server = ''
+        server = 'bluesky.social'
+    else:
+        profile = profile_doc[platform][0]["profile"]
+        if platform == 'mastodon':
+            handle_field = "Mastodon Handle"
+            platformId_field = "mastodon_id"
+            name = profile['displayName']
+            server = profile['mastodonServer']
+        elif platform == "twitter":
+            handle_field = "Twitter Handle"
+            platformId_field = "twitter_id"
+            name = profile['name']
+            server = ''
+        else:
+            print('no platform info compatible')
+    handle = profile["username"]
 
     platform_id = profile['id']
     firebase_id = profile_id
@@ -108,6 +119,7 @@ def build_base_notion_profile(profile_doc:dict,profile_id:str):
                     ]
                 }
             }
+
         }
     )
     
@@ -127,11 +139,12 @@ def get_firebase_profile_doc(firebase_id):
         return None
     
 def load_profile_to_notion(firebase_id:str):
-    notion_id = lookup_notion_profile(firebase_id)
-    if  not notion_id:
-        profile_dict = get_firebase_profile_doc(firebase_id)
-        notion_id = build_base_notion_profile(profile_dict,firebase_id)
-    return notion_id
+    with profile_lock:
+        notion_id = lookup_notion_profile(firebase_id)
+        if  not notion_id:
+            profile_dict = get_firebase_profile_doc(firebase_id)
+            notion_id = build_base_notion_profile(profile_dict,firebase_id)
+        return notion_id
 
 #Updating Zotero Item types from triples when creating the url object
 def get_url_zotero_triples(url:str):
@@ -338,6 +351,26 @@ def get_dg_class_triples(post_firebase_id,classes):
     print(f'dg query resulted with {len(triples)} triples')
     return triples
 
+"""def get_profiles(origin):
+    users_ref = db.collection('users')
+    if origin == 'bluesky':
+        query = users_ref.where('twitter','==',None).where('mastodon','==',None)
+    else:
+        query = users_ref.where('accounts','==',None)
+    docs = query.stream()
+    return [(doc.to_dict(),doc.id) for doc in docs]
+
+def load_profiles_to_notion(origin):
+    profiles = get_profiles(origin)
+    print(f'got {len(profiles)} profiles')
+    for p,firebase_id in profiles:
+        notion_id = lookup_notion_profile(firebase_id)
+        if  not notion_id:
+            notion_id = build_base_notion_profile(p,firebase_id)
+        return notion_id"""
+
+
+
 def convert_timestamp_to_notion_date(createdAtMs):
     # Convert milliseconds to seconds
     timestamp_s = createdAtMs / 1000
@@ -454,7 +487,7 @@ def build_dynamic_postpage_properties(post_dict: dict, post_firebase_id: str):
         properties[prop_name] = {"relation": relation_list}
     properties["linksTo"] = {"relation":urls}
     properties["relations tags"] = {"multi_select":[{"name":p} for p in prop_name_set]}
-    discourse_types = get_classes_list(get_dg_class_triples(post_firebase_id))
+    discourse_types = get_classes_list(get_dg_class_triples(post_firebase_id,classes))
     properties["Discourse Type"] = {"multi_select":[{"name":tp} for tp in discourse_types]}
     return properties
 
@@ -507,11 +540,14 @@ def load_posts_to_notion(post_tuple_list: list):
             create_notion_post_page(post_dict,post_id)
             print(f'post page with id {post_id} was loaded to Notion')
 """
-def get_posts(start_Ms = 0,count_limit = None):
-    if start_Ms:
-        posts_ref = db.collection('posts').where("parsedStatus", '==', "processed").where("createdAtMs", '>', start_Ms).limit(count_limit)
+def get_posts(count_limit = None,post_platform = None):
+    if post_platform:
+        posts_ref = db.collection('posts').where("parsedStatus", '==', "processed").where("origin","==",post_platform).limit(count_limit)
+        print(f'Getting {post_platform} posts with count limit {count_limit}')
     else:
-        posts_ref = db.collection('posts').where("parsedStatus", '==', "processed").limit(count_limit)
+        posts_ref = db.collection('posts').limit(count_limit)
+        print(f'Getting posts from all platforms with count limit {count_limit}')
+
     # Execute the query
     docs = posts_ref.stream()
     posts = []
@@ -548,19 +584,21 @@ if __name__ == "__main__":
 
     arguments = docopt.docopt(__doc__)
 
-    first_post_to_load = arguments.get("--Ms")
     post_count_limit = arguments.get("--count")
 
-    if first_post_to_load:
-        first_post_to_load = int(first_post_to_load)
-    else:
-        first_post_to_load = 0
+    post_platform = arguments.get("--origin")
+
+    print("got arg")
     if post_count_limit:
         post_count_limit = int(post_count_limit)
     else:
         post_count_limit = None
+    
     print(f'limit to {post_count_limit} posts')
-    posts = get_posts(first_post_to_load,post_count_limit)
+
+    #load_profiles_to_notion(post_platform)
+
+    posts = get_posts(post_count_limit,post_platform)
 
     load_posts_to_notion(posts)
 
