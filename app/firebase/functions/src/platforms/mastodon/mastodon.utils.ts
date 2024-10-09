@@ -123,3 +123,19 @@ export const cleanMastodonContent = (content: string): string => {
 
   return cleanedContent;
 };
+
+export const getMastodonUserId = (server: string, accountId: string) =>
+  `${server}:${accountId}`;
+
+export const parseMastodonUserId = (mastodonUserId: string) => {
+  const [server, accountId] = mastodonUserId.split(':');
+  return { server, accountId };
+};
+
+export const getUniqueMastodonUsername = (username: string, server: string) =>
+  `${username}@${server}`;
+
+export const parseMastodonUniqueUsername = (uniqueUsername: string) => {
+  const [username, server] = uniqueUsername.split('@');
+  return { username, server };
+};
