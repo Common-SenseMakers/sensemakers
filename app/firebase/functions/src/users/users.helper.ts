@@ -5,6 +5,7 @@ import {
   PLATFORM,
   PUBLISHABLE_PLATFORM,
 } from '../@shared/types/types.platforms';
+import { AppPostFull } from '../@shared/types/types.posts';
 import { AppPost } from '../@shared/types/types.posts';
 import {
   AccountDetailsBase,
@@ -15,6 +16,7 @@ import {
   AutopostOption,
   DefinedIfTrue,
 } from '../@shared/types/types.user';
+import { parseBlueskyURI } from '../@shared/utils/bluesky.utils';
 
 export interface PlatformAccount {
   platform: PUBLISHABLE_PLATFORM;
@@ -150,5 +152,59 @@ export class UsersHelper {
     }
 
     return account as DefinedIfTrue<T, AccountDetailsRead>;
+  }
+
+  static getOriginAccountDetails(user: AppUserRead, post: AppPostFull) {
+    const platformUsername = post.generic.author.username;
+    const platformName = post.generic.author.name || platformUsername;
+
+    let platformAccountUrl: string | undefined;
+    let platformPostUrl: string | undefined;
+
+    const twitterAccount = UsersHelper.getProfile(user, PLATFORM.Twitter);
+    const mastodonAccount = UsersHelper.getProfile(user, PLATFORM.Mastodon);
+    const blueskyAccount = UsersHelper.getProfile(user, PLATFORM.Bluesky);
+
+    const platformPost = post.mirrors.find(
+      (platformPost) => platformPost.platformId === post.origin
+    )?.posted;
+
+    const platformPostId = platformPost?.post_id;
+
+    if (twitterAccount && post.origin === PLATFORM.Twitter) {
+      platformAccountUrl = platformUsername
+        ? `https://x.com/${platformUsername}`
+        : undefined;
+      platformPostUrl = platformPostId
+        ? `https://x.com/${platformUsername}/status/${platformPostId}`
+        : undefined;
+    } else if (mastodonAccount && post.origin === PLATFORM.Mastodon) {
+      const server = mastodonAccount.profile?.mastodonServer;
+      platformAccountUrl =
+        platformUsername && server
+          ? `https://${server}/@${platformUsername}`
+          : undefined;
+      platformPostUrl =
+        platformPostId && server
+          ? `https://${server}/@${platformUsername}/${platformPostId}`
+          : undefined;
+    } else if (blueskyAccount && post.origin === PLATFORM.Bluesky) {
+      platformAccountUrl = platformUsername
+        ? `https://bsky.app/profile/${platformUsername}`
+        : undefined;
+      platformPostUrl = platformPostId
+        ? `https://bsky.app/profile/${platformUsername}/post/${parseBlueskyURI(platformPostId).rkey}`
+        : undefined;
+    } else {
+      throw new Error(
+        'Platform account details for post origin platform not found'
+      );
+    }
+
+    return {
+      platformAccountUrl,
+      platformName,
+      platformPostUrl,
+    };
   }
 }

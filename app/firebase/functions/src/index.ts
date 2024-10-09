@@ -57,6 +57,8 @@ const secrets = [
   envRuntime.TWITTER_CLIENT_SECRET,
   envRuntime.TWITTER_BEARER_TOKEN,
   envRuntime.MASTODON_ACCESS_TOKEN,
+  envRuntime.BLUESKY_APP_PASSWORD,
+  envRuntime.BLUESKY_USERNAME,
   envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
   envRuntime.EMAIL_CLIENT_SECRET,
   envRuntime.MAGIC_ADMIN_SECRET,

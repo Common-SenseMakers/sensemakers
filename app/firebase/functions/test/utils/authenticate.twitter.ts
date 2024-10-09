@@ -2,7 +2,6 @@ import { IOAuth2RequestTokenResult } from 'twitter-api-v2';
 
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import {
-  TwitterAccountCredentials,
   TwitterGetContextParams,
   TwitterSigninCredentials,
   TwitterSignupData,

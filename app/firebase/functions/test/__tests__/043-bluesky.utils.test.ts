@@ -3,10 +3,10 @@ import { expect } from 'chai';
 import fs from 'fs';
 
 import { BlueskyPost } from '../../src/@shared/types/types.bluesky';
+import { parseBlueskyURI } from '../../src/@shared/utils/bluesky.utils';
 import {
   cleanBlueskyContent,
   convertBlueskyPostsToThreads,
-  extractRKeyFromURI,
 } from '../../src/platforms/bluesky/bluesky.utils';
 
 describe('bluesky utility functions', () => {
@@ -123,9 +123,14 @@ describe('bluesky utility functions', () => {
       'Original post with a link: https://example.com/full-link'
     );
   });
-  it('extracts rKey from URI', () => {
+  it.only('parses Bluesky URI correctly', () => {
     const uri = 'at://did:plc:example/app.bsky.feed.post/3j5sy9apqv2';
-    const rkey = extractRKeyFromURI(uri);
-    expect(rkey).to.equal('3j5sy9apqv2');
+    const parsedURI = parseBlueskyURI(uri);
+    expect(parsedURI).to.not.be.null;
+    expect(parsedURI).to.deep.equal({
+      did: 'did:plc:example',
+      collection: 'app.bsky.feed.post',
+      rkey: '3j5sy9apqv2',
+    });
   });
 });

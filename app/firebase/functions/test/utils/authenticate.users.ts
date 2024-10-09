@@ -1,5 +1,3 @@
-import AtpAgent from '@atproto/api';
-
 import { BlueskyAccountDetails } from '../../src/@shared/types/types.bluesky';
 import { NotificationFreq } from '../../src/@shared/types/types.notifications';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
@@ -10,7 +8,6 @@ import {
   TestUserCredentials,
 } from '../../src/@shared/types/types.user';
 import { TransactionManager } from '../../src/db/transaction.manager';
-import { removeUndefinedFields } from '../../src/platforms/bluesky/bluesky.utils';
 import { getPrefixedUserId } from '../../src/users/users.utils';
 import { handleTwitterSignupMock } from '../__tests__/reusable/mocked.singup';
 import { USE_REAL_TWITTER } from '../__tests__/setup';
@@ -98,26 +95,22 @@ const authenticateBlueskyForUser = async (
     };
   }
 
-  const agent = new AtpAgent({ service: 'https://bsky.social' });
-  await agent.login({
-    identifier: credentials.bluesky.username,
-    password: credentials.bluesky.appPassword,
-  });
-  if (!agent.session) {
-    throw new Error('Failed to login to Bluesky');
-  }
-  const sessionData = removeUndefinedFields(agent.session);
-
   const blueskyUserDetails: BlueskyAccountDetails = {
     signupDate: 0,
     user_id: credentials.bluesky.id,
     credentials: {
-      read: sessionData,
-      write: sessionData,
+      read: {
+        username: credentials.bluesky.username,
+        appPassword: credentials.bluesky.appPassword,
+      },
+      write: {
+        username: credentials.bluesky.username,
+        appPassword: credentials.bluesky.appPassword,
+      },
     },
   };
 
-  user[PLATFORM.Bluesky] = [blueskyUserDetails];
+  user.accounts[PLATFORM.Bluesky] = [blueskyUserDetails];
 
   return user;
 };
@@ -176,7 +169,7 @@ const authenticateMastodonForUser = async (
     };
   }
 
-  user[PLATFORM.Mastodon] = [
+  user.accounts[PLATFORM.Mastodon] = [
     {
       signupDate: 0,
       user_id: credentials.mastodon.id,

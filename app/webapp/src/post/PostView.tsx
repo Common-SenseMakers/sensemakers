@@ -209,10 +209,7 @@ export const PostView = (props: { profile?: TwitterProfile }) => {
     return (
       <>
         <Box pad="medium">
-          <PostHeader
-            name="Name"
-            imageUrl="https://avatars.githubusercontent.com/u/1407693?v=4"
-            boxProps={{ margin: { bottom: '16px' } }}></PostHeader>
+          <PostHeader boxProps={{ margin: { bottom: '16px' } }}></PostHeader>
           {!hideSemantics && (
             <SemanticsEditor
               patternProps={patternProps}

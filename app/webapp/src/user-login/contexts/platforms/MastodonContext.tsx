@@ -104,7 +104,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
 
       try {
         const params: MastodonGetContextParams = {
-          domain,
+          mastodonServer: domain,
           callback_url: window.location.href,
           type,
         };
@@ -174,7 +174,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
           const signupData: MastodonSignupData = {
             ...context,
             code: code_param,
-            domain: new URL(context.authorizationUrl).hostname,
+            mastodonServer: new URL(context.authorizationUrl).hostname,
             callback_url: window.location.href,
             type: 'read',
           };
@@ -190,6 +190,10 @@ export const MastodonContext = (props: PropsWithChildren) => {
             }
 
             searchParams.delete('code');
+            setPlatformConnectedStatus(
+              PLATFORM.Mastodon,
+              PlatformConnectedStatus.Connected
+            );
             refreshConnected();
             setSearchParams(searchParams);
           });

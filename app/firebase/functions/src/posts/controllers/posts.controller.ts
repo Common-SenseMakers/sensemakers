@@ -1,5 +1,9 @@
 import { RequestHandler } from 'express';
 
+import {
+  AddUserDataPayload,
+  FetchParams,
+} from '../../@shared/types/types.fetch';
 import { PublishPostPayload } from '../../@shared/types/types.fetch';
 import {
   PostUpdatePayload,
@@ -240,6 +244,56 @@ export const unpublishPlatformPostController: RequestHandler = async (
     if (DEBUG) logger.debug(`${request.path}: updatePost`, payload);
 
     response.status(200).send({ success: true });
+  } catch (error) {
+    logger.error('error', error);
+    response.status(500).send({ success: false, error });
+  }
+};
+
+export const addUserDataController: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    const services = getServices(request);
+
+    const payload = request.body as AddUserDataPayload;
+
+    const result = await services.db.run(async (manager) => {
+      /** handle signup and refetch user posts */
+      return await services.users.handleSignup(
+        payload.platformId,
+        payload,
+        manager,
+        payload.userId
+      );
+    });
+    if (!result) {
+      throw new Error('user not found');
+    }
+
+    const user = await services.db.run(async (manager) => {
+      return await services.users.repo.getUser(result.userId, manager);
+    });
+
+    if (!user) {
+      throw new Error('user not found');
+    }
+
+    /** the value of sinceId or untilId doesn't matter, as long as it exists, then it will be converted to appropriate fetch params */
+    const fetchParams: FetchParams = payload.latest
+      ? { expectedAmount: payload.amount, sinceId: user.userId }
+      : { expectedAmount: payload.amount, untilId: user.userId };
+
+    const fetchedPosts = await services.postsManager.fetchUser({
+      userId: user?.userId,
+      user,
+      params: fetchParams,
+    });
+
+    if (DEBUG) logger.debug(`${request.path}: addUserData`, payload);
+
+    response.status(200).send({ success: true, data: fetchedPosts });
   } catch (error) {
     logger.error('error', error);
     response.status(500).send({ success: false, error });

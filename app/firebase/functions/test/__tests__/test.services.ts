@@ -1,9 +1,10 @@
 import { getFirestore } from 'firebase-admin/firestore';
 import { spy, when } from 'ts-mockito';
 
-import { PLATFORM } from '../../src/@shared/types/types.user';
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { ActivityRepository } from '../../src/activity/activity.repository';
 import { ActivityService } from '../../src/activity/activity.service';
+import { API_DOMAIN } from '../../src/config/config.runtime';
 import { DBInstance } from '../../src/db/instance';
 import { EmailSenderService } from '../../src/emailSender/email.sender.service';
 import {
@@ -49,6 +50,7 @@ import { PlatformPostsRepository } from '../../src/posts/platform.posts.reposito
 import { PostsManager } from '../../src/posts/posts.manager';
 import { PostsProcessing } from '../../src/posts/posts.processing';
 import { PostsRepository } from '../../src/posts/posts.repository';
+import { ProfilesRepository } from '../../src/profiles/profiles.repository';
 import { TriplesRepository } from '../../src/semantics/triples.repository';
 import { TimeMock, getTimeMock } from '../../src/time/mock/time.service.mock';
 import { TimeService } from '../../src/time/time.service';
@@ -91,7 +93,8 @@ export const getTestServices = (config: TestServicesConfig) => {
   });
 
   const db = new DBInstance(getFirestore());
-  const userRepo = new UsersRepository(db);
+  const profilesRepo = new ProfilesRepository(db);
+  const userRepo = new UsersRepository(db, profilesRepo);
   const postsRepo = new PostsRepository(db);
   const triplesRepo = new TriplesRepository(db);
   const platformPostsRepo = new PlatformPostsRepository(db);
@@ -121,7 +124,9 @@ export const getTestServices = (config: TestServicesConfig) => {
   const twitter = getTwitterMock(_twitter, config.twitter, testUser);
 
   /** mocked mastodon */
-  const _mastodon = new MastodonService(time, userRepo);
+  const _mastodon = new MastodonService(time, userRepo, {
+    apiDomain: API_DOMAIN,
+  });
   const mastodon = getMastodonMock(_mastodon, config.mastodon, testUser);
 
   /** mocked mastodon */
@@ -158,6 +163,7 @@ export const getTestServices = (config: TestServicesConfig) => {
   const usersService = new UsersService(
     db,
     userRepo,
+    profilesRepo,
     identityServices,
     time,
     email,

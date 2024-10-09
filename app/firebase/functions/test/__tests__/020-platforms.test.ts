@@ -1,17 +1,14 @@
+import AtpAgent from '@atproto/api';
 import { expect } from 'chai';
 
-import {
-  BlueskyThread,
-  BlueskyUserDetails,
-} from '../../src/@shared/types/types.bluesky';
+import { BlueskyAccountDetails } from '../../src/@shared/types/types.bluesky';
 import {
   FetchParams,
   PlatformFetchParams,
 } from '../../src/@shared/types/types.fetch';
 import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
-import { PlatformPostCreate } from '../../src/@shared/types/types.platform.posts';
-import { AppTweet, TwitterThread } from '../../src/@shared/types/types.twitter';
-import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
+import { AppUser } from '../../src/@shared/types/types.user';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
@@ -19,7 +16,6 @@ import { logger } from '../../src/instances/logger';
 import { BlueskyService } from '../../src/platforms/bluesky/bluesky.service';
 import { MastodonService } from '../../src/platforms/mastodon/mastodon.service';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
-import { convertToAppTweets } from '../../src/platforms/twitter/twitter.utils';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
 import { getMockPost } from '../utils/posts.utils';
@@ -93,7 +89,7 @@ describe('02-platforms', () => {
       }
       const twitterService = services.platforms.get(PLATFORM.Twitter);
       const userDetails = allUserDetails[0];
-      if (userDetails.read === undefined) {
+      if (userDetails.credentials.read === undefined) {
         throw new Error('Unexpected');
       }
 
@@ -108,14 +104,18 @@ describe('02-platforms', () => {
       };
 
       const threads = await services.db.run((manager) =>
-        twitterService.fetch(fetchParams, userDetails, manager)
+        twitterService.fetch(
+          userDetails.user_id,
+          fetchParams,
+          userDetails.credentials
+        )
       );
 
       expect(threads).to.not.be.undefined;
       expect(threads.platformPosts.length).to.be.greaterThanOrEqual(1);
     });
 
-    it.only('gets account by username', async () => {
+    it('gets account by username', async () => {
       const twitterService = services.platforms.get(
         PLATFORM.Twitter
       ) as TwitterService;
@@ -125,10 +125,27 @@ describe('02-platforms', () => {
         throw new Error('Missing TWITTER_BEARER_TOKEN');
       }
 
-      const result = await twitterService.getAccountByUsername(
-        username,
-        bearerToken
-      );
+      const result = await twitterService.getProfileByUsername(username);
+
+      expect(result).to.not.be.null;
+      if (result) {
+        expect(result.id).to.be.a('string');
+        expect(result.username).to.equal(username);
+        expect(result.name).to.be.a('string');
+        expect(result.profile_image_url).to.be.a('string');
+      }
+    });
+    it('gets account by username', async () => {
+      const twitterService = services.platforms.get(
+        PLATFORM.Twitter
+      ) as TwitterService;
+      const username = 'wesleyfinck';
+      const bearerToken = process.env.TWITTER_BEARER_TOKEN;
+      if (!bearerToken) {
+        throw new Error('Missing TWITTER_BEARER_TOKEN');
+      }
+
+      const result = await twitterService.getProfileByUsername(username);
 
       expect(result).to.not.be.null;
       if (result) {
@@ -147,13 +164,22 @@ describe('02-platforms', () => {
       }
 
       try {
-        const post = getMockPost({ authorId: user.userId, id: 'post-id-1' });
+        const post = getMockPost({
+          authorUserId: user.userId,
+          id: 'post-id-1',
+        });
 
         const nanopubService = services.platforms.get(PLATFORM.Nanopub);
 
+        const userRead = await services.db.run((manager) => {
+          if (!user) {
+            throw new Error('user not created');
+          }
+          return services.users.getUserWithProfiles(user.userId, manager);
+        });
         const nanopub = await nanopubService.convertFromGeneric({
           post,
-          author: user,
+          author: userRead,
         });
 
         if (!nanopub) {
@@ -171,17 +197,16 @@ describe('02-platforms', () => {
         );
         expect(signed).to.not.be.undefined;
 
+        const account = UsersHelper.getAccount(user, PLATFORM.Nanopub);
+        if (!account) {
+          throw new Error('User does not have Nanopub credentials');
+        }
+
         const published = await services.db.run((manager) =>
-          nanopubService.publish(
-            {
-              draft: signed.rdf(),
-              userDetails: {
-                signupDate: 0,
-                user_id: '123456',
-              },
-            },
-            manager
-          )
+          nanopubService.publish({
+            draft: signed.rdf(),
+            credentials: account.credentials,
+          })
         );
         expect(published).to.not.be.undefined;
       } catch (error) {
@@ -196,12 +221,12 @@ describe('02-platforms', () => {
       if (!user) {
         throw new Error('appUser not created');
       }
-      const allUserDetails = user[PLATFORM.Mastodon];
+      const allUserDetails = user.accounts[PLATFORM.Mastodon];
       if (!allUserDetails || allUserDetails.length < 0) {
         throw new Error('Unexpected');
       }
       const userDetails = allUserDetails[0];
-      if (userDetails.read === undefined) {
+      if (userDetails.credentials.read === undefined) {
         throw new Error('Unexpected');
       }
 
@@ -211,7 +236,11 @@ describe('02-platforms', () => {
       };
 
       const result = await services.db.run((manager) =>
-        mastodonService.fetch(fetchParams, userDetails, manager)
+        mastodonService.fetch(
+          userDetails.user_id,
+          fetchParams,
+          userDetails.credentials
+        )
       );
 
       expect(result).to.not.be.undefined;
@@ -221,12 +250,12 @@ describe('02-platforms', () => {
       if (!user) {
         throw new Error('appUser not created');
       }
-      const allUserDetails = user[PLATFORM.Mastodon];
+      const allUserDetails = user.accounts[PLATFORM.Mastodon];
       if (!allUserDetails || allUserDetails.length < 0) {
         throw new Error('Unexpected');
       }
       const userDetails = allUserDetails[0];
-      if (userDetails.read === undefined) {
+      if (userDetails.credentials.read === undefined) {
         throw new Error('Unexpected');
       }
 
@@ -237,7 +266,11 @@ describe('02-platforms', () => {
       };
 
       const result = await services.db.run((manager) =>
-        mastodonService.fetch(fetchParams, userDetails, manager)
+        mastodonService.fetch(
+          userDetails.user_id,
+          fetchParams,
+          userDetails.credentials
+        )
       );
 
       if (USE_REAL_MASTODON) {
@@ -245,28 +278,83 @@ describe('02-platforms', () => {
         expect(result.platformPosts.length).to.be.greaterThan(0);
       }
     });
+
+    it('gets account by username', async () => {
+      // https://fediscience.org/@petergleick
+      const username = 'petergleick';
+      const server = 'fediscience.org';
+
+      const accessToken = process.env.MASTODON_ACCESS_TOKEN;
+      if (!accessToken) {
+        throw new Error('Missing MASTODON_ACCESS_TOKEN');
+      }
+
+      const mastodonService = services.platforms.get(
+        PLATFORM.Mastodon
+      ) as MastodonService;
+
+      const result = await mastodonService.getAccountByUsername(
+        username,
+        server,
+        { accessToken }
+      );
+
+      expect(result).to.not.be.null;
+      if (result) {
+        expect(result.id).to.be.a('string');
+        expect(result.username).to.equal(username);
+        expect(result.displayName).to.be.a('string');
+        expect(result.avatar).to.be.a('string');
+        expect(result.mastodonServer).to.equal(server);
+      }
+    });
   });
 
   describe('bluesky', () => {
     let blueskyService: BlueskyService;
-    let userDetails: BlueskyUserDetails;
+    let userDetails: BlueskyAccountDetails;
 
     before(() => {
       if (!user) {
         throw new Error('appUser not created');
       }
-      const allUserDetails = user[PLATFORM.Bluesky];
+      const allUserDetails = user.accounts[PLATFORM.Bluesky];
       if (!allUserDetails || allUserDetails.length < 0) {
         throw new Error('Unexpected');
       }
       userDetails = allUserDetails[0];
-      if (userDetails.read === undefined) {
+      if (userDetails.credentials.read === undefined) {
         throw new Error('Unexpected');
       }
 
       blueskyService = services.platforms.get(
         PLATFORM.Bluesky
       ) as BlueskyService;
+    });
+
+    it('gets account by username', async () => {
+      const username = 'ronent.bsky.social';
+      const agent = new AtpAgent({ service: 'https://bsky.social' });
+      const blueskyUsername = process.env.BLUESKY_USERNAME;
+      const blueskyAppPassword = process.env.BLUESKY_APP_PASSWORD;
+      if (!blueskyUsername || !blueskyAppPassword) {
+        throw new Error('Missing BLUESKY_USERNAME or BLUESKY_APP_PASSWORD');
+      }
+
+      await agent.login({
+        identifier: blueskyUsername,
+        password: blueskyAppPassword,
+      });
+
+      const result = await blueskyService.getAccountByUsername(username, agent);
+
+      expect(result).to.not.be.null;
+      if (result) {
+        expect(result.id).to.be.a('string');
+        expect(result.username).to.equal(username);
+        expect(result.displayName).to.be.a('string');
+        expect(result.avatar).to.be.a('string');
+      }
     });
 
     (USE_REAL_BLUESKY ? it : it.skip)(
@@ -276,9 +364,11 @@ describe('02-platforms', () => {
           'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wdgnynfq2h';
         // https://bsky.app/profile/weswalla.bsky.social/post/3l4wdgnynfq2h
 
-        const result = await services.db.run((manager) =>
-          blueskyService.get(postId, userDetails, manager)
-        );
+        const result = (
+          await services.db.run((manager) =>
+            blueskyService.get(postId, userDetails.credentials)
+          )
+        ).platformPost;
         const expectedThreadIds = [
           'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z',
           'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd52krts24',
@@ -297,7 +387,7 @@ describe('02-platforms', () => {
         );
 
         // Check that all posts in the thread are from the same author
-        const authorDid = result.post.author.did;
+        const authorDid = result.post.author.id;
         result.post.posts.forEach((post) => {
           expect(post.author.did).to.equal(authorDid);
         });
@@ -315,13 +405,17 @@ describe('02-platforms', () => {
       }
     );
 
-    it.only('fetches the latest posts without since_id or until_id', async () => {
+    it('fetches the latest posts without since_id or until_id', async () => {
       const fetchParams: PlatformFetchParams = {
         expectedAmount: 10,
       };
 
       const result = await services.db.run((manager) =>
-        blueskyService.fetch(fetchParams, userDetails, manager)
+        blueskyService.fetch(
+          userDetails.user_id,
+          fetchParams,
+          userDetails.credentials
+        )
       );
 
       expect(result).to.not.be.undefined;

@@ -3,6 +3,7 @@ import {
   createContext,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from 'react';
 
@@ -35,6 +36,7 @@ export const ALREADY_CONNECTED_KEY = 'already-connected';
 
 export type AccountContextType = {
   connectedUser?: ConnectedUser;
+  connectedSourcePlatforms: PUBLISHABLE_PLATFORM[];
   isConnected: boolean;
   email?: EmailDetails;
   disconnect: () => void;
@@ -299,10 +301,25 @@ export const AccountContext = (props: PropsWithChildren) => {
     return platformsConnectedStatus && platformsConnectedStatus[platformId];
   };
 
+  const connectedSourcePlatforms = useMemo(() => {
+    return ALL_SOURCE_PLATFORMS.filter((platform) => {
+      const profiles = connectedUser?.profiles;
+      const profile = profiles && profiles[platform];
+      return profile !== undefined;
+    });
+  }, [connectedUser]);
+
+  useEffect(() => {
+    connectedSourcePlatforms.forEach((platform) => {
+      setPlatformConnectedStatus(platform, PlatformConnectedStatus.Connected);
+    });
+  }, [connectedSourcePlatforms]);
+
   return (
     <AccountContextValue.Provider
       value={{
         connectedUser: connectedUser === null ? undefined : connectedUser,
+        connectedSourcePlatforms,
         email,
         isConnected: connectedUser !== undefined && connectedUser !== null,
         disconnect,

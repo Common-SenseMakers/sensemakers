@@ -1,5 +1,6 @@
 import { mastodon } from 'masto';
 
+import { AccountProfile } from './types.profiles';
 import { AccountDetailsBase } from './types.user';
 
 export interface MastodonProfile {
@@ -7,8 +8,9 @@ export interface MastodonProfile {
   username: string;
   displayName: string;
   avatar: string;
-  domain: string;
+  mastodonServer: string;
 }
+export type MastodonAccountProfile = AccountProfile<MastodonProfile>;
 
 export interface MastodonAccountCredentials {
   server: string;
@@ -21,7 +23,7 @@ export type MastodonAccountDetails = AccountDetailsBase<{
 }>;
 
 export interface MastodonGetContextParams {
-  domain: string;
+  mastodonServer: string;
   callback_url: string;
   type: 'read' | 'write';
 }
@@ -39,7 +41,7 @@ export interface MastodonOAuthSignupData extends MastodonGetContextParams {
 }
 
 export interface MastodonAccessTokenSignupData {
-  domain: string;
+  mastodonServer: string;
   accessToken: string;
   type: 'read' | 'write';
 }
@@ -57,7 +59,9 @@ export interface MastodonThread {
 export type MastodonPost = mastodon.v1.Status;
 export type MastodonAccount = mastodon.v1.Account;
 
-// TODO: Not sure what is needed to signin users on tests
 export interface MastodonSigninCredentials {
   id: string;
+  username: string;
+  mastodonServer: string;
+  accessToken: string;
 }

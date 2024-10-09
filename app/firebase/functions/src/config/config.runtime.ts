@@ -13,6 +13,8 @@ const mandatory: Array<keyof typeof envRuntime> = [
   'TWITTER_BEARER_TOKEN',
   'MASTODON_SERVER',
   'MASTODON_ACCESS_TOKEN',
+  'BLUESKY_APP_PASSWORD',
+  'BLUESKY_USERNAME',
   'PROJECT_ID',
   'NANOPUBS_PUBLISH_SERVERS',
   'NP_PUBLISH_RSA_PRIVATE_KEY',
@@ -46,6 +48,8 @@ export const TWITTER_BEARER_TOKEN = envRuntime.TWITTER_BEARER_TOKEN;
 
 export const MASTODON_ACCESS_TOKEN = envRuntime.MASTODON_ACCESS_TOKEN;
 export const MASTODON_SERVER = 'mastodon.social';
+export const BLUESKY_APP_PASSWORD = envRuntime.BLUESKY_APP_PASSWORD;
+export const BLUESKY_USERNAME = envRuntime.BLUESKY_USERNAME;
 
 export const ADMIN_API_KEY = envRuntime.ADMIN_API_KEY;
 

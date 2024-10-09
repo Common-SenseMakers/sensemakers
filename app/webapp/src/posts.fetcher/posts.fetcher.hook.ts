@@ -52,7 +52,7 @@ export interface FetcherConfig {
  * fething newer and older posts as requested by a consuming component
  */
 export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
-  const { connectedUser, overallLoginStatus } = useAccountContext();
+  const { connectedUser, connectedSourcePlatforms } = useAccountContext();
 
   const {
     endpoint,
@@ -234,34 +234,20 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
     setPosts([]);
   };
 
-  /** first data fill happens everytime the posts are empty and the firstFetched is false */
+  /** first data fill happens everytime a new source platform is added/removed */
   useEffect(() => {
-    if (
-      posts &&
-      !fetchedOlderFirst &&
-      overallLoginStatus === OverallLoginStatus.FullyLoggedIn &&
-      connectedUser
-    ) {
-      if (DEBUG)
-        console.log('first fetch older', {
-          posts,
-          fetchedOlderFirst,
-          connectedUser,
-        });
+    if (DEBUG)
+      console.log('first fetch older with new platform added', {
+        posts,
+        fetchedOlderFirst,
+        connectedSourcePlatforms,
+      });
+    if (connectedSourcePlatforms.length > 0) {
+      reset();
       setFetchedOlderFirst(true);
-
       _fetchOlder(undefined);
     }
-  }, [posts, fetchedOlderFirst, connectedUser]);
-
-  /** is this hook still needed? */
-  // useEffect(() => {
-  //   if (posts.length > 0 && twitterProfile && mastodonProfile) {
-  //     if (DEBUG) console.log('first fetch older with new platform added');
-  //     reset();
-  //     _fetchOlder(undefined);
-  //   }
-  // }, [connectedUser]);
+  }, [connectedSourcePlatforms]);
 
   /** whenever posts have been fetched, check if we have fetched for newer posts yet, and if not, fetch for newer */
   useEffect(() => {
@@ -281,6 +267,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
   /** reset at every status change  */
   useEffect(() => {
     reset();
+    _fetchOlder(undefined);
   }, [status, labels, keywords, endpoint]);
 
   const _oldestPostId = useMemo(() => {

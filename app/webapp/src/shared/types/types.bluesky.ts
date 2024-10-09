@@ -7,9 +7,9 @@ import {
   AppBskyFeedDefs,
   AppBskyFeedPost,
   AppBskyRichtextFacet,
-  AtpSessionData,
 } from '@atproto/api';
 
+import { AccountProfile } from './types.profiles';
 import { AccountDetailsBase } from './types.user';
 
 export interface BlueskySigninCredentials {
@@ -19,7 +19,10 @@ export interface BlueskySigninCredentials {
   appPassword: string;
 }
 
-export type BlueskyCredentials = AtpSessionData;
+export type BlueskyCredentials = {
+  username: string;
+  appPassword: string;
+};
 
 export interface BlueskyAccountCredentials {
   write?: BlueskyCredentials;
@@ -35,6 +38,7 @@ export interface BlueskyProfile {
   displayName?: string;
   avatar?: string;
 }
+export type BlueskyAccountProfile = AccountProfile<BlueskyProfile>;
 
 export interface BlueskyGetContextParams {
   callback_url: string;

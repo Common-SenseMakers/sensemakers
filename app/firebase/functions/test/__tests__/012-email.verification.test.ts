@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { TwitterSignupContext } from '../../src/@shared/types/types.twitter';
-import { PLATFORM } from '../../src/@shared/types/types.user';
 import { logger } from '../../src/instances/logger';
 import { resetDB } from '../utils/db';
 import { handleTwitterSignupMock } from './reusable/mocked.singup';

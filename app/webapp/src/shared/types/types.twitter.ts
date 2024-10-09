@@ -17,11 +17,9 @@ export type TwitterGetContextParams = {
 export type TwitterSignupContext = IOAuth2RequestTokenResult &
   TwitterGetContextParams;
 
-export type TwitterAccountSignupData = TwitterSignupContext & {
+export type TwitterSignupData = TwitterSignupContext & {
   code: string;
 };
-
-export type TwitterSignupData = TwitterAccountSignupData;
 
 /**
  * For Twitter we need to store the oAuth token and secret as part of the signup process

@@ -53,13 +53,14 @@ import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
 import { UsersRepository } from '../../users/users.repository';
 import { PlatformService, WithCredentials } from '../platforms.interface';
-import { expansions, tweetFields } from './twitter.config';
+import { expansions, tweetFields, userFields } from './twitter.config';
 import { TwitterServiceClient } from './twitter.service.client';
 import {
   convertToAppTweetBase,
   convertToAppTweets,
   convertTweetsToThreads,
   dateStrToTimestampMs,
+  getOriginalAuthor,
   getTweetTextWithUrls,
   getTweetUrl,
   handleTwitterError,
@@ -129,6 +130,7 @@ export class TwitterService
         max_results: MAX_TWEETS > 100 ? 100 : MAX_TWEETS,
         expansions,
         'tweet.fields': tweetFields,
+        'user.fields': userFields,
       };
 
       let nextToken: string | undefined = undefined;
@@ -262,6 +264,7 @@ export class TwitterService
         max_results: 30,
         expansions,
         'tweet.fields': tweetFields,
+        'user.fields': userFields,
         exclude: ['retweets', 'replies'],
       };
 
@@ -296,6 +299,9 @@ export class TwitterService
               result.data.data,
               result.data.includes
             );
+
+            originalAuthor = getOriginalAuthor(user_id, result.data.includes);
+
             /** keep track of the number of threads */
             appTweets.forEach((tweet) => {
               if (tweet.conversation_id) {
@@ -307,7 +313,7 @@ export class TwitterService
 
             if (!originalAuthor) {
               const profileParams: Partial<UsersV2Params> = {
-                'user.fields': ['profile_image_url', 'name', 'username'],
+                'user.fields': userFields,
               };
 
               const originalAuthorData = await readOnlyClient.v2.user(
@@ -414,7 +420,10 @@ export class TwitterService
 
     const twitterThread = platformPost.posted.post;
     const genericAuthor: GenericAuthor = {
-      ...twitterThread.author,
+      id: twitterThread.author.id,
+      name: twitterThread.author.name || twitterThread.author.username,
+      username: twitterThread.author.username,
+      avatarUrl: twitterThread.author.profile_image_url,
       platformId: PLATFORM.Twitter,
     };
 

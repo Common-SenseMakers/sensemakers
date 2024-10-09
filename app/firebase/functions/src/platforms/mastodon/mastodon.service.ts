@@ -66,7 +66,7 @@ export class MastodonService
     if (DEBUG) logger.debug('createApp', { params }, DEBUG_PREFIX);
 
     const client = createRestAPIClient({
-      url: `https://${params.domain}`,
+      url: `https://${params.mastodonServer}`,
     });
 
     const scopes = params.type === 'write' ? 'read write' : 'read';
@@ -75,7 +75,7 @@ export class MastodonService
       clientName: 'SenseNets',
       redirectUris: params.callback_url,
       scopes,
-      website: `https://${params.domain}`,
+      website: `https://${params.mastodonServer}`,
     });
 
     if (DEBUG) logger.debug('createApp result', { app }, DEBUG_PREFIX);
@@ -104,7 +104,7 @@ export class MastodonService
     if (DEBUG)
       logger.debug('getSignupContext', { userId, params }, DEBUG_PREFIX);
 
-    if (!params || !params.domain || !params.callback_url) {
+    if (!params || !params.mastodonServer || !params.callback_url) {
       throw new Error('Mastodon server and callback URL are required');
     }
 
@@ -116,7 +116,7 @@ export class MastodonService
     const scopes = params.type === 'write' ? 'read+write' : 'read';
 
     const authorizationUrl =
-      `https://${params.domain}/oauth/authorize?` +
+      `https://${params.mastodonServer}/oauth/authorize?` +
       `client_id=${app.clientId}&` +
       `scope=${scopes}&` +
       `redirect_uri=${params.callback_url}&` +
@@ -139,7 +139,7 @@ export class MastodonService
         return { accessToken: signupData.accessToken };
       }
       const client = createOAuthAPIClient({
-        url: `https://${signupData.domain}`,
+        url: `https://${signupData.mastodonServer}`,
       });
       return await client.token.create({
         clientId: signupData.clientId,
@@ -182,7 +182,7 @@ export class MastodonService
       username: account.username,
       displayName: account.displayName,
       avatar: account.avatar,
-      domain: signupData.domain,
+      mastodonServer: signupData.mastodonServer,
     };
 
     const profile: AccountProfileBase<MastodonProfile> = {
@@ -330,6 +330,7 @@ export class MastodonService
       id: thread.author.id,
       username: thread.author.username,
       name: thread.author.displayName,
+      avatarUrl: thread.author.avatar,
     };
 
     const genericPosts: GenericPost[] = thread.posts.map((status) => ({
@@ -349,7 +350,7 @@ export class MastodonService
     const credentials = postPublish.credentials;
 
     const client = createRestAPIClient({
-      url: `https://${credentials.write.domain}`,
+      url: `https://${credentials.write.mastodonServer}`,
       accessToken: credentials.write.accessToken,
     });
 
@@ -470,7 +471,7 @@ export class MastodonService
           username: account.username,
           displayName: account.displayName,
           avatar: account.avatar,
-          domain: server,
+          mastodonServer: server,
         };
       }
       return null;
@@ -493,7 +494,7 @@ export class MastodonService
         id: mdProfile.id,
         avatar: mdProfile.avatar,
         displayName: mdProfile.displayName,
-        domain: 'placeholder',
+        mastodonServer: 'placeholder',
         username: mdProfile.username,
       },
     };

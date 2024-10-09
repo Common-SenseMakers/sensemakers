@@ -16,7 +16,8 @@ import { useTwitterContext } from './contexts/platforms/TwitterContext';
 export const ConnectSocialsPage = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { connectedUser, setAlreadyConnected } = useAccountContext();
+  const { connectedUser, connectedSourcePlatforms, setAlreadyConnected } =
+    useAccountContext();
 
   const { connect: connectTwitter } = useTwitterContext();
 
@@ -99,7 +100,7 @@ export const ConnectSocialsPage = () => {
           primary
           label={t(I18Keys.continue)}
           onClick={handleContinue}
-          disabled={!twitterProfile && !mastodonProfile}
+          disabled={connectedSourcePlatforms.length === 0}
           style={{ width: '100%' }}
         />
       </Box>

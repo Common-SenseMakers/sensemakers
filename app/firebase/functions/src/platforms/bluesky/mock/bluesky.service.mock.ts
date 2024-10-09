@@ -3,11 +3,14 @@ import { anything, instance, spy, when } from 'ts-mockito';
 import {
   BlueskyAccountDetails,
   BlueskyGetContextParams,
+  BlueskyProfile,
   BlueskySignupContext,
   BlueskySignupData,
 } from '../../../@shared/types/types.bluesky';
 import { PlatformFetchParams } from '../../../@shared/types/types.fetch';
 import { PlatformPostPublish } from '../../../@shared/types/types.platform.posts';
+import { PLATFORM } from '../../../@shared/types/types.platforms';
+import { AccountProfileCreate } from '../../../@shared/types/types.profiles';
 import {
   AccountDetailsBase,
   TestUserCredentials,
@@ -2464,20 +2467,23 @@ export const getBlueskyMock = (
         const accountDetails = {
           user_id: 'did:plc:6z5botgrc5vekq7j26xnvawq',
           signupDate: 1725473415250,
-          read: {
-            refreshJwt: '',
-            accessJwt: '',
-            handle: '',
-            did: '',
-            active: true,
+          credentials: {
+            read: {
+              username: 'sensenetsbot.bsky.social',
+              appPassword: '2134-1234-1234-1234',
+            },
           },
         };
-        const profile = {
-          id: 'did:plc:6z5botgrc5vekq7j26xnvawq',
-          username: 'weswalla.bsky.social',
-          name: 'Wesley Finck',
-          avatar:
-            'https://media.cosocial.ca/accounts/avatars/111/971/425/782/516/559/original/963c30efd081957e.jpeg',
+        const profile: AccountProfileCreate<BlueskyProfile> = {
+          platformId: PLATFORM.Bluesky,
+          user_id: 'did:plc:6z5botgrc5vekq7j26xnvawq',
+          profile: {
+            id: 'did:plc:6z5botgrc5vekq7j26xnvawq',
+            username: 'weswalla.bsky.social',
+            displayName: 'Wesley Finck',
+            avatar:
+              'https://media.cosocial.ca/accounts/avatars/111/971/425/782/516/559/original/963c30efd081957e.jpeg',
+          },
         };
 
         return { accountDetails, profile };

@@ -203,7 +203,7 @@ export class TwitterServiceClient {
     const profileParams: Partial<UsersV2Params> = {
       'user.fields': ['profile_image_url', 'name', 'username'],
     };
-    const { data: twitterUser } = await result.client.v2.me(profileParams);
+    const { data: user } = await result.client.v2.me(profileParams);
 
     if (!result.refreshToken) {
       throw new Error('Unexpected undefined refresh token');
@@ -212,43 +212,44 @@ export class TwitterServiceClient {
     if (!result.expiresIn) {
       throw new Error('Unexpected undefined refresh token');
     }
-
     const credentials: TwitterCredentials = {
       accessToken: result.accessToken,
       refreshToken: result.refreshToken,
       expiresIn: result.expiresIn,
       expiresAtMs: this.time.now() + result.expiresIn * 1000,
     };
-
-    if (DEBUG)
-      logger.debug(
-        'handleSignupData',
-        { account: twitterUser, credentials },
-        DEBUG_PREFIX
-      );
-
-    const twitter: TwitterAccountDetails = {
-      user_id: twitterUser.id,
-      signupDate: 0,
+    const twitterAccountDetails: TwitterAccountDetails = {
+      user_id: user.id,
+      signupDate: this.time.now(),
       credentials: {
         read: credentials,
       },
     };
+    const twitterProfile: AccountProfileCreate<TwitterProfile> = {
+      platformId: PLATFORM.Twitter,
+      user_id: user.id,
+      profile: user,
+    };
+
+    if (DEBUG)
+      logger.debug('handleSignupData', { user, credentials }, DEBUG_PREFIX);
 
     /** the same credentials apply for reading and writing */
     if (data.type === 'write') {
-      twitter.credentials['write'] = credentials;
+      twitterAccountDetails.credentials['write'] = credentials;
     }
 
-    if (DEBUG) logger.debug('handleSignupData', twitter, DEBUG_PREFIX);
+    if (DEBUG)
+      logger.debug(
+        'handleSignupData',
+        { twitterProfile, twitterAccountDetails },
+        DEBUG_PREFIX
+      );
 
-    const profile: AccountProfileCreate<TwitterProfile> = {
-      platformId: PLATFORM.Twitter,
-      user_id: twitterUser.id,
-      profile: twitterUser,
+    return {
+      accountDetails: twitterAccountDetails,
+      profile: twitterProfile,
     };
-
-    return { accountDetails: twitter, profile };
   }
 
   async getProfileByUsername(
