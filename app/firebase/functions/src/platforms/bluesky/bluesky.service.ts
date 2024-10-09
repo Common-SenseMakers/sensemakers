@@ -243,7 +243,7 @@ export class BlueskyService
 
     const platformPosts = threads.map((thread) => ({
       post_id: thread.thread_id,
-      user_id: 'placeholder',
+      user_id: thread.author.id,
       timestampMs: new Date(thread.posts[0].record.createdAt).getTime(),
       post: thread,
     }));

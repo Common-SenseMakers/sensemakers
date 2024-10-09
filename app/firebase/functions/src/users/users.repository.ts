@@ -48,8 +48,7 @@ export class UsersRepository {
 
   public async userExists(userId: string, manager: TransactionManager) {
     const doc = await this.getUserDoc(userId, manager);
-    const data = doc.data() as Record<string, any>;
-    return doc.exists && Object.keys(data).length > 0;
+    return doc.exists;
   }
 
   public async getUser<T extends boolean>(
