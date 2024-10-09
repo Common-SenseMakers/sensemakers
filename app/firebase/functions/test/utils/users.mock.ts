@@ -27,9 +27,11 @@ export const getMockedUser = (credentials: TestUserCredentials): AppUser => {
           credentials: {
             read: {
               accessToken: '',
+              server: '',
             },
             write: {
               accessToken: '',
+              server: '',
             },
           },
         },

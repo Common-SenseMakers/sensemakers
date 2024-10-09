@@ -4,7 +4,10 @@ import { spy, when } from 'ts-mockito';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { ActivityRepository } from '../../src/activity/activity.repository';
 import { ActivityService } from '../../src/activity/activity.service';
-import { API_DOMAIN } from '../../src/config/config.runtime';
+import {
+  MASTODON_ACCESS_TOKEN,
+  MASTODON_SERVER,
+} from '../../src/config/config.runtime';
 import { DBInstance } from '../../src/db/instance';
 import { EmailSenderService } from '../../src/emailSender/email.sender.service';
 import {
@@ -125,7 +128,8 @@ export const getTestServices = (config: TestServicesConfig) => {
 
   /** mocked mastodon */
   const _mastodon = new MastodonService(time, userRepo, {
-    apiDomain: API_DOMAIN,
+    MASTODON_ACCESS_TOKEN: MASTODON_ACCESS_TOKEN.value(),
+    MASTODON_SERVER: MASTODON_SERVER,
   });
   const mastodon = getMastodonMock(_mastodon, config.mastodon, testUser);
 
