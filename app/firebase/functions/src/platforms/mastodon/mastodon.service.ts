@@ -44,7 +44,8 @@ const DEBUG = true;
 const DEBUG_PREFIX = 'MastodonService';
 
 export interface MastodonServiceConfig {
-  apiDomain: string;
+  MASTODON_SERVER: string;
+  MASTODON_ACCESS_TOKEN: string;
 }
 
 export class MastodonService
@@ -80,6 +81,20 @@ export class MastodonService
     if (DEBUG) logger.debug('createApp result', { app }, DEBUG_PREFIX);
 
     return app;
+  }
+
+  public getClient(credentials?: MastodonAccountCredentials) {
+    return createRestAPIClient(
+      credentials
+        ? {
+            url: `https://${credentials.server}`,
+            accessToken: credentials.accessToken,
+          }
+        : {
+            url: this.config.MASTODON_API,
+            accessToken: this.config.MASTODON_ACCESS_TOKEN,
+          }
+    );
   }
 
   public async getSignupContext(
@@ -137,14 +152,15 @@ export class MastodonService
 
     if (DEBUG) logger.debug('handleSignupData token', { token }, DEBUG_PREFIX);
 
-    const mastoClient = createRestAPIClient({
-      url: `https://${signupData.domain}`,
+    const mastoClient = this.getClient({
+      server: signupData.domain,
       accessToken: token.accessToken,
     });
 
     const account = await mastoClient.v1.accounts.verifyCredentials();
     const credentials: MastodonAccountCredentials = {
       accessToken: token.accessToken,
+      server: signupData.domain,
     };
 
     const mastodon: MastodonAccountDetails = {
@@ -180,20 +196,14 @@ export class MastodonService
   public async fetch(
     user_id: string,
     params: PlatformFetchParams,
-    credentials: AccountCredentials<
+    credentials?: AccountCredentials<
       MastodonAccountCredentials,
       MastodonAccountCredentials
     >
   ): Promise<FetchedResult<MastodonThread>> {
     if (DEBUG) logger.debug('fetch', { params, credentials }, DEBUG_PREFIX);
 
-    if (!credentials.read) {
-      throw new Error('profile and/or read credentials are not provided');
-    }
-    const client = createRestAPIClient({
-      url: `https://${credentials.read.domain || this.config.apiDomain}`,
-      accessToken: credentials.read.accessToken,
-    });
+    const client = this.getClient(credentials?.read);
 
     const fetchParams: any = {
       limit: 40, // Default limit
@@ -388,10 +398,7 @@ export class MastodonService
       throw new Error('read credentials are not provided');
     }
 
-    const client = createRestAPIClient({
-      url: `https://${credentials.read.domain}`,
-      accessToken: credentials.read.accessToken,
-    });
+    const client = this.getClient(credentials?.read);
 
     const context = await client.v1.statuses.$select(post_id).context.fetch();
     const rootStatus = await (async () => {
@@ -449,14 +456,11 @@ export class MastodonService
   public async getAccountByUsername(
     username: string,
     server: string,
-    credentials: MastodonAccountCredentials
+    credentials?: MastodonAccountCredentials
   ): Promise<MastodonProfile | null> {
     try {
       // TODO: support using a provided server or our default apiDomain
-      const client = createRestAPIClient({
-        url: `https://${server}`,
-        accessToken: credentials.accessToken,
-      });
+      const client = this.getClient(credentials);
 
       const account = await client.v1.accounts.lookup({ acct: username });
 
@@ -477,12 +481,9 @@ export class MastodonService
 
   public async getProfile(
     user_id: string,
-    credentials: MastodonAccountCredentials
+    credentials?: MastodonAccountCredentials
   ): Promise<AccountProfileBase<MastodonProfile>> {
-    const client = createRestAPIClient({
-      url: `https://${credentials.domain || this.config.apiDomain}`,
-      accessToken: credentials.accessToken,
-    });
+    const client = this.getClient(credentials);
 
     const mdProfile = await client.v1.accounts.$select(user_id).fetch();
 

@@ -11,6 +11,7 @@ const mandatory: Array<keyof typeof envRuntime> = [
   'TWITTER_CLIENT_ID',
   'TWITTER_CLIENT_SECRET',
   'TWITTER_BEARER_TOKEN',
+  'MASTODON_SERVER',
   'MASTODON_ACCESS_TOKEN',
   'PROJECT_ID',
   'NANOPUBS_PUBLISH_SERVERS',
@@ -44,7 +45,7 @@ export const TWITTER_CLIENT_SECRET = envRuntime.TWITTER_CLIENT_SECRET;
 export const TWITTER_BEARER_TOKEN = envRuntime.TWITTER_BEARER_TOKEN;
 
 export const MASTODON_ACCESS_TOKEN = envRuntime.MASTODON_ACCESS_TOKEN;
-export const API_DOMAIN = 'mastodon.social';
+export const MASTODON_SERVER = 'mastodon.social';
 
 export const ADMIN_API_KEY = envRuntime.ADMIN_API_KEY;
 

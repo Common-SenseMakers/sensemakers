@@ -73,7 +73,7 @@ export interface PlatformService<
 
   getProfile(
     user_id: string,
-    credentials: any
+    credentials?: any
   ): Promise<AccountProfileBase | undefined>;
 
   signDraft?(post: PlatformPostDraft): Promise<DraftType>;

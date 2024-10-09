@@ -4,10 +4,11 @@ import { PLATFORM } from '../@shared/types/types.platforms';
 import { ActivityRepository } from '../activity/activity.repository';
 import { ActivityService } from '../activity/activity.service';
 import {
-  API_DOMAIN,
   EMAIL_CLIENT_SECRET,
   FUNCTIONS_PY_URL,
   IS_EMULATOR,
+  MASTODON_ACCESS_TOKEN,
+  MASTODON_SERVER,
   NANOPUBS_PUBLISH_SERVERS,
   NP_PUBLISH_RSA_PRIVATE_KEY,
   NP_PUBLISH_RSA_PUBLIC_KEY,
@@ -118,7 +119,8 @@ export const createServices = (firestore: Firestore) => {
   );
 
   const _mastodon = new MastodonService(time, userRepo, {
-    apiDomain: API_DOMAIN,
+    MASTODON_SERVER,
+    MASTODON_ACCESS_TOKEN,
   });
   const mastodon = getMastodonMock(
     _mastodon,

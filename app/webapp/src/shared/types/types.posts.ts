@@ -139,6 +139,7 @@ export interface PostsQueryParams extends StructuredSemantics {
   userId?: string;
   profileIds?: string;
   status?: string;
+  origins?: PLATFORM[];
 }
 
 export interface PostsQuery extends PostsQueryParams {

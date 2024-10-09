@@ -59,6 +59,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     const authorProfileKey: keyof AppPost = 'authorProfileId';
     const reviewedStatusKey: keyof AppPost = 'reviewedStatus';
     const republishedStatusKey: keyof AppPost = 'republishedStatus';
+    const originKey: keyof AppPost = 'origin';
 
     const keywordsKey: keyof AppPost = 'keywords';
     const labelsKey: keyof AppPost = 'labels';
@@ -87,6 +88,28 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       }
     })(this.db.collections.posts);
 
+    const ofOrigin = ((_base: Query) => {
+      if (queryParams.origins && queryParams.origins.length > 0) {
+        if (DEBUG)
+          logger.debug(
+            'getMany - filter by origin',
+            queryParams.origins,
+            DEBUG_PREFIX
+          );
+
+        return _base.where(originKey, 'in', queryParams.origins);
+      } else {
+        if (DEBUG)
+          logger.debug(
+            'getMany - dont filter by origin',
+            undefined,
+            DEBUG_PREFIX
+          );
+
+        return _base;
+      }
+    })(ofUser);
+
     const ofProfiles = ((_base: Query) => {
       if (queryParams.profileIds && queryParams.profileIds.length > 0) {
         if (DEBUG)
@@ -107,7 +130,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
         return _base;
       }
-    })(ofUser);
+    })(ofOrigin);
 
     if (DEBUG) logger.debug('getOfUser', queryParams, DEBUG_PREFIX);
 
@@ -255,6 +278,49 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     })) as AppPost[];
 
     return appPosts.sort((a, b) => b.createdAtMs - a.createdAtMs);
+  }
+
+  public async getAllOfQuery(queryParams: PostsQuery, limit?: number) {
+    let stillPending = true;
+    const allPosts: AppPost[] = [];
+
+    while (stillPending) {
+      if (DEBUG) logger.debug('getAllOfQuery', queryParams, DEBUG_PREFIX);
+      const posts = await this.getMany(queryParams);
+
+      stillPending = posts.length === queryParams.fetchParams.expectedAmount;
+
+      if (DEBUG)
+        logger.debug(
+          `getAllOfQuery - got ${posts.length} posts`,
+          { stillPending },
+          DEBUG_PREFIX
+        );
+
+      allPosts.push(...posts);
+
+      if (limit && allPosts.length >= limit) {
+        if (DEBUG)
+          logger.debug(
+            `getAllOfQuery - limit reached`,
+            { limit, n: allPosts.length },
+            DEBUG_PREFIX
+          );
+
+        stillPending = false;
+      }
+
+      queryParams.fetchParams.untilId = posts[posts.length - 1].id;
+
+      if (DEBUG)
+        logger.debug(
+          `getAllOfQuery - sinceId updated to ${queryParams.fetchParams.sinceId}`,
+          undefined,
+          DEBUG_PREFIX
+        );
+    }
+
+    return limit ? allPosts.slice(0, limit) : allPosts;
   }
 
   /** Cannot be part of a transaction */
