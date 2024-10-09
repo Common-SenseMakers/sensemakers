@@ -8,7 +8,7 @@ import {
   NotificationStatus,
 } from '../@shared/types/types.notifications';
 import { SciFilterClassfication } from '../@shared/types/types.parser';
-import { PLATFORM } from '../@shared/types/types.user';
+import { PLATFORM } from '../@shared/types/types.platforms';
 import { QUIET_SIGNUP_PERIOD } from '../config/config.runtime';
 import { logger } from '../instances/logger';
 import { Services } from '../instances/services';
@@ -48,8 +48,12 @@ export const activityEventCreatedHook = async (
           true
         );
 
-        if (post.authorId) {
-          const author = await users.repo.getUser(post.authorId, manager, true);
+        if (post.authorUserId) {
+          const author = await users.repo.getUser(
+            post.authorUserId,
+            manager,
+            true
+          );
 
           const isQuiet =
             time.now() < author.signupDate + QUIET_SIGNUP_PERIOD &&
@@ -91,7 +95,7 @@ export const activityEventCreatedHook = async (
 
             notifications.createNotification(
               {
-                userId: post.authorId,
+                userId: post.authorUserId,
                 activityId: activityEvent.id,
                 status: NotificationStatus.pending,
               },

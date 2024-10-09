@@ -1,6 +1,7 @@
 import { NANOPUB_EXPLORER_SERVER } from '../app/config';
 import { NANOPUB_EXPLORER_URL_EMAIL } from '../email/constants';
 import { PlatformPostPublishStatus } from '../shared/types/types.platform.posts';
+import { PLATFORM } from '../shared/types/types.platforms';
 import {
   AppPost,
   AppPostFull,
@@ -9,7 +10,6 @@ import {
   AppPostRepublishedStatus,
   AppPostReviewStatus,
 } from '../shared/types/types.posts';
-import { PLATFORM } from '../shared/types/types.user';
 
 /** The prosemirror render assumes --- separates the posts and creates <p> for each */
 export const concatenateThread = (post: {

@@ -4,7 +4,8 @@ import {
   PlatformPostPosted,
   PlatformPostStatusUpdate,
 } from '../@shared/types/types.platform.posts';
-import { DefinedIfTrue, PLATFORM } from '../@shared/types/types.user';
+import { PLATFORM } from '../@shared/types/types.platforms';
+import { DefinedIfTrue } from '../@shared/types/types.user';
 import { DBInstance } from '../db/instance';
 import { BaseRepository, removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';

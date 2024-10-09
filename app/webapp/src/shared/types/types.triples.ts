@@ -2,7 +2,7 @@ export interface PostTriple {
   id: string;
   postId: string;
   postCreatedAtMs: number;
-  authorId?: string;
+  authorProfileId?: string;
   subject: string;
   predicate: string;
   object: string;

@@ -1,9 +1,10 @@
 import { Firestore } from 'firebase-admin/firestore';
 
-import { PLATFORM } from '../@shared/types/types.user';
+import { PLATFORM } from '../@shared/types/types.platforms';
 import { ActivityRepository } from '../activity/activity.repository';
 import { ActivityService } from '../activity/activity.service';
 import {
+  API_DOMAIN,
   EMAIL_CLIENT_SECRET,
   FUNCTIONS_PY_URL,
   IS_EMULATOR,
@@ -50,6 +51,7 @@ import { PlatformPostsRepository } from '../posts/platform.posts.repository';
 import { PostsManager } from '../posts/posts.manager';
 import { PostsProcessing } from '../posts/posts.processing';
 import { PostsRepository } from '../posts/posts.repository';
+import { ProfilesRepository } from '../profiles/profiles.repository';
 import { TriplesRepository } from '../semantics/triples.repository';
 import { TimeService } from '../time/time.service';
 import { UsersRepository } from '../users/users.repository';
@@ -74,7 +76,8 @@ export const createServices = (firestore: Firestore) => {
   if (DEBUG) logger.info('Creating services');
 
   const db = new DBInstance(firestore);
-  const userRepo = new UsersRepository(db);
+  const profilesRepo = new ProfilesRepository(db);
+  const userRepo = new UsersRepository(db, profilesRepo);
   const postsRepo = new PostsRepository(db);
   const triplesRepo = new TriplesRepository(db);
   const platformPostsRepo = new PlatformPostsRepository(db);
@@ -114,7 +117,9 @@ export const createServices = (firestore: Firestore) => {
     USE_REAL_NANOPUB.value() ? 'real' : 'mock-publish'
   );
 
-  const _mastodon = new MastodonService(time, userRepo);
+  const _mastodon = new MastodonService(time, userRepo, {
+    apiDomain: API_DOMAIN,
+  });
   const mastodon = getMastodonMock(
     _mastodon,
     USE_REAL_MASTODON.value()
@@ -158,6 +163,7 @@ export const createServices = (firestore: Firestore) => {
   const usersService = new UsersService(
     db,
     userRepo,
+    profilesRepo,
     identityPlatforms,
     time,
     email,

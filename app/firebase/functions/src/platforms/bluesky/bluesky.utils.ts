@@ -40,11 +40,17 @@ export const convertBlueskyPostsToThreads = (
     );
 
     const primaryThread = extractPrimaryThread(sortedPosts[0].uri, sortedPosts);
+    const bskAuthor = sortedPosts[0].author;
 
     return {
       thread_id: sortedPosts[0].uri,
       posts: primaryThread,
-      author: sortedPosts[0].author,
+      author: {
+        id: bskAuthor.did,
+        username: bskAuthor.handle,
+        avatar: bskAuthor.avatar,
+        displayName: bskAuthor.displayName,
+      },
     };
   });
   return threads;

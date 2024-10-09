@@ -1,6 +1,6 @@
 import { Request } from 'firebase-functions/v2/tasks';
 
-import { PLATFORM } from '../../@shared/types/types.user';
+import { PLATFORM } from '../../@shared/types/types.platforms';
 import { logger } from '../../instances/logger';
 import { Services } from '../../instances/services';
 
@@ -29,16 +29,6 @@ export const autopostPostTask = async (req: Request, services: Services) => {
       true
     );
 
-    if (!post.authorId) {
-      throw new Error(`Post ${post.id} does not have an author`);
-    }
-
-    await postsManager.publishPost(
-      post,
-      platformIds,
-      post.authorId,
-      manager,
-      true
-    );
+    await postsManager.publishPost(post, platformIds, manager, true);
   });
 };

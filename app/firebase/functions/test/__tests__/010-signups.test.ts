@@ -1,12 +1,9 @@
 import { expect } from 'chai';
 
 import { MastodonAccessTokenSignupData } from '../../src/@shared/types/types.mastodon';
-import {
-  NanopubUserProfile,
-  NanupubSignupData,
-} from '../../src/@shared/types/types.nanopubs';
+import { NanupubSignupData } from '../../src/@shared/types/types.nanopubs';
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { TwitterSignupContext } from '../../src/@shared/types/types.twitter';
-import { PLATFORM } from '../../src/@shared/types/types.user';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { logger } from '../../src/instances/logger';
 import '../../src/platforms/twitter/mock/twitter.service.mock';
@@ -107,7 +104,7 @@ describe('010-signups', () => {
               PLATFORM.Mastodon,
               {
                 accessToken: mastodonCredentials.accessToken,
-                domain: mastodonCredentials.mastodonServer,
+                mastodonServer: mastodonCredentials.mastodonServer,
                 type: mastodonCredentials.type,
               },
               manager,

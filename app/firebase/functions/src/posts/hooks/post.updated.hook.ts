@@ -128,8 +128,8 @@ export const postUpdatedHook = async (
   /** trigger Autopost*/
   if (wasParsed) {
     const author = await db.run(async (manager) => {
-      return post.authorId
-        ? users.repo.getUser(post.authorId, manager, true)
+      return post.authorUserId
+        ? users.repo.getUser(post.authorUserId, manager, true)
         : undefined;
     });
 

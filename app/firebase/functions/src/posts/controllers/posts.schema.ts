@@ -1,7 +1,7 @@
 import { array, mixed, number, object, string } from 'yup';
 
+import { PLATFORM } from '../../@shared/types/types.platforms';
 import { PostsQueryStatus } from '../../@shared/types/types.posts';
-import { PLATFORM } from '../../@shared/types/types.user';
 
 export const postIdValidation = object({
   postId: string().required(),

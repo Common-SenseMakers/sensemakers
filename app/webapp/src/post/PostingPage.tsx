@@ -19,7 +19,7 @@ export const PostingPage = () => {
   const { overallLoginStatus, connectedUser } = useAccountContext();
   const [postingPostId, setPostingPostId] = usePersist(POSTING_POST_ID, null);
 
-  const orcid = connectedUser?.accounts?.orcid;
+  const orcid = connectedUser?.profiles?.orcid;
 
   const navigate = useNavigate();
 

@@ -1,11 +1,11 @@
 /** NANOPUB */
-import { HexStr, UserDetailsBase } from './types.user';
+import { AccountDetailsBase, HexStr } from './types.user';
 
 /**
  * Nanopubs use private keys for authentication, no need to store credentials for each
  * user
  */
-export interface NanopubUserProfile {
+export interface NanopubProfile {
   rsaPublickey: string;
   ethAddress: HexStr;
   introNanopubDraft?: string;
@@ -14,15 +14,20 @@ export interface NanopubUserProfile {
   ethToRsaSignature: HexStr;
 }
 
-export type NanupubSignupData = NanopubUserProfile & {
+export type NanupubSignupContext = NanopubProfile;
+
+export type NanupubSignupData = NanopubProfile & {
   ethToRsaSignature: HexStr;
 };
 
-export interface NanopubUserDetails
-  extends UserDetailsBase<NanopubUserProfile, undefined, undefined> {}
+export interface NanopubAccountDetails extends AccountDetailsBase {}
 
 export interface RSAKeys {
   privateKey: string;
   publicKey: string;
   address?: HexStr;
+}
+
+export interface NanopubSigninCredentials {
+  ethPrivateKey: HexStr;
 }

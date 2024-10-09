@@ -36,7 +36,7 @@ export const PostPublishStatusModals = (props: {
   const { connectedUser } = useAccountContext();
   const { connect: _connectOrcid } = useOrcidContext();
 
-  const orcid = connectedUser?.accounts?.orcid;
+  const orcid = connectedUser?.profiles?.orcid;
 
   const [isUnpublishing, setIsUnpublishing] = useState<boolean>(false);
 

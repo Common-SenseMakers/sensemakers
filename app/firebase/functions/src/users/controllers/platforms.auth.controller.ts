@@ -1,6 +1,9 @@
 import { RequestHandler } from 'express';
 
-import { PLATFORM } from '../../@shared/types/types.user';
+import {
+  IDENTITY_PLATFORM,
+  PLATFORM,
+} from '../../@shared/types/types.platforms';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
 import {
@@ -74,7 +77,7 @@ export const handleSignupController: RequestHandler = async (
   response
 ) => {
   try {
-    const platform = request.params.platform as PLATFORM;
+    const platform = request.params.platform as IDENTITY_PLATFORM;
 
     const services = getServices(request);
     const userId = getAuthenticatedUser(request);

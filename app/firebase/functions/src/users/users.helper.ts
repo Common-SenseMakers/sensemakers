@@ -1,20 +1,24 @@
 import { SciFilterClassfication } from '../@shared/types/types.parser';
-import { AppPost } from '../@shared/types/types.posts';
 import {
   ALL_PUBLISH_PLATFORMS,
-  AppUser,
-  AppUserCreate,
-  AutopostOption,
-  DefinedIfTrue,
   IDENTITY_PLATFORM,
   PLATFORM,
   PUBLISHABLE_PLATFORM,
-  UserDetailsBase,
+} from '../@shared/types/types.platforms';
+import { AppPost } from '../@shared/types/types.posts';
+import {
+  AccountDetailsBase,
+  AccountDetailsRead,
+  AppUser,
+  AppUserCreate,
+  AppUserRead,
+  AutopostOption,
+  DefinedIfTrue,
 } from '../@shared/types/types.user';
 
-export interface PlatformDetails {
+export interface PlatformAccount {
   platform: PUBLISHABLE_PLATFORM;
-  account: UserDetailsBase;
+  account: AccountDetailsBase;
 }
 
 export class UsersHelper {
@@ -25,7 +29,7 @@ export class UsersHelper {
   static getAccounts(
     user: AppUser | AppUserCreate,
     platformId: IDENTITY_PLATFORM
-  ): UserDetailsBase[] {
+  ): AccountDetailsBase[] {
     const platformAccounts = user.accounts[platformId];
 
     if (!platformAccounts) {
@@ -44,7 +48,7 @@ export class UsersHelper {
     platformId: IDENTITY_PLATFORM,
     user_id?: string,
     _throw?: T
-  ): DefinedIfTrue<T, UserDetailsBase> {
+  ): DefinedIfTrue<T, AccountDetailsBase> {
     const platformAccounts = UsersHelper.getAccounts(user, platformId);
 
     if (platformAccounts.length === 0 && _throw) {
@@ -52,7 +56,7 @@ export class UsersHelper {
     }
 
     if (platformAccounts.length === 0) {
-      return undefined as DefinedIfTrue<T, UserDetailsBase>;
+      return undefined as DefinedIfTrue<T, AccountDetailsBase>;
     }
 
     const account = user_id
@@ -60,13 +64,13 @@ export class UsersHelper {
       : platformAccounts[0];
 
     if (!account) {
-      return undefined as DefinedIfTrue<T, UserDetailsBase>;
+      return undefined as DefinedIfTrue<T, AccountDetailsBase>;
     }
 
-    return account as DefinedIfTrue<T, UserDetailsBase>;
+    return account as DefinedIfTrue<T, AccountDetailsBase>;
   }
 
-  static getAllAccounts(user: AppUserCreate | AppUser): PlatformDetails[] {
+  static getAllAccounts(user: AppUserCreate | AppUser): PlatformAccount[] {
     const perPlatform = ALL_PUBLISH_PLATFORMS.map((platform) => {
       return {
         platform,
@@ -74,7 +78,7 @@ export class UsersHelper {
       };
     });
 
-    const allAccounts: PlatformDetails[] = [];
+    const allAccounts: PlatformAccount[] = [];
     perPlatform.forEach((p) => {
       p.accounts.forEach((account) => {
         allAccounts.push({ platform: p.platform, account });
@@ -108,14 +112,43 @@ export class UsersHelper {
     return platformIds;
   }
 
-  /** return a list of platformIds which have at least one account that hasn't yet fetched from platform */
-  static platformsWithoutFetch(user: AppUser): PUBLISHABLE_PLATFORM[] {
-    return Array.from(
-      new Set(
-        UsersHelper.getAllAccounts(user)
-          .filter((platformDetails) => !platformDetails.account.fetched)
-          .map((platformDetails) => platformDetails.platform)
-      )
-    );
+  static getProfiles<P = any>(
+    user: AppUserRead,
+    platformId: IDENTITY_PLATFORM
+  ): AccountDetailsRead<P>[] {
+    const platformProfiles = user.profiles[platformId];
+
+    if (!platformProfiles) {
+      return [];
+    }
+
+    return platformProfiles as AccountDetailsRead<P>[];
+  }
+
+  static getProfile<T extends boolean, P = any>(
+    user: AppUserRead,
+    platformId: IDENTITY_PLATFORM,
+    user_id?: string,
+    _throw?: T
+  ): DefinedIfTrue<T, AccountDetailsRead<P>> {
+    const platformProfiles = UsersHelper.getProfiles<P>(user, platformId);
+
+    if (platformProfiles.length === 0 && _throw) {
+      throw new Error('Platform profile not found');
+    }
+
+    if (platformProfiles.length === 0) {
+      return undefined as DefinedIfTrue<T, AccountDetailsRead<P>>;
+    }
+
+    const account = user_id
+      ? platformProfiles.find((p) => p.user_id === user_id)
+      : platformProfiles[0];
+
+    if (!account) {
+      return undefined as DefinedIfTrue<T, AccountDetailsRead>;
+    }
+
+    return account as DefinedIfTrue<T, AccountDetailsRead>;
   }
 }

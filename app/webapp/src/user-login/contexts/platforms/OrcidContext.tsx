@@ -10,7 +10,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useAppFetch } from '../../../api/app.fetch';
 import { ORCID_API_URL, ORCID_CLIENT_ID } from '../../../app/config';
 import { HandleSignupResult } from '../../../shared/types/types.fetch';
-import { PLATFORM } from '../../../shared/types/types.user';
+import { PLATFORM } from '../../../shared/types/types.platforms';
 import { usePersist } from '../../../utils/use.persist';
 import { useAccountContext } from '../AccountContext';
 
@@ -94,7 +94,11 @@ export const OrcidContext = (props: PropsWithChildren) => {
   };
 
   useEffect(() => {
-    if (connectedUser && connectedUser.accounts[PLATFORM.Orcid]) {
+    if (
+      connectedUser &&
+      connectedUser.profiles &&
+      connectedUser.profiles[PLATFORM.Orcid]
+    ) {
       setWasConnecting(false);
     }
   }, [connectedUser]);

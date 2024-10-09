@@ -3,13 +3,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { useAppFetch } from '../../api/app.fetch';
 import { NotificationFreq } from '../../shared/types/types.notifications';
 import { PlatformPostDraft } from '../../shared/types/types.platform.posts';
+import { PLATFORM } from '../../shared/types/types.platforms';
 import { TwitterPlatformPost } from '../../shared/types/types.twitter';
-import {
-  AppUserRead,
-  AutopostOption,
-  PLATFORM,
-} from '../../shared/types/types.user';
-import { getAccount } from '../../user-login/user.helper';
+import { AppUserRead } from '../../shared/types/types.user';
+import { ConnectedUser } from '../../user-login/contexts/AccountContext';
 import { AppPostStatus, getPostStatuses } from '../posts.helper';
 import { PostFetchContext } from './use.post.fetch';
 
@@ -20,7 +17,7 @@ export interface PostDerivedContext {
 
 export const usePostDerived = (
   fetched: PostFetchContext,
-  connectedUser?: AppUserRead
+  connectedUser?: ConnectedUser
 ) => {
   const appFetch = useAppFetch();
 
@@ -29,7 +26,8 @@ export const usePostDerived = (
   /** create drafts if connected user has account and draft for that platform does
    * not exists */
   useEffect(() => {
-    const nanopubAccount = getAccount(connectedUser, PLATFORM.Nanopub);
+    const nanopubAccount =
+      connectedUser?.profiles && connectedUser?.profiles[PLATFORM.Nanopub];
     if (nanopubAccount && !nanopubDraft && !requesteDraft) {
       /** if draft not available, create it */
       setRequestedDraft(true);

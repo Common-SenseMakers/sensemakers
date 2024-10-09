@@ -48,7 +48,7 @@
       "args": [
         "--project",
         "./tsconfig.scripts.json",
-        "./migrations/002-post-structured-semantics.ts"
+        "./migrations/003-posts-from-dataset.ts"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",

@@ -7,6 +7,10 @@ import {
   PlatformPostPublishStatus,
 } from '../../src/@shared/types/types.platform.posts';
 import {
+  PLATFORM,
+  PUBLISHABLE_PLATFORM,
+} from '../../src/@shared/types/types.platforms';
+import {
   AppPost,
   AppPostFull,
   AppPostParsedStatus,
@@ -16,17 +20,15 @@ import {
   GenericThread,
 } from '../../src/@shared/types/types.posts';
 import { TwitterThread } from '../../src/@shared/types/types.twitter';
-import {
-  PLATFORM,
-  PUBLISHABLE_PLATFORM,
-} from '../../src/@shared/types/types.user';
 import { activityEventCreatedHook } from '../../src/activity/activity.created.hook';
 import { Services } from '../../src/instances/services';
 import { postUpdatedHook } from '../../src/posts/hooks/post.updated.hook';
+import { getProfileId } from '../../src/profiles/profiles.repository';
 import { testCredentials } from '../__tests__/test.accounts';
 
 export const getMockPostNew = () => {
-  const authorId = 'test-author-id';
+  const authorUserId = 'test-author-id';
+  const authorProfileId = 'test-profile-id';
   const createdAtMs = Date.now();
 
   const defaultGeneric: GenericThread = {
@@ -49,7 +51,8 @@ export const getMockPostNew = () => {
   const post: AppPostFull = {
     id: 'post-id',
     createdAtMs: createdAtMs,
-    authorId: authorId,
+    authorProfileId: authorProfileId,
+    authorUserId: authorUserId,
     generic: defaultGeneric,
     semantics: last_output.semantics,
     origin: PLATFORM.Twitter,
@@ -73,7 +76,7 @@ export const getMockPostNew = () => {
             tweets: [],
             id: 'post-id',
             createdAtMs: createdAtMs,
-            authorId: authorId,
+            authorId: authorProfileId,
             content: 'test content',
             semantics: `
                     @prefix ns1: <http://purl.org/spar/cito/> .
@@ -102,7 +105,7 @@ export const getMockPost = (
   refPost: Partial<AppPostFull>,
   platformId?: PLATFORM
 ) => {
-  const authorId = refPost.authorId || 'test-author-id';
+  const authorId = refPost.authorUserId || 'test-author-id';
   const createdAtMs = refPost.createdAtMs || Date.now();
 
   const defaultGeneric: GenericThread = {
@@ -354,7 +357,11 @@ export const getMockPost = (
   const post: AppPostFull = {
     id: refPost.id || 'post-id',
     createdAtMs: createdAtMs,
-    authorId: authorId,
+    authorProfileId: getProfileId(
+      platformMirror.platformId,
+      platformMirror.posted?.post.author.id as string
+    ),
+    authorUserId: authorId,
     generic: refPost.generic || defaultGeneric,
     semantics: refPost.semantics || '',
     origin: platformId || PLATFORM.Twitter,
