@@ -3,6 +3,7 @@ import {
   createContext,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from 'react';
 
@@ -302,7 +303,9 @@ export const AccountContext = (props: PropsWithChildren) => {
 
   const connectedSourcePlatforms = useMemo(() => {
     return ALL_SOURCE_PLATFORMS.filter((platform) => {
-      return connectedUser?.accounts[platform] !== undefined;
+      const profiles = connectedUser?.profiles;
+      const profile = profiles && profiles[platform];
+      return profile !== undefined;
     });
   }, [connectedUser]);
 

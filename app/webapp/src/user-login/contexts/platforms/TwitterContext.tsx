@@ -53,6 +53,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
     overallLoginStatus,
     setLoginFlowState,
     getPlatformConnectedStatus,
+    setPlatformConnectedStatus,
   } = useAccountContext();
 
   const { disconnect } = useDisconnectContext();
