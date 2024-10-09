@@ -120,7 +120,7 @@ export const createServices = (firestore: Firestore) => {
 
   const _mastodon = new MastodonService(time, userRepo, {
     MASTODON_SERVER,
-    MASTODON_ACCESS_TOKEN,
+    MASTODON_ACCESS_TOKEN: MASTODON_ACCESS_TOKEN.value(),
   });
   const mastodon = getMastodonMock(
     _mastodon,

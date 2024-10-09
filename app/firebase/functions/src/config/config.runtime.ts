@@ -48,6 +48,7 @@ export const TWITTER_BEARER_TOKEN = envRuntime.TWITTER_BEARER_TOKEN;
 
 export const MASTODON_ACCESS_TOKEN = envRuntime.MASTODON_ACCESS_TOKEN;
 export const MASTODON_SERVER = 'mastodon.social';
+
 export const BLUESKY_APP_PASSWORD = envRuntime.BLUESKY_APP_PASSWORD;
 export const BLUESKY_USERNAME = envRuntime.BLUESKY_USERNAME;
 

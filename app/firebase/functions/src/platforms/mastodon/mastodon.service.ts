@@ -91,7 +91,7 @@ export class MastodonService
             accessToken: credentials.accessToken,
           }
         : {
-            url: this.config.MASTODON_API,
+            url: this.config.MASTODON_SERVER,
             accessToken: this.config.MASTODON_ACCESS_TOKEN,
           }
     );
@@ -153,14 +153,14 @@ export class MastodonService
     if (DEBUG) logger.debug('handleSignupData token', { token }, DEBUG_PREFIX);
 
     const mastoClient = this.getClient({
-      server: signupData.domain,
+      server: signupData.mastodonServer,
       accessToken: token.accessToken,
     });
 
     const account = await mastoClient.v1.accounts.verifyCredentials();
     const credentials: MastodonAccountCredentials = {
       accessToken: token.accessToken,
-      server: signupData.domain,
+      server: signupData.mastodonServer,
     };
 
     const mastodon: MastodonAccountDetails = {

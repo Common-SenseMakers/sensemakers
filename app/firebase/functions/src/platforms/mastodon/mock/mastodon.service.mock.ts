@@ -1386,7 +1386,7 @@ export const getMastodonMock = (
     );
     when(mocked.handleSignupData(anything())).thenCall(
       (data: MastodonAccessTokenSignupData) => {
-        const user_id = data.domain; // for testing purposes we pass the user_id as the mastodon server
+        const user_id = data.mastodonServer; // for testing purposes we pass the user_id as the mastodon server
         const testCredentials = getTestCredentials(
           process.env.TEST_USER_ACCOUNTS as string
         );
@@ -1418,7 +1418,7 @@ export const getMastodonMock = (
             id: currentMastodonCredentials.id,
             displayName: 'placeholder', // currentUserCredentials.mastodon.username,
             username: 'placeholder', //: currentUserCredentials.mastodon.username,
-            domain: 'mastodon.social',
+            mastodonServer: 'mastodon.social',
             avatar:
               'https://pbs.twimg.com/profile_images/1783977034038882304/RGn66lGT_normal.jpg',
           },
