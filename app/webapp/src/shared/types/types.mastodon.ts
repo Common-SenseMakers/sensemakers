@@ -8,12 +8,12 @@ export interface MastodonProfile {
   username: string;
   displayName: string;
   avatar: string;
-  domain: string;
+  mastodonServer: string;
 }
 export type MastodonAccountProfile = AccountProfile<MastodonProfile>;
 
 export interface MastodonAccountCredentials {
-  domain?: string;
+  mastodonServer?: string;
   accessToken: string;
 }
 

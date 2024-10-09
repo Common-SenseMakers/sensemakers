@@ -305,7 +305,7 @@ describe('02-platforms', () => {
         expect(result.username).to.equal(username);
         expect(result.displayName).to.be.a('string');
         expect(result.avatar).to.be.a('string');
-        expect(result.domain).to.equal(server);
+        expect(result.mastodonServer).to.equal(server);
       }
     });
   });

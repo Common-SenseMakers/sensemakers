@@ -1,9 +1,9 @@
-import { MastodonAccessTokenSignupData } from '../../src/@shared/types/types.mastodon';
 import {
-  AppUser,
+  MastodonAccessTokenSignupData,
   MastodonAccountCredentials,
-  PLATFORM,
-} from '../../src/@shared/types/types.user';
+} from '../../src/@shared/types/types.mastodon';
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
+import { AppUser } from '../../src/@shared/types/types.user';
 import { TransactionManager } from '../../src/db/transaction.manager';
 import { logger } from '../../src/instances/logger';
 import { Services } from '../../src/instances/services';
@@ -23,9 +23,9 @@ export const authenticateMastodonUser = async (
   if (DEBUG) logger.debug('authenticateMastodonUser', { testAccount });
 
   const signupData: MastodonAccessTokenSignupData = {
-    domain: testAccount.mastodonServer,
+    mastodonServer: testAccount.mastodonServer || 'mastodon.social',
     accessToken: testAccount.accessToken,
-    type: testAccount.type,
+    type: 'read',
   };
 
   /** create users using the Mastodon profiles */

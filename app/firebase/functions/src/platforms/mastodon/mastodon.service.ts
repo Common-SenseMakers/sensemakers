@@ -166,7 +166,7 @@ export class MastodonService
       username: account.username,
       displayName: account.displayName,
       avatar: account.avatar,
-      domain: signupData.mastodonServer,
+      mastodonServer: signupData.mastodonServer,
     };
 
     const profile: AccountProfileBase<MastodonProfile> = {
@@ -191,7 +191,7 @@ export class MastodonService
       throw new Error('profile and/or read credentials are not provided');
     }
     const client = createRestAPIClient({
-      url: `https://${credentials.read.domain || this.config.apiDomain}`,
+      url: `https://${credentials.read.mastodonServer || this.config.apiDomain}`,
       accessToken: credentials.read.accessToken,
     });
 
@@ -340,7 +340,7 @@ export class MastodonService
     const credentials = postPublish.credentials;
 
     const client = createRestAPIClient({
-      url: `https://${credentials.write.domain}`,
+      url: `https://${credentials.write.mastodonServer}`,
       accessToken: credentials.write.accessToken,
     });
 
@@ -390,7 +390,7 @@ export class MastodonService
     }
 
     const client = createRestAPIClient({
-      url: `https://${credentials.read.domain}`,
+      url: `https://${credentials.read.mastodonServer}`,
       accessToken: credentials.read.accessToken,
     });
 
@@ -467,7 +467,7 @@ export class MastodonService
           username: account.username,
           displayName: account.displayName,
           avatar: account.avatar,
-          domain: server,
+          mastodonServer: server,
         };
       }
       return null;
@@ -481,7 +481,7 @@ export class MastodonService
     credentials: MastodonAccountCredentials
   ): Promise<AccountProfileBase<MastodonProfile>> {
     const client = createRestAPIClient({
-      url: `https://${credentials.domain || this.config.apiDomain}`,
+      url: `https://${credentials.mastodonServer || this.config.apiDomain}`,
       accessToken: credentials.accessToken,
     });
 
@@ -493,7 +493,7 @@ export class MastodonService
         id: mdProfile.id,
         avatar: mdProfile.avatar,
         displayName: mdProfile.displayName,
-        domain: 'placeholder',
+        mastodonServer: 'placeholder',
         username: mdProfile.username,
       },
     };

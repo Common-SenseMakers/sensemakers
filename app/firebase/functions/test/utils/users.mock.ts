@@ -107,7 +107,7 @@ export const getMockedUserRead = (
             username: 'test',
             displayName: 'Test User',
             avatar: 'https://test.com/avatar.jpg',
-            domain: 'mastodon.social',
+            mastodonServer: 'mastodon.social',
           },
         },
       ],
