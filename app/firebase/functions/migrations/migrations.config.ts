@@ -1,4 +1,9 @@
+import dotenv from 'dotenv';
+
 import { ServicesConfig } from '../src/instances/services';
+
+// Load environment variables from .env file
+dotenv.config({ path: './migrations/.env.migrations' });
 
 export const config: ServicesConfig = {
   testCredentials: process.env.TEST_USER_ACCOUNTS as string,
@@ -12,7 +17,9 @@ export const config: ServicesConfig = {
       publicKey: process.env.NP_PUBLISH_RSA_PUBLIC_KEY as string,
       privateKey: process.env.NP_PUBLISH_RSA_PRIVATE_KEY as string,
     },
-    servers: JSON.parse(process.env.NANOPUBS_PUBLISH_SERVERS as string),
+    servers: process.env.NANOPUBS_PUBLISH_SERVERS
+      ? JSON.parse(process.env.NANOPUBS_PUBLISH_SERVERS)
+      : [],
   },
   mastodon: {
     MASTODON_ACCESS_TOKEN: process.env.MASTODON_ACCESS_TOKEN as string,

@@ -1,14 +1,10 @@
-import dotenv from 'dotenv';
 import * as admin from 'firebase-admin';
 import { AppOptions } from 'firebase-admin';
 
 import { LocalLogger, LogLevel } from '../src/instances/local.logger';
 import { logger } from '../src/instances/logger';
-import { ServicesConfig, createServices } from '../src/instances/services';
+import { createServices } from '../src/instances/services';
 import { config } from './migrations.config';
-
-// Load environment variables from .env file
-dotenv.config({ path: './migrations/.env.migrations' });
 
 // update log levels
 
