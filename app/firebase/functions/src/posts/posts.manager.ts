@@ -93,6 +93,7 @@ export class PostsManager {
     fetchedPost: PlatformPostPosted<T>
   ) {
     const platformPost: PlatformPostCreate = {
+      post_id: fetchedPost.post_id,
       platformId: platformId as PUBLISHABLE_PLATFORM,
       publishStatus: PlatformPostPublishStatus.PUBLISHED,
       publishOrigin: PlatformPostPublishOrigin.FETCHED,
@@ -684,6 +685,11 @@ export class PostsManager {
         const post = await this.processing.posts.get(postId, manager, true);
         if (post.parsingStatus === 'processing') {
           if (DEBUG) logger.debug(`parsePost - already parsing ${postId}`);
+          return false;
+        }
+
+        if (post.parsedStatus === AppPostParsedStatus.PROCESSED) {
+          if (DEBUG) logger.debug(`parsePost - already parsed ${postId}`);
           return false;
         }
 

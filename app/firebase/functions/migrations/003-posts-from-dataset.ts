@@ -14,114 +14,141 @@ const DEBUG = true;
     await servicesSource.postsManager.processing.posts.getAllOfQuery(
       {
         origins: [PLATFORM.Mastodon, PLATFORM.Twitter],
-        fetchParams: { expectedAmount: 50 },
+        fetchParams: { expectedAmount: 100 },
       },
-      1
+      500
     );
 
   logger.info(`Processing ${posts.length} posts`);
 
   await Promise.all(
     posts.map(async (sourcePost) => {
-      console.log('Processing sourcePost post', sourcePost.id);
+      try {
+        console.log('Processing sourcePost post', sourcePost.id);
 
-      if (!includePlatforms.includes(sourcePost.origin)) {
-        if (DEBUG)
-          logger.debug(`skipping ${sourcePost.id} from ${sourcePost.origin}`);
-        return;
-      }
-
-      const sourcePostFull = await servicesSource.db.run(
-        async (managerSource) => {
-          if (DEBUG) logger.debug(`Fetching full post ${sourcePost.id}`);
-          const sourcePostFull =
-            await servicesSource.postsManager.processing.getPostFull(
-              sourcePost.id,
-              managerSource,
-              true
-            );
-
+        if (!includePlatforms.includes(sourcePost.origin)) {
           if (DEBUG)
-            logger.debug(`Full post ${sourcePost.id}`, { sourcePostFull });
-
-          return sourcePostFull;
-        }
-      );
-
-      await servicesTarget.db.run(async (managerTarget) => {
-        const sourceAuthorId = (sourcePost as any)['authorId'];
-
-        /** check if we have  */
-        const userExists = await servicesTarget.users.repo.userExists(
-          sourceAuthorId,
-          managerTarget
-        );
-
-        const targetPost: AppPost = {
-          ...sourcePost,
-        };
-
-        /** the authorId property does not exists anymore */
-        delete (targetPost as any)['authorId'];
-        delete (targetPost as any)['id'];
-
-        if (DEBUG) logger.debug(`targetPost ready`, { targetPost });
-
-        /**
-         * authorUserId is now optional, we will link the post to the user only if it is a signedup user
-         * userIds are determinisitc and thus equivalent
-         */
-        if (userExists) {
-          if (DEBUG) logger.debug(`authorUserId exists`, { sourceAuthorId });
-          targetPost.authorUserId = sourceAuthorId;
+            logger.debug(`skipping ${sourcePost.id} from ${sourcePost.origin}`);
+          return;
         }
 
-        /** the profile needs to exist */
-        const originMirror = PostsHelper.getPostMirror(
-          sourcePostFull,
-          { platformId: sourcePost.origin },
-          true
+        const sourcePostFull = await servicesSource.db.run(
+          async (managerSource) => {
+            if (DEBUG) logger.debug(`Fetching full post ${sourcePost.id}`);
+            const sourcePostFull =
+              await servicesSource.postsManager.processing.getPostFull(
+                sourcePost.id,
+                managerSource,
+                true
+              );
+
+            if (DEBUG)
+              logger.debug(`Full post ${sourcePost.id}`, { sourcePostFull });
+
+            return sourcePostFull;
+          }
         );
 
-        if (!originMirror.posted) {
-          throw new Error(`Mirror should have a posted property`);
-        }
+        await servicesTarget.db.run(async (managerTarget) => {
+          /** check this platform post does not already exists */
+          const sourceAuthorId = (sourcePost as any)['authorId'];
 
-        /** create profile */
-        const profileId = getProfileId(
-          sourcePost.origin,
-          originMirror.posted.user_id
-        );
-        if (DEBUG) logger.debug(`creating profile exists`, { profileId });
-        await servicesTarget.postsManager.getOrCreateProfile(
-          profileId,
-          managerTarget
-        );
-
-        const targetMirror = { ...originMirror };
-        delete (targetMirror as any)['id'];
-
-        /** create mirror PlatformPost */
-        if (DEBUG)
-          logger.debug(`creating mirror platformPost`, { targetMirror });
-
-        const mirrorTarget =
-          servicesTarget.postsManager.processing.platformPosts.create(
-            targetMirror,
+          /** check if we have  */
+          const userExists = await servicesTarget.users.repo.userExists(
+            sourceAuthorId,
             managerTarget
           );
 
-        /** connect the platform post witht he app post */
-        targetPost.mirrorsIds = [mirrorTarget.id];
+          const targetPost: AppPost = {
+            ...sourcePost,
+          };
 
-        /** create AppPost */
-        if (DEBUG) logger.debug(`creating post`, { targetPost });
+          /** the authorId property does not exists anymore */
+          delete (targetPost as any)['authorId'];
+          delete (targetPost as any)['id'];
 
-        servicesTarget.postsManager.processing.posts.create(
-          targetPost,
-          managerTarget
-        );
-      });
+          if (DEBUG) logger.debug(`targetPost ready`, { targetPost });
+
+          /**
+           * authorUserId is now optional, we will link the post to the user only if it is a signedup user
+           * userIds are determinisitc and thus equivalent
+           */
+          if (userExists) {
+            if (DEBUG) logger.debug(`authorUserId exists`, { sourceAuthorId });
+            targetPost.authorUserId = sourceAuthorId;
+          }
+
+          /** the profile needs to exist */
+          const originMirror = PostsHelper.getPostMirror(
+            sourcePostFull,
+            { platformId: sourcePost.origin },
+            true
+          );
+
+          if (!originMirror.posted) {
+            throw new Error(`Mirror should have a posted property`);
+          }
+
+          const existingMirrorId =
+            await servicesTarget.postsManager.processing.platformPosts.getFrom_post_id(
+              originMirror.platformId,
+              originMirror.posted.post_id,
+              managerTarget
+            );
+
+          if (existingMirrorId) {
+            if (DEBUG)
+              logger.debug(
+                `skiping post ${sourcePost.id}. It already exists in target`,
+                {
+                  existingMirrorId,
+                }
+              );
+            return;
+          }
+
+          /** create profile */
+          const profileId = getProfileId(
+            sourcePost.origin,
+            originMirror.posted.user_id
+          );
+          if (DEBUG) logger.debug(`creating profile exists`, { profileId });
+
+          await servicesTarget.postsManager.getOrCreateProfile(
+            profileId,
+            managerTarget
+          );
+
+          const targetMirror = { ...originMirror };
+          delete (targetMirror as any)['id'];
+
+          /** missing post_id */
+          targetMirror.post_id = originMirror.posted.post_id;
+
+          /** create mirror PlatformPost */
+          if (DEBUG)
+            logger.debug(`creating mirror platformPost`, { targetMirror });
+
+          const mirrorTarget =
+            servicesTarget.postsManager.processing.platformPosts.create(
+              targetMirror,
+              managerTarget
+            );
+
+          /** connect the platform post witht he app post */
+          targetPost.mirrorsIds = [mirrorTarget.id];
+
+          /** create AppPost */
+          if (DEBUG) logger.debug(`creating post`, { targetPost });
+
+          servicesTarget.postsManager.processing.posts.create(
+            targetPost,
+            managerTarget
+          );
+        });
+      } catch (error) {
+        console.error('Error processing post', sourcePost.id, error);
+      }
     })
   );
 })();

@@ -4,7 +4,7 @@ import { ENVIRONMENTS } from '../config/ENVIRONMENTS';
 import { NODE_ENV } from '../config/config.runtime';
 import { logger } from '../instances/logger';
 import { createServices } from '../instances/services';
-import { config } from '../services.config';
+import { getConfig } from '../services.config';
 import { enqueueTaskProduction } from './tasks.enqueuer';
 import { enqueueTaskMockLocal } from './tasks.enqueuer.mock';
 
@@ -16,7 +16,7 @@ export const enqueueTask = async (name: string, params: any) => {
     return enqueueTaskMockLocal(
       name,
       params,
-      createServices(firestore, config)
+      createServices(firestore, getConfig())
     );
   }
 

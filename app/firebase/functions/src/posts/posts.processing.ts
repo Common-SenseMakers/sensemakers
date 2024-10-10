@@ -63,6 +63,7 @@ export class PostsProcessing {
   ): Promise<PlatformPostCreated | undefined> {
     const existing = platformPost.posted
       ? await this.platformPosts.getFrom_post_id(
+          platformPost.platformId,
           platformPost.posted.post_id,
           manager
         )
@@ -379,11 +380,13 @@ export class PostsProcessing {
   }
 
   async getFrom_post_id<T extends boolean, R = AppPost>(
+    platform: PLATFORM,
     post_id: string,
     manager: TransactionManager,
     shouldThrow?: T
   ): Promise<DefinedIfTrue<T, R>> {
     const platformPostId = await this.platformPosts.getFrom_post_id(
+      platform,
       post_id,
       manager,
       true

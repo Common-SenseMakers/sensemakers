@@ -23,44 +23,46 @@ import {
 } from './config/config.runtime';
 import { ServicesConfig } from './instances/services';
 
-export const config: ServicesConfig = {
-  isEmulator: process.env.FIRESTORE_EMULATOR_HOST !== undefined,
-  testCredentials: TEST_USER_ACCOUNTS.value(),
-  twitter: {
-    clientId: TWITTER_CLIENT_ID.value(),
-    clientSecret: TWITTER_CLIENT_SECRET.value(),
-    bearerToken: TWITTER_BEARER_TOKEN.value(),
-  },
-  nanopub: {
-    rsaKeys: {
-      publicKey: NP_PUBLISH_RSA_PUBLIC_KEY.value(),
-      privateKey: NP_PUBLISH_RSA_PRIVATE_KEY.value(),
+export const getConfig = (): ServicesConfig => {
+  return {
+    isEmulator: process.env.FIRESTORE_EMULATOR_HOST !== undefined,
+    testCredentials: TEST_USER_ACCOUNTS.value(),
+    twitter: {
+      clientId: TWITTER_CLIENT_ID.value(),
+      clientSecret: TWITTER_CLIENT_SECRET.value(),
+      bearerToken: TWITTER_BEARER_TOKEN.value(),
     },
-    servers: JSON.parse(NANOPUBS_PUBLISH_SERVERS.value()),
-  },
-  mastodon: {
-    MASTODON_ACCESS_TOKEN: MASTODON_ACCESS_TOKEN.value(),
-    MASTODON_SERVER: MASTODON_SERVER,
-  },
-  bluesky: {
-    BLUESKY_USERNAME: BLUESKY_USERNAME.value(),
-    BLUESKY_APP_PASSWORD: BLUESKY_APP_PASSWORD.value(),
-    BLUESKY_SERVICE_URL: BLUESKY_SERVICE_URL,
-  },
-  email: {
-    apiKey: EMAIL_CLIENT_SECRET.value(),
-  },
-  parser: FUNCTIONS_PY_URL.value(),
-  our: {
-    expiresIn: '30d',
-    tokenSecret: OUR_TOKEN_SECRET.value(),
-  },
-  mock: {
-    USE_REAL_BLUESKY: USE_REAL_BLUESKY.value(),
-    USE_REAL_EMAIL: USE_REAL_EMAIL.value(),
-    USE_REAL_MASTODON: USE_REAL_MASTODON.value(),
-    USE_REAL_NANOPUB: USE_REAL_NANOPUB.value(),
-    USE_REAL_PARSER: USE_REAL_PARSER.value(),
-    USE_REAL_TWITTER: USE_REAL_TWITTERX.value(),
-  },
+    nanopub: {
+      rsaKeys: {
+        publicKey: NP_PUBLISH_RSA_PUBLIC_KEY.value(),
+        privateKey: NP_PUBLISH_RSA_PRIVATE_KEY.value(),
+      },
+      servers: JSON.parse(NANOPUBS_PUBLISH_SERVERS.value()),
+    },
+    mastodon: {
+      MASTODON_ACCESS_TOKEN: MASTODON_ACCESS_TOKEN.value(),
+      MASTODON_SERVER: MASTODON_SERVER,
+    },
+    bluesky: {
+      BLUESKY_USERNAME: BLUESKY_USERNAME.value(),
+      BLUESKY_APP_PASSWORD: BLUESKY_APP_PASSWORD.value(),
+      BLUESKY_SERVICE_URL: BLUESKY_SERVICE_URL,
+    },
+    email: {
+      apiKey: EMAIL_CLIENT_SECRET.value(),
+    },
+    parser: FUNCTIONS_PY_URL.value(),
+    our: {
+      expiresIn: '30d',
+      tokenSecret: OUR_TOKEN_SECRET.value(),
+    },
+    mock: {
+      USE_REAL_BLUESKY: USE_REAL_BLUESKY.value(),
+      USE_REAL_EMAIL: USE_REAL_EMAIL.value(),
+      USE_REAL_MASTODON: USE_REAL_MASTODON.value(),
+      USE_REAL_NANOPUB: USE_REAL_NANOPUB.value(),
+      USE_REAL_PARSER: USE_REAL_PARSER.value(),
+      USE_REAL_TWITTER: USE_REAL_TWITTERX.value(),
+    },
+  };
 };
