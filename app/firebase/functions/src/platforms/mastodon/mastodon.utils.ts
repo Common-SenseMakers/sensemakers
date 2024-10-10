@@ -132,11 +132,16 @@ export const parseMastodonUserId = (mastodonUserId: string) => {
   return { server, accountId };
 };
 
-export const getUniqueMastodonUsername = (username: string, server: string) =>
+export const getGlobalMastodonUsername = (username: string, server: string) =>
   `${username}@${server}`;
 
-export const parseMastodonUniqueUsername = (uniqueUsername: string) => {
-  const [username, server] = uniqueUsername.split('@');
+export const parseMastodonGlobalUsername = (globalUsername: string) => {
+  const [username, server] = globalUsername.split('@');
+  if (!username || !server) {
+    throw new Error(
+      `Invalid Mastodon unique username: ${globalUsername}. Expected format: username@server.`
+    );
+  }
   return { username, server };
 };
 

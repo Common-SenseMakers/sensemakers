@@ -39,7 +39,7 @@ import {
   convertMastodonPostsToThreads,
   extractPrimaryThread,
   getMastodonUserId,
-  getUniqueMastodonUsername,
+  parseMastodonGlobalUsername,
   parseMastodonURI,
   parseMastodonUserId,
 } from './mastodon.utils';
