@@ -5,18 +5,16 @@ import { PostsHelper } from '../src/posts/posts.helper';
 import { getProfileId } from '../src/profiles/profiles.repository';
 import { servicesSource, servicesTarget } from './migrations.services';
 
-const includePlatforms: PLATFORM[] = [PLATFORM.Mastodon, PLATFORM.Twitter];
-
 const DEBUG = true;
 
 (async () => {
   const posts =
     await servicesSource.postsManager.processing.posts.getAllOfQuery(
       {
-        origins: [PLATFORM.Mastodon, PLATFORM.Twitter],
+        origins: [PLATFORM.Mastodon],
         fetchParams: { expectedAmount: 100 },
       },
-      500
+      1
     );
 
   logger.info(`Processing ${posts.length} posts`);
@@ -25,12 +23,6 @@ const DEBUG = true;
     posts.map(async (sourcePost) => {
       try {
         console.log('Processing sourcePost post', sourcePost.id);
-
-        if (!includePlatforms.includes(sourcePost.origin)) {
-          if (DEBUG)
-            logger.debug(`skipping ${sourcePost.id} from ${sourcePost.origin}`);
-          return;
-        }
 
         const sourcePostFull = await servicesSource.db.run(
           async (managerSource) => {
@@ -107,11 +99,15 @@ const DEBUG = true;
             return;
           }
 
+          const author_user_id = (() => {
+            if (originMirror.platformId === PLATFORM.Mastodon) {
+              return `${originMirror.posted.user_id}`;
+            }
+            return originMirror.posted.user_id;
+          })();
+
           /** create profile */
-          const profileId = getProfileId(
-            sourcePost.origin,
-            originMirror.posted.user_id
-          );
+          const profileId = getProfileId(sourcePost.origin, author_user_id);
           if (DEBUG) logger.debug(`creating profile exists`, { profileId });
 
           await servicesTarget.postsManager.getOrCreateProfile(
