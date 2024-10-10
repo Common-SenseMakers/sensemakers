@@ -176,9 +176,11 @@ const authenticateMastodonForUser = async (
       credentials: {
         read: {
           accessToken: credentials.mastodon.id,
+          server: 'https://mastodon.social',
         },
         write: {
           accessToken: credentials.mastodon.id,
+          server: 'https://mastodon.social',
         },
       },
     },

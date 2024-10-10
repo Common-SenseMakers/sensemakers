@@ -40,7 +40,7 @@ export const convertMastodonPostsToThreads = (
     const primaryThread = extractPrimaryThread(sortedPosts[0].id, sortedPosts);
 
     return {
-      thread_id: sortedPosts[0].id, // The root post ID
+      thread_id: sortedPosts[0].uri, // The root post URI
       posts: primaryThread,
       author,
     };
@@ -123,3 +123,44 @@ export const cleanMastodonContent = (content: string): string => {
 
   return cleanedContent;
 };
+
+export const getMastodonUserId = (accountId: string, server: string) =>
+  `${accountId}:${server}`;
+
+export const parseMastodonUserId = (mastodonUserId: string) => {
+  const [accountId, server] = mastodonUserId.split(':');
+  return { accountId, server };
+};
+
+export const getGlobalMastodonUsername = (username: string, server: string) =>
+  `${username}@${server}`;
+
+export const parseMastodonGlobalUsername = (globalUsername: string) => {
+  const [username, server] = globalUsername.split('@');
+  if (!username || !server) {
+    throw new Error(
+      `Invalid Mastodon unique username: ${globalUsername}. Expected format: username@server.`
+    );
+  }
+  return { username, server };
+};
+
+export function parseMastodonURI(uri: string) {
+  try {
+    if (!uri.startsWith('https://')) {
+      throw new Error('Invalid URI: must start with "https://".');
+    }
+
+    const parts = uri.split('/');
+
+    if (parts.length !== 7) {
+      throw new Error('Invalid URI: expected exactly 5 parts.');
+    }
+
+    const [, , server, , username, , postId] = parts;
+
+    return { server, username, postId };
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}

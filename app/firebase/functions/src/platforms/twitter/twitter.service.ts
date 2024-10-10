@@ -602,4 +602,30 @@ export class TwitterService
   ): Promise<PlatformPostDeleteDraft | undefined> {
     return undefined;
   }
+  async getProfileByUsername(
+    username: string,
+    credentials?: TwitterCredentials
+  ): Promise<AccountProfileBase<TwitterProfile> | undefined> {
+    try {
+      const { client } = await this.getClient(credentials, 'read');
+      const userResponse = await client.v2.userByUsername(username, {
+        'user.fields': ['id', 'name', 'username', 'profile_image_url'],
+      });
+
+      if (userResponse.data) {
+        return {
+          user_id: userResponse.data.id,
+          profile: {
+            id: userResponse.data.id,
+            name: userResponse.data.name,
+            username: userResponse.data.username,
+            profile_image_url: userResponse.data.profile_image_url,
+          },
+        };
+      }
+      throw new Error(`User not found`);
+    } catch (e: any) {
+      throw new Error(handleTwitterError(e));
+    }
+  }
 }

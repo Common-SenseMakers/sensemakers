@@ -251,28 +251,4 @@ export class TwitterServiceClient {
       profile: twitterProfile,
     };
   }
-
-  async getProfileByUsername(
-    username: string,
-    credentials?: TwitterCredentials
-  ): Promise<TwitterProfile | null> {
-    try {
-      const { client } = await this.getClient(credentials, 'read');
-      const userResponse = await client.v2.userByUsername(username, {
-        'user.fields': ['id', 'name', 'username', 'profile_image_url'],
-      });
-
-      if (userResponse.data) {
-        return {
-          id: userResponse.data.id,
-          name: userResponse.data.name,
-          username: userResponse.data.username,
-          profile_image_url: userResponse.data.profile_image_url,
-        };
-      }
-      return null;
-    } catch (e: any) {
-      throw new Error(handleTwitterError(e));
-    }
-  }
 }

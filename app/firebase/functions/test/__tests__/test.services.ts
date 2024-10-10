@@ -4,7 +4,13 @@ import { spy, when } from 'ts-mockito';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { ActivityRepository } from '../../src/activity/activity.repository';
 import { ActivityService } from '../../src/activity/activity.service';
-import { API_DOMAIN } from '../../src/config/config.runtime';
+import {
+  BLUESKY_APP_PASSWORD,
+  BLUESKY_SERVICE_URL,
+  BLUESKY_USERNAME,
+  MASTODON_ACCESS_TOKEN,
+  MASTODON_SERVER,
+} from '../../src/config/config.runtime';
 import { DBInstance } from '../../src/db/instance';
 import { EmailSenderService } from '../../src/emailSender/email.sender.service';
 import {
@@ -125,12 +131,17 @@ export const getTestServices = (config: TestServicesConfig) => {
 
   /** mocked mastodon */
   const _mastodon = new MastodonService(time, userRepo, {
-    apiDomain: API_DOMAIN,
+    MASTODON_ACCESS_TOKEN: MASTODON_ACCESS_TOKEN.value(),
+    MASTODON_SERVER,
   });
   const mastodon = getMastodonMock(_mastodon, config.mastodon, testUser);
 
   /** mocked mastodon */
-  const _bluesky = new BlueskyService(time, userRepo);
+  const _bluesky = new BlueskyService(time, userRepo, {
+    BLUESKY_APP_PASSWORD: BLUESKY_APP_PASSWORD.value(),
+    BLUESKY_USERNAME: BLUESKY_USERNAME.value(),
+    BLUESKY_SERVICE_URL,
+  });
   const bluesky = getBlueskyMock(_bluesky, config.bluesky, testUser);
 
   /** nanopub */

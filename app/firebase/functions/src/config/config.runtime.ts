@@ -15,6 +15,7 @@ const mandatory: Array<keyof typeof envRuntime> = [
   'MASTODON_ACCESS_TOKEN',
   'BLUESKY_APP_PASSWORD',
   'BLUESKY_USERNAME',
+  'BLUESKY_SERVICE_URL',
   'PROJECT_ID',
   'NANOPUBS_PUBLISH_SERVERS',
   'NP_PUBLISH_RSA_PRIVATE_KEY',
@@ -51,6 +52,7 @@ export const MASTODON_SERVER = 'mastodon.social';
 
 export const BLUESKY_APP_PASSWORD = envRuntime.BLUESKY_APP_PASSWORD;
 export const BLUESKY_USERNAME = envRuntime.BLUESKY_USERNAME;
+export const BLUESKY_SERVICE_URL = 'https://bsky.social';
 
 export const ADMIN_API_KEY = envRuntime.ADMIN_API_KEY;
 
