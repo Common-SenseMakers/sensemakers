@@ -87,7 +87,7 @@ export interface PlatformPostDeleteDraft<D = any>
  * */
 export interface PlatformPostPublish<D = any, C = any> {
   draft: D;
-  credentials: AccountCredentials<C>;
+  credentials: AccountCredentials<any, C>;
 }
 
 export interface PlatformPostUpdate<D = any> extends PlatformPostPublish<D> {
