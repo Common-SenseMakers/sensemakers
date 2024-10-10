@@ -40,7 +40,7 @@ export const convertMastodonPostsToThreads = (
     const primaryThread = extractPrimaryThread(sortedPosts[0].id, sortedPosts);
 
     return {
-      thread_id: sortedPosts[0].id, // The root post ID
+      thread_id: sortedPosts[0].uri, // The root post URI
       posts: primaryThread,
       author,
     };
@@ -139,3 +139,23 @@ export const parseMastodonUniqueUsername = (uniqueUsername: string) => {
   const [username, server] = uniqueUsername.split('@');
   return { username, server };
 };
+
+export function parseMastodonURI(uri: string) {
+  try {
+    if (!uri.startsWith('https://')) {
+      throw new Error('Invalid URI: must start with "https://".');
+    }
+
+    const parts = uri.split('/');
+
+    if (parts.length !== 7) {
+      throw new Error('Invalid URI: expected exactly 5 parts.');
+    }
+
+    const [, , server, , username, , postId] = parts;
+
+    return { server, username, postId };
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}

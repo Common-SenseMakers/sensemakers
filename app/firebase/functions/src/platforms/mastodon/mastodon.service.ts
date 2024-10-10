@@ -40,6 +40,7 @@ import {
   extractPrimaryThread,
   getMastodonUserId,
   getUniqueMastodonUsername,
+  parseMastodonURI,
   parseMastodonUserId,
 } from './mastodon.utils';
 
@@ -347,12 +348,15 @@ export class MastodonService
   }
 
   public async publish(
-    postPublish: PlatformPostPublish<string>
+    postPublish: PlatformPostPublish<string, MastodonAccountCredentials>
   ): Promise<{ post: PlatformPostPosted<mastodon.v1.Status> }> {
     const credentials = postPublish.credentials;
 
+    if (!credentials.write) {
+      throw new Error('write credentials are not provided');
+    }
     const client = createRestAPIClient({
-      url: `https://${credentials.write.mastodonServer}`,
+      url: `https://${credentials.write.server}`,
       accessToken: credentials.write.accessToken,
     });
 
@@ -361,8 +365,8 @@ export class MastodonService
     });
 
     const post = {
-      post_id: status.id,
-      user_id: status.account.id,
+      post_id: status.uri,
+      user_id: getMastodonUserId(credentials.write.server, status.account.id),
       timestampMs: new Date(status.createdAt).getTime(),
       post: status,
     };
@@ -401,15 +405,13 @@ export class MastodonService
       throw new Error('read credentials are not provided');
     }
 
-    const client = this.getClient(
-      this.config.MASTODON_SERVER,
-      credentials?.read
-    );
+    const { server, postId } = parseMastodonURI(post_id);
+    const client = this.getClient(server, credentials?.read);
 
-    const context = await client.v1.statuses.$select(post_id).context.fetch();
+    const context = await client.v1.statuses.$select(postId).context.fetch();
     const rootStatus = await (async () => {
       if (context.ancestors.length === 0) {
-        return await client.v1.statuses.$select(post_id).fetch();
+        return await client.v1.statuses.$select(postId).fetch();
       }
 
       return context.ancestors.reduce((oldestStatus, currStatus) => {
@@ -429,7 +431,7 @@ export class MastodonService
 
     const platformPost = {
       post_id: thread.thread_id,
-      user_id: thread.author.id,
+      user_id: getMastodonUserId(server, thread.author.id),
       timestampMs: new Date(thread.posts[0].createdAt).getTime(),
       post: thread,
     };
@@ -453,7 +455,7 @@ export class MastodonService
     const thread = extractPrimaryThread(rootStatus.id, sortedStatuses);
 
     return {
-      thread_id: rootStatus.id,
+      thread_id: rootStatus.uri,
       posts: thread,
       author: rootStatus.account,
     };
