@@ -69,6 +69,7 @@ import {
 export interface TwitterApiCredentials {
   clientId: string;
   clientSecret: string;
+  bearerToken: string;
 }
 
 const DEBUG = false;

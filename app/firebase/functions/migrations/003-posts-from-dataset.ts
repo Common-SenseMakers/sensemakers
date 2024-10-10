@@ -16,7 +16,7 @@ const DEBUG = true;
         origins: [PLATFORM.Mastodon, PLATFORM.Twitter],
         fetchParams: { expectedAmount: 50 },
       },
-      100
+      1
     );
 
   logger.info(`Processing ${posts.length} posts`);

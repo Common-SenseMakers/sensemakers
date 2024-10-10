@@ -39,10 +39,10 @@ export class TwitterServiceClient {
   /**
    * Get generic client user app credentials
    * */
-  protected getGenericClient() {
+  protected getAppClient() {
     if (DEBUG) {
       logger.debug(
-        'getGenericClient',
+        'getAppClient',
         {
           clientId: this.apiCredentials.clientId.substring(0, 8),
           clientSecret: this.apiCredentials.clientSecret.substring(0, 8),
@@ -55,6 +55,18 @@ export class TwitterServiceClient {
       clientId: this.apiCredentials.clientId,
       clientSecret: this.apiCredentials.clientSecret,
     });
+  }
+
+  protected getBearerClient() {
+    logger.debug(
+      'getAppClient',
+      {
+        bearerToken: this.apiCredentials.bearerToken.substring(0, 8),
+      },
+      DEBUG_PREFIX
+    );
+
+    return new TwitterApi(this.apiCredentials.bearerToken);
   }
 
   /**
@@ -90,7 +102,7 @@ export class TwitterServiceClient {
 
     /** Check for refresh token anytime after ten minutes before expected expiration */
     if (this.time.now() >= credentials.expiresAtMs - 1000 * 60 * 10) {
-      const _client = this.getGenericClient();
+      const _client = this.getAppClient();
       try {
         if (DEBUG)
           logger.debug(
@@ -150,7 +162,7 @@ export class TwitterServiceClient {
       if (type === 'write') {
         throw new Error('Cannot provide a write client without user details');
       }
-      return { client: this.getGenericClient().readOnly } as GetClientResult<T>;
+      return { client: this.getBearerClient().readOnly } as GetClientResult<T>;
     }
 
     /** otherwise use those credentials directly (fast) */
@@ -164,7 +176,7 @@ export class TwitterServiceClient {
     userId?: string,
     params?: TwitterGetContextParams
   ) {
-    const client = this.getGenericClient();
+    const client = this.getAppClient();
 
     if (!params) {
       throw new Error('params must be defined');
@@ -192,7 +204,7 @@ export class TwitterServiceClient {
   async handleSignupData(data: TwitterSignupData) {
     if (DEBUG) logger.debug('handleSignupData', data, DEBUG_PREFIX);
 
-    const client = this.getGenericClient();
+    const client = this.getAppClient();
 
     const result = await client.loginWithOAuth2({
       code: data.code,

@@ -49,6 +49,7 @@ import {
 } from './posts/tasks/posts.autopost.task';
 import { PARSE_POST_TASK, parsePostTask } from './posts/tasks/posts.parse.task';
 import { router } from './router';
+import { config } from './services.config';
 
 // all secrets are available to all functions
 const secrets = [
@@ -63,13 +64,13 @@ const secrets = [
   envRuntime.MAGIC_ADMIN_SECRET,
 ];
 
-export const config = IS_EMULATOR
+export const appConfig = IS_EMULATOR
   ? {
       projectId: 'demo-sensenets',
     }
   : {};
 
-const app = admin.initializeApp(config);
+const app = admin.initializeApp(appConfig);
 const firestore = app.firestore();
 
 // import { fetchNewPosts } from './posts/posts.job';
@@ -84,6 +85,7 @@ exports['api'] = functions
     secrets,
   })
   .https.onRequest(buildApp(router));
+
 exports['admin'] = functions
   .region(envDeploy.REGION)
   .runWith({
@@ -150,7 +152,7 @@ exports[PARSE_POST_TASK] = onTaskDispatched(
       maxDispatchesPerSecond: 190,
     },
   },
-  (req) => parsePostTask(req, createServices(firestore))
+  (req) => parsePostTask(req, createServices(firestore, config))
 );
 
 exports[AUTOFETCH_POSTS_TASK] = onTaskDispatched(
@@ -164,7 +166,7 @@ exports[AUTOFETCH_POSTS_TASK] = onTaskDispatched(
     },
   },
   async (req) => {
-    void (await autofetchUserPosts(req, createServices(firestore)));
+    void (await autofetchUserPosts(req, createServices(firestore, config)));
   }
 );
 
@@ -175,7 +177,7 @@ exports[AUTOPOST_POST_TASK] = onTaskDispatched(
     minInstances: envDeploy.CONFIG_MININSTANCE,
     secrets,
   },
-  (req) => autopostPostTask(req, createServices(firestore))
+  (req) => autopostPostTask(req, createServices(firestore, config))
 );
 
 exports[NOTIFY_USER_TASK] = onTaskDispatched(
@@ -190,7 +192,7 @@ exports[NOTIFY_USER_TASK] = onTaskDispatched(
       throw new Error('userId not found for task notifyUserTask');
     }
 
-    return notifyUserTask(req.data.userId, createServices(firestore));
+    return notifyUserTask(req.data.userId, createServices(firestore, config));
   }
 );
 
@@ -240,7 +242,7 @@ exports.postUpdateListener = onDocumentUpdated(
       event,
       'postId'
     );
-    await postUpdatedHook(after, createServices(firestore), before);
+    await postUpdatedHook(after, createServices(firestore, config), before);
   }
 );
 
@@ -251,7 +253,7 @@ exports.postCreateListener = onDocumentCreated(
   },
   async (event) => {
     const created = getCreatedOnCreate<AppPost>(event, 'postId');
-    await postUpdatedHook(created, createServices(firestore));
+    await postUpdatedHook(created, createServices(firestore, config));
   }
 );
 
@@ -265,7 +267,11 @@ exports.platformPostUpdateListener = onDocumentUpdated(
       event,
       'platformPostId'
     );
-    await platformPostUpdatedHook(after, createServices(firestore), before);
+    await platformPostUpdatedHook(
+      after,
+      createServices(firestore, config),
+      before
+    );
   }
 );
 
@@ -280,7 +286,7 @@ exports.activityEventCreateListener = onDocumentCreated(
       'activityEventId'
     );
 
-    await activityEventCreatedHook(created, createServices(firestore));
+    await activityEventCreatedHook(created, createServices(firestore, config));
   }
 );
 
@@ -289,7 +295,7 @@ const emulatorTriggerRouter = express.Router();
 
 emulatorTriggerRouter.post('/autofetch', async (request, response) => {
   logger.debug('autofetch triggered');
-  await triggerAutofetchPosts(createServices(firestore));
+  await triggerAutofetchPosts(createServices(firestore, config));
   response.status(200).send({ success: true });
 });
 
@@ -310,7 +316,7 @@ emulatorTriggerRouter.post('/sendNotifications', async (request, response) => {
 emulatorTriggerRouter.post('/emailTest', async (request, response) => {
   logger.debug('emailTest triggered');
 
-  const services = createServices(firestore);
+  const services = createServices(firestore, config);
   const message: Message = {
     From: EMAIL_SENDER_FROM.value(),
     ReplyTo: EMAIL_SENDER_FROM.value(),

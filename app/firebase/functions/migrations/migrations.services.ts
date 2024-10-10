@@ -4,12 +4,14 @@ import { AppOptions } from 'firebase-admin';
 
 import { LocalLogger, LogLevel } from '../src/instances/local.logger';
 import { logger } from '../src/instances/logger';
-import { createServices } from '../src/instances/services';
+import { ServicesConfig, createServices } from '../src/instances/services';
+import { config } from './migrations.config';
 
 // Load environment variables from .env file
-dotenv.config({ path: './migrations/.migrations.env' });
+dotenv.config({ path: './migrations/.env.migrations' });
 
 // update log levels
+
 if (process.env.LOG_LEVEL_MSG && process.env.LOG_LEVEL_OBJ) {
   (logger as LocalLogger).msgLevel = process.env.LOG_LEVEL_MSG as LogLevel;
   (logger as LocalLogger).ctxLevel = process.env.LOG_LEVEL_OBJ as LogLevel;
@@ -77,5 +79,5 @@ export const appTarget = initApp(
   'target'
 );
 
-export const servicesSource = createServices(appSource.firestore());
-export const servicesTarget = createServices(appTarget.firestore());
+export const servicesSource = createServices(appSource.firestore(), config);
+export const servicesTarget = createServices(appTarget.firestore(), config);
