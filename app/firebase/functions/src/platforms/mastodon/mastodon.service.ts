@@ -163,8 +163,8 @@ export class MastodonService
     };
 
     const mastodonUserId = getMastodonUserId(
-      signupData.mastodonServer,
-      account.id
+      account.id,
+      signupData.mastodonServer
     );
     const mastodon: MastodonAccountDetails = {
       user_id: mastodonUserId,
@@ -366,7 +366,7 @@ export class MastodonService
 
     const post = {
       post_id: status.uri,
-      user_id: getMastodonUserId(credentials.write.server, status.account.id),
+      user_id: getMastodonUserId(status.account.id, credentials.write.server),
       timestampMs: new Date(status.createdAt).getTime(),
       post: status,
     };
@@ -431,7 +431,7 @@ export class MastodonService
 
     const platformPost = {
       post_id: thread.thread_id,
-      user_id: getMastodonUserId(server, thread.author.id),
+      user_id: getMastodonUserId(thread.author.id, server),
       timestampMs: new Date(thread.posts[0].createdAt).getTime(),
       post: thread,
     };
@@ -461,29 +461,28 @@ export class MastodonService
     };
   }
 
-  public async getAccountByUsername(
+  public async getProfileByUsername(
     username: string,
-    server: string,
     credentials?: MastodonAccountCredentials
-  ): Promise<MastodonProfile | null> {
+  ): Promise<AccountProfileBase<MastodonProfile>> {
     try {
-      // TODO: support using a provided server or our default apiDomain
+      const { server } = parseMastodonGlobalUsername(username);
       const client = this.getClient(server, credentials);
 
-      const account = await client.v1.accounts.lookup({
-        acct: getUniqueMastodonUsername(username, server),
+      const mdProfile = await client.v1.accounts.lookup({
+        acct: username,
       });
-
-      if (account) {
-        return {
-          id: account.id,
-          username: account.username,
-          displayName: account.displayName,
-          avatar: account.avatar,
+      const profile: AccountProfileBase<MastodonProfile> = {
+        user_id: getMastodonUserId(mdProfile.id, server),
+        profile: {
+          id: mdProfile.id,
+          avatar: mdProfile.avatar,
+          displayName: mdProfile.displayName,
           mastodonServer: server,
-        };
-      }
-      return null;
+          username: mdProfile.username,
+        },
+      };
+      return profile;
     } catch (e: any) {
       throw new Error(`Error fetching Mastodon account: ${e.message}`);
     }

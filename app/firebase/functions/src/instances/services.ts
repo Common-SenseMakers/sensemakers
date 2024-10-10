@@ -4,6 +4,9 @@ import { PLATFORM } from '../@shared/types/types.platforms';
 import { ActivityRepository } from '../activity/activity.repository';
 import { ActivityService } from '../activity/activity.service';
 import {
+  BLUESKY_APP_PASSWORD,
+  BLUESKY_SERVICE_URL,
+  BLUESKY_USERNAME,
   EMAIL_CLIENT_SECRET,
   FUNCTIONS_PY_URL,
   IS_EMULATOR,
@@ -129,7 +132,11 @@ export const createServices = (firestore: Firestore) => {
       : { signup: true, fetch: true, publish: true, get: true },
     testUser
   );
-  const _bluesky = new BlueskyService(time, userRepo);
+  const _bluesky = new BlueskyService(time, userRepo, {
+    BLUESKY_APP_PASSWORD: BLUESKY_APP_PASSWORD.value(),
+    BLUESKY_USERNAME: BLUESKY_USERNAME.value(),
+    BLUESKY_SERVICE_URL,
+  });
   const bluesky = getBlueskyMock(
     _bluesky,
     USE_REAL_BLUESKY.value()

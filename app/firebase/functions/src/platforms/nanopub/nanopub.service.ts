@@ -177,6 +177,12 @@ export class NanopubService
   ): Promise<AccountProfileBase | undefined> {
     throw new Error('Method not implemented.');
   }
+  getProfileByUsername(
+    user_id: string,
+    credentials: any
+  ): Promise<AccountProfileBase | undefined> {
+    throw new Error('Method not implemented.');
+  }
 
   async signDraft(post: PlatformPostDraft<any>): Promise<string> {
     try {
