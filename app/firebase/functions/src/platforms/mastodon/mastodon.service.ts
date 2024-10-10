@@ -89,7 +89,7 @@ export class MastodonService
 
   public getClient(server: string, credentials?: MastodonAccountCredentials) {
     return createRestAPIClient({
-      url: server,
+      url: `https://${server}`,
       accessToken: credentials
         ? credentials.accessToken
         : this.config.MASTODON_ACCESS_TOKEN,
@@ -215,10 +215,10 @@ export class MastodonService
     };
 
     if (params.since_id) {
-      fetchParams.minId = params.since_id;
+      fetchParams.minId = parseMastodonURI(params.since_id).postId;
     }
     if (params.until_id) {
-      fetchParams.maxId = params.until_id;
+      fetchParams.maxId = parseMastodonURI(params.until_id).postId;
     }
 
     if (DEBUG) logger.debug('fetch params', { fetchParams }, DEBUG_PREFIX);
@@ -244,13 +244,16 @@ export class MastodonService
         (a, b) => Number(b.id) - Number(a.id)
       );
 
-      if (!newestId) newestId = sortedStatuses[0].id;
+      if (!newestId) newestId = sortedStatuses[0].uri;
       newestId =
-        sortedStatuses[0].id > newestId ? sortedStatuses[0].id : newestId;
-      if (!oldestId) oldestId = sortedStatuses[sortedStatuses.length - 1].id;
+        sortedStatuses[0].id > parseMastodonURI(newestId).postId
+          ? sortedStatuses[0].uri
+          : newestId;
+      if (!oldestId) oldestId = sortedStatuses[sortedStatuses.length - 1].uri;
       oldestId =
-        sortedStatuses[sortedStatuses.length - 1].id < oldestId
-          ? sortedStatuses[sortedStatuses.length - 1].id
+        sortedStatuses[sortedStatuses.length - 1].id <
+        parseMastodonURI(oldestId).postId
+          ? sortedStatuses[sortedStatuses.length - 1].uri
           : oldestId;
 
       const threads = convertMastodonPostsToThreads(
@@ -330,7 +333,7 @@ export class MastodonService
     const thread = platformPost.posted.post;
     const genericAuthor: GenericAuthor = {
       platformId: PLATFORM.Mastodon,
-      id: thread.author.id,
+      id: thread.author.id, // TODO: make sure this is a unique id
       username: thread.author.username,
       name: thread.author.displayName,
       avatarUrl: thread.author.avatar,
