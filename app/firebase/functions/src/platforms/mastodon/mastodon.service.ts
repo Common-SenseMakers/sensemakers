@@ -44,7 +44,6 @@ import {
   parseMastodonAccountURI,
   parseMastodonGlobalUsername,
   parseMastodonPostURI,
-  unsuportedPlatformProfile,
 } from './mastodon.utils';
 
 const DEBUG = true;
@@ -90,10 +89,6 @@ export class MastodonService
   }
 
   public getClient(server: string, credentials?: MastodonAccountCredentials) {
-    if (!credentials && !this.config.accessTokens[server]) {
-      /** we dont support connecting to that server */
-      return undefined;
-    }
     return createRestAPIClient({
       url: `https://${server}`,
       accessToken: credentials
@@ -162,12 +157,6 @@ export class MastodonService
       accessToken: token.accessToken,
     });
 
-    if (!mastoClient) {
-      throw new Error(
-        `We dont support users from ${signupData.mastodonServer} Mastodon server`
-      );
-    }
-
     const account = await mastoClient.v1.accounts.verifyCredentials();
     const credentials: MastodonAccountCredentials = {
       accessToken: token.accessToken,
@@ -218,12 +207,6 @@ export class MastodonService
     if (DEBUG) logger.debug('fetch', { params, credentials }, DEBUG_PREFIX);
     const { server, localUsername } = parseMastodonAccountURI(user_id);
     const client = this.getClient(server, credentials?.read);
-
-    if (!client) {
-      throw new Error(
-        `We dont support FETCHING from ${server} Mastodon server`
-      );
-    }
 
     const account = await client.v1.accounts.lookup({
       acct: localUsername,
@@ -432,10 +415,6 @@ export class MastodonService
     const { server, postId } = parseMastodonPostURI(post_id);
     const client = this.getClient(server, credentials?.read);
 
-    if (!client) {
-      throw new Error(`We dont support GETTING from ${server} Mastodon server`);
-    }
-
     const context = await client.v1.statuses.$select(postId).context.fetch();
     const rootStatus = await (async () => {
       if (context.ancestors.length === 0) {
@@ -499,14 +478,9 @@ export class MastodonService
       const { server } = parseMastodonGlobalUsername(username);
       const client = this.getClient(server, credentials);
 
-      const mdProfile = await (() => {
-        if (client) {
-          return client.v1.accounts.lookup({
-            acct: username,
-          });
-        }
-        return unsuportedPlatformProfile(server, username);
-      })();
+      const mdProfile = await client.v1.accounts.lookup({
+        acct: username,
+      });
 
       const profile: AccountProfileBase<PlatformProfile> = {
         user_id: mdProfile.url,
@@ -531,12 +505,9 @@ export class MastodonService
     const { server, localUsername } = parseMastodonAccountURI(user_id);
     const client = this.getClient(server, credentials);
 
-    const mdProfile = await (() => {
-      if (client) {
-        return client.v1.accounts.$select(localUsername).fetch();
-      }
-      return unsuportedPlatformProfile(server, localUsername);
-    })();
+    const mdProfile = await client.v1.accounts.lookup({
+      acct: localUsername,
+    });
 
     const profile: AccountProfileBase<PlatformProfile> = {
       user_id,

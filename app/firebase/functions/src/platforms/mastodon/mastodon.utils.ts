@@ -1,5 +1,3 @@
-import { mastodon } from 'masto';
-
 import {
   MastodonAccount,
   MastodonPost,
@@ -177,21 +175,4 @@ export function parseMastodonPostURI(uri: string) {
   } catch (error: any) {
     throw new Error(error.message);
   }
-}
-
-export function unsuportedPlatformProfile(
-  server: string,
-  username: string
-): Pick<
-  mastodon.v1.Account,
-  'url' | 'username' | 'id' | 'displayName' | 'avatar' | 'note'
-> {
-  return {
-    url: `https://${server}/@${username}`,
-    username,
-    id: username,
-    displayName: username,
-    avatar: '',
-    note: '',
-  };
 }
