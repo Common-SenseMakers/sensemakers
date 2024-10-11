@@ -171,6 +171,7 @@ export const createServices = (
     userRepo,
     profilesRepo,
     identityPlatforms,
+    platformsMap,
     time,
     email,
     config.our

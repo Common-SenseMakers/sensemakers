@@ -2,7 +2,6 @@ import express from 'express';
 
 import { getPublicFeedController } from './feed/feed.controller';
 import {
-  addUserDataController,
   approvePostController,
   createDraftPostController,
   getPostController,
@@ -39,5 +38,4 @@ router.post('/posts/parse', parsePostController);
 router.post('/posts/update', updatePostController);
 router.post('/posts/unpublish', unpublishPlatformPostController);
 
-adminRouter.post('/addUserData', addUserDataController);
 router.post('/feed/get', getPublicFeedController);

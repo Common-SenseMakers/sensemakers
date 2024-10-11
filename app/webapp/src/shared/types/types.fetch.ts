@@ -40,10 +40,7 @@ export interface PublishPostPayload {
 
 export interface AddUserDataPayload {
   username: string;
-  mastodonServer?: string;
   platformId: IDENTITY_PLATFORM;
   amount: number;
   latest?: boolean;
-  userId?: string;
-  isGhost: true;
 }

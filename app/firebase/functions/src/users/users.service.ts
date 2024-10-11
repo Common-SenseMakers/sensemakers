@@ -24,7 +24,10 @@ import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { EmailSenderService } from '../emailSender/email.sender.service';
 import { logger } from '../instances/logger';
-import { IdentityServicesMap } from '../platforms/platforms.service';
+import {
+  IdentityServicesMap,
+  PlatformsMap,
+} from '../platforms/platforms.service';
 import { ProfilesRepository } from '../profiles/profiles.repository';
 import { TimeService } from '../time/time.service';
 import { UsersHelper } from './users.helper';
@@ -51,6 +54,7 @@ export class UsersService {
     public repo: UsersRepository,
     public profiles: ProfilesRepository,
     public identityPlatforms: IdentityServicesMap,
+    public platformServices: PlatformsMap,
     public time: TimeService,
     public emailSender: EmailSenderService,
     protected ourToken: OurTokenConfig
@@ -343,6 +347,36 @@ export class UsersService {
     user_id: string,
     manager: TransactionManager
   ) {}
+  public async getOrCreateProfileByUsername(
+    platformId: IDENTITY_PLATFORM,
+    username: string,
+    manager: TransactionManager
+  ) {
+    const user_id = await this.profiles.getByPlatformUsername(
+      platformId,
+      'username',
+      username,
+      manager
+    );
+
+    if (user_id) {
+      return await this.profiles.getProfile(platformId, user_id, manager);
+    }
+
+    const profile = await this.platformServices
+      .get(platformId)
+      ?.getProfileByUsername(username);
+
+    if (!profile) {
+      throw new Error('Profile not found');
+    }
+    const profileCreate: AccountProfileCreate = {
+      ...profile,
+      platformId: platformId,
+    };
+    this.profiles.create(profileCreate, manager);
+    return profile;
+  }
 
   public async getUserWithProfiles(
     userId: string,
