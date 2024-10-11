@@ -22,8 +22,7 @@ export const config: ServicesConfig = {
       : [],
   },
   mastodon: {
-    MASTODON_ACCESS_TOKEN: process.env.MASTODON_ACCESS_TOKEN as string,
-    MASTODON_SERVER: process.env.MASTODON_SERVER as string,
+    accessTokens: JSON.parse(process.env.MASTODON_ACCESS_TOKENS as string),
   },
   bluesky: {
     BLUESKY_USERNAME: process.env.BLUESKY_USERNAME as string,

@@ -14,7 +14,7 @@ const DEBUG = true;
         origins: [PLATFORM.Mastodon],
         fetchParams: { expectedAmount: 100 },
       },
-      1
+      50
     );
 
   logger.info(`Processing ${posts.length} posts`);

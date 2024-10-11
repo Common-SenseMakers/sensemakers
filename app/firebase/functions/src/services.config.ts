@@ -4,8 +4,7 @@ import {
   BLUESKY_USERNAME,
   EMAIL_CLIENT_SECRET,
   FUNCTIONS_PY_URL,
-  MASTODON_ACCESS_TOKEN,
-  MASTODON_SERVER,
+  MASTODON_ACCESS_TOKENS,
   NANOPUBS_PUBLISH_SERVERS,
   NP_PUBLISH_RSA_PRIVATE_KEY,
   NP_PUBLISH_RSA_PUBLIC_KEY,
@@ -40,8 +39,7 @@ export const getConfig = (): ServicesConfig => {
       servers: JSON.parse(NANOPUBS_PUBLISH_SERVERS.value()),
     },
     mastodon: {
-      MASTODON_ACCESS_TOKEN: MASTODON_ACCESS_TOKEN.value(),
-      MASTODON_SERVER: MASTODON_SERVER,
+      accessTokens: JSON.parse(MASTODON_ACCESS_TOKENS.value()),
     },
     bluesky: {
       BLUESKY_USERNAME: BLUESKY_USERNAME.value(),

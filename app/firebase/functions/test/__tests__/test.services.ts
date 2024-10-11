@@ -8,8 +8,7 @@ import {
   BLUESKY_APP_PASSWORD,
   BLUESKY_SERVICE_URL,
   BLUESKY_USERNAME,
-  MASTODON_ACCESS_TOKEN,
-  MASTODON_SERVER,
+  MASTODON_ACCESS_TOKENS,
 } from '../../src/config/config.runtime';
 import { DBInstance } from '../../src/db/instance';
 import { EmailSenderService } from '../../src/emailSender/email.sender.service';
@@ -124,6 +123,7 @@ export const getTestServices = (config: TestServicesConfig) => {
   const _twitter = new TwitterService(time, userRepo, {
     clientId: process.env.TWITTER_CLIENT_ID as string,
     clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
+    bearerToken: process.env.TWITTER_BEARER_TOKEN as string,
   });
 
   const testUser = testCredentials[0];
@@ -131,8 +131,7 @@ export const getTestServices = (config: TestServicesConfig) => {
 
   /** mocked mastodon */
   const _mastodon = new MastodonService(time, userRepo, {
-    MASTODON_ACCESS_TOKEN: MASTODON_ACCESS_TOKEN.value(),
-    MASTODON_SERVER,
+    accessTokens: JSON.parse(MASTODON_ACCESS_TOKENS.value()),
   });
   const mastodon = getMastodonMock(_mastodon, config.mastodon, testUser);
 
