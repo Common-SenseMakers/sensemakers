@@ -1,16 +1,6 @@
 import { mastodon } from 'masto';
 
-import { AccountProfile } from './types.profiles';
 import { AccountDetailsBase } from './types.user';
-
-export interface MastodonProfile {
-  id: string;
-  username: string;
-  displayName: string;
-  avatar: string;
-  mastodonServer: string;
-}
-export type MastodonAccountProfile = AccountProfile<MastodonProfile>;
 
 export interface MastodonAccountCredentials {
   server: string;

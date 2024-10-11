@@ -6,12 +6,14 @@ import {
 } from 'twitter-api-v2';
 
 import { PLATFORM } from '../../@shared/types/types.platforms';
-import { AccountProfileCreate } from '../../@shared/types/types.profiles';
+import {
+  AccountProfileCreate,
+  PlatformProfile,
+} from '../../@shared/types/types.profiles';
 import {
   TwitterAccountDetails,
   TwitterCredentials,
   TwitterGetContextParams,
-  TwitterProfile,
   TwitterSignupData,
 } from '../../@shared/types/types.twitter';
 import { logger } from '../../instances/logger';
@@ -237,7 +239,7 @@ export class TwitterServiceClient {
         read: credentials,
       },
     };
-    const twitterProfile: AccountProfileCreate<TwitterProfile> = {
+    const twitterProfile: AccountProfileCreate<PlatformProfile> = {
       platformId: PLATFORM.Twitter,
       user_id: user.id,
       profile: user,

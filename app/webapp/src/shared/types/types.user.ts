@@ -1,11 +1,9 @@
 import {
   BlueskyAccountDetails,
-  BlueskyProfile,
   BlueskySigninCredentials,
 } from './types.bluesky';
 import {
   MastodonAccountDetails,
-  MastodonProfile,
   MastodonSigninCredentials,
 } from './types.mastodon';
 import {
@@ -17,10 +15,9 @@ import { NotificationFreq } from './types.notifications';
 import { OrcidAccountDetails, OrcidProfile } from './types.orcid';
 import { PLATFORM } from './types.platforms';
 import { AppPostFull } from './types.posts';
-import { WithPlatformUserId } from './types.profiles';
+import { PlatformProfile, WithPlatformUserId } from './types.profiles';
 import {
   TwitterAccountDetails,
-  TwitterProfile,
   TwitterSigninCredentials,
 } from './types.twitter';
 
@@ -128,10 +125,10 @@ export interface AccountDetailsRead<P = any> {
 export interface AppUserRead extends UserWithId, UserWithSettings {
   profiles: {
     [PLATFORM.Orcid]?: AccountDetailsRead<OrcidProfile>[];
-    [PLATFORM.Twitter]?: AccountDetailsRead<TwitterProfile>[];
+    [PLATFORM.Twitter]?: AccountDetailsRead<PlatformProfile>[];
     [PLATFORM.Nanopub]?: AccountDetailsRead<NanopubProfile>[];
-    [PLATFORM.Mastodon]?: AccountDetailsRead<MastodonProfile>[];
-    [PLATFORM.Bluesky]?: AccountDetailsRead<BlueskyProfile>[];
+    [PLATFORM.Mastodon]?: AccountDetailsRead<PlatformProfile>[];
+    [PLATFORM.Bluesky]?: AccountDetailsRead<PlatformProfile>[];
   };
 }
 

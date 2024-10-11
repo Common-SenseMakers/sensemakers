@@ -27,6 +27,14 @@ export interface AccountProfile<P = any> {
   fetched?: FetchedDetails;
 }
 
+export interface PlatformProfile {
+  id: string;
+  username: string;
+  displayName?: string;
+  avatar?: string;
+  description?: string;
+}
+
 export type AccountProfileCreate<P = any> = Omit<AccountProfile<P>, 'id'>;
 export type AccountProfileBase<P = any> = Omit<
   AccountProfile<P>,

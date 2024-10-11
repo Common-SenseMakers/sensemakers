@@ -14,7 +14,6 @@ import {
   TwitterCredentials,
   TwitterDraft,
   TwitterGetContextParams,
-  TwitterProfile,
   TwitterSignupContext,
   TwitterSignupData,
   TwitterThread,
@@ -291,15 +290,16 @@ export const getTwitterMock = (
             },
           },
         };
-        const twitterProfile: AccountProfileCreate<TwitterProfile> = {
+        const twitterProfile: AccountProfileCreate = {
           platformId: PLATFORM.Twitter,
           user_id: currentUserCredentials.twitter.id,
           profile: {
             id: currentUserCredentials.twitter.id,
-            name: currentUserCredentials.twitter.username,
+            displayName: currentUserCredentials.twitter.username,
             username: currentUserCredentials.twitter.username,
-            profile_image_url:
+            avatar:
               'https://pbs.twimg.com/profile_images/1783977034038882304/RGn66lGT_normal.jpg',
+            description: 'test description',
           },
         };
         return {

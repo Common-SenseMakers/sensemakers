@@ -5,7 +5,6 @@ import {
   MastodonAccessTokenSignupData,
   MastodonAccountDetails,
   MastodonGetContextParams,
-  MastodonProfile,
   MastodonSignupContext,
 } from '../../../@shared/types/types.mastodon';
 import { PlatformPostPublish } from '../../../@shared/types/types.platform.posts';
@@ -1411,16 +1410,16 @@ export const getMastodonMock = (
             },
           },
         };
-        const profile: AccountProfileCreate<MastodonProfile> = {
+        const profile: AccountProfileCreate = {
           platformId: PLATFORM.Mastodon,
           user_id: currentMastodonCredentials.id,
           profile: {
             id: currentMastodonCredentials.id,
             displayName: 'placeholder', // currentUserCredentials.mastodon.username,
-            username: 'placeholder', //: currentUserCredentials.mastodon.username,
-            mastodonServer: 'mastodon.social',
+            username: 'placeholder@placeholder.com', //: currentUserCredentials.mastodon.username,
             avatar:
               'https://pbs.twimg.com/profile_images/1783977034038882304/RGn66lGT_normal.jpg',
+            description: 'placeholder',
           },
         };
         return {

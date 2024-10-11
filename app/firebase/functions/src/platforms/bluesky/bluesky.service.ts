@@ -9,7 +9,6 @@ import {
   BlueskyAccountDetails,
   BlueskyCredentials,
   BlueskyPost,
-  BlueskyProfile,
   BlueskySignupContext,
   BlueskySignupData,
   BlueskyThread,
@@ -32,6 +31,7 @@ import {
   GenericThread,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
+import { PlatformProfile } from '../../@shared/types/types.profiles';
 import {
   AccountProfileBase,
   AccountProfileCreate,
@@ -120,14 +120,14 @@ export class BlueskyService
       },
     };
 
-    const bskSimpleUser: BlueskyProfile = {
+    const bskSimpleUser: PlatformProfile = {
       id: bskFullUser.data.did,
       username: bskFullUser.data.handle,
       displayName: bskFullUser.data.displayName || bskFullUser.data.handle,
       avatar: bskFullUser.data.avatar || '',
     };
 
-    const profile: AccountProfileCreate<BlueskyProfile> = {
+    const profile: AccountProfileCreate<PlatformProfile> = {
       platformId: PLATFORM.Bluesky,
       user_id: bskSimpleUser.id,
       profile: bskSimpleUser,
@@ -149,7 +149,7 @@ export class BlueskyService
   public async getProfileByUsername(
     username: string,
     credentials?: BlueskyCredentials
-  ): Promise<AccountProfileBase<BlueskyProfile> | undefined> {
+  ): Promise<AccountProfileBase<PlatformProfile> | undefined> {
     try {
       if (!credentials) {
         throw new Error('Missing Bluesky user details');
@@ -444,7 +444,7 @@ export class BlueskyService
   public async getProfile(
     user_id: string,
     credentials: any
-  ): Promise<AccountProfileBase<BlueskyProfile> | undefined> {
+  ): Promise<AccountProfileBase<PlatformProfile> | undefined> {
     try {
       if (!credentials) {
         throw new Error('Missing Bluesky user details');
