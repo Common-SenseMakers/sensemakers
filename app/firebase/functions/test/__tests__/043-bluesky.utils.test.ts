@@ -123,7 +123,7 @@ describe('bluesky utility functions', () => {
       'Original post with a link: https://example.com/full-link'
     );
   });
-  it.only('parses Bluesky URI correctly', () => {
+  it('parses Bluesky URI correctly', () => {
     const uri = 'at://did:plc:example/app.bsky.feed.post/3j5sy9apqv2';
     const parsedURI = parseBlueskyURI(uri);
     expect(parsedURI).to.not.be.null;
