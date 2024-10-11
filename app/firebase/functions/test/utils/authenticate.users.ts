@@ -172,7 +172,7 @@ const authenticateMastodonForUser = async (
   user.accounts[PLATFORM.Mastodon] = [
     {
       signupDate: 0,
-      user_id: credentials.mastodon.id,
+      user_id: `https://${credentials.mastodon.mastodonServer}/@${credentials.mastodon.username}`,
       credentials: {
         read: {
           accessToken: credentials.mastodon.id,

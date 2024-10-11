@@ -124,14 +124,6 @@ export const cleanMastodonContent = (content: string): string => {
   return cleanedContent;
 };
 
-export const getMastodonUserId = (accountId: string, server: string) =>
-  `${accountId}:${server}`;
-
-export const parseMastodonUserId = (mastodonUserId: string) => {
-  const [accountId, server] = mastodonUserId.split(':');
-  return { accountId, server };
-};
-
 export const getGlobalMastodonUsername = (username: string, server: string) =>
   `${username}@${server}`;
 
@@ -145,7 +137,26 @@ export const parseMastodonGlobalUsername = (globalUsername: string) => {
   return { username, server };
 };
 
-export function parseMastodonURI(uri: string) {
+export function parseMastodonAccountURL(url: string) {
+  try {
+    if (!url.startsWith('https://')) {
+      throw new Error('Invalid URL: must start with "https://".');
+    }
+
+    const parts = url.split('/');
+
+    if (parts.length !== 4) {
+      throw new Error('Invalid URL: expected exactly 5 parts.');
+    }
+
+    const [, , server, localUsername] = parts;
+
+    return { server, localUsername: localUsername.split('@')[1] };
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+}
+export function parseMastodonPostURI(uri: string) {
   try {
     if (!uri.startsWith('https://')) {
       throw new Error('Invalid URI: must start with "https://".');

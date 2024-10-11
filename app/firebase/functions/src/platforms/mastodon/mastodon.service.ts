@@ -38,10 +38,9 @@ import {
   cleanMastodonContent,
   convertMastodonPostsToThreads,
   extractPrimaryThread,
-  getMastodonUserId,
+  parseMastodonAccountURL,
   parseMastodonGlobalUsername,
-  parseMastodonURI,
-  parseMastodonUserId,
+  parseMastodonPostURI,
 } from './mastodon.utils';
 
 const DEBUG = true;
@@ -162,12 +161,8 @@ export class MastodonService
       server: signupData.mastodonServer,
     };
 
-    const mastodonUserId = getMastodonUserId(
-      account.id,
-      signupData.mastodonServer
-    );
     const mastodon: MastodonAccountDetails = {
-      user_id: mastodonUserId,
+      user_id: account.url,
       signupDate: this.time.now(),
       credentials: {
         read: credentials,
@@ -189,7 +184,7 @@ export class MastodonService
     };
 
     const profile: AccountProfileBase<MastodonProfile> = {
-      user_id: mastodonUserId,
+      user_id: account.url,
       profile: mdProfile,
     };
 
@@ -205,8 +200,12 @@ export class MastodonService
     >
   ): Promise<FetchedResult<MastodonThread>> {
     if (DEBUG) logger.debug('fetch', { params, credentials }, DEBUG_PREFIX);
-    const { server, accountId } = parseMastodonUserId(user_id);
+    const { server, localUsername } = parseMastodonAccountURL(user_id);
     const client = this.getClient(server, credentials?.read);
+
+    const account = await client.v1.accounts.lookup({
+      acct: localUsername,
+    });
 
     const fetchParams: any = {
       limit: 40, // Default limit
@@ -215,16 +214,16 @@ export class MastodonService
     };
 
     if (params.since_id) {
-      fetchParams.minId = parseMastodonURI(params.since_id).postId;
+      fetchParams.minId = parseMastodonPostURI(params.since_id).postId;
     }
     if (params.until_id) {
-      fetchParams.maxId = parseMastodonURI(params.until_id).postId;
+      fetchParams.maxId = parseMastodonPostURI(params.until_id).postId;
     }
 
     if (DEBUG) logger.debug('fetch params', { fetchParams }, DEBUG_PREFIX);
 
     const paginator = client.v1.accounts
-      .$select(accountId)
+      .$select(account.id)
       .statuses.list(fetchParams);
 
     let allStatuses: MastodonPost[] = [];
@@ -246,13 +245,13 @@ export class MastodonService
 
       if (!newestId) newestId = sortedStatuses[0].uri;
       newestId =
-        sortedStatuses[0].id > parseMastodonURI(newestId).postId
+        sortedStatuses[0].id > parseMastodonPostURI(newestId).postId
           ? sortedStatuses[0].uri
           : newestId;
       if (!oldestId) oldestId = sortedStatuses[sortedStatuses.length - 1].uri;
       oldestId =
         sortedStatuses[sortedStatuses.length - 1].id <
-        parseMastodonURI(oldestId).postId
+        parseMastodonPostURI(oldestId).postId
           ? sortedStatuses[sortedStatuses.length - 1].uri
           : oldestId;
 
@@ -369,7 +368,7 @@ export class MastodonService
 
     const post = {
       post_id: status.uri,
-      user_id: getMastodonUserId(status.account.id, credentials.write.server),
+      user_id: status.account.url,
       timestampMs: new Date(status.createdAt).getTime(),
       post: status,
     };
@@ -408,7 +407,7 @@ export class MastodonService
       throw new Error('read credentials are not provided');
     }
 
-    const { server, postId } = parseMastodonURI(post_id);
+    const { server, postId } = parseMastodonPostURI(post_id);
     const client = this.getClient(server, credentials?.read);
 
     const context = await client.v1.statuses.$select(postId).context.fetch();
@@ -428,13 +427,15 @@ export class MastodonService
       .$select(rootStatus.id)
       .context.fetch();
 
-    const user_id = rootStatus.account.id;
-
-    const thread = this.constructThread(rootStatus, contextOfRoot, user_id);
+    const thread = this.constructThread(
+      rootStatus,
+      contextOfRoot,
+      rootStatus.account.id
+    );
 
     const platformPost = {
       post_id: thread.thread_id,
-      user_id: getMastodonUserId(thread.author.id, server),
+      user_id: thread.author.url,
       timestampMs: new Date(thread.posts[0].createdAt).getTime(),
       post: thread,
     };
@@ -476,7 +477,7 @@ export class MastodonService
         acct: username,
       });
       const profile: AccountProfileBase<MastodonProfile> = {
-        user_id: getMastodonUserId(mdProfile.id, server),
+        user_id: mdProfile.url,
         profile: {
           id: mdProfile.id,
           avatar: mdProfile.avatar,
@@ -495,10 +496,10 @@ export class MastodonService
     user_id: string,
     credentials?: MastodonAccountCredentials
   ): Promise<AccountProfileBase<MastodonProfile>> {
-    const { server, accountId } = parseMastodonUserId(user_id);
+    const { server, localUsername } = parseMastodonAccountURL(user_id);
     const client = this.getClient(server, credentials);
 
-    const mdProfile = await client.v1.accounts.$select(accountId).fetch();
+    const mdProfile = await client.v1.accounts.$select(localUsername).fetch();
 
     const profile: AccountProfileBase<MastodonProfile> = {
       user_id,
