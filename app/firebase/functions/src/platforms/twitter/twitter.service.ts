@@ -34,6 +34,7 @@ import {
 import {
   AccountProfileBase,
   FetchedDetails,
+  PlatformProfile,
 } from '../../@shared/types/types.profiles';
 import {
   AppTweet,
@@ -41,7 +42,6 @@ import {
   TwitterAccountDetails,
   TwitterCredentials,
   TwitterDraft,
-  TwitterProfile,
   TwitterSignupContext,
   TwitterSignupData,
   TwitterThread,
@@ -491,19 +491,20 @@ export class TwitterService
   public async getProfile(
     user_id: string,
     credentials: TwitterCredentials
-  ): Promise<AccountProfileBase<TwitterProfile>> {
+  ): Promise<AccountProfileBase<PlatformProfile>> {
     const { client } = await this.getClient(credentials, 'read');
 
     const profileParams: Partial<UsersV2Params> = {
-      'user.fields': ['profile_image_url', 'name', 'username'],
+      'user.fields': userFields,
     };
 
     const twitterProfile = await client.v2.user(user_id, profileParams);
-    const profile: TwitterProfile = {
+    const profile: PlatformProfile = {
       id: twitterProfile.data.id,
-      name: twitterProfile.data.name,
+      displayName: twitterProfile.data.name,
       username: twitterProfile.data.username,
-      profile_image_url: twitterProfile.data.profile_image_url,
+      avatar: twitterProfile.data.profile_image_url,
+      description: twitterProfile.data.description,
     };
 
     return { user_id, profile };
@@ -606,11 +607,11 @@ export class TwitterService
   async getProfileByUsername(
     username: string,
     credentials?: TwitterCredentials
-  ): Promise<AccountProfileBase<TwitterProfile> | undefined> {
+  ): Promise<AccountProfileBase<PlatformProfile> | undefined> {
     try {
       const { client } = await this.getClient(credentials, 'read');
       const userResponse = await client.v2.userByUsername(username, {
-        'user.fields': ['id', 'name', 'username', 'profile_image_url'],
+        'user.fields': userFields,
       });
 
       if (userResponse.data) {
@@ -618,9 +619,10 @@ export class TwitterService
           user_id: userResponse.data.id,
           profile: {
             id: userResponse.data.id,
-            name: userResponse.data.name,
+            displayName: userResponse.data.name,
             username: userResponse.data.username,
-            profile_image_url: userResponse.data.profile_image_url,
+            avatar: userResponse.data.profile_image_url,
+            description: userResponse.data.description,
           },
         };
       }

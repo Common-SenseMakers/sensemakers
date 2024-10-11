@@ -6,7 +6,6 @@ import {
 } from 'twitter-api-v2';
 
 import { PlatformPost } from './types.platform.posts';
-import { AccountProfile } from './types.profiles';
 import { AccountCredentials, AccountDetailsBase } from './types.user';
 
 export type TwitterGetContextParams = {
@@ -44,17 +43,10 @@ export interface TwitterSigninCredentials {
   type: 'read' | 'write';
 }
 
-export type TwitterProfile = Pick<
-  UserV2,
-  'profile_image_url' | 'name' | 'username' | 'id'
->;
-
 export interface TwitterAccountDetails
   extends AccountDetailsBase<
     AccountCredentials<TwitterCredentials, TwitterCredentials>
   > {}
-
-export type TwitterAccountProfile = AccountProfile<TwitterProfile>;
 
 export type TweetRead = TweetV2PostTweetResult['data'];
 

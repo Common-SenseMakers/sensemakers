@@ -3,7 +3,6 @@ import { anything, instance, spy, when } from 'ts-mockito';
 import {
   BlueskyAccountDetails,
   BlueskyGetContextParams,
-  BlueskyProfile,
   BlueskySignupContext,
   BlueskySignupData,
 } from '../../../@shared/types/types.bluesky';
@@ -2474,7 +2473,7 @@ export const getBlueskyMock = (
             },
           },
         };
-        const profile: AccountProfileCreate<BlueskyProfile> = {
+        const profile: AccountProfileCreate = {
           platformId: PLATFORM.Bluesky,
           user_id: 'did:plc:6z5botgrc5vekq7j26xnvawq',
           profile: {
@@ -2483,6 +2482,7 @@ export const getBlueskyMock = (
             displayName: 'Wesley Finck',
             avatar:
               'https://media.cosocial.ca/accounts/avatars/111/971/425/782/516/559/original/963c30efd081957e.jpeg',
+            description: 'I am a bot',
           },
         };
 

@@ -9,7 +9,7 @@ import {
   AppBskyRichtextFacet,
 } from '@atproto/api';
 
-import { AccountProfile } from './types.profiles';
+import { PlatformProfile } from './types.profiles';
 import { AccountDetailsBase } from './types.user';
 
 export interface BlueskySigninCredentials {
@@ -32,14 +32,6 @@ export interface BlueskyAccountCredentials {
 export type BlueskyAccountDetails =
   AccountDetailsBase<BlueskyAccountCredentials>;
 
-export interface BlueskyProfile {
-  id: string;
-  username: string;
-  displayName?: string;
-  avatar?: string;
-}
-export type BlueskyAccountProfile = AccountProfile<BlueskyProfile>;
-
 export interface BlueskyGetContextParams {
   callback_url: string;
   type: 'read' | 'write';
@@ -55,7 +47,7 @@ export type BlueskySignupData = {
 export interface BlueskyThread {
   thread_id: string;
   posts: BlueskyPost[];
-  author: BlueskyProfile;
+  author: PlatformProfile;
 }
 
 export interface QuotedBlueskyPost {
