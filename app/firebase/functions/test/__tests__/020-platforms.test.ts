@@ -15,6 +15,7 @@ import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
 import { BlueskyService } from '../../src/platforms/bluesky/bluesky.service';
 import { MastodonService } from '../../src/platforms/mastodon/mastodon.service';
+import { parseMastodonGlobalUsername } from '../../src/platforms/mastodon/mastodon.utils';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
@@ -69,8 +70,11 @@ describe('02-platforms', () => {
         (u) =>
           UsersHelper.getAccount(u, PLATFORM.Twitter, testUser.twitter.id) !==
             undefined &&
-          UsersHelper.getAccount(u, PLATFORM.Mastodon, testUser.mastodon.id) !==
-            undefined &&
+          UsersHelper.getAccount(
+            u,
+            PLATFORM.Mastodon,
+            `https://${testUser.mastodon.mastodonServer}/@${testUser.mastodon.username}`
+          ) !== undefined &&
           UsersHelper.getAccount(u, PLATFORM.Bluesky, testUser.bluesky.id) !==
             undefined
       );
@@ -125,34 +129,15 @@ describe('02-platforms', () => {
         throw new Error('Missing TWITTER_BEARER_TOKEN');
       }
 
-      const result = await twitterService.getProfileByUsername(username);
+      const result = (await twitterService.getProfileByUsername(username))
+        ?.profile;
 
       expect(result).to.not.be.null;
       if (result) {
         expect(result.id).to.be.a('string');
         expect(result.username).to.equal(username);
-        expect(result.name).to.be.a('string');
-        expect(result.profile_image_url).to.be.a('string');
-      }
-    });
-    it('gets account by username', async () => {
-      const twitterService = services.platforms.get(
-        PLATFORM.Twitter
-      ) as TwitterService;
-      const username = 'wesleyfinck';
-      const bearerToken = process.env.TWITTER_BEARER_TOKEN;
-      if (!bearerToken) {
-        throw new Error('Missing TWITTER_BEARER_TOKEN');
-      }
-
-      const result = await twitterService.getProfileByUsername(username);
-
-      expect(result).to.not.be.null;
-      if (result) {
-        expect(result.id).to.be.a('string');
-        expect(result.username).to.equal(username);
-        expect(result.name).to.be.a('string');
-        expect(result.profile_image_url).to.be.a('string');
+        expect(result.displayName).to.be.a('string');
+        expect(result.avatar).to.be.a('string');
       }
     });
   });
@@ -262,7 +247,7 @@ describe('02-platforms', () => {
       const mastodonService = services.platforms.get(PLATFORM.Mastodon);
       const fetchParams: PlatformFetchParams = {
         expectedAmount: 5,
-        until_id: '112639305281497968',
+        until_id: `https://cosocial.ca/users/weswalla/statuses/112639305281497968`,
       };
 
       const result = await services.db.run((manager) =>
@@ -281,8 +266,7 @@ describe('02-platforms', () => {
 
     it('gets account by username', async () => {
       // https://fediscience.org/@petergleick
-      const username = 'petergleick';
-      const server = 'fediscience.org';
+      const username = 'petergleick@fediscience.org';
 
       const accessToken = process.env.MASTODON_ACCESS_TOKEN;
       if (!accessToken) {
@@ -293,11 +277,12 @@ describe('02-platforms', () => {
         PLATFORM.Mastodon
       ) as MastodonService;
 
-      const result = await mastodonService.getAccountByUsername(
-        username,
-        server,
-        { accessToken }
-      );
+      const result = (
+        await mastodonService.getProfileByUsername(username, {
+          accessToken,
+          server: parseMastodonGlobalUsername(username).server,
+        })
+      ).profile;
 
       expect(result).to.not.be.null;
       if (result) {
@@ -305,7 +290,6 @@ describe('02-platforms', () => {
         expect(result.username).to.equal(username);
         expect(result.displayName).to.be.a('string');
         expect(result.avatar).to.be.a('string');
-        expect(result.mastodonServer).to.equal(server);
       }
     });
   });
@@ -346,7 +330,12 @@ describe('02-platforms', () => {
         password: blueskyAppPassword,
       });
 
-      const result = await blueskyService.getAccountByUsername(username, agent);
+      const result = (
+        await blueskyService.getProfileByUsername(username, {
+          appPassword: blueskyAppPassword,
+          username: blueskyUsername,
+        })
+      )?.profile;
 
       expect(result).to.not.be.null;
       if (result) {
