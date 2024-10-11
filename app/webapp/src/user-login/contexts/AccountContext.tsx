@@ -8,8 +8,6 @@ import {
 } from 'react';
 
 import { _appFetch } from '../../api/app.fetch';
-import { BlueskyProfile } from '../../shared/types/types.bluesky';
-import { MastodonProfile } from '../../shared/types/types.mastodon';
 import { NanopubProfile } from '../../shared/types/types.nanopubs';
 import { NotificationFreq } from '../../shared/types/types.notifications';
 import { OrcidProfile } from '../../shared/types/types.orcid';
@@ -19,7 +17,7 @@ import {
   PLATFORM,
   PUBLISHABLE_PLATFORM,
 } from '../../shared/types/types.platforms';
-import { TwitterProfile } from '../../shared/types/types.twitter';
+import { PlatformProfile } from '../../shared/types/types.profiles';
 import {
   AppUserRead,
   AutopostOption,
@@ -69,10 +67,10 @@ const AccountContextValue = createContext<AccountContextType | undefined>(
 export interface ConnectedUser extends Omit<AppUserRead, 'profiles'> {
   profiles?: {
     [PLATFORM.Orcid]?: OrcidProfile;
-    [PLATFORM.Twitter]?: TwitterProfile;
+    [PLATFORM.Twitter]?: PlatformProfile;
     [PLATFORM.Nanopub]?: NanopubProfile;
-    [PLATFORM.Mastodon]?: MastodonProfile;
-    [PLATFORM.Bluesky]?: BlueskyProfile;
+    [PLATFORM.Mastodon]?: PlatformProfile;
+    [PLATFORM.Bluesky]?: PlatformProfile;
   };
 }
 

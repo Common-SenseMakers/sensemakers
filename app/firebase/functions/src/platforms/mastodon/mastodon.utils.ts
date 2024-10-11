@@ -137,25 +137,26 @@ export const parseMastodonGlobalUsername = (globalUsername: string) => {
   return { localUsername: username, server };
 };
 
-export function parseMastodonAccountURL(url: string) {
+export function parseMastodonAccountURI(uri: string) {
   try {
-    if (!url.startsWith('https://')) {
+    if (!uri.startsWith('https://')) {
       throw new Error('Invalid URL: must start with "https://".');
     }
 
-    const parts = url.split('/');
+    const parts = uri.split('/');
 
-    if (parts.length !== 4) {
+    if (parts.length !== 5) {
       throw new Error('Invalid URL: expected exactly 5 parts.');
     }
 
-    const [, , server, localUsername] = parts;
+    const [, , server, , localUsername] = parts;
 
-    return { server, localUsername: localUsername.split('@')[1] };
+    return { server, localUsername };
   } catch (error: any) {
     throw new Error(error.message);
   }
 }
+
 export function parseMastodonPostURI(uri: string) {
   try {
     if (!uri.startsWith('https://')) {

@@ -43,7 +43,7 @@ export const ConnectSocialsPage = () => {
           disabled={!connectTwitter}
           icon={
             twitterProfile ? (
-              <PlatformAvatar imageUrl={twitterProfile?.profile_image_url} />
+              <PlatformAvatar imageUrl={twitterProfile?.avatar} />
             ) : (
               <TwitterIcon size={40} color="black"></TwitterIcon>
             )
@@ -69,11 +69,7 @@ export const ConnectSocialsPage = () => {
           platformName={'Mastodon'}
           onButtonClicked={() => navigate(AbsoluteRoutes.ConnectMastodon)}
           buttonText={mastodonProfile ? '' : 'connect'}
-          username={
-            mastodonProfile
-              ? `@${mastodonProfile.username}@${mastodonProfile.mastodonServer}`
-              : ''
-          }
+          username={mastodonProfile?.username || ''}
           connected={!!mastodonProfile}
         />
 

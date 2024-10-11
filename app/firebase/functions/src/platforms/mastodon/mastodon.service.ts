@@ -41,7 +41,7 @@ import {
   convertMastodonPostsToThreads,
   extractPrimaryThread,
   getGlobalMastodonUsername,
-  parseMastodonAccountURL,
+  parseMastodonAccountURI,
   parseMastodonGlobalUsername,
   parseMastodonPostURI,
 } from './mastodon.utils';
@@ -206,7 +206,7 @@ export class MastodonService
     >
   ): Promise<FetchedResult<MastodonThread>> {
     if (DEBUG) logger.debug('fetch', { params, credentials }, DEBUG_PREFIX);
-    const { server, localUsername } = parseMastodonAccountURL(user_id);
+    const { server, localUsername } = parseMastodonAccountURI(user_id);
     const client = this.getClient(server, credentials?.read);
 
     const account = await client.v1.accounts.lookup({
@@ -502,7 +502,7 @@ export class MastodonService
     user_id: string,
     credentials?: MastodonAccountCredentials
   ): Promise<AccountProfileBase<PlatformProfile>> {
-    const { server, localUsername } = parseMastodonAccountURL(user_id);
+    const { server, localUsername } = parseMastodonAccountURI(user_id);
     const client = this.getClient(server, credentials);
 
     const mdProfile = await client.v1.accounts.$select(localUsername).fetch();

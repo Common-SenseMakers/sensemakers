@@ -20,3 +20,12 @@ export const getUsernameTag = (platformId: PLATFORM) => {
 export const generateToken = () => {
   return randomBytes(16).toString('hex'); // generates a 32-character hex string
 };
+
+// remove unused characters from a string to be used as key in firestore
+export function encodeId(input: string): string {
+  return encodeURIComponent(input);
+}
+// decode a string encoded with encodeId
+export function decodeId(encoded: string): string {
+  return decodeURIComponent(encoded);
+}

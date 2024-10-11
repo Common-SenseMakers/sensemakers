@@ -294,7 +294,7 @@ export const UserSettingsPage = () => {
         <PlatformSection
           icon={
             twitterProfile ? (
-              <PlatformAvatar imageUrl={twitterProfile?.profile_image_url} />
+              <PlatformAvatar imageUrl={twitterProfile?.avatar} />
             ) : (
               <TwitterIcon size={40} color="black"></TwitterIcon>
             )
@@ -322,11 +322,7 @@ export const UserSettingsPage = () => {
             });
           }}
           buttonText={needConnectMastodon ? 'connect' : ''}
-          username={
-            mastodonProfile
-              ? `@${mastodonProfile.username}@${mastodonProfile.mastodonServer}`
-              : '- not connected -'
-          }
+          username={mastodonProfile?.username || ''}
           connected={mastodonProfile !== undefined}></PlatformSection>
 
         <PlatformSection

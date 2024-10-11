@@ -11,7 +11,7 @@ import { I18Keys } from '../i18n/i18n';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID, PatternProps } from '../semantics/patterns/patterns';
 import { AppPostReviewStatus } from '../shared/types/types.posts';
-import { TwitterProfile } from '../shared/types/types.twitter';
+import { PlatformProfile } from '../shared/types/types.profiles';
 import { AppButton } from '../ui-components';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
@@ -29,7 +29,7 @@ import { concatenateThread, hideSemanticsHelper } from './posts.helper';
 const DEBUG = false;
 
 /** extract the postId from the route and pass it to a PostContext */
-export const PostView = (props: { profile?: TwitterProfile }) => {
+export const PostView = (props: { profile?: PlatformProfile }) => {
   const appFetch = useAppFetch();
 
   // shared persisted state with PostingPage.tsx
