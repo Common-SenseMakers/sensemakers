@@ -101,7 +101,7 @@ const DEBUG = true;
 
           const author_user_id = (() => {
             if (originMirror.platformId === PLATFORM.Mastodon) {
-              return `${originMirror.posted.post.author.uri}`;
+              return `${originMirror.posted.post.author.url}`;
             }
             return originMirror.posted.user_id;
           })();
