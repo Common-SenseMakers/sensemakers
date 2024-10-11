@@ -134,7 +134,7 @@ export const parseMastodonGlobalUsername = (globalUsername: string) => {
       `Invalid Mastodon unique username: ${globalUsername}. Expected format: username@server.`
     );
   }
-  return { username, server };
+  return { localUsername: username, server };
 };
 
 export function parseMastodonAccountURL(url: string) {
