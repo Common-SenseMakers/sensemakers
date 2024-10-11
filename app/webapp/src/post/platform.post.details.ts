@@ -63,56 +63,40 @@ export const getPlatformPostDetails = (
     return '';
   })();
 
-  const url = (() => {
+  const { url, authorName, authorAvatarUrl } = (() => {
     if (platformPost && platformPost.posted) {
       if (platformPost.platformId === PLATFORM.Twitter) {
         const twitterThread = platformPost.posted.post as TwitterThread;
-        return `https://x.com/${twitterThread.author.username}/status/${platformPost.posted.post_id}`;
+        return {
+          url: `https://x.com/${twitterThread.author.username}/status/${platformPost.posted.post_id}`,
+          authorName: twitterThread.author.name,
+          authorAvatarUrl: twitterThread.author.profile_image_url,
+        };
       }
 
       if (platformPost.platformId === PLATFORM.Mastodon) {
         const mastodonThread = platformPost.posted.post as MastodonThread;
-        return mastodonThread.posts[0].url || mastodonThread.posts[0].uri;
+        return {
+          url: mastodonThread.posts[0].url || mastodonThread.posts[0].uri,
+          authorName: mastodonThread.author.displayName,
+          authorAvatarUrl: mastodonThread.author.avatar,
+        };
       }
 
       if (platformPost.platformId === PLATFORM.Bluesky) {
         const blueskyThread = platformPost.posted.post as BlueskyThread;
-        return `https://bsky.app/profile/${blueskyThread.author.username}/post/${parseBlueskyURI(platformPost.posted.post_id).rkey}`;
+        return {
+          url: `https://bsky.app/profile/${blueskyThread.author.username}/post/${parseBlueskyURI(platformPost.posted.post_id).rkey}`,
+          authorName: blueskyThread.author.displayName,
+          authorAvatarUrl: blueskyThread.author.avatar,
+        };
       }
     }
 
-    return '';
+    return { url: '', authorName: '', authorAvatarUrl: '' };
   })();
 
   const timestampMs = platformPost.posted?.timestampMs;
-
-  const authorName = (() => {
-    if (platformPost && platformPost.posted) {
-      if (platformPost.platformId === PLATFORM.Twitter) {
-        return platformPost.posted?.author.name;
-      }
-
-      if (platformPost.platformId === PLATFORM.Mastodon) {
-        return `mastodon placeholder`;
-      }
-    }
-
-    return '';
-  })();
-
-  const authorAvatarUrl = (() => {
-    if (platformPost && platformPost.posted) {
-      if (platformPost.platformId === PLATFORM.Twitter) {
-        return platformPost.posted?.author.profile_image_url;
-      }
-
-      if (platformPost.platformId === PLATFORM.Mastodon) {
-        return `mastodon placeholder`;
-      }
-    }
-
-    return '';
-  })();
 
   return { label, url, timestampMs, authorName, authorAvatarUrl };
 };

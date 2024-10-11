@@ -134,7 +134,11 @@ export const parseMastodonGlobalUsername = (globalUsername: string) => {
       `Invalid Mastodon unique username: ${globalUsername}. Expected format: username@server.`
     );
   }
-  return { localUsername: username, server };
+  return {
+    localUsername: username,
+    server,
+    accountURL: `https://${server}/@${username}`,
+  };
 };
 
 export function parseMastodonAccountURI(uri: string) {
@@ -145,13 +149,20 @@ export function parseMastodonAccountURI(uri: string) {
 
     const parts = uri.split('/');
 
-    if (parts.length !== 5) {
-      throw new Error('Invalid URL: expected exactly 5 parts.');
+    if (parts.length !== 4) {
+      throw new Error('Invalid URL: expected exactly 4 parts.');
     }
 
-    const [, , server, , localUsername] = parts;
+    const [, , server, localUsername] = parts;
 
-    return { server, localUsername };
+    return {
+      server,
+      localUsername: localUsername.split('@')[1],
+      globalUsername: getGlobalMastodonUsername(
+        localUsername.split('@')[1],
+        server
+      ),
+    };
   } catch (error: any) {
     throw new Error(error.message);
   }

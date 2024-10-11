@@ -335,10 +335,11 @@ export class MastodonService
     }
 
     const thread = platformPost.posted.post;
+    const { globalUsername } = parseMastodonAccountURI(thread.author.url);
     const genericAuthor: GenericAuthor = {
       platformId: PLATFORM.Mastodon,
-      id: thread.author.id, // TODO: make sure this is a unique id
-      username: thread.author.username,
+      id: thread.author.id,
+      username: globalUsername,
       name: thread.author.displayName,
       avatarUrl: thread.author.avatar,
     };
