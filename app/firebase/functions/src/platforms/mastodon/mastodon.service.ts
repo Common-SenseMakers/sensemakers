@@ -164,7 +164,7 @@ export class MastodonService
     };
 
     const mastodon: MastodonAccountDetails = {
-      user_id: account.url,
+      user_id: parseMastodonAccountURI(account.url).globalUsername,
       signupDate: this.time.now(),
       credentials: {
         read: credentials,
@@ -189,7 +189,7 @@ export class MastodonService
     };
 
     const profile: AccountProfileBase<PlatformProfile> = {
-      user_id: account.url,
+      user_id: parseMastodonAccountURI(account.url).globalUsername,
       profile: mdProfile,
     };
 
@@ -205,7 +205,7 @@ export class MastodonService
     >
   ): Promise<FetchedResult<MastodonThread>> {
     if (DEBUG) logger.debug('fetch', { params, credentials }, DEBUG_PREFIX);
-    const { server, localUsername } = parseMastodonAccountURI(user_id);
+    const { server, localUsername } = parseMastodonGlobalUsername(user_id);
     const client = this.getClient(server, credentials?.read);
 
     const account = await client.v1.accounts.lookup({
@@ -374,7 +374,7 @@ export class MastodonService
 
     const post = {
       post_id: status.uri,
-      user_id: status.account.url,
+      user_id: parseMastodonAccountURI(status.account.url).globalUsername,
       timestampMs: new Date(status.createdAt).getTime(),
       post: status,
     };
@@ -441,7 +441,7 @@ export class MastodonService
 
     const platformPost = {
       post_id: thread.thread_id,
-      user_id: thread.author.url,
+      user_id: parseMastodonAccountURI(thread.author.url).globalUsername,
       timestampMs: new Date(thread.posts[0].createdAt).getTime(),
       post: thread,
     };
@@ -484,7 +484,7 @@ export class MastodonService
       });
 
       const profile: AccountProfileBase<PlatformProfile> = {
-        user_id: mdProfile.url,
+        user_id: parseMastodonAccountURI(mdProfile.url).globalUsername,
         profile: {
           id: mdProfile.id,
           avatar: mdProfile.avatar,
@@ -503,7 +503,7 @@ export class MastodonService
     user_id: string,
     credentials?: MastodonAccountCredentials
   ): Promise<AccountProfileBase<PlatformProfile>> {
-    const { server, localUsername } = parseMastodonAccountURI(user_id);
+    const { server, localUsername } = parseMastodonGlobalUsername(user_id);
     const client = this.getClient(server, credentials);
 
     const mdProfile = await client.v1.accounts.lookup({
