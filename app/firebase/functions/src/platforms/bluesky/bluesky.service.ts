@@ -151,9 +151,6 @@ export class BlueskyService
     credentials?: BlueskyCredentials
   ): Promise<AccountProfileBase<PlatformProfile> | undefined> {
     try {
-      if (!credentials) {
-        throw new Error('Missing Bluesky user details');
-      }
       const agent = await this.getClient(credentials);
       const profile = await agent.getProfile({ actor: username });
 
@@ -177,16 +174,12 @@ export class BlueskyService
   public async fetch(
     user_id: string,
     params: PlatformFetchParams,
-    credentials: BlueskyAccountCredentials
+    credentials?: BlueskyAccountCredentials
   ): Promise<FetchedResult<BlueskyThread>> {
     if (DEBUG)
       logger.debug('fetch', { user_id, params, credentials }, DEBUG_PREFIX);
 
-    if (!credentials.read) {
-      throw new Error('Missing Bluesky user details');
-    }
-
-    const agent = await this.getClient(credentials.read);
+    const agent = await this.getClient(credentials?.read);
 
     let allPosts: BlueskyPost[] = [];
     let newestId: string | undefined;
@@ -194,10 +187,10 @@ export class BlueskyService
     let cursor: string | undefined;
 
     const sincePost = params.since_id
-      ? await this.getPost(params.since_id, credentials.read)
+      ? await this.getPost(params.since_id, credentials?.read)
       : undefined;
     const untilPost = params.until_id
-      ? await this.getPost(params.until_id, credentials.read)
+      ? await this.getPost(params.until_id, credentials?.read)
       : undefined;
 
     // If until_id is provided, use its createdAt as the initial cursor
@@ -318,7 +311,7 @@ export class BlueskyService
 
   private async getPost(
     postId: string,
-    credentials: BlueskyCredentials
+    credentials?: BlueskyCredentials
   ): Promise<
     { uri: string; cid: string; value: AppBskyFeedPost.Record } | undefined
   > {
