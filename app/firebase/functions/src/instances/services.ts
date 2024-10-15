@@ -1,42 +1,36 @@
 import { Firestore } from 'firebase-admin/firestore';
 
-import { PLATFORM } from '../@shared/types/types.user';
+import { OurTokenConfig } from '../@shared/types/types.fetch';
+import { PLATFORM } from '../@shared/types/types.platforms';
 import { ActivityRepository } from '../activity/activity.repository';
 import { ActivityService } from '../activity/activity.service';
-import {
-  EMAIL_CLIENT_SECRET,
-  FUNCTIONS_PY_URL,
-  IS_EMULATOR,
-  NANOPUBS_PUBLISH_SERVERS,
-  NP_PUBLISH_RSA_PRIVATE_KEY,
-  NP_PUBLISH_RSA_PUBLIC_KEY,
-  OUR_EXPIRES_IN,
-  OUR_TOKEN_SECRET,
-  TEST_USER_ACCOUNTS,
-  TWITTER_CLIENT_ID,
-  TWITTER_CLIENT_SECRET,
-  USE_REAL_BLUESKY,
-  USE_REAL_EMAIL,
-  USE_REAL_MASTODON,
-  USE_REAL_NANOPUB,
-  USE_REAL_PARSER,
-  USE_REAL_TWITTERX,
-} from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
-import { EmailSenderService } from '../emailSender/email.sender.service';
+import {
+  EmailSenderService,
+  EmailServiceConfig,
+} from '../emailSender/email.sender.service';
 import { getEmailSenderMock } from '../emailSender/email.sender.service.mock';
 import { FeedService } from '../feed/feed.service';
 import { NotificationService } from '../notifications/notification.service';
 import { NotificationsRepository } from '../notifications/notifications.repository';
 import { getParserMock } from '../parser/mock/parser.service.mock';
 import { ParserService } from '../parser/parser.service';
-import { BlueskyService } from '../platforms/bluesky/bluesky.service';
+import {
+  BlueskyService,
+  BlueskyServiceConfig,
+} from '../platforms/bluesky/bluesky.service';
 import { getBlueskyMock } from '../platforms/bluesky/mock/bluesky.service.mock';
-import { MastodonService } from '../platforms/mastodon/mastodon.service';
+import {
+  MastodonService,
+  MastodonServiceConfig,
+} from '../platforms/mastodon/mastodon.service';
 import { getMastodonMock } from '../platforms/mastodon/mock/mastodon.service.mock';
 import { getTestCredentials } from '../platforms/mock/test.users';
 import { getNanopubMock } from '../platforms/nanopub/mock/nanopub.service.mock';
-import { NanopubService } from '../platforms/nanopub/nanopub.service';
+import {
+  NanopubService,
+  NanopubServiceConfig,
+} from '../platforms/nanopub/nanopub.service';
 // import { ParserService } from '../parser/parser.service';
 import { OrcidService } from '../platforms/orcid/orcid.service';
 import {
@@ -45,11 +39,15 @@ import {
   PlatformsService,
 } from '../platforms/platforms.service';
 import { getTwitterMock } from '../platforms/twitter/mock/twitter.service.mock';
-import { TwitterService } from '../platforms/twitter/twitter.service';
+import {
+  TwitterApiCredentials,
+  TwitterService,
+} from '../platforms/twitter/twitter.service';
 import { PlatformPostsRepository } from '../posts/platform.posts.repository';
 import { PostsManager } from '../posts/posts.manager';
 import { PostsProcessing } from '../posts/posts.processing';
 import { PostsRepository } from '../posts/posts.repository';
+import { ProfilesRepository } from '../profiles/profiles.repository';
 import { TriplesRepository } from '../semantics/triples.repository';
 import { TimeService } from '../time/time.service';
 import { UsersRepository } from '../users/users.repository';
@@ -70,11 +68,35 @@ export interface Services {
   email: EmailSenderService;
 }
 
-export const createServices = (firestore: Firestore) => {
+export interface ServicesConfig {
+  testCredentials: string;
+  twitter: TwitterApiCredentials;
+  nanopub: NanopubServiceConfig;
+  mastodon: MastodonServiceConfig;
+  bluesky: BlueskyServiceConfig;
+  email: EmailServiceConfig;
+  parser: string;
+  our: OurTokenConfig;
+  isEmulator: boolean;
+  mock: {
+    USE_REAL_PARSER: boolean;
+    USE_REAL_TWITTER: boolean;
+    USE_REAL_MASTODON: boolean;
+    USE_REAL_BLUESKY: boolean;
+    USE_REAL_NANOPUB: boolean;
+    USE_REAL_EMAIL: boolean;
+  };
+}
+
+export const createServices = (
+  firestore: Firestore,
+  config: ServicesConfig
+) => {
   if (DEBUG) logger.info('Creating services');
 
   const db = new DBInstance(firestore);
-  const userRepo = new UsersRepository(db);
+  const profilesRepo = new ProfilesRepository(db);
+  const userRepo = new UsersRepository(db, profilesRepo);
   const postsRepo = new PostsRepository(db);
   const triplesRepo = new TriplesRepository(db);
   const platformPostsRepo = new PlatformPostsRepository(db);
@@ -86,46 +108,37 @@ export const createServices = (firestore: Firestore) => {
   const time = new TimeService();
 
   const orcid = new OrcidService();
-  const _twitter = new TwitterService(time, userRepo, {
-    clientId: TWITTER_CLIENT_ID.value(),
-    clientSecret: TWITTER_CLIENT_SECRET.value(),
-  });
+  const _twitter = new TwitterService(time, userRepo, config.twitter);
 
-  const testCredentials = getTestCredentials(TEST_USER_ACCOUNTS.value());
+  const testCredentials = getTestCredentials(config.testCredentials);
   const testUser = testCredentials && testCredentials[0];
 
   const twitter = getTwitterMock(
     _twitter,
-    USE_REAL_TWITTERX.value()
+    config.mock.USE_REAL_TWITTER
       ? undefined
       : { signup: true, fetch: true, publish: true, get: true },
     testUser
   );
 
-  const _nanopub = new NanopubService(time, {
-    servers: JSON.parse(NANOPUBS_PUBLISH_SERVERS.value()),
-    rsaKeys: {
-      privateKey: NP_PUBLISH_RSA_PRIVATE_KEY.value(),
-      publicKey: NP_PUBLISH_RSA_PUBLIC_KEY.value(),
-    },
-  });
+  const _nanopub = new NanopubService(time, config.nanopub);
   const nanopub = getNanopubMock(
     _nanopub,
-    USE_REAL_NANOPUB.value() ? 'real' : 'mock-publish'
+    config.mock.USE_REAL_NANOPUB ? 'real' : 'mock-publish'
   );
 
-  const _mastodon = new MastodonService(time, userRepo);
+  const _mastodon = new MastodonService(time, userRepo, config.mastodon);
   const mastodon = getMastodonMock(
     _mastodon,
-    USE_REAL_MASTODON.value()
+    config.mock.USE_REAL_MASTODON
       ? undefined
       : { signup: true, fetch: true, publish: true, get: true },
     testUser
   );
-  const _bluesky = new BlueskyService(time, userRepo);
+  const _bluesky = new BlueskyService(time, userRepo, config.bluesky);
   const bluesky = getBlueskyMock(
     _bluesky,
-    USE_REAL_BLUESKY.value()
+    config.mock.USE_REAL_BLUESKY
       ? undefined
       : { signup: true, fetch: true, publish: true, get: true },
     testUser
@@ -145,26 +158,23 @@ export const createServices = (firestore: Firestore) => {
   platformsMap.set(PLATFORM.Bluesky, bluesky);
 
   /** email sender service */
-  const _email = new EmailSenderService({
-    apiKey: EMAIL_CLIENT_SECRET.value(),
-  });
+  const _email = new EmailSenderService(config.email);
 
   const { instance: email } = getEmailSenderMock(
     _email,
-    USE_REAL_EMAIL.value() ? 'real' : 'mock'
+    config.mock.USE_REAL_EMAIL ? 'real' : 'mock'
   );
 
   /** users service */
   const usersService = new UsersService(
     db,
     userRepo,
+    profilesRepo,
     identityPlatforms,
+    platformsMap,
     time,
     email,
-    {
-      tokenSecret: OUR_TOKEN_SECRET.value(),
-      expiresIn: OUR_EXPIRES_IN,
-    }
+    config.our
   );
 
   // trigger magic init
@@ -177,10 +187,10 @@ export const createServices = (firestore: Firestore) => {
   );
 
   /** parser service */
-  const _parser = new ParserService(FUNCTIONS_PY_URL.value());
+  const _parser = new ParserService(config.parser);
   const parser = getParserMock(
     _parser,
-    USE_REAL_PARSER.value() ? 'real' : 'mock'
+    config.mock.USE_REAL_PARSER ? 'real' : 'mock'
   );
 
   /** posts service */
@@ -215,7 +225,7 @@ export const createServices = (firestore: Firestore) => {
     activityRepo,
     userRepo,
     email,
-    !IS_EMULATOR
+    !config.isEmulator
   );
 
   /** feed */
@@ -236,12 +246,12 @@ export const createServices = (firestore: Firestore) => {
 
   if (DEBUG) {
     logger.debug('services', {
-      USE_REAL_PARSER: USE_REAL_PARSER.value(),
-      USE_REAL_TWITTER: USE_REAL_TWITTERX.value(),
-      USE_REAL_MASTODON: USE_REAL_MASTODON.value(),
-      USE_REAL_BLUESKY: USE_REAL_BLUESKY.value(),
-      USE_REAL_NANOPUB: USE_REAL_NANOPUB.value(),
-      USE_REAL_EMAIL: USE_REAL_EMAIL.value(),
+      USE_REAL_PARSER: config.mock.USE_REAL_PARSER,
+      USE_REAL_TWITTER: config.mock.USE_REAL_TWITTER,
+      USE_REAL_MASTODON: config.mock.USE_REAL_MASTODON,
+      USE_REAL_BLUESKY: config.mock.USE_REAL_BLUESKY,
+      USE_REAL_NANOPUB: config.mock.USE_REAL_NANOPUB,
+      USE_REAL_EMAIL: config.mock.USE_REAL_EMAIL,
     });
   }
   return services;

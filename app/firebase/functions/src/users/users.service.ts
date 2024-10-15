@@ -7,10 +7,15 @@ import {
 } from '../@shared/types/types.fetch';
 import {
   ALL_IDENTITY_PLATFORMS,
+  IDENTITY_PLATFORM,
+  PLATFORM,
+} from '../@shared/types/types.platforms';
+import { AccountProfileCreate } from '../@shared/types/types.profiles';
+import {
+  AccountCredentials,
   AccountDetailsRead,
   AppUserRead,
   EmailDetails,
-  PLATFORM,
   UserSettings,
   UserSettingsUpdate,
 } from '../@shared/types/types.user';
@@ -19,13 +24,18 @@ import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { EmailSenderService } from '../emailSender/email.sender.service';
 import { logger } from '../instances/logger';
-import { IdentityServicesMap } from '../platforms/platforms.service';
+import {
+  IdentityServicesMap,
+  PlatformsMap,
+} from '../platforms/platforms.service';
+import { ProfilesRepository } from '../profiles/profiles.repository';
 import { TimeService } from '../time/time.service';
 import { UsersHelper } from './users.helper';
 import { UsersRepository } from './users.repository';
-import { getPrefixedUserId, getUsernameTag } from './users.utils';
+import { getPrefixedUserId } from './users.utils';
 
 const DEBUG = true;
+const DEBUG_PREFIX = 'UsersService';
 
 interface TokenData {
   userId: string;
@@ -42,7 +52,9 @@ export class UsersService {
   constructor(
     public db: DBInstance,
     public repo: UsersRepository,
+    public profiles: ProfilesRepository,
     public identityPlatforms: IdentityServicesMap,
+    public platformServices: PlatformsMap,
     public time: TimeService,
     public emailSender: EmailSenderService,
     protected ourToken: OurTokenConfig
@@ -88,7 +100,7 @@ export class UsersService {
    * otherewise a new user is created.
    */
   public async handleSignup<T = any>(
-    platform: PLATFORM,
+    platform: IDENTITY_PLATFORM,
     signupData: T,
     manager: TransactionManager,
     _userId?: string // MUST be the authenticated userId if provided
@@ -104,7 +116,7 @@ export class UsersService {
         userId: _userId,
       });
 
-    const authenticatedDetails =
+    const { accountDetails: authenticatedDetails, profile } =
       await this.getIdentityService(platform).handleSignupData(signupData);
 
     const prefixed_user_id = getPrefixedUserId(
@@ -113,7 +125,7 @@ export class UsersService {
     );
 
     const existingUserWithAccountId =
-      await this.repo.getUserWithPlatformAccount(
+      await this.profiles.getUserIdWithPlatformAccount(
         platform,
         authenticatedDetails.user_id,
         manager
@@ -176,12 +188,21 @@ export class UsersService {
             { _userId, platform, authenticatedDetails }
           );
 
-        await this.repo.setPlatformDetails(
+        await this.repo.setAccountDetails(
           _userId,
           platform,
           authenticatedDetails,
           manager
         );
+
+        /** create the profile when addint that account */
+        const profileCreate: AccountProfileCreate = {
+          ...profile,
+          userId: _userId,
+          platformId: platform,
+        };
+
+        this.profiles.create(profileCreate, manager);
       }
     } else {
       /**
@@ -200,7 +221,7 @@ export class UsersService {
             ' user exist with this platform user_id, then return an accessToken'
           );
 
-        await this.repo.setPlatformDetails(
+        await this.repo.setAccountDetails(
           userId,
           platform,
           authenticatedDetails,
@@ -221,18 +242,27 @@ export class UsersService {
 
         const initSettings: UserSettings = USER_INIT_SETTINGS;
 
-        await this.repo.createUser(
+        const userId = await this.repo.createUser(
           prefixed_user_id,
           {
             settings: initSettings,
             signupDate: this.time.now(),
-            platformIds: [prefixed_user_id],
             accounts: {
               [platform]: [authenticatedDetails],
             },
           },
           manager
         );
+
+        /** create profile and link it to the user */
+        /** create the profile when addint that account */
+        const profileCreate: AccountProfileCreate = {
+          ...profile,
+          userId,
+          platformId: platform,
+        };
+
+        this.profiles.create(profileCreate, manager);
 
         if (DEBUG)
           logger.debug(
@@ -251,6 +281,54 @@ export class UsersService {
     return;
   }
 
+  public async updateAccountCredentials(
+    userId: string,
+    platformId: PLATFORM,
+    user_id: string,
+    credentials: AccountCredentials,
+    manager: TransactionManager
+  ) {
+    if (DEBUG)
+      logger.debug(
+        'getUserClientAndUpdateDetails - newCredentials',
+        credentials,
+        DEBUG_PREFIX
+      );
+
+    const user = await this.repo.getUser(userId, manager, true);
+
+    if (platformId === PLATFORM.Local) {
+      throw new Error('Cannot update local credentials');
+    }
+
+    const accounts = user.accounts[platformId];
+    if (!accounts) {
+      throw new Error('Unexpected accounts not found');
+    }
+
+    const account = accounts.find((c) => c.user_id === user_id);
+    if (!account) {
+      throw new Error(`Unexpected account for user_id ${user_id} not found`);
+    }
+
+    /** update the credentials */
+    account.credentials = credentials;
+
+    if (DEBUG)
+      logger.debug(
+        'getUserClientAndUpdateDetails - newDetails',
+        account,
+        DEBUG_PREFIX
+      );
+
+    await this.repo.setAccountDetails(
+      userId,
+      PLATFORM.Twitter,
+      account,
+      manager
+    );
+  }
+
   protected generateOurAccessToken(data: TokenData) {
     return jwt.sign(data, this.ourToken.tokenSecret, {
       expiresIn: this.ourToken.expiresIn,
@@ -264,27 +342,46 @@ export class UsersService {
     return verified.payload.userId;
   }
 
-  public async getUserProfileFromPlatformUsername(
+  public async getOrCreateProfile(
     platformId: PLATFORM,
-    username: string
+    user_id: string,
+    manager: TransactionManager
+  ) {}
+  public async getOrCreateProfileByUsername(
+    platformId: IDENTITY_PLATFORM,
+    username: string,
+    manager: TransactionManager
   ) {
-    const profile = await this.db.run(async (manager) => {
-      const usernameTag = getUsernameTag(platformId);
-      const userId = await this.repo.getByPlatformUsername(
-        platformId,
-        usernameTag,
-        username,
-        manager,
-        true
-      );
+    const profileId = await this.profiles.getByPlatformUsername(
+      platformId,
+      'username',
+      username,
+      manager
+    );
 
-      return this.getUserProfile(userId, manager);
-    });
+    if (profileId) {
+      return await this.profiles.getByProfileId(profileId, manager);
+    }
 
+    const profile = await this.platformServices
+      .get(platformId)
+      ?.getProfileByUsername(username);
+
+    if (!profile) {
+      throw new Error('Profile not found');
+    }
+    const profileCreate: AccountProfileCreate = {
+      ...profile,
+      platformId: platformId,
+    };
+    this.profiles.create(profileCreate, manager);
     return profile;
   }
 
-  public async getUserProfile(userId: string, manager: TransactionManager) {
+  public async getUserWithProfiles(
+    userId: string,
+    manager: TransactionManager
+  ) {
     const user = await this.repo.getUser(userId, manager, true);
 
     /** delete the token, from the public profile */
@@ -299,25 +396,39 @@ export class UsersService {
       email,
       signupDate: user.signupDate,
       settings: user.settings,
-      accounts: {},
+      profiles: {},
     };
 
     /** extract the profile for each account */
-    ALL_IDENTITY_PLATFORMS.forEach((platform) => {
-      const accounts = UsersHelper.getAccounts(user, platform);
+    await Promise.all(
+      ALL_IDENTITY_PLATFORMS.map(async (platform) => {
+        const accounts = UsersHelper.getAccounts(user, platform);
 
-      accounts.forEach((account) => {
-        const current = userRead.accounts[platform] || [];
-        current.push({
-          user_id: account.user_id,
-          profile: account.profile,
-          read: account.read !== undefined,
-          write: account.write !== undefined,
-        });
+        await Promise.all(
+          accounts.map(async (account) => {
+            const profile = await this.profiles.getProfile(
+              platform,
+              account.user_id,
+              manager
+            );
 
-        userRead.accounts[platform] = current as AccountDetailsRead<any>[];
-      });
-    });
+            if (profile) {
+              const current = userRead.profiles[platform] || [];
+
+              current.push({
+                user_id: account.user_id,
+                profile: profile.profile,
+                read: account.credentials.read !== undefined,
+                write: account.credentials.write !== undefined,
+              });
+
+              userRead.profiles[platform] =
+                current as AccountDetailsRead<any>[];
+            }
+          })
+        );
+      })
+    );
 
     return userRead;
   }

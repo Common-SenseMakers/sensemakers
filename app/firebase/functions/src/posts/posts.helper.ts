@@ -4,18 +4,17 @@ import {
   PlatformPost,
   PlatformPostPosted,
 } from '../@shared/types/types.platform.posts';
-import { AppPostFull, GenericPost } from '../@shared/types/types.posts';
 import {
-  DefinedIfTrue,
   PLATFORM,
   PUBLISHABLE_PLATFORM,
-  UserDetailsBase,
-} from '../@shared/types/types.user';
+} from '../@shared/types/types.platforms';
+import { AppPostFull, GenericPost } from '../@shared/types/types.posts';
+import { AccountDetailsBase, DefinedIfTrue } from '../@shared/types/types.user';
 import { APP_URL } from '../config/config.runtime';
 
 export interface PlatformDetails {
   platform: PUBLISHABLE_PLATFORM;
-  account: UserDetailsBase;
+  account: AccountDetailsBase;
 }
 
 export class PostsHelper {

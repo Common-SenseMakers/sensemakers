@@ -1,15 +1,13 @@
-import dotenv from 'dotenv';
 import * as admin from 'firebase-admin';
 import { AppOptions } from 'firebase-admin';
 
 import { LocalLogger, LogLevel } from '../src/instances/local.logger';
 import { logger } from '../src/instances/logger';
 import { createServices } from '../src/instances/services';
-
-// Load environment variables from .env file
-dotenv.config({ path: './migrations/.migrations.env' });
+import { config } from './migrations.config';
 
 // update log levels
+
 if (process.env.LOG_LEVEL_MSG && process.env.LOG_LEVEL_OBJ) {
   (logger as LocalLogger).msgLevel = process.env.LOG_LEVEL_MSG as LogLevel;
   (logger as LocalLogger).ctxLevel = process.env.LOG_LEVEL_OBJ as LogLevel;
@@ -48,7 +46,7 @@ logger.info('Running in local mode with certificate', {
 const initApp = (config: AppOptions, name: string) => {
   const app = admin.initializeApp(config, name);
 
-  if (projectIdSource?.startsWith('demo-')) {
+  if (config.projectId?.startsWith('demo-')) {
     app.firestore().settings({
       host: 'localhost:8080',
       ssl: false,
@@ -77,5 +75,5 @@ export const appTarget = initApp(
   'target'
 );
 
-export const servicesSource = createServices(appSource.firestore());
-export const servicesTarget = createServices(appTarget.firestore());
+export const servicesSource = createServices(appSource.firestore(), config);
+export const servicesTarget = createServices(appTarget.firestore(), config);

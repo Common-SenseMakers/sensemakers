@@ -2,7 +2,8 @@ import { expect } from 'chai';
 import { anything, capture, verify } from 'ts-mockito';
 
 import { NotificationFreq } from '../../src/@shared/types/types.notifications';
-import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
+import { AppUser } from '../../src/@shared/types/types.user';
 import { logger } from '../../src/instances/logger';
 import { triggerSendNotifications } from '../../src/notifications/notification.task';
 import { triggerAutofetchPosts } from '../../src/posts/tasks/posts.autofetch.task';

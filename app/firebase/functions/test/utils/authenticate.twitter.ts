@@ -1,14 +1,12 @@
 import { IOAuth2RequestTokenResult } from 'twitter-api-v2';
 
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import {
   TwitterGetContextParams,
+  TwitterSigninCredentials,
   TwitterSignupData,
 } from '../../src/@shared/types/types.twitter';
-import {
-  AppUser,
-  PLATFORM,
-  TwitterAccountCredentials,
-} from '../../src/@shared/types/types.user';
+import { AppUser } from '../../src/@shared/types/types.user';
 import { TransactionManager } from '../../src/db/transaction.manager';
 import { logger } from '../../src/instances/logger';
 import { Services } from '../../src/instances/services';
@@ -24,7 +22,7 @@ const DEBUG = false;
  * return their full profiles
  */
 export const authenticateTwitterUser = async (
-  testAccount: TwitterAccountCredentials,
+  testAccount: TwitterSigninCredentials,
   services: Services,
   manager: TransactionManager,
   _userId?: string

@@ -1,11 +1,13 @@
 import {
   AuthenticationResult,
+  OrcidAccountDetails,
+  OrcidCredentials,
+  OrcidProfile,
   OrcidSignupContext,
   OrcidSignupData,
-  OrcidUserCredentials,
-  OrcidUserDetails,
-  OrcidUserProfile,
 } from '../../@shared/types/types.orcid';
+import { PLATFORM } from '../../@shared/types/types.platforms';
+import { AccountProfileCreate } from '../../@shared/types/types.profiles';
 import {
   ORCID_API_URL,
   ORCID_CLIENT_ID,
@@ -19,7 +21,7 @@ const DEBUG_PREFIX = 'OrcidService';
 
 export class OrcidService
   implements
-    IdentityService<OrcidSignupContext, OrcidSignupData, OrcidUserDetails>
+    IdentityService<OrcidSignupContext, OrcidSignupData, OrcidAccountDetails>
 {
   public async getSignupContext(): Promise<OrcidSignupContext> {
     throw new Error('not implemented');
@@ -82,7 +84,7 @@ export class OrcidService
       data.callbackUrl
     );
 
-    const credentials: OrcidUserCredentials = {
+    const credentials: OrcidCredentials = {
       access_token: result.access_token,
       refresh_token: result.refresh_token,
       expires_in: result.expires_in,
@@ -90,15 +92,15 @@ export class OrcidService
       token_type: result.token_type,
     };
 
-    const profile: OrcidUserProfile = {
+    const orcidProfile: OrcidProfile = {
       name: result.name,
+      orcid: result.orcid,
     };
 
-    const orcid: OrcidUserDetails = {
+    const orcid: OrcidAccountDetails = {
       user_id: result.orcid,
       signupDate: 0,
-      profile,
-      read: credentials,
+      credentials: { read: credentials },
     };
 
     if (DEBUG) {
@@ -109,6 +111,12 @@ export class OrcidService
       );
     }
 
-    return orcid;
+    const profile: AccountProfileCreate<OrcidProfile> = {
+      platformId: PLATFORM.Orcid,
+      user_id: orcid.user_id,
+      profile: orcidProfile,
+    };
+
+    return { accountDetails: orcid, profile };
   }
 }

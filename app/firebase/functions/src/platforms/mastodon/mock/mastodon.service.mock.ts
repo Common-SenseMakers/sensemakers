@@ -2,16 +2,17 @@ import { anything, instance, spy, when } from 'ts-mockito';
 
 import { PlatformFetchParams } from '../../../@shared/types/types.fetch';
 import {
+  MastodonAccessTokenSignupData,
+  MastodonAccountDetails,
   MastodonGetContextParams,
   MastodonSignupContext,
-  MastodonSignupData,
-  MastodonUserDetails,
 } from '../../../@shared/types/types.mastodon';
 import { PlatformPostPublish } from '../../../@shared/types/types.platform.posts';
+import { PLATFORM } from '../../../@shared/types/types.platforms';
+import { AccountProfileCreate } from '../../../@shared/types/types.profiles';
 import {
-  PLATFORM,
+  AccountDetailsBase,
   TestUserCredentials,
-  UserDetailsBase,
 } from '../../../@shared/types/types.user';
 import { APP_URL } from '../../../config/config.runtime';
 import { TransactionManager } from '../../../db/transaction.manager';
@@ -37,7 +38,7 @@ export const getMastodonMock = (
   const mocked = spy(mastodonService);
 
   if (type.publish) {
-    when(mocked.publish(anything(), anything())).thenCall(
+    when(mocked.publish(anything())).thenCall(
       (postPublish: PlatformPostPublish<string>) => {
         // Implementation goes here
       }
@@ -48,7 +49,7 @@ export const getMastodonMock = (
     when(mocked.fetch(anything(), anything(), anything())).thenCall(
       async (
         params: PlatformFetchParams,
-        userDetails: UserDetailsBase,
+        userDetails: AccountDetailsBase,
         manager: TransactionManager
       ) => {
         if (params.since_id) {
@@ -1169,10 +1170,10 @@ export const getMastodonMock = (
   }
 
   if (type.get) {
-    when(mocked.get(anything(), anything(), anything())).thenCall(
+    when(mocked.get(anything(), anything())).thenCall(
       async (
         post_id: string,
-        userDetails: UserDetailsBase,
+        userDetails: AccountDetailsBase,
         manager: TransactionManager
       ) => {
         return {
@@ -1383,8 +1384,8 @@ export const getMastodonMock = (
       }
     );
     when(mocked.handleSignupData(anything())).thenCall(
-      (data: MastodonSignupData): MastodonUserDetails => {
-        const user_id = data.domain; // for testing purposes we pass the user_id as the domain
+      (data: MastodonAccessTokenSignupData) => {
+        const user_id = data.mastodonServer; // for testing purposes we pass the user_id as the mastodon server
         const testCredentials = getTestCredentials(
           process.env.TEST_USER_ACCOUNTS as string
         );
@@ -1398,20 +1399,32 @@ export const getMastodonMock = (
         if (!currentMastodonCredentials) {
           throw new Error('test credentials not found');
         }
-        return {
+        const accountDetails: MastodonAccountDetails = {
           user_id: currentMastodonCredentials.id,
-          signupDate: 1725473415250,
+          signupDate: Date.now(),
+          credentials: {
+            read: {
+              server: 'mastodon.social',
+              accessToken:
+                'ZWJzaEJCU1BSaFZvLUIwRFNCNHNXVlQtTV9mY2VSaDlOSk5ETjJPci0zbmJtOjE3MTk0MzM5ODkyNTM6MTowOmF0OjE',
+            },
+          },
+        };
+        const profile: AccountProfileCreate = {
+          platformId: PLATFORM.Mastodon,
+          user_id: currentMastodonCredentials.id,
           profile: {
             id: currentMastodonCredentials.id,
-            username: currentMastodonCredentials.username,
-            displayName: currentMastodonCredentials.displayName,
+            displayName: 'placeholder', // currentUserCredentials.mastodon.username,
+            username: 'placeholder@placeholder.com', //: currentUserCredentials.mastodon.username,
             avatar:
-              'https://media.cosocial.ca/accounts/avatars/111/971/425/782/516/559/original/963c30efd081957e.jpeg',
-            mastodonServer: currentMastodonCredentials.mastodonServer,
+              'https://pbs.twimg.com/profile_images/1783977034038882304/RGn66lGT_normal.jpg',
+            description: 'placeholder',
           },
-          read: {
-            accessToken: currentMastodonCredentials.accessToken,
-          },
+        };
+        return {
+          accountDetails,
+          profile,
         };
       }
     );

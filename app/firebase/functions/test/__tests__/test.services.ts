@@ -1,9 +1,15 @@
 import { getFirestore } from 'firebase-admin/firestore';
 import { spy, when } from 'ts-mockito';
 
-import { PLATFORM } from '../../src/@shared/types/types.user';
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { ActivityRepository } from '../../src/activity/activity.repository';
 import { ActivityService } from '../../src/activity/activity.service';
+import {
+  BLUESKY_APP_PASSWORD,
+  BLUESKY_SERVICE_URL,
+  BLUESKY_USERNAME,
+  MASTODON_ACCESS_TOKENS,
+} from '../../src/config/config.runtime';
 import { DBInstance } from '../../src/db/instance';
 import { EmailSenderService } from '../../src/emailSender/email.sender.service';
 import {
@@ -49,6 +55,7 @@ import { PlatformPostsRepository } from '../../src/posts/platform.posts.reposito
 import { PostsManager } from '../../src/posts/posts.manager';
 import { PostsProcessing } from '../../src/posts/posts.processing';
 import { PostsRepository } from '../../src/posts/posts.repository';
+import { ProfilesRepository } from '../../src/profiles/profiles.repository';
 import { TriplesRepository } from '../../src/semantics/triples.repository';
 import { TimeMock, getTimeMock } from '../../src/time/mock/time.service.mock';
 import { TimeService } from '../../src/time/time.service';
@@ -91,7 +98,8 @@ export const getTestServices = (config: TestServicesConfig) => {
   });
 
   const db = new DBInstance(getFirestore());
-  const userRepo = new UsersRepository(db);
+  const profilesRepo = new ProfilesRepository(db);
+  const userRepo = new UsersRepository(db, profilesRepo);
   const postsRepo = new PostsRepository(db);
   const triplesRepo = new TriplesRepository(db);
   const platformPostsRepo = new PlatformPostsRepository(db);
@@ -115,17 +123,24 @@ export const getTestServices = (config: TestServicesConfig) => {
   const _twitter = new TwitterService(time, userRepo, {
     clientId: process.env.TWITTER_CLIENT_ID as string,
     clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
+    bearerToken: process.env.TWITTER_BEARER_TOKEN as string,
   });
 
   const testUser = testCredentials[0];
   const twitter = getTwitterMock(_twitter, config.twitter, testUser);
 
   /** mocked mastodon */
-  const _mastodon = new MastodonService(time, userRepo);
+  const _mastodon = new MastodonService(time, userRepo, {
+    accessTokens: JSON.parse(MASTODON_ACCESS_TOKENS.value()),
+  });
   const mastodon = getMastodonMock(_mastodon, config.mastodon, testUser);
 
   /** mocked mastodon */
-  const _bluesky = new BlueskyService(time, userRepo);
+  const _bluesky = new BlueskyService(time, userRepo, {
+    BLUESKY_APP_PASSWORD: BLUESKY_APP_PASSWORD.value(),
+    BLUESKY_USERNAME: BLUESKY_USERNAME.value(),
+    BLUESKY_SERVICE_URL,
+  });
   const bluesky = getBlueskyMock(_bluesky, config.bluesky, testUser);
 
   /** nanopub */
@@ -158,6 +173,7 @@ export const getTestServices = (config: TestServicesConfig) => {
   const usersService = new UsersService(
     db,
     userRepo,
+    profilesRepo,
     identityServices,
     time,
     email,

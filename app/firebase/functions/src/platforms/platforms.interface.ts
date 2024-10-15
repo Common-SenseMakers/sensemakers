@@ -14,64 +14,79 @@ import {
   PostAndAuthor,
 } from '../@shared/types/types.posts';
 import {
-  AppUser,
-  PLATFORM,
-  UserDetailsBase,
+  AccountProfile,
+  AccountProfileBase,
+} from '../@shared/types/types.profiles';
+import {
+  AccountCredentials,
+  AccountDetailsBase,
+  AppUserRead,
 } from '../@shared/types/types.user';
-import { TransactionManager } from '../db/transaction.manager';
 
-/** use conditional types to dynamically assign credential types for each platform */
-export type CredentialsForPlatform<P> = P extends PLATFORM.Twitter
-  ? { accessToken: string }
-  : any;
+export interface WithCredentials {
+  credentials?: AccountCredentials;
+}
 
 export interface IdentityService<
-  SignupContext,
-  SignupData,
-  UserDetails extends UserDetailsBase,
+  SignupContext = any,
+  SignupData = any,
+  AccountDetails extends AccountDetailsBase = AccountDetailsBase,
+  PlatformAccountProfile extends AccountProfile = AccountProfile,
 > {
   /** provides info needed by the frontend to start the signup flow */
   getSignupContext: (userId?: string, params?: any) => Promise<SignupContext>;
   /** handles the data obtained by the frontend after the signup flow */
-  handleSignupData: (signupData: SignupData) => Promise<UserDetails>;
+  handleSignupData: (signupData: SignupData) => Promise<{
+    accountDetails: AccountDetails;
+    profile: Omit<PlatformAccountProfile, 'id' | 'platformId'>;
+  }>;
 }
 
 export interface PlatformService<
   SignupContext = any,
   SignupData = any,
-  UserDetails extends UserDetailsBase = UserDetailsBase,
+  UserDetails extends AccountDetailsBase = AccountDetailsBase,
   DraftType = any,
 > extends IdentityService<SignupContext, SignupData, UserDetails> {
   get(
     post_id: string,
-    userDetails: UserDetailsBase,
-    manager?: TransactionManager
-  ): Promise<PlatformPostPosted>;
+    credentials?: AccountCredentials
+  ): Promise<
+    {
+      platformPost: PlatformPostPosted;
+    } & WithCredentials
+  >;
   fetch(
+    user_id: string,
     params: PlatformFetchParams,
-    userDetails: UserDetailsBase,
-    manager: TransactionManager
+    credentials?: AccountCredentials
   ): Promise<FetchedResult>;
-  signDraft(
-    post: PlatformPostDraft,
-    account: UserDetailsBase
-  ): Promise<DraftType>;
   publish(
-    post: PlatformPostPublish,
-    manager: TransactionManager
-  ): Promise<PlatformPostPosted>;
-  update(
-    post: PlatformPostUpdate,
-    manager: TransactionManager
-  ): Promise<PlatformPostPosted>;
+    post: PlatformPostPublish
+  ): Promise<{ post: PlatformPostPosted } & WithCredentials>;
+  update?(
+    post: PlatformPostUpdate
+  ): Promise<{ post: PlatformPostPosted } & WithCredentials>;
+
   convertToGeneric(platformPost: PlatformPostCreate): Promise<GenericThread>;
   convertFromGeneric(postAndAuthor: PostAndAuthor): Promise<PlatformPostDraft>;
 
+  getProfile(
+    user_id: string,
+    credentials?: any
+  ): Promise<AccountProfileBase | undefined>;
+
+  getProfileByUsername(
+    username: string,
+    credentials?: any
+  ): Promise<AccountProfileBase | undefined>;
+
+  signDraft?(post: PlatformPostDraft): Promise<DraftType>;
   /** for signature based platforms, this creates the draft that represents
    * a delete of a post. The draft is then signed by the user */
-  buildDeleteDraft(
+  buildDeleteDraft?(
     post_id: string,
     post: AppPostFull,
-    author: AppUser
+    author: AppUserRead
   ): Promise<PlatformPostDeleteDraft | undefined>;
 }

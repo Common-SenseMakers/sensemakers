@@ -15,7 +15,7 @@ import {
   BlueskySignupData,
 } from '../../../shared/types/types.bluesky';
 import { HandleSignupResult } from '../../../shared/types/types.fetch';
-import { PLATFORM } from '../../../shared/types/types.user';
+import { PLATFORM } from '../../../shared/types/types.platforms';
 import {
   LoginFlowState,
   PlatformConnectedStatus,
@@ -59,7 +59,9 @@ export const BlueskyContext = (props: PropsWithChildren) => {
   const appFetch = useAppFetch();
 
   const needConnect =
-    !connectedUser || !connectedUser.accounts[PLATFORM.Bluesky];
+    !connectedUser ||
+    !connectedUser.profiles ||
+    !connectedUser.profiles[PLATFORM.Bluesky];
 
   const connect = useCallback(
     async (

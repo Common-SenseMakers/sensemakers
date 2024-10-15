@@ -24,14 +24,18 @@ export class TriplesRepository extends BaseRepository<
   public async getWithPredicates(
     fetchParams: FetchParams,
     labelsUris?: string[],
-    userId?: string
+    profileIds?: string
   ) {
     const predicate_property: keyof PostTriple = 'predicate';
-    const userId_property: keyof PostTriple = 'authorId';
+    const authorProfileId_property: keyof PostTriple = 'authorProfileId';
     const postCreatedAtMs_property: keyof PostTriple = 'postCreatedAtMs';
 
-    const base = userId
-      ? this.db.collections.triples.where(userId_property, '==', userId)
+    const base = profileIds
+      ? this.db.collections.triples.where(
+          authorProfileId_property,
+          'in',
+          profileIds
+        )
       : this.db.collections.triples;
 
     const filtered = (() => {

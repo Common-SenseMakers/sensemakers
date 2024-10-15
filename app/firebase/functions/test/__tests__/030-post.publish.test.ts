@@ -5,6 +5,7 @@ import {
   PlatformPostPublishStatus,
   PlatformPostSignerType,
 } from '../../src/@shared/types/types.platform.posts';
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import {
   AppPostFull,
   AppPostRepublishedStatus,
@@ -12,7 +13,7 @@ import {
   GenericThread,
   PostsQueryStatus,
 } from '../../src/@shared/types/types.posts';
-import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
+import { AppUser } from '../../src/@shared/types/types.user';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
@@ -143,6 +144,8 @@ describe('030-process', () => {
           await services.postsManager.publishPost(
             pendingPost,
             [PLATFORM.Nanopub],
+            undefined,
+            undefined,
             user.userId
           );
 
@@ -230,6 +233,8 @@ describe('030-process', () => {
           await services.postsManager.publishPost(
             pendingPost,
             [PLATFORM.Nanopub],
+            undefined,
+            undefined,
             user.userId
           );
 
@@ -320,9 +325,15 @@ describe('030-process', () => {
       expect(latestNanopubUri).to.not.be.undefined;
       expect(rootNanopubUri).to.equal(latestNanopubUri);
 
+      const userRead = await services.db.run((manager) => {
+        if (!user) {
+          throw new Error('user not created');
+        }
+        return services.users.getUserWithProfiles(user.userId, manager);
+      });
       const nanopubDraft = await services.platforms
         .get(PLATFORM.Nanopub)
-        .convertFromGeneric({ post: newPost, author: user });
+        .convertFromGeneric({ post: newPost, author: userRead });
 
       if (!nanopubDraft.unsignedPost) {
         throw new Error('unsignedPost undefined');
@@ -346,6 +357,8 @@ describe('030-process', () => {
       await services.postsManager.publishPost(
         { ...newPost, mirrors: [...nonUpdatedMirrors, nanopubPlatformPost] },
         [PLATFORM.Nanopub],
+        undefined,
+        undefined,
         user.userId
       );
 

@@ -1,5 +1,4 @@
 import {
-  AppBskyActorDefs,
   AppBskyEmbedExternal,
   AppBskyEmbedImages,
   AppBskyEmbedRecord,
@@ -8,25 +7,30 @@ import {
   AppBskyFeedDefs,
   AppBskyFeedPost,
   AppBskyRichtextFacet,
-  AtpSessionData,
 } from '@atproto/api';
 
-import { UserDetailsBase } from './types.user';
+import { PlatformProfile } from './types.profiles';
+import { AccountDetailsBase } from './types.user';
 
-export interface BlueskyUserProfile {
+export interface BlueskySigninCredentials {
   id: string;
   username: string;
   name: string;
-  avatar: string;
+  appPassword: string;
 }
 
-export type BlueskyUserCredentials = AtpSessionData;
+export type BlueskyCredentials = {
+  username: string;
+  appPassword: string;
+};
 
-export type BlueskyUserDetails = UserDetailsBase<
-  BlueskyUserProfile,
-  BlueskyUserCredentials,
-  BlueskyUserCredentials
->;
+export interface BlueskyAccountCredentials {
+  write?: BlueskyCredentials;
+  read?: BlueskyCredentials;
+}
+
+export type BlueskyAccountDetails =
+  AccountDetailsBase<BlueskyAccountCredentials>;
 
 export interface BlueskyGetContextParams {
   callback_url: string;
@@ -39,10 +43,11 @@ export type BlueskySignupData = {
   appPassword: string;
   type: 'read' | 'write';
 };
+
 export interface BlueskyThread {
   thread_id: string;
   posts: BlueskyPost[];
-  author: BlueskyAccount;
+  author: PlatformProfile;
 }
 
 export interface QuotedBlueskyPost {
@@ -78,10 +83,3 @@ export type BlueskyPost = AppBskyFeedDefs.PostView & {
     record: QuotedBlueskyPost;
   };
 };
-export type BlueskyAccount = AppBskyActorDefs.ProfileViewDetailed;
-export interface BlueskyProfile {
-  id: string;
-  handle: string;
-  displayName?: string;
-  avatar?: string;
-}

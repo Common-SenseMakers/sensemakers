@@ -1,16 +1,13 @@
-import AtpAgent from '@atproto/api';
-
-import { BlueskyUserDetails } from '../../src/@shared/types/types.bluesky';
+import { BlueskyAccountDetails } from '../../src/@shared/types/types.bluesky';
 import { NotificationFreq } from '../../src/@shared/types/types.notifications';
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { TwitterSignupContext } from '../../src/@shared/types/types.twitter';
 import {
   AppUser,
   AutopostOption,
-  PLATFORM,
   TestUserCredentials,
 } from '../../src/@shared/types/types.user';
 import { TransactionManager } from '../../src/db/transaction.manager';
-import { removeUndefinedFields } from '../../src/platforms/bluesky/bluesky.utils';
 import { getPrefixedUserId } from '../../src/users/users.utils';
 import { handleTwitterSignupMock } from '../__tests__/reusable/mocked.singup';
 import { USE_REAL_TWITTER } from '../__tests__/setup';
@@ -85,7 +82,6 @@ const authenticateBlueskyForUser = async (
   if (!user) {
     user = {
       userId: getPrefixedUserId(PLATFORM.Bluesky, credentials.bluesky.id),
-      platformIds: [],
       settings: {
         autopost: {
           [PLATFORM.Nanopub]: {
@@ -99,33 +95,22 @@ const authenticateBlueskyForUser = async (
     };
   }
 
-  user.platformIds.push(
-    getPrefixedUserId(PLATFORM.Bluesky, credentials.bluesky.id)
-  );
-  const agent = new AtpAgent({ service: 'https://bsky.social' });
-  await agent.login({
-    identifier: credentials.bluesky.username,
-    password: credentials.bluesky.appPassword,
-  });
-  if (!agent.session) {
-    throw new Error('Failed to login to Bluesky');
-  }
-  const sessionData = removeUndefinedFields(agent.session);
-
-  const blueskyUserDetails: BlueskyUserDetails = {
+  const blueskyUserDetails: BlueskyAccountDetails = {
     signupDate: 0,
     user_id: credentials.bluesky.id,
-    profile: {
-      id: credentials.bluesky.id,
-      username: credentials.bluesky.username,
-      name: credentials.bluesky.name,
-      avatar: 'https://example.com/avatar.jpg', // You may want to update this with a real avatar URL
+    credentials: {
+      read: {
+        username: credentials.bluesky.username,
+        appPassword: credentials.bluesky.appPassword,
+      },
+      write: {
+        username: credentials.bluesky.username,
+        appPassword: credentials.bluesky.appPassword,
+      },
     },
-    read: sessionData,
-    write: sessionData,
   };
 
-  user[PLATFORM.Bluesky] = [blueskyUserDetails];
+  user.accounts[PLATFORM.Bluesky] = [blueskyUserDetails];
 
   return user;
 };
@@ -171,7 +156,6 @@ const authenticateMastodonForUser = async (
   if (!user) {
     user = {
       userId: getPrefixedUserId(PLATFORM.Mastodon, credentials.mastodon.id),
-      platformIds: [],
       settings: {
         autopost: {
           [PLATFORM.Nanopub]: {
@@ -185,27 +169,19 @@ const authenticateMastodonForUser = async (
     };
   }
 
-  user.platformIds.push(
-    getPrefixedUserId(PLATFORM.Mastodon, credentials.mastodon.id)
-  );
-
-  user[PLATFORM.Mastodon] = [
+  user.accounts[PLATFORM.Mastodon] = [
     {
       signupDate: 0,
-      user_id: credentials.mastodon.id,
-      profile: {
-        id: credentials.mastodon.id,
-        username: credentials.mastodon.username,
-        displayName: credentials.mastodon.displayName,
-        avatar:
-          'https://media.cosocial.ca/accounts/avatars/111/971/425/782/516/559/original/963c30efd081957e.jpeg',
-        mastodonServer: credentials.mastodon.mastodonServer,
-      },
-      read: {
-        accessToken: credentials.mastodon.accessToken,
-      },
-      write: {
-        accessToken: credentials.mastodon.accessToken,
+      user_id: `https://${credentials.mastodon.mastodonServer}/@${credentials.mastodon.username}`,
+      credentials: {
+        read: {
+          accessToken: credentials.mastodon.id,
+          server: 'https://mastodon.social',
+        },
+        write: {
+          accessToken: credentials.mastodon.id,
+          server: 'https://mastodon.social',
+        },
       },
     },
   ];
@@ -224,7 +200,6 @@ const authenticateNanopubForUser = async (
   if (!user) {
     user = {
       userId: getPrefixedUserId(PLATFORM.Nanopub, profile.ethAddress),
-      platformIds: [],
       settings: {
         autopost: {
           [PLATFORM.Nanopub]: {
@@ -238,20 +213,11 @@ const authenticateNanopubForUser = async (
     };
   }
 
-  user.platformIds.push(
-    getPrefixedUserId(PLATFORM.Nanopub, profile.ethAddress)
-  );
-
   user.accounts[PLATFORM.Nanopub] = [
     {
       signupDate: 0,
       user_id: profile.ethAddress,
-      profile: {
-        ethAddress: profile.ethAddress,
-        rsaPublickey: profile.rsaPublickey,
-        ethToRsaSignature: profile.ethToRsaSignature,
-        introNanopubUri: profile.introNanopubUri,
-      },
+      credentials: {},
     },
   ];
 
