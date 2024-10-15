@@ -310,7 +310,9 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
         stillPending = false;
       }
 
-      queryParams.fetchParams.untilId = posts[posts.length - 1].id;
+      if (posts.length > 0) {
+        queryParams.fetchParams.untilId = posts[posts.length - 1].id;
+      }
 
       if (DEBUG)
         logger.debug(
