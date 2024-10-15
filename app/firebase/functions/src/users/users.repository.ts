@@ -12,10 +12,10 @@ import {
   UserSettings,
 } from '../@shared/types/types.user';
 import { DBInstance } from '../db/instance';
+import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
 import { ProfilesRepository } from '../profiles/profiles.repository';
-import { decodeId, encodeId } from './users.utils';
 
 const DEBUG = false;
 
@@ -30,7 +30,7 @@ export class UsersRepository {
     manager: TransactionManager,
     onlyIfExists: boolean = false
   ) {
-    const ref = this.db.collections.users.doc(encodeId(userId));
+    const ref = this.db.collections.users.doc(userId);
     if (onlyIfExists) {
       const doc = await this.getUserDoc(userId, manager);
 
@@ -85,8 +85,8 @@ export class UsersRepository {
     manager: TransactionManager
   ) {
     const ref = await this.getUserRef(userId, manager);
-    manager.create(ref, user);
-    return decodeId(ref.id);
+    manager.create(ref, removeUndefined(user));
+    return ref.id;
   }
 
   /** append or overwrite userDetails for an account of a given platform */
@@ -236,19 +236,19 @@ export class UsersRepository {
     );
 
     const result = await query.get();
-    return result.docs.map((doc) => decodeId(doc.id)) as string[];
+    return result.docs.map((doc) => doc.id) as string[];
   }
 
   public async getAll() {
     const snapshot = await this.db.collections.users.get();
-    return snapshot.docs.map((doc) => decodeId(doc.id));
+    return snapshot.docs.map((doc) => doc.id);
   }
 
   public async getAllIds() {
     const snapshot = await this.db.collections.users.get();
     const usersIds: string[] = [];
     snapshot.forEach((doc) => {
-      usersIds.push(decodeId(doc.id));
+      usersIds.push(doc.id);
     });
 
     return usersIds;
@@ -287,7 +287,7 @@ export class UsersRepository {
 
     const result = await manager.query(query);
 
-    return result.docs.map((doc) => decodeId(doc.id)) as string[];
+    return result.docs.map((doc) => doc.id) as string[];
   }
 
   public async getByEmail<T extends boolean, R = string>(
@@ -315,7 +315,7 @@ export class UsersRepository {
     const doc = users.docs[0];
 
     return {
-      id: decodeId(doc.id),
+      id: doc.id,
       ...doc.data(),
     } as unknown as DefinedIfTrue<T, R>;
   }

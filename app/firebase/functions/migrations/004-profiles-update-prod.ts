@@ -2,6 +2,7 @@ import {
   ALL_IDENTITY_PLATFORMS,
   PLATFORM,
 } from '../src/@shared/types/types.platforms';
+import { AppUserCreate } from '../src/@shared/types/types.user';
 import { logger } from '../src/instances/logger';
 import { getGlobalMastodonUsername } from '../src/platforms/mastodon/mastodon.utils';
 import { getProfileId } from '../src/profiles/profiles.repository';
@@ -33,7 +34,8 @@ const DEBUG = true;
         async (managerTarget) => {
           if (DEBUG) logger.debug(`processing ${user.userId}`);
 
-          return Promise.all(
+          /** create profiles */
+          await Promise.all(
             ALL_IDENTITY_PLATFORMS.map(async (platformId) => {
               const accounts = (user as any)[platformId] || [];
 
@@ -74,6 +76,36 @@ const DEBUG = true;
                 })
               );
             })
+          );
+
+          /** create user */
+          const twitterAccounts = (user as any)['twitter'] || [];
+          const nanopubAccounts = (user as any)['nanopub'] || [];
+
+          twitterAccounts.forEach((account: any) => {
+            delete account['fetched'];
+            delete account['profile'];
+          });
+
+          nanopubAccounts.forEach((account: any) => {
+            delete account['fetched'];
+            delete account['profile'];
+          });
+
+          const userCreate: AppUserCreate = {
+            settings: user.settings,
+            signupDate: user.signupDate,
+            email: user.email,
+            accounts: {
+              twitter: twitterAccounts,
+              nanopub: nanopubAccounts,
+            },
+          };
+
+          await servicesTarget.users.repo.createUser(
+            user.userId,
+            userCreate,
+            managerTarget
           );
         },
         undefined,
