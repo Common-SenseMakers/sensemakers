@@ -57,7 +57,13 @@ export class UsersRepository {
     manager: TransactionManager,
     shouldThrow?: T
   ): Promise<DefinedIfTrue<T, AppUser>> {
-    const doc = await this.getUserDoc(userId, manager);
+    let doc = await this.getUserDoc(userId, manager);
+
+    if (!doc.exists) {
+      console.log('remove me');
+      const ref = this.db.collections.users.doc(userId);
+      doc = await manager.get(ref);
+    }
 
     const _shouldThrow = shouldThrow !== undefined ? shouldThrow : false;
 

@@ -171,17 +171,18 @@ export class NanopubService
     };
   }
 
-  getProfile(
+  async getProfile(
     user_id: string,
     credentials: any
   ): Promise<AccountProfileBase | undefined> {
-    throw new Error('Method not implemented.');
+    return { user_id };
   }
-  getProfileByUsername(
+
+  async getProfileByUsername(
     user_id: string,
     credentials: any
   ): Promise<AccountProfileBase | undefined> {
-    throw new Error('Method not implemented.');
+    return { user_id };
   }
 
   async signDraft(post: PlatformPostDraft<any>): Promise<string> {

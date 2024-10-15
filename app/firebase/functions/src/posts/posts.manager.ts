@@ -560,7 +560,7 @@ export class PostsManager {
     return posts;
   }
 
-  async createProfile<P = any>(
+  async readAndCreateProfile<P = any>(
     profileId: string,
     manager: TransactionManager
   ): Promise<AccountProfile<P>> {
@@ -592,7 +592,7 @@ export class PostsManager {
     );
 
     if (!profile) {
-      return this.createProfile<P>(profileId, manager);
+      return this.readAndCreateProfile<P>(profileId, manager);
     }
 
     return profile as P;
