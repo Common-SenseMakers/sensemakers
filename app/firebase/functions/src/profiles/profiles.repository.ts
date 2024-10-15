@@ -10,7 +10,6 @@ import {
 import { DefinedIfTrue } from '../@shared/types/types.user';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
-import { decodeId, encodeId } from '../users/users.utils';
 
 export const getProfileId = (platform: PLATFORM, user_id: string) =>
   `${platform}-${user_id}`;
@@ -36,12 +35,12 @@ export class ProfilesRepository {
     manager: TransactionManager
   ) {
     const profileRef = this.db.collections.profiles.doc(
-      encodeId(getProfileId(accountProfile.platformId, accountProfile.user_id))
+      getProfileId(accountProfile.platformId, accountProfile.user_id)
     );
 
     manager.create(profileRef, accountProfile);
 
-    return decodeId(profileRef.id);
+    return profileRef.id;
   }
 
   protected async getRef(
@@ -49,7 +48,7 @@ export class ProfilesRepository {
     manager: TransactionManager,
     onlyIfExists: boolean = false
   ) {
-    const ref = this.db.collections.profiles.doc(encodeId(profileId));
+    const ref = this.db.collections.profiles.doc(profileId);
     if (onlyIfExists) {
       const doc = await this.getDoc(profileId, manager);
 
@@ -82,7 +81,7 @@ export class ProfilesRepository {
     }
 
     return {
-      id: decodeId(doc.id),
+      id: doc.id,
       ...doc.data(),
     } as unknown as DefinedIfTrue<T, AccountProfile<P>>;
   }
@@ -110,7 +109,7 @@ export class ProfilesRepository {
 
     const profiles = snap.docs.map((doc) => {
       return {
-        id: decodeId(doc.id),
+        id: doc.id,
         ...doc.data(),
       } as AccountProfile;
     });
@@ -150,7 +149,7 @@ export class ProfilesRepository {
       );
     }
 
-    const profileId = decodeId(snap.docs[0].id);
+    const profileId = snap.docs[0].id;
     return profileId as DefinedIfTrue<T, string>;
   }
 

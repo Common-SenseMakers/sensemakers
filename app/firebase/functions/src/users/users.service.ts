@@ -352,15 +352,15 @@ export class UsersService {
     username: string,
     manager: TransactionManager
   ) {
-    const user_id = await this.profiles.getByPlatformUsername(
+    const profileId = await this.profiles.getByPlatformUsername(
       platformId,
       'username',
       username,
       manager
     );
 
-    if (user_id) {
-      return await this.profiles.getProfile(platformId, user_id, manager);
+    if (profileId) {
+      return await this.profiles.getByProfileId(profileId, manager);
     }
 
     const profile = await this.platformServices
