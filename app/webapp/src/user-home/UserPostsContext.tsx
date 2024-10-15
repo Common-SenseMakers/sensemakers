@@ -72,6 +72,7 @@ export const UserPostsContext: React.FC<{
       status,
       subscribe: true,
       onPostsAdded,
+      DEBUG_PREIX: '[USER POSTS] ',
     };
   }, [status]);
 
