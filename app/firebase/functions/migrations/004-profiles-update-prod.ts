@@ -5,7 +5,6 @@ import {
 import { logger } from '../src/instances/logger';
 import { getGlobalMastodonUsername } from '../src/platforms/mastodon/mastodon.utils';
 import { getProfileId } from '../src/profiles/profiles.repository';
-import { UsersHelper } from '../src/users/users.helper';
 import { servicesSource, servicesTarget } from './migrations.services';
 
 const DEBUG = true;
@@ -26,18 +25,20 @@ const DEBUG = true;
 
   if (DEBUG) logger.debug(`${users.length} users found`);
 
+  await servicesTarget.db.clear();
+
   await Promise.all(
     users.map(async (user) => {
-      const res = await servicesTarget.db.run(
+      await servicesTarget.db.run(
         async (managerTarget) => {
           if (DEBUG) logger.debug(`processing ${user.userId}`);
 
           return Promise.all(
             ALL_IDENTITY_PLATFORMS.map(async (platformId) => {
-              const accounts = UsersHelper.getAccounts(user, platformId);
+              const accounts = (user as any)[platformId] || [];
 
               return Promise.all(
-                accounts.map(async (account) => {
+                accounts.map(async (account: any) => {
                   if (DEBUG)
                     logger.debug(`${user.userId} account`, { account });
                   const fetched = (account as any)['fetched'];
@@ -56,7 +57,7 @@ const DEBUG = true;
                   const profileId = getProfileId(platformId, user_id);
 
                   /** this reads the profile from the platforms */
-                  await servicesTarget.postsManager.getOrCreateProfile(
+                  await servicesTarget.users.getOrCreateProfile(
                     profileId,
                     managerTarget
                   );
@@ -80,7 +81,6 @@ const DEBUG = true;
         `USER ${user.userId} tx`,
         true
       );
-      if (DEBUG) logger.debug(`processed ${user.userId}`, { res });
     })
   );
 

@@ -7,7 +7,10 @@ import {
   OrcidSignupData,
 } from '../../@shared/types/types.orcid';
 import { PLATFORM } from '../../@shared/types/types.platforms';
-import { AccountProfileCreate } from '../../@shared/types/types.profiles';
+import {
+  AccountProfileBase,
+  AccountProfileCreate,
+} from '../../@shared/types/types.profiles';
 import {
   ORCID_API_URL,
   ORCID_CLIENT_ID,
@@ -118,5 +121,19 @@ export class OrcidService
     };
 
     return { accountDetails: orcid, profile };
+  }
+
+  async getProfile(
+    user_id: string,
+    credentials?: any
+  ): Promise<AccountProfileBase | undefined> {
+    return { user_id };
+  }
+
+  async getProfileByUsername(
+    username: string,
+    credentials?: any
+  ): Promise<AccountProfileBase | undefined> {
+    throw new Error('Method not implemented.');
   }
 }

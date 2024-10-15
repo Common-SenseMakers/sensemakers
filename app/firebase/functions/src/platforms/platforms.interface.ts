@@ -40,6 +40,16 @@ export interface IdentityService<
     accountDetails: AccountDetails;
     profile: Omit<PlatformAccountProfile, 'id' | 'platformId'>;
   }>;
+
+  getProfile(
+    user_id: string,
+    credentials?: any
+  ): Promise<AccountProfileBase | undefined>;
+
+  getProfileByUsername(
+    username: string,
+    credentials?: any
+  ): Promise<AccountProfileBase | undefined>;
 }
 
 export interface PlatformService<
@@ -70,16 +80,6 @@ export interface PlatformService<
 
   convertToGeneric(platformPost: PlatformPostCreate): Promise<GenericThread>;
   convertFromGeneric(postAndAuthor: PostAndAuthor): Promise<PlatformPostDraft>;
-
-  getProfile(
-    user_id: string,
-    credentials?: any
-  ): Promise<AccountProfileBase | undefined>;
-
-  getProfileByUsername(
-    username: string,
-    credentials?: any
-  ): Promise<AccountProfileBase | undefined>;
 
   signDraft?(post: PlatformPostDraft): Promise<DraftType>;
   /** for signature based platforms, this creates the draft that represents

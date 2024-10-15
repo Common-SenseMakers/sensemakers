@@ -110,7 +110,7 @@ const DEBUG = true;
           const profileId = getProfileId(sourcePost.origin, author_user_id);
           if (DEBUG) logger.debug(`creating profile exists`, { profileId });
 
-          await servicesTarget.postsManager.getOrCreateProfile(
+          await servicesTarget.users.getOrCreateProfile(
             profileId,
             managerTarget
           );

@@ -10,7 +10,10 @@ import {
   IDENTITY_PLATFORM,
   PLATFORM,
 } from '../@shared/types/types.platforms';
-import { AccountProfileCreate } from '../@shared/types/types.profiles';
+import {
+  AccountProfile,
+  AccountProfileCreate,
+} from '../@shared/types/types.profiles';
 import {
   AccountCredentials,
   AccountDetailsRead,
@@ -28,7 +31,10 @@ import {
   IdentityServicesMap,
   PlatformsMap,
 } from '../platforms/platforms.service';
-import { ProfilesRepository } from '../profiles/profiles.repository';
+import {
+  ProfilesRepository,
+  splitProfileId,
+} from '../profiles/profiles.repository';
 import { TimeService } from '../time/time.service';
 import { UsersHelper } from './users.helper';
 import { UsersRepository } from './users.repository';
@@ -342,42 +348,6 @@ export class UsersService {
     return verified.payload.userId;
   }
 
-  public async getOrCreateProfile(
-    platformId: PLATFORM,
-    user_id: string,
-    manager: TransactionManager
-  ) {}
-  public async getOrCreateProfileByUsername(
-    platformId: IDENTITY_PLATFORM,
-    username: string,
-    manager: TransactionManager
-  ) {
-    const profileId = await this.profiles.getByPlatformUsername(
-      platformId,
-      'username',
-      username,
-      manager
-    );
-
-    if (profileId) {
-      return await this.profiles.getByProfileId(profileId, manager);
-    }
-
-    const profile = await this.platformServices
-      .get(platformId)
-      ?.getProfileByUsername(username);
-
-    if (!profile) {
-      throw new Error('Profile not found');
-    }
-    const profileCreate: AccountProfileCreate = {
-      ...profile,
-      platformId: platformId,
-    };
-    this.profiles.create(profileCreate, manager);
-    return profile;
-  }
-
   public async getUserWithProfiles(
     userId: string,
     manager: TransactionManager
@@ -506,5 +476,78 @@ export class UsersService {
       'User signup',
       `User ${userMetadata.email} signed up`
     );
+  }
+
+  // TODO: looks redundant with readAndCreateProfile
+  public async getOrCreateProfileByUsername(
+    platformId: IDENTITY_PLATFORM,
+    username: string,
+    manager: TransactionManager
+  ) {
+    const profileId = await this.profiles.getByPlatformUsername(
+      platformId,
+      'username',
+      username,
+      manager
+    );
+
+    if (profileId) {
+      return await this.profiles.getByProfileId(profileId, manager);
+    }
+
+    const profile =
+      await this.getIdentityService(platformId).getProfileByUsername(username);
+
+    if (!profile) {
+      throw new Error('Profile not found');
+    }
+    const profileCreate: AccountProfileCreate = {
+      ...profile,
+      platformId: platformId,
+    };
+    this.profiles.create(profileCreate, manager);
+    return profile;
+  }
+
+  async readAndCreateProfile<P = any>(
+    profileId: string,
+    manager: TransactionManager,
+    credentials?: any
+  ): Promise<AccountProfile<P>> {
+    const { platform, user_id } = splitProfileId(profileId);
+
+    const profileBase = await this.getIdentityService(platform).getProfile(
+      user_id,
+      credentials
+    );
+
+    if (!profileBase) {
+      throw new Error(`Profile for user ${user_id} not found in ${platform}`);
+    }
+
+    const profileCreate: AccountProfileCreate = {
+      ...profileBase,
+      platformId: platform,
+    };
+
+    const id = this.profiles.create(profileCreate, manager);
+    return { id, ...profileCreate };
+  }
+
+  /** Get or create an account profile */
+  async getOrCreateProfile<P = any>(
+    profileId: string,
+    manager: TransactionManager
+  ) {
+    const profile = await this.profiles.getByProfileId<false, P>(
+      profileId,
+      manager
+    );
+
+    if (!profile) {
+      return this.readAndCreateProfile<P>(profileId, manager);
+    }
+
+    return profile as P;
   }
 }

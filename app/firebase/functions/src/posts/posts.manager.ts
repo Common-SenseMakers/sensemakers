@@ -32,11 +32,7 @@ import {
   PostsQuery,
   PostsQueryStatus,
 } from '../@shared/types/types.posts';
-import {
-  AccountProfile,
-  AccountProfileCreate,
-  FetchedDetails,
-} from '../@shared/types/types.profiles';
+import { FetchedDetails } from '../@shared/types/types.profiles';
 import { AccountCredentials, AppUser } from '../@shared/types/types.user';
 import { PARSING_TIMEOUT_MS } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
@@ -44,7 +40,6 @@ import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
 import { ParserService } from '../parser/parser.service';
 import { PlatformsService } from '../platforms/platforms.service';
-import { splitProfileId } from '../profiles/profiles.repository';
 import { TimeService } from '../time/time.service';
 import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
@@ -376,7 +371,7 @@ export class PostsManager {
 
       await Promise.all(
         Array.from(profileIds).map((profileId) => {
-          this.getOrCreateProfile(profileId, manager);
+          this.users.getOrCreateProfile(profileId, manager);
         })
       );
 
@@ -559,45 +554,6 @@ export class PostsManager {
 
     return posts;
   }
-
-  async readAndCreateProfile<P = any>(
-    profileId: string,
-    manager: TransactionManager
-  ): Promise<AccountProfile<P>> {
-    const { platform, user_id } = splitProfileId(profileId);
-
-    const profileBase = await this.platforms.getProfile(platform, user_id);
-
-    if (!profileBase) {
-      throw new Error(`Profile for user ${user_id} not found in ${platform}`);
-    }
-
-    const profileCreate: AccountProfileCreate = {
-      ...profileBase,
-      platformId: platform,
-    };
-
-    const id = this.users.profiles.create(profileCreate, manager);
-    return { id, ...profileCreate };
-  }
-
-  /** Get or create an account profile */
-  async getOrCreateProfile<P = any>(
-    profileId: string,
-    manager: TransactionManager
-  ) {
-    const profile = await this.users.profiles.getByProfileId<false, P>(
-      profileId,
-      manager
-    );
-
-    if (!profile) {
-      return this.readAndCreateProfile<P>(profileId, manager);
-    }
-
-    return profile as P;
-  }
-
   /** Get posts AppPostFull of user, cannot be part of a transaction
    * We trigger fetching posts from the platforms from here
    */
