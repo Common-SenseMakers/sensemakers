@@ -18,3 +18,21 @@ export const toBase64 = async (file: File): Promise<string | undefined> => {
 export const cap = (string: string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
+
+export function arraysEqual<T = any>(
+  a: T[],
+  b: T[],
+  compareFn?: (a: T, b: T) => number
+): boolean {
+  if (a.length !== b.length) return false;
+
+  const sortedA = [...a].sort(compareFn);
+  const sortedB = [...b].sort(compareFn);
+
+  for (let i = 0; i < sortedA.length; i++) {
+    if (sortedA[i] !== sortedB[i]) {
+      return false;
+    }
+  }
+  return true;
+}
