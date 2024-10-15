@@ -16,8 +16,6 @@ const userId = process.env.USER_ID as string;
 const DEBUG = false;
 
 services.db.run(async (manager) => {
-  const user = await services.users.repo.getUser(userId, manager, true);
-
   const notificationsIds =
     await services.notifications.notificationsRepo.getUnotifiedOfUser(
       userId,

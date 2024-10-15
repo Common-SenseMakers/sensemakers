@@ -48,7 +48,7 @@
       "args": [
         "--project",
         "./tsconfig.scripts.json",
-        "./migrations/003-posts-from-dataset.ts"
+        "./migrations/004-profiles-update-prod.ts"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",

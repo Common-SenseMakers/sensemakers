@@ -103,4 +103,14 @@ export class DBInstance {
       }
     }
   }
+
+  /** WARNING!!! clear all collections */
+  async clear() {
+    const collections = await this.firestore.listCollections();
+    await Promise.all(
+      collections.map(async (collection) => {
+        return this.firestore.recursiveDelete(collection);
+      })
+    );
+  }
 }

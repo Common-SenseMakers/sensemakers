@@ -1,5 +1,3 @@
-import { FieldValue } from 'firebase-admin/firestore';
-
 import { app } from './scripts.services';
 
 const mandatory = ['USER_ID', 'PLATFORM_ID'];
@@ -143,13 +141,10 @@ if (process.env.FB_PROJECT_ID === 'sensenets-prod') {
       delete updatedAccounts[platformId];
 
       // Update the document by removing the matching platformIds and updating the accounts
-      await firestore
-        .collection('users')
-        .doc(userId)
-        .update({
-          platformIds: updatedPlatformIds,
-          accounts: updatedAccounts,
-        });
+      await firestore.collection('users').doc(userId).update({
+        platformIds: updatedPlatformIds,
+        accounts: updatedAccounts,
+      });
 
       console.log(
         `Platform '${platformId}' removed from accounts, and platformIds updated for userId: ${userId}`

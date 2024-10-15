@@ -3,6 +3,7 @@ import * as admin from 'firebase-admin';
 
 import { logger } from '../src/instances/logger';
 import { createServices } from '../src/instances/services';
+import { config } from './scripts.config';
 
 // Load environment variables from .env file
 dotenv.config({ path: './scripts/.script.env' });
@@ -25,4 +26,4 @@ export const app = admin.initializeApp({
   projectId: process.env.FB_PROJECT_ID,
 });
 
-export const services = createServices(app.firestore());
+export const services = createServices(app.firestore(), config);
