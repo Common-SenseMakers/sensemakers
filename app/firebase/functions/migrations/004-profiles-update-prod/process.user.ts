@@ -6,7 +6,11 @@ import {
   AccountProfileBase,
   AccountProfileCreate,
 } from '../../src/@shared/types/types.profiles';
-import { AppUser, AppUserCreate } from '../../src/@shared/types/types.user';
+import {
+  AccountCredentials,
+  AppUser,
+  AppUserCreate,
+} from '../../src/@shared/types/types.user';
 import { DEBUG } from '../../src/emailSender/email.sender.service';
 import { logger } from '../../src/instances/logger';
 import { Services } from '../../src/instances/services';
@@ -66,15 +70,32 @@ export const processUser = async (user: AppUser, services: Services) => {
       /** create user */
       const twitterAccounts = (user as any)['twitter'] || [];
       const nanopubAccounts = (user as any)['nanopub'] || [];
+      const orcidAccounts = (user as any)['orcid'] || [];
 
-      twitterAccounts.forEach((account: any) => {
+      const accounts = [
+        ...twitterAccounts,
+        ...nanopubAccounts,
+        ...orcidAccounts,
+      ];
+
+      accounts.forEach((account: any) => {
         delete account['fetched'];
         delete account['profile'];
-      });
 
-      nanopubAccounts.forEach((account: any) => {
-        delete account['fetched'];
-        delete account['profile'];
+        const credentials: AccountCredentials = {};
+
+        if (account['read']) {
+          credentials.read = { ...account['read'] };
+        }
+
+        if (account['write']) {
+          credentials.write = { ...account['write'] };
+        }
+
+        delete account['read'];
+        delete account['write'];
+
+        account.credentials = credentials;
       });
 
       const userCreate: AppUserCreate = {

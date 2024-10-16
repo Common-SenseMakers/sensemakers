@@ -1,6 +1,5 @@
 import { logger } from 'firebase-functions';
 
-import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { AppPost } from '../../src/@shared/types/types.posts';
 import { DEBUG } from '../../src/emailSender/email.sender.service';
 import { Services } from '../../src/instances/services';
@@ -61,6 +60,11 @@ export const processPost = async (
         targetPost.authorUserId = sourceAuthorId;
       }
 
+      targetPost.authorProfileId = getProfileId(
+        targetPost.origin,
+        targetPost.generic.author.id
+      );
+
       /** the profile needs to exist */
       const originMirror = PostsHelper.getPostMirror(
         sourcePostFull,
@@ -90,19 +94,6 @@ export const processPost = async (
         return;
       }
 
-      const author_user_id = (() => {
-        if (originMirror.platformId === PLATFORM.Mastodon) {
-          return `${originMirror.posted.post.author.url}`;
-        }
-        return originMirror.posted.user_id;
-      })();
-
-      /** create profile */
-      const profileId = getProfileId(sourcePost.origin, author_user_id);
-      if (DEBUG) logger.debug(`creating profile exists`, { profileId });
-
-      await servicesTarget.users.getOrCreateProfile(profileId, managerTarget);
-
       const targetMirror = { ...originMirror };
       delete (targetMirror as any)['id'];
 
@@ -124,10 +115,32 @@ export const processPost = async (
       /** create AppPost */
       if (DEBUG) logger.debug(`creating post`, { targetPost });
 
-      servicesTarget.postsManager.processing.posts.create(
-        targetPost,
-        managerTarget
-      );
+      const targetPostCreated: AppPost =
+        servicesTarget.postsManager.processing.posts.create(
+          targetPost,
+          managerTarget
+        );
+
+      /** process semantics */
+      const structured =
+        await servicesTarget.postsManager.processing.processSemantics(
+          targetPostCreated.id,
+          managerTarget,
+          sourcePost.semantics
+        );
+
+      if (structured) {
+        if (DEBUG)
+          logger.debug(
+            `updating structured semantics ${targetPostCreated.id}`,
+            structured
+          );
+        await servicesTarget.postsManager.processing.posts.update(
+          targetPostCreated.id,
+          { ...structured },
+          managerTarget
+        );
+      }
     });
   } catch (error) {
     console.error('Error processing post', sourcePost.id, error);

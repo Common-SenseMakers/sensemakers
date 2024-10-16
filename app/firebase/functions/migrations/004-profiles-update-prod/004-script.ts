@@ -5,7 +5,7 @@ import { servicesSource, servicesTarget } from '../migrations.services';
 import { processPost } from './process.post';
 import { processUser } from './process.user';
 
-const DEBUG = false;
+const DEBUG = true;
 
 (async () => {
   /**
@@ -33,6 +33,7 @@ const DEBUG = false;
   const posts =
     await servicesSource.postsManager.processing.posts.getAllOfQuery(
       {
+        userId: 'nanopub:0x23fC0DAb9BD663d1bb64B0867d6a00FbC8f0D08A',
         origins: [PLATFORM.Twitter],
         fetchParams: { expectedAmount: 100 },
       },
