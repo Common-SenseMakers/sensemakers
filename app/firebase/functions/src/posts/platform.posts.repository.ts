@@ -4,7 +4,8 @@ import {
   PlatformPostPosted,
   PlatformPostStatusUpdate,
 } from '../@shared/types/types.platform.posts';
-import { DefinedIfTrue, PLATFORM } from '../@shared/types/types.user';
+import { PLATFORM } from '../@shared/types/types.platforms';
+import { DefinedIfTrue } from '../@shared/types/types.user';
 import { DBInstance } from '../db/instance';
 import { BaseRepository, removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
@@ -80,14 +81,20 @@ export class PlatformPostsRepository extends BaseRepository<
 
   /** Get the platform post from the published post_id */
   public async getFrom_post_id<T extends boolean, R = string>(
+    platform: PLATFORM,
     post_id: string,
     manager: TransactionManager,
     shouldThrow?: T
   ): Promise<DefinedIfTrue<T, R>> {
+    const post_idKey: keyof PlatformPost = 'post_id';
+    const platformKey: keyof PlatformPost = 'platformId';
+
     const _shouldThrow = shouldThrow !== undefined ? shouldThrow : false;
 
     const posts = await manager.query(
-      this.db.collections.platformPosts.where('posted.post_id', '==', post_id)
+      this.db.collections.platformPosts
+        .where(platformKey, '==', platform)
+        .where(post_idKey, '==', post_id)
     );
 
     if (posts.empty) {

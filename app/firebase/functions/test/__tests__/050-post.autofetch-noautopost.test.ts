@@ -6,6 +6,7 @@ import {
   PlatformPostPosted,
   PlatformPostPublishStatus,
 } from '../../src/@shared/types/types.platform.posts';
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import {
   AppPostParsedStatus,
   AppPostParsingStatus,
@@ -13,7 +14,7 @@ import {
   PostsQueryStatus,
 } from '../../src/@shared/types/types.posts';
 import { TwitterThread } from '../../src/@shared/types/types.twitter';
-import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
+import { AppUser } from '../../src/@shared/types/types.user';
 import { logger } from '../../src/instances/logger';
 import { triggerAutofetchPosts } from '../../src/posts/tasks/posts.autofetch.task';
 import { resetDB } from '../utils/db';
@@ -63,7 +64,8 @@ describe('050-autofetch-no-autopost', () => {
 
     it('publish a tweet in the name of the test user', async () => {
       const TEST_CONTENT = `This is a test post ${USE_REAL_TWITTER ? Date.now() : ''}`;
-      thread = await _02_publishTweet(globalTestServices, TEST_CONTENT, user);
+      thread = (await _02_publishTweet(globalTestServices, TEST_CONTENT, user))
+        .post;
     });
 
     it('fetch user posts and check notifications', async () => {

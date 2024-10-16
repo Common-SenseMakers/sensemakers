@@ -6,17 +6,14 @@ import {
   PlatformPostPosted,
   PlatformPostPublishStatus,
 } from '../../src/@shared/types/types.platform.posts';
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import {
   AppPostParsedStatus,
   AppPostParsingStatus,
   AppPostRepublishedStatus,
 } from '../../src/@shared/types/types.posts';
 import { TwitterThread } from '../../src/@shared/types/types.twitter';
-import {
-  AppUser,
-  AutopostOption,
-  PLATFORM,
-} from '../../src/@shared/types/types.user';
+import { AppUser, AutopostOption } from '../../src/@shared/types/types.user';
 import { logger } from '../../src/instances/logger';
 import { triggerAutofetchPosts } from '../../src/posts/tasks/posts.autofetch.task';
 import { resetDB } from '../utils/db';
@@ -73,7 +70,7 @@ describe.skip('051-autofetch-autopost', () => {
     it('publish a tweet in the name of the test user', async () => {
       const TEST_CONTENT = `This is a test post F ${USE_REAL_TWITTER ? Date.now() : ''}`; // It should result on a citoid labeled post
 
-      thread = await _02_publishTweet(services, TEST_CONTENT, user);
+      thread = (await _02_publishTweet(services, TEST_CONTENT, user)).post;
     });
 
     it('fetch posts, autopost and check notifications', async () => {

@@ -16,7 +16,8 @@ import { useTwitterContext } from './contexts/platforms/TwitterContext';
 export const ConnectSocialsPage = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { connectedUser, setAlreadyConnected } = useAccountContext();
+  const { connectedUser, connectedSourcePlatforms, setAlreadyConnected } =
+    useAccountContext();
 
   const { connect: connectTwitter } = useTwitterContext();
 
@@ -42,7 +43,7 @@ export const ConnectSocialsPage = () => {
           disabled={!connectTwitter}
           icon={
             twitterProfile ? (
-              <PlatformAvatar imageUrl={twitterProfile?.profile_image_url} />
+              <PlatformAvatar imageUrl={twitterProfile?.avatar} />
             ) : (
               <TwitterIcon size={40} color="black"></TwitterIcon>
             )
@@ -68,11 +69,7 @@ export const ConnectSocialsPage = () => {
           platformName={'Mastodon'}
           onButtonClicked={() => navigate(AbsoluteRoutes.ConnectMastodon)}
           buttonText={mastodonProfile ? '' : 'connect'}
-          username={
-            mastodonProfile
-              ? `@${mastodonProfile.username}@${mastodonProfile.mastodonServer}`
-              : ''
-          }
+          username={mastodonProfile?.username || ''}
           connected={!!mastodonProfile}
         />
 
@@ -99,7 +96,7 @@ export const ConnectSocialsPage = () => {
           primary
           label={t(I18Keys.continue)}
           onClick={handleContinue}
-          disabled={!twitterProfile && !mastodonProfile}
+          disabled={connectedSourcePlatforms.length === 0}
           style={{ width: '100%' }}
         />
       </Box>

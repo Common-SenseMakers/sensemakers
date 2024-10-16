@@ -3,6 +3,7 @@ import {
   PlatformPostPublishOrigin,
   PlatformPostPublishStatus,
 } from '../types/types.platform.posts';
+import { PLATFORM } from '../types/types.platforms';
 import {
   AppPostFull,
   AppPostParsedStatus,
@@ -11,10 +12,10 @@ import {
   AppPostReviewStatus,
   GenericThread,
 } from '../types/types.posts';
-import { PLATFORM } from '../types/types.user';
 
 export const getMockPublishedPost = () => {
-  const authorId = 'test-author-id';
+  const authorId = 'test-author-userId';
+  const authorProfileId = 'test-author-user_id';
   const createdAtMs =
     Date.now() - Math.floor(Math.random() * 20 + 1) * 24 * 60 * 60 * 1000;
 
@@ -43,7 +44,8 @@ export const getMockPublishedPost = () => {
   const post: AppPostFull = {
     id: 'post-id',
     createdAtMs: createdAtMs,
-    authorId: authorId,
+    authorProfileId,
+    authorUserId: authorId,
     generic: defaultGeneric,
     semantics: last_output.semantics,
     origin: PLATFORM.Twitter,
@@ -105,7 +107,9 @@ export const getMockPublishedPost = () => {
 };
 
 export const getMockAutoPublishedPost = () => {
-  const authorId = 'test-author-id';
+  const authorId = 'test-author-userId';
+  const authorProfileId = 'test-author-user_id';
+
   const createdAtMs =
     Date.now() - Math.floor(Math.random() * 20 + 1) * 24 * 60 * 60 * 1000;
 
@@ -134,7 +138,8 @@ export const getMockAutoPublishedPost = () => {
   const post: AppPostFull = {
     id: 'post-id',
     createdAtMs: createdAtMs,
-    authorId: authorId,
+    authorProfileId,
+    authorUserId: authorId,
     generic: defaultGeneric,
     semantics: last_output.semantics,
     origin: PLATFORM.Twitter,
@@ -195,7 +200,9 @@ export const getMockAutoPublishedPost = () => {
   return post;
 };
 export const getMockPendingPost = () => {
-  const authorId = 'test-author-id';
+  const authorId = 'test-author-userId';
+  const authorProfileId = 'test-author-user_id';
+
   const createdAtMs =
     Date.now() - Math.floor(Math.random() * 20 + 1) * 24 * 60 * 60 * 1000;
 
@@ -228,7 +235,8 @@ export const getMockPendingPost = () => {
   const post: AppPostFull = {
     id: 'post-id',
     createdAtMs: createdAtMs,
-    authorId: authorId,
+    authorProfileId,
+    authorUserId: authorId,
     generic: defaultGeneric,
     semantics: last_output.semantics,
     origin: PLATFORM.Twitter,

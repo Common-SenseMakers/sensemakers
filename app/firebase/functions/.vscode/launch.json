@@ -48,7 +48,7 @@
       "args": [
         "--project",
         "./tsconfig.scripts.json",
-        "./migrations/002-post-structured-semantics.ts"
+        "./migrations/004-profiles-update-prod/004-script.ts"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",

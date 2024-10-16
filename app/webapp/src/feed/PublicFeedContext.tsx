@@ -28,36 +28,31 @@ export const FeedPostsContext: React.FC<{
 }> = ({ children }) => {
   const location = useLocation();
 
-  const config = useMemo((): FetcherConfig => {
-    const feedIx = locationToFeedIx(location);
-    const labels = feedTabs[feedIx].labels;
-
-    return {
-      endpoint: '/api/feed/get',
-      status: PostsQueryStatus.PUBLISHED,
-      labels,
-    };
-  }, [location]);
-
   const feed0 = usePostsFetcher({
     endpoint: '/api/feed/get',
-    status: PostsQueryStatus.PUBLISHED,
     labels: feedTabs[0].labels,
+    DEBUG_PREIX: `[FEED 0] `,
   });
 
   const feed1 = usePostsFetcher({
     endpoint: '/api/feed/get',
-    status: PostsQueryStatus.PUBLISHED,
     labels: feedTabs[1].labels,
+    DEBUG_PREIX: `[FEED 1] `,
   });
 
   const feed2 = usePostsFetcher({
     endpoint: '/api/feed/get',
-    status: PostsQueryStatus.PUBLISHED,
     labels: feedTabs[2].labels,
+    DEBUG_PREIX: `[FEED 2] `,
   });
 
-  const feeds = [feed0, feed1, feed2];
+  const feed3 = usePostsFetcher({
+    endpoint: '/api/feed/get',
+    labels: feedTabs[3].labels,
+    DEBUG_PREIX: `[FEED 3] `,
+  });
+
+  const feeds = [feed0, feed1, feed2, feed3];
 
   const feedIx = locationToFeedIx(location);
   const feed = feeds[feedIx];

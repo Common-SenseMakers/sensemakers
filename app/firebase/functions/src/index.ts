@@ -7,7 +7,7 @@ import {
   onDocumentCreated,
   onDocumentUpdated,
 } from 'firebase-functions/v2/firestore';
-import { onSchedule } from 'firebase-functions/v2/scheduler';
+// import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { onTaskDispatched } from 'firebase-functions/v2/tasks';
 import { Message } from 'postmark';
 
@@ -17,18 +17,18 @@ import { PlatformPost } from './@shared/types/types.platform.posts';
 import { AppPost } from './@shared/types/types.posts';
 import { CollectionNames } from './@shared/utils/collectionNames';
 import { activityEventCreatedHook } from './activity/activity.created.hook';
+import { adminRouter } from './admin.router';
 import {
-  AUTOFETCH_PERIOD,
-  DAILY_NOTIFICATION_PERIOD,
+  // AUTOFETCH_PERIOD,
+  // DAILY_NOTIFICATION_PERIOD,
   EMAIL_SENDER_FROM,
-  IS_EMULATOR,
-  MONTHLY_NOTIFICATION_PERIOD,
-  WEEKLY_NOTIFICATION_PERIOD,
+  IS_EMULATOR, // MONTHLY_NOTIFICATION_PERIOD,
+  // WEEKLY_NOTIFICATION_PERIOD,
 } from './config/config.runtime';
 import { envDeploy } from './config/typedenv.deploy';
 import { envRuntime } from './config/typedenv.runtime';
 import { getServices } from './controllers.utils';
-import { buildApp } from './instances/app';
+import { buildAdminApp, buildApp } from './instances/app';
 import { logger } from './instances/logger';
 import { createServices } from './instances/services';
 import {
@@ -49,24 +49,28 @@ import {
 } from './posts/tasks/posts.autopost.task';
 import { PARSE_POST_TASK, parsePostTask } from './posts/tasks/posts.parse.task';
 import { router } from './router';
+import { getConfig } from './services.config';
 
 // all secrets are available to all functions
 const secrets = [
   envRuntime.ORCID_SECRET,
   envRuntime.OUR_TOKEN_SECRET,
   envRuntime.TWITTER_CLIENT_SECRET,
+  envRuntime.TWITTER_BEARER_TOKEN,
+  envRuntime.MASTODON_ACCESS_TOKENS,
+  envRuntime.BLUESKY_APP_PASSWORD,
   envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
   envRuntime.EMAIL_CLIENT_SECRET,
   envRuntime.MAGIC_ADMIN_SECRET,
 ];
 
-export const config = IS_EMULATOR
+export const appConfig = IS_EMULATOR
   ? {
       projectId: 'demo-sensenets',
     }
   : {};
 
-const app = admin.initializeApp(config);
+const app = admin.initializeApp(appConfig);
 const firestore = app.firestore();
 
 // import { fetchNewPosts } from './posts/posts.job';
@@ -82,44 +86,54 @@ exports['api'] = functions
   })
   .https.onRequest(buildApp(router));
 
+exports['admin'] = functions
+  .region(envDeploy.REGION)
+  .runWith({
+    timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
+    memory: envDeploy.CONFIG_MEMORY,
+    minInstances: envDeploy.CONFIG_MININSTANCE,
+    secrets: [...secrets, envRuntime.ADMIN_API_KEY],
+  })
+  .https.onRequest(buildAdminApp(adminRouter));
+
 /** jobs */
-exports.accountFetch = onSchedule(
-  {
-    schedule: AUTOFETCH_PERIOD,
-    secrets,
-  },
-  () => triggerAutofetchPosts(createServices(firestore))
-);
+// exports.accountFetch = onSchedule(
+//   {
+//     schedule: AUTOFETCH_PERIOD,
+//     secrets,
+//   },
+//   () => triggerAutofetchPosts(createServices(firestore))
+// );
 
-exports.sendDailyNotifications = onSchedule(
-  {
-    schedule: DAILY_NOTIFICATION_PERIOD,
-    secrets,
-  },
-  () =>
-    triggerSendNotifications(NotificationFreq.Daily, createServices(firestore))
-);
+// exports.sendDailyNotifications = onSchedule(
+//   {
+//     schedule: DAILY_NOTIFICATION_PERIOD,
+//     secrets,
+//   },
+//   () =>
+//     triggerSendNotifications(NotificationFreq.Daily, createServices(firestore))
+// );
 
-exports.sendWeeklyNotifications = onSchedule(
-  {
-    schedule: WEEKLY_NOTIFICATION_PERIOD,
-    secrets,
-  },
-  () =>
-    triggerSendNotifications(NotificationFreq.Weekly, createServices(firestore))
-);
+// exports.sendWeeklyNotifications = onSchedule(
+//   {
+//     schedule: WEEKLY_NOTIFICATION_PERIOD,
+//     secrets,
+//   },
+//   () =>
+//     triggerSendNotifications(NotificationFreq.Weekly, createServices(firestore))
+// );
 
-exports.sendMonthlyNotifications = onSchedule(
-  {
-    schedule: MONTHLY_NOTIFICATION_PERIOD,
-    secrets,
-  },
-  () =>
-    triggerSendNotifications(
-      NotificationFreq.Monthly,
-      createServices(firestore)
-    )
-);
+// exports.sendMonthlyNotifications = onSchedule(
+//   {
+//     schedule: MONTHLY_NOTIFICATION_PERIOD,
+//     secrets,
+//   },
+//   () =>
+//     triggerSendNotifications(
+//       NotificationFreq.Monthly,
+//       createServices(firestore)
+//     )
+// );
 
 /** tasks */
 exports[PARSE_POST_TASK] = onTaskDispatched(
@@ -138,7 +152,7 @@ exports[PARSE_POST_TASK] = onTaskDispatched(
       maxDispatchesPerSecond: 190,
     },
   },
-  (req) => parsePostTask(req, createServices(firestore))
+  (req) => parsePostTask(req, createServices(firestore, getConfig()))
 );
 
 exports[AUTOFETCH_POSTS_TASK] = onTaskDispatched(
@@ -152,7 +166,10 @@ exports[AUTOFETCH_POSTS_TASK] = onTaskDispatched(
     },
   },
   async (req) => {
-    void (await autofetchUserPosts(req, createServices(firestore)));
+    void (await autofetchUserPosts(
+      req,
+      createServices(firestore, getConfig())
+    ));
   }
 );
 
@@ -163,7 +180,7 @@ exports[AUTOPOST_POST_TASK] = onTaskDispatched(
     minInstances: envDeploy.CONFIG_MININSTANCE,
     secrets,
   },
-  (req) => autopostPostTask(req, createServices(firestore))
+  (req) => autopostPostTask(req, createServices(firestore, getConfig()))
 );
 
 exports[NOTIFY_USER_TASK] = onTaskDispatched(
@@ -178,7 +195,10 @@ exports[NOTIFY_USER_TASK] = onTaskDispatched(
       throw new Error('userId not found for task notifyUserTask');
     }
 
-    return notifyUserTask(req.data.userId, createServices(firestore));
+    return notifyUserTask(
+      req.data.userId,
+      createServices(firestore, getConfig())
+    );
   }
 );
 
@@ -228,7 +248,11 @@ exports.postUpdateListener = onDocumentUpdated(
       event,
       'postId'
     );
-    await postUpdatedHook(after, createServices(firestore), before);
+    await postUpdatedHook(
+      after,
+      createServices(firestore, getConfig()),
+      before
+    );
   }
 );
 
@@ -239,7 +263,7 @@ exports.postCreateListener = onDocumentCreated(
   },
   async (event) => {
     const created = getCreatedOnCreate<AppPost>(event, 'postId');
-    await postUpdatedHook(created, createServices(firestore));
+    await postUpdatedHook(created, createServices(firestore, getConfig()));
   }
 );
 
@@ -253,7 +277,11 @@ exports.platformPostUpdateListener = onDocumentUpdated(
       event,
       'platformPostId'
     );
-    await platformPostUpdatedHook(after, createServices(firestore), before);
+    await platformPostUpdatedHook(
+      after,
+      createServices(firestore, getConfig()),
+      before
+    );
   }
 );
 
@@ -268,7 +296,10 @@ exports.activityEventCreateListener = onDocumentCreated(
       'activityEventId'
     );
 
-    await activityEventCreatedHook(created, createServices(firestore));
+    await activityEventCreatedHook(
+      created,
+      createServices(firestore, getConfig())
+    );
   }
 );
 
@@ -277,7 +308,7 @@ const emulatorTriggerRouter = express.Router();
 
 emulatorTriggerRouter.post('/autofetch', async (request, response) => {
   logger.debug('autofetch triggered');
-  await triggerAutofetchPosts(createServices(firestore));
+  await triggerAutofetchPosts(createServices(firestore, getConfig()));
   response.status(200).send({ success: true });
 });
 
@@ -298,7 +329,7 @@ emulatorTriggerRouter.post('/sendNotifications', async (request, response) => {
 emulatorTriggerRouter.post('/emailTest', async (request, response) => {
   logger.debug('emailTest triggered');
 
-  const services = createServices(firestore);
+  const services = createServices(firestore, getConfig());
   const message: Message = {
     From: EMAIL_SENDER_FROM.value(),
     ReplyTo: EMAIL_SENDER_FROM.value(),
@@ -322,3 +353,14 @@ exports['trigger'] = functions
     secrets,
   })
   .https.onRequest(buildApp(emulatorTriggerRouter));
+
+/** admin */
+exports['admin'] = functions
+  .region(envDeploy.REGION)
+  .runWith({
+    timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
+    memory: envDeploy.CONFIG_MEMORY,
+    minInstances: envDeploy.CONFIG_MININSTANCE,
+    secrets: [...secrets, envRuntime.ADMIN_API_KEY],
+  })
+  .https.onRequest(buildAdminApp(adminRouter));

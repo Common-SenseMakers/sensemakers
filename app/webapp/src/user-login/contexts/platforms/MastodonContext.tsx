@@ -19,7 +19,7 @@ import {
   MastodonSignupContext,
   MastodonSignupData,
 } from '../../../shared/types/types.mastodon';
-import { PLATFORM } from '../../../shared/types/types.user';
+import { PLATFORM } from '../../../shared/types/types.platforms';
 import { usePersist } from '../../../utils/use.persist';
 import {
   LoginFlowState,
@@ -76,7 +76,9 @@ export const MastodonContext = (props: PropsWithChildren) => {
   const appFetch = useAppFetch();
 
   const needConnect =
-    !connectedUser || !connectedUser.accounts[PLATFORM.Mastodon];
+    !connectedUser ||
+    !connectedUser.profiles ||
+    !connectedUser.profiles[PLATFORM.Mastodon];
 
   useEffect(() => {
     if (error) {
@@ -102,9 +104,8 @@ export const MastodonContext = (props: PropsWithChildren) => {
 
       try {
         const params: MastodonGetContextParams = {
-          domain,
-          // callback_url: `${window.location.origin}${callbackUrl}`,
-          callback_url: callbackUrl || window.location.href,
+          mastodonServer: domain,
+          callback_url: window.location.href,
           type,
         };
         log('Fetching Mastodon signup context', params);
@@ -129,7 +130,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
         }
       } catch (err: any) {
         log('Error connecting to Mastodon', err);
-        setError(t(I18Keys.errorConnectMastodon, { mastodonServer: domain }));
+        setError(t(I18Keys.errorConnectMastodon, { domain }));
         setLoginFlowState(LoginFlowState.Idle);
         setPlatformConnectedStatus(
           PLATFORM.Mastodon,
@@ -173,7 +174,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
           const signupData: MastodonSignupData = {
             ...context,
             code: code_param,
-            domain: new URL(context.authorizationUrl).hostname,
+            mastodonServer: new URL(context.authorizationUrl).hostname,
             callback_url: window.location.href,
             type: 'read',
           };
@@ -189,6 +190,10 @@ export const MastodonContext = (props: PropsWithChildren) => {
             }
 
             searchParams.delete('code');
+            setPlatformConnectedStatus(
+              PLATFORM.Mastodon,
+              PlatformConnectedStatus.Connected
+            );
             refreshConnected();
             setSearchParams(searchParams);
           });

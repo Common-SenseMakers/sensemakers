@@ -17,11 +17,8 @@ import { ViewportPage } from '../app/layout/Viewport';
 import { I18Keys } from '../i18n/i18n';
 import { RouteNames } from '../route.names';
 import { NotificationFreq } from '../shared/types/types.notifications';
-import {
-  AutopostOption,
-  PLATFORM,
-  UserSettingsUpdate,
-} from '../shared/types/types.user';
+import { PLATFORM } from '../shared/types/types.platforms';
+import { AutopostOption, UserSettingsUpdate } from '../shared/types/types.user';
 import { AppButton, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
@@ -33,7 +30,6 @@ import { useBlueskyContext } from '../user-login/contexts/platforms/BlueskyConte
 import { useMastodonContext } from '../user-login/contexts/platforms/MastodonContext';
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { useTwitterContext } from '../user-login/contexts/platforms/TwitterContext';
-import { getAccount } from '../user-login/user.helper';
 import { PlatformSection } from '../user-settings/PlatformsSection';
 import { SettingsOptionSelector } from '../user-settings/SettingsOptionsSelector';
 import {
@@ -86,8 +82,7 @@ export const UserSettingsPage = () => {
   const twitterProfile = connectedUser?.profiles?.twitter;
   const mastodonProfile = connectedUser?.profiles?.mastodon;
   const blueskyProfile = connectedUser?.profiles?.bluesky;
-  const orcidAccounts = connectedUser?.accounts?.orcid;
-  const orcidAccount = orcidAccounts ? orcidAccounts[0] : undefined;
+  const orcidAccount = connectedUser?.profiles?.orcid;
 
   // receive the autopost invite
   useEffect(() => {
@@ -299,7 +294,7 @@ export const UserSettingsPage = () => {
         <PlatformSection
           icon={
             twitterProfile ? (
-              <PlatformAvatar imageUrl={twitterProfile?.profile_image_url} />
+              <PlatformAvatar imageUrl={twitterProfile?.avatar} />
             ) : (
               <TwitterIcon size={40} color="black"></TwitterIcon>
             )
@@ -327,11 +322,7 @@ export const UserSettingsPage = () => {
             });
           }}
           buttonText={needConnectMastodon ? 'connect' : ''}
-          username={
-            mastodonProfile
-              ? `@${mastodonProfile.username}@${mastodonProfile.mastodonServer}`
-              : '- not connected -'
-          }
+          username={mastodonProfile?.username || ''}
           connected={mastodonProfile !== undefined}></PlatformSection>
 
         <PlatformSection
@@ -360,7 +351,7 @@ export const UserSettingsPage = () => {
           onButtonClicked={() => connectOrcid('/settings')}
           buttonText="connect"
           username={
-            orcidAccount ? `@${orcidAccount.user_id}` : '- not connected -'
+            orcidAccount ? `@${orcidAccount.orcid}` : '- not connected -'
           }
           connected={orcidAccount !== undefined}
           connecting={connectingOrcid}></PlatformSection>

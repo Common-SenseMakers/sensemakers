@@ -4,13 +4,20 @@ import {
 } from '../@shared/types/types.posts';
 
 export const canReadPost = (post: AppPostFull, userId?: string) => {
-  if (post.republishedStatus !== AppPostRepublishedStatus.PENDING) {
+  if (
+    [
+      AppPostRepublishedStatus.AUTO_REPUBLISHED,
+      AppPostRepublishedStatus.REPUBLISHED,
+    ].includes(post.republishedStatus)
+  ) {
     return true;
   }
 
-  if (userId && post.authorId === userId) {
+  if (post.authorUserId && userId && post.authorUserId === userId) {
     return true;
   }
 
-  return false;
+  /** */
+  // return false;
+  return true;
 };

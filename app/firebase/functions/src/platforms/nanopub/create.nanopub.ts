@@ -1,7 +1,7 @@
 import { Store } from 'n3';
 
 import { AppPostFull } from '../../@shared/types/types.posts';
-import { AppUser, AutopostOption } from '../../@shared/types/types.user';
+import { AppUserRead, AutopostOption } from '../../@shared/types/types.user';
 import { parseRDF, replaceNodes } from '../../@shared/utils/n3.utils';
 import {
   ASSERTION_URI,
@@ -13,7 +13,7 @@ import { prepareNanopubDetails } from './prepare.nanopub.details';
 
 export const createNanopublication = async (
   post: AppPostFull,
-  user: AppUser
+  user: AppUserRead
 ) => {
   const {
     introUri,

@@ -1,5 +1,5 @@
+import { IDENTITY_PLATFORM, PLATFORM } from './types.platforms';
 import { AppPostFull } from './types.posts';
-import { PLATFORM, PUBLISHABLE_PLATFORM } from './types.user';
 
 export interface OurTokenConfig {
   tokenSecret: string;
@@ -18,7 +18,6 @@ export interface HandleSignupResult {
 export interface FetchParams {
   sinceId?: string;
   untilId?: string;
-  platformIds?: PUBLISHABLE_PLATFORM[];
   expectedAmount: number;
 }
 
@@ -37,4 +36,11 @@ export interface UserProfileQuery {
 export interface PublishPostPayload {
   post: AppPostFull;
   platformIds: PLATFORM[];
+}
+
+export interface AddUserDataPayload {
+  username: string;
+  platformId: IDENTITY_PLATFORM;
+  amount: number;
+  latest?: boolean;
 }
