@@ -46,7 +46,13 @@ export const FeedPostsContext: React.FC<{
     DEBUG_PREIX: `[FEED 2] `,
   });
 
-  const feeds = [feed0, feed1, feed2];
+  const feed3 = usePostsFetcher({
+    endpoint: '/api/feed/get',
+    labels: feedTabs[3].labels,
+    DEBUG_PREIX: `[FEED 3] `,
+  });
+
+  const feeds = [feed0, feed1, feed2, feed3];
 
   const feedIx = locationToFeedIx(location);
   const feed = feeds[feedIx];
