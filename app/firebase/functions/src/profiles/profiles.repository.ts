@@ -9,6 +9,7 @@ import {
 } from '../@shared/types/types.profiles';
 import { DefinedIfTrue } from '../@shared/types/types.user';
 import { DBInstance } from '../db/instance';
+import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 
 export const getProfileId = (platform: PLATFORM, user_id: string) =>
@@ -38,7 +39,7 @@ export class ProfilesRepository {
       getProfileId(accountProfile.platformId, accountProfile.user_id)
     );
 
-    manager.create(profileRef, accountProfile);
+    manager.create(profileRef, removeUndefined(accountProfile));
 
     return profileRef.id;
   }
