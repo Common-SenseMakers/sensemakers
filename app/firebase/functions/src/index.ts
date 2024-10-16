@@ -7,7 +7,7 @@ import {
   onDocumentCreated,
   onDocumentUpdated,
 } from 'firebase-functions/v2/firestore';
-// import { onSchedule } from 'firebase-functions/v2/scheduler';
+import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { onTaskDispatched } from 'firebase-functions/v2/tasks';
 import { Message } from 'postmark';
 
@@ -19,11 +19,12 @@ import { CollectionNames } from './@shared/utils/collectionNames';
 import { activityEventCreatedHook } from './activity/activity.created.hook';
 import { adminRouter } from './admin.router';
 import {
-  // AUTOFETCH_PERIOD,
-  // DAILY_NOTIFICATION_PERIOD,
+  AUTOFETCH_PERIOD,
+  DAILY_NOTIFICATION_PERIOD,
   EMAIL_SENDER_FROM,
-  IS_EMULATOR, // MONTHLY_NOTIFICATION_PERIOD,
-  // WEEKLY_NOTIFICATION_PERIOD,
+  IS_EMULATOR,
+  MONTHLY_NOTIFICATION_PERIOD,
+  WEEKLY_NOTIFICATION_PERIOD,
 } from './config/config.runtime';
 import { envDeploy } from './config/typedenv.deploy';
 import { envRuntime } from './config/typedenv.runtime';
@@ -97,43 +98,49 @@ exports['admin'] = functions
   .https.onRequest(buildAdminApp(adminRouter));
 
 /** jobs */
-// exports.accountFetch = onSchedule(
-//   {
-//     schedule: AUTOFETCH_PERIOD,
-//     secrets,
-//   },
-//   () => triggerAutofetchPosts(createServices(firestore))
-// );
+exports.accountFetch = onSchedule(
+  {
+    schedule: AUTOFETCH_PERIOD,
+    secrets,
+  },
+  () => triggerAutofetchPosts(createServices(firestore, getConfig()))
+);
 
-// exports.sendDailyNotifications = onSchedule(
-//   {
-//     schedule: DAILY_NOTIFICATION_PERIOD,
-//     secrets,
-//   },
-//   () =>
-//     triggerSendNotifications(NotificationFreq.Daily, createServices(firestore))
-// );
+exports.sendDailyNotifications = onSchedule(
+  {
+    schedule: DAILY_NOTIFICATION_PERIOD,
+    secrets,
+  },
+  () =>
+    triggerSendNotifications(
+      NotificationFreq.Daily,
+      createServices(firestore, getConfig())
+    )
+);
 
-// exports.sendWeeklyNotifications = onSchedule(
-//   {
-//     schedule: WEEKLY_NOTIFICATION_PERIOD,
-//     secrets,
-//   },
-//   () =>
-//     triggerSendNotifications(NotificationFreq.Weekly, createServices(firestore))
-// );
+exports.sendWeeklyNotifications = onSchedule(
+  {
+    schedule: WEEKLY_NOTIFICATION_PERIOD,
+    secrets,
+  },
+  () =>
+    triggerSendNotifications(
+      NotificationFreq.Weekly,
+      createServices(firestore, getConfig())
+    )
+);
 
-// exports.sendMonthlyNotifications = onSchedule(
-//   {
-//     schedule: MONTHLY_NOTIFICATION_PERIOD,
-//     secrets,
-//   },
-//   () =>
-//     triggerSendNotifications(
-//       NotificationFreq.Monthly,
-//       createServices(firestore)
-//     )
-// );
+exports.sendMonthlyNotifications = onSchedule(
+  {
+    schedule: MONTHLY_NOTIFICATION_PERIOD,
+    secrets,
+  },
+  () =>
+    triggerSendNotifications(
+      NotificationFreq.Monthly,
+      createServices(firestore, getConfig())
+    )
+);
 
 /** tasks */
 exports[PARSE_POST_TASK] = onTaskDispatched(
