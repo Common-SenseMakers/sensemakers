@@ -1,6 +1,6 @@
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { logger } from '../../src/instances/logger';
-import { processInBatches } from '../migration.utils';
+import { processInBatches, promptUser } from '../migration.utils';
 import { servicesSource, servicesTarget } from '../migrations.services';
 import { processPost } from './process.post';
 import { processUser } from './process.user';
@@ -23,6 +23,13 @@ const DEBUG = true;
 
   if (DEBUG) logger.debug(`${users.length} users found`);
 
+  const confirm = await promptUser(
+    `Do you want to delete the target database ${(servicesTarget.db.firestore as any)._projectId}? (y/N)`
+  );
+  if (!confirm) {
+    return;
+  }
+
   await servicesTarget.db.clear();
 
   /** create users */
@@ -35,6 +42,7 @@ const DEBUG = true;
       {
         origins: [PLATFORM.Twitter],
         fetchParams: { expectedAmount: 100 },
+        status: 'published',
       },
       undefined
     );

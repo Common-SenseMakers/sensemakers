@@ -3,7 +3,6 @@ import { logger } from 'firebase-functions';
 import { AppPost } from '../../src/@shared/types/types.posts';
 import { DEBUG } from '../../src/emailSender/email.sender.service';
 import { Services } from '../../src/instances/services';
-import { PostsHelper } from '../../src/posts/posts.helper';
 import { getProfileId } from '../../src/profiles/profiles.repository';
 
 export const processPost = async (
@@ -65,52 +64,53 @@ export const processPost = async (
         targetPost.generic.author.id
       );
 
-      /** the profile needs to exist */
-      const originMirror = PostsHelper.getPostMirror(
-        sourcePostFull,
-        { platformId: sourcePost.origin },
-        true
+      /** the mirror platformPosts */
+      const mirrorIds = await Promise.all(
+        sourcePostFull.mirrors.map(async (mirror) => {
+          if (!mirror.posted) {
+            return;
+          }
+
+          const existingMirrorId =
+            await servicesTarget.postsManager.processing.platformPosts.getFrom_post_id(
+              mirror.platformId,
+              mirror.posted.post_id,
+              managerTarget
+            );
+
+          if (existingMirrorId) {
+            if (DEBUG)
+              logger.debug(
+                `skiping post ${sourcePost.id}. It already exists in target`,
+                {
+                  existingMirrorId,
+                }
+              );
+            return existingMirrorId;
+          }
+
+          const targetMirror = { ...mirror };
+          delete (targetMirror as any)['id'];
+
+          /** missing post_id */
+          targetMirror.post_id = mirror.posted.post_id;
+
+          /** create mirror PlatformPost */
+          if (DEBUG)
+            logger.debug(`creating mirror platformPost`, { targetMirror });
+
+          const mirrorTarget =
+            servicesTarget.postsManager.processing.platformPosts.create(
+              targetMirror,
+              managerTarget
+            );
+
+          return mirrorTarget.id;
+        })
       );
 
-      if (!originMirror.posted) {
-        throw new Error(`Mirror should have a posted property`);
-      }
-
-      const existingMirrorId =
-        await servicesTarget.postsManager.processing.platformPosts.getFrom_post_id(
-          originMirror.platformId,
-          originMirror.posted.post_id,
-          managerTarget
-        );
-
-      if (existingMirrorId) {
-        if (DEBUG)
-          logger.debug(
-            `skiping post ${sourcePost.id}. It already exists in target`,
-            {
-              existingMirrorId,
-            }
-          );
-        return;
-      }
-
-      const targetMirror = { ...originMirror };
-      delete (targetMirror as any)['id'];
-
-      /** missing post_id */
-      targetMirror.post_id = originMirror.posted.post_id;
-
-      /** create mirror PlatformPost */
-      if (DEBUG) logger.debug(`creating mirror platformPost`, { targetMirror });
-
-      const mirrorTarget =
-        servicesTarget.postsManager.processing.platformPosts.create(
-          targetMirror,
-          managerTarget
-        );
-
       /** connect the platform post witht he app post */
-      targetPost.mirrorsIds = [mirrorTarget.id];
+      targetPost.mirrorsIds = mirrorIds.filter((id) => id !== undefined);
 
       /** create AppPost */
       if (DEBUG) logger.debug(`creating post`, { targetPost });
