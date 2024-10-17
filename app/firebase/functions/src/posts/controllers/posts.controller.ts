@@ -11,7 +11,11 @@ import {
 import { IS_EMULATOR } from '../../config/config.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
-import { FETCH_TWITTER_ACCOUNT_TASK } from '../../platforms/platforms.tasks';
+import {
+  FETCH_BLUESKY_ACCOUNT_TASK,
+  FETCH_MASTODON_ACCOUNT_TASK,
+  FETCH_TWITTER_ACCOUNT_TASK,
+} from '../../platforms/platforms.tasks';
 import { getProfileId } from '../../profiles/profiles.repository';
 import { enqueueTask } from '../../tasksUtils/tasks.support';
 import { canReadPost } from '../posts.access.control';
@@ -277,6 +281,22 @@ export const addAccountDataController: RequestHandler = async (
       await enqueueTask(FETCH_TWITTER_ACCOUNT_TASK, {
         profileId,
         platformId: PLATFORM.Twitter,
+        latest: payload.latest,
+        amount: payload.amount,
+      });
+    }
+    if (payload.platformId === PLATFORM.Mastodon) {
+      await enqueueTask(FETCH_MASTODON_ACCOUNT_TASK, {
+        profileId,
+        platformId: PLATFORM.Mastodon,
+        latest: payload.latest,
+        amount: payload.amount,
+      });
+    }
+    if (payload.platformId === PLATFORM.Bluesky) {
+      await enqueueTask(FETCH_BLUESKY_ACCOUNT_TASK, {
+        profileId,
+        platformId: PLATFORM.Bluesky,
         latest: payload.latest,
         amount: payload.amount,
       });

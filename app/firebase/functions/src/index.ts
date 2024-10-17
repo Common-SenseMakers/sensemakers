@@ -244,8 +244,28 @@ exports[FETCH_MASTODON_ACCOUNT_TASK] = onTaskDispatched(
       minBackoffSeconds: 60,
     },
     rateLimits: {
-      maxConcurrentDispatches: 100, // 1 task dispatched at a time
-      maxDispatchesPerSecond: 1, // max 1 task every 2 minutes
+      maxConcurrentDispatches: 100,
+      maxDispatchesPerSecond: 1, // max 1 task every second
+    },
+  },
+  (req) => fetchPlatformAccountTask(req, createServices(firestore, getConfig()))
+);
+
+/**
+ * com.atproto.server.createSession (for now this is the limiting API call since we login with username and app password each fetch)
+ * Measured per account
+ * 30 per 5 minutes
+ * 300 per day
+ */
+exports[FETCH_MASTODON_ACCOUNT_TASK] = onTaskDispatched(
+  {
+    retryConfig: {
+      maxAttempts: 3,
+      minBackoffSeconds: 60,
+    },
+    rateLimits: {
+      maxConcurrentDispatches: 10, // 1 task dispatched at a time
+      maxDispatchesPerSecond: 1 / 10, // max 6 task every 1 minutes
     },
   },
   (req) => fetchPlatformAccountTask(req, createServices(firestore, getConfig()))

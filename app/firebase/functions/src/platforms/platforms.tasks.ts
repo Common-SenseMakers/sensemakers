@@ -6,6 +6,7 @@ import { Services } from '../instances/services';
 
 export const FETCH_TWITTER_ACCOUNT_TASK = 'fetchTwitterAccount';
 export const FETCH_MASTODON_ACCOUNT_TASK = 'fetchMastodonAccount';
+export const FETCH_BLUESKY_ACCOUNT_TASK = 'fetchBlueskyAccount';
 
 export const fetchPlatformAccountTask = async (
   req: Request,
