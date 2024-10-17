@@ -254,15 +254,17 @@ export class TwitterService
         await this.getClient(credentials, 'read');
 
       /**
-       * TODO: because we are fetching 30 tweets per page, we
-       * can easily end up with more threads than the requested expectedResults
-       * The rate limit of 5 request in 15 minutes gives us 150 tweets max per result
-       * */
+       * the fetch params expected amount is refering to main threads. So here we multiply
+       * that expected amount by 5, up to the max of 100.
+       *
+       */
+      const max_results =
+        params.expectedAmount * 5 > 100 ? 100 : params.expectedAmount * 5;
 
       const _timelineParams: Partial<TweetV2UserTimelineParams> = {
         since_id: params.since_id,
         until_id: params.until_id,
-        max_results: 30,
+        max_results,
         expansions,
         'tweet.fields': tweetFields,
         'user.fields': userFields,
@@ -630,5 +632,17 @@ export class TwitterService
     } catch (e: any) {
       throw new Error(handleTwitterError(e));
     }
+  }
+
+  async getFollowing(
+    user_id: string,
+    credentials: TwitterCredentials
+  ): Promise<string[]> {
+    const { client } = await this.getClient(credentials, 'read');
+    const following = await client.v2.following(user_id, {
+      'user.fields': userFields,
+    });
+
+    return following.data.map((user) => user.id);
   }
 }

@@ -213,6 +213,11 @@ exports[NOTIFY_USER_TASK] = onTaskDispatched(
   }
 );
 
+/**
+ * GET_2_users_param_tweets: https://developer.x.com/en/docs/x-api/rate-limits#v2-limits-basic
+ * 10 requests / 15 min per app
+ * 5 requests / 15 min per user
+ */
 exports[FETCH_TWITTER_ACCOUNT_TASK] = onTaskDispatched(
   {
     retryConfig: {
