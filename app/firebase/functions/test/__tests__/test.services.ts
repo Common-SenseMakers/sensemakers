@@ -160,6 +160,12 @@ export const getTestServices = (config: TestServicesConfig) => {
   identityServices.set(PLATFORM.Mastodon, mastodon);
   identityServices.set(PLATFORM.Bluesky, bluesky);
 
+  /** all platforms */
+  platformsMap.set(PLATFORM.Twitter, twitter);
+  platformsMap.set(PLATFORM.Nanopub, nanopub);
+  platformsMap.set(PLATFORM.Mastodon, mastodon);
+  platformsMap.set(PLATFORM.Bluesky, bluesky);
+
   const _email = new EmailSenderService({
     apiKey: process.env.EMAIL_CLIENT_SECRET as string,
   });
@@ -175,6 +181,7 @@ export const getTestServices = (config: TestServicesConfig) => {
     userRepo,
     profilesRepo,
     identityServices,
+    platformsMap,
     time,
     email,
     {
@@ -182,12 +189,6 @@ export const getTestServices = (config: TestServicesConfig) => {
       expiresIn: '30d',
     }
   );
-
-  /** all platforms */
-  platformsMap.set(PLATFORM.Twitter, twitter);
-  platformsMap.set(PLATFORM.Nanopub, nanopub);
-  platformsMap.set(PLATFORM.Mastodon, mastodon);
-  platformsMap.set(PLATFORM.Bluesky, bluesky);
 
   /** platforms service */
   const platformsService = new PlatformsService(

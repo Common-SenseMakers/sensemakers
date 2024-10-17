@@ -37,6 +37,11 @@ import {
   notifyUserTask,
   triggerSendNotifications,
 } from './notifications/notification.task';
+import {
+  FETCH_MASTODON_ACCOUNT_TASK,
+  FETCH_TWITTER_ACCOUNT_TASK,
+  fetchPlatformAccountTask,
+} from './platforms/platforms.tasks';
 import { platformPostUpdatedHook } from './posts/hooks/platformPost.updated.hook';
 import { postUpdatedHook } from './posts/hooks/post.updated.hook';
 import {
@@ -207,6 +212,63 @@ exports[NOTIFY_USER_TASK] = onTaskDispatched(
       createServices(firestore, getConfig())
     );
   }
+);
+
+/**
+ * GET_2_users_param_tweets: https://developer.x.com/en/docs/x-api/rate-limits#v2-limits-basic
+ * 10 requests / 15 min per app
+ * 5 requests / 15 min per user
+ */
+exports[FETCH_TWITTER_ACCOUNT_TASK] = onTaskDispatched(
+  {
+    retryConfig: {
+      maxAttempts: 3,
+      minBackoffSeconds: 60 * 5,
+    },
+    rateLimits: {
+      maxConcurrentDispatches: 1, // 1 task dispatched at a time
+      maxDispatchesPerSecond: 1 / (60 * 2), // max 1 task every 2 minutes
+    },
+  },
+  (req) => fetchPlatformAccountTask(req, createServices(firestore, getConfig()))
+);
+
+/**
+ * rate limits: https://docs-p.joinmastodon.org/api/rate-limits/
+ * 300 requests / 5 min per account
+ */
+exports[FETCH_MASTODON_ACCOUNT_TASK] = onTaskDispatched(
+  {
+    retryConfig: {
+      maxAttempts: 3,
+      minBackoffSeconds: 60,
+    },
+    rateLimits: {
+      maxConcurrentDispatches: 100,
+      maxDispatchesPerSecond: 1, // max 1 task every second
+    },
+  },
+  (req) => fetchPlatformAccountTask(req, createServices(firestore, getConfig()))
+);
+
+/**
+ * com.atproto.server.createSession (for now this is the limiting API call since we login with username and app password each fetch)
+ * Measured per account
+ * 30 per 5 minutes
+ * 300 per day
+ */
+exports[FETCH_MASTODON_ACCOUNT_TASK] = onTaskDispatched(
+  {
+    retryConfig: {
+      maxAttempts: 3,
+      minBackoffSeconds: 60,
+    },
+    rateLimits: {
+      maxConcurrentDispatches: 10, // 1 task dispatched at a time
+      maxDispatchesPerSecond: 1 / 10, // max 6 task every 1 minutes
+    },
+  },
+  (req) => fetchPlatformAccountTask(req, createServices(firestore, getConfig()))
 );
 
 const getBeforeAndAfterOnUpdate = <T>(
