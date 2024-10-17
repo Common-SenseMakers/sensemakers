@@ -11,7 +11,7 @@ import {
 import { IS_EMULATOR } from '../../config/config.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
-import { FETCH_TWITTER_ACCOUNT_TASK } from '../../platforms/twitter/twitter.tasks';
+import { FETCH_TWITTER_ACCOUNT_TASK } from '../../platforms/platforms.tasks';
 import { getProfileId } from '../../profiles/profiles.repository';
 import { enqueueTask } from '../../tasksUtils/tasks.support';
 import { canReadPost } from '../posts.access.control';
@@ -276,6 +276,7 @@ export const addAccountDataController: RequestHandler = async (
     if (payload.platformId === PLATFORM.Twitter) {
       await enqueueTask(FETCH_TWITTER_ACCOUNT_TASK, {
         profileId,
+        platformId: PLATFORM.Twitter,
         latest: payload.latest,
         amount: payload.amount,
       });

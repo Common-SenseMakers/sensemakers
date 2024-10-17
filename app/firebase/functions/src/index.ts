@@ -38,9 +38,10 @@ import {
   triggerSendNotifications,
 } from './notifications/notification.task';
 import {
+  FETCH_MASTODON_ACCOUNT_TASK,
   FETCH_TWITTER_ACCOUNT_TASK,
-  fetchTwitterAccountTask,
-} from './platforms/twitter/twitter.tasks';
+  fetchPlatformAccountTask,
+} from './platforms/platforms.tasks';
 import { platformPostUpdatedHook } from './posts/hooks/platformPost.updated.hook';
 import { postUpdatedHook } from './posts/hooks/post.updated.hook';
 import {
@@ -229,7 +230,25 @@ exports[FETCH_TWITTER_ACCOUNT_TASK] = onTaskDispatched(
       maxDispatchesPerSecond: 1 / (60 * 2), // max 1 task every 2 minutes
     },
   },
-  (req) => fetchTwitterAccountTask(req, createServices(firestore, getConfig()))
+  (req) => fetchPlatformAccountTask(req, createServices(firestore, getConfig()))
+);
+
+/**
+ * rate limits: https://docs-p.joinmastodon.org/api/rate-limits/
+ * 300 requests / 5 min per account
+ */
+exports[FETCH_MASTODON_ACCOUNT_TASK] = onTaskDispatched(
+  {
+    retryConfig: {
+      maxAttempts: 3,
+      minBackoffSeconds: 60,
+    },
+    rateLimits: {
+      maxConcurrentDispatches: 100, // 1 task dispatched at a time
+      maxDispatchesPerSecond: 1, // max 1 task every 2 minutes
+    },
+  },
+  (req) => fetchPlatformAccountTask(req, createServices(firestore, getConfig()))
 );
 
 const getBeforeAndAfterOnUpdate = <T>(
