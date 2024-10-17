@@ -149,7 +149,8 @@ export const PostCard = (props: {
         )}
       </Box>
       <Box pad={{ top: 'medium' }}>
-        {updated.inPrePublish &&
+        {!isPublicFeed &&
+          updated.inPrePublish &&
           updated.postMerged?.parsedStatus ===
             AppPostParsedStatus.PROCESSED && (
             <PublishButtons compact></PublishButtons>

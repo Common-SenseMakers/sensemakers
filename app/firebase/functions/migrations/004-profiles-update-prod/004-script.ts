@@ -42,7 +42,6 @@ const DEBUG = true;
       {
         origins: [PLATFORM.Twitter],
         fetchParams: { expectedAmount: 100 },
-        status: 'published',
       },
       undefined
     );
