@@ -48,7 +48,8 @@
       "args": [
         "--project",
         "./tsconfig.scripts.json",
-        "./migrations/004-profiles-update-prod/004-script.ts"
+        // "./migrations/004-profiles-update-prod/004-script.ts",
+        "./scripts/050-get-followees.ts"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",

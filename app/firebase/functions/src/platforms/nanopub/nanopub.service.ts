@@ -236,9 +236,7 @@ export class NanopubService
    * Receives a list of PostToPublish (platformPost, mirrors and user credentials) and returns
    * a list of the updated platformPosts
    */
-  async publish(
-    postPublish: PlatformPostPublish<any>
-  ): Promise<PlatformPostPosted<any>> {
+  async publish(postPublish: PlatformPostPublish<any>) {
     const user_id = postPublish.draft.user_id;
     const published = await this.publishInternal(postPublish.draft);
 
@@ -249,7 +247,7 @@ export class NanopubService
         user_id: user_id,
         post: published.rdf(),
       };
-      return platformPostPosted;
+      return { platformPost: platformPostPosted };
     }
 
     throw new Error('Could not publish nanopub');
@@ -266,7 +264,7 @@ export class NanopubService
         user_id: user_id,
         post: published.rdf(),
       };
-      return { post: platformPostPosted };
+      return { platformPost: platformPostPosted };
     }
 
     throw new Error('Could not publish nanopub');

@@ -513,7 +513,7 @@ export class TwitterService
   /** user_id must be from the authenticated userId */
   public async publish(
     postPublish: PlatformPostPublish<TwitterDraft, TwitterCredentials>
-  ): Promise<{ post: PlatformPostPosted<TwitterThread> } & WithCredentials> {
+  ) {
     // TODO udpate to support many
     const post = postPublish.draft;
 
@@ -571,13 +571,15 @@ export class TwitterService
         newAccountCredentials.write = newCredentials;
       }
 
-      return { post: posted, credentials: newAccountCredentials };
+      return { platformPost: posted, credentials: newAccountCredentials };
     } catch (e: any) {
       throw new Error(handleTwitterError(e));
     }
   }
 
-  update(post: PlatformPostUpdate<any>): Promise<PlatformPostPosted<any>> {
+  async update(
+    post: PlatformPostUpdate<any>
+  ): Promise<{ platformPost: PlatformPostPosted<any, any> } & WithCredentials> {
     throw new Error('Method not implemented.');
   }
 

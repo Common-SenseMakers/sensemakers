@@ -821,7 +821,7 @@ export class PostsManager {
         throw new Error(`Expected signed post to be provided`);
       }
 
-      const { post: posted, credentials } = await platform.publish({
+      const { platformPost, credentials } = await platform.publish({
         draft: mirror.deleteDraft.signedPost,
         credentials: account.credentials,
       });
@@ -840,10 +840,10 @@ export class PostsManager {
       await this.processing.platformPosts.update(
         mirror.id,
         {
-          posted: posted,
+          posted: platformPost,
           publishOrigin: PlatformPostPublishOrigin.POSTED,
           publishStatus: PlatformPostPublishStatus.UNPUBLISHED,
-          ...(mirror.post_id ? {} : { post_id: posted.post_id }),
+          ...(mirror.post_id ? {} : { post_id: platformPost.post_id }),
         },
         manager
       );
@@ -1001,7 +1001,7 @@ export class PostsManager {
               throw new Error(`Expected signed post to be provided`);
             }
 
-            const { post: posted, credentials } = await platform.publish({
+            const { platformPost, credentials } = await platform.publish({
               draft: mirror.draft.signedPost,
               credentials: account.credentials,
             });
@@ -1018,14 +1018,14 @@ export class PostsManager {
 
             const platformPostUpdate: PlatformPostStatusUpdate = {
               draft: mirror.draft,
-              posted: posted,
+              posted: platformPost,
               publishOrigin: PlatformPostPublishOrigin.POSTED,
               publishStatus: PlatformPostPublishStatus.PUBLISHED,
             };
 
             /** set the original post_id */
-            if (!mirror.post_id && posted.post_id) {
-              platformPostUpdate.post_id = posted.post_id;
+            if (!mirror.post_id && platformPost.post_id) {
+              platformPostUpdate.post_id = platformPost.post_id;
             }
 
             if (DEBUG)

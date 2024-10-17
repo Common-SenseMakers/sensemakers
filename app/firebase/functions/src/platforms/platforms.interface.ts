@@ -72,11 +72,11 @@ export interface PlatformService<
     credentials?: AccountCredentials
   ): Promise<FetchedResult>;
   publish(
-    post: PlatformPostPublish
-  ): Promise<{ post: PlatformPostPosted } & WithCredentials>;
+    platformPost: PlatformPostPublish
+  ): Promise<{ platformPost: PlatformPostPosted } & WithCredentials>;
   update?(
-    post: PlatformPostUpdate
-  ): Promise<{ post: PlatformPostPosted } & WithCredentials>;
+    platformPost: PlatformPostUpdate
+  ): Promise<{ platformPost: PlatformPostPosted } & WithCredentials>;
 
   convertToGeneric(platformPost: PlatformPostCreate): Promise<GenericThread>;
   convertFromGeneric(postAndAuthor: PostAndAuthor): Promise<PlatformPostDraft>;
