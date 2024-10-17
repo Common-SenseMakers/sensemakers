@@ -97,7 +97,6 @@ export enum OverallLoginStatus {
   NotKnown = 'NotKnown', // init value before we check localStorage
   LoggedOut = 'LoggedOut',
   LogginIn = 'LogginIn',
-  PartialLoggedIn = 'PartialLoggedIn',
   FullyLoggedIn = 'FullyLoggedIn',
 }
 
@@ -221,43 +220,9 @@ export const AccountContext = (props: PropsWithChildren) => {
      * once connected user is defined and has an email, but there is no
      * twitter, the user is partially logged in
      */
-    if (connectedUser && connectedUser.email) {
-      /** if not a single source platform has been connected, consider login partial */
-      if (
-        !ALL_SOURCE_PLATFORMS.some((platformId: PUBLISHABLE_PLATFORM) => {
-          return (
-            connectedUser.profiles &&
-            connectedUser.profiles[platformId] !== undefined
-          );
-        })
-      ) {
-        setOverallLoginStatus(OverallLoginStatus.PartialLoggedIn);
-      } else {
-        setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
-      }
-
-      /** update each platform persisted connected status */
-      ALL_PUBLISH_PLATFORMS.forEach((platform) => {
-        if (
-          connectedUser.profiles &&
-          connectedUser.profiles[platform] &&
-          loginFlowState !== LoginFlowState.Disconnecting
-        ) {
-          setPlatformsConnectedStatus({
-            ...platformsConnectedStatus,
-            [platform]: PlatformConnectedStatus.Connected,
-          });
-        }
-      });
-    }
-
-    /** If finished fetching for connected user and is undefined, then
-     * the status is not not-known, its a confirmed LoggedOut */
-    if (
-      overallLoginStatus === OverallLoginStatus.NotKnown &&
-      connectedUser === undefined
-    ) {
-      disconnect();
+    if (connectedUser) {
+      /** connectedUser === loggedIn now */
+      setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
     }
   }, [connectedUser, overallLoginStatus, token, loginFlowState]);
 

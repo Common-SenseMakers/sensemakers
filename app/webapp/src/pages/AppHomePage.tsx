@@ -41,12 +41,8 @@ export const AppHomePage = (props: {}) => {
       return { content: <></>, nav: undefined };
     }
 
-    if (overallLoginStatus === OverallLoginStatus.LoggedOut) {
-      return { content: <AppWelcome />, nav: undefined };
-    }
-
     if (
-      overallLoginStatus === OverallLoginStatus.PartialLoggedIn ||
+      overallLoginStatus === OverallLoginStatus.LoggedOut ||
       (overallLoginStatus === OverallLoginStatus.FullyLoggedIn &&
         !alreadyConnected)
     ) {

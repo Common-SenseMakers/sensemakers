@@ -147,9 +147,8 @@ export const MastodonContext = (props: PropsWithChildren) => {
         code_param &&
         connectedUser &&
         wasConnecting &&
-        (overallLoginStatus === OverallLoginStatus.PartialLoggedIn ||
-          getPlatformConnectedStatus(PLATFORM.Mastodon) ===
-            PlatformConnectedStatus.Connecting)
+        getPlatformConnectedStatus(PLATFORM.Mastodon) ===
+          PlatformConnectedStatus.Connecting
       ) {
         log('useEffect MastodonSignup', {
           code_param,

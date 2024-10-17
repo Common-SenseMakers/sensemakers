@@ -137,9 +137,8 @@ export const TwitterContext = (props: PropsWithChildren) => {
         state_param &&
         connectedUser &&
         wasConnecting &&
-        (overallLoginStatus === OverallLoginStatus.PartialLoggedIn ||
-          getPlatformConnectedStatus(PLATFORM.Twitter) ===
-            PlatformConnectedStatus.Connecting)
+        getPlatformConnectedStatus(PLATFORM.Twitter) ===
+          PlatformConnectedStatus.Connecting
       ) {
         if (DEBUG)
           console.log('useEffect TwitterSignup', {
