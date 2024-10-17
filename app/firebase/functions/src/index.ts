@@ -37,6 +37,10 @@ import {
   notifyUserTask,
   triggerSendNotifications,
 } from './notifications/notification.task';
+import {
+  FETCH_TWITTER_ACCOUNT_TASK,
+  fetchTwitterAccountTask,
+} from './platforms/twitter/twitter.tasks';
 import { platformPostUpdatedHook } from './posts/hooks/platformPost.updated.hook';
 import { postUpdatedHook } from './posts/hooks/post.updated.hook';
 import {
@@ -207,6 +211,20 @@ exports[NOTIFY_USER_TASK] = onTaskDispatched(
       createServices(firestore, getConfig())
     );
   }
+);
+
+exports[FETCH_TWITTER_ACCOUNT_TASK] = onTaskDispatched(
+  {
+    retryConfig: {
+      maxAttempts: 3,
+      minBackoffSeconds: 60 * 5,
+    },
+    rateLimits: {
+      maxConcurrentDispatches: 1, // 1 task dispatched at a time
+      maxDispatchesPerSecond: 1 / (60 * 2), // max 1 task every 2 minutes
+    },
+  },
+  (req) => fetchTwitterAccountTask(req, createServices(firestore, getConfig()))
 );
 
 const getBeforeAndAfterOnUpdate = <T>(

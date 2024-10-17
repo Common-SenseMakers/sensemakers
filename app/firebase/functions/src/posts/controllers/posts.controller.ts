@@ -1,10 +1,8 @@
 import { RequestHandler } from 'express';
 
-import {
-  AddUserDataPayload,
-  FetchParams,
-} from '../../@shared/types/types.fetch';
+import { AddUserDataPayload } from '../../@shared/types/types.fetch';
 import { PublishPostPayload } from '../../@shared/types/types.fetch';
+import { PLATFORM } from '../../@shared/types/types.platforms';
 import {
   PostUpdatePayload,
   PostsQuery,
@@ -13,6 +11,8 @@ import {
 import { IS_EMULATOR } from '../../config/config.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
+import { FETCH_TWITTER_ACCOUNT_TASK } from '../../platforms/twitter/twitter.tasks';
+import { getProfileId } from '../../profiles/profiles.repository';
 import { enqueueTask } from '../../tasksUtils/tasks.support';
 import { canReadPost } from '../posts.access.control';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
@@ -272,23 +272,18 @@ export const addAccountDataController: RequestHandler = async (
         `unable to find profile for ${payload.username} on ${payload.platformId}`
       );
     }
-    /** the value of sinceId or untilId doesn't matter, as long as it exists, then it will be converted to appropriate fetch params */
-    const fetchParams: FetchParams = payload.latest
-      ? { expectedAmount: payload.amount, sinceId: profile.user_id }
-      : { expectedAmount: payload.amount, untilId: profile.user_id };
-
-    const fetchedPosts = await services.db.run(async (manager) => {
-      return services.postsManager.fetchAccount(
-        payload.platformId,
-        profile?.user_id,
-        fetchParams,
-        manager
-      );
-    });
+    const profileId = getProfileId(payload.platformId, profile?.user_id);
+    if (payload.platformId === PLATFORM.Twitter) {
+      await enqueueTask(FETCH_TWITTER_ACCOUNT_TASK, {
+        profileId,
+        latest: payload.latest,
+        amount: payload.amount,
+      });
+    }
 
     if (DEBUG) logger.debug(`${request.path}: addAccountData`, payload);
 
-    response.status(200).send({ success: true, data: fetchedPosts });
+    response.status(200).send({ success: true });
   } catch (error) {
     logger.error('error', error);
     response.status(500).send({ success: false, error });
