@@ -264,7 +264,7 @@ exports[FETCH_MASTODON_ACCOUNT_TASK] = onTaskDispatched(
       minBackoffSeconds: 60,
     },
     rateLimits: {
-      maxConcurrentDispatches: 10, // 1 task dispatched at a time
+      maxConcurrentDispatches: 10,
       maxDispatchesPerSecond: 1 / 10, // max 6 task every 1 minutes
     },
   },
