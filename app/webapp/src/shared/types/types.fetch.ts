@@ -1,5 +1,5 @@
+import { IDENTITY_PLATFORM, PLATFORM } from './types.platforms';
 import { AppPostFull } from './types.posts';
-import { PLATFORM } from './types.user';
 
 export interface OurTokenConfig {
   tokenSecret: string;
@@ -36,4 +36,11 @@ export interface UserProfileQuery {
 export interface PublishPostPayload {
   post: AppPostFull;
   platformIds: PLATFORM[];
+}
+
+export interface AddUserDataPayload {
+  username: string;
+  platformId: IDENTITY_PLATFORM;
+  amount: number;
+  latest?: boolean;
 }

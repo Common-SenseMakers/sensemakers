@@ -1,8 +1,8 @@
 export interface PostTriple {
   id: string;
   postId: string;
-  createdAtMs: number;
-  authorId?: string;
+  postCreatedAtMs: number;
+  authorProfileId?: string;
   subject: string;
   predicate: string;
   object: string;

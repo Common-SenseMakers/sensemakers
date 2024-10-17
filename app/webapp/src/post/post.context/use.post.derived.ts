@@ -2,33 +2,22 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { useAppFetch } from '../../api/app.fetch';
 import { NotificationFreq } from '../../shared/types/types.notifications';
-import {
-  PlatformPost,
-  PlatformPostDraft,
-} from '../../shared/types/types.platform.posts';
-import { AppPostFull } from '../../shared/types/types.posts';
-import { TwitterThread, TwitterUser } from '../../shared/types/types.twitter';
-import {
-  AppUserRead,
-  AutopostOption,
-  PLATFORM,
-} from '../../shared/types/types.user';
-import { useNanopubContext } from '../../user-login/contexts/platforms/nanopubs/NanopubContext';
-import { getAccount } from '../../user-login/user.helper';
+import { PlatformPostDraft } from '../../shared/types/types.platform.posts';
+import { PLATFORM } from '../../shared/types/types.platforms';
+import { TwitterPlatformPost } from '../../shared/types/types.twitter';
+import { AppUserRead } from '../../shared/types/types.user';
+import { ConnectedUser } from '../../user-login/contexts/AccountContext';
 import { AppPostStatus, getPostStatuses } from '../posts.helper';
 import { PostFetchContext } from './use.post.fetch';
 
 export interface PostDerivedContext {
-  author: AppUserRead;
   nanopubDraft: PlatformPostDraft | undefined;
-  tweet?: PlatformPost<TwitterThread, any, TwitterUser>;
   statuses: AppPostStatus;
 }
 
 export const usePostDerived = (
   fetched: PostFetchContext,
-  connectedUser?: AppUserRead,
-  postInit?: AppPostFull
+  connectedUser?: ConnectedUser
 ) => {
   const appFetch = useAppFetch();
 
@@ -37,7 +26,8 @@ export const usePostDerived = (
   /** create drafts if connected user has account and draft for that platform does
    * not exists */
   useEffect(() => {
-    const nanopubAccount = getAccount(connectedUser, PLATFORM.Nanopub);
+    const nanopubAccount =
+      connectedUser?.profiles && connectedUser?.profiles[PLATFORM.Nanopub];
     if (nanopubAccount && !nanopubDraft && !requesteDraft) {
       /** if draft not available, create it */
       setRequestedDraft(true);
@@ -49,36 +39,6 @@ export const usePostDerived = (
     }
   }, [fetched.post, connectedUser]);
 
-  /** TODO: This is a placeholder. The post author may not be the connected user. We can probably have an
-   * endpoint to get user profiles by userIds */
-  const author: AppUserRead = {
-    userId: '1234',
-    signupDate: 1720702932,
-    settings: {
-      notificationFreq: NotificationFreq.None,
-      autopost: {
-        [PLATFORM.Nanopub]: { value: AutopostOption.MANUAL },
-      },
-    },
-    twitter: [
-      {
-        user_id: '1234',
-        read: true,
-        write: true,
-        profile: {
-          id: '1234',
-          name: 'SenseNet Bot',
-          username: 'sense_nets_bot',
-          profile_image_url:
-            'https://pbs.twimg.com/profile_images/1783977034038882304/RGn66lGT_normal.jpg',
-        },
-      },
-    ],
-  };
-
-  const tweet = fetched.post?.mirrors?.find(
-    (m) => m.platformId === PLATFORM.Twitter
-  );
   const postIdFinal = useMemo(() => fetched.post?.id, [fetched.post]);
 
   const nanopubDraft = useMemo(() => {
@@ -92,5 +52,5 @@ export const usePostDerived = (
 
   const statuses = useMemo(() => getPostStatuses(fetched.post), [fetched.post]);
 
-  return { author, nanopubDraft, tweet, statuses, postId: postIdFinal };
+  return { nanopubDraft, statuses, postId: postIdFinal };
 };

@@ -1,21 +1,21 @@
 import { AppPostFull } from '../../@shared/types/types.posts';
-import { AppUser } from '../../@shared/types/types.user';
+import { AppUserRead } from '../../@shared/types/types.user';
 import { buildRetractionNp } from './nanopub.utils';
 import { prepareNanopubDetails } from './prepare.nanopub.details';
 
 export const createRetractionNanopub = async (
   post_id: string,
   post: AppPostFull,
-  author: AppUser
+  author: AppUserRead
 ) => {
-  const { introUri, twitterUsername, twitterName, ethAddress, orcidId } =
+  const { introUri, platformAccountUrl, platformName, ethAddress, orcidId } =
     prepareNanopubDetails(author, post);
 
   return buildRetractionNp(
     post_id,
     introUri,
-    twitterUsername,
-    twitterName,
+    platformAccountUrl,
+    platformName,
     ethAddress,
     orcidId
   );

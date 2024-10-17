@@ -1,12 +1,9 @@
 import { expect } from 'chai';
 
 import { NotificationFreq } from '../../src/@shared/types/types.notifications';
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { AppPostParsingStatus } from '../../src/@shared/types/types.posts';
-import {
-  AppUser,
-  AutopostOption,
-  PLATFORM,
-} from '../../src/@shared/types/types.user';
+import { AppUser, AutopostOption } from '../../src/@shared/types/types.user';
 import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
 import { Services } from '../../src/instances/services';
@@ -26,6 +23,7 @@ import {
   USE_REAL_TWITTER,
   testUsers,
 } from './setup';
+import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
 const fetchAndGetNotifications = async (
@@ -39,7 +37,12 @@ const fetchAndGetNotifications = async (
     throw new Error('post_id not defined');
   }
 
-  const post = await fetchPostInTests(userId, post_id, services);
+  const post = await fetchPostInTests(
+    userId,
+    post_id,
+    services,
+    PLATFORM.Twitter
+  );
 
   if (!post) {
     throw new Error('post undefined');
@@ -84,7 +87,7 @@ describe('061 parse tweet, ', () => {
     describe('manual no-notifications', async () => {
       before(async () => {
         logger.debug('resetting DB');
-        await resetDB();
+        await resetDB([[''], [''], [''], [''], ['']], [testCredentials[0]]);
 
         const users = await services.db.run((manager) => {
           return createUsers(services, testUsers, manager);
@@ -98,6 +101,10 @@ describe('061 parse tweet, ', () => {
               '1753077743816777728'
             ) !== undefined
         );
+
+        if (!user) {
+          throw new Error('user not created');
+        }
 
         await updateUserSettings(
           services,
@@ -161,7 +168,7 @@ describe('061 parse tweet, ', () => {
     describe('manual daily-notifications', async () => {
       before(async () => {
         logger.debug('resetting DB');
-        await resetDB();
+        await resetDB([[''], [''], [''], [''], ['']], [testCredentials[0]]);
 
         const users = await services.db.run((manager) => {
           return createUsers(services, testUsers, manager);
@@ -174,6 +181,10 @@ describe('061 parse tweet, ', () => {
               '1753077743816777728'
             ) !== undefined
         );
+
+        if (!user) {
+          throw new Error('user not created');
+        }
 
         await updateUserSettings(
           services,
@@ -237,7 +248,7 @@ describe('061 parse tweet, ', () => {
     describe('autopost daily-notifications', async () => {
       before(async () => {
         logger.debug('resetting DB');
-        await resetDB();
+        await resetDB([[''], [''], [''], [''], ['']], [testCredentials[0]]);
 
         const users = await services.db.run((manager) => {
           return createUsers(services, testUsers, manager);
@@ -251,6 +262,10 @@ describe('061 parse tweet, ', () => {
               '1753077743816777728'
             ) !== undefined
         );
+
+        if (!user) {
+          throw new Error('user not created');
+        }
 
         await updateUserSettings(
           services,

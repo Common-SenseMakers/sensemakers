@@ -1,8 +1,9 @@
 import { NotificationFreq } from '../../src/@shared/types/types.notifications';
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import {
   AppUser,
+  AppUserRead,
   AutopostOption,
-  PLATFORM,
   TestUserCredentials,
 } from '../../src/@shared/types/types.user';
 
@@ -18,49 +19,139 @@ export const getMockedUser = (credentials: TestUserCredentials): AppUser => {
       },
       notificationFreq: NotificationFreq.None,
     },
-    platformIds: [
-      `${PLATFORM.Twitter}:${credentials.twitter.id}`,
-      `${PLATFORM.Nanopub}:${credentials.nanopub.ethPrivateKey}`,
-    ],
-    [PLATFORM.Twitter]: [
-      {
-        user_id: credentials[PLATFORM.Twitter].id,
-        signupDate: 0,
-        profile: {
-          profile_image_url:
-            'https://pbs.twimg.com/profile_images/1753077803258449920/2vI5Y2Wx_normal.png',
-          id: credentials[PLATFORM.Twitter].id,
-          name: credentials[PLATFORM.Twitter].username,
-          username: credentials[PLATFORM.Twitter].username,
+    accounts: {
+      [PLATFORM.Mastodon]: [
+        {
+          user_id: credentials[PLATFORM.Mastodon].id,
+          signupDate: 0,
+          credentials: {
+            read: {
+              accessToken: '',
+              server: '',
+            },
+            write: {
+              accessToken: '',
+              server: '',
+            },
+          },
         },
-        read: {
-          accessToken: '',
-          refreshToken: '',
-          expiresIn: 7200,
-          expiresAtMs: 9718901096756,
+      ],
+      [PLATFORM.Bluesky]: [
+        {
+          user_id: credentials[PLATFORM.Bluesky].id,
+          signupDate: 0,
+          credentials: {
+            read: {
+              username: '',
+              appPassword: '',
+            },
+            write: {
+              username: '',
+              appPassword: '',
+            },
+          },
         },
-        write: {
-          accessToken: '',
-          refreshToken: '',
-          expiresIn: 7200,
-          expiresAtMs: 9718901096756,
+      ],
+      [PLATFORM.Twitter]: [
+        {
+          user_id: credentials[PLATFORM.Twitter].id,
+          signupDate: 0,
+
+          credentials: {
+            read: {
+              accessToken: '',
+              refreshToken: '',
+              expiresIn: 7200,
+              expiresAtMs: 9718901096756,
+            },
+            write: {
+              accessToken: '',
+              refreshToken: '',
+              expiresIn: 7200,
+              expiresAtMs: 9718901096756,
+            },
+          },
+        },
+      ],
+      [PLATFORM.Nanopub]: [
+        {
+          signupDate: 0,
+          user_id: '0x59b277c77F738e9B758B73Dd9Bfc6DE36D6e0EB1',
+          credentials: {},
+        },
+      ],
+    },
+  };
+};
+
+export const getMockedUserRead = (
+  credentials: TestUserCredentials
+): AppUserRead => {
+  return {
+    userId: credentials.userId,
+    signupDate: 1719938012425,
+    settings: {
+      autopost: {
+        [PLATFORM.Nanopub]: {
+          value: AutopostOption.MANUAL,
         },
       },
-    ],
-    [PLATFORM.Nanopub]: [
-      {
-        signupDate: 0,
-        user_id: '0x59b277c77F738e9B758B73Dd9Bfc6DE36D6e0EB1',
-        profile: {
-          introNanopubUri:
-            'https://w3id.org/np/RAffsv5cH41cAXA_HOasEJ74XyQXOENnB9lc-iyUCoM4w',
-          ethAddress: '0x59b277c77F738e9B758B73Dd9Bfc6DE36D6e0EB1',
-          rsaPublickey:
-            '-----BEGIN PUBLIC KEY-----\r\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAj7mSvsl6URu4Vt7hzYWh\r\nn4AqqGHpUabpOUl5YErTWP7xcuK25dVd2RE2NHqL6fUeJQFB9ijKr9jUkVGVVLXa\r\n+A1HOsJXSMVhB8Owv/VnDJwA+92qjA3bN3//H98PR3UOXBmZDNUiwZ2IB6jmDkjO\r\n2NknJKsOpYVE3lc/VRKOATNoi1MFDR4dyDU9XjyPcn/p420GYafEkdoEnuihvML+\r\nr5UwIBzkhs20IQhEZivExUBnxLE/jC2sdUmN0aHlqAGKU0x7uMmrMpx1MekAJ3Ic\r\nLtoUYLyo39eOqfeGE5mgom/XRI4J7TPoFDQdzbKdz+wgkzPDRrQ9L4MCMKc0YJL6\r\nMwIDAQAB\r\n-----END PUBLIC KEY-----\r\n',
-          ethToRsaSignature:
-            '0xc0416f86379aecce40b0cf959adf40ea9043b1098cee66c80bfe667094ea88914112134c17090ae09ec86e98fc4651436377df05ef16c46afd6fe260bfac76fe1c',
+      notificationFreq: NotificationFreq.None,
+    },
+    profiles: {
+      [PLATFORM.Mastodon]: [
+        {
+          user_id: credentials[PLATFORM.Mastodon].id,
+          read: true,
+          write: false,
+          profile: {
+            id: '1234',
+            username: 'test@test.com',
+            displayName: 'Test User',
+            avatar: 'https://test.com/avatar.jpg',
+            description: 'Test description',
+          },
         },
-      },
-    ],
+      ],
+      [PLATFORM.Bluesky]: [
+        {
+          user_id: credentials[PLATFORM.Bluesky].id,
+          read: true,
+          write: false,
+          profile: {
+            id: '1234',
+            username: 'test',
+            displayName: 'Test User',
+            avatar: 'https://test.com/avatar.jpg',
+          },
+        },
+      ],
+      [PLATFORM.Twitter]: [
+        {
+          user_id: credentials[PLATFORM.Twitter].id,
+          read: true,
+          write: false,
+          profile: {
+            id: '1234',
+            username: 'test',
+            displayName: 'Test User',
+            avatar: 'https://test.com/avatar.jpg',
+            description: 'Test description',
+          },
+        },
+      ],
+      [PLATFORM.Nanopub]: [
+        {
+          user_id: '0x59b277c77F738e9B758B73Dd9Bfc6DE36D6e0EB1',
+          read: true,
+          write: true,
+          profile: {
+            rsaPublickey: '1234',
+            ethAddress: '0x59b277c77F738e9B758B73Dd9Bfc6DE36D6e0EB1',
+            ethToRsaSignature: '0x1234567',
+          },
+        },
+      ],
+    },
   };
 };

@@ -1,16 +1,20 @@
-import { PlatformPost } from '../@shared/types/types.platform.posts';
-import { AppPostFull, GenericPost } from '../@shared/types/types.posts';
+import { BlueskyThread } from '../@shared/types/types.bluesky';
+import { MastodonThread } from '../@shared/types/types.mastodon';
 import {
-  DefinedIfTrue,
+  PlatformPost,
+  PlatformPostPosted,
+} from '../@shared/types/types.platform.posts';
+import {
   PLATFORM,
-  PUBLISHABLE_PLATFORMS,
-  UserDetailsBase,
-} from '../@shared/types/types.user';
+  PUBLISHABLE_PLATFORM,
+} from '../@shared/types/types.platforms';
+import { AppPostFull, GenericPost } from '../@shared/types/types.posts';
+import { AccountDetailsBase, DefinedIfTrue } from '../@shared/types/types.user';
 import { APP_URL } from '../config/config.runtime';
 
 export interface PlatformDetails {
-  platform: PUBLISHABLE_PLATFORMS;
-  account: UserDetailsBase;
+  platform: PUBLISHABLE_PLATFORM;
+  account: AccountDetailsBase;
 }
 
 export class PostsHelper {
@@ -60,5 +64,32 @@ export class PostsHelper {
     }
 
     return mirror;
+  }
+
+  static getNewestPostIdInPlatformPostThread<P>(
+    platformId: PLATFORM,
+    platformPosted: PlatformPostPosted<P>
+  ): string {
+    if (platformId === PLATFORM.Mastodon) {
+      const mastodonThread = platformPosted.post as MastodonThread;
+      const newestPostId = mastodonThread.posts.reduce(
+        (acc, post) => (post.id > acc ? post.id : acc),
+        mastodonThread.posts[0].id
+      );
+      return newestPostId;
+    }
+    if (platformId === PLATFORM.Bluesky) {
+      const blueskyThread = platformPosted.post as BlueskyThread;
+      const newestPost = blueskyThread.posts.reduce(
+        (acc, post) =>
+          new Date(post.record.createdAt).getTime() >
+          new Date(acc.record.createdAt).getTime()
+            ? post
+            : acc,
+        blueskyThread.posts[0]
+      );
+      return newestPost.uri;
+    }
+    return platformPosted.post_id;
   }
 }

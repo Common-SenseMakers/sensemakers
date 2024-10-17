@@ -11,13 +11,12 @@ import { I18Keys } from '../i18n/i18n';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID, PatternProps } from '../semantics/patterns/patterns';
 import { AppPostReviewStatus } from '../shared/types/types.posts';
-import { TwitterUserProfile } from '../shared/types/types.twitter';
+import { PlatformProfile } from '../shared/types/types.profiles';
 import { AppButton } from '../ui-components';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
-import { useNanopubContext } from '../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { usePersist } from '../utils/use.persist';
 import { PostHeader } from './PostHeader';
 import { PostNav } from './PostNav';
@@ -30,7 +29,7 @@ import { concatenateThread, hideSemanticsHelper } from './posts.helper';
 const DEBUG = false;
 
 /** extract the postId from the route and pass it to a PostContext */
-export const PostView = (props: { profile?: TwitterUserProfile }) => {
+export const PostView = (props: { profile?: PlatformProfile }) => {
   const appFetch = useAppFetch();
 
   // shared persisted state with PostingPage.tsx
@@ -107,6 +106,13 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
   }, [postingPostId, connectedUser, justSetPostId, updated.postMerged?.id]);
 
   const action = (() => {
+    if (
+      connectedUser &&
+      updated.postMerged?.authorUserId !== connectedUser.userId
+    ) {
+      return <></>;
+    }
+
     if (
       !updated.statusesMerged.processed &&
       !updated.statusesMerged.isParsing
@@ -210,7 +216,7 @@ export const PostView = (props: { profile?: TwitterUserProfile }) => {
     return (
       <>
         <Box pad="medium">
-          <PostHeader margin={{ bottom: '16px' }}></PostHeader>
+          <PostHeader boxProps={{ margin: { bottom: '16px' } }}></PostHeader>
           {!hideSemantics && (
             <SemanticsEditor
               patternProps={patternProps}

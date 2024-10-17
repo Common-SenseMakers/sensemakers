@@ -1,7 +1,7 @@
 import fs from 'fs';
 
+import { PLATFORM } from '../src/@shared/types/types.platforms';
 import { PostsQueryStatus } from '../src/@shared/types/types.posts';
-import { PLATFORM } from '../src/@shared/types/types.user';
 import { services } from './scripts.services';
 
 (async () => {
@@ -12,14 +12,16 @@ import { services } from './scripts.services';
 
   await Promise.all(
     usersIds.map(async (userId) => {
-      const publications =
-        await services.postsManager.processing.posts.getOfUser(userId, {
+      const publications = await services.postsManager.processing.posts.getMany(
+        {
+          userId,
           status: PostsQueryStatus.PUBLISHED,
           fetchParams: { expectedAmount: 100 },
-        });
+        }
+      );
 
       services.db.run(async (manager) => {
-        const user = await services.users.getUserProfile(userId, manager);
+        const user = await services.users.getUserWithProfiles(userId, manager);
 
         console.log(
           `User ${user.email?.email} has ${publications.length} publications and autopost: ${user.settings.autopost[PLATFORM.Nanopub].value}`

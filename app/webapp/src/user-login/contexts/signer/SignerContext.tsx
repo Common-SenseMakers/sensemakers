@@ -59,6 +59,7 @@ export const SignerContext = (props: PropsWithChildren) => {
   const [address, setAddress] = useState<HexStr>();
   const [magicSigner, setMagicSigner] = useState<WalletClient>();
   const [isConnectingMagic, setIsConnectingMagic] = useState<boolean>(false);
+  const [isSettingEmail, setIsSettingEmail] = useState<boolean>(false);
 
   const [errorConnecting, setErrorConnecting] = useState<boolean>(false);
 
@@ -204,10 +205,18 @@ export const SignerContext = (props: PropsWithChildren) => {
   /** authenticate magic email to backend (one way call that should endup with the user email updated) */
   useEffect(() => {
     if (DEBUG) console.log('check setEmail', { magicSigner, connectedUser });
-    if (magicSigner && connectedUser && connectedUser.email === undefined) {
+
+    if (
+      magicSigner &&
+      connectedUser &&
+      connectedUser.email === undefined &&
+      !isSettingEmail
+    ) {
       setLoginFlowState(LoginFlowState.RegisteringEmail);
+      setIsSettingEmail(true);
       magic.user.getIdToken().then((idToken) => {
         appFetch('/api/auth/setMagicEmail', { idToken }, true).then(() => {
+          setIsSettingEmail(false);
           refreshUser();
         });
       });
