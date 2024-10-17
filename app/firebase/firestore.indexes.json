@@ -19,21 +19,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "authorId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "createdAtMs",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "posts",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "authorId",
+          "fieldPath": "authorUserId",
           "order": "ASCENDING"
         },
         {
@@ -51,21 +37,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "authorId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "createdAtMs",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "posts",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "authorId",
+          "fieldPath": "authorUserId",
           "order": "ASCENDING"
         },
         {
@@ -83,25 +55,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "authorId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "origin",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "createdAtMs",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "posts",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "authorId",
+          "fieldPath": "authorUserId",
           "order": "ASCENDING"
         },
         {
@@ -119,7 +73,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "authorId",
+          "fieldPath": "authorUserId",
           "order": "ASCENDING"
         },
         {
@@ -137,25 +91,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "authorId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "reviewedStatus",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "createdAtMs",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "posts",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "authorId",
+          "fieldPath": "authorUserId",
           "order": "ASCENDING"
         },
         {
@@ -207,6 +143,20 @@
         {
           "fieldPath": "createdAtMs",
           "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "labels",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "createdAtMs",
+          "order": "ASCENDING"
         },
         {
           "fieldPath": "republishedStatus",
@@ -225,27 +175,23 @@
         {
           "fieldPath": "createdAtMs",
           "order": "DESCENDING"
-        },
-        {
-          "fieldPath": "republishedStatus",
-          "order": "DESCENDING"
         }
       ]
     },
     {
-      "collectionGroup": "triples",
+      "collectionGroup": "posts",
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "authorId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "predicate",
-          "order": "ASCENDING"
+          "fieldPath": "labels",
+          "arrayConfig": "CONTAINS"
         },
         {
           "fieldPath": "createdAtMs",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "republishedStatus",
           "order": "DESCENDING"
         }
       ]

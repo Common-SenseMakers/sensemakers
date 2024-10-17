@@ -18,6 +18,7 @@
     "deploy-prod": "firebase deploy --project prod",
     "deploy-dataset": "firebase deploy --project dataset",
     "prepare:hooks": "husky install",
+    "clone-indexes": "bash -x ./clone-indexes.sh",
     "reset-dev": "firebase firestore:delete --all-collections --project sensenets-dev",
     "reset-staging": "firebase firestore:delete --all-collections --project sensenets-staging",
     "reset-prod": "firebase firestore:delete --all-collections --project sensenets-prod",

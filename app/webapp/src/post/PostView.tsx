@@ -107,6 +107,13 @@ export const PostView = (props: { profile?: PlatformProfile }) => {
 
   const action = (() => {
     if (
+      connectedUser &&
+      updated.postMerged?.authorUserId !== connectedUser.userId
+    ) {
+      return <></>;
+    }
+
+    if (
       !updated.statusesMerged.processed &&
       !updated.statusesMerged.isParsing
     ) {
