@@ -43,13 +43,12 @@ const BlueskyContextValue = createContext<BlueskyContextType | undefined>(
 );
 
 export const BlueskyContext = (props: PropsWithChildren) => {
-  const { show } = useToastContext();
   const { t } = useTranslation();
 
   const {
     connectedUser,
     refresh: refreshConnected,
-    overallLoginStatus,
+    setToken: setOurToken,
     setLoginFlowState,
     setPlatformConnectedStatus,
   } = useAccountContext();
@@ -87,9 +86,14 @@ export const BlueskyContext = (props: PropsWithChildren) => {
 
         const result = await appFetch<HandleSignupResult>(
           `/api/auth/${PLATFORM.Bluesky}/signup`,
-          signupData,
-          true
+          signupData
         );
+
+        if (result.ourAccessToken) {
+          setOurToken(result.ourAccessToken);
+        } else {
+          refreshConnected();
+        }
 
         log('Bluesky signup result', result);
 
