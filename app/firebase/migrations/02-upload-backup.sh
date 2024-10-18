@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # imports data into a project from a backup stored in a Cloud Storage bucket
+# yarn upload-backup <from-project-id> <backup folder name> <to-project-id>
 
 FROM_PROJECT_ID=$1
 BACKUP=$2
