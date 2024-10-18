@@ -737,13 +737,6 @@ export class PostsManager {
     if (DEBUG) logger.debug(`updatePost ${postId}`, { postId, postUpdate });
     await this.processing.posts.update(postId, postUpdate, manager);
 
-    try {
-      if (DEBUG) logger.debug(`createOrUpdatePostDrafts ${postId}`);
-      await this.processing.createOrUpdatePostDrafts(postId, manager);
-    } catch (err: any) {
-      logger.warn(`Error updating post drafts ${postId}`, err);
-    }
-
     /** sync the semantics as triples when the post is updated */
     const postUpdated = await this.processing.posts.get(postId, manager, true);
     const structured = await this.processing.processSemantics(

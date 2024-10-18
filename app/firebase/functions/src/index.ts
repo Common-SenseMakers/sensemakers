@@ -13,34 +13,19 @@ import {
   TaskQueueOptions,
   onTaskDispatched,
 } from 'firebase-functions/v2/tasks';
-import { Message } from 'postmark';
 
 import { ActivityEventBase } from './@shared/types/types.activity';
-import { NotificationFreq } from './@shared/types/types.notifications';
 import { PlatformPost } from './@shared/types/types.platform.posts';
 import { AppPost } from './@shared/types/types.posts';
 import { CollectionNames } from './@shared/utils/collectionNames';
 import { activityEventCreatedHook } from './activity/activity.created.hook';
 import { adminRouter } from './admin.router';
-import {
-  AUTOFETCH_PERIOD,
-  DAILY_NOTIFICATION_PERIOD,
-  EMAIL_SENDER_FROM,
-  IS_EMULATOR,
-  MONTHLY_NOTIFICATION_PERIOD,
-  WEEKLY_NOTIFICATION_PERIOD,
-} from './config/config.runtime';
+import { AUTOFETCH_PERIOD, IS_EMULATOR } from './config/config.runtime';
 import { envDeploy } from './config/typedenv.deploy';
 import { envRuntime } from './config/typedenv.runtime';
-import { getServices } from './controllers.utils';
 import { buildAdminApp, buildApp } from './instances/app';
 import { logger } from './instances/logger';
 import { createServices } from './instances/services';
-import {
-  NOTIFY_USER_TASK,
-  notifyUserTask,
-  triggerSendNotifications,
-} from './notifications/notification.task';
 import { platformPostUpdatedHook } from './posts/hooks/platformPost.updated.hook';
 import { postUpdatedHook } from './posts/hooks/post.updated.hook';
 import {
@@ -119,42 +104,6 @@ exports.accountFetch = onSchedule(
   () => triggerAutofetchPosts(createServices(firestore, getConfig()))
 );
 
-exports.sendDailyNotifications = onSchedule(
-  {
-    schedule: DAILY_NOTIFICATION_PERIOD,
-    secrets,
-  },
-  () =>
-    triggerSendNotifications(
-      NotificationFreq.Daily,
-      createServices(firestore, getConfig())
-    )
-);
-
-exports.sendWeeklyNotifications = onSchedule(
-  {
-    schedule: WEEKLY_NOTIFICATION_PERIOD,
-    secrets,
-  },
-  () =>
-    triggerSendNotifications(
-      NotificationFreq.Weekly,
-      createServices(firestore, getConfig())
-    )
-);
-
-exports.sendMonthlyNotifications = onSchedule(
-  {
-    schedule: MONTHLY_NOTIFICATION_PERIOD,
-    secrets,
-  },
-  () =>
-    triggerSendNotifications(
-      NotificationFreq.Monthly,
-      createServices(firestore, getConfig())
-    )
-);
-
 /** tasks */
 exports[PARSE_POST_TASK] = onTaskDispatched(
   {
@@ -190,17 +139,6 @@ exports[AUTOFETCH_POSTS_TASK] = onTaskDispatched(
 exports[AUTOPOST_POST_TASK] = onTaskDispatched(deployConfigTasks, (req) =>
   autopostPostTask(req, createServices(firestore, getConfig()))
 );
-
-exports[NOTIFY_USER_TASK] = onTaskDispatched(deployConfigTasks, async (req) => {
-  if (!req.data.userId) {
-    throw new Error('userId not found for task notifyUserTask');
-  }
-
-  return notifyUserTask(
-    req.data.userId,
-    createServices(firestore, getConfig())
-  );
-});
 
 const getBeforeAndAfterOnUpdate = <T>(
   event: FirestoreEvent<functions.Change<QueryDocumentSnapshot> | undefined>,
@@ -309,38 +247,6 @@ const emulatorTriggerRouter = express.Router();
 emulatorTriggerRouter.post('/autofetch', async (request, response) => {
   logger.debug('autofetch triggered');
   await triggerAutofetchPosts(createServices(firestore, getConfig()));
-  response.status(200).send({ success: true });
-});
-
-emulatorTriggerRouter.post('/sendNotifications', async (request, response) => {
-  logger.debug('sendNotifications triggered');
-  const params = request.query;
-  if (!params.freq) {
-    throw new Error('freq parameter is required');
-  }
-
-  await triggerSendNotifications(
-    params.freq as NotificationFreq,
-    getServices(request)
-  );
-  response.status(200).send({ success: true });
-});
-
-emulatorTriggerRouter.post('/emailTest', async (request, response) => {
-  logger.debug('emailTest triggered');
-
-  const services = createServices(firestore, getConfig());
-  const message: Message = {
-    From: EMAIL_SENDER_FROM.value(),
-    ReplyTo: EMAIL_SENDER_FROM.value(),
-    To: 'pepo@sense-nets.xyz',
-    Subject: 'Test email',
-    HtmlBody: '<h1>Test email</h1><p>This is a test email</p>',
-    TextBody: 'Test email\nThis is a test email',
-    MessageStream: 'outbound',
-  };
-
-  await services.email.callSendEmail(message);
   response.status(200).send({ success: true });
 });
 

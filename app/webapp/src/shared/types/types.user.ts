@@ -6,11 +6,7 @@ import {
   MastodonAccountDetails,
   MastodonSigninCredentials,
 } from './types.mastodon';
-import {
-  NanopubAccountDetails,
-  NanopubProfile,
-  NanopubSigninCredentials,
-} from './types.nanopubs';
+import { NanopubSigninCredentials } from './types.nanopubs';
 import { NotificationFreq } from './types.notifications';
 import { OrcidAccountDetails, OrcidProfile } from './types.orcid';
 import { PLATFORM } from './types.platforms';
@@ -56,9 +52,7 @@ export interface UserWithId {
   userId: string;
 }
 
-export interface UserSettings {
-  notificationFreq: NotificationFreq;
-}
+export interface UserSettings {}
 
 export type UserSettingsUpdate = Partial<UserSettings>;
 
