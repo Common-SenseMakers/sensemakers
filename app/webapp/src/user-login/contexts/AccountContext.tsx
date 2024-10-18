@@ -227,8 +227,6 @@ export const AccountContext = (props: PropsWithChildren) => {
     _setOverallLoginStatus(OverallLoginStatus.LoggedOut);
   };
 
-  const currentNotifications = connectedUser?.settings?.notificationFreq;
-
   const email = connectedUser ? connectedUser.email : undefined;
 
   const setPlatformConnectedStatus = (
@@ -277,7 +275,6 @@ export const AccountContext = (props: PropsWithChildren) => {
         loginFlowState,
         setLoginFlowState,
         resetLogin,
-        currentNotifications,
         setPlatformConnectedStatus,
         getPlatformConnectedStatus,
         alreadyConnected,
