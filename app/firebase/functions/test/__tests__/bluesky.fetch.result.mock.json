@@ -1,0 +1,2719 @@
+{
+  "feed": [
+    {
+      "post": {
+        "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wdgnynfq2h",
+        "cid": "bafyreibgoiyfpnwyaxg6m4tcl5igns6z3w46ecwivefrv2v2nidlhlwjmi",
+        "author": {
+          "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+          "handle": "weswalla.bsky.social",
+          "displayName": "Wesley Finck",
+          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+          "associated": {
+            "chat": {
+              "allowIncoming": "following"
+            }
+          },
+          "viewer": {
+            "muted": false,
+            "blockedBy": false
+          },
+          "labels": [],
+          "createdAt": "2024-02-08T00:14:23.947Z"
+        },
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2024-09-24T19:16:55.488Z",
+          "embed": {
+            "$type": "app.bsky.embed.external",
+            "external": {
+              "description": "",
+              "title": "Our Purpose",
+              "uri": "https://selfdeterminationtheory.org/our-purpose/"
+            }
+          },
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "https://selfdeterminationtheory.org/our-purpose/"
+                }
+              ],
+              "index": {
+                "byteEnd": 167,
+                "byteStart": 127
+              }
+            }
+          ],
+          "langs": [
+            "en"
+          ],
+          "reply": {
+            "parent": {
+              "cid": "bafyreiesiupjfvjgezjj2mnyh7bbdzztqkn7gu2bgpgpipz7d5h7j7s7ym",
+              "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd52krts24"
+            },
+            "root": {
+              "cid": "bafyreig7foqn2iwo2mql5f5on4sglow6vwzlvfxq4ajtm2mlpnrmpzfrhe",
+              "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z"
+            }
+          },
+          "text": "the Center for Self Determination Theory is quite active in spreading awareness of the theory and its implications for society selfdeterminationtheory.org/our-purpose/"
+        },
+        "embed": {
+          "$type": "app.bsky.embed.external#view",
+          "external": {
+            "uri": "https://selfdeterminationtheory.org/our-purpose/",
+            "title": "Our Purpose",
+            "description": ""
+          }
+        },
+        "replyCount": 0,
+        "repostCount": 0,
+        "likeCount": 0,
+        "quoteCount": 0,
+        "indexedAt": "2024-09-24T19:16:55.488Z",
+        "viewer": {
+          "threadMuted": false,
+          "embeddingDisabled": false
+        },
+        "labels": []
+      },
+      "reply": {
+        "root": {
+          "$type": "app.bsky.feed.defs#postView",
+          "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z",
+          "cid": "bafyreig7foqn2iwo2mql5f5on4sglow6vwzlvfxq4ajtm2mlpnrmpzfrhe",
+          "author": {
+            "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+            "handle": "weswalla.bsky.social",
+            "displayName": "Wesley Finck",
+            "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+            "associated": {
+              "chat": {
+                "allowIncoming": "following"
+              }
+            },
+            "viewer": {
+              "muted": false,
+              "blockedBy": false
+            },
+            "labels": [],
+            "createdAt": "2024-02-08T00:14:23.947Z"
+          },
+          "record": {
+            "$type": "app.bsky.feed.post",
+            "createdAt": "2024-09-24T19:09:58.385Z",
+            "embed": {
+              "$type": "app.bsky.embed.external",
+              "external": {
+                "description": "",
+                "title": "The Theory",
+                "uri": "https://selfdeterminationtheory.org/the-theory/"
+              }
+            },
+            "facets": [
+              {
+                "features": [
+                  {
+                    "$type": "app.bsky.richtext.facet#link",
+                    "uri": "https://selfdeterminationtheory.org/the-theory/"
+                  }
+                ],
+                "index": {
+                  "byteEnd": 165,
+                  "byteStart": 126
+                }
+              }
+            ],
+            "langs": [
+              "en"
+            ],
+            "text": "self determination theory is one of the most compelling theories about human behaviour and development that I've come across. selfdeterminationtheory.org/the-theory/"
+          },
+          "embed": {
+            "$type": "app.bsky.embed.external#view",
+            "external": {
+              "uri": "https://selfdeterminationtheory.org/the-theory/",
+              "title": "The Theory",
+              "description": ""
+            }
+          },
+          "replyCount": 2,
+          "repostCount": 0,
+          "likeCount": 0,
+          "quoteCount": 0,
+          "indexedAt": "2024-09-24T19:09:58.385Z",
+          "viewer": {
+            "threadMuted": false,
+            "embeddingDisabled": false
+          },
+          "labels": []
+        },
+        "parent": {
+          "$type": "app.bsky.feed.defs#postView",
+          "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd52krts24",
+          "cid": "bafyreiesiupjfvjgezjj2mnyh7bbdzztqkn7gu2bgpgpipz7d5h7j7s7ym",
+          "author": {
+            "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+            "handle": "weswalla.bsky.social",
+            "displayName": "Wesley Finck",
+            "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+            "associated": {
+              "chat": {
+                "allowIncoming": "following"
+              }
+            },
+            "viewer": {
+              "muted": false,
+              "blockedBy": false
+            },
+            "labels": [],
+            "createdAt": "2024-02-08T00:14:23.947Z"
+          },
+          "record": {
+            "$type": "app.bsky.feed.post",
+            "createdAt": "2024-09-24T19:11:33.132Z",
+            "embed": {
+              "$type": "app.bsky.embed.external",
+              "external": {
+                "description": "",
+                "title": "ResearchA677CD6C-FAD9-4CF3-9640-8768D4149A42",
+                "uri": "https://selfdeterminationtheory.org/research/"
+              }
+            },
+            "facets": [
+              {
+                "features": [
+                  {
+                    "$type": "app.bsky.richtext.facet#link",
+                    "uri": "https://selfdeterminationtheory.org/research/"
+                  }
+                ],
+                "index": {
+                  "byteEnd": 160,
+                  "byteStart": 123
+                }
+              }
+            ],
+            "langs": [
+              "en"
+            ],
+            "reply": {
+              "parent": {
+                "cid": "bafyreig7foqn2iwo2mql5f5on4sglow6vwzlvfxq4ajtm2mlpnrmpzfrhe",
+                "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z"
+              },
+              "root": {
+                "cid": "bafyreig7foqn2iwo2mql5f5on4sglow6vwzlvfxq4ajtm2mlpnrmpzfrhe",
+                "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z"
+              }
+            },
+            "text": "SDT scholars are quite prolific and the body of research is ever growing (surprising amount of Canadian scholars actually) selfdeterminationtheory.org/research/"
+          },
+          "embed": {
+            "$type": "app.bsky.embed.external#view",
+            "external": {
+              "uri": "https://selfdeterminationtheory.org/research/",
+              "title": "ResearchA677CD6C-FAD9-4CF3-9640-8768D4149A42",
+              "description": ""
+            }
+          },
+          "replyCount": 2,
+          "repostCount": 0,
+          "likeCount": 0,
+          "quoteCount": 0,
+          "indexedAt": "2024-09-24T19:11:33.132Z",
+          "viewer": {
+            "threadMuted": false,
+            "embeddingDisabled": false
+          },
+          "labels": []
+        },
+        "grandparentAuthor": {
+          "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+          "handle": "weswalla.bsky.social",
+          "displayName": "Wesley Finck",
+          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+          "associated": {
+            "chat": {
+              "allowIncoming": "following"
+            }
+          },
+          "viewer": {
+            "muted": false,
+            "blockedBy": false
+          },
+          "labels": [],
+          "createdAt": "2024-02-08T00:14:23.947Z"
+        }
+      }
+    },
+    {
+      "post": {
+        "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wddsabis2h",
+        "cid": "bafyreidriq7eovlymtcktggp7v57duuu3bbyyvb3kh7smtc3vgogm4gszu",
+        "author": {
+          "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+          "handle": "weswalla.bsky.social",
+          "displayName": "Wesley Finck",
+          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+          "associated": {
+            "chat": {
+              "allowIncoming": "following"
+            }
+          },
+          "viewer": {
+            "muted": false,
+            "blockedBy": false
+          },
+          "labels": [],
+          "createdAt": "2024-02-08T00:14:23.947Z"
+        },
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2024-09-24T19:15:19.285Z",
+          "embed": {
+            "$type": "app.bsky.embed.external",
+            "external": {
+              "description": "",
+              "title": "",
+              "uri": "https://papyrus.bib.umontreal.ca/xmlui/bitstream/handle/1866/22373/AS%20parenting%202008%20post_public.pdf;jsessionid=E6DD2C1AC199E68F57976AAEFB233B74?sequence=1"
+            }
+          },
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "https://papyrus.bib.umontreal.ca/xmlui/bitstream/handle/1866/22373/AS%20parenting%202008%20post_public.pdf;jsessionid=E6DD2C1AC199E68F57976AAEFB233B74?sequence=1"
+                }
+              ],
+              "index": {
+                "byteEnd": 115,
+                "byteStart": 75
+              }
+            }
+          ],
+          "langs": [
+            "en"
+          ],
+          "reply": {
+            "parent": {
+              "cid": "bafyreig7foqn2iwo2mql5f5on4sglow6vwzlvfxq4ajtm2mlpnrmpzfrhe",
+              "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z"
+            },
+            "root": {
+              "cid": "bafyreig7foqn2iwo2mql5f5on4sglow6vwzlvfxq4ajtm2mlpnrmpzfrhe",
+              "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z"
+            }
+          },
+          "text": "One area it touches on a lot is parenting, here's a neat paper about that: papyrus.bib.umontreal.ca/xmlui/bitstr..."
+        },
+        "embed": {
+          "$type": "app.bsky.embed.external#view",
+          "external": {
+            "uri": "https://papyrus.bib.umontreal.ca/xmlui/bitstream/handle/1866/22373/AS%20parenting%202008%20post_public.pdf;jsessionid=E6DD2C1AC199E68F57976AAEFB233B74?sequence=1",
+            "title": "",
+            "description": ""
+          }
+        },
+        "replyCount": 0,
+        "repostCount": 0,
+        "likeCount": 0,
+        "quoteCount": 0,
+        "indexedAt": "2024-09-24T19:15:19.285Z",
+        "viewer": {
+          "threadMuted": false,
+          "embeddingDisabled": false
+        },
+        "labels": []
+      },
+      "reply": {
+        "root": {
+          "$type": "app.bsky.feed.defs#postView",
+          "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z",
+          "cid": "bafyreig7foqn2iwo2mql5f5on4sglow6vwzlvfxq4ajtm2mlpnrmpzfrhe",
+          "author": {
+            "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+            "handle": "weswalla.bsky.social",
+            "displayName": "Wesley Finck",
+            "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+            "associated": {
+              "chat": {
+                "allowIncoming": "following"
+              }
+            },
+            "viewer": {
+              "muted": false,
+              "blockedBy": false
+            },
+            "labels": [],
+            "createdAt": "2024-02-08T00:14:23.947Z"
+          },
+          "record": {
+            "$type": "app.bsky.feed.post",
+            "createdAt": "2024-09-24T19:09:58.385Z",
+            "embed": {
+              "$type": "app.bsky.embed.external",
+              "external": {
+                "description": "",
+                "title": "The Theory",
+                "uri": "https://selfdeterminationtheory.org/the-theory/"
+              }
+            },
+            "facets": [
+              {
+                "features": [
+                  {
+                    "$type": "app.bsky.richtext.facet#link",
+                    "uri": "https://selfdeterminationtheory.org/the-theory/"
+                  }
+                ],
+                "index": {
+                  "byteEnd": 165,
+                  "byteStart": 126
+                }
+              }
+            ],
+            "langs": [
+              "en"
+            ],
+            "text": "self determination theory is one of the most compelling theories about human behaviour and development that I've come across. selfdeterminationtheory.org/the-theory/"
+          },
+          "embed": {
+            "$type": "app.bsky.embed.external#view",
+            "external": {
+              "uri": "https://selfdeterminationtheory.org/the-theory/",
+              "title": "The Theory",
+              "description": ""
+            }
+          },
+          "replyCount": 2,
+          "repostCount": 0,
+          "likeCount": 0,
+          "quoteCount": 0,
+          "indexedAt": "2024-09-24T19:09:58.385Z",
+          "viewer": {
+            "threadMuted": false,
+            "embeddingDisabled": false
+          },
+          "labels": []
+        },
+        "parent": {
+          "$type": "app.bsky.feed.defs#postView",
+          "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z",
+          "cid": "bafyreig7foqn2iwo2mql5f5on4sglow6vwzlvfxq4ajtm2mlpnrmpzfrhe",
+          "author": {
+            "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+            "handle": "weswalla.bsky.social",
+            "displayName": "Wesley Finck",
+            "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+            "associated": {
+              "chat": {
+                "allowIncoming": "following"
+              }
+            },
+            "viewer": {
+              "muted": false,
+              "blockedBy": false
+            },
+            "labels": [],
+            "createdAt": "2024-02-08T00:14:23.947Z"
+          },
+          "record": {
+            "$type": "app.bsky.feed.post",
+            "createdAt": "2024-09-24T19:09:58.385Z",
+            "embed": {
+              "$type": "app.bsky.embed.external",
+              "external": {
+                "description": "",
+                "title": "The Theory",
+                "uri": "https://selfdeterminationtheory.org/the-theory/"
+              }
+            },
+            "facets": [
+              {
+                "features": [
+                  {
+                    "$type": "app.bsky.richtext.facet#link",
+                    "uri": "https://selfdeterminationtheory.org/the-theory/"
+                  }
+                ],
+                "index": {
+                  "byteEnd": 165,
+                  "byteStart": 126
+                }
+              }
+            ],
+            "langs": [
+              "en"
+            ],
+            "text": "self determination theory is one of the most compelling theories about human behaviour and development that I've come across. selfdeterminationtheory.org/the-theory/"
+          },
+          "embed": {
+            "$type": "app.bsky.embed.external#view",
+            "external": {
+              "uri": "https://selfdeterminationtheory.org/the-theory/",
+              "title": "The Theory",
+              "description": ""
+            }
+          },
+          "replyCount": 2,
+          "repostCount": 0,
+          "likeCount": 0,
+          "quoteCount": 0,
+          "indexedAt": "2024-09-24T19:09:58.385Z",
+          "viewer": {
+            "threadMuted": false,
+            "embeddingDisabled": false
+          },
+          "labels": []
+        }
+      }
+    },
+    {
+      "post": {
+        "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wdcb3w322z",
+        "cid": "bafyreicw53trheykcocuhdwvhbdkejsb6pmaiwcrzimruv32n2jericleu",
+        "author": {
+          "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+          "handle": "weswalla.bsky.social",
+          "displayName": "Wesley Finck",
+          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+          "associated": {
+            "chat": {
+              "allowIncoming": "following"
+            }
+          },
+          "viewer": {
+            "muted": false,
+            "blockedBy": false
+          },
+          "labels": [],
+          "createdAt": "2024-02-08T00:14:23.947Z"
+        },
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2024-09-24T19:14:27.758Z",
+          "embed": {
+            "$type": "app.bsky.embed.external",
+            "external": {
+              "description": "YouTube video by Happiness & Its Causes",
+              "thumb": {
+                "$type": "blob",
+                "ref": {
+                  "$link": "bafkreicicwvgjhubi7qhtjkfpc552bd5prs5e7oabud4ppx5ls243fhkdq"
+                },
+                "mimeType": "image/jpeg",
+                "size": 209528
+              },
+              "title": "MOTIVATION & LIFESTYLE with Richard Ryan at Happiness & Its Causes 2017",
+              "uri": "https://www.youtube.com/watch?v=wzN10--mNw8&t=175s"
+            }
+          },
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "https://www.youtube.com/watch?v=wzN10--mNw8&t=175s"
+                }
+              ],
+              "index": {
+                "byteEnd": 69,
+                "byteStart": 38
+              }
+            }
+          ],
+          "langs": [
+            "en"
+          ],
+          "reply": {
+            "parent": {
+              "cid": "bafyreifxy4hvz6id34zajalsc23s33s73gw3eyxbc7kwjgbi6yvcpmthoy",
+              "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wdaif3va2h"
+            },
+            "root": {
+              "cid": "bafyreig7foqn2iwo2mql5f5on4sglow6vwzlvfxq4ajtm2mlpnrmpzfrhe",
+              "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z"
+            }
+          },
+          "text": "Here's a short overview of the theory www.youtube.com/watch?v=wzN1..."
+        },
+        "embed": {
+          "$type": "app.bsky.embed.external#view",
+          "external": {
+            "uri": "https://www.youtube.com/watch?v=wzN10--mNw8&t=175s",
+            "title": "MOTIVATION & LIFESTYLE with Richard Ryan at Happiness & Its Causes 2017",
+            "description": "YouTube video by Happiness & Its Causes",
+            "thumb": "https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreicicwvgjhubi7qhtjkfpc552bd5prs5e7oabud4ppx5ls243fhkdq@jpeg"
+          }
+        },
+        "replyCount": 0,
+        "repostCount": 0,
+        "likeCount": 0,
+        "quoteCount": 0,
+        "indexedAt": "2024-09-24T19:14:27.758Z",
+        "viewer": {
+          "threadMuted": false,
+          "embeddingDisabled": false
+        },
+        "labels": []
+      },
+      "reply": {
+        "root": {
+          "$type": "app.bsky.feed.defs#postView",
+          "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z",
+          "cid": "bafyreig7foqn2iwo2mql5f5on4sglow6vwzlvfxq4ajtm2mlpnrmpzfrhe",
+          "author": {
+            "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+            "handle": "weswalla.bsky.social",
+            "displayName": "Wesley Finck",
+            "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+            "associated": {
+              "chat": {
+                "allowIncoming": "following"
+              }
+            },
+            "viewer": {
+              "muted": false,
+              "blockedBy": false
+            },
+            "labels": [],
+            "createdAt": "2024-02-08T00:14:23.947Z"
+          },
+          "record": {
+            "$type": "app.bsky.feed.post",
+            "createdAt": "2024-09-24T19:09:58.385Z",
+            "embed": {
+              "$type": "app.bsky.embed.external",
+              "external": {
+                "description": "",
+                "title": "The Theory",
+                "uri": "https://selfdeterminationtheory.org/the-theory/"
+              }
+            },
+            "facets": [
+              {
+                "features": [
+                  {
+                    "$type": "app.bsky.richtext.facet#link",
+                    "uri": "https://selfdeterminationtheory.org/the-theory/"
+                  }
+                ],
+                "index": {
+                  "byteEnd": 165,
+                  "byteStart": 126
+                }
+              }
+            ],
+            "langs": [
+              "en"
+            ],
+            "text": "self determination theory is one of the most compelling theories about human behaviour and development that I've come across. selfdeterminationtheory.org/the-theory/"
+          },
+          "embed": {
+            "$type": "app.bsky.embed.external#view",
+            "external": {
+              "uri": "https://selfdeterminationtheory.org/the-theory/",
+              "title": "The Theory",
+              "description": ""
+            }
+          },
+          "replyCount": 2,
+          "repostCount": 0,
+          "likeCount": 0,
+          "quoteCount": 0,
+          "indexedAt": "2024-09-24T19:09:58.385Z",
+          "viewer": {
+            "threadMuted": false,
+            "embeddingDisabled": false
+          },
+          "labels": []
+        },
+        "parent": {
+          "$type": "app.bsky.feed.defs#postView",
+          "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wdaif3va2h",
+          "cid": "bafyreifxy4hvz6id34zajalsc23s33s73gw3eyxbc7kwjgbi6yvcpmthoy",
+          "author": {
+            "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+            "handle": "weswalla.bsky.social",
+            "displayName": "Wesley Finck",
+            "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+            "associated": {
+              "chat": {
+                "allowIncoming": "following"
+              }
+            },
+            "viewer": {
+              "muted": false,
+              "blockedBy": false
+            },
+            "labels": [],
+            "createdAt": "2024-02-08T00:14:23.947Z"
+          },
+          "record": {
+            "$type": "app.bsky.feed.post",
+            "createdAt": "2024-09-24T19:13:28.290Z",
+            "embed": {
+              "$type": "app.bsky.embed.external",
+              "external": {
+                "description": "Semantic Scholar profile for Richard M. Ryan, with 27513 highly influential citations and 499 scientific research papers.",
+                "thumb": {
+                  "$type": "blob",
+                  "ref": {
+                    "$link": "bafkreifluh6qlba467xstgk5lc5uykjszcnzpidkikctaedsiwkqqwgsym"
+                  },
+                  "mimeType": "image/jpeg",
+                  "size": 335354
+                },
+                "title": "Richard M. Ryan | Semantic Scholar",
+                "uri": "https://www.semanticscholar.org/author/Richard-M.-Ryan/2242812951"
+              }
+            },
+            "facets": [
+              {
+                "features": [
+                  {
+                    "$type": "app.bsky.richtext.facet#link",
+                    "uri": "https://www.semanticscholar.org/author/Richard-M.-Ryan/2242812951"
+                  }
+                ],
+                "index": {
+                  "byteEnd": 118,
+                  "byteStart": 79
+                }
+              }
+            ],
+            "langs": [
+              "en"
+            ],
+            "reply": {
+              "parent": {
+                "cid": "bafyreiesiupjfvjgezjj2mnyh7bbdzztqkn7gu2bgpgpipz7d5h7j7s7ym",
+                "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd52krts24"
+              },
+              "root": {
+                "cid": "bafyreig7foqn2iwo2mql5f5on4sglow6vwzlvfxq4ajtm2mlpnrmpzfrhe",
+                "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z"
+              }
+            },
+            "text": "one of the creators of the theory is one of the most cited academics I know of www.semanticscholar.org/author/Richa..."
+          },
+          "embed": {
+            "$type": "app.bsky.embed.external#view",
+            "external": {
+              "uri": "https://www.semanticscholar.org/author/Richard-M.-Ryan/2242812951",
+              "title": "Richard M. Ryan | Semantic Scholar",
+              "description": "Semantic Scholar profile for Richard M. Ryan, with 27513 highly influential citations and 499 scientific research papers.",
+              "thumb": "https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreifluh6qlba467xstgk5lc5uykjszcnzpidkikctaedsiwkqqwgsym@jpeg"
+            }
+          },
+          "replyCount": 1,
+          "repostCount": 0,
+          "likeCount": 0,
+          "quoteCount": 0,
+          "indexedAt": "2024-09-24T19:13:28.290Z",
+          "viewer": {
+            "threadMuted": false,
+            "embeddingDisabled": false
+          },
+          "labels": []
+        },
+        "grandparentAuthor": {
+          "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+          "handle": "weswalla.bsky.social",
+          "displayName": "Wesley Finck",
+          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+          "associated": {
+            "chat": {
+              "allowIncoming": "following"
+            }
+          },
+          "viewer": {
+            "muted": false,
+            "blockedBy": false
+          },
+          "labels": [],
+          "createdAt": "2024-02-08T00:14:23.947Z"
+        }
+      }
+    },
+    {
+      "post": {
+        "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wdaif3va2h",
+        "cid": "bafyreifxy4hvz6id34zajalsc23s33s73gw3eyxbc7kwjgbi6yvcpmthoy",
+        "author": {
+          "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+          "handle": "weswalla.bsky.social",
+          "displayName": "Wesley Finck",
+          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+          "associated": {
+            "chat": {
+              "allowIncoming": "following"
+            }
+          },
+          "viewer": {
+            "muted": false,
+            "blockedBy": false
+          },
+          "labels": [],
+          "createdAt": "2024-02-08T00:14:23.947Z"
+        },
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2024-09-24T19:13:28.290Z",
+          "embed": {
+            "$type": "app.bsky.embed.external",
+            "external": {
+              "description": "Semantic Scholar profile for Richard M. Ryan, with 27513 highly influential citations and 499 scientific research papers.",
+              "thumb": {
+                "$type": "blob",
+                "ref": {
+                  "$link": "bafkreifluh6qlba467xstgk5lc5uykjszcnzpidkikctaedsiwkqqwgsym"
+                },
+                "mimeType": "image/jpeg",
+                "size": 335354
+              },
+              "title": "Richard M. Ryan | Semantic Scholar",
+              "uri": "https://www.semanticscholar.org/author/Richard-M.-Ryan/2242812951"
+            }
+          },
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "https://www.semanticscholar.org/author/Richard-M.-Ryan/2242812951"
+                }
+              ],
+              "index": {
+                "byteEnd": 118,
+                "byteStart": 79
+              }
+            }
+          ],
+          "langs": [
+            "en"
+          ],
+          "reply": {
+            "parent": {
+              "cid": "bafyreiesiupjfvjgezjj2mnyh7bbdzztqkn7gu2bgpgpipz7d5h7j7s7ym",
+              "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd52krts24"
+            },
+            "root": {
+              "cid": "bafyreig7foqn2iwo2mql5f5on4sglow6vwzlvfxq4ajtm2mlpnrmpzfrhe",
+              "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z"
+            }
+          },
+          "text": "one of the creators of the theory is one of the most cited academics I know of www.semanticscholar.org/author/Richa..."
+        },
+        "embed": {
+          "$type": "app.bsky.embed.external#view",
+          "external": {
+            "uri": "https://www.semanticscholar.org/author/Richard-M.-Ryan/2242812951",
+            "title": "Richard M. Ryan | Semantic Scholar",
+            "description": "Semantic Scholar profile for Richard M. Ryan, with 27513 highly influential citations and 499 scientific research papers.",
+            "thumb": "https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreifluh6qlba467xstgk5lc5uykjszcnzpidkikctaedsiwkqqwgsym@jpeg"
+          }
+        },
+        "replyCount": 1,
+        "repostCount": 0,
+        "likeCount": 0,
+        "quoteCount": 0,
+        "indexedAt": "2024-09-24T19:13:28.290Z",
+        "viewer": {
+          "threadMuted": false,
+          "embeddingDisabled": false
+        },
+        "labels": []
+      },
+      "reply": {
+        "root": {
+          "$type": "app.bsky.feed.defs#postView",
+          "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z",
+          "cid": "bafyreig7foqn2iwo2mql5f5on4sglow6vwzlvfxq4ajtm2mlpnrmpzfrhe",
+          "author": {
+            "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+            "handle": "weswalla.bsky.social",
+            "displayName": "Wesley Finck",
+            "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+            "associated": {
+              "chat": {
+                "allowIncoming": "following"
+              }
+            },
+            "viewer": {
+              "muted": false,
+              "blockedBy": false
+            },
+            "labels": [],
+            "createdAt": "2024-02-08T00:14:23.947Z"
+          },
+          "record": {
+            "$type": "app.bsky.feed.post",
+            "createdAt": "2024-09-24T19:09:58.385Z",
+            "embed": {
+              "$type": "app.bsky.embed.external",
+              "external": {
+                "description": "",
+                "title": "The Theory",
+                "uri": "https://selfdeterminationtheory.org/the-theory/"
+              }
+            },
+            "facets": [
+              {
+                "features": [
+                  {
+                    "$type": "app.bsky.richtext.facet#link",
+                    "uri": "https://selfdeterminationtheory.org/the-theory/"
+                  }
+                ],
+                "index": {
+                  "byteEnd": 165,
+                  "byteStart": 126
+                }
+              }
+            ],
+            "langs": [
+              "en"
+            ],
+            "text": "self determination theory is one of the most compelling theories about human behaviour and development that I've come across. selfdeterminationtheory.org/the-theory/"
+          },
+          "embed": {
+            "$type": "app.bsky.embed.external#view",
+            "external": {
+              "uri": "https://selfdeterminationtheory.org/the-theory/",
+              "title": "The Theory",
+              "description": ""
+            }
+          },
+          "replyCount": 2,
+          "repostCount": 0,
+          "likeCount": 0,
+          "quoteCount": 0,
+          "indexedAt": "2024-09-24T19:09:58.385Z",
+          "viewer": {
+            "threadMuted": false,
+            "embeddingDisabled": false
+          },
+          "labels": []
+        },
+        "parent": {
+          "$type": "app.bsky.feed.defs#postView",
+          "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd52krts24",
+          "cid": "bafyreiesiupjfvjgezjj2mnyh7bbdzztqkn7gu2bgpgpipz7d5h7j7s7ym",
+          "author": {
+            "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+            "handle": "weswalla.bsky.social",
+            "displayName": "Wesley Finck",
+            "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+            "associated": {
+              "chat": {
+                "allowIncoming": "following"
+              }
+            },
+            "viewer": {
+              "muted": false,
+              "blockedBy": false
+            },
+            "labels": [],
+            "createdAt": "2024-02-08T00:14:23.947Z"
+          },
+          "record": {
+            "$type": "app.bsky.feed.post",
+            "createdAt": "2024-09-24T19:11:33.132Z",
+            "embed": {
+              "$type": "app.bsky.embed.external",
+              "external": {
+                "description": "",
+                "title": "ResearchA677CD6C-FAD9-4CF3-9640-8768D4149A42",
+                "uri": "https://selfdeterminationtheory.org/research/"
+              }
+            },
+            "facets": [
+              {
+                "features": [
+                  {
+                    "$type": "app.bsky.richtext.facet#link",
+                    "uri": "https://selfdeterminationtheory.org/research/"
+                  }
+                ],
+                "index": {
+                  "byteEnd": 160,
+                  "byteStart": 123
+                }
+              }
+            ],
+            "langs": [
+              "en"
+            ],
+            "reply": {
+              "parent": {
+                "cid": "bafyreig7foqn2iwo2mql5f5on4sglow6vwzlvfxq4ajtm2mlpnrmpzfrhe",
+                "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z"
+              },
+              "root": {
+                "cid": "bafyreig7foqn2iwo2mql5f5on4sglow6vwzlvfxq4ajtm2mlpnrmpzfrhe",
+                "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z"
+              }
+            },
+            "text": "SDT scholars are quite prolific and the body of research is ever growing (surprising amount of Canadian scholars actually) selfdeterminationtheory.org/research/"
+          },
+          "embed": {
+            "$type": "app.bsky.embed.external#view",
+            "external": {
+              "uri": "https://selfdeterminationtheory.org/research/",
+              "title": "ResearchA677CD6C-FAD9-4CF3-9640-8768D4149A42",
+              "description": ""
+            }
+          },
+          "replyCount": 2,
+          "repostCount": 0,
+          "likeCount": 0,
+          "quoteCount": 0,
+          "indexedAt": "2024-09-24T19:11:33.132Z",
+          "viewer": {
+            "threadMuted": false,
+            "embeddingDisabled": false
+          },
+          "labels": []
+        },
+        "grandparentAuthor": {
+          "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+          "handle": "weswalla.bsky.social",
+          "displayName": "Wesley Finck",
+          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+          "associated": {
+            "chat": {
+              "allowIncoming": "following"
+            }
+          },
+          "viewer": {
+            "muted": false,
+            "blockedBy": false
+          },
+          "labels": [],
+          "createdAt": "2024-02-08T00:14:23.947Z"
+        }
+      }
+    },
+    {
+      "post": {
+        "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd52krts24",
+        "cid": "bafyreiesiupjfvjgezjj2mnyh7bbdzztqkn7gu2bgpgpipz7d5h7j7s7ym",
+        "author": {
+          "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+          "handle": "weswalla.bsky.social",
+          "displayName": "Wesley Finck",
+          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+          "associated": {
+            "chat": {
+              "allowIncoming": "following"
+            }
+          },
+          "viewer": {
+            "muted": false,
+            "blockedBy": false
+          },
+          "labels": [],
+          "createdAt": "2024-02-08T00:14:23.947Z"
+        },
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2024-09-24T19:11:33.132Z",
+          "embed": {
+            "$type": "app.bsky.embed.external",
+            "external": {
+              "description": "",
+              "title": "ResearchA677CD6C-FAD9-4CF3-9640-8768D4149A42",
+              "uri": "https://selfdeterminationtheory.org/research/"
+            }
+          },
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "https://selfdeterminationtheory.org/research/"
+                }
+              ],
+              "index": {
+                "byteEnd": 160,
+                "byteStart": 123
+              }
+            }
+          ],
+          "langs": [
+            "en"
+          ],
+          "reply": {
+            "parent": {
+              "cid": "bafyreig7foqn2iwo2mql5f5on4sglow6vwzlvfxq4ajtm2mlpnrmpzfrhe",
+              "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z"
+            },
+            "root": {
+              "cid": "bafyreig7foqn2iwo2mql5f5on4sglow6vwzlvfxq4ajtm2mlpnrmpzfrhe",
+              "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z"
+            }
+          },
+          "text": "SDT scholars are quite prolific and the body of research is ever growing (surprising amount of Canadian scholars actually) selfdeterminationtheory.org/research/"
+        },
+        "embed": {
+          "$type": "app.bsky.embed.external#view",
+          "external": {
+            "uri": "https://selfdeterminationtheory.org/research/",
+            "title": "ResearchA677CD6C-FAD9-4CF3-9640-8768D4149A42",
+            "description": ""
+          }
+        },
+        "replyCount": 2,
+        "repostCount": 0,
+        "likeCount": 0,
+        "quoteCount": 0,
+        "indexedAt": "2024-09-24T19:11:33.132Z",
+        "viewer": {
+          "threadMuted": false,
+          "embeddingDisabled": false
+        },
+        "labels": []
+      },
+      "reply": {
+        "root": {
+          "$type": "app.bsky.feed.defs#postView",
+          "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z",
+          "cid": "bafyreig7foqn2iwo2mql5f5on4sglow6vwzlvfxq4ajtm2mlpnrmpzfrhe",
+          "author": {
+            "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+            "handle": "weswalla.bsky.social",
+            "displayName": "Wesley Finck",
+            "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+            "associated": {
+              "chat": {
+                "allowIncoming": "following"
+              }
+            },
+            "viewer": {
+              "muted": false,
+              "blockedBy": false
+            },
+            "labels": [],
+            "createdAt": "2024-02-08T00:14:23.947Z"
+          },
+          "record": {
+            "$type": "app.bsky.feed.post",
+            "createdAt": "2024-09-24T19:09:58.385Z",
+            "embed": {
+              "$type": "app.bsky.embed.external",
+              "external": {
+                "description": "",
+                "title": "The Theory",
+                "uri": "https://selfdeterminationtheory.org/the-theory/"
+              }
+            },
+            "facets": [
+              {
+                "features": [
+                  {
+                    "$type": "app.bsky.richtext.facet#link",
+                    "uri": "https://selfdeterminationtheory.org/the-theory/"
+                  }
+                ],
+                "index": {
+                  "byteEnd": 165,
+                  "byteStart": 126
+                }
+              }
+            ],
+            "langs": [
+              "en"
+            ],
+            "text": "self determination theory is one of the most compelling theories about human behaviour and development that I've come across. selfdeterminationtheory.org/the-theory/"
+          },
+          "embed": {
+            "$type": "app.bsky.embed.external#view",
+            "external": {
+              "uri": "https://selfdeterminationtheory.org/the-theory/",
+              "title": "The Theory",
+              "description": ""
+            }
+          },
+          "replyCount": 2,
+          "repostCount": 0,
+          "likeCount": 0,
+          "quoteCount": 0,
+          "indexedAt": "2024-09-24T19:09:58.385Z",
+          "viewer": {
+            "threadMuted": false,
+            "embeddingDisabled": false
+          },
+          "labels": []
+        },
+        "parent": {
+          "$type": "app.bsky.feed.defs#postView",
+          "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z",
+          "cid": "bafyreig7foqn2iwo2mql5f5on4sglow6vwzlvfxq4ajtm2mlpnrmpzfrhe",
+          "author": {
+            "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+            "handle": "weswalla.bsky.social",
+            "displayName": "Wesley Finck",
+            "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+            "associated": {
+              "chat": {
+                "allowIncoming": "following"
+              }
+            },
+            "viewer": {
+              "muted": false,
+              "blockedBy": false
+            },
+            "labels": [],
+            "createdAt": "2024-02-08T00:14:23.947Z"
+          },
+          "record": {
+            "$type": "app.bsky.feed.post",
+            "createdAt": "2024-09-24T19:09:58.385Z",
+            "embed": {
+              "$type": "app.bsky.embed.external",
+              "external": {
+                "description": "",
+                "title": "The Theory",
+                "uri": "https://selfdeterminationtheory.org/the-theory/"
+              }
+            },
+            "facets": [
+              {
+                "features": [
+                  {
+                    "$type": "app.bsky.richtext.facet#link",
+                    "uri": "https://selfdeterminationtheory.org/the-theory/"
+                  }
+                ],
+                "index": {
+                  "byteEnd": 165,
+                  "byteStart": 126
+                }
+              }
+            ],
+            "langs": [
+              "en"
+            ],
+            "text": "self determination theory is one of the most compelling theories about human behaviour and development that I've come across. selfdeterminationtheory.org/the-theory/"
+          },
+          "embed": {
+            "$type": "app.bsky.embed.external#view",
+            "external": {
+              "uri": "https://selfdeterminationtheory.org/the-theory/",
+              "title": "The Theory",
+              "description": ""
+            }
+          },
+          "replyCount": 2,
+          "repostCount": 0,
+          "likeCount": 0,
+          "quoteCount": 0,
+          "indexedAt": "2024-09-24T19:09:58.385Z",
+          "viewer": {
+            "threadMuted": false,
+            "embeddingDisabled": false
+          },
+          "labels": []
+        }
+      }
+    },
+    {
+      "post": {
+        "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4wd2aares2z",
+        "cid": "bafyreig7foqn2iwo2mql5f5on4sglow6vwzlvfxq4ajtm2mlpnrmpzfrhe",
+        "author": {
+          "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+          "handle": "weswalla.bsky.social",
+          "displayName": "Wesley Finck",
+          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+          "associated": {
+            "chat": {
+              "allowIncoming": "following"
+            }
+          },
+          "viewer": {
+            "muted": false,
+            "blockedBy": false
+          },
+          "labels": [],
+          "createdAt": "2024-02-08T00:14:23.947Z"
+        },
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2024-09-24T19:09:58.385Z",
+          "embed": {
+            "$type": "app.bsky.embed.external",
+            "external": {
+              "description": "",
+              "title": "The Theory",
+              "uri": "https://selfdeterminationtheory.org/the-theory/"
+            }
+          },
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "https://selfdeterminationtheory.org/the-theory/"
+                }
+              ],
+              "index": {
+                "byteEnd": 165,
+                "byteStart": 126
+              }
+            }
+          ],
+          "langs": [
+            "en"
+          ],
+          "text": "self determination theory is one of the most compelling theories about human behaviour and development that I've come across. selfdeterminationtheory.org/the-theory/"
+        },
+        "embed": {
+          "$type": "app.bsky.embed.external#view",
+          "external": {
+            "uri": "https://selfdeterminationtheory.org/the-theory/",
+            "title": "The Theory",
+            "description": ""
+          }
+        },
+        "replyCount": 2,
+        "repostCount": 0,
+        "likeCount": 0,
+        "quoteCount": 0,
+        "indexedAt": "2024-09-24T19:09:58.385Z",
+        "viewer": {
+          "threadMuted": false,
+          "embeddingDisabled": false
+        },
+        "labels": []
+      }
+    },
+    {
+      "post": {
+        "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4tpp5hujn2v",
+        "cid": "bafyreigrwbhgrissbjg4nz5ga46x7qkvwghyrpbhlzrgxmbpouzi6rjjje",
+        "author": {
+          "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+          "handle": "weswalla.bsky.social",
+          "displayName": "Wesley Finck",
+          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+          "associated": {
+            "chat": {
+              "allowIncoming": "following"
+            }
+          },
+          "viewer": {
+            "muted": false,
+            "blockedBy": false
+          },
+          "labels": [],
+          "createdAt": "2024-02-08T00:14:23.947Z"
+        },
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2024-09-23T18:18:25.568Z",
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "https://getwhisky.app/"
+                }
+              ],
+              "index": {
+                "byteEnd": 83,
+                "byteStart": 61
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "https://getwhisky.app/"
+                }
+              ],
+              "index": {
+                "byteEnd": 83,
+                "byteStart": 61
+              }
+            }
+          ],
+          "langs": [
+            "en"
+          ],
+          "text": "I've been able to play a few steam games on my macbook using https://getwhisky.app/ and it works pretty well! So far it handles Chained Together and Pilgrim without issue, but Lunch Lady kept glitching out everytime she killed me"
+        },
+        "replyCount": 0,
+        "repostCount": 0,
+        "likeCount": 1,
+        "quoteCount": 0,
+        "indexedAt": "2024-09-23T18:18:25.568Z",
+        "viewer": {
+          "threadMuted": false,
+          "embeddingDisabled": false
+        },
+        "labels": []
+      }
+    },
+    {
+      "post": {
+        "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3l4ebss5mmt2f",
+        "cid": "bafyreidpcnk6nrdr7dbtzm35xfwv4b4xcqxjkcgimqjclwxrzutcabosqi",
+        "author": {
+          "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+          "handle": "weswalla.bsky.social",
+          "displayName": "Wesley Finck",
+          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+          "associated": {
+            "chat": {
+              "allowIncoming": "following"
+            }
+          },
+          "viewer": {
+            "muted": false,
+            "blockedBy": false
+          },
+          "labels": [],
+          "createdAt": "2024-02-08T00:14:23.947Z"
+        },
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2024-09-17T14:59:59.300Z",
+          "embed": {
+            "$type": "app.bsky.embed.record",
+            "record": {
+              "cid": "bafyreifcxkilyav5acswehpn5b247ru6zhlhckfewu6brxst4bexcucyry",
+              "uri": "at://did:plc:ormie3tjweyhnqckjlzowoxg/app.bsky.feed.post/3l4eak57v5y2h"
+            }
+          },
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "epistemiccommons"
+                }
+              ],
+              "index": {
+                "byteEnd": 149,
+                "byteStart": 132
+              }
+            }
+          ],
+          "langs": [
+            "en"
+          ],
+          "text": "Let’s keep journalism independent and free from perverse incentives. Best way is to support directly with a monthly subscription. #epistemiccommons"
+        },
+        "embed": {
+          "$type": "app.bsky.embed.record#view",
+          "record": {
+            "$type": "app.bsky.embed.record#viewRecord",
+            "uri": "at://did:plc:ormie3tjweyhnqckjlzowoxg/app.bsky.feed.post/3l4eak57v5y2h",
+            "cid": "bafyreifcxkilyav5acswehpn5b247ru6zhlhckfewu6brxst4bexcucyry",
+            "author": {
+              "did": "did:plc:ormie3tjweyhnqckjlzowoxg",
+              "handle": "thetyee.ca",
+              "displayName": "The Tyee",
+              "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:ormie3tjweyhnqckjlzowoxg/bafkreigstewya7254mpk4fmvodpmfrqtbxmupztdeman6kuatl4v5walze@jpeg",
+              "associated": {
+                "chat": {
+                  "allowIncoming": "following"
+                }
+              },
+              "viewer": {
+                "muted": false,
+                "blockedBy": false,
+                "following": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.graph.follow/3kqtnbuevx62y"
+              },
+              "labels": [],
+              "createdAt": "2024-02-06T17:28:31.293Z"
+            },
+            "value": {
+              "$type": "app.bsky.feed.post",
+              "createdAt": "2024-09-17T14:37:15.542Z",
+              "embed": {
+                "$type": "app.bsky.embed.external",
+                "external": {
+                  "description": "Our annual report back to our readers is hot off the presses.",
+                  "thumb": {
+                    "$type": "blob",
+                    "ref": {
+                      "$link": "bafkreibopkhpq5gqi6fefvhped4w4uwfngi5a4mbwbwdu2wksd35yaxynm"
+                    },
+                    "mimeType": "image/jpeg",
+                    "size": 339662
+                  },
+                  "title": "Behold! The Tyee’s 2023 Impact Report | The Tyee",
+                  "uri": "https://thetyee.ca/Tyeenews/2024/09/17/Tyee-2023-Impact-Report/?utm_source=bluesky&utm_medium=social&utm_campaign=editorial"
+                }
+              },
+              "facets": [
+                {
+                  "features": [
+                    {
+                      "$type": "app.bsky.richtext.facet#tag",
+                      "tag": "CdnMedia"
+                    }
+                  ],
+                  "index": {
+                    "byteEnd": 259,
+                    "byteStart": 250
+                  }
+                }
+              ],
+              "langs": [
+                "en"
+              ],
+              "text": "Supporting The Tyee is not like taking out a subscription to a newspaper — it’s a contribution toward the kind of journalism you want to see more of in our community.\n\nIt only feels fair that we share what we’re able to do with your help. ✨\n\n#CdnMedia"
+            },
+            "labels": [],
+            "likeCount": 5,
+            "replyCount": 0,
+            "repostCount": 4,
+            "quoteCount": 1,
+            "indexedAt": "2024-09-17T14:37:15.542Z",
+            "embeds": [
+              {
+                "$type": "app.bsky.embed.external#view",
+                "external": {
+                  "uri": "https://thetyee.ca/Tyeenews/2024/09/17/Tyee-2023-Impact-Report/?utm_source=bluesky&utm_medium=social&utm_campaign=editorial",
+                  "title": "Behold! The Tyee’s 2023 Impact Report | The Tyee",
+                  "description": "Our annual report back to our readers is hot off the presses.",
+                  "thumb": "https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:ormie3tjweyhnqckjlzowoxg/bafkreibopkhpq5gqi6fefvhped4w4uwfngi5a4mbwbwdu2wksd35yaxynm@jpeg"
+                }
+              }
+            ]
+          }
+        },
+        "replyCount": 0,
+        "repostCount": 0,
+        "likeCount": 0,
+        "quoteCount": 0,
+        "indexedAt": "2024-09-17T14:59:59.300Z",
+        "viewer": {
+          "threadMuted": false,
+          "embeddingDisabled": false
+        },
+        "labels": []
+      }
+    },
+    {
+      "post": {
+        "uri": "at://did:plc:lehcqqkwzcwvjvw66uthu5oq/app.bsky.feed.post/3l2pmnsgdjn27",
+        "cid": "bafyreic7apa6p7o32jluxkxyltajpwotzkiu6r4sdusscmns5fmkxxqug4",
+        "author": {
+          "did": "did:plc:lehcqqkwzcwvjvw66uthu5oq",
+          "handle": "atprotocol.dev",
+          "displayName": "AT Protocol Fan Account",
+          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:lehcqqkwzcwvjvw66uthu5oq/bafkreib3n46bkixt6uyfpx26nvetn64ny4cc4bil6kbn537ashft3elrga@jpeg",
+          "associated": {
+            "chat": {
+              "allowIncoming": "all"
+            }
+          },
+          "viewer": {
+            "muted": false,
+            "blockedBy": false
+          },
+          "labels": [],
+          "createdAt": "2024-08-19T15:43:00.487Z"
+        },
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2024-08-27T16:22:57.262Z",
+          "embed": {
+            "$type": "app.bsky.embed.external",
+            "external": {
+              "description": "Smoke Signal is an events & RSVP system, built by Nick Gerakines on top of ATProtocol.",
+              "thumb": {
+                "$type": "blob",
+                "ref": {
+                  "$link": "bafkreier5usn75o4hdnhdcwr62f7svomkzgcx6tiypeppjg64nwvwhnsuu"
+                },
+                "mimeType": "image/jpeg",
+                "size": 303891
+              },
+              "title": "Tech Talk: Smoke Signal Events",
+              "uri": "https://atprotocol.dev/tech-talk-smoke-signal-events/"
+            }
+          },
+          "facets": [
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#mention",
+                  "did": "did:plc:2cxgdrgtsmrbqnjkwyplmp43"
+                }
+              ],
+              "index": {
+                "byteEnd": 45,
+                "byteStart": 36
+              }
+            },
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#mention",
+                  "did": "did:plc:cbkjy5n7bk3ax2wplmtjofq2"
+                }
+              ],
+              "index": {
+                "byteEnd": 81,
+                "byteStart": 67
+              }
+            },
+            {
+              "$type": "app.bsky.richtext.facet",
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#mention",
+                  "did": "did:plc:tgudj2fjm77pzkuawquqhsxm"
+                }
+              ],
+              "index": {
+                "byteEnd": 127,
+                "byteStart": 108
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "https://atprotocol.dev/tech-talk-smoke-signal-events/"
+                }
+              ],
+              "index": {
+                "byteEnd": 183,
+                "byteStart": 153
+              }
+            }
+          ],
+          "langs": [
+            "en"
+          ],
+          "text": "Our second tech talk is now booked. @bmann.ca will be talking with @ngerakines.me about Smoke Signal Events @smokesignal.events next Thursday, Sept 5th\n\natprotocol.dev/tech-talk-sm..."
+        },
+        "embed": {
+          "$type": "app.bsky.embed.external#view",
+          "external": {
+            "uri": "https://atprotocol.dev/tech-talk-smoke-signal-events/",
+            "title": "Tech Talk: Smoke Signal Events",
+            "description": "Smoke Signal is an events & RSVP system, built by Nick Gerakines on top of ATProtocol.",
+            "thumb": "https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:lehcqqkwzcwvjvw66uthu5oq/bafkreier5usn75o4hdnhdcwr62f7svomkzgcx6tiypeppjg64nwvwhnsuu@jpeg"
+          }
+        },
+        "replyCount": 1,
+        "repostCount": 8,
+        "likeCount": 15,
+        "quoteCount": 1,
+        "indexedAt": "2024-08-27T16:22:57.262Z",
+        "viewer": {
+          "repost": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.repost/3l2pqqxdjyh2q",
+          "threadMuted": false,
+          "embeddingDisabled": false
+        },
+        "labels": []
+      },
+      "reason": {
+        "$type": "app.bsky.feed.defs#reasonRepost",
+        "by": {
+          "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+          "handle": "weswalla.bsky.social",
+          "displayName": "Wesley Finck",
+          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+          "associated": {
+            "chat": {
+              "allowIncoming": "following"
+            }
+          },
+          "viewer": {
+            "muted": false,
+            "blockedBy": false
+          },
+          "labels": [],
+          "createdAt": "2024-02-08T00:14:23.947Z"
+        },
+        "indexedAt": "2024-08-27T17:36:18.001Z"
+      }
+    },
+    {
+      "post": {
+        "uri": "at://did:plc:2cxgdrgtsmrbqnjkwyplmp43/app.bsky.feed.post/3l2goevecsb2i",
+        "cid": "bafyreie7lrknfjfjwsl7nyw2g6ns6unsj363zh2tejq2j4mhf2jbgwcwcu",
+        "author": {
+          "did": "did:plc:2cxgdrgtsmrbqnjkwyplmp43",
+          "handle": "bmann.ca",
+          "displayName": "Boris",
+          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:2cxgdrgtsmrbqnjkwyplmp43/bafkreifxvurkstoum2gfk6tg4t2r7tpbusjqzv5qv3wlqrptkpeqz4z6si@jpeg",
+          "associated": {
+            "chat": {
+              "allowIncoming": "all"
+            }
+          },
+          "viewer": {
+            "muted": false,
+            "blockedBy": false,
+            "following": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.graph.follow/3km3x76fbwv2e",
+            "followedBy": "at://did:plc:2cxgdrgtsmrbqnjkwyplmp43/app.bsky.graph.follow/3km3yftchgl2r"
+          },
+          "labels": [],
+          "createdAt": "2022-11-23T23:40:09.930Z"
+        },
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2024-08-24T02:59:48.065Z",
+          "embed": {
+            "$type": "app.bsky.embed.external",
+            "external": {
+              "description": "Vancouver Game Garden is an independent games showcase featuring local developers in Vancouver, Canada.",
+              "thumb": {
+                "$type": "blob",
+                "ref": {
+                  "$link": "bafkreie6mymscoa6flmrbqjpkjhbgmlb5pbgwa3fhecm3yeryzlsvlmgui"
+                },
+                "mimeType": "image/jpeg",
+                "size": 481770
+              },
+              "title": "Vancouver Game Garden",
+              "uri": "https://vangamegarden.com/"
+            }
+          },
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "https://milanimal.itch.io/constellations"
+                }
+              ],
+              "index": {
+                "byteEnd": 250,
+                "byteStart": 218
+              }
+            }
+          ],
+          "langs": [
+            "en"
+          ],
+          "text": "Vancouver Game Garden tomorrow — Saturday, Aug 24th — at Heritage Hall on Main Street. \n\nAttendance is free for the public, 10am to 6pm. \n\nTry games by local designers, include Z-Space member Milan’s Stellations milanimal.itch.io/constellations"
+        },
+        "embed": {
+          "$type": "app.bsky.embed.external#view",
+          "external": {
+            "uri": "https://vangamegarden.com/",
+            "title": "Vancouver Game Garden",
+            "description": "Vancouver Game Garden is an independent games showcase featuring local developers in Vancouver, Canada.",
+            "thumb": "https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:2cxgdrgtsmrbqnjkwyplmp43/bafkreie6mymscoa6flmrbqjpkjhbgmlb5pbgwa3fhecm3yeryzlsvlmgui@jpeg"
+          }
+        },
+        "replyCount": 0,
+        "repostCount": 1,
+        "likeCount": 0,
+        "quoteCount": 0,
+        "indexedAt": "2024-08-24T02:59:48.065Z",
+        "viewer": {
+          "repost": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.repost/3l2gw2wniji2w",
+          "threadMuted": false,
+          "embeddingDisabled": false
+        },
+        "labels": []
+      },
+      "reason": {
+        "$type": "app.bsky.feed.defs#reasonRepost",
+        "by": {
+          "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+          "handle": "weswalla.bsky.social",
+          "displayName": "Wesley Finck",
+          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+          "associated": {
+            "chat": {
+              "allowIncoming": "following"
+            }
+          },
+          "viewer": {
+            "muted": false,
+            "blockedBy": false
+          },
+          "labels": [],
+          "createdAt": "2024-02-08T00:14:23.947Z"
+        },
+        "indexedAt": "2024-08-24T05:17:23.859Z"
+      }
+    },
+    {
+      "post": {
+        "uri": "at://did:plc:vwzwgnygau7ed7b7wt5ux7y2/app.bsky.feed.post/3kzzkjylajh2z",
+        "cid": "bafyreighexsbngotzhghms6nzfblj7nlmhvpfpy6dbzddxe34my6v5v57y",
+        "author": {
+          "did": "did:plc:vwzwgnygau7ed7b7wt5ux7y2",
+          "handle": "retr0.id",
+          "displayName": "David Buchanan",
+          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:vwzwgnygau7ed7b7wt5ux7y2/bafkreifrtz3ngpzz5qmhjliv5toj4nvyjovijxs5e2la67wddhmdhro5he@jpeg",
+          "associated": {
+            "chat": {
+              "allowIncoming": "following"
+            }
+          },
+          "viewer": {
+            "muted": false,
+            "blockedBy": false
+          },
+          "labels": [],
+          "createdAt": "2023-04-27T09:23:54.423Z"
+        },
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2024-08-18T21:46:27.738Z",
+          "langs": [
+            "en"
+          ],
+          "text": "frankly there's a whole generation of users who are not \"web users\", nor \"internet users\", merely \"app users\".\n\nI don't say this to dunk on anyone, but to point out that we have a problem to solve."
+        },
+        "replyCount": 27,
+        "repostCount": 113,
+        "likeCount": 598,
+        "quoteCount": 11,
+        "indexedAt": "2024-08-18T21:46:27.738Z",
+        "viewer": {
+          "repost": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.repost/3l22mfrz7is2i",
+          "threadMuted": false,
+          "embeddingDisabled": false
+        },
+        "labels": []
+      },
+      "reason": {
+        "$type": "app.bsky.feed.defs#reasonRepost",
+        "by": {
+          "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+          "handle": "weswalla.bsky.social",
+          "displayName": "Wesley Finck",
+          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+          "associated": {
+            "chat": {
+              "allowIncoming": "following"
+            }
+          },
+          "viewer": {
+            "muted": false,
+            "blockedBy": false
+          },
+          "labels": [],
+          "createdAt": "2024-02-08T00:14:23.947Z"
+        },
+        "indexedAt": "2024-08-19T07:52:33.744Z"
+      }
+    },
+    {
+      "post": {
+        "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3kzp6xiyp3a2t",
+        "cid": "bafyreic7izyboe3pyba4c53h6cliv5zhfzkpkneevxhbmsm6zqclm4z5om",
+        "author": {
+          "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+          "handle": "weswalla.bsky.social",
+          "displayName": "Wesley Finck",
+          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+          "associated": {
+            "chat": {
+              "allowIncoming": "following"
+            }
+          },
+          "viewer": {
+            "muted": false,
+            "blockedBy": false
+          },
+          "labels": [],
+          "createdAt": "2024-02-08T00:14:23.947Z"
+        },
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2024-08-14T18:52:38.935Z",
+          "embed": {
+            "$type": "app.bsky.embed.images",
+            "images": [
+              {
+                "alt": "The Triopticon was developed for the following purposes:\n\nTo bring together, observe and explore how different bodies of knowledge apply and interact in a particular field\nTo create a safe space to communicate conflicting perspectives, linked to the aporetic turn.\nTo deliver a richer alternative to a traditional conference setting experience.\nTo work through conflicting beliefs.\nTo provide novel opportunities for analysis and synthesis of areas of disagreement and/or conflict.\nTo encourage a rich context which encourages new thinking and the exchange and combination of ideas\nTo produce artefacts which can be used to inform further pieces of work.",
+                "aspectRatio": {
+                  "height": 750,
+                  "width": 1648
+                },
+                "image": {
+                  "$type": "blob",
+                  "ref": {
+                    "$link": "bafkreibwosugxaorli2tusrr46ddqkw3kov5hdpnazksfdotnunm5j62eu"
+                  },
+                  "mimeType": "image/jpeg",
+                  "size": 718894
+                }
+              }
+            ]
+          },
+          "langs": [
+            "en"
+          ],
+          "reply": {
+            "parent": {
+              "cid": "bafyreigfjh6bdreetzsufa5ygx2nycgbpuo6q7jpaii6lk4dn6kipzix7u",
+              "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3kzp6wooqmi2z"
+            },
+            "root": {
+              "cid": "bafyreigfjh6bdreetzsufa5ygx2nycgbpuo6q7jpaii6lk4dn6kipzix7u",
+              "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3kzp6wooqmi2z"
+            }
+          },
+          "text": "\"The Triopticon process was designed to provide a fresh compromise between a formal conference and the more unstructured unconference.\""
+        },
+        "embed": {
+          "$type": "app.bsky.embed.images#view",
+          "images": [
+            {
+              "thumb": "https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreibwosugxaorli2tusrr46ddqkw3kov5hdpnazksfdotnunm5j62eu@jpeg",
+              "fullsize": "https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreibwosugxaorli2tusrr46ddqkw3kov5hdpnazksfdotnunm5j62eu@jpeg",
+              "alt": "The Triopticon was developed for the following purposes:\n\nTo bring together, observe and explore how different bodies of knowledge apply and interact in a particular field\nTo create a safe space to communicate conflicting perspectives, linked to the aporetic turn.\nTo deliver a richer alternative to a traditional conference setting experience.\nTo work through conflicting beliefs.\nTo provide novel opportunities for analysis and synthesis of areas of disagreement and/or conflict.\nTo encourage a rich context which encourages new thinking and the exchange and combination of ideas\nTo produce artefacts which can be used to inform further pieces of work.",
+              "aspectRatio": {
+                "height": 750,
+                "width": 1648
+              }
+            }
+          ]
+        },
+        "replyCount": 0,
+        "repostCount": 0,
+        "likeCount": 1,
+        "quoteCount": 0,
+        "indexedAt": "2024-08-14T18:52:38.935Z",
+        "viewer": {
+          "threadMuted": false,
+          "embeddingDisabled": false
+        },
+        "labels": []
+      },
+      "reply": {
+        "root": {
+          "$type": "app.bsky.feed.defs#postView",
+          "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3kzp6wooqmi2z",
+          "cid": "bafyreigfjh6bdreetzsufa5ygx2nycgbpuo6q7jpaii6lk4dn6kipzix7u",
+          "author": {
+            "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+            "handle": "weswalla.bsky.social",
+            "displayName": "Wesley Finck",
+            "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+            "associated": {
+              "chat": {
+                "allowIncoming": "following"
+              }
+            },
+            "viewer": {
+              "muted": false,
+              "blockedBy": false
+            },
+            "labels": [],
+            "createdAt": "2024-02-08T00:14:23.947Z"
+          },
+          "record": {
+            "$type": "app.bsky.feed.post",
+            "createdAt": "2024-08-14T18:52:11.324Z",
+            "embed": {
+              "$type": "app.bsky.embed.external",
+              "external": {
+                "description": "",
+                "thumb": {
+                  "$type": "blob",
+                  "ref": {
+                    "$link": "bafkreifwz3xwzjqfoybqorz5uuorhmztsgpduy4n4am466xsvyjalid2zm"
+                  },
+                  "mimeType": "image/jpeg",
+                  "size": 255792
+                },
+                "title": "Triopticon",
+                "uri": "https://cynefin.io/index.php/Triopticon"
+              }
+            },
+            "facets": [
+              {
+                "features": [
+                  {
+                    "$type": "app.bsky.richtext.facet#tag",
+                    "tag": "DWebCamp2024"
+                  }
+                ],
+                "index": {
+                  "byteEnd": 13,
+                  "byteStart": 0
+                }
+              },
+              {
+                "features": [
+                  {
+                    "$type": "app.bsky.richtext.facet#link",
+                    "uri": "https://cynefin.io/index.php/Triopticon"
+                  }
+                ],
+                "index": {
+                  "byteEnd": 240,
+                  "byteStart": 214
+                }
+              }
+            ],
+            "langs": [
+              "en"
+            ],
+            "text": "#DWebCamp2024 was full of discussion and exploration which I'd love to see in the space between conference and unconference with something like the triopticon workshop method to see what kind of synthesis emerges. cynefin.io/index.php/Tr..."
+          },
+          "embed": {
+            "$type": "app.bsky.embed.external#view",
+            "external": {
+              "uri": "https://cynefin.io/index.php/Triopticon",
+              "title": "Triopticon",
+              "description": "",
+              "thumb": "https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreifwz3xwzjqfoybqorz5uuorhmztsgpduy4n4am466xsvyjalid2zm@jpeg"
+            }
+          },
+          "replyCount": 1,
+          "repostCount": 0,
+          "likeCount": 0,
+          "quoteCount": 0,
+          "indexedAt": "2024-08-14T18:52:11.324Z",
+          "viewer": {
+            "threadMuted": false,
+            "embeddingDisabled": false
+          },
+          "labels": []
+        },
+        "parent": {
+          "$type": "app.bsky.feed.defs#postView",
+          "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3kzp6wooqmi2z",
+          "cid": "bafyreigfjh6bdreetzsufa5ygx2nycgbpuo6q7jpaii6lk4dn6kipzix7u",
+          "author": {
+            "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+            "handle": "weswalla.bsky.social",
+            "displayName": "Wesley Finck",
+            "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+            "associated": {
+              "chat": {
+                "allowIncoming": "following"
+              }
+            },
+            "viewer": {
+              "muted": false,
+              "blockedBy": false
+            },
+            "labels": [],
+            "createdAt": "2024-02-08T00:14:23.947Z"
+          },
+          "record": {
+            "$type": "app.bsky.feed.post",
+            "createdAt": "2024-08-14T18:52:11.324Z",
+            "embed": {
+              "$type": "app.bsky.embed.external",
+              "external": {
+                "description": "",
+                "thumb": {
+                  "$type": "blob",
+                  "ref": {
+                    "$link": "bafkreifwz3xwzjqfoybqorz5uuorhmztsgpduy4n4am466xsvyjalid2zm"
+                  },
+                  "mimeType": "image/jpeg",
+                  "size": 255792
+                },
+                "title": "Triopticon",
+                "uri": "https://cynefin.io/index.php/Triopticon"
+              }
+            },
+            "facets": [
+              {
+                "features": [
+                  {
+                    "$type": "app.bsky.richtext.facet#tag",
+                    "tag": "DWebCamp2024"
+                  }
+                ],
+                "index": {
+                  "byteEnd": 13,
+                  "byteStart": 0
+                }
+              },
+              {
+                "features": [
+                  {
+                    "$type": "app.bsky.richtext.facet#link",
+                    "uri": "https://cynefin.io/index.php/Triopticon"
+                  }
+                ],
+                "index": {
+                  "byteEnd": 240,
+                  "byteStart": 214
+                }
+              }
+            ],
+            "langs": [
+              "en"
+            ],
+            "text": "#DWebCamp2024 was full of discussion and exploration which I'd love to see in the space between conference and unconference with something like the triopticon workshop method to see what kind of synthesis emerges. cynefin.io/index.php/Tr..."
+          },
+          "embed": {
+            "$type": "app.bsky.embed.external#view",
+            "external": {
+              "uri": "https://cynefin.io/index.php/Triopticon",
+              "title": "Triopticon",
+              "description": "",
+              "thumb": "https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreifwz3xwzjqfoybqorz5uuorhmztsgpduy4n4am466xsvyjalid2zm@jpeg"
+            }
+          },
+          "replyCount": 1,
+          "repostCount": 0,
+          "likeCount": 0,
+          "quoteCount": 0,
+          "indexedAt": "2024-08-14T18:52:11.324Z",
+          "viewer": {
+            "threadMuted": false,
+            "embeddingDisabled": false
+          },
+          "labels": []
+        }
+      }
+    },
+    {
+      "post": {
+        "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3kzp6wooqmi2z",
+        "cid": "bafyreigfjh6bdreetzsufa5ygx2nycgbpuo6q7jpaii6lk4dn6kipzix7u",
+        "author": {
+          "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+          "handle": "weswalla.bsky.social",
+          "displayName": "Wesley Finck",
+          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+          "associated": {
+            "chat": {
+              "allowIncoming": "following"
+            }
+          },
+          "viewer": {
+            "muted": false,
+            "blockedBy": false
+          },
+          "labels": [],
+          "createdAt": "2024-02-08T00:14:23.947Z"
+        },
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2024-08-14T18:52:11.324Z",
+          "embed": {
+            "$type": "app.bsky.embed.external",
+            "external": {
+              "description": "",
+              "thumb": {
+                "$type": "blob",
+                "ref": {
+                  "$link": "bafkreifwz3xwzjqfoybqorz5uuorhmztsgpduy4n4am466xsvyjalid2zm"
+                },
+                "mimeType": "image/jpeg",
+                "size": 255792
+              },
+              "title": "Triopticon",
+              "uri": "https://cynefin.io/index.php/Triopticon"
+            }
+          },
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "DWebCamp2024"
+                }
+              ],
+              "index": {
+                "byteEnd": 13,
+                "byteStart": 0
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "https://cynefin.io/index.php/Triopticon"
+                }
+              ],
+              "index": {
+                "byteEnd": 240,
+                "byteStart": 214
+              }
+            }
+          ],
+          "langs": [
+            "en"
+          ],
+          "text": "#DWebCamp2024 was full of discussion and exploration which I'd love to see in the space between conference and unconference with something like the triopticon workshop method to see what kind of synthesis emerges. cynefin.io/index.php/Tr..."
+        },
+        "embed": {
+          "$type": "app.bsky.embed.external#view",
+          "external": {
+            "uri": "https://cynefin.io/index.php/Triopticon",
+            "title": "Triopticon",
+            "description": "",
+            "thumb": "https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreifwz3xwzjqfoybqorz5uuorhmztsgpduy4n4am466xsvyjalid2zm@jpeg"
+          }
+        },
+        "replyCount": 1,
+        "repostCount": 0,
+        "likeCount": 0,
+        "quoteCount": 0,
+        "indexedAt": "2024-08-14T18:52:11.324Z",
+        "viewer": {
+          "threadMuted": false,
+          "embeddingDisabled": false
+        },
+        "labels": []
+      }
+    },
+    {
+      "post": {
+        "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3kytynxpfnh23",
+        "cid": "bafyreifkdyjd3qt7odkldvsocv6tv6jpyjqktnm25exgaexnz2ahnw2rha",
+        "author": {
+          "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+          "handle": "weswalla.bsky.social",
+          "displayName": "Wesley Finck",
+          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+          "associated": {
+            "chat": {
+              "allowIncoming": "following"
+            }
+          },
+          "viewer": {
+            "muted": false,
+            "blockedBy": false
+          },
+          "labels": [],
+          "createdAt": "2024-02-08T00:14:23.947Z"
+        },
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2024-08-03T23:18:03.334Z",
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#tag",
+                  "tag": "DWebCamp2024"
+                }
+              ],
+              "index": {
+                "byteEnd": 13,
+                "byteStart": 0
+              }
+            }
+          ],
+          "langs": [
+            "en"
+          ],
+          "reply": {
+            "parent": {
+              "cid": "bafyreide5g5mgyaehggztd5gynjg65pxsjqvdelo3zu3m5b7yv42u2mbdy",
+              "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3kytklglpnc2n"
+            },
+            "root": {
+              "cid": "bafyreide5g5mgyaehggztd5gynjg65pxsjqvdelo3zu3m5b7yv42u2mbdy",
+              "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3kytklglpnc2n"
+            }
+          },
+          "text": "#DWebCamp2024"
+        },
+        "replyCount": 0,
+        "repostCount": 0,
+        "likeCount": 1,
+        "quoteCount": 0,
+        "indexedAt": "2024-08-03T23:18:03.334Z",
+        "viewer": {
+          "threadMuted": false,
+          "embeddingDisabled": false
+        },
+        "labels": []
+      },
+      "reply": {
+        "root": {
+          "$type": "app.bsky.feed.defs#postView",
+          "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3kytklglpnc2n",
+          "cid": "bafyreide5g5mgyaehggztd5gynjg65pxsjqvdelo3zu3m5b7yv42u2mbdy",
+          "author": {
+            "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+            "handle": "weswalla.bsky.social",
+            "displayName": "Wesley Finck",
+            "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+            "associated": {
+              "chat": {
+                "allowIncoming": "following"
+              }
+            },
+            "viewer": {
+              "muted": false,
+              "blockedBy": false
+            },
+            "labels": [],
+            "createdAt": "2024-02-08T00:14:23.947Z"
+          },
+          "record": {
+            "$type": "app.bsky.feed.post",
+            "createdAt": "2024-08-03T19:06:05Z",
+            "embed": {
+              "$type": "app.bsky.embed.external",
+              "external": {
+                "description": "View more about this event at DWeb Camp 2024",
+                "thumb": {
+                  "$type": "blob",
+                  "ref": {
+                    "$link": "bafkreiavnnpwyvm2ousf3xycngvp6keo6q5aesm3jukz6bs5akneytxgya"
+                  },
+                  "mimeType": "image/png",
+                  "size": 39212
+                },
+                "title": "DWeb Camp 2024: Intro to Improv",
+                "uri": "http://dlvr.it/TBSGXS"
+              }
+            },
+            "facets": [
+              {
+                "features": [
+                  {
+                    "$type": "app.bsky.richtext.facet#link",
+                    "uri": "http://dlvr.it/TBSGXS"
+                  }
+                ],
+                "index": {
+                  "byteEnd": 122,
+                  "byteStart": 101
+                }
+              },
+              {
+                "features": [
+                  {
+                    "$type": "app.bsky.richtext.facet#link",
+                    "uri": "http://dlvr.it/TBSGXf"
+                  }
+                ],
+                "index": {
+                  "byteEnd": 173,
+                  "byteStart": 152
+                }
+              },
+              {
+                "features": [
+                  {
+                    "$type": "app.bsky.richtext.facet#link",
+                    "uri": "http://dlvr.it/TBSGXj"
+                  }
+                ],
+                "index": {
+                  "byteEnd": 230,
+                  "byteStart": 209
+                }
+              }
+            ],
+            "text": "Will be hosting/co-hosting some fun activities/talks at #DWebCamp2024 this year!\n1. Intro to Improv: http://dlvr.it/TBSGXS\n2. Deep dive into SenseNets: http://dlvr.it/TBSGXf\n3. Lightning Talk about SenseNets: http://dlvr.it/TBSGXj\n\nCome on by if you can :)"
+          },
+          "embed": {
+            "$type": "app.bsky.embed.external#view",
+            "external": {
+              "uri": "http://dlvr.it/TBSGXS",
+              "title": "DWeb Camp 2024: Intro to Improv",
+              "description": "View more about this event at DWeb Camp 2024",
+              "thumb": "https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreiavnnpwyvm2ousf3xycngvp6keo6q5aesm3jukz6bs5akneytxgya@jpeg"
+            }
+          },
+          "replyCount": 1,
+          "repostCount": 0,
+          "likeCount": 1,
+          "quoteCount": 0,
+          "indexedAt": "2024-08-03T19:06:05.000Z",
+          "viewer": {
+            "threadMuted": false,
+            "embeddingDisabled": false
+          },
+          "labels": []
+        },
+        "parent": {
+          "$type": "app.bsky.feed.defs#postView",
+          "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3kytklglpnc2n",
+          "cid": "bafyreide5g5mgyaehggztd5gynjg65pxsjqvdelo3zu3m5b7yv42u2mbdy",
+          "author": {
+            "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+            "handle": "weswalla.bsky.social",
+            "displayName": "Wesley Finck",
+            "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+            "associated": {
+              "chat": {
+                "allowIncoming": "following"
+              }
+            },
+            "viewer": {
+              "muted": false,
+              "blockedBy": false
+            },
+            "labels": [],
+            "createdAt": "2024-02-08T00:14:23.947Z"
+          },
+          "record": {
+            "$type": "app.bsky.feed.post",
+            "createdAt": "2024-08-03T19:06:05Z",
+            "embed": {
+              "$type": "app.bsky.embed.external",
+              "external": {
+                "description": "View more about this event at DWeb Camp 2024",
+                "thumb": {
+                  "$type": "blob",
+                  "ref": {
+                    "$link": "bafkreiavnnpwyvm2ousf3xycngvp6keo6q5aesm3jukz6bs5akneytxgya"
+                  },
+                  "mimeType": "image/png",
+                  "size": 39212
+                },
+                "title": "DWeb Camp 2024: Intro to Improv",
+                "uri": "http://dlvr.it/TBSGXS"
+              }
+            },
+            "facets": [
+              {
+                "features": [
+                  {
+                    "$type": "app.bsky.richtext.facet#link",
+                    "uri": "http://dlvr.it/TBSGXS"
+                  }
+                ],
+                "index": {
+                  "byteEnd": 122,
+                  "byteStart": 101
+                }
+              },
+              {
+                "features": [
+                  {
+                    "$type": "app.bsky.richtext.facet#link",
+                    "uri": "http://dlvr.it/TBSGXf"
+                  }
+                ],
+                "index": {
+                  "byteEnd": 173,
+                  "byteStart": 152
+                }
+              },
+              {
+                "features": [
+                  {
+                    "$type": "app.bsky.richtext.facet#link",
+                    "uri": "http://dlvr.it/TBSGXj"
+                  }
+                ],
+                "index": {
+                  "byteEnd": 230,
+                  "byteStart": 209
+                }
+              }
+            ],
+            "text": "Will be hosting/co-hosting some fun activities/talks at #DWebCamp2024 this year!\n1. Intro to Improv: http://dlvr.it/TBSGXS\n2. Deep dive into SenseNets: http://dlvr.it/TBSGXf\n3. Lightning Talk about SenseNets: http://dlvr.it/TBSGXj\n\nCome on by if you can :)"
+          },
+          "embed": {
+            "$type": "app.bsky.embed.external#view",
+            "external": {
+              "uri": "http://dlvr.it/TBSGXS",
+              "title": "DWeb Camp 2024: Intro to Improv",
+              "description": "View more about this event at DWeb Camp 2024",
+              "thumb": "https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreiavnnpwyvm2ousf3xycngvp6keo6q5aesm3jukz6bs5akneytxgya@jpeg"
+            }
+          },
+          "replyCount": 1,
+          "repostCount": 0,
+          "likeCount": 1,
+          "quoteCount": 0,
+          "indexedAt": "2024-08-03T19:06:05.000Z",
+          "viewer": {
+            "threadMuted": false,
+            "embeddingDisabled": false
+          },
+          "labels": []
+        }
+      }
+    },
+    {
+      "post": {
+        "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3kytklglpnc2n",
+        "cid": "bafyreide5g5mgyaehggztd5gynjg65pxsjqvdelo3zu3m5b7yv42u2mbdy",
+        "author": {
+          "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+          "handle": "weswalla.bsky.social",
+          "displayName": "Wesley Finck",
+          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+          "associated": {
+            "chat": {
+              "allowIncoming": "following"
+            }
+          },
+          "viewer": {
+            "muted": false,
+            "blockedBy": false
+          },
+          "labels": [],
+          "createdAt": "2024-02-08T00:14:23.947Z"
+        },
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2024-08-03T19:06:05Z",
+          "embed": {
+            "$type": "app.bsky.embed.external",
+            "external": {
+              "description": "View more about this event at DWeb Camp 2024",
+              "thumb": {
+                "$type": "blob",
+                "ref": {
+                  "$link": "bafkreiavnnpwyvm2ousf3xycngvp6keo6q5aesm3jukz6bs5akneytxgya"
+                },
+                "mimeType": "image/png",
+                "size": 39212
+              },
+              "title": "DWeb Camp 2024: Intro to Improv",
+              "uri": "http://dlvr.it/TBSGXS"
+            }
+          },
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "http://dlvr.it/TBSGXS"
+                }
+              ],
+              "index": {
+                "byteEnd": 122,
+                "byteStart": 101
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "http://dlvr.it/TBSGXf"
+                }
+              ],
+              "index": {
+                "byteEnd": 173,
+                "byteStart": 152
+              }
+            },
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "http://dlvr.it/TBSGXj"
+                }
+              ],
+              "index": {
+                "byteEnd": 230,
+                "byteStart": 209
+              }
+            }
+          ],
+          "text": "Will be hosting/co-hosting some fun activities/talks at #DWebCamp2024 this year!\n1. Intro to Improv: http://dlvr.it/TBSGXS\n2. Deep dive into SenseNets: http://dlvr.it/TBSGXf\n3. Lightning Talk about SenseNets: http://dlvr.it/TBSGXj\n\nCome on by if you can :)"
+        },
+        "embed": {
+          "$type": "app.bsky.embed.external#view",
+          "external": {
+            "uri": "http://dlvr.it/TBSGXS",
+            "title": "DWeb Camp 2024: Intro to Improv",
+            "description": "View more about this event at DWeb Camp 2024",
+            "thumb": "https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreiavnnpwyvm2ousf3xycngvp6keo6q5aesm3jukz6bs5akneytxgya@jpeg"
+          }
+        },
+        "replyCount": 1,
+        "repostCount": 0,
+        "likeCount": 1,
+        "quoteCount": 0,
+        "indexedAt": "2024-08-03T19:06:05.000Z",
+        "viewer": {
+          "threadMuted": false,
+          "embeddingDisabled": false
+        },
+        "labels": []
+      }
+    },
+    {
+      "post": {
+        "uri": "at://did:plc:2cxgdrgtsmrbqnjkwyplmp43/app.bsky.feed.post/3kw6ayygfk72d",
+        "cid": "bafyreidzm6bhzwpck7g3qd4ptljsqflh6denhzie5owpfworwz2otxwaky",
+        "author": {
+          "did": "did:plc:2cxgdrgtsmrbqnjkwyplmp43",
+          "handle": "bmann.ca",
+          "displayName": "Boris",
+          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:2cxgdrgtsmrbqnjkwyplmp43/bafkreifxvurkstoum2gfk6tg4t2r7tpbusjqzv5qv3wlqrptkpeqz4z6si@jpeg",
+          "associated": {
+            "chat": {
+              "allowIncoming": "all"
+            }
+          },
+          "viewer": {
+            "muted": false,
+            "blockedBy": false,
+            "following": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.graph.follow/3km3x76fbwv2e",
+            "followedBy": "at://did:plc:2cxgdrgtsmrbqnjkwyplmp43/app.bsky.graph.follow/3km3yftchgl2r"
+          },
+          "labels": [],
+          "createdAt": "2022-11-23T23:40:09.930Z"
+        },
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2024-06-30T20:58:25.000Z",
+          "embed": {
+            "$type": "app.bsky.embed.external",
+            "external": {
+              "description": "Z-Space currently has one private office available. Unit 303 has a call room, a board room that can be booked for meetings, and a private office, as well as a small waiting area / foyer.",
+              "title": "Private Office",
+              "uri": "https://zspace.commonscomputer.com/s/af6b1264-90cc-46d4-a669-bba172150d6e"
+            }
+          },
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "https://zspace.commonscomputer.com/s/af6b1264-90cc-46d4-a669-bba172150d6e"
+                }
+              ],
+              "index": {
+                "byteEnd": 233,
+                "byteStart": 210
+              }
+            }
+          ],
+          "text": "This is the first month of the [[Z-Space]] non-profit fully taking over the 3rd floor of 505 Hamilton. We have a private office available to rent for 3-4 people, as well as a few flex or permanent desks left.\n zspace.commonscomput..."
+        },
+        "embed": {
+          "$type": "app.bsky.embed.external#view",
+          "external": {
+            "uri": "https://zspace.commonscomputer.com/s/af6b1264-90cc-46d4-a669-bba172150d6e",
+            "title": "Private Office",
+            "description": "Z-Space currently has one private office available. Unit 303 has a call room, a board room that can be booked for meetings, and a private office, as well as a small waiting area / foyer."
+          }
+        },
+        "replyCount": 0,
+        "repostCount": 1,
+        "likeCount": 4,
+        "quoteCount": 0,
+        "indexedAt": "2024-06-30T20:58:25.000Z",
+        "viewer": {
+          "repost": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.repost/3kw6o5g3die2h",
+          "like": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.like/3kw6o5bpjmc2r",
+          "threadMuted": false,
+          "embeddingDisabled": false
+        },
+        "labels": []
+      },
+      "reason": {
+        "$type": "app.bsky.feed.defs#reasonRepost",
+        "by": {
+          "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+          "handle": "weswalla.bsky.social",
+          "displayName": "Wesley Finck",
+          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+          "associated": {
+            "chat": {
+              "allowIncoming": "following"
+            }
+          },
+          "viewer": {
+            "muted": false,
+            "blockedBy": false
+          },
+          "labels": [],
+          "createdAt": "2024-02-08T00:14:23.947Z"
+        },
+        "indexedAt": "2024-07-01T00:53:32.827Z"
+      }
+    },
+    {
+      "post": {
+        "uri": "at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3kv7wmoj3fc2o",
+        "cid": "bafyreib4mcvx34ju6t6catoa764ldngvehj43gi6aabrblq3c62gbydtgy",
+        "author": {
+          "did": "did:plc:6z5botgrc5vekq7j26xnvawq",
+          "handle": "weswalla.bsky.social",
+          "displayName": "Wesley Finck",
+          "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg",
+          "associated": {
+            "chat": {
+              "allowIncoming": "following"
+            }
+          },
+          "viewer": {
+            "muted": false,
+            "blockedBy": false
+          },
+          "labels": [],
+          "createdAt": "2024-02-08T00:14:23.947Z"
+        },
+        "record": {
+          "$type": "app.bsky.feed.post",
+          "createdAt": "2024-06-18T19:32:43.048Z",
+          "embed": {
+            "$type": "app.bsky.embed.external",
+            "external": {
+              "description": "All things tools-for-thought. Note-taking, task management, memory augmentation, content consumption/production.\nWhat are some interesting workflows you've…",
+              "thumb": {
+                "$type": "blob",
+                "ref": {
+                  "$link": "bafkreieta6omg3ydlieewfssxf4ncleahknyp7rsu5h4oxk4p4tdj73a5i"
+                },
+                "mimeType": "image/jpeg",
+                "size": 169404
+              },
+              "title": "Tools-For-Thought Meetup #2 · Luma",
+              "uri": "https://lu.ma/b1jflw04"
+            }
+          },
+          "facets": [
+            {
+              "features": [
+                {
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": "https://lu.ma/b1jflw04"
+                }
+              ],
+              "index": {
+                "byteEnd": 113,
+                "byteStart": 99
+              }
+            }
+          ],
+          "langs": [
+            "en"
+          ],
+          "text": "calling all tft enthusiasts, come on out and share your tools and workflows!\nJuly 11 5:30pm-7:30pm\nlu.ma/b1jflw04"
+        },
+        "embed": {
+          "$type": "app.bsky.embed.external#view",
+          "external": {
+            "uri": "https://lu.ma/b1jflw04",
+            "title": "Tools-For-Thought Meetup #2 · Luma",
+            "description": "All things tools-for-thought. Note-taking, task management, memory augmentation, content consumption/production.\nWhat are some interesting workflows you've…",
+            "thumb": "https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreieta6omg3ydlieewfssxf4ncleahknyp7rsu5h4oxk4p4tdj73a5i@jpeg"
+          }
+        },
+        "replyCount": 0,
+        "repostCount": 0,
+        "likeCount": 2,
+        "quoteCount": 0,
+        "indexedAt": "2024-06-18T19:32:43.048Z",
+        "viewer": {
+          "threadMuted": false,
+          "embeddingDisabled": false
+        },
+        "labels": []
+      }
+    }
+  ],
+  "cursor": "2024-06-18T18:22:06.39Z"
+}

@@ -6,13 +6,15 @@ import {
   PlatformPostPosted,
   PlatformPostPublishStatus,
 } from '../../src/@shared/types/types.platform.posts';
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import {
   AppPostParsedStatus,
   AppPostParsingStatus,
   AppPostRepublishedStatus,
+  PostsQueryStatus,
 } from '../../src/@shared/types/types.posts';
 import { TwitterThread } from '../../src/@shared/types/types.twitter';
-import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
+import { AppUser } from '../../src/@shared/types/types.user';
 import { logger } from '../../src/instances/logger';
 import { triggerAutofetchPosts } from '../../src/posts/tasks/posts.autofetch.task';
 import { resetDB } from '../utils/db';
@@ -41,6 +43,7 @@ describe('050-autofetch-no-autopost', () => {
       const testUser = testCredentials[0];
       user = await _01_createAndFetchUsers(
         globalTestServices,
+        PLATFORM.Twitter,
         testUser.twitter.id,
         {
           DEBUG,
@@ -61,7 +64,8 @@ describe('050-autofetch-no-autopost', () => {
 
     it('publish a tweet in the name of the test user', async () => {
       const TEST_CONTENT = `This is a test post ${USE_REAL_TWITTER ? Date.now() : ''}`;
-      thread = await _02_publishTweet(globalTestServices, TEST_CONTENT, user);
+      thread = (await _02_publishTweet(globalTestServices, TEST_CONTENT, user))
+        .post;
     });
 
     it('fetch user posts and check notifications', async () => {
@@ -76,10 +80,14 @@ describe('050-autofetch-no-autopost', () => {
       await triggerAutofetchPosts(globalTestServices);
 
       /** read user posts */
-      const postsRead = await globalTestServices.postsManager.getOfUser(
-        user.userId
-      );
-      expect(postsRead).to.have.length(TEST_THREADS.length + 1);
+      const postsRead = await globalTestServices.postsManager.getOfUser({
+        userId: user.userId,
+        status: PostsQueryStatus.DRAFTS,
+        fetchParams: { expectedAmount: TEST_THREADS.length + 1 + 6 },
+      });
+      expect(
+        postsRead.filter((post) => post.origin === PLATFORM.Twitter)
+      ).to.have.length(Math.ceil(TEST_THREADS.length / 2) + 1);
 
       const postOfThread2 = postsRead.find((p) =>
         p.mirrors.find(

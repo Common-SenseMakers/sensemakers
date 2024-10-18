@@ -5,6 +5,7 @@ import {
   PlatformPostPublishStatus,
   PlatformPostSignerType,
 } from '../../src/@shared/types/types.platform.posts';
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import {
   AppPostFull,
   AppPostRepublishedStatus,
@@ -12,7 +13,7 @@ import {
   GenericThread,
   PostsQueryStatus,
 } from '../../src/@shared/types/types.posts';
-import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
+import { AppUser } from '../../src/@shared/types/types.user';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
@@ -26,6 +27,8 @@ import {
 } from './reusable/create-post-fetch';
 import {
   TEST_THREADS,
+  USE_REAL_BLUESKY,
+  USE_REAL_MASTODON,
   USE_REAL_NANOPUB,
   USE_REAL_PARSER,
   USE_REAL_TWITTER,
@@ -44,6 +47,12 @@ describe('030-process', () => {
     twitter: USE_REAL_TWITTER
       ? undefined
       : { publish: true, signup: true, fetch: true },
+    bluesky: USE_REAL_BLUESKY
+      ? undefined
+      : { publish: true, signup: true, fetch: true, get: true },
+    mastodon: USE_REAL_MASTODON
+      ? undefined
+      : { publish: true, signup: true, fetch: true },
     nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
     emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
@@ -59,10 +68,15 @@ describe('030-process', () => {
 
     before(async () => {
       const testUser = testCredentials[0];
-      user = await _01_createAndFetchUsers(services, testUser.twitter.id, {
-        DEBUG,
-        DEBUG_PREFIX,
-      });
+      user = await _01_createAndFetchUsers(
+        services,
+        PLATFORM.Twitter,
+        testUser[PLATFORM.Twitter].id,
+        {
+          DEBUG,
+          DEBUG_PREFIX,
+        }
+      );
     });
 
     it('publish a tweet in the name of the test user', async () => {
@@ -80,13 +94,19 @@ describe('030-process', () => {
       }
 
       /** get pending posts of user */
-      const pendingPosts = await services.postsManager.getOfUser(user.userId, {
+      const allPendingPosts = await services.postsManager.getOfUser({
+        userId: user.userId,
         status: PostsQueryStatus.PENDING,
-        fetchParams: { expectedAmount: 10 },
+        fetchParams: { expectedAmount: 30 },
       });
+      const pendingPosts = allPendingPosts.filter(
+        (pendingPost) => pendingPost.origin === PLATFORM.Twitter
+      );
 
       if (!USE_REAL_TWITTER && TEST_THREADS.length > 1) {
-        expect(pendingPosts).to.have.length(TEST_THREADS.length + 1 - 1); // one post is ignored
+        expect(pendingPosts).to.have.length(
+          Math.ceil(TEST_THREADS.length / 2) + 1 - 1
+        ); // one post is ignored
       }
 
       await Promise.all(
@@ -124,6 +144,8 @@ describe('030-process', () => {
           await services.postsManager.publishPost(
             pendingPost,
             [PLATFORM.Nanopub],
+            undefined,
+            undefined,
             user.userId
           );
 
@@ -166,14 +188,20 @@ describe('030-process', () => {
       }
 
       /** get pending posts of user */
-      const pendingPosts = await services.postsManager.getOfUser(user.userId, {
+      const allPendingPosts = await services.postsManager.getOfUser({
+        userId: user.userId,
         status: PostsQueryStatus.PENDING,
-        fetchParams: { expectedAmount: 10 },
+        fetchParams: { expectedAmount: 30 },
       });
+      const pendingPosts = allPendingPosts.filter(
+        (pendingPost) => pendingPost.origin === PLATFORM.Twitter
+      );
 
       if (!USE_REAL_TWITTER) {
         if (TEST_THREADS.length > 1) {
-          expect(pendingPosts).to.have.length(TEST_THREADS.length - 1 - 1); // 1 ifnored post
+          expect(pendingPosts).to.have.length(
+            Math.ceil(TEST_THREADS.length / 2) - 1 - 1
+          ); // 1 ifnored post
         } else {
           expect(pendingPosts).to.have.length(0);
         }
@@ -205,6 +233,8 @@ describe('030-process', () => {
           await services.postsManager.publishPost(
             pendingPost,
             [PLATFORM.Nanopub],
+            undefined,
+            undefined,
             user.userId
           );
 
@@ -247,15 +277,15 @@ describe('030-process', () => {
       }
 
       /** get published posts of user */
-      const publishedPosts = await services.postsManager.getOfUser(
-        user.userId,
-        {
-          status: PostsQueryStatus.PUBLISHED,
-          fetchParams: { expectedAmount: 10 },
-        }
-      );
+      const publishedPosts = await services.postsManager.getOfUser({
+        userId: user.userId,
+        status: PostsQueryStatus.PUBLISHED,
+        fetchParams: { expectedAmount: 30 },
+      });
 
-      expect(publishedPosts).to.have.length(TEST_THREADS.length + 1 - 1); // 1 ignored post
+      expect(publishedPosts).to.have.length(
+        Math.ceil(TEST_THREADS.length / 2) + 1 - 1
+      ); // 1 ignored post
 
       const post = publishedPosts[0];
 
@@ -295,9 +325,15 @@ describe('030-process', () => {
       expect(latestNanopubUri).to.not.be.undefined;
       expect(rootNanopubUri).to.equal(latestNanopubUri);
 
+      const userRead = await services.db.run((manager) => {
+        if (!user) {
+          throw new Error('user not created');
+        }
+        return services.users.getUserWithProfiles(user.userId, manager);
+      });
       const nanopubDraft = await services.platforms
         .get(PLATFORM.Nanopub)
-        .convertFromGeneric({ post: newPost, author: user });
+        .convertFromGeneric({ post: newPost, author: userRead });
 
       if (!nanopubDraft.unsignedPost) {
         throw new Error('unsignedPost undefined');
@@ -321,6 +357,8 @@ describe('030-process', () => {
       await services.postsManager.publishPost(
         { ...newPost, mirrors: [...nonUpdatedMirrors, nanopubPlatformPost] },
         [PLATFORM.Nanopub],
+        undefined,
+        undefined,
         user.userId
       );
 
@@ -355,15 +393,15 @@ describe('030-process', () => {
       }
 
       /** get published posts of user */
-      const publishedPosts = await services.postsManager.getOfUser(
-        user.userId,
-        {
-          status: PostsQueryStatus.PUBLISHED,
-          fetchParams: { expectedAmount: 10 },
-        }
-      );
+      const publishedPosts = await services.postsManager.getOfUser({
+        userId: user.userId,
+        status: PostsQueryStatus.PUBLISHED,
+        fetchParams: { expectedAmount: 30 },
+      });
 
-      expect(publishedPosts).to.have.length(TEST_THREADS.length + 1 - 1); // 1 ignored post
+      expect(publishedPosts).to.have.length(
+        Math.ceil(TEST_THREADS.length / 2) + 1 - 1
+      ); // 1 ignored post
 
       const post = publishedPosts[0];
 

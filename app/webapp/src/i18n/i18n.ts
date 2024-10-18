@@ -10,16 +10,26 @@ export enum I18Keys {
   googleOAuthInputBtn = 's0095go',
 
   connectSocialsTitle = 's0090',
+  connectMastodonTitle = 's0090a',
   connectSocialsParagraph = 's0091',
   connectSocialsParagraph2 = 's0092',
+  connectMastodonParagraph = 's0091a',
   signInX = 's012',
+  signInMastodon = 's012a',
+  mastodonServer = 's012b',
+  mastodonServerPlaceholder = 's012c',
 
   connectAccounts = 's010',
   connectParagraph = 's011',
   errorConnectTwitter = 's013',
+  errorConnectMastodon = 's013a',
   yourPublications = 's014',
   TweetX = 's015',
   ThreadX = 's016',
+  TootMastodon = 's016b',
+  ThreadMastodon = 's016c',
+  PostBluesky = 's016d',
+  ThreadBluesky = 's016e',
   addKeyword = 's017',
   profile = 's018',
   updateAvailable = 's019',
@@ -33,6 +43,7 @@ export enum I18Keys {
   logoutTitle = 's025c',
 
   drafts = 's026',
+  feedTitle = 's026a',
 
   introNextLabel = 's026x',
   introFinalLabel = 's026y',
@@ -224,14 +235,21 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.emailInputBtn]: 'Get started',
   [I18Keys.googleOAuthInputBtn]: 'Continue with Google',
 
-  [I18Keys.connectSocialsTitle]: 'Connect your socials',
+  [I18Keys.connectSocialsTitle]: 'Connect your accounts',
+  [I18Keys.connectMastodonTitle]: 'Connect to Mastodon',
   [I18Keys.connectSocialsParagraph]:
-    'Link your X·Twitter account to start transforming your tweets into nanopublications.',
+    'Link your accounts to start transforming your posts into nanopublications. You can always change this in your settings.',
   [I18Keys.connectSocialsParagraph2]:
     'By connecting, you can easily identify and FAIRify your valuable scientific insights.',
+  [I18Keys.connectMastodonParagraph]:
+    "To connect your account, we need to know your Mastodon server domain. If you're unsure, check the domain in your Mastodon profile URL.",
   [I18Keys.signInX]: 'Sign in with X',
+  [I18Keys.signInMastodon]: 'Sign in with Mastodon',
+  [I18Keys.mastodonServer]: 'Server domain ',
+  [I18Keys.mastodonServerPlaceholder]: 'e.g. "mastodon.social"',
 
   [I18Keys.drafts]: 'Drafts',
+  [I18Keys.feedTitle]: 'Explore',
 
   [I18Keys.introNextLabel]: 'Next Tip',
   [I18Keys.introFinalLabel]: 'Let’s nanopublish!',
@@ -258,9 +276,15 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.connectParagraph]:
     'SenseNets loads your X (Twitter) feed and analyzes your posts using AI to deduct keywords and relations, which can be used to better interpret the meaning of your content.',
   [I18Keys.errorConnectTwitter]: 'Error connecting Twitter',
+  [I18Keys.errorConnectMastodon]:
+    'An error occurred while connecting to the Mastodon server: {{mastodonServer}}',
   [I18Keys.yourPublications]: 'Your publications',
   [I18Keys.TweetX]: 'X · Tweet',
   [I18Keys.ThreadX]: 'X · Thread',
+  [I18Keys.TootMastodon]: 'Mastodon · Toot',
+  [I18Keys.ThreadMastodon]: 'Mastodon · Thread',
+  [I18Keys.PostBluesky]: 'Bluesky · Post',
+  [I18Keys.ThreadBluesky]: 'Bluesky · Thread',
   [I18Keys.addKeyword]: 'add keyword',
   [I18Keys.profile]: 'Profile',
   [I18Keys.updateAvailable]: 'An update is available, ',

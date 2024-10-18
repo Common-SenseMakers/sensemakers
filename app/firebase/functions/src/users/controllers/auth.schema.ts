@@ -1,7 +1,14 @@
 import { object, string } from 'yup';
 
 import { NotificationFreq } from '../../@shared/types/types.notifications';
-import { AutopostOption, PLATFORM } from '../../@shared/types/types.user';
+import { PLATFORM } from '../../@shared/types/types.platforms';
+import { AutopostOption } from '../../@shared/types/types.user';
+
+export const mastodonGetSignupContextSchema = object({
+  mastodonServer: string().required(),
+  callback_url: string().required(),
+  type: string().oneOf(['read', 'write']).required(),
+}).noUnknown(true);
 
 export const twitterGetSignupContextSchema = object({
   callback_url: string().required(),
@@ -32,6 +39,21 @@ export const nanopubSignupDataSchema = object({
 export const orcidSignupDataSchema = object({
   code: string().required(),
   callbackUrl: string().required(),
+}).noUnknown(true);
+
+export const mastodonSignupDataSchema = object({
+  code: string().required(),
+  mastodonServer: string().required(),
+  callback_url: string().required(),
+  type: string().oneOf(['read', 'write']).required(),
+  clientId: string().required(),
+  clientSecret: string().required(),
+}).noUnknown(true);
+
+export const blueskySignupDataSchema = object({
+  username: string().required(),
+  appPassword: string().required(),
+  type: string().oneOf(['read', 'write']).required(),
 }).noUnknown(true);
 
 export const userSettingsUpdateSchema = object({

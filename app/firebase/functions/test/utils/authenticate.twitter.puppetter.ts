@@ -1,6 +1,7 @@
 import puppeteer from 'puppeteer';
 
-import { AppUser, PLATFORM } from '../../src/@shared/types/types.user';
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
+import { AppUser } from '../../src/@shared/types/types.user';
 import { logger } from '../../src/instances/logger';
 
 const NEXT_BUTTON_TEXT = 'Next';
@@ -117,10 +118,11 @@ export const checkOutdatedTwitterTokens = (appUsers: AppUser[]) => {
   // appUsers = JSON.parse(fileContents);
   const outdatedUsers = appUsers.filter(
     (user) =>
-      user[PLATFORM.Twitter] &&
-      user[PLATFORM.Twitter].some((twitterAccount) => {
+      user.accounts[PLATFORM.Twitter] &&
+      user.accounts[PLATFORM.Twitter].some((twitterAccount) => {
         return (
-          twitterAccount.read && twitterAccount.read.expiresAtMs < Date.now()
+          twitterAccount.credentials.read &&
+          twitterAccount.credentials.read.expiresAtMs < Date.now()
         );
       })
   );

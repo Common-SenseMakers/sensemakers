@@ -20,6 +20,7 @@ export interface StyleConstants {
     primary: string;
     textLight: string;
     textLight2: string;
+    grayIcon: string;
     shade: string;
     links: string;
     text: string;
@@ -56,6 +57,7 @@ const constants: StyleConstants = {
     primary: '#111827',
     textLight: '#4B5563',
     textLight2: '#6B7280',
+    grayIcon: '#374151',
     shade: '#F9FAFB',
     text: '#111827',
     links: '#3182CE',

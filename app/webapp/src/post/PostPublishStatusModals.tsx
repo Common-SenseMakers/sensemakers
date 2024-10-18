@@ -27,12 +27,16 @@ enum PublishPostAction {
 const ORCID_INVITE_DISABLE = 'orcidInviteDisabled';
 const PUB_WARNING_DISABLE = 'pubWarningDisabled';
 
-export const PostPublishStatusModals = () => {
+export const PostPublishStatusModals = (props: {
+  showCelebration?: boolean;
+}) => {
   const { setJustPublished } = useAutopostInviteContext();
   const { updated, fetched, derived, navigatePost, publish } = usePost();
 
-  const { orcid } = useAccountContext();
+  const { connectedUser } = useAccountContext();
   const { connect: _connectOrcid } = useOrcidContext();
+
+  const orcid = connectedUser?.profiles?.orcid;
 
   const [isUnpublishing, setIsUnpublishing] = useState<boolean>(false);
 
@@ -96,28 +100,32 @@ export const PostPublishStatusModals = () => {
   };
 
   useEffect(() => {
-    if (
-      publish.publishIntent &&
-      disableOrcidInvitePers &&
-      disablePubWarningPers
-    ) {
-      if (DEBUG) console.log(`publishApproved directly ${fetched.post?.id}`);
-      publishApproved();
-    }
-
-    if (publish.publishIntent && disablePubWarningPers) {
-      if (!orcid) {
-        if (DEBUG) console.log(`force show askOrcid modal ${fetched.post?.id}`);
-        setAskedOrcid(true);
+    if (publish.publishIntent) {
+      if (disableOrcidInvitePers) {
+        if (disablePubWarningPers) {
+          if (DEBUG)
+            console.log(`publishApproved directly ${fetched.post?.id}`);
+          publishApproved();
+        } else if (orcid) {
+          if (DEBUG)
+            console.log(`show final approve modal ${fetched.post?.id}`);
+          setAskedOrcid(true);
+        } else {
+          if (DEBUG)
+            console.log(`force show askOrcid modal ${fetched.post?.id}`);
+          setAskedOrcid(false);
+        }
       } else {
-        if (DEBUG)
-          console.log(
-            `just publish the user already have orcid ${fetched.post?.id}`
-          );
-        publishApproved();
+        if (DEBUG) console.log(`show askOrcid modal ${fetched.post?.id}`);
+        setAskedOrcid(false);
       }
     }
-  }, [publish.publishIntent, disableOrcidInvitePers, disablePubWarningPers]);
+  }, [
+    publish.publishIntent,
+    disableOrcidInvitePers,
+    disablePubWarningPers,
+    orcid,
+  ]);
 
   const unpublishApproved = () => {
     if (DEBUG) console.log(`unpublishApproved ${fetched.postId}`);
@@ -143,6 +151,7 @@ export const PostPublishStatusModals = () => {
     }
 
     if (action === PublishPostAction.nextPost) {
+      publish.setPublishIntent(false);
       navigatePost.openNextPost();
       return;
     }
@@ -245,9 +254,9 @@ export const PostPublishStatusModals = () => {
             size={18}></AppCheckBoxMessage>
         ),
         primaryButton: {
-          label: !disablePubWarningPers
-            ? t(I18Keys.continue)
-            : t(I18Keys.publish),
+          label: disablePubWarningPers
+            ? t(I18Keys.publish)
+            : t(I18Keys.continue),
           onClick: () => clickedNextAfterOrcid(),
         },
         secondaryButton: {
@@ -425,6 +434,8 @@ export const PostPublishStatusModals = () => {
         askedOrcid,
         orcid,
         published: derived.statuses.live,
+        disableOrcidInvitePers,
+        disablePubWarningPers,
       });
 
     if (publish.publishIntent) {
@@ -440,10 +451,19 @@ export const PostPublishStatusModals = () => {
         } else if (!disablePubWarningPers) {
           if (DEBUG) console.log(`finalApprove ${fetched.postId}`);
           return finalApprove;
+        } else {
+          if (DEBUG)
+            console.log(
+              `skipping finalApprove, publishing directly ${fetched.postId}`
+            );
+          publishApproved();
+          return publishingModal;
         }
-      } else {
+      } else if (props.showCelebration) {
         if (DEBUG) console.log(`publishedModal ${fetched.postId}`);
         return publishedModal;
+      } else {
+        publishedModalClosed(PublishPostAction.None);
       }
     }
 

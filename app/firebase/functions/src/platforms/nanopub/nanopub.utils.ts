@@ -2,7 +2,7 @@ import { Nanopub } from '@nanopub/sign';
 import { DataFactory, Quad, Store, Writer } from 'n3';
 
 import { GenericAuthor } from '../../@shared/types/types.posts';
-import { AutopostOption, PLATFORM } from '../../@shared/types/types.user';
+import { AutopostOption } from '../../@shared/types/types.user';
 import { logger } from '../../instances/logger';
 import * as URI from './constants';
 
@@ -57,8 +57,8 @@ export const sendTriplets = (): Store => {
 export const buildSpostProv = (
   postType: string,
   introUri: string,
-  twitterHandle: string,
-  tweetUrl: string,
+  accountUrl: string,
+  postUrl: string,
   options: BuildSpostNpOptions = {}
 ): Store => {
   const { orcidId } = options;
@@ -69,7 +69,7 @@ export const buildSpostProv = (
 
   // Define the subjects, predicates, and objects
   const cosmo = namedNode(URI.COSMO_PREFIX);
-  const xHandle = namedNode(URI.X_PREFIX + twitterHandle);
+  const accountNode = namedNode(accountUrl);
   const assertion = namedNode(URI.ASSERTION_URI);
   const activity = namedNode(URI.ACTIVITY_URI);
   const introNode = namedNode(introUri);
@@ -113,13 +113,13 @@ export const buildSpostProv = (
   store.addQuad(
     introNode,
     namedNode(URI.FOAF_ACCOUNT),
-    xHandle,
+    accountNode,
     provenanceGraphUri
   );
   store.addQuad(
     assertion,
     namedNode(URI.PROV_WAS_ASSOCIATED_WITH),
-    xHandle,
+    accountNode,
     provenanceGraphUri
   );
   store.addQuad(
@@ -131,7 +131,7 @@ export const buildSpostProv = (
   store.addQuad(
     assertion,
     namedNode(URI.PROV_LINKS_TO),
-    namedNode(tweetUrl),
+    namedNode(postUrl),
     provenanceGraphUri
   );
 
@@ -343,12 +343,12 @@ export const buildNpHead = (): Store => {
 export const buildSpostNp = async (
   ethAddress: string,
   introUri: string,
-  twitterHandle: string,
+  accountUrl: string,
   postType: string,
   name: string,
   semantics: Store,
   postText: string,
-  tweetUrl: string,
+  postUrl: string,
   options: BuildSpostNpOptions = {}
 ): Promise<Nanopub> => {
   return new Promise((resolve, reject) => {
@@ -356,8 +356,8 @@ export const buildSpostNp = async (
     const provStore = buildSpostProv(
       postType,
       introUri,
-      twitterHandle,
-      tweetUrl,
+      accountUrl,
+      postUrl,
       options
     );
     const pubinfoStore = buildSpostPubinfo(
@@ -431,7 +431,6 @@ export const buildIntroNp = async (
     const assertionGraph = namedNode(URI.ASSERTION_URI);
     const provenanceGraph = namedNode(URI.PROVENANCE_URI);
     const pubinfoGraph = namedNode(URI.PUBINFO_URI);
-    const x = URI.X_PREFIX;
     const keyDeclarationNode = namedNode(
       `${URI.KEY_DECLARATION_URI}${ethAddress}`
     );
@@ -600,8 +599,8 @@ export const buildIntroNp = async (
       literal(ethAddress),
       namedNode(URI.PUBINFO_URI)
     );
-    if (author?.platformId === PLATFORM.Twitter) {
-      const twitterNode = namedNode(`${x}${author.username}`);
+    if (author) {
+      const platformAuthorNode = namedNode(`${author.username}`);
 
       writer.addQuad(
         baseNode,
@@ -612,7 +611,7 @@ export const buildIntroNp = async (
       writer.addQuad(
         baseNode,
         namedNode(URI.FOAF_ACCOUNT),
-        twitterNode,
+        platformAuthorNode,
         assertionGraph
       );
     }
@@ -675,12 +674,12 @@ export const buildIntroNp = async (
 export const buildRetractionNp = async (
   targetNp: string,
   introUri: string,
-  twitter_handle: string,
+  accountUrl: string,
   name: string,
   ethAddress: string,
   orcidId?: string
 ): Promise<Nanopub> => {
-  const xHandle = namedNode(`${URI.X_PREFIX}${twitter_handle}`);
+  const accountNode = namedNode(accountUrl);
   const assertionGraph = namedNode(URI.ASSERTION_URI);
   const provenanceGraph = namedNode(URI.PROVENANCE_URI);
   const pubinfoGraph = namedNode(URI.PUBINFO_URI);
@@ -702,13 +701,13 @@ export const buildRetractionNp = async (
   writer.addQuad(
     introNode,
     namedNode(URI.FOAF_ACCOUNT),
-    xHandle,
+    accountNode,
     provenanceGraph
   );
   writer.addQuad(
     namedNode(URI.ASSERTION_URI),
     namedNode(URI.PROV_WAS_ATTRIBUTED_TO),
-    xHandle,
+    accountNode,
     provenanceGraph
   );
   if (orcidId) {

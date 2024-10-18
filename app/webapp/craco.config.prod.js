@@ -43,6 +43,32 @@ if (process.env.FB_PROJECT === 'dev') {
   ];
 }
 
+if (process.env.FB_PROJECT === 'dev-md') {
+  base.webpack.configure.plugins = [
+    ...newPlugins,
+    new webpack.DefinePlugin({
+      ...definePlugin.definitions,
+      process: {
+        ...definePlugin.definitions.process,
+        env: {
+          ...definePlugin.definitions.process.env,
+          NODE_ENV: '"development"',
+          FUNCTIONS_BASE:
+            '"https://us-central1-sensenets-dev-md.cloudfunctions.net"',
+          FB_APIKEY: '"AIzaSyCTDgxBCPC-iiTwe2WgD6O0lsKcLrxdSf4"',
+          FB_AUTHDOMAIN: '"sensenets-dev-md.firebaseapp.com"',
+          FB_PROJECTID: '"sensenets-dev-md"',
+          FB_STORAGE_BUCKET: '"sensenets-dev-md.appspot.com"',
+          FB_MESSAGING_SENDER_ID: '"40268371653"',
+          FB_APPID: '"1:40268371653:web:442bb46707112b84b3c2ac"',
+          APP_URL: '"https://development-md--sensemakers.netlify.app/"',
+          NANOPUB_EXPLORER_SERVER: '"https://np.test.knowledgepixels.com/"',
+        },
+      },
+    }),
+  ];
+}
+
 if (process.env.FB_PROJECT === 'staging') {
   base.webpack.configure.plugins = [
     ...newPlugins,

@@ -6,5 +6,10 @@
     "baseUrl": "./"
   },
   "compileOnSave": true,
-  "include": ["src/index.ts", "src/custom.d.ts", "scripts/**/*"]
+  "include": [
+    "src/index.ts",
+    "src/custom.d.ts",
+    "scripts/**/*",
+    "migrations/**/*"
+  ]
 }

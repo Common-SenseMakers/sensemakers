@@ -7,12 +7,12 @@ import {
   PlatformPostDraftApproval,
   PlatformPostSignerType,
 } from '../../shared/types/types.platform.posts';
+import { PLATFORM } from '../../shared/types/types.platforms';
 import {
   AppPostRepublishedStatus,
   AppPostReviewStatus,
   UnpublishPlatformPostPayload,
 } from '../../shared/types/types.posts';
-import { PLATFORM } from '../../shared/types/types.user';
 import { useNanopubContext } from '../../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { PostFetchContext } from './use.post.fetch';
 import { PostUpdateContext } from './use.post.update';
@@ -124,9 +124,10 @@ export const usePostPublish = (
     }
 
     updated.setEnabledEdit(false);
+
     show({
       title: 'Post published',
-      message: 'Your post has been published - Find it under the "Nanopub" tab',
+      message: 'Your post has been published and moved to the "Nanopub" tab',
     });
   };
 

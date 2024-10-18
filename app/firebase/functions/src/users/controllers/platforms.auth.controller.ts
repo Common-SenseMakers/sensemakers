@@ -1,9 +1,15 @@
 import { RequestHandler } from 'express';
 
-import { PLATFORM } from '../../@shared/types/types.user';
+import {
+  IDENTITY_PLATFORM,
+  PLATFORM,
+} from '../../@shared/types/types.platforms';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
 import {
+  blueskySignupDataSchema,
+  mastodonGetSignupContextSchema,
+  mastodonSignupDataSchema,
   nanopubGetSignupContextSchema,
   nanopubSignupDataSchema,
   orcidGetSignupContextSchema,
@@ -12,7 +18,7 @@ import {
   twitterSignupDataSchema,
 } from './auth.schema';
 
-const DEBUG = false;
+const DEBUG = true;
 const DEBUG_PREFIX = '[AUTH-CONTROLLER]';
 
 export const getSignupContextController: RequestHandler = async (
@@ -36,6 +42,14 @@ export const getSignupContextController: RequestHandler = async (
 
       if (platform === PLATFORM.Orcid) {
         return orcidGetSignupContextSchema.validate(request.body);
+      }
+
+      if (platform === PLATFORM.Mastodon) {
+        return mastodonGetSignupContextSchema.validate(request.body);
+      }
+
+      if (platform === PLATFORM.Bluesky) {
+        return request.body;
       }
 
       throw new Error(`Unexpected platform ${platform}`);
@@ -63,7 +77,7 @@ export const handleSignupController: RequestHandler = async (
   response
 ) => {
   try {
-    const platform = request.params.platform as PLATFORM;
+    const platform = request.params.platform as IDENTITY_PLATFORM;
 
     const services = getServices(request);
     const userId = getAuthenticatedUser(request);
@@ -79,6 +93,14 @@ export const handleSignupController: RequestHandler = async (
 
       if (platform === PLATFORM.Orcid) {
         return orcidSignupDataSchema.validate(request.body);
+      }
+
+      if (platform === PLATFORM.Mastodon) {
+        return mastodonSignupDataSchema.validate(request.body);
+      }
+
+      if (platform === PLATFORM.Bluesky) {
+        return blueskySignupDataSchema.validate(request.body);
       }
 
       throw new Error(`Unexpected platform ${platform}`);

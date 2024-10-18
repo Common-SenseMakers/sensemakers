@@ -97,7 +97,7 @@ export class TransactionManager {
    */
   private getCumMutationOf(id: string) {
     const mutations = this.mutations.get(id);
-    if (!mutations) return {};
+    if (!mutations) return undefined;
 
     /** merge all mutations data */
     const obj = mutations.reduce((_obj, mut) => {
@@ -132,7 +132,9 @@ export class TransactionManager {
       ? await this.transaction.get(documentRef)
       : await documentRef.get();
 
-    const mergedData = merge(onFirestore.data(), cached);
+    const mergedData = cached
+      ? merge(onFirestore.data(), cached)
+      : onFirestore.data();
 
     return {
       id: documentRef.id,
@@ -230,6 +232,10 @@ export class TransactionManager {
             break;
 
           case MutationType.update:
+            if (Object.keys(mut.data).length === 0) {
+              break;
+            }
+
             mut.precondition
               ? this.mutator.update(mut.documentRef, mut.data, mut.precondition)
               : this.mutator.update(mut.documentRef, mut.data);

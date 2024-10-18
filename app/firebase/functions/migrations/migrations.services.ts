@@ -1,26 +1,19 @@
-import dotenv from 'dotenv';
 import * as admin from 'firebase-admin';
 import { AppOptions } from 'firebase-admin';
 
 import { LocalLogger, LogLevel } from '../src/instances/local.logger';
 import { logger } from '../src/instances/logger';
 import { createServices } from '../src/instances/services';
-
-// Load environment variables from .env file
-dotenv.config({ path: './migrations/.migrations.env' });
+import { config } from './migrations.config';
 
 // update log levels
+
 if (process.env.LOG_LEVEL_MSG && process.env.LOG_LEVEL_OBJ) {
   (logger as LocalLogger).msgLevel = process.env.LOG_LEVEL_MSG as LogLevel;
   (logger as LocalLogger).ctxLevel = process.env.LOG_LEVEL_OBJ as LogLevel;
 }
 
-const mandatory = [
-  'FB_CERT_PATH_SOURCE',
-  'FB_PROJECT_ID_SOURCE',
-  'FB_CERT_PATH_TARGET',
-  'FB_PROJECT_ID_TARGET',
-];
+const mandatory: string[] = [];
 
 mandatory.forEach((varName) => {
   if (!process.env[varName]) {
@@ -35,8 +28,8 @@ const projectIdTarget = process.env.FB_PROJECT_ID_TARGET;
 const certPathSource = process.env.FB_CERT_PATH_SOURCE;
 const certPathTarget = process.env.FB_CERT_PATH_TARGET;
 
-const serviceAccountSource = require('../' + certPathSource);
-const serviceAccountTarget = require('../' + certPathTarget);
+const serviceAccountSource = certPathSource && require('../' + certPathSource);
+const serviceAccountTarget = certPathTarget && require('../' + certPathTarget);
 
 logger.info('Running in local mode with certificate', {
   projectIdSource,
@@ -53,7 +46,7 @@ logger.info('Running in local mode with certificate', {
 const initApp = (config: AppOptions, name: string) => {
   const app = admin.initializeApp(config, name);
 
-  if (projectIdSource?.startsWith('demo-')) {
+  if (config.projectId?.startsWith('demo-')) {
     app.firestore().settings({
       host: 'localhost:8080',
       ssl: false,
@@ -64,19 +57,23 @@ const initApp = (config: AppOptions, name: string) => {
 };
 
 export const appSource = initApp(
-  {
-    projectId: projectIdSource,
-    credential: admin.credential.cert(serviceAccountSource),
-  },
+  serviceAccountSource
+    ? {
+        projectId: projectIdSource,
+        credential: admin.credential.cert(serviceAccountSource),
+      }
+    : { projectId: projectIdSource },
   'source'
 );
 export const appTarget = initApp(
-  {
-    projectId: projectIdTarget,
-    credential: admin.credential.cert(serviceAccountTarget),
-  },
+  serviceAccountTarget
+    ? {
+        projectId: projectIdTarget,
+        credential: admin.credential.cert(serviceAccountTarget),
+      }
+    : { projectId: projectIdTarget },
   'target'
 );
 
-export const servicesSource = createServices(appSource.firestore());
-export const servicesTarget = createServices(appTarget.firestore());
+export const servicesSource = createServices(appSource.firestore(), config);
+export const servicesTarget = createServices(appTarget.firestore(), config);

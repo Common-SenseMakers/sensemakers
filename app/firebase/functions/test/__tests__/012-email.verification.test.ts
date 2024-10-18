@@ -1,10 +1,10 @@
 import { expect } from 'chai';
 
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { TwitterSignupContext } from '../../src/@shared/types/types.twitter';
-import { PLATFORM } from '../../src/@shared/types/types.user';
 import { logger } from '../../src/instances/logger';
 import { resetDB } from '../utils/db';
-import { handleSignupMock } from './reusable/mocked.singup';
+import { handleTwitterSignupMock } from './reusable/mocked.singup';
 import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
@@ -34,7 +34,7 @@ describe('012-email verification', () => {
           testCredentials[0].twitter.id
         );
 
-      userId = await handleSignupMock(services, {
+      userId = await handleTwitterSignupMock(services, {
         ...twitterSignupContext,
         code: 'mocked',
       });

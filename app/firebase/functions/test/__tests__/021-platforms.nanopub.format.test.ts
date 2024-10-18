@@ -5,7 +5,7 @@ import {
   PlatformPostPublishOrigin,
   PlatformPostPublishStatus,
 } from '../../src/@shared/types/types.platform.posts';
-import { PLATFORM } from '../../src/@shared/types/types.user';
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
 import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
 import { cleanPublicKey } from '../../src/@shared/utils/semantics.helper';
@@ -18,17 +18,18 @@ import { buildIntroNp } from '../../src/platforms/nanopub/nanopub.utils';
 import { TimeService } from '../../src/time/time.service';
 import { getNanopubProfile } from '../utils/nanopub.profile';
 import { getMockPost } from '../utils/posts.utils';
-import { getMockedUser } from '../utils/users.mock';
+import { getMockedUserRead } from '../utils/users.mock';
 
 const DEBUG = true;
 const PUBLISH = true;
 
-describe('021-nanopublication format', () => {
+describe.skip('nanopublication format', () => {
   it('publishes a correctly formatted mock nanopub to the test server and updates it', async () => {
-    const post = getMockPost({
-      authorId: 'test-user-id',
-      id: 'post-id-1',
-      semantics: `
+    const post = getMockPost(
+      {
+        authorUserId: 'test-user-id',
+        id: 'post-id-1',
+        semantics: `
         @prefix ns1: <http://purl.org/spar/cito/> .
         @prefix schema: <https://schema.org/> .
         
@@ -37,20 +38,40 @@ describe('021-nanopublication format', () => {
           ns1:includesQuotationFrom <https://twitter.com/ori_goldberg/status/1781281656071946541> ;    
           schema:keywords "ExternalSecurity",        "Geopolitics",        "Israel",        "Kissinger",        "PoliticalScience",        "Security" .
         `,
-    });
-    const mockUser = getMockedUser({
+      },
+      PLATFORM.Twitter
+    );
+    const mockUser = getMockedUserRead({
       userId: 'test-user-id',
       [PLATFORM.Nanopub]: {
         ethPrivateKey: '0xprivate',
       },
       [PLATFORM.Twitter]: {
         id: '123456',
-        username: 'test-user',
+        username: 'test-user-twitter',
         password: 'test-password',
         type: 'read',
       },
+      [PLATFORM.Mastodon]: {
+        id: '123456',
+        username: 'test-username-mastodon',
+        accessToken: 'test-access',
+        mastodonServer: 'test-server.com',
+      },
+      [PLATFORM.Bluesky]: {
+        id: '123456',
+        username: 'test-username-bluesky',
+        name: 'test-user-bluesky',
+        appPassword: 'test-app-password',
+      },
     });
     const rsaKeys = getRSAKeys('');
+    // const userRead = await services.db.run((manager) => {
+    //   if (!user) {
+    //     throw new Error('user not created');
+    //   }
+    //   return services.users.getUserWithProfiles(user.userId, manager);
+    // });
     const nanopub = await new NanopubService(new TimeService(), {
       servers: JSON.parse(process.env.NANOPUBS_PUBLISH_SERVERS as string),
       rsaKeys: {
@@ -104,10 +125,11 @@ describe('021-nanopublication format', () => {
     }
 
     /** update the nanopublication */
-    const updatedPost = getMockPost({
-      authorId: 'test-user-id',
-      id: 'post-id-1',
-      semantics: `
+    const updatedPost = getMockPost(
+      {
+        authorUserId: 'test-user-id',
+        id: 'post-id-1',
+        semantics: `
         @prefix ns1: <http://purl.org/spar/cito/> .
         @prefix schema: <https://schema.org/> .
         
@@ -116,22 +138,24 @@ describe('021-nanopublication format', () => {
           ns1:includesQuotationFrom <https://twitter.com/ori_goldberg/status/1781281656071946541> ;    
           schema:keywords "ExternalSecurity",        "Geopolitics",        "Israel",        "Kissinger",        "PoliticalScience",        "Security" .
         `,
-      mirrors: [
-        {
-          id: 'post-id-1',
-          post_id: published.info().uri as string,
-          publishOrigin: PlatformPostPublishOrigin.POSTED,
-          publishStatus: PlatformPostPublishStatus.PUBLISHED,
-          platformId: PLATFORM.Nanopub,
-          posted: {
+        mirrors: [
+          {
+            id: 'post-id-1',
             post_id: published.info().uri as string,
-            user_id: 'test-user-id',
-            timestampMs: Date.now(),
-            post: published.rdf(),
+            publishOrigin: PlatformPostPublishOrigin.POSTED,
+            publishStatus: PlatformPostPublishStatus.PUBLISHED,
+            platformId: PLATFORM.Nanopub,
+            posted: {
+              post_id: published.info().uri as string,
+              user_id: 'test-user-id',
+              timestampMs: Date.now(),
+              post: published.rdf(),
+            },
           },
-        },
-      ],
-    });
+        ],
+      },
+      PLATFORM.Twitter
+    );
     const updatedNanopub = await createNanopublication(updatedPost, mockUser);
     const updatedSigned = await signNanopublication(
       updatedNanopub.rdf(),

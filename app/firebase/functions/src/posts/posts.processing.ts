@@ -1,3 +1,4 @@
+import { StructuredSemantics } from '../@shared/types/types.parser';
 import {
   PlatformPost,
   PlatformPostCreate,
@@ -8,6 +9,10 @@ import {
   PlatformPostPublishStatus,
 } from '../@shared/types/types.platform.posts';
 import {
+  PLATFORM,
+  PUBLISHABLE_PLATFORM,
+} from '../@shared/types/types.platforms';
+import {
   AppPost,
   AppPostCreate,
   AppPostFull,
@@ -16,16 +21,13 @@ import {
   AppPostRepublishedStatus,
   AppPostReviewStatus,
 } from '../@shared/types/types.posts';
-import {
-  ALL_PUBLISH_PLATFORMS,
-  DefinedIfTrue,
-  PLATFORM,
-} from '../@shared/types/types.user';
+import { DefinedIfTrue } from '../@shared/types/types.user';
 import { mapStoreElements, parseRDF } from '../@shared/utils/n3.utils';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
 import { PlatformsService } from '../platforms/platforms.service';
+import { getProfileId } from '../profiles/profiles.repository';
 import { TriplesRepository } from '../semantics/triples.repository';
 import { TimeService } from '../time/time.service';
 import { UsersHelper } from '../users/users.helper';
@@ -56,10 +58,12 @@ export class PostsProcessing {
    * */
   async createPlatformPost(
     platformPost: PlatformPostCreate,
-    manager: TransactionManager
+    manager: TransactionManager,
+    authorUserId?: string
   ): Promise<PlatformPostCreated | undefined> {
     const existing = platformPost.posted
       ? await this.platformPosts.getFrom_post_id(
+          platformPost.platformId,
           platformPost.posted.post_id,
           manager
         )
@@ -88,19 +92,16 @@ export class PostsProcessing {
       manager
     );
 
-    const authorId = await this.users.repo.getUserWithPlatformAccount(
-      PLATFORM.Twitter,
-      user_id,
-      manager,
-      false
-    );
+    /** the profile may not exist in the Profiles collection */
+    const authorProfileId = getProfileId(platformPost.platformId, user_id);
 
     /** create AppPost */
     const post = await this.createAppPost(
       {
         generic: genericPostData,
         origin: platformPost.platformId,
-        authorId,
+        authorProfileId,
+        authorUserId,
         mirrorsIds: [platformPostCreated.id],
         createdAtMs: platformPost.posted?.timestampMs || this.time.now(),
       },
@@ -116,11 +117,16 @@ export class PostsProcessing {
   /** Store all platform posts */
   async createPlatformPosts(
     platformPosts: PlatformPostCreate[],
-    manager: TransactionManager
+    manager: TransactionManager,
+    authorUserId?: string
   ) {
     const postsCreated = await Promise.all(
       platformPosts.map(async (platformPost) => {
-        return await this.createPlatformPost(platformPost, manager);
+        return await this.createPlatformPost(
+          platformPost,
+          manager,
+          authorUserId
+        );
       })
     );
 
@@ -133,22 +139,27 @@ export class PostsProcessing {
 
     const appPostFull = await this.getPostFull(postId, manager, true);
 
-    // posts without authors does not have mirrors
-    if (!appPostFull.authorId) {
-      return;
-    }
-
-    const user = await this.users.repo.getUser(
-      appPostFull.authorId,
-      manager,
-      true
-    );
-
     /**
-     * Create platformPosts as drafts on all platforms
+     * Create platformPosts as drafts on all platforms (nanopub only for now)
      * */
     const drafts = await Promise.all(
-      ALL_PUBLISH_PLATFORMS.map(async (platformId) => {
+      ([PLATFORM.Nanopub] as PUBLISHABLE_PLATFORM[]).map(async (platformId) => {
+        const authorProfile = await this.users.profiles.getByProfileId(
+          appPostFull.authorProfileId,
+          manager,
+          true
+        );
+
+        if (!authorProfile.userId) {
+          throw new Error('Profile must be of a signed up userId');
+        }
+
+        const user = await this.users.repo.getUser(
+          authorProfile.userId,
+          manager,
+          true
+        );
+
         const accounts = UsersHelper.getAccounts(user, platformId);
 
         if (DEBUG)
@@ -163,10 +174,14 @@ export class PostsProcessing {
           accounts.map(async (account) => {
             /** create/update the draft for that platform and account */
             const platform = this.platforms.get(platformId);
+            const userRead = await this.users.getUserWithProfiles(
+              user.userId,
+              manager
+            );
 
             const draftPost = await platform.convertFromGeneric({
               post: appPostFull,
-              author: user,
+              author: userRead,
             });
 
             if (DEBUG)
@@ -233,11 +248,16 @@ export class PostsProcessing {
 
               let deleteDraft: undefined | any = undefined;
 
-              if (post_id) {
+              if (post_id && platform.buildDeleteDraft) {
+                const userRead = await this.users.getUserWithProfiles(
+                  user.userId,
+                  manager
+                );
+
                 deleteDraft = await platform.buildDeleteDraft(
                   post_id,
                   appPostFull,
-                  user
+                  userRead
                 );
               }
 
@@ -264,36 +284,50 @@ export class PostsProcessing {
     return drafts.flat();
   }
 
-  async upsertTriples(
+  async processSemantics(
     postId: string,
     manager: TransactionManager,
     semantics?: string
-  ) {
+  ): Promise<StructuredSemantics | undefined> {
     /** always delete old triples */
     await this.triples.deleteOfPost(postId, manager);
 
-    if (semantics) {
-      const post = await this.posts.get(postId, manager, true);
-      const store = await parseRDF(semantics);
+    if (!semantics) return undefined;
 
-      const createdAtMs = post.createdAtMs;
-      const authorId = post.authorId;
+    const post = await this.posts.get(postId, manager, true);
+    const store = await parseRDF(semantics);
 
+    const createdAtMs = post.createdAtMs;
+    const authorProfileId = post.authorProfileId;
+
+    const labels: Set<string> = new Set();
+    const keywords: Set<string> = new Set();
+
+    mapStoreElements(store, (q) => {
       /** store the triples */
-      mapStoreElements(store, (q) => {
-        this.triples.create(
-          {
-            postId,
-            createdAtMs,
-            authorId,
-            subject: q.subject.value,
-            predicate: q.predicate.value,
-            object: q.object.value,
-          },
-          manager
-        );
-      });
-    }
+      this.triples.create(
+        {
+          postId,
+          postCreatedAtMs: createdAtMs,
+          authorProfileId,
+          subject: q.subject.value,
+          predicate: q.predicate.value,
+          object: q.object.value,
+        },
+        manager
+      );
+
+      if (q.predicate.value === 'https://schema.org/keywords') {
+        keywords.add(q.object.value);
+      } else {
+        labels.add(q.predicate.value);
+      }
+    });
+
+    return {
+      labels: Array.from(labels),
+      keywords: Array.from(keywords),
+    };
   }
 
   async createAppPost(
@@ -346,11 +380,13 @@ export class PostsProcessing {
   }
 
   async getFrom_post_id<T extends boolean, R = AppPost>(
+    platform: PLATFORM,
     post_id: string,
     manager: TransactionManager,
     shouldThrow?: T
   ): Promise<DefinedIfTrue<T, R>> {
     const platformPostId = await this.platformPosts.getFrom_post_id(
+      platform,
       post_id,
       manager,
       true
