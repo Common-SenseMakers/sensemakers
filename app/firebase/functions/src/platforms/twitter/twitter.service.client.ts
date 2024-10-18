@@ -242,7 +242,13 @@ export class TwitterServiceClient {
     const twitterProfile: AccountProfileCreate<PlatformProfile> = {
       platformId: PLATFORM.Twitter,
       user_id: user.id,
-      profile: user,
+      profile: {
+        id: user.id,
+        username: user.username,
+        avatar: user.profile_image_url,
+        displayName: user.name,
+        description: '',
+      },
     };
 
     if (DEBUG)
