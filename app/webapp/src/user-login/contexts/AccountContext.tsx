@@ -8,7 +8,6 @@ import {
 } from 'react';
 
 import { _appFetch } from '../../api/app.fetch';
-import { NanopubProfile } from '../../shared/types/types.nanopubs';
 import { NotificationFreq } from '../../shared/types/types.notifications';
 import { OrcidProfile } from '../../shared/types/types.orcid';
 import {
@@ -18,11 +17,7 @@ import {
   PUBLISHABLE_PLATFORM,
 } from '../../shared/types/types.platforms';
 import { PlatformProfile } from '../../shared/types/types.profiles';
-import {
-  AppUserRead,
-  AutopostOption,
-  EmailDetails,
-} from '../../shared/types/types.user';
+import { AppUserRead, EmailDetails } from '../../shared/types/types.user';
 import { usePersist } from '../../utils/use.persist';
 
 const DEBUG = false;
@@ -46,7 +41,6 @@ export type AccountContextType = {
   setLoginFlowState: (status: LoginFlowState) => void;
   loginFlowState: LoginFlowState;
   resetLogin: () => void;
-  currentAutopost?: AutopostOption;
   currentNotifications?: NotificationFreq;
   setPlatformConnectedStatus: (
     platform: PLATFORM,
@@ -68,7 +62,6 @@ export interface ConnectedUser extends Omit<AppUserRead, 'profiles'> {
   profiles?: {
     [PLATFORM.Orcid]?: OrcidProfile;
     [PLATFORM.Twitter]?: PlatformProfile;
-    [PLATFORM.Nanopub]?: NanopubProfile;
     [PLATFORM.Mastodon]?: PlatformProfile;
     [PLATFORM.Bluesky]?: PlatformProfile;
   };
@@ -174,9 +167,6 @@ export const AccountContext = (props: PropsWithChildren) => {
               mastodon:
                 user.profiles[PLATFORM.Mastodon] &&
                 user.profiles[PLATFORM.Mastodon][0].profile,
-              nanopub:
-                user.profiles[PLATFORM.Nanopub] &&
-                user.profiles[PLATFORM.Nanopub][0].profile,
               orcid:
                 user.profiles[PLATFORM.Orcid] &&
                 user.profiles[PLATFORM.Orcid][0].profile,
@@ -237,9 +227,6 @@ export const AccountContext = (props: PropsWithChildren) => {
     _setOverallLoginStatus(OverallLoginStatus.LoggedOut);
   };
 
-  const currentAutopost =
-    connectedUser?.settings?.autopost[PLATFORM.Nanopub].value;
-
   const currentNotifications = connectedUser?.settings?.notificationFreq;
 
   const email = connectedUser ? connectedUser.email : undefined;
@@ -290,7 +277,6 @@ export const AccountContext = (props: PropsWithChildren) => {
         loginFlowState,
         setLoginFlowState,
         resetLogin,
-        currentAutopost,
         currentNotifications,
         setPlatformConnectedStatus,
         getPlatformConnectedStatus,

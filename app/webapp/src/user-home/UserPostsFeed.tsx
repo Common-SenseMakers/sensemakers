@@ -45,20 +45,6 @@ export const UserPostsFeed = () => {
 
   const location = useLocation();
 
-  const pageIx = locationToPageIx(location);
-  const pageTitle = useMemo(() => {
-    if (pageIx === 0) {
-      return t(I18Keys.drafts);
-    }
-    if (pageIx === 1) {
-      return t(I18Keys.postsNames);
-    }
-    if (pageIx === 2) {
-      return t(I18Keys.feedTitle);
-    }
-    return '';
-  }, [pageIx]);
-
   useEffect(() => {
     let timeout: NodeJS.Timeout;
     if (location.state?.postId) {
@@ -117,7 +103,7 @@ export const UserPostsFeed = () => {
         {updater}
         <PostsFetcherComponent
           feed={feed}
-          pageTitle={pageTitle}
+          pageTitle={t(I18Keys.myPosts)}
           filterOptions={options}
           status={filterStatus}
           onFilterOptionChanged={(value) =>

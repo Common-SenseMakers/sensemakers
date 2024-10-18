@@ -47,6 +47,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
   const {
     connectedUser,
+    setToken: setOurToken,
     refresh: refreshConnected,
     overallLoginStatus,
     setLoginFlowState,
@@ -177,7 +178,12 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
               searchParams.delete('state');
               searchParams.delete('code');
-              refreshConnected();
+              if (result.ourAccessToken) {
+                setOurToken(result.ourAccessToken);
+              } else {
+                refreshConnected();
+              }
+
               setPlatformConnectedStatus(
                 PLATFORM.Twitter,
                 PlatformConnectedStatus.Connected

@@ -6,8 +6,6 @@ import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID } from '../semantics/patterns/patterns';
 import { AppPostFull, AppPostParsedStatus } from '../shared/types/types.posts';
 import { useThemeContext } from '../ui-components/ThemedApp';
-import { NanopubStatus } from './NanopubStatus';
-import { PublishButtons } from './PostPublishButtons';
 import { PostTextStatic } from './PostTextStatic';
 import { getPostDetails } from './platform.post.details';
 import { usePost } from './post.context/PostContext';
@@ -19,7 +17,6 @@ const PostCardHeaderUser = (props: { post: AppPostFull }) => {
   return (
     <>
       <PlatformPostAnchor details={details}></PlatformPostAnchor>
-      <NanopubStatus post={props.post}></NanopubStatus>
     </>
   );
 };
@@ -147,14 +144,6 @@ export const PostCard = (props: {
               originalParsed: post?.originalParsed,
             }}></SemanticsEditor>
         )}
-      </Box>
-      <Box pad={{ top: 'medium' }}>
-        {!isPublicFeed &&
-          updated.inPrePublish &&
-          updated.postMerged?.parsedStatus ===
-            AppPostParsedStatus.PROCESSED && (
-            <PublishButtons compact></PublishButtons>
-          )}
       </Box>
     </Box>
   );

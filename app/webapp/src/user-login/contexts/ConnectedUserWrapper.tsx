@@ -3,7 +3,6 @@ import { PropsWithChildren, createContext, useContext } from 'react';
 
 import { UserPostsContext } from '../../user-home/UserPostsContext';
 import { AccountContext } from './AccountContext';
-import { AutopostInviteContext } from './AutopostInviteContext';
 import { DisconnectUserContext } from './DisconnectUserContext';
 import { NavHistoryContext } from './NavHistoryContext';
 import { BlueskyContext } from './platforms/BlueskyContext';
@@ -35,9 +34,7 @@ export const ConnectedUserWrapper = (props: PropsWithChildren) => {
               <MastodonContext>
                 <TwitterContext>
                   <UserPostsContext>
-                    <AutopostInviteContext>
-                      <NavHistoryContext>{props.children}</NavHistoryContext>
-                    </AutopostInviteContext>
+                    <NavHistoryContext>{props.children}</NavHistoryContext>
                   </UserPostsContext>
                 </TwitterContext>
               </MastodonContext>

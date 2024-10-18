@@ -56,19 +56,7 @@ export interface UserWithId {
   userId: string;
 }
 
-export enum AutopostOption {
-  MANUAL = 'MANUAL',
-  DETERMINISTIC = 'DETERMINISTIC',
-  AI = 'AI',
-}
-
 export interface UserSettings {
-  autopost: {
-    [PLATFORM.Nanopub]: {
-      value: AutopostOption;
-      after?: number;
-    };
-  };
   notificationFreq: NotificationFreq;
 }
 
@@ -88,7 +76,6 @@ export interface UserWithSettings {
 export interface UserAccounts {
   [PLATFORM.Orcid]?: OrcidAccountDetails[];
   [PLATFORM.Twitter]?: TwitterAccountDetails[];
-  [PLATFORM.Nanopub]?: NanopubAccountDetails[];
   [PLATFORM.Mastodon]?: MastodonAccountDetails[];
   [PLATFORM.Bluesky]?: BlueskyAccountDetails[];
 }
@@ -126,7 +113,6 @@ export interface AppUserRead extends UserWithId, UserWithSettings {
   profiles: {
     [PLATFORM.Orcid]?: AccountDetailsRead<OrcidProfile>[];
     [PLATFORM.Twitter]?: AccountDetailsRead<PlatformProfile>[];
-    [PLATFORM.Nanopub]?: AccountDetailsRead<NanopubProfile>[];
     [PLATFORM.Mastodon]?: AccountDetailsRead<PlatformProfile>[];
     [PLATFORM.Bluesky]?: AccountDetailsRead<PlatformProfile>[];
   };

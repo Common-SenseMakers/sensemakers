@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Box } from 'grommet';
 import { createContext, useContext } from 'react';
 import { Outlet, Route, Routes } from 'react-router-dom';
@@ -29,17 +30,21 @@ const AppContainerContextValue = createContext<
   AppContainerContextType | undefined
 >(undefined);
 
+const queryClient = new QueryClient();
+
 export const AppContainer0 = (props: React.PropsWithChildren) => {
   return (
     <>
       <GlobalStyles />
       <ThemedApp>
         <ResponsiveApp>
-          <LoadingContext>
-            <ConnectedUserWrapper>
-              <AppContainer></AppContainer>
-            </ConnectedUserWrapper>
-          </LoadingContext>
+          <QueryClientProvider client={queryClient}>
+            <LoadingContext>
+              <ConnectedUserWrapper>
+                <AppContainer></AppContainer>
+              </ConnectedUserWrapper>
+            </LoadingContext>
+          </QueryClientProvider>
         </ResponsiveApp>
       </ThemedApp>
     </>

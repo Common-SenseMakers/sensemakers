@@ -56,18 +56,6 @@ export const getMockPublishedPost = () => {
     originalParsed,
     mirrors: [
       {
-        id: 'pp-id-nanopub',
-        platformId: PLATFORM.Nanopub,
-        publishOrigin: PlatformPostPublishOrigin.FETCHED,
-        publishStatus: PlatformPostPublishStatus.PUBLISHED,
-        posted: {
-          post_id: 'https://np.test.knowledgepixels.com/123456',
-          timestampMs: createdAtMs,
-          user_id: '123412341234',
-          post: {},
-        },
-      },
-      {
         id: 'pp-id',
         platformId: PLATFORM.Twitter,
         publishOrigin: PlatformPostPublishOrigin.FETCHED,
@@ -149,18 +137,6 @@ export const getMockAutoPublishedPost = () => {
     republishedStatus: AppPostRepublishedStatus.AUTO_REPUBLISHED,
     originalParsed,
     mirrors: [
-      {
-        id: 'pp-id-nanopub',
-        platformId: PLATFORM.Nanopub,
-        publishOrigin: PlatformPostPublishOrigin.FETCHED,
-        publishStatus: PlatformPostPublishStatus.PUBLISHED,
-        posted: {
-          post_id: 'https://np.test.knowledgepixels.com/123456',
-          timestampMs: createdAtMs,
-          user_id: '123412341234',
-          post: {},
-        },
-      },
       {
         id: 'pp-id',
         platformId: PLATFORM.Twitter,
