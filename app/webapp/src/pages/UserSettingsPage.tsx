@@ -191,23 +191,6 @@ export const UserSettingsPage = () => {
           <SettingSectionTitle
             value={t(I18Keys.yourAccounts)}></SettingSectionTitle>
         </Box>
-        <PlatformSection
-          icon={
-            <BoxCentered
-              style={{
-                height: '40px',
-                width: '40px',
-                backgroundColor: '#498283',
-                borderRadius: '20px',
-              }}>
-              <EmailIcon></EmailIcon>
-            </BoxCentered>
-          }
-          platformName={t(I18Keys.emailAddress)}
-          onButtonClicked={() => {}}
-          buttonText=""
-          username={connectedUser?.email ? connectedUser.email?.email : ''}
-          connected={!!connectedUser?.email}></PlatformSection>
 
         <PlatformSection
           icon={

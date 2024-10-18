@@ -94,7 +94,7 @@ export const PostCard = (props: {
 
   return (
     <Box
-      pad={{ top: '16px', horizontal: '12px' }}
+      pad={{ top: '16px', horizontal: '12px', bottom: '16px' }}
       style={{
         backgroundColor: shade ? constants.colors.shade : 'white',
         borderTop: '2px solid var(--Neutral-300, #D1D5DB)',
