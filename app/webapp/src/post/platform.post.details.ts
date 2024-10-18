@@ -26,11 +26,14 @@ export const getPostDetails = (
   );
   const platformPostDetails = getPlatformPostDetails(platformPost);
   if (!platformPostDetails) return undefined;
-  return {
-    ...platformPostDetails,
-    authorName: post?.generic.author.name,
-    authorAvatarUrl: post?.generic.author.avatarUrl,
-  };
+
+  /** use post values instead of platform post when available */
+  platformPostDetails.authorName =
+    platformPostDetails.authorName || post?.generic.author.name;
+  platformPostDetails.authorAvatarUrl =
+    platformPostDetails.authorAvatarUrl || post?.generic.author.avatarUrl;
+
+  return platformPostDetails;
 };
 
 /** single function to convert from a platform post to generic details used in the UI */
