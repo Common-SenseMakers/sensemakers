@@ -181,7 +181,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
               localStorage.removeItem(LS_MASTODON_CONTEXT_KEY);
             }
 
-            if (result.ourAccessToken) {
+            if (result && result.ourAccessToken) {
               setOurToken(result.ourAccessToken);
             } else {
               refreshConnected();

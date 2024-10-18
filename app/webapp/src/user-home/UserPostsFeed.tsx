@@ -13,7 +13,6 @@ import {
 import { PostsQuery, PostsQueryStatus } from '../shared/types/types.posts';
 import { AppModal } from '../ui-components';
 import { usePersist } from '../utils/use.persist';
-import { IntroModals } from './IntroModal';
 import { useUserPosts } from './UserPostsContext';
 
 const DEBUG = false;
@@ -87,16 +86,6 @@ export const UserPostsFeed = () => {
     return <></>;
   })();
 
-  const modal = (() => {
-    if (showIntro) {
-      return (
-        <AppModal type="small" onModalClosed={() => closeIntro()}>
-          <IntroModals closeModal={() => closeIntro()}></IntroModals>
-        </AppModal>
-      );
-    }
-  })();
-
   return (
     <>
       <Box fill justify="start">
@@ -109,7 +98,6 @@ export const UserPostsFeed = () => {
           onFilterOptionChanged={(value) =>
             setFilter(value)
           }></PostsFetcherComponent>
-        {modal}
       </Box>
     </>
   );

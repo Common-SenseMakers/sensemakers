@@ -29,7 +29,11 @@ export const ConnectMastodonPage = () => {
 
   const handleConnect = () => {
     if (connect) {
-      connect(mastodonServer, 'read', window.location.href);
+      connect(
+        mastodonServer,
+        'read',
+        location.state?.callbackUrl || window.location.href
+      );
     }
   };
 
