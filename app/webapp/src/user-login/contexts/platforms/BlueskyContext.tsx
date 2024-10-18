@@ -22,7 +22,7 @@ import {
   useAccountContext,
 } from '../AccountContext';
 
-const DEBUG = true;
+const DEBUG = false;
 
 const log = (...args: any[]) => {
   if (DEBUG) console.log(...args);

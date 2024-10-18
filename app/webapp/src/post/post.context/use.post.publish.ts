@@ -13,7 +13,6 @@ import {
   AppPostReviewStatus,
   UnpublishPlatformPostPayload,
 } from '../../shared/types/types.posts';
-import { useNanopubContext } from '../../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { PostFetchContext } from './use.post.fetch';
 import { PostUpdateContext } from './use.post.update';
 
@@ -47,8 +46,6 @@ export const usePostPublish = (
   >(undefined);
 
   const [isRetracting, setIsRetracting] = useState(false);
-
-  const { signNanopublication } = useNanopubContext();
 
   const reset = () => {
     setPublishIntent(false);
@@ -87,12 +84,7 @@ export const usePostPublish = (
     }
 
     if (nanopub.draft.signerType === PlatformPostSignerType.USER) {
-      if (!signNanopublication) {
-        throw new Error(`Unexpected signNanopublication undefined`);
-      }
-
-      const signed = await signNanopublication(nanopub.draft.unsignedPost);
-      nanopub.draft.signedPost = signed.rdf();
+      throw new Error(`Unexpected signNanopublication undefined`);
     }
 
     /** approve is set the first time a post is published (should be set
@@ -147,14 +139,7 @@ export const usePostPublish = (
     }
 
     if (nanopub.deleteDraft.signerType === PlatformPostSignerType.USER) {
-      if (!signNanopublication) {
-        throw new Error(`Unexpected signNanopublication undefined`);
-      }
-
-      const signed = await signNanopublication(
-        nanopub.deleteDraft.unsignedPost
-      );
-      nanopub.deleteDraft.signedPost = signed.rdf();
+      throw new Error(`Unexpected signNanopublication undefined`);
     }
 
     nanopub.deleteDraft.postApproval = PlatformPostDraftApproval.APPROVED;

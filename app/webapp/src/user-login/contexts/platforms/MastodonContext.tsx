@@ -65,10 +65,6 @@ export const MastodonContext = (props: PropsWithChildren) => {
     getPlatformConnectedStatus,
   } = useAccountContext();
 
-  const [wasConnecting, setWasConnecting] = usePersist<boolean>(
-    WAS_CONNECTING_MASTODON,
-    false
-  );
   const [searchParams, setSearchParams] = useSearchParams();
   const [error, setError] = useState<string | undefined>(undefined);
   const code_param = searchParams.get('code');
@@ -121,7 +117,10 @@ export const MastodonContext = (props: PropsWithChildren) => {
         );
 
         if (signupContext) {
-          setWasConnecting(true);
+          setPlatformConnectedStatus(
+            PLATFORM.Mastodon,
+            PlatformConnectedStatus.Connecting
+          );
           log(
             'Redirecting to Mastodon authorization URL',
             signupContext.authorizationUrl
@@ -146,7 +145,6 @@ export const MastodonContext = (props: PropsWithChildren) => {
       if (
         code_param &&
         connectedUser &&
-        wasConnecting &&
         getPlatformConnectedStatus(PLATFORM.Mastodon) ===
           PlatformConnectedStatus.Connecting
       ) {
@@ -197,8 +195,6 @@ export const MastodonContext = (props: PropsWithChildren) => {
             setSearchParams(searchParams);
           });
         }
-
-        setWasConnecting(false);
       }
     }
   }, [

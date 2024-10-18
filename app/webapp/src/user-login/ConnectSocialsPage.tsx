@@ -7,7 +7,7 @@ import { BlueskyIcon, MastodonIcon, TwitterIcon } from '../app/common/Icons';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { I18Keys } from '../i18n/i18n';
 import { AbsoluteRoutes, RouteNames } from '../route.names';
-import { AppButton, AppHeading } from '../ui-components';
+import { AppButton, AppHeading, AppSubtitle } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
 import { PlatformSection } from '../user-settings/PlatformsSection';
 import { useAccountContext } from './contexts/AccountContext';
@@ -32,7 +32,9 @@ export const ConnectSocialsPage = () => {
   const content = (
     <Box>
       <Box style={{ flexGrow: 1 }}>
-        <AppHeading level="1">{t(I18Keys.connectSocialsTitle)}</AppHeading>
+        <AppHeading level="1">{t(I18Keys.introTitle)}</AppHeading>
+        <Box width="100%" height="4px"></Box>
+        <AppSubtitle>{t(I18Keys.introSubtitle)}</AppSubtitle>
         <Box width="100%" height="16px"></Box>
 
         <AppParagraph margin={{ bottom: 'medium' }}>

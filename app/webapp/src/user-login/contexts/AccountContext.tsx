@@ -25,7 +25,7 @@ import {
 } from '../../shared/types/types.user';
 import { usePersist } from '../../utils/use.persist';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const OUR_TOKEN_NAME = 'ourToken';
 export const LOGIN_STATUS = 'loginStatus';
@@ -77,12 +77,6 @@ export interface ConnectedUser extends Omit<AppUserRead, 'profiles'> {
 /** explicit status of the login/signup process */
 export enum LoginFlowState {
   Idle = 'Idle',
-  ConnectingSigner = 'ConnectingSigner',
-  ComputingAddress = 'ComputingAddress',
-  ComputingRSAKeys = 'ComputingsRSAKeys',
-  CreatingEthSignature = 'CreatingEthSignature',
-  SignningUpNanopub = 'SignningUpNanopub',
-  RegisteringEmail = 'RegisteringEmail',
   ConnectingTwitter = 'ConnectingTwitter',
   ConnectingMastodon = 'ConnectingMastodon',
   ConnectingBluesky = 'ConnectingBluesky',
@@ -198,9 +192,11 @@ export const AccountContext = (props: PropsWithChildren) => {
         setConnectedUser({ ...user, profiles });
       } else {
         if (DEBUG) console.log('setting connected user as null');
+        setOverallLoginStatus(OverallLoginStatus.LoggedOut);
         setConnectedUser(null);
       }
     } catch (e) {
+      setOverallLoginStatus(OverallLoginStatus.LoggedOut);
       setToken(null);
     }
   };

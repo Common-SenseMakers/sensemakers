@@ -15,7 +15,7 @@ import {
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { arraysEqual } from '../utils/general';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export interface PostFetcherInterface {
   posts?: AppPostFull[];

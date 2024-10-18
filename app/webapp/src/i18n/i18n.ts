@@ -238,7 +238,7 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.connectSocialsTitle]: 'Connect your accounts',
   [I18Keys.connectMastodonTitle]: 'Connect to Mastodon',
   [I18Keys.connectSocialsParagraph]:
-    'Link your accounts to start transforming your posts into nanopublications. You can always change this in your settings.',
+    'Connect your accounts to process your post as an hyperfeed. You must link at least one account, and you will be able to link other accounts later.',
   [I18Keys.connectSocialsParagraph2]:
     'By connecting, you can easily identify and FAIRify your valuable scientific insights.',
   [I18Keys.connectMastodonParagraph]:
