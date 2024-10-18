@@ -13,7 +13,6 @@ import {
 import { PostsQuery, PostsQueryStatus } from '../shared/types/types.posts';
 import { AppModal } from '../ui-components';
 import { usePersist } from '../utils/use.persist';
-import { IntroModals } from './IntroModal';
 import { useUserPosts } from './UserPostsContext';
 
 const DEBUG = false;
@@ -44,20 +43,6 @@ export const UserPostsFeed = () => {
   const { feed, filterStatus } = useUserPosts();
 
   const location = useLocation();
-
-  const pageIx = locationToPageIx(location);
-  const pageTitle = useMemo(() => {
-    if (pageIx === 0) {
-      return t(I18Keys.drafts);
-    }
-    if (pageIx === 1) {
-      return t(I18Keys.postsNames);
-    }
-    if (pageIx === 2) {
-      return t(I18Keys.feedTitle);
-    }
-    return '';
-  }, [pageIx]);
 
   useEffect(() => {
     let timeout: NodeJS.Timeout;
@@ -101,29 +86,18 @@ export const UserPostsFeed = () => {
     return <></>;
   })();
 
-  const modal = (() => {
-    if (showIntro) {
-      return (
-        <AppModal type="small" onModalClosed={() => closeIntro()}>
-          <IntroModals closeModal={() => closeIntro()}></IntroModals>
-        </AppModal>
-      );
-    }
-  })();
-
   return (
     <>
       <Box fill justify="start">
         {updater}
         <PostsFetcherComponent
           feed={feed}
-          pageTitle={pageTitle}
+          pageTitle={t(I18Keys.myPosts)}
           filterOptions={options}
           status={filterStatus}
           onFilterOptionChanged={(value) =>
             setFilter(value)
           }></PostsFetcherComponent>
-        {modal}
       </Box>
     </>
   );

@@ -9,10 +9,8 @@ import {
   PostUpdatePayload,
   PostsQueryStatus,
 } from '../../shared/types/types.posts';
-import { AppUserRead } from '../../shared/types/types.user';
 import { useUserPosts } from '../../user-home/UserPostsContext';
 import { ConnectedUser } from '../../user-login/contexts/AccountContext';
-import { useNanopubContext } from '../../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { AppPostStatus, getPostStatuses } from '../posts.helper';
 import { PostDerivedContext } from './use.post.derived';
 import { PostFetchContext } from './use.post.fetch';
@@ -169,17 +167,6 @@ export const usePostUpdate = (
     return getPostStatuses(postMerged);
   }, [postMerged]);
 
-  const { signNanopublication } = useNanopubContext();
-
-  const canPublishNanopub =
-    connectedUser &&
-    connectedUser.profiles?.nanopub &&
-    signNanopublication &&
-    derived.nanopubDraft;
-
-  const readyToNanopublish =
-    canPublishNanopub && derived.nanopubDraft && !statusesMerged.live;
-
   const inPrePublish = !statusesMerged.live && !statusesMerged.ignored;
 
   return {
@@ -193,8 +180,7 @@ export const usePostUpdate = (
     setIsUpdating,
     updateSemantics,
     updatePost: optimisticUpdate,
-    readyToNanopublish:
-      readyToNanopublish !== undefined ? readyToNanopublish : false,
+    readyToNanopublish: false,
     inPrePublish,
   };
 };

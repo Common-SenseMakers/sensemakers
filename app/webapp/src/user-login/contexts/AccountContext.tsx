@@ -8,7 +8,6 @@ import {
 } from 'react';
 
 import { _appFetch } from '../../api/app.fetch';
-import { NanopubProfile } from '../../shared/types/types.nanopubs';
 import { NotificationFreq } from '../../shared/types/types.notifications';
 import { OrcidProfile } from '../../shared/types/types.orcid';
 import {
@@ -18,14 +17,10 @@ import {
   PUBLISHABLE_PLATFORM,
 } from '../../shared/types/types.platforms';
 import { PlatformProfile } from '../../shared/types/types.profiles';
-import {
-  AppUserRead,
-  AutopostOption,
-  EmailDetails,
-} from '../../shared/types/types.user';
+import { AppUserRead, EmailDetails } from '../../shared/types/types.user';
 import { usePersist } from '../../utils/use.persist';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const OUR_TOKEN_NAME = 'ourToken';
 export const LOGIN_STATUS = 'loginStatus';
@@ -46,7 +41,6 @@ export type AccountContextType = {
   setLoginFlowState: (status: LoginFlowState) => void;
   loginFlowState: LoginFlowState;
   resetLogin: () => void;
-  currentAutopost?: AutopostOption;
   currentNotifications?: NotificationFreq;
   setPlatformConnectedStatus: (
     platform: PLATFORM,
@@ -68,7 +62,6 @@ export interface ConnectedUser extends Omit<AppUserRead, 'profiles'> {
   profiles?: {
     [PLATFORM.Orcid]?: OrcidProfile;
     [PLATFORM.Twitter]?: PlatformProfile;
-    [PLATFORM.Nanopub]?: NanopubProfile;
     [PLATFORM.Mastodon]?: PlatformProfile;
     [PLATFORM.Bluesky]?: PlatformProfile;
   };
@@ -77,12 +70,6 @@ export interface ConnectedUser extends Omit<AppUserRead, 'profiles'> {
 /** explicit status of the login/signup process */
 export enum LoginFlowState {
   Idle = 'Idle',
-  ConnectingSigner = 'ConnectingSigner',
-  ComputingAddress = 'ComputingAddress',
-  ComputingRSAKeys = 'ComputingsRSAKeys',
-  CreatingEthSignature = 'CreatingEthSignature',
-  SignningUpNanopub = 'SignningUpNanopub',
-  RegisteringEmail = 'RegisteringEmail',
   ConnectingTwitter = 'ConnectingTwitter',
   ConnectingMastodon = 'ConnectingMastodon',
   ConnectingBluesky = 'ConnectingBluesky',
@@ -97,7 +84,6 @@ export enum OverallLoginStatus {
   NotKnown = 'NotKnown', // init value before we check localStorage
   LoggedOut = 'LoggedOut',
   LogginIn = 'LogginIn',
-  PartialLoggedIn = 'PartialLoggedIn',
   FullyLoggedIn = 'FullyLoggedIn',
 }
 
@@ -181,9 +167,6 @@ export const AccountContext = (props: PropsWithChildren) => {
               mastodon:
                 user.profiles[PLATFORM.Mastodon] &&
                 user.profiles[PLATFORM.Mastodon][0].profile,
-              nanopub:
-                user.profiles[PLATFORM.Nanopub] &&
-                user.profiles[PLATFORM.Nanopub][0].profile,
               orcid:
                 user.profiles[PLATFORM.Orcid] &&
                 user.profiles[PLATFORM.Orcid][0].profile,
@@ -199,9 +182,11 @@ export const AccountContext = (props: PropsWithChildren) => {
         setConnectedUser({ ...user, profiles });
       } else {
         if (DEBUG) console.log('setting connected user as null');
+        setOverallLoginStatus(OverallLoginStatus.LoggedOut);
         setConnectedUser(null);
       }
     } catch (e) {
+      setOverallLoginStatus(OverallLoginStatus.LoggedOut);
       setToken(null);
     }
   };
@@ -221,43 +206,9 @@ export const AccountContext = (props: PropsWithChildren) => {
      * once connected user is defined and has an email, but there is no
      * twitter, the user is partially logged in
      */
-    if (connectedUser && connectedUser.email) {
-      /** if not a single source platform has been connected, consider login partial */
-      if (
-        !ALL_SOURCE_PLATFORMS.some((platformId: PUBLISHABLE_PLATFORM) => {
-          return (
-            connectedUser.profiles &&
-            connectedUser.profiles[platformId] !== undefined
-          );
-        })
-      ) {
-        setOverallLoginStatus(OverallLoginStatus.PartialLoggedIn);
-      } else {
-        setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
-      }
-
-      /** update each platform persisted connected status */
-      ALL_PUBLISH_PLATFORMS.forEach((platform) => {
-        if (
-          connectedUser.profiles &&
-          connectedUser.profiles[platform] &&
-          loginFlowState !== LoginFlowState.Disconnecting
-        ) {
-          setPlatformsConnectedStatus({
-            ...platformsConnectedStatus,
-            [platform]: PlatformConnectedStatus.Connected,
-          });
-        }
-      });
-    }
-
-    /** If finished fetching for connected user and is undefined, then
-     * the status is not not-known, its a confirmed LoggedOut */
-    if (
-      overallLoginStatus === OverallLoginStatus.NotKnown &&
-      connectedUser === undefined
-    ) {
-      disconnect();
+    if (connectedUser) {
+      /** connectedUser === loggedIn now */
+      setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
     }
   }, [connectedUser, overallLoginStatus, token, loginFlowState]);
 
@@ -275,9 +226,6 @@ export const AccountContext = (props: PropsWithChildren) => {
     _setLoginFlowState(LoginFlowState.Idle);
     _setOverallLoginStatus(OverallLoginStatus.LoggedOut);
   };
-
-  const currentAutopost =
-    connectedUser?.settings?.autopost[PLATFORM.Nanopub].value;
 
   const currentNotifications = connectedUser?.settings?.notificationFreq;
 
@@ -329,7 +277,6 @@ export const AccountContext = (props: PropsWithChildren) => {
         loginFlowState,
         setLoginFlowState,
         resetLogin,
-        currentAutopost,
         currentNotifications,
         setPlatformConnectedStatus,
         getPlatformConnectedStatus,

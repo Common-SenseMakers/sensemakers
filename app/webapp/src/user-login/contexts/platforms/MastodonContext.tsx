@@ -20,10 +20,8 @@ import {
   MastodonSignupData,
 } from '../../../shared/types/types.mastodon';
 import { PLATFORM } from '../../../shared/types/types.platforms';
-import { usePersist } from '../../../utils/use.persist';
 import {
   LoginFlowState,
-  OverallLoginStatus,
   PlatformConnectedStatus,
   useAccountContext,
 } from '../AccountContext';
@@ -33,15 +31,13 @@ const DEBUG = false;
 const log = (...args: any[]) => {
   if (DEBUG) console.log(...args);
 };
-const WAS_CONNECTING_MASTODON = 'was-connecting-mastodon';
-
 export const LS_MASTODON_CONTEXT_KEY = 'mastodon-signin-context';
 
 export type MastodonContextType = {
   connect?: (
     domain: string,
     type: MastodonGetContextParams['type'],
-    callbackUrl?: string
+    callbackUrl: string
   ) => Promise<void>;
   needConnect?: boolean;
   error?: string;
@@ -58,6 +54,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
 
   const {
     connectedUser,
+    setToken: setOurToken,
     refresh: refreshConnected,
     overallLoginStatus,
     setLoginFlowState,
@@ -65,10 +62,6 @@ export const MastodonContext = (props: PropsWithChildren) => {
     getPlatformConnectedStatus,
   } = useAccountContext();
 
-  const [wasConnecting, setWasConnecting] = usePersist<boolean>(
-    WAS_CONNECTING_MASTODON,
-    false
-  );
   const [searchParams, setSearchParams] = useSearchParams();
   const [error, setError] = useState<string | undefined>(undefined);
   const code_param = searchParams.get('code');
@@ -93,7 +86,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
     async (
       domain: string,
       type: MastodonGetContextParams['type'],
-      callbackUrl?: string
+      callbackUrl: string
     ) => {
       setLoginFlowState(LoginFlowState.ConnectingMastodon);
       setPlatformConnectedStatus(
@@ -105,7 +98,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
       try {
         const params: MastodonGetContextParams = {
           mastodonServer: domain,
-          callback_url: window.location.href,
+          callback_url: callbackUrl,
           type,
         };
         log('Fetching Mastodon signup context', params);
@@ -121,7 +114,10 @@ export const MastodonContext = (props: PropsWithChildren) => {
         );
 
         if (signupContext) {
-          setWasConnecting(true);
+          setPlatformConnectedStatus(
+            PLATFORM.Mastodon,
+            PlatformConnectedStatus.Connecting
+          );
           log(
             'Redirecting to Mastodon authorization URL',
             signupContext.authorizationUrl
@@ -145,11 +141,8 @@ export const MastodonContext = (props: PropsWithChildren) => {
     if (!verifierHandled.current) {
       if (
         code_param &&
-        connectedUser &&
-        wasConnecting &&
-        (overallLoginStatus === OverallLoginStatus.PartialLoggedIn ||
-          getPlatformConnectedStatus(PLATFORM.Mastodon) ===
-            PlatformConnectedStatus.Connecting)
+        getPlatformConnectedStatus(PLATFORM.Mastodon) ===
+          PlatformConnectedStatus.Connecting
       ) {
         log('useEffect MastodonSignup', {
           code_param,
@@ -181,12 +174,17 @@ export const MastodonContext = (props: PropsWithChildren) => {
 
           appFetch<HandleSignupResult>(
             `/api/auth/${PLATFORM.Mastodon}/signup`,
-            signupData,
-            true
+            signupData
           ).then((result) => {
             log('Mastodon signup result', result);
             if (result) {
               localStorage.removeItem(LS_MASTODON_CONTEXT_KEY);
+            }
+
+            if (result && result.ourAccessToken) {
+              setOurToken(result.ourAccessToken);
+            } else {
+              refreshConnected();
             }
 
             searchParams.delete('code');
@@ -198,8 +196,6 @@ export const MastodonContext = (props: PropsWithChildren) => {
             setSearchParams(searchParams);
           });
         }
-
-        setWasConnecting(false);
       }
     }
   }, [

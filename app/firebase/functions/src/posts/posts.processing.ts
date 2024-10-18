@@ -3,15 +3,8 @@ import {
   PlatformPost,
   PlatformPostCreate,
   PlatformPostCreated,
-  PlatformPostDraft,
-  PlatformPostDraftApproval,
-  PlatformPostPublishOrigin,
-  PlatformPostPublishStatus,
 } from '../@shared/types/types.platform.posts';
-import {
-  PLATFORM,
-  PUBLISHABLE_PLATFORM,
-} from '../@shared/types/types.platforms';
+import { PLATFORM } from '../@shared/types/types.platforms';
 import {
   AppPost,
   AppPostCreate,
@@ -25,18 +18,13 @@ import { DefinedIfTrue } from '../@shared/types/types.user';
 import { mapStoreElements, parseRDF } from '../@shared/utils/n3.utils';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
-import { logger } from '../instances/logger';
 import { PlatformsService } from '../platforms/platforms.service';
 import { getProfileId } from '../profiles/profiles.repository';
 import { TriplesRepository } from '../semantics/triples.repository';
 import { TimeService } from '../time/time.service';
-import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { PlatformPostsRepository } from './platform.posts.repository';
-import { PostsHelper } from './posts.helper';
 import { PostsRepository } from './posts.repository';
-
-const DEBUG = false;
 
 /**
  * Per-PlatformPost or Per-AppPost methods.
@@ -131,157 +119,6 @@ export class PostsProcessing {
     );
 
     return postsCreated.filter((p) => p !== undefined) as PlatformPostCreated[];
-  }
-
-  /** Create and store all platform posts for one post */
-  async createOrUpdatePostDrafts(postId: string, manager: TransactionManager) {
-    if (DEBUG) logger.debug(`createOrUpdatePostDrafts ${postId}`);
-
-    const appPostFull = await this.getPostFull(postId, manager, true);
-
-    /**
-     * Create platformPosts as drafts on all platforms (nanopub only for now)
-     * */
-    const drafts = await Promise.all(
-      ([PLATFORM.Nanopub] as PUBLISHABLE_PLATFORM[]).map(async (platformId) => {
-        const authorProfile = await this.users.profiles.getByProfileId(
-          appPostFull.authorProfileId,
-          manager,
-          true
-        );
-
-        if (!authorProfile.userId) {
-          throw new Error('Profile must be of a signed up userId');
-        }
-
-        const user = await this.users.repo.getUser(
-          authorProfile.userId,
-          manager,
-          true
-        );
-
-        const accounts = UsersHelper.getAccounts(user, platformId);
-
-        if (DEBUG)
-          logger.debug(
-            `createPostDrafts - accounts ${JSON.stringify(accounts.map((a) => a.user_id))}`,
-            {
-              accounts,
-            }
-          );
-
-        return Promise.all(
-          accounts.map(async (account) => {
-            /** create/update the draft for that platform and account */
-            const platform = this.platforms.get(platformId);
-            const userRead = await this.users.getUserWithProfiles(
-              user.userId,
-              manager
-            );
-
-            const draftPost = await platform.convertFromGeneric({
-              post: appPostFull,
-              author: userRead,
-            });
-
-            if (DEBUG)
-              logger.debug(
-                `createPostDrafts- account postId: ${postId}, platformId: ${platformId}, account: ${account.user_id}`,
-                {
-                  draftPost,
-                  account,
-                }
-              );
-
-            const existingMirror = PostsHelper.getPostMirror(appPostFull, {
-              platformId,
-              user_id: account.user_id,
-            });
-
-            if (DEBUG)
-              logger.debug(
-                `createPostDrafts- existing mirror ${postId}, existingMirror:${existingMirror !== undefined}`,
-                {
-                  existingMirror,
-                }
-              );
-
-            const draft: PlatformPostDraft = {
-              postApproval: PlatformPostDraftApproval.PENDING,
-              user_id: account.user_id,
-            };
-
-            if (draftPost.unsignedPost) {
-              draft.unsignedPost = draftPost.unsignedPost;
-            }
-
-            if (!existingMirror) {
-              /** create and add as mirror */
-              const draftCreate: PlatformPostCreate = {
-                platformId,
-                publishStatus: PlatformPostPublishStatus.DRAFT,
-                publishOrigin: PlatformPostPublishOrigin.POSTED,
-                draft,
-              };
-
-              const plaformPost = this.platformPosts.create(
-                draftCreate,
-                manager
-              );
-              if (DEBUG)
-                logger.debug(
-                  `createPostDrafts- addMirror ${postId} - plaformPost:${plaformPost.id}`,
-                  {
-                    postId,
-                    plaformPost,
-                  }
-                );
-
-              this.posts.addMirror(postId, plaformPost.id, manager);
-            } else {
-              const post_id = existingMirror.post_id;
-
-              if (DEBUG)
-                logger.debug(
-                  `createPostDrafts- buildDeleteDraft for post ${postId}, existingMirror post_id:${post_id}`
-                );
-
-              let deleteDraft: undefined | any = undefined;
-
-              if (post_id && platform.buildDeleteDraft) {
-                const userRead = await this.users.getUserWithProfiles(
-                  user.userId,
-                  manager
-                );
-
-                deleteDraft = await platform.buildDeleteDraft(
-                  post_id,
-                  appPostFull,
-                  userRead
-                );
-              }
-
-              if (DEBUG)
-                logger.debug(`createPostDrafts- update ${postId}`, {
-                  postId,
-                  draft,
-                  deleteDraft,
-                });
-
-              await this.platformPosts.update(
-                existingMirror.id,
-                { draft, deleteDraft },
-                manager
-              );
-            }
-          })
-        );
-      })
-    );
-
-    /** add drafts as post mirrors */
-
-    return drafts.flat();
   }
 
   async processSemantics(

@@ -20,17 +20,20 @@ export const ConnectMastodonPage = () => {
   const { connectedUser } = useAccountContext();
   const [mastodonServer, setMastodonServer] = useState('');
 
-  const mastodonProfile = connectedUser?.profiles?.mastodon;
-
   useEffect(() => {
+    const mastodonProfile = connectedUser?.profiles?.mastodon;
     if (mastodonProfile) {
       navigate(AbsoluteRoutes.App);
     }
-  }, [mastodonProfile, navigate]);
+  }, [connectedUser, navigate]);
 
   const handleConnect = () => {
     if (connect) {
-      connect(mastodonServer, 'read', location.state?.callbackUrl);
+      connect(
+        mastodonServer,
+        'read',
+        location.state?.callbackUrl || window.location.href
+      );
     }
   };
 

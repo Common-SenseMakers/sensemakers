@@ -3,7 +3,6 @@ import express from 'express';
 import { getPublicFeedController } from './feed/feed.controller';
 import {
   approvePostController,
-  createDraftPostController,
   getPostController,
   getUserPostsController,
   parsePostController,
@@ -12,7 +11,6 @@ import {
 } from './posts/controllers/posts.controller';
 import {
   getLoggedUserController,
-  setUserEmailMagic,
   setUserSettingsController,
 } from './users/controllers/logged.user.controller';
 import {
@@ -27,12 +25,10 @@ router.post('/auth/:platform/context', getSignupContextController);
 router.post('/auth/:platform/signup', handleSignupController);
 router.post('/auth/settings', setUserSettingsController);
 router.post('/auth/me', getLoggedUserController);
-router.post('/auth/setMagicEmail', setUserEmailMagic);
 
 router.post('/posts/getOfUser', getUserPostsController);
 
 router.post('/posts/get', getPostController);
-router.post('/posts/createDraft', createDraftPostController);
 router.post('/posts/approve', approvePostController);
 router.post('/posts/parse', parsePostController);
 router.post('/posts/update', updatePostController);

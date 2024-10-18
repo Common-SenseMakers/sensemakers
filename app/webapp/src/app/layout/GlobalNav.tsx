@@ -95,16 +95,10 @@ export const GlobalNav = (props: {}) => {
   return (
     <Box direction="row" align="center" style={{ height: '48px' }}>
       {button(
-        'Drafts',
+        'My Posts',
         <DraftsIcon></DraftsIcon>,
         `/${PostsQueryStatus.DRAFTS}`,
         pageIx === 0
-      )}
-      {button(
-        'Nanopubs',
-        <PublishedIcon></PublishedIcon>,
-        `/${PostsQueryStatus.PUBLISHED}`,
-        pageIx === 1
       )}
       {button(
         t(I18Keys.feedTitle),

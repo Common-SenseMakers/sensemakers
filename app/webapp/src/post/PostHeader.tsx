@@ -3,7 +3,6 @@ import { Box, BoxExtendedProps, Text } from 'grommet';
 import { PlatformPostAnchor } from '../app/anchors/PlatformPostAnchor';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { useThemeContext } from '../ui-components/ThemedApp';
-import { NanopubStatus } from './NanopubStatus';
 import { getPostDetails } from './platform.post.details';
 import { usePost } from './post.context/PostContext';
 
@@ -42,10 +41,6 @@ export const PostHeader = (props: { boxProps: BoxExtendedProps }) => {
             loading={post === undefined}
             details={details}></PlatformPostAnchor>
         </Box>
-      </Box>
-
-      <Box gap="small" align="end">
-        <NanopubStatus post={updated.postMerged}></NanopubStatus>
       </Box>
     </Box>
   );

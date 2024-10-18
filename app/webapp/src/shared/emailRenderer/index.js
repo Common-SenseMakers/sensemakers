@@ -11,38 +11,6 @@
 return /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./src/app/config.ts":
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   APP_URL: () => (/* binding */ APP_URL),
-/* harmony export */   BUILD_ID: () => (/* binding */ BUILD_ID),
-/* harmony export */   FUNCTIONS_BASE: () => (/* binding */ FUNCTIONS_BASE),
-/* harmony export */   MAGIC_API_KEY: () => (/* binding */ MAGIC_API_KEY),
-/* harmony export */   NANOPUB_EXPLORER_SERVER: () => (/* binding */ NANOPUB_EXPLORER_SERVER),
-/* harmony export */   ORCID_API_URL: () => (/* binding */ ORCID_API_URL),
-/* harmony export */   ORCID_CLIENT_ID: () => (/* binding */ ORCID_CLIENT_ID),
-/* harmony export */   ORCID_REDIRECT_URL: () => (/* binding */ ORCID_REDIRECT_URL),
-/* harmony export */   SUPPORT_EMAIL_ADDRESS: () => (/* binding */ SUPPORT_EMAIL_ADDRESS),
-/* harmony export */   TWITTER_API_URL: () => (/* binding */ TWITTER_API_URL),
-/* harmony export */   WALLETCONNECT_PROJECT_ID: () => (/* binding */ WALLETCONNECT_PROJECT_ID)
-/* harmony export */ });
-var FUNCTIONS_BASE = ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).FUNCTIONS_BASE;
-var ORCID_CLIENT_ID = ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).ORCID_CLIENT_ID;
-var ORCID_API_URL = 'https://orcid.org';
-var APP_URL = ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).APP_URL;
-var ORCID_REDIRECT_URL = APP_URL;
-var TWITTER_API_URL = 'https://api.twitter.com';
-var WALLETCONNECT_PROJECT_ID = 'c12fdc701fd336cf8dc059f6784906bc';
-var MAGIC_API_KEY = 'pk_live_A603B0287DAF3C97';
-var NANOPUB_EXPLORER_SERVER = ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).NANOPUB_EXPLORER_SERVER;
-var BUILD_ID = ({"NODE_ENV":"production","PUBLIC_URL":"","WDS_SOCKET_HOST":undefined,"WDS_SOCKET_PATH":undefined,"WDS_SOCKET_PORT":undefined,"FAST_REFRESH":true}).REACT_APP_VERSION;
-var SUPPORT_EMAIL_ADDRESS = 'support@sense-nets.xyz';
-
-/***/ }),
-
 /***/ "./src/email/EmailRow.tsx":
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -199,11 +167,11 @@ var EmailTemplate = function (_a) {
         pendingPosts = _a.pendingPosts,
         manuallyPublishedPosts = _a.manuallyPublishedPosts,
         autoPublishedPosts = _a.autoPublishedPosts;
-      var preview = "".concat(autoPublishedPosts.length > 0 ? "".concat((0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.autoPublishedNanopubEmailPreview, {
+      var preview = "".concat(autoPublishedPosts.length > 0 ? "".concat((0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.TweetX, {
         count: autoPublishedPosts.length
-      }), ", ") : '').concat(manuallyPublishedPosts.length > 0 ? "".concat((0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.publishedNanopubEmailPreview, {
+      }), ", ") : '').concat(manuallyPublishedPosts.length > 0 ? "".concat((0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.TweetX, {
         count: manuallyPublishedPosts.length
-      }), ", ") : '').concat(pendingPosts.length > 0 ? "".concat((0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.recommendedNanopubEmailPreview, {
+      }), ", ") : '').concat(pendingPosts.length > 0 ? "".concat((0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.TweetX, {
         count: pendingPosts.length
       })) : '');
       var footer = (0,i18next__WEBPACK_IMPORTED_MODULE_1__.t)(_i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.emailFooter, {
@@ -230,11 +198,11 @@ var EmailTemplate = function (_a) {
             var summaryByStatusKey = function () {
               switch (idx) {
                 case 0:
-                  return _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.recommendedNanopubEmailSummary;
+                  return _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.TweetX;
                 case 1:
-                  return _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.publishedNanopubEmailSummary;
+                  return _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.TweetX;
                 default:
-                  return _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.autoPublishedNanopubEmailSummary;
+                  return _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.TweetX;
               }
             }();
             return (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_react_email_components__WEBPACK_IMPORTED_MODULE_12__.Text, __assign({
@@ -267,17 +235,17 @@ var EmailTemplate = function (_a) {
           switch (idx) {
             case 0:
               return {
-                sectionHeaderKey: _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.recommendedNanopubEmailHeader,
+                sectionHeaderKey: _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.TweetX,
                 postLinkByStatus: reviewPostsLink
               };
             case 1:
               return {
-                sectionHeaderKey: _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.publishedNanopubEmailHeader,
+                sectionHeaderKey: _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.TweetX,
                 postLinkByStatus: publishedPostsLink
               };
             default:
               return {
-                sectionHeaderKey: _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.autoPublishedNanopubEmailHeader,
+                sectionHeaderKey: _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__.I18Keys.TweetX,
                 postLinkByStatus: publishedPostsLink
               };
           }
@@ -514,7 +482,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var i18next__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/i18next/dist/esm/i18next.js");
 /* harmony import */ var _i18n_i18n__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/i18n/i18n.ts");
 /* harmony import */ var _post_posts_helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./src/post/posts.helper.ts");
-/* harmony import */ var _shared_types_types_user__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./src/shared/types/types.user.ts");
+/* harmony import */ var _shared_types_types_platforms__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./src/shared/types/types.platforms.ts");
 /* harmony import */ var _utils_post_utils__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./src/utils/post.utils.ts");
 /* harmony import */ var _LabelsRow__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./src/email/LabelsRow.tsx");
 /* harmony import */ var _RefCardEmail__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__("./src/email/RefCardEmail.tsx");
@@ -557,7 +525,7 @@ var PostCardEmail = function (_a) {
     return text;
   }();
   var capitalizedPlatform = post.origin.charAt(0).toUpperCase() + post.origin.slice(1);
-  var label = "".concat(post.origin === _shared_types_types_user__WEBPACK_IMPORTED_MODULE_4__.PLATFORM.Twitter ? 'X•' : "".concat(capitalizedPlatform, " ")).concat(post.generic.thread.length > 1 ? 'Thread' : post.origin === _shared_types_types_user__WEBPACK_IMPORTED_MODULE_4__.PLATFORM.Twitter ? 'Tweet' : 'Post');
+  var label = "".concat(post.origin === _shared_types_types_platforms__WEBPACK_IMPORTED_MODULE_4__.PLATFORM.Twitter ? 'X•' : "".concat(capitalizedPlatform, " ")).concat(post.generic.thread.length > 1 ? 'Thread' : post.origin === _shared_types_types_platforms__WEBPACK_IMPORTED_MODULE_4__.PLATFORM.Twitter ? 'Tweet' : 'Post');
   var formatter = new Intl.DateTimeFormat('en-US', {
     month: 'long',
     day: 'numeric',
@@ -994,14 +962,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   LOGO_URL: () => (/* binding */ LOGO_URL),
 /* harmony export */   MAX_KEYWORDS: () => (/* binding */ MAX_KEYWORDS),
 /* harmony export */   MAX_POSTS_IN_EMAIL: () => (/* binding */ MAX_POSTS_IN_EMAIL),
-/* harmony export */   MAX_REFERENCES: () => (/* binding */ MAX_REFERENCES),
-/* harmony export */   NANOPUB_EXPLORER_URL_EMAIL: () => (/* binding */ NANOPUB_EXPLORER_URL_EMAIL)
+/* harmony export */   MAX_REFERENCES: () => (/* binding */ MAX_REFERENCES)
 /* harmony export */ });
 var MAX_POSTS_IN_EMAIL = 3;
 var LOGO_URL = 'https://development--sensemakers.netlify.app/icons/logo-192.png';
 var MAX_KEYWORDS = 2;
 var MAX_REFERENCES = 1;
-var NANOPUB_EXPLORER_URL_EMAIL = 'https://np.knowledgepixels.com/';
 
 /***/ }),
 
@@ -1159,20 +1125,28 @@ var I18Keys;
   I18Keys["introParagraph1"] = "s007";
   I18Keys["introParagraph2"] = "s008";
   I18Keys["emailInputBtn"] = "s0095";
+  I18Keys["googleOAuthInputBtn"] = "s0095go";
   I18Keys["connectSocialsTitle"] = "s0090";
+  I18Keys["connectMastodonTitle"] = "s0090a";
   I18Keys["connectSocialsParagraph"] = "s0091";
-  I18Keys["connectSocialsParagraphMastodon"] = "s0091a";
   I18Keys["connectSocialsParagraph2"] = "s0092";
+  I18Keys["connectMastodonParagraph"] = "s0091a";
   I18Keys["signInX"] = "s012";
   I18Keys["signInMastodon"] = "s012a";
+  I18Keys["mastodonServer"] = "s012b";
+  I18Keys["mastodonServerPlaceholder"] = "s012c";
+  I18Keys["myPosts"] = "n001";
   I18Keys["connectAccounts"] = "s010";
   I18Keys["connectParagraph"] = "s011";
   I18Keys["errorConnectTwitter"] = "s013";
+  I18Keys["errorConnectMastodon"] = "s013a";
   I18Keys["yourPublications"] = "s014";
   I18Keys["TweetX"] = "s015";
   I18Keys["ThreadX"] = "s016";
   I18Keys["TootMastodon"] = "s016b";
   I18Keys["ThreadMastodon"] = "s016c";
+  I18Keys["PostBluesky"] = "s016d";
+  I18Keys["ThreadBluesky"] = "s016e";
   I18Keys["addKeyword"] = "s017";
   I18Keys["profile"] = "s018";
   I18Keys["updateAvailable"] = "s019";
@@ -1185,6 +1159,7 @@ var I18Keys;
   I18Keys["logout"] = "s025";
   I18Keys["logoutTitle"] = "s025c";
   I18Keys["drafts"] = "s026";
+  I18Keys["feedTitle"] = "s026a";
   I18Keys["introNextLabel"] = "s026x";
   I18Keys["introFinalLabel"] = "s026y";
   I18Keys["goBack"] = "s026z";
@@ -1216,14 +1191,14 @@ var I18Keys;
   I18Keys["unpublishingErrorPar01"] = "s0345xw1";
   I18Keys["returnToDraft"] = "s0353";
   I18Keys["yesPublish"] = "s0364";
-  I18Keys["returnToNanopub"] = "s0353x";
   I18Keys["yesUnpublish"] = "s0365x";
   I18Keys["publishingTitle"] = "s0365";
   I18Keys["publishingPar01"] = "s0365xw";
   I18Keys["publishingErrorTitle"] = "s03650";
   I18Keys["publishingErrorPar01"] = "s03651";
   I18Keys["publishedTitle"] = "s0366";
-  I18Keys["publishedText"] = "s0367";
+  I18Keys["publishedTextPar1"] = "s0367";
+  I18Keys["publishedTextPar2"] = "s0367cdc";
   I18Keys["nextPost"] = "s0368";
   I18Keys["openPublished"] = "s0369";
   I18Keys["edit"] = "s037";
@@ -1231,36 +1206,7 @@ var I18Keys;
   I18Keys["cancel"] = "s039";
   I18Keys["emailHeader"] = "s0400";
   I18Keys["emailSummary"] = "s0400a";
-  I18Keys["recommendedNanopubEmailHeader"] = "s040";
-  I18Keys["recommendedNanopubEmailHeaderSingular"] = "s040_one";
-  I18Keys["recommendedNanopubEmailHeaderPlural"] = "s040_other";
-  I18Keys["recommendedNanopubEmailSummary"] = "s040a";
-  I18Keys["recommendedNanopubEmailSummarySingular"] = "s040a_one";
-  I18Keys["recommendedNanopubEmailSummaryPlural"] = "s040a_other";
-  I18Keys["recommendedNanopubEmailPreview"] = "s040b";
-  I18Keys["recommendedNanopubEmailPreviewSingular"] = "s040b_one";
-  I18Keys["recommendedNanopubEmailPreviewPlural"] = "s040b_other";
-  I18Keys["recommendedNanopubEmailFooter"] = "s041";
   I18Keys["emailFooter"] = "s041a";
-  I18Keys["publishedNanopubEmailHeader"] = "s042";
-  I18Keys["publishedNanopubEmailHeaderSingular"] = "s042_one";
-  I18Keys["publishedNanopubEmailHeaderPlural"] = "s042_other";
-  I18Keys["publishedNanopubEmailSummary"] = "s0420";
-  I18Keys["publishedNanopubEmailSummarySingular"] = "s0420_one";
-  I18Keys["publishedNanopubEmailSummaryPlural"] = "s0420_other";
-  I18Keys["publishedNanopubEmailPreview"] = "s0421";
-  I18Keys["publishedNanopubEmailPreviewSingular"] = "s0421_one";
-  I18Keys["publishedNanopubEmailPreviewPlural"] = "s0421_other";
-  I18Keys["autoPublishedNanopubEmailHeader"] = "s042a";
-  I18Keys["autoPublishedNanopubEmailHeaderSingular"] = "s042a_one";
-  I18Keys["autoPublishedNanopubEmailHeaderPlural"] = "s042a_other";
-  I18Keys["autoPublishedNanopubEmailSummary"] = "s042aa";
-  I18Keys["autoPublishedNanopubEmailSummarySingular"] = "s042aa_one";
-  I18Keys["autoPublishedNanopubEmailSummaryPlural"] = "s042aa_other";
-  I18Keys["autoPublishedNanopubEmailPreview"] = "s042ab";
-  I18Keys["autoPublishedNanopubEmailPreviewSingular"] = "s042ab_one";
-  I18Keys["autoPublishedNanopubEmailPreviewPlural"] = "s042ab_other";
-  I18Keys["autoPublishedNanopubEmailFooter"] = "s043a";
   I18Keys["daily"] = "s047";
   I18Keys["weekly"] = "s048";
   I18Keys["monthly"] = "s049";
@@ -1280,6 +1226,8 @@ var I18Keys;
   I18Keys["notificationsSettings"] = "s057";
   I18Keys["notificationsSettingsExplainer"] = "s057c";
   I18Keys["publishingAutomationExplainer"] = "s056c";
+  I18Keys["readTheDocs"] = "s058d";
+  I18Keys["readTheDocsDescription"] = "s058cd";
   I18Keys["getSupport"] = "s058";
   I18Keys["getSupportDescription"] = "s058c";
   I18Keys["yourAccounts"] = "s059";
@@ -1308,6 +1256,7 @@ var I18Keys;
   I18Keys["postStatusForReview"] = "s089";
   I18Keys["postStatusPublished"] = "s090";
   I18Keys["postStatusAutopublished"] = "s091";
+  I18Keys["unignorePost"] = "s092";
 })(I18Keys || (I18Keys = {}));
 var check = new Set();
 for (var _i = 0, _b = Object.entries(I18Keys); _i < _b.length; _i++) {
@@ -1315,7 +1264,7 @@ for (var _i = 0, _b = Object.entries(I18Keys); _i < _b.length; _i++) {
   if (check.has(entry[1])) throw new Error("repeated value ".concat(entry[1], " for I18Keys key ").concat(entry[0]));
   check.add(entry[1]);
 }
-var translationENG = (_a = {}, _a[I18Keys.introTitle] = 'Your ideas matter again', _a[I18Keys.introSubtitle] = 'Transform your social media activity into meaningful scientific contributions', _a[I18Keys.introParagraph1] = 'Social media posts are a valuable source of scientific knowledge, but they get buried in noisy feeds and locked away by platforms.', _a[I18Keys.introParagraph2] = 'Harness this knowledge by converting your social media posts into nanopublications, making your content <b>FAIR</b> (<b>F</b>indable, <b>A</b>ccessible, <b>I</b>nteroperable and <b>R</b>eusable), so your contributions can get proper recognition', _a[I18Keys.emailInputBtn] = 'Get started', _a[I18Keys.connectSocialsTitle] = 'Connect your socials', _a[I18Keys.connectSocialsParagraph] = 'Link your X·Twitter account to start transforming your tweets into nanopublications.', _a[I18Keys.connectSocialsParagraphMastodon] = 'Link your Mastodon account to start transforming your posts into nanopublications.', _a[I18Keys.connectSocialsParagraph2] = 'By connecting, you can easily identify and FAIRify your valuable scientific insights.', _a[I18Keys.signInX] = 'Sign in with X', _a[I18Keys.signInMastodon] = 'Sign in with Mastodon', _a[I18Keys.drafts] = 'Drafts', _a[I18Keys.introNextLabel] = 'Next Tip', _a[I18Keys.introFinalLabel] = 'Let’s nanopublish!', _a[I18Keys.introHeading01] = 'We’re finding your science posts', _a[I18Keys.introText011] = 'Our AI is scanning your latest X · Twitter posts to identify and tag your science-related content.  These tags make your posts machine-readable, enhancing their discoverability and usability. ', _a[I18Keys.introText012] = 'The posts tagged as "For Review" are those our AI recommends for nanopublishing.', _a[I18Keys.introHeading02] = 'Nanopublish your research and recommendations ', _a[I18Keys.introText021] = 'All your research-related posts make valuable nanopublications!', _a[I18Keys.introText022] = "Posts mentioning references with a DOI are perfect candidates, but don't stop there. Consider sharing research ideas, conference highlights, grant information, or job opportunities as well.", _a[I18Keys.introHeading03] = 'We’ve got you covered!', _a[I18Keys.introText031] = "As you continue posting on X · Twitter, we'll monitor your feed for relevant content to ensure your future research remains FAIR and under your control.", _a[I18Keys.introText032] = 'You can adjust your notification and publishing automation settings anytime in your preferences.', _a[I18Keys.connectAccounts] = 'Connect your accounts', _a[I18Keys.connectParagraph] = 'SenseNets loads your X (Twitter) feed and analyzes your posts using AI to deduct keywords and relations, which can be used to better interpret the meaning of your content.', _a[I18Keys.errorConnectTwitter] = 'Error connecting Twitter', _a[I18Keys.yourPublications] = 'Your publications', _a[I18Keys.TweetX] = 'X · Tweet', _a[I18Keys.ThreadX] = 'X · Thread', _a[I18Keys.TootMastodon] = 'Mastodon · Toot', _a[I18Keys.ThreadMastodon] = 'Mastodon · Thread', _a[I18Keys.addKeyword] = 'add keyword', _a[I18Keys.profile] = 'Profile', _a[I18Keys.updateAvailable] = 'An update is available, ', _a[I18Keys.updateNow] = 'update now', _a[I18Keys.installPrompt] = 'Please install this app, ', _a[I18Keys.installNow] = 'install', _a[I18Keys.noMorePosts] = 'No more posts to show', _a[I18Keys.loadMorePosts] = 'Load more posts', _a[I18Keys.settings] = 'Settings', _a[I18Keys.logoutTitle] = 'Logout', _a[I18Keys.logout] = 'Logout', _a[I18Keys.ignore] = 'Ignore', _a[I18Keys.publish] = 'Nanopublish', _a[I18Keys.postsNames] = 'Nanopubs', _a[I18Keys.connectOrcidTitle] = 'Your data, your identity', _a[I18Keys.connectOrcidPar01] = 'Your nanopublications are owned by you and tied to your identity through cryptographic signing. We created a wallet for you using your email to sign each nanopub.', _a[I18Keys.connectOrcidPar02] = 'You can also <b>connect your ORCID</b> account, so your nanopubs are linked to your professional profile. This can be done at any time in your settings.', _a[I18Keys.connectOrcid] = 'Connect ORCID', _a[I18Keys.continue] = 'Continue', _a[I18Keys.publishWarningTitle] = 'Share your research', _a[I18Keys.publishWarningPar01] = 'Once published, your nanopub will be added to the decentralized nanopublications network, making your research accessible and verifiable.', _a[I18Keys.publishWarningPar02] = 'While you can retract a nanopub to make it invisible to most users, <b>it cannot be deleted</b>. This ensures the integrity of the scientific record.', _a[I18Keys.returnToDraft] = 'No, return to draft', _a[I18Keys.yesPublish] = 'Yes, I want to publish', _a[I18Keys.returnToNanopub] = 'Go back', _a[I18Keys.yesUnpublish] = 'Yes, I want to retract', _a[I18Keys.publishingTitle] = 'Publishing', _a[I18Keys.publishingPar01] = 'Your nanopublication is being sent to the network. Please wait a moment.', _a[I18Keys.publishingErrorTitle] = 'Error Publishing Nanopublication', _a[I18Keys.publishingErrorPar01] = 'There was an error while attempting to publish your post. Please try again. If it persists, contact support.', _a[I18Keys.unpublishingTitle] = 'Retracting', _a[I18Keys.unpublishingPar01] = 'Your nanopublication is marked as retracted. Please wait a moment.', _a[I18Keys.unpublishingErrorTitle] = 'Error Retracting Nanopublication', _a[I18Keys.unpublishingErrorPar01] = 'There was an error while attempting to retract your post. Please try again. If it persists, contact support.', _a[I18Keys.publishedTitle] = 'Your nanopublication is live!', _a[I18Keys.publishedText] = 'Your post has been nanopublished.', _a[I18Keys.nextPost] = 'Next post for review', _a[I18Keys.openPublished] = 'See live nanopublication', _a[I18Keys.edit] = 'Edit', _a[I18Keys.unpublish] = 'Retract', _a[I18Keys.cancel] = 'Cancel', _a[I18Keys.emailHeader] = '{{timeframe}} Activity Summary', _a[I18Keys.emailSummary] = "Here's what happened {{timeframe}}:", _a[I18Keys.recommendedNanopubEmailHeader] = '', _a[I18Keys.recommendedNanopubEmailHeaderSingular] = 'You have {{count}} potential nanopublication ready for review {{timeframe}}.', _a[I18Keys.recommendedNanopubEmailHeaderPlural] = 'You have {{count}} potential nanopublications ready for review {{timeframe}}.', _a[I18Keys.recommendedNanopubEmailFooter] = "This is your {{timeframe}} nanopub recommendation summary. You can [edit your email settings here]({{emailSettingsLink}}). Don't see a post you'd like to nanopublish? [Review all your recent posts here]({{ignoredPostsLink}}).", _a[I18Keys.recommendedNanopubEmailSummary] = '', _a[I18Keys.recommendedNanopubEmailSummarySingular] = 'You have {{count}} potential nanopublication for review.', _a[I18Keys.recommendedNanopubEmailSummaryPlural] = 'You have {{count}} potential nanopublications for review.', _a[I18Keys.recommendedNanopubEmailPreview] = '', _a[I18Keys.recommendedNanopubEmailPreviewSingular] = '{{count}} potential nanopublication for review.', _a[I18Keys.recommendedNanopubEmailPreviewPlural] = '{{count}} potential nanopublications for review.', _a[I18Keys.emailFooter] = "This is your {{timeframe}} activity summary. You can [edit your email or automation settings here]({{emailSettingsLink}}). Don't see a post you'd like to nanopublish? [Review all your recent posts here]({{ignoredPostsLink}}). See any mistakes in your nanopublications? [Edit or retract your automated nanopublications here]({{publishedPostsLink}}).", _a[I18Keys.publishedNanopubEmailHeader] = '', _a[I18Keys.publishedNanopubEmailHeaderSingular] = 'You published {{count}} post {{timeframe}}.', _a[I18Keys.publishedNanopubEmailHeaderPlural] = 'You published {{count}} posts {{timeframe}}.', _a[I18Keys.publishedNanopubEmailSummary] = '', _a[I18Keys.publishedNanopubEmailSummarySingular] = 'You manually nanopublished {{count}} post.', _a[I18Keys.publishedNanopubEmailSummaryPlural] = 'You manually nanopublished {{count}} posts.', _a[I18Keys.publishedNanopubEmailPreview] = '', _a[I18Keys.publishedNanopubEmailPreviewSingular] = '{{count}} manually published', _a[I18Keys.publishedNanopubEmailPreviewPlural] = '{{count}} manually published', _a[I18Keys.autoPublishedNanopubEmailHeader] = '', _a[I18Keys.autoPublishedNanopubEmailHeaderSingular] = "We've automatically published {{count}} post {{timeframe}}.", _a[I18Keys.autoPublishedNanopubEmailHeaderPlural] = "We've automatically published {{count}} posts {{timeframe}}.", _a[I18Keys.autoPublishedNanopubEmailFooter] = 'These posts were automatically published according to your automation settings. You can [change your automation settings here]({{automationSettingsLink}}).\n\nSee any mistakes in your nanopublications? [Edit or retract your automated nanopublications here]({{publishedPostsLink}}).', _a[I18Keys.autoPublishedNanopubEmailSummary] = '', _a[I18Keys.autoPublishedNanopubEmailSummarySingular] = 'We autopublished {{count}} post for you.', _a[I18Keys.autoPublishedNanopubEmailSummaryPlural] = 'We autopublished {{count}} posts for you.', _a[I18Keys.autoPublishedNanopubEmailPreview] = '', _a[I18Keys.autoPublishedNanopubEmailPreviewSingular] = '{{count}} autopublished', _a[I18Keys.autoPublishedNanopubEmailPreviewPlural] = '{{count}} autopublished', _a[I18Keys.daily] = 'daily', _a[I18Keys.weekly] = 'weekly', _a[I18Keys.monthly] = 'monthly', _a[I18Keys.emailReviewPostButton] = 'Review Post', _a[I18Keys.emailSeeAllButton] = 'See All', _a[I18Keys.emailMorePostsNote] = '', _a[I18Keys.emailMorePostsNoteSingular] = '+{{count}} more post', _a[I18Keys.emailMorePostsNotePlural] = '+{{count}} more posts', _a[I18Keys.copyright] = 'Copyright © 2024', _a[I18Keys.downloads] = 'Downloads', _a[I18Keys.installApp] = 'Install application on your device', _a[I18Keys.usingApp] = 'Using SenseNets', _a[I18Keys.publishingAutomation] = 'Publishing Automation', _a[I18Keys.publishingAutomationExplainer] = 'Choose how you’d like to nanopublish your future X · Twitter posts.', _a[I18Keys.notificationsSettings] = 'Notification Settings', _a[I18Keys.notificationsSettingsExplainer] = 'Choose how often you’d like to receive email notifications.', _a[I18Keys.getSupport] = 'Get Support', _a[I18Keys.yourAccounts] = 'Your Accounts', _a[I18Keys.XTwitter] = 'X · Twitter', _a[I18Keys.emailAddress] = 'Email Address', _a[I18Keys.ORCID] = 'ORCID', _a[I18Keys.notificationSettingsOpt1Title] = 'Daily summary', _a[I18Keys.notificationSettingsOpt2Title] = 'Weekly summary', _a[I18Keys.notificationSettingsOpt3Title] = 'Monthly summary', _a[I18Keys.notificationSettingsOpt4Title] = 'I don’t want to receive notifications', _a[I18Keys.publishingAutomationOpt1Title] = 'AI automated publishing', _a[I18Keys.publishingAutomationOpt1Desc] = 'All science posts detected with our AI filter will be automatically nanopublished.', _a[I18Keys.publishingAutomationOpt2Title] = 'Reference-Based automated publishing', _a[I18Keys.publishingAutomationOpt2Desc] = 'We will automatically nanopublish with academic reference identifiers such as DOIs, PMIDs, PMCIDs, or ISBNs. (No AI.)', _a[I18Keys.publishingAutomationOpt3Title] = 'Supervised publishing', _a[I18Keys.publishingAutomationOpt3Desc] = 'You receive a notification when new science posts are detected, and can manually review them before publishing.', _a[I18Keys.autopostInviteTitle] = 'Make your content FAIR,<br> without even thinking about it.', _a[I18Keys.autpostInvitePar01] = 'Nanopublishing could be even easier. Take control of your content by choosing how you’d like future posts to be nanopublished. ', _a[I18Keys.autopostInvitePar02] = 'You can always change this in your settings.', _a[I18Keys.dontShowAgain] = 'Don’t show this message again', _a[I18Keys.reviewSettings] = 'Review settings', _a[I18Keys.notNow] = 'Not now', _a[I18Keys.noPostsFound] = 'No posts found', _a[I18Keys.noPostsFoundDesc] = 'We couldn’t find any posts.', _a[I18Keys.getSupportDescription] = '<a href=mailto:support@sense-nets.xyz>support@sense-nets.xyz</a>', _a[I18Keys.today] = 'today', _a[I18Keys.thisWeek] = 'this week', _a[I18Keys.thisMonth] = 'this month', _a[I18Keys.emailSubject] = 'Your {{timeframe}} SenseNets Activity Summary', _a[I18Keys.postStatusForReview] = 'For Review', _a[I18Keys.postStatusPublished] = 'Published', _a[I18Keys.postStatusAutopublished] = 'Autopublished', _a[I18Keys.goBack] = 'Go back', _a[I18Keys.unpublishWarningTitle] = 'Retract your nanopublication', _a[I18Keys.unpublishWarningPar01] = 'This action marks your nanopublication as retracted. You can republish it later if you wish.', _a);
+var translationENG = (_a = {}, _a[I18Keys.introTitle] = 'Your ideas matter again', _a[I18Keys.introSubtitle] = 'Transform your social media activity into meaningful scientific contributions', _a[I18Keys.introParagraph1] = 'Social media posts are a valuable source of scientific knowledge, but they get buried in noisy feeds and locked away by platforms.', _a[I18Keys.introParagraph2] = 'Harness this knowledge by converting your social media posts into nanopublications, making your content <b>FAIR</b> (<b>F</b>indable, <b>A</b>ccessible, <b>I</b>nteroperable and <b>R</b>eusable), so your contributions can get proper recognition', _a[I18Keys.emailInputBtn] = 'Get started', _a[I18Keys.googleOAuthInputBtn] = 'Continue with Google', _a[I18Keys.connectSocialsTitle] = 'Connect your accounts', _a[I18Keys.connectMastodonTitle] = 'Connect to Mastodon', _a[I18Keys.connectSocialsParagraph] = 'Connect your accounts to process your post as an hyperfeed. You must link at least one account, and you will be able to link other accounts later.', _a[I18Keys.connectSocialsParagraph2] = 'By connecting, you can easily identify and FAIRify your valuable scientific insights.', _a[I18Keys.connectMastodonParagraph] = "To connect your account, we need to know your Mastodon server domain. If you're unsure, check the domain in your Mastodon profile URL.", _a[I18Keys.signInX] = 'Sign in with X', _a[I18Keys.signInMastodon] = 'Sign in with Mastodon', _a[I18Keys.mastodonServer] = 'Server domain ', _a[I18Keys.mastodonServerPlaceholder] = 'e.g. "mastodon.social"', _a[I18Keys.myPosts] = 'My Posts', _a[I18Keys.drafts] = 'Drafts', _a[I18Keys.feedTitle] = 'Explore', _a[I18Keys.introNextLabel] = 'Next Tip', _a[I18Keys.introFinalLabel] = 'Let’s nanopublish!', _a[I18Keys.introHeading01] = 'We’re finding your science posts', _a[I18Keys.introText011] = 'Our AI is scanning your latest X · Twitter posts to identify and tag your science-related content.  These tags make your posts machine-readable, enhancing their discoverability and usability. ', _a[I18Keys.introText012] = 'The posts tagged as "For Review" are those our AI recommends for nanopublishing.', _a[I18Keys.introHeading02] = 'Nanopublish your research and recommendations ', _a[I18Keys.introText021] = 'All your research-related posts make valuable nanopublications!', _a[I18Keys.introText022] = "Posts mentioning references with a DOI are perfect candidates, but don't stop there. Consider sharing research ideas, conference highlights, grant information, or job opportunities as well.", _a[I18Keys.introHeading03] = 'We’ve got you covered!', _a[I18Keys.introText031] = "As you continue posting on X · Twitter, we'll monitor your feed for relevant content to ensure your future research remains FAIR and under your control.", _a[I18Keys.introText032] = 'You can adjust your notification and publishing automation settings anytime in your preferences.', _a[I18Keys.connectAccounts] = 'Connect your accounts', _a[I18Keys.connectParagraph] = 'SenseNets loads your X (Twitter) feed and analyzes your posts using AI to deduct keywords and relations, which can be used to better interpret the meaning of your content.', _a[I18Keys.errorConnectTwitter] = 'Error connecting Twitter', _a[I18Keys.errorConnectMastodon] = 'An error occurred while connecting to the Mastodon server: {{mastodonServer}}', _a[I18Keys.yourPublications] = 'Your publications', _a[I18Keys.TweetX] = 'X · Tweet', _a[I18Keys.ThreadX] = 'X · Thread', _a[I18Keys.TootMastodon] = 'Mastodon · Toot', _a[I18Keys.ThreadMastodon] = 'Mastodon · Thread', _a[I18Keys.PostBluesky] = 'Bluesky · Post', _a[I18Keys.ThreadBluesky] = 'Bluesky · Thread', _a[I18Keys.addKeyword] = 'add keyword', _a[I18Keys.profile] = 'Profile', _a[I18Keys.updateAvailable] = 'An update is available, ', _a[I18Keys.updateNow] = 'update now', _a[I18Keys.installPrompt] = 'Please install this app, ', _a[I18Keys.installNow] = 'install', _a[I18Keys.noMorePosts] = 'No more posts to show', _a[I18Keys.loadMorePosts] = 'Load more posts', _a[I18Keys.settings] = 'Settings', _a[I18Keys.logoutTitle] = 'Logout', _a[I18Keys.logout] = 'Logout', _a[I18Keys.ignore] = 'Ignore', _a[I18Keys.publish] = 'Nanopublish', _a[I18Keys.postsNames] = 'Nanopubs', _a[I18Keys.connectOrcidTitle] = 'Your data, your identity', _a[I18Keys.connectOrcidPar01] = 'Your nanopublications are owned by you and tied to your identity through cryptographic signing. We created a wallet for you using your email to sign each nanopub.', _a[I18Keys.connectOrcidPar02] = 'You can also <b>connect your ORCID</b> account, so your nanopubs are linked to your professional profile. This can be done at any time in your settings.', _a[I18Keys.connectOrcid] = 'Connect ORCID', _a[I18Keys.continue] = 'Continue', _a[I18Keys.publishWarningTitle] = 'Share your research', _a[I18Keys.publishWarningPar01] = 'Once published, your nanopub will be added to the decentralized nanopublications network, making your research accessible and verifiable.', _a[I18Keys.publishWarningPar02] = 'While you can retract a nanopub to make it invisible to most users, <b>it cannot be deleted</b>. This ensures the integrity of the scientific record.', _a[I18Keys.returnToDraft] = 'No, return to draft', _a[I18Keys.yesPublish] = 'Yes, I want to publish', _a[I18Keys.yesUnpublish] = 'Yes, I want to retract', _a[I18Keys.publishingTitle] = 'Publishing', _a[I18Keys.publishingPar01] = 'Your nanopublication is being sent to the network. Please wait a moment.', _a[I18Keys.publishingErrorTitle] = 'Error Publishing Nanopublication', _a[I18Keys.publishingErrorPar01] = 'There was an error while attempting to publish your post. Please try again. If it persists, contact support.', _a[I18Keys.unpublishingTitle] = 'Retracting', _a[I18Keys.unpublishingPar01] = 'Your nanopublication is marked as retracted. Please wait a moment.', _a[I18Keys.unpublishingErrorTitle] = 'Error Retracting Nanopublication', _a[I18Keys.unpublishingErrorPar01] = 'There was an error while attempting to retract your post. Please try again. If it persists, contact support.', _a[I18Keys.publishedTitle] = 'Your nanopublication is live!', _a[I18Keys.publishedTextPar1] = 'Your post has been nanopublished.', _a[I18Keys.publishedTextPar2] = 'You can find this post now under the "Nanopubs" section.', _a[I18Keys.nextPost] = 'Next post for review', _a[I18Keys.openPublished] = 'See live nanopublication', _a[I18Keys.edit] = 'Edit', _a[I18Keys.unpublish] = 'Retract', _a[I18Keys.cancel] = 'Cancel', _a[I18Keys.emailHeader] = '{{timeframe}} Activity Summary', _a[I18Keys.emailSummary] = "Here's what happened {{timeframe}}:", _a[I18Keys.emailFooter] = "This is your {{timeframe}} activity summary. You can [edit your email or automation settings here]({{emailSettingsLink}}). Don't see a post you'd like to nanopublish? [Review all your recent posts here]({{ignoredPostsLink}}). See any mistakes in your nanopublications? [Edit or retract your automated nanopublications here]({{publishedPostsLink}}).", _a[I18Keys.daily] = 'daily', _a[I18Keys.weekly] = 'weekly', _a[I18Keys.monthly] = 'monthly', _a[I18Keys.emailReviewPostButton] = 'Review Post', _a[I18Keys.emailSeeAllButton] = 'See All', _a[I18Keys.emailMorePostsNote] = '', _a[I18Keys.emailMorePostsNoteSingular] = '+{{count}} more post', _a[I18Keys.emailMorePostsNotePlural] = '+{{count}} more posts', _a[I18Keys.copyright] = 'Copyright © 2024', _a[I18Keys.downloads] = 'Downloads', _a[I18Keys.installApp] = 'Install application on your device', _a[I18Keys.usingApp] = 'Using SenseNets', _a[I18Keys.publishingAutomation] = 'Publishing Automation', _a[I18Keys.publishingAutomationExplainer] = 'Choose how you’d like to nanopublish your future X · Twitter posts.', _a[I18Keys.notificationsSettings] = 'Notification Settings', _a[I18Keys.notificationsSettingsExplainer] = 'Choose how often you’d like to receive email notifications.', _a[I18Keys.getSupport] = 'Get Support', _a[I18Keys.yourAccounts] = 'Your Accounts', _a[I18Keys.XTwitter] = 'X · Twitter', _a[I18Keys.emailAddress] = 'Email Address', _a[I18Keys.ORCID] = 'ORCID', _a[I18Keys.notificationSettingsOpt1Title] = 'Daily summary', _a[I18Keys.notificationSettingsOpt2Title] = 'Weekly summary', _a[I18Keys.notificationSettingsOpt3Title] = 'Monthly summary', _a[I18Keys.notificationSettingsOpt4Title] = 'I don’t want to receive notifications', _a[I18Keys.publishingAutomationOpt1Title] = 'AI automated publishing', _a[I18Keys.publishingAutomationOpt1Desc] = 'All science posts detected with our AI filter will be automatically nanopublished.', _a[I18Keys.publishingAutomationOpt2Title] = 'Reference-Based automated publishing', _a[I18Keys.publishingAutomationOpt2Desc] = 'We will automatically nanopublish with academic reference identifiers such as DOIs, PMIDs, PMCIDs, or ISBNs. (No AI.)', _a[I18Keys.publishingAutomationOpt3Title] = 'Supervised publishing', _a[I18Keys.publishingAutomationOpt3Desc] = 'You receive a notification when new science posts are detected, and can manually review them before publishing.', _a[I18Keys.autopostInviteTitle] = 'Make your content FAIR,<br> without even thinking about it.', _a[I18Keys.autpostInvitePar01] = 'Nanopublishing could be even easier. Take control of your content by choosing how you’d like future posts to be nanopublished. ', _a[I18Keys.autopostInvitePar02] = 'You can always change this in your settings.', _a[I18Keys.dontShowAgain] = 'Don’t show this message again', _a[I18Keys.reviewSettings] = 'Review settings', _a[I18Keys.notNow] = 'Not now', _a[I18Keys.noPostsFound] = 'No posts found', _a[I18Keys.noPostsFoundDesc] = 'We couldn’t find any posts.', _a[I18Keys.getSupportDescription] = '<a href=mailto:support@sense-nets.xyz>support@sense-nets.xyz</a>', _a[I18Keys.today] = 'today', _a[I18Keys.thisWeek] = 'this week', _a[I18Keys.thisMonth] = 'this month', _a[I18Keys.emailSubject] = 'Your {{timeframe}} SenseNets Activity Summary', _a[I18Keys.postStatusForReview] = 'For Review', _a[I18Keys.postStatusPublished] = 'Published', _a[I18Keys.postStatusAutopublished] = 'Autopublished', _a[I18Keys.goBack] = 'Go back', _a[I18Keys.unpublishWarningTitle] = 'Retract your nanopublication', _a[I18Keys.unpublishWarningPar01] = 'This action marks your nanopublication as retracted. You can republish it later if you wish.', _a[I18Keys.readTheDocs] = 'Documentation', _a[I18Keys.readTheDocsDescription] = '<a href="https://sense-nets.xyz/docs" target="_blank">https://sense-nets.xyz/docs</a>', _a[I18Keys.unignorePost] = 'Review for publication', _a);
 i18next__WEBPACK_IMPORTED_MODULE_0__["default"].use(react_i18next__WEBPACK_IMPORTED_MODULE_1__.initReactI18next).init({
   resources: {
     ENG: {
@@ -1342,15 +1291,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   getPostStatuses: () => (/* binding */ getPostStatuses),
 /* harmony export */   hideSemanticsHelper: () => (/* binding */ hideSemanticsHelper)
 /* harmony export */ });
-/* harmony import */ var _app_config__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/app/config.ts");
-/* harmony import */ var _email_constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/email/constants.ts");
-/* harmony import */ var _shared_types_types_platform_posts__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/shared/types/types.platform.posts.ts");
-/* harmony import */ var _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./src/shared/types/types.posts.ts");
-/* harmony import */ var _shared_types_types_user__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./src/shared/types/types.user.ts");
-
-
-
-
+/* harmony import */ var _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/shared/types/types.posts.ts");
 
 /** The prosemirror render assumes --- separates the posts and creates <p> for each */
 var concatenateThread = function (post) {
@@ -1359,40 +1300,23 @@ var concatenateThread = function (post) {
   }, '');
 };
 var getPostStatuses = function (post) {
-  var _a;
-  var nanopubPlatformPost = (_a = post === null || post === void 0 ? void 0 : post.mirrors) === null || _a === void 0 ? void 0 : _a.find(function (m) {
-    return m.platformId === _shared_types_types_user__WEBPACK_IMPORTED_MODULE_4__.PLATFORM.Nanopub;
-  });
-  var postedNanopub = nanopubPlatformPost === null || nanopubPlatformPost === void 0 ? void 0 : nanopubPlatformPost.posted;
-  var nanopubHash = postedNanopub ? postedNanopub.post_id.split('/').pop() : undefined;
-  var nanopubUrl = postedNanopub ? "".concat(_app_config__WEBPACK_IMPORTED_MODULE_0__.NANOPUB_EXPLORER_SERVER ? _app_config__WEBPACK_IMPORTED_MODULE_0__.NANOPUB_EXPLORER_SERVER : _email_constants__WEBPACK_IMPORTED_MODULE_1__.NANOPUB_EXPLORER_URL_EMAIL).concat(nanopubHash) : undefined;
-  var unpublished = (nanopubPlatformPost === null || nanopubPlatformPost === void 0 ? void 0 : nanopubPlatformPost.publishStatus) === _shared_types_types_platform_posts__WEBPACK_IMPORTED_MODULE_2__.PlatformPostPublishStatus.UNPUBLISHED;
-  var processed = post && post.parsedStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_3__.AppPostParsedStatus.PROCESSED;
-  var errored = post && post.parsingStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_3__.AppPostParsingStatus.ERRORED;
-  var isParsing = post && post.parsingStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_3__.AppPostParsingStatus.PROCESSING;
-  var pending = post && post.reviewedStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_3__.AppPostReviewStatus.PENDING;
-  var ignored = post && post.reviewedStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_3__.AppPostReviewStatus.IGNORED;
-  var published = !!postedNanopub;
-  var manuallyPublished = post && !!postedNanopub && post.republishedStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_3__.AppPostRepublishedStatus.REPUBLISHED;
-  var autoPublished = post && !!postedNanopub && post.republishedStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_3__.AppPostRepublishedStatus.AUTO_REPUBLISHED;
-  var isEditing = post && post.reviewedStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_3__.AppPostReviewStatus.DRAFT;
-  var live = published && !unpublished;
+  var processed = post && post.parsedStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_0__.AppPostParsedStatus.PROCESSED;
+  var errored = post && post.parsingStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_0__.AppPostParsingStatus.ERRORED;
+  var isParsing = post && post.parsingStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_0__.AppPostParsingStatus.PROCESSING;
+  var pending = post && post.reviewedStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_0__.AppPostReviewStatus.PENDING;
+  var ignored = post && post.reviewedStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_0__.AppPostReviewStatus.IGNORED;
+  var isEditing = post && post.reviewedStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_0__.AppPostReviewStatus.DRAFT;
   return {
     processed: processed,
     errored: errored,
     isParsing: isParsing,
     pending: pending,
     ignored: ignored,
-    nanopubUrl: nanopubUrl,
-    live: live,
-    manuallyPublished: manuallyPublished,
-    autoPublished: autoPublished,
-    isEditing: isEditing,
-    unpublished: unpublished
+    isEditing: isEditing
   };
 };
 var hideSemanticsHelper = function (post) {
-  var hide = post && post.reviewedStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_3__.AppPostReviewStatus.IGNORED;
+  var hide = post && post.reviewedStatus === _shared_types_types_posts__WEBPACK_IMPORTED_MODULE_0__.AppPostReviewStatus.IGNORED;
   return hide !== undefined && hide;
 };
 
@@ -1411,15 +1335,21 @@ var RouteNames = {
   AppHome: '',
   Post: 'post',
   Settings: 'settings',
+  Feed: 'feed',
   Posting: 'posting',
-  Test: 'test'
+  Test: 'test',
+  ConnectMastodon: 'connect-mastodon',
+  ConnectBluesky: 'connect-bluesky'
 };
 var AbsoluteRoutes = {
   App: '/',
   Post: function (postId) {
     return "/".concat(RouteNames.Post, "/").concat(postId);
   },
-  Settings: "/".concat(RouteNames.Settings)
+  Feed: "/".concat(RouteNames.Feed),
+  Settings: "/".concat(RouteNames.Settings),
+  ConnectMastodon: "/".concat(RouteNames.ConnectMastodon),
+  ConnectBluesky: "/".concat(RouteNames.ConnectBluesky)
 };
 
 /***/ }),
@@ -1440,6 +1370,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+var DEBUG = false;
 /** construct RDF Store synchronously */
 var semanticStringToStore = function (semantics) {
   var parser = new n3__WEBPACK_IMPORTED_MODULE_2__["default"]();
@@ -1459,20 +1390,40 @@ var useSemanticsStore = function (props) {
     setOriginalStore = _c[1];
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     if (props.originalParsed) {
+      if (DEBUG) console.log('updating original store', {
+        originalStore: originalStore
+      });
       (0,_shared_utils_n3_utils__WEBPACK_IMPORTED_MODULE_1__.parseRDF)(props.originalParsed.semantics).then(function (_store) {
-        /** both stores are set to the same value if not semantics are provided */
+        /** both stores are set to the same value if no semantics are provided */
+        if (DEBUG) console.log('setting original store', {
+          _store: _store
+        });
         setOriginalStore(_store);
-        if (!props.semantics) setStore(_store);
+        if (!props.semantics) {
+          if (DEBUG) console.log('setting store (equal to original)', {
+            _store: _store
+          });
+          setStore(_store);
+        }
       });
     }
   }, [props.originalParsed, props.semantics]);
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     /** then the actual stored is set. If prop.semantics is provided */
     if (!props.semantics) {
+      if (DEBUG) console.log('updating semantics store - use originalStore', {
+        originalStore: originalStore
+      });
       setStore(originalStore);
     } else {
+      if (DEBUG) console.log('updating semantics store - use semantics', {
+        semantics: props.semantics
+      });
       (0,_shared_utils_n3_utils__WEBPACK_IMPORTED_MODULE_1__.parseRDF)(props.semantics).then(function (_store) {
-        return setStore(_store);
+        if (DEBUG) console.log('setting semantics store', {
+          store: _store
+        });
+        setStore(_store);
       });
     }
   }, [originalStore, props.semantics]);
@@ -1527,17 +1478,25 @@ var processSemantics = function (originalStore, store, support) {
     });
   }
   /** then append the metadata for each ref */
-  for (var _i = 0, _c = Array.from(refs.entries()); _i < _c.length; _i++) {
-    var _d = _c[_i],
-      ref = _d[0],
-      value = _d[1];
+  var refsArray = Array.from(refs.entries());
+  refsArray.sort(function (a, b) {
+    var _a, _b, _c, _d, _e, _f;
+    var orderA = (_c = (_b = (_a = support === null || support === void 0 ? void 0 : support.refs_meta) === null || _a === void 0 ? void 0 : _a[a[0]]) === null || _b === void 0 ? void 0 : _b.order) !== null && _c !== void 0 ? _c : Infinity;
+    var orderB = (_f = (_e = (_d = support === null || support === void 0 ? void 0 : support.refs_meta) === null || _d === void 0 ? void 0 : _d[b[0]]) === null || _e === void 0 ? void 0 : _e.order) !== null && _f !== void 0 ? _f : Infinity;
+    return orderA - orderB;
+  });
+  var sortedRefs = new Map();
+  for (var _i = 0, refsArray_1 = refsArray; _i < refsArray_1.length; _i++) {
+    var _c = refsArray_1[_i],
+      ref = _c[0],
+      value = _c[1];
     var meta = (support === null || support === void 0 ? void 0 : support.refs_meta) ? support.refs_meta[ref] : undefined;
-    refs.set(ref, {
+    sortedRefs.set(ref, {
       labelsUris: value ? value.labelsUris : [],
       meta: meta
     });
   }
-  return refs;
+  return sortedRefs;
 };
 
 /***/ }),
@@ -1568,50 +1527,28 @@ var NotificationStatus;
 
 /***/ }),
 
-/***/ "./src/shared/types/types.platform.posts.ts":
+/***/ "./src/shared/types/types.platforms.ts":
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   PlatformPostDraftApproval: () => (/* binding */ PlatformPostDraftApproval),
-/* harmony export */   PlatformPostPublishOrigin: () => (/* binding */ PlatformPostPublishOrigin),
-/* harmony export */   PlatformPostPublishStatus: () => (/* binding */ PlatformPostPublishStatus),
-/* harmony export */   PlatformPostSignerType: () => (/* binding */ PlatformPostSignerType)
+/* harmony export */   ALL_IDENTITY_PLATFORMS: () => (/* binding */ ALL_IDENTITY_PLATFORMS),
+/* harmony export */   ALL_PUBLISH_PLATFORMS: () => (/* binding */ ALL_PUBLISH_PLATFORMS),
+/* harmony export */   ALL_SOURCE_PLATFORMS: () => (/* binding */ ALL_SOURCE_PLATFORMS),
+/* harmony export */   PLATFORM: () => (/* binding */ PLATFORM)
 /* harmony export */ });
-/**
- * Platform posts as stored in our DB. A platform post can be in one of these statuses
- * - 'draft': The post has an `id`, a `platformId` value, and a `draft` value.
- * - 'posted': The post has been published on the platform and has a defined `postedStatus`.
- * - 'fetched': The post was fetched from the platform, has a defined `postedStatus`
- * */
-/**
- * A PlatformPost is on object that was already stored on our DB
- * */
-var PlatformPostPublishStatus;
-(function (PlatformPostPublishStatus) {
-  PlatformPostPublishStatus["DRAFT"] = "draft";
-  PlatformPostPublishStatus["PUBLISHED"] = "published";
-  PlatformPostPublishStatus["UNPUBLISHED"] = "unpublished";
-})(PlatformPostPublishStatus || (PlatformPostPublishStatus = {}));
-var PlatformPostPublishOrigin;
-(function (PlatformPostPublishOrigin) {
-  PlatformPostPublishOrigin["FETCHED"] = "fetched";
-  PlatformPostPublishOrigin["POSTED"] = "posted";
-})(PlatformPostPublishOrigin || (PlatformPostPublishOrigin = {}));
-/**
- * The PlatformPostDraft status is defined prior to posting a PlatformPost
- */
-var PlatformPostDraftApproval;
-(function (PlatformPostDraftApproval) {
-  PlatformPostDraftApproval["PENDING"] = "pending";
-  PlatformPostDraftApproval["APPROVED"] = "approved";
-})(PlatformPostDraftApproval || (PlatformPostDraftApproval = {}));
-var PlatformPostSignerType;
-(function (PlatformPostSignerType) {
-  PlatformPostSignerType["USER"] = "user";
-  PlatformPostSignerType["DELEGATED"] = "delegated";
-})(PlatformPostSignerType || (PlatformPostSignerType = {}));
+var PLATFORM;
+(function (PLATFORM) {
+  PLATFORM["Local"] = "local";
+  PLATFORM["Orcid"] = "orcid";
+  PLATFORM["Twitter"] = "twitter";
+  PLATFORM["Mastodon"] = "mastodon";
+  PLATFORM["Bluesky"] = "bluesky";
+})(PLATFORM || (PLATFORM = {}));
+var ALL_SOURCE_PLATFORMS = [PLATFORM.Twitter, PLATFORM.Mastodon, PLATFORM.Bluesky];
+var ALL_PUBLISH_PLATFORMS = [PLATFORM.Twitter, PLATFORM.Mastodon, PLATFORM.Bluesky];
+var ALL_IDENTITY_PLATFORMS = [PLATFORM.Twitter, PLATFORM.Orcid, PLATFORM.Mastodon, PLATFORM.Bluesky];
 
 /***/ }),
 
@@ -1667,43 +1604,13 @@ var PostsQueryStatus;
 
 /***/ }),
 
-/***/ "./src/shared/types/types.user.ts":
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   ALL_IDENTITY_PLATFORMS: () => (/* binding */ ALL_IDENTITY_PLATFORMS),
-/* harmony export */   ALL_PUBLISH_PLATFORMS: () => (/* binding */ ALL_PUBLISH_PLATFORMS),
-/* harmony export */   AutopostOption: () => (/* binding */ AutopostOption),
-/* harmony export */   PLATFORM: () => (/* binding */ PLATFORM)
-/* harmony export */ });
-/** user types */
-var PLATFORM;
-(function (PLATFORM) {
-  PLATFORM["Local"] = "local";
-  PLATFORM["Orcid"] = "orcid";
-  PLATFORM["Twitter"] = "twitter";
-  PLATFORM["Nanopub"] = "nanopub";
-  PLATFORM["Mastodon"] = "mastodon";
-})(PLATFORM || (PLATFORM = {}));
-var ALL_PUBLISH_PLATFORMS = [PLATFORM.Twitter, PLATFORM.Nanopub, PLATFORM.Mastodon];
-var ALL_IDENTITY_PLATFORMS = [PLATFORM.Twitter, PLATFORM.Nanopub, PLATFORM.Orcid, PLATFORM.Mastodon];
-var AutopostOption;
-(function (AutopostOption) {
-  AutopostOption["MANUAL"] = "MANUAL";
-  AutopostOption["DETERMINISTIC"] = "DETERMINISTIC";
-  AutopostOption["AI"] = "AI";
-})(AutopostOption || (AutopostOption = {}));
-
-/***/ }),
-
 /***/ "./src/shared/utils/n3.utils.ts":
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   cloneStore: () => (/* binding */ cloneStore),
 /* harmony export */   filterStore: () => (/* binding */ filterStore),
 /* harmony export */   forEachStore: () => (/* binding */ forEachStore),
 /* harmony export */   mapStore: () => (/* binding */ mapStore),
@@ -1885,6 +1792,11 @@ var mapStore = function (store, callback, subject, predicate, object, graph) {
   }, subject, predicate, object, graph);
   return newStore;
 };
+var cloneStore = function (store) {
+  return mapStore(store, function (q) {
+    return q;
+  });
+};
 var mapStoreElements = function (store, callback, subject, predicate, object, graph) {
   if (subject === void 0) {
     subject = null;
@@ -1979,6 +1891,7 @@ var replaceNodes = function (store, replaceMap) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   arraysEqual: () => (/* binding */ arraysEqual),
 /* harmony export */   cap: () => (/* binding */ cap),
 /* harmony export */   toBase64: () => (/* binding */ toBase64),
 /* harmony export */   toTimestamp: () => (/* binding */ toTimestamp),
@@ -2099,6 +2012,15 @@ var __generator = undefined && undefined.__generator || function (thisArg, body)
     };
   }
 };
+var __spreadArray = undefined && undefined.__spreadArray || function (to, from, pack) {
+  if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+    if (ar || !(i in from)) {
+      if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+      ar[i] = from[i];
+    }
+  }
+  return to.concat(ar || Array.prototype.slice.call(from));
+};
 function toTimestamp(date) {
   return Math.round(new Date(date).getTime() / 1000);
 }
@@ -2131,6 +2053,17 @@ var toBase64 = function (file) {
 var cap = function (string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
+function arraysEqual(a, b, compareFn) {
+  if (a.length !== b.length) return false;
+  var sortedA = __spreadArray([], a, true).sort(compareFn);
+  var sortedB = __spreadArray([], b, true).sort(compareFn);
+  for (var i = 0; i < sortedA.length; i++) {
+    if (sortedA[i] !== sortedB[i]) {
+      return false;
+    }
+  }
+  return true;
+}
 
 /***/ }),
 
@@ -2140,46 +2073,11 @@ var cap = function (string) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   getPlatformProfile: () => (/* binding */ getPlatformProfile),
 /* harmony export */   splitPostsByStatus: () => (/* binding */ splitPostsByStatus),
 /* harmony export */   zoteroItemTypeDisplay: () => (/* binding */ zoteroItemTypeDisplay)
 /* harmony export */ });
 /* harmony import */ var _post_posts_helper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/post/posts.helper.ts");
-/* harmony import */ var _shared_types_types_user__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/shared/types/types.user.ts");
 
-
-function getPlatformProfile(user, platform, authorId) {
-  if (!user) {
-    return undefined;
-  }
-  if (platform === _shared_types_types_user__WEBPACK_IMPORTED_MODULE_1__.PLATFORM.Local) {
-    return undefined;
-  }
-  var platformProfiles = user[platform];
-  if (!platformProfiles) {
-    return undefined;
-  }
-  for (var _i = 0, platformProfiles_1 = platformProfiles; _i < platformProfiles_1.length; _i++) {
-    var platformProfile = platformProfiles_1[_i];
-    if ("".concat(platform, ":").concat(platformProfile.user_id) === authorId) {
-      switch (platform) {
-        case _shared_types_types_user__WEBPACK_IMPORTED_MODULE_1__.PLATFORM.Twitter:
-          var twitterProfile = platformProfile.profile;
-          if (!twitterProfile) {
-            return undefined;
-          }
-          return {
-            profileName: twitterProfile.name,
-            profileHandle: twitterProfile.username,
-            profileImageUrl: twitterProfile.profile_image_url
-          };
-        default:
-          return undefined;
-      }
-    }
-  }
-  return undefined;
-}
 function zoteroItemTypeDisplay(itemType) {
   return itemType.split(/(?=[A-Z])/).map(function (word) {
     return word.charAt(0).toUpperCase() + word.slice(1);
@@ -38597,9 +38495,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   use: () => (/* binding */ use),
 /* harmony export */   walkTokens: () => (/* binding */ walkTokens)
 /* harmony export */ });
-/* harmony import */ var _Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_classPrivateMethodInitSpec_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/classPrivateMethodInitSpec.js");
-/* harmony import */ var _Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_assertClassBrand_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/assertClassBrand.js");
-/* harmony import */ var _Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/defineProperty.js");
+/* harmony import */ var _home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_classPrivateMethodInitSpec_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/classPrivateMethodInitSpec.js");
+/* harmony import */ var _home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_assertClassBrand_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/assertClassBrand.js");
+/* harmony import */ var _home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/defineProperty.js");
 
 
 
@@ -38922,10 +38820,10 @@ function indentCodeCompensation(raw, text) {
  */
 class _Tokenizer {
   constructor(options) {
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
     // TODO: Fix this rules type
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "rules", void 0);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "lexer", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "rules", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "lexer", void 0);
     this.options = options || _defaults;
   }
   space(src) {
@@ -39803,11 +39701,11 @@ function mangle(text) {
  */
 class _Lexer {
   constructor(options) {
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "tokens", void 0);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "state", void 0);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "tokenizer", void 0);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "inlineQueue", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "tokens", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "state", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "tokenizer", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "inlineQueue", void 0);
     // TokenList cannot be created in one go
     // @ts-expect-error
     this.tokens = [];
@@ -40232,7 +40130,7 @@ class _Lexer {
  */
 class _Renderer {
   constructor(options) {
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
     this.options = options || _defaults;
   }
   code(code, infostring, escaped) {
@@ -40383,7 +40281,7 @@ class _TextRenderer {
  */
 class _Slugger {
   constructor() {
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "seen", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "seen", void 0);
     this.seen = {};
   }
   serialize(value) {
@@ -40427,10 +40325,10 @@ class _Slugger {
  */
 class _Parser {
   constructor(options) {
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "renderer", void 0);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "textRenderer", void 0);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "slugger", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "renderer", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "textRenderer", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "slugger", void 0);
     this.options = options || _defaults;
     this.options.renderer = this.options.renderer || new _Renderer();
     this.renderer = this.options.renderer;
@@ -40696,7 +40594,7 @@ class _Parser {
 }
 class _Hooks {
   constructor(options) {
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", void 0);
     this.options = options || _defaults;
   }
   /**
@@ -40712,24 +40610,24 @@ class _Hooks {
     return html;
   }
 }
-(0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(_Hooks, "passThroughHooks", new Set(['preprocess', 'postprocess']));
+(0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(_Hooks, "passThroughHooks", new Set(['preprocess', 'postprocess']));
 var _Marked_brand = /*#__PURE__*/new WeakSet();
 class Marked {
   constructor() {
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_classPrivateMethodInitSpec_js__WEBPACK_IMPORTED_MODULE_0__["default"])(this, _Marked_brand);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "defaults", _getDefaults());
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", this.setOptions);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "parse", (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_assertClassBrand_js__WEBPACK_IMPORTED_MODULE_1__["default"])(_Marked_brand, this, _parseMarkdown).call(this, _Lexer.lex, _Parser.parse));
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "parseInline", (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_assertClassBrand_js__WEBPACK_IMPORTED_MODULE_1__["default"])(_Marked_brand, this, _parseMarkdown).call(this, _Lexer.lexInline, _Parser.parseInline));
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Parser", _Parser);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "parser", _Parser.parse);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Renderer", _Renderer);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "TextRenderer", _TextRenderer);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Lexer", _Lexer);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "lexer", _Lexer.lex);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Tokenizer", _Tokenizer);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Slugger", _Slugger);
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Hooks", _Hooks);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_classPrivateMethodInitSpec_js__WEBPACK_IMPORTED_MODULE_0__["default"])(this, _Marked_brand);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "defaults", _getDefaults());
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "options", this.setOptions);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "parse", (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_assertClassBrand_js__WEBPACK_IMPORTED_MODULE_1__["default"])(_Marked_brand, this, _parseMarkdown).call(this, _Lexer.lex, _Parser.parse));
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "parseInline", (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_assertClassBrand_js__WEBPACK_IMPORTED_MODULE_1__["default"])(_Marked_brand, this, _parseMarkdown).call(this, _Lexer.lexInline, _Parser.parseInline));
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Parser", _Parser);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "parser", _Parser.parse);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Renderer", _Renderer);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "TextRenderer", _TextRenderer);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Lexer", _Lexer);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "lexer", _Lexer.lex);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Tokenizer", _Tokenizer);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Slugger", _Slugger);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, "Hooks", _Hooks);
     this.use(...arguments);
   }
   /**
@@ -40971,7 +40869,7 @@ function _parseMarkdown(lexer, parser) {
       }
       opt.async = true;
     }
-    const throwError = (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_assertClassBrand_js__WEBPACK_IMPORTED_MODULE_1__["default"])(_Marked_brand, this, _onError).call(this, !!opt.silent, !!opt.async, callback);
+    const throwError = (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_assertClassBrand_js__WEBPACK_IMPORTED_MODULE_1__["default"])(_Marked_brand, this, _onError).call(this, !!opt.silent, !!opt.async, callback);
     // throw error in case of non string input
     if (typeof src === 'undefined' || src === null) {
       return throwError(new Error('marked(): input parameter is undefined or null'));
@@ -41168,7 +41066,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   parseCssInJsToInlineCss: () => (/* binding */ parseCssInJsToInlineCss),
 /* harmony export */   parseMarkdownToJSX: () => (/* binding */ parseMarkdownToJSX)
 /* harmony export */ });
-/* harmony import */ var _Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/defineProperty.js");
+/* harmony import */ var _home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/defineProperty.js");
 /* harmony import */ var marked__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/marked/lib/marked.esm.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/react/index.js");
 
@@ -41375,7 +41273,7 @@ var MarkdownParser = class MarkdownParser {
     let {
       customStyles
     } = _ref3;
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__["default"])(this, "renderer", void 0);
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__["default"])(this, "renderer", void 0);
     this.renderer = initRenderer({
       customStyles
     });
@@ -42682,7 +42580,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   setDefaults: () => (/* reexport safe */ _defaults_js__WEBPACK_IMPORTED_MODULE_2__.setDefaults),
 /* harmony export */   setI18n: () => (/* reexport safe */ _i18nInstance_js__WEBPACK_IMPORTED_MODULE_3__.setI18n)
 /* harmony export */ });
-/* harmony import */ var _Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/defineProperty.js");
+/* harmony import */ var _home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./node_modules/@babel/runtime/helpers/esm/defineProperty.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./node_modules/react/index.js");
 /* harmony import */ var _defaults_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./node_modules/react-i18next/dist/es/defaults.js");
 /* harmony import */ var _i18nInstance_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./node_modules/react-i18next/dist/es/i18nInstance.js");
@@ -42696,7 +42594,7 @@ __webpack_require__.r(__webpack_exports__);
 const I18nContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_1__.createContext)();
 class ReportNamespaces {
   constructor() {
-    (0,_Users_weswalla_sensemaking_networks_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__["default"])(this, "getUsedNamespaces", () => Object.keys(this.usedNamespaces));
+    (0,_home_pepo_pr_cs_sensemakers_app_webapp_node_modules_babel_runtime_helpers_esm_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__["default"])(this, "getUsedNamespaces", () => Object.keys(this.usedNamespaces));
     this.usedNamespaces = {};
   }
   addUsedNamespaces(namespaces) {

@@ -72,12 +72,3 @@ export const PlatformPostAnchor = (props: {
     </Anchor>
   );
 };
-
-export const NanopubAnchor = (props: AnchorExtendedProps) => {
-  const { t } = useTranslation();
-  return (
-    <Anchor target="_blank" size="small" {...props}>
-      {t('nanopub')}
-    </Anchor>
-  );
-};

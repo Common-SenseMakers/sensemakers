@@ -18,7 +18,6 @@ import { canReadPost } from '../posts.access.control';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 import {
   approvePostSchema,
-  createDraftPostSchema,
   getUserPostsQuerySchema,
   postIdValidation,
   retractPostSchema,
@@ -145,36 +144,6 @@ export const parsePostController: RequestHandler = async (
       logger.debug(`${request.path}: parsePost: ${payload.postId}`, {
         post: payload,
       });
-
-    response.status(200).send({ success: true });
-  } catch (error: any) {
-    logger.error('error', error);
-    response.status(500).send({ success: false, error: error.message });
-  }
-};
-
-export const createDraftPostController: RequestHandler = async (
-  request,
-  response
-) => {
-  try {
-    const { db, postsManager } = getServices(request);
-
-    const payload = (await createDraftPostSchema.validate(request.body)) as {
-      postId: string;
-    };
-
-    if (DEBUG)
-      logger.debug(`${request.path}: createDraftPostController`, {
-        payload,
-      });
-
-    db.run(async (manager) => {
-      return postsManager.processing.createOrUpdatePostDrafts(
-        payload.postId,
-        manager
-      );
-    });
 
     response.status(200).send({ success: true });
   } catch (error: any) {

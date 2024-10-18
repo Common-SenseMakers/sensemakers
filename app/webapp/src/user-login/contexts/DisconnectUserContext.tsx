@@ -3,8 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { AbsoluteRoutes } from '../../route.names';
 import { OverallLoginStatus, useAccountContext } from './AccountContext';
-import { useNanopubContext } from './platforms/nanopubs/NanopubContext';
-import { useAppSigner } from './signer/SignerContext';
 
 const DEBUG = false;
 
@@ -20,8 +18,6 @@ const ConnectedUserContextValue = createContext<
 export const DisconnectUserContext = (props: PropsWithChildren) => {
   const { disconnect: disconnectServer, overallLoginStatus } =
     useAccountContext();
-  const { disconnect: disconnectWallet } = useAppSigner();
-  const { disconnect: disconnectNanopub } = useNanopubContext();
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -40,8 +36,6 @@ export const DisconnectUserContext = (props: PropsWithChildren) => {
 
   const disconnect = () => {
     disconnectServer();
-    disconnectWallet();
-    disconnectNanopub();
   };
 
   return (

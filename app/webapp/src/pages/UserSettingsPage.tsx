@@ -17,14 +17,12 @@ import { ViewportPage } from '../app/layout/Viewport';
 import { I18Keys } from '../i18n/i18n';
 import { RouteNames } from '../route.names';
 import { NotificationFreq } from '../shared/types/types.notifications';
-import { PLATFORM } from '../shared/types/types.platforms';
-import { AutopostOption, UserSettingsUpdate } from '../shared/types/types.user';
+import { UserSettingsUpdate } from '../shared/types/types.user';
 import { AppButton, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
-import { useAutopostInviteContext } from '../user-login/contexts/AutopostInviteContext';
 import { useDisconnectContext } from '../user-login/contexts/DisconnectUserContext';
 import { useBlueskyContext } from '../user-login/contexts/platforms/BlueskyContext';
 import { useMastodonContext } from '../user-login/contexts/platforms/MastodonContext';
@@ -57,8 +55,7 @@ export const UserSettingsPage = () => {
 
   const appFetch = useAppFetch();
 
-  const { connectedUser, refresh, currentAutopost, currentNotifications } =
-    useAccountContext();
+  const { connectedUser, refresh, currentNotifications } = useAccountContext();
   const [isSetting, setIsSetting] = useState(false);
   const { disconnect } = useDisconnectContext();
 
@@ -72,9 +69,6 @@ export const UserSettingsPage = () => {
   const { connect: connectTwitter, needConnect: needConnectTwitter } =
     useTwitterContext();
 
-  const { reviewAutopostIntention, setReviewAutopostIntention } =
-    useAutopostInviteContext();
-
   const [showSettingsPage, setShowSettingsPage] = useState<
     SettingsSections | undefined
   >(undefined);
@@ -84,34 +78,11 @@ export const UserSettingsPage = () => {
   const blueskyProfile = connectedUser?.profiles?.bluesky;
   const orcidAccount = connectedUser?.profiles?.orcid;
 
-  // receive the autopost invite
-  useEffect(() => {
-    if (reviewAutopostIntention) {
-      setReviewAutopostIntention(false);
-      setShowSettingsPage(SettingsSections.Autopost);
-    }
-  }, [reviewAutopostIntention]);
-
   const setSettings = async (newSettings: UserSettingsUpdate) => {
     return appFetch('/api/auth/settings', newSettings).then(() => {
       setIsSetting(false);
       refresh();
     });
-  };
-
-  const setAutopost = (option: AutopostOption) => {
-    if (connectedUser) {
-      const settings = connectedUser.settings;
-      const newSettings: UserSettingsUpdate = {
-        autopost: {
-          ...settings.autopost,
-          [PLATFORM.Nanopub]: { value: option },
-        },
-      };
-
-      setIsSetting(true);
-      void setSettings(newSettings);
-    }
   };
 
   const setNotifications = (notificationFreq: NotificationFreq) => {
@@ -123,37 +94,6 @@ export const UserSettingsPage = () => {
       void setSettings(newSettings);
     }
   };
-
-  const autopostPage = (
-    <SettingsSubPage
-      title={t(I18Keys.publishingAutomation)}
-      subtitle={t(I18Keys.publishingAutomationExplainer)}
-      onBack={() => setShowSettingsPage(undefined)}
-      content={
-        <Box>
-          <SettingsOptionSelector
-            options={[
-              {
-                title: t(I18Keys.publishingAutomationOpt2Title),
-                description: t(I18Keys.publishingAutomationOpt2Desc),
-                id: AutopostOption.DETERMINISTIC,
-                optionSelected: (id) => setAutopost(id as AutopostOption),
-                selected: currentAutopost === AutopostOption.DETERMINISTIC,
-              },
-            ]}></SettingsOptionSelector>
-          <SettingsOptionSelector
-            options={[
-              {
-                title: t(I18Keys.publishingAutomationOpt3Title),
-                description: t(I18Keys.publishingAutomationOpt3Desc),
-                id: AutopostOption.MANUAL,
-                optionSelected: (id) => setAutopost(id as AutopostOption),
-                selected: currentAutopost === AutopostOption.MANUAL,
-              },
-            ]}></SettingsOptionSelector>
-        </Box>
-      }></SettingsSubPage>
-  );
 
   const notificationsPage = (
     <SettingsSubPage
@@ -206,14 +146,6 @@ export const UserSettingsPage = () => {
       );
     }
 
-    if (showSettingsPage === SettingsSections.Autopost) {
-      return autopostPage;
-    }
-
-    if (showSettingsPage === SettingsSections.Notifications) {
-      return notificationsPage;
-    }
-
     return (
       <Box>
         <Box
@@ -232,20 +164,6 @@ export const UserSettingsPage = () => {
           <SettingSectionTitle
             value={t(I18Keys.usingApp)}></SettingSectionTitle>
         </Box>
-
-        <SettingsSection
-          icon={<AutopostIcon size={24}></AutopostIcon>}
-          title={t(I18Keys.publishingAutomation)}
-          onSectionClicked={() => {
-            setShowSettingsPage(SettingsSections.Autopost);
-          }}></SettingsSection>
-
-        <SettingsSection
-          icon={<BellIcon size={24}></BellIcon>}
-          title={t(I18Keys.notificationsSettings)}
-          onSectionClicked={() => {
-            setShowSettingsPage(SettingsSections.Notifications);
-          }}></SettingsSection>
 
         <SettingsSection
           icon={<DocIcon size={24}></DocIcon>}
@@ -273,23 +191,6 @@ export const UserSettingsPage = () => {
           <SettingSectionTitle
             value={t(I18Keys.yourAccounts)}></SettingSectionTitle>
         </Box>
-        <PlatformSection
-          icon={
-            <BoxCentered
-              style={{
-                height: '40px',
-                width: '40px',
-                backgroundColor: '#498283',
-                borderRadius: '20px',
-              }}>
-              <EmailIcon></EmailIcon>
-            </BoxCentered>
-          }
-          platformName={t(I18Keys.emailAddress)}
-          onButtonClicked={() => {}}
-          buttonText=""
-          username={connectedUser?.email ? connectedUser.email?.email : ''}
-          connected={!!connectedUser?.email}></PlatformSection>
 
         <PlatformSection
           icon={

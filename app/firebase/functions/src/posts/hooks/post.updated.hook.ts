@@ -12,8 +12,6 @@ import {
 import { logger } from '../../instances/logger';
 import { Services } from '../../instances/services';
 import { enqueueTask } from '../../tasksUtils/tasks.support';
-import { UsersHelper } from '../../users/users.helper';
-import { AUTOPOST_POST_TASK } from '../tasks/posts.autopost.task';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 
 const PREFIX = 'POST-UPDATED-HOOK';
@@ -27,7 +25,7 @@ export const postUpdatedHook = async (
 ) => {
   const postId = post.id;
 
-  const { db, time, activity, users } = services;
+  const { db, time, activity } = services;
 
   /** Frontend watcher to react to changes in real-time */
   const updateRef = db.collections.updates.doc(`post-${postId}`);
@@ -57,7 +55,7 @@ export const postUpdatedHook = async (
   const activitiesCreated: ActivityEventBase[] = [];
 
   /** Create the activity elements */
-  const { wasParsed } = await db.run(
+  await db.run(
     async (manager) => {
       /** detect parsed state change */
       const wasParsed =
@@ -126,37 +124,6 @@ export const postUpdatedHook = async (
     undefined,
     `postUpdatedHook - wasParsed - wasAutoposted ${postId}`
   );
-
-  /** trigger Autopost*/
-  if (wasParsed) {
-    const author = await db.run(async (manager) => {
-      return post.authorUserId
-        ? users.repo.getUser(post.authorUserId, manager, true)
-        : undefined;
-    });
-
-    if (author) {
-      /** autopost when parsed, author has autopost enabled, and post detected as research using deterministic approach */
-      const autopostOnPlatforms = UsersHelper.getAutopostPlatformIds(
-        author,
-        post
-      );
-
-      if (autopostOnPlatforms.length > 0) {
-        if (DEBUG)
-          logger.debug(
-            `trigger ${AUTOPOST_POST_TASK}-${postId}`,
-            { autopostOnPlatforms },
-            PREFIX
-          );
-
-        await enqueueTask(AUTOPOST_POST_TASK, {
-          postId,
-          platformIds: autopostOnPlatforms,
-        });
-      }
-    }
-  }
 
   return activitiesCreated;
 };
