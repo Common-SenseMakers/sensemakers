@@ -38,6 +38,7 @@ import {
   triggerSendNotifications,
 } from './notifications/notification.task';
 import {
+  FETCH_BLUESKY_ACCOUNT_TASK,
   FETCH_MASTODON_ACCOUNT_TASK,
   FETCH_TWITTER_ACCOUNT_TASK,
   fetchPlatformAccountTask,
@@ -257,7 +258,7 @@ exports[FETCH_MASTODON_ACCOUNT_TASK] = onTaskDispatched(
  * 30 per 5 minutes
  * 300 per day
  */
-exports[FETCH_MASTODON_ACCOUNT_TASK] = onTaskDispatched(
+exports[FETCH_BLUESKY_ACCOUNT_TASK] = onTaskDispatched(
   {
     retryConfig: {
       maxAttempts: 3,
