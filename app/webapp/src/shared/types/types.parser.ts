@@ -19,6 +19,7 @@ export type AppPostSemantics = string;
 export interface StructuredSemantics {
   labels?: string[];
   keywords?: string[];
+  refsMeta?: Record<string, RefMeta>;
 }
 
 export interface OntologyItem {

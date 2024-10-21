@@ -1,4 +1,8 @@
-import { StructuredSemantics } from '../@shared/types/types.parser';
+import {
+  ParsePostResult,
+  RefMeta,
+  StructuredSemantics,
+} from '../@shared/types/types.parser';
 import {
   PlatformPost,
   PlatformPostCreate,
@@ -18,6 +22,7 @@ import { DefinedIfTrue } from '../@shared/types/types.user';
 import { mapStoreElements, parseRDF } from '../@shared/utils/n3.utils';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
+import { LinksService } from '../links/links.service';
 import { PlatformsService } from '../platforms/platforms.service';
 import { getProfileId } from '../profiles/profiles.repository';
 import { TriplesRepository } from '../semantics/triples.repository';
@@ -37,7 +42,8 @@ export class PostsProcessing {
     public triples: TriplesRepository,
     public posts: PostsRepository,
     public platformPosts: PlatformPostsRepository,
-    protected platforms: PlatformsService
+    protected platforms: PlatformsService,
+    protected linksService: LinksService
   ) {}
 
   /**
@@ -124,7 +130,9 @@ export class PostsProcessing {
   async processSemantics(
     postId: string,
     manager: TransactionManager,
-    semantics?: string
+    semantics?: string,
+    first?: boolean,
+    originalParsed?: ParsePostResult
   ): Promise<StructuredSemantics | undefined> {
     /** always delete old triples */
     await this.triples.deleteOfPost(postId, manager);
@@ -137,8 +145,9 @@ export class PostsProcessing {
     const createdAtMs = post.createdAtMs;
     const authorProfileId = post.authorProfileId;
 
-    const labels: Set<string> = new Set();
+    const labels: Set<{ label: string; url: string }> = new Set();
     const keywords: Set<string> = new Set();
+    const refsMeta: Record<string, RefMeta> = {};
 
     mapStoreElements(store, (q) => {
       /** store the triples */
@@ -157,13 +166,46 @@ export class PostsProcessing {
       if (q.predicate.value === 'https://schema.org/keywords') {
         keywords.add(q.object.value);
       } else {
-        labels.add(q.predicate.value);
+        labels.add({ label: q.predicate.value, url: q.object.value });
       }
     });
 
+    /** */
+    if (first) {
+      await Promise.all(
+        Array.from(labels).map(async (label) => {
+          const url = label.url;
+          const refMeta = await (async () => {
+            const refMetaOrg =
+              originalParsed?.support?.refs_meta &&
+              originalParsed?.support?.refs_meta[url];
+
+            const isPartial =
+              !refMetaOrg ||
+              !refMetaOrg.image ||
+              !refMetaOrg.title ||
+              !refMetaOrg.summary ||
+              !refMetaOrg.url ||
+              !refMetaOrg.item_type;
+
+            if (isPartial) {
+              return await this.linksService.getRefMeta(url, manager);
+            } else {
+              /** store/update refMeta */
+              this.linksService.setRefMeta(refMetaOrg, manager);
+              return refMetaOrg;
+            }
+          })();
+
+          refsMeta[url] = refMeta;
+        })
+      );
+    }
+
     return {
-      labels: Array.from(labels),
+      labels: Array.from(labels).map((l) => l.label),
       keywords: Array.from(keywords),
+      refsMeta,
     };
   }
 

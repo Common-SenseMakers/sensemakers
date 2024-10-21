@@ -3,7 +3,6 @@ import { useMemo } from 'react';
 
 import { ParsedSupport, RefMeta } from '../../../shared/types/types.parser';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
-import { useThemeContext } from '../../../ui-components/ThemedApp';
 import { RefCard } from '../common/RefCard';
 import { RefData } from './process.semantics';
 
@@ -14,6 +13,7 @@ export const RefWithLabels = (props: {
   ix: number;
   refUrl: string;
   refData: RefData;
+  showLabels?: boolean;
   support?: ParsedSupport;
   addLabel: (labelUri: string) => void;
   removeLabel: (labelUri: string) => void;
@@ -22,6 +22,8 @@ export const RefWithLabels = (props: {
 }) => {
   const labelsOntology = props.support?.ontology?.semantic_predicates;
   const refData = props.refData;
+  const { showLabels } =
+    props.showLabels !== undefined ? props : { showLabels: true };
 
   /** display names for selected labels */
   const labelsDisplayNames = useMemo(
@@ -74,13 +76,19 @@ export const RefWithLabels = (props: {
   return (
     <Box>
       <Box direction="row" margin={{ bottom: 'small' }}>
-        <AppLabelsEditor
-          editable={props.editable}
-          colors={{ font: '#337FBD', background: '#EDF7FF', border: '#ADCCE4' }}
-          labels={labelsDisplayNames}
-          options={optionDisplayNames}
-          removeLabel={(label) => removeLabel(label)}
-          addLabel={(label) => addLabel(label)}></AppLabelsEditor>
+        {showLabels && (
+          <AppLabelsEditor
+            editable={props.editable}
+            colors={{
+              font: '#337FBD',
+              background: '#EDF7FF',
+              border: '#ADCCE4',
+            }}
+            labels={labelsDisplayNames}
+            options={optionDisplayNames}
+            removeLabel={(label) => removeLabel(label)}
+            addLabel={(label) => addLabel(label)}></AppLabelsEditor>
+        )}
       </Box>
       {refData.meta ? (
         <RefCard

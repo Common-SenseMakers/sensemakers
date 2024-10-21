@@ -11,11 +11,11 @@ import { splitArray } from '../../../ui-components/utils';
 import { useSemanticsStore } from '../common/use.semantics';
 import { PatternProps } from '../patterns';
 import { RefWithLabels } from './RefLabel';
-import { RefData, RefsMap, processSemantics } from './process.semantics';
+import { RefsMap, processSemantics } from './process.semantics';
 
 export const RefLabelsComponent = (props: PatternProps) => {
   const { store, originalStore } = useSemanticsStore(props);
-  const size = props.size || 'normal  ';
+  const size = props.size || 'normal';
 
   /** processed ref labels with metadata */
   const refs = useMemo<RefsMap>(
@@ -102,6 +102,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
               return (
                 <RefWithLabels
                   ix={index}
+                  showLabels={size === 'normal'}
                   editable={props.editable}
                   key={ref}
                   refUrl={ref}
@@ -113,7 +114,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
               );
             })}
           </Box>
-          {restOfRefs.length > 0 && (
+          {/* {restOfRefs.length > 0 && (
             <AppLabel
               margin={{ top: '16px' }}
               colors={{
@@ -125,7 +126,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
                 borderRadius: '4px',
                 border: 'none',
               }}>{`+ ${restOfRefs.length} Reference${restOfRefs.length > 1 ? 's' : ''}`}</AppLabel>
-          )}
+          )} */}
         </Box>
       </Box>
     );
