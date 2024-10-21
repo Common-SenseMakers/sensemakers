@@ -284,6 +284,10 @@ export class TwitterService
 
         try {
           logger.debug(`Twitter Service - userTimeline - ${user_id}`);
+          /**
+           * 10 requests / 15 min per app (10,000 monthly limit)
+           * 5 requests / 15 min per user (10,000 monthly limit)
+           */
           const result = await readOnlyClient.v2.userTimeline(
             user_id,
             timelineParams
@@ -612,6 +616,11 @@ export class TwitterService
   ): Promise<AccountProfileBase<PlatformProfile> | undefined> {
     try {
       const { client } = await this.getClient(credentials, 'read');
+
+      /**
+       * 500 requests / 24 hours per app (15,000 monthly limit)
+       * 300 requests / 24 hours per user (3,000 monthly limit)
+       */
       const userResponse = await client.v2.userByUsername(username, {
         'user.fields': userFields,
       });
