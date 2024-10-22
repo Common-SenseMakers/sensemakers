@@ -52,6 +52,9 @@ export const BLUESKY_SERVICE_URL = 'https://bsky.social';
 
 export const ADMIN_API_KEY = envRuntime.ADMIN_API_KEY;
 
+export const IFRAMELY_API_URL = 'iframe.ly/api/iframely';
+export const IFRAMELY_API_KEY = envRuntime.IFRAMELY_API_KEY;
+
 export const TWITTER_CALLBACK_URL = envRuntime.TWITTER_CALLBACK_URL;
 export const TWITTER_REVOKE_URL = envRuntime.TWITTER_REVOKE_URL;
 

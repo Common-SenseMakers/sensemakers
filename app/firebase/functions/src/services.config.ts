@@ -3,6 +3,8 @@ import {
   BLUESKY_SERVICE_URL,
   BLUESKY_USERNAME,
   FUNCTIONS_PY_URL,
+  IFRAMELY_API_KEY,
+  IFRAMELY_API_URL,
   MASTODON_ACCESS_TOKENS,
   OUR_TOKEN_SECRET,
   TEST_USER_ACCOUNTS,
@@ -39,6 +41,10 @@ export const getConfig = (): ServicesConfig => {
     our: {
       expiresIn: '30d',
       tokenSecret: OUR_TOKEN_SECRET.value(),
+    },
+    links: {
+      apiUrl: IFRAMELY_API_URL,
+      apiKey: IFRAMELY_API_KEY.value(),
     },
     mock: {
       USE_REAL_BLUESKY: USE_REAL_BLUESKY.value(),

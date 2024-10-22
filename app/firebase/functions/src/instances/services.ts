@@ -7,7 +7,7 @@ import { ActivityService } from '../activity/activity.service';
 import { DBInstance } from '../db/instance';
 import { FeedService } from '../feed/feed.service';
 import { LinksRepository } from '../links/links.repository';
-import { LinksService } from '../links/links.service';
+import { LinksConfig, LinksService } from '../links/links.service';
 import { getParserMock } from '../parser/mock/parser.service.mock';
 import { ParserService } from '../parser/parser.service';
 import {
@@ -63,6 +63,7 @@ export interface ServicesConfig {
   parser: string;
   our: OurTokenConfig;
   isEmulator: boolean;
+  links: LinksConfig;
   mock: {
     USE_REAL_PARSER: boolean;
     USE_REAL_TWITTER: boolean;
@@ -161,9 +162,7 @@ export const createServices = (
     config.mock.USE_REAL_PARSER ? 'real' : 'mock'
   );
 
-  const linksService = new LinksService(linksRepo, {
-    apiUrl: config.links.apiUrl,
-  });
+  const linksService = new LinksService(linksRepo, config.links);
 
   /** posts service */
   const postsProcessing = new PostsProcessing(

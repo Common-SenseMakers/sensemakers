@@ -46,6 +46,8 @@ const MAGIC_ADMIN_SECRET = defineSecret('MAGIC_ADMIN_SECRET');
 const NP_PUBLISH_RSA_PRIVATE_KEY = defineSecret('NP_PUBLISH_RSA_PRIVATE_KEY');
 const ADMIN_API_KEY = defineSecret('ADMIN_API_KEY');
 
+const IFRAMELY_API_KEY = defineSecret('IFRAMELY_API_KEY');
+
 export const envRuntime = {
   NODE_ENV: process.env.NODE_ENV,
   REGION: process.env.FUNCTION_REGION,
@@ -82,4 +84,5 @@ export const envRuntime = {
   EMAIL_CLIENT_SECRET: EMAIL_CLIENT_SECRET,
   MAGIC_ADMIN_SECRET: MAGIC_ADMIN_SECRET,
   ADMIN_API_KEY: ADMIN_API_KEY,
+  IFRAMELY_API_KEY: IFRAMELY_API_KEY,
 };
