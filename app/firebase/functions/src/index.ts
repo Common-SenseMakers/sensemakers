@@ -53,6 +53,7 @@ const secrets: SecretParam[] = [
   envRuntime.EMAIL_CLIENT_SECRET,
   envRuntime.MAGIC_ADMIN_SECRET,
   envRuntime.IFRAMELY_API_KEY,
+  envRuntime.BLUESKY_APP_PASSWORD,
 ];
 
 const deployConfig: functions.RuntimeOptions = {

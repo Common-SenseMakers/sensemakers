@@ -161,38 +161,45 @@ export const getTwitterMock = (
         user_id: string,
         params: PlatformFetchParams,
         credentials?: TwitterCredentials
-      ): Promise<TwitterThread[]> => {
+      ): Promise<{
+        threads: TwitterThread[];
+        credentials?: TwitterCredentials;
+      }> => {
         if (NODE_ENV === ENVIRONMENTS.LOCAL) {
           if (params.since_id) {
-            return [
-              {
-                conversation_id: (Number(params.since_id) + 100).toString(),
-                tweets: [
-                  getSampleTweet(
-                    (Number(params.since_id) + 100).toString(),
-                    user_id,
-                    Date.now(),
-                    (Number(params.since_id) + 100).toString(),
-                    ''
-                  ),
-                ],
-                author: {
-                  id: 'dummy-author-id',
-                  name: 'dummy-author-name',
-                  username: 'dummy-author-username',
-                  profile_image_url:
-                    'https://pbs.twimg.com/profile_images/1783977034038882304/RGn66lGT_normal.jpg',
+            return {
+              threads: [
+                {
+                  conversation_id: (Number(params.since_id) + 100).toString(),
+                  tweets: [
+                    getSampleTweet(
+                      (Number(params.since_id) + 100).toString(),
+                      user_id,
+                      Date.now(),
+                      (Number(params.since_id) + 100).toString(),
+                      ''
+                    ),
+                  ],
+                  author: {
+                    id: 'dummy-author-id',
+                    name: 'dummy-author-name',
+                    username: 'dummy-author-username',
+                    profile_image_url:
+                      'https://pbs.twimg.com/profile_images/1783977034038882304/RGn66lGT_normal.jpg',
+                  },
                 },
-              },
-            ];
+              ],
+            };
           } else if (params.until_id) {
-            return [];
+            return { threads: [] };
           } else {
-            return getTimelineMock(
-              'dummy-user-id',
-              'dummy-user-name',
-              'dummy-user-username'
-            );
+            return {
+              threads: getTimelineMock(
+                'dummy-user-id',
+                'dummy-user-name',
+                'dummy-user-username'
+              ),
+            };
           }
         }
 
@@ -210,8 +217,8 @@ export const getTwitterMock = (
           return true;
         });
         return params.expectedAmount && threads.length > params.expectedAmount
-          ? threads.slice(0, params.expectedAmount)
-          : threads;
+          ? { threads: threads.slice(0, params.expectedAmount) }
+          : { threads };
       }
     );
   }

@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase-admin/app';
 import { Context } from 'mocha';
 import * as sinon from 'sinon';
 
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { AppUser } from '../../src/@shared/types/types.user';
 import { envRuntime } from '../../src/config/typedenv.runtime';
 import * as tasksSupport from '../../src/tasksUtils/tasks.support';
@@ -80,7 +81,8 @@ export const mochaHooks = (): Mocha.RootHookObject => {
             const user = await authenticateTestUser(
               accountCredentials,
               globalTestServices,
-              manager
+              manager,
+              [PLATFORM.Mastodon, PLATFORM.Bluesky]
             );
             testUsers.push(user);
           })

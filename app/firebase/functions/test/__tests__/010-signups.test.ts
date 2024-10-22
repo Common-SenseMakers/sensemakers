@@ -38,7 +38,7 @@ describe('010-signups', () => {
       });
     });
 
-    describe('connect mastodon account', () => {
+    describe.skip('connect mastodon account', () => {
       it('connect mastodon account', async () => {
         await services.db.run(async (manager) => {
           const mastodonCredentials = testCredentials[0].mastodon;

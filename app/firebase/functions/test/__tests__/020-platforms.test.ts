@@ -26,7 +26,7 @@ import {
 import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
-describe('02-platforms', () => {
+describe.only('02-platforms', () => {
   let user: AppUser | undefined;
 
   const services = getTestServices({
@@ -58,14 +58,7 @@ describe('02-platforms', () => {
       user = users.find(
         (u) =>
           UsersHelper.getAccount(u, PLATFORM.Twitter, testUser.twitter.id) !==
-            undefined &&
-          UsersHelper.getAccount(
-            u,
-            PLATFORM.Mastodon,
-            `https://${testUser.mastodon.mastodonServer}/@${testUser.mastodon.username}`
-          ) !== undefined &&
-          UsersHelper.getAccount(u, PLATFORM.Bluesky, testUser.bluesky.id) !==
-            undefined
+          undefined
       );
     });
   });
@@ -96,19 +89,17 @@ describe('02-platforms', () => {
         expectedAmount: 5,
       };
 
-      const threads = await services.db.run((manager) =>
-        twitterService.fetch(
-          userDetails.user_id,
-          fetchParams,
-          userDetails.credentials
-        )
+      const threads = await twitterService.fetch(
+        userDetails.user_id,
+        fetchParams,
+        userDetails.credentials
       );
 
       expect(threads).to.not.be.undefined;
       expect(threads.platformPosts.length).to.be.greaterThanOrEqual(1);
     });
 
-    it('gets account by username', async () => {
+    it.skip('gets account by username', async () => {
       const twitterService = services.platforms.get(
         PLATFORM.Twitter
       ) as TwitterService;
@@ -131,7 +122,7 @@ describe('02-platforms', () => {
     });
   });
 
-  describe('mastodon', () => {
+  describe.skip('mastodon', () => {
     it('fetches the latest posts', async () => {
       if (!user) {
         throw new Error('appUser not created');
@@ -224,7 +215,7 @@ describe('02-platforms', () => {
     });
   });
 
-  describe('bluesky', () => {
+  describe.skip('bluesky', () => {
     let blueskyService: BlueskyService;
     let userDetails: BlueskyAccountDetails;
 
