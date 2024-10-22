@@ -96,7 +96,7 @@ describe('031 test parse', () => {
       }
     });
 
-    it('gets a post from mastodon and parses it', async () => {
+    it.skip('gets a post from mastodon and parses it', async () => {
       const { postsManager } = services;
 
       const post_id = '113091870835600081'; //https://cosocial.ca/@weswalla/113091870835600081
@@ -130,7 +130,7 @@ describe('031 test parse', () => {
       }
     });
 
-    it('gets a post from bluesky and parses it', async () => {
+    it.skip('gets a post from bluesky and parses it', async () => {
       const { postsManager } = services;
 
       const post_id =

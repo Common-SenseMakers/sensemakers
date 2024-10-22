@@ -17,6 +17,7 @@ import {
   TwitterSignupContext,
   TwitterSignupData,
   TwitterThread,
+  TwitterUser,
 } from '../../../@shared/types/types.twitter';
 import { TestUserCredentials } from '../../../@shared/types/types.user';
 import { ENVIRONMENTS } from '../../../config/ENVIRONMENTS';
@@ -228,7 +229,10 @@ export const getTwitterMock = (
       async (
         post_id: string,
         credentials?: TwitterAccountCredentials
-      ): Promise<PlatformPostPosted<TwitterThread>> => {
+      ): Promise<{
+        platformPost: PlatformPostPosted<TwitterThread, TwitterUser>;
+        credentials?: TwitterAccountCredentials;
+      }> => {
         const thread = state.threads.find(
           (thread) => thread.conversation_id === post_id
         );
@@ -238,10 +242,12 @@ export const getTwitterMock = (
         }
 
         return {
-          post_id: thread.conversation_id,
-          user_id: thread.author.id,
-          timestampMs: dateStrToTimestampMs(thread.tweets[0].created_at),
-          post: thread,
+          platformPost: {
+            post_id: thread.conversation_id,
+            user_id: thread.author.id,
+            timestampMs: dateStrToTimestampMs(thread.tweets[0].created_at),
+            post: thread,
+          },
         };
       }
     );

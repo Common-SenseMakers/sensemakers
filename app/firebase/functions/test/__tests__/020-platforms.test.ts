@@ -26,7 +26,7 @@ import {
 import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
-describe.only('02-platforms', () => {
+describe('02-platforms', () => {
   let user: AppUser | undefined;
 
   const services = getTestServices({
