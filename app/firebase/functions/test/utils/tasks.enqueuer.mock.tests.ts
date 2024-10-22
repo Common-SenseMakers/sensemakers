@@ -1,10 +1,6 @@
 import { logger } from '../../src/instances/logger';
 import { Services } from '../../src/instances/services';
 import {
-  NOTIFY_USER_TASK,
-  notifyUserTask,
-} from '../../src/notifications/notification.task';
-import {
   AUTOFETCH_POSTS_TASK,
   autofetchUserPosts,
 } from '../../src/posts/tasks/posts.autofetch.task';
@@ -84,14 +80,6 @@ export const enqueueTaskMockOnTests = async (
           postUpdatedHookOnTest(postCreated.post, services)
         )
       );
-    }
-
-    if (name === NOTIFY_USER_TASK) {
-      if (!services) {
-        throw new Error('services are required');
-      }
-
-      return notifyUserTask(params.userId, services);
     }
   })();
 };

@@ -3,7 +3,6 @@ import { expect } from 'chai';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { AppPostParsingStatus } from '../../src/@shared/types/types.posts';
 import { AppUser } from '../../src/@shared/types/types.user';
-import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
@@ -17,7 +16,6 @@ import {
 import {
   USE_REAL_BLUESKY,
   USE_REAL_MASTODON,
-  USE_REAL_NANOPUB,
   USE_REAL_PARSER,
   USE_REAL_TWITTER,
   testUsers,
@@ -36,9 +34,7 @@ describe('031 test parse', () => {
     mastodon: USE_REAL_MASTODON
       ? undefined
       : { publish: true, signup: true, fetch: true, get: true },
-    nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
-    emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
   });
 
   before(async () => {

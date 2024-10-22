@@ -2,6 +2,10 @@ import { RefMeta } from '../@shared/types/types.parser';
 import { TransactionManager } from '../db/transaction.manager';
 import { LinksRepository } from './links.repository';
 
+export interface LinksMockConfig {
+  get: boolean;
+}
+
 export interface LinksConfig {
   apiUrl: string;
   apiKey: string;
