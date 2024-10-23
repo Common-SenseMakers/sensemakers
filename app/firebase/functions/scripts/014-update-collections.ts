@@ -148,11 +148,16 @@ async function updateTriples() {
       const updatedData = { ...data };
 
       // Change createdAtMs to postCreatedAtMs
-      updatedData.postCreatedAtMs = data.createdAtMs;
-      delete updatedData.createdAtMs;
+      if (data.createdAtMs) {
+        updatedData.postCreatedAtMs = data.createdAtMs;
+        delete updatedData.createdAtMs;
+      } else {
+        console.warn(`No createdAtMs for triple: ${doc.id}`);
+      }
 
       // Update authorId to authorProfileId
-      const [platformId, platformAccountId] = data.authorId.split(':');
+      const [platformId, ...rest] = data.authorId.split(':');
+      const platformAccountId = rest.join(':');
 
       if (platformId === PLATFORM.Bluesky || platformId === PLATFORM.Twitter) {
         updatedData.authorProfileId = `${platformId}-${platformAccountId}`;
