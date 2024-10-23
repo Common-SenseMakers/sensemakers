@@ -134,11 +134,34 @@ async function updateTriples() {
   for (const doc of triplesSnapshot.docs) {
     const data = doc.data();
 
-    if (data.authorId && data.authorId.startsWith('mastodon:')) {
-      const updatedData = {
-        ...data,
-        authorId: `mastodon:${data.authorId.split(':')[1]}@${data.authorId.split(':')[2] || ''}`,
-      };
+    if (data.authorId) {
+      const updatedData = { ...data };
+      
+      // Change createdAtMs to postCreatedAtMs
+      updatedData.postCreatedAtMs = data.createdAtMs;
+      delete updatedData.createdAtMs;
+
+      // Update authorId to authorProfileId
+      const [platformId, platformAccountId] = data.authorId.split(':');
+      
+      if (platformId === 'bluesky' || platformId === 'twitter') {
+        updatedData.authorProfileId = `${platformId}-${platformAccountId}`;
+      } else if (platformId === 'mastodon') {
+        const userDoc = await firestore.collection('users').doc(platformAccountId).get();
+        const userData = userDoc.data();
+        if (userData && userData.mastodon && userData.mastodon[0]) {
+          const globalUsername = `${userData.mastodon[0].profile.username}@${userData.mastodon[0].profile.mastodonServer}`;
+          updatedData.authorProfileId = `mastodon-${globalUsername}`;
+        } else {
+          console.warn(`User document not found or invalid for Mastodon user: ${platformAccountId}`);
+          continue;
+        }
+      } else {
+        console.warn(`Unknown platform: ${platformId}`);
+        continue;
+      }
+
+      delete updatedData.authorId;
 
       await doc.ref.set(updatedData);
     }
