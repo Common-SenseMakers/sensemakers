@@ -96,7 +96,7 @@ export const RefWithLabels = (props: {
           url={props.refUrl}
           title={refData.meta?.title}
           description={refData.meta?.summary}
-          image={refData.meta?.image}
+          image={refData.meta?.thumbnail_url}
           refType={refData.meta.item_type}
           sourceRef={getSourceRefNumber(refData.meta, props.allRefs)}></RefCard>
       ) : (
@@ -111,8 +111,6 @@ export const RefWithLabels = (props: {
 const getSourceRefNumber = (meta: RefMeta, allRefs: [string, RefData][]) => {
   const currRefData = allRefs.find(([ref]) => ref === meta.url);
 
-  const refSource = allRefs.find(
-    ([ref]) => ref === currRefData?.[1].meta?.ref_source_url
-  );
+  const refSource = allRefs.find(([ref]) => ref === currRefData?.[1].meta?.url);
   return refSource?.[1].meta?.order ? refSource[1].meta.order : undefined;
 };
