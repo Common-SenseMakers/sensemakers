@@ -1,4 +1,5 @@
 import { PLATFORM } from '../src/@shared/types/types.platforms';
+import { parseMastodonAccountURI } from '../src/platforms/mastodon/mastodon.utils';
 import { app } from './scripts.services';
 
 const firestore = app.firestore();
@@ -100,28 +101,36 @@ async function updateCollections() {
 //   console.log('Posts updated');
 // }
 
-// async function updatePlatformPosts() {
-//   const platformPostsSnapshot = await firestore
-//     .collection('platformPosts')
-//     .get();
+async function updatePlatformPosts() {
+  const platformPostsSnapshot = await firestore
+    .collection('platformPosts')
+    .get();
 
-//   for (const doc of platformPostsSnapshot.docs) {
-//     const data = doc.data();
+  let count = 0;
+  for (const doc of platformPostsSnapshot.docs) {
+    if (count >= 5) break;
+    count++;
+    const data = doc.data();
+    if (!data.post_id) {
+      const updatedData = { ...data };
+      if (data.platformId === PLATFORM.Mastodon) {
+        const mastodonPostId = data.posted.post.posts[0].uri;
+        const mastodonUserId = parseMastodonAccountURI(
+          data.posted.post.author.url
+        ).globalUsername;
 
-//     if (data.platformId === 'mastodon') {
-//       const updatedData = {
-//         ...data,
-//         post_id: data.posted.post.id,
-//         'posted.post_id': data.posted.post.id,
-//         'posted.user_id': data.posted.post.account.id,
-//       };
-
-//       await doc.ref.set(updatedData);
-//     }
-//   }
-
-//   console.log('PlatformPosts updated');
-// }
+        updatedData.posted.post.thread_id = mastodonPostId;
+        updatedData.posted.user_id = mastodonUserId;
+        updatedData.posted.post_id = mastodonPostId;
+        updatedData.post_id = mastodonPostId;
+      } else {
+        updatedData.post_id = data.posted.post_id;
+      }
+      console.log('Updating platformPost:', { updatedData, docId: doc.id });
+      await doc.ref.set(updatedData);
+    }
+  }
+}
 
 // async function removeUserDocs() {
 //   const userDocs = await firestore.collection('users').get();
