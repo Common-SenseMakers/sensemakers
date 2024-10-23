@@ -1,5 +1,4 @@
 import { app } from './scripts.services';
-import { firestore } from 'firebase-admin';
 
 const firestore = app.firestore();
 
@@ -13,15 +12,18 @@ async function updateCollections() {
 
 async function updateProfiles() {
   const profilesSnapshot = await firestore.collection('profiles').get();
-  
+
   for (const doc of profilesSnapshot.docs) {
     const data = doc.data();
     const userId = data.profile.userId || data.profile.user_id;
     const platformId = data.platformId;
-    
+
     if (!userId || !platformId) continue;
 
-    const userDoc = await firestore.collection('users').doc(userId.split(':')[1]).get();
+    const userDoc = await firestore
+      .collection('users')
+      .doc(userId.split(':')[1])
+      .get();
     const userData = userDoc.data();
 
     if (!userData) continue;
@@ -60,7 +62,10 @@ async function updatePosts() {
 
     if (!origin || !authorId) continue;
 
-    const userDoc = await firestore.collection('users').doc(authorId.split(':')[1]).get();
+    const userDoc = await firestore
+      .collection('users')
+      .doc(authorId.split(':')[1])
+      .get();
     const userData = userDoc.data();
 
     if (!userData) continue;
@@ -89,7 +94,9 @@ async function updatePosts() {
 }
 
 async function updatePlatformPosts() {
-  const platformPostsSnapshot = await firestore.collection('platformPosts').get();
+  const platformPostsSnapshot = await firestore
+    .collection('platformPosts')
+    .get();
 
   for (const doc of platformPostsSnapshot.docs) {
     const data = doc.data();
