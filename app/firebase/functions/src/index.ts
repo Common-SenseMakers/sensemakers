@@ -52,6 +52,8 @@ const secrets: SecretParam[] = [
   envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
   envRuntime.EMAIL_CLIENT_SECRET,
   envRuntime.MAGIC_ADMIN_SECRET,
+  envRuntime.IFRAMELY_API_KEY,
+  envRuntime.BLUESKY_APP_PASSWORD,
 ];
 
 const deployConfig: functions.RuntimeOptions = {

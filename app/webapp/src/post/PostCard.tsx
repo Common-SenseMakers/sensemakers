@@ -97,10 +97,6 @@ export const PostCard = (props: {
       pad={{ top: '16px', horizontal: '12px', bottom: '16px' }}
       style={{
         backgroundColor: shade ? constants.colors.shade : 'white',
-        borderTop: '2px solid var(--Neutral-300, #D1D5DB)',
-        borderRight: '1px solid var(--Neutral-300, #D1D5DB)',
-        borderLeft: '1px solid var(--Neutral-300, #D1D5DB)',
-        borderBottom: 'none',
       }}>
       <Box
         style={{ cursor: 'pointer', position: 'relative' }}
@@ -109,21 +105,6 @@ export const PostCard = (props: {
           {header}
         </Box>
 
-        {!hideSemantics && (
-          <SemanticsEditor
-            include={[PATTERN_ID.KEYWORDS]}
-            patternProps={{
-              isLoading:
-                updated.statusesMerged.isParsing !== undefined
-                  ? updated.statusesMerged.isParsing
-                  : false,
-              editable: false,
-              size: 'compact',
-              semantics: post?.semantics,
-              originalParsed: post?.originalParsed,
-            }}></SemanticsEditor>
-        )}
-
         <PostTextStatic
           onClick={handleInternalClick}
           truncate
@@ -131,18 +112,20 @@ export const PostCard = (props: {
           text={postText}></PostTextStatic>
 
         {!hideSemantics && (
-          <SemanticsEditor
-            include={[PATTERN_ID.REF_LABELS]}
-            patternProps={{
-              isLoading:
-                updated.statusesMerged.isParsing !== undefined
-                  ? updated.statusesMerged.isParsing
-                  : false,
-              size: 'compact',
-              editable: false,
-              semantics: post?.semantics,
-              originalParsed: post?.originalParsed,
-            }}></SemanticsEditor>
+          <Box>
+            <SemanticsEditor
+              include={[PATTERN_ID.REF_LABELS]}
+              patternProps={{
+                isLoading:
+                  updated.statusesMerged.isParsing !== undefined
+                    ? updated.statusesMerged.isParsing
+                    : false,
+                size: 'compact',
+                editable: false,
+                semantics: post?.semantics,
+                originalParsed: post?.originalParsed,
+              }}></SemanticsEditor>
+          </Box>
         )}
       </Box>
     </Box>

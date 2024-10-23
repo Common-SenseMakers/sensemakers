@@ -6,6 +6,8 @@ import { ActivityRepository } from '../activity/activity.repository';
 import { ActivityService } from '../activity/activity.service';
 import { DBInstance } from '../db/instance';
 import { FeedService } from '../feed/feed.service';
+import { LinksRepository } from '../links/links.repository';
+import { LinksConfig, LinksService } from '../links/links.service';
 import { getParserMock } from '../parser/mock/parser.service.mock';
 import { ParserService } from '../parser/parser.service';
 import {
@@ -61,6 +63,7 @@ export interface ServicesConfig {
   parser: string;
   our: OurTokenConfig;
   isEmulator: boolean;
+  links: LinksConfig;
   mock: {
     USE_REAL_PARSER: boolean;
     USE_REAL_TWITTER: boolean;
@@ -84,6 +87,7 @@ export const createServices = (
   const triplesRepo = new TriplesRepository(db);
   const platformPostsRepo = new PlatformPostsRepository(db);
   const activityRepo = new ActivityRepository(db);
+  const linksRepo = new LinksRepository(db);
 
   const identityPlatforms: IdentityServicesMap = new Map();
   const platformsMap: PlatformsMap = new Map();
@@ -158,6 +162,8 @@ export const createServices = (
     config.mock.USE_REAL_PARSER ? 'real' : 'mock'
   );
 
+  const linksService = new LinksService(linksRepo, config.links);
+
   /** posts service */
   const postsProcessing = new PostsProcessing(
     usersService,
@@ -165,7 +171,8 @@ export const createServices = (
     triplesRepo,
     postsRepo,
     platformPostsRepo,
-    platformsService
+    platformsService,
+    linksService
   );
   // const postsParser = new PostsParser(platformsService, parserService);
   const postsManager = new PostsManager(

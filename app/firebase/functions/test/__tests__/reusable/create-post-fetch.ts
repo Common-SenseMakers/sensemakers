@@ -46,9 +46,7 @@ export const _01_createAndFetchUsers = async (
   if (DEBUG) logger.debug(` ${user?.userId}`, { user }, DEBUG_PREFIX);
 
   /** fetch will store the posts in the DB */
-  services.notifications.haveQuiet = true;
   await fetchPostsInTests(user.userId, { expectedAmount: 10 }, services);
-  services.notifications.haveQuiet = false;
 
   /** bypass quiet period for notifications */
   services.time.forward(6 * 60 * 1000);

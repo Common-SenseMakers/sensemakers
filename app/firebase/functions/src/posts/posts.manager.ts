@@ -725,14 +725,17 @@ export class PostsManager {
     if (DEBUG) logger.debug(`parsePost - done ${postId}`, { postId, update });
 
     /** store the semantics and mark as processed */
-    await this.updatePost(post.id, update, manager);
+    await this.updatePost(post.id, update, manager, true);
   }
+
+  async processUrls(postId: string, manager: TransactionManager) {}
 
   /** single place to update a post (it updates the drafts if necessary) */
   async updatePost(
     postId: string,
     postUpdate: PostUpdate,
-    manager: TransactionManager
+    manager: TransactionManager,
+    first?: boolean
   ) {
     if (DEBUG) logger.debug(`updatePost ${postId}`, { postId, postUpdate });
     await this.processing.posts.update(postId, postUpdate, manager);
@@ -742,13 +745,18 @@ export class PostsManager {
     const structured = await this.processing.processSemantics(
       postId,
       manager,
-      postUpdated.semantics
+      postUpdated.semantics,
+      first
     );
 
     if (structured) {
       if (DEBUG)
         logger.debug(`updating strucured semantics ${postId}`, structured);
-      await this.processing.posts.update(postId, { ...structured }, manager);
+      await this.processing.posts.update(
+        postId,
+        { structuredSemantics: structured },
+        manager
+      );
     }
   }
 

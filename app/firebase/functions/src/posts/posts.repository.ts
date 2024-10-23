@@ -1,6 +1,7 @@
 import { FieldValue } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions/v1';
 
+import { StructuredSemantics } from '../@shared/types/types.parser';
 import {
   AppPost,
   AppPostCreate,
@@ -61,8 +62,9 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     const republishedStatusKey: keyof AppPost = 'republishedStatus';
     const originKey: keyof AppPost = 'origin';
 
-    const keywordsKey: keyof AppPost = 'keywords';
-    const labelsKey: keyof AppPost = 'labels';
+    const structuredSemanticsKey: keyof AppPost = 'structuredSemantics';
+    const keywordsKey: keyof StructuredSemantics = 'keywords';
+    const labelsKey: keyof StructuredSemantics = 'labels';
 
     if (DEBUG) logger.debug('getMany', queryParams, DEBUG_PREFIX);
 
@@ -211,7 +213,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
           );
 
         return _base.where(
-          keywordsKey,
+          `${structuredSemanticsKey}.${keywordsKey}`,
           'array-contains-any',
           queryParams.keywords
         );
@@ -225,7 +227,11 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
             DEBUG_PREFIX
           );
 
-        return _base.where(labelsKey, 'array-contains-any', queryParams.labels);
+        return _base.where(
+          `${structuredSemanticsKey}.${labelsKey}`,
+          'array-contains-any',
+          queryParams.labels
+        );
       }
 
       return _base;

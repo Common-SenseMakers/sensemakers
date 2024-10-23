@@ -1,9 +1,7 @@
-import { NotificationFreq } from '../../src/@shared/types/types.notifications';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import {
   AppUser,
   AppUserRead,
-  AutopostOption,
   TestUserCredentials,
 } from '../../src/@shared/types/types.user';
 
@@ -11,14 +9,7 @@ export const getMockedUser = (credentials: TestUserCredentials): AppUser => {
   return {
     userId: credentials.userId,
     signupDate: 1719938012425,
-    settings: {
-      autopost: {
-        [PLATFORM.Nanopub]: {
-          value: AutopostOption.MANUAL,
-        },
-      },
-      notificationFreq: NotificationFreq.None,
-    },
+    settings: {},
     accounts: {
       [PLATFORM.Mastodon]: [
         {
@@ -73,13 +64,6 @@ export const getMockedUser = (credentials: TestUserCredentials): AppUser => {
           },
         },
       ],
-      [PLATFORM.Nanopub]: [
-        {
-          signupDate: 0,
-          user_id: '0x59b277c77F738e9B758B73Dd9Bfc6DE36D6e0EB1',
-          credentials: {},
-        },
-      ],
     },
   };
 };
@@ -90,14 +74,7 @@ export const getMockedUserRead = (
   return {
     userId: credentials.userId,
     signupDate: 1719938012425,
-    settings: {
-      autopost: {
-        [PLATFORM.Nanopub]: {
-          value: AutopostOption.MANUAL,
-        },
-      },
-      notificationFreq: NotificationFreq.None,
-    },
+    settings: {},
     profiles: {
       [PLATFORM.Mastodon]: [
         {
@@ -137,18 +114,6 @@ export const getMockedUserRead = (
             displayName: 'Test User',
             avatar: 'https://test.com/avatar.jpg',
             description: 'Test description',
-          },
-        },
-      ],
-      [PLATFORM.Nanopub]: [
-        {
-          user_id: '0x59b277c77F738e9B758B73Dd9Bfc6DE36D6e0EB1',
-          read: true,
-          write: true,
-          profile: {
-            rsaPublickey: '1234',
-            ethAddress: '0x59b277c77F738e9B758B73Dd9Bfc6DE36D6e0EB1',
-            ethToRsaSignature: '0x1234567',
           },
         },
       ],
