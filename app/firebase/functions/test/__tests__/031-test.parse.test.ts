@@ -65,7 +65,12 @@ describe('031 test parse', () => {
     it('gets a post (thread) from twitter and parses it', async () => {
       const { postsManager } = services;
 
-      const post_id = process.env.TEST_THREAD_ID || '0';
+      if (USE_REAL_TWITTER) {
+        logger.warn(
+          `Warning, the TEST_THREAD_ID must be at most 15 days old to be correctly fetched`
+        );
+      }
+      const post_id = USE_REAL_TWITTER ? process.env.TEST_THREAD_ID : '0';
 
       if (!post_id) {
         throw new Error('TEST_THREAD_ID not defined in .env.test file');

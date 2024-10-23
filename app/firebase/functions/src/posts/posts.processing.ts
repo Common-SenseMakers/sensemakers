@@ -170,7 +170,7 @@ export class PostsProcessing {
       }
     });
 
-    /** */
+    /** TODO: dont support editing references of post */
     if (first) {
       await Promise.all(
         Array.from(labels).map(async (label) => {
@@ -182,17 +182,19 @@ export class PostsProcessing {
 
             const isPartial =
               !refMetaOrg ||
-              !refMetaOrg.image ||
               !refMetaOrg.title ||
               !refMetaOrg.summary ||
-              !refMetaOrg.url ||
-              !refMetaOrg.item_type;
+              !refMetaOrg.url;
 
             if (isPartial) {
-              return await this.linksService.getRefMeta(url, manager);
+              const oembed = await this.linksService.getOEmbed(url, manager);
+              return {
+                ...oembed,
+                item_type: refMetaOrg?.item_type,
+              };
             } else {
               /** store/update refMeta */
-              this.linksService.setRefMeta(refMetaOrg, manager);
+              this.linksService.setOEmbed(refMetaOrg, manager);
               return refMetaOrg;
             }
           })();

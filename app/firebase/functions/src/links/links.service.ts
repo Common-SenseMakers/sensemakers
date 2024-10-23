@@ -1,4 +1,4 @@
-import { RefMeta } from '../@shared/types/types.parser';
+import { OEmbed, RefMeta } from '../@shared/types/types.parser';
 import { TransactionManager } from '../db/transaction.manager';
 import { LinksRepository } from './links.repository';
 
@@ -17,10 +17,10 @@ export class LinksService {
     protected config: LinksConfig
   ) {}
 
-  async fetchRefMeta(refUrlEncoded: string): Promise<RefMeta> {
+  async fetchOEmbed(url: string): Promise<RefMeta> {
     try {
       const res = await fetch(
-        `${this.config.apiUrl}?url=${refUrlEncoded}&api_key=${this.config.apiKey}`,
+        `${this.config.apiUrl}/oembed?url=${encodeURIComponent(url)}&api_key=${this.config.apiKey}`,
         {
           headers: [['Content-Type', 'application/json']],
           method: 'get',
@@ -28,21 +28,21 @@ export class LinksService {
       );
       return await res.json();
     } catch (e) {
-      throw new Error(`Error fetching ref ${refUrlEncoded} meta: ${e}`);
+      throw new Error(`Error fetching ref ${url} meta: ${e}`);
     }
   }
 
-  async getRefMeta(url: string, manager: TransactionManager): Promise<RefMeta> {
+  async getOEmbed(url: string, manager: TransactionManager): Promise<OEmbed> {
     const existing = await this.links.get(url, manager);
     if (existing) return existing;
 
-    const refMeta = await this.fetchRefMeta(url);
-    this.links.set(url, refMeta, manager);
+    const oembed = await this.fetchOEmbed(url);
+    this.links.set(url, oembed, manager);
 
-    return refMeta;
+    return oembed;
   }
 
-  async setRefMeta(refMeta: RefMeta, manager: TransactionManager) {
-    this.links.set(refMeta.url, refMeta, manager);
+  async setOEmbed(oembed: OEmbed, manager: TransactionManager) {
+    this.links.set(oembed.url, oembed, manager);
   }
 }

@@ -48,6 +48,10 @@ describe('070 test feed', () => {
     });
 
     it('fetch and parse all posts', async () => {
+      if (USE_REAL_TWITTER) {
+        logger.warn(`Feed test disbaled with real twitter`);
+        return;
+      }
       for (let ix = 0; ix < feedThreads.length; ix++) {
         const post_id = ix.toString();
 
@@ -73,6 +77,10 @@ describe('070 test feed', () => {
     });
 
     it('returns a feed', async () => {
+      if (USE_REAL_TWITTER) {
+        logger.warn(`Feed test disbaled with real twitter`);
+        return;
+      }
       const { feed } = services;
       const result1 = await feed.getFeed({
         fetchParams: { expectedAmount: 10 },

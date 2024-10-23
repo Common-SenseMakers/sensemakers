@@ -725,7 +725,7 @@ export class PostsManager {
     if (DEBUG) logger.debug(`parsePost - done ${postId}`, { postId, update });
 
     /** store the semantics and mark as processed */
-    await this.updatePost(post.id, update, manager);
+    await this.updatePost(post.id, update, manager, true);
   }
 
   async processUrls(postId: string, manager: TransactionManager) {}
