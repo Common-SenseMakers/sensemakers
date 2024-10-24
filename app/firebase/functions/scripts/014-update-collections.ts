@@ -10,63 +10,107 @@ if (process.env.FB_PROJECT_ID !== 'sensenets-dataset') {
 }
 
 async function updateCollections() {
-  // await updateProfiles();
+  await updateProfiles();
   await updatePosts();
   await updatePlatformPosts();
-  // await removeUserDocs();
   await updateTriples();
+  // await removeUserDocs();
 }
 
-// async function updateProfiles() {
-//   const profilesSnapshot = await firestore.collection('profiles').get();
+async function updateProfiles() {
+  const profilesSnapshot = await firestore.collection('profiles').get();
+  // get one profile from each platform
 
-//   for (const doc of profilesSnapshot.docs) {
-//     const data = doc.data();
-//     const userId = data.profile.userId || data.profile.user_id;
-//     const platformId = data.platformId;
+  for (const doc of profilesSnapshot.docs) {
+    const data = doc.data();
+    const userId = data.userId;
+    const platformId = data.platformId;
 
-//     if (!userId || !platformId) continue;
+    if (!userId || !platformId) continue;
 
-//     const userDoc = await firestore
-//       .collection('users')
-//       .doc(userId.split(':')[1])
-//       .get();
-//     const userData = userDoc.data();
+    const userDoc = await firestore.collection('users').doc(userId).get();
+    const userData = userDoc.data();
 
-//     if (!userData) continue;
+    if (!userData) continue;
 
-//     const newProfileData = {
-//       platformId,
-//       profile: {
-//         id: data.profile.id,
-//         name: data.profile.name || data.profile.displayName || '',
-//         username: data.profile.username || '',
-//         avatar: data.profile.avatar || '',
-//       },
-//       fetched: userData.accounts[platformId]?.fetched || {},
-//     };
+    const avatar = (() => {
+      if (platformId === PLATFORM.Mastodon) {
+        return (
+          data.profile.avatar ||
+          'https://mastodon.social/avatars/original/missing.png'
+        );
+      }
+      if (platformId === PLATFORM.Twitter) {
+        return data.profile.profile_image_url;
+      }
+      if (platformId === PLATFORM.Bluesky) {
+        return data.profile.avatar;
+      }
+      return data.profile.avatar;
+    })();
 
-//     if (platformId === 'mastodon') {
-//       newProfileData.profile.username = `${data.profile.username}@${data.profile.mastodonServer || ''}`;
-//       //@ts-ignore
-//       delete newProfileData.profile.mastodonServer;
-//     }
+    const username = (() => {
+      if (platformId === PLATFORM.Mastodon) {
+        return `${data.profile.username}@${data.profile.mastodonServer}`;
+      }
+      return data.profile.username;
+    })();
 
-//     const newDocId = `${platformId}:${data.profile.id}`;
-//     await firestore.collection('profiles').doc(newDocId).set(newProfileData);
-//     await doc.ref.delete();
-//   }
+    const displayName = (() => {
+      if (platformId === PLATFORM.Mastodon) {
+        return data.profile.displayName || username;
+      }
+      return data.profile.name || username;
+    })();
 
-//   console.log('Profiles updated');
-// }
+    const fetched = (() => {
+      if (userData.accounts && userData.accounts[platformId]) {
+        return userData.accounts[platformId][0].fetched || {};
+      }
+      return userData[platformId][0].fetched || {};
+    })();
+
+    // "https://mastodon.social/users/ShaRef/statuses/113324282143873010"
+
+    if (platformId === PLATFORM.Mastodon) {
+      const newest_id = `https://${data.profile.mastodonServer}/users/${data.profile.username}/statuses/${fetched.newest_id}`;
+      const oldest_id = `https://${data.profile.mastodonServer}/users/${data.profile.username}/statuses/${fetched.oldest_id}`;
+      fetched.newest_id = newest_id;
+      fetched.oldest_id = oldest_id;
+    }
+
+    const user_id = (() => {
+      if (platformId === PLATFORM.Mastodon) {
+        return `${data.profile.username}@${data.profile.mastodonServer}`;
+      }
+      return data.profile.id;
+    })();
+    const newProfileData = {
+      platformId,
+      profile: {
+        id: data.profile.id,
+        displayName,
+        username,
+        avatar,
+      },
+      fetched,
+      user_id,
+    };
+
+    if (platformId === 'mastodon') {
+      newProfileData.profile.username = `${data.profile.username}@${data.profile.mastodonServer || ''}`;
+    }
+
+    const newDocId = `${platformId}-${user_id}`;
+    await firestore.collection('profiles').doc(newDocId).set(newProfileData);
+    await doc.ref.delete();
+  }
+}
 
 async function updatePosts() {
   const postsSnapshot = await firestore.collection('posts').get();
 
-  let count = 0;
   for (const doc of postsSnapshot.docs) {
-    if (count >= 7) break;
-    count++;
     const data = doc.data();
     const origin = data.origin;
     const authorId = data.authorId;
@@ -78,7 +122,6 @@ async function updatePosts() {
 
     if (!userData) continue;
 
-    console.log('User data:', userData);
     const accountInfo = (() => {
       if (userData.accounts && userData.accounts[origin]) {
         return userData.accounts[origin][0];
@@ -139,10 +182,7 @@ async function updatePosts() {
     }
 
     await doc.ref.set(updatedData);
-    console.log('Post updated:', { post: updatedData, docId: doc.id });
   }
-
-  console.log('Posts updated');
 }
 
 async function updatePlatformPosts() {
@@ -150,10 +190,7 @@ async function updatePlatformPosts() {
     .collection('platformPosts')
     .get();
 
-  let count = 0;
   for (const doc of platformPostsSnapshot.docs) {
-    if (count >= 5) break;
-    count++;
     const data = doc.data();
     if (!data.post_id) {
       const updatedData = { ...data };
@@ -170,32 +207,27 @@ async function updatePlatformPosts() {
       } else {
         updatedData.post_id = data.posted.post_id;
       }
-      console.log('Updating platformPost:', { updatedData, docId: doc.id });
       await doc.ref.set(updatedData);
     }
   }
 }
 
-async function removeUserDocs() {
-  const userDocs = await firestore.collection('users').get();
-  const batch = firestore.batch();
+// async function removeUserDocs() {
+//   const userDocs = await firestore.collection('users').get();
+//   const batch = firestore.batch();
 
-  userDocs.forEach((doc) => {
-    batch.delete(doc.ref);
-  });
+//   userDocs.forEach((doc) => {
+//     batch.delete(doc.ref);
+//   });
 
-  await batch.commit();
-  console.log('User documents removed');
-}
+//   await batch.commit();
+// }
 
 async function updateTriples() {
   const triplesSnapshot = await firestore.collection('triples').get();
 
-  let count = 0;
   for (const doc of triplesSnapshot.docs) {
-    if (count >= 5) break;
     const data = doc.data();
-    count++;
 
     if (data.authorId) {
       const updatedData = { ...data };
@@ -204,8 +236,6 @@ async function updateTriples() {
       if (data.createdAtMs) {
         updatedData.postCreatedAtMs = data.createdAtMs;
         delete updatedData.createdAtMs;
-      } else {
-        console.warn(`No createdAtMs for triple: ${doc.id}`);
       }
 
       // Update authorId to authorProfileId
@@ -230,19 +260,14 @@ async function updateTriples() {
           continue;
         }
       } else {
-        console.warn(`Unknown platform: ${platformId}`);
         continue;
       }
 
       delete updatedData.authorId;
 
-      console.log('Updating triple:', { updatedData, docId: doc.id });
-
       await doc.ref.set(updatedData);
     }
   }
-
-  console.log('Triples updated');
 }
 
 (async () => {
