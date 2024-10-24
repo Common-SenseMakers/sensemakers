@@ -17,7 +17,7 @@ import {
   FETCH_TWITTER_ACCOUNT_TASK,
 } from '../../platforms/platforms.tasks';
 import { getProfileId } from '../../profiles/profiles.repository';
-import { enqueueTask } from '../../tasksUtils/tasks.support';
+import { chunkNumber, enqueueTask } from '../../tasksUtils/tasks.support';
 import { canReadPost } from '../posts.access.control';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 import {
@@ -254,63 +254,6 @@ export const unpublishPlatformPostController: RequestHandler = async (
   }
 };
 
-export const addAccountDataController: RequestHandler = async (
-  request,
-  response
-) => {
-  try {
-    const services = getServices(request);
-
-    const payload = request.body as AddUserDataPayload;
-
-    const profile = await services.db.run(async (manager) => {
-      return services.users.getOrCreateProfileByUsername(
-        payload.platformId,
-        payload.username,
-        manager
-      );
-    });
-
-    if (!profile) {
-      throw new Error(
-        `unable to find profile for ${payload.username} on ${payload.platformId}`
-      );
-    }
-    const profileId = getProfileId(payload.platformId, profile?.user_id);
-    if (payload.platformId === PLATFORM.Twitter) {
-      await enqueueTask(FETCH_TWITTER_ACCOUNT_TASK, {
-        profileId,
-        platformId: PLATFORM.Twitter,
-        latest: payload.latest,
-        amount: payload.amount,
-      });
-    }
-    if (payload.platformId === PLATFORM.Mastodon) {
-      await enqueueTask(FETCH_MASTODON_ACCOUNT_TASK, {
-        profileId,
-        platformId: PLATFORM.Mastodon,
-        latest: payload.latest,
-        amount: payload.amount,
-      });
-    }
-    if (payload.platformId === PLATFORM.Bluesky) {
-      await enqueueTask(FETCH_BLUESKY_ACCOUNT_TASK, {
-        profileId,
-        platformId: PLATFORM.Bluesky,
-        latest: payload.latest,
-        amount: payload.amount,
-      });
-    }
-
-    if (DEBUG) logger.debug(`${request.path}: addAccountData`, payload);
-
-    response.status(200).send({ success: true });
-  } catch (error) {
-    logger.error('error', error);
-    response.status(500).send({ success: false, error });
-  }
-};
-
 export const addAccountsDataController: RequestHandler = async (
   request,
   response
@@ -335,13 +278,10 @@ export const addAccountsDataController: RequestHandler = async (
       }
 
       const profileId = getProfileId(payload.platformId, profile?.user_id);
-      const chunkSize = 100;
-      const chunks = Math.ceil(payload.amount / chunkSize);
+      const chunkSize = 50;
+      const fetchAmountChunks = chunkNumber(payload.amount, chunkSize);
 
-      for (let i = 0; i < chunks; i++) {
-        const amount = Math.min(chunkSize, payload.amount - i * chunkSize);
-        const latest = i === 0 ? payload.latest : undefined;
-
+      for (const fetchAmountChunk of fetchAmountChunks) {
         let taskName;
         switch (payload.platformId) {
           case PLATFORM.Twitter:
@@ -360,8 +300,8 @@ export const addAccountsDataController: RequestHandler = async (
         await enqueueTask(taskName, {
           profileId,
           platformId: payload.platformId,
-          latest,
-          amount,
+          latest: payload.latest,
+          amount: fetchAmountChunk,
         });
       }
     }
