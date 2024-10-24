@@ -159,10 +159,10 @@ exports[PARSE_POST_TASK] = onTaskDispatched(
     retryConfig: {
       maxAttempts: 5,
     },
-    concurrency: 190,
+    concurrency: 50,
     rateLimits: {
-      maxConcurrentDispatches: 190,
-      maxDispatchesPerSecond: 190,
+      maxConcurrentDispatches: 50,
+      maxDispatchesPerSecond: 50,
     },
   },
   (req) => parsePostTask(req, createServices(firestore, getConfig()))
