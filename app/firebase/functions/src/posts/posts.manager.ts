@@ -860,17 +860,7 @@ export class PostsManager {
     });
   }
 
-  /**
-   * Approving a post receives an AppPostFull.
-   * - The content and the semantics might have changed.
-   * - The draft value on the mirrors array might have changed.
-   *
-   * The platformIds are the platforms where the post will be published
-   * (or updated/republished)
-   *
-   * userId must be the authenticated user to prevent posting on
-   * behalf of others.
-   */
+  /** mark a post as republish */
   async publishPost(
     newPost: AppPostFull,
     platformIds: PLATFORM[],

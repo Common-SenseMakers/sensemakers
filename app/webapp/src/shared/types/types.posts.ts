@@ -62,8 +62,8 @@ interface AppPostBase {
   parsingStatus: AppPostParsingStatus;
   parsingStartedAtMs?: number;
   parsedStatus: AppPostParsedStatus;
-  reviewedStatus: AppPostReviewStatus;
-  republishedStatus: AppPostRepublishedStatus;
+  updateStatus: AppPostReviewStatus;
+  indexStatus: WIP;
   originalParsed?: ParsePostResult;
   semantics?: AppPostSemantics;
   mirrorsIds: string[];
