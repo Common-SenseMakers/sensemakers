@@ -310,3 +310,67 @@ export const addAccountDataController: RequestHandler = async (
     response.status(500).send({ success: false, error });
   }
 };
+
+export const addAccountsDataController: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    const services = getServices(request);
+    const payloads = request.body as AddUserDataPayload[];
+
+    for (const payload of payloads) {
+      const profile = await services.db.run(async (manager) => {
+        return services.users.getOrCreateProfileByUsername(
+          payload.platformId,
+          payload.username,
+          manager
+        );
+      });
+
+      if (!profile) {
+        throw new Error(
+          `unable to find profile for ${payload.username} on ${payload.platformId}`
+        );
+      }
+
+      const profileId = getProfileId(payload.platformId, profile?.user_id);
+      const chunkSize = 100;
+      const chunks = Math.ceil(payload.amount / chunkSize);
+
+      for (let i = 0; i < chunks; i++) {
+        const amount = Math.min(chunkSize, payload.amount - i * chunkSize);
+        const latest = i === 0 ? payload.latest : undefined;
+
+        let taskName;
+        switch (payload.platformId) {
+          case PLATFORM.Twitter:
+            taskName = FETCH_TWITTER_ACCOUNT_TASK;
+            break;
+          case PLATFORM.Mastodon:
+            taskName = FETCH_MASTODON_ACCOUNT_TASK;
+            break;
+          case PLATFORM.Bluesky:
+            taskName = FETCH_BLUESKY_ACCOUNT_TASK;
+            break;
+          default:
+            throw new Error(`Unsupported platform: ${payload.platformId}`);
+        }
+
+        await enqueueTask(taskName, {
+          profileId,
+          platformId: payload.platformId,
+          latest,
+          amount,
+        });
+      }
+    }
+
+    if (DEBUG) logger.debug(`${request.path}: addAccountsData`, payloads);
+
+    response.status(200).send({ success: true });
+  } catch (error) {
+    logger.error('error', error);
+    response.status(500).send({ success: false, error });
+  }
+};
