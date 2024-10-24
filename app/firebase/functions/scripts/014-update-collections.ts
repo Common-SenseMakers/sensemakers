@@ -1,4 +1,5 @@
 import { PLATFORM } from '../src/@shared/types/types.platforms';
+import { mapStoreElements, parseRDF } from '../src/@shared/utils/n3.utils';
 import { parseMastodonAccountURI } from '../src/platforms/mastodon/mastodon.utils';
 import { app } from './scripts.services';
 
@@ -10,8 +11,8 @@ if (process.env.FB_PROJECT_ID !== 'sensenets-dataset') {
 
 async function updateCollections() {
   // await updateProfiles();
-  // await updatePosts();
-  // await updatePlatformPosts();
+  await updatePosts();
+  await updatePlatformPosts();
   // await removeUserDocs();
   await updateTriples();
 }
@@ -59,47 +60,90 @@ async function updateCollections() {
 //   console.log('Profiles updated');
 // }
 
-// async function updatePosts() {
-//   const postsSnapshot = await firestore.collection('posts').get();
+async function updatePosts() {
+  const postsSnapshot = await firestore.collection('posts').get();
 
-//   for (const doc of postsSnapshot.docs) {
-//     const data = doc.data();
-//     const origin = data.origin;
-//     const authorId = data.authorId;
+  let count = 0;
+  for (const doc of postsSnapshot.docs) {
+    if (count >= 7) break;
+    count++;
+    const data = doc.data();
+    const origin = data.origin;
+    const authorId = data.authorId;
 
-//     if (!origin || !authorId) continue;
+    if (!origin || !authorId) continue;
 
-//     const userDoc = await firestore
-//       .collection('users')
-//       .doc(authorId.split(':')[1])
-//       .get();
-//     const userData = userDoc.data();
+    const userDoc = await firestore.collection('users').doc(authorId).get();
+    const userData = userDoc.data();
 
-//     if (!userData) continue;
+    if (!userData) continue;
 
-//     const accountInfo = userData.accounts[origin];
-//     if (!accountInfo) continue;
+    console.log('User data:', userData);
+    const accountInfo = (() => {
+      if (userData.accounts && userData.accounts[origin]) {
+        return userData.accounts[origin][0];
+      }
+      return userData[origin][0];
+    })();
 
-//     const updatedData = {
-//       ...data,
-//       generic: {
-//         ...data.generic,
-//         author: {
-//           ...data.generic.author,
-//           ...accountInfo.profile,
-//         },
-//       },
-//       authorProfileId: `${origin}:${accountInfo.profile.id}`,
-//     };
+    if (!accountInfo) continue;
 
-//     //@ts-ignore
-//     delete updatedData.authorId;
+    const avatarUrl = (() => {
+      if (origin === PLATFORM.Mastodon) {
+        return (
+          accountInfo.profile.avatar ||
+          'https://mastodon.social/avatars/original/missing.png'
+        );
+      }
+      if (origin === PLATFORM.Twitter) {
+        return accountInfo.profile.profile_image_url;
+      }
+      if (origin === PLATFORM.Bluesky) {
+        return accountInfo.profile.avatar;
+      }
+      return accountInfo.profile.avatar;
+    })();
+    const username = (() => {
+      if (origin === PLATFORM.Mastodon) {
+        return `${accountInfo.profile.username}@${accountInfo.profile.mastodonServer}`;
+      }
+      return accountInfo.profile.username;
+    })();
+    const platformAccountId = (() => {
+      if (origin === PLATFORM.Mastodon) {
+        return `${accountInfo.profile.username}@${accountInfo.profile.mastodonServer}`;
+      }
+      return accountInfo.profile.id;
+    })();
 
-//     await doc.ref.set(updatedData);
-//   }
+    const updatedData: any = {
+      ...data,
+      generic: {
+        ...data.generic,
+        author: {
+          ...data.generic.author,
+          avatarUrl,
+          username,
+        },
+      },
+      authorProfileId: `${origin}-${platformAccountId}`,
+    };
 
-//   console.log('Posts updated');
-// }
+    delete updatedData.authorId;
+    if (data.originalParsed) {
+      const { keywords, labels } = await processSemanticsWithoutTransaction(
+        data.originalParsed.semantics
+      );
+      updatedData.keywords = keywords;
+      updatedData.labels = labels;
+    }
+
+    await doc.ref.set(updatedData);
+    console.log('Post updated:', { post: updatedData, docId: doc.id });
+  }
+
+  console.log('Posts updated');
+}
 
 async function updatePlatformPosts() {
   const platformPostsSnapshot = await firestore
@@ -132,17 +176,17 @@ async function updatePlatformPosts() {
   }
 }
 
-// async function removeUserDocs() {
-//   const userDocs = await firestore.collection('users').get();
-//   const batch = firestore.batch();
+async function removeUserDocs() {
+  const userDocs = await firestore.collection('users').get();
+  const batch = firestore.batch();
 
-//   userDocs.forEach((doc) => {
-//     batch.delete(doc.ref);
-//   });
+  userDocs.forEach((doc) => {
+    batch.delete(doc.ref);
+  });
 
-//   await batch.commit();
-//   console.log('User documents removed');
-// }
+  await batch.commit();
+  console.log('User documents removed');
+}
 
 async function updateTriples() {
   const triplesSnapshot = await firestore.collection('triples').get();
@@ -209,3 +253,25 @@ async function updateTriples() {
     console.error('Error updating collections:', error);
   }
 })();
+
+async function processSemanticsWithoutTransaction(
+  semantics: string
+): Promise<{ labels: string[]; keywords: string[] }> {
+  const store = await parseRDF(semantics);
+
+  const labels: Set<string> = new Set();
+  const keywords: Set<string> = new Set();
+
+  mapStoreElements(store, (q) => {
+    if (q.predicate.value === 'https://schema.org/keywords') {
+      keywords.add(q.object.value);
+    } else {
+      labels.add(q.predicate.value);
+    }
+  });
+
+  return {
+    labels: Array.from(labels),
+    keywords: Array.from(keywords),
+  };
+}
