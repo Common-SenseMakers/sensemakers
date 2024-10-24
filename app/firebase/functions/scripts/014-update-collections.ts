@@ -19,7 +19,8 @@ async function updateCollections() {
 
 async function updateProfiles() {
   const profilesSnapshot = await firestore.collection('profiles').get();
-  // get one profile from each platform
+  let batch = firestore.batch();
+  let batchCount = 0;
 
   for (const doc of profilesSnapshot.docs) {
     const data = doc.data();
@@ -70,8 +71,6 @@ async function updateProfiles() {
       return userData[platformId][0].fetched || {};
     })();
 
-    // "https://mastodon.social/users/ShaRef/statuses/113324282143873010"
-
     if (platformId === PLATFORM.Mastodon) {
       const newest_id = `https://${data.profile.mastodonServer}/users/${data.profile.username}/statuses/${fetched.newest_id}`;
       const oldest_id = `https://${data.profile.mastodonServer}/users/${data.profile.username}/statuses/${fetched.oldest_id}`;
@@ -102,13 +101,27 @@ async function updateProfiles() {
     }
 
     const newDocId = `${platformId}-${user_id}`;
-    await firestore.collection('profiles').doc(newDocId).set(newProfileData);
-    await doc.ref.delete();
+    batch.set(firestore.collection('profiles').doc(newDocId), newProfileData);
+    batch.delete(doc.ref);
+
+    batchCount++;
+
+    if (batchCount === 200) {
+      await batch.commit();
+      batch = firestore.batch();
+      batchCount = 0;
+    }
+  }
+
+  if (batchCount > 0) {
+    await batch.commit();
   }
 }
 
 async function updatePosts() {
   const postsSnapshot = await firestore.collection('posts').get();
+  let batch = firestore.batch();
+  let batchCount = 0;
 
   for (const doc of postsSnapshot.docs) {
     const data = doc.data();
@@ -181,7 +194,18 @@ async function updatePosts() {
       updatedData.labels = labels;
     }
 
-    await doc.ref.set(updatedData);
+    batch.set(doc.ref, updatedData);
+    batchCount++;
+
+    if (batchCount === 200) {
+      await batch.commit();
+      batch = firestore.batch();
+      batchCount = 0;
+    }
+  }
+
+  if (batchCount > 0) {
+    await batch.commit();
   }
 }
 
@@ -189,6 +213,8 @@ async function updatePlatformPosts() {
   const platformPostsSnapshot = await firestore
     .collection('platformPosts')
     .get();
+  let batch = firestore.batch();
+  let batchCount = 0;
 
   for (const doc of platformPostsSnapshot.docs) {
     const data = doc.data();
@@ -207,8 +233,19 @@ async function updatePlatformPosts() {
       } else {
         updatedData.post_id = data.posted.post_id;
       }
-      await doc.ref.set(updatedData);
+      batch.set(doc.ref, updatedData);
+      batchCount++;
+
+      if (batchCount === 200) {
+        await batch.commit();
+        batch = firestore.batch();
+        batchCount = 0;
+      }
     }
+  }
+
+  if (batchCount > 0) {
+    await batch.commit();
   }
 }
 
@@ -225,6 +262,8 @@ async function updatePlatformPosts() {
 
 async function updateTriples() {
   const triplesSnapshot = await firestore.collection('triples').get();
+  let batch = firestore.batch();
+  let batchCount = 0;
 
   for (const doc of triplesSnapshot.docs) {
     const data = doc.data();
@@ -265,8 +304,19 @@ async function updateTriples() {
 
       delete updatedData.authorId;
 
-      await doc.ref.set(updatedData);
+      batch.set(doc.ref, updatedData);
+      batchCount++;
+
+      if (batchCount === 200) {
+        await batch.commit();
+        batch = firestore.batch();
+        batchCount = 0;
+      }
     }
+  }
+
+  if (batchCount > 0) {
+    await batch.commit();
   }
 }
 
