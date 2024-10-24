@@ -1,8 +1,7 @@
-import { Box, Image } from 'grommet';
+import { Box } from 'grommet';
 
 export const ClearIcon = (props: { size?: number; color?: string }) => {
   const size = props.size || 18;
-  const color = props.color || 'black';
 
   return (
     <Box>

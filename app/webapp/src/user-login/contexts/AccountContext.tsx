@@ -1,6 +1,7 @@
 import {
   PropsWithChildren,
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -33,11 +34,11 @@ export type AccountContextType = {
   isConnected: boolean;
   email?: EmailDetails;
   disconnect: () => void;
-  refresh: () => void;
-  token?: string;
+  refresh: () => Promise<void>;
+  token?: string | null;
   setToken: (token: string) => void;
   setOverallLoginStatus: (status: OverallLoginStatus) => void;
-  overallLoginStatus: OverallLoginStatus | undefined;
+  overallLoginStatus: OverallLoginStatus | undefined | null;
   setLoginFlowState: (status: LoginFlowState) => void;
   loginFlowState: LoginFlowState;
   resetLogin: () => void;
@@ -48,8 +49,8 @@ export type AccountContextType = {
   ) => void;
   getPlatformConnectedStatus: (
     platformId: PLATFORM
-  ) => PlatformConnectedStatus | undefined;
-  alreadyConnected?: boolean;
+  ) => PlatformConnectedStatus | undefined | null;
+  alreadyConnected?: boolean | null;
   setAlreadyConnected: (value: boolean) => void;
 };
 
@@ -130,27 +131,15 @@ export const AccountContext = (props: PropsWithChildren) => {
     false
   );
 
-  /** keep the conneccted user linkted to the current token */
-  useEffect(() => {
-    refresh();
-  }, [token]);
+  const setOverallLoginStatus = useCallback(
+    (status: OverallLoginStatus) => {
+      if (DEBUG) console.log('setOverallLoginStatus', status);
+      _setOverallLoginStatus(status);
+    },
+    [_setOverallLoginStatus]
+  );
 
-  const setOverallLoginStatus = (status: OverallLoginStatus) => {
-    if (DEBUG) console.log('setOverallLoginStatus', status);
-    _setOverallLoginStatus(status);
-  };
-
-  const setLoginFlowState = (status: LoginFlowState) => {
-    if (DEBUG) console.log('setLoginFlowState', status);
-    _setLoginFlowState(status);
-  };
-
-  const resetLogin = () => {
-    setLoginFlowState(LoginFlowState.Idle);
-    setOverallLoginStatus(OverallLoginStatus.NotKnown);
-  };
-
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     try {
       if (token) {
         if (DEBUG) console.log('getting me', { token });
@@ -189,6 +178,21 @@ export const AccountContext = (props: PropsWithChildren) => {
       setOverallLoginStatus(OverallLoginStatus.LoggedOut);
       setToken(null);
     }
+  }, [setOverallLoginStatus, setToken, token]);
+
+  /** keep the conneccted user linkted to the current token */
+  useEffect(() => {
+    refresh().catch(console.error);
+  }, [refresh, token]);
+
+  const setLoginFlowState = (status: LoginFlowState) => {
+    if (DEBUG) console.log('setLoginFlowState', status);
+    _setLoginFlowState(status);
+  };
+
+  const resetLogin = () => {
+    setLoginFlowState(LoginFlowState.Idle);
+    setOverallLoginStatus(OverallLoginStatus.NotKnown);
   };
 
   /**
@@ -210,7 +214,13 @@ export const AccountContext = (props: PropsWithChildren) => {
       /** connectedUser === loggedIn now */
       setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
     }
-  }, [connectedUser, overallLoginStatus, token, loginFlowState]);
+  }, [
+    connectedUser,
+    overallLoginStatus,
+    token,
+    loginFlowState,
+    setOverallLoginStatus,
+  ]);
 
   const disconnect = () => {
     setConnectedUser(undefined);
@@ -229,19 +239,19 @@ export const AccountContext = (props: PropsWithChildren) => {
 
   const email = connectedUser ? connectedUser.email : undefined;
 
-  const setPlatformConnectedStatus = (
-    platformId: PLATFORM,
-    status: PlatformConnectedStatus
-  ) => {
-    setPlatformsConnectedStatus({
-      ...platformsConnectedStatus,
-      [platformId]: status,
-    });
-  };
+  const setPlatformConnectedStatus = useCallback(
+    (platformId: PLATFORM, status: PlatformConnectedStatus) => {
+      setPlatformsConnectedStatus({
+        ...platformsConnectedStatus,
+        [platformId]: status,
+      });
+    },
+    [platformsConnectedStatus, setPlatformsConnectedStatus]
+  );
 
   const getPlatformConnectedStatus = (
     platformId: PLATFORM
-  ): PlatformConnectedStatus | undefined => {
+  ): PlatformConnectedStatus | undefined | null => {
     return platformsConnectedStatus && platformsConnectedStatus[platformId];
   };
 
@@ -257,7 +267,7 @@ export const AccountContext = (props: PropsWithChildren) => {
     connectedSourcePlatforms.forEach((platform) => {
       setPlatformConnectedStatus(platform, PlatformConnectedStatus.Connected);
     });
-  }, [connectedSourcePlatforms]);
+  }, [connectedSourcePlatforms, setPlatformConnectedStatus]);
 
   return (
     <AccountContextValue.Provider

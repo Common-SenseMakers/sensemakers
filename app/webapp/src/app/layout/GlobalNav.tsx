@@ -3,14 +3,13 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Location, useLocation, useNavigate } from 'react-router-dom';
 
-import { I18Keys } from '../../i18n/i18n';
+import { AppGeneralKeys } from '../../i18n/i18n.app.general';
 import { AbsoluteRoutes, RouteNames } from '../../route.names';
 import { PostsQueryStatus } from '../../shared/types/types.posts';
 import { AppButton } from '../../ui-components';
 import { useThemeContext } from '../../ui-components/ThemedApp';
 import { DraftsIcon } from '../icons/DraftsIcon';
 import { FeedIcon } from '../icons/FeedIcon';
-import { PublishedIcon } from '../icons/PublishedIcon';
 import { SettignsIcon } from '../icons/SettingsIcon';
 
 const DEBUG = false;
@@ -40,7 +39,7 @@ export const locationToPageIx = (location: Location) => {
   }
 };
 
-export const GlobalNav = (props: {}) => {
+export const GlobalNav = () => {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
@@ -95,19 +94,19 @@ export const GlobalNav = (props: {}) => {
   return (
     <Box direction="row" align="center" style={{ height: '48px' }}>
       {button(
-        'My Posts',
+        t(AppGeneralKeys.myPosts),
         <DraftsIcon></DraftsIcon>,
         `/${PostsQueryStatus.DRAFTS}`,
         pageIx === 0
       )}
       {button(
-        t(I18Keys.feedTitle),
+        t(AppGeneralKeys.feedTitle),
         <FeedIcon></FeedIcon>,
         AbsoluteRoutes.Feed,
         pageIx === 2
       )}
       {button(
-        'Settings',
+        t(AppGeneralKeys.settings),
         <SettignsIcon></SettignsIcon>,
         AbsoluteRoutes.Settings,
         pageIx === 3

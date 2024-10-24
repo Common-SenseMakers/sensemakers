@@ -1,13 +1,11 @@
-import React, { useContext, useEffect, useMemo } from 'react';
+import React, { useContext } from 'react';
 import { createContext } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import {
-  FetcherConfig,
   PostFetcherInterface,
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
-import { PostsQueryStatus } from '../shared/types/types.posts';
 import { locationToFeedIx } from './FeedTabs';
 import { feedTabs } from './feed.config';
 
@@ -31,25 +29,25 @@ export const FeedPostsContext: React.FC<{
   const feed0 = usePostsFetcher({
     endpoint: '/api/feed/get',
     labels: feedTabs[0].labels,
-    DEBUG_PREIX: `[FEED 0] `,
+    DEBUG_PREFIX: `[FEED 0] `,
   });
 
   const feed1 = usePostsFetcher({
     endpoint: '/api/feed/get',
     labels: feedTabs[1].labels,
-    DEBUG_PREIX: `[FEED 1] `,
+    DEBUG_PREFIX: `[FEED 1] `,
   });
 
   const feed2 = usePostsFetcher({
     endpoint: '/api/feed/get',
     labels: feedTabs[2].labels,
-    DEBUG_PREIX: `[FEED 2] `,
+    DEBUG_PREFIX: `[FEED 2] `,
   });
 
   const feed3 = usePostsFetcher({
     endpoint: '/api/feed/get',
     labels: feedTabs[3].labels,
-    DEBUG_PREIX: `[FEED 3] `,
+    DEBUG_PREFIX: `[FEED 3] `,
   });
 
   const feeds = [feed0, feed1, feed2, feed3];

@@ -94,8 +94,12 @@ export const KeywordsComponent = (props: PatternProps) => {
           editable={props.editable}
           colors={{ font: '#498283', background: '#F5FCFC', border: '#BDD9D7' }}
           labels={keywords}
-          addLabel={(newLabel) => addKeyword(newLabel)}
-          removeLabel={(newLabel) => removeKeyword(newLabel)}></AppLabelsEditor>
+          addLabel={(newLabel) => {
+            addKeyword(newLabel).catch(console.error);
+          }}
+          removeLabel={(newLabel) => {
+            removeKeyword(newLabel).catch(console.error);
+          }}></AppLabelsEditor>
       </Box>
     </Box>
   );

@@ -1,6 +1,6 @@
 import { t } from 'i18next';
 
-import { I18Keys } from '../i18n/i18n';
+import { PlatformsKeys } from '../i18n/i18n.platforms';
 import { BlueskyThread } from '../shared/types/types.bluesky';
 import { MastodonThread } from '../shared/types/types.mastodon';
 import { PlatformPost } from '../shared/types/types.platform.posts';
@@ -46,20 +46,20 @@ export const getPlatformPostDetails = (
     if (platformPost && platformPost.posted) {
       if (platformPost.platformId === PLATFORM.Twitter) {
         return (platformPost.posted.post as TwitterThread).tweets.length > 1
-          ? t(I18Keys.ThreadX)
-          : t(I18Keys.TweetX);
+          ? t(PlatformsKeys.ThreadX)
+          : t(PlatformsKeys.TweetX);
       }
 
       if (platformPost.platformId === PLATFORM.Mastodon) {
         return (platformPost.posted.post as MastodonThread).posts.length > 1
-          ? t(I18Keys.ThreadMastodon)
-          : t(I18Keys.TootMastodon);
+          ? t(PlatformsKeys.ThreadMastodon)
+          : t(PlatformsKeys.TootMastodon);
       }
 
       if (platformPost.platformId === PLATFORM.Bluesky) {
         return (platformPost.posted.post as BlueskyThread).posts.length > 1
-          ? t(I18Keys.ThreadBluesky)
-          : t(I18Keys.PostBluesky);
+          ? t(PlatformsKeys.ThreadBluesky)
+          : t(PlatformsKeys.PostBluesky);
       }
     }
 

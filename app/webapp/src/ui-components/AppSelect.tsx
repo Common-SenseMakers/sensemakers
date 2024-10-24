@@ -1,7 +1,5 @@
-import { Box, BoxExtendedProps, Select, SelectExtendedProps } from 'grommet';
+import { Select, SelectExtendedProps } from 'grommet';
 import React from 'react';
-
-import { useThemeContext } from './ThemedApp';
 
 export const AppSelect = React.forwardRef<
   HTMLInputElement,

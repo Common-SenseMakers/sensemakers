@@ -76,13 +76,13 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
         setBasePost(fetched.post);
       }
     }
-  }, [fetched.post]);
+  }, [basePost, fetched.post, operations]);
 
   useEffect(() => {
     setOperations([]);
     setBasePost(fetched.post);
     setMergedSemantics(fetched.post?.semantics);
-  }, [fetched.postId]);
+  }, [fetched.post, fetched.postId]);
 
   /** the base store is the store derived from the base post */
   const baseStore = useMemo(() => {
@@ -148,13 +148,15 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
         mergedStoreSize: mergedStore.size,
       });
 
-    writeRDF(mergedStore).then((_semantics) => {
-      if (DEBUG)
-        console.log('computing merged semantics - semantics computed', {
-          _semantics,
-        });
-      setMergedSemantics(_semantics);
-    });
+    writeRDF(mergedStore)
+      .then((_semantics) => {
+        if (DEBUG)
+          console.log('computing merged semantics - semantics computed', {
+            _semantics,
+          });
+        setMergedSemantics(_semantics);
+      })
+      .catch(console.error);
   }, [baseStore, operations]);
 
   const hasOperation = (
@@ -247,7 +249,7 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
 
       setOperations([...operations]);
     },
-    [baseStore]
+    [baseStore, operations]
   );
 
   return { mergedSemantics, updateSemantics };

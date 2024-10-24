@@ -1,6 +1,4 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
-import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { Location, useLocation, useNavigate } from 'react-router-dom';
 
 import { RouteNames } from '../route.names';
@@ -24,8 +22,7 @@ export const locationToFeedIx = (location: Location) => {
   }
 };
 
-export const FeedTabs = (props: {}) => {
-  const { t } = useTranslation();
+export const FeedTabs = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { constants } = useThemeContext();

@@ -51,7 +51,7 @@ export const getMockPublishedPost = () => {
     origin: PLATFORM.Twitter,
     parsedStatus: AppPostParsedStatus.PROCESSED,
     parsingStatus: AppPostParsingStatus.IDLE,
-    reviewedStatus: AppPostReviewStatus.APPROVED,
+    reviewedStatus: AppPostReviewStatus.DRAFT,
     republishedStatus: AppPostRepublishedStatus.REPUBLISHED,
     originalParsed,
     mirrors: [
@@ -133,7 +133,7 @@ export const getMockAutoPublishedPost = () => {
     origin: PLATFORM.Twitter,
     parsedStatus: AppPostParsedStatus.PROCESSED,
     parsingStatus: AppPostParsingStatus.IDLE,
-    reviewedStatus: AppPostReviewStatus.APPROVED,
+    reviewedStatus: AppPostReviewStatus.PENDING,
     republishedStatus: AppPostRepublishedStatus.AUTO_REPUBLISHED,
     originalParsed,
     mirrors: [

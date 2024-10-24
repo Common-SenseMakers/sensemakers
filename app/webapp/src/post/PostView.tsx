@@ -7,23 +7,21 @@ import { useAppFetch } from '../api/app.fetch';
 import { ClearIcon } from '../app/icons/ClearIcon';
 import { SendIcon } from '../app/icons/SendIcon';
 import { ViewportPage } from '../app/layout/Viewport';
-import { I18Keys } from '../i18n/i18n';
+import { PostEditKeys } from '../i18n/i18n.edit.post';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID, PatternProps } from '../semantics/patterns/patterns';
-import { AppPostReviewStatus } from '../shared/types/types.posts';
 import { PlatformProfile } from '../shared/types/types.profiles';
 import { AppButton } from '../ui-components';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
-import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { usePersist } from '../utils/use.persist';
 import { PostHeader } from './PostHeader';
 import { PostNav } from './PostNav';
 import { PostTextEditable } from './PostTextEditable';
 import { POSTING_POST_ID } from './PostingPage';
 import { usePost } from './post.context/PostContext';
-import { concatenateThread, hideSemanticsHelper } from './posts.helper';
+import { concatenateThread } from './posts.helper';
 
 const DEBUG = false;
 
@@ -37,11 +35,9 @@ export const PostView = (props: { profile?: PlatformProfile }) => {
     null
   );
   // local state to prevent detecting the returning before leaving
-  const [justSetPostId, setJustSetPostId] = useState<boolean>(false);
+  const [justSetPostId] = useState<boolean>(false);
 
-  const [_isReparsing, setIsReparsing] = useState(false);
-
-  const { connect: _connectOrcid } = useOrcidContext();
+  const [, setIsReparsing] = useState(false);
 
   const { constants } = useThemeContext();
   const { updated } = usePost();
@@ -63,20 +59,10 @@ export const PostView = (props: { profile?: PlatformProfile }) => {
       setIsReparsing(true);
       await appFetch('/api/posts/parse', { postId: updated.postMerged?.id });
       setIsReparsing(false);
-    } catch (e: any) {
+    } catch (e) {
       setIsReparsing(false);
       console.error(e);
-      throw new Error(e);
     }
-  };
-
-  const reviewForPublication = async () => {
-    if (!updated.postMerged) {
-      throw new Error(`Unexpected post not found`);
-    }
-    updated.updatePost({
-      reviewedStatus: AppPostReviewStatus.PENDING,
-    });
   };
 
   const enableEditOrUpdate = () => {
@@ -100,7 +86,13 @@ export const PostView = (props: { profile?: PlatformProfile }) => {
       if (DEBUG) console.log(`posting post detected for ${postingPostId}`);
       setPostingPostId(null);
     }
-  }, [postingPostId, connectedUser, justSetPostId, updated.postMerged?.id]);
+  }, [
+    postingPostId,
+    connectedUser,
+    justSetPostId,
+    updated.postMerged?.id,
+    setPostingPostId,
+  ]);
 
   const action = (() => {
     if (
@@ -119,19 +111,10 @@ export const PostView = (props: { profile?: PlatformProfile }) => {
           margin={{ top: 'medium' }}
           icon={<Refresh color={constants.colors.text}></Refresh>}
           style={{ width: '100%' }}
-          onClick={() => reparse()}
+          onClick={() => {
+            reparse().catch((e) => console.error(e));
+          }}
           label="Process"></AppButton>
-      );
-    }
-
-    if (updated.statusesMerged.ignored) {
-      return (
-        <AppButton
-          disabled={updated.isUpdating}
-          margin={{ top: 'medium' }}
-          primary
-          onClick={() => reviewForPublication()}
-          label={t(I18Keys.unignorePost)}></AppButton>
       );
     }
 
@@ -144,7 +127,7 @@ export const PostView = (props: { profile?: PlatformProfile }) => {
               disabled={updated.isUpdating}
               icon={<SendIcon></SendIcon>}
               onClick={() => enableEditOrUpdate()}
-              label={t(I18Keys.edit)}
+              label={t(PostEditKeys.edit)}
               style={{ width: '100%' }}></AppButton>
           </Box>
         </Box>
@@ -159,7 +142,7 @@ export const PostView = (props: { profile?: PlatformProfile }) => {
               disabled={updated.isUpdating}
               icon={<ClearIcon></ClearIcon>}
               onClick={() => cancelEdit()}
-              label={t(I18Keys.cancel)}></AppButton>
+              label={t(PostEditKeys.cancel)}></AppButton>
           </Box>
           <Box width="50%" align="end" gap="small">
             <AppButton
@@ -167,7 +150,7 @@ export const PostView = (props: { profile?: PlatformProfile }) => {
               disabled={updated.isUpdating}
               icon={<SendIcon></SendIcon>}
               onClick={() => enableEditOrUpdate()}
-              label={t(I18Keys.publish)}
+              label={t(PostEditKeys.publish)}
               style={{ width: '100%' }}></AppButton>
           </Box>
         </Box>
@@ -178,7 +161,7 @@ export const PostView = (props: { profile?: PlatformProfile }) => {
   })();
 
   const editable = updated.editable;
-  const hideSemantics = hideSemanticsHelper(updated.postMerged);
+  const hideSemantics = false;
 
   const content = (() => {
     if (!updated.postMerged) {

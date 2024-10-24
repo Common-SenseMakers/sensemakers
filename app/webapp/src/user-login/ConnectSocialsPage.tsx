@@ -5,7 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { AppLogo } from '../app/brand/AppLogo';
 import { BlueskyIcon, MastodonIcon, TwitterIcon } from '../app/common/Icons';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
-import { I18Keys } from '../i18n/i18n';
+import { IntroKeys } from '../i18n/i18n.intro';
+import { PlatformsKeys } from '../i18n/i18n.platforms';
 import { AbsoluteRoutes, RouteNames } from '../route.names';
 import { AppButton, AppHeading, AppSubtitle } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
@@ -32,13 +33,13 @@ export const ConnectSocialsPage = () => {
   const content = (
     <Box>
       <Box style={{ flexGrow: 1 }}>
-        <AppHeading level="1">{t(I18Keys.introTitle)}</AppHeading>
+        <AppHeading level="1">{t(IntroKeys.introTitle)}</AppHeading>
         <Box width="100%" height="4px"></Box>
-        <AppSubtitle>{t(I18Keys.introSubtitle)}</AppSubtitle>
+        <AppSubtitle>{t(IntroKeys.introSubtitle)}</AppSubtitle>
         <Box width="100%" height="16px"></Box>
 
         <AppParagraph margin={{ bottom: 'medium' }}>
-          {t(I18Keys.connectSocialsParagraph)}
+          {t(IntroKeys.connectSocialsParagraph)}
         </AppParagraph>
 
         <PlatformSection
@@ -50,7 +51,7 @@ export const ConnectSocialsPage = () => {
               <TwitterIcon size={40} color="black"></TwitterIcon>
             )
           }
-          platformName={t(I18Keys.XTwitter)}
+          platformName={t(PlatformsKeys.XTwitter)}
           onButtonClicked={() =>
             connectTwitter ? connectTwitter('read') : null
           }
@@ -96,7 +97,7 @@ export const ConnectSocialsPage = () => {
       <Box align="center" margin={{ top: 'large' }}>
         <AppButton
           primary
-          label={t(I18Keys.continue)}
+          label={t(IntroKeys.continue)}
           onClick={handleContinue}
           disabled={connectedSourcePlatforms.length === 0}
           style={{ width: '100%' }}

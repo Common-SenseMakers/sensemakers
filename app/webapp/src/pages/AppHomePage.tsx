@@ -13,22 +13,22 @@ import {
 
 const DEBUG = false;
 
-export const AppHomePage = (props: {}) => {
-  const { overallLoginStatus, alreadyConnected } = useAccountContext();
+const LoadingPlaceholder = (
+  <>
+    <LoadingDiv
+      margin={{ bottom: '4px' }}
+      width="100%"
+      height="120px"></LoadingDiv>
+    {(() => {
+      return [1, 2, 4, 5, 6, 7, 8].map((ix) => (
+        <PostCardLoading key={ix}></PostCardLoading>
+      ));
+    })()}
+  </>
+);
 
-  const LoadingPlaceholder = (
-    <>
-      <LoadingDiv
-        margin={{ bottom: '4px' }}
-        width="100%"
-        height="120px"></LoadingDiv>
-      {(() => {
-        return [1, 2, 4, 5, 6, 7, 8].map((ix) => (
-          <PostCardLoading key={ix}></PostCardLoading>
-        ));
-      })()}
-    </>
-  );
+export const AppHomePage = () => {
+  const { overallLoginStatus, alreadyConnected } = useAccountContext();
 
   const { content, nav } = useMemo(() => {
     if (DEBUG)

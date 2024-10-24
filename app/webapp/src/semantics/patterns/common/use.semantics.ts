@@ -31,23 +31,25 @@ export const useSemanticsStore = (props: PatternProps) => {
         console.log('updating original store', {
           originalStore,
         });
-      parseRDF(props.originalParsed.semantics).then((_store) => {
-        /** both stores are set to the same value if no semantics are provided */
-        if (DEBUG)
-          console.log('setting original store', {
-            _store,
-          });
-        setOriginalStore(_store);
-        if (!props.semantics) {
+      parseRDF(props.originalParsed.semantics)
+        .then((_store) => {
+          /** both stores are set to the same value if no semantics are provided */
           if (DEBUG)
-            console.log('setting store (equal to original)', {
+            console.log('setting original store', {
               _store,
             });
-          setStore(_store);
-        }
-      });
+          setOriginalStore(_store);
+          if (!props.semantics) {
+            if (DEBUG)
+              console.log('setting store (equal to original)', {
+                _store,
+              });
+            setStore(_store);
+          }
+        })
+        .catch(console.error);
     }
-  }, [props.originalParsed, props.semantics]);
+  }, [originalStore, props.originalParsed, props.semantics]);
 
   useEffect(() => {
     /** then the actual stored is set. If prop.semantics is provided */
@@ -64,13 +66,15 @@ export const useSemanticsStore = (props: PatternProps) => {
           semantics: props.semantics,
         });
 
-      parseRDF(props.semantics).then((_store) => {
-        if (DEBUG)
-          console.log('setting semantics store', {
-            store: _store,
-          });
-        setStore(_store);
-      });
+      parseRDF(props.semantics)
+        .then((_store) => {
+          if (DEBUG)
+            console.log('setting semantics store', {
+              store: _store,
+            });
+          setStore(_store);
+        })
+        .catch(console.error);
     }
   }, [originalStore, props.semantics]);
   return { store, originalStore };

@@ -17,7 +17,7 @@ export const POSTING_POST_ID = 'postingPostId';
 /** extract the postId from the route and pass it to a PostContext */
 export const PostingPage = () => {
   const { overallLoginStatus, connectedUser } = useAccountContext();
-  const [postingPostId, setPostingPostId] = usePersist(POSTING_POST_ID, null);
+  const [postingPostId] = usePersist(POSTING_POST_ID, null);
 
   const orcid = connectedUser?.profiles?.orcid;
 
@@ -43,7 +43,7 @@ export const PostingPage = () => {
         });
       navigate(AbsoluteRoutes.Post(postingPostId));
     }
-  }, [postingPostId, overallLoginStatus, orcid]);
+  }, [postingPostId, overallLoginStatus, orcid, navigate]);
 
   return (
     <ViewportPage

@@ -6,10 +6,8 @@ import {
   useContext,
   useState,
 } from 'react';
-import { useTranslation } from 'react-i18next';
 
 import { useAppFetch } from '../../../api/app.fetch';
-import { useToastContext } from '../../../app/ToastsContext';
 import {
   BlueskyGetContextParams,
   BlueskySignupData,
@@ -24,7 +22,8 @@ import {
 
 const DEBUG = false;
 
-const log = (...args: any[]) => {
+const log = (...args: unknown[]) => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   if (DEBUG) console.log(...args);
 };
 
@@ -43,8 +42,6 @@ const BlueskyContextValue = createContext<BlueskyContextType | undefined>(
 );
 
 export const BlueskyContext = (props: PropsWithChildren) => {
-  const { t } = useTranslation();
-
   const {
     connectedUser,
     refresh: refreshConnected,
@@ -92,17 +89,17 @@ export const BlueskyContext = (props: PropsWithChildren) => {
         if (result.ourAccessToken) {
           setOurToken(result.ourAccessToken);
         } else {
-          refreshConnected();
+          refreshConnected().catch(console.error);
         }
 
         log('Bluesky signup result', result);
 
-        refreshConnected();
+        refreshConnected().catch(console.error);
         setPlatformConnectedStatus(
           PLATFORM.Bluesky,
           PlatformConnectedStatus.Connected
         );
-      } catch (err: any) {
+      } catch (err) {
         log('Error connecting to Bluesky', err);
         setError('Error connecting to Bluesky');
         setLoginFlowState(LoginFlowState.Idle);
@@ -113,11 +110,11 @@ export const BlueskyContext = (props: PropsWithChildren) => {
       }
     },
     [
-      appFetch,
       setLoginFlowState,
       setPlatformConnectedStatus,
+      appFetch,
       refreshConnected,
-      t,
+      setOurToken,
     ]
   );
 

@@ -1,4 +1,4 @@
-import { Box, Image } from 'grommet';
+import { Box } from 'grommet';
 
 export const AppIcon = (props: { size?: number }) => {
   const size = props.size || 18;

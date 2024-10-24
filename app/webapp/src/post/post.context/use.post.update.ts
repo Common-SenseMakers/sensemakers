@@ -7,7 +7,6 @@ import {
   AppPostReviewStatus,
   PostUpdate,
   PostUpdatePayload,
-  PostsQueryStatus,
 } from '../../shared/types/types.posts';
 import { useUserPosts } from '../../user-home/UserPostsContext';
 import { ConnectedUser } from '../../user-login/contexts/AccountContext';
@@ -28,7 +27,7 @@ export interface PostUpdateContext {
   isUpdating: boolean;
   setIsUpdating: (updating: boolean) => void;
   updateSemantics: (newSemantics: string) => void;
-  updatePost: (update: PostUpdate) => Promise<void>;
+  updatePost: (update: PostUpdate) => void;
   readyToNanopublish: boolean;
   inPrePublish: boolean;
 }
@@ -42,7 +41,7 @@ export const usePostUpdate = (
   const { show } = useToastContext();
   const appFetch = useAppFetch();
 
-  const { filterStatus, feed } = useUserPosts();
+  const { feed } = useUserPosts();
   const { removePost } = feed;
 
   const [enabledEdit, setEnabledEdit] = useState<boolean>(false);
@@ -67,69 +66,64 @@ export const usePostUpdate = (
   }, [fetched.post]);
 
   /** actuall call to update the post in the backend */
-  const _updatePost = async (update: PostUpdate) => {
-    if (!fetched.post) {
-      return;
-    }
-
-    setIsUpdating(true);
-    try {
-      await appFetch<void, PostUpdatePayload>('/api/posts/update', {
-        postId: fetched.post.id,
-        postUpdate: update,
-      });
-      // setIsUpdating(false); let the refetch set the udpate flow to false
-    } catch (e: any) {
-      console.error(e);
-      show({ title: 'Error updating post', message: e.message });
-      setIsUpdating(false);
-    }
-  };
-
-  /** updatePost and optimistically update the post object */
-  const optimisticUpdate = useCallback(
+  const _updatePost = useCallback(
     async (update: PostUpdate) => {
       if (!fetched.post) {
         return;
       }
 
-      setPostEdited({ ...fetched.post, ...update });
-      updatePost(update);
+      setIsUpdating(true);
+      try {
+        await appFetch<void, PostUpdatePayload>('/api/posts/update', {
+          postId: fetched.post.id,
+          postUpdate: update,
+        });
+        // setIsUpdating(false); let the refetch set the udpate flow to false
+      } catch (e) {
+        console.error(e);
+        show({ title: 'Error updating post', message: (e as Error).message });
+        setIsUpdating(false);
+      }
     },
-    [fetched.post]
+    [appFetch, fetched.post, show]
   );
 
   /** updatePost and optimistically update the posts lists */
-  const updatePost = async (update: PostUpdate) => {
-    /** optimistic remove the post from the filtered list */
-    const statusKept = (() => {
-      if (filterStatus === PostsQueryStatus.DRAFTS) {
+  const updatePost = useCallback(
+    async (update: PostUpdate) => {
+      /** optimistic remove the post from the filtered list */
+      const statusKept = (() => {
         return true;
-      }
-      if (filterStatus === PostsQueryStatus.PENDING) {
-        return update.reviewedStatus === AppPostReviewStatus.PENDING;
-      }
-      if (filterStatus === PostsQueryStatus.PUBLISHED) {
-        return update.reviewedStatus === AppPostReviewStatus.APPROVED;
-      }
-      if (filterStatus === PostsQueryStatus.IGNORED) {
-        return update.reviewedStatus === AppPostReviewStatus.IGNORED;
-      }
-    })();
+      })();
 
-    if (!statusKept && fetched.postId) {
-      removePost(fetched.postId);
-    }
+      if (!statusKept && fetched.postId) {
+        removePost(fetched.postId);
+      }
 
-    _updatePost(update);
-  };
+      await _updatePost(update);
+    },
+    [_updatePost, fetched.postId, removePost]
+  );
+
+  /** updatePost and optimistically update the post object */
+  const optimisticUpdate = useCallback(
+    (update: PostUpdate) => {
+      if (!fetched.post) {
+        return;
+      }
+
+      setPostEdited({ ...fetched.post, ...update });
+      updatePost(update).catch(console.error);
+    },
+    [fetched.post, updatePost]
+  );
 
   const updateSemantics = (newSemantics: string) => {
     updateSemanticsLocal(newSemantics);
     updatePost({
       semantics: newSemantics,
       reviewedStatus: AppPostReviewStatus.DRAFT,
-    });
+    }).catch(console.error);
   };
 
   /**
@@ -154,14 +148,7 @@ export const usePostUpdate = (
       };
     }
     return undefined;
-  }, [
-    fetched.postId,
-    fetched.post,
-    postInit,
-    postEdited,
-    fetched.isLoading,
-    mergedSemantics,
-  ]);
+  }, [fetched.post, postInit, postEdited, fetched.isLoading, mergedSemantics]);
 
   const statusesMerged = useMemo(() => {
     return getPostStatuses(postMerged);

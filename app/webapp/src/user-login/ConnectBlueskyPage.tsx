@@ -1,10 +1,10 @@
 import { Box } from 'grommet';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { AppLogo } from '../app/brand/AppLogo';
-import { I18Keys } from '../i18n/i18n';
+import { IntroKeys } from '../i18n/i18n.intro';
 import { AppButton, AppHeading, AppInput } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
 import { useAccountContext } from './contexts/AccountContext';
@@ -28,7 +28,7 @@ export const ConnectBlueskyPage = () => {
 
   const handleConnect = () => {
     if (connect) {
-      connect(username, appPassword, 'read');
+      connect(username, appPassword, 'read').catch(console.error);
     }
   };
 
@@ -79,7 +79,7 @@ export const ConnectBlueskyPage = () => {
         <Box align="center" margin={{ top: 'medium' }}>
           <AppButton
             primary
-            label={t(I18Keys.continue)}
+            label={t(IntroKeys.continue)}
             onClick={handleConnect}
             disabled={!username || !appPassword}
             style={{ width: '100%' }}

@@ -24,7 +24,7 @@ export interface SetPageTitleType {
   main: string;
 }
 
-export type AppContainerContextType = {};
+export type AppContainerContextType = object;
 
 const AppContainerContextValue = createContext<
   AppContainerContextType | undefined

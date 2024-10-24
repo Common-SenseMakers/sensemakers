@@ -5,12 +5,13 @@ const DEBUG = false;
 export const usePersist = <T>(
   stateName: string,
   initialValue: T | null
-): [T | undefined, (value: T | null) => void, () => void] => {
+): [T | undefined | null, (value: T | null) => void, () => void] => {
   const name = `persist/${stateName}`;
 
   const getFromStorage = <T>(name: string, defaultValue?: T | null) => {
     try {
-      const val = JSON.parse(localStorage.getItem(name) + '');
+      const item = localStorage.getItem(name);
+      const val = item !== null ? (JSON.parse(item) as T) : null;
       if (val === null && defaultValue === null) {
         return null;
       }
@@ -25,9 +26,11 @@ export const usePersist = <T>(
     }
   };
 
-  const [state, setState] = useState<T | undefined>(
+  const [state, setState] = useState<T | undefined | null>(
     getFromStorage<T>(name, initialValue)
   );
+
+  const deleteValue = useCallback(() => localStorage.removeItem(name), [name]);
 
   const setValue = useCallback(
     (value: T | null) => {
@@ -40,10 +43,8 @@ export const usePersist = <T>(
       }
       if (DEBUG) console.log(`setting usePersist ${name}`, value);
     },
-    [name]
+    [deleteValue, name]
   );
-
-  const deleteValue = () => localStorage.removeItem(name);
 
   return [state, setValue, deleteValue];
 };

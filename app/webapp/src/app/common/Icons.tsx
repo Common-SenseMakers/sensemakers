@@ -4,7 +4,6 @@ export const TwitterIcon = (
   props: { size?: number; color?: string } & BoxExtendedProps
 ) => {
   const size = props.size || 20;
-  const color = props.color || 'white';
   return (
     <Box
       height={`${size}px`}

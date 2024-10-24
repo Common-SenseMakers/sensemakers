@@ -2,7 +2,6 @@ import { Box } from 'grommet';
 import { DataFactory } from 'n3';
 import { useMemo } from 'react';
 
-import { RefMeta } from '../../../shared/types/types.parser';
 import { filterStore, writeRDF } from '../../../shared/utils/n3.utils';
 import { THIS_POST_NAME } from '../../../shared/utils/semantics.helper';
 import { AppLabel } from '../../../ui-components';
@@ -22,7 +21,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
     () =>
       originalStore && store && props.originalParsed
         ? processSemantics(originalStore, store, props.originalParsed?.support)
-        : new Map(),
+        : (new Map() as RefsMap),
     [originalStore, props.originalParsed, store]
   );
 
@@ -102,19 +101,23 @@ export const RefLabelsComponent = (props: PatternProps) => {
               return (
                 <RefWithLabels
                   ix={index}
-                  showLabels={size === 'normal'}
+                  showLabels={true}
                   editable={props.editable}
                   key={ref}
                   refUrl={ref}
                   refData={refData}
                   support={props.originalParsed?.support}
-                  removeLabel={(labelUri: string) => removeLabel(ref, labelUri)}
-                  addLabel={(labelUri: string) => addLabel(ref, labelUri)}
+                  removeLabel={(labelUri: string) => {
+                    removeLabel(ref, labelUri).catch(console.error);
+                  }}
+                  addLabel={(labelUri: string) => {
+                    addLabel(ref, labelUri).catch(console.error);
+                  }}
                   allRefs={visibleRefs}></RefWithLabels>
               );
             })}
           </Box>
-          {/* {restOfRefs.length > 0 && (
+          {restOfRefs.length > 0 && (
             <AppLabel
               margin={{ top: '16px' }}
               colors={{
@@ -126,7 +129,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
                 borderRadius: '4px',
                 border: 'none',
               }}>{`+ ${restOfRefs.length} Reference${restOfRefs.length > 1 ? 's' : ''}`}</AppLabel>
-          )} */}
+          )}
         </Box>
       </Box>
     );

@@ -1,4 +1,3 @@
-import { disconnect } from 'process';
 import {
   PropsWithChildren,
   createContext,
@@ -30,7 +29,7 @@ export const NavHistoryContext = (props: PropsWithChildren) => {
     } else {
       setStack([...stack.slice(0, stack.length - 1), pathname]);
     }
-  }, [pathname, type]);
+  }, [pathname, stack, type]);
 
   return (
     <NavHistoryContextValue.Provider

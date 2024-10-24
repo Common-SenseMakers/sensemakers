@@ -36,8 +36,6 @@ export const getPostStatuses = (post?: AppPostFull): AppPostStatus => {
     post && post.parsingStatus === AppPostParsingStatus.PROCESSING;
 
   const pending = post && post.reviewedStatus === AppPostReviewStatus.PENDING;
-  const ignored = post && post.reviewedStatus === AppPostReviewStatus.IGNORED;
-
   const isEditing = post && post.reviewedStatus === AppPostReviewStatus.DRAFT;
 
   return {
@@ -45,12 +43,6 @@ export const getPostStatuses = (post?: AppPostFull): AppPostStatus => {
     errored,
     isParsing,
     pending,
-    ignored,
     isEditing,
   };
-};
-
-export const hideSemanticsHelper = (post?: AppPostFull): boolean => {
-  const hide = post && post.reviewedStatus === AppPostReviewStatus.IGNORED;
-  return hide !== undefined && hide;
 };

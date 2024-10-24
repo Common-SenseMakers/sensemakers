@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { createContext } from 'react';
 import { useLocation } from 'react-router-dom';
 
@@ -53,18 +53,23 @@ export const UserPostsContext: React.FC<{
     return PostsQueryStatus.DRAFTS;
   }, [location]);
 
-  const onPostsAdded = (newPosts: AppPostFull[]) => {
-    /** trigger parse if not parsed and not parsing */
-    newPosts.forEach((post) => {
-      if (
-        post.parsedStatus === AppPostParsedStatus.UNPROCESSED &&
-        post.parsingStatus !== AppPostParsingStatus.PROCESSING
-      ) {
-        // async trigger parse
-        appFetch(`/api/posts/parse`, { postId: post.id });
-      }
-    });
-  };
+  const onPostsAdded = useCallback(
+    (newPosts: AppPostFull[]) => {
+      /** trigger parse if not parsed and not parsing */
+      newPosts.forEach((post) => {
+        if (
+          post.parsedStatus === AppPostParsedStatus.UNPROCESSED &&
+          post.parsingStatus !== AppPostParsingStatus.PROCESSING
+        ) {
+          // async trigger parse
+          appFetch(`/api/posts/parse`, { postId: post.id }).catch(
+            console.error
+          );
+        }
+      });
+    },
+    [appFetch]
+  );
 
   const config = useMemo((): FetcherConfig => {
     return {
@@ -72,9 +77,9 @@ export const UserPostsContext: React.FC<{
       status,
       subscribe: true,
       onPostsAdded,
-      DEBUG_PREIX: '[USER POSTS] ',
+      DEBUG_PREFIX: '[USER POSTS] ',
     };
-  }, [status]);
+  }, [onPostsAdded, status]);
 
   const feed = usePostsFetcher(config);
 

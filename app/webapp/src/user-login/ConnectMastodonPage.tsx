@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { AppLogo } from '../app/brand/AppLogo';
-import { I18Keys } from '../i18n/i18n';
+import { IntroKeys } from '../i18n/i18n.intro';
 import { AbsoluteRoutes } from '../route.names';
 import { AppButton, AppHeading, AppInput } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
@@ -29,11 +29,13 @@ export const ConnectMastodonPage = () => {
 
   const handleConnect = () => {
     if (connect) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const callbackUrl = location.state?.callbackUrl as string | undefined;
       connect(
         mastodonServer,
         'read',
-        location.state?.callbackUrl || window.location.href
-      );
+        callbackUrl || window.location.href
+      ).catch(console.error);
     }
   };
 
@@ -43,22 +45,22 @@ export const ConnectMastodonPage = () => {
       style={{ flexGrow: 1 }}>
       <AppLogo margin={{ bottom: 'xlarge' }} />
       <Box style={{ flexGrow: 1 }}>
-        <AppHeading level="1">{t(I18Keys.connectMastodonTitle)}</AppHeading>
+        <AppHeading level="1">{t(IntroKeys.connectMastodonTitle)}</AppHeading>
         <Box width="100%" height="16px" />
 
         <AppParagraph margin={{ bottom: 'medium' }}>
-          {t(I18Keys.connectMastodonParagraph)}
+          {t(IntroKeys.connectMastodonParagraph)}
         </AppParagraph>
 
         <AppParagraph
           margin={{ bottom: 'small' }}
           size="small"
           style={{ fontWeight: 'bold' }}>
-          {t(I18Keys.mastodonServer)}
+          {t(IntroKeys.mastodonServer)}
         </AppParagraph>
         <Box margin={{ bottom: 'medium' }}>
           <AppInput
-            placeholder={t(I18Keys.mastodonServerPlaceholder)}
+            placeholder={t(IntroKeys.mastodonServerPlaceholder)}
             value={mastodonServer}
             onChange={(event) => setMastodonServer(event.target.value)}
             style={{ width: '100%' }}
@@ -67,7 +69,7 @@ export const ConnectMastodonPage = () => {
         <Box align="center" margin={{ top: 'medium' }}>
           <AppButton
             primary
-            label={t(I18Keys.continue)}
+            label={t(IntroKeys.continue)}
             onClick={handleConnect}
             disabled={!isValidMastodonDomain(mastodonServer)}
             style={{ width: '100%' }}

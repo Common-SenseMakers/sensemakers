@@ -158,7 +158,7 @@ export const replaceNodes = (
   replaceMap: Record<string, string>
 ) => {
   const newStore = mapStore(store, (quad) => {
-    let { subject, predicate, object, graph } = quad;
+    const { subject, predicate, object, graph } = quad;
 
     return DataFactory.quad(
       replaceNode(subject, replaceMap) as Quad_Subject,

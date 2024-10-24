@@ -1,4 +1,3 @@
-import { connected } from 'process';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
@@ -6,11 +5,8 @@ import { useAppFetch } from '../api/app.fetch';
 import { subscribeToUpdates } from '../firestore/realtime.listener';
 import {
   AppPostFull,
-  AppPostRepublishedStatus,
-  AppPostReviewStatus,
   PostsQuery,
   PostsQueryParams,
-  PostsQueryStatus,
 } from '../shared/types/types.posts';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { arraysEqual } from '../utils/general';
@@ -43,7 +39,7 @@ export interface FetcherConfig {
   subscribe?: boolean;
   onPostsAdded?: (posts: AppPostFull[]) => void;
   PAGE_SIZE?: number;
-  DEBUG_PREIX?: string;
+  DEBUG_PREFIX?: string;
 }
 
 /**
@@ -63,6 +59,8 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
     PAGE_SIZE: _PAGE_SIZE,
   } = input;
 
+  const DEBUG_PREFIX = input.DEBUG_PREFIX || '';
+
   const PAGE_SIZE = _PAGE_SIZE || 5;
 
   const appFetch = useAppFetch();
@@ -80,22 +78,23 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
   const [errorFetchingNewer, setErrorFetchingNewer] = useState<Error>();
   const [moreToFetch, setMoreToFetch] = useState(true);
 
-  const [connectedSourcePlatformsInit, setConnectedSourcePlatformsInit] =
-    useState(connectedSourcePlatforms);
+  const [connectedSourcePlatformsInit] = useState(connectedSourcePlatforms);
 
   const unsubscribeCallbacks = useRef<Record<string, () => void>>({});
 
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const code = searchParams.get('code');
 
-  const _labels = labels || [];
-  const _keywords = keywords || [];
+  const queryParams: PostsQueryParams = useMemo(() => {
+    const _labels = labels || [];
+    const _keywords = keywords || [];
 
-  const queryParams: PostsQueryParams = {
-    status,
-    keywords: _keywords,
-    labels: _labels,
-  };
+    return {
+      status,
+      keywords: _keywords,
+      labels: _labels,
+    };
+  }, [keywords, labels, status]);
 
   /** refetch a post and overwrite its value in the array */
   const refetchPost = useCallback(
@@ -113,27 +112,13 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
         );
 
         if (DEBUG)
-          console.log(`${input.DEBUG_PREIX}refetch post returned`, {
+          console.log(`${DEBUG_PREFIX}refetch post returned`, {
             post,
             posts,
           });
 
         const shouldRemove = (() => {
-          if (status === PostsQueryStatus.DRAFTS) {
-            return [
-              AppPostRepublishedStatus.AUTO_REPUBLISHED,
-              AppPostRepublishedStatus.REPUBLISHED,
-            ].includes(post.republishedStatus);
-          }
-          if (status === PostsQueryStatus.IGNORED) {
-            return post.reviewedStatus !== AppPostReviewStatus.IGNORED;
-          }
-          if (status === PostsQueryStatus.PENDING) {
-            return post.reviewedStatus !== AppPostReviewStatus.PENDING;
-          }
-          if (status === PostsQueryStatus.PUBLISHED) {
-            return post.republishedStatus === AppPostRepublishedStatus.PENDING;
-          }
+          return false;
         })();
 
         setPosts((prev) => {
@@ -141,14 +126,14 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
           const ix = prev ? prev.findIndex((p) => p.id === postId) : -1;
 
           if (DEBUG)
-            console.log(`${input.DEBUG_PREIX}setPosts called`, {
+            console.log(`${DEBUG_PREFIX}setPosts called`, {
               ix,
               newPosts,
             });
 
           if (ix !== -1) {
             if (DEBUG)
-              console.log(`${input.DEBUG_PREIX}settingPost`, {
+              console.log(`${DEBUG_PREFIX}settingPost`, {
                 ix,
                 shouldRemove,
               });
@@ -162,74 +147,79 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
         });
       } catch (e) {
         console.error(e);
-        throw new Error(`${input.DEBUG_PREIX}Error fetching post ${postId}`);
+        throw new Error(`${DEBUG_PREFIX || ''}Error fetching post ${postId}`);
       }
     },
-    [posts, connectedUser, status]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [connectedUser, code, posts]
   );
 
-  const setPostsCallback = (
-    prev: AppPostFull[] | undefined,
-    candidateNewPosts: AppPostFull[],
-    position: 'start' | 'end'
-  ) => {
-    /** filter existing posts */
-    const newPosts =
-      prev !== undefined
-        ? candidateNewPosts.filter(
-            (post) => !prev.find((prevPost) => prevPost.id === post.id)
-          )
-        : candidateNewPosts;
+  const setPostsCallback = useCallback(
+    (
+      prev: AppPostFull[] | undefined,
+      candidateNewPosts: AppPostFull[],
+      position: 'start' | 'end'
+    ) => {
+      /** filter existing posts */
+      const newPosts =
+        prev !== undefined
+          ? candidateNewPosts.filter(
+              (post) => !prev.find((prevPost) => prevPost.id === post.id)
+            )
+          : candidateNewPosts;
 
-    /** subscribe to updates */
-    newPosts.forEach((post) => {
-      if (!unsubscribeCallbacks.current) {
-        unsubscribeCallbacks.current = {};
-      }
+      /** subscribe to updates */
+      newPosts.forEach((post) => {
+        if (!unsubscribeCallbacks.current) {
+          unsubscribeCallbacks.current = {};
+        }
 
-      const current = unsubscribeCallbacks.current[post.id];
-      /** unsubscribe from previous */
-      if (current) {
-        if (DEBUG)
-          console.log(
-            `${input.DEBUG_PREIX}current unsubscribe for post ${post.id} found`
-          );
-        current();
-      }
-
-      if (subscribe) {
-        const unsubscribe = subscribeToUpdates(`post-${post.id}`, () => {
+        const current = unsubscribeCallbacks.current[post.id];
+        /** unsubscribe from previous */
+        if (current) {
           if (DEBUG)
-            console.log(`${input.DEBUG_PREIX}update detected`, post.id);
-          refetchPost(post.id);
-        });
+            console.log(
+              `${DEBUG_PREFIX}current unsubscribe for post ${post.id} found`
+            );
+          current();
+        }
 
-        if (DEBUG)
-          console.log(
-            `${input.DEBUG_PREIX}unsubscribefor post ${post.id} stored on unsubscribeCallbacks`
-          );
-        unsubscribeCallbacks.current[post.id] = unsubscribe;
-      }
-    });
+        if (subscribe) {
+          const unsubscribe = subscribeToUpdates(`post-${post.id}`, () => {
+            if (DEBUG) console.log(`${DEBUG_PREFIX}update detected`, post.id);
+            refetchPost(post.id).catch((e) => {
+              console.error(e);
+            });
+          });
 
-    const allPosts =
-      position === 'end'
-        ? prev
-          ? prev.concat(newPosts)
-          : newPosts
-        : prev
-          ? newPosts.reverse().concat(prev)
-          : newPosts;
+          if (DEBUG)
+            console.log(
+              `${DEBUG_PREFIX}unsubscribefor post ${post.id} stored on unsubscribeCallbacks`
+            );
+          unsubscribeCallbacks.current[post.id] = unsubscribe;
+        }
+      });
 
-    if (DEBUG)
-      console.log(`${input.DEBUG_PREIX}pushing posts`, { prev, allPosts });
-    return allPosts;
-  };
+      const allPosts =
+        position === 'end'
+          ? prev
+            ? prev.concat(newPosts)
+            : newPosts
+          : prev
+            ? newPosts.reverse().concat(prev)
+            : newPosts;
+
+      if (DEBUG)
+        console.log(`${DEBUG_PREFIX}pushing posts`, { prev, allPosts });
+      return allPosts;
+    },
+    [DEBUG_PREFIX, refetchPost, subscribe]
+  );
 
   const addPosts = useCallback(
     (newPosts: AppPostFull[], position: 'start' | 'end') => {
       if (DEBUG)
-        console.log(`${input.DEBUG_PREIX}addPosts called`, { posts: newPosts });
+        console.log(`${DEBUG_PREFIX}addPosts called`, { posts: newPosts });
 
       /** add posts  */
       setPosts((prev) => setPostsCallback(prev, newPosts, position));
@@ -238,7 +228,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
         onPostsAdded(newPosts);
       }
     },
-    [appFetch, refetchPost]
+    [DEBUG_PREFIX, onPostsAdded, setPostsCallback]
   );
 
   /** unsubscribe from all updates when unmounting */
@@ -248,84 +238,48 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
         ([postId, unsubscribe]) => {
           if (DEBUG)
             console.log(
-              `${input.DEBUG_PREIX}unsubscribing from post ${postId} at unmount`
+              `${DEBUG_PREFIX}unsubscribing from post ${postId} at unmount`
             );
           unsubscribe();
         }
       );
     };
-  }, []);
+  }, [DEBUG_PREFIX]);
 
-  const removeAllPosts = () => {
+  const removeAllPosts = useCallback(() => {
     /** unsubscribe from all posts */
     Object.entries(unsubscribeCallbacks.current).forEach(
       ([postId, unsubscribe]) => {
-        if (DEBUG)
-          console.log(`${input.DEBUG_PREIX}unsubscribing from ${postId}`);
+        if (DEBUG) console.log(`${DEBUG_PREFIX}unsubscribing from ${postId}`);
         unsubscribe();
       }
     );
     /** reset the array */
-    if (DEBUG) console.log(`${input.DEBUG_PREIX}settings pots to empty array`);
+    if (DEBUG) console.log(`${DEBUG_PREFIX}settings pots to empty array`);
     setPosts([]);
-  };
+  }, [DEBUG_PREFIX]);
 
-  /** first data fill happens everytime a new source platform is added/removed */
-  useEffect(() => {
-    if (DEBUG)
-      console.log(
-        `${input.DEBUG_PREIX}first fetch older with new platform added`,
-        {
-          posts,
-          fetchedOlderFirst,
-          connectedSourcePlatforms,
-        }
-      );
-    if (
-      !arraysEqual(connectedSourcePlatforms, connectedSourcePlatformsInit) &&
-      !isFetchingOlder
-    ) {
-      reset();
-      setFetchedOlderFirst(true);
-      if (DEBUG)
-        console.log(
-          `${input.DEBUG_PREIX}_fetchOlder due to connectedSourcePlatforms`,
-          { connectedSourcePlatforms }
-        );
-
-      _fetchOlder(undefined);
-    }
-  }, [connectedSourcePlatforms]);
-
-  /** whenever posts have been fetched, check if we have fetched for newer posts yet, and if not, fetch for newer */
-  useEffect(() => {
-    if (posts && posts.length > 0 && !fetchedNewerFirst && connectedUser) {
-      if (DEBUG) console.log(`${input.DEBUG_PREIX}first fetch newer`);
-      _fetchNewer(posts[0].id);
-    }
-  }, [posts, fetchedNewerFirst]);
-
-  const reset = () => {
-    if (DEBUG) console.log(`${input.DEBUG_PREIX}resetting posts`);
+  const reset = useCallback(() => {
+    if (DEBUG) console.log(`${DEBUG_PREFIX}resetting posts`);
     removeAllPosts();
     setFetchedOlderFirst(false);
     setIsLoading(true);
-  };
+  }, [DEBUG_PREFIX, removeAllPosts]);
 
   const _oldestPostId = useMemo(() => {
     const oldest = posts ? posts[posts.length - 1]?.id : undefined;
     if (DEBUG)
       console.log(
-        `${input.DEBUG_PREIX}recomputing oldest _oldestPostId ${oldest}`
+        `${DEBUG_PREFIX}recomputing oldest _oldestPostId ${oldest || ''}`
       );
     return oldest;
-  }, [posts]);
+  }, [DEBUG_PREFIX, posts]);
 
   /** fetch for more post backwards */
   const _fetchOlder = useCallback(
     async (oldestPostId?: string) => {
       if (DEBUG)
-        console.log(`${input.DEBUG_PREIX}fetching for older`, {
+        console.log(`${DEBUG_PREFIX}fetching for older`, {
           oldestPostId,
           connectedUser,
           isFetchingOlder,
@@ -336,7 +290,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
       }
 
       if (DEBUG)
-        console.log(`${input.DEBUG_PREIX}fetching for older`, {
+        console.log(`${DEBUG_PREFIX}fetching for older`, {
           oldestPostId,
           isFetchingOlder,
           fetchedOlderFirst,
@@ -352,20 +306,14 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
           },
         };
         if (DEBUG)
-          console.log(
-            `${input.DEBUG_PREIX}fetching for older - twitter`,
-            params
-          );
+          console.log(`${DEBUG_PREFIX}fetching for older - twitter`, params);
         const readPosts = await appFetch<AppPostFull[], PostsQuery>(
           endpoint,
           params
         );
 
         if (DEBUG)
-          console.log(
-            `${input.DEBUG_PREIX}fetching for older retrieved`,
-            readPosts
-          );
+          console.log(`${DEBUG_PREFIX}fetching for older retrieved`, readPosts);
         addPosts(readPosts, 'end');
         setIsFetchingOlder(false);
         setIsLoading(false);
@@ -374,32 +322,44 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
         } else {
           setMoreToFetch(true);
         }
-      } catch (e: any) {
-        console.error(`${input.DEBUG_PREIX}error fetching older`, {
+      } catch (e) {
+        console.error(`${DEBUG_PREFIX}error fetching older`, {
           e,
           isFetchingOlder,
         });
         setIsFetchingOlder(false);
-        setErrorFetchingOlder(e);
+        setErrorFetchingOlder(e as Error);
         setIsLoading(false);
       }
     },
-    [appFetch, status, connectedUser, isFetchingOlder, queryParams, code]
+    [
+      DEBUG_PREFIX,
+      connectedUser,
+      isFetchingOlder,
+      code,
+      fetchedOlderFirst,
+      queryParams,
+      PAGE_SIZE,
+      appFetch,
+      endpoint,
+      addPosts,
+    ]
   );
 
   /** public function to trigger fetching for older posts */
   const fetchOlder = useCallback(() => {
-    if (DEBUG)
-      console.log(`${input.DEBUG_PREIX}external fetchOlder`, _oldestPostId);
-    _fetchOlder(_oldestPostId);
-  }, [_fetchOlder, _oldestPostId]);
+    if (DEBUG) console.log(`${DEBUG_PREFIX}external fetchOlder`, _oldestPostId);
+    _fetchOlder(_oldestPostId).catch((e) => {
+      console.error(e);
+    });
+  }, [DEBUG_PREFIX, _fetchOlder, _oldestPostId]);
 
   /** reset at every status change  */
   useEffect(() => {
     reset();
     if (DEBUG)
       console.log(
-        `${input.DEBUG_PREIX}_fetchOlder due to status, labels, keywords, endpoint change`,
+        `${DEBUG_PREFIX}_fetchOlder due to status, labels, keywords, endpoint change`,
         {
           status,
           labels,
@@ -408,15 +368,26 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
           fetchedOlderFirst,
         }
       );
-    _fetchOlder(undefined);
-  }, [status, labels, keywords, endpoint]);
+    _fetchOlder(undefined).catch((e) => {
+      console.error(e);
+    });
+  }, [
+    status,
+    labels,
+    keywords,
+    endpoint,
+    reset,
+    DEBUG_PREFIX,
+    fetchedOlderFirst,
+    _fetchOlder,
+  ]);
 
   const newestPostId = useMemo(() => {
     const newest = posts ? posts[0]?.id : undefined;
     if (DEBUG)
-      console.log(`${input.DEBUG_PREIX}recomputing newestPostId ${newest}`);
+      console.log(`${DEBUG_PREFIX}recomputing newestPostId ${newest || ''}`);
     return newest;
-  }, [posts]);
+  }, [DEBUG_PREFIX, posts]);
 
   const _fetchNewer = useCallback(
     async (_newestPostId: string) => {
@@ -424,7 +395,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
         return;
       }
 
-      if (DEBUG) console.log(`${input.DEBUG_PREIX}fetching for newer`);
+      if (DEBUG) console.log(`${DEBUG_PREFIX}fetching for newer`);
       setIsFetchingNewer(true);
       setFetchedNewerFirst(true);
 
@@ -436,38 +407,90 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
             sinceId: _newestPostId,
           },
         };
-        if (DEBUG)
-          console.log(`${input.DEBUG_PREIX}fetching for newer`, params);
+        if (DEBUG) console.log(`${DEBUG_PREFIX}fetching for newer`, params);
         const readPosts = await appFetch<AppPostFull[], PostsQuery>(
           endpoint,
           params
         );
 
         if (DEBUG)
-          console.log(
-            `${input.DEBUG_PREIX}fetching for newer retrieved`,
-            readPosts
-          );
+          console.log(`${DEBUG_PREFIX}fetching for newer retrieved`, readPosts);
         addPosts(readPosts, 'start');
         setIsFetchingNewer(false);
         setIsLoading(false);
-      } catch (e: any) {
+      } catch (e) {
         setIsFetchingNewer(false);
-        setErrorFetchingNewer(e);
+        setErrorFetchingNewer(e as Error);
         setIsLoading(false);
       }
     },
-    [appFetch, connectedUser]
+    [
+      DEBUG_PREFIX,
+      PAGE_SIZE,
+      addPosts,
+      appFetch,
+      code,
+      connectedUser,
+      endpoint,
+      queryParams,
+    ]
   );
 
   /** public function to trigger fetching for older posts */
   const fetchNewer = useCallback(() => {
     if (newestPostId) {
       if (DEBUG)
-        console.log(`${input.DEBUG_PREIX}external fetchNewer`, newestPostId);
-      _fetchNewer(newestPostId);
+        console.log(`${DEBUG_PREFIX}external fetchNewer`, newestPostId);
+      _fetchNewer(newestPostId).catch((e) => {
+        console.error(e);
+      });
     }
-  }, [_fetchNewer, newestPostId]);
+  }, [DEBUG_PREFIX, _fetchNewer, newestPostId]);
+
+  /** first data fill happens everytime a new source platform is added/removed */
+  useEffect(() => {
+    if (DEBUG)
+      console.log(`${DEBUG_PREFIX}first fetch older with new platform added`, {
+        posts,
+        fetchedOlderFirst,
+        connectedSourcePlatforms,
+      });
+    if (
+      !arraysEqual(connectedSourcePlatforms, connectedSourcePlatformsInit) &&
+      !isFetchingOlder
+    ) {
+      reset();
+      setFetchedOlderFirst(true);
+      if (DEBUG)
+        console.log(
+          `${DEBUG_PREFIX}_fetchOlder due to connectedSourcePlatforms`,
+          { connectedSourcePlatforms }
+        );
+
+      _fetchOlder(undefined).catch((e) => {
+        console.error(e);
+      });
+    }
+  }, [
+    DEBUG_PREFIX,
+    _fetchOlder,
+    connectedSourcePlatforms,
+    connectedSourcePlatformsInit,
+    fetchedOlderFirst,
+    isFetchingOlder,
+    posts,
+    reset,
+  ]);
+
+  /** whenever posts have been fetched, check if we have fetched for newer posts yet, and if not, fetch for newer */
+  useEffect(() => {
+    if (posts && posts.length > 0 && !fetchedNewerFirst && connectedUser) {
+      if (DEBUG) console.log(`${DEBUG_PREFIX}first fetch newer`);
+      _fetchNewer(posts[0].id).catch((e) => {
+        console.error(e);
+      });
+    }
+  }, [posts, fetchedNewerFirst, connectedUser, DEBUG_PREFIX, _fetchNewer]);
 
   /** turn off errors automatically */
   useEffect(() => {
@@ -479,14 +502,17 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
     }
   }, [errorFetchingNewer, errorFetchingOlder]);
 
-  const removePost = (postId: string) => {
-    if (DEBUG)
-      console.log(`${input.DEBUG_PREIX}removing post ${postId} from list`);
-    setPosts((prev) =>
-      prev ? prev.filter((p) => p.id !== postId) : undefined
-    );
-    unsubscribeCallbacks.current[postId]?.();
-  };
+  const removePost = useCallback(
+    (postId: string) => {
+      if (DEBUG)
+        console.log(`${DEBUG_PREFIX}removing post ${postId} from list`);
+      setPosts((prev) =>
+        prev ? prev.filter((p) => p.id !== postId) : undefined
+      );
+      unsubscribeCallbacks.current[postId]?.();
+    },
+    [DEBUG_PREFIX]
+  );
 
   const getPost = useCallback(
     (postId: string) => {
@@ -508,12 +534,12 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
 
       const currPostIndex = posts?.findIndex((p) => p.id === postId);
       const prevPostId =
-        posts && currPostIndex != undefined && currPostIndex > 0
+        posts && currPostIndex !== undefined && currPostIndex > 0
           ? posts[currPostIndex - 1].id
           : undefined;
 
       const nextPostId =
-        posts && currPostIndex != undefined && currPostIndex < posts.length - 1
+        posts && currPostIndex !== undefined && currPostIndex < posts.length - 1
           ? posts[currPostIndex + 1].id
           : undefined;
 
@@ -522,7 +548,22 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
     [posts]
   );
 
-  return {
+  const feed = useMemo(() => {
+    return {
+      posts,
+      getPost,
+      removePost,
+      fetchOlder,
+      isFetchingOlder,
+      errorFetchingOlder,
+      fetchNewer,
+      isFetchingNewer,
+      errorFetchingNewer,
+      isLoading,
+      moreToFetch,
+      getNextAndPrev,
+    };
+  }, [
     posts,
     getPost,
     removePost,
@@ -535,5 +576,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
     isLoading,
     moreToFetch,
     getNextAndPrev,
-  };
+  ]);
+
+  return feed;
 };

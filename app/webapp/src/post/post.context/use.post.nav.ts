@@ -17,7 +17,7 @@ export const usePostNav = (fetched: PostFetchContext): PostNavContext => {
 
   const { prevPostId, nextPostId } = useMemo(
     () => feed.getNextAndPrev(fetched.postId),
-    [fetched.post]
+    [feed, fetched.postId]
   );
 
   const openNextPost = () => {

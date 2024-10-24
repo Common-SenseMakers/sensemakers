@@ -65,7 +65,7 @@ export const ViewportContainer = (props: React.HTMLProps<HTMLDivElement>) => {
             position: 'relative',
           }}>
           <Anchor
-            href={`https://twitter.com/${process.env.PROJECT_TWITTER_ACCOUNT}`}
+            href={`https://twitter.com/${process.env.PROJECT_TWITTER_ACCOUNT as string}`}
             target="_blank">
             <AppIcon size={14}></AppIcon>
           </Anchor>
@@ -145,13 +145,15 @@ export const ViewportPage = (props: {
         });
       }, options);
 
-      if (bottomMarkerRef.current) {
-        observer.observe(bottomMarkerRef.current);
+      const current = bottomMarkerRef.current;
+
+      if (current) {
+        observer.observe(current);
       }
 
       return () => {
-        if (bottomMarkerRef.current) {
-          observer.unobserve(bottomMarkerRef.current);
+        if (current) {
+          observer.unobserve(current);
         }
       };
     }

@@ -28,13 +28,11 @@ export const HelpTip = (props: IHelpTip) => {
       <DropButton
         style={{ ...props.style }}
         dropContent={<HelpDrop>{content}</HelpDrop>}
-        dropProps={
-          {
-            margin: '10px',
-            align: { bottom: 'top' },
-            style: { borderRadius: '20px', maxWidth: '280px' },
-          } as any
-        }>
+        dropProps={{
+          margin: '10px',
+          align: { bottom: 'top' },
+          style: { borderRadius: '20px', maxWidth: '280px' },
+        }}>
         <Box justify="center" style={{ overflow: 'hidden' }}>
           <CircleQuestion
             style={{
