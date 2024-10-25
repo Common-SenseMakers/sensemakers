@@ -259,10 +259,15 @@ export const addAccountsDataController: RequestHandler = async (
   response
 ) => {
   try {
+    if (DEBUG) logger.debug(`${request.path}: Starting addAccountsDataController`, { payloads: request.body });
+    
     const services = getServices(request);
     const payloads = request.body as AddUserDataPayload[];
 
     for (const payload of payloads) {
+      if (DEBUG) logger.debug('Processing payload', { payload });
+      if (DEBUG) logger.debug('Fetching profile', { platformId: payload.platformId, username: payload.username });
+      
       const profile = await services.db.run(async (manager) => {
         return services.users.getOrCreateProfileByUsername(
           payload.platformId,
@@ -272,16 +277,26 @@ export const addAccountsDataController: RequestHandler = async (
       });
 
       if (!profile) {
-        throw new Error(
-          `unable to find profile for ${payload.username} on ${payload.platformId}`
-        );
+        const error = `unable to find profile for ${payload.username} on ${payload.platformId}`;
+        logger.error(error);
+        throw new Error(error);
       }
+
+      if (DEBUG) logger.debug('Profile found', { profile });
 
       const profileId = getProfileId(payload.platformId, profile?.user_id);
       const chunkSize = 50;
       const fetchAmountChunks = chunkNumber(payload.amount, chunkSize);
 
+      if (DEBUG) logger.debug('Processing chunks', { 
+        profileId,
+        totalChunks: fetchAmountChunks.length,
+        chunkSize,
+        totalAmount: payload.amount 
+      });
+
       for (const fetchAmountChunk of fetchAmountChunks) {
+        if (DEBUG) logger.debug('Processing chunk', { fetchAmountChunk });
         let taskName;
         switch (payload.platformId) {
           case PLATFORM.Twitter:
@@ -297,16 +312,21 @@ export const addAccountsDataController: RequestHandler = async (
             throw new Error(`Unsupported platform: ${payload.platformId}`);
         }
 
-        await enqueueTask(taskName, {
+        const taskData = {
           profileId,
           platformId: payload.platformId,
           latest: payload.latest,
           amount: fetchAmountChunk,
-        });
+        };
+        
+        if (DEBUG) logger.debug('Enqueueing task', { taskName, taskData });
+        await enqueueTask(taskName, taskData);
       }
     }
 
-    if (DEBUG) logger.debug(`${request.path}: addAccountsData`, payloads);
+    if (DEBUG) logger.debug(`${request.path}: Successfully completed addAccountsData`, { 
+      totalPayloads: payloads.length 
+    });
 
     response.status(200).send({ success: true });
   } catch (error) {
