@@ -29,7 +29,7 @@ import {
   updatePostSchema,
 } from './posts.schema';
 
-const DEBUG = false;
+const DEBUG = true;
 
 /**
  * get user posts from the DB (does not fetch for more)
@@ -259,15 +259,21 @@ export const addAccountsDataController: RequestHandler = async (
   response
 ) => {
   try {
-    if (DEBUG) logger.debug(`${request.path}: Starting addAccountsDataController`, { payloads: request.body });
-    
+    if (DEBUG)
+      logger.debug(`${request.path}: Starting addAccountsDataController`, {
+        payloads: request.body,
+      });
+
     const services = getServices(request);
     const payloads = request.body as AddUserDataPayload[];
 
     for (const payload of payloads) {
-      if (DEBUG) logger.debug('Processing payload', { payload });
-      if (DEBUG) logger.debug('Fetching profile', { platformId: payload.platformId, username: payload.username });
-      
+      if (DEBUG)
+        logger.debug('Fetching profile', {
+          platformId: payload.platformId,
+          username: payload.username,
+        });
+
       const profile = await services.db.run(async (manager) => {
         return services.users.getOrCreateProfileByUsername(
           payload.platformId,
@@ -288,15 +294,7 @@ export const addAccountsDataController: RequestHandler = async (
       const chunkSize = 50;
       const fetchAmountChunks = chunkNumber(payload.amount, chunkSize);
 
-      if (DEBUG) logger.debug('Processing chunks', { 
-        profileId,
-        totalChunks: fetchAmountChunks.length,
-        chunkSize,
-        totalAmount: payload.amount 
-      });
-
       for (const fetchAmountChunk of fetchAmountChunks) {
-        if (DEBUG) logger.debug('Processing chunk', { fetchAmountChunk });
         let taskName;
         switch (payload.platformId) {
           case PLATFORM.Twitter:
@@ -318,15 +316,16 @@ export const addAccountsDataController: RequestHandler = async (
           latest: payload.latest,
           amount: fetchAmountChunk,
         };
-        
+
         if (DEBUG) logger.debug('Enqueueing task', { taskName, taskData });
         await enqueueTask(taskName, taskData);
       }
     }
 
-    if (DEBUG) logger.debug(`${request.path}: Successfully completed addAccountsData`, { 
-      totalPayloads: payloads.length 
-    });
+    if (DEBUG)
+      logger.debug(`${request.path}: Successfully completed addAccountsData`, {
+        totalPayloads: payloads.length,
+      });
 
     response.status(200).send({ success: true });
   } catch (error) {

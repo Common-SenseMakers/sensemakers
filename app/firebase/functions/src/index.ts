@@ -221,6 +221,7 @@ exports[NOTIFY_USER_TASK] = onTaskDispatched(
  */
 exports[FETCH_TWITTER_ACCOUNT_TASK] = onTaskDispatched(
   {
+    secrets,
     retryConfig: {
       maxAttempts: 3,
       minBackoffSeconds: 60 * 5,
@@ -239,6 +240,7 @@ exports[FETCH_TWITTER_ACCOUNT_TASK] = onTaskDispatched(
  */
 exports[FETCH_MASTODON_ACCOUNT_TASK] = onTaskDispatched(
   {
+    secrets,
     retryConfig: {
       maxAttempts: 3,
       minBackoffSeconds: 60,
@@ -259,6 +261,7 @@ exports[FETCH_MASTODON_ACCOUNT_TASK] = onTaskDispatched(
  */
 exports[FETCH_BLUESKY_ACCOUNT_TASK] = onTaskDispatched(
   {
+    secrets,
     retryConfig: {
       maxAttempts: 3,
       minBackoffSeconds: 60,
