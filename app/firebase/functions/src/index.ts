@@ -58,7 +58,6 @@ const secrets: SecretParam[] = [
   envRuntime.EMAIL_CLIENT_SECRET,
   envRuntime.MAGIC_ADMIN_SECRET,
   envRuntime.IFRAMELY_API_KEY,
-  envRuntime.BLUESKY_APP_PASSWORD,
 ];
 
 const deployConfig: functions.RuntimeOptions = {
@@ -118,6 +117,7 @@ exports[PARSE_POST_TASK] = onTaskDispatched(
     maxInstances: 1,
     retryConfig: {
       maxAttempts: 5,
+      minBackoffSeconds: 5,
     },
     concurrency: 50,
     rateLimits: {
