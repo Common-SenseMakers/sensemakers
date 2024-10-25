@@ -5,11 +5,10 @@ import {
 } from '../types/types.platform.posts';
 import { PLATFORM } from '../types/types.platforms';
 import {
+  AppPostEditStatus,
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
-  AppPostRepublishedStatus,
-  AppPostReviewStatus,
   GenericThread,
 } from '../types/types.posts';
 
@@ -51,8 +50,7 @@ export const getMockPublishedPost = () => {
     origin: PLATFORM.Twitter,
     parsedStatus: AppPostParsedStatus.PROCESSED,
     parsingStatus: AppPostParsingStatus.IDLE,
-    reviewedStatus: AppPostReviewStatus.DRAFT,
-    republishedStatus: AppPostRepublishedStatus.REPUBLISHED,
+    editStatus: AppPostEditStatus.PENDING,
     originalParsed,
     mirrors: [
       {
@@ -84,8 +82,7 @@ export const getMockPublishedPost = () => {
             origin: PLATFORM.Twitter,
             parsedStatus: AppPostParsedStatus.PROCESSED,
             parsingStatus: AppPostParsingStatus.IDLE,
-            reviewedStatus: AppPostReviewStatus.PENDING,
-            republishedStatus: AppPostRepublishedStatus.PENDING,
+            editStatus: AppPostEditStatus.PENDING,
           },
         },
       },
@@ -133,8 +130,7 @@ export const getMockAutoPublishedPost = () => {
     origin: PLATFORM.Twitter,
     parsedStatus: AppPostParsedStatus.PROCESSED,
     parsingStatus: AppPostParsingStatus.IDLE,
-    reviewedStatus: AppPostReviewStatus.PENDING,
-    republishedStatus: AppPostRepublishedStatus.AUTO_REPUBLISHED,
+    editStatus: AppPostEditStatus.PENDING,
     originalParsed,
     mirrors: [
       {
@@ -166,8 +162,7 @@ export const getMockAutoPublishedPost = () => {
             origin: PLATFORM.Twitter,
             parsedStatus: AppPostParsedStatus.PROCESSED,
             parsingStatus: AppPostParsingStatus.IDLE,
-            reviewedStatus: AppPostReviewStatus.PENDING,
-            republishedStatus: AppPostRepublishedStatus.PENDING,
+            editStatus: AppPostEditStatus.PENDING,
           },
         },
       },
@@ -218,8 +213,7 @@ export const getMockPendingPost = () => {
     origin: PLATFORM.Twitter,
     parsedStatus: AppPostParsedStatus.PROCESSED,
     parsingStatus: AppPostParsingStatus.IDLE,
-    reviewedStatus: AppPostReviewStatus.PENDING,
-    republishedStatus: AppPostRepublishedStatus.PENDING,
+    editStatus: AppPostEditStatus.PENDING,
     originalParsed,
     mirrors: [
       {
@@ -251,8 +245,7 @@ export const getMockPendingPost = () => {
             origin: PLATFORM.Twitter,
             parsedStatus: AppPostParsedStatus.PROCESSED,
             parsingStatus: AppPostParsingStatus.IDLE,
-            reviewedStatus: AppPostReviewStatus.PENDING,
-            republishedStatus: AppPostRepublishedStatus.PENDING,
+            editStatus: AppPostEditStatus.PENDING,
           },
         },
       },

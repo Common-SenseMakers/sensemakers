@@ -4,12 +4,7 @@ import {
   AddUserDataPayload,
   FetchParams,
 } from '../../@shared/types/types.fetch';
-import { PublishPostPayload } from '../../@shared/types/types.fetch';
-import {
-  PostUpdatePayload,
-  PostsQuery,
-  UnpublishPlatformPostPayload,
-} from '../../@shared/types/types.posts';
+import { PostUpdatePayload, PostsQuery } from '../../@shared/types/types.posts';
 import { IS_EMULATOR } from '../../config/config.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
@@ -17,10 +12,8 @@ import { enqueueTask } from '../../tasksUtils/tasks.support';
 import { canReadPost } from '../posts.access.control';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 import {
-  approvePostSchema,
   getUserPostsQuerySchema,
   postIdValidation,
-  retractPostSchema,
   updatePostSchema,
 } from './posts.schema';
 
@@ -92,38 +85,6 @@ export const getPostController: RequestHandler = async (request, response) => {
   }
 };
 
-export const approvePostController: RequestHandler = async (
-  request,
-  response
-) => {
-  try {
-    const userId = getAuthenticatedUser(request, true);
-    const { postsManager } = getServices(request);
-
-    const payload = (await approvePostSchema.validate(
-      request.body
-    )) as PublishPostPayload;
-
-    await postsManager.publishPost(
-      payload.post,
-      payload.platformIds,
-      undefined,
-      false,
-      userId
-    );
-
-    if (DEBUG)
-      logger.debug(`${request.path}: approvePost`, {
-        post: payload,
-      });
-
-    response.status(200).send({ success: true });
-  } catch (error: any) {
-    logger.error('error', error);
-    response.status(500).send({ success: false, error: error.message });
-  }
-};
-
 export const parsePostController: RequestHandler = async (
   request,
   response
@@ -181,34 +142,6 @@ export const updatePostController: RequestHandler = async (
         manager
       );
     });
-
-    if (DEBUG) logger.debug(`${request.path}: updatePost`, payload);
-
-    response.status(200).send({ success: true });
-  } catch (error) {
-    logger.error('error', error);
-    response.status(500).send({ success: false, error });
-  }
-};
-
-export const unpublishPlatformPostController: RequestHandler = async (
-  request,
-  response
-) => {
-  try {
-    const userId = getAuthenticatedUser(request, true);
-    const { postsManager } = getServices(request);
-
-    const payload = (await retractPostSchema.validate(
-      request.body
-    )) as UnpublishPlatformPostPayload;
-
-    await postsManager.unpublishPlatformPost(
-      payload.postId,
-      userId,
-      payload.platformId,
-      payload.post_id
-    );
 
     if (DEBUG) logger.debug(`${request.path}: updatePost`, payload);
 

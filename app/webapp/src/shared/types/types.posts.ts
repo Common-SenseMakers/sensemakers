@@ -40,7 +40,7 @@ export enum AppPostParsedStatus {
   UNPROCESSED = 'unprocessed',
   PROCESSED = 'processed',
 }
-export enum AppPostReviewStatus {
+export enum AppPostEditStatus {
   PENDING = 'pending',
   DRAFT = 'draft',
   UPDATED = 'updated',
@@ -62,8 +62,7 @@ interface AppPostBase {
   parsingStatus: AppPostParsingStatus;
   parsingStartedAtMs?: number;
   parsedStatus: AppPostParsedStatus;
-  updateStatus: AppPostReviewStatus;
-  indexStatus: WIP;
+  editStatus: AppPostEditStatus;
   originalParsed?: ParsePostResult;
   semantics?: AppPostSemantics;
   mirrorsIds: string[];
@@ -112,8 +111,7 @@ export type PostUpdate = Partial<
     | 'parsingStatus'
     | 'parsingStartedAtMs'
     | 'parsedStatus'
-    | 'reviewedStatus'
-    | 'republishedStatus'
+    | 'editStatus'
   >
 >;
 
@@ -123,10 +121,9 @@ export interface PostUpdatePayload {
 }
 
 export enum PostsQueryStatus {
-  PUBLISHED = 'published',
+  ALL = 'all',
   IGNORED = 'ignored',
-  PENDING = 'pending',
-  DRAFTS = 'drafts',
+  IS_SCIENCE = 'isScience',
 }
 
 export interface UnpublishPlatformPostPayload {
@@ -135,11 +132,12 @@ export interface UnpublishPlatformPostPayload {
   post_id: string;
 }
 
-export interface PostsQueryParams extends StructuredSemantics {
+export interface PostsQueryParams {
   userId?: string;
   profileIds?: string;
-  status?: string;
+  status?: PostsQueryStatus;
   origins?: PLATFORM[];
+  semantics?: StructuredSemantics;
 }
 
 export interface PostsQuery extends PostsQueryParams {

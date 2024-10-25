@@ -5,10 +5,6 @@ import {
   autofetchUserPosts,
 } from '../posts/tasks/posts.autofetch.task';
 import {
-  AUTOPOST_POST_TASK,
-  autopostPostTask,
-} from '../posts/tasks/posts.autopost.task';
-import {
   PARSE_POST_TASK,
   parsePostTask,
 } from '../posts/tasks/posts.parse.task';
@@ -26,10 +22,6 @@ export const enqueueTaskMockLocal = async (
     await (async () => {
       if (name === PARSE_POST_TASK) {
         await parsePostTask({ data: params } as any, services);
-      }
-
-      if (name === AUTOPOST_POST_TASK) {
-        await autopostPostTask({ data: params } as any, services);
       }
 
       if (name === AUTOFETCH_POSTS_TASK) {

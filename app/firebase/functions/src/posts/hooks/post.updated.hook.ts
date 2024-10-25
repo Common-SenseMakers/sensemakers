@@ -4,11 +4,7 @@ import {
   ActivityType,
   PostActData,
 } from '../../@shared/types/types.activity';
-import {
-  AppPost,
-  AppPostParsedStatus,
-  AppPostRepublishedStatus,
-} from '../../@shared/types/types.posts';
+import { AppPost, AppPostParsedStatus } from '../../@shared/types/types.posts';
 import { logger } from '../../instances/logger';
 import { Services } from '../../instances/services';
 import { enqueueTask } from '../../tasksUtils/tasks.support';
@@ -82,37 +78,11 @@ export const postUpdatedHook = async (
         activitiesCreated.push(parsedActivity);
       }
 
-      // if was parsed and user has autopost, then also trigger autopost
-      const wasAutoposted =
-        postBefore &&
-        postBefore.republishedStatus === AppPostRepublishedStatus.PENDING &&
-        post.republishedStatus !== AppPostRepublishedStatus.PENDING;
-
-      if (wasAutoposted) {
-        if (DEBUG)
-          logger.debug(
-            `wasAutoposted ${PARSE_POST_TASK}-${postId}`,
-            undefined,
-            PREFIX
-          );
-        const event: ActivityEventCreate<PostActData> = {
-          type: ActivityType.PostAutoposted,
-          data: {
-            postId: post.id,
-          },
-          timestamp: time.now(),
-        };
-
-        const autopostedActivity = activity.repo.create(event, manager);
-        activitiesCreated.push(autopostedActivity);
-      }
-
       if (DEBUG)
         logger.debug(
           `postUpdatedHook -${postId}`,
           {
             post,
-            wasAutoposted,
             wasParsed,
           },
           PREFIX

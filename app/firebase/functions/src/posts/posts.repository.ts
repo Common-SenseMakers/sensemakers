@@ -6,8 +6,6 @@ import {
   AppPost,
   AppPostCreate,
   AppPostParsedStatus,
-  AppPostRepublishedStatus,
-  AppPostReviewStatus,
   PostUpdate,
   PostsQuery,
   PostsQueryStatus,
@@ -58,13 +56,12 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     const createdAtKey: keyof AppPost = 'createdAtMs';
     const authorUserKey: keyof AppPost = 'authorUserId';
     const authorProfileKey: keyof AppPost = 'authorProfileId';
-    const reviewedStatusKey: keyof AppPost = 'reviewedStatus';
-    const republishedStatusKey: keyof AppPost = 'republishedStatus';
     const originKey: keyof AppPost = 'origin';
 
     const structuredSemanticsKey: keyof AppPost = 'structuredSemantics';
     const keywordsKey: keyof StructuredSemantics = 'keywords';
     const labelsKey: keyof StructuredSemantics = 'labels';
+    const isScienceKey: keyof StructuredSemantics = 'isScience';
 
     if (DEBUG) logger.debug('getMany', queryParams, DEBUG_PREFIX);
 
@@ -137,7 +134,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     if (DEBUG) logger.debug('getOfUser', queryParams, DEBUG_PREFIX);
 
     const withStatuses = ((_base: Query) => {
-      if (!queryParams.status) {
+      if (!queryParams.status || queryParams.status === PostsQueryStatus.ALL) {
         if (DEBUG)
           logger.debug(
             'getMany - dont filter by status',
@@ -147,44 +144,6 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
         return _base;
       }
 
-      if (queryParams.status === PostsQueryStatus.DRAFTS) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by status',
-            PostsQueryStatus.DRAFTS,
-            DEBUG_PREFIX
-          );
-        return _base.where(republishedStatusKey, 'in', [
-          AppPostRepublishedStatus.PENDING,
-          AppPostRepublishedStatus.UNREPUBLISHED,
-        ]);
-      }
-      if (queryParams.status === PostsQueryStatus.PENDING) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by status',
-            PostsQueryStatus.PENDING,
-            DEBUG_PREFIX
-          );
-        return _base.where(
-          reviewedStatusKey,
-          '==',
-          AppPostReviewStatus.PENDING
-        );
-      }
-      if (queryParams.status === PostsQueryStatus.PUBLISHED) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by status',
-            PostsQueryStatus.PUBLISHED,
-            DEBUG_PREFIX
-          );
-        return _base.where(
-          republishedStatusKey,
-          '!=',
-          AppPostRepublishedStatus.PENDING
-        );
-      }
       if (queryParams.status === PostsQueryStatus.IGNORED) {
         if (DEBUG)
           logger.debug(
@@ -192,11 +151,24 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
             PostsQueryStatus.IGNORED,
             DEBUG_PREFIX
           );
-
         return _base.where(
-          reviewedStatusKey,
+          `${structuredSemanticsKey}.${isScienceKey}`,
           '==',
-          AppPostReviewStatus.IGNORED
+          false
+        );
+      }
+
+      if (queryParams.status === PostsQueryStatus.IS_SCIENCE) {
+        if (DEBUG)
+          logger.debug(
+            'getMany - filter by status',
+            PostsQueryStatus.IS_SCIENCE,
+            DEBUG_PREFIX
+          );
+        return _base.where(
+          `${structuredSemanticsKey}.${isScienceKey}`,
+          '==',
+          true
         );
       }
 
@@ -204,33 +176,39 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     })(ofProfiles);
 
     const withSemantics = ((_base: Query) => {
-      if (queryParams.keywords && queryParams.keywords.length > 0) {
+      if (
+        queryParams.semantics?.keywords &&
+        queryParams.semantics?.keywords.length > 0
+      ) {
         if (DEBUG)
           logger.debug(
             'getMany - filter by keywords',
-            JSON.stringify(queryParams.keywords),
+            JSON.stringify(queryParams.semantics.keywords),
             DEBUG_PREFIX
           );
 
         return _base.where(
           `${structuredSemanticsKey}.${keywordsKey}`,
           'array-contains-any',
-          queryParams.keywords
+          queryParams.semantics.keywords
         );
       }
 
-      if (queryParams.labels && queryParams.labels.length > 0) {
+      if (
+        queryParams.semantics?.labels &&
+        queryParams.semantics?.labels.length > 0
+      ) {
         if (DEBUG)
           logger.debug(
             'getMany - filter by labels',
-            JSON.stringify(queryParams.labels),
+            JSON.stringify(queryParams.semantics.labels),
             DEBUG_PREFIX
           );
 
         return _base.where(
           `${structuredSemanticsKey}.${labelsKey}`,
           'array-contains-any',
-          queryParams.labels
+          queryParams.semantics.labels
         );
       }
 

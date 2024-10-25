@@ -2,11 +2,9 @@ import express from 'express';
 
 import { getPublicFeedController } from './feed/feed.controller';
 import {
-  approvePostController,
   getPostController,
   getUserPostsController,
   parsePostController,
-  unpublishPlatformPostController,
   updatePostController,
 } from './posts/controllers/posts.controller';
 import {
@@ -29,9 +27,7 @@ router.post('/auth/me', getLoggedUserController);
 router.post('/posts/getOfUser', getUserPostsController);
 
 router.post('/posts/get', getPostController);
-router.post('/posts/approve', approvePostController);
 router.post('/posts/parse', parsePostController);
 router.post('/posts/update', updatePostController);
-router.post('/posts/unpublish', unpublishPlatformPostController);
 
 router.post('/feed/get', getPublicFeedController);

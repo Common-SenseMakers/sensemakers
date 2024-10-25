@@ -12,11 +12,10 @@ import { PLATFORM } from '../@shared/types/types.platforms';
 import {
   AppPost,
   AppPostCreate,
+  AppPostEditStatus,
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
-  AppPostRepublishedStatus,
-  AppPostReviewStatus,
 } from '../@shared/types/types.posts';
 import { DefinedIfTrue } from '../@shared/types/types.user';
 import { mapStoreElements, parseRDF } from '../@shared/utils/n3.utils';
@@ -98,6 +97,7 @@ export class PostsProcessing {
         authorUserId,
         mirrorsIds: [platformPostCreated.id],
         createdAtMs: platformPost.posted?.timestampMs || this.time.now(),
+        editStatus: AppPostEditStatus.PENDING,
       },
       manager
     );
@@ -223,8 +223,7 @@ export class PostsProcessing {
       ...input,
       parsedStatus: AppPostParsedStatus.UNPROCESSED,
       parsingStatus: AppPostParsingStatus.IDLE,
-      reviewedStatus: AppPostReviewStatus.PENDING,
-      republishedStatus: AppPostRepublishedStatus.PENDING,
+      editStatus: AppPostEditStatus.PENDING,
     };
 
     /** Create the post */
