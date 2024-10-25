@@ -89,11 +89,14 @@ export class MastodonService
   }
 
   public getClient(server: string, credentials?: MastodonAccountCredentials) {
+    const accessTokenServer = this.config.accessTokens[server]
+      ? server
+      : 'mastodon.social';
     return createRestAPIClient({
       url: `https://${server}`,
       accessToken: credentials
         ? credentials.accessToken
-        : this.config.accessTokens[server],
+        : this.config.accessTokens[accessTokenServer],
     });
   }
 
