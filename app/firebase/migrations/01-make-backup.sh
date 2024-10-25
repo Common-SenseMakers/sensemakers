@@ -2,6 +2,7 @@
 
 # Makes a backup of the Firestore data in the specified project, stores
 # it in a Cloud Storage bucket, and then downloads it to a local folder.
+# yarn make-backup <project-id>
 
 # Check if the project ID was provided as an input
 if [ "$#" -ne 1 ]; then

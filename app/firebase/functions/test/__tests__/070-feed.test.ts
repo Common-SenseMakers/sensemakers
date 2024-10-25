@@ -2,7 +2,6 @@ import { expect } from 'chai';
 
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { AppUser } from '../../src/@shared/types/types.user';
-import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { logger } from '../../src/instances/logger';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
@@ -13,12 +12,7 @@ import {
   _02_publishTweet,
   _03_fetchAfterPublish,
 } from './reusable/create-post-fetch';
-import {
-  USE_REAL_NANOPUB,
-  USE_REAL_PARSER,
-  USE_REAL_TWITTER,
-  testUsers,
-} from './setup';
+import { USE_REAL_PARSER, USE_REAL_TWITTER, testUsers } from './setup';
 import { getTestServices } from './test.services';
 
 const feedThreads = [[''], [''], [''], [''], ['']];
@@ -29,9 +23,7 @@ describe('070 test feed', () => {
     twitter: USE_REAL_TWITTER
       ? undefined
       : { publish: true, signup: true, fetch: true, get: true },
-    nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
-    emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
   });
 
   before(async () => {
@@ -56,6 +48,10 @@ describe('070 test feed', () => {
     });
 
     it('fetch and parse all posts', async () => {
+      if (USE_REAL_TWITTER) {
+        logger.warn(`Feed test disbaled with real twitter`);
+        return;
+      }
       for (let ix = 0; ix < feedThreads.length; ix++) {
         const post_id = ix.toString();
 
@@ -81,6 +77,10 @@ describe('070 test feed', () => {
     });
 
     it('returns a feed', async () => {
+      if (USE_REAL_TWITTER) {
+        logger.warn(`Feed test disbaled with real twitter`);
+        return;
+      }
       const { feed } = services;
       const result1 = await feed.getFeed({
         fetchParams: { expectedAmount: 10 },

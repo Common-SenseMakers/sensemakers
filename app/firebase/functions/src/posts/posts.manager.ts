@@ -725,37 +725,38 @@ export class PostsManager {
     if (DEBUG) logger.debug(`parsePost - done ${postId}`, { postId, update });
 
     /** store the semantics and mark as processed */
-    await this.updatePost(post.id, update, manager);
+    await this.updatePost(post.id, update, manager, true);
   }
+
+  async processUrls(postId: string, manager: TransactionManager) {}
 
   /** single place to update a post (it updates the drafts if necessary) */
   async updatePost(
     postId: string,
     postUpdate: PostUpdate,
-    manager: TransactionManager
+    manager: TransactionManager,
+    first?: boolean
   ) {
     if (DEBUG) logger.debug(`updatePost ${postId}`, { postId, postUpdate });
     await this.processing.posts.update(postId, postUpdate, manager);
-
-    try {
-      if (DEBUG) logger.debug(`createOrUpdatePostDrafts ${postId}`);
-      await this.processing.createOrUpdatePostDrafts(postId, manager);
-    } catch (err: any) {
-      logger.warn(`Error updating post drafts ${postId}`, err);
-    }
 
     /** sync the semantics as triples when the post is updated */
     const postUpdated = await this.processing.posts.get(postId, manager, true);
     const structured = await this.processing.processSemantics(
       postId,
       manager,
-      postUpdated.semantics
+      postUpdated.semantics,
+      first
     );
 
     if (structured) {
       if (DEBUG)
         logger.debug(`updating strucured semantics ${postId}`, structured);
-      await this.processing.posts.update(postId, { ...structured }, manager);
+      await this.processing.posts.update(
+        postId,
+        { structuredSemantics: structured },
+        manager
+      );
     }
   }
 
@@ -821,7 +822,7 @@ export class PostsManager {
         throw new Error(`Expected signed post to be provided`);
       }
 
-      const { post: posted, credentials } = await platform.publish({
+      const { platformPost, credentials } = await platform.publish({
         draft: mirror.deleteDraft.signedPost,
         credentials: account.credentials,
       });
@@ -840,10 +841,10 @@ export class PostsManager {
       await this.processing.platformPosts.update(
         mirror.id,
         {
-          posted: posted,
+          posted: platformPost,
           publishOrigin: PlatformPostPublishOrigin.POSTED,
           publishStatus: PlatformPostPublishStatus.UNPUBLISHED,
-          ...(mirror.post_id ? {} : { post_id: posted.post_id }),
+          ...(mirror.post_id ? {} : { post_id: platformPost.post_id }),
         },
         manager
       );
@@ -1001,7 +1002,7 @@ export class PostsManager {
               throw new Error(`Expected signed post to be provided`);
             }
 
-            const { post: posted, credentials } = await platform.publish({
+            const { platformPost, credentials } = await platform.publish({
               draft: mirror.draft.signedPost,
               credentials: account.credentials,
             });
@@ -1018,14 +1019,14 @@ export class PostsManager {
 
             const platformPostUpdate: PlatformPostStatusUpdate = {
               draft: mirror.draft,
-              posted: posted,
+              posted: platformPost,
               publishOrigin: PlatformPostPublishOrigin.POSTED,
               publishStatus: PlatformPostPublishStatus.PUBLISHED,
             };
 
             /** set the original post_id */
-            if (!mirror.post_id && posted.post_id) {
-              platformPostUpdate.post_id = posted.post_id;
+            if (!mirror.post_id && platformPost.post_id) {
+              platformPostUpdate.post_id = platformPost.post_id;
             }
 
             if (DEBUG)

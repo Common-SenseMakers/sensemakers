@@ -1,10 +1,8 @@
 import { BlueskyAccountDetails } from '../../src/@shared/types/types.bluesky';
-import { NotificationFreq } from '../../src/@shared/types/types.notifications';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { TwitterSignupContext } from '../../src/@shared/types/types.twitter';
 import {
   AppUser,
-  AutopostOption,
   TestUserCredentials,
 } from '../../src/@shared/types/types.user';
 import { TransactionManager } from '../../src/db/transaction.manager';
@@ -13,7 +11,6 @@ import { handleTwitterSignupMock } from '../__tests__/reusable/mocked.singup';
 import { USE_REAL_TWITTER } from '../__tests__/setup';
 import { TestServices } from '../__tests__/test.services';
 import { authenticateTwitterUser } from './authenticate.twitter';
-import { getNanopubProfile } from './nanopub.profile';
 
 export const authenticateTestUsers = async (
   credentials: TestUserCredentials[],
@@ -53,10 +50,6 @@ export const authenticateTestUser = async (
     );
   }
 
-  if (PLATFORM.Nanopub in credentials) {
-    user = await authenticateNanopubForUser(credentials, user);
-  }
-
   if (!excludePlatforms.includes(PLATFORM.Bluesky)) {
     user = await authenticateBlueskyForUser(
       credentials,
@@ -82,14 +75,7 @@ const authenticateBlueskyForUser = async (
   if (!user) {
     user = {
       userId: getPrefixedUserId(PLATFORM.Bluesky, credentials.bluesky.id),
-      settings: {
-        autopost: {
-          [PLATFORM.Nanopub]: {
-            value: AutopostOption.MANUAL,
-          },
-        },
-        notificationFreq: NotificationFreq.Daily,
-      },
+      settings: {},
       signupDate: Date.now(),
       accounts: {},
     };
@@ -156,14 +142,7 @@ const authenticateMastodonForUser = async (
   if (!user) {
     user = {
       userId: getPrefixedUserId(PLATFORM.Mastodon, credentials.mastodon.id),
-      settings: {
-        autopost: {
-          [PLATFORM.Nanopub]: {
-            value: AutopostOption.MANUAL,
-          },
-        },
-        notificationFreq: NotificationFreq.Daily,
-      },
+      settings: {},
       signupDate: Date.now(),
       accounts: {},
     };
@@ -183,41 +162,6 @@ const authenticateMastodonForUser = async (
           server: 'https://mastodon.social',
         },
       },
-    },
-  ];
-
-  return user;
-};
-
-const authenticateNanopubForUser = async (
-  credentials: TestUserCredentials,
-  user?: AppUser
-): Promise<AppUser> => {
-  const { profile } = await getNanopubProfile(
-    credentials.nanopub.ethPrivateKey
-  );
-
-  if (!user) {
-    user = {
-      userId: getPrefixedUserId(PLATFORM.Nanopub, profile.ethAddress),
-      settings: {
-        autopost: {
-          [PLATFORM.Nanopub]: {
-            value: AutopostOption.MANUAL,
-          },
-        },
-        notificationFreq: NotificationFreq.Daily,
-      },
-      signupDate: Date.now(),
-      accounts: {},
-    };
-  }
-
-  user.accounts[PLATFORM.Nanopub] = [
-    {
-      signupDate: 0,
-      user_id: profile.ethAddress,
-      credentials: {},
     },
   ];
 

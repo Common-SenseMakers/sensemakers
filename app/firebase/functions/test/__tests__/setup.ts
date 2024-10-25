@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase-admin/app';
 import { Context } from 'mocha';
 import * as sinon from 'sinon';
 
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { AppUser } from '../../src/@shared/types/types.user';
 import { envRuntime } from '../../src/config/typedenv.runtime';
 import * as tasksSupport from '../../src/tasksUtils/tasks.support';
@@ -19,7 +20,7 @@ export const USE_REAL_MASTODON = process.env.USE_REAL_MASTODON === 'true';
 export const USE_REAL_BLUESKY = process.env.USE_REAL_BLUESKY === 'true';
 export const USE_REAL_NANOPUB = process.env.USE_REAL_NANOPUB === 'true';
 export const USE_REAL_PARSER = process.env.USE_REAL_PARSER === 'true';
-export const USE_REAL_EMAIL = process.env.USE_REAL_EMAIL === 'true';
+export const USE_REAL_LINKS = process.env.USE_REAL_LINKS === 'true';
 export const EMAIL_SENDER_FROM = process.env.EMAIL_SENDER_FROM as string;
 export const TEST_EMAIL = process.env.TEST_EMAIL as string;
 
@@ -50,9 +51,12 @@ export let globalTestServices = getTestServices({
   mastodon: USE_REAL_MASTODON
     ? undefined
     : { publish: true, signup: true, fetch: true, get: true },
-  nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
   parser: USE_REAL_PARSER ? 'real' : 'mock',
-  emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
+  links: USE_REAL_LINKS
+    ? undefined
+    : {
+        get: true,
+      },
 });
 
 export const mochaHooks = (): Mocha.RootHookObject => {
@@ -77,7 +81,8 @@ export const mochaHooks = (): Mocha.RootHookObject => {
             const user = await authenticateTestUser(
               accountCredentials,
               globalTestServices,
-              manager
+              manager,
+              [PLATFORM.Mastodon, PLATFORM.Bluesky]
             );
             testUsers.push(user);
           })

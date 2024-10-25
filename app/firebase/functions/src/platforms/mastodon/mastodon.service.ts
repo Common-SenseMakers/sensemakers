@@ -360,7 +360,7 @@ export class MastodonService
 
   public async publish(
     postPublish: PlatformPostPublish<string, MastodonAccountCredentials>
-  ): Promise<{ post: PlatformPostPosted<mastodon.v1.Status> }> {
+  ): Promise<{ platformPost: PlatformPostPosted<mastodon.v1.Status> }> {
     const credentials = postPublish.credentials;
 
     if (!credentials.write) {
@@ -382,7 +382,7 @@ export class MastodonService
       post: status,
     };
 
-    return { post };
+    return { platformPost: post };
   }
 
   public async convertFromGeneric(

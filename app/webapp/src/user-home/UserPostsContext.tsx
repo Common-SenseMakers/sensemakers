@@ -15,7 +15,7 @@ import {
   PostsQueryStatus,
 } from '../shared/types/types.posts';
 
-const DEBUG = true;
+const DEBUG = false;
 
 interface PostContextType {
   filterStatus: PostsQueryStatus;

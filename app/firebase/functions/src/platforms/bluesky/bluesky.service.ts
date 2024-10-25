@@ -391,7 +391,7 @@ export class BlueskyService
 
   public async publish(
     postPublish: PlatformPostPublish<string, BlueskyCredentials>
-  ): Promise<PlatformPostPosted<any>> {
+  ) {
     if (DEBUG) logger.debug('publish', { postPublish }, DEBUG_PREFIX);
 
     const userDetails = postPublish.credentials;
@@ -407,10 +407,12 @@ export class BlueskyService
     });
 
     return {
-      post_id: response.uri,
-      user_id: agent.session?.did!,
-      timestampMs: Date.now(),
-      post: response,
+      platformPost: {
+        post_id: response.uri,
+        user_id: agent.session?.did!,
+        timestampMs: Date.now(),
+        post: response,
+      },
     };
   }
 

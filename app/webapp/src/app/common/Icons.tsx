@@ -20,16 +20,6 @@ export const TwitterIcon = (
   );
 };
 
-export const NanopubsIcon = (props: { size?: number; color?: string }) => {
-  const size = props.size || 20;
-  const color = props.color || 'white';
-  return (
-    <Box style={{ height: `${size}px`, width: `${size}px` }}>
-      <Image src="/icons/nanopub.png" />
-    </Box>
-  );
-};
-
 export const MastodonIcon = (
   props: {
     size?: number;

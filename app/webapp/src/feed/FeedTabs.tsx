@@ -53,7 +53,7 @@ export const FeedTabs = (props: {}) => {
     };
 
     return (
-      <Box {...externalBoxProps}>
+      <Box {...externalBoxProps} key={text}>
         <AppButton
           plain
           style={{ height: '100%' }}

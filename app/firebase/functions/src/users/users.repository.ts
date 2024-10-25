@@ -1,12 +1,10 @@
 import { FieldValue } from 'firebase-admin/firestore';
 
-import { NotificationFreq } from '../@shared/types/types.notifications';
 import { PLATFORM } from '../@shared/types/types.platforms';
 import {
   AccountDetailsBase,
   AppUser,
   AppUserCreate,
-  AutopostOption,
   DefinedIfTrue,
   EmailDetails,
   UserSettings,
@@ -222,23 +220,6 @@ export class UsersRepository {
     });
   }
 
-  public async getWithAutopostValues(
-    platformId: PLATFORM,
-    values: AutopostOption[]
-  ): Promise<string[]> {
-    const settingsKey: keyof AppUser = 'settings';
-    const autopostKey: keyof UserSettings = 'autopost';
-
-    const query = this.db.collections.users.where(
-      `${settingsKey}.${autopostKey}.${platformId}.value`,
-      'in',
-      values
-    );
-
-    const result = await query.get();
-    return result.docs.map((doc) => doc.id) as string[];
-  }
-
   public async getAll() {
     const snapshot = await this.db.collections.users.get();
     return snapshot.docs.map((doc) => doc.id);
@@ -270,24 +251,6 @@ export class UsersRepository {
     manager.update(ref, {
       settings: newSettings,
     });
-  }
-
-  public async getByNotificationFreq(
-    notificationFrequency: NotificationFreq,
-    manager: TransactionManager
-  ) {
-    const settingsKey: keyof AppUser = 'settings';
-    const notificationFrequencyKey: keyof UserSettings = 'notificationFreq';
-
-    const query = this.db.collections.users.where(
-      `${settingsKey}.${notificationFrequencyKey}`,
-      '==',
-      notificationFrequency
-    );
-
-    const result = await manager.query(query);
-
-    return result.docs.map((doc) => doc.id) as string[];
   }
 
   public async getByEmail<T extends boolean, R = string>(

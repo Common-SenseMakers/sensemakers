@@ -74,6 +74,8 @@ export interface TwitterApiCredentials {
 
 const DEBUG = false;
 
+const MAX_OLDER_THAN = 1000 * 60 * 60 * 24 * 7; // 7 days
+
 /** Twitter service handles all interactions with Twitter API */
 export class TwitterService
   extends TwitterServiceClient
@@ -119,6 +121,15 @@ export class TwitterService
 
       const original = await readOnlyClient.v2.singleTweet(post_id, options);
       const authorId = original.data.author_id;
+
+      if (
+        Date.now() - dateStrToTimestampMs(original.data.created_at as string) >
+        MAX_OLDER_THAN
+      ) {
+        throw new Error(
+          `Tweet too old, cannot read thread since search endpoint does not archive`
+        );
+      }
 
       if (!authorId) {
         throw new Error('author_id not found');
@@ -519,7 +530,7 @@ export class TwitterService
   /** user_id must be from the authenticated userId */
   public async publish(
     postPublish: PlatformPostPublish<TwitterDraft, TwitterCredentials>
-  ): Promise<{ post: PlatformPostPosted<TwitterThread> } & WithCredentials> {
+  ) {
     // TODO udpate to support many
     const post = postPublish.draft;
 
@@ -577,13 +588,15 @@ export class TwitterService
         newAccountCredentials.write = newCredentials;
       }
 
-      return { post: posted, credentials: newAccountCredentials };
+      return { platformPost: posted, credentials: newAccountCredentials };
     } catch (e: any) {
       throw new Error(handleTwitterError(e));
     }
   }
 
-  update(post: PlatformPostUpdate<any>): Promise<PlatformPostPosted<any>> {
+  async update(
+    post: PlatformPostUpdate<any>
+  ): Promise<{ platformPost: PlatformPostPosted<any, any> } & WithCredentials> {
     throw new Error('Method not implemented.');
   }
 

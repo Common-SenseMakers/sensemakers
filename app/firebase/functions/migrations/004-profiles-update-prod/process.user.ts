@@ -5,6 +5,7 @@ import {
 import {
   AccountProfileBase,
   AccountProfileCreate,
+  PlatformProfile,
 } from '../../src/@shared/types/types.profiles';
 import {
   AccountCredentials,
@@ -42,11 +43,24 @@ export const processUser = async (user: AppUser, services: Services) => {
                 return account.user_id;
               })();
 
+              const profile = ((): PlatformProfile => {
+                if (platformId === PLATFORM.Twitter) {
+                  return {
+                    id: account.profile.id,
+                    username: account.profile.username,
+                    avatar: account.profile.profile_image_url,
+                    displayName: account.profile.name,
+                    description: '',
+                  };
+                }
+                return account.profile;
+              })();
+
               /** this reads the profile from the platforms */
               const profileBase: AccountProfileBase = {
                 user_id,
                 fetched,
-                profile: account.profile,
+                profile,
                 userId: user.userId,
               };
 

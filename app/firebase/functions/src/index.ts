@@ -1,41 +1,30 @@
 import express from 'express';
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
+import { SecretParam } from 'firebase-functions/lib/params/types';
 import {
   FirestoreEvent,
   QueryDocumentSnapshot,
   onDocumentCreated,
   onDocumentUpdated,
 } from 'firebase-functions/v2/firestore';
-// import { onSchedule } from 'firebase-functions/v2/scheduler';
-import { onTaskDispatched } from 'firebase-functions/v2/tasks';
-import { Message } from 'postmark';
+import {
+  TaskQueueOptions,
+  onTaskDispatched,
+} from 'firebase-functions/v2/tasks';
 
 import { ActivityEventBase } from './@shared/types/types.activity';
-import { NotificationFreq } from './@shared/types/types.notifications';
 import { PlatformPost } from './@shared/types/types.platform.posts';
 import { AppPost } from './@shared/types/types.posts';
 import { CollectionNames } from './@shared/utils/collectionNames';
 import { activityEventCreatedHook } from './activity/activity.created.hook';
 import { adminRouter } from './admin.router';
-import {
-  // AUTOFETCH_PERIOD,
-  // DAILY_NOTIFICATION_PERIOD,
-  EMAIL_SENDER_FROM,
-  IS_EMULATOR, // MONTHLY_NOTIFICATION_PERIOD,
-  // WEEKLY_NOTIFICATION_PERIOD,
-} from './config/config.runtime';
+import { IS_EMULATOR } from './config/config.runtime';
 import { envDeploy } from './config/typedenv.deploy';
 import { envRuntime } from './config/typedenv.runtime';
-import { getServices } from './controllers.utils';
 import { buildAdminApp, buildApp } from './instances/app';
 import { logger } from './instances/logger';
 import { createServices } from './instances/services';
-import {
-  NOTIFY_USER_TASK,
-  notifyUserTask,
-  triggerSendNotifications,
-} from './notifications/notification.task';
 import {
   FETCH_BLUESKY_ACCOUNT_TASK,
   FETCH_MASTODON_ACCOUNT_TASK,
@@ -58,7 +47,7 @@ import { router } from './router';
 import { getConfig } from './services.config';
 
 // all secrets are available to all functions
-const secrets = [
+const secrets: SecretParam[] = [
   envRuntime.ORCID_SECRET,
   envRuntime.OUR_TOKEN_SECRET,
   envRuntime.TWITTER_CLIENT_SECRET,
@@ -68,7 +57,25 @@ const secrets = [
   envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
   envRuntime.EMAIL_CLIENT_SECRET,
   envRuntime.MAGIC_ADMIN_SECRET,
+  envRuntime.IFRAMELY_API_KEY,
+  envRuntime.BLUESKY_APP_PASSWORD,
 ];
+
+const deployConfig: functions.RuntimeOptions = {
+  timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
+  memory: envDeploy.CONFIG_MEMORY,
+  minInstances: envDeploy.CONFIG_MININSTANCE,
+  secrets,
+};
+
+const deployConfigTasks: TaskQueueOptions = {
+  timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
+  memory: envDeploy.CONFIG_MEMORY_TASKS,
+  minInstances: envDeploy.CONFIG_MININSTANCE,
+  secrets,
+};
+
+const region = envDeploy.REGION;
 
 export const appConfig = IS_EMULATOR
   ? {
@@ -83,21 +90,14 @@ const firestore = app.firestore();
 
 /** Registed the API as an HTTP triggered function */
 exports['api'] = functions
-  .region(envDeploy.REGION)
-  .runWith({
-    timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
-    memory: envDeploy.CONFIG_MEMORY,
-    minInstances: envDeploy.CONFIG_MININSTANCE,
-    secrets,
-  })
+  .region(region)
+  .runWith(deployConfig)
   .https.onRequest(buildApp(router));
 
 exports['admin'] = functions
   .region(envDeploy.REGION)
   .runWith({
-    timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
-    memory: envDeploy.CONFIG_MEMORY,
-    minInstances: envDeploy.CONFIG_MININSTANCE,
+    ...deployConfig,
     secrets: [...secrets, envRuntime.ADMIN_API_KEY],
   })
   .https.onRequest(buildAdminApp(adminRouter));
@@ -111,50 +111,11 @@ exports['admin'] = functions
 //   () => triggerAutofetchPosts(createServices(firestore, getConfig()))
 // );
 
-// exports.sendDailyNotifications = onSchedule(
-//   {
-//     schedule: DAILY_NOTIFICATION_PERIOD,
-//     secrets,
-//   },
-//   () =>
-//     triggerSendNotifications(
-//       NotificationFreq.Daily,
-//       createServices(firestore, getConfig())
-//     )
-// );
-
-// exports.sendWeeklyNotifications = onSchedule(
-//   {
-//     schedule: WEEKLY_NOTIFICATION_PERIOD,
-//     secrets,
-//   },
-//   () =>
-//     triggerSendNotifications(
-//       NotificationFreq.Weekly,
-//       createServices(firestore, getConfig())
-//     )
-// );
-
-// exports.sendMonthlyNotifications = onSchedule(
-//   {
-//     schedule: MONTHLY_NOTIFICATION_PERIOD,
-//     secrets,
-//   },
-//   () =>
-//     triggerSendNotifications(
-//       NotificationFreq.Monthly,
-//       createServices(firestore, getConfig())
-//     )
-// );
-
 /** tasks */
 exports[PARSE_POST_TASK] = onTaskDispatched(
   {
-    timeoutSeconds: envDeploy.CONFIG_TIMEOUT_PARSER,
-    memory: envDeploy.CONFIG_MEMORY,
-    minInstances: envDeploy.CONFIG_MININSTANCE,
+    ...deployConfigTasks,
     maxInstances: 1,
-    secrets,
     retryConfig: {
       maxAttempts: 5,
     },
@@ -169,10 +130,7 @@ exports[PARSE_POST_TASK] = onTaskDispatched(
 
 exports[AUTOFETCH_POSTS_TASK] = onTaskDispatched(
   {
-    timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
-    memory: envDeploy.CONFIG_MEMORY,
-    minInstances: envDeploy.CONFIG_MININSTANCE,
-    secrets,
+    ...deployConfigTasks,
     retryConfig: {
       maxAttempts: 1,
     },
@@ -185,33 +143,8 @@ exports[AUTOFETCH_POSTS_TASK] = onTaskDispatched(
   }
 );
 
-exports[AUTOPOST_POST_TASK] = onTaskDispatched(
-  {
-    timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
-    memory: envDeploy.CONFIG_MEMORY,
-    minInstances: envDeploy.CONFIG_MININSTANCE,
-    secrets,
-  },
-  (req) => autopostPostTask(req, createServices(firestore, getConfig()))
-);
-
-exports[NOTIFY_USER_TASK] = onTaskDispatched(
-  {
-    timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
-    memory: envDeploy.CONFIG_MEMORY,
-    minInstances: envDeploy.CONFIG_MININSTANCE,
-    secrets,
-  },
-  async (req) => {
-    if (!req.data.userId) {
-      throw new Error('userId not found for task notifyUserTask');
-    }
-
-    return notifyUserTask(
-      req.data.userId,
-      createServices(firestore, getConfig())
-    );
-  }
+exports[AUTOPOST_POST_TASK] = onTaskDispatched(deployConfigTasks, (req) =>
+  autopostPostTask(req, createServices(firestore, getConfig()))
 );
 
 /**
@@ -384,55 +317,19 @@ emulatorTriggerRouter.post('/autofetch', async (request, response) => {
   response.status(200).send({ success: true });
 });
 
-emulatorTriggerRouter.post('/sendNotifications', async (request, response) => {
-  logger.debug('sendNotifications triggered');
-  const params = request.query;
-  if (!params.freq) {
-    throw new Error('freq parameter is required');
-  }
-
-  await triggerSendNotifications(
-    params.freq as NotificationFreq,
-    getServices(request)
-  );
-  response.status(200).send({ success: true });
-});
-
-emulatorTriggerRouter.post('/emailTest', async (request, response) => {
-  logger.debug('emailTest triggered');
-
-  const services = createServices(firestore, getConfig());
-  const message: Message = {
-    From: EMAIL_SENDER_FROM.value(),
-    ReplyTo: EMAIL_SENDER_FROM.value(),
-    To: 'pepo@sense-nets.xyz',
-    Subject: 'Test email',
-    HtmlBody: '<h1>Test email</h1><p>This is a test email</p>',
-    TextBody: 'Test email\nThis is a test email',
-    MessageStream: 'outbound',
-  };
-
-  await services.email.callSendEmail(message);
-  response.status(200).send({ success: true });
-});
-
 exports['trigger'] = functions
-  .region(envDeploy.REGION)
+  .region(region)
   .runWith({
-    timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
-    memory: envDeploy.CONFIG_MEMORY,
-    minInstances: envDeploy.CONFIG_MININSTANCE,
+    ...deployConfig,
     secrets,
   })
   .https.onRequest(buildApp(emulatorTriggerRouter));
 
 /** admin */
 exports['admin'] = functions
-  .region(envDeploy.REGION)
+  .region(region)
   .runWith({
-    timeoutSeconds: envDeploy.CONFIG_TIMEOUT,
-    memory: envDeploy.CONFIG_MEMORY,
-    minInstances: envDeploy.CONFIG_MININSTANCE,
+    ...deployConfig,
     secrets: [...secrets, envRuntime.ADMIN_API_KEY],
   })
   .https.onRequest(buildAdminApp(adminRouter));

@@ -71,7 +71,9 @@ interface AppPostBase {
   mirrorsIds: string[];
 }
 
-export interface AppPost extends AppPostBase, StructuredSemantics {}
+export interface AppPost extends AppPostBase {
+  structuredSemantics?: StructuredSemantics;
+}
 
 export type AppPostCreate = Omit<AppPost, 'id'>;
 
@@ -107,8 +109,7 @@ export type PostUpdate = Partial<
     AppPost,
     | 'generic'
     | 'semantics'
-    | 'keywords'
-    | 'labels'
+    | 'structuredSemantics'
     | 'originalParsed'
     | 'parsingStatus'
     | 'parsingStartedAtMs'

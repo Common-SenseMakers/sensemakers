@@ -17,16 +17,14 @@ import {
   TwitterGetContextParams,
   TwitterSignupContext,
 } from '../../../shared/types/types.twitter';
-import { usePersist } from '../../../utils/use.persist';
 import {
   LoginFlowState,
-  OverallLoginStatus,
   PlatformConnectedStatus,
   useAccountContext,
 } from '../AccountContext';
 import { useDisconnectContext } from '../DisconnectUserContext';
 
-const DEBUG = true;
+const DEBUG = false;
 const WAS_CONNECTING_TWITTER = 'was-connecting-twitter';
 
 export const LS_TWITTER_CONTEXT_KEY = 'twitter-signin-context';
@@ -49,6 +47,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
   const {
     connectedUser,
+    setToken: setOurToken,
     refresh: refreshConnected,
     overallLoginStatus,
     setLoginFlowState,
@@ -58,10 +57,6 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
   const { disconnect } = useDisconnectContext();
 
-  const [wasConnecting, setWasConnecting] = usePersist<boolean>(
-    WAS_CONNECTING_TWITTER,
-    false
-  );
   const [searchParams, setSearchParams] = useSearchParams();
   const state_param = searchParams.get('state');
   const code_param = searchParams.get('code');
@@ -96,7 +91,6 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
     /** go to twitter */
     if (siginContext) {
-      setWasConnecting(true);
       window.location.href = siginContext.url;
     }
   };
@@ -120,7 +114,12 @@ export const TwitterContext = (props: PropsWithChildren) => {
         setSearchParams(searchParams);
       }
 
-      if (wasConnecting && !state_param && !code_param) {
+      if (
+        getPlatformConnectedStatus(PLATFORM.Twitter) ===
+          PlatformConnectedStatus.Connecting &&
+        !state_param &&
+        !code_param
+      ) {
         if (DEBUG)
           console.log('was connecting true but no state params - logout', {
             state_param,
@@ -128,18 +127,18 @@ export const TwitterContext = (props: PropsWithChildren) => {
             overallLoginStatus,
           });
 
-        setWasConnecting(false);
+        setPlatformConnectedStatus(
+          PLATFORM.Twitter,
+          PlatformConnectedStatus.Disconnected
+        );
         disconnect();
       }
 
       if (
         code_param &&
         state_param &&
-        connectedUser &&
-        wasConnecting &&
-        (overallLoginStatus === OverallLoginStatus.PartialLoggedIn ||
-          getPlatformConnectedStatus(PLATFORM.Twitter) ===
-            PlatformConnectedStatus.Connecting)
+        getPlatformConnectedStatus(PLATFORM.Twitter) ===
+          PlatformConnectedStatus.Connecting
       ) {
         if (DEBUG)
           console.log('useEffect TwitterSignup', {
@@ -168,30 +167,39 @@ export const TwitterContext = (props: PropsWithChildren) => {
           if (DEBUG)
             console.log(`calling api/auth/${PLATFORM.Twitter}/signup`, context);
 
-          appFetch<HandleSignupResult>(
-            `/api/auth/${PLATFORM.Twitter}/signup`,
-            {
-              ...context,
-              code: code_param,
-            },
-            true
-          ).then((result) => {
-            if (result) {
-              localStorage.removeItem(LS_TWITTER_CONTEXT_KEY);
-            }
+          appFetch<HandleSignupResult>(`/api/auth/${PLATFORM.Twitter}/signup`, {
+            ...context,
+            code: code_param,
+          })
+            .then((result) => {
+              if (result) {
+                localStorage.removeItem(LS_TWITTER_CONTEXT_KEY);
+              }
 
-            searchParams.delete('state');
-            searchParams.delete('code');
-            refreshConnected();
-            setPlatformConnectedStatus(
-              PLATFORM.Twitter,
-              PlatformConnectedStatus.Connected
-            );
-            setSearchParams(searchParams);
-          });
+              searchParams.delete('state');
+              searchParams.delete('code');
+              if (result.ourAccessToken) {
+                setOurToken(result.ourAccessToken);
+              } else {
+                refreshConnected();
+              }
+
+              setPlatformConnectedStatus(
+                PLATFORM.Twitter,
+                PlatformConnectedStatus.Connected
+              );
+              setSearchParams(searchParams);
+            })
+            .catch((e) => {
+              searchParams.delete('state');
+              searchParams.delete('code');
+              setPlatformConnectedStatus(
+                PLATFORM.Twitter,
+                PlatformConnectedStatus.Disconnected
+              );
+              setSearchParams(searchParams);
+            });
         }
-
-        setWasConnecting(false);
       }
     }
   }, [

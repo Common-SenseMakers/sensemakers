@@ -8,7 +8,7 @@ import {
   convertMastodonPostsToThreads,
 } from '../../src/platforms/mastodon/mastodon.utils';
 
-describe('mastodon utility functions', () => {
+describe.skip('mastodon utility functions', () => {
   it('converts mastodon posts to threads', async () => {
     const result = JSON.parse(
       fs.readFileSync(

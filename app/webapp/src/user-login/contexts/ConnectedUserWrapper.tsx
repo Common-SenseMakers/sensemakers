@@ -3,16 +3,12 @@ import { PropsWithChildren, createContext, useContext } from 'react';
 
 import { UserPostsContext } from '../../user-home/UserPostsContext';
 import { AccountContext } from './AccountContext';
-import { AutopostInviteContext } from './AutopostInviteContext';
 import { DisconnectUserContext } from './DisconnectUserContext';
 import { NavHistoryContext } from './NavHistoryContext';
 import { BlueskyContext } from './platforms/BlueskyContext';
 import { MastodonContext } from './platforms/MastodonContext';
 import { OrcidContext } from './platforms/OrcidContext';
 import { TwitterContext } from './platforms/TwitterContext';
-import { NanopubContext } from './platforms/nanopubs/NanopubContext';
-import { ConnectedWallet } from './signer/ConnectedWalletContext';
-import { SignerContext } from './signer/SignerContext';
 
 const DEBUG = false;
 
@@ -32,29 +28,19 @@ export const ConnectedUserWrapper = (props: PropsWithChildren) => {
   return (
     <ConnectedUserWrapperValue.Provider value={{}}>
       <AccountContext>
-        <ConnectedWallet>
-          <SignerContext>
-            <NanopubContext>
-              <OrcidContext>
-                <DisconnectUserContext>
-                  <BlueskyContext>
-                    <MastodonContext>
-                      <TwitterContext>
-                        <UserPostsContext>
-                          <AutopostInviteContext>
-                            <NavHistoryContext>
-                              {props.children}
-                            </NavHistoryContext>
-                          </AutopostInviteContext>
-                        </UserPostsContext>
-                      </TwitterContext>
-                    </MastodonContext>
-                  </BlueskyContext>
-                </DisconnectUserContext>
-              </OrcidContext>
-            </NanopubContext>
-          </SignerContext>
-        </ConnectedWallet>
+        <OrcidContext>
+          <DisconnectUserContext>
+            <BlueskyContext>
+              <MastodonContext>
+                <TwitterContext>
+                  <UserPostsContext>
+                    <NavHistoryContext>{props.children}</NavHistoryContext>
+                  </UserPostsContext>
+                </TwitterContext>
+              </MastodonContext>
+            </BlueskyContext>
+          </DisconnectUserContext>
+        </OrcidContext>
       </AccountContext>
     </ConnectedUserWrapperValue.Provider>
   );

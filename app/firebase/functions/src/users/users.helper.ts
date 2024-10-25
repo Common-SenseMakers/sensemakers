@@ -1,4 +1,3 @@
-import { SciFilterClassfication } from '../@shared/types/types.parser';
 import {
   ALL_PUBLISH_PLATFORMS,
   IDENTITY_PLATFORM,
@@ -6,7 +5,6 @@ import {
   PUBLISHABLE_PLATFORM,
 } from '../@shared/types/types.platforms';
 import { AppPostFull } from '../@shared/types/types.posts';
-import { AppPost } from '../@shared/types/types.posts';
 import { PlatformProfile } from '../@shared/types/types.profiles';
 import {
   AccountDetailsBase,
@@ -14,7 +12,6 @@ import {
   AppUser,
   AppUserCreate,
   AppUserRead,
-  AutopostOption,
   DefinedIfTrue,
 } from '../@shared/types/types.user';
 import { parseBlueskyURI } from '../@shared/utils/bluesky.utils';
@@ -90,30 +87,6 @@ export class UsersHelper {
     });
 
     return allAccounts;
-  }
-
-  static getAutopostPlatformIds(user: AppUser, post: AppPost): PLATFORM[] {
-    const platformIds = (
-      Object.keys(user.settings.autopost) as PLATFORM[]
-    ).filter((platformId: PLATFORM) => {
-      if (platformId !== PLATFORM.Nanopub) {
-        throw new Error('Only autopost to nanopub is suported for now');
-      }
-
-      /** only if the user has autopost configured as deterministic
-       * and the post was detected as reserach using citoid */
-      if (
-        user.settings.autopost[platformId].value !== AutopostOption.MANUAL &&
-        post.originalParsed?.filter_classification ===
-          SciFilterClassfication.CITOID_DETECTED_RESEARCH
-      ) {
-        return true;
-      }
-
-      return false;
-    });
-
-    return platformIds;
   }
 
   static getProfiles<P = any>(

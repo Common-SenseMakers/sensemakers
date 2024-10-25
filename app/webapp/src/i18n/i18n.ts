@@ -19,6 +19,8 @@ export enum I18Keys {
   mastodonServer = 's012b',
   mastodonServerPlaceholder = 's012c',
 
+  myPosts = 'n001',
+
   connectAccounts = 's010',
   connectParagraph = 's011',
   errorConnectTwitter = 's013',
@@ -85,7 +87,6 @@ export enum I18Keys {
 
   returnToDraft = 's0353',
   yesPublish = 's0364',
-  returnToNanopub = 's0353x',
   yesUnpublish = 's0365x',
 
   publishingTitle = 's0365',
@@ -107,46 +108,7 @@ export enum I18Keys {
   emailHeader = 's0400',
   emailSummary = 's0400a',
 
-  recommendedNanopubEmailHeader = 's040',
-  recommendedNanopubEmailHeaderSingular = 's040_one',
-  recommendedNanopubEmailHeaderPlural = 's040_other',
-
-  recommendedNanopubEmailSummary = 's040a',
-  recommendedNanopubEmailSummarySingular = 's040a_one',
-  recommendedNanopubEmailSummaryPlural = 's040a_other',
-
-  recommendedNanopubEmailPreview = 's040b',
-  recommendedNanopubEmailPreviewSingular = 's040b_one',
-  recommendedNanopubEmailPreviewPlural = 's040b_other',
-
-  recommendedNanopubEmailFooter = 's041',
   emailFooter = 's041a',
-
-  publishedNanopubEmailHeader = 's042',
-  publishedNanopubEmailHeaderSingular = 's042_one',
-  publishedNanopubEmailHeaderPlural = 's042_other',
-
-  publishedNanopubEmailSummary = 's0420',
-  publishedNanopubEmailSummarySingular = 's0420_one',
-  publishedNanopubEmailSummaryPlural = 's0420_other',
-
-  publishedNanopubEmailPreview = 's0421',
-  publishedNanopubEmailPreviewSingular = 's0421_one',
-  publishedNanopubEmailPreviewPlural = 's0421_other',
-
-  autoPublishedNanopubEmailHeader = 's042a',
-  autoPublishedNanopubEmailHeaderSingular = 's042a_one',
-  autoPublishedNanopubEmailHeaderPlural = 's042a_other',
-
-  autoPublishedNanopubEmailSummary = 's042aa',
-  autoPublishedNanopubEmailSummarySingular = 's042aa_one',
-  autoPublishedNanopubEmailSummaryPlural = 's042aa_other',
-
-  autoPublishedNanopubEmailPreview = 's042ab',
-  autoPublishedNanopubEmailPreviewSingular = 's042ab_one',
-  autoPublishedNanopubEmailPreviewPlural = 's042ab_other',
-
-  autoPublishedNanopubEmailFooter = 's043a',
 
   daily = 's047',
   weekly = 's048',
@@ -238,7 +200,7 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.connectSocialsTitle]: 'Connect your accounts',
   [I18Keys.connectMastodonTitle]: 'Connect to Mastodon',
   [I18Keys.connectSocialsParagraph]:
-    'Link your accounts to start transforming your posts into nanopublications. You can always change this in your settings.',
+    'Connect your accounts to process your post as an hyperfeed. You must link at least one account, and you will be able to link other accounts later.',
   [I18Keys.connectSocialsParagraph2]:
     'By connecting, you can easily identify and FAIRify your valuable scientific insights.',
   [I18Keys.connectMastodonParagraph]:
@@ -248,6 +210,7 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.mastodonServer]: 'Server domain ',
   [I18Keys.mastodonServerPlaceholder]: 'e.g. "mastodon.social"',
 
+  [I18Keys.myPosts]: 'My Posts',
   [I18Keys.drafts]: 'Drafts',
   [I18Keys.feedTitle]: 'Explore',
 
@@ -317,7 +280,6 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.returnToDraft]: 'No, return to draft',
   [I18Keys.yesPublish]: 'Yes, I want to publish',
 
-  [I18Keys.returnToNanopub]: 'Go back',
   [I18Keys.yesUnpublish]: 'Yes, I want to retract',
 
   [I18Keys.publishingTitle]: 'Publishing',
@@ -348,58 +310,8 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.emailHeader]: '{{timeframe}} Activity Summary',
   [I18Keys.emailSummary]: "Here's what happened {{timeframe}}:",
 
-  [I18Keys.recommendedNanopubEmailHeader]: '',
-  [I18Keys.recommendedNanopubEmailHeaderSingular]:
-    'You have {{count}} potential nanopublication ready for review {{timeframe}}.',
-  [I18Keys.recommendedNanopubEmailHeaderPlural]:
-    'You have {{count}} potential nanopublications ready for review {{timeframe}}.',
-  [I18Keys.recommendedNanopubEmailFooter]:
-    "This is your {{timeframe}} nanopub recommendation summary. You can [edit your email settings here]({{emailSettingsLink}}). Don't see a post you'd like to nanopublish? [Review all your recent posts here]({{ignoredPostsLink}}).",
-  [I18Keys.recommendedNanopubEmailSummary]: '',
-  [I18Keys.recommendedNanopubEmailSummarySingular]:
-    'You have {{count}} potential nanopublication for review.',
-  [I18Keys.recommendedNanopubEmailSummaryPlural]:
-    'You have {{count}} potential nanopublications for review.',
-  [I18Keys.recommendedNanopubEmailPreview]: '',
-  [I18Keys.recommendedNanopubEmailPreviewSingular]:
-    '{{count}} potential nanopublication for review.',
-  [I18Keys.recommendedNanopubEmailPreviewPlural]:
-    '{{count}} potential nanopublications for review.',
-
   [I18Keys.emailFooter]:
     "This is your {{timeframe}} activity summary. You can [edit your email or automation settings here]({{emailSettingsLink}}). Don't see a post you'd like to nanopublish? [Review all your recent posts here]({{ignoredPostsLink}}). See any mistakes in your nanopublications? [Edit or retract your automated nanopublications here]({{publishedPostsLink}}).",
-
-  [I18Keys.publishedNanopubEmailHeader]: '',
-  [I18Keys.publishedNanopubEmailHeaderSingular]:
-    'You published {{count}} post {{timeframe}}.',
-  [I18Keys.publishedNanopubEmailHeaderPlural]:
-    'You published {{count}} posts {{timeframe}}.',
-  [I18Keys.publishedNanopubEmailSummary]: '',
-  [I18Keys.publishedNanopubEmailSummarySingular]:
-    'You manually nanopublished {{count}} post.',
-  [I18Keys.publishedNanopubEmailSummaryPlural]:
-    'You manually nanopublished {{count}} posts.',
-  [I18Keys.publishedNanopubEmailPreview]: '',
-  [I18Keys.publishedNanopubEmailPreviewSingular]:
-    '{{count}} manually published',
-  [I18Keys.publishedNanopubEmailPreviewPlural]: '{{count}} manually published',
-
-  [I18Keys.autoPublishedNanopubEmailHeader]: '',
-  [I18Keys.autoPublishedNanopubEmailHeaderSingular]:
-    "We've automatically published {{count}} post {{timeframe}}.",
-  [I18Keys.autoPublishedNanopubEmailHeaderPlural]:
-    "We've automatically published {{count}} posts {{timeframe}}.",
-
-  [I18Keys.autoPublishedNanopubEmailFooter]:
-    'These posts were automatically published according to your automation settings. You can [change your automation settings here]({{automationSettingsLink}}).\n\nSee any mistakes in your nanopublications? [Edit or retract your automated nanopublications here]({{publishedPostsLink}}).',
-  [I18Keys.autoPublishedNanopubEmailSummary]: '',
-  [I18Keys.autoPublishedNanopubEmailSummarySingular]:
-    'We autopublished {{count}} post for you.',
-  [I18Keys.autoPublishedNanopubEmailSummaryPlural]:
-    'We autopublished {{count}} posts for you.',
-  [I18Keys.autoPublishedNanopubEmailPreview]: '',
-  [I18Keys.autoPublishedNanopubEmailPreviewSingular]: '{{count}} autopublished',
-  [I18Keys.autoPublishedNanopubEmailPreviewPlural]: '{{count}} autopublished',
 
   [I18Keys.daily]: 'daily',
   [I18Keys.weekly]: 'weekly',

@@ -4,7 +4,6 @@ import { useEffect, useMemo } from 'react';
 import { useAppFetch } from '../../api/app.fetch';
 import { subscribeToUpdates } from '../../firestore/realtime.listener';
 import { AppPostFull } from '../../shared/types/types.posts';
-import { AppUserRead } from '../../shared/types/types.user';
 import { ConnectedUser } from '../../user-login/contexts/AccountContext';
 
 export interface PostFetchContext {

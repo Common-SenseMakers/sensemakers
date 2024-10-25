@@ -20,7 +20,6 @@ import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { usePersist } from '../utils/use.persist';
 import { PostHeader } from './PostHeader';
 import { PostNav } from './PostNav';
-import { PublishButtons } from './PostPublishButtons';
 import { PostTextEditable } from './PostTextEditable';
 import { POSTING_POST_ID } from './PostingPage';
 import { usePost } from './post.context/PostContext';
@@ -45,7 +44,7 @@ export const PostView = (props: { profile?: PlatformProfile }) => {
   const { connect: _connectOrcid } = useOrcidContext();
 
   const { constants } = useThemeContext();
-  const { updated, publish } = usePost();
+  const { updated } = usePost();
 
   const postText = updated.postMerged
     ? concatenateThread(updated.postMerged.generic)
@@ -83,8 +82,6 @@ export const PostView = (props: { profile?: PlatformProfile }) => {
   const enableEditOrUpdate = () => {
     if (!updated.enabledEdit) {
       updated.setEnabledEdit(true);
-    } else {
-      publish.publishOrRepublish();
     }
   };
 
@@ -106,6 +103,13 @@ export const PostView = (props: { profile?: PlatformProfile }) => {
   }, [postingPostId, connectedUser, justSetPostId, updated.postMerged?.id]);
 
   const action = (() => {
+    if (
+      connectedUser &&
+      updated.postMerged?.authorUserId !== connectedUser.userId
+    ) {
+      return <></>;
+    }
+
     if (
       !updated.statusesMerged.processed &&
       !updated.statusesMerged.isParsing
@@ -131,24 +135,13 @@ export const PostView = (props: { profile?: PlatformProfile }) => {
       );
     }
 
-    if (updated.inPrePublish) {
-      return <PublishButtons></PublishButtons>;
-    }
-
     if (updated.statusesMerged.live && !updated.enabledEdit) {
       return (
         <Box direction="row" gap="small" margin={{ top: 'medium' }}>
-          <Box width="50%" style={{ flexGrow: 1 }}>
-            <AppButton
-              disabled={updated.isUpdating || publish.isRetracting}
-              icon={<ClearIcon></ClearIcon>}
-              onClick={() => publish.setUnpublishIntent(true)}
-              label={t(I18Keys.unpublish)}></AppButton>
-          </Box>
           <Box width="50%" align="end" gap="small">
             <AppButton
               primary
-              disabled={updated.isUpdating || publish.isRetracting}
+              disabled={updated.isUpdating}
               icon={<SendIcon></SendIcon>}
               onClick={() => enableEditOrUpdate()}
               label={t(I18Keys.edit)}
@@ -210,11 +203,6 @@ export const PostView = (props: { profile?: PlatformProfile }) => {
       <>
         <Box pad="medium">
           <PostHeader boxProps={{ margin: { bottom: '16px' } }}></PostHeader>
-          {!hideSemantics && (
-            <SemanticsEditor
-              patternProps={patternProps}
-              include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
-          )}
 
           <PostTextEditable text={postText}></PostTextEditable>
 

@@ -5,8 +5,6 @@ import { AppButton } from '../ui-components';
 import { useThemeContext } from '../ui-components/ThemedApp';
 
 export enum SettingsSections {
-  Autopost = 'autopost',
-  Notifications = 'notifications',
   Support = 'support',
 }
 

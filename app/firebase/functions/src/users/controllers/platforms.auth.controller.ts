@@ -10,8 +10,6 @@ import {
   blueskySignupDataSchema,
   mastodonGetSignupContextSchema,
   mastodonSignupDataSchema,
-  nanopubGetSignupContextSchema,
-  nanopubSignupDataSchema,
   orcidGetSignupContextSchema,
   orcidSignupDataSchema,
   twitterGetSignupContextSchema,
@@ -34,10 +32,6 @@ export const getSignupContextController: RequestHandler = async (
     const payload = await (async () => {
       if (platform === PLATFORM.Twitter) {
         return twitterGetSignupContextSchema.validate(request.body);
-      }
-
-      if (platform === PLATFORM.Nanopub) {
-        return nanopubGetSignupContextSchema.validate(request.body);
       }
 
       if (platform === PLATFORM.Orcid) {
@@ -85,10 +79,6 @@ export const handleSignupController: RequestHandler = async (
     const payload = await (async () => {
       if (platform === PLATFORM.Twitter) {
         return twitterSignupDataSchema.validate(request.body);
-      }
-
-      if (platform === PLATFORM.Nanopub) {
-        return nanopubSignupDataSchema.validate(request.body);
       }
 
       if (platform === PLATFORM.Orcid) {

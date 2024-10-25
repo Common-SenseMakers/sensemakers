@@ -1,6 +1,4 @@
-import { NotificationFreq } from '../@shared/types/types.notifications';
-import { PLATFORM } from '../@shared/types/types.platforms';
-import { AutopostOption, UserSettings } from '../@shared/types/types.user';
+import { UserSettings } from '../@shared/types/types.user';
 import { envRuntime } from './typedenv.runtime';
 
 /** Verify that all needed env variables were provided */
@@ -54,6 +52,9 @@ export const BLUESKY_SERVICE_URL = 'https://bsky.social';
 
 export const ADMIN_API_KEY = envRuntime.ADMIN_API_KEY;
 
+export const IFRAMELY_API_URL = 'iframe.ly/api/iframely';
+export const IFRAMELY_API_KEY = envRuntime.IFRAMELY_API_KEY;
+
 export const TWITTER_CALLBACK_URL = envRuntime.TWITTER_CALLBACK_URL;
 export const TWITTER_REVOKE_URL = envRuntime.TWITTER_REVOKE_URL;
 
@@ -93,7 +94,4 @@ export const NANOPUBS_PUBLISH_SERVERS = envRuntime.NANOPUBS_PUBLISH_SERVERS;
 export const EMAIL_CLIENT_SECRET = envRuntime.EMAIL_CLIENT_SECRET;
 export const MAGIC_ADMIN_SECRET = envRuntime.MAGIC_ADMIN_SECRET;
 
-export const USER_INIT_SETTINGS: UserSettings = {
-  autopost: { [PLATFORM.Nanopub]: { value: AutopostOption.MANUAL } },
-  notificationFreq: NotificationFreq.Daily,
-};
+export const USER_INIT_SETTINGS: UserSettings = {};
