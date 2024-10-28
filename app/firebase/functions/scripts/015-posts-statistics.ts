@@ -7,9 +7,10 @@ if (process.env.FB_PROJECT_ID !== 'sensenets-dataset') {
 }
 
 async function gatherPostsStatistics() {
-  const [postsSnapshot, unprocessedSnapshot] = await Promise.all([
+  const [postsSnapshot, unprocessedSnapshot, profilesSnapshot] = await Promise.all([
     firestore.collection('posts').get(),
-    firestore.collection('posts').where('parsedStatus', '==', 'unprocessed').get()
+    firestore.collection('posts').where('parsedStatus', '==', 'unprocessed').get(),
+    firestore.collection('profiles').get()
   ]);
   
   const totalPosts = postsSnapshot.size;
@@ -21,6 +22,8 @@ async function gatherPostsStatistics() {
   console.log(`Unprocessed posts: ${unprocessedPosts}`);
   console.log(`Processed posts: ${totalPosts - unprocessedPosts}`);
   console.log(`Unprocessed percentage: ${((unprocessedPosts / totalPosts) * 100).toFixed(2)}%`);
+  console.log('----------------');
+  console.log(`Total profiles: ${profilesSnapshot.size}`);
 }
 
 (async () => {
