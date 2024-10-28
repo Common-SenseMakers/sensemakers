@@ -127,11 +127,38 @@ export class PostsProcessing {
     return postsCreated.filter((p) => p !== undefined) as PlatformPostCreated[];
   }
 
+  async getRefMeta(
+    url: string,
+    manager: TransactionManager,
+    originalParsed?: ParsePostResult
+  ): Promise<RefMeta> {
+    const refMetaOrg =
+      originalParsed?.support?.refs_meta &&
+      originalParsed?.support?.refs_meta[url];
+
+    const isPartial =
+      !refMetaOrg ||
+      !refMetaOrg.title ||
+      !refMetaOrg.summary ||
+      !refMetaOrg.url;
+
+    if (isPartial) {
+      const oembed = await this.linksService.getOEmbed(url, manager);
+      return {
+        ...oembed,
+        item_type: refMetaOrg?.item_type,
+      };
+    } else {
+      /** store/update refMeta */
+      this.linksService.setOEmbed(refMetaOrg, manager);
+      return refMetaOrg;
+    }
+  }
+
   async processSemantics(
     postId: string,
     manager: TransactionManager,
     semantics?: string,
-    first?: boolean,
     originalParsed?: ParsePostResult
   ): Promise<StructuredSemantics | undefined> {
     /** always delete old triples */
@@ -170,39 +197,16 @@ export class PostsProcessing {
       }
     });
 
-    /** TODO: dont support editing references of post */
-    if (first) {
-      await Promise.all(
-        Array.from(labels).map(async (label) => {
-          const url = label.url;
-          const refMeta = await (async () => {
-            const refMetaOrg =
-              originalParsed?.support?.refs_meta &&
-              originalParsed?.support?.refs_meta[url];
+    /** update labels refsMeta */
 
-            const isPartial =
-              !refMetaOrg ||
-              !refMetaOrg.title ||
-              !refMetaOrg.summary ||
-              !refMetaOrg.url;
+    await Promise.all(
+      Array.from(labels).map(async (label) => {
+        const url = label.url;
+        const refMeta = await this.getRefMeta(url, manager, originalParsed);
 
-            if (isPartial) {
-              const oembed = await this.linksService.getOEmbed(url, manager);
-              return {
-                ...oembed,
-                item_type: refMetaOrg?.item_type,
-              };
-            } else {
-              /** store/update refMeta */
-              this.linksService.setOEmbed(refMetaOrg, manager);
-              return refMetaOrg;
-            }
-          })();
-
-          refsMeta[url] = refMeta;
-        })
-      );
-    }
+        refsMeta[url] = refMeta;
+      })
+    );
 
     return {
       labels: Array.from(labels).map((l) => l.label),

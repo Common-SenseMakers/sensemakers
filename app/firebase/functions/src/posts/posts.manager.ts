@@ -735,8 +735,7 @@ export class PostsManager {
     const structured = await this.processing.processSemantics(
       postId,
       manager,
-      postUpdated.semantics,
-      first
+      postUpdated.semantics
     );
 
     if (structured) {
