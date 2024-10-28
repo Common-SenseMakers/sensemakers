@@ -66,6 +66,7 @@ export const USE_REAL_MASTODON = envRuntime.USE_REAL_MASTODON;
 export const USE_REAL_BLUESKY = envRuntime.USE_REAL_BLUESKY;
 export const USE_REAL_NANOPUB = envRuntime.USE_REAL_NANOPUB;
 export const USE_REAL_EMAIL = envRuntime.USE_REAL_EMAIL;
+export const USE_REAL_LINKS = envRuntime.USE_REAL_LINKS;
 
 export const TEST_USER_ACCOUNTS = envRuntime.TEST_USER_ACCOUNTS;
 

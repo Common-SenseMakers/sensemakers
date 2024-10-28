@@ -17,7 +17,7 @@ export class LinksService {
     protected config: LinksConfig
   ) {}
 
-  async fetchOEmbed(url: string): Promise<RefMeta> {
+  private async fetchOEmbed(url: string): Promise<RefMeta> {
     try {
       const res = await fetch(
         `${this.config.apiUrl}/oembed?url=${encodeURIComponent(url)}&api_key=${this.config.apiKey}`,
