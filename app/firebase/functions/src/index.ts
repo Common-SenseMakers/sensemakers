@@ -179,8 +179,8 @@ exports[FETCH_MASTODON_ACCOUNT_TASK] = onTaskDispatched(
       minBackoffSeconds: 60,
     },
     rateLimits: {
-      maxConcurrentDispatches: 100,
-      maxDispatchesPerSecond: 1, // max 1 task every second
+      maxConcurrentDispatches: 20,
+      maxDispatchesPerSecond: 1 / 5, // max 1 task every 5 second
     },
   },
   (req) => fetchPlatformAccountTask(req, createServices(firestore, getConfig()))
