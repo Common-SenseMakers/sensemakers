@@ -8,6 +8,7 @@ import { DBInstance } from '../db/instance';
 import { FeedService } from '../feed/feed.service';
 import { LinksRepository } from '../links/links.repository';
 import { LinksConfig, LinksService } from '../links/links.service';
+import { getLinksMock } from '../links/links.service.mock';
 import { getParserMock } from '../parser/mock/parser.service.mock';
 import { ParserService } from '../parser/parser.service';
 import {
@@ -71,6 +72,7 @@ export interface ServicesConfig {
     USE_REAL_BLUESKY: boolean;
     USE_REAL_NANOPUB: boolean;
     USE_REAL_EMAIL: boolean;
+    USE_REAL_LINKS: boolean;
   };
 }
 
@@ -162,7 +164,8 @@ export const createServices = (
     config.mock.USE_REAL_PARSER ? 'real' : 'mock'
   );
 
-  const linksService = new LinksService(linksRepo, config.links);
+  const _linksService = new LinksService(linksRepo, config.links);
+  const linksService = getLinksMock(_linksService, { enable: true });
 
   /** posts service */
   const postsProcessing = new PostsProcessing(
