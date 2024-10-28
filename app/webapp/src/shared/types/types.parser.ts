@@ -16,8 +16,13 @@ export interface ParsePostRequest<P> {
 }
 
 export type AppPostSemantics = string;
+
+export interface LabelDetails {
+  label: string;
+  uri: string;
+}
 export interface StructuredSemantics {
-  labels?: string[];
+  labels?: { label: string; uri: string }[];
   keywords?: string[];
   refsMeta?: Record<string, RefMeta>;
   isScience?: boolean;

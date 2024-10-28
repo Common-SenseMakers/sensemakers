@@ -86,8 +86,8 @@ describe('070 test feed', () => {
         fetchParams: { expectedAmount: 10 },
         semantics: {
           labels: [
-            'https://sense-nets.xyz/announcesResource',
-            'http://purl.org/spar/cito/discusses',
+            { label: 'https://sense-nets.xyz/announcesResource', uri: '' },
+            { label: 'http://purl.org/spar/cito/discusses', uri: '' },
           ],
         },
       });
@@ -97,8 +97,11 @@ describe('070 test feed', () => {
         fetchParams: { expectedAmount: 10 },
         semantics: {
           labels: [
-            'https://sense-nets.xyz/asksQuestionAbout',
-            'http://purl.org/spar/cito/includesQuotationFrom',
+            { label: 'https://sense-nets.xyz/asksQuestionAbout', uri: '' },
+            {
+              label: 'http://purl.org/spar/cito/includesQuotationFrom',
+              uri: '',
+            },
           ],
         },
       });

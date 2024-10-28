@@ -1,4 +1,5 @@
 import {
+  LabelDetails,
   ParsePostResult,
   RefMeta,
   StructuredSemantics,
@@ -172,7 +173,7 @@ export class PostsProcessing {
     const createdAtMs = post.createdAtMs;
     const authorProfileId = post.authorProfileId;
 
-    const labels: Set<{ label: string; url: string }> = new Set();
+    const labels: Set<LabelDetails> = new Set();
     const keywords: Set<string> = new Set();
     const refsMeta: Record<string, RefMeta> = {};
 
@@ -193,7 +194,7 @@ export class PostsProcessing {
       if (q.predicate.value === 'https://schema.org/keywords') {
         keywords.add(q.object.value);
       } else {
-        labels.add({ label: q.predicate.value, url: q.object.value });
+        labels.add({ label: q.predicate.value, uri: q.object.value });
       }
     });
 
@@ -201,7 +202,7 @@ export class PostsProcessing {
 
     await Promise.all(
       Array.from(labels).map(async (label) => {
-        const url = label.url;
+        const url = label.uri;
         const refMeta = await this.getRefMeta(url, manager, originalParsed);
 
         refsMeta[url] = refMeta;
@@ -209,7 +210,7 @@ export class PostsProcessing {
     );
 
     return {
-      labels: Array.from(labels).map((l) => l.label),
+      labels: Array.from(labels),
       keywords: Array.from(keywords),
       refsMeta,
     };
