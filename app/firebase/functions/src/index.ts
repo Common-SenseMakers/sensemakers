@@ -119,10 +119,10 @@ exports[PARSE_POST_TASK] = onTaskDispatched(
       maxAttempts: 5,
       minBackoffSeconds: 5,
     },
-    concurrency: 50,
+    concurrency: 100,
     rateLimits: {
-      maxConcurrentDispatches: 50,
-      maxDispatchesPerSecond: 50,
+      maxConcurrentDispatches: 100,
+      maxDispatchesPerSecond: 100,
     },
   },
   (req) => parsePostTask(req, createServices(firestore, getConfig()))
@@ -154,6 +154,7 @@ exports[AUTOPOST_POST_TASK] = onTaskDispatched(deployConfigTasks, (req) =>
  */
 exports[FETCH_TWITTER_ACCOUNT_TASK] = onTaskDispatched(
   {
+    ...deployConfigTasks,
     secrets,
     retryConfig: {
       maxAttempts: 3,
@@ -173,6 +174,7 @@ exports[FETCH_TWITTER_ACCOUNT_TASK] = onTaskDispatched(
  */
 exports[FETCH_MASTODON_ACCOUNT_TASK] = onTaskDispatched(
   {
+    ...deployConfigTasks,
     secrets,
     retryConfig: {
       maxAttempts: 3,
@@ -194,6 +196,7 @@ exports[FETCH_MASTODON_ACCOUNT_TASK] = onTaskDispatched(
  */
 exports[FETCH_BLUESKY_ACCOUNT_TASK] = onTaskDispatched(
   {
+    ...deployConfigTasks,
     secrets,
     retryConfig: {
       maxAttempts: 3,

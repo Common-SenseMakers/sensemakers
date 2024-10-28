@@ -228,7 +228,8 @@ export class MastodonService
       fetchParams.maxId = parseMastodonPostURI(params.until_id).postId;
     }
 
-    if (DEBUG) logger.debug('fetch params', { fetchParams }, DEBUG_PREFIX);
+    if (DEBUG)
+      logger.debug('fetch params', { user_id, fetchParams }, DEBUG_PREFIX);
 
     const paginator = client.v1.accounts
       .$select(account.id)
