@@ -668,28 +668,30 @@ export class PostsManager {
 
     if (shouldParse) {
       /** then process */
-      await this.db.run(
-        async (manager) => {
-          try {
-            await this._parsePost(postId, manager);
-          } catch (err: any) {
+      try {
+        await this._parsePost(postId);
+      } catch (err: any) {
+        await this.db.run(
+          async (manager) => {
             logger.error(`Error parsing post ${postId}`, err);
             await this.updatePost(
               postId,
               { parsingStatus: AppPostParsingStatus.ERRORED },
               manager
             );
-          }
-        },
-        undefined,
-        undefined,
-        `parsePost - parsing ${postId}`
-      );
+          },
+          undefined,
+          undefined,
+          `parsePost - parsing ${postId}`
+        );
+      }
     }
   }
 
-  protected async _parsePost(postId: string, manager: TransactionManager) {
-    const post = await this.processing.posts.get(postId, manager, true);
+  protected async _parsePost(postId: string) {
+    const post = await this.db.run(async (manager) => {
+      return this.processing.posts.get(postId, manager, true);
+    });
     if (DEBUG) logger.debug(`parsePost - start ${postId}`, { postId, post });
 
     const params: ParsePostRequest<TopicsParams> = {
@@ -725,7 +727,9 @@ export class PostsManager {
     if (DEBUG) logger.debug(`parsePost - done ${postId}`, { postId, update });
 
     /** store the semantics and mark as processed */
-    await this.updatePost(post.id, update, manager, true);
+    await this.db.run(async (manager) => {
+      return this.updatePost(post.id, update, manager, true);
+    });
   }
 
   async processUrls(postId: string, manager: TransactionManager) {}
