@@ -1,5 +1,6 @@
 export const RouteNames = {
   AppHome: '',
+  MyPosts: 'my-posts',
   Post: 'post',
   Settings: 'settings',
   Feed: 'feed',
@@ -11,6 +12,7 @@ export const RouteNames = {
 
 export const AbsoluteRoutes = {
   App: '/',
+  MyPosts: `/${RouteNames.MyPosts}`,
   Post: (postId: string) => `/${RouteNames.Post}/${postId}`,
   Feed: `/${RouteNames.Feed}`,
   Settings: `/${RouteNames.Settings}`,

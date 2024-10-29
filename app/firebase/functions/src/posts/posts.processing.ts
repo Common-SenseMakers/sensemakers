@@ -19,6 +19,10 @@ import {
 } from '../@shared/types/types.posts';
 import { DefinedIfTrue } from '../@shared/types/types.user';
 import { mapStoreElements, parseRDF } from '../@shared/utils/n3.utils';
+import {
+  HAS_KEYWORD_URI,
+  HAS_TOPIC_URI,
+} from '../@shared/utils/semantics.helper';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { LinksService } from '../links/links.service';
@@ -175,6 +179,7 @@ export class PostsProcessing {
     const labels: Set<string> = new Set();
     const keywords: Set<string> = new Set();
     const refsMeta: Record<string, RefMeta> = {};
+    const topics: Set<string> = new Set();
 
     mapStoreElements(store, (q) => {
       /** store the triples */
@@ -190,10 +195,15 @@ export class PostsProcessing {
         manager
       );
 
-      if (q.predicate.value === 'https://schema.org/keywords') {
+      if (q.predicate.value === HAS_KEYWORD_URI) {
         keywords.add(q.object.value);
       } else {
-        labels.add(q.predicate.value);
+        if (q.predicate.value === HAS_TOPIC_URI) {
+          topics.add(q.object.value);
+        } else {
+          // non kewyords or is-a, ar marked as ref labels
+          labels.add(q.predicate.value);
+        }
       }
     });
 
@@ -211,6 +221,7 @@ export class PostsProcessing {
     return {
       labels: Array.from(labels),
       keywords: Array.from(keywords),
+      topics: Array.from(topics),
       refsMeta,
     };
   }

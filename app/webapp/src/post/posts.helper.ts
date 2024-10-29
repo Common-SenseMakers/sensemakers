@@ -1,9 +1,9 @@
 import {
   AppPost,
+  AppPostEditStatus,
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
-  AppPostReviewStatus,
 } from '../shared/types/types.posts';
 
 /** The prosemirror render assumes --- separates the posts and creates <p> for each */
@@ -35,14 +35,12 @@ export const getPostStatuses = (post?: AppPostFull): AppPostStatus => {
   const isParsing =
     post && post.parsingStatus === AppPostParsingStatus.PROCESSING;
 
-  const pending = post && post.reviewedStatus === AppPostReviewStatus.PENDING;
-  const isEditing = post && post.reviewedStatus === AppPostReviewStatus.DRAFT;
+  const isEditing = post && post.editStatus === AppPostEditStatus.DRAFT;
 
   return {
     processed,
     errored,
     isParsing,
-    pending,
     isEditing,
   };
 };

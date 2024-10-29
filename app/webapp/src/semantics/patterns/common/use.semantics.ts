@@ -2,7 +2,6 @@ import { Parser, Store } from 'n3';
 import { useEffect, useState } from 'react';
 
 import { parseRDF } from '../../../shared/utils/n3.utils';
-import { PatternProps } from '../patterns';
 
 const DEBUG = false;
 
@@ -17,7 +16,10 @@ export const semanticStringToStore = (semantics?: string) => {
   return store;
 };
 
-export const useSemanticsStore = (props: PatternProps) => {
+export const useSemanticsStore = (props: {
+  semantics?: string;
+  originalParsed?: { semantics: string };
+}) => {
   const [store, setStore] = useState<Store>(
     semanticStringToStore(props.semantics)
   );

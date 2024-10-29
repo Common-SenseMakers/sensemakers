@@ -3,7 +3,7 @@ import { DataFactory } from 'n3';
 import { useMemo } from 'react';
 
 import { filterStore, writeRDF } from '../../../shared/utils/n3.utils';
-import { THIS_POST_NAME } from '../../../shared/utils/semantics.helper';
+import { THIS_POST_NAME_URI } from '../../../shared/utils/semantics.helper';
 import { AppLabel } from '../../../ui-components';
 import { LoadingDiv } from '../../../ui-components/LoadingDiv';
 import { splitArray } from '../../../ui-components/utils';
@@ -48,7 +48,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
 
   const addLabel = async (ref: string, labelUri: string) => {
     if (props.semanticsUpdated && store) {
-      const THIS_POST = DataFactory.namedNode(THIS_POST_NAME);
+      const THIS_POST = DataFactory.namedNode(THIS_POST_NAME_URI);
       const labelNode = DataFactory.namedNode(labelUri);
       const refNode = DataFactory.namedNode(ref);
 

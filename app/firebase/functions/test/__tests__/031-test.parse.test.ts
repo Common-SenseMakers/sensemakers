@@ -97,7 +97,6 @@ describe('031 test parse', () => {
       expect(parsedPost.semantics).to.not.be.undefined;
 
       expect(parsedPost.structuredSemantics).to.not.be.undefined;
-
       expect(parsedPost.structuredSemantics?.labels).to.not.be.undefined;
 
       if (

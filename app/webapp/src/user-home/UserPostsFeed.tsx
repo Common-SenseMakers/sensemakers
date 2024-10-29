@@ -9,15 +9,14 @@ import {
   FilterOption,
   PostsFetcherComponent,
 } from '../posts.fetcher/PostsFetcherComponent';
-import { PostsQuery, PostsQueryStatus } from '../shared/types/types.posts';
+import { PostsQueryStatus } from '../shared/types/types.posts';
 import { usePersist } from '../utils/use.persist';
 import { useUserPosts } from './UserPostsContext';
 
 const options: FilterOption[] = [
-  { value: PostsQueryStatus.DRAFTS, pretty: 'All Drafts' },
-  { value: PostsQueryStatus.IGNORED, pretty: 'Ignored' },
-  { value: PostsQueryStatus.PENDING, pretty: 'For Review' },
-  { value: PostsQueryStatus.PUBLISHED, pretty: 'Published' },
+  { value: PostsQueryStatus.ALL, pretty: 'All' },
+  { value: PostsQueryStatus.IGNORED, pretty: 'Hidden' },
+  { value: PostsQueryStatus.IS_SCIENCE, pretty: 'Included' },
 ];
 
 const INTRO_SHOWN = 'introShown';
@@ -61,8 +60,8 @@ export const UserPostsFeed = () => {
 
   const navigate = useNavigate();
 
-  const setFilter = (filter: PostsQuery) => {
-    navigate(`/${filter.status || ''}`);
+  const setFilter = (filter: PostsQueryStatus) => {
+    navigate(`/${filter} : ''}`);
   };
 
   const updater = (() => {

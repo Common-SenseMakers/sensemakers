@@ -7,7 +7,7 @@ import {
   mapStoreElements,
   writeRDF,
 } from '../../../shared/utils/n3.utils';
-import { THIS_POST_NAME } from '../../../shared/utils/semantics.helper';
+import { THIS_POST_NAME_URI } from '../../../shared/utils/semantics.helper';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { LoadingDiv } from '../../../ui-components/LoadingDiv';
 import { useSemanticsStore } from '../common/use.semantics';
@@ -32,7 +32,7 @@ export const KeywordsComponent = (props: PatternProps) => {
 
   const addKeyword = async (keyword: string) => {
     if (props.semanticsUpdated && store && KEYWORD_PREDICATE) {
-      const THIS_POST = DataFactory.namedNode(THIS_POST_NAME);
+      const THIS_POST = DataFactory.namedNode(THIS_POST_NAME_URI);
       const labelNode = DataFactory.namedNode(KEYWORD_PREDICATE);
       const refNode = DataFactory.literal(keyword);
 

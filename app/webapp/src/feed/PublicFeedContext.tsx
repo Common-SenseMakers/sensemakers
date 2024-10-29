@@ -28,25 +28,25 @@ export const FeedPostsContext: React.FC<{
 
   const feed0 = usePostsFetcher({
     endpoint: '/api/feed/get',
-    labels: feedTabs[0].labels,
+    queryParams: { semantics: { labels: feedTabs[0].labels } },
     DEBUG_PREFIX: `[FEED 0] `,
   });
 
   const feed1 = usePostsFetcher({
     endpoint: '/api/feed/get',
-    labels: feedTabs[1].labels,
+    queryParams: { semantics: { labels: feedTabs[1].labels } },
     DEBUG_PREFIX: `[FEED 1] `,
   });
 
   const feed2 = usePostsFetcher({
     endpoint: '/api/feed/get',
-    labels: feedTabs[2].labels,
+    queryParams: { semantics: { labels: feedTabs[2].labels } },
     DEBUG_PREFIX: `[FEED 2] `,
   });
 
   const feed3 = usePostsFetcher({
     endpoint: '/api/feed/get',
-    labels: feedTabs[3].labels,
+    queryParams: { semantics: { labels: feedTabs[3].labels } },
     DEBUG_PREFIX: `[FEED 3] `,
   });
 

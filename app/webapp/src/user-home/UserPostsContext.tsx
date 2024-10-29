@@ -14,6 +14,7 @@ import {
   AppPostParsingStatus,
   PostsQueryStatus,
 } from '../shared/types/types.posts';
+import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
 
 const DEBUG = false;
 
@@ -39,7 +40,7 @@ export const UserPostsContext: React.FC<{
 
   /** status is derived from location
    * set the filter status based on it */
-  const status = useMemo(() => {
+  const { topics, status } = useMemo(() => {
     if (
       Object.values(PostsQueryStatus)
         .map((v) => `/${v}`)
@@ -48,9 +49,20 @@ export const UserPostsContext: React.FC<{
       const newStatus = location.pathname.slice(1) as PostsQueryStatus;
       if (DEBUG)
         console.log(`changing status based on location to ${newStatus}`);
-      return newStatus;
+      if (newStatus === PostsQueryStatus.ALL) {
+        return { topics: undefined, status: PostsQueryStatus.ALL };
+      }
+      if (newStatus === PostsQueryStatus.IGNORED) {
+        return { topics: [], status: PostsQueryStatus.IGNORED };
+      }
+      if (newStatus === PostsQueryStatus.IS_SCIENCE) {
+        return {
+          topics: [SCIENCE_TOPIC_URI],
+          status: PostsQueryStatus.IS_SCIENCE,
+        };
+      }
     }
-    return PostsQueryStatus.DRAFTS;
+    return { topics: undefined, status: PostsQueryStatus.ALL };
   }, [location]);
 
   const onPostsAdded = useCallback(
@@ -74,12 +86,12 @@ export const UserPostsContext: React.FC<{
   const config = useMemo((): FetcherConfig => {
     return {
       endpoint: '/api/posts/getOfUser',
-      status,
+      queryParams: { semantics: { topics } },
       subscribe: true,
       onPostsAdded,
       DEBUG_PREFIX: '[USER POSTS] ',
     };
-  }, [onPostsAdded, status]);
+  }, [onPostsAdded, topics]);
 
   const feed = usePostsFetcher(config);
 

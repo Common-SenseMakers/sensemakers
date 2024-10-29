@@ -3,19 +3,26 @@ import { useTranslation } from 'react-i18next';
 
 import { AppCheckBoxMessage } from '../app/icons/AppCheckBoxMessage';
 import { PostEditKeys } from '../i18n/i18n.edit.post';
+import {
+  HAS_TOPIC_URI,
+  SCIENCE_TOPIC_URI,
+  THIS_POST_NAME_URI,
+} from '../shared/utils/semantics.helper';
 import { usePost } from './post.context/PostContext';
 
 export const PublishButtons = () => {
   const { t } = useTranslation();
-  const { publish } = usePost();
+  const { updated } = usePost();
 
   const checkboxChanged = (value: boolean) => {
     if (value) {
-      publish.publish().catch((e) => {
-        console.error('publish error', e);
-      });
+      updated.addTriple([THIS_POST_NAME_URI, HAS_TOPIC_URI, SCIENCE_TOPIC_URI]);
     } else {
-      publish.unpublish();
+      updated.removeTriple([
+        THIS_POST_NAME_URI,
+        HAS_TOPIC_URI,
+        SCIENCE_TOPIC_URI,
+      ]);
     }
   };
 
@@ -28,7 +35,7 @@ export const PublishButtons = () => {
       pad={{ bottom: '12px' }}>
       <AppCheckBoxMessage
         message={t(PostEditKeys.publish)}
-        onCheckChange={checkboxChanged}></AppCheckBoxMessage>
+        onCheckChange={(value) => checkboxChanged(value)}></AppCheckBoxMessage>
     </Box>
   );
 };

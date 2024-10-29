@@ -5,7 +5,6 @@ import { Location, useLocation, useNavigate } from 'react-router-dom';
 
 import { AppGeneralKeys } from '../../i18n/i18n.app.general';
 import { AbsoluteRoutes, RouteNames } from '../../route.names';
-import { PostsQueryStatus } from '../../shared/types/types.posts';
 import { AppButton } from '../../ui-components';
 import { useThemeContext } from '../../ui-components/ThemedApp';
 import { DraftsIcon } from '../icons/DraftsIcon';
@@ -19,23 +18,17 @@ export const locationToPageIx = (location: Location) => {
 
   if (
     location.pathname === '/' ||
-    location.pathname.startsWith(`/${PostsQueryStatus.DRAFTS}`) ||
-    location.pathname.startsWith(`/${PostsQueryStatus.IGNORED}`) ||
-    location.pathname.startsWith(`/${PostsQueryStatus.PENDING}`)
+    location.pathname.startsWith(`/${RouteNames.MyPosts}`)
   ) {
     return 0;
   }
 
-  if (location.pathname.startsWith(`/${PostsQueryStatus.PUBLISHED}`)) {
+  if (location.pathname.startsWith(`/${RouteNames.Feed}`)) {
     return 1;
   }
 
-  if (location.pathname.startsWith(`/${RouteNames.Feed}`)) {
-    return 2;
-  }
-
   if (location.pathname.startsWith(`/${RouteNames.Settings}`)) {
-    return 3;
+    return 2;
   }
 };
 
@@ -96,20 +89,20 @@ export const GlobalNav = () => {
       {button(
         t(AppGeneralKeys.myPosts),
         <DraftsIcon></DraftsIcon>,
-        `/${PostsQueryStatus.DRAFTS}`,
+        AbsoluteRoutes.MyPosts,
         pageIx === 0
       )}
       {button(
         t(AppGeneralKeys.feedTitle),
         <FeedIcon></FeedIcon>,
         AbsoluteRoutes.Feed,
-        pageIx === 2
+        pageIx === 1
       )}
       {button(
         t(AppGeneralKeys.settings),
         <SettignsIcon></SettignsIcon>,
         AbsoluteRoutes.Settings,
-        pageIx === 3
+        pageIx === 2
       )}
     </Box>
   );

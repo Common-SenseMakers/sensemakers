@@ -13,7 +13,7 @@ import { AppGeneralKeys } from '../i18n/i18n.app.general';
 import { PostCard } from '../post/PostCard';
 import { PostCardLoading } from '../post/PostCardLoading';
 import { PostContext } from '../post/post.context/PostContext';
-import { PostsQuery, PostsQueryStatus } from '../shared/types/types.posts';
+import { PostsQueryStatus } from '../shared/types/types.posts';
 import { AppButton, AppHeading, AppSelect } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
@@ -37,7 +37,7 @@ export const PostsFetcherComponent = (props: {
   pageTitle: string;
   filterOptions: FilterOption[];
   status?: PostsQueryStatus;
-  onFilterOptionChanged: (filter: PostsQuery) => void;
+  onFilterOptionChanged: (filter: PostsQueryStatus) => void;
   isPublicFeed?: boolean;
   showHeader?: boolean;
 }) => {
@@ -248,10 +248,7 @@ export const PostsFetcherComponent = (props: {
       }
       options={options}
       onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-        onFilterOptionChanged({
-          status: e.target.value,
-          fetchParams: { expectedAmount: 10 },
-        });
+        onFilterOptionChanged(e.target.value as PostsQueryStatus);
       }}>
       {(status: string) => {
         return <FilterValue padx status={status}></FilterValue>;

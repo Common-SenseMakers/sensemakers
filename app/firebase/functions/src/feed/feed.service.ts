@@ -1,4 +1,8 @@
-import { AppPostFull, PostsQuery } from '../@shared/types/types.posts';
+import {
+  AppPostFull,
+  PostsQuery,
+  PostsQueryDefined,
+} from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
 import { PostsManager } from '../posts/posts.manager';
 
@@ -9,7 +13,15 @@ export class FeedService {
   ) {}
 
   async getFeed(params: PostsQuery): Promise<AppPostFull[]> {
-    const posts = await this.postsManager.processing.posts.getMany(params);
+    const queryParams: PostsQueryDefined = {
+      fetchParams: {
+        ...params.fetchParams,
+        expectedAmount: params.fetchParams?.expectedAmount || 10,
+      },
+      ...params,
+    };
+
+    const posts = await this.postsManager.processing.posts.getMany(queryParams);
 
     const postsFull = await Promise.all(
       posts.map((post) => this.postsManager.appendMirrors(post))

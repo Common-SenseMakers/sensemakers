@@ -7,8 +7,7 @@ import {
   AppPostCreate,
   AppPostParsedStatus,
   PostUpdate,
-  PostsQuery,
-  PostsQueryStatus,
+  PostsQueryDefined,
 } from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
 import { BaseRepository, removeUndefined } from '../db/repo.base';
@@ -51,7 +50,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   }
 
   /** Cannot be part of a transaction */
-  public async getMany(queryParams: PostsQuery) {
+  public async getMany(queryParams: PostsQueryDefined) {
     /** type protection agains properties renaming */
     const createdAtKey: keyof AppPost = 'createdAtMs';
     const authorUserKey: keyof AppPost = 'authorUserId';
@@ -61,11 +60,11 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     const structuredSemanticsKey: keyof AppPost = 'structuredSemantics';
     const keywordsKey: keyof StructuredSemantics = 'keywords';
     const labelsKey: keyof StructuredSemantics = 'labels';
-    const isScienceKey: keyof StructuredSemantics = 'isScience';
+    const topicsKey: keyof StructuredSemantics = 'topics';
 
     if (DEBUG) logger.debug('getMany', queryParams, DEBUG_PREFIX);
 
-    const ofUser = ((_base: Query) => {
+    let cumulativeQuery = ((_base: Query) => {
       if (queryParams.userId) {
         if (DEBUG)
           logger.debug(
@@ -87,7 +86,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       }
     })(this.db.collections.posts);
 
-    const ofOrigin = ((_base: Query) => {
+    cumulativeQuery = ((_base: Query) => {
       if (queryParams.origins && queryParams.origins.length > 0) {
         if (DEBUG)
           logger.debug(
@@ -107,9 +106,9 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
         return _base;
       }
-    })(ofUser);
+    })(cumulativeQuery);
 
-    const ofProfiles = ((_base: Query) => {
+    cumulativeQuery = ((_base: Query) => {
       if (queryParams.profileIds && queryParams.profileIds.length > 0) {
         if (DEBUG)
           logger.debug(
@@ -129,71 +128,40 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
         return _base;
       }
-    })(ofOrigin);
+    })(cumulativeQuery);
 
     if (DEBUG) logger.debug('getOfUser', queryParams, DEBUG_PREFIX);
 
-    const withStatuses = ((_base: Query) => {
-      if (!queryParams.status || queryParams.status === PostsQueryStatus.ALL) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - dont filter by status',
-            undefined,
-            DEBUG_PREFIX
-          );
-        return _base;
-      }
-
-      if (queryParams.status === PostsQueryStatus.IGNORED) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by status',
-            PostsQueryStatus.IGNORED,
-            DEBUG_PREFIX
-          );
-        return _base.where(
-          `${structuredSemanticsKey}.${isScienceKey}`,
-          '==',
-          false
-        );
-      }
-
-      if (queryParams.status === PostsQueryStatus.IS_SCIENCE) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by status',
-            PostsQueryStatus.IS_SCIENCE,
-            DEBUG_PREFIX
-          );
-        return _base.where(
-          `${structuredSemanticsKey}.${isScienceKey}`,
-          '==',
-          true
-        );
-      }
-
-      return _base;
-    })(ofProfiles);
-
-    const withSemantics = ((_base: Query) => {
+    cumulativeQuery = ((_base: Query) => {
       if (
-        queryParams.semantics?.keywords &&
-        queryParams.semantics?.keywords.length > 0
+        queryParams.semantics?.topics &&
+        queryParams.semantics?.topics.length > 0
       ) {
         if (DEBUG)
           logger.debug(
-            'getMany - filter by keywords',
-            JSON.stringify(queryParams.semantics.keywords),
+            'getMany - filter by labels',
+            JSON.stringify(queryParams.semantics.topics),
             DEBUG_PREFIX
           );
 
         return _base.where(
-          `${structuredSemanticsKey}.${keywordsKey}`,
+          `${structuredSemanticsKey}.${topicsKey}`,
           'array-contains-any',
-          queryParams.semantics.keywords
+          queryParams.semantics.topics
         );
-      }
+      } else {
+        if (DEBUG)
+          logger.debug(
+            'getMany - filter by topics skipped',
+            undefined,
+            DEBUG_PREFIX
+          );
 
+        return _base;
+      }
+    })(cumulativeQuery);
+
+    cumulativeQuery = ((_base: Query) => {
       if (
         queryParams.semantics?.labels &&
         queryParams.semantics?.labels.length > 0
@@ -210,10 +178,46 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
           'array-contains-any',
           queryParams.semantics.labels
         );
-      }
+      } else {
+        if (DEBUG)
+          logger.debug(
+            'getMany - filter by labels skipped',
+            undefined,
+            DEBUG_PREFIX
+          );
 
-      return _base;
-    })(withStatuses);
+        return _base;
+      }
+    })(cumulativeQuery);
+
+    cumulativeQuery = ((_base: Query) => {
+      if (
+        queryParams.semantics?.keywords &&
+        queryParams.semantics?.keywords.length > 0
+      ) {
+        if (DEBUG)
+          logger.debug(
+            'getMany - filter by keywords',
+            JSON.stringify(queryParams.semantics.keywords),
+            DEBUG_PREFIX
+          );
+
+        return _base.where(
+          `${structuredSemanticsKey}.${keywordsKey}`,
+          'array-contains-any',
+          queryParams.semantics.keywords
+        );
+      } else {
+        if (DEBUG)
+          logger.debug(
+            'getMany - filter by keywords skipped',
+            undefined,
+            DEBUG_PREFIX
+          );
+
+        return _base;
+      }
+    })(cumulativeQuery);
 
     /** get the sinceCreatedAt and untilCreatedAt timestamps from the elements ids */
     const { sinceCreatedAt, untilCreatedAt } = await (async () => {
@@ -250,7 +254,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
         const ordered = _base.orderBy(createdAtKey, 'desc');
         return untilCreatedAt ? ordered.startAfter(untilCreatedAt) : ordered;
       }
-    })(withSemantics);
+    })(cumulativeQuery);
 
     const posts = await paginated
       .limit(queryParams.fetchParams.expectedAmount)
@@ -264,7 +268,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     return appPosts.sort((a, b) => b.createdAtMs - a.createdAtMs);
   }
 
-  public async getAllOfQuery(queryParams: PostsQuery, limit?: number) {
+  public async getAllOfQuery(queryParams: PostsQueryDefined, limit?: number) {
     let stillPending = true;
     const allPosts: AppPost[] = [];
 

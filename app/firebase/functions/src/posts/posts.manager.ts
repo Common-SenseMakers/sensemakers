@@ -2,6 +2,7 @@ import { FetchParams, PlatformFetchParams } from '../@shared/types/types.fetch';
 import {
   PARSER_MODE,
   ParsePostRequest,
+  SciFilterClassfication,
   TopicsParams,
 } from '../@shared/types/types.parser';
 import {
@@ -25,10 +26,16 @@ import {
   AppPostParsingStatus,
   PostUpdate,
   PostsQuery,
-  PostsQueryStatus,
+  PostsQueryDefined,
 } from '../@shared/types/types.posts';
 import { FetchedDetails } from '../@shared/types/types.profiles';
 import { AccountCredentials, AppUser } from '../@shared/types/types.user';
+import { addTripleToSemantics } from '../@shared/utils/n3.utils';
+import {
+  HAS_TOPIC_URI,
+  SCIENCE_TOPIC_URI,
+  THIS_POST_NAME_URI,
+} from '../@shared/utils/semantics.helper';
 import { PARSING_TIMEOUT_MS } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
@@ -458,7 +465,7 @@ export class PostsManager {
    * single place where new posts are fetched for a signedup user
    * from any platform
    * */
-  private async fetchIfNecessary(queryParams: PostsQuery): Promise<{
+  private async fetchIfNecessary(queryParams: PostsQueryDefined): Promise<{
     posts: AppPost[];
     enough: boolean;
   }> {
@@ -467,11 +474,7 @@ export class PostsManager {
     }
 
     /** fetch only if queryuing for all posts of a user */
-    if (
-      queryParams.semantics ||
-      queryParams.profileIds ||
-      (queryParams.status && queryParams.status === PostsQueryStatus.ALL)
-    ) {
+    if (queryParams.semantics || queryParams.profileIds) {
       return { posts: [], enough: true };
     }
 
@@ -530,7 +533,7 @@ export class PostsManager {
   }
 
   /** get AppPost and fetch for new posts if necessary */
-  private async getAndFetchIfNecessary(queryParams: PostsQuery) {
+  private async getAndFetchIfNecessary(queryParams: PostsQueryDefined) {
     if (!queryParams.userId) {
       throw new Error('userId is required');
     }
@@ -564,7 +567,11 @@ export class PostsManager {
       throw new Error('userId is required');
     }
 
-    const queryParams: PostsQuery = {
+    const queryParams: PostsQueryDefined = {
+      fetchParams: {
+        ..._queryParams.fetchParams,
+        expectedAmount: _queryParams.fetchParams?.expectedAmount || 10,
+      },
       ..._queryParams,
     };
 
@@ -707,8 +714,25 @@ export class PostsManager {
       throw new Error(`Error parsing post: ${post.id}`);
     }
 
+    /** temp hack to convert filter_classification into topic semantics*/
+    const hackedSemantics = await (async () => {
+      if (
+        [
+          SciFilterClassfication.AI_DETECTED_RESEARCH,
+          SciFilterClassfication.CITOID_DETECTED_RESEARCH,
+        ].includes(parserResult.filter_classification)
+      ) {
+        return addTripleToSemantics(parserResult.semantics, [
+          THIS_POST_NAME_URI,
+          HAS_TOPIC_URI,
+          SCIENCE_TOPIC_URI,
+        ]);
+      }
+      return parserResult.semantics;
+    })();
+
     const update: PostUpdate = {
-      semantics: parserResult.semantics,
+      semantics: hackedSemantics,
       originalParsed: parserResult,
       parsedStatus: AppPostParsedStatus.PROCESSED,
       parsingStatus: AppPostParsingStatus.IDLE,

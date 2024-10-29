@@ -3,11 +3,8 @@ import { useSearchParams } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
 import { subscribeToUpdates } from '../firestore/realtime.listener';
-import {
-  AppPostFull,
-  PostsQuery,
-  PostsQueryParams,
-} from '../shared/types/types.posts';
+import { FetchParams } from '../shared/types/types.fetch';
+import { AppPostFull, PostsQuery } from '../shared/types/types.posts';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { arraysEqual } from '../utils/general';
 
@@ -33,9 +30,7 @@ export interface PostFetcherInterface {
 
 export interface FetcherConfig {
   endpoint: string;
-  status?: string;
-  labels?: string[];
-  keywords?: string[];
+  queryParams: PostsQuery;
   subscribe?: boolean;
   onPostsAdded?: (posts: AppPostFull[]) => void;
   PAGE_SIZE?: number;
@@ -51,9 +46,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
 
   const {
     endpoint,
-    status,
-    labels,
-    keywords,
+    queryParams,
     subscribe,
     onPostsAdded,
     PAGE_SIZE: _PAGE_SIZE,
@@ -84,17 +77,6 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
 
   const [searchParams] = useSearchParams();
   const code = searchParams.get('code');
-
-  const queryParams: PostsQueryParams = useMemo(() => {
-    const _labels = labels || [];
-    const _keywords = keywords || [];
-
-    return {
-      status,
-      keywords: _keywords,
-      labels: _labels,
-    };
-  }, [keywords, labels, status]);
 
   /** refetch a post and overwrite its value in the array */
   const refetchPost = useCallback(
@@ -299,11 +281,11 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
 
       try {
         const params: PostsQuery = {
-          ...queryParams,
           fetchParams: {
             expectedAmount: PAGE_SIZE,
             untilId: oldestPostId,
           },
+          ...queryParams,
         };
         if (DEBUG)
           console.log(`${DEBUG_PREFIX}fetching for older - twitter`, params);
@@ -317,7 +299,9 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
         addPosts(readPosts, 'end');
         setIsFetchingOlder(false);
         setIsLoading(false);
-        if (readPosts.length < params.fetchParams.expectedAmount) {
+        if (
+          readPosts.length < (params.fetchParams as FetchParams).expectedAmount
+        ) {
           setMoreToFetch(false);
         } else {
           setMoreToFetch(true);
@@ -361,9 +345,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
       console.log(
         `${DEBUG_PREFIX}_fetchOlder due to status, labels, keywords, endpoint change`,
         {
-          status,
-          labels,
-          keywords,
+          queryParams,
           endpoint,
           fetchedOlderFirst,
         }
@@ -372,9 +354,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
       console.error(e);
     });
   }, [
-    status,
-    labels,
-    keywords,
+    queryParams,
     endpoint,
     reset,
     DEBUG_PREFIX,

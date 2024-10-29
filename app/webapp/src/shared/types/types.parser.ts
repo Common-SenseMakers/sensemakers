@@ -21,7 +21,7 @@ export interface StructuredSemantics {
   labels?: string[];
   keywords?: string[];
   refsMeta?: Record<string, RefMeta>;
-  isScience?: boolean;
+  topics?: string[];
 }
 
 export interface OntologyItem {
