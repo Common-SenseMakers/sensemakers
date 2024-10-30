@@ -174,7 +174,8 @@ export class PostsManager {
     user_id: string,
     params: FetchParams,
     manager: TransactionManager,
-    credentials?: AccountCredentials
+    credentials?: AccountCredentials,
+    userId?: string
   ) {
     const profile = await this.users.profiles.getProfile(
       platformId,
@@ -197,22 +198,14 @@ export class PostsManager {
         credentials
       );
 
-      if (fetchedPosts.credentials) {
-        const userId = await this.users.profiles.getUserIdWithPlatformAccount(
+      if (fetchedPosts.credentials && userId) {
+        this.users.updateAccountCredentials(
+          userId,
           platformId,
           user_id,
-          manager,
-          false
+          fetchedPosts.credentials,
+          manager
         );
-        if (userId) {
-          this.users.updateAccountCredentials(
-            userId,
-            platformId,
-            user_id,
-            fetchedPosts.credentials,
-            manager
-          );
-        }
       }
 
       if (DEBUG)
@@ -340,7 +333,8 @@ export class PostsManager {
     user_id: string,
     params: FetchParams,
     manager: TransactionManager,
-    credentials?: AccountCredentials
+    credentials?: AccountCredentials,
+    userId?: string
   ) {
     try {
       if (DEBUG)
@@ -356,7 +350,8 @@ export class PostsManager {
         user_id,
         params,
         manager,
-        credentials
+        credentials,
+        userId
       );
 
       if (!platformPostsCreate) {
@@ -459,7 +454,8 @@ export class PostsManager {
                       user_id,
                       inputs.params,
                       manager,
-                      account.credentials
+                      account.credentials,
+                      user.userId
                     );
                     return result;
                   }
