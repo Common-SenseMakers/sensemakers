@@ -46,6 +46,7 @@ import {
   cleanBlueskyContent,
   convertBlueskyPostsToThreads,
   extractPrimaryThread,
+  removeUndefinedFields,
 } from './bluesky.utils';
 
 const DEBUG = true;
@@ -73,26 +74,33 @@ export class BlueskyService
   ) {}
 
   private async getClient(credentials?: BlueskyCredentials): Promise<AtpAgent> {
-    if (this.agent) {
-      return this.agent;
+    const session = await (async () => {
+      if (!credentials) {
+        if (this.agent?.session) {
+          return this.agent.session;
+        }
+        this.agent = new AtpAgent({
+          service: this.config.BLUESKY_SERVICE_URL,
+        });
+        await this.agent.login({
+          identifier: this.config.BLUESKY_USERNAME,
+          password: this.config.BLUESKY_APP_PASSWORD,
+        });
+        if (!this.agent.session) {
+          throw new Error('Failed to login to Bluesky');
+        }
+        return this.agent.session;
+      }
+      return credentials;
+    })();
+    if (!this.agent) {
+      throw new Error('Failed to initialize bluesky client');
     }
-    const agent = new AtpAgent({ service: this.config.BLUESKY_SERVICE_URL });
-    await agent.login(
-      credentials
-        ? {
-            identifier: credentials.username,
-            password: credentials.appPassword,
-          }
-        : {
-            identifier: this.config.BLUESKY_USERNAME,
-            password: this.config.BLUESKY_APP_PASSWORD,
-          }
-    );
-    if (!agent.session) {
-      throw new Error('Failed to login to Bluesky');
+    await this.agent.resumeSession(session);
+    if (!this.agent.session) {
+      throw new Error('Failed to initiate bluesky session');
     }
-    this.agent = agent;
-    return agent;
+    return this.agent;
   }
 
   public async getSignupContext(userId?: string, params?: any): Promise<any> {
@@ -102,7 +110,7 @@ export class BlueskyService
 
   public async handleSignupData(signupData: BlueskySignupData) {
     if (DEBUG) logger.debug('handleSignupData', { signupData }, DEBUG_PREFIX);
-    const agent = new AtpAgent({ service: 'https://bsky.social' });
+    const agent = new AtpAgent({ service: this.config.BLUESKY_SERVICE_URL });
     await agent.login({
       identifier: signupData.username,
       password: signupData.appPassword,
@@ -114,14 +122,12 @@ export class BlueskyService
       actor: agent.session.did,
     });
 
+    const sessionData = removeUndefinedFields(agent.session);
     const bluesky: BlueskyAccountDetails = {
       user_id: bskFullUser.data.did,
       signupDate: this.time.now(),
       credentials: {
-        read: {
-          username: signupData.username,
-          appPassword: signupData.appPassword,
-        },
+        read: sessionData,
       },
     };
 
@@ -139,10 +145,7 @@ export class BlueskyService
     };
 
     if (signupData.type === 'write') {
-      bluesky.credentials['write'] = {
-        username: signupData.username,
-        appPassword: signupData.appPassword,
-      };
+      bluesky.credentials['write'] = sessionData;
     }
 
     if (DEBUG)
