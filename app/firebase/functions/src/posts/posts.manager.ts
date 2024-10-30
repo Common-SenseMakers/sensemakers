@@ -197,6 +197,24 @@ export class PostsManager {
         credentials
       );
 
+      if (fetchedPosts.credentials) {
+        const userId = await this.users.profiles.getUserIdWithPlatformAccount(
+          platformId,
+          user_id,
+          manager,
+          false
+        );
+        if (userId) {
+          this.users.updateAccountCredentials(
+            userId,
+            platformId,
+            user_id,
+            fetchedPosts.credentials,
+            manager
+          );
+        }
+      }
+
       if (DEBUG)
         logger.debug(
           `fetchUser ${platformId} - platformPosts: ${fetchedPosts.platformPosts.length}`,
