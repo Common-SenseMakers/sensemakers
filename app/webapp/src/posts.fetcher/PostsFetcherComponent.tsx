@@ -280,7 +280,7 @@ export const PostsFetcherComponent = (props: {
           <AppHeading level="3">{pageTitle}</AppHeading>
           <BoxCentered style={{ height: '40px' }}>{reload}</BoxCentered>
         </Box>
-        <Box>{menu}</Box>
+        <Box>{true || menu}</Box>
       </Box>
     </Box>
   );

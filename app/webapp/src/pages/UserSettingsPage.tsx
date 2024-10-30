@@ -127,7 +127,7 @@ export const UserSettingsPage = () => {
           }
           platformName={t(PlatformsKeys.XTwitter)}
           onButtonClicked={() => {
-            connectTwitter && connectTwitter('read');
+            connectTwitter && connectTwitter('read').catch(console.error);
           }}
           buttonText={needConnectTwitter ? 'connect' : ''}
           username={twitterProfile ? `@${twitterProfile.username}` : ''}

@@ -36,7 +36,6 @@ export const PostNav = () => {
       if (DEBUG)
         console.log('fetching older', {
           nextPostId: navigatePost.nextPostId,
-          isFetchingOlder,
           errorFetchingOlder,
           triggeredFetchOlder,
         });

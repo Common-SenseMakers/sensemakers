@@ -52,9 +52,11 @@ export const ConnectSocialsPage = () => {
             )
           }
           platformName={t(PlatformsKeys.XTwitter)}
-          onButtonClicked={() =>
-            connectTwitter ? connectTwitter('read') : null
-          }
+          onButtonClicked={() => {
+            if (connectTwitter) {
+              connectTwitter('read').catch(console.error);
+            }
+          }}
           buttonText={twitterProfile ? '' : 'connect'}
           username={twitterProfile ? `@${twitterProfile.username}` : ''}
           connected={!!twitterProfile}

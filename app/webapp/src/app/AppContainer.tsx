@@ -3,7 +3,7 @@ import { Box } from 'grommet';
 import { createContext, useContext } from 'react';
 import { Outlet, Route, Routes } from 'react-router-dom';
 
-import { FeedPostsContext } from '../feed/PublicFeedContext';
+// import { FeedPostsContext } from '../feed/PublicFeedContext';
 import { AppHomePage } from '../pages/AppHomePage';
 import { PublicFeedPage } from '../pages/PublicFeedPage';
 import { UserSettingsPage } from '../pages/UserSettingsPage';
@@ -82,9 +82,9 @@ export const AppContainer = (props: React.PropsWithChildren) => {
                 <Route
                   path={`${RouteNames.Feed}/*`}
                   element={
-                    <FeedPostsContext>
-                      <PublicFeedPage></PublicFeedPage>
-                    </FeedPostsContext>
+                    // <FeedPostsContext>
+                    <PublicFeedPage></PublicFeedPage>
+                    // </FeedPostsContext>
                   }></Route>
 
                 <Route path={''} element={<AppHomePage></AppHomePage>}></Route>

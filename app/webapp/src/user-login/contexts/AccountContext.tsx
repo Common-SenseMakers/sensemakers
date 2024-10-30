@@ -21,7 +21,7 @@ import { PlatformProfile } from '../../shared/types/types.profiles';
 import { AppUserRead, EmailDetails } from '../../shared/types/types.user';
 import { usePersist } from '../../utils/use.persist';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export const OUR_TOKEN_NAME = 'ourToken';
 export const LOGIN_STATUS = 'loginStatus';
@@ -267,7 +267,8 @@ export const AccountContext = (props: PropsWithChildren) => {
     connectedSourcePlatforms.forEach((platform) => {
       setPlatformConnectedStatus(platform, PlatformConnectedStatus.Connected);
     });
-  }, [connectedSourcePlatforms, setPlatformConnectedStatus]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connectedSourcePlatforms]);
 
   return (
     <AccountContextValue.Provider

@@ -22,6 +22,8 @@ export const NavHistoryContext = (props: PropsWithChildren) => {
   const type = useNavigationType();
 
   useEffect(() => {
+    console.log({ pathname, type });
+
     if (type === 'POP') {
       setStack(stack.slice(0, stack.length - 1));
     } else if (type === 'PUSH') {
@@ -29,7 +31,8 @@ export const NavHistoryContext = (props: PropsWithChildren) => {
     } else {
       setStack([...stack.slice(0, stack.length - 1), pathname]);
     }
-  }, [pathname, stack, type]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, type]);
 
   return (
     <NavHistoryContextValue.Provider
