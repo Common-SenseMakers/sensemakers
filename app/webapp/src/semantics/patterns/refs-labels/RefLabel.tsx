@@ -109,8 +109,6 @@ export const RefWithLabels = (props: {
 };
 
 const getSourceRefNumber = (meta: RefMeta, allRefs: [string, RefData][]) => {
-  const currRefData = allRefs.find(([ref]) => ref === meta.url);
-
-  const refSource = allRefs.find(([ref]) => ref === currRefData?.[1].meta?.url);
+  const refSource = allRefs.find(([ref]) => ref === meta.ref_source_url);
   return refSource?.[1].meta?.order ? refSource[1].meta.order : undefined;
 };
