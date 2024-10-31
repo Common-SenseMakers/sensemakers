@@ -77,13 +77,15 @@ export class BlueskyService
     credentials?: BlueskyCredentials
   ): Promise<{ client: AtpAgent; credentials?: BlueskyCredentials }> {
     const session = await (async () => {
+      if (!this.agent) {
+        this.agent = new AtpAgent({
+          service: this.config.BLUESKY_SERVICE_URL,
+        });
+      }
       if (!credentials) {
         if (this.agent?.session) {
           return this.agent.session;
         }
-        this.agent = new AtpAgent({
-          service: this.config.BLUESKY_SERVICE_URL,
-        });
         await this.agent.login({
           identifier: this.config.BLUESKY_USERNAME,
           password: this.config.BLUESKY_APP_PASSWORD,
