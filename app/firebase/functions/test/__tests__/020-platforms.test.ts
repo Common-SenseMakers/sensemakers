@@ -122,7 +122,7 @@ describe('02-platforms', () => {
     });
   });
 
-  describe.skip('mastodon', () => {
+  describe('mastodon', () => {
     it('fetches the latest posts', async () => {
       if (!user) {
         throw new Error('appUser not created');
@@ -215,7 +215,7 @@ describe('02-platforms', () => {
     });
   });
 
-  describe.skip('bluesky', () => {
+  describe('bluesky', () => {
     let blueskyService: BlueskyService;
     let userDetails: BlueskyAccountDetails;
 
@@ -252,10 +252,7 @@ describe('02-platforms', () => {
       });
 
       const result = (
-        await blueskyService.getProfileByUsername(username, {
-          appPassword: blueskyAppPassword,
-          username: blueskyUsername,
-        })
+        await blueskyService.getProfileByUsername(username, agent.session)
       )?.profile;
 
       expect(result).to.not.be.null;
