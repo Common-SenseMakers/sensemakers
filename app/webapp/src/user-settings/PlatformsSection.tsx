@@ -47,7 +47,7 @@ export const PlatformSection = (props: {
       <Box>
         {!props.connected ? (
           <AppButton
-            disabled={props.disabled}
+            disabled={props.connecting}
             label={props.connecting ? 'connecting' : props.buttonText}
             onClick={props.onButtonClicked}
           />
