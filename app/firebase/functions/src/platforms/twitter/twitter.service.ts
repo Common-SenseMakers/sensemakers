@@ -256,7 +256,7 @@ export class TwitterService
     user_id: string,
     params: PlatformFetchParams,
     credentials?: TwitterCredentials
-  ): Promise<{ threads: TwitterThread[]; credentials: TwitterCredentials }> {
+  ): Promise<{ threads: TwitterThread[]; credentials?: TwitterCredentials }> {
     try {
       if (DEBUG) logger.debug('Twitter Service - fetchInternal - start');
 
@@ -654,17 +654,5 @@ export class TwitterService
     } catch (e: any) {
       throw new Error(handleTwitterError(e));
     }
-  }
-
-  async getFollowing(
-    user_id: string,
-    credentials: TwitterCredentials
-  ): Promise<string[]> {
-    const { client } = await this.getClient(credentials, 'read');
-    const following = await client.v2.following(user_id, {
-      'user.fields': userFields,
-    });
-
-    return following.data.map((user) => user.id);
   }
 }

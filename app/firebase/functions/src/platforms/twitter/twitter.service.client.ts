@@ -27,8 +27,8 @@ const DEBUG_PREFIX = 'TwitterServiceClient';
 
 export type GetClientResult<T extends 'read' | 'write' | undefined> =
   T extends 'write'
-    ? { client: TwitterApi; credentials: TwitterCredentials }
-    : { client: TwitterApiReadOnly; credentials: TwitterCredentials };
+    ? { client: TwitterApi; credentials?: TwitterCredentials }
+    : { client: TwitterApiReadOnly; credentials?: TwitterCredentials };
 
 /** check https://github.com/PLhery/node-twitter-api-v2/blob/master/doc/auth.md#oauth2-user-wide-authentication-flow for OAuth2 flow */
 
