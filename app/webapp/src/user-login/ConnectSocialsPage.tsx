@@ -7,17 +7,25 @@ import { BlueskyIcon, MastodonIcon, TwitterIcon } from '../app/common/Icons';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { I18Keys } from '../i18n/i18n';
 import { AbsoluteRoutes, RouteNames } from '../route.names';
+import { PLATFORM } from '../shared/types/types.platforms';
 import { AppButton, AppHeading, AppSubtitle } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
 import { PlatformSection } from '../user-settings/PlatformsSection';
-import { useAccountContext } from './contexts/AccountContext';
+import {
+  PlatformConnectedStatus,
+  useAccountContext,
+} from './contexts/AccountContext';
 import { useTwitterContext } from './contexts/platforms/TwitterContext';
 
 export const ConnectSocialsPage = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { connectedUser, connectedSourcePlatforms, setAlreadyConnected } =
-    useAccountContext();
+  const {
+    connectedUser,
+    connectedSourcePlatforms,
+    setAlreadyConnected,
+    getPlatformConnectedStatus,
+  } = useAccountContext();
 
   const { connect: connectTwitter } = useTwitterContext();
 
@@ -57,6 +65,10 @@ export const ConnectSocialsPage = () => {
           buttonText={twitterProfile ? '' : 'connect'}
           username={twitterProfile ? `@${twitterProfile.username}` : ''}
           connected={!!twitterProfile}
+          connecting={
+            getPlatformConnectedStatus(PLATFORM.Twitter) ===
+            PlatformConnectedStatus.Connecting
+          }
         />
 
         <PlatformSection
