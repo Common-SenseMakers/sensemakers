@@ -16,8 +16,10 @@ export const POSTING_POST_ID = 'postingPostId';
 
 /** extract the postId from the route and pass it to a PostContext */
 export const PostingPage = () => {
-  const { overallLoginStatus, orcidProfile } = useAccountContext();
+  const { overallLoginStatus, connectedUser } = useAccountContext();
   const [postingPostId, setPostingPostId] = usePersist(POSTING_POST_ID, null);
+
+  const orcid = connectedUser?.profiles?.orcid;
 
   const navigate = useNavigate();
 
@@ -26,13 +28,13 @@ export const PostingPage = () => {
       console.log('PostingPage', {
         postingPostId,
         overallLoginStatus,
-        orcidProfile,
+        orcid,
       });
 
     if (
       postingPostId &&
       overallLoginStatus === OverallLoginStatus.FullyLoggedIn &&
-      orcidProfile
+      orcid
     ) {
       if (DEBUG)
         console.log('PostingPage - navigating to post', {
@@ -41,7 +43,7 @@ export const PostingPage = () => {
         });
       navigate(AbsoluteRoutes.Post(postingPostId));
     }
-  }, [postingPostId, overallLoginStatus, orcidProfile]);
+  }, [postingPostId, overallLoginStatus, orcid]);
 
   return (
     <ViewportPage

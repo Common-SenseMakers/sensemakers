@@ -1,7 +1,8 @@
 import { Nanopub } from '@nanopub/sign';
 
 import { RSAKeys } from '../src/@shared/types/types.nanopubs';
-import { HexStr, PLATFORM } from '../src/@shared/types/types.user';
+import { PLATFORM } from '../src/@shared/types/types.platforms';
+import { HexStr } from '../src/@shared/types/types.user';
 import { signNanopublication } from '../src/@shared/utils/nanopub.sign.util';
 import { cleanPublicKey } from '../src/@shared/utils/semantics.helper';
 import {

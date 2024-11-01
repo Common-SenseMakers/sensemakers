@@ -9,7 +9,7 @@ export class TriplesRepository extends BaseRepository<
   PostTripleCreate
 > {
   constructor(protected db: DBInstance) {
-    super(db.collections.triples);
+    super(db.collections.triples, db);
   }
 
   public async deleteOfPost(postId: string, manager: TransactionManager) {
@@ -21,23 +21,27 @@ export class TriplesRepository extends BaseRepository<
     await Promise.all(postTriples.docs.map((doc) => manager.delete(doc.ref)));
   }
 
-  public async getWithPredicatesOfUser(
-    userId: string,
-    labelsUris: string[],
-    fetchParams: FetchParams
+  public async getWithPredicates(
+    fetchParams: FetchParams,
+    labelsUris?: string[],
+    profileIds?: string
   ) {
     const predicate_property: keyof PostTriple = 'predicate';
-    const userId_property: keyof PostTriple = 'authorId';
-    const createdAt_property: keyof PostTriple = 'createdAtMs';
+    const authorProfileId_property: keyof PostTriple = 'authorProfileId';
+    const postCreatedAtMs_property: keyof PostTriple = 'postCreatedAtMs';
 
-    const base = this.db.collections.triples.where(
-      userId_property,
-      '==',
-      userId
-    );
+    const base = profileIds
+      ? this.db.collections.triples.where(
+          authorProfileId_property,
+          'in',
+          profileIds
+        )
+      : this.db.collections.triples;
 
     const filtered = (() => {
-      return base.where(predicate_property, 'in', labelsUris);
+      return labelsUris && labelsUris.length > 0
+        ? base.where(predicate_property, 'in', labelsUris)
+        : base;
     })();
 
     const { untilCreatedAt } = await (async () => {
@@ -46,7 +50,7 @@ export class TriplesRepository extends BaseRepository<
 
         if (fetchParams.untilId) {
           const until = await this.get(fetchParams.untilId, manager);
-          untilCreatedAt = until ? until.createdAtMs : undefined;
+          untilCreatedAt = until ? until.postCreatedAtMs : undefined;
         }
 
         return { untilCreatedAt };
@@ -54,7 +58,7 @@ export class TriplesRepository extends BaseRepository<
     })();
 
     const paginated = await (async () => {
-      const ordered = filtered.orderBy(createdAt_property, 'desc');
+      const ordered = filtered.orderBy(postCreatedAtMs_property, 'desc');
       return untilCreatedAt ? ordered.startAfter(untilCreatedAt) : ordered;
     })();
 

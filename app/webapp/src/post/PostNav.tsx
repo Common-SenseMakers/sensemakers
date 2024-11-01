@@ -6,59 +6,70 @@ import { NavButton } from '../app/NavButton';
 import { LeftChevronIcon } from '../app/icons/LeftChveronIcon';
 import { LeftIcon } from '../app/icons/LeftIcon';
 import { RightIcon } from '../app/icons/RightIcon';
-import { TwitterUserProfile } from '../shared/types/types.twitter';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useUserPosts } from '../user-home/UserPostsContext';
-import { usePost } from './PostContext';
+import { useNavigationHistory } from '../user-login/contexts/NavHistoryContext';
+import { usePost } from './post.context/PostContext';
 
 const DEBUG = false;
 
-export const PostNav = (props: { profile?: TwitterUserProfile }) => {
-  const profile = props.profile;
-  const { post, nextPostId, prevPostId } = usePost();
+export const PostNav = () => {
+  const { fetched, navigatePost } = usePost();
 
-  const { fetchOlder, isFetchingOlder, errorFetchingOlder } = useUserPosts();
+  const { feed } = useUserPosts();
+  const { fetchOlder, isFetchingOlder, errorFetchingOlder } = feed;
   const [triggeredFetchOlder, setTriggeredFetchedOlder] = useState(false);
 
   const navigate = useNavigate();
+  const { hasHistory } = useNavigationHistory();
   const { constants } = useThemeContext();
 
   useEffect(() => {
     if (
-      !nextPostId &&
+      !navigatePost.nextPostId &&
       !isFetchingOlder &&
       !errorFetchingOlder &&
       !triggeredFetchOlder
     ) {
       setTriggeredFetchedOlder(true);
-      console.log('fetching older', {
-        nextPostId,
-        isFetchingOlder,
-        errorFetchingOlder,
-        triggeredFetchOlder,
-      });
+      if (DEBUG)
+        console.log('fetching older', {
+          nextPostId: navigatePost.nextPostId,
+          isFetchingOlder,
+          errorFetchingOlder,
+          triggeredFetchOlder,
+        });
 
       fetchOlder();
     }
 
     /** reset triggeredFetchedOlder once the nextPostId was obtained */
-    if (nextPostId) {
+    if (navigatePost.nextPostId) {
       setTriggeredFetchedOlder(false);
     }
-  }, [errorFetchingOlder, isFetchingOlder, nextPostId, triggeredFetchOlder]);
+  }, [
+    errorFetchingOlder,
+    isFetchingOlder,
+    navigatePost.nextPostId,
+    triggeredFetchOlder,
+  ]);
 
   const goToPrev = () => {
-    navigate(`/post/${prevPostId}`);
+    navigate(`/post/${navigatePost.prevPostId}`);
   };
 
   const goToNext = () => {
-    if (nextPostId) {
-      navigate(`/post/${nextPostId}`);
+    if (navigatePost.nextPostId) {
+      navigate(`/post/${navigatePost.nextPostId}`);
     }
   };
 
-  if (DEBUG) console.log('PostNav', { nextPostId, prevPostId });
+  if (DEBUG)
+    console.log('PostNav', {
+      nextPostId: navigatePost.nextPostId,
+      prevPostId: navigatePost.prevPostId,
+    });
 
   return (
     <Box
@@ -73,16 +84,15 @@ export const PostNav = (props: { profile?: TwitterUserProfile }) => {
       <NavButton
         icon={<LeftChevronIcon></LeftChevronIcon>}
         label={'Back'}
-        onClick={() =>
-          profile
-            ? navigate('..', { state: { postId: post?.id } })
-            : navigate('/')
-        }></NavButton>
+        onClick={() => {
+          if (hasHistory) navigate(-1);
+          else navigate('..', { state: { postId: fetched.postId } });
+        }}></NavButton>
 
       <Box direction="row" gap="8px">
         <NavButton
           icon={<LeftIcon></LeftIcon>}
-          disabled={!prevPostId}
+          disabled={!navigatePost.prevPostId}
           label="Previous"
           onClick={() => goToPrev()}></NavButton>
         <NavButton
@@ -96,7 +106,7 @@ export const PostNav = (props: { profile?: TwitterUserProfile }) => {
               )}
             </Box>
           }
-          disabled={!nextPostId}
+          disabled={!navigatePost.nextPostId}
           label="Next"
           onClick={() => goToNext()}></NavButton>
       </Box>

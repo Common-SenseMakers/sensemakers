@@ -1,17 +1,16 @@
+import { BlueskyAccountDetails } from '../../src/@shared/types/types.bluesky';
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { TwitterSignupContext } from '../../src/@shared/types/types.twitter';
 import {
   AppUser,
-  NanopubAccountCredentials,
-  PLATFORM,
   TestUserCredentials,
 } from '../../src/@shared/types/types.user';
 import { TransactionManager } from '../../src/db/transaction.manager';
 import { getPrefixedUserId } from '../../src/users/users.utils';
-import { handleSignupMock } from '../__tests__/reusable/mocked.singup';
+import { handleTwitterSignupMock } from '../__tests__/reusable/mocked.singup';
 import { USE_REAL_TWITTER } from '../__tests__/setup';
 import { TestServices } from '../__tests__/test.services';
 import { authenticateTwitterUser } from './authenticate.twitter';
-import { getNanopubProfile } from './nanopub.profile';
 
 export const authenticateTestUsers = async (
   credentials: TestUserCredentials[],
@@ -28,53 +27,140 @@ export const authenticateTestUsers = async (
 export const authenticateTestUser = async (
   credentials: TestUserCredentials,
   services: TestServices,
-  manager: TransactionManager
+  manager: TransactionManager,
+  excludePlatforms: PLATFORM[] = []
 ): Promise<AppUser> => {
-  const user0 = await (async () => {
-    if (USE_REAL_TWITTER) {
-      return authenticateTwitterUser(credentials.twitter, services, manager);
-    } else {
-      const twitterSignupContext: TwitterSignupContext =
-        await services.users.getSignupContext(
-          PLATFORM.Twitter,
-          credentials.twitter.id
-        );
-      const userId = await handleSignupMock(services, {
-        ...twitterSignupContext,
-        code: 'mocked',
-      });
+  let user: AppUser | undefined;
 
-      return services.users.repo.getUser(userId, manager, true);
-    }
-  })();
-
-  if (!USE_REAL_TWITTER) {
-    // authenticateTwitterUser dont add nanopub credentials, getMockedUser does
-    return await authenticateNanopub(user0, credentials.nanopub);
+  if (!excludePlatforms.includes(PLATFORM.Twitter)) {
+    user = await authenticateTwitterForUser(
+      credentials,
+      services,
+      manager,
+      user
+    );
   }
 
-  return user0;
+  if (!excludePlatforms.includes(PLATFORM.Mastodon)) {
+    user = await authenticateMastodonForUser(
+      credentials,
+      services,
+      manager,
+      user
+    );
+  }
+
+  if (!excludePlatforms.includes(PLATFORM.Bluesky)) {
+    user = await authenticateBlueskyForUser(
+      credentials,
+      services,
+      manager,
+      user
+    );
+  }
+
+  if (!user) {
+    throw new Error('No platforms were authenticated');
+  }
+
+  return user;
 };
 
-const authenticateNanopub = async (
-  user: AppUser,
-  credentials: NanopubAccountCredentials
+const authenticateBlueskyForUser = async (
+  credentials: TestUserCredentials,
+  services: TestServices,
+  manager: TransactionManager,
+  user?: AppUser
 ): Promise<AppUser> => {
-  const { profile } = await getNanopubProfile(credentials.ethPrivateKey);
+  if (!user) {
+    user = {
+      userId: getPrefixedUserId(PLATFORM.Bluesky, credentials.bluesky.id),
+      settings: {},
+      signupDate: Date.now(),
+      accounts: {},
+    };
+  }
 
-  user.platformIds.push(
-    getPrefixedUserId(PLATFORM.Nanopub, profile.ethAddress)
-  );
+  const blueskyUserDetails: BlueskyAccountDetails = {
+    signupDate: 0,
+    user_id: credentials.bluesky.id,
+    credentials: {
+      read: {
+        username: credentials.bluesky.username,
+        appPassword: credentials.bluesky.appPassword,
+      },
+      write: {
+        username: credentials.bluesky.username,
+        appPassword: credentials.bluesky.appPassword,
+      },
+    },
+  };
 
-  user[PLATFORM.Nanopub] = [
+  user.accounts[PLATFORM.Bluesky] = [blueskyUserDetails];
+
+  return user;
+};
+
+const authenticateTwitterForUser = async (
+  credentials: TestUserCredentials,
+  services: TestServices,
+  manager: TransactionManager,
+  user?: AppUser
+): Promise<AppUser> => {
+  if (USE_REAL_TWITTER) {
+    return authenticateTwitterUser(
+      credentials.twitter,
+      services,
+      manager,
+      user?.userId
+    );
+  } else {
+    const twitterSignupContext: TwitterSignupContext =
+      await services.users.getSignupContext(
+        PLATFORM.Twitter,
+        credentials.twitter.id
+      );
+    const userId = await handleTwitterSignupMock(
+      services,
+      {
+        ...twitterSignupContext,
+        code: 'mocked',
+      },
+      user?.userId
+    );
+
+    return services.users.repo.getUser(userId, manager, true);
+  }
+};
+
+const authenticateMastodonForUser = async (
+  credentials: TestUserCredentials,
+  services: TestServices,
+  manager: TransactionManager,
+  user?: AppUser
+): Promise<AppUser> => {
+  if (!user) {
+    user = {
+      userId: getPrefixedUserId(PLATFORM.Mastodon, credentials.mastodon.id),
+      settings: {},
+      signupDate: Date.now(),
+      accounts: {},
+    };
+  }
+
+  user.accounts[PLATFORM.Mastodon] = [
     {
       signupDate: 0,
-      user_id: profile.ethAddress,
-      profile: {
-        ethAddress: profile.ethAddress,
-        rsaPublickey: profile.rsaPublickey,
-        ethToRsaSignature: profile.ethToRsaSignature,
-        introNanopubUri: profile.introNanopubUri,
+      user_id: `https://${credentials.mastodon.mastodonServer}/@${credentials.mastodon.username}`,
+      credentials: {
+        read: {
+          accessToken: credentials.mastodon.id,
+          server: 'https://mastodon.social',
+        },
+        write: {
+          accessToken: credentials.mastodon.id,
+          server: 'https://mastodon.social',
+        },
       },
     },
   ];

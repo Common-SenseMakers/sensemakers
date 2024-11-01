@@ -16,6 +16,11 @@ export interface ParsePostRequest<P> {
 }
 
 export type AppPostSemantics = string;
+export interface StructuredSemantics {
+  labels?: string[];
+  keywords?: string[];
+  refsMeta?: Record<string, RefMeta>;
+}
 
 export interface OntologyItem {
   uri: string;
@@ -29,12 +34,22 @@ export interface OntologyItem {
   versions?: string[];
 }
 
-export interface RefMeta {
+export interface OEmbed {
   url: string;
-  title: string;
-  summary: string;
-  item_type: string;
-  image: string;
+  title?: string;
+  summary?: string;
+  provider_name?: string;
+  provider_url?: string;
+  thumbnail_url?: string;
+  author_name?: string;
+  author_url?: string;
+  thumbnail_width?: number;
+  thumbnail_height?: number;
+}
+
+export interface RefMeta extends OEmbed {
+  item_type?: string;
+  order?: number;
 }
 
 export interface ParserOntology {

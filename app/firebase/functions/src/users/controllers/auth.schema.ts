@@ -1,7 +1,10 @@
 import { object, string } from 'yup';
 
-import { NotificationFreq } from '../../@shared/types/types.notifications';
-import { AutopostOption, PLATFORM } from '../../@shared/types/types.user';
+export const mastodonGetSignupContextSchema = object({
+  mastodonServer: string().required(),
+  callback_url: string().required(),
+  type: string().oneOf(['read', 'write']).required(),
+}).noUnknown(true);
 
 export const twitterGetSignupContextSchema = object({
   callback_url: string().required(),
@@ -34,20 +37,22 @@ export const orcidSignupDataSchema = object({
   callbackUrl: string().required(),
 }).noUnknown(true);
 
-export const userSettingsUpdateSchema = object({
-  autopost: object({
-    [PLATFORM.Nanopub]: object({
-      value: string()
-        .oneOf([...Object.values(AutopostOption)])
-        .required(),
-    }),
-  })
-    .optional()
-    .default(undefined),
-  notificationFreq: string()
-    .oneOf([...Object.values(NotificationFreq)])
-    .optional(),
+export const mastodonSignupDataSchema = object({
+  code: string().required(),
+  mastodonServer: string().required(),
+  callback_url: string().required(),
+  type: string().oneOf(['read', 'write']).required(),
+  clientId: string().required(),
+  clientSecret: string().required(),
 }).noUnknown(true);
+
+export const blueskySignupDataSchema = object({
+  username: string().required(),
+  appPassword: string().required(),
+  type: string().oneOf(['read', 'write']).required(),
+}).noUnknown(true);
+
+export const userSettingsUpdateSchema = object({}).noUnknown(true);
 
 export const magicEmailSetSchema = object({
   idToken: string().required(),

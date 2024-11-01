@@ -11,12 +11,18 @@ import {
   ResponsiveContext,
   Text,
 } from 'grommet';
-import { ReactNode, createContext, useEffect, useRef, useState } from 'react';
+import {
+  ReactNode,
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import { AppHeading } from '../../ui-components';
 import { useResponsive } from '../../ui-components/ResponsiveApp';
 import { useThemeContext } from '../../ui-components/ThemedApp';
-import { TwitterIcon } from '../common/Icons';
 import { BUILD_ID } from '../config';
 import { AppIcon } from '../icons/AppIcon';
 
@@ -101,9 +107,13 @@ export const ViewportHeadingLarge = (props: { label: ReactNode }) => {
   );
 };
 
-export const ViewportPageScrollContext = createContext({
-  isAtBottom: false,
-});
+export interface ViewportPageContext {
+  isAtBottom: boolean;
+}
+
+export const ViewportPageContextValue = createContext<
+  ViewportPageContext | undefined
+>(undefined);
 
 /**
  * fill the vertical space with a scrollable content area, and leave the bottom
@@ -148,7 +158,7 @@ export const ViewportPage = (props: {
   }, []);
 
   return (
-    <ViewportPageScrollContext.Provider value={{ isAtBottom }}>
+    <ViewportPageContextValue.Provider value={{ isAtBottom }}>
       <Box
         id="viewport-page"
         ref={viewportPageRef}
@@ -176,8 +186,14 @@ export const ViewportPage = (props: {
           <></>
         )}
       </Box>
-    </ViewportPageScrollContext.Provider>
+    </ViewportPageContextValue.Provider>
   );
+};
+
+export const useViewport = (): ViewportPageContext => {
+  const context = useContext(ViewportPageContextValue);
+  if (!context) throw Error('context not found');
+  return context;
 };
 
 export interface ITwoColumns {

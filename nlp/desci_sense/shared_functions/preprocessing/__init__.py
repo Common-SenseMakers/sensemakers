@@ -69,6 +69,7 @@ def convert_app_post_to_ref_post(
         content=app_post.content,
         ref_urls=ref_urls,
         source_network=source_network,
+        quoted_url=None
     )
 
 
@@ -228,6 +229,21 @@ def trim_thread_by_length(thread: ThreadRefPost, max_chars: int) -> ThreadRefPos
 
 
 class ParserInput(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
+
+    """
+    ThreadRefPost does not include validation
+    """
+    class Config:
+        arbitrary_types_allowed = True
+
+    """
+    ThreadRefPost does not include validation
+    """
+    class Config:
+        arbitrary_types_allowed = True
+
     """
     Format of input for processing by parser.
     """
@@ -268,6 +284,12 @@ def convert_parse_request_to_parser_input(
 
 
 class PreprocParserInput(BaseModel):
+    """
+     ThreadRefPost does not include validation
+    """
+    class Config:
+        arbitrary_types_allowed = True
+    
     post_to_parse: ThreadRefPost = Field(
         description="Post in input format for parser after preprocessing"
     )

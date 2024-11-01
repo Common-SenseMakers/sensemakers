@@ -3,6 +3,7 @@ lib/**/*.js
 lib/**/*.js.map
 
 lib-test/
+lib-scripts/
 
 # TypeScript v1 declaration files
 typings/
@@ -19,5 +20,8 @@ test/__tests__/test.users.json
 **/*firebase-adminsdk*.json
 /scripts/.script.env
 users.dashboard.output.json
+/migrations/.migrations.env
 
 test.email.html
+
+*-all.nanopubs.data

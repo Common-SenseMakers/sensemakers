@@ -90,15 +90,15 @@ export const EmailTemplate = ({
       splitPostsByStatus(posts);
     const preview = `${
       autoPublishedPosts.length > 0
-        ? `${t(I18Keys.autoPublishedNanopubEmailPreview, { count: autoPublishedPosts.length })}, `
+        ? `${t(I18Keys.TweetX, { count: autoPublishedPosts.length })}, `
         : ''
     }${
       manuallyPublishedPosts.length > 0
-        ? `${t(I18Keys.publishedNanopubEmailPreview, { count: manuallyPublishedPosts.length })}, `
+        ? `${t(I18Keys.TweetX, { count: manuallyPublishedPosts.length })}, `
         : ''
     }${
       pendingPosts.length > 0
-        ? `${t(I18Keys.recommendedNanopubEmailPreview, { count: pendingPosts.length })}`
+        ? `${t(I18Keys.TweetX, { count: pendingPosts.length })}`
         : ''
     }`;
     let footer = t(I18Keys.emailFooter, {
@@ -117,11 +117,11 @@ export const EmailTemplate = ({
             const summaryByStatusKey = (() => {
               switch (idx) {
                 case 0:
-                  return I18Keys.recommendedNanopubEmailSummary;
+                  return I18Keys.TweetX;
                 case 1:
-                  return I18Keys.publishedNanopubEmailSummary;
+                  return I18Keys.TweetX;
                 default:
-                  return I18Keys.autoPublishedNanopubEmailSummary;
+                  return I18Keys.TweetX;
               }
             })();
             return (
@@ -149,17 +149,17 @@ export const EmailTemplate = ({
           switch (idx) {
             case 0:
               return {
-                sectionHeaderKey: I18Keys.recommendedNanopubEmailHeader,
+                sectionHeaderKey: I18Keys.TweetX,
                 postLinkByStatus: reviewPostsLink,
               };
             case 1:
               return {
-                sectionHeaderKey: I18Keys.publishedNanopubEmailHeader,
+                sectionHeaderKey: I18Keys.TweetX,
                 postLinkByStatus: publishedPostsLink,
               };
             default:
               return {
-                sectionHeaderKey: I18Keys.autoPublishedNanopubEmailHeader,
+                sectionHeaderKey: I18Keys.TweetX,
                 postLinkByStatus: publishedPostsLink,
               };
           }

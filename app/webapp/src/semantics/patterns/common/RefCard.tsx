@@ -16,6 +16,7 @@ export const RefCard = (props: {
   image?: string;
   onClick?: () => void;
   refType?: string;
+  sourceRef?: number;
 }) => {
   const titleTruncated = props.title && truncate(props.title, 50);
   const { constants } = useThemeContext();
@@ -53,7 +54,7 @@ export const RefCard = (props: {
           style={{ borderRadius: '4px', border: 'none' }}>
           Reference {props.ix}
         </AppLabel>
-        {props.refType ? (
+        {props.refType && (
           <AppLabel
             colors={{
               font: constants.colors.textLight2,
@@ -61,10 +62,10 @@ export const RefCard = (props: {
               border: 'transparent',
             }}
             style={{ borderRadius: '4px', border: 'none' }}>
-            {zoteroItemTypeDisplay(props.refType)}
+            {props.sourceRef
+              ? `${zoteroItemTypeDisplay(props.refType)} from Reference ${props.sourceRef}`
+              : zoteroItemTypeDisplay(props.refType)}
           </AppLabel>
-        ) : (
-          <></>
         )}
       </Box>
 
@@ -82,7 +83,7 @@ export const RefCard = (props: {
 
       <Box style={{ overflow: 'hidden' }}>
         <Text style={{ fontSize: '16px', color: '#337FBD', fontWeight: '400' }}>
-          {props.url}
+          {urlTruncated}
         </Text>
       </Box>
     </Box>

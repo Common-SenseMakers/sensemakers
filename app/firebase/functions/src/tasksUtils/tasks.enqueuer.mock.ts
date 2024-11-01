@@ -1,10 +1,6 @@
 import { logger } from '../instances/logger';
 import { Services } from '../instances/services';
 import {
-  NOTIFY_USER_TASK,
-  notifyUserTask,
-} from '../notifications/notification.task';
-import {
   AUTOFETCH_POSTS_TASK,
   autofetchUserPosts,
 } from '../posts/tasks/posts.autofetch.task';
@@ -38,10 +34,6 @@ export const enqueueTaskMockLocal = async (
 
       if (name === AUTOFETCH_POSTS_TASK) {
         await autofetchUserPosts({ data: params } as any, services);
-      }
-
-      if (name === NOTIFY_USER_TASK) {
-        await notifyUserTask(params.userId, services);
       }
     })();
   } catch (e) {

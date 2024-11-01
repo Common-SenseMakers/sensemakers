@@ -48,17 +48,26 @@ export const AppCheckBox = (props: { checked?: boolean; size?: number }) => {
   return <BoxCentered>{props.checked ? checkedSvg : uncheckedSvg}</BoxCentered>;
 };
 
+const DEBUG = false;
+
 export const AppCheckBoxMessage = (props: {
+  checked?: boolean;
   message: string | JSX.Element;
   onCheckChange: (value: boolean) => void;
-  checked?: boolean;
   size?: number;
   boxProps?: BoxExtendedProps;
 }) => {
   const { boxProps, message } = props;
 
+  const clicked = () => {
+    if (DEBUG) console.log('clicked', props.checked);
+    props.onCheckChange(!props.checked);
+  };
+
+  console.log('checked', props.checked);
+
   return (
-    <AppButton onClick={() => props.onCheckChange(!props.checked)} plain>
+    <AppButton onClick={() => clicked()} plain>
       <Box
         direction="row"
         gap="12px"

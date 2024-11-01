@@ -3,7 +3,6 @@ import { useMemo } from 'react';
 
 import { ParsedSupport, RefMeta } from '../../../shared/types/types.parser';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
-import { useThemeContext } from '../../../ui-components/ThemedApp';
 import { RefCard } from '../common/RefCard';
 import { RefData } from './process.semantics';
 
@@ -14,13 +13,17 @@ export const RefWithLabels = (props: {
   ix: number;
   refUrl: string;
   refData: RefData;
+  showLabels?: boolean;
   support?: ParsedSupport;
   addLabel: (labelUri: string) => void;
   removeLabel: (labelUri: string) => void;
   editable?: boolean;
+  allRefs: [string, RefData][];
 }) => {
   const labelsOntology = props.support?.ontology?.semantic_predicates;
   const refData = props.refData;
+  const { showLabels } =
+    props.showLabels !== undefined ? props : { showLabels: true };
 
   /** display names for selected labels */
   const labelsDisplayNames = useMemo(
@@ -73,13 +76,19 @@ export const RefWithLabels = (props: {
   return (
     <Box>
       <Box direction="row" margin={{ bottom: 'small' }}>
-        <AppLabelsEditor
-          editable={props.editable}
-          colors={{ font: '#337FBD', background: '#EDF7FF', border: '#ADCCE4' }}
-          labels={labelsDisplayNames}
-          options={optionDisplayNames}
-          removeLabel={(label) => removeLabel(label)}
-          addLabel={(label) => addLabel(label)}></AppLabelsEditor>
+        {showLabels && (
+          <AppLabelsEditor
+            editable={props.editable}
+            colors={{
+              font: '#337FBD',
+              background: '#EDF7FF',
+              border: '#ADCCE4',
+            }}
+            labels={labelsDisplayNames}
+            options={optionDisplayNames}
+            removeLabel={(label) => removeLabel(label)}
+            addLabel={(label) => addLabel(label)}></AppLabelsEditor>
+        )}
       </Box>
       {refData.meta ? (
         <RefCard
@@ -87,8 +96,9 @@ export const RefWithLabels = (props: {
           url={props.refUrl}
           title={refData.meta?.title}
           description={refData.meta?.summary}
-          image={refData.meta?.image}
-          refType={refData.meta.item_type}></RefCard>
+          image={refData.meta?.thumbnail_url}
+          refType={refData.meta.item_type}
+          sourceRef={getSourceRefNumber(refData.meta, props.allRefs)}></RefCard>
       ) : (
         <Anchor target="_blank" href={props.refUrl}>
           {props.refUrl}
@@ -96,4 +106,11 @@ export const RefWithLabels = (props: {
       )}
     </Box>
   );
+};
+
+const getSourceRefNumber = (meta: RefMeta, allRefs: [string, RefData][]) => {
+  const currRefData = allRefs.find(([ref]) => ref === meta.url);
+
+  const refSource = allRefs.find(([ref]) => ref === currRefData?.[1].meta?.url);
+  return refSource?.[1].meta?.order ? refSource[1].meta.order : undefined;
 };

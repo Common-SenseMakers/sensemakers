@@ -6,29 +6,74 @@ export const TwitterIcon = (
   const size = props.size || 20;
   const color = props.color || 'white';
   return (
-    <Box style={{ height: `${size}px`, width: `${size}px` }}>
-      <svg
-        style={{ height: '100%', width: 'auto' }}
-        width="1200"
-        height="1227"
-        viewBox="0 0 1200 1227"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z"
-          fill={color}
-        />
-      </svg>
+    <Box
+      height={`${size}px`}
+      width={`${size}px`}
+      align="center"
+      justify="center"
+      style={{
+        borderRadius: `${size / 2}px`,
+        backgroundColor: 'black',
+      }}>
+      <Image src="/icons/x-logo/logo-white.png" height={`${size * 0.6}px`} />
     </Box>
   );
 };
 
-export const NanopubsIcon = (props: { size?: number; color?: string }) => {
-  const size = props.size || 20;
+export const MastodonIcon = (
+  props: {
+    size?: number;
+    color?: 'white' | 'black' | 'purple';
+  } & BoxExtendedProps
+) => {
   const color = props.color || 'white';
+  const size = props.size || 20;
+
   return (
-    <Box style={{ height: `${size}px`, width: `${size}px` }}>
-      <Image src="/icons/nanopub.png"></Image>
+    <Box
+      height={`${size}px`}
+      width={`${size}px`}
+      align="center"
+      justify="center"
+      style={{
+        borderRadius: `${size / 2}px`,
+        backgroundColor: 'black',
+      }}>
+      <Image src={`/icons/mastodon-${color}.svg`} height={`${size * 0.6}px`} />
+    </Box>
+  );
+};
+
+export const BlueskyIcon = (
+  props: {
+    size?: number;
+    color?: 'blue' | 'white';
+  } & BoxExtendedProps
+) => {
+  const color = props.color || 'white';
+  const size = props.size || 20;
+
+  return (
+    <Box
+      height={`${size}px`}
+      width={`${size}px`}
+      align="center"
+      justify="center"
+      style={{
+        borderRadius: `${size / 2}px`,
+        backgroundColor: 'black',
+      }}>
+      <Image
+        src={`/icons/bluesky.png`}
+        height={`${size * 0.6}px`}
+        style={
+          color === 'white'
+            ? {
+                filter: 'brightness(0) invert(1)', // Invert colors to make the image white
+              }
+            : {}
+        }
+      />
     </Box>
   );
 };

@@ -10,20 +10,6 @@ from env_config import (
     kw_model,
 )
 
-# content = 'This is definititely an announcement of https://www.alink.com and I dont agree with https://anotherlink.io'
-# author_data = {
-#     "platformId": "Twitter",
-#     "id": "12345",
-#     "username": "johndoe",
-#     "name": "John Doe",
-# }
-
-# post_data = {
-#     "content": "This is an interesting paper https://arxiv.org/abs/2312.05230 but I disagree with its sequel https://arxiv.org/abs/2401.14000  #user-hashtag"
-# }
-
-# thread_data = {"thread": [post_data], "author": author_data}
-
 thread_data = {
     "author": {
         "id": "2111",

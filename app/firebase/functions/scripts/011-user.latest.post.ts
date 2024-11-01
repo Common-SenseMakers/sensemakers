@@ -14,8 +14,9 @@ mandatory.forEach((varName) => {
 const userId = process.env.USER_ID as string;
 
 (async () => {
-  const posts = await services.postsManager.processing.posts.getOfUser(userId, {
-    status: PostsQueryStatus.ALL,
+  const posts = await services.postsManager.processing.posts.getMany({
+    userId,
+    status: PostsQueryStatus.DRAFTS,
     fetchParams: { expectedAmount: 1 },
   });
 

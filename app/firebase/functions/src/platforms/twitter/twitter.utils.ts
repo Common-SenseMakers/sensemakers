@@ -176,6 +176,7 @@ export const convertTweetsToThreads = (
         id: author.id,
         name: author.name,
         username: author.username,
+        profile_image_url: author.profile_image_url,
       },
     };
   });
@@ -214,4 +215,11 @@ const getEarliestResponse = (id: string, tweets: AppTweet[]) => {
 
 export const getTweetUrl = (username: string, id: string) => {
   return `https://x.com/${username}/status/${id}`;
+};
+
+export const getOriginalAuthor = (
+  user_id: string,
+  includes?: ApiV2Includes
+) => {
+  return includes?.users?.find((user) => user.id === user_id);
 };

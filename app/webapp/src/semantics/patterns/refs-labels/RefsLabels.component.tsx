@@ -2,6 +2,7 @@ import { Box } from 'grommet';
 import { DataFactory } from 'n3';
 import { useMemo } from 'react';
 
+import { RefMeta } from '../../../shared/types/types.parser';
 import { filterStore, writeRDF } from '../../../shared/utils/n3.utils';
 import { THIS_POST_NAME } from '../../../shared/utils/semantics.helper';
 import { AppLabel } from '../../../ui-components';
@@ -14,7 +15,7 @@ import { RefsMap, processSemantics } from './process.semantics';
 
 export const RefLabelsComponent = (props: PatternProps) => {
   const { store, originalStore } = useSemanticsStore(props);
-  const size = props.size || 'normal  ';
+  const size = props.size || 'normal';
 
   /** processed ref labels with metadata */
   const refs = useMemo<RefsMap>(
@@ -85,7 +86,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
     return <></>;
   }
 
-  const allRefs = Array.from(refs.entries()).reverse();
+  const allRefs = Array.from(refs.entries());
   const [visibleRefs, restOfRefs] =
     size === 'compact' ? splitArray(allRefs, 2) : [allRefs, []];
 
@@ -94,26 +95,26 @@ export const RefLabelsComponent = (props: PatternProps) => {
       <Box margin={{ top: 'small' }}>
         <Box style={{ display: 'block' }}>
           <Box gap="16px">
-            {visibleRefs.map(([ref, refData], ixref) => {
+            {visibleRefs.map(([ref, refData], index) => {
               if (!props.originalParsed)
-                throw new Error('Undexpected undefined');
+                throw new Error('Unexpected undefined');
 
               return (
                 <RefWithLabels
-                  ix={ixref}
+                  ix={index}
+                  showLabels={size === 'normal'}
                   editable={props.editable}
-                  key={ixref}
+                  key={ref}
                   refUrl={ref}
                   refData={refData}
                   support={props.originalParsed?.support}
                   removeLabel={(labelUri: string) => removeLabel(ref, labelUri)}
-                  addLabel={(labelUri: string) =>
-                    addLabel(ref, labelUri)
-                  }></RefWithLabels>
+                  addLabel={(labelUri: string) => addLabel(ref, labelUri)}
+                  allRefs={visibleRefs}></RefWithLabels>
               );
             })}
           </Box>
-          {restOfRefs.length > 0 && (
+          {/* {restOfRefs.length > 0 && (
             <AppLabel
               margin={{ top: '16px' }}
               colors={{
@@ -125,7 +126,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
                 borderRadius: '4px',
                 border: 'none',
               }}>{`+ ${restOfRefs.length} Reference${restOfRefs.length > 1 ? 's' : ''}`}</AppLabel>
-          )}
+          )} */}
         </Box>
       </Box>
     );

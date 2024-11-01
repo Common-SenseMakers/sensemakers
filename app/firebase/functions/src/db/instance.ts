@@ -1,4 +1,4 @@
-import { Firestore, getFirestore } from 'firebase-admin/firestore';
+import { Firestore } from 'firebase-admin/firestore';
 
 import { CollectionNames } from '../@shared/utils/collectionNames';
 import { logger } from '../instances/logger';
@@ -8,6 +8,8 @@ import {
   ManagerModes,
   TransactionManager,
 } from './transaction.manager';
+
+const DEBUG = false;
 
 export class DBInstance {
   public firestore: Firestore;
@@ -21,13 +23,12 @@ export class DBInstance {
     profiles: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
     triples: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
     activity: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
-    userNotifications: (
-      userId: string
-    ) => FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
+    links: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
   };
 
-  constructor() {
-    this.firestore = getFirestore();
+  constructor(firestore: Firestore) {
+    if (DEBUG) logger.debug('Creating DBInstance');
+    this.firestore = firestore;
 
     this.collections = {
       signup: this.firestore.collection(CollectionNames.Signup),
@@ -38,11 +39,7 @@ export class DBInstance {
       profiles: this.firestore.collection(CollectionNames.Profiles),
       triples: this.firestore.collection(CollectionNames.Triples),
       activity: this.firestore.collection(CollectionNames.Activity),
-      userNotifications: (userId: string) =>
-        this.firestore
-          .collection(CollectionNames.Users)
-          .doc(userId)
-          .collection(CollectionNames.Notifications),
+      links: this.firestore.collection(CollectionNames.Links),
     };
   }
 
@@ -99,5 +96,15 @@ export class DBInstance {
         }
       }
     }
+  }
+
+  /** WARNING!!! clear all collections */
+  async clear() {
+    const collections = await this.firestore.listCollections();
+    await Promise.all(
+      collections.map(async (collection) => {
+        return this.firestore.recursiveDelete(collection);
+      })
+    );
   }
 }

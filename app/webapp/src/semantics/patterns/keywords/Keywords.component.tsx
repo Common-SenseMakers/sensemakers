@@ -10,13 +10,10 @@ import {
 import { THIS_POST_NAME } from '../../../shared/utils/semantics.helper';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { LoadingDiv } from '../../../ui-components/LoadingDiv';
-import { useThemeContext } from '../../../ui-components/ThemedApp';
 import { useSemanticsStore } from '../common/use.semantics';
 import { PatternProps } from '../patterns';
 
 export const KeywordsComponent = (props: PatternProps) => {
-  const { constants } = useThemeContext();
-
   /** actual semantics */
   const { store } = useSemanticsStore(props);
 
@@ -77,6 +74,7 @@ export const KeywordsComponent = (props: PatternProps) => {
       <Box direction="row" gap="10px" pad={{ vertical: '8px' }}>
         {[0, 1, 2].map((n) => (
           <LoadingDiv
+            key={n}
             height={'24px'}
             style={{ borderRadius: '8px', width: '120px' }}></LoadingDiv>
         ))}
@@ -92,6 +90,7 @@ export const KeywordsComponent = (props: PatternProps) => {
         }}
         direction="row">
         <AppLabelsEditor
+          maxLabels={props.size === 'compact' ? 2 : undefined}
           editable={props.editable}
           colors={{ font: '#498283', background: '#F5FCFC', border: '#BDD9D7' }}
           labels={keywords}

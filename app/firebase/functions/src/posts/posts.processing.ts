@@ -1,12 +1,14 @@
 import {
+  ParsePostResult,
+  RefMeta,
+  StructuredSemantics,
+} from '../@shared/types/types.parser';
+import {
   PlatformPost,
   PlatformPostCreate,
   PlatformPostCreated,
-  PlatformPostDraft,
-  PlatformPostDraftApproval,
-  PlatformPostPublishOrigin,
-  PlatformPostPublishStatus,
 } from '../@shared/types/types.platform.posts';
+import { PLATFORM } from '../@shared/types/types.platforms';
 import {
   AppPost,
   AppPostCreate,
@@ -16,25 +18,18 @@ import {
   AppPostRepublishedStatus,
   AppPostReviewStatus,
 } from '../@shared/types/types.posts';
-import {
-  ALL_PUBLISH_PLATFORMS,
-  DefinedIfTrue,
-  PLATFORM,
-} from '../@shared/types/types.user';
+import { DefinedIfTrue } from '../@shared/types/types.user';
 import { mapStoreElements, parseRDF } from '../@shared/utils/n3.utils';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
-import { logger } from '../instances/logger';
+import { LinksService } from '../links/links.service';
 import { PlatformsService } from '../platforms/platforms.service';
+import { getProfileId } from '../profiles/profiles.repository';
 import { TriplesRepository } from '../semantics/triples.repository';
 import { TimeService } from '../time/time.service';
-import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { PlatformPostsRepository } from './platform.posts.repository';
-import { PostsHelper } from './posts.helper';
 import { PostsRepository } from './posts.repository';
-
-const DEBUG = false;
 
 /**
  * Per-PlatformPost or Per-AppPost methods.
@@ -47,7 +42,8 @@ export class PostsProcessing {
     public triples: TriplesRepository,
     public posts: PostsRepository,
     public platformPosts: PlatformPostsRepository,
-    protected platforms: PlatformsService
+    protected platforms: PlatformsService,
+    protected linksService: LinksService
   ) {}
 
   /**
@@ -56,10 +52,12 @@ export class PostsProcessing {
    * */
   async createPlatformPost(
     platformPost: PlatformPostCreate,
-    manager: TransactionManager
+    manager: TransactionManager,
+    authorUserId?: string
   ): Promise<PlatformPostCreated | undefined> {
     const existing = platformPost.posted
       ? await this.platformPosts.getFrom_post_id(
+          platformPost.platformId,
           platformPost.posted.post_id,
           manager
         )
@@ -88,19 +86,16 @@ export class PostsProcessing {
       manager
     );
 
-    const authorId = await this.users.repo.getUserWithPlatformAccount(
-      PLATFORM.Twitter,
-      user_id,
-      manager,
-      false
-    );
+    /** the profile may not exist in the Profiles collection */
+    const authorProfileId = getProfileId(platformPost.platformId, user_id);
 
     /** create AppPost */
     const post = await this.createAppPost(
       {
         generic: genericPostData,
         origin: platformPost.platformId,
-        authorId,
+        authorProfileId,
+        authorUserId,
         mirrorsIds: [platformPostCreated.id],
         createdAtMs: platformPost.posted?.timestampMs || this.time.now(),
       },
@@ -116,184 +111,104 @@ export class PostsProcessing {
   /** Store all platform posts */
   async createPlatformPosts(
     platformPosts: PlatformPostCreate[],
-    manager: TransactionManager
+    manager: TransactionManager,
+    authorUserId?: string
   ) {
     const postsCreated = await Promise.all(
       platformPosts.map(async (platformPost) => {
-        return await this.createPlatformPost(platformPost, manager);
+        return await this.createPlatformPost(
+          platformPost,
+          manager,
+          authorUserId
+        );
       })
     );
 
     return postsCreated.filter((p) => p !== undefined) as PlatformPostCreated[];
   }
 
-  /** Create and store all platform posts for one post */
-  async createOrUpdatePostDrafts(postId: string, manager: TransactionManager) {
-    if (DEBUG) logger.debug(`createOrUpdatePostDrafts ${postId}`);
-
-    const appPostFull = await this.getPostFull(postId, manager, true);
-
-    // posts without authors does not have mirrors
-    if (!appPostFull.authorId) {
-      return;
-    }
-
-    const user = await this.users.repo.getUser(
-      appPostFull.authorId,
-      manager,
-      true
-    );
-
-    /**
-     * Create platformPosts as drafts on all platforms
-     * */
-    const drafts = await Promise.all(
-      ALL_PUBLISH_PLATFORMS.map(async (platformId) => {
-        const accounts = UsersHelper.getAccounts(user, platformId);
-
-        if (DEBUG)
-          logger.debug(
-            `createPostDrafts - accounts ${JSON.stringify(accounts.map((a) => a.user_id))}`,
-            {
-              accounts,
-            }
-          );
-
-        return Promise.all(
-          accounts.map(async (account) => {
-            /** create/update the draft for that platform and account */
-            const platform = this.platforms.get(platformId);
-
-            const draftPost = await platform.convertFromGeneric({
-              post: appPostFull,
-              author: user,
-            });
-
-            if (DEBUG)
-              logger.debug(
-                `createPostDrafts- account postId: ${postId}, platformId: ${platformId}, account: ${account.user_id}`,
-                {
-                  draftPost,
-                  account,
-                }
-              );
-
-            const existingMirror = PostsHelper.getPostMirror(appPostFull, {
-              platformId,
-              user_id: account.user_id,
-            });
-
-            if (DEBUG)
-              logger.debug(
-                `createPostDrafts- existing mirror ${postId}, existingMirror:${existingMirror !== undefined}`,
-                {
-                  existingMirror,
-                }
-              );
-
-            const draft: PlatformPostDraft = {
-              postApproval: PlatformPostDraftApproval.PENDING,
-              user_id: account.user_id,
-            };
-
-            if (draftPost.unsignedPost) {
-              draft.unsignedPost = draftPost.unsignedPost;
-            }
-
-            if (!existingMirror) {
-              /** create and add as mirror */
-              const draftCreate: PlatformPostCreate = {
-                platformId,
-                publishStatus: PlatformPostPublishStatus.DRAFT,
-                publishOrigin: PlatformPostPublishOrigin.POSTED,
-                draft,
-              };
-
-              const plaformPost = this.platformPosts.create(
-                draftCreate,
-                manager
-              );
-              if (DEBUG)
-                logger.debug(
-                  `createPostDrafts- addMirror ${postId} - plaformPost:${plaformPost.id}`,
-                  {
-                    postId,
-                    plaformPost,
-                  }
-                );
-
-              this.posts.addMirror(postId, plaformPost.id, manager);
-            } else {
-              const post_id = existingMirror.post_id;
-
-              if (DEBUG)
-                logger.debug(
-                  `createPostDrafts- buildDeleteDraft for post ${postId}, existingMirror post_id:${post_id}`
-                );
-
-              let deleteDraft: undefined | any = undefined;
-
-              if (post_id) {
-                deleteDraft = await platform.buildDeleteDraft(
-                  post_id,
-                  appPostFull,
-                  user
-                );
-              }
-
-              if (DEBUG)
-                logger.debug(`createPostDrafts- update ${postId}`, {
-                  postId,
-                  draft,
-                  deleteDraft,
-                });
-
-              await this.platformPosts.update(
-                existingMirror.id,
-                { draft, deleteDraft },
-                manager
-              );
-            }
-          })
-        );
-      })
-    );
-
-    /** add drafts as post mirrors */
-
-    return drafts.flat();
-  }
-
-  async upsertTriples(
+  async processSemantics(
     postId: string,
     manager: TransactionManager,
-    semantics?: string
-  ) {
+    semantics?: string,
+    first?: boolean,
+    originalParsed?: ParsePostResult
+  ): Promise<StructuredSemantics | undefined> {
     /** always delete old triples */
     await this.triples.deleteOfPost(postId, manager);
 
-    if (semantics) {
-      const post = await this.posts.get(postId, manager, true);
-      const store = await parseRDF(semantics);
+    if (!semantics) return undefined;
 
-      const createdAtMs = post.createdAtMs;
-      const authorId = post.authorId;
+    const post = await this.posts.get(postId, manager, true);
+    const store = await parseRDF(semantics);
 
+    const createdAtMs = post.createdAtMs;
+    const authorProfileId = post.authorProfileId;
+
+    const labels: Set<{ label: string; url: string }> = new Set();
+    const keywords: Set<string> = new Set();
+    const refsMeta: Record<string, RefMeta> = {};
+
+    mapStoreElements(store, (q) => {
       /** store the triples */
-      mapStoreElements(store, (q) => {
-        this.triples.create(
-          {
-            postId,
-            createdAtMs,
-            authorId,
-            subject: q.subject.value,
-            predicate: q.predicate.value,
-            object: q.object.value,
-          },
-          manager
-        );
-      });
+      this.triples.create(
+        {
+          postId,
+          postCreatedAtMs: createdAtMs,
+          authorProfileId,
+          subject: q.subject.value,
+          predicate: q.predicate.value,
+          object: q.object.value,
+        },
+        manager
+      );
+
+      if (q.predicate.value === 'https://schema.org/keywords') {
+        keywords.add(q.object.value);
+      } else {
+        labels.add({ label: q.predicate.value, url: q.object.value });
+      }
+    });
+
+    /** TODO: dont support editing references of post */
+    if (first) {
+      await Promise.all(
+        Array.from(labels).map(async (label) => {
+          const url = label.url;
+          const refMeta = await (async () => {
+            const refMetaOrg =
+              originalParsed?.support?.refs_meta &&
+              originalParsed?.support?.refs_meta[url];
+
+            const isPartial =
+              !refMetaOrg ||
+              !refMetaOrg.title ||
+              !refMetaOrg.summary ||
+              !refMetaOrg.url;
+
+            if (isPartial) {
+              const oembed = await this.linksService.getOEmbed(url, manager);
+              return {
+                ...oembed,
+                item_type: refMetaOrg?.item_type,
+              };
+            } else {
+              /** store/update refMeta */
+              this.linksService.setOEmbed(refMetaOrg, manager);
+              return refMetaOrg;
+            }
+          })();
+
+          refsMeta[url] = refMeta;
+        })
+      );
     }
+
+    return {
+      labels: Array.from(labels).map((l) => l.label),
+      keywords: Array.from(keywords),
+      refsMeta,
+    };
   }
 
   async createAppPost(
@@ -346,11 +261,13 @@ export class PostsProcessing {
   }
 
   async getFrom_post_id<T extends boolean, R = AppPost>(
+    platform: PLATFORM,
     post_id: string,
     manager: TransactionManager,
     shouldThrow?: T
   ): Promise<DefinedIfTrue<T, R>> {
     const platformPostId = await this.platformPosts.getFrom_post_id(
+      platform,
       post_id,
       manager,
       true

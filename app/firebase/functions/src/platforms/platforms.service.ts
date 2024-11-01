@@ -1,29 +1,17 @@
-import { FetchParams, PlatformFetchParams } from '../@shared/types/types.fetch';
+import { PlatformFetchParams } from '../@shared/types/types.fetch';
 import {
   PlatformPostCreate,
   PlatformPostPublish,
 } from '../@shared/types/types.platform.posts';
-import { PLATFORM, UserDetailsBase } from '../@shared/types/types.user';
-import { TransactionManager } from '../db/transaction.manager';
+import { PLATFORM } from '../@shared/types/types.platforms';
+import { AccountCredentials } from '../@shared/types/types.user';
 import { TimeService } from '../time/time.service';
 import { UsersService } from '../users/users.service';
 import { IdentityService, PlatformService } from './platforms.interface';
 
-interface FetchUserParams {
-  params: FetchParams;
-  userDetails: UserDetailsBase;
-}
+export type PlatformsMap = Map<PLATFORM, PlatformService>;
 
-export type FetchAllUserPostsParams = Map<PLATFORM, FetchUserParams[]>;
-export type PlatformsMap = Map<
-  PLATFORM,
-  PlatformService<any, any, UserDetailsBase>
->;
-
-export type IdentityServicesMap = Map<
-  PLATFORM,
-  IdentityService<any, any, UserDetailsBase>
->;
+export type IdentityServicesMap = Map<PLATFORM, IdentityService>;
 
 /** a wrapper of the PlatformSerivces to get defined and typed Platform services */
 export class PlatformsService {
@@ -42,16 +30,16 @@ export class PlatformsService {
   }
 
   public async fetch(
+    user_id: string,
     platformId: PLATFORM,
     params: PlatformFetchParams,
-    userDetails: UserDetailsBase,
-    manager: TransactionManager
+    credentials?: AccountCredentials
   ) {
     /** all fetched posts from one platform */
     const fetched = await this.get(platformId).fetch(
+      user_id,
       params,
-      userDetails,
-      manager
+      credentials
     );
     return fetched;
   }
@@ -61,12 +49,13 @@ export class PlatformsService {
     return platform.convertToGeneric(platformPost);
   }
 
-  public publish(
-    platformId: PLATFORM,
-    postPublish: PlatformPostPublish,
-    manager: TransactionManager
-  ) {
+  public publish(platformId: PLATFORM, postPublish: PlatformPostPublish) {
     const platform = this.get(platformId);
-    return platform.publish(postPublish, manager);
+    return platform.publish(postPublish);
+  }
+
+  public getProfile(platformId: PLATFORM, user_id: string, credentials?: any) {
+    const platform = this.get(platformId);
+    return platform.getProfile(user_id, credentials);
   }
 }

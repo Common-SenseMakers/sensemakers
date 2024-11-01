@@ -1,16 +1,20 @@
-import { constants } from 'buffer';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Box } from 'grommet';
-import { createContext, useContext, useMemo, useState } from 'react';
-import { Outlet, Route, Routes, useLocation } from 'react-router-dom';
+import { createContext, useContext } from 'react';
+import { Outlet, Route, Routes } from 'react-router-dom';
 
-import { AppHome } from '../pages/AppHome';
+import { FeedPostsContext } from '../feed/PublicFeedContext';
+import { AppHomePage } from '../pages/AppHomePage';
+import { PublicFeedPage } from '../pages/PublicFeedPage';
+import { UserSettingsPage } from '../pages/UserSettingsPage';
 import { PostPage } from '../post/PostPage';
 import { PostingPage } from '../post/PostingPage';
 import { RouteNames } from '../route.names';
 import { ResponsiveApp } from '../ui-components/ResponsiveApp';
 import { ThemedApp, useThemeContext } from '../ui-components/ThemedApp';
+import { ConnectBlueskyPage } from '../user-login/ConnectBlueskyPage';
+import { ConnectMastodonPage } from '../user-login/ConnectMastodonPage';
 import { ConnectedUserWrapper } from '../user-login/contexts/ConnectedUserWrapper';
-import { UserSettingsPage } from '../user-settings/UserSettingsPage';
 import { LoadingContext } from './LoadingContext';
 import { GlobalStyles } from './layout/GlobalStyles';
 import { MAX_WIDTH_APP, ViewportContainer } from './layout/Viewport';
@@ -26,17 +30,21 @@ const AppContainerContextValue = createContext<
   AppContainerContextType | undefined
 >(undefined);
 
+const queryClient = new QueryClient();
+
 export const AppContainer0 = (props: React.PropsWithChildren) => {
   return (
     <>
       <GlobalStyles />
       <ThemedApp>
         <ResponsiveApp>
-          <LoadingContext>
-            <ConnectedUserWrapper>
-              <AppContainer></AppContainer>
-            </ConnectedUserWrapper>
-          </LoadingContext>
+          <QueryClientProvider client={queryClient}>
+            <LoadingContext>
+              <ConnectedUserWrapper>
+                <AppContainer></AppContainer>
+              </ConnectedUserWrapper>
+            </LoadingContext>
+          </QueryClientProvider>
         </ResponsiveApp>
       </ThemedApp>
     </>
@@ -70,8 +78,28 @@ export const AppContainer = (props: React.PropsWithChildren) => {
                 <Route
                   path={`${RouteNames.Settings}`}
                   element={<UserSettingsPage></UserSettingsPage>}></Route>
-                <Route path={''} element={<AppHome></AppHome>}></Route>
-                <Route path={'/*'} element={<AppHome></AppHome>}></Route>
+
+                <Route
+                  path={`${RouteNames.Feed}/*`}
+                  element={
+                    <FeedPostsContext>
+                      <PublicFeedPage></PublicFeedPage>
+                    </FeedPostsContext>
+                  }></Route>
+
+                <Route path={''} element={<AppHomePage></AppHomePage>}></Route>
+
+                <Route
+                  path={'/*'}
+                  element={<AppHomePage></AppHomePage>}></Route>
+                <Route
+                  path={`${RouteNames.ConnectMastodon}`}
+                  element={<ConnectMastodonPage />}
+                />
+
+                <Route
+                  path={`${RouteNames.ConnectBluesky}`}
+                  element={<ConnectBlueskyPage />}></Route>
               </Route>
             </Routes>
           </Box>

@@ -20,7 +20,7 @@ from env_config import (
 app = initialize_app()
 
 
-@https_fn.on_request(min_instances=1, memory=2048, timeout_sec=600)
+@https_fn.on_request(min_instances=1, max_instances=100, memory=2048, timeout_sec=3600, concurrency=190)
 def SM_FUNCTION_post_parser(request):
     """
     Wrapper on SM_FUNCTION_post_parser_imp

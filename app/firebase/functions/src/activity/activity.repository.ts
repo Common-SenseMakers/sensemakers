@@ -10,6 +10,6 @@ export class ActivityRepository extends BaseRepository<
   ActivityEventCreate<any>
 > {
   constructor(protected db: DBInstance) {
-    super(db.collections.activity);
+    super(db.collections.activity, db);
   }
 }

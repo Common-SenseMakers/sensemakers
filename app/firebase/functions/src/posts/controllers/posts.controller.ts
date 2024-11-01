@@ -1,14 +1,14 @@
 import { RequestHandler } from 'express';
 
 import {
-  PublishPostPayload,
-  UserProfileQuery,
+  AddUserDataPayload,
+  FetchParams,
 } from '../../@shared/types/types.fetch';
+import { PublishPostPayload } from '../../@shared/types/types.fetch';
 import {
   PostUpdatePayload,
-  ProfilePostsQuery,
+  PostsQuery,
   UnpublishPlatformPostPayload,
-  UserPostsQuery,
 } from '../../@shared/types/types.posts';
 import { IS_EMULATOR } from '../../config/config.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
@@ -18,10 +18,7 @@ import { canReadPost } from '../posts.access.control';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 import {
   approvePostSchema,
-  createDraftPostSchema,
   getUserPostsQuerySchema,
-  getUserProfilePostsSchema,
-  getUserProfileSchema,
   postIdValidation,
   retractPostSchema,
   updatePostSchema,
@@ -39,73 +36,15 @@ export const getUserPostsController: RequestHandler = async (
   try {
     const queryParams = (await getUserPostsQuerySchema.validate(
       request.body
-    )) as UserPostsQuery;
+    )) as PostsQuery;
 
     logger.debug(`${request.path} - query parameters`, { queryParams });
     const userId = getAuthenticatedUser(request, true);
     const { postsManager } = getServices(request);
 
-    const posts = await postsManager.getOfUser(userId, queryParams);
+    const posts = await postsManager.getOfUser({ ...queryParams, userId });
 
     if (DEBUG) logger.debug(`${request.path}: posts`, { posts, userId });
-    response.status(200).send({ success: true, data: posts });
-  } catch (error: any) {
-    logger.error('error', error);
-    response.status(500).send({ success: false, error: error.message });
-  }
-};
-
-/**
- * PUBLIC get user profile from a platform and username
- * */
-export const getUserProfileController: RequestHandler = async (
-  request,
-  response
-) => {
-  try {
-    const payload = (await getUserProfileSchema.validate(
-      request.body
-    )) as UserProfileQuery;
-
-    logger.debug(`${request.path} - payload`, { payload });
-    const { users } = getServices(request);
-    const profile = await users.getUserProfileFromPlatformUsername(
-      payload.platformId,
-      payload.username
-    );
-
-    if (DEBUG) logger.debug(`${request.path}: users`, { profile });
-
-    response.status(200).send({ success: true, data: profile });
-  } catch (error: any) {
-    logger.error('error', error);
-    response.status(500).send({ success: false, error: error.message });
-  }
-};
-
-/**
- * PUBLIC get user posts from the DB (does not fetch for more)
- * */
-export const getUserProfilePostsController: RequestHandler = async (
-  request,
-  response
-) => {
-  try {
-    const queryParams = (await getUserProfilePostsSchema.validate(
-      request.body
-    )) as ProfilePostsQuery;
-
-    logger.debug(`${request.path} - query parameters`, { queryParams });
-    const { postsManager } = getServices(request);
-
-    const posts = await postsManager.getUserProfile(
-      queryParams.platformId,
-      queryParams.username,
-      queryParams.fetchParams,
-      queryParams.labelsUris
-    );
-    if (DEBUG) logger.debug(`${request.path}: posts`, { posts });
-
     response.status(200).send({ success: true, data: posts });
   } catch (error: any) {
     logger.error('error', error);
@@ -165,7 +104,13 @@ export const approvePostController: RequestHandler = async (
       request.body
     )) as PublishPostPayload;
 
-    await postsManager.publishPost(payload.post, payload.platformIds, userId);
+    await postsManager.publishPost(
+      payload.post,
+      payload.platformIds,
+      undefined,
+      false,
+      userId
+    );
 
     if (DEBUG)
       logger.debug(`${request.path}: approvePost`, {
@@ -207,36 +152,6 @@ export const parsePostController: RequestHandler = async (
   }
 };
 
-export const createDraftPostController: RequestHandler = async (
-  request,
-  response
-) => {
-  try {
-    const { db, postsManager } = getServices(request);
-
-    const payload = (await createDraftPostSchema.validate(request.body)) as {
-      postId: string;
-    };
-
-    if (DEBUG)
-      logger.debug(`${request.path}: createDraftPostController`, {
-        payload,
-      });
-
-    db.run(async (manager) => {
-      return postsManager.processing.createOrUpdatePostDrafts(
-        payload.postId,
-        manager
-      );
-    });
-
-    response.status(200).send({ success: true });
-  } catch (error: any) {
-    logger.error('error', error);
-    response.status(500).send({ success: false, error: error.message });
-  }
-};
-
 export const updatePostController: RequestHandler = async (
   request,
   response
@@ -256,7 +171,7 @@ export const updatePostController: RequestHandler = async (
         true
       );
 
-      if (post.authorId !== userId) {
+      if (post.authorUserId !== userId) {
         throw new Error(`Post can only be edited by the author`);
       }
 
@@ -298,6 +213,51 @@ export const unpublishPlatformPostController: RequestHandler = async (
     if (DEBUG) logger.debug(`${request.path}: updatePost`, payload);
 
     response.status(200).send({ success: true });
+  } catch (error) {
+    logger.error('error', error);
+    response.status(500).send({ success: false, error });
+  }
+};
+
+export const addAccountDataController: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    const services = getServices(request);
+
+    const payload = request.body as AddUserDataPayload;
+
+    const profile = await services.db.run(async (manager) => {
+      return services.users.getOrCreateProfileByUsername(
+        payload.platformId,
+        payload.username,
+        manager
+      );
+    });
+
+    if (!profile) {
+      throw new Error(
+        `unable to find profile for ${payload.username} on ${payload.platformId}`
+      );
+    }
+    /** the value of sinceId or untilId doesn't matter, as long as it exists, then it will be converted to appropriate fetch params */
+    const fetchParams: FetchParams = payload.latest
+      ? { expectedAmount: payload.amount, sinceId: profile.user_id }
+      : { expectedAmount: payload.amount, untilId: profile.user_id };
+
+    const fetchedPosts = await services.db.run(async (manager) => {
+      return services.postsManager.fetchAccount(
+        payload.platformId,
+        profile?.user_id,
+        fetchParams,
+        manager
+      );
+    });
+
+    if (DEBUG) logger.debug(`${request.path}: addAccountData`, payload);
+
+    response.status(200).send({ success: true, data: fetchedPosts });
   } catch (error) {
     logger.error('error', error);
     response.status(500).send({ success: false, error });

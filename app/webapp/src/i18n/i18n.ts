@@ -7,18 +7,31 @@ export enum I18Keys {
   introParagraph1 = 's007',
   introParagraph2 = 's008',
   emailInputBtn = 's0095',
+  googleOAuthInputBtn = 's0095go',
 
   connectSocialsTitle = 's0090',
+  connectMastodonTitle = 's0090a',
   connectSocialsParagraph = 's0091',
   connectSocialsParagraph2 = 's0092',
+  connectMastodonParagraph = 's0091a',
   signInX = 's012',
+  signInMastodon = 's012a',
+  mastodonServer = 's012b',
+  mastodonServerPlaceholder = 's012c',
+
+  myPosts = 'n001',
 
   connectAccounts = 's010',
   connectParagraph = 's011',
   errorConnectTwitter = 's013',
+  errorConnectMastodon = 's013a',
   yourPublications = 's014',
   TweetX = 's015',
   ThreadX = 's016',
+  TootMastodon = 's016b',
+  ThreadMastodon = 's016c',
+  PostBluesky = 's016d',
+  ThreadBluesky = 's016e',
   addKeyword = 's017',
   profile = 's018',
   updateAvailable = 's019',
@@ -32,6 +45,7 @@ export enum I18Keys {
   logoutTitle = 's025c',
 
   drafts = 's026',
+  feedTitle = 's026a',
 
   introNextLabel = 's026x',
   introFinalLabel = 's026y',
@@ -73,7 +87,6 @@ export enum I18Keys {
 
   returnToDraft = 's0353',
   yesPublish = 's0364',
-  returnToNanopub = 's0353x',
   yesUnpublish = 's0365x',
 
   publishingTitle = 's0365',
@@ -82,7 +95,8 @@ export enum I18Keys {
   publishingErrorPar01 = 's03651',
 
   publishedTitle = 's0366',
-  publishedText = 's0367',
+  publishedTextPar1 = 's0367',
+  publishedTextPar2 = 's0367cdc',
   nextPost = 's0368',
   openPublished = 's0369',
 
@@ -94,46 +108,7 @@ export enum I18Keys {
   emailHeader = 's0400',
   emailSummary = 's0400a',
 
-  recommendedNanopubEmailHeader = 's040',
-  recommendedNanopubEmailHeaderSingular = 's040_one',
-  recommendedNanopubEmailHeaderPlural = 's040_other',
-
-  recommendedNanopubEmailSummary = 's040a',
-  recommendedNanopubEmailSummarySingular = 's040a_one',
-  recommendedNanopubEmailSummaryPlural = 's040a_other',
-
-  recommendedNanopubEmailPreview = 's040b',
-  recommendedNanopubEmailPreviewSingular = 's040b_one',
-  recommendedNanopubEmailPreviewPlural = 's040b_other',
-
-  recommendedNanopubEmailFooter = 's041',
   emailFooter = 's041a',
-
-  publishedNanopubEmailHeader = 's042',
-  publishedNanopubEmailHeaderSingular = 's042_one',
-  publishedNanopubEmailHeaderPlural = 's042_other',
-
-  publishedNanopubEmailSummary = 's0420',
-  publishedNanopubEmailSummarySingular = 's0420_one',
-  publishedNanopubEmailSummaryPlural = 's0420_other',
-
-  publishedNanopubEmailPreview = 's0421',
-  publishedNanopubEmailPreviewSingular = 's0421_one',
-  publishedNanopubEmailPreviewPlural = 's0421_other',
-
-  autoPublishedNanopubEmailHeader = 's042a',
-  autoPublishedNanopubEmailHeaderSingular = 's042a_one',
-  autoPublishedNanopubEmailHeaderPlural = 's042a_other',
-
-  autoPublishedNanopubEmailSummary = 's042aa',
-  autoPublishedNanopubEmailSummarySingular = 's042aa_one',
-  autoPublishedNanopubEmailSummaryPlural = 's042aa_other',
-
-  autoPublishedNanopubEmailPreview = 's042ab',
-  autoPublishedNanopubEmailPreviewSingular = 's042ab_one',
-  autoPublishedNanopubEmailPreviewPlural = 's042ab_other',
-
-  autoPublishedNanopubEmailFooter = 's043a',
 
   daily = 's047',
   weekly = 's048',
@@ -159,6 +134,10 @@ export enum I18Keys {
   notificationsSettings = 's057',
   notificationsSettingsExplainer = 's057c',
   publishingAutomationExplainer = 's056c',
+
+  readTheDocs = 's058d',
+  readTheDocsDescription = 's058cd',
+
   getSupport = 's058',
   getSupportDescription = 's058c',
 
@@ -196,6 +175,8 @@ export enum I18Keys {
   postStatusForReview = 's089',
   postStatusPublished = 's090',
   postStatusAutopublished = 's091',
+
+  unignorePost = 's092',
 }
 
 const check = new Set();
@@ -214,15 +195,24 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.introParagraph2]:
     'Harness this knowledge by converting your social media posts into nanopublications, making your content <b>FAIR</b> (<b>F</b>indable, <b>A</b>ccessible, <b>I</b>nteroperable and <b>R</b>eusable), so your contributions can get proper recognition',
   [I18Keys.emailInputBtn]: 'Get started',
+  [I18Keys.googleOAuthInputBtn]: 'Continue with Google',
 
-  [I18Keys.connectSocialsTitle]: 'Connect your socials',
+  [I18Keys.connectSocialsTitle]: 'Connect your accounts',
+  [I18Keys.connectMastodonTitle]: 'Connect to Mastodon',
   [I18Keys.connectSocialsParagraph]:
-    'Link your X·Twitter account to start transforming your tweets into nanopublications.',
+    'Connect your accounts to process your post as an hyperfeed. You must link at least one account, and you will be able to link other accounts later.',
   [I18Keys.connectSocialsParagraph2]:
     'By connecting, you can easily identify and FAIRify your valuable scientific insights.',
+  [I18Keys.connectMastodonParagraph]:
+    "To connect your account, we need to know your Mastodon server domain. If you're unsure, check the domain in your Mastodon profile URL.",
   [I18Keys.signInX]: 'Sign in with X',
+  [I18Keys.signInMastodon]: 'Sign in with Mastodon',
+  [I18Keys.mastodonServer]: 'Server domain ',
+  [I18Keys.mastodonServerPlaceholder]: 'e.g. "mastodon.social"',
 
+  [I18Keys.myPosts]: 'My Posts',
   [I18Keys.drafts]: 'Drafts',
+  [I18Keys.feedTitle]: 'Explore',
 
   [I18Keys.introNextLabel]: 'Next Tip',
   [I18Keys.introFinalLabel]: 'Let’s nanopublish!',
@@ -249,9 +239,15 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.connectParagraph]:
     'SenseNets loads your X (Twitter) feed and analyzes your posts using AI to deduct keywords and relations, which can be used to better interpret the meaning of your content.',
   [I18Keys.errorConnectTwitter]: 'Error connecting Twitter',
+  [I18Keys.errorConnectMastodon]:
+    'An error occurred while connecting to the Mastodon server: {{mastodonServer}}',
   [I18Keys.yourPublications]: 'Your publications',
   [I18Keys.TweetX]: 'X · Tweet',
   [I18Keys.ThreadX]: 'X · Thread',
+  [I18Keys.TootMastodon]: 'Mastodon · Toot',
+  [I18Keys.ThreadMastodon]: 'Mastodon · Thread',
+  [I18Keys.PostBluesky]: 'Bluesky · Post',
+  [I18Keys.ThreadBluesky]: 'Bluesky · Thread',
   [I18Keys.addKeyword]: 'add keyword',
   [I18Keys.profile]: 'Profile',
   [I18Keys.updateAvailable]: 'An update is available, ',
@@ -284,7 +280,6 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.returnToDraft]: 'No, return to draft',
   [I18Keys.yesPublish]: 'Yes, I want to publish',
 
-  [I18Keys.returnToNanopub]: 'Go back',
   [I18Keys.yesUnpublish]: 'Yes, I want to retract',
 
   [I18Keys.publishingTitle]: 'Publishing',
@@ -302,7 +297,9 @@ const translationENG: Record<I18Keys, string> = {
     'There was an error while attempting to retract your post. Please try again. If it persists, contact support.',
 
   [I18Keys.publishedTitle]: 'Your nanopublication is live!',
-  [I18Keys.publishedText]: 'Your post has been nanopublished.',
+  [I18Keys.publishedTextPar1]: 'Your post has been nanopublished.',
+  [I18Keys.publishedTextPar2]:
+    'You can find this post now under the "Nanopubs" section.',
   [I18Keys.nextPost]: 'Next post for review',
   [I18Keys.openPublished]: 'See live nanopublication',
 
@@ -313,58 +310,8 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.emailHeader]: '{{timeframe}} Activity Summary',
   [I18Keys.emailSummary]: "Here's what happened {{timeframe}}:",
 
-  [I18Keys.recommendedNanopubEmailHeader]: '',
-  [I18Keys.recommendedNanopubEmailHeaderSingular]:
-    'You have {{count}} potential nanopublication ready for review {{timeframe}}.',
-  [I18Keys.recommendedNanopubEmailHeaderPlural]:
-    'You have {{count}} potential nanopublications ready for review {{timeframe}}.',
-  [I18Keys.recommendedNanopubEmailFooter]:
-    "This is your {{timeframe}} nanopub recommendation summary. You can [edit your email settings here]({{emailSettingsLink}}). Don't see a post you'd like to nanopublish? [Review all your recent posts here]({{ignoredPostsLink}}).",
-  [I18Keys.recommendedNanopubEmailSummary]: '',
-  [I18Keys.recommendedNanopubEmailSummarySingular]:
-    'You have {{count}} potential nanopublication for review.',
-  [I18Keys.recommendedNanopubEmailSummaryPlural]:
-    'You have {{count}} potential nanopublications for review.',
-  [I18Keys.recommendedNanopubEmailPreview]: '',
-  [I18Keys.recommendedNanopubEmailPreviewSingular]:
-    '{{count}} potential nanopublication for review.',
-  [I18Keys.recommendedNanopubEmailPreviewPlural]:
-    '{{count}} potential nanopublications for review.',
-
   [I18Keys.emailFooter]:
     "This is your {{timeframe}} activity summary. You can [edit your email or automation settings here]({{emailSettingsLink}}). Don't see a post you'd like to nanopublish? [Review all your recent posts here]({{ignoredPostsLink}}). See any mistakes in your nanopublications? [Edit or retract your automated nanopublications here]({{publishedPostsLink}}).",
-
-  [I18Keys.publishedNanopubEmailHeader]: '',
-  [I18Keys.publishedNanopubEmailHeaderSingular]:
-    'You published {{count}} post {{timeframe}}.',
-  [I18Keys.publishedNanopubEmailHeaderPlural]:
-    'You published {{count}} posts {{timeframe}}.',
-  [I18Keys.publishedNanopubEmailSummary]: '',
-  [I18Keys.publishedNanopubEmailSummarySingular]:
-    'You manually nanopublished {{count}} post.',
-  [I18Keys.publishedNanopubEmailSummaryPlural]:
-    'You manually nanopublished {{count}} posts.',
-  [I18Keys.publishedNanopubEmailPreview]: '',
-  [I18Keys.publishedNanopubEmailPreviewSingular]:
-    '{{count}} manually published',
-  [I18Keys.publishedNanopubEmailPreviewPlural]: '{{count}} manually published',
-
-  [I18Keys.autoPublishedNanopubEmailHeader]: '',
-  [I18Keys.autoPublishedNanopubEmailHeaderSingular]:
-    "We've automatically published {{count}} post {{timeframe}}.",
-  [I18Keys.autoPublishedNanopubEmailHeaderPlural]:
-    "We've automatically published {{count}} posts {{timeframe}}.",
-
-  [I18Keys.autoPublishedNanopubEmailFooter]:
-    'These posts were automatically published according to your automation settings. You can [change your automation settings here]({{automationSettingsLink}}).\n\nSee any mistakes in your nanopublications? [Edit or retract your automated nanopublications here]({{publishedPostsLink}}).',
-  [I18Keys.autoPublishedNanopubEmailSummary]: '',
-  [I18Keys.autoPublishedNanopubEmailSummarySingular]:
-    'We autopublished {{count}} post for you.',
-  [I18Keys.autoPublishedNanopubEmailSummaryPlural]:
-    'We autopublished {{count}} posts for you.',
-  [I18Keys.autoPublishedNanopubEmailPreview]: '',
-  [I18Keys.autoPublishedNanopubEmailPreviewSingular]: '{{count}} autopublished',
-  [I18Keys.autoPublishedNanopubEmailPreviewPlural]: '{{count}} autopublished',
 
   [I18Keys.daily]: 'daily',
   [I18Keys.weekly]: 'weekly',
@@ -442,6 +389,11 @@ const translationENG: Record<I18Keys, string> = {
   [I18Keys.unpublishWarningTitle]: 'Retract your nanopublication',
   [I18Keys.unpublishWarningPar01]:
     'This action marks your nanopublication as retracted. You can republish it later if you wish.',
+
+  [I18Keys.readTheDocs]: 'Documentation',
+  [I18Keys.readTheDocsDescription]:
+    '<a href="https://sense-nets.xyz/docs" target="_blank">https://sense-nets.xyz/docs</a>',
+  [I18Keys.unignorePost]: 'Review for publication',
 };
 
 i18n.use(initReactI18next).init({
