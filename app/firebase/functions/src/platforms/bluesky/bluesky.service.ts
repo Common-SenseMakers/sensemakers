@@ -68,10 +68,14 @@ export class BlueskyService
   constructor(
     protected time: TimeService,
     protected usersRepo: UsersRepository,
-    protected config: BlueskyServiceConfig
+    protected config: BlueskyServiceConfig,
+    protected agent?: AtpAgent
   ) {}
 
   private async getClient(credentials?: BlueskyCredentials): Promise<AtpAgent> {
+    if (this.agent) {
+      return this.agent;
+    }
     const agent = new AtpAgent({ service: this.config.BLUESKY_SERVICE_URL });
     await agent.login(
       credentials
@@ -87,6 +91,7 @@ export class BlueskyService
     if (!agent.session) {
       throw new Error('Failed to login to Bluesky');
     }
+    this.agent = agent;
     return agent;
   }
 

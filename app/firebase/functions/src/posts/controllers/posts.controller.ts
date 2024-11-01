@@ -1,10 +1,8 @@
 import { RequestHandler } from 'express';
 
-import {
-  AddUserDataPayload,
-  FetchParams,
-} from '../../@shared/types/types.fetch';
+import { AddUserDataPayload } from '../../@shared/types/types.fetch';
 import { PublishPostPayload } from '../../@shared/types/types.fetch';
+import { PLATFORM } from '../../@shared/types/types.platforms';
 import {
   PostUpdatePayload,
   PostsQuery,
@@ -13,7 +11,13 @@ import {
 import { IS_EMULATOR } from '../../config/config.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
-import { enqueueTask } from '../../tasksUtils/tasks.support';
+import {
+  FETCH_BLUESKY_ACCOUNT_TASK,
+  FETCH_MASTODON_ACCOUNT_TASK,
+  FETCH_TWITTER_ACCOUNT_TASK,
+} from '../../platforms/platforms.tasks';
+import { getProfileId } from '../../profiles/profiles.repository';
+import { chunkNumber, enqueueTask } from '../../tasksUtils/tasks.support';
 import { canReadPost } from '../posts.access.control';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 import {
@@ -24,7 +28,7 @@ import {
   updatePostSchema,
 } from './posts.schema';
 
-const DEBUG = false;
+const DEBUG = true;
 
 /**
  * get user posts from the DB (does not fetch for more)
@@ -219,45 +223,80 @@ export const unpublishPlatformPostController: RequestHandler = async (
   }
 };
 
-export const addAccountDataController: RequestHandler = async (
+export const addAccountsDataController: RequestHandler = async (
   request,
   response
 ) => {
   try {
+    if (DEBUG)
+      logger.debug(`${request.path}: Starting addAccountsDataController`, {
+        payloads: request.body,
+      });
+
     const services = getServices(request);
+    const payloads = request.body as AddUserDataPayload[];
 
-    const payload = request.body as AddUserDataPayload;
+    for (const payload of payloads) {
+      if (DEBUG)
+        logger.debug('Fetching profile', {
+          platformId: payload.platformId,
+          username: payload.username,
+        });
 
-    const profile = await services.db.run(async (manager) => {
-      return services.users.getOrCreateProfileByUsername(
-        payload.platformId,
-        payload.username,
-        manager
-      );
-    });
+      const profile = await services.db.run(async (manager) => {
+        return services.users.getOrCreateProfileByUsername(
+          payload.platformId,
+          payload.username,
+          manager
+        );
+      });
 
-    if (!profile) {
-      throw new Error(
-        `unable to find profile for ${payload.username} on ${payload.platformId}`
-      );
+      if (!profile) {
+        const error = `unable to find profile for ${payload.username} on ${payload.platformId}`;
+        logger.error(error);
+        throw new Error(error);
+      }
+
+      if (DEBUG) logger.debug('Profile found', { profile });
+
+      const profileId = getProfileId(payload.platformId, profile?.user_id);
+      const chunkSize = 50;
+      const fetchAmountChunks = chunkNumber(payload.amount, chunkSize);
+
+      for (const fetchAmountChunk of fetchAmountChunks) {
+        let taskName;
+        switch (payload.platformId) {
+          case PLATFORM.Twitter:
+            taskName = FETCH_TWITTER_ACCOUNT_TASK;
+            break;
+          case PLATFORM.Mastodon:
+            taskName = FETCH_MASTODON_ACCOUNT_TASK;
+            break;
+          case PLATFORM.Bluesky:
+            taskName = FETCH_BLUESKY_ACCOUNT_TASK;
+            break;
+          default:
+            throw new Error(`Unsupported platform: ${payload.platformId}`);
+        }
+
+        const taskData = {
+          profileId,
+          platformId: payload.platformId,
+          latest: payload.latest,
+          amount: fetchAmountChunk,
+        };
+
+        if (DEBUG) logger.debug('Enqueueing task', { taskName, taskData });
+        await enqueueTask(taskName, taskData);
+      }
     }
-    /** the value of sinceId or untilId doesn't matter, as long as it exists, then it will be converted to appropriate fetch params */
-    const fetchParams: FetchParams = payload.latest
-      ? { expectedAmount: payload.amount, sinceId: profile.user_id }
-      : { expectedAmount: payload.amount, untilId: profile.user_id };
 
-    const fetchedPosts = await services.db.run(async (manager) => {
-      return services.postsManager.fetchAccount(
-        payload.platformId,
-        profile?.user_id,
-        fetchParams,
-        manager
-      );
-    });
+    if (DEBUG)
+      logger.debug(`${request.path}: Successfully completed addAccountsData`, {
+        totalPayloads: payloads.length,
+      });
 
-    if (DEBUG) logger.debug(`${request.path}: addAccountData`, payload);
-
-    response.status(200).send({ success: true, data: fetchedPosts });
+    response.status(200).send({ success: true });
   } catch (error) {
     logger.error('error', error);
     response.status(500).send({ success: false, error });
