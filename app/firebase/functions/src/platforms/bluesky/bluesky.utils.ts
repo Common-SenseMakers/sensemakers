@@ -115,10 +115,6 @@ export function cleanBlueskyContent(
 ): string {
   let text = post.text;
   const facets = post.facets;
-  if (!facets) {
-    return text;
-  }
-
   // Convert the text to a byte array for accurate offset slicing
   const textBytes = Buffer.from(text, 'utf-8');
 
@@ -126,7 +122,7 @@ export function cleanBlueskyContent(
   const urlMap = new Map<string, string>();
 
   // Collect each link facet's byte-offset substring and map it to its full URL
-  for (const facet of facets) {
+  for (const facet of facets || []) {
     const linkFeature = facet.features.find(
       (feature) => feature.$type === 'app.bsky.richtext.facet#link'
     ) as Link | undefined;
