@@ -1,4 +1,5 @@
 import { AppBskyEmbedExternal, AppBskyFeedPost } from '@atproto/api';
+import { Link } from '@atproto/api/dist/client/types/app/bsky/richtext/facet';
 
 import {
   BlueskyPost,
@@ -109,60 +110,58 @@ const getEarliestResponse = (id: string, posts: BlueskyPost[]) => {
   );
 };
 
-export const cleanBlueskyContent = (
+export function cleanBlueskyContent(
   post: AppBskyFeedPost.Record | QuotedBlueskyPost['value']
-): string => {
-  let cleanedContent = post.text;
+): string {
+  let text = post.text;
   const facets = post.facets;
-  const appendedUrls: string[] = [];
+  if (!facets) {
+    return text;
+  }
 
-  // Replace truncated URLs with full URLs using facets
-  if (facets) {
-    const replacements: { start: number; end: number; url: string }[] = [];
+  // Convert the text to a byte array for accurate offset slicing
+  const textBytes = Buffer.from(text, 'utf-8');
 
-    facets.forEach((facet) => {
-      const feature = facet.features[0];
-      if (feature.$type === 'app.bsky.richtext.facet#link') {
-        const url = feature.uri as string;
-        const start = facet.index.byteStart;
-        const end = facet.index.byteEnd;
+  // Map of byte-offset substrings to their full URLs
+  const urlMap = new Map<string, string>();
 
-        if (cleanedContent.slice(start, end) !== url) {
-          replacements.push({ start, end, url });
-        } else if (!cleanedContent.includes(url)) {
-          appendedUrls.push(url);
-        }
-      }
-    });
+  // Collect each link facet's byte-offset substring and map it to its full URL
+  for (const facet of facets) {
+    const linkFeature = facet.features.find(
+      (feature) => feature.$type === 'app.bsky.richtext.facet#link'
+    ) as Link | undefined;
+    if (linkFeature?.uri) {
+      const { byteStart, byteEnd } = facet.index;
 
-    // Sort replacements in reverse order to avoid affecting positions
-    replacements.sort((a, b) => b.start - a.start);
+      // Extract the substring in bytes, then decode it
+      // const urlBytes = textBytes.slice(byteStart, byteEnd);
+      const urlBytes = Uint8Array.prototype.slice.call(
+        textBytes,
+        byteStart,
+        byteEnd
+      );
+      // const urlSubstring = urlBytes.toString('utf-8');
+      const urlSubstring = Buffer.from(urlBytes).toString('utf-8');
 
-    for (const { start, end, url } of replacements) {
-      cleanedContent =
-        cleanedContent.slice(0, start) + url + cleanedContent.slice(end);
+      // Map the decoded substring to the full URL
+      urlMap.set(urlSubstring, linkFeature.uri);
     }
+  }
+
+  // Replace each substring with the full URL in the text
+  for (const [shortUrl, fullUrl] of urlMap.entries()) {
+    text = text.replace(shortUrl, fullUrl);
   }
 
   // Check for embed URL
   if (post.embed && post.embed.$type === 'app.bsky.embed.external') {
     const embedUrl = (post.embed as AppBskyEmbedExternal.Main).external.uri;
-    if (
-      embedUrl &&
-      !cleanedContent.includes(embedUrl) &&
-      !appendedUrls.includes(embedUrl)
-    ) {
-      appendedUrls.push(embedUrl);
+    if (embedUrl && !text.includes(embedUrl)) {
+      text += '\n\n' + embedUrl;
     }
   }
-
-  // Append URLs that weren't in the original text
-  if (appendedUrls.length > 0) {
-    cleanedContent += '\n\n' + appendedUrls.join('\n');
-  }
-
-  return cleanedContent;
-};
+  return text;
+}
 
 export function cleanBlueskyPost(post: BlueskyPost): BlueskyPost {
   const cleanEmbed = (embed: any): any => {
