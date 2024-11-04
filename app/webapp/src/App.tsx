@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
@@ -6,7 +7,22 @@ import { ServiceWorker } from './app/ServiceWorkerContext';
 import { ToastsContext } from './app/ToastsContext';
 import { i18n } from './i18n/i18n';
 
+const DEBUG = true;
+const DEBUG_PREFIX = ``;
+
 function App() {
+  // for debug
+  useEffect(() => {
+    let mounted = true;
+    if (mounted) {
+      if (DEBUG) console.log(`${DEBUG_PREFIX}App mounted`);
+    }
+    return () => {
+      mounted = false;
+      if (DEBUG) console.log(`${DEBUG_PREFIX}App unmounted`);
+    };
+  }, []);
+
   return (
     <div className="App">
       <ServiceWorker>

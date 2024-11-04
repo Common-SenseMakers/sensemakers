@@ -80,6 +80,19 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
   const [searchParams] = useSearchParams();
   const code = searchParams.get('code');
 
+  // for debug
+  useEffect(() => {
+    let mounted = true;
+    if (mounted) {
+      if (DEBUG) console.log(`${DEBUG_PREFIX}usePostsFetcher mounted`);
+    }
+    return () => {
+      mounted = false;
+      if (DEBUG) console.log(`${DEBUG_PREFIX}usePostsFetcher unmounted`);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   /** refetch a post and overwrite its value in the array */
   const refetchPost = useCallback(
     async (postId: string) => {
@@ -227,7 +240,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
     };
   }, [DEBUG_PREFIX]);
 
-  const removeAllPosts = useCallback(() => {
+  const removeAllPosts = () => {
     /** unsubscribe from all posts */
     Object.entries(unsubscribeCallbacks.current).forEach(
       ([postId, unsubscribe]) => {
@@ -238,16 +251,13 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
     /** reset the array */
     if (DEBUG) console.log(`${DEBUG_PREFIX}settings pots to empty array`);
     setPosts([]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const reset = useCallback(() => {
+  };
+  const reset = () => {
     if (DEBUG) console.log(`${DEBUG_PREFIX}resetting posts`);
     removeAllPosts();
     setFetchedOlderFirst(false);
     setIsLoading(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [removeAllPosts]);
+  };
 
   const _oldestPostId = useMemo(() => {
     const oldest = posts ? posts[posts.length - 1]?.id : undefined;
@@ -345,14 +355,8 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
     fetchOlderCallback(undefined).catch((e) => {
       console.error(e);
     });
-  }, [
-    queryParams,
-    endpoint,
-    reset,
-    DEBUG_PREFIX,
-    fetchedOlderFirst,
-    fetchOlderCallback,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryParams, endpoint]);
 
   const newestPostId = useMemo(() => {
     const newest = posts ? posts[0]?.id : undefined;

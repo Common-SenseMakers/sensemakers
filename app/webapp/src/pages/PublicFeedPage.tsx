@@ -1,12 +1,11 @@
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
-
-// import { PublicFeed } from '../feed/PublicFeed';
+import { PublicFeed } from '../feed/PublicFeed';
 
 export const PublicFeedPage = () => {
   return (
     <ViewportPage
-      content={<></>}
+      content={<PublicFeed></PublicFeed>}
       nav={<GlobalNav></GlobalNav>}
       justify="start"></ViewportPage>
   );

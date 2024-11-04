@@ -1,9 +1,9 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Box } from 'grommet';
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useEffect } from 'react';
 import { Outlet, Route, Routes } from 'react-router-dom';
 
-// import { FeedPostsContext } from '../feed/PublicFeedContext';
+import { FeedPostsContext } from '../feed/PublicFeedContext';
 import { AppHomePage } from '../pages/AppHomePage';
 import { PublicFeedPage } from '../pages/PublicFeedPage';
 import { UserSettingsPage } from '../pages/UserSettingsPage';
@@ -24,6 +24,9 @@ export interface SetPageTitleType {
   main: string;
 }
 
+const DEBUG = true;
+const DEBUG_PREFIX = ``;
+
 export type AppContainerContextType = object;
 
 const AppContainerContextValue = createContext<
@@ -33,6 +36,18 @@ const AppContainerContextValue = createContext<
 const queryClient = new QueryClient();
 
 export const AppContainer0 = (props: React.PropsWithChildren) => {
+  // for debug
+  useEffect(() => {
+    let mounted = true;
+    if (mounted) {
+      if (DEBUG) console.log(`${DEBUG_PREFIX}AppContainer0 mounted`);
+    }
+    return () => {
+      mounted = false;
+      if (DEBUG) console.log(`${DEBUG_PREFIX}AppContainer0 unmounted`);
+    };
+  }, []);
+
   return (
     <>
       <GlobalStyles />
@@ -82,9 +97,9 @@ export const AppContainer = (props: React.PropsWithChildren) => {
                 <Route
                   path={`${RouteNames.Feed}/*`}
                   element={
-                    // <FeedPostsContext>
-                    <PublicFeedPage></PublicFeedPage>
-                    // </FeedPostsContext>
+                    <FeedPostsContext>
+                      <PublicFeedPage></PublicFeedPage>
+                    </FeedPostsContext>
                   }></Route>
 
                 <Route path={''} element={<AppHomePage></AppHomePage>}></Route>

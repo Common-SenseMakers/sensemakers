@@ -1,13 +1,17 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useMemo } from 'react';
 import { createContext } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import {
+  FetcherConfig,
   PostFetcherInterface,
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
 import { locationToFeedIx } from './FeedTabs';
 import { feedTabs } from './feed.config';
+
+const DEBUG = true;
+const DEBUG_PREFIX = ``;
 
 interface FeedContextType {
   feed: PostFetcherInterface;
@@ -26,31 +30,49 @@ export const FeedPostsContext: React.FC<{
 }> = ({ children }) => {
   const location = useLocation();
 
-  const feed0 = usePostsFetcher({
-    endpoint: '/api/feed/get',
-    queryParams: { semantics: { labels: feedTabs[0].labels } },
-    DEBUG_PREFIX: `[FEED 0] `,
-  });
+  // for debug
+  useEffect(() => {
+    let mounted = true;
+    if (mounted) {
+      if (DEBUG) console.log(`${DEBUG_PREFIX}FeedPostsContext mounted`);
+    }
+    return () => {
+      mounted = false;
+      if (DEBUG) console.log(`${DEBUG_PREFIX}FeedPostsContext unmounted`);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const feed1 = usePostsFetcher({
-    endpoint: '/api/feed/get',
-    queryParams: { semantics: { labels: feedTabs[1].labels } },
-    DEBUG_PREFIX: `[FEED 1] `,
-  });
+  const feed0Config = useMemo((): FetcherConfig => {
+    return {
+      endpoint: '/api/feed/get',
+      queryParams: { semantics: { labels: feedTabs[0].labels } },
+      DEBUG_PREFIX: `[FEED 0] `,
+    };
+  }, []);
 
-  const feed2 = usePostsFetcher({
-    endpoint: '/api/feed/get',
-    queryParams: { semantics: { labels: feedTabs[2].labels } },
-    DEBUG_PREFIX: `[FEED 2] `,
-  });
+  const feed0 = usePostsFetcher(feed0Config);
 
-  const feed3 = usePostsFetcher({
-    endpoint: '/api/feed/get',
-    queryParams: { semantics: { labels: feedTabs[3].labels } },
-    DEBUG_PREFIX: `[FEED 3] `,
-  });
+  // const feed1 = usePostsFetcher({
+  //   endpoint: '/api/feed/get',
+  //   queryParams: { semantics: { labels: feedTabs[1].labels } },
+  //   DEBUG_PREFIX: `[FEED 1] `,
+  // });
 
-  const feeds = [feed0, feed1, feed2, feed3];
+  // const feed2 = usePostsFetcher({
+  //   endpoint: '/api/feed/get',
+  //   queryParams: { semantics: { labels: feedTabs[2].labels } },
+  //   DEBUG_PREFIX: `[FEED 2] `,
+  // });
+
+  // const feed3 = usePostsFetcher({
+  //   endpoint: '/api/feed/get',
+  //   queryParams: { semantics: { labels: feedTabs[3].labels } },
+  //   DEBUG_PREFIX: `[FEED 3] `,
+  // });
+
+  // const feeds = [feed0, feed1, feed2, feed3];
+  const feeds = [feed0];
 
   const feedIx = locationToFeedIx(location);
   const feed = feeds[feedIx];
@@ -68,7 +90,7 @@ export const FeedPostsContext: React.FC<{
 export const useFeedPosts = () => {
   const context = useContext(FeedPostsContextValue);
   if (!context) {
-    throw new Error('usePosts must be used within a PostProvider');
+    throw new Error('useFeedPosts must be used within a PostProvider');
   }
   return context;
 };
