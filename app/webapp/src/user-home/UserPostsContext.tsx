@@ -2,6 +2,7 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import { createContext } from 'react';
 import { useLocation } from 'react-router-dom';
 
+import { useAppFetch } from '../api/app.fetch';
 import {
   FetcherConfig,
   PostFetcherInterface,
@@ -41,6 +42,7 @@ export const UserPostsContextValue = createContext<PostContextType | undefined>(
 export const UserPostsContext: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
+  const appFetch = useAppFetch();
   const location = useLocation();
 
   /** status is derived from location
@@ -86,12 +88,11 @@ export const UserPostsContext: React.FC<{
         post.parsingStatus !== AppPostParsingStatus.PROCESSING
       ) {
         // async trigger parse
-        console.warn(`skipping triggering reparsing of post ${post.id}`);
-        // appFetch(`/api/posts/parse`, { postId: post.id }).catch(
-        //   console.error
-        // );
+        // console.warn(`skipping triggering reparsing of post ${post.id}`);
+        appFetch(`/api/posts/parse`, { postId: post.id }).catch(console.error);
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const config = useMemo((): FetcherConfig => {
