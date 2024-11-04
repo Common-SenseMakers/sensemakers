@@ -25,8 +25,7 @@ export const UserPostsFeed = () => {
     }
   }, [introShown]);
 
-  const { feed, filterStatus } = useUserPosts();
-  console.log('UserPostsFeed', { feed, filterStatus });
+  const { feed } = useUserPosts();
 
   const location = useLocation();
 

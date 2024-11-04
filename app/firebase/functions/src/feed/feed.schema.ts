@@ -11,7 +11,7 @@ export const smeanticsQueryParamsSchema = object({
   keywords: array(string()).optional(),
   refs: array(string()).optional(),
   topics: array(string()).optional(),
-});
+}).default(undefined);
 
 export const queryParamsSchema = object({
   fetchParams: fetchParamsSchema.required(),

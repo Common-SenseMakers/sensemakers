@@ -9,7 +9,7 @@ import { AppPostFull, PostsQuery } from '../shared/types/types.posts';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { arraysEqual } from '../utils/general';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export interface PostFetcherInterface {
   feedNameDebug: string;
@@ -452,8 +452,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
       console.warn('skipping reset due to connectedPlatforms');
       // reset();
       // setFetchedOlderFirst(true);
-
-      _fetchOlder(undefined);
+      // _fetchOlder(undefined);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -463,7 +462,6 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
     fetchedOlderFirst,
     isFetchingOlder,
     posts,
-    reset,
   ]);
 
   /** whenever posts have been fetched, check if we have fetched for newer posts yet, and if not, fetch for newer */

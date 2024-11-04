@@ -2,7 +2,6 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import { createContext } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { useAppFetch } from '../api/app.fetch';
 import {
   FetcherConfig,
   PostFetcherInterface,
@@ -12,7 +11,7 @@ import {
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
-  ArrayIncludeQuery,
+  PostsQuery,
 } from '../shared/types/types.posts';
 import {
   NOT_SCIENCE_TOPIC_URI,
@@ -42,16 +41,14 @@ export const UserPostsContextValue = createContext<PostContextType | undefined>(
 export const UserPostsContext: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
-  const appFetch = useAppFetch();
-
   const location = useLocation();
 
   /** status is derived from location
    * set the filter status based on it.
    * It then converts into topics, which is
    * what the backend understands*/
-  const { topics, status } = useMemo((): {
-    topics: ArrayIncludeQuery;
+  const { queryParams, status } = useMemo((): {
+    queryParams: PostsQuery;
     status: PostsQueryStatus;
   } => {
     if (
@@ -63,51 +60,49 @@ export const UserPostsContext: React.FC<{
       if (DEBUG)
         console.log(`changing status based on location to ${newStatus}`);
       if (newStatus === PostsQueryStatus.ALL) {
-        return { topics: [], status: PostsQueryStatus.ALL };
+        return { queryParams: {}, status: PostsQueryStatus.ALL };
       }
       if (newStatus === PostsQueryStatus.IGNORED) {
         return {
-          topics: [NOT_SCIENCE_TOPIC_URI],
+          queryParams: { semantics: { topics: [NOT_SCIENCE_TOPIC_URI] } },
           status: PostsQueryStatus.IGNORED,
         };
       }
       if (newStatus === PostsQueryStatus.IS_SCIENCE) {
         return {
-          topics: [SCIENCE_TOPIC_URI],
+          queryParams: { semantics: { topics: [SCIENCE_TOPIC_URI] } },
           status: PostsQueryStatus.IS_SCIENCE,
         };
       }
     }
-    return { topics: [], status: PostsQueryStatus.ALL };
+    return { queryParams: {}, status: PostsQueryStatus.ALL };
   }, [location]);
 
-  const onPostsAdded = useCallback(
-    (newPosts: AppPostFull[]) => {
-      /** trigger parse if not parsed and not parsing */
-      newPosts.forEach((post) => {
-        if (
-          post.parsedStatus === AppPostParsedStatus.UNPROCESSED &&
-          post.parsingStatus !== AppPostParsingStatus.PROCESSING
-        ) {
-          // async trigger parse
-          appFetch(`/api/posts/parse`, { postId: post.id }).catch(
-            console.error
-          );
-        }
-      });
-    },
-    [appFetch]
-  );
+  const onPostsAdded = useCallback((newPosts: AppPostFull[]) => {
+    /** trigger parse if not parsed and not parsing */
+    newPosts.forEach((post) => {
+      if (
+        post.parsedStatus === AppPostParsedStatus.UNPROCESSED &&
+        post.parsingStatus !== AppPostParsingStatus.PROCESSING
+      ) {
+        // async trigger parse
+        console.warn(`skipping triggering reparsing of post ${post.id}`);
+        // appFetch(`/api/posts/parse`, { postId: post.id }).catch(
+        //   console.error
+        // );
+      }
+    });
+  }, []);
 
   const config = useMemo((): FetcherConfig => {
     return {
       endpoint: '/api/posts/getOfUser',
-      queryParams: { semantics: { topics } },
+      queryParams,
       subscribe: true,
       onPostsAdded,
       DEBUG_PREFIX: '[USER POSTS] ',
     };
-  }, [onPostsAdded, topics]);
+  }, [onPostsAdded, queryParams]);
 
   const feed = usePostsFetcher(config);
 

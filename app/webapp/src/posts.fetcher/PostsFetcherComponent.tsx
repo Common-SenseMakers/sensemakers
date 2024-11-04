@@ -74,9 +74,8 @@ export const PostsFetcherComponent = (props: {
           isLoading,
           moreToFetch,
         });
-      console.warn('skipping infinte scroll');
 
-      // fetchOlder();
+      fetchOlder();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchOlder, isAtBottom, isLoading, moreToFetch]);
