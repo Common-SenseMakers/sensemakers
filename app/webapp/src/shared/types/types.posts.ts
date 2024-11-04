@@ -1,9 +1,5 @@
 import { FetchParams } from './types.fetch';
-import {
-  AppPostSemantics,
-  ParsePostResult,
-  StructuredSemantics,
-} from './types.parser';
+import { AppPostSemantics, ParsePostResult, RefMeta } from './types.parser';
 import { PlatformPost } from './types.platform.posts';
 import { PLATFORM } from './types.platforms';
 import { AppUserRead } from './types.user';
@@ -27,6 +23,24 @@ export interface GenericThread {
   thread: GenericPost[];
   author: GenericAuthor;
 }
+
+/** Structured semantics */
+export interface StructuredSemantics {
+  labels?: string[];
+  keywords?: string[];
+  refsMeta?: Record<string, RefMeta>;
+  topics?: string[];
+}
+
+export type ArrayIncludeQuery = string[];
+
+export interface StructuredSemanticsQuery {
+  labels?: ArrayIncludeQuery;
+  keywords?: ArrayIncludeQuery;
+  refs?: ArrayIncludeQuery;
+  topics?: ArrayIncludeQuery;
+}
+
 /**
  * AppPost object as stored on our database
  *  */
@@ -123,8 +137,8 @@ export interface UnpublishPlatformPostPayload {
 export interface PostsQueryParams {
   userId?: string;
   profileIds?: string;
-  origins?: PLATFORM[];
-  semantics?: StructuredSemantics;
+  origins?: ArrayIncludeQuery;
+  semantics?: StructuredSemanticsQuery;
 }
 
 export interface PostsQuery extends PostsQueryParams {

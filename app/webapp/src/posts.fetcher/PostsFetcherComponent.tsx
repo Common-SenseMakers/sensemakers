@@ -1,11 +1,10 @@
-import { Box, BoxExtendedProps, Text } from 'grommet';
+import { Box, Text } from 'grommet';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { ModalContent } from '../app/AppModalStandard';
 import { useToastContext } from '../app/ToastsContext';
-import { FilterIcon } from '../app/icons/FilterIcon';
 import { HmmIcon } from '../app/icons/HmmIcon';
 import { ReloadIcon } from '../app/icons/ReloadIcon';
 import { useViewport } from '../app/layout/Viewport';
@@ -13,8 +12,7 @@ import { AppGeneralKeys } from '../i18n/i18n.app.general';
 import { PostCard } from '../post/PostCard';
 import { PostCardLoading } from '../post/PostCardLoading';
 import { PostContext } from '../post/post.context/PostContext';
-import { PostsQueryStatus } from '../shared/types/types.posts';
-import { AppButton, AppHeading, AppSelect } from '../ui-components';
+import { AppButton, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
@@ -35,9 +33,6 @@ export interface FilterOption {
 export const PostsFetcherComponent = (props: {
   feed: PostFetcherInterface;
   pageTitle: string;
-  filterOptions: FilterOption[];
-  status?: PostsQueryStatus;
-  onFilterOptionChanged: (filter: PostsQueryStatus) => void;
   isPublicFeed?: boolean;
   showHeader?: boolean;
 }) => {
@@ -47,9 +42,6 @@ export const PostsFetcherComponent = (props: {
 
   const {
     pageTitle,
-    status: filterStatus,
-    filterOptions,
-    onFilterOptionChanged,
     feed,
     isPublicFeed: _isPublicFeed,
     showHeader: _showHeader,
@@ -228,43 +220,6 @@ export const PostsFetcherComponent = (props: {
     fetchOlder,
   ]);
 
-  const FilterValue = (
-    props: {
-      status?: string;
-      border?: boolean;
-      padx?: boolean;
-    } & BoxExtendedProps
-  ) => {
-    const pretty = filterOptions.find(
-      (opt) => opt.value === props.status
-    )?.pretty;
-    return (
-      <Box pad={{ horizontal: 'small', vertical: 'small' }} width="100%">
-        <Text size="small">{pretty}</Text>
-      </Box>
-    );
-  };
-
-  const options = filterOptions.map((opt) => opt.value);
-
-  const menu = (
-    <AppSelect
-      value={
-        <Box direction="row" align="center">
-          <FilterValue border status={filterStatus}></FilterValue>
-          <FilterIcon></FilterIcon>
-        </Box>
-      }
-      options={options}
-      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-        onFilterOptionChanged(e.target.value as PostsQueryStatus);
-      }}>
-      {(status: string) => {
-        return <FilterValue padx status={status}></FilterValue>;
-      }}
-    </AppSelect>
-  );
-
   const reload = isFetchingNewer ? (
     <Box>
       <Loading color={constants.colors.primary} size="20px"></Loading>
@@ -289,7 +244,6 @@ export const PostsFetcherComponent = (props: {
           <AppHeading level="3">{pageTitle}</AppHeading>
           <BoxCentered style={{ height: '40px' }}>{reload}</BoxCentered>
         </Box>
-        <Box>{true || menu}</Box>
       </Box>
     </Box>
   );

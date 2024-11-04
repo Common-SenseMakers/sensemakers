@@ -44,10 +44,7 @@ export const PublicFeed = () => {
           showHeader={false}
           isPublicFeed={true}
           feed={feed}
-          pageTitle={t(AppGeneralKeys.feedTitle)}
-          filterOptions={[]}
-          // eslint-disable-next-line @typescript-eslint/no-empty-function
-          onFilterOptionChanged={(value) => {}}></PostsFetcherComponent>
+          pageTitle={t(AppGeneralKeys.feedTitle)}></PostsFetcherComponent>
       </Box>
     </>
   );

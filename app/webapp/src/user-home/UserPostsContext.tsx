@@ -12,12 +12,20 @@ import {
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
-  PostsQueryStatus,
+  ArrayIncludeQuery,
 } from '../shared/types/types.posts';
-import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
+import {
+  NOT_SCIENCE_TOPIC_URI,
+  SCIENCE_TOPIC_URI,
+} from '../shared/utils/semantics.helper';
 
 const DEBUG = false;
 
+export enum PostsQueryStatus {
+  ALL = 'all',
+  IGNORED = 'ignored',
+  IS_SCIENCE = 'science',
+}
 interface PostContextType {
   filterStatus: PostsQueryStatus;
   feed: PostFetcherInterface;
@@ -39,8 +47,13 @@ export const UserPostsContext: React.FC<{
   const location = useLocation();
 
   /** status is derived from location
-   * set the filter status based on it */
-  const { topics, status } = useMemo(() => {
+   * set the filter status based on it.
+   * It then converts into topics, which is
+   * what the backend understands*/
+  const { topics, status } = useMemo((): {
+    topics: ArrayIncludeQuery;
+    status: PostsQueryStatus;
+  } => {
     if (
       Object.values(PostsQueryStatus)
         .map((v) => `/${v}`)
@@ -50,10 +63,13 @@ export const UserPostsContext: React.FC<{
       if (DEBUG)
         console.log(`changing status based on location to ${newStatus}`);
       if (newStatus === PostsQueryStatus.ALL) {
-        return { topics: undefined, status: PostsQueryStatus.ALL };
+        return { topics: [], status: PostsQueryStatus.ALL };
       }
       if (newStatus === PostsQueryStatus.IGNORED) {
-        return { topics: [], status: PostsQueryStatus.IGNORED };
+        return {
+          topics: [NOT_SCIENCE_TOPIC_URI],
+          status: PostsQueryStatus.IGNORED,
+        };
       }
       if (newStatus === PostsQueryStatus.IS_SCIENCE) {
         return {
@@ -62,7 +78,7 @@ export const UserPostsContext: React.FC<{
         };
       }
     }
-    return { topics: undefined, status: PostsQueryStatus.ALL };
+    return { topics: [], status: PostsQueryStatus.ALL };
   }, [location]);
 
   const onPostsAdded = useCallback(

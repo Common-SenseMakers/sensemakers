@@ -1,7 +1,10 @@
 import { FieldValue } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions/v1';
 
-import { StructuredSemantics } from '../@shared/types/types.parser';
+import {
+  ArrayIncludeQuery,
+  StructuredSemantics,
+} from '../@shared/types/types.posts';
 import {
   AppPost,
   AppPostCreate,
@@ -20,6 +23,58 @@ type Query = FirebaseFirestore.Query<
   FirebaseFirestore.DocumentData,
   FirebaseFirestore.DocumentData
 >;
+
+const filterByEqual = (
+  _base: Query,
+  key: string,
+  value: undefined | string | number | boolean
+) => {
+  let query = _base;
+
+  if (value !== undefined) {
+    if (DEBUG)
+      logger.debug(`getMany - filter by ${key} equals`, value, DEBUG_PREFIX);
+
+    query = query.where(key, '==', value);
+  }
+
+  return query;
+};
+
+const filterByIn = (_base: Query, key: string, values?: string[]) => {
+  let query = _base;
+
+  if (!values) return query;
+
+  if (values && values.length > 0) {
+    if (DEBUG)
+      logger.debug(`getMany - filter by ${key} in`, values, DEBUG_PREFIX);
+
+    query = query.where(key, 'in', values);
+  }
+
+  return query;
+};
+
+const filterByArrayContainsAny = (
+  _base: Query,
+  key: string,
+  values?: ArrayIncludeQuery
+) => {
+  let query = _base;
+
+  if (!values) return query;
+
+  if (values && values.length > 0) {
+    if (DEBUG)
+      logger.debug(`getMany - filter by ${key} includes`, values, DEBUG_PREFIX);
+
+    query = query.where(key, 'array-contains-any', values);
+  }
+
+  return query;
+};
+
 export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   constructor(protected db: DBInstance) {
     super(db.collections.posts, db);
@@ -54,170 +109,46 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     /** type protection against properties renaming */
     const createdAtKey: keyof AppPost = 'createdAtMs';
     const authorUserKey: keyof AppPost = 'authorUserId';
-    const authorProfileKey: keyof AppPost = 'authorProfileId';
+    // const authorProfileKey: keyof AppPost = 'authorProfileId';
     const originKey: keyof AppPost = 'origin';
 
     const structuredSemanticsKey: keyof AppPost = 'structuredSemantics';
+
     const keywordsKey: keyof StructuredSemantics = 'keywords';
+
+    // const refsMetaKey: keyof StructuredSemantics = 'refsMeta';
+    // const urlKey: keyof RefMeta = 'url';
+
     const labelsKey: keyof StructuredSemantics = 'labels';
     const topicsKey: keyof StructuredSemantics = 'topics';
 
     if (DEBUG) logger.debug('getMany', queryParams, DEBUG_PREFIX);
 
-    let cumulativeQuery = ((_base: Query) => {
-      if (queryParams.userId) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by userId',
-            queryParams.userId,
-            DEBUG_PREFIX
-          );
+    let query = filterByEqual(
+      this.db.collections.posts,
+      authorUserKey,
+      queryParams.userId
+    );
 
-        return _base.where(authorUserKey, '==', queryParams.userId);
-      } else {
-        if (DEBUG)
-          logger.debug(
-            'getMany - dont filter by userId',
-            undefined,
-            DEBUG_PREFIX
-          );
+    query = filterByIn(query, originKey, queryParams.origins);
 
-        return _base;
-      }
-    })(this.db.collections.posts);
+    query = filterByArrayContainsAny(
+      query,
+      `${structuredSemanticsKey}.${topicsKey}`,
+      queryParams.semantics?.topics
+    );
 
-    cumulativeQuery = ((_base: Query) => {
-      if (queryParams.origins && queryParams.origins.length > 0) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by origin',
-            queryParams.origins,
-            DEBUG_PREFIX
-          );
+    query = filterByArrayContainsAny(
+      query,
+      `${structuredSemanticsKey}.${labelsKey}`,
+      queryParams.semantics?.labels
+    );
 
-        return _base.where(originKey, 'in', queryParams.origins);
-      } else {
-        if (DEBUG)
-          logger.debug(
-            'getMany - dont filter by origin',
-            undefined,
-            DEBUG_PREFIX
-          );
-
-        return _base;
-      }
-    })(cumulativeQuery);
-
-    cumulativeQuery = ((_base: Query) => {
-      if (queryParams.profileIds && queryParams.profileIds.length > 0) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by profileIds',
-            queryParams.profileIds,
-            DEBUG_PREFIX
-          );
-
-        return _base.where(authorProfileKey, 'in', queryParams.profileIds);
-      } else {
-        if (DEBUG)
-          logger.debug(
-            'getMany - dont filter by profilesIds',
-            undefined,
-            DEBUG_PREFIX
-          );
-
-        return _base;
-      }
-    })(cumulativeQuery);
-
-    if (DEBUG) logger.debug('getOfUser', queryParams, DEBUG_PREFIX);
-
-    cumulativeQuery = ((_base: Query) => {
-      if (
-        queryParams.semantics?.topics &&
-        queryParams.semantics?.topics.length > 0
-      ) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by labels',
-            JSON.stringify(queryParams.semantics.topics),
-            DEBUG_PREFIX
-          );
-
-        return _base.where(
-          `${structuredSemanticsKey}.${topicsKey}`,
-          'array-contains-any',
-          queryParams.semantics.topics
-        );
-      } else {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by topics skipped',
-            undefined,
-            DEBUG_PREFIX
-          );
-
-        return _base;
-      }
-    })(cumulativeQuery);
-
-    cumulativeQuery = ((_base: Query) => {
-      if (
-        queryParams.semantics?.labels &&
-        queryParams.semantics?.labels.length > 0
-      ) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by labels',
-            JSON.stringify(queryParams.semantics.labels),
-            DEBUG_PREFIX
-          );
-
-        return _base.where(
-          `${structuredSemanticsKey}.${labelsKey}`,
-          'array-contains-any',
-          queryParams.semantics.labels
-        );
-      } else {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by labels skipped',
-            undefined,
-            DEBUG_PREFIX
-          );
-
-        return _base;
-      }
-    })(cumulativeQuery);
-
-    cumulativeQuery = ((_base: Query) => {
-      if (
-        queryParams.semantics?.keywords &&
-        queryParams.semantics?.keywords.length > 0
-      ) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by keywords',
-            JSON.stringify(queryParams.semantics.keywords),
-            DEBUG_PREFIX
-          );
-
-        return _base.where(
-          `${structuredSemanticsKey}.${keywordsKey}`,
-          'array-contains-any',
-          queryParams.semantics.keywords
-        );
-      } else {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by keywords skipped',
-            undefined,
-            DEBUG_PREFIX
-          );
-
-        return _base;
-      }
-    })(cumulativeQuery);
+    query = filterByArrayContainsAny(
+      query,
+      `${structuredSemanticsKey}.${keywordsKey}`,
+      queryParams.semantics?.keywords
+    );
 
     /** get the sinceCreatedAt and untilCreatedAt timestamps from the elements ids */
     const { sinceCreatedAt, untilCreatedAt } = await (async () => {
@@ -254,7 +185,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
         const ordered = _base.orderBy(createdAtKey, 'desc');
         return untilCreatedAt ? ordered.startAfter(untilCreatedAt) : ordered;
       }
-    })(cumulativeQuery);
+    })(query);
 
     const posts = await paginated
       .limit(queryParams.fetchParams.expectedAmount)

@@ -17,13 +17,6 @@ export interface ParsePostRequest<P> {
 
 export type AppPostSemantics = string;
 
-export interface StructuredSemantics {
-  labels?: string[];
-  keywords?: string[];
-  refsMeta?: Record<string, RefMeta>;
-  topics?: string[];
-}
-
 export interface OntologyItem {
   uri: string;
   display_name: string;

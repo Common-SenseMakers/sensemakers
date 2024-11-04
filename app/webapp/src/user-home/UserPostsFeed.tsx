@@ -1,23 +1,13 @@
 import { Anchor, Box, Text } from 'grommet';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import { useServiceWorker } from '../app/ServiceWorkerContext';
 import { AppGeneralKeys } from '../i18n/i18n.app.general';
-import {
-  FilterOption,
-  PostsFetcherComponent,
-} from '../posts.fetcher/PostsFetcherComponent';
-import { PostsQueryStatus } from '../shared/types/types.posts';
+import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
 import { usePersist } from '../utils/use.persist';
 import { useUserPosts } from './UserPostsContext';
-
-const options: FilterOption[] = [
-  { value: PostsQueryStatus.ALL, pretty: 'All' },
-  { value: PostsQueryStatus.IGNORED, pretty: 'Hidden' },
-  { value: PostsQueryStatus.IS_SCIENCE, pretty: 'Included' },
-];
 
 const INTRO_SHOWN = 'introShown';
 
@@ -59,12 +49,6 @@ export const UserPostsFeed = () => {
     return () => clearTimeout(timeout);
   }, [location]);
 
-  const navigate = useNavigate();
-
-  const setFilter = (filter: PostsQueryStatus) => {
-    navigate(`/${filter} : ''}`);
-  };
-
   const updater = (() => {
     if (hasUpdate) {
       return (
@@ -89,12 +73,7 @@ export const UserPostsFeed = () => {
         {updater}
         <PostsFetcherComponent
           feed={feed}
-          pageTitle={t(AppGeneralKeys.myPosts)}
-          filterOptions={options}
-          status={filterStatus}
-          onFilterOptionChanged={(value) =>
-            setFilter(value)
-          }></PostsFetcherComponent>
+          pageTitle={t(AppGeneralKeys.myPosts)}></PostsFetcherComponent>
       </Box>
     </>
   );

@@ -1,8 +1,4 @@
-import {
-  ParsePostResult,
-  RefMeta,
-  StructuredSemantics,
-} from '../@shared/types/types.parser';
+import { ParsePostResult, RefMeta } from '../@shared/types/types.parser';
 import {
   PlatformPost,
   PlatformPostCreate,
@@ -16,6 +12,7 @@ import {
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
+  StructuredSemantics,
 } from '../@shared/types/types.posts';
 import { DefinedIfTrue } from '../@shared/types/types.user';
 import { mapStoreElements, parseRDF } from '../@shared/utils/n3.utils';

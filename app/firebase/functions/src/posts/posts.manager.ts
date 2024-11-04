@@ -33,6 +33,7 @@ import { AccountCredentials, AppUser } from '../@shared/types/types.user';
 import { addTripleToSemantics } from '../@shared/utils/n3.utils';
 import {
   HAS_TOPIC_URI,
+  NOT_SCIENCE_TOPIC_URI,
   SCIENCE_TOPIC_URI,
   THIS_POST_NAME_URI,
 } from '../@shared/utils/semantics.helper';
@@ -716,19 +717,16 @@ export class PostsManager {
 
     /** temp hack to convert filter_classification into topic semantics*/
     const hackedSemantics = await (async () => {
-      if (
-        [
-          SciFilterClassfication.AI_DETECTED_RESEARCH,
-          SciFilterClassfication.CITOID_DETECTED_RESEARCH,
-        ].includes(parserResult.filter_classification)
-      ) {
-        return addTripleToSemantics(parserResult.semantics, [
-          THIS_POST_NAME_URI,
-          HAS_TOPIC_URI,
-          SCIENCE_TOPIC_URI,
-        ]);
-      }
-      return parserResult.semantics;
+      const isScience = [
+        SciFilterClassfication.AI_DETECTED_RESEARCH,
+        SciFilterClassfication.CITOID_DETECTED_RESEARCH,
+      ].includes(parserResult.filter_classification);
+
+      return addTripleToSemantics(parserResult.semantics, [
+        THIS_POST_NAME_URI,
+        HAS_TOPIC_URI,
+        isScience ? SCIENCE_TOPIC_URI : NOT_SCIENCE_TOPIC_URI,
+      ]);
     })();
 
     const update: PostUpdate = {
