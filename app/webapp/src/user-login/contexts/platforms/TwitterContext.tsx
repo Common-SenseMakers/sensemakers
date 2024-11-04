@@ -24,7 +24,7 @@ import {
 } from '../AccountContext';
 import { useDisconnectContext } from '../DisconnectUserContext';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export const LS_TWITTER_CONTEXT_KEY = 'twitter-signin-context';
 
@@ -201,6 +201,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
         }
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     state_param,
     code_param,
@@ -209,11 +210,8 @@ export const TwitterContext = (props: PropsWithChildren) => {
     searchParams,
     connectedUser,
     setSearchParams,
-    getPlatformConnectedStatus,
-    setPlatformConnectedStatus,
     show,
     t,
-    disconnect,
     refreshConnected,
     appFetch,
     setOurToken,

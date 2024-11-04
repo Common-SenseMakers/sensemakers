@@ -12,6 +12,7 @@ import { arraysEqual } from '../utils/general';
 const DEBUG = true;
 
 export interface PostFetcherInterface {
+  feedNameDebug: string;
   posts?: AppPostFull[];
   isLoading: boolean;
   isFetchingOlder: boolean;
@@ -283,8 +284,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
           },
           ...queryParams,
         };
-        if (DEBUG)
-          console.log(`${DEBUG_PREFIX}fetching for older - twitter`, params);
+        if (DEBUG) console.log(`${DEBUG_PREFIX}fetching for older`, params);
         const readPosts = await appFetch<AppPostFull[], PostsQuery>(
           endpoint,
           params
@@ -331,16 +331,16 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
 
   /** reset at every status change  */
   useEffect(() => {
-    reset();
     if (DEBUG)
       console.log(
-        `${DEBUG_PREFIX}_fetchOlder due to status, labels, keywords, endpoint change`,
+        `${DEBUG_PREFIX}resetting and _fetchOlder due to status, labels, keywords, endpoint change`,
         {
           queryParams,
           endpoint,
           fetchedOlderFirst,
         }
       );
+    reset();
     setIsFetchingOlder(true);
     fetchOlderCallback(undefined).catch((e) => {
       console.error(e);
@@ -427,22 +427,26 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
   /** first data fill happens everytime a new source platform is added/removed */
   useEffect(() => {
     if (DEBUG)
-      console.log(`${DEBUG_PREFIX}first fetch older with new platform added`, {
-        posts,
-        fetchedOlderFirst,
-        connectedSourcePlatforms,
-      });
+      console.log(
+        `${DEBUG_PREFIX} checking first fetch older with new platform added`,
+        {
+          posts,
+          fetchedOlderFirst,
+          connectedSourcePlatforms,
+        }
+      );
     if (
       !arraysEqual(connectedSourcePlatforms, connectedSourcePlatformsInit) &&
       !isFetchingOlder
     ) {
-      reset();
-      setFetchedOlderFirst(true);
       if (DEBUG)
         console.log(
-          `${DEBUG_PREFIX}_fetchOlder due to connectedSourcePlatforms`,
+          `${DEBUG_PREFIX} resetting and _fetchOlder due to connectedSourcePlatforms`,
           { connectedSourcePlatforms }
         );
+      console.warn('skipping reset due to connectedPlatforms');
+      // reset();
+      // setFetchedOlderFirst(true);
 
       _fetchOlder(undefined);
     }
@@ -536,6 +540,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
       isLoading,
       moreToFetch,
       getNextAndPrev,
+      feedNameDebug: DEBUG_PREFIX,
     };
   }, [
     posts,
@@ -550,6 +555,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
     isLoading,
     moreToFetch,
     getNextAndPrev,
+    DEBUG_PREFIX,
   ]);
 
   return feed;

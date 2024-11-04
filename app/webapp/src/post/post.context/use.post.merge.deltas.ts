@@ -14,7 +14,7 @@ import {
 } from '../../shared/utils/n3.utils';
 import { PostFetchContext } from './use.post.fetch';
 
-export const DEBUG = false;
+export const DEBUG = true;
 
 interface QuadOperation {
   type: 'add' | 'remove';
@@ -32,7 +32,9 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
   useEffect(() => {
     if (!basePost && fetched.post) {
       if (DEBUG)
-        console.log('setting base post', { fetchedPost: fetched.post });
+        console.log(`setting base post ${fetched.post.id}`, {
+          fetchedPost: fetched.post,
+        });
       setBasePost(fetched.post);
     } else {
       if (fetched.post) {
@@ -40,7 +42,7 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
          * as they are found in the fetched post (beacuse they were applied) */
 
         if (DEBUG)
-          console.log('reacting to fetched post update', {
+          console.log(`reacting to fetched post update ${fetched.post.id}`, {
             fetchedPost: fetched.post,
           });
         const fetchedStore = semanticStringToStore(fetched.post.semantics);
@@ -67,7 +69,7 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
         });
 
         if (DEBUG)
-          console.log('reset base', {
+          console.log(`reset base ${fetched.post.id}`, {
             operations: [...operations],
             fetchedPost: fetched.post,
           });
@@ -76,9 +78,15 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
         setBasePost(fetched.post);
       }
     }
-  }, [basePost, fetched.post, operations]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [basePost, fetched.post]);
 
   useEffect(() => {
+    if (DEBUG)
+      console.log(
+        `starting merged semantics computation due to fetchedPost change ${fetched.post?.id || ''}`
+      );
+
     setOperations([]);
     setBasePost(fetched.post);
     setMergedSemantics(fetched.post?.semantics);
@@ -89,7 +97,7 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
     if (!basePost) return;
 
     if (DEBUG)
-      console.log('baseStore computed', {
+      console.log(`baseStore computed ${basePost.id}`, {
         basePostSemantic: basePost.semantics,
       });
 
@@ -100,7 +108,7 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
   useEffect(() => {
     if (DEBUG)
       console.log(
-        'computing merged semantics - merge semantics merged effect',
+        `computing merged semantics - merge semantics merged effect ${fetched.post?.id || ''}`,
         {
           operations,
           baseStoreSize: baseStore?.size,
@@ -157,6 +165,7 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
         setMergedSemantics(_semantics);
       })
       .catch(console.error);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [baseStore, operations]);
 
   const hasOperation = (
@@ -222,7 +231,7 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
   const updateSemantics = useCallback(
     (newSemantics: string) => {
       if (DEBUG)
-        console.log('calling updateSemantics', {
+        console.log(`calling updateSemantics ${fetched.post?.id || ''}`, {
           newSemantics,
           baseStore,
         });
@@ -250,13 +259,17 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
       });
 
       if (DEBUG)
-        console.log('"update finishing, setting new operations', {
-          newSemantics,
-          operations,
-        });
+        console.log(
+          `update finishing, setting new operations  ${fetched.post?.id || ''}`,
+          {
+            newSemantics,
+            operations,
+          }
+        );
 
       setOperations([...operations]);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [addQuad, baseStore, operations, removeQuad]
   );
 

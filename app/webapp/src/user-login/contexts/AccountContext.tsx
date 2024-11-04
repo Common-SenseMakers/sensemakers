@@ -239,15 +239,19 @@ export const AccountContext = (props: PropsWithChildren) => {
 
   const email = connectedUser ? connectedUser.email : undefined;
 
-  const setPlatformConnectedStatus = useCallback(
-    (platformId: PLATFORM, status: PlatformConnectedStatus) => {
-      setPlatformsConnectedStatus({
-        ...platformsConnectedStatus,
-        [platformId]: status,
-      });
-    },
-    [platformsConnectedStatus, setPlatformsConnectedStatus]
-  );
+  const setPlatformConnectedStatus = (
+    platformId: PLATFORM,
+    status: PlatformConnectedStatus
+  ) => {
+    if (DEBUG)
+      console.log(
+        `setting PlatformsConnectedStatus platformId ${platformId} status ${status}`
+      );
+    setPlatformsConnectedStatus({
+      ...platformsConnectedStatus,
+      [platformId]: status,
+    });
+  };
 
   const getPlatformConnectedStatus = (
     platformId: PLATFORM

@@ -20,7 +20,7 @@ import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { PostFetcherInterface } from './posts.fetcher.hook';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export interface FilterOption {
   value: string;
@@ -76,8 +76,17 @@ export const PostsFetcherComponent = (props: {
 
   useEffect(() => {
     if (isAtBottom && !isLoading && moreToFetch) {
-      fetchOlder();
+      if (DEBUG)
+        console.log(`${feed.feedNameDebug}fetchingOlder due to isAtBottom`, {
+          isAtBottom,
+          isLoading,
+          moreToFetch,
+        });
+      console.warn('skipping infinte scroll');
+
+      // fetchOlder();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchOlder, isAtBottom, isLoading, moreToFetch]);
 
   useEffect(() => {

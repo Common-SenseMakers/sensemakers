@@ -13,7 +13,7 @@ export interface PostFetchContext {
   refetch: () => void;
 }
 
-const DEBUG = false;
+const DEBUG = true;
 
 /** hook in charge of fething the current post, and keeping it
  * and its derived values updated in real time */
@@ -25,7 +25,8 @@ export const usePostFetch = (
   const appFetch = useAppFetch();
 
   const postId = useMemo(() => {
-    if (DEBUG) console.log('useMemo postId', { _postId, postInit });
+    if (DEBUG)
+      console.log(`useMemo postId ${_postId || ''}`, { _postId, postInit });
     const actualPostId = _postId ? _postId : (postInit as AppPostFull).id;
     return actualPostId;
   }, [_postId, postInit]);

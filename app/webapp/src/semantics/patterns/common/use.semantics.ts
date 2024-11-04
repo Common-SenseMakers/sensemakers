@@ -16,6 +16,9 @@ export const semanticStringToStore = (semantics?: string) => {
   return store;
 };
 
+/** keeps a semantics n3 store in sync with the semantics string provided as input,
+ * if originalParsed is provided it will also create the corresponding original store
+ */
 export const useSemanticsStore = (props: {
   semantics?: string;
   originalParsed?: { semantics: string };
@@ -27,6 +30,7 @@ export const useSemanticsStore = (props: {
     semanticStringToStore(props.originalParsed?.semantics)
   );
 
+  /**  */
   useEffect(() => {
     if (props.originalParsed) {
       if (DEBUG)
@@ -51,7 +55,8 @@ export const useSemanticsStore = (props: {
         })
         .catch(console.error);
     }
-  }, [originalStore, props.originalParsed, props.semantics]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.originalParsed, props.semantics]);
 
   useEffect(() => {
     /** then the actual stored is set. If prop.semantics is provided */
