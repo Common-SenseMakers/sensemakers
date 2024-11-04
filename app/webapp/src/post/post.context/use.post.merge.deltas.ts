@@ -14,7 +14,7 @@ import {
 } from '../../shared/utils/n3.utils';
 import { PostFetchContext } from './use.post.fetch';
 
-export const DEBUG = true;
+export const DEBUG = false;
 
 interface QuadOperation {
   type: 'add' | 'remove';

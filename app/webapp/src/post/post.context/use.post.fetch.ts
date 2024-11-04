@@ -13,7 +13,7 @@ export interface PostFetchContext {
   refetch: () => void;
 }
 
-const DEBUG = true;
+const DEBUG = false;
 
 /** hook in charge of fething the current post, and keeping it
  * and its derived values updated in real time */

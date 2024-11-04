@@ -10,7 +10,7 @@ import {
 import { locationToFeedIx } from './FeedTabs';
 import { feedTabs } from './feed.config';
 
-const DEBUG = true;
+const DEBUG = false;
 const DEBUG_PREFIX = ``;
 
 interface FeedContextType {

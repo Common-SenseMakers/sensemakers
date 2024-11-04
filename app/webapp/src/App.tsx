@@ -7,7 +7,7 @@ import { ServiceWorker } from './app/ServiceWorkerContext';
 import { ToastsContext } from './app/ToastsContext';
 import { i18n } from './i18n/i18n';
 
-const DEBUG = true;
+const DEBUG = false;
 const DEBUG_PREFIX = ``;
 
 function App() {

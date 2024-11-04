@@ -20,7 +20,7 @@ import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { PostFetcherInterface } from './posts.fetcher.hook';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export interface FilterOption {
   value: string;

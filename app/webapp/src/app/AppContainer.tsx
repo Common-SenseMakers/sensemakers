@@ -24,7 +24,7 @@ export interface SetPageTitleType {
   main: string;
 }
 
-const DEBUG = true;
+const DEBUG = false;
 const DEBUG_PREFIX = ``;
 
 export type AppContainerContextType = object;

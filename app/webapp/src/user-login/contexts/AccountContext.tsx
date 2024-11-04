@@ -21,7 +21,7 @@ import { PlatformProfile } from '../../shared/types/types.profiles';
 import { AppUserRead, EmailDetails } from '../../shared/types/types.user';
 import { usePersist } from '../../utils/use.persist';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const OUR_TOKEN_NAME = 'ourToken';
 export const LOGIN_STATUS = 'loginStatus';

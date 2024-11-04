@@ -9,7 +9,7 @@ import { AppPostFull, PostsQuery } from '../shared/types/types.posts';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { arraysEqual } from '../utils/general';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export interface PostFetcherInterface {
   feedNameDebug: string;
@@ -252,6 +252,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
     if (DEBUG) console.log(`${DEBUG_PREFIX}settings pots to empty array`);
     setPosts([]);
   };
+
   const reset = () => {
     if (DEBUG) console.log(`${DEBUG_PREFIX}resetting posts`);
     removeAllPosts();
@@ -356,7 +357,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
       console.error(e);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryParams, endpoint]);
+  }, [connectedUser, queryParams, endpoint]);
 
   const newestPostId = useMemo(() => {
     const newest = posts ? posts[0]?.id : undefined;
