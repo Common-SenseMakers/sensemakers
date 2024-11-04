@@ -51,28 +51,36 @@ export const FeedPostsContext: React.FC<{
     };
   }, []);
 
+  const feed1Config = useMemo((): FetcherConfig => {
+    return {
+      endpoint: '/api/feed/get',
+      queryParams: { semantics: { labels: feedTabs[1].labels } },
+      DEBUG_PREFIX: `[FEED 0] `,
+    };
+  }, []);
+
+  const feed2Config = useMemo((): FetcherConfig => {
+    return {
+      endpoint: '/api/feed/get',
+      queryParams: { semantics: { labels: feedTabs[2].labels } },
+      DEBUG_PREFIX: `[FEED 0] `,
+    };
+  }, []);
+
+  const feed3Config = useMemo((): FetcherConfig => {
+    return {
+      endpoint: '/api/feed/get',
+      queryParams: { semantics: { labels: feedTabs[3].labels } },
+      DEBUG_PREFIX: `[FEED 0] `,
+    };
+  }, []);
+
   const feed0 = usePostsFetcher(feed0Config);
+  const feed1 = usePostsFetcher(feed1Config);
+  const feed2 = usePostsFetcher(feed2Config);
+  const feed3 = usePostsFetcher(feed3Config);
 
-  // const feed1 = usePostsFetcher({
-  //   endpoint: '/api/feed/get',
-  //   queryParams: { semantics: { labels: feedTabs[1].labels } },
-  //   DEBUG_PREFIX: `[FEED 1] `,
-  // });
-
-  // const feed2 = usePostsFetcher({
-  //   endpoint: '/api/feed/get',
-  //   queryParams: { semantics: { labels: feedTabs[2].labels } },
-  //   DEBUG_PREFIX: `[FEED 2] `,
-  // });
-
-  // const feed3 = usePostsFetcher({
-  //   endpoint: '/api/feed/get',
-  //   queryParams: { semantics: { labels: feedTabs[3].labels } },
-  //   DEBUG_PREFIX: `[FEED 3] `,
-  // });
-
-  // const feeds = [feed0, feed1, feed2, feed3];
-  const feeds = [feed0];
+  const feeds = [feed0, feed1, feed2, feed3];
 
   const feedIx = locationToFeedIx(location);
   const feed = feeds[feedIx];
