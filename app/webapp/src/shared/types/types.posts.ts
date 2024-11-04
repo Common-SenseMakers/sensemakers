@@ -114,12 +114,6 @@ export interface PostUpdatePayload {
   postUpdate: PostUpdate;
 }
 
-export enum PostsQueryStatus {
-  ALL = 'all',
-  IGNORED = 'ignored',
-  IS_SCIENCE = 'isScience',
-}
-
 export interface UnpublishPlatformPostPayload {
   postId: string;
   platformId: PLATFORM;

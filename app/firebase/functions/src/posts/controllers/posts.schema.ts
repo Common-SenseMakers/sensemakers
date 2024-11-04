@@ -1,7 +1,6 @@
 import { array, mixed, number, object, string } from 'yup';
 
 import { PLATFORM } from '../../@shared/types/types.platforms';
-import { PostsQueryStatus } from '../../@shared/types/types.posts';
 
 export const postIdValidation = object({
   postId: string().required(),
@@ -9,15 +8,6 @@ export const postIdValidation = object({
 
 export const createDraftPostSchema = object({
   postId: string().required(),
-}).noUnknown(true);
-
-export const getUserPostsQuerySchema = object({
-  status: string().oneOf([...Object.values(PostsQueryStatus)]),
-  fetchParams: object({
-    expectedAmount: number().required(),
-    sinceId: string().optional(),
-    untilId: string().optional(),
-  }).required(),
 }).noUnknown(true);
 
 export const getUserProfileSchema = object({

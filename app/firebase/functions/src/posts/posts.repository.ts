@@ -51,7 +51,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
   /** Cannot be part of a transaction */
   public async getMany(queryParams: PostsQueryDefined) {
-    /** type protection agains properties renaming */
+    /** type protection against properties renaming */
     const createdAtKey: keyof AppPost = 'createdAtMs';
     const authorUserKey: keyof AppPost = 'authorUserId';
     const authorProfileKey: keyof AppPost = 'authorProfileId';

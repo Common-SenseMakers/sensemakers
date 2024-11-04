@@ -7,15 +7,12 @@ import {
 import { PostUpdatePayload, PostsQuery } from '../../@shared/types/types.posts';
 import { IS_EMULATOR } from '../../config/config.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
+import { queryParamsSchema } from '../../feed/feed.schema';
 import { logger } from '../../instances/logger';
 import { enqueueTask } from '../../tasksUtils/tasks.support';
 import { canReadPost } from '../posts.access.control';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
-import {
-  getUserPostsQuerySchema,
-  postIdValidation,
-  updatePostSchema,
-} from './posts.schema';
+import { postIdValidation, updatePostSchema } from './posts.schema';
 
 const DEBUG = false;
 
@@ -27,7 +24,7 @@ export const getUserPostsController: RequestHandler = async (
   response
 ) => {
   try {
-    const queryParams = (await getUserPostsQuerySchema.validate(
+    const queryParams = (await queryParamsSchema.validate(
       request.body
     )) as PostsQuery;
 
