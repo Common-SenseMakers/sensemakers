@@ -1,48 +1,28 @@
-import React, { useContext, useEffect, useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { createContext } from 'react';
-import { useLocation } from 'react-router-dom';
 
 import {
   FetcherConfig,
   PostFetcherInterface,
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
-import { locationToFeedIx } from './FeedTabs';
 import { feedTabs } from './feed.config';
 
-const DEBUG = false;
-const DEBUG_PREFIX = ``;
-
-interface FeedContextType {
-  feed: PostFetcherInterface;
+interface PublicFeedsContextType {
+  feeds: PostFetcherInterface[];
 }
 
-export const FeedPostsContextValue = createContext<FeedContextType | undefined>(
-  undefined
-);
+export const FeedPostsContextValue = createContext<
+  PublicFeedsContextType | undefined
+>(undefined);
 
 /**
  * wraps the usePostsFetcher around the feed endpoint and serves
  * the returned posts to lower level components as useFeedPosts()
  */
-export const FeedPostsContext: React.FC<{
+export const PublicFeedsContext: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
-  const location = useLocation();
-
-  // for debug
-  useEffect(() => {
-    let mounted = true;
-    if (mounted) {
-      if (DEBUG) console.log(`${DEBUG_PREFIX}FeedPostsContext mounted`);
-    }
-    return () => {
-      mounted = false;
-      if (DEBUG) console.log(`${DEBUG_PREFIX}FeedPostsContext unmounted`);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const feed0Config = useMemo((): FetcherConfig => {
     return {
       endpoint: '/api/feed/get',
@@ -82,13 +62,10 @@ export const FeedPostsContext: React.FC<{
 
   const feeds = [feed0, feed1, feed2, feed3];
 
-  const feedIx = locationToFeedIx(location);
-  const feed = feeds[feedIx];
-
   return (
     <FeedPostsContextValue.Provider
       value={{
-        feed,
+        feeds,
       }}>
       {children}
     </FeedPostsContextValue.Provider>

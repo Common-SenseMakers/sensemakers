@@ -5,15 +5,16 @@ import { useLocation } from 'react-router-dom';
 
 import { AppGeneralKeys } from '../i18n/i18n.app.general';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
-import { FeedTabs } from './FeedTabs';
-import { useFeedPosts } from './PublicFeedContext';
+import { FeedTabs, locationToFeedIx } from './FeedTabs';
+import { useFeedPosts } from './PublicFeedsContext';
 
 export const PublicFeed = () => {
   const { t } = useTranslation();
-
-  const { feed } = useFeedPosts();
-
   const location = useLocation();
+
+  const { feeds } = useFeedPosts();
+
+  const feedIx = locationToFeedIx(location);
 
   useEffect(() => {
     let timeout: NodeJS.Timeout;
@@ -40,11 +41,22 @@ export const PublicFeed = () => {
     <>
       <Box fill justify="start">
         <FeedTabs></FeedTabs>
-        <PostsFetcherComponent
-          showHeader={false}
-          isPublicFeed={true}
-          feed={feed}
-          pageTitle={t(AppGeneralKeys.feedTitle)}></PostsFetcherComponent>
+        {feeds.map((feed, ix) => {
+          return (
+            <Box
+              style={
+                feedIx === ix
+                  ? { height: 'auto', visibility: 'visible' }
+                  : { height: '0px', visibility: 'hidden' }
+              }>
+              <PostsFetcherComponent
+                showHeader={false}
+                isPublicFeed={true}
+                feed={feed}
+                pageTitle={t(AppGeneralKeys.feedTitle)}></PostsFetcherComponent>
+            </Box>
+          );
+        })}
       </Box>
     </>
   );
