@@ -30,14 +30,14 @@ const LoadingPlaceholder = (
 export const AppHomePage = () => {
   const { overallLoginStatus, alreadyConnected } = useAccountContext();
 
-  const { content, nav } = useMemo(() => {
+  const { content, nav, fixed } = useMemo(() => {
     if (DEBUG)
       console.log('AppHome', {
         overallLoginStatus,
       });
 
     if (overallLoginStatus === OverallLoginStatus.NotKnown) {
-      return { content: <></>, nav: undefined };
+      return { fixed: false, content: <></>, nav: undefined };
     }
 
     if (
@@ -46,6 +46,7 @@ export const AppHomePage = () => {
         !alreadyConnected)
     ) {
       return {
+        fixed: false,
         content: <ConnectSocialsPage />,
         nav: undefined,
       };
@@ -53,13 +54,16 @@ export const AppHomePage = () => {
 
     if (overallLoginStatus === OverallLoginStatus.FullyLoggedIn) {
       return {
+        fixed: true,
         content: <UserPostsFeed></UserPostsFeed>,
         nav: <GlobalNav></GlobalNav>,
       };
     }
 
-    return { content: LoadingPlaceholder, nav: undefined };
+    return { fixed: false, content: LoadingPlaceholder, nav: undefined };
   }, [overallLoginStatus, alreadyConnected]);
 
-  return <ViewportPage fixed content={content} nav={nav} justify="start" />;
+  return (
+    <ViewportPage fixed={fixed} content={content} nav={nav} justify="start" />
+  );
 };
