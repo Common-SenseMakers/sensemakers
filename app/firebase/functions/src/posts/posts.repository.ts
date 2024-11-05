@@ -1,16 +1,16 @@
 import { FieldValue } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions/v1';
 
-import { StructuredSemantics } from '../@shared/types/types.parser';
+import {
+  ArrayIncludeQuery,
+  StructuredSemantics,
+} from '../@shared/types/types.posts';
 import {
   AppPost,
   AppPostCreate,
   AppPostParsedStatus,
-  AppPostRepublishedStatus,
-  AppPostReviewStatus,
   PostUpdate,
-  PostsQuery,
-  PostsQueryStatus,
+  PostsQueryDefined,
 } from '../@shared/types/types.posts';
 import { DBInstance } from '../db/instance';
 import { BaseRepository, removeUndefined } from '../db/repo.base';
@@ -23,6 +23,58 @@ type Query = FirebaseFirestore.Query<
   FirebaseFirestore.DocumentData,
   FirebaseFirestore.DocumentData
 >;
+
+const filterByEqual = (
+  _base: Query,
+  key: string,
+  value: undefined | string | number | boolean
+) => {
+  let query = _base;
+
+  if (value !== undefined) {
+    if (DEBUG)
+      logger.debug(`getMany - filter by ${key} equals`, value, DEBUG_PREFIX);
+
+    query = query.where(key, '==', value);
+  }
+
+  return query;
+};
+
+const filterByIn = (_base: Query, key: string, values?: string[]) => {
+  let query = _base;
+
+  if (!values) return query;
+
+  if (values && values.length > 0) {
+    if (DEBUG)
+      logger.debug(`getMany - filter by ${key} in`, values, DEBUG_PREFIX);
+
+    query = query.where(key, 'in', values);
+  }
+
+  return query;
+};
+
+const filterByArrayContainsAny = (
+  _base: Query,
+  key: string,
+  values?: ArrayIncludeQuery
+) => {
+  let query = _base;
+
+  if (!values) return query;
+
+  if (values && values.length > 0) {
+    if (DEBUG)
+      logger.debug(`getMany - filter by ${key} includes`, values, DEBUG_PREFIX);
+
+    query = query.where(key, 'array-contains-any', values);
+  }
+
+  return query;
+};
+
 export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   constructor(protected db: DBInstance) {
     super(db.collections.posts, db);
@@ -53,189 +105,50 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   }
 
   /** Cannot be part of a transaction */
-  public async getMany(queryParams: PostsQuery) {
-    /** type protection agains properties renaming */
+  public async getMany(queryParams: PostsQueryDefined) {
+    /** type protection against properties renaming */
     const createdAtKey: keyof AppPost = 'createdAtMs';
     const authorUserKey: keyof AppPost = 'authorUserId';
-    const authorProfileKey: keyof AppPost = 'authorProfileId';
-    const reviewedStatusKey: keyof AppPost = 'reviewedStatus';
-    const republishedStatusKey: keyof AppPost = 'republishedStatus';
+    // const authorProfileKey: keyof AppPost = 'authorProfileId';
     const originKey: keyof AppPost = 'origin';
 
     const structuredSemanticsKey: keyof AppPost = 'structuredSemantics';
+
     const keywordsKey: keyof StructuredSemantics = 'keywords';
+
+    // const refsMetaKey: keyof StructuredSemantics = 'refsMeta';
+    // const urlKey: keyof RefMeta = 'url';
+
     const labelsKey: keyof StructuredSemantics = 'labels';
+    const topicsKey: keyof StructuredSemantics = 'topics';
 
     if (DEBUG) logger.debug('getMany', queryParams, DEBUG_PREFIX);
 
-    const ofUser = ((_base: Query) => {
-      if (queryParams.userId) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by userId',
-            queryParams.userId,
-            DEBUG_PREFIX
-          );
+    let query = filterByEqual(
+      this.db.collections.posts,
+      authorUserKey,
+      queryParams.userId
+    );
 
-        return _base.where(authorUserKey, '==', queryParams.userId);
-      } else {
-        if (DEBUG)
-          logger.debug(
-            'getMany - dont filter by userId',
-            undefined,
-            DEBUG_PREFIX
-          );
+    query = filterByIn(query, originKey, queryParams.origins);
 
-        return _base;
-      }
-    })(this.db.collections.posts);
+    query = filterByArrayContainsAny(
+      query,
+      `${structuredSemanticsKey}.${topicsKey}`,
+      queryParams.semantics?.topics
+    );
 
-    const ofOrigin = ((_base: Query) => {
-      if (queryParams.origins && queryParams.origins.length > 0) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by origin',
-            queryParams.origins,
-            DEBUG_PREFIX
-          );
+    query = filterByArrayContainsAny(
+      query,
+      `${structuredSemanticsKey}.${labelsKey}`,
+      queryParams.semantics?.labels
+    );
 
-        return _base.where(originKey, 'in', queryParams.origins);
-      } else {
-        if (DEBUG)
-          logger.debug(
-            'getMany - dont filter by origin',
-            undefined,
-            DEBUG_PREFIX
-          );
-
-        return _base;
-      }
-    })(ofUser);
-
-    const ofProfiles = ((_base: Query) => {
-      if (queryParams.profileIds && queryParams.profileIds.length > 0) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by profileIds',
-            queryParams.profileIds,
-            DEBUG_PREFIX
-          );
-
-        return _base.where(authorProfileKey, 'in', queryParams.profileIds);
-      } else {
-        if (DEBUG)
-          logger.debug(
-            'getMany - dont filter by profilesIds',
-            undefined,
-            DEBUG_PREFIX
-          );
-
-        return _base;
-      }
-    })(ofOrigin);
-
-    if (DEBUG) logger.debug('getOfUser', queryParams, DEBUG_PREFIX);
-
-    const withStatuses = ((_base: Query) => {
-      if (!queryParams.status) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - dont filter by status',
-            undefined,
-            DEBUG_PREFIX
-          );
-        return _base;
-      }
-
-      if (queryParams.status === PostsQueryStatus.DRAFTS) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by status',
-            PostsQueryStatus.DRAFTS,
-            DEBUG_PREFIX
-          );
-        return _base.where(republishedStatusKey, 'in', [
-          AppPostRepublishedStatus.PENDING,
-          AppPostRepublishedStatus.UNREPUBLISHED,
-        ]);
-      }
-      if (queryParams.status === PostsQueryStatus.PENDING) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by status',
-            PostsQueryStatus.PENDING,
-            DEBUG_PREFIX
-          );
-        return _base.where(
-          reviewedStatusKey,
-          '==',
-          AppPostReviewStatus.PENDING
-        );
-      }
-      if (queryParams.status === PostsQueryStatus.PUBLISHED) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by status',
-            PostsQueryStatus.PUBLISHED,
-            DEBUG_PREFIX
-          );
-        return _base.where(
-          republishedStatusKey,
-          '!=',
-          AppPostRepublishedStatus.PENDING
-        );
-      }
-      if (queryParams.status === PostsQueryStatus.IGNORED) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by status',
-            PostsQueryStatus.IGNORED,
-            DEBUG_PREFIX
-          );
-
-        return _base.where(
-          reviewedStatusKey,
-          '==',
-          AppPostReviewStatus.IGNORED
-        );
-      }
-
-      return _base;
-    })(ofProfiles);
-
-    const withSemantics = ((_base: Query) => {
-      if (queryParams.keywords && queryParams.keywords.length > 0) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by keywords',
-            JSON.stringify(queryParams.keywords),
-            DEBUG_PREFIX
-          );
-
-        return _base.where(
-          `${structuredSemanticsKey}.${keywordsKey}`,
-          'array-contains-any',
-          queryParams.keywords
-        );
-      }
-
-      if (queryParams.labels && queryParams.labels.length > 0) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by labels',
-            JSON.stringify(queryParams.labels),
-            DEBUG_PREFIX
-          );
-
-        return _base.where(
-          `${structuredSemanticsKey}.${labelsKey}`,
-          'array-contains-any',
-          queryParams.labels
-        );
-      }
-
-      return _base;
-    })(withStatuses);
+    query = filterByArrayContainsAny(
+      query,
+      `${structuredSemanticsKey}.${keywordsKey}`,
+      queryParams.semantics?.keywords
+    );
 
     /** get the sinceCreatedAt and untilCreatedAt timestamps from the elements ids */
     const { sinceCreatedAt, untilCreatedAt } = await (async () => {
@@ -272,7 +185,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
         const ordered = _base.orderBy(createdAtKey, 'desc');
         return untilCreatedAt ? ordered.startAfter(untilCreatedAt) : ordered;
       }
-    })(withSemantics);
+    })(query);
 
     const posts = await paginated
       .limit(queryParams.fetchParams.expectedAmount)
@@ -286,7 +199,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     return appPosts.sort((a, b) => b.createdAtMs - a.createdAtMs);
   }
 
-  public async getAllOfQuery(queryParams: PostsQuery, limit?: number) {
+  public async getAllOfQuery(queryParams: PostsQueryDefined, limit?: number) {
     let stillPending = true;
     const allPosts: AppPost[] = [];
 

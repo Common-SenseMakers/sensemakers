@@ -32,7 +32,9 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
   useEffect(() => {
     if (!basePost && fetched.post) {
       if (DEBUG)
-        console.log('setting base post', { fetchedPost: fetched.post });
+        console.log(`setting base post ${fetched.post.id}`, {
+          fetchedPost: fetched.post,
+        });
       setBasePost(fetched.post);
     } else {
       if (fetched.post) {
@@ -40,7 +42,7 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
          * as they are found in the fetched post (beacuse they were applied) */
 
         if (DEBUG)
-          console.log('reacting to fetched post update', {
+          console.log(`reacting to fetched post update ${fetched.post.id}`, {
             fetchedPost: fetched.post,
           });
         const fetchedStore = semanticStringToStore(fetched.post.semantics);
@@ -67,7 +69,7 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
         });
 
         if (DEBUG)
-          console.log('reset base', {
+          console.log(`reset base ${fetched.post.id}`, {
             operations: [...operations],
             fetchedPost: fetched.post,
           });
@@ -76,20 +78,26 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
         setBasePost(fetched.post);
       }
     }
-  }, [fetched.post]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [basePost, fetched.post]);
 
   useEffect(() => {
+    if (DEBUG)
+      console.log(
+        `starting merged semantics computation due to fetchedPost change ${fetched.post?.id || ''}`
+      );
+
     setOperations([]);
     setBasePost(fetched.post);
     setMergedSemantics(fetched.post?.semantics);
-  }, [fetched.postId]);
+  }, [fetched.post, fetched.postId]);
 
   /** the base store is the store derived from the base post */
   const baseStore = useMemo(() => {
     if (!basePost) return;
 
     if (DEBUG)
-      console.log('baseStore computed', {
+      console.log(`baseStore computed ${basePost.id}`, {
         basePostSemantic: basePost.semantics,
       });
 
@@ -100,7 +108,7 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
   useEffect(() => {
     if (DEBUG)
       console.log(
-        'computing merged semantics - merge semantics merged effect',
+        `computing merged semantics - merge semantics merged effect ${fetched.post?.id || ''}`,
         {
           operations,
           baseStoreSize: baseStore?.size,
@@ -148,13 +156,16 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
         mergedStoreSize: mergedStore.size,
       });
 
-    writeRDF(mergedStore).then((_semantics) => {
-      if (DEBUG)
-        console.log('computing merged semantics - semantics computed', {
-          _semantics,
-        });
-      setMergedSemantics(_semantics);
-    });
+    writeRDF(mergedStore)
+      .then((_semantics) => {
+        if (DEBUG)
+          console.log('computing merged semantics - semantics computed', {
+            _semantics,
+          });
+        setMergedSemantics(_semantics);
+      })
+      .catch(console.error);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [baseStore, operations]);
 
   const hasOperation = (
@@ -168,11 +179,59 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
     );
   };
 
+  const addQuad = useCallback(
+    (quad: Quad) => {
+      const operation: QuadOperation = { type: 'add', quad };
+
+      if (!hasOperation(operations, operation)) {
+        const removeOperation: QuadOperation = { type: 'remove', quad };
+
+        /** if there was a remove operation remove that one */
+        if (hasOperation(operations, removeOperation)) {
+          if (DEBUG)
+            console.log(
+              'operation "add" applied by removing a "remove" operation',
+              removeOperation
+            );
+          operations.splice(operations.indexOf(removeOperation), 1);
+        } else {
+          if (DEBUG)
+            console.log('"add" operation found on newSemantics', {
+              quad,
+            });
+          operations.push(operation);
+        }
+      }
+    },
+    [operations]
+  );
+
+  const removeQuad = useCallback(
+    (quad: Quad) => {
+      const addOperation: QuadOperation = { type: 'add', quad };
+
+      if (hasOperation(operations, addOperation)) {
+        if (DEBUG)
+          console.log('operation "remove" applied by removing add operation', {
+            quad,
+          });
+        operations.splice(operations.indexOf(addOperation), 1);
+      } else {
+        if (DEBUG)
+          console.log('"remove" operation found on newSemantics', {
+            quad,
+          });
+        operations.push({ type: 'remove', quad });
+      }
+    },
+    [operations]
+  );
+
   /** external function to add or remove quads */
   const updateSemantics = useCallback(
     (newSemantics: string) => {
       if (DEBUG)
-        console.log('calling updateSemantics', {
+        console.log(`calling updateSemantics ${fetched.post?.id || ''}`, {
           newSemantics,
           baseStore,
         });
@@ -188,67 +247,31 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
          * baseStore nor a pending operation
          */
         if (!baseStore.has(quad)) {
-          const operation: QuadOperation = { type: 'add', quad };
-
-          if (!hasOperation(operations, operation)) {
-            const removeOperation: QuadOperation = { type: 'remove', quad };
-
-            /** if there was a remove operation remove that one */
-            if (hasOperation(operations, removeOperation)) {
-              if (DEBUG)
-                console.log(
-                  'operation "add" applied by removing a "remove" operation',
-                  removeOperation
-                );
-              operations.splice(operations.indexOf(removeOperation), 1);
-            } else {
-              if (DEBUG)
-                console.log('"add" operation found on newSemantics', {
-                  newSemantics,
-                  quad,
-                });
-              operations.push(operation);
-            }
-          }
+          addQuad(quad);
         }
       });
 
       /** add "remove" operations */
       forEachStore(baseStore, (quad) => {
         if (!newStore.has(quad)) {
-          const addOperation: QuadOperation = { type: 'add', quad };
-
-          if (hasOperation(operations, addOperation)) {
-            if (DEBUG)
-              console.log(
-                'operation "remove" applied by removing add operation',
-                {
-                  newSemantics,
-                  quad,
-                }
-              );
-            operations.splice(operations.indexOf(addOperation), 1);
-          } else {
-            if (DEBUG)
-              console.log('"remove" operation found on newSemantics', {
-                newSemantics,
-                quad,
-              });
-            operations.push({ type: 'remove', quad });
-          }
+          removeQuad(quad);
         }
       });
 
       if (DEBUG)
-        console.log('"update finishing, setting new operations', {
-          newSemantics,
-          operations,
-        });
+        console.log(
+          `update finishing, setting new operations  ${fetched.post?.id || ''}`,
+          {
+            newSemantics,
+            operations,
+          }
+        );
 
       setOperations([...operations]);
     },
-    [baseStore]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [addQuad, baseStore, operations, removeQuad]
   );
 
-  return { mergedSemantics, updateSemantics };
+  return { mergedSemantics, updateSemantics, addQuad, removeQuad };
 };

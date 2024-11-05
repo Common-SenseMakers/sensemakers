@@ -6,8 +6,6 @@ import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { RefCard } from '../common/RefCard';
 import { RefData } from './process.semantics';
 
-const DEBUG = false;
-
 /** renders the labels for one ref */
 export const RefWithLabels = (props: {
   ix: number;
@@ -36,7 +34,7 @@ export const RefWithLabels = (props: {
         if (!label_ontology)
           throw new Error(`Unexpected ontology not found for ${labelUri}`);
 
-        return label_ontology.display_name as string;
+        return label_ontology.display_name;
       }),
     [labelsOntology, refData.labelsUris]
   );

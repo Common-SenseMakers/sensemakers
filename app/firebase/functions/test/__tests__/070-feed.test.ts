@@ -84,25 +84,29 @@ describe('070 test feed', () => {
       const { feed } = services;
       const result1 = await feed.getFeed({
         fetchParams: { expectedAmount: 10 },
-        labels: [
-          'https://sense-nets.xyz/announcesResource',
-          'http://purl.org/spar/cito/discusses',
-        ],
+        semantics: {
+          labels: [
+            'https://sense-nets.xyz/announcesResource',
+            'http://purl.org/spar/cito/discusses',
+          ],
+        },
       });
       expect(result1).to.have.length(3);
 
       const result2 = await feed.getFeed({
         fetchParams: { expectedAmount: 10 },
-        labels: [
-          'https://sense-nets.xyz/asksQuestionAbout',
-          'http://purl.org/spar/cito/includesQuotationFrom',
-        ],
+        semantics: {
+          labels: [
+            'https://sense-nets.xyz/asksQuestionAbout',
+            'http://purl.org/spar/cito/includesQuotationFrom',
+          ],
+        },
       });
       expect(result2).to.have.length(2);
 
       const result3 = await feed.getFeed({
         fetchParams: { expectedAmount: 10 },
-        labels: [],
+        semantics: { labels: [] },
       });
       expect(result3).to.have.length(5);
     });

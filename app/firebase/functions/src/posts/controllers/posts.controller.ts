@@ -1,15 +1,11 @@
 import { RequestHandler } from 'express';
 
 import { AddUserDataPayload } from '../../@shared/types/types.fetch';
-import { PublishPostPayload } from '../../@shared/types/types.fetch';
 import { PLATFORM } from '../../@shared/types/types.platforms';
-import {
-  PostUpdatePayload,
-  PostsQuery,
-  UnpublishPlatformPostPayload,
-} from '../../@shared/types/types.posts';
+import { PostUpdatePayload, PostsQuery } from '../../@shared/types/types.posts';
 import { IS_EMULATOR } from '../../config/config.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
+import { queryParamsSchema } from '../../feed/feed.schema';
 import { logger } from '../../instances/logger';
 import {
   FETCH_BLUESKY_ACCOUNT_TASK,
@@ -20,13 +16,7 @@ import { getProfileId } from '../../profiles/profiles.repository';
 import { chunkNumber, enqueueTask } from '../../tasksUtils/tasks.support';
 import { canReadPost } from '../posts.access.control';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
-import {
-  approvePostSchema,
-  getUserPostsQuerySchema,
-  postIdValidation,
-  retractPostSchema,
-  updatePostSchema,
-} from './posts.schema';
+import { postIdValidation, updatePostSchema } from './posts.schema';
 
 const DEBUG = true;
 
@@ -38,7 +28,7 @@ export const getUserPostsController: RequestHandler = async (
   response
 ) => {
   try {
-    const queryParams = (await getUserPostsQuerySchema.validate(
+    const queryParams = (await queryParamsSchema.validate(
       request.body
     )) as PostsQuery;
 
@@ -90,38 +80,6 @@ export const getPostController: RequestHandler = async (request, response) => {
         });
       response.status(200).send({ success: true, data: post });
     }
-  } catch (error: any) {
-    logger.error('error', error);
-    response.status(500).send({ success: false, error: error.message });
-  }
-};
-
-export const approvePostController: RequestHandler = async (
-  request,
-  response
-) => {
-  try {
-    const userId = getAuthenticatedUser(request, true);
-    const { postsManager } = getServices(request);
-
-    const payload = (await approvePostSchema.validate(
-      request.body
-    )) as PublishPostPayload;
-
-    await postsManager.publishPost(
-      payload.post,
-      payload.platformIds,
-      undefined,
-      false,
-      userId
-    );
-
-    if (DEBUG)
-      logger.debug(`${request.path}: approvePost`, {
-        post: payload,
-      });
-
-    response.status(200).send({ success: true });
   } catch (error: any) {
     logger.error('error', error);
     response.status(500).send({ success: false, error: error.message });
@@ -185,34 +143,6 @@ export const updatePostController: RequestHandler = async (
         manager
       );
     });
-
-    if (DEBUG) logger.debug(`${request.path}: updatePost`, payload);
-
-    response.status(200).send({ success: true });
-  } catch (error) {
-    logger.error('error', error);
-    response.status(500).send({ success: false, error });
-  }
-};
-
-export const unpublishPlatformPostController: RequestHandler = async (
-  request,
-  response
-) => {
-  try {
-    const userId = getAuthenticatedUser(request, true);
-    const { postsManager } = getServices(request);
-
-    const payload = (await retractPostSchema.validate(
-      request.body
-    )) as UnpublishPlatformPostPayload;
-
-    await postsManager.unpublishPlatformPost(
-      payload.postId,
-      userId,
-      payload.platformId,
-      payload.post_id
-    );
 
     if (DEBUG) logger.debug(`${request.path}: updatePost`, payload);
 

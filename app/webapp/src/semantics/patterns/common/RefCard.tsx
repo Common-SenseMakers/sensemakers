@@ -1,4 +1,4 @@
-import { Anchor, Box, Paragraph, Text } from 'grommet';
+import { Box, Paragraph, Text } from 'grommet';
 
 import { AppHeading, AppLabel } from '../../../ui-components';
 import { useThemeContext } from '../../../ui-components/ThemedApp';

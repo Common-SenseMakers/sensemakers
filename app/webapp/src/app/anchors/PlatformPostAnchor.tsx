@@ -1,5 +1,4 @@
-import { Anchor, AnchorExtendedProps, Box } from 'grommet';
-import { useTranslation } from 'react-i18next';
+import { Anchor, Box } from 'grommet';
 
 import { GenericPlatformPostDetails } from '../../post/platform.post.details';
 import { LoadingDiv } from '../../ui-components/LoadingDiv';
@@ -25,7 +24,6 @@ export const PlatformPostAnchor = (props: {
   loading?: boolean;
   details?: GenericPlatformPostDetails;
 }) => {
-  const { t } = useTranslation();
   const { constants } = useThemeContext();
 
   const { loading, details } = props;

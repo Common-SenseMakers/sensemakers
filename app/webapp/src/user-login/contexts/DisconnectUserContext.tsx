@@ -1,10 +1,14 @@
-import { PropsWithChildren, createContext, useContext, useEffect } from 'react';
+import {
+  PropsWithChildren,
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+} from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { AbsoluteRoutes } from '../../route.names';
 import { OverallLoginStatus, useAccountContext } from './AccountContext';
-
-const DEBUG = false;
 
 export type ConnectedUserContextType = {
   disconnect: () => void;
@@ -22,7 +26,10 @@ export const DisconnectUserContext = (props: PropsWithChildren) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const closedRoutes = [AbsoluteRoutes.Post(''), AbsoluteRoutes.Settings];
+  const closedRoutes = useMemo(
+    () => [AbsoluteRoutes.Post(''), AbsoluteRoutes.Settings],
+    []
+  );
 
   useEffect(() => {
     /** navigate home if not logged user */
@@ -32,7 +39,7 @@ export const DisconnectUserContext = (props: PropsWithChildren) => {
     if (isClosedRoute && overallLoginStatus === OverallLoginStatus.LoggedOut) {
       navigate(AbsoluteRoutes.App);
     }
-  }, [location, overallLoginStatus]);
+  }, [closedRoutes, location, navigate, overallLoginStatus]);
 
   const disconnect = () => {
     disconnectServer();

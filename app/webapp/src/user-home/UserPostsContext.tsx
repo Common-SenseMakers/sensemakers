@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { createContext } from 'react';
 import { useLocation } from 'react-router-dom';
 
@@ -12,11 +12,20 @@ import {
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
-  PostsQueryStatus,
+  PostsQuery,
 } from '../shared/types/types.posts';
+import {
+  NOT_SCIENCE_TOPIC_URI,
+  SCIENCE_TOPIC_URI,
+} from '../shared/utils/semantics.helper';
 
 const DEBUG = false;
 
+export enum PostsQueryStatus {
+  ALL = 'all',
+  IGNORED = 'ignored',
+  IS_SCIENCE = 'science',
+}
 interface PostContextType {
   filterStatus: PostsQueryStatus;
   feed: PostFetcherInterface;
@@ -34,12 +43,16 @@ export const UserPostsContext: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
   const appFetch = useAppFetch();
-
   const location = useLocation();
 
   /** status is derived from location
-   * set the filter status based on it */
-  const status = useMemo(() => {
+   * set the filter status based on it.
+   * It then converts into topics, which is
+   * what the backend understands*/
+  const { queryParams, status } = useMemo((): {
+    queryParams: PostsQuery;
+    status: PostsQueryStatus;
+  } => {
     if (
       Object.values(PostsQueryStatus)
         .map((v) => `/${v}`)
@@ -48,12 +61,26 @@ export const UserPostsContext: React.FC<{
       const newStatus = location.pathname.slice(1) as PostsQueryStatus;
       if (DEBUG)
         console.log(`changing status based on location to ${newStatus}`);
-      return newStatus;
+      if (newStatus === PostsQueryStatus.ALL) {
+        return { queryParams: {}, status: PostsQueryStatus.ALL };
+      }
+      if (newStatus === PostsQueryStatus.IGNORED) {
+        return {
+          queryParams: { semantics: { topics: [NOT_SCIENCE_TOPIC_URI] } },
+          status: PostsQueryStatus.IGNORED,
+        };
+      }
+      if (newStatus === PostsQueryStatus.IS_SCIENCE) {
+        return {
+          queryParams: { semantics: { topics: [SCIENCE_TOPIC_URI] } },
+          status: PostsQueryStatus.IS_SCIENCE,
+        };
+      }
     }
-    return PostsQueryStatus.DRAFTS;
+    return { queryParams: {}, status: PostsQueryStatus.ALL };
   }, [location]);
 
-  const onPostsAdded = (newPosts: AppPostFull[]) => {
+  const onPostsAdded = useCallback((newPosts: AppPostFull[]) => {
     /** trigger parse if not parsed and not parsing */
     newPosts.forEach((post) => {
       if (
@@ -61,20 +88,22 @@ export const UserPostsContext: React.FC<{
         post.parsingStatus !== AppPostParsingStatus.PROCESSING
       ) {
         // async trigger parse
-        appFetch(`/api/posts/parse`, { postId: post.id });
+        // console.warn(`skipping triggering reparsing of post ${post.id}`);
+        appFetch(`/api/posts/parse`, { postId: post.id }).catch(console.error);
       }
     });
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const config = useMemo((): FetcherConfig => {
     return {
       endpoint: '/api/posts/getOfUser',
-      status,
+      queryParams,
       subscribe: true,
       onPostsAdded,
-      DEBUG_PREIX: '[USER POSTS] ',
+      DEBUG_PREFIX: '[USER POSTS] ',
     };
-  }, [status]);
+  }, [onPostsAdded, queryParams]);
 
   const feed = usePostsFetcher(config);
 

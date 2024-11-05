@@ -12,7 +12,7 @@ import { useSearchParams } from 'react-router-dom';
 
 import { useAppFetch } from '../../../api/app.fetch';
 import { useToastContext } from '../../../app/ToastsContext';
-import { I18Keys } from '../../../i18n/i18n';
+import { IntroKeys } from '../../../i18n/i18n.intro';
 import { HandleSignupResult } from '../../../shared/types/types.fetch';
 import {
   MastodonGetContextParams,
@@ -28,7 +28,7 @@ import {
 
 const DEBUG = false;
 
-const log = (...args: any[]) => {
+const log = (...args: unknown[]) => {
   if (DEBUG) console.log(...args);
 };
 export const LS_MASTODON_CONTEXT_KEY = 'mastodon-signin-context';
@@ -80,7 +80,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
         message: error,
       });
     }
-  }, [error]);
+  }, [error, show]);
 
   const connect = useCallback(
     async (
@@ -124,9 +124,9 @@ export const MastodonContext = (props: PropsWithChildren) => {
           );
           window.location.href = signupContext.authorizationUrl;
         }
-      } catch (err: any) {
+      } catch (err) {
         log('Error connecting to Mastodon', err);
-        setError(t(I18Keys.errorConnectMastodon, { domain }));
+        setError(t(IntroKeys.errorConnectMastodon, { domain }));
         setLoginFlowState(LoginFlowState.Idle);
         setPlatformConnectedStatus(
           PLATFORM.Mastodon,
@@ -134,7 +134,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
         );
       }
     },
-    [appFetch, setLoginFlowState]
+    [appFetch, setLoginFlowState, setPlatformConnectedStatus, t]
   );
 
   useEffect(() => {
@@ -157,7 +157,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
           log('Unexpected state: Mastodon context not found in localStorage');
           // unexpected state, reset
           searchParams.delete('code');
-          refreshConnected();
+          refreshConnected().catch(console.error);
           setSearchParams(searchParams);
         } else {
           const context = JSON.parse(contextStr) as MastodonSignupContext;
@@ -175,26 +175,28 @@ export const MastodonContext = (props: PropsWithChildren) => {
           appFetch<HandleSignupResult>(
             `/api/auth/${PLATFORM.Mastodon}/signup`,
             signupData
-          ).then((result) => {
-            log('Mastodon signup result', result);
-            if (result) {
-              localStorage.removeItem(LS_MASTODON_CONTEXT_KEY);
-            }
+          )
+            .then((result) => {
+              log('Mastodon signup result', result);
+              if (result) {
+                localStorage.removeItem(LS_MASTODON_CONTEXT_KEY);
+              }
 
-            if (result && result.ourAccessToken) {
-              setOurToken(result.ourAccessToken);
-            } else {
-              refreshConnected();
-            }
+              if (result && result.ourAccessToken) {
+                setOurToken(result.ourAccessToken);
+              } else {
+                refreshConnected().catch(console.error);
+              }
 
-            searchParams.delete('code');
-            setPlatformConnectedStatus(
-              PLATFORM.Mastodon,
-              PlatformConnectedStatus.Connected
-            );
-            refreshConnected();
-            setSearchParams(searchParams);
-          });
+              searchParams.delete('code');
+              setPlatformConnectedStatus(
+                PLATFORM.Mastodon,
+                PlatformConnectedStatus.Connected
+              );
+              refreshConnected().catch(console.error);
+              setSearchParams(searchParams);
+            })
+            .catch(console.error);
         }
       }
     }
@@ -204,6 +206,11 @@ export const MastodonContext = (props: PropsWithChildren) => {
     searchParams,
     connectedUser,
     setSearchParams,
+    getPlatformConnectedStatus,
+    refreshConnected,
+    appFetch,
+    setPlatformConnectedStatus,
+    setOurToken,
   ]);
 
   return (

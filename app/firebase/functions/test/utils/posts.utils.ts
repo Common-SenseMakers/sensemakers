@@ -11,11 +11,10 @@ import {
 } from '../../src/@shared/types/types.platforms';
 import {
   AppPost,
+  AppPostEditStatus,
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
-  AppPostRepublishedStatus,
-  AppPostReviewStatus,
   GenericThread,
 } from '../../src/@shared/types/types.posts';
 import { TwitterThread } from '../../src/@shared/types/types.twitter';
@@ -291,8 +290,7 @@ export const getMockPost = (
     origin: platformId || PLATFORM.Twitter,
     parsedStatus: AppPostParsedStatus.PROCESSED,
     parsingStatus: AppPostParsingStatus.IDLE,
-    reviewedStatus: AppPostReviewStatus.PENDING,
-    republishedStatus: AppPostRepublishedStatus.PENDING,
+    editStatus: refPost.editStatus || AppPostEditStatus.PENDING,
     mirrors: refPost.mirrors
       ? [...refPost.mirrors, platformMirror]
       : [platformMirror],

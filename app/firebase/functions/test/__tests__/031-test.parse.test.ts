@@ -96,6 +96,28 @@ describe('031 test parse', () => {
       expect(parsedPost.parsingStatus).to.equal(AppPostParsingStatus.IDLE);
       expect(parsedPost.semantics).to.not.be.undefined;
 
+      expect(parsedPost.structuredSemantics).to.not.be.undefined;
+      expect(parsedPost.structuredSemantics?.labels).to.not.be.undefined;
+
+      if (
+        !parsedPost.structuredSemantics ||
+        !parsedPost.structuredSemantics.labels
+      ) {
+        throw new Error('labels should be undefined');
+      }
+
+      if (
+        !parsedPost.structuredSemantics ||
+        !parsedPost.structuredSemantics.refsMeta
+      ) {
+        throw new Error('refsMeta should be undefined');
+      }
+
+      expect(parsedPost.structuredSemantics.labels).to.have.length(1);
+      expect(
+        Object.keys(parsedPost.structuredSemantics.refsMeta)
+      ).to.have.length(1);
+
       if (process.env.TEST_THREAD_ID) {
         logger.debug('parsedPost', JSON.stringify(parsedPost, null, 2));
       }

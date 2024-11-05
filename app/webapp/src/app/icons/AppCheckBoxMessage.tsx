@@ -64,8 +64,6 @@ export const AppCheckBoxMessage = (props: {
     props.onCheckChange(!props.checked);
   };
 
-  console.log('checked', props.checked);
-
   return (
     <AppButton onClick={() => clicked()} plain>
       <Box

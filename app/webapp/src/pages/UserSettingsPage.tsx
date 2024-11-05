@@ -1,24 +1,18 @@
 import { Box, Text } from 'grommet';
-import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { useAppFetch } from '../api/app.fetch';
 import { BlueskyIcon, MastodonIcon, TwitterIcon } from '../app/common/Icons';
-import { AutopostIcon } from '../app/icons/AutopostIcon';
-import { BellIcon } from '../app/icons/BellIcon';
 import { DocIcon } from '../app/icons/DocIcon';
-import { EmailIcon } from '../app/icons/EmailIcon';
 import { OrcidIcon } from '../app/icons/OrcidIcon';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { SupportIcon } from '../app/icons/SupportIcon';
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
-import { I18Keys } from '../i18n/i18n';
+import { PlatformsKeys } from '../i18n/i18n.platforms';
+import { SettingsKeys } from '../i18n/i18n.settings';
 import { RouteNames } from '../route.names';
-import { NotificationFreq } from '../shared/types/types.notifications';
 import { PLATFORM } from '../shared/types/types.platforms';
-import { UserSettingsUpdate } from '../shared/types/types.user';
 import { AppButton, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
@@ -33,12 +27,7 @@ import { useMastodonContext } from '../user-login/contexts/platforms/MastodonCon
 import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { useTwitterContext } from '../user-login/contexts/platforms/TwitterContext';
 import { PlatformSection } from '../user-settings/PlatformsSection';
-import { SettingsOptionSelector } from '../user-settings/SettingsOptionsSelector';
-import {
-  SettingsSection,
-  SettingsSections,
-} from '../user-settings/SettingsSection';
-import { SettingsSubPage } from '../user-settings/UserSettingsSubpage';
+import { SettingsSection } from '../user-settings/SettingsSection';
 
 export const SettingSectionTitle = (props: { value: string }) => {
   const { constants } = useThemeContext();
@@ -57,15 +46,7 @@ export const UserSettingsPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const appFetch = useAppFetch();
-
-  const {
-    connectedUser,
-    refresh,
-    currentNotifications,
-    getPlatformConnectedStatus,
-  } = useAccountContext();
-  const [isSetting, setIsSetting] = useState(false);
+  const { connectedUser, getPlatformConnectedStatus } = useAccountContext();
   const { disconnect } = useDisconnectContext();
 
   const { connect: connectOrcid, connecting: connectingOrcid } =
@@ -78,73 +59,10 @@ export const UserSettingsPage = () => {
   const { connect: connectTwitter, needConnect: needConnectTwitter } =
     useTwitterContext();
 
-  const [showSettingsPage, setShowSettingsPage] = useState<
-    SettingsSections | undefined
-  >(undefined);
-
   const twitterProfile = connectedUser?.profiles?.twitter;
   const mastodonProfile = connectedUser?.profiles?.mastodon;
   const blueskyProfile = connectedUser?.profiles?.bluesky;
   const orcidAccount = connectedUser?.profiles?.orcid;
-
-  const setSettings = async (newSettings: UserSettingsUpdate) => {
-    return appFetch('/api/auth/settings', newSettings).then(() => {
-      setIsSetting(false);
-      refresh();
-    });
-  };
-
-  const setNotifications = (notificationFreq: NotificationFreq) => {
-    if (connectedUser) {
-      const newSettings: UserSettingsUpdate = {
-        notificationFreq,
-      };
-
-      void setSettings(newSettings);
-    }
-  };
-
-  const notificationsPage = (
-    <SettingsSubPage
-      title={t(I18Keys.notificationsSettings)}
-      subtitle={t(I18Keys.notificationsSettingsExplainer)}
-      onBack={() => setShowSettingsPage(undefined)}
-      content={
-        <Box>
-          <SettingsOptionSelector
-            options={[
-              {
-                title: t(I18Keys.notificationSettingsOpt1Title),
-                id: NotificationFreq.Daily,
-                optionSelected: (id) =>
-                  setNotifications(id as NotificationFreq),
-                selected: currentNotifications === NotificationFreq.Daily,
-              },
-              {
-                title: t(I18Keys.notificationSettingsOpt2Title),
-                id: NotificationFreq.Weekly,
-                optionSelected: (id) =>
-                  setNotifications(id as NotificationFreq),
-                selected: currentNotifications === NotificationFreq.Weekly,
-              },
-              {
-                title: t(I18Keys.notificationSettingsOpt3Title),
-                id: NotificationFreq.Monthly,
-                optionSelected: (id) =>
-                  setNotifications(id as NotificationFreq),
-                selected: currentNotifications === NotificationFreq.Monthly,
-              },
-              {
-                title: t(I18Keys.notificationSettingsOpt4Title),
-                id: NotificationFreq.None,
-                optionSelected: (id) =>
-                  setNotifications(id as NotificationFreq),
-                selected: currentNotifications === NotificationFreq.None,
-              },
-            ]}></SettingsOptionSelector>
-        </Box>
-      }></SettingsSubPage>
-  );
 
   const content = (() => {
     if (!connectedUser) {
@@ -164,32 +82,34 @@ export const UserSettingsPage = () => {
             borderBottom: `1px solid ${constants.colors.border}`,
           }}
           justify="center">
-          <AppHeading level="3">{t(I18Keys.settings)}</AppHeading>
+          <AppHeading level="3">{t(SettingsKeys.settings)}</AppHeading>
         </Box>
 
         <Box
           pad={{ horizontal: 'medium', top: '24px' }}
           margin={{ bottom: '8px' }}>
           <SettingSectionTitle
-            value={t(I18Keys.usingApp)}></SettingSectionTitle>
+            value={t(SettingsKeys.usingApp)}></SettingSectionTitle>
         </Box>
 
         <SettingsSection
           icon={<DocIcon size={24}></DocIcon>}
-          title={t(I18Keys.readTheDocs)}
+          title={t(SettingsKeys.readTheDocs)}
           description={
             <Trans
-              i18nKey={I18Keys.readTheDocsDescription}
+              i18nKey={SettingsKeys.readTheDocsDescription}
+              // eslint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/anchor-is-valid
               components={{ a: <a></a> }}></Trans>
           }
           showChevron={false}></SettingsSection>
 
         <SettingsSection
           icon={<SupportIcon size={24}></SupportIcon>}
-          title={t(I18Keys.getSupport)}
+          title={t(SettingsKeys.getSupport)}
           description={
             <Trans
-              i18nKey={I18Keys.getSupportDescription}
+              i18nKey={SettingsKeys.getSupportDescription}
+              // eslint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/anchor-is-valid
               components={{ a: <a></a> }}></Trans>
           }
           showChevron={false}></SettingsSection>
@@ -198,7 +118,7 @@ export const UserSettingsPage = () => {
           pad={{ horizontal: 'medium' }}
           margin={{ top: '24px', bottom: '8px' }}>
           <SettingSectionTitle
-            value={t(I18Keys.yourAccounts)}></SettingSectionTitle>
+            value={t(SettingsKeys.yourAccounts)}></SettingSectionTitle>
         </Box>
 
         <PlatformSection
@@ -209,9 +129,9 @@ export const UserSettingsPage = () => {
               <TwitterIcon size={40} color="black"></TwitterIcon>
             )
           }
-          platformName={t(I18Keys.XTwitter)}
+          platformName={t(PlatformsKeys.XTwitter)}
           onButtonClicked={() => {
-            connectTwitter && connectTwitter('read');
+            connectTwitter && connectTwitter('read').catch(console.error);
           }}
           buttonText={needConnectTwitter ? 'connect' : ''}
           username={twitterProfile ? `@${twitterProfile.username}` : ''}
@@ -269,7 +189,7 @@ export const UserSettingsPage = () => {
 
         <PlatformSection
           icon={<OrcidIcon size={40}></OrcidIcon>}
-          platformName={t(I18Keys.ORCID)}
+          platformName={t(PlatformsKeys.ORCID)}
           onButtonClicked={() => connectOrcid('/settings')}
           buttonText="connect"
           username={
@@ -286,11 +206,11 @@ export const UserSettingsPage = () => {
           margin={{ top: '54px', bottom: '8px' }}>
           <SettingSectionTitle
             value={
-              t(I18Keys.logoutTitle) +
+              t(SettingsKeys.logoutTitle) +
               (twitterProfile ? ` @${twitterProfile.username}` : '')
             }></SettingSectionTitle>
           <AppButton
-            label={t(I18Keys.logout)}
+            label={t(SettingsKeys.logout)}
             onClick={() => disconnect()}></AppButton>
         </Box>
       </Box>

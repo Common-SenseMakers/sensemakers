@@ -7,17 +7,17 @@ import { useAccountContext } from '../user-login/contexts/AccountContext';
 const DEBUG = false;
 
 export interface AppFetch {
-  post<T = any, R = AxiosResponse<T>['data'], D = any>(
+  post<T = unknown, R = AxiosResponse<T>['data'], D = unknown>(
     url: string,
     data?: D,
     config?: AxiosRequestConfig<D>
   ): Promise<R>;
 }
 
-export const _appFetch = async <T = any, D = any>(
+export const _appFetch = async <T = unknown, D = unknown>(
   path: string,
   payload?: D,
-  accessToken?: string
+  accessToken?: string | null
 ) => {
   try {
     const headers: AxiosRequestConfig['headers'] = {};
@@ -27,6 +27,7 @@ export const _appFetch = async <T = any, D = any>(
     }
 
     const res = await axios.post<{ data: T }>(
+      // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
       FUNCTIONS_BASE + path,
       payload || {},
       {
@@ -38,9 +39,15 @@ export const _appFetch = async <T = any, D = any>(
       console.log(`appFetch: ${path}`, { payload, data: res.data.data });
 
     return (res.data.data ? res.data.data : null) as T;
-  } catch (e: any) {
+  } catch (e) {
     console.error(e);
-    throw new Error(`Error fetching ${path} - ${e.response.data.error}`);
+    if (e instanceof Error) {
+      const axiosError = e as { response?: { data?: { error?: string } } };
+      const errorMessage = axiosError.response?.data?.error ?? 'Unknown error';
+      throw new Error(`Error fetching ${path} - ${errorMessage}`);
+    }
+
+    throw new Error(`Error fetching ${path} - Unknown error`);
   }
 };
 
@@ -48,7 +55,7 @@ export const useAppFetch = () => {
   const { token } = useAccountContext();
 
   const appFetch = useCallback(
-    async <T, D = any>(path: string, data?: D, auth: boolean = false) => {
+    async <T, D = unknown>(path: string, data?: D, auth = false) => {
       if (auth && !token) {
         throw new Error('No token available');
       }

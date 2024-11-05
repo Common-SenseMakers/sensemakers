@@ -5,10 +5,6 @@ import {
   autofetchUserPosts,
 } from '../../src/posts/tasks/posts.autofetch.task';
 import {
-  AUTOPOST_POST_TASK,
-  autopostPostTask,
-} from '../../src/posts/tasks/posts.autopost.task';
-import {
   PARSE_POST_TASK,
   parsePostTask,
 } from '../../src/posts/tasks/posts.parse.task';
@@ -44,23 +40,6 @@ export const enqueueTaskMockOnTests = async (
       );
 
       /** should detect the parse and trigger the autopost if needed */
-      await postUpdatedHookOnTest(postAfter, services, postBefore);
-    }
-
-    if (name === AUTOPOST_POST_TASK) {
-      const { db, postsManager } = services;
-
-      const postBefore = await db.run(async (manager) =>
-        postsManager.processing.posts.get(params.postId, manager, true)
-      );
-
-      await autopostPostTask({ data: params } as any, services);
-
-      const postAfter = await db.run(async (manager) =>
-        postsManager.processing.posts.get(params.postId, manager, true)
-      );
-
-      /** should create the activity */
       await postUpdatedHookOnTest(postAfter, services, postBefore);
     }
 

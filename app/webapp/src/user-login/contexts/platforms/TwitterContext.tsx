@@ -10,7 +10,7 @@ import { useSearchParams } from 'react-router-dom';
 
 import { useAppFetch } from '../../../api/app.fetch';
 import { useToastContext } from '../../../app/ToastsContext';
-import { I18Keys } from '../../../i18n/i18n';
+import { IntroKeys } from '../../../i18n/i18n.intro';
 import { HandleSignupResult } from '../../../shared/types/types.fetch';
 import { PLATFORM } from '../../../shared/types/types.platforms';
 import {
@@ -25,13 +25,12 @@ import {
 import { useDisconnectContext } from '../DisconnectUserContext';
 
 const DEBUG = false;
-const WAS_CONNECTING_TWITTER = 'was-connecting-twitter';
 
 export const LS_TWITTER_CONTEXT_KEY = 'twitter-signin-context';
 
 /** Manages the authentication process with Twitter */
 export type TwitterContextType = {
-  connect?: (type: TwitterGetContextParams['type']) => void;
+  connect?: (type: TwitterGetContextParams['type']) => Promise<void>;
   needConnect?: boolean;
 };
 
@@ -108,7 +107,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
           PLATFORM.Twitter,
           PlatformConnectedStatus.Disconnected
         );
-        show({ title: t(I18Keys.errorConnectTwitter), message: error_param });
+        show({ title: t(IntroKeys.errorConnectTwitter), message: error_param });
         searchParams.delete('error');
         searchParams.delete('state');
         setSearchParams(searchParams);
@@ -155,7 +154,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
           // unexpected state, reset
           searchParams.delete('state');
           searchParams.delete('code');
-          refreshConnected();
+          refreshConnected().catch(console.error);
           setSearchParams(searchParams);
         } else {
           const context = JSON.parse(contextStr) as TwitterSignupContext;
@@ -181,7 +180,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
               if (result.ourAccessToken) {
                 setOurToken(result.ourAccessToken);
               } else {
-                refreshConnected();
+                refreshConnected().catch(console.error);
               }
 
               setPlatformConnectedStatus(
@@ -202,6 +201,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
         }
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     state_param,
     code_param,
@@ -210,6 +210,11 @@ export const TwitterContext = (props: PropsWithChildren) => {
     searchParams,
     connectedUser,
     setSearchParams,
+    show,
+    t,
+    refreshConnected,
+    appFetch,
+    setOurToken,
   ]);
 
   return (

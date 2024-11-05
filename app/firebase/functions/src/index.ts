@@ -38,10 +38,6 @@ import {
   autofetchUserPosts,
   triggerAutofetchPosts,
 } from './posts/tasks/posts.autofetch.task';
-import {
-  AUTOPOST_POST_TASK,
-  autopostPostTask,
-} from './posts/tasks/posts.autopost.task';
 import { PARSE_POST_TASK, parsePostTask } from './posts/tasks/posts.parse.task';
 import { router } from './router';
 import { getConfig } from './services.config';
@@ -141,10 +137,6 @@ exports[AUTOFETCH_POSTS_TASK] = onTaskDispatched(
       createServices(firestore, getConfig())
     ));
   }
-);
-
-exports[AUTOPOST_POST_TASK] = onTaskDispatched(deployConfigTasks, (req) =>
-  autopostPostTask(req, createServices(firestore, getConfig()))
 );
 
 /**

@@ -2,6 +2,7 @@ import { Box, Heading, Layer, Meter, Spinner, Text } from 'grommet';
 import {
   ReactNode,
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useRef,
@@ -79,7 +80,7 @@ export const LoadingContext = ({ children }: LoadingContextProps) => {
   };
 
   /** an always-running periodic call */
-  const updateTime = () => {
+  const updateTime = useCallback(() => {
     if (expectedLoadingTime && timeElapsedRef.current !== undefined) {
       const ratio = timeElapsedRef.current / expectedLoadingTime;
       const ratioPending = 1 - ratio;
@@ -98,7 +99,7 @@ export const LoadingContext = ({ children }: LoadingContextProps) => {
 
       setTimeElapsed(timeElapsedRef.current + increment);
     }
-  };
+  }, [expectedLoadingTime]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -106,7 +107,7 @@ export const LoadingContext = ({ children }: LoadingContextProps) => {
     }, PERIOD);
 
     return () => clearInterval(intervalId);
-  }, [expectedLoadingTime]);
+  }, [expectedLoadingTime, updateTime]);
 
   const setExpectedLoadingTime = (timeMs: number) => {
     setTimeElapsed(0);

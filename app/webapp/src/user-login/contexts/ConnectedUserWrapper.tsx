@@ -1,4 +1,3 @@
-import { Nav } from 'grommet';
 import { PropsWithChildren, createContext, useContext } from 'react';
 
 import { UserPostsContext } from '../../user-home/UserPostsContext';
@@ -10,8 +9,7 @@ import { MastodonContext } from './platforms/MastodonContext';
 import { OrcidContext } from './platforms/OrcidContext';
 import { TwitterContext } from './platforms/TwitterContext';
 
-const DEBUG = false;
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ConnectedUserContextType {}
 
 const ConnectedUserWrapperValue = createContext<

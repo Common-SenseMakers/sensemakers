@@ -3,7 +3,7 @@ import { logger } from 'firebase-functions/v1';
 
 import { PostsQuery } from '../@shared/types/types.posts';
 import { getAuthenticatedUser, getServices } from '../controllers.utils';
-import { getFeedSchema } from './feed.schema';
+import { queryParamsSchema } from './feed.schema';
 
 const DEBUG = false;
 
@@ -15,7 +15,7 @@ export const getPublicFeedController: RequestHandler = async (
   response
 ) => {
   try {
-    const queryParams = (await getFeedSchema.validate(
+    const queryParams = (await queryParamsSchema.validate(
       request.body
     )) as PostsQuery;
 

@@ -7,7 +7,7 @@ import {
   mapStoreElements,
   writeRDF,
 } from '../../../shared/utils/n3.utils';
-import { THIS_POST_NAME } from '../../../shared/utils/semantics.helper';
+import { THIS_POST_NAME_URI } from '../../../shared/utils/semantics.helper';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { LoadingDiv } from '../../../ui-components/LoadingDiv';
 import { useSemanticsStore } from '../common/use.semantics';
@@ -32,7 +32,7 @@ export const KeywordsComponent = (props: PatternProps) => {
 
   const addKeyword = async (keyword: string) => {
     if (props.semanticsUpdated && store && KEYWORD_PREDICATE) {
-      const THIS_POST = DataFactory.namedNode(THIS_POST_NAME);
+      const THIS_POST = DataFactory.namedNode(THIS_POST_NAME_URI);
       const labelNode = DataFactory.namedNode(KEYWORD_PREDICATE);
       const refNode = DataFactory.literal(keyword);
 
@@ -94,8 +94,12 @@ export const KeywordsComponent = (props: PatternProps) => {
           editable={props.editable}
           colors={{ font: '#498283', background: '#F5FCFC', border: '#BDD9D7' }}
           labels={keywords}
-          addLabel={(newLabel) => addKeyword(newLabel)}
-          removeLabel={(newLabel) => removeKeyword(newLabel)}></AppLabelsEditor>
+          addLabel={(newLabel) => {
+            addKeyword(newLabel).catch(console.error);
+          }}
+          removeLabel={(newLabel) => {
+            removeKeyword(newLabel).catch(console.error);
+          }}></AppLabelsEditor>
       </Box>
     </Box>
   );

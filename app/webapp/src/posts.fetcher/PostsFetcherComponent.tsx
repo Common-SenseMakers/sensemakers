@@ -1,24 +1,22 @@
-import { Box, BoxExtendedProps, Text } from 'grommet';
+import { Box, Text } from 'grommet';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { ModalContent } from '../app/AppModalStandard';
 import { useToastContext } from '../app/ToastsContext';
-import { FilterIcon } from '../app/icons/FilterIcon';
 import { HmmIcon } from '../app/icons/HmmIcon';
 import { ReloadIcon } from '../app/icons/ReloadIcon';
 import { useViewport } from '../app/layout/Viewport';
-import { I18Keys } from '../i18n/i18n';
+import { AppGeneralKeys } from '../i18n/i18n.app.general';
 import { PostCard } from '../post/PostCard';
 import { PostCardLoading } from '../post/PostCardLoading';
 import { PostContext } from '../post/post.context/PostContext';
-import { PostsQuery, PostsQueryStatus } from '../shared/types/types.posts';
-import { AppButton, AppHeading, AppSelect } from '../ui-components';
+import { AppButton, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
-import { PostFetcherInterface, usePostsFetcher } from './posts.fetcher.hook';
+import { PostFetcherInterface } from './posts.fetcher.hook';
 
 const DEBUG = false;
 
@@ -35,9 +33,6 @@ export interface FilterOption {
 export const PostsFetcherComponent = (props: {
   feed: PostFetcherInterface;
   pageTitle: string;
-  filterOptions: FilterOption[];
-  status?: PostsQueryStatus;
-  onFilterOptionChanged: (filter: PostsQuery) => void;
   isPublicFeed?: boolean;
   showHeader?: boolean;
 }) => {
@@ -47,9 +42,6 @@ export const PostsFetcherComponent = (props: {
 
   const {
     pageTitle,
-    status: filterStatus,
-    filterOptions,
-    onFilterOptionChanged,
     feed,
     isPublicFeed: _isPublicFeed,
     showHeader: _showHeader,
@@ -76,9 +68,17 @@ export const PostsFetcherComponent = (props: {
 
   useEffect(() => {
     if (isAtBottom && !isLoading && moreToFetch) {
+      if (DEBUG)
+        console.log(`${feed.feedNameDebug}fetchingOlder due to isAtBottom`, {
+          isAtBottom,
+          isLoading,
+          moreToFetch,
+        });
+
       fetchOlder();
     }
-  }, [isAtBottom]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchOlder, isAtBottom, isLoading, moreToFetch]);
 
   useEffect(() => {
     const error = errorFetchingOlder || errorFetchingNewer;
@@ -105,7 +105,7 @@ export const PostsFetcherComponent = (props: {
         message,
       });
     }
-  }, [errorFetchingOlder, errorFetchingNewer]);
+  }, [errorFetchingOlder, errorFetchingNewer, show]);
 
   const content = useMemo(() => {
     if (DEBUG) {
@@ -128,7 +128,7 @@ export const PostsFetcherComponent = (props: {
         <BoxCentered style={{ height: '100%' }}>
           <ModalContent
             type="small"
-            title={t(I18Keys.noPostsFound)}
+            title={t(AppGeneralKeys.noPostsFound)}
             icon={
               <BoxCentered
                 style={{
@@ -141,7 +141,9 @@ export const PostsFetcherComponent = (props: {
                 <HmmIcon size={40}></HmmIcon>
               </BoxCentered>
             }
-            parragraphs={[<>{t(I18Keys.noPostsFoundDesc)}</>]}></ModalContent>
+            parragraphs={[
+              <>{t(AppGeneralKeys.noPostsFoundDesc)}</>,
+            ]}></ModalContent>
         </BoxCentered>
       );
     }
@@ -183,7 +185,7 @@ export const PostsFetcherComponent = (props: {
                 cursor: 'pointer',
               }}
               onClick={() => fetchOlder()}>
-              {t(I18Keys.loadMorePosts)}
+              {t(AppGeneralKeys.loadMorePosts)}
             </Text>
           </Box>
         )}
@@ -200,7 +202,7 @@ export const PostsFetcherComponent = (props: {
                 lineHeight: '16px',
                 color: 'grey',
               }}>
-              {t(I18Keys.noMorePosts)}
+              {t(AppGeneralKeys.noMorePosts)}
             </Text>
           </Box>
         )}
@@ -209,51 +211,13 @@ export const PostsFetcherComponent = (props: {
   }, [
     posts,
     isLoading,
-    isPublicFeed,
     isFetchingOlder,
     moreToFetch,
+    t,
+    isPublicFeed,
+    navigate,
     fetchOlder,
   ]);
-
-  const FilterValue = (
-    props: {
-      status?: string;
-      border?: boolean;
-      padx?: boolean;
-    } & BoxExtendedProps
-  ) => {
-    const pretty = filterOptions.find(
-      (opt) => opt.value === props.status
-    )?.pretty;
-    return (
-      <Box pad={{ horizontal: 'small', vertical: 'small' }} width="100%">
-        <Text size="small">{pretty}</Text>
-      </Box>
-    );
-  };
-
-  const options = filterOptions.map((opt) => opt.value);
-
-  const menu = (
-    <AppSelect
-      value={
-        <Box direction="row" align="center">
-          <FilterValue border status={filterStatus}></FilterValue>
-          <FilterIcon></FilterIcon>
-        </Box>
-      }
-      options={options}
-      onChange={(e) => {
-        onFilterOptionChanged({
-          status: e.target.value,
-          fetchParams: { expectedAmount: 10 },
-        });
-      }}>
-      {(status) => {
-        return <FilterValue padx status={status}></FilterValue>;
-      }}
-    </AppSelect>
-  );
 
   const reload = isFetchingNewer ? (
     <Box>
@@ -279,7 +243,6 @@ export const PostsFetcherComponent = (props: {
           <AppHeading level="3">{pageTitle}</AppHeading>
           <BoxCentered style={{ height: '40px' }}>{reload}</BoxCentered>
         </Box>
-        <Box>{menu}</Box>
       </Box>
     </Box>
   );

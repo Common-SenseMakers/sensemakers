@@ -12,7 +12,7 @@ export const PostPage = () => {
 
   const postInit = useMemo(
     () => (postId ? feed.getPost(postId) : undefined),
-    [postId]
+    [feed, postId]
   );
 
   return (

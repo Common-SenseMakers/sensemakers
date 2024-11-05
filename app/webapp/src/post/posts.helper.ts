@@ -1,9 +1,9 @@
 import {
   AppPost,
+  AppPostEditStatus,
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
-  AppPostReviewStatus,
 } from '../shared/types/types.posts';
 
 /** The prosemirror render assumes --- separates the posts and creates <p> for each */
@@ -35,22 +35,12 @@ export const getPostStatuses = (post?: AppPostFull): AppPostStatus => {
   const isParsing =
     post && post.parsingStatus === AppPostParsingStatus.PROCESSING;
 
-  const pending = post && post.reviewedStatus === AppPostReviewStatus.PENDING;
-  const ignored = post && post.reviewedStatus === AppPostReviewStatus.IGNORED;
-
-  const isEditing = post && post.reviewedStatus === AppPostReviewStatus.DRAFT;
+  const isEditing = post && post.editStatus === AppPostEditStatus.DRAFT;
 
   return {
     processed,
     errored,
     isParsing,
-    pending,
-    ignored,
     isEditing,
   };
-};
-
-export const hideSemanticsHelper = (post?: AppPostFull): boolean => {
-  const hide = post && post.reviewedStatus === AppPostReviewStatus.IGNORED;
-  return hide !== undefined && hide;
 };

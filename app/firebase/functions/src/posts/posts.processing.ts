@@ -1,8 +1,4 @@
-import {
-  ParsePostResult,
-  RefMeta,
-  StructuredSemantics,
-} from '../@shared/types/types.parser';
+import { ParsePostResult, RefMeta } from '../@shared/types/types.parser';
 import {
   PlatformPost,
   PlatformPostCreate,
@@ -12,14 +8,18 @@ import { PLATFORM } from '../@shared/types/types.platforms';
 import {
   AppPost,
   AppPostCreate,
+  AppPostEditStatus,
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
-  AppPostRepublishedStatus,
-  AppPostReviewStatus,
+  StructuredSemantics,
 } from '../@shared/types/types.posts';
 import { DefinedIfTrue } from '../@shared/types/types.user';
 import { mapStoreElements, parseRDF } from '../@shared/utils/n3.utils';
+import {
+  HAS_KEYWORD_URI,
+  HAS_TOPIC_URI,
+} from '../@shared/utils/semantics.helper';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { LinksService } from '../links/links.service';
@@ -98,6 +98,7 @@ export class PostsProcessing {
         authorUserId,
         mirrorsIds: [platformPostCreated.id],
         createdAtMs: platformPost.posted?.timestampMs || this.time.now(),
+        editStatus: AppPostEditStatus.PENDING,
       },
       manager
     );
@@ -127,11 +128,38 @@ export class PostsProcessing {
     return postsCreated.filter((p) => p !== undefined) as PlatformPostCreated[];
   }
 
+  async getRefMeta(
+    url: string,
+    manager: TransactionManager,
+    originalParsed?: ParsePostResult
+  ): Promise<RefMeta> {
+    const refMetaOrg =
+      originalParsed?.support?.refs_meta &&
+      originalParsed?.support?.refs_meta[url];
+
+    const isPartial =
+      !refMetaOrg ||
+      !refMetaOrg.title ||
+      !refMetaOrg.summary ||
+      !refMetaOrg.url;
+
+    if (isPartial) {
+      const oembed = await this.linksService.getOEmbed(url, manager);
+      return {
+        ...oembed,
+        item_type: refMetaOrg?.item_type,
+      };
+    } else {
+      /** store/update refMeta */
+      this.linksService.setOEmbed(refMetaOrg, manager);
+      return refMetaOrg;
+    }
+  }
+
   async processSemantics(
     postId: string,
     manager: TransactionManager,
     semantics?: string,
-    first?: boolean,
     originalParsed?: ParsePostResult
   ): Promise<StructuredSemantics | undefined> {
     /** always delete old triples */
@@ -145,9 +173,10 @@ export class PostsProcessing {
     const createdAtMs = post.createdAtMs;
     const authorProfileId = post.authorProfileId;
 
-    const labels: Set<{ label: string; url: string }> = new Set();
+    const labels: Set<string> = new Set();
     const keywords: Set<string> = new Set();
     const refsMeta: Record<string, RefMeta> = {};
+    const topics: Set<string> = new Set();
 
     mapStoreElements(store, (q) => {
       /** store the triples */
@@ -163,50 +192,33 @@ export class PostsProcessing {
         manager
       );
 
-      if (q.predicate.value === 'https://schema.org/keywords') {
+      if (q.predicate.value === HAS_KEYWORD_URI) {
         keywords.add(q.object.value);
       } else {
-        labels.add({ label: q.predicate.value, url: q.object.value });
+        if (q.predicate.value === HAS_TOPIC_URI) {
+          topics.add(q.object.value);
+        } else {
+          // non kewyords or is-a, ar marked as ref labels
+          labels.add(q.predicate.value);
+        }
       }
     });
 
-    /** TODO: dont support editing references of post */
-    if (first) {
-      await Promise.all(
-        Array.from(labels).map(async (label) => {
-          const url = label.url;
-          const refMeta = await (async () => {
-            const refMetaOrg =
-              originalParsed?.support?.refs_meta &&
-              originalParsed?.support?.refs_meta[url];
+    /** update labels refsMeta */
 
-            const isPartial =
-              !refMetaOrg ||
-              !refMetaOrg.title ||
-              !refMetaOrg.summary ||
-              !refMetaOrg.url;
+    await Promise.all(
+      Array.from(labels).map(async (label) => {
+        const url = label;
+        const refMeta = await this.getRefMeta(url, manager, originalParsed);
 
-            if (isPartial) {
-              const oembed = await this.linksService.getOEmbed(url, manager);
-              return {
-                ...oembed,
-                item_type: refMetaOrg?.item_type,
-              };
-            } else {
-              /** store/update refMeta */
-              this.linksService.setOEmbed(refMetaOrg, manager);
-              return refMetaOrg;
-            }
-          })();
-
-          refsMeta[url] = refMeta;
-        })
-      );
-    }
+        refsMeta[url] = refMeta;
+      })
+    );
 
     return {
-      labels: Array.from(labels).map((l) => l.label),
+      labels: Array.from(labels),
       keywords: Array.from(keywords),
+      topics: Array.from(topics),
       refsMeta,
     };
   }
@@ -223,8 +235,7 @@ export class PostsProcessing {
       ...input,
       parsedStatus: AppPostParsedStatus.UNPROCESSED,
       parsingStatus: AppPostParsingStatus.IDLE,
-      reviewedStatus: AppPostReviewStatus.PENDING,
-      republishedStatus: AppPostRepublishedStatus.PENDING,
+      editStatus: AppPostEditStatus.PENDING,
     };
 
     /** Create the post */

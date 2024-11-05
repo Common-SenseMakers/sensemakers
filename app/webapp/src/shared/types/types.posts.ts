@@ -1,9 +1,5 @@
 import { FetchParams } from './types.fetch';
-import {
-  AppPostSemantics,
-  ParsePostResult,
-  StructuredSemantics,
-} from './types.parser';
+import { AppPostSemantics, ParsePostResult, RefMeta } from './types.parser';
 import { PlatformPost } from './types.platform.posts';
 import { PLATFORM } from './types.platforms';
 import { AppUserRead } from './types.user';
@@ -27,6 +23,24 @@ export interface GenericThread {
   thread: GenericPost[];
   author: GenericAuthor;
 }
+
+/** Structured semantics */
+export interface StructuredSemantics {
+  labels?: string[];
+  keywords?: string[];
+  refsMeta?: Record<string, RefMeta>;
+  topics?: string[];
+}
+
+export type ArrayIncludeQuery = string[];
+
+export interface StructuredSemanticsQuery {
+  labels?: ArrayIncludeQuery;
+  keywords?: ArrayIncludeQuery;
+  refs?: ArrayIncludeQuery;
+  topics?: ArrayIncludeQuery;
+}
+
 /**
  * AppPost object as stored on our database
  *  */
@@ -40,18 +54,10 @@ export enum AppPostParsedStatus {
   UNPROCESSED = 'unprocessed',
   PROCESSED = 'processed',
 }
-export enum AppPostReviewStatus {
+export enum AppPostEditStatus {
   PENDING = 'pending',
-  APPROVED = 'approved',
-  IGNORED = 'ignored',
   DRAFT = 'draft',
   UPDATED = 'updated',
-}
-export enum AppPostRepublishedStatus {
-  PENDING = 'pending',
-  REPUBLISHED = 'republished',
-  AUTO_REPUBLISHED = 'autoRepublished',
-  UNREPUBLISHED = 'unrepublished',
 }
 
 interface AppPostBase {
@@ -64,8 +70,7 @@ interface AppPostBase {
   parsingStatus: AppPostParsingStatus;
   parsingStartedAtMs?: number;
   parsedStatus: AppPostParsedStatus;
-  reviewedStatus: AppPostReviewStatus;
-  republishedStatus: AppPostRepublishedStatus;
+  editStatus: AppPostEditStatus;
   originalParsed?: ParsePostResult;
   semantics?: AppPostSemantics;
   mirrorsIds: string[];
@@ -114,8 +119,7 @@ export type PostUpdate = Partial<
     | 'parsingStatus'
     | 'parsingStartedAtMs'
     | 'parsedStatus'
-    | 'reviewedStatus'
-    | 'republishedStatus'
+    | 'editStatus'
   >
 >;
 
@@ -124,29 +128,26 @@ export interface PostUpdatePayload {
   postUpdate: PostUpdate;
 }
 
-export enum PostsQueryStatus {
-  PUBLISHED = 'published',
-  IGNORED = 'ignored',
-  PENDING = 'pending',
-  DRAFTS = 'drafts',
-}
-
 export interface UnpublishPlatformPostPayload {
   postId: string;
   platformId: PLATFORM;
   post_id: string;
 }
 
-export interface PostsQueryParams extends StructuredSemantics {
+export interface PostsQueryParams {
   userId?: string;
   profileIds?: string;
-  status?: string;
-  origins?: PLATFORM[];
+  origins?: ArrayIncludeQuery;
+  semantics?: StructuredSemanticsQuery;
 }
 
 export interface PostsQuery extends PostsQueryParams {
-  fetchParams: FetchParams;
+  fetchParams?: FetchParams;
 }
+
+export type PostsQueryDefined = Omit<PostsQuery, 'fetchParams'> & {
+  fetchParams: FetchParams;
+};
 
 export interface ProfilePostsQuery {
   platformId: PLATFORM;

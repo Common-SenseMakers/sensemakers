@@ -7,7 +7,7 @@ import {
   SciFilterClassfication,
   TopicsParams,
 } from '../../@shared/types/types.parser';
-import { THIS_POST_NAME } from '../../@shared/utils/semantics.helper';
+import { THIS_POST_NAME_URI } from '../../@shared/utils/semantics.helper';
 import { logger } from '../../instances/logger';
 import { ParserService } from '../parser.service';
 import { randomIndex } from './utils';
@@ -35,7 +35,7 @@ export const MOCKED_PARSER_RESULTS: ParsePostResult[] = [
   },
   {
     filter_classification: SciFilterClassfication.NOT_RESEARCH,
-    semantics: `<${THIS_POST_NAME}> <https://schema.org/keywords> "rerer" .`,
+    semantics: `<${THIS_POST_NAME_URI}> <https://schema.org/keywords> "rerer" .`,
   },
 ];
 

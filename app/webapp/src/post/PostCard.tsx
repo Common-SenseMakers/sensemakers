@@ -4,24 +4,15 @@ import { PlatformPostAnchor } from '../app/anchors/PlatformPostAnchor';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID } from '../semantics/patterns/patterns';
-import { AppPostFull, AppPostParsedStatus } from '../shared/types/types.posts';
+import { AppPostFull } from '../shared/types/types.posts';
 import { useThemeContext } from '../ui-components/ThemedApp';
+import { PublishButtons } from './PostPublishButtons';
 import { PostTextStatic } from './PostTextStatic';
 import { getPostDetails } from './platform.post.details';
 import { usePost } from './post.context/PostContext';
-import { concatenateThread, hideSemanticsHelper } from './posts.helper';
+import { concatenateThread } from './posts.helper';
 
-const PostCardHeaderUser = (props: { post: AppPostFull }) => {
-  const details = getPostDetails(props.post);
-
-  return (
-    <>
-      <PlatformPostAnchor details={details}></PlatformPostAnchor>
-    </>
-  );
-};
-
-const PostCardHeaderFeed = (props: { post: AppPostFull }) => {
+const PostCardHeader = (props: { post: AppPostFull }) => {
   const { constants } = useThemeContext();
   const details = getPostDetails(props.post);
 
@@ -60,7 +51,6 @@ export const PostCard = (props: {
 }) => {
   const { shade: _shade } = props;
   const shade = _shade || false;
-  const isPublicFeed = props.isPublicFeed || false;
 
   const { updated } = usePost();
   const post = updated.postMerged;
@@ -84,26 +74,45 @@ export const PostCard = (props: {
     }
   };
 
-  const hideSemantics = hideSemanticsHelper(post);
+  const hideSemantics = false;
 
-  const header = isPublicFeed ? (
-    <PostCardHeaderFeed post={post}></PostCardHeaderFeed>
-  ) : (
-    <PostCardHeaderUser post={post}></PostCardHeaderUser>
-  );
+  const header = <PostCardHeader post={post}></PostCardHeader>;
 
   return (
     <Box
       pad={{ top: '16px', horizontal: '12px', bottom: '16px' }}
       style={{
         backgroundColor: shade ? constants.colors.shade : 'white',
+        borderTop: '2px solid var(--Neutral-300, #D1D5DB)',
+        borderRight: '1px solid var(--Neutral-300, #D1D5DB)',
+        borderLeft: '1px solid var(--Neutral-300, #D1D5DB)',
+        borderBottom: 'none',
       }}>
       <Box
         style={{ cursor: 'pointer', position: 'relative' }}
         onClick={handleClick}>
         <Box direction="row" justify="between" margin={{ bottom: '6.5px' }}>
+          <PublishButtons></PublishButtons>
+        </Box>
+
+        <Box direction="row" justify="between" margin={{ bottom: '6.5px' }}>
           {header}
         </Box>
+
+        {!hideSemantics && (
+          <SemanticsEditor
+            include={[PATTERN_ID.KEYWORDS]}
+            patternProps={{
+              isLoading:
+                updated.statusesMerged.isParsing !== undefined
+                  ? updated.statusesMerged.isParsing
+                  : false,
+              editable: false,
+              size: 'compact',
+              semantics: post?.semantics,
+              originalParsed: post?.originalParsed,
+            }}></SemanticsEditor>
+        )}
 
         <PostTextStatic
           onClick={handleInternalClick}

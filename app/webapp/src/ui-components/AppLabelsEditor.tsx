@@ -3,7 +3,7 @@ import { Edit } from 'grommet-icons';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { I18Keys } from '../i18n/i18n';
+import { PostEditKeys } from '../i18n/i18n.edit.post';
 import { AppButton } from './AppButton';
 import { AppInput } from './AppInput';
 import { AppLabel, LabelColors } from './AppLabel';
@@ -46,8 +46,6 @@ export const AppLabelsEditor = (props: {
       ? props.options.filter((e) => (e ? e.includes(input) : false))
       : [];
   }, [input, onlyOptions, props.options]);
-
-  const addWidth = '120px';
 
   useEffect(() => {
     if (DEBUG) console.log('autofocusing input', { adding });
@@ -139,7 +137,7 @@ export const AppLabelsEditor = (props: {
                 lineHeight: '16px',
               }}
               color={constants.colors.primary}>
-              {t(I18Keys.addKeyword)}
+              {t(PostEditKeys.addKeyword)}
             </Text>
           </Box>
         </AppButton>
@@ -267,7 +265,7 @@ export const AppLabelsEditor = (props: {
             backgroundColor: constants.colors.shade,
             width: '100%',
             padding: '12px 12px 12px 12px',
-            top: `${height}px`,
+            top: `${height || 0}px`,
             borderBottomLeftRadius: '6px',
             borderBottomRightRadius: '6px',
             zIndex: 1,

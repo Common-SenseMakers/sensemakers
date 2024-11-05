@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import { useAppFetch } from '../../api/app.fetch';
 import { subscribeToUpdates } from '../../firestore/realtime.listener';
@@ -25,7 +25,8 @@ export const usePostFetch = (
   const appFetch = useAppFetch();
 
   const postId = useMemo(() => {
-    if (DEBUG) console.log('useMemo postId', { _postId, postInit });
+    if (DEBUG)
+      console.log(`useMemo postId ${_postId || ''}`, { _postId, postInit });
     const actualPostId = _postId ? _postId : (postInit as AppPostFull).id;
     return actualPostId;
   }, [_postId, postInit]);
@@ -43,17 +44,17 @@ export const usePostFetch = (
           if (DEBUG) console.log('fetching', { postId });
           return appFetch<AppPostFull>('/api/posts/get', { postId });
         }
-      } catch (e: any) {
+      } catch (e) {
         console.error(e);
-        throw new Error(e);
+        throw new Error((e as Error).message);
       }
     },
   });
 
-  const _refetch = () => {
+  const _refetch = useCallback(() => {
     if (DEBUG) console.log(`updated to post${postId} detected - refetching`);
-    refetch();
-  };
+    refetch().catch(console.error);
+  }, [postId, refetch]);
 
   /**
    * subscribe to real time updates of this post and trigger a refetch everytime
@@ -64,7 +65,7 @@ export const usePostFetch = (
       if (DEBUG) console.log('unsubscribing to updates post', postId);
       unsubscribe();
     };
-  }, []);
+  }, [_refetch, postId]);
 
   /**
    * subscribe to real time updates of this post platform posts */
@@ -74,7 +75,9 @@ export const usePostFetch = (
     if (post && post.mirrors) {
       const unsubscribes = post.mirrors.map((m) => {
         return {
-          unsubscribe: subscribeToUpdates(`platformPost-${m.id}`, refetch),
+          unsubscribe: subscribeToUpdates(`platformPost-${m.id}`, () => {
+            refetch().catch(console.error);
+          }),
           platformPostId: m.id,
         };
       });
@@ -90,12 +93,12 @@ export const usePostFetch = (
         });
       };
     }
-  }, [post]);
+  }, [post, postId, refetch]);
 
   return {
     postId,
     post,
     isLoading,
-    refetch,
+    refetch: _refetch,
   };
 };

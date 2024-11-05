@@ -1,4 +1,4 @@
-import { Box, Image } from 'grommet';
+import { Box } from 'grommet';
 
 export const SendIcon = (props: { size?: number; color?: string }) => {
   const size = props.size || 18;

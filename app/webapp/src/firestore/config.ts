@@ -20,8 +20,7 @@ export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 
 const isProd =
-  process.env.NODE_ENV === 'production' ||
-  (process as any).env.NODE_ENV === 'test-prod';
+  process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'test-prod';
 
 if (!isProd) {
   console.log(

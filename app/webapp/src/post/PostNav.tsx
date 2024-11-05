@@ -36,7 +36,6 @@ export const PostNav = () => {
       if (DEBUG)
         console.log('fetching older', {
           nextPostId: navigatePost.nextPostId,
-          isFetchingOlder,
           errorFetchingOlder,
           triggeredFetchOlder,
         });
@@ -50,13 +49,16 @@ export const PostNav = () => {
     }
   }, [
     errorFetchingOlder,
+    fetchOlder,
     isFetchingOlder,
     navigatePost.nextPostId,
     triggeredFetchOlder,
   ]);
 
   const goToPrev = () => {
-    navigate(`/post/${navigatePost.prevPostId}`);
+    if (navigatePost.prevPostId) {
+      navigate(`/post/${navigatePost.prevPostId}`);
+    }
   };
 
   const goToNext = () => {

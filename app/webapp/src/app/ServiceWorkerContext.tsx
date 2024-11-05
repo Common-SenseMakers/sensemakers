@@ -35,7 +35,7 @@ export const ServiceWorker = (props: PropsWithChildren) => {
 
   const [hasUpdate, setHasUpdate] = useState<boolean>(false);
 
-  const [displayMode, setDisplayMode] = useState<
+  const [, setDisplayMode] = useState<
     'browser' | 'standalone' | 'twa' | undefined
   >(undefined);
 
@@ -65,6 +65,7 @@ export const ServiceWorker = (props: PropsWithChildren) => {
       ).matches;
       if (document.referrer.startsWith('android-app://')) {
         return 'twa';
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
       } else if ((navigator as any).standalone || isStandalone) {
         return 'standalone';
       }
@@ -92,14 +93,21 @@ export const ServiceWorker = (props: PropsWithChildren) => {
 
   const install = () => {
     if (installEvent) {
-      installEvent.prompt();
-      installEvent.userChoice.then((choice) => {
-        if (choice.outcome === 'accepted') {
-          setNeedsInstall(false);
-        } else {
-          setNeedsInstall(true);
-        }
+      installEvent.prompt().catch((err) => {
+        console.error(err);
       });
+
+      installEvent.userChoice
+        .then((choice) => {
+          if (choice.outcome === 'accepted') {
+            setNeedsInstall(false);
+          } else {
+            setNeedsInstall(true);
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+        });
     }
   };
 
