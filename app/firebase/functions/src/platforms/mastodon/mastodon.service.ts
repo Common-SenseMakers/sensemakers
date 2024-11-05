@@ -46,7 +46,7 @@ import {
   parseMastodonPostURI,
 } from './mastodon.utils';
 
-const DEBUG = true;
+const DEBUG = false;
 const DEBUG_PREFIX = 'MastodonService';
 
 export interface MastodonServiceConfig {

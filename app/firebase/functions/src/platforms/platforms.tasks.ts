@@ -5,7 +5,7 @@ import { FetchParams } from '../@shared/types/types.fetch';
 import { PLATFORM } from '../@shared/types/types.platforms';
 import { Services } from '../instances/services';
 
-export const DEBUG = true;
+export const DEBUG = false;
 
 export const FETCH_TWITTER_ACCOUNT_TASK = 'fetchTwitterAccount';
 export const FETCH_MASTODON_ACCOUNT_TASK = 'fetchMastodonAccount';

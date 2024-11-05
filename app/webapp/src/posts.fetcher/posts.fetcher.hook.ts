@@ -9,7 +9,7 @@ import { AppPostFull, PostsQuery } from '../shared/types/types.posts';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { arraysEqual } from '../utils/general';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export interface PostFetcherInterface {
   feedNameDebug: string;

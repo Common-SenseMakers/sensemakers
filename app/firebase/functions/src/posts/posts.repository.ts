@@ -16,7 +16,7 @@ import { DBInstance } from '../db/instance';
 import { BaseRepository, removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 
-const DEBUG = true;
+const DEBUG = false;
 const DEBUG_PREFIX = 'PostsRepository';
 
 type Query = FirebaseFirestore.Query<

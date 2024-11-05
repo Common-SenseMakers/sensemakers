@@ -49,7 +49,7 @@ import {
   removeUndefinedFields,
 } from './bluesky.utils';
 
-const DEBUG = true;
+const DEBUG = false;
 const DEBUG_PREFIX = 'BlueskyService';
 
 export interface BlueskyServiceConfig {

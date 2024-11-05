@@ -3,7 +3,7 @@ import * as readline from 'readline';
 // Import readline module
 import { logger } from '../src/instances/logger';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export async function processInBatches<T, R>(
   promiseFunctions: (() => Promise<R>)[],

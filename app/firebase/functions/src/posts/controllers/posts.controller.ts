@@ -18,7 +18,7 @@ import { canReadPost } from '../posts.access.control';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 import { postIdValidation, updatePostSchema } from './posts.schema';
 
-const DEBUG = true;
+const DEBUG = false;
 
 /**
  * get user posts from the DB (does not fetch for more)

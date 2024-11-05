@@ -48,7 +48,7 @@ import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { PostsProcessing } from './posts.processing';
 
-const DEBUG = true;
+const DEBUG = false;
 
 const areCredentialsInvalid = (err: { message: string }) => {
   return err.message.includes('Value passed for the token was invalid');

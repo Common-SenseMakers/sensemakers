@@ -5,7 +5,7 @@ import { servicesSource, servicesTarget } from '../migrations.services';
 import { processPost } from './process.post';
 import { processUser } from './process.user';
 
-const DEBUG = true;
+const DEBUG = false;
 
 (async () => {
   /**
