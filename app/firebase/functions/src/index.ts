@@ -83,7 +83,7 @@ export const appConfig = IS_EMULATOR
   : {};
 
 const app = admin.initializeApp(appConfig);
-const firestore = app.firestore();
+export const firestore = app.firestore();
 
 // import { fetchNewPosts } from './posts/posts.job';
 
