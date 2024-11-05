@@ -8,7 +8,6 @@ import {
   onDocumentCreated,
   onDocumentUpdated,
 } from 'firebase-functions/v2/firestore';
-import { onSchedule } from 'firebase-functions/v2/scheduler';
 import {
   TaskQueueOptions,
   onTaskDispatched,
@@ -20,12 +19,18 @@ import { AppPost } from './@shared/types/types.posts';
 import { CollectionNames } from './@shared/utils/collectionNames';
 import { activityEventCreatedHook } from './activity/activity.created.hook';
 import { adminRouter } from './admin.router';
-import { AUTOFETCH_PERIOD, IS_EMULATOR } from './config/config.runtime';
+import { IS_EMULATOR } from './config/config.runtime';
 import { envDeploy } from './config/typedenv.deploy';
 import { envRuntime } from './config/typedenv.runtime';
 import { buildAdminApp, buildApp } from './instances/app';
 import { logger } from './instances/logger';
 import { createServices } from './instances/services';
+import {
+  FETCH_BLUESKY_ACCOUNT_TASK,
+  FETCH_MASTODON_ACCOUNT_TASK,
+  FETCH_TWITTER_ACCOUNT_TASK,
+  fetchPlatformAccountTask,
+} from './platforms/platforms.tasks';
 import { platformPostUpdatedHook } from './posts/hooks/platformPost.updated.hook';
 import { postUpdatedHook } from './posts/hooks/post.updated.hook';
 import {
@@ -49,7 +54,6 @@ const secrets: SecretParam[] = [
   envRuntime.EMAIL_CLIENT_SECRET,
   envRuntime.MAGIC_ADMIN_SECRET,
   envRuntime.IFRAMELY_API_KEY,
-  envRuntime.BLUESKY_APP_PASSWORD,
 ];
 
 const deployConfig: functions.RuntimeOptions = {
@@ -94,13 +98,13 @@ exports['admin'] = functions
   .https.onRequest(buildAdminApp(adminRouter));
 
 /** jobs */
-exports.accountFetch = onSchedule(
-  {
-    schedule: AUTOFETCH_PERIOD,
-    secrets,
-  },
-  () => triggerAutofetchPosts(createServices(firestore, getConfig()))
-);
+// exports.accountFetch = onSchedule(
+//   {
+//     schedule: AUTOFETCH_PERIOD,
+//     secrets,
+//   },
+//   () => triggerAutofetchPosts(createServices(firestore, getConfig()))
+// );
 
 /** tasks */
 exports[PARSE_POST_TASK] = onTaskDispatched(
@@ -109,11 +113,12 @@ exports[PARSE_POST_TASK] = onTaskDispatched(
     maxInstances: 1,
     retryConfig: {
       maxAttempts: 5,
+      minBackoffSeconds: 5,
     },
-    concurrency: 190,
+    concurrency: 100,
     rateLimits: {
-      maxConcurrentDispatches: 190,
-      maxDispatchesPerSecond: 190,
+      maxConcurrentDispatches: 100,
+      maxDispatchesPerSecond: 100,
     },
   },
   (req) => parsePostTask(req, createServices(firestore, getConfig()))
@@ -132,6 +137,69 @@ exports[AUTOFETCH_POSTS_TASK] = onTaskDispatched(
       createServices(firestore, getConfig())
     ));
   }
+);
+
+/**
+ * GET_2_users_param_tweets: https://developer.x.com/en/docs/x-api/rate-limits#v2-limits-basic
+ * 10 requests / 15 min per app
+ * 5 requests / 15 min per user
+ */
+exports[FETCH_TWITTER_ACCOUNT_TASK] = onTaskDispatched(
+  {
+    ...deployConfigTasks,
+    secrets,
+    retryConfig: {
+      maxAttempts: 3,
+      minBackoffSeconds: 60 * 5,
+    },
+    rateLimits: {
+      maxConcurrentDispatches: 1, // 1 task dispatched at a time
+      maxDispatchesPerSecond: 1 / (60 * 2), // max 1 task every 2 minutes
+    },
+  },
+  (req) => fetchPlatformAccountTask(req, createServices(firestore, getConfig()))
+);
+
+/**
+ * rate limits: https://docs-p.joinmastodon.org/api/rate-limits/
+ * 300 requests / 5 min per account
+ */
+exports[FETCH_MASTODON_ACCOUNT_TASK] = onTaskDispatched(
+  {
+    ...deployConfigTasks,
+    secrets,
+    retryConfig: {
+      maxAttempts: 3,
+      minBackoffSeconds: 60,
+    },
+    rateLimits: {
+      maxConcurrentDispatches: 20,
+      maxDispatchesPerSecond: 1 / 5, // max 1 task every 5 second
+    },
+  },
+  (req) => fetchPlatformAccountTask(req, createServices(firestore, getConfig()))
+);
+
+/**
+ * com.atproto.server.createSession (for now this is the limiting API call since we login with username and app password each fetch)
+ * Measured per account
+ * 30 per 5 minutes
+ * 300 per day
+ */
+exports[FETCH_BLUESKY_ACCOUNT_TASK] = onTaskDispatched(
+  {
+    ...deployConfigTasks,
+    secrets,
+    retryConfig: {
+      maxAttempts: 3,
+      minBackoffSeconds: 60,
+    },
+    rateLimits: {
+      maxConcurrentDispatches: 10,
+      maxDispatchesPerSecond: 1 / 10, // max 6 task every 1 minutes
+    },
+  },
+  (req) => fetchPlatformAccountTask(req, createServices(firestore, getConfig()))
 );
 
 const getBeforeAndAfterOnUpdate = <T>(

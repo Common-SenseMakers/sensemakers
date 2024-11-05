@@ -1,3 +1,5 @@
+import AtpAgent from '@atproto/api';
+
 import { BlueskyAccountDetails } from '../../src/@shared/types/types.bluesky';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { TwitterSignupContext } from '../../src/@shared/types/types.twitter';
@@ -5,10 +7,11 @@ import {
   AppUser,
   TestUserCredentials,
 } from '../../src/@shared/types/types.user';
+import { BLUESKY_SERVICE_URL } from '../../src/config/config.runtime';
 import { TransactionManager } from '../../src/db/transaction.manager';
 import { getPrefixedUserId } from '../../src/users/users.utils';
 import { handleTwitterSignupMock } from '../__tests__/reusable/mocked.singup';
-import { USE_REAL_TWITTER } from '../__tests__/setup';
+import { USE_REAL_BLUESKY, USE_REAL_TWITTER } from '../__tests__/setup';
 import { TestServices } from '../__tests__/test.services';
 import { authenticateTwitterUser } from './authenticate.twitter';
 
@@ -81,18 +84,35 @@ const authenticateBlueskyForUser = async (
     };
   }
 
+  const blueskyCredentials = await (async () => {
+    if (USE_REAL_BLUESKY) {
+      const agent = new AtpAgent({
+        service: BLUESKY_SERVICE_URL,
+      });
+      await agent.login({
+        identifier: credentials.bluesky.username,
+        password: credentials.bluesky.appPassword,
+      });
+      if (!agent.session) {
+        throw new Error('Failed to login to bluesky');
+      }
+      return agent.session;
+    }
+    return {
+      refreshJwt: '1234',
+      accessJwt: '1234',
+      handle: credentials.bluesky.username,
+      did: credentials.bluesky.id,
+      active: true,
+    };
+  })();
+
   const blueskyUserDetails: BlueskyAccountDetails = {
     signupDate: 0,
     user_id: credentials.bluesky.id,
     credentials: {
-      read: {
-        username: credentials.bluesky.username,
-        appPassword: credentials.bluesky.appPassword,
-      },
-      write: {
-        username: credentials.bluesky.username,
-        appPassword: credentials.bluesky.appPassword,
-      },
+      read: blueskyCredentials,
+      write: blueskyCredentials,
     },
   };
 

@@ -22,3 +22,15 @@ export const enqueueTask = async (name: string, params: any) => {
 
   return enqueueTaskProduction(name, params);
 };
+
+export function chunkNumber(total: number, chunkSize: number): number[] {
+  const chunks: number[] = [];
+  while (total > chunkSize) {
+    chunks.push(chunkSize);
+    total -= chunkSize;
+  }
+  if (total > 0) {
+    chunks.push(total);
+  }
+  return chunks;
+}

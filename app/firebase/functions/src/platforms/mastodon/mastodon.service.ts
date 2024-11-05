@@ -89,11 +89,14 @@ export class MastodonService
   }
 
   public getClient(server: string, credentials?: MastodonAccountCredentials) {
+    const accessTokenServer = this.config.accessTokens[server]
+      ? server
+      : 'mastodon.social';
     return createRestAPIClient({
       url: `https://${server}`,
       accessToken: credentials
         ? credentials.accessToken
-        : this.config.accessTokens[server],
+        : this.config.accessTokens[accessTokenServer],
     });
   }
 
@@ -225,7 +228,8 @@ export class MastodonService
       fetchParams.maxId = parseMastodonPostURI(params.until_id).postId;
     }
 
-    if (DEBUG) logger.debug('fetch params', { fetchParams }, DEBUG_PREFIX);
+    if (DEBUG)
+      logger.debug('fetch params', { user_id, fetchParams }, DEBUG_PREFIX);
 
     const paginator = client.v1.accounts
       .$select(account.id)

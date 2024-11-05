@@ -176,7 +176,8 @@ export class PostsManager {
     user_id: string,
     params: FetchParams,
     manager: TransactionManager,
-    credentials?: AccountCredentials
+    credentials?: AccountCredentials,
+    userId?: string
   ) {
     const profile = await this.users.profiles.getProfile(
       platformId,
@@ -198,6 +199,16 @@ export class PostsManager {
         platformParams,
         credentials
       );
+
+      if (fetchedPosts.credentials && userId) {
+        this.users.updateAccountCredentials(
+          userId,
+          platformId,
+          user_id,
+          fetchedPosts.credentials,
+          manager
+        );
+      }
 
       if (DEBUG)
         logger.debug(
@@ -324,7 +335,8 @@ export class PostsManager {
     user_id: string,
     params: FetchParams,
     manager: TransactionManager,
-    credentials?: AccountCredentials
+    credentials?: AccountCredentials,
+    userId?: string
   ) {
     try {
       if (DEBUG)
@@ -340,7 +352,8 @@ export class PostsManager {
         user_id,
         params,
         manager,
-        credentials
+        credentials,
+        userId
       );
 
       if (!platformPostsCreate) {
@@ -443,7 +456,8 @@ export class PostsManager {
                       user_id,
                       inputs.params,
                       manager,
-                      account.credentials
+                      account.credentials,
+                      user.userId
                     );
                     return result;
                   }
@@ -677,28 +691,30 @@ export class PostsManager {
 
     if (shouldParse) {
       /** then process */
-      await this.db.run(
-        async (manager) => {
-          try {
-            await this._parsePost(postId, manager);
-          } catch (err: any) {
+      try {
+        await this._parsePost(postId);
+      } catch (err: any) {
+        await this.db.run(
+          async (manager) => {
             logger.error(`Error parsing post ${postId}`, err);
             await this.updatePost(
               postId,
               { parsingStatus: AppPostParsingStatus.ERRORED },
               manager
             );
-          }
-        },
-        undefined,
-        undefined,
-        `parsePost - parsing ${postId}`
-      );
+          },
+          undefined,
+          undefined,
+          `parsePost - parsing ${postId}`
+        );
+      }
     }
   }
 
-  protected async _parsePost(postId: string, manager: TransactionManager) {
-    const post = await this.processing.posts.get(postId, manager, true);
+  protected async _parsePost(postId: string) {
+    const post = await this.db.run(async (manager) => {
+      return this.processing.posts.get(postId, manager, true);
+    });
     if (DEBUG) logger.debug(`parsePost - start ${postId}`, { postId, post });
 
     const params: ParsePostRequest<TopicsParams> = {
@@ -739,7 +755,9 @@ export class PostsManager {
     if (DEBUG) logger.debug(`parsePost - done ${postId}`, { postId, update });
 
     /** store the semantics and mark as processed */
-    await this.updatePost(post.id, update, manager, true);
+    await this.db.run(async (manager) => {
+      return this.updatePost(post.id, update, manager, true);
+    });
   }
 
   /** single place to update a post (it updates the drafts if necessary) */

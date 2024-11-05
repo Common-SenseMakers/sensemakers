@@ -45,6 +45,7 @@ export interface OEmbed {
 export interface RefMeta extends OEmbed {
   item_type?: string;
   order?: number;
+  ref_source_url?: string;
 }
 
 export interface ParserOntology {

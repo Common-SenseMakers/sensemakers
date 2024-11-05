@@ -12,11 +12,15 @@ import { ViewportPage } from '../app/layout/Viewport';
 import { PlatformsKeys } from '../i18n/i18n.platforms';
 import { SettingsKeys } from '../i18n/i18n.settings';
 import { RouteNames } from '../route.names';
+import { PLATFORM } from '../shared/types/types.platforms';
 import { AppButton, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
-import { useAccountContext } from '../user-login/contexts/AccountContext';
+import {
+  PlatformConnectedStatus,
+  useAccountContext,
+} from '../user-login/contexts/AccountContext';
 import { useDisconnectContext } from '../user-login/contexts/DisconnectUserContext';
 import { useBlueskyContext } from '../user-login/contexts/platforms/BlueskyContext';
 import { useMastodonContext } from '../user-login/contexts/platforms/MastodonContext';
@@ -42,7 +46,7 @@ export const UserSettingsPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const { connectedUser } = useAccountContext();
+  const { connectedUser, getPlatformConnectedStatus } = useAccountContext();
   const { disconnect } = useDisconnectContext();
 
   const { connect: connectOrcid, connecting: connectingOrcid } =
@@ -131,6 +135,10 @@ export const UserSettingsPage = () => {
           }}
           buttonText={needConnectTwitter ? 'connect' : ''}
           username={twitterProfile ? `@${twitterProfile.username}` : ''}
+          connecting={
+            getPlatformConnectedStatus(PLATFORM.Twitter) ===
+            PlatformConnectedStatus.Connecting
+          }
           connected={twitterProfile !== undefined}></PlatformSection>
 
         <PlatformSection
@@ -149,6 +157,10 @@ export const UserSettingsPage = () => {
           }}
           buttonText={needConnectMastodon ? 'connect' : ''}
           username={mastodonProfile?.username || ''}
+          connecting={
+            getPlatformConnectedStatus(PLATFORM.Mastodon) ===
+            PlatformConnectedStatus.Connecting
+          }
           connected={mastodonProfile !== undefined}></PlatformSection>
 
         <PlatformSection
@@ -168,6 +180,10 @@ export const UserSettingsPage = () => {
           buttonText={needConnectBluesky ? 'connect' : ''}
           username={
             blueskyProfile ? `@${blueskyProfile.username}` : '- not connected -'
+          }
+          connecting={
+            getPlatformConnectedStatus(PLATFORM.Bluesky) ===
+            PlatformConnectedStatus.Connecting
           }
           connected={!!blueskyProfile}></PlatformSection>
 
