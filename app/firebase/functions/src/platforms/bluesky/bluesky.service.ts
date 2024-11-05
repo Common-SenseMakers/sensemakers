@@ -144,6 +144,7 @@ export class BlueskyService
       username: bskFullUser.data.handle,
       displayName: bskFullUser.data.displayName || bskFullUser.data.handle,
       avatar: bskFullUser.data.avatar || '',
+      description: bskFullUser.data.description || '',
     };
 
     const profile: AccountProfileCreate<PlatformProfile> = {
@@ -178,6 +179,7 @@ export class BlueskyService
             username: profile.data.handle,
             displayName: profile.data.displayName || profile.data.handle,
             avatar: profile.data.avatar || '',
+            description: profile.data.description || '',
           },
         };
       }
