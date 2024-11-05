@@ -153,7 +153,7 @@ export const updatePostController: RequestHandler = async (
   }
 };
 
-export const addAccountDataController: RequestHandler = async (
+export const addAccountsDataController: RequestHandler = async (
   request,
   response
 ) => {
