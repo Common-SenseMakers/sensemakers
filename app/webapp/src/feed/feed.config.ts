@@ -22,16 +22,18 @@ export const feedTabs: FeedTabConfig[] = [
       'https://sense-nets.xyz/mentionsListeningStatus',
       'https://sense-nets.xyz/mentionsWatchingStatus',
       'https://sense-nets.xyz/mentionsReadingStatus',
-      'https://sense-nets.xyz/mentionsStatus',
-      'http://purl.org/spar/cito/reviews',
       'https://sense-nets.xyz/indicatesInterest',
+      'http://purl.org/spar/cito/agreesWith',
     ],
   },
   {
     id: 'new-research',
     title: 'New research',
     tooltip: '',
-    labels: ['https://sense-nets.xyz/announcesResource'],
+    labels: [
+      'https://sense-nets.xyz/announcesResource',
+      'https://sense-nets.xyz/summarizes',
+    ],
   },
   {
     id: 'opportunities',
@@ -42,6 +44,19 @@ export const feedTabs: FeedTabConfig[] = [
       'https://sense-nets.xyz/announcesJob',
       'https://sense-nets.xyz/mentionsCallForPapers',
       'https://sense-nets.xyz/mentionsFundingOpportunity',
+    ],
+  },
+  {
+    id: 'discussions',
+    title: 'Discussions',
+    tooltip: '',
+    labels: [
+      'http://purl.org/spar/cito/disagreesWith',
+      'http://purl.org/spar/cito/agreesWith',
+      'http://purl.org/spar/cito/reviews',
+      'https://sense-nets.xyz/asksQuestionAbout',
+      'http://purl.org/spar/cito/includesQuotationFrom',
+      'http://purl.org/spar/cito/discusses',
     ],
   },
 ];
