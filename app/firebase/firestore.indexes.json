@@ -1,65 +1,11 @@
 {
   "indexes": [
     {
-      "collectionGroup": "notifications",
-      "queryScope": "COLLECTION_GROUP",
-      "fields": [
-        {
-          "fieldPath": "activityId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "userId",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
       "collectionGroup": "posts",
       "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "authorUserId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "createdAtMs",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "republishedStatus",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "posts",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "authorUserId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "createdAtMs",
-          "order": "DESCENDING"
-        },
-        {
-          "fieldPath": "republishedStatus",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "posts",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "authorUserId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "republishedStatus",
           "order": "ASCENDING"
         },
         {
@@ -77,121 +23,7 @@
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "republishedStatus",
-          "order": "ASCENDING"
-        },
-        {
           "fieldPath": "createdAtMs",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "posts",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "authorUserId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "reviewedStatus",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "createdAtMs",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "posts",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "createdAtMs",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "republishedStatus",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "posts",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "createdAtMs",
-          "order": "DESCENDING"
-        },
-        {
-          "fieldPath": "republishedStatus",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "posts",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "labels",
-          "arrayConfig": "CONTAINS"
-        },
-        {
-          "fieldPath": "createdAtMs",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "posts",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "labels",
-          "arrayConfig": "CONTAINS"
-        },
-        {
-          "fieldPath": "createdAtMs",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "republishedStatus",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "posts",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "labels",
-          "arrayConfig": "CONTAINS"
-        },
-        {
-          "fieldPath": "createdAtMs",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "posts",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "labels",
-          "arrayConfig": "CONTAINS"
-        },
-        {
-          "fieldPath": "createdAtMs",
-          "order": "DESCENDING"
-        },
-        {
-          "fieldPath": "republishedStatus",
           "order": "DESCENDING"
         }
       ]
