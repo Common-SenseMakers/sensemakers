@@ -8,6 +8,7 @@ import {
   onDocumentCreated,
   onDocumentUpdated,
 } from 'firebase-functions/v2/firestore';
+import { onSchedule } from 'firebase-functions/v2/scheduler';
 import {
   TaskQueueOptions,
   onTaskDispatched,
@@ -19,7 +20,7 @@ import { AppPost } from './@shared/types/types.posts';
 import { CollectionNames } from './@shared/utils/collectionNames';
 import { activityEventCreatedHook } from './activity/activity.created.hook';
 import { adminRouter } from './admin.router';
-import { IS_EMULATOR } from './config/config.runtime';
+import { AUTOFETCH_PERIOD, IS_EMULATOR } from './config/config.runtime';
 import { envDeploy } from './config/typedenv.deploy';
 import { envRuntime } from './config/typedenv.runtime';
 import { buildAdminApp, buildApp } from './instances/app';
@@ -79,7 +80,7 @@ export const appConfig = IS_EMULATOR
   : {};
 
 const app = admin.initializeApp(appConfig);
-const firestore = app.firestore();
+export const firestore = app.firestore();
 
 // import { fetchNewPosts } from './posts/posts.job';
 
@@ -98,13 +99,13 @@ exports['admin'] = functions
   .https.onRequest(buildAdminApp(adminRouter));
 
 /** jobs */
-// exports.accountFetch = onSchedule(
-//   {
-//     schedule: AUTOFETCH_PERIOD,
-//     secrets,
-//   },
-//   () => triggerAutofetchPosts(createServices(firestore, getConfig()))
-// );
+exports.accountFetch = onSchedule(
+  {
+    schedule: AUTOFETCH_PERIOD,
+    secrets,
+  },
+  () => triggerAutofetchPosts(createServices(firestore, getConfig()))
+);
 
 /** tasks */
 exports[PARSE_POST_TASK] = onTaskDispatched(
