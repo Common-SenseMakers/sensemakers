@@ -150,9 +150,9 @@ export const PostsFetcherComponent = (props: {
 
     return (
       <>
-        <Box>
+        <Box style={{ height: '100%' }}>
           {posts.map((post, ix) => (
-            <Box key={ix} id={`post-${post.id}`}>
+            <Box key={ix} id={`post-${post.id}`} style={{ flexShrink: 0 }}>
               <PostContext postInit={post}>
                 <PostCard
                   isPublicFeed={isPublicFeed}

@@ -1,5 +1,4 @@
 import { Box } from 'grommet';
-import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
@@ -13,50 +12,44 @@ export const PublicFeed = () => {
   const location = useLocation();
 
   const { feeds } = useFeedPosts();
+  const n = feeds.length;
+  const percWidth = 100 / n;
 
   const feedIx = locationToFeedIx(location);
 
-  useEffect(() => {
-    let timeout: NodeJS.Timeout;
-
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-unsafe-member-access
-    const postId = location.state?.postId as string;
-
-    if (postId) {
-      const postCard = document.querySelector(`#post-${postId}`);
-      const viewportPage = document.querySelector('#content');
-      if (postCard && viewportPage) {
-        timeout = setTimeout(() => {
-          postCard.scrollIntoView({
-            behavior: 'instant' as ScrollBehavior,
-            block: 'center',
-          });
-        }, 0);
-      }
-    }
-    return () => clearTimeout(timeout);
-  }, [location]);
-
   return (
     <>
-      <Box fill justify="start">
+      <Box fill justify="start" style={{ height: '100%' }}>
         <FeedTabs></FeedTabs>
-        {feeds.map((feed, ix) => {
-          return (
-            <Box
-              style={
-                feedIx === ix
-                  ? { height: 'auto', visibility: 'visible' }
-                  : { height: '0px', visibility: 'hidden' }
-              }>
-              <PostsFetcherComponent
-                showHeader={false}
-                isPublicFeed={true}
-                feed={feed}
-                pageTitle={t(AppGeneralKeys.feedTitle)}></PostsFetcherComponent>
-            </Box>
-          );
-        })}
+        <div style={{ height: 'calc(100% - 48px)', overflow: 'hidden' }}>
+          <div
+            style={{
+              transform: `translateX(${-1 * feedIx * percWidth}%)`,
+              transition: ' transform 0.5s ease-in-out',
+              height: '100%',
+              width: '400%',
+            }}>
+            {feeds.map((feed, ix) => {
+              return (
+                <Box
+                  style={{
+                    width: '25%',
+                    height: '100%',
+                    overflowY: 'auto',
+                    float: 'left',
+                  }}>
+                  <PostsFetcherComponent
+                    showHeader={false}
+                    isPublicFeed={true}
+                    feed={feed}
+                    pageTitle={t(
+                      AppGeneralKeys.feedTitle
+                    )}></PostsFetcherComponent>
+                </Box>
+              );
+            })}
+          </div>
+        </div>
       </Box>
     </>
   );

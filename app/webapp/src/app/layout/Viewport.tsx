@@ -123,9 +123,11 @@ export const ViewportPage = (props: {
   content: ReactNode;
   nav?: ReactNode;
   justify?: BoxProps['justify'];
+  fixed?: boolean;
 }) => {
   const { mobile } = useResponsive();
   const pad = mobile ? 'none' : 'large';
+  const fixed = props.fixed !== undefined ? props.fixed : false;
 
   const [isAtBottom, setIsAtBottom] = useState(false);
   const viewportPageRef = useRef<HTMLDivElement | null>(null);
@@ -172,9 +174,15 @@ export const ViewportPage = (props: {
           margin: '0 auto',
           overflow: 'hidden',
         }}>
-        <Box id="content" style={{ flexGrow: 1, overflowY: 'auto' }}>
+        <Box
+          id="content"
+          style={
+            fixed
+              ? { height: 'calc(100% - 48px)' }
+              : { flexGrow: 1, overflowY: 'auto' }
+          }>
           <Box
-            style={{ flexGrow: 1, flexShrink: 0 }}
+            style={fixed ? { height: '100%' } : { flexGrow: 1, flexShrink: 0 }}
             justify={props.justify || 'center'}>
             {props.content}
           </Box>
