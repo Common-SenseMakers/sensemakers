@@ -11,14 +11,7 @@ import {
   ResponsiveContext,
   Text,
 } from 'grommet';
-import {
-  ReactNode,
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { ReactNode, createContext, useContext } from 'react';
 
 import { AppHeading } from '../../ui-components';
 import { useResponsive } from '../../ui-components/ResponsiveApp';
@@ -107,9 +100,8 @@ export const ViewportHeadingLarge = (props: { label: ReactNode }) => {
   );
 };
 
-export interface ViewportPageContext {
-  isAtBottom: boolean;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ViewportPageContext {}
 
 export const ViewportPageContextValue = createContext<
   ViewportPageContext | undefined
@@ -123,47 +115,16 @@ export const ViewportPage = (props: {
   content: ReactNode;
   nav?: ReactNode;
   justify?: BoxProps['justify'];
+  fixed?: boolean;
 }) => {
   const { mobile } = useResponsive();
   const pad = mobile ? 'none' : 'large';
-
-  const [isAtBottom, setIsAtBottom] = useState(false);
-  const viewportPageRef = useRef<HTMLDivElement | null>(null);
-  const bottomMarkerRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (viewportPageRef.current) {
-      const options = {
-        root: viewportPageRef.current,
-        rootMargin: '0px',
-        threshold: 0,
-      };
-
-      const observer = new IntersectionObserver((entries, observer) => {
-        entries.forEach((entry) => {
-          setIsAtBottom(entry.isIntersecting);
-        });
-      }, options);
-
-      const current = bottomMarkerRef.current;
-
-      if (current) {
-        observer.observe(current);
-      }
-
-      return () => {
-        if (current) {
-          observer.unobserve(current);
-        }
-      };
-    }
-  }, []);
+  const fixed = props.fixed !== undefined ? props.fixed : false;
 
   return (
-    <ViewportPageContextValue.Provider value={{ isAtBottom }}>
+    <ViewportPageContextValue.Provider value={{}}>
       <Box
         id="viewport-page"
-        ref={viewportPageRef}
         pad={pad}
         style={{
           height: '100%',
@@ -172,13 +133,18 @@ export const ViewportPage = (props: {
           margin: '0 auto',
           overflow: 'hidden',
         }}>
-        <Box id="content" style={{ flexGrow: 1, overflowY: 'auto' }}>
+        <Box
+          id="content"
+          style={
+            fixed
+              ? { height: 'calc(100% - 48px)' }
+              : { flexGrow: 1, overflowY: 'auto' }
+          }>
           <Box
-            style={{ flexGrow: 1, flexShrink: 0 }}
+            style={fixed ? { height: '100%' } : { flexGrow: 1, flexShrink: 0 }}
             justify={props.justify || 'center'}>
             {props.content}
           </Box>
-          <div style={{ padding: '1px' }} ref={bottomMarkerRef}></div>
         </Box>
         {props.nav ? (
           <Box id="nav" style={{ height: '48px', flexShrink: 0 }}>
