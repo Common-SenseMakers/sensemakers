@@ -27,13 +27,13 @@ export const PublicFeed = () => {
               transform: `translateX(${-1 * feedIx * percWidth}%)`,
               transition: ' transform 0.5s ease-in-out',
               height: '100%',
-              width: '400%',
+              width: `${feeds.length * 100}%`,
             }}>
             {feeds.map((feed, ix) => {
               return (
                 <Box
                   style={{
-                    width: '25%',
+                    width: `${percWidth}%`,
                     height: '100%',
                     float: 'left',
                   }}>

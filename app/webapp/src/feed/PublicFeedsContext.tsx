@@ -35,7 +35,7 @@ export const PublicFeedsContext: React.FC<{
     return {
       endpoint: '/api/feed/get',
       queryParams: { semantics: { labels: feedTabs[1].labels } },
-      DEBUG_PREFIX: `[FEED 0] `,
+      DEBUG_PREFIX: `[FEED 1] `,
     };
   }, []);
 
@@ -43,7 +43,7 @@ export const PublicFeedsContext: React.FC<{
     return {
       endpoint: '/api/feed/get',
       queryParams: { semantics: { labels: feedTabs[2].labels } },
-      DEBUG_PREFIX: `[FEED 0] `,
+      DEBUG_PREFIX: `[FEED 2] `,
     };
   }, []);
 
@@ -51,7 +51,15 @@ export const PublicFeedsContext: React.FC<{
     return {
       endpoint: '/api/feed/get',
       queryParams: { semantics: { labels: feedTabs[3].labels } },
-      DEBUG_PREFIX: `[FEED 0] `,
+      DEBUG_PREFIX: `[FEED 3] `,
+    };
+  }, []);
+
+  const feed4Config = useMemo((): FetcherConfig => {
+    return {
+      endpoint: '/api/feed/get',
+      queryParams: { semantics: { labels: feedTabs[4].labels } },
+      DEBUG_PREFIX: `[FEED 4] `,
     };
   }, []);
 
@@ -59,8 +67,9 @@ export const PublicFeedsContext: React.FC<{
   const feed1 = usePostsFetcher(feed1Config);
   const feed2 = usePostsFetcher(feed2Config);
   const feed3 = usePostsFetcher(feed3Config);
+  const feed4 = usePostsFetcher(feed4Config);
 
-  const feeds = [feed0, feed1, feed2, feed3];
+  const feeds = [feed0, feed1, feed2, feed3, feed4];
 
   return (
     <FeedPostsContextValue.Provider
