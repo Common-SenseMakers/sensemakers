@@ -71,7 +71,6 @@ export const AppLabelsEditor = (props: {
   };
 
   useOutsideClick(keyBox, () => {
-    if (DEBUG) console.log('useOutsideClick', { adding });
     if (adding) {
       reset();
     }

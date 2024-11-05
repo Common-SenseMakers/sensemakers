@@ -32,6 +32,7 @@ export const PublicFeed = () => {
             {feeds.map((feed, ix) => {
               return (
                 <Box
+                  key={ix}
                   style={{
                     width: `${percWidth}%`,
                     height: '100%',

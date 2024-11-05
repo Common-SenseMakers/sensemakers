@@ -1,5 +1,5 @@
 import { Box, Text } from 'grommet';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -110,118 +110,96 @@ export const PostsFetcherComponent = (props: {
     }
   }, [errorFetchingOlder, errorFetchingNewer, show]);
 
-  const content = useMemo(() => {
-    if (DEBUG) {
-      console.log('PostsFetcherComponent - content', {
-        posts,
-        isLoading,
-        isPublicFeed,
-        isFetchingOlder,
-        moreToFetch,
-      });
-    }
-    if (!posts || isLoading) {
-      return [1, 2, 4, 5, 6, 7, 8].map((ix) => (
-        <PostCardLoading key={ix}></PostCardLoading>
-      ));
-    }
+  const showLoading = [1, 2, 4, 5, 6, 7, 8].map((ix) => (
+    <PostCardLoading key={ix}></PostCardLoading>
+  ));
 
-    if (posts.length === 0) {
-      return (
-        <BoxCentered style={{ height: '100%' }}>
-          <ModalContent
-            type="small"
-            title={t(AppGeneralKeys.noPostsFound)}
-            icon={
-              <BoxCentered
-                style={{
-                  height: '60px',
-                  width: '60px',
-                  borderRadius: '40px',
-                  backgroundColor: '#CEE2F2',
-                }}
-                margin={{ bottom: '16px' }}>
-                <HmmIcon size={40}></HmmIcon>
-              </BoxCentered>
-            }
-            parragraphs={[
-              <>{t(AppGeneralKeys.noPostsFoundDesc)}</>,
-            ]}></ModalContent>
-        </BoxCentered>
-      );
-    }
+  const showNoPosts = (
+    <BoxCentered style={{ height: '100%' }}>
+      <ModalContent
+        type="small"
+        title={t(AppGeneralKeys.noPostsFound)}
+        icon={
+          <BoxCentered
+            style={{
+              height: '60px',
+              width: '60px',
+              borderRadius: '40px',
+              backgroundColor: '#CEE2F2',
+            }}
+            margin={{ bottom: '16px' }}>
+            <HmmIcon size={40}></HmmIcon>
+          </BoxCentered>
+        }
+        parragraphs={[
+          <>{t(AppGeneralKeys.noPostsFoundDesc)}</>,
+        ]}></ModalContent>
+    </BoxCentered>
+  );
 
-    return (
-      <Box ref={containerRef} style={{ height: '100%', overflowY: 'auto' }}>
-        {posts.map((post, ix) => (
-          <Box key={ix} id={`post-${post.id}`} style={{ flexShrink: 0 }}>
-            <PostContext postInit={post}>
-              <PostCard
-                isPublicFeed={isPublicFeed}
-                handleClick={() => {
-                  const path = `/post/${post.id}`;
-                  navigate(path);
-                }}></PostCard>
-            </PostContext>
-          </Box>
-        ))}
+  const showPosts = posts ? (
+    <Box ref={containerRef} style={{ height: '100%', overflowY: 'auto' }}>
+      {posts.map((post, ix) => (
+        <Box key={ix} id={`post-${post.id}`} style={{ flexShrink: 0 }}>
+          <PostContext postInit={post}>
+            <PostCard
+              isPublicFeed={isPublicFeed}
+              handleClick={() => {
+                const path = `/post/${post.id}`;
+                navigate(path);
+              }}></PostCard>
+          </PostContext>
+        </Box>
+      ))}
 
-        <div style={{ padding: '1px' }} ref={bottomRef}></div>
+      <div style={{ padding: '1px' }} ref={bottomRef}></div>
 
-        {isFetchingOlder && (
-          <Box>
-            <LoadingDiv height="120px" width="100%"></LoadingDiv>
-          </Box>
-        )}
-        {moreToFetch && !isFetchingOlder && (
-          <Box
-            margin={{ vertical: 'medium', horizontal: 'medium' }}
-            align="center"
-            justify="center">
-            <Text
-              style={{
-                fontSize: '14px',
-                fontStyle: 'normal',
-                fontWeight: '500',
-                lineHeight: '16px',
-                color: 'grey',
-                textDecoration: 'underline',
-                cursor: 'pointer',
-              }}
-              onClick={() => fetchOlder()}>
-              {t(AppGeneralKeys.loadMorePosts)}
-            </Text>
-          </Box>
-        )}
-        {!moreToFetch && (
-          <Box
-            margin={{ vertical: 'medium', horizontal: 'medium' }}
-            align="center"
-            justify="center">
-            <Text
-              style={{
-                fontSize: '14px',
-                fontStyle: 'normal',
-                fontWeight: '500',
-                lineHeight: '16px',
-                color: 'grey',
-              }}>
-              {t(AppGeneralKeys.noMorePosts)}
-            </Text>
-          </Box>
-        )}
-      </Box>
-    );
-  }, [
-    posts,
-    isLoading,
-    isFetchingOlder,
-    moreToFetch,
-    t,
-    isPublicFeed,
-    navigate,
-    fetchOlder,
-  ]);
+      {isFetchingOlder && (
+        <Box>
+          <LoadingDiv height="120px" width="100%"></LoadingDiv>
+        </Box>
+      )}
+      {moreToFetch && !isFetchingOlder && (
+        <Box
+          margin={{ vertical: 'medium', horizontal: 'medium' }}
+          align="center"
+          justify="center">
+          <Text
+            style={{
+              fontSize: '14px',
+              fontStyle: 'normal',
+              fontWeight: '500',
+              lineHeight: '16px',
+              color: 'grey',
+              textDecoration: 'underline',
+              cursor: 'pointer',
+            }}
+            onClick={() => fetchOlder()}>
+            {t(AppGeneralKeys.loadMorePosts)}
+          </Text>
+        </Box>
+      )}
+      {!moreToFetch && (
+        <Box
+          margin={{ vertical: 'medium', horizontal: 'medium' }}
+          align="center"
+          justify="center">
+          <Text
+            style={{
+              fontSize: '14px',
+              fontStyle: 'normal',
+              fontWeight: '500',
+              lineHeight: '16px',
+              color: 'grey',
+            }}>
+            {t(AppGeneralKeys.noMorePosts)}
+          </Text>
+        </Box>
+      )}
+    </Box>
+  ) : (
+    <></>
+  );
 
   const reload = isFetchingNewer ? (
     <Box>
@@ -255,7 +233,11 @@ export const PostsFetcherComponent = (props: {
     <>
       {showHeader && header}
       <Box fill justify="start">
-        {content}
+        {!posts || isLoading
+          ? showLoading
+          : posts.length === 0
+            ? showNoPosts
+            : showPosts}
       </Box>
     </>
   );
