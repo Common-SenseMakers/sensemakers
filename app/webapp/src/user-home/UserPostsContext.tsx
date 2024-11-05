@@ -1,6 +1,5 @@
 import React, { useCallback, useContext, useMemo } from 'react';
 import { createContext } from 'react';
-import { useLocation } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
 import {
@@ -14,12 +13,6 @@ import {
   AppPostParsingStatus,
   PostsQuery,
 } from '../shared/types/types.posts';
-import {
-  NOT_SCIENCE_TOPIC_URI,
-  SCIENCE_TOPIC_URI,
-} from '../shared/utils/semantics.helper';
-
-const DEBUG = false;
 
 export enum PostsQueryStatus {
   ALL = 'all',
@@ -43,7 +36,6 @@ export const UserPostsContext: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
   const appFetch = useAppFetch();
-  const location = useLocation();
 
   /** status is derived from location
    * set the filter status based on it.
@@ -53,32 +45,8 @@ export const UserPostsContext: React.FC<{
     queryParams: PostsQuery;
     status: PostsQueryStatus;
   } => {
-    if (
-      Object.values(PostsQueryStatus)
-        .map((v) => `/${v}`)
-        .includes(location.pathname)
-    ) {
-      const newStatus = location.pathname.slice(1) as PostsQueryStatus;
-      if (DEBUG)
-        console.log(`changing status based on location to ${newStatus}`);
-      if (newStatus === PostsQueryStatus.ALL) {
-        return { queryParams: {}, status: PostsQueryStatus.ALL };
-      }
-      if (newStatus === PostsQueryStatus.IGNORED) {
-        return {
-          queryParams: { semantics: { topics: [NOT_SCIENCE_TOPIC_URI] } },
-          status: PostsQueryStatus.IGNORED,
-        };
-      }
-      if (newStatus === PostsQueryStatus.IS_SCIENCE) {
-        return {
-          queryParams: { semantics: { topics: [SCIENCE_TOPIC_URI] } },
-          status: PostsQueryStatus.IS_SCIENCE,
-        };
-      }
-    }
     return { queryParams: {}, status: PostsQueryStatus.ALL };
-  }, [location]);
+  }, []);
 
   const onPostsAdded = useCallback((newPosts: AppPostFull[]) => {
     /** trigger parse if not parsed and not parsing */

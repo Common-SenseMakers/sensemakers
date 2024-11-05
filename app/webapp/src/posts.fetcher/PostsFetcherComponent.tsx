@@ -1,5 +1,5 @@
 import { Box, Text } from 'grommet';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -7,7 +7,6 @@ import { ModalContent } from '../app/AppModalStandard';
 import { useToastContext } from '../app/ToastsContext';
 import { HmmIcon } from '../app/icons/HmmIcon';
 import { ReloadIcon } from '../app/icons/ReloadIcon';
-import { useViewport } from '../app/layout/Viewport';
 import { AppGeneralKeys } from '../i18n/i18n.app.general';
 import { PostCard } from '../post/PostCard';
 import { PostCardLoading } from '../post/PostCardLoading';
@@ -16,6 +15,7 @@ import { AppButton, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
+import { useIsAtBottom } from '../ui-components/hooks/IsAtBottom';
 import { PostFetcherInterface } from './posts.fetcher.hook';
 
 const DEBUG = false;
@@ -64,7 +64,10 @@ export const PostsFetcherComponent = (props: {
     moreToFetch,
   } = feed;
 
-  const { isAtBottom } = useViewport();
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  const { isAtBottom } = useIsAtBottom(containerRef, bottomRef);
 
   useEffect(() => {
     if (isAtBottom && !isLoading && moreToFetch) {
@@ -149,21 +152,22 @@ export const PostsFetcherComponent = (props: {
     }
 
     return (
-      <>
-        <Box style={{ height: '100%' }}>
-          {posts.map((post, ix) => (
-            <Box key={ix} id={`post-${post.id}`} style={{ flexShrink: 0 }}>
-              <PostContext postInit={post}>
-                <PostCard
-                  isPublicFeed={isPublicFeed}
-                  handleClick={() => {
-                    const path = `/post/${post.id}`;
-                    navigate(path);
-                  }}></PostCard>
-              </PostContext>
-            </Box>
-          ))}
-        </Box>
+      <Box ref={containerRef} style={{ height: '100%', overflowY: 'auto' }}>
+        {posts.map((post, ix) => (
+          <Box key={ix} id={`post-${post.id}`} style={{ flexShrink: 0 }}>
+            <PostContext postInit={post}>
+              <PostCard
+                isPublicFeed={isPublicFeed}
+                handleClick={() => {
+                  const path = `/post/${post.id}`;
+                  navigate(path);
+                }}></PostCard>
+            </PostContext>
+          </Box>
+        ))}
+
+        <div style={{ padding: '1px' }} ref={bottomRef}></div>
+
         {isFetchingOlder && (
           <Box>
             <LoadingDiv height="120px" width="100%"></LoadingDiv>
@@ -206,7 +210,7 @@ export const PostsFetcherComponent = (props: {
             </Text>
           </Box>
         )}
-      </>
+      </Box>
     );
   }, [
     posts,

@@ -11,14 +11,7 @@ import {
   ResponsiveContext,
   Text,
 } from 'grommet';
-import {
-  ReactNode,
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { ReactNode, createContext, useContext } from 'react';
 
 import { AppHeading } from '../../ui-components';
 import { useResponsive } from '../../ui-components/ResponsiveApp';
@@ -107,9 +100,8 @@ export const ViewportHeadingLarge = (props: { label: ReactNode }) => {
   );
 };
 
-export interface ViewportPageContext {
-  isAtBottom: boolean;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ViewportPageContext {}
 
 export const ViewportPageContextValue = createContext<
   ViewportPageContext | undefined
@@ -129,43 +121,10 @@ export const ViewportPage = (props: {
   const pad = mobile ? 'none' : 'large';
   const fixed = props.fixed !== undefined ? props.fixed : false;
 
-  const [isAtBottom, setIsAtBottom] = useState(false);
-  const viewportPageRef = useRef<HTMLDivElement | null>(null);
-  const bottomMarkerRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (viewportPageRef.current) {
-      const options = {
-        root: viewportPageRef.current,
-        rootMargin: '0px',
-        threshold: 0,
-      };
-
-      const observer = new IntersectionObserver((entries, observer) => {
-        entries.forEach((entry) => {
-          setIsAtBottom(entry.isIntersecting);
-        });
-      }, options);
-
-      const current = bottomMarkerRef.current;
-
-      if (current) {
-        observer.observe(current);
-      }
-
-      return () => {
-        if (current) {
-          observer.unobserve(current);
-        }
-      };
-    }
-  }, []);
-
   return (
-    <ViewportPageContextValue.Provider value={{ isAtBottom }}>
+    <ViewportPageContextValue.Provider value={{}}>
       <Box
         id="viewport-page"
-        ref={viewportPageRef}
         pad={pad}
         style={{
           height: '100%',
@@ -186,7 +145,6 @@ export const ViewportPage = (props: {
             justify={props.justify || 'center'}>
             {props.content}
           </Box>
-          <div style={{ padding: '1px' }} ref={bottomMarkerRef}></div>
         </Box>
         {props.nav ? (
           <Box id="nav" style={{ height: '48px', flexShrink: 0 }}>

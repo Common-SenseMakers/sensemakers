@@ -16,13 +16,15 @@ const NavHistoryContextValue = createContext<NavHistoryContextType | undefined>(
   undefined
 );
 
+const DEBUG = false;
+
 export const NavHistoryContext = (props: PropsWithChildren) => {
   const [stack, setStack] = useState<string[]>([]);
   const { pathname } = useLocation();
   const type = useNavigationType();
 
   useEffect(() => {
-    console.log({ pathname, type });
+    if (DEBUG) console.log({ pathname, type });
 
     if (type === 'POP') {
       setStack(stack.slice(0, stack.length - 1));

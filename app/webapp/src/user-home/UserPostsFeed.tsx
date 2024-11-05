@@ -1,7 +1,6 @@
 import { Anchor, Box, Text } from 'grommet';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
 
 import { useServiceWorker } from '../app/ServiceWorkerContext';
 import { AppGeneralKeys } from '../i18n/i18n.app.general';
@@ -26,27 +25,6 @@ export const UserPostsFeed = () => {
   }, [introShown]);
 
   const { feed } = useUserPosts();
-
-  const location = useLocation();
-
-  useEffect(() => {
-    let timeout: NodeJS.Timeout;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const postId = location.state?.postId as string | undefined;
-    if (postId) {
-      const postCard = document.querySelector(`#post-${postId}`);
-      const viewportPage = document.querySelector('#content');
-      if (postCard && viewportPage) {
-        timeout = setTimeout(() => {
-          postCard.scrollIntoView({
-            behavior: 'instant' as ScrollBehavior,
-            block: 'center',
-          });
-        }, 0);
-      }
-    }
-    return () => clearTimeout(timeout);
-  }, [location]);
 
   const updater = (() => {
     if (hasUpdate) {

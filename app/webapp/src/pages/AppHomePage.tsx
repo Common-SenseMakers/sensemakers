@@ -61,5 +61,5 @@ export const AppHomePage = () => {
     return { content: LoadingPlaceholder, nav: undefined };
   }, [overallLoginStatus, alreadyConnected]);
 
-  return <ViewportPage content={content} nav={nav} justify="start" />;
+  return <ViewportPage fixed content={content} nav={nav} justify="start" />;
 };

@@ -35,7 +35,6 @@ export const PublicFeed = () => {
                   style={{
                     width: '25%',
                     height: '100%',
-                    overflowY: 'auto',
                     float: 'left',
                   }}>
                   <PostsFetcherComponent
