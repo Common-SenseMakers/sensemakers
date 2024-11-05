@@ -44,7 +44,13 @@ def scrape_posts_for_users(users, admin_key):
 
         # Handle the response
         if response.status_code == 200:
-            print(f"Success for {user['username']}:", response.json())
+            print(f"Success for {user['username']}:")
+            try:
+                response = dict(response)
+                user_id = response['data'][0]['post']['generic']['author']['platformId']+response['data'][0]['post']['generic']['author']['id']
+                print(f'user has id {user_id}')
+            except Exception as e:
+                print(f'Error accoured {e}')
         else:
             print(f"Failed for {user['username']} with status code {response.status_code}: {response.text}")
 
