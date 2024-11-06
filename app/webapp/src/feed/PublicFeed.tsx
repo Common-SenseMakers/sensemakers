@@ -21,7 +21,9 @@ export const PublicFeed = () => {
   return (
     <>
       <Box fill justify="start" style={{ height: '100%' }}>
-        <Box pad={{ horizontal: '12px', vertical: '6px' }}>
+        <Box
+          pad={{ horizontal: '12px', vertical: '6px' }}
+          margin={{ bottom: '4px' }}>
           <AppHeading level="2">{'Explore'}</AppHeading>
         </Box>
 

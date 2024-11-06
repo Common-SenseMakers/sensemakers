@@ -323,6 +323,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [connectedUser, code, queryParams, endpoint]
   );
+  console.log(`${DEBUG_PREFIX}`, isFetchingOlder);
 
   const _fetchOlder = (oldestPostId?: string) => {
     setIsFetchingOlder(true);
@@ -330,7 +331,10 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
       .then(() => {
         setIsFetchingOlder(false);
       })
-      .catch(console.error);
+      .catch((e) => {
+        console.error(e);
+        setIsFetchingOlder(false);
+      });
   };
 
   /** public function to trigger fetching for older posts since the current oldest one */
@@ -353,9 +357,14 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
       );
     reset();
     setIsFetchingOlder(true);
-    fetchOlderCallback(undefined).catch((e) => {
-      console.error(e);
-    });
+    fetchOlderCallback(undefined)
+      .then(() => {
+        setIsFetchingOlder(false);
+      })
+      .catch((e) => {
+        console.error(e);
+        setIsFetchingOlder(false);
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectedUser, queryParams, endpoint]);
 

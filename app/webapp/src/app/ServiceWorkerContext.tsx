@@ -39,11 +39,6 @@ export const ServiceWorker = (props: PropsWithChildren) => {
     'browser' | 'standalone' | 'twa' | undefined
   >(undefined);
 
-  const onSWUpdate = useCallback((registration: ServiceWorkerRegistration) => {
-    setHasUpdate(true);
-    setWaitingWorker(registration.waiting);
-  }, []);
-
   const updateApp = useCallback(() => {
     console.log('updateApp called');
     waitingWorker?.postMessage({ type: 'SKIP_WAITING' });
@@ -51,11 +46,21 @@ export const ServiceWorker = (props: PropsWithChildren) => {
     window.location.reload();
   }, [waitingWorker]);
 
+  const onSWUpdate = useCallback(
+    (registration: ServiceWorkerRegistration) => {
+      setHasUpdate(true);
+      updateApp();
+      setWaitingWorker(registration.waiting);
+    },
+    [updateApp]
+  );
+
   useEffect(() => {
     serviceWorkerRegistration.register({
       onUpdate: onSWUpdate,
       onUpdateReady: onSWUpdate,
     });
+    return () => serviceWorkerRegistration.unregister();
   }, [onSWUpdate]);
 
   const checkDisplayMode = () => {
