@@ -33,6 +33,13 @@ export interface StructuredSemantics {
   topics?: string[];
 }
 
+export interface RefLabel {
+  label: string;
+  authorId?: string;
+  postId?: string;
+  platformPostUrl?: string;
+}
+
 export type ArrayIncludeQuery = string[];
 
 export interface StructuredSemanticsQuery {

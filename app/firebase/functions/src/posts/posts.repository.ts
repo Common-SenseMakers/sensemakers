@@ -3,6 +3,7 @@ import { logger } from 'firebase-functions/v1';
 
 import {
   ArrayIncludeQuery,
+  RefLabel,
   StructuredSemantics,
 } from '../@shared/types/types.posts';
 import {
@@ -206,9 +207,35 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     return appPosts.sort((a, b) => b.createdAtMs - a.createdAtMs);
   }
 
-  public getPostRefsStats(post: AppPost): string[] {
-    if (!post.structuredSemantics?.refsMeta) return [];
-    return Object.keys(post.structuredSemantics.refsMeta);
+  public async getAggregatedRefsLabels(
+    references: string[]
+  ): Promise<Record<string, RefLabel[]>> {
+    const refsStats: Record<string, RefLabel[]> = {};
+    const referencePosts = await this.getMany({
+      semantics: { refs: references },
+      fetchParams: { expectedAmount: 100 },
+    });
+    referencePosts.forEach((referencePost) => {
+      references.forEach((reference) => {
+        if (referencePost.structuredSemantics?.refsMeta) {
+          const refMeta = referencePost.structuredSemantics.refsMeta[reference];
+          const refLabels: RefLabel[] | undefined = refMeta?.labels?.map(
+            (label) => ({
+              label,
+              postId: referencePost.id,
+              authorId: referencePost.authorProfileId,
+              platformPostUrl: referencePost.generic.thread[0].url,
+            })
+          );
+          const updatedLabels = [
+            ...(refsStats[reference] || []),
+            ...(refLabels || []),
+          ];
+          refsStats[reference] = updatedLabels;
+        }
+      });
+    });
+    return refsStats;
   }
 
   public async getAllOfQuery(queryParams: PostsQueryDefined, limit?: number) {
