@@ -226,11 +226,14 @@ export const AccountContext = (props: PropsWithChildren) => {
     setConnectedUser(undefined);
     setToken(null);
 
+    const disabledStatus: PlatformsConnectedStatus = {};
+
     ALL_PUBLISH_PLATFORMS.forEach((platform) => {
-      setPlatformsConnectedStatus({
-        ...platformsConnectedStatus,
-        [platform]: PlatformConnectedStatus.Disconnected,
-      });
+      disabledStatus[platform] = PlatformConnectedStatus.Disconnected;
+    });
+
+    setPlatformsConnectedStatus({
+      ...disabledStatus,
     });
 
     _setLoginFlowState(LoginFlowState.Idle);

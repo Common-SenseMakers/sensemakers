@@ -50,6 +50,10 @@ export const ConnectMastodonPage = () => {
   };
 
   const status = getPlatformConnectedStatus(PLATFORM.Mastodon);
+  const server = !isValidMastodonDomain(mastodonServer)
+    ? DEFAULT_SERVER
+    : mastodonServer;
+  const continueLabel = `${t(IntroKeys.continue)} with ${server}`;
 
   const { title, content } = useMemo((): {
     title: string;
@@ -76,15 +80,11 @@ export const ConnectMastodonPage = () => {
                 margin={{ bottom: 'small' }}
                 size="small"
                 style={{ fontWeight: 'bold' }}>
-                {t(IntroKeys.mastodonServer)}
+                {`${t(IntroKeys.mastodonServer)}: ${server}`}
               </AppParagraph>
               <Box margin={{ bottom: 'medium' }}>
-                <AppButton label={DEFAULT_SERVER} primary></AppButton>
-                <Box margin={{ vertical: 'medium' }}>
-                  <AppParagraph>or, input another one:</AppParagraph>
-                </Box>
                 <AppInput
-                  placeholder={t(IntroKeys.mastodonServerPlaceholder)}
+                  placeholder={'or type another server'}
                   value={mastodonServer}
                   onChange={(event) => setMastodonServer(event.target.value)}
                   style={{ width: '100%' }}
@@ -93,7 +93,7 @@ export const ConnectMastodonPage = () => {
               <Box align="center" margin={{ top: 'medium' }}>
                 <AppButton
                   primary
-                  label={t(IntroKeys.continue)}
+                  label={continueLabel}
                   onClick={handleConnect}
                   style={{ width: '100%' }}
                 />
@@ -108,7 +108,7 @@ export const ConnectMastodonPage = () => {
       return {
         title: t(IntroKeys.connectingMastodon),
         content: (
-          <BoxCentered>
+          <BoxCentered pad="large">
             <Loading />
           </BoxCentered>
         ),

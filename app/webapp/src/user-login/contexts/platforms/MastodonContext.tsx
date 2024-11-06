@@ -151,13 +151,11 @@ export const MastodonContext = (props: PropsWithChildren) => {
         });
 
       setPlatformConnectedStatus(
-        PLATFORM.Twitter,
+        PLATFORM.Mastodon,
         PlatformConnectedStatus.Disconnected
       );
       disconnect();
     }
-
-    WIP;
 
     if (!verifierHandled.current) {
       if (
@@ -221,18 +219,8 @@ export const MastodonContext = (props: PropsWithChildren) => {
         }
       }
     }
-  }, [
-    code_param,
-    overallLoginStatus,
-    searchParams,
-    connectedUser,
-    setSearchParams,
-    getPlatformConnectedStatus,
-    refreshConnected,
-    appFetch,
-    setPlatformConnectedStatus,
-    setOurToken,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code_param, overallLoginStatus, searchParams, connectedUser]);
 
   return (
     <MastodonContextValue.Provider
