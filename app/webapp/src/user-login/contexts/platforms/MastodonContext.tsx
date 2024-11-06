@@ -75,13 +75,19 @@ export const MastodonContext = (props: PropsWithChildren) => {
     !connectedUser.profiles[PLATFORM.Mastodon];
 
   useEffect(() => {
+    // reset error
+    setError(undefined);
+  }, []);
+
+  useEffect(() => {
     if (error) {
       show({
         title: 'Error Connecting Mastodon',
         message: error,
       });
     }
-  }, [error, show]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error]);
 
   const connect = useCallback(
     async (

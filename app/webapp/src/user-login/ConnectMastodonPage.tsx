@@ -24,9 +24,12 @@ export const ConnectMastodonPage = () => {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
+
   const { connect, error } = useMastodonContext();
   const { connectedUser, getPlatformConnectedStatus } = useAccountContext();
+
   const [mastodonServer, setMastodonServer] = useState('');
+  const [isConnecting, setIsConnecting] = useState(false);
 
   useEffect(() => {
     const mastodonProfile = connectedUser?.profiles?.mastodon;
@@ -35,34 +38,52 @@ export const ConnectMastodonPage = () => {
     }
   }, [connectedUser, navigate]);
 
+  useEffect(() => {
+    if (error) {
+      setIsConnecting(false);
+    }
+  }, [error]);
+
+  const server = useMemo(() => {
+    return !isValidMastodonDomain(mastodonServer)
+      ? DEFAULT_SERVER
+      : mastodonServer;
+  }, [mastodonServer]);
+
   const handleConnect = () => {
     if (connect) {
-      const server = isValidMastodonDomain(mastodonServer)
-        ? mastodonServer
-        : DEFAULT_SERVER;
+      const callbackUrl =
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        (location.state?.callbackUrl as string | undefined) ||
+        `${window.location.origin}${AbsoluteRoutes.ConnectMastodon}`;
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const callbackUrl = location.state?.callbackUrl as string | undefined;
-      connect(server, 'read', callbackUrl || window.location.href).catch(
-        console.error
-      );
+      setIsConnecting(true);
+      connect(server, 'read', callbackUrl).catch(console.error);
     }
   };
 
   const status = getPlatformConnectedStatus(PLATFORM.Mastodon);
-  const server = !isValidMastodonDomain(mastodonServer)
-    ? DEFAULT_SERVER
-    : mastodonServer;
   const continueLabel = `${t(IntroKeys.continue)} with ${server}`;
 
   const { title, content } = useMemo((): {
     title: string;
     content: JSX.Element;
   } => {
-    if (error) {
+    if (status === PlatformConnectedStatus.Connecting || isConnecting) {
       return {
-        title: 'Error',
-        content: <AppParagraph color="status-error">{error}</AppParagraph>,
+        title: t(IntroKeys.connectingMastodon),
+        content: (
+          <BoxCentered pad="large">
+            <Loading />
+          </BoxCentered>
+        ),
+      };
+    }
+
+    if (status === PlatformConnectedStatus.Connected) {
+      return {
+        title: 'Connected to Mastodon',
+        content: <></>,
       };
     }
 
@@ -98,27 +119,12 @@ export const ConnectMastodonPage = () => {
                   style={{ width: '100%' }}
                 />
               </Box>
+              {error && (
+                <AppParagraph color="status-error">{error}</AppParagraph>
+              )}
             </>
           </Keyboard>
         ),
-      };
-    }
-
-    if (status === PlatformConnectedStatus.Connecting) {
-      return {
-        title: t(IntroKeys.connectingMastodon),
-        content: (
-          <BoxCentered pad="large">
-            <Loading />
-          </BoxCentered>
-        ),
-      };
-    }
-
-    if (status === PlatformConnectedStatus.Connected) {
-      return {
-        title: 'Connected to Mastodon',
-        content: <></>,
       };
     }
 
