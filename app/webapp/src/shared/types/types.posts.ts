@@ -28,6 +28,7 @@ export interface GenericThread {
 export interface StructuredSemantics {
   labels?: string[];
   keywords?: string[];
+  refs?: string[];
   refsMeta?: Record<string, RefMeta>;
   topics?: string[];
 }

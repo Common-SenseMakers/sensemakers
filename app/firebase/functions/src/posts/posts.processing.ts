@@ -225,6 +225,7 @@ export class PostsProcessing {
       keywords: Array.from(keywords),
       topics: Array.from(topics),
       refsMeta,
+      refs: Object.keys(refsMeta),
     };
   }
 
