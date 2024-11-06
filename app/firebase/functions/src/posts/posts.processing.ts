@@ -177,6 +177,7 @@ export class PostsProcessing {
     const keywords: Set<string> = new Set();
     const refsMeta: Record<string, RefMeta> = {};
     const topics: Set<string> = new Set();
+    const refsLabels: Record<string, string[]> = {};
 
     mapStoreElements(store, (q) => {
       /** store the triples */
@@ -198,8 +199,12 @@ export class PostsProcessing {
         if (q.predicate.value === HAS_TOPIC_URI) {
           topics.add(q.object.value);
         } else {
-          // non kewyords or is-a, ar marked as ref labels
+          // non kewyords or is-a, are marked as ref labels
           labels.add(q.predicate.value);
+          refsLabels[q.object.value] = [
+            ...(refsLabels[q.object.value] || []),
+            q.predicate.value,
+          ];
         }
       }
     });
@@ -211,7 +216,7 @@ export class PostsProcessing {
         const url = label;
         const refMeta = await this.getRefMeta(url, manager, originalParsed);
 
-        refsMeta[url] = refMeta;
+        refsMeta[url] = { ...refMeta, labels: refsLabels[url] || undefined };
       })
     );
 
