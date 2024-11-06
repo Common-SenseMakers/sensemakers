@@ -2,10 +2,10 @@ import { useMemo } from 'react';
 
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
+import { ConnectPage } from '../pages/ConnectPage';
 import { PostCardLoading } from '../post/PostCardLoading';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { UserPostsFeed } from '../user-home/UserPostsFeed';
-import { ConnectSocialsPage } from '../user-login/ConnectSocialsPage';
 import {
   OverallLoginStatus,
   useAccountContext,
@@ -47,7 +47,7 @@ export const AppHomePage = () => {
     ) {
       return {
         fixed: false,
-        content: <ConnectSocialsPage />,
+        content: <ConnectPage></ConnectPage>,
         nav: undefined,
       };
     }

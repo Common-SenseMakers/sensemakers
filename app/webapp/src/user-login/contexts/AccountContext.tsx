@@ -9,6 +9,7 @@ import {
 } from 'react';
 
 import { _appFetch } from '../../api/app.fetch';
+import { STARTED_KEY } from '../../pages/ConnectPage';
 import { NotificationFreq } from '../../shared/types/types.notifications';
 import { OrcidProfile } from '../../shared/types/types.orcid';
 import {
@@ -131,6 +132,8 @@ export const AccountContext = (props: PropsWithChildren) => {
     false
   );
 
+  const [, setStart] = usePersist(STARTED_KEY, false);
+
   const setOverallLoginStatus = useCallback(
     (status: OverallLoginStatus) => {
       if (DEBUG) console.log('setOverallLoginStatus', status);
@@ -237,6 +240,7 @@ export const AccountContext = (props: PropsWithChildren) => {
       ...disabledStatus,
     });
 
+    setStart(null);
     _setLoginFlowState(LoginFlowState.Idle);
     _setOverallLoginStatus(OverallLoginStatus.LoggedOut);
   };

@@ -2,7 +2,6 @@ import { Box } from 'grommet';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { AppLogo } from '../app/brand/AppLogo';
 import { BlueskyIcon, MastodonIcon, TwitterIcon } from '../app/common/Icons';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { IntroKeys } from '../i18n/i18n.intro';
@@ -18,7 +17,7 @@ import {
 } from './contexts/AccountContext';
 import { useTwitterContext } from './contexts/platforms/TwitterContext';
 
-export const ConnectSocialsPage = () => {
+export const ConnectSocials = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const {
@@ -124,7 +123,6 @@ export const ConnectSocialsPage = () => {
     <Box
       pad={{ horizontal: 'medium', vertical: 'large' }}
       style={{ flexGrow: 1 }}>
-      <AppLogo margin={{ bottom: 'xlarge' }}></AppLogo>
       <Box style={{ flexGrow: 1 }}>{content}</Box>
     </Box>
   );
