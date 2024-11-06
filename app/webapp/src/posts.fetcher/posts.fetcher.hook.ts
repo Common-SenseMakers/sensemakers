@@ -323,7 +323,6 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [connectedUser, code, queryParams, endpoint]
   );
-  console.log(`${DEBUG_PREFIX}`, isFetchingOlder);
 
   const _fetchOlder = (oldestPostId?: string) => {
     setIsFetchingOlder(true);
