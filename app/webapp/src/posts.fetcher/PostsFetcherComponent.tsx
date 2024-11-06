@@ -232,7 +232,7 @@ export const PostsFetcherComponent = (props: {
   return (
     <>
       {showHeader && header}
-      <Box fill justify="start">
+      <Box fill style={{ backgroundColor: '#FFFFFF' }} justify="start">
         {!posts || isLoading
           ? showLoading
           : posts.length === 0

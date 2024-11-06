@@ -1,5 +1,6 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
 import { Location, useLocation, useNavigate } from 'react-router-dom';
+import { CSSProperties } from 'styled-components';
 
 import { RouteNames } from '../route.names';
 import { AppButton } from '../ui-components';
@@ -29,6 +30,8 @@ export const FeedTabs = () => {
 
   const feedIx = locationToFeedIx(location);
 
+  const borderStyle = `1px solid ${constants.colors.border}`;
+
   const tabElement = (text: string, route: string, isSelected: boolean) => {
     const internalBoxProps: BoxExtendedProps = {
       direction: 'row',
@@ -42,13 +45,13 @@ export const FeedTabs = () => {
     const externalBoxProps: BoxExtendedProps = {
       style: {
         flex: '0 0 auto',
-        marginLeft: '11px',
         height: '100%',
         justifyContent: 'center',
         backgroundColor: isSelected ? '#FFFFFF' : 'transparent',
-        borderTop: `1px solid ${constants.colors.border}`,
-        borderLeft: `1px solid ${constants.colors.border}`,
-        borderRight: `1px solid ${constants.colors.border}`,
+        borderTop: borderStyle,
+        borderLeft: borderStyle,
+        borderRight: borderStyle,
+        borderBottom: isSelected ? 'none' : borderStyle,
         borderRadius: '8px 8px 0 0',
       },
     };
@@ -71,6 +74,13 @@ export const FeedTabs = () => {
     );
   };
 
+  const spaceStyle: CSSProperties = {
+    flex: '0 0 auto',
+    height: '100%',
+    borderBottom: borderStyle,
+    width: '11px',
+  };
+
   return (
     <div
       style={{
@@ -81,9 +91,17 @@ export const FeedTabs = () => {
         scrollbarWidth: 'none',
         msOverflowStyle: 'none',
       }}>
-      {feedTabs.map((tab, ix) =>
-        tabElement(tab.title, `/${RouteNames.Feed}/${tab.id}`, feedIx === ix)
-      )}
+      {feedTabs.map((tab, ix) => (
+        <>
+          <div style={spaceStyle}></div>
+          {tabElement(
+            tab.title,
+            `/${RouteNames.Feed}/${tab.id}`,
+            feedIx === ix
+          )}
+          {ix === feedTabs.length - 1 && <div style={spaceStyle}></div>}
+        </>
+      ))}
     </div>
   );
 };

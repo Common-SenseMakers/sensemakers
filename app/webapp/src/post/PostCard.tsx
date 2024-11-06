@@ -83,10 +83,10 @@ export const PostCard = (props: {
       pad={{ top: '16px', horizontal: '12px', bottom: '16px' }}
       style={{
         backgroundColor: shade ? constants.colors.shade : 'white',
-        borderTop: '1px solid var(--Neutral-300, #D1D5DB)',
+        borderBottom: '1px solid var(--Neutral-300, #D1D5DB)',
         borderRight: '1px solid var(--Neutral-300, #D1D5DB)',
         borderLeft: '1px solid var(--Neutral-300, #D1D5DB)',
-        borderBottom: 'none',
+        borderTop: 'none',
       }}>
       <Box
         style={{ cursor: 'pointer', position: 'relative' }}
