@@ -2,6 +2,7 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions/v1';
 
 import {
+  AppPostRead,
   ArrayIncludeQuery,
   RefLabel,
   StructuredSemantics,
@@ -199,15 +200,32 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       .limit(queryParams.fetchParams.expectedAmount)
       .get();
 
-    const appPosts = posts.docs.map((doc) => ({
+    let appPosts = posts.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
-    })) as AppPost[];
+    })) as AppPostRead[];
+
+    if (queryParams.includeAggregateLabels) {
+      appPosts = await Promise.all(
+        appPosts.map(async (post) => {
+          return {
+            ...post,
+            meta: post.structuredSemantics?.refs
+              ? {
+                  refLabels: await this.getAggregatedRefLabels(
+                    post.structuredSemantics.refs
+                  ),
+                }
+              : undefined,
+          };
+        })
+      );
+    }
 
     return appPosts.sort((a, b) => b.createdAtMs - a.createdAtMs);
   }
 
-  public async getAggregatedRefsLabels(
+  public async getAggregatedRefLabels(
     references: string[]
   ): Promise<Record<string, RefLabel[]>> {
     const refsStats: Record<string, RefLabel[]> = {};

@@ -87,6 +87,11 @@ interface AppPostBase {
 export interface AppPost extends AppPostBase {
   structuredSemantics?: StructuredSemantics;
 }
+export interface AppPostRead extends AppPost {
+  meta?: {
+    refLabels: Record<string, RefLabel[]>;
+  };
+}
 
 export type AppPostCreate = Omit<AppPost, 'id'>;
 
@@ -147,6 +152,7 @@ export interface PostsQueryParams {
   profileIds?: string;
   origins?: ArrayIncludeQuery;
   semantics?: StructuredSemanticsQuery;
+  includeAggregateLabels?: boolean;
 }
 
 export interface PostsQuery extends PostsQueryParams {
