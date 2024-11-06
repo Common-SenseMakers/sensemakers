@@ -18,7 +18,7 @@ const PostCardHeader = (props: { post: AppPostFull }) => {
 
   return (
     <Box direction="row" align="center" justify="between" width="100%">
-      <Box direction="row" align="center" gap="12px">
+      <Box direction="row" align="center" gap="4px">
         <PlatformAvatar
           size={24}
           imageUrl={details?.authorAvatarUrl}></PlatformAvatar>
@@ -83,7 +83,7 @@ export const PostCard = (props: {
       pad={{ top: '16px', horizontal: '12px', bottom: '16px' }}
       style={{
         backgroundColor: shade ? constants.colors.shade : 'white',
-        borderTop: '2px solid var(--Neutral-300, #D1D5DB)',
+        borderTop: '1px solid var(--Neutral-300, #D1D5DB)',
         borderRight: '1px solid var(--Neutral-300, #D1D5DB)',
         borderLeft: '1px solid var(--Neutral-300, #D1D5DB)',
         borderBottom: 'none',
@@ -91,9 +91,11 @@ export const PostCard = (props: {
       <Box
         style={{ cursor: 'pointer', position: 'relative' }}
         onClick={handleClick}>
-        <Box direction="row" justify="between" margin={{ bottom: '6.5px' }}>
-          <PublishButtons></PublishButtons>
-        </Box>
+        {false && (
+          <Box direction="row" justify="between" margin={{ bottom: '6.5px' }}>
+            <PublishButtons></PublishButtons>
+          </Box>
+        )}
 
         <Box direction="row" justify="between" margin={{ bottom: '6.5px' }}>
           {header}

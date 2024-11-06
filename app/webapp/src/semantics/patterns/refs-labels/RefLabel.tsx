@@ -72,22 +72,13 @@ export const RefWithLabels = (props: {
   };
 
   return (
-    <Box>
-      <Box direction="row" margin={{ bottom: 'small' }}>
-        {showLabels && (
-          <AppLabelsEditor
-            editable={props.editable}
-            colors={{
-              font: '#337FBD',
-              background: '#EDF7FF',
-              border: '#ADCCE4',
-            }}
-            labels={labelsDisplayNames}
-            options={optionDisplayNames}
-            removeLabel={(label) => removeLabel(label)}
-            addLabel={(label) => addLabel(label)}></AppLabelsEditor>
-        )}
-      </Box>
+    <Box
+      style={{
+        borderRadius: '12px',
+        border: '1px solid #D1D5DB',
+        width: '100%',
+      }}
+      pad="12px">
       {refData.meta ? (
         <RefCard
           ix={props.ix + 1}
@@ -102,6 +93,21 @@ export const RefWithLabels = (props: {
           {props.refUrl}
         </Anchor>
       )}
+      <Box direction="row" margin={{ top: '40px' }}>
+        {showLabels && (
+          <AppLabelsEditor
+            editable={props.editable}
+            colors={{
+              font: '#FFFFFF',
+              background: '#337FBD',
+              border: '#5293C7',
+            }}
+            labels={labelsDisplayNames}
+            options={optionDisplayNames}
+            removeLabel={(label) => removeLabel(label)}
+            addLabel={(label) => addLabel(label)}></AppLabelsEditor>
+        )}
+      </Box>
     </Box>
   );
 };

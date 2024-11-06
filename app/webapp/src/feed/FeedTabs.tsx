@@ -35,17 +35,21 @@ export const FeedTabs = () => {
       gap: '4px',
       align: 'center',
       justify: 'center',
+      pad: { horizontal: '12px', vertical: '8px' },
+      style: { minWidth: '88px' },
     };
+
     const externalBoxProps: BoxExtendedProps = {
       style: {
-        flexGrow: 1,
+        flex: '0 0 auto',
+        marginLeft: '11px',
         height: '100%',
         justifyContent: 'center',
-      },
-      border: {
-        color: isSelected ? constants.colors.primary : 'transparent',
-        side: 'bottom',
-        size: '2px',
+        backgroundColor: isSelected ? '#FFFFFF' : 'transparent',
+        borderTop: `1px solid ${constants.colors.border}`,
+        borderLeft: `1px solid ${constants.colors.border}`,
+        borderRight: `1px solid ${constants.colors.border}`,
+        borderRadius: '8px 8px 0 0',
       },
     };
 
@@ -68,10 +72,18 @@ export const FeedTabs = () => {
   };
 
   return (
-    <Box direction="row" align="center" style={{ height: '48px' }}>
+    <div
+      style={{
+        height: '48px',
+        display: 'flex',
+        overflowX: 'auto',
+        whiteSpace: 'nowrap',
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none',
+      }}>
       {feedTabs.map((tab, ix) =>
         tabElement(tab.title, `/${RouteNames.Feed}/${tab.id}`, feedIx === ix)
       )}
-    </Box>
+    </div>
   );
 };

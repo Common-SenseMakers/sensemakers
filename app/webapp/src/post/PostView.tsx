@@ -187,6 +187,12 @@ export const PostView = (props: { profile?: PlatformProfile }) => {
         <Box pad="medium">
           <PostHeader boxProps={{ margin: { bottom: '16px' } }}></PostHeader>
 
+          {!hideSemantics && (
+            <SemanticsEditor
+              patternProps={patternProps}
+              include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
+          )}
+
           <PostTextEditable text={postText}></PostTextEditable>
 
           {!hideSemantics && (
