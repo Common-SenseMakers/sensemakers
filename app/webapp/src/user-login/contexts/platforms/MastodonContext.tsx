@@ -56,6 +56,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
     connectedUser,
     setToken: setOurToken,
     refresh: refreshConnected,
+    disconnect,
     overallLoginStatus,
     setLoginFlowState,
     setPlatformConnectedStatus,
@@ -138,6 +139,26 @@ export const MastodonContext = (props: PropsWithChildren) => {
   );
 
   useEffect(() => {
+    if (
+      getPlatformConnectedStatus(PLATFORM.Mastodon) ===
+        PlatformConnectedStatus.Connecting &&
+      !code_param
+    ) {
+      if (DEBUG)
+        console.log('was connecting true but no state params - logout', {
+          code_param,
+          overallLoginStatus,
+        });
+
+      setPlatformConnectedStatus(
+        PLATFORM.Twitter,
+        PlatformConnectedStatus.Disconnected
+      );
+      disconnect();
+    }
+
+    WIP;
+
     if (!verifierHandled.current) {
       if (
         code_param &&
