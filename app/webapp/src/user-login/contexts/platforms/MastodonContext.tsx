@@ -85,6 +85,10 @@ export const MastodonContext = (props: PropsWithChildren) => {
         title: 'Error Connecting Mastodon',
         message: error,
       });
+      setPlatformConnectedStatus(
+        PLATFORM.Mastodon,
+        PlatformConnectedStatus.Disconnected
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
