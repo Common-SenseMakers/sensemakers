@@ -150,6 +150,12 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       queryParams.semantics?.keywords
     );
 
+    query = filterByArrayContainsAny(
+      query,
+      `${structuredSemanticsKey}.refsMeta`,
+      queryParams.semantics?.refs
+    );
+
     /** get the sinceCreatedAt and untilCreatedAt timestamps from the elements ids */
     const { sinceCreatedAt, untilCreatedAt } = await (async () => {
       return this.db.run(async (manager) => {
@@ -197,6 +203,11 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     })) as AppPost[];
 
     return appPosts.sort((a, b) => b.createdAtMs - a.createdAtMs);
+  }
+
+  public getPostRefsStats(post: AppPost): string[] {
+    if (!post.structuredSemantics?.refsMeta) return [];
+    return Object.keys(post.structuredSemantics.refsMeta);
   }
 
   public async getAllOfQuery(queryParams: PostsQueryDefined, limit?: number) {
