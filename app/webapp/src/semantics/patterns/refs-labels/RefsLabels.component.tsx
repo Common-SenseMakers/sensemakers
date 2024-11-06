@@ -87,7 +87,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
 
   const allRefs = Array.from(refs.entries());
   const [visibleRefs, restOfRefs] =
-    size === 'compact' ? splitArray(allRefs, 2) : [allRefs, []];
+    size === 'compact' ? splitArray(allRefs, 1) : [allRefs, []];
 
   if (refs && refs.size > 0) {
     return (

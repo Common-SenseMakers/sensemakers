@@ -159,6 +159,7 @@ export const PostsFetcherComponent = (props: {
           <LoadingDiv height="120px" width="100%"></LoadingDiv>
         </Box>
       )}
+
       {moreToFetch && !isFetchingOlder && (
         <Box
           margin={{ vertical: 'medium', horizontal: 'medium' }}
@@ -179,9 +180,11 @@ export const PostsFetcherComponent = (props: {
           </Text>
         </Box>
       )}
+
       {!moreToFetch && (
         <Box
-          margin={{ vertical: 'medium', horizontal: 'medium' }}
+          style={{ flexShrink: 0 }}
+          pad={{ vertical: 'large', horizontal: 'medium' }}
           align="center"
           justify="center">
           <Text
@@ -232,7 +235,7 @@ export const PostsFetcherComponent = (props: {
   return (
     <>
       {showHeader && header}
-      <Box fill justify="start">
+      <Box fill style={{ backgroundColor: '#FFFFFF' }} justify="start">
         {!posts || isLoading
           ? showLoading
           : posts.length === 0

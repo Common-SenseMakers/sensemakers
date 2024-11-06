@@ -1,6 +1,6 @@
 import { Box, Paragraph, Text } from 'grommet';
 
-import { AppHeading, AppLabel } from '../../../ui-components';
+import { AppHeading } from '../../../ui-components';
 import { useThemeContext } from '../../../ui-components/ThemedApp';
 import { zoteroItemTypeDisplay } from '../../../utils/post.utils';
 
@@ -31,41 +31,24 @@ export const RefCard = (props: {
   };
 
   return (
-    <Box
-      align="start"
-      pad={{ horizontal: '12px', vertical: '8px' }}
-      style={{
-        borderRadius: '12px',
-        border: '1px solid #D1D5DB',
-        width: '100%',
-      }}
-      onClick={(e) => onCardClicked(e)}>
+    <Box align="start" pad={{}} onClick={(e) => onCardClicked(e)}>
       <Box
-        margin={{ bottom: '4px' }}
+        margin={{ bottom: '20px' }}
         width="100%"
         direction="row"
-        justify="between">
-        <AppLabel
-          colors={{
-            font: constants.colors.textLight2,
-            background: '#E5E7EB',
-            border: 'transparent',
-          }}
-          style={{ borderRadius: '4px', border: 'none' }}>
-          Reference {props.ix}
-        </AppLabel>
+        justify="start">
         {props.refType && (
-          <AppLabel
-            colors={{
-              font: constants.colors.textLight2,
-              background: 'transparent',
-              border: 'transparent',
-            }}
-            style={{ borderRadius: '4px', border: 'none' }}>
+          <Text
+            style={{
+              fontSize: '14px',
+              fontWeight: '500',
+              lineHeight: '16px',
+              color: constants.colors.textLight2,
+            }}>
             {props.sourceRef
               ? `${zoteroItemTypeDisplay(props.refType)} from Reference ${props.sourceRef}`
               : zoteroItemTypeDisplay(props.refType)}
-          </AppLabel>
+          </Text>
         )}
       </Box>
 
