@@ -1,5 +1,5 @@
-import { Box } from 'grommet';
-import { useEffect, useState } from 'react';
+import { Box, Keyboard } from 'grommet';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -9,6 +9,7 @@ import { AbsoluteRoutes } from '../route.names';
 import { PLATFORM } from '../shared/types/types.platforms';
 import { AppButton, AppHeading, AppInput } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
+import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import {
   PlatformConnectedStatus,
@@ -17,13 +18,18 @@ import {
 import { useMastodonContext } from './contexts/platforms/MastodonContext';
 import { isValidMastodonDomain } from './user.helper';
 
+const DEFAULT_SERVER = 'mastodon.social';
+
 export const ConnectMastodonPage = () => {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
+
   const { connect, error } = useMastodonContext();
   const { connectedUser, getPlatformConnectedStatus } = useAccountContext();
+
   const [mastodonServer, setMastodonServer] = useState('');
+  const [isConnecting, setIsConnecting] = useState(false);
 
   useEffect(() => {
     const mastodonProfile = connectedUser?.profiles?.mastodon;
@@ -32,17 +38,102 @@ export const ConnectMastodonPage = () => {
     }
   }, [connectedUser, navigate]);
 
+  useEffect(() => {
+    if (error) {
+      setIsConnecting(false);
+    }
+  }, [error]);
+
+  const server = useMemo(() => {
+    return !isValidMastodonDomain(mastodonServer)
+      ? DEFAULT_SERVER
+      : mastodonServer;
+  }, [mastodonServer]);
+
   const handleConnect = () => {
     if (connect) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const callbackUrl = location.state?.callbackUrl as string | undefined;
-      connect(
-        mastodonServer,
-        'read',
-        callbackUrl || window.location.href
-      ).catch(console.error);
+      const callbackUrl =
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        (location.state?.callbackUrl as string | undefined) ||
+        `${window.location.origin}${AbsoluteRoutes.ConnectMastodon}`;
+
+      setIsConnecting(true);
+      connect(server, 'read', callbackUrl).catch(console.error);
     }
   };
+
+  const status = getPlatformConnectedStatus(PLATFORM.Mastodon);
+  const continueLabel = `${t(IntroKeys.continue)} with ${server}`;
+
+  const { title, content } = useMemo((): {
+    title: string;
+    content: JSX.Element;
+  } => {
+    if (status === PlatformConnectedStatus.Connecting || isConnecting) {
+      return {
+        title: t(IntroKeys.connectingMastodon),
+        content: (
+          <BoxCentered pad="large">
+            <Loading />
+          </BoxCentered>
+        ),
+      };
+    }
+
+    if (status === PlatformConnectedStatus.Connected) {
+      return {
+        title: 'Connected to Mastodon',
+        content: <></>,
+      };
+    }
+
+    if (!status || status === PlatformConnectedStatus.Disconnected) {
+      return {
+        title: t(IntroKeys.connectMastodonTitle),
+        content: (
+          <Keyboard onEnter={() => handleConnect()}>
+            <>
+              <AppParagraph margin={{ bottom: 'medium' }}>
+                {t(IntroKeys.connectMastodonParagraph)}
+              </AppParagraph>
+
+              <AppParagraph
+                margin={{ bottom: 'small' }}
+                size="small"
+                style={{ fontWeight: 'bold' }}>
+                {`${t(IntroKeys.mastodonServer)}: ${server}`}
+              </AppParagraph>
+              <Box margin={{ bottom: 'medium' }}>
+                <AppInput
+                  placeholder={'or type another server'}
+                  value={mastodonServer}
+                  onChange={(event) => setMastodonServer(event.target.value)}
+                  style={{ width: '100%' }}
+                />
+              </Box>
+              <Box align="center" margin={{ top: 'medium' }}>
+                <AppButton
+                  primary
+                  label={continueLabel}
+                  onClick={handleConnect}
+                  style={{ width: '100%' }}
+                />
+              </Box>
+              {error && (
+                <AppParagraph color="status-error">{error}</AppParagraph>
+              )}
+            </>
+          </Keyboard>
+        ),
+      };
+    }
+
+    return {
+      title: 'Connected to Mastodon',
+      content: <></>,
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error, mastodonServer, status, t]);
 
   return (
     <Box
@@ -50,72 +141,9 @@ export const ConnectMastodonPage = () => {
       style={{ flexGrow: 1 }}>
       <AppLogo margin={{ bottom: 'xlarge' }} />
       <Box style={{ flexGrow: 1 }}>
-        {getPlatformConnectedStatus(PLATFORM.Mastodon) ===
-          PlatformConnectedStatus.Disconnected && (
-          <>
-            <AppHeading level="1">
-              {t(IntroKeys.connectMastodonTitle)}
-            </AppHeading>
-            <Box width="100%" height="16px" />
-
-            <AppParagraph margin={{ bottom: 'medium' }}>
-              {t(IntroKeys.connectMastodonParagraph)}
-            </AppParagraph>
-
-            <AppParagraph
-              margin={{ bottom: 'small' }}
-              size="small"
-              style={{ fontWeight: 'bold' }}>
-              {t(IntroKeys.mastodonServer)}
-            </AppParagraph>
-            <Box margin={{ bottom: 'medium' }}>
-              <AppInput
-                placeholder={t(IntroKeys.mastodonServerPlaceholder)}
-                value={mastodonServer}
-                onChange={(event) => setMastodonServer(event.target.value)}
-                style={{ width: '100%' }}
-                disabled={
-                  getPlatformConnectedStatus(PLATFORM.Mastodon) ===
-                  PlatformConnectedStatus.Connecting
-                }
-              />
-            </Box>
-            <Box align="center" margin={{ top: 'medium' }}>
-              <AppButton
-                primary
-                label={t(IntroKeys.continue)}
-                onClick={handleConnect}
-                disabled={
-                  !isValidMastodonDomain(mastodonServer) ||
-                  getPlatformConnectedStatus(PLATFORM.Mastodon) ===
-                    PlatformConnectedStatus.Connecting
-                }
-                style={{ width: '100%' }}
-              />
-            </Box>
-          </>
-        )}
-        {getPlatformConnectedStatus(PLATFORM.Mastodon) ===
-          PlatformConnectedStatus.Connecting && (
-          <>
-            <AppHeading level="1">{'Connecting to Mastodon'}</AppHeading>
-            <Box width="100%" height="16px" />
-            <Loading />
-          </>
-        )}
-        {getPlatformConnectedStatus(PLATFORM.Mastodon) ===
-          PlatformConnectedStatus.Connected && (
-          <>
-            <AppHeading level="1">{'Connected to Mastodon'}</AppHeading>
-            <Box width="100%" height="16px" />
-          </>
-        )}
-
-        {error && (
-          <Box margin={{ top: 'small' }}>
-            <AppParagraph color="status-error">{error}</AppParagraph>
-          </Box>
-        )}
+        <AppHeading level="1">{title}</AppHeading>
+        <Box width="100%" height="16px" />
+        {content}
       </Box>
     </Box>
   );

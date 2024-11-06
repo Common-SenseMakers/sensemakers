@@ -22,7 +22,10 @@ export const PlatformSection = (props: {
       pad={{ horizontal: '16px', vertical: '16px' }}
       direction="row"
       align="center"
-      style={{ border: `1px solid ${constants.colors.border}` }}>
+      style={{
+        border: `1px solid ${constants.colors.border}`,
+        position: 'relative',
+      }}>
       <Box style={{ width: '50px' }}>{props.icon}</Box>
       <Box
         style={{
@@ -44,7 +47,7 @@ export const PlatformSection = (props: {
           )}
         </Box>
       </Box>
-      <Box>
+      <Box style={{ position: 'absolute', right: 12 }}>
         {!props.connected ? (
           <AppButton
             disabled={props.connecting}
@@ -56,13 +59,19 @@ export const PlatformSection = (props: {
             direction="row"
             align="center"
             gap="4px"
-            pad={{ horizontal: 'small' }}>
+            pad="small"
+            style={{
+              width: '100px',
+              backgroundColor: constants.colors.shade,
+              flexShrink: 0,
+            }}>
             <CheckIcon></CheckIcon>
             <Text
               style={{
                 fontSize: '12px',
                 lineHeight: '14px',
                 color: '#038153',
+                flexShrink: 0,
               }}>
               Connected
             </Text>

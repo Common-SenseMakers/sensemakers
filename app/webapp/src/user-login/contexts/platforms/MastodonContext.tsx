@@ -56,6 +56,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
     connectedUser,
     setToken: setOurToken,
     refresh: refreshConnected,
+    disconnect,
     overallLoginStatus,
     setLoginFlowState,
     setPlatformConnectedStatus,
@@ -74,13 +75,19 @@ export const MastodonContext = (props: PropsWithChildren) => {
     !connectedUser.profiles[PLATFORM.Mastodon];
 
   useEffect(() => {
+    // reset error
+    setError(undefined);
+  }, []);
+
+  useEffect(() => {
     if (error) {
       show({
         title: 'Error Connecting Mastodon',
         message: error,
       });
     }
-  }, [error, show]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error]);
 
   const connect = useCallback(
     async (
@@ -138,6 +145,24 @@ export const MastodonContext = (props: PropsWithChildren) => {
   );
 
   useEffect(() => {
+    if (
+      getPlatformConnectedStatus(PLATFORM.Mastodon) ===
+        PlatformConnectedStatus.Connecting &&
+      !code_param
+    ) {
+      if (DEBUG)
+        console.log('was connecting true but no state params - logout', {
+          code_param,
+          overallLoginStatus,
+        });
+
+      setPlatformConnectedStatus(
+        PLATFORM.Mastodon,
+        PlatformConnectedStatus.Disconnected
+      );
+      disconnect();
+    }
+
     if (!verifierHandled.current) {
       if (
         code_param &&
@@ -200,18 +225,8 @@ export const MastodonContext = (props: PropsWithChildren) => {
         }
       }
     }
-  }, [
-    code_param,
-    overallLoginStatus,
-    searchParams,
-    connectedUser,
-    setSearchParams,
-    getPlatformConnectedStatus,
-    refreshConnected,
-    appFetch,
-    setPlatformConnectedStatus,
-    setOurToken,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code_param, overallLoginStatus, searchParams, connectedUser]);
 
   return (
     <MastodonContextValue.Provider

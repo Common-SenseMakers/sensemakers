@@ -214,6 +214,7 @@ export const AccountContext = (props: PropsWithChildren) => {
       /** connectedUser === loggedIn now */
       setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     connectedUser,
     overallLoginStatus,
@@ -226,11 +227,14 @@ export const AccountContext = (props: PropsWithChildren) => {
     setConnectedUser(undefined);
     setToken(null);
 
+    const disabledStatus: PlatformsConnectedStatus = {};
+
     ALL_PUBLISH_PLATFORMS.forEach((platform) => {
-      setPlatformsConnectedStatus({
-        ...platformsConnectedStatus,
-        [platform]: PlatformConnectedStatus.Disconnected,
-      });
+      disabledStatus[platform] = PlatformConnectedStatus.Disconnected;
+    });
+
+    setPlatformsConnectedStatus({
+      ...disabledStatus,
     });
 
     _setLoginFlowState(LoginFlowState.Idle);
