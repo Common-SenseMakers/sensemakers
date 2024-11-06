@@ -3,6 +3,7 @@ import { RequestHandler } from 'express';
 import { AddUserDataPayload } from '../../@shared/types/types.fetch';
 import { PLATFORM } from '../../@shared/types/types.platforms';
 import { PostUpdatePayload, PostsQuery } from '../../@shared/types/types.posts';
+import { AccountProfileBase } from '../../@shared/types/types.profiles';
 import { IS_EMULATOR } from '../../config/config.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { queryParamsSchema } from '../../feed/feed.schema';
@@ -18,7 +19,7 @@ import { canReadPost } from '../posts.access.control';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 import { postIdValidation, updatePostSchema } from './posts.schema';
 
-const DEBUG = false;
+const DEBUG = true;
 
 /**
  * get user posts from the DB (does not fetch for more)
@@ -173,18 +174,24 @@ export const addAccountsDataController: RequestHandler = async (
           username: payload.username,
         });
 
-      const profile = await services.db.run(async (manager) => {
-        return services.users.getOrCreateProfileByUsername(
-          payload.platformId,
-          payload.username,
-          manager
-        );
-      });
+      let profile: AccountProfileBase | undefined;
+      try {
+        profile = await services.db.run(async (manager) => {
+          return services.users.getOrCreateProfileByUsername(
+            payload.platformId,
+            payload.username,
+            manager
+          );
+        });
+      } catch (error) {
+        logger.error('error', error);
+        continue;
+      }
 
       if (!profile) {
         const error = `unable to find profile for ${payload.username} on ${payload.platformId}`;
         logger.error(error);
-        throw new Error(error);
+        continue;
       }
 
       if (DEBUG) logger.debug('Profile found', { profile });
