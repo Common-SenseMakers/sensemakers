@@ -138,7 +138,14 @@ export const PostsFetcherComponent = (props: {
   );
 
   const showPosts = posts ? (
-    <Box ref={containerRef} style={{ height: '100%', overflowY: 'auto' }}>
+    <Box
+      ref={containerRef}
+      style={{
+        height: '100%',
+        overflowY: 'auto',
+        maxWidth: 600,
+        margin: '0 auto',
+      }}>
       {posts.map((post, ix) => (
         <Box key={ix} id={`post-${post.id}`} style={{ flexShrink: 0 }}>
           <PostContext postInit={post}>

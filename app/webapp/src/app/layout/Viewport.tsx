@@ -22,6 +22,7 @@ import { AppIcon } from '../icons/AppIcon';
 
 export const MAX_WIDTH_LANDING = 1600;
 export const MAX_WIDTH_APP = 600;
+export const MAX_BUTTON_WIDTH = 300;
 
 export const ViewportContainer = (props: React.HTMLProps<HTMLDivElement>) => {
   const { constants } = useThemeContext();

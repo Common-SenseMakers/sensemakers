@@ -96,7 +96,13 @@ export const FeedTabs = () => {
         msOverflowStyle: 'none',
       }}>
       {feedTabs.map((tab, ix) => (
-        <>
+        <Box
+          direction="row"
+          key={ix}
+          style={{
+            flex: '0 0 auto',
+            height: '100%',
+          }}>
           <div style={spaceStyle}></div>
           {tabElement(
             tab.title,
@@ -104,7 +110,7 @@ export const FeedTabs = () => {
             feedIx === ix
           )}
           {ix === feedTabs.length - 1 && <div style={spaceStyle}></div>}
-        </>
+        </Box>
       ))}
     </div>
   );
