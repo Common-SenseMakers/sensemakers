@@ -247,6 +247,8 @@ export const PostsFetcherComponent = (props: {
         position: 'absolute',
         top: 0,
         backgroundColor: '#ffffff',
+        height: '100%',
+        width: '100%',
       }}>
       <PostOverlay
         postId={postToShow.id}

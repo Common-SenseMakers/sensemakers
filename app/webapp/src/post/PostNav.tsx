@@ -22,6 +22,7 @@ export const PostNav = (props: { onPostNav?: OnPostNav }) => {
         height: '40px',
         borderBottom: '1px solid #F3F4F6',
         backgroundColor: constants.colors.shade,
+        flexShrink: 0,
       }}
       pad={{ horizontal: '12px' }}
       direction="row"

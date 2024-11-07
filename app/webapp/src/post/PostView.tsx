@@ -155,34 +155,34 @@ export const PostView = (props: {
     };
 
     return (
-      <>
-        <Box pad="medium">
-          <PostHeader boxProps={{ margin: { bottom: '16px' } }}></PostHeader>
+      <Box
+        pad={{ top: 'medium', horizontal: 'medium', bottom: 'large' }}
+        style={{ flexShrink: 0 }}>
+        <PostHeader boxProps={{ margin: { bottom: '16px' } }}></PostHeader>
 
-          {!hideSemantics && (
-            <SemanticsEditor
-              patternProps={patternProps}
-              include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
-          )}
+        {!hideSemantics && (
+          <SemanticsEditor
+            patternProps={patternProps}
+            include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
+        )}
 
-          <PostTextEditable text={postText}></PostTextEditable>
+        <PostTextEditable text={postText}></PostTextEditable>
 
-          {!hideSemantics && (
-            <SemanticsEditor
-              patternProps={patternProps}
-              include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
-          )}
+        {!hideSemantics && (
+          <SemanticsEditor
+            patternProps={patternProps}
+            include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
+        )}
 
-          {action}
-        </Box>
-      </>
+        {action}
+      </Box>
     );
   })();
 
   return (
     <Box fill>
       <PostNav onPostNav={onPostNav}></PostNav>
-      {content}
+      <Box style={{ overflowY: 'auto', flexGrow: 1 }}>{content}</Box>
     </Box>
   );
 };
