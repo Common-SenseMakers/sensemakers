@@ -100,7 +100,7 @@ export type AppPostCreate = Omit<AppPost, 'id'>;
  * author profile (including credentials). Useful to transfer publishing
  * information between services
  * */
-export interface AppPostFull extends Omit<AppPost, 'mirrorsIds'> {
+export interface AppPostFull extends Omit<AppPostRead, 'mirrorsIds'> {
   mirrors: PlatformPost[];
 }
 
