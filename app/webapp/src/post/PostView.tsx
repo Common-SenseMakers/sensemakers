@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { useAppFetch } from '../api/app.fetch';
 import { ClearIcon } from '../app/icons/ClearIcon';
 import { SendIcon } from '../app/icons/SendIcon';
-import { ViewportPage } from '../app/layout/Viewport';
 import { PostEditKeys } from '../i18n/i18n.edit.post';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID, PatternProps } from '../semantics/patterns/patterns';
@@ -181,12 +180,9 @@ export const PostView = (props: {
   })();
 
   return (
-    <ViewportPage
-      content={
-        <Box fill>
-          <PostNav onPostNav={onPostNav}></PostNav>
-          {content}
-        </Box>
-      }></ViewportPage>
+    <Box fill>
+      <PostNav onPostNav={onPostNav}></PostNav>
+      {content}
+    </Box>
   );
 };
