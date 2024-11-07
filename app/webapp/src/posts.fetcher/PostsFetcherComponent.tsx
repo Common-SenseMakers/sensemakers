@@ -242,7 +242,12 @@ export const PostsFetcherComponent = (props: {
   );
 
   const showPost = postToShow && (
-    <Box style={{ position: 'absolute', top: 0, backgroundColor: '#ffffff' }}>
+    <Box
+      style={{
+        position: 'absolute',
+        top: 0,
+        backgroundColor: '#ffffff',
+      }}>
       <PostOverlay
         postId={postToShow.id}
         postInit={postToShow}
@@ -269,7 +274,10 @@ export const PostsFetcherComponent = (props: {
   return (
     <>
       {showHeader && header}
-      <Box fill style={{ backgroundColor: '#FFFFFF' }} justify="start">
+      <Box
+        fill
+        style={{ backgroundColor: '#FFFFFF', position: 'relative' }}
+        justify="start">
         {!posts || isLoading
           ? showLoading
           : posts.length === 0
