@@ -242,26 +242,28 @@ export const PostsFetcherComponent = (props: {
   );
 
   const showPost = postToShow && (
-    <PostOverlay
-      postId={postToShow.id}
-      postInit={postToShow}
-      onPostNav={{
-        onBack: () => setPostToShow(undefined),
-        onPrev: () => {
-          const { prevPostId } = feed.getNextAndPrev();
-          if (prevPostId) {
-            const prev = feed.getPost(prevPostId);
-            setPostToShow(prev);
-          }
-        },
-        onNext: () => {
-          const { nextPostId } = feed.getNextAndPrev();
-          if (nextPostId) {
-            const next = feed.getPost(nextPostId);
-            setPostToShow(next);
-          }
-        },
-      }}></PostOverlay>
+    <Box style={{ position: 'absolute', top: 0, backgroundColor: '#ffffff' }}>
+      <PostOverlay
+        postId={postToShow.id}
+        postInit={postToShow}
+        onPostNav={{
+          onBack: () => setPostToShow(undefined),
+          onPrev: () => {
+            const { prevPostId } = feed.getNextAndPrev();
+            if (prevPostId) {
+              const prev = feed.getPost(prevPostId);
+              setPostToShow(prev);
+            }
+          },
+          onNext: () => {
+            const { nextPostId } = feed.getNextAndPrev();
+            if (nextPostId) {
+              const next = feed.getPost(nextPostId);
+              setPostToShow(next);
+            }
+          },
+        }}></PostOverlay>
+    </Box>
   );
 
   return (

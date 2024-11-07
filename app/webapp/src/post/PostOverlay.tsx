@@ -1,7 +1,6 @@
 import { Box } from 'grommet';
 
 import { AppPostFull } from '../shared/types/types.posts';
-import { AppModal } from '../ui-components';
 import { OnPostNav } from './PostNav';
 import { PostView } from './PostView';
 import { PostContext } from './post.context/PostContext';
@@ -14,24 +13,11 @@ export const PostOverlay = (props: {
 }) => {
   const { postId, postInit, onPostNav } = props;
 
-  const onClose = () => {
-    onPostNav && onPostNav.onBack && onPostNav.onBack();
-  };
-
   return (
-    <AppModal
-      type="normal"
-      windowStyle={{ backgroundColor: '#FFFFFF' }}
-      layerProps={{
-        full: true,
-      }}
-      onClickOutside={() => onClose()}
-      onModalClosed={() => onClose()}>
-      <Box style={{ height: '100vh' }}>
-        <PostContext postId={postId} postInit={postInit} showCelebration>
-          <PostView onPostNav={onPostNav}></PostView>
-        </PostContext>
-      </Box>
-    </AppModal>
+    <Box style={{ height: '100vh' }}>
+      <PostContext postId={postId} postInit={postInit} showCelebration>
+        <PostView onPostNav={onPostNav}></PostView>
+      </PostContext>
+    </Box>
   );
 };
