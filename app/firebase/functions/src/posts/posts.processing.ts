@@ -212,8 +212,8 @@ export class PostsProcessing {
     /** update labels refsMeta */
 
     await Promise.all(
-      Array.from(labels).map(async (label) => {
-        const url = label;
+      Array.from(Object.keys(refsLabels)).map(async (reference) => {
+        const url = reference;
         const refMeta = await this.getRefMeta(url, manager, originalParsed);
 
         refsMeta[url] = { ...refMeta, labels: refsLabels[url] || undefined };
