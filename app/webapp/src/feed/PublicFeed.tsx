@@ -1,41 +1,22 @@
 import { Box } from 'grommet';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import { AppGeneralKeys } from '../i18n/i18n.app.general';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
 import { AppHeading } from '../ui-components';
-import { useSwap } from '../ui-components/hooks/useSwap';
-import { FeedTabs, feedIndexToPathname, locationToFeedIx } from './FeedTabs';
+import { FeedTabs, locationToFeedIx } from './FeedTabs';
 import { useFeedPosts } from './PublicFeedsContext';
-import { feedTabs } from './feed.config';
 
 export const PublicFeed = () => {
   const { t } = useTranslation();
   const location = useLocation();
-  const navigate = useNavigate();
 
   const { feeds } = useFeedPosts();
   const n = feeds.length;
   const percWidth = 100 / n;
 
   const feedIx = locationToFeedIx(location);
-  const swipeLeft = () => {
-    if (feedTabs.length > 2 && feedIx < feedTabs.length - 2) {
-      navigate(feedIndexToPathname(feedIx + 1));
-    }
-  };
-
-  const swipeRight = () => {
-    if (feedIx > 0) {
-      navigate(feedIndexToPathname(feedIx - 1));
-    }
-  };
-
-  const touchEvents = useSwap({
-    left: () => swipeLeft(),
-    right: () => swipeRight(),
-  });
 
   return (
     <>
@@ -48,11 +29,7 @@ export const PublicFeed = () => {
 
         <FeedTabs></FeedTabs>
 
-        <div
-          style={{ height: 'calc(100% - 48px)', overflow: 'hidden' }}
-          onTouchStart={touchEvents.onTouchStart}
-          onTouchEnd={touchEvents.onTouchEnd}
-          onTouchMove={touchEvents.onTouchMove}>
+        <div style={{ height: 'calc(100% - 48px)', overflow: 'hidden' }}>
           <div
             style={{
               transform: `translateX(${-1 * feedIx * percWidth}%)`,
