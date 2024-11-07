@@ -23,6 +23,10 @@ export const locationToFeedIx = (location: Location) => {
   }
 };
 
+export const feedIndexToPathname = (ix: number) => {
+  return `/feed/${feedTabs[ix].id}`;
+};
+
 export const FeedTabs = () => {
   const location = useLocation();
   const navigate = useNavigate();
