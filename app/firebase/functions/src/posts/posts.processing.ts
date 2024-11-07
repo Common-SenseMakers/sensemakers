@@ -18,6 +18,7 @@ import { DefinedIfTrue } from '../@shared/types/types.user';
 import { mapStoreElements, parseRDF } from '../@shared/utils/n3.utils';
 import {
   HAS_KEYWORD_URI,
+  HAS_RDF_SYNTAX_TYPE_URI,
   HAS_TOPIC_URI,
   HAS_ZOTERO_REFERENCE_TYPE_URI,
 } from '../@shared/utils/semantics.helper';
@@ -203,7 +204,10 @@ export class PostsProcessing {
           // non kewyords or is-a, are marked as ref labels
           const reference = q.object.value;
           const label = q.predicate.value;
-          if (label !== HAS_ZOTERO_REFERENCE_TYPE_URI) {
+          if (
+            label !== HAS_ZOTERO_REFERENCE_TYPE_URI &&
+            label !== HAS_RDF_SYNTAX_TYPE_URI
+          ) {
             labels.add(label);
             refsLabels[reference] = [...(refsLabels[reference] || []), label];
           }
