@@ -13,7 +13,6 @@ export const RouteNames = {
 export const AbsoluteRoutes = {
   App: '/',
   MyPosts: `/${RouteNames.MyPosts}`,
-  Post: (postId: string) => `/${RouteNames.Post}/${postId}`,
   Feed: `/${RouteNames.Feed}`,
   Settings: `/${RouteNames.Settings}`,
   ConnectMastodon: `/${RouteNames.ConnectMastodon}`,

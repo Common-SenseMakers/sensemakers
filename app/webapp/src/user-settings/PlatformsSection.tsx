@@ -61,7 +61,7 @@ export const PlatformSection = (props: {
             gap="4px"
             pad="small"
             style={{
-              width: '100px',
+              width: 'fit-content',
               backgroundColor: constants.colors.shade,
               flexShrink: 0,
             }}>

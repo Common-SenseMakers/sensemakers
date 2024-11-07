@@ -6,9 +6,8 @@ import { Outlet, Route, Routes } from 'react-router-dom';
 import { PublicFeedsContext } from '../feed/PublicFeedsContext';
 import { AppHomePage } from '../pages/AppHomePage';
 import { PublicFeedPage } from '../pages/PublicFeedPage';
+import { UserPostsPage } from '../pages/UserPostsPage';
 import { UserSettingsPage } from '../pages/UserSettingsPage';
-import { PostPage } from '../post/PostPage';
-import { PostingPage } from '../post/PostingPage';
 import { RouteNames } from '../route.names';
 import { ResponsiveApp } from '../ui-components/ResponsiveApp';
 import { ThemedApp, useThemeContext } from '../ui-components/ThemedApp';
@@ -85,14 +84,6 @@ export const AppContainer = (props: React.PropsWithChildren) => {
             <Routes>
               <Route path={RouteNames.AppHome} element={<Outlet />}>
                 <Route
-                  path={`${RouteNames.Posting}`}
-                  element={<PostingPage></PostingPage>}></Route>
-
-                <Route
-                  path={`${RouteNames.Post}/:postId`}
-                  element={<PostPage></PostPage>}></Route>
-
-                <Route
                   path={`${RouteNames.Settings}`}
                   element={<UserSettingsPage></UserSettingsPage>}></Route>
 
@@ -103,8 +94,9 @@ export const AppContainer = (props: React.PropsWithChildren) => {
                 <Route path={''} element={<AppHomePage></AppHomePage>}></Route>
 
                 <Route
-                  path={'/*'}
-                  element={<AppHomePage></AppHomePage>}></Route>
+                  path={`/${RouteNames.MyPosts}`}
+                  element={<UserPostsPage></UserPostsPage>}></Route>
+
                 <Route
                   path={`${RouteNames.ConnectMastodon}`}
                   element={<ConnectMastodonPage />}

@@ -1,77 +1,20 @@
 import { Box } from 'grommet';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import { NavButton } from '../app/NavButton';
 import { LeftChevronIcon } from '../app/icons/LeftChveronIcon';
 import { LeftIcon } from '../app/icons/LeftIcon';
 import { RightIcon } from '../app/icons/RightIcon';
-import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
-import { useUserPosts } from '../user-home/UserPostsContext';
-import { useNavigationHistory } from '../user-login/contexts/NavHistoryContext';
-import { usePost } from './post.context/PostContext';
 
-const DEBUG = false;
+export interface OnPostNav {
+  onBack?: () => void;
+  onPrev?: () => void;
+  onNext?: () => void;
+}
 
-export const PostNav = () => {
-  const { fetched, navigatePost } = usePost();
-
-  const { feed } = useUserPosts();
-  const { fetchOlder, isFetchingOlder, errorFetchingOlder } = feed;
-  const [triggeredFetchOlder, setTriggeredFetchedOlder] = useState(false);
-
-  const navigate = useNavigate();
-  const { hasHistory } = useNavigationHistory();
+export const PostNav = (props: { onPostNav?: OnPostNav }) => {
+  const { onPostNav } = props;
   const { constants } = useThemeContext();
-
-  useEffect(() => {
-    if (
-      !navigatePost.nextPostId &&
-      !isFetchingOlder &&
-      !errorFetchingOlder &&
-      !triggeredFetchOlder
-    ) {
-      setTriggeredFetchedOlder(true);
-      if (DEBUG)
-        console.log('fetching older', {
-          nextPostId: navigatePost.nextPostId,
-          errorFetchingOlder,
-          triggeredFetchOlder,
-        });
-
-      fetchOlder();
-    }
-
-    /** reset triggeredFetchedOlder once the nextPostId was obtained */
-    if (navigatePost.nextPostId) {
-      setTriggeredFetchedOlder(false);
-    }
-  }, [
-    errorFetchingOlder,
-    fetchOlder,
-    isFetchingOlder,
-    navigatePost.nextPostId,
-    triggeredFetchOlder,
-  ]);
-
-  const goToPrev = () => {
-    if (navigatePost.prevPostId) {
-      navigate(`/post/${navigatePost.prevPostId}`);
-    }
-  };
-
-  const goToNext = () => {
-    if (navigatePost.nextPostId) {
-      navigate(`/post/${navigatePost.nextPostId}`);
-    }
-  };
-
-  if (DEBUG)
-    console.log('PostNav', {
-      nextPostId: navigatePost.nextPostId,
-      prevPostId: navigatePost.prevPostId,
-    });
 
   return (
     <Box
@@ -83,34 +26,35 @@ export const PostNav = () => {
       pad={{ horizontal: '12px' }}
       direction="row"
       justify="between">
-      <NavButton
-        icon={<LeftChevronIcon></LeftChevronIcon>}
-        label={'Back'}
-        onClick={() => {
-          if (hasHistory) navigate(-1);
-          else navigate('..', { state: { postId: fetched.postId } });
-        }}></NavButton>
+      {onPostNav && onPostNav.onBack && (
+        <NavButton
+          icon={<LeftChevronIcon></LeftChevronIcon>}
+          label={'Back'}
+          onClick={() => {
+            if (onPostNav.onBack) onPostNav.onBack();
+          }}></NavButton>
+      )}
 
       <Box direction="row" gap="8px">
         <NavButton
           icon={<LeftIcon></LeftIcon>}
-          disabled={!navigatePost.prevPostId}
+          disabled={onPostNav && !!onPostNav.onPrev}
           label="Previous"
-          onClick={() => goToPrev()}></NavButton>
+          onClick={() =>
+            onPostNav && onPostNav.onPrev && onPostNav.onPrev()
+          }></NavButton>
         <NavButton
           reverse
           icon={
             <Box justify="center" style={{ width: '22px' }}>
-              {isFetchingOlder ? (
-                <Loading size="16px"></Loading>
-              ) : (
-                <RightIcon></RightIcon>
-              )}
+              <RightIcon></RightIcon>
             </Box>
           }
-          disabled={!navigatePost.nextPostId}
+          disabled={onPostNav && !!onPostNav.onNext}
           label="Next"
-          onClick={() => goToNext()}></NavButton>
+          onClick={() =>
+            onPostNav && onPostNav.onNext && onPostNav.onNext()
+          }></NavButton>
       </Box>
     </Box>
   );

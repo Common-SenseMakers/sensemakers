@@ -1,7 +1,6 @@
 import { Box, Text } from 'grommet';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 
 import { ModalContent } from '../app/AppModalStandard';
 import { useToastContext } from '../app/ToastsContext';
@@ -10,7 +9,9 @@ import { ReloadIcon } from '../app/icons/ReloadIcon';
 import { AppGeneralKeys } from '../i18n/i18n.app.general';
 import { PostCard } from '../post/PostCard';
 import { PostCardLoading } from '../post/PostCardLoading';
+import { PostOverlay } from '../post/PostOverlay';
 import { PostContext } from '../post/post.context/PostContext';
+import { AppPostFull } from '../shared/types/types.posts';
 import { AppButton, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
@@ -40,6 +41,10 @@ export const PostsFetcherComponent = (props: {
   const { constants } = useThemeContext();
   const { t } = useTranslation();
 
+  const [postToShow, setPostToShow] = useState<AppPostFull | undefined>(
+    undefined
+  );
+
   const {
     pageTitle,
     feed,
@@ -49,8 +54,6 @@ export const PostsFetcherComponent = (props: {
 
   const isPublicFeed = _isPublicFeed !== undefined ? _isPublicFeed : false;
   const showHeader = _showHeader !== undefined ? _showHeader : true;
-
-  const navigate = useNavigate();
 
   const {
     posts,
@@ -152,8 +155,7 @@ export const PostsFetcherComponent = (props: {
             <PostCard
               isPublicFeed={isPublicFeed}
               handleClick={() => {
-                const path = `/post/${post.id}`;
-                navigate(path);
+                setPostToShow(post);
               }}></PostCard>
           </PostContext>
         </Box>
@@ -239,6 +241,29 @@ export const PostsFetcherComponent = (props: {
     </Box>
   );
 
+  const showPost = postToShow && (
+    <PostOverlay
+      postId={postToShow.id}
+      postInit={postToShow}
+      onPostNav={{
+        onBack: () => setPostToShow(undefined),
+        onPrev: () => {
+          const { prevPostId } = feed.getNextAndPrev();
+          if (prevPostId) {
+            const prev = feed.getPost(prevPostId);
+            setPostToShow(prev);
+          }
+        },
+        onNext: () => {
+          const { nextPostId } = feed.getNextAndPrev();
+          if (nextPostId) {
+            const next = feed.getPost(nextPostId);
+            setPostToShow(next);
+          }
+        },
+      }}></PostOverlay>
+  );
+
   return (
     <>
       {showHeader && header}
@@ -248,6 +273,7 @@ export const PostsFetcherComponent = (props: {
           : posts.length === 0
             ? showNoPosts
             : showPosts}
+        {showPost}
       </Box>
     </>
   );

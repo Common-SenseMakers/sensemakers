@@ -1,6 +1,6 @@
 import { Box } from 'grommet';
 import { Refresh } from 'grommet-icons';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useAppFetch } from '../api/app.fetch';
@@ -15,27 +15,19 @@ import { AppButton } from '../ui-components';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
-import { usePersist } from '../utils/use.persist';
 import { PostHeader } from './PostHeader';
-import { PostNav } from './PostNav';
+import { OnPostNav, PostNav } from './PostNav';
 import { PostTextEditable } from './PostTextEditable';
-import { POSTING_POST_ID } from './PostingPage';
 import { usePost } from './post.context/PostContext';
 import { concatenateThread } from './posts.helper';
 
-const DEBUG = false;
-
 /** extract the postId from the route and pass it to a PostContext */
-export const PostView = (props: { profile?: PlatformProfile }) => {
+export const PostView = (props: {
+  profile?: PlatformProfile;
+  onPostNav?: OnPostNav;
+}) => {
   const appFetch = useAppFetch();
-
-  // shared persisted state with PostingPage.tsx
-  const [postingPostId, setPostingPostId] = usePersist<string>(
-    POSTING_POST_ID,
-    null
-  );
-  // local state to prevent detecting the returning before leaving
-  const [justSetPostId] = useState<boolean>(false);
+  const { onPostNav } = props;
 
   const [, setIsReparsing] = useState(false);
 
@@ -74,25 +66,6 @@ export const PostView = (props: { profile?: PlatformProfile }) => {
   const cancelEdit = () => {
     updated.setEnabledEdit(false);
   };
-
-  // receives the navigate from PostingPage and opens the post intent
-  useEffect(() => {
-    if (
-      postingPostId &&
-      connectedUser &&
-      !justSetPostId &&
-      updated.postMerged?.id
-    ) {
-      if (DEBUG) console.log(`posting post detected for ${postingPostId}`);
-      setPostingPostId(null);
-    }
-  }, [
-    postingPostId,
-    connectedUser,
-    justSetPostId,
-    updated.postMerged?.id,
-    setPostingPostId,
-  ]);
 
   const action = (() => {
     if (
@@ -211,7 +184,7 @@ export const PostView = (props: { profile?: PlatformProfile }) => {
     <ViewportPage
       content={
         <Box fill>
-          <PostNav></PostNav>
+          <PostNav onPostNav={onPostNav}></PostNav>
           {content}
         </Box>
       }></ViewportPage>
