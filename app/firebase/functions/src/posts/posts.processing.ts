@@ -255,6 +255,36 @@ export class PostsProcessing {
     return post;
   }
 
+  /** fill post to Full */
+  async hydratePostFull(
+    post: AppPost,
+    addMirrors: boolean,
+    addAggregatedLabels: boolean,
+    manager: TransactionManager
+  ): Promise<AppPostFull> {
+    const postFull: AppPostFull = post;
+
+    if (addMirrors) {
+      const mirrors = await Promise.all(
+        post.mirrorsIds.map((mirrorId) =>
+          this.platformPosts.get(mirrorId, manager)
+        )
+      );
+      postFull.mirrors = mirrors.filter(
+        (m) => m !== undefined
+      ) as PlatformPost[];
+    }
+
+    if (addAggregatedLabels && post.structuredSemantics?.refs) {
+      const refLabels = await this.posts.getAggregatedRefLabels(
+        post.structuredSemantics.refs
+      );
+      postFull.meta = { refLabels };
+    }
+
+    return postFull;
+  }
+
   /** get AppPostFull */
   async getPostFull<T extends boolean, R = AppPostFull>(
     postId: string,
@@ -271,16 +301,9 @@ export class PostsProcessing {
       return undefined as DefinedIfTrue<T, R>;
     }
 
-    const mirrors = await Promise.all(
-      post.mirrorsIds.map((mirrorId) =>
-        this.platformPosts.get(mirrorId, manager)
-      )
-    );
+    const postFull = await this.hydratePostFull(post, true, true, manager);
 
-    return {
-      ...post,
-      mirrors: mirrors.filter((m) => m !== undefined) as PlatformPost[],
-    } as unknown as DefinedIfTrue<T, R>;
+    return postFull as unknown as DefinedIfTrue<T, R>;
   }
 
   async getFrom_post_id<T extends boolean, R = AppPost>(

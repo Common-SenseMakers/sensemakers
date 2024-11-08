@@ -22,7 +22,10 @@ const getFeedConfig = (
 ): FetcherConfig => {
   return {
     endpoint: '/api/feed/get',
-    queryParams: { semantics: { labels: tab.labels, topic: tab.topic } },
+    queryParams: {
+      semantics: { labels: tab.labels, topic: tab.topic },
+      includeAggregateLabels: true,
+    },
     DEBUG_PREFIX,
   };
 };

@@ -136,6 +136,9 @@ export const PostCard = (props: {
                 semantics: post?.semantics,
                 originalParsed: post?.originalParsed,
               }}></SemanticsEditor>
+            <Box>
+              {post?.meta && Object.keys(post.meta.refLabels).map((key) => key)}
+            </Box>
           </Box>
         )}
       </Box>

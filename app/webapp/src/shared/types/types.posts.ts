@@ -101,7 +101,7 @@ export type AppPostCreate = Omit<AppPost, 'id'>;
  * information between services
  * */
 export interface AppPostFull extends Omit<AppPostRead, 'mirrorsIds'> {
-  mirrors: PlatformPost[];
+  mirrors?: PlatformPost[];
 }
 
 export interface PostAndAuthor {
@@ -173,4 +173,9 @@ export interface MastodonGetContextParams {
   mastodonServer: string;
   callback_url: string;
   type: 'read' | 'write';
+}
+
+export interface GetPostPayload {
+  postId: string;
+  includeAggregateLabels?: boolean;
 }
