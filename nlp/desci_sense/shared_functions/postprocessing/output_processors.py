@@ -232,6 +232,7 @@ class KeywordParser(BaseOutputParser):
             answer={
                 "keywords": top_k_valid,
                 "research_keyword": academic_indicator_kw,
+                "normalized_keywords":normalize_keywords(top_k_valid)
             },
             pparser_type=ParserChainType.KEYWORDS,
             reasoning=final_reasoning,
@@ -240,6 +241,20 @@ class KeywordParser(BaseOutputParser):
 
         # return extracted_content
 
+def normalize_keyword(keyword:str):
+    # Step 1: Convert to lowercase
+    keyword = keyword.lower()
+    
+    # Step 2: Replace non-alphanumeric characters and multiple spaces with hyphens
+    keyword = re.sub(r'[\s_]+', '-', keyword)  # Replace spaces or underscores with hyphens
+    
+    # Step 3: Remove any characters that aren't letters, numbers, or hyphens
+    keyword = re.sub(r'[^a-z0-9-]', '', keyword)
+    
+    return keyword
+
+def normalize_keywords(keywords:list):
+    return [normalize_keyword(keyword) for keyword in keywords]
 
 def extract_tags_list(text):
     # Pattern to match " ##Allowed Tags: " followed by the list
