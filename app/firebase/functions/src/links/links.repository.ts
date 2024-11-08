@@ -1,9 +1,14 @@
+import * as crypto from 'crypto';
 import { OEmbed } from '../@shared/types/types.parser';
 import { DBInstance } from '../db/instance';
 import { BaseRepository, removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { decodeId, encodeId } from '../users/users.utils';
 import { DefinedIfTrue } from '../@shared/types/types.user';
+
+function hashUrl(url: string): string {
+  return crypto.createHash('md5').update(url).digest('hex');
+}
 
 export class LinksRepository extends BaseRepository<OEmbed, OEmbed> {
   constructor(protected db: DBInstance) {
@@ -13,15 +18,17 @@ export class LinksRepository extends BaseRepository<OEmbed, OEmbed> {
     });
   }
 
-  /**  creates an OEmbed link entry */
+  /**  creates an OEmbed link entry using normalized_url hash as ID */
   public create(
     oembed: OEmbed,
     manager: TransactionManager,
-    id?: string
   ) {
-    const linkRef = id 
-      ? this.db.collections.links.doc(this.encode(id))
-      : this.db.collections.links.doc();
+    if (!oembed.normalized_url) {
+      throw new Error('OEmbed must have a normalized_url');
+    }
+
+    const id = hashUrl(oembed.normalized_url);
+    const linkRef = this.db.collections.links.doc(this.encode(id));
 
     manager.create(linkRef, removeUndefined(oembed));
 
