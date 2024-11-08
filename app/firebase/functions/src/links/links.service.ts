@@ -57,11 +57,8 @@ export class LinksService {
     manager: TransactionManager
   ) {
     const linkId = hashAndNormalizeUrl(url);
-    const postRef: RefPostData = {
-      ...postData,
-    };
 
-    await this.links.setRefPost(linkId, postRef, manager);
+    await this.links.setRefPost(linkId, postData, manager);
   }
 
   async getRefPosts(url: string, manager: TransactionManager) {

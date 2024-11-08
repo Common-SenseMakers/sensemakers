@@ -10,7 +10,7 @@ export function hashUrl(url: string): string {
 export function normalizeUrl(url: string): string {
   let normalizedUrl = url.toLowerCase(); // Convert to lowercase
 
-  const urlObj = new URL(`http://${normalizedUrl}`); // Add temporary protocol for parsing
+  const urlObj = new URL(normalizedUrl); // Add temporary protocol for parsing
 
   // Normalize path
   urlObj.pathname = urlObj.pathname.replace(/\/$/, '');

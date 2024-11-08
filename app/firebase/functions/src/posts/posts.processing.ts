@@ -221,7 +221,12 @@ export class PostsProcessing {
       Array.from(Object.keys(refsLabels)).map(async (reference) => {
         const url = reference;
         const refMeta = await this.getRefMeta(url, manager, originalParsed);
-        const refPostData: RefPostData = { ...post };
+        const refPostData: RefPostData = {
+          id: post.id,
+          authorProfileId: post.authorProfileId,
+          createdAtMs: post.createdAtMs,
+          structuredSemantics: { labels: refsLabels[url] },
+        };
         /** always delete all labels from a post for a reference */
         await this.linksService.deleteRefPost(url, postId, manager);
 
