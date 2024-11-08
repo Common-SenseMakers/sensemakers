@@ -2,8 +2,10 @@ import { Anchor, Box } from 'grommet';
 import { useMemo } from 'react';
 
 import { ParsedSupport, RefMeta } from '../../../shared/types/types.parser';
+import { AppPostFull } from '../../../shared/types/types.posts';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { RefCard } from '../common/RefCard';
+import { AggregatedRefLabels } from './AggregatedRefLabels';
 import { RefData } from './process.semantics';
 
 /** renders the labels for one ref */
@@ -13,6 +15,7 @@ export const RefWithLabels = (props: {
   refData: RefData;
   showLabels?: boolean;
   support?: ParsedSupport;
+  post?: AppPostFull;
   addLabel: (labelUri: string) => void;
   removeLabel: (labelUri: string) => void;
   editable?: boolean;
@@ -71,6 +74,14 @@ export const RefWithLabels = (props: {
     props.addLabel(getLabelFromDisplayName(label).uri);
   };
 
+  const refLabels = props.post?.meta?.refLabels[props.refUrl];
+
+  const show =
+    refLabels &&
+    refLabels.find(
+      (refLabel) => refLabel.authorProfileId !== props.post?.authorProfileId
+    ) !== undefined;
+
   return (
     <Box
       style={{
@@ -93,7 +104,18 @@ export const RefWithLabels = (props: {
           {props.refUrl}
         </Anchor>
       )}
-      <Box direction="row" margin={{ top: '40px' }}>
+
+      {show ? (
+        <Box margin={{ top: '22px' }}>
+          <AggregatedRefLabels
+            refLabels={refLabels}
+            ontology={props.support?.ontology}></AggregatedRefLabels>
+        </Box>
+      ) : (
+        <></>
+      )}
+
+      <Box margin={{ top: '16px' }}>
         {showLabels && (
           <AppLabelsEditor
             editable={props.editable}

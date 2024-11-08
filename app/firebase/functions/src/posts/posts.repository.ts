@@ -211,19 +211,21 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     references: string[]
   ): Promise<Record<string, RefLabel[]>> {
     const refsStats: Record<string, RefLabel[]> = {};
+
     const referencePosts = await this.getMany({
       semantics: { refs: references },
       fetchParams: { expectedAmount: 100 },
     });
+
     referencePosts.forEach((referencePost) => {
       references.forEach((reference) => {
         if (referencePost.structuredSemantics?.refsMeta) {
           const refMeta = referencePost.structuredSemantics.refsMeta[reference];
-          const refLabels: RefLabel[] | undefined = refMeta?.labels?.map(
-            (label) => ({
+          const refLabels = refMeta?.labels?.map(
+            (label): RefLabel => ({
               label,
               postId: referencePost.id,
-              authorId: referencePost.authorProfileId,
+              authorProfileId: referencePost.authorProfileId,
               platformPostUrl: referencePost.generic.thread[0].url,
             })
           );
@@ -235,6 +237,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
         }
       });
     });
+
     return refsStats;
   }
 

@@ -21,6 +21,7 @@ import {
   HAS_RDF_SYNTAX_TYPE_URI,
   HAS_TOPIC_URI,
   HAS_ZOTERO_REFERENCE_TYPE_URI,
+  THIS_POST_NAME_URI,
 } from '../@shared/utils/semantics.helper';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
@@ -202,9 +203,11 @@ export class PostsProcessing {
           topic = q.object.value;
         } else {
           // non kewyords or is-a, are marked as ref labels
+          const subject = q.subject.value;
           const reference = q.object.value;
           const label = q.predicate.value;
           if (
+            subject === THIS_POST_NAME_URI &&
             label !== HAS_ZOTERO_REFERENCE_TYPE_URI &&
             label !== HAS_RDF_SYNTAX_TYPE_URI
           ) {

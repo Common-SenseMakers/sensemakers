@@ -13,7 +13,7 @@ import useOutsideClick from './hooks/OutsideClickHook';
 const DEBUG = false;
 
 export const AppLabelsEditor = (props: {
-  labels: string[];
+  labels: Array<string | JSX.Element>;
   maxLabels?: number;
   options?: string[];
   addLabel?: (label: string) => void;
@@ -190,10 +190,11 @@ export const AppLabelsEditor = (props: {
               <AppLabel
                 colors={colors}
                 showClose={adding}
-                remove={() => removeLabel(label)}
+                remove={() => removeLabel(label as string)}
                 key={ix}
                 margin={{ right: marginRight, bottom: 'xsmall' }}>
-                {`${hashtag ? '#' : ''}${label}`}
+                {`${hashtag ? '#' : ''}`}
+                <span>{label}</span>
               </AppLabel>
             </Box>
           );

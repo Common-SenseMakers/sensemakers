@@ -35,8 +35,8 @@ export interface StructuredSemantics {
 
 export interface RefLabel {
   label: string;
-  authorId?: string;
   postId?: string;
+  authorProfileId?: string;
   platformPostUrl?: string;
 }
 
@@ -87,10 +87,12 @@ interface AppPostBase {
 export interface AppPost extends AppPostBase {
   structuredSemantics?: StructuredSemantics;
 }
+
+export interface PostSemanticsMeta {
+  refLabels: Record<string, RefLabel[]>;
+}
 export interface AppPostRead extends AppPost {
-  meta?: {
-    refLabels: Record<string, RefLabel[]>;
-  };
+  meta?: PostSemanticsMeta;
 }
 
 export type AppPostCreate = Omit<AppPost, 'id'>;
