@@ -1,7 +1,6 @@
 import { Box, Text } from 'grommet';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 
 import { ModalContent } from '../app/AppModalStandard';
 import { useToastContext } from '../app/ToastsContext';
@@ -10,7 +9,9 @@ import { ReloadIcon } from '../app/icons/ReloadIcon';
 import { AppGeneralKeys } from '../i18n/i18n.app.general';
 import { PostCard } from '../post/PostCard';
 import { PostCardLoading } from '../post/PostCardLoading';
+import { PostOverlay } from '../post/PostOverlay';
 import { PostContext } from '../post/post.context/PostContext';
+import { AppPostFull } from '../shared/types/types.posts';
 import { AppButton, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
@@ -40,6 +41,10 @@ export const PostsFetcherComponent = (props: {
   const { constants } = useThemeContext();
   const { t } = useTranslation();
 
+  const [postToShow, setPostToShow] = useState<AppPostFull | undefined>(
+    undefined
+  );
+
   const {
     pageTitle,
     feed,
@@ -49,8 +54,6 @@ export const PostsFetcherComponent = (props: {
 
   const isPublicFeed = _isPublicFeed !== undefined ? _isPublicFeed : false;
   const showHeader = _showHeader !== undefined ? _showHeader : true;
-
-  const navigate = useNavigate();
 
   const {
     posts,
@@ -138,15 +141,21 @@ export const PostsFetcherComponent = (props: {
   );
 
   const showPosts = posts ? (
-    <Box ref={containerRef} style={{ height: '100%', overflowY: 'auto' }}>
+    <Box
+      ref={containerRef}
+      style={{
+        height: '100%',
+        overflowY: 'auto',
+        maxWidth: 600,
+        margin: '0 auto',
+      }}>
       {posts.map((post, ix) => (
         <Box key={ix} id={`post-${post.id}`} style={{ flexShrink: 0 }}>
           <PostContext postInit={post}>
             <PostCard
               isPublicFeed={isPublicFeed}
               handleClick={() => {
-                const path = `/post/${post.id}`;
-                navigate(path);
+                setPostToShow(post);
               }}></PostCard>
           </PostContext>
         </Box>
@@ -159,6 +168,7 @@ export const PostsFetcherComponent = (props: {
           <LoadingDiv height="120px" width="100%"></LoadingDiv>
         </Box>
       )}
+
       {moreToFetch && !isFetchingOlder && (
         <Box
           margin={{ vertical: 'medium', horizontal: 'medium' }}
@@ -179,9 +189,11 @@ export const PostsFetcherComponent = (props: {
           </Text>
         </Box>
       )}
+
       {!moreToFetch && (
         <Box
-          margin={{ vertical: 'medium', horizontal: 'medium' }}
+          style={{ flexShrink: 0 }}
+          pad={{ vertical: 'large', horizontal: 'medium' }}
           align="center"
           justify="center">
           <Text
@@ -229,15 +241,51 @@ export const PostsFetcherComponent = (props: {
     </Box>
   );
 
+  const showPost = postToShow && (
+    <Box
+      style={{
+        position: 'absolute',
+        top: 0,
+        backgroundColor: '#ffffff',
+        height: '100%',
+        width: '100%',
+      }}>
+      <PostOverlay
+        postId={postToShow.id}
+        postInit={postToShow}
+        onPostNav={{
+          onBack: () => setPostToShow(undefined),
+          onPrev: () => {
+            const { prevPostId } = feed.getNextAndPrev();
+            if (prevPostId) {
+              const prev = feed.getPost(prevPostId);
+              setPostToShow(prev);
+            }
+          },
+          onNext: () => {
+            const { nextPostId } = feed.getNextAndPrev();
+            if (nextPostId) {
+              const next = feed.getPost(nextPostId);
+              setPostToShow(next);
+            }
+          },
+        }}></PostOverlay>
+    </Box>
+  );
+
   return (
     <>
       {showHeader && header}
-      <Box fill justify="start">
+      <Box
+        fill
+        style={{ backgroundColor: '#FFFFFF', position: 'relative' }}
+        justify="start">
         {!posts || isLoading
           ? showLoading
           : posts.length === 0
             ? showNoPosts
             : showPosts}
+        {showPost}
       </Box>
     </>
   );

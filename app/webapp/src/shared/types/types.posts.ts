@@ -30,13 +30,13 @@ export interface StructuredSemantics {
   keywords?: string[];
   refs?: string[];
   refsMeta?: Record<string, RefMeta>;
-  topics?: string[];
+  topic?: string;
 }
 
 export interface RefLabel {
   label: string;
-  authorId?: string;
   postId?: string;
+  authorProfileId?: string;
   platformPostUrl?: string;
 }
 
@@ -46,7 +46,7 @@ export interface StructuredSemanticsQuery {
   labels?: ArrayIncludeQuery;
   keywords?: ArrayIncludeQuery;
   refs?: ArrayIncludeQuery;
-  topics?: ArrayIncludeQuery;
+  topic?: string;
 }
 
 /**
@@ -87,10 +87,12 @@ interface AppPostBase {
 export interface AppPost extends AppPostBase {
   structuredSemantics?: StructuredSemantics;
 }
+
+export interface PostSemanticsMeta {
+  refLabels: Record<string, RefLabel[]>;
+}
 export interface AppPostRead extends AppPost {
-  meta?: {
-    refLabels: Record<string, RefLabel[]>;
-  };
+  meta?: PostSemanticsMeta;
 }
 
 export type AppPostCreate = Omit<AppPost, 'id'>;
@@ -101,7 +103,7 @@ export type AppPostCreate = Omit<AppPost, 'id'>;
  * information between services
  * */
 export interface AppPostFull extends Omit<AppPostRead, 'mirrorsIds'> {
-  mirrors: PlatformPost[];
+  mirrors?: PlatformPost[];
 }
 
 export interface PostAndAuthor {
@@ -173,4 +175,9 @@ export interface MastodonGetContextParams {
   mastodonServer: string;
   callback_url: string;
   type: 'read' | 'write';
+}
+
+export interface GetPostPayload {
+  postId: string;
+  includeAggregateLabels?: boolean;
 }

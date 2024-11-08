@@ -1,5 +1,6 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
 import { Location, useLocation, useNavigate } from 'react-router-dom';
+import { CSSProperties } from 'styled-components';
 
 import { RouteNames } from '../route.names';
 import { AppButton } from '../ui-components';
@@ -22,6 +23,10 @@ export const locationToFeedIx = (location: Location) => {
   }
 };
 
+export const feedIndexToPathname = (ix: number) => {
+  return `/feed/${feedTabs[ix].id}`;
+};
+
 export const FeedTabs = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -29,23 +34,29 @@ export const FeedTabs = () => {
 
   const feedIx = locationToFeedIx(location);
 
+  const borderStyle = `1px solid ${constants.colors.border}`;
+
   const tabElement = (text: string, route: string, isSelected: boolean) => {
     const internalBoxProps: BoxExtendedProps = {
       direction: 'row',
       gap: '4px',
       align: 'center',
       justify: 'center',
+      pad: { horizontal: '12px', vertical: '8px' },
+      style: { minWidth: '88px' },
     };
+
     const externalBoxProps: BoxExtendedProps = {
       style: {
-        flexGrow: 1,
+        flex: '0 0 auto',
         height: '100%',
         justifyContent: 'center',
-      },
-      border: {
-        color: isSelected ? constants.colors.primary : 'transparent',
-        side: 'bottom',
-        size: '2px',
+        backgroundColor: isSelected ? '#FFFFFF' : 'transparent',
+        borderTop: borderStyle,
+        borderLeft: borderStyle,
+        borderRight: borderStyle,
+        borderBottom: isSelected ? 'none' : borderStyle,
+        borderRadius: '8px 8px 0 0',
       },
     };
 
@@ -67,11 +78,40 @@ export const FeedTabs = () => {
     );
   };
 
+  const spaceStyle: CSSProperties = {
+    flex: '0 0 auto',
+    height: '100%',
+    borderBottom: borderStyle,
+    width: '11px',
+  };
+
   return (
-    <Box direction="row" align="center" style={{ height: '48px' }}>
-      {feedTabs.map((tab, ix) =>
-        tabElement(tab.title, `/${RouteNames.Feed}/${tab.id}`, feedIx === ix)
-      )}
-    </Box>
+    <div
+      style={{
+        height: '48px',
+        display: 'flex',
+        overflowX: 'auto',
+        whiteSpace: 'nowrap',
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none',
+      }}>
+      {feedTabs.map((tab, ix) => (
+        <Box
+          direction="row"
+          key={ix}
+          style={{
+            flex: '0 0 auto',
+            height: '100%',
+          }}>
+          <div style={spaceStyle}></div>
+          {tabElement(
+            tab.title,
+            `/${RouteNames.Feed}/${tab.id}`,
+            feedIx === ix
+          )}
+          {ix === feedTabs.length - 1 && <div style={spaceStyle}></div>}
+        </Box>
+      ))}
+    </div>
   );
 };

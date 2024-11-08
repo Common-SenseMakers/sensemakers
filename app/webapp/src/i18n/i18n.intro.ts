@@ -9,6 +9,7 @@ export enum IntroKeys {
 
   connectSocialsTitle = 'intro-s007',
   connectMastodonTitle = 'intro-s008',
+  connectingMastodon = 'intro-s009x',
   connectSocialsParagraph = 'intro-s009',
   connectSocialsParagraph2 = 'intro-s010',
   connectMastodonParagraph = 'intro-s011',
@@ -27,6 +28,7 @@ export const introValues: Record<IntroKeys, string> = {
 
   [IntroKeys.connectSocialsTitle]: 'Connect your accounts',
   [IntroKeys.connectMastodonTitle]: 'Connect to Mastodon',
+  [IntroKeys.connectingMastodon]: 'Connecting to Mastodon',
   [IntroKeys.connectSocialsParagraph]:
     'Connect your accounts to process your post as an hyperfeed. You must link at least one account, and you will be able to link other accounts later.',
   [IntroKeys.connectSocialsParagraph2]:

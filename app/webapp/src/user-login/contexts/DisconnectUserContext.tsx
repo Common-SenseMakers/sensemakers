@@ -26,10 +26,7 @@ export const DisconnectUserContext = (props: PropsWithChildren) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const closedRoutes = useMemo(
-    () => [AbsoluteRoutes.Post(''), AbsoluteRoutes.Settings],
-    []
-  );
+  const closedRoutes = useMemo(() => [AbsoluteRoutes.Settings], []);
 
   useEffect(() => {
     /** navigate home if not logged user */

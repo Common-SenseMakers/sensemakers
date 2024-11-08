@@ -9,6 +9,7 @@ import {
 } from 'react';
 
 import { _appFetch } from '../../api/app.fetch';
+import { STARTED_KEY } from '../../pages/ConnectPage';
 import { NotificationFreq } from '../../shared/types/types.notifications';
 import { OrcidProfile } from '../../shared/types/types.orcid';
 import {
@@ -131,6 +132,8 @@ export const AccountContext = (props: PropsWithChildren) => {
     false
   );
 
+  const [, setStart] = usePersist(STARTED_KEY, false);
+
   const setOverallLoginStatus = useCallback(
     (status: OverallLoginStatus) => {
       if (DEBUG) console.log('setOverallLoginStatus', status);
@@ -214,6 +217,7 @@ export const AccountContext = (props: PropsWithChildren) => {
       /** connectedUser === loggedIn now */
       setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     connectedUser,
     overallLoginStatus,
@@ -226,13 +230,17 @@ export const AccountContext = (props: PropsWithChildren) => {
     setConnectedUser(undefined);
     setToken(null);
 
+    const disabledStatus: PlatformsConnectedStatus = {};
+
     ALL_PUBLISH_PLATFORMS.forEach((platform) => {
-      setPlatformsConnectedStatus({
-        ...platformsConnectedStatus,
-        [platform]: PlatformConnectedStatus.Disconnected,
-      });
+      disabledStatus[platform] = PlatformConnectedStatus.Disconnected;
     });
 
+    setPlatformsConnectedStatus({
+      ...disabledStatus,
+    });
+
+    setStart(null);
     _setLoginFlowState(LoginFlowState.Idle);
     _setOverallLoginStatus(OverallLoginStatus.LoggedOut);
   };

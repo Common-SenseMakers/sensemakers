@@ -2,15 +2,16 @@ import { Box } from 'grommet';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { AppLogo } from '../app/brand/AppLogo';
 import { BlueskyIcon, MastodonIcon, TwitterIcon } from '../app/common/Icons';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
+import { MAX_BUTTON_WIDTH } from '../app/layout/Viewport';
 import { IntroKeys } from '../i18n/i18n.intro';
 import { PlatformsKeys } from '../i18n/i18n.platforms';
 import { AbsoluteRoutes, RouteNames } from '../route.names';
 import { PLATFORM } from '../shared/types/types.platforms';
-import { AppButton, AppHeading, AppSubtitle } from '../ui-components';
+import { AppButton, AppHeading } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
+import { BoxCentered } from '../ui-components/BoxCentered';
 import { PlatformSection } from '../user-settings/PlatformsSection';
 import {
   PlatformConnectedStatus,
@@ -18,7 +19,7 @@ import {
 } from './contexts/AccountContext';
 import { useTwitterContext } from './contexts/platforms/TwitterContext';
 
-export const ConnectSocialsPage = () => {
+export const ConnectSocials = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const {
@@ -41,10 +42,8 @@ export const ConnectSocialsPage = () => {
   const content = (
     <Box>
       <Box style={{ flexGrow: 1 }}>
-        <AppHeading level="1">{t(IntroKeys.introTitle)}</AppHeading>
+        <AppHeading level="1">{t(IntroKeys.connectSocialsTitle)}</AppHeading>
         <Box width="100%" height="4px"></Box>
-        <AppSubtitle>{t(IntroKeys.introSubtitle)}</AppSubtitle>
-        <Box width="100%" height="16px"></Box>
 
         <AppParagraph margin={{ bottom: 'medium' }}>
           {t(IntroKeys.connectSocialsParagraph)}
@@ -108,15 +107,15 @@ export const ConnectSocialsPage = () => {
         />
       </Box>
 
-      <Box align="center" margin={{ top: 'large' }}>
+      <BoxCentered margin={{ top: 'large' }}>
         <AppButton
           primary
           label={t(IntroKeys.continue)}
           onClick={handleContinue}
           disabled={connectedSourcePlatforms.length === 0}
-          style={{ width: '100%' }}
+          style={{ width: '100%', maxWidth: MAX_BUTTON_WIDTH }}
         />
-      </Box>
+      </BoxCentered>
     </Box>
   );
 
@@ -124,7 +123,6 @@ export const ConnectSocialsPage = () => {
     <Box
       pad={{ horizontal: 'medium', vertical: 'large' }}
       style={{ flexGrow: 1 }}>
-      <AppLogo margin={{ bottom: 'xlarge' }}></AppLogo>
       <Box style={{ flexGrow: 1 }}>{content}</Box>
     </Box>
   );

@@ -12,7 +12,7 @@ export enum AppGeneralKeys {
 
 export const appGeneralValues: Record<AppGeneralKeys, string> = {
   [AppGeneralKeys.myPosts]: 'Your Posts',
-  [AppGeneralKeys.feedTitle]: 'Explore',
+  [AppGeneralKeys.feedTitle]: 'Hyperfeed',
   [AppGeneralKeys.settings]: 'Settings',
   [AppGeneralKeys.updateAvailable]: 'An update is available, ',
   [AppGeneralKeys.updateNow]: 'update now',

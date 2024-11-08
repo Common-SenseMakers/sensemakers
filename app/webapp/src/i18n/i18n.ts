@@ -6,13 +6,15 @@ import { PostEditKeys, editValues } from './i18n.edit.post';
 import { IntroKeys, introValues } from './i18n.intro';
 import { PlatformsKeys, platformsValues } from './i18n.platforms';
 import { SettingsKeys, settingsValues } from './i18n.settings';
+import { WelcomeKeys, welcomeValues } from './i18n.welcome';
 
 export type I18Keys =
   | IntroKeys
   | AppGeneralKeys
   | PlatformsKeys
   | SettingsKeys
-  | PostEditKeys;
+  | PostEditKeys
+  | WelcomeKeys;
 
 export const translationENG: Record<I18Keys, string> = {
   ...introValues,
@@ -20,6 +22,7 @@ export const translationENG: Record<I18Keys, string> = {
   ...platformsValues,
   ...settingsValues,
   ...editValues,
+  ...welcomeValues,
 };
 
 i18n

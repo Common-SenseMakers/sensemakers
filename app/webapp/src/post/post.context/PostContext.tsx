@@ -4,14 +4,12 @@ import { AppPostFull } from '../../shared/types/types.posts';
 import { useAccountContext } from '../../user-login/contexts/AccountContext';
 import { PostDerivedContext, usePostDerived } from './use.post.derived';
 import { PostFetchContext, usePostFetch } from './use.post.fetch';
-import { PostNavContext, usePostNav } from './use.post.nav';
 import { PostUpdateContext, usePostUpdate } from './use.post.update';
 
 interface PostContextType {
   fetched: PostFetchContext;
   derived: PostDerivedContext;
   updated: PostUpdateContext;
-  navigatePost: PostNavContext;
 }
 
 const PostContextValue = createContext<PostContextType | undefined>(undefined);
@@ -31,7 +29,6 @@ export const PostContext: React.FC<{
   const fetched = usePostFetch(connectedUser, _postId, postInit);
   const derived = usePostDerived(fetched);
   const updated = usePostUpdate(fetched, derived, postInit, connectedUser);
-  const navigatePost = usePostNav(fetched);
 
   return (
     <PostContextValue.Provider
@@ -39,7 +36,6 @@ export const PostContext: React.FC<{
         fetched,
         derived,
         updated,
-        navigatePost,
       }}>
       {children}
     </PostContextValue.Provider>

@@ -2,7 +2,11 @@ import { RequestHandler } from 'express';
 
 import { AddUserDataPayload } from '../../@shared/types/types.fetch';
 import { PLATFORM } from '../../@shared/types/types.platforms';
-import { PostUpdatePayload, PostsQuery } from '../../@shared/types/types.posts';
+import {
+  GetPostPayload,
+  PostUpdatePayload,
+  PostsQuery,
+} from '../../@shared/types/types.posts';
 import { AccountProfileBase } from '../../@shared/types/types.profiles';
 import { IS_EMULATOR } from '../../config/config.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
@@ -55,11 +59,11 @@ export const getPostController: RequestHandler = async (request, response) => {
     const userId = getAuthenticatedUser(request);
     const { postsManager } = getServices(request);
 
-    const payload = (await postIdValidation.validate(request.body)) as {
-      postId: string;
-    };
+    const payload = (await postIdValidation.validate(
+      request.body
+    )) as GetPostPayload;
 
-    const post = await postsManager.getPost(payload.postId, true);
+    const post = await postsManager.getPost(payload, true);
 
     const canRead = canReadPost(post, userId);
 

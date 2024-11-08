@@ -92,7 +92,7 @@ export const KeywordsComponent = (props: PatternProps) => {
         <AppLabelsEditor
           maxLabels={props.size === 'compact' ? 2 : undefined}
           editable={props.editable}
-          colors={{ font: '#498283', background: '#F5FCFC', border: '#BDD9D7' }}
+          colors={{ font: '#FFFFFF', background: '#498283', border: '#6C9C9D' }}
           labels={keywords}
           addLabel={(newLabel) => {
             addKeyword(newLabel).catch(console.error);

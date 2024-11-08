@@ -15,8 +15,6 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 interface SWContextType {
-  hasUpdate: boolean;
-  updateApp: () => void;
   needsInstall: boolean;
   install: () => void;
 }
@@ -33,29 +31,29 @@ export const ServiceWorker = (props: PropsWithChildren) => {
     null
   );
 
-  const [hasUpdate, setHasUpdate] = useState<boolean>(false);
-
   const [, setDisplayMode] = useState<
     'browser' | 'standalone' | 'twa' | undefined
   >(undefined);
 
+  useEffect(() => {
+    if (waitingWorker) {
+      console.log('force update app');
+      waitingWorker?.postMessage({ type: 'SKIP_WAITING' });
+      window.location.reload();
+    }
+  }, [waitingWorker]);
+
   const onSWUpdate = useCallback((registration: ServiceWorkerRegistration) => {
-    setHasUpdate(true);
+    console.log('waiting worker detected');
     setWaitingWorker(registration.waiting);
   }, []);
-
-  const updateApp = useCallback(() => {
-    console.log('updateApp called');
-    waitingWorker?.postMessage({ type: 'SKIP_WAITING' });
-    setHasUpdate(false);
-    window.location.reload();
-  }, [waitingWorker]);
 
   useEffect(() => {
     serviceWorkerRegistration.register({
       onUpdate: onSWUpdate,
       onUpdateReady: onSWUpdate,
     });
+    return () => serviceWorkerRegistration.unregister();
   }, [onSWUpdate]);
 
   const checkDisplayMode = () => {
@@ -114,8 +112,6 @@ export const ServiceWorker = (props: PropsWithChildren) => {
   return (
     <SWContextValue.Provider
       value={{
-        hasUpdate,
-        updateApp,
         needsInstall,
         install,
       }}>

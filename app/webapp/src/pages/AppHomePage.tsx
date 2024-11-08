@@ -1,15 +1,16 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
+import { ConnectPage, STARTED_KEY } from '../pages/ConnectPage';
 import { PostCardLoading } from '../post/PostCardLoading';
+import { AbsoluteRoutes } from '../route.names';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
-import { UserPostsFeed } from '../user-home/UserPostsFeed';
-import { ConnectSocialsPage } from '../user-login/ConnectSocialsPage';
 import {
   OverallLoginStatus,
   useAccountContext,
 } from '../user-login/contexts/AccountContext';
+import { usePersist } from '../utils/use.persist';
 
 const DEBUG = false;
 
@@ -28,7 +29,18 @@ const LoadingPlaceholder = (
 );
 
 export const AppHomePage = () => {
+  const navigate = useNavigate();
+
+  const [start] = usePersist(STARTED_KEY, false);
+
   const { overallLoginStatus, alreadyConnected } = useAccountContext();
+
+  useEffect(() => {
+    if (overallLoginStatus === OverallLoginStatus.FullyLoggedIn && start) {
+      navigate(AbsoluteRoutes.MyPosts);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [overallLoginStatus]);
 
   const { content, nav, fixed } = useMemo(() => {
     if (DEBUG)
@@ -47,16 +59,8 @@ export const AppHomePage = () => {
     ) {
       return {
         fixed: false,
-        content: <ConnectSocialsPage />,
+        content: <ConnectPage></ConnectPage>,
         nav: undefined,
-      };
-    }
-
-    if (overallLoginStatus === OverallLoginStatus.FullyLoggedIn) {
-      return {
-        fixed: true,
-        content: <UserPostsFeed></UserPostsFeed>,
-        nav: <GlobalNav></GlobalNav>,
       };
     }
 

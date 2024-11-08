@@ -2,7 +2,6 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions/v1';
 
 import {
-  AppPostRead,
   ArrayIncludeQuery,
   RefLabel,
   StructuredSemantics,
@@ -122,7 +121,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     // const urlKey: keyof RefMeta = 'url';
 
     const labelsKey: keyof StructuredSemantics = 'labels';
-    const topicsKey: keyof StructuredSemantics = 'topics';
+    const topicKey: keyof StructuredSemantics = 'topic';
     const refsKey: keyof StructuredSemantics = 'refs';
 
     if (DEBUG) logger.debug('getMany', queryParams, DEBUG_PREFIX);
@@ -137,8 +136,8 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
     query = filterByArrayContainsAny(
       query,
-      `${structuredSemanticsKey}.${topicsKey}`,
-      queryParams.semantics?.topics
+      `${structuredSemanticsKey}.${refsKey}`,
+      queryParams.semantics?.refs
     );
 
     query = filterByArrayContainsAny(
@@ -153,10 +152,10 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       queryParams.semantics?.keywords
     );
 
-    query = filterByArrayContainsAny(
+    query = filterByEqual(
       query,
-      `${structuredSemanticsKey}.${refsKey}`,
-      queryParams.semantics?.refs
+      `${structuredSemanticsKey}.${topicKey}`,
+      queryParams.semantics?.topic
     );
 
     /** get the sinceCreatedAt and untilCreatedAt timestamps from the elements ids */
@@ -203,24 +202,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     let appPosts = posts.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
-    })) as AppPostRead[];
-
-    if (queryParams.includeAggregateLabels) {
-      appPosts = await Promise.all(
-        appPosts.map(async (post) => {
-          return {
-            ...post,
-            meta: post.structuredSemantics?.refs
-              ? {
-                  refLabels: await this.getAggregatedRefLabels(
-                    post.structuredSemantics.refs
-                  ),
-                }
-              : undefined,
-          };
-        })
-      );
-    }
+    })) as AppPost[];
 
     return appPosts.sort((a, b) => b.createdAtMs - a.createdAtMs);
   }
@@ -229,19 +211,21 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     references: string[]
   ): Promise<Record<string, RefLabel[]>> {
     const refsStats: Record<string, RefLabel[]> = {};
+
     const referencePosts = await this.getMany({
       semantics: { refs: references },
       fetchParams: { expectedAmount: 100 },
     });
+
     referencePosts.forEach((referencePost) => {
       references.forEach((reference) => {
         if (referencePost.structuredSemantics?.refsMeta) {
           const refMeta = referencePost.structuredSemantics.refsMeta[reference];
-          const refLabels: RefLabel[] | undefined = refMeta?.labels?.map(
-            (label) => ({
+          const refLabels = refMeta?.labels?.map(
+            (label): RefLabel => ({
               label,
               postId: referencePost.id,
-              authorId: referencePost.authorProfileId,
+              authorProfileId: referencePost.authorProfileId,
               platformPostUrl: referencePost.generic.thread[0].url,
             })
           );
@@ -253,6 +237,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
         }
       });
     });
+
     return refsStats;
   }
 

@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 
 import { AppGeneralKeys } from '../i18n/i18n.app.general';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
+import { AppHeading } from '../ui-components';
 import { FeedTabs, locationToFeedIx } from './FeedTabs';
 import { useFeedPosts } from './PublicFeedsContext';
 
@@ -20,7 +21,14 @@ export const PublicFeed = () => {
   return (
     <>
       <Box fill justify="start" style={{ height: '100%' }}>
+        <Box
+          pad={{ horizontal: '12px', vertical: '6px' }}
+          margin={{ bottom: '4px' }}>
+          <AppHeading level="2">{'Explore'}</AppHeading>
+        </Box>
+
         <FeedTabs></FeedTabs>
+
         <div style={{ height: 'calc(100% - 48px)', overflow: 'hidden' }}>
           <div
             style={{

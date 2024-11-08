@@ -16,11 +16,13 @@ import { ReactNode, createContext, useContext } from 'react';
 import { AppHeading } from '../../ui-components';
 import { useResponsive } from '../../ui-components/ResponsiveApp';
 import { useThemeContext } from '../../ui-components/ThemedApp';
+import { AppLogo } from '../brand/AppLogo';
 import { BUILD_ID } from '../config';
 import { AppIcon } from '../icons/AppIcon';
 
 export const MAX_WIDTH_LANDING = 1600;
 export const MAX_WIDTH_APP = 600;
+export const MAX_BUTTON_WIDTH = 1600;
 
 export const ViewportContainer = (props: React.HTMLProps<HTMLDivElement>) => {
   const { constants } = useThemeContext();
@@ -116,10 +118,12 @@ export const ViewportPage = (props: {
   nav?: ReactNode;
   justify?: BoxProps['justify'];
   fixed?: boolean;
+  addLogo?: boolean;
 }) => {
   const { mobile } = useResponsive();
   const pad = mobile ? 'none' : 'large';
   const fixed = props.fixed !== undefined ? props.fixed : false;
+  const addLogo = props.addLogo !== undefined ? props.addLogo : false;
 
   return (
     <ViewportPageContextValue.Provider value={{}}>
@@ -143,6 +147,13 @@ export const ViewportPage = (props: {
           <Box
             style={fixed ? { height: '100%' } : { flexGrow: 1, flexShrink: 0 }}
             justify={props.justify || 'center'}>
+            {addLogo ? (
+              <Box pad={{ horizontal: '12px', vertical: '10px' }}>
+                <AppLogo margin={{ bottom: 'xlarge' }}></AppLogo>
+              </Box>
+            ) : (
+              <></>
+            )}
             {props.content}
           </Box>
         </Box>

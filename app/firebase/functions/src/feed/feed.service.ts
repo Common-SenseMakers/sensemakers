@@ -21,10 +21,24 @@ export class FeedService {
       ...params,
     };
 
+    const includeAggregateLabels =
+      queryParams.includeAggregateLabels !== undefined
+        ? queryParams.includeAggregateLabels
+        : false;
+
     const posts = await this.postsManager.processing.posts.getMany(queryParams);
 
     const postsFull = await Promise.all(
-      posts.map((post) => this.postsManager.appendMirrors(post))
+      posts.map((post) =>
+        this.db.run((manager) =>
+          this.postsManager.processing.hydratePostFull(
+            post,
+            true,
+            includeAggregateLabels,
+            manager
+          )
+        )
+      )
     );
 
     return postsFull;

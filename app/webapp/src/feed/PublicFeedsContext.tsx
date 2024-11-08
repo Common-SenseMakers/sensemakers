@@ -6,7 +6,7 @@ import {
   PostFetcherInterface,
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
-import { feedTabs } from './feed.config';
+import { FeedTabConfig, feedTabs } from './feed.config';
 
 interface PublicFeedsContextType {
   feeds: PostFetcherInterface[];
@@ -16,6 +16,20 @@ export const FeedPostsContextValue = createContext<
   PublicFeedsContextType | undefined
 >(undefined);
 
+const getFeedConfig = (
+  tab: FeedTabConfig,
+  DEBUG_PREFIX: string
+): FetcherConfig => {
+  return {
+    endpoint: '/api/feed/get',
+    queryParams: {
+      semantics: { labels: tab.labels, topic: tab.topic },
+      includeAggregateLabels: true,
+    },
+    DEBUG_PREFIX,
+  };
+};
+
 /**
  * wraps the usePostsFetcher around the feed endpoint and serves
  * the returned posts to lower level components as useFeedPosts()
@@ -24,43 +38,23 @@ export const PublicFeedsContext: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
   const feed0Config = useMemo((): FetcherConfig => {
-    return {
-      endpoint: '/api/feed/get',
-      queryParams: { semantics: { labels: feedTabs[0].labels } },
-      DEBUG_PREFIX: `[FEED 0] `,
-    };
+    return getFeedConfig(feedTabs[0], '[FEED 0] ');
   }, []);
 
   const feed1Config = useMemo((): FetcherConfig => {
-    return {
-      endpoint: '/api/feed/get',
-      queryParams: { semantics: { labels: feedTabs[1].labels } },
-      DEBUG_PREFIX: `[FEED 1] `,
-    };
+    return getFeedConfig(feedTabs[1], '[FEED 1] ');
   }, []);
 
   const feed2Config = useMemo((): FetcherConfig => {
-    return {
-      endpoint: '/api/feed/get',
-      queryParams: { semantics: { labels: feedTabs[2].labels } },
-      DEBUG_PREFIX: `[FEED 2] `,
-    };
+    return getFeedConfig(feedTabs[2], '[FEED 2] ');
   }, []);
 
   const feed3Config = useMemo((): FetcherConfig => {
-    return {
-      endpoint: '/api/feed/get',
-      queryParams: { semantics: { labels: feedTabs[3].labels } },
-      DEBUG_PREFIX: `[FEED 3] `,
-    };
+    return getFeedConfig(feedTabs[3], '[FEED 3] ');
   }, []);
 
   const feed4Config = useMemo((): FetcherConfig => {
-    return {
-      endpoint: '/api/feed/get',
-      queryParams: { semantics: { labels: feedTabs[4].labels } },
-      DEBUG_PREFIX: `[FEED 4] `,
-    };
+    return getFeedConfig(feedTabs[4], '[FEED 4] ');
   }, []);
 
   const feed0 = usePostsFetcher(feed0Config);

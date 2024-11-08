@@ -1,12 +1,11 @@
 import { Box } from 'grommet';
 import { Refresh } from 'grommet-icons';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useAppFetch } from '../api/app.fetch';
 import { ClearIcon } from '../app/icons/ClearIcon';
 import { SendIcon } from '../app/icons/SendIcon';
-import { ViewportPage } from '../app/layout/Viewport';
 import { PostEditKeys } from '../i18n/i18n.edit.post';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID, PatternProps } from '../semantics/patterns/patterns';
@@ -15,27 +14,19 @@ import { AppButton } from '../ui-components';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
-import { usePersist } from '../utils/use.persist';
 import { PostHeader } from './PostHeader';
-import { PostNav } from './PostNav';
+import { OnPostNav, PostNav } from './PostNav';
 import { PostTextEditable } from './PostTextEditable';
-import { POSTING_POST_ID } from './PostingPage';
 import { usePost } from './post.context/PostContext';
 import { concatenateThread } from './posts.helper';
 
-const DEBUG = false;
-
 /** extract the postId from the route and pass it to a PostContext */
-export const PostView = (props: { profile?: PlatformProfile }) => {
+export const PostView = (props: {
+  profile?: PlatformProfile;
+  onPostNav?: OnPostNav;
+}) => {
   const appFetch = useAppFetch();
-
-  // shared persisted state with PostingPage.tsx
-  const [postingPostId, setPostingPostId] = usePersist<string>(
-    POSTING_POST_ID,
-    null
-  );
-  // local state to prevent detecting the returning before leaving
-  const [justSetPostId] = useState<boolean>(false);
+  const { onPostNav } = props;
 
   const [, setIsReparsing] = useState(false);
 
@@ -74,25 +65,6 @@ export const PostView = (props: { profile?: PlatformProfile }) => {
   const cancelEdit = () => {
     updated.setEnabledEdit(false);
   };
-
-  // receives the navigate from PostingPage and opens the post intent
-  useEffect(() => {
-    if (
-      postingPostId &&
-      connectedUser &&
-      !justSetPostId &&
-      updated.postMerged?.id
-    ) {
-      if (DEBUG) console.log(`posting post detected for ${postingPostId}`);
-      setPostingPostId(null);
-    }
-  }, [
-    postingPostId,
-    connectedUser,
-    justSetPostId,
-    updated.postMerged?.id,
-    setPostingPostId,
-  ]);
 
   const action = (() => {
     if (
@@ -183,31 +155,34 @@ export const PostView = (props: { profile?: PlatformProfile }) => {
     };
 
     return (
-      <>
-        <Box pad="medium">
-          <PostHeader boxProps={{ margin: { bottom: '16px' } }}></PostHeader>
+      <Box
+        pad={{ top: 'medium', horizontal: 'medium', bottom: 'large' }}
+        style={{ flexShrink: 0 }}>
+        <PostHeader boxProps={{ margin: { bottom: '16px' } }}></PostHeader>
 
-          <PostTextEditable text={postText}></PostTextEditable>
+        {!hideSemantics && (
+          <SemanticsEditor
+            patternProps={patternProps}
+            include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
+        )}
 
-          {!hideSemantics && (
-            <SemanticsEditor
-              patternProps={patternProps}
-              include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
-          )}
+        <PostTextEditable text={postText}></PostTextEditable>
 
-          {action}
-        </Box>
-      </>
+        {!hideSemantics && (
+          <SemanticsEditor
+            patternProps={patternProps}
+            include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
+        )}
+
+        {action}
+      </Box>
     );
   })();
 
   return (
-    <ViewportPage
-      content={
-        <Box fill>
-          <PostNav></PostNav>
-          {content}
-        </Box>
-      }></ViewportPage>
+    <Box fill>
+      <PostNav onPostNav={onPostNav}></PostNav>
+      <Box style={{ overflowY: 'auto', flexGrow: 1 }}>{content}</Box>
+    </Box>
   );
 };
