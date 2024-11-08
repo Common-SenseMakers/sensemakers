@@ -20,15 +20,13 @@ export const getLinksMock = (
   const mocked = spy(linksService) as unknown as LinksService;
 
   if (type.enable) {
-    when(mocked.getOEmbed(anything(), anything())).thenCall(
-      (url: string, manager: TransactionManager) => {
-        const oembed: OEmbed = {
-          url,
-          normalized_url: normalizeUrl(url),
-        };
-        return oembed;
-      }
-    );
+    when(mocked.fetchOEmbed(anything())).thenCall((url: string) => {
+      const oembed: OEmbed = {
+        url,
+        normalized_url: normalizeUrl(url),
+      };
+      return oembed;
+    });
 
     when(mocked.setOEmbed(anything(), anything())).thenCall(
       (url: string, manager: TransactionManager) => {
