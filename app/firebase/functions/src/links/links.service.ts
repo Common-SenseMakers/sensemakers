@@ -1,4 +1,5 @@
-import { OEmbed, RefMeta } from '../@shared/types/types.parser';
+import { RefMeta } from '../@shared/types/types.parser';
+import { OEmbed, RefPostData } from '../@shared/types/types.references';
 import { TransactionManager } from '../db/transaction.manager';
 import { LinksRepository } from './links.repository';
 import { hashAndNormalizeUrl, hashUrl, normalizeUrl } from './links.utils';
@@ -48,5 +49,23 @@ export class LinksService {
 
   async setOEmbed(oembed: OEmbed, manager: TransactionManager) {
     this.links.set(hashAndNormalizeUrl(oembed.url), oembed, manager);
+  }
+
+  async setPostWithRef(
+    url: string,
+    postData: RefPostData,
+    manager: TransactionManager
+  ) {
+    const linkId = hashAndNormalizeUrl(url);
+    const postRef: RefPostData = {
+      ...postData,
+    };
+
+    await this.links.setPostRef(linkId, postRef, manager);
+  }
+
+  async getPostsWithRef(url: string, manager: TransactionManager) {
+    const linkId = hashAndNormalizeUrl(url);
+    return this.links.getPostRefs(linkId, manager);
   }
 }

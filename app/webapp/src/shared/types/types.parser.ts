@@ -1,4 +1,5 @@
 import { GenericThread } from './types.posts';
+import { OEmbed } from './types.references';
 
 export enum PARSER_MODE {
   REF_LABELS = 'REF_LABELS',
@@ -27,20 +28,6 @@ export interface OntologyItem {
   valid_subject_types?: string;
   valid_object_types?: string;
   versions?: string[];
-}
-
-export interface OEmbed {
-  url: string;
-  normalized_url: string;
-  title?: string;
-  summary?: string;
-  provider_name?: string;
-  provider_url?: string;
-  thumbnail_url?: string;
-  author_name?: string;
-  author_url?: string;
-  thumbnail_width?: number;
-  thumbnail_height?: number;
 }
 
 export interface RefMeta extends OEmbed {
