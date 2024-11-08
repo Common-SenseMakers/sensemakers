@@ -135,10 +135,10 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
     query = filterByIn(query, originKey, queryParams.origins);
 
-    query = filterByEqual(
+    query = filterByArrayContainsAny(
       query,
-      `${structuredSemanticsKey}.${topicKey}`,
-      queryParams.semantics?.topic
+      `${structuredSemanticsKey}.${refsKey}`,
+      queryParams.semantics?.refs
     );
 
     query = filterByArrayContainsAny(
@@ -153,10 +153,10 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       queryParams.semantics?.keywords
     );
 
-    query = filterByArrayContainsAny(
+    query = filterByEqual(
       query,
-      `${structuredSemanticsKey}.${refsKey}`,
-      queryParams.semantics?.refs
+      `${structuredSemanticsKey}.${topicKey}`,
+      queryParams.semantics?.topic
     );
 
     /** get the sinceCreatedAt and untilCreatedAt timestamps from the elements ids */
