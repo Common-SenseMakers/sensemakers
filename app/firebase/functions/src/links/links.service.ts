@@ -51,7 +51,7 @@ export class LinksService {
     this.links.set(hashAndNormalizeUrl(oembed.url), oembed, manager);
   }
 
-  async setPostWithRef(
+  async setRefPost(
     url: string,
     postData: RefPostData,
     manager: TransactionManager
@@ -61,11 +61,20 @@ export class LinksService {
       ...postData,
     };
 
-    await this.links.setPostRef(linkId, postRef, manager);
+    await this.links.setRefPost(linkId, postRef, manager);
   }
 
-  async getPostsWithRef(url: string, manager: TransactionManager) {
+  async getRefPosts(url: string, manager: TransactionManager) {
     const linkId = hashAndNormalizeUrl(url);
-    return this.links.getPostRefs(linkId, manager);
+    return this.links.getRefPosts(linkId, manager);
+  }
+
+  async deleteRefPost(
+    url: string,
+    postId: string,
+    manager: TransactionManager
+  ) {
+    const linkId = hashAndNormalizeUrl(url);
+    return this.links.deleteRefPost(linkId, postId, manager);
   }
 }

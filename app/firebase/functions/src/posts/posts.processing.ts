@@ -14,6 +14,7 @@ import {
   AppPostParsingStatus,
   StructuredSemantics,
 } from '../@shared/types/types.posts';
+import { RefPostData } from '../@shared/types/types.references';
 import { DefinedIfTrue } from '../@shared/types/types.user';
 import { mapStoreElements, parseRDF } from '../@shared/utils/n3.utils';
 import {
@@ -215,12 +216,16 @@ export class PostsProcessing {
       }
     });
 
-    /** update labels refsMeta */
-
+    /** get reference meta and store post in reference subcollections */
     await Promise.all(
       Array.from(Object.keys(refsLabels)).map(async (reference) => {
         const url = reference;
         const refMeta = await this.getRefMeta(url, manager, originalParsed);
+        const refPostData: RefPostData = { ...post };
+        /** always delete all labels from a post for a reference */
+        await this.linksService.deleteRefPost(url, postId, manager);
+
+        await this.linksService.setRefPost(url, refPostData, manager);
 
         refsMeta[url] = { ...refMeta, labels: refsLabels[url] || undefined };
       })
