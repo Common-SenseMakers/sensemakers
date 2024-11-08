@@ -1,6 +1,6 @@
 import { anything, instance, spy, when } from 'ts-mockito';
 
-import { OEmbed } from '../@shared/types/types.parser';
+import { OEmbed } from '../@shared/types/types.references';
 import { TransactionManager } from '../db/transaction.manager';
 import { LinksMockConfig, LinksService } from './links.service';
 import { normalizeUrl } from './links.utils';
