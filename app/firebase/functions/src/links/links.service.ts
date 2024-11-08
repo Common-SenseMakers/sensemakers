@@ -4,6 +4,7 @@ import { LinksRepository } from './links.repository';
 
 export interface LinksMockConfig {
   get: boolean;
+  enable?: boolean;
 }
 
 export interface LinksConfig {

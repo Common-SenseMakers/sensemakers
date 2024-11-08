@@ -165,7 +165,7 @@ export const createServices = (
   );
 
   const _linksService = new LinksService(linksRepo, config.links);
-  const linksService = getLinksMock(_linksService, { enable: true });
+  const linksService = getLinksMock(_linksService, { get: true, enable: true });
 
   /** posts service */
   const postsProcessing = new PostsProcessing(

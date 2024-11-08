@@ -15,6 +15,7 @@ import { FeedService } from '../../src/feed/feed.service';
 import { Services } from '../../src/instances/services';
 import { LinksRepository } from '../../src/links/links.repository';
 import { LinksMockConfig, LinksService } from '../../src/links/links.service';
+import { getLinksMock } from '../../src/links/links.service.mock';
 import {
   ParserMockConfig,
   getParserMock,
@@ -168,10 +169,11 @@ export const getTestServices = (config: TestServicesConfig) => {
   const parser = getParserMock(_parser, config.parser);
 
   /** links */
-  const linksService = new LinksService(linksRepo, {
+  const _linksService = new LinksService(linksRepo, {
     apiKey: process.env.IFRAMELY_API_KEY as string,
     apiUrl: process.env.IFRAMELY_API_URL as string,
   });
+  const linksService = getLinksMock(_linksService, config.links);
 
   /** posts service */
   const postsProcessing = new PostsProcessing(

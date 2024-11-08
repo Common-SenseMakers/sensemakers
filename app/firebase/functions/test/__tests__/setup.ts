@@ -55,6 +55,7 @@ export let globalTestServices = getTestServices({
     ? undefined
     : {
         get: true,
+        enable: true,
       },
 });
 

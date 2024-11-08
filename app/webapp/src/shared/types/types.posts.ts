@@ -28,8 +28,16 @@ export interface GenericThread {
 export interface StructuredSemantics {
   labels?: string[];
   keywords?: string[];
+  refs?: string[];
   refsMeta?: Record<string, RefMeta>;
   topics?: string[];
+}
+
+export interface RefLabel {
+  label: string;
+  authorId?: string;
+  postId?: string;
+  platformPostUrl?: string;
 }
 
 export type ArrayIncludeQuery = string[];
@@ -79,6 +87,11 @@ interface AppPostBase {
 export interface AppPost extends AppPostBase {
   structuredSemantics?: StructuredSemantics;
 }
+export interface AppPostRead extends AppPost {
+  meta?: {
+    refLabels: Record<string, RefLabel[]>;
+  };
+}
 
 export type AppPostCreate = Omit<AppPost, 'id'>;
 
@@ -87,7 +100,7 @@ export type AppPostCreate = Omit<AppPost, 'id'>;
  * author profile (including credentials). Useful to transfer publishing
  * information between services
  * */
-export interface AppPostFull extends Omit<AppPost, 'mirrorsIds'> {
+export interface AppPostFull extends Omit<AppPostRead, 'mirrorsIds'> {
   mirrors: PlatformPost[];
 }
 
@@ -139,6 +152,7 @@ export interface PostsQueryParams {
   profileIds?: string;
   origins?: ArrayIncludeQuery;
   semantics?: StructuredSemanticsQuery;
+  includeAggregateLabels?: boolean;
 }
 
 export interface PostsQuery extends PostsQueryParams {

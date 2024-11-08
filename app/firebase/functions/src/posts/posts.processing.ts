@@ -18,7 +18,9 @@ import { DefinedIfTrue } from '../@shared/types/types.user';
 import { mapStoreElements, parseRDF } from '../@shared/utils/n3.utils';
 import {
   HAS_KEYWORD_URI,
+  HAS_RDF_SYNTAX_TYPE_URI,
   HAS_TOPIC_URI,
+  HAS_ZOTERO_REFERENCE_TYPE_URI,
 } from '../@shared/utils/semantics.helper';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
@@ -177,6 +179,7 @@ export class PostsProcessing {
     const keywords: Set<string> = new Set();
     const refsMeta: Record<string, RefMeta> = {};
     const topics: Set<string> = new Set();
+    const refsLabels: Record<string, string[]> = {};
 
     mapStoreElements(store, (q) => {
       /** store the triples */
@@ -198,8 +201,16 @@ export class PostsProcessing {
         if (q.predicate.value === HAS_TOPIC_URI) {
           topics.add(q.object.value);
         } else {
-          // non kewyords or is-a, ar marked as ref labels
-          labels.add(q.predicate.value);
+          // non kewyords or is-a, are marked as ref labels
+          const reference = q.object.value;
+          const label = q.predicate.value;
+          if (
+            label !== HAS_ZOTERO_REFERENCE_TYPE_URI &&
+            label !== HAS_RDF_SYNTAX_TYPE_URI
+          ) {
+            labels.add(label);
+            refsLabels[reference] = [...(refsLabels[reference] || []), label];
+          }
         }
       }
     });
@@ -207,11 +218,11 @@ export class PostsProcessing {
     /** update labels refsMeta */
 
     await Promise.all(
-      Array.from(labels).map(async (label) => {
-        const url = label;
+      Array.from(Object.keys(refsLabels)).map(async (reference) => {
+        const url = reference;
         const refMeta = await this.getRefMeta(url, manager, originalParsed);
 
-        refsMeta[url] = refMeta;
+        refsMeta[url] = { ...refMeta, labels: refsLabels[url] || undefined };
       })
     );
 
@@ -220,6 +231,7 @@ export class PostsProcessing {
       keywords: Array.from(keywords),
       topics: Array.from(topics),
       refsMeta,
+      refs: Object.keys(refsMeta),
     };
   }
 
