@@ -122,7 +122,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     // const urlKey: keyof RefMeta = 'url';
 
     const labelsKey: keyof StructuredSemantics = 'labels';
-    const topicsKey: keyof StructuredSemantics = 'topics';
+    const topicKey: keyof StructuredSemantics = 'topic';
     const refsKey: keyof StructuredSemantics = 'refs';
 
     if (DEBUG) logger.debug('getMany', queryParams, DEBUG_PREFIX);
@@ -135,10 +135,10 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
     query = filterByIn(query, originKey, queryParams.origins);
 
-    query = filterByArrayContainsAny(
+    query = filterByEqual(
       query,
-      `${structuredSemanticsKey}.${topicsKey}`,
-      queryParams.semantics?.topics
+      `${structuredSemanticsKey}.${topicKey}`,
+      queryParams.semantics?.topic
     );
 
     query = filterByArrayContainsAny(

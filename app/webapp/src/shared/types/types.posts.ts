@@ -30,7 +30,7 @@ export interface StructuredSemantics {
   keywords?: string[];
   refs?: string[];
   refsMeta?: Record<string, RefMeta>;
-  topics?: string[];
+  topic?: string;
 }
 
 export interface RefLabel {
@@ -46,7 +46,7 @@ export interface StructuredSemanticsQuery {
   labels?: ArrayIncludeQuery;
   keywords?: ArrayIncludeQuery;
   refs?: ArrayIncludeQuery;
-  topics?: ArrayIncludeQuery;
+  topic?: string;
 }
 
 /**

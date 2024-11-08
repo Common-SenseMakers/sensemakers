@@ -178,8 +178,8 @@ export class PostsProcessing {
     const labels: Set<string> = new Set();
     const keywords: Set<string> = new Set();
     const refsMeta: Record<string, RefMeta> = {};
-    const topics: Set<string> = new Set();
     const refsLabels: Record<string, string[]> = {};
+    let topic: string | undefined = undefined;
 
     mapStoreElements(store, (q) => {
       /** store the triples */
@@ -199,7 +199,7 @@ export class PostsProcessing {
         keywords.add(q.object.value);
       } else {
         if (q.predicate.value === HAS_TOPIC_URI) {
-          topics.add(q.object.value);
+          topic = q.object.value;
         } else {
           // non kewyords or is-a, are marked as ref labels
           const reference = q.object.value;
@@ -229,7 +229,7 @@ export class PostsProcessing {
     return {
       labels: Array.from(labels),
       keywords: Array.from(keywords),
-      topics: Array.from(topics),
+      topic,
       refsMeta,
       refs: Object.keys(refsMeta),
     };
