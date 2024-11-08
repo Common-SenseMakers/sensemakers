@@ -5,6 +5,7 @@ import {
   AppPostSemantics,
   ParsePostResult,
 } from '../../shared/types/types.parser';
+import { AppPostFull } from '../../shared/types/types.posts';
 import { KeywordsComponent } from './keywords/Keywords.component';
 import { RefLabelsComponent } from './refs-labels/RefsLabels.component';
 
@@ -20,6 +21,7 @@ export interface PatternProps {
   originalParsed?: ParsePostResult;
   semantics?: AppPostSemantics;
   semanticsUpdated?: (semantics: AppPostSemantics) => void;
+  post?: AppPostFull;
 }
 
 export const patternsLib: Record<

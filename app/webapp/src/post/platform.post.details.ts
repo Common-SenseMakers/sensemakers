@@ -21,7 +21,7 @@ export const getPostDetails = (
   post?: AppPostFull,
   platformId?: PLATFORM
 ): GenericPlatformPostDetails | undefined => {
-  const platformPost = post?.mirrors.find(
+  const platformPost = post?.mirrors?.find(
     (m) => m.platformId === (platformId ? platformId : post.origin)
   );
   const platformPostDetails = getPlatformPostDetails(platformPost);

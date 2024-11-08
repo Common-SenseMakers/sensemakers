@@ -65,7 +65,13 @@ export const RefCard = (props: {
       </Paragraph>
 
       <Box style={{ overflow: 'hidden' }}>
-        <Text style={{ fontSize: '16px', color: '#337FBD', fontWeight: '400' }}>
+        <Text
+          style={{
+            fontSize: '16px',
+            color: '#337FBD',
+            fontWeight: '400',
+            lineBreak: 'anywhere',
+          }}>
           {urlTruncated}
         </Text>
       </Box>

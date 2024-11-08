@@ -18,7 +18,10 @@ import { DefinedIfTrue } from '../@shared/types/types.user';
 import { mapStoreElements, parseRDF } from '../@shared/utils/n3.utils';
 import {
   HAS_KEYWORD_URI,
+  HAS_RDF_SYNTAX_TYPE_URI,
   HAS_TOPIC_URI,
+  HAS_ZOTERO_REFERENCE_TYPE_URI,
+  THIS_POST_NAME_URI,
 } from '../@shared/utils/semantics.helper';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
@@ -176,7 +179,8 @@ export class PostsProcessing {
     const labels: Set<string> = new Set();
     const keywords: Set<string> = new Set();
     const refsMeta: Record<string, RefMeta> = {};
-    const topics: Set<string> = new Set();
+    const refsLabels: Record<string, string[]> = {};
+    let topic: string | undefined = undefined;
 
     mapStoreElements(store, (q) => {
       /** store the triples */
@@ -196,10 +200,20 @@ export class PostsProcessing {
         keywords.add(q.object.value);
       } else {
         if (q.predicate.value === HAS_TOPIC_URI) {
-          topics.add(q.object.value);
+          topic = q.object.value;
         } else {
-          // non kewyords or is-a, ar marked as ref labels
-          labels.add(q.predicate.value);
+          // non kewyords or is-a, are marked as ref labels
+          const subject = q.subject.value;
+          const reference = q.object.value;
+          const label = q.predicate.value;
+          if (
+            subject === THIS_POST_NAME_URI &&
+            label !== HAS_ZOTERO_REFERENCE_TYPE_URI &&
+            label !== HAS_RDF_SYNTAX_TYPE_URI
+          ) {
+            labels.add(label);
+            refsLabels[reference] = [...(refsLabels[reference] || []), label];
+          }
         }
       }
     });
@@ -207,19 +221,20 @@ export class PostsProcessing {
     /** update labels refsMeta */
 
     await Promise.all(
-      Array.from(labels).map(async (label) => {
-        const url = label;
+      Array.from(Object.keys(refsLabels)).map(async (reference) => {
+        const url = reference;
         const refMeta = await this.getRefMeta(url, manager, originalParsed);
 
-        refsMeta[url] = refMeta;
+        refsMeta[url] = { ...refMeta, labels: refsLabels[url] || undefined };
       })
     );
 
     return {
       labels: Array.from(labels),
       keywords: Array.from(keywords),
-      topics: Array.from(topics),
+      topic,
       refsMeta,
+      refs: Object.keys(refsMeta),
     };
   }
 
@@ -243,6 +258,36 @@ export class PostsProcessing {
     return post;
   }
 
+  /** fill post to Full */
+  async hydratePostFull(
+    post: AppPost,
+    addMirrors: boolean,
+    addAggregatedLabels: boolean,
+    manager: TransactionManager
+  ): Promise<AppPostFull> {
+    const postFull: AppPostFull = post;
+
+    if (addMirrors) {
+      const mirrors = await Promise.all(
+        post.mirrorsIds.map((mirrorId) =>
+          this.platformPosts.get(mirrorId, manager)
+        )
+      );
+      postFull.mirrors = mirrors.filter(
+        (m) => m !== undefined
+      ) as PlatformPost[];
+    }
+
+    if (addAggregatedLabels && post.structuredSemantics?.refs) {
+      const refLabels = await this.posts.getAggregatedRefLabels(
+        post.structuredSemantics.refs
+      );
+      postFull.meta = { refLabels };
+    }
+
+    return postFull;
+  }
+
   /** get AppPostFull */
   async getPostFull<T extends boolean, R = AppPostFull>(
     postId: string,
@@ -259,16 +304,9 @@ export class PostsProcessing {
       return undefined as DefinedIfTrue<T, R>;
     }
 
-    const mirrors = await Promise.all(
-      post.mirrorsIds.map((mirrorId) =>
-        this.platformPosts.get(mirrorId, manager)
-      )
-    );
+    const postFull = await this.hydratePostFull(post, true, true, manager);
 
-    return {
-      ...post,
-      mirrors: mirrors.filter((m) => m !== undefined) as PlatformPost[],
-    } as unknown as DefinedIfTrue<T, R>;
+    return postFull as unknown as DefinedIfTrue<T, R>;
   }
 
   async getFrom_post_id<T extends boolean, R = AppPost>(

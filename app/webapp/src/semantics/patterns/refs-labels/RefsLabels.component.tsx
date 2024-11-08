@@ -99,21 +99,24 @@ export const RefLabelsComponent = (props: PatternProps) => {
                 throw new Error('Unexpected undefined');
 
               return (
-                <RefWithLabels
-                  ix={index}
-                  showLabels={true}
-                  editable={props.editable}
-                  key={ref}
-                  refUrl={ref}
-                  refData={refData}
-                  support={props.originalParsed?.support}
-                  removeLabel={(labelUri: string) => {
-                    removeLabel(ref, labelUri).catch(console.error);
-                  }}
-                  addLabel={(labelUri: string) => {
-                    addLabel(ref, labelUri).catch(console.error);
-                  }}
-                  allRefs={visibleRefs}></RefWithLabels>
+                <>
+                  <RefWithLabels
+                    ix={index}
+                    showLabels={true}
+                    editable={props.editable}
+                    key={ref}
+                    refUrl={ref}
+                    refData={refData}
+                    support={props.originalParsed?.support}
+                    post={props.post}
+                    removeLabel={(labelUri: string) => {
+                      removeLabel(ref, labelUri).catch(console.error);
+                    }}
+                    addLabel={(labelUri: string) => {
+                      addLabel(ref, labelUri).catch(console.error);
+                    }}
+                    allRefs={visibleRefs}></RefWithLabels>
+                </>
               );
             })}
           </Box>

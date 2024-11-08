@@ -28,8 +28,16 @@ export interface GenericThread {
 export interface StructuredSemantics {
   labels?: string[];
   keywords?: string[];
+  refs?: string[];
   refsMeta?: Record<string, RefMeta>;
-  topics?: string[];
+  topic?: string;
+}
+
+export interface RefLabel {
+  label: string;
+  postId?: string;
+  authorProfileId?: string;
+  platformPostUrl?: string;
 }
 
 export type ArrayIncludeQuery = string[];
@@ -38,7 +46,7 @@ export interface StructuredSemanticsQuery {
   labels?: ArrayIncludeQuery;
   keywords?: ArrayIncludeQuery;
   refs?: ArrayIncludeQuery;
-  topics?: ArrayIncludeQuery;
+  topic?: string;
 }
 
 /**
@@ -80,6 +88,13 @@ export interface AppPost extends AppPostBase {
   structuredSemantics?: StructuredSemantics;
 }
 
+export interface PostSemanticsMeta {
+  refLabels: Record<string, RefLabel[]>;
+}
+export interface AppPostRead extends AppPost {
+  meta?: PostSemanticsMeta;
+}
+
 export type AppPostCreate = Omit<AppPost, 'id'>;
 
 /**
@@ -87,8 +102,8 @@ export type AppPostCreate = Omit<AppPost, 'id'>;
  * author profile (including credentials). Useful to transfer publishing
  * information between services
  * */
-export interface AppPostFull extends Omit<AppPost, 'mirrorsIds'> {
-  mirrors: PlatformPost[];
+export interface AppPostFull extends Omit<AppPostRead, 'mirrorsIds'> {
+  mirrors?: PlatformPost[];
 }
 
 export interface PostAndAuthor {
@@ -139,6 +154,7 @@ export interface PostsQueryParams {
   profileIds?: string;
   origins?: ArrayIncludeQuery;
   semantics?: StructuredSemanticsQuery;
+  includeAggregateLabels?: boolean;
 }
 
 export interface PostsQuery extends PostsQueryParams {
@@ -159,4 +175,9 @@ export interface MastodonGetContextParams {
   mastodonServer: string;
   callback_url: string;
   type: 'read' | 'write';
+}
+
+export interface GetPostPayload {
+  postId: string;
+  includeAggregateLabels?: boolean;
 }

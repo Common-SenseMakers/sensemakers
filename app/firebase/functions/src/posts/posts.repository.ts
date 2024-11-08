@@ -3,6 +3,7 @@ import { logger } from 'firebase-functions/v1';
 
 import {
   ArrayIncludeQuery,
+  RefLabel,
   StructuredSemantics,
 } from '../@shared/types/types.posts';
 import {
@@ -120,7 +121,8 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     // const urlKey: keyof RefMeta = 'url';
 
     const labelsKey: keyof StructuredSemantics = 'labels';
-    const topicsKey: keyof StructuredSemantics = 'topics';
+    const topicKey: keyof StructuredSemantics = 'topic';
+    const refsKey: keyof StructuredSemantics = 'refs';
 
     if (DEBUG) logger.debug('getMany', queryParams, DEBUG_PREFIX);
 
@@ -134,8 +136,8 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
     query = filterByArrayContainsAny(
       query,
-      `${structuredSemanticsKey}.${topicsKey}`,
-      queryParams.semantics?.topics
+      `${structuredSemanticsKey}.${refsKey}`,
+      queryParams.semantics?.refs
     );
 
     query = filterByArrayContainsAny(
@@ -148,6 +150,12 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       query,
       `${structuredSemanticsKey}.${keywordsKey}`,
       queryParams.semantics?.keywords
+    );
+
+    query = filterByEqual(
+      query,
+      `${structuredSemanticsKey}.${topicKey}`,
+      queryParams.semantics?.topic
     );
 
     /** get the sinceCreatedAt and untilCreatedAt timestamps from the elements ids */
@@ -191,12 +199,46 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       .limit(queryParams.fetchParams.expectedAmount)
       .get();
 
-    const appPosts = posts.docs.map((doc) => ({
+    let appPosts = posts.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     })) as AppPost[];
 
     return appPosts.sort((a, b) => b.createdAtMs - a.createdAtMs);
+  }
+
+  public async getAggregatedRefLabels(
+    references: string[]
+  ): Promise<Record<string, RefLabel[]>> {
+    const refsStats: Record<string, RefLabel[]> = {};
+
+    const referencePosts = await this.getMany({
+      semantics: { refs: references },
+      fetchParams: { expectedAmount: 100 },
+    });
+
+    referencePosts.forEach((referencePost) => {
+      references.forEach((reference) => {
+        if (referencePost.structuredSemantics?.refsMeta) {
+          const refMeta = referencePost.structuredSemantics.refsMeta[reference];
+          const refLabels = refMeta?.labels?.map(
+            (label): RefLabel => ({
+              label,
+              postId: referencePost.id,
+              authorProfileId: referencePost.authorProfileId,
+              platformPostUrl: referencePost.generic.thread[0].url,
+            })
+          );
+          const updatedLabels = [
+            ...(refsStats[reference] || []),
+            ...(refLabels || []),
+          ];
+          refsStats[reference] = updatedLabels;
+        }
+      });
+    });
+
+    return refsStats;
   }
 
   public async getAllOfQuery(queryParams: PostsQueryDefined, limit?: number) {

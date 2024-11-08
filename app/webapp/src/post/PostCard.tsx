@@ -135,6 +135,7 @@ export const PostCard = (props: {
                 editable: false,
                 semantics: post?.semantics,
                 originalParsed: post?.originalParsed,
+                post,
               }}></SemanticsEditor>
           </Box>
         )}

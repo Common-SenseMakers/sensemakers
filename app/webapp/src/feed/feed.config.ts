@@ -1,8 +1,11 @@
+import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
+
 export interface FeedTabConfig {
   id: string;
   title: string;
   tooltip: string;
   labels: string[];
+  topic?: string;
 }
 
 export const feedTabs: FeedTabConfig[] = [
@@ -25,6 +28,7 @@ export const feedTabs: FeedTabConfig[] = [
       'https://sense-nets.xyz/indicatesInterest',
       'http://purl.org/spar/cito/agreesWith',
     ],
+    topic: SCIENCE_TOPIC_URI,
   },
   {
     id: 'new-research',
@@ -34,6 +38,7 @@ export const feedTabs: FeedTabConfig[] = [
       'https://sense-nets.xyz/announcesResource',
       'https://sense-nets.xyz/summarizes',
     ],
+    topic: SCIENCE_TOPIC_URI,
   },
   {
     id: 'opportunities',
@@ -45,6 +50,7 @@ export const feedTabs: FeedTabConfig[] = [
       'https://sense-nets.xyz/mentionsCallForPapers',
       'https://sense-nets.xyz/mentionsFundingOpportunity',
     ],
+    topic: SCIENCE_TOPIC_URI,
   },
   {
     id: 'discussions',
@@ -58,5 +64,6 @@ export const feedTabs: FeedTabConfig[] = [
       'http://purl.org/spar/cito/includesQuotationFrom',
       'http://purl.org/spar/cito/discusses',
     ],
+    topic: SCIENCE_TOPIC_URI,
   },
 ];

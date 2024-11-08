@@ -6,7 +6,6 @@ import {
   TopicsParams,
 } from '../@shared/types/types.parser';
 import {
-  PlatformPost,
   PlatformPostCreate,
   PlatformPostCreated,
   PlatformPostPosted,
@@ -21,9 +20,9 @@ import {
 } from '../@shared/types/types.platforms';
 import {
   AppPost,
-  AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
+  GetPostPayload,
   PostUpdate,
   PostsQuery,
   PostsQueryDefined,
@@ -582,6 +581,11 @@ export class PostsManager {
       throw new Error('userId is required');
     }
 
+    const includeAggregateLabels =
+      _queryParams.includeAggregateLabels !== undefined
+        ? _queryParams.includeAggregateLabels
+        : false;
+
     const queryParams: PostsQueryDefined = {
       fetchParams: {
         ..._queryParams.fetchParams,
@@ -593,7 +597,16 @@ export class PostsManager {
     const appPosts = await this.getAndFetchIfNecessary(queryParams);
 
     const postsFull = await Promise.all(
-      appPosts.map((post) => this.appendMirrors(post))
+      appPosts.map((post) =>
+        this.db.run((manager) =>
+          this.processing.hydratePostFull(
+            post,
+            true,
+            includeAggregateLabels,
+            manager
+          )
+        )
+      )
     );
 
     logger.debug(
@@ -603,30 +616,14 @@ export class PostsManager {
     return postsFull;
   }
 
-  /**
-   * Append full mirrors to AppPost and return AppPostFull
-   * */
-  async appendMirrors(post: AppPost): Promise<AppPostFull> {
-    const mirrors = await Promise.all(
-      post.mirrorsIds.map((mirrorId) => {
-        return this.db.run((manager) =>
-          this.processing.platformPosts.get(mirrorId, manager)
-        );
-      })
-    );
-
-    return {
-      ...post,
-      mirrors: mirrors.filter((m) => m !== undefined) as PlatformPost[],
-    };
-  }
-
   async getPost<T extends boolean>(
-    postId: string,
+    payload: GetPostPayload,
     shouldThrow?: T,
     manager?: TransactionManager
   ) {
     const func = async (manager: TransactionManager) => {
+      const postId = payload.postId;
+
       const post = await this.processing.getPostFull(
         postId,
         manager,

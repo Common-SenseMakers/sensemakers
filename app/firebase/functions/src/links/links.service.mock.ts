@@ -2,11 +2,7 @@ import { anything, instance, spy, when } from 'ts-mockito';
 
 import { OEmbed } from '../@shared/types/types.parser';
 import { TransactionManager } from '../db/transaction.manager';
-import { LinksService } from './links.service';
-
-export interface LinksMockConfig {
-  enable?: boolean;
-}
+import { LinksMockConfig, LinksService } from './links.service';
 
 /**
  * TwitterService mock that publish and fetches posts without really

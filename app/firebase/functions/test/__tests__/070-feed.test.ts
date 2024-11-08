@@ -110,5 +110,63 @@ describe('070 test feed', () => {
       });
       expect(result3).to.have.length(5);
     });
+    it('returns a feed with aggregated reference labels', async () => {
+      if (USE_REAL_TWITTER) {
+        logger.warn(`Feed test disbaled with real twitter`);
+        return;
+      }
+      const { feed } = services;
+      const result1 = await feed.getFeed({
+        fetchParams: { expectedAmount: 10 },
+        semantics: {
+          labels: [
+            'https://sense-nets.xyz/announcesResource',
+            'http://purl.org/spar/cito/discusses',
+          ],
+        },
+        includeAggregateLabels: true,
+      });
+      expect(result1).to.have.length(3);
+      result1.forEach((post) => {
+        expect(post.meta?.refLabels).to.not.be.undefined;
+        post.meta &&
+          expect(Object.keys(post.meta!.refLabels)).to.have.length.greaterThan(
+            0
+          );
+      });
+
+      const result2 = await feed.getFeed({
+        fetchParams: { expectedAmount: 10 },
+        semantics: {
+          labels: [
+            'https://sense-nets.xyz/asksQuestionAbout',
+            'http://purl.org/spar/cito/includesQuotationFrom',
+          ],
+        },
+        includeAggregateLabels: true,
+      });
+      expect(result2).to.have.length(2);
+      result2.forEach((post) => {
+        expect(post.meta?.refLabels).to.not.be.undefined;
+        post.meta &&
+          expect(Object.keys(post.meta.refLabels)).to.have.length.greaterThan(
+            0
+          );
+      });
+
+      const result3 = await feed.getFeed({
+        fetchParams: { expectedAmount: 10 },
+        semantics: { labels: [] },
+        includeAggregateLabels: true,
+      });
+      expect(result3).to.have.length(5);
+      result3.forEach((post) => {
+        expect(post.meta?.refLabels).to.not.be.undefined;
+        post.meta &&
+          expect(Object.keys(post.meta.refLabels)).to.have.length.greaterThan(
+            0
+          );
+      });
+    });
   });
 });

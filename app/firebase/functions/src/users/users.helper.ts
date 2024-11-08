@@ -142,9 +142,11 @@ export class UsersHelper {
       throw new Error('Platform account details for post origin not found');
     }
 
-    const platformPost = post.mirrors.find(
-      (platformPost) => platformPost.platformId === post.origin
-    )?.posted;
+    const platformPost =
+      post.mirrors &&
+      post.mirrors.find(
+        (platformPost) => platformPost.platformId === post.origin
+      )?.posted;
 
     const platformPostId = platformPost?.post_id;
 
