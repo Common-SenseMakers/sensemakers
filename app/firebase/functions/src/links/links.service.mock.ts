@@ -3,6 +3,7 @@ import { anything, instance, spy, when } from 'ts-mockito';
 import { OEmbed } from '../@shared/types/types.parser';
 import { TransactionManager } from '../db/transaction.manager';
 import { LinksMockConfig, LinksService } from './links.service';
+import { normalizeUrl } from './links.utils';
 
 /**
  * TwitterService mock that publish and fetches posts without really
@@ -23,6 +24,7 @@ export const getLinksMock = (
       (url: string, manager: TransactionManager) => {
         const oembed: OEmbed = {
           url,
+          normalized_url: normalizeUrl(url),
         };
         return oembed;
       }

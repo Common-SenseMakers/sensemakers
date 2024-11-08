@@ -1,4 +1,13 @@
-function normalizeUrl(url: string): string {
+import * as crypto from 'crypto';
+
+export function hashAndNormalizeUrl(url: string): string {
+  return hashUrl(normalizeUrl(url));
+}
+
+export function hashUrl(url: string): string {
+  return crypto.createHash('md5').update(url).digest('hex');
+}
+export function normalizeUrl(url: string): string {
   let normalizedUrl = url.toLowerCase(); // Convert to lowercase
 
   const urlObj = new URL(`http://${normalizedUrl}`); // Add temporary protocol for parsing

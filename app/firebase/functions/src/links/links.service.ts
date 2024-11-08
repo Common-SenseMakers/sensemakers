@@ -1,6 +1,7 @@
 import { OEmbed, RefMeta } from '../@shared/types/types.parser';
 import { TransactionManager } from '../db/transaction.manager';
 import { LinksRepository } from './links.repository';
+import { hashAndNormalizeUrl, hashUrl, normalizeUrl } from './links.utils';
 
 export interface LinksMockConfig {
   get: boolean;
@@ -34,16 +35,18 @@ export class LinksService {
   }
 
   async getOEmbed(url: string, manager: TransactionManager): Promise<OEmbed> {
-    const existing = await this.links.get(url, manager);
+    const normalizedUrl = normalizeUrl(url);
+    const urlHash = hashUrl(normalizedUrl);
+    const existing = await this.links.get(urlHash, manager);
     if (existing) return existing;
 
-    const oembed = await this.fetchOEmbed(url);
-    this.links.set(url, oembed, manager);
+    const oembed = await this.fetchOEmbed(normalizedUrl);
+    this.links.set(urlHash, oembed, manager);
 
     return oembed;
   }
 
   async setOEmbed(oembed: OEmbed, manager: TransactionManager) {
-    this.links.set(oembed.url, oembed, manager);
+    this.links.set(hashAndNormalizeUrl(oembed.url), oembed, manager);
   }
 }
