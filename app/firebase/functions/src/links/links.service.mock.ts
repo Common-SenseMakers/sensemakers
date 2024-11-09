@@ -22,8 +22,8 @@ export const getLinksMock = (
   if (type.enable) {
     when(mocked.fetchOEmbed(anything())).thenCall((url: string) => {
       const oembed: OEmbed = {
-        url,
-        normalized_url: normalizeUrl(url),
+        original_url: url,
+        url: normalizeUrl(url),
       };
       return oembed;
     });

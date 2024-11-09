@@ -2,7 +2,7 @@ import { AppPost } from './types.posts';
 
 export interface OEmbed {
   url: string;
-  normalized_url: string;
+  original_url?: string;
   title?: string;
   summary?: string;
   provider_name?: string;

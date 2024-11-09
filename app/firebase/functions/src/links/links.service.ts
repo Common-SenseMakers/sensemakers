@@ -1,6 +1,7 @@
 import { RefMeta } from '../@shared/types/types.parser';
 import { OEmbed, RefPostData } from '../@shared/types/types.references';
 import { TransactionManager } from '../db/transaction.manager';
+import { logger } from '../instances/logger';
 import { LinksRepository } from './links.repository';
 import { hashAndNormalizeUrl, hashUrl, normalizeUrl } from './links.utils';
 
@@ -21,17 +22,19 @@ export class LinksService {
   ) {}
 
   async fetchOEmbed(url: string): Promise<RefMeta> {
+    const normalizedUrl = normalizeUrl(url);
     try {
       const res = await fetch(
-        `${this.config.apiUrl}/oembed?url=${encodeURIComponent(url)}&api_key=${this.config.apiKey}`,
+        `${this.config.apiUrl}/oembed?url=${encodeURIComponent(normalizedUrl)}&api_key=${this.config.apiKey}`,
         {
           headers: [['Content-Type', 'application/json']],
           method: 'get',
         }
       );
-      return await res.json();
+      return await { ...res.json(), original_url: url };
     } catch (e) {
-      throw new Error(`Error fetching ref ${url} meta: ${e}`);
+      logger.warn(`Error fetching ref ${url} meta: ${e}`);
+      return { original_url: url, url: normalizedUrl };
     }
   }
 
@@ -41,7 +44,7 @@ export class LinksService {
     const existing = await this.links.get(urlHash, manager);
     if (existing) return existing;
 
-    const oembed = await this.fetchOEmbed(normalizedUrl);
+    const oembed = await this.fetchOEmbed(url);
     this.links.set(urlHash, oembed, manager);
 
     return oembed;
