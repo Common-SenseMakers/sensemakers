@@ -23,10 +23,12 @@ import {
   HAS_TOPIC_URI,
   HAS_ZOTERO_REFERENCE_TYPE_URI,
   THIS_POST_NAME_URI,
+  THIS_POST_NAME_URI_PLACEHOLDER,
 } from '../@shared/utils/semantics.helper';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { LinksService } from '../links/links.service';
+import { normalizeUrl } from '../links/links.utils';
 import { PlatformsService } from '../platforms/platforms.service';
 import { getProfileId } from '../profiles/profiles.repository';
 import { TriplesRepository } from '../semantics/triples.repository';
@@ -208,7 +210,8 @@ export class PostsProcessing {
           const reference = q.object.value;
           const label = q.predicate.value;
           if (
-            subject === THIS_POST_NAME_URI &&
+            (subject === THIS_POST_NAME_URI ||
+              subject === THIS_POST_NAME_URI_PLACEHOLDER) &&
             label !== HAS_ZOTERO_REFERENCE_TYPE_URI &&
             label !== HAS_RDF_SYNTAX_TYPE_URI
           ) {
@@ -234,8 +237,12 @@ export class PostsProcessing {
         await this.linksService.deleteRefPost(url, postId, manager);
 
         await this.linksService.setRefPost(url, refPostData, manager);
+        const normalizedUrl = normalizeUrl(url);
 
-        refsMeta[url] = { ...refMeta, labels: refsLabels[url] || undefined };
+        refsMeta[normalizedUrl] = {
+          ...refMeta,
+          labels: refsLabels[url] || undefined,
+        };
       })
     );
 
