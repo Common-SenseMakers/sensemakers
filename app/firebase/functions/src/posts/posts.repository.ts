@@ -244,32 +244,44 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   ): Promise<Record<string, RefLabel[]>> {
     const refsStats: Record<string, RefLabel[]> = {};
 
-    const referencePosts = await this.getMany({
-      semantics: { refs: references },
-      fetchParams: { expectedAmount: 100 },
-    });
+    // Get all posts for each reference from their respective subcollections
+    const postsPromises = references.map(async (reference) => {
+      const linkId = hashAndNormalizeUrl(reference);
+      const linkPosts = await this.db.collections.links
+        .doc(linkId)
+        .collection(CollectionNames.LinkPostsSubcollection)
+        .get();
 
-    referencePosts.forEach((referencePost) => {
-      references.forEach((reference) => {
-        if (referencePost.structuredSemantics?.refsMeta) {
-          const refMeta = referencePost.structuredSemantics.refsMeta[reference];
+      // Get the full post data for each reference
+      const postRefs = linkPosts.docs.map(doc => 
+        this.db.collections.posts.doc(doc.id)
+      );
+      const fullPosts = await this.db.firestore.getAll(...postRefs);
+      
+      // Process each post's labels for this reference
+      fullPosts.forEach(postDoc => {
+        const post = postDoc.data() as AppPost;
+        if (post?.structuredSemantics?.refsMeta) {
+          const refMeta = post.structuredSemantics.refsMeta[reference];
           const refLabels = refMeta?.labels?.map(
             (label): RefLabel => ({
               label,
-              postId: referencePost.id,
-              authorProfileId: referencePost.authorProfileId,
-              platformPostUrl: referencePost.generic.thread[0].url,
+              postId: postDoc.id,
+              authorProfileId: post.authorProfileId,
+              platformPostUrl: post.generic.thread[0].url,
             })
           );
-          const updatedLabels = [
-            ...(refsStats[reference] || []),
-            ...(refLabels || []),
-          ];
-          refsStats[reference] = updatedLabels;
+          if (refLabels) {
+            refsStats[reference] = [
+              ...(refsStats[reference] || []),
+              ...refLabels
+            ];
+          }
         }
       });
     });
 
+    await Promise.all(postsPromises);
     return refsStats;
   }
 
