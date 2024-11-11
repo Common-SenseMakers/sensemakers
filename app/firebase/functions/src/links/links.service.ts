@@ -17,7 +17,7 @@ export interface LinksConfig {
 
 export class LinksService {
   constructor(
-    public links: LinksRepository,
+    protected links: LinksRepository,
     protected config: LinksConfig
   ) {}
 

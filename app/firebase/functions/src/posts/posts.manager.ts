@@ -777,8 +777,7 @@ export class PostsManager {
       await this.processing.processSemantics(
         postId,
         manager,
-        postUpdated.semantics,
-        postUpdated.originalParsed
+        postUpdated.semantics
       );
     }
   }

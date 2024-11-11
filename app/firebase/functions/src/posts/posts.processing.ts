@@ -28,7 +28,7 @@ import {
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { LinksService } from '../links/links.service';
-import { hashAndNormalizeUrl, normalizeUrl } from '../links/links.utils';
+import { normalizeUrl } from '../links/links.utils';
 import { PlatformsService } from '../platforms/platforms.service';
 import { getProfileId } from '../profiles/profiles.repository';
 import { TriplesRepository } from '../semantics/triples.repository';
@@ -143,22 +143,23 @@ export class PostsProcessing {
       originalParsed?.support?.refs_meta &&
       originalParsed?.support?.refs_meta[url];
 
-    /** store/update refMeta */
-    const oembed = {
-      url: normalizeUrl(url),
-      original_url: url,
-      title: refMetaOrg?.title,
-      summary: refMetaOrg?.summary,
-    };
-    const linkDoc = await this.linksService.links.get(
-      hashAndNormalizeUrl(url),
-      manager
-    );
-    if (!linkDoc?.title || !linkDoc?.summary) {
-      this.linksService.setOEmbed(oembed, manager);
-      return oembed;
+    const isPartial =
+      !refMetaOrg ||
+      !refMetaOrg.title ||
+      !refMetaOrg.summary ||
+      !refMetaOrg.url;
+
+    if (isPartial) {
+      const oembed = await this.linksService.getOEmbed(url, manager);
+      return {
+        ...oembed,
+        item_type: refMetaOrg?.item_type,
+      };
+    } else {
+      /** store/update refMeta */
+      this.linksService.setOEmbed(refMetaOrg, manager);
+      return refMetaOrg;
     }
-    return linkDoc;
   }
 
   async processSemantics(
@@ -234,7 +235,7 @@ export class PostsProcessing {
           platformPostUrl: post.generic.thread[0].url,
         });
         /** always delete all labels from a post for a reference */
-        await this.linksService.deleteRefPost(url, post.id, manager);
+        await this.linksService.deleteRefPost(url, postId, manager);
 
         await this.linksService.setRefPost(url, refPostData, manager);
         const normalizedUrl = normalizeUrl(url);
