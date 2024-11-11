@@ -167,7 +167,7 @@ export class PostsProcessing {
     manager: TransactionManager,
     semantics?: string,
     originalParsed?: ParsePostResult
-  ): Promise<StructuredSemantics | undefined> {
+  ): Promise<void> {
     /** always delete old triples */
     await this.triples.deleteOfPost(postId, manager);
 
@@ -247,13 +247,15 @@ export class PostsProcessing {
       })
     );
 
-    return {
+    const structuredSemantics: StructuredSemantics = {
       labels: Array.from(labels),
       keywords: Array.from(keywords),
       topic,
       refsMeta,
       refs: Object.keys(refsMeta),
     };
+
+    await this.posts.update(postId, { structuredSemantics }, manager);
   }
 
   async createAppPost(

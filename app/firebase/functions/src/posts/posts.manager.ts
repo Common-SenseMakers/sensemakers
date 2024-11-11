@@ -767,21 +767,17 @@ export class PostsManager {
     if (DEBUG) logger.debug(`updatePost ${postId}`, { postId, postUpdate });
     await this.processing.posts.update(postId, postUpdate, manager);
 
-    /** sync the semantics as triples when the post is updated */
-    const postUpdated = await this.processing.posts.get(postId, manager, true);
-    const structured = await this.processing.processSemantics(
-      postId,
-      manager,
-      postUpdated.semantics
-    );
-
-    if (structured) {
-      if (DEBUG)
-        logger.debug(`updating strucured semantics ${postId}`, structured);
-      await this.processing.posts.update(
+    if (postUpdate.semantics) {
+      /** handle side-effects related to semantics when the post is updated */
+      const postUpdated = await this.processing.posts.get(
         postId,
-        { structuredSemantics: structured },
-        manager
+        manager,
+        true
+      );
+      await this.processing.processSemantics(
+        postId,
+        manager,
+        postUpdated.semantics
       );
     }
   }
