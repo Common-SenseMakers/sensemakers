@@ -30,6 +30,16 @@ export const splitProfileId = (profileId: string) => {
 export class ProfilesRepository {
   constructor(protected db: DBInstance) {}
 
+  public async getAll(): Promise<AccountProfile[]> {
+    const snapshot = await this.db.collections.profiles.get();
+    return snapshot.docs.map((doc) => {
+      return {
+        id: doc.id,
+        ...doc.data(),
+      } as AccountProfile;
+    });
+  }
+
   /**  creates an AccountProfile. It does not set the fetched property */
   public create(
     accountProfile: AccountProfileCreate,

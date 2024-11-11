@@ -34,24 +34,26 @@ export class PostsHelper {
     filters: { platformId: PLATFORM; user_id?: string; post_id?: string },
     shouldThrow?: T
   ): DefinedIfTrue<T, PlatformPost> {
-    const mirror = post.mirrors.find((m) => {
-      let match = m.platformId === filters.platformId;
+    const mirror =
+      post.mirrors &&
+      post.mirrors.find((m) => {
+        let match = m.platformId === filters.platformId;
 
-      if (filters.user_id) {
-        const author_user_id = m.posted
-          ? m.posted.user_id
-          : m.draft
-            ? m.draft.user_id
-            : undefined;
-        match = match && filters.user_id === author_user_id;
-      }
+        if (filters.user_id) {
+          const author_user_id = m.posted
+            ? m.posted.user_id
+            : m.draft
+              ? m.draft.user_id
+              : undefined;
+          match = match && filters.user_id === author_user_id;
+        }
 
-      if (filters.post_id) {
-        match = match && filters.post_id === m.post_id;
-      }
+        if (filters.post_id) {
+          match = match && filters.post_id === m.post_id;
+        }
 
-      return match;
-    });
+        return match;
+      });
 
     if (!mirror) {
       if (shouldThrow) {
