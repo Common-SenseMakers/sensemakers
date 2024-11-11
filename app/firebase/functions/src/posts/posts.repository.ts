@@ -219,21 +219,22 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       .limit(queryParams.fetchParams.expectedAmount)
       .get();
 
-    let appPosts = (await Promise.all(
-      posts.docs.map(async (doc) => {
-        if (useLinksSubcollection) {
-          const appPost = await this.db.collections.posts.doc(doc.id).get();
-          return {
-            id: doc.id,
-            ...appPost.data(),
-          };
-        }
-        return {
+    let appPosts = (await (async () => {
+      if (useLinksSubcollection) {
+        const docRefs = posts.docs.map((doc) =>
+          this.db.collections.posts.doc(doc.id)
+        );
+        const docs = await this.db.firestore.getAll(...docRefs);
+        return docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
-        };
-      })
-    )) as AppPost[];
+        }));
+      }
+      return posts.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+    })()) as AppPost[];
 
     return appPosts.sort((a, b) => b.createdAtMs - a.createdAtMs);
   }
