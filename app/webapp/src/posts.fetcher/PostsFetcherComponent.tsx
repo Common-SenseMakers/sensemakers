@@ -11,6 +11,7 @@ import { PostCard } from '../post/PostCard';
 import { PostCardLoading } from '../post/PostCardLoading';
 import { PostOverlay } from '../post/PostOverlay';
 import { RefOverlay } from '../post/RefOverlay';
+import { UserProfileOverlay } from '../post/UserProfileOverlay';
 import { PostContext } from '../post/post.context/PostContext';
 import {
   PostClickEvent,
@@ -45,6 +46,7 @@ export const PostsFetcherComponent = (props: {
   enableOverlay?: {
     post: boolean;
     ref: boolean;
+    user: boolean;
   };
 }) => {
   const { show } = useToastContext();
@@ -54,8 +56,13 @@ export const PostsFetcherComponent = (props: {
   const [postToShow, setPostToShow] = useState<AppPostFull | undefined>(
     undefined
   );
-
   const [refToShow, setRefToShow] = useState<string | undefined>(undefined);
+  const [userIdToShow, setUserIdToShow] = useState<string | undefined>(
+    undefined
+  );
+  const [profileIdToShow, setProfileIdToShow] = useState<string | undefined>(
+    undefined
+  );
 
   const {
     pageTitle,
@@ -68,7 +75,9 @@ export const PostsFetcherComponent = (props: {
   const isPublicFeed = _isPublicFeed !== undefined ? _isPublicFeed : false;
   const showHeader = _showHeader !== undefined ? _showHeader : true;
   const enableOverlay =
-    _enableOverlay !== undefined ? _enableOverlay : { post: true, ref: false };
+    _enableOverlay !== undefined
+      ? _enableOverlay
+      : { post: true, ref: false, user: false };
 
   const {
     posts,
@@ -131,6 +140,9 @@ export const PostsFetcherComponent = (props: {
 
   const reset = () => {
     setPostToShow(undefined);
+    setProfileIdToShow(undefined);
+    setRefToShow(undefined);
+    setUserIdToShow(undefined);
   };
 
   useOutsideClick(containerRef, () => {
@@ -170,10 +182,26 @@ export const PostsFetcherComponent = (props: {
         setPostToShow(post);
       }
     }
+
     if (event.target === PostClickTarget.REF) {
       if (enableOverlay.ref) {
         if (DEBUG) console.log(`clicked on ref ${event.payload as string}`);
         setRefToShow(event.payload as string);
+      }
+    }
+
+    if (event.target === PostClickTarget.USER_ID) {
+      if (enableOverlay.user) {
+        if (DEBUG) console.log(`clicked on user ${event.payload as string}`);
+        setUserIdToShow(event.payload as string);
+      }
+    }
+
+    if (event.target === PostClickTarget.PLATFORM_USER_ID) {
+      if (enableOverlay.user) {
+        if (DEBUG)
+          console.log(`clicked on platform user ${event.payload as string}`);
+        setProfileIdToShow(event.payload as string);
       }
     }
   };
@@ -303,11 +331,18 @@ export const PostsFetcherComponent = (props: {
     <RefOverlay
       refUrl={refToShow}
       overlayNav={{
-        onBack: () => setRefToShow(undefined),
+        onBack: () => reset(),
       }}></RefOverlay>
   );
 
-  const showOverlay = (showPost || showRef) && (
+  const showProfile = (userIdToShow || profileIdToShow) && (
+    <UserProfileOverlay
+      userId={userIdToShow}
+      profileId={profileIdToShow}
+      overlayNav={{ onBack: () => reset() }}></UserProfileOverlay>
+  );
+
+  const showOverlay = (showPost || showRef || showProfile) && (
     <Box
       style={{
         position: 'absolute',
@@ -316,7 +351,15 @@ export const PostsFetcherComponent = (props: {
         height: '100%',
         width: '100%',
       }}>
-      {showPost ? showPost : showRef ? showRef : <></>}
+      {showPost ? (
+        showPost
+      ) : showRef ? (
+        showRef
+      ) : showProfile ? (
+        showProfile
+      ) : (
+        <></>
+      )}
     </Box>
   );
 

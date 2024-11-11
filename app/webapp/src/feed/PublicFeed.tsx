@@ -47,7 +47,7 @@ export const PublicFeed = () => {
                     float: 'left',
                   }}>
                   <PostsFetcherComponent
-                    enableOverlay={{ post: true, ref: true }}
+                    enableOverlay={{ post: true, ref: true, user: true }}
                     showHeader={false}
                     isPublicFeed={true}
                     feed={feed}

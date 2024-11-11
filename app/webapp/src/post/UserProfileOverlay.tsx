@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Box } from 'grommet';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { useAppFetch } from '../api/app.fetch';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
@@ -8,8 +8,7 @@ import {
   FetcherConfig,
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
-import { RefCard } from '../semantics/patterns/common/RefCard';
-import { RefMeta } from '../shared/types/types.parser';
+import { AccountProfile } from '../shared/types/types.profiles';
 import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
 import { AppHeading } from '../ui-components';
 import { OnOverlayNav, OverlayNav } from './OverlayNav';
@@ -17,23 +16,29 @@ import { OnOverlayNav, OverlayNav } from './OverlayNav';
 const DEBUG = true;
 
 /** extract the postId from the route and pass it to a PostContext */
-export const RefOverlay = (props: {
-  refUrl: string;
+export const UserProfileOverlay = (props: {
+  profileId?: string;
+  userId?: string;
   overlayNav: OnOverlayNav;
 }) => {
   const appFetch = useAppFetch();
-  const { refUrl, overlayNav } = props;
+  const { profileId, userId, overlayNav } = props;
 
-  const { data: refMeta } = useQuery({
-    queryKey: ['ref', refUrl],
+  const { data: profiles } = useQuery({
+    queryKey: ['ref', profileId, userId],
     queryFn: async () => {
       try {
-        if (refUrl) {
-          if (DEBUG) console.log(`fetching ref ${refUrl}`);
-          const refMeta = await appFetch<RefMeta>('/api/refs/get', {
-            ref: refUrl,
+        if (userId) {
+          if (DEBUG) console.log(`fetching profiles of ${userId}`);
+          const profiles = await appFetch<AccountProfile[]>('/api/users/get', {
+            userId,
           });
-          return refMeta;
+          return profiles;
+        } else if (profileId) {
+          const profile = await appFetch<AccountProfile>('/api/profiles/get', {
+            profileId,
+          });
+          return [profile];
         }
       } catch (e) {
         console.error(e);
@@ -42,11 +47,16 @@ export const RefOverlay = (props: {
     },
   });
 
+  useEffect(() => {
+    console.log({ profiles });
+  }, [profiles]);
+
   const feedConfig = useMemo((): FetcherConfig => {
     return {
       endpoint: '/api/feed/get',
       queryParams: {
-        semantics: { refs: [refUrl], topic: SCIENCE_TOPIC_URI },
+        userId: userId,
+        semantics: { topic: SCIENCE_TOPIC_URI },
         includeAggregateLabels: true,
       },
       DEBUG_PREFIX: 'REF FEED',
@@ -65,16 +75,9 @@ export const RefOverlay = (props: {
           flexShrink: 0,
           border: '1.6px solid var(--Neutral-300, #D1D5DB)',
         }}>
-        <AppHeading level="3">Posts about</AppHeading>
-        <RefCard
-          url={refUrl}
-          title={refMeta?.title}
-          description={refMeta?.summary}
-          image={refMeta?.thumbnail_url}
-          refType={refMeta?.item_type}></RefCard>
+        <AppHeading level="3">Posts about {userId}</AppHeading>
       </Box>
       <PostsFetcherComponent
-        enableOverlay={{ post: false, ref: false, user: false }}
         showHeader={false}
         isPublicFeed={true}
         feed={feed}

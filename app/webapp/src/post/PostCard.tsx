@@ -11,21 +11,46 @@ import {
 } from '../semantics/patterns/patterns';
 import { AppPostFull } from '../shared/types/types.posts';
 import { useThemeContext } from '../ui-components/ThemedApp';
-import { PublishButtons } from './PostPublishButtons';
 import { PostTextStatic } from './PostTextStatic';
 import { getPostDetails } from './platform.post.details';
 import { usePost } from './post.context/PostContext';
 import { concatenateThread } from './posts.helper';
 
 const REFS_SEMANTICS_ID = 'refs-semantics';
+const POST_AUTHOR_ID = 'post-author';
 
-const PostCardHeader = (props: { post: AppPostFull }) => {
+const PostCardHeader = (props: {
+  post: AppPostFull;
+  onPostClick?: (event: PostClickEvent) => void;
+}) => {
   const { constants } = useThemeContext();
   const details = getPostDetails(props.post);
 
+  const onUserClicked = () => {
+    if (props.post.authorUserId) {
+      props.onPostClick &&
+        props.onPostClick({
+          target: PostClickTarget.USER_ID,
+          payload: props.post.authorUserId,
+        });
+    }
+
+    if (props.post.authorProfileId) {
+      props.onPostClick &&
+        props.onPostClick({
+          target: PostClickTarget.PLATFORM_USER_ID,
+          payload: props.post.authorProfileId,
+        });
+    }
+  };
+
   return (
     <Box direction="row" align="center" justify="between" width="100%">
-      <Box direction="row" align="center" gap="4px">
+      <Box
+        direction="row"
+        align="center"
+        gap="4px"
+        onClick={() => onUserClicked()}>
         <PlatformAvatar
           size={24}
           imageUrl={details?.authorAvatarUrl}></PlatformAvatar>
@@ -77,6 +102,11 @@ export const PostCard = (props: {
       if (target.id === REFS_SEMANTICS_ID) {
         return; // Stop further processing
       }
+
+      if (target.id === POST_AUTHOR_ID) {
+        return; // Stop further processing
+      }
+
       target = target.parentNode as HTMLElement;
     }
 
@@ -93,7 +123,11 @@ export const PostCard = (props: {
 
   const hideSemantics = false;
 
-  const header = <PostCardHeader post={post}></PostCardHeader>;
+  const header = (
+    <PostCardHeader
+      post={post}
+      onPostClick={props.onPostClick}></PostCardHeader>
+  );
 
   return (
     <Box
@@ -108,13 +142,11 @@ export const PostCard = (props: {
       <Box
         style={{ cursor: 'pointer', position: 'relative' }}
         onClick={handleClick}>
-        {false && (
-          <Box direction="row" justify="between" margin={{ bottom: '6.5px' }}>
-            <PublishButtons></PublishButtons>
-          </Box>
-        )}
-
-        <Box direction="row" justify="between" margin={{ bottom: '6.5px' }}>
+        <Box
+          id={POST_AUTHOR_ID}
+          direction="row"
+          justify="between"
+          margin={{ bottom: '16px' }}>
           {header}
         </Box>
 

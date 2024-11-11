@@ -16,6 +16,8 @@ export enum PATTERN_ID {
 
 export enum PostClickTarget {
   POST = 'POST',
+  USER_ID = 'USER_ID',
+  PLATFORM_USER_ID = 'PLATFORM_USER_ID',
   REF = 'REF',
 }
 
