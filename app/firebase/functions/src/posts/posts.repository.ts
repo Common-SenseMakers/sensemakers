@@ -3,7 +3,6 @@ import { logger } from 'firebase-functions/v1';
 
 import {
   ArrayIncludeQuery,
-  RefLabel,
   StructuredSemantics,
 } from '../@shared/types/types.posts';
 import {
@@ -13,6 +12,7 @@ import {
   PostUpdate,
   PostsQueryDefined,
 } from '../@shared/types/types.posts';
+import { RefLabel } from '../@shared/types/types.references';
 import { CollectionNames } from '../@shared/utils/collectionNames';
 import { DBInstance } from '../db/instance';
 import { BaseRepository, removeUndefined } from '../db/repo.base';
