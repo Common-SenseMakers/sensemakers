@@ -230,7 +230,7 @@ class KeywordParser(BaseOutputParser):
 
         return ParserChainOutput(
             answer={
-                "unormalized_keywords": top_k_valid,
+                "raw_keywords": top_k_valid,
                 "research_keyword": academic_indicator_kw,
                 "keywords":normalize_keywords(top_k_valid)
             },
