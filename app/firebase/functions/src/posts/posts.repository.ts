@@ -110,15 +110,12 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     /** type protection against properties renaming */
     const createdAtKey: keyof AppPost = 'createdAtMs';
     const authorUserKey: keyof AppPost = 'authorUserId';
-    // const authorProfileKey: keyof AppPost = 'authorProfileId';
+    const authorProfileKey: keyof AppPost = 'authorProfileId';
     const originKey: keyof AppPost = 'origin';
 
     const structuredSemanticsKey: keyof AppPost = 'structuredSemantics';
 
     const keywordsKey: keyof StructuredSemantics = 'keywords';
-
-    // const refsMetaKey: keyof StructuredSemantics = 'refsMeta';
-    // const urlKey: keyof RefMeta = 'url';
 
     const labelsKey: keyof StructuredSemantics = 'labels';
     const topicKey: keyof StructuredSemantics = 'topic';
@@ -131,6 +128,8 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       authorUserKey,
       queryParams.userId
     );
+
+    query = filterByEqual(query, authorProfileKey, queryParams.profileId);
 
     query = filterByIn(query, originKey, queryParams.origins);
 

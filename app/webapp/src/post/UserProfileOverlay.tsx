@@ -25,7 +25,7 @@ export const UserProfileOverlay = (props: {
   const { profileId, userId, overlayNav } = props;
 
   const { data: profiles } = useQuery({
-    queryKey: ['ref', profileId, userId],
+    queryKey: ['userProfile', profileId, userId],
     queryFn: async () => {
       try {
         if (userId) {
@@ -56,6 +56,7 @@ export const UserProfileOverlay = (props: {
       endpoint: '/api/feed/get',
       queryParams: {
         userId: userId,
+        profileId: profileId,
         semantics: { topic: SCIENCE_TOPIC_URI },
         includeAggregateLabels: true,
       },
