@@ -12,7 +12,7 @@ import {
   PostUpdate,
   PostsQueryDefined,
 } from '../@shared/types/types.posts';
-import { RefLabel } from '../@shared/types/types.references';
+import { RefLabel, RefPostData } from '../@shared/types/types.references';
 import { CollectionNames } from '../@shared/utils/collectionNames';
 import { DBInstance } from '../db/instance';
 import { BaseRepository, removeUndefined } from '../db/repo.base';
@@ -252,29 +252,22 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
         .collection(CollectionNames.LinkPostsSubcollection)
         .get();
 
-      // Get the full post data for each reference
-      const postRefs = linkPosts.docs.map(doc => 
-        this.db.collections.posts.doc(doc.id)
-      );
-      const fullPosts = await this.db.firestore.getAll(...postRefs);
-      
-      // Process each post's labels for this reference
-      fullPosts.forEach(postDoc => {
-        const post = postDoc.data() as AppPost;
-        if (post?.structuredSemantics?.refsMeta) {
-          const refMeta = post.structuredSemantics.refsMeta[reference];
-          const refLabels = refMeta?.labels?.map(
+      // Process each post's labels directly from the subcollection documents
+      linkPosts.docs.forEach((doc) => {
+        const refPost = doc.data() as RefPostData;
+        if (refPost?.structuredSemantics?.labels) {
+          const refLabels = refPost.structuredSemantics?.labels?.map(
             (label): RefLabel => ({
               label,
-              postId: postDoc.id,
-              authorProfileId: post.authorProfileId,
-              platformPostUrl: post.generic.thread[0].url,
+              postId: doc.id,
+              authorProfileId: refPost.authorProfileId,
+              platformPostUrl: refPost.platformPostUrl,
             })
           );
           if (refLabels) {
             refsStats[reference] = [
               ...(refsStats[reference] || []),
-              ...refLabels
+              ...refLabels,
             ];
           }
         }
