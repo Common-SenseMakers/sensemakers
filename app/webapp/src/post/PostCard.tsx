@@ -1,9 +1,14 @@
 import { Box, Text } from 'grommet';
+import { MouseEventHandler } from 'react';
 
 import { PlatformPostAnchor } from '../app/anchors/PlatformPostAnchor';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
-import { PATTERN_ID } from '../semantics/patterns/patterns';
+import {
+  PATTERN_ID,
+  PostClickEvent,
+  PostClickTarget,
+} from '../semantics/patterns/patterns';
 import { AppPostFull } from '../shared/types/types.posts';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { PublishButtons } from './PostPublishButtons';
@@ -11,6 +16,8 @@ import { PostTextStatic } from './PostTextStatic';
 import { getPostDetails } from './platform.post.details';
 import { usePost } from './post.context/PostContext';
 import { concatenateThread } from './posts.helper';
+
+const REFS_SEMANTICS_ID = 'refs-semantics';
 
 const PostCardHeader = (props: { post: AppPostFull }) => {
   const { constants } = useThemeContext();
@@ -46,7 +53,7 @@ const PostCardHeader = (props: { post: AppPostFull }) => {
 export const PostCard = (props: {
   isPublicFeed?: boolean;
   shade?: boolean;
-  handleClick: () => void;
+  onPostClick: (event: PostClickEvent) => void;
   isEmail?: boolean;
 }) => {
   const { shade: _shade } = props;
@@ -62,8 +69,18 @@ export const PostCard = (props: {
     return <></>;
   }
 
-  const handleClick = () => {
-    props.handleClick();
+  const handleClick: MouseEventHandler = (event) => {
+    let target = event.target as HTMLElement;
+
+    // filter clicks on the ref semantics
+    while (target !== null) {
+      if (target.id === REFS_SEMANTICS_ID) {
+        return; // Stop further processing
+      }
+      target = target.parentNode as HTMLElement;
+    }
+
+    props.onPostClick({ target: PostClickTarget.POST, payload: post });
   };
 
   const postText = concatenateThread(post.generic);
@@ -123,7 +140,7 @@ export const PostCard = (props: {
           text={postText}></PostTextStatic>
 
         {!hideSemantics && (
-          <Box margin={{ top: '24px' }}>
+          <Box margin={{ top: '24px' }} id={REFS_SEMANTICS_ID}>
             <SemanticsEditor
               include={[PATTERN_ID.REF_LABELS]}
               patternProps={{
@@ -136,6 +153,7 @@ export const PostCard = (props: {
                 semantics: post?.semantics,
                 originalParsed: post?.originalParsed,
                 post,
+                onPostClick: props.onPostClick,
               }}></SemanticsEditor>
           </Box>
         )}

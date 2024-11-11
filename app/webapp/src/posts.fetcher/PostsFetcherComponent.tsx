@@ -10,7 +10,12 @@ import { AppGeneralKeys } from '../i18n/i18n.app.general';
 import { PostCard } from '../post/PostCard';
 import { PostCardLoading } from '../post/PostCardLoading';
 import { PostOverlay } from '../post/PostOverlay';
+import { RefOverlay } from '../post/RefOverlay';
 import { PostContext } from '../post/post.context/PostContext';
+import {
+  PostClickEvent,
+  PostClickTarget,
+} from '../semantics/patterns/patterns';
 import { AppPostFull } from '../shared/types/types.posts';
 import { AppButton, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
@@ -45,6 +50,8 @@ export const PostsFetcherComponent = (props: {
   const [postToShow, setPostToShow] = useState<AppPostFull | undefined>(
     undefined
   );
+
+  const [refToShow, setRefToShow] = useState<string | undefined>(undefined);
 
   const {
     pageTitle,
@@ -150,6 +157,16 @@ export const PostsFetcherComponent = (props: {
     </BoxCentered>
   );
 
+  const onPostClick = (post: AppPostFull, event: PostClickEvent) => {
+    if (event.target === PostClickTarget.POST) {
+      setPostToShow(post);
+    }
+    if (event.target === PostClickTarget.REF) {
+      if (DEBUG) console.log(`clicked on ref ${event.payload as string}`);
+      setRefToShow(event.payload as string);
+    }
+  };
+
   const showPosts = posts ? (
     <Box
       ref={postsContainerRef}
@@ -164,9 +181,7 @@ export const PostsFetcherComponent = (props: {
           <PostContext postInit={post}>
             <PostCard
               isPublicFeed={isPublicFeed}
-              handleClick={() => {
-                setPostToShow(post);
-              }}></PostCard>
+              onPostClick={(event) => onPostClick(post, event)}></PostCard>
           </PostContext>
         </Box>
       ))}
@@ -252,6 +267,31 @@ export const PostsFetcherComponent = (props: {
   );
 
   const showPost = postToShow && (
+    <PostOverlay
+      postId={postToShow.id}
+      postInit={postToShow}
+      onPostNav={{
+        onBack: () => reset(),
+        onPrev: () => {
+          const { prevPostId } = feed.getNextAndPrev();
+          if (prevPostId) {
+            const prev = feed.getPost(prevPostId);
+            setPostToShow(prev);
+          }
+        },
+        onNext: () => {
+          const { nextPostId } = feed.getNextAndPrev();
+          if (nextPostId) {
+            const next = feed.getPost(nextPostId);
+            setPostToShow(next);
+          }
+        },
+      }}></PostOverlay>
+  );
+
+  const showRef = refToShow && <RefOverlay refUrl={refToShow}></RefOverlay>;
+
+  const showOverlay = (showPost || showRef) && (
     <Box
       style={{
         position: 'absolute',
@@ -260,26 +300,7 @@ export const PostsFetcherComponent = (props: {
         height: '100%',
         width: '100%',
       }}>
-      <PostOverlay
-        postId={postToShow.id}
-        postInit={postToShow}
-        onPostNav={{
-          onBack: () => reset(),
-          onPrev: () => {
-            const { prevPostId } = feed.getNextAndPrev();
-            if (prevPostId) {
-              const prev = feed.getPost(prevPostId);
-              setPostToShow(prev);
-            }
-          },
-          onNext: () => {
-            const { nextPostId } = feed.getNextAndPrev();
-            if (nextPostId) {
-              const next = feed.getPost(nextPostId);
-              setPostToShow(next);
-            }
-          },
-        }}></PostOverlay>
+      {showPost ? showPost : showRef ? showRef : <></>}
     </Box>
   );
 
@@ -296,7 +317,7 @@ export const PostsFetcherComponent = (props: {
           : posts.length === 0
             ? showNoPosts
             : showPosts}
-        {showPost}
+        {showOverlay}
       </Box>
     </>
   );

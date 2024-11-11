@@ -9,7 +9,7 @@ import { LoadingDiv } from '../../../ui-components/LoadingDiv';
 import { splitArray } from '../../../ui-components/utils';
 import { useSemanticsStore } from '../common/use.semantics';
 import { PatternProps } from '../patterns';
-import { RefWithLabels } from './RefLabel';
+import { RefWithLabels } from './RefWithLabels';
 import { RefsMap, processSemantics } from './process.semantics';
 
 export const RefLabelsComponent = (props: PatternProps) => {
@@ -115,7 +115,8 @@ export const RefLabelsComponent = (props: PatternProps) => {
                     addLabel={(labelUri: string) => {
                       addLabel(ref, labelUri).catch(console.error);
                     }}
-                    allRefs={visibleRefs}></RefWithLabels>
+                    allRefs={visibleRefs}
+                    onPostClick={props.onPostClick}></RefWithLabels>
                 </>
               );
             })}

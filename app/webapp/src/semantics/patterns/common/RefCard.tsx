@@ -1,4 +1,4 @@
-import { Box, Paragraph, Text } from 'grommet';
+import { Anchor, Box, Paragraph, Text } from 'grommet';
 
 import { AppHeading } from '../../../ui-components';
 import { useThemeContext } from '../../../ui-components/ThemedApp';
@@ -9,8 +9,8 @@ const truncate = (text: string, size: number) => {
 };
 
 export const RefCard = (props: {
-  ix: number;
   url: string;
+  ix?: number;
   title?: string;
   description?: string;
   image?: string;
@@ -26,8 +26,14 @@ export const RefCard = (props: {
   const onCardClicked = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) => {
-    event.stopPropagation();
-    window.open(props.url, '_blank', 'noopener,noreferrer');
+    const target = event.target as HTMLElement;
+
+    if (target.id === 'url-anchor') {
+      window.open(props.url, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    props.onClick && props.onClick();
   };
 
   return (
@@ -65,15 +71,18 @@ export const RefCard = (props: {
       </Paragraph>
 
       <Box style={{ overflow: 'hidden' }}>
-        <Text
+        <Anchor
+          id="url-anchor"
           style={{
             fontSize: '16px',
             color: '#337FBD',
             fontWeight: '400',
             lineBreak: 'anywhere',
-          }}>
+            textDecoration: 'none',
+          }}
+          target="_blank">
           {urlTruncated}
-        </Text>
+        </Anchor>
       </Box>
     </Box>
   );

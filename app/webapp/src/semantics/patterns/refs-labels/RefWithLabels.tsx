@@ -5,6 +5,7 @@ import { ParsedSupport, RefMeta } from '../../../shared/types/types.parser';
 import { AppPostFull } from '../../../shared/types/types.posts';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { RefCard } from '../common/RefCard';
+import { PostClickEvent, PostClickTarget } from '../patterns';
 import { AggregatedRefLabels } from './AggregatedRefLabels';
 import { RefData } from './process.semantics';
 
@@ -20,6 +21,7 @@ export const RefWithLabels = (props: {
   removeLabel: (labelUri: string) => void;
   editable?: boolean;
   allRefs: [string, RefData][];
+  onPostClick?: (event: PostClickEvent) => void;
 }) => {
   const labelsOntology = props.support?.ontology?.semantic_predicates;
   const refData = props.refData;
@@ -98,7 +100,14 @@ export const RefWithLabels = (props: {
           description={refData.meta?.summary}
           image={refData.meta?.thumbnail_url}
           refType={refData.meta.item_type}
-          sourceRef={getSourceRefNumber(refData.meta, props.allRefs)}></RefCard>
+          sourceRef={getSourceRefNumber(refData.meta, props.allRefs)}
+          onClick={() => {
+            props.onPostClick &&
+              props.onPostClick({
+                target: PostClickTarget.REF,
+                payload: props.refUrl,
+              });
+          }}></RefCard>
       ) : (
         <Anchor target="_blank" href={props.refUrl}>
           {props.refUrl}
