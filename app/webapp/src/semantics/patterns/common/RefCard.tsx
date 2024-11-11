@@ -4,6 +4,8 @@ import { AppHeading } from '../../../ui-components';
 import { useThemeContext } from '../../../ui-components/ThemedApp';
 import { zoteroItemTypeDisplay } from '../../../utils/post.utils';
 
+export const REF_URL_ANCHOR_ID = 'ref-url-anchor';
+
 const truncate = (text: string, size: number) => {
   return text.slice(0, size) + (text.length > size ? '...' : '');
 };
@@ -23,21 +25,8 @@ export const RefCard = (props: {
 
   const urlTruncated = truncate(props.url, 50);
 
-  const onCardClicked = (
-    event: React.MouseEvent<HTMLDivElement, MouseEvent>
-  ) => {
-    const target = event.target as HTMLElement;
-
-    if (target.id === 'url-anchor') {
-      window.open(props.url, '_blank', 'noopener,noreferrer');
-      return;
-    }
-
-    props.onClick && props.onClick();
-  };
-
   return (
-    <Box align="start" pad={{}} onClick={(e) => onCardClicked(e)}>
+    <Box align="start" pad={{}}>
       <Box
         margin={{ bottom: '20px' }}
         width="100%"
@@ -72,7 +61,7 @@ export const RefCard = (props: {
 
       <Box style={{ overflow: 'hidden' }}>
         <Anchor
-          id="url-anchor"
+          id={REF_URL_ANCHOR_ID}
           style={{
             fontSize: '16px',
             color: '#337FBD',

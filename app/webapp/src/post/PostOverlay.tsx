@@ -1,7 +1,7 @@
 import { Box } from 'grommet';
 
 import { AppPostFull } from '../shared/types/types.posts';
-import { OnPostNav } from './PostNav';
+import { OnOverlayNav } from './OverlayNav';
 import { PostView } from './PostView';
 import { PostContext } from './post.context/PostContext';
 
@@ -9,14 +9,14 @@ import { PostContext } from './post.context/PostContext';
 export const PostOverlay = (props: {
   postId: string;
   postInit?: AppPostFull;
-  onPostNav?: OnPostNav;
+  overlayNav?: OnOverlayNav;
 }) => {
-  const { postId, postInit, onPostNav } = props;
+  const { postId, postInit, overlayNav } = props;
 
   return (
     <Box style={{}}>
       <PostContext postId={postId} postInit={postInit} showCelebration>
-        <PostView onPostNav={onPostNav}></PostView>
+        <PostView overlayNav={overlayNav}></PostView>
       </PostContext>
     </Box>
   );

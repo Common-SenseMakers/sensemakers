@@ -42,6 +42,7 @@ export const PostsFetcherComponent = (props: {
   pageTitle: string;
   isPublicFeed?: boolean;
   showHeader?: boolean;
+  enableOverlay?: boolean;
 }) => {
   const { show } = useToastContext();
   const { constants } = useThemeContext();
@@ -58,10 +59,12 @@ export const PostsFetcherComponent = (props: {
     feed,
     isPublicFeed: _isPublicFeed,
     showHeader: _showHeader,
+    enableOverlay: _enableOverlay,
   } = props;
 
   const isPublicFeed = _isPublicFeed !== undefined ? _isPublicFeed : false;
   const showHeader = _showHeader !== undefined ? _showHeader : true;
+  const enableOverlay = _enableOverlay !== undefined ? _enableOverlay : false;
 
   const {
     posts,
@@ -158,6 +161,8 @@ export const PostsFetcherComponent = (props: {
   );
 
   const onPostClick = (post: AppPostFull, event: PostClickEvent) => {
+    if (!enableOverlay) return;
+
     if (event.target === PostClickTarget.POST) {
       setPostToShow(post);
     }
@@ -174,7 +179,6 @@ export const PostsFetcherComponent = (props: {
         height: '100%',
         overflowY: 'auto',
         maxWidth: 600,
-        margin: '0 auto',
       }}>
       {posts.map((post, ix) => (
         <Box key={ix} id={`post-${post.id}`} style={{ flexShrink: 0 }}>
@@ -270,7 +274,7 @@ export const PostsFetcherComponent = (props: {
     <PostOverlay
       postId={postToShow.id}
       postInit={postToShow}
-      onPostNav={{
+      overlayNav={{
         onBack: () => reset(),
         onPrev: () => {
           const { prevPostId } = feed.getNextAndPrev();
@@ -289,7 +293,13 @@ export const PostsFetcherComponent = (props: {
       }}></PostOverlay>
   );
 
-  const showRef = refToShow && <RefOverlay refUrl={refToShow}></RefOverlay>;
+  const showRef = refToShow && (
+    <RefOverlay
+      refUrl={refToShow}
+      overlayNav={{
+        onBack: () => setRefToShow(undefined),
+      }}></RefOverlay>
+  );
 
   const showOverlay = (showPost || showRef) && (
     <Box

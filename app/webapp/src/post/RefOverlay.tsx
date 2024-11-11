@@ -11,14 +11,18 @@ import {
 import { RefCard } from '../semantics/patterns/common/RefCard';
 import { RefMeta } from '../shared/types/types.parser';
 import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
-import { AppButton } from '../ui-components';
+import { AppHeading } from '../ui-components';
+import { OnOverlayNav, OverlayNav } from './OverlayNav';
 
 const DEBUG = true;
 
 /** extract the postId from the route and pass it to a PostContext */
-export const RefOverlay = (props: { refUrl: string }) => {
+export const RefOverlay = (props: {
+  refUrl: string;
+  overlayNav: OnOverlayNav;
+}) => {
   const appFetch = useAppFetch();
-  const { refUrl } = props;
+  const { refUrl, overlayNav } = props;
 
   const { data: refMeta } = useQuery({
     queryKey: ['ref', refUrl],
@@ -53,9 +57,15 @@ export const RefOverlay = (props: { refUrl: string }) => {
   const feed = usePostsFetcher(feedConfig);
 
   return (
-    <Box style={{}}>
-      <AppButton label="back"></AppButton>
-      <Box style={{ flexShrink: 0 }}>
+    <Box>
+      <OverlayNav overlayNav={overlayNav}></OverlayNav>
+      <Box
+        pad="medium"
+        style={{
+          flexShrink: 0,
+          border: '1.6px solid var(--Neutral-300, #D1D5DB)',
+        }}>
+        <AppHeading level="3">Posts about</AppHeading>
         <RefCard
           url={refUrl}
           title={refMeta?.title}
