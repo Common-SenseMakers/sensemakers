@@ -17,6 +17,7 @@ import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useIsAtBottom } from '../ui-components/hooks/IsAtBottom';
+import useOutsideClick from '../ui-components/hooks/OutsideClickHook';
 import { PostFetcherInterface } from './posts.fetcher.hook';
 
 const DEBUG = false;
@@ -68,9 +69,10 @@ export const PostsFetcherComponent = (props: {
   } = feed;
 
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const postsContainerRef = useRef<HTMLDivElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  const { isAtBottom } = useIsAtBottom(containerRef, bottomRef);
+  const { isAtBottom } = useIsAtBottom(postsContainerRef, bottomRef);
 
   useEffect(() => {
     if (isAtBottom && !isLoading && moreToFetch) {
@@ -113,6 +115,14 @@ export const PostsFetcherComponent = (props: {
     }
   }, [errorFetchingOlder, errorFetchingNewer, show]);
 
+  const reset = () => {
+    setPostToShow(undefined);
+  };
+
+  useOutsideClick(containerRef, () => {
+    reset();
+  });
+
   const showLoading = [1, 2, 4, 5, 6, 7, 8].map((ix) => (
     <PostCardLoading key={ix}></PostCardLoading>
   ));
@@ -142,7 +152,7 @@ export const PostsFetcherComponent = (props: {
 
   const showPosts = posts ? (
     <Box
-      ref={containerRef}
+      ref={postsContainerRef}
       style={{
         height: '100%',
         overflowY: 'auto',
@@ -254,7 +264,7 @@ export const PostsFetcherComponent = (props: {
         postId={postToShow.id}
         postInit={postToShow}
         onPostNav={{
-          onBack: () => setPostToShow(undefined),
+          onBack: () => reset(),
           onPrev: () => {
             const { prevPostId } = feed.getNextAndPrev();
             if (prevPostId) {
@@ -277,6 +287,7 @@ export const PostsFetcherComponent = (props: {
     <>
       {showHeader && header}
       <Box
+        ref={containerRef}
         fill
         style={{ backgroundColor: '#FFFFFF', position: 'relative' }}
         justify="start">
