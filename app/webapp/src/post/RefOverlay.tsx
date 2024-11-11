@@ -74,6 +74,7 @@ export const RefOverlay = (props: {
           refType={refMeta?.item_type}></RefCard>
       </Box>
       <PostsFetcherComponent
+        enableOverlay={{ post: false, ref: false }}
         showHeader={false}
         isPublicFeed={true}
         feed={feed}
