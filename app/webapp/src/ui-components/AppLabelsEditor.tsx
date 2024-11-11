@@ -182,17 +182,15 @@ export const AppLabelsEditor = (props: {
       }}>
       <Box style={{ display: 'block' }}>
         {visibleLables.map((label, ix) => {
-          const marginRight = ix < visibleLables.length - 1 ? 'small' : '0';
+          const marginRight = ix < visibleLables.length - 1 ? '4px' : '0';
           return (
-            <Box
-              key={ix}
-              style={{ display: 'block', float: 'left', paddingTop: '5.5px' }}>
+            <Box key={ix} style={{ display: 'block', float: 'left' }}>
               <AppLabel
                 colors={colors}
                 showClose={adding}
                 remove={() => removeLabel(label as string)}
                 key={ix}
-                margin={{ right: marginRight, bottom: 'xsmall' }}>
+                margin={{ right: marginRight, bottom: '4px' }}>
                 {`${hashtag ? '#' : ''}`}
                 <span>{label}</span>
               </AppLabel>
@@ -200,10 +198,8 @@ export const AppLabelsEditor = (props: {
           );
         })}
         {hasManyLabels && !adding ? (
-          <Box style={{ display: 'block', float: 'left', paddingTop: '5.5px' }}>
-            <AppLabel
-              colors={colors}
-              margin={{ left: 'small', bottom: 'xsmall' }}>
+          <Box style={{ display: 'block', float: 'left' }}>
+            <AppLabel colors={colors} margin={{ left: '4px', bottom: '4px' }}>
               {`+${nonVisibleLabels.length}`}
             </AppLabel>
           </Box>
@@ -214,7 +210,6 @@ export const AppLabelsEditor = (props: {
           style={{
             display: 'block',
             float: 'left',
-            paddingTop: '5px',
           }}>
           {adding ? (
             <Keyboard

@@ -80,7 +80,7 @@ export const PostCard = (props: {
 
   return (
     <Box
-      pad={{ top: '16px', horizontal: '12px', bottom: '16px' }}
+      pad={{ top: '16px', horizontal: '12px', bottom: '24px' }}
       style={{
         backgroundColor: shade ? constants.colors.shade : 'white',
         borderBottom: '1px solid var(--Neutral-300, #D1D5DB)',
@@ -123,7 +123,7 @@ export const PostCard = (props: {
           text={postText}></PostTextStatic>
 
         {!hideSemantics && (
-          <Box>
+          <Box margin={{ top: '24px' }}>
             <SemanticsEditor
               include={[PATTERN_ID.REF_LABELS]}
               patternProps={{

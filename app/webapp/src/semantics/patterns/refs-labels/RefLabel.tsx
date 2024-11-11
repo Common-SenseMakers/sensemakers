@@ -86,7 +86,7 @@ export const RefWithLabels = (props: {
     <Box
       style={{
         borderRadius: '12px',
-        border: '1px solid #D1D5DB',
+        border: '1.6px solid #D1D5DB',
         width: '100%',
       }}
       pad="12px">

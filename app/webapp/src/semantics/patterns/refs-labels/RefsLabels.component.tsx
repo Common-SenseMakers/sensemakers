@@ -91,7 +91,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
 
   if (refs && refs.size > 0) {
     return (
-      <Box margin={{ top: 'small' }}>
+      <Box>
         <Box style={{ display: 'block' }}>
           <Box gap="16px">
             {visibleRefs.map(([ref, refData], index) => {

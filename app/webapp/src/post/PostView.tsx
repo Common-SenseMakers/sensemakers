@@ -152,6 +152,7 @@ export const PostView = (props: {
       semantics: updated.postMerged?.semantics,
       originalParsed: updated.postMerged?.originalParsed,
       semanticsUpdated: semanticsUpdated,
+      post: updated.postMerged,
     };
 
     return (
@@ -169,9 +170,11 @@ export const PostView = (props: {
         <PostTextEditable text={postText}></PostTextEditable>
 
         {!hideSemantics && (
-          <SemanticsEditor
-            patternProps={patternProps}
-            include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
+          <Box margin={{ top: '24px' }}>
+            <SemanticsEditor
+              patternProps={patternProps}
+              include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
+          </Box>
         )}
 
         {action}
