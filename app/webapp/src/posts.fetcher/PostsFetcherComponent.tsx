@@ -42,7 +42,10 @@ export const PostsFetcherComponent = (props: {
   pageTitle: string;
   isPublicFeed?: boolean;
   showHeader?: boolean;
-  enableOverlay?: boolean;
+  enableOverlay?: {
+    post: boolean;
+    ref: boolean;
+  };
 }) => {
   const { show } = useToastContext();
   const { constants } = useThemeContext();
@@ -64,7 +67,8 @@ export const PostsFetcherComponent = (props: {
 
   const isPublicFeed = _isPublicFeed !== undefined ? _isPublicFeed : false;
   const showHeader = _showHeader !== undefined ? _showHeader : true;
-  const enableOverlay = _enableOverlay !== undefined ? _enableOverlay : false;
+  const enableOverlay =
+    _enableOverlay !== undefined ? _enableOverlay : { post: true, ref: false };
 
   const {
     posts,
@@ -161,14 +165,16 @@ export const PostsFetcherComponent = (props: {
   );
 
   const onPostClick = (post: AppPostFull, event: PostClickEvent) => {
-    if (!enableOverlay) return;
-
     if (event.target === PostClickTarget.POST) {
-      setPostToShow(post);
+      if (enableOverlay.post) {
+        setPostToShow(post);
+      }
     }
     if (event.target === PostClickTarget.REF) {
-      if (DEBUG) console.log(`clicked on ref ${event.payload as string}`);
-      setRefToShow(event.payload as string);
+      if (enableOverlay.ref) {
+        if (DEBUG) console.log(`clicked on ref ${event.payload as string}`);
+        setRefToShow(event.payload as string);
+      }
     }
   };
 
