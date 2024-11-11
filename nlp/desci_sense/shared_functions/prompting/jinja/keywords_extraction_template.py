@@ -12,7 +12,7 @@ Rules:
 - Keywords should should be normalized to a consistent form of lowercase acronym e.g. 'AI' should be returned as 'ai' and separated words should be separated with a hyphen, e.g. 'ModelTheory' should be 'model-theory'    
 - do not separated compound words like blockchain. 
 
-- If there is not enough context in the post content or meta data, e.g. there are no words, return only the special keyword ( #academic or #not-academic)
+- If there is not enough context in the post content or meta data, e.g. there are no words or the text is to short so there is ambiguity, return only the special keyword ( #academic or #not-academic)
 - Your final answer should be structured as follows:
     - Reasoning Steps: (your reasoning steps)
     - Repeat the exact text of the post content given to you at the end of the prompt (should be the same text as the post content)
