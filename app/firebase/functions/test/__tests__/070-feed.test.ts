@@ -168,5 +168,40 @@ describe('070 test feed', () => {
           );
       });
     });
+    it('returns a reference page feed filtered by labels', async () => {
+      if (USE_REAL_TWITTER) {
+        logger.warn(`Feed test disbaled with real twitter`);
+        return;
+      }
+      const { feed } = services;
+      const result1 = await feed.getFeed({
+        fetchParams: { expectedAmount: 10 },
+        semantics: {
+          refs: ['https://twitter.com/ItaiYanai/status/1780813867213336910'],
+        },
+      });
+      expect(result1).to.have.length(2);
+
+      const result2 = await feed.getFeed({
+        fetchParams: { expectedAmount: 10 },
+        semantics: {
+          refs: ['https://twitter.com/ItaiYanai/status/1780813867213336910'],
+          labels: [
+            'http://purl.org/spar/cito/discusses',
+            'https://sense-nets.xyz/includesQuotationFrom',
+          ],
+        },
+      });
+      expect(result2).to.have.length(2);
+
+      const result3 = await feed.getFeed({
+        fetchParams: { expectedAmount: 10 },
+        semantics: {
+          refs: ['https://twitter.com/ItaiYanai/status/1780813867213336910'],
+          labels: ['http://purl.org/spar/cito/discusses'],
+        },
+      });
+      expect(result3).to.have.length(1);
+    });
   });
 });

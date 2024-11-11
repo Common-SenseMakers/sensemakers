@@ -13,9 +13,12 @@ import {
   PostUpdate,
   PostsQueryDefined,
 } from '../@shared/types/types.posts';
+import { CollectionNames } from '../@shared/utils/collectionNames';
 import { DBInstance } from '../db/instance';
 import { BaseRepository, removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
+import { hashAndNormalizeUrl } from '../links/links.utils';
+import { doesQueryUseSubcollection } from '../posts/posts.helper';
 
 const DEBUG = false;
 const DEBUG_PREFIX = 'PostsRepository';
@@ -126,19 +129,34 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
     if (DEBUG) logger.debug('getMany', queryParams, DEBUG_PREFIX);
 
+    const { useLinksSubcollection } = doesQueryUseSubcollection(queryParams);
+
+    /** check if we can query the links subcollection rather than the entire posts */
+    const baseCollection = (() => {
+      if (useLinksSubcollection && queryParams.semantics?.refs) {
+        const linkId = hashAndNormalizeUrl(queryParams.semantics.refs[0]);
+        return this.db.collections.links
+          .doc(linkId)
+          .collection(CollectionNames.LinkPostsSubcollection);
+      }
+      return this.db.collections.posts;
+    })();
+
     let query = filterByEqual(
-      this.db.collections.posts,
+      baseCollection,
       authorUserKey,
       queryParams.userId
     );
 
     query = filterByIn(query, originKey, queryParams.origins);
 
-    query = filterByArrayContainsAny(
-      query,
-      `${structuredSemanticsKey}.${refsKey}`,
-      queryParams.semantics?.refs
-    );
+    if (!useLinksSubcollection) {
+      query = filterByArrayContainsAny(
+        query,
+        `${structuredSemanticsKey}.${refsKey}`,
+        queryParams.semantics?.refs
+      );
+    }
 
     query = filterByArrayContainsAny(
       query,
@@ -146,17 +164,19 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       queryParams.semantics?.labels
     );
 
-    query = filterByArrayContainsAny(
-      query,
-      `${structuredSemanticsKey}.${keywordsKey}`,
-      queryParams.semantics?.keywords
-    );
+    if (!useLinksSubcollection) {
+      query = filterByArrayContainsAny(
+        query,
+        `${structuredSemanticsKey}.${keywordsKey}`,
+        queryParams.semantics?.keywords
+      );
 
-    query = filterByEqual(
-      query,
-      `${structuredSemanticsKey}.${topicKey}`,
-      queryParams.semantics?.topic
-    );
+      query = filterByEqual(
+        query,
+        `${structuredSemanticsKey}.${topicKey}`,
+        queryParams.semantics?.topic
+      );
+    }
 
     /** get the sinceCreatedAt and untilCreatedAt timestamps from the elements ids */
     const { sinceCreatedAt, untilCreatedAt } = await (async () => {
@@ -199,10 +219,21 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       .limit(queryParams.fetchParams.expectedAmount)
       .get();
 
-    let appPosts = posts.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as AppPost[];
+    let appPosts = (await Promise.all(
+      posts.docs.map(async (doc) => {
+        if (useLinksSubcollection) {
+          const appPost = await this.db.collections.posts.doc(doc.id).get();
+          return {
+            id: doc.id,
+            ...appPost.data(),
+          };
+        }
+        return {
+          id: doc.id,
+          ...doc.data(),
+        };
+      })
+    )) as AppPost[];
 
     return appPosts.sort((a, b) => b.createdAtMs - a.createdAtMs);
   }
