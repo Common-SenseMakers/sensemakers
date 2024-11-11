@@ -14,8 +14,8 @@ import { AppButton } from '../ui-components';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
+import { OnOverlayNav, OverlayNav } from './OverlayNav';
 import { PostHeader } from './PostHeader';
-import { OnPostNav, PostNav } from './PostNav';
 import { PostTextEditable } from './PostTextEditable';
 import { usePost } from './post.context/PostContext';
 import { concatenateThread } from './posts.helper';
@@ -23,10 +23,10 @@ import { concatenateThread } from './posts.helper';
 /** extract the postId from the route and pass it to a PostContext */
 export const PostView = (props: {
   profile?: PlatformProfile;
-  onPostNav?: OnPostNav;
+  overlayNav?: OnOverlayNav;
 }) => {
   const appFetch = useAppFetch();
-  const { onPostNav } = props;
+  const { overlayNav } = props;
 
   const [, setIsReparsing] = useState(false);
 
@@ -184,7 +184,7 @@ export const PostView = (props: {
 
   return (
     <Box fill>
-      <PostNav onPostNav={onPostNav}></PostNav>
+      <OverlayNav overlayNav={overlayNav}></OverlayNav>
       <Box style={{ overflowY: 'auto', flexGrow: 1 }}>{content}</Box>
     </Box>
   );

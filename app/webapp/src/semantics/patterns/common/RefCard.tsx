@@ -1,16 +1,18 @@
-import { Box, Paragraph, Text } from 'grommet';
+import { Anchor, Box, Paragraph, Text } from 'grommet';
 
 import { AppHeading } from '../../../ui-components';
 import { useThemeContext } from '../../../ui-components/ThemedApp';
 import { zoteroItemTypeDisplay } from '../../../utils/post.utils';
+
+export const REF_URL_ANCHOR_ID = 'ref-url-anchor';
 
 const truncate = (text: string, size: number) => {
   return text.slice(0, size) + (text.length > size ? '...' : '');
 };
 
 export const RefCard = (props: {
-  ix: number;
   url: string;
+  ix?: number;
   title?: string;
   description?: string;
   image?: string;
@@ -23,15 +25,8 @@ export const RefCard = (props: {
 
   const urlTruncated = truncate(props.url, 50);
 
-  const onCardClicked = (
-    event: React.MouseEvent<HTMLDivElement, MouseEvent>
-  ) => {
-    event.stopPropagation();
-    window.open(props.url, '_blank', 'noopener,noreferrer');
-  };
-
   return (
-    <Box align="start" pad={{}} onClick={(e) => onCardClicked(e)}>
+    <Box align="start" pad={{}}>
       <Box
         margin={{ bottom: '20px' }}
         width="100%"
@@ -65,15 +60,18 @@ export const RefCard = (props: {
       </Paragraph>
 
       <Box style={{ overflow: 'hidden' }}>
-        <Text
+        <Anchor
+          id={REF_URL_ANCHOR_ID}
           style={{
             fontSize: '16px',
             color: '#337FBD',
             fontWeight: '400',
             lineBreak: 'anywhere',
-          }}>
+            textDecoration: 'none',
+          }}
+          target="_blank">
           {urlTruncated}
-        </Text>
+        </Anchor>
       </Box>
     </Box>
   );

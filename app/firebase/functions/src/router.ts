@@ -1,6 +1,7 @@
 import express from 'express';
 
 import { getPublicFeedController } from './feed/feed.controller';
+import { getRefMetaController } from './links/links.controller';
 import {
   getPostController,
   getUserPostsController,
@@ -31,3 +32,5 @@ router.post('/posts/parse', parsePostController);
 router.post('/posts/update', updatePostController);
 
 router.post('/feed/get', getPublicFeedController);
+
+router.post('/refs/get', getRefMetaController);

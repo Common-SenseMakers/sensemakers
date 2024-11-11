@@ -14,6 +14,16 @@ export enum PATTERN_ID {
   REF_LABELS = 'ref-labels',
 }
 
+export enum PostClickTarget {
+  POST = 'POST',
+  REF = 'REF',
+}
+
+export interface PostClickEvent {
+  target: PostClickTarget;
+  payload: unknown;
+}
+
 export interface PatternProps {
   size?: 'compact' | 'normal';
   isLoading?: boolean;
@@ -22,6 +32,7 @@ export interface PatternProps {
   semantics?: AppPostSemantics;
   semanticsUpdated?: (semantics: AppPostSemantics) => void;
   post?: AppPostFull;
+  onPostClick?: (event: PostClickEvent) => void;
 }
 
 export const patternsLib: Record<
