@@ -50,7 +50,10 @@ export const ConnectBlueskyPage = () => {
             <Box width="100%" height="16px" />
             <AppParagraph margin={{ bottom: 'medium' }}>
               To connect your Bluesky account, you need to{' '}
-              <a href="https://bsky.app/settings/app-passwords">
+              <a
+                target="_blank"
+                href="https://bsky.app/settings/app-passwords"
+                rel="noreferrer">
                 generate an app password
               </a>
               .
