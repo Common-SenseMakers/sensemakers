@@ -143,33 +143,11 @@ export class PostsProcessing {
       originalParsed?.support?.refs_meta &&
       originalParsed?.support?.refs_meta[url];
 
-    const isPartial =
-      !refMetaOrg ||
-      !refMetaOrg.title ||
-      !refMetaOrg.summary ||
-      !refMetaOrg.url;
-
-    if (isPartial) {
-      const oembed = await this.linksService.getOEmbed(
-        url,
-        manager,
-        refMetaOrg
-      );
-      return {
-        ...oembed,
-        item_type: refMetaOrg?.item_type,
-      };
-    } else {
-      /** store/update refMeta */
-      const oembed = {
-        url: normalizeUrl(url),
-        original_url: url,
-        title: refMetaOrg.title,
-        summary: refMetaOrg.summary,
-      };
-      await this.linksService.setOEmbed(oembed, manager);
-      return { ...refMetaOrg, ...oembed };
-    }
+    const oembed = await this.linksService.getOEmbed(url, manager, refMetaOrg);
+    return {
+      ...oembed,
+      item_type: refMetaOrg?.item_type,
+    };
   }
 
   async processSemantics(
@@ -238,8 +216,8 @@ export class PostsProcessing {
         const url = reference;
         const refMeta = await this.getRefMeta(
           url,
-          manager
-          // post.originalParsed
+          manager,
+          post.originalParsed
         );
         const refPostData: RefPostData = removeUndefined({
           id: post.id,

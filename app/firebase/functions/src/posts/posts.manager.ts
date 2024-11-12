@@ -778,7 +778,6 @@ export class PostsManager {
         postId,
         manager,
         postUpdated.semantics
-        // postUpdated.originalParsed
       );
     }
   }

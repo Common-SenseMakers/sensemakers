@@ -50,13 +50,16 @@ export class LinksService {
     if (existing) return existing;
 
     const oembed = await this.fetchOEmbed(url);
+    const originalRefMeta = removeUndefined({
+      title: parsedMeta?.title,
+      summary: parsedMeta?.summary,
+    });
     this.links.set(
       urlHash,
-      removeUndefined({
-        title: parsedMeta?.title,
-        summary: parsedMeta?.summary,
+      {
+        ...originalRefMeta,
         ...oembed,
-      }),
+      },
       manager
     );
 
