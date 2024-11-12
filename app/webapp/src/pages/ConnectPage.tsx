@@ -15,7 +15,7 @@ export const ConnectPage = () => {
   const content = start ? (
     <ConnectSocials></ConnectSocials>
   ) : (
-    <Box pad={{ vertical: '24px', horizontal: '12px' }}>
+    <Box pad={{ bottom: '24px', horizontal: '12px' }}>
       <Welcome></Welcome>
       <BoxCentered>
         <AppButton

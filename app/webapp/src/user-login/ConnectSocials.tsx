@@ -121,7 +121,7 @@ export const ConnectSocials = () => {
 
   return (
     <Box
-      pad={{ horizontal: 'medium', vertical: 'large' }}
+      pad={{ horizontal: 'medium', bottom: 'large' }}
       style={{ flexGrow: 1 }}>
       <Box style={{ flexGrow: 1 }}>{content}</Box>
     </Box>
