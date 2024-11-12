@@ -89,7 +89,9 @@ export const getPlatformPostDetails = (
           url: mastodonThread.posts[0].url || mastodonThread.posts[0].uri,
           authorName:
             mastodonThread.author.displayName || mastodonThread.author.username,
-          authorAvatarUrl: mastodonThread.author.avatar,
+          authorAvatarUrl:
+            mastodonThread.author.avatar ||
+            'https://mastodon.social/avatars/original/missing.png',
         };
       }
 
@@ -99,7 +101,7 @@ export const getPlatformPostDetails = (
           url: `https://bsky.app/profile/${blueskyThread.author.username}/post/${parseBlueskyURI(platformPost.posted.post_id).rkey}`,
           authorName:
             blueskyThread.author.displayName || blueskyThread.author.username,
-          authorAvatarUrl: blueskyThread.author.avatar,
+          authorAvatarUrl: blueskyThread.author.avatar || '/icons/bluesky.png',
         };
       }
     }
