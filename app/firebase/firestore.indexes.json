@@ -5,6 +5,42 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
+          "fieldPath": "authorProfileId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "structuredSemantics.topic",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAtMs",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "authorProfileId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "structuredSemantics.topic",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAtMs",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
           "fieldPath": "authorUserId",
           "order": "ASCENDING"
         },
