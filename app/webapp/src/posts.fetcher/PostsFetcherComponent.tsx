@@ -154,7 +154,7 @@ export const PostsFetcherComponent = (props: {
   ));
 
   const showNoPosts = (
-    <BoxCentered style={{ height: '100%' }}>
+    <BoxCentered style={{ height: '100%' }} pad={{ top: 'large' }}>
       <ModalContent
         type="small"
         title={t(AppGeneralKeys.noPostsFound)}
@@ -169,10 +169,7 @@ export const PostsFetcherComponent = (props: {
             margin={{ bottom: '16px' }}>
             <HmmIcon size={40}></HmmIcon>
           </BoxCentered>
-        }
-        parragraphs={[
-          <>{t(AppGeneralKeys.noPostsFoundDesc)}</>,
-        ]}></ModalContent>
+        }></ModalContent>
     </BoxCentered>
   );
 
