@@ -14,7 +14,7 @@ export const PostOverlay = (props: {
   const { postId, postInit, overlayNav } = props;
 
   return (
-    <Box style={{}}>
+    <Box style={{ height: '100%' }}>
       <PostContext postId={postId} postInit={postInit} showCelebration>
         <PostView overlayNav={overlayNav}></PostView>
       </PostContext>

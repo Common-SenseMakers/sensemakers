@@ -261,8 +261,8 @@ export const AppLabelsEditor = (props: {
             width: '100%',
             padding: '12px 12px 12px 12px',
             top: `${height || 0}px`,
-            borderBottomLeftRadius: '6px',
-            borderBottomRightRadius: '6px',
+            borderRadius: '6px',
+            border: `2px ${constants.colors.border} solid`,
             zIndex: 1,
           }}
           direction="row"
