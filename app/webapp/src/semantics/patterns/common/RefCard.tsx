@@ -13,6 +13,15 @@ const truncate = (text: string, size: number) => {
   return text.slice(0, size) + (text.length > size ? '...' : '');
 };
 
+const extractDomain = (url: string): string => {
+  try {
+    const urlObj = new URL(url);
+    return urlObj.hostname;
+  } catch {
+    return url;
+  }
+};
+
 export const RefCard = (props: {
   url: string;
   ix?: number;
@@ -26,7 +35,7 @@ export const RefCard = (props: {
   const titleTruncated = props.title && truncate(props.title, 50);
   const { constants } = useThemeContext();
 
-  const urlTruncated = truncate(props.url, 50);
+  const domain = extractDomain(props.url);
 
   const [thumbnail, setThumbnail] = useState<string | undefined>(undefined);
 
@@ -102,7 +111,7 @@ export const RefCard = (props: {
                 textDecoration: 'none',
               }}
               target="_blank">
-              {urlTruncated}
+              {domain}
             </Anchor>
           </Box>
         </Box>
