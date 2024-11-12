@@ -85,7 +85,7 @@ export const UserProfileOverlay = (props: {
       endpoint: '/api/feed/get',
       queryParams: {
         userId: userId,
-        profileId: profileId,
+        profileId: userId !== undefined ? undefined : profileId,
         semantics: { topic: SCIENCE_TOPIC_URI },
         includeAggregateLabels: true,
       },
