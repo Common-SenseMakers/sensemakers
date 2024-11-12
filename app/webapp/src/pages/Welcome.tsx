@@ -12,33 +12,64 @@ export const Welcome = () => {
       <Box style={{ flexGrow: 1 }}>
         <AppHeading level="1">{t(WelcomeKeys.title)}</AppHeading>
         <Box width="100%" height="4px"></Box>
-        <AppSubtitle>{t(WelcomeKeys.subtitle)}</AppSubtitle>
-        <Box width="100%" height="16px"></Box>
-        <AppParagraph>{t(WelcomeKeys.par1)}</AppParagraph>
-        <AppParagraph addMargin>
-          <Trans
-            i18nKey={WelcomeKeys.bullet1}
-            components={{ b: <b></b> }}></Trans>
-        </AppParagraph>
-        <AppParagraph addMargin>
-          <Trans
-            i18nKey={WelcomeKeys.bullet2}
-            components={{ b: <b></b> }}></Trans>
-        </AppParagraph>
-        <AppParagraph addMargin>
-          <Trans
-            i18nKey={WelcomeKeys.bullet3}
-            components={{ b: <b></b> }}></Trans>
-        </AppParagraph>
-        <AppParagraph addMargin>
-          <Trans
-            i18nKey={WelcomeKeys.bullet4}
-            components={{ b: <b></b> }}></Trans>
-        </AppParagraph>
-        <AppParagraph addMargin>
-          <Trans i18nKey={WelcomeKeys.par2} components={{ b: <b></b> }}></Trans>
-        </AppParagraph>
+        <Box style={{ flexGrow: 1 }} gap="16px">
+          <AppSubtitle>{t(WelcomeKeys.subtitle)}</AppSubtitle>
+          <AppParagraph>{t(WelcomeKeys.par1)}</AppParagraph>
+          <WelcomeBullet emoji="📊" translationKey={WelcomeKeys.bullet1} />
+          <WelcomeBullet emoji="💡" translationKey={WelcomeKeys.bullet2} />
+          <WelcomeBullet emoji="💬" translationKey={WelcomeKeys.bullet3} />
+          <WelcomeBullet emoji="👁️" translationKey={WelcomeKeys.bullet4} />
+          <AppParagraph>
+            <Trans
+              i18nKey={WelcomeKeys.par2}
+              components={{ b: <b></b> }}></Trans>
+          </AppParagraph>
+        </Box>
       </Box>
+    </Box>
+  );
+};
+
+interface WelcomeBulletProps {
+  emoji: string;
+  translationKey: string;
+}
+
+export const WelcomeBullet = ({
+  emoji,
+  translationKey,
+}: WelcomeBulletProps) => {
+  return (
+    <Box
+      direction="row"
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        gap: '8px',
+        alignSelf: 'stretch',
+      }}>
+      <Box
+        style={{
+          display: 'flex',
+          padding: '0px 4px',
+          justifyContent: 'center',
+          alignItems: 'center',
+          fontSize: '24px',
+          fontFamily: 'Libre Franklin',
+          fontStyle: 'normal',
+          fontWeight: '800',
+          lineHeight: '32px' /* 133.333% */,
+          letterSpacing: '-0.48px',
+        }}>
+        {emoji}
+      </Box>
+      <AppParagraph
+        style={{
+          flex: '1 0 0',
+        }}>
+        <Trans i18nKey={translationKey} components={{ b: <b></b> }}></Trans>
+      </AppParagraph>
     </Box>
   );
 };
