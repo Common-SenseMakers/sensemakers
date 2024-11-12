@@ -1,24 +1,9 @@
 import { Anchor, Box } from 'grommet';
 
-import { GenericPlatformPostDetails } from '../../post/platform.post.details';
-import { LoadingDiv } from '../../ui-components/LoadingDiv';
-import { useThemeContext } from '../../ui-components/ThemedApp';
-import { OpenLinkIcon } from '../icons/OpenLinkIcon';
-
-export const TwitterProfileAnchor = (props: { screen_name?: string }) => {
-  if (!props.screen_name) {
-    return <LoadingDiv></LoadingDiv>;
-  }
-  return (
-    <Anchor
-      style={{}}
-      target="_blank"
-      href={`https://twitter.com/${props.screen_name}`}
-      size="small">
-      @{props.screen_name}
-    </Anchor>
-  );
-};
+import { OpenLinkIcon } from '../app/icons/OpenLinkIcon';
+import { LoadingDiv } from '../ui-components/LoadingDiv';
+import { useThemeContext } from '../ui-components/ThemedApp';
+import { GenericPlatformPostDetails } from './platform-specific.details';
 
 export const PlatformPostAnchor = (props: {
   loading?: boolean;

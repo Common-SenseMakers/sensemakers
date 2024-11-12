@@ -1,7 +1,6 @@
 import { Box, Text } from 'grommet';
 import { MouseEventHandler } from 'react';
 
-import { PlatformPostAnchor } from '../app/anchors/PlatformPostAnchor';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import {
@@ -11,8 +10,9 @@ import {
 } from '../semantics/patterns/patterns';
 import { AppPostFull } from '../shared/types/types.posts';
 import { useThemeContext } from '../ui-components/ThemedApp';
+import { PlatformPostAnchor } from './PlatformPostAnchor';
 import { PostTextStatic } from './PostTextStatic';
-import { getPostDetails } from './platform.post.details';
+import { getPostDetails } from './platform-specific.details';
 import { usePost } from './post.context/PostContext';
 import { concatenateThread } from './posts.helper';
 

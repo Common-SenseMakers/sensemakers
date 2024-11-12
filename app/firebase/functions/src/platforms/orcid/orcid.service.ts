@@ -96,7 +96,8 @@ export class OrcidService
     };
 
     const orcidProfile: OrcidProfile = {
-      name: result.name,
+      id: result.orcid,
+      username: result.name,
       orcid: result.orcid,
     };
 

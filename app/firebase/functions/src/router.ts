@@ -8,6 +8,7 @@ import {
   parsePostController,
   updatePostController,
 } from './posts/controllers/posts.controller';
+import { getProfileController } from './profiles/profiles.controller';
 import {
   getLoggedUserController,
   setUserSettingsController,
@@ -34,3 +35,4 @@ router.post('/posts/update', updatePostController);
 router.post('/feed/get', getPublicFeedController);
 
 router.post('/refs/get', getRefMetaController);
+router.post('/profiles/get', getProfileController);

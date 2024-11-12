@@ -8,7 +8,10 @@ import {
   FetcherConfig,
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
+import { AccountProfileHeader } from '../profiles/AccountProfileHeader';
 import { AccountProfile } from '../shared/types/types.profiles';
+import { GetProfilePayload } from '../shared/types/types.user';
+import { splitProfileId } from '../shared/utils/profiles.utils';
 import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
 import { AppHeading } from '../ui-components';
 import { OnOverlayNav, OverlayNav } from './OverlayNav';
@@ -24,7 +27,7 @@ export const UserProfileOverlay = (props: {
   const appFetch = useAppFetch();
   const { profileId, userId, overlayNav } = props;
 
-  const { data: profiles } = useQuery({
+  const { data: accounts } = useQuery({
     queryKey: ['userProfile', profileId, userId],
     queryFn: async () => {
       try {
@@ -35,9 +38,15 @@ export const UserProfileOverlay = (props: {
           });
           return profiles;
         } else if (profileId) {
-          const profile = await appFetch<AccountProfile>('/api/profiles/get', {
-            profileId,
-          });
+          const { platform, user_id } = splitProfileId(profileId);
+          const payload: GetProfilePayload = {
+            platformId: platform,
+            user_id,
+          };
+          const profile = await appFetch<AccountProfile, GetProfilePayload>(
+            '/api/profiles/get',
+            payload
+          );
           return [profile];
         }
       } catch (e) {
@@ -48,8 +57,8 @@ export const UserProfileOverlay = (props: {
   });
 
   useEffect(() => {
-    console.log({ profiles });
-  }, [profiles]);
+    console.log({ accounts });
+  }, [accounts]);
 
   const feedConfig = useMemo((): FetcherConfig => {
     return {
@@ -76,7 +85,19 @@ export const UserProfileOverlay = (props: {
           flexShrink: 0,
           border: '1.6px solid var(--Neutral-300, #D1D5DB)',
         }}>
-        <AppHeading level="3">Posts about {userId}</AppHeading>
+        <AppHeading level="3">Posts by</AppHeading>
+        <Box margin={{ vertical: 'medium' }}>
+          {userId ? (
+            <></>
+          ) : profileId ? (
+            <AccountProfileHeader
+              account={
+                accounts !== undefined ? accounts[0] : undefined
+              }></AccountProfileHeader>
+          ) : (
+            <></>
+          )}
+        </Box>
       </Box>
       <PostsFetcherComponent
         showHeader={false}

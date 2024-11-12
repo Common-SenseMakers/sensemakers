@@ -12,6 +12,7 @@ import {
 import {
   AccountProfile,
   AccountProfileCreate,
+  PlatformProfile,
 } from '../@shared/types/types.profiles';
 import {
   AccountCredentials,
@@ -21,6 +22,7 @@ import {
   UserSettings,
   UserSettingsUpdate,
 } from '../@shared/types/types.user';
+import { splitProfileId } from '../@shared/utils/profiles.utils';
 import { USER_INIT_SETTINGS } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
@@ -29,10 +31,7 @@ import {
   IdentityServicesMap,
   PlatformsMap,
 } from '../platforms/platforms.service';
-import {
-  ProfilesRepository,
-  splitProfileId,
-} from '../profiles/profiles.repository';
+import { ProfilesRepository } from '../profiles/profiles.repository';
 import { TimeService } from '../time/time.service';
 import { UsersHelper } from './users.helper';
 import { UsersRepository } from './users.repository';
@@ -379,7 +378,7 @@ export class UsersService {
               manager
             );
 
-            if (profile) {
+            if (profile && profile.profile) {
               const current = userRead.profiles[platform] || [];
 
               current.push({
@@ -426,7 +425,6 @@ export class UsersService {
   ) {
     const profileId = await this.profiles.getByPlatformUsername(
       platformId,
-      'username',
       username,
       manager
     );
@@ -449,7 +447,7 @@ export class UsersService {
     return profile;
   }
 
-  async readAndCreateProfile<P = any>(
+  async readAndCreateProfile<P extends PlatformProfile = PlatformProfile>(
     profileId: string,
     manager: TransactionManager,
     credentials?: any
@@ -471,11 +469,16 @@ export class UsersService {
     };
 
     const id = this.profiles.create(profileCreate, manager);
-    return { id, ...profileCreate };
+    const profile = {
+      id,
+      ...profileCreate,
+    } as AccountProfile<P>;
+
+    return profile;
   }
 
   /** Get or create an account profile */
-  async getOrCreateProfile<P = any>(
+  async getOrCreateProfile<P extends PlatformProfile = PlatformProfile>(
     profileId: string,
     manager: TransactionManager
   ) {
@@ -488,6 +491,6 @@ export class UsersService {
       return this.readAndCreateProfile<P>(profileId, manager);
     }
 
-    return profile as P;
+    return profile;
   }
 }

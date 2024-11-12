@@ -15,7 +15,7 @@ import {
   DefinedIfTrue,
 } from '../@shared/types/types.user';
 import { parseBlueskyURI } from '../@shared/utils/bluesky.utils';
-import { parseMastodonGlobalUsername } from '../platforms/mastodon/mastodon.utils';
+import { parseMastodonGlobalUsername } from '../@shared/utils/mastodon.utils';
 
 export interface PlatformAccount {
   platform: PUBLISHABLE_PLATFORM;
@@ -102,7 +102,7 @@ export class UsersHelper {
     return platformProfiles as AccountDetailsRead<P>[];
   }
 
-  static getProfile<T extends boolean, P = any>(
+  static getProfile<T extends boolean, P = unknown>(
     user: AppUserRead,
     platformId: IDENTITY_PLATFORM,
     user_id?: string,
@@ -123,10 +123,10 @@ export class UsersHelper {
       : platformProfiles[0];
 
     if (!account) {
-      return undefined as DefinedIfTrue<T, AccountDetailsRead>;
+      return undefined as DefinedIfTrue<T, AccountDetailsRead<P>>;
     }
 
-    return account as DefinedIfTrue<T, AccountDetailsRead>;
+    return account as DefinedIfTrue<T, AccountDetailsRead<P>>;
   }
 
   static getOriginAccountDetails(user: AppUserRead, post: AppPostFull) {

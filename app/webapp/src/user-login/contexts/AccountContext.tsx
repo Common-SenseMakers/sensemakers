@@ -217,6 +217,11 @@ export const AccountContext = (props: PropsWithChildren) => {
       /** connectedUser === loggedIn now */
       setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
     }
+
+    if (connectedUser === null) {
+      disconnect();
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     connectedUser,

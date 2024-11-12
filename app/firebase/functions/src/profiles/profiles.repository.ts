@@ -1,31 +1,15 @@
-import {
-  ALL_IDENTITY_PLATFORMS,
-  PLATFORM,
-} from '../@shared/types/types.platforms';
+import { PLATFORM } from '../@shared/types/types.platforms';
 import {
   AccountProfile,
   AccountProfileCreate,
   FetchedDetails,
+  PlatformProfile,
 } from '../@shared/types/types.profiles';
 import { DefinedIfTrue } from '../@shared/types/types.user';
+import { getProfileId } from '../@shared/utils/profiles.utils';
 import { DBInstance } from '../db/instance';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
-
-export const getProfileId = (platform: PLATFORM, user_id: string) =>
-  `${platform}-${user_id}`;
-
-export const splitProfileId = (profileId: string) => {
-  for (const platform of ALL_IDENTITY_PLATFORMS) {
-    if (profileId.startsWith(`${platform}-`)) {
-      return {
-        platform,
-        user_id: profileId.replace(`${platform}-`, ''),
-      };
-    }
-  }
-  throw new Error(`Cant split unexpected profileId ${profileId}`);
-};
 
 export class ProfilesRepository {
   constructor(protected db: DBInstance) {}
@@ -76,11 +60,10 @@ export class ProfilesRepository {
     return manager.get(ref);
   }
 
-  public async getByProfileId<T extends boolean, P = any>(
-    profileId: string,
-    manager: TransactionManager,
-    shouldThrow?: T
-  ) {
+  public async getByProfileId<
+    T extends boolean,
+    P extends PlatformProfile = PlatformProfile,
+  >(profileId: string, manager: TransactionManager, shouldThrow?: T) {
     const doc = await this.getDoc(profileId, manager);
 
     const _shouldThrow = shouldThrow !== undefined ? shouldThrow : false;
@@ -130,13 +113,13 @@ export class ProfilesRepository {
 
   public async getByPlatformUsername<T extends boolean>(
     platformId: PLATFORM,
-    usernameTag: string,
     username: string,
     manager: TransactionManager,
     shouldThrow?: T
   ) {
     const platformId_property: keyof AccountProfile = 'platformId';
     const profile_property: keyof AccountProfile = 'profile';
+    const usernameTag: keyof PlatformProfile = 'username';
 
     const query = this.db.collections.profiles
       .where(platformId_property, '==', platformId)

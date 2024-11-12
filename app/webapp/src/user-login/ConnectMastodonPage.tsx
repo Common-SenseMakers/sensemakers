@@ -83,7 +83,11 @@ export const ConnectMastodonPage = () => {
     if (status === PlatformConnectedStatus.Connected) {
       return {
         title: 'Connected to Mastodon',
-        content: <></>,
+        content: (
+          <AppButton
+            onClick={() => navigate(AbsoluteRoutes.App)}
+            label="Go Back"></AppButton>
+        ),
       };
     }
 

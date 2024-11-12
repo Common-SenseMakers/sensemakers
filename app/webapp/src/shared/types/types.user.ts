@@ -95,7 +95,7 @@ export type AppUserCreate = Omit<AppUser, 'userId'>;
  * The AccountDetailsRead combines the AccountDetails (signup date and credentials
  * existence) with the account profile
  */
-export interface AccountDetailsRead<P = any> {
+export interface AccountDetailsRead<P = unknown> {
   user_id: string;
   profile: P;
   read: boolean;
@@ -135,3 +135,9 @@ export type RenderEmailFunction = (
   notificationFrequency: NotificationFreq,
   appUrl: string
 ) => { html: string; plainText: string; subject: string };
+
+export interface GetProfilePayload {
+  platformId: PLATFORM;
+  user_id?: string;
+  username?: string;
+}

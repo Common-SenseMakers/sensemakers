@@ -1,9 +1,9 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
 
-import { PlatformPostAnchor } from '../app/anchors/PlatformPostAnchor';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
+import { PlatformPostAnchor } from '../post/PlatformPostAnchor';
 import { useThemeContext } from '../ui-components/ThemedApp';
-import { getPostDetails } from './platform.post.details';
+import { getPostDetails } from './platform-specific.details';
 import { usePost } from './post.context/PostContext';
 
 /** should be used inside a PostContext */

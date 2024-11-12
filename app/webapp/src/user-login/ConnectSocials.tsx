@@ -82,7 +82,7 @@ export const ConnectSocials = () => {
               <MastodonIcon size={40} color="white"></MastodonIcon>
             )
           }
-          platformName={'Mastodon'}
+          platformName={t(PlatformsKeys.Mastodon)}
           onButtonClicked={() => navigate(AbsoluteRoutes.ConnectMastodon)}
           buttonText={mastodonProfile ? '' : 'connect'}
           username={mastodonProfile?.username || ''}
@@ -97,7 +97,7 @@ export const ConnectSocials = () => {
               <BlueskyIcon size={40} color="white"></BlueskyIcon>
             )
           }
-          platformName={'Bluesky'}
+          platformName={t(PlatformsKeys.Bluesky)}
           onButtonClicked={() => {
             navigate(RouteNames.ConnectBluesky);
           }}

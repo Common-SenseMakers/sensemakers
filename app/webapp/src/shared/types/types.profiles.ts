@@ -18,7 +18,7 @@ export interface FetchedDetails {
 }
 
 /** Keep tracks of all Accounts known to the app. */
-export interface AccountProfile<P = any> {
+export interface AccountProfile<P extends PlatformProfile = PlatformProfile> {
   id: string;
   platformId: IDENTITY_PLATFORM;
   user_id: string;
@@ -35,8 +35,7 @@ export interface PlatformProfile {
   description?: string;
 }
 
-export type AccountProfileCreate<P = any> = Omit<AccountProfile<P>, 'id'>;
-export type AccountProfileBase<P = any> = Omit<
-  AccountProfile<P>,
-  'id' | 'platformId'
->;
+export type AccountProfileCreate<P extends PlatformProfile = PlatformProfile> =
+  Omit<AccountProfile<P>, 'id'>;
+export type AccountProfileBase<P extends PlatformProfile = PlatformProfile> =
+  Omit<AccountProfile<P>, 'id' | 'platformId'>;

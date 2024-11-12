@@ -31,6 +31,12 @@ import {
   PlatformProfile,
 } from '../../@shared/types/types.profiles';
 import { AccountCredentials } from '../../@shared/types/types.user';
+import {
+  getGlobalMastodonUsername,
+  parseMastodonAccountURI,
+  parseMastodonGlobalUsername,
+  parseMastodonPostURI,
+} from '../../@shared/utils/mastodon.utils';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
@@ -40,10 +46,6 @@ import {
   cleanMastodonContent,
   convertMastodonPostsToThreads,
   extractPrimaryThread,
-  getGlobalMastodonUsername,
-  parseMastodonAccountURI,
-  parseMastodonGlobalUsername,
-  parseMastodonPostURI,
 } from './mastodon.utils';
 
 const DEBUG = false;
