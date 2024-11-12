@@ -222,7 +222,6 @@ export const MastodonContext = (props: PropsWithChildren) => {
                 PLATFORM.Mastodon,
                 PlatformConnectedStatus.Connected
               );
-              refreshConnected().catch(console.error);
               setSearchParams(searchParams);
             })
             .catch(console.error);

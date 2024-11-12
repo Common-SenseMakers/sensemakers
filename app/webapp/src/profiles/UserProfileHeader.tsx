@@ -61,10 +61,12 @@ export const UserProfileHeader = (props: {
           }}>
           {displayName}
         </Text>
-        <Box>
-          {profiles.map((profile) => {
+        <Box gap="4px">
+          {profiles.map((profile, ix) => {
             return (
-              <AccountProfileAnchor account={profile}></AccountProfileAnchor>
+              <AccountProfileAnchor
+                key={ix}
+                account={profile}></AccountProfileAnchor>
             );
           })}
         </Box>

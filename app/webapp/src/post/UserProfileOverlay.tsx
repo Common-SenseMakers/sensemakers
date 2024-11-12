@@ -20,7 +20,7 @@ import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
 import { AppHeading } from '../ui-components';
 import { OnOverlayNav, OverlayNav } from './OverlayNav';
 
-const DEBUG = true;
+const DEBUG = false;
 
 /** extract the postId from the route and pass it to a PostContext */
 export const UserProfileOverlay = (props: {
@@ -77,7 +77,7 @@ export const UserProfileOverlay = (props: {
   });
 
   useEffect(() => {
-    console.log({ user, profile });
+    if (DEBUG) console.log({ user, profile });
   }, [user, profile]);
 
   const feedConfig = useMemo((): FetcherConfig => {
