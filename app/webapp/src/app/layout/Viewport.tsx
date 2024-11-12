@@ -148,9 +148,12 @@ export const ViewportPage = (props: {
             style={fixed ? { height: '100%' } : { flexGrow: 1, flexShrink: 0 }}
             justify={props.justify || 'center'}>
             {addLogo ? (
-              <Box pad={{ horizontal: '12px', vertical: '10px' }}>
-                <AppLogo margin={{ bottom: 'xlarge' }}></AppLogo>
-              </Box>
+              <>
+                <Box pad={{ horizontal: '12px' }}>
+                  <AppLogo></AppLogo>
+                </Box>
+                <Box width="100%" height="40px"></Box>
+              </>
             ) : (
               <></>
             )}
