@@ -1,5 +1,6 @@
 import { RefMeta } from '../@shared/types/types.parser';
 import { OEmbed, RefPostData } from '../@shared/types/types.references';
+import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
 import { LinksRepository } from './links.repository';
@@ -38,14 +39,26 @@ export class LinksService {
     }
   }
 
-  async getOEmbed(url: string, manager: TransactionManager): Promise<OEmbed> {
+  async getOEmbed(
+    url: string,
+    manager: TransactionManager,
+    parsedMeta?: OEmbed
+  ): Promise<OEmbed> {
     const normalizedUrl = normalizeUrl(url);
     const urlHash = hashUrl(normalizedUrl);
     const existing = await this.links.get(urlHash, manager);
     if (existing) return existing;
 
     const oembed = await this.fetchOEmbed(url);
-    this.links.set(urlHash, oembed, manager);
+    this.links.set(
+      urlHash,
+      removeUndefined({
+        title: parsedMeta?.title,
+        summary: parsedMeta?.summary,
+        ...oembed,
+      }),
+      manager
+    );
 
     return oembed;
   }

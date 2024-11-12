@@ -150,15 +150,25 @@ export class PostsProcessing {
       !refMetaOrg.url;
 
     if (isPartial) {
-      const oembed = await this.linksService.getOEmbed(url, manager);
+      const oembed = await this.linksService.getOEmbed(
+        url,
+        manager,
+        refMetaOrg
+      );
       return {
         ...oembed,
         item_type: refMetaOrg?.item_type,
       };
     } else {
       /** store/update refMeta */
-      this.linksService.setOEmbed(refMetaOrg, manager);
-      return refMetaOrg;
+      const oembed = {
+        url: normalizeUrl(url),
+        original_url: url,
+        title: refMetaOrg.title,
+        summary: refMetaOrg.summary,
+      };
+      await this.linksService.setOEmbed(oembed, manager);
+      return { ...refMetaOrg, ...oembed };
     }
   }
 
@@ -226,7 +236,11 @@ export class PostsProcessing {
     await Promise.all(
       Array.from(Object.keys(refsLabels)).map(async (reference) => {
         const url = reference;
-        const refMeta = await this.getRefMeta(url, manager, originalParsed);
+        const refMeta = await this.getRefMeta(
+          url,
+          manager
+          // post.originalParsed
+        );
         const refPostData: RefPostData = removeUndefined({
           id: post.id,
           authorProfileId: post.authorProfileId,
