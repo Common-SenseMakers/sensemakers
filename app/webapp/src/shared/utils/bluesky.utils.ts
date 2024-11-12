@@ -1,4 +1,4 @@
-import { AccountProfile } from '../types/types.profiles';
+import { AccountProfileRead } from '../types/types.profiles';
 
 export interface BlueskyURI {
   did: string;
@@ -31,6 +31,6 @@ export function parseBlueskyURI(uri: string): BlueskyURI {
   }
 }
 
-export const getBlueskyProfileDetails = (profile: AccountProfile) => {
+export const getBlueskyProfileDetails = (profile: AccountProfileRead) => {
   return { accountURL: `https://bsky.app/profile/${profile.user_id}` };
 };

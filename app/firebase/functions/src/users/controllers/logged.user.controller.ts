@@ -14,7 +14,7 @@ export const getLoggedUserController: RequestHandler = async (
     const services = getServices(request);
 
     const user = await services.db.run((manager) =>
-      services.users.getUserWithProfiles(userId, manager)
+      services.users.getLoggedUserWithProfiles(userId, manager)
     );
 
     response.status(200).send({

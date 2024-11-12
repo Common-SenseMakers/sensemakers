@@ -27,6 +27,8 @@ export interface AccountProfile<P extends PlatformProfile = PlatformProfile> {
   fetched?: FetchedDetails;
 }
 
+export type AccountProfileRead = Omit<AccountProfile, 'fetched' | 'id'>;
+
 export interface PlatformProfile {
   id: string;
   username: string;

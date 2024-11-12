@@ -1,12 +1,12 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
 
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
-import { AccountProfile } from '../shared/types/types.profiles';
+import { AccountProfileRead } from '../shared/types/types.profiles';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { AccountProfileAnchor } from './AccountProfileAnchor';
 
 export const AccountProfileHeader = (props: {
-  account?: AccountProfile;
+  account?: AccountProfileRead;
   boxProps?: BoxExtendedProps;
 }) => {
   const { constants } = useThemeContext();

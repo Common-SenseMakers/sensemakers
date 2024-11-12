@@ -2,10 +2,12 @@ import { Anchor, Box } from 'grommet';
 
 import { OpenLinkIcon } from '../app/icons/OpenLinkIcon';
 import { getAccountDetails } from '../post/platform-specific.details';
-import { AccountProfile } from '../shared/types/types.profiles';
+import { AccountProfileRead } from '../shared/types/types.profiles';
 import { useThemeContext } from '../ui-components/ThemedApp';
 
-export const AccountProfileAnchor = (props: { account?: AccountProfile }) => {
+export const AccountProfileAnchor = (props: {
+  account?: AccountProfileRead;
+}) => {
   const { constants } = useThemeContext();
   const { account } = props;
 

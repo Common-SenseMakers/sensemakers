@@ -9,9 +9,13 @@ import {
 import { NanopubSigninCredentials } from './types.nanopubs';
 import { NotificationFreq } from './types.notifications';
 import { OrcidAccountDetails, OrcidProfile } from './types.orcid';
-import { PLATFORM } from './types.platforms';
+import { IDENTITY_PLATFORM, PLATFORM } from './types.platforms';
 import { AppPostFull } from './types.posts';
-import { PlatformProfile, WithPlatformUserId } from './types.profiles';
+import {
+  AccountProfileRead,
+  PlatformProfile,
+  WithPlatformUserId,
+} from './types.profiles';
 import {
   TwitterAccountDetails,
   TwitterSigninCredentials,
@@ -52,6 +56,7 @@ export interface UserWithId {
   userId: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UserSettings {}
 
 export type UserSettingsUpdate = Partial<UserSettings>;
@@ -95,7 +100,10 @@ export type AppUserCreate = Omit<AppUser, 'userId'>;
  * The AccountDetailsRead combines the AccountDetails (signup date and credentials
  * existence) with the account profile
  */
-export interface AccountDetailsRead<P = unknown> {
+export interface AccountDetailsRead<
+  P extends PlatformProfile = PlatformProfile,
+> {
+  platformId: IDENTITY_PLATFORM;
   user_id: string;
   profile: P;
   read: boolean;
@@ -103,12 +111,24 @@ export interface AccountDetailsRead<P = unknown> {
 }
 
 /** accounts include the readable details (not sensitive details) */
+
+/** details sent to the logged in user about themeselves */
 export interface AppUserRead extends UserWithId, UserWithSettings {
   profiles: {
     [PLATFORM.Orcid]?: AccountDetailsRead<OrcidProfile>[];
     [PLATFORM.Twitter]?: AccountDetailsRead<PlatformProfile>[];
     [PLATFORM.Mastodon]?: AccountDetailsRead<PlatformProfile>[];
     [PLATFORM.Bluesky]?: AccountDetailsRead<PlatformProfile>[];
+  };
+}
+
+/** details publicly available about a user */
+export interface AppUserPublicRead extends UserWithId {
+  profiles: {
+    [PLATFORM.Orcid]?: AccountProfileRead[];
+    [PLATFORM.Twitter]?: AccountProfileRead[];
+    [PLATFORM.Mastodon]?: AccountProfileRead[];
+    [PLATFORM.Bluesky]?: AccountProfileRead[];
   };
 }
 

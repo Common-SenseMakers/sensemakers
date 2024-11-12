@@ -1,6 +1,7 @@
 import { RequestHandler } from 'express';
 import { object, string } from 'yup';
 
+import { AccountProfileRead } from '../@shared/types/types.profiles';
 import { GetProfilePayload } from '../@shared/types/types.user';
 import { getProfileId } from '../@shared/utils/profiles.utils';
 import { getServices } from '../controllers.utils';
@@ -50,7 +51,15 @@ export const getProfileController: RequestHandler = async (
       return users.profiles.getByProfileId(profileId, manager, false);
     });
 
-    if (DEBUG) logger.debug(`${request.path}: profile`, { profile });
+    const publicProfile: AccountProfileRead | undefined = profile && {
+      platformId: profile.platformId,
+      user_id: profile.user_id,
+      profile: profile.profile,
+      userId: profile.userId,
+    };
+
+    if (DEBUG)
+      logger.debug(`${request.path}: profile`, { profile: publicProfile });
     response.status(200).send({ success: true, data: profile });
   } catch (error: any) {
     logger.error('error', error);

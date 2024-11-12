@@ -6,7 +6,7 @@ import { MastodonThread } from '../shared/types/types.mastodon';
 import { PlatformPost } from '../shared/types/types.platform.posts';
 import { PLATFORM } from '../shared/types/types.platforms';
 import { AppPostFull } from '../shared/types/types.posts';
-import { AccountProfile } from '../shared/types/types.profiles';
+import { AccountProfileRead } from '../shared/types/types.profiles';
 import { TwitterThread } from '../shared/types/types.twitter';
 import {
   getBlueskyProfileDetails,
@@ -110,7 +110,7 @@ export const getPlatformPostDetails = (
 };
 
 export const getAccountDetails = (
-  account: AccountProfile
+  account: AccountProfileRead
 ): { url: string; label: string; username?: string } => {
   if (account.platformId === PLATFORM.Twitter) {
     if (!account.profile) throw new Error('Unexpected');
@@ -133,7 +133,7 @@ export const getAccountDetails = (
   if (account.platformId === PLATFORM.Bluesky) {
     const { accountURL } = getBlueskyProfileDetails(account);
     return {
-      label: t(PlatformsKeys.Mastodon),
+      label: t(PlatformsKeys.Bluesky),
       url: accountURL,
       username: account.profile?.username,
     };

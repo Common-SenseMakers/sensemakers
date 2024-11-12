@@ -89,7 +89,7 @@ export class UsersHelper {
     return allAccounts;
   }
 
-  static getProfiles<P = any>(
+  static getProfiles<P extends PlatformProfile = PlatformProfile>(
     user: AppUserRead,
     platformId: IDENTITY_PLATFORM
   ): AccountDetailsRead<P>[] {
@@ -102,7 +102,10 @@ export class UsersHelper {
     return platformProfiles as AccountDetailsRead<P>[];
   }
 
-  static getProfile<T extends boolean, P = unknown>(
+  static getProfile<
+    T extends boolean,
+    P extends PlatformProfile = PlatformProfile,
+  >(
     user: AppUserRead,
     platformId: IDENTITY_PLATFORM,
     user_id?: string,

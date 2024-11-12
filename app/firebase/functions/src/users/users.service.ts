@@ -12,11 +12,13 @@ import {
 import {
   AccountProfile,
   AccountProfileCreate,
+  AccountProfileRead,
   PlatformProfile,
 } from '../@shared/types/types.profiles';
 import {
   AccountCredentials,
   AccountDetailsRead,
+  AppUserPublicRead,
   AppUserRead,
   EmailDetails,
   UserSettings,
@@ -344,26 +346,12 @@ export class UsersService {
     return verified.payload.userId;
   }
 
-  public async getUserWithProfiles(
+  public async getUserReadProfiles(
     userId: string,
     manager: TransactionManager
   ) {
     const user = await this.repo.getUser(userId, manager, true);
-
-    /** delete the token, from the public profile */
-    const email: EmailDetails | undefined = user.email
-      ? {
-          ...user.email,
-        }
-      : undefined;
-
-    const userRead: AppUserRead = {
-      userId,
-      email,
-      signupDate: user.signupDate,
-      settings: user.settings,
-      profiles: {},
-    };
+    const profiles: AppUserRead['profiles'] = {};
 
     /** extract the profile for each account */
     await Promise.all(
@@ -379,22 +367,79 @@ export class UsersService {
             );
 
             if (profile && profile.profile) {
-              const current = userRead.profiles[platform] || [];
+              const current = profiles[platform] || [];
 
               current.push({
                 user_id: account.user_id,
+                platformId: platform,
                 profile: profile.profile,
                 read: account.credentials.read !== undefined,
                 write: account.credentials.write !== undefined,
               });
 
-              userRead.profiles[platform] =
-                current as AccountDetailsRead<any>[];
+              profiles[platform] = current as AccountDetailsRead<any>[];
             }
           })
         );
       })
     );
+
+    return profiles;
+  }
+
+  /** get a user and their public profiles data */
+  public async getPublicUserWithProfiles(
+    userId: string,
+    manager: TransactionManager
+  ): Promise<AppUserPublicRead> {
+    const readProfiles = await this.getUserReadProfiles(userId, manager);
+    const publicProfiles: AppUserPublicRead['profiles'] = {};
+
+    (Array.from(Object.keys(readProfiles)) as IDENTITY_PLATFORM[]).forEach(
+      (platform: IDENTITY_PLATFORM) => {
+        const accounts = readProfiles[platform];
+        if (accounts) {
+          publicProfiles[platform] = accounts.map((account) => {
+            const profile: AccountProfileRead = {
+              platformId: account.platformId,
+              user_id: account.user_id,
+              userId: userId,
+              profile: account.profile,
+            };
+            return profile;
+          });
+        }
+      }
+    );
+
+    return {
+      userId,
+      profiles: publicProfiles,
+    };
+  }
+
+  public async getLoggedUserWithProfiles(
+    userId: string,
+    manager: TransactionManager
+  ) {
+    const user = await this.repo.getUser(userId, manager, true);
+
+    /** delete the token, from the public profile */
+    const email: EmailDetails | undefined = user.email
+      ? {
+          ...user.email,
+        }
+      : undefined;
+
+    const readProfiles = await this.getUserReadProfiles(userId, manager);
+
+    const userRead: AppUserRead = {
+      userId,
+      email,
+      signupDate: user.signupDate,
+      settings: user.settings,
+      profiles: readProfiles,
+    };
 
     return userRead;
   }
