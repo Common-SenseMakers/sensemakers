@@ -77,7 +77,8 @@ export const getPlatformPostDetails = (
         const twitterThread = platformPost.posted.post as TwitterThread;
         return {
           url: `https://x.com/${twitterThread.author.username}/status/${platformPost.posted.post_id}`,
-          authorName: twitterThread.author.name,
+          authorName:
+            twitterThread.author.name || twitterThread.author.username,
           authorAvatarUrl: twitterThread.author.profile_image_url,
         };
       }
@@ -86,7 +87,8 @@ export const getPlatformPostDetails = (
         const mastodonThread = platformPost.posted.post as MastodonThread;
         return {
           url: mastodonThread.posts[0].url || mastodonThread.posts[0].uri,
-          authorName: mastodonThread.author.displayName,
+          authorName:
+            mastodonThread.author.displayName || mastodonThread.author.username,
           authorAvatarUrl: mastodonThread.author.avatar,
         };
       }
@@ -95,7 +97,8 @@ export const getPlatformPostDetails = (
         const blueskyThread = platformPost.posted.post as BlueskyThread;
         return {
           url: `https://bsky.app/profile/${blueskyThread.author.username}/post/${parseBlueskyURI(platformPost.posted.post_id).rkey}`,
-          authorName: blueskyThread.author.displayName,
+          authorName:
+            blueskyThread.author.displayName || blueskyThread.author.username,
           authorAvatarUrl: blueskyThread.author.avatar,
         };
       }
