@@ -24,6 +24,7 @@ import { concatenateThread } from './posts.helper';
 export const PostView = (props: {
   profile?: PlatformProfile;
   overlayNav?: OnOverlayNav;
+  onPostClick?: (event: PostClickEvent) => void;
 }) => {
   const appFetch = useAppFetch();
   const { overlayNav } = props;
