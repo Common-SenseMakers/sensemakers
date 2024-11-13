@@ -1,10 +1,12 @@
 import { RequestHandler } from 'express';
 import { object, string } from 'yup';
 
+import { OEmbed } from '../@shared/types/types.parser';
+import { PostsQueryDefined } from '../@shared/types/types.posts';
 import { getServices } from '../controllers.utils';
 import { logger } from '../instances/logger';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export const getRefSchema = object({
   ref: string().required(),
@@ -23,11 +25,34 @@ export const getRefMetaController: RequestHandler = async (
     };
 
     logger.debug(`${request.path} - query parameters`, { queryParams });
-    const { links, db } = getServices(request);
+    const { db, postsManager } = getServices(request);
 
-    const refData = await db.run((manager) =>
-      links.getOEmbed(queryParams.ref, manager)
+    const getManyQueryParams: PostsQueryDefined = {
+      fetchParams: {
+        expectedAmount: 1,
+      },
+      semantics: { refs: [queryParams.ref] },
+    };
+    const posts =
+      await postsManager.processing.posts.getMany(getManyQueryParams);
+    if (posts.length === 0) {
+      throw new Error(`No posts found for ref ${queryParams.ref}`);
+    }
+    const postsFull = await Promise.all(
+      posts.map((post) =>
+        db.run((manager) =>
+          postsManager.processing.hydratePostFull(post, true, true, manager)
+        )
+      )
     );
+    const refPost = postsFull[0];
+    const refMeta =
+      refPost.originalParsed?.support?.refs_meta?.[queryParams.ref];
+    const refData: OEmbed = {
+      url: queryParams.ref,
+      title: refMeta?.title,
+      summary: refMeta?.summary,
+    };
 
     if (DEBUG) logger.debug(`${request.path}: refData`, { refData });
     response.status(200).send({ success: true, data: refData });
