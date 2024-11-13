@@ -48,6 +48,7 @@ export interface RefMeta extends OEmbed {
   ref_source_url?: string;
   labels?: string[];
   refLabels?: RefLabel[];
+  ontology?: ParserOntology;
 }
 
 export interface ParserOntology {

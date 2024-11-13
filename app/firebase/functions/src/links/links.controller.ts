@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { object, string } from 'yup';
 
-import { OEmbed, RefMeta } from '../@shared/types/types.parser';
+import { RefMeta } from '../@shared/types/types.parser';
 import { PostsQueryDefined } from '../@shared/types/types.posts';
 import { getServices } from '../controllers.utils';
 import { logger } from '../instances/logger';
@@ -53,6 +53,7 @@ export const getRefMetaController: RequestHandler = async (
       title: refMeta?.title,
       summary: refMeta?.summary,
       refLabels: refPost.meta?.refLabels[queryParams.ref],
+      ontology: refPost.originalParsed?.support?.ontology,
     };
 
     if (DEBUG) logger.debug(`${request.path}: refData`, { refData });

@@ -8,10 +8,9 @@ import {
   FetcherConfig,
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
-import { RefCard } from '../semantics/patterns/common/RefCard';
+import { RefWithLabels } from '../semantics/patterns/refs-labels/RefWithLabels';
 import { RefMeta } from '../shared/types/types.parser';
 import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
-import { AppHeading } from '../ui-components';
 import { OnOverlayNav, OverlayNav } from './OverlayNav';
 
 const DEBUG = true;
@@ -55,7 +54,7 @@ export const RefOverlay = (props: {
   }, []);
 
   const feed = usePostsFetcher(feedConfig);
-
+  const refData = { labelsUris: refMeta?.labels || [], meta: refMeta };
   return (
     <Box>
       <OverlayNav overlayNav={overlayNav}></OverlayNav>
@@ -65,13 +64,22 @@ export const RefOverlay = (props: {
           flexShrink: 0,
           border: '1.6px solid var(--Neutral-300, #D1D5DB)',
         }}>
-        <AppHeading level="3">Posts about</AppHeading>
-        <RefCard
-          url={refUrl}
-          title={refMeta?.title}
-          description={refMeta?.summary}
-          image={refMeta?.thumbnail_url}
-          refType={refMeta?.item_type}></RefCard>
+        <RefWithLabels
+          ix={0}
+          showLabels={true}
+          showDescription={true}
+          editable={false}
+          refUrl={refUrl}
+          refData={refData}
+          refLabels={refMeta?.refLabels}
+          allRefs={[[refUrl, refData]]}
+          ontology={refMeta?.ontology}
+          removeLabel={() => {
+            return undefined;
+          }}
+          addLabel={() => {
+            return undefined;
+          }}></RefWithLabels>
       </Box>
       <PostsFetcherComponent
         enableOverlay={{ post: false, ref: false, user: false }}

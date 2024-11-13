@@ -98,6 +98,9 @@ export const RefLabelsComponent = (props: PatternProps) => {
               if (!props.originalParsed)
                 throw new Error('Unexpected undefined');
 
+              const refLabels = props.post?.meta?.refLabels[ref];
+
+              const authorProfileId = props.post?.authorProfileId;
               return (
                 <>
                   <RefWithLabels
@@ -108,8 +111,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
                     key={ref}
                     refUrl={ref}
                     refData={refData}
-                    support={props.originalParsed?.support}
-                    post={props.post}
+                    ontology={props.originalParsed?.support?.ontology}
                     removeLabel={(labelUri: string) => {
                       removeLabel(ref, labelUri).catch(console.error);
                     }}
@@ -117,7 +119,9 @@ export const RefLabelsComponent = (props: PatternProps) => {
                       addLabel(ref, labelUri).catch(console.error);
                     }}
                     allRefs={visibleRefs}
-                    onPostClick={props.onPostClick}></RefWithLabels>
+                    onPostClick={props.onPostClick}
+                    refLabels={refLabels}
+                    authorProfileId={authorProfileId}></RefWithLabels>
                 </>
               );
             })}

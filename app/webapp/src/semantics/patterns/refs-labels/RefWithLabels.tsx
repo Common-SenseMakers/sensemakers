@@ -1,8 +1,8 @@
 import { Anchor, Box } from 'grommet';
 import { useMemo } from 'react';
 
-import { ParsedSupport, RefMeta } from '../../../shared/types/types.parser';
-import { AppPostFull } from '../../../shared/types/types.posts';
+import { ParserOntology, RefMeta } from '../../../shared/types/types.parser';
+import { RefLabel } from '../../../shared/types/types.posts';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { REF_URL_ANCHOR_ID, RefCard } from '../common/RefCard';
 import { PostClickEvent, PostClickTarget } from '../patterns';
@@ -16,15 +16,16 @@ export const RefWithLabels = (props: {
   refData: RefData;
   showLabels?: boolean;
   showDescription?: boolean;
-  support?: ParsedSupport;
-  post?: AppPostFull;
+  ontology?: ParserOntology;
   addLabel: (labelUri: string) => void;
   removeLabel: (labelUri: string) => void;
   editable?: boolean;
   allRefs: [string, RefData][];
   onPostClick?: (event: PostClickEvent) => void;
+  refLabels?: RefLabel[];
+  authorProfileId?: string;
 }) => {
-  const labelsOntology = props.support?.ontology?.semantic_predicates;
+  const labelsOntology = props.ontology?.semantic_predicates;
   const refData = props.refData;
   const { showLabels } =
     props.showLabels !== undefined ? props : { showLabels: true };
@@ -77,12 +78,12 @@ export const RefWithLabels = (props: {
     props.addLabel(getLabelFromDisplayName(label).uri);
   };
 
-  const refLabels = props.post?.meta?.refLabels[props.refUrl];
+  const refLabels = props.refLabels;
 
   const show =
     refLabels &&
     refLabels.find(
-      (refLabel) => refLabel.authorProfileId !== props.post?.authorProfileId
+      (refLabel) => refLabel.authorProfileId !== props.authorProfileId
     ) !== undefined;
 
   const onCardClicked = (
@@ -132,7 +133,7 @@ export const RefWithLabels = (props: {
         <Box margin={{ top: '22px' }}>
           <AggregatedRefLabels
             refLabels={refLabels}
-            ontology={props.support?.ontology}></AggregatedRefLabels>
+            ontology={props.ontology}></AggregatedRefLabels>
         </Box>
       ) : (
         <></>
