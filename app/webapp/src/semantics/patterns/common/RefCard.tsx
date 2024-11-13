@@ -112,7 +112,11 @@ export const RefCard = (props: {
             level={4}
             color="#111827"
             style={{ fontWeight: '500', fontSize: '18px' }}>
-            {titleTruncated}
+            {titleTruncated === 'Twitter post'
+              ? urlMeta?.title
+                ? urlMeta.title
+                : titleTruncated
+              : titleTruncated}
           </AppHeading>
           {props.showDescription &&
             (props.description || urlMeta?.description) && (
