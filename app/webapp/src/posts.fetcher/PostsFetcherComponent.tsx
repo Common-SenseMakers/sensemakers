@@ -176,10 +176,11 @@ export const PostsFetcherComponent = (props: {
   const onPostClick = (post: AppPostFull, event: PostClickEvent) => {
     // Reset all overlays first
     reset();
-    
+
     if (event.target === PostClickTarget.POST) {
       if (enableOverlay.post) {
         setPostToShow(post);
+        return;
       }
     }
 
@@ -187,6 +188,7 @@ export const PostsFetcherComponent = (props: {
       if (enableOverlay.ref) {
         if (DEBUG) console.log(`clicked on ref ${event.payload as string}`);
         setRefToShow(event.payload as string);
+        return;
       }
     }
 
@@ -194,6 +196,7 @@ export const PostsFetcherComponent = (props: {
       if (enableOverlay.user) {
         if (DEBUG) console.log(`clicked on user ${event.payload as string}`);
         setUserIdToShow(event.payload as string);
+        return;
       }
     }
 
@@ -202,6 +205,7 @@ export const PostsFetcherComponent = (props: {
         if (DEBUG)
           console.log(`clicked on platform user ${event.payload as string}`);
         setProfileIdToShow(event.payload as string);
+        return;
       }
     }
   };
