@@ -122,6 +122,7 @@ export const RefWithLabels = (props: {
           }
           image={refData.meta?.thumbnail_url}
           refType={refData.meta.item_type}
+          showDescription={props.showDescription}
           sourceRef={getSourceRefNumber(refData.meta, props.allRefs)}></RefCard>
       ) : (
         <Anchor target="_blank" href={props.refUrl}>

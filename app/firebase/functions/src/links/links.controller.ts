@@ -54,6 +54,7 @@ export const getRefMetaController: RequestHandler = async (
       summary: refMeta?.summary,
       refLabels: refPost.meta?.refLabels[queryParams.ref],
       ontology: refPost.originalParsed?.support?.ontology,
+      ...refMeta,
     };
 
     if (DEBUG) logger.debug(`${request.path}: refData`, { refData });
