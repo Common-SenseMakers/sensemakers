@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Anchor, Box, Text } from 'grommet';
+import { Anchor, Box, Paragraph, Text } from 'grommet';
 import { useEffect, useState } from 'react';
 
 import { IFRAMELY_API_KEY, IFRAMELY_API_URL } from '../../../app/config';
@@ -31,22 +31,25 @@ export const RefCard = (props: {
   title?: string;
   description?: string;
   image?: string;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent) => void;
   refType?: string;
   sourceRef?: number;
+  showDescription?: boolean;
 }) => {
   const titleTruncated = props.title && truncate(props.title, 50);
   const { constants } = useThemeContext();
 
   const domain = extractDomain(props.url);
 
-  const [thumbnail, setThumbnail] = useState<string | undefined>(undefined);
+  const [urlMeta, setUrlMeta] = useState<
+    { thumbnail: string; description: string; title: string } | undefined
+  >(undefined);
 
   useEffect(() => {
     const fetchThumbnail = async () => {
       try {
-        const thumbnailUrl = await getThumbnail(props.url);
-        setThumbnail(thumbnailUrl);
+        const urlMetaResponse = await getUrlMeta(props.url);
+        setUrlMeta(urlMetaResponse);
       } catch (error) {
         console.error('Error fetching thumbnail:', error);
       }
@@ -58,7 +61,7 @@ export const RefCard = (props: {
   }, [props.url]);
 
   return (
-    <Box align="start" pad={{}}>
+    <Box align="start" pad={{}} onClick={props.onClick}>
       <Box
         margin={{ bottom: '20px' }}
         width="100%"
@@ -81,18 +84,18 @@ export const RefCard = (props: {
       <Box
         style={{
           display: 'flex',
-          alignItems: 'center',
+          alignItems: props.showDescription ? 'flex-start' : 'center',
           gap: '12px',
           alignSelf: 'stretch',
           flexDirection: 'row',
         }}>
-        {thumbnail && (
+        {urlMeta?.thumbnail && (
           <Box
             style={{
               borderRadius: '8px',
               border: '1px solid var(--Neutral-300, #D1D5DB)',
-              background: thumbnail
-                ? `url(${thumbnail}) lightgray 50% / cover no-repeat`
+              background: urlMeta.thumbnail
+                ? `url(${urlMeta.thumbnail}) lightgray 50% / cover no-repeat`
                 : undefined,
               width: '76px',
               height: '76px',
@@ -109,11 +112,34 @@ export const RefCard = (props: {
           }}>
           <AppHeading
             level={4}
-            color="#374151"
+            color="#111827"
             style={{ fontWeight: '500', fontSize: '18px' }}>
-            {titleTruncated}
+            {titleTruncated === 'Twitter post'
+              ? urlMeta?.title
+                ? urlMeta.title
+                : titleTruncated
+              : titleTruncated}
           </AppHeading>
+          {props.showDescription &&
+            (props.description || urlMeta?.description) && (
+              <Paragraph
+                margin={{ vertical: '4px' }}
+                size="medium"
+                style={{
+                  lineHeight: '18px',
+                  color: '#111827',
+                  fontSize: '14px',
+                  fontStyle: 'normal',
+                  fontWeight: '400',
+                }}
+                maxLines={6}>
+                {props.description || urlMeta?.description}
+              </Paragraph>
+            )}
           <Box
+            onClick={() =>
+              window.open(props.url, '_blank', 'noopener,noreferrer')
+            }
             direction="row"
             gap="4px"
             style={{
@@ -141,7 +167,11 @@ export const RefCard = (props: {
   );
 };
 
-async function getThumbnail(url: string): Promise<string | undefined> {
+async function getUrlMeta(
+  url: string
+): Promise<
+  { thumbnail: string; description: string; title: string } | undefined
+> {
   if (!IFRAMELY_API_KEY || !IFRAMELY_API_URL) {
     console.error('Iframely API key not found.');
     return undefined;
@@ -157,7 +187,11 @@ async function getThumbnail(url: string): Promise<string | undefined> {
     if (data.links && data.links.thumbnail && data.links.thumbnail.length > 0) {
       // Extract the first thumbnail URL
       const thumbnailUrl = data.links.thumbnail[0].href;
-      return thumbnailUrl;
+      return {
+        thumbnail: thumbnailUrl,
+        description: data.meta.description,
+        title: data.meta.title,
+      };
     } else {
       if (DEBUG) console.error('No thumbnail found for the provided URL.');
       return undefined;
@@ -172,5 +206,9 @@ interface IframelyResponse {
     thumbnail: {
       href: string;
     }[];
+  };
+  meta: {
+    title: string;
+    description: string;
   };
 }

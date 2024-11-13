@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Box } from 'grommet';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { useAppFetch } from '../api/app.fetch';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
@@ -8,10 +8,12 @@ import {
   FetcherConfig,
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
-import { RefCard } from '../semantics/patterns/common/RefCard';
+import { RefWithLabels } from '../semantics/patterns/refs-labels/RefWithLabels';
 import { RefMeta } from '../shared/types/types.parser';
+import { PLATFORM } from '../shared/types/types.platforms';
+import { PlatformProfile } from '../shared/types/types.profiles';
 import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
-import { AppHeading } from '../ui-components';
+import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { OnOverlayNav, OverlayNav } from './OverlayNav';
 
 const DEBUG = true;
@@ -23,6 +25,19 @@ export const RefOverlay = (props: {
 }) => {
   const appFetch = useAppFetch();
   const { refUrl, overlayNav } = props;
+
+  const { connectedUser } = useAccountContext();
+  const [accountProfileId, setAccountProfileId] = useState<string | undefined>(
+    undefined
+  );
+
+  useEffect(() => {
+    Object.entries(connectedUser?.profiles || {}).forEach(([key, value]) => {
+      if (key !== PLATFORM.Orcid && value) {
+        setAccountProfileId(`${key}-${(value as PlatformProfile).id}`);
+      }
+    });
+  }, [connectedUser]);
 
   const { data: refMeta } = useQuery({
     queryKey: ['ref', refUrl],
@@ -55,7 +70,13 @@ export const RefOverlay = (props: {
   }, []);
 
   const feed = usePostsFetcher(feedConfig);
-
+  const refData = {
+    labelsUris:
+      (refMeta?.refLabels || [])
+        .map((refLabel) => refLabel.label)
+        .filter((label) => label !== 'https://sense-nets.xyz/quotesPost') || [],
+    meta: refMeta,
+  };
   return (
     <Box>
       <OverlayNav overlayNav={overlayNav}></OverlayNav>
@@ -65,13 +86,23 @@ export const RefOverlay = (props: {
           flexShrink: 0,
           border: '1.6px solid var(--Neutral-300, #D1D5DB)',
         }}>
-        <AppHeading level="3">Posts about</AppHeading>
-        <RefCard
-          url={refUrl}
-          title={refMeta?.title}
-          description={refMeta?.summary}
-          image={refMeta?.thumbnail_url}
-          refType={refMeta?.item_type}></RefCard>
+        <RefWithLabels
+          ix={0}
+          authorProfileId={accountProfileId}
+          showLabels={true}
+          showDescription={true}
+          editable={false}
+          refUrl={refUrl}
+          refData={refData}
+          refLabels={refMeta?.refLabels}
+          allRefs={[[refUrl, refData]]}
+          ontology={refMeta?.ontology}
+          removeLabel={() => {
+            return undefined;
+          }}
+          addLabel={() => {
+            return undefined;
+          }}></RefWithLabels>
       </Box>
       <PostsFetcherComponent
         enableOverlay={{ post: false, ref: false, user: false }}

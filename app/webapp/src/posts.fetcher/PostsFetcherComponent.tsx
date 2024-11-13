@@ -174,6 +174,9 @@ export const PostsFetcherComponent = (props: {
   );
 
   const onPostClick = (post: AppPostFull, event: PostClickEvent) => {
+    // Reset all overlays first
+    reset();
+    
     if (event.target === PostClickTarget.POST) {
       if (enableOverlay.post) {
         setPostToShow(post);
@@ -305,6 +308,7 @@ export const PostsFetcherComponent = (props: {
     <PostOverlay
       postId={postToShow.id}
       postInit={postToShow}
+      onPostClick={(event) => onPostClick(postToShow, event)}
       overlayNav={{
         onBack: () => reset(),
         onPrev: () => {
