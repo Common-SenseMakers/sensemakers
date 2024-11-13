@@ -3,6 +3,7 @@ import { Anchor, Box, Text } from 'grommet';
 import { useEffect, useState } from 'react';
 
 import { IFRAMELY_API_KEY, IFRAMELY_API_URL } from '../../../app/config';
+import { OpenLinkIcon } from '../../../app/icons/OpenLinkIcon';
 import { AppHeading } from '../../../ui-components';
 import { useThemeContext } from '../../../ui-components/ThemedApp';
 import { zoteroItemTypeDisplay } from '../../../utils/post.utils';
@@ -96,23 +97,41 @@ export const RefCard = (props: {
               flexShrink: 0,
             }}></Box>
         )}
-        <Box>
-          <AppHeading level={4} color="#374151" style={{ fontWeight: '500' }}>
+        <Box
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            gap: '4px',
+            flex: '1 0 0',
+          }}>
+          <AppHeading
+            level={4}
+            color="#374151"
+            style={{ fontWeight: '500', fontSize: '18px' }}>
             {titleTruncated}
           </AppHeading>
-          <Box style={{ overflow: 'hidden' }}>
+          <Box
+            direction="row"
+            gap="4px"
+            style={{
+              overflow: 'hidden',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
             <Anchor
               id={REF_URL_ANCHOR_ID}
               style={{
                 fontSize: '16px',
                 color: '#337FBD',
-                fontWeight: '400',
+                fontWeight: '500',
                 lineBreak: 'anywhere',
                 textDecoration: 'none',
               }}
               target="_blank">
               {domain}
             </Anchor>
+            <OpenLinkIcon size={16} color="#337FBD" />
           </Box>
         </Box>
       </Box>
