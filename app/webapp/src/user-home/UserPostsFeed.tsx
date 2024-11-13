@@ -3,7 +3,10 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppGeneralKeys } from '../i18n/i18n.app.general';
-import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
+import {
+  OverlayConfig,
+  PostsFetcherComponent,
+} from '../posts.fetcher/PostsFetcherComponent';
 import { usePersist } from '../utils/use.persist';
 import { useUserPosts } from './UserPostsContext';
 
@@ -23,17 +26,19 @@ export const UserPostsFeed = () => {
 
   const { feed } = useUserPosts();
 
+  const overlayConfig: OverlayConfig = {
+    post: { enabled: true },
+    ref: { enabled: true },
+    user: { enabled: true },
+  };
+
   return (
     <>
       <Box fill justify="start">
         <PostsFetcherComponent
           feed={feed}
           pageTitle={t(AppGeneralKeys.myPosts)}
-          enableOverlay={{
-            post: true,
-            ref: true,
-            user: true,
-          }}></PostsFetcherComponent>
+          overlayConfig={overlayConfig}></PostsFetcherComponent>
       </Box>
     </>
   );

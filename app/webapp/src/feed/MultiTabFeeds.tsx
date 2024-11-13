@@ -1,22 +1,36 @@
 import { Box } from 'grommet';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
 
 import { AppGeneralKeys } from '../i18n/i18n.app.general';
-import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
+import {
+  OverlayConfig,
+  PostsFetcherComponent,
+} from '../posts.fetcher/PostsFetcherComponent';
+import { PostFetcherInterface } from '../posts.fetcher/posts.fetcher.hook';
 import { AppHeading } from '../ui-components';
-import { FeedTabs, locationToFeedIx } from './FeedTabs';
-import { useFeedPosts } from './PublicFeedsContext';
+import { FeedTabs } from './FeedTabs';
+import { FeedTabConfig } from './feed.config';
 
-export const PublicFeed = () => {
+export const MultiTabFeeds = (props: {
+  feeds: PostFetcherInterface[];
+  tabs: FeedTabConfig[];
+  feedIxInit?: number;
+}) => {
   const { t } = useTranslation();
-  const location = useLocation();
 
-  const { feeds } = useFeedPosts();
+  const { feeds, tabs, feedIxInit } = props;
+
+  const [feedIx, setFeedIx] = useState<number>(feedIxInit || 0);
+
   const n = feeds.length;
   const percWidth = 100 / n;
 
-  const feedIx = locationToFeedIx(location);
+  const overlayConfig: OverlayConfig = {
+    post: { enabled: true },
+    ref: { enabled: true },
+    user: { enabled: true },
+  };
 
   return (
     <>
@@ -27,7 +41,10 @@ export const PublicFeed = () => {
           <AppHeading level="2">{'Explore'}</AppHeading>
         </Box>
 
-        <FeedTabs></FeedTabs>
+        <FeedTabs
+          feedIx={feedIx}
+          onTabClicked={(ix) => setFeedIx(ix)}
+          feedTabs={tabs}></FeedTabs>
 
         <div style={{ height: 'calc(100% - 48px)', overflow: 'hidden' }}>
           <div
@@ -47,7 +64,7 @@ export const PublicFeed = () => {
                     float: 'left',
                   }}>
                   <PostsFetcherComponent
-                    enableOverlay={{ post: true, ref: true, user: true }}
+                    overlayConfig={overlayConfig}
                     showHeader={false}
                     isPublicFeed={true}
                     feed={feed}

@@ -1,7 +1,6 @@
 import { Box, Text } from 'grommet';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router-dom';
 
 import { ModalContent } from '../app/AppModalStandard';
 import { useToastContext } from '../app/ToastsContext';
@@ -24,7 +23,6 @@ import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useIsAtBottom } from '../ui-components/hooks/IsAtBottom';
-import useOutsideClick from '../ui-components/hooks/OutsideClickHook';
 import { PostFetcherInterface } from './posts.fetcher.hook';
 
 const DEBUG = true;
@@ -32,6 +30,35 @@ const DEBUG = true;
 export interface FilterOption {
   value: string;
   pretty: string;
+}
+
+export interface OverlayConfig {
+  post: {
+    enabled: boolean;
+    postId?: string;
+  };
+  ref: { enabled: boolean; ref?: string };
+  user: {
+    enabled: boolean;
+    profileId?: string;
+    userId?: string;
+  };
+}
+
+export interface OnFeedNav {
+  onPostClicked: (postId: string) => void;
+  onProfileIdClicked: (profileId: string) => void;
+  onUserIdClicked: (userId: string) => void;
+  onRefClicked: (ref: string) => void;
+  onBackClicked?: () => void;
+}
+
+interface ShowOverlayConfig {
+  postToShow?: AppPostFull;
+  postIdToShow?: string;
+  refToShow?: string;
+  userIdToShow?: string;
+  profileIdToShow?: string;
 }
 
 /**
@@ -44,115 +71,39 @@ export const PostsFetcherComponent = (props: {
   pageTitle: string;
   isPublicFeed?: boolean;
   showHeader?: boolean;
-  enableOverlay?: {
-    post: boolean;
-    ref: boolean;
-    user: boolean;
-  };
+  onFeedNav?: OnFeedNav;
+  overlayConfig?: OverlayConfig;
 }) => {
   const { show } = useToastContext();
   const { constants } = useThemeContext();
   const { t } = useTranslation();
-
-  const [postToShow, _setPostToShow] = useState<AppPostFull | undefined>(
-    undefined
-  );
-
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  const reset = useCallback(() => {
-    searchParams.forEach((value, key) => {
-      searchParams.delete(key);
-    });
-  }, [searchParams]);
-
-  const setSearchParam = (key: string, value: string) => {
-    if (DEBUG) console.log(`setSearchParam: ${key}=${value}`);
-
-    const newSearchParams = new URLSearchParams();
-    newSearchParams.append(key, value);
-    setSearchParams((prev) => {
-      console.log(`setSearchParams ${prev.toString()}`);
-      return newSearchParams;
-    });
-  };
-
-  const setPostToShow = (post?: AppPostFull, _postId?: string) => {
-    const postId = post ? post.id : _postId;
-    if (DEBUG) console.log(`setPostToShow`, { post, postId });
-    if (post) {
-      _setPostToShow(post);
-    }
-    if (postId) {
-      setSearchParam('postId', postId);
-    }
-  };
-
-  const setRefToShow = (ref?: string) => {
-    if (DEBUG) console.log(`setRefToShow`, { ref });
-    if (ref) {
-      setSearchParam('ref', ref);
-    }
-  };
-
-  const setUserIdToShow = (userId?: string) => {
-    if (DEBUG) console.log(`setUserIdToShow`, { userId });
-    if (userId) {
-      setSearchParam('userId', userId);
-    }
-  };
-
-  const setProfileIdToShow = (profileId?: string) => {
-    if (DEBUG) console.log(`setProfileIdToShow`, { profileId });
-    if (profileId) {
-      setSearchParam('profileId', profileId);
-    }
-  };
-
-  useEffect(() => {
-    const postId = searchParams.get('postId');
-
-    if (postId === null) {
-      setPostToShow(undefined);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
-
-  const {
-    ref: refToShow,
-    userId: userIdToShow,
-    profileId: profileIdToShow,
-    postId: postIdToShow,
-  } = useMemo(() => {
-    if (DEBUG) console.log('searchParams memo:', searchParams.toString());
-
-    const ref = searchParams.get('ref');
-    const userId = searchParams.get('userId');
-    const profileId = searchParams.get('profileId');
-    const postId = searchParams.get('postId');
-
-    return {
-      ref: ref !== null ? ref : undefined,
-      userId: userId !== null ? userId : undefined,
-      profileId: profileId !== null ? profileId : undefined,
-      postId: postId !== null ? postId : undefined,
-    };
-  }, [searchParams]);
 
   const {
     pageTitle,
     feed,
     isPublicFeed: _isPublicFeed,
     showHeader: _showHeader,
-    enableOverlay: _enableOverlay,
+    overlayConfig: _overlayConfig,
+    onFeedNav,
   } = props;
 
   const isPublicFeed = _isPublicFeed !== undefined ? _isPublicFeed : false;
   const showHeader = _showHeader !== undefined ? _showHeader : true;
-  const enableOverlay =
-    _enableOverlay !== undefined
-      ? _enableOverlay
-      : { post: true, ref: false, user: false };
+  const overlayConfig: OverlayConfig = useMemo(
+    () =>
+      _overlayConfig || {
+        post: {
+          enabled: true,
+        },
+        ref: {
+          enabled: true,
+        },
+        user: {
+          enabled: true,
+        },
+      },
+    [_overlayConfig]
+  );
 
   const {
     posts,
@@ -164,9 +115,25 @@ export const PostsFetcherComponent = (props: {
     errorFetchingNewer,
     isLoading,
     moreToFetch,
+    getPost,
   } = feed;
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const showOverlayConfig = useMemo<ShowOverlayConfig>(() => {
+    if (!overlayConfig) {
+      return { postToShow: undefined, postIdToShow: undefined };
+    }
+
+    if (overlayConfig.post.enabled && overlayConfig.post.postId) {
+      const post = getPost(overlayConfig.post.postId);
+      return { postToShow: post, postIdToShow: overlayConfig.post.postId };
+    }
+
+    return {};
+  }, [getPost, overlayConfig]);
+
+  const { postToShow, postIdToShow, refToShow, userIdToShow, profileIdToShow } =
+    showOverlayConfig;
+
   const postsContainerRef = useRef<HTMLDivElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
@@ -213,10 +180,6 @@ export const PostsFetcherComponent = (props: {
     }
   }, [errorFetchingOlder, errorFetchingNewer, show]);
 
-  useOutsideClick(containerRef, () => {
-    reset();
-  });
-
   const showLoading = [1, 2, 4, 5, 6, 7, 8].map((ix) => (
     <PostCardLoading key={ix}></PostCardLoading>
   ));
@@ -243,30 +206,31 @@ export const PostsFetcherComponent = (props: {
 
   const onPostClick = (post: AppPostFull, event: PostClickEvent) => {
     if (event.target === PostClickTarget.POST) {
-      if (enableOverlay.post) {
-        setPostToShow(post);
+      if (overlayConfig.post.enabled) {
+        onFeedNav && onFeedNav.onPostClicked(post.id);
       }
     }
 
     if (event.target === PostClickTarget.REF) {
-      if (enableOverlay.ref) {
+      if (overlayConfig.ref.enabled) {
         if (DEBUG) console.log(`clicked on ref ${event.payload as string}`);
-        setRefToShow(event.payload as string);
+        onFeedNav && onFeedNav.onRefClicked(event.payload as string);
       }
     }
 
-    if (event.target === PostClickTarget.USER_ID) {
-      if (enableOverlay.user) {
+    if (
+      [PostClickTarget.USER_ID, PostClickTarget.PLATFORM_USER_ID].includes(
+        event.target
+      )
+    ) {
+      if (overlayConfig.user.enabled) {
         if (DEBUG) console.log(`clicked on user ${event.payload as string}`);
-        setUserIdToShow(event.payload as string);
-      }
-    }
-
-    if (event.target === PostClickTarget.PLATFORM_USER_ID) {
-      if (enableOverlay.user) {
-        if (DEBUG)
-          console.log(`clicked on platform user ${event.payload as string}`);
-        setProfileIdToShow(event.payload as string);
+        if (event.target === PostClickTarget.USER_ID) {
+          onFeedNav && onFeedNav.onUserIdClicked(event.payload as string);
+        }
+        if (event.target === PostClickTarget.PLATFORM_USER_ID) {
+          onFeedNav && onFeedNav.onProfileIdClicked(event.payload as string);
+        }
       }
     }
   };
@@ -374,19 +338,20 @@ export const PostsFetcherComponent = (props: {
       postId={postToShow.id}
       postInit={postToShow}
       overlayNav={{
-        onBack: () => reset(),
+        onBack: () =>
+          onFeedNav && onFeedNav.onBackClicked && onFeedNav.onBackClicked(),
         onPrev: () => {
           const { prevPostId } = feed.getNextAndPrev();
           if (prevPostId) {
             const prev = feed.getPost(prevPostId);
-            setPostToShow(prev);
+            prev && onFeedNav && onFeedNav.onPostClicked(prev.id);
           }
         },
         onNext: () => {
           const { nextPostId } = feed.getNextAndPrev();
           if (nextPostId) {
             const next = feed.getPost(nextPostId);
-            setPostToShow(next);
+            next && onFeedNav && onFeedNav.onPostClicked(next.id);
           }
         },
       }}></PostOverlay>
@@ -396,7 +361,8 @@ export const PostsFetcherComponent = (props: {
     <RefOverlay
       refUrl={refToShow}
       overlayNav={{
-        onBack: () => reset(),
+        onBack: () =>
+          onFeedNav && onFeedNav.onBackClicked && onFeedNav.onBackClicked(),
       }}></RefOverlay>
   );
 
@@ -404,7 +370,10 @@ export const PostsFetcherComponent = (props: {
     <UserProfileOverlay
       userId={userIdToShow}
       profileId={profileIdToShow}
-      overlayNav={{ onBack: () => reset() }}></UserProfileOverlay>
+      overlayNav={{
+        onBack: () =>
+          onFeedNav && onFeedNav.onBackClicked && onFeedNav.onBackClicked(),
+      }}></UserProfileOverlay>
   );
 
   const showOverlay = (showPost || showRef || showProfile) && (
@@ -432,7 +401,6 @@ export const PostsFetcherComponent = (props: {
     <>
       {showHeader && header}
       <Box
-        ref={containerRef}
         fill
         style={{ backgroundColor: '#FFFFFF', position: 'relative' }}
         justify="start">

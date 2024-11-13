@@ -55,9 +55,7 @@ export const AppContainer0 = (props: React.PropsWithChildren) => {
           <QueryClientProvider client={queryClient}>
             <LoadingContext>
               <ConnectedUserWrapper>
-                <PublicFeedsContext>
-                  <AppContainer></AppContainer>
-                </PublicFeedsContext>
+                <AppContainer></AppContainer>
               </ConnectedUserWrapper>
             </LoadingContext>
           </QueryClientProvider>
