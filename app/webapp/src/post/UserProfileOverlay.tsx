@@ -122,7 +122,12 @@ export const UserProfileOverlay = (props: {
         showHeader={false}
         isPublicFeed={true}
         feed={feed}
-        pageTitle={'Ref'}></PostsFetcherComponent>
+        pageTitle={'Ref'}
+        enableOverlay={{
+          post: true,
+          ref: true,
+          user: true,
+        }}></PostsFetcherComponent>
     </Box>
   );
 };

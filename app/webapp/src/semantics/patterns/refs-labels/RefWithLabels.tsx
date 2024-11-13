@@ -100,7 +100,11 @@ export const RefWithLabels = (props: {
             props.showDescription ? refData.meta?.summary : undefined
           }
           image={refData.meta?.thumbnail_url}
-          refType={refData.meta.item_type}
+          refType={
+            refData.meta.item_type !== 'unknown'
+              ? refData.meta.item_type
+              : undefined
+          }
           showDescription={props.showDescription}
           sourceRef={getSourceRefNumber(refData.meta, props.allRefs)}></RefCard>
       ) : (

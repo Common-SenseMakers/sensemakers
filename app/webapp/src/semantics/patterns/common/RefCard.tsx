@@ -37,6 +37,7 @@ export const RefCard = (props: {
   showDescription?: boolean;
 }) => {
   const titleTruncated = props.title && truncate(props.title, 50);
+
   const { constants } = useThemeContext();
 
   const domain = extractDomain(props.url);
@@ -44,6 +45,19 @@ export const RefCard = (props: {
   const [urlMeta, setUrlMeta] = useState<
     { thumbnail: string; description: string; title: string } | undefined
   >(undefined);
+
+  const isTweet = titleTruncated === 'Twitter post';
+
+  const titleFinal =
+    isTweet || titleTruncated === undefined
+      ? urlMeta?.title
+        ? urlMeta.title
+        : titleTruncated
+      : titleTruncated;
+
+  if (titleTruncated === 'Twitter post' && urlMeta !== undefined) {
+    console.log(urlMeta);
+  }
 
   useEffect(() => {
     const fetchThumbnail = async () => {
@@ -114,11 +128,7 @@ export const RefCard = (props: {
             level={4}
             color="#111827"
             style={{ fontWeight: '500', fontSize: '18px' }}>
-            {titleTruncated === 'Twitter post'
-              ? urlMeta?.title
-                ? urlMeta.title
-                : titleTruncated
-              : titleTruncated}
+            {titleFinal}
           </AppHeading>
           {props.showDescription &&
             (props.description || urlMeta?.description) && (
