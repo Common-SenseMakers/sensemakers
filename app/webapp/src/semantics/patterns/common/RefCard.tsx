@@ -121,6 +121,9 @@ export const RefCard = (props: {
             </Paragraph>
           )}
           <Box
+            onClick={() =>
+              window.open(props.url, '_blank', 'noopener,noreferrer')
+            }
             direction="row"
             gap="4px"
             style={{
