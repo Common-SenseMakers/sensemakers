@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Anchor, Box, Text } from 'grommet';
+import { Anchor, Box, Paragraph, Text } from 'grommet';
 import { useEffect, useState } from 'react';
 
 import { IFRAMELY_API_KEY, IFRAMELY_API_URL } from '../../../app/config';
@@ -111,6 +111,15 @@ export const RefCard = (props: {
             style={{ fontWeight: '500', fontSize: '18px' }}>
             {titleTruncated}
           </AppHeading>
+          {props.description && (
+            <Paragraph
+              margin={{ vertical: '4px' }}
+              size="medium"
+              style={{ lineHeight: '18px', color: constants.colors.textLight2 }}
+              maxLines={2}>
+              {props.description}
+            </Paragraph>
+          )}
           <Box
             direction="row"
             gap="4px"

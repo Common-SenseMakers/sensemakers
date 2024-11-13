@@ -15,6 +15,7 @@ export const RefWithLabels = (props: {
   refUrl: string;
   refData: RefData;
   showLabels?: boolean;
+  showDescription?: boolean;
   support?: ParsedSupport;
   post?: AppPostFull;
   addLabel: (labelUri: string) => void;
@@ -115,7 +116,9 @@ export const RefWithLabels = (props: {
           ix={props.ix + 1}
           url={props.refUrl}
           title={refData.meta?.title}
-          description={refData.meta?.summary}
+          description={
+            props.showDescription ? refData.meta?.summary : undefined
+          }
           image={refData.meta?.thumbnail_url}
           refType={refData.meta.item_type}
           sourceRef={getSourceRefNumber(refData.meta, props.allRefs)}></RefCard>

@@ -103,6 +103,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
                   <RefWithLabels
                     ix={index}
                     showLabels={true}
+                    showDescription={false}
                     editable={props.editable}
                     key={ref}
                     refUrl={ref}
