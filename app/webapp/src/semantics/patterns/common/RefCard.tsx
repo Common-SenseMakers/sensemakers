@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Anchor, Box, Paragraph, Text } from 'grommet';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { IFRAMELY_API_KEY, IFRAMELY_API_URL } from '../../../app/config';
 import { OpenLinkIcon } from '../../../app/icons/OpenLinkIcon';
@@ -36,28 +36,36 @@ export const RefCard = (props: {
   sourceRef?: number;
   showDescription?: boolean;
 }) => {
-  const titleTruncated = props.title && truncate(props.title, 50);
+  const titleTruncated = useMemo(
+    () => props.title && truncate(props.title, 50),
+    [props.title]
+  );
 
   const { constants } = useThemeContext();
 
-  const domain = extractDomain(props.url);
+  const domain = useMemo(() => extractDomain(props.url), [props.url]);
 
   const [urlMeta, setUrlMeta] = useState<
     { thumbnail: string; description: string; title: string } | undefined
   >(undefined);
 
-  const isTweet = titleTruncated === 'Twitter post';
+  const titleFinal = useMemo(() => {
+    const isTweet = titleTruncated === 'Twitter post';
+    const isBskPost = domain === 'bsky.app';
 
-  const titleFinal =
-    isTweet || titleTruncated === undefined
-      ? urlMeta?.title
-        ? urlMeta.title
-        : titleTruncated
-      : titleTruncated;
+    if (isTweet || titleTruncated === undefined) {
+      if (urlMeta && urlMeta.title) {
+        return urlMeta?.title;
+      }
+      return titleTruncated;
+    }
 
-  if (titleTruncated === 'Twitter post' && urlMeta !== undefined) {
-    console.log(urlMeta);
-  }
+    if (isBskPost) {
+      return 'Bluesky Post';
+    }
+
+    return titleTruncated;
+  }, [domain, titleTruncated, urlMeta]);
 
   useEffect(() => {
     const fetchThumbnail = async () => {
