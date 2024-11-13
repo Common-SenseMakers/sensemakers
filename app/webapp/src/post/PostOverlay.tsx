@@ -10,13 +10,14 @@ export const PostOverlay = (props: {
   postId: string;
   postInit?: AppPostFull;
   overlayNav?: OnOverlayNav;
+  onPostClick?: (event: PostClickEvent) => void; 
 }) => {
   const { postId, postInit, overlayNav } = props;
 
   return (
     <Box style={{}}>
       <PostContext postId={postId} postInit={postInit} showCelebration>
-        <PostView overlayNav={overlayNav}></PostView>
+        <PostView overlayNav={overlayNav} onPostClick={props.onPostClick}></PostView>
       </PostContext>
     </Box>
   );
