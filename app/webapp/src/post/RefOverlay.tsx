@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Box } from 'grommet';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { useAppFetch } from '../api/app.fetch';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
@@ -10,7 +10,10 @@ import {
 } from '../posts.fetcher/posts.fetcher.hook';
 import { RefWithLabels } from '../semantics/patterns/refs-labels/RefWithLabels';
 import { RefMeta } from '../shared/types/types.parser';
+import { PLATFORM } from '../shared/types/types.platforms';
+import { PlatformProfile } from '../shared/types/types.profiles';
 import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
+import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { OnOverlayNav, OverlayNav } from './OverlayNav';
 
 const DEBUG = true;
@@ -22,6 +25,19 @@ export const RefOverlay = (props: {
 }) => {
   const appFetch = useAppFetch();
   const { refUrl, overlayNav } = props;
+
+  const { connectedUser } = useAccountContext();
+  const [accountProfileId, setAccountProfileId] = useState<string | undefined>(
+    undefined
+  );
+
+  useEffect(() => {
+    Object.entries(connectedUser?.profiles || {}).forEach(([key, value]) => {
+      if (key !== PLATFORM.Orcid && value) {
+        setAccountProfileId(`${key}-${(value as PlatformProfile).id}`);
+      }
+    });
+  }, [connectedUser]);
 
   const { data: refMeta } = useQuery({
     queryKey: ['ref', refUrl],
@@ -54,7 +70,13 @@ export const RefOverlay = (props: {
   }, []);
 
   const feed = usePostsFetcher(feedConfig);
-  const refData = { labelsUris: refMeta?.labels || [], meta: refMeta };
+  const refData = {
+    labelsUris:
+      (refMeta?.refLabels || [])
+        .map((refLabel) => refLabel.label)
+        .filter((label) => label !== 'https://sense-nets.xyz/quotesPost') || [],
+    meta: refMeta,
+  };
   return (
     <Box>
       <OverlayNav overlayNav={overlayNav}></OverlayNav>
@@ -66,6 +88,7 @@ export const RefOverlay = (props: {
         }}>
         <RefWithLabels
           ix={0}
+          authorProfileId={accountProfileId}
           showLabels={true}
           showDescription={true}
           editable={false}

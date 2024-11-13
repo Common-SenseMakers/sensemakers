@@ -31,7 +31,7 @@ export const RefWithLabels = (props: {
     props.showLabels !== undefined ? props : { showLabels: true };
 
   /** display names for selected labels */
-  const labelsDisplayNames = useMemo(
+  let labelsDisplayNames = useMemo(
     () =>
       refData.labelsUris.map((labelUri) => {
         const label_ontology = labelsOntology
@@ -45,6 +45,9 @@ export const RefWithLabels = (props: {
       }),
     [labelsOntology, refData.labelsUris]
   );
+
+  // make labelsDisplayNames unique
+  labelsDisplayNames = Array.from(new Set(labelsDisplayNames));
 
   /** list of possible labels from ontology (filtering those selected) */
   const optionDisplayNames = useMemo(
