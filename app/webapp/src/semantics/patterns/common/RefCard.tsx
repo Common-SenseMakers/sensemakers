@@ -82,7 +82,7 @@ export const RefCard = (props: {
       <Box
         style={{
           display: 'flex',
-          alignItems: 'center',
+          alignItems: props.showDescription ? 'flex-start' : 'center',
           gap: '12px',
           alignSelf: 'stretch',
           flexDirection: 'row',
