@@ -4,8 +4,8 @@ import { useMemo } from 'react';
 import { ParserOntology, RefMeta } from '../../../shared/types/types.parser';
 import { RefLabel } from '../../../shared/types/types.posts';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
-import { REF_URL_ANCHOR_ID, RefCard } from '../common/RefCard';
-import { PostClickEvent, PostClickTarget } from '../patterns';
+import { RefCard } from '../common/RefCard';
+import { PostClickEvent } from '../patterns';
 import { AggregatedRefLabels } from './AggregatedRefLabels';
 import { RefData } from './process.semantics';
 
@@ -86,32 +86,8 @@ export const RefWithLabels = (props: {
       (refLabel) => refLabel.authorProfileId !== props.authorProfileId
     ) !== undefined;
 
-  const onCardClicked = (
-    event: React.MouseEvent<HTMLDivElement, MouseEvent>
-  ) => {
-    const target = event.target as HTMLElement;
-
-    if (target.id === REF_URL_ANCHOR_ID) {
-      window.open(props.refUrl, '_blank', 'noopener,noreferrer');
-      return;
-    }
-
-    props.onPostClick &&
-      props.onPostClick({
-        target: PostClickTarget.REF,
-        payload: props.refUrl,
-      });
-  };
-
   return (
-    <Box
-      style={{
-        borderRadius: '12px',
-        border: '1.6px solid #D1D5DB',
-        width: '100%',
-      }}
-      pad="12px"
-      onClick={(e) => onCardClicked(e)}>
+    <>
       {refData.meta ? (
         <RefCard
           ix={props.ix + 1}
@@ -155,7 +131,7 @@ export const RefWithLabels = (props: {
             addLabel={(label) => addLabel(label)}></AppLabelsEditor>
         )}
       </Box>
-    </Box>
+    </>
   );
 };
 
