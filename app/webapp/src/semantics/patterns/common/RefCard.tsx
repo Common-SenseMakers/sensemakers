@@ -8,6 +8,8 @@ import { AppHeading } from '../../../ui-components';
 import { useThemeContext } from '../../../ui-components/ThemedApp';
 import { zoteroItemTypeDisplay } from '../../../utils/post.utils';
 
+const DEBUG = false;
+
 export const REF_URL_ANCHOR_ID = 'ref-url-anchor';
 
 const truncate = (text: string, size: number) => {
@@ -157,7 +159,7 @@ async function getThumbnail(url: string): Promise<string | undefined> {
       const thumbnailUrl = data.links.thumbnail[0].href;
       return thumbnailUrl;
     } else {
-      console.error('No thumbnail found for the provided URL.');
+      if (DEBUG) console.error('No thumbnail found for the provided URL.');
       return undefined;
     }
   } catch (error) {

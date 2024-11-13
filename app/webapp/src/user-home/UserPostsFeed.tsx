@@ -28,7 +28,12 @@ export const UserPostsFeed = () => {
       <Box fill justify="start">
         <PostsFetcherComponent
           feed={feed}
-          pageTitle={t(AppGeneralKeys.myPosts)}></PostsFetcherComponent>
+          pageTitle={t(AppGeneralKeys.myPosts)}
+          enableOverlay={{
+            post: true,
+            ref: true,
+            user: true,
+          }}></PostsFetcherComponent>
       </Box>
     </>
   );

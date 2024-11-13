@@ -31,6 +31,8 @@ export const UserProfileOverlay = (props: {
   const appFetch = useAppFetch();
   const { profileId, userId, overlayNav } = props;
 
+  const isUser = userId !== undefined;
+
   const { data: profile } = useQuery({
     queryKey: ['userProfile', profileId],
     queryFn: async () => {
@@ -107,7 +109,7 @@ export const UserProfileOverlay = (props: {
         }}>
         <AppHeading level="3">Posts by</AppHeading>
         <Box margin={{ vertical: 'medium' }}>
-          {user ? (
+          {isUser ? (
             <UserProfileHeader user={user}></UserProfileHeader>
           ) : profile ? (
             <AccountProfileHeader account={profile}></AccountProfileHeader>
