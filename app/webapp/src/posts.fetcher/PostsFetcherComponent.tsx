@@ -1,6 +1,7 @@
 import { Box, Text } from 'grommet';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 
 import { ModalContent } from '../app/AppModalStandard';
 import { useToastContext } from '../app/ToastsContext';
@@ -26,7 +27,7 @@ import { useIsAtBottom } from '../ui-components/hooks/IsAtBottom';
 import useOutsideClick from '../ui-components/hooks/OutsideClickHook';
 import { PostFetcherInterface } from './posts.fetcher.hook';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export interface FilterOption {
   value: string;
@@ -53,16 +54,90 @@ export const PostsFetcherComponent = (props: {
   const { constants } = useThemeContext();
   const { t } = useTranslation();
 
-  const [postToShow, setPostToShow] = useState<AppPostFull | undefined>(
+  const [postToShow, _setPostToShow] = useState<AppPostFull | undefined>(
     undefined
   );
-  const [refToShow, setRefToShow] = useState<string | undefined>(undefined);
-  const [userIdToShow, setUserIdToShow] = useState<string | undefined>(
-    undefined
-  );
-  const [profileIdToShow, setProfileIdToShow] = useState<string | undefined>(
-    undefined
-  );
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const reset = useCallback(() => {
+    searchParams.forEach((value, key) => {
+      searchParams.delete(key);
+    });
+  }, [searchParams]);
+
+  const setSearchParam = (key: string, value: string) => {
+    if (DEBUG) console.log(`setSearchParam: ${key}=${value}`);
+
+    const newSearchParams = new URLSearchParams();
+    newSearchParams.append(key, value);
+    setSearchParams((prev) => {
+      console.log(`setSearchParams ${prev.toString()}`);
+      return newSearchParams;
+    });
+  };
+
+  const setPostToShow = (post?: AppPostFull, _postId?: string) => {
+    const postId = post ? post.id : _postId;
+    if (DEBUG) console.log(`setPostToShow`, { post, postId });
+    if (post) {
+      _setPostToShow(post);
+    }
+    if (postId) {
+      setSearchParam('postId', postId);
+    }
+  };
+
+  const setRefToShow = (ref?: string) => {
+    if (DEBUG) console.log(`setRefToShow`, { ref });
+    if (ref) {
+      setSearchParam('ref', ref);
+    }
+  };
+
+  const setUserIdToShow = (userId?: string) => {
+    if (DEBUG) console.log(`setUserIdToShow`, { userId });
+    if (userId) {
+      setSearchParam('userId', userId);
+    }
+  };
+
+  const setProfileIdToShow = (profileId?: string) => {
+    if (DEBUG) console.log(`setProfileIdToShow`, { profileId });
+    if (profileId) {
+      setSearchParam('profileId', profileId);
+    }
+  };
+
+  useEffect(() => {
+    const postId = searchParams.get('postId');
+
+    if (postId === null) {
+      setPostToShow(undefined);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  const {
+    ref: refToShow,
+    userId: userIdToShow,
+    profileId: profileIdToShow,
+    postId: postIdToShow,
+  } = useMemo(() => {
+    if (DEBUG) console.log('searchParams memo:', searchParams.toString());
+
+    const ref = searchParams.get('ref');
+    const userId = searchParams.get('userId');
+    const profileId = searchParams.get('profileId');
+    const postId = searchParams.get('postId');
+
+    return {
+      ref: ref !== null ? ref : undefined,
+      userId: userId !== null ? userId : undefined,
+      profileId: profileId !== null ? profileId : undefined,
+      postId: postId !== null ? postId : undefined,
+    };
+  }, [searchParams]);
 
   const {
     pageTitle,
@@ -137,13 +212,6 @@ export const PostsFetcherComponent = (props: {
       });
     }
   }, [errorFetchingOlder, errorFetchingNewer, show]);
-
-  const reset = () => {
-    setPostToShow(undefined);
-    setProfileIdToShow(undefined);
-    setRefToShow(undefined);
-    setUserIdToShow(undefined);
-  };
 
   useOutsideClick(containerRef, () => {
     reset();
@@ -301,7 +369,7 @@ export const PostsFetcherComponent = (props: {
     </Box>
   );
 
-  const showPost = postToShow && (
+  const showPost = postToShow && postIdToShow && (
     <PostOverlay
       postId={postToShow.id}
       postInit={postToShow}
