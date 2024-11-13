@@ -308,7 +308,7 @@ export const PostsFetcherComponent = (props: {
     <PostOverlay
       postId={postToShow.id}
       postInit={postToShow}
-      onPostClick={onPostClick}
+      onPostClick={(event) => onPostClick(postToShow, event)}
       overlayNav={{
         onBack: () => reset(),
         onPrev: () => {
