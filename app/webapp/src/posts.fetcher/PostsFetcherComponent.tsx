@@ -177,6 +177,9 @@ export const PostsFetcherComponent = (props: {
   );
 
   const onPostClick = (post: AppPostFull, event: PostClickEvent) => {
+    // Reset all overlays first
+    reset();
+    
     if (event.target === PostClickTarget.POST) {
       if (enableOverlay.post) {
         setPostToShow(post);
