@@ -10,6 +10,8 @@ import { FeedTabConfig, feedTabs } from './feed.config';
 
 interface PublicFeedsContextType {
   feeds: PostFetcherInterface[];
+  overlay?: 'ref' | 'post' | 'user';
+  setOverlay: (overlay: 'ref' | 'post' | 'user' | undefined) => void;
 }
 
 export const FeedPostsContextValue = createContext<
@@ -37,6 +39,10 @@ const getFeedConfig = (
 export const PublicFeedsContext: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
+  const [overlay, setOverlay] = React.useState<
+    'ref' | 'post' | 'user' | undefined
+  >(undefined);
+
   const feed0Config = useMemo((): FetcherConfig => {
     return getFeedConfig(feedTabs[0], '[FEED 0] ');
   }, []);
@@ -69,6 +75,8 @@ export const PublicFeedsContext: React.FC<{
     <FeedPostsContextValue.Provider
       value={{
         feeds,
+        overlay,
+        setOverlay,
       }}>
       {children}
     </FeedPostsContextValue.Provider>

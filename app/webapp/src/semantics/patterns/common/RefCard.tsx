@@ -53,15 +53,14 @@ export const RefCard = (props: {
     const isTweet = titleTruncated === 'Twitter post';
     const isBskPost = domain === 'bsky.app';
 
-    if (isTweet || titleTruncated === undefined) {
+    if (isBskPost) {
+      return 'Bluesky Post';
+    }
+    if (isTweet || !titleTruncated) {
       if (urlMeta && urlMeta.title) {
         return urlMeta?.title;
       }
       return titleTruncated;
-    }
-
-    if (isBskPost) {
-      return 'Bluesky Post';
     }
 
     return titleTruncated;
@@ -150,7 +149,7 @@ export const RefCard = (props: {
                   fontStyle: 'normal',
                   fontWeight: '400',
                 }}
-                maxLines={6}>
+                maxLines={3}>
                 {props.description || urlMeta?.description}
               </Paragraph>
             )}
