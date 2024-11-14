@@ -3,6 +3,7 @@ import { Box } from 'grommet';
 import { useEffect, useMemo } from 'react';
 
 import { useAppFetch } from '../api/app.fetch';
+import { OverlayContext } from '../posts.fetcher/OverlayContext';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
 import {
   FetcherConfig,
@@ -99,30 +100,32 @@ export const UserProfileOverlay = (props: {
   const feed = usePostsFetcher(feedConfig);
 
   return (
-    <Box>
-      <OverlayNav overlayNav={overlayNav}></OverlayNav>
-      <Box
-        pad="medium"
-        style={{
-          flexShrink: 0,
-          border: '1.6px solid var(--Neutral-300, #D1D5DB)',
-        }}>
-        <AppHeading level="3">Posts by</AppHeading>
-        <Box margin={{ vertical: 'medium' }}>
-          {isUser ? (
-            <UserProfileHeader user={user}></UserProfileHeader>
-          ) : profile ? (
-            <AccountProfileHeader account={profile}></AccountProfileHeader>
-          ) : (
-            <></>
-          )}
+    <OverlayContext>
+      <Box>
+        <OverlayNav overlayNav={overlayNav}></OverlayNav>
+        <Box
+          pad="medium"
+          style={{
+            flexShrink: 0,
+            border: '1.6px solid var(--Neutral-300, #D1D5DB)',
+          }}>
+          <AppHeading level="3">Posts by</AppHeading>
+          <Box margin={{ vertical: 'medium' }}>
+            {isUser ? (
+              <UserProfileHeader user={user}></UserProfileHeader>
+            ) : profile ? (
+              <AccountProfileHeader account={profile}></AccountProfileHeader>
+            ) : (
+              <></>
+            )}
+          </Box>
         </Box>
+        <PostsFetcherComponent
+          showHeader={false}
+          isPublicFeed={true}
+          feed={feed}
+          pageTitle={'Ref'}></PostsFetcherComponent>
       </Box>
-      <PostsFetcherComponent
-        showHeader={false}
-        isPublicFeed={true}
-        feed={feed}
-        pageTitle={'Ref'}></PostsFetcherComponent>
-    </Box>
+    </OverlayContext>
   );
 };

@@ -3,6 +3,7 @@ import { Box } from 'grommet';
 import { useEffect, useMemo, useState } from 'react';
 
 import { useAppFetch } from '../api/app.fetch';
+import { OverlayContext } from '../posts.fetcher/OverlayContext';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
 import {
   FetcherConfig,
@@ -81,37 +82,39 @@ export const RefOverlay = (props: {
   };
 
   return (
-    <Box>
-      <OverlayNav overlayNav={overlayNav}></OverlayNav>
-      <Box
-        pad="medium"
-        style={{
-          flexShrink: 0,
-          border: '1.6px solid var(--Neutral-300, #D1D5DB)',
-        }}>
-        <RefWithLabels
-          ix={0}
-          authorProfileId={accountProfileId}
-          showLabels={true}
-          showDescription={true}
-          editable={false}
-          refUrl={refUrl}
-          refData={refData}
-          refLabels={refMeta?.refLabels}
-          allRefs={[[refUrl, refData]]}
-          ontology={refMeta?.ontology}
-          removeLabel={() => {
-            return undefined;
-          }}
-          addLabel={() => {
-            return undefined;
-          }}></RefWithLabels>
+    <OverlayContext>
+      <Box>
+        <OverlayNav overlayNav={overlayNav}></OverlayNav>
+        <Box
+          pad="medium"
+          style={{
+            flexShrink: 0,
+            border: '1.6px solid var(--Neutral-300, #D1D5DB)',
+          }}>
+          <RefWithLabels
+            ix={0}
+            authorProfileId={accountProfileId}
+            showLabels={true}
+            showDescription={true}
+            editable={false}
+            refUrl={refUrl}
+            refData={refData}
+            refLabels={refMeta?.refLabels}
+            allRefs={[[refUrl, refData]]}
+            ontology={refMeta?.ontology}
+            removeLabel={() => {
+              return undefined;
+            }}
+            addLabel={() => {
+              return undefined;
+            }}></RefWithLabels>
+        </Box>
+        <PostsFetcherComponent
+          showHeader={false}
+          isPublicFeed={true}
+          feed={feed}
+          pageTitle={'Ref'}></PostsFetcherComponent>
       </Box>
-      <PostsFetcherComponent
-        showHeader={false}
-        isPublicFeed={true}
-        feed={feed}
-        pageTitle={'Ref'}></PostsFetcherComponent>
-    </Box>
+    </OverlayContext>
   );
 };

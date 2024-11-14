@@ -1,5 +1,6 @@
 import { Box } from 'grommet';
 
+import { OverlayContext } from '../posts.fetcher/OverlayContext';
 import { PostClickEvent } from '../semantics/patterns/patterns';
 import { AppPostFull } from '../shared/types/types.posts';
 import { OnOverlayNav } from './OverlayNav';
@@ -16,12 +17,14 @@ export const PostOverlay = (props: {
   const { postId, postInit, overlayNav } = props;
 
   return (
-    <Box style={{ height: '100%' }}>
-      <PostContext postId={postId} postInit={postInit} showCelebration>
-        <PostView
-          overlayNav={overlayNav}
-          onPostClick={props.onPostClick}></PostView>
-      </PostContext>
-    </Box>
+    <OverlayContext>
+      <Box style={{ height: '100%' }}>
+        <PostContext postId={postId} postInit={postInit} showCelebration>
+          <PostView
+            overlayNav={overlayNav}
+            onPostClick={props.onPostClick}></PostView>
+        </PostContext>
+      </Box>
+    </OverlayContext>
   );
 };
