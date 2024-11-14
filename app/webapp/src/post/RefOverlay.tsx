@@ -62,7 +62,7 @@ export const RefOverlay = (props: {
       endpoint: '/api/feed/get',
       queryParams: {
         semantics: { refs: [refUrl], topic: SCIENCE_TOPIC_URI },
-        includeAggregateLabels: true,
+        includeAggregateLabels: false,
       },
       DEBUG_PREFIX: 'REF FEED',
     };
@@ -74,6 +74,7 @@ export const RefOverlay = (props: {
   const refData = {
     labelsUris:
       (refMeta?.refLabels || [])
+        .filter((refLabel) => refLabel.authorProfileId === accountProfileId)
         .map((refLabel) => refLabel.label)
         .filter((label) => label !== 'https://sense-nets.xyz/quotesPost') || [],
     meta: refMeta,
