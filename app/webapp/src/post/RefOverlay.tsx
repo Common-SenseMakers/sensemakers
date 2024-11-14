@@ -3,6 +3,7 @@ import { Box } from 'grommet';
 import { useEffect, useMemo, useState } from 'react';
 
 import { useAppFetch } from '../api/app.fetch';
+import { OverlayContext } from '../posts.fetcher/OverlayContext';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
 import {
   FetcherConfig,
@@ -14,17 +15,13 @@ import { PLATFORM } from '../shared/types/types.platforms';
 import { PlatformProfile } from '../shared/types/types.profiles';
 import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
-import { OnOverlayNav, OverlayNav } from './OverlayNav';
 
 const DEBUG = true;
 
 /** extract the postId from the route and pass it to a PostContext */
-export const RefOverlay = (props: {
-  refUrl: string;
-  overlayNav: OnOverlayNav;
-}) => {
+export const RefOverlay = (props: { refUrl: string }) => {
   const appFetch = useAppFetch();
-  const { refUrl, overlayNav } = props;
+  const { refUrl } = props;
 
   const { connectedUser } = useAccountContext();
   const [accountProfileId, setAccountProfileId] = useState<string | undefined>(
@@ -70,6 +67,7 @@ export const RefOverlay = (props: {
   }, []);
 
   const feed = usePostsFetcher(feedConfig);
+
   const refData = {
     labelsUris:
       (refMeta?.refLabels || [])
@@ -78,39 +76,40 @@ export const RefOverlay = (props: {
         .filter((label) => label !== 'https://sense-nets.xyz/quotesPost') || [],
     meta: refMeta,
   };
+
   return (
-    <Box>
-      <OverlayNav overlayNav={overlayNav}></OverlayNav>
-      <Box
-        pad="medium"
-        style={{
-          flexShrink: 0,
-          border: '1.6px solid var(--Neutral-300, #D1D5DB)',
-        }}>
-        <RefWithLabels
-          ix={0}
-          authorProfileId={accountProfileId}
-          showLabels={true}
-          showDescription={true}
-          editable={false}
-          refUrl={refUrl}
-          refData={refData}
-          refLabels={refMeta?.refLabels}
-          allRefs={[[refUrl, refData]]}
-          ontology={refMeta?.ontology}
-          removeLabel={() => {
-            return undefined;
-          }}
-          addLabel={() => {
-            return undefined;
-          }}></RefWithLabels>
+    <OverlayContext>
+      <Box>
+        <Box
+          pad="medium"
+          style={{
+            flexShrink: 0,
+            border: '1.6px solid var(--Neutral-300, #D1D5DB)',
+          }}>
+          <RefWithLabels
+            ix={0}
+            authorProfileId={accountProfileId}
+            showLabels={true}
+            showDescription={true}
+            editable={false}
+            refUrl={refUrl}
+            refData={refData}
+            refLabels={refMeta?.refLabels}
+            allRefs={[[refUrl, refData]]}
+            ontology={refMeta?.ontology}
+            removeLabel={() => {
+              return undefined;
+            }}
+            addLabel={() => {
+              return undefined;
+            }}></RefWithLabels>
+        </Box>
+        <PostsFetcherComponent
+          showHeader={false}
+          isPublicFeed={true}
+          feed={feed}
+          pageTitle={'Ref'}></PostsFetcherComponent>
       </Box>
-      <PostsFetcherComponent
-        enableOverlay={{ post: false, ref: false, user: false }}
-        showHeader={false}
-        isPublicFeed={true}
-        feed={feed}
-        pageTitle={'Ref'}></PostsFetcherComponent>
-    </Box>
+    </OverlayContext>
   );
 };

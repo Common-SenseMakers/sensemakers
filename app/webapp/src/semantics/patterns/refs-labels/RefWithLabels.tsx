@@ -1,7 +1,6 @@
 import { Anchor, Box } from 'grommet';
 import { useMemo } from 'react';
 
-import { useFeedPosts } from '../../../feed/PublicFeedsContext';
 import { ParserOntology, RefMeta } from '../../../shared/types/types.parser';
 import { RefLabel } from '../../../shared/types/types.posts';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
@@ -30,8 +29,6 @@ export const RefWithLabels = (props: {
   const refData = props.refData;
   const { showLabels } =
     props.showLabels !== undefined ? props : { showLabels: true };
-
-  const { overlay } = useFeedPosts();
 
   /** display names for selected labels */
   let labelsDisplayNames = useMemo(
@@ -116,12 +113,10 @@ export const RefWithLabels = (props: {
         </Anchor>
       )}
 
-      {show && (overlay !== 'ref' || props.showDescription) ? (
+      {show ? (
         <Box margin={{ top: '22px' }}>
           <AggregatedRefLabels
-            refLabels={refLabels.filter(
-              (refLabel) => refLabel.authorProfileId !== props.authorProfileId
-            )}
+            refLabels={refLabels}
             ontology={props.ontology}></AggregatedRefLabels>
         </Box>
       ) : (

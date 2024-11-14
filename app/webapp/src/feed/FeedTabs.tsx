@@ -1,42 +1,21 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
-import { Location, useLocation, useNavigate } from 'react-router-dom';
 import { CSSProperties } from 'styled-components';
 
-import { RouteNames } from '../route.names';
 import { AppButton } from '../ui-components';
 import { useThemeContext } from '../ui-components/ThemedApp';
-import { feedTabs } from './feed.config';
+import { FeedTabConfig } from './feed.config';
 
-const DEBUG = false;
-
-export const locationToFeedIx = (location: Location) => {
-  if (DEBUG) console.log(location);
-
-  const pageIx = feedTabs.findIndex((tab) =>
-    location.pathname.startsWith(`/feed/${tab.id}`)
-  );
-
-  if (pageIx === -1) {
-    return 0;
-  } else {
-    return pageIx;
-  }
-};
-
-export const feedIndexToPathname = (ix: number) => {
-  return `/feed/${feedTabs[ix].id}`;
-};
-
-export const FeedTabs = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
+export const FeedTabs = (props: {
+  feedTabs: FeedTabConfig[];
+  onTabClicked: (tabIx: number) => void;
+  feedIx: number;
+}) => {
   const { constants } = useThemeContext();
-
-  const feedIx = locationToFeedIx(location);
+  const { feedTabs, onTabClicked, feedIx } = props;
 
   const borderStyle = `1px solid ${constants.colors.border}`;
 
-  const tabElement = (text: string, route: string, isSelected: boolean) => {
+  const tabElement = (text: string, ix: number, isSelected: boolean) => {
     const internalBoxProps: BoxExtendedProps = {
       direction: 'row',
       gap: '4px',
@@ -66,7 +45,7 @@ export const FeedTabs = () => {
           plain
           style={{ height: '100%' }}
           onClick={() => {
-            navigate(route);
+            onTabClicked(ix);
           }}>
           <Box {...internalBoxProps}>
             <Box justify="center">
@@ -104,11 +83,7 @@ export const FeedTabs = () => {
             height: '100%',
           }}>
           <div style={spaceStyle}></div>
-          {tabElement(
-            tab.title,
-            `/${RouteNames.Feed}/${tab.id}`,
-            feedIx === ix
-          )}
+          {tabElement(tab.title, ix, feedIx === ix)}
           {ix === feedTabs.length - 1 && <div style={spaceStyle}></div>}
         </Box>
       ))}

@@ -3,7 +3,6 @@ import { Box } from 'grommet';
 import { createContext, useContext, useEffect } from 'react';
 import { Outlet, Route, Routes } from 'react-router-dom';
 
-import { PublicFeedsContext } from '../feed/PublicFeedsContext';
 import { AppHomePage } from '../pages/AppHomePage';
 import { PublicFeedPage } from '../pages/PublicFeedPage';
 import { UserPostsPage } from '../pages/UserPostsPage';
@@ -55,9 +54,7 @@ export const AppContainer0 = (props: React.PropsWithChildren) => {
           <QueryClientProvider client={queryClient}>
             <LoadingContext>
               <ConnectedUserWrapper>
-                <PublicFeedsContext>
-                  <AppContainer></AppContainer>
-                </PublicFeedsContext>
+                <AppContainer></AppContainer>
               </ConnectedUserWrapper>
             </LoadingContext>
           </QueryClientProvider>

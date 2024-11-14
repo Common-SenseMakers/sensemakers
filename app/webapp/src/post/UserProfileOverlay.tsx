@@ -3,6 +3,7 @@ import { Box } from 'grommet';
 import { useEffect, useMemo } from 'react';
 
 import { useAppFetch } from '../api/app.fetch';
+import { OverlayContext } from '../posts.fetcher/OverlayContext';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
 import {
   FetcherConfig,
@@ -18,7 +19,6 @@ import {
 import { splitProfileId } from '../shared/utils/profiles.utils';
 import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
 import { AppHeading } from '../ui-components';
-import { OnOverlayNav, OverlayNav } from './OverlayNav';
 
 const DEBUG = false;
 
@@ -26,10 +26,9 @@ const DEBUG = false;
 export const UserProfileOverlay = (props: {
   profileId?: string;
   userId?: string;
-  overlayNav: OnOverlayNav;
 }) => {
   const appFetch = useAppFetch();
-  const { profileId, userId, overlayNav } = props;
+  const { profileId, userId } = props;
 
   const isUser = userId !== undefined;
 
@@ -99,35 +98,31 @@ export const UserProfileOverlay = (props: {
   const feed = usePostsFetcher(feedConfig);
 
   return (
-    <Box>
-      <OverlayNav overlayNav={overlayNav}></OverlayNav>
-      <Box
-        pad="medium"
-        style={{
-          flexShrink: 0,
-          border: '1.6px solid var(--Neutral-300, #D1D5DB)',
-        }}>
-        <AppHeading level="3">Posts by</AppHeading>
-        <Box margin={{ vertical: 'medium' }}>
-          {isUser ? (
-            <UserProfileHeader user={user}></UserProfileHeader>
-          ) : profile ? (
-            <AccountProfileHeader account={profile}></AccountProfileHeader>
-          ) : (
-            <></>
-          )}
+    <OverlayContext>
+      <Box>
+        <Box
+          pad="medium"
+          style={{
+            flexShrink: 0,
+            border: '1.6px solid var(--Neutral-300, #D1D5DB)',
+          }}>
+          <AppHeading level="3">Posts by</AppHeading>
+          <Box margin={{ vertical: 'medium' }}>
+            {isUser ? (
+              <UserProfileHeader user={user}></UserProfileHeader>
+            ) : profile ? (
+              <AccountProfileHeader account={profile}></AccountProfileHeader>
+            ) : (
+              <></>
+            )}
+          </Box>
         </Box>
+        <PostsFetcherComponent
+          showHeader={false}
+          isPublicFeed={true}
+          feed={feed}
+          pageTitle={'Ref'}></PostsFetcherComponent>
       </Box>
-      <PostsFetcherComponent
-        showHeader={false}
-        isPublicFeed={true}
-        feed={feed}
-        pageTitle={'Ref'}
-        enableOverlay={{
-          post: true,
-          ref: true,
-          user: true,
-        }}></PostsFetcherComponent>
-    </Box>
+    </OverlayContext>
   );
 };
