@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppGeneralKeys } from '../i18n/i18n.app.general';
-import { OverlayContext } from '../posts.fetcher/OverlayContext';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
 import { AppHeading } from '../ui-components';
 import { usePersist } from '../utils/use.persist';
@@ -26,8 +25,8 @@ export const UserPostsFeed = () => {
   const { feed } = useUserPosts();
 
   return (
-    <OverlayContext>
-      <Box fill justify="start">
+    <>
+      <Box justify="start">
         <Box pad="medium">
           <AppHeading level={2}>{t(AppGeneralKeys.myPosts)}</AppHeading>
         </Box>
@@ -35,6 +34,6 @@ export const UserPostsFeed = () => {
           feed={feed}
           pageTitle={t(AppGeneralKeys.myPosts)}></PostsFetcherComponent>
       </Box>
-    </OverlayContext>
+    </>
   );
 };

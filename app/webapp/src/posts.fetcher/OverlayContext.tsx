@@ -46,7 +46,6 @@ export const OverlayContext = (props: PropsWithChildren) => {
               position: 'absolute',
               backgroundColor: '#ffffff',
               top: 0,
-              left: 0,
             }}>
             <OverlayNav overlayNav={{ onBack: () => close() }}></OverlayNav>
             <Overlay></Overlay>
