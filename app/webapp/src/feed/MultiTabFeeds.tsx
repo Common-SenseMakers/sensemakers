@@ -1,4 +1,4 @@
-import { Box } from 'grommet';
+import { Box, BoxExtendedProps } from 'grommet';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -14,63 +14,64 @@ export const MultiTabFeeds = (
     feeds: PostFetcherInterface[];
     tabs: FeedTabConfig[];
     feedIxInit?: number;
+    style?: BoxExtendedProps['style'];
   } & OnOverlayShown
 ) => {
   const { t } = useTranslation();
   const [showTop, setShowTop] = useState(true);
 
-  const { feeds, tabs, feedIxInit } = props;
+  const { feeds, tabs, feedIxInit, style } = props;
 
   const [feedIx, setFeedIx] = useState<number>(feedIxInit || 0);
 
   const n = feeds.length;
   const percWidth = 100 / n;
+  const bottomHeight = showTop ? `calc(100% - 48px)` : `100%`;
+  // const bottomHeight = `100%`;
 
   return (
-    <>
-      <OverlayLayout
-        top={
-          <FeedTabs
-            feedIx={feedIx}
-            onTabClicked={(ix) => setFeedIx(ix)}
-            feedTabs={tabs}></FeedTabs>
-        }
-        bottom={
+    <OverlayLayout
+      style={style}
+      top={
+        <FeedTabs
+          feedIx={feedIx}
+          onTabClicked={(ix) => setFeedIx(ix)}
+          feedTabs={tabs}></FeedTabs>
+      }
+      bottom={
+        <div
+          style={{
+            height: bottomHeight,
+          }}>
           <div
             style={{
-              height: `calc(100%${showTop ? '- 48px' : ''})`,
-              overflow: 'hidden',
+              transform: `translateX(${-1 * feedIx * percWidth}%)`,
+              transition: ' transform 0.5s ease-in-out',
+              height: '100%',
+              width: `${feeds.length * 100}%`,
             }}>
-            <div
-              style={{
-                transform: `translateX(${-1 * feedIx * percWidth}%)`,
-                transition: ' transform 0.5s ease-in-out',
-                height: '100%',
-                width: `${feeds.length * 100}%`,
-              }}>
-              {feeds.map((feed, ix) => {
-                return (
-                  <Box
-                    key={ix}
-                    style={{
-                      width: `${percWidth}%`,
-                      height: '100%',
-                      float: 'left',
-                    }}>
-                    <PostsFetcherComponent
-                      onOverlayShown={() => setShowTop(!showTop)}
-                      showHeader={false}
-                      isPublicFeed={true}
-                      feed={feed}
-                      pageTitle={t(
-                        AppGeneralKeys.feedTitle
-                      )}></PostsFetcherComponent>
-                  </Box>
-                );
-              })}
-            </div>
+            {feeds.map((feed, ix) => {
+              return (
+                <Box
+                  key={ix}
+                  style={{
+                    width: `${percWidth}%`,
+                    height: '100%',
+                    float: 'left',
+                  }}>
+                  <PostsFetcherComponent
+                    onOverlayShown={() => setShowTop(!showTop)}
+                    showHeader={false}
+                    isPublicFeed={true}
+                    feed={feed}
+                    pageTitle={t(
+                      AppGeneralKeys.feedTitle
+                    )}></PostsFetcherComponent>
+                </Box>
+              );
+            })}
           </div>
-        }></OverlayLayout>
-    </>
+        </div>
+      }></OverlayLayout>
   );
 };

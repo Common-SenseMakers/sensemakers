@@ -141,7 +141,7 @@ export const ViewportPage = (props: {
           id="content"
           style={
             fixed
-              ? { height: 'calc(100% - 48px)', overflow: 'hidden' }
+              ? { height: 'calc(100% - 48px)' }
               : { flexGrow: 1, overflowY: 'auto' }
           }>
           <Box

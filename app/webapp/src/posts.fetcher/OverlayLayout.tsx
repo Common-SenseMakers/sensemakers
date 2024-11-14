@@ -1,4 +1,4 @@
-import { Box } from 'grommet';
+import { Box, BoxExtendedProps } from 'grommet';
 import { cloneElement, useState } from 'react';
 
 export interface OnOverlayShown {
@@ -8,8 +8,9 @@ export interface OnOverlayShown {
 export const OverlayLayout = (props: {
   top: JSX.Element;
   bottom: JSX.Element;
+  style?: BoxExtendedProps['style'];
 }) => {
-  const { top, bottom } = props;
+  const { top, bottom, style } = props;
   const [showTop, setShowTop] = useState(true);
 
   const onOverlayShown = (shown: boolean) => {
@@ -25,9 +26,12 @@ export const OverlayLayout = (props: {
         flexGrow: 1,
         height: '100%',
         width: '100%',
+        ...style,
       }}>
       {showTop && <Box style={{ flexShrink: 0 }}>{top}</Box>}
-      <Box style={{ flexShrink: 0, height: '100%' }}>{_bottom}</Box>
+      <Box style={{ flexShrink: 0, flexGrow: 1, height: '100%' }}>
+        {_bottom}
+      </Box>
     </Box>
   );
 };

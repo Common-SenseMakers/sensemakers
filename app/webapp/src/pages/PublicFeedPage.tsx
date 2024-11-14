@@ -85,6 +85,7 @@ export const PublicFeedPage = () => {
           top={<></>}
           bottom={
             <MultiTabFeeds
+              style={{ paddingTop: '16px' }}
               feeds={feeds}
               tabs={feedTabs}
               feedIxInit={ixInit}></MultiTabFeeds>

@@ -3,7 +3,7 @@ import { RefOverlay } from '../post/RefOverlay';
 import { UserProfileOverlay } from '../post/UserProfileOverlay';
 import { AppPostFull } from '../shared/types/types.posts';
 
-interface ShowOverlayConfig {
+export interface ShowOverlayProps {
   post?: AppPostFull;
   postId?: string;
   ref?: string;
@@ -11,7 +11,7 @@ interface ShowOverlayConfig {
   profileId?: string;
 }
 
-export const Overlay = (props: ShowOverlayConfig) => {
+export const Overlay = (props: ShowOverlayProps) => {
   const { post, postId, ref, userId, profileId } = props;
 
   if (post && postId) {
