@@ -1,7 +1,11 @@
+import { useMemo } from 'react';
+
+import { OverlayNav } from '../post/OverlayNav';
 import { PostOverlay } from '../post/PostOverlay';
 import { RefOverlay } from '../post/RefOverlay';
 import { UserProfileOverlay } from '../post/UserProfileOverlay';
 import { AppPostFull } from '../shared/types/types.posts';
+import { useOverlay } from './OverlayContext';
 
 export interface ShowOverlayProps {
   post?: AppPostFull;
@@ -11,25 +15,32 @@ export interface ShowOverlayProps {
   profileId?: string;
 }
 
-export const Overlay = (props: ShowOverlayProps) => {
-  const { post, postId, ref, userId, profileId } = props;
+export const Overlay = () => {
+  const { overlay, close } = useOverlay();
 
-  if (post && postId) {
-    return <PostOverlay postId={post.id} postInit={post}></PostOverlay>;
-  }
+  const content = useMemo(() => {
+    const { post, postId, ref, userId, profileId } = overlay;
+    if (post && postId) {
+      return <PostOverlay postId={post.id} postInit={post}></PostOverlay>;
+    }
 
-  if (ref) {
-    return <RefOverlay refUrl={ref} overlayNav={{}}></RefOverlay>;
-  }
+    if (ref) {
+      return <RefOverlay refUrl={ref} overlayNav={{}}></RefOverlay>;
+    }
 
-  if (userId || profileId) {
-    return (
-      <UserProfileOverlay
-        userId={userId}
-        profileId={profileId}
-        overlayNav={{}}></UserProfileOverlay>
-    );
-  }
-
-  return <></>;
+    if (userId || profileId) {
+      return (
+        <UserProfileOverlay
+          userId={userId}
+          profileId={profileId}
+          overlayNav={{}}></UserProfileOverlay>
+      );
+    }
+  }, [overlay]);
+  return (
+    <>
+      <OverlayNav overlayNav={{ onBack: () => close() }}></OverlayNav>
+      {content}
+    </>
+  );
 };

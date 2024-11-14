@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { ModalContent } from '../app/AppModalStandard';
 import { useToastContext } from '../app/ToastsContext';
 import { HmmIcon } from '../app/icons/HmmIcon';
-import { ReloadIcon } from '../app/icons/ReloadIcon';
 import { AppGeneralKeys } from '../i18n/i18n.app.general';
 import { PostCard } from '../post/PostCard';
 import { PostCardLoading } from '../post/PostCardLoading';
@@ -15,13 +14,10 @@ import {
   PostClickTarget,
 } from '../semantics/patterns/patterns';
 import { AppPostFull } from '../shared/types/types.posts';
-import { AppButton, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
-import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
-import { useThemeContext } from '../ui-components/ThemedApp';
+import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useIsAtBottom } from '../ui-components/hooks/IsAtBottom';
-import { Overlay } from './Overlay';
-import { OnOverlayShown } from './OverlayLayout';
+import { useOverlay } from './OverlayContext';
 import { PostFetcherInterface } from './posts.fetcher.hook';
 
 const DEBUG = true;
@@ -50,31 +46,27 @@ export interface OnFeedNav {
  * to interact with it) and renders it as a feed of PostCard.
  * It includes the infinite scrolling
  */
-export const PostsFetcherComponent = (
-  props: {
-    feed: PostFetcherInterface;
-    pageTitle: string;
-    isPublicFeed?: boolean;
-    showHeader?: boolean;
-    onFeedNav?: OnFeedNav;
-    overlayConfig?: OverlayConfig;
-  } & OnOverlayShown
-) => {
-  const { show } = useToastContext();
-  const { constants } = useThemeContext();
+export const PostsFetcherComponent = (props: {
+  feed: PostFetcherInterface;
+  pageTitle: string;
+  isPublicFeed?: boolean;
+  showHeader?: boolean;
+  onFeedNav?: OnFeedNav;
+  overlayConfig?: OverlayConfig;
+}) => {
+  const { show: showToast } = useToastContext();
   const { t } = useTranslation();
 
   const {
-    pageTitle,
     feed,
     isPublicFeed: _isPublicFeed,
-    showHeader: _showHeader,
     overlayConfig: _overlayConfig,
     onFeedNav,
   } = props;
 
+  const { show: showOverlay } = useOverlay();
+
   const isPublicFeed = _isPublicFeed !== undefined ? _isPublicFeed : false;
-  const showHeader = _showHeader !== undefined ? _showHeader : true;
   const overlayConfig: OverlayConfig = useMemo(
     () =>
       _overlayConfig || {
@@ -90,8 +82,6 @@ export const PostsFetcherComponent = (
     fetchOlder,
     errorFetchingOlder,
     isFetchingOlder,
-    fetchNewer,
-    isFetchingNewer,
     errorFetchingNewer,
     isLoading,
     moreToFetch,
@@ -136,12 +126,13 @@ export const PostsFetcherComponent = (
         return error.message;
       })();
 
-      show({
+      showToast({
         title: 'Error getting users posts',
         message,
       });
     }
-  }, [errorFetchingOlder, errorFetchingNewer, show]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [errorFetchingOlder, errorFetchingNewer]);
 
   const showLoading = [1, 2, 4, 5, 6, 7, 8].map((ix) => (
     <PostCardLoading key={ix}></PostCardLoading>
@@ -168,9 +159,15 @@ export const PostsFetcherComponent = (
   );
 
   const onPostClick = (post: AppPostFull, event: PostClickEvent) => {
+    if (DEBUG) console.log('onPostClick', { event, overlayConfig });
+
     if (event.target === PostClickTarget.POST) {
       if (overlayConfig.post) {
         onFeedNav && onFeedNav.onPostClicked(post.id);
+        const _post = event.payload as AppPostFull;
+
+        if (DEBUG) console.log('onPostClick - setOverlay', { _post });
+        showOverlay({ post: _post, postId: _post.id });
         return;
       }
     }
@@ -179,6 +176,9 @@ export const PostsFetcherComponent = (
       if (overlayConfig.ref) {
         if (DEBUG) console.log(`clicked on ref ${event.payload as string}`);
         onFeedNav && onFeedNav.onRefClicked(event.payload as string);
+
+        if (DEBUG) console.log('onPostClick - setOverlay', { event });
+        showOverlay({ ref: event.payload as string });
         return;
       }
     }
@@ -192,9 +192,13 @@ export const PostsFetcherComponent = (
         if (DEBUG) console.log(`clicked on user ${event.payload as string}`);
         if (event.target === PostClickTarget.USER_ID) {
           onFeedNav && onFeedNav.onUserIdClicked(event.payload as string);
+          if (DEBUG) console.log('onPostClick - setOverlay', { event });
+          showOverlay({ userId: event.payload as string });
         }
         if (event.target === PostClickTarget.PLATFORM_USER_ID) {
           onFeedNav && onFeedNav.onProfileIdClicked(event.payload as string);
+          if (DEBUG) console.log('onPostClick - setOverlay', { event });
+          showOverlay({ profileId: event.payload as string });
         }
         return;
       }
@@ -271,48 +275,16 @@ export const PostsFetcherComponent = (
     <></>
   );
 
-  const reload = isFetchingNewer ? (
-    <Box>
-      <Loading color={constants.colors.primary} size="20px"></Loading>
-    </Box>
-  ) : (
-    <AppButton
-      plain
-      icon={<ReloadIcon size={20}></ReloadIcon>}
-      onClick={() => fetchNewer()}></AppButton>
-  );
-
-  const header = (
-    <Box
-      pad={{ horizontal: 'medium', vertical: 'none' }}
-      style={{
-        backgroundColor: constants.colors.shade,
-        flexShrink: 0,
-        minHeight: '40px',
-      }}>
-      <Box direction="row" justify="between" align="center">
-        <Box direction="row" align="center" gap="12px">
-          <AppHeading level="3">{pageTitle}</AppHeading>
-          <BoxCentered style={{ height: '40px' }}>{reload}</BoxCentered>
-        </Box>
-      </Box>
-    </Box>
-  );
-
   return (
-    <>
-      {showHeader && header}
-      <Box
-        fill
-        style={{ backgroundColor: '#FFFFFF', position: 'relative' }}
-        justify="start">
-        {!posts || isLoading
-          ? showLoading
-          : posts.length === 0
-            ? showNoPosts
-            : showPosts}
-        <Overlay></Overlay>
-      </Box>
-    </>
+    <Box
+      fill
+      style={{ backgroundColor: '#FFFFFF', position: 'relative' }}
+      justify="start">
+      {!posts || isLoading
+        ? showLoading
+        : posts.length === 0
+          ? showNoPosts
+          : showPosts}
+    </Box>
   );
 };

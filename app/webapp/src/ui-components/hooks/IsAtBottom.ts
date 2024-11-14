@@ -1,6 +1,6 @@
 import { MutableRefObject, useEffect, useState } from 'react';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const useIsAtBottom = (
   containerRef: MutableRefObject<HTMLElement | null>,

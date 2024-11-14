@@ -17,8 +17,6 @@ export const OverlayNav = (props: { overlayNav?: OnOverlayNav }) => {
   return (
     <Box
       style={{
-        height: '40px',
-        borderBottom: '1px solid #F3F4F6',
         backgroundColor: '#FFFFFF',
         flexShrink: 0,
       }}
