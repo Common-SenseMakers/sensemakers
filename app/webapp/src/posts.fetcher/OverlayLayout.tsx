@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Box, BoxExtendedProps } from 'grommet';
-import { cloneElement, useState } from 'react';
+import { useState } from 'react';
 
 export interface OnOverlayShown {
-  onOverlayShown?: (shown: boolean) => void;
+  handleOverlayShown?: (shown: boolean) => void;
 }
 
 export const OverlayLayout = (props: {
@@ -13,11 +14,12 @@ export const OverlayLayout = (props: {
   const { top, bottom, style } = props;
   const [showTop, setShowTop] = useState(true);
 
-  const onOverlayShown = (shown: boolean) => {
+  const handleOverlayShown = (shown: boolean) => {
     setShowTop(!shown);
   };
 
-  const _bottom = cloneElement(bottom, { onOverlayShown });
+  // const _bottom = cloneElement(bottom, { handleOverlayShown });
+  const _bottom = bottom;
 
   return (
     <Box

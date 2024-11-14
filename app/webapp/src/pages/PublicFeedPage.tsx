@@ -11,7 +11,7 @@ import {
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const locationToFeedIx = (location: Location) => {
   if (DEBUG) console.log(location);

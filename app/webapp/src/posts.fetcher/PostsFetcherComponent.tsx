@@ -219,8 +219,6 @@ export const PostsFetcherComponent = (
         </Box>
       ))}
 
-      <div style={{ padding: '1px' }} ref={bottomRef}></div>
-
       {isFetchingOlder && (
         <Box>
           <LoadingDiv height="120px" width="100%"></LoadingDiv>
@@ -232,7 +230,8 @@ export const PostsFetcherComponent = (
           margin={{ vertical: 'medium', horizontal: 'medium' }}
           align="center"
           justify="center"
-          style={{ flexShrink: 0 }}>
+          style={{ flexShrink: 0 }}
+          ref={bottomRef}>
           <Text
             style={{
               fontSize: '14px',

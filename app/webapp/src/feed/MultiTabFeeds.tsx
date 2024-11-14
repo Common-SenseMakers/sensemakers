@@ -42,6 +42,8 @@ export const MultiTabFeeds = (
         <div
           style={{
             height: bottomHeight,
+            width: '100%',
+            overflow: 'hidden',
           }}>
           <div
             style={{
@@ -60,7 +62,7 @@ export const MultiTabFeeds = (
                     float: 'left',
                   }}>
                   <PostsFetcherComponent
-                    onOverlayShown={() => setShowTop(!showTop)}
+                    handleOverlayShown={() => setShowTop(!showTop)}
                     showHeader={false}
                     isPublicFeed={true}
                     feed={feed}
