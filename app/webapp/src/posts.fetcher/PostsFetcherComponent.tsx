@@ -6,6 +6,7 @@ import { ModalContent } from '../app/AppModalStandard';
 import { useToastContext } from '../app/ToastsContext';
 import { HmmIcon } from '../app/icons/HmmIcon';
 import { ReloadIcon } from '../app/icons/ReloadIcon';
+import { useFeedPosts } from '../feed/PublicFeedsContext';
 import { AppGeneralKeys } from '../i18n/i18n.app.general';
 import { PostCard } from '../post/PostCard';
 import { PostCardLoading } from '../post/PostCardLoading';
@@ -52,6 +53,7 @@ export const PostsFetcherComponent = (props: {
   const { show } = useToastContext();
   const { constants } = useThemeContext();
   const { t } = useTranslation();
+  const { setOverlay } = useFeedPosts();
 
   const [postToShow, setPostToShow] = useState<AppPostFull | undefined>(
     undefined
@@ -143,6 +145,7 @@ export const PostsFetcherComponent = (props: {
     setProfileIdToShow(undefined);
     setRefToShow(undefined);
     setUserIdToShow(undefined);
+    setOverlay(undefined);
   };
 
   useOutsideClick(containerRef, () => {
@@ -188,6 +191,7 @@ export const PostsFetcherComponent = (props: {
       if (enableOverlay.ref) {
         if (DEBUG) console.log(`clicked on ref ${event.payload as string}`);
         setRefToShow(event.payload as string);
+        setOverlay('ref');
         return;
       }
     }
