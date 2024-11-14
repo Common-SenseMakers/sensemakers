@@ -4,6 +4,7 @@ import { NavButton } from '../app/NavButton';
 import { LeftChevronIcon } from '../app/icons/LeftChveronIcon';
 import { LeftIcon } from '../app/icons/LeftIcon';
 import { RightIcon } from '../app/icons/RightIcon';
+import { useThemeContext } from '../ui-components/ThemedApp';
 
 export interface OnOverlayNav {
   onBack?: () => void;
@@ -12,12 +13,13 @@ export interface OnOverlayNav {
 }
 
 export const OverlayNav = (props: { overlayNav?: OnOverlayNav }) => {
+  const { constants } = useThemeContext();
   const { overlayNav: onOverlayNav } = props;
 
   return (
     <Box
       style={{
-        backgroundColor: '#FFFFFF',
+        backgroundColor: constants.colors.shade,
         flexShrink: 0,
         height: '64px',
       }}

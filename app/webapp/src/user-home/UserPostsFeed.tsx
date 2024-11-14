@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { AppGeneralKeys } from '../i18n/i18n.app.general';
 import { OverlayContext } from '../posts.fetcher/OverlayContext';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
+import { AppHeading } from '../ui-components';
 import { usePersist } from '../utils/use.persist';
 import { useUserPosts } from './UserPostsContext';
 
@@ -27,6 +28,9 @@ export const UserPostsFeed = () => {
   return (
     <OverlayContext>
       <Box fill justify="start">
+        <Box pad="medium">
+          <AppHeading level={2}>{t(AppGeneralKeys.myPosts)}</AppHeading>
+        </Box>
         <PostsFetcherComponent
           feed={feed}
           pageTitle={t(AppGeneralKeys.myPosts)}></PostsFetcherComponent>
