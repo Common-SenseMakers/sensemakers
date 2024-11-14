@@ -102,42 +102,40 @@ export const RefLabelsComponent = (props: PatternProps) => {
 
               const authorProfileId = props.post?.authorProfileId;
               return (
-                <>
-                  <Box
-                    style={{
-                      borderRadius: '12px',
-                      border: '1.6px solid #D1D5DB',
-                      width: '100%',
+                <Box
+                  key={index}
+                  style={{
+                    borderRadius: '12px',
+                    border: '1.6px solid #D1D5DB',
+                    width: '100%',
+                  }}
+                  pad="12px"
+                  onClick={() =>
+                    props.onPostClick &&
+                    props.onPostClick({
+                      target: PostClickTarget.REF,
+                      payload: ref,
+                    })
+                  }>
+                  <RefWithLabels
+                    ix={index}
+                    showLabels={true}
+                    showDescription={false}
+                    editable={props.editable}
+                    refUrl={ref}
+                    refData={refData}
+                    ontology={props.originalParsed?.support?.ontology}
+                    removeLabel={(labelUri: string) => {
+                      removeLabel(ref, labelUri).catch(console.error);
                     }}
-                    pad="12px"
-                    onClick={() =>
-                      props.onPostClick &&
-                      props.onPostClick({
-                        target: PostClickTarget.REF,
-                        payload: ref,
-                      })
-                    }>
-                    <RefWithLabels
-                      ix={index}
-                      showLabels={true}
-                      showDescription={false}
-                      editable={props.editable}
-                      key={ref}
-                      refUrl={ref}
-                      refData={refData}
-                      ontology={props.originalParsed?.support?.ontology}
-                      removeLabel={(labelUri: string) => {
-                        removeLabel(ref, labelUri).catch(console.error);
-                      }}
-                      addLabel={(labelUri: string) => {
-                        addLabel(ref, labelUri).catch(console.error);
-                      }}
-                      allRefs={visibleRefs}
-                      onPostClick={props.onPostClick}
-                      refLabels={refLabels}
-                      authorProfileId={authorProfileId}></RefWithLabels>
-                  </Box>
-                </>
+                    addLabel={(labelUri: string) => {
+                      addLabel(ref, labelUri).catch(console.error);
+                    }}
+                    allRefs={visibleRefs}
+                    onPostClick={props.onPostClick}
+                    refLabels={refLabels}
+                    authorProfileId={authorProfileId}></RefWithLabels>
+                </Box>
               );
             })}
           </Box>

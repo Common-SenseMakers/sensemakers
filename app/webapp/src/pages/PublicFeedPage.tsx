@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Location, useLocation } from 'react-router-dom';
 
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { MultiTabFeeds } from '../feed/MultiTabFeeds';
 import { FeedTabConfig, feedTabs } from '../feed/feed.config';
+import { OverlayLayout } from '../posts.fetcher/OverlayLayout';
 import {
   FetcherConfig,
   usePostsFetcher,
@@ -79,7 +80,16 @@ export const PublicFeedPage = () => {
   return (
     <ViewportPage
       fixed
-      content={<MultiTabFeeds feeds={feeds} tabs={feedTabs}></MultiTabFeeds>}
+      content={
+        <OverlayLayout
+          top={<></>}
+          bottom={
+            <MultiTabFeeds
+              feeds={feeds}
+              tabs={feedTabs}
+              feedIxInit={ixInit}></MultiTabFeeds>
+          }></OverlayLayout>
+      }
       nav={<GlobalNav></GlobalNav>}
       justify="start"></ViewportPage>
   );

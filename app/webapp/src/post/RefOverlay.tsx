@@ -3,10 +3,7 @@ import { Box } from 'grommet';
 import { useEffect, useMemo, useState } from 'react';
 
 import { useAppFetch } from '../api/app.fetch';
-import {
-  OverlayConfig,
-  PostsFetcherComponent,
-} from '../posts.fetcher/PostsFetcherComponent';
+import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
 import {
   FetcherConfig,
   usePostsFetcher,
@@ -74,12 +71,6 @@ export const RefOverlay = (props: {
 
   const feed = usePostsFetcher(feedConfig);
 
-  const overlayConfig: OverlayConfig = {
-    post: { enabled: true },
-    ref: { enabled: true },
-    user: { enabled: true },
-  };
-
   const refData = {
     labelsUris:
       (refMeta?.refLabels || [])
@@ -116,7 +107,6 @@ export const RefOverlay = (props: {
           }}></RefWithLabels>
       </Box>
       <PostsFetcherComponent
-        overlayConfig={overlayConfig}
         showHeader={false}
         isPublicFeed={true}
         feed={feed}

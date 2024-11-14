@@ -9,9 +9,6 @@ import { ReloadIcon } from '../app/icons/ReloadIcon';
 import { AppGeneralKeys } from '../i18n/i18n.app.general';
 import { PostCard } from '../post/PostCard';
 import { PostCardLoading } from '../post/PostCardLoading';
-import { PostOverlay } from '../post/PostOverlay';
-import { RefOverlay } from '../post/RefOverlay';
-import { UserProfileOverlay } from '../post/UserProfileOverlay';
 import { PostContext } from '../post/post.context/PostContext';
 import {
   PostClickEvent,
@@ -23,6 +20,8 @@ import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useIsAtBottom } from '../ui-components/hooks/IsAtBottom';
+import { Overlay } from './Overlay';
+import { OnOverlayShown } from './OverlayLayout';
 import { PostFetcherInterface } from './posts.fetcher.hook';
 
 const DEBUG = true;
@@ -33,16 +32,9 @@ export interface FilterOption {
 }
 
 export interface OverlayConfig {
-  post: {
-    enabled: boolean;
-    postId?: string;
-  };
-  ref: { enabled: boolean; ref?: string };
-  user: {
-    enabled: boolean;
-    profileId?: string;
-    userId?: string;
-  };
+  post: boolean;
+  ref: boolean;
+  user: boolean;
 }
 
 export interface OnFeedNav {
@@ -53,27 +45,21 @@ export interface OnFeedNav {
   onBackClicked?: () => void;
 }
 
-interface ShowOverlayConfig {
-  postToShow?: AppPostFull;
-  postIdToShow?: string;
-  refToShow?: string;
-  userIdToShow?: string;
-  profileIdToShow?: string;
-}
-
 /**
  * Receives a PostFetcherInterface object (with the posts array and methods
  * to interact with it) and renders it as a feed of PostCard.
  * It includes the infinite scrolling
  */
-export const PostsFetcherComponent = (props: {
-  feed: PostFetcherInterface;
-  pageTitle: string;
-  isPublicFeed?: boolean;
-  showHeader?: boolean;
-  onFeedNav?: OnFeedNav;
-  overlayConfig?: OverlayConfig;
-}) => {
+export const PostsFetcherComponent = (
+  props: {
+    feed: PostFetcherInterface;
+    pageTitle: string;
+    isPublicFeed?: boolean;
+    showHeader?: boolean;
+    onFeedNav?: OnFeedNav;
+    overlayConfig?: OverlayConfig;
+  } & OnOverlayShown
+) => {
   const { show } = useToastContext();
   const { constants } = useThemeContext();
   const { t } = useTranslation();
@@ -92,15 +78,9 @@ export const PostsFetcherComponent = (props: {
   const overlayConfig: OverlayConfig = useMemo(
     () =>
       _overlayConfig || {
-        post: {
-          enabled: true,
-        },
-        ref: {
-          enabled: true,
-        },
-        user: {
-          enabled: true,
-        },
+        post: true,
+        ref: true,
+        user: true,
       },
     [_overlayConfig]
   );
@@ -115,24 +95,7 @@ export const PostsFetcherComponent = (props: {
     errorFetchingNewer,
     isLoading,
     moreToFetch,
-    getPost,
   } = feed;
-
-  const showOverlayConfig = useMemo<ShowOverlayConfig>(() => {
-    if (!overlayConfig) {
-      return { postToShow: undefined, postIdToShow: undefined };
-    }
-
-    if (overlayConfig.post.enabled && overlayConfig.post.postId) {
-      const post = getPost(overlayConfig.post.postId);
-      return { postToShow: post, postIdToShow: overlayConfig.post.postId };
-    }
-
-    return {};
-  }, [getPost, overlayConfig]);
-
-  const { postToShow, postIdToShow, refToShow, userIdToShow, profileIdToShow } =
-    showOverlayConfig;
 
   const postsContainerRef = useRef<HTMLDivElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
@@ -205,18 +168,15 @@ export const PostsFetcherComponent = (props: {
   );
 
   const onPostClick = (post: AppPostFull, event: PostClickEvent) => {
-    // Reset all overlays first
-    reset();
-
     if (event.target === PostClickTarget.POST) {
-      if (overlayConfig.post.enabled) {
+      if (overlayConfig.post) {
         onFeedNav && onFeedNav.onPostClicked(post.id);
         return;
       }
     }
 
     if (event.target === PostClickTarget.REF) {
-      if (overlayConfig.ref.enabled) {
+      if (overlayConfig.ref) {
         if (DEBUG) console.log(`clicked on ref ${event.payload as string}`);
         onFeedNav && onFeedNav.onRefClicked(event.payload as string);
         return;
@@ -228,7 +188,7 @@ export const PostsFetcherComponent = (props: {
         event.target
       )
     ) {
-      if (overlayConfig.user.enabled) {
+      if (overlayConfig.user) {
         if (DEBUG) console.log(`clicked on user ${event.payload as string}`);
         if (event.target === PostClickTarget.USER_ID) {
           onFeedNav && onFeedNav.onUserIdClicked(event.payload as string);
@@ -339,71 +299,6 @@ export const PostsFetcherComponent = (props: {
     </Box>
   );
 
-  const showPost = postToShow && postIdToShow && (
-    <PostOverlay
-      postId={postToShow.id}
-      postInit={postToShow}
-      onPostClick={(event) => onPostClick(postToShow, event)}
-      overlayNav={{
-        onBack: () =>
-          onFeedNav && onFeedNav.onBackClicked && onFeedNav.onBackClicked(),
-        onPrev: () => {
-          const { prevPostId } = feed.getNextAndPrev();
-          if (prevPostId) {
-            const prev = feed.getPost(prevPostId);
-            prev && onFeedNav && onFeedNav.onPostClicked(prev.id);
-          }
-        },
-        onNext: () => {
-          const { nextPostId } = feed.getNextAndPrev();
-          if (nextPostId) {
-            const next = feed.getPost(nextPostId);
-            next && onFeedNav && onFeedNav.onPostClicked(next.id);
-          }
-        },
-      }}></PostOverlay>
-  );
-
-  const showRef = refToShow && (
-    <RefOverlay
-      refUrl={refToShow}
-      overlayNav={{
-        onBack: () =>
-          onFeedNav && onFeedNav.onBackClicked && onFeedNav.onBackClicked(),
-      }}></RefOverlay>
-  );
-
-  const showProfile = (userIdToShow || profileIdToShow) && (
-    <UserProfileOverlay
-      userId={userIdToShow}
-      profileId={profileIdToShow}
-      overlayNav={{
-        onBack: () =>
-          onFeedNav && onFeedNav.onBackClicked && onFeedNav.onBackClicked(),
-      }}></UserProfileOverlay>
-  );
-
-  const showOverlay = (showPost || showRef || showProfile) && (
-    <Box
-      style={{
-        position: 'absolute',
-        top: 0,
-        backgroundColor: '#ffffff',
-        height: '100%',
-        width: '100%',
-      }}>
-      {showPost ? (
-        showPost
-      ) : showRef ? (
-        showRef
-      ) : showProfile ? (
-        showProfile
-      ) : (
-        <></>
-      )}
-    </Box>
-  );
-
   return (
     <>
       {showHeader && header}
@@ -416,7 +311,7 @@ export const PostsFetcherComponent = (props: {
           : posts.length === 0
             ? showNoPosts
             : showPosts}
-        {showOverlay}
+        <Overlay></Overlay>
       </Box>
     </>
   );

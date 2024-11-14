@@ -1,17 +1,35 @@
-import { PropsWithChildren } from 'react';
+import { PostOverlay } from '../post/PostOverlay';
+import { RefOverlay } from '../post/RefOverlay';
+import { UserProfileOverlay } from '../post/UserProfileOverlay';
+import { AppPostFull } from '../shared/types/types.posts';
 
-export const Overlay = (props: PropsWithChildren) => {
-  return (
-    <Box
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: ,
-        backgroundColor: '#ffffff',
-        height: '100%',
-        width: '100%',
-      }}>
-      {props.children}
-    </Box>
-  );
+interface ShowOverlayConfig {
+  post?: AppPostFull;
+  postId?: string;
+  ref?: string;
+  userId?: string;
+  profileId?: string;
+}
+
+export const Overlay = (props: ShowOverlayConfig) => {
+  const { post, postId, ref, userId, profileId } = props;
+
+  if (post && postId) {
+    return <PostOverlay postId={post.id} postInit={post}></PostOverlay>;
+  }
+
+  if (ref) {
+    return <RefOverlay refUrl={ref} overlayNav={{}}></RefOverlay>;
+  }
+
+  if (userId || profileId) {
+    return (
+      <UserProfileOverlay
+        userId={userId}
+        profileId={profileId}
+        overlayNav={{}}></UserProfileOverlay>
+    );
+  }
+
+  return <></>;
 };
