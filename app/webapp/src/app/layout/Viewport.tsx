@@ -121,7 +121,7 @@ export const ViewportPage = (props: {
   addLogo?: boolean;
 }) => {
   const { mobile } = useResponsive();
-  const pad = mobile ? 'none' : 'large';
+  const pad = mobile ? 'none' : 'none';
   const fixed = props.fixed !== undefined ? props.fixed : false;
   const addLogo = props.addLogo !== undefined ? props.addLogo : false;
 
