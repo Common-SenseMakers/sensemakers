@@ -205,9 +205,13 @@ export const PostsFetcherComponent = (props: {
   );
 
   const onPostClick = (post: AppPostFull, event: PostClickEvent) => {
+    // Reset all overlays first
+    reset();
+
     if (event.target === PostClickTarget.POST) {
       if (overlayConfig.post.enabled) {
         onFeedNav && onFeedNav.onPostClicked(post.id);
+        return;
       }
     }
 
@@ -215,6 +219,7 @@ export const PostsFetcherComponent = (props: {
       if (overlayConfig.ref.enabled) {
         if (DEBUG) console.log(`clicked on ref ${event.payload as string}`);
         onFeedNav && onFeedNav.onRefClicked(event.payload as string);
+        return;
       }
     }
 
@@ -231,6 +236,7 @@ export const PostsFetcherComponent = (props: {
         if (event.target === PostClickTarget.PLATFORM_USER_ID) {
           onFeedNav && onFeedNav.onProfileIdClicked(event.payload as string);
         }
+        return;
       }
     }
   };
@@ -337,6 +343,7 @@ export const PostsFetcherComponent = (props: {
     <PostOverlay
       postId={postToShow.id}
       postInit={postToShow}
+      onPostClick={(event) => onPostClick(postToShow, event)}
       overlayNav={{
         onBack: () =>
           onFeedNav && onFeedNav.onBackClicked && onFeedNav.onBackClicked(),

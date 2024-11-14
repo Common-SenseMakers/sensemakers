@@ -1,11 +1,11 @@
 import { Anchor, Box } from 'grommet';
 import { useMemo } from 'react';
 
-import { ParsedSupport, RefMeta } from '../../../shared/types/types.parser';
-import { AppPostFull } from '../../../shared/types/types.posts';
+import { ParserOntology, RefMeta } from '../../../shared/types/types.parser';
+import { RefLabel } from '../../../shared/types/types.posts';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
-import { REF_URL_ANCHOR_ID, RefCard } from '../common/RefCard';
-import { PostClickEvent, PostClickTarget } from '../patterns';
+import { RefCard } from '../common/RefCard';
+import { PostClickEvent } from '../patterns';
 import { AggregatedRefLabels } from './AggregatedRefLabels';
 import { RefData } from './process.semantics';
 
@@ -15,21 +15,23 @@ export const RefWithLabels = (props: {
   refUrl: string;
   refData: RefData;
   showLabels?: boolean;
-  support?: ParsedSupport;
-  post?: AppPostFull;
+  showDescription?: boolean;
+  ontology?: ParserOntology;
   addLabel: (labelUri: string) => void;
   removeLabel: (labelUri: string) => void;
   editable?: boolean;
   allRefs: [string, RefData][];
   onPostClick?: (event: PostClickEvent) => void;
+  refLabels?: RefLabel[];
+  authorProfileId?: string;
 }) => {
-  const labelsOntology = props.support?.ontology?.semantic_predicates;
+  const labelsOntology = props.ontology?.semantic_predicates;
   const refData = props.refData;
   const { showLabels } =
     props.showLabels !== undefined ? props : { showLabels: true };
 
   /** display names for selected labels */
-  const labelsDisplayNames = useMemo(
+  let labelsDisplayNames = useMemo(
     () =>
       refData.labelsUris.map((labelUri) => {
         const label_ontology = labelsOntology
@@ -43,6 +45,9 @@ export const RefWithLabels = (props: {
       }),
     [labelsOntology, refData.labelsUris]
   );
+
+  // make labelsDisplayNames unique
+  labelsDisplayNames = Array.from(new Set(labelsDisplayNames));
 
   /** list of possible labels from ontology (filtering those selected) */
   const optionDisplayNames = useMemo(
@@ -76,48 +81,31 @@ export const RefWithLabels = (props: {
     props.addLabel(getLabelFromDisplayName(label).uri);
   };
 
-  const refLabels = props.post?.meta?.refLabels[props.refUrl];
+  const refLabels = props.refLabels;
 
   const show =
     refLabels &&
     refLabels.find(
-      (refLabel) => refLabel.authorProfileId !== props.post?.authorProfileId
+      (refLabel) => refLabel.authorProfileId !== props.authorProfileId
     ) !== undefined;
 
-  const onCardClicked = (
-    event: React.MouseEvent<HTMLDivElement, MouseEvent>
-  ) => {
-    const target = event.target as HTMLElement;
-
-    if (target.id === REF_URL_ANCHOR_ID) {
-      window.open(props.refUrl, '_blank', 'noopener,noreferrer');
-      return;
-    }
-
-    props.onPostClick &&
-      props.onPostClick({
-        target: PostClickTarget.REF,
-        payload: props.refUrl,
-      });
-  };
-
   return (
-    <Box
-      style={{
-        borderRadius: '12px',
-        border: '1.6px solid #D1D5DB',
-        width: '100%',
-      }}
-      pad="12px"
-      onClick={(e) => onCardClicked(e)}>
+    <>
       {refData.meta ? (
         <RefCard
           ix={props.ix + 1}
           url={props.refUrl}
           title={refData.meta?.title}
-          description={refData.meta?.summary}
+          description={
+            props.showDescription ? refData.meta?.summary : undefined
+          }
           image={refData.meta?.thumbnail_url}
-          refType={refData.meta.item_type}
+          refType={
+            refData.meta.item_type !== 'unknown'
+              ? refData.meta.item_type
+              : undefined
+          }
+          showDescription={props.showDescription}
           sourceRef={getSourceRefNumber(refData.meta, props.allRefs)}></RefCard>
       ) : (
         <Anchor target="_blank" href={props.refUrl}>
@@ -129,7 +117,7 @@ export const RefWithLabels = (props: {
         <Box margin={{ top: '22px' }}>
           <AggregatedRefLabels
             refLabels={refLabels}
-            ontology={props.support?.ontology}></AggregatedRefLabels>
+            ontology={props.ontology}></AggregatedRefLabels>
         </Box>
       ) : (
         <></>
@@ -150,7 +138,7 @@ export const RefWithLabels = (props: {
             addLabel={(label) => addLabel(label)}></AppLabelsEditor>
         )}
       </Box>
-    </Box>
+    </>
   );
 };
 

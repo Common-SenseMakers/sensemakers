@@ -43,13 +43,16 @@ export const PlatformPostAnchor = (props: {
         direction="row"
         align="center"
         wrap
+        justify="end"
         style={{
-          gap: '8px',
           display: 'inline-flex',
           flexWrap: 'wrap',
         }}>
-        <span style={{ color: constants.colors.textLight2 }}>{label}</span>
-        <span style={{ color: '#4B5563' }}>{date}</span>
+        <span
+          style={{ color: constants.colors.textLight2, marginRight: '8px' }}>
+          {label}
+        </span>
+        <span style={{ color: '#4B5563', marginRight: '8px' }}>{date}</span>
         <OpenLinkIcon size={12} />
       </Box>
     </Anchor>

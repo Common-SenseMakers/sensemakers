@@ -8,7 +8,11 @@ import { ClearIcon } from '../app/icons/ClearIcon';
 import { SendIcon } from '../app/icons/SendIcon';
 import { PostEditKeys } from '../i18n/i18n.edit.post';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
-import { PATTERN_ID, PatternProps } from '../semantics/patterns/patterns';
+import {
+  PATTERN_ID,
+  PatternProps,
+  PostClickEvent,
+} from '../semantics/patterns/patterns';
 import { PlatformProfile } from '../shared/types/types.profiles';
 import { AppButton } from '../ui-components';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
@@ -24,6 +28,7 @@ import { concatenateThread } from './posts.helper';
 export const PostView = (props: {
   profile?: PlatformProfile;
   overlayNav?: OnOverlayNav;
+  onPostClick?: (event: PostClickEvent) => void;
 }) => {
   const appFetch = useAppFetch();
   const { overlayNav } = props;
@@ -172,7 +177,7 @@ export const PostView = (props: {
         {!hideSemantics && (
           <Box margin={{ top: '24px' }}>
             <SemanticsEditor
-              patternProps={patternProps}
+              patternProps={{ ...patternProps, onPostClick: props.onPostClick }}
               include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
           </Box>
         )}

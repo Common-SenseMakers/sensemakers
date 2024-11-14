@@ -33,6 +33,7 @@ const PostCardHeader = (props: {
           target: PostClickTarget.USER_ID,
           payload: props.post.authorUserId,
         });
+      return;
     }
 
     if (props.post.authorProfileId) {
@@ -41,6 +42,7 @@ const PostCardHeader = (props: {
           target: PostClickTarget.PLATFORM_USER_ID,
           payload: props.post.authorProfileId,
         });
+      return;
     }
   };
 

@@ -1,4 +1,4 @@
-import { GenericThread } from './types.posts';
+import { GenericThread, RefLabel } from './types.posts';
 
 export enum PARSER_MODE {
   REF_LABELS = 'REF_LABELS',
@@ -47,6 +47,8 @@ export interface RefMeta extends OEmbed {
   order?: number;
   ref_source_url?: string;
   labels?: string[];
+  refLabels?: RefLabel[];
+  ontology?: ParserOntology;
 }
 
 export interface ParserOntology {
