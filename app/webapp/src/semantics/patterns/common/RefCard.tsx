@@ -150,7 +150,7 @@ export const RefCard = (props: {
                   fontStyle: 'normal',
                   fontWeight: '400',
                 }}
-                maxLines={6}>
+                maxLines={3}>
                 {props.description || urlMeta?.description}
               </Paragraph>
             )}

@@ -116,7 +116,9 @@ export const RefWithLabels = (props: {
       {show ? (
         <Box margin={{ top: '22px' }}>
           <AggregatedRefLabels
-            refLabels={refLabels}
+            refLabels={refLabels.filter(
+              (refLabel) => refLabel.authorProfileId !== props.authorProfileId
+            )}
             ontology={props.ontology}></AggregatedRefLabels>
         </Box>
       ) : (
