@@ -2,6 +2,8 @@ import { Box, BoxExtendedProps, Text } from 'grommet';
 
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { PlatformPostAnchor } from '../post/PlatformPostAnchor';
+import { useOverlay } from '../posts.fetcher/OverlayContext';
+import { PostClickTarget } from '../semantics/patterns/patterns';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { getPostDetails } from './platform-specific.details';
 import { usePost } from './post.context/PostContext';
@@ -10,18 +12,42 @@ import { usePost } from './post.context/PostContext';
 export const PostHeader = (props: { boxProps: BoxExtendedProps }) => {
   const { constants } = useThemeContext();
   const { updated } = usePost();
+  const { onPostClick } = useOverlay();
+
   const post = updated.postMerged;
 
   const { boxProps } = props;
 
   const details = getPostDetails(post);
 
+  const onUserClicked = () => {
+    if (!post) return;
+
+    if (post.authorUserId) {
+      onPostClick({
+        target: PostClickTarget.USER_ID,
+        payload: post.authorUserId,
+      });
+      return;
+    }
+
+    if (post.authorProfileId) {
+      onPostClick({
+        target: PostClickTarget.PLATFORM_USER_ID,
+        payload: post.authorProfileId,
+      });
+      return;
+    }
+  };
+
   return (
     <Box direction="row" justify="between" {...boxProps}>
       <Box direction="row">
-        <PlatformAvatar
-          size={48}
-          imageUrl={details?.authorAvatarUrl}></PlatformAvatar>
+        <Box onClick={() => onUserClicked()}>
+          <PlatformAvatar
+            size={48}
+            imageUrl={details?.authorAvatarUrl}></PlatformAvatar>
+        </Box>
         <Box width="100%" margin={{ left: 'medium' }}>
           <Box direction="row" justify="between">
             <Text

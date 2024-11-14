@@ -1,5 +1,5 @@
 import { Box, Text } from 'grommet';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ModalContent } from '../app/AppModalStandard';
@@ -9,15 +9,9 @@ import { AppGeneralKeys } from '../i18n/i18n.app.general';
 import { PostCard } from '../post/PostCard';
 import { PostCardLoading } from '../post/PostCardLoading';
 import { PostContext } from '../post/post.context/PostContext';
-import {
-  PostClickEvent,
-  PostClickTarget,
-} from '../semantics/patterns/patterns';
-import { AppPostFull } from '../shared/types/types.posts';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useIsAtBottom } from '../ui-components/hooks/IsAtBottom';
-import { useOverlay } from './OverlayContext';
 import { PostFetcherInterface } from './posts.fetcher.hook';
 
 const DEBUG = true;
@@ -33,14 +27,6 @@ export interface OverlayConfig {
   user: boolean;
 }
 
-export interface OnFeedNav {
-  onPostClicked: (postId: string) => void;
-  onProfileIdClicked: (profileId: string) => void;
-  onUserIdClicked: (userId: string) => void;
-  onRefClicked: (ref: string) => void;
-  onBackClicked?: () => void;
-}
-
 /**
  * Receives a PostFetcherInterface object (with the posts array and methods
  * to interact with it) and renders it as a feed of PostCard.
@@ -51,31 +37,15 @@ export const PostsFetcherComponent = (props: {
   pageTitle: string;
   isPublicFeed?: boolean;
   showHeader?: boolean;
-  onFeedNav?: OnFeedNav;
+
   overlayConfig?: OverlayConfig;
 }) => {
   const { show: showToast } = useToastContext();
   const { t } = useTranslation();
 
-  const {
-    feed,
-    isPublicFeed: _isPublicFeed,
-    overlayConfig: _overlayConfig,
-    onFeedNav,
-  } = props;
-
-  const { show: showOverlay } = useOverlay();
+  const { feed, isPublicFeed: _isPublicFeed } = props;
 
   const isPublicFeed = _isPublicFeed !== undefined ? _isPublicFeed : false;
-  const overlayConfig: OverlayConfig = useMemo(
-    () =>
-      _overlayConfig || {
-        post: true,
-        ref: true,
-        user: true,
-      },
-    [_overlayConfig]
-  );
 
   const {
     posts,
@@ -158,53 +128,6 @@ export const PostsFetcherComponent = (props: {
     </BoxCentered>
   );
 
-  const onPostClick = (post: AppPostFull, event: PostClickEvent) => {
-    if (DEBUG) console.log('onPostClick', { event, overlayConfig });
-
-    if (event.target === PostClickTarget.POST) {
-      if (overlayConfig.post) {
-        onFeedNav && onFeedNav.onPostClicked(post.id);
-        const _post = event.payload as AppPostFull;
-
-        if (DEBUG) console.log('onPostClick - setOverlay', { _post });
-        showOverlay({ post: _post, postId: _post.id });
-        return;
-      }
-    }
-
-    if (event.target === PostClickTarget.REF) {
-      if (overlayConfig.ref) {
-        if (DEBUG) console.log(`clicked on ref ${event.payload as string}`);
-        onFeedNav && onFeedNav.onRefClicked(event.payload as string);
-
-        if (DEBUG) console.log('onPostClick - setOverlay', { event });
-        showOverlay({ ref: event.payload as string });
-        return;
-      }
-    }
-
-    if (
-      [PostClickTarget.USER_ID, PostClickTarget.PLATFORM_USER_ID].includes(
-        event.target
-      )
-    ) {
-      if (overlayConfig.user) {
-        if (DEBUG) console.log(`clicked on user ${event.payload as string}`);
-        if (event.target === PostClickTarget.USER_ID) {
-          onFeedNav && onFeedNav.onUserIdClicked(event.payload as string);
-          if (DEBUG) console.log('onPostClick - setOverlay', { event });
-          showOverlay({ userId: event.payload as string });
-        }
-        if (event.target === PostClickTarget.PLATFORM_USER_ID) {
-          onFeedNav && onFeedNav.onProfileIdClicked(event.payload as string);
-          if (DEBUG) console.log('onPostClick - setOverlay', { event });
-          showOverlay({ profileId: event.payload as string });
-        }
-        return;
-      }
-    }
-  };
-
   const showPosts = posts ? (
     <Box
       ref={postsContainerRef}
@@ -216,9 +139,7 @@ export const PostsFetcherComponent = (props: {
       {posts.map((post, ix) => (
         <Box key={ix} id={`post-${post.id}`} style={{ flexShrink: 0 }}>
           <PostContext postInit={post}>
-            <PostCard
-              isPublicFeed={isPublicFeed}
-              onPostClick={(event) => onPostClick(post, event)}></PostCard>
+            <PostCard isPublicFeed={isPublicFeed}></PostCard>
           </PostContext>
         </Box>
       ))}

@@ -34,7 +34,6 @@ export interface PatternProps {
   semantics?: AppPostSemantics;
   semanticsUpdated?: (semantics: AppPostSemantics) => void;
   post?: AppPostFull;
-  onPostClick?: (event: PostClickEvent) => void;
 }
 
 export const patternsLib: Record<

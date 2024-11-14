@@ -176,7 +176,7 @@ export const PostView = (props: {
         {!hideSemantics && (
           <Box margin={{ top: '24px' }}>
             <SemanticsEditor
-              patternProps={{ ...patternProps, onPostClick: props.onPostClick }}
+              patternProps={{ ...patternProps }}
               include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
           </Box>
         )}

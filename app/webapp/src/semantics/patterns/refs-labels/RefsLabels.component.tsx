@@ -2,6 +2,7 @@ import { Box } from 'grommet';
 import { DataFactory } from 'n3';
 import { useMemo } from 'react';
 
+import { useOverlay } from '../../../posts.fetcher/OverlayContext';
 import { filterStore, writeRDF } from '../../../shared/utils/n3.utils';
 import { THIS_POST_NAME_URI } from '../../../shared/utils/semantics.helper';
 import { AppLabel } from '../../../ui-components';
@@ -15,6 +16,8 @@ import { RefsMap, processSemantics } from './process.semantics';
 export const RefLabelsComponent = (props: PatternProps) => {
   const { store, originalStore } = useSemanticsStore(props);
   const size = props.size || 'normal';
+
+  const { onPostClick } = useOverlay();
 
   /** processed ref labels with metadata */
   const refs = useMemo<RefsMap>(
@@ -111,8 +114,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
                   }}
                   pad="12px"
                   onClick={() =>
-                    props.onPostClick &&
-                    props.onPostClick({
+                    onPostClick({
                       target: PostClickTarget.REF,
                       payload: ref,
                     })
@@ -132,7 +134,6 @@ export const RefLabelsComponent = (props: PatternProps) => {
                       addLabel(ref, labelUri).catch(console.error);
                     }}
                     allRefs={visibleRefs}
-                    onPostClick={props.onPostClick}
                     refLabels={refLabels}
                     authorProfileId={authorProfileId}></RefWithLabels>
                 </Box>

@@ -2,12 +2,9 @@ import { Box, Text } from 'grommet';
 import { MouseEventHandler } from 'react';
 
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
+import { useOverlay } from '../posts.fetcher/OverlayContext';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
-import {
-  PATTERN_ID,
-  PostClickEvent,
-  PostClickTarget,
-} from '../semantics/patterns/patterns';
+import { PATTERN_ID, PostClickTarget } from '../semantics/patterns/patterns';
 import { AppPostFull } from '../shared/types/types.posts';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { PlatformPostAnchor } from './PlatformPostAnchor';
@@ -19,29 +16,26 @@ import { concatenateThread } from './posts.helper';
 const REFS_SEMANTICS_ID = 'refs-semantics';
 const POST_AUTHOR_ID = 'post-author';
 
-const PostCardHeader = (props: {
-  post: AppPostFull;
-  onPostClick?: (event: PostClickEvent) => void;
-}) => {
+const PostCardHeader = (props: { post: AppPostFull }) => {
   const { constants } = useThemeContext();
   const details = getPostDetails(props.post);
 
+  const { onPostClick } = useOverlay();
+
   const onUserClicked = () => {
     if (props.post.authorUserId) {
-      props.onPostClick &&
-        props.onPostClick({
-          target: PostClickTarget.USER_ID,
-          payload: props.post.authorUserId,
-        });
+      onPostClick({
+        target: PostClickTarget.USER_ID,
+        payload: props.post.authorUserId,
+      });
       return;
     }
 
     if (props.post.authorProfileId) {
-      props.onPostClick &&
-        props.onPostClick({
-          target: PostClickTarget.PLATFORM_USER_ID,
-          payload: props.post.authorProfileId,
-        });
+      onPostClick({
+        target: PostClickTarget.PLATFORM_USER_ID,
+        payload: props.post.authorProfileId,
+      });
       return;
     }
   };
@@ -80,7 +74,6 @@ const PostCardHeader = (props: {
 export const PostCard = (props: {
   isPublicFeed?: boolean;
   shade?: boolean;
-  onPostClick: (event: PostClickEvent) => void;
   isEmail?: boolean;
 }) => {
   const { shade: _shade } = props;
@@ -90,6 +83,8 @@ export const PostCard = (props: {
   const post = updated.postMerged;
 
   const { constants } = useThemeContext();
+
+  const { onPostClick } = useOverlay();
 
   if (!post) {
     console.warn('unexpected post undefined in PostCard');
@@ -112,7 +107,7 @@ export const PostCard = (props: {
       target = target.parentNode as HTMLElement;
     }
 
-    props.onPostClick({ target: PostClickTarget.POST, payload: post });
+    onPostClick({ target: PostClickTarget.POST, payload: post });
   };
 
   const postText = concatenateThread(post.generic);
@@ -125,11 +120,7 @@ export const PostCard = (props: {
 
   const hideSemantics = false;
 
-  const header = (
-    <PostCardHeader
-      post={post}
-      onPostClick={props.onPostClick}></PostCardHeader>
-  );
+  const header = <PostCardHeader post={post}></PostCardHeader>;
 
   return (
     <Box
@@ -187,7 +178,6 @@ export const PostCard = (props: {
                 semantics: post?.semantics,
                 originalParsed: post?.originalParsed,
                 post,
-                onPostClick: props.onPostClick,
               }}></SemanticsEditor>
           </Box>
         )}
