@@ -231,7 +231,8 @@ export const PostsFetcherComponent = (
         <Box
           margin={{ vertical: 'medium', horizontal: 'medium' }}
           align="center"
-          justify="center">
+          justify="center"
+          style={{ flexShrink: 0 }}>
           <Text
             style={{
               fontSize: '14px',
