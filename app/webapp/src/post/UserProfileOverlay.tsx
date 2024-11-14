@@ -19,7 +19,6 @@ import {
 import { splitProfileId } from '../shared/utils/profiles.utils';
 import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
 import { AppHeading } from '../ui-components';
-import { OnOverlayNav, OverlayNav } from './OverlayNav';
 
 const DEBUG = false;
 
@@ -27,10 +26,9 @@ const DEBUG = false;
 export const UserProfileOverlay = (props: {
   profileId?: string;
   userId?: string;
-  overlayNav: OnOverlayNav;
 }) => {
   const appFetch = useAppFetch();
-  const { profileId, userId, overlayNav } = props;
+  const { profileId, userId } = props;
 
   const isUser = userId !== undefined;
 
@@ -102,7 +100,6 @@ export const UserProfileOverlay = (props: {
   return (
     <OverlayContext>
       <Box>
-        <OverlayNav overlayNav={overlayNav}></OverlayNav>
         <Box
           pad="medium"
           style={{

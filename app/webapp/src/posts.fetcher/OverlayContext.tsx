@@ -1,6 +1,7 @@
 import { Box } from 'grommet';
 import { PropsWithChildren, createContext, useContext, useState } from 'react';
 
+import { OverlayNav } from '../post/OverlayNav';
 import { Overlay, ShowOverlayProps } from './Overlay';
 
 export interface OverlayContextType {
@@ -35,7 +36,6 @@ export const OverlayContext = (props: PropsWithChildren) => {
         style={{
           height: '100%',
           width: '100%',
-          position: 'relative',
         }}>
         <Box style={{ height: '100%', width: '100%' }}>{props.children}</Box>
         {Object.keys(overlay).length > 0 && (
@@ -48,6 +48,7 @@ export const OverlayContext = (props: PropsWithChildren) => {
               top: 0,
               left: 0,
             }}>
+            <OverlayNav overlayNav={{ onBack: () => close() }}></OverlayNav>
             <Overlay></Overlay>
           </Box>
         )}

@@ -15,17 +15,13 @@ import { PLATFORM } from '../shared/types/types.platforms';
 import { PlatformProfile } from '../shared/types/types.profiles';
 import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
-import { OnOverlayNav, OverlayNav } from './OverlayNav';
 
 const DEBUG = true;
 
 /** extract the postId from the route and pass it to a PostContext */
-export const RefOverlay = (props: {
-  refUrl: string;
-  overlayNav: OnOverlayNav;
-}) => {
+export const RefOverlay = (props: { refUrl: string }) => {
   const appFetch = useAppFetch();
-  const { refUrl, overlayNav } = props;
+  const { refUrl } = props;
 
   const { connectedUser } = useAccountContext();
   const [accountProfileId, setAccountProfileId] = useState<string | undefined>(
@@ -84,7 +80,6 @@ export const RefOverlay = (props: {
   return (
     <OverlayContext>
       <Box>
-        <OverlayNav overlayNav={overlayNav}></OverlayNav>
         <Box
           pad="medium"
           style={{

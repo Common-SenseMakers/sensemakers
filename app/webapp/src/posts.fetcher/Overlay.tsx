@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 
-import { OverlayNav } from '../post/OverlayNav';
 import { PostOverlay } from '../post/PostOverlay';
 import { RefOverlay } from '../post/RefOverlay';
 import { UserProfileOverlay } from '../post/UserProfileOverlay';
@@ -16,7 +15,7 @@ export interface ShowOverlayProps {
 }
 
 export const Overlay = () => {
-  const { overlay, close } = useOverlay();
+  const { overlay } = useOverlay();
 
   const content = useMemo(() => {
     const { post, postId, ref, userId, profileId } = overlay;
@@ -25,22 +24,16 @@ export const Overlay = () => {
     }
 
     if (ref) {
-      return <RefOverlay refUrl={ref} overlayNav={{}}></RefOverlay>;
+      return <RefOverlay refUrl={ref}></RefOverlay>;
     }
 
     if (userId || profileId) {
       return (
         <UserProfileOverlay
           userId={userId}
-          profileId={profileId}
-          overlayNav={{}}></UserProfileOverlay>
+          profileId={profileId}></UserProfileOverlay>
       );
     }
   }, [overlay]);
-  return (
-    <>
-      <OverlayNav overlayNav={{ onBack: () => close() }}></OverlayNav>
-      {content}
-    </>
-  );
+  return <>{content}</>;
 };

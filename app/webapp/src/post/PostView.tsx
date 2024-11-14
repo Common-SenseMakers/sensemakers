@@ -18,7 +18,7 @@ import { AppButton } from '../ui-components';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
-import { OnOverlayNav, OverlayNav } from './OverlayNav';
+import { OnOverlayNav } from './OverlayNav';
 import { PostHeader } from './PostHeader';
 import { PostTextEditable } from './PostTextEditable';
 import { usePost } from './post.context/PostContext';
@@ -31,7 +31,6 @@ export const PostView = (props: {
   onPostClick?: (event: PostClickEvent) => void;
 }) => {
   const appFetch = useAppFetch();
-  const { overlayNav } = props;
 
   const [, setIsReparsing] = useState(false);
 
@@ -189,7 +188,6 @@ export const PostView = (props: {
 
   return (
     <Box fill>
-      <OverlayNav overlayNav={overlayNav}></OverlayNav>
       <Box style={{ overflowY: 'auto', flexGrow: 1 }}>{content}</Box>
     </Box>
   );

@@ -1,3 +1,4 @@
+import { Box } from 'grommet';
 import { useMemo } from 'react';
 import { Location, useLocation } from 'react-router-dom';
 
@@ -81,12 +82,14 @@ export const PublicFeedPage = () => {
     <ViewportPage
       fixed
       content={
-        <OverlayContext>
-          <MultiTabFeeds
-            feeds={feeds}
-            tabs={feedTabs}
-            feedIxInit={ixInit}></MultiTabFeeds>
-        </OverlayContext>
+        <Box style={{ position: 'relative', paddingTop: '16px' }}>
+          <OverlayContext>
+            <MultiTabFeeds
+              feeds={feeds}
+              tabs={feedTabs}
+              feedIxInit={ixInit}></MultiTabFeeds>
+          </OverlayContext>
+        </Box>
       }
       nav={<GlobalNav></GlobalNav>}
       justify="start"></ViewportPage>

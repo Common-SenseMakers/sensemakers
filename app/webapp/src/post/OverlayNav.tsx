@@ -19,6 +19,7 @@ export const OverlayNav = (props: { overlayNav?: OnOverlayNav }) => {
       style={{
         backgroundColor: '#FFFFFF',
         flexShrink: 0,
+        height: '64px',
       }}
       pad={{ horizontal: '12px' }}
       direction="row"
