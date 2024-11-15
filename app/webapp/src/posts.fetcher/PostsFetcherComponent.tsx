@@ -74,7 +74,7 @@ export const PostsFetcherComponent = (props: {
       fetchOlder();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchOlder, isAtBottom, isLoading, moreToFetch]);
+  }, [isAtBottom]);
 
   useEffect(() => {
     const error = errorFetchingOlder || errorFetchingNewer;

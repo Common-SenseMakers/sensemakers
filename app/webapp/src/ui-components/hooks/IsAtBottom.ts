@@ -7,6 +7,8 @@ export const useIsAtBottom = (
   lastRef: MutableRefObject<HTMLElement | null>
 ) => {
   const [isAtBottom, setIsAtBottom] = useState(false);
+  const containerRect = containerRef.current?.getBoundingClientRect();
+  const lastRect = lastRef.current?.getBoundingClientRect();
 
   useEffect(() => {
     if (DEBUG) console.log(`isAtBottom`, { containerRef, lastRef });
@@ -45,7 +47,8 @@ export const useIsAtBottom = (
         }
       };
     }
-  }, [containerRef, lastRef]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [containerRect, lastRect]);
 
   return { isAtBottom };
 };
