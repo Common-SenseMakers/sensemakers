@@ -145,7 +145,7 @@ export const PostsFetcherComponent = (props: {
       ))}
 
       {isFetchingOlder && (
-        <Box>
+        <Box style={{ flexShrink: 0 }}>
           <LoadingDiv height="120px" width="100%"></LoadingDiv>
         </Box>
       )}
