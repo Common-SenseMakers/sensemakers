@@ -23,10 +23,12 @@ export const AppLabelsEditor = (props: {
   hashtag?: boolean;
   colors: LabelColors;
   editable?: boolean;
+  onLabelClick?: (label: string) => void;
 }) => {
   const editable = props.editable !== undefined ? props.editable : false;
   const colors = props.colors;
   const hashtag = props.hashtag !== undefined ? props.hashtag : false;
+  const onLabelClick = props.onLabelClick;
 
   const { constants } = useThemeContext();
   const { t } = useTranslation();
@@ -187,7 +189,16 @@ export const AppLabelsEditor = (props: {
         {visibleLables.map((label, ix) => {
           const marginRight = ix < visibleLables.length - 1 ? '4px' : '0';
           return (
-            <Box key={ix} style={{ display: 'block', float: 'left' }}>
+            <Box
+              key={ix}
+              style={{
+                display: 'block',
+                float: 'left',
+                cursor: onLabelClick ? 'pointer' : 'inherit',
+              }}
+              onClick={() => {
+                onLabelClick && !adding && onLabelClick(label as string);
+              }}>
               <AppLabel
                 colors={colors}
                 showClose={adding}

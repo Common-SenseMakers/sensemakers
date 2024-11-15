@@ -2,7 +2,7 @@ import { Box, Text } from 'grommet';
 import { MouseEventHandler } from 'react';
 
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
-import { useOverlay } from '../posts.fetcher/OverlayContext';
+import { useOverlay } from '../overlays/OverlayContext';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID, PostClickTarget } from '../semantics/patterns/patterns';
 import { AppPostFull } from '../shared/types/types.posts';
@@ -13,6 +13,7 @@ import { getPostDetails } from './platform-specific.details';
 import { usePost } from './post.context/PostContext';
 import { concatenateThread } from './posts.helper';
 
+const KEYWORDS_SEMANTICS_ID = 'keywords-semantics';
 const REFS_SEMANTICS_ID = 'refs-semantics';
 const POST_AUTHOR_ID = 'post-author';
 
@@ -96,11 +97,11 @@ export const PostCard = (props: {
 
     // filter clicks on the ref semantics
     while (target !== null) {
-      if (target.id === REFS_SEMANTICS_ID) {
-        return; // Stop further processing
-      }
-
-      if (target.id === POST_AUTHOR_ID) {
+      if (
+        [REFS_SEMANTICS_ID, POST_AUTHOR_ID, KEYWORDS_SEMANTICS_ID].includes(
+          target.id
+        )
+      ) {
         return; // Stop further processing
       }
 
@@ -144,18 +145,20 @@ export const PostCard = (props: {
         </Box>
 
         {!hideSemantics && (
-          <SemanticsEditor
-            include={[PATTERN_ID.KEYWORDS]}
-            patternProps={{
-              isLoading:
-                updated.statusesMerged.isParsing !== undefined
-                  ? updated.statusesMerged.isParsing
-                  : false,
-              editable: false,
-              size: 'compact',
-              semantics: post?.semantics,
-              originalParsed: post?.originalParsed,
-            }}></SemanticsEditor>
+          <Box id={KEYWORDS_SEMANTICS_ID}>
+            <SemanticsEditor
+              include={[PATTERN_ID.KEYWORDS]}
+              patternProps={{
+                isLoading:
+                  updated.statusesMerged.isParsing !== undefined
+                    ? updated.statusesMerged.isParsing
+                    : false,
+                editable: false,
+                size: 'compact',
+                semantics: post?.semantics,
+                originalParsed: post?.originalParsed,
+              }}></SemanticsEditor>
+          </Box>
         )}
 
         <PostTextStatic

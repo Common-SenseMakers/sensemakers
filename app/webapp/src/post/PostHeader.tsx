@@ -1,8 +1,8 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
 
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
+import { useOverlay } from '../overlays/OverlayContext';
 import { PlatformPostAnchor } from '../post/PlatformPostAnchor';
-import { useOverlay } from '../posts.fetcher/OverlayContext';
 import { PostClickTarget } from '../semantics/patterns/patterns';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { getPostDetails } from './platform-specific.details';

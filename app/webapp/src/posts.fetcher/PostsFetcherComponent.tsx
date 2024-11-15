@@ -34,7 +34,7 @@ export interface OverlayConfig {
  */
 export const PostsFetcherComponent = (props: {
   feed: PostFetcherInterface;
-  pageTitle: string;
+  pageTitle?: string;
   isPublicFeed?: boolean;
   showHeader?: boolean;
 

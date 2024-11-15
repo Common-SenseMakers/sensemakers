@@ -6,7 +6,7 @@ import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { MultiTabFeeds } from '../feed/MultiTabFeeds';
 import { FeedTabConfig, feedTabs } from '../feed/feed.config';
-import { OverlayContext } from '../posts.fetcher/OverlayContext';
+import { OverlayContext } from '../overlays/OverlayContext';
 import {
   FetcherConfig,
   usePostsFetcher,

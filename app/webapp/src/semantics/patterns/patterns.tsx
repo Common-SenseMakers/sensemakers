@@ -19,6 +19,7 @@ export enum PostClickTarget {
   USER_ID = 'USER_ID',
   PLATFORM_USER_ID = 'PLATFORM_USER_ID',
   REF = 'REF',
+  KEYWORD = 'KEYWORD',
 }
 
 export interface PostClickEvent {

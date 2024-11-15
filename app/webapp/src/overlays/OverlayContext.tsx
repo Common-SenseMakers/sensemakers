@@ -1,7 +1,7 @@
 import { Box } from 'grommet';
 import { PropsWithChildren, createContext, useContext, useState } from 'react';
 
-import { OverlayNav } from '../post/OverlayNav';
+import { OverlayNav } from '../overlays/OverlayNav';
 import { DEBUG } from '../post/post.context/use.post.merge.deltas';
 import {
   PostClickEvent,
@@ -40,6 +40,12 @@ export const OverlayContext = (props: PropsWithChildren) => {
 
       if (DEBUG) console.log('onPostClick - setOverlay', { _post });
       show({ post: _post, postId: _post.id });
+      return;
+    }
+
+    if (event.target === PostClickTarget.KEYWORD) {
+      if (DEBUG) console.log('onPostClick - setOverlay', { event });
+      show({ ref: event.payload as string });
       return;
     }
 

@@ -2,6 +2,7 @@ import { Box } from 'grommet';
 import { DataFactory } from 'n3';
 import { useMemo } from 'react';
 
+import { useOverlay } from '../../../overlays/OverlayContext';
 import {
   filterStore,
   mapStoreElements,
@@ -11,11 +12,17 @@ import { THIS_POST_NAME_URI } from '../../../shared/utils/semantics.helper';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { LoadingDiv } from '../../../ui-components/LoadingDiv';
 import { useSemanticsStore } from '../common/use.semantics';
-import { PatternProps } from '../patterns';
+import { PatternProps, PostClickTarget } from '../patterns';
 
 export const KeywordsComponent = (props: PatternProps) => {
   /** actual semantics */
   const { store } = useSemanticsStore(props);
+
+  const { onPostClick } = useOverlay();
+
+  const handleKeywordClick = (keyword: string) => {
+    onPostClick({ target: PostClickTarget.KEYWORD, payload: keyword });
+  };
 
   const KEYWORD_PREDICATE =
     props.originalParsed?.support?.ontology?.keyword_predicate?.uri;
@@ -94,6 +101,7 @@ export const KeywordsComponent = (props: PatternProps) => {
           editable={props.editable}
           colors={{ font: '#FFFFFF', background: '#498283', border: '#6C9C9D' }}
           labels={keywords}
+          onLabelClick={handleKeywordClick}
           addLabel={(newLabel) => {
             addKeyword(newLabel).catch(console.error);
           }}
