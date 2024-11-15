@@ -12,6 +12,8 @@ import useOutsideClick from './hooks/OutsideClickHook';
 
 const DEBUG = false;
 
+export const REF_LABELS_EDITOR_ID = 'ref-labels-editor';
+
 export const AppLabelsEditor = (props: {
   labels: Array<string | JSX.Element>;
   maxLabels?: number;
@@ -174,6 +176,7 @@ export const AppLabelsEditor = (props: {
 
   return (
     <Box
+      id={REF_LABELS_EDITOR_ID}
       ref={keyBox}
       width="100%"
       style={{

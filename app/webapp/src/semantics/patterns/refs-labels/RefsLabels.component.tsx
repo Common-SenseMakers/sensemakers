@@ -6,6 +6,7 @@ import { useOverlay } from '../../../posts.fetcher/OverlayContext';
 import { filterStore, writeRDF } from '../../../shared/utils/n3.utils';
 import { THIS_POST_NAME_URI } from '../../../shared/utils/semantics.helper';
 import { AppLabel } from '../../../ui-components';
+import { REF_LABELS_EDITOR_ID } from '../../../ui-components/AppLabelsEditor';
 import { LoadingDiv } from '../../../ui-components/LoadingDiv';
 import { splitArray } from '../../../ui-components/utils';
 import { useSemanticsStore } from '../common/use.semantics';
@@ -18,6 +19,24 @@ export const RefLabelsComponent = (props: PatternProps) => {
   const size = props.size || 'normal';
 
   const { onPostClick } = useOverlay();
+
+  const handleClick = (
+    event: React.MouseEvent<HTMLDivElement>,
+    ref: string
+  ) => {
+    let target = event.target as HTMLElement;
+
+    // filter clicks on the ref semantics
+    while (target !== null) {
+      if (target.id === REF_LABELS_EDITOR_ID) {
+        return; // Stop further processing
+      }
+
+      target = target.parentNode as HTMLElement;
+    }
+
+    onPostClick({ target: PostClickTarget.REF, payload: ref });
+  };
 
   /** processed ref labels with metadata */
   const refs = useMemo<RefsMap>(
@@ -113,11 +132,8 @@ export const RefLabelsComponent = (props: PatternProps) => {
                     width: '100%',
                   }}
                   pad="12px"
-                  onClick={() =>
-                    onPostClick({
-                      target: PostClickTarget.REF,
-                      payload: ref,
-                    })
+                  onClick={(e: React.MouseEvent<HTMLDivElement>) =>
+                    handleClick(e, ref)
                   }>
                   <RefWithLabels
                     ix={index}

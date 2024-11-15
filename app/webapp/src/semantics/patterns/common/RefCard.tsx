@@ -31,7 +31,6 @@ export const RefCard = (props: {
   title?: string;
   description?: string;
   image?: string;
-  onClick?: (e: React.MouseEvent) => void;
   refType?: string;
   sourceRef?: number;
   showDescription?: boolean;
@@ -82,7 +81,7 @@ export const RefCard = (props: {
   }, [props.url]);
 
   return (
-    <Box align="start" pad={{}} onClick={props.onClick}>
+    <Box align="start" pad={{}}>
       <Box
         margin={{ bottom: '20px' }}
         width="100%"

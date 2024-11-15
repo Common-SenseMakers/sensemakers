@@ -5,7 +5,6 @@ import { ParserOntology, RefMeta } from '../../../shared/types/types.parser';
 import { RefLabel } from '../../../shared/types/types.posts';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { RefCard } from '../common/RefCard';
-import { PostClickEvent } from '../patterns';
 import { AggregatedRefLabels } from './AggregatedRefLabels';
 import { RefData } from './process.semantics';
 
@@ -21,7 +20,6 @@ export const RefWithLabels = (props: {
   removeLabel: (labelUri: string) => void;
   editable?: boolean;
   allRefs: [string, RefData][];
-  onPostClick?: (event: PostClickEvent) => void;
   refLabels?: RefLabel[];
   authorProfileId?: string;
 }) => {
