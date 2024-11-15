@@ -1,9 +1,10 @@
-import { Anchor, Box } from 'grommet';
+import { Box } from 'grommet';
 import { useMemo } from 'react';
 
 import { ParserOntology, RefMeta } from '../../../shared/types/types.parser';
 import { RefLabel } from '../../../shared/types/types.posts';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
+import { LoadingDiv } from '../../../ui-components/LoadingDiv';
 import { RefCard } from '../common/RefCard';
 import { AggregatedRefLabels } from './AggregatedRefLabels';
 import { RefData } from './process.semantics';
@@ -106,9 +107,15 @@ export const RefWithLabels = (props: {
           showDescription={props.showDescription}
           sourceRef={getSourceRefNumber(refData.meta, props.allRefs)}></RefCard>
       ) : (
-        <Anchor target="_blank" href={props.refUrl}>
-          {props.refUrl}
-        </Anchor>
+        <Box gap="10px" pad={{ vertical: '8px' }}>
+          <LoadingDiv
+            height={'16px'}
+            style={{ borderRadius: '12px', width: '120px' }}></LoadingDiv>
+
+          <LoadingDiv
+            height={'76px'}
+            style={{ borderRadius: '12px', width: '100%' }}></LoadingDiv>
+        </Box>
       )}
 
       {show ? (
