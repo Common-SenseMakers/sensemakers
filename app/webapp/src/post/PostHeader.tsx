@@ -43,11 +43,11 @@ export const PostHeader = (props: { boxProps: BoxExtendedProps }) => {
   return (
     <Box direction="row" justify="between" {...boxProps}>
       <Box direction="row">
-        <Box onClick={() => onUserClicked()}>
+        <div style={{ cursor: 'pointer' }} onClick={() => onUserClicked()}>
           <PlatformAvatar
             size={48}
             imageUrl={details?.authorAvatarUrl}></PlatformAvatar>
-        </Box>
+        </div>
         <Box width="100%" margin={{ left: 'medium' }}>
           <Box direction="row" justify="between">
             <Text
