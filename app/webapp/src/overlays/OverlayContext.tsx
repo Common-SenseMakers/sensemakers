@@ -1,5 +1,12 @@
 import { Box } from 'grommet';
-import { PropsWithChildren, createContext, useContext, useState } from 'react';
+import {
+  PropsWithChildren,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import { OverlayNav } from '../overlays/OverlayNav';
 import { DEBUG } from '../post/post.context/use.post.merge.deltas';
@@ -14,6 +21,7 @@ export interface OverlayContextType {
   show: (shown: ShowOverlayProps) => void;
   close: () => void;
   onPostClick: (event: PostClickEvent) => void;
+  syncQueryParams: () => void;
   overlay: ShowOverlayProps;
 }
 
@@ -24,6 +32,20 @@ const OverlayContextValue = createContext<OverlayContextType | undefined>(
 export const OverlayContext = (props: PropsWithChildren) => {
   const [overlay, setOverlay] = useState<ShowOverlayProps>({});
 
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const parentOverlay = useOverlay();
+
+  const setSearchParam = (key: string, value: string) => {
+    if (DEBUG) console.log(`setSearchParam: ${key}=${value}`);
+
+    searchParams.forEach((value, key) => {
+      searchParams.delete(key);
+    });
+    searchParams.append(key, value);
+    setSearchParams(searchParams);
+  };
+
   const show = (value: ShowOverlayProps) => {
     setOverlay(value);
   };
@@ -31,6 +53,48 @@ export const OverlayContext = (props: PropsWithChildren) => {
   const close = () => {
     setOverlay({});
   };
+
+  const syncQueryParams = () => {
+    if (Object.keys(overlay).length === 0) {
+      if (parentOverlay !== undefined) {
+        parentOverlay.syncQueryParams();
+      } else {
+        searchParams.forEach((value, key) => {
+          searchParams.delete(key);
+        });
+        setSearchParams(searchParams);
+      }
+      return;
+    }
+
+    if (overlay.post) {
+      setSearchParam('post', overlay.post.id);
+      return;
+    }
+    if (overlay.ref) {
+      setSearchParam('ref', overlay.ref);
+      return;
+    }
+    if (overlay.userId) {
+      setSearchParam('userId', overlay.userId);
+      return;
+    }
+    if (overlay.profileId) {
+      setSearchParam('profileId', overlay.profileId);
+      return;
+    }
+    if (overlay.keyword) {
+      setSearchParam('keyword', overlay.keyword);
+      return;
+    }
+  };
+
+  useEffect(() => {
+    syncQueryParams();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [overlay]);
+
+  const showOverlay = Object.keys(overlay).length > 0;
 
   const onPostClick = (event: PostClickEvent) => {
     if (DEBUG) console.log('onPostClick', { event });
@@ -80,6 +144,7 @@ export const OverlayContext = (props: PropsWithChildren) => {
         close,
         overlay,
         onPostClick,
+        syncQueryParams,
       }}>
       <Box
         style={{
@@ -87,7 +152,7 @@ export const OverlayContext = (props: PropsWithChildren) => {
           width: '100%',
         }}>
         <Box style={{ height: '100%', width: '100%' }}>{props.children}</Box>
-        {Object.keys(overlay).length > 0 && (
+        {showOverlay && (
           <Box
             style={{
               height: '100%',
@@ -105,8 +170,7 @@ export const OverlayContext = (props: PropsWithChildren) => {
   );
 };
 
-export const useOverlay = (): OverlayContextType => {
+export const useOverlay = (): OverlayContextType | undefined => {
   const context = useContext(OverlayContextValue);
-  if (!context) throw Error('context not found');
   return context;
 };

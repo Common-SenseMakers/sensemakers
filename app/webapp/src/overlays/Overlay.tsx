@@ -17,10 +17,14 @@ export interface ShowOverlayProps {
 }
 
 export const Overlay = () => {
-  const { overlay } = useOverlay();
+  const overlay = useOverlay();
 
   const content = useMemo(() => {
-    const { post, postId, ref, userId, profileId, keyword } = overlay;
+    if (!overlay) {
+      return <></>;
+    }
+
+    const { post, postId, ref, userId, profileId, keyword } = overlay.overlay;
     if (post && postId) {
       return <PostOverlay postId={post.id} postInit={post}></PostOverlay>;
     }

@@ -18,7 +18,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
   const { store, originalStore } = useSemanticsStore(props);
   const size = props.size || 'normal';
 
-  const { onPostClick } = useOverlay();
+  const overlay = useOverlay();
 
   const handleClick = (
     event: React.MouseEvent<HTMLDivElement>,
@@ -35,7 +35,8 @@ export const RefLabelsComponent = (props: PatternProps) => {
       target = target.parentNode as HTMLElement;
     }
 
-    onPostClick({ target: PostClickTarget.REF, payload: ref });
+    overlay &&
+      overlay.onPostClick({ target: PostClickTarget.REF, payload: ref });
   };
 
   /** processed ref labels with metadata */
