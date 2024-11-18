@@ -45,7 +45,7 @@ export const OverlayContext = (props: PropsWithChildren) => {
 
     if (event.target === PostClickTarget.KEYWORD) {
       if (DEBUG) console.log('onPostClick - setOverlay', { event });
-      show({ ref: event.payload as string });
+      show({ keyword: event.payload as string });
       return;
     }
 
