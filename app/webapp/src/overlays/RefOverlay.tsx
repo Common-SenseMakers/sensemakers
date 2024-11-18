@@ -3,7 +3,6 @@ import { Box } from 'grommet';
 import { useEffect, useMemo, useState } from 'react';
 
 import { useAppFetch } from '../api/app.fetch';
-import { OverlayContext } from '../posts.fetcher/OverlayContext';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
 import {
   FetcherConfig,
@@ -15,6 +14,7 @@ import { PLATFORM } from '../shared/types/types.platforms';
 import { PlatformProfile } from '../shared/types/types.profiles';
 import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
+import { OverlayContext } from './OverlayContext';
 
 const DEBUG = true;
 

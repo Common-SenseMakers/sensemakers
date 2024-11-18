@@ -2,7 +2,7 @@ import { Box } from 'grommet';
 
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
-import { OverlayContext } from '../posts.fetcher/OverlayContext';
+import { OverlayContext } from '../overlays/OverlayContext';
 import { UserPostsFeed } from '../user-home/UserPostsFeed';
 
 export const UserPostsPage = () => {

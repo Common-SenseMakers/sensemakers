@@ -7,6 +7,7 @@ import { useAppFetch } from '../api/app.fetch';
 import { ClearIcon } from '../app/icons/ClearIcon';
 import { SendIcon } from '../app/icons/SendIcon';
 import { PostEditKeys } from '../i18n/i18n.edit.post';
+import { OnOverlayNav } from '../overlays/OverlayNav';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import {
   PATTERN_ID,
@@ -18,7 +19,6 @@ import { AppButton } from '../ui-components';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
-import { OnOverlayNav } from './OverlayNav';
 import { PostHeader } from './PostHeader';
 import { PostTextEditable } from './PostTextEditable';
 import { usePost } from './post.context/PostContext';

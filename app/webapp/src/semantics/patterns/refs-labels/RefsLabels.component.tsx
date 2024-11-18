@@ -2,7 +2,7 @@ import { Box } from 'grommet';
 import { DataFactory } from 'n3';
 import { useMemo } from 'react';
 
-import { useOverlay } from '../../../posts.fetcher/OverlayContext';
+import { useOverlay } from '../../../overlays/OverlayContext';
 import { filterStore, writeRDF } from '../../../shared/utils/n3.utils';
 import { THIS_POST_NAME_URI } from '../../../shared/utils/semantics.helper';
 import { AppLabel } from '../../../ui-components';

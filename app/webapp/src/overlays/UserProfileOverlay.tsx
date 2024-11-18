@@ -3,7 +3,7 @@ import { Box } from 'grommet';
 import { useEffect, useMemo } from 'react';
 
 import { useAppFetch } from '../api/app.fetch';
-import { OverlayContext } from '../posts.fetcher/OverlayContext';
+import { OverlayContext } from '../overlays/OverlayContext';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
 import {
   FetcherConfig,

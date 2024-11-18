@@ -1,10 +1,10 @@
 import { Box } from 'grommet';
 
-import { OverlayContext } from '../posts.fetcher/OverlayContext';
+import { PostView } from '../post/PostView';
+import { PostContext } from '../post/post.context/PostContext';
 import { AppPostFull } from '../shared/types/types.posts';
+import { OverlayContext } from './OverlayContext';
 import { OnOverlayNav } from './OverlayNav';
-import { PostView } from './PostView';
-import { PostContext } from './post.context/PostContext';
 
 /** extract the postId from the route and pass it to a PostContext */
 export const PostOverlay = (props: {
