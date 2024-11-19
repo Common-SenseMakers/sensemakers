@@ -12,6 +12,8 @@ import { PostClickEvent } from '../semantics/patterns/patterns';
 import { Overlay, OverlayValue } from './Overlay';
 import { eventToOverlay } from './overlay.utils';
 
+const DEBUG = true;
+
 export enum OverlayQueryParams {
   Post = 'p',
   Ref = 'r',
@@ -21,6 +23,7 @@ export enum OverlayQueryParams {
 }
 
 export interface OverlayContextType {
+  level: number;
   onPostClick: (event: PostClickEvent) => void;
   onChildOverlayNav: (value: OverlayValue) => void;
   overlay: OverlayValue;
@@ -34,11 +37,14 @@ export const OverlayContext = (
   props: PropsWithChildren & {
     init?: OverlayValue | null;
     onOverlayNav?: (value: OverlayValue) => void;
+    level?: number;
   }
 ) => {
   const [overlay, _setOverlay] = useState<OverlayValue>(props.init || {});
 
   const parentOverlay = useOverlay();
+
+  const level = parentOverlay ? parentOverlay.level + 1 : 0;
 
   const setOverlay = (value: OverlayValue) => _setOverlay(value);
 
@@ -54,6 +60,14 @@ export const OverlayContext = (
   };
 
   const onChildOverlayNav = (childOverlay: OverlayValue) => {
+    if (DEBUG) {
+      console.log(`OverlayContext onChildOverlayNav level: ${level}`, {
+        overlay,
+        childOverlay,
+        level,
+      });
+    }
+
     const childClosed = Object.keys(childOverlay).length === 0;
     const activeOverlay = childClosed ? overlay : childOverlay;
 
@@ -70,6 +84,10 @@ export const OverlayContext = (
 
   /** detect this level overlay changes */
   useEffect(() => {
+    if (DEBUG) {
+      console.log(`OverlayContext useEffect overlay level: ${level}`, overlay);
+    }
+
     if (parentOverlay) {
       parentOverlay.onChildOverlayNav(overlay);
     }
@@ -87,6 +105,7 @@ export const OverlayContext = (
   return (
     <OverlayContextValue.Provider
       value={{
+        level,
         overlay,
         onPostClick,
         onChildOverlayNav,

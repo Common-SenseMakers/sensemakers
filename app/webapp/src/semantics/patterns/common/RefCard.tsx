@@ -213,7 +213,7 @@ async function getUrlMeta(
       return undefined;
     }
   } catch (error) {
-    console.error('Error fetching data from Iframely API:', error);
+    // console.error('Error fetching data from Iframely API:', error);
     return undefined;
   }
 }

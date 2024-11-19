@@ -137,23 +137,39 @@ export const PublicFeedPage = () => {
     }
 
     if (overlay.post) {
-      setSearchParam(OverlayQueryParams.Post, overlay.post.id);
+      /** prevent dup nav */
+      const current = searchParams.get(OverlayQueryParams.Post);
+      if (current === null || current !== overlay.post.id) {
+        setSearchParam(OverlayQueryParams.Post, overlay.post.id);
+      }
       return;
     }
     if (overlay.ref) {
-      setSearchParam(OverlayQueryParams.Ref, overlay.ref);
+      const current = searchParams.get(OverlayQueryParams.Ref);
+      if (current === null || current !== overlay.ref) {
+        setSearchParam(OverlayQueryParams.Ref, overlay.ref);
+      }
       return;
     }
     if (overlay.userId) {
-      setSearchParam(OverlayQueryParams.User, overlay.userId);
+      const current = searchParams.get(OverlayQueryParams.User);
+      if (current === null || current !== overlay.userId) {
+        setSearchParam(OverlayQueryParams.User, overlay.userId);
+      }
       return;
     }
     if (overlay.profileId) {
-      setSearchParam(OverlayQueryParams.Profile, overlay.profileId);
+      const current = searchParams.get(OverlayQueryParams.Profile);
+      if (current === null || current !== overlay.profileId) {
+        setSearchParam(OverlayQueryParams.Profile, overlay.profileId);
+      }
       return;
     }
     if (overlay.keyword) {
-      setSearchParam(OverlayQueryParams.Keyword, overlay.keyword);
+      const current = searchParams.get(OverlayQueryParams.Keyword);
+      if (current === null || current !== overlay.keyword) {
+        setSearchParam(OverlayQueryParams.Keyword, overlay.keyword);
+      }
       return;
     }
   };
