@@ -25,8 +25,9 @@ export const Overlay = () => {
     }
 
     const { post, postId, ref, userId, profileId, keyword } = overlay.overlay;
-    if (post && postId) {
-      return <PostOverlay postId={post.id} postInit={post}></PostOverlay>;
+    if (post || postId) {
+      const _postId = post ? post.id : (postId as string);
+      return <PostOverlay postId={_postId} postInit={post}></PostOverlay>;
     }
 
     if (ref) {

@@ -10,15 +10,20 @@ import { useSearchParams } from 'react-router-dom';
 
 import { OverlayNav } from '../overlays/OverlayNav';
 import { DEBUG } from '../post/post.context/use.post.merge.deltas';
-import {
-  PostClickEvent,
-  PostClickTarget,
-} from '../semantics/patterns/patterns';
-import { AppPostFull } from '../shared/types/types.posts';
+import { PostClickEvent } from '../semantics/patterns/patterns';
 import { Overlay, ShowOverlayProps } from './Overlay';
+import { eventToOverlay } from './overlay.utils';
+
+export enum OverlayQueryParams {
+  Post = 'p',
+  Ref = 'r',
+  User = 'u',
+  Profile = 'pr',
+  Keyword = 'kw',
+}
 
 export interface OverlayContextType {
-  show: (shown: ShowOverlayProps) => void;
+  setOverlay: (value: ShowOverlayProps) => void;
   close: () => void;
   onPostClick: (event: PostClickEvent) => void;
   syncQueryParams: () => void;
@@ -29,8 +34,10 @@ const OverlayContextValue = createContext<OverlayContextType | undefined>(
   undefined
 );
 
-export const OverlayContext = (props: PropsWithChildren) => {
-  const [overlay, setOverlay] = useState<ShowOverlayProps>({});
+export const OverlayContext = (
+  props: PropsWithChildren & { init?: ShowOverlayProps | null }
+) => {
+  const [overlay, _setOverlay] = useState<ShowOverlayProps>(props.init || {});
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -46,12 +53,17 @@ export const OverlayContext = (props: PropsWithChildren) => {
     setSearchParams(searchParams);
   };
 
-  const show = (value: ShowOverlayProps) => {
-    setOverlay(value);
-  };
+  const setOverlay = (value: ShowOverlayProps) => _setOverlay(value);
 
   const close = () => {
-    setOverlay({});
+    _setOverlay({});
+  };
+
+  const onPostClick = (event: PostClickEvent) => {
+    const newOverlay = eventToOverlay(event);
+    if (newOverlay) {
+      setOverlay(newOverlay);
+    }
   };
 
   const syncQueryParams = () => {
@@ -68,23 +80,23 @@ export const OverlayContext = (props: PropsWithChildren) => {
     }
 
     if (overlay.post) {
-      setSearchParam('post', overlay.post.id);
+      setSearchParam(OverlayQueryParams.Post, overlay.post.id);
       return;
     }
     if (overlay.ref) {
-      setSearchParam('ref', overlay.ref);
+      setSearchParam(OverlayQueryParams.Ref, overlay.ref);
       return;
     }
     if (overlay.userId) {
-      setSearchParam('userId', overlay.userId);
+      setSearchParam(OverlayQueryParams.User, overlay.userId);
       return;
     }
     if (overlay.profileId) {
-      setSearchParam('profileId', overlay.profileId);
+      setSearchParam(OverlayQueryParams.Profile, overlay.profileId);
       return;
     }
     if (overlay.keyword) {
-      setSearchParam('keyword', overlay.keyword);
+      setSearchParam(OverlayQueryParams.Keyword, overlay.keyword);
       return;
     }
   };
@@ -96,51 +108,10 @@ export const OverlayContext = (props: PropsWithChildren) => {
 
   const showOverlay = Object.keys(overlay).length > 0;
 
-  const onPostClick = (event: PostClickEvent) => {
-    if (DEBUG) console.log('onPostClick', { event });
-
-    if (event.target === PostClickTarget.POST) {
-      const _post = event.payload as AppPostFull;
-
-      if (DEBUG) console.log('onPostClick - setOverlay', { _post });
-      show({ post: _post, postId: _post.id });
-      return;
-    }
-
-    if (event.target === PostClickTarget.KEYWORD) {
-      if (DEBUG) console.log('onPostClick - setOverlay', { event });
-      show({ keyword: event.payload as string });
-      return;
-    }
-
-    if (event.target === PostClickTarget.REF) {
-      if (DEBUG) console.log('onPostClick - setOverlay', { event });
-      show({ ref: event.payload as string });
-      return;
-    }
-
-    if (
-      [PostClickTarget.USER_ID, PostClickTarget.PLATFORM_USER_ID].includes(
-        event.target
-      )
-    ) {
-      if (DEBUG) console.log(`clicked on user ${event.payload as string}`);
-      if (event.target === PostClickTarget.USER_ID) {
-        if (DEBUG) console.log('onPostClick - setOverlay', { event });
-        show({ userId: event.payload as string });
-      }
-      if (event.target === PostClickTarget.PLATFORM_USER_ID) {
-        if (DEBUG) console.log('onPostClick - setOverlay', { event });
-        show({ profileId: event.payload as string });
-      }
-      return;
-    }
-  };
-
   return (
     <OverlayContextValue.Provider
       value={{
-        show,
+        setOverlay,
         close,
         overlay,
         onPostClick,

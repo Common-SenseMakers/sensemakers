@@ -1,16 +1,22 @@
 import { Box } from 'grommet';
-import { useMemo } from 'react';
-import { Location, useLocation } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { Location, useLocation, useSearchParams } from 'react-router-dom';
 
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { MultiTabFeeds } from '../feed/MultiTabFeeds';
 import { FeedTabConfig, feedTabs } from '../feed/feed.config';
-import { OverlayContext } from '../overlays/OverlayContext';
+import { ShowOverlayProps } from '../overlays/Overlay';
+import { OverlayContext, OverlayQueryParams } from '../overlays/OverlayContext';
+import { eventToOverlay, hasSearchParam } from '../overlays/overlay.utils';
 import {
   FetcherConfig,
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
+import {
+  PostClickEvent,
+  PostClickTarget,
+} from '../semantics/patterns/patterns';
 
 const DEBUG = false;
 
@@ -50,6 +56,65 @@ export const PublicFeedPage = () => {
   const location = useLocation();
   const ixInit = locationToFeedIx(location);
 
+  const [searchParams] = useSearchParams();
+  const [overlayInit, setOverlayInit] = useState<
+    ShowOverlayProps | undefined | null
+  >();
+
+  /** check for URL parameters and set the overlayInit.
+   * it does it only once at page load
+   */
+  useEffect(() => {
+    if (!hasSearchParam(searchParams)) {
+      setOverlayInit(null);
+    }
+
+    Object.values(OverlayQueryParams).forEach((key) => {
+      if (searchParams.has(key)) {
+        const event: PostClickEvent | undefined = (() => {
+          if (key === OverlayQueryParams.Post) {
+            return {
+              target: PostClickTarget.POST,
+              payload: searchParams.get(key),
+            };
+          }
+          if (key === OverlayQueryParams.Keyword) {
+            return {
+              target: PostClickTarget.KEYWORD,
+              payload: searchParams.get(key),
+            };
+          }
+          if (key === OverlayQueryParams.Ref) {
+            return {
+              target: PostClickTarget.REF,
+              payload: searchParams.get(key),
+            };
+          }
+          if (key === OverlayQueryParams.User) {
+            return {
+              target: PostClickTarget.USER_ID,
+              payload: searchParams.get(key),
+            };
+          }
+          if (key === OverlayQueryParams.Profile) {
+            return {
+              target: PostClickTarget.PLATFORM_USER_ID,
+              payload: searchParams.get(key),
+            };
+          }
+        })();
+
+        if (event) {
+          const _overlay = eventToOverlay(event);
+          if (_overlay) {
+            setOverlayInit(_overlay);
+          }
+        }
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const feed0Config = useMemo((): FetcherConfig => {
     return getFeedConfig(feedTabs[0], '[FEED 0] ');
   }, []);
@@ -83,12 +148,14 @@ export const PublicFeedPage = () => {
       fixed
       content={
         <Box style={{ position: 'relative', paddingTop: '16px' }}>
-          <OverlayContext>
-            <MultiTabFeeds
-              feeds={feeds}
-              tabs={feedTabs}
-              feedIxInit={ixInit}></MultiTabFeeds>
-          </OverlayContext>
+          {overlayInit !== undefined && (
+            <OverlayContext init={overlayInit}>
+              <MultiTabFeeds
+                feeds={feeds}
+                tabs={feedTabs}
+                feedIxInit={ixInit}></MultiTabFeeds>
+            </OverlayContext>
+          )}
         </Box>
       }
       nav={<GlobalNav></GlobalNav>}
