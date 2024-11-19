@@ -7,7 +7,7 @@ import { PostOverlay } from './PostOverlay';
 import { RefOverlay } from './RefOverlay';
 import { UserProfileOverlay } from './UserProfileOverlay';
 
-export interface ShowOverlayProps {
+export interface OverlayValue {
   post?: AppPostFull;
   postId?: string;
   ref?: string;

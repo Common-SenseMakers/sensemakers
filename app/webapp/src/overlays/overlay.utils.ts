@@ -3,7 +3,7 @@ import {
   PostClickTarget,
 } from '../semantics/patterns/patterns';
 import { AppPostFull } from '../shared/types/types.posts';
-import { ShowOverlayProps } from './Overlay';
+import { OverlayValue } from './Overlay';
 import { OverlayQueryParams } from './OverlayContext';
 
 const DEBUG = false;
@@ -17,7 +17,7 @@ export const hasSearchParam = (searchParams: URLSearchParams) => {
 
 export const eventToOverlay = (
   event: PostClickEvent
-): ShowOverlayProps | undefined => {
+): OverlayValue | undefined => {
   if (DEBUG) console.log('onPostClick', { event });
 
   if (event.target === PostClickTarget.POST) {
@@ -58,5 +58,45 @@ export const eventToOverlay = (
       return { profileId: event.payload as string };
     }
     return;
+  }
+};
+
+export const searchParamsKeyValueToEvent = (
+  key: OverlayQueryParams,
+  value: string | null
+) => {
+  if (value === null) {
+    return undefined;
+  }
+
+  if (key === OverlayQueryParams.Post) {
+    return {
+      target: PostClickTarget.POST,
+      payload: value,
+    };
+  }
+  if (key === OverlayQueryParams.Keyword) {
+    return {
+      target: PostClickTarget.KEYWORD,
+      payload: value,
+    };
+  }
+  if (key === OverlayQueryParams.Ref) {
+    return {
+      target: PostClickTarget.REF,
+      payload: value,
+    };
+  }
+  if (key === OverlayQueryParams.User) {
+    return {
+      target: PostClickTarget.USER_ID,
+      payload: value,
+    };
+  }
+  if (key === OverlayQueryParams.Profile) {
+    return {
+      target: PostClickTarget.PLATFORM_USER_ID,
+      payload: value,
+    };
   }
 };

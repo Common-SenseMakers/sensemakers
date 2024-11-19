@@ -6,12 +6,10 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { useSearchParams } from 'react-router-dom';
 
 import { OverlayNav } from '../overlays/OverlayNav';
-import { DEBUG } from '../post/post.context/use.post.merge.deltas';
 import { PostClickEvent } from '../semantics/patterns/patterns';
-import { Overlay, ShowOverlayProps } from './Overlay';
+import { Overlay, OverlayValue } from './Overlay';
 import { eventToOverlay } from './overlay.utils';
 
 export enum OverlayQueryParams {
@@ -23,11 +21,9 @@ export enum OverlayQueryParams {
 }
 
 export interface OverlayContextType {
-  setOverlay: (value: ShowOverlayProps) => void;
-  close: () => void;
   onPostClick: (event: PostClickEvent) => void;
-  syncQueryParams: () => void;
-  overlay: ShowOverlayProps;
+  onChildOverlayNav: (value: OverlayValue) => void;
+  overlay: OverlayValue;
 }
 
 const OverlayContextValue = createContext<OverlayContextType | undefined>(
@@ -35,28 +31,19 @@ const OverlayContextValue = createContext<OverlayContextType | undefined>(
 );
 
 export const OverlayContext = (
-  props: PropsWithChildren & { init?: ShowOverlayProps | null }
+  props: PropsWithChildren & {
+    init?: OverlayValue | null;
+    onOverlayNav?: (value: OverlayValue) => void;
+  }
 ) => {
-  const [overlay, _setOverlay] = useState<ShowOverlayProps>(props.init || {});
-
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [overlay, _setOverlay] = useState<OverlayValue>(props.init || {});
 
   const parentOverlay = useOverlay();
 
-  const setSearchParam = (key: string, value: string) => {
-    if (DEBUG) console.log(`setSearchParam: ${key}=${value}`);
-
-    searchParams.forEach((value, key) => {
-      searchParams.delete(key);
-    });
-    searchParams.append(key, value);
-    setSearchParams(searchParams);
-  };
-
-  const setOverlay = (value: ShowOverlayProps) => _setOverlay(value);
+  const setOverlay = (value: OverlayValue) => _setOverlay(value);
 
   const close = () => {
-    _setOverlay({});
+    setOverlay({});
   };
 
   const onPostClick = (event: PostClickEvent) => {
@@ -66,43 +53,32 @@ export const OverlayContext = (
     }
   };
 
-  const syncQueryParams = () => {
-    if (Object.keys(overlay).length === 0) {
-      if (parentOverlay !== undefined) {
-        parentOverlay.syncQueryParams();
-      } else {
-        searchParams.forEach((value, key) => {
-          searchParams.delete(key);
-        });
-        setSearchParams(searchParams);
-      }
-      return;
+  const onChildOverlayNav = (childOverlay: OverlayValue) => {
+    const childClosed = Object.keys(childOverlay).length === 0;
+    const activeOverlay = childClosed ? overlay : childOverlay;
+
+    /** propagate upwards the active overlay */
+    if (parentOverlay) {
+      parentOverlay.onChildOverlayNav(activeOverlay);
     }
 
-    if (overlay.post) {
-      setSearchParam(OverlayQueryParams.Post, overlay.post.id);
-      return;
-    }
-    if (overlay.ref) {
-      setSearchParam(OverlayQueryParams.Ref, overlay.ref);
-      return;
-    }
-    if (overlay.userId) {
-      setSearchParam(OverlayQueryParams.User, overlay.userId);
-      return;
-    }
-    if (overlay.profileId) {
-      setSearchParam(OverlayQueryParams.Profile, overlay.profileId);
-      return;
-    }
-    if (overlay.keyword) {
-      setSearchParam(OverlayQueryParams.Keyword, overlay.keyword);
-      return;
+    /** propagate upwards through prop */
+    if (props.onOverlayNav) {
+      props.onOverlayNav(activeOverlay);
     }
   };
 
+  /** detect this level overlay changes */
   useEffect(() => {
-    syncQueryParams();
+    if (parentOverlay) {
+      parentOverlay.onChildOverlayNav(overlay);
+    }
+
+    /** propagate upwards through prop */
+    if (props.onOverlayNav) {
+      props.onOverlayNav(overlay);
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [overlay]);
 
@@ -111,11 +87,9 @@ export const OverlayContext = (
   return (
     <OverlayContextValue.Provider
       value={{
-        setOverlay,
-        close,
         overlay,
         onPostClick,
-        syncQueryParams,
+        onChildOverlayNav,
       }}>
       <Box
         style={{

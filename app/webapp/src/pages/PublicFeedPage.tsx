@@ -6,19 +6,20 @@ import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { MultiTabFeeds } from '../feed/MultiTabFeeds';
 import { FeedTabConfig, feedTabs } from '../feed/feed.config';
-import { ShowOverlayProps } from '../overlays/Overlay';
+import { OverlayValue } from '../overlays/Overlay';
 import { OverlayContext, OverlayQueryParams } from '../overlays/OverlayContext';
-import { eventToOverlay, hasSearchParam } from '../overlays/overlay.utils';
+import {
+  eventToOverlay,
+  hasSearchParam,
+  searchParamsKeyValueToEvent,
+} from '../overlays/overlay.utils';
 import {
   FetcherConfig,
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
-import {
-  PostClickEvent,
-  PostClickTarget,
-} from '../semantics/patterns/patterns';
+import { PostClickEvent } from '../semantics/patterns/patterns';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export const locationToFeedIx = (location: Location) => {
   if (DEBUG) console.log(location);
@@ -54,59 +55,46 @@ const getFeedConfig = (
 
 export const PublicFeedPage = () => {
   const location = useLocation();
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const ixInit = locationToFeedIx(location);
 
-  const [searchParams] = useSearchParams();
   const [overlayInit, setOverlayInit] = useState<
-    ShowOverlayProps | undefined | null
+    OverlayValue | undefined | null
   >();
 
   /** check for URL parameters and set the overlayInit.
    * it does it only once at page load
    */
   useEffect(() => {
-    if (!hasSearchParam(searchParams)) {
+    const has = hasSearchParam(searchParams);
+    if (DEBUG) console.log('PublicFeedPage initial useEffect', { has });
+
+    if (!has) {
       setOverlayInit(null);
     }
 
     Object.values(OverlayQueryParams).forEach((key) => {
       if (searchParams.has(key)) {
-        const event: PostClickEvent | undefined = (() => {
-          if (key === OverlayQueryParams.Post) {
-            return {
-              target: PostClickTarget.POST,
-              payload: searchParams.get(key),
-            };
-          }
-          if (key === OverlayQueryParams.Keyword) {
-            return {
-              target: PostClickTarget.KEYWORD,
-              payload: searchParams.get(key),
-            };
-          }
-          if (key === OverlayQueryParams.Ref) {
-            return {
-              target: PostClickTarget.REF,
-              payload: searchParams.get(key),
-            };
-          }
-          if (key === OverlayQueryParams.User) {
-            return {
-              target: PostClickTarget.USER_ID,
-              payload: searchParams.get(key),
-            };
-          }
-          if (key === OverlayQueryParams.Profile) {
-            return {
-              target: PostClickTarget.PLATFORM_USER_ID,
-              payload: searchParams.get(key),
-            };
-          }
-        })();
+        const event: PostClickEvent | undefined = searchParamsKeyValueToEvent(
+          key,
+          searchParams.get(key)
+        );
+
+        if (DEBUG)
+          console.log(`PublicFeedPage initial useEffect - found ${key}`, {
+            event,
+          });
 
         if (event) {
           const _overlay = eventToOverlay(event);
           if (_overlay) {
+            if (DEBUG)
+              console.log(`PublicFeedPage initial useEffect - setOverlay`, {
+                _overlay,
+              });
+
             setOverlayInit(_overlay);
           }
         }
@@ -114,6 +102,61 @@ export const PublicFeedPage = () => {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const setSearchParam = (key: string, value: string) => {
+    if (DEBUG) console.log(`setSearchParam: ${key}=${value}`);
+
+    searchParams.forEach((value, key) => {
+      searchParams.delete(key);
+    });
+    searchParams.append(key, value);
+    setSearchParams(searchParams);
+  };
+
+  const onOverlayNav = (overlay: OverlayValue) => {
+    if (DEBUG)
+      console.log(`PublicFeedPage - onOverlayNav`, {
+        overlay,
+      });
+
+    syncQueryParams(overlay);
+  };
+
+  const syncQueryParams = (overlay: OverlayValue) => {
+    if (Object.keys(overlay).length === 0) {
+      searchParams.forEach((value, key) => {
+        searchParams.delete(key);
+      });
+      if (DEBUG)
+        console.log(`PublicFeedPage - syncQueryParams - delete all`, {
+          overlay,
+        });
+
+      setSearchParams(searchParams);
+      return;
+    }
+
+    if (overlay.post) {
+      setSearchParam(OverlayQueryParams.Post, overlay.post.id);
+      return;
+    }
+    if (overlay.ref) {
+      setSearchParam(OverlayQueryParams.Ref, overlay.ref);
+      return;
+    }
+    if (overlay.userId) {
+      setSearchParam(OverlayQueryParams.User, overlay.userId);
+      return;
+    }
+    if (overlay.profileId) {
+      setSearchParam(OverlayQueryParams.Profile, overlay.profileId);
+      return;
+    }
+    if (overlay.keyword) {
+      setSearchParam(OverlayQueryParams.Keyword, overlay.keyword);
+      return;
+    }
+  };
 
   const feed0Config = useMemo((): FetcherConfig => {
     return getFeedConfig(feedTabs[0], '[FEED 0] ');
@@ -149,7 +192,9 @@ export const PublicFeedPage = () => {
       content={
         <Box style={{ position: 'relative', paddingTop: '16px' }}>
           {overlayInit !== undefined && (
-            <OverlayContext init={overlayInit}>
+            <OverlayContext
+              init={overlayInit}
+              onOverlayNav={(overlay) => onOverlayNav(overlay)}>
               <MultiTabFeeds
                 feeds={feeds}
                 tabs={feedTabs}
