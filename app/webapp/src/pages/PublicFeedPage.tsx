@@ -58,7 +58,7 @@ export const PublicFeedPage = () => {
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const ixInit = locationToFeedIx(location);
+  const ixInit = useMemo(() => locationToFeedIx(location), [location]);
 
   const [overlayInit, setOverlayInit] = useState<
     OverlayValue | undefined | null

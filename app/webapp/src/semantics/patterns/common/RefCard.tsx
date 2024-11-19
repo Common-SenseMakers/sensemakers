@@ -1,4 +1,4 @@
-import axios from 'axios';
+// import axios from 'axios';
 import { Anchor, Box, Paragraph, Text } from 'grommet';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -183,6 +183,7 @@ export const RefCard = (props: {
   );
 };
 
+// eslint-disable-next-line @typescript-eslint/require-await
 async function getUrlMeta(
   url: string
 ): Promise<
@@ -192,12 +193,22 @@ async function getUrlMeta(
     console.error('Iframely API key not found.');
     return undefined;
   }
-  const apiKey = IFRAMELY_API_KEY;
-  const apiUrl = `${IFRAMELY_API_URL}/iframely?url=${encodeURIComponent(url)}&api_key=${apiKey}`;
+  // const apiKey = IFRAMELY_API_KEY;
+  // const apiUrl = `${IFRAMELY_API_URL}/iframely?url=${encodeURIComponent(url)}&api_key=${apiKey}`;
 
   try {
-    const response = await axios.get(apiUrl);
-    const data: IframelyResponse = response.data as IframelyResponse;
+    // const response = await axios.get(apiUrl);
+    // const data: IframelyResponse = response.data as IframelyResponse;
+
+    const data: IframelyResponse = {
+      links: {
+        thumbnail: [{ href: 'https://via.placeholder.com/150' }],
+      },
+      meta: {
+        title: 'Title',
+        description: 'Description',
+      },
+    };
 
     // Check if 'links' and 'thumbnail' are present in the response
     if (data.links && data.links.thumbnail && data.links.thumbnail.length > 0) {
