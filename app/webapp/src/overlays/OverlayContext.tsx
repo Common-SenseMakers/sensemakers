@@ -1,85 +1,149 @@
 import { Box } from 'grommet';
-import { PropsWithChildren, createContext, useContext, useState } from 'react';
+import {
+  PropsWithChildren,
+  createContext,
+  useCallback,
+  useContext,
+  useState,
+} from 'react';
 
 import { OverlayNav } from '../overlays/OverlayNav';
-import { DEBUG } from '../post/post.context/use.post.merge.deltas';
-import {
-  PostClickEvent,
-  PostClickTarget,
-} from '../semantics/patterns/patterns';
-import { AppPostFull } from '../shared/types/types.posts';
-import { Overlay, ShowOverlayProps } from './Overlay';
+import { PostClickEvent } from '../semantics/patterns/patterns';
+import { useBack } from '../ui-components/hooks/useBack';
+import { Overlay, OverlayValue } from './Overlay';
+import { eventToOverlay } from './overlay.utils';
+
+const DEBUG = true;
+
+export enum OverlayQueryParams {
+  Post = 'p',
+  Ref = 'r',
+  User = 'u',
+  Profile = 'pr',
+  Keyword = 'kw',
+}
 
 export interface OverlayContextType {
-  show: (shown: ShowOverlayProps) => void;
-  close: () => void;
+  level: number;
   onPostClick: (event: PostClickEvent) => void;
-  overlay: ShowOverlayProps;
+  onChildOverlayNav: (value: OverlayValue) => void;
+  setIsLast: (isLast: boolean) => void;
+  overlay: OverlayValue;
 }
 
 const OverlayContextValue = createContext<OverlayContextType | undefined>(
   undefined
 );
 
-export const OverlayContext = (props: PropsWithChildren) => {
-  const [overlay, setOverlay] = useState<ShowOverlayProps>({});
+export const OverlayContext = (
+  props: PropsWithChildren & {
+    init?: OverlayValue | null;
+    onOverlayNav?: (value: OverlayValue) => void;
+    level?: number;
+  }
+) => {
+  const [overlay, _setOverlay] = useState<OverlayValue>(props.init || {});
+  const [isLast, _setIsLast] = useState(false);
 
-  const show = (value: ShowOverlayProps) => {
-    setOverlay(value);
+  const parentOverlay = useOverlay();
+
+  const level = parentOverlay ? parentOverlay.level + 1 : 0;
+
+  const setOverlay = (value: OverlayValue) => {
+    _setOverlay(value);
+
+    if (Object.keys(value).length > 0) {
+      /** mark as the last overlay whose content is shown */
+      _setIsLast(true);
+
+      /** mark parent as not the last */
+      parentOverlay && parentOverlay.setIsLast(false);
+    } else {
+      _setIsLast(false);
+      /** if closing, mark parent as last true */
+      parentOverlay && parentOverlay.setIsLast(true);
+    }
+
+    if (DEBUG) {
+      console.log(`OverlayContext setOverlay level: ${level}`, value);
+    }
+
+    /** propagate upwards through onChildOverlayNav */
+    if (parentOverlay) {
+      if (DEBUG) {
+        console.log(`OverlayContext propagating upwards: ${level}`, value);
+      }
+
+      parentOverlay.onChildOverlayNav(value);
+    }
+
+    /** propagate upwards through prop */
+    if (props.onOverlayNav) {
+      if (DEBUG) {
+        console.log(`OverlayContext propagating outwards: ${level}`, value);
+      }
+
+      props.onOverlayNav(value);
+    }
+  };
+
+  const setIsLast = (isLast: boolean) => {
+    _setIsLast(isLast);
+    /** recursively mark as not being the last */
+    if (isLast) {
+      parentOverlay && parentOverlay.setIsLast(false);
+    }
   };
 
   const close = () => {
     setOverlay({});
   };
 
+  useBack(isLast, close);
+
   const onPostClick = (event: PostClickEvent) => {
-    if (DEBUG) console.log('onPostClick', { event });
-
-    if (event.target === PostClickTarget.POST) {
-      const _post = event.payload as AppPostFull;
-
-      if (DEBUG) console.log('onPostClick - setOverlay', { _post });
-      show({ post: _post, postId: _post.id });
-      return;
-    }
-
-    if (event.target === PostClickTarget.KEYWORD) {
-      if (DEBUG) console.log('onPostClick - setOverlay', { event });
-      show({ keyword: event.payload as string });
-      return;
-    }
-
-    if (event.target === PostClickTarget.REF) {
-      if (DEBUG) console.log('onPostClick - setOverlay', { event });
-      show({ ref: event.payload as string });
-      return;
-    }
-
-    if (
-      [PostClickTarget.USER_ID, PostClickTarget.PLATFORM_USER_ID].includes(
-        event.target
-      )
-    ) {
-      if (DEBUG) console.log(`clicked on user ${event.payload as string}`);
-      if (event.target === PostClickTarget.USER_ID) {
-        if (DEBUG) console.log('onPostClick - setOverlay', { event });
-        show({ userId: event.payload as string });
-      }
-      if (event.target === PostClickTarget.PLATFORM_USER_ID) {
-        if (DEBUG) console.log('onPostClick - setOverlay', { event });
-        show({ profileId: event.payload as string });
-      }
-      return;
+    const newOverlay = eventToOverlay(event);
+    if (newOverlay) {
+      setOverlay(newOverlay);
     }
   };
+
+  const onChildOverlayNav = useCallback(
+    (childOverlay: OverlayValue) => {
+      if (DEBUG) {
+        console.log(`OverlayContext onChildOverlayNav level: ${level}`, {
+          overlay,
+          childOverlay,
+          level,
+        });
+      }
+
+      const childClosed = Object.keys(childOverlay).length === 0;
+      const activeOverlay = childClosed ? overlay : childOverlay;
+
+      /** propagate upwards the active overlay */
+      if (parentOverlay) {
+        parentOverlay.onChildOverlayNav(activeOverlay);
+      }
+
+      /** propagate upwards through prop */
+      if (props.onOverlayNav) {
+        props.onOverlayNav(activeOverlay);
+      }
+    },
+    [level, overlay, parentOverlay, props]
+  );
+
+  const showOverlay = Object.keys(overlay).length > 0;
 
   return (
     <OverlayContextValue.Provider
       value={{
-        show,
-        close,
+        level,
         overlay,
         onPostClick,
+        onChildOverlayNav,
+        setIsLast,
       }}>
       <Box
         style={{
@@ -87,7 +151,7 @@ export const OverlayContext = (props: PropsWithChildren) => {
           width: '100%',
         }}>
         <Box style={{ height: '100%', width: '100%' }}>{props.children}</Box>
-        {Object.keys(overlay).length > 0 && (
+        {showOverlay && (
           <Box
             style={{
               height: '100%',
@@ -105,8 +169,7 @@ export const OverlayContext = (props: PropsWithChildren) => {
   );
 };
 
-export const useOverlay = (): OverlayContextType => {
+export const useOverlay = (): OverlayContextType | undefined => {
   const context = useContext(OverlayContextValue);
-  if (!context) throw Error('context not found');
   return context;
 };

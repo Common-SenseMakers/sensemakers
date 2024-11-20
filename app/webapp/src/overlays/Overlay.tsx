@@ -7,7 +7,7 @@ import { PostOverlay } from './PostOverlay';
 import { RefOverlay } from './RefOverlay';
 import { UserProfileOverlay } from './UserProfileOverlay';
 
-export interface ShowOverlayProps {
+export interface OverlayValue {
   post?: AppPostFull;
   postId?: string;
   ref?: string;
@@ -17,12 +17,17 @@ export interface ShowOverlayProps {
 }
 
 export const Overlay = () => {
-  const { overlay } = useOverlay();
+  const overlay = useOverlay();
 
   const content = useMemo(() => {
-    const { post, postId, ref, userId, profileId, keyword } = overlay;
-    if (post && postId) {
-      return <PostOverlay postId={post.id} postInit={post}></PostOverlay>;
+    if (!overlay) {
+      return <></>;
+    }
+
+    const { post, postId, ref, userId, profileId, keyword } = overlay.overlay;
+    if (post || postId) {
+      const _postId = post ? post.id : (postId as string);
+      return <PostOverlay postId={_postId} postInit={post}></PostOverlay>;
     }
 
     if (ref) {

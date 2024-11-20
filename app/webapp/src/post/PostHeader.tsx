@@ -12,7 +12,7 @@ import { usePost } from './post.context/PostContext';
 export const PostHeader = (props: { boxProps: BoxExtendedProps }) => {
   const { constants } = useThemeContext();
   const { updated } = usePost();
-  const { onPostClick } = useOverlay();
+  const overlay = useOverlay();
 
   const post = updated.postMerged;
 
@@ -24,18 +24,20 @@ export const PostHeader = (props: { boxProps: BoxExtendedProps }) => {
     if (!post) return;
 
     if (post.authorUserId) {
-      onPostClick({
-        target: PostClickTarget.USER_ID,
-        payload: post.authorUserId,
-      });
+      overlay &&
+        overlay.onPostClick({
+          target: PostClickTarget.USER_ID,
+          payload: post.authorUserId,
+        });
       return;
     }
 
     if (post.authorProfileId) {
-      onPostClick({
-        target: PostClickTarget.PLATFORM_USER_ID,
-        payload: post.authorProfileId,
-      });
+      overlay &&
+        overlay.onPostClick({
+          target: PostClickTarget.PLATFORM_USER_ID,
+          payload: post.authorProfileId,
+        });
       return;
     }
   };

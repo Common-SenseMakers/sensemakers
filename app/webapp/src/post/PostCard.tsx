@@ -21,22 +21,24 @@ const PostCardHeader = (props: { post: AppPostFull }) => {
   const { constants } = useThemeContext();
   const details = getPostDetails(props.post);
 
-  const { onPostClick } = useOverlay();
+  const overlay = useOverlay();
 
   const onUserClicked = () => {
     if (props.post.authorUserId) {
-      onPostClick({
-        target: PostClickTarget.USER_ID,
-        payload: props.post.authorUserId,
-      });
+      overlay &&
+        overlay.onPostClick({
+          target: PostClickTarget.USER_ID,
+          payload: props.post.authorUserId,
+        });
       return;
     }
 
     if (props.post.authorProfileId) {
-      onPostClick({
-        target: PostClickTarget.PLATFORM_USER_ID,
-        payload: props.post.authorProfileId,
-      });
+      overlay &&
+        overlay.onPostClick({
+          target: PostClickTarget.PLATFORM_USER_ID,
+          payload: props.post.authorProfileId,
+        });
       return;
     }
   };
@@ -85,7 +87,7 @@ export const PostCard = (props: {
 
   const { constants } = useThemeContext();
 
-  const { onPostClick } = useOverlay();
+  const overlay = useOverlay();
 
   if (!post) {
     console.warn('unexpected post undefined in PostCard');
@@ -108,7 +110,8 @@ export const PostCard = (props: {
       target = target.parentNode as HTMLElement;
     }
 
-    onPostClick({ target: PostClickTarget.POST, payload: post });
+    overlay &&
+      overlay.onPostClick({ target: PostClickTarget.POST, payload: post });
   };
 
   const postText = concatenateThread(post.generic);

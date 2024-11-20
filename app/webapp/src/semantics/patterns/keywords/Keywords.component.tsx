@@ -18,10 +18,14 @@ export const KeywordsComponent = (props: PatternProps) => {
   /** actual semantics */
   const { store } = useSemanticsStore(props);
 
-  const { onPostClick } = useOverlay();
+  const overlay = useOverlay();
 
   const handleKeywordClick = (keyword: string) => {
-    onPostClick({ target: PostClickTarget.KEYWORD, payload: keyword });
+    overlay &&
+      overlay.onPostClick({
+        target: PostClickTarget.KEYWORD,
+        payload: keyword,
+      });
   };
 
   const KEYWORD_PREDICATE =
