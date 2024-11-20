@@ -4,13 +4,12 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useState,
 } from 'react';
-import { useNavigationType } from 'react-router-dom';
 
 import { OverlayNav } from '../overlays/OverlayNav';
 import { PostClickEvent } from '../semantics/patterns/patterns';
+import { useBack } from '../ui-components/hooks/useBack';
 import { Overlay, OverlayValue } from './Overlay';
 import { eventToOverlay } from './overlay.utils';
 
@@ -43,8 +42,6 @@ export const OverlayContext = (
     level?: number;
   }
 ) => {
-  const navigationType = useNavigationType();
-
   const [overlay, _setOverlay] = useState<OverlayValue>(props.init || {});
   const [isLast, _setIsLast] = useState(false);
 
@@ -62,6 +59,7 @@ export const OverlayContext = (
       /** mark parent as not the last */
       parentOverlay && parentOverlay.setIsLast(false);
     } else {
+      _setIsLast(false);
       /** if closing, mark parent as last true */
       parentOverlay && parentOverlay.setIsLast(true);
     }
@@ -97,18 +95,11 @@ export const OverlayContext = (
     }
   };
 
-  /** detect  back button */
-  useEffect(() => {
-    // Check if the navigation type is 'POP', which indicates use of the back or forward button
-    if (navigationType === 'POP' && isLast) {
-      close();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navigationType]);
-
   const close = () => {
     setOverlay({});
   };
+
+  useBack(isLast, close);
 
   const onPostClick = (event: PostClickEvent) => {
     const newOverlay = eventToOverlay(event);
