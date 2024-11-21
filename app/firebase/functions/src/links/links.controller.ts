@@ -25,36 +25,31 @@ export const getRefMetaController: RequestHandler = async (
     };
 
     logger.debug(`${request.path} - query parameters`, { queryParams });
-    const { db, postsManager } = getServices(request);
+    const { db, postsManager, links } = getServices(request);
 
-    const getManyQueryParams: PostsQueryDefined = {
-      fetchParams: {
-        expectedAmount: 1,
-      },
-      semantics: { refs: [queryParams.ref] },
-    };
-    const posts =
-      await postsManager.processing.posts.getMany(getManyQueryParams);
-    if (posts.length === 0) {
-      throw new Error(`No posts found for ref ${queryParams.ref}`);
-    }
-    const postsFull = await Promise.all(
-      posts.map((post) =>
-        db.run((manager) =>
-          postsManager.processing.hydratePostFull(post, true, true, manager)
-        )
-      )
-    );
-    const refPost = postsFull[0];
-    const refMeta =
-      refPost.originalParsed?.support?.refs_meta?.[queryParams.ref];
+    const { refOEmbed, refPost } = await db.run(async (manager) => {
+      const refOEmbed = await links.getOEmbed(queryParams.ref, manager);
+      const refPosts = await links.getRefPosts(queryParams.ref, manager);
+      if (refPosts.length === 0) {
+        throw new Error(`No posts found for ref ${queryParams.ref}`);
+      }
+      const refPost = await postsManager.processing.posts.get(
+        refPosts[0].id,
+        manager
+      );
+      if (!refPost) {
+        throw new Error(`No post found for ref ${queryParams.ref}`);
+      }
+      return { refOEmbed, refPost };
+    });
+    const refLabels =
+      await postsManager.processing.posts.getAggregatedRefLabels([
+        queryParams.ref,
+      ]);
     const refData: RefMeta = {
-      url: queryParams.ref,
-      title: refMeta?.title,
-      summary: refMeta?.summary,
-      refLabels: refPost.meta?.refLabels[queryParams.ref],
+      refLabels: refLabels[queryParams.ref],
       ontology: refPost.originalParsed?.support?.ontology,
-      ...refMeta,
+      ...refOEmbed,
     };
 
     if (DEBUG) logger.debug(`${request.path}: refData`, { refData });
