@@ -1,12 +1,14 @@
 import express from 'express';
 
 import { getPublicFeedController } from './feed/feed.controller';
+import { getRefMetaController } from './links/links.controller';
 import {
   getPostController,
   getUserPostsController,
   parsePostController,
   updatePostController,
 } from './posts/controllers/posts.controller';
+import { getProfileController } from './profiles/profiles.controller';
 import {
   getLoggedUserController,
   setUserSettingsController,
@@ -15,6 +17,7 @@ import {
   getSignupContextController,
   handleSignupController,
 } from './users/controllers/platforms.auth.controller';
+import { getUserController } from './users/controllers/public.user.controller';
 
 export const router = express.Router();
 export const adminRouter = express.Router();
@@ -25,9 +28,12 @@ router.post('/auth/settings', setUserSettingsController);
 router.post('/auth/me', getLoggedUserController);
 
 router.post('/posts/getOfUser', getUserPostsController);
-
 router.post('/posts/get', getPostController);
 router.post('/posts/parse', parsePostController);
 router.post('/posts/update', updatePostController);
 
 router.post('/feed/get', getPublicFeedController);
+
+router.post('/refs/get', getRefMetaController);
+router.post('/profiles/get', getProfileController);
+router.post('/users/get', getUserController);

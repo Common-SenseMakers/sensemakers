@@ -17,6 +17,7 @@ import {
 import { RefPostData } from '../@shared/types/types.references';
 import { DefinedIfTrue } from '../@shared/types/types.user';
 import { mapStoreElements, parseRDF } from '../@shared/utils/n3.utils';
+import { getProfileId } from '../@shared/utils/profiles.utils';
 import {
   HAS_KEYWORD_URI,
   HAS_RDF_SYNTAX_TYPE_URI,
@@ -30,7 +31,6 @@ import { TransactionManager } from '../db/transaction.manager';
 import { LinksService } from '../links/links.service';
 import { normalizeUrl } from '../links/links.utils';
 import { PlatformsService } from '../platforms/platforms.service';
-import { getProfileId } from '../profiles/profiles.repository';
 import { TriplesRepository } from '../semantics/triples.repository';
 import { TimeService } from '../time/time.service';
 import { UsersService } from '../users/users.service';

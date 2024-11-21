@@ -457,7 +457,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
           `${DEBUG_PREFIX} resetting and _fetchOlder due to connectedSourcePlatforms`,
           { connectedSourcePlatforms }
         );
-      console.warn('skipping reset due to connectedPlatforms');
+      // console.warn('skipping reset due to connectedPlatforms');
       // reset();
       // setFetchedOlderFirst(true);
       // _fetchOlder(undefined);

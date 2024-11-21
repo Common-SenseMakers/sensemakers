@@ -37,5 +37,6 @@ export const config: ServicesConfig = {
     USE_REAL_NANOPUB: process.env.USE_REAL_NANOPUB === 'true',
     USE_REAL_PARSER: process.env.USE_REAL_PARSER === 'true',
     USE_REAL_TWITTER: process.env.USE_REAL_TWITTERX === 'true',
+    USE_REAL_LINKS: process.env.USE_REAL_LINKS === 'true',
   },
 };

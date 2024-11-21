@@ -145,7 +145,7 @@ export interface UnpublishPlatformPostPayload {
 
 export interface PostsQueryParams {
   userId?: string;
-  profileIds?: string;
+  profileId?: string;
   origins?: ArrayIncludeQuery;
   semantics?: StructuredSemanticsQuery;
   includeAggregateLabels?: boolean;

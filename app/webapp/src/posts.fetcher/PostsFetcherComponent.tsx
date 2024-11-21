@@ -1,29 +1,30 @@
 import { Box, Text } from 'grommet';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ModalContent } from '../app/AppModalStandard';
 import { useToastContext } from '../app/ToastsContext';
 import { HmmIcon } from '../app/icons/HmmIcon';
-import { ReloadIcon } from '../app/icons/ReloadIcon';
 import { AppGeneralKeys } from '../i18n/i18n.app.general';
 import { PostCard } from '../post/PostCard';
 import { PostCardLoading } from '../post/PostCardLoading';
-import { PostOverlay } from '../post/PostOverlay';
 import { PostContext } from '../post/post.context/PostContext';
-import { AppPostFull } from '../shared/types/types.posts';
-import { AppButton, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
-import { Loading, LoadingDiv } from '../ui-components/LoadingDiv';
-import { useThemeContext } from '../ui-components/ThemedApp';
+import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useIsAtBottom } from '../ui-components/hooks/IsAtBottom';
 import { PostFetcherInterface } from './posts.fetcher.hook';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export interface FilterOption {
   value: string;
   pretty: string;
+}
+
+export interface OverlayConfig {
+  post: boolean;
+  ref: boolean;
+  user: boolean;
 }
 
 /**
@@ -33,44 +34,33 @@ export interface FilterOption {
  */
 export const PostsFetcherComponent = (props: {
   feed: PostFetcherInterface;
-  pageTitle: string;
+  pageTitle?: string;
   isPublicFeed?: boolean;
   showHeader?: boolean;
+
+  overlayConfig?: OverlayConfig;
 }) => {
-  const { show } = useToastContext();
-  const { constants } = useThemeContext();
+  const { show: showToast } = useToastContext();
   const { t } = useTranslation();
 
-  const [postToShow, setPostToShow] = useState<AppPostFull | undefined>(
-    undefined
-  );
-
-  const {
-    pageTitle,
-    feed,
-    isPublicFeed: _isPublicFeed,
-    showHeader: _showHeader,
-  } = props;
+  const { feed, isPublicFeed: _isPublicFeed } = props;
 
   const isPublicFeed = _isPublicFeed !== undefined ? _isPublicFeed : false;
-  const showHeader = _showHeader !== undefined ? _showHeader : true;
 
   const {
     posts,
     fetchOlder,
     errorFetchingOlder,
     isFetchingOlder,
-    fetchNewer,
-    isFetchingNewer,
     errorFetchingNewer,
     isLoading,
     moreToFetch,
   } = feed;
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const postsContainerRef = useRef<HTMLDivElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  const { isAtBottom } = useIsAtBottom(containerRef, bottomRef);
+  const { isAtBottom } = useIsAtBottom(postsContainerRef, bottomRef);
 
   useEffect(() => {
     if (isAtBottom && !isLoading && moreToFetch) {
@@ -84,7 +74,7 @@ export const PostsFetcherComponent = (props: {
       fetchOlder();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchOlder, isAtBottom, isLoading, moreToFetch]);
+  }, [isAtBottom]);
 
   useEffect(() => {
     const error = errorFetchingOlder || errorFetchingNewer;
@@ -106,19 +96,20 @@ export const PostsFetcherComponent = (props: {
         return error.message;
       })();
 
-      show({
+      showToast({
         title: 'Error getting users posts',
         message,
       });
     }
-  }, [errorFetchingOlder, errorFetchingNewer, show]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [errorFetchingOlder, errorFetchingNewer]);
 
   const showLoading = [1, 2, 4, 5, 6, 7, 8].map((ix) => (
     <PostCardLoading key={ix}></PostCardLoading>
   ));
 
   const showNoPosts = (
-    <BoxCentered style={{ height: '100%' }}>
+    <BoxCentered style={{ height: '100%' }} pad={{ top: 'large' }}>
       <ModalContent
         type="small"
         title={t(AppGeneralKeys.noPostsFound)}
@@ -133,38 +124,28 @@ export const PostsFetcherComponent = (props: {
             margin={{ bottom: '16px' }}>
             <HmmIcon size={40}></HmmIcon>
           </BoxCentered>
-        }
-        parragraphs={[
-          <>{t(AppGeneralKeys.noPostsFoundDesc)}</>,
-        ]}></ModalContent>
+        }></ModalContent>
     </BoxCentered>
   );
 
   const showPosts = posts ? (
     <Box
-      ref={containerRef}
+      ref={postsContainerRef}
       style={{
         height: '100%',
         overflowY: 'auto',
         maxWidth: 600,
-        margin: '0 auto',
       }}>
       {posts.map((post, ix) => (
         <Box key={ix} id={`post-${post.id}`} style={{ flexShrink: 0 }}>
           <PostContext postInit={post}>
-            <PostCard
-              isPublicFeed={isPublicFeed}
-              handleClick={() => {
-                setPostToShow(post);
-              }}></PostCard>
+            <PostCard isPublicFeed={isPublicFeed}></PostCard>
           </PostContext>
         </Box>
       ))}
 
-      <div style={{ padding: '1px' }} ref={bottomRef}></div>
-
       {isFetchingOlder && (
-        <Box>
+        <Box style={{ flexShrink: 0 }}>
           <LoadingDiv height="120px" width="100%"></LoadingDiv>
         </Box>
       )}
@@ -173,7 +154,9 @@ export const PostsFetcherComponent = (props: {
         <Box
           margin={{ vertical: 'medium', horizontal: 'medium' }}
           align="center"
-          justify="center">
+          justify="center"
+          style={{ flexShrink: 0 }}
+          ref={bottomRef}>
           <Text
             style={{
               fontSize: '14px',
@@ -213,80 +196,16 @@ export const PostsFetcherComponent = (props: {
     <></>
   );
 
-  const reload = isFetchingNewer ? (
-    <Box>
-      <Loading color={constants.colors.primary} size="20px"></Loading>
-    </Box>
-  ) : (
-    <AppButton
-      plain
-      icon={<ReloadIcon size={20}></ReloadIcon>}
-      onClick={() => fetchNewer()}></AppButton>
-  );
-
-  const header = (
-    <Box
-      pad={{ horizontal: 'medium', vertical: 'none' }}
-      style={{
-        backgroundColor: constants.colors.shade,
-        flexShrink: 0,
-        minHeight: '40px',
-      }}>
-      <Box direction="row" justify="between" align="center">
-        <Box direction="row" align="center" gap="12px">
-          <AppHeading level="3">{pageTitle}</AppHeading>
-          <BoxCentered style={{ height: '40px' }}>{reload}</BoxCentered>
-        </Box>
-      </Box>
-    </Box>
-  );
-
-  const showPost = postToShow && (
-    <Box
-      style={{
-        position: 'absolute',
-        top: 0,
-        backgroundColor: '#ffffff',
-        height: '100%',
-        width: '100%',
-      }}>
-      <PostOverlay
-        postId={postToShow.id}
-        postInit={postToShow}
-        onPostNav={{
-          onBack: () => setPostToShow(undefined),
-          onPrev: () => {
-            const { prevPostId } = feed.getNextAndPrev();
-            if (prevPostId) {
-              const prev = feed.getPost(prevPostId);
-              setPostToShow(prev);
-            }
-          },
-          onNext: () => {
-            const { nextPostId } = feed.getNextAndPrev();
-            if (nextPostId) {
-              const next = feed.getPost(nextPostId);
-              setPostToShow(next);
-            }
-          },
-        }}></PostOverlay>
-    </Box>
-  );
-
   return (
-    <>
-      {showHeader && header}
-      <Box
-        fill
-        style={{ backgroundColor: '#FFFFFF', position: 'relative' }}
-        justify="start">
-        {!posts || isLoading
-          ? showLoading
-          : posts.length === 0
-            ? showNoPosts
-            : showPosts}
-        {showPost}
-      </Box>
-    </>
+    <Box
+      fill
+      style={{ backgroundColor: '#FFFFFF', position: 'relative' }}
+      justify="start">
+      {!posts || isLoading
+        ? showLoading
+        : posts.length === 0
+          ? showNoPosts
+          : showPosts}
+    </Box>
   );
 };

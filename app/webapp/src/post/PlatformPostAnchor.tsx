@@ -1,24 +1,9 @@
 import { Anchor, Box } from 'grommet';
 
-import { GenericPlatformPostDetails } from '../../post/platform.post.details';
-import { LoadingDiv } from '../../ui-components/LoadingDiv';
-import { useThemeContext } from '../../ui-components/ThemedApp';
-import { OpenLinkIcon } from '../icons/OpenLinkIcon';
-
-export const TwitterProfileAnchor = (props: { screen_name?: string }) => {
-  if (!props.screen_name) {
-    return <LoadingDiv></LoadingDiv>;
-  }
-  return (
-    <Anchor
-      style={{}}
-      target="_blank"
-      href={`https://twitter.com/${props.screen_name}`}
-      size="small">
-      @{props.screen_name}
-    </Anchor>
-  );
-};
+import { OpenLinkIcon } from '../app/icons/OpenLinkIcon';
+import { LoadingDiv } from '../ui-components/LoadingDiv';
+import { useThemeContext } from '../ui-components/ThemedApp';
+import { GenericPlatformPostDetails } from './platform-specific.details';
 
 export const PlatformPostAnchor = (props: {
   loading?: boolean;
@@ -58,14 +43,19 @@ export const PlatformPostAnchor = (props: {
         direction="row"
         align="center"
         wrap
+        justify="end"
         style={{
-          gap: '8px',
           display: 'inline-flex',
           flexWrap: 'wrap',
         }}>
-        <span style={{ color: constants.colors.textLight2 }}>{label}</span>
-        <span style={{ color: '#4B5563' }}>{date}</span>
-        <OpenLinkIcon size={12} />
+        <span
+          style={{ color: constants.colors.textLight2, marginRight: '8px' }}>
+          {label}
+        </span>
+        <Box direction="row" align="center">
+          <span style={{ color: '#4B5563', marginRight: '8px' }}>{date}</span>
+          <OpenLinkIcon size={12} />
+        </Box>
       </Box>
     </Anchor>
   );

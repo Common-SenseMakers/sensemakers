@@ -7,15 +7,19 @@ import { useAppFetch } from '../api/app.fetch';
 import { ClearIcon } from '../app/icons/ClearIcon';
 import { SendIcon } from '../app/icons/SendIcon';
 import { PostEditKeys } from '../i18n/i18n.edit.post';
+import { OnOverlayNav } from '../overlays/OverlayNav';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
-import { PATTERN_ID, PatternProps } from '../semantics/patterns/patterns';
+import {
+  PATTERN_ID,
+  PatternProps,
+  PostClickEvent,
+} from '../semantics/patterns/patterns';
 import { PlatformProfile } from '../shared/types/types.profiles';
 import { AppButton } from '../ui-components';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { PostHeader } from './PostHeader';
-import { OnPostNav, PostNav } from './PostNav';
 import { PostTextEditable } from './PostTextEditable';
 import { usePost } from './post.context/PostContext';
 import { concatenateThread } from './posts.helper';
@@ -23,10 +27,10 @@ import { concatenateThread } from './posts.helper';
 /** extract the postId from the route and pass it to a PostContext */
 export const PostView = (props: {
   profile?: PlatformProfile;
-  onPostNav?: OnPostNav;
+  overlayNav?: OnOverlayNav;
+  onPostClick?: (event: PostClickEvent) => void;
 }) => {
   const appFetch = useAppFetch();
-  const { onPostNav } = props;
 
   const [, setIsReparsing] = useState(false);
 
@@ -152,6 +156,7 @@ export const PostView = (props: {
       semantics: updated.postMerged?.semantics,
       originalParsed: updated.postMerged?.originalParsed,
       semanticsUpdated: semanticsUpdated,
+      post: updated.postMerged,
     };
 
     return (
@@ -169,9 +174,11 @@ export const PostView = (props: {
         <PostTextEditable text={postText}></PostTextEditable>
 
         {!hideSemantics && (
-          <SemanticsEditor
-            patternProps={patternProps}
-            include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
+          <Box margin={{ top: '24px' }}>
+            <SemanticsEditor
+              patternProps={{ ...patternProps }}
+              include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
+          </Box>
         )}
 
         {action}
@@ -181,7 +188,6 @@ export const PostView = (props: {
 
   return (
     <Box fill>
-      <PostNav onPostNav={onPostNav}></PostNav>
       <Box style={{ overflowY: 'auto', flexGrow: 1 }}>{content}</Box>
     </Box>
   );

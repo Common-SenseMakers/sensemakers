@@ -12,6 +12,8 @@ import useOutsideClick from './hooks/OutsideClickHook';
 
 const DEBUG = false;
 
+export const REF_LABELS_EDITOR_ID = 'ref-labels-editor';
+
 export const AppLabelsEditor = (props: {
   labels: Array<string | JSX.Element>;
   maxLabels?: number;
@@ -21,10 +23,12 @@ export const AppLabelsEditor = (props: {
   hashtag?: boolean;
   colors: LabelColors;
   editable?: boolean;
+  onLabelClick?: (label: string) => void;
 }) => {
   const editable = props.editable !== undefined ? props.editable : false;
   const colors = props.colors;
   const hashtag = props.hashtag !== undefined ? props.hashtag : false;
+  const onLabelClick = props.onLabelClick;
 
   const { constants } = useThemeContext();
   const { t } = useTranslation();
@@ -174,6 +178,7 @@ export const AppLabelsEditor = (props: {
 
   return (
     <Box
+      id={REF_LABELS_EDITOR_ID}
       ref={keyBox}
       width="100%"
       style={{
@@ -182,17 +187,24 @@ export const AppLabelsEditor = (props: {
       }}>
       <Box style={{ display: 'block' }}>
         {visibleLables.map((label, ix) => {
-          const marginRight = ix < visibleLables.length - 1 ? 'small' : '0';
+          const marginRight = ix < visibleLables.length - 1 ? '4px' : '0';
           return (
             <Box
               key={ix}
-              style={{ display: 'block', float: 'left', paddingTop: '5.5px' }}>
+              style={{
+                display: 'block',
+                float: 'left',
+                cursor: onLabelClick ? 'pointer' : 'inherit',
+              }}
+              onClick={() => {
+                onLabelClick && !adding && onLabelClick(label as string);
+              }}>
               <AppLabel
                 colors={colors}
                 showClose={adding}
                 remove={() => removeLabel(label as string)}
                 key={ix}
-                margin={{ right: marginRight, bottom: 'xsmall' }}>
+                margin={{ right: marginRight, bottom: '4px' }}>
                 {`${hashtag ? '#' : ''}`}
                 <span>{label}</span>
               </AppLabel>
@@ -200,10 +212,8 @@ export const AppLabelsEditor = (props: {
           );
         })}
         {hasManyLabels && !adding ? (
-          <Box style={{ display: 'block', float: 'left', paddingTop: '5.5px' }}>
-            <AppLabel
-              colors={colors}
-              margin={{ left: 'small', bottom: 'xsmall' }}>
+          <Box style={{ display: 'block', float: 'left' }}>
+            <AppLabel colors={colors} margin={{ left: '4px', bottom: '4px' }}>
               {`+${nonVisibleLabels.length}`}
             </AppLabel>
           </Box>
@@ -214,7 +224,6 @@ export const AppLabelsEditor = (props: {
           style={{
             display: 'block',
             float: 'left',
-            paddingTop: '5px',
           }}>
           {adding ? (
             <Keyboard
@@ -266,8 +275,8 @@ export const AppLabelsEditor = (props: {
             width: '100%',
             padding: '12px 12px 12px 12px',
             top: `${height || 0}px`,
-            borderBottomLeftRadius: '6px',
-            borderBottomRightRadius: '6px',
+            borderRadius: '6px',
+            border: `2px ${constants.colors.border} solid`,
             zIndex: 1,
           }}
           direction="row"

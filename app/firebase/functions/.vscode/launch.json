@@ -49,7 +49,7 @@
       "args": [
         "--project",
         "./tsconfig.scripts.json",
-        "./migrations/004-profiles-update-prod/004-script.ts"
+        "./migrations/006-posts-append-to-db.ts"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",

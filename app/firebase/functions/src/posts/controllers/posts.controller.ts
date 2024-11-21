@@ -8,6 +8,7 @@ import {
   PostsQuery,
 } from '../../@shared/types/types.posts';
 import { AccountProfileBase } from '../../@shared/types/types.profiles';
+import { getProfileId } from '../../@shared/utils/profiles.utils';
 import { IS_EMULATOR } from '../../config/config.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { queryParamsSchema } from '../../feed/feed.schema';
@@ -17,7 +18,6 @@ import {
   FETCH_MASTODON_ACCOUNT_TASK,
   FETCH_TWITTER_ACCOUNT_TASK,
 } from '../../platforms/platforms.tasks';
-import { getProfileId } from '../../profiles/profiles.repository';
 import { chunkNumber, enqueueTask } from '../../tasksUtils/tasks.support';
 import { canReadPost } from '../posts.access.control';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';

@@ -54,6 +54,7 @@ export interface Services {
   time: TimeService;
   db: DBInstance;
   activity: ActivityService;
+  links: LinksService;
 }
 
 export interface ServicesConfig {
@@ -202,6 +203,7 @@ export const createServices = (
     time,
     db,
     activity,
+    links: linksService,
   };
 
   if (DEBUG) {

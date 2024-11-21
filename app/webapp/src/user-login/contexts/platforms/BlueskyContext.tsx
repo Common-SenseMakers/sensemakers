@@ -94,7 +94,6 @@ export const BlueskyContext = (props: PropsWithChildren) => {
 
         log('Bluesky signup result', result);
 
-        refreshConnected().catch(console.error);
         setPlatformConnectedStatus(
           PLATFORM.Bluesky,
           PlatformConnectedStatus.Connected

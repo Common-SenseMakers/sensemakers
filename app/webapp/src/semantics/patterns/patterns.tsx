@@ -14,6 +14,19 @@ export enum PATTERN_ID {
   REF_LABELS = 'ref-labels',
 }
 
+export enum PostClickTarget {
+  POST = 'POST',
+  USER_ID = 'USER_ID',
+  PLATFORM_USER_ID = 'PLATFORM_USER_ID',
+  REF = 'REF',
+  KEYWORD = 'KEYWORD',
+}
+
+export interface PostClickEvent {
+  target: PostClickTarget;
+  payload: unknown;
+}
+
 export interface PatternProps {
   size?: 'compact' | 'normal';
   isLoading?: boolean;

@@ -1,24 +1,55 @@
 import { Box, Text } from 'grommet';
+import { MouseEventHandler } from 'react';
 
-import { PlatformPostAnchor } from '../app/anchors/PlatformPostAnchor';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
+import { useOverlay } from '../overlays/OverlayContext';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
-import { PATTERN_ID } from '../semantics/patterns/patterns';
+import { PATTERN_ID, PostClickTarget } from '../semantics/patterns/patterns';
 import { AppPostFull } from '../shared/types/types.posts';
 import { useThemeContext } from '../ui-components/ThemedApp';
-import { PublishButtons } from './PostPublishButtons';
+import { PlatformPostAnchor } from './PlatformPostAnchor';
 import { PostTextStatic } from './PostTextStatic';
-import { getPostDetails } from './platform.post.details';
+import { getPostDetails } from './platform-specific.details';
 import { usePost } from './post.context/PostContext';
 import { concatenateThread } from './posts.helper';
+
+const KEYWORDS_SEMANTICS_ID = 'keywords-semantics';
+const REFS_SEMANTICS_ID = 'refs-semantics';
+const POST_AUTHOR_ID = 'post-author';
 
 const PostCardHeader = (props: { post: AppPostFull }) => {
   const { constants } = useThemeContext();
   const details = getPostDetails(props.post);
 
+  const overlay = useOverlay();
+
+  const onUserClicked = () => {
+    if (props.post.authorUserId) {
+      overlay &&
+        overlay.onPostClick({
+          target: PostClickTarget.USER_ID,
+          payload: props.post.authorUserId,
+        });
+      return;
+    }
+
+    if (props.post.authorProfileId) {
+      overlay &&
+        overlay.onPostClick({
+          target: PostClickTarget.PLATFORM_USER_ID,
+          payload: props.post.authorProfileId,
+        });
+      return;
+    }
+  };
+
   return (
     <Box direction="row" align="center" justify="between" width="100%">
-      <Box direction="row" align="center" gap="4px">
+      <Box
+        direction="row"
+        align="center"
+        gap="4px"
+        onClick={() => onUserClicked()}>
         <PlatformAvatar
           size={24}
           imageUrl={details?.authorAvatarUrl}></PlatformAvatar>
@@ -46,7 +77,6 @@ const PostCardHeader = (props: { post: AppPostFull }) => {
 export const PostCard = (props: {
   isPublicFeed?: boolean;
   shade?: boolean;
-  handleClick: () => void;
   isEmail?: boolean;
 }) => {
   const { shade: _shade } = props;
@@ -57,13 +87,31 @@ export const PostCard = (props: {
 
   const { constants } = useThemeContext();
 
+  const overlay = useOverlay();
+
   if (!post) {
     console.warn('unexpected post undefined in PostCard');
     return <></>;
   }
 
-  const handleClick = () => {
-    props.handleClick();
+  const handleClick: MouseEventHandler = (event) => {
+    let target = event.target as HTMLElement;
+
+    // filter clicks on the ref semantics
+    while (target !== null) {
+      if (
+        [REFS_SEMANTICS_ID, POST_AUTHOR_ID, KEYWORDS_SEMANTICS_ID].includes(
+          target.id
+        )
+      ) {
+        return; // Stop further processing
+      }
+
+      target = target.parentNode as HTMLElement;
+    }
+
+    overlay &&
+      overlay.onPostClick({ target: PostClickTarget.POST, payload: post });
   };
 
   const postText = concatenateThread(post.generic);
@@ -80,7 +128,7 @@ export const PostCard = (props: {
 
   return (
     <Box
-      pad={{ top: '16px', horizontal: '12px', bottom: '16px' }}
+      pad={{ top: '16px', horizontal: '12px', bottom: '24px' }}
       style={{
         backgroundColor: shade ? constants.colors.shade : 'white',
         borderBottom: '1px solid var(--Neutral-300, #D1D5DB)',
@@ -91,29 +139,29 @@ export const PostCard = (props: {
       <Box
         style={{ cursor: 'pointer', position: 'relative' }}
         onClick={handleClick}>
-        {false && (
-          <Box direction="row" justify="between" margin={{ bottom: '6.5px' }}>
-            <PublishButtons></PublishButtons>
-          </Box>
-        )}
-
-        <Box direction="row" justify="between" margin={{ bottom: '6.5px' }}>
+        <Box
+          id={POST_AUTHOR_ID}
+          direction="row"
+          justify="between"
+          margin={{ bottom: '16px' }}>
           {header}
         </Box>
 
         {!hideSemantics && (
-          <SemanticsEditor
-            include={[PATTERN_ID.KEYWORDS]}
-            patternProps={{
-              isLoading:
-                updated.statusesMerged.isParsing !== undefined
-                  ? updated.statusesMerged.isParsing
-                  : false,
-              editable: false,
-              size: 'compact',
-              semantics: post?.semantics,
-              originalParsed: post?.originalParsed,
-            }}></SemanticsEditor>
+          <Box id={KEYWORDS_SEMANTICS_ID}>
+            <SemanticsEditor
+              include={[PATTERN_ID.KEYWORDS]}
+              patternProps={{
+                isLoading:
+                  updated.statusesMerged.isParsing !== undefined
+                    ? updated.statusesMerged.isParsing
+                    : false,
+                editable: false,
+                size: 'compact',
+                semantics: post?.semantics,
+                originalParsed: post?.originalParsed,
+              }}></SemanticsEditor>
+          </Box>
         )}
 
         <PostTextStatic
@@ -123,7 +171,7 @@ export const PostCard = (props: {
           text={postText}></PostTextStatic>
 
         {!hideSemantics && (
-          <Box>
+          <Box margin={{ top: '24px' }} id={REFS_SEMANTICS_ID}>
             <SemanticsEditor
               include={[PATTERN_ID.REF_LABELS]}
               patternProps={{

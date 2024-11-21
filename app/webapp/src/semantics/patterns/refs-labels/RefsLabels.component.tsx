@@ -2,19 +2,42 @@ import { Box } from 'grommet';
 import { DataFactory } from 'n3';
 import { useMemo } from 'react';
 
+import { useOverlay } from '../../../overlays/OverlayContext';
 import { filterStore, writeRDF } from '../../../shared/utils/n3.utils';
 import { THIS_POST_NAME_URI } from '../../../shared/utils/semantics.helper';
 import { AppLabel } from '../../../ui-components';
+import { REF_LABELS_EDITOR_ID } from '../../../ui-components/AppLabelsEditor';
 import { LoadingDiv } from '../../../ui-components/LoadingDiv';
 import { splitArray } from '../../../ui-components/utils';
 import { useSemanticsStore } from '../common/use.semantics';
-import { PatternProps } from '../patterns';
-import { RefWithLabels } from './RefLabel';
+import { PatternProps, PostClickTarget } from '../patterns';
+import { RefWithLabels } from './RefWithLabels';
 import { RefsMap, processSemantics } from './process.semantics';
 
 export const RefLabelsComponent = (props: PatternProps) => {
   const { store, originalStore } = useSemanticsStore(props);
   const size = props.size || 'normal';
+
+  const overlay = useOverlay();
+
+  const handleClick = (
+    event: React.MouseEvent<HTMLDivElement>,
+    ref: string
+  ) => {
+    let target = event.target as HTMLElement;
+
+    // filter clicks on the ref semantics
+    while (target !== null) {
+      if (target.id === REF_LABELS_EDITOR_ID) {
+        return; // Stop further processing
+      }
+
+      target = target.parentNode as HTMLElement;
+    }
+
+    overlay &&
+      overlay.onPostClick({ target: PostClickTarget.REF, payload: ref });
+  };
 
   /** processed ref labels with metadata */
   const refs = useMemo<RefsMap>(
@@ -91,32 +114,46 @@ export const RefLabelsComponent = (props: PatternProps) => {
 
   if (refs && refs.size > 0) {
     return (
-      <Box margin={{ top: 'small' }}>
+      <Box>
         <Box style={{ display: 'block' }}>
           <Box gap="16px">
             {visibleRefs.map(([ref, refData], index) => {
               if (!props.originalParsed)
                 throw new Error('Unexpected undefined');
 
+              const refLabels = props.post?.meta?.refLabels[ref];
+
+              const authorProfileId = props.post?.authorProfileId;
               return (
-                <>
+                <Box
+                  key={index}
+                  style={{
+                    borderRadius: '12px',
+                    border: '1.6px solid #D1D5DB',
+                    width: '100%',
+                  }}
+                  pad="12px"
+                  onClick={(e: React.MouseEvent<HTMLDivElement>) =>
+                    handleClick(e, ref)
+                  }>
                   <RefWithLabels
                     ix={index}
                     showLabels={true}
+                    showDescription={false}
                     editable={props.editable}
-                    key={ref}
                     refUrl={ref}
                     refData={refData}
-                    support={props.originalParsed?.support}
-                    post={props.post}
+                    ontology={props.originalParsed?.support?.ontology}
                     removeLabel={(labelUri: string) => {
                       removeLabel(ref, labelUri).catch(console.error);
                     }}
                     addLabel={(labelUri: string) => {
                       addLabel(ref, labelUri).catch(console.error);
                     }}
-                    allRefs={visibleRefs}></RefWithLabels>
-                </>
+                    allRefs={visibleRefs}
+                    refLabels={refLabels}
+                    authorProfileId={authorProfileId}></RefWithLabels>
+                </Box>
               );
             })}
           </Box>

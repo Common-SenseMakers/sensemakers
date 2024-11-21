@@ -1,6 +1,8 @@
 export enum PlatformsKeys {
   XTwitter = 'platforms-s001',
   ORCID = 'platforms-s002',
+  Mastodon = 'platforms-s0021',
+  Bluesky = 'platforms-s0022',
   TweetX = 'platforms-s003',
   ThreadX = 'platforms-s004',
   TootMastodon = 'platforms-s005',
@@ -12,6 +14,8 @@ export enum PlatformsKeys {
 export const platformsValues: Record<PlatformsKeys, string> = {
   [PlatformsKeys.XTwitter]: 'X · Twitter',
   [PlatformsKeys.ORCID]: 'ORCID',
+  [PlatformsKeys.Mastodon]: 'Mastodon',
+  [PlatformsKeys.Bluesky]: 'Bluesky',
   [PlatformsKeys.TweetX]: 'X · Tweet',
   [PlatformsKeys.ThreadX]: 'X · Thread',
   [PlatformsKeys.TootMastodon]: 'Mastodon · Toot',

@@ -488,7 +488,7 @@ export class PostsManager {
     }
 
     /** fetch only if queryuing for all posts of a user */
-    if (queryParams.semantics || queryParams.profileIds) {
+    if (queryParams.semantics || queryParams.profileId) {
       return { posts: [], enough: true };
     }
 

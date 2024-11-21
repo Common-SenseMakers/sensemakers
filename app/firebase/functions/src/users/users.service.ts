@@ -12,15 +12,19 @@ import {
 import {
   AccountProfile,
   AccountProfileCreate,
+  AccountProfileRead,
+  PlatformProfile,
 } from '../@shared/types/types.profiles';
 import {
   AccountCredentials,
   AccountDetailsRead,
+  AppUserPublicRead,
   AppUserRead,
   EmailDetails,
   UserSettings,
   UserSettingsUpdate,
 } from '../@shared/types/types.user';
+import { splitProfileId } from '../@shared/utils/profiles.utils';
 import { USER_INIT_SETTINGS } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
@@ -29,10 +33,7 @@ import {
   IdentityServicesMap,
   PlatformsMap,
 } from '../platforms/platforms.service';
-import {
-  ProfilesRepository,
-  splitProfileId,
-} from '../profiles/profiles.repository';
+import { ProfilesRepository } from '../profiles/profiles.repository';
 import { TimeService } from '../time/time.service';
 import { UsersHelper } from './users.helper';
 import { UsersRepository } from './users.repository';
@@ -345,26 +346,12 @@ export class UsersService {
     return verified.payload.userId;
   }
 
-  public async getUserWithProfiles(
+  public async getUserReadProfiles(
     userId: string,
     manager: TransactionManager
   ) {
     const user = await this.repo.getUser(userId, manager, true);
-
-    /** delete the token, from the public profile */
-    const email: EmailDetails | undefined = user.email
-      ? {
-          ...user.email,
-        }
-      : undefined;
-
-    const userRead: AppUserRead = {
-      userId,
-      email,
-      signupDate: user.signupDate,
-      settings: user.settings,
-      profiles: {},
-    };
+    const profiles: AppUserRead['profiles'] = {};
 
     /** extract the profile for each account */
     await Promise.all(
@@ -379,23 +366,80 @@ export class UsersService {
               manager
             );
 
-            if (profile) {
-              const current = userRead.profiles[platform] || [];
+            if (profile && profile.profile) {
+              const current = profiles[platform] || [];
 
               current.push({
                 user_id: account.user_id,
+                platformId: platform,
                 profile: profile.profile,
                 read: account.credentials.read !== undefined,
                 write: account.credentials.write !== undefined,
               });
 
-              userRead.profiles[platform] =
-                current as AccountDetailsRead<any>[];
+              profiles[platform] = current as AccountDetailsRead<any>[];
             }
           })
         );
       })
     );
+
+    return profiles;
+  }
+
+  /** get a user and their public profiles data */
+  public async getPublicUserWithProfiles(
+    userId: string,
+    manager: TransactionManager
+  ): Promise<AppUserPublicRead> {
+    const readProfiles = await this.getUserReadProfiles(userId, manager);
+    const publicProfiles: AppUserPublicRead['profiles'] = {};
+
+    (Array.from(Object.keys(readProfiles)) as IDENTITY_PLATFORM[]).forEach(
+      (platform: IDENTITY_PLATFORM) => {
+        const accounts = readProfiles[platform];
+        if (accounts) {
+          publicProfiles[platform] = accounts.map((account) => {
+            const profile: AccountProfileRead = {
+              platformId: account.platformId,
+              user_id: account.user_id,
+              userId: userId,
+              profile: account.profile,
+            };
+            return profile;
+          });
+        }
+      }
+    );
+
+    return {
+      userId,
+      profiles: publicProfiles,
+    };
+  }
+
+  public async getLoggedUserWithProfiles(
+    userId: string,
+    manager: TransactionManager
+  ) {
+    const user = await this.repo.getUser(userId, manager, true);
+
+    /** delete the token, from the public profile */
+    const email: EmailDetails | undefined = user.email
+      ? {
+          ...user.email,
+        }
+      : undefined;
+
+    const readProfiles = await this.getUserReadProfiles(userId, manager);
+
+    const userRead: AppUserRead = {
+      userId,
+      email,
+      signupDate: user.signupDate,
+      settings: user.settings,
+      profiles: readProfiles,
+    };
 
     return userRead;
   }
@@ -426,7 +470,6 @@ export class UsersService {
   ) {
     const profileId = await this.profiles.getByPlatformUsername(
       platformId,
-      'username',
       username,
       manager
     );
@@ -449,7 +492,7 @@ export class UsersService {
     return profile;
   }
 
-  async readAndCreateProfile<P = any>(
+  async readAndCreateProfile<P extends PlatformProfile = PlatformProfile>(
     profileId: string,
     manager: TransactionManager,
     credentials?: any
@@ -471,11 +514,16 @@ export class UsersService {
     };
 
     const id = this.profiles.create(profileCreate, manager);
-    return { id, ...profileCreate };
+    const profile = {
+      id,
+      ...profileCreate,
+    } as AccountProfile<P>;
+
+    return profile;
   }
 
   /** Get or create an account profile */
-  async getOrCreateProfile<P = any>(
+  async getOrCreateProfile<P extends PlatformProfile = PlatformProfile>(
     profileId: string,
     manager: TransactionManager
   ) {
@@ -488,6 +536,6 @@ export class UsersService {
       return this.readAndCreateProfile<P>(profileId, manager);
     }
 
-    return profile as P;
+    return profile;
   }
 }

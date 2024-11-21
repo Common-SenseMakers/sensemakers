@@ -33,7 +33,7 @@ export const usePostFetch = (
 
   /** if postInit not provided get post from the DB */
   const {
-    data: post,
+    data: _post,
     refetch,
     isLoading,
   } = useQuery({
@@ -50,6 +50,8 @@ export const usePostFetch = (
       }
     },
   });
+
+  const post = _post || postInit;
 
   const _refetch = useCallback(() => {
     if (DEBUG) console.log(`updated to post${postId} detected - refetching`);

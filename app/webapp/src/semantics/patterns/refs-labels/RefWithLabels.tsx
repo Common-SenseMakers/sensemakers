@@ -1,9 +1,10 @@
-import { Anchor, Box } from 'grommet';
+import { Box } from 'grommet';
 import { useMemo } from 'react';
 
-import { ParsedSupport, RefMeta } from '../../../shared/types/types.parser';
-import { AppPostFull } from '../../../shared/types/types.posts';
+import { ParserOntology, RefMeta } from '../../../shared/types/types.parser';
+import { RefLabel } from '../../../shared/types/types.posts';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
+import { LoadingDiv } from '../../../ui-components/LoadingDiv';
 import { RefCard } from '../common/RefCard';
 import { AggregatedRefLabels } from './AggregatedRefLabels';
 import { RefData } from './process.semantics';
@@ -14,20 +15,22 @@ export const RefWithLabels = (props: {
   refUrl: string;
   refData: RefData;
   showLabels?: boolean;
-  support?: ParsedSupport;
-  post?: AppPostFull;
+  showDescription?: boolean;
+  ontology?: ParserOntology;
   addLabel: (labelUri: string) => void;
   removeLabel: (labelUri: string) => void;
   editable?: boolean;
   allRefs: [string, RefData][];
+  refLabels?: RefLabel[];
+  authorProfileId?: string;
 }) => {
-  const labelsOntology = props.support?.ontology?.semantic_predicates;
+  const labelsOntology = props.ontology?.semantic_predicates;
   const refData = props.refData;
   const { showLabels } =
     props.showLabels !== undefined ? props : { showLabels: true };
 
   /** display names for selected labels */
-  const labelsDisplayNames = useMemo(
+  let labelsDisplayNames = useMemo(
     () =>
       refData.labelsUris.map((labelUri) => {
         const label_ontology = labelsOntology
@@ -41,6 +44,9 @@ export const RefWithLabels = (props: {
       }),
     [labelsOntology, refData.labelsUris]
   );
+
+  // make labelsDisplayNames unique
+  labelsDisplayNames = Array.from(new Set(labelsDisplayNames));
 
   /** list of possible labels from ontology (filtering those selected) */
   const optionDisplayNames = useMemo(
@@ -74,42 +80,49 @@ export const RefWithLabels = (props: {
     props.addLabel(getLabelFromDisplayName(label).uri);
   };
 
-  const refLabels = props.post?.meta?.refLabels[props.refUrl];
+  const refLabels = props.refLabels;
 
   const show =
     refLabels &&
     refLabels.find(
-      (refLabel) => refLabel.authorProfileId !== props.post?.authorProfileId
+      (refLabel) => refLabel.authorProfileId !== props.authorProfileId
     ) !== undefined;
 
   return (
-    <Box
-      style={{
-        borderRadius: '12px',
-        border: '1px solid #D1D5DB',
-        width: '100%',
-      }}
-      pad="12px">
+    <>
       {refData.meta ? (
         <RefCard
           ix={props.ix + 1}
           url={props.refUrl}
           title={refData.meta?.title}
-          description={refData.meta?.summary}
+          description={
+            props.showDescription ? refData.meta?.summary : undefined
+          }
           image={refData.meta?.thumbnail_url}
-          refType={refData.meta.item_type}
+          refType={
+            refData.meta.item_type !== 'unknown'
+              ? refData.meta.item_type
+              : undefined
+          }
+          showDescription={props.showDescription}
           sourceRef={getSourceRefNumber(refData.meta, props.allRefs)}></RefCard>
       ) : (
-        <Anchor target="_blank" href={props.refUrl}>
-          {props.refUrl}
-        </Anchor>
+        <Box gap="10px" pad={{ vertical: '8px' }}>
+          <LoadingDiv
+            height={'16px'}
+            style={{ borderRadius: '12px', width: '120px' }}></LoadingDiv>
+
+          <LoadingDiv
+            height={'76px'}
+            style={{ borderRadius: '12px', width: '100%' }}></LoadingDiv>
+        </Box>
       )}
 
       {show ? (
         <Box margin={{ top: '22px' }}>
           <AggregatedRefLabels
             refLabels={refLabels}
-            ontology={props.support?.ontology}></AggregatedRefLabels>
+            ontology={props.ontology}></AggregatedRefLabels>
         </Box>
       ) : (
         <></>
@@ -130,7 +143,7 @@ export const RefWithLabels = (props: {
             addLabel={(label) => addLabel(label)}></AppLabelsEditor>
         )}
       </Box>
-    </Box>
+    </>
   );
 };
 
