@@ -2,7 +2,6 @@ import { RequestHandler } from 'express';
 import { object, string } from 'yup';
 
 import { RefMeta } from '../@shared/types/types.parser';
-import { PostsQueryDefined } from '../@shared/types/types.posts';
 import { getServices } from '../controllers.utils';
 import { logger } from '../instances/logger';
 

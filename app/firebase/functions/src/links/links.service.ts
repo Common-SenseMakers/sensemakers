@@ -34,7 +34,7 @@ export class LinksService {
       );
       const resJson = await res.json();
       const resData = resJson as RefMeta;
-      return { ...resData, original_url: url };
+      return { ...resData, original_url: url, url: normalizedUrl };
     } catch (e) {
       logger.warn(`Error fetching ref ${url} meta: ${e}`);
       return { original_url: url, url: normalizedUrl };

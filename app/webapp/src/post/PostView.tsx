@@ -156,6 +156,7 @@ export const PostView = (props: {
       semantics: updated.postMerged?.semantics,
       originalParsed: updated.postMerged?.originalParsed,
       semanticsUpdated: semanticsUpdated,
+      structuredSemantics: updated.postMerged?.structuredSemantics,
       post: updated.postMerged,
     };
 

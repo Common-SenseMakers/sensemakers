@@ -5,7 +5,10 @@ import {
   AppPostSemantics,
   ParsePostResult,
 } from '../../shared/types/types.parser';
-import { AppPostFull } from '../../shared/types/types.posts';
+import {
+  AppPostFull,
+  StructuredSemantics,
+} from '../../shared/types/types.posts';
 import { KeywordsComponent } from './keywords/Keywords.component';
 import { RefLabelsComponent } from './refs-labels/RefsLabels.component';
 
@@ -35,6 +38,7 @@ export interface PatternProps {
   semantics?: AppPostSemantics;
   semanticsUpdated?: (semantics: AppPostSemantics) => void;
   post?: AppPostFull;
+  structuredSemantics?: StructuredSemantics;
 }
 
 export const patternsLib: Record<

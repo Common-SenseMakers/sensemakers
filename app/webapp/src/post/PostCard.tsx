@@ -160,6 +160,7 @@ export const PostCard = (props: {
                 size: 'compact',
                 semantics: post?.semantics,
                 originalParsed: post?.originalParsed,
+                structuredSemantics: post?.structuredSemantics,
               }}></SemanticsEditor>
           </Box>
         )}
@@ -183,6 +184,7 @@ export const PostCard = (props: {
                 editable: false,
                 semantics: post?.semantics,
                 originalParsed: post?.originalParsed,
+                structuredSemantics: post?.structuredSemantics,
                 post,
               }}></SemanticsEditor>
           </Box>
