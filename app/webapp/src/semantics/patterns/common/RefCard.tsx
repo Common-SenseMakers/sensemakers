@@ -1,14 +1,11 @@
 // import axios from 'axios';
 import { Anchor, Box, Paragraph, Text } from 'grommet';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
-import { IFRAMELY_API_KEY, IFRAMELY_API_URL } from '../../../app/config';
 import { OpenLinkIcon } from '../../../app/icons/OpenLinkIcon';
 import { AppHeading } from '../../../ui-components';
 import { useThemeContext } from '../../../ui-components/ThemedApp';
 import { zoteroItemTypeDisplay } from '../../../utils/post.utils';
-
-const DEBUG = false;
 
 export const REF_URL_ANCHOR_ID = 'ref-url-anchor';
 
@@ -44,42 +41,6 @@ export const RefCard = (props: {
 
   const domain = useMemo(() => extractDomain(props.url), [props.url]);
 
-  const [urlMeta, setUrlMeta] = useState<
-    { thumbnail: string; description: string; title: string } | undefined
-  >(undefined);
-
-  const titleFinal = useMemo(() => {
-    const isTweet = titleTruncated === 'Twitter post';
-    const isBskPost = domain === 'bsky.app';
-
-    if (isBskPost) {
-      return 'Bluesky Post';
-    }
-    if (isTweet || !titleTruncated) {
-      if (urlMeta && urlMeta.title) {
-        return urlMeta?.title;
-      }
-      return titleTruncated;
-    }
-
-    return titleTruncated;
-  }, [domain, titleTruncated, urlMeta]);
-
-  useEffect(() => {
-    const fetchThumbnail = async () => {
-      try {
-        const urlMetaResponse = await getUrlMeta(props.url);
-        setUrlMeta(urlMetaResponse);
-      } catch (error) {
-        console.error('Error fetching thumbnail:', error);
-      }
-    };
-
-    fetchThumbnail().catch((error) =>
-      console.error('Error in fetchThumbnail:', error)
-    );
-  }, [props.url]);
-
   return (
     <Box align="start" pad={{}}>
       <Box
@@ -109,13 +70,13 @@ export const RefCard = (props: {
           alignSelf: 'stretch',
           flexDirection: 'row',
         }}>
-        {urlMeta?.thumbnail && (
+        {props.image && (
           <Box
             style={{
               borderRadius: '8px',
               border: '1px solid var(--Neutral-300, #D1D5DB)',
-              background: urlMeta.thumbnail
-                ? `url(${urlMeta.thumbnail}) lightgray 50% / cover no-repeat`
+              background: props.image
+                ? `url(${props.image}) lightgray 50% / cover no-repeat`
                 : undefined,
               width: '76px',
               height: '76px',
@@ -134,24 +95,23 @@ export const RefCard = (props: {
             level={4}
             color="#111827"
             style={{ fontWeight: '500', fontSize: '18px' }}>
-            {titleFinal}
+            {titleTruncated}
           </AppHeading>
-          {props.showDescription &&
-            (props.description || urlMeta?.description) && (
-              <Paragraph
-                margin={{ vertical: '4px' }}
-                size="medium"
-                style={{
-                  lineHeight: '18px',
-                  color: '#111827',
-                  fontSize: '14px',
-                  fontStyle: 'normal',
-                  fontWeight: '400',
-                }}
-                maxLines={3}>
-                {props.description || urlMeta?.description}
-              </Paragraph>
-            )}
+          {props.showDescription && props.description && (
+            <Paragraph
+              margin={{ vertical: '4px' }}
+              size="medium"
+              style={{
+                lineHeight: '18px',
+                color: '#111827',
+                fontSize: '14px',
+                fontStyle: 'normal',
+                fontWeight: '400',
+              }}
+              maxLines={3}>
+              {props.description}
+            </Paragraph>
+          )}
           <Box
             onClick={() =>
               window.open(props.url, '_blank', 'noopener,noreferrer')
@@ -182,60 +142,3 @@ export const RefCard = (props: {
     </Box>
   );
 };
-
-// eslint-disable-next-line @typescript-eslint/require-await
-async function getUrlMeta(
-  url: string
-): Promise<
-  { thumbnail: string; description: string; title: string } | undefined
-> {
-  if (!IFRAMELY_API_KEY || !IFRAMELY_API_URL) {
-    console.error('Iframely API key not found.');
-    return undefined;
-  }
-  // const apiKey = IFRAMELY_API_KEY;
-  // const apiUrl = `${IFRAMELY_API_URL}/iframely?url=${encodeURIComponent(url)}&api_key=${apiKey}`;
-
-  try {
-    // const response = await axios.get(apiUrl);
-    // const data: IframelyResponse = response.data as IframelyResponse;
-
-    const data: IframelyResponse = {
-      links: {
-        thumbnail: [{ href: 'https://via.placeholder.com/150' }],
-      },
-      meta: {
-        title: 'Title',
-        description: 'Description',
-      },
-    };
-
-    // Check if 'links' and 'thumbnail' are present in the response
-    if (data.links && data.links.thumbnail && data.links.thumbnail.length > 0) {
-      // Extract the first thumbnail URL
-      const thumbnailUrl = data.links.thumbnail[0].href;
-      return {
-        thumbnail: thumbnailUrl,
-        description: data.meta.description,
-        title: data.meta.title,
-      };
-    } else {
-      if (DEBUG) console.error('No thumbnail found for the provided URL.');
-      return undefined;
-    }
-  } catch (error) {
-    // console.error('Error fetching data from Iframely API:', error);
-    return undefined;
-  }
-}
-interface IframelyResponse {
-  links: {
-    thumbnail: {
-      href: string;
-    }[];
-  };
-  meta: {
-    title: string;
-    description: string;
-  };
-}
