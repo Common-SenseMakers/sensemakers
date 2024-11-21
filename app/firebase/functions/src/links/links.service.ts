@@ -32,7 +32,9 @@ export class LinksService {
           method: 'get',
         }
       );
-      return await { ...res.json(), original_url: url };
+      const resJson = await res.json();
+      const resData = resJson as RefMeta;
+      return { ...resData, original_url: url };
     } catch (e) {
       logger.warn(`Error fetching ref ${url} meta: ${e}`);
       return { original_url: url, url: normalizedUrl };

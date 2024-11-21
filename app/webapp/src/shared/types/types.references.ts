@@ -2,16 +2,21 @@ import { AppPost } from './types.posts';
 
 export interface OEmbed {
   url: string;
-  original_url?: string;
+  type?: string;
+  version?: string;
   title?: string;
-  summary?: string;
-  provider_name?: string;
-  provider_url?: string;
-  thumbnail_url?: string;
-  author_name?: string;
+  description?: string;
+  author?: string;
   author_url?: string;
+  provider_name?: string;
+  thumbnail_url?: string;
   thumbnail_width?: number;
   thumbnail_height?: number;
+  html?: string;
+  original_url?: string;
+  summary?: string;
+  provider_url?: string;
+  author_name?: string;
 }
 
 export type RefPostData = Pick<
