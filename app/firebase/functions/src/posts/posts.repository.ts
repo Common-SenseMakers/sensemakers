@@ -223,6 +223,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
         const docRefs = posts.docs.map((doc) =>
           this.db.collections.posts.doc(doc.id)
         );
+        if (docRefs.length === 0) return [];
         const docs = await this.db.firestore.getAll(...docRefs);
         return docs.map((doc) => ({
           id: doc.id,
