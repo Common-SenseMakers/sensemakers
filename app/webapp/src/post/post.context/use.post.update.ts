@@ -17,7 +17,7 @@ import { PostDerivedContext } from './use.post.derived';
 import { PostFetchContext } from './use.post.fetch';
 import { usePostMergeDeltas } from './use.post.merge.deltas';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export interface PostUpdateContext {
   editable: boolean; // can be true if not published

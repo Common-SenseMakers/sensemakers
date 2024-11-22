@@ -17,7 +17,7 @@ import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { OverlayContext } from './OverlayContext';
 import { usePublicFeed } from './PublicFeedContext';
 
-const DEBUG = true;
+const DEBUG = false;
 
 /** extract the postId from the route and pass it to a PostContext */
 export const RefOverlay = (props: { refUrl: string }) => {

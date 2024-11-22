@@ -20,7 +20,7 @@ import {
 } from '../posts.fetcher/posts.fetcher.hook';
 import { PostClickEvent } from '../semantics/patterns/patterns';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const locationToFeedIx = (location: Location) => {
   if (DEBUG) console.log(location);

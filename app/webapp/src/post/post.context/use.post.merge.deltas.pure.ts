@@ -7,7 +7,7 @@ export interface QuadOperation {
   quad: Quad;
 }
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const getMergedStore = (
   _baseStore: Store,
