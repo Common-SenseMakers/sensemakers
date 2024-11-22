@@ -1,3 +1,4 @@
+import { Store } from 'n3';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useAppFetch } from '../../api/app.fetch';
@@ -8,6 +9,7 @@ import {
   PostUpdate,
   PostUpdatePayload,
 } from '../../shared/types/types.posts';
+import { parseRDF } from '../../shared/utils/n3.utils';
 import { useUserPosts } from '../../user-home/UserPostsContext';
 import { ConnectedUser } from '../../user-login/contexts/AccountContext';
 import { AppPostStatus, getPostStatuses } from '../posts.helper';
@@ -15,13 +17,14 @@ import { PostDerivedContext } from './use.post.derived';
 import { PostFetchContext } from './use.post.fetch';
 import { usePostMergeDeltas } from './use.post.merge.deltas';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export interface PostUpdateContext {
   editable: boolean; // can be true if not published
   enabledEdit: boolean; // only true if editing after publishing
   postEdited: AppPostFull | undefined;
   postMerged?: AppPostFull;
+  storeMerged?: Store;
   statusesMerged: AppPostStatus;
   setEnabledEdit: (enabled: boolean) => void;
   isUpdating: boolean;
@@ -52,6 +55,7 @@ export const usePostUpdate = (
 
   const { mergedSemantics, updateSemantics: updateSemanticsLocal } =
     usePostMergeDeltas(fetched);
+  const [storeMerged, setStoreMerged] = useState<Store | undefined>();
 
   const editable =
     connectedUser !== undefined &&
@@ -150,6 +154,16 @@ export const usePostUpdate = (
     return undefined;
   }, [fetched.post, postInit, postEdited, fetched.isLoading, mergedSemantics]);
 
+  useEffect(() => {
+    if (mergedSemantics) {
+      parseRDF(mergedSemantics)
+        .then((store) => {
+          setStoreMerged(store);
+        })
+        .catch(console.error);
+    }
+  }, [mergedSemantics]);
+
   const statusesMerged = useMemo(() => {
     return getPostStatuses(postMerged);
   }, [postMerged]);
@@ -161,6 +175,7 @@ export const usePostUpdate = (
     enabledEdit,
     postEdited,
     postMerged,
+    storeMerged,
     statusesMerged,
     setEnabledEdit,
     isUpdating,
