@@ -19,25 +19,23 @@ export const semanticStringToStore = (semantics?: string) => {
 /** keeps a semantics n3 store in sync with the semantics string provided as input,
  * if originalParsed is provided it will also create the corresponding original store
  */
-export const useSemanticsStore = (props: {
-  semantics?: string;
-  originalParsed?: { semantics: string };
-}) => {
-  const [store, setStore] = useState<Store>(
-    semanticStringToStore(props.semantics)
-  );
+export const useSemanticsStore = (
+  semantics?: string,
+  originalParsed?: { semantics: string }
+) => {
+  const [store, setStore] = useState<Store>(semanticStringToStore(semantics));
   const [originalStore, setOriginalStore] = useState<Store>(
-    semanticStringToStore(props.originalParsed?.semantics)
+    semanticStringToStore(originalParsed?.semantics)
   );
 
   /**  */
   useEffect(() => {
-    if (props.originalParsed) {
+    if (originalParsed) {
       if (DEBUG)
         console.log('updating original store', {
           originalStore,
         });
-      parseRDF(props.originalParsed.semantics)
+      parseRDF(originalParsed.semantics)
         .then((_store) => {
           /** both stores are set to the same value if no semantics are provided */
           if (DEBUG)
@@ -45,7 +43,7 @@ export const useSemanticsStore = (props: {
               _store,
             });
           setOriginalStore(_store);
-          if (!props.semantics) {
+          if (!semantics) {
             if (DEBUG)
               console.log('setting store (equal to original)', {
                 _store,
@@ -56,11 +54,11 @@ export const useSemanticsStore = (props: {
         .catch(console.error);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.originalParsed, props.semantics]);
+  }, [originalParsed, semantics]);
 
   useEffect(() => {
     /** then the actual stored is set. If prop.semantics is provided */
-    if (!props.semantics) {
+    if (!semantics) {
       if (DEBUG)
         console.log('updating semantics store - use originalStore', {
           originalStore,
@@ -70,10 +68,10 @@ export const useSemanticsStore = (props: {
     } else {
       if (DEBUG)
         console.log('updating semantics store - use semantics', {
-          semantics: props.semantics,
+          semantics: semantics,
         });
 
-      parseRDF(props.semantics)
+      parseRDF(semantics)
         .then((_store) => {
           if (DEBUG)
             console.log('setting semantics store', {
@@ -83,6 +81,6 @@ export const useSemanticsStore = (props: {
         })
         .catch(console.error);
     }
-  }, [originalStore, props.semantics]);
+  }, [originalStore, semantics]);
   return { store, originalStore };
 };
