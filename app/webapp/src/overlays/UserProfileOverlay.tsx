@@ -19,6 +19,7 @@ import {
 import { splitProfileId } from '../shared/utils/profiles.utils';
 import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
 import { AppHeading } from '../ui-components';
+import { usePublicFeed } from './PublicFeedContext';
 
 const DEBUG = false;
 
@@ -29,6 +30,9 @@ export const UserProfileOverlay = (props: {
 }) => {
   const appFetch = useAppFetch();
   const { profileId, userId } = props;
+
+  const publicFeedContext = usePublicFeed();
+  const isPublicFeed = publicFeedContext && publicFeedContext.isPublicFeed;
 
   const isUser = userId !== undefined;
 
@@ -119,7 +123,7 @@ export const UserProfileOverlay = (props: {
         </Box>
         <PostsFetcherComponent
           showHeader={false}
-          isPublicFeed={true}
+          isPublicFeed={isPublicFeed}
           feed={feed}
           pageTitle={'Ref'}></PostsFetcherComponent>
       </Box>

@@ -29,8 +29,8 @@ export const AppCheckBox = (props: { checked?: boolean; size?: number }) => {
   const uncheckedSvg = (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width={props.size}
-      height={props.size}
+      width={size}
+      height={size}
       viewBox="0 0 18 18"
       fill="none">
       <rect
@@ -45,7 +45,11 @@ export const AppCheckBox = (props: { checked?: boolean; size?: number }) => {
       />
     </svg>
   );
-  return <BoxCentered>{props.checked ? checkedSvg : uncheckedSvg}</BoxCentered>;
+  return (
+    <BoxCentered style={{ height: size, width: size, flexShrink: 0 }}>
+      {props.checked ? checkedSvg : uncheckedSvg}
+    </BoxCentered>
+  );
 };
 
 const DEBUG = false;

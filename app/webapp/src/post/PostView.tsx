@@ -14,19 +14,19 @@ import {
   PatternProps,
   PostClickEvent,
 } from '../semantics/patterns/patterns';
-import { PlatformProfile } from '../shared/types/types.profiles';
 import { AppButton } from '../ui-components';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { PostHeader } from './PostHeader';
+import { PublishButtons } from './PostPublishButtons';
 import { PostTextEditable } from './PostTextEditable';
 import { usePost } from './post.context/PostContext';
 import { concatenateThread } from './posts.helper';
 
 /** extract the postId from the route and pass it to a PostContext */
 export const PostView = (props: {
-  profile?: PlatformProfile;
+  isPublicFeed?: boolean;
   overlayNav?: OnOverlayNav;
   onPostClick?: (event: PostClickEvent) => void;
 }) => {
@@ -160,29 +160,40 @@ export const PostView = (props: {
     };
 
     return (
-      <Box
-        pad={{ top: 'medium', horizontal: 'medium', bottom: 'large' }}
-        style={{ flexShrink: 0 }}>
-        <PostHeader boxProps={{ margin: { bottom: '16px' } }}></PostHeader>
-
-        {!hideSemantics && (
-          <SemanticsEditor
-            patternProps={patternProps}
-            include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
-        )}
-
-        <PostTextEditable text={postText}></PostTextEditable>
-
-        {!hideSemantics && (
-          <Box margin={{ top: '24px' }}>
-            <SemanticsEditor
-              patternProps={{ ...patternProps }}
-              include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
+      <>
+        {!props.isPublicFeed && (
+          <Box
+            style={{ flexShrink: 0 }}
+            direction="row"
+            justify="between"
+            margin={{ bottom: '16px' }}>
+            <PublishButtons></PublishButtons>
           </Box>
         )}
+        <Box
+          pad={{ top: 'medium', horizontal: 'medium', bottom: 'large' }}
+          style={{ flexShrink: 0 }}>
+          <PostHeader boxProps={{ margin: { bottom: '16px' } }}></PostHeader>
 
-        {action}
-      </Box>
+          {!hideSemantics && (
+            <SemanticsEditor
+              patternProps={patternProps}
+              include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
+          )}
+
+          <PostTextEditable text={postText}></PostTextEditable>
+
+          {!hideSemantics && (
+            <Box margin={{ top: '24px' }}>
+              <SemanticsEditor
+                patternProps={{ ...patternProps }}
+                include={[PATTERN_ID.REF_LABELS]}></SemanticsEditor>
+            </Box>
+          )}
+
+          {action}
+        </Box>
+      </>
     );
   })();
 

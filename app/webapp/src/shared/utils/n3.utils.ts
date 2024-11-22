@@ -43,9 +43,12 @@ export const writeRDF = async (store: Store): Promise<string | undefined> => {
   });
 };
 
-export const addTripleToSemantics = async (text: string, triple: string[]) => {
+export const addTripleToSemantics = async (
+  semantics: string,
+  triple: string[]
+) => {
   const [subject, predicate, object] = triple;
-  const store = await parseRDF(text);
+  const store = await parseRDF(semantics);
   store.addQuad(
     DataFactory.quad(
       DataFactory.namedNode(subject),
@@ -190,4 +193,14 @@ export const getNode = (value: string): NamedNode | Literal => {
   } catch (e) {
     return DataFactory.literal(value);
   }
+};
+
+export const tripleToQuad = (triple: string[]) => {
+  const [subject, predicate, object, graph] = triple;
+  return DataFactory.quad(
+    DataFactory.namedNode(subject),
+    DataFactory.namedNode(predicate),
+    getNode(object),
+    graph ? DataFactory.namedNode(graph) : DataFactory.defaultGraph()
+  );
 };

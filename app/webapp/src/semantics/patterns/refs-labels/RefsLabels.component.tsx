@@ -15,7 +15,10 @@ import { RefWithLabels } from './RefWithLabels';
 import { RefsMap, processSemantics } from './process.semantics';
 
 export const RefLabelsComponent = (props: PatternProps) => {
-  const { store, originalStore } = useSemanticsStore(props);
+  const { store, originalStore } = useSemanticsStore(
+    props.semantics,
+    props.originalParsed
+  );
   const size = props.size || 'normal';
 
   const overlay = useOverlay();
