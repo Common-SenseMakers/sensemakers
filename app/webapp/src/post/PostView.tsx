@@ -162,7 +162,11 @@ export const PostView = (props: {
     return (
       <>
         {!props.isPublicFeed && (
-          <Box direction="row" justify="between" margin={{ bottom: '16px' }}>
+          <Box
+            style={{ flexShrink: 0 }}
+            direction="row"
+            justify="between"
+            margin={{ bottom: '16px' }}>
             <PublishButtons></PublishButtons>
           </Box>
         )}

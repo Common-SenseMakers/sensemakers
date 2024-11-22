@@ -208,7 +208,7 @@ export const PublicFeedPage = () => {
       fixed
       content={
         <Box style={{ position: 'relative', paddingTop: '16px' }}>
-          <PublicFeedContext>
+          <PublicFeedContext isPublicFeed>
             {overlayInit !== undefined && (
               <OverlayContext
                 init={overlayInit}
