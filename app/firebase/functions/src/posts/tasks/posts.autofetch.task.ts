@@ -1,9 +1,9 @@
 import { Request } from 'firebase-functions/v2/tasks';
 
 import { PLATFORM } from '../../@shared/types/types.platforms';
+import { getProfileId } from '../../@shared/utils/profiles.utils';
 import { logger } from '../../instances/logger';
 import { Services } from '../../instances/services';
-import { getProfileId } from '../../@shared/utils/profiles.utils';
 import {
   FETCH_BLUESKY_ACCOUNT_TASK,
   FETCH_MASTODON_ACCOUNT_TASK,
@@ -33,7 +33,7 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
     }
 
     const profileId = getProfileId(profile.platformId, profile.user_id);
-    
+
     let taskName;
     switch (profile.platformId) {
       case PLATFORM.Twitter:
@@ -66,7 +66,7 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
       { taskName, taskData },
       DEBUG_PREFIX
     );
-    await enqueueTask(taskName, taskData, services);
+    await enqueueTask(taskName, taskData);
   }
 };
 
