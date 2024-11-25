@@ -42,10 +42,11 @@ A user will pass in a post, and you should think step by step, before selecting 
 
 
 Rules:
-- Your final answer should be structured as follows:
+- Your final output should be structured as follows:
     - Reasoning Steps: (your reasoning steps)
     - Candidate Topics: (For potential each topic you choose, explain why you chose it.)
-    - Final Answer: (a set of final topics, based on the Candidate Topics. The rest of the final keywords must be included in the Candidate Topics list!)
+    - Final Answer: (a set of final topics, based on the Candidate Topics. The final answer should include only topics from the Candidate Topics list!)
+- The output should not include anything besides Reasoning Steps, Candidate Topics and Final Answer!
 
 
 # Input post text:
