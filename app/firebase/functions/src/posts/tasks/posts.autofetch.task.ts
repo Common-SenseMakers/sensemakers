@@ -1,5 +1,7 @@
 import { Request } from 'firebase-functions/v2/tasks';
 
+const DEBUG = false;
+
 import { PLATFORM } from '../../@shared/types/types.platforms';
 import { getProfileId } from '../../@shared/utils/profiles.utils';
 import { logger } from '../../instances/logger';
@@ -16,11 +18,11 @@ export const AUTOFETCH_POSTS_TASK = 'autofetchPosts';
 const DEBUG_PREFIX = 'AUTOFETCH';
 
 export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
-  logger.debug(`triggerAutofetchPostsForNonUsers`, undefined, DEBUG_PREFIX);
+  if (DEBUG) logger.debug(`triggerAutofetchPostsForNonUsers`, undefined, DEBUG_PREFIX);
   const { users } = services;
 
   const profiles = await users.profiles.getAll();
-  logger.debug(
+  if (DEBUG) logger.debug(
     `number of profiles: ${profiles.length}`,
     undefined,
     DEBUG_PREFIX
@@ -46,7 +48,7 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
         taskName = FETCH_BLUESKY_ACCOUNT_TASK;
         break;
       default:
-        logger.warn(
+        if (DEBUG) logger.warn(
           `Unsupported platform for autofetch: ${profile.platformId}`,
           undefined,
           DEBUG_PREFIX
@@ -61,7 +63,7 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
       latest: true,
     };
 
-    logger.debug(
+    if (DEBUG) logger.debug(
       `Enqueueing fetch task for profile ${profileId}`,
       { taskName, taskData },
       DEBUG_PREFIX
@@ -71,16 +73,16 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
 };
 
 export const triggerAutofetchPosts = async (services: Services) => {
-  logger.debug(`triggerAutofetchPosts`, undefined, DEBUG_PREFIX);
+  if (DEBUG) logger.debug(`triggerAutofetchPosts`, undefined, DEBUG_PREFIX);
   const { users } = services;
 
   const usersIds = await users.repo.getAll();
 
-  logger.debug(`number of users: ${usersIds.length}`, undefined, DEBUG_PREFIX);
+  if (DEBUG) logger.debug(`number of users: ${usersIds.length}`, undefined, DEBUG_PREFIX);
 
   await Promise.all(
     usersIds.map((userId) => {
-      logger.debug(
+      if (DEBUG) logger.debug(
         `enqueing of users: ${usersIds.length}`,
         undefined,
         DEBUG_PREFIX
@@ -91,7 +93,7 @@ export const triggerAutofetchPosts = async (services: Services) => {
 };
 
 export const autofetchUserPosts = async (req: Request, services: Services) => {
-  logger.debug(`autofetchUserPosts: userId: ${req.data.userId}`);
+  if (DEBUG) logger.debug(`autofetchUserPosts: userId: ${req.data.userId}`);
 
   const userId = req.data.userId as string;
 
