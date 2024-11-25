@@ -129,6 +129,7 @@ def init_multi_chain_parser_config(
         name="keywords",
         use_metadata=True,
         llm_config=LLMConfig(llm_type=kw_llm_type),
+        post_renderer=PostRendererType(post_renderer_type),
     )
     multi_refs_tagger_config = MultiRefTaggerChainConfig(
         name="multi_refs_tagger",

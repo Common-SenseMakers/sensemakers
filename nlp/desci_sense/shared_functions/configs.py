@@ -148,6 +148,10 @@ class KeywordPParserChainConfig(PostParserChainConfig):
         default=6,
         description="Maximum number of keywords to generate",
     )
+    quoted_context_length : int = Field(
+        default=500,
+        description='Truncate quoted post length to concatenate to the post content appended to the prompt',
+    )
 
 
 class HashtagPParserChainConfig(PostParserChainConfig):

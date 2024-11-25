@@ -23,12 +23,14 @@ Quote posts are a special kind of reference, where the post quotes another post.
 def render_quote_post_content(
     post: QuoteRefPost,
     ordered_refs: Optional[List[str]] = None,
+    quoted_context_length : int = None,
 ) -> str:
     """_summary_
 
     Args:
         post (QuoteRefPost): _description_
         ordered_urls (Optional[List[str]]): _description_
+        quoted_context_length : length to append quoted post as context
 
     Returns:
         str: _description_
@@ -58,9 +60,9 @@ def render_quote_post_content(
                 f"<quoted ref_{quoted_url_idx}>{quoted_post.content}</quote>"
             )
 
-            # replace quoted post url with rendered version
+            # replace quoted post url with rendered version truncated to a certain length 
             processed_content = processed_content.replace(
-                post.quoted_url, rendered_quoted_post
+                post.quoted_url, rendered_quoted_post[:quoted_context_length]
             )
 
             # remove quoted post url from list to process
