@@ -110,16 +110,12 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
          * a new quad is one that is in the newSemantcis but is not in the
          * baseStore nor a pending operation
          */
-        if (!baseStore.has(quad)) {
-          newOperations = addQuad(quad, newOperations);
-        }
+        newOperations = addQuad(baseStore, quad, newOperations);
       });
 
       /** add "remove" operations */
       forEachStore(baseStore, (quad) => {
-        if (!newStore.has(quad)) {
-          newOperations = removeQuad(quad, newOperations);
-        }
+        newOperations = removeQuad(baseStore, quad, newOperations);
       });
 
       if (DEBUG)

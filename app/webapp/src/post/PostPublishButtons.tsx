@@ -19,7 +19,7 @@ import {
 } from '../shared/utils/semantics.helper';
 import { usePost } from './post.context/PostContext';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export const PublishButtons = () => {
   const { t } = useTranslation();

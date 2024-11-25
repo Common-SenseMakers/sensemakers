@@ -79,7 +79,11 @@ const hasOperation = (
 };
 
 /** return the updated operatios array after removing a quad */
-export const removeQuad = (quad: Quad, _operations: QuadOperation[]) => {
+export const removeQuad = (
+  baseStore: Store,
+  quad: Quad,
+  _operations: QuadOperation[]
+) => {
   const addOperation: QuadOperation = { type: 'add', quad };
 
   if (hasOperation(_operations, addOperation)) {
@@ -89,32 +93,39 @@ export const removeQuad = (quad: Quad, _operations: QuadOperation[]) => {
       });
     _operations.splice(_operations.indexOf(addOperation), 1);
   } else {
-    if (DEBUG)
-      console.log('"remove" operation found on newSemantics', {
-        quad,
-      });
-    _operations.push({ type: 'remove', quad });
+    const operation: QuadOperation = { type: 'remove', quad };
+    if (baseStore.has(quad) && !hasOperation(_operations, operation)) {
+      if (DEBUG)
+        console.log('"remove" operation found on newSemantics', {
+          quad,
+        });
+      _operations.push();
+    }
   }
   /** force update */
   return [..._operations];
 };
 
 /** return the updated operations array after adding a quad */
-export const addQuad = (quad: Quad, _operations: QuadOperation[]) => {
+export const addQuad = (
+  baseStore: Store,
+  quad: Quad,
+  _operations: QuadOperation[]
+) => {
   const operation: QuadOperation = { type: 'add', quad };
+  const removeOperation: QuadOperation = { type: 'remove', quad };
 
-  if (!hasOperation(_operations, operation)) {
-    const removeOperation: QuadOperation = { type: 'remove', quad };
-
-    /** if there was a remove operation remove that one */
-    if (hasOperation(_operations, removeOperation)) {
-      if (DEBUG)
-        console.log(
-          'operation "add" applied by removing a "remove" operation',
-          removeOperation
-        );
-      _operations.splice(_operations.indexOf(removeOperation), 1);
-    } else {
+  /** if there was a remove operation remove that one */
+  if (hasOperation(_operations, removeOperation)) {
+    if (DEBUG)
+      console.log(
+        'operation "add" applied by removing a "remove" operation',
+        removeOperation
+      );
+    _operations.splice(_operations.indexOf(removeOperation), 1);
+  } else {
+    // Otherwise, if the base store not have the quad and there is no operation to add it, add it
+    if (!baseStore.has(quad) && !hasOperation(_operations, operation)) {
       if (DEBUG)
         console.log('"add" operation found on newSemantics', {
           quad,
