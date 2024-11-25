@@ -1,7 +1,5 @@
 import { Request } from 'firebase-functions/v2/tasks';
 
-const DEBUG = false;
-
 import { PLATFORM } from '../../@shared/types/types.platforms';
 import { getProfileId } from '../../@shared/utils/profiles.utils';
 import { logger } from '../../instances/logger';
@@ -13,20 +11,24 @@ import {
 } from '../../platforms/platforms.tasks';
 import { enqueueTask } from '../../tasksUtils/tasks.support';
 
+const DEBUG = false;
+
 export const AUTOFETCH_POSTS_TASK = 'autofetchPosts';
 
 const DEBUG_PREFIX = 'AUTOFETCH';
 
 export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
-  if (DEBUG) logger.debug(`triggerAutofetchPostsForNonUsers`, undefined, DEBUG_PREFIX);
+  if (DEBUG)
+    logger.debug(`triggerAutofetchPostsForNonUsers`, undefined, DEBUG_PREFIX);
   const { users } = services;
 
   const profiles = await users.profiles.getAll();
-  if (DEBUG) logger.debug(
-    `number of profiles: ${profiles.length}`,
-    undefined,
-    DEBUG_PREFIX
-  );
+  if (DEBUG)
+    logger.debug(
+      `number of profiles: ${profiles.length}`,
+      undefined,
+      DEBUG_PREFIX
+    );
 
   for (const profile of profiles) {
     // Skip profiles that belong to registered users
@@ -48,11 +50,12 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
         taskName = FETCH_BLUESKY_ACCOUNT_TASK;
         break;
       default:
-        if (DEBUG) logger.warn(
-          `Unsupported platform for autofetch: ${profile.platformId}`,
-          undefined,
-          DEBUG_PREFIX
-        );
+        if (DEBUG)
+          logger.warn(
+            `Unsupported platform for autofetch: ${profile.platformId}`,
+            undefined,
+            DEBUG_PREFIX
+          );
         continue;
     }
 
@@ -63,11 +66,12 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
       latest: true,
     };
 
-    if (DEBUG) logger.debug(
-      `Enqueueing fetch task for profile ${profileId}`,
-      { taskName, taskData },
-      DEBUG_PREFIX
-    );
+    if (DEBUG)
+      logger.debug(
+        `Enqueueing fetch task for profile ${profileId}`,
+        { taskName, taskData },
+        DEBUG_PREFIX
+      );
     await enqueueTask(taskName, taskData);
   }
 };
@@ -78,15 +82,21 @@ export const triggerAutofetchPosts = async (services: Services) => {
 
   const usersIds = await users.repo.getAll();
 
-  if (DEBUG) logger.debug(`number of users: ${usersIds.length}`, undefined, DEBUG_PREFIX);
+  if (DEBUG)
+    logger.debug(
+      `number of users: ${usersIds.length}`,
+      undefined,
+      DEBUG_PREFIX
+    );
 
   await Promise.all(
     usersIds.map((userId) => {
-      if (DEBUG) logger.debug(
-        `enqueing of users: ${usersIds.length}`,
-        undefined,
-        DEBUG_PREFIX
-      );
+      if (DEBUG)
+        logger.debug(
+          `enqueing of users: ${usersIds.length}`,
+          undefined,
+          DEBUG_PREFIX
+        );
       return (enqueueTask as any)(AUTOFETCH_POSTS_TASK, { userId }, services);
     })
   );
