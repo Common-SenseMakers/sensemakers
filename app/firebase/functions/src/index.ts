@@ -104,7 +104,11 @@ exports.accountFetch = onSchedule(
     schedule: AUTOFETCH_PERIOD,
     secrets,
   },
-  () => triggerAutofetchPosts(createServices(firestore, getConfig()))
+  async () => {
+    const services = createServices(firestore, getConfig());
+    await triggerAutofetchPosts(services);
+    await triggerAutofetchPostsForNonUsers(services);
+  }
 );
 
 /** tasks */
