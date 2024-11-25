@@ -15,8 +15,9 @@ import { PlatformProfile } from '../shared/types/types.profiles';
 import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { OverlayContext } from './OverlayContext';
+import { usePublicFeed } from './PublicFeedContext';
 
-const DEBUG = true;
+const DEBUG = false;
 
 /** extract the postId from the route and pass it to a PostContext */
 export const RefOverlay = (props: { refUrl: string }) => {
@@ -27,6 +28,9 @@ export const RefOverlay = (props: { refUrl: string }) => {
   const [accountProfileId, setAccountProfileId] = useState<string | undefined>(
     undefined
   );
+
+  const publicFeedContext = usePublicFeed();
+  const isPublicFeed = publicFeedContext && publicFeedContext.isPublicFeed;
 
   useEffect(() => {
     Object.entries(connectedUser?.profiles || {}).forEach(([key, value]) => {
@@ -106,7 +110,7 @@ export const RefOverlay = (props: { refUrl: string }) => {
         </Box>
         <PostsFetcherComponent
           showHeader={false}
-          isPublicFeed={true}
+          isPublicFeed={isPublicFeed}
           feed={feed}
           pageTitle={'Ref'}></PostsFetcherComponent>
       </Box>

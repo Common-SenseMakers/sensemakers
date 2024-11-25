@@ -8,6 +8,7 @@ import { PATTERN_ID, PostClickTarget } from '../semantics/patterns/patterns';
 import { AppPostFull } from '../shared/types/types.posts';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { PlatformPostAnchor } from './PlatformPostAnchor';
+import { PublishButtons } from './PostPublishButtons';
 import { PostTextStatic } from './PostTextStatic';
 import { getPostDetails } from './platform-specific.details';
 import { usePost } from './post.context/PostContext';
@@ -115,6 +116,7 @@ export const PostCard = (props: {
   };
 
   const postText = concatenateThread(post.generic);
+  const showPublish = !props.isPublicFeed;
 
   const handleInternalClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).tagName === 'A') {
@@ -127,69 +129,73 @@ export const PostCard = (props: {
   const header = <PostCardHeader post={post}></PostCardHeader>;
 
   return (
-    <Box
-      pad={{ top: '16px', horizontal: '12px', bottom: '24px' }}
-      style={{
-        backgroundColor: shade ? constants.colors.shade : 'white',
-        borderBottom: '1px solid var(--Neutral-300, #D1D5DB)',
-        borderRight: '1px solid var(--Neutral-300, #D1D5DB)',
-        borderLeft: '1px solid var(--Neutral-300, #D1D5DB)',
-        borderTop: 'none',
-      }}>
-      <Box
-        style={{ cursor: 'pointer', position: 'relative' }}
-        onClick={handleClick}>
-        <Box
-          id={POST_AUTHOR_ID}
-          direction="row"
-          justify="between"
-          margin={{ bottom: '16px' }}>
-          {header}
+    <>
+      {showPublish && (
+        <Box direction="row" justify="between" margin={{ bottom: '16px' }}>
+          <PublishButtons></PublishButtons>
         </Box>
-
-        {!hideSemantics && (
-          <Box id={KEYWORDS_SEMANTICS_ID}>
-            <SemanticsEditor
-              include={[PATTERN_ID.KEYWORDS]}
-              patternProps={{
-                isLoading:
-                  updated.statusesMerged.isParsing !== undefined
-                    ? updated.statusesMerged.isParsing
-                    : false,
-                editable: false,
-                size: 'compact',
-                semantics: post?.semantics,
-                originalParsed: post?.originalParsed,
-                structuredSemantics: post?.structuredSemantics,
-              }}></SemanticsEditor>
+      )}
+      <Box
+        pad={{ top: '16px', horizontal: '12px', bottom: '24px' }}
+        style={{
+          backgroundColor: shade ? constants.colors.shade : 'white',
+          borderBottom: '1px solid var(--Neutral-300, #D1D5DB)',
+          borderRight: '1px solid var(--Neutral-300, #D1D5DB)',
+          borderLeft: '1px solid var(--Neutral-300, #D1D5DB)',
+          borderTop: 'none',
+        }}>
+        <Box
+          style={{ cursor: 'pointer', position: 'relative' }}
+          onClick={handleClick}>
+          <Box
+            id={POST_AUTHOR_ID}
+            direction="row"
+            justify="between"
+            margin={{ bottom: '16px' }}>
+            {header}
           </Box>
-        )}
-
-        <PostTextStatic
-          onClick={handleInternalClick}
-          truncate
-          shade={shade}
-          text={postText}></PostTextStatic>
-
-        {!hideSemantics && (
-          <Box margin={{ top: '24px' }} id={REFS_SEMANTICS_ID}>
-            <SemanticsEditor
-              include={[PATTERN_ID.REF_LABELS]}
-              patternProps={{
-                isLoading:
-                  updated.statusesMerged.isParsing !== undefined
-                    ? updated.statusesMerged.isParsing
-                    : false,
-                size: 'compact',
-                editable: false,
-                semantics: post?.semantics,
-                originalParsed: post?.originalParsed,
-                structuredSemantics: post?.structuredSemantics,
-                post,
-              }}></SemanticsEditor>
-          </Box>
-        )}
+          {!hideSemantics && (
+            <Box id={KEYWORDS_SEMANTICS_ID}>
+              <SemanticsEditor
+                include={[PATTERN_ID.KEYWORDS]}
+                patternProps={{
+                  isLoading:
+                    updated.statusesMerged.isParsing !== undefined
+                      ? updated.statusesMerged.isParsing
+                      : false,
+                  editable: false,
+                  size: 'compact',
+                  semantics: post?.semantics,
+                  originalParsed: post?.originalParsed,
+                  structuredSemantics: post?.structuredSemantics,
+                }}></SemanticsEditor>
+            </Box>
+          )}
+          <PostTextStatic
+            onClick={handleInternalClick}
+            truncate
+            shade={shade}
+            text={postText}></PostTextStatic>
+          {!hideSemantics && (
+            <Box margin={{ top: '24px' }} id={REFS_SEMANTICS_ID}>
+              <SemanticsEditor
+                include={[PATTERN_ID.REF_LABELS]}
+                patternProps={{
+                  isLoading:
+                    updated.statusesMerged.isParsing !== undefined
+                      ? updated.statusesMerged.isParsing
+                      : false,
+                  size: 'compact',
+                  editable: false,
+                  semantics: post?.semantics,
+                  originalParsed: post?.originalParsed,
+                  structuredSemantics: post?.structuredSemantics,
+                  post,
+                }}></SemanticsEditor>
+            </Box>
+          )}
+        </Box>
       </Box>
-    </Box>
+    </>
   );
 };

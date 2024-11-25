@@ -1,4 +1,4 @@
-import { DataFactory } from 'n3';
+import { Store } from 'n3';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useAppFetch } from '../../api/app.fetch';
@@ -9,7 +9,7 @@ import {
   PostUpdate,
   PostUpdatePayload,
 } from '../../shared/types/types.posts';
-import { getNode } from '../../shared/utils/n3.utils';
+import { parseRDF } from '../../shared/utils/n3.utils';
 import { useUserPosts } from '../../user-home/UserPostsContext';
 import { ConnectedUser } from '../../user-login/contexts/AccountContext';
 import { AppPostStatus, getPostStatuses } from '../posts.helper';
@@ -24,13 +24,12 @@ export interface PostUpdateContext {
   enabledEdit: boolean; // only true if editing after publishing
   postEdited: AppPostFull | undefined;
   postMerged?: AppPostFull;
+  storeMerged?: Store;
   statusesMerged: AppPostStatus;
   setEnabledEdit: (enabled: boolean) => void;
   isUpdating: boolean;
   setIsUpdating: (updating: boolean) => void;
   updateSemantics: (newSemantics: string) => void;
-  addTriple: (triple: string[]) => void;
-  removeTriple: (triple: string[]) => void;
   updatePost: (update: PostUpdate) => void;
   readyToNanopublish: boolean;
   inPrePublish: boolean;
@@ -54,12 +53,9 @@ export const usePostUpdate = (
   );
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const {
-    mergedSemantics,
-    updateSemantics: updateSemanticsLocal,
-    addQuad,
-    removeQuad,
-  } = usePostMergeDeltas(fetched);
+  const { mergedSemantics, updateSemantics: updateSemanticsLocal } =
+    usePostMergeDeltas(fetched);
+  const [storeMerged, setStoreMerged] = useState<Store | undefined>();
 
   const editable =
     connectedUser !== undefined &&
@@ -134,32 +130,6 @@ export const usePostUpdate = (
     }).catch(console.error);
   };
 
-  const addTriple = (triple: string[]) => {
-    const [subject, predicate, object, defaultGraph] = triple;
-
-    addQuad(
-      DataFactory.quad(
-        DataFactory.namedNode(subject),
-        DataFactory.namedNode(predicate),
-        getNode(object),
-        DataFactory.namedNode(defaultGraph) || DataFactory.defaultGraph()
-      )
-    );
-  };
-
-  const removeTriple = (triple: string[]) => {
-    const [subject, predicate, object, defaultGraph] = triple;
-
-    removeQuad(
-      DataFactory.quad(
-        DataFactory.namedNode(subject),
-        DataFactory.namedNode(predicate),
-        getNode(object),
-        DataFactory.namedNode(defaultGraph) || DataFactory.defaultGraph()
-      )
-    );
-  };
-
   /**
    * combine edited and fetched posts to get the current local version of a post
    * semantics are merged independently in the usePostMergeDeltas hook
@@ -184,6 +154,16 @@ export const usePostUpdate = (
     return undefined;
   }, [fetched.post, postInit, postEdited, fetched.isLoading, mergedSemantics]);
 
+  useEffect(() => {
+    if (mergedSemantics) {
+      parseRDF(mergedSemantics)
+        .then((store) => {
+          setStoreMerged(store);
+        })
+        .catch(console.error);
+    }
+  }, [mergedSemantics]);
+
   const statusesMerged = useMemo(() => {
     return getPostStatuses(postMerged);
   }, [postMerged]);
@@ -195,14 +175,13 @@ export const usePostUpdate = (
     enabledEdit,
     postEdited,
     postMerged,
+    storeMerged,
     statusesMerged,
     setEnabledEdit,
     isUpdating,
     setIsUpdating,
     updateSemantics,
     updatePost: optimisticUpdate,
-    addTriple,
-    removeTriple,
     readyToNanopublish: false,
     inPrePublish,
   };

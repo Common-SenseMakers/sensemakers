@@ -9,10 +9,13 @@ import {
 import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
 import { AppHeading } from '../ui-components';
 import { OverlayContext } from './OverlayContext';
+import { usePublicFeed } from './PublicFeedContext';
 
 /** extract the postId from the route and pass it to a PostContext */
 export const KeywordOverlay = (props: { keyword: string }) => {
   const { keyword } = props;
+  const publicFeedContext = usePublicFeed();
+  const isPublicFeed = publicFeedContext && publicFeedContext.isPublicFeed;
 
   const feedConfig = useMemo((): FetcherConfig => {
     return {
@@ -41,7 +44,7 @@ export const KeywordOverlay = (props: { keyword: string }) => {
         </Box>
         <PostsFetcherComponent
           showHeader={false}
-          isPublicFeed={true}
+          isPublicFeed={isPublicFeed}
           feed={feed}></PostsFetcherComponent>
       </Box>
     </OverlayContext>

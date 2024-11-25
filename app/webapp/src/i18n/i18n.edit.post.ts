@@ -10,7 +10,7 @@ export enum PostEditKeys {
 export const editValues: Record<PostEditKeys, string> = {
   [PostEditKeys.edit]: 'Edit',
   [PostEditKeys.cancel]: 'Cancel',
-  [PostEditKeys.publish]: 'Publish',
+  [PostEditKeys.publish]: 'Share to Hyperfeeds',
   [PostEditKeys.addKeyword]: 'Add Keyword',
   [PostEditKeys.republishPost]: 'Share to Hyperfeeds',
   [PostEditKeys.unpublishPost]: 'Share to Hyperfeeds',

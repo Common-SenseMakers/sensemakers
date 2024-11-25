@@ -8,6 +8,7 @@ import { MultiTabFeeds } from '../feed/MultiTabFeeds';
 import { FeedTabConfig, feedTabs } from '../feed/feed.config';
 import { OverlayValue } from '../overlays/Overlay';
 import { OverlayContext, OverlayQueryParams } from '../overlays/OverlayContext';
+import { PublicFeedContext } from '../overlays/PublicFeedContext';
 import {
   eventToOverlay,
   hasSearchParam,
@@ -19,7 +20,7 @@ import {
 } from '../posts.fetcher/posts.fetcher.hook';
 import { PostClickEvent } from '../semantics/patterns/patterns';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const locationToFeedIx = (location: Location) => {
   if (DEBUG) console.log(location);
@@ -207,16 +208,18 @@ export const PublicFeedPage = () => {
       fixed
       content={
         <Box style={{ position: 'relative', paddingTop: '16px' }}>
-          {overlayInit !== undefined && (
-            <OverlayContext
-              init={overlayInit}
-              onOverlayNav={(overlay) => onOverlayNav(overlay)}>
-              <MultiTabFeeds
-                feeds={feeds}
-                tabs={feedTabs}
-                feedIxInit={ixInit}></MultiTabFeeds>
-            </OverlayContext>
-          )}
+          <PublicFeedContext isPublicFeed>
+            {overlayInit !== undefined && (
+              <OverlayContext
+                init={overlayInit}
+                onOverlayNav={(overlay) => onOverlayNav(overlay)}>
+                <MultiTabFeeds
+                  feeds={feeds}
+                  tabs={feedTabs}
+                  feedIxInit={ixInit}></MultiTabFeeds>
+              </OverlayContext>
+            )}
+          </PublicFeedContext>
         </Box>
       }
       nav={<GlobalNav></GlobalNav>}

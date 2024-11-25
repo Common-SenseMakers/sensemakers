@@ -1,41 +1,108 @@
 import { Box } from 'grommet';
+import { DataFactory } from 'n3';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppCheckBoxMessage } from '../app/icons/AppCheckBoxMessage';
 import { PostEditKeys } from '../i18n/i18n.edit.post';
 import {
+  cloneStore,
+  getNode,
+  tripleToQuad,
+  writeRDF,
+} from '../shared/utils/n3.utils';
+import {
   HAS_TOPIC_URI,
+  NOT_SCIENCE_TOPIC_URI,
   SCIENCE_TOPIC_URI,
   THIS_POST_NAME_URI,
 } from '../shared/utils/semantics.helper';
 import { usePost } from './post.context/PostContext';
 
+const DEBUG = true;
+
 export const PublishButtons = () => {
   const { t } = useTranslation();
   const { updated } = usePost();
 
-  const checkboxChanged = (value: boolean) => {
-    if (value) {
-      updated.addTriple([THIS_POST_NAME_URI, HAS_TOPIC_URI, SCIENCE_TOPIC_URI]);
-    } else {
-      updated.removeTriple([
-        THIS_POST_NAME_URI,
-        HAS_TOPIC_URI,
-        SCIENCE_TOPIC_URI,
-      ]);
+  const isScience = useMemo(() => {
+    if (!updated.storeMerged) {
+      return false;
     }
-  };
+    const [subject, predicate, object] = [
+      THIS_POST_NAME_URI,
+      HAS_TOPIC_URI,
+      SCIENCE_TOPIC_URI,
+    ];
+
+    const _isScience = updated.storeMerged.has(
+      DataFactory.quad(
+        DataFactory.namedNode(subject),
+        DataFactory.namedNode(predicate),
+        getNode(object),
+        DataFactory.defaultGraph()
+      )
+    );
+
+    if (DEBUG) console.log('PublishButtons - isScience', _isScience);
+
+    if (_isScience) return true;
+    return false;
+  }, [updated.storeMerged]);
+
+  const checkboxChanged = useCallback(
+    async (value: boolean) => {
+      if (!updated.storeMerged) {
+        throw new Error('Unexpected');
+      }
+
+      const newStore = cloneStore(updated.storeMerged);
+      if (value) {
+        newStore.removeQuad(
+          tripleToQuad([
+            THIS_POST_NAME_URI,
+            HAS_TOPIC_URI,
+            NOT_SCIENCE_TOPIC_URI,
+          ])
+        );
+        newStore.addQuad(
+          tripleToQuad([THIS_POST_NAME_URI, HAS_TOPIC_URI, SCIENCE_TOPIC_URI])
+        );
+      } else {
+        newStore.removeQuad(
+          tripleToQuad([THIS_POST_NAME_URI, HAS_TOPIC_URI, SCIENCE_TOPIC_URI])
+        );
+        newStore.addQuad(
+          tripleToQuad([
+            THIS_POST_NAME_URI,
+            HAS_TOPIC_URI,
+            NOT_SCIENCE_TOPIC_URI,
+          ])
+        );
+      }
+
+      const newSemantics = await writeRDF(newStore);
+      if (!newSemantics) throw new Error('Unexpected');
+      updated.updateSemantics(newSemantics);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [updated.storeMerged]
+  );
 
   return (
     <Box
+      style={{ backgroundColor: '#FFEEDB', width: '100%' }}
       direction="row"
-      justify="end"
+      justify="between"
       gap="16px"
       align="center"
-      pad={{ bottom: '12px' }}>
+      pad={{ vertical: '12px', horizontal: '12px' }}>
       <AppCheckBoxMessage
         message={t(PostEditKeys.publish)}
-        onCheckChange={(value) => checkboxChanged(value)}></AppCheckBoxMessage>
+        checked={isScience}
+        onCheckChange={(value) => {
+          checkboxChanged(value).catch((e) => console.error(e));
+        }}></AppCheckBoxMessage>
     </Box>
   );
 };

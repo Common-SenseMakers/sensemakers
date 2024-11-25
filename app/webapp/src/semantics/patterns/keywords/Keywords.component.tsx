@@ -16,7 +16,7 @@ import { PatternProps, PostClickTarget } from '../patterns';
 
 export const KeywordsComponent = (props: PatternProps) => {
   /** actual semantics */
-  const { store } = useSemanticsStore(props);
+  const { store } = useSemanticsStore(props.semantics, props.originalParsed);
 
   const overlay = useOverlay();
 
