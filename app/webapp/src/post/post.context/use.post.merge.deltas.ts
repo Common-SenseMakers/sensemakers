@@ -29,24 +29,22 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
 
   /** base post is initialized with the first fetched post */
   useEffect(() => {
-    if (!basePost && fetched.post) {
-      if (DEBUG)
-        console.log(`setting base post ${fetched.post.id}`, {
-          fetchedPost: fetched.post,
-        });
-      setBasePost(fetched.post);
-    }
-  }, [basePost, fetched.post]);
-
-  useEffect(() => {
     if (DEBUG)
       console.log(
         `starting merged semantics computation due to fetchedPost change ${fetched.post?.id || ''}`
       );
 
     setOperations([]);
-    setBasePost(fetched.post);
-    setMergedSemantics(fetched.post?.semantics);
+
+    if (fetched.post) {
+      setBasePost(fetched.post);
+      const baseSemantics = fetched.post?.semantics;
+      setMergedSemantics(baseSemantics);
+      const _baseStore = semanticStringToStore(baseSemantics);
+      setBaseStore(_baseStore);
+    } else {
+      setBaseStore(undefined);
+    }
   }, [fetched.post, fetched.postId]);
 
   /** the base store is the store derived from the base post */
@@ -55,14 +53,6 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
       setBaseStore(undefined);
       return;
     }
-
-    if (DEBUG)
-      console.log(`baseStore computed ${basePost.id}`, {
-        basePostSemantic: basePost.semantics,
-      });
-
-    const _baseStore = semanticStringToStore(basePost.semantics);
-    setBaseStore(_baseStore);
   }, [basePost]);
 
   /** keeps merged semantics derived from the basePost and operations */
