@@ -200,7 +200,7 @@ export class PostsManager {
       );
 
       if (fetchedPosts.credentials && userId) {
-        this.users.updateAccountCredentials(
+        await this.users.updateAccountCredentials(
           userId,
           platformId,
           user_id,
