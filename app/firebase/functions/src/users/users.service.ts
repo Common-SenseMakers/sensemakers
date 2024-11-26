@@ -27,6 +27,7 @@ import {
 import { splitProfileId } from '../@shared/utils/profiles.utils';
 import { USER_INIT_SETTINGS } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
+import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
 import {
@@ -316,7 +317,7 @@ export class UsersService {
     }
 
     /** update the credentials */
-    account.credentials = credentials;
+    account.credentials = removeUndefined(credentials);
 
     if (DEBUG)
       logger.debug(
@@ -325,12 +326,7 @@ export class UsersService {
         DEBUG_PREFIX
       );
 
-    await this.repo.setAccountDetails(
-      userId,
-      PLATFORM.Twitter,
-      account,
-      manager
-    );
+    await this.repo.setAccountDetails(userId, platformId, account, manager);
   }
 
   protected generateOurAccessToken(data: TokenData) {
