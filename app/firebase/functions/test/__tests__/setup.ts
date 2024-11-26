@@ -2,6 +2,8 @@ import { initializeApp } from 'firebase-admin/app';
 import { Context } from 'mocha';
 import * as sinon from 'sinon';
 
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
+import { AccountProfile } from '../../src/@shared/types/types.profiles';
 import { AppUser } from '../../src/@shared/types/types.user';
 import { envRuntime } from '../../src/config/typedenv.runtime';
 import * as tasksSupport from '../../src/tasksUtils/tasks.support';
@@ -22,11 +24,13 @@ export const USE_REAL_PARSER = process.env.USE_REAL_PARSER === 'true';
 export const USE_REAL_LINKS = process.env.USE_REAL_LINKS === 'true';
 export const EMAIL_SENDER_FROM = process.env.EMAIL_SENDER_FROM as string;
 export const TEST_EMAIL = process.env.TEST_EMAIL as string;
+export const INCLUDE_TEST_PLATFORMS_STR = process.env
+  .INCLUDE_TEST_PLATFORMS_STR as string;
 
 export type InjectableContext = Readonly<{
   // properties injected using the Root Mocha Hooks
 }>;
-export let testUsers: AppUser[] = [];
+export let testUsers: { users: AppUser[]; profiles: AccountProfile[] } = [];
 
 export const TEST_THREADS: string[][] = process.env.TEST_THREADS
   ? JSON.parse(process.env.TEST_THREADS as string)
@@ -74,6 +78,11 @@ export const mochaHooks = (): Mocha.RootHookObject => {
           enqueueTaskMockOnTests(name, params, globalTestServices)
         );
 
+      console.log(INCLUDE_TEST_PLATFORMS_STR);
+      const includePlatforms = INCLUDE_TEST_PLATFORMS_STR
+        ? JSON.parse(INCLUDE_TEST_PLATFORMS_STR)
+        : [PLATFORM.Twitter, PLATFORM.Mastodon, PLATFORM.Bluesky];
+
       /** prepare/authenticate users  */
       await globalTestServices.db.run(async (manager) => {
         await Promise.all(
@@ -81,6 +90,7 @@ export const mochaHooks = (): Mocha.RootHookObject => {
             const user = await authenticateTestUser(
               accountCredentials,
               globalTestServices,
+              includePlatforms,
               manager
             );
             testUsers.push(user);

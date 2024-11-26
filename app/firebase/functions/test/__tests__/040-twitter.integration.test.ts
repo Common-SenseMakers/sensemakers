@@ -18,10 +18,13 @@ describe.skip('twitter integration', () => {
   });
 
   it(`authenticates ${NUM_TWITTER_USERS} twitter users with the oauth 2.0 flow for reading access`, async () => {
+    const includePlatforms = [PLATFORM.Twitter];
+
     const appUsers = await services.db.run((manager) =>
       authenticateTestUsers(
         testCredentials.slice(0, NUM_TWITTER_USERS),
         services,
+        includePlatforms,
         manager
       )
     );

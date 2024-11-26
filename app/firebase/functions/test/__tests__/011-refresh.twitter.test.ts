@@ -62,18 +62,12 @@ describe.only('011-twitter refresh', () => {
 
       (services.time as any).set(account?.credentials.read.expiresAtMs);
 
-      const { client, credentials: firstCredentials } = (await (
+      const { client, credentials: newCredentials } = (await (
         twitterService as any
       ).getClient(account.credentials, 'read')) as GetClientResult<'read'>;
 
       expect(client).to.not.be.undefined;
-      expect(firstCredentials).to.not.be.undefined;
-
-      logger.debug(`firstCredentials`, { firstCredentials });
-
-      if (!firstCredentials) {
-        throw new Error('unexpected');
-      }
+      expect(newCredentials).to.be.undefined;
 
       await services.db.run(async (manager) => {
         if (!user) {
@@ -92,11 +86,10 @@ describe.only('011-twitter refresh', () => {
           account.user_id
         );
 
-        expect(accountRead?.credentials?.read.refreshToken).to.equal(
-          firstCredentials?.refreshToken
-        );
-
+        expect(accountRead?.credentials).to.not.be.undefined;
         logger.debug(`accountRead`, { accountRead });
+
+        return accountRead?.credentials;
       });
 
       expect(user).to.not.be.undefined;

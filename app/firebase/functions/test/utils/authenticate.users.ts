@@ -2,6 +2,7 @@ import AtpAgent from '@atproto/api';
 
 import { BlueskyAccountDetails } from '../../src/@shared/types/types.bluesky';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
+import { AccountProfile } from '../../src/@shared/types/types.profiles';
 import { TwitterSignupContext } from '../../src/@shared/types/types.twitter';
 import {
   AppUser,
@@ -18,11 +19,12 @@ import { authenticateTwitterUser } from './authenticate.twitter';
 export const authenticateTestUsers = async (
   credentials: TestUserCredentials[],
   services: TestServices,
+  includePlatforms: PLATFORM[],
   manager: TransactionManager
 ) => {
   return Promise.all(
     credentials.map((credential) =>
-      authenticateTestUser(credential, services, manager)
+      authenticateTestUser(credential, services, includePlatforms, manager)
     )
   );
 };
@@ -30,21 +32,25 @@ export const authenticateTestUsers = async (
 export const authenticateTestUser = async (
   credentials: TestUserCredentials,
   services: TestServices,
-  manager: TransactionManager,
-  excludePlatforms: PLATFORM[] = []
-): Promise<AppUser> => {
+  includePlatforms: PLATFORM[],
+  manager: TransactionManager
+): Promise<{ user: AppUser; profiles: AccountProfile }> => {
   let user: AppUser | undefined;
+  let profiles: AccountProfile[] = [];
 
-  if (!excludePlatforms.includes(PLATFORM.Twitter)) {
-    user = await authenticateTwitterForUser(
+  if (includePlatforms.includes(PLATFORM.Twitter)) {
+    const { user: twitterUser, profile } = await authenticateTwitterForUser(
       credentials,
       services,
       manager,
       user
     );
+
+    user = twitterUser;
+    profiles.push(profile);
   }
 
-  if (!excludePlatforms.includes(PLATFORM.Mastodon)) {
+  if (includePlatforms.includes(PLATFORM.Mastodon)) {
     user = await authenticateMastodonForUser(
       credentials,
       services,
@@ -53,7 +59,7 @@ export const authenticateTestUser = async (
     );
   }
 
-  if (!excludePlatforms.includes(PLATFORM.Bluesky)) {
+  if (includePlatforms.includes(PLATFORM.Bluesky)) {
     user = await authenticateBlueskyForUser(
       credentials,
       services,
