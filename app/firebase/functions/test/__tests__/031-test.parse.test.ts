@@ -91,7 +91,7 @@ describe('031 test parse', () => {
         throw new Error('post undefined');
       }
 
-      const parsedPost = await postsManager.getPost(post.id, true);
+      const parsedPost = await postsManager.getPost({ postId: post.id }, true);
       expect(parsedPost).to.not.be.undefined;
       expect(parsedPost.parsingStatus).to.equal(AppPostParsingStatus.IDLE);
       expect(parsedPost.semantics).to.not.be.undefined;
@@ -147,7 +147,7 @@ describe('031 test parse', () => {
         throw new Error('post undefined');
       }
 
-      const parsedPost = await postsManager.getPost(post.id, true);
+      const parsedPost = await postsManager.getPost({ postId: post.id }, true);
       expect(parsedPost).to.not.be.undefined;
       expect(parsedPost.parsingStatus).to.equal(AppPostParsingStatus.IDLE);
       expect(parsedPost.semantics).to.not.be.undefined;
@@ -182,7 +182,7 @@ describe('031 test parse', () => {
         throw new Error('post undefined');
       }
 
-      const parsedPost = await postsManager.getPost(post.id, true);
+      const parsedPost = await postsManager.getPost({ postId: post.id }, true);
       expect(parsedPost).to.not.be.undefined;
       expect(parsedPost.parsingStatus).to.equal(AppPostParsingStatus.IDLE);
       expect(parsedPost.semantics).to.not.be.undefined;

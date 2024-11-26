@@ -2,7 +2,7 @@ import { Box } from 'grommet';
 import { useMemo } from 'react';
 
 import { ParserOntology, RefMeta } from '../../../shared/types/types.parser';
-import { RefLabel } from '../../../shared/types/types.posts';
+import { RefLabel } from '../../../shared/types/types.references';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { LoadingDiv } from '../../../ui-components/LoadingDiv';
 import { RefCard } from '../common/RefCard';
@@ -96,7 +96,7 @@ export const RefWithLabels = (props: {
           url={props.refUrl}
           title={refData.meta?.title}
           description={
-            props.showDescription ? refData.meta?.summary : undefined
+            props.showDescription ? refData.meta?.description : undefined
           }
           image={refData.meta?.thumbnail_url}
           refType={

@@ -3,7 +3,6 @@ import { logger } from 'firebase-functions/v1';
 
 import {
   ArrayIncludeQuery,
-  RefLabel,
   StructuredSemantics,
 } from '../@shared/types/types.posts';
 import {
@@ -13,9 +12,13 @@ import {
   PostUpdate,
   PostsQueryDefined,
 } from '../@shared/types/types.posts';
+import { RefLabel, RefPostData } from '../@shared/types/types.references';
+import { CollectionNames } from '../@shared/utils/collectionNames';
 import { DBInstance } from '../db/instance';
 import { BaseRepository, removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
+import { hashAndNormalizeUrl } from '../links/links.utils';
+import { doesQueryUseSubcollection } from '../posts/posts.helper';
 
 const DEBUG = false;
 const DEBUG_PREFIX = 'PostsRepository';
@@ -123,8 +126,21 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
     if (DEBUG) logger.debug('getMany', queryParams, DEBUG_PREFIX);
 
+    const { useLinksSubcollection } = doesQueryUseSubcollection(queryParams);
+
+    /** check if we can query the links subcollection rather than the entire posts */
+    const baseCollection = (() => {
+      if (useLinksSubcollection && queryParams.semantics?.refs) {
+        const linkId = hashAndNormalizeUrl(queryParams.semantics.refs[0]);
+        return this.db.collections.links
+          .doc(linkId)
+          .collection(CollectionNames.LinkPostsSubcollection);
+      }
+      return this.db.collections.posts;
+    })();
+
     let query = filterByEqual(
-      this.db.collections.posts,
+      baseCollection,
       authorUserKey,
       queryParams.userId
     );
@@ -133,11 +149,13 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
     query = filterByIn(query, originKey, queryParams.origins);
 
-    query = filterByArrayContainsAny(
-      query,
-      `${structuredSemanticsKey}.${refsKey}`,
-      queryParams.semantics?.refs
-    );
+    if (!useLinksSubcollection) {
+      query = filterByArrayContainsAny(
+        query,
+        `${structuredSemanticsKey}.${refsKey}`,
+        queryParams.semantics?.refs
+      );
+    }
 
     query = filterByArrayContainsAny(
       query,
@@ -145,17 +163,19 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       queryParams.semantics?.labels
     );
 
-    query = filterByArrayContainsAny(
-      query,
-      `${structuredSemanticsKey}.${keywordsKey}`,
-      queryParams.semantics?.keywords
-    );
+    if (!useLinksSubcollection) {
+      query = filterByArrayContainsAny(
+        query,
+        `${structuredSemanticsKey}.${keywordsKey}`,
+        queryParams.semantics?.keywords
+      );
 
-    query = filterByEqual(
-      query,
-      `${structuredSemanticsKey}.${topicKey}`,
-      queryParams.semantics?.topic
-    );
+      query = filterByEqual(
+        query,
+        `${structuredSemanticsKey}.${topicKey}`,
+        queryParams.semantics?.topic
+      );
+    }
 
     /** get the sinceCreatedAt and untilCreatedAt timestamps from the elements ids */
     const { sinceCreatedAt, untilCreatedAt } = await (async () => {
@@ -198,10 +218,23 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       .limit(queryParams.fetchParams.expectedAmount)
       .get();
 
-    let appPosts = posts.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as AppPost[];
+    let appPosts = (await (async () => {
+      if (useLinksSubcollection) {
+        const docRefs = posts.docs.map((doc) =>
+          this.db.collections.posts.doc(doc.id)
+        );
+        if (docRefs.length === 0) return [];
+        const docs = await this.db.firestore.getAll(...docRefs);
+        return docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+      }
+      return posts.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+    })()) as AppPost[];
 
     return appPosts.sort((a, b) => b.createdAtMs - a.createdAtMs);
   }
@@ -211,32 +244,37 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   ): Promise<Record<string, RefLabel[]>> {
     const refsStats: Record<string, RefLabel[]> = {};
 
-    const referencePosts = await this.getMany({
-      semantics: { refs: references },
-      fetchParams: { expectedAmount: 100 },
-    });
+    // Get all posts for each reference from their respective subcollections
+    const postsPromises = references.map(async (reference) => {
+      const linkId = hashAndNormalizeUrl(reference);
+      const linkPosts = await this.db.collections.links
+        .doc(linkId)
+        .collection(CollectionNames.LinkPostsSubcollection)
+        .get();
 
-    referencePosts.forEach((referencePost) => {
-      references.forEach((reference) => {
-        if (referencePost.structuredSemantics?.refsMeta) {
-          const refMeta = referencePost.structuredSemantics.refsMeta[reference];
-          const refLabels = refMeta?.labels?.map(
+      // Process each post's labels directly from the subcollection documents
+      linkPosts.docs.forEach((doc) => {
+        const refPost = doc.data() as RefPostData;
+        if (refPost?.structuredSemantics?.labels) {
+          const refLabels = refPost.structuredSemantics?.labels?.map(
             (label): RefLabel => ({
               label,
-              postId: referencePost.id,
-              authorProfileId: referencePost.authorProfileId,
-              platformPostUrl: referencePost.generic.thread[0].url,
+              postId: doc.id,
+              authorProfileId: refPost.authorProfileId,
+              platformPostUrl: refPost.platformPostUrl,
             })
           );
-          const updatedLabels = [
-            ...(refsStats[reference] || []),
-            ...(refLabels || []),
-          ];
-          refsStats[reference] = updatedLabels;
+          if (refLabels) {
+            refsStats[reference] = [
+              ...(refsStats[reference] || []),
+              ...refLabels,
+            ];
+          }
         }
       });
     });
 
+    await Promise.all(postsPromises);
     return refsStats;
   }
 

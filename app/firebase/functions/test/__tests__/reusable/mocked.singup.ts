@@ -46,7 +46,7 @@ export const handleTwitterSignupMock = async (
       if (!user) {
         throw new Error('user not created');
       }
-      return services.users.getUserWithProfiles(user.userId, manager);
+      return services.users.getLoggedUserWithProfiles(user.userId, manager);
     });
     expect(userRead).to.not.be.undefined;
 

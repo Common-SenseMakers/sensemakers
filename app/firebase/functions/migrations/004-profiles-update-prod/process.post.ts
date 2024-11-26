@@ -1,9 +1,10 @@
 import { logger } from 'firebase-functions';
 
 import { AppPost } from '../../src/@shared/types/types.posts';
-import { DEBUG } from '../../src/emailSender/email.sender.service';
 import { Services } from '../../src/instances/services';
 import { getProfileId } from '../../src/profiles/profiles.repository';
+
+const DEBUG = true;
 
 export const processPost = async (
   sourcePost: AppPost,
@@ -66,7 +67,7 @@ export const processPost = async (
 
       /** the mirror platformPosts */
       const mirrorIds = await Promise.all(
-        sourcePostFull.mirrors.map(async (mirror) => {
+        sourcePostFull.mirrors!.map(async (mirror) => {
           if (!mirror.posted) {
             return;
           }
@@ -122,25 +123,11 @@ export const processPost = async (
         );
 
       /** process semantics */
-      const structured =
-        await servicesTarget.postsManager.processing.processSemantics(
-          targetPostCreated.id,
-          managerTarget,
-          sourcePost.semantics
-        );
-
-      if (structured) {
-        if (DEBUG)
-          logger.debug(
-            `updating structured semantics ${targetPostCreated.id}`,
-            structured
-          );
-        await servicesTarget.postsManager.processing.posts.update(
-          targetPostCreated.id,
-          { ...structured },
-          managerTarget
-        );
-      }
+      await servicesTarget.postsManager.processing.processSemantics(
+        targetPostCreated.id,
+        managerTarget,
+        sourcePost.semantics
+      );
     });
   } catch (error) {
     console.error('Error processing post', sourcePost.id, error);

@@ -14,6 +14,7 @@ import {
   AppPostParsingStatus,
   StructuredSemantics,
 } from '../@shared/types/types.posts';
+import { RefPostData } from '../@shared/types/types.references';
 import { DefinedIfTrue } from '../@shared/types/types.user';
 import { mapStoreElements, parseRDF } from '../@shared/utils/n3.utils';
 import { getProfileId } from '../@shared/utils/profiles.utils';
@@ -23,10 +24,12 @@ import {
   HAS_TOPIC_URI,
   HAS_ZOTERO_REFERENCE_TYPE_URI,
   THIS_POST_NAME_URI,
+  THIS_POST_NAME_URI_PLACEHOLDER,
 } from '../@shared/utils/semantics.helper';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { LinksService } from '../links/links.service';
+import { normalizeUrl } from '../links/links.utils';
 import { PlatformsService } from '../platforms/platforms.service';
 import { TriplesRepository } from '../semantics/triples.repository';
 import { TimeService } from '../time/time.service';
@@ -140,23 +143,11 @@ export class PostsProcessing {
       originalParsed?.support?.refs_meta &&
       originalParsed?.support?.refs_meta[url];
 
-    const isPartial =
-      !refMetaOrg ||
-      !refMetaOrg.title ||
-      !refMetaOrg.summary ||
-      !refMetaOrg.url;
-
-    if (isPartial) {
-      const oembed = await this.linksService.getOEmbed(url, manager);
-      return {
-        ...oembed,
-        item_type: refMetaOrg?.item_type,
-      };
-    } else {
-      /** store/update refMeta */
-      this.linksService.setOEmbed(refMetaOrg, manager);
-      return refMetaOrg;
-    }
+    const oembed = await this.linksService.getOEmbed(url, manager, refMetaOrg);
+    return {
+      ...oembed,
+      item_type: refMetaOrg?.item_type,
+    };
   }
 
   async processSemantics(
@@ -164,7 +155,7 @@ export class PostsProcessing {
     manager: TransactionManager,
     semantics?: string,
     originalParsed?: ParsePostResult
-  ): Promise<StructuredSemantics | undefined> {
+  ): Promise<void> {
     /** always delete old triples */
     await this.triples.deleteOfPost(postId, manager);
 
@@ -207,7 +198,8 @@ export class PostsProcessing {
           const reference = q.object.value;
           const label = q.predicate.value;
           if (
-            subject === THIS_POST_NAME_URI &&
+            (subject === THIS_POST_NAME_URI ||
+              subject === THIS_POST_NAME_URI_PLACEHOLDER) &&
             label !== HAS_ZOTERO_REFERENCE_TYPE_URI &&
             label !== HAS_RDF_SYNTAX_TYPE_URI
           ) {
@@ -218,24 +210,44 @@ export class PostsProcessing {
       }
     });
 
-    /** update labels refsMeta */
-
+    /** get reference meta and store post in reference subcollections */
     await Promise.all(
       Array.from(Object.keys(refsLabels)).map(async (reference) => {
         const url = reference;
-        const refMeta = await this.getRefMeta(url, manager, originalParsed);
+        const refMeta = await this.getRefMeta(
+          url,
+          manager,
+          post.originalParsed
+        );
+        const refPostData: RefPostData = removeUndefined({
+          id: post.id,
+          authorProfileId: post.authorProfileId,
+          createdAtMs: post.createdAtMs,
+          structuredSemantics: { labels: refsLabels[url] },
+          platformPostUrl: post.generic.thread[0].url,
+        });
+        /** always delete all labels from a post for a reference */
+        await this.linksService.deleteRefPost(url, postId, manager);
 
-        refsMeta[url] = { ...refMeta, labels: refsLabels[url] || undefined };
+        await this.linksService.setRefPost(url, refPostData, manager);
+        const normalizedUrl = normalizeUrl(url);
+
+        refsMeta[normalizedUrl] = {
+          ...refMeta,
+          labels: refsLabels[url] || undefined,
+        };
       })
     );
 
-    return {
+    const structuredSemantics: StructuredSemantics = {
       labels: Array.from(labels),
       keywords: Array.from(keywords),
       topic,
       refsMeta,
       refs: Object.keys(refsMeta),
     };
+
+    await this.posts.update(postId, { structuredSemantics }, manager);
   }
 
   async createAppPost(

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 import { ParserOntology } from '../../../shared/types/types.parser';
-import { RefLabel } from '../../../shared/types/types.posts';
+import { RefLabel } from '../../../shared/types/types.references';
 import { LabelColors } from '../../../ui-components';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 

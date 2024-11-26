@@ -119,7 +119,7 @@ export const _03_fetchAfterPublish = async (
   expect(postRead.semantics).to.not.be.undefined;
   expect(postRead.originalParsed).to.not.be.undefined;
 
-  const tweetRead = postRead.mirrors.find(
+  const tweetRead = postRead.mirrors?.find(
     (m) => m.platformId === PLATFORM.Twitter
   );
 
