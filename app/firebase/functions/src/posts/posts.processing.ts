@@ -203,8 +203,12 @@ export class PostsProcessing {
             label !== HAS_ZOTERO_REFERENCE_TYPE_URI &&
             label !== HAS_RDF_SYNTAX_TYPE_URI
           ) {
+            const normalizedReference = normalizeUrl(reference);
             labels.add(label);
-            refsLabels[reference] = [...(refsLabels[reference] || []), label];
+            refsLabels[normalizedReference] = [
+              ...(refsLabels[normalizedReference] || []),
+              label,
+            ];
           }
         }
       }
@@ -243,7 +247,7 @@ export class PostsProcessing {
       labels: Array.from(labels),
       keywords: Array.from(keywords),
       topic,
-      refsMeta,
+      refsMeta: removeUndefined(refsMeta),
       refs: Object.keys(refsMeta),
     };
 
