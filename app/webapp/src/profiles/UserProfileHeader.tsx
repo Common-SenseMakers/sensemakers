@@ -22,7 +22,7 @@ export const UserProfileHeader = (props: {
     }
 
     let _profiles: AccountProfileRead[] = [];
-    ALL_IDENTITY_PLATFORMS.map((platform) => {
+    ALL_IDENTITY_PLATFORMS.forEach((platform) => {
       const accounts = user.profiles[platform];
       if (accounts) {
         _profiles = _profiles.concat(accounts);

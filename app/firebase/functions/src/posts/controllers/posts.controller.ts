@@ -23,7 +23,7 @@ import { canReadPost } from '../posts.access.control';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 import { postIdValidation, updatePostSchema } from './posts.schema';
 
-const DEBUG = true;
+const DEBUG = false;
 
 /**
  * get user posts from the DB (does not fetch for more)
@@ -63,7 +63,12 @@ export const getPostController: RequestHandler = async (request, response) => {
       request.body
     )) as GetPostPayload;
 
-    const post = await postsManager.getPost(payload, true);
+    const config = payload.config || {
+      addMirrors: true,
+      addAggregatedLabels: false,
+    };
+
+    const post = await postsManager.getPost(payload.postId, config, true);
 
     const canRead = canReadPost(post, userId);
 

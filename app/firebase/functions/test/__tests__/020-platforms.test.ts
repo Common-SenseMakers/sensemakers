@@ -8,10 +8,10 @@ import {
 } from '../../src/@shared/types/types.fetch';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { AppUser } from '../../src/@shared/types/types.user';
+import { parseMastodonGlobalUsername } from '../../src/@shared/utils/mastodon.utils';
 import { logger } from '../../src/instances/logger';
 import { BlueskyService } from '../../src/platforms/bluesky/bluesky.service';
 import { MastodonService } from '../../src/platforms/mastodon/mastodon.service';
-import { parseMastodonGlobalUsername } from '../../src/platforms/mastodon/mastodon.utils';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';

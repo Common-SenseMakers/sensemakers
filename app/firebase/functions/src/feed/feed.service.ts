@@ -1,5 +1,6 @@
 import {
   AppPostFull,
+  HydrateConfig,
   PostsQuery,
   PostsQueryDefined,
 } from '../@shared/types/types.posts';
@@ -21,10 +22,20 @@ export class FeedService {
       ...params,
     };
 
-    const includeAggregateLabels =
-      queryParams.includeAggregateLabels !== undefined
-        ? queryParams.includeAggregateLabels
+    const addAggregatedLabels =
+      queryParams.hydrateConfig?.addAggregatedLabels !== undefined
+        ? queryParams.hydrateConfig.addAggregatedLabels
         : false;
+
+    const addMirrors =
+      queryParams.hydrateConfig?.addMirrors !== undefined
+        ? queryParams.hydrateConfig.addMirrors
+        : true;
+
+    const hydrateConfig: HydrateConfig = {
+      addAggregatedLabels,
+      addMirrors,
+    };
 
     const posts = await this.postsManager.processing.posts.getMany(queryParams);
 
@@ -33,8 +44,7 @@ export class FeedService {
         this.db.run((manager) =>
           this.postsManager.processing.hydratePostFull(
             post,
-            true,
-            includeAggregateLabels,
+            hydrateConfig,
             manager
           )
         )

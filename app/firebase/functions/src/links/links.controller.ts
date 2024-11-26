@@ -41,7 +41,11 @@ export const getRefMetaController: RequestHandler = async (
     const postsFull = await Promise.all(
       posts.map((post) =>
         db.run((manager) =>
-          postsManager.processing.hydratePostFull(post, true, true, manager)
+          postsManager.processing.hydratePostFull(
+            post,
+            { addAggregatedLabels: true, addMirrors: true },
+            manager
+          )
         )
       )
     );

@@ -12,6 +12,7 @@ import {
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
+  HydrateConfig,
   StructuredSemantics,
 } from '../@shared/types/types.posts';
 import { DefinedIfTrue } from '../@shared/types/types.user';
@@ -261,13 +262,12 @@ export class PostsProcessing {
   /** fill post to Full */
   async hydratePostFull(
     post: AppPost,
-    addMirrors: boolean,
-    addAggregatedLabels: boolean,
+    config: HydrateConfig,
     manager: TransactionManager
   ): Promise<AppPostFull> {
     const postFull: AppPostFull = post;
 
-    if (addMirrors) {
+    if (config.addMirrors) {
       const mirrors = await Promise.all(
         post.mirrorsIds.map((mirrorId) =>
           this.platformPosts.get(mirrorId, manager)
@@ -278,7 +278,7 @@ export class PostsProcessing {
       ) as PlatformPost[];
     }
 
-    if (addAggregatedLabels && post.structuredSemantics?.refs) {
+    if (config.addAggregatedLabels && post.structuredSemantics?.refs) {
       const refLabels = await this.posts.getAggregatedRefLabels(
         post.structuredSemantics.refs
       );
@@ -291,6 +291,7 @@ export class PostsProcessing {
   /** get AppPostFull */
   async getPostFull<T extends boolean, R = AppPostFull>(
     postId: string,
+    config: HydrateConfig,
     manager: TransactionManager,
     shouldThrow?: T
   ): Promise<DefinedIfTrue<T, R>> {
@@ -304,7 +305,7 @@ export class PostsProcessing {
       return undefined as DefinedIfTrue<T, R>;
     }
 
-    const postFull = await this.hydratePostFull(post, true, true, manager);
+    const postFull = await this.hydratePostFull(post, config, manager);
 
     return postFull as unknown as DefinedIfTrue<T, R>;
   }
