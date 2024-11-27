@@ -87,20 +87,39 @@ export const mochaHooks = (): Mocha.RootHookObject => {
         ? JSON.parse(INCLUDE_TEST_PLATFORMS_STR)
         : [PLATFORM.Twitter, PLATFORM.Mastodon, PLATFORM.Bluesky];
 
-      /** prepare/authenticate users  */
-      await globalTestServices.db.run(async (manager) => {
-        await Promise.all(
+      /** prepare/authenticate users and store them on a global variable
+       * the DB is reset at every test
+       */
+      const users = await globalTestServices.db.run(async (manager) => {
+        return Promise.all(
           testCredentials.map(async (accountCredentials) => {
-            const userAndProfiles = await authenticateTestUser(
+            return authenticateTestUser(
               accountCredentials,
               globalTestServices,
               includePlatforms,
               manager
             );
-            testUsers.push(userAndProfiles);
           })
         );
       });
+
+      /** Profiles are created in the DB but need to be moved to the global test variable */
+      await Promise.all(
+        users.map(async (user) => {
+          const profiles = await globalTestServices.db.run(async (manager) => {
+            return globalTestServices.users.profiles.getOfUser(
+              user.userId,
+              manager
+            );
+          });
+
+          const userAndProfiles: UserAndProfiles = {
+            user,
+            profiles,
+          };
+          testUsers.push(userAndProfiles);
+        })
+      );
 
       testUsers.sort((a, b) => a.user.userId.localeCompare(b.user.userId));
 

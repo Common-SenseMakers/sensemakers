@@ -6,11 +6,11 @@ import {
   TwitterSigninCredentials,
   TwitterSignupData,
 } from '../../src/@shared/types/types.twitter';
+import { AppUser } from '../../src/@shared/types/types.user';
 import { TransactionManager } from '../../src/db/transaction.manager';
 import { logger } from '../../src/instances/logger';
 import { Services } from '../../src/instances/services';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
-import { UserAndProfiles } from '../__tests__/setup';
 import { runAuthenticateTwitterUser } from './authenticate.twitter.puppetter';
 
 const CALLBACK_URL = 'https://sense-nets.xyz/';
@@ -26,7 +26,7 @@ export const authenticateTwitterUser = async (
   services: Services,
   manager: TransactionManager,
   _userId?: string
-): Promise<UserAndProfiles> => {
+): Promise<AppUser> => {
   if (DEBUG) logger.debug('authenticateTwitterUser', { testAccount });
 
   const twitterService = services.platforms.get<TwitterService>(
@@ -71,10 +71,6 @@ export const authenticateTwitterUser = async (
 
   /** read the just created user (will fail if not found) */
   const user = await services.users.repo.getUser(result.userId, manager, true);
-  const profiles = await services.users.profiles.getOfUser(
-    result.userId,
-    manager
-  );
 
-  return { user, profiles };
+  return user;
 };

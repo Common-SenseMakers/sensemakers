@@ -4,7 +4,6 @@ import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { AppUser } from '../../src/@shared/types/types.user';
 import { logger } from '../../src/instances/logger';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
-import { GetClientResult } from '../../src/platforms/twitter/twitter.service.client';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
 import { createUsers } from '../utils/users.utils';
@@ -33,77 +32,18 @@ describe.only('011-twitter refresh', () => {
     );
   });
 
-  describe('refresh token manually', () => {
-    it('refresh token', async () => {
-      if (!USE_REAL_TWITTER) {
-        logger.debug(
-          'skipping refresh token test. Enabled only with real twitter'
-        );
-        return;
-      }
-      const twitterService = (services.platforms as any).platforms.get(
-        PLATFORM.Twitter
-      ) as TwitterService;
-
-      const account = await services.db.run(async (manager) => {
-        if (!user) {
-          throw new Error('unexpected');
-        }
-
-        const account = UsersHelper.getAccount(
-          user,
-          PLATFORM.Twitter,
-          undefined,
-          true
-        );
-
-        return account;
-      });
-
-      (services.time as any).set(account?.credentials.read.expiresAtMs);
-
-      const { client, credentials: newCredentials } = (await (
-        twitterService as any
-      ).getClient(account.credentials, 'read')) as GetClientResult<'read'>;
-
-      expect(client).to.not.be.undefined;
-      expect(newCredentials).to.be.undefined;
-
-      await services.db.run(async (manager) => {
-        if (!user) {
-          throw new Error('unexpected');
-        }
-
-        const userRead = await services.users.repo.getUser(
-          user.userId,
-          manager,
-          true
-        );
-
-        const accountRead = UsersHelper.getAccount(
-          userRead,
-          PLATFORM.Twitter,
-          account.user_id
-        );
-
-        expect(accountRead?.credentials).to.not.be.undefined;
-        logger.debug(`accountRead`, { accountRead });
-
-        return accountRead?.credentials;
-      });
-
-      expect(user).to.not.be.undefined;
-    });
-  });
-
   describe('refresh token through getOfUser', () => {
     it('refresh token', async () => {
       if (!user) {
         throw new Error('unexpected');
       }
 
+      const twitterService = (services.platforms as any).platforms.get(
+        PLATFORM.Twitter
+      ) as TwitterService;
+
       /** read the expireTime */
-      const account = await services.db.run(async (manager) => {
+      const account1 = await services.db.run(async (manager) => {
         if (!user) {
           throw new Error('unexpected');
         }
@@ -122,12 +62,17 @@ describe.only('011-twitter refresh', () => {
         );
       });
 
-      logger.debug(`account ${account.credentials.read?.refreshToken}`, {
-        account,
+      logger.debug(`account ${account1.credentials.read?.refreshToken}`, {
+        account: account1,
       });
 
+      /** credentials should be valid */
+      const tweetId = '1818267753016381936';
+      const tweet = twitterService.getPost(tweetId, account1.credentials.read);
+      expect(tweet).to.not.be.undefined;
+
       /** set the mock time service time to that value */
-      (services.time as any).set(account.credentials.read?.expiresAtMs);
+      (services.time as any).set(account1.credentials.read?.expiresAtMs);
 
       // call getOfUsers (this should update the refresh token)
       void (await services.postsManager.getOfUser({
@@ -135,7 +80,7 @@ describe.only('011-twitter refresh', () => {
         fetchParams: { expectedAmount: 10 },
       }));
 
-      const accountAfter = await services.db.run(async (manager) => {
+      const account2 = await services.db.run(async (manager) => {
         if (!user) {
           throw new Error('unexpected');
         }
@@ -154,164 +99,52 @@ describe.only('011-twitter refresh', () => {
         );
       });
 
-      logger.debug(
-        `accountAfter ${accountAfter.credentials.read?.refreshToken}`,
-        {
-          accountAfter,
-        }
-      );
-
-      expect(account.credentials.read?.refreshToken).to.not.equal(
-        accountAfter.credentials.read?.refreshToken
-      );
-    });
-  });
-
-  describe('remove platform on invalid token', () => {
-    it('removes platform', async () => {
-      if (!USE_REAL_TWITTER) {
-        logger.debug(
-          'skipping refresh token test. Enabled only with real twitter'
-        );
-        return;
-      }
-
-      const twitterService = (services.platforms as any).platforms.get(
-        PLATFORM.Twitter
-      ) as TwitterService;
-
-      const account = await services.db.run(async (manager) => {
-        if (!user) {
-          throw new Error('unexpected');
-        }
-
-        const userRead = await services.users.repo.getUser(
-          user.userId,
-          manager,
-          true
-        );
-
-        return UsersHelper.getAccount(
-          userRead,
-          PLATFORM.Twitter,
-          undefined,
-          true
-        );
+      logger.debug(`accountAfter ${account2.credentials.read?.refreshToken}`, {
+        accountAfter: account2,
       });
 
-      const tweetId = '1818267753016381936';
-
-      const tweet = twitterService.getPost(tweetId, account.credentials.read);
-
-      expect(tweet).to.not.be.undefined;
-
-      (services.time as any).set(account?.credentials.read.expiresAtMs);
-
-      const { client, credentials: secondCredentials } = (await (
-        twitterService as any
-      ).getClient(account.credentials, 'read')) as GetClientResult<'read'>;
-
-      expect(client).to.not.be.undefined;
-      expect(secondCredentials).to.not.be.undefined;
-
-      logger.debug(`secondCredentials`, { secondCredentials });
-
-      await services.db.run(async (manager) => {
-        if (!user) {
-          throw new Error('unexpected');
-        }
-
-        const userRead = await services.users.repo.getUser(
-          user?.userId,
-          manager,
-          true
-        );
-
-        const accountRead = UsersHelper.getAccount(
-          userRead,
-          PLATFORM.Twitter,
-          account.user_id
-        );
-
-        expect(accountRead?.credentials.read.refreshToken).to.equal(
-          secondCredentials?.refreshToken
-        );
-
-        logger.debug(`accountRead`, { accountRead });
-      });
-
-      // check refresh token is valid
-      const tweet2 = twitterService.getPost(tweetId, secondCredentials);
-
+      /** new credentials should be valid */
+      const tweet2 = twitterService.getPost(tweetId, account2.credentials.read);
       expect(tweet2).to.not.be.undefined;
 
-      // corrupt the refresh token (this should not happen BTW...)
-      //   await services.db.run(async (manager) => {
-      //     const latestUser = await services.users.repo.getUser(
-      //       userId,
-      //       manager,
-      //       true
-      //     );
+      expect(account1.credentials.read?.refreshToken).to.not.equal(
+        account2.credentials.read?.refreshToken
+      );
 
-      //     const latestDetails = UsersHelper.getAccount(
-      //       latestUser,
-      //       PLATFORM.Twitter,
-      //       account.user_id
-      //     ) as TwitterUserDetails;
+      /** set the mock time service time to that value */
+      (services.time as any).set(account2.credentials.read?.expiresAtMs);
 
-      //     if (!latestDetails.read) {
-      //       throw new Error('unexpected read undefined');
-      //     }
+      // call getOfUsers (this should update the refresh token again)
+      void (await services.postsManager.getOfUser({
+        userId: user?.userId,
+        fetchParams: { expectedAmount: 10 },
+      }));
 
-      //     const currentRefresh = latestDetails?.read?.refreshToken;
+      const account3 = await services.db.run(async (manager) => {
+        if (!user) {
+          throw new Error('unexpected');
+        }
 
-      //     if (!currentRefresh) {
-      //       throw new Error('unexpected refresh token undefined');
-      //     }
-      //     const newRefresh = 'ABCD' + currentRefresh.slice(4);
+        const userRead = await services.users.repo.getUser(
+          user.userId,
+          manager,
+          true
+        );
 
-      //     latestDetails.read.refreshToken = newRefresh;
+        return UsersHelper.getAccount(
+          userRead,
+          PLATFORM.Twitter,
+          undefined,
+          true
+        );
+      });
 
-      //     await services.users.repo.setPlatformDetails(
-      //       userId,
-      //       PLATFORM.Twitter,
-      //       latestDetails,
-      //       manager
-      //     );
-      //   });
+      const tweet3 = twitterService.getPost(tweetId, account3.credentials.read);
+      expect(tweet3).to.not.be.undefined;
 
-      //   // check refresh token is not valid
-      //   await services.db.run(async (manager) => {
-      //     const latestUser = await services.users.repo.getUser(
-      //       userId,
-      //       manager,
-      //       true
-      //     );
-
-      //     const latestDetails = UsersHelper.getAccount(
-      //       latestUser,
-      //       PLATFORM.Twitter,
-      //       account.user_id
-      //     ) as TwitterUserDetails;
-
-      //     if (!latestDetails || !latestDetails.read) {
-      //       throw new Error('unexpected');
-      //     }
-
-      //     (services.time as any).set(latestDetails.read.expiresAtMs);
-      //   });
-
-      //   // check refresh token is valid
-      //   const { post } = await services.db.run(async (manager) =>
-      //     services.postsManager.fetchPostFromPlatform(
-      //       userId,
-      //       PLATFORM.Twitter,
-      //       tweetId,
-      //       manager
-      //     )
-      //   );
-
-      //   expect(post).to.be.undefined;
+      expect(account2.credentials.read?.refreshToken).to.not.equal(
+        account3.credentials.read?.refreshToken
+      );
     });
   });
 });
