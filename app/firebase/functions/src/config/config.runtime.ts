@@ -52,7 +52,7 @@ export const BLUESKY_SERVICE_URL = 'https://bsky.social';
 
 export const ADMIN_API_KEY = envRuntime.ADMIN_API_KEY;
 
-export const IFRAMELY_API_URL = 'iframe.ly/api/iframely';
+export const IFRAMELY_API_URL = 'https://iframe.ly/api';
 export const IFRAMELY_API_KEY = envRuntime.IFRAMELY_API_KEY;
 
 export const TWITTER_CALLBACK_URL = envRuntime.TWITTER_CALLBACK_URL;
@@ -82,6 +82,7 @@ export const NANOPUBS_PUBLISH_SERVERS_STR = envRuntime.NANOPUBS_PUBLISH_SERVERS;
 
 export const QUIET_SIGNUP_PERIOD = 5 * 60 * 1000; // 5 minutes
 export const AUTOFETCH_PERIOD = 'every 30 minutes';
+export const AUTOFETCH_NON_USER_PERIOD = 'every 2 hours';
 
 export const DAILY_NOTIFICATION_PERIOD = 'every day 18:00';
 export const WEEKLY_NOTIFICATION_PERIOD = 'every monday 18:00';

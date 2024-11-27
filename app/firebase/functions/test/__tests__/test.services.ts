@@ -76,6 +76,8 @@ export const getTestServices = (config: TestServicesConfig) => {
     'NANOPUBS_PUBLISH_SERVERS',
     'NP_PUBLISH_RSA_PRIVATE_KEY',
     'NP_PUBLISH_RSA_PUBLIC_KEY',
+    'IFRAMELY_API_KEY',
+    'IFRAMELY_API_URL',
   ];
 
   mandatory.forEach((varName) => {
@@ -207,6 +209,7 @@ export const getTestServices = (config: TestServicesConfig) => {
     time: time as TimeMock,
     db,
     activity,
+    links: linksService,
   };
 
   return services;

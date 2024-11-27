@@ -154,7 +154,6 @@ export const PostCard = (props: {
             margin={{ bottom: '16px' }}>
             {header}
           </Box>
-
           {!hideSemantics && (
             <Box id={KEYWORDS_SEMANTICS_ID}>
               <SemanticsEditor
@@ -168,16 +167,15 @@ export const PostCard = (props: {
                   size: 'compact',
                   semantics: post?.semantics,
                   originalParsed: post?.originalParsed,
+                  structuredSemantics: post?.structuredSemantics,
                 }}></SemanticsEditor>
             </Box>
           )}
-
           <PostTextStatic
             onClick={handleInternalClick}
             truncate
             shade={shade}
             text={postText}></PostTextStatic>
-
           {!hideSemantics && (
             <Box margin={{ top: '24px' }} id={REFS_SEMANTICS_ID}>
               <SemanticsEditor
@@ -191,6 +189,7 @@ export const PostCard = (props: {
                   editable: false,
                   semantics: post?.semantics,
                   originalParsed: post?.originalParsed,
+                  structuredSemantics: post?.structuredSemantics,
                   post,
                 }}></SemanticsEditor>
             </Box>

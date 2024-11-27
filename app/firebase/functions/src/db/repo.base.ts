@@ -13,6 +13,10 @@ export function removeUndefined(obj: any): any {
       } else if (typeof obj[key] === 'object') {
         removeUndefined(obj[key]); // Recurse into nested objects
       }
+      // Delete empty string keys
+      if (key.trim() === '') {
+        delete obj[key];
+      }
     }
   }
   return obj;

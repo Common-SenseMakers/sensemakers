@@ -8,7 +8,11 @@ import {
   PLATFORM,
   PUBLISHABLE_PLATFORM,
 } from '../@shared/types/types.platforms';
-import { AppPostFull, GenericPost } from '../@shared/types/types.posts';
+import {
+  AppPostFull,
+  GenericPost,
+  PostsQueryDefined,
+} from '../@shared/types/types.posts';
 import { AccountDetailsBase, DefinedIfTrue } from '../@shared/types/types.user';
 import { APP_URL } from '../config/config.runtime';
 
@@ -95,3 +99,24 @@ export class PostsHelper {
     return platformPosted.post_id;
   }
 }
+
+const QUERY_PARAMS_FOR_USING_LINKS_SUBCOLLECTION = [
+  'semantics',
+  'fetchParams',
+  'includeAggregateLabels',
+];
+
+export const doesQueryUseSubcollection = (queryParams: PostsQueryDefined) => {
+  let defaultResult = {
+    useLinksSubcollection: false,
+  };
+  const hasOnlySemantics = Object.keys(queryParams).every((param) =>
+    QUERY_PARAMS_FOR_USING_LINKS_SUBCOLLECTION.includes(param)
+  );
+  if (hasOnlySemantics && queryParams.semantics?.refs?.length === 1) {
+    return {
+      useLinksSubcollection: true,
+    };
+  }
+  return defaultResult;
+};

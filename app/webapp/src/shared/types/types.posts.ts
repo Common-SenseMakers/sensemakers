@@ -2,6 +2,7 @@ import { FetchParams } from './types.fetch';
 import { AppPostSemantics, ParsePostResult, RefMeta } from './types.parser';
 import { PlatformPost } from './types.platform.posts';
 import { PLATFORM } from './types.platforms';
+import { RefLabel } from './types.references';
 import { AppUserRead } from './types.user';
 
 export interface GenericAuthor {
@@ -31,13 +32,6 @@ export interface StructuredSemantics {
   refs?: string[];
   refsMeta?: Record<string, RefMeta>;
   topic?: string;
-}
-
-export interface RefLabel {
-  label: string;
-  postId?: string;
-  authorProfileId?: string;
-  platformPostUrl?: string;
 }
 
 export type ArrayIncludeQuery = string[];

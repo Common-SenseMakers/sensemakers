@@ -18,10 +18,10 @@ import {
   GenericThread,
 } from '../../src/@shared/types/types.posts';
 import { TwitterThread } from '../../src/@shared/types/types.twitter';
+import { getProfileId } from '../../src/@shared/utils/profiles.utils';
 import { activityEventCreatedHook } from '../../src/activity/activity.created.hook';
 import { Services } from '../../src/instances/services';
 import { postUpdatedHook } from '../../src/posts/hooks/post.updated.hook';
-import { getProfileId } from '../../src/profiles/profiles.repository';
 import { testCredentials } from '../__tests__/test.accounts';
 
 export const getMockPost = (
