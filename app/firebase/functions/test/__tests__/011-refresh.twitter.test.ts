@@ -25,7 +25,7 @@ describe.only('011-twitter refresh', () => {
     await resetDB();
 
     const users = await services.db.run(async (manager) => {
-      return createUsers(services, Array.from(testUsers.values()), manager);
+      return createUsers(services, testUsers, manager);
     });
 
     user = users.find(

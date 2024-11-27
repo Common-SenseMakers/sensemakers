@@ -12,7 +12,11 @@ import { BLUESKY_SERVICE_URL } from '../../src/config/config.runtime';
 import { TransactionManager } from '../../src/db/transaction.manager';
 import { getPrefixedUserId } from '../../src/users/users.utils';
 import { handleTwitterSignupMock } from '../__tests__/reusable/mocked.singup';
-import { USE_REAL_BLUESKY, USE_REAL_TWITTER } from '../__tests__/setup';
+import {
+  USE_REAL_BLUESKY,
+  USE_REAL_TWITTER,
+  UserAndProfiles,
+} from '../__tests__/setup';
 import { TestServices } from '../__tests__/test.services';
 import { authenticateTwitterUser } from './authenticate.twitter';
 
@@ -34,45 +38,51 @@ export const authenticateTestUser = async (
   services: TestServices,
   includePlatforms: PLATFORM[],
   manager: TransactionManager
-): Promise<{ user: AppUser; profiles: AccountProfile }> => {
+): Promise<UserAndProfiles> => {
   let user: AppUser | undefined;
   let profiles: AccountProfile[] = [];
 
   if (includePlatforms.includes(PLATFORM.Twitter)) {
-    const { user: twitterUser, profile } = await authenticateTwitterForUser(
+    const twitterUser = await authenticateTwitterForUser(
       credentials,
       services,
       manager,
       user
     );
 
-    user = twitterUser;
-    profiles.push(profile);
+    user = twitterUser.user;
+    profiles.push(...twitterUser.profiles);
   }
 
   if (includePlatforms.includes(PLATFORM.Mastodon)) {
-    user = await authenticateMastodonForUser(
+    const mastodonUser = await authenticateMastodonForUser(
       credentials,
       services,
       manager,
       user
     );
+
+    user = mastodonUser.user;
+    profiles.push(...mastodonUser.profiles);
   }
 
   if (includePlatforms.includes(PLATFORM.Bluesky)) {
-    user = await authenticateBlueskyForUser(
+    const bskUser = await authenticateBlueskyForUser(
       credentials,
       services,
       manager,
       user
     );
+
+    user = bskUser.user;
+    profiles.push(...bskUser.profiles);
   }
 
   if (!user) {
     throw new Error('No platforms were authenticated');
   }
 
-  return user;
+  return { user, profiles };
 };
 
 const authenticateBlueskyForUser = async (
@@ -80,7 +90,7 @@ const authenticateBlueskyForUser = async (
   services: TestServices,
   manager: TransactionManager,
   user?: AppUser
-): Promise<AppUser> => {
+): Promise<UserAndProfiles> => {
   if (!user) {
     user = {
       userId: getPrefixedUserId(PLATFORM.Bluesky, credentials.bluesky.id),
@@ -124,7 +134,7 @@ const authenticateBlueskyForUser = async (
 
   user.accounts[PLATFORM.Bluesky] = [blueskyUserDetails];
 
-  return user;
+  return { user, profiles: [] };
 };
 
 const authenticateTwitterForUser = async (
@@ -132,7 +142,7 @@ const authenticateTwitterForUser = async (
   services: TestServices,
   manager: TransactionManager,
   user?: AppUser
-): Promise<AppUser> => {
+): Promise<UserAndProfiles> => {
   if (USE_REAL_TWITTER) {
     return authenticateTwitterUser(
       credentials.twitter,
@@ -155,7 +165,8 @@ const authenticateTwitterForUser = async (
       user?.userId
     );
 
-    return services.users.repo.getUser(userId, manager, true);
+    const userRead = await services.users.repo.getUser(userId, manager, true);
+    return { user: userRead, profiles: [] };
   }
 };
 
@@ -164,7 +175,7 @@ const authenticateMastodonForUser = async (
   services: TestServices,
   manager: TransactionManager,
   user?: AppUser
-): Promise<AppUser> => {
+): Promise<UserAndProfiles> => {
   if (!user) {
     user = {
       userId: getPrefixedUserId(PLATFORM.Mastodon, credentials.mastodon.id),
@@ -191,5 +202,5 @@ const authenticateMastodonForUser = async (
     },
   ];
 
-  return user;
+  return { user, profiles: [] };
 };

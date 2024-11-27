@@ -30,7 +30,11 @@ export const INCLUDE_TEST_PLATFORMS_STR = process.env
 export type InjectableContext = Readonly<{
   // properties injected using the Root Mocha Hooks
 }>;
-export let testUsers: { users: AppUser[]; profiles: AccountProfile[] } = [];
+export interface UserAndProfiles {
+  user: AppUser;
+  profiles: AccountProfile[];
+}
+export let testUsers: UserAndProfiles[] = [];
 
 export const TEST_THREADS: string[][] = process.env.TEST_THREADS
   ? JSON.parse(process.env.TEST_THREADS as string)
@@ -87,18 +91,18 @@ export const mochaHooks = (): Mocha.RootHookObject => {
       await globalTestServices.db.run(async (manager) => {
         await Promise.all(
           testCredentials.map(async (accountCredentials) => {
-            const user = await authenticateTestUser(
+            const userAndProfiles = await authenticateTestUser(
               accountCredentials,
               globalTestServices,
               includePlatforms,
               manager
             );
-            testUsers.push(user);
+            testUsers.push(userAndProfiles);
           })
         );
       });
 
-      testUsers.sort((a, b) => a.userId.localeCompare(b.userId));
+      testUsers.sort((a, b) => a.user.userId.localeCompare(b.user.userId));
 
       Object.assign(this, context);
     },

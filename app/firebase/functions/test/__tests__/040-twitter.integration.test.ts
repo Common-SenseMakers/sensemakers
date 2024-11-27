@@ -20,7 +20,7 @@ describe.skip('twitter integration', () => {
   it(`authenticates ${NUM_TWITTER_USERS} twitter users with the oauth 2.0 flow for reading access`, async () => {
     const includePlatforms = [PLATFORM.Twitter];
 
-    const appUsers = await services.db.run((manager) =>
+    const appUsersAndProfiles = await services.db.run((manager) =>
       authenticateTestUsers(
         testCredentials.slice(0, NUM_TWITTER_USERS),
         services,
@@ -29,10 +29,12 @@ describe.skip('twitter integration', () => {
       )
     );
 
-    expect(appUsers).to.not.be.undefined;
-    expect(appUsers.length).to.eq(NUM_TWITTER_USERS);
-    for (const appUser of appUsers) {
-      for (const twitterDetails of appUser.accounts[PLATFORM.Twitter] ?? []) {
+    expect(appUsersAndProfiles).to.not.be.undefined;
+    expect(appUsersAndProfiles.length).to.eq(NUM_TWITTER_USERS);
+    for (const appUserAndProfile of appUsersAndProfiles) {
+      for (const twitterDetails of appUserAndProfile.user.accounts[
+        PLATFORM.Twitter
+      ] ?? []) {
         if (!twitterDetails.credentials.read?.accessToken) {
           throw new Error('unexpected: access token missing');
         }
