@@ -14,6 +14,7 @@ export const feedTabs: FeedTabConfig[] = [
     title: 'All',
     tooltip: '',
     labels: [],
+    topic: SCIENCE_TOPIC_URI,
   },
   {
     id: 'recommendations',

@@ -11,7 +11,7 @@ import {
   removeQuad,
 } from './use.post.merge.deltas.pure';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export interface TripleOperation {
   type: 'add' | 'remove';

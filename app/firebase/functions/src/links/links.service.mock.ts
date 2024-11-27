@@ -1,9 +1,9 @@
 import { anything, instance, spy, when } from 'ts-mockito';
 
 import { OEmbed } from '../@shared/types/types.references';
+import { normalizeUrl } from '../@shared/utils/links.utils';
 import { TransactionManager } from '../db/transaction.manager';
 import { LinksMockConfig, LinksService } from './links.service';
-import { normalizeUrl } from './links.utils';
 
 /**
  * TwitterService mock that publish and fetches posts without really
