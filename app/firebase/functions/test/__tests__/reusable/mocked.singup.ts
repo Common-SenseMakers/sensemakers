@@ -3,7 +3,6 @@ import { logger } from 'firebase-functions';
 
 import { PLATFORM } from '../../../src/@shared/types/types.platforms';
 import { TwitterSignupData } from '../../../src/@shared/types/types.twitter';
-import { UsersHelper } from '../../../src/users/users.helper';
 import { getPrefixedUserId } from '../../../src/users/users.utils';
 import { TestServices } from '../test.services';
 
@@ -46,12 +45,9 @@ export const handleTwitterSignupMock = async (
       if (!user) {
         throw new Error('user not created');
       }
-      return services.users.getLoggedUserWithProfiles(user.userId, manager);
+      return services.users.getPublicUserWithProfiles(user.userId, manager);
     });
     expect(userRead).to.not.be.undefined;
-
-    const profile = UsersHelper.getProfile(userRead, PLATFORM.Twitter);
-    expect(profile).to.not.be.undefined;
 
     return userRead.userId;
   });

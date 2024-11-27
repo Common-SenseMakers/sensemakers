@@ -82,6 +82,11 @@ export interface AppPost extends AppPostBase {
   structuredSemantics?: StructuredSemantics;
 }
 
+export interface HydrateConfig {
+  addMirrors?: boolean;
+  addAggregatedLabels?: boolean;
+}
+
 export interface PostSemanticsMeta {
   refLabels: Record<string, RefLabel[]>;
 }
@@ -148,7 +153,7 @@ export interface PostsQueryParams {
   profileId?: string;
   origins?: ArrayIncludeQuery;
   semantics?: StructuredSemanticsQuery;
-  includeAggregateLabels?: boolean;
+  hydrateConfig?: HydrateConfig;
 }
 
 export interface PostsQuery extends PostsQueryParams {
@@ -173,5 +178,5 @@ export interface MastodonGetContextParams {
 
 export interface GetPostPayload {
   postId: string;
-  includeAggregateLabels?: boolean;
+  config?: HydrateConfig;
 }

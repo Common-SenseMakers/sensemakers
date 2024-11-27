@@ -175,7 +175,7 @@ export const getTestServices = (config: TestServicesConfig) => {
     apiKey: process.env.IFRAMELY_API_KEY as string,
     apiUrl: process.env.IFRAMELY_API_URL as string,
   });
-  const linksService = getLinksMock(_linksService, config.links);
+  const links = getLinksMock(_linksService, config.links);
 
   /** posts service */
   const postsProcessing = new PostsProcessing(
@@ -185,7 +185,7 @@ export const getTestServices = (config: TestServicesConfig) => {
     postsRepo,
     platformPostsRepo,
     platformsService,
-    linksService
+    links
   );
 
   const postsManager = new PostsManager(
@@ -209,7 +209,7 @@ export const getTestServices = (config: TestServicesConfig) => {
     time: time as TimeMock,
     db,
     activity,
-    links: linksService,
+    links,
   };
 
   return services;

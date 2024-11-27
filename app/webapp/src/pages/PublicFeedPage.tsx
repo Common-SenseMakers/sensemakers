@@ -48,7 +48,7 @@ const getFeedConfig = (
     endpoint: '/api/feed/get',
     queryParams: {
       semantics: { labels: tab.labels, topic: tab.topic },
-      includeAggregateLabels: true,
+      hydrateConfig: { addAggregatedLabels: true },
     },
     DEBUG_PREFIX,
   };

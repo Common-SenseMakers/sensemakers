@@ -124,7 +124,7 @@ describe('070 test feed', () => {
             'http://purl.org/spar/cito/discusses',
           ],
         },
-        includeAggregateLabels: true,
+        hydrateConfig: { addAggregatedLabels: true },
       });
       expect(result1).to.have.length(3);
       result1.forEach((post) => {
@@ -143,7 +143,7 @@ describe('070 test feed', () => {
             'http://purl.org/spar/cito/includesQuotationFrom',
           ],
         },
-        includeAggregateLabels: true,
+        hydrateConfig: { addAggregatedLabels: true },
       });
       expect(result2).to.have.length(2);
       result2.forEach((post) => {
@@ -157,7 +157,7 @@ describe('070 test feed', () => {
       const result3 = await feed.getFeed({
         fetchParams: { expectedAmount: 10 },
         semantics: { labels: [] },
-        includeAggregateLabels: true,
+        hydrateConfig: { addAggregatedLabels: true },
       });
       expect(result3).to.have.length(5);
       result3.forEach((post) => {

@@ -118,6 +118,11 @@ export const _03_fetchAfterPublish = async (
 
   expect(postRead.semantics).to.not.be.undefined;
   expect(postRead.originalParsed).to.not.be.undefined;
+  expect(postRead.mirrors).to.not.be.undefined;
+
+  if (!postRead.mirrors) {
+    throw new Error('unexpected');
+  }
 
   const tweetRead = postRead.mirrors?.find(
     (m) => m.platformId === PLATFORM.Twitter

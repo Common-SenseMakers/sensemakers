@@ -18,11 +18,12 @@ import { authenticateTwitterUser } from './authenticate.twitter';
 export const authenticateTestUsers = async (
   credentials: TestUserCredentials[],
   services: TestServices,
+  includePlatforms: PLATFORM[],
   manager: TransactionManager
 ) => {
   return Promise.all(
     credentials.map((credential) =>
-      authenticateTestUser(credential, services, manager)
+      authenticateTestUser(credential, services, includePlatforms, manager)
     )
   );
 };
@@ -30,36 +31,42 @@ export const authenticateTestUsers = async (
 export const authenticateTestUser = async (
   credentials: TestUserCredentials,
   services: TestServices,
-  manager: TransactionManager,
-  excludePlatforms: PLATFORM[] = []
+  includePlatforms: PLATFORM[],
+  manager: TransactionManager
 ): Promise<AppUser> => {
   let user: AppUser | undefined;
 
-  if (!excludePlatforms.includes(PLATFORM.Twitter)) {
-    user = await authenticateTwitterForUser(
+  if (includePlatforms.includes(PLATFORM.Twitter)) {
+    const twitterUser = await authenticateTwitterForUser(
       credentials,
       services,
       manager,
       user
     );
+
+    user = twitterUser;
   }
 
-  if (!excludePlatforms.includes(PLATFORM.Mastodon)) {
-    user = await authenticateMastodonForUser(
+  if (includePlatforms.includes(PLATFORM.Mastodon)) {
+    const mastodonUser = await authenticateMastodonForUser(
       credentials,
       services,
       manager,
       user
     );
+
+    user = mastodonUser;
   }
 
-  if (!excludePlatforms.includes(PLATFORM.Bluesky)) {
-    user = await authenticateBlueskyForUser(
+  if (includePlatforms.includes(PLATFORM.Bluesky)) {
+    const bskUser = await authenticateBlueskyForUser(
       credentials,
       services,
       manager,
       user
     );
+
+    user = bskUser;
   }
 
   if (!user) {
@@ -149,7 +156,8 @@ const authenticateTwitterForUser = async (
       user?.userId
     );
 
-    return services.users.repo.getUser(userId, manager, true);
+    const userRead = await services.users.repo.getUser(userId, manager, true);
+    return userRead;
   }
 };
 

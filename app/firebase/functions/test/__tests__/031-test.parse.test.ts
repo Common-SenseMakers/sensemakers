@@ -1,7 +1,10 @@
 import { expect } from 'chai';
 
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
-import { AppPostParsingStatus } from '../../src/@shared/types/types.posts';
+import {
+  AppPostParsingStatus,
+  HydrateConfig,
+} from '../../src/@shared/types/types.posts';
 import { AppUser } from '../../src/@shared/types/types.user';
 import { logger } from '../../src/instances/logger';
 import { UsersHelper } from '../../src/users/users.helper';
@@ -91,7 +94,15 @@ describe('031 test parse', () => {
         throw new Error('post undefined');
       }
 
-      const parsedPost = await postsManager.getPost({ postId: post.id }, true);
+      const hydrateConfig: HydrateConfig = {
+        addMirrors: true,
+        addAggregatedLabels: false,
+      };
+      const parsedPost = await postsManager.getPost(
+        post.id,
+        hydrateConfig,
+        true
+      );
       expect(parsedPost).to.not.be.undefined;
       expect(parsedPost.parsingStatus).to.equal(AppPostParsingStatus.IDLE);
       expect(parsedPost.semantics).to.not.be.undefined;
@@ -147,7 +158,15 @@ describe('031 test parse', () => {
         throw new Error('post undefined');
       }
 
-      const parsedPost = await postsManager.getPost({ postId: post.id }, true);
+      const hydrateConfig: HydrateConfig = {
+        addMirrors: true,
+        addAggregatedLabels: false,
+      };
+      const parsedPost = await postsManager.getPost(
+        post.id,
+        hydrateConfig,
+        true
+      );
       expect(parsedPost).to.not.be.undefined;
       expect(parsedPost.parsingStatus).to.equal(AppPostParsingStatus.IDLE);
       expect(parsedPost.semantics).to.not.be.undefined;
@@ -182,7 +201,15 @@ describe('031 test parse', () => {
         throw new Error('post undefined');
       }
 
-      const parsedPost = await postsManager.getPost({ postId: post.id }, true);
+      const hydrateConfig: HydrateConfig = {
+        addMirrors: true,
+        addAggregatedLabels: false,
+      };
+      const parsedPost = await postsManager.getPost(
+        post.id,
+        hydrateConfig,
+        true
+      );
       expect(parsedPost).to.not.be.undefined;
       expect(parsedPost.parsingStatus).to.equal(AppPostParsingStatus.IDLE);
       expect(parsedPost.semantics).to.not.be.undefined;

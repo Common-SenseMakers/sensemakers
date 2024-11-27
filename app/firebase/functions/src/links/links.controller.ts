@@ -11,9 +11,6 @@ export const getRefSchema = object({
   ref: string().required(),
 });
 
-/**
- * get user posts from the DB (does not fetch for more)
- * */
 export const getRefMetaController: RequestHandler = async (
   request,
   response

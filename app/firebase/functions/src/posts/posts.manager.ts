@@ -22,7 +22,7 @@ import {
   AppPost,
   AppPostParsedStatus,
   AppPostParsingStatus,
-  GetPostPayload,
+  HydrateConfig,
   PostUpdate,
   PostsQuery,
   PostsQueryDefined,
@@ -581,10 +581,20 @@ export class PostsManager {
       throw new Error('userId is required');
     }
 
-    const includeAggregateLabels =
-      _queryParams.includeAggregateLabels !== undefined
-        ? _queryParams.includeAggregateLabels
+    const addAggregatedLabels =
+      _queryParams.hydrateConfig?.addAggregatedLabels !== undefined
+        ? _queryParams.hydrateConfig.addAggregatedLabels
         : false;
+
+    const addMirrors =
+      _queryParams.hydrateConfig?.addMirrors !== undefined
+        ? _queryParams.hydrateConfig.addMirrors
+        : true;
+
+    const hydrateConfig: HydrateConfig = {
+      addAggregatedLabels,
+      addMirrors,
+    };
 
     const queryParams: PostsQueryDefined = {
       fetchParams: {
@@ -599,12 +609,7 @@ export class PostsManager {
     const postsFull = await Promise.all(
       appPosts.map((post) =>
         this.db.run((manager) =>
-          this.processing.hydratePostFull(
-            post,
-            true,
-            includeAggregateLabels,
-            manager
-          )
+          this.processing.hydratePostFull(post, hydrateConfig, manager)
         )
       )
     );
@@ -617,15 +622,15 @@ export class PostsManager {
   }
 
   async getPost<T extends boolean>(
-    payload: GetPostPayload,
+    postId: string,
+    config: HydrateConfig,
     shouldThrow?: T,
     manager?: TransactionManager
   ) {
     const func = async (manager: TransactionManager) => {
-      const postId = payload.postId;
-
       const post = await this.processing.getPostFull(
         postId,
+        config,
         manager,
         shouldThrow
       );
@@ -644,7 +649,12 @@ export class PostsManager {
           );
 
           // re-read post with latest parsingStatus
-          return this.processing.getPostFull(postId, manager, shouldThrow);
+          return this.processing.getPostFull(
+            postId,
+            config,
+            manager,
+            shouldThrow
+          );
         }
       }
 

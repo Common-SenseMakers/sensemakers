@@ -22,7 +22,7 @@ import { UsersRepository } from '../../users/users.repository';
 import { TwitterApiCredentials } from './twitter.service';
 import { handleTwitterError } from './twitter.utils';
 
-const DEBUG = false;
+const DEBUG = true;
 const DEBUG_PREFIX = 'TwitterServiceClient';
 
 export type GetClientResult<T extends 'read' | 'write' | undefined> =
@@ -226,11 +226,12 @@ export class TwitterServiceClient {
     if (!result.expiresIn) {
       throw new Error('Unexpected undefined refresh token');
     }
+
     const credentials: TwitterCredentials = {
       accessToken: result.accessToken,
       refreshToken: result.refreshToken,
       expiresIn: result.expiresIn,
-      expiresAtMs: this.time.now() + result.expiresIn * 1000,
+      expiresAtMs: this.time.now() + 1000 * 60 * 11,
     };
     const twitterAccountDetails: TwitterAccountDetails = {
       user_id: user.id,
