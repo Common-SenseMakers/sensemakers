@@ -92,7 +92,7 @@ export const UserProfileOverlay = (props: {
         userId: userId,
         profileId: userId !== undefined ? undefined : profileId,
         semantics: { topic: SCIENCE_TOPIC_URI },
-        includeAggregateLabels: true,
+        hydrateConfig: { addAggregatedLabels: true },
       },
       DEBUG_PREFIX: 'REF FEED',
     };
