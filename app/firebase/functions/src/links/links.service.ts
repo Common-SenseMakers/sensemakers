@@ -1,10 +1,11 @@
 import { RefMeta } from '../@shared/types/types.parser';
 import { OEmbed, RefPostData } from '../@shared/types/types.references';
+import { normalizeUrl } from '../@shared/utils/links.utils';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
 import { LinksRepository } from './links.repository';
-import { hashAndNormalizeUrl, hashUrl, normalizeUrl } from './links.utils';
+import { hashAndNormalizeUrl, hashUrl } from './links.utils';
 
 export interface LinksMockConfig {
   get: boolean;

@@ -1,6 +1,7 @@
 import { Store } from 'n3';
 
 import { ParsedSupport, RefMeta } from '../../../shared/types/types.parser';
+import { normalizeUrl } from '../../../shared/utils/links.utils';
 import { filterStore, forEachStore } from '../../../shared/utils/n3.utils';
 
 export interface RefData {
@@ -62,9 +63,7 @@ export const processSemantics = (
 
   const sortedRefs: RefsMap = new Map();
   for (const [ref, value] of refsArray) {
-    const normalizedRef = Object.entries(refsMeta ?? {}).find(
-      ([, refMeta]) => refMeta.original_url === ref
-    )?.[0];
+    const normalizedRef = normalizeUrl(ref);
     const meta =
       refsMeta && normalizedRef ? refsMeta[normalizedRef] : undefined;
 
