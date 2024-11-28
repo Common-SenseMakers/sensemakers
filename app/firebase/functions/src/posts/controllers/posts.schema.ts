@@ -6,6 +6,14 @@ export const postIdValidation = object({
   postId: string().required(),
 }).noUnknown(true);
 
+export const getPostSchema = object({
+  postId: string().required(),
+  config: object({
+    addMirrors: string().optional(),
+    addAggregatedLabels: string().optional(),
+  }).optional(),
+}).noUnknown(true);
+
 export const createDraftPostSchema = object({
   postId: string().required(),
 }).noUnknown(true);
