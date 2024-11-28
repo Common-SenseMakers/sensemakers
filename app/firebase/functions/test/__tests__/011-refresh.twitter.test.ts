@@ -10,7 +10,7 @@ import { createUsers } from '../utils/users.utils';
 import { USE_REAL_PARSER, USE_REAL_TWITTER, testUsers } from './setup';
 import { getTestServices } from './test.services';
 
-describe.only('011-twitter refresh', () => {
+describe('011-twitter refresh', () => {
   let user: AppUser | undefined;
 
   const services = getTestServices({

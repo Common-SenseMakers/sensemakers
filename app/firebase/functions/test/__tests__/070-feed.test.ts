@@ -3,6 +3,7 @@ import { expect } from 'chai';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { AppUser } from '../../src/@shared/types/types.user';
 import { logger } from '../../src/instances/logger';
+import { doesQueryUseSubcollection } from '../../src/posts/posts.helper';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
 import { fetchPostInTests } from '../utils/posts.utils';
@@ -82,7 +83,7 @@ describe('070 test feed', () => {
         return;
       }
       const { feed } = services;
-      const result1 = await feed.getFeed({
+      const query1 = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
           labels: [
@@ -90,10 +91,13 @@ describe('070 test feed', () => {
             'http://purl.org/spar/cito/discusses',
           ],
         },
-      });
+      };
+      const result1 = await feed.getFeed(query1);
       expect(result1).to.have.length(3);
+      expect(doesQueryUseSubcollection(query1).useLinksSubcollection).to.be
+        .false;
 
-      const result2 = await feed.getFeed({
+      const query2 = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
           labels: [
@@ -101,14 +105,20 @@ describe('070 test feed', () => {
             'http://purl.org/spar/cito/includesQuotationFrom',
           ],
         },
-      });
+      };
+      const result2 = await feed.getFeed(query2);
       expect(result2).to.have.length(2);
+      expect(doesQueryUseSubcollection(query2).useLinksSubcollection).to.be
+        .false;
 
-      const result3 = await feed.getFeed({
+      const query3 = {
         fetchParams: { expectedAmount: 10 },
         semantics: { labels: [] },
-      });
+      };
+      const result3 = await feed.getFeed(query3);
       expect(result3).to.have.length(5);
+      expect(doesQueryUseSubcollection(query3).useLinksSubcollection).to.be
+        .false;
     });
     it('returns a feed with aggregated reference labels', async () => {
       if (USE_REAL_TWITTER) {
@@ -116,7 +126,7 @@ describe('070 test feed', () => {
         return;
       }
       const { feed } = services;
-      const result1 = await feed.getFeed({
+      const query1 = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
           labels: [
@@ -125,8 +135,11 @@ describe('070 test feed', () => {
           ],
         },
         hydrateConfig: { addAggregatedLabels: true },
-      });
+      };
+      const result1 = await feed.getFeed(query1);
       expect(result1).to.have.length(3);
+      expect(doesQueryUseSubcollection(query1).useLinksSubcollection).to.be
+        .false;
       result1.forEach((post) => {
         expect(post.meta?.refLabels).to.not.be.undefined;
         post.meta &&
@@ -135,7 +148,7 @@ describe('070 test feed', () => {
           );
       });
 
-      const result2 = await feed.getFeed({
+      const query2 = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
           labels: [
@@ -144,8 +157,11 @@ describe('070 test feed', () => {
           ],
         },
         hydrateConfig: { addAggregatedLabels: true },
-      });
+      };
+      const result2 = await feed.getFeed(query2);
       expect(result2).to.have.length(2);
+      expect(doesQueryUseSubcollection(query2).useLinksSubcollection).to.be
+        .false;
       result2.forEach((post) => {
         expect(post.meta?.refLabels).to.not.be.undefined;
         post.meta &&
@@ -154,12 +170,15 @@ describe('070 test feed', () => {
           );
       });
 
-      const result3 = await feed.getFeed({
+      const query3 = {
         fetchParams: { expectedAmount: 10 },
         semantics: { labels: [] },
         hydrateConfig: { addAggregatedLabels: true },
-      });
+      };
+      const result3 = await feed.getFeed(query3);
       expect(result3).to.have.length(5);
+      expect(doesQueryUseSubcollection(query3).useLinksSubcollection).to.be
+        .false;
       result3.forEach((post) => {
         expect(post.meta?.refLabels).to.not.be.undefined;
         post.meta &&
@@ -174,15 +193,19 @@ describe('070 test feed', () => {
         return;
       }
       const { feed } = services;
-      const result1 = await feed.getFeed({
+      const query1 = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
           refs: ['https://twitter.com/ItaiYanai/status/1780813867213336910'],
         },
-      });
+        hydrateConfig: { addAggregatedLabels: false },
+      };
+      const result1 = await feed.getFeed(query1);
       expect(result1).to.have.length(2);
+      expect(doesQueryUseSubcollection(query1).useLinksSubcollection).to.be
+        .true;
 
-      const result2 = await feed.getFeed({
+      const query2 = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
           refs: ['https://twitter.com/ItaiYanai/status/1780813867213336910'],
@@ -190,18 +213,26 @@ describe('070 test feed', () => {
             'http://purl.org/spar/cito/discusses',
             'https://sense-nets.xyz/includesQuotationFrom',
           ],
+          hydrateConfig: { addAggregatedLabels: false },
         },
-      });
+      };
+      const result2 = await feed.getFeed(query2);
       expect(result2).to.have.length(2);
+      expect(doesQueryUseSubcollection(query2).useLinksSubcollection).to.be
+        .true;
 
-      const result3 = await feed.getFeed({
+      const query3 = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
           refs: ['https://twitter.com/ItaiYanai/status/1780813867213336910'],
           labels: ['http://purl.org/spar/cito/discusses'],
         },
-      });
+        hydrateConfig: { addAggregatedLabels: false },
+      };
+      const result3 = await feed.getFeed(query3);
       expect(result3).to.have.length(1);
+      expect(doesQueryUseSubcollection(query3).useLinksSubcollection).to.be
+        .true;
     });
   });
 });

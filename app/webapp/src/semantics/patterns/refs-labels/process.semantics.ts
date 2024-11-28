@@ -67,7 +67,7 @@ export const processSemantics = (
     const meta =
       refsMeta && normalizedRef ? refsMeta[normalizedRef] : undefined;
 
-    sortedRefs.set(ref, {
+    sortedRefs.set(normalizedRef, {
       labelsUris: value ? value.labelsUris : [],
       meta,
     });

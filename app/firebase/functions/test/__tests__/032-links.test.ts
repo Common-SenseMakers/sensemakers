@@ -5,7 +5,7 @@ import { logger } from '../../src/instances/logger';
 import { resetDB } from '../utils/db';
 import { getTestServices } from './test.services';
 
-describe.only('020-links', () => {
+describe('020-links', () => {
   const services = getTestServices({
     time: 'mock',
     parser: 'mock',

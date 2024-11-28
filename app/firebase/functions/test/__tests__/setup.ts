@@ -1,4 +1,4 @@
-import { initializeApp } from 'firebase-admin/app';
+import { getApp, getApps, initializeApp } from 'firebase-admin/app';
 import { Context } from 'mocha';
 import * as sinon from 'sinon';
 
@@ -43,9 +43,11 @@ export const TEST_THREADS: string[][] = process.env.TEST_THREADS
 // TestContext will be used by all the test
 export type TestContext = Mocha.Context & Context;
 
-export const app = initializeApp({
-  projectId: 'demo-sensenets',
-});
+export const app = getApps().length
+  ? getApp() // Return the existing app if already initialized
+  : initializeApp({
+      projectId: 'demo-sensenets',
+    });
 
 export let globalTestServices = getTestServices({
   time: 'mock',

@@ -100,23 +100,26 @@ export class PostsHelper {
   }
 }
 
-const QUERY_PARAMS_FOR_USING_LINKS_SUBCOLLECTION = [
-  'semantics',
-  'fetchParams',
-  'includeAggregateLabels',
+const QUERY_PARAMS_NOT_USING_LINKS_SUBCOLLECTION = [
+  'userId',
+  'profileId',
+  'origins',
 ];
 
 export const doesQueryUseSubcollection = (queryParams: PostsQueryDefined) => {
   let defaultResult = {
     useLinksSubcollection: false,
   };
-  const hasOnlySemantics = Object.keys(queryParams).every((param) =>
-    QUERY_PARAMS_FOR_USING_LINKS_SUBCOLLECTION.includes(param)
+
+  const canUseSubcollection = !QUERY_PARAMS_NOT_USING_LINKS_SUBCOLLECTION.some(
+    (param) => param in queryParams
   );
-  if (hasOnlySemantics && queryParams.semantics?.refs?.length === 1) {
+
+  if (canUseSubcollection && queryParams.semantics?.refs?.length === 1) {
     return {
       useLinksSubcollection: true,
     };
   }
+
   return defaultResult;
 };
