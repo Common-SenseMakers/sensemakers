@@ -3,6 +3,7 @@ import { expect } from 'chai';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { AppUser } from '../../src/@shared/types/types.user';
 import { logger } from '../../src/instances/logger';
+import { doesQueryUseSubcollection } from '../../src/posts/posts.helper';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
 import { fetchPostInTests } from '../utils/posts.utils';
@@ -179,10 +180,12 @@ describe.only('070 test feed', () => {
         semantics: {
           refs: ['https://twitter.com/ItaiYanai/status/1780813867213336910'],
         },
+        hydrateConfig: { addAggregatedLabels: false },
       };
       const result1 = await feed.getFeed(query1);
       expect(result1).to.have.length(2);
-      expect(doesQueryUseSubcollection(query1).useLinksSubcollection).to.be.true;
+      expect(doesQueryUseSubcollection(query1).useLinksSubcollection).to.be
+        .true;
 
       const query2 = {
         fetchParams: { expectedAmount: 10 },
@@ -192,11 +195,13 @@ describe.only('070 test feed', () => {
             'http://purl.org/spar/cito/discusses',
             'https://sense-nets.xyz/includesQuotationFrom',
           ],
+          hydrateConfig: { addAggregatedLabels: false },
         },
       };
       const result2 = await feed.getFeed(query2);
       expect(result2).to.have.length(2);
-      expect(doesQueryUseSubcollection(query2).useLinksSubcollection).to.be.true;
+      expect(doesQueryUseSubcollection(query2).useLinksSubcollection).to.be
+        .true;
 
       const query3 = {
         fetchParams: { expectedAmount: 10 },
@@ -204,10 +209,12 @@ describe.only('070 test feed', () => {
           refs: ['https://twitter.com/ItaiYanai/status/1780813867213336910'],
           labels: ['http://purl.org/spar/cito/discusses'],
         },
+        hydrateConfig: { addAggregatedLabels: false },
       };
       const result3 = await feed.getFeed(query3);
       expect(result3).to.have.length(1);
-      expect(doesQueryUseSubcollection(query3).useLinksSubcollection).to.be.true;
+      expect(doesQueryUseSubcollection(query3).useLinksSubcollection).to.be
+        .true;
     });
   });
 });
