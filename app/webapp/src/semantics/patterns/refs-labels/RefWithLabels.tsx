@@ -1,6 +1,7 @@
 import { Box } from 'grommet';
 import { useMemo } from 'react';
 
+import { useOverlay } from '../../../overlays/OverlayContext';
 import { ParserOntology, RefMeta } from '../../../shared/types/types.parser';
 import { RefLabel } from '../../../shared/types/types.references';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
@@ -28,6 +29,7 @@ export const RefWithLabels = (props: {
   const refData = props.refData;
   const { showLabels } =
     props.showLabels !== undefined ? props : { showLabels: true };
+  const overlay = useOverlay()?.overlay;
 
   /** display names for selected labels */
   let labelsDisplayNames = useMemo(
@@ -118,7 +120,7 @@ export const RefWithLabels = (props: {
         </Box>
       )}
 
-      {show ? (
+      {show && (!overlay?.ref || props.showDescription) ? (
         <Box margin={{ top: '22px' }}>
           <AggregatedRefLabels
             refLabels={refLabels}
