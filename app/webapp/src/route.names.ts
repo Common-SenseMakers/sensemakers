@@ -7,6 +7,7 @@ export const RouteNames = {
   Posting: 'posting', // callback when singing up while posting
   Test: 'test',
   ConnectMastodon: 'connect-mastodon',
+  ConnectTwitter: 'connect-twitter',
   ConnectBluesky: 'connect-bluesky',
 };
 

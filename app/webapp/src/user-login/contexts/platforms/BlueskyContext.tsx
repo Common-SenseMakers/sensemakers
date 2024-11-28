@@ -93,11 +93,6 @@ export const BlueskyContext = (props: PropsWithChildren) => {
         }
 
         log('Bluesky signup result', result);
-
-        setPlatformConnectedStatus(
-          PLATFORM.Bluesky,
-          PlatformConnectedStatus.Connected
-        );
       } catch (err) {
         log('Error connecting to Bluesky', err);
         setError('Error connecting to Bluesky');

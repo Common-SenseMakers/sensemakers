@@ -12,6 +12,7 @@ import { ResponsiveApp } from '../ui-components/ResponsiveApp';
 import { ThemedApp, useThemeContext } from '../ui-components/ThemedApp';
 import { ConnectBlueskyPage } from '../user-login/ConnectBlueskyPage';
 import { ConnectMastodonPage } from '../user-login/ConnectMastodonPage';
+import { ConnectTwitterPage } from '../user-login/ConnectTwitterPage';
 import { ConnectedUserWrapper } from '../user-login/contexts/ConnectedUserWrapper';
 import { LoadingContext } from './LoadingContext';
 import { GlobalStyles } from './layout/GlobalStyles';
@@ -93,6 +94,11 @@ export const AppContainer = (props: React.PropsWithChildren) => {
                 <Route
                   path={`/${RouteNames.MyPosts}`}
                   element={<UserPostsPage></UserPostsPage>}></Route>
+
+                <Route
+                  path={`${RouteNames.ConnectTwitter}`}
+                  element={<ConnectTwitterPage />}
+                />
 
                 <Route
                   path={`${RouteNames.ConnectMastodon}`}

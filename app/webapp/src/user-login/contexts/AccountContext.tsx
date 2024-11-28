@@ -15,8 +15,8 @@ import { OrcidProfile } from '../../shared/types/types.orcid';
 import {
   ALL_PUBLISH_PLATFORMS,
   ALL_SOURCE_PLATFORMS,
+  IDENTITY_PLATFORM,
   PLATFORM,
-  PUBLISHABLE_PLATFORM,
 } from '../../shared/types/types.platforms';
 import { PlatformProfile } from '../../shared/types/types.profiles';
 import { AppUserRead, EmailDetails } from '../../shared/types/types.user';
@@ -31,7 +31,7 @@ export const ALREADY_CONNECTED_KEY = 'already-connected';
 
 export type AccountContextType = {
   connectedUser?: ConnectedUser;
-  connectedSourcePlatforms: PUBLISHABLE_PLATFORM[];
+  connectedPlatforms: IDENTITY_PLATFORM[];
   isConnected: boolean;
   email?: EmailDetails;
   disconnect: () => void;
@@ -181,6 +181,7 @@ export const AccountContext = (props: PropsWithChildren) => {
       setOverallLoginStatus(OverallLoginStatus.LoggedOut);
       setToken(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setOverallLoginStatus, setToken, token]);
 
   /** keep the conneccted user linkted to the current token */
@@ -218,7 +219,15 @@ export const AccountContext = (props: PropsWithChildren) => {
       setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
     }
 
-    if (connectedUser === null) {
+    const isConnecting =
+      ALL_PUBLISH_PLATFORMS.find((platform) => {
+        return (
+          getPlatformConnectedStatus(platform) ===
+          PlatformConnectedStatus.Connecting
+        );
+      }) !== undefined;
+
+    if (connectedUser === null && !isConnecting) {
       disconnect();
     }
 
@@ -232,6 +241,8 @@ export const AccountContext = (props: PropsWithChildren) => {
   ]);
 
   const disconnect = () => {
+    if (DEBUG) console.log(`disconnect called`);
+
     setConnectedUser(undefined);
     setToken(null);
 
@@ -272,7 +283,7 @@ export const AccountContext = (props: PropsWithChildren) => {
     return platformsConnectedStatus && platformsConnectedStatus[platformId];
   };
 
-  const connectedSourcePlatforms = useMemo(() => {
+  const connectedPlatforms = useMemo(() => {
     return ALL_SOURCE_PLATFORMS.filter((platform) => {
       const profiles = connectedUser?.profiles;
       const profile = profiles && profiles[platform];
@@ -280,18 +291,19 @@ export const AccountContext = (props: PropsWithChildren) => {
     });
   }, [connectedUser]);
 
+  /** single place where a connecting platform is marked as connected */
   useEffect(() => {
-    connectedSourcePlatforms.forEach((platform) => {
+    connectedPlatforms.forEach((platform) => {
       setPlatformConnectedStatus(platform, PlatformConnectedStatus.Connected);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connectedSourcePlatforms]);
+  }, [connectedPlatforms]);
 
   return (
     <AccountContextValue.Provider
       value={{
         connectedUser: connectedUser === null ? undefined : connectedUser,
-        connectedSourcePlatforms,
+        connectedPlatforms,
         email,
         isConnected: connectedUser !== undefined && connectedUser !== null,
         disconnect,

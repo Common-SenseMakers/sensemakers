@@ -24,7 +24,7 @@ export const ConnectSocials = () => {
   const { t } = useTranslation();
   const {
     connectedUser,
-    connectedSourcePlatforms,
+    connectedPlatforms,
     setAlreadyConnected,
     getPlatformConnectedStatus,
   } = useAccountContext();
@@ -112,7 +112,7 @@ export const ConnectSocials = () => {
           primary
           label={t(IntroKeys.continue)}
           onClick={handleContinue}
-          disabled={connectedSourcePlatforms.length === 0}
+          disabled={connectedPlatforms.length === 0}
           style={{ width: '100%', maxWidth: MAX_BUTTON_WIDTH }}
         />
       </BoxCentered>

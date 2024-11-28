@@ -19,6 +19,7 @@ export enum IntroKeys {
   mastodonServerPlaceholder = 'intro-s015',
 
   continue = 'intro-s016',
+  connnectingTwitter = 'intro-s017x',
 }
 
 export const introValues: Record<IntroKeys, string> = {
@@ -47,4 +48,5 @@ export const introValues: Record<IntroKeys, string> = {
   [IntroKeys.errorConnectMastodon]:
     'An error occurred while connecting to the Mastodon server: {{mastodonServer}}',
   [IntroKeys.continue]: 'Continue',
+  [IntroKeys.connnectingTwitter]: 'Connecting Twitter...',
 };
