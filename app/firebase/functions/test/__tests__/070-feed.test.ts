@@ -174,15 +174,17 @@ describe.only('070 test feed', () => {
         return;
       }
       const { feed } = services;
-      const result1 = await feed.getFeed({
+      const query1 = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
           refs: ['https://twitter.com/ItaiYanai/status/1780813867213336910'],
         },
-      });
+      };
+      const result1 = await feed.getFeed(query1);
       expect(result1).to.have.length(2);
+      expect(doesQueryUseSubcollection(query1).useLinksSubcollection).to.be.true;
 
-      const result2 = await feed.getFeed({
+      const query2 = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
           refs: ['https://twitter.com/ItaiYanai/status/1780813867213336910'],
@@ -191,17 +193,21 @@ describe.only('070 test feed', () => {
             'https://sense-nets.xyz/includesQuotationFrom',
           ],
         },
-      });
+      };
+      const result2 = await feed.getFeed(query2);
       expect(result2).to.have.length(2);
+      expect(doesQueryUseSubcollection(query2).useLinksSubcollection).to.be.true;
 
-      const result3 = await feed.getFeed({
+      const query3 = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
           refs: ['https://twitter.com/ItaiYanai/status/1780813867213336910'],
           labels: ['http://purl.org/spar/cito/discusses'],
         },
-      });
+      };
+      const result3 = await feed.getFeed(query3);
       expect(result3).to.have.length(1);
+      expect(doesQueryUseSubcollection(query3).useLinksSubcollection).to.be.true;
     });
   });
 });
