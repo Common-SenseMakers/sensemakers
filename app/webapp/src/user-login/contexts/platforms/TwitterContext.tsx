@@ -6,11 +6,12 @@ import {
   useRef,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 
 import { useAppFetch } from '../../../api/app.fetch';
 import { useToastContext } from '../../../app/ToastsContext';
 import { IntroKeys } from '../../../i18n/i18n.intro';
+import { RouteNames } from '../../../route.names';
 import { HandleSignupResult } from '../../../shared/types/types.fetch';
 import { PLATFORM } from '../../../shared/types/types.platforms';
 import {
@@ -40,6 +41,7 @@ const TwitterContextValue = createContext<TwitterContextType | undefined>(
 
 /** Manages the authentication process */
 export const TwitterContext = (props: PropsWithChildren) => {
+  const location = useLocation();
   const { show } = useToastContext();
   const { t } = useTranslation();
   const verifierHandled = useRef(false);
@@ -77,7 +79,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
     );
 
     const params: TwitterGetContextParams = {
-      callback_url: window.location.href,
+      callback_url: window.location.href + `${RouteNames.ConnectTwitter}`,
       type,
     };
     const siginContext = await appFetch<TwitterSignupContext>(
@@ -131,6 +133,23 @@ export const TwitterContext = (props: PropsWithChildren) => {
           PlatformConnectedStatus.Disconnected
         );
         disconnect();
+        return;
+      }
+
+      /** only handle signup from the twitter-connect subroute, otherwise, reset process */
+      if (
+        (code_param || state_param) &&
+        getPlatformConnectedStatus(PLATFORM.Twitter) ===
+          PlatformConnectedStatus.Connecting
+      ) {
+        if (location.pathname !== `/${RouteNames.ConnectTwitter}`) {
+          setPlatformConnectedStatus(
+            PLATFORM.Twitter,
+            PlatformConnectedStatus.Disconnected
+          );
+          disconnect();
+          return;
+        }
       }
 
       if (
@@ -183,10 +202,6 @@ export const TwitterContext = (props: PropsWithChildren) => {
                 refreshConnected().catch(console.error);
               }
 
-              setPlatformConnectedStatus(
-                PLATFORM.Twitter,
-                PlatformConnectedStatus.Connected
-              );
               setSearchParams(searchParams);
             })
             .catch((e) => {

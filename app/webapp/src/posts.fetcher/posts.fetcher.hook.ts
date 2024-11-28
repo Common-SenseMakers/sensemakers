@@ -44,7 +44,7 @@ export interface FetcherConfig {
  * fething newer and older posts as requested by a consuming component
  */
 export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
-  const { connectedUser, connectedSourcePlatforms } = useAccountContext();
+  const { connectedUser, connectedPlatforms } = useAccountContext();
 
   const {
     endpoint,
@@ -73,7 +73,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
   const [errorFetchingNewer, setErrorFetchingNewer] = useState<Error>();
   const [moreToFetch, setMoreToFetch] = useState(true);
 
-  const [connectedSourcePlatformsInit] = useState(connectedSourcePlatforms);
+  const [connectedPlatformsInit] = useState(connectedPlatforms);
 
   const unsubscribeCallbacks = useRef<Record<string, () => void>>({});
 
@@ -445,17 +445,17 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
         {
           posts,
           fetchedOlderFirst,
-          connectedSourcePlatforms,
+          connectedPlatforms,
         }
       );
     if (
-      !arraysEqual(connectedSourcePlatforms, connectedSourcePlatformsInit) &&
+      !arraysEqual(connectedPlatforms, connectedPlatformsInit) &&
       !isFetchingOlder
     ) {
       if (DEBUG)
         console.log(
           `${DEBUG_PREFIX} resetting and _fetchOlder due to connectedSourcePlatforms`,
-          { connectedSourcePlatforms }
+          { connectedPlatforms }
         );
       // console.warn('skipping reset due to connectedPlatforms');
       // reset();
@@ -465,8 +465,8 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     DEBUG_PREFIX,
-    connectedSourcePlatforms,
-    connectedSourcePlatformsInit,
+    connectedPlatforms,
+    connectedPlatformsInit,
     fetchedOlderFirst,
     isFetchingOlder,
     posts,
