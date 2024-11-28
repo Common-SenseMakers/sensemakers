@@ -21,7 +21,11 @@ import {
 import { chunkNumber, enqueueTask } from '../../tasksUtils/tasks.support';
 import { canReadPost } from '../posts.access.control';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
-import { postIdValidation, updatePostSchema } from './posts.schema';
+import {
+  getPostSchema,
+  postIdValidation,
+  updatePostSchema,
+} from './posts.schema';
 
 const DEBUG = false;
 
@@ -59,13 +63,13 @@ export const getPostController: RequestHandler = async (request, response) => {
     const userId = getAuthenticatedUser(request);
     const { postsManager } = getServices(request);
 
-    const payload = (await postIdValidation.validate(
+    const payload = (await getPostSchema.validate(
       request.body
     )) as GetPostPayload;
 
     const config = payload.config || {
       addMirrors: true,
-      addAggregatedLabels: false,
+      addAggregatedLabels: true,
     };
 
     const post = await postsManager.getPost(payload.postId, config, true);

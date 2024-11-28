@@ -213,13 +213,16 @@ describe('070 test feed', () => {
             'http://purl.org/spar/cito/discusses',
             'https://sense-nets.xyz/includesQuotationFrom',
           ],
-          hydrateConfig: { addAggregatedLabels: false },
         },
+        hydrateConfig: { addAggregatedLabels: true },
       };
       const result2 = await feed.getFeed(query2);
       expect(result2).to.have.length(2);
-      expect(doesQueryUseSubcollection(query2).useLinksSubcollection).to.be
-        .true;
+      expect(doesQueryUseSubcollection(query2).useLinksSubcollection).to.be.true;
+      result2.forEach((post) => {
+        expect(post.meta?.refLabels).to.not.be.undefined;
+        expect(Object.keys(post.meta!.refLabels)).to.have.length.greaterThan(0);
+      });
 
       const query3 = {
         fetchParams: { expectedAmount: 10 },
