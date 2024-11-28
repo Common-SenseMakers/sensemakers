@@ -11,7 +11,9 @@ export const getPostSchema = object({
   config: object({
     addMirrors: string().optional(),
     addAggregatedLabels: string().optional(),
-  }).optional(),
+  })
+    .optional()
+    .default(undefined),
 }).noUnknown(true);
 
 export const createDraftPostSchema = object({
