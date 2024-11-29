@@ -30,6 +30,7 @@ import {
 import { FetchedDetails } from '../@shared/types/types.profiles';
 import { AccountCredentials, AppUser } from '../@shared/types/types.user';
 import { addTripleToSemantics } from '../@shared/utils/n3.utils';
+import { getProfileId } from '../@shared/utils/profiles.utils';
 import {
   HAS_TOPIC_URI,
   NOT_SCIENCE_TOPIC_URI,
@@ -178,11 +179,9 @@ export class PostsManager {
     credentials?: AccountCredentials,
     userId?: string
   ) {
-    const profile = await this.users.profiles.getProfile(
-      platformId,
-      user_id,
-      manager,
-      true
+    const profile = await this.users.getOrCreateProfile(
+      getProfileId(platformId, user_id),
+      manager
     );
 
     const platformParams = await this.preparePlatformParams(
