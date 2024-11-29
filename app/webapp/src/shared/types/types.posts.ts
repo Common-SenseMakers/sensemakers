@@ -126,6 +126,7 @@ export interface AppPostMirror {
 export type PostUpdate = Partial<
   Pick<
     AppPost,
+    | 'authorUserId'
     | 'generic'
     | 'semantics'
     | 'structuredSemantics'

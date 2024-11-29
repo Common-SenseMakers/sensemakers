@@ -1,6 +1,7 @@
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
+import { processInBatches } from '../../src/db/db.utils';
 import { logger } from '../../src/instances/logger';
-import { processInBatches, promptUser } from '../migration.utils';
+import { promptUser } from '../migration.utils';
 import { servicesSource, servicesTarget } from '../migrations.services';
 import { processPost } from './process.post';
 import { processUser } from './process.user';

@@ -1,9 +1,9 @@
 import { AppPost } from '../src/@shared/types/types.posts';
 import { AccountProfile } from '../src/@shared/types/types.profiles';
+import { getProfileId } from '../src/@shared/utils/profiles.utils';
+import { processInBatches } from '../src/db/db.utils';
 import { logger } from '../src/instances/logger';
 import { PostsHelper } from '../src/posts/posts.helper';
-import { getProfileId } from '../src/profiles/profiles.repository';
-import { processInBatches } from './migration.utils';
 import { servicesSource, servicesTarget } from './migrations.services';
 
 const DEBUG = false;
@@ -38,6 +38,7 @@ const DEBUG = false;
           const sourcePostFull =
             await servicesSource.postsManager.processing.getPostFull(
               sourcePost.id,
+              {},
               managerSource,
               true
             );
@@ -109,7 +110,7 @@ const DEBUG = false;
             throw new Error(`Profile ${author_user_id} not found`);
           }
 
-          servicesTarget.users.profiles.create(sourceProfile, managerTarget);
+          servicesTarget.users.createProfile(sourceProfile, managerTarget);
         }
 
         /** create mirror PlatformPost */

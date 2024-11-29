@@ -1,4 +1,4 @@
-import { Box, Text } from 'grommet';
+import { Box, BoxExtendedProps, Text } from 'grommet';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -37,13 +37,13 @@ export const PostsFetcherComponent = (props: {
   pageTitle?: string;
   isPublicFeed?: boolean;
   showHeader?: boolean;
-
   overlayConfig?: OverlayConfig;
+  boxProps?: BoxExtendedProps;
 }) => {
   const { show: showToast } = useToastContext();
   const { t } = useTranslation();
 
-  const { feed, isPublicFeed: _isPublicFeed } = props;
+  const { feed, isPublicFeed: _isPublicFeed, boxProps } = props;
 
   const isPublicFeed = _isPublicFeed !== undefined ? _isPublicFeed : false;
 
@@ -199,8 +199,13 @@ export const PostsFetcherComponent = (props: {
   return (
     <Box
       fill
-      style={{ backgroundColor: '#FFFFFF', position: 'relative' }}
-      justify="start">
+      style={{
+        backgroundColor: '#FFFFFF',
+        position: 'relative',
+        ...boxProps?.style,
+      }}
+      justify="start"
+      {...boxProps}>
       {!posts || isLoading
         ? showLoading
         : posts.length === 0

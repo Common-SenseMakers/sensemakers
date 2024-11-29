@@ -18,6 +18,8 @@ const KEYWORDS_SEMANTICS_ID = 'keywords-semantics';
 const REFS_SEMANTICS_ID = 'refs-semantics';
 const POST_AUTHOR_ID = 'post-author';
 
+export const CARD_BORDER = '1px solid var(--Neutral-300, #D1D5DB)';
+
 const PostCardHeader = (props: { post: AppPostFull }) => {
   const { constants } = useThemeContext();
   const details = getPostDetails(props.post);
@@ -116,7 +118,6 @@ export const PostCard = (props: {
   };
 
   const postText = concatenateThread(post.generic);
-  const showPublish = !props.isPublicFeed;
 
   const handleInternalClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).tagName === 'A') {
@@ -129,21 +130,17 @@ export const PostCard = (props: {
   const header = <PostCardHeader post={post}></PostCardHeader>;
 
   return (
-    <>
-      {showPublish && (
-        <Box direction="row" justify="between" margin={{ bottom: '16px' }}>
-          <PublishButtons></PublishButtons>
-        </Box>
-      )}
-      <Box
-        pad={{ top: '16px', horizontal: '12px', bottom: '24px' }}
-        style={{
-          backgroundColor: shade ? constants.colors.shade : 'white',
-          borderBottom: '1px solid var(--Neutral-300, #D1D5DB)',
-          borderRight: '1px solid var(--Neutral-300, #D1D5DB)',
-          borderLeft: '1px solid var(--Neutral-300, #D1D5DB)',
-          borderTop: 'none',
-        }}>
+    <Box
+      style={{
+        backgroundColor: shade ? constants.colors.shade : 'white',
+        borderBottom: CARD_BORDER,
+        borderRight: CARD_BORDER,
+        borderLeft: CARD_BORDER,
+        borderTop: 'none',
+      }}>
+      <PublishButtons margin={{ bottom: '16px' }}></PublishButtons>
+
+      <Box pad={{ top: '16px', horizontal: '12px', bottom: '24px' }}>
         <Box
           style={{ cursor: 'pointer', position: 'relative' }}
           onClick={handleClick}>
@@ -196,6 +193,6 @@ export const PostCard = (props: {
           )}
         </Box>
       </Box>
-    </>
+    </Box>
   );
 };

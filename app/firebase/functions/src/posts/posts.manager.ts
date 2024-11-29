@@ -30,6 +30,7 @@ import {
 import { FetchedDetails } from '../@shared/types/types.profiles';
 import { AccountCredentials, AppUser } from '../@shared/types/types.user';
 import { addTripleToSemantics } from '../@shared/utils/n3.utils';
+import { getProfileId } from '../@shared/utils/profiles.utils';
 import {
   HAS_TOPIC_URI,
   NOT_SCIENCE_TOPIC_URI,
@@ -178,11 +179,9 @@ export class PostsManager {
     credentials?: AccountCredentials,
     userId?: string
   ) {
-    const profile = await this.users.profiles.getProfile(
-      platformId,
-      user_id,
-      manager,
-      true
+    const profile = await this.users.getOrCreateProfile(
+      getProfileId(platformId, user_id),
+      manager
     );
 
     const platformParams = await this.preparePlatformParams(
@@ -763,7 +762,7 @@ export class PostsManager {
 
     /** store the semantics and mark as processed */
     await this.db.run(async (manager) => {
-      return this.updatePost(post.id, update, manager, true);
+      return this.updatePost(post.id, update, manager);
     });
   }
 
@@ -771,8 +770,7 @@ export class PostsManager {
   async updatePost(
     postId: string,
     postUpdate: PostUpdate,
-    manager: TransactionManager,
-    first?: boolean
+    manager: TransactionManager
   ) {
     if (DEBUG) logger.debug(`updatePost ${postId}`, { postId, postUpdate });
     await this.processing.posts.update(postId, postUpdate, manager);
@@ -789,6 +787,76 @@ export class PostsManager {
         manager,
         postUpdated.semantics
       );
+    }
+  }
+
+  /**
+   * look for users accounts and update the userId property on the corresponding
+   * Profiles
+   */
+  async linkExistingUser(userId: string) {
+    /** on transaction to set the profiles */
+    await this.db.run(async (manager) => {
+      const user = await this.users.repo.getUser(userId, manager, true);
+      await Promise.all(
+        ALL_PUBLISH_PLATFORMS.map(async (platform) => {
+          const accounts = UsersHelper.getAccounts(user, platform);
+          await Promise.all(
+            accounts.map(async (account) => {
+              /** udpate the profile */
+              const profileId = getProfileId(platform, account.user_id);
+
+              const profile = await this.users.profiles.getByProfileId(
+                profileId,
+                manager,
+                true
+              );
+              if (!profile) {
+                throw new Error('unexpected missing profile');
+              }
+
+              await this.users.profiles.setUserId(profileId, userId, manager);
+            })
+          );
+        })
+      );
+    });
+
+    /** one transaction to read all platform posts */
+    const _allPosts = await this.db.run(async (manager) => {
+      const user = await this.users.repo.getUser(userId, manager, true);
+      return Promise.all(
+        ALL_PUBLISH_PLATFORMS.map(async (platform) => {
+          const accounts = UsersHelper.getAccounts(user, platform);
+          return Promise.all(
+            accounts.map(async (account) => {
+              /** udpate the profile */
+              const profileId = getProfileId(platform, account.user_id);
+              /** get this account platform posts */
+              const posts = await this.processing.posts.getAllOfQuery({
+                profileId,
+                fetchParams: { expectedAmount: 1000 },
+              });
+              return posts;
+            })
+          );
+        })
+      );
+    });
+
+    const allPosts = _allPosts.flat(2);
+
+    /** write in batches of 100 */
+    const size = 100;
+    for (let i = 0; i < allPosts.length; i += size) {
+      const thisPosts = allPosts.slice(i, i + size);
+      await this.db.run(async (manager) => {
+        return Promise.all(
+          thisPosts.map((post) =>
+            this.updatePost(post.id, { authorUserId: userId }, manager)
+          )
+        );
+      });
     }
   }
 }

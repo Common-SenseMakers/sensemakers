@@ -108,11 +108,13 @@ export const AppLabelsEditor = (props: {
   };
 
   const hasManyLabels =
-    props.maxLabels !== undefined && props.labels.length >= props.maxLabels;
+    props.maxLabels !== undefined && props.labels.length >= props.maxLabels + 1;
+
   const visibleLables =
     props.maxLabels !== undefined
       ? props.labels.slice(0, props.maxLabels)
       : props.labels;
+
   const nonVisibleLabels =
     props.maxLabels !== undefined ? props.labels.slice(props.maxLabels) : [];
 

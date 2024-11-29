@@ -18,6 +18,7 @@ import { AppButton } from '../ui-components';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
+import { CARD_BORDER } from './PostCard';
 import { PostHeader } from './PostHeader';
 import { PublishButtons } from './PostPublishButtons';
 import { PostTextEditable } from './PostTextEditable';
@@ -162,15 +163,8 @@ export const PostView = (props: {
 
     return (
       <>
-        {!props.isPublicFeed && (
-          <Box
-            style={{ flexShrink: 0 }}
-            direction="row"
-            justify="between"
-            margin={{ bottom: '16px' }}>
-            <PublishButtons></PublishButtons>
-          </Box>
-        )}
+        <PublishButtons margin={{ bottom: '16px' }}></PublishButtons>
+
         <Box
           pad={{ top: 'medium', horizontal: 'medium', bottom: 'large' }}
           style={{ flexShrink: 0 }}>
@@ -200,7 +194,14 @@ export const PostView = (props: {
 
   return (
     <Box fill>
-      <Box style={{ overflowY: 'auto', flexGrow: 1 }}>{content}</Box>
+      <Box
+        style={{
+          overflowY: 'auto',
+          flexGrow: 1,
+          border: CARD_BORDER,
+        }}>
+        {content}
+      </Box>
     </Box>
   );
 };
