@@ -107,18 +107,18 @@ export const handleSignupController: RequestHandler = async (
     const result = await services.db.run(
       async (manager) => {
         /** handle signup and refetch user posts */
-        return await services.users.handleSignup(
-          platform,
-          payload,
-          manager,
-          userId
-        );
+        return services.users.handleSignup(platform, payload, manager, userId);
       },
       undefined,
       undefined,
       `handleSignupController ${debugId}`,
       DEBUG
     );
+
+    if (result) {
+      /** update userId of posts and profiles */
+      await services.postsManager.linkExistingUser(result.userId);
+    }
 
     response.status(200).send({ success: true, data: result });
   } catch (error: any) {

@@ -3,7 +3,6 @@ import { expect } from 'chai';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { AppUser } from '../../src/@shared/types/types.user';
 import { logger } from '../../src/instances/logger';
-import { getPostController } from '../../src/posts/controllers/posts.controller';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
 import { fetchPostInTests } from '../utils/posts.utils';
@@ -23,7 +22,7 @@ import { getTestServices } from './test.services';
 
 const feedThreads = [[''], [''], [''], [''], ['']];
 
-describe.only('080 get reference aggregation', () => {
+describe.skip('080 get reference aggregation', () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER

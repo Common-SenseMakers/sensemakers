@@ -128,7 +128,7 @@ const authenticateBlueskyForUser = async (
   return user;
 };
 
-const authenticateTwitterForUser = async (
+export const authenticateTwitterForUser = async (
   credentials: TestUserCredentials,
   services: TestServices,
   manager: TransactionManager,

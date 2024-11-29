@@ -49,6 +49,7 @@ export const fetchPlatformAccountTask = async (
   if (DEBUG) logger.debug('Fetching account with params', { fetchParams });
 
   let credentials: AccountCredentials | undefined = undefined;
+
   if (platformId === PLATFORM.Bluesky) {
     const blueskyDoc = await firestore
       .collection('adminCredentials')
