@@ -24,7 +24,7 @@ import {
   UserSettings,
   UserSettingsUpdate,
 } from '../@shared/types/types.user';
-import { splitProfileId } from '../@shared/utils/profiles.utils';
+import { getProfileId, splitProfileId } from '../@shared/utils/profiles.utils';
 import { USER_INIT_SETTINGS } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
 import { removeUndefined } from '../db/repo.base';
@@ -207,7 +207,7 @@ export class UsersService {
           platformId: platform,
         };
 
-        this.profiles.create(profileCreate, manager);
+        this.upsertProfile(profileCreate, manager);
       }
     } else {
       /**
@@ -267,7 +267,7 @@ export class UsersService {
           platformId: platform,
         };
 
-        this.profiles.create(profileCreate, manager);
+        this.upsertProfile(profileCreate, manager);
 
         if (DEBUG)
           logger.debug(
@@ -480,11 +480,25 @@ export class UsersService {
     if (!profile) {
       throw new Error('Profile not found');
     }
+
     const profileCreate: AccountProfileCreate = {
       ...profile,
       platformId: platformId,
     };
-    this.profiles.create(profileCreate, manager);
+    this.createProfile(profileCreate, manager);
+    return profile;
+  }
+
+  async createProfile<P extends PlatformProfile = PlatformProfile>(
+    profileCreate: AccountProfileCreate,
+    manager: TransactionManager
+  ) {
+    const id = this.profiles.create(profileCreate, manager);
+    const profile = {
+      id,
+      ...profileCreate,
+    } as AccountProfile<P>;
+
     return profile;
   }
 
@@ -509,11 +523,23 @@ export class UsersService {
       platformId: platform,
     };
 
-    const id = this.profiles.create(profileCreate, manager);
-    const profile = {
-      id,
-      ...profileCreate,
-    } as AccountProfile<P>;
+    return this.createProfile(profileCreate, manager);
+  }
+
+  /**  */
+  async upsertProfile<P extends PlatformProfile = PlatformProfile>(
+    profile: AccountProfileCreate,
+    manager: TransactionManager
+  ) {
+    const profileId = getProfileId(profile.platformId, profile.user_id);
+    const exisiting = await this.profiles.getByProfileId<false, P>(
+      profileId,
+      manager
+    );
+
+    if (!exisiting) {
+      return this.createProfile<P>(profile, manager);
+    }
 
     return profile;
   }

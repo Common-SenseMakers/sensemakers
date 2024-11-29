@@ -28,7 +28,7 @@ export const createUsers = async (
           userId,
         };
 
-        services.users.profiles.create(profileCreate, manager);
+        services.users.createProfile(profileCreate, manager);
       });
 
       return services.users.repo.getUser(userId, manager, true);

@@ -208,4 +208,13 @@ export class ProfilesRepository {
     /** overwrite all the user account credentials */
     manager.update(profileRef, { fetched: newFetched });
   }
+
+  async setUserId(
+    profileId: string,
+    userId: string,
+    manager: TransactionManager
+  ) {
+    const profileRef = await this.getRef(profileId, manager, true);
+    manager.update(profileRef, { userId });
+  }
 }

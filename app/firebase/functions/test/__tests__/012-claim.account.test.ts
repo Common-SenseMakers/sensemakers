@@ -57,6 +57,9 @@ describe.only('012-claim-account', () => {
         authenticateTwitterForUser(credentials, services, manager, undefined)
       );
 
+      /** update userId of posts and profiles */
+      await services.postsManager.linkExistingUser(twitterUser.userId);
+
       expect(twitterUser).to.not.be.undefined;
     });
   });
