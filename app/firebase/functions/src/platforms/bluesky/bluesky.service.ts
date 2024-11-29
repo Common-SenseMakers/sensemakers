@@ -3,8 +3,10 @@ import AtpAgent, {
   AppBskyFeedPost,
   RichText,
 } from '@atproto/api';
+import * as jwt from 'jsonwebtoken';
 
 import {
+  AccessJwtPayload,
   BlueskyAccountCredentials,
   BlueskyAccountDetails,
   BlueskyCredentials,
@@ -104,10 +106,18 @@ export class BlueskyService
     if (!this.agent.session) {
       throw new Error('Failed to initiate bluesky session');
     }
-    const newCredentials =
-      session.accessJwt !== this.agent.session.accessJwt
-        ? this.agent.session
-        : undefined;
+    const decodedAccessJwt = jwt.decode(
+      this.agent.session.accessJwt
+    ) as AccessJwtPayload;
+
+    let newCredentials: BlueskyCredentials | undefined = undefined;
+
+    /** if the access token is under 1 hour from expiring, refresh it */
+    if (decodedAccessJwt.exp * 1000 - this.time.now() < 1000 * 60 * 60) {
+      await this.agent.sessionManager.refreshSession();
+      newCredentials = this.agent.session;
+    }
+
     return { client: this.agent, credentials: newCredentials };
   }
 
