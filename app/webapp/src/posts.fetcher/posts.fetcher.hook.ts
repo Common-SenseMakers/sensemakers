@@ -3,7 +3,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
-import { subscribeToUpdates } from '../firestore/realtime.listener';
 import { FetchParams } from '../shared/types/types.fetch';
 import { AppPostFull, PostsQuery } from '../shared/types/types.posts';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
@@ -46,13 +45,7 @@ export interface FetcherConfig {
 export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
   const { connectedUser, connectedPlatforms } = useAccountContext();
 
-  const {
-    endpoint,
-    queryParams,
-    subscribe,
-    onPostsAdded,
-    PAGE_SIZE: _PAGE_SIZE,
-  } = input;
+  const { endpoint, queryParams, onPostsAdded, PAGE_SIZE: _PAGE_SIZE } = input;
 
   const DEBUG_PREFIX = input.DEBUG_PREFIX || '';
 
@@ -93,132 +86,56 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /** refetch a post and overwrite its value in the array */
-  const refetchPost = useCallback(
-    async (postId: string) => {
-      // skip fetching if we are in the middle of a code management
-      if (!connectedUser || code) {
-        return;
-      }
-
-      try {
-        const post = await appFetch<AppPostFull>(
-          `/api/posts/get`,
-          { postId },
-          true
-        );
-
-        if (DEBUG)
-          console.log(`${DEBUG_PREFIX}refetch post returned`, {
-            post,
-            posts,
-          });
-
-        const shouldRemove = (() => {
-          return false;
-        })();
-
-        setPosts((prev) => {
-          const newPosts = prev ? [...prev] : [];
-          const ix = prev ? prev.findIndex((p) => p.id === postId) : -1;
-
-          if (DEBUG)
-            console.log(`${DEBUG_PREFIX}setPosts called`, {
-              ix,
-              newPosts,
-            });
-
-          if (ix !== -1) {
-            if (DEBUG)
-              console.log(`${DEBUG_PREFIX}settingPost`, {
-                ix,
-                shouldRemove,
-              });
-            if (shouldRemove) {
-              newPosts.splice(ix, 1);
-            } else {
-              newPosts[ix] = post;
-            }
-          }
-          return newPosts;
-        });
-      } catch (e) {
-        console.error(e);
-        throw new Error(`${DEBUG_PREFIX || ''}Error fetching post ${postId}`);
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [connectedUser, code, posts]
-  );
-
-  const setPostsCallback = (
-    prev: AppPostFull[] | undefined,
-    candidateNewPosts: AppPostFull[],
-    position: 'start' | 'end'
-  ) => {
-    /** filter existing posts */
-    const newPosts =
-      prev !== undefined
-        ? candidateNewPosts.filter(
-            (post) => !prev.find((prevPost) => prevPost.id === post.id)
-          )
-        : candidateNewPosts;
-
-    /** subscribe to updates */
-    newPosts.forEach((post) => {
-      if (!unsubscribeCallbacks.current) {
-        unsubscribeCallbacks.current = {};
-      }
-
-      const current = unsubscribeCallbacks.current[post.id];
-      /** unsubscribe from previous */
-      if (current) {
-        if (DEBUG)
-          console.log(
-            `${DEBUG_PREFIX}current unsubscribe for post ${post.id} found`
-          );
-        current();
-      }
-
-      if (subscribe) {
-        const unsubscribe = subscribeToUpdates(`post-${post.id}`, () => {
-          if (DEBUG) console.log(`${DEBUG_PREFIX}update detected`, post.id);
-          refetchPost(post.id).catch((e) => {
-            console.error(e);
-          });
-        });
-
-        if (DEBUG)
-          console.log(
-            `${DEBUG_PREFIX}unsubscribefor post ${post.id} stored on unsubscribeCallbacks`
-          );
-        unsubscribeCallbacks.current[post.id] = unsubscribe;
-      }
-    });
-
-    const allPosts =
-      position === 'end'
-        ? prev
-          ? prev.concat(newPosts)
-          : newPosts
-        : prev
-          ? newPosts.reverse().concat(prev)
-          : newPosts;
-
-    if (DEBUG) console.log(`${DEBUG_PREFIX}pushing posts`, { prev, allPosts });
-    return allPosts;
-  };
-
   const addPosts = useCallback(
-    (newPosts: AppPostFull[], position: 'start' | 'end') => {
+    (candidateNewPosts: AppPostFull[], position: 'start' | 'end') => {
       if (DEBUG)
-        console.log(`${DEBUG_PREFIX}addPosts called`, { posts: newPosts });
+        console.log(`${DEBUG_PREFIX}addPosts called`, {
+          posts: candidateNewPosts,
+        });
 
       /** add posts  */
-      setPosts((prev) => setPostsCallback(prev, newPosts, position));
+      setPosts((prev) => {
+        /** filter existing posts */
+        const newPosts =
+          prev !== undefined
+            ? candidateNewPosts.filter(
+                (post) => !prev.find((prevPost) => prevPost.id === post.id)
+              )
+            : candidateNewPosts;
+
+        /** subscribe to updates */
+        newPosts.forEach((post) => {
+          if (!unsubscribeCallbacks.current) {
+            unsubscribeCallbacks.current = {};
+          }
+
+          const current = unsubscribeCallbacks.current[post.id];
+          /** unsubscribe from previous */
+          if (current) {
+            if (DEBUG)
+              console.log(
+                `${DEBUG_PREFIX}current unsubscribe for post ${post.id} found`
+              );
+            current();
+          }
+        });
+
+        const allPosts =
+          position === 'end'
+            ? prev
+              ? prev.concat(newPosts)
+              : newPosts
+            : prev
+              ? newPosts.reverse().concat(prev)
+              : newPosts;
+
+        if (DEBUG)
+          console.log(`${DEBUG_PREFIX}pushing posts`, { prev, allPosts });
+        return allPosts;
+      });
 
       if (onPostsAdded) {
-        onPostsAdded(newPosts);
+        onPostsAdded(candidateNewPosts);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

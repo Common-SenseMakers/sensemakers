@@ -1,4 +1,4 @@
-import { Box } from 'grommet';
+import { Box, Text } from 'grommet';
 import { DataFactory } from 'n3';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -98,11 +98,16 @@ export const PublishButtons = () => {
       align="center"
       pad={{ vertical: '12px', horizontal: '12px' }}>
       <AppCheckBoxMessage
+        reverse
+        boxType="toggle"
         message={t(PostEditKeys.publish)}
         checked={isScience}
         onCheckChange={(value) => {
           checkboxChanged(value).catch((e) => console.error(e));
         }}></AppCheckBoxMessage>
+      <Box>
+        <Text>{}</Text>
+      </Box>
     </Box>
   );
 };
