@@ -1,10 +1,11 @@
-import { Box, Text } from 'grommet';
+import { Box, BoxExtendedProps } from 'grommet';
 import { DataFactory } from 'n3';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppCheckBoxMessage } from '../app/icons/AppCheckBoxMessage';
 import { PostEditKeys } from '../i18n/i18n.edit.post';
+import { AppPostParsingStatus } from '../shared/types/types.posts';
 import {
   cloneStore,
   getNode,
@@ -17,13 +18,16 @@ import {
   SCIENCE_TOPIC_URI,
   THIS_POST_NAME_URI,
 } from '../shared/utils/semantics.helper';
+import { LoadingDiv } from '../ui-components/LoadingDiv';
+import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { usePost } from './post.context/PostContext';
 
 const DEBUG = false;
 
-export const PublishButtons = () => {
+export const PublishButtons = (props: BoxExtendedProps) => {
   const { t } = useTranslation();
   const { updated } = usePost();
+  const { connectedUser } = useAccountContext();
 
   const isScience = useMemo(() => {
     if (!updated.storeMerged) {
@@ -89,25 +93,36 @@ export const PublishButtons = () => {
     [updated.storeMerged]
   );
 
+  const show =
+    connectedUser &&
+    updated.postMerged &&
+    updated.postMerged.authorUserId === connectedUser.userId;
+
+  if (!show) {
+    return <></>;
+  }
+
   return (
     <Box
-      style={{ backgroundColor: '#FFEEDB', width: '100%' }}
       direction="row"
       justify="between"
       gap="16px"
       align="center"
-      pad={{ vertical: '12px', horizontal: '12px' }}>
-      <AppCheckBoxMessage
-        reverse
-        boxType="toggle"
-        message={t(PostEditKeys.publish)}
-        checked={isScience}
-        onCheckChange={(value) => {
-          checkboxChanged(value).catch((e) => console.error(e));
-        }}></AppCheckBoxMessage>
-      <Box>
-        <Text>{}</Text>
-      </Box>
+      pad={{ vertical: '12px', horizontal: '12px' }}
+      {...props}
+      style={{ backgroundColor: '#FFEEDB', width: '100%', ...props.style }}>
+      {updated.postMerged?.parsingStatus === AppPostParsingStatus.PROCESSING ? (
+        <LoadingDiv style={{ width: '160px' }}></LoadingDiv>
+      ) : (
+        <AppCheckBoxMessage
+          reverse
+          boxType="toggle"
+          message={t(PostEditKeys.publish)}
+          checked={isScience}
+          onCheckChange={(value) => {
+            checkboxChanged(value).catch((e) => console.error(e));
+          }}></AppCheckBoxMessage>
+      )}
     </Box>
   );
 };

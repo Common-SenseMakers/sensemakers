@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppGeneralKeys } from '../i18n/i18n.app.general';
+import { CARD_BORDER } from '../post/PostCard';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
 import { AppHeading } from '../ui-components';
 import { usePersist } from '../utils/use.persist';
@@ -31,6 +32,9 @@ export const UserPostsFeed = () => {
           <AppHeading level={2}>{t(AppGeneralKeys.myPosts)}</AppHeading>
         </Box>
         <PostsFetcherComponent
+          boxProps={{
+            style: { borderTop: CARD_BORDER },
+          }}
           feed={feed}
           pageTitle={t(AppGeneralKeys.myPosts)}></PostsFetcherComponent>
       </Box>

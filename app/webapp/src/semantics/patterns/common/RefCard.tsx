@@ -3,6 +3,7 @@ import { Anchor, Box, Paragraph, Text } from 'grommet';
 import { useMemo } from 'react';
 
 import { OpenLinkIcon } from '../../../app/icons/OpenLinkIcon';
+import { CARD_BORDER } from '../../../post/PostCard';
 import { AppHeading } from '../../../ui-components';
 import { useThemeContext } from '../../../ui-components/ThemedApp';
 import { zoteroItemTypeDisplay } from '../../../utils/post.utils';
@@ -74,7 +75,7 @@ export const RefCard = (props: {
           <Box
             style={{
               borderRadius: '8px',
-              border: '1px solid var(--Neutral-300, #D1D5DB)',
+              border: CARD_BORDER,
               background: props.image
                 ? `url(${props.image}) lightgray 50% / cover no-repeat`
                 : undefined,
