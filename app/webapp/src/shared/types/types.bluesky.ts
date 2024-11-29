@@ -81,3 +81,11 @@ export type BlueskyPost = AppBskyFeedDefs.PostView & {
     record: QuotedBlueskyPost;
   };
 };
+
+export interface AccessJwtPayload {
+  scope: string;
+  sub: string;
+  iat: number;
+  exp: number;
+  aud: string;
+}
