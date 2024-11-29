@@ -36,9 +36,13 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
       const _baseStore = semanticStringToStore(semantics);
       setBaseStore(_baseStore);
     } else {
-      /** This is the key merge: when updates from the backend are received, we
+      /**
+       * This is the key merge: when updates from the backend are received, we
        * see which operations have been applied and move them from the operations list
-       * to the base store
+       * to the base store.
+       *
+       * Updates from the backend can also come from updates to fetched.post done by another
+       * PostContext.
        */
       if (fetched.post && baseStore) {
         /** updates after base post was set. Remove operations
@@ -50,9 +54,8 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
           });
 
         const fetchedStore = semanticStringToStore(fetched.post.semantics);
-        let modified = false;
 
-        /** check if add operations are in the semantics */
+        /** Add or remove operations that have been applied */
         operations.forEach((operation) => {
           if (operation.type === 'add' && fetchedStore.has(operation.quad)) {
             /** the quad was added to the semantics, remove operation */
@@ -60,7 +63,6 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
               console.log('operation "add" detected as applied', { operation });
             operations.splice(operations.indexOf(operation), 1);
             baseStore.addQuad(operation.quad);
-            modified = true;
           }
 
           if (
@@ -74,7 +76,28 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
               });
             operations.splice(operations.indexOf(operation), 1);
             baseStore.removeQuad(operation.quad);
-            modified = true;
+          }
+        });
+
+        /** Add or remove quads that are in the new fetched.post */
+        forEachStore(fetchedStore, (quad) => {
+          if (!baseStore.has(quad)) {
+            if (DEBUG)
+              console.log('quad added by fetched post', {
+                quad,
+              });
+            baseStore.addQuad(quad);
+          }
+        });
+
+        /** Remove quads that are not in the new fetched.post */
+        forEachStore(baseStore, (quad) => {
+          if (!fetchedStore.has(quad)) {
+            if (DEBUG)
+              console.log('quad removed by fetched post', {
+                quad,
+              });
+            baseStore.removeQuad(quad);
           }
         });
 
@@ -84,14 +107,13 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
             fetchedPost: fetched.post,
           });
 
-        if (modified) {
-          /** unapplied uperations remain stored locally, eventually this array should be empty if everything goes well */
-          setOperations([...operations]);
-          setBaseStore(cloneStore(baseStore));
-        }
+        /** unapplied uperations remain stored locally, eventually this array should be empty if everything goes well */
+        setOperations([...operations]);
+        setBaseStore(cloneStore(baseStore));
       }
     }
-  }, [baseStore, fetched.post, operations]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetched.post]);
 
   /** keeps merged semantics derived from the basePost and operations */
   useEffect(() => {
