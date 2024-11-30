@@ -181,6 +181,7 @@ export class UsersService {
 
         return {
           userId: _userId,
+          created: false,
         };
       } else {
         /**
@@ -207,7 +208,7 @@ export class UsersService {
           platformId: platform,
         };
 
-        this.upsertProfile(profileCreate, manager);
+        await this.upsertProfile(profileCreate, manager);
       }
     } else {
       /**
@@ -238,6 +239,7 @@ export class UsersService {
             userId,
           }),
           userId,
+          created: false,
         };
       } else {
         /**
@@ -247,17 +249,30 @@ export class UsersService {
 
         const initSettings: UserSettings = USER_INIT_SETTINGS;
 
-        const userId = await this.repo.createUser(
-          prefixed_user_id,
-          {
-            settings: initSettings,
-            signupDate: this.time.now(),
-            accounts: {
-              [platform]: [authenticatedDetails],
+        const exisiting = await this.repo.getUser(prefixed_user_id, manager);
+        let userId = prefixed_user_id;
+
+        if (!exisiting) {
+          userId = await this.repo.createUser(
+            prefixed_user_id,
+            {
+              settings: initSettings,
+              signupDate: this.time.now(),
+              accounts: {
+                [platform]: [authenticatedDetails],
+              },
             },
-          },
-          manager
-        );
+            manager
+          );
+        } else {
+          /** recover from intermediate signup situations (not expected but useful on some data migrations) */
+          await this.repo.setAccountDetails(
+            exisiting.userId,
+            platform,
+            authenticatedDetails,
+            manager
+          );
+        }
 
         /** create profile and link it to the user */
         /** create the profile when addint that account */
@@ -267,7 +282,7 @@ export class UsersService {
           platformId: platform,
         };
 
-        this.upsertProfile(profileCreate, manager);
+        await this.upsertProfile(profileCreate, manager);
 
         if (DEBUG)
           logger.debug(
@@ -279,6 +294,7 @@ export class UsersService {
             userId: prefixed_user_id,
           }),
           userId: prefixed_user_id,
+          created: true,
         };
       }
     }

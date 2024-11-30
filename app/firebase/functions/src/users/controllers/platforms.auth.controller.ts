@@ -115,7 +115,7 @@ export const handleSignupController: RequestHandler = async (
       DEBUG
     );
 
-    if (result) {
+    if (result?.created) {
       /** update userId of posts and profiles */
       await services.postsManager.linkExistingUser(result.userId);
     }

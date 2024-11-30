@@ -7,6 +7,7 @@ export interface OurTokenConfig {
 }
 
 export interface HandleSignupResult {
+  created: boolean;
   userId: string;
   ourAccessToken?: string;
 }
