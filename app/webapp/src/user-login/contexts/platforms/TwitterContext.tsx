@@ -6,12 +6,12 @@ import {
   useRef,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { useAppFetch } from '../../../api/app.fetch';
 import { useToastContext } from '../../../app/ToastsContext';
 import { IntroKeys } from '../../../i18n/i18n.intro';
-import { RouteNames } from '../../../route.names';
+import { AbsoluteRoutes, RouteNames } from '../../../route.names';
 import { HandleSignupResult } from '../../../shared/types/types.fetch';
 import { PLATFORM } from '../../../shared/types/types.platforms';
 import {
@@ -41,6 +41,7 @@ const TwitterContextValue = createContext<TwitterContextType | undefined>(
 
 /** Manages the authentication process */
 export const TwitterContext = (props: PropsWithChildren) => {
+  const navigate = useNavigate();
   const location = useLocation();
   const { show } = useToastContext();
   const { t } = useTranslation();
@@ -231,6 +232,15 @@ export const TwitterContext = (props: PropsWithChildren) => {
     appFetch,
     setOurToken,
   ]);
+  /** abandon connect path */
+  useEffect(() => {
+    if (
+      location.pathname === `/${RouteNames.ConnectTwitter}` &&
+      (!state_param || !code_param)
+    ) {
+      navigate(AbsoluteRoutes.App);
+    }
+  }, [state_param, code_param, location, navigate]);
 
   return (
     <TwitterContextValue.Provider
