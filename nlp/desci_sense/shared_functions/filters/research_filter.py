@@ -38,6 +38,10 @@ def apply_research_filter(result: CombinedParserOutput) -> SciFilterClassficatio
     if len(set(result.item_types).intersection(set(item_types_whitelist))) > 0:
         return SciFilterClassfication.CITOID_DETECTED_RESEARCH
 
+    # if not-academic special keyword assigned, classify as non research
+    if result.research_keyword == "not-academic":
+        return SciFilterClassfication.NOT_RESEARCH
+
     # if item types inconclusive, use scoring system
     score = 0
 
