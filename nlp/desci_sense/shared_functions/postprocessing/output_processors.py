@@ -241,7 +241,7 @@ class KeywordParser(BaseOutputParser):
 
         # return extracted_content
 
-def normalize_keyword(keyword):
+def normalize_keyword(keyword:str):
     # Step 1: Remove dots from abbreviations like "A.I."
     keyword = re.sub(r'\.', '', keyword)
     
@@ -263,7 +263,7 @@ def normalize_keyword(keyword):
     return keyword
 
 
-def normalize_keywords(keywords:list):
+def normalize_keywords(keywords:List[str]):
     return [normalize_keyword(keyword) for keyword in keywords]
 
 def extract_tags_list(text):
