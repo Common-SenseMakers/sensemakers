@@ -40,7 +40,7 @@ import { UsersHelper } from './users.helper';
 import { UsersRepository } from './users.repository';
 import { getPrefixedUserId } from './users.utils';
 
-const DEBUG = false;
+const DEBUG = true;
 const DEBUG_PREFIX = 'UsersService';
 
 interface TokenData {
@@ -217,7 +217,8 @@ export class UsersService {
 
       if (existingUserWithAccount) {
         /**
-         * a user exist with this platform user_id, then return an accessToken and consider this a login for that userId
+         * a user exist with this platform user_id, then store the new credentials and
+         * return an accessToken and consider this a login for that userId
          * */
 
         const userId = existingUserWithAccount.userId;
@@ -234,6 +235,21 @@ export class UsersService {
           manager
         );
 
+        // patch to recover uncreated profiles
+        const existing = this.profiles.getByProfileId(
+          getProfileId(platform, authenticatedDetails.user_id),
+          manager
+        );
+        if (!existing) {
+          const profileCreate: AccountProfileCreate = {
+            ...profile,
+            userId,
+            platformId: platform,
+          };
+
+          await this.upsertProfile(profileCreate, manager);
+        }
+
         return {
           ourAccessToken: this.generateOurAccessToken({
             userId,
@@ -249,30 +265,17 @@ export class UsersService {
 
         const initSettings: UserSettings = USER_INIT_SETTINGS;
 
-        const exisiting = await this.repo.getUser(prefixed_user_id, manager);
-        let userId = prefixed_user_id;
-
-        if (!exisiting) {
-          userId = await this.repo.createUser(
-            prefixed_user_id,
-            {
-              settings: initSettings,
-              signupDate: this.time.now(),
-              accounts: {
-                [platform]: [authenticatedDetails],
-              },
+        const userId = await this.repo.createUser(
+          prefixed_user_id,
+          {
+            settings: initSettings,
+            signupDate: this.time.now(),
+            accounts: {
+              [platform]: [authenticatedDetails],
             },
-            manager
-          );
-        } else {
-          /** recover from intermediate signup situations (not expected but useful on some data migrations) */
-          await this.repo.setAccountDetails(
-            exisiting.userId,
-            platform,
-            authenticatedDetails,
-            manager
-          );
-        }
+          },
+          manager
+        );
 
         /** create profile and link it to the user */
         /** create the profile when addint that account */

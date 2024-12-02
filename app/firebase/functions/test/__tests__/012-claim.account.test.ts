@@ -10,7 +10,7 @@ import { USE_REAL_PARSER, USE_REAL_TWITTER, testUsers } from './setup';
 import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
-describe.only('012-claim-account', () => {
+describe('012-claim-account', () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER ? undefined : { publish: true, signup: true },

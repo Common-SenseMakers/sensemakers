@@ -1,5 +1,3 @@
-import { FieldValue } from 'firebase-admin/firestore';
-
 import { PLATFORM } from '../@shared/types/types.platforms';
 import {
   AccountDetailsBase,
@@ -207,16 +205,16 @@ export class UsersRepository {
       throw new Error(`User ${userId} data as expected`);
     }
 
-    const details = (user.accounts[platform] as Array<AccountDetailsBase>).find(
-      (details) => details.user_id === user_id
-    );
+    /** keep details of other accounts */
+    const newPlatformAccounts = (
+      user.accounts[platform] as Array<AccountDetailsBase>
+    ).filter((details) => details.user_id !== user_id);
 
-    if (!details) {
-      throw new Error(`Details for user ${userId} not found`);
-    }
+    const newAccounts = { ...user.accounts };
+    newAccounts[platform] = newPlatformAccounts;
 
     manager.update(doc.ref, {
-      [platform]: FieldValue.arrayRemove(details),
+      accounts: newAccounts,
     });
   }
 

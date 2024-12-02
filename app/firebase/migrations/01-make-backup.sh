@@ -5,16 +5,18 @@
 # yarn make-backup <project-id>
 
 # Check if the project ID was provided as an input
-if [ "$#" -ne 1 ]; then
+if [ "$#" -lt 1 ]; then
   echo "Usage: $0 <project-id>"
   exit 1
 fi
 
 # Assign the project ID to a variable
 PROJECT_ID=$1
+FOLDER_NAME=$2
 
 # Generate the current date in the specified format
 DATE=$(date "+%Y-%m-%d-%H-%M-%S")
+FOLDER_NAME=${2:-$DATE}
 
 # Set the project for the gcloud commands
 firebase use $PROJECT_ID
@@ -22,7 +24,7 @@ gcloud config set project $PROJECT_ID
 
 # Define the bucket name (adjust this as necessary)
 BUCKET_NAME="${PROJECT_ID}"
-CLOUD_URL=gs://$BUCKET_NAME/backups/$DATE
+CLOUD_URL=gs://$BUCKET_NAME/backups/$FOLDER_NAME
 
 # Create the bucket if it doesn't exist (optional step, uncomment if needed)
 # gsutil mb -p $PROJECT_ID gs://$BUCKET_NAME/

@@ -29,5 +29,6 @@ export type OrcidProfile = PlatformProfile &
   Pick<AuthenticationResult, 'orcid'>;
 
 /** For ORCID we only need to store the name of the user */
-export interface OrcidAccountDetails
-  extends AccountDetailsBase<{ read: OrcidCredentials }> {}
+export type OrcidAccountDetails = AccountDetailsBase<{
+  read?: OrcidCredentials;
+}>;
