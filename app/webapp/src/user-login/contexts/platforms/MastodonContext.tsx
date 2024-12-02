@@ -145,7 +145,8 @@ export const MastodonContext = (props: PropsWithChildren) => {
         );
       }
     },
-    [appFetch, setLoginFlowState, setPlatformConnectedStatus, t]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [appFetch, setLoginFlowState, t]
   );
 
   useEffect(() => {

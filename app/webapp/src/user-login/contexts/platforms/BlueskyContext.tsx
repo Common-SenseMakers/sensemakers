@@ -103,13 +103,8 @@ export const BlueskyContext = (props: PropsWithChildren) => {
         );
       }
     },
-    [
-      setLoginFlowState,
-      setPlatformConnectedStatus,
-      appFetch,
-      refreshConnected,
-      setOurToken,
-    ]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [setLoginFlowState, appFetch, refreshConnected, setOurToken]
   );
 
   return (

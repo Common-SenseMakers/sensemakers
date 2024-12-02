@@ -13,8 +13,8 @@ import { STARTED_KEY } from '../../pages/ConnectPage';
 import { NotificationFreq } from '../../shared/types/types.notifications';
 import { OrcidProfile } from '../../shared/types/types.orcid';
 import {
+  ALL_IDENTITY_PLATFORMS,
   ALL_PUBLISH_PLATFORMS,
-  ALL_SOURCE_PLATFORMS,
   IDENTITY_PLATFORM,
   PLATFORM,
 } from '../../shared/types/types.platforms';
@@ -45,11 +45,11 @@ export type AccountContextType = {
   resetLogin: () => void;
   currentNotifications?: NotificationFreq;
   setPlatformConnectedStatus: (
-    platform: PLATFORM,
+    platform: IDENTITY_PLATFORM,
     status: PlatformConnectedStatus
   ) => void;
   getPlatformConnectedStatus: (
-    platformId: PLATFORM
+    platformId: IDENTITY_PLATFORM
   ) => PlatformConnectedStatus | undefined | null;
   alreadyConnected?: boolean | null;
   setAlreadyConnected: (value: boolean) => void;
@@ -96,7 +96,7 @@ export enum PlatformConnectedStatus {
 }
 
 export type PlatformsConnectedStatus = Partial<
-  Record<PLATFORM, PlatformConnectedStatus>
+  Record<IDENTITY_PLATFORM, PlatformConnectedStatus>
 >;
 
 const platformsConnectedStatusInit: PlatformsConnectedStatus = {};
@@ -278,13 +278,13 @@ export const AccountContext = (props: PropsWithChildren) => {
   };
 
   const getPlatformConnectedStatus = (
-    platformId: PLATFORM
+    platformId: IDENTITY_PLATFORM
   ): PlatformConnectedStatus | undefined | null => {
     return platformsConnectedStatus && platformsConnectedStatus[platformId];
   };
 
   const connectedPlatforms = useMemo(() => {
-    return ALL_SOURCE_PLATFORMS.filter((platform) => {
+    return ALL_IDENTITY_PLATFORMS.filter((platform) => {
       const profiles = connectedUser?.profiles;
       const profile = profiles && profiles[platform];
       return profile !== undefined;
@@ -294,9 +294,29 @@ export const AccountContext = (props: PropsWithChildren) => {
   /** single place where a connecting platform is marked as connected */
   useEffect(() => {
     if (connectedUser) {
-      connectedPlatforms.forEach((platform) => {
-        setPlatformConnectedStatus(platform, PlatformConnectedStatus.Connected);
+      let modified = false;
+      const newConnectedStatus = { ...platformsConnectedStatus };
+
+      ALL_IDENTITY_PLATFORMS.forEach((platform) => {
+        if (
+          getPlatformConnectedStatus(platform) !==
+            PlatformConnectedStatus.Connected &&
+          connectedPlatforms.includes(platform)
+        ) {
+          newConnectedStatus[platform] = PlatformConnectedStatus.Connected;
+          modified = true;
+        }
       });
+
+      if (modified) {
+        setPlatformsConnectedStatus(newConnectedStatus);
+      }
+
+      connectedPlatforms.forEach((platform) => {
+        newConnectedStatus[platform] = PlatformConnectedStatus.Connected;
+      });
+
+      setPlatformsConnectedStatus(newConnectedStatus);
 
       /** protection in case a logged user remains without accounts (beacuse of a hard account reset) */
       if (connectedPlatforms.length === 0) {
@@ -305,7 +325,7 @@ export const AccountContext = (props: PropsWithChildren) => {
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connectedPlatforms, connectedUser]);
+  }, [connectedPlatforms, connectedUser, platformsConnectedStatus]);
 
   return (
     <AccountContextValue.Provider
