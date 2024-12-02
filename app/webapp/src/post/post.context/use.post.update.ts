@@ -33,6 +33,7 @@ export interface PostUpdateContext {
   updatePost: (update: PostUpdate) => void;
   readyToNanopublish: boolean;
   inPrePublish: boolean;
+  isDraft: boolean;
 }
 
 export const usePostUpdate = (
@@ -53,8 +54,11 @@ export const usePostUpdate = (
   );
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const { mergedSemantics, updateSemantics: updateSemanticsLocal } =
-    usePostMergeDeltas(fetched);
+  const {
+    mergedSemantics,
+    updateSemantics: updateSemanticsLocal,
+    isDraft,
+  } = usePostMergeDeltas(fetched);
   const [storeMerged, setStoreMerged] = useState<Store | undefined>();
 
   const editable =
@@ -184,5 +188,6 @@ export const usePostUpdate = (
     updatePost: optimisticUpdate,
     readyToNanopublish: false,
     inPrePublish,
+    isDraft,
   };
 };

@@ -4,12 +4,16 @@ import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { useOverlay } from '../overlays/OverlayContext';
 import { PlatformPostAnchor } from '../post/PlatformPostAnchor';
 import { PostClickTarget } from '../semantics/patterns/patterns';
+import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { getPostDetails } from './platform-specific.details';
 import { usePost } from './post.context/PostContext';
 
 /** should be used inside a PostContext */
-export const PostHeader = (props: { boxProps: BoxExtendedProps }) => {
+export const PostHeader = (props: {
+  boxProps: BoxExtendedProps;
+  showLoading: boolean;
+}) => {
   const { constants } = useThemeContext();
   const { updated } = usePost();
   const overlay = useOverlay();
@@ -70,6 +74,11 @@ export const PostHeader = (props: { boxProps: BoxExtendedProps }) => {
             details={details}></PlatformPostAnchor>
         </Box>
       </Box>
+      {props.showLoading && (
+        <Box pad={{ horizontal: 'medium' }}>
+          <Loading size="14px"></Loading>
+        </Box>
+      )}
     </Box>
   );
 };
