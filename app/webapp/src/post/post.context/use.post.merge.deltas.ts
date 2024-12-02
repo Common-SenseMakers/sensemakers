@@ -56,7 +56,9 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
         const fetchedStore = semanticStringToStore(fetched.post.semantics);
 
         /** Add or remove operations that have been applied */
-        operations.forEach((operation) => {
+        const originalOperations = [...operations];
+
+        originalOperations.forEach((operation) => {
           if (operation.type === 'add' && fetchedStore.has(operation.quad)) {
             /** the quad was added to the semantics, remove operation */
             if (DEBUG)
