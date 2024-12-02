@@ -106,7 +106,7 @@ export class PostsManager {
     manager: TransactionManager
   ) {
     logger.error(
-      `Token error fetching from platform ${platformId}. Reset credentials`
+      `Token error fetching from platform ${platformId} for user ${user_id}. Reset credentials`
     );
     await this.users.repo.removeAccountDetails(platformId, user_id, manager);
   }
