@@ -1,5 +1,5 @@
 import { Store } from 'n3';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { semanticStringToStore } from '../../semantics/patterns/common/use.semantics';
 import { cloneStore, forEachStore } from '../../shared/utils/n3.utils';
@@ -56,7 +56,9 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
         const fetchedStore = semanticStringToStore(fetched.post.semantics);
 
         /** Add or remove operations that have been applied */
-        operations.forEach((operation) => {
+        const originalOperations = [...operations];
+
+        originalOperations.forEach((operation) => {
           if (operation.type === 'add' && fetchedStore.has(operation.quad)) {
             /** the quad was added to the semantics, remove operation */
             if (DEBUG)
@@ -260,5 +262,9 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
     [baseStore, operations]
   );
 
-  return { mergedSemantics, updateSemantics, removeQuad };
+  const isDraft = useMemo(() => {
+    return operations.length > 0;
+  }, [operations]);
+
+  return { mergedSemantics, updateSemantics, removeQuad, isDraft };
 };

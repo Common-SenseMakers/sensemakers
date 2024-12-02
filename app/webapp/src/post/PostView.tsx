@@ -168,7 +168,9 @@ export const PostView = (props: {
         <Box
           pad={{ top: 'medium', horizontal: 'medium', bottom: 'large' }}
           style={{ flexShrink: 0 }}>
-          <PostHeader boxProps={{ margin: { bottom: '16px' } }}></PostHeader>
+          <PostHeader
+            boxProps={{ margin: { bottom: '16px' } }}
+            showLoading={updated.isDraft}></PostHeader>
 
           {!hideSemantics && (
             <SemanticsEditor
