@@ -9,9 +9,9 @@ The keywords should represent the most salient topics and concepts introduced in
 Rules:
 - You should choose up to {{ max_keywords}} keywords, plus the additional special academic/non-academic keyword!
 - Keywords should be prefixed with a hashtag, e.g., #ai
-- Keywords should should be normalized to a consistent form of lowercase acronym e.g. 'AI' should be returned as 'ai' and separated words should be separated with a hyphen, e.g. 'ModelTheory' should be 'model-theory'    
-- do not separated compound words like blockchain.
-- reduce ambiguity by adding minimal amount of words to the keyword to add context. e.g. instead of #revolution use #french-revolution if the post has that extra context. 
+- Keywords should should be normalized to a consistent form of lowercase acronym e.g. 'AI' should be returned as 'ai' and separate words should be separated with a hyphen, e.g. 'ModelTheory' should be 'model-theory'    
+- do not separate compound words like blockchain.
+- reduce ambiguity by adding a minimal amount of words to the keyword to add context. e.g. instead of #revolution use #french-revolution if the post has that extra context. 
 
 - If there is not enough context in the post content or meta data, e.g. there are no words or the text is to short so there is ambiguity, return only the special keyword ( #academic or #not-academic)
 - Your final answer should be structured as follows:
@@ -25,9 +25,3 @@ Rules:
 # Output:
 """
 )
-
-''' - Repeat the exact text of the post content given to you at the end of the prompt (should be the same text as the post content)
-    - Keywords context: a dictionary where each keyword is paired with a short description that captures the meaning conveyed in the post  e.g. {'pulsar':'a highly magnetized rotating neutron star that emits beams of electromagnetic radiation out of its magnetic poles.'} 
-    - context: a dictionary where each keyword is paired with a short description that captures the meaning conveyed in the post  e.g. {'pulsar':'a highly magnetized rotating neutron star that emits beams of electromagnetic radiation out of its magnetic poles.'} 
-
-    '''
