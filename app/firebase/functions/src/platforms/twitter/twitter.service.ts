@@ -191,6 +191,10 @@ export class TwitterService
             allTweets.push(...appTweets);
 
             nextToken = result.meta.next_token;
+          } else {
+            if (original.data) {
+              allTweets.push(original.data as AppTweet);
+            }
           }
         } catch (e: any) {
           if (e.rateLimit) {

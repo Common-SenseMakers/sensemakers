@@ -132,7 +132,7 @@ export class PostsManager {
       );
 
       if (newCredentials) {
-        this.users.updateAccountCredentials(
+        await this.users.updateAccountCredentials(
           userId,
           platformId,
           account.user_id,

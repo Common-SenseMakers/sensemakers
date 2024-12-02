@@ -1,5 +1,3 @@
-import { FieldValue } from 'firebase-admin/firestore';
-
 import { PLATFORM } from '../@shared/types/types.platforms';
 import {
   AccountDetailsBase,
@@ -208,12 +206,15 @@ export class UsersRepository {
     }
 
     /** keep details of other accounts */
-    const newAccounts = (
+    const newPlatformAccounts = (
       user.accounts[platform] as Array<AccountDetailsBase>
     ).filter((details) => details.user_id !== user_id);
 
+    const newAccounts = { ...user.accounts };
+    newAccounts[platform] = newPlatformAccounts;
+
     manager.update(doc.ref, {
-      [platform]: newAccounts,
+      accounts: newAccounts,
     });
   }
 
