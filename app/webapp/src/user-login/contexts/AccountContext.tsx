@@ -296,8 +296,14 @@ export const AccountContext = (props: PropsWithChildren) => {
     connectedPlatforms.forEach((platform) => {
       setPlatformConnectedStatus(platform, PlatformConnectedStatus.Connected);
     });
+    /** protection in case a logged user remains without accounts (beacuse of a hard account reset) */
+
+    if (connectedUser && connectedPlatforms.length === 0) {
+      disconnect();
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connectedPlatforms]);
+  }, [connectedPlatforms, connectedUser]);
 
   return (
     <AccountContextValue.Provider
