@@ -236,10 +236,11 @@ export class UsersService {
         );
 
         // patch to recover uncreated profiles
-        const existing = this.profiles.getByProfileId(
+        const existing = await this.profiles.getByProfileId(
           getProfileId(platform, authenticatedDetails.user_id),
           manager
         );
+
         if (!existing) {
           const profileCreate: AccountProfileCreate = {
             ...profile,
