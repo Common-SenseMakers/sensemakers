@@ -293,13 +293,15 @@ export const AccountContext = (props: PropsWithChildren) => {
 
   /** single place where a connecting platform is marked as connected */
   useEffect(() => {
-    connectedPlatforms.forEach((platform) => {
-      setPlatformConnectedStatus(platform, PlatformConnectedStatus.Connected);
-    });
-    /** protection in case a logged user remains without accounts (beacuse of a hard account reset) */
+    if (connectedUser) {
+      connectedPlatforms.forEach((platform) => {
+        setPlatformConnectedStatus(platform, PlatformConnectedStatus.Connected);
+      });
 
-    if (connectedUser && connectedPlatforms.length === 0) {
-      disconnect();
+      /** protection in case a logged user remains without accounts (beacuse of a hard account reset) */
+      if (connectedPlatforms.length === 0) {
+        disconnect();
+      }
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
