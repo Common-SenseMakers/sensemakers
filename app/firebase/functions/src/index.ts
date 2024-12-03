@@ -16,6 +16,7 @@ import {
 
 import { ActivityEventBase } from './@shared/types/types.activity';
 import { PlatformPost } from './@shared/types/types.platform.posts';
+import { PLATFORM } from './@shared/types/types.platforms';
 import { AppPost } from './@shared/types/types.posts';
 import { CollectionNames } from './@shared/utils/collectionNames';
 import { activityEventCreatedHook } from './activity/activity.created.hook';
@@ -31,12 +32,8 @@ import { buildAdminApp, buildApp } from './instances/app';
 import { logger } from './instances/logger';
 import { createServices } from './instances/services';
 import {
-  FETCH_BLUESKY_ACCOUNT_TASK,
-  FETCH_BLUESKY_TASK_DISPATCH_RATE,
-  FETCH_MASTODON_ACCOUNT_TASK,
-  FETCH_MASTODON_TASK_DISPATCH_RATE,
-  FETCH_TWITTER_ACCOUNT_TASK,
-  FETCH_TWITTER_TASK_DISPATCH_RATE,
+  FETCH_ACCOUNT_TASKS,
+  FETCH_TASK_DISPATCH_RATES,
   fetchPlatformAccountTask,
 } from './platforms/platforms.tasks';
 import { platformPostUpdatedHook } from './posts/hooks/platformPost.updated.hook';
@@ -171,7 +168,7 @@ exports[AUTOFETCH_POSTS_TASK] = onTaskDispatched(
  * 10 requests / 15 min per app
  * 5 requests / 15 min per user
  */
-exports[FETCH_TWITTER_ACCOUNT_TASK] = onTaskDispatched(
+exports[FETCH_ACCOUNT_TASKS[PLATFORM.Twitter]] = onTaskDispatched(
   {
     ...deployConfigTasks,
     secrets,
@@ -181,7 +178,7 @@ exports[FETCH_TWITTER_ACCOUNT_TASK] = onTaskDispatched(
     },
     rateLimits: {
       maxConcurrentDispatches: 1, // 1 task dispatched at a time
-      maxDispatchesPerSecond: FETCH_TWITTER_TASK_DISPATCH_RATE,
+      maxDispatchesPerSecond: FETCH_TASK_DISPATCH_RATES[PLATFORM.Twitter],
     },
   },
   (req) => fetchPlatformAccountTask(req, createServices(firestore, getConfig()))
@@ -191,7 +188,7 @@ exports[FETCH_TWITTER_ACCOUNT_TASK] = onTaskDispatched(
  * rate limits: https://docs-p.joinmastodon.org/api/rate-limits/
  * all endpoints: 300 requests / 5 min per account
  */
-exports[FETCH_MASTODON_ACCOUNT_TASK] = onTaskDispatched(
+exports[FETCH_ACCOUNT_TASKS[PLATFORM.Mastodon]] = onTaskDispatched(
   {
     ...deployConfigTasks,
     secrets,
@@ -201,7 +198,7 @@ exports[FETCH_MASTODON_ACCOUNT_TASK] = onTaskDispatched(
     },
     rateLimits: {
       maxConcurrentDispatches: 20,
-      maxDispatchesPerSecond: FETCH_MASTODON_TASK_DISPATCH_RATE,
+      maxDispatchesPerSecond: FETCH_TASK_DISPATCH_RATES[PLATFORM.Mastodon],
     },
   },
   (req) => fetchPlatformAccountTask(req, createServices(firestore, getConfig()))
@@ -211,7 +208,7 @@ exports[FETCH_MASTODON_ACCOUNT_TASK] = onTaskDispatched(
  * rate limit: https://docs.bsky.app/docs/advanced-guides/rate-limits
  * all endpoits by IP: 3000 requests / 5 minutes
  */
-exports[FETCH_BLUESKY_ACCOUNT_TASK] = onTaskDispatched(
+exports[FETCH_ACCOUNT_TASKS[PLATFORM.Bluesky]] = onTaskDispatched(
   {
     ...deployConfigTasks,
     secrets,
@@ -221,7 +218,7 @@ exports[FETCH_BLUESKY_ACCOUNT_TASK] = onTaskDispatched(
     },
     rateLimits: {
       maxConcurrentDispatches: 10,
-      maxDispatchesPerSecond: FETCH_BLUESKY_TASK_DISPATCH_RATE,
+      maxDispatchesPerSecond: FETCH_TASK_DISPATCH_RATES[PLATFORM.Bluesky],
     },
   },
   (req) => fetchPlatformAccountTask(req, createServices(firestore, getConfig()))
