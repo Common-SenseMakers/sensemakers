@@ -111,7 +111,6 @@ ALL_PUBLISH_PLATFORMS.forEach((platform) => {
  * in the localStorage
  */
 export const AccountContext = (props: PropsWithChildren) => {
-  console.log('rendering AccountContext');
   const [connectedUser, setConnectedUser] = useState<ConnectedUser | null>();
 
   const [loginFlowState, _setLoginFlowState] = useState<LoginFlowState>(
