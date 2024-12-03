@@ -111,6 +111,7 @@ ALL_PUBLISH_PLATFORMS.forEach((platform) => {
  * in the localStorage
  */
 export const AccountContext = (props: PropsWithChildren) => {
+  console.log('rendering AccountContext');
   const [connectedUser, setConnectedUser] = useState<ConnectedUser | null>();
 
   const [loginFlowState, _setLoginFlowState] = useState<LoginFlowState>(
@@ -311,12 +312,6 @@ export const AccountContext = (props: PropsWithChildren) => {
       if (modified) {
         setPlatformsConnectedStatus(newConnectedStatus);
       }
-
-      connectedPlatforms.forEach((platform) => {
-        newConnectedStatus[platform] = PlatformConnectedStatus.Connected;
-      });
-
-      setPlatformsConnectedStatus(newConnectedStatus);
 
       /** protection in case a logged user remains without accounts (beacuse of a hard account reset) */
       if (connectedPlatforms.length === 0) {
