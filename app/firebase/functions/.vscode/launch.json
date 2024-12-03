@@ -49,7 +49,7 @@
       "args": [
         "--project",
         "./tsconfig.scripts.json",
-        "./migrations/006-posts-append-to-db.ts"
+        "./scripts/061-process-accountsIds.ts"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",

@@ -1,6 +1,6 @@
 import * as admin from 'firebase-admin';
-import { AppOptions } from 'firebase-admin';
 
+import { initApp } from '../scripts/scripts.utils';
 import { LocalLogger, LogLevel } from '../src/instances/local.logger';
 import { logger } from '../src/instances/logger';
 import { createServices } from '../src/instances/services';
@@ -40,20 +40,6 @@ logger.info(
     certPathTarget,
   }
 );
-
-const initApp = (config: AppOptions, name: string) => {
-  const app = admin.initializeApp(config, name);
-
-  if (config.projectId?.startsWith('demo-')) {
-    logger.info(`Connecting to emualtor - ${config.projectId}`);
-    app.firestore().settings({
-      host: 'localhost:8080',
-      ssl: false,
-    });
-  }
-
-  return app;
-};
 
 export const appSource = initApp(
   serviceAccountSource
