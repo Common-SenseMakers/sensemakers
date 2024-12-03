@@ -130,7 +130,7 @@ export class UsersService {
     );
 
     const existingUserWithAccountId =
-      await this.profiles.getUserIdWithPlatformAccount(
+      await this.repo.getUserIdWithPlatformAccount(
         platform,
         authenticatedDetails.user_id,
         manager

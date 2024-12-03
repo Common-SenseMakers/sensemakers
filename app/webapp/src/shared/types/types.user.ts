@@ -81,6 +81,7 @@ export interface UserAccounts {
 
 export interface UserWithAccounts {
   accounts: UserAccounts;
+  accountsIds: string[]; // redundant, used to index users with accounts
 }
 
 /**
@@ -94,7 +95,7 @@ export interface AppUser
     UserWithSettings,
     UserWithAccounts {}
 
-export type AppUserCreate = Omit<AppUser, 'userId'>;
+export type AppUserCreate = Omit<AppUser, 'userId' | 'accountsIds'>;
 
 /**
  * The AccountDetailsRead combines the AccountDetails (signup date and credentials
