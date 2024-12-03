@@ -146,7 +146,12 @@ export const AccountContext = (props: PropsWithChildren) => {
     try {
       if (token) {
         if (DEBUG) console.log('getting me', { token });
-        const user = await _appFetch<AppUserRead>('/api/auth/me', {}, token);
+        const user = await _appFetch<AppUserRead>(
+          '/api/auth/me',
+          {},
+          true,
+          token
+        );
         if (DEBUG) console.log('set connectedUser after fetch', { user });
 
         /** extract the profile of each platform for convenience */

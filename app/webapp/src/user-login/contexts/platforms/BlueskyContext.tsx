@@ -81,12 +81,12 @@ export const BlueskyContext = (props: PropsWithChildren) => {
 
         log('Calling Bluesky signup', signupData);
 
-        const result = await appFetch<HandleSignupResult>(
+        const result = await appFetch<HandleSignupResult, unknown, false>(
           `/api/auth/${PLATFORM.Bluesky}/signup`,
           signupData
         );
 
-        if (result.ourAccessToken) {
+        if (result && result.ourAccessToken) {
           setOurToken(result.ourAccessToken);
         } else {
           refreshConnected().catch(console.error);

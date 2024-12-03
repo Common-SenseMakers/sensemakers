@@ -82,7 +82,7 @@ export const AppContainer = (props: React.PropsWithChildren) => {
             <Routes>
               <Route path={RouteNames.AppHome} element={<Outlet />}>
                 <Route
-                  path={`${RouteNames.Settings}`}
+                  path={`${RouteNames.Settings}/*`}
                   element={<UserSettingsPage></UserSettingsPage>}></Route>
 
                 <Route

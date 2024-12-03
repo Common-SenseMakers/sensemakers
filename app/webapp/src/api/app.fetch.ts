@@ -2,6 +2,7 @@ import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { useCallback } from 'react';
 
 import { FUNCTIONS_BASE } from '../app/config';
+import { DefinedIfTrue } from '../shared/types/types.user';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 
 const DEBUG = false;
@@ -14,11 +15,16 @@ export interface AppFetch {
   ): Promise<R>;
 }
 
-export const _appFetch = async <T = unknown, D = unknown>(
+export const _appFetch = async <
+  T = unknown,
+  D = unknown,
+  S extends boolean = true,
+>(
   path: string,
   payload?: D,
+  shouldThrow?: S,
   accessToken?: string | null
-) => {
+): Promise<DefinedIfTrue<S, T>> => {
   try {
     const headers: AxiosRequestConfig['headers'] = {};
 
@@ -38,7 +44,13 @@ export const _appFetch = async <T = unknown, D = unknown>(
     if (DEBUG)
       console.log(`appFetch: ${path}`, { payload, data: res.data.data });
 
-    return (res.data.data ? res.data.data : null) as T;
+    if (shouldThrow) {
+      if (!res.data.data) {
+        throw new Error(`Error fetching ${path} - no data`);
+      }
+    }
+
+    return res.data.data as DefinedIfTrue<S, T>;
   } catch (e) {
     console.error(e);
     if (e instanceof Error) {
@@ -55,11 +67,16 @@ export const useAppFetch = () => {
   const { token } = useAccountContext();
 
   const appFetch = useCallback(
-    async <T, D = unknown>(path: string, data?: D, auth = false) => {
+    async <T, D = unknown, S extends boolean = true>(
+      path: string,
+      data?: D,
+      shouldThrow?: S,
+      auth = false
+    ) => {
       if (auth && !token) {
         throw new Error('No token available');
       }
-      return _appFetch<T, D>(path, data, token);
+      return _appFetch<T, D, S>(path, data, shouldThrow, token);
     },
     [token]
   );

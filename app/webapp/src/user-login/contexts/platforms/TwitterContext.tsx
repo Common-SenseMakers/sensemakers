@@ -79,9 +79,8 @@ export const TwitterContext = (props: PropsWithChildren) => {
       PlatformConnectedStatus.Connecting
     );
 
-    const callback_url = location.pathname.startsWith(`/${RouteNames.Settings}`)
-      ? window.location.href
-      : `${window.location.href}${RouteNames.ConnectTwitter}`;
+    const sep = window.location.href.endsWith('/') ? '' : '/';
+    const callback_url = `${window.location.href}${sep}${RouteNames.ConnectTwitter}`;
 
     const params: TwitterGetContextParams = {
       callback_url,
@@ -146,7 +145,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
         getPlatformConnectedStatus(PLATFORM.Twitter) ===
           PlatformConnectedStatus.Connecting
       ) {
-        if (location.pathname !== `/${RouteNames.ConnectTwitter}`) {
+        if (!location.pathname.includes(`/${RouteNames.ConnectTwitter}`)) {
           setPlatformConnectedStatus(
             PLATFORM.Twitter,
             PlatformConnectedStatus.Disconnected
@@ -189,10 +188,13 @@ export const TwitterContext = (props: PropsWithChildren) => {
           if (DEBUG)
             console.log(`calling api/auth/${PLATFORM.Twitter}/signup`, context);
 
-          appFetch<HandleSignupResult>(`/api/auth/${PLATFORM.Twitter}/signup`, {
-            ...context,
-            code: code_param,
-          })
+          appFetch<HandleSignupResult, unknown, false>(
+            `/api/auth/${PLATFORM.Twitter}/signup`,
+            {
+              ...context,
+              code: code_param,
+            }
+          )
             .then((result) => {
               if (result) {
                 localStorage.removeItem(LS_TWITTER_CONTEXT_KEY);
@@ -200,7 +202,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
               searchParams.delete('state');
               searchParams.delete('code');
-              if (result.ourAccessToken) {
+              if (result && result.ourAccessToken) {
                 setOurToken(result.ourAccessToken);
               } else {
                 refreshConnected().catch(console.error);

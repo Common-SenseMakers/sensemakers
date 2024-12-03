@@ -200,7 +200,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
             type: 'read',
           };
 
-          appFetch<HandleSignupResult>(
+          appFetch<HandleSignupResult, unknown, false>(
             `/api/auth/${PLATFORM.Mastodon}/signup`,
             signupData
           )
