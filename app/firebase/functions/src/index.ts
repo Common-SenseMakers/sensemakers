@@ -32,8 +32,11 @@ import { logger } from './instances/logger';
 import { createServices } from './instances/services';
 import {
   FETCH_BLUESKY_ACCOUNT_TASK,
+  FETCH_BLUESKY_TASK_DISPATCH_RATE,
   FETCH_MASTODON_ACCOUNT_TASK,
+  FETCH_MASTODON_TASK_DISPATCH_RATE,
   FETCH_TWITTER_ACCOUNT_TASK,
+  FETCH_TWITTER_TASK_DISPATCH_RATE,
   fetchPlatformAccountTask,
 } from './platforms/platforms.tasks';
 import { platformPostUpdatedHook } from './posts/hooks/platformPost.updated.hook';
@@ -126,18 +129,23 @@ exports.nonUserAccountFetch = onSchedule(
 );
 
 /** tasks */
+/**
+ * Open Router rate limits: https://openrouter.ai/docs/limits
+ *
+ */
 exports[PARSE_POST_TASK] = onTaskDispatched(
   {
     ...deployConfigTasks,
-    maxInstances: 1,
     retryConfig: {
       maxAttempts: 5,
       minBackoffSeconds: 5,
+      maxDoublings: 4,
     },
+    maxInstances: 10,
     concurrency: 100,
     rateLimits: {
       maxConcurrentDispatches: 100,
-      maxDispatchesPerSecond: 100,
+      maxDispatchesPerSecond: 150,
     },
   },
   (req) => parsePostTask(req, createServices(firestore, getConfig()))
@@ -173,7 +181,7 @@ exports[FETCH_TWITTER_ACCOUNT_TASK] = onTaskDispatched(
     },
     rateLimits: {
       maxConcurrentDispatches: 1, // 1 task dispatched at a time
-      maxDispatchesPerSecond: 1 / (60 * 2), // max 1 task every 2 minutes
+      maxDispatchesPerSecond: FETCH_TWITTER_TASK_DISPATCH_RATE,
     },
   },
   (req) => fetchPlatformAccountTask(req, createServices(firestore, getConfig()))
@@ -181,7 +189,7 @@ exports[FETCH_TWITTER_ACCOUNT_TASK] = onTaskDispatched(
 
 /**
  * rate limits: https://docs-p.joinmastodon.org/api/rate-limits/
- * 300 requests / 5 min per account
+ * all endpoints: 300 requests / 5 min per account
  */
 exports[FETCH_MASTODON_ACCOUNT_TASK] = onTaskDispatched(
   {
@@ -193,17 +201,15 @@ exports[FETCH_MASTODON_ACCOUNT_TASK] = onTaskDispatched(
     },
     rateLimits: {
       maxConcurrentDispatches: 20,
-      maxDispatchesPerSecond: 1 / 5, // max 1 task every 5 second
+      maxDispatchesPerSecond: FETCH_MASTODON_TASK_DISPATCH_RATE,
     },
   },
   (req) => fetchPlatformAccountTask(req, createServices(firestore, getConfig()))
 );
 
 /**
- * com.atproto.server.createSession (for now this is the limiting API call since we login with username and app password each fetch)
- * Measured per account
- * 30 per 5 minutes
- * 300 per day
+ * rate limit: https://docs.bsky.app/docs/advanced-guides/rate-limits
+ * all endpoits by IP: 3000 requests / 5 minutes
  */
 exports[FETCH_BLUESKY_ACCOUNT_TASK] = onTaskDispatched(
   {
@@ -215,7 +221,7 @@ exports[FETCH_BLUESKY_ACCOUNT_TASK] = onTaskDispatched(
     },
     rateLimits: {
       maxConcurrentDispatches: 10,
-      maxDispatchesPerSecond: 1 / 10, // max 6 task every 1 minutes
+      maxDispatchesPerSecond: FETCH_BLUESKY_TASK_DISPATCH_RATE,
     },
   },
   (req) => fetchPlatformAccountTask(req, createServices(firestore, getConfig()))

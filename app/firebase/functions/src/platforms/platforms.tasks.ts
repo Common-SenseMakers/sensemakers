@@ -16,6 +16,30 @@ export const FETCH_TWITTER_ACCOUNT_TASK = 'fetchTwitterAccount';
 export const FETCH_MASTODON_ACCOUNT_TASK = 'fetchMastodonAccount';
 export const FETCH_BLUESKY_ACCOUNT_TASK = 'fetchBlueskyAccount';
 
+/** TWITTER
+ * 10 requests / 15 minutes
+ * assume 2 API calls per fetch on average
+ * thus 5 fetches / 15 minutes
+ * or 1 fetch every 3 minutes
+ */
+export const FETCH_TWITTER_TASK_DISPATCH_RATE = 1 / (60 * 3); // 1 task every 3 minutes
+
+/** MASTODON
+ * 300 requests / 5 minutes
+ * assume 2 API calls per fetch on average + 1 for account name to id lookup + 1 for redundancy (to be able to account for adding accounts in batches)
+ * 75 fetches / 5 minutes
+ * or 1 fetch every 4 seconds
+ */
+export const FETCH_MASTODON_TASK_DISPATCH_RATE = 1 / 4; // 1 task every 4 seconds
+
+/** BLUESKY
+ * 3000 requests / 5 minutes
+ * assume 2 API calls per fetch on average + 1 for token refreshing (~every 1 hour) and redundancy
+ * 1000 fetches / 5 minutes
+ * or 10 fetch every 3 seconds
+ */
+export const FETCH_BLUESKY_TASK_DISPATCH_RATE = 10 / 3; // 10 task every 3 seconds
+
 export const fetchPlatformAccountTask = async (
   req: Request,
   services: Services
