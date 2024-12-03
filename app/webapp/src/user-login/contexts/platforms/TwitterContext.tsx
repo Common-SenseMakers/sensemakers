@@ -79,8 +79,12 @@ export const TwitterContext = (props: PropsWithChildren) => {
       PlatformConnectedStatus.Connecting
     );
 
+    const callback_url = location.pathname.startsWith(`/${RouteNames.Settings}`)
+      ? window.location.href
+      : `${window.location.href}${RouteNames.ConnectTwitter}`;
+
     const params: TwitterGetContextParams = {
-      callback_url: window.location.href + `${RouteNames.ConnectTwitter}`,
+      callback_url,
       type,
     };
     const siginContext = await appFetch<TwitterSignupContext>(
@@ -133,7 +137,6 @@ export const TwitterContext = (props: PropsWithChildren) => {
           PLATFORM.Twitter,
           PlatformConnectedStatus.Disconnected
         );
-        disconnect();
         return;
       }
 
