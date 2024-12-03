@@ -56,7 +56,6 @@ export const MastodonContext = (props: PropsWithChildren) => {
     connectedUser,
     setToken: setOurToken,
     refresh: refreshConnected,
-    disconnect,
     overallLoginStatus,
     setLoginFlowState,
     setPlatformConnectedStatus,
@@ -165,7 +164,6 @@ export const MastodonContext = (props: PropsWithChildren) => {
         PLATFORM.Mastodon,
         PlatformConnectedStatus.Disconnected
       );
-      disconnect();
     }
 
     if (!verifierHandled.current) {
