@@ -76,7 +76,7 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
 
         if (DEBUG)
           logger.debug(
-            `Enqueueing fetch task for profile ${profileId}`,
+            `Enqueueing fetch task for non-user profile ${profileId}`,
             { taskName, taskData },
             DEBUG_PREFIX
           );
