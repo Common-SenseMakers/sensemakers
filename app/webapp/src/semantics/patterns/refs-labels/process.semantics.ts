@@ -38,14 +38,14 @@ export const processSemantics = (
   /** get the refs from the original store (even if their value is undefined) */
   if (orgRefLabels && refLabels) {
     forEachStore(orgRefLabels, (quad) => {
-      const ref = quad.object.value;
+      const ref = quad.object.value.toLocaleLowerCase();
       refs.set(ref, { labelsUris: [] });
     });
 
     /** then get the labels from the actual semantics */
     forEachStore(refLabels, (quad) => {
       const label = quad.predicate.value;
-      const ref = quad.object.value;
+      const ref = quad.object.value.toLocaleLowerCase();
       const current = refs.get(ref);
       const newLabels = current ? current.labelsUris.concat(label) : [label];
 
