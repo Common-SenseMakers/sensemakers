@@ -1,17 +1,17 @@
 import { Request } from 'firebase-functions/v2/tasks';
 
-import { PLATFORM } from '../../@shared/types/types.platforms';
+import { firestore } from '../..';
+import { ALL_SOURCE_PLATFORMS } from '../../@shared/types/types.platforms';
 import { getProfileId } from '../../@shared/utils/profiles.utils';
 import { logger } from '../../instances/logger';
 import { Services } from '../../instances/services';
 import {
-  FETCH_BLUESKY_ACCOUNT_TASK,
-  FETCH_MASTODON_ACCOUNT_TASK,
-  FETCH_TWITTER_ACCOUNT_TASK,
+  FETCH_ACCOUNT_TASKS,
+  FETCH_TASK_DISPATCH_RATES,
 } from '../../platforms/platforms.tasks';
 import { enqueueTask } from '../../tasksUtils/tasks.support';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export const AUTOFETCH_POSTS_TASK = 'autofetchPosts';
 
@@ -23,57 +23,67 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
   const { users } = services;
 
   const profiles = await users.profiles.getAll();
-  if (DEBUG)
-    logger.debug(
-      `number of profiles: ${profiles.length}`,
-      undefined,
-      DEBUG_PREFIX
+  const nonUserProfiles = profiles.filter((profile) => !profile.userId);
+
+  ALL_SOURCE_PLATFORMS.forEach(async (platformId) => {
+    const nonUserPlatformProfiles = nonUserProfiles.filter(
+      (profile) => profile.platformId === platformId
     );
+    const fetchPlatformMinPeriod =
+      nonUserPlatformProfiles.length /
+      (FETCH_TASK_DISPATCH_RATES[platformId] * 60); // in minutes
 
-  for (const profile of profiles) {
-    // Skip profiles that belong to registered users
-    if (profile.userId) {
-      continue;
-    }
+    const jobLastRun = await (async () => {
+      const docId = `${platformId}-autofetchNonUserPosts`;
+      const jobMetaDoc = await firestore.collection('jobMeta').doc(docId).get();
+      const existingTimestamp = jobMetaDoc.data()?.jobLastRunMs;
+      if (!existingTimestamp) {
+        const jobLastRunMs = Date.now();
+        await firestore.collection('jobMeta').doc(docId).set({ jobLastRunMs });
+        return jobLastRunMs;
+      }
+      return existingTimestamp as number;
+    })();
 
-    const profileId = getProfileId(profile.platformId, profile.user_id);
+    if (Date.now() - jobLastRun > fetchPlatformMinPeriod) {
+      if (DEBUG)
+        logger.debug(
+          `Triggering non-user autofetch for ${platformId}`,
+          DEBUG_PREFIX
+        );
 
-    let taskName;
-    switch (profile.platformId) {
-      case PLATFORM.Twitter:
-        taskName = FETCH_TWITTER_ACCOUNT_TASK;
-        break;
-      case PLATFORM.Mastodon:
-        taskName = FETCH_MASTODON_ACCOUNT_TASK;
-        break;
-      case PLATFORM.Bluesky:
-        taskName = FETCH_BLUESKY_ACCOUNT_TASK;
-        break;
-      default:
+      await firestore
+        .collection('jobMeta')
+        .doc(`${platformId}-autofetchNonUserPosts`)
+        .set({ jobLastRunMs: Date.now() });
+
+      for (const profile of nonUserPlatformProfiles) {
+        // Skip profiles that belong to registered users
+        if (profile.userId) {
+          continue;
+        }
+
+        const profileId = getProfileId(profile.platformId, profile.user_id);
+
+        const taskName = FETCH_ACCOUNT_TASKS[platformId];
+
+        const taskData = {
+          profileId,
+          platformId,
+          amount: 50, // Fetch last 50 posts
+          latest: true,
+        };
+
         if (DEBUG)
-          logger.warn(
-            `Unsupported platform for autofetch: ${profile.platformId}`,
-            undefined,
+          logger.debug(
+            `Enqueueing fetch task for profile ${profileId}`,
+            { taskName, taskData },
             DEBUG_PREFIX
           );
-        continue;
+        await enqueueTask(taskName, taskData);
+      }
     }
-
-    const taskData = {
-      profileId,
-      platformId: profile.platformId,
-      amount: 50, // Fetch last 50 posts
-      latest: true,
-    };
-
-    if (DEBUG)
-      logger.debug(
-        `Enqueueing fetch task for profile ${profileId}`,
-        { taskName, taskData },
-        DEBUG_PREFIX
-      );
-    await enqueueTask(taskName, taskData);
-  }
+  });
 };
 
 export const triggerAutofetchPosts = async (services: Services) => {
