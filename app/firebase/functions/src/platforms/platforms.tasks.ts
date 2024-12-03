@@ -25,7 +25,7 @@ export const FETCH_TASK_DISPATCH_RATES = {
    * thus 5 fetches / 15 minutes
    * or 1 fetch every 3 minutes
    */
-  [PLATFORM.Twitter]: 1 / (60 * 3), // 1 task every 3 minutes
+  [PLATFORM.Twitter]: 1 / (60 * 3), // 1 task every 180 seconds
 
   /** MASTODON
    * 300 requests / 5 minutes

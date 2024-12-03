@@ -30,8 +30,8 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
       (profile) => profile.platformId === platformId
     );
     const fetchPlatformMinPeriod =
-      nonUserPlatformProfiles.length /
-      (FETCH_TASK_DISPATCH_RATES[platformId] * 60); // in minutes
+      (nonUserPlatformProfiles.length / FETCH_TASK_DISPATCH_RATES[platformId]) *
+      1000; // in ms
 
     const jobLastRun = await (async () => {
       const docId = `${platformId}-autofetchNonUserPosts`;
