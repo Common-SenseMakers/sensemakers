@@ -141,7 +141,7 @@ exports[PARSE_POST_TASK] = onTaskDispatched(
     maxInstances: 10,
     concurrency: 100,
     rateLimits: {
-      maxConcurrentDispatches: 100,
+      maxConcurrentDispatches: 1000,
       maxDispatchesPerSecond: 150,
     },
   },
