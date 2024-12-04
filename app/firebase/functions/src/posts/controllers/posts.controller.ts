@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 
 import { AddUserDataPayload } from '../../@shared/types/types.fetch';
-import { PLATFORM } from '../../@shared/types/types.platforms';
+import { PUBLISHABLE_PLATFORM } from '../../@shared/types/types.platforms';
 import {
   GetPostPayload,
   PostUpdatePayload,
@@ -13,11 +13,7 @@ import { IS_EMULATOR } from '../../config/config.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { queryParamsSchema } from '../../feed/feed.schema';
 import { logger } from '../../instances/logger';
-import {
-  FETCH_BLUESKY_ACCOUNT_TASK,
-  FETCH_MASTODON_ACCOUNT_TASK,
-  FETCH_TWITTER_ACCOUNT_TASK,
-} from '../../platforms/platforms.tasks';
+import { FETCH_ACCOUNT_TASKS } from '../../platforms/platforms.tasks';
 import { chunkNumber, enqueueTask } from '../../tasksUtils/tasks.support';
 import { canReadPost } from '../posts.access.control';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
@@ -214,20 +210,8 @@ export const addAccountsDataController: RequestHandler = async (
       const fetchAmountChunks = chunkNumber(payload.amount, chunkSize);
 
       for (const fetchAmountChunk of fetchAmountChunks) {
-        let taskName;
-        switch (payload.platformId) {
-          case PLATFORM.Twitter:
-            taskName = FETCH_TWITTER_ACCOUNT_TASK;
-            break;
-          case PLATFORM.Mastodon:
-            taskName = FETCH_MASTODON_ACCOUNT_TASK;
-            break;
-          case PLATFORM.Bluesky:
-            taskName = FETCH_BLUESKY_ACCOUNT_TASK;
-            break;
-          default:
-            throw new Error(`Unsupported platform: ${payload.platformId}`);
-        }
+        const taskName =
+          FETCH_ACCOUNT_TASKS[payload.platformId as PUBLISHABLE_PLATFORM];
 
         const taskData = {
           profileId,

@@ -16,6 +16,7 @@ import {
 
 import { ActivityEventBase } from './@shared/types/types.activity';
 import { PlatformPost } from './@shared/types/types.platform.posts';
+import { PLATFORM } from './@shared/types/types.platforms';
 import { AppPost } from './@shared/types/types.posts';
 import { CollectionNames } from './@shared/utils/collectionNames';
 import { activityEventCreatedHook } from './activity/activity.created.hook';
@@ -31,9 +32,8 @@ import { buildAdminApp, buildApp } from './instances/app';
 import { logger } from './instances/logger';
 import { createServices } from './instances/services';
 import {
-  FETCH_BLUESKY_ACCOUNT_TASK,
-  FETCH_MASTODON_ACCOUNT_TASK,
-  FETCH_TWITTER_ACCOUNT_TASK,
+  FETCH_ACCOUNT_TASKS,
+  FETCH_TASK_DISPATCH_RATES,
   fetchPlatformAccountTask,
 } from './platforms/platforms.tasks';
 import { platformPostUpdatedHook } from './posts/hooks/platformPost.updated.hook';
@@ -126,18 +126,23 @@ exports.nonUserAccountFetch = onSchedule(
 );
 
 /** tasks */
+/**
+ * Open Router rate limits: https://openrouter.ai/docs/limits
+ *
+ */
 exports[PARSE_POST_TASK] = onTaskDispatched(
   {
     ...deployConfigTasks,
-    maxInstances: 1,
     retryConfig: {
       maxAttempts: 5,
       minBackoffSeconds: 5,
+      maxDoublings: 4,
     },
+    maxInstances: 10,
     concurrency: 100,
     rateLimits: {
-      maxConcurrentDispatches: 100,
-      maxDispatchesPerSecond: 100,
+      maxConcurrentDispatches: 1000,
+      maxDispatchesPerSecond: 150,
     },
   },
   (req) => parsePostTask(req, createServices(firestore, getConfig()))
@@ -163,7 +168,7 @@ exports[AUTOFETCH_POSTS_TASK] = onTaskDispatched(
  * 10 requests / 15 min per app
  * 5 requests / 15 min per user
  */
-exports[FETCH_TWITTER_ACCOUNT_TASK] = onTaskDispatched(
+exports[FETCH_ACCOUNT_TASKS[PLATFORM.Twitter]] = onTaskDispatched(
   {
     ...deployConfigTasks,
     secrets,
@@ -173,7 +178,7 @@ exports[FETCH_TWITTER_ACCOUNT_TASK] = onTaskDispatched(
     },
     rateLimits: {
       maxConcurrentDispatches: 1, // 1 task dispatched at a time
-      maxDispatchesPerSecond: 1 / (60 * 2), // max 1 task every 2 minutes
+      maxDispatchesPerSecond: FETCH_TASK_DISPATCH_RATES[PLATFORM.Twitter],
     },
   },
   (req) => fetchPlatformAccountTask(req, createServices(firestore, getConfig()))
@@ -181,9 +186,9 @@ exports[FETCH_TWITTER_ACCOUNT_TASK] = onTaskDispatched(
 
 /**
  * rate limits: https://docs-p.joinmastodon.org/api/rate-limits/
- * 300 requests / 5 min per account
+ * all endpoints: 300 requests / 5 min per account
  */
-exports[FETCH_MASTODON_ACCOUNT_TASK] = onTaskDispatched(
+exports[FETCH_ACCOUNT_TASKS[PLATFORM.Mastodon]] = onTaskDispatched(
   {
     ...deployConfigTasks,
     secrets,
@@ -192,20 +197,18 @@ exports[FETCH_MASTODON_ACCOUNT_TASK] = onTaskDispatched(
       minBackoffSeconds: 60,
     },
     rateLimits: {
-      maxConcurrentDispatches: 20,
-      maxDispatchesPerSecond: 1 / 5, // max 1 task every 5 second
+      maxConcurrentDispatches: 1000,
+      maxDispatchesPerSecond: FETCH_TASK_DISPATCH_RATES[PLATFORM.Mastodon],
     },
   },
   (req) => fetchPlatformAccountTask(req, createServices(firestore, getConfig()))
 );
 
 /**
- * com.atproto.server.createSession (for now this is the limiting API call since we login with username and app password each fetch)
- * Measured per account
- * 30 per 5 minutes
- * 300 per day
+ * rate limit: https://docs.bsky.app/docs/advanced-guides/rate-limits
+ * all endpoits by IP: 3000 requests / 5 minutes
  */
-exports[FETCH_BLUESKY_ACCOUNT_TASK] = onTaskDispatched(
+exports[FETCH_ACCOUNT_TASKS[PLATFORM.Bluesky]] = onTaskDispatched(
   {
     ...deployConfigTasks,
     secrets,
@@ -214,8 +217,8 @@ exports[FETCH_BLUESKY_ACCOUNT_TASK] = onTaskDispatched(
       minBackoffSeconds: 60,
     },
     rateLimits: {
-      maxConcurrentDispatches: 10,
-      maxDispatchesPerSecond: 1 / 10, // max 6 task every 1 minutes
+      maxConcurrentDispatches: 1000,
+      maxDispatchesPerSecond: FETCH_TASK_DISPATCH_RATES[PLATFORM.Bluesky],
     },
   },
   (req) => fetchPlatformAccountTask(req, createServices(firestore, getConfig()))
