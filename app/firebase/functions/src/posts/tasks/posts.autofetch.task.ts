@@ -10,6 +10,7 @@ import {
   FETCH_TASK_DISPATCH_RATES,
 } from '../../platforms/platforms.tasks';
 import { enqueueTask } from '../../tasksUtils/tasks.support';
+import { AutofetchNonUserPostsJobMeta } from './types.posts.tasks';
 
 const DEBUG = true;
 
@@ -36,10 +37,15 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
     const jobLastRun = await (async () => {
       const docId = `${platformId}-autofetchNonUserPosts`;
       const jobMetaDoc = await firestore.collection('jobMeta').doc(docId).get();
-      const existingTimestamp = jobMetaDoc.data()?.jobLastRunMs;
+      const existingTimestamp = jobMetaDoc.data()?.jobLastRunMs as
+        | AutofetchNonUserPostsJobMeta['jobLastRunMs']
+        | undefined;
       if (!existingTimestamp) {
         const jobLastRunMs = Date.now();
-        await firestore.collection('jobMeta').doc(docId).set({ jobLastRunMs });
+        await firestore
+          .collection('jobMeta')
+          .doc(docId)
+          .set({ jobLastRunMs } as AutofetchNonUserPostsJobMeta);
         return jobLastRunMs;
       }
       return existingTimestamp as number;
@@ -55,7 +61,7 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
       await firestore
         .collection('jobMeta')
         .doc(`${platformId}-autofetchNonUserPosts`)
-        .set({ jobLastRunMs: Date.now() });
+        .set({ jobLastRunMs: Date.now() } as AutofetchNonUserPostsJobMeta);
 
       for (const profile of nonUserPlatformProfiles) {
         // Skip profiles that belong to registered users
