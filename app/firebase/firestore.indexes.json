@@ -9,6 +9,20 @@
           "order": "ASCENDING"
         },
         {
+          "fieldPath": "createdAtMs",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "authorProfileId",
+          "order": "ASCENDING"
+        },
+        {
           "fieldPath": "structuredSemantics.topic",
           "order": "ASCENDING"
         },
