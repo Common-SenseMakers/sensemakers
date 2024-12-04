@@ -14,6 +14,7 @@ import {
 } from '../@shared/types/types.posts';
 import { RefLabel, RefPostData } from '../@shared/types/types.references';
 import { CollectionNames } from '../@shared/utils/collectionNames';
+import { SCIENCE_TOPIC_URI } from '../@shared/utils/semantics.helper';
 import { DBInstance } from '../db/instance';
 import { BaseRepository, removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
@@ -163,19 +164,17 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       queryParams.semantics?.labels
     );
 
-    if (!useLinksSubcollection) {
-      query = filterByArrayContainsAny(
-        query,
-        `${structuredSemanticsKey}.${keywordsKey}`,
-        queryParams.semantics?.keywords
-      );
+    query = filterByArrayContainsAny(
+      query,
+      `${structuredSemanticsKey}.${keywordsKey}`,
+      queryParams.semantics?.keywords
+    );
 
-      query = filterByEqual(
-        query,
-        `${structuredSemanticsKey}.${topicKey}`,
-        queryParams.semantics?.topic
-      );
-    }
+    query = filterByEqual(
+      query,
+      `${structuredSemanticsKey}.${topicKey}`,
+      queryParams.semantics?.topic
+    );
 
     /** get the sinceCreatedAt and untilCreatedAt timestamps from the elements ids */
     const { sinceCreatedAt, untilCreatedAt } = await (async () => {
@@ -255,7 +254,10 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       // Process each post's labels directly from the subcollection documents
       linkPosts.docs.forEach((doc) => {
         const refPost = doc.data() as RefPostData;
-        if (refPost?.structuredSemantics?.labels) {
+        if (
+          refPost?.structuredSemantics?.labels &&
+          refPost.structuredSemantics.topic === SCIENCE_TOPIC_URI
+        ) {
           const refLabels = refPost.structuredSemantics?.labels?.map(
             (label): RefLabel => ({
               label,

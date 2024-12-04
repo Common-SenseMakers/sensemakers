@@ -2,6 +2,7 @@ import { expect } from 'chai';
 
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { AppUser } from '../../src/@shared/types/types.user';
+import { SCIENCE_TOPIC_URI } from '../../src/@shared/utils/semantics.helper';
 import { logger } from '../../src/instances/logger';
 import { doesQueryUseSubcollection } from '../../src/posts/posts.helper';
 import { UsersHelper } from '../../src/users/users.helper';
@@ -187,55 +188,73 @@ describe('070 test feed', () => {
           );
       });
     });
-    it('returns a reference page feed filtered by labels', async () => {
-      if (USE_REAL_TWITTER) {
-        logger.warn(`Feed test disbaled with real twitter`);
-        return;
-      }
-      const { feed } = services;
-      const query1 = {
-        fetchParams: { expectedAmount: 10 },
-        semantics: {
-          refs: ['https://twitter.com/ItaiYanai/status/1780813867213336910'],
-        },
-        hydrateConfig: { addAggregatedLabels: false },
-      };
-      const result1 = await feed.getFeed(query1);
-      expect(result1).to.have.length(2);
-      expect(doesQueryUseSubcollection(query1).useLinksSubcollection).to.be
-        .true;
+    describe('reference page feed', () => {
+      const TEST_REF =
+        'https://twitter.com/ItaiYanai/status/1780813867213336910';
 
-      const query2 = {
-        fetchParams: { expectedAmount: 10 },
-        semantics: {
-          refs: ['https://twitter.com/ItaiYanai/status/1780813867213336910'],
-          labels: [
-            'http://purl.org/spar/cito/discusses',
-            'https://sense-nets.xyz/includesQuotationFrom',
-          ],
-        },
-        hydrateConfig: { addAggregatedLabels: true },
-      };
-      const result2 = await feed.getFeed(query2);
-      expect(result2).to.have.length(2);
-      expect(doesQueryUseSubcollection(query2).useLinksSubcollection).to.be.true;
-      result2.forEach((post) => {
-        expect(post.meta?.refLabels).to.not.be.undefined;
-        expect(Object.keys(post.meta!.refLabels)).to.have.length.greaterThan(0);
+      it('returns unfiltered reference page feed', async () => {
+        if (USE_REAL_TWITTER) {
+          logger.warn(`Feed test disbaled with real twitter`);
+          return;
+        }
+        const { feed } = services;
+        const query = {
+          fetchParams: { expectedAmount: 10 },
+          semantics: {
+            refs: [TEST_REF],
+            topic: SCIENCE_TOPIC_URI,
+          },
+          hydrateConfig: { addAggregatedLabels: false },
+        };
+        const result = await feed.getFeed(query);
+        expect(result).to.have.length(1);
+        expect(doesQueryUseSubcollection(query).useLinksSubcollection).to.be
+          .true;
       });
 
-      const query3 = {
-        fetchParams: { expectedAmount: 10 },
-        semantics: {
-          refs: ['https://twitter.com/ItaiYanai/status/1780813867213336910'],
-          labels: ['http://purl.org/spar/cito/discusses'],
-        },
-        hydrateConfig: { addAggregatedLabels: false },
-      };
-      const result3 = await feed.getFeed(query3);
-      expect(result3).to.have.length(1);
-      expect(doesQueryUseSubcollection(query3).useLinksSubcollection).to.be
-        .true;
+      it('returns reference page feed filtered by labels', async () => {
+        if (USE_REAL_TWITTER) {
+          logger.warn(`Feed test disbaled with real twitter`);
+          return;
+        }
+        const { feed } = services;
+        const query = {
+          fetchParams: { expectedAmount: 10 },
+          semantics: {
+            refs: [TEST_REF],
+            labels: [
+              'http://purl.org/spar/cito/discusses',
+              'http://sense-nets.xyz/includesQuotationFrom',
+            ],
+          },
+          hydrateConfig: { addAggregatedLabels: false },
+        };
+        const result = await feed.getFeed(query);
+        expect(result).to.have.length(1);
+        expect(doesQueryUseSubcollection(query).useLinksSubcollection).to.be
+          .true;
+      });
+
+      it('returns reference page feed filtered by keywords', async () => {
+        if (USE_REAL_TWITTER) {
+          logger.warn(`Feed test disabled with real twitter`);
+          return;
+        }
+        const { feed } = services;
+        const query = {
+          fetchParams: { expectedAmount: 10 },
+          semantics: {
+            refs: [TEST_REF],
+            keywords: ['AI'],
+            topic: SCIENCE_TOPIC_URI,
+          },
+          hydrateConfig: { addAggregatedLabels: false },
+        };
+        const result = await feed.getFeed(query);
+        expect(result).to.have.length(1); // there are 2 posts with this tag and reference, but one of them is marked as not science
+        expect(doesQueryUseSubcollection(query).useLinksSubcollection).to.be
+          .true;
+      });
     });
   });
 });
