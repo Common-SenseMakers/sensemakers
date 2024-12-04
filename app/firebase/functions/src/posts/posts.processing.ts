@@ -215,7 +215,7 @@ export class PostsProcessing {
       }
     });
 
-    /** get reference meta and store post in reference subcollections */
+    /** add labels to refMeta */
     await Promise.all(
       Array.from(Object.keys(refsLabels)).map(async (reference) => {
         const url = reference;
@@ -224,17 +224,6 @@ export class PostsProcessing {
           manager,
           post.originalParsed
         );
-        const refPostData: RefPostData = removeUndefined({
-          id: post.id,
-          authorProfileId: post.authorProfileId,
-          createdAtMs: post.createdAtMs,
-          structuredSemantics: { labels: refsLabels[url] },
-          platformPostUrl: post.generic.thread[0].url,
-        });
-        /** always delete all labels from a post for a reference */
-        await this.linksService.deleteRefPost(url, postId, manager);
-
-        await this.linksService.setRefPost(url, refPostData, manager);
         const normalizedUrl = normalizeUrl(url);
 
         refsMeta[normalizedUrl] = {
@@ -251,6 +240,26 @@ export class PostsProcessing {
       refsMeta: removeUndefined(refsMeta),
       refs: Object.keys(refsMeta),
     };
+    /** get reference meta and store post in reference subcollections */
+    await Promise.all(
+      Array.from(Object.keys(refsLabels)).map(async (reference) => {
+        const url = reference;
+        const refPostData: RefPostData = removeUndefined({
+          id: post.id,
+          authorProfileId: post.authorProfileId,
+          createdAtMs: post.createdAtMs,
+          structuredSemantics: {
+            ...structuredSemantics,
+            labels: refsLabels[url], // include ONLY the labels for this reference
+          },
+          platformPostUrl: post.generic.thread[0].url,
+        });
+        /** always delete a post for a reference when updating semantics */
+        await this.linksService.deleteRefPost(url, postId, manager);
+
+        await this.linksService.setRefPost(url, refPostData, manager);
+      })
+    );
 
     await this.posts.update(postId, { structuredSemantics }, manager);
   }

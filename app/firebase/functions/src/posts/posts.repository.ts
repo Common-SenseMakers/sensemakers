@@ -163,19 +163,17 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       queryParams.semantics?.labels
     );
 
-    if (!useLinksSubcollection) {
-      query = filterByArrayContainsAny(
-        query,
-        `${structuredSemanticsKey}.${keywordsKey}`,
-        queryParams.semantics?.keywords
-      );
+    query = filterByArrayContainsAny(
+      query,
+      `${structuredSemanticsKey}.${keywordsKey}`,
+      queryParams.semantics?.keywords
+    );
 
-      query = filterByEqual(
-        query,
-        `${structuredSemanticsKey}.${topicKey}`,
-        queryParams.semantics?.topic
-      );
-    }
+    query = filterByEqual(
+      query,
+      `${structuredSemanticsKey}.${topicKey}`,
+      queryParams.semantics?.topic
+    );
 
     /** get the sinceCreatedAt and untilCreatedAt timestamps from the elements ids */
     const { sinceCreatedAt, untilCreatedAt } = await (async () => {
