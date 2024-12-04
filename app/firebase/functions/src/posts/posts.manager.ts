@@ -48,7 +48,7 @@ import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { PostsProcessing } from './posts.processing';
 
-const DEBUG = false;
+const DEBUG = true;
 
 const areCredentialsInvalid = (err: { message: string }) => {
   return err.message.includes('Value passed for the token was invalid');
@@ -798,6 +798,11 @@ export class PostsManager {
     /** on transaction to set the profiles */
     await this.db.run(async (manager) => {
       const user = await this.users.repo.getUser(userId, manager, true);
+
+      if (DEBUG) {
+        logger.debug('linkExistingUser', { user });
+      }
+
       await Promise.all(
         ALL_PUBLISH_PLATFORMS.map(async (platform) => {
           const accounts = UsersHelper.getAccounts(user, platform);
@@ -805,6 +810,12 @@ export class PostsManager {
             accounts.map(async (account) => {
               /** udpate the profile */
               const profileId = getProfileId(platform, account.user_id);
+
+              if (DEBUG) {
+                logger.debug(
+                  `linkExistingUser ${userId} to profile ${profileId}`
+                );
+              }
 
               const profile = await this.users.profiles.getByProfileId(
                 profileId,
@@ -825,6 +836,7 @@ export class PostsManager {
     /** one transaction to read all platform posts */
     const _allPosts = await this.db.run(async (manager) => {
       const user = await this.users.repo.getUser(userId, manager, true);
+
       return Promise.all(
         ALL_PUBLISH_PLATFORMS.map(async (platform) => {
           const accounts = UsersHelper.getAccounts(user, platform);
@@ -837,6 +849,9 @@ export class PostsManager {
                 profileId,
                 fetchParams: { expectedAmount: 1000 },
               });
+              if (DEBUG) {
+                logger.debug(`got ${posts.length} posts of ${profileId}`);
+              }
               return posts;
             })
           );
@@ -852,9 +867,12 @@ export class PostsManager {
       const thisPosts = allPosts.slice(i, i + size);
       await this.db.run(async (manager) => {
         return Promise.all(
-          thisPosts.map((post) =>
-            this.updatePost(post.id, { authorUserId: userId }, manager)
-          )
+          thisPosts.map((post) => {
+            if (DEBUG) {
+              logger.debug(`updating author of post ${post.id} to ${userId}`);
+            }
+            return this.updatePost(post.id, { authorUserId: userId }, manager);
+          })
         );
       });
     }

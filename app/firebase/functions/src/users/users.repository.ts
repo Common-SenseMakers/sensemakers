@@ -6,12 +6,15 @@ import {
   DefinedIfTrue,
   EmailDetails,
   UserSettings,
+  UserWithAccounts,
 } from '../@shared/types/types.user';
+import { getProfileId } from '../@shared/utils/profiles.utils';
 import { DBInstance } from '../db/instance';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
 import { ProfilesRepository } from '../profiles/profiles.repository';
+import { UsersHelper } from './users.helper';
 
 const DEBUG = false;
 
@@ -56,7 +59,6 @@ export class UsersRepository {
     let doc = await this.getUserDoc(userId, manager);
 
     if (!doc.exists) {
-      console.log('remove me');
       const ref = this.db.collections.users.doc(userId);
       doc = await manager.get(ref);
     }
@@ -81,8 +83,59 @@ export class UsersRepository {
     manager: TransactionManager
   ) {
     const ref = await this.getUserRef(userId, manager);
-    manager.create(ref, removeUndefined(user));
+    const accountsIds = UsersHelper.accountsToAccountsIds(user.accounts);
+    const userWithAccountsIds: AppUserCreate & {
+      accountsIds: AppUser['accountsIds'];
+    } = {
+      ...user,
+      accountsIds,
+    };
+
+    manager.create(ref, removeUndefined(userWithAccountsIds));
     return ref.id;
+  }
+
+  public async deleteUser(userId: string, manager: TransactionManager) {
+    const ref = await this.getUserRef(userId, manager);
+    manager.delete(ref);
+  }
+
+  public async getUserIdWithPlatformAccount<T extends boolean>(
+    platform: PLATFORM,
+    user_id: string,
+    manager: TransactionManager,
+    shouldThrow?: T
+  ): Promise<DefinedIfTrue<T, string>> {
+    const profile_id = getProfileId(platform, user_id);
+
+    /** protect against changes in the property name */
+    const accountsIds_property: keyof UserWithAccounts = 'accountsIds';
+
+    const query = this.db.collections.users.where(
+      accountsIds_property,
+      'array-contains',
+      profile_id
+    );
+    const snap = await manager.query(query);
+
+    const _shouldThrow = shouldThrow !== undefined ? shouldThrow : false;
+
+    if (snap.empty) {
+      if (_shouldThrow)
+        throw new Error(
+          `User with user_id: ${user_id} and platform ${platform} not found`
+        );
+      else return undefined as DefinedIfTrue<T, string>;
+    }
+
+    if (snap.size > 1) {
+      throw new Error(
+        `Data corrupted. Unexpected multiple users with the same platform user_id ${profile_id}`
+      );
+    }
+
+    /** should not return the data as it does not include the tx manager cache */
+    return snap.docs[0].id as DefinedIfTrue<T, string>;
   }
 
   /** append or overwrite userDetails for an account of a given platform */
@@ -97,12 +150,11 @@ export class UsersRepository {
      * one from userId
      */
     const user = await (async () => {
-      const existWithAccountId =
-        await this.profiles.getUserIdWithPlatformAccount(
-          platform,
-          details.user_id,
-          manager
-        );
+      const existWithAccountId = await this.getUserIdWithPlatformAccount(
+        platform,
+        details.user_id,
+        manager
+      );
 
       const existWithAccount = existWithAccountId
         ? await this.getUser(existWithAccountId, manager)
@@ -163,8 +215,13 @@ export class UsersRepository {
 
     const userRef = await this.getUserRef(userId, manager, true);
 
+    const newAccounts = { ...user.accounts, [platform]: platformAccounts };
+    const newAccountsIds = UsersHelper.accountsToAccountsIds(newAccounts);
+
+    /** store a redundant list of profileIds */
     const update: Partial<AppUser> = {
-      accounts: { ...user.accounts, [platform]: platformAccounts },
+      accounts: newAccounts,
+      accountsIds: newAccountsIds,
     };
 
     if (DEBUG) logger.debug(`Updating user ${userId}`, { update });
@@ -178,7 +235,7 @@ export class UsersRepository {
     user_id: string,
     manager: TransactionManager
   ) {
-    const userId = await this.profiles.getUserIdWithPlatformAccount(
+    const userId = await this.getUserIdWithPlatformAccount(
       platform,
       user_id,
       manager,
@@ -213,8 +270,10 @@ export class UsersRepository {
     const newAccounts = { ...user.accounts };
     newAccounts[platform] = newPlatformAccounts;
 
+    const newAccountsIds = UsersHelper.accountsToAccountsIds(newAccounts);
     manager.update(doc.ref, {
       accounts: newAccounts,
+      newAccountsIds,
     });
   }
 
