@@ -181,7 +181,7 @@ export class UsersService {
 
         return {
           userId: _userId,
-          created: false,
+          linkProfile: false,
         };
       } else {
         /**
@@ -256,7 +256,7 @@ export class UsersService {
             userId,
           }),
           userId,
-          created: false,
+          linkProfile: true,
         };
       } else {
         /**
@@ -298,7 +298,7 @@ export class UsersService {
             userId: prefixed_user_id,
           }),
           userId: prefixed_user_id,
-          created: true,
+          linkProfile: true,
         };
       }
     }
