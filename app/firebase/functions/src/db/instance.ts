@@ -24,6 +24,9 @@ export class DBInstance {
     triples: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
     activity: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
     links: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
+    linkPosts: (
+      linkId: string
+    ) => FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
   };
 
   constructor(firestore: Firestore) {
@@ -40,6 +43,11 @@ export class DBInstance {
       triples: this.firestore.collection(CollectionNames.Triples),
       activity: this.firestore.collection(CollectionNames.Activity),
       links: this.firestore.collection(CollectionNames.Links),
+      linkPosts: (linkId: string) =>
+        this.firestore
+          .collection(CollectionNames.Links)
+          .doc(linkId)
+          .collection(CollectionNames.LinkPostsSubcollection),
     };
   }
 

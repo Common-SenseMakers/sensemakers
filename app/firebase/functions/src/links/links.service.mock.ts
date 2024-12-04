@@ -1,8 +1,6 @@
 import { anything, instance, spy, when } from 'ts-mockito';
 
 import { OEmbed } from '../@shared/types/types.references';
-import { normalizeUrl } from '../@shared/utils/links.utils';
-import { TransactionManager } from '../db/transaction.manager';
 import { LinksMockConfig, LinksService } from './links.service';
 
 /**
@@ -23,16 +21,10 @@ export const getLinksMock = (
     when(mocked.fetchOEmbed(anything())).thenCall((url: string) => {
       const oembed: OEmbed = {
         original_url: url,
-        url: normalizeUrl(url),
+        url,
       };
       return oembed;
     });
-
-    when(mocked.setOEmbed(anything(), anything())).thenCall(
-      (url: string, manager: TransactionManager) => {
-        return;
-      }
-    );
   }
   return instance(mocked) as unknown as LinksService;
 };

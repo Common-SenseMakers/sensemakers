@@ -17,7 +17,7 @@ import { CollectionNames } from '../@shared/utils/collectionNames';
 import { DBInstance } from '../db/instance';
 import { BaseRepository, removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
-import { hashAndNormalizeUrl } from '../links/links.utils';
+import { hashUrl } from '../links/links.utils';
 import { doesQueryUseSubcollection } from '../posts/posts.helper';
 
 const DEBUG = false;
@@ -131,7 +131,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     /** check if we can query the links subcollection rather than the entire posts */
     const baseCollection = (() => {
       if (useLinksSubcollection && queryParams.semantics?.refs) {
-        const linkId = hashAndNormalizeUrl(queryParams.semantics.refs[0]);
+        const linkId = hashUrl(queryParams.semantics.refs[0]);
         return this.db.collections.links
           .doc(linkId)
           .collection(CollectionNames.LinkPostsSubcollection);
@@ -246,7 +246,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
     // Get all posts for each reference from their respective subcollections
     const postsPromises = references.map(async (reference) => {
-      const linkId = hashAndNormalizeUrl(reference);
+      const linkId = hashUrl(reference);
       const linkPosts = await this.db.collections.links
         .doc(linkId)
         .collection(CollectionNames.LinkPostsSubcollection)
