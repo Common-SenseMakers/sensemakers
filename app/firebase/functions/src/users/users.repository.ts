@@ -1,7 +1,4 @@
-import {
-  ALL_IDENTITY_PLATFORMS,
-  PLATFORM,
-} from '../@shared/types/types.platforms';
+import { PLATFORM } from '../@shared/types/types.platforms';
 import {
   AccountDetailsBase,
   AppUser,
@@ -17,20 +14,9 @@ import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
 import { ProfilesRepository } from '../profiles/profiles.repository';
+import { UsersHelper } from './users.helper';
 
 const DEBUG = false;
-
-const accountsToAccountsIds = (accounts: AppUser['accounts']) => {
-  let newAccountsIds: string[] = [];
-  ALL_IDENTITY_PLATFORMS.forEach((_platform) => {
-    if (accounts[_platform]) {
-      accounts[_platform].forEach((a) => {
-        newAccountsIds.push(getProfileId(_platform, a.user_id));
-      });
-    }
-  });
-  return newAccountsIds;
-};
 
 export class UsersRepository {
   constructor(
@@ -73,7 +59,6 @@ export class UsersRepository {
     let doc = await this.getUserDoc(userId, manager);
 
     if (!doc.exists) {
-      console.log('remove me');
       const ref = this.db.collections.users.doc(userId);
       doc = await manager.get(ref);
     }
@@ -98,7 +83,7 @@ export class UsersRepository {
     manager: TransactionManager
   ) {
     const ref = await this.getUserRef(userId, manager);
-    const accountsIds = accountsToAccountsIds(user.accounts);
+    const accountsIds = UsersHelper.accountsToAccountsIds(user.accounts);
     const userWithAccountsIds: AppUserCreate & {
       accountsIds: AppUser['accountsIds'];
     } = {
@@ -108,6 +93,11 @@ export class UsersRepository {
 
     manager.create(ref, removeUndefined(userWithAccountsIds));
     return ref.id;
+  }
+
+  public async deleteUser(userId: string, manager: TransactionManager) {
+    const ref = await this.getUserRef(userId, manager);
+    manager.delete(ref);
   }
 
   public async getUserIdWithPlatformAccount<T extends boolean>(
@@ -226,7 +216,7 @@ export class UsersRepository {
     const userRef = await this.getUserRef(userId, manager, true);
 
     const newAccounts = { ...user.accounts, [platform]: platformAccounts };
-    const newAccountsIds = accountsToAccountsIds(newAccounts);
+    const newAccountsIds = UsersHelper.accountsToAccountsIds(newAccounts);
 
     /** store a redundant list of profileIds */
     const update: Partial<AppUser> = {
@@ -280,7 +270,7 @@ export class UsersRepository {
     const newAccounts = { ...user.accounts };
     newAccounts[platform] = newPlatformAccounts;
 
-    const newAccountsIds = accountsToAccountsIds(newAccounts);
+    const newAccountsIds = UsersHelper.accountsToAccountsIds(newAccounts);
     manager.update(doc.ref, {
       accounts: newAccounts,
       newAccountsIds,

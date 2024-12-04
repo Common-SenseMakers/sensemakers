@@ -1,4 +1,5 @@
 import {
+  ALL_IDENTITY_PLATFORMS,
   ALL_PUBLISH_PLATFORMS,
   IDENTITY_PLATFORM,
   PLATFORM,
@@ -16,6 +17,7 @@ import {
 } from '../@shared/types/types.user';
 import { parseBlueskyURI } from '../@shared/utils/bluesky.utils';
 import { parseMastodonGlobalUsername } from '../@shared/utils/mastodon.utils';
+import { getProfileId } from '../@shared/utils/profiles.utils';
 
 export interface PlatformAccount {
   platform: PUBLISHABLE_PLATFORM;
@@ -205,4 +207,16 @@ export class UsersHelper {
       platformPostUrl,
     };
   }
+
+  static accountsToAccountsIds = (accounts: AppUser['accounts']) => {
+    let newAccountsIds: string[] = [];
+    ALL_IDENTITY_PLATFORMS.forEach((_platform) => {
+      if (accounts[_platform]) {
+        accounts[_platform].forEach((a) => {
+          newAccountsIds.push(getProfileId(_platform, a.user_id));
+        });
+      }
+    });
+    return newAccountsIds;
+  };
 }

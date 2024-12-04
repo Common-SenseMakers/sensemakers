@@ -62,4 +62,5 @@ export interface ParsePostResult {
   filter_classification: SciFilterClassfication;
   semantics: AppPostSemantics;
   support?: ParsedSupport;
+  metadata?: Record<string, any>;
 }

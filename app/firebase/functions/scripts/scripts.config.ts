@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import { ServicesConfig } from '../src/instances/services';
 
 // Load environment variables from .env file
-dotenv.config({ path: './migrations/.env.migrations' });
+dotenv.config({ path: './scripts/.script.env' });
 
 export const config: ServicesConfig = {
   links: {

@@ -1,13 +1,13 @@
-import dotenv from 'dotenv';
 import * as admin from 'firebase-admin';
 
+import { LocalLogger, LogLevel } from '../src/instances/local.logger';
 import { logger } from '../src/instances/logger';
 import { createServices } from '../src/instances/services';
 import { config } from './scripts.config';
 import { initApp } from './scripts.utils';
 
-// Load environment variables from .env file
-dotenv.config({ path: './scripts/.script.env' });
+(logger as LocalLogger).msgLevel = process.env.LOG_LEVEL_MSG as LogLevel;
+(logger as LocalLogger).ctxLevel = process.env.LOG_LEVEL_OBJ as LogLevel;
 
 const mandatory = ['FB_CERT_PATH', 'FB_PROJECT_ID', 'NANOPUBS_PUBLISH_SERVERS'];
 
@@ -20,8 +20,6 @@ mandatory.forEach((varName) => {
 });
 
 const serviceAccount = require('../' + process.env.FB_CERT_PATH);
-
-logger.info('Running in local mode with certificate');
 
 const projectId = process.env.FB_PROJECT_ID;
 
