@@ -31,18 +31,18 @@ import { services } from './scripts.services';
       })
     );
 
-    const posts = await services.postsManager.processing.posts.getMany({
-      fetchParams: { expectedAmount: 10 },
-      userId,
-    });
+    // const posts = await services.postsManager.processing.posts.getMany({
+    //   fetchParams: { expectedAmount: 10 },
+    //   userId,
+    // });
 
-    logger.info(`${posts.length} Posts for user: ${user.userId} read`);
-    posts.forEach((post) => {
-      const postClean = { ...post };
-      delete postClean.originalParsed?.support;
-      delete postClean.originalParsed?.metadata;
+    // logger.info(`${posts.length} Posts for user: ${user.userId} read`);
+    // posts.forEach((post) => {
+    //   const postClean = { ...post };
+    //   delete postClean.originalParsed?.support;
+    //   delete postClean.originalParsed?.metadata;
 
-      logger.info(`Posts ${post.id}`, { post });
-    });
+    //   logger.info(`Posts ${post.id}`, { post });
+    // });
   });
 })();
