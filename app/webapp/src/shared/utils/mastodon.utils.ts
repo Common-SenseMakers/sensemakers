@@ -52,7 +52,7 @@ export function parseMastodonPostURI(uri: string) {
     const parts = uri.split('/');
 
     if (parts.length !== 7) {
-      throw new Error('Invalid URI: expected exactly 5 parts.');
+      throw new Error('Invalid URI: expected exactly 7 parts.');
     }
 
     const [, , server, , username, , postId] = parts;

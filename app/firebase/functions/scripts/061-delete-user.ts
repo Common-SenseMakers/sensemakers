@@ -6,7 +6,7 @@ import { services } from './scripts.services';
   const users = await services.users.repo.getAll();
   logger.info(`Processing ${users.length} users`);
 
-  const userId = 'twitter:1773032135814717440';
+  const userId = 'twitter:1753077743816777728';
 
   await services.db.run(async (manager) => {
     const user = await services.users.repo.getUser(userId, manager, true);
