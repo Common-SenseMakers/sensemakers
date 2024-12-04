@@ -56,15 +56,17 @@ def render_quote_post_content(
             # get order of appearance for quoted post url (1-indexed)
             quoted_url_idx = ordered_refs.index(post.quoted_url) + 1
 
-            rendered_quoted_post = (
-                f"<quoted ref_{quoted_url_idx}>{quoted_post.content}</quote>"
-            )
+             # Truncate the quoted content first
+            truncated_content = quoted_post.content[:quoted_context_length]
+            # Add enclosing tags after truncation
+            rendered_quoted_post = f"<quoted ref_{quoted_url_idx}>{truncated_content}</quoted>"
+
 
             # replace quoted post url with rendered version truncated to a certain length 
             processed_content = processed_content.replace(
-                post.quoted_url, rendered_quoted_post[:quoted_context_length]
+                post.quoted_url, rendered_quoted_post
             )
-
+            print("Processed Content:::",processed_content)
             # remove quoted post url from list to process
             refs_to_process.remove(post.quoted_url)
 
