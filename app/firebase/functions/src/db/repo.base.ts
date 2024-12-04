@@ -22,7 +22,7 @@ export function removeUndefined(obj: any): any {
   return obj;
 }
 
-export class BaseRepository<TT, CC> {
+export class BaseRepository<DataType, DataCreateType> {
   constructor(
     protected collection: FirebaseFirestore.CollectionReference,
     protected db: DBInstance,
@@ -41,10 +41,10 @@ export class BaseRepository<TT, CC> {
   }
 
   public create(
-    post: CC,
+    post: DataCreateType,
     manager: TransactionManager,
     id?: string
-  ): CC & { id: string } {
+  ): DataCreateType & { id: string } {
     const postRef = id
       ? this.collection.doc(this.encode ? this.encode(id) : id)
       : this.collection.doc();
@@ -68,7 +68,7 @@ export class BaseRepository<TT, CC> {
     return ref;
   }
 
-  public set(id: string, data: TT, manager: TransactionManager) {
+  public set(id: string, data: DataType, manager: TransactionManager) {
     const ref = this.getRef(id);
     manager.set(ref, data);
   }
@@ -90,11 +90,11 @@ export class BaseRepository<TT, CC> {
     const refs = Array.from(ids).map((id) => this.getRef(id));
     const snapshot = await this.db.firestore.getAll(...refs);
     return snapshot.map((doc) => {
-      return { id: this.decode(doc.id), ...doc.data() } as TT;
+      return { id: this.decode(doc.id), ...doc.data() } as DataType;
     });
   }
 
-  public async get<T extends boolean, R = TT>(
+  public async get<T extends boolean, R = DataType>(
     id: string,
     manager: TransactionManager,
     shouldThrow?: T

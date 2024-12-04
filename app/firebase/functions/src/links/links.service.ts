@@ -1,9 +1,13 @@
-import { RefMeta } from '../@shared/types/types.parser';
-import { OEmbed, RefPostData } from '../@shared/types/types.references';
+import {
+  LinkSource,
+  OEmbed,
+  RefPostData,
+} from '../@shared/types/types.references';
 import { normalizeUrl } from '../@shared/utils/links.utils';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
+import { TimeService } from '../time/time.service';
 import { LinksRepository } from './links.repository';
 import { hashAndNormalizeUrl, hashUrl } from './links.utils';
 
@@ -19,11 +23,14 @@ export interface LinksConfig {
 
 export class LinksService {
   constructor(
-    protected links: LinksRepository,
+    public links: LinksRepository,
+    protected time: TimeService,
     protected config: LinksConfig
   ) {}
 
-  async fetchOEmbed(url: string): Promise<RefMeta> {
+  async fetchOEmbed(
+    url: string
+  ): Promise<{ success: boolean; oembed: OEmbed }> {
     const normalizedUrl = normalizeUrl(url);
     try {
       const res = await fetch(
@@ -34,11 +41,19 @@ export class LinksService {
         }
       );
       const resJson = await res.json();
-      const resData = resJson as RefMeta;
-      return { ...resData, original_url: url, url: normalizedUrl };
+      if (resJson.status === 403) {
+        return {
+          success: false,
+          oembed: { original_url: url, url: normalizedUrl },
+        };
+      }
+      const resData = resJson as OEmbed;
+      const oembed = { ...resData, original_url: url, url: normalizedUrl };
+      return { success: true, oembed };
     } catch (e) {
       logger.warn(`Error fetching ref ${url} meta: ${e}`);
-      return { original_url: url, url: normalizedUrl };
+      const oembed = { original_url: url, url: normalizedUrl, success: false };
+      return { success: true, oembed };
     }
   }
 
@@ -50,27 +65,49 @@ export class LinksService {
     const normalizedUrl = normalizeUrl(url);
     const urlHash = hashUrl(normalizedUrl);
     const existing = await this.links.get(urlHash, manager);
-    if (existing) return existing;
 
-    const oembed = await this.fetchOEmbed(url);
+    /** refetch from iframely links that have not been fetched */
+    if (existing && existing.sources && existing.sources[LinkSource.iframely]) {
+      return existing.oembed;
+    }
+
+    const iframely = await this.fetchOEmbed(url);
     const originalRefMeta = removeUndefined({
       title: parsedMeta?.title,
       summary: parsedMeta?.summary,
     });
+
+    const newOembed: OEmbed = {
+      ...originalRefMeta,
+      ...iframely.oembed,
+    };
+
+    /** parser decides type */
+    newOembed.type = originalRefMeta.type;
+
     this.links.set(
       urlHash,
       {
-        ...originalRefMeta,
-        ...oembed,
+        oembed: newOembed,
+        sources: {
+          [LinkSource.parser]: {
+            timestamp: this.time.now(),
+            status: 'SUCCESS',
+          },
+          [LinkSource.iframely]: {
+            timestamp: this.time.now(),
+            status: iframely.success ? 'SUCCESS' : 'ERROR',
+          },
+        },
       },
       manager
     );
 
-    return oembed;
+    return newOembed;
   }
 
   async setOEmbed(oembed: OEmbed, manager: TransactionManager) {
-    this.links.set(hashAndNormalizeUrl(oembed.url), oembed, manager);
+    this.links.set(hashAndNormalizeUrl(oembed.url), { oembed }, manager);
   }
 
   async setRefPost(

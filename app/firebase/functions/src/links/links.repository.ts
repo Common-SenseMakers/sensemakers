@@ -1,10 +1,10 @@
-import { OEmbed, RefPostData } from '../@shared/types/types.references';
+import { LinkMeta, RefPostData } from '../@shared/types/types.references';
 import { CollectionNames } from '../@shared/utils/collectionNames';
 import { DBInstance } from '../db/instance';
 import { BaseRepository } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 
-export class LinksRepository extends BaseRepository<OEmbed, OEmbed> {
+export class LinksRepository extends BaseRepository<LinkMeta, LinkMeta> {
   constructor(protected db: DBInstance) {
     super(db.collections.links, db);
   }
