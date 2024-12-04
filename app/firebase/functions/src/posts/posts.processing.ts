@@ -239,19 +239,13 @@ export class PostsProcessing {
     /** Sync ref posts semantics on redundant subcollections */
     await Promise.all(
       Array.from(Object.keys(refsLabels)).map(async (ref) => {
-        const refPostData: RefPostData = removeUndefined({
-          id: post.id,
-          authorProfileId: post.authorProfileId,
-          createdAtMs: post.createdAtMs,
-          structuredSemantics: {
-            ...structuredSemantics,
-            /** filter - only labels that apply to that ref */
-            labels: refsLabels[ref],
-          },
-          platformPostUrl: post.generic.thread[0].url,
-        });
+        const refStructuredSemantics = {
+          ...structuredSemantics,
+          /** filter - only labels that apply to that ref */
+          labels: refsLabels[ref],
+        };
 
-        await this.syncRefPost(ref, postId, refPostData, manager);
+        await this.syncRefPost(ref, post, refStructuredSemantics, manager);
       })
     );
 
@@ -260,12 +254,20 @@ export class PostsProcessing {
 
   async syncRefPost(
     url: string,
-    postId: string,
-    refPostData: RefPostData,
+    post: AppPost,
+    semantics: StructuredSemantics,
     manager: TransactionManager
   ) {
+    const refPostData: RefPostData = removeUndefined({
+      id: post.id,
+      authorProfileId: post.authorProfileId,
+      createdAtMs: post.createdAtMs,
+      semantics,
+      platformPostUrl: post.generic.thread[0].url,
+    });
+
     /** always delete all labels from a post for a reference */
-    await this.linksService.deleteRefPost(url, postId, manager);
+    await this.linksService.deleteRefPost(url, post.id, manager);
     await this.linksService.setRefPost(url, refPostData, manager);
   }
 
