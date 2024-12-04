@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import { Box } from 'grommet';
 import { DataFactory } from 'n3';
 import { useMemo } from 'react';
@@ -42,6 +43,24 @@ export const RefLabelsComponent = (props: PatternProps) => {
       overlay.onPostClick({ target: PostClickTarget.REF, payload: ref });
   };
 
+  const { data: refMeta } = useQuery({
+    queryKey: ['ref', refUrl],
+    queryFn: async () => {
+      try {
+        if (refUrl) {
+          if (DEBUG) console.log(`fetching ref ${refUrl}`);
+          const refMeta = await appFetch<RefMeta>('/api/refs/get', {
+            ref: refUrl,
+          });
+          return refMeta;
+        }
+      } catch (e) {
+        console.error(e);
+        throw new Error((e as Error).message);
+      }
+    },
+  });
+
   /** processed ref labels with metadata */
   const refs = useMemo<RefsMap>(
     () =>
@@ -50,10 +69,10 @@ export const RefLabelsComponent = (props: PatternProps) => {
             originalStore,
             store,
             props.originalParsed?.support,
-            props.structuredSemantics?.refsMeta
+            refsMeta
           )
         : (new Map() as RefsMap),
-    [originalStore, props.originalParsed, store, props.structuredSemantics]
+    [originalStore, props.originalParsed, store, refMeta]
   );
 
   const removeLabel = async (ref: string, labelUri: string) => {
