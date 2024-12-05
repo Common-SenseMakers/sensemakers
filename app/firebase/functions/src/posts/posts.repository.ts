@@ -14,10 +14,11 @@ import {
 } from '../@shared/types/types.posts';
 import { RefLabel, RefPostData } from '../@shared/types/types.references';
 import { CollectionNames } from '../@shared/utils/collectionNames';
+import { SCIENCE_TOPIC_URI } from '../@shared/utils/semantics.helper';
 import { DBInstance } from '../db/instance';
 import { BaseRepository, removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
-import { hashAndNormalizeUrl } from '../links/links.utils';
+import { hashUrl } from '../links/links.utils';
 import { doesQueryUseSubcollection } from '../posts/posts.helper';
 
 const DEBUG = false;
@@ -131,7 +132,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     /** check if we can query the links subcollection rather than the entire posts */
     const baseCollection = (() => {
       if (useLinksSubcollection && queryParams.semantics?.refs) {
-        const linkId = hashAndNormalizeUrl(queryParams.semantics.refs[0]);
+        const linkId = hashUrl(queryParams.semantics.refs[0]);
         return this.db.collections.links
           .doc(linkId)
           .collection(CollectionNames.LinkPostsSubcollection);
@@ -163,19 +164,17 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       queryParams.semantics?.labels
     );
 
-    if (!useLinksSubcollection) {
-      query = filterByArrayContainsAny(
-        query,
-        `${structuredSemanticsKey}.${keywordsKey}`,
-        queryParams.semantics?.keywords
-      );
+    query = filterByArrayContainsAny(
+      query,
+      `${structuredSemanticsKey}.${keywordsKey}`,
+      queryParams.semantics?.keywords
+    );
 
-      query = filterByEqual(
-        query,
-        `${structuredSemanticsKey}.${topicKey}`,
-        queryParams.semantics?.topic
-      );
-    }
+    query = filterByEqual(
+      query,
+      `${structuredSemanticsKey}.${topicKey}`,
+      queryParams.semantics?.topic
+    );
 
     /** get the sinceCreatedAt and untilCreatedAt timestamps from the elements ids */
     const { sinceCreatedAt, untilCreatedAt } = await (async () => {
@@ -246,7 +245,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
     // Get all posts for each reference from their respective subcollections
     const postsPromises = references.map(async (reference) => {
-      const linkId = hashAndNormalizeUrl(reference);
+      const linkId = hashUrl(reference);
       const linkPosts = await this.db.collections.links
         .doc(linkId)
         .collection(CollectionNames.LinkPostsSubcollection)
@@ -255,7 +254,10 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       // Process each post's labels directly from the subcollection documents
       linkPosts.docs.forEach((doc) => {
         const refPost = doc.data() as RefPostData;
-        if (refPost?.structuredSemantics?.labels) {
+        if (
+          refPost?.structuredSemantics?.labels &&
+          refPost.structuredSemantics.topic === SCIENCE_TOPIC_URI
+        ) {
           const refLabels = refPost.structuredSemantics?.labels?.map(
             (label): RefLabel => ({
               label,

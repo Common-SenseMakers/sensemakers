@@ -1,11 +1,15 @@
 import { RefMeta } from '../@shared/types/types.parser';
-import { OEmbed, RefPostData } from '../@shared/types/types.references';
-import { normalizeUrl } from '../@shared/utils/links.utils';
+import {
+  LinkSource,
+  OEmbed,
+  RefPostData,
+} from '../@shared/types/types.references';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
+import { TimeService } from '../time/time.service';
 import { LinksRepository } from './links.repository';
-import { hashAndNormalizeUrl, hashUrl } from './links.utils';
+import { hashUrl } from './links.utils';
 
 export interface LinksMockConfig {
   get: boolean;
@@ -19,58 +23,83 @@ export interface LinksConfig {
 
 export class LinksService {
   constructor(
-    protected links: LinksRepository,
+    public links: LinksRepository,
+    protected time: TimeService,
     protected config: LinksConfig
   ) {}
 
-  async fetchOEmbed(url: string): Promise<RefMeta> {
-    const normalizedUrl = normalizeUrl(url);
+  async fetchOEmbed(
+    url: string
+  ): Promise<{ success: boolean; oembed?: OEmbed }> {
     try {
       const res = await fetch(
-        `${this.config.apiUrl}/oembed?url=${encodeURIComponent(normalizedUrl)}&api_key=${this.config.apiKey}`,
+        `${this.config.apiUrl}/oembed?url=${encodeURIComponent(url)}&api_key=${this.config.apiKey}`,
         {
           headers: [['Content-Type', 'application/json']],
           method: 'get',
         }
       );
       const resJson = await res.json();
-      const resData = resJson as RefMeta;
-      return { ...resData, original_url: url, url: normalizedUrl };
+      if (resJson.status === 403) {
+        return {
+          success: false,
+        };
+      }
+      const resData = resJson as OEmbed;
+      const oembed = { ...resData, original_url: url, url };
+      return { success: true, oembed };
     } catch (e) {
       logger.warn(`Error fetching ref ${url} meta: ${e}`);
-      return { original_url: url, url: normalizedUrl };
+      return { success: false };
     }
   }
 
   async getOEmbed(
     url: string,
     manager: TransactionManager,
-    parsedMeta?: OEmbed
+    refMetaOrg?: RefMeta
   ): Promise<OEmbed> {
-    const normalizedUrl = normalizeUrl(url);
-    const urlHash = hashUrl(normalizedUrl);
+    const urlHash = hashUrl(url);
     const existing = await this.links.get(urlHash, manager);
-    if (existing) return existing;
 
-    const oembed = await this.fetchOEmbed(url);
+    /** refetch from iframely links that have not been fetched */
+    if (existing && existing.sources && existing.sources[LinkSource.iframely]) {
+      return existing.oembed;
+    }
+
+    const iframely = await this.fetchOEmbed(url);
     const originalRefMeta = removeUndefined({
-      title: parsedMeta?.title,
-      summary: parsedMeta?.summary,
+      title: refMetaOrg?.title,
+      summary: refMetaOrg?.summary,
     });
+
+    const newOembed: OEmbed = {
+      ...originalRefMeta,
+      ...iframely.oembed,
+    };
+
+    /** parser decides type */
+    newOembed.type = originalRefMeta.type;
+
     this.links.set(
       urlHash,
       {
-        ...originalRefMeta,
-        ...oembed,
+        oembed: removeUndefined(newOembed),
+        sources: {
+          [LinkSource.parser]: {
+            timestamp: this.time.now(),
+            status: 'SUCCESS',
+          },
+          [LinkSource.iframely]: {
+            timestamp: this.time.now(),
+            status: iframely.success ? 'SUCCESS' : 'ERROR',
+          },
+        },
       },
       manager
     );
 
-    return oembed;
-  }
-
-  async setOEmbed(oembed: OEmbed, manager: TransactionManager) {
-    this.links.set(hashAndNormalizeUrl(oembed.url), oembed, manager);
+    return newOembed;
   }
 
   async setRefPost(
@@ -78,13 +107,12 @@ export class LinksService {
     postData: RefPostData,
     manager: TransactionManager
   ) {
-    const linkId = hashAndNormalizeUrl(url);
-
+    const linkId = hashUrl(url);
     await this.links.setRefPost(linkId, postData, manager);
   }
 
   async getRefPosts(url: string, manager: TransactionManager) {
-    const linkId = hashAndNormalizeUrl(url);
+    const linkId = hashUrl(url);
     return this.links.getRefPosts(linkId, manager);
   }
 
@@ -93,7 +121,7 @@ export class LinksService {
     postId: string,
     manager: TransactionManager
   ) {
-    const linkId = hashAndNormalizeUrl(url);
+    const linkId = hashUrl(url);
     return this.links.deleteRefPost(linkId, postId, manager);
   }
 }

@@ -46,14 +46,9 @@ export const RefLabelsComponent = (props: PatternProps) => {
   const refs = useMemo<RefsMap>(
     () =>
       originalStore && store && props.originalParsed
-        ? processSemantics(
-            originalStore,
-            store,
-            props.originalParsed?.support,
-            props.structuredSemantics?.refsMeta
-          )
+        ? processSemantics(originalStore, store, props.originalParsed?.support)
         : (new Map() as RefsMap),
-    [originalStore, props.originalParsed, store, props.structuredSemantics]
+    [originalStore, props.originalParsed, store]
   );
 
   const removeLabel = async (ref: string, labelUri: string) => {
@@ -129,39 +124,43 @@ export const RefLabelsComponent = (props: PatternProps) => {
               if (!props.originalParsed)
                 throw new Error('Unexpected undefined');
 
-              const refLabels = props.post?.meta?.refLabels[ref];
+              const refDisplayMeta = props.post?.meta?.references[ref];
 
-              const authorProfileId = props.post?.authorProfileId;
+              const aggregatedLabelsWithoutAuthorLabels =
+                refDisplayMeta?.aggregatedLabels?.filter(
+                  (refLabel) =>
+                    refLabel.authorProfileId !== props.post?.authorProfileId
+                );
+
               return (
-                <Box
-                  key={index}
-                  style={{
-                    borderRadius: '12px',
-                    border: '1.6px solid #D1D5DB',
-                    width: '100%',
-                  }}
-                  pad="12px"
-                  onClick={(e: React.MouseEvent<HTMLDivElement>) =>
-                    handleClick(e, ref)
-                  }>
-                  <RefWithLabels
-                    ix={index}
-                    showLabels={true}
-                    showDescription={false}
-                    editable={props.editable}
-                    refUrl={ref}
-                    refData={refData}
-                    ontology={props.originalParsed?.support?.ontology}
-                    removeLabel={(labelUri: string) => {
-                      removeLabel(ref, labelUri).catch(console.error);
+                refDisplayMeta?.oembed && (
+                  <Box
+                    key={index}
+                    style={{
+                      borderRadius: '12px',
+                      border: '1.6px solid #D1D5DB',
+                      width: '100%',
                     }}
-                    addLabel={(labelUri: string) => {
-                      addLabel(ref, labelUri).catch(console.error);
-                    }}
-                    allRefs={visibleRefs}
-                    refLabels={refLabels}
-                    authorProfileId={authorProfileId}></RefWithLabels>
-                </Box>
+                    pad="12px"
+                    onClick={(e: React.MouseEvent<HTMLDivElement>) =>
+                      handleClick(e, ref)
+                    }>
+                    <RefWithLabels
+                      ix={index}
+                      oembed={refDisplayMeta.oembed}
+                      authorLabels={refs.get(ref)?.labelsUris || []}
+                      aggregatedLabels={aggregatedLabelsWithoutAuthorLabels}
+                      showDescription={false}
+                      editable={props.editable}
+                      ontology={props.originalParsed?.support?.ontology}
+                      removeLabel={(labelUri: string) => {
+                        removeLabel(ref, labelUri).catch(console.error);
+                      }}
+                      addLabel={(labelUri: string) => {
+                        addLabel(ref, labelUri).catch(console.error);
+                      }}></RefWithLabels>
+                  </Box>
+                )
               );
             })}
           </Box>

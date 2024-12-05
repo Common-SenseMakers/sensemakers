@@ -165,7 +165,7 @@ export const createServices = (
     config.mock.USE_REAL_PARSER ? 'real' : 'mock'
   );
 
-  const _linksService = new LinksService(linksRepo, config.links);
+  const _linksService = new LinksService(linksRepo, time, config.links);
   const linksService = getLinksMock(
     _linksService,
     config.mock.USE_REAL_LINKS ? undefined : { get: true, enable: true }

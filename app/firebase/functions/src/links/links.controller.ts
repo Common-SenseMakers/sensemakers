@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { object, string } from 'yup';
 
-import { RefMeta } from '../@shared/types/types.parser';
+import { RefDisplayMeta } from '../@shared/types/types.references';
 import { getServices } from '../controllers.utils';
 import { logger } from '../instances/logger';
 
@@ -42,14 +42,16 @@ export const getRefMetaController: RequestHandler = async (
       await postsManager.processing.posts.getAggregatedRefLabels([
         queryParams.ref,
       ]);
-    const refData: RefMeta = {
-      refLabels: refLabels[queryParams.ref],
+
+    const refDisplayMeta: RefDisplayMeta = {
+      oembed: refOEmbed,
+      aggregatedLabels: refLabels[queryParams.ref],
       ontology: refPost.originalParsed?.support?.ontology,
-      ...refOEmbed,
     };
 
-    if (DEBUG) logger.debug(`${request.path}: refData`, { refData });
-    response.status(200).send({ success: true, data: refData });
+    if (DEBUG)
+      logger.debug(`${request.path}: refDisplayMeta`, { refDisplayMeta });
+    response.status(200).send({ success: true, data: refDisplayMeta });
   } catch (error: any) {
     logger.error('error', error);
     response.status(500).send({ success: false, error: error.message });

@@ -1,7 +1,5 @@
 export function normalizeUrl(url: string): string {
-  const normalizedUrl = url.toLowerCase(); // Convert to lowercase
-
-  const urlObj = new URL(normalizedUrl); // Add temporary protocol for parsing
+  const urlObj = new URL(url); // Add temporary protocol for parsing
 
   // Normalize path
   urlObj.pathname = urlObj.pathname.replace(/\/$/, '');

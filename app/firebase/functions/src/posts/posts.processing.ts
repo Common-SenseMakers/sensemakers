@@ -15,7 +15,7 @@ import {
   HydrateConfig,
   StructuredSemantics,
 } from '../@shared/types/types.posts';
-import { RefPostData } from '../@shared/types/types.references';
+import { RefDisplayMeta, RefPostData } from '../@shared/types/types.references';
 import { DefinedIfTrue } from '../@shared/types/types.user';
 import { normalizeUrl } from '../@shared/utils/links.utils';
 import { mapStoreElements, parseRDF } from '../@shared/utils/n3.utils';
@@ -135,15 +135,11 @@ export class PostsProcessing {
     return postsCreated.filter((p) => p !== undefined) as PlatformPostCreated[];
   }
 
-  async getRefMeta(
+  async enhanceRefMeta(
     url: string,
     manager: TransactionManager,
-    originalParsed?: ParsePostResult
+    refMetaOrg?: RefMeta
   ): Promise<RefMeta> {
-    const refMetaOrg =
-      originalParsed?.support?.refs_meta &&
-      originalParsed?.support?.refs_meta[url];
-
     const oembed = await this.linksService.getOEmbed(url, manager, refMetaOrg);
     return {
       ...oembed,
@@ -170,7 +166,6 @@ export class PostsProcessing {
 
     const labels: Set<string> = new Set();
     const keywords: Set<string> = new Set();
-    const refsMeta: Record<string, RefMeta> = {};
     const refsLabels: Record<string, string[]> = {};
     let topic: string | undefined = undefined;
 
@@ -204,6 +199,7 @@ export class PostsProcessing {
             label !== HAS_ZOTERO_REFERENCE_TYPE_URI &&
             label !== HAS_RDF_SYNTAX_TYPE_URI
           ) {
+            /** normalize URL when they are feed  */
             const normalizedReference = normalizeUrl(reference);
             labels.add(label);
             refsLabels[normalizedReference] = [
@@ -215,32 +211,20 @@ export class PostsProcessing {
       }
     });
 
-    /** get reference meta and store post in reference subcollections */
+    /**
+     * for each ref, read and update its metadata from the links service,
+     * also prepare the refsMeta object with the metadata of each url
+     */
+    const refsMeta: Record<string, RefMeta> = {};
+
     await Promise.all(
-      Array.from(Object.keys(refsLabels)).map(async (reference) => {
-        const url = reference;
-        const refMeta = await this.getRefMeta(
-          url,
-          manager,
-          post.originalParsed
-        );
-        const refPostData: RefPostData = removeUndefined({
-          id: post.id,
-          authorProfileId: post.authorProfileId,
-          createdAtMs: post.createdAtMs,
-          structuredSemantics: { labels: refsLabels[url] },
-          platformPostUrl: post.generic.thread[0].url,
-        });
-        /** always delete all labels from a post for a reference */
-        await this.linksService.deleteRefPost(url, postId, manager);
+      Array.from(Object.keys(refsLabels)).map(async (url) => {
+        const refMetaOrg =
+          originalParsed?.support?.refs_meta &&
+          originalParsed?.support?.refs_meta[url];
 
-        await this.linksService.setRefPost(url, refPostData, manager);
-        const normalizedUrl = normalizeUrl(url);
-
-        refsMeta[normalizedUrl] = {
-          ...refMeta,
-          labels: refsLabels[url] || undefined,
-        };
+        const refMeta = await this.enhanceRefMeta(url, manager, refMetaOrg);
+        refsMeta[url] = { ...refMeta, labels: refsLabels[url] || undefined };
       })
     );
 
@@ -252,7 +236,39 @@ export class PostsProcessing {
       refs: Object.keys(refsMeta),
     };
 
+    /** Sync ref posts semantics on redundant subcollections */
+    await Promise.all(
+      Array.from(Object.keys(refsLabels)).map(async (ref) => {
+        const refStructuredSemantics = {
+          ...structuredSemantics,
+          /** filter - only labels that apply to that ref */
+          labels: refsLabels[ref],
+        };
+
+        await this.syncRefPost(ref, post, refStructuredSemantics, manager);
+      })
+    );
+
     await this.posts.update(postId, { structuredSemantics }, manager);
+  }
+
+  async syncRefPost(
+    url: string,
+    post: AppPost,
+    semantics: StructuredSemantics,
+    manager: TransactionManager
+  ) {
+    const refPostData: RefPostData = removeUndefined({
+      id: post.id,
+      authorProfileId: post.authorProfileId,
+      createdAtMs: post.createdAtMs,
+      structuredSemantics: semantics,
+      platformPostUrl: post.generic.thread[0].url,
+    } as RefPostData);
+
+    /** always delete all labels from a post for a reference */
+    await this.linksService.deleteRefPost(url, post.id, manager);
+    await this.linksService.setRefPost(url, refPostData, manager);
   }
 
   async createAppPost(
@@ -294,12 +310,19 @@ export class PostsProcessing {
       ) as PlatformPost[];
     }
 
-    if (config.addAggregatedLabels && post.structuredSemantics?.refs) {
-      const refLabels = await this.posts.getAggregatedRefLabels(
-        post.structuredSemantics.refs
-      );
-      postFull.meta = { refLabels };
-    }
+    const postFullMeta: Map<string, RefDisplayMeta> = new Map();
+    await Promise.all(
+      post.structuredSemantics?.refs?.map(async (ref) => {
+        const oembed = await this.linksService.getOEmbed(ref, manager);
+        if (config.addAggregatedLabels) {
+          const refLabels = await this.posts.getAggregatedRefLabels([ref]);
+          postFullMeta.set(ref, { oembed, aggregatedLabels: refLabels[ref] });
+        } else postFullMeta.set(ref, { oembed });
+      }) || []
+    );
+
+    const references = Object.fromEntries(postFullMeta);
+    postFull.meta = { references };
 
     return postFull;
   }

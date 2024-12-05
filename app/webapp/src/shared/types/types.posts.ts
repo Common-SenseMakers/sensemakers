@@ -2,7 +2,7 @@ import { FetchParams } from './types.fetch';
 import { AppPostSemantics, ParsePostResult, RefMeta } from './types.parser';
 import { PlatformPost } from './types.platform.posts';
 import { PLATFORM } from './types.platforms';
-import { RefLabel } from './types.references';
+import { RefDisplayMeta } from './types.references';
 import { AppUserRead } from './types.user';
 
 export interface GenericAuthor {
@@ -79,7 +79,7 @@ interface AppPostBase {
 }
 
 export interface AppPost extends AppPostBase {
-  structuredSemantics?: StructuredSemantics;
+  structuredSemantics?: StructuredSemantics; // for indexing purposes. Will be duplicated across subcollections
 }
 
 export interface HydrateConfig {
@@ -87,11 +87,11 @@ export interface HydrateConfig {
   addAggregatedLabels?: boolean;
 }
 
-export interface PostSemanticsMeta {
-  refLabels: Record<string, RefLabel[]>;
+export interface PostReadMeta {
+  references: Record<string, RefDisplayMeta>;
 }
 export interface AppPostRead extends AppPost {
-  meta?: PostSemanticsMeta;
+  meta?: PostReadMeta;
 }
 
 export type AppPostCreate = Omit<AppPost, 'id'>;

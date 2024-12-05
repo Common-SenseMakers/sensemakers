@@ -49,7 +49,7 @@
       "args": [
         "--project",
         "./tsconfig.scripts.json",
-        "./scripts/061-process-accountsIds.ts"
+        "./migrations/008-links-iframely-status.ts"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",

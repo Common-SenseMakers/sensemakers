@@ -1,4 +1,23 @@
+import { ParserOntology } from './types.parser';
 import { AppPost } from './types.posts';
+
+export enum LinkSource {
+  parser = 'PARSER',
+  iframely = 'IFRAMELY',
+}
+
+export interface LinkSourceStatus {
+  timestamp: number;
+  status: 'SUCCESS' | 'ERROR';
+}
+
+export interface LinkMeta {
+  oembed: OEmbed;
+  sources?: {
+    [LinkSource.parser]?: LinkSourceStatus;
+    [LinkSource.iframely]?: LinkSourceStatus;
+  };
+}
 
 export interface OEmbed {
   url: string;
@@ -31,4 +50,10 @@ export interface RefLabel {
   postId?: string;
   authorProfileId?: string;
   platformPostUrl?: string;
+}
+
+export interface RefDisplayMeta {
+  aggregatedLabels?: RefLabel[];
+  oembed?: OEmbed;
+  ontology?: ParserOntology;
 }

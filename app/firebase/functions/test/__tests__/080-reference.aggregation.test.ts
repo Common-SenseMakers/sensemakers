@@ -22,7 +22,7 @@ import { getTestServices } from './test.services';
 
 const feedThreads = [[''], [''], [''], [''], ['']];
 
-describe('080 get reference aggregation', () => {
+describe.only('080 get reference aggregation', () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER
@@ -91,14 +91,18 @@ describe('080 get reference aggregation', () => {
 
       const references = [
         'https://twitter.com/ItaiYanai/status/1780813867213336910',
-        'https://twitter.com/DeSciMic/status/1765391765358436666',
-        'https://twitter.com/Rainmaker1973/status/1788916168008368195',
-        'https://gatherfor.medium.com/maslow-got-it-wrong-ae45d6217a8c',
-        'https://twitter.com/andrea_is_a/status/1679471381929402369/photo/1',
       ];
       const aggregatedLabels =
         await postsManager.processing.posts.getAggregatedRefLabels(references);
-      expect(aggregatedLabels).to.not.be.undefined;
+      const labels = aggregatedLabels[references[0]];
+      const expectedLabels = [
+        'http://purl.org/spar/cito/discusses',
+        'https://sense-nets.xyz/asksQuestionAbout',
+      ];
+      expect(labels.length).to.equal(expectedLabels.length);
+      for (const label of labels) {
+        expect(expectedLabels).to.include(label.label);
+      }
     });
     it('gets a post with aggregated labels', async () => {
       const { postsManager } = services;
