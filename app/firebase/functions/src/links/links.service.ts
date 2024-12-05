@@ -84,7 +84,7 @@ export class LinksService {
     this.links.set(
       urlHash,
       {
-        oembed: newOembed,
+        oembed: removeUndefined(newOembed),
         sources: {
           [LinkSource.parser]: {
             timestamp: this.time.now(),
