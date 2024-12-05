@@ -1,4 +1,3 @@
-import { useQuery } from '@tanstack/react-query';
 import { Box } from 'grommet';
 import { DataFactory } from 'n3';
 import { useMemo } from 'react';
@@ -49,7 +48,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
       originalStore && store && props.originalParsed
         ? processSemantics(originalStore, store, props.originalParsed?.support)
         : (new Map() as RefsMap),
-    [originalStore, props.originalParsed, store, props.originalParsed]
+    [originalStore, props.originalParsed, store]
   );
 
   const removeLabel = async (ref: string, labelUri: string) => {

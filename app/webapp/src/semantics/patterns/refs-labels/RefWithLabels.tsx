@@ -1,7 +1,7 @@
 import { Box } from 'grommet';
 import { useMemo } from 'react';
 
-import { ParserOntology, RefMeta } from '../../../shared/types/types.parser';
+import { ParserOntology } from '../../../shared/types/types.parser';
 import { OEmbed, RefLabel } from '../../../shared/types/types.references';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { LoadingDiv } from '../../../ui-components/LoadingDiv';

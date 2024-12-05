@@ -9,7 +9,6 @@ import {
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
 import { RefWithLabels } from '../semantics/patterns/refs-labels/RefWithLabels';
-import { RefMeta } from '../shared/types/types.parser';
 import { PLATFORM } from '../shared/types/types.platforms';
 import { PlatformProfile } from '../shared/types/types.profiles';
 import { RefDisplayMeta } from '../shared/types/types.references';
