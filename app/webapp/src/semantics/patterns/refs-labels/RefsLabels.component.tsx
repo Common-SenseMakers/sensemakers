@@ -43,36 +43,13 @@ export const RefLabelsComponent = (props: PatternProps) => {
       overlay.onPostClick({ target: PostClickTarget.REF, payload: ref });
   };
 
-  const { data: refMeta } = useQuery({
-    queryKey: ['ref', refUrl],
-    queryFn: async () => {
-      try {
-        if (refUrl) {
-          if (DEBUG) console.log(`fetching ref ${refUrl}`);
-          const refMeta = await appFetch<RefMeta>('/api/refs/get', {
-            ref: refUrl,
-          });
-          return refMeta;
-        }
-      } catch (e) {
-        console.error(e);
-        throw new Error((e as Error).message);
-      }
-    },
-  });
-
   /** processed ref labels with metadata */
   const refs = useMemo<RefsMap>(
     () =>
       originalStore && store && props.originalParsed
-        ? processSemantics(
-            originalStore,
-            store,
-            props.originalParsed?.support,
-            refsMeta
-          )
+        ? processSemantics(originalStore, store, props.originalParsed?.support)
         : (new Map() as RefsMap),
-    [originalStore, props.originalParsed, store, refMeta]
+    [originalStore, props.originalParsed, store, props.originalParsed]
   );
 
   const removeLabel = async (ref: string, labelUri: string) => {
@@ -148,39 +125,37 @@ export const RefLabelsComponent = (props: PatternProps) => {
               if (!props.originalParsed)
                 throw new Error('Unexpected undefined');
 
-              const refLabels = props.post?.meta?.refLabels[ref];
+              const refDisplayMeta = props.post?.meta?.references[ref];
 
-              const authorProfileId = props.post?.authorProfileId;
               return (
-                <Box
-                  key={index}
-                  style={{
-                    borderRadius: '12px',
-                    border: '1.6px solid #D1D5DB',
-                    width: '100%',
-                  }}
-                  pad="12px"
-                  onClick={(e: React.MouseEvent<HTMLDivElement>) =>
-                    handleClick(e, ref)
-                  }>
-                  <RefWithLabels
-                    ix={index}
-                    showLabels={true}
-                    showDescription={false}
-                    editable={props.editable}
-                    refUrl={ref}
-                    refData={refData}
-                    ontology={props.originalParsed?.support?.ontology}
-                    removeLabel={(labelUri: string) => {
-                      removeLabel(ref, labelUri).catch(console.error);
+                refDisplayMeta?.oembed && (
+                  <Box
+                    key={index}
+                    style={{
+                      borderRadius: '12px',
+                      border: '1.6px solid #D1D5DB',
+                      width: '100%',
                     }}
-                    addLabel={(labelUri: string) => {
-                      addLabel(ref, labelUri).catch(console.error);
-                    }}
-                    allRefs={visibleRefs}
-                    refLabels={refLabels}
-                    authorProfileId={authorProfileId}></RefWithLabels>
-                </Box>
+                    pad="12px"
+                    onClick={(e: React.MouseEvent<HTMLDivElement>) =>
+                      handleClick(e, ref)
+                    }>
+                    <RefWithLabels
+                      ix={index}
+                      oembed={refDisplayMeta.oembed}
+                      authorLabels={refs.get(ref)?.labelsUris || []}
+                      aggregatedLabels={refDisplayMeta.aggregatedLabels}
+                      showDescription={false}
+                      editable={props.editable}
+                      ontology={props.originalParsed?.support?.ontology}
+                      removeLabel={(labelUri: string) => {
+                        removeLabel(ref, labelUri).catch(console.error);
+                      }}
+                      addLabel={(labelUri: string) => {
+                        addLabel(ref, labelUri).catch(console.error);
+                      }}></RefWithLabels>
+                  </Box>
+                )
               );
             })}
           </Box>

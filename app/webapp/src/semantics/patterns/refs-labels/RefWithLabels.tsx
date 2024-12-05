@@ -2,37 +2,32 @@ import { Box } from 'grommet';
 import { useMemo } from 'react';
 
 import { ParserOntology, RefMeta } from '../../../shared/types/types.parser';
-import { RefLabel } from '../../../shared/types/types.references';
+import { OEmbed, RefLabel } from '../../../shared/types/types.references';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { LoadingDiv } from '../../../ui-components/LoadingDiv';
 import { RefCard } from '../common/RefCard';
 import { AggregatedRefLabels } from './AggregatedRefLabels';
-import { RefData } from './process.semantics';
 
 /** renders the labels for one ref */
 export const RefWithLabels = (props: {
   ix: number;
-  refUrl: string;
-  refData: RefData;
-  showLabels?: boolean;
+  oembed: OEmbed;
+  authorLabels: string[];
+  aggregatedLabels?: RefLabel[];
+  showAggregatedLabels?: boolean;
+  showAuthorLabels?: boolean;
   showDescription?: boolean;
-  ontology?: ParserOntology;
   addLabel: (labelUri: string) => void;
   removeLabel: (labelUri: string) => void;
   editable?: boolean;
-  allRefs: [string, RefData][];
-  refLabels?: RefLabel[];
-  authorProfileId?: string;
+  ontology?: ParserOntology;
 }) => {
   const labelsOntology = props.ontology?.semantic_predicates;
-  const refData = props.refData;
-  const { showLabels } =
-    props.showLabels !== undefined ? props : { showLabels: true };
 
   /** display names for selected labels */
   let labelsDisplayNames = useMemo(
     () =>
-      refData.labelsUris.map((labelUri) => {
+      props.authorLabels.map((labelUri) => {
         const label_ontology = labelsOntology
           ? labelsOntology.find((item) => item.uri === labelUri)
           : undefined;
@@ -42,7 +37,7 @@ export const RefWithLabels = (props: {
 
         return label_ontology.display_name;
       }),
-    [labelsOntology, refData.labelsUris]
+    [labelsOntology, props.authorLabels]
   );
 
   // make labelsDisplayNames unique
@@ -53,10 +48,10 @@ export const RefWithLabels = (props: {
     () =>
       labelsOntology
         ? labelsOntology
-            .filter((l) => !refData.labelsUris.includes(l.uri))
+            .filter((l) => !props.authorLabels.includes(l.uri))
             .map((l) => l.display_name)
         : undefined,
-    [labelsOntology, refData.labelsUris]
+    [labelsOntology, props.authorLabels]
   );
 
   const getLabelFromDisplayName = (displayName: string) => {
@@ -80,32 +75,21 @@ export const RefWithLabels = (props: {
     props.addLabel(getLabelFromDisplayName(label).uri);
   };
 
-  const refLabels = props.refLabels;
-
-  const show =
-    refLabels &&
-    refLabels.find(
-      (refLabel) => refLabel.authorProfileId !== props.authorProfileId
-    ) !== undefined;
-
   return (
     <>
-      {refData.meta ? (
+      {props.oembed ? (
         <RefCard
           ix={props.ix + 1}
-          url={props.refUrl}
-          title={refData.meta?.title}
+          url={props.oembed.url}
+          title={props.oembed.title}
           description={
-            props.showDescription ? refData.meta?.description : undefined
+            props.showDescription ? props.oembed.description : undefined
           }
-          image={refData.meta?.thumbnail_url}
+          image={props.oembed.thumbnail_url}
           refType={
-            refData.meta.item_type !== 'unknown'
-              ? refData.meta.item_type
-              : undefined
+            props.oembed.type !== 'unknown' ? props.oembed.type : undefined
           }
-          showDescription={props.showDescription}
-          sourceRef={getSourceRefNumber(refData.meta, props.allRefs)}></RefCard>
+          showDescription={props.showDescription}></RefCard>
       ) : (
         <Box gap="10px" pad={{ vertical: '8px' }}>
           <LoadingDiv
@@ -118,10 +102,10 @@ export const RefWithLabels = (props: {
         </Box>
       )}
 
-      {show ? (
+      {props.showAggregatedLabels !== false && props.aggregatedLabels ? (
         <Box margin={{ top: '22px' }}>
           <AggregatedRefLabels
-            refLabels={refLabels}
+            refLabels={props.aggregatedLabels}
             ontology={props.ontology}></AggregatedRefLabels>
         </Box>
       ) : (
@@ -129,7 +113,7 @@ export const RefWithLabels = (props: {
       )}
 
       <Box margin={{ top: '16px' }}>
-        {showLabels && (
+        {props.showAuthorLabels !== false && (
           <AppLabelsEditor
             editable={props.editable}
             colors={{
@@ -145,9 +129,4 @@ export const RefWithLabels = (props: {
       </Box>
     </>
   );
-};
-
-const getSourceRefNumber = (meta: RefMeta, allRefs: [string, RefData][]) => {
-  const refSource = allRefs.find(([ref]) => ref === meta.ref_source_url);
-  return refSource?.[1].meta?.order ? refSource[1].meta.order : undefined;
 };

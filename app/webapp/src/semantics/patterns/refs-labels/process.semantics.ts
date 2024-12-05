@@ -13,8 +13,7 @@ export type RefsMap = Map<string, RefData>;
 export const processSemantics = (
   originalStore: Store,
   store: Store,
-  support?: ParsedSupport,
-  refsMeta?: Record<string, RefMeta>
+  support?: ParsedSupport
 ): RefsMap => {
   const possiblePredicates = support?.ontology?.semantic_predicates?.map(
     (item) => item.uri
@@ -64,12 +63,9 @@ export const processSemantics = (
   const sortedRefs: RefsMap = new Map();
   for (const [ref, value] of refsArray) {
     const normalizedRef = normalizeUrl(ref);
-    const meta =
-      refsMeta && normalizedRef ? refsMeta[normalizedRef] : undefined;
 
     sortedRefs.set(normalizedRef, {
       labelsUris: value ? value.labelsUris : [],
-      meta,
     });
   }
 

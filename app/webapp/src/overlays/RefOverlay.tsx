@@ -12,6 +12,7 @@ import { RefWithLabels } from '../semantics/patterns/refs-labels/RefWithLabels';
 import { RefMeta } from '../shared/types/types.parser';
 import { PLATFORM } from '../shared/types/types.platforms';
 import { PlatformProfile } from '../shared/types/types.profiles';
+import { RefDisplayMeta } from '../shared/types/types.references';
 import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { OverlayContext } from './OverlayContext';
@@ -40,13 +41,13 @@ export const RefOverlay = (props: { refUrl: string }) => {
     });
   }, [connectedUser]);
 
-  const { data: refMeta } = useQuery({
+  const { data: refDisplayMeta } = useQuery({
     queryKey: ['ref', refUrl],
     queryFn: async () => {
       try {
         if (refUrl) {
           if (DEBUG) console.log(`fetching ref ${refUrl}`);
-          const refMeta = await appFetch<RefMeta>('/api/refs/get', {
+          const refMeta = await appFetch<RefDisplayMeta>('/api/refs/get', {
             ref: refUrl,
           });
           return refMeta;
@@ -72,14 +73,11 @@ export const RefOverlay = (props: { refUrl: string }) => {
 
   const feed = usePostsFetcher(feedConfig);
 
-  const refData = {
-    labelsUris:
-      (refMeta?.refLabels || [])
-        .filter((refLabel) => refLabel.authorProfileId === accountProfileId)
-        .map((refLabel) => refLabel.label)
-        .filter((label) => label !== 'https://sense-nets.xyz/quotesPost') || [],
-    meta: refMeta,
-  };
+  const authorLabels =
+    (refDisplayMeta?.aggregatedLabels || [])
+      .filter((refLabel) => refLabel.authorProfileId === accountProfileId)
+      .map((refLabel) => refLabel.label)
+      .filter((label) => label !== 'https://sense-nets.xyz/quotesPost') || [];
 
   return (
     <OverlayContext>
@@ -90,23 +88,22 @@ export const RefOverlay = (props: { refUrl: string }) => {
             flexShrink: 0,
             border: '1.6px solid var(--Neutral-300, #D1D5DB)',
           }}>
-          <RefWithLabels
-            ix={0}
-            authorProfileId={accountProfileId}
-            showLabels={true}
-            showDescription={true}
-            editable={false}
-            refUrl={refUrl}
-            refData={refData}
-            refLabels={refMeta?.refLabels}
-            allRefs={[[refUrl, refData]]}
-            ontology={refMeta?.ontology}
-            removeLabel={() => {
-              return undefined;
-            }}
-            addLabel={() => {
-              return undefined;
-            }}></RefWithLabels>
+          {refDisplayMeta?.oembed && (
+            <RefWithLabels
+              ix={1}
+              oembed={refDisplayMeta.oembed}
+              authorLabels={authorLabels}
+              aggregatedLabels={refDisplayMeta.aggregatedLabels}
+              showDescription={true}
+              editable={false}
+              ontology={refDisplayMeta?.ontology}
+              removeLabel={() => {
+                return undefined;
+              }}
+              addLabel={() => {
+                return undefined;
+              }}></RefWithLabels>
+          )}
         </Box>
         <PostsFetcherComponent
           showHeader={false}
