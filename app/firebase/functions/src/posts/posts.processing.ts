@@ -311,15 +311,18 @@ export class PostsProcessing {
     }
 
     const postFullMeta: Map<string, RefDisplayMeta> = new Map();
-    post.structuredSemantics?.refs?.forEach(async (ref) => {
-      const oembed = await this.linksService.getOEmbed(ref, manager);
-      if (config.addAggregatedLabels) {
-        const refLabels = await this.posts.getAggregatedRefLabels([ref]);
-        postFullMeta.set(ref, { oembed, aggregatedLabels: refLabels[ref] });
-      } else postFullMeta.set(ref, { oembed });
-    });
+    await Promise.all(
+      post.structuredSemantics?.refs?.map(async (ref) => {
+        const oembed = await this.linksService.getOEmbed(ref, manager);
+        if (config.addAggregatedLabels) {
+          const refLabels = await this.posts.getAggregatedRefLabels([ref]);
+          postFullMeta.set(ref, { oembed, aggregatedLabels: refLabels[ref] });
+        } else postFullMeta.set(ref, { oembed });
+      }) || []
+    );
 
-    postFull.meta = { references: Object.fromEntries(postFullMeta) };
+    const references = Object.fromEntries(postFullMeta);
+    postFull.meta = { references };
 
     return postFull;
   }
