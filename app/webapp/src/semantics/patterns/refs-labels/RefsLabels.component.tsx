@@ -126,6 +126,12 @@ export const RefLabelsComponent = (props: PatternProps) => {
 
               const refDisplayMeta = props.post?.meta?.references[ref];
 
+              const aggregatedLabelsWithoutAuthorLabels =
+                refDisplayMeta?.aggregatedLabels?.filter(
+                  (refLabel) =>
+                    refLabel.authorProfileId !== props.post?.authorProfileId
+                );
+
               return (
                 refDisplayMeta?.oembed && (
                   <Box
@@ -143,7 +149,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
                       ix={index}
                       oembed={refDisplayMeta.oembed}
                       authorLabels={refs.get(ref)?.labelsUris || []}
-                      aggregatedLabels={refDisplayMeta.aggregatedLabels}
+                      aggregatedLabels={aggregatedLabelsWithoutAuthorLabels}
                       showDescription={false}
                       editable={props.editable}
                       ontology={props.originalParsed?.support?.ontology}
