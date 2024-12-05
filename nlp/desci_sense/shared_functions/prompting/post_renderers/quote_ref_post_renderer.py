@@ -59,7 +59,7 @@ def render_quote_post_content(
              # Truncate the quoted content first
             truncated_content = quoted_post.content[:quoted_context_length]
             # Add enclosing tags after truncation
-            rendered_quoted_post = f"<quoted ref_{quoted_url_idx}>{truncated_content}</quoted>"
+            rendered_quoted_post = f"<quoted ref_{quoted_url_idx}>{truncated_content}</quote>"
 
 
             # replace quoted post url with rendered version truncated to a certain length 
