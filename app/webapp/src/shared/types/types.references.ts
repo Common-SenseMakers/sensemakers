@@ -1,3 +1,4 @@
+import { ParserOntology } from './types.parser';
 import { AppPost } from './types.posts';
 
 export enum LinkSource {
@@ -49,4 +50,10 @@ export interface RefLabel {
   postId?: string;
   authorProfileId?: string;
   platformPostUrl?: string;
+}
+
+export interface RefDisplayMeta {
+  aggregatedLabels?: RefLabel[];
+  oembed?: OEmbed;
+  ontology?: ParserOntology;
 }

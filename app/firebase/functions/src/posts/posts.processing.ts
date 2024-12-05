@@ -15,7 +15,7 @@ import {
   HydrateConfig,
   StructuredSemantics,
 } from '../@shared/types/types.posts';
-import { RefPostData } from '../@shared/types/types.references';
+import { RefDisplayMeta, RefPostData } from '../@shared/types/types.references';
 import { DefinedIfTrue } from '../@shared/types/types.user';
 import { normalizeUrl } from '../@shared/utils/links.utils';
 import { mapStoreElements, parseRDF } from '../@shared/utils/n3.utils';
@@ -310,12 +310,16 @@ export class PostsProcessing {
       ) as PlatformPost[];
     }
 
-    if (config.addAggregatedLabels && post.structuredSemantics?.refs) {
-      const refLabels = await this.posts.getAggregatedRefLabels(
-        post.structuredSemantics.refs
-      );
-      postFull.meta = { refLabels };
-    }
+    const postFullMeta: Map<string, RefDisplayMeta> = new Map();
+    post.structuredSemantics?.refs?.forEach(async (ref) => {
+      const oembed = await this.linksService.getOEmbed(ref, manager);
+      if (config.addAggregatedLabels) {
+        const refLabels = await this.posts.getAggregatedRefLabels([ref]);
+        postFullMeta.set(ref, { oembed, aggregatedLabels: refLabels[ref] });
+      } else postFullMeta.set(ref, { oembed });
+    });
+
+    postFull.meta = { references: Object.fromEntries(postFullMeta) };
 
     return postFull;
   }
