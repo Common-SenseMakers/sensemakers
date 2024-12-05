@@ -262,9 +262,9 @@ export class PostsProcessing {
       id: post.id,
       authorProfileId: post.authorProfileId,
       createdAtMs: post.createdAtMs,
-      semantics,
+      structuredSemantics: semantics,
       platformPostUrl: post.generic.thread[0].url,
-    });
+    } as RefPostData);
 
     /** always delete all labels from a post for a reference */
     await this.linksService.deleteRefPost(url, post.id, manager);
