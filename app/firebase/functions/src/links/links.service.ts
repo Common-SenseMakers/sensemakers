@@ -80,9 +80,7 @@ export class LinksService {
     };
 
     /** parser decides type */
-    newOembed.type = refMetaOrg?.item_type
-      ? refMetaOrg.item_type
-      : newOembed.type;
+    newOembed.type = refMetaOrg?.item_type;
 
     this.links.set(
       urlHash,
