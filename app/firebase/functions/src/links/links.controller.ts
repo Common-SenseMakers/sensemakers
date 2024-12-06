@@ -24,7 +24,6 @@ export const getRefMetaController: RequestHandler = async (
     const { db, postsManager, links } = getServices(request);
 
     const { refOEmbed, refPost } = await db.run(async (manager) => {
-      const refOEmbed = await links.getOEmbed(queryParams.ref, manager);
       const refPosts = await links.getRefPosts(queryParams.ref, manager);
       if (refPosts.length === 0) {
         throw new Error(`No posts found for ref ${queryParams.ref}`);
@@ -36,6 +35,14 @@ export const getRefMetaController: RequestHandler = async (
       if (!refPost) {
         throw new Error(`No post found for ref ${queryParams.ref}`);
       }
+      const refMetaOrg = refPost.originalParsed?.support?.refs_meta
+        ? refPost.originalParsed.support.refs_meta[queryParams.ref]
+        : undefined;
+      const refOEmbed = await links.getOEmbed(
+        queryParams.ref,
+        manager,
+        refMetaOrg
+      );
       return { refOEmbed, refPost };
     });
     const refLabels =

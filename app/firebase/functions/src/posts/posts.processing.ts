@@ -319,7 +319,14 @@ export class PostsProcessing {
     const postFullMeta: Map<string, RefDisplayMeta> = new Map();
     await Promise.all(
       post.structuredSemantics?.refs?.map(async (ref) => {
-        const oembed = await this.linksService.getOEmbed(ref, manager);
+        const refMetaOrg = post.originalParsed?.support?.refs_meta
+          ? post.originalParsed?.support?.refs_meta[ref]
+          : undefined;
+        const oembed = await this.linksService.getOEmbed(
+          ref,
+          manager,
+          refMetaOrg
+        );
         if (config.addAggregatedLabels) {
           const refLabels = await this.posts.getAggregatedRefLabels([ref]);
           postFullMeta.set(ref, { oembed, aggregatedLabels: refLabels[ref] });
