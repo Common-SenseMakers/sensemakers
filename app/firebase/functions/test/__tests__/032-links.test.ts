@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import fs from 'fs';
 
 import { AppPost } from '../../src/@shared/types/types.posts';
 import { OEmbed } from '../../src/@shared/types/types.references';
@@ -98,6 +99,37 @@ describe('020-links', () => {
         description: expectedOembed.description,
         thumbnail_url: expectedOembed.thumbnail_url,
       });
+    });
+
+    it.only('processes the semantics of a post and stores the oembed data merged with citoid data', async () => {
+      const testRef = 'https://x.com/ColeRotman/status/1863422595942773233';
+      const testRefType = 'forumPost';
+
+      const services = getTestServices({
+        time: 'real',
+        parser: 'real',
+      });
+      const testPost = JSON.parse(
+        fs.readFileSync('./test/__tests__/032-mock.post.json', 'utf8')
+      ) as AppPost;
+      const post = await services.db.run(async (manager) => {
+        return services.postsManager.processing.createAppPost(
+          testPost,
+          manager
+        );
+      });
+      await services.db.run(async (manager) => {
+        return services.postsManager.processing.processSemantics(
+          post.id,
+          manager,
+          post.semantics
+        );
+      });
+
+      const oembed = await services.db.run(async (manager) => {
+        return services.links.getOEmbed(testRef, manager);
+      });
+      expect(oembed.type).to.equal(testRefType);
     });
   });
 });

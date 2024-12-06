@@ -226,8 +226,8 @@ export class PostsProcessing {
     await Promise.all(
       Array.from(Object.keys(refsLabels)).map(async (url) => {
         const refMetaOrg =
-          originalParsed?.support?.refs_meta &&
-          originalParsed?.support?.refs_meta[url];
+          post.originalParsed?.support?.refs_meta &&
+          post.originalParsed?.support?.refs_meta[url];
 
         const refMeta = await this.enhanceRefMeta(url, manager, refMetaOrg);
         refsMeta[url] = { ...refMeta, labels: refsLabels[url] || undefined };

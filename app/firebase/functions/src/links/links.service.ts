@@ -68,9 +68,10 @@ export class LinksService {
     }
 
     const iframely = await this.fetchOEmbed(url);
-    const originalRefMeta = removeUndefined({
+    const originalRefMeta: RefMeta = removeUndefined({
       title: refMetaOrg?.title,
       summary: refMetaOrg?.summary,
+      description: refMetaOrg?.summary,
     });
 
     const newOembed: OEmbed = {
@@ -79,7 +80,9 @@ export class LinksService {
     };
 
     /** parser decides type */
-    newOembed.type = originalRefMeta.type;
+    newOembed.type = refMetaOrg?.item_type
+      ? refMetaOrg.item_type
+      : newOembed.type;
 
     this.links.set(
       urlHash,
