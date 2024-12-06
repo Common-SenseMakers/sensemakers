@@ -31,6 +31,7 @@ import {
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { LinksService } from '../links/links.service';
+import { handleQuotePostReference } from '../links/links.utils';
 import { PlatformsService } from '../platforms/platforms.service';
 import { TriplesRepository } from '../semantics/triples.repository';
 import { TimeService } from '../time/time.service';
@@ -200,7 +201,12 @@ export class PostsProcessing {
             label !== HAS_RDF_SYNTAX_TYPE_URI
           ) {
             /** normalize URL when they are feed  */
-            const normalizedReference = normalizeUrl(reference);
+            const _normalizedReference = normalizeUrl(reference);
+            /** temporary hotfit until the parser handles the quote post edge cases */
+            const normalizedReference = handleQuotePostReference(
+              _normalizedReference,
+              post
+            );
             labels.add(label);
             refsLabels[normalizedReference] = [
               ...(refsLabels[normalizedReference] || []),

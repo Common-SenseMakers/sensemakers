@@ -1,7 +1,10 @@
 import { expect } from 'chai';
 
+import { AppPost } from '../../src/@shared/types/types.posts';
 import { OEmbed } from '../../src/@shared/types/types.references';
+import { normalizeUrl } from '../../src/@shared/utils/links.utils';
 import { logger } from '../../src/instances/logger';
+import { handleQuotePostReference } from '../../src/links/links.utils';
 import { resetDB } from '../utils/db';
 import { getTestServices } from './test.services';
 
@@ -15,7 +18,51 @@ describe('020-links', () => {
     logger.debug('resetting DB');
     await resetDB();
   });
+  describe('handles quote post reference bug', () => {
+    const post = {
+      id: 'qcguDyDPYXRYEiiZOlkH',
+      generic: {
+        author: {
+          id: '343566768',
+          name: 'Brian Gordon',
+          username: 'GordonBrianR',
+          avatarUrl:
+            'https://pbs.twimg.com/profile_images/2163220130/profile_picture_normal.JPG',
+          platformId: 'twitter',
+        },
+        thread: [
+          {
+            url: 'https://x.com/GordonBrianR/status/1863710508047798290',
+            content:
+              'Noted https://twitter.com/colerotman/status/1863422595942773233',
+            quotedThread: {
+              author: {
+                id: '456531793',
+                name: 'Cole Rotman',
+                username: 'ColeRotman',
+                platformId: 'twitter',
+              },
+              thread: [
+                {
+                  content:
+                    'There\'s a well-known expression in venture capital:\n\n"Only a handful of companies per year actually matter" \n\nI thought it would be interesting to go back and find the Series A deals that actually "mattered" each year with the benefit of hindsight: 👇',
+                  url: 'https://x.com/ColeRotman/status/1863422595942773233',
+                },
+              ],
+            },
+          },
+        ],
+      },
+    } as any as AppPost;
 
+    const originalUrl =
+      'https://twitter.com/colerotman/status/1863422595942773233';
+    const normalizedUrl = normalizeUrl(originalUrl);
+    const processedReference = handleQuotePostReference(normalizedUrl, post);
+    expect(processedReference).to.equal(
+      'https://x.com/ColeRotman/status/1863422595942773233'
+    );
+  });
   describe('getOEmbed', () => {
     const testUrl =
       'https://mikeyoungacademy.dk/bluesky-is-emerging-as-the-new-platform-for-science/';
