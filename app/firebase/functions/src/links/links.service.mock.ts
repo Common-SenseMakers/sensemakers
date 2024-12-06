@@ -20,10 +20,9 @@ export const getLinksMock = (
   if (type.enable) {
     when(mocked.fetchOEmbed(anything())).thenCall((url: string) => {
       const oembed: OEmbed = {
-        original_url: url,
         url,
       };
-      return oembed;
+      return { success: true, oembed };
     });
   }
   return instance(mocked) as unknown as LinksService;

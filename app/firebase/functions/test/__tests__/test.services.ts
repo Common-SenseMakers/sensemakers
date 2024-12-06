@@ -171,7 +171,7 @@ export const getTestServices = (config: TestServicesConfig) => {
   const parser = getParserMock(_parser, config.parser);
 
   /** links */
-  const _linksService = new LinksService(linksRepo, {
+  const _linksService = new LinksService(linksRepo, time, {
     apiKey: process.env.IFRAMELY_API_KEY as string,
     apiUrl: process.env.IFRAMELY_API_URL as string,
   });
