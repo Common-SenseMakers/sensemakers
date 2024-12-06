@@ -16,7 +16,7 @@ const tweetId2 = process.env.TEST_TWEET_ID_2;
 const tweetId3 = process.env.TEST_TWEET_ID_3;
 const tweetId4 = process.env.TEST_TWEET_ID_4;
 
-describe.only('011-twitter refresh', () => {
+describe('011-twitter refresh', () => {
   let user: AppUser | undefined;
 
   const services = getTestServices({

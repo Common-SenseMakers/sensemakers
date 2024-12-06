@@ -142,9 +142,9 @@ describe('070 test feed', () => {
       expect(doesQueryUseSubcollection(query1).useLinksSubcollection).to.be
         .false;
       result1.forEach((post) => {
-        expect(post.meta?.refLabels).to.not.be.undefined;
+        expect(post.meta?.references).to.not.be.undefined;
         post.meta &&
-          expect(Object.keys(post.meta!.refLabels)).to.have.length.greaterThan(
+          expect(Object.keys(post.meta.references)).to.have.length.greaterThan(
             0
           );
       });
@@ -164,9 +164,9 @@ describe('070 test feed', () => {
       expect(doesQueryUseSubcollection(query2).useLinksSubcollection).to.be
         .false;
       result2.forEach((post) => {
-        expect(post.meta?.refLabels).to.not.be.undefined;
+        expect(post.meta?.references).to.not.be.undefined;
         post.meta &&
-          expect(Object.keys(post.meta.refLabels)).to.have.length.greaterThan(
+          expect(Object.keys(post.meta.references)).to.have.length.greaterThan(
             0
           );
       });
@@ -181,9 +181,9 @@ describe('070 test feed', () => {
       expect(doesQueryUseSubcollection(query3).useLinksSubcollection).to.be
         .false;
       result3.forEach((post) => {
-        expect(post.meta?.refLabels).to.not.be.undefined;
+        expect(post.meta?.references).to.not.be.undefined;
         post.meta &&
-          expect(Object.keys(post.meta.refLabels)).to.have.length.greaterThan(
+          expect(Object.keys(post.meta.references)).to.have.length.greaterThan(
             0
           );
       });

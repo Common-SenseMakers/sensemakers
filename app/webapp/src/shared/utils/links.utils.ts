@@ -1,6 +1,11 @@
 export function normalizeUrl(url: string): string {
   const urlObj = new URL(url); // Add temporary protocol for parsing
 
+  // Replace domain if it is twitter.com
+  if (urlObj.hostname === 'twitter.com') {
+    urlObj.hostname = 'x.com';
+  }
+
   // Normalize path
   urlObj.pathname = urlObj.pathname.replace(/\/$/, '');
 

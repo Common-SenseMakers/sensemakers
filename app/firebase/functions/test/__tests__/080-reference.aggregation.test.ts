@@ -22,7 +22,7 @@ import { getTestServices } from './test.services';
 
 const feedThreads = [[''], [''], [''], [''], ['']];
 
-describe.only('080 get reference aggregation', () => {
+describe('080 get reference aggregation', () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER

@@ -5,6 +5,7 @@ import {
   AppUser,
   TestUserCredentials,
 } from '../../src/@shared/types/types.user';
+import { getProfileId } from '../../src/@shared/utils/profiles.utils';
 import { TransactionManager } from '../../src/db/transaction.manager';
 import { getPrefixedUserId } from '../../src/users/users.utils';
 import { handleTwitterSignupMock } from '../__tests__/reusable/mocked.singup';
@@ -85,6 +86,7 @@ const authenticateBlueskyForUser = async (
       settings: {},
       signupDate: Date.now(),
       accounts: {},
+      accountsIds: [getProfileId(PLATFORM.Bluesky, credentials.bluesky.id)],
     };
   }
 
@@ -151,6 +153,7 @@ const authenticateMastodonForUser = async (
       settings: {},
       signupDate: Date.now(),
       accounts: {},
+      accountsIds: [getProfileId(PLATFORM.Mastodon, credentials.mastodon.id)],
     };
   }
 
