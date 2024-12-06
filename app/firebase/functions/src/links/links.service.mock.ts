@@ -20,7 +20,7 @@ export const getLinksMock = (
   if (type.enable) {
     when(mocked.fetchOEmbed(anything())).thenCall((url: string) => {
       const oembed: OEmbed = {
-        url,
+        url: url + '/mock',
         type: 'mocked',
       };
       return { success: true, oembed };
