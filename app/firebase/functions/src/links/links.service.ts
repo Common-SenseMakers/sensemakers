@@ -64,7 +64,11 @@ export class LinksService {
 
     /** refetch from iframely links that have not been fetched */
     if (existing && existing.sources && existing.sources[LinkSource.iframely]) {
-      return existing.oembed;
+      const newOembed = {
+        ...existing.oembed,
+        type: refMetaOrg?.item_type,
+      };
+      return newOembed;
     }
 
     const iframely = await this.fetchOEmbed(url);
