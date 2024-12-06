@@ -31,7 +31,10 @@ import {
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { LinksService } from '../links/links.service';
-import { handleQuotePostReference } from '../links/links.utils';
+import {
+  getOriginalRefMetaFromPost,
+  handleQuotePostReference,
+} from '../links/links.utils';
 import { PlatformsService } from '../platforms/platforms.service';
 import { TriplesRepository } from '../semantics/triples.repository';
 import { TimeService } from '../time/time.service';
@@ -225,9 +228,7 @@ export class PostsProcessing {
 
     await Promise.all(
       Array.from(Object.keys(refsLabels)).map(async (url) => {
-        const refMetaOrg =
-          post.originalParsed?.support?.refs_meta &&
-          post.originalParsed?.support?.refs_meta[url];
+        const refMetaOrg = getOriginalRefMetaFromPost(post, url);
 
         const refMeta = await this.enhanceRefMeta(url, manager, refMetaOrg);
         refsMeta[url] = { ...refMeta, labels: refsLabels[url] || undefined };
@@ -319,9 +320,7 @@ export class PostsProcessing {
     const postFullMeta: Map<string, RefDisplayMeta> = new Map();
     await Promise.all(
       post.structuredSemantics?.refs?.map(async (ref) => {
-        const refMetaOrg = post.originalParsed?.support?.refs_meta
-          ? post.originalParsed?.support?.refs_meta[ref]
-          : undefined;
+        const refMetaOrg = getOriginalRefMetaFromPost(post, ref);
         const oembed = await this.linksService.getOEmbed(
           ref,
           manager,
