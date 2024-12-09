@@ -1,9 +1,39 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
+import { useEffect, useRef, useState } from 'react';
 import { CSSProperties } from 'styled-components';
 
 import { AppButton } from '../ui-components';
+import { BoxCentered } from '../ui-components/BoxCentered';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { FeedTabConfig } from './feed.config';
+
+const RightIcon = () => {
+  return (
+    <BoxCentered
+      style={{
+        height: '24px',
+        width: '24px',
+        borderRadius: '12px',
+        border: '1px solid #D1D5DB',
+        background: '#F9FAFB',
+      }}>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+        fill="none">
+        <path
+          d="M6.6001 4L10.6001 8L6.6001 12"
+          stroke="#4B5563"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </BoxCentered>
+  );
+};
 
 export const FeedTabs = (props: {
   feedTabs: FeedTabConfig[];
@@ -12,6 +42,46 @@ export const FeedTabs = (props: {
 }) => {
   const { constants } = useThemeContext();
   const { feedTabs, onTabClicked, feedIx } = props;
+
+  const [showRightCaret, setShowRightCaret] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Check for overflow and update right caret visibility
+  useEffect(() => {
+    const checkOverflow = () => {
+      const container = containerRef.current;
+      if (container) {
+        const isOverflowing = container.scrollWidth > container.clientWidth;
+        setShowRightCaret(
+          isOverflowing &&
+            container.scrollLeft + container.clientWidth < container.scrollWidth
+        );
+      }
+    };
+
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, []);
+
+  // Update the visibility of the right caret based on scroll position
+  const handleScroll = () => {
+    const container = containerRef.current;
+    if (container) {
+      const atRightEnd =
+        container.scrollWidth -
+          Math.ceil(container.scrollLeft + container.clientWidth) <=
+        1;
+      setShowRightCaret(!atRightEnd);
+    }
+  };
+
+  const scrollToRight = () => {
+    const container = containerRef.current;
+    if (container) {
+      container.scrollLeft = container.scrollWidth - container.clientWidth;
+    }
+  };
 
   const borderStyle = `1px solid ${constants.colors.border}`;
 
@@ -66,6 +136,8 @@ export const FeedTabs = (props: {
 
   return (
     <div
+      ref={containerRef}
+      onScroll={handleScroll}
       style={{
         height: '48px',
         display: 'flex',
@@ -87,6 +159,26 @@ export const FeedTabs = (props: {
           {ix === feedTabs.length - 1 && <div style={spaceStyle}></div>}
         </Box>
       ))}
+      {showRightCaret && (
+        <Box
+          onClick={() => scrollToRight()}
+          justify="end"
+          style={{
+            cursor: 'pointer',
+            position: 'absolute',
+            right: '0',
+            top: '0',
+            height: '63px',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '10px',
+            width: '48px',
+            background:
+              'linear-gradient(to left, rgba(255,255,255,1), rgba(255,255,255,0))',
+          }}>
+          <RightIcon></RightIcon>
+        </Box>
+      )}
     </div>
   );
 };
