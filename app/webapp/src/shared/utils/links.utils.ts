@@ -1,3 +1,5 @@
+import { AppPost } from '../types/types.posts';
+
 export function normalizeUrl(url: string): string {
   const urlObj = new URL(url); // Add temporary protocol for parsing
 
@@ -35,4 +37,17 @@ export function normalizeUrl(url: string): string {
   urlObj.search = new URLSearchParams(sortedParams).toString();
 
   return urlObj.toString();
+}
+
+export function handleQuotePostReference(reference: string, post: AppPost) {
+  const quotedPostUrl = post.generic.thread[0].quotedThread?.thread[0].url;
+  if (!quotedPostUrl) {
+    return reference;
+  }
+  const normalizedQuotedPostUrl = normalizeUrl(quotedPostUrl);
+  const lowercaseQuotedPostUrl = normalizedQuotedPostUrl.toLowerCase();
+  if (reference === lowercaseQuotedPostUrl) {
+    return normalizedQuotedPostUrl;
+  }
+  return reference;
 }

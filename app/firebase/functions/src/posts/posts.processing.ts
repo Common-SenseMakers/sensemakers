@@ -17,7 +17,10 @@ import {
 } from '../@shared/types/types.posts';
 import { RefDisplayMeta, RefPostData } from '../@shared/types/types.references';
 import { DefinedIfTrue } from '../@shared/types/types.user';
-import { normalizeUrl } from '../@shared/utils/links.utils';
+import {
+  handleQuotePostReference,
+  normalizeUrl,
+} from '../@shared/utils/links.utils';
 import { mapStoreElements, parseRDF } from '../@shared/utils/n3.utils';
 import { getProfileId } from '../@shared/utils/profiles.utils';
 import {
@@ -31,10 +34,7 @@ import {
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { LinksService } from '../links/links.service';
-import {
-  getOriginalRefMetaFromPost,
-  handleQuotePostReference,
-} from '../links/links.utils';
+import { getOriginalRefMetaFromPost } from '../links/links.utils';
 import { PlatformsService } from '../platforms/platforms.service';
 import { TriplesRepository } from '../semantics/triples.repository';
 import { TimeService } from '../time/time.service';

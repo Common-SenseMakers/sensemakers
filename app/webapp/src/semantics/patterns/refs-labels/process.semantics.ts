@@ -1,7 +1,11 @@
 import { Store } from 'n3';
 
 import { ParsedSupport, RefMeta } from '../../../shared/types/types.parser';
-import { normalizeUrl } from '../../../shared/utils/links.utils';
+import { AppPost, AppPostFull } from '../../../shared/types/types.posts';
+import {
+  handleQuotePostReference,
+  normalizeUrl,
+} from '../../../shared/utils/links.utils';
 import { filterStore, forEachStore } from '../../../shared/utils/n3.utils';
 
 export interface RefData {
@@ -13,7 +17,8 @@ export type RefsMap = Map<string, RefData>;
 export const processSemantics = (
   originalStore: Store,
   store: Store,
-  support?: ParsedSupport
+  support?: ParsedSupport,
+  post?: AppPostFull
 ): RefsMap => {
   const possiblePredicates = support?.ontology?.semantic_predicates?.map(
     (item) => item.uri
@@ -37,14 +42,18 @@ export const processSemantics = (
   /** get the refs from the original store (even if their value is undefined) */
   if (orgRefLabels && refLabels) {
     forEachStore(orgRefLabels, (quad) => {
-      const ref = quad.object.value.toLocaleLowerCase();
+      const ref = post
+        ? handleQuotePostReference(quad.object.value, post as AppPost)
+        : quad.object.value;
       refs.set(ref, { labelsUris: [] });
     });
 
     /** then get the labels from the actual semantics */
     forEachStore(refLabels, (quad) => {
       const label = quad.predicate.value;
-      const ref = quad.object.value.toLocaleLowerCase();
+      const ref = post
+        ? handleQuotePostReference(quad.object.value, post as AppPost)
+        : quad.object.value;
       const current = refs.get(ref);
       const newLabels = current ? current.labelsUris.concat(label) : [label];
 

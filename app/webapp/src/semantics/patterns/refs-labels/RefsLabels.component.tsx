@@ -46,9 +46,14 @@ export const RefLabelsComponent = (props: PatternProps) => {
   const refs = useMemo<RefsMap>(
     () =>
       originalStore && store && props.originalParsed
-        ? processSemantics(originalStore, store, props.originalParsed?.support)
+        ? processSemantics(
+            originalStore,
+            store,
+            props.originalParsed?.support,
+            props.post
+          )
         : (new Map() as RefsMap),
-    [originalStore, props.originalParsed, store]
+    [originalStore, props.originalParsed, store, props.post]
   );
 
   const removeLabel = async (ref: string, labelUri: string) => {

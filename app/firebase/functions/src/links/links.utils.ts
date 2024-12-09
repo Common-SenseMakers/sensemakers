@@ -8,19 +8,6 @@ export function hashUrl(url: string): string {
   return crypto.createHash('md5').update(url).digest('hex');
 }
 
-export function handleQuotePostReference(reference: string, post: AppPost) {
-  const quotedPostUrl = post.generic.thread[0].quotedThread?.thread[0].url;
-  if (!quotedPostUrl) {
-    return reference;
-  }
-  const normalizedQuotedPostUrl = normalizeUrl(quotedPostUrl);
-  const lowercaseQuotedPostUrl = normalizedQuotedPostUrl.toLowerCase();
-  if (reference === lowercaseQuotedPostUrl) {
-    return normalizedQuotedPostUrl;
-  }
-  return reference;
-}
-
 export function getOriginalRefMetaFromPost(post: AppPost, ref: string) {
   const originalRefsMeta = post.originalParsed?.support?.refs_meta;
   if (!originalRefsMeta) {
