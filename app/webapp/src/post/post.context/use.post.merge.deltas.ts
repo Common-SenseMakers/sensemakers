@@ -8,7 +8,6 @@ import {
   QuadOperation,
   getMergedSemantics,
   hasOperation,
-  removeQuad,
 } from './use.post.merge.deltas.pure';
 
 const DEBUG = false;
@@ -266,5 +265,5 @@ export const usePostMergeDeltas = (fetched: PostFetchContext) => {
     return operations.length > 0;
   }, [operations]);
 
-  return { mergedSemantics, updateSemantics, removeQuad, isDraft };
+  return { mergedSemantics, updateSemantics, isDraft };
 };

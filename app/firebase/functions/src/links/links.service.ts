@@ -1,5 +1,6 @@
 import { RefMeta } from '../@shared/types/types.parser';
 import {
+  LinkMeta,
   LinkSource,
   OEmbed,
   RefPostData,
@@ -54,13 +55,26 @@ export class LinksService {
     }
   }
 
+  async getByUrl<T extends boolean>(
+    url: string,
+    manager: TransactionManager,
+    shouldThrow?: T
+  ) {
+    const urlHash = hashUrl(url);
+    return this.links.get(urlHash, manager, shouldThrow);
+  }
+
+  setByUrl(url: string, newLinkMeta: LinkMeta, manager: TransactionManager) {
+    const urlHash = hashUrl(url);
+    this.links.set(urlHash, newLinkMeta, manager);
+  }
+
   async getOEmbed(
     url: string,
     manager: TransactionManager,
     refMetaOrg?: RefMeta
   ): Promise<OEmbed> {
-    const urlHash = hashUrl(url);
-    const existing = await this.links.get(urlHash, manager);
+    const existing = await this.getByUrl(url, manager);
 
     /** refetch from iframely links that have not been fetched */
     if (existing && existing.sources && existing.sources[LinkSource.iframely]) {
@@ -86,8 +100,8 @@ export class LinksService {
     /** parser decides type */
     newOembed.type = refMetaOrg?.item_type;
 
-    this.links.set(
-      urlHash,
+    this.setByUrl(
+      url,
       {
         oembed: removeUndefined(newOembed),
         sources: {
