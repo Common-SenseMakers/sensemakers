@@ -878,24 +878,31 @@ export class PostsManager {
     }
   }
   async deleteAccountFull(platformId: PLATFORM, user_id: string) {
-    await this.db.run(async (manager) => {
-      const profileId = getProfileId(platformId, user_id);
+    const profileId = getProfileId(platformId, user_id);
 
-      const posts = await this.processing.posts.getAllOfQuery({
-        profileId,
-        fetchParams: { expectedAmount: 100000 },
+    const posts = await this.processing.posts.getAllOfQuery({
+      profileId,
+      fetchParams: { expectedAmount: 100000 },
+    });
+
+    if (DEBUG) {
+      logger.debug(`fully deleting ${posts.length} posts of ${profileId}`);
+    }
+
+    const batchSize = 100;
+
+    for (let i = 0; i < posts.length; i += batchSize) {
+      const batch = posts.slice(i, i + batchSize);
+      await this.db.run(async (manager) => {
+        await Promise.all(
+          batch.map((post) => {
+            return this.processing.deletePostFull(post.id, manager);
+          })
+        );
       });
+    }
 
-      if (DEBUG) {
-        logger.debug(`fully deleting ${posts.length} posts of ${profileId}`);
-      }
-
-      await Promise.all(
-        posts.map((post) => {
-          return this.processing.deletePostFull(post.id, manager);
-        })
-      );
-
+    await this.db.run(async (manager) => {
       this.users.profiles.delete(profileId, manager);
     });
   }
