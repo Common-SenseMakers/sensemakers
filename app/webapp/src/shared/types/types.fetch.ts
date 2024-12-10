@@ -38,10 +38,3 @@ export interface PublishPostPayload {
   post: AppPostFull;
   platformIds: PLATFORM[];
 }
-
-export interface AddUserDataPayload {
-  username: string;
-  platformId: IDENTITY_PLATFORM;
-  amount: number;
-  latest?: boolean;
-}
