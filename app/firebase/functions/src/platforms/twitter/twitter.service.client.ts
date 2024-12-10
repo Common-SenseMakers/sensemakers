@@ -231,7 +231,7 @@ export class TwitterServiceClient {
       accessToken: result.accessToken,
       refreshToken: result.refreshToken,
       expiresIn: result.expiresIn,
-      expiresAtMs: this.time.now() + 1000 * 60 * 11,
+      expiresAtMs: this.time.now() + result.expiresIn * 1000,
     };
     const twitterAccountDetails: TwitterAccountDetails = {
       user_id: user.id,
