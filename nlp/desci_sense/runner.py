@@ -28,7 +28,9 @@ def load_config(config_path: str = None) -> MultiParserChainConfig:
     else:
         # use a default config - this is the config loaded in the streamlit demo app
         config = init_multi_chain_parser_config(
-            llm_type="mistralai/mixtral-8x7b-instruct:nitro",
+            ref_tagger_llm_type="mistralai/mixtral-8x7b-instruct:nitro",
+            kw_llm_type="mistralai/mixtral-8x7b-instruct:nitro",
+            topic_llm_type="mistralai/mixtral-8x7b-instruct:nitro",
             post_process_type="combined",
             post_renderer_type="quote_ref_post",
         )

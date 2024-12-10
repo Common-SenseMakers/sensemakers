@@ -8,7 +8,7 @@ sys.path.append(str(ROOT))
 import nest_asyncio
 
 nest_asyncio.apply()
-
+from difflib import ndiff
 from desci_sense.shared_functions.dataloaders import scrape_post
 from desci_sense.shared_functions.web_extractors.metadata_extractors import (
     extract_posts_ref_metadata_dict,
@@ -87,7 +87,7 @@ title: Replay of procedural experience is independent of the hippocampus
 summary: Sleep is critical for consolidating all forms of memory1-3, from episodic experience to the development of motor skills4-6. A core feature of the consolidation process is offline replay of neuronal firing patterns that occur during experience7,8. This replay is thought to originate in the hippocampus and trigger the reactivation of ensembles of cortical and subcortical neurons1,3,9-18. However, non-declarative memories do not require the hippocampus for learning or for sleep-dependent consolidat
 =========="""
 
-RENDER_TARGET_MULTI_REF = "\n- Author: default_author\n- Content: These 2 papers are highly recommended!\nhttps://arxiv.org/abs/2402.04607\nhttps://royalsocietypublishing.org/doi/10.1098/rstb.2022.0267\n\n- References:\n1: https://arxiv.org/abs/2402.04607\nItem type: preprint\nTitle: Google Scholar is manipulatable\nSummary: Citations are widely considered in scientists' evaluation. As such, scientists may be incentivized to inflate their citation counts. While previous literature has examined self-citations and citation cartels, it remains unclear whether scientists can purchase citations. Here, we compile a dataset of ~1.6 million profiles on Google Scholar to examine instances of citation fraud on the platform. We survey faculty at highly-ranked universities, and confirm that Google Scholar is widely used when ev\n------------------\n2: https://royalsocietypublishing.org/doi/10.1098/rstb.2022.0267\nItem type: journalArticle\nTitle: Reducing global inequality increases local cooperation: a simple model of group selection with a global externality\nSummary: \n------------------\n"
+RENDER_TARGET_MULTI_REF = "\n- Author: default_author\n- Content: These 2 papers are highly recommended!\nhttps://arxiv.org/abs/2402.04607\nhttps://royalsocietypublishing.org/doi/10.1098/rstb.2022.0267\n\n- References:\n1: https://arxiv.org/abs/2402.04607\nItem type: preprint\nTitle: Google Scholar is manipulatable\nSummary: Citations are widely considered in scientists' evaluation. As such, scientists may be incentivized to inflate their citation counts. While previous literature has examined self-citations and citation cartels, it remains unclear whether scientists can purchase citations. Here, we compile a dataset of ~1.6 million profiles on Google Scholar to examine instances of citation fraud on the platform. We survey faculty at highly-ranked universities, and confirm that Google Scholar is widely used when ev\n------------------\n2: https://royalsocietypublishing.org/doi/10.1098/rstb.2022.0267\nItem type: journalArticle\nTitle: Reducing global inequality increases local cooperation: a simple model of group selection with a global externality\nSummary: Group-structured models often explain the evolution of prosocial activities in terms of selection acting at both individual and group levels. Such models do not typically consider how individuals' behaviours may have consequences beyond the boundaries of their groups. However, many behaviours affect global environmental variables, including climate change and ecosystem fragility. Against this background, we propose a simple model of multi-level selection in the presence of global externalities. \n------------------\n"
 
 RENDER_TARGET_KW = "- Content: I really liked this paper!\nhttps://arxiv.org/abs/2402.04607\n\n- References:\n1: https://arxiv.org/abs/2402.04607\nItem type: preprint\nTitle: Google Scholar is manipulatable\nSummary: Citations are widely considered in scientists' evaluation. As such, scientists may be incentivized to inflate their citation counts. While previous literature has examined self-citations and citation cartels, it remains unclear whether scientists can purchase citations. Here, we compile a dataset of ~1.6 million profiles on Google Scholar to examine instances of citation fraud on the platform. We survey faculty at highly-ranked universities, and confirm that Google Scholar is widely used when ev\n------------------\n"
 
@@ -162,7 +162,7 @@ summary: None
 url: https://journals.sagepub.com/doi/10.1177/20451253231198466
 item_type: journalArticle
 title: History repeating: guidelines to address common problems in psychedelic science
-summary: None
+summary: Research in the last decade has expressed considerable optimism about the clinical potential of psychedelics for the treatment of mental disorders. This optimism is reflected in an increase in research papers, investments by pharmaceutical companies, patents, media coverage, as well as political and legislative changes. However, psychedelic science is facing serious challenges that threaten the validity of core findings and raise doubt regarding clinical efficacy and safety. In this paper, we in
 ==========
 <ref_3> 
 url: https://www.youtube.com/watch?feature=youtu.be&si=kjMtNR1Hwe7NZ8as&v=WknlkmJee4E
@@ -221,7 +221,8 @@ def test_ref_render_multi_ref():
     ref_post_renderer = RefPostRenderer()
     rendered = ref_post_renderer.render(ref_post, md_list)
     target = RENDER_TARGET_MULTI_REF
-    assert rendered == target
+    diff = ndiff(rendered.splitlines(keepends=True), target.splitlines(keepends=True))
+    assert rendered == target, print(''.join(diff), end="")
 
 
 def test_ref_renderer_in_parser():
@@ -402,7 +403,7 @@ def test_thread_render_single_post():
 
 
 if __name__ == "__main__":
-    thread_post = get_thread_single_post()
+    thread_post = get_thread_1()
     multi_config = MultiParserChainConfig(
         parser_configs=[
             MultiRefTaggerChainConfig(
@@ -417,4 +418,5 @@ if __name__ == "__main__":
     md_dict = extract_posts_ref_metadata_dict([thread_post])
     prompt = mcp.instantiate_prompts(thread_post, md_dict)
     prompt_str = prompt["multi_ref_tagger_input"]
-    assert TARGET_RENDER_SINGLE_POST_THREAD in prompt_str, unidiff_output(TARGET_RENDER_SINGLE_POST_THREAD, prompt_str)
+    diff = ndiff(prompt_str.splitlines(keepends=True), THREAD_TEST_1_TARGET.splitlines(keepends=True))
+    assert THREAD_TEST_1_TARGET in prompt_str, ''.join(diff)
