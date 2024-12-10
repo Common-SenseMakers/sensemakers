@@ -106,4 +106,9 @@ export class PlatformPostsRepository extends BaseRepository<
 
     return doc.id as DefinedIfTrue<T, R>;
   }
+
+  delete(platformPostId: string, manager: TransactionManager) {
+    const ref = this.getRef(platformPostId);
+    manager.delete(ref);
+  }
 }

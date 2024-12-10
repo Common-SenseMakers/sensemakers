@@ -340,4 +340,9 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
     return posts.docs.map((doc) => doc.id) as string[];
   }
+
+  delete(postId: string, manager: TransactionManager) {
+    const ref = this.getRef(postId);
+    manager.delete(ref);
+  }
 }
