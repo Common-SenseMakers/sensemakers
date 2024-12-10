@@ -273,7 +273,7 @@ export class UsersRepository {
     const newAccountsIds = UsersHelper.accountsToAccountsIds(newAccounts);
     manager.update(doc.ref, {
       accounts: newAccounts,
-      newAccountsIds,
+      accountsIds: newAccountsIds,
     });
   }
 

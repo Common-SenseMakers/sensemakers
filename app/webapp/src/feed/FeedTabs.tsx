@@ -7,7 +7,9 @@ import { BoxCentered } from '../ui-components/BoxCentered';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { FeedTabConfig } from './feed.config';
 
-const RightIcon = () => {
+const Chevron = (props: { direction: 'left' | 'right' }) => {
+  const { direction } = props;
+  const rotate = direction === 'right' ? 'rotate(0deg)' : 'rotate(180deg)';
   return (
     <BoxCentered
       style={{
@@ -22,7 +24,8 @@ const RightIcon = () => {
         width="16"
         height="16"
         viewBox="0 0 16 16"
-        fill="none">
+        fill="none"
+        style={{ transform: rotate }}>
         <path
           d="M6.6001 4L10.6001 8L6.6001 12"
           stroke="#4B5563"
@@ -35,6 +38,9 @@ const RightIcon = () => {
   );
 };
 
+const LeftIcon = () => <Chevron direction="left"></Chevron>;
+const RightIcon = () => <Chevron direction="right"></Chevron>;
+
 export const FeedTabs = (props: {
   feedTabs: FeedTabConfig[];
   onTabClicked: (tabIx: number) => void;
@@ -44,6 +50,8 @@ export const FeedTabs = (props: {
   const { feedTabs, onTabClicked, feedIx } = props;
 
   const [showRightCaret, setShowRightCaret] = useState(false);
+  const [showLeftCaret, setShowLeftCaret] = useState(false);
+
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Check for overflow and update right caret visibility
@@ -73,13 +81,27 @@ export const FeedTabs = (props: {
           Math.ceil(container.scrollLeft + container.clientWidth) <=
         1;
       setShowRightCaret(!atRightEnd);
+      setShowLeftCaret(atRightEnd);
     }
   };
 
   const scrollToRight = () => {
     const container = containerRef.current;
     if (container) {
-      container.scrollLeft = container.scrollWidth - container.clientWidth;
+      container.scrollTo({
+        left: container.scrollWidth - container.clientWidth,
+        behavior: 'smooth',
+      });
+    }
+  };
+
+  const scrollToLeft = () => {
+    const container = containerRef.current;
+    if (container) {
+      container.scrollTo({
+        left: 0,
+        behavior: 'smooth',
+      });
     }
   };
 
@@ -159,6 +181,26 @@ export const FeedTabs = (props: {
           {ix === feedTabs.length - 1 && <div style={spaceStyle}></div>}
         </Box>
       ))}
+      {showLeftCaret && (
+        <Box
+          onClick={() => scrollToLeft()}
+          justify="end"
+          style={{
+            cursor: 'pointer',
+            position: 'absolute',
+            left: '0',
+            top: '0',
+            height: '63px',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '10px',
+            width: '48px',
+            background:
+              'linear-gradient(to left, rgba(255,255,255,0), rgba(255,255,255,1))',
+          }}>
+          <LeftIcon></LeftIcon>
+        </Box>
+      )}
       {showRightCaret && (
         <Box
           onClick={() => scrollToRight()}
