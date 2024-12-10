@@ -1,4 +1,4 @@
-import { IDENTITY_PLATFORM, PLATFORM } from './types.platforms';
+import { PLATFORM } from './types.platforms';
 import { AppPostFull } from './types.posts';
 
 export interface OurTokenConfig {
