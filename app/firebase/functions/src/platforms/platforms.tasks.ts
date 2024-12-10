@@ -10,7 +10,7 @@ import { Services } from '../instances/services';
 import { getConfig } from '../services.config';
 import { removeUndefinedFields } from './bluesky/bluesky.utils';
 
-export const DEBUG = false;
+export const DEBUG = true;
 
 export const FETCH_ACCOUNT_TASKS = {
   [PLATFORM.Twitter]: 'fetchTwitterAccount',
