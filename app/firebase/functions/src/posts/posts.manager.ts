@@ -903,6 +903,18 @@ export class PostsManager {
     }
 
     await this.db.run(async (manager) => {
+      const userId = await this.users.repo.getUserIdWithPlatformAccount(
+        platformId,
+        user_id,
+        manager
+      );
+      if (userId) {
+        await this.users.repo.removeAccountDetails(
+          platformId,
+          user_id,
+          manager
+        );
+      }
       this.users.profiles.delete(profileId, manager);
     });
   }
