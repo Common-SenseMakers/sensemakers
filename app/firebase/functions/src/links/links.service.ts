@@ -69,6 +69,47 @@ export class LinksService {
     this.links.set(urlHash, newLinkMeta, manager);
   }
 
+  async refreshOEmbed(
+    url: string,
+    manager: TransactionManager,
+    refMetaOrg?: RefMeta
+  ) {
+    const iframely = await this.fetchOEmbed(url);
+    const originalRefMeta: RefMeta = removeUndefined({
+      title: refMetaOrg?.title,
+      summary: refMetaOrg?.summary,
+      description: refMetaOrg?.summary,
+    });
+
+    const oembed: OEmbed = {
+      ...originalRefMeta,
+      ...iframely.oembed,
+    };
+
+    /** parser decides type */
+    oembed.type = refMetaOrg?.item_type;
+
+    this.setByUrl(
+      url,
+      {
+        oembed: removeUndefined(oembed),
+        sources: {
+          [LinkSource.parser]: {
+            timestamp: this.time.now(),
+            status: 'SUCCESS',
+          },
+          [LinkSource.iframely]: {
+            timestamp: this.time.now(),
+            status: iframely.success ? 'SUCCESS' : 'ERROR',
+          },
+        },
+      },
+      manager
+    );
+
+    return oembed;
+  }
+
   async getOEmbed(
     url: string,
     manager: TransactionManager,
@@ -85,39 +126,7 @@ export class LinksService {
       return newOembed;
     }
 
-    const iframely = await this.fetchOEmbed(url);
-    const originalRefMeta: RefMeta = removeUndefined({
-      title: refMetaOrg?.title,
-      summary: refMetaOrg?.summary,
-      description: refMetaOrg?.summary,
-    });
-
-    const newOembed: OEmbed = {
-      ...originalRefMeta,
-      ...iframely.oembed,
-    };
-
-    /** parser decides type */
-    newOembed.type = refMetaOrg?.item_type;
-
-    this.setByUrl(
-      url,
-      {
-        oembed: removeUndefined(newOembed),
-        sources: {
-          [LinkSource.parser]: {
-            timestamp: this.time.now(),
-            status: 'SUCCESS',
-          },
-          [LinkSource.iframely]: {
-            timestamp: this.time.now(),
-            status: iframely.success ? 'SUCCESS' : 'ERROR',
-          },
-        },
-      },
-      manager
-    );
-
+    const newOembed = await this.refreshOEmbed(url, manager, refMetaOrg);
     return newOembed;
   }
 

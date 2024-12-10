@@ -11,5 +11,7 @@ import { services } from './scripts.services';
   await services.db.run(async (manager) => {
     const link = await services.links.getByUrl(url, manager, true);
     logger.info(`link found: ${link.oembed.url}`, { link });
+
+    await services.links.refreshOEmbed(url, manager);
   });
 })();
