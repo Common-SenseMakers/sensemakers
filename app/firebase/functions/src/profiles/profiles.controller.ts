@@ -108,6 +108,22 @@ export const addNonUserProfilesController: RequestHandler = async (
 
       let profile: AccountProfileBase | undefined;
       try {
+        const hasProfile = await services.db.run(async (manager) => {
+          return services.users.profiles.getByPlatformUsername(
+            parsedProfile.platformId,
+            parsedProfile.username,
+            manager
+          );
+        });
+
+        /** skip fetching this profile if it already exists, as it will be fetched regularly */
+        if (hasProfile) {
+          if (DEBUG)
+            logger.debug('Profile has already been fetched, skipping', {
+              profileId: hasProfile,
+            });
+          continue;
+        }
         profile = await services.db.run(async (manager) => {
           return services.users.getOrCreateProfileByUsername(
             parsedProfile.platformId,
@@ -116,7 +132,10 @@ export const addNonUserProfilesController: RequestHandler = async (
           );
         });
       } catch (error) {
-        logger.error('error', error);
+        logger.error(
+          `error adding profile ${JSON.stringify(parsedProfile)}:`,
+          error
+        );
         continue;
       }
 
@@ -127,11 +146,6 @@ export const addNonUserProfilesController: RequestHandler = async (
       }
 
       if (DEBUG) logger.debug('Profile found', { profile });
-
-      /** if this profile has already been fetched, skip it as it will be fetched regularly in a scheduled function */
-      if (profile.fetched) {
-        continue;
-      }
 
       const profileId = getProfileId(
         parsedProfile.platformId,
