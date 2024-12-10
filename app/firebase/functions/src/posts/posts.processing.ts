@@ -54,7 +54,7 @@ export class PostsProcessing {
     public posts: PostsRepository,
     public platformPosts: PlatformPostsRepository,
     protected platforms: PlatformsService,
-    protected linksService: LinksService
+    public linksService: LinksService
   ) {}
 
   /**
