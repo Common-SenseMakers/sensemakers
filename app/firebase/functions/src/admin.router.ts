@@ -1,7 +1,7 @@
 import express from 'express';
 
-import { addAccountsDataController } from './posts/controllers/posts.controller';
+import { addNonUserProfilesController } from './profiles/profiles.controller';
 
 export const adminRouter = express.Router();
 
-adminRouter.post('/addAccountsData', addAccountsDataController);
+adminRouter.post('/addNonUserProfiles', addNonUserProfilesController);
