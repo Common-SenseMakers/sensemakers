@@ -386,4 +386,27 @@ export class PostsProcessing {
 
     return this.posts.get(platformPost.postId, manager, shouldThrow);
   }
+  /** delete a post and all its linked documents */
+  async deletePostFull(postId: string, manager: TransactionManager) {
+    const post = await this.posts.get(postId, manager, true);
+
+    /** delete all triples */
+    await this.triples.deleteOfPost(postId, manager);
+
+    /** delete all platform posts */
+    await Promise.all(
+      post.mirrorsIds.map((mirrorId) =>
+        this.platformPosts.delete(mirrorId, manager)
+      )
+    );
+
+    /** delete all link subcollection posts */
+    await Promise.all(
+      post.structuredSemantics?.refs?.map((ref) => {
+        this.linksService.deleteRefPost(ref, postId, manager);
+      }) || []
+    );
+
+    this.posts.delete(postId, manager);
+  }
 }

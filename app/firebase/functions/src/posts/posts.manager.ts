@@ -877,30 +877,4 @@ export class PostsManager {
       });
     }
   }
-
-  /** delete a post and all its linked documents */
-  async deletePostFull(postId: string) {
-    await this.db.run(async (manager) => {
-      const post = await this.processing.posts.get(postId, manager, true);
-
-      /** delete all triples */
-      await this.processing.triples.deleteOfPost(postId, manager);
-
-      /** delete all platform posts */
-      await Promise.all(
-        post.mirrorsIds.map((mirrorId) =>
-          this.processing.platformPosts.delete(mirrorId, manager)
-        )
-      );
-
-      /** delete all link subcollection posts */
-      await Promise.all(
-        post.structuredSemantics?.refs?.map((ref) => {
-          this.processing.linksService.deleteRefPost(ref, postId, manager);
-        }) || []
-      );
-
-      this.processing.posts.delete(postId, manager);
-    });
-  }
 }
