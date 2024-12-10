@@ -7,7 +7,11 @@ import {
   AccountProfileRead,
 } from '../@shared/types/types.profiles';
 import { GetProfilePayload } from '../@shared/types/types.user';
-import { getProfileId, parseProfileUrl } from '../@shared/utils/profiles.utils';
+import {
+  getProfileId,
+  parseProfileUrl,
+  splitProfileId,
+} from '../@shared/utils/profiles.utils';
 import { getServices } from '../controllers.utils';
 import { logger } from '../instances/logger';
 import { FETCH_ACCOUNT_TASKS } from '../platforms/platforms.tasks';
@@ -151,6 +155,73 @@ export const addNonUserProfilesController: RequestHandler = async (
         if (DEBUG) logger.debug('Enqueueing task', { taskName, taskData });
         await enqueueTask(taskName, taskData);
       }
+    }
+
+    if (DEBUG)
+      logger.debug(`${request.path}: Successfully completed addAccountsData`, {
+        totalPayloads: parsedProfiles.length,
+      });
+
+    response.status(200).send({ success: true });
+  } catch (error) {
+    logger.error('error', error);
+    response.status(500).send({ success: false, error });
+  }
+};
+
+export const deleteProfilesController: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    if (DEBUG)
+      logger.debug(`${request.path}: Starting addAccountsDataController`, {
+        payloads: request.body,
+      });
+
+    const services = getServices(request);
+    const profileUrls = request.body as string[];
+    const parsedProfiles = profileUrls
+      .map((profileUrl) => {
+        const parsed = parseProfileUrl(profileUrl);
+        return parsed;
+      })
+      .filter((profile) => profile);
+
+    for (const parsedProfile of parsedProfiles) {
+      if (!parsedProfile) {
+        continue;
+      }
+      if (DEBUG)
+        logger.debug('Fetching profile', {
+          platformId: parsedProfile.platformId,
+          username: parsedProfile.username,
+        });
+
+      let profileId: string | undefined;
+      try {
+        profileId = await services.db.run(async (manager) => {
+          return services.users.profiles.getByPlatformUsername(
+            parsedProfile.platformId,
+            parsedProfile.username,
+            manager
+          );
+        });
+      } catch (error) {
+        logger.error('error', error);
+        continue;
+      }
+
+      if (!profileId) {
+        const error = `unable to find profile for ${parsedProfile.username} on ${parsedProfile.platformId}`;
+        logger.error(error);
+        continue;
+      }
+
+      if (DEBUG) logger.debug('Profile found', { profileId });
+
+      const { platform, user_id } = splitProfileId(profileId);
+      await services.postsManager.deleteAccountFull(platform, user_id);
     }
 
     if (DEBUG)

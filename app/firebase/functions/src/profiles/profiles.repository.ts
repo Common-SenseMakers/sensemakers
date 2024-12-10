@@ -217,4 +217,9 @@ export class ProfilesRepository {
     const profileRef = await this.getRef(profileId, manager, true);
     manager.update(profileRef, { userId });
   }
+
+  delete(profileId: string, manager: TransactionManager) {
+    const ref = this.db.collections.profiles.doc(profileId);
+    manager.delete(ref);
+  }
 }
