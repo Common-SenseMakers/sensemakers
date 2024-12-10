@@ -26,7 +26,7 @@ const DEBUG = false;
 
 export const PublishButtons = (props: BoxExtendedProps) => {
   const { t } = useTranslation();
-  const { updated } = usePost();
+  const { updated, fetched } = usePost();
   const { connectedUser } = useAccountContext();
 
   const isScience = useMemo(() => {
@@ -87,7 +87,13 @@ export const PublishButtons = (props: BoxExtendedProps) => {
 
       const newSemantics = await writeRDF(newStore);
       if (!newSemantics) throw new Error('Unexpected');
-      updated.updateSemantics(newSemantics);
+      updated
+        .updateSemantics(newSemantics)
+        .then(() => {
+          /** force refetch instead of waiting for real time update */
+          fetched.refetch();
+        })
+        .catch(console.error);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [updated.storeMerged]

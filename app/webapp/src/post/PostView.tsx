@@ -36,7 +36,7 @@ export const PostView = (props: {
   const [, setIsReparsing] = useState(false);
 
   const { constants } = useThemeContext();
-  const { updated } = usePost();
+  const { updated, fetched } = usePost();
 
   const postText = updated.postMerged
     ? concatenateThread(updated.postMerged.generic)
@@ -47,7 +47,13 @@ export const PostView = (props: {
   const { t } = useTranslation();
 
   const semanticsUpdated = (newSemantics: string) => {
-    updated.updateSemantics(newSemantics);
+    updated
+      .updateSemantics(newSemantics)
+      .then(() => {
+        /** force refetch instead of waiting for real time update */
+        fetched.refetch();
+      })
+      .catch(console.error);
   };
 
   const reparse = async () => {

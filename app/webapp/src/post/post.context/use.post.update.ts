@@ -29,7 +29,7 @@ export interface PostUpdateContext {
   setEnabledEdit: (enabled: boolean) => void;
   isUpdating: boolean;
   setIsUpdating: (updating: boolean) => void;
-  updateSemantics: (newSemantics: string) => void;
+  updateSemantics: (newSemantics: string) => Promise<void>;
   updatePost: (update: PostUpdate) => void;
   readyToNanopublish: boolean;
   inPrePublish: boolean;
@@ -126,9 +126,9 @@ export const usePostUpdate = (
     [fetched.post, updatePost]
   );
 
-  const updateSemantics = (newSemantics: string) => {
+  const updateSemantics = async (newSemantics: string) => {
     updateSemanticsLocal(newSemantics);
-    updatePost({
+    await updatePost({
       semantics: newSemantics,
       editStatus: AppPostEditStatus.DRAFT,
     }).catch(console.error);
