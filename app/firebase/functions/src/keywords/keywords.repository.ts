@@ -1,4 +1,4 @@
-import { KeywordMeta } from '../../../../webapp/src/shared/types/types.keywords';
+import { KeywordMeta } from '../@shared/types/types.keywords';
 import { PostSubcollectionIndex } from '../@shared/types/types.posts';
 import { CollectionNames } from '../@shared/utils/collectionNames';
 import { DBInstance } from '../db/instance';

@@ -1,5 +1,4 @@
-import { KeywordMeta } from '../../../../webapp/src/shared/types/types.keywords';
-import { PostSubcollectionIndex } from '../@shared/types/types.references';
+import { PostSubcollectionIndex } from '../@shared/types/types.posts';
 import { TransactionManager } from '../db/transaction.manager';
 import { TimeService } from '../time/time.service';
 import { KeywordsRepository } from './keywords.repository';
