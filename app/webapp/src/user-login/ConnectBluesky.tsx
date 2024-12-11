@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { AppLogo } from '../app/brand/AppLogo';
 import { IntroKeys } from '../i18n/i18n.intro';
 import { PLATFORM } from '../shared/types/types.platforms';
 import { AppButton, AppHeading, AppInput } from '../ui-components';
@@ -41,7 +40,6 @@ export const ConnectBlueskyPage = () => {
     <Box
       pad={{ horizontal: 'medium', vertical: 'large' }}
       style={{ flexGrow: 1 }}>
-      <AppLogo margin={{ bottom: 'xlarge' }} />
       <Box style={{ flexGrow: 1 }}>
         {getPlatformConnectedStatus(PLATFORM.Bluesky) ===
           PlatformConnectedStatus.Disconnected && (

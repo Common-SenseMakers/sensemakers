@@ -31,7 +31,10 @@ export const LS_TWITTER_CONTEXT_KEY = 'twitter-signin-context';
 
 /** Manages the authentication process with Twitter */
 export type TwitterContextType = {
-  connect?: (type: TwitterGetContextParams['type']) => Promise<void>;
+  connect?: (
+    type: TwitterGetContextParams['type'],
+    callback_url: string
+  ) => Promise<void>;
   needConnect?: boolean;
 };
 
@@ -71,16 +74,16 @@ export const TwitterContext = (props: PropsWithChildren) => {
     !connectedUser.profiles ||
     !connectedUser.profiles[PLATFORM.Twitter];
 
-  const connect = async (type: TwitterGetContextParams['type']) => {
+  const connect = async (
+    type: TwitterGetContextParams['type'],
+    callback_url: string
+  ) => {
     setLoginFlowState(LoginFlowState.ConnectingTwitter);
     getPlatformConnectedStatus(PLATFORM.Twitter);
     setPlatformConnectedStatus(
       PLATFORM.Twitter,
       PlatformConnectedStatus.Connecting
     );
-
-    const sep = window.location.href.endsWith('/') ? '' : '/';
-    const callback_url = `${window.location.href}${sep}${RouteNames.ConnectTwitter}`;
 
     const params: TwitterGetContextParams = {
       callback_url,

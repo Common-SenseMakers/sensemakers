@@ -11,7 +11,7 @@ import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { PlatformsKeys } from '../i18n/i18n.platforms';
 import { SettingsKeys } from '../i18n/i18n.settings';
-import { RouteNames } from '../route.names';
+import { AbsoluteRoutes, RouteNames } from '../route.names';
 import { PLATFORM } from '../shared/types/types.platforms';
 import { AppButton, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
@@ -28,6 +28,7 @@ import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { useTwitterContext } from '../user-login/contexts/platforms/TwitterContext';
 import { PlatformSection } from '../user-settings/PlatformsSection';
 import { SettingsSection } from '../user-settings/SettingsSection';
+import { getAppUrl } from '../utils/general';
 
 export const SettingSectionTitle = (props: { value: string }) => {
   const { constants } = useThemeContext();
@@ -131,7 +132,11 @@ export const UserSettingsPage = () => {
           }
           platformName={t(PlatformsKeys.XTwitter)}
           onButtonClicked={() => {
-            connectTwitter && connectTwitter('read').catch(console.error);
+            connectTwitter &&
+              connectTwitter(
+                'read',
+                `${getAppUrl()}${AbsoluteRoutes.Settings}/${RouteNames.ConnectTwitter}}`
+              ).catch(console.error);
           }}
           buttonText={needConnectTwitter ? 'connect' : ''}
           username={twitterProfile ? `@${twitterProfile.username}` : ''}
@@ -151,7 +156,7 @@ export const UserSettingsPage = () => {
           }
           platformName={'Mastodon'}
           onButtonClicked={() => {
-            navigate(`../${RouteNames.ConnectMastodon}`, {
+            navigate(AbsoluteRoutes.ConnectMastodon, {
               state: { callbackUrl: window.location.href },
             });
           }}
@@ -173,7 +178,7 @@ export const UserSettingsPage = () => {
           }
           platformName={'Bluesky'}
           onButtonClicked={() => {
-            navigate(`../${RouteNames.ConnectBluesky}`, {
+            navigate(AbsoluteRoutes.ConnectBluesky, {
               state: { callbackUrl: window.location.href },
             });
           }}

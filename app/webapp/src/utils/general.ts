@@ -36,3 +36,7 @@ export function arraysEqual<T = unknown>(
   }
   return true;
 }
+
+export const getAppUrl = () => {
+  return `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}`;
+};

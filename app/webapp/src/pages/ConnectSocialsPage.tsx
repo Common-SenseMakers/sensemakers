@@ -7,7 +7,7 @@ import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { MAX_BUTTON_WIDTH, ViewportPage } from '../app/layout/Viewport';
 import { IntroKeys } from '../i18n/i18n.intro';
 import { PlatformsKeys } from '../i18n/i18n.platforms';
-import { AbsoluteRoutes, RouteNames } from '../route.names';
+import { AbsoluteRoutes } from '../route.names';
 import { PLATFORM } from '../shared/types/types.platforms';
 import { AppButton, AppHeading } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
@@ -18,6 +18,7 @@ import {
 } from '../user-login/contexts/AccountContext';
 import { useTwitterContext } from '../user-login/contexts/platforms/TwitterContext';
 import { PlatformSection } from '../user-settings/PlatformsSection';
+import { getAppUrl } from '../utils/general';
 
 export enum LoginCase {
   signup = 'signup',
@@ -74,7 +75,10 @@ export const ConnectSocialsPage = () => {
           platformName={t(PlatformsKeys.XTwitter)}
           onButtonClicked={() => {
             if (connectTwitter) {
-              connectTwitter('read').catch(console.error);
+              connectTwitter(
+                'read',
+                `${getAppUrl()}${AbsoluteRoutes.ConnectTwitter}`
+              ).catch(console.error);
             }
           }}
           buttonText={twitterProfile ? '' : buttonText}
@@ -112,7 +116,7 @@ export const ConnectSocialsPage = () => {
           }
           platformName={t(PlatformsKeys.Bluesky)}
           onButtonClicked={() => {
-            navigate(RouteNames.ConnectBluesky);
+            navigate(AbsoluteRoutes.ConnectBluesky);
           }}
           buttonText={blueskyProfile ? '' : buttonText}
           username={blueskyProfile ? `@${blueskyProfile.username}` : ''}

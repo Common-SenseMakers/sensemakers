@@ -93,11 +93,6 @@ export const Welcome = () => {
       <BoxCentered gap="16px" direction="row">
         <AppButton
           style={{ flexGrow: 1 }}
-          margin={{ top: 'large' }}
-          label="Log in"
-          onClick={() => setLoginCase(LoginCase.login)}></AppButton>
-        <AppButton
-          style={{ flexGrow: 1 }}
           primary
           margin={{ top: 'large' }}
           label="Get started"

@@ -20,6 +20,7 @@ export const AbsoluteRoutes = {
   Start: `/${RouteNames.Start}`,
   Feed: `/${RouteNames.Feed}`,
   Settings: `/${RouteNames.Settings}`,
-  ConnectMastodon: `/${RouteNames.ConnectMastodon}`,
-  ConnectBluesky: `/${RouteNames.ConnectBluesky}`,
+  ConnectTwitter: `/${RouteNames.Connect}/${RouteNames.ConnectTwitter}`,
+  ConnectMastodon: `/${RouteNames.Connect}/${RouteNames.ConnectMastodon}`,
+  ConnectBluesky: `/${RouteNames.Connect}/${RouteNames.ConnectBluesky}`,
 };
