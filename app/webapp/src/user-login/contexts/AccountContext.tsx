@@ -9,7 +9,6 @@ import {
 } from 'react';
 
 import { _appFetch } from '../../api/app.fetch';
-import { STARTED_KEY } from '../../pages/ConnectPage';
 import { NotificationFreq } from '../../shared/types/types.notifications';
 import { OrcidProfile } from '../../shared/types/types.orcid';
 import {
@@ -51,8 +50,6 @@ export type AccountContextType = {
   getPlatformConnectedStatus: (
     platformId: IDENTITY_PLATFORM
   ) => PlatformConnectedStatus | undefined | null;
-  alreadyConnected?: boolean | null;
-  setAlreadyConnected: (value: boolean) => void;
 };
 
 const AccountContextValue = createContext<AccountContextType | undefined>(
@@ -126,13 +123,6 @@ export const AccountContext = (props: PropsWithChildren) => {
       PLATFORMS_LOGIN_STATUS,
       platformsConnectedStatusInit
     );
-
-  const [alreadyConnected, setAlreadyConnected] = usePersist(
-    ALREADY_CONNECTED_KEY,
-    false
-  );
-
-  const [, setStart] = usePersist(STARTED_KEY, false);
 
   const setOverallLoginStatus = useCallback(
     (status: OverallLoginStatus) => {
@@ -261,7 +251,6 @@ export const AccountContext = (props: PropsWithChildren) => {
       ...disabledStatus,
     });
 
-    setStart(null);
     _setLoginFlowState(LoginFlowState.Idle);
     _setOverallLoginStatus(OverallLoginStatus.LoggedOut);
   };
@@ -344,8 +333,6 @@ export const AccountContext = (props: PropsWithChildren) => {
         resetLogin,
         setPlatformConnectedStatus,
         getPlatformConnectedStatus,
-        alreadyConnected,
-        setAlreadyConnected,
       }}>
       {props.children}
     </AccountContextValue.Provider>

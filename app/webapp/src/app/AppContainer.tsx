@@ -12,6 +12,7 @@ import { ResponsiveApp } from '../ui-components/ResponsiveApp';
 import { ThemedApp, useThemeContext } from '../ui-components/ThemedApp';
 import { ConnectBlueskyPage } from '../user-login/ConnectBlueskyPage';
 import { ConnectMastodonPage } from '../user-login/ConnectMastodonPage';
+import { ConnectSocials } from '../user-login/ConnectSocialsPage';
 import { ConnectTwitterPage } from '../user-login/ConnectTwitterPage';
 import { ConnectedUserWrapper } from '../user-login/contexts/ConnectedUserWrapper';
 import { LoadingContext } from './LoadingContext';
@@ -89,7 +90,9 @@ export const AppContainer = (props: React.PropsWithChildren) => {
                   path={`${RouteNames.Feed}/*`}
                   element={<PublicFeedPage></PublicFeedPage>}></Route>
 
-                <Route path={''} element={<AppHomePage></AppHomePage>}></Route>
+                <Route
+                  path={`/${RouteNames.Start}`}
+                  element={<AppHomePage></AppHomePage>}></Route>
 
                 <Route
                   path={`/${RouteNames.MyPosts}`}
@@ -108,6 +111,10 @@ export const AppContainer = (props: React.PropsWithChildren) => {
                 <Route
                   path={`${RouteNames.ConnectBluesky}`}
                   element={<ConnectBlueskyPage />}></Route>
+
+                <Route
+                  path={''}
+                  element={<ConnectSocials></ConnectSocials>}></Route>
               </Route>
             </Routes>
           </Box>

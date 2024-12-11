@@ -455,6 +455,7 @@ export class UsersService {
       signupDate: user.signupDate,
       settings: user.settings,
       profiles: readProfiles,
+      details: user.details,
     };
 
     return userRead;

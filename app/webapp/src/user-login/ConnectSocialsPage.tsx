@@ -19,15 +19,18 @@ import {
 } from './contexts/AccountContext';
 import { useTwitterContext } from './contexts/platforms/TwitterContext';
 
-export const ConnectSocials = () => {
+export enum LoginCase {
+  signup = 'signup',
+  login = 'login',
+}
+
+export const ConnectSocials = (props: { loginCase: LoginCase }) => {
+  const { loginCase } = props;
+
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const {
-    connectedUser,
-    connectedPlatforms,
-    setAlreadyConnected,
-    getPlatformConnectedStatus,
-  } = useAccountContext();
+  const { connectedUser, connectedPlatforms, getPlatformConnectedStatus } =
+    useAccountContext();
 
   const { connect: connectTwitter } = useTwitterContext();
 
@@ -35,18 +38,28 @@ export const ConnectSocials = () => {
   const mastodonProfile = connectedUser?.profiles?.mastodon;
   const blueskyProfile = connectedUser?.profiles?.bluesky;
 
+  const buttonText =
+    loginCase === LoginCase.login ? t(IntroKeys.login) : t(IntroKeys.connect);
+
   const handleContinue = () => {
-    setAlreadyConnected(true);
+    navigate(AbsoluteRoutes.MyPosts);
   };
 
   const content = (
     <Box>
       <Box style={{ flexGrow: 1 }}>
-        <AppHeading level="1">{t(IntroKeys.connectSocialsTitle)}</AppHeading>
+        <AppHeading level="1">
+          {loginCase === LoginCase.login
+            ? t(IntroKeys.loginTitle)
+            : t(IntroKeys.signupTitle)}
+        </AppHeading>
+
         <Box width="100%" height="4px"></Box>
 
         <AppParagraph margin={{ bottom: 'medium' }}>
-          {t(IntroKeys.connectSocialsParagraph)}
+          {loginCase === LoginCase.login
+            ? t(IntroKeys.loginSubtitle)
+            : t(IntroKeys.signupSubtitle)}
         </AppParagraph>
 
         <PlatformSection
@@ -64,7 +77,7 @@ export const ConnectSocials = () => {
               connectTwitter('read').catch(console.error);
             }
           }}
-          buttonText={twitterProfile ? '' : 'connect'}
+          buttonText={twitterProfile ? '' : buttonText}
           username={twitterProfile ? `@${twitterProfile.username}` : ''}
           connected={!!twitterProfile}
           connecting={
@@ -84,7 +97,7 @@ export const ConnectSocials = () => {
           }
           platformName={t(PlatformsKeys.Mastodon)}
           onButtonClicked={() => navigate(AbsoluteRoutes.ConnectMastodon)}
-          buttonText={mastodonProfile ? '' : 'connect'}
+          buttonText={mastodonProfile ? '' : buttonText}
           username={mastodonProfile?.username || ''}
           connected={!!mastodonProfile}
         />
@@ -101,7 +114,7 @@ export const ConnectSocials = () => {
           onButtonClicked={() => {
             navigate(RouteNames.ConnectBluesky);
           }}
-          buttonText={blueskyProfile ? '' : 'connect'}
+          buttonText={blueskyProfile ? '' : buttonText}
           username={blueskyProfile ? `@${blueskyProfile.username}` : ''}
           connected={!!blueskyProfile}
         />

@@ -6,23 +6,24 @@ export enum WelcomeKeys {
   bullet2 = 'welcome-s005',
   bullet3 = 'welcome-s006',
   bullet4 = 'welcome-s007',
+  bullet5 = 'welcome-s009',
   par2 = 'welcome-s008',
 }
 
 export const welcomeValues: Record<WelcomeKeys, string> = {
-  [WelcomeKeys.title]: 'Your ideas matter',
-  [WelcomeKeys.subtitle]:
-    'Transform your social media activity into meaningful scientific contributions.',
+  [WelcomeKeys.title]: 'Welcome to Hyperfeed',
+  [WelcomeKeys.subtitle]: 'Transform your research discovery process.',
   [WelcomeKeys.par1]:
-    'Social media posts are a valuable source of scientific knowledge, but they get buried in noisy feeds and locked away by platforms. Sensenet helps you:',
+    'Hyperfeed is a social media feed designed to help researchers surface valuable insights.',
   [WelcomeKeys.bullet1]:
-    '<b>Own your data:</b> Keep control of your intellectual contributions',
+    '<b>Hyper Focused:</b> Just research content – leave the cat videos at home',
   [WelcomeKeys.bullet2]:
-    '<b>Make your ideas citable:</b> Transform casual posts into structured scientific content',
+    '<b>Cross-Platform Reach:</b> Aggregate discussions across Twitter, Mastodon, and Blue Sky',
   [WelcomeKeys.bullet3]:
-    '<b>Enhance meaning:</b> Add semantic tags to make your posts more precisely interpretable by both humans and machines',
+    '<b>Flexible Discovery:</b> Discover content through keywords, researchers, posts or references',
   [WelcomeKeys.bullet4]:
-    '<b>Increase visibility:</b> Help researchers easily discover your insights',
-  [WelcomeKeys.par2]:
-    'Share your knowledge more effectively and get the recognition your ideas deserve.',
+    '<b>Build Context:</b> Understand the full context of how papers are being discussed',
+  [WelcomeKeys.bullet5]:
+    '<b>Increase Visibility:</b> Smart tagging helps your ideas reach interested peers',
+  [WelcomeKeys.par2]: 'Join Hyperfeed to start finding signal in the noise.',
 };
