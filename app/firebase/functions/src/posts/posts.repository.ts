@@ -3,6 +3,7 @@ import { logger } from 'firebase-functions/v1';
 
 import {
   ArrayIncludeQuery,
+  PostSubcollectionIndex,
   StructuredSemantics,
 } from '../@shared/types/types.posts';
 import {
@@ -12,7 +13,7 @@ import {
   PostUpdate,
   PostsQueryDefined,
 } from '../@shared/types/types.posts';
-import { RefLabel, RefPostData } from '../@shared/types/types.references';
+import { RefLabel } from '../@shared/types/types.references';
 import { CollectionNames } from '../@shared/utils/collectionNames';
 import { SCIENCE_TOPIC_URI } from '../@shared/utils/semantics.helper';
 import { DBInstance } from '../db/instance';
@@ -253,7 +254,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
       // Process each post's labels directly from the subcollection documents
       linkPosts.docs.forEach((doc) => {
-        const refPost = doc.data() as RefPostData;
+        const refPost = doc.data() as PostSubcollectionIndex;
         if (
           refPost?.structuredSemantics?.labels &&
           refPost.structuredSemantics.topic === SCIENCE_TOPIC_URI

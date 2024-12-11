@@ -27,6 +27,10 @@ export class DBInstance {
     linkPosts: (
       linkId: string
     ) => FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
+    keywords: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
+    keywordPosts: (
+      keywordId: string
+    ) => FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
   };
 
   constructor(firestore: Firestore) {
@@ -48,6 +52,12 @@ export class DBInstance {
           .collection(CollectionNames.Links)
           .doc(linkId)
           .collection(CollectionNames.LinkPostsSubcollection),
+      keywords: this.firestore.collection(CollectionNames.Keywords),
+      keywordPosts: (linkId: string) =>
+        this.firestore
+          .collection(CollectionNames.Keywords)
+          .doc(linkId)
+          .collection(CollectionNames.KeywordPostsSubcollection),
     };
   }
 

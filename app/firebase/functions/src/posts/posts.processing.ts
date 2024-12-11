@@ -13,9 +13,10 @@ import {
   AppPostParsedStatus,
   AppPostParsingStatus,
   HydrateConfig,
+  PostSubcollectionIndex,
   StructuredSemantics,
 } from '../@shared/types/types.posts';
-import { RefDisplayMeta, RefPostData } from '../@shared/types/types.references';
+import { RefDisplayMeta } from '../@shared/types/types.references';
 import { DefinedIfTrue } from '../@shared/types/types.user';
 import {
   handleQuotePostReference,
@@ -33,6 +34,7 @@ import {
 } from '../@shared/utils/semantics.helper';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
+import { KeywordsService } from '../keywords/keywords.service';
 import { LinksService } from '../links/links.service';
 import { getOriginalRefMetaFromPost } from '../links/links.utils';
 import { PlatformsService } from '../platforms/platforms.service';
@@ -54,7 +56,8 @@ export class PostsProcessing {
     public posts: PostsRepository,
     public platformPosts: PlatformPostsRepository,
     protected platforms: PlatformsService,
-    public linksService: LinksService
+    public linksService: LinksService,
+    public keywordsService: KeywordsService
   ) {}
 
   /**
@@ -256,6 +259,24 @@ export class PostsProcessing {
       })
     );
 
+    // Sync keywords subcollections
+    await Promise.all(
+      Array.from(keywords).map(async (keyword) => {
+        // Create the keyword document if it doesn't exist
+        await this.keywordsService.setKeyword(keyword, manager);
+
+        // Add post to keyword's posts subcollection
+        const postData: PostSubcollectionIndex = {
+          id: post.id,
+          authorProfileId: post.authorProfileId,
+          createdAtMs: post.createdAtMs,
+          structuredSemantics,
+          platformPostUrl: post.generic.thread[0].url,
+        };
+        await this.keywordsService.setKeywordPost(keyword, postData, manager);
+      })
+    );
+
     await this.posts.update(postId, { structuredSemantics }, manager);
   }
 
@@ -265,13 +286,13 @@ export class PostsProcessing {
     semantics: StructuredSemantics,
     manager: TransactionManager
   ) {
-    const refPostData: RefPostData = removeUndefined({
+    const refPostData: PostSubcollectionIndex = removeUndefined({
       id: post.id,
       authorProfileId: post.authorProfileId,
       createdAtMs: post.createdAtMs,
       structuredSemantics: semantics,
       platformPostUrl: post.generic.thread[0].url,
-    } as RefPostData);
+    } as PostSubcollectionIndex);
 
     /** always delete all labels from a post for a reference */
     await this.linksService.deleteRefPost(url, post.id, manager);
@@ -404,6 +425,13 @@ export class PostsProcessing {
     await Promise.all(
       post.structuredSemantics?.refs?.map((ref) => {
         this.linksService.deleteRefPost(ref, postId, manager);
+      }) || []
+    );
+
+    /** delete all keyword subcollection posts */
+    await Promise.all(
+      post.structuredSemantics?.keywords?.map((keyword) => {
+        this.keywordsService.deleteKeywordPost(keyword, postId, manager);
       }) || []
     );
 
