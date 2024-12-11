@@ -107,19 +107,47 @@ const QUERY_PARAMS_NOT_USING_LINKS_SUBCOLLECTION = [
 ];
 
 export const doesQueryUseSubcollection = (queryParams: PostsQueryDefined) => {
-  let defaultResult = {
+  let result = {
     useLinksSubcollection: false,
+    useKeywordsSubcollection: false,
   };
 
   const canUseSubcollection = !QUERY_PARAMS_NOT_USING_LINKS_SUBCOLLECTION.some(
     (param) => param in queryParams
   );
 
-  if (canUseSubcollection && queryParams.semantics?.refs?.length === 1) {
-    return {
-      useLinksSubcollection: true,
-    };
+  if (canUseSubcollection) {
+    if (queryParams.semantics?.refs?.length === 1) {
+      result.useLinksSubcollection = true;
+    } else if (queryParams.semantics?.keywords?.length === 1) {
+      result.useKeywordsSubcollection = true;
+    }
   }
 
-  return defaultResult;
+  return result;
+};
+
+export const getBaseCollectionQuery = (
+  collections: typeof DBInstance.prototype.collections,
+  queryParams: PostsQueryDefined
+) => {
+  const { useLinksSubcollection, useKeywordsSubcollection } = 
+    doesQueryUseSubcollection(queryParams);
+
+  // Check if we can query subcollections rather than the entire posts
+  if (useLinksSubcollection && queryParams.semantics?.refs) {
+    const linkId = hashUrl(queryParams.semantics.refs[0]);
+    return collections.links
+      .doc(linkId)
+      .collection(CollectionNames.LinkPostsSubcollection);
+  }
+
+  if (useKeywordsSubcollection && queryParams.semantics?.keywords) {
+    const keyword = queryParams.semantics.keywords[0];
+    return collections.keywords
+      .doc(keyword)
+      .collection(CollectionNames.KeywordPostsSubcollection);
+  }
+
+  return collections.posts;
 };

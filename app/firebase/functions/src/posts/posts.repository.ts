@@ -128,18 +128,10 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
     if (DEBUG) logger.debug('getMany', queryParams, DEBUG_PREFIX);
 
-    const { useLinksSubcollection } = doesQueryUseSubcollection(queryParams);
+    const { useLinksSubcollection, useKeywordsSubcollection } = 
+      doesQueryUseSubcollection(queryParams);
 
-    /** check if we can query the links subcollection rather than the entire posts */
-    const baseCollection = (() => {
-      if (useLinksSubcollection && queryParams.semantics?.refs) {
-        const linkId = hashUrl(queryParams.semantics.refs[0]);
-        return this.db.collections.links
-          .doc(linkId)
-          .collection(CollectionNames.LinkPostsSubcollection);
-      }
-      return this.db.collections.posts;
-    })();
+    const baseCollection = getBaseCollectionQuery(this.db.collections, queryParams);
 
     let query = filterByEqual(
       baseCollection,
@@ -151,11 +143,18 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
     query = filterByIn(query, originKey, queryParams.origins);
 
-    if (!useLinksSubcollection) {
+    // Only apply these filters when querying the main posts collection
+    if (!useLinksSubcollection && !useKeywordsSubcollection) {
       query = filterByArrayContainsAny(
         query,
         `${structuredSemanticsKey}.${refsKey}`,
         queryParams.semantics?.refs
+      );
+
+      query = filterByArrayContainsAny(
+        query,
+        `${structuredSemanticsKey}.${keywordsKey}`,
+        queryParams.semantics?.keywords
       );
     }
 
