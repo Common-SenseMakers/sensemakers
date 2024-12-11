@@ -50,10 +50,6 @@ import { PostsProcessing } from './posts.processing';
 
 const DEBUG = true;
 
-const areCredentialsInvalid = (err: { message: string }) => {
-  return err.message.includes('Value passed for the token was invalid');
-};
-
 /**
  * Top level methods. They instantiate a TransactionManger and execute
  * read and writes to the DB
@@ -98,17 +94,6 @@ export class PostsManager {
     };
 
     return platformPost;
-  }
-
-  private async resetCredentials(
-    platformId: PLATFORM,
-    user_id: string,
-    manager: TransactionManager
-  ) {
-    logger.error(
-      `Token error fetching from platform ${platformId} for user ${user_id}. Skipping Reset credentials`
-    );
-    // await this.users.repo.removeAccountDetails(platformId, user_id, manager);
   }
 
   public async fetchPostFromPlatform(
@@ -157,12 +142,12 @@ export class PostsManager {
 
       return platformPostCreated;
     } catch (err: any) {
-      if (areCredentialsInvalid(err)) {
-        await this.resetCredentials(platformId, account.user_id, manager);
-        return { post: undefined };
-      }
+      logger.error(
+        `error fetching post ${post_id} from platform ${platformId}`,
+        { err }
+      );
 
-      throw new Error(err);
+      return { post: undefined };
     }
   }
 
@@ -233,12 +218,12 @@ export class PostsManager {
         this.initPlatformPost(platformId, fetchedPost)
       );
     } catch (err: any) {
-      if (areCredentialsInvalid(err)) {
-        await this.resetCredentials(platformId, user_id, manager);
-        return undefined;
-      }
+      logger.error(
+        `Error fetching posts for user_id ${user_id} on platform ${platformId}`,
+        { err }
+      );
 
-      throw new Error(err);
+      return undefined;
     }
   }
 
