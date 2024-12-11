@@ -34,6 +34,7 @@ import {
 } from '../@shared/utils/semantics.helper';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
+import { KeywordsService } from '../keywords/keywords.service';
 import { LinksService } from '../links/links.service';
 import { getOriginalRefMetaFromPost } from '../links/links.utils';
 import { PlatformsService } from '../platforms/platforms.service';
@@ -55,7 +56,8 @@ export class PostsProcessing {
     public posts: PostsRepository,
     public platformPosts: PlatformPostsRepository,
     protected platforms: PlatformsService,
-    public linksService: LinksService
+    public linksService: LinksService,
+    public keywordsService: KeywordsService
   ) {}
 
   /**
@@ -257,6 +259,24 @@ export class PostsProcessing {
       })
     );
 
+    // Sync keywords subcollections
+    await Promise.all(
+      Array.from(keywords).map(async (keyword) => {
+        // Create the keyword document if it doesn't exist
+        await this.keywordsService.setKeyword(keyword, manager);
+
+        // Add post to keyword's posts subcollection
+        const postData: PostSubcollectionIndex = {
+          id: post.id,
+          authorProfileId: post.authorProfileId,
+          createdAtMs: post.createdAtMs,
+          structuredSemantics,
+          platformPostUrl: post.generic.thread[0].url,
+        };
+        await this.keywordsService.setKeywordPost(keyword, postData, manager);
+      })
+    );
+
     await this.posts.update(postId, { structuredSemantics }, manager);
   }
 
@@ -405,6 +425,13 @@ export class PostsProcessing {
     await Promise.all(
       post.structuredSemantics?.refs?.map((ref) => {
         this.linksService.deleteRefPost(ref, postId, manager);
+      }) || []
+    );
+
+    /** delete all keyword subcollection posts */
+    await Promise.all(
+      post.structuredSemantics?.keywords?.map((keyword) => {
+        this.keywordsService.deleteKeywordPost(keyword, postId, manager);
       }) || []
     );
 
