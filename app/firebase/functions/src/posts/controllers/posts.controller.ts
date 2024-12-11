@@ -1,20 +1,15 @@
 import { RequestHandler } from 'express';
 
-import { AddUserDataPayload } from '../../@shared/types/types.fetch';
-import { PUBLISHABLE_PLATFORM } from '../../@shared/types/types.platforms';
 import {
   GetPostPayload,
   PostUpdatePayload,
   PostsQuery,
 } from '../../@shared/types/types.posts';
-import { AccountProfileBase } from '../../@shared/types/types.profiles';
-import { getProfileId } from '../../@shared/utils/profiles.utils';
 import { IS_EMULATOR } from '../../config/config.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { queryParamsSchema } from '../../feed/feed.schema';
 import { logger } from '../../instances/logger';
-import { FETCH_ACCOUNT_TASKS } from '../../platforms/platforms.tasks';
-import { chunkNumber, enqueueTask } from '../../tasksUtils/tasks.support';
+import { enqueueTask } from '../../tasksUtils/tasks.support';
 import { canReadPost } from '../posts.access.control';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 import {
@@ -155,80 +150,6 @@ export const updatePostController: RequestHandler = async (
     });
 
     if (DEBUG) logger.debug(`${request.path}: updatePost`, payload);
-
-    response.status(200).send({ success: true });
-  } catch (error) {
-    logger.error('error', error);
-    response.status(500).send({ success: false, error });
-  }
-};
-
-export const addAccountsDataController: RequestHandler = async (
-  request,
-  response
-) => {
-  try {
-    if (DEBUG)
-      logger.debug(`${request.path}: Starting addAccountsDataController`, {
-        payloads: request.body,
-      });
-
-    const services = getServices(request);
-    const payloads = request.body as AddUserDataPayload[];
-
-    for (const payload of payloads) {
-      if (DEBUG)
-        logger.debug('Fetching profile', {
-          platformId: payload.platformId,
-          username: payload.username,
-        });
-
-      let profile: AccountProfileBase | undefined;
-      try {
-        profile = await services.db.run(async (manager) => {
-          return services.users.getOrCreateProfileByUsername(
-            payload.platformId,
-            payload.username,
-            manager
-          );
-        });
-      } catch (error) {
-        logger.error('error', error);
-        continue;
-      }
-
-      if (!profile) {
-        const error = `unable to find profile for ${payload.username} on ${payload.platformId}`;
-        logger.error(error);
-        continue;
-      }
-
-      if (DEBUG) logger.debug('Profile found', { profile });
-
-      const profileId = getProfileId(payload.platformId, profile?.user_id);
-      const chunkSize = 50;
-      const fetchAmountChunks = chunkNumber(payload.amount, chunkSize);
-
-      for (const fetchAmountChunk of fetchAmountChunks) {
-        const taskName =
-          FETCH_ACCOUNT_TASKS[payload.platformId as PUBLISHABLE_PLATFORM];
-
-        const taskData = {
-          profileId,
-          platformId: payload.platformId,
-          latest: payload.latest,
-          amount: fetchAmountChunk,
-        };
-
-        if (DEBUG) logger.debug('Enqueueing task', { taskName, taskData });
-        await enqueueTask(taskName, taskData);
-      }
-    }
-
-    if (DEBUG)
-      logger.debug(`${request.path}: Successfully completed addAccountsData`, {
-        totalPayloads: payloads.length,
-      });
 
     response.status(200).send({ success: true });
   } catch (error) {

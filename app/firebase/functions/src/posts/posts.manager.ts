@@ -862,4 +862,45 @@ export class PostsManager {
       });
     }
   }
+  async deleteAccountFull(platformId: PLATFORM, user_id: string) {
+    const profileId = getProfileId(platformId, user_id);
+
+    const posts = await this.processing.posts.getAllOfQuery({
+      profileId,
+      fetchParams: { expectedAmount: 100000 },
+    });
+
+    if (DEBUG) {
+      logger.debug(`fully deleting ${posts.length} posts of ${profileId}`);
+    }
+
+    const batchSize = 100;
+
+    for (let i = 0; i < posts.length; i += batchSize) {
+      const batch = posts.slice(i, i + batchSize);
+      await this.db.run(async (manager) => {
+        await Promise.all(
+          batch.map((post) => {
+            return this.processing.deletePostFull(post.id, manager);
+          })
+        );
+      });
+    }
+
+    await this.db.run(async (manager) => {
+      const userId = await this.users.repo.getUserIdWithPlatformAccount(
+        platformId,
+        user_id,
+        manager
+      );
+      if (userId) {
+        await this.users.repo.removeAccountDetails(
+          platformId,
+          user_id,
+          manager
+        );
+      }
+      this.users.profiles.delete(profileId, manager);
+    });
+  }
 }
