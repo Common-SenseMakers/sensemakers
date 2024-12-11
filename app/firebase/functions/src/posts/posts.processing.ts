@@ -13,9 +13,10 @@ import {
   AppPostParsedStatus,
   AppPostParsingStatus,
   HydrateConfig,
+  PostSubcollectionIndex,
   StructuredSemantics,
 } from '../@shared/types/types.posts';
-import { RefDisplayMeta, RefPostData } from '../@shared/types/types.references';
+import { RefDisplayMeta } from '../@shared/types/types.references';
 import { DefinedIfTrue } from '../@shared/types/types.user';
 import {
   handleQuotePostReference,
@@ -265,13 +266,13 @@ export class PostsProcessing {
     semantics: StructuredSemantics,
     manager: TransactionManager
   ) {
-    const refPostData: RefPostData = removeUndefined({
+    const refPostData: PostSubcollectionIndex = removeUndefined({
       id: post.id,
       authorProfileId: post.authorProfileId,
       createdAtMs: post.createdAtMs,
       structuredSemantics: semantics,
       platformPostUrl: post.generic.thread[0].url,
-    } as RefPostData);
+    } as PostSubcollectionIndex);
 
     /** always delete all labels from a post for a reference */
     await this.linksService.deleteRefPost(url, post.id, manager);

@@ -181,3 +181,10 @@ export interface GetPostPayload {
   postId: string;
   config?: HydrateConfig;
 }
+
+export type PostSubcollectionIndex = Pick<
+  AppPost,
+  'id' | 'authorProfileId' | 'createdAtMs' | 'structuredSemantics'
+> & {
+  platformPostUrl?: string;
+};
