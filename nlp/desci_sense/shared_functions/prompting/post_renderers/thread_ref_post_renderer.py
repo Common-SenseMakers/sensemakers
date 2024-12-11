@@ -31,7 +31,11 @@ def render_thread_content(
     rendered = []
     for quote_post in thread_posts:
         rendered.append(
-            render_quote_post_content(quote_post, ordered_refs=ordered_refs,quoted_context_length=quoted_context_length)
+            render_quote_post_content(
+                quote_post,
+                ordered_refs=ordered_refs,
+                quoted_context_length=quoted_context_length,
+            )
         )
 
     # add line breaks
@@ -75,7 +79,10 @@ class ThreadRefPostRenderer(PostRenderer):
         # create mapping by url -> metadata
         md_dict = {md.url: md for md in metadata_list}
 
-        processed_content = render_thread_content(thread, quoted_context_length)
+        processed_content = render_thread_content(
+            thread,
+            quoted_context_length,
+        )
 
         # render metadata
         rendered_metadata = None

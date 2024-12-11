@@ -77,7 +77,6 @@ class KeywordPostParserChain(PostParserChain):
             post,
             metadata_list,
             show_author=False,
-            #quoted_context_length=50,
             quoted_context_length=self.parser_config.quoted_context_length,
         )
 
