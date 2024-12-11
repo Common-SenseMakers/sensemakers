@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { BlueskyIcon, MastodonIcon, TwitterIcon } from '../app/common/Icons';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
-import { MAX_BUTTON_WIDTH } from '../app/layout/Viewport';
+import { MAX_BUTTON_WIDTH, ViewportPage } from '../app/layout/Viewport';
 import { IntroKeys } from '../i18n/i18n.intro';
 import { PlatformsKeys } from '../i18n/i18n.platforms';
 import { AbsoluteRoutes, RouteNames } from '../route.names';
@@ -12,20 +12,20 @@ import { PLATFORM } from '../shared/types/types.platforms';
 import { AppButton, AppHeading } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
 import { BoxCentered } from '../ui-components/BoxCentered';
-import { PlatformSection } from '../user-settings/PlatformsSection';
 import {
   PlatformConnectedStatus,
   useAccountContext,
-} from './contexts/AccountContext';
-import { useTwitterContext } from './contexts/platforms/TwitterContext';
+} from '../user-login/contexts/AccountContext';
+import { useTwitterContext } from '../user-login/contexts/platforms/TwitterContext';
+import { PlatformSection } from '../user-settings/PlatformsSection';
 
 export enum LoginCase {
   signup = 'signup',
   login = 'login',
 }
 
-export const ConnectSocials = (props: { loginCase: LoginCase }) => {
-  const { loginCase } = props;
+export const ConnectSocialsPage = () => {
+  const loginCase = LoginCase.login;
 
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -132,11 +132,5 @@ export const ConnectSocials = (props: { loginCase: LoginCase }) => {
     </Box>
   );
 
-  return (
-    <Box
-      pad={{ horizontal: 'medium', bottom: 'large' }}
-      style={{ flexGrow: 1 }}>
-      <Box style={{ flexGrow: 1 }}>{content}</Box>
-    </Box>
-  );
+  return <ViewportPage content={content}></ViewportPage>;
 };

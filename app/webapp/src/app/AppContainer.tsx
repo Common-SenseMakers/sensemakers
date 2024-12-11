@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect } from 'react';
 import { Outlet, Route, Routes } from 'react-router-dom';
 
 import { AppHomePage } from '../pages/AppHomePage';
+import { ConnectSocialsPage } from '../pages/ConnectSocialsPage';
 import { PublicFeedPage } from '../pages/PublicFeedPage';
 import { UserPostsPage } from '../pages/UserPostsPage';
 import { UserSettingsPage } from '../pages/UserSettingsPage';
@@ -12,7 +13,6 @@ import { ResponsiveApp } from '../ui-components/ResponsiveApp';
 import { ThemedApp, useThemeContext } from '../ui-components/ThemedApp';
 import { ConnectBlueskyPage } from '../user-login/ConnectBlueskyPage';
 import { ConnectMastodonPage } from '../user-login/ConnectMastodonPage';
-import { ConnectSocials } from '../user-login/ConnectSocialsPage';
 import { ConnectTwitterPage } from '../user-login/ConnectTwitterPage';
 import { ConnectedUserWrapper } from '../user-login/contexts/ConnectedUserWrapper';
 import { LoadingContext } from './LoadingContext';
@@ -92,7 +92,7 @@ export const AppContainer = (props: React.PropsWithChildren) => {
 
                 <Route
                   path={`/${RouteNames.Start}`}
-                  element={<AppHomePage></AppHomePage>}></Route>
+                  element={<ConnectSocialsPage></ConnectSocialsPage>}></Route>
 
                 <Route
                   path={`/${RouteNames.MyPosts}`}
@@ -112,9 +112,7 @@ export const AppContainer = (props: React.PropsWithChildren) => {
                   path={`${RouteNames.ConnectBluesky}`}
                   element={<ConnectBlueskyPage />}></Route>
 
-                <Route
-                  path={''}
-                  element={<ConnectSocials></ConnectSocials>}></Route>
+                <Route path={''} element={<AppHomePage></AppHomePage>}></Route>
               </Route>
             </Routes>
           </Box>

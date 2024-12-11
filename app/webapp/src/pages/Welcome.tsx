@@ -1,34 +1,14 @@
-import { Box } from 'grommet';
+import { Box, Image } from 'grommet';
 import { t } from 'i18next';
 import { Trans } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 import { WelcomeKeys } from '../i18n/i18n.welcome';
-import { AppHeading, AppSubtitle } from '../ui-components';
+import { AbsoluteRoutes } from '../route.names';
+import { AppButton, AppHeading, AppSubtitle } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
-
-export const Welcome = () => {
-  return (
-    <Box style={{ flexGrow: 1 }}>
-      <Box style={{ flexGrow: 1 }}>
-        <AppHeading level="1">{t(WelcomeKeys.title)}</AppHeading>
-        <Box width="100%" height="4px"></Box>
-        <Box style={{ flexGrow: 1 }} gap="16px">
-          <AppSubtitle>{t(WelcomeKeys.subtitle)}</AppSubtitle>
-          <AppParagraph>{t(WelcomeKeys.par1)}</AppParagraph>
-          <WelcomeBullet emoji="📊" translationKey={WelcomeKeys.bullet1} />
-          <WelcomeBullet emoji="💡" translationKey={WelcomeKeys.bullet2} />
-          <WelcomeBullet emoji="💬" translationKey={WelcomeKeys.bullet3} />
-          <WelcomeBullet emoji="👁️" translationKey={WelcomeKeys.bullet4} />
-          <AppParagraph>
-            <Trans
-              i18nKey={WelcomeKeys.par2}
-              components={{ b: <b></b> }}></Trans>
-          </AppParagraph>
-        </Box>
-      </Box>
-    </Box>
-  );
-};
+import { BoxCentered } from '../ui-components/BoxCentered';
+import { LoginCase } from './ConnectSocialsPage';
 
 interface WelcomeBulletProps {
   emoji: string;
@@ -51,18 +31,10 @@ export const WelcomeBullet = ({
       }}>
       <Box
         style={{
-          display: 'flex',
-          padding: '0px 4px',
-          justifyContent: 'center',
-          alignItems: 'center',
-          fontSize: '24px',
-          fontFamily: 'Libre Franklin',
-          fontStyle: 'normal',
-          fontWeight: '800',
-          lineHeight: '32px' /* 133.333% */,
-          letterSpacing: '-0.48px',
+          height: '32px',
+          width: '32px',
         }}>
-        {emoji}
+        <Image src={emoji}></Image>
       </Box>
       <AppParagraph
         style={{
@@ -70,6 +42,67 @@ export const WelcomeBullet = ({
         }}>
         <Trans i18nKey={translationKey} components={{ b: <b></b> }}></Trans>
       </AppParagraph>
+    </Box>
+  );
+};
+
+export const Welcome = () => {
+  const navigate = useNavigate();
+
+  const setLoginCase = (loginCase: LoginCase) => {
+    navigate(AbsoluteRoutes.Start);
+  };
+
+  return (
+    <Box pad={{ bottom: '24px', horizontal: '12px' }}>
+      <Box style={{ flexGrow: 1 }}>
+        <Box style={{ flexGrow: 1 }}>
+          <AppHeading level="1">{t(WelcomeKeys.title)}</AppHeading>
+          <Box width="100%" height="4px"></Box>
+          <Box style={{ flexGrow: 1 }} gap="16px">
+            <AppSubtitle>{t(WelcomeKeys.subtitle)}</AppSubtitle>
+            <AppParagraph>{t(WelcomeKeys.par1)}</AppParagraph>
+            <WelcomeBullet
+              emoji="/icons/intro/icon01.png"
+              translationKey={WelcomeKeys.bullet1}
+            />
+            <WelcomeBullet
+              emoji="/icons/intro/icon02.png"
+              translationKey={WelcomeKeys.bullet2}
+            />
+            <WelcomeBullet
+              emoji="/icons/intro/icon03.png"
+              translationKey={WelcomeKeys.bullet3}
+            />
+            <WelcomeBullet
+              emoji="/icons/intro/icon04.png"
+              translationKey={WelcomeKeys.bullet4}
+            />
+            <WelcomeBullet
+              emoji="/icons/intro/icon05.png"
+              translationKey={WelcomeKeys.bullet5}
+            />
+            <AppParagraph>
+              <Trans
+                i18nKey={WelcomeKeys.par2}
+                components={{ b: <b></b> }}></Trans>
+            </AppParagraph>
+          </Box>
+        </Box>
+      </Box>
+      <BoxCentered gap="16px" direction="row">
+        <AppButton
+          style={{ flexGrow: 1 }}
+          margin={{ top: 'large' }}
+          label="Log in"
+          onClick={() => setLoginCase(LoginCase.login)}></AppButton>
+        <AppButton
+          style={{ flexGrow: 1 }}
+          primary
+          margin={{ top: 'large' }}
+          label="Get started"
+          onClick={() => setLoginCase(LoginCase.signup)}></AppButton>
+      </BoxCentered>
     </Box>
   );
 };

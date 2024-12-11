@@ -9,7 +9,7 @@ import {
   OverallLoginStatus,
   useAccountContext,
 } from '../user-login/contexts/AccountContext';
-import { WelcomePage } from './WelcomePage';
+import { Welcome } from './Welcome';
 
 const DEBUG = false;
 
@@ -59,7 +59,7 @@ export const AppHomePage = () => {
     if (overallLoginStatus === OverallLoginStatus.LoggedOut) {
       return {
         fixed: false,
-        content: <WelcomePage></WelcomePage>,
+        content: <Welcome></Welcome>,
         nav: undefined,
       };
     }
