@@ -256,5 +256,73 @@ describe('070 test feed', () => {
           .true;
       });
     });
+
+    describe('keyword page feed', () => {
+      const TEST_KEYWORD = 'AI';
+
+      it('returns unfiltered keyword page feed', async () => {
+        if (USE_REAL_TWITTER) {
+          logger.warn(`Feed test disabled with real twitter`);
+          return;
+        }
+        const { feed } = services;
+        const query = {
+          fetchParams: { expectedAmount: 10 },
+          semantics: {
+            keywords: [TEST_KEYWORD],
+            topic: SCIENCE_TOPIC_URI,
+          },
+          hydrateConfig: { addAggregatedLabels: false },
+        };
+        const result = await feed.getFeed(query);
+        expect(result).to.have.length(2);
+        expect(doesQueryUseSubcollection(query).useKeywordsSubcollection).to.be
+          .true;
+      });
+
+      it('returns keyword page feed filtered by labels', async () => {
+        if (USE_REAL_TWITTER) {
+          logger.warn(`Feed test disabled with real twitter`);
+          return;
+        }
+        const { feed } = services;
+        const query = {
+          fetchParams: { expectedAmount: 10 },
+          semantics: {
+            keywords: [TEST_KEYWORD],
+            labels: [
+              'http://purl.org/spar/cito/discusses',
+              'http://sense-nets.xyz/includesQuotationFrom',
+            ],
+          },
+          hydrateConfig: { addAggregatedLabels: false },
+        };
+        const result = await feed.getFeed(query);
+        expect(result).to.have.length(1);
+        expect(doesQueryUseSubcollection(query).useKeywordsSubcollection).to.be
+          .true;
+      });
+
+      it('returns keyword page feed filtered by references', async () => {
+        if (USE_REAL_TWITTER) {
+          logger.warn(`Feed test disabled with real twitter`);
+          return;
+        }
+        const { feed } = services;
+        const query = {
+          fetchParams: { expectedAmount: 10 },
+          semantics: {
+            keywords: [TEST_KEYWORD],
+            refs: ['https://twitter.com/ItaiYanai/status/1780813867213336910'],
+            topic: SCIENCE_TOPIC_URI,
+          },
+          hydrateConfig: { addAggregatedLabels: false },
+        };
+        const result = await feed.getFeed(query);
+        expect(result).to.have.length(1);
+        expect(doesQueryUseSubcollection(query).useKeywordsSubcollection).to.be
+          .true;
+      });
+    });
   });
 });
