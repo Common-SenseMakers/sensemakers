@@ -4,15 +4,17 @@ import { createContext, useContext, useEffect } from 'react';
 import { Outlet, Route, Routes } from 'react-router-dom';
 
 import { AppHomePage } from '../pages/AppHomePage';
+import { ConnectPage } from '../pages/ConnectPage';
+import { ConnectSocialsPage } from '../pages/ConnectSocialsPage';
 import { PublicFeedPage } from '../pages/PublicFeedPage';
 import { UserPostsPage } from '../pages/UserPostsPage';
 import { UserSettingsPage } from '../pages/UserSettingsPage';
 import { RouteNames } from '../route.names';
 import { ResponsiveApp } from '../ui-components/ResponsiveApp';
 import { ThemedApp, useThemeContext } from '../ui-components/ThemedApp';
-import { ConnectBlueskyPage } from '../user-login/ConnectBlueskyPage';
-import { ConnectMastodonPage } from '../user-login/ConnectMastodonPage';
-import { ConnectTwitterPage } from '../user-login/ConnectTwitterPage';
+import { ConnectBlueskyPage } from '../user-login/ConnectBluesky';
+import { ConnectMastodonPage } from '../user-login/ConnectMastodon';
+import { ConnectTwitterPage } from '../user-login/ConnectTwitter';
 import { ConnectedUserWrapper } from '../user-login/contexts/ConnectedUserWrapper';
 import { LoadingContext } from './LoadingContext';
 import { GlobalStyles } from './layout/GlobalStyles';
@@ -89,25 +91,33 @@ export const AppContainer = (props: React.PropsWithChildren) => {
                   path={`${RouteNames.Feed}/*`}
                   element={<PublicFeedPage></PublicFeedPage>}></Route>
 
-                <Route path={''} element={<AppHomePage></AppHomePage>}></Route>
+                <Route
+                  path={`/${RouteNames.Connect}`}
+                  element={<ConnectPage />}>
+                  <Route
+                    path={`${RouteNames.ConnectTwitter}`}
+                    element={<ConnectTwitterPage />}
+                  />
+
+                  <Route
+                    path={`${RouteNames.ConnectMastodon}`}
+                    element={<ConnectMastodonPage />}
+                  />
+
+                  <Route
+                    path={`${RouteNames.ConnectBluesky}`}
+                    element={<ConnectBlueskyPage />}></Route>
+                </Route>
+
+                <Route
+                  path={`/${RouteNames.Start}`}
+                  element={<ConnectSocialsPage></ConnectSocialsPage>}></Route>
 
                 <Route
                   path={`/${RouteNames.MyPosts}`}
                   element={<UserPostsPage></UserPostsPage>}></Route>
 
-                <Route
-                  path={`${RouteNames.ConnectTwitter}`}
-                  element={<ConnectTwitterPage />}
-                />
-
-                <Route
-                  path={`${RouteNames.ConnectMastodon}`}
-                  element={<ConnectMastodonPage />}
-                />
-
-                <Route
-                  path={`${RouteNames.ConnectBluesky}`}
-                  element={<ConnectBlueskyPage />}></Route>
+                <Route path={''} element={<AppHomePage></AppHomePage>}></Route>
               </Route>
             </Routes>
           </Box>

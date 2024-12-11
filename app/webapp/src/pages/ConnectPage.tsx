@@ -1,33 +1,25 @@
 import { Box } from 'grommet';
+import { Outlet } from 'react-router-dom';
 
-import { MAX_BUTTON_WIDTH, ViewportPage } from '../app/layout/Viewport';
-import { AppButton } from '../ui-components';
-import { BoxCentered } from '../ui-components/BoxCentered';
-import { ConnectSocials } from '../user-login/ConnectSocials';
-import { usePersist } from '../utils/use.persist';
-import { Welcome } from './Welcome';
-
-export const STARTED_KEY = 'started';
+import { GlobalNav } from '../app/layout/GlobalNav';
+import { ViewportPage } from '../app/layout/Viewport';
 
 export const ConnectPage = () => {
-  const [start, setStart] = usePersist(STARTED_KEY, false);
-
-  const content = start ? (
-    <ConnectSocials></ConnectSocials>
-  ) : (
-    <Box pad={{ bottom: '24px', horizontal: '12px' }}>
-      <Welcome></Welcome>
-      <BoxCentered>
-        <AppButton
-          primary
-          margin={{ top: 'large' }}
-          label="Get started"
-          style={{ width: '100%', maxWidth: MAX_BUTTON_WIDTH }}
-          onClick={() => setStart(true)}></AppButton>
-      </BoxCentered>
-    </Box>
-  );
   return (
-    <ViewportPage addLogo content={content} justify="start"></ViewportPage>
+    <ViewportPage
+      addLogo
+      content={
+        <Box
+          pad={{ horizontal: 'medium', vertical: 'large' }}
+          style={{ flexGrow: 1 }}>
+          <Box style={{ flexGrow: 1 }}>
+            <Box width="100%" height="16px" />
+            <Outlet></Outlet>
+          </Box>
+        </Box>
+      }
+      nav={<GlobalNav></GlobalNav>}
+      justify="start"
+    />
   );
 };

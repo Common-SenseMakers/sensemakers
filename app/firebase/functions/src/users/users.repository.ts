@@ -16,7 +16,7 @@ import { logger } from '../instances/logger';
 import { ProfilesRepository } from '../profiles/profiles.repository';
 import { UsersHelper } from './users.helper';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export class UsersRepository {
   constructor(
@@ -308,6 +308,14 @@ export class UsersRepository {
     manager.update(ref, {
       settings: newSettings,
     });
+  }
+
+  public async setOnboarded(userId: string, manager: TransactionManager) {
+    if (DEBUG) logger.debug(`setOnboarded`, { userId });
+
+    const update: Partial<AppUser> = { details: { onboarded: true } };
+    const ref = await this.getUserRef(userId, manager, true);
+    manager.update(ref, update);
   }
 
   public async getByEmail<T extends boolean, R = string>(

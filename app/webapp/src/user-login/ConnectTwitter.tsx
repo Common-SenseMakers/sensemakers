@@ -3,7 +3,6 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { AppLogo } from '../app/brand/AppLogo';
 import { IntroKeys } from '../i18n/i18n.intro';
 import { AbsoluteRoutes } from '../route.names';
 import { PLATFORM } from '../shared/types/types.platforms';
@@ -25,7 +24,6 @@ export const ConnectTwitterPage = () => {
     <Box
       pad={{ horizontal: 'medium', vertical: 'large' }}
       style={{ flexGrow: 1 }}>
-      <AppLogo margin={{ bottom: 'xlarge' }} />
       <Box style={{ flexGrow: 1 }}>
         <AppHeading level="1">{t(IntroKeys.connnectingTwitter)}</AppHeading>
         <Box width="100%" height="16px" />

@@ -1,5 +1,7 @@
 export const RouteNames = {
   AppHome: '',
+  Start: 'start',
+  Connect: 'connect',
   MyPosts: 'my-posts',
   Post: 'post',
   Settings: 'settings',
@@ -13,9 +15,12 @@ export const RouteNames = {
 
 export const AbsoluteRoutes = {
   App: '/',
+  Connect: `/${RouteNames.Connect}`,
   MyPosts: `/${RouteNames.MyPosts}`,
+  Start: `/${RouteNames.Start}`,
   Feed: `/${RouteNames.Feed}`,
   Settings: `/${RouteNames.Settings}`,
-  ConnectMastodon: `/${RouteNames.ConnectMastodon}`,
-  ConnectBluesky: `/${RouteNames.ConnectBluesky}`,
+  ConnectTwitter: `/${RouteNames.Connect}/${RouteNames.ConnectTwitter}`,
+  ConnectMastodon: `/${RouteNames.Connect}/${RouteNames.ConnectMastodon}`,
+  ConnectBluesky: `/${RouteNames.Connect}/${RouteNames.ConnectBluesky}`,
 };

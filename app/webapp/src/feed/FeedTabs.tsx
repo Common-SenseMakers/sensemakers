@@ -29,9 +29,9 @@ const Chevron = (props: { direction: 'left' | 'right' }) => {
         <path
           d="M6.6001 4L10.6001 8L6.6001 12"
           stroke="#4B5563"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
       </svg>
     </BoxCentered>

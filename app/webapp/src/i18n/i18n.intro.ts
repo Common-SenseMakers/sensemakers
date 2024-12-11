@@ -1,9 +1,12 @@
 export enum IntroKeys {
-  introTitle = 'intro-s001',
-  introSubtitle = 'intro-s002',
+  loginTitle = 'intro-s001',
+  loginSubtitle = 'intro-s002',
+  signupTitle = 'intro-s001s',
+  signupSubtitle = 'intro-s002s',
 
-  connectAccounts = 'intro-s003',
-  connectParagraph = 'intro-s004',
+  login = 'intro-s003',
+  connect = 'intro-s004',
+
   errorConnectTwitter = 'intro-s005',
   errorConnectMastodon = 'intro-s006',
 
@@ -23,9 +26,16 @@ export enum IntroKeys {
 }
 
 export const introValues: Record<IntroKeys, string> = {
-  [IntroKeys.introTitle]: 'Your ideas matter again',
-  [IntroKeys.introSubtitle]:
-    'Transform your social media activity into meaningful scientific contributions',
+  [IntroKeys.loginTitle]: 'Log in to your account',
+  [IntroKeys.loginSubtitle]:
+    'Log in with any of the social media profiles associated with your account.s',
+
+  [IntroKeys.signupTitle]: 'Connect your accounts',
+  [IntroKeys.signupSubtitle]:
+    'Link your accounts to super-charge your feeds and start finding new science-related content.',
+
+  [IntroKeys.login]: 'Log in',
+  [IntroKeys.connect]: 'Connect',
 
   [IntroKeys.connectSocialsTitle]: 'Connect your accounts',
   [IntroKeys.connectMastodonTitle]: 'Connect to Mastodon',
@@ -41,9 +51,6 @@ export const introValues: Record<IntroKeys, string> = {
   [IntroKeys.mastodonServer]: 'Server domain ',
   [IntroKeys.mastodonServerPlaceholder]: 'e.g. "mastodon.social"',
 
-  [IntroKeys.connectAccounts]: 'Connect your accounts',
-  [IntroKeys.connectParagraph]:
-    'SenseNets loads your X (Twitter) feed and analyzes your posts using AI to deduct keywords and relations, which can be used to better interpret the meaning of your content.',
   [IntroKeys.errorConnectTwitter]: 'Error connecting Twitter',
   [IntroKeys.errorConnectMastodon]:
     'An error occurred while connecting to the Mastodon server: {{mastodonServer}}',

@@ -56,6 +56,12 @@ export interface UserWithId {
   userId: string;
 }
 
+export interface UserWithDetails {
+  details?: {
+    onboarded: boolean;
+  };
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UserSettings {}
 
@@ -93,7 +99,8 @@ export interface AppUser
   extends UserWithId,
     UserWithId,
     UserWithSettings,
-    UserWithAccounts {}
+    UserWithAccounts,
+    UserWithDetails {}
 
 export type AppUserCreate = Omit<AppUser, 'userId' | 'accountsIds'>;
 
@@ -114,7 +121,10 @@ export interface AccountDetailsRead<
 /** accounts include the readable details (not sensitive details) */
 
 /** details sent to the logged in user about themeselves */
-export interface AppUserRead extends UserWithId, UserWithSettings {
+export interface AppUserRead
+  extends UserWithId,
+    UserWithSettings,
+    UserWithDetails {
   profiles: {
     [PLATFORM.Orcid]?: AccountDetailsRead<OrcidProfile>[];
     [PLATFORM.Twitter]?: AccountDetailsRead<PlatformProfile>[];
