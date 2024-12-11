@@ -46,7 +46,7 @@ export const ConnectSocialsPage = () => {
   };
 
   const content = (
-    <Box>
+    <Box pad={{ bottom: '24px', horizontal: '12px' }}>
       <Box style={{ flexGrow: 1 }}>
         <AppHeading level="1">
           {loginCase === LoginCase.login
@@ -132,5 +132,7 @@ export const ConnectSocialsPage = () => {
     </Box>
   );
 
-  return <ViewportPage content={content}></ViewportPage>;
+  return (
+    <ViewportPage addLogo content={content} justify="start"></ViewportPage>
+  );
 };

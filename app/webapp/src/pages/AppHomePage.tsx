@@ -68,6 +68,12 @@ export const AppHomePage = () => {
   }, [overallLoginStatus]);
 
   return (
-    <ViewportPage fixed={fixed} content={content} nav={nav} justify="start" />
+    <ViewportPage
+      addLogo
+      fixed={fixed}
+      content={content}
+      nav={nav}
+      justify="start"
+    />
   );
 };
