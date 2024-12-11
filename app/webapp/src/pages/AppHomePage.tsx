@@ -30,21 +30,15 @@ const LoadingPlaceholder = (
 export const AppHomePage = () => {
   const navigate = useNavigate();
 
-  const { overallLoginStatus, connectedUser } = useAccountContext();
+  const { overallLoginStatus } = useAccountContext();
 
   useEffect(() => {
-    const alreadyConnected =
-      connectedUser && connectedUser.details && connectedUser.details.onboarded;
-
     if (overallLoginStatus === OverallLoginStatus.FullyLoggedIn) {
-      if (alreadyConnected) {
-        navigate(AbsoluteRoutes.MyPosts);
-      } else {
-        navigate(AbsoluteRoutes.Start);
-      }
+      navigate(AbsoluteRoutes.Start);
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [overallLoginStatus, connectedUser]);
+  }, [overallLoginStatus]);
 
   const { content, nav, fixed } = useMemo(() => {
     if (DEBUG)

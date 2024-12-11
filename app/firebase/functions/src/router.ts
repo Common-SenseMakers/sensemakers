@@ -11,6 +11,7 @@ import {
 import { getProfileController } from './profiles/profiles.controller';
 import {
   getLoggedUserController,
+  setUserOnboardedController,
   setUserSettingsController,
 } from './users/controllers/logged.user.controller';
 import {
@@ -25,6 +26,7 @@ export const adminRouter = express.Router();
 router.post('/auth/:platform/context', getSignupContextController);
 router.post('/auth/:platform/signup', handleSignupController);
 router.post('/auth/settings', setUserSettingsController);
+router.post('/auth/setOnboarded', setUserOnboardedController);
 router.post('/auth/me', getLoggedUserController);
 
 router.post('/posts/getOfUser', getUserPostsController);

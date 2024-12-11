@@ -47,3 +47,20 @@ export const setUserSettingsController: RequestHandler = async (
     response.status(500).send({ success: false, error: error.message });
   }
 };
+
+export const setUserOnboardedController: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    const userId = getAuthenticatedUser(request, true);
+    const services = getServices(request);
+
+    await services.users.setOnboarded(userId);
+
+    response.status(200).send({ success: true });
+  } catch (error: any) {
+    logger.error('error', error);
+    response.status(500).send({ success: false, error: error.message });
+  }
+};

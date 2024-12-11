@@ -581,4 +581,10 @@ export class UsersService {
 
     return profile;
   }
+
+  async setOnboarded(userId: string) {
+    return this.db.run(async (manager) => {
+      await this.repo.setOnboarded(userId, manager);
+    });
+  }
 }

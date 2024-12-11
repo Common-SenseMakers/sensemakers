@@ -1,7 +1,9 @@
 import { Box } from 'grommet';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
+import { useAppFetch } from '../api/app.fetch';
 import { BlueskyIcon, MastodonIcon, TwitterIcon } from '../app/common/Icons';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { MAX_BUTTON_WIDTH, ViewportPage } from '../app/layout/Viewport';
@@ -27,6 +29,7 @@ export enum LoginCase {
 
 export const ConnectSocialsPage = () => {
   const loginCase = LoginCase.login;
+  const appFetch = useAppFetch();
 
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -43,8 +46,18 @@ export const ConnectSocialsPage = () => {
     loginCase === LoginCase.login ? t(IntroKeys.login) : t(IntroKeys.connect);
 
   const handleContinue = () => {
+    appFetch('/api/auth/setOnboarded', {}, true).catch(console.error);
     navigate(AbsoluteRoutes.MyPosts);
   };
+
+  useEffect(() => {
+    const alreadyConnected =
+      connectedUser && connectedUser.details && connectedUser.details.onboarded;
+
+    if (alreadyConnected) {
+      navigate(AbsoluteRoutes.MyPosts);
+    }
+  }, [connectedUser, navigate]);
 
   const content = (
     <Box pad={{ bottom: '24px', horizontal: '12px' }}>
