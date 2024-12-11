@@ -23,14 +23,15 @@ Quote posts are a special kind of reference, where the post quotes another post.
 
 def render_thread_content(
     thread: ThreadRefPost,
+    quoted_context_length: int = None,
 ) -> str:
-    thread_posts = thread.posts
+    thread_posts = thread.thread_posts()
     ordered_refs = thread.md_ref_urls()
 
     rendered = []
     for quote_post in thread_posts:
         rendered.append(
-            render_quote_post_content(quote_post, ordered_refs=ordered_refs)
+            render_quote_post_content(quote_post, ordered_refs=ordered_refs,quoted_context_length=quoted_context_length)
         )
 
     # add line breaks
@@ -62,6 +63,7 @@ class ThreadRefPostRenderer(PostRenderer):
         thread: ThreadRefPost,
         metadata_list: List[RefMetadata],
         show_author: bool = True,
+        quoted_context_length: int = None,
     ) -> str:
         if show_author:
             author_name = thread.author
@@ -73,7 +75,7 @@ class ThreadRefPostRenderer(PostRenderer):
         # create mapping by url -> metadata
         md_dict = {md.url: md for md in metadata_list}
 
-        processed_content = render_thread_content(thread)
+        processed_content = render_thread_content(thread, quoted_context_length)
 
         # render metadata
         rendered_metadata = None

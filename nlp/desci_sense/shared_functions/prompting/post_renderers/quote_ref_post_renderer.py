@@ -66,7 +66,6 @@ def render_quote_post_content(
             processed_content = processed_content.replace(
                 post.quoted_url, rendered_quoted_post
             )
-            print("Processed Content:::",processed_content)
             # remove quoted post url from list to process
             refs_to_process.remove(post.quoted_url)
 
@@ -104,6 +103,7 @@ class QuoteRefPostRenderer(PostRenderer):
         post: QuoteRefPost,
         metadata_list: List[RefMetadata],
         show_author: bool = True,
+        quoted_context_length : int = None,
     ) -> str:
         if show_author:
             author_name = post.author
@@ -115,7 +115,7 @@ class QuoteRefPostRenderer(PostRenderer):
         # create mapping by url -> metadata
         md_dict = {md.url: md for md in metadata_list}
 
-        rendered_content = render_quote_post_content(post)
+        rendered_content = render_quote_post_content(post,quoted_context_length=quoted_context_length)
 
         # render metadata
         rendered_metadata = None
