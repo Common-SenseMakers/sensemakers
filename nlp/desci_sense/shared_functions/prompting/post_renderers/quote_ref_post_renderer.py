@@ -23,12 +23,14 @@ Quote posts are a special kind of reference, where the post quotes another post.
 def render_quote_post_content(
     post: QuoteRefPost,
     ordered_refs: Optional[List[str]] = None,
+    quoted_context_length: int = None,
 ) -> str:
     """_summary_
 
     Args:
         post (QuoteRefPost): _description_
         ordered_urls (Optional[List[str]]): _description_
+        quoted_context_length : length to append quoted post as context
 
     Returns:
         str: _description_
@@ -54,15 +56,17 @@ def render_quote_post_content(
             # get order of appearance for quoted post url (1-indexed)
             quoted_url_idx = ordered_refs.index(post.quoted_url) + 1
 
+            # Truncate the quoted content first
+            truncated_content = quoted_post.content[:quoted_context_length]
+            # Add enclosing tags after truncation
             rendered_quoted_post = (
-                f"<quoted ref_{quoted_url_idx}>{quoted_post.content}</quote>"
+                f"<quoted ref_{quoted_url_idx}>{truncated_content}</quote>"
             )
 
-            # replace quoted post url with rendered version
+            # replace quoted post url with rendered version truncated to a certain length
             processed_content = processed_content.replace(
                 post.quoted_url, rendered_quoted_post
             )
-
             # remove quoted post url from list to process
             refs_to_process.remove(post.quoted_url)
 
@@ -100,6 +104,7 @@ class QuoteRefPostRenderer(PostRenderer):
         post: QuoteRefPost,
         metadata_list: List[RefMetadata],
         show_author: bool = True,
+        quoted_context_length: int = None,
     ) -> str:
         if show_author:
             author_name = post.author
@@ -111,7 +116,10 @@ class QuoteRefPostRenderer(PostRenderer):
         # create mapping by url -> metadata
         md_dict = {md.url: md for md in metadata_list}
 
-        rendered_content = render_quote_post_content(post)
+        rendered_content = render_quote_post_content(
+            post,
+            quoted_context_length=quoted_context_length,
+        )
 
         # render metadata
         rendered_metadata = None
