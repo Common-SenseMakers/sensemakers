@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 
 import { BlueskyIcon, MastodonIcon, TwitterIcon } from '../app/common/Icons';
 import { DocIcon } from '../app/icons/DocIcon';
-import { OrcidIcon } from '../app/icons/OrcidIcon';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { SupportIcon } from '../app/icons/SupportIcon';
 import { GlobalNav } from '../app/layout/GlobalNav';
@@ -24,7 +23,6 @@ import {
 import { useDisconnectContext } from '../user-login/contexts/DisconnectUserContext';
 import { useBlueskyContext } from '../user-login/contexts/platforms/BlueskyContext';
 import { useMastodonContext } from '../user-login/contexts/platforms/MastodonContext';
-import { useOrcidContext } from '../user-login/contexts/platforms/OrcidContext';
 import { useTwitterContext } from '../user-login/contexts/platforms/TwitterContext';
 import { PlatformSection } from '../user-settings/PlatformsSection';
 import { SettingsSection } from '../user-settings/SettingsSection';
@@ -50,9 +48,6 @@ export const UserSettingsPage = () => {
   const { connectedUser, getPlatformConnectedStatus } = useAccountContext();
   const { disconnect } = useDisconnectContext();
 
-  const { connect: connectOrcid, connecting: connectingOrcid } =
-    useOrcidContext();
-
   const { needConnect: needConnectMastodon } = useMastodonContext();
 
   const { needConnect: needConnectBluesky } = useBlueskyContext();
@@ -63,7 +58,6 @@ export const UserSettingsPage = () => {
   const twitterProfile = connectedUser?.profiles?.twitter;
   const mastodonProfile = connectedUser?.profiles?.mastodon;
   const blueskyProfile = connectedUser?.profiles?.bluesky;
-  const orcidAccount = connectedUser?.profiles?.orcid;
 
   const content = (() => {
     if (!connectedUser) {
@@ -191,17 +185,6 @@ export const UserSettingsPage = () => {
             PlatformConnectedStatus.Connecting
           }
           connected={!!blueskyProfile}></PlatformSection>
-
-        <PlatformSection
-          icon={<OrcidIcon size={40}></OrcidIcon>}
-          platformName={t(PlatformsKeys.ORCID)}
-          onButtonClicked={() => connectOrcid('/settings')}
-          buttonText="connect"
-          username={
-            orcidAccount ? `@${orcidAccount.orcid}` : '- not connected -'
-          }
-          connected={orcidAccount !== undefined}
-          connecting={connectingOrcid}></PlatformSection>
 
         <Box
           direction="row"
