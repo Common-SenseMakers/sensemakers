@@ -52,7 +52,7 @@ export const UserPostsFeed = () => {
             </Box>
             <AppButton plain onClick={() => setHideShareInfo(true)}>
               <Box style={{ width: '28px', flexShrink: 0 }} justify="center">
-                <ClearIcon size={28}></ClearIcon>
+                <ClearIcon circle={false} size={20}></ClearIcon>
               </Box>
             </AppButton>
           </Box>

@@ -1,7 +1,33 @@
 import { Box } from 'grommet';
 
-export const ClearIcon = (props: { size?: number; color?: string }) => {
+export const ClearIcon = (props: {
+  size?: number;
+  color?: string;
+  circle?: boolean;
+}) => {
   const size = props.size || 18;
+  const circle = props.circle !== undefined ? props.circle : true;
+
+  if (!circle) {
+    return (
+      <Box>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width={size}
+          height={size}
+          viewBox="0 0 20 20"
+          fill="none">
+          <path
+            d="M5 15L15 5M5 5L15 15"
+            stroke="#374151"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </Box>
+    );
+  }
 
   return (
     <Box>
