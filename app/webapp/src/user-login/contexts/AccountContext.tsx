@@ -19,6 +19,7 @@ import {
 } from '../../shared/types/types.platforms';
 import { PlatformProfile } from '../../shared/types/types.profiles';
 import { AppUserRead, EmailDetails } from '../../shared/types/types.user';
+import { HIDE_SHARE_INFO } from '../../user-home/UserPostsFeed';
 import { usePersist } from '../../utils/use.persist';
 
 const DEBUG = false;
@@ -123,6 +124,8 @@ export const AccountContext = (props: PropsWithChildren) => {
       PLATFORMS_LOGIN_STATUS,
       platformsConnectedStatusInit
     );
+
+  const [, setHideShareInfo] = usePersist<boolean>(HIDE_SHARE_INFO, false);
 
   const setOverallLoginStatus = useCallback(
     (status: OverallLoginStatus) => {
@@ -251,6 +254,7 @@ export const AccountContext = (props: PropsWithChildren) => {
       ...disabledStatus,
     });
 
+    setHideShareInfo(null);
     _setLoginFlowState(LoginFlowState.Idle);
     _setOverallLoginStatus(OverallLoginStatus.LoggedOut);
   };

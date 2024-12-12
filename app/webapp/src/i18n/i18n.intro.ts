@@ -23,6 +23,7 @@ export enum IntroKeys {
 
   continue = 'intro-s016',
   connnectingTwitter = 'intro-s017x',
+  shareInfo = 'intro-s018',
 }
 
 export const introValues: Record<IntroKeys, string> = {
@@ -56,4 +57,6 @@ export const introValues: Record<IntroKeys, string> = {
     'An error occurred while connecting to the Mastodon server: {{mastodonServer}}',
   [IntroKeys.continue]: 'Continue',
   [IntroKeys.connnectingTwitter]: 'Connecting Twitter...',
+  [IntroKeys.shareInfo]:
+    'As you post on social media, we automatically detect your research-related content, tag it and share it to Hyperfeed. You can edit your tags and stop sharing any of your content at any time.',
 };
