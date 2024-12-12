@@ -1,10 +1,12 @@
-import { Box, BoxExtendedProps } from 'grommet';
+import { Box, BoxExtendedProps, Text } from 'grommet';
 import { DataFactory } from 'n3';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppCheckBoxMessage } from '../app/icons/AppCheckBoxMessage';
+import { InfoIcon } from '../app/icons/InfoIcon';
 import { PostEditKeys } from '../i18n/i18n.edit.post';
+import { SciFilterClassfication } from '../shared/types/types.parser';
 import { AppPostParsingStatus } from '../shared/types/types.posts';
 import {
   cloneStore,
@@ -18,6 +20,7 @@ import {
   SCIENCE_TOPIC_URI,
   THIS_POST_NAME_URI,
 } from '../shared/utils/semantics.helper';
+import { HelpTip } from '../ui-components';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
@@ -30,6 +33,13 @@ export const PublishButtons = (props: BoxExtendedProps) => {
   const { t } = useTranslation();
   const { updated, fetched } = usePost();
   const { connectedUser } = useAccountContext();
+
+  const isAIDetected =
+    updated.postMerged?.originalParsed &&
+    [
+      SciFilterClassfication.AI_DETECTED_RESEARCH,
+      SciFilterClassfication.CITOID_DETECTED_RESEARCH,
+    ].includes(updated.postMerged.originalParsed.filter_classification);
 
   const isScience = useMemo(() => {
     if (!updated.storeMerged) {
@@ -133,6 +143,39 @@ export const PublishButtons = (props: BoxExtendedProps) => {
             checkboxChanged(value).catch((e) => console.error(e));
           }}></AppCheckBoxMessage>
       )}
+
+      <Box direction="row" gap="6px" align="center">
+        <Text
+          style={{
+            color: '#374151',
+            textAlign: 'center',
+            fontSize: '12px',
+            fontStyle: 'normal',
+            fontWeight: '500',
+            lineHeight: '14px',
+          }}>
+          {isAIDetected
+            ? t(PostEditKeys.researchDetected)
+            : t(PostEditKeys.researchNotDetected)}
+        </Text>
+        <HelpTip
+          icon={<InfoIcon size={16}></InfoIcon>}
+          _content={
+            <Text
+              style={{
+                color: '#374151',
+                textAlign: 'left',
+                fontSize: '14px',
+                fontStyle: 'normal',
+                fontWeight: '500',
+                lineHeight: '16px',
+              }}>
+              {isAIDetected
+                ? t(PostEditKeys.researchDetectedHelp)
+                : t(PostEditKeys.reseachNotDetectedHelp)}
+            </Text>
+          }></HelpTip>
+      </Box>
     </Box>
   );
 };
