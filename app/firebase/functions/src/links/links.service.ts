@@ -1,9 +1,9 @@
 import { RefMeta } from '../@shared/types/types.parser';
+import { PostSubcollectionIndex } from '../@shared/types/types.posts';
 import {
   LinkMeta,
   LinkSource,
   OEmbed,
-  RefPostData,
 } from '../@shared/types/types.references';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
@@ -132,7 +132,7 @@ export class LinksService {
 
   async setRefPost(
     url: string,
-    postData: RefPostData,
+    postData: PostSubcollectionIndex,
     manager: TransactionManager
   ) {
     const linkId = hashUrl(url);

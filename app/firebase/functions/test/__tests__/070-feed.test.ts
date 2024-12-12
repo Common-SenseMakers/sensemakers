@@ -19,7 +19,7 @@ import { getTestServices } from './test.services';
 
 const feedThreads = [[''], [''], [''], [''], ['']];
 
-describe('070 test feed', () => {
+describe.only('070 test feed', () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER
@@ -254,6 +254,71 @@ describe('070 test feed', () => {
         expect(result).to.have.length(1); // there are 2 posts with this tag and reference, but one of them is marked as not science
         expect(doesQueryUseSubcollection(query).useLinksSubcollection).to.be
           .true;
+      });
+    });
+
+    describe('keyword page feed', () => {
+      const TEST_KEYWORD = 'AI';
+
+      it('returns unfiltered keyword page feed', async () => {
+        if (USE_REAL_TWITTER) {
+          logger.warn(`Feed test disabled with real twitter`);
+          return;
+        }
+        const { feed } = services;
+        const query = {
+          fetchParams: { expectedAmount: 10 },
+          semantics: {
+            keywords: [TEST_KEYWORD],
+            topic: SCIENCE_TOPIC_URI,
+          },
+          hydrateConfig: { addAggregatedLabels: false },
+        };
+        const result = await feed.getFeed(query);
+        expect(result).to.have.length(1);
+        expect(doesQueryUseSubcollection(query).useKeywordsSubcollection).to.be
+          .true;
+      });
+
+      it('returns keyword page feed filtered by labels', async () => {
+        if (USE_REAL_TWITTER) {
+          logger.warn(`Feed test disabled with real twitter`);
+          return;
+        }
+        const { feed } = services;
+        const query = {
+          fetchParams: { expectedAmount: 10 },
+          semantics: {
+            keywords: [TEST_KEYWORD],
+            labels: ['http://purl.org/spar/cito/discusses'],
+          },
+          hydrateConfig: { addAggregatedLabels: false },
+        };
+        const result = await feed.getFeed(query);
+        expect(result).to.have.length(1);
+        expect(doesQueryUseSubcollection(query).useKeywordsSubcollection).to.be
+          .true;
+      });
+
+      it('returns keyword page feed filtered by references', async () => {
+        if (USE_REAL_TWITTER) {
+          logger.warn(`Feed test disabled with real twitter`);
+          return;
+        }
+        const { feed } = services;
+        const query = {
+          fetchParams: { expectedAmount: 10 },
+          semantics: {
+            keywords: [TEST_KEYWORD],
+            refs: ['https://x.com/ItaiYanai/status/1780813867213336910'],
+            topic: SCIENCE_TOPIC_URI,
+          },
+          hydrateConfig: { addAggregatedLabels: false },
+        };
+        const result = await feed.getFeed(query);
+        expect(result).to.have.length(1);
+        expect(doesQueryUseSubcollection(query).useKeywordsSubcollection).to.be
+          .false; // in this case it would use the reference subcollection
       });
     });
   });

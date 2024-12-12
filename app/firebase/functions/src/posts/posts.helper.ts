@@ -9,12 +9,19 @@ import {
   PUBLISHABLE_PLATFORM,
 } from '../@shared/types/types.platforms';
 import {
+  AppPost,
   AppPostFull,
   GenericPost,
   PostsQueryDefined,
+  StructuredSemantics,
 } from '../@shared/types/types.posts';
 import { AccountDetailsBase, DefinedIfTrue } from '../@shared/types/types.user';
+import { CollectionNames } from '../@shared/utils/collectionNames';
+import { normalizeUrl } from '../@shared/utils/links.utils';
 import { APP_URL } from '../config/config.runtime';
+import { DBInstance } from '../db/instance';
+import { hashUrl } from '../links/links.utils';
+import { filterByArrayContainsAny } from './posts.repository';
 
 export interface PlatformDetails {
   platform: PUBLISHABLE_PLATFORM;
@@ -107,19 +114,83 @@ const QUERY_PARAMS_NOT_USING_LINKS_SUBCOLLECTION = [
 ];
 
 export const doesQueryUseSubcollection = (queryParams: PostsQueryDefined) => {
-  let defaultResult = {
+  let result = {
     useLinksSubcollection: false,
+    useKeywordsSubcollection: false,
   };
 
   const canUseSubcollection = !QUERY_PARAMS_NOT_USING_LINKS_SUBCOLLECTION.some(
     (param) => param in queryParams
   );
 
-  if (canUseSubcollection && queryParams.semantics?.refs?.length === 1) {
-    return {
-      useLinksSubcollection: true,
-    };
+  if (canUseSubcollection) {
+    if (queryParams.semantics?.refs?.length === 1) {
+      result.useLinksSubcollection = true;
+    } else if (queryParams.semantics?.keywords?.length === 1) {
+      result.useKeywordsSubcollection = true;
+    }
   }
 
-  return defaultResult;
+  return result;
 };
+
+/** checks if this query should use a subcollection and set up the query object on the best collection */
+export const getBaseQuery = (
+  collections: typeof DBInstance.prototype.collections,
+  queryParams: PostsQueryDefined
+) => {
+  const { useLinksSubcollection, useKeywordsSubcollection } =
+    doesQueryUseSubcollection(queryParams);
+
+  // Check if we can query subcollections rather than the entire posts
+  const baseCollection = (() => {
+    if (useLinksSubcollection && queryParams.semantics?.refs) {
+      const linkId = hashUrl(normalizeUrl(queryParams.semantics.refs[0]));
+      return collections.links
+        .doc(linkId)
+        .collection(CollectionNames.LinkPostsSubcollection);
+    }
+
+    if (useKeywordsSubcollection && queryParams.semantics?.keywords) {
+      const keyword = queryParams.semantics.keywords[0];
+      return collections.keywords
+        .doc(keyword)
+        .collection(CollectionNames.KeywordPostsSubcollection);
+    }
+
+    return collections.posts;
+  })();
+
+  const query = (() => {
+    if (!useLinksSubcollection) {
+      return filterByArrayContainsAny(
+        baseCollection,
+        `${STRUCTURED_SEMANTICS_KEY}.${REFS_KEY}`,
+        queryParams.semantics?.refs
+      );
+    }
+    if (!useKeywordsSubcollection) {
+      return filterByArrayContainsAny(
+        baseCollection,
+        `${STRUCTURED_SEMANTICS_KEY}.${KEYWORDS_KEY}`,
+        queryParams.semantics?.keywords
+      );
+    }
+    return baseCollection;
+  })();
+  return query;
+};
+
+/** type protection against properties renaming */
+export const CREATED_AT_KEY: keyof AppPost = 'createdAtMs';
+export const AUTHOR_USER_KEY: keyof AppPost = 'authorUserId';
+export const AUTHOR_PROFILE_KEY: keyof AppPost = 'authorProfileId';
+export const ORIGIN_KEY: keyof AppPost = 'origin';
+
+export const STRUCTURED_SEMANTICS_KEY: keyof AppPost = 'structuredSemantics';
+
+export const KEYWORDS_KEY: keyof StructuredSemantics = 'keywords';
+
+export const LABELS_KEY: keyof StructuredSemantics = 'labels';
+export const TOPIC_KEY: keyof StructuredSemantics = 'topic';
+export const REFS_KEY: keyof StructuredSemantics = 'refs';
