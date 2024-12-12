@@ -129,13 +129,7 @@ export const PostsFetcherComponent = (props: {
   );
 
   const showPosts = posts ? (
-    <Box
-      ref={postsContainerRef}
-      style={{
-        height: '100%',
-        overflowY: 'auto',
-        maxWidth: 600,
-      }}>
+    <>
       {posts.map((post, ix) => (
         <Box key={ix} id={`post-${post.id}`} style={{ flexShrink: 0 }}>
           <PostContext postInit={post}>
@@ -191,7 +185,7 @@ export const PostsFetcherComponent = (props: {
           </Text>
         </Box>
       )}
-    </Box>
+    </>
   ) : (
     <></>
   );
@@ -206,11 +200,19 @@ export const PostsFetcherComponent = (props: {
       }}
       justify="start"
       {...boxProps}>
-      {!posts || isLoading
-        ? showLoading
-        : posts.length === 0
-          ? showNoPosts
-          : showPosts}
+      <Box
+        ref={postsContainerRef}
+        style={{
+          height: '100%',
+          overflowY: 'auto',
+          maxWidth: 600,
+        }}>
+        {!posts || isLoading
+          ? showLoading
+          : posts.length === 0
+            ? showNoPosts
+            : showPosts}
+      </Box>
     </Box>
   );
 };
