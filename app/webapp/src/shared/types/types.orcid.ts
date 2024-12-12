@@ -1,3 +1,4 @@
+import { PlatformProfile } from './types.profiles';
 import { AccountDetailsBase } from './types.user';
 
 /** ORCID */
@@ -24,8 +25,10 @@ export type OrcidCredentials = Pick<
   AuthenticationResult,
   'access_token' | 'expires_in' | 'refresh_token' | 'scope' | 'token_type'
 >;
-export type OrcidProfile = Pick<AuthenticationResult, 'name' | 'orcid'>;
+export type OrcidProfile = PlatformProfile &
+  Pick<AuthenticationResult, 'orcid'>;
 
 /** For ORCID we only need to store the name of the user */
-export interface OrcidAccountDetails
-  extends AccountDetailsBase<{ read: OrcidCredentials }> {}
+export type OrcidAccountDetails = AccountDetailsBase<{
+  read?: OrcidCredentials;
+}>;

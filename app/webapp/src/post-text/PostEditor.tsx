@@ -1,11 +1,14 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { ProseMirror } from '@nytimes/react-prosemirror';
 import { EditorProps } from '@nytimes/react-prosemirror/dist/types/hooks/useEditorView';
 import { Box } from 'grommet';
 import { baseKeymap, splitBlock } from 'prosemirror-commands';
 import { keymap } from 'prosemirror-keymap';
-import { DOMParser } from 'prosemirror-model';
+import { DOMParser, Mark } from 'prosemirror-model';
 import { Schema } from 'prosemirror-model';
-import { EditorState } from 'prosemirror-state';
+import { EditorState, Transaction } from 'prosemirror-state';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -64,7 +67,7 @@ const schema = new Schema({
       parseDOM: [
         {
           tag: 'a[href]',
-          getAttrs(dom: any) {
+          getAttrs(dom) {
             return {
               href: dom.getAttribute('href'),
               title: dom.getAttribute('title'),
@@ -72,10 +75,14 @@ const schema = new Schema({
           },
         },
       ],
-      toDOM(node) {
+      toDOM(node: Mark) {
         return [
           'a',
-          { href: node.attrs.href, title: node.attrs.title, target: '_blank' },
+          {
+            href: node.attrs.href as string,
+            title: node.attrs.title as string,
+            target: '_blank',
+          },
           0,
         ];
       },
@@ -83,16 +90,14 @@ const schema = new Schema({
   },
 });
 
-function editorStateToPlainText(state: any) {
-  const paragraphs = state.doc.content.content;
+function editorStateToPlainText(state: EditorState) {
   const content: string[] = [];
 
-  for (let ix = 0; ix < paragraphs.length; ix++) {
-    const par = paragraphs[ix];
+  state.doc.content.forEach((par, offset, index) => {
     const text = par.textContent;
-    const suffix = ix < paragraphs.length - 1 ? '\n\n' : '';
+    const suffix = index < state.doc.content.childCount - 1 ? '\n\n' : '';
     content.push(text + suffix);
-  }
+  });
 
   if (DEBUG) console.log({ content });
 
@@ -130,9 +135,10 @@ export const PostEditor = (props: IStatementEditable) => {
       });
       setEditorState(newState);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.value]);
 
-  const handleTransaction = (tr: any) => {
+  const handleTransaction = (tr: Transaction) => {
     setEditorState((s) => s.apply(tr));
   };
 
@@ -142,7 +148,7 @@ export const PostEditor = (props: IStatementEditable) => {
       if (DEBUG) console.log({ editorState, newText });
       props.onChanged(newText);
     }
-  }, [editorState]);
+  }, [editorState, props, props.onChanged]);
 
   const editorProps: EditorProps = {
     editable: () => (props.editable !== undefined ? props.editable : false),

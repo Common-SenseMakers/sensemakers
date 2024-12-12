@@ -2,26 +2,84 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions/v1';
 
 import {
+  ArrayIncludeQuery,
+  StructuredSemantics,
+} from '../@shared/types/types.posts';
+import {
   AppPost,
   AppPostCreate,
   AppPostParsedStatus,
-  AppPostRepublishedStatus,
-  AppPostReviewStatus,
   PostUpdate,
-  PostsQuery,
-  PostsQueryStatus,
+  PostsQueryDefined,
 } from '../@shared/types/types.posts';
+import { RefLabel, RefPostData } from '../@shared/types/types.references';
+import { CollectionNames } from '../@shared/utils/collectionNames';
+import { SCIENCE_TOPIC_URI } from '../@shared/utils/semantics.helper';
 import { DBInstance } from '../db/instance';
 import { BaseRepository, removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
+import { hashUrl } from '../links/links.utils';
+import { doesQueryUseSubcollection } from '../posts/posts.helper';
 
-const DEBUG = true;
+const DEBUG = false;
 const DEBUG_PREFIX = 'PostsRepository';
 
 type Query = FirebaseFirestore.Query<
   FirebaseFirestore.DocumentData,
   FirebaseFirestore.DocumentData
 >;
+
+const filterByEqual = (
+  _base: Query,
+  key: string,
+  value: undefined | string | number | boolean
+) => {
+  let query = _base;
+
+  if (value !== undefined) {
+    if (DEBUG)
+      logger.debug(`getMany - filter by ${key} equals`, value, DEBUG_PREFIX);
+
+    query = query.where(key, '==', value);
+  }
+
+  return query;
+};
+
+const filterByIn = (_base: Query, key: string, values?: string[]) => {
+  let query = _base;
+
+  if (!values) return query;
+
+  if (values && values.length > 0) {
+    if (DEBUG)
+      logger.debug(`getMany - filter by ${key} in`, values, DEBUG_PREFIX);
+
+    query = query.where(key, 'in', values);
+  }
+
+  return query;
+};
+
+const filterByArrayContainsAny = (
+  _base: Query,
+  key: string,
+  values?: ArrayIncludeQuery
+) => {
+  let query = _base;
+
+  if (!values) return query;
+
+  if (values && values.length > 0) {
+    if (DEBUG)
+      logger.debug(`getMany - filter by ${key} includes`, values, DEBUG_PREFIX);
+
+    query = query.where(key, 'array-contains-any', values);
+  }
+
+  return query;
+};
+
 export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   constructor(protected db: DBInstance) {
     super(db.collections.posts, db);
@@ -52,184 +110,71 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   }
 
   /** Cannot be part of a transaction */
-  public async getMany(queryParams: PostsQuery) {
-    /** type protection agains properties renaming */
+  public async getMany(queryParams: PostsQueryDefined) {
+    /** type protection against properties renaming */
     const createdAtKey: keyof AppPost = 'createdAtMs';
     const authorUserKey: keyof AppPost = 'authorUserId';
     const authorProfileKey: keyof AppPost = 'authorProfileId';
-    const reviewedStatusKey: keyof AppPost = 'reviewedStatus';
-    const republishedStatusKey: keyof AppPost = 'republishedStatus';
     const originKey: keyof AppPost = 'origin';
 
-    const keywordsKey: keyof AppPost = 'keywords';
-    const labelsKey: keyof AppPost = 'labels';
+    const structuredSemanticsKey: keyof AppPost = 'structuredSemantics';
+
+    const keywordsKey: keyof StructuredSemantics = 'keywords';
+
+    const labelsKey: keyof StructuredSemantics = 'labels';
+    const topicKey: keyof StructuredSemantics = 'topic';
+    const refsKey: keyof StructuredSemantics = 'refs';
 
     if (DEBUG) logger.debug('getMany', queryParams, DEBUG_PREFIX);
 
-    const ofUser = ((_base: Query) => {
-      if (queryParams.userId) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by userId',
-            queryParams.userId,
-            DEBUG_PREFIX
-          );
+    const { useLinksSubcollection } = doesQueryUseSubcollection(queryParams);
 
-        return _base.where(authorUserKey, '==', queryParams.userId);
-      } else {
-        if (DEBUG)
-          logger.debug(
-            'getMany - dont filter by userId',
-            undefined,
-            DEBUG_PREFIX
-          );
-
-        return _base;
+    /** check if we can query the links subcollection rather than the entire posts */
+    const baseCollection = (() => {
+      if (useLinksSubcollection && queryParams.semantics?.refs) {
+        const linkId = hashUrl(queryParams.semantics.refs[0]);
+        return this.db.collections.links
+          .doc(linkId)
+          .collection(CollectionNames.LinkPostsSubcollection);
       }
-    })(this.db.collections.posts);
+      return this.db.collections.posts;
+    })();
 
-    const ofOrigin = ((_base: Query) => {
-      if (queryParams.origins && queryParams.origins.length > 0) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by origin',
-            queryParams.origins,
-            DEBUG_PREFIX
-          );
+    let query = filterByEqual(
+      baseCollection,
+      authorUserKey,
+      queryParams.userId
+    );
 
-        return _base.where(originKey, 'in', queryParams.origins);
-      } else {
-        if (DEBUG)
-          logger.debug(
-            'getMany - dont filter by origin',
-            undefined,
-            DEBUG_PREFIX
-          );
+    query = filterByEqual(query, authorProfileKey, queryParams.profileId);
 
-        return _base;
-      }
-    })(ofUser);
+    query = filterByIn(query, originKey, queryParams.origins);
 
-    const ofProfiles = ((_base: Query) => {
-      if (queryParams.profileIds && queryParams.profileIds.length > 0) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by profileIds',
-            queryParams.profileIds,
-            DEBUG_PREFIX
-          );
+    if (!useLinksSubcollection) {
+      query = filterByArrayContainsAny(
+        query,
+        `${structuredSemanticsKey}.${refsKey}`,
+        queryParams.semantics?.refs
+      );
+    }
 
-        return _base.where(authorProfileKey, 'in', queryParams.profileIds);
-      } else {
-        if (DEBUG)
-          logger.debug(
-            'getMany - dont filter by profilesIds',
-            undefined,
-            DEBUG_PREFIX
-          );
+    query = filterByArrayContainsAny(
+      query,
+      `${structuredSemanticsKey}.${labelsKey}`,
+      queryParams.semantics?.labels
+    );
 
-        return _base;
-      }
-    })(ofOrigin);
+    query = filterByArrayContainsAny(
+      query,
+      `${structuredSemanticsKey}.${keywordsKey}`,
+      queryParams.semantics?.keywords
+    );
 
-    if (DEBUG) logger.debug('getOfUser', queryParams, DEBUG_PREFIX);
-
-    const withStatuses = ((_base: Query) => {
-      if (!queryParams.status) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - dont filter by status',
-            undefined,
-            DEBUG_PREFIX
-          );
-        return _base;
-      }
-
-      if (queryParams.status === PostsQueryStatus.DRAFTS) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by status',
-            PostsQueryStatus.DRAFTS,
-            DEBUG_PREFIX
-          );
-        return _base.where(republishedStatusKey, 'in', [
-          AppPostRepublishedStatus.PENDING,
-          AppPostRepublishedStatus.UNREPUBLISHED,
-        ]);
-      }
-      if (queryParams.status === PostsQueryStatus.PENDING) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by status',
-            PostsQueryStatus.PENDING,
-            DEBUG_PREFIX
-          );
-        return _base.where(
-          reviewedStatusKey,
-          '==',
-          AppPostReviewStatus.PENDING
-        );
-      }
-      if (queryParams.status === PostsQueryStatus.PUBLISHED) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by status',
-            PostsQueryStatus.PUBLISHED,
-            DEBUG_PREFIX
-          );
-        return _base.where(
-          republishedStatusKey,
-          '!=',
-          AppPostRepublishedStatus.PENDING
-        );
-      }
-      if (queryParams.status === PostsQueryStatus.IGNORED) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by status',
-            PostsQueryStatus.IGNORED,
-            DEBUG_PREFIX
-          );
-
-        return _base.where(
-          reviewedStatusKey,
-          '==',
-          AppPostReviewStatus.IGNORED
-        );
-      }
-
-      return _base;
-    })(ofProfiles);
-
-    const withSemantics = ((_base: Query) => {
-      if (queryParams.keywords && queryParams.keywords.length > 0) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by keywords',
-            JSON.stringify(queryParams.keywords),
-            DEBUG_PREFIX
-          );
-
-        return _base.where(
-          keywordsKey,
-          'array-contains-any',
-          queryParams.keywords
-        );
-      }
-
-      if (queryParams.labels && queryParams.labels.length > 0) {
-        if (DEBUG)
-          logger.debug(
-            'getMany - filter by labels',
-            JSON.stringify(queryParams.labels),
-            DEBUG_PREFIX
-          );
-
-        return _base.where(labelsKey, 'array-contains-any', queryParams.labels);
-      }
-
-      return _base;
-    })(withStatuses);
+    query = filterByEqual(
+      query,
+      `${structuredSemanticsKey}.${topicKey}`,
+      queryParams.semantics?.topic
+    );
 
     /** get the sinceCreatedAt and untilCreatedAt timestamps from the elements ids */
     const { sinceCreatedAt, untilCreatedAt } = await (async () => {
@@ -266,21 +211,76 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
         const ordered = _base.orderBy(createdAtKey, 'desc');
         return untilCreatedAt ? ordered.startAfter(untilCreatedAt) : ordered;
       }
-    })(withSemantics);
+    })(query);
 
     const posts = await paginated
       .limit(queryParams.fetchParams.expectedAmount)
       .get();
 
-    const appPosts = posts.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as AppPost[];
+    let appPosts = (await (async () => {
+      if (useLinksSubcollection) {
+        const docRefs = posts.docs.map((doc) =>
+          this.db.collections.posts.doc(doc.id)
+        );
+        if (docRefs.length === 0) return [];
+        const docs = await this.db.firestore.getAll(...docRefs);
+        return docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+      }
+      return posts.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+    })()) as AppPost[];
 
     return appPosts.sort((a, b) => b.createdAtMs - a.createdAtMs);
   }
 
-  public async getAllOfQuery(queryParams: PostsQuery, limit?: number) {
+  public async getAggregatedRefLabels(
+    references: string[]
+  ): Promise<Record<string, RefLabel[]>> {
+    const refsStats: Record<string, RefLabel[]> = {};
+
+    // Get all posts for each reference from their respective subcollections
+    const postsPromises = references.map(async (reference) => {
+      const linkId = hashUrl(reference);
+      const linkPosts = await this.db.collections.links
+        .doc(linkId)
+        .collection(CollectionNames.LinkPostsSubcollection)
+        .get();
+
+      // Process each post's labels directly from the subcollection documents
+      linkPosts.docs.forEach((doc) => {
+        const refPost = doc.data() as RefPostData;
+        if (
+          refPost?.structuredSemantics?.labels &&
+          refPost.structuredSemantics.topic === SCIENCE_TOPIC_URI
+        ) {
+          const refLabels = refPost.structuredSemantics?.labels?.map(
+            (label): RefLabel => ({
+              label,
+              postId: doc.id,
+              authorProfileId: refPost.authorProfileId,
+              platformPostUrl: refPost.platformPostUrl,
+            })
+          );
+          if (refLabels) {
+            refsStats[reference] = [
+              ...(refsStats[reference] || []),
+              ...refLabels,
+            ];
+          }
+        }
+      });
+    });
+
+    await Promise.all(postsPromises);
+    return refsStats;
+  }
+
+  public async getAllOfQuery(queryParams: PostsQueryDefined, limit?: number) {
     let stillPending = true;
     const allPosts: AppPost[] = [];
 
@@ -339,5 +339,10 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       .get();
 
     return posts.docs.map((doc) => doc.id) as string[];
+  }
+
+  delete(postId: string, manager: TransactionManager) {
+    const ref = this.getRef(postId);
+    manager.delete(ref);
   }
 }

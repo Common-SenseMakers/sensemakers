@@ -29,6 +29,7 @@ const USE_REAL_MASTODON = defineBoolean('USE_REAL_MASTODON');
 const USE_REAL_BLUESKY = defineBoolean('USE_REAL_BLUESKY');
 const USE_REAL_NANOPUB = defineBoolean('USE_REAL_NANOPUB');
 const USE_REAL_EMAIL = defineBoolean('USE_REAL_EMAIL');
+const USE_REAL_LINKS = defineBoolean('USE_REAL_LINKS');
 const TEST_USER_ACCOUNTS = defineString('TEST_USER_ACCOUNTS');
 
 const LOG_LEVEL_MSG = defineString('LOG_LEVEL_MSG');
@@ -45,6 +46,8 @@ const MAGIC_ADMIN_SECRET = defineSecret('MAGIC_ADMIN_SECRET');
 
 const NP_PUBLISH_RSA_PRIVATE_KEY = defineSecret('NP_PUBLISH_RSA_PRIVATE_KEY');
 const ADMIN_API_KEY = defineSecret('ADMIN_API_KEY');
+
+const IFRAMELY_API_KEY = defineSecret('IFRAMELY_API_KEY');
 
 export const envRuntime = {
   NODE_ENV: process.env.NODE_ENV,
@@ -82,4 +85,6 @@ export const envRuntime = {
   EMAIL_CLIENT_SECRET: EMAIL_CLIENT_SECRET,
   MAGIC_ADMIN_SECRET: MAGIC_ADMIN_SECRET,
   ADMIN_API_KEY: ADMIN_API_KEY,
+  IFRAMELY_API_KEY: IFRAMELY_API_KEY,
+  USE_REAL_LINKS: USE_REAL_LINKS,
 };

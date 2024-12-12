@@ -1,4 +1,3 @@
-import { Magic } from '@magic-sdk/admin';
 import * as jwt from 'jsonwebtoken';
 
 import {
@@ -13,28 +12,29 @@ import {
 import {
   AccountProfile,
   AccountProfileCreate,
+  AccountProfileRead,
+  PlatformProfile,
 } from '../@shared/types/types.profiles';
 import {
   AccountCredentials,
   AccountDetailsRead,
+  AppUserPublicRead,
   AppUserRead,
   EmailDetails,
   UserSettings,
   UserSettingsUpdate,
 } from '../@shared/types/types.user';
+import { getProfileId, splitProfileId } from '../@shared/utils/profiles.utils';
 import { USER_INIT_SETTINGS } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
+import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
-import { EmailSenderService } from '../emailSender/email.sender.service';
 import { logger } from '../instances/logger';
 import {
   IdentityServicesMap,
   PlatformsMap,
 } from '../platforms/platforms.service';
-import {
-  ProfilesRepository,
-  splitProfileId,
-} from '../profiles/profiles.repository';
+import { ProfilesRepository } from '../profiles/profiles.repository';
 import { TimeService } from '../time/time.service';
 import { UsersHelper } from './users.helper';
 import { UsersRepository } from './users.repository';
@@ -62,7 +62,6 @@ export class UsersService {
     public identityPlatforms: IdentityServicesMap,
     public platformServices: PlatformsMap,
     public time: TimeService,
-    public emailSender: EmailSenderService,
     protected ourToken: OurTokenConfig
   ) {}
 
@@ -131,7 +130,7 @@ export class UsersService {
     );
 
     const existingUserWithAccountId =
-      await this.profiles.getUserIdWithPlatformAccount(
+      await this.repo.getUserIdWithPlatformAccount(
         platform,
         authenticatedDetails.user_id,
         manager
@@ -182,6 +181,7 @@ export class UsersService {
 
         return {
           userId: _userId,
+          linkProfile: false,
         };
       } else {
         /**
@@ -208,7 +208,7 @@ export class UsersService {
           platformId: platform,
         };
 
-        this.profiles.create(profileCreate, manager);
+        await this.upsertProfile(profileCreate, manager);
       }
     } else {
       /**
@@ -217,7 +217,8 @@ export class UsersService {
 
       if (existingUserWithAccount) {
         /**
-         * a user exist with this platform user_id, then return an accessToken and consider this a login for that userId
+         * a user exist with this platform user_id, then store the new credentials and
+         * return an accessToken and consider this a login for that userId
          * */
 
         const userId = existingUserWithAccount.userId;
@@ -234,11 +235,28 @@ export class UsersService {
           manager
         );
 
+        // patch to recover uncreated profiles
+        const existing = await this.profiles.getByProfileId(
+          getProfileId(platform, authenticatedDetails.user_id),
+          manager
+        );
+
+        if (!existing) {
+          const profileCreate: AccountProfileCreate = {
+            ...profile,
+            userId,
+            platformId: platform,
+          };
+
+          await this.upsertProfile(profileCreate, manager);
+        }
+
         return {
           ourAccessToken: this.generateOurAccessToken({
             userId,
           }),
           userId,
+          linkProfile: true,
         };
       } else {
         /**
@@ -268,7 +286,7 @@ export class UsersService {
           platformId: platform,
         };
 
-        this.profiles.create(profileCreate, manager);
+        await this.upsertProfile(profileCreate, manager);
 
         if (DEBUG)
           logger.debug(
@@ -280,6 +298,7 @@ export class UsersService {
             userId: prefixed_user_id,
           }),
           userId: prefixed_user_id,
+          linkProfile: true,
         };
       }
     }
@@ -318,7 +337,7 @@ export class UsersService {
     }
 
     /** update the credentials */
-    account.credentials = credentials;
+    account.credentials = removeUndefined(credentials);
 
     if (DEBUG)
       logger.debug(
@@ -327,12 +346,7 @@ export class UsersService {
         DEBUG_PREFIX
       );
 
-    await this.repo.setAccountDetails(
-      userId,
-      PLATFORM.Twitter,
-      account,
-      manager
-    );
+    await this.repo.setAccountDetails(userId, platformId, account, manager);
   }
 
   protected generateOurAccessToken(data: TokenData) {
@@ -348,26 +362,12 @@ export class UsersService {
     return verified.payload.userId;
   }
 
-  public async getUserWithProfiles(
+  public async getUserReadProfiles(
     userId: string,
     manager: TransactionManager
   ) {
     const user = await this.repo.getUser(userId, manager, true);
-
-    /** delete the token, from the public profile */
-    const email: EmailDetails | undefined = user.email
-      ? {
-          ...user.email,
-        }
-      : undefined;
-
-    const userRead: AppUserRead = {
-      userId,
-      email,
-      signupDate: user.signupDate,
-      settings: user.settings,
-      profiles: {},
-    };
+    const profiles: AppUserRead['profiles'] = {};
 
     /** extract the profile for each account */
     await Promise.all(
@@ -382,23 +382,81 @@ export class UsersService {
               manager
             );
 
-            if (profile) {
-              const current = userRead.profiles[platform] || [];
+            if (profile && profile.profile) {
+              const current = profiles[platform] || [];
 
               current.push({
                 user_id: account.user_id,
+                platformId: platform,
                 profile: profile.profile,
                 read: account.credentials.read !== undefined,
                 write: account.credentials.write !== undefined,
               });
 
-              userRead.profiles[platform] =
-                current as AccountDetailsRead<any>[];
+              profiles[platform] = current as AccountDetailsRead<any>[];
             }
           })
         );
       })
     );
+
+    return profiles;
+  }
+
+  /** get a user and their public profiles data */
+  public async getPublicUserWithProfiles(
+    userId: string,
+    manager: TransactionManager
+  ): Promise<AppUserPublicRead> {
+    const readProfiles = await this.getUserReadProfiles(userId, manager);
+    const publicProfiles: AppUserPublicRead['profiles'] = {};
+
+    (Array.from(Object.keys(readProfiles)) as IDENTITY_PLATFORM[]).forEach(
+      (platform: IDENTITY_PLATFORM) => {
+        const accounts = readProfiles[platform];
+        if (accounts) {
+          publicProfiles[platform] = accounts.map((account) => {
+            const profile: AccountProfileRead = {
+              platformId: account.platformId,
+              user_id: account.user_id,
+              userId: userId,
+              profile: account.profile,
+            };
+            return profile;
+          });
+        }
+      }
+    );
+
+    return {
+      userId,
+      profiles: publicProfiles,
+    };
+  }
+
+  public async getLoggedUserWithProfiles(
+    userId: string,
+    manager: TransactionManager
+  ) {
+    const user = await this.repo.getUser(userId, manager, true);
+
+    /** delete the token, from the public profile */
+    const email: EmailDetails | undefined = user.email
+      ? {
+          ...user.email,
+        }
+      : undefined;
+
+    const readProfiles = await this.getUserReadProfiles(userId, manager);
+
+    const userRead: AppUserRead = {
+      userId,
+      email,
+      signupDate: user.signupDate,
+      settings: user.settings,
+      profiles: readProfiles,
+      details: user.details,
+    };
 
     return userRead;
   }
@@ -406,13 +464,6 @@ export class UsersService {
   updateSettings(userId: string, settings: UserSettingsUpdate) {
     return this.db.run(async (manager) => {
       // set timestamp
-      if (settings.autopost) {
-        settings.autopost[PLATFORM.Nanopub] = {
-          value: settings.autopost[PLATFORM.Nanopub].value,
-          after: this.time.now(),
-        };
-      }
-
       await this.repo.updateSettings(userId, settings, manager);
     });
   }
@@ -428,56 +479,6 @@ export class UsersService {
     });
   }
 
-  async setEmailFromMagic(userId: string, idToken: string, magic: Magic) {
-    const userMetadata = await magic.users.getMetadataByToken(idToken);
-    if (DEBUG) {
-      logger.debug('setEmailFromMagic', { userId, userMetadata });
-    }
-
-    await this.db.run(async (manager) => {
-      const user = await this.repo.getUser(userId, manager, true);
-      if (user.email) {
-        throw new Error('Email already set');
-      }
-
-      const accounts = UsersHelper.getAccounts(user, PLATFORM.Nanopub);
-      const addresses = accounts.map((a) => a.user_id.toLocaleLowerCase());
-
-      if (DEBUG) {
-        logger.debug('setEmailFromMagic - addresses', { accounts, addresses });
-      }
-
-      /** check the magic user has a wallet that is owned by the logged in user */
-      if (
-        userMetadata.publicAddress &&
-        addresses.includes(userMetadata.publicAddress.toLocaleLowerCase())
-      ) {
-        if (userMetadata.email) {
-          if (DEBUG) {
-            logger.debug('setEmailFromMagic- email', {
-              email: userMetadata.email,
-            });
-          }
-
-          await this.repo.setEmail(
-            user.userId,
-            { email: userMetadata.email, source: 'MAGIC' },
-            manager
-          );
-        } else {
-          throw new Error('No email found');
-        }
-      } else {
-        throw new Error('No wallet found');
-      }
-    });
-
-    await this.emailSender.sendAdminEmail(
-      'User signup',
-      `User ${userMetadata.email} signed up`
-    );
-  }
-
   // TODO: looks redundant with readAndCreateProfile
   public async getOrCreateProfileByUsername(
     platformId: IDENTITY_PLATFORM,
@@ -486,7 +487,6 @@ export class UsersService {
   ) {
     const profileId = await this.profiles.getByPlatformUsername(
       platformId,
-      'username',
       username,
       manager
     );
@@ -501,15 +501,29 @@ export class UsersService {
     if (!profile) {
       throw new Error('Profile not found');
     }
+
     const profileCreate: AccountProfileCreate = {
       ...profile,
       platformId: platformId,
     };
-    this.profiles.create(profileCreate, manager);
+    this.createProfile(profileCreate, manager);
     return profile;
   }
 
-  async readAndCreateProfile<P = any>(
+  async createProfile<P extends PlatformProfile = PlatformProfile>(
+    profileCreate: AccountProfileCreate,
+    manager: TransactionManager
+  ) {
+    const id = this.profiles.create(profileCreate, manager);
+    const profile = {
+      id,
+      ...profileCreate,
+    } as AccountProfile<P>;
+
+    return profile;
+  }
+
+  async readAndCreateProfile<P extends PlatformProfile = PlatformProfile>(
     profileId: string,
     manager: TransactionManager,
     credentials?: any
@@ -530,12 +544,29 @@ export class UsersService {
       platformId: platform,
     };
 
-    const id = this.profiles.create(profileCreate, manager);
-    return { id, ...profileCreate };
+    return this.createProfile(profileCreate, manager);
+  }
+
+  /**  */
+  async upsertProfile<P extends PlatformProfile = PlatformProfile>(
+    profile: AccountProfileCreate,
+    manager: TransactionManager
+  ) {
+    const profileId = getProfileId(profile.platformId, profile.user_id);
+    const exisiting = await this.profiles.getByProfileId<false, P>(
+      profileId,
+      manager
+    );
+
+    if (!exisiting) {
+      return this.createProfile<P>(profile, manager);
+    }
+
+    return profile;
   }
 
   /** Get or create an account profile */
-  async getOrCreateProfile<P = any>(
+  async getOrCreateProfile<P extends PlatformProfile = PlatformProfile>(
     profileId: string,
     manager: TransactionManager
   ) {
@@ -548,6 +579,12 @@ export class UsersService {
       return this.readAndCreateProfile<P>(profileId, manager);
     }
 
-    return profile as P;
+    return profile;
+  }
+
+  async setOnboarded(userId: string) {
+    return this.db.run(async (manager) => {
+      await this.repo.setOnboarded(userId, manager);
+    });
   }
 }

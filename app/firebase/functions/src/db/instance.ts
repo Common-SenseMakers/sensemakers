@@ -23,8 +23,9 @@ export class DBInstance {
     profiles: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
     triples: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
     activity: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
-    userNotifications: (
-      userId: string
+    links: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
+    linkPosts: (
+      linkId: string
     ) => FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
   };
 
@@ -41,11 +42,12 @@ export class DBInstance {
       profiles: this.firestore.collection(CollectionNames.Profiles),
       triples: this.firestore.collection(CollectionNames.Triples),
       activity: this.firestore.collection(CollectionNames.Activity),
-      userNotifications: (userId: string) =>
+      links: this.firestore.collection(CollectionNames.Links),
+      linkPosts: (linkId: string) =>
         this.firestore
-          .collection(CollectionNames.Users)
-          .doc(userId)
-          .collection(CollectionNames.Notifications),
+          .collection(CollectionNames.Links)
+          .doc(linkId)
+          .collection(CollectionNames.LinkPostsSubcollection),
     };
   }
 

@@ -1,4 +1,4 @@
-import { IDENTITY_PLATFORM, PLATFORM } from './types.platforms';
+import { PLATFORM } from './types.platforms';
 import { AppPostFull } from './types.posts';
 
 export interface OurTokenConfig {
@@ -7,6 +7,7 @@ export interface OurTokenConfig {
 }
 
 export interface HandleSignupResult {
+  linkProfile: boolean;
   userId: string;
   ourAccessToken?: string;
 }
@@ -36,11 +37,4 @@ export interface UserProfileQuery {
 export interface PublishPostPayload {
   post: AppPostFull;
   platformIds: PLATFORM[];
-}
-
-export interface AddUserDataPayload {
-  username: string;
-  platformId: IDENTITY_PLATFORM;
-  amount: number;
-  latest?: boolean;
 }

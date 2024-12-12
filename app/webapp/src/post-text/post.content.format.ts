@@ -45,7 +45,7 @@ export const textToHtml = (text: string) => {
   let html = paragraphs?.map((p, i) => `<p>${p}</p>`).join('');
 
   const urlRegex =
-    /\bhttps?:\/\/[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
+    /\bhttps?:\/\/[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/gi;
 
   html = html.replace(urlRegex, replaceUrlCallback);
 

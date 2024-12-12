@@ -2,9 +2,8 @@ import { expect } from 'chai';
 import { TwitterApi } from 'twitter-api-v2';
 
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
-import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
 import { authenticateTestUsers } from '../utils/authenticate.users';
-import { USE_REAL_NANOPUB, USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
+import { USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
 import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
@@ -15,16 +14,17 @@ describe.skip('twitter integration', () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER ? undefined : { publish: true, signup: true },
-    nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
-    emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
   });
 
   it(`authenticates ${NUM_TWITTER_USERS} twitter users with the oauth 2.0 flow for reading access`, async () => {
+    const includePlatforms = [PLATFORM.Twitter];
+
     const appUsers = await services.db.run((manager) =>
       authenticateTestUsers(
         testCredentials.slice(0, NUM_TWITTER_USERS),
         services,
+        includePlatforms,
         manager
       )
     );

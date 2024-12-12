@@ -5,14 +5,10 @@ import { PLATFORM } from '../@shared/types/types.platforms';
 import { ActivityRepository } from '../activity/activity.repository';
 import { ActivityService } from '../activity/activity.service';
 import { DBInstance } from '../db/instance';
-import {
-  EmailSenderService,
-  EmailServiceConfig,
-} from '../emailSender/email.sender.service';
-import { getEmailSenderMock } from '../emailSender/email.sender.service.mock';
 import { FeedService } from '../feed/feed.service';
-import { NotificationService } from '../notifications/notification.service';
-import { NotificationsRepository } from '../notifications/notifications.repository';
+import { LinksRepository } from '../links/links.repository';
+import { LinksConfig, LinksService } from '../links/links.service';
+import { getLinksMock } from '../links/links.service.mock';
 import { getParserMock } from '../parser/mock/parser.service.mock';
 import { ParserService } from '../parser/parser.service';
 import {
@@ -26,12 +22,6 @@ import {
 } from '../platforms/mastodon/mastodon.service';
 import { getMastodonMock } from '../platforms/mastodon/mock/mastodon.service.mock';
 import { getTestCredentials } from '../platforms/mock/test.users';
-import { getNanopubMock } from '../platforms/nanopub/mock/nanopub.service.mock';
-import {
-  NanopubService,
-  NanopubServiceConfig,
-} from '../platforms/nanopub/nanopub.service';
-// import { ParserService } from '../parser/parser.service';
 import { OrcidService } from '../platforms/orcid/orcid.service';
 import {
   IdentityServicesMap,
@@ -63,21 +53,19 @@ export interface Services {
   platforms: PlatformsService;
   time: TimeService;
   db: DBInstance;
-  notifications: NotificationService;
   activity: ActivityService;
-  email: EmailSenderService;
+  links: LinksService;
 }
 
 export interface ServicesConfig {
   testCredentials: string;
   twitter: TwitterApiCredentials;
-  nanopub: NanopubServiceConfig;
   mastodon: MastodonServiceConfig;
   bluesky: BlueskyServiceConfig;
-  email: EmailServiceConfig;
   parser: string;
   our: OurTokenConfig;
   isEmulator: boolean;
+  links: LinksConfig;
   mock: {
     USE_REAL_PARSER: boolean;
     USE_REAL_TWITTER: boolean;
@@ -85,6 +73,7 @@ export interface ServicesConfig {
     USE_REAL_BLUESKY: boolean;
     USE_REAL_NANOPUB: boolean;
     USE_REAL_EMAIL: boolean;
+    USE_REAL_LINKS: boolean;
   };
 }
 
@@ -101,7 +90,7 @@ export const createServices = (
   const triplesRepo = new TriplesRepository(db);
   const platformPostsRepo = new PlatformPostsRepository(db);
   const activityRepo = new ActivityRepository(db);
-  const notificationsRepo = new NotificationsRepository(db);
+  const linksRepo = new LinksRepository(db);
 
   const identityPlatforms: IdentityServicesMap = new Map();
   const platformsMap: PlatformsMap = new Map();
@@ -119,12 +108,6 @@ export const createServices = (
       ? undefined
       : { signup: true, fetch: true, publish: true, get: true },
     testUser
-  );
-
-  const _nanopub = new NanopubService(time, config.nanopub);
-  const nanopub = getNanopubMock(
-    _nanopub,
-    config.mock.USE_REAL_NANOPUB ? 'real' : 'mock-publish'
   );
 
   const _mastodon = new MastodonService(time, userRepo, config.mastodon);
@@ -147,23 +130,13 @@ export const createServices = (
   /** all identity services */
   identityPlatforms.set(PLATFORM.Orcid, orcid);
   identityPlatforms.set(PLATFORM.Twitter, twitter);
-  identityPlatforms.set(PLATFORM.Nanopub, nanopub);
   identityPlatforms.set(PLATFORM.Mastodon, mastodon);
   identityPlatforms.set(PLATFORM.Bluesky, bluesky);
 
   /** all platforms */
   platformsMap.set(PLATFORM.Twitter, twitter);
-  platformsMap.set(PLATFORM.Nanopub, nanopub);
   platformsMap.set(PLATFORM.Mastodon, mastodon);
   platformsMap.set(PLATFORM.Bluesky, bluesky);
-
-  /** email sender service */
-  const _email = new EmailSenderService(config.email);
-
-  const { instance: email } = getEmailSenderMock(
-    _email,
-    config.mock.USE_REAL_EMAIL ? 'real' : 'mock'
-  );
 
   /** users service */
   const usersService = new UsersService(
@@ -173,7 +146,6 @@ export const createServices = (
     identityPlatforms,
     platformsMap,
     time,
-    email,
     config.our
   );
 
@@ -193,6 +165,12 @@ export const createServices = (
     config.mock.USE_REAL_PARSER ? 'real' : 'mock'
   );
 
+  const _linksService = new LinksService(linksRepo, time, config.links);
+  const linksService = getLinksMock(
+    _linksService,
+    config.mock.USE_REAL_LINKS ? undefined : { get: true, enable: true }
+  );
+
   /** posts service */
   const postsProcessing = new PostsProcessing(
     usersService,
@@ -200,7 +178,8 @@ export const createServices = (
     triplesRepo,
     postsRepo,
     platformPostsRepo,
-    platformsService
+    platformsService,
+    linksService
   );
   // const postsParser = new PostsParser(platformsService, parserService);
   const postsManager = new PostsManager(
@@ -215,19 +194,6 @@ export const createServices = (
   /** activity service */
   const activity = new ActivityService(activityRepo);
 
-  /** notification service */
-
-  const notifications = new NotificationService(
-    db,
-    notificationsRepo,
-    postsRepo,
-    platformPostsRepo,
-    activityRepo,
-    userRepo,
-    email,
-    !config.isEmulator
-  );
-
   /** feed */
   const feed = new FeedService(db, postsManager);
 
@@ -239,9 +205,8 @@ export const createServices = (
     feed,
     time,
     db,
-    notifications,
     activity,
-    email,
+    links: linksService,
   };
 
   if (DEBUG) {

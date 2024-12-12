@@ -3,8 +3,10 @@ import AtpAgent, {
   AppBskyFeedPost,
   RichText,
 } from '@atproto/api';
+import * as jwt from 'jsonwebtoken';
 
 import {
+  AccessJwtPayload,
   BlueskyAccountCredentials,
   BlueskyAccountDetails,
   BlueskyCredentials,
@@ -41,14 +43,15 @@ import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
 import { UsersRepository } from '../../users/users.repository';
-import { PlatformService } from '../platforms.interface';
+import { PlatformService, WithCredentials } from '../platforms.interface';
 import {
   cleanBlueskyContent,
   convertBlueskyPostsToThreads,
   extractPrimaryThread,
+  removeUndefinedFields,
 } from './bluesky.utils';
 
-const DEBUG = true;
+const DEBUG = false;
 const DEBUG_PREFIX = 'BlueskyService';
 
 export interface BlueskyServiceConfig {
@@ -68,26 +71,54 @@ export class BlueskyService
   constructor(
     protected time: TimeService,
     protected usersRepo: UsersRepository,
-    protected config: BlueskyServiceConfig
+    protected config: BlueskyServiceConfig,
+    protected agent?: AtpAgent
   ) {}
 
-  private async getClient(credentials?: BlueskyCredentials): Promise<AtpAgent> {
-    const agent = new AtpAgent({ service: this.config.BLUESKY_SERVICE_URL });
-    await agent.login(
-      credentials
-        ? {
-            identifier: credentials.username,
-            password: credentials.appPassword,
-          }
-        : {
-            identifier: this.config.BLUESKY_USERNAME,
-            password: this.config.BLUESKY_APP_PASSWORD,
-          }
-    );
-    if (!agent.session) {
-      throw new Error('Failed to login to Bluesky');
+  private async getClient(
+    credentials?: BlueskyCredentials
+  ): Promise<{ client: AtpAgent; credentials?: BlueskyCredentials }> {
+    const session = await (async () => {
+      if (!this.agent) {
+        this.agent = new AtpAgent({
+          service: this.config.BLUESKY_SERVICE_URL,
+        });
+      }
+      if (!credentials) {
+        if (this.agent?.session) {
+          return this.agent.session;
+        }
+        await this.agent.login({
+          identifier: this.config.BLUESKY_USERNAME,
+          password: this.config.BLUESKY_APP_PASSWORD,
+        });
+        if (!this.agent.session) {
+          throw new Error('Failed to login to Bluesky');
+        }
+        return this.agent.session;
+      }
+      return credentials;
+    })();
+    if (!this.agent) {
+      throw new Error('Failed to initialize bluesky client');
     }
-    return agent;
+    await this.agent.resumeSession(session);
+    if (!this.agent.session) {
+      throw new Error('Failed to initiate bluesky session');
+    }
+    const decodedAccessJwt = jwt.decode(
+      this.agent.session.accessJwt
+    ) as AccessJwtPayload;
+
+    let newCredentials: BlueskyCredentials | undefined = undefined;
+
+    /** if the access token is under 1 hour from expiring, refresh it */
+    if (decodedAccessJwt.exp * 1000 - this.time.now() < 1000 * 60 * 60) {
+      await this.agent.sessionManager.refreshSession();
+      newCredentials = this.agent.session;
+    }
+
+    return { client: this.agent, credentials: newCredentials };
   }
 
   public async getSignupContext(userId?: string, params?: any): Promise<any> {
@@ -97,7 +128,7 @@ export class BlueskyService
 
   public async handleSignupData(signupData: BlueskySignupData) {
     if (DEBUG) logger.debug('handleSignupData', { signupData }, DEBUG_PREFIX);
-    const agent = new AtpAgent({ service: 'https://bsky.social' });
+    const agent = new AtpAgent({ service: this.config.BLUESKY_SERVICE_URL });
     await agent.login({
       identifier: signupData.username,
       password: signupData.appPassword,
@@ -109,14 +140,12 @@ export class BlueskyService
       actor: agent.session.did,
     });
 
+    const sessionData = removeUndefinedFields(agent.session);
     const bluesky: BlueskyAccountDetails = {
       user_id: bskFullUser.data.did,
       signupDate: this.time.now(),
       credentials: {
-        read: {
-          username: signupData.username,
-          appPassword: signupData.appPassword,
-        },
+        read: sessionData,
       },
     };
 
@@ -125,6 +154,7 @@ export class BlueskyService
       username: bskFullUser.data.handle,
       displayName: bskFullUser.data.displayName || bskFullUser.data.handle,
       avatar: bskFullUser.data.avatar || '',
+      description: bskFullUser.data.description || '',
     };
 
     const profile: AccountProfileCreate<PlatformProfile> = {
@@ -134,10 +164,7 @@ export class BlueskyService
     };
 
     if (signupData.type === 'write') {
-      bluesky.credentials['write'] = {
-        username: signupData.username,
-        appPassword: signupData.appPassword,
-      };
+      bluesky.credentials['write'] = sessionData;
     }
 
     if (DEBUG)
@@ -151,7 +178,7 @@ export class BlueskyService
     credentials?: BlueskyCredentials
   ): Promise<AccountProfileBase<PlatformProfile> | undefined> {
     try {
-      const agent = await this.getClient(credentials);
+      const { client: agent } = await this.getClient(credentials);
       const profile = await agent.getProfile({ actor: username });
 
       if (profile.success) {
@@ -162,6 +189,7 @@ export class BlueskyService
             username: profile.data.handle,
             displayName: profile.data.displayName || profile.data.handle,
             avatar: profile.data.avatar || '',
+            description: profile.data.description || '',
           },
         };
       }
@@ -179,7 +207,15 @@ export class BlueskyService
     if (DEBUG)
       logger.debug('fetch', { user_id, params, credentials }, DEBUG_PREFIX);
 
-    const agent = await this.getClient(credentials?.read);
+    const { client: agent, credentials: newCredentials } = await this.getClient(
+      credentials?.read
+    );
+    const newAccountCredentials: BlueskyAccountCredentials | undefined =
+      newCredentials ? { read: newCredentials } : undefined;
+
+    if (newAccountCredentials && credentials?.write) {
+      newAccountCredentials.write = newCredentials;
+    }
 
     let allPosts: BlueskyPost[] = [];
     let newestId: string | undefined;
@@ -278,8 +314,6 @@ export class BlueskyService
 
     const threads = convertBlueskyPostsToThreads(allPosts, user_id);
 
-    console.error('TODO: implement DID');
-
     const platformPosts = threads.map((thread) => ({
       post_id: thread.thread_id,
       user_id: thread.author.id,
@@ -293,6 +327,7 @@ export class BlueskyService
         oldest_id: oldestId,
       },
       platformPosts,
+      credentials: newAccountCredentials,
     };
 
     if (DEBUG)
@@ -315,7 +350,7 @@ export class BlueskyService
   ): Promise<
     { uri: string; cid: string; value: AppBskyFeedPost.Record } | undefined
   > {
-    const agent = await this.getClient(credentials);
+    const { client: agent } = await this.getClient(credentials);
     const { did, rkey } = parseBlueskyURI(postId);
     if (!rkey) {
       throw new Error('Invalid post ID');
@@ -390,8 +425,16 @@ export class BlueskyService
     if (DEBUG) logger.debug('publish', { postPublish }, DEBUG_PREFIX);
 
     const userDetails = postPublish.credentials;
-    if (!userDetails.read) throw new Error('Missing Bluesky user details');
-    const agent = await this.getClient(userDetails.read);
+    if (!userDetails.write) throw new Error('Missing Bluesky user details');
+    const { client: agent, credentials: newCredentials } = await this.getClient(
+      userDetails.write
+    );
+    const newAccountCredentials: BlueskyAccountCredentials | undefined =
+      newCredentials ? { read: newCredentials } : undefined;
+
+    if (newAccountCredentials && userDetails.write) {
+      newAccountCredentials.write = newCredentials;
+    }
 
     const rt = new RichText({ text: postPublish.draft });
     await rt.detectFacets(agent);
@@ -408,6 +451,7 @@ export class BlueskyService
         timestampMs: Date.now(),
         post: response,
       },
+      credentials: newAccountCredentials,
     };
   }
 
@@ -444,7 +488,7 @@ export class BlueskyService
       if (!credentials) {
         throw new Error('Missing Bluesky user details');
       }
-      const agent = await this.getClient(credentials);
+      const { client: agent } = await this.getClient(credentials);
       const profile = await agent.getProfile({ actor: user_id });
 
       if (profile.success) {
@@ -467,13 +511,23 @@ export class BlueskyService
   public async get(
     post_id: string,
     credentials: BlueskyAccountCredentials
-  ): Promise<{ platformPost: PlatformPostPosted<BlueskyThread> }> {
+  ): Promise<
+    { platformPost: PlatformPostPosted<BlueskyThread> } & WithCredentials
+  > {
     if (DEBUG) logger.debug('get', { post_id, credentials }, DEBUG_PREFIX);
 
     if (!credentials.read) {
       throw new Error('Missing Bluesky user details');
     }
-    const agent = await this.getClient(credentials.read);
+    const { client: agent, credentials: newCredentials } = await this.getClient(
+      credentials.read
+    );
+    const newAccountCredentials: BlueskyAccountCredentials | undefined =
+      newCredentials ? { read: newCredentials } : undefined;
+
+    if (newAccountCredentials && credentials?.write) {
+      newAccountCredentials.write = newCredentials;
+    }
 
     const response = await agent.getPostThread({
       uri: post_id,
@@ -534,7 +588,7 @@ export class BlueskyService
       post: blueskyThread,
     };
 
-    return { platformPost };
+    return { platformPost, credentials: newAccountCredentials };
   }
 
   private findRootPost(

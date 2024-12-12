@@ -11,7 +11,7 @@ export const OrcidIcon = (props: { size?: number }) => {
         height={size}
         viewBox="0 0 40 40"
         fill="none">
-        <g clip-path="url(#clip0_617_9927)">
+        <g clipPath="url(#clip0_617_9927)">
           <path
             d="M40 20C40 31.0469 31.0469 40 20 40C8.95312 40 0 31.0469 0 20C0 8.95312 8.95312 0 20 0C31.0469 0 40 8.95312 40 20Z"
             fill="#A6CE39"

@@ -2,28 +2,58 @@ import { Box } from 'grommet';
 import { DataFactory } from 'n3';
 import { useMemo } from 'react';
 
-import { RefMeta } from '../../../shared/types/types.parser';
+import { useOverlay } from '../../../overlays/OverlayContext';
 import { filterStore, writeRDF } from '../../../shared/utils/n3.utils';
-import { THIS_POST_NAME } from '../../../shared/utils/semantics.helper';
+import { THIS_POST_NAME_URI } from '../../../shared/utils/semantics.helper';
 import { AppLabel } from '../../../ui-components';
+import { REF_LABELS_EDITOR_ID } from '../../../ui-components/AppLabelsEditor';
 import { LoadingDiv } from '../../../ui-components/LoadingDiv';
 import { splitArray } from '../../../ui-components/utils';
 import { useSemanticsStore } from '../common/use.semantics';
-import { PatternProps } from '../patterns';
-import { RefWithLabels } from './RefLabel';
-import { RefData, RefsMap, processSemantics } from './process.semantics';
+import { PatternProps, PostClickTarget } from '../patterns';
+import { RefWithLabels } from './RefWithLabels';
+import { RefsMap, processSemantics } from './process.semantics';
 
 export const RefLabelsComponent = (props: PatternProps) => {
-  const { store, originalStore } = useSemanticsStore(props);
-  const size = props.size || 'normal  ';
+  const { store, originalStore } = useSemanticsStore(
+    props.semantics,
+    props.originalParsed
+  );
+  const size = props.size || 'normal';
+
+  const overlay = useOverlay();
+
+  const handleClick = (
+    event: React.MouseEvent<HTMLDivElement>,
+    ref: string
+  ) => {
+    let target = event.target as HTMLElement;
+
+    // filter clicks on the ref semantics
+    while (target !== null) {
+      if (target.id === REF_LABELS_EDITOR_ID) {
+        return; // Stop further processing
+      }
+
+      target = target.parentNode as HTMLElement;
+    }
+
+    overlay &&
+      overlay.onPostClick({ target: PostClickTarget.REF, payload: ref });
+  };
 
   /** processed ref labels with metadata */
   const refs = useMemo<RefsMap>(
     () =>
       originalStore && store && props.originalParsed
-        ? processSemantics(originalStore, store, props.originalParsed?.support)
-        : new Map(),
-    [originalStore, props.originalParsed, store]
+        ? processSemantics(
+            originalStore,
+            store,
+            props.originalParsed?.support,
+            props.post
+          )
+        : (new Map() as RefsMap),
+    [originalStore, props.originalParsed, store, props.post]
   );
 
   const removeLabel = async (ref: string, labelUri: string) => {
@@ -49,7 +79,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
 
   const addLabel = async (ref: string, labelUri: string) => {
     if (props.semanticsUpdated && store) {
-      const THIS_POST = DataFactory.namedNode(THIS_POST_NAME);
+      const THIS_POST = DataFactory.namedNode(THIS_POST_NAME_URI);
       const labelNode = DataFactory.namedNode(labelUri);
       const refNode = DataFactory.namedNode(ref);
 
@@ -88,28 +118,54 @@ export const RefLabelsComponent = (props: PatternProps) => {
 
   const allRefs = Array.from(refs.entries());
   const [visibleRefs, restOfRefs] =
-    size === 'compact' ? splitArray(allRefs, 2) : [allRefs, []];
+    size === 'compact' ? splitArray(allRefs, 1) : [allRefs, []];
 
   if (refs && refs.size > 0) {
     return (
-      <Box margin={{ top: 'small' }}>
+      <Box>
         <Box style={{ display: 'block' }}>
           <Box gap="16px">
             {visibleRefs.map(([ref, refData], index) => {
               if (!props.originalParsed)
                 throw new Error('Unexpected undefined');
 
+              const refDisplayMeta = props.post?.meta?.references[ref];
+
+              const aggregatedLabelsWithoutAuthorLabels =
+                refDisplayMeta?.aggregatedLabels?.filter(
+                  (refLabel) =>
+                    refLabel.authorProfileId !== props.post?.authorProfileId
+                );
+
               return (
-                <RefWithLabels
-                  ix={index}
-                  editable={props.editable}
-                  key={ref}
-                  refUrl={ref}
-                  refData={refData}
-                  support={props.originalParsed?.support}
-                  removeLabel={(labelUri: string) => removeLabel(ref, labelUri)}
-                  addLabel={(labelUri: string) => addLabel(ref, labelUri)}
-                  allRefs={visibleRefs}></RefWithLabels>
+                refDisplayMeta?.oembed && (
+                  <Box
+                    key={index}
+                    style={{
+                      borderRadius: '12px',
+                      border: '1.6px solid #D1D5DB',
+                      width: '100%',
+                    }}
+                    pad="12px"
+                    onClick={(e: React.MouseEvent<HTMLDivElement>) =>
+                      handleClick(e, ref)
+                    }>
+                    <RefWithLabels
+                      ix={index}
+                      oembed={refDisplayMeta.oembed}
+                      authorLabels={refs.get(ref)?.labelsUris || []}
+                      aggregatedLabels={aggregatedLabelsWithoutAuthorLabels}
+                      showDescription={false}
+                      editable={props.editable}
+                      ontology={props.originalParsed?.support?.ontology}
+                      removeLabel={(labelUri: string) => {
+                        removeLabel(ref, labelUri).catch(console.error);
+                      }}
+                      addLabel={(labelUri: string) => {
+                        addLabel(ref, labelUri).catch(console.error);
+                      }}></RefWithLabels>
+                  </Box>
+                )
               );
             })}
           </Box>

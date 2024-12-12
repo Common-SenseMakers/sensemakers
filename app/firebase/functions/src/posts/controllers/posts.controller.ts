@@ -1,27 +1,20 @@
 import { RequestHandler } from 'express';
 
 import {
-  AddUserDataPayload,
-  FetchParams,
-} from '../../@shared/types/types.fetch';
-import { PublishPostPayload } from '../../@shared/types/types.fetch';
-import {
+  GetPostPayload,
   PostUpdatePayload,
   PostsQuery,
-  UnpublishPlatformPostPayload,
 } from '../../@shared/types/types.posts';
 import { IS_EMULATOR } from '../../config/config.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
+import { queryParamsSchema } from '../../feed/feed.schema';
 import { logger } from '../../instances/logger';
 import { enqueueTask } from '../../tasksUtils/tasks.support';
 import { canReadPost } from '../posts.access.control';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 import {
-  approvePostSchema,
-  createDraftPostSchema,
-  getUserPostsQuerySchema,
+  getPostSchema,
   postIdValidation,
-  retractPostSchema,
   updatePostSchema,
 } from './posts.schema';
 
@@ -35,7 +28,7 @@ export const getUserPostsController: RequestHandler = async (
   response
 ) => {
   try {
-    const queryParams = (await getUserPostsQuerySchema.validate(
+    const queryParams = (await queryParamsSchema.validate(
       request.body
     )) as PostsQuery;
 
@@ -61,11 +54,16 @@ export const getPostController: RequestHandler = async (request, response) => {
     const userId = getAuthenticatedUser(request);
     const { postsManager } = getServices(request);
 
-    const payload = (await postIdValidation.validate(request.body)) as {
-      postId: string;
+    const payload = (await getPostSchema.validate(
+      request.body
+    )) as GetPostPayload;
+
+    const config = payload.config || {
+      addMirrors: true,
+      addAggregatedLabels: true,
     };
 
-    const post = await postsManager.getPost(payload.postId, true);
+    const post = await postsManager.getPost(payload.postId, config, true);
 
     const canRead = canReadPost(post, userId);
 
@@ -93,38 +91,6 @@ export const getPostController: RequestHandler = async (request, response) => {
   }
 };
 
-export const approvePostController: RequestHandler = async (
-  request,
-  response
-) => {
-  try {
-    const userId = getAuthenticatedUser(request, true);
-    const { postsManager } = getServices(request);
-
-    const payload = (await approvePostSchema.validate(
-      request.body
-    )) as PublishPostPayload;
-
-    await postsManager.publishPost(
-      payload.post,
-      payload.platformIds,
-      undefined,
-      false,
-      userId
-    );
-
-    if (DEBUG)
-      logger.debug(`${request.path}: approvePost`, {
-        post: payload,
-      });
-
-    response.status(200).send({ success: true });
-  } catch (error: any) {
-    logger.error('error', error);
-    response.status(500).send({ success: false, error: error.message });
-  }
-};
-
 export const parsePostController: RequestHandler = async (
   request,
   response
@@ -145,36 +111,6 @@ export const parsePostController: RequestHandler = async (
       logger.debug(`${request.path}: parsePost: ${payload.postId}`, {
         post: payload,
       });
-
-    response.status(200).send({ success: true });
-  } catch (error: any) {
-    logger.error('error', error);
-    response.status(500).send({ success: false, error: error.message });
-  }
-};
-
-export const createDraftPostController: RequestHandler = async (
-  request,
-  response
-) => {
-  try {
-    const { db, postsManager } = getServices(request);
-
-    const payload = (await createDraftPostSchema.validate(request.body)) as {
-      postId: string;
-    };
-
-    if (DEBUG)
-      logger.debug(`${request.path}: createDraftPostController`, {
-        payload,
-      });
-
-    db.run(async (manager) => {
-      return postsManager.processing.createOrUpdatePostDrafts(
-        payload.postId,
-        manager
-      );
-    });
 
     response.status(200).send({ success: true });
   } catch (error: any) {
@@ -216,79 +152,6 @@ export const updatePostController: RequestHandler = async (
     if (DEBUG) logger.debug(`${request.path}: updatePost`, payload);
 
     response.status(200).send({ success: true });
-  } catch (error) {
-    logger.error('error', error);
-    response.status(500).send({ success: false, error });
-  }
-};
-
-export const unpublishPlatformPostController: RequestHandler = async (
-  request,
-  response
-) => {
-  try {
-    const userId = getAuthenticatedUser(request, true);
-    const { postsManager } = getServices(request);
-
-    const payload = (await retractPostSchema.validate(
-      request.body
-    )) as UnpublishPlatformPostPayload;
-
-    await postsManager.unpublishPlatformPost(
-      payload.postId,
-      userId,
-      payload.platformId,
-      payload.post_id
-    );
-
-    if (DEBUG) logger.debug(`${request.path}: updatePost`, payload);
-
-    response.status(200).send({ success: true });
-  } catch (error) {
-    logger.error('error', error);
-    response.status(500).send({ success: false, error });
-  }
-};
-
-export const addAccountDataController: RequestHandler = async (
-  request,
-  response
-) => {
-  try {
-    const services = getServices(request);
-
-    const payload = request.body as AddUserDataPayload;
-
-    const profile = await services.db.run(async (manager) => {
-      return services.users.getOrCreateProfileByUsername(
-        payload.platformId,
-        payload.username,
-        manager
-      );
-    });
-
-    if (!profile) {
-      throw new Error(
-        `unable to find profile for ${payload.username} on ${payload.platformId}`
-      );
-    }
-    /** the value of sinceId or untilId doesn't matter, as long as it exists, then it will be converted to appropriate fetch params */
-    const fetchParams: FetchParams = payload.latest
-      ? { expectedAmount: payload.amount, sinceId: profile.user_id }
-      : { expectedAmount: payload.amount, untilId: profile.user_id };
-
-    const fetchedPosts = await services.db.run(async (manager) => {
-      return services.postsManager.fetchAccount(
-        payload.platformId,
-        profile?.user_id,
-        fetchParams,
-        manager
-      );
-    });
-
-    if (DEBUG) logger.debug(`${request.path}: addAccountData`, payload);
-
-    response.status(200).send({ success: true, data: fetchedPosts });
   } catch (error) {
     logger.error('error', error);
     response.status(500).send({ success: false, error });

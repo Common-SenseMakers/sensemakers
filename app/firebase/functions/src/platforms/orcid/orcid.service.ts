@@ -19,7 +19,7 @@ import {
 import { logger } from '../../instances/logger';
 import { IdentityService } from '../platforms.interface';
 
-const DEBUG = true;
+const DEBUG = false;
 const DEBUG_PREFIX = 'OrcidService';
 
 export class OrcidService
@@ -96,7 +96,8 @@ export class OrcidService
     };
 
     const orcidProfile: OrcidProfile = {
-      name: result.name,
+      id: result.orcid,
+      username: result.name,
       orcid: result.orcid,
     };
 

@@ -5,13 +5,29 @@ import {
   AppPostSemantics,
   ParsePostResult,
 } from '../../shared/types/types.parser';
-import { AppButton } from '../../ui-components';
+import {
+  AppPostFull,
+  StructuredSemantics,
+} from '../../shared/types/types.posts';
 import { KeywordsComponent } from './keywords/Keywords.component';
 import { RefLabelsComponent } from './refs-labels/RefsLabels.component';
 
 export enum PATTERN_ID {
   KEYWORDS = 'keywords',
   REF_LABELS = 'ref-labels',
+}
+
+export enum PostClickTarget {
+  POST = 'POST',
+  USER_ID = 'USER_ID',
+  PLATFORM_USER_ID = 'PLATFORM_USER_ID',
+  REF = 'REF',
+  KEYWORD = 'KEYWORD',
+}
+
+export interface PostClickEvent {
+  target: PostClickTarget;
+  payload: unknown;
 }
 
 export interface PatternProps {
@@ -21,6 +37,8 @@ export interface PatternProps {
   originalParsed?: ParsePostResult;
   semantics?: AppPostSemantics;
   semanticsUpdated?: (semantics: AppPostSemantics) => void;
+  post?: AppPostFull;
+  structuredSemantics?: StructuredSemantics;
 }
 
 export const patternsLib: Record<

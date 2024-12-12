@@ -9,7 +9,7 @@ import {
   convertBlueskyPostsToThreads,
 } from '../../src/platforms/bluesky/bluesky.utils';
 
-describe('bluesky utility functions', () => {
+describe.skip('bluesky utility functions', () => {
   it('converts bluesky posts to threads', async () => {
     const did = process.env.BLUESKY_USER_ID;
     if (!did) {

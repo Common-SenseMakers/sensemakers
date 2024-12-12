@@ -8,7 +8,11 @@ import {
   PLATFORM,
   PUBLISHABLE_PLATFORM,
 } from '../@shared/types/types.platforms';
-import { AppPostFull, GenericPost } from '../@shared/types/types.posts';
+import {
+  AppPostFull,
+  GenericPost,
+  PostsQueryDefined,
+} from '../@shared/types/types.posts';
 import { AccountDetailsBase, DefinedIfTrue } from '../@shared/types/types.user';
 import { APP_URL } from '../config/config.runtime';
 
@@ -34,24 +38,26 @@ export class PostsHelper {
     filters: { platformId: PLATFORM; user_id?: string; post_id?: string },
     shouldThrow?: T
   ): DefinedIfTrue<T, PlatformPost> {
-    const mirror = post.mirrors.find((m) => {
-      let match = m.platformId === filters.platformId;
+    const mirror =
+      post.mirrors &&
+      post.mirrors.find((m) => {
+        let match = m.platformId === filters.platformId;
 
-      if (filters.user_id) {
-        const author_user_id = m.posted
-          ? m.posted.user_id
-          : m.draft
-            ? m.draft.user_id
-            : undefined;
-        match = match && filters.user_id === author_user_id;
-      }
+        if (filters.user_id) {
+          const author_user_id = m.posted
+            ? m.posted.user_id
+            : m.draft
+              ? m.draft.user_id
+              : undefined;
+          match = match && filters.user_id === author_user_id;
+        }
 
-      if (filters.post_id) {
-        match = match && filters.post_id === m.post_id;
-      }
+        if (filters.post_id) {
+          match = match && filters.post_id === m.post_id;
+        }
 
-      return match;
-    });
+        return match;
+      });
 
     if (!mirror) {
       if (shouldThrow) {
@@ -93,3 +99,27 @@ export class PostsHelper {
     return platformPosted.post_id;
   }
 }
+
+const QUERY_PARAMS_NOT_USING_LINKS_SUBCOLLECTION = [
+  'userId',
+  'profileId',
+  'origins',
+];
+
+export const doesQueryUseSubcollection = (queryParams: PostsQueryDefined) => {
+  let defaultResult = {
+    useLinksSubcollection: false,
+  };
+
+  const canUseSubcollection = !QUERY_PARAMS_NOT_USING_LINKS_SUBCOLLECTION.some(
+    (param) => param in queryParams
+  );
+
+  if (canUseSubcollection && queryParams.semantics?.refs?.length === 1) {
+    return {
+      useLinksSubcollection: true,
+    };
+  }
+
+  return defaultResult;
+};

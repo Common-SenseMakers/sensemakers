@@ -1,20 +1,15 @@
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useContext } from 'react';
 
 import { AppPostFull } from '../../shared/types/types.posts';
 import { useAccountContext } from '../../user-login/contexts/AccountContext';
-import { PostPublishStatusModals } from '../PostPublishStatusModals';
 import { PostDerivedContext, usePostDerived } from './use.post.derived';
 import { PostFetchContext, usePostFetch } from './use.post.fetch';
-import { PostNavContext, usePostNav } from './use.post.nav';
-import { PostPublishContext, usePostPublish } from './use.post.publish';
 import { PostUpdateContext, usePostUpdate } from './use.post.update';
 
 interface PostContextType {
   fetched: PostFetchContext;
   derived: PostDerivedContext;
   updated: PostUpdateContext;
-  publish: PostPublishContext;
-  navigatePost: PostNavContext;
 }
 
 const PostContextValue = createContext<PostContextType | undefined>(undefined);
@@ -32,10 +27,8 @@ export const PostContext: React.FC<{
   const { connectedUser } = useAccountContext();
 
   const fetched = usePostFetch(connectedUser, _postId, postInit);
-  const derived = usePostDerived(fetched, connectedUser);
+  const derived = usePostDerived(fetched);
   const updated = usePostUpdate(fetched, derived, postInit, connectedUser);
-  const publish = usePostPublish(fetched, updated);
-  const navigatePost = usePostNav(fetched);
 
   return (
     <PostContextValue.Provider
@@ -43,11 +36,7 @@ export const PostContext: React.FC<{
         fetched,
         derived,
         updated,
-        publish,
-        navigatePost,
       }}>
-      <PostPublishStatusModals
-        showCelebration={showCelebration}></PostPublishStatusModals>
       {children}
     </PostContextValue.Provider>
   );

@@ -1,36 +1,58 @@
 import { Box, Text } from 'grommet';
+import { MouseEventHandler } from 'react';
 
-import { PlatformPostAnchor } from '../app/anchors/PlatformPostAnchor';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
+import { useOverlay } from '../overlays/OverlayContext';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
-import { PATTERN_ID } from '../semantics/patterns/patterns';
-import { AppPostFull, AppPostParsedStatus } from '../shared/types/types.posts';
+import { PATTERN_ID, PostClickTarget } from '../semantics/patterns/patterns';
+import { AppPostFull } from '../shared/types/types.posts';
 import { useThemeContext } from '../ui-components/ThemedApp';
-import { NanopubStatus } from './NanopubStatus';
+import { PlatformPostAnchor } from './PlatformPostAnchor';
 import { PublishButtons } from './PostPublishButtons';
 import { PostTextStatic } from './PostTextStatic';
-import { getPostDetails } from './platform.post.details';
+import { getPostDetails } from './platform-specific.details';
 import { usePost } from './post.context/PostContext';
-import { concatenateThread, hideSemanticsHelper } from './posts.helper';
+import { concatenateThread } from './posts.helper';
 
-const PostCardHeaderUser = (props: { post: AppPostFull }) => {
-  const details = getPostDetails(props.post);
+const KEYWORDS_SEMANTICS_ID = 'keywords-semantics';
+const REFS_SEMANTICS_ID = 'refs-semantics';
+const POST_AUTHOR_ID = 'post-author';
 
-  return (
-    <>
-      <PlatformPostAnchor details={details}></PlatformPostAnchor>
-      <NanopubStatus post={props.post}></NanopubStatus>
-    </>
-  );
-};
+export const CARD_BORDER = '1px solid var(--Neutral-300, #D1D5DB)';
 
-const PostCardHeaderFeed = (props: { post: AppPostFull }) => {
+const PostCardHeader = (props: { post: AppPostFull }) => {
   const { constants } = useThemeContext();
   const details = getPostDetails(props.post);
 
+  const overlay = useOverlay();
+
+  const onUserClicked = () => {
+    if (props.post.authorUserId) {
+      overlay &&
+        overlay.onPostClick({
+          target: PostClickTarget.USER_ID,
+          payload: props.post.authorUserId,
+        });
+      return;
+    }
+
+    if (props.post.authorProfileId) {
+      overlay &&
+        overlay.onPostClick({
+          target: PostClickTarget.PLATFORM_USER_ID,
+          payload: props.post.authorProfileId,
+        });
+      return;
+    }
+  };
+
   return (
     <Box direction="row" align="center" justify="between" width="100%">
-      <Box direction="row" align="center" gap="12px">
+      <Box
+        direction="row"
+        align="center"
+        gap="4px"
+        onClick={() => onUserClicked()}>
         <PlatformAvatar
           size={24}
           imageUrl={details?.authorAvatarUrl}></PlatformAvatar>
@@ -58,25 +80,41 @@ const PostCardHeaderFeed = (props: { post: AppPostFull }) => {
 export const PostCard = (props: {
   isPublicFeed?: boolean;
   shade?: boolean;
-  handleClick: () => void;
   isEmail?: boolean;
 }) => {
   const { shade: _shade } = props;
   const shade = _shade || false;
-  const isPublicFeed = props.isPublicFeed || false;
 
   const { updated } = usePost();
   const post = updated.postMerged;
 
   const { constants } = useThemeContext();
 
+  const overlay = useOverlay();
+
   if (!post) {
     console.warn('unexpected post undefined in PostCard');
     return <></>;
   }
 
-  const handleClick = () => {
-    props.handleClick();
+  const handleClick: MouseEventHandler = (event) => {
+    let target = event.target as HTMLElement;
+
+    // filter clicks on the ref semantics
+    while (target !== null) {
+      if (
+        [REFS_SEMANTICS_ID, POST_AUTHOR_ID, KEYWORDS_SEMANTICS_ID].includes(
+          target.id
+        )
+      ) {
+        return; // Stop further processing
+      }
+
+      target = target.parentNode as HTMLElement;
+    }
+
+    overlay &&
+      overlay.onPostClick({ target: PostClickTarget.POST, payload: post });
   };
 
   const postText = concatenateThread(post.generic);
@@ -87,74 +125,73 @@ export const PostCard = (props: {
     }
   };
 
-  const hideSemantics = hideSemanticsHelper(post);
+  const hideSemantics = false;
 
-  const header = isPublicFeed ? (
-    <PostCardHeaderFeed post={post}></PostCardHeaderFeed>
-  ) : (
-    <PostCardHeaderUser post={post}></PostCardHeaderUser>
-  );
+  const header = <PostCardHeader post={post}></PostCardHeader>;
 
   return (
     <Box
-      pad={{ top: '16px', horizontal: '12px' }}
       style={{
         backgroundColor: shade ? constants.colors.shade : 'white',
-        borderTop: '2px solid var(--Neutral-300, #D1D5DB)',
-        borderRight: '1px solid var(--Neutral-300, #D1D5DB)',
-        borderLeft: '1px solid var(--Neutral-300, #D1D5DB)',
-        borderBottom: 'none',
+        borderBottom: CARD_BORDER,
+        borderRight: CARD_BORDER,
+        borderLeft: CARD_BORDER,
+        borderTop: 'none',
       }}>
-      <Box
-        style={{ cursor: 'pointer', position: 'relative' }}
-        onClick={handleClick}>
-        <Box direction="row" justify="between" margin={{ bottom: '6.5px' }}>
-          {header}
-        </Box>
+      <PublishButtons margin={{ bottom: '16px' }}></PublishButtons>
 
-        {!hideSemantics && (
-          <SemanticsEditor
-            include={[PATTERN_ID.KEYWORDS]}
-            patternProps={{
-              isLoading:
-                updated.statusesMerged.isParsing !== undefined
-                  ? updated.statusesMerged.isParsing
-                  : false,
-              editable: false,
-              size: 'compact',
-              semantics: post?.semantics,
-              originalParsed: post?.originalParsed,
-            }}></SemanticsEditor>
-        )}
-
-        <PostTextStatic
-          onClick={handleInternalClick}
-          truncate
-          shade={shade}
-          text={postText}></PostTextStatic>
-
-        {!hideSemantics && (
-          <SemanticsEditor
-            include={[PATTERN_ID.REF_LABELS]}
-            patternProps={{
-              isLoading:
-                updated.statusesMerged.isParsing !== undefined
-                  ? updated.statusesMerged.isParsing
-                  : false,
-              size: 'compact',
-              editable: false,
-              semantics: post?.semantics,
-              originalParsed: post?.originalParsed,
-            }}></SemanticsEditor>
-        )}
-      </Box>
-      <Box pad={{ top: 'medium' }}>
-        {!isPublicFeed &&
-          updated.inPrePublish &&
-          updated.postMerged?.parsedStatus ===
-            AppPostParsedStatus.PROCESSED && (
-            <PublishButtons compact></PublishButtons>
+      <Box pad={{ top: '16px', horizontal: '12px', bottom: '24px' }}>
+        <Box
+          style={{ cursor: 'pointer', position: 'relative' }}
+          onClick={handleClick}>
+          <Box
+            id={POST_AUTHOR_ID}
+            direction="row"
+            justify="between"
+            margin={{ bottom: '16px' }}>
+            {header}
+          </Box>
+          {!hideSemantics && (
+            <Box id={KEYWORDS_SEMANTICS_ID}>
+              <SemanticsEditor
+                include={[PATTERN_ID.KEYWORDS]}
+                patternProps={{
+                  isLoading:
+                    updated.statusesMerged.isParsing !== undefined
+                      ? updated.statusesMerged.isParsing
+                      : false,
+                  editable: false,
+                  size: 'compact',
+                  semantics: post?.semantics,
+                  originalParsed: post?.originalParsed,
+                  structuredSemantics: post?.structuredSemantics,
+                }}></SemanticsEditor>
+            </Box>
           )}
+          <PostTextStatic
+            onClick={handleInternalClick}
+            truncate
+            shade={shade}
+            text={postText}></PostTextStatic>
+          {!hideSemantics && (
+            <Box margin={{ top: '24px' }} id={REFS_SEMANTICS_ID}>
+              <SemanticsEditor
+                include={[PATTERN_ID.REF_LABELS]}
+                patternProps={{
+                  isLoading:
+                    updated.statusesMerged.isParsing !== undefined
+                      ? updated.statusesMerged.isParsing
+                      : false,
+                  size: 'compact',
+                  editable: false,
+                  semantics: post?.semantics,
+                  originalParsed: post?.originalParsed,
+                  structuredSemantics: post?.structuredSemantics,
+                  post,
+                }}></SemanticsEditor>
+            </Box>
+          )}
+        </Box>
       </Box>
     </Box>
   );

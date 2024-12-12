@@ -1,7 +1,7 @@
 import { Plugin } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 
-export default function placeholder(text: any) {
+export default function placeholder(text: string) {
   const update = (view: EditorView) => {
     if (view.state.doc.textContent) {
       view.dom.removeAttribute('data-placeholder');

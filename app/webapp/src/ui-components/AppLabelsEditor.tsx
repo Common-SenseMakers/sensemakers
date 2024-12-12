@@ -3,7 +3,7 @@ import { Edit } from 'grommet-icons';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { I18Keys } from '../i18n/i18n';
+import { PostEditKeys } from '../i18n/i18n.edit.post';
 import { AppButton } from './AppButton';
 import { AppInput } from './AppInput';
 import { AppLabel, LabelColors } from './AppLabel';
@@ -12,8 +12,10 @@ import useOutsideClick from './hooks/OutsideClickHook';
 
 const DEBUG = false;
 
+export const REF_LABELS_EDITOR_ID = 'ref-labels-editor';
+
 export const AppLabelsEditor = (props: {
-  labels: string[];
+  labels: Array<string | JSX.Element>;
   maxLabels?: number;
   options?: string[];
   addLabel?: (label: string) => void;
@@ -21,10 +23,12 @@ export const AppLabelsEditor = (props: {
   hashtag?: boolean;
   colors: LabelColors;
   editable?: boolean;
+  onLabelClick?: (label: string) => void;
 }) => {
   const editable = props.editable !== undefined ? props.editable : false;
   const colors = props.colors;
   const hashtag = props.hashtag !== undefined ? props.hashtag : false;
+  const onLabelClick = props.onLabelClick;
 
   const { constants } = useThemeContext();
   const { t } = useTranslation();
@@ -46,8 +50,6 @@ export const AppLabelsEditor = (props: {
       ? props.options.filter((e) => (e ? e.includes(input) : false))
       : [];
   }, [input, onlyOptions, props.options]);
-
-  const addWidth = '120px';
 
   useEffect(() => {
     if (DEBUG) console.log('autofocusing input', { adding });
@@ -73,7 +75,6 @@ export const AppLabelsEditor = (props: {
   };
 
   useOutsideClick(keyBox, () => {
-    if (DEBUG) console.log('useOutsideClick', { adding });
     if (adding) {
       reset();
     }
@@ -107,11 +108,13 @@ export const AppLabelsEditor = (props: {
   };
 
   const hasManyLabels =
-    props.maxLabels !== undefined && props.labels.length >= props.maxLabels;
+    props.maxLabels !== undefined && props.labels.length >= props.maxLabels + 1;
+
   const visibleLables =
     props.maxLabels !== undefined
       ? props.labels.slice(0, props.maxLabels)
       : props.labels;
+
   const nonVisibleLabels =
     props.maxLabels !== undefined ? props.labels.slice(props.maxLabels) : [];
 
@@ -139,7 +142,7 @@ export const AppLabelsEditor = (props: {
                 lineHeight: '16px',
               }}
               color={constants.colors.primary}>
-              {t(I18Keys.addKeyword)}
+              {t(PostEditKeys.addKeyword)}
             </Text>
           </Box>
         </AppButton>
@@ -177,6 +180,7 @@ export const AppLabelsEditor = (props: {
 
   return (
     <Box
+      id={REF_LABELS_EDITOR_ID}
       ref={keyBox}
       width="100%"
       style={{
@@ -185,27 +189,33 @@ export const AppLabelsEditor = (props: {
       }}>
       <Box style={{ display: 'block' }}>
         {visibleLables.map((label, ix) => {
-          const marginRight = ix < visibleLables.length - 1 ? 'small' : '0';
+          const marginRight = ix < visibleLables.length - 1 ? '4px' : '0';
           return (
             <Box
               key={ix}
-              style={{ display: 'block', float: 'left', paddingTop: '5.5px' }}>
+              style={{
+                display: 'block',
+                float: 'left',
+                cursor: onLabelClick ? 'pointer' : 'inherit',
+              }}
+              onClick={() => {
+                onLabelClick && !adding && onLabelClick(label as string);
+              }}>
               <AppLabel
                 colors={colors}
                 showClose={adding}
-                remove={() => removeLabel(label)}
+                remove={() => removeLabel(label as string)}
                 key={ix}
-                margin={{ right: marginRight, bottom: 'xsmall' }}>
-                {`${hashtag ? '#' : ''}${label}`}
+                margin={{ right: marginRight, bottom: '4px' }}>
+                {`${hashtag ? '#' : ''}`}
+                <span>{label}</span>
               </AppLabel>
             </Box>
           );
         })}
         {hasManyLabels && !adding ? (
-          <Box style={{ display: 'block', float: 'left', paddingTop: '5.5px' }}>
-            <AppLabel
-              colors={colors}
-              margin={{ left: 'small', bottom: 'xsmall' }}>
+          <Box style={{ display: 'block', float: 'left' }}>
+            <AppLabel colors={colors} margin={{ left: '4px', bottom: '4px' }}>
               {`+${nonVisibleLabels.length}`}
             </AppLabel>
           </Box>
@@ -216,7 +226,6 @@ export const AppLabelsEditor = (props: {
           style={{
             display: 'block',
             float: 'left',
-            paddingTop: '5px',
           }}>
           {adding ? (
             <Keyboard
@@ -267,9 +276,9 @@ export const AppLabelsEditor = (props: {
             backgroundColor: constants.colors.shade,
             width: '100%',
             padding: '12px 12px 12px 12px',
-            top: `${height}px`,
-            borderBottomLeftRadius: '6px',
-            borderBottomRightRadius: '6px',
+            top: `${height || 0}px`,
+            borderRadius: '6px',
+            border: `2px ${constants.colors.border} solid`,
             zIndex: 1,
           }}
           direction="row"

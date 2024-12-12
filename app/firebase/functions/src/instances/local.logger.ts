@@ -93,7 +93,7 @@ export class LocalLogger {
     if (showCtx) {
       console[method](
         `${marker}: ${msg}`,
-        util.inspect(obj, { depth: 5, colors: true }) || ''
+        util.inspect(obj, { depth: 6, colors: true }) || ''
       );
     } else {
       console[method](`${marker}: ${msg}`);

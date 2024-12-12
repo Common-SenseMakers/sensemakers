@@ -10,15 +10,13 @@ import {
   blueskySignupDataSchema,
   mastodonGetSignupContextSchema,
   mastodonSignupDataSchema,
-  nanopubGetSignupContextSchema,
-  nanopubSignupDataSchema,
   orcidGetSignupContextSchema,
   orcidSignupDataSchema,
   twitterGetSignupContextSchema,
   twitterSignupDataSchema,
 } from './auth.schema';
 
-const DEBUG = true;
+const DEBUG = false;
 const DEBUG_PREFIX = '[AUTH-CONTROLLER]';
 
 export const getSignupContextController: RequestHandler = async (
@@ -34,10 +32,6 @@ export const getSignupContextController: RequestHandler = async (
     const payload = await (async () => {
       if (platform === PLATFORM.Twitter) {
         return twitterGetSignupContextSchema.validate(request.body);
-      }
-
-      if (platform === PLATFORM.Nanopub) {
-        return nanopubGetSignupContextSchema.validate(request.body);
       }
 
       if (platform === PLATFORM.Orcid) {
@@ -87,10 +81,6 @@ export const handleSignupController: RequestHandler = async (
         return twitterSignupDataSchema.validate(request.body);
       }
 
-      if (platform === PLATFORM.Nanopub) {
-        return nanopubSignupDataSchema.validate(request.body);
-      }
-
       if (platform === PLATFORM.Orcid) {
         return orcidSignupDataSchema.validate(request.body);
       }
@@ -117,18 +107,19 @@ export const handleSignupController: RequestHandler = async (
     const result = await services.db.run(
       async (manager) => {
         /** handle signup and refetch user posts */
-        return await services.users.handleSignup(
-          platform,
-          payload,
-          manager,
-          userId
-        );
+        return services.users.handleSignup(platform, payload, manager, userId);
       },
       undefined,
       undefined,
       `handleSignupController ${debugId}`,
       DEBUG
     );
+
+    if (result?.linkProfile) {
+      /** update userId of posts and profiles */
+      logger.debug('linkExistingUser', result.userId, DEBUG_PREFIX);
+      await services.postsManager.linkExistingUser(result.userId);
+    }
 
     response.status(200).send({ success: true, data: result });
   } catch (error: any) {

@@ -2,20 +2,31 @@ import { Box } from 'grommet';
 import { DataFactory } from 'n3';
 import { useMemo } from 'react';
 
+import { useOverlay } from '../../../overlays/OverlayContext';
 import {
   filterStore,
   mapStoreElements,
   writeRDF,
 } from '../../../shared/utils/n3.utils';
-import { THIS_POST_NAME } from '../../../shared/utils/semantics.helper';
+import { THIS_POST_NAME_URI } from '../../../shared/utils/semantics.helper';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { LoadingDiv } from '../../../ui-components/LoadingDiv';
 import { useSemanticsStore } from '../common/use.semantics';
-import { PatternProps } from '../patterns';
+import { PatternProps, PostClickTarget } from '../patterns';
 
 export const KeywordsComponent = (props: PatternProps) => {
   /** actual semantics */
-  const { store } = useSemanticsStore(props);
+  const { store } = useSemanticsStore(props.semantics, props.originalParsed);
+
+  const overlay = useOverlay();
+
+  const handleKeywordClick = (keyword: string) => {
+    overlay &&
+      overlay.onPostClick({
+        target: PostClickTarget.KEYWORD,
+        payload: keyword,
+      });
+  };
 
   const KEYWORD_PREDICATE =
     props.originalParsed?.support?.ontology?.keyword_predicate?.uri;
@@ -32,7 +43,7 @@ export const KeywordsComponent = (props: PatternProps) => {
 
   const addKeyword = async (keyword: string) => {
     if (props.semanticsUpdated && store && KEYWORD_PREDICATE) {
-      const THIS_POST = DataFactory.namedNode(THIS_POST_NAME);
+      const THIS_POST = DataFactory.namedNode(THIS_POST_NAME_URI);
       const labelNode = DataFactory.namedNode(KEYWORD_PREDICATE);
       const refNode = DataFactory.literal(keyword);
 
@@ -92,10 +103,15 @@ export const KeywordsComponent = (props: PatternProps) => {
         <AppLabelsEditor
           maxLabels={props.size === 'compact' ? 2 : undefined}
           editable={props.editable}
-          colors={{ font: '#498283', background: '#F5FCFC', border: '#BDD9D7' }}
+          colors={{ font: '#FFFFFF', background: '#498283', border: '#6C9C9D' }}
           labels={keywords}
-          addLabel={(newLabel) => addKeyword(newLabel)}
-          removeLabel={(newLabel) => removeKeyword(newLabel)}></AppLabelsEditor>
+          onLabelClick={handleKeywordClick}
+          addLabel={(newLabel) => {
+            addKeyword(newLabel).catch(console.error);
+          }}
+          removeLabel={(newLabel) => {
+            removeKeyword(newLabel).catch(console.error);
+          }}></AppLabelsEditor>
       </Box>
     </Box>
   );

@@ -1,18 +1,20 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Box } from 'grommet';
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useEffect } from 'react';
 import { Outlet, Route, Routes } from 'react-router-dom';
 
-import { FeedPostsContext } from '../feed/PublicFeedContext';
 import { AppHomePage } from '../pages/AppHomePage';
+import { ConnectPage } from '../pages/ConnectPage';
+import { ConnectSocialsPage } from '../pages/ConnectSocialsPage';
 import { PublicFeedPage } from '../pages/PublicFeedPage';
+import { UserPostsPage } from '../pages/UserPostsPage';
 import { UserSettingsPage } from '../pages/UserSettingsPage';
-import { PostPage } from '../post/PostPage';
-import { PostingPage } from '../post/PostingPage';
 import { RouteNames } from '../route.names';
 import { ResponsiveApp } from '../ui-components/ResponsiveApp';
 import { ThemedApp, useThemeContext } from '../ui-components/ThemedApp';
-import { ConnectBlueskyPage } from '../user-login/ConnectBlueskyPage';
-import { ConnectMastodonPage } from '../user-login/ConnectMastodonPage';
+import { ConnectBlueskyPage } from '../user-login/ConnectBluesky';
+import { ConnectMastodonPage } from '../user-login/ConnectMastodon';
+import { ConnectTwitterPage } from '../user-login/ConnectTwitter';
 import { ConnectedUserWrapper } from '../user-login/contexts/ConnectedUserWrapper';
 import { LoadingContext } from './LoadingContext';
 import { GlobalStyles } from './layout/GlobalStyles';
@@ -23,23 +25,42 @@ export interface SetPageTitleType {
   main: string;
 }
 
-export type AppContainerContextType = {};
+const DEBUG = false;
+const DEBUG_PREFIX = ``;
+
+export type AppContainerContextType = object;
 
 const AppContainerContextValue = createContext<
   AppContainerContextType | undefined
 >(undefined);
 
+const queryClient = new QueryClient();
+
 export const AppContainer0 = (props: React.PropsWithChildren) => {
+  // for debug
+  useEffect(() => {
+    let mounted = true;
+    if (mounted) {
+      if (DEBUG) console.log(`${DEBUG_PREFIX}AppContainer0 mounted`);
+    }
+    return () => {
+      mounted = false;
+      if (DEBUG) console.log(`${DEBUG_PREFIX}AppContainer0 unmounted`);
+    };
+  }, []);
+
   return (
     <>
       <GlobalStyles />
       <ThemedApp>
         <ResponsiveApp>
-          <LoadingContext>
-            <ConnectedUserWrapper>
-              <AppContainer></AppContainer>
-            </ConnectedUserWrapper>
-          </LoadingContext>
+          <QueryClientProvider client={queryClient}>
+            <LoadingContext>
+              <ConnectedUserWrapper>
+                <AppContainer></AppContainer>
+              </ConnectedUserWrapper>
+            </LoadingContext>
+          </QueryClientProvider>
         </ResponsiveApp>
       </ThemedApp>
     </>
@@ -63,38 +84,40 @@ export const AppContainer = (props: React.PropsWithChildren) => {
             <Routes>
               <Route path={RouteNames.AppHome} element={<Outlet />}>
                 <Route
-                  path={`${RouteNames.Posting}`}
-                  element={<PostingPage></PostingPage>}></Route>
-
-                <Route
-                  path={`${RouteNames.Post}/:postId`}
-                  element={<PostPage></PostPage>}></Route>
-
-                <Route
-                  path={`${RouteNames.Settings}`}
+                  path={`${RouteNames.Settings}/*`}
                   element={<UserSettingsPage></UserSettingsPage>}></Route>
 
                 <Route
                   path={`${RouteNames.Feed}/*`}
-                  element={
-                    <FeedPostsContext>
-                      <PublicFeedPage></PublicFeedPage>
-                    </FeedPostsContext>
-                  }></Route>
+                  element={<PublicFeedPage></PublicFeedPage>}></Route>
+
+                <Route
+                  path={`/${RouteNames.Connect}`}
+                  element={<ConnectPage />}>
+                  <Route
+                    path={`${RouteNames.ConnectTwitter}`}
+                    element={<ConnectTwitterPage />}
+                  />
+
+                  <Route
+                    path={`${RouteNames.ConnectMastodon}`}
+                    element={<ConnectMastodonPage />}
+                  />
+
+                  <Route
+                    path={`${RouteNames.ConnectBluesky}`}
+                    element={<ConnectBlueskyPage />}></Route>
+                </Route>
+
+                <Route
+                  path={`/${RouteNames.Start}`}
+                  element={<ConnectSocialsPage></ConnectSocialsPage>}></Route>
+
+                <Route
+                  path={`/${RouteNames.MyPosts}`}
+                  element={<UserPostsPage></UserPostsPage>}></Route>
 
                 <Route path={''} element={<AppHomePage></AppHomePage>}></Route>
-
-                <Route
-                  path={'/*'}
-                  element={<AppHomePage></AppHomePage>}></Route>
-                <Route
-                  path={`${RouteNames.ConnectMastodon}`}
-                  element={<ConnectMastodonPage />}
-                />
-
-                <Route
-                  path={`${RouteNames.ConnectBluesky}`}
-                  element={<ConnectBlueskyPage />}></Route>
               </Route>
             </Routes>
           </Box>

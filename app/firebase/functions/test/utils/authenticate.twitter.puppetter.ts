@@ -18,7 +18,7 @@ export const runAuthenticateTwitterUser = async (
   username: string,
   password: string
 ): Promise<string> => {
-  const browser = await puppeteer.launch({ headless: false });
+  const browser = await puppeteer.launch({ headless: true });
 
   if (DEBUG) logger.debug('context', { context }, DEBUG_PREFIX);
 

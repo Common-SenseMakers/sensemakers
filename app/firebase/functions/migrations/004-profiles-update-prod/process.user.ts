@@ -69,7 +69,7 @@ export const processUser = async (user: AppUser, services: Services) => {
                 platformId: platformId,
               };
 
-              const id = servicesTarget.users.profiles.create(
+              const id = servicesTarget.users.createProfile(
                 profileCreate,
                 manager
               );

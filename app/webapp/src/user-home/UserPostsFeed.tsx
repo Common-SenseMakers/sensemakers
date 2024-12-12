@@ -1,129 +1,66 @@
-import { Anchor, Box, Text } from 'grommet';
-import { useEffect, useMemo, useState } from 'react';
+import { Box, Text } from 'grommet';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router-dom';
 
-import { useServiceWorker } from '../app/ServiceWorkerContext';
-import { locationToPageIx } from '../app/layout/GlobalNav';
-import { I18Keys } from '../i18n/i18n';
-import {
-  FilterOption,
-  PostsFetcherComponent,
-} from '../posts.fetcher/PostsFetcherComponent';
-import { PostsQuery, PostsQueryStatus } from '../shared/types/types.posts';
-import { AppModal } from '../ui-components';
+import { ClearIcon } from '../app/icons/ClearIcon';
+import { AppGeneralKeys } from '../i18n/i18n.app.general';
+import { IntroKeys } from '../i18n/i18n.intro';
+import { CARD_BORDER } from '../post/PostCard';
+import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
+import { AppButton, AppHeading } from '../ui-components';
 import { usePersist } from '../utils/use.persist';
-import { IntroModals } from './IntroModal';
 import { useUserPosts } from './UserPostsContext';
 
-const DEBUG = false;
-
-const options: FilterOption[] = [
-  { value: PostsQueryStatus.DRAFTS, pretty: 'All Drafts' },
-  { value: PostsQueryStatus.IGNORED, pretty: 'Ignored' },
-  { value: PostsQueryStatus.PENDING, pretty: 'For Review' },
-  { value: PostsQueryStatus.PUBLISHED, pretty: 'Published' },
-];
-
-const INTRO_SHOWN = 'introShown';
+export const HIDE_SHARE_INFO = 'hideShareInfo';
 
 export const UserPostsFeed = () => {
   const { t } = useTranslation();
 
-  const { hasUpdate, updateApp } = useServiceWorker();
+  const [hideShareInfo, setHideShareInfo] = usePersist<boolean>(
+    HIDE_SHARE_INFO,
+    false
+  );
 
-  const [introShown, setIntroShown] = usePersist<boolean>(INTRO_SHOWN, false);
-  const [showIntro, setShowIntro] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (!introShown) {
-      setShowIntro(true);
-    }
-  }, []);
-
-  const { feed, filterStatus } = useUserPosts();
-
-  const location = useLocation();
-
-  const pageIx = locationToPageIx(location);
-  const pageTitle = useMemo(() => {
-    if (pageIx === 0) {
-      return t(I18Keys.drafts);
-    }
-    if (pageIx === 1) {
-      return t(I18Keys.postsNames);
-    }
-    if (pageIx === 2) {
-      return t(I18Keys.feedTitle);
-    }
-    return '';
-  }, [pageIx]);
-
-  useEffect(() => {
-    let timeout: NodeJS.Timeout;
-    if (location.state?.postId) {
-      const postCard = document.querySelector(`#post-${location.state.postId}`);
-      const viewportPage = document.querySelector('#content');
-      if (postCard && viewportPage) {
-        timeout = setTimeout(() => {
-          postCard.scrollIntoView({
-            behavior: 'instant' as ScrollBehavior,
-            block: 'center',
-          });
-        }, 0);
-      }
-    }
-    return () => clearTimeout(timeout);
-  }, []);
-
-  const navigate = useNavigate();
-
-  const setFilter = (filter: PostsQuery) => {
-    navigate(`/${filter.status}`);
-  };
-
-  const closeIntro = () => {
-    setIntroShown(true);
-    setShowIntro(false);
-  };
-
-  const updater = (() => {
-    if (hasUpdate) {
-      return (
-        <Box direction="row" align="center" gap="4px">
-          <Text style={{ fontSize: '14px' }}>{t(I18Keys.updateAvailable)}</Text>
-          <Anchor onClick={() => updateApp()}>
-            <Text style={{ fontSize: '14px' }}>{t(I18Keys.updateNow)}</Text>
-          </Anchor>
-        </Box>
-      );
-    }
-    return <></>;
-  })();
-
-  const modal = (() => {
-    if (showIntro) {
-      return (
-        <AppModal type="small" onModalClosed={() => closeIntro()}>
-          <IntroModals closeModal={() => closeIntro()}></IntroModals>
-        </AppModal>
-      );
-    }
-  })();
+  const { feed } = useUserPosts();
 
   return (
     <>
-      <Box fill justify="start">
-        {updater}
+      <Box justify="start">
+        <Box pad="medium" style={{ borderBottom: CARD_BORDER, flexShrink: 0 }}>
+          <AppHeading level={2}>{t(AppGeneralKeys.myPosts)}</AppHeading>
+        </Box>
+        {!hideShareInfo && (
+          <Box
+            direction="row"
+            pad="medium"
+            gap="28px"
+            style={{
+              borderBottom: CARD_BORDER,
+              backgroundColor: '#DAEDED',
+              flexShrink: 0,
+            }}>
+            <Box style={{ flexGrow: 1 }}>
+              <Text
+                style={{
+                  color: '#374151',
+                  fontSize: '14px',
+                  fontStyle: 'normal',
+                  fontWeight: '500',
+                  lineHeight: '16px',
+                }}>
+                {t(IntroKeys.shareInfo)}
+              </Text>
+            </Box>
+            <AppButton plain onClick={() => setHideShareInfo(true)}>
+              <Box style={{ width: '28px', flexShrink: 0 }} justify="center">
+                <ClearIcon circle={false} size={20}></ClearIcon>
+              </Box>
+            </AppButton>
+          </Box>
+        )}
         <PostsFetcherComponent
+          boxProps={{}}
           feed={feed}
-          pageTitle={pageTitle}
-          filterOptions={options}
-          status={filterStatus}
-          onFilterOptionChanged={(value) =>
-            setFilter(value)
-          }></PostsFetcherComponent>
-        {modal}
+          pageTitle={t(AppGeneralKeys.myPosts)}></PostsFetcherComponent>
       </Box>
     </>
   );

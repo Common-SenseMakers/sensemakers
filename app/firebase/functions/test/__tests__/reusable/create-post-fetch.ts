@@ -46,9 +46,7 @@ export const _01_createAndFetchUsers = async (
   if (DEBUG) logger.debug(` ${user?.userId}`, { user }, DEBUG_PREFIX);
 
   /** fetch will store the posts in the DB */
-  services.notifications.haveQuiet = true;
   await fetchPostsInTests(user.userId, { expectedAmount: 10 }, services);
-  services.notifications.haveQuiet = false;
 
   /** bypass quiet period for notifications */
   services.time.forward(6 * 60 * 1000);
@@ -120,8 +118,13 @@ export const _03_fetchAfterPublish = async (
 
   expect(postRead.semantics).to.not.be.undefined;
   expect(postRead.originalParsed).to.not.be.undefined;
+  expect(postRead.mirrors).to.not.be.undefined;
 
-  const tweetRead = postRead.mirrors.find(
+  if (!postRead.mirrors) {
+    throw new Error('unexpected');
+  }
+
+  const tweetRead = postRead.mirrors?.find(
     (m) => m.platformId === PLATFORM.Twitter
   );
 

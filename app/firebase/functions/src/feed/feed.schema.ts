@@ -1,14 +1,22 @@
 import { array, number, object, string } from 'yup';
 
-import { PostsQueryStatus } from '../@shared/types/types.posts';
+export const fetchParamsSchema = object({
+  expectedAmount: number().required(),
+  sinceId: string().optional(),
+  untilId: string().optional(),
+});
 
-export const getFeedSchema = object({
-  fetchParams: object({
-    expectedAmount: number().required(),
-    sinceId: string().optional(),
-    untilId: string().optional(),
-  }).required(),
-  status: string().oneOf([...Object.values(PostsQueryStatus)]),
-  labels: array(string()).required(),
-  keywords: array(string()).required(),
-}).noUnknown(true);
+export const smeanticsQueryParamsSchema = object({
+  labels: array(string()).optional(),
+  keywords: array(string()).optional(),
+  refs: array(string()).optional(),
+  topics: array(string()).optional(),
+}).default(undefined);
+
+export const queryParamsSchema = object({
+  fetchParams: fetchParamsSchema.required(),
+  userId: string().optional(),
+  profileIds: array(string()).optional(),
+  origins: array(string()).optional(),
+  semantics: smeanticsQueryParamsSchema.optional(),
+});

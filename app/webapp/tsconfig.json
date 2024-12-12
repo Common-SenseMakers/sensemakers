@@ -19,5 +19,5 @@
     "emitDeclarationOnly": true,
     "outDir": "./build"
   },
-  "include": ["src/index.tsx", "test"]
+  "include": ["src/index.tsx", "src/service-worker.ts", "test"]
 }

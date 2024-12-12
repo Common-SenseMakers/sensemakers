@@ -6,10 +6,8 @@ import {
   useContext,
   useState,
 } from 'react';
-import { useTranslation } from 'react-i18next';
 
 import { useAppFetch } from '../../../api/app.fetch';
-import { useToastContext } from '../../../app/ToastsContext';
 import {
   BlueskyGetContextParams,
   BlueskySignupData,
@@ -22,9 +20,10 @@ import {
   useAccountContext,
 } from '../AccountContext';
 
-const DEBUG = true;
+const DEBUG = false;
 
-const log = (...args: any[]) => {
+const log = (...args: unknown[]) => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   if (DEBUG) console.log(...args);
 };
 
@@ -43,13 +42,10 @@ const BlueskyContextValue = createContext<BlueskyContextType | undefined>(
 );
 
 export const BlueskyContext = (props: PropsWithChildren) => {
-  const { show } = useToastContext();
-  const { t } = useTranslation();
-
   const {
     connectedUser,
     refresh: refreshConnected,
-    overallLoginStatus,
+    setToken: setOurToken,
     setLoginFlowState,
     setPlatformConnectedStatus,
   } = useAccountContext();
@@ -85,20 +81,19 @@ export const BlueskyContext = (props: PropsWithChildren) => {
 
         log('Calling Bluesky signup', signupData);
 
-        const result = await appFetch<HandleSignupResult>(
+        const result = await appFetch<HandleSignupResult, unknown, false>(
           `/api/auth/${PLATFORM.Bluesky}/signup`,
-          signupData,
-          true
+          signupData
         );
+
+        if (result && result.ourAccessToken) {
+          setOurToken(result.ourAccessToken);
+        } else {
+          refreshConnected().catch(console.error);
+        }
 
         log('Bluesky signup result', result);
-
-        refreshConnected();
-        setPlatformConnectedStatus(
-          PLATFORM.Bluesky,
-          PlatformConnectedStatus.Connected
-        );
-      } catch (err: any) {
+      } catch (err) {
         log('Error connecting to Bluesky', err);
         setError('Error connecting to Bluesky');
         setLoginFlowState(LoginFlowState.Idle);
@@ -108,13 +103,8 @@ export const BlueskyContext = (props: PropsWithChildren) => {
         );
       }
     },
-    [
-      appFetch,
-      setLoginFlowState,
-      setPlatformConnectedStatus,
-      refreshConnected,
-      t,
-    ]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [setLoginFlowState, appFetch, refreshConnected, setOurToken]
   );
 
   return (

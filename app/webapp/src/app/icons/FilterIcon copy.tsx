@@ -1,7 +1,5 @@
 import { Box } from 'grommet';
 
-import { useThemeContext } from '../../ui-components/ThemedApp';
-
 export const CheckIcon = (props: { size?: number }) => {
   const size = props.size || 18;
 
