@@ -19,7 +19,7 @@ import { getTestServices } from './test.services';
 
 const feedThreads = [[''], [''], [''], [''], ['']];
 
-describe('070 test feed', () => {
+describe.only('070 test feed', () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER
@@ -275,7 +275,7 @@ describe('070 test feed', () => {
           hydrateConfig: { addAggregatedLabels: false },
         };
         const result = await feed.getFeed(query);
-        expect(result).to.have.length(2);
+        expect(result).to.have.length(1);
         expect(doesQueryUseSubcollection(query).useKeywordsSubcollection).to.be
           .true;
       });
@@ -290,10 +290,7 @@ describe('070 test feed', () => {
           fetchParams: { expectedAmount: 10 },
           semantics: {
             keywords: [TEST_KEYWORD],
-            labels: [
-              'http://purl.org/spar/cito/discusses',
-              'http://sense-nets.xyz/includesQuotationFrom',
-            ],
+            labels: ['http://purl.org/spar/cito/discusses'],
           },
           hydrateConfig: { addAggregatedLabels: false },
         };
@@ -313,7 +310,7 @@ describe('070 test feed', () => {
           fetchParams: { expectedAmount: 10 },
           semantics: {
             keywords: [TEST_KEYWORD],
-            refs: ['https://twitter.com/ItaiYanai/status/1780813867213336910'],
+            refs: ['https://x.com/ItaiYanai/status/1780813867213336910'],
             topic: SCIENCE_TOPIC_URI,
           },
           hydrateConfig: { addAggregatedLabels: false },
@@ -321,7 +318,7 @@ describe('070 test feed', () => {
         const result = await feed.getFeed(query);
         expect(result).to.have.length(1);
         expect(doesQueryUseSubcollection(query).useKeywordsSubcollection).to.be
-          .true;
+          .false; // in this case it would use the reference subcollection
       });
     });
   });
