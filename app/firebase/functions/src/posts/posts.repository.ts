@@ -4,7 +4,6 @@ import { logger } from 'firebase-functions/v1';
 import {
   ArrayIncludeQuery,
   PostSubcollectionIndex,
-  StructuredSemantics,
 } from '../@shared/types/types.posts';
 import {
   AppPost,
@@ -20,7 +19,17 @@ import { DBInstance } from '../db/instance';
 import { BaseRepository, removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { hashUrl } from '../links/links.utils';
-import { doesQueryUseSubcollection } from '../posts/posts.helper';
+import {
+  AUTHOR_PROFILE_KEY,
+  AUTHOR_USER_KEY,
+  CREATED_AT_KEY,
+  LABELS_KEY,
+  ORIGIN_KEY,
+  STRUCTURED_SEMANTICS_KEY,
+  TOPIC_KEY,
+  doesQueryUseSubcollection,
+  getBaseQuery,
+} from '../posts/posts.helper';
 
 const DEBUG = false;
 const DEBUG_PREFIX = 'PostsRepository';
@@ -62,7 +71,7 @@ const filterByIn = (_base: Query, key: string, values?: string[]) => {
   return query;
 };
 
-const filterByArrayContainsAny = (
+export const filterByArrayContainsAny = (
   _base: Query,
   key: string,
   values?: ArrayIncludeQuery
@@ -112,67 +121,28 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
   /** Cannot be part of a transaction */
   public async getMany(queryParams: PostsQueryDefined) {
-    /** type protection against properties renaming */
-    const createdAtKey: keyof AppPost = 'createdAtMs';
-    const authorUserKey: keyof AppPost = 'authorUserId';
-    const authorProfileKey: keyof AppPost = 'authorProfileId';
-    const originKey: keyof AppPost = 'origin';
-
-    const structuredSemanticsKey: keyof AppPost = 'structuredSemantics';
-
-    const keywordsKey: keyof StructuredSemantics = 'keywords';
-
-    const labelsKey: keyof StructuredSemantics = 'labels';
-    const topicKey: keyof StructuredSemantics = 'topic';
-    const refsKey: keyof StructuredSemantics = 'refs';
-
     if (DEBUG) logger.debug('getMany', queryParams, DEBUG_PREFIX);
 
-    const { useLinksSubcollection, useKeywordsSubcollection } = 
+    const { useLinksSubcollection, useKeywordsSubcollection } =
       doesQueryUseSubcollection(queryParams);
 
-    const baseCollection = getBaseCollectionQuery(this.db.collections, queryParams);
+    const baseQuery = getBaseQuery(this.db.collections, queryParams);
 
-    let query = filterByEqual(
-      baseCollection,
-      authorUserKey,
-      queryParams.userId
-    );
+    let query = filterByEqual(baseQuery, AUTHOR_USER_KEY, queryParams.userId);
 
-    query = filterByEqual(query, authorProfileKey, queryParams.profileId);
+    query = filterByEqual(query, AUTHOR_PROFILE_KEY, queryParams.profileId);
 
-    query = filterByIn(query, originKey, queryParams.origins);
-
-    // Only apply these filters when querying the main posts collection
-    if (!useLinksSubcollection && !useKeywordsSubcollection) {
-      query = filterByArrayContainsAny(
-        query,
-        `${structuredSemanticsKey}.${refsKey}`,
-        queryParams.semantics?.refs
-      );
-
-      query = filterByArrayContainsAny(
-        query,
-        `${structuredSemanticsKey}.${keywordsKey}`,
-        queryParams.semantics?.keywords
-      );
-    }
+    query = filterByIn(query, ORIGIN_KEY, queryParams.origins);
 
     query = filterByArrayContainsAny(
       query,
-      `${structuredSemanticsKey}.${labelsKey}`,
+      `${STRUCTURED_SEMANTICS_KEY}.${LABELS_KEY}`,
       queryParams.semantics?.labels
-    );
-
-    query = filterByArrayContainsAny(
-      query,
-      `${structuredSemanticsKey}.${keywordsKey}`,
-      queryParams.semantics?.keywords
     );
 
     query = filterByEqual(
       query,
-      `${structuredSemanticsKey}.${topicKey}`,
+      `${STRUCTURED_SEMANTICS_KEY}.${TOPIC_KEY}`,
       queryParams.semantics?.topic
     );
 
@@ -205,10 +175,10 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     /** two modes, forward sinceId or backwards untilId  */
     const paginated = await (async (_base: Query) => {
       if (sinceCreatedAt) {
-        const ordered = _base.orderBy(createdAtKey, 'asc');
+        const ordered = _base.orderBy(CREATED_AT_KEY, 'asc');
         return ordered.startAfter(sinceCreatedAt);
       } else {
-        const ordered = _base.orderBy(createdAtKey, 'desc');
+        const ordered = _base.orderBy(CREATED_AT_KEY, 'desc');
         return untilCreatedAt ? ordered.startAfter(untilCreatedAt) : ordered;
       }
     })(query);
@@ -218,7 +188,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       .get();
 
     let appPosts = (await (async () => {
-      if (useLinksSubcollection) {
+      if (useLinksSubcollection || useKeywordsSubcollection) {
         const docRefs = posts.docs.map((doc) =>
           this.db.collections.posts.doc(doc.id)
         );
