@@ -19,12 +19,14 @@ import {
   THIS_POST_NAME_URI,
 } from '../shared/utils/semantics.helper';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
+import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { usePost } from './post.context/PostContext';
 
 const DEBUG = false;
 
 export const PublishButtons = (props: BoxExtendedProps) => {
+  const { constants } = useThemeContext();
   const { t } = useTranslation();
   const { updated, fetched } = usePost();
   const { connectedUser } = useAccountContext();
@@ -104,6 +106,8 @@ export const PublishButtons = (props: BoxExtendedProps) => {
     updated.postMerged &&
     updated.postMerged.authorUserId === connectedUser.userId;
 
+  const backgroundColor = isScience ? '#CEE2F2' : constants.colors.shade;
+
   if (!show) {
     return <></>;
   }
@@ -116,7 +120,7 @@ export const PublishButtons = (props: BoxExtendedProps) => {
       align="center"
       pad={{ vertical: '12px', horizontal: '12px' }}
       {...props}
-      style={{ backgroundColor: '#FFEEDB', width: '100%', ...props.style }}>
+      style={{ backgroundColor, width: '100%', ...props.style }}>
       {updated.postMerged?.parsingStatus === AppPostParsingStatus.PROCESSING ? (
         <LoadingDiv style={{ width: '160px' }}></LoadingDiv>
       ) : (

@@ -102,7 +102,9 @@ export const RefWithLabels = (props: {
         </Box>
       )}
 
-      {props.showAggregatedLabels !== false && props.aggregatedLabels ? (
+      {props.showAggregatedLabels !== false &&
+      props.aggregatedLabels &&
+      props.aggregatedLabels.length > 0 ? (
         <Box margin={{ top: '22px' }}>
           <AggregatedRefLabels
             refLabels={props.aggregatedLabels}
