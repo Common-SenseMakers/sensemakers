@@ -166,6 +166,7 @@ export class PostsProcessing {
     if (!semantics) return undefined;
 
     const post = await this.posts.get(postId, manager, true);
+    const originalStructuredSemantics = post.structuredSemantics;
     const store = await parseRDF(semantics);
 
     const createdAtMs = post.createdAtMs;
@@ -259,7 +260,18 @@ export class PostsProcessing {
       })
     );
 
-    // Sync keywords subcollections
+    // Sync keywords subcollections - remove deleted keywords and add new ones or update existing ones
+
+    const deletedKeywords = (
+      originalStructuredSemantics?.keywords || []
+    ).filter((element) => !Array.from(keywords).includes(element));
+
+    await Promise.all(
+      deletedKeywords.map(async (keyword) => {
+        await this.keywordsService.deleteKeywordPost(keyword, postId, manager);
+      })
+    );
+
     await Promise.all(
       Array.from(keywords).map(async (keyword) => {
         // Create the keyword document if it doesn't exist
