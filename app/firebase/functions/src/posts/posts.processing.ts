@@ -263,7 +263,7 @@ export class PostsProcessing {
     await Promise.all(
       Array.from(keywords).map(async (keyword) => {
         // Create the keyword document if it doesn't exist
-        await this.keywordsService.setKeyword(keyword, manager);
+        this.keywordsService.setKeyword(keyword, manager);
 
         // Add post to keyword's posts subcollection
         const postData: PostSubcollectionIndex = {
@@ -273,6 +273,7 @@ export class PostsProcessing {
           structuredSemantics,
           platformPostUrl: post.generic.thread[0].url,
         };
+        await this.keywordsService.deleteKeywordPost(keyword, post.id, manager);
         await this.keywordsService.setKeywordPost(keyword, postData, manager);
       })
     );
