@@ -31,11 +31,11 @@ import { envRuntime } from './config/typedenv.runtime';
 import { buildAdminApp, buildApp } from './instances/app';
 import { logger } from './instances/logger';
 import { createServices } from './instances/services';
+import { fetchPlatformAccountTask } from './platforms/platforms.tasks';
 import {
   FETCH_ACCOUNT_TASKS,
   FETCH_TASK_DISPATCH_RATES,
-  fetchPlatformAccountTask,
-} from './platforms/platforms.tasks';
+} from './platforms/platforms.tasks.config';
 import { platformPostUpdatedHook } from './posts/hooks/platformPost.updated.hook';
 import { postUpdatedHook } from './posts/hooks/post.updated.hook';
 import {

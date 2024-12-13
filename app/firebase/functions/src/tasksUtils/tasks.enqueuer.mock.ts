@@ -1,10 +1,8 @@
 import { PLATFORM } from '../@shared/types/types.platforms';
 import { logger } from '../instances/logger';
 import { Services } from '../instances/services';
-import {
-  FETCH_ACCOUNT_TASKS,
-  fetchPlatformAccountTask,
-} from '../platforms/platforms.tasks';
+import { fetchPlatformAccountTask } from '../platforms/platforms.tasks';
+import { FETCH_ACCOUNT_TASKS } from '../platforms/platforms.tasks.config';
 import {
   AUTOFETCH_POSTS_TASK,
   autofetchUserPosts,
