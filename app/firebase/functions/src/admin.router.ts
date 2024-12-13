@@ -7,5 +7,5 @@ import {
 
 export const adminRouter = express.Router();
 
-adminRouter.post('/addNonUserProfiles', addNonUserProfilesController);
+adminRouter.post('/addProfiles', addNonUserProfilesController);
 adminRouter.post('/deleteProfiles', deleteProfilesController);

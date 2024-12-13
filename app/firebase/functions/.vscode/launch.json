@@ -42,6 +42,20 @@
       "internalConsoleOptions": "neverOpen"
     },
     {
+      "name": "add accounts",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "ts-node",
+      "args": [
+        "--project",
+        "./tsconfig.scripts.json",
+        "./scripts/016-add-account-data.ts"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
       "name": "migration: 00X",
       "type": "node",
       "request": "launch",

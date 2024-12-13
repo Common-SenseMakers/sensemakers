@@ -25,7 +25,12 @@ export interface AccountProfile<P extends PlatformProfile = PlatformProfile> {
   userId?: string;
   profile?: P;
   fetched?: FetchedDetails;
+  autofetch?: boolean;
 }
+
+export const profileDefaults: Partial<AccountProfile> = {
+  autofetch: true,
+};
 
 export type AccountProfileRead = Omit<AccountProfile, 'fetched' | 'id'>;
 
@@ -41,3 +46,7 @@ export type AccountProfileCreate<P extends PlatformProfile = PlatformProfile> =
   Omit<AccountProfile<P>, 'id'>;
 export type AccountProfileBase<P extends PlatformProfile = PlatformProfile> =
   Omit<AccountProfile<P>, 'id' | 'platformId'>;
+
+export type ProfilesQueryParams = Partial<
+  Pick<AccountProfile, 'platformId' | 'userId' | 'autofetch'>
+> & { userIdDefined?: boolean } & { limit?: number };

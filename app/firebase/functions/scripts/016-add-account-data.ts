@@ -4,11 +4,11 @@ import fs from 'fs';
 
 dotenv.config({ path: './scripts/.script.env' });
 
-const FUNCTION_URL = process.env.FUNCTION_URL;
-const ADMIN_KEY = process.env.ADMIN_API_KEY;
-const OPEN_SCIENCE_ACCOUNTS_PATH = process.env.OPEN_SCIENCE_ACCOUNTS_PATH;
+const FUNCTION_URL = process.env.FUNCTIONS_URL;
+const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
+const ACCOUNTS_FILE_PATH = process.env.ACCOUNTS_FILE_PATH;
 
-if (!ADMIN_KEY) {
+if (!ADMIN_API_KEY) {
   console.error('ADMIN_API_KEY environment variable is not set');
   process.exit(1);
 }
@@ -19,12 +19,16 @@ async function addAccountData(payload: string[]) {
       console.error('FUNCTION_URL environment variable is not set');
       process.exit(1);
     }
-    const response = await axios.post(FUNCTION_URL, payload, {
-      headers: {
-        'Content-Type': 'application/json',
-        'admin-api-key': ADMIN_KEY,
-      },
-    });
+    const response = await axios.post(
+      FUNCTION_URL + '/admin/addProfiles',
+      payload,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'admin-api-key': ADMIN_API_KEY,
+        },
+      }
+    );
     return response.data;
   } catch (error: any) {
     console.error(error.response?.data || error.message);
@@ -33,13 +37,11 @@ async function addAccountData(payload: string[]) {
 
 async function processUserDataPayloads() {
   try {
-    if (!OPEN_SCIENCE_ACCOUNTS_PATH) {
-      console.error(
-        'OPEN_SCIENCE_ACCOUNTS_PATH environment variable is not set'
-      );
+    if (!ACCOUNTS_FILE_PATH) {
+      console.error('ACCOUNTS_FILE_PATH environment variable is not set');
       process.exit(1);
     }
-    const rawData = fs.readFileSync(OPEN_SCIENCE_ACCOUNTS_PATH, 'utf-8');
+    const rawData = fs.readFileSync(ACCOUNTS_FILE_PATH, 'utf-8');
     const payloads: string[] = JSON.parse(rawData);
 
     await addAccountData(payloads);
