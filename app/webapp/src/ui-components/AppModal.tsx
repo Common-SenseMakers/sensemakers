@@ -1,5 +1,4 @@
-import { Box, Layer, LayerExtendedProps, LayerPositionType } from 'grommet';
-import { Close } from 'grommet-icons';
+import { Box, Layer, LayerExtendedProps } from 'grommet';
 import React from 'react';
 
 import { MAX_WIDTH_APP } from '../app/layout/Viewport';
@@ -31,16 +30,7 @@ export const AppModal = (props: IAppModal) => {
 
   const content = (
     <>
-      <Box style={{ flexShrink: '0' }}>
-        <Box
-          direction="row"
-          onClick={(): void => close()}
-          align="center"
-          justify="end">
-          <Close style={{ height: '12px', width: '12px' }}></Close>
-        </Box>
-      </Box>
-      <Box style={{ flexGrow: 1, maxHeight: '90vh' }}>{child}</Box>
+      <Box style={{ flexGrow: 1 }}>{child}</Box>
     </>
   );
 
@@ -48,7 +38,6 @@ export const AppModal = (props: IAppModal) => {
     if (props.type === 'small') {
       return (
         <Box
-          pad={{ vertical: '24px', horizontal: '24px' }}
           style={{
             backgroundColor: 'white',
             borderRadius: '6px',

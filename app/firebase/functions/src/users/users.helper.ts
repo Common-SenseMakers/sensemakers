@@ -1,12 +1,11 @@
-import { SciFilterClassfication } from '../@shared/types/types.parser';
 import {
+  ALL_IDENTITY_PLATFORMS,
   ALL_PUBLISH_PLATFORMS,
   IDENTITY_PLATFORM,
   PLATFORM,
   PUBLISHABLE_PLATFORM,
 } from '../@shared/types/types.platforms';
 import { AppPostFull } from '../@shared/types/types.posts';
-import { AppPost } from '../@shared/types/types.posts';
 import { PlatformProfile } from '../@shared/types/types.profiles';
 import {
   AccountDetailsBase,
@@ -14,11 +13,11 @@ import {
   AppUser,
   AppUserCreate,
   AppUserRead,
-  AutopostOption,
   DefinedIfTrue,
 } from '../@shared/types/types.user';
 import { parseBlueskyURI } from '../@shared/utils/bluesky.utils';
-import { parseMastodonGlobalUsername } from '../platforms/mastodon/mastodon.utils';
+import { parseMastodonGlobalUsername } from '../@shared/utils/mastodon.utils';
+import { getProfileId } from '../@shared/utils/profiles.utils';
 
 export interface PlatformAccount {
   platform: PUBLISHABLE_PLATFORM;
@@ -92,31 +91,7 @@ export class UsersHelper {
     return allAccounts;
   }
 
-  static getAutopostPlatformIds(user: AppUser, post: AppPost): PLATFORM[] {
-    const platformIds = (
-      Object.keys(user.settings.autopost) as PLATFORM[]
-    ).filter((platformId: PLATFORM) => {
-      if (platformId !== PLATFORM.Nanopub) {
-        throw new Error('Only autopost to nanopub is suported for now');
-      }
-
-      /** only if the user has autopost configured as deterministic
-       * and the post was detected as reserach using citoid */
-      if (
-        user.settings.autopost[platformId].value !== AutopostOption.MANUAL &&
-        post.originalParsed?.filter_classification ===
-          SciFilterClassfication.CITOID_DETECTED_RESEARCH
-      ) {
-        return true;
-      }
-
-      return false;
-    });
-
-    return platformIds;
-  }
-
-  static getProfiles<P = any>(
+  static getProfiles<P extends PlatformProfile = PlatformProfile>(
     user: AppUserRead,
     platformId: IDENTITY_PLATFORM
   ): AccountDetailsRead<P>[] {
@@ -129,7 +104,10 @@ export class UsersHelper {
     return platformProfiles as AccountDetailsRead<P>[];
   }
 
-  static getProfile<T extends boolean, P = any>(
+  static getProfile<
+    T extends boolean,
+    P extends PlatformProfile = PlatformProfile,
+  >(
     user: AppUserRead,
     platformId: IDENTITY_PLATFORM,
     user_id?: string,
@@ -150,10 +128,10 @@ export class UsersHelper {
       : platformProfiles[0];
 
     if (!account) {
-      return undefined as DefinedIfTrue<T, AccountDetailsRead>;
+      return undefined as DefinedIfTrue<T, AccountDetailsRead<P>>;
     }
 
-    return account as DefinedIfTrue<T, AccountDetailsRead>;
+    return account as DefinedIfTrue<T, AccountDetailsRead<P>>;
   }
 
   static getOriginAccountDetails(user: AppUserRead, post: AppPostFull) {
@@ -169,9 +147,11 @@ export class UsersHelper {
       throw new Error('Platform account details for post origin not found');
     }
 
-    const platformPost = post.mirrors.find(
-      (platformPost) => platformPost.platformId === post.origin
-    )?.posted;
+    const platformPost =
+      post.mirrors &&
+      post.mirrors.find(
+        (platformPost) => platformPost.platformId === post.origin
+      )?.posted;
 
     const platformPostId = platformPost?.post_id;
 
@@ -227,4 +207,16 @@ export class UsersHelper {
       platformPostUrl,
     };
   }
+
+  static accountsToAccountsIds = (accounts: AppUser['accounts']) => {
+    let newAccountsIds: string[] = [];
+    ALL_IDENTITY_PLATFORMS.forEach((_platform) => {
+      if (accounts[_platform]) {
+        accounts[_platform].forEach((a) => {
+          newAccountsIds.push(getProfileId(_platform, a.user_id));
+        });
+      }
+    });
+    return newAccountsIds;
+  };
 }

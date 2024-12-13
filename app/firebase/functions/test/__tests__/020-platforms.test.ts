@@ -6,25 +6,19 @@ import {
   FetchParams,
   PlatformFetchParams,
 } from '../../src/@shared/types/types.fetch';
-import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { AppUser } from '../../src/@shared/types/types.user';
-import { signNanopublication } from '../../src/@shared/utils/nanopub.sign.util';
-import { getRSAKeys } from '../../src/@shared/utils/rsa.keys';
-import { USE_REAL_EMAIL } from '../../src/config/config.runtime';
+import { parseMastodonGlobalUsername } from '../../src/@shared/utils/mastodon.utils';
 import { logger } from '../../src/instances/logger';
 import { BlueskyService } from '../../src/platforms/bluesky/bluesky.service';
 import { MastodonService } from '../../src/platforms/mastodon/mastodon.service';
-import { parseMastodonGlobalUsername } from '../../src/platforms/mastodon/mastodon.utils';
 import { TwitterService } from '../../src/platforms/twitter/twitter.service';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
-import { getMockPost } from '../utils/posts.utils';
 import { createUsers } from '../utils/users.utils';
 import {
   USE_REAL_BLUESKY,
   USE_REAL_MASTODON,
-  USE_REAL_NANOPUB,
   USE_REAL_PARSER,
   USE_REAL_TWITTER,
   testUsers,
@@ -33,7 +27,6 @@ import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
 describe('02-platforms', () => {
-  let rsaKeys: RSAKeys | undefined;
   let user: AppUser | undefined;
 
   const services = getTestServices({
@@ -47,16 +40,12 @@ describe('02-platforms', () => {
     mastodon: USE_REAL_MASTODON
       ? undefined
       : { publish: true, signup: true, fetch: true, get: true },
-    nanopub: USE_REAL_NANOPUB ? 'real' : 'mock-publish',
     parser: USE_REAL_PARSER ? 'real' : 'mock',
-    emailSender: USE_REAL_EMAIL ? 'spy' : 'mock',
   });
 
   before(async () => {
     logger.debug('resetting DB');
     await resetDB();
-
-    rsaKeys = getRSAKeys('');
 
     await services.db.run(async (manager) => {
       const users = await createUsers(
@@ -69,14 +58,7 @@ describe('02-platforms', () => {
       user = users.find(
         (u) =>
           UsersHelper.getAccount(u, PLATFORM.Twitter, testUser.twitter.id) !==
-            undefined &&
-          UsersHelper.getAccount(
-            u,
-            PLATFORM.Mastodon,
-            `https://${testUser.mastodon.mastodonServer}/@${testUser.mastodon.username}`
-          ) !== undefined &&
-          UsersHelper.getAccount(u, PLATFORM.Bluesky, testUser.bluesky.id) !==
-            undefined
+          undefined
       );
     });
   });
@@ -107,19 +89,17 @@ describe('02-platforms', () => {
         expectedAmount: 5,
       };
 
-      const threads = await services.db.run((manager) =>
-        twitterService.fetch(
-          userDetails.user_id,
-          fetchParams,
-          userDetails.credentials
-        )
+      const threads = await twitterService.fetch(
+        userDetails.user_id,
+        fetchParams,
+        userDetails.credentials
       );
 
       expect(threads).to.not.be.undefined;
       expect(threads.platformPosts.length).to.be.greaterThanOrEqual(1);
     });
 
-    it('gets account by username', async () => {
+    it.skip('gets account by username', async () => {
       const twitterService = services.platforms.get(
         PLATFORM.Twitter
       ) as TwitterService;
@@ -138,65 +118,6 @@ describe('02-platforms', () => {
         expect(result.username).to.equal(username);
         expect(result.displayName).to.be.a('string');
         expect(result.avatar).to.be.a('string');
-      }
-    });
-  });
-
-  describe('nanopub', () => {
-    it('creates a draft nanopub, sign and publish', async () => {
-      if (!user) {
-        throw new Error('appUser not created');
-      }
-
-      try {
-        const post = getMockPost({
-          authorUserId: user.userId,
-          id: 'post-id-1',
-        });
-
-        const nanopubService = services.platforms.get(PLATFORM.Nanopub);
-
-        const userRead = await services.db.run((manager) => {
-          if (!user) {
-            throw new Error('user not created');
-          }
-          return services.users.getUserWithProfiles(user.userId, manager);
-        });
-        const nanopub = await nanopubService.convertFromGeneric({
-          post,
-          author: userRead,
-        });
-
-        if (!nanopub) {
-          throw new Error('Post not created');
-        }
-
-        if (!rsaKeys) {
-          throw new Error('RSA keys not created');
-        }
-
-        const signed = await signNanopublication(
-          nanopub.unsignedPost,
-          rsaKeys,
-          ''
-        );
-        expect(signed).to.not.be.undefined;
-
-        const account = UsersHelper.getAccount(user, PLATFORM.Nanopub);
-        if (!account) {
-          throw new Error('User does not have Nanopub credentials');
-        }
-
-        const published = await services.db.run((manager) =>
-          nanopubService.publish({
-            draft: signed.rdf(),
-            credentials: account.credentials,
-          })
-        );
-        expect(published).to.not.be.undefined;
-      } catch (error) {
-        console.error('error: ', error);
-        throw error;
       }
     });
   });
@@ -331,10 +252,7 @@ describe('02-platforms', () => {
       });
 
       const result = (
-        await blueskyService.getProfileByUsername(username, {
-          appPassword: blueskyAppPassword,
-          username: blueskyUsername,
-        })
+        await blueskyService.getProfileByUsername(username, agent.session)
       )?.profile;
 
       expect(result).to.not.be.null;

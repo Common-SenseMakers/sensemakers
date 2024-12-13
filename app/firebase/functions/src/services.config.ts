@@ -2,12 +2,10 @@ import {
   BLUESKY_APP_PASSWORD,
   BLUESKY_SERVICE_URL,
   BLUESKY_USERNAME,
-  EMAIL_CLIENT_SECRET,
   FUNCTIONS_PY_URL,
+  IFRAMELY_API_KEY,
+  IFRAMELY_API_URL,
   MASTODON_ACCESS_TOKENS,
-  NANOPUBS_PUBLISH_SERVERS,
-  NP_PUBLISH_RSA_PRIVATE_KEY,
-  NP_PUBLISH_RSA_PUBLIC_KEY,
   OUR_TOKEN_SECRET,
   TEST_USER_ACCOUNTS,
   TWITTER_BEARER_TOKEN,
@@ -15,6 +13,7 @@ import {
   TWITTER_CLIENT_SECRET,
   USE_REAL_BLUESKY,
   USE_REAL_EMAIL,
+  USE_REAL_LINKS,
   USE_REAL_MASTODON,
   USE_REAL_NANOPUB,
   USE_REAL_PARSER,
@@ -31,13 +30,6 @@ export const getConfig = (): ServicesConfig => {
       clientSecret: TWITTER_CLIENT_SECRET.value(),
       bearerToken: TWITTER_BEARER_TOKEN.value(),
     },
-    nanopub: {
-      rsaKeys: {
-        publicKey: NP_PUBLISH_RSA_PUBLIC_KEY.value(),
-        privateKey: NP_PUBLISH_RSA_PRIVATE_KEY.value(),
-      },
-      servers: JSON.parse(NANOPUBS_PUBLISH_SERVERS.value()),
-    },
     mastodon: {
       accessTokens: JSON.parse(MASTODON_ACCESS_TOKENS.value()),
     },
@@ -46,13 +38,14 @@ export const getConfig = (): ServicesConfig => {
       BLUESKY_APP_PASSWORD: BLUESKY_APP_PASSWORD.value(),
       BLUESKY_SERVICE_URL: BLUESKY_SERVICE_URL,
     },
-    email: {
-      apiKey: EMAIL_CLIENT_SECRET.value(),
-    },
     parser: FUNCTIONS_PY_URL.value(),
     our: {
       expiresIn: '30d',
       tokenSecret: OUR_TOKEN_SECRET.value(),
+    },
+    links: {
+      apiUrl: IFRAMELY_API_URL,
+      apiKey: IFRAMELY_API_KEY.value(),
     },
     mock: {
       USE_REAL_BLUESKY: USE_REAL_BLUESKY.value(),
@@ -61,6 +54,7 @@ export const getConfig = (): ServicesConfig => {
       USE_REAL_NANOPUB: USE_REAL_NANOPUB.value(),
       USE_REAL_PARSER: USE_REAL_PARSER.value(),
       USE_REAL_TWITTER: USE_REAL_TWITTERX.value(),
+      USE_REAL_LINKS: USE_REAL_LINKS.value(),
     },
   };
 };

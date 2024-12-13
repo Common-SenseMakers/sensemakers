@@ -1,34 +1,30 @@
-import {
-  ALL_IDENTITY_PLATFORMS,
-  PLATFORM,
-} from '../@shared/types/types.platforms';
+import { PLATFORM } from '../@shared/types/types.platforms';
 import {
   AccountProfile,
   AccountProfileCreate,
   FetchedDetails,
+  PlatformProfile,
+  ProfilesQueryParams,
+  profileDefaults,
 } from '../@shared/types/types.profiles';
 import { DefinedIfTrue } from '../@shared/types/types.user';
-import { DBInstance } from '../db/instance';
+import { getProfileId } from '../@shared/utils/profiles.utils';
+import { DBInstance, Query } from '../db/instance';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 
-export const getProfileId = (platform: PLATFORM, user_id: string) =>
-  `${platform}-${user_id}`;
-
-export const splitProfileId = (profileId: string) => {
-  for (const platform of ALL_IDENTITY_PLATFORMS) {
-    if (profileId.startsWith(`${platform}-`)) {
-      return {
-        platform,
-        user_id: profileId.replace(`${platform}-`, ''),
-      };
-    }
-  }
-  throw new Error(`Cant split unexpected profileId ${profileId}`);
-};
-
 export class ProfilesRepository {
   constructor(protected db: DBInstance) {}
+
+  public async getAll(): Promise<AccountProfile[]> {
+    const snapshot = await this.db.collections.profiles.get();
+    return snapshot.docs.map((doc) => {
+      return {
+        id: doc.id,
+        ...doc.data(),
+      } as AccountProfile;
+    });
+  }
 
   /**  creates an AccountProfile. It does not set the fetched property */
   public create(
@@ -39,7 +35,12 @@ export class ProfilesRepository {
       getProfileId(accountProfile.platformId, accountProfile.user_id)
     );
 
-    manager.create(profileRef, removeUndefined(accountProfile));
+    const profile: AccountProfileCreate = {
+      ...profileDefaults,
+      ...removeUndefined(accountProfile),
+    };
+
+    manager.create(profileRef, profile);
 
     return profileRef.id;
   }
@@ -66,11 +67,10 @@ export class ProfilesRepository {
     return manager.get(ref);
   }
 
-  public async getByProfileId<T extends boolean, P = any>(
-    profileId: string,
-    manager: TransactionManager,
-    shouldThrow?: T
-  ) {
+  public async getByProfileId<
+    T extends boolean,
+    P extends PlatformProfile = PlatformProfile,
+  >(profileId: string, manager: TransactionManager, shouldThrow?: T) {
     const doc = await this.getDoc(profileId, manager);
 
     const _shouldThrow = shouldThrow !== undefined ? shouldThrow : false;
@@ -120,13 +120,13 @@ export class ProfilesRepository {
 
   public async getByPlatformUsername<T extends boolean>(
     platformId: PLATFORM,
-    usernameTag: string,
     username: string,
     manager: TransactionManager,
     shouldThrow?: T
   ) {
     const platformId_property: keyof AccountProfile = 'platformId';
     const profile_property: keyof AccountProfile = 'profile';
+    const usernameTag: keyof PlatformProfile = 'username';
 
     const query = this.db.collections.profiles
       .where(platformId_property, '==', platformId)
@@ -214,5 +214,70 @@ export class ProfilesRepository {
 
     /** overwrite all the user account credentials */
     manager.update(profileRef, { fetched: newFetched });
+  }
+
+  async setUserId(
+    profileId: string,
+    userId: string,
+    manager: TransactionManager
+  ) {
+    const profileRef = await this.getRef(profileId, manager, true);
+    manager.update(profileRef, { userId });
+  }
+
+  delete(profileId: string, manager: TransactionManager) {
+    const ref = this.db.collections.profiles.doc(profileId);
+    manager.delete(ref);
+  }
+
+  async getMany(queryParams: ProfilesQueryParams) {
+    const autofetch_property: keyof ProfilesQueryParams = 'autofetch';
+    const platformId_property: keyof ProfilesQueryParams = 'platformId';
+    const userId_property: keyof ProfilesQueryParams = 'userId';
+
+    let baseQuery = ((_base: Query) => {
+      if (queryParams.autofetch) {
+        return _base.where(autofetch_property, '==', queryParams.autofetch);
+      }
+      return _base;
+    })(this.db.collections.profiles);
+
+    baseQuery = ((_base: Query) => {
+      if (queryParams.platformId) {
+        return _base.where(platformId_property, '==', queryParams.platformId);
+      }
+      return _base;
+    })(baseQuery);
+
+    baseQuery = ((_base: Query) => {
+      if (queryParams.userId) {
+        return _base.where(userId_property, '==', queryParams.userId);
+      }
+      return _base;
+    })(baseQuery);
+
+    baseQuery = ((_base: Query) => {
+      if (queryParams.userIdDefined !== undefined) {
+        if (queryParams.userIdDefined) {
+          return _base.where(userId_property, '!=', null);
+        } else {
+          return _base.where(userId_property, '==', null);
+        }
+      }
+      return _base;
+    })(baseQuery);
+
+    const paginated = await (async (_base: Query) => {
+      if (queryParams.limit) {
+        return _base.limit(queryParams.limit);
+      }
+      return _base;
+    })(baseQuery);
+
+    const snapshot = await paginated.get();
+
+    return snapshot.docs.map((doc) => {
+      return doc.id;
+    });
   }
 }

@@ -1,28 +1,27 @@
-import { BlueskyAccountDetails } from '../../src/@shared/types/types.bluesky';
-import { NotificationFreq } from '../../src/@shared/types/types.notifications';
+import { BlueskySignupData } from '../../src/@shared/types/types.bluesky';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { TwitterSignupContext } from '../../src/@shared/types/types.twitter';
 import {
   AppUser,
-  AutopostOption,
   TestUserCredentials,
 } from '../../src/@shared/types/types.user';
+import { getProfileId } from '../../src/@shared/utils/profiles.utils';
 import { TransactionManager } from '../../src/db/transaction.manager';
 import { getPrefixedUserId } from '../../src/users/users.utils';
 import { handleTwitterSignupMock } from '../__tests__/reusable/mocked.singup';
 import { USE_REAL_TWITTER } from '../__tests__/setup';
 import { TestServices } from '../__tests__/test.services';
 import { authenticateTwitterUser } from './authenticate.twitter';
-import { getNanopubProfile } from './nanopub.profile';
 
 export const authenticateTestUsers = async (
   credentials: TestUserCredentials[],
   services: TestServices,
+  includePlatforms: PLATFORM[],
   manager: TransactionManager
 ) => {
   return Promise.all(
     credentials.map((credential) =>
-      authenticateTestUser(credential, services, manager)
+      authenticateTestUser(credential, services, includePlatforms, manager)
     )
   );
 };
@@ -30,40 +29,42 @@ export const authenticateTestUsers = async (
 export const authenticateTestUser = async (
   credentials: TestUserCredentials,
   services: TestServices,
-  manager: TransactionManager,
-  excludePlatforms: PLATFORM[] = []
+  includePlatforms: PLATFORM[],
+  manager: TransactionManager
 ): Promise<AppUser> => {
   let user: AppUser | undefined;
 
-  if (!excludePlatforms.includes(PLATFORM.Twitter)) {
-    user = await authenticateTwitterForUser(
+  if (includePlatforms.includes(PLATFORM.Twitter)) {
+    const twitterUser = await authenticateTwitterForUser(
       credentials,
       services,
       manager,
       user
     );
+
+    user = twitterUser;
   }
 
-  if (!excludePlatforms.includes(PLATFORM.Mastodon)) {
-    user = await authenticateMastodonForUser(
+  if (includePlatforms.includes(PLATFORM.Mastodon)) {
+    const mastodonUser = await authenticateMastodonForUser(
       credentials,
       services,
       manager,
       user
     );
+
+    user = mastodonUser;
   }
 
-  if (PLATFORM.Nanopub in credentials) {
-    user = await authenticateNanopubForUser(credentials, user);
-  }
-
-  if (!excludePlatforms.includes(PLATFORM.Bluesky)) {
-    user = await authenticateBlueskyForUser(
+  if (includePlatforms.includes(PLATFORM.Bluesky)) {
+    const bskUser = await authenticateBlueskyForUser(
       credentials,
       services,
       manager,
       user
     );
+
+    user = bskUser;
   }
 
   if (!user) {
@@ -82,40 +83,32 @@ const authenticateBlueskyForUser = async (
   if (!user) {
     user = {
       userId: getPrefixedUserId(PLATFORM.Bluesky, credentials.bluesky.id),
-      settings: {
-        autopost: {
-          [PLATFORM.Nanopub]: {
-            value: AutopostOption.MANUAL,
-          },
-        },
-        notificationFreq: NotificationFreq.Daily,
-      },
+      settings: {},
       signupDate: Date.now(),
       accounts: {},
+      accountsIds: [getProfileId(PLATFORM.Bluesky, credentials.bluesky.id)],
     };
   }
 
-  const blueskyUserDetails: BlueskyAccountDetails = {
-    signupDate: 0,
-    user_id: credentials.bluesky.id,
-    credentials: {
-      read: {
-        username: credentials.bluesky.username,
-        appPassword: credentials.bluesky.appPassword,
-      },
-      write: {
-        username: credentials.bluesky.username,
-        appPassword: credentials.bluesky.appPassword,
-      },
-    },
+  const signupData: BlueskySignupData = {
+    username: credentials.bluesky.username,
+    appPassword: credentials.bluesky.appPassword,
+    type: 'write',
   };
 
-  user.accounts[PLATFORM.Bluesky] = [blueskyUserDetails];
+  await services.users.handleSignup(
+    PLATFORM.Bluesky,
+    signupData,
+    manager,
+    user.userId
+  );
+
+  user = await services.users.repo.getUser(user.userId, manager, true);
 
   return user;
 };
 
-const authenticateTwitterForUser = async (
+export const authenticateTwitterForUser = async (
   credentials: TestUserCredentials,
   services: TestServices,
   manager: TransactionManager,
@@ -143,7 +136,8 @@ const authenticateTwitterForUser = async (
       user?.userId
     );
 
-    return services.users.repo.getUser(userId, manager, true);
+    const userRead = await services.users.repo.getUser(userId, manager, true);
+    return userRead;
   }
 };
 
@@ -156,16 +150,10 @@ const authenticateMastodonForUser = async (
   if (!user) {
     user = {
       userId: getPrefixedUserId(PLATFORM.Mastodon, credentials.mastodon.id),
-      settings: {
-        autopost: {
-          [PLATFORM.Nanopub]: {
-            value: AutopostOption.MANUAL,
-          },
-        },
-        notificationFreq: NotificationFreq.Daily,
-      },
+      settings: {},
       signupDate: Date.now(),
       accounts: {},
+      accountsIds: [getProfileId(PLATFORM.Mastodon, credentials.mastodon.id)],
     };
   }
 
@@ -183,41 +171,6 @@ const authenticateMastodonForUser = async (
           server: 'https://mastodon.social',
         },
       },
-    },
-  ];
-
-  return user;
-};
-
-const authenticateNanopubForUser = async (
-  credentials: TestUserCredentials,
-  user?: AppUser
-): Promise<AppUser> => {
-  const { profile } = await getNanopubProfile(
-    credentials.nanopub.ethPrivateKey
-  );
-
-  if (!user) {
-    user = {
-      userId: getPrefixedUserId(PLATFORM.Nanopub, profile.ethAddress),
-      settings: {
-        autopost: {
-          [PLATFORM.Nanopub]: {
-            value: AutopostOption.MANUAL,
-          },
-        },
-        notificationFreq: NotificationFreq.Daily,
-      },
-      signupDate: Date.now(),
-      accounts: {},
-    };
-  }
-
-  user.accounts[PLATFORM.Nanopub] = [
-    {
-      signupDate: 0,
-      user_id: profile.ethAddress,
-      credentials: {},
     },
   ];
 

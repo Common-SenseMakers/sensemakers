@@ -17,7 +17,7 @@ const firestore = app.firestore();
   // Step 1: Count posts authored by the user
   const postsSnapshot = await firestore
     .collection('posts')
-    .where('authorId', '==', userId)
+    .where('authorUserId', '==', userId)
     .get();
 
   const postIdsToDelete: string[] = [];

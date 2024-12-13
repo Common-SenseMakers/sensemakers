@@ -1,6 +1,6 @@
 import * as admin from 'firebase-admin';
-import { AppOptions } from 'firebase-admin';
 
+import { initApp } from '../scripts/scripts.utils';
 import { LocalLogger, LogLevel } from '../src/instances/local.logger';
 import { logger } from '../src/instances/logger';
 import { createServices } from '../src/instances/services';
@@ -31,30 +31,15 @@ const certPathTarget = process.env.FB_CERT_PATH_TARGET;
 const serviceAccountSource = certPathSource && require('../' + certPathSource);
 const serviceAccountTarget = certPathTarget && require('../' + certPathTarget);
 
-logger.info('Running in local mode with certificate', {
-  projectIdSource,
-  projectIdTarget,
-  certPathSource,
-  certPathTarget,
-});
-
-// export const appSource = admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccountSource),
-//   projectId: process.env.FB_PROJECT_ID_SOURCE,
-// });
-
-const initApp = (config: AppOptions, name: string) => {
-  const app = admin.initializeApp(config, name);
-
-  if (config.projectId?.startsWith('demo-')) {
-    app.firestore().settings({
-      host: 'localhost:8080',
-      ssl: false,
-    });
+logger.info(
+  `Running locally - sourceProject: ${projectIdSource} - targetProject: ${projectIdTarget}`,
+  {
+    projectIdSource,
+    projectIdTarget,
+    certPathSource,
+    certPathTarget,
   }
-
-  return app;
-};
+);
 
 export const appSource = initApp(
   serviceAccountSource

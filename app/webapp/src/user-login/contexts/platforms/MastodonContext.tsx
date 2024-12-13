@@ -12,7 +12,7 @@ import { useSearchParams } from 'react-router-dom';
 
 import { useAppFetch } from '../../../api/app.fetch';
 import { useToastContext } from '../../../app/ToastsContext';
-import { I18Keys } from '../../../i18n/i18n';
+import { IntroKeys } from '../../../i18n/i18n.intro';
 import { HandleSignupResult } from '../../../shared/types/types.fetch';
 import {
   MastodonGetContextParams,
@@ -20,28 +20,24 @@ import {
   MastodonSignupData,
 } from '../../../shared/types/types.mastodon';
 import { PLATFORM } from '../../../shared/types/types.platforms';
-import { usePersist } from '../../../utils/use.persist';
 import {
   LoginFlowState,
-  OverallLoginStatus,
   PlatformConnectedStatus,
   useAccountContext,
 } from '../AccountContext';
 
 const DEBUG = false;
 
-const log = (...args: any[]) => {
+const log = (...args: unknown[]) => {
   if (DEBUG) console.log(...args);
 };
-const WAS_CONNECTING_MASTODON = 'was-connecting-mastodon';
-
 export const LS_MASTODON_CONTEXT_KEY = 'mastodon-signin-context';
 
 export type MastodonContextType = {
   connect?: (
     domain: string,
     type: MastodonGetContextParams['type'],
-    callbackUrl?: string
+    callbackUrl: string
   ) => Promise<void>;
   needConnect?: boolean;
   error?: string;
@@ -58,6 +54,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
 
   const {
     connectedUser,
+    setToken: setOurToken,
     refresh: refreshConnected,
     overallLoginStatus,
     setLoginFlowState,
@@ -65,10 +62,6 @@ export const MastodonContext = (props: PropsWithChildren) => {
     getPlatformConnectedStatus,
   } = useAccountContext();
 
-  const [wasConnecting, setWasConnecting] = usePersist<boolean>(
-    WAS_CONNECTING_MASTODON,
-    false
-  );
   const [searchParams, setSearchParams] = useSearchParams();
   const [error, setError] = useState<string | undefined>(undefined);
   const code_param = searchParams.get('code');
@@ -81,19 +74,29 @@ export const MastodonContext = (props: PropsWithChildren) => {
     !connectedUser.profiles[PLATFORM.Mastodon];
 
   useEffect(() => {
+    // reset error
+    setError(undefined);
+  }, []);
+
+  useEffect(() => {
     if (error) {
       show({
         title: 'Error Connecting Mastodon',
         message: error,
       });
+      setPlatformConnectedStatus(
+        PLATFORM.Mastodon,
+        PlatformConnectedStatus.Disconnected
+      );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
 
   const connect = useCallback(
     async (
       domain: string,
       type: MastodonGetContextParams['type'],
-      callbackUrl?: string
+      callbackUrl: string
     ) => {
       setLoginFlowState(LoginFlowState.ConnectingMastodon);
       setPlatformConnectedStatus(
@@ -105,7 +108,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
       try {
         const params: MastodonGetContextParams = {
           mastodonServer: domain,
-          callback_url: window.location.href,
+          callback_url: callbackUrl,
           type,
         };
         log('Fetching Mastodon signup context', params);
@@ -121,16 +124,19 @@ export const MastodonContext = (props: PropsWithChildren) => {
         );
 
         if (signupContext) {
-          setWasConnecting(true);
+          setPlatformConnectedStatus(
+            PLATFORM.Mastodon,
+            PlatformConnectedStatus.Connecting
+          );
           log(
             'Redirecting to Mastodon authorization URL',
             signupContext.authorizationUrl
           );
           window.location.href = signupContext.authorizationUrl;
         }
-      } catch (err: any) {
+      } catch (err) {
         log('Error connecting to Mastodon', err);
-        setError(t(I18Keys.errorConnectMastodon, { domain }));
+        setError(t(IntroKeys.errorConnectMastodon, { domain }));
         setLoginFlowState(LoginFlowState.Idle);
         setPlatformConnectedStatus(
           PLATFORM.Mastodon,
@@ -138,18 +144,33 @@ export const MastodonContext = (props: PropsWithChildren) => {
         );
       }
     },
-    [appFetch, setLoginFlowState]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [appFetch, setLoginFlowState, t]
   );
 
   useEffect(() => {
+    if (
+      getPlatformConnectedStatus(PLATFORM.Mastodon) ===
+        PlatformConnectedStatus.Connecting &&
+      !code_param
+    ) {
+      if (DEBUG)
+        console.log('was connecting true but no state params - logout', {
+          code_param,
+          overallLoginStatus,
+        });
+
+      setPlatformConnectedStatus(
+        PLATFORM.Mastodon,
+        PlatformConnectedStatus.Disconnected
+      );
+    }
+
     if (!verifierHandled.current) {
       if (
         code_param &&
-        connectedUser &&
-        wasConnecting &&
-        (overallLoginStatus === OverallLoginStatus.PartialLoggedIn ||
-          getPlatformConnectedStatus(PLATFORM.Mastodon) ===
-            PlatformConnectedStatus.Connecting)
+        getPlatformConnectedStatus(PLATFORM.Mastodon) ===
+          PlatformConnectedStatus.Connecting
       ) {
         log('useEffect MastodonSignup', {
           code_param,
@@ -164,7 +185,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
           log('Unexpected state: Mastodon context not found in localStorage');
           // unexpected state, reset
           searchParams.delete('code');
-          refreshConnected();
+          refreshConnected().catch(console.error);
           setSearchParams(searchParams);
         } else {
           const context = JSON.parse(contextStr) as MastodonSignupContext;
@@ -179,36 +200,31 @@ export const MastodonContext = (props: PropsWithChildren) => {
             type: 'read',
           };
 
-          appFetch<HandleSignupResult>(
+          appFetch<HandleSignupResult, unknown, false>(
             `/api/auth/${PLATFORM.Mastodon}/signup`,
-            signupData,
-            true
-          ).then((result) => {
-            log('Mastodon signup result', result);
-            if (result) {
-              localStorage.removeItem(LS_MASTODON_CONTEXT_KEY);
-            }
+            signupData
+          )
+            .then((result) => {
+              log('Mastodon signup result', result);
+              if (result) {
+                localStorage.removeItem(LS_MASTODON_CONTEXT_KEY);
+              }
 
-            searchParams.delete('code');
-            setPlatformConnectedStatus(
-              PLATFORM.Mastodon,
-              PlatformConnectedStatus.Connected
-            );
-            refreshConnected();
-            setSearchParams(searchParams);
-          });
+              if (result && result.ourAccessToken) {
+                setOurToken(result.ourAccessToken);
+              } else {
+                refreshConnected().catch(console.error);
+              }
+
+              searchParams.delete('code');
+              setSearchParams(searchParams);
+            })
+            .catch(console.error);
         }
-
-        setWasConnecting(false);
       }
     }
-  }, [
-    code_param,
-    overallLoginStatus,
-    searchParams,
-    connectedUser,
-    setSearchParams,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code_param, overallLoginStatus, searchParams, connectedUser]);
 
   return (
     <MastodonContextValue.Provider

@@ -1,10 +1,6 @@
 import { Box, BoxExtendedProps } from 'grommet';
 
-import { useThemeContext } from './ThemedApp';
-
 export const AppTag = (props: BoxExtendedProps): JSX.Element => {
-  const { constants } = useThemeContext();
-
   return (
     <Box
       direction="row"

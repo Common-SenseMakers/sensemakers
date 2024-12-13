@@ -1,17 +1,14 @@
+import { PLATFORM } from '../@shared/types/types.platforms';
 import { logger } from '../instances/logger';
 import { Services } from '../instances/services';
 import {
-  NOTIFY_USER_TASK,
-  notifyUserTask,
-} from '../notifications/notification.task';
+  FETCH_ACCOUNT_TASKS,
+  fetchPlatformAccountTask,
+} from '../platforms/platforms.tasks';
 import {
   AUTOFETCH_POSTS_TASK,
   autofetchUserPosts,
 } from '../posts/tasks/posts.autofetch.task';
-import {
-  AUTOPOST_POST_TASK,
-  autopostPostTask,
-} from '../posts/tasks/posts.autopost.task';
 import {
   PARSE_POST_TASK,
   parsePostTask,
@@ -30,19 +27,24 @@ export const enqueueTaskMockLocal = async (
     await (async () => {
       if (name === PARSE_POST_TASK) {
         await parsePostTask({ data: params } as any, services);
-      }
-
-      if (name === AUTOPOST_POST_TASK) {
-        await autopostPostTask({ data: params } as any, services);
+        return;
       }
 
       if (name === AUTOFETCH_POSTS_TASK) {
         await autofetchUserPosts({ data: params } as any, services);
+        return;
       }
 
-      if (name === NOTIFY_USER_TASK) {
-        await notifyUserTask(params.userId, services);
+      if (
+        name === FETCH_ACCOUNT_TASKS[PLATFORM.Twitter] ||
+        name === FETCH_ACCOUNT_TASKS[PLATFORM.Mastodon] ||
+        name === FETCH_ACCOUNT_TASKS[PLATFORM.Bluesky]
+      ) {
+        await fetchPlatformAccountTask({ data: params } as any, services);
+        return;
       }
+
+      throw Error(`Dont have a mock for task ${name}`);
     })();
   } catch (e) {
     logger.error(`Error runing task ${name}`, e);

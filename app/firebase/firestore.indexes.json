@@ -1,52 +1,16 @@
 {
   "indexes": [
     {
-      "collectionGroup": "notifications",
-      "queryScope": "COLLECTION_GROUP",
-      "fields": [
-        {
-          "fieldPath": "activityId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "userId",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
       "collectionGroup": "posts",
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "authorUserId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "createdAtMs",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "republishedStatus",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "posts",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "authorUserId",
+          "fieldPath": "authorProfileId",
           "order": "ASCENDING"
         },
         {
           "fieldPath": "createdAtMs",
           "order": "DESCENDING"
-        },
-        {
-          "fieldPath": "republishedStatus",
-          "order": "DESCENDING"
         }
       ]
     },
@@ -55,11 +19,11 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "authorUserId",
+          "fieldPath": "authorProfileId",
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "republishedStatus",
+          "fieldPath": "structuredSemantics.topic",
           "order": "ASCENDING"
         },
         {
@@ -73,11 +37,11 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "authorUserId",
+          "fieldPath": "authorProfileId",
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "republishedStatus",
+          "fieldPath": "structuredSemantics.topic",
           "order": "ASCENDING"
         },
         {
@@ -95,7 +59,17 @@
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "reviewedStatus",
+          "fieldPath": "createdAtMs",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "authorUserId",
           "order": "ASCENDING"
         },
         {
@@ -109,11 +83,15 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "createdAtMs",
+          "fieldPath": "authorUserId",
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "republishedStatus",
+          "fieldPath": "structuredSemantics.topic",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAtMs",
           "order": "ASCENDING"
         }
       ]
@@ -123,11 +101,33 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "createdAtMs",
-          "order": "DESCENDING"
+          "fieldPath": "structuredSemantics.keywords",
+          "arrayConfig": "CONTAINS"
         },
         {
-          "fieldPath": "republishedStatus",
+          "fieldPath": "structuredSemantics.topic",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAtMs",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "structuredSemantics.keywords",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "structuredSemantics.topic",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAtMs",
           "order": "DESCENDING"
         }
       ]
@@ -137,7 +137,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "labels",
+          "fieldPath": "structuredSemantics.labels",
           "arrayConfig": "CONTAINS"
         },
         {
@@ -151,25 +151,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "labels",
-          "arrayConfig": "CONTAINS"
-        },
-        {
-          "fieldPath": "createdAtMs",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "republishedStatus",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "posts",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "labels",
+          "fieldPath": "structuredSemantics.labels",
           "arrayConfig": "CONTAINS"
         },
         {
@@ -183,15 +165,111 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "labels",
+          "fieldPath": "structuredSemantics.labels",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "structuredSemantics.topic",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAtMs",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "structuredSemantics.labels",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "structuredSemantics.topic",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAtMs",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "structuredSemantics.refs",
           "arrayConfig": "CONTAINS"
         },
         {
           "fieldPath": "createdAtMs",
           "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "structuredSemantics.refs",
+          "arrayConfig": "CONTAINS"
         },
         {
-          "fieldPath": "republishedStatus",
+          "fieldPath": "structuredSemantics.topic",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAtMs",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "structuredSemantics.refs",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "structuredSemantics.topic",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAtMs",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "structuredSemantics.topic",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAtMs",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "structuredSemantics.topic",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAtMs",
           "order": "DESCENDING"
         }
       ]

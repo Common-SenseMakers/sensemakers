@@ -11,15 +11,11 @@ import {
   MASTODON_ACCESS_TOKENS,
 } from '../../src/config/config.runtime';
 import { DBInstance } from '../../src/db/instance';
-import { EmailSenderService } from '../../src/emailSender/email.sender.service';
-import {
-  EmailSenderMockConfig,
-  getEmailSenderMock,
-} from '../../src/emailSender/email.sender.service.mock';
 import { FeedService } from '../../src/feed/feed.service';
 import { Services } from '../../src/instances/services';
-import { NotificationService } from '../../src/notifications/notification.service';
-import { NotificationsRepository } from '../../src/notifications/notifications.repository';
+import { LinksRepository } from '../../src/links/links.repository';
+import { LinksMockConfig, LinksService } from '../../src/links/links.service';
+import { getLinksMock } from '../../src/links/links.service.mock';
 import {
   ParserMockConfig,
   getParserMock,
@@ -35,11 +31,6 @@ import {
   MastodonMockConfig,
   getMastodonMock,
 } from '../../src/platforms/mastodon/mock/mastodon.service.mock';
-import {
-  NanopubMockConfig,
-  getNanopubMock,
-} from '../../src/platforms/nanopub/mock/nanopub.service.mock';
-import { NanopubService } from '../../src/platforms/nanopub/nanopub.service';
 import { OrcidService } from '../../src/platforms/orcid/orcid.service';
 import {
   IdentityServicesMap,
@@ -56,7 +47,6 @@ import { PostsManager } from '../../src/posts/posts.manager';
 import { PostsProcessing } from '../../src/posts/posts.processing';
 import { PostsRepository } from '../../src/posts/posts.repository';
 import { ProfilesRepository } from '../../src/profiles/profiles.repository';
-import { TriplesRepository } from '../../src/semantics/triples.repository';
 import { TimeMock, getTimeMock } from '../../src/time/mock/time.service.mock';
 import { TimeService } from '../../src/time/time.service';
 import { UsersRepository } from '../../src/users/users.repository';
@@ -67,14 +57,12 @@ export interface TestServicesConfig {
   twitter?: TwitterMockConfig;
   mastodon?: MastodonMockConfig;
   bluesky?: BlueskyMockConfig;
-  nanopub: NanopubMockConfig;
   parser: ParserMockConfig;
+  links?: LinksMockConfig;
   time: 'real' | 'mock';
-  emailSender: EmailSenderMockConfig;
 }
 
 export type TestServices = Services & {
-  emailMock?: EmailSenderService;
   time: TimeMock;
 };
 
@@ -87,6 +75,8 @@ export const getTestServices = (config: TestServicesConfig) => {
     'NANOPUBS_PUBLISH_SERVERS',
     'NP_PUBLISH_RSA_PRIVATE_KEY',
     'NP_PUBLISH_RSA_PUBLIC_KEY',
+    'IFRAMELY_API_KEY',
+    'IFRAMELY_API_URL',
   ];
 
   mandatory.forEach((varName) => {
@@ -101,10 +91,9 @@ export const getTestServices = (config: TestServicesConfig) => {
   const profilesRepo = new ProfilesRepository(db);
   const userRepo = new UsersRepository(db, profilesRepo);
   const postsRepo = new PostsRepository(db);
-  const triplesRepo = new TriplesRepository(db);
   const platformPostsRepo = new PlatformPostsRepository(db);
-  const notificationsRepo = new NotificationsRepository(db);
   const activityRepo = new ActivityRepository(db);
+  const linksRepo = new LinksRepository(db);
 
   const identityServices: IdentityServicesMap = new Map();
   const platformsMap: PlatformsMap = new Map();
@@ -143,31 +132,16 @@ export const getTestServices = (config: TestServicesConfig) => {
   });
   const bluesky = getBlueskyMock(_bluesky, config.bluesky, testUser);
 
-  /** nanopub */
-  const _nanopub = new NanopubService(time, {
-    servers: JSON.parse(process.env.NANOPUBS_PUBLISH_SERVERS as string),
-    rsaKeys: {
-      privateKey: process.env.NP_PUBLISH_RSA_PRIVATE_KEY as string,
-      publicKey: process.env.NP_PUBLISH_RSA_PUBLIC_KEY as string,
-    },
-  });
-  const nanopub = getNanopubMock(_nanopub, config.nanopub);
-
   /** all identity services */
   identityServices.set(PLATFORM.Orcid, orcid);
   identityServices.set(PLATFORM.Twitter, twitter);
-  identityServices.set(PLATFORM.Nanopub, nanopub);
   identityServices.set(PLATFORM.Mastodon, mastodon);
   identityServices.set(PLATFORM.Bluesky, bluesky);
 
-  const _email = new EmailSenderService({
-    apiKey: process.env.EMAIL_CLIENT_SECRET as string,
-  });
-
-  const { instance: email, mock: emailMock } = getEmailSenderMock(
-    _email,
-    config.emailSender
-  );
+  /** all platforms */
+  platformsMap.set(PLATFORM.Twitter, twitter);
+  platformsMap.set(PLATFORM.Mastodon, mastodon);
+  platformsMap.set(PLATFORM.Bluesky, bluesky);
 
   /** users service */
   const usersService = new UsersService(
@@ -175,19 +149,13 @@ export const getTestServices = (config: TestServicesConfig) => {
     userRepo,
     profilesRepo,
     identityServices,
+    platformsMap,
     time,
-    email,
     {
       tokenSecret: process.env.OUR_TOKEN_SECRET as string,
       expiresIn: '30d',
     }
   );
-
-  /** all platforms */
-  platformsMap.set(PLATFORM.Twitter, twitter);
-  platformsMap.set(PLATFORM.Nanopub, nanopub);
-  platformsMap.set(PLATFORM.Mastodon, mastodon);
-  platformsMap.set(PLATFORM.Bluesky, bluesky);
 
   /** platforms service */
   const platformsService = new PlatformsService(
@@ -200,14 +168,21 @@ export const getTestServices = (config: TestServicesConfig) => {
   const _parser = new ParserService(process.env.PARSER_API_URL as string);
   const parser = getParserMock(_parser, config.parser);
 
+  /** links */
+  const _linksService = new LinksService(linksRepo, time, {
+    apiKey: process.env.IFRAMELY_API_KEY as string,
+    apiUrl: process.env.IFRAMELY_API_URL as string,
+  });
+  const links = getLinksMock(_linksService, config.links);
+
   /** posts service */
   const postsProcessing = new PostsProcessing(
     usersService,
     time,
-    triplesRepo,
     postsRepo,
     platformPostsRepo,
-    platformsService
+    platformsService,
+    links
   );
 
   const postsManager = new PostsManager(
@@ -217,17 +192,6 @@ export const getTestServices = (config: TestServicesConfig) => {
     platformsService,
     parser,
     time
-  );
-
-  const notifications = new NotificationService(
-    db,
-    notificationsRepo,
-    postsRepo,
-    platformPostsRepo,
-    activityRepo,
-    userRepo,
-    email,
-    false
   );
 
   const activity = new ActivityService(activityRepo);
@@ -241,10 +205,8 @@ export const getTestServices = (config: TestServicesConfig) => {
     platforms: platformsService,
     time: time as TimeMock,
     db,
-    notifications,
-    emailMock,
     activity,
-    email,
+    links,
   };
 
   return services;

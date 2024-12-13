@@ -1,6 +1,7 @@
 import {
   PropsWithChildren,
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -8,24 +9,20 @@ import {
 } from 'react';
 
 import { _appFetch } from '../../api/app.fetch';
-import { NanopubProfile } from '../../shared/types/types.nanopubs';
 import { NotificationFreq } from '../../shared/types/types.notifications';
 import { OrcidProfile } from '../../shared/types/types.orcid';
 import {
+  ALL_IDENTITY_PLATFORMS,
   ALL_PUBLISH_PLATFORMS,
-  ALL_SOURCE_PLATFORMS,
+  IDENTITY_PLATFORM,
   PLATFORM,
-  PUBLISHABLE_PLATFORM,
 } from '../../shared/types/types.platforms';
 import { PlatformProfile } from '../../shared/types/types.profiles';
-import {
-  AppUserRead,
-  AutopostOption,
-  EmailDetails,
-} from '../../shared/types/types.user';
+import { AppUserRead, EmailDetails } from '../../shared/types/types.user';
+import { HIDE_SHARE_INFO } from '../../user-home/UserPostsFeed';
 import { usePersist } from '../../utils/use.persist';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const OUR_TOKEN_NAME = 'ourToken';
 export const LOGIN_STATUS = 'loginStatus';
@@ -34,29 +31,26 @@ export const ALREADY_CONNECTED_KEY = 'already-connected';
 
 export type AccountContextType = {
   connectedUser?: ConnectedUser;
-  connectedSourcePlatforms: PUBLISHABLE_PLATFORM[];
+  connectedPlatforms: IDENTITY_PLATFORM[];
   isConnected: boolean;
   email?: EmailDetails;
   disconnect: () => void;
-  refresh: () => void;
-  token?: string;
+  refresh: () => Promise<void>;
+  token?: string | null;
   setToken: (token: string) => void;
   setOverallLoginStatus: (status: OverallLoginStatus) => void;
-  overallLoginStatus: OverallLoginStatus | undefined;
+  overallLoginStatus: OverallLoginStatus | undefined | null;
   setLoginFlowState: (status: LoginFlowState) => void;
   loginFlowState: LoginFlowState;
   resetLogin: () => void;
-  currentAutopost?: AutopostOption;
   currentNotifications?: NotificationFreq;
   setPlatformConnectedStatus: (
-    platform: PLATFORM,
+    platform: IDENTITY_PLATFORM,
     status: PlatformConnectedStatus
   ) => void;
   getPlatformConnectedStatus: (
-    platformId: PLATFORM
-  ) => PlatformConnectedStatus | undefined;
-  alreadyConnected?: boolean;
-  setAlreadyConnected: (value: boolean) => void;
+    platformId: IDENTITY_PLATFORM
+  ) => PlatformConnectedStatus | undefined | null;
 };
 
 const AccountContextValue = createContext<AccountContextType | undefined>(
@@ -68,7 +62,6 @@ export interface ConnectedUser extends Omit<AppUserRead, 'profiles'> {
   profiles?: {
     [PLATFORM.Orcid]?: OrcidProfile;
     [PLATFORM.Twitter]?: PlatformProfile;
-    [PLATFORM.Nanopub]?: NanopubProfile;
     [PLATFORM.Mastodon]?: PlatformProfile;
     [PLATFORM.Bluesky]?: PlatformProfile;
   };
@@ -77,12 +70,6 @@ export interface ConnectedUser extends Omit<AppUserRead, 'profiles'> {
 /** explicit status of the login/signup process */
 export enum LoginFlowState {
   Idle = 'Idle',
-  ConnectingSigner = 'ConnectingSigner',
-  ComputingAddress = 'ComputingAddress',
-  ComputingRSAKeys = 'ComputingsRSAKeys',
-  CreatingEthSignature = 'CreatingEthSignature',
-  SignningUpNanopub = 'SignningUpNanopub',
-  RegisteringEmail = 'RegisteringEmail',
   ConnectingTwitter = 'ConnectingTwitter',
   ConnectingMastodon = 'ConnectingMastodon',
   ConnectingBluesky = 'ConnectingBluesky',
@@ -97,7 +84,6 @@ export enum OverallLoginStatus {
   NotKnown = 'NotKnown', // init value before we check localStorage
   LoggedOut = 'LoggedOut',
   LogginIn = 'LogginIn',
-  PartialLoggedIn = 'PartialLoggedIn',
   FullyLoggedIn = 'FullyLoggedIn',
 }
 
@@ -108,7 +94,7 @@ export enum PlatformConnectedStatus {
 }
 
 export type PlatformsConnectedStatus = Partial<
-  Record<PLATFORM, PlatformConnectedStatus>
+  Record<IDENTITY_PLATFORM, PlatformConnectedStatus>
 >;
 
 const platformsConnectedStatusInit: PlatformsConnectedStatus = {};
@@ -139,36 +125,26 @@ export const AccountContext = (props: PropsWithChildren) => {
       platformsConnectedStatusInit
     );
 
-  const [alreadyConnected, setAlreadyConnected] = usePersist(
-    ALREADY_CONNECTED_KEY,
-    false
+  const [, setHideShareInfo] = usePersist<boolean>(HIDE_SHARE_INFO, false);
+
+  const setOverallLoginStatus = useCallback(
+    (status: OverallLoginStatus) => {
+      if (DEBUG) console.log('setOverallLoginStatus', status);
+      _setOverallLoginStatus(status);
+    },
+    [_setOverallLoginStatus]
   );
 
-  /** keep the conneccted user linkted to the current token */
-  useEffect(() => {
-    refresh();
-  }, [token]);
-
-  const setOverallLoginStatus = (status: OverallLoginStatus) => {
-    if (DEBUG) console.log('setOverallLoginStatus', status);
-    _setOverallLoginStatus(status);
-  };
-
-  const setLoginFlowState = (status: LoginFlowState) => {
-    if (DEBUG) console.log('setLoginFlowState', status);
-    _setLoginFlowState(status);
-  };
-
-  const resetLogin = () => {
-    setLoginFlowState(LoginFlowState.Idle);
-    setOverallLoginStatus(OverallLoginStatus.NotKnown);
-  };
-
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     try {
       if (token) {
         if (DEBUG) console.log('getting me', { token });
-        const user = await _appFetch<AppUserRead>('/api/auth/me', {}, token);
+        const user = await _appFetch<AppUserRead>(
+          '/api/auth/me',
+          {},
+          true,
+          token
+        );
         if (DEBUG) console.log('set connectedUser after fetch', { user });
 
         /** extract the profile of each platform for convenience */
@@ -181,9 +157,6 @@ export const AccountContext = (props: PropsWithChildren) => {
               mastodon:
                 user.profiles[PLATFORM.Mastodon] &&
                 user.profiles[PLATFORM.Mastodon][0].profile,
-              nanopub:
-                user.profiles[PLATFORM.Nanopub] &&
-                user.profiles[PLATFORM.Nanopub][0].profile,
               orcid:
                 user.profiles[PLATFORM.Orcid] &&
                 user.profiles[PLATFORM.Orcid][0].profile,
@@ -199,11 +172,29 @@ export const AccountContext = (props: PropsWithChildren) => {
         setConnectedUser({ ...user, profiles });
       } else {
         if (DEBUG) console.log('setting connected user as null');
+        setOverallLoginStatus(OverallLoginStatus.LoggedOut);
         setConnectedUser(null);
       }
     } catch (e) {
+      setOverallLoginStatus(OverallLoginStatus.LoggedOut);
       setToken(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setOverallLoginStatus, setToken, token]);
+
+  /** keep the conneccted user linkted to the current token */
+  useEffect(() => {
+    refresh().catch(console.error);
+  }, [refresh, token]);
+
+  const setLoginFlowState = (status: LoginFlowState) => {
+    if (DEBUG) console.log('setLoginFlowState', status);
+    _setLoginFlowState(status);
+  };
+
+  const resetLogin = () => {
+    setLoginFlowState(LoginFlowState.Idle);
+    setOverallLoginStatus(OverallLoginStatus.NotKnown);
   };
 
   /**
@@ -221,65 +212,52 @@ export const AccountContext = (props: PropsWithChildren) => {
      * once connected user is defined and has an email, but there is no
      * twitter, the user is partially logged in
      */
-    if (connectedUser && connectedUser.email) {
-      /** if not a single source platform has been connected, consider login partial */
-      if (
-        !ALL_SOURCE_PLATFORMS.some((platformId: PUBLISHABLE_PLATFORM) => {
-          return (
-            connectedUser.profiles &&
-            connectedUser.profiles[platformId] !== undefined
-          );
-        })
-      ) {
-        setOverallLoginStatus(OverallLoginStatus.PartialLoggedIn);
-      } else {
-        setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
-      }
-
-      /** update each platform persisted connected status */
-      ALL_PUBLISH_PLATFORMS.forEach((platform) => {
-        if (
-          connectedUser.profiles &&
-          connectedUser.profiles[platform] &&
-          loginFlowState !== LoginFlowState.Disconnecting
-        ) {
-          setPlatformsConnectedStatus({
-            ...platformsConnectedStatus,
-            [platform]: PlatformConnectedStatus.Connected,
-          });
-        }
-      });
+    if (connectedUser) {
+      /** connectedUser === loggedIn now */
+      setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
     }
 
-    /** If finished fetching for connected user and is undefined, then
-     * the status is not not-known, its a confirmed LoggedOut */
-    if (
-      overallLoginStatus === OverallLoginStatus.NotKnown &&
-      connectedUser === undefined
-    ) {
+    const isConnecting =
+      ALL_PUBLISH_PLATFORMS.find((platform) => {
+        return (
+          getPlatformConnectedStatus(platform) ===
+          PlatformConnectedStatus.Connecting
+        );
+      }) !== undefined;
+
+    if (connectedUser === null && !isConnecting) {
       disconnect();
     }
-  }, [connectedUser, overallLoginStatus, token, loginFlowState]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    connectedUser,
+    overallLoginStatus,
+    token,
+    loginFlowState,
+    setOverallLoginStatus,
+  ]);
 
   const disconnect = () => {
+    if (DEBUG) console.log(`disconnect called`);
+
     setConnectedUser(undefined);
     setToken(null);
 
+    const disabledStatus: PlatformsConnectedStatus = {};
+
     ALL_PUBLISH_PLATFORMS.forEach((platform) => {
-      setPlatformsConnectedStatus({
-        ...platformsConnectedStatus,
-        [platform]: PlatformConnectedStatus.Disconnected,
-      });
+      disabledStatus[platform] = PlatformConnectedStatus.Disconnected;
     });
 
+    setPlatformsConnectedStatus({
+      ...disabledStatus,
+    });
+
+    setHideShareInfo(null);
     _setLoginFlowState(LoginFlowState.Idle);
     _setOverallLoginStatus(OverallLoginStatus.LoggedOut);
   };
-
-  const currentAutopost =
-    connectedUser?.settings?.autopost[PLATFORM.Nanopub].value;
-
-  const currentNotifications = connectedUser?.settings?.notificationFreq;
 
   const email = connectedUser ? connectedUser.email : undefined;
 
@@ -287,6 +265,10 @@ export const AccountContext = (props: PropsWithChildren) => {
     platformId: PLATFORM,
     status: PlatformConnectedStatus
   ) => {
+    if (DEBUG)
+      console.log(
+        `setting PlatformsConnectedStatus platformId ${platformId} status ${status}`
+      );
     setPlatformsConnectedStatus({
       ...platformsConnectedStatus,
       [platformId]: status,
@@ -294,30 +276,54 @@ export const AccountContext = (props: PropsWithChildren) => {
   };
 
   const getPlatformConnectedStatus = (
-    platformId: PLATFORM
-  ): PlatformConnectedStatus | undefined => {
+    platformId: IDENTITY_PLATFORM
+  ): PlatformConnectedStatus | undefined | null => {
     return platformsConnectedStatus && platformsConnectedStatus[platformId];
   };
 
-  const connectedSourcePlatforms = useMemo(() => {
-    return ALL_SOURCE_PLATFORMS.filter((platform) => {
+  const connectedPlatforms = useMemo(() => {
+    return ALL_IDENTITY_PLATFORMS.filter((platform) => {
       const profiles = connectedUser?.profiles;
       const profile = profiles && profiles[platform];
       return profile !== undefined;
     });
   }, [connectedUser]);
 
+  /** single place where a connecting platform is marked as connected */
   useEffect(() => {
-    connectedSourcePlatforms.forEach((platform) => {
-      setPlatformConnectedStatus(platform, PlatformConnectedStatus.Connected);
-    });
-  }, [connectedSourcePlatforms]);
+    if (connectedUser) {
+      let modified = false;
+      const newConnectedStatus = { ...platformsConnectedStatus };
+
+      ALL_IDENTITY_PLATFORMS.forEach((platform) => {
+        if (
+          getPlatformConnectedStatus(platform) !==
+            PlatformConnectedStatus.Connected &&
+          connectedPlatforms.includes(platform)
+        ) {
+          newConnectedStatus[platform] = PlatformConnectedStatus.Connected;
+          modified = true;
+        }
+      });
+
+      if (modified) {
+        setPlatformsConnectedStatus(newConnectedStatus);
+      }
+
+      /** protection in case a logged user remains without accounts (beacuse of a hard account reset) */
+      if (connectedPlatforms.length === 0) {
+        disconnect();
+      }
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connectedPlatforms, connectedUser, platformsConnectedStatus]);
 
   return (
     <AccountContextValue.Provider
       value={{
         connectedUser: connectedUser === null ? undefined : connectedUser,
-        connectedSourcePlatforms,
+        connectedPlatforms,
         email,
         isConnected: connectedUser !== undefined && connectedUser !== null,
         disconnect,
@@ -329,12 +335,8 @@ export const AccountContext = (props: PropsWithChildren) => {
         loginFlowState,
         setLoginFlowState,
         resetLogin,
-        currentAutopost,
-        currentNotifications,
         setPlatformConnectedStatus,
         getPlatformConnectedStatus,
-        alreadyConnected,
-        setAlreadyConnected,
       }}>
       {props.children}
     </AccountContextValue.Provider>

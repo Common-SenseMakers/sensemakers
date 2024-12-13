@@ -6,16 +6,16 @@ import {
   MastodonAccountDetails,
   MastodonSigninCredentials,
 } from './types.mastodon';
-import {
-  NanopubAccountDetails,
-  NanopubProfile,
-  NanopubSigninCredentials,
-} from './types.nanopubs';
+import { NanopubSigninCredentials } from './types.nanopubs';
 import { NotificationFreq } from './types.notifications';
 import { OrcidAccountDetails, OrcidProfile } from './types.orcid';
-import { PLATFORM } from './types.platforms';
+import { IDENTITY_PLATFORM, PLATFORM } from './types.platforms';
 import { AppPostFull } from './types.posts';
-import { PlatformProfile, WithPlatformUserId } from './types.profiles';
+import {
+  AccountProfileRead,
+  PlatformProfile,
+  WithPlatformUserId,
+} from './types.profiles';
 import {
   TwitterAccountDetails,
   TwitterSigninCredentials,
@@ -56,21 +56,14 @@ export interface UserWithId {
   userId: string;
 }
 
-export enum AutopostOption {
-  MANUAL = 'MANUAL',
-  DETERMINISTIC = 'DETERMINISTIC',
-  AI = 'AI',
+export interface UserWithDetails {
+  details?: {
+    onboarded: boolean;
+  };
 }
 
-export interface UserSettings {
-  autopost: {
-    [PLATFORM.Nanopub]: {
-      value: AutopostOption;
-      after?: number;
-    };
-  };
-  notificationFreq: NotificationFreq;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface UserSettings {}
 
 export type UserSettingsUpdate = Partial<UserSettings>;
 
@@ -88,13 +81,13 @@ export interface UserWithSettings {
 export interface UserAccounts {
   [PLATFORM.Orcid]?: OrcidAccountDetails[];
   [PLATFORM.Twitter]?: TwitterAccountDetails[];
-  [PLATFORM.Nanopub]?: NanopubAccountDetails[];
   [PLATFORM.Mastodon]?: MastodonAccountDetails[];
   [PLATFORM.Bluesky]?: BlueskyAccountDetails[];
 }
 
 export interface UserWithAccounts {
   accounts: UserAccounts;
+  accountsIds: string[]; // redundant, used to index users with accounts
 }
 
 /**
@@ -106,15 +99,19 @@ export interface AppUser
   extends UserWithId,
     UserWithId,
     UserWithSettings,
-    UserWithAccounts {}
+    UserWithAccounts,
+    UserWithDetails {}
 
-export type AppUserCreate = Omit<AppUser, 'userId'>;
+export type AppUserCreate = Omit<AppUser, 'userId' | 'accountsIds'>;
 
 /**
  * The AccountDetailsRead combines the AccountDetails (signup date and credentials
  * existence) with the account profile
  */
-export interface AccountDetailsRead<P = any> {
+export interface AccountDetailsRead<
+  P extends PlatformProfile = PlatformProfile,
+> {
+  platformId: IDENTITY_PLATFORM;
   user_id: string;
   profile: P;
   read: boolean;
@@ -122,13 +119,27 @@ export interface AccountDetailsRead<P = any> {
 }
 
 /** accounts include the readable details (not sensitive details) */
-export interface AppUserRead extends UserWithId, UserWithSettings {
+
+/** details sent to the logged in user about themeselves */
+export interface AppUserRead
+  extends UserWithId,
+    UserWithSettings,
+    UserWithDetails {
   profiles: {
     [PLATFORM.Orcid]?: AccountDetailsRead<OrcidProfile>[];
     [PLATFORM.Twitter]?: AccountDetailsRead<PlatformProfile>[];
-    [PLATFORM.Nanopub]?: AccountDetailsRead<NanopubProfile>[];
     [PLATFORM.Mastodon]?: AccountDetailsRead<PlatformProfile>[];
     [PLATFORM.Bluesky]?: AccountDetailsRead<PlatformProfile>[];
+  };
+}
+
+/** details publicly available about a user */
+export interface AppUserPublicRead extends UserWithId {
+  profiles: {
+    [PLATFORM.Orcid]?: AccountProfileRead[];
+    [PLATFORM.Twitter]?: AccountProfileRead[];
+    [PLATFORM.Mastodon]?: AccountProfileRead[];
+    [PLATFORM.Bluesky]?: AccountProfileRead[];
   };
 }
 
@@ -155,3 +166,9 @@ export type RenderEmailFunction = (
   notificationFrequency: NotificationFreq,
   appUrl: string
 ) => { html: string; plainText: string; subject: string };
+
+export interface GetProfilePayload {
+  platformId: PLATFORM;
+  user_id?: string;
+  username?: string;
+}

@@ -31,6 +31,12 @@ import {
   PlatformProfile,
 } from '../../@shared/types/types.profiles';
 import { AccountCredentials } from '../../@shared/types/types.user';
+import {
+  getGlobalMastodonUsername,
+  parseMastodonAccountURI,
+  parseMastodonGlobalUsername,
+  parseMastodonPostURI,
+} from '../../@shared/utils/mastodon.utils';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
@@ -40,13 +46,9 @@ import {
   cleanMastodonContent,
   convertMastodonPostsToThreads,
   extractPrimaryThread,
-  getGlobalMastodonUsername,
-  parseMastodonAccountURI,
-  parseMastodonGlobalUsername,
-  parseMastodonPostURI,
 } from './mastodon.utils';
 
-const DEBUG = true;
+const DEBUG = false;
 const DEBUG_PREFIX = 'MastodonService';
 
 export interface MastodonServiceConfig {
@@ -89,11 +91,14 @@ export class MastodonService
   }
 
   public getClient(server: string, credentials?: MastodonAccountCredentials) {
+    const accessTokenServer = this.config.accessTokens[server]
+      ? server
+      : 'mastodon.social';
     return createRestAPIClient({
       url: `https://${server}`,
       accessToken: credentials
         ? credentials.accessToken
-        : this.config.accessTokens[server],
+        : this.config.accessTokens[accessTokenServer],
     });
   }
 
@@ -225,7 +230,8 @@ export class MastodonService
       fetchParams.maxId = parseMastodonPostURI(params.until_id).postId;
     }
 
-    if (DEBUG) logger.debug('fetch params', { fetchParams }, DEBUG_PREFIX);
+    if (DEBUG)
+      logger.debug('fetch params', { user_id, fetchParams }, DEBUG_PREFIX);
 
     const paginator = client.v1.accounts
       .$select(account.id)

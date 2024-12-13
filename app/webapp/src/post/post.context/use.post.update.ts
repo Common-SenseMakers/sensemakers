@@ -1,18 +1,17 @@
+import { Store } from 'n3';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useAppFetch } from '../../api/app.fetch';
 import { useToastContext } from '../../app/ToastsContext';
 import {
+  AppPostEditStatus,
   AppPostFull,
-  AppPostReviewStatus,
   PostUpdate,
   PostUpdatePayload,
-  PostsQueryStatus,
 } from '../../shared/types/types.posts';
-import { AppUserRead } from '../../shared/types/types.user';
+import { parseRDF } from '../../shared/utils/n3.utils';
 import { useUserPosts } from '../../user-home/UserPostsContext';
 import { ConnectedUser } from '../../user-login/contexts/AccountContext';
-import { useNanopubContext } from '../../user-login/contexts/platforms/nanopubs/NanopubContext';
 import { AppPostStatus, getPostStatuses } from '../posts.helper';
 import { PostDerivedContext } from './use.post.derived';
 import { PostFetchContext } from './use.post.fetch';
@@ -25,14 +24,16 @@ export interface PostUpdateContext {
   enabledEdit: boolean; // only true if editing after publishing
   postEdited: AppPostFull | undefined;
   postMerged?: AppPostFull;
+  storeMerged?: Store;
   statusesMerged: AppPostStatus;
   setEnabledEdit: (enabled: boolean) => void;
   isUpdating: boolean;
   setIsUpdating: (updating: boolean) => void;
-  updateSemantics: (newSemantics: string) => void;
-  updatePost: (update: PostUpdate) => Promise<void>;
+  updateSemantics: (newSemantics: string) => Promise<void>;
+  updatePost: (update: PostUpdate) => void;
   readyToNanopublish: boolean;
   inPrePublish: boolean;
+  isDraft: boolean;
 }
 
 export const usePostUpdate = (
@@ -44,7 +45,7 @@ export const usePostUpdate = (
   const { show } = useToastContext();
   const appFetch = useAppFetch();
 
-  const { filterStatus, feed } = useUserPosts();
+  const { feed } = useUserPosts();
   const { removePost } = feed;
 
   const [enabledEdit, setEnabledEdit] = useState<boolean>(false);
@@ -53,8 +54,12 @@ export const usePostUpdate = (
   );
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const { mergedSemantics, updateSemantics: updateSemanticsLocal } =
-    usePostMergeDeltas(fetched);
+  const {
+    mergedSemantics,
+    updateSemantics: updateSemanticsLocal,
+    isDraft,
+  } = usePostMergeDeltas(fetched);
+  const [storeMerged, setStoreMerged] = useState<Store | undefined>();
 
   const editable =
     connectedUser !== undefined &&
@@ -69,69 +74,64 @@ export const usePostUpdate = (
   }, [fetched.post]);
 
   /** actuall call to update the post in the backend */
-  const _updatePost = async (update: PostUpdate) => {
-    if (!fetched.post) {
-      return;
-    }
-
-    setIsUpdating(true);
-    try {
-      await appFetch<void, PostUpdatePayload>('/api/posts/update', {
-        postId: fetched.post.id,
-        postUpdate: update,
-      });
-      // setIsUpdating(false); let the refetch set the udpate flow to false
-    } catch (e: any) {
-      console.error(e);
-      show({ title: 'Error updating post', message: e.message });
-      setIsUpdating(false);
-    }
-  };
-
-  /** updatePost and optimistically update the post object */
-  const optimisticUpdate = useCallback(
+  const _updatePost = useCallback(
     async (update: PostUpdate) => {
       if (!fetched.post) {
         return;
       }
 
-      setPostEdited({ ...fetched.post, ...update });
-      updatePost(update);
+      setIsUpdating(true);
+      try {
+        await appFetch<void, PostUpdatePayload>('/api/posts/update', {
+          postId: fetched.post.id,
+          postUpdate: update,
+        });
+        // setIsUpdating(false); let the refetch set the udpate flow to false
+      } catch (e) {
+        console.error(e);
+        show({ title: 'Error updating post', message: (e as Error).message });
+        setIsUpdating(false);
+      }
     },
-    [fetched.post]
+    [appFetch, fetched.post, show]
   );
 
   /** updatePost and optimistically update the posts lists */
-  const updatePost = async (update: PostUpdate) => {
-    /** optimistic remove the post from the filtered list */
-    const statusKept = (() => {
-      if (filterStatus === PostsQueryStatus.DRAFTS) {
+  const updatePost = useCallback(
+    async (update: PostUpdate) => {
+      /** optimistic remove the post from the filtered list */
+      const statusKept = (() => {
         return true;
-      }
-      if (filterStatus === PostsQueryStatus.PENDING) {
-        return update.reviewedStatus === AppPostReviewStatus.PENDING;
-      }
-      if (filterStatus === PostsQueryStatus.PUBLISHED) {
-        return update.reviewedStatus === AppPostReviewStatus.APPROVED;
-      }
-      if (filterStatus === PostsQueryStatus.IGNORED) {
-        return update.reviewedStatus === AppPostReviewStatus.IGNORED;
-      }
-    })();
+      })();
 
-    if (!statusKept && fetched.postId) {
-      removePost(fetched.postId);
-    }
+      if (!statusKept && fetched.postId) {
+        removePost(fetched.postId);
+      }
 
-    _updatePost(update);
-  };
+      await _updatePost(update);
+    },
+    [_updatePost, fetched.postId, removePost]
+  );
 
-  const updateSemantics = (newSemantics: string) => {
+  /** updatePost and optimistically update the post object */
+  const optimisticUpdate = useCallback(
+    (update: PostUpdate) => {
+      if (!fetched.post) {
+        return;
+      }
+
+      setPostEdited({ ...fetched.post, ...update });
+      updatePost(update).catch(console.error);
+    },
+    [fetched.post, updatePost]
+  );
+
+  const updateSemantics = async (newSemantics: string) => {
     updateSemanticsLocal(newSemantics);
-    updatePost({
+    await updatePost({
       semantics: newSemantics,
-      reviewedStatus: AppPostReviewStatus.DRAFT,
-    });
+      editStatus: AppPostEditStatus.DRAFT,
+    }).catch(console.error);
   };
 
   /**
@@ -156,29 +156,21 @@ export const usePostUpdate = (
       };
     }
     return undefined;
-  }, [
-    fetched.postId,
-    fetched.post,
-    postInit,
-    postEdited,
-    fetched.isLoading,
-    mergedSemantics,
-  ]);
+  }, [fetched.post, postInit, postEdited, fetched.isLoading, mergedSemantics]);
+
+  useEffect(() => {
+    if (mergedSemantics) {
+      parseRDF(mergedSemantics)
+        .then((store) => {
+          setStoreMerged(store);
+        })
+        .catch(console.error);
+    }
+  }, [mergedSemantics]);
 
   const statusesMerged = useMemo(() => {
     return getPostStatuses(postMerged);
   }, [postMerged]);
-
-  const { signNanopublication } = useNanopubContext();
-
-  const canPublishNanopub =
-    connectedUser &&
-    connectedUser.profiles?.nanopub &&
-    signNanopublication &&
-    derived.nanopubDraft;
-
-  const readyToNanopublish =
-    canPublishNanopub && derived.nanopubDraft && !statusesMerged.live;
 
   const inPrePublish = !statusesMerged.live && !statusesMerged.ignored;
 
@@ -187,14 +179,15 @@ export const usePostUpdate = (
     enabledEdit,
     postEdited,
     postMerged,
+    storeMerged,
     statusesMerged,
     setEnabledEdit,
     isUpdating,
     setIsUpdating,
     updateSemantics,
     updatePost: optimisticUpdate,
-    readyToNanopublish:
-      readyToNanopublish !== undefined ? readyToNanopublish : false,
+    readyToNanopublish: false,
     inPrePublish,
+    isDraft,
   };
 };

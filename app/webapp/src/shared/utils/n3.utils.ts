@@ -43,6 +43,22 @@ export const writeRDF = async (store: Store): Promise<string | undefined> => {
   });
 };
 
+export const addTripleToSemantics = async (
+  semantics: string,
+  triple: string[]
+) => {
+  const [subject, predicate, object] = triple;
+  const store = await parseRDF(semantics);
+  store.addQuad(
+    DataFactory.quad(
+      DataFactory.namedNode(subject),
+      DataFactory.namedNode(predicate),
+      DataFactory.namedNode(object)
+    )
+  );
+  return writeRDF(store);
+};
+
 export const mapStore = (
   store: Store,
   callback: (q: Quad) => Quad,
@@ -158,7 +174,7 @@ export const replaceNodes = (
   replaceMap: Record<string, string>
 ) => {
   const newStore = mapStore(store, (quad) => {
-    let { subject, predicate, object, graph } = quad;
+    const { subject, predicate, object, graph } = quad;
 
     return DataFactory.quad(
       replaceNode(subject, replaceMap) as Quad_Subject,
@@ -169,4 +185,22 @@ export const replaceNodes = (
   });
 
   return newStore;
+};
+
+export const getNode = (value: string): NamedNode | Literal => {
+  try {
+    return DataFactory.namedNode(value);
+  } catch (e) {
+    return DataFactory.literal(value);
+  }
+};
+
+export const tripleToQuad = (triple: string[]) => {
+  const [subject, predicate, object, graph] = triple;
+  return DataFactory.quad(
+    DataFactory.namedNode(subject),
+    DataFactory.namedNode(predicate),
+    getNode(object),
+    graph ? DataFactory.namedNode(graph) : DataFactory.defaultGraph()
+  );
 };

@@ -76,18 +76,31 @@ export const OrcidContext = (props: PropsWithChildren) => {
         `/api/auth/${PLATFORM.Orcid}/signup`,
         { code, callbackUrl },
         true
-      ).then((result) => {
-        if (DEBUG) console.log('orcird signup returned', { result });
+      )
+        .then((result) => {
+          if (DEBUG) console.log('orcird signup returned', { result });
 
-        searchParams.delete('code');
-        setSearchParams(searchParams);
-        refreshConnected();
-      });
+          searchParams.delete('code');
+          setSearchParams(searchParams);
+          refreshConnected().catch(console.error);
+        })
+        .catch(console.error);
     }
-  }, [code, connectedUser, searchParams, setSearchParams]);
+  }, [
+    appFetch,
+    code,
+    connectedUser,
+    redirectPath,
+    refreshConnected,
+    searchParams,
+    setSearchParams,
+    wasConnecting,
+  ]);
 
   /** connect will navigate to the orcid signing page */
   const connect = (path: string) => {
+    if (!ORCID_CLIENT_ID) throw Error('ORCID_CLIENT_ID not set');
+
     setWasConnecting(true);
     setRedirectPath(path);
     window.location.href = `${ORCID_API_URL}/oauth/authorize?client_id=${ORCID_CLIENT_ID}&response_type=code&scope=/authenticate&redirect_uri=${window.location.origin + path}`;
@@ -101,13 +114,13 @@ export const OrcidContext = (props: PropsWithChildren) => {
     ) {
       setWasConnecting(false);
     }
-  }, [connectedUser]);
+  }, [connectedUser, setWasConnecting]);
 
   return (
     <OrcidContextValue.Provider
       value={{
         connect,
-        connecting: wasConnecting !== undefined ? wasConnecting : false,
+        connecting: wasConnecting ?? false,
       }}>
       {props.children}
     </OrcidContextValue.Provider>

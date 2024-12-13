@@ -5,7 +5,7 @@ import { PostsHelper } from '../src/posts/posts.helper';
 import { getProfileId } from '../src/profiles/profiles.repository';
 import { servicesSource, servicesTarget } from './migrations.services';
 
-const DEBUG = true;
+const DEBUG = false;
 
 (async () => {
   const posts =

@@ -11,6 +11,11 @@ import {
 
 const DEBUG = false;
 
+export type Query = FirebaseFirestore.Query<
+  FirebaseFirestore.DocumentData,
+  FirebaseFirestore.DocumentData
+>;
+
 export class DBInstance {
   public firestore: Firestore;
 
@@ -21,10 +26,10 @@ export class DBInstance {
     platformPosts: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
     updates: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
     profiles: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
-    triples: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
     activity: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
-    userNotifications: (
-      userId: string
+    links: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
+    linkPosts: (
+      linkId: string
     ) => FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
   };
 
@@ -39,13 +44,13 @@ export class DBInstance {
       platformPosts: this.firestore.collection(CollectionNames.PlatformPosts),
       updates: this.firestore.collection(CollectionNames.Updates),
       profiles: this.firestore.collection(CollectionNames.Profiles),
-      triples: this.firestore.collection(CollectionNames.Triples),
       activity: this.firestore.collection(CollectionNames.Activity),
-      userNotifications: (userId: string) =>
+      links: this.firestore.collection(CollectionNames.Links),
+      linkPosts: (linkId: string) =>
         this.firestore
-          .collection(CollectionNames.Users)
-          .doc(userId)
-          .collection(CollectionNames.Notifications),
+          .collection(CollectionNames.Links)
+          .doc(linkId)
+          .collection(CollectionNames.LinkPostsSubcollection),
     };
   }
 

@@ -1,13 +1,14 @@
 import { Box, BoxExtendedProps } from 'grommet';
 import { FormDown, FormUp, Refresh } from 'grommet-icons';
-import React, { useState } from 'react';
+import React, { PropsWithChildren, useState } from 'react';
 
 import { useThemeContext } from './ThemedApp';
 import { StyleConstants } from './themes';
 
-export interface AppCardProps extends BoxExtendedProps {
+export interface AppCardProps extends PropsWithChildren {
+  boxProps?: BoxExtendedProps;
   reloading?: boolean;
-  onReload?: () => any;
+  onReload?: () => void;
 }
 
 const cardStyle = (constants: StyleConstants): React.CSSProperties => {
@@ -21,14 +22,7 @@ const cardStyle = (constants: StyleConstants): React.CSSProperties => {
 export const AppCard = React.forwardRef<HTMLDivElement, AppCardProps>(
   (props, ref) => {
     const { constants } = useThemeContext();
-
-    /** filter props that are not Box */
-    const boxProps = Object.keys(props)
-      .filter((key) => ['onReload', 'reloading'].indexOf(key) < 0)
-      .reduce(
-        (newObj, key) => Object.assign(newObj, { [key]: (props as any)[key] }),
-        {}
-      );
+    const { boxProps } = props;
 
     const showReload = props.onReload !== undefined;
     return (
@@ -38,7 +32,7 @@ export const AppCard = React.forwardRef<HTMLDivElement, AppCardProps>(
         style={{
           position: 'relative',
           ...cardStyle(constants),
-          ...props.style,
+          ...(boxProps || {}).style,
         }}>
         {props.children}
         {showReload ? (

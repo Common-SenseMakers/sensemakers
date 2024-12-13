@@ -23,3 +23,4 @@ app/last_output.json
 
 twitterApiCache.json
 .aider*
+.DS_store

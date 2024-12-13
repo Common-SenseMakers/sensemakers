@@ -1,9 +1,5 @@
 import { object, string } from 'yup';
 
-import { NotificationFreq } from '../../@shared/types/types.notifications';
-import { PLATFORM } from '../../@shared/types/types.platforms';
-import { AutopostOption } from '../../@shared/types/types.user';
-
 export const mastodonGetSignupContextSchema = object({
   mastodonServer: string().required(),
   callback_url: string().required(),
@@ -56,20 +52,7 @@ export const blueskySignupDataSchema = object({
   type: string().oneOf(['read', 'write']).required(),
 }).noUnknown(true);
 
-export const userSettingsUpdateSchema = object({
-  autopost: object({
-    [PLATFORM.Nanopub]: object({
-      value: string()
-        .oneOf([...Object.values(AutopostOption)])
-        .required(),
-    }),
-  })
-    .optional()
-    .default(undefined),
-  notificationFreq: string()
-    .oneOf([...Object.values(NotificationFreq)])
-    .optional(),
-}).noUnknown(true);
+export const userSettingsUpdateSchema = object({}).noUnknown(true);
 
 export const magicEmailSetSchema = object({
   idToken: string().required(),

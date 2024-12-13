@@ -4,7 +4,6 @@ export const TwitterIcon = (
   props: { size?: number; color?: string } & BoxExtendedProps
 ) => {
   const size = props.size || 20;
-  const color = props.color || 'white';
   return (
     <Box
       height={`${size}px`}
@@ -16,16 +15,6 @@ export const TwitterIcon = (
         backgroundColor: 'black',
       }}>
       <Image src="/icons/x-logo/logo-white.png" height={`${size * 0.6}px`} />
-    </Box>
-  );
-};
-
-export const NanopubsIcon = (props: { size?: number; color?: string }) => {
-  const size = props.size || 20;
-  const color = props.color || 'white';
-  return (
-    <Box style={{ height: `${size}px`, width: `${size}px` }}>
-      <Image src="/icons/nanopub.png" />
     </Box>
   );
 };

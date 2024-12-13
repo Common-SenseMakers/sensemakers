@@ -1,6 +1,9 @@
+import { AtpSessionData } from '@atproto/api';
+import * as jwt from 'jsonwebtoken';
 import { anything, instance, spy, when } from 'ts-mockito';
 
 import {
+  AccessJwtPayload,
   BlueskyAccountDetails,
   BlueskyGetContextParams,
   BlueskySignupContext,
@@ -2463,14 +2466,28 @@ export const getBlueskyMock = (
     );
     when(mocked.handleSignupData(anything())).thenCall(
       (data: BlueskySignupData) => {
+        const mockPayload: AccessJwtPayload = {
+          scope: 'com.atproto.appPassPrivileged',
+          sub: 'did:plc:xq36vykdkrzknmcxo3jnn5wq',
+          iat: Math.floor(Date.now() / 1000),
+          exp: Math.floor(Date.now() / 1000) + 3600 * 2,
+          aud: 'did:web:woodear.us-west.host.bsky.network',
+        };
+
+        const secretKey = 'test-secret-key';
+        const accessJwt = jwt.sign(mockPayload, secretKey);
+
         const accountDetails = {
           user_id: 'did:plc:6z5botgrc5vekq7j26xnvawq',
           signupDate: 1725473415250,
           credentials: {
             read: {
-              username: 'sensenetsbot.bsky.social',
-              appPassword: '2134-1234-1234-1234',
-            },
+              accessJwt,
+              refreshJwt: accessJwt,
+              handle: data.username,
+              did: 'did:plc:6z5botgrc5vekq7j26xnvawq',
+              active: true,
+            } as AtpSessionData,
           },
         };
         const profile: AccountProfileCreate = {

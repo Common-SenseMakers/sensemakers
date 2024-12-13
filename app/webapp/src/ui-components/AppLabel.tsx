@@ -2,7 +2,6 @@ import { Box, BoxExtendedProps, Text } from 'grommet';
 import { Close } from 'grommet-icons';
 
 import { AppButton } from './AppButton';
-import { useThemeContext } from './ThemedApp';
 
 export interface LabelColors {
   font: string;
@@ -18,7 +17,6 @@ export const AppLabel = (
   }
 ): JSX.Element => {
   const colors = props.colors;
-  const { constants } = useThemeContext();
 
   const remove = () => {
     if (props.remove) {

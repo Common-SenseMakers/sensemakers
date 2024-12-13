@@ -7,6 +7,7 @@ import {
   AppBskyFeedDefs,
   AppBskyFeedPost,
   AppBskyRichtextFacet,
+  AtpSessionData,
 } from '@atproto/api';
 
 import { PlatformProfile } from './types.profiles';
@@ -19,10 +20,7 @@ export interface BlueskySigninCredentials {
   appPassword: string;
 }
 
-export type BlueskyCredentials = {
-  username: string;
-  appPassword: string;
-};
+export type BlueskyCredentials = AtpSessionData;
 
 export interface BlueskyAccountCredentials {
   write?: BlueskyCredentials;
@@ -83,3 +81,11 @@ export type BlueskyPost = AppBskyFeedDefs.PostView & {
     record: QuotedBlueskyPost;
   };
 };
+
+export interface AccessJwtPayload {
+  scope: string;
+  sub: string;
+  iat: number;
+  exp: number;
+  aud: string;
+}

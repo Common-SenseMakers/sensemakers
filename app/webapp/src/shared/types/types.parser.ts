@@ -1,4 +1,5 @@
 import { GenericThread } from './types.posts';
+import { OEmbed, RefLabel } from './types.references';
 
 export enum PARSER_MODE {
   REF_LABELS = 'REF_LABELS',
@@ -16,10 +17,6 @@ export interface ParsePostRequest<P> {
 }
 
 export type AppPostSemantics = string;
-export interface StructuredSemantics {
-  labels?: string[];
-  keywords?: string[];
-}
 
 export interface OntologyItem {
   uri: string;
@@ -33,14 +30,13 @@ export interface OntologyItem {
   versions?: string[];
 }
 
-export interface RefMeta {
-  url: string;
-  title: string;
-  summary: string;
-  item_type: string;
-  image: string;
+export interface RefMeta extends OEmbed {
+  item_type?: string;
+  order?: number;
   ref_source_url?: string;
-  order: number;
+  labels?: string[];
+  refLabels?: RefLabel[];
+  ontology?: ParserOntology;
 }
 
 export interface ParserOntology {
@@ -66,4 +62,5 @@ export interface ParsePostResult {
   filter_classification: SciFilterClassfication;
   semantics: AppPostSemantics;
   support?: ParsedSupport;
+  metadata?: Record<string, any>;
 }

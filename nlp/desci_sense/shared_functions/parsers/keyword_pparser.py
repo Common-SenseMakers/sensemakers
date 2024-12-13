@@ -77,12 +77,13 @@ class KeywordPostParserChain(PostParserChain):
             post,
             metadata_list,
             show_author=False,
+            quoted_context_length=self.parser_config.quoted_context_length,
         )
 
         # instantiate prompt with ref post details
         full_prompt = self.prompt_template.render(
             rendered_post=rendered_post,
             max_keywords=self.parser_config.max_keywords,
+            quoted_context_length=self.parser_config.quoted_context_length,
         )
-
         return {self.input_name: full_prompt}

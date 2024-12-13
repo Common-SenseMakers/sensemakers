@@ -6,14 +6,11 @@ import {
   TopicsParams,
 } from '../@shared/types/types.parser';
 import {
-  PlatformPost,
   PlatformPostCreate,
   PlatformPostCreated,
   PlatformPostPosted,
   PlatformPostPublishOrigin,
   PlatformPostPublishStatus,
-  PlatformPostSignerType,
-  PlatformPostStatusUpdate,
 } from '../@shared/types/types.platform.posts';
 import {
   ALL_PUBLISH_PLATFORMS,
@@ -23,17 +20,23 @@ import {
 } from '../@shared/types/types.platforms';
 import {
   AppPost,
-  AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
-  AppPostRepublishedStatus,
-  AppPostReviewStatus,
+  HydrateConfig,
   PostUpdate,
   PostsQuery,
-  PostsQueryStatus,
+  PostsQueryDefined,
 } from '../@shared/types/types.posts';
 import { FetchedDetails } from '../@shared/types/types.profiles';
 import { AccountCredentials, AppUser } from '../@shared/types/types.user';
+import { addTripleToSemantics } from '../@shared/utils/n3.utils';
+import { getProfileId } from '../@shared/utils/profiles.utils';
+import {
+  HAS_TOPIC_URI,
+  NOT_SCIENCE_TOPIC_URI,
+  SCIENCE_TOPIC_URI,
+  THIS_POST_NAME_URI,
+} from '../@shared/utils/semantics.helper';
 import { PARSING_TIMEOUT_MS } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
@@ -43,14 +46,9 @@ import { PlatformsService } from '../platforms/platforms.service';
 import { TimeService } from '../time/time.service';
 import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
-import { PostsHelper } from './posts.helper';
 import { PostsProcessing } from './posts.processing';
 
 const DEBUG = true;
-
-const areCredentialsInvalid = (err: { message: string }) => {
-  return err.message.includes('Value passed for the token was invalid');
-};
 
 /**
  * Top level methods. They instantiate a TransactionManger and execute
@@ -98,17 +96,6 @@ export class PostsManager {
     return platformPost;
   }
 
-  private async resetCredentials(
-    platformId: PLATFORM,
-    user_id: string,
-    manager: TransactionManager
-  ) {
-    logger.error(
-      `Token error fetching from platform ${platformId}. Reset credentials`
-    );
-    await this.users.repo.removeAccountDetails(platformId, user_id, manager);
-  }
-
   public async fetchPostFromPlatform(
     userId: string,
     platformId: PUBLISHABLE_PLATFORM,
@@ -130,7 +117,7 @@ export class PostsManager {
       );
 
       if (newCredentials) {
-        this.users.updateAccountCredentials(
+        await this.users.updateAccountCredentials(
           userId,
           platformId,
           account.user_id,
@@ -155,12 +142,12 @@ export class PostsManager {
 
       return platformPostCreated;
     } catch (err: any) {
-      if (areCredentialsInvalid(err)) {
-        await this.resetCredentials(platformId, account.user_id, manager);
-        return { post: undefined };
-      }
+      logger.error(
+        `error fetching post ${post_id} from platform ${platformId}`,
+        { err }
+      );
 
-      throw new Error(err);
+      return { post: undefined };
     }
   }
 
@@ -174,13 +161,12 @@ export class PostsManager {
     user_id: string,
     params: FetchParams,
     manager: TransactionManager,
-    credentials?: AccountCredentials
+    credentials?: AccountCredentials,
+    userId?: string
   ) {
-    const profile = await this.users.profiles.getProfile(
-      platformId,
-      user_id,
-      manager,
-      true
+    const profile = await this.users.getOrCreateProfile(
+      getProfileId(platformId, user_id),
+      manager
     );
 
     const platformParams = await this.preparePlatformParams(
@@ -196,6 +182,16 @@ export class PostsManager {
         platformParams,
         credentials
       );
+
+      if (fetchedPosts.credentials && userId) {
+        await this.users.updateAccountCredentials(
+          userId,
+          platformId,
+          user_id,
+          fetchedPosts.credentials,
+          manager
+        );
+      }
 
       if (DEBUG)
         logger.debug(
@@ -222,12 +218,12 @@ export class PostsManager {
         this.initPlatformPost(platformId, fetchedPost)
       );
     } catch (err: any) {
-      if (areCredentialsInvalid(err)) {
-        await this.resetCredentials(platformId, user_id, manager);
-        return undefined;
-      }
+      logger.error(
+        `Error fetching posts for user_id ${user_id} on platform ${platformId}`,
+        { err }
+      );
 
-      throw new Error(err);
+      return undefined;
     }
   }
 
@@ -322,7 +318,8 @@ export class PostsManager {
     user_id: string,
     params: FetchParams,
     manager: TransactionManager,
-    credentials?: AccountCredentials
+    credentials?: AccountCredentials,
+    userId?: string
   ) {
     try {
       if (DEBUG)
@@ -338,7 +335,8 @@ export class PostsManager {
         user_id,
         params,
         manager,
-        credentials
+        credentials,
+        userId
       );
 
       if (!platformPostsCreate) {
@@ -441,7 +439,8 @@ export class PostsManager {
                       user_id,
                       inputs.params,
                       manager,
-                      account.credentials
+                      account.credentials,
+                      user.userId
                     );
                     return result;
                   }
@@ -464,12 +463,17 @@ export class PostsManager {
    * single place where new posts are fetched for a signedup user
    * from any platform
    * */
-  private async fetchIfNecessary(queryParams: PostsQuery): Promise<{
+  private async fetchIfNecessary(queryParams: PostsQueryDefined): Promise<{
     posts: AppPost[];
     enough: boolean;
   }> {
     if (queryParams.userId === undefined) {
       throw new Error('userId is a required query parameter here');
+    }
+
+    /** fetch only if queryuing for all posts of a user */
+    if (queryParams.semantics || queryParams.profileId) {
+      return { posts: [], enough: true };
     }
 
     /** if sinceId is provided fetch forward always */
@@ -486,40 +490,38 @@ export class PostsManager {
     /** if untilId is provided fetch backwards, but only if not enough posts are already stored */
     const posts = await this.processing.posts.getMany(queryParams);
 
-    if (queryParams.status === PostsQueryStatus.DRAFTS) {
-      /** fetch if older posts are less thant he expected amount */
-      if (posts.length < queryParams.fetchParams.expectedAmount) {
-        enough = false;
+    /** fetch if older posts are less thant he expected amount */
+    if (posts.length < queryParams.fetchParams.expectedAmount) {
+      enough = false;
 
-        await this.fetchUser({
-          userId: queryParams.userId,
-          params: queryParams.fetchParams,
-        });
-      }
-
-      /** fetch if there is a platform (maybe a recently connected one) without fetched details */
-      const profiles = await this.db.run((manager) => {
-        if (queryParams.userId === undefined) {
-          throw new Error('userId is a required query parameter here');
-        }
-        return this.users.profiles.getOfUser(queryParams.userId, manager);
+      await this.fetchUser({
+        userId: queryParams.userId,
+        params: queryParams.fetchParams,
       });
+    }
 
-      const platformsWithoutFetch = profiles
-        .filter((profile) => profile.fetched !== undefined)
-        .map((profile) => profile.platformId);
-
-      if (platformsWithoutFetch.length > 0) {
-        enough = false;
-
-        await this.fetchUser({
-          userId: queryParams.userId,
-          platformIds: platformsWithoutFetch,
-          params: {
-            ...queryParams.fetchParams,
-          },
-        });
+    /** fetch if there is a platform (maybe a recently connected one) without fetched details */
+    const profiles = await this.db.run((manager) => {
+      if (queryParams.userId === undefined) {
+        throw new Error('userId is a required query parameter here');
       }
+      return this.users.profiles.getOfUser(queryParams.userId, manager);
+    });
+
+    const platformsWithoutFetch = profiles
+      .filter((profile) => profile.fetched !== undefined)
+      .map((profile) => profile.platformId);
+
+    if (platformsWithoutFetch.length > 0) {
+      enough = false;
+
+      await this.fetchUser({
+        userId: queryParams.userId,
+        platformIds: platformsWithoutFetch,
+        params: {
+          ...queryParams.fetchParams,
+        },
+      });
     }
 
     return {
@@ -529,21 +531,22 @@ export class PostsManager {
   }
 
   /** get AppPost and fetch for new posts if necessary */
-  private async getAndFetchIfNecessary(queryParams: PostsQuery) {
+  private async getAndFetchIfNecessary(queryParams: PostsQueryDefined) {
     if (!queryParams.userId) {
       throw new Error('userId is required');
     }
 
-    const { posts: older, enough } = await this.fetchIfNecessary(queryParams);
+    /** only fetch if searching for all "my posts" and not filtering by status or  */
+    const { posts, enough } = await this.fetchIfNecessary(queryParams);
 
     /**
      * after fetching (if it was necessary), get the posts from
      * the db. If there were enough posts already, then no need to
      * read from the db again
      */
-    const posts = await (async () => {
+    const _posts = await (async () => {
       if (enough) {
-        return older;
+        return posts;
       }
 
       return this.processing.posts.getMany({
@@ -552,7 +555,7 @@ export class PostsManager {
       });
     })();
 
-    return posts;
+    return _posts;
   }
   /** Get posts AppPostFull of user, cannot be part of a transaction
    * We trigger fetching posts from the platforms from here
@@ -562,15 +565,37 @@ export class PostsManager {
       throw new Error('userId is required');
     }
 
-    const queryParams: PostsQuery = {
-      status: PostsQueryStatus.DRAFTS,
+    const addAggregatedLabels =
+      _queryParams.hydrateConfig?.addAggregatedLabels !== undefined
+        ? _queryParams.hydrateConfig.addAggregatedLabels
+        : false;
+
+    const addMirrors =
+      _queryParams.hydrateConfig?.addMirrors !== undefined
+        ? _queryParams.hydrateConfig.addMirrors
+        : true;
+
+    const hydrateConfig: HydrateConfig = {
+      addAggregatedLabels,
+      addMirrors,
+    };
+
+    const queryParams: PostsQueryDefined = {
+      fetchParams: {
+        ..._queryParams.fetchParams,
+        expectedAmount: _queryParams.fetchParams?.expectedAmount || 10,
+      },
       ..._queryParams,
     };
 
     const appPosts = await this.getAndFetchIfNecessary(queryParams);
 
     const postsFull = await Promise.all(
-      appPosts.map((post) => this.appendMirrors(post))
+      appPosts.map((post) =>
+        this.db.run((manager) =>
+          this.processing.hydratePostFull(post, hydrateConfig, manager)
+        )
+      )
     );
 
     logger.debug(
@@ -580,32 +605,16 @@ export class PostsManager {
     return postsFull;
   }
 
-  /**
-   * Append full mirrors to AppPost and return AppPostFull
-   * */
-  async appendMirrors(post: AppPost): Promise<AppPostFull> {
-    const mirrors = await Promise.all(
-      post.mirrorsIds.map((mirrorId) => {
-        return this.db.run((manager) =>
-          this.processing.platformPosts.get(mirrorId, manager)
-        );
-      })
-    );
-
-    return {
-      ...post,
-      mirrors: mirrors.filter((m) => m !== undefined) as PlatformPost[],
-    };
-  }
-
   async getPost<T extends boolean>(
     postId: string,
+    config: HydrateConfig,
     shouldThrow?: T,
     manager?: TransactionManager
   ) {
     const func = async (manager: TransactionManager) => {
       const post = await this.processing.getPostFull(
         postId,
+        config,
         manager,
         shouldThrow
       );
@@ -624,7 +633,12 @@ export class PostsManager {
           );
 
           // re-read post with latest parsingStatus
-          return this.processing.getPostFull(postId, manager, shouldThrow);
+          return this.processing.getPostFull(
+            postId,
+            config,
+            manager,
+            shouldThrow
+          );
         }
       }
 
@@ -668,28 +682,30 @@ export class PostsManager {
 
     if (shouldParse) {
       /** then process */
-      await this.db.run(
-        async (manager) => {
-          try {
-            await this._parsePost(postId, manager);
-          } catch (err: any) {
+      try {
+        await this._parsePost(postId);
+      } catch (err: any) {
+        await this.db.run(
+          async (manager) => {
             logger.error(`Error parsing post ${postId}`, err);
             await this.updatePost(
               postId,
               { parsingStatus: AppPostParsingStatus.ERRORED },
               manager
             );
-          }
-        },
-        undefined,
-        undefined,
-        `parsePost - parsing ${postId}`
-      );
+          },
+          undefined,
+          undefined,
+          `parsePost - parsing ${postId}`
+        );
+      }
     }
   }
 
-  protected async _parsePost(postId: string, manager: TransactionManager) {
-    const post = await this.processing.posts.get(postId, manager, true);
+  protected async _parsePost(postId: string) {
+    const post = await this.db.run(async (manager) => {
+      return this.processing.posts.get(postId, manager, true);
+    });
     if (DEBUG) logger.debug(`parsePost - start ${postId}`, { postId, post });
 
     const params: ParsePostRequest<TopicsParams> = {
@@ -706,26 +722,33 @@ export class PostsManager {
       throw new Error(`Error parsing post: ${post.id}`);
     }
 
-    /** science filter hack */
-    const reviewedStatus: AppPostReviewStatus = [
-      SciFilterClassfication.AI_DETECTED_RESEARCH,
-      SciFilterClassfication.CITOID_DETECTED_RESEARCH,
-    ].includes(parserResult.filter_classification)
-      ? AppPostReviewStatus.PENDING
-      : AppPostReviewStatus.IGNORED;
+    /** temp hack to convert filter_classification into topic semantics*/
+    const hackedSemantics = await (async () => {
+      const isScience = [
+        SciFilterClassfication.AI_DETECTED_RESEARCH,
+        SciFilterClassfication.CITOID_DETECTED_RESEARCH,
+      ].includes(parserResult.filter_classification);
+
+      return addTripleToSemantics(parserResult.semantics, [
+        THIS_POST_NAME_URI,
+        HAS_TOPIC_URI,
+        isScience ? SCIENCE_TOPIC_URI : NOT_SCIENCE_TOPIC_URI,
+      ]);
+    })();
 
     const update: PostUpdate = {
-      semantics: parserResult.semantics,
+      semantics: hackedSemantics,
       originalParsed: parserResult,
       parsedStatus: AppPostParsedStatus.PROCESSED,
       parsingStatus: AppPostParsingStatus.IDLE,
-      reviewedStatus,
     };
 
     if (DEBUG) logger.debug(`parsePost - done ${postId}`, { postId, update });
 
     /** store the semantics and mark as processed */
-    await this.updatePost(post.id, update, manager);
+    await this.db.run(async (manager) => {
+      return this.updatePost(post.id, update, manager);
+    });
   }
 
   /** single place to update a post (it updates the drafts if necessary) */
@@ -737,337 +760,147 @@ export class PostsManager {
     if (DEBUG) logger.debug(`updatePost ${postId}`, { postId, postUpdate });
     await this.processing.posts.update(postId, postUpdate, manager);
 
-    try {
-      if (DEBUG) logger.debug(`createOrUpdatePostDrafts ${postId}`);
-      await this.processing.createOrUpdatePostDrafts(postId, manager);
-    } catch (err: any) {
-      logger.warn(`Error updating post drafts ${postId}`, err);
-    }
-
-    /** sync the semantics as triples when the post is updated */
-    const postUpdated = await this.processing.posts.get(postId, manager, true);
-    const structured = await this.processing.processSemantics(
-      postId,
-      manager,
-      postUpdated.semantics
-    );
-
-    if (structured) {
-      if (DEBUG)
-        logger.debug(`updating strucured semantics ${postId}`, structured);
-      await this.processing.posts.update(postId, { ...structured }, manager);
-    }
-  }
-
-  /** deletes the mirror of a post from a platform. userId MUST be a verified user */
-  async unpublishPlatformPost(
-    postId: string,
-    userId: string,
-    platformId: PLATFORM,
-    post_id: string
-  ) {
-    return this.db.run(async (manager) => {
-      const user = await this.users.repo.getUser(userId, manager, true);
-      const post = await this.processing.getPostFull(postId, manager, true);
-
-      if (!post.authorUserId) {
-        throw new Error(`Cannout publish post without author: ${post.id}`);
-      }
-
-      if (post.authorUserId !== userId) {
-        throw new Error(`Only author can unpublish a post: ${post.id}`);
-      }
-
-      const mirror = PostsHelper.getPostMirror(
-        post,
-        { platformId, post_id },
-        true
-      );
-
-      if (!mirror) {
-        throw new Error(`Mirror on ${platformId} not found for post ${postId}`);
-      }
-
-      if (!mirror.posted) {
-        throw new Error(
-          `Mirror on ${platformId} not posted for post ${postId}`
-        );
-      }
-
-      if (mirror.publishStatus !== PlatformPostPublishStatus.PUBLISHED) {
-        throw new Error(`Mirror of ${postId} on ${platformId} not published`);
-      }
-
-      const account = UsersHelper.getAccount(
-        user,
-        mirror.platformId,
-        mirror.posted.user_id,
-        true
-      );
-
-      const platform = this.platforms.get(mirror.platformId);
-
-      if (
-        mirror.deleteDraft &&
-        (mirror.deleteDraft.signerType === undefined ||
-          mirror.deleteDraft.signerType === PlatformPostSignerType.DELEGATED) &&
-        platform.signDraft
-      ) {
-        const signedPost = await platform.signDraft(mirror.deleteDraft);
-        mirror.deleteDraft.signedPost = signedPost;
-      }
-
-      if (!mirror.deleteDraft || !mirror.deleteDraft.signedPost) {
-        throw new Error(`Expected signed post to be provided`);
-      }
-
-      const { platformPost, credentials } = await platform.publish({
-        draft: mirror.deleteDraft.signedPost,
-        credentials: account.credentials,
-      });
-
-      if (credentials && userId) {
-        await this.users.updateAccountCredentials(
-          userId,
-          mirror.platformId,
-          account.user_id,
-          credentials,
-          manager
-        );
-      }
-
-      /** update the platformPost */
-      await this.processing.platformPosts.update(
-        mirror.id,
-        {
-          posted: platformPost,
-          publishOrigin: PlatformPostPublishOrigin.POSTED,
-          publishStatus: PlatformPostPublishStatus.UNPUBLISHED,
-          ...(mirror.post_id ? {} : { post_id: platformPost.post_id }),
-        },
-        manager
-      );
-
-      /** mark post (TODO: what about multiplatform?) */
-      await this.updatePost(
+    if (postUpdate.semantics) {
+      /** handle side-effects related to semantics when the post is updated */
+      const postUpdated = await this.processing.posts.get(
         postId,
-        {
-          republishedStatus: AppPostRepublishedStatus.UNREPUBLISHED,
-        },
-        manager
+        manager,
+        true
       );
-    });
+      await this.processing.processSemantics(
+        postId,
+        manager,
+        postUpdated.semantics
+      );
+    }
   }
 
   /**
-   * Approving a post receives an AppPostFull.
-   * - The content and the semantics might have changed.
-   * - The draft value on the mirrors array might have changed.
-   *
-   * The platformIds are the platforms where the post will be published
-   * (or updated/republished)
-   *
-   * userId must be the authenticated user to prevent posting on
-   * behalf of others.
+   * look for users accounts and update the userId property on the corresponding
+   * Profiles
    */
-  async publishPost(
-    newPost: AppPostFull,
-    platformIds: PLATFORM[],
-    manager?: TransactionManager,
-    auto?: boolean,
-    authenticatedUserId?: string // if authenticatedUserId is provided, it is verified
-  ) {
-    const publishFunction = async (manager: TransactionManager) => {
-      if (DEBUG) logger.debug(`approvePost ${newPost.id}`, { post: newPost });
+  async linkExistingUser(userId: string) {
+    /** on transaction to set the profiles */
+    await this.db.run(async (manager) => {
+      const user = await this.users.repo.getUser(userId, manager, true);
 
-      const existingPost = await this.processing.posts.get(
-        newPost.id,
-        manager,
-        true
-      );
-
-      if (!existingPost) {
-        throw new Error(`Post not found: ${newPost.id}`);
+      if (DEBUG) {
+        logger.debug('linkExistingUser', { user });
       }
 
-      if (!existingPost.authorUserId) {
-        throw new Error(`Cannout publish post without author: ${newPost.id}`);
-      }
+      await Promise.all(
+        ALL_PUBLISH_PLATFORMS.map(async (platform) => {
+          const accounts = UsersHelper.getAccounts(user, platform);
+          await Promise.all(
+            accounts.map(async (account) => {
+              /** udpate the profile */
+              const profileId = getProfileId(platform, account.user_id);
 
-      if (
-        authenticatedUserId &&
-        existingPost.authorUserId !== authenticatedUserId
-      ) {
-        throw new Error(`Only author can publish a post: ${newPost.id}`);
-      }
+              if (DEBUG) {
+                logger.debug(
+                  `linkExistingUser ${userId} to profile ${profileId}`
+                );
+              }
 
-      /** for now its either ignore all, or approve all */
-      if (newPost.reviewedStatus === AppPostReviewStatus.IGNORED) {
-        await this.updatePost(
-          newPost.id,
-          {
-            reviewedStatus: AppPostReviewStatus.IGNORED,
-          },
-          manager
-        );
-        return;
-      }
-
-      /** set review status */
-      const reviewedStatus =
-        existingPost.republishedStatus !== AppPostRepublishedStatus.PENDING
-          ? AppPostReviewStatus.UPDATED
-          : AppPostReviewStatus.APPROVED;
-
-      await this.updatePost(
-        newPost.id,
-        {
-          reviewedStatus,
-        },
-        manager
-      );
-
-      if (DEBUG)
-        logger.debug('approvePost - updateContent', {
-          existing: existingPost,
-          post: newPost,
-        });
-
-      /**
-       * Force update the content and semantics. The updatePost method makes sure
-       * the mirrors and triples are aligned with the post. So its safer to always
-       * call it
-       */
-      await this.updatePost(
-        newPost.id,
-        {
-          reviewedStatus: AppPostReviewStatus.APPROVED,
-          generic: newPost.generic,
-          semantics: newPost.semantics,
-        },
-        manager
-      );
-
-      /**
-       * Get the full updated post with it's mirrors to make sure any semantic updates
-       * are reflected in the mirrors (because of optimistic updates in the frontend).
-       * We could additionally add some checks here to see if there is a difference
-       * between the updated and newPost and handle that accordingly.
-       */
-      const updatedPostFull = await this.processing.getPostFull(
-        newPost.id,
-        manager,
-        true
-      );
-
-      /** publish drafts */
-      const published = await Promise.all(
-        updatedPostFull.mirrors.map(async (mirror) => {
-          if (platformIds.includes(mirror.platformId) && mirror.draft) {
-            if (!existingPost.authorUserId) {
-              throw new Error(
-                `Cannout publish post without author: ${newPost.id}`
+              const profile = await this.users.profiles.getByProfileId(
+                profileId,
+                manager,
+                true
               );
-            }
+              if (!profile) {
+                throw new Error('unexpected missing profile');
+              }
 
-            const user = await this.users.repo.getUser(
-              existingPost.authorUserId,
-              manager,
-              true
-            );
-
-            const account = UsersHelper.getAccount(
-              user,
-              mirror.platformId,
-              mirror.draft.user_id,
-              true
-            );
-
-            if (DEBUG)
-              logger.debug('approvePost - publish mirror', { mirror, account });
-
-            const platform = this.platforms.get(mirror.platformId);
-
-            if (
-              (mirror.draft.signerType === undefined ||
-                mirror.draft.signerType === PlatformPostSignerType.DELEGATED) &&
-              platform.signDraft
-            ) {
-              const signedPost = await platform.signDraft(mirror.draft);
-              mirror.draft.signedPost = signedPost;
-            }
-
-            if (!mirror.draft.signedPost) {
-              throw new Error(`Expected signed post to be provided`);
-            }
-
-            const { platformPost, credentials } = await platform.publish({
-              draft: mirror.draft.signedPost,
-              credentials: account.credentials,
-            });
-
-            if (credentials && authenticatedUserId) {
-              await this.users.updateAccountCredentials(
-                authenticatedUserId,
-                mirror.platformId,
-                account.user_id,
-                credentials,
-                manager
-              );
-            }
-
-            const platformPostUpdate: PlatformPostStatusUpdate = {
-              draft: mirror.draft,
-              posted: platformPost,
-              publishOrigin: PlatformPostPublishOrigin.POSTED,
-              publishStatus: PlatformPostPublishStatus.PUBLISHED,
-            };
-
-            /** set the original post_id */
-            if (!mirror.post_id && platformPost.post_id) {
-              platformPostUpdate.post_id = platformPost.post_id;
-            }
-
-            if (DEBUG)
-              logger.debug('approvePost - update platformPost', {
-                platformPostId: mirror.id,
-                platformPostUpdate,
-              });
-
-            /**  update platform post status and posted values*/
-            await this.processing.platformPosts.update(
-              mirror.id,
-              platformPostUpdate,
-              manager
-            );
-
-            return true;
-          } else {
-            /** unpublished are the mirrors that were not posted (or fetched) */
-            return mirror.posted !== undefined;
-          }
+              await this.users.profiles.setUserId(profileId, userId, manager);
+            })
+          );
         })
       );
+    });
 
-      /** if all mirrors where published */
-      if (published.every((v) => v === true)) {
-        const wasAuto = auto !== undefined ? auto : false;
-        await this.updatePost(
-          newPost.id,
-          {
-            republishedStatus: wasAuto
-              ? AppPostRepublishedStatus.AUTO_REPUBLISHED
-              : AppPostRepublishedStatus.REPUBLISHED,
-          },
+    /** one transaction to read all platform posts */
+    const _allPosts = await this.db.run(async (manager) => {
+      const user = await this.users.repo.getUser(userId, manager, true);
+
+      return Promise.all(
+        ALL_PUBLISH_PLATFORMS.map(async (platform) => {
+          const accounts = UsersHelper.getAccounts(user, platform);
+          return Promise.all(
+            accounts.map(async (account) => {
+              /** udpate the profile */
+              const profileId = getProfileId(platform, account.user_id);
+              /** get this account platform posts */
+              const posts = await this.processing.posts.getAllOfQuery({
+                profileId,
+                fetchParams: { expectedAmount: 1000 },
+              });
+              if (DEBUG) {
+                logger.debug(`got ${posts.length} posts of ${profileId}`);
+              }
+              return posts;
+            })
+          );
+        })
+      );
+    });
+
+    const allPosts = _allPosts.flat(2);
+
+    /** write in batches of 100 */
+    const size = 100;
+    for (let i = 0; i < allPosts.length; i += size) {
+      const thisPosts = allPosts.slice(i, i + size);
+      await this.db.run(async (manager) => {
+        return Promise.all(
+          thisPosts.map((post) => {
+            if (DEBUG) {
+              logger.debug(`updating author of post ${post.id} to ${userId}`);
+            }
+            return this.updatePost(post.id, { authorUserId: userId }, manager);
+          })
+        );
+      });
+    }
+  }
+  async deleteAccountFull(platformId: PLATFORM, user_id: string) {
+    const profileId = getProfileId(platformId, user_id);
+
+    const posts = await this.processing.posts.getAllOfQuery({
+      profileId,
+      fetchParams: { expectedAmount: 100000 },
+    });
+
+    if (DEBUG) {
+      logger.debug(`fully deleting ${posts.length} posts of ${profileId}`);
+    }
+
+    const batchSize = 100;
+
+    for (let i = 0; i < posts.length; i += batchSize) {
+      const batch = posts.slice(i, i + batchSize);
+      await this.db.run(async (manager) => {
+        await Promise.all(
+          batch.map((post) => {
+            return this.processing.deletePostFull(post.id, manager);
+          })
+        );
+      });
+    }
+
+    await this.db.run(async (manager) => {
+      const userId = await this.users.repo.getUserIdWithPlatformAccount(
+        platformId,
+        user_id,
+        manager
+      );
+      if (userId) {
+        await this.users.repo.removeAccountDetails(
+          platformId,
+          user_id,
           manager
         );
       }
-    };
-
-    if (manager) {
-      return publishFunction(manager);
-    } else {
-      return this.db.run((manager) => publishFunction(manager));
-    }
+      this.users.profiles.delete(profileId, manager);
+    });
   }
 }

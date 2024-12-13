@@ -5,11 +5,10 @@ import {
 } from '../types/types.platform.posts';
 import { PLATFORM } from '../types/types.platforms';
 import {
+  AppPostEditStatus,
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
-  AppPostRepublishedStatus,
-  AppPostReviewStatus,
   GenericThread,
 } from '../types/types.posts';
 
@@ -51,22 +50,9 @@ export const getMockPublishedPost = () => {
     origin: PLATFORM.Twitter,
     parsedStatus: AppPostParsedStatus.PROCESSED,
     parsingStatus: AppPostParsingStatus.IDLE,
-    reviewedStatus: AppPostReviewStatus.APPROVED,
-    republishedStatus: AppPostRepublishedStatus.REPUBLISHED,
+    editStatus: AppPostEditStatus.PENDING,
     originalParsed,
     mirrors: [
-      {
-        id: 'pp-id-nanopub',
-        platformId: PLATFORM.Nanopub,
-        publishOrigin: PlatformPostPublishOrigin.FETCHED,
-        publishStatus: PlatformPostPublishStatus.PUBLISHED,
-        posted: {
-          post_id: 'https://np.test.knowledgepixels.com/123456',
-          timestampMs: createdAtMs,
-          user_id: '123412341234',
-          post: {},
-        },
-      },
       {
         id: 'pp-id',
         platformId: PLATFORM.Twitter,
@@ -96,8 +82,7 @@ export const getMockPublishedPost = () => {
             origin: PLATFORM.Twitter,
             parsedStatus: AppPostParsedStatus.PROCESSED,
             parsingStatus: AppPostParsingStatus.IDLE,
-            reviewedStatus: AppPostReviewStatus.PENDING,
-            republishedStatus: AppPostRepublishedStatus.PENDING,
+            editStatus: AppPostEditStatus.PENDING,
           },
         },
       },
@@ -145,22 +130,9 @@ export const getMockAutoPublishedPost = () => {
     origin: PLATFORM.Twitter,
     parsedStatus: AppPostParsedStatus.PROCESSED,
     parsingStatus: AppPostParsingStatus.IDLE,
-    reviewedStatus: AppPostReviewStatus.APPROVED,
-    republishedStatus: AppPostRepublishedStatus.AUTO_REPUBLISHED,
+    editStatus: AppPostEditStatus.PENDING,
     originalParsed,
     mirrors: [
-      {
-        id: 'pp-id-nanopub',
-        platformId: PLATFORM.Nanopub,
-        publishOrigin: PlatformPostPublishOrigin.FETCHED,
-        publishStatus: PlatformPostPublishStatus.PUBLISHED,
-        posted: {
-          post_id: 'https://np.test.knowledgepixels.com/123456',
-          timestampMs: createdAtMs,
-          user_id: '123412341234',
-          post: {},
-        },
-      },
       {
         id: 'pp-id',
         platformId: PLATFORM.Twitter,
@@ -190,8 +162,7 @@ export const getMockAutoPublishedPost = () => {
             origin: PLATFORM.Twitter,
             parsedStatus: AppPostParsedStatus.PROCESSED,
             parsingStatus: AppPostParsingStatus.IDLE,
-            reviewedStatus: AppPostReviewStatus.PENDING,
-            republishedStatus: AppPostRepublishedStatus.PENDING,
+            editStatus: AppPostEditStatus.PENDING,
           },
         },
       },
@@ -242,8 +213,7 @@ export const getMockPendingPost = () => {
     origin: PLATFORM.Twitter,
     parsedStatus: AppPostParsedStatus.PROCESSED,
     parsingStatus: AppPostParsingStatus.IDLE,
-    reviewedStatus: AppPostReviewStatus.PENDING,
-    republishedStatus: AppPostRepublishedStatus.PENDING,
+    editStatus: AppPostEditStatus.PENDING,
     originalParsed,
     mirrors: [
       {
@@ -275,8 +245,7 @@ export const getMockPendingPost = () => {
             origin: PLATFORM.Twitter,
             parsedStatus: AppPostParsedStatus.PROCESSED,
             parsingStatus: AppPostParsingStatus.IDLE,
-            reviewedStatus: AppPostReviewStatus.PENDING,
-            republishedStatus: AppPostRepublishedStatus.PENDING,
+            editStatus: AppPostEditStatus.PENDING,
           },
         },
       },

@@ -3,7 +3,7 @@ import { useRef } from 'react';
 
 const DEBUG = false;
 
-export const EditorAutoFocus = (props: {}) => {
+export const EditorAutoFocus = () => {
   const autofocused = useRef(false);
 
   useEditorEffect((view) => {

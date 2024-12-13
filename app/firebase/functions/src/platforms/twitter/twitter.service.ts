@@ -74,6 +74,8 @@ export interface TwitterApiCredentials {
 
 const DEBUG = false;
 
+const MAX_OLDER_THAN = 1000 * 60 * 60 * 24 * 7; // 7 days
+
 /** Twitter service handles all interactions with Twitter API */
 export class TwitterService
   extends TwitterServiceClient
@@ -119,6 +121,15 @@ export class TwitterService
 
       const original = await readOnlyClient.v2.singleTweet(post_id, options);
       const authorId = original.data.author_id;
+
+      if (
+        Date.now() - dateStrToTimestampMs(original.data.created_at as string) >
+        MAX_OLDER_THAN
+      ) {
+        throw new Error(
+          `Tweet too old, cannot read thread since search endpoint does not archive`
+        );
+      }
 
       if (!authorId) {
         throw new Error('author_id not found');
@@ -180,6 +191,10 @@ export class TwitterService
             allTweets.push(...appTweets);
 
             nextToken = result.meta.next_token;
+          } else {
+            if (original.data) {
+              allTweets.push(original.data as AppTweet);
+            }
           }
         } catch (e: any) {
           if (e.rateLimit) {
@@ -245,7 +260,7 @@ export class TwitterService
     user_id: string,
     params: PlatformFetchParams,
     credentials?: TwitterCredentials
-  ): Promise<{ threads: TwitterThread[]; credentials: TwitterCredentials }> {
+  ): Promise<{ threads: TwitterThread[]; credentials?: TwitterCredentials }> {
     try {
       if (DEBUG) logger.debug('Twitter Service - fetchInternal - start');
 
@@ -254,15 +269,17 @@ export class TwitterService
         await this.getClient(credentials, 'read');
 
       /**
-       * TODO: because we are fetching 30 tweets per page, we
-       * can easily end up with more threads than the requested expectedResults
-       * The rate limit of 5 request in 15 minutes gives us 150 tweets max per result
-       * */
+       * the fetch params expected amount is refering to main threads. So here we multiply
+       * that expected amount by 5, up to the max of 100.
+       *
+       */
+      const max_results =
+        params.expectedAmount * 5 > 100 ? 100 : params.expectedAmount * 5;
 
       const _timelineParams: Partial<TweetV2UserTimelineParams> = {
         since_id: params.since_id,
         until_id: params.until_id,
-        max_results: 30,
+        max_results,
         expansions,
         'tweet.fields': tweetFields,
         'user.fields': userFields,
@@ -282,6 +299,10 @@ export class TwitterService
 
         try {
           logger.debug(`Twitter Service - userTimeline - ${user_id}`);
+          /**
+           * 10 requests / 15 min per app (10,000 monthly limit)
+           * 5 requests / 15 min per user (10,000 monthly limit)
+           */
           const result = await readOnlyClient.v2.userTimeline(
             user_id,
             timelineParams
@@ -612,6 +633,11 @@ export class TwitterService
   ): Promise<AccountProfileBase<PlatformProfile> | undefined> {
     try {
       const { client } = await this.getClient(credentials, 'read');
+
+      /**
+       * 500 requests / 24 hours per app (15,000 monthly limit)
+       * 300 requests / 24 hours per user (3,000 monthly limit)
+       */
       const userResponse = await client.v2.userByUsername(username, {
         'user.fields': userFields,
       });

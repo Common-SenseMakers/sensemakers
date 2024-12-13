@@ -1,7 +1,11 @@
 import express from 'express';
 
-import { addAccountDataController } from './posts/controllers/posts.controller';
+import {
+  addNonUserProfilesController,
+  deleteProfilesController,
+} from './profiles/profiles.controller';
 
 export const adminRouter = express.Router();
 
-adminRouter.post('/addAccountData', addAccountDataController);
+adminRouter.post('/addProfiles', addNonUserProfilesController);
+adminRouter.post('/deleteProfiles', deleteProfilesController);

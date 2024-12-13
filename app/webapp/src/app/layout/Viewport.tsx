@@ -11,23 +11,18 @@ import {
   ResponsiveContext,
   Text,
 } from 'grommet';
-import {
-  ReactNode,
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { ReactNode, createContext, useContext } from 'react';
 
 import { AppHeading } from '../../ui-components';
 import { useResponsive } from '../../ui-components/ResponsiveApp';
 import { useThemeContext } from '../../ui-components/ThemedApp';
+import { AppLogo } from '../brand/AppLogo';
 import { BUILD_ID } from '../config';
 import { AppIcon } from '../icons/AppIcon';
 
 export const MAX_WIDTH_LANDING = 1600;
 export const MAX_WIDTH_APP = 600;
+export const MAX_BUTTON_WIDTH = 1600;
 
 export const ViewportContainer = (props: React.HTMLProps<HTMLDivElement>) => {
   const { constants } = useThemeContext();
@@ -65,7 +60,7 @@ export const ViewportContainer = (props: React.HTMLProps<HTMLDivElement>) => {
             position: 'relative',
           }}>
           <Anchor
-            href={`https://twitter.com/${process.env.PROJECT_TWITTER_ACCOUNT}`}
+            href={`https://twitter.com/${process.env.PROJECT_TWITTER_ACCOUNT as string}`}
             target="_blank">
             <AppIcon size={14}></AppIcon>
           </Anchor>
@@ -107,9 +102,8 @@ export const ViewportHeadingLarge = (props: { label: ReactNode }) => {
   );
 };
 
-export interface ViewportPageContext {
-  isAtBottom: boolean;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ViewportPageContext {}
 
 export const ViewportPageContextValue = createContext<
   ViewportPageContext | undefined
@@ -123,45 +117,18 @@ export const ViewportPage = (props: {
   content: ReactNode;
   nav?: ReactNode;
   justify?: BoxProps['justify'];
+  fixed?: boolean;
+  addLogo?: boolean;
 }) => {
   const { mobile } = useResponsive();
-  const pad = mobile ? 'none' : 'large';
-
-  const [isAtBottom, setIsAtBottom] = useState(false);
-  const viewportPageRef = useRef<HTMLDivElement | null>(null);
-  const bottomMarkerRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (viewportPageRef.current) {
-      const options = {
-        root: viewportPageRef.current,
-        rootMargin: '0px',
-        threshold: 0,
-      };
-
-      const observer = new IntersectionObserver((entries, observer) => {
-        entries.forEach((entry) => {
-          setIsAtBottom(entry.isIntersecting);
-        });
-      }, options);
-
-      if (bottomMarkerRef.current) {
-        observer.observe(bottomMarkerRef.current);
-      }
-
-      return () => {
-        if (bottomMarkerRef.current) {
-          observer.unobserve(bottomMarkerRef.current);
-        }
-      };
-    }
-  }, []);
+  const pad = mobile ? 'none' : 'none';
+  const fixed = props.fixed !== undefined ? props.fixed : false;
+  const addLogo = props.addLogo !== undefined ? props.addLogo : false;
 
   return (
-    <ViewportPageContextValue.Provider value={{ isAtBottom }}>
+    <ViewportPageContextValue.Provider value={{}}>
       <Box
         id="viewport-page"
-        ref={viewportPageRef}
         pad={pad}
         style={{
           height: '100%',
@@ -170,13 +137,28 @@ export const ViewportPage = (props: {
           margin: '0 auto',
           overflow: 'hidden',
         }}>
-        <Box id="content" style={{ flexGrow: 1, overflowY: 'auto' }}>
+        <Box
+          id="content"
+          style={
+            fixed
+              ? { height: 'calc(100% - 48px)' }
+              : { flexGrow: 1, overflowY: 'auto' }
+          }>
           <Box
-            style={{ flexGrow: 1, flexShrink: 0 }}
+            style={fixed ? { height: '100%' } : { flexGrow: 1, flexShrink: 0 }}
             justify={props.justify || 'center'}>
+            {addLogo ? (
+              <>
+                <Box pad={{ horizontal: '12px' }}>
+                  <AppLogo></AppLogo>
+                </Box>
+                <Box width="100%" height="40px"></Box>
+              </>
+            ) : (
+              <></>
+            )}
             {props.content}
           </Box>
-          <div style={{ padding: '1px' }} ref={bottomMarkerRef}></div>
         </Box>
         {props.nav ? (
           <Box id="nav" style={{ height: '48px', flexShrink: 0 }}>

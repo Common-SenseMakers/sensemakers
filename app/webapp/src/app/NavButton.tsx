@@ -1,7 +1,6 @@
 import { Box, Text } from 'grommet';
 
 import { AppButton } from '../ui-components';
-import { HomeIcon } from './icons/HomeIcon';
 
 export const NavButton = (props: {
   icon: JSX.Element;

@@ -12,12 +12,13 @@
         "FIRESTORE_EMULATOR_HOST": "127.0.0.1:8080",
         "LOG_LEVEL_MSG": "error",
         "LOG_LEVEL_OBJ": "error",
-        "USE_REAL_TWITTERX": "false",
+        "USE_REAL_TWITTERX": "true",
         "USE_REAL_NANOPUB": "false",
         "USE_REAL_PARSER": "false",
         "USE_REAL_EMAIL": "false",
         "USE_REAL_MASTODON": "false",
         "USE_REAL_BLUESKY": "false",
+        "USE_REAL_LINKS": "true",
         "APP_URL": "http://localhost:3000"
         // "TEST_THREAD_ID": "1823373556643688718"
       },
@@ -41,6 +42,20 @@
       "internalConsoleOptions": "neverOpen"
     },
     {
+      "name": "add accounts",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "ts-node",
+      "args": [
+        "--project",
+        "./tsconfig.scripts.json",
+        "./scripts/016-add-account-data.ts"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
       "name": "migration: 00X",
       "type": "node",
       "request": "launch",
@@ -48,7 +63,7 @@
       "args": [
         "--project",
         "./tsconfig.scripts.json",
-        "./migrations/004-profiles-update-prod/004-script.ts"
+        "./migrations/008-links-iframely-status.ts"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",

@@ -5,7 +5,7 @@ export enum CollectionNames {
   PlatformPosts = 'platformPosts',
   Updates = 'updates',
   Profiles = 'profiles',
-  Triples = 'triples',
   Activity = 'activity',
-  Notifications = 'notifications',
+  Links = 'links',
+  LinkPostsSubcollection = 'posts',
 }

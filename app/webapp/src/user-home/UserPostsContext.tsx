@@ -1,6 +1,5 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { createContext } from 'react';
-import { useLocation } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
 import {
@@ -12,11 +11,14 @@ import {
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
-  PostsQueryStatus,
+  PostsQuery,
 } from '../shared/types/types.posts';
 
-const DEBUG = true;
-
+export enum PostsQueryStatus {
+  ALL = 'all',
+  IGNORED = 'ignored',
+  IS_SCIENCE = 'science',
+}
 interface PostContextType {
   filterStatus: PostsQueryStatus;
   feed: PostFetcherInterface;
@@ -35,25 +37,18 @@ export const UserPostsContext: React.FC<{
 }> = ({ children }) => {
   const appFetch = useAppFetch();
 
-  const location = useLocation();
-
   /** status is derived from location
-   * set the filter status based on it */
-  const status = useMemo(() => {
-    if (
-      Object.values(PostsQueryStatus)
-        .map((v) => `/${v}`)
-        .includes(location.pathname)
-    ) {
-      const newStatus = location.pathname.slice(1) as PostsQueryStatus;
-      if (DEBUG)
-        console.log(`changing status based on location to ${newStatus}`);
-      return newStatus;
-    }
-    return PostsQueryStatus.DRAFTS;
-  }, [location]);
+   * set the filter status based on it.
+   * It then converts into topics, which is
+   * what the backend understands*/
+  const { queryParams, status } = useMemo((): {
+    queryParams: PostsQuery;
+    status: PostsQueryStatus;
+  } => {
+    return { queryParams: {}, status: PostsQueryStatus.ALL };
+  }, []);
 
-  const onPostsAdded = (newPosts: AppPostFull[]) => {
+  const onPostsAdded = useCallback((newPosts: AppPostFull[]) => {
     /** trigger parse if not parsed and not parsing */
     newPosts.forEach((post) => {
       if (
@@ -61,20 +56,22 @@ export const UserPostsContext: React.FC<{
         post.parsingStatus !== AppPostParsingStatus.PROCESSING
       ) {
         // async trigger parse
-        appFetch(`/api/posts/parse`, { postId: post.id });
+        // console.warn(`skipping triggering reparsing of post ${post.id}`);
+        appFetch(`/api/posts/parse`, { postId: post.id }).catch(console.error);
       }
     });
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const config = useMemo((): FetcherConfig => {
     return {
       endpoint: '/api/posts/getOfUser',
-      status,
+      queryParams,
       subscribe: true,
       onPostsAdded,
-      DEBUG_PREIX: '[USER POSTS] ',
+      DEBUG_PREFIX: '[USER POSTS] ',
     };
-  }, [status]);
+  }, [onPostsAdded, queryParams]);
 
   const feed = usePostsFetcher(config);
 

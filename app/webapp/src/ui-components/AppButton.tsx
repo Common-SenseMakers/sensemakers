@@ -13,7 +13,7 @@ import { Loading } from './LoadingDiv';
 import { useResponsive } from './ResponsiveApp';
 import { useThemeContext } from './ThemedApp';
 
-export interface IButton extends ButtonExtendedProps {}
+export type IButton = ButtonExtendedProps;
 
 const circleButtonStyle: React.CSSProperties = {
   width: '56px',
