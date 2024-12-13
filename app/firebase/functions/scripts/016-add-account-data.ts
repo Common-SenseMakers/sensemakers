@@ -1,3 +1,17 @@
+/**
+ * This is a script for adding non-user accounts to whichever firebase project you want to add them to
+ * You will need the following environment variables:
+ * - FUNCTION_URL: the URL of the function that will add the accounts. I.e. https://us-central1-{firebase-project}.cloudfunctions.net/admin/addNonUserProfiles
+ * - ADMIN_API_KEY: the admin API key for the admin functions
+ * - OPEN_SCIENCE_ACCOUNTS_PATH: the path to the JSON file containing the profile urls of the accounts you want to add.
+ * - It should be structured as an array of strings.
+ * - e.g. ["https://bsky.app/profile/wesleyfinck.org", "https://x.com/rtk254", ...]
+ *
+ * NOTE: this script can also be used to remove accounts (regardless of if they are connected to a user or not).
+ * To do so, you will need to change the FUNCTION_URL to the URL of the function that will remove the accounts.
+ * E.g. https://us-central1-{firebase-project}.cloudfunctions.net/admin/deleteProfiles
+ * The structure of the JSON file should be the same.
+ */
 import axios from 'axios';
 import dotenv from 'dotenv';
 import fs from 'fs';

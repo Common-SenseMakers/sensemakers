@@ -21,7 +21,15 @@ async function processBatch(
     const batchPosts = await services.db.run(async (manager) => {
       return Promise.all(
         batch.map((postId) =>
-          services.postsManager.processing.getPostFull(postId, manager, true)
+          services.postsManager.processing.getPostFull(
+            postId,
+            {
+              addMirrors: false,
+              addAggregatedLabels: false,
+            },
+            manager,
+            true
+          )
         )
       );
     });
