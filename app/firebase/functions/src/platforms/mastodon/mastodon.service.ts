@@ -245,8 +245,13 @@ export class MastodonService
       const result = await paginator.next();
       if (result.done) break;
 
-      const statuses = result.value;
-      if (statuses.length === 0) break;
+      const _statuses = result.value;
+      if (_statuses.length === 0) break;
+
+      /** filter out anything that isn't public */
+      const statuses = _statuses.filter(
+        (status) => status.visibility === 'public'
+      );
 
       allStatuses.push(...statuses);
 
