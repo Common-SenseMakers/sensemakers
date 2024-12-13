@@ -47,7 +47,6 @@ import { PostsManager } from '../../src/posts/posts.manager';
 import { PostsProcessing } from '../../src/posts/posts.processing';
 import { PostsRepository } from '../../src/posts/posts.repository';
 import { ProfilesRepository } from '../../src/profiles/profiles.repository';
-import { TriplesRepository } from '../../src/semantics/triples.repository';
 import { TimeMock, getTimeMock } from '../../src/time/mock/time.service.mock';
 import { TimeService } from '../../src/time/time.service';
 import { UsersRepository } from '../../src/users/users.repository';
@@ -92,7 +91,6 @@ export const getTestServices = (config: TestServicesConfig) => {
   const profilesRepo = new ProfilesRepository(db);
   const userRepo = new UsersRepository(db, profilesRepo);
   const postsRepo = new PostsRepository(db);
-  const triplesRepo = new TriplesRepository(db);
   const platformPostsRepo = new PlatformPostsRepository(db);
   const activityRepo = new ActivityRepository(db);
   const linksRepo = new LinksRepository(db);
@@ -181,7 +179,6 @@ export const getTestServices = (config: TestServicesConfig) => {
   const postsProcessing = new PostsProcessing(
     usersService,
     time,
-    triplesRepo,
     postsRepo,
     platformPostsRepo,
     platformsService,

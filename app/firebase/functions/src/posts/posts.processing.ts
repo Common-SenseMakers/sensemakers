@@ -36,7 +36,6 @@ import { TransactionManager } from '../db/transaction.manager';
 import { LinksService } from '../links/links.service';
 import { getOriginalRefMetaFromPost } from '../links/links.utils';
 import { PlatformsService } from '../platforms/platforms.service';
-import { TriplesRepository } from '../semantics/triples.repository';
 import { TimeService } from '../time/time.service';
 import { UsersService } from '../users/users.service';
 import { PlatformPostsRepository } from './platform.posts.repository';
@@ -50,7 +49,6 @@ export class PostsProcessing {
   constructor(
     protected users: UsersService,
     private time: TimeService,
-    public triples: TriplesRepository,
     public posts: PostsRepository,
     public platformPosts: PlatformPostsRepository,
     protected platforms: PlatformsService,
@@ -157,16 +155,10 @@ export class PostsProcessing {
     semantics?: string,
     originalParsed?: ParsePostResult
   ): Promise<void> {
-    /** always delete old triples */
-    await this.triples.deleteOfPost(postId, manager);
-
     if (!semantics) return undefined;
 
     const post = await this.posts.get(postId, manager, true);
     const store = await parseRDF(semantics);
-
-    const createdAtMs = post.createdAtMs;
-    const authorProfileId = post.authorProfileId;
 
     const labels: Set<string> = new Set();
     const keywords: Set<string> = new Set();
@@ -174,19 +166,6 @@ export class PostsProcessing {
     let topic: string | undefined = undefined;
 
     mapStoreElements(store, (q) => {
-      /** store the triples */
-      this.triples.create(
-        {
-          postId,
-          postCreatedAtMs: createdAtMs,
-          authorProfileId,
-          subject: q.subject.value,
-          predicate: q.predicate.value,
-          object: q.object.value,
-        },
-        manager
-      );
-
       if (q.predicate.value === HAS_KEYWORD_URI) {
         keywords.add(q.object.value);
       } else {
@@ -389,9 +368,6 @@ export class PostsProcessing {
   /** delete a post and all its linked documents */
   async deletePostFull(postId: string, manager: TransactionManager) {
     const post = await this.posts.get(postId, manager, true);
-
-    /** delete all triples */
-    await this.triples.deleteOfPost(postId, manager);
 
     /** delete all platform posts */
     await Promise.all(

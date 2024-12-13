@@ -38,7 +38,6 @@ import { PostsManager } from '../posts/posts.manager';
 import { PostsProcessing } from '../posts/posts.processing';
 import { PostsRepository } from '../posts/posts.repository';
 import { ProfilesRepository } from '../profiles/profiles.repository';
-import { TriplesRepository } from '../semantics/triples.repository';
 import { TimeService } from '../time/time.service';
 import { UsersRepository } from '../users/users.repository';
 import { UsersService } from '../users/users.service';
@@ -87,7 +86,6 @@ export const createServices = (
   const profilesRepo = new ProfilesRepository(db);
   const userRepo = new UsersRepository(db, profilesRepo);
   const postsRepo = new PostsRepository(db);
-  const triplesRepo = new TriplesRepository(db);
   const platformPostsRepo = new PlatformPostsRepository(db);
   const activityRepo = new ActivityRepository(db);
   const linksRepo = new LinksRepository(db);
@@ -175,7 +173,6 @@ export const createServices = (
   const postsProcessing = new PostsProcessing(
     usersService,
     time,
-    triplesRepo,
     postsRepo,
     platformPostsRepo,
     platformsService,
