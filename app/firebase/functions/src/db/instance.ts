@@ -11,6 +11,11 @@ import {
 
 const DEBUG = false;
 
+export type Query = FirebaseFirestore.Query<
+  FirebaseFirestore.DocumentData,
+  FirebaseFirestore.DocumentData
+>;
+
 export class DBInstance {
   public firestore: Firestore;
 

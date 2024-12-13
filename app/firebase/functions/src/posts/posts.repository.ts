@@ -15,7 +15,7 @@ import {
 import { RefLabel, RefPostData } from '../@shared/types/types.references';
 import { CollectionNames } from '../@shared/utils/collectionNames';
 import { SCIENCE_TOPIC_URI } from '../@shared/utils/semantics.helper';
-import { DBInstance } from '../db/instance';
+import { DBInstance, Query } from '../db/instance';
 import { BaseRepository, removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { hashUrl } from '../links/links.utils';
@@ -23,11 +23,6 @@ import { doesQueryUseSubcollection } from '../posts/posts.helper';
 
 const DEBUG = false;
 const DEBUG_PREFIX = 'PostsRepository';
-
-type Query = FirebaseFirestore.Query<
-  FirebaseFirestore.DocumentData,
-  FirebaseFirestore.DocumentData
->;
 
 const filterByEqual = (
   _base: Query,

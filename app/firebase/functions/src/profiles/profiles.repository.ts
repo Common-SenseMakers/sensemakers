@@ -4,10 +4,11 @@ import {
   AccountProfileCreate,
   FetchedDetails,
   PlatformProfile,
+  ProfilesQueryParams,
 } from '../@shared/types/types.profiles';
 import { DefinedIfTrue } from '../@shared/types/types.user';
 import { getProfileId } from '../@shared/utils/profiles.utils';
-import { DBInstance } from '../db/instance';
+import { DBInstance, Query } from '../db/instance';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 
@@ -221,5 +222,56 @@ export class ProfilesRepository {
   delete(profileId: string, manager: TransactionManager) {
     const ref = this.db.collections.profiles.doc(profileId);
     manager.delete(ref);
+  }
+
+  async getMany(queryParams: ProfilesQueryParams) {
+    const autofetch_property: keyof ProfilesQueryParams = 'autofetch';
+    const platformId_property: keyof ProfilesQueryParams = 'platformId';
+    const userId_property: keyof ProfilesQueryParams = 'userId';
+
+    let baseQuery = ((_base: Query) => {
+      if (queryParams.autofetch) {
+        return _base.where(autofetch_property, '==', queryParams.autofetch);
+      }
+      return _base;
+    })(this.db.collections.profiles);
+
+    baseQuery = ((_base: Query) => {
+      if (queryParams.platformId) {
+        return _base.where(platformId_property, '==', queryParams.platformId);
+      }
+      return _base;
+    })(baseQuery);
+
+    baseQuery = ((_base: Query) => {
+      if (queryParams.userId) {
+        return _base.where(userId_property, '==', queryParams.userId);
+      }
+      return _base;
+    })(baseQuery);
+
+    baseQuery = ((_base: Query) => {
+      if (queryParams.userIdDefined !== undefined) {
+        if (queryParams.userIdDefined) {
+          return _base.where(userId_property, '!=', null);
+        } else {
+          return _base.where(userId_property, '==', null);
+        }
+      }
+      return _base;
+    })(baseQuery);
+
+    const paginated = await (async (_base: Query) => {
+      if (queryParams.limit) {
+        return _base.limit(queryParams.limit);
+      }
+      return _base;
+    })(baseQuery);
+
+    const snapshot = await paginated.get();
+
+    return snapshot.docs.map((doc) => {
+      return doc.id;
+    });
   }
 }

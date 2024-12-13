@@ -1,8 +1,10 @@
 import { Request } from 'firebase-functions/v2/tasks';
 
 import { firestore } from '../..';
-import { ALL_SOURCE_PLATFORMS } from '../../@shared/types/types.platforms';
-import { getProfileId } from '../../@shared/utils/profiles.utils';
+import {
+  ALL_SOURCE_PLATFORMS,
+  IDENTITY_PLATFORM,
+} from '../../@shared/types/types.platforms';
 import { logger } from '../../instances/logger';
 import { Services } from '../../instances/services';
 import {
@@ -21,18 +23,17 @@ const DEBUG_PREFIX = 'AUTOFETCH';
 export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
   if (DEBUG)
     logger.debug(`triggerAutofetchPostsForNonUsers`, undefined, DEBUG_PREFIX);
-  const { users } = services;
-
-  const profiles = await users.profiles.getAll();
-  const nonUserProfiles = profiles.filter((profile) => !profile.userId);
+  const { users, db } = services;
 
   ALL_SOURCE_PLATFORMS.forEach(async (platformId) => {
-    const nonUserPlatformProfiles = nonUserProfiles.filter(
-      (profile) => profile.platformId === platformId
-    );
+    const profilesIds = await users.profiles.getMany({
+      autofetch: true,
+      platformId: platformId as IDENTITY_PLATFORM,
+      userIdDefined: false,
+    });
+
     const fetchPlatformMinPeriod =
-      (nonUserPlatformProfiles.length / FETCH_TASK_DISPATCH_RATES[platformId]) *
-      1000; // in ms
+      (profilesIds.length / FETCH_TASK_DISPATCH_RATES[platformId]) * 1000; // in ms
 
     const jobLastRun = await (async () => {
       const docId = `${platformId}-autofetchNonUserPosts`;
@@ -63,13 +64,15 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
         .doc(`${platformId}-autofetchNonUserPosts`)
         .set({ jobLastRunMs: Date.now() } as AutofetchNonUserPostsJobMeta);
 
-      for (const profile of nonUserPlatformProfiles) {
+      for (const profileId of profilesIds) {
         // Skip profiles that belong to registered users
+        const profile = await db.run((manager) =>
+          users.profiles.getByProfileId(profileId, manager, true)
+        );
+
         if (profile.userId) {
           continue;
         }
-
-        const profileId = getProfileId(profile.platformId, profile.user_id);
 
         const taskName = FETCH_ACCOUNT_TASKS[platformId];
 
