@@ -144,38 +144,42 @@ export const PublishButtons = (props: BoxExtendedProps) => {
           }}></AppCheckBoxMessage>
       )}
 
-      <Box direction="row" gap="6px" align="center">
-        <Text
-          style={{
-            color: '#374151',
-            textAlign: 'center',
-            fontSize: '12px',
-            fontStyle: 'normal',
-            fontWeight: '500',
-            lineHeight: '14px',
-          }}>
-          {isAIDetected
-            ? t(PostEditKeys.researchDetected)
-            : t(PostEditKeys.researchNotDetected)}
-        </Text>
-        <HelpTip
-          icon={<InfoIcon size={16}></InfoIcon>}
-          _content={
-            <Text
-              style={{
-                color: '#374151',
-                textAlign: 'left',
-                fontSize: '14px',
-                fontStyle: 'normal',
-                fontWeight: '500',
-                lineHeight: '16px',
-              }}>
-              {isAIDetected
-                ? t(PostEditKeys.researchDetectedHelp)
-                : t(PostEditKeys.reseachNotDetectedHelp)}
-            </Text>
-          }></HelpTip>
-      </Box>
+      {updated.postMerged?.parsingStatus === AppPostParsingStatus.PROCESSING ? (
+        <LoadingDiv style={{ width: '160px' }}></LoadingDiv>
+      ) : (
+        <Box direction="row" gap="6px" align="center">
+          <Text
+            style={{
+              color: '#374151',
+              textAlign: 'center',
+              fontSize: '12px',
+              fontStyle: 'normal',
+              fontWeight: '500',
+              lineHeight: '14px',
+            }}>
+            {isAIDetected
+              ? t(PostEditKeys.researchDetected)
+              : t(PostEditKeys.researchNotDetected)}
+          </Text>
+          <HelpTip
+            icon={<InfoIcon size={16}></InfoIcon>}
+            _content={
+              <Text
+                style={{
+                  color: '#374151',
+                  textAlign: 'left',
+                  fontSize: '14px',
+                  fontStyle: 'normal',
+                  fontWeight: '500',
+                  lineHeight: '16px',
+                }}>
+                {isAIDetected
+                  ? t(PostEditKeys.researchDetectedHelp)
+                  : t(PostEditKeys.reseachNotDetectedHelp)}
+              </Text>
+            }></HelpTip>
+        </Box>
+      )}
     </Box>
   );
 };

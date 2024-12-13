@@ -14,6 +14,7 @@
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "run-script": "ts-node --project ./tsconfig.scripts.json",
+    "add-accounts": "yarn run-script ./scripts/016-add-account-data.ts",
     "logs": "firebase functions:log"
   },
   "engines": {
