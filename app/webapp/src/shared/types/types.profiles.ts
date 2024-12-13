@@ -28,6 +28,10 @@ export interface AccountProfile<P extends PlatformProfile = PlatformProfile> {
   autofetch?: boolean;
 }
 
+export const profileDefaults: Partial<AccountProfile> = {
+  autofetch: true,
+};
+
 export type AccountProfileRead = Omit<AccountProfile, 'fetched' | 'id'>;
 
 export interface PlatformProfile {

@@ -5,7 +5,7 @@ import { DBInstance } from './instance';
 
 const DEBUG = false;
 
-export function removeUndefined(obj: any): any {
+export function removeUndefined<T>(obj: T): T {
   if (obj !== null && typeof obj === 'object') {
     for (const key in obj) {
       if (obj[key] === undefined) {

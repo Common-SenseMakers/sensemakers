@@ -5,6 +5,7 @@ import {
   FetchedDetails,
   PlatformProfile,
   ProfilesQueryParams,
+  profileDefaults,
 } from '../@shared/types/types.profiles';
 import { DefinedIfTrue } from '../@shared/types/types.user';
 import { getProfileId } from '../@shared/utils/profiles.utils';
@@ -34,7 +35,12 @@ export class ProfilesRepository {
       getProfileId(accountProfile.platformId, accountProfile.user_id)
     );
 
-    manager.create(profileRef, removeUndefined(accountProfile));
+    const profile: AccountProfileCreate = {
+      ...profileDefaults,
+      ...removeUndefined(accountProfile),
+    };
+
+    manager.create(profileRef, profile);
 
     return profileRef.id;
   }

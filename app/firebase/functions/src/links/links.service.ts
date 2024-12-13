@@ -75,14 +75,17 @@ export class LinksService {
     refMetaOrg?: RefMeta
   ) {
     const iframely = await this.fetchOEmbed(url);
-    const originalRefMeta: RefMeta = removeUndefined({
-      title: refMetaOrg?.title,
-      summary: refMetaOrg?.summary,
-      description: refMetaOrg?.summary,
-    });
+    const originalRefMeta =
+      refMetaOrg &&
+      removeUndefined<RefMeta>({
+        title: refMetaOrg.title,
+        summary: refMetaOrg.summary,
+        description: refMetaOrg.summary,
+        url: refMetaOrg.url,
+      });
 
     const oembed: OEmbed = {
-      ...originalRefMeta,
+      ...(originalRefMeta as RefMeta),
       ...iframely.oembed,
     };
 
