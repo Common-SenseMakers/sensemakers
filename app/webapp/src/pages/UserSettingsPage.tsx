@@ -129,7 +129,7 @@ export const UserSettingsPage = () => {
             connectTwitter &&
               connectTwitter(
                 'read',
-                `${getAppUrl()}${AbsoluteRoutes.Settings}/${RouteNames.ConnectTwitter}}`
+                `${getAppUrl()}${AbsoluteRoutes.Settings}/${RouteNames.ConnectTwitter}`
               ).catch(console.error);
           }}
           buttonText={needConnectTwitter ? 'connect' : ''}
