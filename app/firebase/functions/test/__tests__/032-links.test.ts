@@ -3,9 +3,11 @@ import fs from 'fs';
 
 import { AppPost } from '../../src/@shared/types/types.posts';
 import { OEmbed } from '../../src/@shared/types/types.references';
-import { normalizeUrl } from '../../src/@shared/utils/links.utils';
+import {
+  handleQuotePostReference,
+  normalizeUrl,
+} from '../../src/@shared/utils/links.utils';
 import { logger } from '../../src/instances/logger';
-import { handleQuotePostReference } from '../../src/links/links.utils';
 import { resetDB } from '../utils/db';
 import { getTestServices } from './test.services';
 
@@ -101,7 +103,7 @@ describe('020-links', () => {
       });
     });
 
-    it.only('processes the semantics of a post and stores the oembed data merged with citoid data', async () => {
+    it('processes the semantics of a post and stores the oembed data merged with citoid data', async () => {
       const testRef = 'https://x.com/ColeRotman/status/1863422595942773233';
       const testRefType = 'forumPost';
 
