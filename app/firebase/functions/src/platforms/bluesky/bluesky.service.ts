@@ -390,6 +390,7 @@ export class BlueskyService
         content: cleanBlueskyContent(post.record),
       };
 
+      try {
       if (
         post.embed &&
         (post.embed.$type === 'app.bsky.embed.record#view' ||
@@ -419,6 +420,13 @@ export class BlueskyService
             ],
           };
         }
+        }
+      } catch (e) {
+        logger.warn(
+          `Error parsing quoted post in post ${post.id}. Excluding from generic post`,
+          { postId: post.id, error: e },
+          DEBUG_PREFIX
+        );
       }
 
       return genericPost;
