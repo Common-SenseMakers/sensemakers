@@ -9,6 +9,10 @@ import {
   FetchParams,
   PlatformFetchParams,
 } from '../../src/@shared/types/types.fetch';
+import {
+  MastodonAccountDetails,
+  MastodonThread,
+} from '../../src/@shared/types/types.mastodon';
 import { PlatformPostCreate } from '../../src/@shared/types/types.platform.posts';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { AppUser } from '../../src/@shared/types/types.user';
@@ -127,6 +131,27 @@ describe('02-platforms', () => {
   });
 
   describe('mastodon', () => {
+    let mastodonService: MastodonService;
+    let userDetails: MastodonAccountDetails;
+
+    before(() => {
+      if (!user) {
+        throw new Error('appUser not created');
+      }
+      const allUserDetails = user.accounts[PLATFORM.Mastodon];
+      if (!allUserDetails || allUserDetails.length < 0) {
+        throw new Error('Unexpected');
+      }
+      userDetails = allUserDetails[0];
+      if (userDetails.credentials.read === undefined) {
+        throw new Error('Unexpected');
+      }
+
+      mastodonService = services.platforms.get(
+        PLATFORM.Mastodon
+      ) as MastodonService;
+    });
+
     it('fetches the latest posts', async () => {
       if (!user) {
         throw new Error('appUser not created');
