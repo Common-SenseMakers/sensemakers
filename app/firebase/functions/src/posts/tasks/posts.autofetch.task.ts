@@ -10,7 +10,7 @@ import { Services } from '../../instances/services';
 import {
   FETCH_ACCOUNT_TASKS,
   FETCH_TASK_DISPATCH_RATES,
-} from '../../platforms/platforms.tasks';
+} from '../../platforms/platforms.tasks.config';
 import { enqueueTask } from '../../tasksUtils/tasks.support';
 import { AutofetchNonUserPostsJobMeta } from './types.posts.tasks';
 

@@ -1,11 +1,15 @@
 import AtpAgent from '@atproto/api';
 import { expect } from 'chai';
 
-import { BlueskyAccountDetails } from '../../src/@shared/types/types.bluesky';
+import {
+  BlueskyAccountDetails,
+  BlueskyThread,
+} from '../../src/@shared/types/types.bluesky';
 import {
   FetchParams,
   PlatformFetchParams,
 } from '../../src/@shared/types/types.fetch';
+import { PlatformPostCreate } from '../../src/@shared/types/types.platform.posts';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { AppUser } from '../../src/@shared/types/types.user';
 import { parseMastodonGlobalUsername } from '../../src/@shared/utils/mastodon.utils';
@@ -327,6 +331,17 @@ describe('02-platforms', () => {
 
       expect(result).to.not.be.undefined;
       expect(result.platformPosts.length).to.be.greaterThan(0);
+    });
+    it('includes quoted posts in the thread when the embed is of type app.bsky.embed.recordWithMedia#view', async () => {
+      const post_id =
+        'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3lcmhumbudk2m';
+      const result = await blueskyService.get(post_id, userDetails.credentials);
+
+      const genericPost = await blueskyService.convertToGeneric({
+        posted: result.platformPost,
+      } as PlatformPostCreate<BlueskyThread>);
+
+      expect(genericPost.thread[0].quotedThread).to.not.be.undefined;
     });
   });
 });
