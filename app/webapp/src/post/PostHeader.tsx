@@ -1,5 +1,6 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
 
+import { Autoindexed } from '../app/icons/Autoindexed';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { useOverlay } from '../overlays/OverlayContext';
 import { PlatformPostAnchor } from '../post/PlatformPostAnchor';
@@ -19,6 +20,7 @@ export const PostHeader = (props: {
   const overlay = useOverlay();
 
   const post = updated.postMerged;
+  const isAutoIndexed = post?.authorUserId === undefined;
 
   const { boxProps } = props;
 
@@ -55,7 +57,7 @@ export const PostHeader = (props: {
             imageUrl={details?.authorAvatarUrl}></PlatformAvatar>
         </div>
         <Box width="100%" margin={{ left: 'medium' }}>
-          <Box direction="row" justify="between">
+          <Box direction="row" justify="start" gap="8px" align="center">
             <Text
               color={constants.colors.primary}
               style={{
@@ -67,6 +69,7 @@ export const PostHeader = (props: {
               }}>
               {details?.authorName}
             </Text>
+            {isAutoIndexed && <Autoindexed></Autoindexed>}
           </Box>
           <Box margin={{ bottom: '6px' }}></Box>
           <PlatformPostAnchor

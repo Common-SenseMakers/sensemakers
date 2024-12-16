@@ -1,6 +1,7 @@
 import { Box, Text } from 'grommet';
 import { MouseEventHandler } from 'react';
 
+import { Autoindexed } from '../app/icons/Autoindexed';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { useOverlay } from '../overlays/OverlayContext';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
@@ -23,6 +24,7 @@ export const CARD_BORDER = '1px solid var(--Neutral-300, #D1D5DB)';
 const PostCardHeader = (props: { post: AppPostFull }) => {
   const { constants } = useThemeContext();
   const details = getPostDetails(props.post);
+  const isAutoIndexed = props.post.authorUserId === undefined;
 
   const overlay = useOverlay();
 
@@ -56,7 +58,7 @@ const PostCardHeader = (props: { post: AppPostFull }) => {
         <PlatformAvatar
           size={24}
           imageUrl={details?.authorAvatarUrl}></PlatformAvatar>
-        <Box direction="row" justify="between">
+        <Box direction="row" justify="between" gap="8px" align="center">
           <Text
             color={constants.colors.grayIcon}
             style={{
@@ -68,6 +70,7 @@ const PostCardHeader = (props: { post: AppPostFull }) => {
             }}>
             {details?.authorName}
           </Text>
+          {isAutoIndexed && <Autoindexed></Autoindexed>}
         </Box>
       </Box>
       <Box>
