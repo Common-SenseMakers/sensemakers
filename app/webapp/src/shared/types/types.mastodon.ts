@@ -52,6 +52,5 @@ export type MastodonAccount = mastodon.v1.Account;
 export interface MastodonSigninCredentials {
   id: string;
   username: string;
-  mastodonServer: string;
   accessToken: string;
 }

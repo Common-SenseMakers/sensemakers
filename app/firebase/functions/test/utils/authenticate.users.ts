@@ -1,10 +1,12 @@
 import { BlueskySignupData } from '../../src/@shared/types/types.bluesky';
+import { MastodonAccessTokenSignupData } from '../../src/@shared/types/types.mastodon';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { TwitterSignupContext } from '../../src/@shared/types/types.twitter';
 import {
   AppUser,
   TestUserCredentials,
 } from '../../src/@shared/types/types.user';
+import { parseMastodonGlobalUsername } from '../../src/@shared/utils/mastodon.utils';
 import { getProfileId } from '../../src/@shared/utils/profiles.utils';
 import { TransactionManager } from '../../src/db/transaction.manager';
 import { getPrefixedUserId } from '../../src/users/users.utils';
@@ -157,10 +159,14 @@ const authenticateMastodonForUser = async (
     };
   }
 
+  const mastodonServer = parseMastodonGlobalUsername(
+    credentials.mastodon.username
+  ).server;
+
   user.accounts[PLATFORM.Mastodon] = [
     {
       signupDate: 0,
-      user_id: `https://${credentials.mastodon.mastodonServer}/@${credentials.mastodon.username}`,
+      user_id: `https://${mastodonServer}/@${credentials.mastodon.username}`,
       credentials: {
         read: {
           accessToken: credentials.mastodon.id,
@@ -173,6 +179,22 @@ const authenticateMastodonForUser = async (
       },
     },
   ];
+
+  // return user;
+  const signupData: MastodonAccessTokenSignupData = {
+    mastodonServer,
+    accessToken: credentials.mastodon.accessToken,
+    type: 'write',
+  };
+
+  await services.users.handleSignup(
+    PLATFORM.Mastodon,
+    signupData,
+    manager,
+    user.userId
+  );
+
+  user = await services.users.repo.getUser(user.userId, manager, true);
 
   return user;
 };
