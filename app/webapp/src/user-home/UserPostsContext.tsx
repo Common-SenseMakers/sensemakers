@@ -1,4 +1,10 @@
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+} from 'react';
 import { createContext } from 'react';
 
 import { useAppFetch } from '../api/app.fetch';
@@ -7,12 +13,14 @@ import {
   PostFetcherInterface,
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
+import { IDENTITY_PLATFORM } from '../shared/types/types.platforms';
 import {
   AppPostFull,
   AppPostParsedStatus,
   AppPostParsingStatus,
   PostsQuery,
 } from '../shared/types/types.posts';
+import { useAccountContext } from '../user-login/contexts/AccountContext';
 
 export enum PostsQueryStatus {
   ALL = 'all',
@@ -35,7 +43,41 @@ export const UserPostsContextValue = createContext<PostContextType | undefined>(
 export const UserPostsContext: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
+  const { connectedUser } = useAccountContext();
+
+  const nProfilesPrev = useRef(0);
+
   const appFetch = useAppFetch();
+
+  const nProfiles = useMemo(() => {
+    if (!connectedUser?.profiles) return undefined;
+    const n = Object.keys(connectedUser.profiles).filter(
+      (p) =>
+        connectedUser.profiles &&
+        connectedUser.profiles[p as IDENTITY_PLATFORM] !== undefined
+    ).length;
+    return n;
+  }, [connectedUser?.profiles]);
+
+  useEffect(() => {
+    if (nProfiles === undefined) {
+      return;
+    }
+
+    /** skip the first call */
+    if (nProfilesPrev.current === 0 && nProfiles > 0) {
+      nProfilesPrev.current = nProfiles;
+    }
+
+    if (nProfilesPrev.current !== nProfiles) {
+      /** force refetch */
+      console.log('-------- PROFILE ADDED ------');
+      feed.fetchOlder();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nProfiles]);
+
+  /** Force refetch if new profile added to user */
 
   /** status is derived from location
    * set the filter status based on it.
