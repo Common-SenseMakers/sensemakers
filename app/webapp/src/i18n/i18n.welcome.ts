@@ -18,7 +18,7 @@ export const welcomeValues: Record<WelcomeKeys, string> = {
   [WelcomeKeys.bullet1]:
     '<b>Hyper Focused:</b> Just research content – leave the cat videos at home',
   [WelcomeKeys.bullet2]:
-    '<b>Cross-Platform Reach:</b> Aggregate discussions across Twitter, Mastodon, and Blue Sky',
+    '<b>Cross-Platform Reach:</b> Aggregate discussions across Twitter, Mastodon, and Bluesky',
   [WelcomeKeys.bullet3]:
     '<b>Flexible Discovery:</b> Discover content through keywords, researchers, posts or references',
   [WelcomeKeys.bullet4]:
