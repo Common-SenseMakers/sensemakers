@@ -11,12 +11,12 @@ export enum WelcomeKeys {
 }
 
 export const welcomeValues: Record<WelcomeKeys, string> = {
-  [WelcomeKeys.title]: 'Welcome to Hyperfeed',
+  [WelcomeKeys.title]: 'SenseNets Hyperfeed',
   [WelcomeKeys.subtitle]: 'Transform your research discovery process.',
   [WelcomeKeys.par1]:
-    'Hyperfeed is a social media feed designed to help researchers surface valuable insights.',
+    'Hyperfeed is a social media feed designed for researchers:',
   [WelcomeKeys.bullet1]:
-    '<b>Hyper Focused:</b> Just research content – leave the cat videos at home',
+    '<b>Hyper Focused:</b> Just research content – no distractions here',
   [WelcomeKeys.bullet2]:
     '<b>Cross-Platform Reach:</b> Aggregate discussions across Twitter, Mastodon, and Bluesky',
   [WelcomeKeys.bullet3]:
