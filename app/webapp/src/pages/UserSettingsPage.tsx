@@ -2,7 +2,11 @@ import { Box, Text } from 'grommet';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { BlueskyIcon, MastodonIcon, TwitterIcon } from '../app/common/Icons';
+import {
+  BlueskyIcon,
+  MastodonIcon,
+  TwitterIcon,
+} from '../app/common/PlatformsIcons';
 import { DocIcon } from '../app/icons/DocIcon';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { SupportIcon } from '../app/icons/SupportIcon';
