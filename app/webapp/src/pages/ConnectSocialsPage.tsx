@@ -86,7 +86,7 @@ export const ConnectSocialsPage = () => {
             twitterProfile ? (
               <PlatformAvatar imageUrl={twitterProfile?.avatar} />
             ) : (
-              <TwitterIcon size={40} color="black"></TwitterIcon>
+              <TwitterIcon inverse size={40} color="black"></TwitterIcon>
             )
           }
           platformName={t(PlatformsKeys.XTwitter)}
@@ -113,7 +113,7 @@ export const ConnectSocialsPage = () => {
             mastodonProfile ? (
               <PlatformAvatar imageUrl={mastodonProfile?.avatar} />
             ) : (
-              <MastodonIcon size={40} color="white"></MastodonIcon>
+              <MastodonIcon inverse size={40}></MastodonIcon>
             )
           }
           platformName={t(PlatformsKeys.Mastodon)}
@@ -128,7 +128,7 @@ export const ConnectSocialsPage = () => {
             blueskyProfile ? (
               <PlatformAvatar imageUrl={blueskyProfile?.avatar} />
             ) : (
-              <BlueskyIcon size={40} color="white"></BlueskyIcon>
+              <BlueskyIcon inverse size={40}></BlueskyIcon>
             )
           }
           platformName={t(PlatformsKeys.Bluesky)}

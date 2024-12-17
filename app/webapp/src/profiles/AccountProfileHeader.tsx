@@ -1,4 +1,5 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
+import { useMemo } from 'react';
 
 import { Autoindexed } from '../app/icons/Autoindexed';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
@@ -7,39 +8,65 @@ import { useThemeContext } from '../ui-components/ThemedApp';
 import { AccountProfileAnchor } from './AccountProfileAnchor';
 
 export const AccountProfileHeader = (props: {
-  account?: AccountProfileRead;
+  accounts: AccountProfileRead[];
   boxProps?: BoxExtendedProps;
 }) => {
   const { constants } = useThemeContext();
 
-  const { account, boxProps } = props;
-  const profile = account?.profile;
+  const { accounts, boxProps } = props;
+
+  const { avatar, displayName } = useMemo(() => {
+    let _avatar: string | undefined = undefined;
+    let _displayName: string | undefined = undefined;
+
+    for (const account of accounts) {
+      if (account.profile && account.profile.avatar) {
+        _avatar = account.profile.avatar;
+      }
+      if (account.profile && account.profile.displayName) {
+        _displayName = account.profile.displayName;
+      }
+    }
+
+    return {
+      avatar: _avatar,
+      displayName: _displayName,
+    };
+  }, [accounts]);
 
   return (
-    <Box direction="row" align="center" gap="8px" {...boxProps}>
-      <PlatformAvatar size={24} imageUrl={profile?.avatar}></PlatformAvatar>
+    <Box direction="row" align="center" justify="between" {...boxProps}>
+      <Box direction="row" align="center" gap="8px">
+        <PlatformAvatar size={24} imageUrl={avatar}></PlatformAvatar>
 
-      <Box
-        direction="row"
-        justify="start"
-        gap="8px"
-        align="center"
-        style={{ flexShrink: 0 }}>
-        <Text
-          color={constants.colors.primary}
-          style={{
-            fontSize: '16px',
-            fontStyle: 'normal',
-            fontWeight: '600',
-            lineHeight: '18px',
-            textDecoration: 'none',
-          }}>
-          {profile?.displayName}
-        </Text>
-        <Autoindexed showInfo></Autoindexed>
+        <Box
+          direction="row"
+          justify="start"
+          gap="8px"
+          align="center"
+          style={{ flexShrink: 0 }}>
+          <Text
+            color={constants.colors.primary}
+            style={{
+              fontSize: '16px',
+              fontStyle: 'normal',
+              fontWeight: '600',
+              lineHeight: '18px',
+              textDecoration: 'none',
+            }}>
+            {displayName}
+          </Text>
+          <Autoindexed showInfo></Autoindexed>
+        </Box>
       </Box>
 
-      <AccountProfileAnchor account={account}></AccountProfileAnchor>
+      <Box direction="row" align="center" gap="12px">
+        {accounts.map((account, ix) => (
+          <AccountProfileAnchor
+            key={ix}
+            account={account}></AccountProfileAnchor>
+        ))}
+      </Box>
     </Box>
   );
 };

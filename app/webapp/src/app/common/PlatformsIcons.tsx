@@ -1,78 +1,153 @@
-import { Box, BoxExtendedProps, Image } from 'grommet';
+import { Box, BoxExtendedProps } from 'grommet';
+import { useMemo } from 'react';
 
-export const TwitterIcon = (
-  props: { size?: number; color?: string } & BoxExtendedProps
+import {
+  IDENTITY_PLATFORM,
+  PLATFORM,
+} from '../../shared/types/types.platforms';
+
+export interface PlatformIconProps {
+  size?: number;
+  color?: string;
+  inverse?: boolean;
+}
+
+export const BasePlatformIcon = (
+  props: {
+    platform: IDENTITY_PLATFORM;
+  } & PlatformIconProps &
+    BoxExtendedProps
 ) => {
   const size = props.size || 20;
-  return (
-    <Box
-      height={`${size}px`}
-      width={`${size}px`}
-      align="center"
-      justify="center"
-      style={{
-        borderRadius: `${size / 2}px`,
-        backgroundColor: 'black',
-      }}>
-      <Image src="/icons/x-logo/logo-white.png" height={`${size * 0.6}px`} />
-    </Box>
-  );
+  const color = props.color || 'black';
+  const inverse = props.inverse !== undefined ? props.inverse : false;
+  const platform = props.platform;
+
+  const { inverseSvg, svg } = useMemo(() => {
+    if (platform === PLATFORM.Twitter) {
+      return {
+        svg: (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width={size}
+            height={size}
+            viewBox="0 0 20 20"
+            fill="none">
+            <path
+              d="M4.33526 2.18534C6.62822 3.90674 9.09455 7.39704 10.0001 9.27013C10.9056 7.39717 13.3718 3.90671 15.6649 2.18534C17.3193 0.943245 20 -0.0178186 20 3.04034C20 3.65109 19.6498 8.171 19.4445 8.90478C18.7306 11.4559 16.1292 12.1066 13.8152 11.7128C17.86 12.4012 18.8889 14.6815 16.6668 16.9617C12.4465 21.2924 10.601 15.8752 10.1278 14.4871C10.0412 14.2326 10.0006 14.1135 10 14.2148C9.9994 14.1135 9.95884 14.2326 9.87215 14.4871C9.39925 15.8752 7.55378 21.2925 3.33322 16.9617C1.11103 14.6815 2.13995 12.4011 6.18483 11.7128C3.87077 12.1066 1.26934 11.4559 0.555548 8.90478C0.350163 8.17093 0 3.65102 0 3.04034C0 -0.0178186 2.68074 0.943245 4.33515 2.18534H4.33526Z"
+              fill={color}
+            />
+          </svg>
+        ),
+        inverseSvg: (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width={0.6 * size}
+            height={0.6 * size}
+            viewBox="0 0 24 24"
+            fill="none">
+            <path
+              d="M1.05462 2L9.70326 13.5641L1 22.9661H2.95875L10.5784 14.7345L16.7349 22.9661H23.4007L14.2654 10.7516L22.3663 2H20.4076L13.3902 9.58119L7.72033 2H1.05462ZM3.93511 3.44282H6.99735L20.5197 21.5231H17.4575L3.93511 3.44282Z"
+              fill="white"
+            />
+          </svg>
+        ),
+      };
+    }
+
+    if (platform === PLATFORM.Mastodon) {
+      return {
+        svg: (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width={size}
+            height={size}
+            viewBox="0 0 20 20"
+            fill="none">
+            <path
+              d="M19.6659 6.56613C19.6659 2.22704 16.8214 0.956019 16.8214 0.956019C15.3876 0.298006 12.9253 0.0210004 10.3669 0H10.3038C7.74544 0.0210004 5.2851 0.298006 3.85032 0.956019C3.85032 0.956019 1.00577 2.22804 1.00577 6.56613C1.00577 7.55915 0.986755 8.74717 1.01777 10.0072C1.12083 14.2503 1.7962 18.4324 5.72134 19.4704C7.53132 19.9494 9.08517 20.0494 10.3359 19.9804C12.6051 19.8544 13.8788 19.1714 13.8788 19.1714L13.8037 17.5253C13.8037 17.5253 12.1819 18.0363 10.3609 17.9743C8.55588 17.9123 6.65184 17.7803 6.35968 15.5653C6.33209 15.3595 6.31872 15.152 6.31966 14.9443C6.31966 14.9443 8.09063 15.3773 10.3359 15.4803C11.7086 15.5433 12.9953 15.4003 14.303 15.2443C16.8104 14.9453 18.9936 13.4013 19.2677 11.9902C19.702 9.76719 19.6659 6.56613 19.6659 6.56613ZM16.3111 12.1562H14.229V7.05714C14.229 5.98212 13.7767 5.4371 12.8712 5.4371C11.8707 5.4371 11.3694 6.08412 11.3694 7.36414V10.1552H9.29929V7.36414C9.29929 6.08412 8.79801 5.4371 7.79647 5.4371C6.89097 5.4371 6.43873 5.98312 6.43873 7.05714V12.1562H4.35659V6.90313C4.35659 5.82911 4.62974 4.9761 5.18004 4.34508C5.74635 3.71407 6.48775 3.39007 7.40926 3.39007C8.47484 3.39007 9.28228 3.79907 9.81557 4.61809L10.3338 5.48711L10.8531 4.61809C11.3864 3.79907 12.1939 3.39007 13.2594 3.39007C14.1799 3.39007 14.9224 3.71407 15.4887 4.34508C16.038 4.9761 16.3111 5.82911 16.3111 6.90313V12.1562Z"
+              fill={color}
+            />
+          </svg>
+        ),
+        inverseSvg: (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width={0.6 * size}
+            height={0.6 * size}
+            viewBox="0 0 23 24"
+            fill="none">
+            <path
+              d="M22.3991 7.87935C22.3991 2.67245 18.9857 1.14722 18.9857 1.14722C17.2651 0.357607 14.3103 0.0252005 11.2402 0H11.1646C8.09453 0.0252005 5.14212 0.357607 3.42038 1.14722C3.42038 1.14722 0.00691906 2.67365 0.00691906 7.87935C0.00691906 9.07098 -0.0158936 10.4966 0.0213267 12.0086C0.144994 17.1003 0.955435 22.1188 5.6656 23.3645C7.83759 23.9393 9.7022 24.0593 11.203 23.9765C13.9261 23.8253 15.4545 23.0056 15.4545 23.0056L15.3645 21.0304C15.3645 21.0304 13.4182 21.6436 11.233 21.5692C9.06706 21.4948 6.78221 21.3364 6.43162 18.6784C6.39851 18.4314 6.38247 18.1824 6.38359 17.9331C6.38359 17.9331 8.50875 18.4528 11.203 18.5764C12.8503 18.652 14.3944 18.4804 15.9636 18.2932C18.9725 17.9343 21.5923 16.0815 21.9213 14.3883C22.4423 11.7206 22.3991 7.87935 22.3991 7.87935ZM18.3733 14.5875H15.8748V8.46856C15.8748 7.17854 15.3321 6.52453 14.2455 6.52453C13.0448 6.52453 12.4433 7.30094 12.4433 8.83697V12.1862H9.95914V8.83697C9.95914 7.30094 9.35761 6.52453 8.15576 6.52453C7.06917 6.52453 6.52647 7.17974 6.52647 8.46856V14.5875H4.02791V8.28376C4.02791 6.99494 4.35569 5.97131 5.01605 5.2141C5.69562 4.45689 6.5853 4.06808 7.69111 4.06808C8.9698 4.06808 9.93873 4.55889 10.5787 5.54171L11.2006 6.58453L11.8238 5.54171C12.4637 4.55889 13.4326 4.06808 14.7113 4.06808C15.8159 4.06808 16.7068 4.45689 17.3864 5.2141C18.0455 5.97131 18.3733 6.99494 18.3733 8.28376V14.5875Z"
+              fill="white"
+            />
+          </svg>
+        ),
+      };
+    }
+
+    if (platform === PLATFORM.Bluesky) {
+      return {
+        svg: (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none">
+            <path
+              d="M4.33526 2.18534C6.62822 3.90674 9.09455 7.39704 10.0001 9.27013C10.9056 7.39717 13.3718 3.90671 15.6649 2.18534C17.3193 0.943245 20 -0.0178186 20 3.04034C20 3.65109 19.6498 8.171 19.4445 8.90478C18.7306 11.4559 16.1292 12.1066 13.8152 11.7128C17.86 12.4012 18.8889 14.6815 16.6668 16.9617C12.4465 21.2924 10.601 15.8752 10.1278 14.4871C10.0412 14.2326 10.0006 14.1135 10 14.2148C9.9994 14.1135 9.95884 14.2326 9.87215 14.4871C9.39925 15.8752 7.55378 21.2925 3.33322 16.9617C1.11103 14.6815 2.13995 12.4011 6.18483 11.7128C3.87077 12.1066 1.26934 11.4559 0.555548 8.90478C0.350163 8.17093 0 3.65102 0 3.04034C0 -0.0178186 2.68074 0.943245 4.33515 2.18534H4.33526Z"
+              fill={color}
+            />
+          </svg>
+        ),
+        inverseSvg: (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="40"
+            height="40"
+            viewBox="0 0 40 40"
+            fill="none">
+            <rect width="40" height="40" rx="20" fill="#111827" />
+            <path
+              d="M13.2023 12.4224C15.9539 14.4881 18.9135 18.6764 20.0001 20.9242C21.0868 18.6766 24.0462 14.4881 26.7978 12.4224C28.7832 10.9319 32 9.77862 32 13.4484C32 14.1813 31.5798 19.6052 31.3333 20.4857C30.4767 23.5471 27.355 24.328 24.5782 23.8554C29.432 24.6815 30.6667 27.4178 28.0001 30.1541C22.9357 35.3509 20.7211 28.8502 20.1534 27.1845C20.0494 26.8791 20.0007 26.7363 20 26.8577C19.9993 26.7363 19.9506 26.8791 19.8466 27.1845C19.2791 28.8502 17.0645 35.351 11.9999 30.1541C9.33323 27.4178 10.5679 24.6813 15.4218 23.8554C12.6449 24.328 9.5232 23.5471 8.66666 20.4857C8.4202 19.6051 8 14.1812 8 13.4484C8 9.77862 11.2169 10.9319 13.2022 12.4224H13.2023Z"
+              fill="white"
+            />
+          </svg>
+        ),
+      };
+    }
+
+    throw new Error(`Platform ${platform} not supported`);
+  }, [color, platform, size]);
+
+  if (inverse) {
+    return (
+      <Box
+        height={`${size}px`}
+        width={`${size}px`}
+        align="center"
+        justify="center"
+        style={{
+          borderRadius: `${size / 2}px`,
+          backgroundColor: color,
+        }}>
+        {inverseSvg}
+      </Box>
+    );
+  } else {
+    return svg;
+  }
 };
 
-export const MastodonIcon = (
-  props: {
-    size?: number;
-    color?: 'white' | 'black' | 'purple';
-  } & BoxExtendedProps
-) => {
-  const color = props.color || 'white';
-  const size = props.size || 20;
-
-  return (
-    <Box
-      height={`${size}px`}
-      width={`${size}px`}
-      align="center"
-      justify="center"
-      style={{
-        borderRadius: `${size / 2}px`,
-        backgroundColor: 'black',
-      }}>
-      <Image src={`/icons/mastodon-${color}.svg`} height={`${size * 0.6}px`} />
-    </Box>
-  );
+export const TwitterIcon = (props: PlatformIconProps & BoxExtendedProps) => {
+  return <BasePlatformIcon platform={PLATFORM.Twitter} {...props} />;
 };
 
-export const BlueskyIcon = (
-  props: {
-    size?: number;
-    color?: 'blue' | 'white';
-  } & BoxExtendedProps
-) => {
-  const color = props.color || 'white';
-  const size = props.size || 20;
+export const MastodonIcon = (props: PlatformIconProps & BoxExtendedProps) => {
+  return <BasePlatformIcon platform={PLATFORM.Mastodon} {...props} />;
+};
 
-  return (
-    <Box
-      height={`${size}px`}
-      width={`${size}px`}
-      align="center"
-      justify="center"
-      style={{
-        borderRadius: `${size / 2}px`,
-        backgroundColor: 'black',
-      }}>
-      <Image
-        src={`/icons/bluesky.png`}
-        height={`${size * 0.6}px`}
-        style={
-          color === 'white'
-            ? {
-                filter: 'brightness(0) invert(1)', // Invert colors to make the image white
-              }
-            : {}
-        }
-      />
-    </Box>
-  );
+export const BlueskyIcon = (props: PlatformIconProps & BoxExtendedProps) => {
+  return <BasePlatformIcon platform={PLATFORM.Bluesky} {...props} />;
 };

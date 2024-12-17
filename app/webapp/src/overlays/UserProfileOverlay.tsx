@@ -113,7 +113,7 @@ export const UserProfileOverlay = (props: {
             {isUser ? (
               <UserProfileHeader user={user}></UserProfileHeader>
             ) : profile ? (
-              <AccountProfileHeader account={profile}></AccountProfileHeader>
+              <AccountProfileHeader accounts={[profile]}></AccountProfileHeader>
             ) : (
               <></>
             )}
