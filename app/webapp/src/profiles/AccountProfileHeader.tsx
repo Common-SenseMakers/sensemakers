@@ -37,35 +37,36 @@ export const AccountProfileHeader = (props: {
   return (
     <Box direction="row" align="center" justify="between" {...boxProps}>
       <Box direction="row" align="center" gap="8px">
-        <PlatformAvatar size={24} imageUrl={avatar}></PlatformAvatar>
+        <PlatformAvatar size={44} imageUrl={avatar}></PlatformAvatar>
 
-        <Box
-          direction="row"
-          justify="start"
-          gap="8px"
-          align="center"
-          style={{ flexShrink: 0 }}>
-          <Text
-            color={constants.colors.primary}
-            style={{
-              fontSize: '16px',
-              fontStyle: 'normal',
-              fontWeight: '600',
-              lineHeight: '18px',
-              textDecoration: 'none',
-            }}>
-            {displayName}
-          </Text>
-          <Autoindexed showInfo></Autoindexed>
+        <Box gap="4px">
+          <Box style={{ flexShrink: 0 }}>
+            <Text
+              color={constants.colors.grayIcon}
+              style={{
+                fontSize: '18px',
+                fontStyle: 'normal',
+                fontWeight: '500',
+                lineHeight: '24px',
+                textDecoration: 'none',
+                letterSpacing: '-0.36px',
+              }}>
+              {displayName}
+            </Text>
+          </Box>
+
+          <Box direction="row" align="center" gap="12px">
+            <Box direction="row" align="center" gap="12px">
+              {accounts.map((account, ix) => (
+                <AccountProfileAnchor
+                  key={ix}
+                  account={account}></AccountProfileAnchor>
+              ))}
+            </Box>
+
+            <Autoindexed showInfo></Autoindexed>
+          </Box>
         </Box>
-      </Box>
-
-      <Box direction="row" align="center" gap="12px">
-        {accounts.map((account, ix) => (
-          <AccountProfileAnchor
-            key={ix}
-            account={account}></AccountProfileAnchor>
-        ))}
       </Box>
     </Box>
   );
