@@ -125,6 +125,7 @@ export const getAccountDetails = (
 ): { url: string; label: string; username?: string; icon?: ReactElement } => {
   if (account.platformId === PLATFORM.Twitter) {
     if (!account.profile) throw new Error('Unexpected');
+    console.log('returning twitter account details');
     return {
       label: t(PlatformsKeys.XTwitter),
       url: `https://twitter.com/${account.profile?.username}`,
@@ -145,6 +146,7 @@ export const getAccountDetails = (
 
   if (account.platformId === PLATFORM.Bluesky) {
     const { accountURL } = getBlueskyProfileDetails(account);
+    console.log('returning Bluesky account details');
     return {
       label: t(PlatformsKeys.Bluesky),
       url: accountURL,

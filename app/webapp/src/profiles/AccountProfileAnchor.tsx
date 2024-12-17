@@ -15,6 +15,8 @@ export const AccountProfileAnchor = (props: {
 
   const { url, icon } = getAccountDetails(account);
 
+  console.log({ icon });
+
   return (
     <Anchor
       style={{

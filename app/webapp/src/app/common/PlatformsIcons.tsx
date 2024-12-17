@@ -25,20 +25,22 @@ export const BasePlatformIcon = (
 
   const { inverseSvg, svg } = useMemo(() => {
     if (platform === PLATFORM.Twitter) {
+      console.log('returning twitter icon');
       return {
         svg: (
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width={size}
             height={size}
-            viewBox="0 0 20 20"
+            viewBox="0 0 16 16"
             fill="none">
             <path
-              d="M4.33526 2.18534C6.62822 3.90674 9.09455 7.39704 10.0001 9.27013C10.9056 7.39717 13.3718 3.90671 15.6649 2.18534C17.3193 0.943245 20 -0.0178186 20 3.04034C20 3.65109 19.6498 8.171 19.4445 8.90478C18.7306 11.4559 16.1292 12.1066 13.8152 11.7128C17.86 12.4012 18.8889 14.6815 16.6668 16.9617C12.4465 21.2924 10.601 15.8752 10.1278 14.4871C10.0412 14.2326 10.0006 14.1135 10 14.2148C9.9994 14.1135 9.95884 14.2326 9.87215 14.4871C9.39925 15.8752 7.55378 21.2925 3.33322 16.9617C1.11103 14.6815 2.13995 12.4011 6.18483 11.7128C3.87077 12.1066 1.26934 11.4559 0.555548 8.90478C0.350163 8.17093 0 3.65102 0 3.04034C0 -0.0178186 2.68074 0.943245 4.33515 2.18534H4.33526Z"
+              d="M0.703158 1.33325L6.46892 9.04262L0.666748 15.3107H1.97258L7.05237 9.8229L11.1567 15.3107H15.6005L9.51035 7.16765L14.911 1.33325H13.6051L8.92689 6.38738L5.14697 1.33325H0.703158ZM2.62349 2.29513H4.66498L13.6799 14.3486H11.6384L2.62349 2.29513Z"
               fill={color}
             />
           </svg>
         ),
+
         inverseSvg: (
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -56,6 +58,7 @@ export const BasePlatformIcon = (
     }
 
     if (platform === PLATFORM.Mastodon) {
+      console.log('returning Mastodon icon');
       return {
         svg: (
           <svg
@@ -87,6 +90,8 @@ export const BasePlatformIcon = (
     }
 
     if (platform === PLATFORM.Bluesky) {
+      console.log('returning Bluesky icon');
+
       return {
         svg: (
           <svg
