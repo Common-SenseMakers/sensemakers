@@ -9,6 +9,10 @@ import {
   FetchParams,
   PlatformFetchParams,
 } from '../../src/@shared/types/types.fetch';
+import {
+  MastodonAccountDetails,
+  MastodonThread,
+} from '../../src/@shared/types/types.mastodon';
 import { PlatformPostCreate } from '../../src/@shared/types/types.platform.posts';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { AppUser } from '../../src/@shared/types/types.user';
@@ -127,6 +131,27 @@ describe('02-platforms', () => {
   });
 
   describe('mastodon', () => {
+    let mastodonService: MastodonService;
+    let userDetails: MastodonAccountDetails;
+
+    before(() => {
+      if (!user) {
+        throw new Error('appUser not created');
+      }
+      const allUserDetails = user.accounts[PLATFORM.Mastodon];
+      if (!allUserDetails || allUserDetails.length < 0) {
+        throw new Error('Unexpected');
+      }
+      userDetails = allUserDetails[0];
+      if (userDetails.credentials.read === undefined) {
+        throw new Error('Unexpected');
+      }
+
+      mastodonService = services.platforms.get(
+        PLATFORM.Mastodon
+      ) as MastodonService;
+    });
+
     it('fetches the latest posts', async () => {
       if (!user) {
         throw new Error('appUser not created');
@@ -216,6 +241,25 @@ describe('02-platforms', () => {
         expect(result.displayName).to.be.a('string');
         expect(result.avatar).to.be.a('string');
       }
+    });
+    it.only('handles newlines in the content html', async () => {
+      const post_id =
+        'https://w3c.social/users/w3c/statuses/113561528162272973';
+      const result = await mastodonService.get(
+        post_id,
+        userDetails.credentials
+      );
+
+      const genericPost = await mastodonService.convertToGeneric({
+        posted: result.platformPost,
+      } as PlatformPostCreate<MastodonThread>);
+
+      const content = genericPost.thread[0].content;
+
+      const accessibilityIndex = content.indexOf('#accessibility');
+      const charAfterAccessibility = content[accessibilityIndex + 14];
+
+      expect(charAfterAccessibility).to.be.equal('\n');
     });
   });
 
