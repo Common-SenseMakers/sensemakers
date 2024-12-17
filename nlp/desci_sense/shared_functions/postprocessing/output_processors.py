@@ -241,23 +241,32 @@ class KeywordParser(BaseOutputParser):
 
         # return extracted_content
 
-def normalize_keyword(keyword:str):
-    # Step 1: Remove dots from abbreviations like "A.I."
+def normalize_keyword(keyword: str) -> str:
+    # Step 1: Remove dots
     keyword = re.sub(r'\.', '', keyword)
     
-    # Step 2: Insert hyphens between lowercase-uppercase transitions for CamelCase separation
-    keyword = re.sub(r'([a-z])([A-Z])', r'\1-\2', keyword)
+    # Step 2 (Preprocessing): 
+    # Convert patterns like IoT, PoW, PoS (uppercase-lowercase-uppercase) into fully uppercase
+    # This prevents unwanted splitting in the next step.
+    # Example: IoT -> IOT, PoW -> POW, PoS -> POS
+    keyword = re.sub(r'([A-Z])([a-z])([A-Z])', 
+                     lambda m: m.group(1) + m.group(2).upper() + m.group(3), 
+                     keyword)
     
-    # Step 3: Convert to lowercase
+    # Step 3: Insert hyphens between lowercase->uppercase transitions (CamelCase separation)
+    # e.g. ModelTheory -> Model-Theory, DeepLearning -> Deep-Learning
+    keyword = re.sub(r'([a-z0-9])([A-Z])', r'\1-\2', keyword)
+    
+    # Step 4: Convert to lowercase
     keyword = keyword.lower()
     
-    # Step 4: Replace spaces, underscores, and special characters with hyphens
+    # Step 5: Replace spaces, underscores, and special characters with hyphens
     keyword = re.sub(r'[\s_@!#\$%^&\*\(\)\[\]\{\};:,/<>?|\\+=~`]', '-', keyword)
     
-    # Step 5: Replace multiple hyphens with a single hyphen
+    # Step 6: Replace multiple hyphens with a single hyphen
     keyword = re.sub(r'-+', '-', keyword)
     
-    # Step 6: Remove any leading or trailing hyphens
+    # Step 7: Remove any leading or trailing hyphens
     keyword = keyword.strip('-')
     
     return keyword

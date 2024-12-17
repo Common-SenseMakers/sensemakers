@@ -50,7 +50,7 @@ def test_tweet_only_htags():
 
     res = mpc.process_ref_post(post)
     graph = res.semantics
-    assert Literal("TESCREAL") in graph.all_nodes()
+    assert Literal("tescreal") in graph.all_nodes()
     assert Literal("transhumanist") in graph.all_nodes()
 
 def test_tweet_htags_kw():
@@ -65,7 +65,7 @@ def test_tweet_htags_kw():
 
     res = mpc.process_ref_post(post)
     graph = res.semantics
-    assert Literal("TESCREAL") in graph.all_nodes()
+    assert Literal("tescreal") in graph.all_nodes()
     assert Literal("transhumanist") in graph.all_nodes()
     
 def test_hashtags_combined_postproc():
@@ -79,10 +79,10 @@ def test_hashtags_combined_postproc():
     post = scrape_post(url)
 
     res = mpc.process_ref_post(post, active_list=["hashtags"])
-    assert set(res.hashtags) == set(['TESCREAL', 'transhumanist'])
+    assert set(res.hashtags) == set(['tescreal', 'transhumanist'])
 
 if __name__ == "__main__":
-    ht = HashtagPParserChainConfig(name="hashtags")
+    """ht = HashtagPParserChainConfig(name="hashtags")
     kp = KeywordPParserChainConfig(name="keywords")
     multi_config = MultiParserChainConfig(
         parser_configs=[ht, kp], post_process_type=PostProcessType.COMBINED
@@ -91,4 +91,5 @@ if __name__ == "__main__":
     url = "https://twitter.com/yoginho/status/1782475359545389138"
     post = scrape_post(url)
 
-    res = mpc.process_ref_post(post, active_list=["hashtags"])
+    res = mpc.process_ref_post(post, active_list=["hashtags"])"""
+    test_base()
