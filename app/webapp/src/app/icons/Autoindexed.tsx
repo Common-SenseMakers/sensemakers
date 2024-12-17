@@ -1,11 +1,25 @@
-import { BoxCentered } from '../../ui-components/BoxCentered';
+import { Box, Text } from 'grommet';
+import { useTranslation } from 'react-i18next';
 
-export const Autoindexed = () => {
+import { AppGeneralKeys } from '../../i18n/i18n.app.general';
+import { HelpTip } from '../../ui-components';
+import { InfoIcon } from './InfoIcon';
+
+export const Autoindexed = (props: { showInfo?: boolean }) => {
+  const { t } = useTranslation();
+
+  const showInfo = props.showInfo !== undefined ? props.showInfo : false;
+
   return (
-    <BoxCentered
+    <Box
+      align="center"
+      direction="row"
+      pad="4px"
+      gap="4px"
+      justify={showInfo ? 'start' : 'center'}
       style={{
         height: '20px',
-        width: '20px',
+        width: showInfo ? 'auto' : '20px',
         borderRadius: '4px',
         backgroundColor: '#FFEEDB',
       }}>
@@ -20,6 +34,34 @@ export const Autoindexed = () => {
           fill="#ED8F1C"
         />
       </svg>
-    </BoxCentered>
+      {showInfo && (
+        <Box direction="row" align="center" gap="4px">
+          <Text
+            style={{
+              color: '#4B5563',
+              fontSize: '12px',
+              fontStyle: 'normal',
+              fontWeight: '500',
+              lineHeight: '14px',
+            }}>
+            {t(AppGeneralKeys.autoIndexed)}
+          </Text>
+          <HelpTip
+            icon={<InfoIcon color="#4B5563" size={16}></InfoIcon>}
+            _content={
+              <Text
+                style={{
+                  color: '#4B5563',
+                  fontSize: '14px',
+                  fontStyle: 'normal',
+                  fontWeight: '500',
+                  lineHeight: '16px',
+                }}>
+                {t(AppGeneralKeys.autoIndexedInfo)}
+              </Text>
+            }></HelpTip>
+        </Box>
+      )}
+    </Box>
   );
 };

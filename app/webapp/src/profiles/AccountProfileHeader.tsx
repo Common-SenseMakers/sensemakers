@@ -31,7 +31,7 @@ export const AccountProfileHeader = (props: {
             }}>
             {profile?.displayName}
           </Text>
-          <Autoindexed></Autoindexed>
+          <Autoindexed showInfo></Autoindexed>
         </Box>
         <Text
           color={constants.colors.primary}
