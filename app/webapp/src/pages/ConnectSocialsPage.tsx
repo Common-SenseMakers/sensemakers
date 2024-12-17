@@ -4,7 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
-import { BlueskyIcon, MastodonIcon, TwitterIcon } from '../app/common/Icons';
+import {
+  BlueskyIcon,
+  MastodonIcon,
+  TwitterIcon,
+} from '../app/common/PlatformsIcons';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { MAX_BUTTON_WIDTH, ViewportPage } from '../app/layout/Viewport';
 import { IntroKeys } from '../i18n/i18n.intro';

@@ -17,22 +17,14 @@ export const AccountProfileHeader = (props: {
 
   return (
     <Box direction="row" align="center" gap="8px" {...boxProps}>
-      <PlatformAvatar size={48} imageUrl={profile?.avatar}></PlatformAvatar>
-      <Box gap="4px">
-        <Box direction="row" justify="start" gap="8px" align="center">
-          <Text
-            color={constants.colors.primary}
-            style={{
-              fontSize: '16px',
-              fontStyle: 'normal',
-              fontWeight: '600',
-              lineHeight: '18px',
-              textDecoration: 'none',
-            }}>
-            {profile?.displayName}
-          </Text>
-          <Autoindexed showInfo></Autoindexed>
-        </Box>
+      <PlatformAvatar size={24} imageUrl={profile?.avatar}></PlatformAvatar>
+
+      <Box
+        direction="row"
+        justify="start"
+        gap="8px"
+        align="center"
+        style={{ flexShrink: 0 }}>
         <Text
           color={constants.colors.primary}
           style={{
@@ -41,9 +33,13 @@ export const AccountProfileHeader = (props: {
             fontWeight: '600',
             lineHeight: '18px',
             textDecoration: 'none',
-          }}></Text>
-        <AccountProfileAnchor account={account}></AccountProfileAnchor>
+          }}>
+          {profile?.displayName}
+        </Text>
+        <Autoindexed showInfo></Autoindexed>
       </Box>
+
+      <AccountProfileAnchor account={account}></AccountProfileAnchor>
     </Box>
   );
 };
