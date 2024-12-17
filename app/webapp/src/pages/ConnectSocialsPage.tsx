@@ -51,7 +51,7 @@ export const ConnectSocialsPage = () => {
 
   const handleContinue = () => {
     appFetch('/api/auth/setOnboarded', {}, true).catch(console.error);
-    navigate(AbsoluteRoutes.MyPosts);
+    navigate(AbsoluteRoutes.Feed);
   };
 
   useEffect(() => {
@@ -59,7 +59,7 @@ export const ConnectSocialsPage = () => {
       connectedUser && connectedUser.details && connectedUser.details.onboarded;
 
     if (alreadyConnected) {
-      navigate(AbsoluteRoutes.MyPosts);
+      navigate(AbsoluteRoutes.Feed);
     }
   }, [connectedUser, navigate]);
 
