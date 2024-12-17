@@ -152,7 +152,7 @@ class KeywordPParserChainConfig(PostParserChainConfig):
         default=500,
         description="Truncate quoted post length to concatenate to the post content appended to the prompt",
     )
-
+    post_renderer: PostRendererType = PostRendererType.THREAD_REF_POST
 
 class HashtagPParserChainConfig(PostParserChainConfig):
     type: ParserChainType = ParserChainType.HASHTAGS
