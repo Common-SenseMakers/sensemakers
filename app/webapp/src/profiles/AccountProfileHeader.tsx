@@ -8,12 +8,15 @@ import { useThemeContext } from '../ui-components/ThemedApp';
 import { AccountProfileAnchor } from './AccountProfileAnchor';
 
 export const AccountProfileHeader = (props: {
+  autoIndexed?: boolean;
   accounts: AccountProfileRead[];
   boxProps?: BoxExtendedProps;
 }) => {
   const { constants } = useThemeContext();
 
   const { accounts, boxProps } = props;
+  const autoIndexed =
+    props.autoIndexed !== undefined ? props.autoIndexed : false;
 
   const { avatar, displayName } = useMemo(() => {
     let _avatar: string | undefined = undefined;
@@ -64,7 +67,7 @@ export const AccountProfileHeader = (props: {
               ))}
             </Box>
 
-            <Autoindexed showInfo></Autoindexed>
+            {autoIndexed && <Autoindexed showInfo></Autoindexed>}
           </Box>
         </Box>
       </Box>
