@@ -149,7 +149,7 @@ export const PostCard = (props: {
         borderLeft: CARD_BORDER,
         borderTop: 'none',
       }}>
-      <PublishButtons margin={{ bottom: '16px' }}></PublishButtons>
+      <PublishButtons></PublishButtons>
 
       <Box pad={{ top: '16px', horizontal: '12px', bottom: '24px' }}>
         <Box

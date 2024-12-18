@@ -126,7 +126,6 @@ export const PublishButtons = (props: BoxExtendedProps) => {
     <Box
       direction="row"
       justify="between"
-      gap="16px"
       align="center"
       pad={{ vertical: '12px', horizontal: '12px' }}
       {...props}
