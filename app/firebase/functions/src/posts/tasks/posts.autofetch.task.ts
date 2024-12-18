@@ -100,6 +100,13 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
           );
         await enqueueTask(taskName, taskData);
       }
+    } else {
+      if (DEBUG)
+        logger.debug(
+          `Skipping non-user autofetch for ${platformId}`,
+          { now, jobLastRun, fetchPlatformMinPeriod },
+          DEBUG_PREFIX
+        );
     }
   });
 };
