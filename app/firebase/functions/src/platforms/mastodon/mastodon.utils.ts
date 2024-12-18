@@ -105,6 +105,7 @@ export const cleanMastodonContent = (content: string): string => {
   // Remove HTML tags, keeping paragraph structure
   let cleanedContent = content
     .replace(/<\/p><p>/g, '\n\n\n')
+    .replace(/<br\s*\/?>/g, '\n') // Replace <br /> with newline character
     .replace(/<[^>]*>/g, '');
 
   // Decode HTML entities

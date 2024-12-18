@@ -57,7 +57,7 @@ class RefPost(Post):
     List of URLs referenced by the post
     """
 
-    quoted_url: Optional[str]
+    quoted_url: Optional[str] = None
     """
     URL of post quoted by this post (for platforms that enable quote tweets)
     """

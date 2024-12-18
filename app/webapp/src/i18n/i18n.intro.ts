@@ -56,7 +56,7 @@ export const introValues: Record<IntroKeys, string> = {
   [IntroKeys.errorConnectMastodon]:
     'An error occurred while connecting to the Mastodon server: {{mastodonServer}}',
   [IntroKeys.continue]: 'Continue',
-  [IntroKeys.connnectingTwitter]: 'Connecting Twitter...',
+  [IntroKeys.connnectingTwitter]: 'Connecting X · Twitter',
   [IntroKeys.shareInfo]:
     'As you post on social media, we automatically detect your research-related content, tag it and share it to Hyperfeed. You can edit your tags and stop sharing any of your content at any time.',
 };

@@ -16,6 +16,7 @@ export const REF_LABELS_EDITOR_ID = 'ref-labels-editor';
 
 export const AppLabelsEditor = (props: {
   labels: Array<string | JSX.Element>;
+  placeholder: string;
   maxLabels?: number;
   options?: string[];
   addLabel?: (label: string) => void;
@@ -24,11 +25,14 @@ export const AppLabelsEditor = (props: {
   colors: LabelColors;
   editable?: boolean;
   onLabelClick?: (label: string) => void;
+  onMoreClicked?: () => void;
+  onNonLabelClick?: () => void;
 }) => {
   const editable = props.editable !== undefined ? props.editable : false;
   const colors = props.colors;
   const hashtag = props.hashtag !== undefined ? props.hashtag : false;
   const onLabelClick = props.onLabelClick;
+  const onMoreClicked = props.onMoreClicked;
 
   const { constants } = useThemeContext();
   const { t } = useTranslation();
@@ -105,6 +109,27 @@ export const AppLabelsEditor = (props: {
 
   const inputChanged = (input: string) => {
     setInput(input);
+  };
+
+  const handleInternalClick = (e: React.MouseEvent) => {
+    let target = e.target as HTMLElement; // Narrowing the type to HTMLElement
+    let isOnLabel = false;
+
+    // filter clicks on labels
+    while (target !== null) {
+      if (target.dataset && target.dataset.marker === 'label') {
+        isOnLabel = true;
+      }
+
+      target = target.parentNode as HTMLElement;
+    }
+
+    if (!isOnLabel && props.onNonLabelClick) {
+      e.stopPropagation();
+      if (props.onNonLabelClick) {
+        props.onNonLabelClick();
+      }
+    }
   };
 
   const hasManyLabels =
@@ -186,12 +211,33 @@ export const AppLabelsEditor = (props: {
       style={{
         backgroundColor: adding ? constants.colors.shade : 'transparent',
         position: 'relative',
-      }}>
+      }}
+      onClick={handleInternalClick}>
       <Box style={{ display: 'block' }}>
+        {visibleLables.length === 0 && !adding && (
+          <Box
+            style={{
+              display: 'block',
+              float: 'left',
+            }}>
+            <Text
+              style={{
+                color: constants.colors.textLight2,
+                fontSize: '14px',
+                fontStyle: 'normal',
+                fontWeight: '400',
+                lineHeight: '16px',
+                textDecoration: 'none',
+              }}>
+              {props.placeholder}
+            </Text>
+          </Box>
+        )}
         {visibleLables.map((label, ix) => {
           const marginRight = ix < visibleLables.length - 1 ? '4px' : '0';
           return (
             <Box
+              data-marker="label"
               key={ix}
               style={{
                 display: 'block',
@@ -215,9 +261,11 @@ export const AppLabelsEditor = (props: {
         })}
         {hasManyLabels && !adding ? (
           <Box style={{ display: 'block', float: 'left' }}>
-            <AppLabel colors={colors} margin={{ left: '4px', bottom: '4px' }}>
-              {`+${nonVisibleLabels.length}`}
-            </AppLabel>
+            <AppButton plain onClick={() => onMoreClicked && onMoreClicked()}>
+              <AppLabel colors={colors} margin={{ left: '4px', bottom: '4px' }}>
+                {`+${nonVisibleLabels.length}`}
+              </AppLabel>
+            </AppButton>
           </Box>
         ) : (
           <></>

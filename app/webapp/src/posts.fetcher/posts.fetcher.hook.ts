@@ -131,6 +131,10 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
 
         if (DEBUG)
           console.log(`${DEBUG_PREFIX}pushing posts`, { prev, allPosts });
+
+        /** resort in case posts come from another platform unsorted from the current ones */
+        allPosts.sort((a, b) => b.createdAtMs - a.createdAtMs);
+
         return allPosts;
       });
 

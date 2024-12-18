@@ -18,7 +18,6 @@ import {
 } from '../shared/types/types.user';
 import { splitProfileId } from '../shared/utils/profiles.utils';
 import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
-import { AppHeading } from '../ui-components';
 import { usePublicFeed } from './PublicFeedContext';
 
 const DEBUG = false;
@@ -110,12 +109,13 @@ export const UserProfileOverlay = (props: {
             flexShrink: 0,
             border: '1.6px solid var(--Neutral-300, #D1D5DB)',
           }}>
-          <AppHeading level="3">Posts by</AppHeading>
           <Box margin={{ vertical: 'medium' }}>
             {isUser ? (
               <UserProfileHeader user={user}></UserProfileHeader>
             ) : profile ? (
-              <AccountProfileHeader account={profile}></AccountProfileHeader>
+              <AccountProfileHeader
+                autoIndexed
+                accounts={[profile]}></AccountProfileHeader>
             ) : (
               <></>
             )}

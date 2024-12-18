@@ -1,5 +1,11 @@
 import { t } from 'i18next';
+import { ReactElement } from 'react';
 
+import {
+  BlueskyIcon,
+  MastodonIcon,
+  TwitterIcon,
+} from '../app/common/PlatformsIcons';
 import { PlatformsKeys } from '../i18n/i18n.platforms';
 import { BlueskyThread } from '../shared/types/types.bluesky';
 import { MastodonThread } from '../shared/types/types.mastodon';
@@ -116,13 +122,15 @@ export const getPlatformPostDetails = (
 
 export const getAccountDetails = (
   account: AccountProfileRead
-): { url: string; label: string; username?: string } => {
+): { url: string; label: string; username?: string; icon?: ReactElement } => {
   if (account.platformId === PLATFORM.Twitter) {
     if (!account.profile) throw new Error('Unexpected');
+    console.log('returning twitter account details');
     return {
       label: t(PlatformsKeys.XTwitter),
       url: `https://twitter.com/${account.profile?.username}`,
       username: account.profile?.username,
+      icon: <TwitterIcon />,
     };
   }
 
@@ -132,15 +140,18 @@ export const getAccountDetails = (
       label: t(PlatformsKeys.Mastodon),
       url: accountURL,
       username: account.profile?.username,
+      icon: <MastodonIcon />,
     };
   }
 
   if (account.platformId === PLATFORM.Bluesky) {
     const { accountURL } = getBlueskyProfileDetails(account);
+    console.log('returning Bluesky account details');
     return {
       label: t(PlatformsKeys.Bluesky),
       url: accountURL,
       username: account.profile?.username,
+      icon: <BlueskyIcon />,
     };
   }
 

@@ -1,11 +1,19 @@
 import AtpAgent from '@atproto/api';
 import { expect } from 'chai';
 
-import { BlueskyAccountDetails } from '../../src/@shared/types/types.bluesky';
+import {
+  BlueskyAccountDetails,
+  BlueskyThread,
+} from '../../src/@shared/types/types.bluesky';
 import {
   FetchParams,
   PlatformFetchParams,
 } from '../../src/@shared/types/types.fetch';
+import {
+  MastodonAccountDetails,
+  MastodonThread,
+} from '../../src/@shared/types/types.mastodon';
+import { PlatformPostCreate } from '../../src/@shared/types/types.platform.posts';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { AppUser } from '../../src/@shared/types/types.user';
 import { parseMastodonGlobalUsername } from '../../src/@shared/utils/mastodon.utils';
@@ -123,6 +131,27 @@ describe('02-platforms', () => {
   });
 
   describe('mastodon', () => {
+    let mastodonService: MastodonService;
+    let userDetails: MastodonAccountDetails;
+
+    before(() => {
+      if (!user) {
+        throw new Error('appUser not created');
+      }
+      const allUserDetails = user.accounts[PLATFORM.Mastodon];
+      if (!allUserDetails || allUserDetails.length < 0) {
+        throw new Error('Unexpected');
+      }
+      userDetails = allUserDetails[0];
+      if (userDetails.credentials.read === undefined) {
+        throw new Error('Unexpected');
+      }
+
+      mastodonService = services.platforms.get(
+        PLATFORM.Mastodon
+      ) as MastodonService;
+    });
+
     it('fetches the latest posts', async () => {
       if (!user) {
         throw new Error('appUser not created');
@@ -212,6 +241,25 @@ describe('02-platforms', () => {
         expect(result.displayName).to.be.a('string');
         expect(result.avatar).to.be.a('string');
       }
+    });
+    it.only('handles newlines in the content html', async () => {
+      const post_id =
+        'https://w3c.social/users/w3c/statuses/113561528162272973';
+      const result = await mastodonService.get(
+        post_id,
+        userDetails.credentials
+      );
+
+      const genericPost = await mastodonService.convertToGeneric({
+        posted: result.platformPost,
+      } as PlatformPostCreate<MastodonThread>);
+
+      const content = genericPost.thread[0].content;
+
+      const accessibilityIndex = content.indexOf('#accessibility');
+      const charAfterAccessibility = content[accessibilityIndex + 14];
+
+      expect(charAfterAccessibility).to.be.equal('\n');
     });
   });
 
@@ -327,6 +375,17 @@ describe('02-platforms', () => {
 
       expect(result).to.not.be.undefined;
       expect(result.platformPosts.length).to.be.greaterThan(0);
+    });
+    it('includes quoted posts in the thread when the embed is of type app.bsky.embed.recordWithMedia#view', async () => {
+      const post_id =
+        'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3lcmhumbudk2m';
+      const result = await blueskyService.get(post_id, userDetails.credentials);
+
+      const genericPost = await blueskyService.convertToGeneric({
+        posted: result.platformPost,
+      } as PlatformPostCreate<BlueskyThread>);
+
+      expect(genericPost.thread[0].quotedThread).to.not.be.undefined;
     });
   });
 });

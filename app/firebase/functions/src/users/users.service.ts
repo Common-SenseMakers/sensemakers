@@ -209,6 +209,11 @@ export class UsersService {
         };
 
         await this.upsertProfile(profileCreate, manager);
+
+        return {
+          userId: _userId,
+          linkProfile: true,
+        };
       }
     } else {
       /**

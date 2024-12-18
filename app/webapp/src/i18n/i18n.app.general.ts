@@ -8,6 +8,8 @@ export enum AppGeneralKeys {
   loadMorePosts = 'appnav-008',
   noPostsFound = 'appnav-009',
   noPostsFoundDesc = 'appnav-010',
+  autoIndexed = 'appnav-011',
+  autoIndexedInfo = 'appnav-012',
 }
 
 export const appGeneralValues: Record<AppGeneralKeys, string> = {
@@ -20,4 +22,7 @@ export const appGeneralValues: Record<AppGeneralKeys, string> = {
   [AppGeneralKeys.loadMorePosts]: 'Load more posts',
   [AppGeneralKeys.noPostsFound]: 'No posts found',
   [AppGeneralKeys.noPostsFoundDesc]: 'No posts found',
+  [AppGeneralKeys.autoIndexed]: 'Auto-indexed',
+  [AppGeneralKeys.autoIndexedInfo]:
+    'This account is automatically indexed and has not yet been claimed by its owner. Keywords and tags are AI generated.',
 };
