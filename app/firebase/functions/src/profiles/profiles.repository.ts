@@ -256,16 +256,16 @@ export class ProfilesRepository {
       return _base;
     })(baseQuery);
 
-    baseQuery = ((_base: Query) => {
-      if (queryParams.userIdDefined !== undefined) {
-        if (queryParams.userIdDefined) {
-          return _base.where(userId_property, '!=', null);
-        } else {
-          return _base.where(userId_property, '==', null);
-        }
-      }
-      return _base;
-    })(baseQuery);
+    // baseQuery = ((_base: Query) => {
+    //   if (queryParams.userIdDefined !== undefined) {
+    //     if (queryParams.userIdDefined) {
+    //       return _base.where(userId_property, '!=', null);
+    //     } else {
+    //       return _base.where(userId_property, '==', null);
+    //     }
+    //   }
+    //   return _base;
+    // })(baseQuery);
 
     const paginated = await (async (_base: Query) => {
       if (queryParams.limit) {

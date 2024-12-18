@@ -1,6 +1,5 @@
 import { Request } from 'firebase-functions/v2/tasks';
 
-import { firestore } from '../..';
 import {
   ALL_SOURCE_PLATFORMS,
   IDENTITY_PLATFORM,
@@ -43,13 +42,16 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
 
     const jobLastRun = await (async () => {
       const docId = `${platformId}-autofetchNonUserPosts`;
-      const jobMetaDoc = await firestore.collection('jobMeta').doc(docId).get();
+      const jobMetaDoc = await services.db.firestore
+        .collection('jobMeta')
+        .doc(docId)
+        .get();
       const existingTimestamp = jobMetaDoc.data()?.jobLastRunMs as
         | AutofetchNonUserPostsJobMeta['jobLastRunMs']
         | undefined;
       if (!existingTimestamp) {
         const jobLastRunMs = Date.now();
-        await firestore
+        await services.db.firestore
           .collection('jobMeta')
           .doc(docId)
           .set({ jobLastRunMs } as AutofetchNonUserPostsJobMeta);
@@ -68,7 +70,7 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
           DEBUG_PREFIX
         );
 
-      await firestore
+      await services.db.firestore
         .collection('jobMeta')
         .doc(`${platformId}-autofetchNonUserPosts`)
         .set({ jobLastRunMs: now } as AutofetchNonUserPostsJobMeta);

@@ -33,10 +33,9 @@ import {
   GenericThread,
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
-import { PlatformProfile } from '../../@shared/types/types.profiles';
 import {
-  AccountProfileBase,
-  AccountProfileCreate,
+  PlatformAccountProfile,
+  PlatformProfile,
 } from '../../@shared/types/types.profiles';
 import { parseBlueskyURI } from '../../@shared/utils/bluesky.utils';
 import { logger } from '../../instances/logger';
@@ -157,8 +156,7 @@ export class BlueskyService
       description: bskFullUser.data.description || '',
     };
 
-    const profile: AccountProfileCreate<PlatformProfile> = {
-      platformId: PLATFORM.Bluesky,
+    const profile: PlatformAccountProfile = {
       user_id: bskSimpleUser.id,
       profile: bskSimpleUser,
     };
@@ -176,7 +174,7 @@ export class BlueskyService
   public async getProfileByUsername(
     username: string,
     credentials?: BlueskyCredentials
-  ): Promise<AccountProfileBase<PlatformProfile> | undefined> {
+  ): Promise<PlatformAccountProfile<PlatformProfile> | undefined> {
     try {
       const { client: agent } = await this.getClient(credentials);
       const profile = await agent.getProfile({ actor: username });
@@ -391,35 +389,35 @@ export class BlueskyService
       };
 
       try {
-      if (
-        post.embed &&
-        (post.embed.$type === 'app.bsky.embed.record#view' ||
-          post.embed.$type === 'app.bsky.embed.recordWithMedia#view')
-      ) {
-        const quotedPost = (() => {
-          if (post.embed.$type === 'app.bsky.embed.record#view') {
-            return post.embed.record as QuotedBlueskyPost;
-          }
-          return post.embed.record.record as QuotedBlueskyPost;
-        })();
+        if (
+          post.embed &&
+          (post.embed.$type === 'app.bsky.embed.record#view' ||
+            post.embed.$type === 'app.bsky.embed.recordWithMedia#view')
+        ) {
+          const quotedPost = (() => {
+            if (post.embed.$type === 'app.bsky.embed.record#view') {
+              return post.embed.record as QuotedBlueskyPost;
+            }
+            return post.embed.record.record as QuotedBlueskyPost;
+          })();
 
-        post.embed.record as QuotedBlueskyPost;
-        if (quotedPost.$type === 'app.bsky.embed.record#viewRecord') {
-          genericPost.quotedThread = {
-            author: {
-              platformId: PLATFORM.Bluesky,
-              id: quotedPost.author.did,
-              username: quotedPost.author.handle,
-              name: quotedPost.author.displayName || quotedPost.author.handle,
-            },
-            thread: [
-              {
-                url: `https://bsky.app/profile/${quotedPost.author.handle}/post/${parseBlueskyURI(quotedPost.uri).rkey}`,
-                content: cleanBlueskyContent(quotedPost.value),
+          post.embed.record as QuotedBlueskyPost;
+          if (quotedPost.$type === 'app.bsky.embed.record#viewRecord') {
+            genericPost.quotedThread = {
+              author: {
+                platformId: PLATFORM.Bluesky,
+                id: quotedPost.author.did,
+                username: quotedPost.author.handle,
+                name: quotedPost.author.displayName || quotedPost.author.handle,
               },
-            ],
-          };
-        }
+              thread: [
+                {
+                  url: `https://bsky.app/profile/${quotedPost.author.handle}/post/${parseBlueskyURI(quotedPost.uri).rkey}`,
+                  content: cleanBlueskyContent(quotedPost.value),
+                },
+              ],
+            };
+          }
         }
       } catch (e) {
         logger.warn(
@@ -502,7 +500,7 @@ export class BlueskyService
   public async getProfile(
     user_id: string,
     credentials: any
-  ): Promise<AccountProfileBase<PlatformProfile> | undefined> {
+  ): Promise<PlatformAccountProfile | undefined> {
     try {
       if (!credentials) {
         throw new Error('Missing Bluesky user details');

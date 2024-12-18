@@ -509,10 +509,11 @@ export class UsersService {
 
     const profileCreate: AccountProfileCreate = {
       ...profile,
-      platformId: platformId,
+      userId: null,
+      platformId,
     };
     this.createProfile(profileCreate, manager);
-    return profile;
+    return { user_id: profileCreate.user_id, profile: profileCreate.profile };
   }
 
   async createProfile<P extends PlatformProfile = PlatformProfile>(
@@ -546,6 +547,7 @@ export class UsersService {
 
     const profileCreate: AccountProfileCreate = {
       ...profileBase,
+      userId: null,
       platformId: platform,
     };
 
