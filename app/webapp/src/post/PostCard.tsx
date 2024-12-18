@@ -100,6 +100,11 @@ export const PostCard = (props: {
     return <></>;
   }
 
+  const onPostClick = () => {
+    overlay &&
+      overlay.onPostClick({ target: PostClickTarget.POST, payload: post });
+  };
+
   const handleClick: MouseEventHandler = (event) => {
     let target = event.target as HTMLElement;
 
@@ -116,8 +121,7 @@ export const PostCard = (props: {
       target = target.parentNode as HTMLElement;
     }
 
-    overlay &&
-      overlay.onPostClick({ target: PostClickTarget.POST, payload: post });
+    onPostClick();
   };
 
   const postText = concatenateThread(post.generic);
@@ -168,6 +172,7 @@ export const PostCard = (props: {
                   semantics: post?.semantics,
                   originalParsed: post?.originalParsed,
                   structuredSemantics: post?.structuredSemantics,
+                  onNonSemanticsClick: () => onPostClick(),
                 }}></SemanticsEditor>
             </Box>
           )}

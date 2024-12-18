@@ -111,7 +111,13 @@ export const KeywordsComponent = (props: PatternProps) => {
           }}
           removeLabel={(newLabel) => {
             removeKeyword(newLabel).catch(console.error);
-          }}></AppLabelsEditor>
+          }}
+          onMoreClicked={() =>
+            props.onNonSemanticsClick && props.onNonSemanticsClick()
+          }
+          onNonLabelClick={() =>
+            props.onNonSemanticsClick && props.onNonSemanticsClick()
+          }></AppLabelsEditor>
       </Box>
     </Box>
   );
