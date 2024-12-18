@@ -47,6 +47,13 @@ describe('021-nonuser account tests', () => {
         userIdDefined: false,
       });
       expect(profiles.length).to.be.equal(1);
+
+      const userProfiles = await services.users.profiles.getMany({
+        autofetch: true,
+        platformId: PLATFORM.Bluesky,
+        userIdDefined: true,
+      });
+      expect(userProfiles.length).to.be.equal(0);
     });
   });
 });
