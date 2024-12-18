@@ -130,7 +130,7 @@ export const PublishButtons = (props: BoxExtendedProps) => {
       align="center"
       pad={{ vertical: '12px', horizontal: '12px' }}
       {...props}
-      style={{ backgroundColor, width: '100%', ...props.style }}>
+      style={{ backgroundColor, width: '100%', flexShrink: 0, ...props.style }}>
       {updated.postMerged?.parsingStatus === AppPostParsingStatus.PROCESSING ? (
         <LoadingDiv style={{ width: '160px' }}></LoadingDiv>
       ) : (
