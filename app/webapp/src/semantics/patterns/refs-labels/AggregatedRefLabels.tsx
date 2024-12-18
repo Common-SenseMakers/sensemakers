@@ -59,6 +59,7 @@ export const AggregatedRefLabels = (props: {
 
   return (
     <AppLabelsEditor
+      placeholder=""
       colors={colors}
       labels={labelsSummary.map((labelDetails) => (
         <span>

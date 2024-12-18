@@ -16,6 +16,7 @@ export const REF_LABELS_EDITOR_ID = 'ref-labels-editor';
 
 export const AppLabelsEditor = (props: {
   labels: Array<string | JSX.Element>;
+  placeholder: string;
   maxLabels?: number;
   options?: string[];
   addLabel?: (label: string) => void;
@@ -213,6 +214,25 @@ export const AppLabelsEditor = (props: {
       }}
       onClick={handleInternalClick}>
       <Box style={{ display: 'block' }}>
+        {visibleLables.length === 0 && !adding && (
+          <Box
+            style={{
+              display: 'block',
+              float: 'left',
+            }}>
+            <Text
+              style={{
+                color: constants.colors.textLight2,
+                fontSize: '14px',
+                fontStyle: 'normal',
+                fontWeight: '400',
+                lineHeight: '16px',
+                textDecoration: 'none',
+              }}>
+              {props.placeholder}
+            </Text>
+          </Box>
+        )}
         {visibleLables.map((label, ix) => {
           const marginRight = ix < visibleLables.length - 1 ? '4px' : '0';
           return (
