@@ -130,7 +130,9 @@ export const RefWithLabels = (props: {
             options={optionDisplayNames}
             removeLabel={(label) => removeLabel(label)}
             addLabel={(label) => addLabel(label)}
-            placeholder={t(PostEditKeys.labelsPlaceholder)}></AppLabelsEditor>
+            placeholder={
+              props.editable ? t(PostEditKeys.labelsPlaceholder) : ''
+            }></AppLabelsEditor>
         )}
       </Box>
     </>
