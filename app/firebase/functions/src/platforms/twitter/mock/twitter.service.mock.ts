@@ -6,8 +6,7 @@ import {
   PlatformPostPosted,
   PlatformPostPublish,
 } from '../../../@shared/types/types.platform.posts';
-import { PLATFORM } from '../../../@shared/types/types.platforms';
-import { AccountProfileCreate } from '../../../@shared/types/types.profiles';
+import { PlatformAccountProfile } from '../../../@shared/types/types.profiles';
 import {
   TwitterAccountCredentials,
   TwitterAccountDetails,
@@ -303,8 +302,7 @@ export const getTwitterMock = (
             },
           },
         };
-        const twitterProfile: AccountProfileCreate = {
-          platformId: PLATFORM.Twitter,
+        const twitterProfile: PlatformAccountProfile = {
           user_id: currentUserCredentials.twitter.id,
           profile: {
             id: currentUserCredentials.twitter.id,

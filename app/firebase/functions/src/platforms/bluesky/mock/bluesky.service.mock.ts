@@ -11,8 +11,7 @@ import {
 } from '../../../@shared/types/types.bluesky';
 import { PlatformFetchParams } from '../../../@shared/types/types.fetch';
 import { PlatformPostPublish } from '../../../@shared/types/types.platform.posts';
-import { PLATFORM } from '../../../@shared/types/types.platforms';
-import { AccountProfileCreate } from '../../../@shared/types/types.profiles';
+import { PlatformAccountProfile } from '../../../@shared/types/types.profiles';
 import {
   AccountDetailsBase,
   TestUserCredentials,
@@ -2490,8 +2489,7 @@ export const getBlueskyMock = (
             } as AtpSessionData,
           },
         };
-        const profile: AccountProfileCreate = {
-          platformId: PLATFORM.Bluesky,
+        const profile: PlatformAccountProfile = {
           user_id: 'did:plc:6z5botgrc5vekq7j26xnvawq',
           profile: {
             id: 'did:plc:6z5botgrc5vekq7j26xnvawq',

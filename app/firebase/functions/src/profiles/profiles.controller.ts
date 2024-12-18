@@ -3,8 +3,8 @@ import { object, string } from 'yup';
 
 import { PUBLISHABLE_PLATFORM } from '../@shared/types/types.platforms';
 import {
-  AccountProfileBase,
   AccountProfileRead,
+  PlatformAccountProfile,
 } from '../@shared/types/types.profiles';
 import { GetProfilePayload } from '../@shared/types/types.user';
 import {
@@ -106,7 +106,7 @@ export const addNonUserProfilesController: RequestHandler = async (
           username: parsedProfile.username,
         });
 
-      let profile: AccountProfileBase | undefined;
+      let profile: PlatformAccountProfile | undefined;
       try {
         const hasProfile = await services.db.run(async (manager) => {
           return services.users.profiles.getByPlatformUsername(
