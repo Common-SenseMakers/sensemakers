@@ -488,7 +488,8 @@ export class UsersService {
   public async getOrCreateProfileByUsername(
     platformId: IDENTITY_PLATFORM,
     username: string,
-    manager: TransactionManager
+    manager: TransactionManager,
+    credentials?: any
   ) {
     const profileId = await this.profiles.getByPlatformUsername(
       platformId,
@@ -500,8 +501,9 @@ export class UsersService {
       return await this.profiles.getByProfileId(profileId, manager);
     }
 
-    const profile =
-      await this.getIdentityService(platformId).getProfileByUsername(username);
+    const profile = await this.getIdentityService(
+      platformId
+    ).getProfileByUsername(username, credentials);
 
     if (!profile) {
       throw new Error('Profile not found');
