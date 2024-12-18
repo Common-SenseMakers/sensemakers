@@ -193,7 +193,9 @@ export class BlueskyService
       }
       throw new Error(`${profile.data}`);
     } catch (e: any) {
-      throw new Error(`Error fetching Bluesky account: ${e.message}`);
+      throw new Error(
+        `Error getting Bluesky account by username: ${e.message}`
+      );
     }
   }
 

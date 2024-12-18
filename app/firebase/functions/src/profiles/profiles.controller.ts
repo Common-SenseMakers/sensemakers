@@ -1,7 +1,10 @@
 import { RequestHandler } from 'express';
 import { object, string } from 'yup';
 
-import { PUBLISHABLE_PLATFORM } from '../@shared/types/types.platforms';
+import {
+  PLATFORM,
+  PUBLISHABLE_PLATFORM,
+} from '../@shared/types/types.platforms';
 import {
   AccountProfileRead,
   PlatformAccountProfile,
@@ -14,6 +17,7 @@ import {
 } from '../@shared/utils/profiles.utils';
 import { getServices } from '../controllers.utils';
 import { logger } from '../instances/logger';
+import { useBlueskyAdminCredentials } from '../platforms/bluesky/bluesky.utils';
 import { FETCH_ACCOUNT_TASKS } from '../platforms/platforms.tasks.config';
 import { chunkNumber, enqueueTask } from '../tasksUtils/tasks.support';
 
@@ -124,11 +128,16 @@ export const addNonUserProfilesController: RequestHandler = async (
             });
           continue;
         }
+        const credentials =
+          parsedProfile.platformId === PLATFORM.Bluesky
+            ? await useBlueskyAdminCredentials(services.db.firestore)
+            : undefined;
         profile = await services.db.run(async (manager) => {
           return services.users.getOrCreateProfileByUsername(
             parsedProfile.platformId,
             parsedProfile.username,
-            manager
+            manager,
+            credentials?.read
           );
         });
       } catch (error) {
